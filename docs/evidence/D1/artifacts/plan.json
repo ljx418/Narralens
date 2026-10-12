@@ -1,0 +1,228 @@
+{
+  "format": "hypit.cli-plan@1",
+  "ok": true,
+  "run": "runs/build.svrun",
+  "targetCount": 1,
+  "targets": [
+    "final.video"
+  ],
+  "requestCount": 7,
+  "requestIssueCount": 0,
+  "producerFailureCount": 0,
+  "producerFailures": [],
+  "providerRequestCount": 0,
+  "localRequestCount": 7,
+  "unresolvedRequestCount": 0,
+  "unsupportedRequestCount": 0,
+  "choiceCount": 0,
+  "providers": [
+    {
+      "request": "need:author%3A%2Fmnt%2Fc%2Fworkspace%2Fvideoworkline%2FNarralens%2Ffixtures%2Fd1-30s%2Fauthors%2Fmain.svml%3A%3Acomponent%3A%3Afinal:request-audio-render",
+      "capability": "@hypit/media-operations@1#render-timeline-audio",
+      "status": "resolved",
+      "endpoint": "media.local",
+      "use": "@hypit/media-local",
+      "pricing": {
+        "kind": "local"
+      }
+    },
+    {
+      "request": "need:author%3A%2Fmnt%2Fc%2Fworkspace%2Fvideoworkline%2FNarralens%2Ffixtures%2Fd1-30s%2Fauthors%2Fmain.svml%3A%3Acomponent%3A%3Afinal:request-mux",
+      "capability": "@hypit/media-operations@1#mux-program-media",
+      "status": "resolved",
+      "endpoint": "media.local",
+      "use": "@hypit/media-local",
+      "pricing": {
+        "kind": "local"
+      }
+    },
+    {
+      "request": "need:author%3A%2Fmnt%2Fc%2Fworkspace%2Fvideoworkline%2FNarralens%2Ffixtures%2Fd1-30s%2Fauthors%2Fmain.svml%3A%3Acomponent%3A%3Afinal:request-visual",
+      "capability": "@hypit/html-program@1#rasterize-visual",
+      "status": "resolved",
+      "endpoint": "html.local",
+      "use": "@hypit/provider-html-local",
+      "pricing": {
+        "kind": "local"
+      }
+    },
+    {
+      "request": "need:author%3A%2Fmnt%2Fc%2Fworkspace%2Fvideoworkline%2FNarralens%2Ffixtures%2Fd1-30s%2Fauthors%2Fmain.svml%3A%3Acomponent%3A%3Anarration-media:inspect",
+      "capability": "@hypit/media-operations@1#inspect-media",
+      "status": "resolved",
+      "endpoint": "media.local",
+      "use": "@hypit/media-local",
+      "pricing": {
+        "kind": "local"
+      }
+    },
+    {
+      "request": "need:author%3A%2Fmnt%2Fc%2Fworkspace%2Fvideoworkline%2FNarralens%2Ffixtures%2Fd1-30s%2Fauthors%2Fmain.svml%3A%3Acomponent%3A%3Anarration-media:normalize",
+      "capability": "@hypit/media-operations@1#normalize-media",
+      "status": "resolved",
+      "endpoint": "media.local",
+      "use": "@hypit/media-local",
+      "pricing": {
+        "kind": "local"
+      }
+    },
+    {
+      "request": "need:author%3A%2Fmnt%2Fc%2Fworkspace%2Fvideoworkline%2FNarralens%2Ffixtures%2Fd1-30s%2Fauthors%2Fmain.svml%3A%3Acomponent%3A%3Avisual-media:inspect",
+      "capability": "@hypit/media-operations@1#inspect-media",
+      "status": "resolved",
+      "endpoint": "media.local",
+      "use": "@hypit/media-local",
+      "pricing": {
+        "kind": "local"
+      }
+    },
+    {
+      "request": "need:author%3A%2Fmnt%2Fc%2Fworkspace%2Fvideoworkline%2FNarralens%2Ffixtures%2Fd1-30s%2Fauthors%2Fmain.svml%3A%3Acomponent%3A%3Avisual-media:normalize",
+      "capability": "@hypit/media-operations@1#normalize-media",
+      "status": "resolved",
+      "endpoint": "media.local",
+      "use": "@hypit/media-local",
+      "pricing": {
+        "kind": "local"
+      }
+    }
+  ],
+  "needs": [
+    {
+      "request": "need:author%3A%2Fmnt%2Fc%2Fworkspace%2Fvideoworkline%2FNarralens%2Ffixtures%2Fd1-30s%2Fauthors%2Fmain.svml%3A%3Acomponent%3A%3Afinal:request-audio-render",
+      "step": "operation:author%3A%2Fmnt%2Fc%2Fworkspace%2Fvideoworkline%2FNarralens%2Ffixtures%2Fd1-30s%2Fauthors%2Fmain.svml%3A%3Acomponent%3A%3Afinal:request-audio-render",
+      "port": "audio",
+      "capability": "@hypit/media-operations@1#render-timeline-audio",
+      "endpoint": "media.local",
+      "summary": {
+        "fields": {},
+        "references": {}
+      },
+      "pending": [
+        {
+          "input": "plan",
+          "record": "record:author%3A%2Fmnt%2Fc%2Fworkspace%2Fvideoworkline%2FNarralens%2Ffixtures%2Fd1-30s%2Fauthors%2Fmain.svml%3A%3Acomponent%3A%3Afinal:compile-audio-program",
+          "sourceStep": "operation:author%3A%2Fmnt%2Fc%2Fworkspace%2Fvideoworkline%2FNarralens%2Ffixtures%2Fd1-30s%2Fauthors%2Fmain.svml%3A%3Acomponent%3A%3Afinal:compile-audio-program"
+        }
+      ]
+    },
+    {
+      "request": "need:author%3A%2Fmnt%2Fc%2Fworkspace%2Fvideoworkline%2FNarralens%2Ffixtures%2Fd1-30s%2Fauthors%2Fmain.svml%3A%3Acomponent%3A%3Afinal:request-mux",
+      "step": "operation:author%3A%2Fmnt%2Fc%2Fworkspace%2Fvideoworkline%2FNarralens%2Ffixtures%2Fd1-30s%2Fauthors%2Fmain.svml%3A%3Acomponent%3A%3Afinal:request-mux",
+      "port": "media",
+      "capability": "@hypit/media-operations@1#mux-program-media",
+      "endpoint": "media.local",
+      "summary": {
+        "fields": {},
+        "references": {
+          "audio": 1,
+          "video": 1
+        }
+      },
+      "pending": [
+        {
+          "input": "audio",
+          "record": "record:author%3A%2Fmnt%2Fc%2Fworkspace%2Fvideoworkline%2FNarralens%2Ffixtures%2Fd1-30s%2Fauthors%2Fmain.svml%3A%3Acomponent%3A%3Afinal:request-audio-render",
+          "kind": "audio"
+        },
+        {
+          "input": "visual",
+          "record": "record:author%3A%2Fmnt%2Fc%2Fworkspace%2Fvideoworkline%2FNarralens%2Ffixtures%2Fd1-30s%2Fauthors%2Fmain.svml%3A%3Acomponent%3A%3Afinal:request-visual",
+          "kind": "video"
+        }
+      ]
+    },
+    {
+      "request": "need:author%3A%2Fmnt%2Fc%2Fworkspace%2Fvideoworkline%2FNarralens%2Ffixtures%2Fd1-30s%2Fauthors%2Fmain.svml%3A%3Acomponent%3A%3Afinal:request-visual",
+      "step": "operation:author%3A%2Fmnt%2Fc%2Fworkspace%2Fvideoworkline%2FNarralens%2Ffixtures%2Fd1-30s%2Fauthors%2Fmain.svml%3A%3Acomponent%3A%3Afinal:request-visual",
+      "port": "visual",
+      "capability": "@hypit/html-program@1#rasterize-visual",
+      "endpoint": "html.local",
+      "summary": {
+        "fields": {},
+        "references": {}
+      },
+      "pending": [
+        {
+          "input": "program",
+          "record": "record:author%3A%2Fmnt%2Fc%2Fworkspace%2Fvideoworkline%2FNarralens%2Ffixtures%2Fd1-30s%2Fauthors%2Fmain.svml%3A%3Acomponent%3A%3Afinal:compile-program",
+          "sourceStep": "operation:author%3A%2Fmnt%2Fc%2Fworkspace%2Fvideoworkline%2FNarralens%2Ffixtures%2Fd1-30s%2Fauthors%2Fmain.svml%3A%3Acomponent%3A%3Afinal:compile-program"
+        }
+      ]
+    },
+    {
+      "request": "need:author%3A%2Fmnt%2Fc%2Fworkspace%2Fvideoworkline%2FNarralens%2Ffixtures%2Fd1-30s%2Fauthors%2Fmain.svml%3A%3Acomponent%3A%3Anarration-media:inspect",
+      "step": "operation:author%3A%2Fmnt%2Fc%2Fworkspace%2Fvideoworkline%2FNarralens%2Ffixtures%2Fd1-30s%2Fauthors%2Fmain.svml%3A%3Acomponent%3A%3Anarration-media:inspect",
+      "port": "inspection",
+      "capability": "@hypit/media-operations@1#inspect-media",
+      "endpoint": "media.local",
+      "summary": {
+        "fields": {},
+        "references": {}
+      },
+      "pending": []
+    },
+    {
+      "request": "need:author%3A%2Fmnt%2Fc%2Fworkspace%2Fvideoworkline%2FNarralens%2Ffixtures%2Fd1-30s%2Fauthors%2Fmain.svml%3A%3Acomponent%3A%3Anarration-media:normalize",
+      "step": "operation:author%3A%2Fmnt%2Fc%2Fworkspace%2Fvideoworkline%2FNarralens%2Ffixtures%2Fd1-30s%2Fauthors%2Fmain.svml%3A%3Acomponent%3A%3Anarration-media:normalize",
+      "port": "media",
+      "capability": "@hypit/media-operations@1#normalize-media",
+      "endpoint": "media.local",
+      "summary": {
+        "fields": {},
+        "references": {}
+      },
+      "pending": [
+        {
+          "input": "inspection",
+          "record": "record:author%3A%2Fmnt%2Fc%2Fworkspace%2Fvideoworkline%2FNarralens%2Ffixtures%2Fd1-30s%2Fauthors%2Fmain.svml%3A%3Acomponent%3A%3Anarration-media:inspect"
+        },
+        {
+          "input": "selection",
+          "record": "record:author%3A%2Fmnt%2Fc%2Fworkspace%2Fvideoworkline%2FNarralens%2Ffixtures%2Fd1-30s%2Fauthors%2Fmain.svml%3A%3Acomponent%3A%3Anarration-media:select",
+          "sourceStep": "operation:author%3A%2Fmnt%2Fc%2Fworkspace%2Fvideoworkline%2FNarralens%2Ffixtures%2Fd1-30s%2Fauthors%2Fmain.svml%3A%3Acomponent%3A%3Anarration-media:select"
+        }
+      ]
+    },
+    {
+      "request": "need:author%3A%2Fmnt%2Fc%2Fworkspace%2Fvideoworkline%2FNarralens%2Ffixtures%2Fd1-30s%2Fauthors%2Fmain.svml%3A%3Acomponent%3A%3Avisual-media:inspect",
+      "step": "operation:author%3A%2Fmnt%2Fc%2Fworkspace%2Fvideoworkline%2FNarralens%2Ffixtures%2Fd1-30s%2Fauthors%2Fmain.svml%3A%3Acomponent%3A%3Avisual-media:inspect",
+      "port": "inspection",
+      "capability": "@hypit/media-operations@1#inspect-media",
+      "endpoint": "media.local",
+      "summary": {
+        "fields": {},
+        "references": {}
+      },
+      "pending": []
+    },
+    {
+      "request": "need:author%3A%2Fmnt%2Fc%2Fworkspace%2Fvideoworkline%2FNarralens%2Ffixtures%2Fd1-30s%2Fauthors%2Fmain.svml%3A%3Acomponent%3A%3Avisual-media:normalize",
+      "step": "operation:author%3A%2Fmnt%2Fc%2Fworkspace%2Fvideoworkline%2FNarralens%2Ffixtures%2Fd1-30s%2Fauthors%2Fmain.svml%3A%3Acomponent%3A%3Avisual-media:normalize",
+      "port": "media",
+      "capability": "@hypit/media-operations@1#normalize-media",
+      "endpoint": "media.local",
+      "summary": {
+        "fields": {},
+        "references": {}
+      },
+      "pending": [
+        {
+          "input": "inspection",
+          "record": "record:author%3A%2Fmnt%2Fc%2Fworkspace%2Fvideoworkline%2FNarralens%2Ffixtures%2Fd1-30s%2Fauthors%2Fmain.svml%3A%3Acomponent%3A%3Avisual-media:inspect"
+        },
+        {
+          "input": "selection",
+          "record": "record:author%3A%2Fmnt%2Fc%2Fworkspace%2Fvideoworkline%2FNarralens%2Ffixtures%2Fd1-30s%2Fauthors%2Fmain.svml%3A%3Acomponent%3A%3Avisual-media:select",
+          "sourceStep": "operation:author%3A%2Fmnt%2Fc%2Fworkspace%2Fvideoworkline%2FNarralens%2Ffixtures%2Fd1-30s%2Fauthors%2Fmain.svml%3A%3Acomponent%3A%3Avisual-media:select"
+        }
+      ]
+    }
+  ],
+  "preflight": {
+    "ok": true,
+    "capabilityCount": 5,
+    "diagnosticCount": 0,
+    "diagnostics": []
+  }
+}

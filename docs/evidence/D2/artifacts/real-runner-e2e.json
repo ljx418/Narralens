@@ -1,0 +1,137 @@
+{
+  "executed_at": "2026-10-12T07:59:22.058Z",
+  "cli": "Claude Code CLI 2.1.205",
+  "invocation_policy": {
+    "shell": false,
+    "tools": [],
+    "permission_mode": "plan",
+    "safe_mode": true,
+    "automatic_retries": 0,
+    "local_budget_limit": null,
+    "local_call_limit": null
+  },
+  "outbound_fields": [
+    "project.project_id",
+    "project.revision",
+    "project.frame_rate",
+    "project.frame_count",
+    "request.base_revision",
+    "request.selection",
+    "request.intent",
+    "request.preserve",
+    "fixed_context"
+  ],
+  "request": {
+    "base_revision": 2,
+    "selection": {
+      "shot_id": "shot-001",
+      "start_frame": 0,
+      "end_frame_exclusive": 300
+    },
+    "intent": "将这一段设计为三个递进镜头：先交代全貌，再展示传导关系，最后落到细节；保留旁白和总时长。",
+    "preserve": [
+      "旁白",
+      "总时长"
+    ]
+  },
+  "job": {
+    "job_id": "job_d431e2e05d9f45ecbc0fc214096c9c0b",
+    "project_id": "d1-30s",
+    "state": "succeeded",
+    "created_at": "2026-10-12T07:58:30.454Z",
+    "updated_at": "2026-10-12T07:59:21.479Z",
+    "proposal_id": "proposal_shot001_3shot_progression"
+  },
+  "events": [
+    {
+      "event_id": 1,
+      "job_id": "job_d431e2e05d9f45ecbc0fc214096c9c0b",
+      "type": "queued",
+      "at": "2026-10-12T07:58:30.454Z"
+    },
+    {
+      "event_id": 2,
+      "job_id": "job_d431e2e05d9f45ecbc0fc214096c9c0b",
+      "type": "running",
+      "at": "2026-10-12T07:58:30.454Z",
+      "message": "Provider request started"
+    },
+    {
+      "event_id": 3,
+      "job_id": "job_d431e2e05d9f45ecbc0fc214096c9c0b",
+      "type": "succeeded",
+      "at": "2026-10-12T07:59:21.479Z",
+      "proposal_id": "proposal_shot001_3shot_progression",
+      "message": "Proposal validated; runner stdout sha256 9b624f67cbd49e81d77b5d972cb2c9cad08dd18b41f2ddb0f4f2f650d50c73bd"
+    }
+  ],
+  "runner_audit": [
+    {
+      "stdout_sha256": "9b624f67cbd49e81d77b5d972cb2c9cad08dd18b41f2ddb0f4f2f650d50c73bd",
+      "model_names": [
+        "MiniMax-M3"
+      ],
+      "total_cost_usd": 0.101904,
+      "duration_ms": 44872,
+      "num_turns": 2,
+      "service_tier": null
+    }
+  ],
+  "proposal": {
+    "schema_version": "1.0",
+    "kind": "narralens.proposal_bundle",
+    "project_id": "d1-30s",
+    "proposal_id": "proposal_shot001_3shot_progression",
+    "base_revision": 2,
+    "selection": {
+      "shot_id": "shot-001",
+      "start_frame": 0,
+      "end_frame_exclusive": 300
+    },
+    "preserve": [
+      "旁白",
+      "总时长"
+    ],
+    "summary": "将 shot-001 的 0–300 帧拆分为三个递进镜头：先以广角交代场景全貌，建立整体空间认知；再通过镜头运动展示要素之间的传导关系；最后收束于细节特写，强化信息落点；保留原旁白与总时长（300 帧）。",
+    "segments": [
+      {
+        "id": "shot-001-seg-01-overview",
+        "duration_frames": 100,
+        "intent": "广角镜头交代场景全貌，建立空间与要素的整体认知，作为三段递进的起点。",
+        "asset_id": null
+      },
+      {
+        "id": "shot-001-seg-02-relationship",
+        "duration_frames": 120,
+        "intent": "通过镜头运动与构图，展示要素之间的传导关系与相互承接，承接全貌、过渡至细节。",
+        "asset_id": null
+      },
+      {
+        "id": "shot-001-seg-03-detail",
+        "duration_frames": 80,
+        "intent": "特写镜头收束于关键细节，强化信息落点与情绪收尾，完成递进叙事的闭合。",
+        "asset_id": null
+      }
+    ],
+    "assets_needed": [],
+    "source_refs": [],
+    "cost": {
+      "status": "unknown",
+      "currency": null,
+      "amount": null
+    },
+    "requires_materialization": true,
+    "renderable": false
+  },
+  "no_write": {
+    "before": {
+      "source_sha256": "ae4edebf3bf05bb178efd2b264f101b744998c7d3bad29aa1ad7a1dd37fcab3a",
+      "run_sha256": "bff6a663f753ac97b546acd1561e95b1aa1aa1239fdd08867a3b28ad782dc738"
+    },
+    "after": {
+      "source_sha256": "ae4edebf3bf05bb178efd2b264f101b744998c7d3bad29aa1ad7a1dd37fcab3a",
+      "run_sha256": "bff6a663f753ac97b546acd1561e95b1aa1aa1239fdd08867a3b28ad782dc738"
+    },
+    "unchanged": true
+  }
+}

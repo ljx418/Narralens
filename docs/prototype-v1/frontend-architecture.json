@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Narralens V1 前端目标架构",
+    "locale": "zh-CN",
+    "quality_profile": "showcase",
+    "viewBox": [1260, 720]
+  },
+  "components": [
+    { "id": "creator", "type": "external", "label": "单人创作者", "sublabel": "键盘 / 指针 / 语义搜索", "pos": [20, 248], "size": [130, 76] },
+    { "id": "app_shell", "type": "frontend", "label": "NarralensApp", "sublabel": "主题 / 路由 / 焦点 / 错误边界", "tag": "V1 目标", "pos": [180, 225], "size": [170, 122] },
+    { "id": "stage_router", "type": "frontend", "label": "StageRouter", "sublabel": "想法 / 精修 / 交付", "tag": "未开发", "pos": [400, 240], "size": [160, 86] },
+    { "id": "idea_stage", "type": "frontend", "label": "IdeaWorkspace", "sublabel": "任务摘要 / 主张 / 脚本", "tag": "未开发", "pos": [620, 30], "size": [160, 86] },
+    { "id": "refine_stage", "type": "frontend", "label": "RefineWorkspace", "sublabel": "播放器 / 导演面板 / 时间轴", "tag": "V1 核心", "pos": [620, 210], "size": [160, 96] },
+    { "id": "delivery_stage", "type": "frontend", "label": "DeliveryWorkspace", "sublabel": "检查 / 标题封面 / 导出", "tag": "未开发", "pos": [620, 390], "size": [160, 86] },
+    { "id": "selection", "type": "messagebus", "label": "SelectionCoordinator", "sublabel": "shotId / frames / anchor", "tag": "未开发", "pos": [820, 40], "size": [180, 94] },
+    { "id": "director", "type": "frontend", "label": "DirectorPane", "sublabel": "提案比较 / 影响 / 分项锁", "tag": "V1 核心", "pos": [820, 210], "size": [180, 96] },
+    { "id": "timeline", "type": "frontend", "label": "TimelineSurface", "sublabel": "虚拟化轨道 / 帧级定位", "tag": "待 D1 对接", "pos": [1050, 210], "size": [180, 94] },
+    { "id": "client_store", "type": "database", "label": "WorkbenchState", "sublabel": "selection / draft / optimistic", "tag": "不存最终时间轴", "pos": [820, 390], "size": [180, 94] },
+    { "id": "host_client", "type": "backend", "label": "HostApiClient", "sublabel": "typed API / SSE / idempotency", "tag": "待 D1", "pos": [1050, 390], "size": [180, 94] },
+    { "id": "hypit_bridge", "type": "backend", "label": "HypitPreviewBridge", "sublabel": "Author Source + Run 真实预览", "tag": "唯一剪辑事实源", "pos": [1050, 555], "size": [180, 108] }
+  ],
+  "boundaries": [
+    { "kind": "region", "label": "Narralens UI · TypeScript/Vite 目标边界", "wraps": ["app_shell", "stage_router", "idea_stage", "refine_stage", "delivery_stage", "selection", "director", "timeline", "client_store", "host_client"] },
+    { "kind": "security-group", "label": "真实工程写入边界", "wraps": ["host_client", "hypit_bridge"] }
+  ],
+  "connections": [
+    { "id": "creator_app", "from": "creator", "to": "app_shell", "label": "统一工作台操作", "variant": "emphasis", "labelAt": [165, 365] },
+    { "id": "app_router", "from": "app_shell", "to": "stage_router", "variant": "emphasis" },
+    { "id": "router_idea", "from": "stage_router", "to": "idea_stage" },
+    { "id": "router_refine", "from": "stage_router", "to": "refine_stage", "variant": "emphasis" },
+    { "id": "router_delivery", "from": "stage_router", "to": "delivery_stage" },
+    { "id": "refine_selection", "from": "refine_stage", "to": "selection", "label": "统一选择模型" },
+    { "id": "selection_director", "from": "selection", "to": "director", "label": "上下文与选区", "labelAt": [910, 172] },
+    { "id": "selection_timeline", "from": "selection", "to": "timeline", "label": "帧范围与播放头", "fromSide": "right", "toSide": "top" },
+    { "id": "director_store", "from": "director", "to": "client_store", "label": "草稿与预演状态", "variant": "dashed", "labelAt": [910, 348] },
+    { "id": "director_host", "from": "director", "to": "host_client", "label": "typed commands", "variant": "emphasis", "fromSide": "right", "toSide": "left" },
+    { "id": "timeline_host", "from": "timeline", "to": "host_client", "label": "时间码与播放请求", "variant": "emphasis", "labelAt": [1140, 348] },
+    { "id": "host_bridge", "from": "host_client", "to": "hypit_bridge", "label": "事务后刷新真实 Run", "variant": "security", "labelAt": [1140, 520] },
+    { "id": "host_store", "from": "host_client", "to": "client_store", "label": "SSE 归并与冲突校正", "variant": "dashed", "labelAt": [1025, 510] }
+  ]
+}

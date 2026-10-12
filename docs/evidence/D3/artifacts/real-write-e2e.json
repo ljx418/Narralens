@@ -1,0 +1,101 @@
+{
+  "format": "narralens.d3-real-write-e2e@1",
+  "at": "2026-10-12T10:21:34.978Z",
+  "project_id": "d1-30s",
+  "baseline": {
+    "source": "ae4edebf3bf05bb178efd2b264f101b744998c7d3bad29aa1ad7a1dd37fcab3a",
+    "run": "bff6a663f753ac97b546acd1561e95b1aa1aa1239fdd08867a3b28ad782dc738",
+    "narration": "ca8d3773b8dea14ff1950de9f4d991797f0d739743ab250e51a14e24eb2bb07a",
+    "studio_revision": 1,
+    "fit": "cover"
+  },
+  "contain": {
+    "response": {
+      "transaction_id": "txn_a700fe4aeb734f2491381c9d0a7b5b64",
+      "project_id": "d1-30s",
+      "previous_revision": 2,
+      "new_revision": 3,
+      "operation": {
+        "op": "set_visual_fit",
+        "shot_id": "shot-002",
+        "value": "contain"
+      },
+      "status": "committed",
+      "changed": true,
+      "source_sha256": "4951b4e7718a7b5af9192e84ae415a9797b951e88c31fc1182852f22d304448e",
+      "run_sha256": "bff6a663f753ac97b546acd1561e95b1aa1aa1239fdd08867a3b28ad782dc738"
+    },
+    "source": "4951b4e7718a7b5af9192e84ae415a9797b951e88c31fc1182852f22d304448e",
+    "run": "bff6a663f753ac97b546acd1561e95b1aa1aa1239fdd08867a3b28ad782dc738",
+    "narration": "ca8d3773b8dea14ff1950de9f4d991797f0d739743ab250e51a14e24eb2bb07a"
+  },
+  "idempotent_replay": {
+    "transaction_id": "txn_a700fe4aeb734f2491381c9d0a7b5b64",
+    "repeated_mutation": false
+  },
+  "guards": {
+    "stale": {
+      "status": 409,
+      "body": {
+        "code": "REVISION_CONFLICT",
+        "message": "Project revision has changed",
+        "correlation_id": "b9ba1a72-09a5-4fbc-ae52-3b5682742df2"
+      }
+    },
+    "locked": {
+      "status": 423,
+      "body": {
+        "code": "TARGET_LOCKED",
+        "message": "The visual target is locked",
+        "correlation_id": "384db206-68cf-4e0a-95e4-15257e517050"
+      }
+    }
+  },
+  "reopen": {
+    "studio_revision": 1,
+    "fit": "contain",
+    "host_revision": 3
+  },
+  "cover": {
+    "response": {
+      "transaction_id": "txn_4c49156f8a5447d5b7bb4423e6ef196d",
+      "project_id": "d1-30s",
+      "previous_revision": 3,
+      "new_revision": 4,
+      "operation": {
+        "op": "set_visual_fit",
+        "shot_id": "shot-002",
+        "value": "cover"
+      },
+      "status": "committed",
+      "changed": true,
+      "source_sha256": "ae4edebf3bf05bb178efd2b264f101b744998c7d3bad29aa1ad7a1dd37fcab3a",
+      "run_sha256": "bff6a663f753ac97b546acd1561e95b1aa1aa1239fdd08867a3b28ad782dc738"
+    },
+    "source": "ae4edebf3bf05bb178efd2b264f101b744998c7d3bad29aa1ad7a1dd37fcab3a",
+    "run": "bff6a663f753ac97b546acd1561e95b1aa1aa1239fdd08867a3b28ad782dc738",
+    "narration": "ca8d3773b8dea14ff1950de9f4d991797f0d739743ab250e51a14e24eb2bb07a"
+  },
+  "final": {
+    "source": "ae4edebf3bf05bb178efd2b264f101b744998c7d3bad29aa1ad7a1dd37fcab3a",
+    "run": "bff6a663f753ac97b546acd1561e95b1aa1aa1239fdd08867a3b28ad782dc738",
+    "narration": "ca8d3773b8dea14ff1950de9f4d991797f0d739743ab250e51a14e24eb2bb07a",
+    "studio_revision": 2,
+    "fit": "cover",
+    "baseline_restored": true
+  },
+  "hypit": {
+    "check": "passed",
+    "plan": "passed"
+  },
+  "invariants": {
+    "frame_count": 900,
+    "target_window": [
+      300,
+      600
+    ],
+    "run_unchanged": true,
+    "narration_unchanged": true,
+    "final_source_restored": true
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "叙镜 D4.0 类型化媒体替换架构",
+    "locale": "zh-CN",
+    "quality_profile": "showcase",
+    "viewBox": [1390, 820]
+  },
+  "components": [
+    { "id": "directorPane", "type": "frontend", "label": "DirectorPane", "sublabel": "确认单个已登记资产", "pos": [30, 330], "size": [175, 72], "tag": "Narralens" },
+    { "id": "writeActor", "type": "backend", "label": "ProjectWriteActor", "sublabel": "FIFO / revision / locks", "pos": [280, 330], "size": [190, 72], "tag": "已实现，需扩展" },
+    { "id": "assetRegistry", "type": "security", "label": "AssetRegistry", "sublabel": "asset_id → 内容哈希资产", "pos": [280, 105], "size": [190, 76], "tag": "待新增" },
+    { "id": "assetManifest", "type": "database", "label": "AssetManifest", "sublabel": "来源 / 许可 / MIME / 时长", "pos": [560, 105], "size": [190, 76], "tag": "待新增" },
+    { "id": "hypitAdapter", "type": "backend", "label": "HypitWriteAdapter", "sublabel": "只发送 ID 与 preimage", "pos": [560, 330], "size": [190, 72], "tag": "已实现，需扩展" },
+    { "id": "studioMutation", "type": "backend", "label": "StudioMutation.media.replace", "sublabel": "校验 authored item / asset", "pos": [820, 330], "size": [220, 76], "tag": "Hypit fork 待新增" },
+    { "id": "sourceEditor", "type": "backend", "label": "Hypit MediaBindingEditor", "sublabel": "package-owned Source 改写", "pos": [1150, 330], "size": [210, 76], "tag": "Hypit fork 待新增" },
+    { "id": "compiler", "type": "backend", "label": "Hypit Compiler", "sublabel": "重编译与后置条件", "pos": [1150, 105], "size": [210, 72], "tag": "已实现，复用" },
+    { "id": "authorSource", "type": "database", "label": "Author Source", "sublabel": "唯一工程事实源", "pos": [1150, 555], "size": [210, 72], "tag": "事务写入" },
+    { "id": "revisionStore", "type": "database", "label": "RevisionStore", "sublabel": "journal / idempotency / attention", "pos": [560, 555], "size": [190, 76], "tag": "已实现，需扩展" },
+    { "id": "registeredAsset", "type": "external", "label": "项目内许可资产", "sublabel": "哈希命名，只读输入", "pos": [820, 105], "size": [220, 76], "tag": "D4.0 本地夹具" }
+  ],
+  "boundaries": [
+    { "kind": "region", "label": "Narralens 所有权", "wraps": ["directorPane", "writeActor", "assetRegistry", "assetManifest", "hypitAdapter", "revisionStore"], "pad": 26 },
+    { "kind": "region", "label": "Hypit fork 所有权", "wraps": ["studioMutation", "sourceEditor", "compiler", "authorSource"], "pad": 26 }
+  ],
+  "connections": [
+    { "id": "confirm", "from": "directorPane", "to": "writeActor", "label": "确认 asset_id + baseRevision", "variant": "emphasis", "labelAt": [242, 320] },
+    { "id": "resolve", "from": "writeActor", "to": "assetRegistry", "label": "解析并验证登记", "variant": "security" },
+    { "id": "manifest", "from": "assetRegistry", "to": "assetManifest", "label": "读取来源与许可", "labelAt": [515, 95] },
+    { "id": "bytes", "from": "assetManifest", "to": "registeredAsset", "label": "校验哈希 / MIME / 时长", "variant": "security", "labelAt": [785, 215] },
+    { "id": "prepare", "from": "writeActor", "to": "hypitAdapter", "label": "prepare + exact preimage", "variant": "emphasis", "labelAt": [515, 320] },
+    { "id": "journal", "from": "writeActor", "to": "revisionStore", "label": "prepare / commit / attention" },
+    { "id": "typedCall", "from": "hypitAdapter", "to": "studioMutation", "label": "POST typed mutation", "variant": "emphasis", "labelAt": [785, 320] },
+    { "id": "registrySnapshot", "from": "registeredAsset", "to": "studioMutation", "label": "启动时清单解析", "variant": "security", "labelAt": [1065, 255] },
+    { "id": "ownedEdit", "from": "studioMutation", "to": "sourceEditor", "label": "目标 clip 媒体绑定", "labelAt": [1095, 320] },
+    { "id": "writeSource", "from": "sourceEditor", "to": "authorSource", "label": "原子写入或回滚", "variant": "security", "labelAt": [1375, 490] },
+    { "id": "compile", "from": "sourceEditor", "to": "compiler", "label": "compile + check" },
+    { "id": "reread", "from": "authorSource", "to": "studioMutation", "label": "重读目标 / 非目标后置条件", "variant": "dashed", "labelAt": [1095, 650] }
+  ],
+  "cards": [
+    { "dot": "emerald", "title": "D4.0 成功门限", "items": ["只替换 shot-002，重开后仍存在", "check / plan / build 通过，第二次正常事务恢复基线"] },
+    { "dot": "rose", "title": "拒绝与失效安全", "items": ["stale revision → 409；未知资产或扩大影响 → 422", "编译失败回滚；结果不确定 → attention，禁止继续写"] },
+    { "dot": "amber", "title": "明确不包含", "items": ["不接入付费 Provider，不生成 3–6 个提案", "D4.0 只关闭跨仓类型化媒体写入能力"] }
+  ]
+}

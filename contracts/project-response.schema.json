@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://narralens.local/schemas/project-response.schema.json",
+  "type": "object", "additionalProperties": false,
+  "required": ["project_id", "revision", "frame_rate", "frame_count", "shots", "preview"],
+  "properties": {
+    "project_id": { "type": "string", "minLength": 1 },
+    "revision": { "type": "integer", "minimum": 0 },
+    "frame_rate": { "type": "number", "exclusiveMinimum": 0 },
+    "frame_count": { "type": "integer", "minimum": 1 },
+    "shots": { "type": "array", "items": { "$ref": "#/$defs/selection" } },
+    "preview": {
+      "type": "object", "additionalProperties": false,
+      "required": ["kind", "url"],
+      "properties": {
+        "kind": { "const": "hypit-studio" },
+        "url": { "type": "string", "pattern": "^http://(localhost|127\\.0\\.0\\.1)(:[0-9]+)?/" }
+      }
+    },
+    "locks": {
+      "type": "object", "additionalProperties": false,
+      "required": ["visual"],
+      "properties": { "visual": { "type": "boolean" } }
+    },
+    "visual_fits": {
+      "type": "object", "additionalProperties": false,
+      "patternProperties": { "^[A-Za-z0-9_-]+$": { "enum": ["contain", "cover"] } }
+    },
+    "visual_assets": {
+      "type": "object", "additionalProperties": false,
+      "patternProperties": { "^[A-Za-z0-9_-]+$": { "type": "string", "pattern": "^asset_[a-z0-9][a-z0-9_-]{0,63}$" } }
+    },
+    "available_visual_assets": {
+      "type": "array", "maxItems": 256,
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["asset_id", "duration_frames", "source_label", "license_label"],
+        "properties": {
+          "asset_id": { "type": "string", "pattern": "^asset_[a-z0-9][a-z0-9_-]{0,63}$" },
+          "duration_frames": { "type": "integer", "minimum": 1 },
+          "source_label": { "type": "string", "minLength": 1, "maxLength": 2048 },
+          "license_label": { "type": "string", "minLength": 1, "maxLength": 2048 }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "selection": {
+      "type": "object", "additionalProperties": false,
+      "required": ["shot_id", "start_frame", "end_frame_exclusive"],
+      "properties": {
+        "shot_id": { "type": "string", "minLength": 1 },
+        "start_frame": { "type": "integer", "minimum": 0 },
+        "end_frame_exclusive": { "type": "integer", "minimum": 1 }
+      }
+    }
+  }
+}

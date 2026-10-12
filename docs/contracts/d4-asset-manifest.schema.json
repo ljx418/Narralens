@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://narralens.local/schemas/d4-asset-manifest.schema.json",
+  "title": "Narralens D4 Asset Manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["format", "assets"],
+  "properties": {
+    "format": { "const": "narralens.asset-manifest@1" },
+    "assets": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["asset_id", "project_path", "sha256", "media_type", "kind", "duration_frames", "source", "license"],
+        "properties": {
+          "asset_id": { "type": "string", "pattern": "^asset_[a-z0-9][a-z0-9_-]{0,63}$" },
+          "project_path": { "type": "string", "pattern": "^(?!/|\\\\)(?!.*(?:^|[\\\\/])\\.\\.(?:[\\\\/]|$)).+" },
+          "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "media_type": { "const": "video/mp4" },
+          "kind": { "const": "video" },
+          "duration_frames": { "type": "integer", "minimum": 1 },
+          "source": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["kind", "label"],
+            "properties": {
+              "kind": { "enum": ["owned", "generated", "licensed"] },
+              "label": { "type": "string", "minLength": 1, "maxLength": 160 },
+              "uri": { "type": "string", "format": "uri" }
+            }
+          },
+          "license": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["status", "label", "commercial_use"],
+            "properties": {
+              "status": { "enum": ["cleared", "restricted", "unknown"] },
+              "label": { "type": "string", "minLength": 1, "maxLength": 160 },
+              "commercial_use": { "type": "boolean" }
+            }
+          }
+        }
+      }
+    }
+  }
+}

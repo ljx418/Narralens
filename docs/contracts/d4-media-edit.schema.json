@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://narralens.local/schemas/d4-media-edit.schema.json",
+  "title": "Narralens D4 Media Edit Operation",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["op", "shot_id", "asset_id"],
+  "properties": {
+    "op": { "const": "replace_visual_asset" },
+    "shot_id": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$" },
+    "asset_id": { "type": "string", "pattern": "^asset_[a-z0-9][a-z0-9_-]{0,63}$" }
+  }
+}

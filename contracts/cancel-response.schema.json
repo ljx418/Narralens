@@ -1,0 +1,10 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://narralens.local/schemas/cancel-response.schema.json",
+  "type": "object", "additionalProperties": false,
+  "required": ["job_id", "state"],
+  "properties": {
+    "job_id": { "type": "string", "pattern": "^job_[A-Za-z0-9_-]+$" },
+    "state": { "enum": ["cancel_requested", "cancelled", "completed_after_cancel"] }
+  }
+}

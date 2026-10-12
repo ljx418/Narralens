@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Narralens D2 统一宿主与真实提案链",
+    "locale": "zh-CN",
+    "quality_profile": "showcase",
+    "viewBox": [1320, 760],
+    "views": [
+      { "id": "request-path", "label": "提案请求主链", "focus": ["user", "app", "host", "jobs", "runner", "openmontage", "proposal"], "note": "页面只通过 loopback Host 发起任务，Runner 输出必须经过 ProposalBundle 校验。" },
+      { "id": "preview-path", "label": "真实预览边界", "focus": ["app", "host", "hypit"], "note": "D2 只读打开真实 Hypit 预览；写入仍留到 D3 统一事务。" },
+      { "id": "risk-gate", "label": "外部调用人工 Gate", "focus": ["host", "runner", "openmontage"], "note": "首次真实 Provider 调用前冻结命令、模型、外传字段和单次预算。" }
+    ]
+  },
+  "components": [
+    { "id": "user", "type": "external", "label": "零号用户", "sublabel": "选择镜头并提出导演要求", "pos": [40, 300], "size": [150, 76] },
+    { "id": "app", "type": "frontend", "label": "NarralensApp", "sublabel": "项目头部 + 真实预览 + DirectorPane", "tag": "D2 新增", "pos": [260, 280], "size": [190, 112] },
+    { "id": "host", "type": "security", "label": "LocalHost API", "sublabel": "loopback / Origin / token / schema", "tag": "D2 新增", "pos": [500, 280], "size": [190, 112] },
+    { "id": "jobs", "type": "messagebus", "label": "JobStore + SSE", "sublabel": "真实阶段 / 事件 ID / 错误", "tag": "D2 新增", "pos": [760, 105], "size": [180, 96] },
+    { "id": "runner", "type": "backend", "label": "ControlledAgentRunner", "sublabel": "无 shell / 超时 / stdout schema", "tag": "需 Provider Gate", "pos": [760, 280], "size": [190, 112] },
+    { "id": "openmontage", "type": "external", "label": "OpenMontage", "sublabel": "固定 SHA 的 pipeline / skills / schema", "pos": [1030, 270], "size": [210, 100] },
+    { "id": "proposal", "type": "database", "label": "Proposal Staging", "sublabel": "ProposalBundle + provenance", "tag": "禁止直写主工程", "pos": [760, 500], "size": [190, 104] },
+    { "id": "hypit", "type": "external", "label": "Hypit 0.3.1", "sublabel": "Studio / Source / Run（D2 只读）", "pos": [500, 500], "size": [190, 104] },
+    { "id": "project", "type": "database", "label": "Project Descriptor", "sublabel": "revision / selection / source paths", "pos": [240, 500], "size": [190, 104] }
+  ],
+  "boundaries": [
+    { "kind": "security-group", "label": "本机 loopback 信任边界", "wraps": ["app", "host", "jobs", "runner", "proposal", "hypit", "project"], "pad": 18 }
+  ],
+  "connections": [
+    { "id": "user-app", "from": "user", "to": "app", "label": "选择 + 意图", "variant": "emphasis", "labelAt": [215, 260] },
+    { "id": "app-host", "from": "app", "to": "host", "label": "POST /api/projects/:id/proposals", "variant": "security", "labelAt": [465, 260] },
+    { "id": "host-job", "from": "host", "to": "jobs", "label": "创建 job + SSE", "variant": "dashed" },
+    { "id": "host-runner", "from": "host", "to": "runner", "label": "受控请求", "variant": "security", "labelAt": [770, 246] },
+    { "id": "runner-om", "from": "runner", "to": "openmontage", "label": "固定 pipeline 上下文", "variant": "dashed", "labelAt": [990, 246] },
+    { "id": "runner-proposal", "from": "runner", "to": "proposal", "label": "校验后落盘", "variant": "emphasis", "labelAt": [855, 446] },
+    { "id": "proposal-host", "from": "proposal", "to": "host", "label": "只读结果", "variant": "dashed" },
+    { "id": "host-hypit", "from": "host", "to": "hypit", "label": "check / Studio 只读信息", "labelAt": [595, 446] },
+    { "id": "project-host", "from": "project", "to": "host", "label": "revision + selection" }
+  ],
+  "cards": [
+    { "dot": "emerald", "title": "D2 出门", "items": ["页面请求触发真实 Runner", "ProposalBundle 通过契约并绑定 base_revision", "浏览候选不写 Hypit Source"] },
+    { "dot": "rose", "title": "人工高风险 Gate", "items": ["批准具体 Provider/模型", "冻结外传字段与单次预算", "未批准时返回 RUNNER_UNAVAILABLE，不得假成功"] }
+  ]
+}

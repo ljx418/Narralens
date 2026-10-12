@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://narralens.local/schemas/job-response.schema.json",
+  "type": "object", "additionalProperties": false,
+  "required": ["job_id", "project_id", "state", "created_at", "updated_at"],
+  "properties": {
+    "job_id": { "type": "string", "pattern": "^job_[A-Za-z0-9_-]+$" },
+    "project_id": { "type": "string", "minLength": 1 },
+    "state": { "enum": ["queued", "running", "cancel_requested", "cancelled", "succeeded", "failed", "completed_after_cancel"] },
+    "created_at": { "type": "string", "format": "date-time" },
+    "updated_at": { "type": "string", "format": "date-time" },
+    "proposal_id": { "type": "string", "minLength": 1 },
+    "error": { "$ref": "api-error.schema.json" }
+  }
+}

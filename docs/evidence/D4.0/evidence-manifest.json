@@ -1,0 +1,43 @@
+{
+  "format": "narralens.evidence-manifest@1",
+  "gate": "D4.0",
+  "date": "2026-10-12",
+  "status": "passed",
+  "environment": { "node": "v22.22.1", "pnpm": "10.33.0", "ffmpeg": "6.1.1-3ubuntu5", "hypit_base": "85e01c76716498e6ec5b8bdfb6b374ca67f0195a", "hypit_commit": "437563f977541002066e6ee961f83a67cbebd3c2" },
+  "assets": {
+    "manifest_sha256": "bbf00c5ef213b4000bd1c01fca8f3cf6e140f99930d39225abab699c6cf1b210",
+    "baseline_sha256": "38cc9e8b7d251b70096f8a355b9823872cff8aedec440074c9d09a2f827db225",
+    "alternate_sha256": "95b24adfd889fac7d63c5f7ead20d76595d63ef47aa5c17c55b5de7e621572aa"
+  },
+  "tests": {
+    "narralens": "47/47 passed plus production build",
+    "hypit_typecheck": "passed",
+    "hypit_targeted": "6/6 passed",
+    "real_transaction": "passed",
+    "real_build_comparison": "passed",
+    "browser_transaction": "passed",
+    "credential_scan": "passed-with-detect-secrets-unavailable"
+  },
+  "artifacts": {
+    "real_transaction": "artifacts/real-media-e2e.json",
+    "build_comparison": "artifacts/build-comparison.json",
+    "browser_report": "artifacts/browser-media-e2e.json",
+    "screenshots": ["artifacts/ui-media-alternate.png", "artifacts/ui-media-restored.png"],
+    "security": "security/credential-scan.json"
+  },
+  "delivery": {
+    "submodule_base": "85e01c76716498e6ec5b8bdfb6b374ca67f0195a",
+    "fork_url": "https://github.com/ljx418/hypit",
+    "branch": "narralens/d4-typed-media-mutation",
+    "commit": "437563f977541002066e6ee961f83a67cbebd3c2",
+    "remote_verified": true,
+    "diff_sha256": "0431e638f480ebeb64165977fd9597fc9e0612bf21b455f0dfd508cc028fbd18",
+    "diff_stat": "7 files changed, 638 insertions(+), 6 deletions(-)",
+    "pin_status": "fixed"
+  },
+  "limitations": [
+    "D4.0 proves one registered local asset replacement and does not implement D4.1 multi-proposal comparison or D4.2 selected-proposal materialization.",
+    "detect-secrets was unavailable; a bounded explicit pattern scan produced zero findings.",
+    "Large temporary build MP4 files are excluded from evidence and were removed after hash/metric capture."
+  ]
+}

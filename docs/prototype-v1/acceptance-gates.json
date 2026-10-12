@@ -1,0 +1,52 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "Narralens V1 前端出门验收门限",
+    "locale": "zh-CN",
+    "quality_profile": "showcase",
+    "viewBox": [1240, 790]
+  },
+  "lanes": [
+    { "id": "owner", "label": "项目负责人" },
+    { "id": "spec", "label": "原型与规格" },
+    { "id": "automation", "label": "自动化证据" },
+    { "id": "real_chain", "label": "真实工程链" },
+    { "id": "exception", "label": "失败与退回", "variant": "exception" }
+  ],
+  "phases": [
+    { "id": "align", "label": "体验对齐", "fromCol": 0, "toCol": 1 },
+    { "id": "verify", "label": "交互与规格验证", "fromCol": 2, "toCol": 3, "variant": "emphasis" },
+    { "id": "prove", "label": "真实链路与出门", "fromCol": 4, "toCol": 5, "variant": "security" }
+  ],
+  "mainPath": ["approve_target", "freeze_spec", "run_scenarios", "ui_gate", "d1_gate", "signoff"],
+  "semanticChecks": {
+    "allowedRoots": ["approve_target"],
+    "allowedTerminals": ["signoff", "blocked"],
+    "requiredPaths": [
+      { "from": "approve_target", "to": "signoff" },
+      { "from": "ui_gate", "to": "blocked" }
+    ]
+  },
+  "nodes": [
+    { "id": "approve_target", "lane": "owner", "col": 0, "type": "external", "label": "批准 V1 目标原型", "sublabel": "布局 / 路线 / 状态语义", "width": 168 },
+    { "id": "freeze_spec", "lane": "spec", "col": 1, "type": "frontend", "label": "冻结体验规格", "sublabel": "组件 / 状态 / 键盘 / 响应式", "width": 164 },
+    { "id": "run_scenarios", "lane": "owner", "col": 2, "type": "external", "label": "执行核心用户场景", "sublabel": "定位 → 比较 → 采用 → 恢复", "width": 176 },
+    { "id": "ui_gate", "lane": "automation", "col": 3, "type": "security", "label": "前端自动化 Gate", "sublabel": "交互 / a11y / 状态 / 视口", "tag": "必须全绿", "width": 174 },
+    { "id": "d1_gate", "lane": "real_chain", "col": 4, "type": "security", "label": "真实链路 Gate", "sublabel": "Hypit 预览 / 重开 / 导出证据", "tag": "不得模拟", "width": 178 },
+    { "id": "signoff", "lane": "owner", "col": 5, "type": "external", "label": "V1 出门签字", "sublabel": "规格、实现、证据一致", "width": 164 },
+    { "id": "blocked", "lane": "exception", "col": 3, "type": "security", "label": "拒绝出门", "sublabel": "重大偏差 / 虚假验收 / 阻塞", "width": 174 },
+    { "id": "revise", "lane": "exception", "col": 4, "type": "messagebus", "label": "退回修订", "sublabel": "文档或实现重新闭环", "width": 164 }
+  ],
+  "edges": [
+    { "id": "target_spec", "from": "approve_target", "to": "freeze_spec", "variant": "emphasis" },
+    { "id": "spec_scenario", "from": "freeze_spec", "to": "run_scenarios", "label": "可执行步骤" },
+    { "id": "scenario_ui", "from": "run_scenarios", "to": "ui_gate", "label": "真实操作记录", "variant": "emphasis" },
+    { "id": "ui_d1", "from": "ui_gate", "to": "d1_gate", "label": "前端 Gate 全绿", "variant": "security" },
+    { "id": "d1_signoff", "from": "d1_gate", "to": "signoff", "label": "真实证据齐全", "variant": "emphasis" },
+    { "id": "ui_block", "from": "ui_gate", "to": "blocked", "label": "任一阻塞项失败", "variant": "security", "role": "error" },
+    { "id": "d1_block", "from": "d1_gate", "to": "blocked", "label": "模拟或链路不通", "variant": "security", "role": "error" },
+    { "id": "blocked_revise", "from": "blocked", "to": "revise", "label": "形成修订清单", "variant": "dashed", "role": "branch" },
+    { "id": "revise_spec", "from": "revise", "to": "freeze_spec", "label": "重新冻结", "variant": "dashed", "role": "return" }
+  ]
+}

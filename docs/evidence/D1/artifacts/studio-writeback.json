@@ -1,0 +1,18 @@
+{
+  "format": "narralens.studio-writeback-evidence@1",
+  "date": "2026-10-12",
+  "studio_url": "http://localhost:5179",
+  "source": "authors/main.svml",
+  "accepted_write": {
+    "request_revision": 1,
+    "http_status": 202,
+    "response_revision": 2,
+    "marker_persisted": true
+  },
+  "stale_write": {
+    "request_revision": 1,
+    "http_status": 409,
+    "error": "The Source changed outside Studio."
+  },
+  "scope": "Studio server Source transaction and stale-revision protection; not a browser UI gesture test."
+}

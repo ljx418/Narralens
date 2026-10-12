@@ -1,0 +1,58 @@
+{
+  "format": "narralens.evidence-manifest@1",
+  "gate": "D2",
+  "date": "2026-10-12",
+  "status": "passed-with-declared-limitations",
+  "environment": {
+    "node": "v22.22.1",
+    "pnpm": "10.33.0",
+    "claude_code_cli": "2.1.205",
+    "browser": "Google Chrome headless"
+  },
+  "tests": {
+    "D2-CONTRACT-01": "passed",
+    "D2-SEC-01": "passed",
+    "D2-JOB-01": "passed",
+    "D2-HYPIT-READ-01": "passed",
+    "D2-UI-01": "passed",
+    "D2-RUNNER-01": "passed",
+    "D2-RUNNER-REAL-01": "passed",
+    "D2-NOWRITE-01": "passed",
+    "D2-E2E-01": "passed"
+  },
+  "automated_check": {
+    "command": "corepack pnpm check",
+    "test_files": 5,
+    "tests": 24,
+    "typescript": "passed",
+    "production_build": "passed"
+  },
+  "real_runner": {
+    "cli": "Claude Code CLI 2.1.205",
+    "model": "MiniMax-M3",
+    "final_evidence_call_cost_usd": 0.101904,
+    "duration_ms": 44872,
+    "num_turns": 2,
+    "automatic_retries_per_job": 0,
+    "product_jobs_during_d2_debug_and_acceptance": 9,
+    "successful_product_jobs": 4,
+    "connectivity_smoke_calls": 1
+  },
+  "nowrite": {
+    "source_sha256_before_after": "ae4edebf3bf05bb178efd2b264f101b744998c7d3bad29aa1ad7a1dd37fcab3a",
+    "run_sha256_before_after": "bff6a663f753ac97b546acd1561e95b1aa1aa1239fdd08867a3b28ad782dc738"
+  },
+  "artifacts": {
+    "real_runner_e2e": { "path": "artifacts/real-runner-e2e.json", "sha256": "6c0a6edba545f25a74bfea4b4edaed242c4719ff061e22703508d014fcc88ef2" },
+    "browser_e2e": { "path": "artifacts/browser-e2e.json", "sha256": "9e73ace5de834d360b345e17c268cc91e569b8e6a607d47cdcf856dc0ff175de" },
+    "initial_ui": { "path": "artifacts/ui-1440x1000.png", "sha256": "086592aa6f1c65dfaea788f3b81eb388d44edc1c3605b45ddebd4c684908ab1b" },
+    "success_ui": { "path": "artifacts/ui-real-runner-success.png", "sha256": "0c53a06ae74ede60d9e8cea80e70a0e532bede4046c872df8f56fe2da8068183" },
+    "credential_scan": "security/credential-scan.json"
+  },
+  "limitations": [
+    "An early Vitest configuration accidentally scanned vendor/hypit; the processes were stopped and the final include/exclude configuration prevents recurrence. This failure was never counted as product acceptance.",
+    "D2 stages and displays one real proposal; it does not write Hypit Source.",
+    "The preview is a verified Hypit Studio descriptor/link, not the complete embedded frame editor.",
+    "Long-project performance, complete accessibility, write transactions, recovery and export remain later V1 gates."
+  ]
+}

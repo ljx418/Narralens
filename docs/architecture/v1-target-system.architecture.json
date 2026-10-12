@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Narralens V1 目标系统架构",
+    "locale": "zh-CN",
+    "quality_profile": "showcase",
+    "viewBox": [1260, 760],
+    "views": [
+      { "id": "creator-flow", "label": "创作者主路径", "focus": ["creator", "workbench", "local_host", "project_actor", "hypit_adapter", "author_source", "hypit_runtime", "delivery"], "note": "从统一工作台到唯一影片事实源与真实交付。" },
+      { "id": "proposal-flow", "label": "提案链", "focus": ["workbench", "local_host", "openmontage_adapter", "agent_runner", "staging", "project_actor"], "note": "OpenMontage 只产出提案与素材，不能直接写主工程。" },
+      { "id": "transaction-boundary", "label": "写入事务", "focus": ["project_actor", "state_store", "staging", "hypit_adapter", "author_source"], "note": "锁、版本、审批与 typed edit 在统一事务中校验。" }
+    ]
+  },
+  "components": [
+    { "id": "creator", "type": "external", "label": "单人创作者", "sublabel": "观点 / 资料 / 素材", "pos": [20, 310], "size": [110, 76] },
+    { "id": "workbench", "type": "frontend", "label": "NarralensApp", "sublabel": "想法 / 精修 / 交付", "tag": "未开发", "pos": [180, 290], "size": [150, 116] },
+    { "id": "local_host", "type": "backend", "label": "LocalHost API", "sublabel": "loopback / typed API / SSE", "tag": "未开发", "pos": [390, 290], "size": [150, 116] },
+    { "id": "project_actor", "type": "security", "label": "ProjectWriteActor", "sublabel": "锁 / 版本 / 审批 / journal", "tag": "串行写入", "pos": [600, 290], "size": [160, 116] },
+    { "id": "state_store", "type": "database", "label": "SQLite + EventLog", "sublabel": "任务 / 修订 / 审批 / 映射", "tag": "非最终时间轴", "pos": [600, 55], "size": [160, 100] },
+    { "id": "openmontage_adapter", "type": "backend", "label": "OpenMontageAdapter", "sublabel": "pipeline / schema normalize", "tag": "待 D1", "pos": [390, 545], "size": [170, 104] },
+    { "id": "agent_runner", "type": "security", "label": "ControlledAgentRunner", "sublabel": "目录 / 命令 / 网络白名单", "tag": "待 D1", "pos": [180, 545], "size": [170, 104] },
+    { "id": "staging", "type": "messagebus", "label": "Proposal Staging", "sublabel": "ProposalBundle / AssetManifest", "tag": "禁止直写主工程", "pos": [600, 545], "size": [170, 104] },
+    { "id": "hypit_adapter", "type": "backend", "label": "HypitAdapter", "sublabel": "stable ID / typed patch", "tag": "待 D1", "pos": [820, 290], "size": [150, 116] },
+    { "id": "author_source", "type": "database", "label": "Author Source + Run", "sublabel": "唯一影片事实源", "tag": "不可复制", "pos": [1040, 290], "size": [170, 116] },
+    { "id": "hypit_runtime", "type": "backend", "label": "Hypit Runtime", "sublabel": "check / compile / build", "tag": "待 D1 固定版本", "pos": [1040, 545], "size": [170, 104] },
+    { "id": "delivery", "type": "external", "label": "真实交付包", "sublabel": "MP4 / 字幕 / 许可 / 标题封面", "tag": "V1 出门证据", "pos": [1040, 55], "size": [170, 100] }
+  ],
+  "boundaries": [
+    { "kind": "region", "label": "Narralens 本地控制层", "wraps": ["workbench", "local_host", "project_actor", "state_store", "openmontage_adapter", "staging", "hypit_adapter"] },
+    { "kind": "security-group", "label": "受控 Agent 执行边界", "wraps": ["agent_runner", "openmontage_adapter"] },
+    { "kind": "security-group", "label": "唯一真实工程写入边界", "wraps": ["project_actor", "hypit_adapter", "author_source"] }
+  ],
+  "connections": [
+    { "id": "creator_workbench", "from": "creator", "to": "workbench", "label": "统一工作台操作", "variant": "emphasis", "labelAt": [155, 430] },
+    { "id": "workbench_host", "from": "workbench", "to": "local_host", "label": "typed commands + SSE", "variant": "emphasis", "labelAt": [360, 430] },
+    { "id": "host_actor", "from": "local_host", "to": "project_actor", "label": "按项目串行化", "variant": "security", "labelAt": [570, 430] },
+    { "id": "actor_store", "from": "project_actor", "to": "state_store", "label": "revision / lock / journal", "fromSide": "top", "toSide": "bottom", "labelAt": [680, 220] },
+    { "id": "host_openmontage", "from": "local_host", "to": "openmontage_adapter", "label": "提案任务", "variant": "dashed", "fromSide": "bottom", "toSide": "top", "labelAt": [465, 485] },
+    { "id": "openmontage_runner", "from": "openmontage_adapter", "to": "agent_runner", "label": "固定 pipeline + skills", "variant": "security", "labelAt": [370, 680] },
+    { "id": "openmontage_staging", "from": "openmontage_adapter", "to": "staging", "label": "归一化提案与素材", "variant": "dashed", "labelAt": [580, 680] },
+    { "id": "staging_actor", "from": "staging", "to": "project_actor", "label": "审批后进入事务", "variant": "security", "fromSide": "top", "toSide": "bottom", "labelAt": [685, 485] },
+    { "id": "actor_hypit", "from": "project_actor", "to": "hypit_adapter", "label": "validated typed edit", "variant": "emphasis", "labelAt": [790, 430] },
+    { "id": "adapter_source", "from": "hypit_adapter", "to": "author_source", "label": "staging → check → commit", "variant": "security", "labelAt": [1005, 430] },
+    { "id": "source_runtime", "from": "author_source", "to": "hypit_runtime", "label": "真实 Run / build", "variant": "emphasis", "fromSide": "bottom", "toSide": "top", "labelAt": [1125, 485] },
+    { "id": "runtime_delivery", "from": "hypit_runtime", "to": "delivery", "label": "验证后交付", "variant": "emphasis", "fromSide": "right", "toSide": "right", "via": [[1235, 597], [1235, 105]], "labelAt": [1225, 420] }
+  ]
+}

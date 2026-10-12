@@ -1,0 +1,51 @@
+<?svml using="@hypit/markup@1"?>
+<svml>
+  <!-- D1 Studio transaction writeback verified -->
+  <import as="media" from="@hypit/media@1"/>
+  <import as="mediaop" from="@hypit/media-operations@1"/>
+  <import as="time" from="@hypit/timeline-author@1"/>
+  <import as="space" from="@hypit/spatial@1"/>
+  <import as="visual" from="@hypit/visual-track@1"/>
+  <import as="audio" from="@hypit/audio-track@1"/>
+  <import as="film" from="@hypit/film@1"/>
+  <import as="html" from="@hypit/html-video@1"/>
+  <import as="style" source="../recipes/main.svs"/>
+
+  <media:Video id="visual-source" src="../assets/generated/visual-10s.mp4"/>
+  <media:Audio id="narration-source" src="../assets/generated/narration-30s.wav"/>
+
+  <time:Clock id="clock" frame-rate="30"/>
+  <mediaop:Normalize id="visual-media" source={visual-source}
+    video="primary-moving" audio="none" span-authority="video" clock={clock}/>
+  <mediaop:Normalize id="narration-media" source={narration-source}
+    video="none" audio="default" span-authority="audio" clock={clock}/>
+
+  <time:Timeline id="program" clock={clock} end="30s">
+    <time:Window id="shot-1" from="0s" until="10s"/>
+    <time:Window id="shot-2" from="10s" until="20s"/>
+    <time:Window id="shot-3" from="20s" until="30s"/>
+  </time:Timeline>
+
+  <space:Canvas id="canvas" width="1280" height="720"/>
+  <space:Frame id="full" within={canvas.bounds} left="0%" top="0%" right="100%" bottom="100%"/>
+  <space:Frame id="shot-2-frame" within={canvas.bounds} left="8%" top="8%" right="92%" bottom="92%"/>
+
+  <visual:Track id="picture" timeline={program.timeline}>
+    <visual:Clip id="shot-1" media={visual-media.media} during={program.shot-1}
+      frame={full} z="10" fit="cover"/>
+    <visual:Clip id="shot-2" media={visual-media.media} during={program.shot-2}
+      frame={shot-2-frame} z="10" fit="cover"/>
+    <visual:Clip id="shot-3" media={visual-media.media} during={program.shot-3}
+      frame={full} z="10" fit="cover"/>
+  </visual:Track>
+
+  <audio:Track id="narration" timeline={program.timeline}>
+    <audio:Clip id="narration" source={narration-media.media} during={program.window}/>
+  </audio:Track>
+
+  <film:Film id="main" canvas={canvas.canvas} timeline={program.timeline} appearance={style.film.main}>
+    <film:Track source={picture.visual}/>
+    <film:Track source={narration.audio}/>
+  </film:Film>
+  <html:Video id="final" composition={main.composition} timeline={program.timeline}/>
+</svml>

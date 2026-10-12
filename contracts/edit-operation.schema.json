@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://narralens.local/schemas/edit-operation.schema.json",
+  "oneOf": [
+    {
+      "type": "object", "additionalProperties": false,
+      "required": ["op", "shot_id", "value"],
+      "properties": {
+        "op": { "const": "set_visual_fit" },
+        "shot_id": { "type": "string", "pattern": "^[A-Za-z0-9_-]+$" },
+        "value": { "enum": ["contain", "cover"] }
+      }
+    },
+    {
+      "type": "object", "additionalProperties": false,
+      "required": ["op", "shot_id", "asset_id"],
+      "properties": {
+        "op": { "const": "replace_visual_asset" },
+        "shot_id": { "type": "string", "pattern": "^[A-Za-z0-9_-]+$" },
+        "asset_id": { "type": "string", "pattern": "^asset_[a-z0-9][a-z0-9_-]{0,63}$" }
+      }
+    }
+  ]
+}

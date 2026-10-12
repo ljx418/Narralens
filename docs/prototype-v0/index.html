@@ -1,0 +1,522 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>叙镜前端原型审查 v0</title>
+  <style>
+    :root {
+      --canvas: #0d1112;
+      --panel: #141a1b;
+      --panel-2: #192122;
+      --panel-3: #202a2b;
+      --line: #303b3c;
+      --line-strong: #465354;
+      --text: #edf2f0;
+      --muted: #8e9b98;
+      --quiet: #66716f;
+      --confirm: #58b99c;
+      --confirm-soft: #17362e;
+      --pending: #d4a25e;
+      --pending-soft: #3a2b18;
+      --danger: #e17878;
+      --danger-soft: #3b2021;
+      --focus: #92d8c1;
+      --radius: 8px;
+      --shadow: 0 16px 48px rgba(0, 0, 0, .28);
+      --ease: cubic-bezier(.22, .7, .2, 1);
+      --rail: 224px;
+      --director: 360px;
+      color-scheme: dark;
+    }
+
+    * { box-sizing: border-box; }
+    html { background: var(--canvas); }
+    body {
+      margin: 0;
+      color: var(--text);
+      background:
+        linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px),
+        var(--canvas);
+      background-size: 40px 40px;
+      font-family: "Noto Sans CJK SC", "Source Han Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+      line-height: 1.45;
+      min-height: 100vh;
+    }
+
+    button, input, textarea { font: inherit; }
+    button { color: inherit; }
+    button:focus-visible, input:focus-visible, textarea:focus-visible, a:focus-visible {
+      outline: 2px solid var(--focus);
+      outline-offset: 2px;
+    }
+    button:disabled { opacity: .38; cursor: not-allowed; }
+    .mono { font-family: "JetBrains Mono", "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
+
+    .review-shell { display: grid; grid-template-columns: var(--rail) minmax(0, 1fr); min-height: 100vh; }
+    .review-rail {
+      position: sticky; top: 0; height: 100vh; z-index: 20;
+      background: rgba(12, 16, 17, .96); border-right: 1px solid var(--line);
+      padding: 24px 16px; display: flex; flex-direction: column; backdrop-filter: blur(18px);
+    }
+    .brand-lockup { padding: 0 8px 22px; border-bottom: 1px solid var(--line); }
+    .brand { font-size: 24px; font-weight: 720; letter-spacing: .16em; }
+    .brand-lockup small { display: block; color: var(--muted); font-size: 10px; margin-top: 6px; letter-spacing: .08em; }
+    .prototype-tag { display: inline-flex; margin-top: 14px; padding: 5px 8px; border: 1px solid #6f532c; color: #efbd75; background: #2b2114; border-radius: 4px; font-size: 10px; }
+    .review-nav { display: grid; gap: 4px; margin-top: 20px; }
+    .review-nav button {
+      border: 0; background: transparent; color: var(--muted); border-radius: 6px;
+      padding: 10px 11px; text-align: left; cursor: pointer; transition: 180ms var(--ease);
+    }
+    .review-nav button:hover { color: var(--text); background: #192021; }
+    .review-nav button.active { color: var(--text); background: #212a2b; box-shadow: inset 2px 0 var(--confirm); }
+    .rail-note { margin-top: auto; color: var(--quiet); font-size: 10px; padding: 16px 8px 0; border-top: 1px solid var(--line); }
+
+    .review-main { min-width: 0; }
+    .review-topbar {
+      position: sticky; top: 0; z-index: 15; min-height: 62px; display: flex; align-items: center; justify-content: space-between;
+      gap: 18px; padding: 0 24px; background: rgba(13, 17, 18, .88); border-bottom: 1px solid var(--line); backdrop-filter: blur(18px);
+    }
+    .review-topbar strong { font-size: 13px; }
+    .status-line { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .status-chip { padding: 5px 8px; border: 1px solid var(--line); border-radius: 4px; color: var(--muted); font-size: 10px; }
+    .status-chip.pending { color: #edbb73; border-color: #624a2b; background: #251d12; }
+    .view { display: none; padding: 28px; animation: enter 220ms var(--ease); }
+    .view.active { display: block; }
+    @keyframes enter { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: none; } }
+    .section-head { display: flex; justify-content: space-between; gap: 24px; align-items: end; margin: 0 auto 20px; max-width: 1480px; }
+    .section-head h1 { margin: 0; font-size: clamp(23px, 2.3vw, 34px); letter-spacing: -.025em; }
+    .section-head p { max-width: 680px; margin: 8px 0 0; color: var(--muted); font-size: 13px; text-wrap: pretty; }
+    .eyebrow { display: block; margin-bottom: 8px; color: var(--confirm); font-size: 10px; letter-spacing: .16em; text-transform: uppercase; }
+
+    .evidence-grid { max-width: 1480px; margin: auto; display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(300px, .75fr); gap: 18px; }
+    .evidence-card { border: 1px solid var(--line); background: var(--panel); border-radius: 10px; overflow: hidden; box-shadow: var(--shadow); }
+    .evidence-card img { display: block; width: 100%; aspect-ratio: 16/10; object-fit: cover; object-position: top; background: #eef2ef; }
+    .card-caption { padding: 14px 16px; display: flex; justify-content: space-between; gap: 16px; border-top: 1px solid var(--line); color: var(--muted); font-size: 11px; }
+    .fact-list { display: grid; gap: 10px; }
+    .fact { border: 1px solid var(--line); background: var(--panel); padding: 15px; border-radius: 8px; }
+    .fact strong { display: block; font-size: 12px; margin-bottom: 5px; }
+    .fact p { margin: 0; color: var(--muted); font-size: 11px; }
+    .fact[data-state="planned"] strong { color: var(--pending); }
+    .fact[data-state="known"] strong { color: var(--confirm); }
+    .fact[data-state="no-go"] strong { color: var(--danger); }
+
+    .workbench-frame { max-width: 1640px; margin: auto; border: 1px solid var(--line-strong); background: #0d1112; border-radius: 10px; overflow: hidden; box-shadow: 0 28px 72px rgba(0,0,0,.42); }
+    .appbar { height: 54px; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 0 14px; border-bottom: 1px solid var(--line); background: #131819; }
+    .project-meta { display: flex; align-items: center; gap: 10px; min-width: 250px; }
+    .project-mark { width: 27px; height: 27px; display: grid; place-items: center; background: var(--confirm-soft); border: 1px solid #2f6958; border-radius: 5px; color: var(--confirm); font-weight: 700; }
+    .project-title strong { display: block; font-size: 11px; }
+    .project-title span { color: var(--muted); font-size: 9px; }
+    .stage-tabs { display: flex; align-self: stretch; }
+    .stage-tabs button { min-width: 78px; border: 0; border-bottom: 2px solid transparent; background: transparent; color: var(--muted); cursor: pointer; font-size: 11px; }
+    .stage-tabs button.active { color: var(--text); border-bottom-color: var(--confirm); }
+    .app-actions { display: flex; align-items: center; gap: 8px; min-width: 250px; justify-content: flex-end; }
+    .save-state { color: var(--muted); font-size: 9px; }
+    .btn { min-height: 30px; border: 1px solid var(--line-strong); background: #202829; border-radius: 5px; padding: 0 10px; cursor: pointer; font-size: 10px; transition: 180ms var(--ease); }
+    .btn:hover { border-color: #60706e; background: #273132; }
+    .btn:active { transform: translateY(1px); }
+    .btn.primary { border-color: #3d8b74; background: #245f4e; color: #f4fffb; }
+    .btn.primary:hover { background: #2d745f; }
+
+    .chapter-strip { height: 52px; display: flex; align-items: center; gap: 7px; padding: 0 12px; border-bottom: 1px solid var(--line); background: #111617; overflow-x: auto; }
+    .chapter-strip button { flex: 0 0 auto; height: 30px; padding: 0 11px; border: 1px solid transparent; background: transparent; color: var(--muted); border-radius: 5px; cursor: pointer; font-size: 9px; }
+    .chapter-strip button.active { border-color: #47645b; background: #1b2e28; color: #c6e7dc; }
+    .semantic-search { margin-left: auto; min-width: 228px; height: 30px; border: 1px solid var(--line); border-radius: 5px; display: flex; align-items: center; padding: 0 9px; gap: 8px; color: var(--quiet); font-size: 9px; }
+    .semantic-search kbd { margin-left: auto; border: 1px solid var(--line); padding: 1px 4px; border-radius: 3px; }
+
+    .workspace { display: grid; grid-template-columns: minmax(0, 1fr) var(--director); grid-template-rows: minmax(390px, 54vh) 238px; }
+    .viewer-zone { position: relative; display: grid; place-items: center; padding: 24px; background: radial-gradient(circle at 48% 42%, #263132 0, #111617 54%, #0b0e0f 100%); min-width: 0; }
+    .video-canvas { width: min(92%, 980px); aspect-ratio: 16 / 9; position: relative; overflow: hidden; border: 1px solid #384344; background: linear-gradient(150deg, #102529, #0b1416 52%, #141d1d); box-shadow: 0 20px 60px rgba(0,0,0,.45); }
+    .video-canvas::before { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, transparent 50%, rgba(88,185,156,.07) 50%), linear-gradient(rgba(255,255,255,.028) 1px, transparent 1px); background-size: 100% 100%, 100% 44px; }
+    .map-shape { position: absolute; inset: 17% 12% 26% 12%; border: 1px solid #3c5f59; background: linear-gradient(120deg, rgba(88,185,156,.12), rgba(255,255,255,.025)); clip-path: polygon(5% 40%, 23% 12%, 53% 24%, 75% 7%, 95% 33%, 82% 58%, 96% 82%, 62% 93%, 39% 70%, 14% 86%); }
+    .video-kicker { position: absolute; left: 5%; top: 8%; color: #9bd2c1; font-size: 10px; letter-spacing: .14em; }
+    .video-title { position: absolute; left: 5%; bottom: 17%; max-width: 62%; font-size: clamp(18px, 2.2vw, 34px); line-height: 1.2; font-weight: 700; letter-spacing: -.02em; }
+    .video-caption { position: absolute; left: 18%; right: 18%; bottom: 5%; text-align: center; color: #fff; font-size: 12px; text-shadow: 0 2px 8px #000; }
+    .canvas-badge { position: absolute; right: 8px; top: 8px; padding: 4px 6px; border: 1px solid #6e512a; background: rgba(48,36,19,.86); color: #ebba74; border-radius: 4px; font-size: 8px; }
+    .player-bar { position: absolute; left: 24px; right: 24px; bottom: 10px; display: flex; justify-content: center; align-items: center; gap: 12px; font-size: 10px; color: var(--muted); }
+    .player-bar button { width: 30px; height: 26px; border: 1px solid var(--line); background: #161d1e; border-radius: 5px; cursor: pointer; }
+
+    .director-pane { border-left: 1px solid var(--line); background: var(--panel); display: flex; flex-direction: column; min-width: 0; }
+    .pane-head { min-height: 50px; display: flex; align-items: center; justify-content: space-between; padding: 0 14px; border-bottom: 1px solid var(--line); }
+    .pane-head strong { font-size: 11px; }
+    .pane-head span { color: var(--pending); font-size: 9px; }
+    .pane-scroll { overflow: auto; padding: 12px; display: grid; gap: 12px; }
+    .selection-card { padding: 10px; border: 1px solid #40504e; background: #1a2223; border-radius: 6px; }
+    .selection-meta { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; font-size: 9px; color: var(--muted); }
+    .prompt-box { width: 100%; min-height: 58px; resize: vertical; color: var(--text); border: 1px solid var(--line-strong); background: #101516; border-radius: 5px; padding: 9px; font-size: 10px; }
+    .locks { display: flex; gap: 6px; margin-top: 8px; }
+    .lock { flex: 1; min-height: 28px; border: 1px solid var(--line); background: #151b1c; color: var(--muted); border-radius: 4px; cursor: pointer; font-size: 9px; }
+    .lock.locked { color: #bfe8db; border-color: #3e7665; background: #19342d; }
+    .proposal-head { display: flex; justify-content: space-between; align-items: center; }
+    .proposal-head strong { font-size: 10px; }
+    .proposal-head span { color: var(--muted); font-size: 8px; }
+    .proposals { display: grid; gap: 7px; }
+    .proposal { border: 1px solid var(--line); background: #161d1e; border-radius: 6px; padding: 9px; cursor: pointer; text-align: left; transition: 180ms var(--ease); }
+    .proposal:hover { border-color: #556261; transform: translateY(-1px); }
+    .proposal.selected { border-color: #4f9f87; background: #19312b; box-shadow: inset 2px 0 var(--confirm); }
+    .proposal-row { display: flex; justify-content: space-between; gap: 8px; align-items: start; }
+    .proposal strong { font-size: 10px; }
+    .proposal p { margin: 4px 0 0; color: var(--muted); font-size: 8px; }
+    .proposal-status { color: var(--pending); font-size: 8px; white-space: nowrap; }
+    .impact { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+    .impact span { padding: 6px; border: 1px solid var(--line); border-radius: 4px; color: var(--muted); font-size: 8px; }
+    .impact b { display: block; color: var(--text); font-size: 9px; margin-bottom: 2px; }
+    .adopt-row { position: sticky; bottom: 0; display: flex; gap: 7px; padding: 10px 12px; border-top: 1px solid var(--line); background: rgba(20,26,27,.96); }
+    .adopt-row .btn { flex: 1; }
+
+    .timeline { grid-column: 1 / -1; border-top: 1px solid var(--line); background: #101516; min-width: 0; }
+    .timeline-toolbar { height: 38px; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 0 12px; border-bottom: 1px solid var(--line); }
+    .timeline-toolbar strong { font-size: 10px; }
+    .timeline-toolbar span { color: var(--muted); font-size: 8px; }
+    .timeline-body { display: grid; grid-template-columns: 76px 1fr; height: 199px; }
+    .track-labels { border-right: 1px solid var(--line); background: #121819; padding-top: 23px; }
+    .track-labels div { height: 38px; display: flex; align-items: center; padding: 0 12px; color: var(--muted); font-size: 9px; border-bottom: 1px solid #202727; }
+    .tracks { position: relative; overflow: hidden; padding-top: 23px; background: repeating-linear-gradient(90deg, transparent 0, transparent 9.9%, rgba(255,255,255,.035) 10%); }
+    .ruler { position: absolute; top: 0; left: 0; right: 0; height: 23px; display: flex; justify-content: space-between; padding: 5px 8px 0; color: var(--quiet); font-size: 7px; border-bottom: 1px solid var(--line); }
+    .track-row { height: 38px; display: flex; gap: 3px; padding: 4px 4px; border-bottom: 1px solid #202727; }
+    .clip { position: relative; min-width: 36px; border: 1px solid #33403e; background: #202a29; color: #8ba09a; border-radius: 3px; padding: 4px 6px; font-size: 7px; cursor: pointer; overflow: hidden; }
+    .clip.visual { background: #233332; }
+    .clip.caption { background: #252a31; border-color: #363e4a; }
+    .clip.voice { background: #2b2922; border-color: #464133; }
+    .clip.music { background: #20262b; border-color: #323d45; }
+    .clip.selected { border-color: var(--confirm); color: #d5f0e7; background: #1d463b; box-shadow: inset 0 0 0 1px #2f6c5b; }
+    .clip small { display: block; opacity: .68; white-space: nowrap; }
+    .playhead { position: absolute; top: 0; bottom: 0; left: 52.4%; width: 1px; background: #e5bf7d; pointer-events: none; }
+    .playhead::before { content: ""; position: absolute; top: 20px; left: -4px; width: 9px; height: 7px; background: #e5bf7d; clip-path: polygon(0 0,100% 0,50% 100%); }
+    .selection-range { position: absolute; top: 23px; bottom: 0; left: 46%; width: 13%; background: rgba(88,185,156,.06); border-left: 1px solid rgba(88,185,156,.5); border-right: 1px solid rgba(88,185,156,.5); pointer-events: none; }
+
+    .architecture-wrap, .module-grid, .route-board, .coverage-grid { max-width: 1480px; margin: auto; }
+    .architecture-wrap { height: calc(100vh - 160px); min-height: 680px; border: 1px solid var(--line); background: #f3f6f5; border-radius: 10px; overflow: hidden; }
+    .architecture-wrap iframe { width: 100%; height: 100%; border: 0; }
+    .module-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .module-card { min-height: 180px; border: 1px solid var(--line); background: var(--panel); border-radius: 8px; padding: 16px; }
+    .module-card header { display: flex; justify-content: space-between; gap: 10px; align-items: start; margin-bottom: 16px; }
+    .module-card h3 { margin: 0; font-size: 13px; }
+    .module-card header span { color: var(--pending); border: 1px solid #5d4527; padding: 3px 5px; border-radius: 3px; font-size: 8px; }
+    .module-card dl { display: grid; grid-template-columns: 66px 1fr; gap: 7px 10px; margin: 0; font-size: 10px; }
+    .module-card dt { color: var(--quiet); }
+    .module-card dd { margin: 0; color: var(--muted); }
+
+    .route-board { display: grid; gap: 16px; }
+    .route-lane { border: 1px solid var(--line); background: var(--panel); border-radius: 8px; padding: 14px; }
+    .route-lane h3 { margin: 0 0 12px; font-size: 11px; color: var(--muted); }
+    .route-nodes { display: grid; grid-template-columns: repeat(6, minmax(120px, 1fr)); gap: 22px; }
+    .route-node { position: relative; min-height: 82px; padding: 11px; border: 1px solid #465251; background: #1c2425; border-radius: 6px; }
+    .route-node:not(:last-child)::after { content: ""; position: absolute; top: 40px; right: -22px; width: 22px; height: 1px; background: #52615e; }
+    .route-node:not(:last-child)::before { content: ""; position: absolute; top: 37px; right: -22px; border-left: 5px solid #758783; border-top: 3px solid transparent; border-bottom: 3px solid transparent; z-index: 2; }
+    .route-node b { display: block; font-size: 10px; }
+    .route-node span { display: block; margin-top: 5px; color: var(--muted); font-size: 8px; }
+    .route-node.approval { border-color: #755b35; background: #2d2418; }
+    .route-node.success { border-color: #3d755f; background: #173128; }
+    .recovery-path { display: grid; grid-template-columns: 1fr auto 1fr; gap: 10px; align-items: center; border: 1px solid #5e3435; background: #27191a; border-radius: 7px; padding: 12px; color: #d9a1a1; font-size: 10px; }
+    .recovery-path span { color: var(--muted); }
+
+    .coverage-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .coverage-card { border: 1px solid var(--line); background: var(--panel); border-radius: 8px; overflow: hidden; }
+    .coverage-card h3 { margin: 0; padding: 13px 15px; border-bottom: 1px solid var(--line); font-size: 11px; }
+    .coverage-card ul { list-style: none; padding: 10px 15px 14px; margin: 0; display: grid; gap: 7px; }
+    .coverage-card li { position: relative; padding-left: 17px; color: var(--muted); font-size: 10px; }
+    .coverage-card li::before { content: ""; position: absolute; left: 0; top: 5px; width: 7px; height: 7px; border-radius: 50%; background: var(--pending); }
+    .coverage-card.known li::before { background: var(--confirm); }
+    .coverage-card.nogo li::before { background: var(--danger); }
+
+    .tweaks-toggle { position: fixed; right: 18px; bottom: 18px; z-index: 50; border: 1px solid var(--line-strong); background: #1c2425; border-radius: 6px; padding: 8px 11px; cursor: pointer; box-shadow: var(--shadow); font-size: 10px; }
+    .tweaks-panel { display: none; position: fixed; right: 18px; bottom: 58px; z-index: 49; width: 252px; border: 1px solid var(--line-strong); background: #171e1f; border-radius: 8px; box-shadow: var(--shadow); padding: 13px; }
+    .tweaks-panel.open { display: block; }
+    .tweaks-panel h3 { margin: 0 0 11px; font-size: 11px; }
+    .tweak-row { display: grid; gap: 6px; margin-top: 10px; color: var(--muted); font-size: 9px; }
+    .segmented { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; }
+    .segmented button { border: 1px solid var(--line); background: #111617; border-radius: 4px; padding: 6px 4px; color: var(--muted); cursor: pointer; font-size: 8px; }
+    .segmented button.active { border-color: #3d806b; background: #1b3c32; color: #ccebe0; }
+    .switch-row { display: flex; justify-content: space-between; align-items: center; }
+    .switch { width: 34px; height: 19px; border: 1px solid var(--line-strong); background: #101516; border-radius: 10px; padding: 2px; cursor: pointer; }
+    .switch::after { content: ""; display: block; width: 13px; height: 13px; border-radius: 50%; background: #65706e; transition: 180ms var(--ease); }
+    .switch.on::after { transform: translateX(15px); background: var(--confirm); }
+
+    .modal-backdrop { display: none; position: fixed; inset: 0; z-index: 80; background: rgba(4,6,6,.74); place-items: center; padding: 20px; }
+    .modal-backdrop.open { display: grid; }
+    .modal { width: min(520px, 100%); border: 1px solid var(--line-strong); background: #171e1f; border-radius: 9px; box-shadow: 0 28px 100px #000; }
+    .modal header { padding: 15px 17px; border-bottom: 1px solid var(--line); }
+    .modal h2 { margin: 0; font-size: 14px; }
+    .modal-body { padding: 15px 17px; display: grid; gap: 10px; }
+    .modal-body p { margin: 0; color: var(--muted); font-size: 10px; }
+    .modal-list { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+    .modal-list div { border: 1px solid var(--line); border-radius: 5px; padding: 9px; font-size: 9px; }
+    .modal-list b { display: block; margin-bottom: 3px; }
+    .modal footer { display: flex; justify-content: flex-end; gap: 8px; padding: 12px 17px; border-top: 1px solid var(--line); }
+    .toast { position: fixed; left: 50%; bottom: 22px; z-index: 100; transform: translate(-50%, 18px); opacity: 0; pointer-events: none; border: 1px solid #3a715f; background: #173128; color: #d8f1e8; border-radius: 6px; padding: 9px 13px; font-size: 10px; transition: 220ms var(--ease); }
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+    .workbench-frame.focus-mode .chapter-strip { display: none; }
+    .workbench-frame.focus-mode .workspace { grid-template-rows: minmax(470px, 66vh) 170px; }
+    .workbench-frame.focus-mode .timeline-body { height: 131px; }
+    .workbench-frame.focus-mode .track-row:last-child, .workbench-frame.focus-mode .track-labels div:last-child { display: none; }
+    .workbench-frame.spatial-mode { --director: 480px; }
+    .workbench-frame.spatial-mode .proposals { grid-template-columns: 1fr 1fr; }
+    .workbench-frame.spatial-mode .proposal { min-height: 92px; }
+    .workbench-frame.comfortable .workspace { --director: 390px; }
+    .workbench-frame.comfortable .pane-scroll { gap: 16px; padding: 16px; }
+
+    @media (max-width: 1180px) {
+      :root { --rail: 188px; --director: 318px; }
+      .view { padding: 20px; }
+      .module-grid { grid-template-columns: repeat(2, 1fr); }
+      .route-nodes { grid-template-columns: repeat(3, 1fr); }
+      .route-node:nth-child(3)::after, .route-node:nth-child(3)::before { display: none; }
+    }
+    @media (max-width: 860px) {
+      .review-shell { grid-template-columns: 1fr; }
+      .review-rail { position: sticky; height: auto; padding: 10px 12px; }
+      .brand-lockup, .rail-note { display: none; }
+      .review-nav { margin: 0; display: flex; overflow-x: auto; }
+      .review-nav button { white-space: nowrap; }
+      .review-topbar { top: 52px; }
+      .evidence-grid, .coverage-grid { grid-template-columns: 1fr; }
+      .workspace { grid-template-columns: 1fr; grid-template-rows: auto auto 220px; }
+      .director-pane { border-left: 0; border-top: 1px solid var(--line); max-height: 480px; }
+      .timeline { grid-column: 1; }
+      .module-grid { grid-template-columns: 1fr; }
+      .app-actions .save-state { display: none; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .001ms !important; transition-duration: .001ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="review-shell">
+    <aside class="review-rail">
+      <div class="brand-lockup">
+        <div class="brand">叙镜</div>
+        <small>NARRALENS · PROTOTYPE REVIEW</small>
+        <span class="prototype-tag">概念原型，不是生产实现</span>
+      </div>
+      <nav class="review-nav" aria-label="原型审查导航">
+        <button class="active" data-view="baseline">01 现状证据</button>
+        <button data-view="workbench">02 目标工作台</button>
+        <button data-view="architecture">03 目标架构</button>
+        <button data-view="modules">04 模块设计</button>
+        <button data-view="journey">05 用户路线</button>
+        <button data-view="coverage">06 PRD 覆盖</button>
+      </nav>
+      <div class="rail-note">v0 · 2026-10-12<br>当前阶段只做体验对齐与原型审查。</div>
+    </aside>
+
+    <main class="review-main">
+      <header class="review-topbar">
+        <div><strong>前端原型审查</strong> <span class="mono" style="color:var(--quiet);font-size:9px">/ v0</span></div>
+        <div class="status-line">
+          <span class="status-chip">PRD v1.0</span>
+          <span class="status-chip">文档型基线</span>
+          <span class="status-chip pending">真实集成待 D1</span>
+        </div>
+      </header>
+
+      <section class="view active" id="baseline">
+        <div class="section-head"><div><span class="eyebrow">Current evidence</span><h1>先把“已有”与“计划”分开。</h1><p>当前仓库只有产品与架构文档、契约示例和文档型 HTML 产品基线；尚未发现生产源码。下面截图是当前可验证的页面事实，不代表真实播放器、编辑事务或导出已经接通。</p></div></div>
+        <div class="evidence-grid">
+          <figure class="evidence-card" style="margin:0">
+            <img src="assets/current-baseline.png" alt="现有 Narralens 文档型产品基线页面截图">
+            <figcaption class="card-caption"><span>现有文档型产品基线</span><span class="mono">narralens-product-baseline.html</span></figcaption>
+          </figure>
+          <div class="fact-list">
+            <div class="fact" data-state="known"><strong>已确认 · 产品与架构文档</strong><p>PRD、交互规范、目标架构、开发计划、验收门槛及上游来源已落盘。</p></div>
+            <div class="fact" data-state="known"><strong>已确认 · 契约示例</strong><p>CreativeTask、ProposalBundle 与 EditRequest 有示例数据，但尚无正式 JSON Schema 实现。</p></div>
+            <div class="fact" data-state="planned"><strong>规划中 · 统一工作台</strong><p>播放器、导演面板、时间轴和交付区当前均为目标体验，不是已实现能力。</p></div>
+            <div class="fact" data-state="planned"><strong>待 D1 · 上游真实边界</strong><p>Hypit Studio 扩展点、Author Source 写入、Run/Build 命令和 OpenMontage 调用方式必须实测。</p></div>
+            <div class="fact" data-state="no-go"><strong>No-Go · 静态原型代替完成验收</strong><p>本原型只能用于体验对齐，不能证明真实视频工程、局部写入、重开或 MP4 导出。</p></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" id="workbench">
+        <div class="section-head"><div><span class="eyebrow">Target experience v0</span><h1>一个工作台，围绕当前选区做导演决策。</h1><p>点击时间轴镜头、切换提案与锁，随后尝试“采用方案”。所有内容均为演示状态，重点是验证信息层级和操作路径。</p></div></div>
+        <div class="workbench-frame" id="workbenchFrame">
+          <div class="appbar">
+            <div class="project-meta"><div class="project-mark">叙</div><div class="project-title"><strong>供应链外溢：示例母项目</strong><span>演示数据 · 12:18 · revision <b id="revisionText">12</b></span></div></div>
+            <div class="stage-tabs"><button>想法</button><button class="active">精修</button><button>交付</button></div>
+            <div class="app-actions"><span class="save-state" id="saveState">已保存 · 本地</span><button class="btn">历史</button><button class="btn">任务 1</button><button class="btn primary">预览检查</button></div>
+          </div>
+          <div class="chapter-strip">
+            <button>片头钩子</button><button>问题定义</button><button class="active">来龙去脉</button><button>核心论证</button><button>反方与边界</button><button>结论</button>
+            <div class="semantic-search">搜索“供应链外溢”所在句 <kbd>/</kbd></div>
+          </div>
+          <div class="workspace">
+            <div class="viewer-zone">
+              <div class="video-canvas" aria-label="演示视频画面">
+                <div class="map-shape"></div><span class="video-kicker">背景与因果 · CH03</span><div class="video-title">一项政策如何沿着供应链向外扩散？</div><div class="video-caption">真正改变市场的，往往不是单一条款，而是它引发的连续反应。</div><span class="canvas-badge">原型画面 · 非真实素材</span>
+              </div>
+              <div class="player-bar"><button aria-label="上一帧">←</button><button id="playButton" aria-label="播放或暂停">▶</button><span class="mono">01:04:12 / 12:18:00</span><button aria-label="下一帧">→</button></div>
+            </div>
+            <aside class="director-pane">
+              <div class="pane-head"><strong>导演面板 · 当前选区</strong><span>5.6 秒</span></div>
+              <div class="pane-scroll">
+                <div class="selection-card">
+                  <div class="selection-meta"><span class="mono">S07 · 01:04:12–01:10:00</span><span>168 帧</span></div>
+                  <label class="sr-only" for="directorPrompt">导演要求</label>
+                  <textarea id="directorPrompt" class="prompt-box">改成三镜组接，保留原解说，不改变总时长。</textarea>
+                  <div class="locks" aria-label="分项锁"><button class="lock" data-lock="visual">画面锁</button><button class="lock locked" data-lock="narration">旁白锁</button><button class="lock locked" data-lock="duration">时长锁</button></div>
+                </div>
+                <div class="proposal-head"><strong>结构化备选</strong><span>预演不写入工程</span></div>
+                <div class="proposals" id="proposalList">
+                  <button class="proposal" data-proposal="A"><div class="proposal-row"><strong>A · 观察式长镜</strong><span class="proposal-status">可直接预演</span></div><p>保留单一观察视角，降低切换密度。</p></button>
+                  <button class="proposal selected" data-proposal="B"><div class="proposal-row"><strong>B · 远景→中景→特写</strong><span class="proposal-status">缺 2 个素材</span></div><p>三镜组接，强化全貌、机制和结果。</p></button>
+                  <button class="proposal" data-proposal="C"><div class="proposal-row"><strong>C · 资料→标注→现场</strong><span class="proposal-status">需许可确认</span></div><p>先给证据全貌，再定位关键细节。</p></button>
+                  <button class="proposal" data-proposal="D"><div class="proposal-row"><strong>D · 对照式表达</strong><span class="proposal-status">可直接预演</span></div><p>左右对比政策前后与受影响对象。</p></button>
+                </div>
+                <div class="impact"><span><b>影响范围</b>仅 S07 选区</span><span><b>保留对象</b>N03 / 字幕 / 总时长</span><span><b>费用状态</b>待素材确认</span><span><b>基线版本</b>baseRevision 12</span></div>
+              </div>
+              <div class="adopt-row"><button class="btn">保存为待补素材</button><button class="btn primary" id="adoptButton">采用方案 B</button></div>
+            </aside>
+            <div class="timeline">
+              <div class="timeline-toolbar"><div><strong>全片时间轴</strong> <span>局部精修 · 当前缩放 240%</span></div><span>←/→ 逐帧 · Shift 1 秒 · I/O 设入出点</span></div>
+              <div class="timeline-body">
+                <div class="track-labels"><div>画面</div><div>字幕</div><div>解说</div><div>音乐</div></div>
+                <div class="tracks"><div class="ruler"><span>01:00</span><span>01:03</span><span>01:06</span><span>01:09</span><span>01:12</span></div><div class="selection-range"></div><div class="playhead"></div>
+                  <div class="track-row"><button class="clip visual" style="flex:1.2">S05<small>政策背景</small></button><button class="clip visual" style="flex:.7">S06<small>资料全貌</small></button><button class="clip visual selected" style="flex:1.1">S07<small>当前选区</small></button><button class="clip visual" style="flex:.8">S08<small>人物结果</small></button><button class="clip visual" style="flex:1.4">S09<small>产业链</small></button></div>
+                  <div class="track-row"><button class="clip caption" style="flex:1.9">字幕 C12</button><button class="clip caption selected" style="flex:1.1">语义锚点</button><button class="clip caption" style="flex:2.2">字幕 C13</button></div>
+                  <div class="track-row"><button class="clip voice" style="flex:2.1">N02</button><button class="clip voice selected" style="flex:1.3">N03 · 已锁定</button><button class="clip voice" style="flex:1.8">N04</button></div>
+                  <div class="track-row"><button class="clip music" style="flex:3.2">BGM · 低密度</button><button class="clip music" style="flex:2">环境底</button></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" id="architecture">
+        <div class="section-head"><div><span class="eyebrow">Target architecture</span><h1>两个能力上游，一个最终剪辑事实源。</h1><p>下图来自 PRD 与架构文档，所有 Narralens 代码实体目前均为目标态规划。图中可搜索、聚焦、切换主题和导出。</p></div></div>
+        <div class="architecture-wrap"><iframe src="target-architecture.html" title="Narralens 目标架构图"></iframe></div>
+      </section>
+
+      <section class="view" id="modules">
+        <div class="section-head"><div><span class="eyebrow">Frontend modules</span><h1>模块围绕“找得到、看得懂、改得稳”。</h1><p>这里是后续原型细化与生产实现的组件边界，不是当前源码清单。</p></div></div>
+        <div class="module-grid">
+          <article class="module-card"><header><h3>ProjectHeader</h3><span>规划中</span></header><dl><dt>职责</dt><dd>项目、账号模板、revision、保存和任务状态。</dd><dt>输入</dt><dd>ProjectSummary / JobState。</dd><dt>关键状态</dt><dd>已保存、保存中、外部变化、任务失败。</dd></dl></article>
+          <article class="module-card"><header><h3>ChapterNavigator</h3><span>规划中</span></header><dl><dt>职责</dt><dd>章节、镜头缩略轨和语义搜索的分层导航。</dd><dt>输出</dt><dd>ScriptBlock、NarrationBlock、时间范围。</dd><dt>约束</dt><dd>60–180 镜头不能靠纵向卡片浏览。</dd></dl></article>
+          <article class="module-card"><header><h3>HypitPreview</h3><span>待 D1</span></header><dl><dt>职责</dt><dd>显示真实 Hypit 编译预览与统一时间码。</dd><dt>输入</dt><dd>Run 产物、当前 revision、播放状态。</dd><dt>约束</dt><dd>不得构造第二套假播放器。</dd></dl></article>
+          <article class="module-card"><header><h3>DirectorPane</h3><span>规划中</span></header><dl><dt>职责</dt><dd>选区上下文、导演要求、提案比较和采用确认。</dd><dt>输入</dt><dd>Selection / ProposalBundle / Locks。</dd><dt>状态</dt><dd>无选区、镜头、区间、关键帧、采用前。</dd></dl></article>
+          <article class="module-card"><header><h3>Timeline</h3><span>待 D1</span></header><dl><dt>职责</dt><dd>画面、字幕、解说、音乐共享统一帧时钟。</dd><dt>交互</dt><dd>逐帧、I/O、缩放、选区、锁状态。</dd><dt>约束</dt><dd>播放头不做视觉滞后缓动。</dd></dl></article>
+          <article class="module-card"><header><h3>ImpactReview</h3><span>规划中</span></header><dl><dt>职责</dt><dd>展示影响范围、保留项、素材缺口、费用和冲突。</dd><dt>输出</dt><dd>采用、保存待补素材或返回修改。</dd><dt>约束</dt><dd>采用前必须绑定 baseRevision。</dd></dl></article>
+          <article class="module-card"><header><h3>SpatialAlternatives</h3><span>P0/P1</span></header><dl><dt>职责</dt><dd>按需展开当前范围的 3–6 个结构化备选。</dd><dt>交互</dt><dd>点击仅预演，“采用”才进入写入事务。</dd><dt>约束</dt><dd>不创造第二条最终时间轴。</dd></dl></article>
+          <article class="module-card"><header><h3>DeliveryPanel</h3><span>规划中</span></header><dl><dt>职责</dt><dd>标题、封面、发布前检查和交付资产。</dd><dt>输入</dt><dd>事实摘要、核心观点、来源许可与输出。</dd><dt>约束</dt><dd>标题与正文结论不得冲突。</dd></dl></article>
+          <article class="module-card"><header><h3>RecoveryCenter</h3><span>规划中</span></header><dl><dt>职责</dt><dd>revision 冲突、锁冲突、晚到任务和失败重试。</dd><dt>原则</dt><dd>失败保留源工程和上次成功输出。</dd><dt>恢复</dt><dd>恢复旧内容仍创建新 revision。</dd></dl></article>
+        </div>
+      </section>
+
+      <section class="view" id="journey">
+        <div class="section-head"><div><span class="eyebrow">User journey</span><h1>从定位一句话，到安全采用一次局部修改。</h1><p>主路径只表达 PRD 已承诺的操作；红色恢复分支对应版本冲突、锁冲突和写入失败。</p></div></div>
+        <div class="route-board">
+          <div class="route-lane"><h3>主操作路径</h3><div class="route-nodes"><div class="route-node"><b>01 定位内容</b><span>章节 / 镜头 / 语义 / 时间码</span></div><div class="route-node"><b>02 建立选区</b><span>明确 start/end 与当前 revision</span></div><div class="route-node"><b>03 提出要求</b><span>描述视觉目标和需要保留的对象</span></div><div class="route-node"><b>04 比较提案</b><span>结构、素材、许可、费用、可渲染性</span></div><div class="route-node approval"><b>05 采用前确认</b><span>影响范围、锁、baseRevision、审批</span></div><div class="route-node success"><b>06 写入并验证</b><span>staging → check → commit → 新 revision</span></div></div></div>
+          <div class="route-lane"><h3>确认后的结果</h3><div class="route-nodes"><div class="route-node"><b>真实预览</b><span>Hypit Run 产物，不是独立模拟播放器</span></div><div class="route-node"><b>撤回与恢复</b><span>已提交内容通过历史恢复创建新 revision</span></div><div class="route-node"><b>关闭并重开</b><span>工程、媒体映射与历史仍然存在</span></div><div class="route-node"><b>再次导出</b><span>MP4、字幕与抽样帧验证</span></div><div class="route-node"><b>标题与封面</b><span>事实一致性检查后人工确认</span></div><div class="route-node success"><b>交付资产</b><span>视频、字幕、来源许可、版本记录</span></div></div></div>
+          <div class="recovery-path"><b>冲突 / 缺素材 / 写入失败</b><span>不覆盖新版，不损坏主 Source，不伪装为可导出完成</span><b>保留提案 → 重新定位或重试</b></div>
+        </div>
+      </section>
+
+      <section class="view" id="coverage">
+        <div class="section-head"><div><span class="eyebrow">PRD coverage</span><h1>本轮只承诺“原型理解正确”。</h1><p>下面状态防止把审查页的交互模拟误报为产品能力。真实能力状态需要在 D1 及后续阶段用代码、工程和 MP4 证据更新。</p></div></div>
+        <div class="coverage-grid">
+          <article class="coverage-card known"><h3>已落盘的事实基线</h3><ul><li>首发用户、内容类型、时长、平台和输出规格</li><li>想法 / 精修 / 交付三阶段导航</li><li>唯一剪辑事实源和 Adapter 边界</li><li>开发里程碑、阶段 Gate 和验收矩阵</li><li>事实来源与媒体许可分离原则</li></ul></article>
+          <article class="coverage-card"><h3>本原型已经覆盖</h3><ul><li>播放器、导演面板、时间轴的统一布局</li><li>章节、语义、镜头和帧级导航层次</li><li>导演要求、多方案、分项锁和影响确认</li><li>采用、revision 更新与失败恢复概念</li><li>目标架构、模块边界和核心用户路线</li></ul></article>
+          <article class="coverage-card"><h3>仍需下一轮原型细化</h3><ul><li>想法阶段：任务摘要、研究、脚本与待核验主张</li><li>交付阶段：标题、封面、来源许可和发布前检查</li><li>加载、空状态、素材缺失、版本冲突和错误态全套视觉</li><li>空间备选视图的展开、预演和回收动画</li><li>键盘全路径和窄屏降级体验</li></ul></article>
+          <article class="coverage-card nogo"><h3>当前明确不能声明</h3><ul><li>OpenMontage 或 Hypit 已完成固定与集成</li><li>真实 Source 写入、锁、事务、回滚或 revision 已实现</li><li>真实视频预览、重开、MP4 导出或帧采样已通过</li><li>100+ 镜头性能和 SSE 断线恢复已经验收</li><li>本阶段已经进入生产代码开发</li></ul></article>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <button class="tweaks-toggle" id="tweaksToggle" aria-expanded="false">Tweaks</button>
+  <aside class="tweaks-panel" id="tweaksPanel" aria-label="原型显示选项">
+    <h3>Tweaks</h3>
+    <div class="tweak-row"><span>工作台布局</span><div class="segmented" id="layoutTweaks"><button class="active" data-layout="standard">标准</button><button data-layout="focus">专注</button><button data-layout="spatial">备选</button></div></div>
+    <div class="tweak-row switch-row"><span>舒适间距</span><button class="switch" id="densitySwitch" aria-label="切换舒适间距"></button></div>
+    <div class="tweak-row switch-row"><span>隐藏原型标记</span><button class="switch" id="badgeSwitch" aria-label="切换原型标记"></button></div>
+  </aside>
+
+  <div class="modal-backdrop" id="confirmModal" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+    <div class="modal"><header><h2 id="confirmTitle">采用方案 B 前确认</h2></header><div class="modal-body"><p>这一步仅模拟采用确认，不会写入真实工程。</p><div class="modal-list"><div><b>替换范围</b><span class="mono">S07 · 168 帧</span></div><div><b>保留对象</b>N03、字幕、总时长</div><div><b>素材缺口</b>2 个素材待 materialize</div><div><b>基线版本</b>baseRevision 12</div></div></div><footer><button class="btn" id="cancelAdopt">返回比较</button><button class="btn primary" id="confirmAdopt">确认模拟采用</button></footer></div>
+  </div>
+  <div class="toast" id="toast" role="status">模拟采用完成：revision 13，旁白与总时长保持。</div>
+
+  <script>
+    const navButtons = [...document.querySelectorAll('.review-nav button')];
+    const views = [...document.querySelectorAll('.view')];
+    const frame = document.getElementById('workbenchFrame');
+    let activeProposal = 'B';
+
+    function showView(id) {
+      navButtons.forEach(button => button.classList.toggle('active', button.dataset.view === id));
+      views.forEach(view => view.classList.toggle('active', view.id === id));
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    navButtons.forEach(button => button.addEventListener('click', () => showView(button.dataset.view)));
+
+    document.querySelectorAll('.chapter-strip button').forEach(button => button.addEventListener('click', () => {
+      document.querySelectorAll('.chapter-strip button').forEach(item => item.classList.remove('active'));
+      button.classList.add('active');
+    }));
+
+    document.querySelectorAll('.lock').forEach(button => button.addEventListener('click', () => {
+      button.classList.toggle('locked');
+      button.setAttribute('aria-pressed', button.classList.contains('locked'));
+    }));
+
+    document.querySelectorAll('.proposal').forEach(button => button.addEventListener('click', () => {
+      activeProposal = button.dataset.proposal;
+      document.querySelectorAll('.proposal').forEach(item => item.classList.toggle('selected', item === button));
+      document.getElementById('adoptButton').textContent = `采用方案 ${activeProposal}`;
+      document.getElementById('confirmTitle').textContent = `采用方案 ${activeProposal} 前确认`;
+    }));
+
+    const playButton = document.getElementById('playButton');
+    playButton.addEventListener('click', () => {
+      const playing = playButton.textContent === 'Ⅱ';
+      playButton.textContent = playing ? '▶' : 'Ⅱ';
+      playButton.setAttribute('aria-label', playing ? '播放' : '暂停');
+    });
+
+    const modal = document.getElementById('confirmModal');
+    document.getElementById('adoptButton').addEventListener('click', () => modal.classList.add('open'));
+    document.getElementById('cancelAdopt').addEventListener('click', () => modal.classList.remove('open'));
+    document.getElementById('confirmAdopt').addEventListener('click', () => {
+      modal.classList.remove('open');
+      document.getElementById('revisionText').textContent = '13';
+      document.getElementById('saveState').textContent = 'revision 13 · 已保存';
+      const toast = document.getElementById('toast');
+      toast.textContent = `模拟采用方案 ${activeProposal}：revision 13，旁白与总时长保持。`;
+      toast.classList.add('show');
+      window.setTimeout(() => toast.classList.remove('show'), 2600);
+    });
+    modal.addEventListener('click', event => { if (event.target === modal) modal.classList.remove('open'); });
+
+    const tweaksToggle = document.getElementById('tweaksToggle');
+    const tweaksPanel = document.getElementById('tweaksPanel');
+    tweaksToggle.addEventListener('click', () => {
+      const open = tweaksPanel.classList.toggle('open');
+      tweaksToggle.setAttribute('aria-expanded', open);
+    });
+    document.querySelectorAll('#layoutTweaks button').forEach(button => button.addEventListener('click', () => {
+      document.querySelectorAll('#layoutTweaks button').forEach(item => item.classList.remove('active'));
+      button.classList.add('active');
+      frame.classList.remove('focus-mode', 'spatial-mode');
+      if (button.dataset.layout === 'focus') frame.classList.add('focus-mode');
+      if (button.dataset.layout === 'spatial') frame.classList.add('spatial-mode');
+    }));
+    document.getElementById('densitySwitch').addEventListener('click', event => {
+      event.currentTarget.classList.toggle('on'); frame.classList.toggle('comfortable');
+    });
+    document.getElementById('badgeSwitch').addEventListener('click', event => {
+      event.currentTarget.classList.toggle('on');
+      document.querySelectorAll('.prototype-tag, .canvas-badge').forEach(item => item.style.visibility = event.currentTarget.classList.contains('on') ? 'hidden' : 'visible');
+    });
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape') { modal.classList.remove('open'); tweaksPanel.classList.remove('open'); tweaksToggle.setAttribute('aria-expanded', 'false'); }
+      if (event.key === '/' && document.activeElement.tagName !== 'TEXTAREA') { event.preventDefault(); showView('workbench'); }
+    });
+    const initialView = new URLSearchParams(window.location.search).get('view');
+    if (initialView && document.getElementById(initialView)) showView(initialView);
+  </script>
+</body>
+</html>

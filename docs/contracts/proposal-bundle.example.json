@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0",
+  "kind": "narralens.proposal_bundle",
+  "project_id": "politics-demo-001",
+  "proposal_id": "proposal-B",
+  "base_revision": 12,
+  "selection": {"shot_id": "S07", "start_frame": 1932, "end_frame_exclusive": 2100},
+  "preserve": ["narration:N03", "captions", "total_duration"],
+  "summary": "三镜组接：全貌→细节→人物/结果",
+  "segments": [
+    {"id": "B01", "duration_frames": 56, "intent": "建立全局背景", "asset_id": null},
+    {"id": "B02", "duration_frames": 56, "intent": "呈现关键细节", "asset_id": null},
+    {"id": "B03", "duration_frames": 56, "intent": "回到人物/结果", "asset_id": null}
+  ],
+  "assets_needed": [],
+  "source_refs": [],
+  "cost": {"status": "unknown", "currency": null, "amount": null},
+  "requires_materialization": true,
+  "renderable": false
+}

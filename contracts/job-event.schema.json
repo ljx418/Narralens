@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://narralens.local/schemas/job-event.schema.json",
+  "type": "object", "additionalProperties": false,
+  "required": ["event_id", "job_id", "type", "at"],
+  "properties": {
+    "event_id": { "type": "integer", "minimum": 1 },
+    "job_id": { "type": "string", "pattern": "^job_[A-Za-z0-9_-]+$" },
+    "type": { "enum": ["queued", "running", "cancel_requested", "cancelled", "succeeded", "failed", "completed_after_cancel"] },
+    "at": { "type": "string", "format": "date-time" },
+    "message": { "type": "string", "maxLength": 500 },
+    "proposal_id": { "type": "string", "minLength": 1 },
+    "error": { "$ref": "api-error.schema.json" }
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Narralens D3 · 真实选区写入事务",
+    "locale": "zh-CN",
+    "output": "d3-write-transaction.architecture.html",
+    "quality_profile": "showcase",
+    "viewBox": [1380, 820],
+    "views": [
+      { "id": "write-path", "label": "主写入路径", "focus": ["ui", "host", "actor", "transaction", "hypit", "source"], "note": "用户确认的 typed edit 必须经单写者、Studio mutation 校验与 metadata commit。" },
+      { "id": "guards", "label": "版本与锁门禁", "focus": ["host", "actor", "locks", "revisions"], "note": "baseRevision、stable identity 和分项锁在写文件前失败关闭。" },
+      { "id": "recovery", "label": "失败恢复", "focus": ["transaction", "journal", "hypit", "source"], "note": "journal 驱动 prepared → source_validated → metadata_committed；失败补偿，未知状态 attention。" }
+    ]
+  },
+  "components": [
+    { "id": "ui", "type": "frontend", "label": "NarralensApp", "sublabel": "确认 typed edit / 显示 diff", "pos": [35, 315], "size": [160, 70], "tag": "已开发·需修改" },
+    { "id": "host", "type": "security", "label": "LocalHost API", "sublabel": "POST /edits · token/origin", "pos": [245, 315], "size": [175, 70], "tag": "已开发·需新增路由" },
+    { "id": "actor", "type": "backend", "label": "ProjectWriteActor", "sublabel": "每工程串行单写者", "pos": [475, 315], "size": [180, 70], "tag": "待新增" },
+    { "id": "transaction", "type": "backend", "label": "EditTransaction", "sublabel": "prepare → mutate → verify", "pos": [720, 315], "size": [185, 70], "tag": "待新增" },
+    { "id": "hypit", "type": "backend", "label": "HypitWriteAdapter", "sublabel": "session + parameter.adjust", "pos": [965, 315], "size": [185, 70], "tag": "待新增" },
+    { "id": "source", "type": "external", "label": "Author Source + Run", "sublabel": "main.svml · build.svrun", "pos": [1205, 315], "size": [155, 70], "tag": "真实 D1 基线" },
+    { "id": "locks", "type": "security", "label": "LockPolicy", "sublabel": "D3：visual 主动锁", "pos": [480, 110], "size": [170, 66], "tag": "待新增" },
+    { "id": "revisions", "type": "database", "label": "RevisionStore", "sublabel": "base / current / monotonic", "pos": [720, 110], "size": [180, 66], "tag": "待新增" },
+    { "id": "journal", "type": "database", "label": "TransactionJournal", "sublabel": "prepared → committed / attention", "pos": [720, 535], "size": [210, 66], "tag": "待新增" },
+    { "id": "invariants", "type": "security", "label": "InvariantVerifier", "sublabel": "session / Source / Run / narration hashes", "pos": [1010, 535], "size": [230, 66], "tag": "待新增" }
+  ],
+  "boundaries": [
+    { "kind": "security-group", "label": "loopback + session token", "wraps": ["ui", "host"] },
+    { "kind": "region", "label": "单工程写入边界", "wraps": ["actor", "transaction", "locks", "revisions", "journal", "invariants"] }
+  ],
+  "connections": [
+    { "id": "ui-host", "from": "ui", "to": "host", "label": "typed edit + baseRevision", "variant": "emphasis", "labelAt": [220, 399] },
+    { "id": "host-actor", "from": "host", "to": "actor", "label": "project_id 分派", "variant": "emphasis", "labelAt": [448, 311] },
+    { "id": "actor-transaction", "from": "actor", "to": "transaction", "label": "串行执行", "variant": "emphasis", "labelAt": [688, 420] },
+    { "id": "transaction-hypit", "from": "transaction", "to": "hypit", "label": "受控 typed patch", "variant": "emphasis", "labelAt": [935, 311] },
+    { "id": "hypit-source", "from": "hypit", "to": "source", "label": "preimage patch + 重新编译", "variant": "emphasis", "labelAt": [1178, 290] },
+    { "id": "locks-actor", "from": "locks", "to": "actor", "label": "423 TARGET_LOCKED", "variant": "security", "labelAt": [565, 190] },
+    { "id": "revision-actor", "from": "revisions", "to": "actor", "label": "409 REVISION_CONFLICT", "variant": "security" },
+    { "id": "transaction-journal", "from": "transaction", "to": "journal", "label": "状态 + hashes", "variant": "dashed", "fromSide": "bottom", "toSide": "top", "labelAt": [813, 399] },
+    { "id": "hypit-invariants", "from": "hypit", "to": "invariants", "label": "复读 session", "variant": "security", "fromSide": "bottom", "toSide": "top" },
+    { "id": "invariants-transaction", "from": "invariants", "to": "transaction", "label": "通过 / 补偿 / attention", "variant": "dashed", "labelAt": [967, 615] }
+  ],
+  "cards": [
+    { "dot": "emerald", "title": "成功门槛", "items": ["局部 visual fit 真实写入并得到新 revision", "真实预览刷新且选区发生预期变化", "旁白/时长 preserve 断言与非目标镜头逐字段不变"] },
+    { "dot": "rose", "title": "失败关闭", "items": ["409/422/423 在 mutation 前拒绝", "后置校验失败补偿到 before hash", "journal 未提交不得显示成功；未知状态 attention"] },
+    { "dot": "amber", "title": "D3 范围", "items": ["只允许既有素材与既有 frame 的 typed visual edit", "不做新素材 materialize、不做 3–6 提案比较", "不把字符串/正则替换当 typed patch"] }
+  ]
+}

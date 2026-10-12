@@ -1,0 +1,249 @@
+{
+  "format": "hypit.cli-logs@1",
+  "build": "bld_20261012T062504576Z_51F9BB9B7D",
+  "source": "result",
+  "records": [
+    {
+      "endpoint": "media.local",
+      "kind": "started",
+      "format": "hypit.execution-log@1",
+      "time": 1791786306255,
+      "command": "need:need:author%3A%2Fmnt%2Fc%2Fworkspace%2Fvideoworkline%2FNarralens%2Ffixtures%2Fd1-30s%2Fauthors%2Fmain.svml%3A%3Acomponent%3A%3Anarration-media:inspect"
+    },
+    {
+      "endpoint": "media.local",
+      "kind": "completed",
+      "format": "hypit.execution-log@1",
+      "time": 1791786306378,
+      "command": "need:need:author%3A%2Fmnt%2Fc%2Fworkspace%2Fvideoworkline%2FNarralens%2Ffixtures%2Fd1-30s%2Fauthors%2Fmain.svml%3A%3Acomponent%3A%3Anarration-media:inspect"
+    },
+    {
+      "endpoint": "media.local",
+      "kind": "started",
+      "format": "hypit.execution-log@1",
+      "time": 1791786306539,
+      "command": "need:need:author%3A%2Fmnt%2Fc%2Fworkspace%2Fvideoworkline%2FNarralens%2Ffixtures%2Fd1-30s%2Fauthors%2Fmain.svml%3A%3Acomponent%3A%3Avisual-media:inspect"
+    },
+    {
+      "endpoint": "media.local",
+      "kind": "started",
+      "format": "hypit.execution-log@1",
+      "time": 1791786306736,
+      "command": "need:need:author%3A%2Fmnt%2Fc%2Fworkspace%2Fvideoworkline%2FNarralens%2Ffixtures%2Fd1-30s%2Fauthors%2Fmain.svml%3A%3Acomponent%3A%3Anarration-media:normalize"
+    },
+    {
+      "endpoint": "media.local",
+      "kind": "completed",
+      "format": "hypit.execution-log@1",
+      "time": 1791786307017,
+      "command": "need:need:author%3A%2Fmnt%2Fc%2Fworkspace%2Fvideoworkline%2FNarralens%2Ffixtures%2Fd1-30s%2Fauthors%2Fmain.svml%3A%3Acomponent%3A%3Avisual-media:inspect"
+    },
+    {
+      "endpoint": "media.local",
+      "kind": "started",
+      "format": "hypit.execution-log@1",
+      "time": 1791786307061,
+      "command": "need:need:author%3A%2Fmnt%2Fc%2Fworkspace%2Fvideoworkline%2FNarralens%2Ffixtures%2Fd1-30s%2Fauthors%2Fmain.svml%3A%3Acomponent%3A%3Avisual-media:normalize"
+    },
+    {
+      "endpoint": "media.local",
+      "kind": "completed",
+      "format": "hypit.execution-log@1",
+      "time": 1791786307063,
+      "command": "need:need:author%3A%2Fmnt%2Fc%2Fworkspace%2Fvideoworkline%2FNarralens%2Ffixtures%2Fd1-30s%2Fauthors%2Fmain.svml%3A%3Acomponent%3A%3Anarration-media:normalize"
+    },
+    {
+      "endpoint": "media.local",
+      "kind": "completed",
+      "format": "hypit.execution-log@1",
+      "time": 1791786308140,
+      "command": "need:need:author%3A%2Fmnt%2Fc%2Fworkspace%2Fvideoworkline%2FNarralens%2Ffixtures%2Fd1-30s%2Fauthors%2Fmain.svml%3A%3Acomponent%3A%3Avisual-media:normalize"
+    },
+    {
+      "endpoint": "html.local",
+      "kind": "started",
+      "format": "hypit.execution-log@1",
+      "time": 1791786308590,
+      "command": "need:need:author%3A%2Fmnt%2Fc%2Fworkspace%2Fvideoworkline%2FNarralens%2Ffixtures%2Fd1-30s%2Fauthors%2Fmain.svml%3A%3Acomponent%3A%3Afinal:request-visual"
+    },
+    {
+      "endpoint": "media.local",
+      "kind": "started",
+      "format": "hypit.execution-log@1",
+      "time": 1791786308605,
+      "command": "need:need:author%3A%2Fmnt%2Fc%2Fworkspace%2Fvideoworkline%2FNarralens%2Ffixtures%2Fd1-30s%2Fauthors%2Fmain.svml%3A%3Acomponent%3A%3Afinal:request-audio-render"
+    },
+    {
+      "endpoint": "html.local",
+      "kind": "diagnostic",
+      "level": "info",
+      "message": "Capture 900 frames; workers 2 (limit 2); opaque fast PNG; GPU hardware; browser /home/administrator/.cache/hypit/html-rasterizer/chrome/chrome-headless-shell/linux-152.0.7928.2/chrome-headless-shell-linux64/chrome-headless-shell; artifact staging concurrency 4; decoded source budget 1073741824 bytes; quality standard; ordered FFmpeg pipe; pending PNG budget 268435456 bytes; encoder ffmpeg",
+      "format": "hypit.execution-log@1",
+      "time": 1791786308607,
+      "command": "need:need:author%3A%2Fmnt%2Fc%2Fworkspace%2Fvideoworkline%2FNarralens%2Ffixtures%2Fd1-30s%2Fauthors%2Fmain.svml%3A%3Acomponent%3A%3Afinal:request-visual"
+    },
+    {
+      "endpoint": "html.local",
+      "kind": "phase",
+      "phase": "preparing resources",
+      "format": "hypit.execution-log@1",
+      "time": 1791786308612,
+      "command": "need:need:author%3A%2Fmnt%2Fc%2Fworkspace%2Fvideoworkline%2FNarralens%2Ffixtures%2Fd1-30s%2Fauthors%2Fmain.svml%3A%3Acomponent%3A%3Afinal:request-visual"
+    },
+    {
+      "endpoint": "html.local",
+      "kind": "diagnostic",
+      "level": "info",
+      "message": "preparing resources: 41 ms",
+      "format": "hypit.execution-log@1",
+      "time": 1791786308635,
+      "command": "need:need:author%3A%2Fmnt%2Fc%2Fworkspace%2Fvideoworkline%2FNarralens%2Ffixtures%2Fd1-30s%2Fauthors%2Fmain.svml%3A%3Acomponent%3A%3Afinal:request-visual"
+    },
+    {
+      "endpoint": "html.local",
+      "kind": "diagnostic",
+      "level": "info",
+      "message": "preparing source media: 267 ms",
+      "format": "hypit.execution-log@1",
+      "time": 1791786308903,
+      "command": "need:need:author%3A%2Fmnt%2Fc%2Fworkspace%2Fvideoworkline%2FNarralens%2Ffixtures%2Fd1-30s%2Fauthors%2Fmain.svml%3A%3Acomponent%3A%3Afinal:request-visual"
+    },
+    {
+      "endpoint": "html.local",
+      "kind": "phase",
+      "phase": "starting browsers",
+      "format": "hypit.execution-log@1",
+      "time": 1791786308904,
+      "command": "need:need:author%3A%2Fmnt%2Fc%2Fworkspace%2Fvideoworkline%2FNarralens%2Ffixtures%2Fd1-30s%2Fauthors%2Fmain.svml%3A%3Acomponent%3A%3Afinal:request-visual"
+    },
+    {
+      "endpoint": "html.local",
+      "kind": "diagnostic",
+      "stream": "stdout",
+      "level": "info",
+      "message": "Capture: opaque fast PNG; fixed workers 2, limit 2",
+      "format": "hypit.execution-log@1",
+      "time": 1791786308904,
+      "command": "need:need:author%3A%2Fmnt%2Fc%2Fworkspace%2Fvideoworkline%2FNarralens%2Ffixtures%2Fd1-30s%2Fauthors%2Fmain.svml%3A%3Acomponent%3A%3Afinal:request-visual"
+    },
+    {
+      "endpoint": "media.local",
+      "kind": "completed",
+      "format": "hypit.execution-log@1",
+      "time": 1791786308946,
+      "command": "need:need:author%3A%2Fmnt%2Fc%2Fworkspace%2Fvideoworkline%2FNarralens%2Ffixtures%2Fd1-30s%2Fauthors%2Fmain.svml%3A%3Acomponent%3A%3Afinal:request-audio-render"
+    },
+    {
+      "endpoint": "html.local",
+      "kind": "diagnostic",
+      "level": "info",
+      "message": "starting browsers: 238 ms",
+      "format": "hypit.execution-log@1",
+      "time": 1791786309140,
+      "command": "need:need:author%3A%2Fmnt%2Fc%2Fworkspace%2Fvideoworkline%2FNarralens%2Ffixtures%2Fd1-30s%2Fauthors%2Fmain.svml%3A%3Acomponent%3A%3Afinal:request-visual"
+    },
+    {
+      "endpoint": "html.local",
+      "kind": "phase",
+      "phase": "rasterizing frames",
+      "format": "hypit.execution-log@1",
+      "time": 1791786309141,
+      "command": "need:need:author%3A%2Fmnt%2Fc%2Fworkspace%2Fvideoworkline%2FNarralens%2Ffixtures%2Fd1-30s%2Fauthors%2Fmain.svml%3A%3Acomponent%3A%3Afinal:request-visual"
+    },
+    {
+      "endpoint": "html.local",
+      "kind": "diagnostic",
+      "stream": "stdout",
+      "level": "info",
+      "message": "Capture worker 0: 450 frames; startup 237 ms; seek 4505 ms; prepare 466 ms; PNG 18781 ms",
+      "format": "hypit.execution-log@1",
+      "time": 1791786335735,
+      "command": "need:need:author%3A%2Fmnt%2Fc%2Fworkspace%2Fvideoworkline%2FNarralens%2Ffixtures%2Fd1-30s%2Fauthors%2Fmain.svml%3A%3Acomponent%3A%3Afinal:request-visual"
+    },
+    {
+      "endpoint": "html.local",
+      "kind": "diagnostic",
+      "stream": "stdout",
+      "level": "info",
+      "message": "Capture worker 1: 450 frames; startup 238 ms; seek 4405 ms; prepare 462 ms; PNG 18980 ms",
+      "format": "hypit.execution-log@1",
+      "time": 1791786335743,
+      "command": "need:need:author%3A%2Fmnt%2Fc%2Fworkspace%2Fvideoworkline%2FNarralens%2Ffixtures%2Fd1-30s%2Fauthors%2Fmain.svml%3A%3Acomponent%3A%3Afinal:request-visual"
+    },
+    {
+      "endpoint": "html.local",
+      "kind": "diagnostic",
+      "stream": "stdout",
+      "level": "info",
+      "message": "Capture source working set: 300 unique frames demanded; decoded 300 frames; redecoded 0; decoder runs 20; decoded bytes 72958681; largest frame 270526 bytes; peak 72958681 bytes; budget 1073741824 bytes; source acquire 3951 worker-ms; output submit 1534 worker-ms",
+      "format": "hypit.execution-log@1",
+      "time": 1791786335828,
+      "command": "need:need:author%3A%2Fmnt%2Fc%2Fworkspace%2Fvideoworkline%2FNarralens%2Ffixtures%2Fd1-30s%2Fauthors%2Fmain.svml%3A%3Acomponent%3A%3Afinal:request-visual"
+    },
+    {
+      "endpoint": "html.local",
+      "kind": "diagnostic",
+      "level": "info",
+      "message": "capturing frames: 26688 ms",
+      "format": "hypit.execution-log@1",
+      "time": 1791786335828,
+      "command": "need:need:author%3A%2Fmnt%2Fc%2Fworkspace%2Fvideoworkline%2FNarralens%2Ffixtures%2Fd1-30s%2Fauthors%2Fmain.svml%3A%3Acomponent%3A%3Afinal:request-visual"
+    },
+    {
+      "endpoint": "html.local",
+      "kind": "phase",
+      "phase": "encoding video",
+      "format": "hypit.execution-log@1",
+      "time": 1791786335830,
+      "command": "need:need:author%3A%2Fmnt%2Fc%2Fworkspace%2Fvideoworkline%2FNarralens%2Ffixtures%2Fd1-30s%2Fauthors%2Fmain.svml%3A%3Acomponent%3A%3Afinal:request-visual"
+    },
+    {
+      "endpoint": "html.local",
+      "kind": "diagnostic",
+      "level": "info",
+      "message": "encoding and verifying video: 1118 ms",
+      "format": "hypit.execution-log@1",
+      "time": 1791786338901,
+      "command": "need:need:author%3A%2Fmnt%2Fc%2Fworkspace%2Fvideoworkline%2FNarralens%2Ffixtures%2Fd1-30s%2Fauthors%2Fmain.svml%3A%3Acomponent%3A%3Afinal:request-visual"
+    },
+    {
+      "endpoint": "html.local",
+      "kind": "phase",
+      "phase": "storing output",
+      "format": "hypit.execution-log@1",
+      "time": 1791786338903,
+      "command": "need:need:author%3A%2Fmnt%2Fc%2Fworkspace%2Fvideoworkline%2FNarralens%2Ffixtures%2Fd1-30s%2Fauthors%2Fmain.svml%3A%3Acomponent%3A%3Afinal:request-visual"
+    },
+    {
+      "endpoint": "html.local",
+      "kind": "diagnostic",
+      "level": "info",
+      "message": "storing output: 70 ms",
+      "format": "hypit.execution-log@1",
+      "time": 1791786338971,
+      "command": "need:need:author%3A%2Fmnt%2Fc%2Fworkspace%2Fvideoworkline%2FNarralens%2Ffixtures%2Fd1-30s%2Fauthors%2Fmain.svml%3A%3Acomponent%3A%3Afinal:request-visual"
+    },
+    {
+      "endpoint": "html.local",
+      "kind": "completed",
+      "format": "hypit.execution-log@1",
+      "time": 1791786338975,
+      "command": "need:need:author%3A%2Fmnt%2Fc%2Fworkspace%2Fvideoworkline%2FNarralens%2Ffixtures%2Fd1-30s%2Fauthors%2Fmain.svml%3A%3Acomponent%3A%3Afinal:request-visual"
+    },
+    {
+      "endpoint": "media.local",
+      "kind": "started",
+      "format": "hypit.execution-log@1",
+      "time": 1791786339007,
+      "command": "need:need:author%3A%2Fmnt%2Fc%2Fworkspace%2Fvideoworkline%2FNarralens%2Ffixtures%2Fd1-30s%2Fauthors%2Fmain.svml%3A%3Acomponent%3A%3Afinal:request-mux"
+    },
+    {
+      "endpoint": "media.local",
+      "kind": "completed",
+      "format": "hypit.execution-log@1",
+      "time": 1791786341972,
+      "command": "need:need:author%3A%2Fmnt%2Fc%2Fworkspace%2Fvideoworkline%2FNarralens%2Ffixtures%2Fd1-30s%2Fauthors%2Fmain.svml%3A%3Acomponent%3A%3Afinal:request-mux"
+    }
+  ],
+  "omittedRecords": 0
+}

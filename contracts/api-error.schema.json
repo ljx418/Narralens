@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://narralens.local/schemas/api-error.schema.json",
+  "type": "object", "additionalProperties": false,
+  "required": ["code", "message", "correlation_id"],
+  "properties": {
+    "code": { "enum": ["INVALID_REQUEST", "INVALID_SESSION", "ORIGIN_REJECTED", "NOT_FOUND", "REVISION_CONFLICT", "IDEMPOTENCY_KEY_CONFLICT", "INVALID_PROPOSAL", "PROVIDER_REJECTED", "PROVIDER_OVERLOADED", "RUNNER_UNAVAILABLE", "RUNNER_TIMEOUT", "UNSUPPORTED_EDIT", "MISSING_ASSET", "MANIFEST_CHANGED", "AMBIGUOUS_TIME", "TARGET_LOCKED", "PROJECT_ATTENTION_REQUIRED", "APPROVAL_REQUIRED", "HYPIT_UNAVAILABLE", "TRANSACTION_FAILED", "INTERNAL_ERROR"] },
+    "message": { "type": "string", "minLength": 1, "maxLength": 500 },
+    "correlation_id": { "type": "string", "minLength": 8 },
+    "details": { "type": "object", "additionalProperties": true }
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "schema_version": "1.0",
+  "kind": "narralens.creative_task",
+  "project_id": "politics-demo-001",
+  "title": "待定选题",
+  "platform": "bilibili",
+  "language": "zh-CN",
+  "target_duration_sec": 720,
+  "output": {"width": 1920, "height": 1080, "fps_num": 30, "fps_den": 1},
+  "format": {
+    "genre": "political-commentary",
+    "shot_cadence_sec": {"min": 5, "max": 10, "hard_limit": false},
+    "chapters_in_script": true,
+    "explicit_visual_chapter_transitions": false
+  },
+  "thesis": "用户确认后的核心观点",
+  "must_keep_quotes": [],
+  "claims": [
+    {"id": "C001", "text": "待核验主张", "status": "needs_verification", "source_refs": []}
+  ],
+  "inputs": [],
+  "cover_and_title": {"title_candidates": 8, "cover_directions": 4, "must_match_facts": true}
+}

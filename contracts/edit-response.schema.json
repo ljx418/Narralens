@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://narralens.local/schemas/edit-response.schema.json",
+  "type": "object", "additionalProperties": false,
+  "required": ["transaction_id", "project_id", "previous_revision", "new_revision", "operation", "status", "changed", "source_sha256", "run_sha256"],
+  "properties": {
+    "transaction_id": { "type": "string", "pattern": "^txn_[A-Za-z0-9_-]+$" },
+    "project_id": { "type": "string", "minLength": 1 },
+    "previous_revision": { "type": "integer", "minimum": 0 },
+    "new_revision": { "type": "integer", "minimum": 0 },
+    "operation": { "$ref": "edit-operation.schema.json" },
+    "status": { "enum": ["committed", "unchanged"] },
+    "changed": { "type": "boolean" },
+    "source_sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "run_sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  }
+}

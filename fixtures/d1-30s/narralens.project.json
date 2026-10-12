@@ -1,0 +1,16 @@
+{
+  "project_id": "d1-30s",
+  "revision": 2,
+  "frame_rate": 30,
+  "frame_count": 900,
+  "shots": [
+    { "shot_id": "shot-001", "authoring_id": "shot-1", "start_frame": 0, "end_frame_exclusive": 300 },
+    { "shot_id": "shot-002", "authoring_id": "shot-2", "start_frame": 300, "end_frame_exclusive": 600 },
+    { "shot_id": "shot-003", "authoring_id": "shot-3", "start_frame": 600, "end_frame_exclusive": 900 }
+  ],
+  "preview": { "kind": "hypit-studio", "url": "http://127.0.0.1:4174/" },
+  "run_file": "runs/build.svrun",
+  "studio_origin": "http://127.0.0.1:4174",
+  "narration_asset": "assets/generated/narration-30s.wav",
+  "asset_manifest": "narralens.assets.json"
+}

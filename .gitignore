@@ -1,0 +1,27 @@
+# Dependencies and build output
+node_modules/
+var/
+dist/
+coverage/
+.hypit/
+/narralens-d1
+
+# Runtime secrets and local state
+.env
+.env.*
+!.env.example
+*.log
+
+# D1 generated media; small JSON/PNG evidence remains versioned
+fixtures/d1-30s/output/
+fixtures/d1-30s/.runtime/
+fixtures/d1-30s/assets/generated/
+*.mp4
+*.wav
+
+# Editors and operating systems
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+

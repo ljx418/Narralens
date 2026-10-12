@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "叙镜目标架构 · 唯一剪辑事实源",
+    "locale": "zh-CN",
+    "quality_profile": "showcase",
+    "viewBox": [1320, 760]
+  },
+  "components": [
+    { "id": "creator", "type": "external", "label": "单人创作者", "sublabel": "观点 / 资料 / 实拍 / 录音", "pos": [30, 323], "size": [150, 74] },
+    { "id": "workbench", "type": "frontend", "label": "Narralens Workbench", "sublabel": "播放器 / 导演面板 / 时间轴 / 交付", "tag": "规划中", "pos": [235, 305], "size": [195, 110] },
+    { "id": "host", "type": "backend", "label": "Narralens Local Host", "sublabel": "任务 / 锁 / 版本 / 审批 / 事务", "tag": "规划中", "pos": [505, 305], "size": [195, 110] },
+    { "id": "event_store", "type": "database", "label": "SQLite + Event Log", "sublabel": "事件 / revision / journal", "tag": "不存第二条时间轴", "pos": [505, 515], "size": [195, 88] },
+    { "id": "om_adapter", "type": "backend", "label": "OpenMontage Adapter", "sublabel": "pipeline 交接 / 产物归一化", "tag": "规划中", "pos": [780, 90], "size": [190, 94] },
+    { "id": "agent_runner", "type": "security", "label": "受控 Agent Runner", "sublabel": "目录 / 命令 / 网络白名单", "tag": "规划中", "pos": [1050, 90], "size": [190, 94] },
+    { "id": "staging", "type": "database", "label": "Proposal / Asset 暂存区", "sublabel": "审批前不得写主工程", "tag": "规划中", "pos": [780, 225], "size": [190, 88] },
+    { "id": "hypit_adapter", "type": "backend", "label": "Hypit Adapter", "sublabel": "stable identity / typed patch", "tag": "规划中", "pos": [780, 390], "size": [190, 94] },
+    { "id": "author_source", "type": "database", "label": "Hypit Author Source + Run", "sublabel": "唯一最终剪辑事实源", "tag": "固定版本待 D1", "pos": [1050, 380], "size": [190, 110] },
+    { "id": "hypit_runtime", "type": "backend", "label": "Hypit Runtime", "sublabel": "check / compile / build", "tag": "真实命令待 D1", "pos": [1050, 535], "size": [190, 88] },
+    { "id": "delivery", "type": "external", "label": "真实交付资产", "sublabel": "MP4 / 字幕 / 来源许可 / 标题封面", "tag": "首月目标", "pos": [780, 550], "size": [190, 100] }
+  ],
+  "boundaries": [
+    { "kind": "region", "label": "本地优先边界", "wraps": ["workbench", "host", "event_store", "om_adapter", "agent_runner", "staging", "hypit_adapter", "author_source", "hypit_runtime"] },
+    { "kind": "security-group", "label": "受控生成边界", "wraps": ["om_adapter", "agent_runner", "staging"] }
+  ],
+  "connections": [
+    { "id": "creator_ui", "from": "creator", "to": "workbench", "label": "导演意图与人工确认", "variant": "emphasis", "labelAt": [208, 429], "route": "orthogonal-h" },
+    { "id": "ui_host", "from": "workbench", "to": "host", "label": "loopback API + SSE", "variant": "emphasis", "labelAt": [468, 429] },
+    { "id": "host_events", "from": "host", "to": "event_store", "label": "追加事件与 journal", "variant": "dashed", "labelAt": [603, 429] },
+    { "id": "host_om", "from": "host", "to": "om_adapter", "label": "创建提案任务" },
+    { "id": "om_runner", "from": "om_adapter", "to": "agent_runner", "label": "固定 pipeline / skills / tools", "variant": "security", "labelAt": [900, 198] },
+    { "id": "runner_staging", "from": "agent_runner", "to": "staging", "label": "ProposalBundle / AssetManifest" },
+    { "id": "staging_host", "from": "staging", "to": "host", "label": "审批与校验结果", "variant": "dashed", "labelAt": [860, 348] },
+    { "id": "host_hypit", "from": "host", "to": "hypit_adapter", "label": "统一 edit transaction", "variant": "emphasis", "labelAt": [740, 501] },
+    { "id": "adapter_source", "from": "hypit_adapter", "to": "author_source", "label": "typed patch + revision", "variant": "emphasis", "labelAt": [1010, 504] },
+    { "id": "source_runtime", "from": "author_source", "to": "hypit_runtime", "label": "真实编译与构建", "labelAt": [1145, 504] },
+    { "id": "runtime_delivery", "from": "hypit_runtime", "to": "delivery", "label": "预览 / MP4 / 字幕", "variant": "emphasis", "labelAt": [1010, 664] }
+  ],
+  "cards": [
+    { "dot": "emerald", "title": "唯一事实源", "items": ["最终时间轴只存在于 Hypit Author Source + Run", "Narralens 数据库只保存控制面状态"] },
+    { "dot": "amber", "title": "D1 前不得猜测", "items": ["Studio 扩展点、写入边界和真实命令必须实测", "当前所有代码实体均为目标态规划"] },
+    { "dot": "rose", "title": "写入保护", "items": ["OpenMontage 不直接写主工程", "所有人工与 Agent 修改走同一事务"] }
+  ]
+}

@@ -1,0 +1,58 @@
+{
+  "format": "narralens.evidence-manifest@1",
+  "gate": "D3",
+  "date": "2026-10-12",
+  "status": "passed-with-declared-limitations",
+  "upstream": {
+    "hypit_commit": "85e01c76716498e6ec5b8bdfb6b374ca67f0195a",
+    "studio_api": "GET /__studio/session + POST /__studio/mutation parameter.adjust"
+  },
+  "tests": {
+    "D3-CONTRACT-01": "passed",
+    "D3-MAP-01": "passed-real-session",
+    "D3-REV-01": "passed-real-409-and-unit-Hypit-409",
+    "D3-LOCK-01": "passed-real-423",
+    "D3-IDEMPOTENCY-01": "passed-real-replay-and-unit-key-conflict",
+    "D3-TXN-01": "passed-real-r2-to-r3-and-r3-to-r4",
+    "D3-INVARIANT-01": "passed-source-run-narration-and-semantic-comparison",
+    "D3-ROLLBACK-01": "passed-protocol-double-compensation-and-attention",
+    "D3-RECOVERY-01": "passed-prepared-abort-target-finalize-and-real-committed-host-restart",
+    "D3-UI-01": "passed-headless-real-click",
+    "D3-REAL-E2E-01": "passed-real-Studio-reopen-check-plan-baseline-restored",
+    "D3-SEC-01": "passed"
+  },
+  "automated_check": {
+    "command": "corepack pnpm check",
+    "result": "38 tests passed; TypeScript and Vite production build passed",
+    "note": "Node 22 node:sqlite emits an experimental API warning"
+  },
+  "real_write": {
+    "artifact": "artifacts/real-write-e2e.json",
+    "sha256": "727791ebd6c38e57780222c82363b407ead403e08fe415d9fc62b2c15a76f844",
+    "baseline_source_sha256": "ae4edebf3bf05bb178efd2b264f101b744998c7d3bad29aa1ad7a1dd37fcab3a",
+    "contain_source_sha256": "4951b4e7718a7b5af9192e84ae415a9797b951e88c31fc1182852f22d304448e",
+    "final_source_sha256": "ae4edebf3bf05bb178efd2b264f101b744998c7d3bad29aa1ad7a1dd37fcab3a",
+    "run_sha256_unchanged": "bff6a663f753ac97b546acd1561e95b1aa1aa1239fdd08867a3b28ad782dc738",
+    "narration_sha256_unchanged": "ca8d3773b8dea14ff1950de9f4d991797f0d739743ab250e51a14e24eb2bb07a"
+  },
+  "browser": {
+    "report": { "path": "artifacts/browser-write-e2e.json", "sha256": "83698145475329e7f8b2a98eb1d0c4bb8761956d62568b634219bc4b79ad4cbc" },
+    "contain_screenshot": { "path": "artifacts/ui-contain-committed.png", "sha256": "da53f8d7e597060db86c7881a8cc74e8d2f00a649db7003bfb0e303a1397e6f3" },
+    "restored_screenshot": { "path": "artifacts/ui-cover-restored.png", "sha256": "135ae46177dde8a393e5956a8e274c601af26520a99fba61e373ef31f2b33a2a" },
+    "layout": "1388 CSS px document width equals 1388 CSS px viewport; no horizontal overflow",
+    "perceptual_review": "passed by image-capable reviewer; typography, hierarchy and transaction state are coherent"
+  },
+  "security": "security/credential-scan.json",
+  "cleanup": {
+    "chrome_profile": "removed after terminating only processes bound to narralens-chrome-d3",
+    "temporary_databases": "removed",
+    "services": "Headless Chrome, Narralens Host and Hypit Studio stopped",
+    "fixture": "restored through a second normal transaction, not manual overwrite"
+  },
+  "limitations": [
+    "D3 implements only the visual fit lock/write primitive; narration and duration are preserve/hash assertions, not active lock controls.",
+    "Failure/attention and prepared/target recovery branches use deterministic protocol doubles; the success/reopen/Host-restart path uses the real Hypit Studio.",
+    "Node 22 node:sqlite remains experimental; this is acceptable for the local V1 prototype but must be reassessed before distribution.",
+    "D3 does not materialize or apply the D2 proposal and does not claim D4 multi-proposal capability."
+  ]
+}

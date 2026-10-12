@@ -1,0 +1,14 @@
+{
+  "schema_version": "1.0",
+  "kind": "narralens.edit_request",
+  "project_id": "politics-demo-001",
+  "base_revision": 12,
+  "idempotency_key": "example-001",
+  "operations": [
+    {
+      "op": "replace_range_with_proposal",
+      "proposal_id": "proposal-B",
+      "range": {"start_frame": 1932, "end_frame_exclusive": 2100}
+    }
+  ]
+}

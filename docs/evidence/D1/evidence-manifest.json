@@ -1,0 +1,84 @@
+{
+  "format": "narralens.evidence-manifest@1",
+  "gate": "D1",
+  "date": "2026-10-12",
+  "status": "passed-with-declared-limitations",
+  "environment": {
+    "node": "v22.22.1",
+    "npm": "10.9.4",
+    "pnpm": "10.33.0",
+    "python": "3.12.3",
+    "ffmpeg": "6.1.1-3ubuntu5",
+    "hypit": "0.3.1"
+  },
+  "upstreams": {
+    "OpenMontage": {
+      "commit": "9327439db69021ab4b0e2776729bf3b58fdb5a87",
+      "license_sha256": "0d96a4ff68ad6d4b6f1f30f713b18d5184912ba8dd389f86aa7710db079abcb0"
+    },
+    "Hypit": {
+      "commit": "85e01c76716498e6ec5b8bdfb6b374ca67f0195a",
+      "license_sha256": "ed7bd598743c93dd27349eab6921e4e86884c785a33aef8ea2caeb541df8b912"
+    }
+  },
+  "builds": [
+    {
+      "id": "bld_20261012T062504576Z_51F9BB9B7D",
+      "role": "baseline",
+      "outcome": "complete",
+      "sha256": "aa6dd2f4baa8e5eeb18e421ab48c143304462ab89e8feaa0ec5933ab983f04d5",
+      "duration_seconds": 30.0,
+      "video": "h264 1280x720 30/1",
+      "audio": "aac 48000Hz stereo"
+    },
+    {
+      "id": "bld_20261012T062633724Z_C400AC1235",
+      "role": "shot-2-frame-modified",
+      "outcome": "complete",
+      "sha256": "0c08f87c842dfc6383cf2f1d1344eaadb354ffbce59883456c7c532cdb848309",
+      "duration_seconds": 30.0,
+      "video": "h264 1280x720 30/1",
+      "audio": "aac 48000Hz stereo"
+    }
+  ],
+  "source": {
+    "author_sha256_after_studio_writeback": "ae4edebf3bf05bb178efd2b264f101b744998c7d3bad29aa1ad7a1dd37fcab3a",
+    "narration_asset_sha256": "ca8d3773b8dea14ff1950de9f4d991797f0d739743ab250e51a14e24eb2bb07a",
+    "decoded_audio_sha256_both_builds": "77d021bf52a235f1574f5311026247ecd090620d8ce4addfeef738c7c9e016fa"
+  },
+  "tests": {
+    "D1-GIT-01": "passed",
+    "D1-UPSTREAM-01": "passed",
+    "D1-HYPIT-01": "passed",
+    "D1-CHECK-01": "passed",
+    "D1-PLAN-01": "passed",
+    "D1-BUILD-01": "passed",
+    "D1-REOPEN-01": "passed",
+    "D1-DIFF-01": "passed-with-no-subtitle-fixture",
+    "D1-STUDIO-01": "passed-server-writeback-ui-gesture-coverage-limited",
+    "D1-OM-01": "passed-discovery-only",
+    "D1-SEC-01": "passed"
+  },
+  "artifacts": {
+    "build_diff": "artifacts/build-diff.tsv",
+    "build_inspection": ["artifacts/build-one-inspect.json", "artifacts/build-two-inspect.json"],
+    "build_logs": ["artifacts/build-one-logs.json", "artifacts/build-two-logs.json"],
+    "checks": ["artifacts/check-author.json", "artifacts/check-run.json"],
+    "plan": "artifacts/plan.json",
+    "ffprobe": ["artifacts/ffprobe-baseline.json", "artifacts/ffprobe-modified.json"],
+    "studio_composition_frames": ["artifacts/studio/frame-000000150.png", "artifacts/studio/frame-000000450.png", "artifacts/studio/frame-000000750.png"],
+    "studio_writeback": "artifacts/studio-writeback.json",
+    "hypit_ir_shot2_frame": "artifacts/ir-shot2-frame.json",
+    "openmontage_probe": "artifacts/openmontage-probe.json",
+    "secret_scan_raw": "artifacts/detect-secrets.json",
+    "credential_scan": "security/credential-scan.json"
+  },
+  "limitations": [
+    "Generated 30-second media fixture does not replace the later real mother-project acceptance.",
+    "No subtitle stream exists in the D1 fixture.",
+    "Studio composition snapshots plus server writeback and stale revision rejection were exercised; there is no Studio UI screenshot and not every browser UI gesture was automated.",
+    "Windows System.Speech audio is not expected to be bit-stable across voice or OS versions; the recorded hash identifies this acceptance run.",
+    "OpenMontage provider availability was not inferred from registry discovery.",
+    "Large generated media is reproducible but intentionally excluded from Git."
+  ]
+}

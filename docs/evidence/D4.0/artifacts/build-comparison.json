@@ -1,0 +1,32 @@
+{
+  "format": "narralens.d40-build-comparison@1",
+  "executed_at": "2026-10-12T13:16:00Z",
+  "commands": {
+    "check_author": { "exit_code": 0, "ok": true, "assets_baseline": 2, "assets_alternate": 3 },
+    "check_run": { "exit_code": 0, "ok": true, "target": "final.video" },
+    "plan": { "exit_code": 0, "ok": true, "request_count": 7, "provider_request_count": 0, "local_request_count": 7 },
+    "build_baseline": { "exit_code": 0, "id": "bld_20261012T131309170Z_437F238506", "outcome": "complete" },
+    "build_alternate": { "exit_code": 0, "id": "bld_20261012T131533851Z_E97FB6EB61", "outcome": "complete" }
+  },
+  "outputs": {
+    "baseline": { "sha256": "0c08f87c842dfc6383cf2f1d1344eaadb354ffbce59883456c7c532cdb848309", "bytes": 7480900 },
+    "alternate": { "sha256": "f3f3e93bfcfe494245a13c3344468407dd076538771448fa104a35f765fe9dc1", "bytes": 6022174 },
+    "both": { "duration_seconds": 30, "video": "h264 1280x720 30fps 900 frames", "audio": "aac 48000Hz stereo" }
+  },
+  "samples": [
+    { "frame": 150, "scope": "non-target", "equal": true, "ssim": 1.0, "pass": true },
+    { "frame": 300, "scope": "target", "equal": false, "ssim": 0.678901, "pass": true },
+    { "frame": 450, "scope": "target", "equal": false, "ssim": 0.674212, "changed_pixel_percent_approx": 72, "pass": true },
+    { "frame": 599, "scope": "target", "equal": false, "ssim": 0.675992, "pass": true },
+    { "frame": 750, "scope": "non-target", "equal": true, "ssim": 1.0, "pass": true }
+  ],
+  "decoded_audio": {
+    "baseline_sha256": "77d021bf52a235f1574f5311026247ecd090620d8ce4addfeef738c7c9e016fa",
+    "alternate_sha256": "77d021bf52a235f1574f5311026247ecd090620d8ce4addfeef738c7c9e016fa",
+    "equal": true
+  },
+  "final_source_sha256": "ae4edebf3bf05bb178efd2b264f101b744998c7d3bad29aa1ad7a1dd37fcab3a",
+  "baseline_restored_by_typed_mutation": true,
+  "network_provider_calls": 0,
+  "cost": 0
+}

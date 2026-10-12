@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://narralens.local/planning/d3-edit-response.schema.json",
+  "title": "D3 planned edit response",
+  "oneOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["transaction_id", "project_id", "previous_revision", "new_revision", "operation", "status", "changed", "source_sha256", "run_sha256"],
+      "properties": {
+        "transaction_id": { "type": "string", "minLength": 1 },
+        "project_id": { "type": "string", "minLength": 1 },
+        "previous_revision": { "type": "integer", "minimum": 0 },
+        "new_revision": { "type": "integer", "minimum": 0 },
+        "operation": { "$ref": "d3-edit-operation.schema.json" },
+        "status": { "enum": ["committed", "unchanged"] },
+        "changed": { "type": "boolean" },
+        "source_sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "run_sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "message", "correlation_id"],
+      "properties": {
+        "code": {
+          "enum": ["INVALID_SESSION", "ORIGIN_REJECTED", "REVISION_CONFLICT", "IDEMPOTENCY_KEY_CONFLICT", "UNSUPPORTED_EDIT", "TARGET_LOCKED", "PROJECT_ATTENTION_REQUIRED", "HYPIT_UNAVAILABLE", "TRANSACTION_FAILED"]
+        },
+        "message": { "type": "string", "minLength": 1 },
+        "correlation_id": { "type": "string", "minLength": 1 },
+        "details": { "type": "object" }
+      }
+    }
+  ]
+}

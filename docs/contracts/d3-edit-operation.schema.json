@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://narralens.local/planning/d3-edit-operation.schema.json",
+  "title": "D3 planned edit operation",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["op", "shot_id", "value"],
+  "properties": {
+    "op": { "const": "set_visual_fit" },
+    "shot_id": { "type": "string", "pattern": "^[A-Za-z0-9_-]+$" },
+    "value": { "enum": ["contain", "cover"] }
+  }
+}
