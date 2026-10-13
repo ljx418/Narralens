@@ -1,0 +1,14 @@
+{
+  "format": "narralens.d41-real-comparison-failed-attempt@1",
+  "executed_at": "2026-10-13T13:29:01.989Z",
+  "automatic_retry": false,
+  "job_id": "job_4dc13892b6314e8c9ddfa3bf18f0573f",
+  "state": "failed",
+  "error": {
+    "code": "INVALID_PROPOSAL_SET",
+    "message": "Runner did not return a structured_output object"
+  },
+  "comparison_published": false,
+  "remediation": "provider schema retained const/enum constraints and added their explicit inferred JSON types before the separate manual re-verification",
+  "raw_stdout_persisted": false
+}

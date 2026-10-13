@@ -1,0 +1,104 @@
+{
+  "format": "narralens.d41-evidence-manifest@1",
+  "generated_at": "2026-10-13T22:22:00+08:00",
+  "stage": "D4.1 multi-proposal comparison",
+  "status": "D4.1-passed",
+  "repositories": {
+    "narralens_base_commit": "e776eddd28c63d9a78f6b7c7797bcebaef542a1f",
+    "narralens_implementation_commit": "44bd351c13d820b9e99bc13c39c2f1532dbee781",
+    "openmontage_commit": "9327439db69021ab4b0e2776729bf3b58fdb5a87",
+    "hypit_commit": "437563f977541002066e6ee961f83a67cbebd3c2",
+    "worktree_note": "D4.1 implementation is frozen at the implementation commit; evidence and status synchronization are finalized by the following documentation commit"
+  },
+  "automated_gate": {
+    "command": "corepack pnpm check",
+    "exit_code": 0,
+    "test_files": 10,
+    "tests_passed": 80,
+    "tests_failed": 0,
+    "tests_skipped": 0,
+    "typescript": "passed",
+    "vite_production_build": "passed",
+    "git_diff_check": "passed",
+    "credential_pattern_scan": "passed",
+    "absolute_path_evidence_scan": "passed"
+  },
+  "real_runner": {
+    "evidence": "artifacts/real-comparison-e2e.json",
+    "cli_version": "2.1.205",
+    "model": "MiniMax-M3",
+    "provider_calls_in_successful_action": 1,
+    "automatic_retries": 0,
+    "proposal_count": 3,
+    "total_cost_usd": 0.209945,
+    "duration_ms": 47454,
+    "num_turns": 2,
+    "stdout_sha256": "ce2d1de166930311a11b26327af7089545d88edca9bac16ddfc7d013ae833635",
+    "source_refs_per_option": [0, 0, 0],
+    "first_failed_attempt_preserved": "artifacts/real-comparison-attempt-1-failure.json"
+  },
+  "no_write": {
+    "source_sha256_before_after_equal": true,
+    "run_sha256_before_after_equal": true,
+    "narration_sha256_before_after_equal": true,
+    "revision_before_after_equal": true,
+    "write_actor_execute_count": 0
+  },
+  "browser": {
+    "evidence": "artifacts/browser-comparison-e2e.json",
+    "browser": "Google Chrome Headless via CDP",
+    "real_keyboard_submit": true,
+    "real_keyboard_option_switch": true,
+    "viewports": [360, 768, 1440, 1920],
+    "horizontal_overflow_count": 0,
+    "text_200_percent": "passed at 1440 physical pixels / 720 CSS pixels / deviceScaleFactor 2",
+    "screenshots": [
+      "artifacts/ui-comparison-360.png",
+      "artifacts/ui-comparison-768.png",
+      "artifacts/ui-comparison-1440.png",
+      "artifacts/ui-comparison-1920.png",
+      "artifacts/ui-comparison-text-200.png"
+    ]
+  },
+  "accessibility": {
+    "axe_version": "4.10.3",
+    "real_result_violations": 0,
+    "postfix_violations": 0,
+    "aria_prohibited_attr_after_fix": 0,
+    "manual_contrast_minimum_ratio": 6.92,
+    "required_normal_text_ratio": 4.5,
+    "evidence": "artifacts/accessibility-postfix.json"
+  },
+  "regression": {
+    "d40_real_media_e2e": "passed",
+    "baseline_to_alternate_to_restart_to_baseline": true,
+    "source_byte_exact_restored": true,
+    "run_unchanged": true,
+    "narration_unchanged": true,
+    "evidence": "../D4.0/artifacts/real-media-e2e.json"
+  },
+  "architecture_visual": {
+    "spec_sha256": "ff7c2004aad99b97a932ddb9881be28d94e4a47e04c791919ecd6b7f130e1536",
+    "artifact_sha256": "0776d6b935b91164a957b5d02d51b657bcc9e3be8eb3f74bc3b94f1a07640888",
+    "archify_browser_evidence": "skipped",
+    "supplementary_review": "four viewport and dual-theme manual inspection passed; skipped was not rewritten as automated pass"
+  },
+  "known_limits": [
+    "single registered-shot selection only",
+    "jobs are not persisted across Host restart",
+    "D4.1 does not materialize assets",
+    "D4.1 does not adopt proposals or write Source",
+    "trusted research source manifest remains P0-01"
+  ],
+  "artifact_sha256": {
+    "artifacts/accessibility-postfix.json": "4a56638305b7b93ec57202560f0cc0f531c12a638220c1d7a6929d4d2c27a31c",
+    "artifacts/browser-comparison-e2e.json": "9a51d268e43a65ee7dd1f4999114a661460cb84456375917ca9edb9c04134df2",
+    "artifacts/real-comparison-attempt-1-failure.json": "984504b6b2b4c9bd320d63d558daec51043332561f699d828284b99114c42640",
+    "artifacts/real-comparison-e2e.json": "45fe85a518a86f4b5485c904e938893e489e4c3c6e726f7b2b89733ee4407525",
+    "artifacts/ui-comparison-1440.png": "14804976f6b1a43986a7fa64e627ac4be68cac8324be2794e69471e52e7bd85b",
+    "artifacts/ui-comparison-1920.png": "46917e29a9c8326556eed2fcd6dcefd052785f326389844d10e78c3f0aac66e9",
+    "artifacts/ui-comparison-360.png": "0e89afff2ea58014465f7b79a002edc24c5fbfca5105e46f45c40d5b03b49e51",
+    "artifacts/ui-comparison-768.png": "249766d1c950caccf882ecee83eac4bbbe244e99914bb20ca781b8111aad90eb",
+    "artifacts/ui-comparison-text-200.png": "3afccc184b9551b4b6a506925c4c6cecf3d036e8d73b3dffc1fdd5f2f7ec137d"
+  }
+}

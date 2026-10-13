@@ -1,6 +1,6 @@
 # 叙镜架构设计 v1.0
 
-文档状态：目标架构已冻结到语义与代码实体层；Gate D1–D3 与 D4.0 已通过。D4.0 路线 A 已产生生产源码、真实事务/构建/浏览器证据并通过内外实现审查，Hypit 薄 fork 固定为 `ljx418/hypit@437563f977541002066e6ee961f83a67cbebd3c2`。`docs/architecture/v1-target-system.architecture.html` 是目标系统架构视图，`Narralens-V1-Development-GAP.drawio` 是开发与验收审查视图。
+文档状态：目标架构已冻结到语义与代码实体层；Gate D1–D3、D4.0 与 D4.1 已通过。D4.0 路线 A 已产生生产源码、真实事务/构建/浏览器证据并通过内外实现审查，Hypit 薄 fork固定为 `ljx418/hypit@437563f977541002066e6ee961f83a67cbebd3c2`。D4.1 多提案比较已形成生产契约、Runner、Adapter/原子暂存、Host/Job、UI 和真实 Runner/浏览器/NOWRITE 证据，并通过内外实现审查；D4.2 尚未开始。`docs/architecture/v1-target-system.architecture.html` 是目标系统架构视图，`Narralens-V1-Development-GAP.drawio` 是开发与验收审查视图。
 
 ## 1. 零层架构
 
@@ -84,18 +84,19 @@ narralens/
 |---|---|---|---|---|
 | `NarralensApp` / `StageRouter` | `src/app/director/` | 用户 → HostApiClient | D2 部分实现：精修页/单提案；完整三阶段路由待后续 | D2 evidence |
 | `SelectionCoordinator` | `app/director/selection/` | 导航/播放器/时间轴/导演面板 | 未开发 | 帧/时间模型经 D1 确认 |
-| `DirectorPane` / `ProposalCompare` | `src/app/director/` | Proposal API → Edit transaction | DirectorPane/单 Proposal 卡已实现；多方案比较待 D4 | D2 evidence |
+| `DirectorPane` / `ProposalCompare` | `src/app/director/` | Proposal API → 后续 Edit transaction | D4.1 已实现 3–6 方案、结构/素材/来源/费用比较和 generation 隔离；不含采用 | D4.1 UI/真实浏览器证据 |
 | `TimelineSurface` | `app/director/timeline/` | Hypit 时间模型 / SelectionContext | 未开发 | D1 确认复用点；禁止自建第二时间轴 |
 | `DeliveryWorkspace` | `app/director/delivery/` | render job / preflight / assets | 未开发 | 真实 build 与交付产物路径确认 |
-| `HostApiClient` | `src/app/director/api/` | UI ↔ Local Host | D2 projects/jobs/events/proposals、D3 fit 与 D4.0 媒体替换已实现 | D2/D3/D4.0 browser E2E |
-| `LocalHost API` | `src/host/server.ts` | UI ↔ actors/adapters | D2 loopback、Origin/token、SSE 与 D3 写 actor endpoint 已实现 | D2/D3 security/contract tests |
-| `ProjectWriteActor` | `src/host/projects/` | API → transaction → adapters | D3 fit 与 D4.0 单镜媒体替换已实现 revision、lock、幂等、补偿/attention/recovery | 多操作/提案采用待 D4.1/D4.2 |
+| `HostApiClient` | `src/app/director/api/` | UI ↔ Local Host | comparison 读取与原有 projects/jobs/events/proposals/edit 均已实现 | D4.1 HTTP/UI tests |
+| `LocalHost API` | `src/host/server.ts` | UI ↔ actors/adapters | D4.1 comparison job、读取、revision 复核与 NOWRITE diagnostics 已实现 | D4.1 contract/HTTP/NOWRITE tests |
+| `ProposalComparisonAdapter` | `src/adapters/openmontage/` | Runner draft → Host 绑定 → atomic staging | D4.1 已实现 schema、GCD 语义差异、空来源白名单和全有或全无暂存 | D4.1 adapter/真实证据 |
+| `ProjectWriteActor` | `src/host/projects/` | API → transaction → adapters | D3 fit 与 D4.0 单镜媒体替换已实现 revision、lock、幂等、补偿/attention/recovery | D4.1 禁止调用；提案采用待 D4.2 |
 | `SQLiteEventStore` | `src/host/projects/revision-store.ts` | actor ↔ revision/journal/idempotency | D3 已实现本地 SQLite revision/journal/event 基础 | schema 迁移生产化与更广恢复待后续 |
-| `OpenMontageAdapter` | `src/adapters/openmontage/` | Host ↔ ControlledAgentRunner | D2 已实现真实 CLI 单提案、校验与暂存 | 禁止直写 Hypit；多提案/materialize 待 D4 |
+| `OpenMontageAdapter` | `src/adapters/openmontage/` | Host ↔ ControlledAgentRunner | D2 单提案保留；D4.1 单次 CLI 多提案、完整 provider schema 与真实 audit 已实现 | 禁止直写 Hypit；D4.2 materialize 另阶段 |
 | `HypitAdapter` | `src/adapters/hypit/` | Actor ↔ Author Source + Run | D3 `parameter.adjust` 与 D4.0 `media.replace` 类型化写已实现 | fork commit `437563f...` 已固定；D4.0 真实事务/构建证据 |
-| JSON contracts | `contracts/` | UI/Host/Adapters/Tests | D2、D3 与 D4.0 operation/manifest 契约已实现 | 契约/TS/语义测试同步 |
+| JSON contracts | `contracts/` | UI/Host/Adapters/Tests | D4.1 request/draft/final schema、TS 类型、AJV validator 与 comparison_id 已实现 | 生产契约测试与真实结果 |
 
-状态口径：`已实现` 只覆盖对应 Gate 的证据范围，不外推到完整 V1；`待 D4.0/后续` 表示目标明确但尚无生产能力。
+状态口径：`已实现` 只覆盖对应 Gate 的证据范围，不外推到完整 V1；`docs-only/待后续` 表示目标明确但尚无生产能力。
 
 ## 6. 核心数据模型
 ### CreativeTask
@@ -109,6 +110,10 @@ narralens/
 
 ### ProposalBundle
 `proposal_id/base_revision/selection/preserve/segments/assets/cost/source_refs/renderable`。它是意图，不是 Hypit 工程语法。
+
+### ProposalComparison（D4.1 已实现）
+
+Runner 只产生不带项目绑定和费用事实的 `ProposalComparisonDraft`；Host 使用当前 project/revision/selection 包装成 `ProposalComparison`，生成 comparison/proposal ID，并从 CLI wrapper 注入真实模型、费用、耗时和 stdout SHA。每个候选必须具备唯一 strategy，且在 segment 数、role 序列或归一化时长序列上至少再有一项结构差异。整个 comparison 原子暂存，任一候选无效则全部失败。D4.1 不调用 `ProjectWriteActor`，不改变 Hypit Source/Run/revision。
 
 ### AssetRef / AssetManifest
 
@@ -133,6 +138,7 @@ narralens/
 ## 7. API 基线（Narralens 自定义，不伪称上游原生）
 - `POST /api/projects/:id/proposals`：选区 + 意图 + baseRevision → jobId。
 - `GET /api/jobs/:id` / SSE events：真实阶段、费用和结果。
+- `GET /api/proposal-comparisons/:id`：读取并重新校验 D4.1 原子暂存的 3–6 个只读候选，同时复核当前 revision；已实现。
 - `POST /api/proposals/:id/materialize`：批准的素材生成/获取。
 - `POST /api/projects/:id/edits`：typed operations + baseRevision → newRevision。
 - `POST /api/projects/:id/renders`：revision + profile → jobId。
@@ -151,11 +157,14 @@ narralens/
 | 422 | `UNSUPPORTED_EDIT` | 不支持拓扑、非局部影响、编译/后置拒绝 |
 | 422 | `MISSING_ASSET` | 未登记、bytes/hash/MIME 不可用 |
 | 422 | `AMBIGUOUS_TIME` | 选区无法唯一映射 |
+| 422 | `INVALID_PROPOSAL_SET` | D4.1 候选数量、帧数、引用、结构差异或可信字段校验失败 |
 | 423 | `TARGET_LOCKED` | 分项锁阻断 |
 | 423 | `PROJECT_ATTENTION_REQUIRED` | 未完成/不确定事务阻断写入 |
 | 428 | `APPROVAL_REQUIRED` | D4.1+ 外传/费用/许可审批；D4.0 不触发 |
 | 500 | `TRANSACTION_FAILED` | 内部失败且已证明未写或已补偿 |
 | 503 | `HYPIT_UNAVAILABLE` / `RUNNER_UNAVAILABLE` | 已登记本地依赖不可达 |
+| 504 | `RUNNER_TIMEOUT` | 受控 Runner 超时或取消终止；费用未知时不得伪造为零 |
+| 529 | `PROVIDER_OVERLOADED` | provider 权威过载；不自动重试，保留用户草稿 |
 
 阶段计划只能引用并收窄此表，不得另造同义 code。生产 `contracts/api-error.schema.json` 必须与 TypeScript union 同步。
 

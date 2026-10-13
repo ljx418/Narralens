@@ -1,0 +1,81 @@
+{
+  "format": "narralens.d41-browser-e2e@1",
+  "executed_at": "2026-10-13T14:08:51.637Z",
+  "browser": "Google Chrome Headless via CDP",
+  "provider_calls": 1,
+  "automatic_retries": 0,
+  "actions": [
+    "键盘提交默认三方案",
+    "等待真实 Runner",
+    "键盘切换第二方案",
+    "检查四视口",
+    "检查 200% 文本"
+  ],
+  "observed": {
+    "three_tabs": true,
+    "first_title": "1. 三镜时序递进组接",
+    "keyboard_second_selected": true,
+    "no_adopt_button": true,
+    "read_only_copy": true,
+    "real_cost_visible": true,
+    "source_status_visible": true,
+    "revision_unchanged": true
+  },
+  "layouts": [
+    {
+      "width": 360,
+      "height": 900,
+      "viewport": 360,
+      "scrollWidth": 360,
+      "scrollHeight": 3844,
+      "no_horizontal_overflow": true
+    },
+    {
+      "width": 768,
+      "height": 1000,
+      "viewport": 768,
+      "scrollWidth": 768,
+      "scrollHeight": 3200,
+      "no_horizontal_overflow": true
+    },
+    {
+      "width": 1440,
+      "height": 1000,
+      "viewport": 1440,
+      "scrollWidth": 1425,
+      "scrollHeight": 2238,
+      "no_horizontal_overflow": true
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "viewport": 1920,
+      "scrollWidth": 1905,
+      "scrollHeight": 2238,
+      "no_horizontal_overflow": true
+    }
+  ],
+  "accessibility": {
+    "version": "4.10.3",
+    "passes": 24,
+    "incomplete": [
+      "aria-prohibited-attr",
+      "color-contrast"
+    ],
+    "violations": []
+  },
+  "text_200_percent": {
+    "physical_width": 1440,
+    "css_viewport": 720,
+    "device_scale_factor": 2,
+    "viewport": 720,
+    "scrollWidth": 705,
+    "scrollHeight": 3168,
+    "no_horizontal_overflow": true
+  },
+  "project_hashes_after": {
+    "source_sha256": "ae4edebf3bf05bb178efd2b264f101b744998c7d3bad29aa1ad7a1dd37fcab3a",
+    "run_sha256": "bff6a663f753ac97b546acd1561e95b1aa1aa1239fdd08867a3b28ad782dc738",
+    "narration_sha256": "ca8d3773b8dea14ff1950de9f4d991797f0d739743ab250e51a14e24eb2bb07a"
+  }
+}

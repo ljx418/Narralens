@@ -1,6 +1,6 @@
 {
   "format": "narralens.d40-real-media-e2e@1",
-  "at": "2026-10-12T14:23:40.572Z",
+  "at": "2026-10-13T14:14:41.574Z",
   "project_id": "d1-30s",
   "baseline": {
     "source": "ae4edebf3bf05bb178efd2b264f101b744998c7d3bad29aa1ad7a1dd37fcab3a",
@@ -15,7 +15,7 @@
   },
   "alternate": {
     "response": {
-      "transaction_id": "txn_3b89c1ffe29144c7ac86b7d52c07e90f",
+      "transaction_id": "txn_9173f7c7e06f49e2b6ef2912fecd3259",
       "project_id": "d1-30s",
       "previous_revision": 2,
       "new_revision": 3,
@@ -40,7 +40,7 @@
     }
   },
   "idempotent_replay": {
-    "transaction_id": "txn_3b89c1ffe29144c7ac86b7d52c07e90f",
+    "transaction_id": "txn_9173f7c7e06f49e2b6ef2912fecd3259",
     "repeated_mutation": false
   },
   "stale": {
@@ -48,7 +48,7 @@
     "body": {
       "code": "REVISION_CONFLICT",
       "message": "Project revision has changed",
-      "correlation_id": "b6864afa-5c76-44cd-899f-8fdbd358f63e"
+      "correlation_id": "63ce029f-b409-478b-a32f-c634d3e6917f"
     }
   },
   "reopen": {
@@ -62,7 +62,7 @@
   },
   "restore": {
     "response": {
-      "transaction_id": "txn_76ab937653374f8d8c4af6f7acf621c5",
+      "transaction_id": "txn_785713c57db0417a965c03ed08c62494",
       "project_id": "d1-30s",
       "previous_revision": 3,
       "new_revision": 4,

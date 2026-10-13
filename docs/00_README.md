@@ -39,4 +39,4 @@
 
 ## 当前阶段（2026-10-12）
 
-V1 目标原型、开发计划与实际开发均已批准。Gate D1、D2、D3、D4.0 已通过。D4.0 类型化本地媒体替换已完成实现、真实构建、内外实现审查，并固定到 Hypit fork commit `437563f977541002066e6ee961f83a67cbebd3c2`；P0-08 仍为 partial，D4.1/D4.2 尚未开始。计划与证据见 `implementation/D4.0-development-and-acceptance-plan.md`、`implementation/D4.0-external-implementation-audit.md` 与 `evidence/D4.0/evidence-manifest.json`。原型入口仍为 `prototype-v1/index.html`，当前生产 UI 位于 `src/app/director/`。
+V1 目标原型、开发计划与实际开发均已批准。Gate D1、D2、D3、D4.0、D4.1 已通过。D4.0 类型化本地媒体替换已完成实现、真实构建、内外实现审查，并固定到 Hypit fork commit `437563f977541002066e6ee961f83a67cbebd3c2`；P0-08 仍为 partial。D4.1 已完成多提案生产实现、80/80 自动化测试、真实 Runner/浏览器/NOWRITE 验收及内外实现审查；D4.2 尚未开始。D4.0 计划与证据见 `implementation/D4.0-development-and-acceptance-plan.md`、`implementation/D4.0-external-implementation-audit.md` 与 `evidence/D4.0/evidence-manifest.json`；D4.1 计划、审计与证据见 `implementation/D4.1-development-and-acceptance-plan.md`、`implementation/D4.1-external-implementation-audit.md` 与 `evidence/D4.1/evidence-manifest.json`。原型入口仍为 `prototype-v1/index.html`，当前生产 UI 位于 `src/app/director/`。

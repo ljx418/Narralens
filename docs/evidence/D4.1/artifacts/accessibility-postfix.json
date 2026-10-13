@@ -1,0 +1,44 @@
+{
+  "format": "narralens.d41-accessibility-postfix@1",
+  "executed_at": "2026-10-13T14:11:32.063Z",
+  "audit": {
+    "version": "4.10.3",
+    "passes": 20,
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "targets": [
+          [
+            ".frame > span"
+          ],
+          [
+            "#intent"
+          ]
+        ],
+        "reasons": [
+          "Fix any of the following:\n  Element's background color could not be determined due to a background gradient",
+          "Fix any of the following:\n  Element's background color could not be determined because it's partially obscured by another element"
+        ]
+      }
+    ]
+  },
+  "manual_contrast_review": {
+    "method": "WCAG relative luminance",
+    "foreground": "#edf2f7",
+    "minimum_required_normal_text": 4.5,
+    "gradient_lightest_background": {
+      "color": "#435465",
+      "ratio": 6.92,
+      "pass": true
+    },
+    "textarea_background": {
+      "color": "#151b23",
+      "ratio": 15.37,
+      "pass": true
+    }
+  },
+  "keyboard_evidence": "browser-comparison-e2e.json: keyboard submit and second-tab selection",
+  "result_ui_evidence": "browser-comparison-e2e.json: axe 4.10.3 found zero violations with real three-option content"
+}

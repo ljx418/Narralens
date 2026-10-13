@@ -1,0 +1,295 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Narralens D4.1 多提案比较目标架构",
+    "locale": "zh-CN",
+    "quality_profile": "showcase",
+    "viewBox": [1320, 680],
+    "repository": {
+      "url": "https://github.com/ljx418/Narralens",
+      "provider": "github",
+      "link_mode": "web",
+      "revision": "44bd351c13d820b9e99bc13c39c2f1532dbee781"
+    },
+    "views": [
+      {
+        "id": "proposal-path",
+        "label": "三提案主链",
+        "focus": ["user", "proposal-compare", "host-api", "runner", "proposal-adapter", "staging"],
+        "note": "一次真实请求产生 3–6 个结构不同、可校验且不会写入主工程的提案。"
+      },
+      {
+        "id": "truth-boundary",
+        "label": "只读事实边界",
+        "focus": ["host-api", "revision-store", "hypit-read", "proposal-adapter"],
+        "note": "baseRevision、选区和 Source 身份来自当前工程；D4.1 不调用任何写适配器。"
+      },
+      {
+        "id": "failure-path",
+        "label": "失败与恢复",
+        "focus": ["host-api", "job-store", "runner", "proposal-compare"],
+        "note": "422、529、取消、晚到结果和 SSE 重放均保留用户输入且不得伪装成功。"
+      }
+    ]
+  },
+  "components": [
+    {
+      "id": "user",
+      "type": "external",
+      "label": "零号用户",
+      "sublabel": "选择镜头并提出导演意图",
+      "pos": [30, 200],
+      "size": [150, 70]
+    },
+    {
+      "id": "proposal-compare",
+      "type": "frontend",
+      "label": "ProposalCompare",
+      "sublabel": "3–6 方案、差异、来源、费用状态",
+      "tag": "D4.1 已实现",
+      "sources": [
+        {
+          "path": "src/app/director/NarralensApp.tsx",
+          "line": 1,
+          "label": "D4.1 多方案比较 UI"
+        }
+      ],
+      "pos": [240, 200],
+      "size": [190, 78]
+    },
+    {
+      "id": "host-api",
+      "type": "backend",
+      "label": "Local Host API",
+      "sublabel": "proposal request / cancel / SSE",
+      "tag": "D4.1 已实现",
+      "sources": [
+        {
+          "path": "src/host/server.ts",
+          "line": 35,
+          "label": "当前 Host 编排入口"
+        }
+      ],
+      "pos": [500, 200],
+      "size": [180, 78]
+    },
+    {
+      "id": "runner",
+      "type": "backend",
+      "label": "ControlledAgentRunner",
+      "sublabel": "固定 Claude Code CLI 调用",
+      "tag": "D4.1 已实现",
+      "sources": [
+        {
+          "path": "src/adapters/openmontage/controlled-agent-runner.ts",
+          "line": 33,
+          "label": "当前受控 Runner"
+        }
+      ],
+      "pos": [750, 200],
+      "size": [195, 78]
+    },
+    {
+      "id": "proposal-adapter",
+      "type": "backend",
+      "label": "ProposalComparisonAdapter",
+      "sublabel": "校验、归一化、差异约束",
+      "tag": "D4.1 已实现",
+      "sources": [
+        {
+          "path": "src/adapters/openmontage/proposal-comparison-adapter.ts",
+          "line": 1,
+          "label": "D4.1 多方案校验与落盘适配器"
+        }
+      ],
+      "pos": [1010, 200],
+      "size": [185, 78]
+    },
+    {
+      "id": "staging",
+      "type": "database",
+      "label": "Proposal Staging",
+      "sublabel": "只存意图与审计，不存第二时间轴",
+      "tag": "D4.1 已实现",
+      "pos": [1010, 390],
+      "size": [190, 78]
+    },
+    {
+      "id": "job-store",
+      "type": "messagebus",
+      "label": "JobStore + SSE",
+      "sublabel": "单调事件、取消、重放、晚到隔离",
+      "tag": "D4.1 已实现",
+      "sources": [
+        {
+          "path": "src/host/job-store.ts",
+          "line": 9,
+          "label": "当前任务事件存储"
+        }
+      ],
+      "pos": [240, 390],
+      "size": [180, 76]
+    },
+    {
+      "id": "revision-store",
+      "type": "database",
+      "label": "RevisionStore",
+      "sublabel": "baseRevision 与 stale 检查",
+      "tag": "复用 D3",
+      "sources": [
+        {
+          "path": "src/host/projects/revision-store.ts",
+          "line": 29,
+          "label": "当前修订存储"
+        }
+      ],
+      "pos": [500, 390],
+      "size": [195, 76]
+    },
+    {
+      "id": "hypit-read",
+      "type": "backend",
+      "label": "HypitReadAdapter",
+      "sublabel": "shot / frame / Source 身份只读",
+      "tag": "复用 D2–D4.0",
+      "sources": [
+        {
+          "path": "src/adapters/hypit/hypit-read-adapter.ts",
+          "line": 10,
+          "label": "当前只读适配器"
+        }
+      ],
+      "pos": [750, 390],
+      "size": [185, 76]
+    },
+    {
+      "id": "hypit-source",
+      "type": "database",
+      "label": "Hypit Author Source + Run",
+      "sublabel": "唯一剪辑事实源；D4.1 哈希不变",
+      "tag": "禁止写入",
+      "pos": [1010, 520],
+      "size": [190, 76]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "security-group",
+      "label": "Narralens 本地同源边界",
+      "wraps": ["proposal-compare", "host-api", "job-store", "revision-store", "hypit-read", "staging"]
+    },
+    {
+      "kind": "region",
+      "label": "受控 Agent 执行与暂存边界",
+      "wraps": ["runner", "proposal-adapter", "staging"]
+    }
+  ],
+  "connections": [
+    {
+      "id": "user-intent",
+      "from": "user",
+      "to": "proposal-compare",
+      "label": "选区 / 意图",
+      "variant": "emphasis"
+    },
+    {
+      "id": "request-proposals",
+      "from": "proposal-compare",
+      "to": "host-api",
+      "label": "创建 / 取消任务",
+      "labelDy": -26
+    },
+    {
+      "id": "invoke-runner",
+      "from": "host-api",
+      "to": "runner",
+      "label": "correlationId"
+    },
+    {
+      "id": "runner-result",
+      "from": "runner",
+      "to": "proposal-adapter",
+      "label": "3–6 提案"
+    },
+    {
+      "id": "validated-staging",
+      "from": "proposal-adapter",
+      "to": "staging",
+      "label": "严格校验后暂存",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "job-events",
+      "from": "host-api",
+      "to": "job-store",
+      "label": "状态 / 费用",
+      "variant": "dashed"
+    },
+    {
+      "id": "revision-check",
+      "from": "host-api",
+      "to": "revision-store",
+      "label": "读取 revision",
+      "variant": "security",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelAt": [590, 340]
+    },
+    {
+      "id": "selection-read",
+      "from": "host-api",
+      "to": "hypit-read",
+      "label": "选区只读",
+      "fromSide": "right",
+      "toSide": "top",
+      "labelDx": 70
+    },
+    {
+      "id": "source-readonly",
+      "from": "hypit-read",
+      "to": "hypit-source",
+      "label": "descriptor / SHA",
+      "variant": "security"
+    },
+    {
+      "id": "sse-to-ui",
+      "from": "job-store",
+      "to": "proposal-compare",
+      "label": "SSE 重放 + live",
+      "variant": "dashed",
+      "fromSide": "top",
+      "toSide": "bottom"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "D4.1 出门能力",
+      "items": [
+        "同一真实选区展示至少 3 个结构不同的提案",
+        "选择提案前不生成昂贵素材、不修改 Hypit Source",
+        "来源、许可状态、费用状态和 baseRevision 可见"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "硬边界",
+      "items": [
+        "D4.1 不实现 materialize 或采用写入",
+        "任一无效提案导致整个结果失败，不展示半真半假的成功",
+        "取消、529 和晚到结果不得覆盖较新的任务状态"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "验收证据",
+      "items": [
+        "真实 Claude Code CLI 多提案产物与完整审计日志",
+        "Source / Run / narration SHA 前后完全一致",
+        "浏览器比较、键盘路径、错误态与无横向溢出证据"
+      ]
+    }
+  ]
+}

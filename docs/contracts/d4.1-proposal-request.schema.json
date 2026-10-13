@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://narralens.local/review/d4.1-proposal-request.schema.json",
+  "title": "Narralens D4.1 Proposal Comparison Request",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["base_revision", "selection", "intent", "preserve", "proposal_count"],
+  "properties": {
+    "base_revision": { "type": "integer", "minimum": 0 },
+    "selection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["shot_id", "start_frame", "end_frame_exclusive"],
+      "properties": {
+        "shot_id": { "type": "string", "pattern": "^shot-[A-Za-z0-9_-]+$" },
+        "start_frame": { "type": "integer", "minimum": 0 },
+        "end_frame_exclusive": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "intent": { "type": "string", "minLength": 1, "maxLength": 4000 },
+    "preserve": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "enum": ["narration", "duration"] }
+    },
+    "proposal_count": { "type": "integer", "minimum": 3, "maximum": 6 }
+  }
+}

@@ -1,6 +1,6 @@
 # 叙镜开发计划 v1.0
 
-状态：实际开发已批准；Gate D1、D2、D3、D4.0 已通过。D4.0 类型化媒体替换已实现、通过内外实现审查并固定到 Hypit fork commit `437563f977541002066e6ee961f83a67cbebd3c2`；D4.1/D4.2 尚未开始，进入前仍须单独完成计划与审计门禁。总览见 `Narralens-V1-Development-GAP.drawio` 第 5 页，需求追踪见 `11_V1_Traceability.md`。
+状态：实际开发已批准；Gate D1、D2、D3、D4.0、D4.1 已通过。D4.0 类型化媒体替换已实现、通过内外实现审查并固定到 Hypit fork commit `437563f977541002066e6ee961f83a67cbebd3c2`；D4.1 多提案比较已完成生产实现、真实验收与内外实现审查；D4.2 尚未开始。总览见 `Narralens-V1-Development-GAP.drawio` 第 5 页，需求追踪见 `11_V1_Traceability.md`。
 
 ## 当前前置阶段 — V1 前端体验冻结（文档中）
 
@@ -101,6 +101,8 @@ M5：多账号模板与稳定批量。
 | M1 / Gate D2 | 通过（限制已声明） | 单页面真实项目→Claude Code CLI Runner→结构化 ProposalBundle→SSE 展示已由真实 E2E 证明；仅一个提案，未写工程 |
 | M2 / Gate D3 | 通过（限制已声明） | 单镜 visual fit typed edit、revision/visual lock/journal/恢复、真实 Studio/Host 重启与 baseline 恢复均有证据；不含 D4 proposal 采用 |
 | Gate D4.0 | 通过（限制已声明） | 注册本地视频资产的类型化单镜替换、许可/来源展示、事务恢复、真实重建与精确恢复已验；Hypit fork/gitlink 已固定；不含 D4.1 多提案和 D4.2 素材化采用 |
+| Gate D4.1 文档 | 通过 / 允许实现 | 多提案 request/draft/comparison schema、只读比较架构和开发验收计划已建立；内部复审 PASS，Claude Code CLI 第二轮 17/17 CLOSED |
+| Gate D4.1 实现 | 通过（限制已声明） | 3–6 多提案只读比较、真实 CLI audit、GCD 差异、原子暂存、80/80、浏览器/NOWRITE、内外实现审查均通过；不含 materialize/采用 |
 | M3–M5 | 未开始 | 依赖前置 Gate，不得提前声称实现 |
 
 ## 工程纪律

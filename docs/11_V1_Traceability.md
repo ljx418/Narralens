@@ -1,8 +1,8 @@
 # Narralens V1 规格—架构—开发—验收追踪矩阵
 
 版本：v1.0  
-状态：实际开发已批准；Gate D1、Gate D2、Gate D3、Gate D4.0 已通过；D4.1/D4.2 尚未开始。  
-事实日期：2026-10-12
+状态：实际开发已批准；Gate D1、Gate D2、Gate D3、Gate D4.0、Gate D4.1 已通过；D4.2 尚未开始。
+事实日期：2026-10-13
 
 ## 1. 使用规则
 
@@ -17,9 +17,9 @@
 | P0-03 真实播放器/时间码 | `RealPreviewSurface`、`HypitAdapter` | D1–D2 | `AT-PREVIEW-01` 帧时间往返 | 真实 Run、时间码/抽样帧 | partial：D2 真实 descriptor/900 帧/30fps/预览入口；完整播放器待后续 |
 | P0-04 全片/局部时间轴 | `TimelineSurface` | D2–D3 | `AT-TIMELINE-01` 缩放不改变选区 | 120 镜头 trace、选区日志 | not-started；D1 前置已清除 |
 | P0-05 镜头/区间/逐帧 | `SelectionCoordinator` | D3 | `AT-SELECTION-01` `[start,end)` 边界 | 首尾帧样本、契约测试 | partial：D3 单镜稳定选区/边界已通过；区间与逐帧 UI 待后续 |
-| P0-06 3–6 提案 | `DirectorPane`、`ProposalCompare`、`OpenMontageAdapter` | D2–D4 | `AT-PROPOSAL-01` 3 个结构差异提案 | Runner 日志、ProposalBundle | partial：D2 单个真实提案链通过；3–6 比较待 D4 |
+| P0-06 3–6 提案 | `DirectorPane`、`ProposalCompare`、`ProposalComparisonAdapter` | D2–D4 | `D41-CONTRACT/COUNT/DIVERSITY/DURATION/REF/TRUST/STAGING/REV/NOWRITE/CANCEL/PROVIDER/RUNNER/UI/A11Y/SEC/REGRESSION` 全族 | Runner 审计、ProposalComparison、结构签名、工程 SHA、Host 写调用计数、浏览器证据 | done：D4.1 生产实现、80/80、真实 CLI 三案、浏览器/NOWRITE 与内外实现审查通过；不包含 P0-07 采用 |
 | P0-07 分项锁 | `ProjectWriteActor`、`LockPolicy` | D3–D4 | `AT-LOCK-01` UI/Agent 同时被阻止 | 423 响应、资产哈希不变 | partial：仅 D3 visual 服务端主动锁这一项通过；narration/duration 主动锁与完整 P0-07 均未通过 |
-| P0-08 素材/来源/许可 | `AssetRegistry`、`MediaBindingEditor`、后续 `MaterializeService` | D4 | `AT-ASSET-01` 缺许可阻断采用/导出 | 422/428、许可清单 | partial：D4.0 本地 cleared 清单、来源/许可展示与真实替换已验，Hypit fork/gitlink 已固定；多提案素材化/审批待 D4.1/D4.2 |
+| P0-08 素材/来源/许可 | `AssetRegistry`、`MediaBindingEditor`、后续 `MaterializeService` | D4 | `AT-ASSET-01` 缺许可阻断采用/导出 | 422/428、许可清单 | partial：D4.0 本地 cleared 清单、来源/许可展示与真实替换已验；D4.1 已展示每案素材需求、空可信来源与待审批状态，素材化、外传与审批待 D4.2 |
 | P0-09 局部差异确认 | `ImpactPreview`、`EditTransaction` | D3 | `AT-DIFF-01` 非目标区逐字段不变 | before/after diff、帧数 | partial：D3 fit before→after、精确 Source 与全 item 不变量通过；丰富 diff 待后续 |
 | P0-10 版本/撤回/恢复/冲突 | `RevisionService`、journal | D3–D5 | `AT-REV-01` 409、恢复产生新 revision | event log、重开记录 | partial：D3 monotonic revision/409/journal/启动恢复通过；用户历史恢复待 D5 |
 | P0-11 重开与 MP4 | `HypitAdapter`、`RenderService` | D1、D6–D7 | `AT-EXPORT-01` 双导出、重开、改一镜 | MP4、ffprobe、工程哈希 | D1 30 秒夹具通过；真实母项目待 D6–D7 |
@@ -31,11 +31,11 @@
 | PRD | 架构控制 | 测试 | 门限 | 当前状态 |
 |---|---|---|---|---|
 | NFR-01 本地优先 | loopback Host、受控 Runner、AssetRef 审批 | `AT-SEC-01` Origin/token、路径穿越、锁定版本 gitleaks 或等价扫描器 | 无凭据进入前端/JSON/日志；记录工具/版本/规则集/时间与 `docs/evidence/<phase>/security/credential-scan.json`；外传逐任务记录 | partial：D2 loopback/Origin/token/路径/外传清单通过；AssetRef 审批待 D4 |
-| NFR-02 可恢复 | ProjectWriteActor + journal + append-only event log | `AT-RECOVERY-01` 在四个 journal 状态注入崩溃 | 重启恢复到最后提交 revision，主 Source 不损坏 | partial：D3 prepared/target/committed/attention 路径通过；完整历史恢复待 D5 |
+| NFR-02 可恢复 | ProjectWriteActor + journal + append-only event log | `AT-RECOVERY-01` 在四个 journal 状态注入崩溃 | 重启恢复到最后提交 revision，主 Source 不损坏 | partial：D3 prepared/target/committed/attention 路径通过；D4.1 只保证 comparison 原子可见且如实声明在途任务可丢失，不推进本项；完整任务/历史恢复待 D5 |
 | NFR-03 可观察 | Job state + SSE + correlation ID | `AT-OBS-01` 断线重连/晚到/取消 | 无重复事件；费用与“已请求取消”如实显示；无假百分比 | partial：D2 event replay/live、取消状态、correlation ID 与 Runner audit 通过；持久事件待 D5 |
-| NFR-04 可测试 | schema/contract/fixture/ffprobe/frame sampling | `AT-CONTRACT-01`、`AT-E2E-01` | 每个 phase 的 evidence manifest 完整 | partial：D2 24 tests、真实 CLI、浏览器证据通过；V1 全阶段未完成 |
+| NFR-04 可测试 | schema/contract/fixture/ffprobe/frame sampling | `AT-CONTRACT-01`、`AT-E2E-01` | 每个 phase 的 evidence manifest 完整 | partial：D4.1 达到 80/80、真实 CLI/浏览器/NOWRITE/evidence manifest；V1 全阶段未完成 |
 | NFR-05 性能 | Timeline virtualization + async jobs | `AT-PERF-01` 120 镜头 reference fixture | 选择反馈 p95 ≤100ms；无 >100ms UI 长任务；机器与 trace 已记录 | not-started |
-| NFR-06 可访问 | focus management、键盘映射、reduced motion、文本状态 | `AT-A11Y-01` axe + keyboard + 200% text + 人工审查 | 无阻塞级问题；全部核心路径可用键盘完成 | partial：D2 键盘提交、focus-visible、文本状态/reduced-motion；axe/200% 待阶段验收 |
+| NFR-06 可访问 | focus management、键盘映射、reduced motion、文本状态 | `AT-A11Y-01` axe + keyboard + 200% text + 人工审查 | 无阻塞级问题；全部核心路径可用键盘完成 | partial：D4.1 axe-core 4.10.3、键盘提交/切换、四视口、200% 重排与人工对比度通过；V1 其余路径待验 |
 
 ## 4. 阶段证据清单
 

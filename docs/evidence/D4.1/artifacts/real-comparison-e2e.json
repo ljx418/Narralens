@@ -1,0 +1,150 @@
+{
+  "format": "narralens.d41-real-comparison-e2e@1",
+  "executed_at": "2026-10-13T13:34:25.710Z",
+  "cli_version": "Claude Code CLI 2.1.205",
+  "invocation_policy": {
+    "calls": 1,
+    "automatic_retries": 0,
+    "local_budget_limit": null,
+    "local_call_limit": null,
+    "safe_mode": true,
+    "permission_mode": "plan",
+    "tools": []
+  },
+  "request": {
+    "project_id": "d1-30s",
+    "base_revision": 2,
+    "selection": {
+      "shot_id": "shot-001",
+      "start_frame": 0,
+      "end_frame_exclusive": 300
+    },
+    "proposal_count": 3,
+    "preserve": [
+      "narration",
+      "duration"
+    ],
+    "intent_sha256": "505dc1314b1041056cdb7370defd0c262a4d3b2264c58c053fbf90b68442b17e"
+  },
+  "job": {
+    "job_id": "job_d47fefa8c17f4398a024640f85659ade",
+    "project_id": "d1-30s",
+    "state": "succeeded",
+    "created_at": "2026-10-13T13:33:35.079Z",
+    "updated_at": "2026-10-13T13:34:24.721Z",
+    "comparison_id": "comparison_5c25e07e_6c50_4600_98ff_d70a6fdd19cf"
+  },
+  "comparison": {
+    "comparison_id": "comparison_5c25e07e_6c50_4600_98ff_d70a6fdd19cf",
+    "proposal_count": 3,
+    "generation_audit": {
+      "stdout_sha256": "ce2d1de166930311a11b26327af7089545d88edca9bac16ddfc7d013ae833635",
+      "model_names": [
+        "MiniMax-M3"
+      ],
+      "total_cost_usd": 0.209945,
+      "duration_ms": 47454,
+      "num_turns": 2,
+      "service_tier": null
+    },
+    "options": [
+      {
+        "proposal_id": "proposal_5c25e07e_6c50_4600_98ff_d70a6fdd19cf_1",
+        "title": "时间递进：起承转合的连续叙事",
+        "strategy": "chronology",
+        "signature": {
+          "segment_count": 3,
+          "roles": [
+            "anchor",
+            "context",
+            "conclusion"
+          ],
+          "normalized_durations": [
+            1,
+            1,
+            1
+          ]
+        },
+        "source_ref_count": 0,
+        "asset_requirement_count": 1,
+        "materialization_cost": {
+          "status": "unknown",
+          "currency": null,
+          "amount": null
+        }
+      },
+      {
+        "proposal_id": "proposal_5c25e07e_6c50_4600_98ff_d70a6fdd19cf_2",
+        "title": "对照结构：双视角的并置呈现",
+        "strategy": "contrast",
+        "signature": {
+          "segment_count": 3,
+          "roles": [
+            "anchor",
+            "contrast",
+            "conclusion"
+          ],
+          "normalized_durations": [
+            1,
+            3,
+            1
+          ]
+        },
+        "source_ref_count": 0,
+        "asset_requirement_count": 3,
+        "materialization_cost": {
+          "status": "unknown",
+          "currency": null,
+          "amount": null
+        }
+      },
+      {
+        "proposal_id": "proposal_5c25e07e_6c50_4600_98ff_d70a6fdd19cf_3",
+        "title": "证据中心：以多条证据支撑主张",
+        "strategy": "evidence-led",
+        "signature": {
+          "segment_count": 4,
+          "roles": [
+            "anchor",
+            "evidence",
+            "evidence",
+            "conclusion"
+          ],
+          "normalized_durations": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "source_ref_count": 0,
+        "asset_requirement_count": 4,
+        "materialization_cost": {
+          "status": "unknown",
+          "currency": null,
+          "amount": null
+        }
+      }
+    ]
+  },
+  "before": {
+    "source_sha256": "ae4edebf3bf05bb178efd2b264f101b744998c7d3bad29aa1ad7a1dd37fcab3a",
+    "run_sha256": "bff6a663f753ac97b546acd1561e95b1aa1aa1239fdd08867a3b28ad782dc738",
+    "narration_sha256": "ca8d3773b8dea14ff1950de9f4d991797f0d739743ab250e51a14e24eb2bb07a",
+    "revision": 2
+  },
+  "after": {
+    "source_sha256": "ae4edebf3bf05bb178efd2b264f101b744998c7d3bad29aa1ad7a1dd37fcab3a",
+    "run_sha256": "bff6a663f753ac97b546acd1561e95b1aa1aa1239fdd08867a3b28ad782dc738",
+    "narration_sha256": "ca8d3773b8dea14ff1950de9f4d991797f0d739743ab250e51a14e24eb2bb07a",
+    "revision": 2
+  },
+  "invariants": {
+    "source_unchanged": true,
+    "run_unchanged": true,
+    "narration_unchanged": true,
+    "revision_unchanged": true,
+    "write_actor_execute_count": 0
+  },
+  "no_fake_success": true
+}
