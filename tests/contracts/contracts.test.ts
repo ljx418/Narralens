@@ -6,7 +6,7 @@ const proposal = JSON.parse(readFileSync(new URL("../../docs/contracts/proposal-
 
 describe("API contracts", () => {
   it("registers the D2-D4.0 frozen schemas", () => {
-    expect(Object.keys(contractIds)).toHaveLength(12);
+    expect(Object.keys(contractIds)).toHaveLength(15);
     for (const id of Object.values(contractIds)) expect(validatorFor(id)).toBeTypeOf("function");
   });
 

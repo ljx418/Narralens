@@ -1,10 +1,12 @@
 import { spawn } from "node:child_process";
 import { createHash } from "node:crypto";
 import proposalSchema from "../../../contracts/proposal-bundle.schema.json" with { type: "json" };
-import type { ProjectResponse, ProposalRequest } from "../../contracts/types.js";
+import comparisonDraftSchema from "../../../contracts/proposal-comparison-draft.schema.json" with { type: "json" };
+import type { ProjectResponse, ProposalComparisonRequest, ProposalRequest, RunnerGenerationAudit } from "../../contracts/types.js";
 import { HttpError } from "../../host/api-error.js";
 
 export const cliProposalEnvelopeSchema = structuralSchema(proposalSchema);
+export const cliComparisonEnvelopeSchema = inlineProviderSchema(comparisonDraftSchema);
 
 export interface RunnerInput {
   project: Pick<ProjectResponse, "project_id" | "revision" | "frame_rate" | "frame_count">;
@@ -17,7 +19,19 @@ export interface RunnerInput {
   };
 }
 
-export interface RunnerOutput { value: unknown; raw_sha256: string; metadata: Record<string, unknown> }
+export interface ComparisonRunnerInput {
+  project: Pick<ProjectResponse, "project_id" | "revision" | "frame_rate" | "frame_count">;
+  request: ProposalComparisonRequest;
+  fixed_context: {
+    product: "Narralens";
+    output_contract: "narralens.proposal_comparison_draft@1.0";
+    upstream: "OpenMontage";
+    pipeline: "proposal-comparison-only";
+    allowed_source_refs: [];
+  };
+}
+
+export interface RunnerOutput { value: unknown; raw_sha256: string; metadata: Record<string, unknown>; audit: RunnerAudit }
 
 export interface RunnerOptions {
   executable?: string;
@@ -28,7 +42,7 @@ export interface RunnerOptions {
   onAudit?: (audit: RunnerAudit) => void;
 }
 
-export interface RunnerAudit { stdout_sha256: string; model_names: string[]; total_cost_usd: number | null; duration_ms: number | null; num_turns: number | null; service_tier: string | null }
+export interface RunnerAudit extends RunnerGenerationAudit {}
 
 export class ControlledAgentRunner {
   readonly executable: string;
@@ -48,11 +62,24 @@ export class ControlledAgentRunner {
   }
 
   async run(input: RunnerInput, signal?: AbortSignal): Promise<RunnerOutput> {
+    return await this.invoke(input, cliProposalEnvelopeSchema,
+      "Generate exactly one Narralens ProposalBundle JSON object from the JSON user prompt. Do not use tools or files. Required fields: schema_version='1.0'; kind='narralens.proposal_bundle'; project_id copied exactly; proposal_id matching proposal_[A-Za-z0-9_-]+; base_revision copied exactly; selection copied exactly; preserve copied exactly and in the same order; non-empty Chinese summary; segments as non-empty objects {id,duration_frames,intent,asset_id} whose positive integer durations exactly sum to selection end_frame_exclusive-start_frame; assets_needed array; source_refs array; cost={status:'unknown',currency:null,amount:null}; requires_materialization=true; renderable=false. Use null asset_id for unknown assets. No markdown or extra top-level fields.",
+      "INVALID_PROPOSAL", signal);
+  }
+
+  async runComparison(input: ComparisonRunnerInput, signal?: AbortSignal): Promise<RunnerOutput> {
+    return await this.invoke(input, cliComparisonEnvelopeSchema,
+      "Generate exactly one Narralens proposal comparison draft JSON object from the JSON user prompt. Do not use tools or files. Return exactly request.proposal_count genuinely distinct options. Copy no trusted IDs: the host assigns comparison_id and proposal_id. Use schema_version='1.0', kind='narralens.proposal_comparison_draft'. Each option must have a unique option_key and a unique strategy.kind; positive integer segment durations must exactly sum to the selected frame range. source_refs MUST be [] because fixed_context.allowed_source_refs is empty. assets_needed describes requirements only and must not create or download assets. requires_materialization=true and renderable=false. Write useful concise Chinese titles, rationales, summaries and intents. No markdown or extra fields.",
+      "INVALID_PROPOSAL_SET", signal);
+  }
+
+  private async invoke(input: RunnerInput | ComparisonRunnerInput, outputSchema: unknown, systemPrompt: string,
+    invalidCode: "INVALID_PROPOSAL" | "INVALID_PROPOSAL_SET", signal?: AbortSignal): Promise<RunnerOutput> {
     const args = [...this.prefixArgs,
       "--print", "--safe-mode", "--permission-mode", "plan", "--tools", "",
       "--disable-slash-commands", "--no-session-persistence", "--output-format", "json",
-      "--json-schema", JSON.stringify(cliProposalEnvelopeSchema),
-      "--append-system-prompt", "Generate exactly one Narralens ProposalBundle JSON object from the JSON user prompt. Do not use tools or files. Required fields: schema_version='1.0'; kind='narralens.proposal_bundle'; project_id copied exactly; proposal_id matching proposal_[A-Za-z0-9_-]+; base_revision copied exactly; selection copied exactly; preserve copied exactly and in the same order; non-empty Chinese summary; segments as non-empty objects {id,duration_frames,intent,asset_id} whose positive integer durations exactly sum to selection end_frame_exclusive-start_frame; assets_needed array; source_refs array; cost={status:'unknown',currency:null,amount:null}; requires_materialization=true; renderable=false. Use null asset_id for unknown assets. No markdown or extra top-level fields.",
+      "--json-schema", JSON.stringify(outputSchema),
+      "--append-system-prompt", systemPrompt,
     ];
     const stdin = `${JSON.stringify(input)}\n`;
     return await new Promise<RunnerOutput>((resolvePromise, reject) => {
@@ -94,7 +121,7 @@ export class ControlledAgentRunner {
         if (settled) return;
         clearTimeout(timer);
         signal?.removeEventListener("abort", abort);
-        if (killedForSize) return finishError(new HttpError(422, "INVALID_PROPOSAL", "Runner output exceeded 1 MiB"));
+        if (killedForSize) return finishError(new HttpError(422, invalidCode, "Runner output exceeded 1 MiB"));
         const errorText = Buffer.concat(stderr).toString("utf8");
         if (code !== 0) {
           const stdoutText = Buffer.concat(stdout).toString("utf8");
@@ -105,31 +132,65 @@ export class ControlledAgentRunner {
         }
         let wrapper: unknown;
         try { wrapper = JSON.parse(Buffer.concat(stdout).toString("utf8")); }
-        catch { return finishError(new HttpError(422, "INVALID_PROPOSAL", "Runner stdout was not a single JSON value")); }
-        if (!wrapper || typeof wrapper !== "object") return finishError(new HttpError(422, "INVALID_PROPOSAL", "Runner JSON wrapper was invalid"));
+        catch { return finishError(new HttpError(422, invalidCode, "Runner stdout was not a single JSON value")); }
+        if (!wrapper || typeof wrapper !== "object") return finishError(new HttpError(422, invalidCode, "Runner JSON wrapper was invalid"));
         const record = wrapper as Record<string, unknown>;
         const value = record.structured_output;
-        if (!value || typeof value !== "object" || Array.isArray(value)) return finishError(new HttpError(422, "INVALID_PROPOSAL", "Runner did not return a structured_output object"));
+        if (!value || typeof value !== "object" || Array.isArray(value)) return finishError(new HttpError(422, invalidCode, "Runner did not return a structured_output object"));
         settled = true;
         const raw = Buffer.concat(stdout);
         const metadata = Object.fromEntries(Object.entries(record).filter(([key]) => !["structured_output", "result"].includes(key)));
-        this.onAudit?.({
+        const audit: RunnerAudit = {
           stdout_sha256: createHash("sha256").update(raw).digest("hex"),
           model_names: record.modelUsage && typeof record.modelUsage === "object" ? Object.keys(record.modelUsage) : [],
           total_cost_usd: typeof record.total_cost_usd === "number" ? record.total_cost_usd : null,
           duration_ms: typeof record.duration_ms === "number" ? record.duration_ms : null,
           num_turns: typeof record.num_turns === "number" ? record.num_turns : null,
           service_tier: typeof record.service_tier === "string" ? record.service_tier : null,
-        });
+        };
+        this.onAudit?.(audit);
         resolvePromise({
           value,
           raw_sha256: createHash("sha256").update(raw).digest("hex"),
           metadata,
+          audit,
         });
       });
       child.stdin.end(stdin);
     });
   }
+}
+
+/** Resolve local $defs references while preserving validation constraints accepted by the provider. */
+export function inlineProviderSchema(value: unknown): unknown {
+  if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error("Provider schema root must be an object");
+  const root = value as Record<string, unknown>;
+  const defs = root.$defs && typeof root.$defs === "object" && !Array.isArray(root.$defs)
+    ? root.$defs as Record<string, unknown> : {};
+  const walk = (node: unknown, stack: string[]): unknown => {
+    if (Array.isArray(node)) return node.map((item) => walk(item, stack));
+    if (!node || typeof node !== "object") return node;
+    const source = node as Record<string, unknown>;
+    if (typeof source.$ref === "string") {
+      const match = /^#\/\$defs\/([^/]+)$/.exec(source.$ref);
+      if (!match) throw new Error(`Unsupported provider schema reference: ${source.$ref}`);
+      const name = decodeURIComponent(match[1]!.replace(/~1/g, "/").replace(/~0/g, "~"));
+      if (!(name in defs)) throw new Error(`Unknown provider schema definition: ${name}`);
+      if (stack.includes(name)) throw new Error(`Recursive provider schema definition: ${name}`);
+      const resolved = walk(defs[name], [...stack, name]);
+      const siblings = Object.fromEntries(Object.entries(source).filter(([key]) => key !== "$ref").map(([key, item]) => [key, walk(item, stack)]));
+      return Object.keys(siblings).length ? { allOf: [resolved], ...siblings } : resolved;
+    }
+    const result = Object.fromEntries(Object.entries(source)
+      .filter(([key]) => !["$schema", "$id", "$defs"].includes(key))
+      .map(([key, item]) => [key, walk(item, stack)]));
+    if (!("type" in result)) {
+      if ("const" in source) result.type = jsonType(source.const);
+      else if (Array.isArray(source.enum)) result.type = [...new Set(source.enum.map(jsonType))];
+    }
+    return result;
+  };
+  return walk(root, []);
 }
 
 function sanitizeDiagnostic(value: string): string {

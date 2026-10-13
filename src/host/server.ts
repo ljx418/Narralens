@@ -4,10 +4,11 @@ import { stat } from "node:fs/promises";
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from "node:http";
 import { extname, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
-import { ControlledAgentRunner, type RunnerInput } from "../adapters/openmontage/controlled-agent-runner.js";
+import { ControlledAgentRunner, type ComparisonRunnerInput } from "../adapters/openmontage/controlled-agent-runner.js";
 import { ProposalAdapter } from "../adapters/openmontage/proposal-adapter.js";
-import { validateEditRequest, validateProposalRequest } from "../contracts/validator.js";
-import type { ApiError, ProjectResponse, ProposalRequest } from "../contracts/types.js";
+import { ProposalComparisonAdapter } from "../adapters/openmontage/proposal-comparison-adapter.js";
+import { validateEditRequest, validateProposalComparisonRequest } from "../contracts/validator.js";
+import type { ApiError, ProjectResponse, ProposalComparisonRequest } from "../contracts/types.js";
 import { HttpError, normalizeError } from "./api-error.js";
 import { JobStore } from "./job-store.js";
 import { ProjectCatalog } from "./projects/project-catalog.js";
@@ -23,6 +24,7 @@ interface HostDependencies {
   jobs?: JobStore;
   runner?: ControlledAgentRunner;
   proposals?: ProposalAdapter;
+  comparisons?: ProposalComparisonAdapter;
   writes?: ProjectWriteActor;
   revisionStore?: RevisionStore;
   sessionTtlMs?: number;
@@ -33,10 +35,12 @@ export class NarralensHost {
   readonly jobs: JobStore;
   readonly runner: ControlledAgentRunner;
   readonly proposals: ProposalAdapter;
+  readonly comparisons: ProposalComparisonAdapter;
   readonly revisions: RevisionStore;
   readonly writes: ProjectWriteActor;
   readonly sessionToken = randomBytes(32).toString("base64url");
   readonly sessionExpiresAt: Date;
+  readonly diagnostics = { write_actor_execute_count: 0 };
   readonly #controllers = new Map<string, AbortController>();
   #server: Server | undefined;
 
@@ -45,6 +49,7 @@ export class NarralensHost {
     this.jobs = dependencies.jobs ?? new JobStore();
     this.runner = dependencies.runner ?? new ControlledAgentRunner({ cwd: projectRoot });
     this.proposals = dependencies.proposals ?? new ProposalAdapter(resolve(projectRoot, "var/proposals"));
+    this.comparisons = dependencies.comparisons ?? new ProposalComparisonAdapter(resolve(projectRoot, "var/proposal-comparisons"));
     this.revisions = dependencies.revisionStore ?? new RevisionStore();
     this.writes = dependencies.writes ?? new ProjectWriteActor(this.catalog, this.revisions);
     this.sessionExpiresAt = new Date(Date.now() + (dependencies.sessionTtlMs ?? 3_600_000));
@@ -53,6 +58,7 @@ export class NarralensHost {
   async listen(port = 4173): Promise<number> {
     if (this.#server) throw new Error("HOST_ALREADY_LISTENING");
     await this.writes.recoverIncomplete();
+    await this.comparisons.cleanupStaleTemporaryFiles();
     this.#server = createServer((request, response) => { void this.#handle(request, response); });
     await new Promise<void>((resolvePromise, reject) => {
       this.#server!.once("error", reject);
@@ -106,6 +112,13 @@ export class NarralensHost {
       if (request.method === "POST" && match?.[1]) return this.#cancel(match[1], response);
       match = url.pathname.match(/^\/api\/proposals\/([A-Za-z0-9_-]+)$/);
       if (request.method === "GET" && match?.[1]) return json(response, 200, await this.proposals.read(match[1]));
+      match = url.pathname.match(/^\/api\/proposal-comparisons\/([^/]+)$/);
+      if (request.method === "GET" && match?.[1]) {
+        const comparison = await this.comparisons.read(match[1]);
+        const current = await this.writes.projectState(comparison.project_id);
+        if (current.revision !== comparison.base_revision) throw new HttpError(409, "REVISION_CONFLICT", "Project revision has changed");
+        return json(response, 200, comparison);
+      }
       throw new HttpError(404, "NOT_FOUND", "Route not found");
     } catch (error) {
       const normalized = normalizeError(error);
@@ -123,7 +136,7 @@ export class NarralensHost {
   async #createProposal(projectId: string, request: IncomingMessage, response: ServerResponse): Promise<void> {
     const project = await this.#project(projectId);
     const body = await readJson(request);
-    const result = validateProposalRequest(body);
+    const result = validateProposalComparisonRequest(body);
     if (!result.ok) throw new HttpError(400, "INVALID_REQUEST", "Proposal request is invalid", { errors: result.errors });
     if (result.value.base_revision !== project.revision) throw new HttpError(409, "REVISION_CONFLICT", "Project revision has changed");
     if (!project.shots.some((shot) => shot.shot_id === result.value.selection.shot_id && shot.start_frame === result.value.selection.start_frame && shot.end_frame_exclusive === result.value.selection.end_frame_exclusive)) {
@@ -140,6 +153,7 @@ export class NarralensHost {
     const body = await readJson(request);
     const result = validateEditRequest(body);
     if (!result.ok) throw new HttpError(422, "UNSUPPORTED_EDIT", "Edit request is invalid", { errors: result.errors });
+    this.diagnostics.write_actor_execute_count += 1;
     json(response, 200, await this.writes.execute(projectId, result.value));
   }
 
@@ -157,18 +171,20 @@ export class NarralensHost {
       ...(availableAssets ? { available_visual_assets: availableAssets } : {}) };
   }
 
-  async #runJob(jobId: string, project: Awaited<ReturnType<ProjectCatalog["read"]>>, request: ProposalRequest, controller: AbortController): Promise<void> {
+  async #runJob(jobId: string, project: ProjectResponse, request: ProposalComparisonRequest, controller: AbortController): Promise<void> {
     try {
       this.jobs.transition(jobId, "running", { message: "Provider request started" });
-      const input: RunnerInput = { project: { project_id: project.project_id, revision: project.revision, frame_rate: project.frame_rate, frame_count: project.frame_count }, request,
-        fixed_context: { product: "Narralens", output_contract: "narralens.proposal_bundle@1.0", upstream: "OpenMontage", pipeline: "proposal-only" } };
-      const output = await this.runner.run(input, controller.signal);
-      const proposal = this.proposals.validate(output.value, project.project_id, request);
-      await this.proposals.save(proposal);
+      const input: ComparisonRunnerInput = { project: { project_id: project.project_id, revision: project.revision, frame_rate: project.frame_rate, frame_count: project.frame_count }, request,
+        fixed_context: { product: "Narralens", output_contract: "narralens.proposal_comparison_draft@1.0", upstream: "OpenMontage", pipeline: "proposal-comparison-only", allowed_source_refs: [] } };
+      const output = await this.runner.runComparison(input, controller.signal);
+      const comparison = this.comparisons.build(output.value, project.project_id, request, output.audit);
+      const currentRevision = (await this.writes.projectState(project.project_id)).revision;
+      if (currentRevision !== request.base_revision) throw new HttpError(409, "REVISION_CONFLICT", "Project revision has changed");
+      await this.comparisons.save(comparison);
       const current = this.jobs.get(jobId);
       this.jobs.transition(jobId, current?.state === "cancel_requested" ? "completed_after_cancel" : "succeeded", {
-        proposal_id: proposal.proposal_id,
-        message: `Proposal validated; runner stdout sha256 ${output.raw_sha256}`,
+        comparison_id: comparison.comparison_id,
+        message: `Proposal comparison validated; runner stdout sha256 ${output.raw_sha256}`,
       });
     } catch (error) {
       const current = this.jobs.get(jobId);

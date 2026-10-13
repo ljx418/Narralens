@@ -7,18 +7,22 @@ import jobResponseSchema from "../../contracts/job-response.schema.json" with { 
 import projectResponseSchema from "../../contracts/project-response.schema.json" with { type: "json" };
 import proposalBundleSchema from "../../contracts/proposal-bundle.schema.json" with { type: "json" };
 import proposalRequestSchema from "../../contracts/proposal-request.schema.json" with { type: "json" };
+import proposalComparisonRequestSchema from "../../contracts/proposal-comparison-request.schema.json" with { type: "json" };
+import proposalComparisonDraftSchema from "../../contracts/proposal-comparison-draft.schema.json" with { type: "json" };
+import proposalComparisonSchema from "../../contracts/proposal-comparison.schema.json" with { type: "json" };
 import sessionResponseSchema from "../../contracts/session-response.schema.json" with { type: "json" };
 import editOperationSchema from "../../contracts/edit-operation.schema.json" with { type: "json" };
 import editRequestSchema from "../../contracts/edit-request.schema.json" with { type: "json" };
 import editResponseSchema from "../../contracts/edit-response.schema.json" with { type: "json" };
 import assetManifestSchema from "../../contracts/asset-manifest.schema.json" with { type: "json" };
-import type { EditRequest, ProposalBundle, ProposalRequest } from "./types.js";
+import type { EditRequest, ProposalBundle, ProposalComparison, ProposalComparisonDraft, ProposalComparisonRequest, ProposalRequest } from "./types.js";
 
 const ajv = new Ajv2020({ allErrors: true, strict: true });
 addFormats(ajv);
 for (const schema of [apiErrorSchema, cancelResponseSchema, jobEventSchema, jobResponseSchema,
   projectResponseSchema, proposalBundleSchema, proposalRequestSchema, sessionResponseSchema,
-  editOperationSchema, editRequestSchema, editResponseSchema, assetManifestSchema]) {
+  editOperationSchema, editRequestSchema, editResponseSchema, assetManifestSchema,
+  proposalComparisonRequestSchema, proposalComparisonDraftSchema, proposalComparisonSchema]) {
   ajv.addSchema(schema);
 }
 
@@ -30,6 +34,9 @@ export const contractIds = {
   projectResponse: projectResponseSchema.$id,
   proposalBundle: proposalBundleSchema.$id,
   proposalRequest: proposalRequestSchema.$id,
+  proposalComparisonRequest: proposalComparisonRequestSchema.$id,
+  proposalComparisonDraft: proposalComparisonDraftSchema.$id,
+  proposalComparison: proposalComparisonSchema.$id,
   sessionResponse: sessionResponseSchema.$id,
   editOperation: editOperationSchema.$id,
   editRequest: editRequestSchema.$id,
@@ -54,6 +61,29 @@ export function validateProposalRequest(value: unknown): { ok: true; value: Prop
   const request = value as ProposalRequest;
   const errors = rangeErrors(request.selection);
   return errors.length ? { ok: false, errors } : { ok: true, value: request };
+}
+
+export function validateProposalComparisonRequest(value: unknown): { ok: true; value: ProposalComparisonRequest } | { ok: false; errors: string[] } {
+  const validate = validatorFor(contractIds.proposalComparisonRequest);
+  if (!validate(value)) return { ok: false, errors: formatErrors(validate.errors) };
+  const request = value as ProposalComparisonRequest;
+  const errors = rangeErrors(request.selection);
+  return errors.length ? { ok: false, errors } : { ok: true, value: request };
+}
+
+export function validateProposalComparisonDraft(value: unknown): { ok: true; value: ProposalComparisonDraft } | { ok: false; errors: string[] } {
+  const validate = validatorFor(contractIds.proposalComparisonDraft);
+  if (!validate(value)) return { ok: false, errors: formatErrors(validate.errors) };
+  return { ok: true, value: value as ProposalComparisonDraft };
+}
+
+export function validateProposalComparison(value: unknown): { ok: true; value: ProposalComparison } | { ok: false; errors: string[] } {
+  const validate = validatorFor(contractIds.proposalComparison);
+  if (!validate(value)) return { ok: false, errors: formatErrors(validate.errors) };
+  const comparison = value as ProposalComparison;
+  const errors = rangeErrors(comparison.selection);
+  if (comparison.proposal_count !== comparison.proposals.length) errors.push("proposal_count must equal proposals length");
+  return errors.length ? { ok: false, errors } : { ok: true, value: comparison };
 }
 
 export function validateEditRequest(value: unknown): { ok: true; value: EditRequest } | { ok: false; errors: string[] } {

@@ -10,6 +10,7 @@
     "at": { "type": "string", "format": "date-time" },
     "message": { "type": "string", "maxLength": 500 },
     "proposal_id": { "type": "string", "minLength": 1 },
+    "comparison_id": { "type": "string", "pattern": "^comparison_[A-Za-z0-9_-]+$" },
     "error": { "$ref": "api-error.schema.json" }
   }
 }

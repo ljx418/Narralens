@@ -1,4 +1,4 @@
-import type { EditRequest, EditResponse, JobEvent, JobResponse, ProjectResponse, ProposalBundle, ProposalRequest } from "../../../contracts/types.js";
+import type { EditRequest, EditResponse, JobEvent, JobResponse, ProjectResponse, ProposalBundle, ProposalComparison, ProposalComparisonRequest } from "../../../contracts/types.js";
 
 export class HostApiError extends Error {
   constructor(readonly status: number, readonly code: string, message: string) { super(message); }
@@ -18,9 +18,10 @@ export class HostApiClient {
   project(projectId: string): Promise<ProjectResponse> { return this.#get(`/api/projects/${projectId}`); }
   job(jobId: string): Promise<JobResponse> { return this.#get(`/api/jobs/${jobId}`); }
   proposal(proposalId: string): Promise<ProposalBundle> { return this.#get(`/api/proposals/${proposalId}`); }
+  comparison(comparisonId: string): Promise<ProposalComparison> { return this.#get(`/api/proposal-comparisons/${comparisonId}`); }
   events(jobId: string, after: number): Promise<JobEvent[]> { return this.#getSse(`/api/jobs/${jobId}/events?after=${after}`); }
 
-  async createProposal(projectId: string, request: ProposalRequest): Promise<JobResponse> {
+  async createProposal(projectId: string, request: ProposalComparisonRequest): Promise<JobResponse> {
     return this.#request(`/api/projects/${projectId}/proposals`, { method: "POST", body: JSON.stringify(request), headers: { "content-type": "application/json" } });
   }
 

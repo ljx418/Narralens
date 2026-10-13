@@ -38,7 +38,7 @@ export class JobStore {
     };
   }
 
-  transition(jobId: string, state: JobState, extra?: Pick<JobEvent, "message" | "proposal_id" | "error">, now = new Date()): JobResponse {
+  transition(jobId: string, state: JobState, extra?: Pick<JobEvent, "message" | "proposal_id" | "comparison_id" | "error">, now = new Date()): JobResponse {
     const job = this.#require(jobId);
     if (terminal.has(job.snapshot.state)) throw new Error("JOB_TERMINAL");
     const at = now.toISOString();
@@ -46,6 +46,7 @@ export class JobStore {
     job.events.push(event);
     job.snapshot = { ...job.snapshot, state, updated_at: at,
       ...(extra?.proposal_id ? { proposal_id: extra.proposal_id } : {}),
+      ...(extra?.comparison_id ? { comparison_id: extra.comparison_id } : {}),
       ...(extra?.error ? { error: extra.error } : {}) };
     for (const listener of this.#listeners.get(jobId) ?? []) listener(structuredClone(event));
     return structuredClone(job.snapshot);

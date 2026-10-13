@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://narralens.local/schemas/proposal-comparison-draft.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "kind", "proposals"],
+  "properties": {
+    "schema_version": { "const": "1.0" },
+    "kind": { "const": "narralens.proposal_comparison_draft" },
+    "proposals": { "type": "array", "minItems": 3, "maxItems": 6, "items": { "$ref": "#/$defs/proposalDraft" } }
+  },
+  "$defs": {
+    "proposalDraft": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["option_key", "title", "strategy", "summary", "segments", "assets_needed", "source_refs", "requires_materialization", "renderable"],
+      "properties": {
+        "option_key": { "type": "string", "pattern": "^[a-z][a-z0-9_-]{0,31}$" },
+        "title": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "strategy": {
+          "type": "object", "additionalProperties": false, "required": ["kind", "rationale"],
+          "properties": {
+            "kind": { "enum": ["chronology", "contrast", "evidence-led", "map-led", "quote-led", "metaphor-led"] },
+            "rationale": { "type": "string", "minLength": 1, "maxLength": 400 }
+          }
+        },
+        "summary": { "type": "string", "minLength": 1, "maxLength": 600 },
+        "segments": {
+          "type": "array", "minItems": 1, "maxItems": 12,
+          "items": {
+            "type": "object", "additionalProperties": false,
+            "required": ["segment_id", "duration_frames", "role", "intent", "asset_requirement_ids"],
+            "properties": {
+              "segment_id": { "type": "string", "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$" },
+              "duration_frames": { "type": "integer", "minimum": 1 },
+              "role": { "enum": ["anchor", "context", "evidence", "contrast", "transition", "conclusion"] },
+              "intent": { "type": "string", "minLength": 1, "maxLength": 500 },
+              "asset_requirement_ids": { "type": "array", "uniqueItems": true, "items": { "type": "string", "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$" } }
+            }
+          }
+        },
+        "assets_needed": {
+          "type": "array", "maxItems": 24,
+          "items": {
+            "type": "object", "additionalProperties": false,
+            "required": ["requirement_id", "kind", "description", "duration_frames", "rights_requirement"],
+            "properties": {
+              "requirement_id": { "type": "string", "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$" },
+              "kind": { "enum": ["video", "image", "graphic", "map", "data-visualization"] },
+              "description": { "type": "string", "minLength": 1, "maxLength": 500 },
+              "duration_frames": { "type": "integer", "minimum": 1 },
+              "rights_requirement": { "const": "cleared" }
+            }
+          }
+        },
+        "source_refs": {
+          "type": "array", "maxItems": 24,
+          "items": {
+            "type": "object", "additionalProperties": false, "required": ["ref_id", "kind", "label"],
+            "properties": {
+              "ref_id": { "type": "string", "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$" },
+              "kind": { "enum": ["project", "user-provided", "research"] },
+              "label": { "type": "string", "minLength": 1, "maxLength": 200 },
+              "claim": { "type": "string", "minLength": 1, "maxLength": 500 }
+            }
+          }
+        },
+        "requires_materialization": { "const": true },
+        "renderable": { "const": false }
+      }
+    }
+  }
+}
