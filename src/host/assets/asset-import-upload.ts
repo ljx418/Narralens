@@ -31,7 +31,8 @@ export interface StagedAssetUpload {
 export async function receiveAssetUpload(request: IncomingMessage, projectRoot: string,
   limits: AssetUploadLimits): Promise<StagedAssetUpload> {
   const totalLimit = limits.totalBytes ?? limits.fileBytes + transportOverhead;
-  if (!Number.isSafeInteger(limits.fileBytes) || limits.fileBytes < 1 || !Number.isSafeInteger(totalLimit)
+  if (!Number.isSafeInteger(limits.fileBytes) || limits.fileBytes < 1 || limits.fileBytes >= Number.MAX_SAFE_INTEGER
+    || !Number.isSafeInteger(totalLimit)
     || totalLimit < limits.fileBytes) throw new Error("INVALID_ASSET_UPLOAD_LIMITS");
   validateLengthHeaders(request, totalLimit);
   const root = await realpath(projectRoot);
@@ -55,7 +56,7 @@ async function parseMultipart(request: IncomingMessage, root: string, stagingRoo
   let parser: ReturnType<typeof Busboy>;
   try {
     parser = Busboy({ headers: request.headers, limits: {
-      files: 1, fields: 1, parts: 3, fileSize: fileLimit, fieldSize: metadataLimit,
+      files: 1, fields: 1, parts: 3, fileSize: fileLimit + 1, fieldSize: metadataLimit + 1,
       fieldNameSize: 32, headerPairs: 32,
     } });
   } catch {
@@ -99,8 +100,10 @@ async function parseMultipart(request: IncomingMessage, root: string, stagingRoo
     parser.once("filesLimit", () => fail(new HttpError(400, "INVALID_REQUEST", "Asset upload has too many files")));
     parser.once("fieldsLimit", () => fail(new HttpError(400, "INVALID_REQUEST", "Asset upload has too many fields")));
     parser.on("field", (name, value, info) => {
-      if (name !== "metadata" || metadataText !== undefined || info.valueTruncated || info.mimeType !== "application/json") {
-        fail(new HttpError(info.valueTruncated ? 413 : 400, "INVALID_REQUEST", "Expected exactly one bounded metadata field"));
+      if (name !== "metadata" || metadataText !== undefined || info.valueTruncated
+        || Buffer.byteLength(value, "utf8") > metadataLimit || info.mimeType !== "application/json") {
+        fail(new HttpError(info.valueTruncated || Buffer.byteLength(value, "utf8") > metadataLimit ? 413 : 400,
+          "INVALID_REQUEST", "Expected exactly one bounded metadata field"));
         return;
       }
       metadataText = value;

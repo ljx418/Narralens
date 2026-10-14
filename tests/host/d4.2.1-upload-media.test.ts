@@ -29,6 +29,10 @@ describe("D4.2.1 streaming asset upload", () => {
       idempotencyKey: "upload:test:1",
     });
     expect(await readdir(join(root, ".narralens/staging"))).toEqual([]);
+    const exactRoot = await mkdtemp(join(tmpdir(), "narralens-upload-exact-limit-"));
+    const exact = await postMultipart(exactRoot, multipartBody("exact-limit-boundary", Buffer.from("mp4")),
+      "exact-limit-boundary", 3);
+    expect(exact.status).toBe(200);
   });
 
   it("rejects unknown or duplicate parts, incorrect part MIME and file overflow without leaving staging", async () => {
