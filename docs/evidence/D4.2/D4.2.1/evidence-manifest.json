@@ -1,11 +1,12 @@
 {
   "format": "narralens.d421-substage-evidence@1",
   "generated_at": "2026-10-14T14:45:00+08:00",
-  "stage": "D4.2.1 Hypit manifest lease and expected-SHA adapter",
+  "stage": "D4.2.1 implementation evidence through Registry and import journal foundation",
   "status": "substage-passed-d4.2.1-remains-in-progress",
   "repositories": {
     "narralens_base_commit": "41fbbd504660df64c9270c0ededb24f89f8ea464",
     "narralens_implementation_commit": "ffbcc0175aa3f5b147b90c2e4782d8a3774459a2",
+    "registry_journal_implementation_commit": "a12a4e40e8d513681168e9dc4487536887d064b1",
     "hypit_commit": "6fdd8c0f02c17b9970aee6deb4550a70e9d57acf",
     "hypit_branch": "narralens/d4-typed-media-mutation",
     "worktree_note": "This manifest and status synchronization are finalized by the documentation commit after the implementation commit."
@@ -14,7 +15,7 @@
     "narralens_command": "corepack pnpm check",
     "narralens_exit_code": 0,
     "narralens_test_files": 12,
-    "narralens_tests_passed": 91,
+    "narralens_tests_passed": 100,
     "hypit_studio_tests_passed": 94,
     "hypit_studio_tests_failed": 0,
     "hypit_typescript": "passed",
@@ -46,11 +47,17 @@
     "must_fix_count": 0,
     "should_fix_count": 0
   },
+  "registry_journal_external_review": {
+    "result": "PASS",
+    "allow_next_substage": true,
+    "must_fix_count": 0,
+    "should_fix_count": 0,
+    "targeted_tests_passed": 9
+  },
   "artifact_sha256": {
     "artifacts/d4.0-real-media-regression.json": "5404457a4c4dad1a99d26ec491e44ce74a584f53cf0cdab79824f4d124b88cd3"
   },
   "remaining_scope": [
-    "AssetRegistry v2 and persistent import journal",
     "AssetImportService and strict multipart GET/POST routes",
     "fault injection, restart recovery and real import evidence",
     "HostApiClient and accessible import/inventory UI",

@@ -1,6 +1,6 @@
 # 叙镜架构设计 v1.0
 
-文档状态：目标架构已冻结到语义与代码实体层；Gate D1–D3、D4.0 与 D4.1 已通过。D4.1 多提案比较已形成生产契约、Runner、Adapter/原子暂存、Host/Job、UI 和真实 Runner/浏览器/NOWRITE 证据，并通过内外实现审查；D4.2 总体方向和子阶段边界已通过内外文档审查。D4.2.1 正在实现，运行时合同/错误码/共享队列与 Hypit manifest lease/Adapter expected SHA 已通过，fork 固定为 `6fdd8c0f02c17b9970aee6deb4550a70e9d57acf`；import journal/service/routes/UI 尚未完成。`docs/architecture/v1-target-system.architecture.html` 是目标系统架构视图，`architecture/d4.2-materialize-adopt.architecture.html` 是 D4.2 全景视图，`architecture/d4.2.1-import-transaction.architecture.html` 是导入事务专项视图，`Narralens-V1-Development-GAP.drawio` 是开发与验收审查视图。
+文档状态：目标架构已冻结到语义与代码实体层；Gate D1–D3、D4.0 与 D4.1 已通过。D4.2 总体方向和子阶段边界已通过内外文档审查。D4.2.1 正在实现，运行时合同/共享队列、Hypit lease/expected SHA、AssetRegistry @1/@2 canonical transaction 与 import journal 已通过各自门禁；fork 固定为 `6fdd8c0f02c17b9970aee6deb4550a70e9d57acf`。ImportService、multipart/routes/UI 尚未完成。`docs/architecture/v1-target-system.architecture.html` 是目标系统架构视图，`architecture/d4.2-materialize-adopt.architecture.html` 是 D4.2 全景视图，`architecture/d4.2.1-import-transaction.architecture.html` 是导入事务专项视图，`Narralens-V1-Development-GAP.drawio` 是开发与验收审查视图。
 
 ## 1. 零层架构
 

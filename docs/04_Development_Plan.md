@@ -1,6 +1,6 @@
 # 叙镜开发计划 v1.0
 
-状态：实际开发已批准；Gate D1、D2、D3、D4.0、D4.1 已通过。D4.1 多提案比较已完成生产实现、真实验收与内外实现审查；D4.2 总体文档及子阶段边界已通过内外审。D4.2.1 已进入实现，合同/错误码/共享队列与 Hypit manifest lease/Adapter expected SHA 子阶段均已通过；fork 固定到 `6fdd8c0f02c17b9970aee6deb4550a70e9d57acf`。import journal/service/routes/UI 尚未完成。总览见 `Narralens-V1-Development-GAP.drawio` 第 5 页，需求追踪见 `11_V1_Traceability.md`。
+状态：实际开发已批准；Gate D1、D2、D3、D4.0、D4.1 已通过。D4.2 总体文档及子阶段边界已通过内外审。D4.2.1 的合同/共享队列、Hypit lease/expected SHA、AssetRegistry/import journal 三个子阶段均已通过，当前 100/100；下一步是 ImportService 与严格 multipart/routes，UI 尚未完成。总览见 `Narralens-V1-Development-GAP.drawio` 第 5 页，需求追踪见 `11_V1_Traceability.md`。
 
 ## 当前前置阶段 — V1 前端体验冻结（文档中）
 
