@@ -1,0 +1,318 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Narralens D4.2 素材实体化与方案采用目标架构",
+    "locale": "zh-CN",
+    "quality_profile": "showcase",
+    "viewBox": [1320, 760],
+    "repository": {
+      "url": "https://github.com/ljx418/Narralens",
+      "provider": "github",
+      "link_mode": "web",
+      "revision": "9f5d01bfdae614e4384214791c5cb6806dd08bd7"
+    },
+    "views": [
+      {
+        "id": "materialize-path",
+        "label": "本地实体化",
+        "focus": ["user", "materialize-ui", "host-api", "asset-import", "asset-registry", "renderer", "materialized-staging"],
+        "note": "本地 MP4 以流式方式导入；已清除素材按方案分段确定性合成为可追溯 composite，期间不写 Source。"
+      },
+      {
+        "id": "adopt-path",
+        "label": "类型化采用",
+        "focus": ["materialize-ui", "host-api", "write-actor", "asset-registry", "hypit-write", "hypit-source"],
+        "note": "采用只传 materialization ID；Actor 重验 revision、锁、manifest、资产和许可后复用 D4.0 media.replace。"
+      },
+      {
+        "id": "recovery-path",
+        "label": "失败与恢复",
+        "focus": ["write-actor", "revision-store", "hypit-write", "hypit-source"],
+        "note": "写入前失败不改 Source；写后验证失败补偿；结果不确定则 attention 并阻断后续写。"
+      }
+    ]
+  },
+  "components": [
+    {
+      "id": "user",
+      "type": "external",
+      "label": "零号用户",
+      "sublabel": "选择、导入、核对",
+      "pos": [25, 210],
+      "size": [160, 78]
+    },
+    {
+      "id": "materialize-ui",
+      "type": "frontend",
+      "label": "Materialize + Impact UI",
+      "sublabel": "逐段绑定、许可、采用前确认",
+      "tag": "D4.2 待新增",
+      "sources": [
+        {
+          "path": "src/app/director/NarralensApp.tsx",
+          "line": 1,
+          "label": "D4.1 ProposalCompare 当前基线"
+        }
+      ],
+      "pos": [235, 210],
+      "size": [200, 82]
+    },
+    {
+      "id": "host-api",
+      "type": "backend",
+      "label": "Local Host API",
+      "sublabel": "multipart / materialize / edits",
+      "tag": "需扩展",
+      "sources": [
+        {
+          "path": "src/host/server.ts",
+          "line": 35,
+          "label": "当前同源 API 编排入口"
+        }
+      ],
+      "pos": [490, 210],
+      "size": [180, 82]
+    },
+    {
+      "id": "asset-import",
+      "type": "backend",
+      "label": "AssetImportService",
+      "sublabel": "流式暂存、SHA、ffprobe、原子安装",
+      "tag": "D4.2 待新增",
+      "pos": [730, 95],
+      "size": [205, 82]
+    },
+    {
+      "id": "asset-registry",
+      "type": "database",
+      "label": "AssetRegistry + Manifest",
+      "sublabel": "bytes / 来源 / 许可 / manifest SHA",
+      "tag": "需扩展原子写",
+      "sources": [
+        {
+          "path": "src/host/projects/asset-registry.ts",
+          "line": 1,
+          "label": "D4.0 只读资产注册表基线"
+        }
+      ],
+      "pos": [1010, 95],
+      "size": [210, 82]
+    },
+    {
+      "id": "renderer",
+      "type": "backend",
+      "label": "MaterializeRenderer",
+      "sublabel": "确定性裁切/缩放/拼接 composite",
+      "tag": "D4.2 待新增",
+      "pos": [730, 330],
+      "size": [205, 82]
+    },
+    {
+      "id": "materialized-staging",
+      "type": "database",
+      "label": "Materialized Proposal",
+      "sublabel": "recipe / segment / composite 审计",
+      "tag": "D4.2 待新增",
+      "pos": [1010, 330],
+      "size": [210, 82]
+    },
+    {
+      "id": "write-actor",
+      "type": "backend",
+      "label": "ProjectWriteActor",
+      "sublabel": "串行、锁、幂等、journal、补偿",
+      "tag": "需扩展采用语义",
+      "sources": [
+        {
+          "path": "src/host/projects/project-write-actor.ts",
+          "line": 9,
+          "label": "D3/D4.0 已验证事务 Actor"
+        }
+      ],
+      "pos": [490, 500],
+      "size": [200, 82]
+    },
+    {
+      "id": "revision-store",
+      "type": "database",
+      "label": "RevisionStore + Journal",
+      "sublabel": "revision / journal / 恢复",
+      "tag": "需扩展 journal",
+      "sources": [
+        {
+          "path": "src/host/projects/revision-store.ts",
+          "line": 29,
+          "label": "当前 revision 与事务日志"
+        }
+      ],
+      "pos": [235, 500],
+      "size": [200, 82]
+    },
+    {
+      "id": "hypit-write",
+      "type": "backend",
+      "label": "HypitWriteAdapter",
+      "sublabel": "typed replace + manifest SHA",
+      "tag": "需窄扩展 manifest 重载",
+      "sources": [
+        {
+          "path": "src/adapters/hypit/hypit-write-adapter.ts",
+          "line": 43,
+          "label": "当前 typed media 写适配器"
+        }
+      ],
+      "pos": [770, 500],
+      "size": [195, 82]
+    },
+    {
+      "id": "hypit-source",
+      "type": "database",
+      "label": "Hypit Author Source + Run",
+      "sublabel": "唯一影片事实源；稳定 shot identity",
+      "tag": "仅 Actor 可写",
+      "pos": [1050, 500],
+      "size": [210, 82]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "security-group",
+      "label": "Narralens 本地同源与工程边界",
+      "wraps": ["materialize-ui", "host-api", "asset-import", "asset-registry", "renderer", "materialized-staging", "write-actor", "revision-store"]
+    },
+    {
+      "kind": "region",
+      "label": "唯一 Source 写入边界",
+      "wraps": ["write-actor", "hypit-write", "hypit-source"]
+    }
+  ],
+  "connections": [
+    {
+      "id": "user-flow",
+      "from": "user",
+      "to": "materialize-ui",
+      "label": "导入 / 绑定 / 确认",
+      "variant": "emphasis",
+      "labelDy": -33
+    },
+    {
+      "id": "ui-api",
+      "from": "materialize-ui",
+      "to": "host-api",
+      "label": "同源 session API",
+      "labelAt": [463, 206]
+    },
+    {
+      "id": "api-import",
+      "from": "host-api",
+      "to": "asset-import",
+      "label": "流式 multipart",
+      "fromSide": "right",
+      "toSide": "left",
+      "labelAt": [700, 191]
+    },
+    {
+      "id": "import-registry",
+      "from": "asset-import",
+      "to": "asset-registry",
+      "label": "原子安装 + manifest",
+      "variant": "security",
+      "labelAt": [973, 91]
+    },
+    {
+      "id": "api-renderer",
+      "from": "host-api",
+      "to": "renderer",
+      "label": "proposal + bindings",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "registry-renderer",
+      "from": "asset-registry",
+      "to": "renderer",
+      "label": "cleared inputs",
+      "variant": "security",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "renderer-record",
+      "from": "renderer",
+      "to": "materialized-staging",
+      "label": "composite + recipe",
+      "labelAt": [973, 426]
+    },
+    {
+      "id": "api-actor",
+      "from": "host-api",
+      "to": "write-actor",
+      "label": "materialization ID",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "actor-record",
+      "from": "materialized-staging",
+      "to": "write-actor",
+      "label": "重验 proposal / manifest",
+      "variant": "security",
+      "fromSide": "bottom",
+      "toSide": "right"
+    },
+    {
+      "id": "actor-journal",
+      "from": "write-actor",
+      "to": "revision-store",
+      "label": "prepare / commit / recover",
+      "variant": "dashed",
+      "labelAt": [463, 596]
+    },
+    {
+      "id": "actor-adapter",
+      "from": "write-actor",
+      "to": "hypit-write",
+      "label": "typed replace + SHA",
+      "variant": "emphasis",
+      "labelAt": [730, 596]
+    },
+    {
+      "id": "adapter-source",
+      "from": "hypit-write",
+      "to": "hypit-source",
+      "label": "preimage / patch / verify",
+      "variant": "security",
+      "labelAt": [1008, 596]
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "目标体验",
+      "items": [
+        "选中方案后逐段导入或绑定本地素材",
+        "许可、使用范围、影响和保持项在采用前可见",
+        "一次确认后真实预览刷新且 revision 只增加一次"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "硬边界",
+      "items": [
+        "无远程下载/生成；URI 只作 https 来源元数据",
+        "Materialize 只产 composite 和审计，不直接写 Source",
+        "所有 Source 写入只能经过 Actor + typed Hypit mutation"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "验收门限",
+      "items": [
+        "composite 精确帧数、边界抽样和真实构建通过",
+        "旁白、总时长、相邻镜头和稳定 shot identity 不变",
+        "409/422/423/失败补偿/重启恢复均有真实证据"
+      ]
+    }
+  ]
+}

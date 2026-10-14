@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://narralens.local/review/d4.2-asset-import-metadata.schema.json",
+  "$comment": "Transport envelope policy: multipart/form-data only; exactly one metadata JSON part and one file part; no other parts; streamed file limit defaults to 2147483648 bytes and may only be reduced by Host startup configuration; parser violations are rejected before this metadata schema is evaluated.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["idempotency_key", "source", "license"],
+  "properties": {
+    "idempotency_key": { "type": "string", "minLength": 8, "maxLength": 128, "pattern": "^[A-Za-z0-9._:-]+$" },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "label"],
+      "properties": {
+        "kind": { "enum": ["owned", "generated", "licensed"] },
+        "label": { "type": "string", "minLength": 1, "maxLength": 2048 },
+        "uri": { "type": "string", "format": "uri", "maxLength": 2048, "pattern": "^https?://" }
+      }
+    },
+    "license": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "label", "commercial_use"],
+      "properties": {
+        "status": { "enum": ["cleared", "restricted", "unknown"] },
+        "label": { "type": "string", "minLength": 1, "maxLength": 2048 },
+        "commercial_use": { "type": "boolean" }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": { "required": ["license"], "properties": { "license": { "type": "object", "required": ["status"], "properties": { "status": { "const": "cleared" } } } } },
+      "then": { "properties": { "license": { "type": "object", "required": ["commercial_use"], "properties": { "commercial_use": { "const": true } } } } }
+    }
+  ]
+}

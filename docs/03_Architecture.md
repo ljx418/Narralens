@@ -1,6 +1,6 @@
 # 叙镜架构设计 v1.0
 
-文档状态：目标架构已冻结到语义与代码实体层；Gate D1–D3、D4.0 与 D4.1 已通过。D4.0 路线 A 已产生生产源码、真实事务/构建/浏览器证据并通过内外实现审查，Hypit 薄 fork固定为 `ljx418/hypit@437563f977541002066e6ee961f83a67cbebd3c2`。D4.1 多提案比较已形成生产契约、Runner、Adapter/原子暂存、Host/Job、UI 和真实 Runner/浏览器/NOWRITE 证据，并通过内外实现审查；D4.2 尚未开始。`docs/architecture/v1-target-system.architecture.html` 是目标系统架构视图，`Narralens-V1-Development-GAP.drawio` 是开发与验收审查视图。
+文档状态：目标架构已冻结到语义与代码实体层；Gate D1–D3、D4.0 与 D4.1 已通过。D4.0 路线 A 已产生生产源码、真实事务/构建/浏览器证据并通过内外实现审查，Hypit 薄 fork固定为 `ljx418/hypit@437563f977541002066e6ee961f83a67cbebd3c2`。D4.1 多提案比较已形成生产契约、Runner、Adapter/原子暂存、Host/Job、UI 和真实 Runner/浏览器/NOWRITE 证据，并通过内外实现审查；D4.2 总体方向和修订后的子阶段边界已通过内外文档审查，允许进入 D4.2.1，生产代码尚未开始。`docs/architecture/v1-target-system.architecture.html` 是目标系统架构视图，`architecture/d4.2-materialize-adopt.architecture.html` 是 D4.2 专项视图，`Narralens-V1-Development-GAP.drawio` 是开发与验收审查视图。
 
 ## 1. 零层架构
 
@@ -90,11 +90,14 @@ narralens/
 | `HostApiClient` | `src/app/director/api/` | UI ↔ Local Host | comparison 读取与原有 projects/jobs/events/proposals/edit 均已实现 | D4.1 HTTP/UI tests |
 | `LocalHost API` | `src/host/server.ts` | UI ↔ actors/adapters | D4.1 comparison job、读取、revision 复核与 NOWRITE diagnostics 已实现 | D4.1 contract/HTTP/NOWRITE tests |
 | `ProposalComparisonAdapter` | `src/adapters/openmontage/` | Runner draft → Host 绑定 → atomic staging | D4.1 已实现 schema、GCD 语义差异、空来源白名单和全有或全无暂存 | D4.1 adapter/真实证据 |
+| `AssetImportService` | `src/host/assets/` | multipart → staging → ffprobe → AssetRegistry | D4.2 docs-only：流式导入，不接收本机绝对路径 | D4.2.1 文档门禁通过，待实现 |
+| `MaterializeService` / `MaterializeRenderer` | `src/host/materialize/` | Proposal + bindings → ffmpeg composite → materialized staging | D4.2 docs-only：异步 Job、确定性 recipe、NOWRITE | D4.2.2 计划，受 D4.2.1 门禁约束 |
 | `ProjectWriteActor` | `src/host/projects/` | API → transaction → adapters | D3 fit 与 D4.0 单镜媒体替换已实现 revision、lock、幂等、补偿/attention/recovery | D4.1 禁止调用；提案采用待 D4.2 |
 | `SQLiteEventStore` | `src/host/projects/revision-store.ts` | actor ↔ revision/journal/idempotency | D3 已实现本地 SQLite revision/journal/event 基础 | schema 迁移生产化与更广恢复待后续 |
 | `OpenMontageAdapter` | `src/adapters/openmontage/` | Host ↔ ControlledAgentRunner | D2 单提案保留；D4.1 单次 CLI 多提案、完整 provider schema 与真实 audit 已实现 | 禁止直写 Hypit；D4.2 materialize 另阶段 |
-| `HypitAdapter` | `src/adapters/hypit/` | Actor ↔ Author Source + Run | D3 `parameter.adjust` 与 D4.0 `media.replace` 类型化写已实现 | fork commit `437563f...` 已固定；D4.0 真实事务/构建证据 |
+| `HypitAdapter` | `src/adapters/hypit/` | Actor ↔ Author Source + Run | D3 `parameter.adjust` 与 D4.0 `media.replace` 类型化写已实现；D4.2.1 计划加入 expected manifest SHA | fork commit `437563f...` 已固定；@1/@2 安全重载须与首次导入同批交付并重跑 D4.0 |
 | JSON contracts | `contracts/` | UI/Host/Adapters/Tests | D4.1 request/draft/final schema、TS 类型、AJV validator 与 comparison_id 已实现 | 生产契约测试与真实结果 |
+| D4.2 review contracts | `docs/contracts/d4.2-*` | 文档审查 → 后续运行时合同 | docs-only：import/materialize/manifest-v2/adopt approval | 外审通过后按子阶段同步，不得提前宣称实现 |
 
 状态口径：`已实现` 只覆盖对应 Gate 的证据范围，不外推到完整 V1；`docs-only/待后续` 表示目标明确但尚无生产能力。
 
@@ -132,6 +135,14 @@ Runner 只产生不带项目绑定和费用事实的 `ProposalComparisonDraft`�
 
 运行时 schema 权威路径为根目录 `contracts/asset-manifest.schema.json`；`docs/contracts/d4-asset-manifest.schema.json` 是 D4.0 审查快照，关系见 `docs/contracts/README.md`。D4.0 固定后 P0-08 仍只标 partial。
 
+`generated` 与许可 `cleared` 是正交事实：前者要求 UI/证据标记为 synthetic，后者只表示当前使用已获许可，不得被解释为真实现场或事实证据。`restricted/unknown` 即使声明可商业使用也不能进入采用链，因为仍可能存在其他使用限制。
+
+### MaterializedProposal（D4.2 docs-only）
+
+D4.2 不把一个 registered shot 拆成新的顶层 Hypit items。`AssetImportService` 流式登记本地 MP4；`MaterializeRenderer` 将所选 Proposal 的每个 segment 绑定到 cleared/commercial input asset，以固定 ffmpeg argv 从第 0 帧确定性裁切、缩放/letterbox、去音频并拼成一个精确帧数 composite。`MaterializedProposal` 保存 proposal/manifest/composite/recipe SHA、segment 输出范围与输入 lineage，只作采用与审计，不是可独立渲染的第二时间轴。
+
+AssetManifest v2 新增 `source.kind=derived` 和输入 SHA lineage：`generated` 继续表示合成/生成来源，`derived` 表示由已清除本地素材确定性加工而来，二者不得混用。AssetRegistry 兼容读取 v1，@1 工程第一次成功提交的 D4.2.1 导入在同一原子 transaction 中保留旧条目、加入新条目并迁移到 v2；失败保持或补偿原始 bytes，成功后不维护第二份活跃清单。当前 Hypit 启动后会固定 @1 manifest SHA 且因任一未清除条目拒绝整表，因此 D4.2.1 必须在开放导入前同批把薄 fork扩展为 @1/@2 安全重载：`media.replace` 携带 expected manifest SHA，Studio 在写 Source 前完整重读并复核，只在 resolve 目标资产时要求 cleared/commercial，且 TOCTOU 变化继续拒绝。采用时 `ProjectWriteActor` 重验当前 revision、visual lock、impact approval、materialization、manifest 和 composite bytes，再调用这一窄扩展后的 D4.0 `media.replace`。因此原 shot Clip/Window identity、旁白与总时长保持，Hypit Source 仍是唯一影片事实源。
+
 ### Revision
 单调递增。恢复旧内容也创建新 revision，不回退数字。
 
@@ -139,7 +150,9 @@ Runner 只产生不带项目绑定和费用事实的 `ProposalComparisonDraft`�
 - `POST /api/projects/:id/proposals`：选区 + 意图 + baseRevision → jobId。
 - `GET /api/jobs/:id` / SSE events：真实阶段、费用和结果。
 - `GET /api/proposal-comparisons/:id`：读取并重新校验 D4.1 原子暂存的 3–6 个只读候选，同时复核当前 revision；已实现。
-- `POST /api/proposals/:id/materialize`：批准的素材生成/获取。
+- `POST /api/projects/:id/assets/import`：D4.2 docs-only；流式本地 MP4 + 来源/许可元数据，不接受客户端路径。
+- `POST /api/proposals/:id/materialize`：D4.2 docs-only；本地绑定与 composite 异步 Job，不调用远程 provider。
+- `GET /api/materializations/:id`：D4.2 docs-only；重验并返回采用影响摘要与 current impact SHA。
 - `POST /api/projects/:id/edits`：typed operations + baseRevision → newRevision。
 - `POST /api/projects/:id/renders`：revision + profile → jobId。
 - `POST /api/jobs/:id/cancel`：尽力取消，已产生外部费用如实记录。
@@ -150,17 +163,19 @@ Runner 只产生不带项目绑定和费用事实的 `ProposalComparisonDraft`�
 | HTTP | code | 适用边界 |
 |---|---|---|
 | 400 | `INVALID_REQUEST` | malformed JSON/transport；契约语义错误由 Host 稳定映射 422 |
+| 413 | `INVALID_REQUEST` | JSON 或 multipart 流超过 Host 上限；立即停止接收并清理私有暂存 |
 | 401 | `INVALID_SESSION` | Host session 缺失/失效 |
 | 403 | `ORIGIN_REJECTED` | Host 或 Studio 同源策略拒绝 |
 | 409 | `REVISION_CONFLICT` | Narralens/Studio revision、Source preimage 或启动后 manifest 变化 |
 | 409 | `IDEMPOTENCY_KEY_CONFLICT` | 同 key 对应不同 canonical request |
+| 409 | `MANIFEST_CHANGED` | 资产清单或已授权 bytes 在准备/采用期间变化；code 已在生产 union/schema，D4.2 补齐导入/重载/采用调用路径 |
 | 422 | `UNSUPPORTED_EDIT` | 不支持拓扑、非局部影响、编译/后置拒绝 |
 | 422 | `MISSING_ASSET` | 未登记、bytes/hash/MIME 不可用 |
 | 422 | `AMBIGUOUS_TIME` | 选区无法唯一映射 |
 | 422 | `INVALID_PROPOSAL_SET` | D4.1 候选数量、帧数、引用、结构差异或可信字段校验失败 |
 | 423 | `TARGET_LOCKED` | 分项锁阻断 |
 | 423 | `PROJECT_ATTENTION_REQUIRED` | 未完成/不确定事务阻断写入 |
-| 428 | `APPROVAL_REQUIRED` | D4.1+ 外传/费用/许可审批；D4.0 不触发 |
+| 428 | `APPROVAL_REQUIRED` | 当前影响/许可快照未确认或已过期；未来外传/费用仍需额外 provider 审批事实 |
 | 500 | `TRANSACTION_FAILED` | 内部失败且已证明未写或已补偿 |
 | 503 | `HYPIT_UNAVAILABLE` / `RUNNER_UNAVAILABLE` | 已登记本地依赖不可达 |
 | 504 | `RUNNER_TIMEOUT` | 受控 Runner 超时或取消终止；费用未知时不得伪造为零 |

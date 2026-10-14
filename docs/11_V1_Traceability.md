@@ -1,7 +1,7 @@
 # Narralens V1 规格—架构—开发—验收追踪矩阵
 
 版本：v1.0  
-状态：实际开发已批准；Gate D1、Gate D2、Gate D3、Gate D4.0、Gate D4.1 已通过；D4.2 尚未开始。
+状态：实际开发已批准；Gate D1、Gate D2、Gate D3、Gate D4.0、Gate D4.1 已通过；D4.2 总体文档方向和修订后的子阶段边界已通过内外审，允许进入 D4.2.1，生产实现未开始。
 事实日期：2026-10-13
 
 ## 1. 使用规则
@@ -18,9 +18,9 @@
 | P0-04 全片/局部时间轴 | `TimelineSurface` | D2–D3 | `AT-TIMELINE-01` 缩放不改变选区 | 120 镜头 trace、选区日志 | not-started；D1 前置已清除 |
 | P0-05 镜头/区间/逐帧 | `SelectionCoordinator` | D3 | `AT-SELECTION-01` `[start,end)` 边界 | 首尾帧样本、契约测试 | partial：D3 单镜稳定选区/边界已通过；区间与逐帧 UI 待后续 |
 | P0-06 3–6 提案 | `DirectorPane`、`ProposalCompare`、`ProposalComparisonAdapter` | D2–D4 | `D41-CONTRACT/COUNT/DIVERSITY/DURATION/REF/TRUST/STAGING/REV/NOWRITE/CANCEL/PROVIDER/RUNNER/UI/A11Y/SEC/REGRESSION` 全族 | Runner 审计、ProposalComparison、结构签名、工程 SHA、Host 写调用计数、浏览器证据 | done：D4.1 生产实现、80/80、真实 CLI 三案、浏览器/NOWRITE 与内外实现审查通过；不包含 P0-07 采用 |
-| P0-07 分项锁 | `ProjectWriteActor`、`LockPolicy` | D3–D4 | `AT-LOCK-01` UI/Agent 同时被阻止 | 423 响应、资产哈希不变 | partial：仅 D3 visual 服务端主动锁这一项通过；narration/duration 主动锁与完整 P0-07 均未通过 |
-| P0-08 素材/来源/许可 | `AssetRegistry`、`MediaBindingEditor`、后续 `MaterializeService` | D4 | `AT-ASSET-01` 缺许可阻断采用/导出 | 422/428、许可清单 | partial：D4.0 本地 cleared 清单、来源/许可展示与真实替换已验；D4.1 已展示每案素材需求、空可信来源与待审批状态，素材化、外传与审批待 D4.2 |
-| P0-09 局部差异确认 | `ImpactPreview`、`EditTransaction` | D3 | `AT-DIFF-01` 非目标区逐字段不变 | before/after diff、帧数 | partial：D3 fit before→after、精确 Source 与全 item 不变量通过；丰富 diff 待后续 |
+| P0-07 分项锁 | `ProjectWriteActor`、`LockPolicy` | D3–D4 | `AT-LOCK-01` UI/Agent 同时被阻止 | 423 响应、资产哈希不变 | partial：仅 D3 visual 服务端主动锁这一项通过；D4.2 计划复验 visual lock，但 narration/duration 主动锁与完整 P0-07 仍待后续 |
+| P0-08 素材/来源/许可 | `AssetRegistry`、`AssetImportService`、`MaterializeService` | D4 | `D42-IMPORT/LICENSE/MAT/SEC` | import/ffprobe、manifest v2、lineage、422/428、许可清单 | partial：D4.0 本地 cleared 清单、来源/许可展示与真实替换已验；D4.1 已展示每案素材需求；D4.2 本地导入、derived lineage、实体化与审批仅 docs-only，外传/provider 不在本阶段 |
+| P0-09 局部差异确认 | `ImpactPreview`、`EditTransaction` | D3–D4 | `AT-DIFF-01`、`D42-APPROVAL/ADOPT` | before/after diff、impact SHA、帧数/边界帧 | partial：D3 fit before→after、精确 Source 与全 item 不变量通过；D4.2 当前只有采用影响确认计划 |
 | P0-10 版本/撤回/恢复/冲突 | `RevisionService`、journal | D3–D5 | `AT-REV-01` 409、恢复产生新 revision | event log、重开记录 | partial：D3 monotonic revision/409/journal/启动恢复通过；用户历史恢复待 D5 |
 | P0-11 重开与 MP4 | `HypitAdapter`、`RenderService` | D1、D6–D7 | `AT-EXPORT-01` 双导出、重开、改一镜 | MP4、ffprobe、工程哈希 | D1 30 秒夹具通过；真实母项目待 D6–D7 |
 | P0-12 标题/封面 | `DeliveryWorkspace` | 第 2 周 | `AT-DELIVERY-01` 8 标题/4 封面、正文一致性 | 候选记录、人工选择 | not-started |

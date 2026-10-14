@@ -1,6 +1,6 @@
 # 叙镜开发计划 v1.0
 
-状态：实际开发已批准；Gate D1、D2、D3、D4.0、D4.1 已通过。D4.0 类型化媒体替换已实现、通过内外实现审查并固定到 Hypit fork commit `437563f977541002066e6ee961f83a67cbebd3c2`；D4.1 多提案比较已完成生产实现、真实验收与内外实现审查；D4.2 尚未开始。总览见 `Narralens-V1-Development-GAP.drawio` 第 5 页，需求追踪见 `11_V1_Traceability.md`。
+状态：实际开发已批准；Gate D1、D2、D3、D4.0、D4.1 已通过。D4.0 类型化媒体替换已实现、通过内外实现审查并固定到 Hypit fork commit `437563f977541002066e6ee961f83a67cbebd3c2`；D4.1 多提案比较已完成生产实现、真实验收与内外实现审查；D4.2 总体文档及修订后的子阶段边界已通过内外审，允许进入 D4.2.1，生产代码尚未开始。总览见 `Narralens-V1-Development-GAP.drawio` 第 5 页，需求追踪见 `11_V1_Traceability.md`。
 
 ## 当前前置阶段 — V1 前端体验冻结（文档中）
 
@@ -39,6 +39,8 @@
 - 比较阶段不生成全部付费视频。
 - 采用一个方案，若缺素材则进入 materialize；记录外传与费用。
 - 一个方案真正落入 Hypit 工程并刷新真实预览。
+
+D4 已拆分并按门禁顺序推进：D4.0 类型化单素材替换、D4.1 只读多提案比较均已通过；D4.2 计划拆为“契约/本地导入/资产登记及 manifest 兼容底座”“只读实体化与确定性 composite”“事务采用与交互闭环”。D4.2 只使用本地已登记素材，不接远程检索/生成 provider；多 segment 先确定性合成为可追溯 composite，再复用 D4.0 `media.replace`，避免破坏 stable shot identity。@2 manifest 与 Hypit 安全重载必须和首次导入同批交付，禁止阶段间回退 D4.0。详见 `implementation/D4.2-development-and-acceptance-plan.md`。
 
 ## Phase 4 — D5：声音、字幕、复用与恢复
 - 视觉改动不重跑已锁旁白。

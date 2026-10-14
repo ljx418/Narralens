@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://narralens.local/review/d4.2-adopt-operation.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["op", "shot_id", "materialization_id", "approval"],
+  "properties": {
+    "op": { "const": "adopt_materialized_proposal" },
+    "shot_id": { "type": "string", "pattern": "^[A-Za-z0-9_-]+$" },
+    "materialization_id": { "type": "string", "pattern": "^materialization_[a-z0-9_]+$" },
+    "approval": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["confirmed", "impact_sha256"],
+      "properties": {
+        "confirmed": { "const": true },
+        "impact_sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+      }
+    }
+  }
+}
