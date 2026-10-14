@@ -10,6 +10,7 @@ import { ProposalComparisonAdapter } from "../adapters/openmontage/proposal-comp
 import { validateEditRequest, validateProposalComparisonRequest } from "../contracts/validator.js";
 import type { ApiError, ProjectResponse, ProposalComparisonRequest } from "../contracts/types.js";
 import { HttpError, normalizeError } from "./api-error.js";
+import { AssetImportService } from "./assets/asset-import-service.js";
 import { JobStore } from "./job-store.js";
 import { ProjectCatalog } from "./projects/project-catalog.js";
 import { ProjectWriteActor } from "./projects/project-write-actor.js";
@@ -29,6 +30,7 @@ interface HostDependencies {
   writes?: ProjectWriteActor;
   revisionStore?: RevisionStore;
   operationQueue?: ProjectOperationQueue;
+  imports?: AssetImportService;
   sessionTtlMs?: number;
 }
 
@@ -41,6 +43,7 @@ export class NarralensHost {
   readonly revisions: RevisionStore;
   readonly writes: ProjectWriteActor;
   readonly operations: ProjectOperationQueue;
+  readonly imports: AssetImportService;
   readonly sessionToken = randomBytes(32).toString("base64url");
   readonly sessionExpiresAt: Date;
   readonly diagnostics = { write_actor_execute_count: 0 };
@@ -54,13 +57,20 @@ export class NarralensHost {
     this.proposals = dependencies.proposals ?? new ProposalAdapter(resolve(projectRoot, "var/proposals"));
     this.comparisons = dependencies.comparisons ?? new ProposalComparisonAdapter(resolve(projectRoot, "var/proposal-comparisons"));
     this.revisions = dependencies.revisionStore ?? new RevisionStore();
-    this.operations = dependencies.operationQueue ?? new InMemoryProjectOperationQueue();
+    this.operations = dependencies.operationQueue ?? dependencies.writes?.operations ?? new InMemoryProjectOperationQueue();
+    if (dependencies.writes !== undefined && dependencies.operationQueue !== undefined
+      && dependencies.writes.operations !== dependencies.operationQueue) throw new Error("HOST_OPERATION_QUEUE_MISMATCH");
     this.writes = dependencies.writes ?? new ProjectWriteActor(this.catalog, this.revisions, undefined, this.operations);
+    if (dependencies.imports !== undefined && (dependencies.imports.catalog !== this.catalog
+      || dependencies.imports.revisions !== this.revisions || dependencies.imports.operations !== this.operations
+      || dependencies.imports.registry !== this.writes.assets)) throw new Error("HOST_IMPORT_DEPENDENCY_MISMATCH");
+    this.imports = dependencies.imports ?? new AssetImportService(this.catalog, this.writes.assets, this.revisions, this.operations);
     this.sessionExpiresAt = new Date(Date.now() + (dependencies.sessionTtlMs ?? 3_600_000));
   }
 
   async listen(port = 4173): Promise<number> {
     if (this.#server) throw new Error("HOST_ALREADY_LISTENING");
+    await this.imports.recoverIncomplete();
     await this.writes.recoverIncomplete();
     await this.comparisons.cleanupStaleTemporaryFiles();
     this.#server = createServer((request, response) => { void this.#handle(request, response); });
@@ -100,6 +110,10 @@ export class NarralensHost {
       this.#authenticate(request);
       let match = url.pathname.match(/^\/api\/projects\/([A-Za-z0-9_-]+)$/);
       if (request.method === "GET" && match?.[1]) return json(response, 200, await this.#project(match[1]));
+      match = url.pathname.match(/^\/api\/projects\/([A-Za-z0-9_-]+)\/assets$/);
+      if (request.method === "GET" && match?.[1]) return json(response, 200, await this.writes.assets.inventory(match[1]));
+      match = url.pathname.match(/^\/api\/projects\/([A-Za-z0-9_-]+)\/assets\/import$/);
+      if (request.method === "POST" && match?.[1]) return await this.#importAsset(match[1], request, response);
       match = url.pathname.match(/^\/api\/projects\/([A-Za-z0-9_-]+)\/proposals$/);
       if (request.method === "POST" && match?.[1]) return await this.#createProposal(match[1], request, response);
       match = url.pathname.match(/^\/api\/projects\/([A-Za-z0-9_-]+)\/edits$/);
@@ -159,6 +173,16 @@ export class NarralensHost {
     if (!result.ok) throw new HttpError(422, "UNSUPPORTED_EDIT", "Edit request is invalid", { errors: result.errors });
     this.diagnostics.write_actor_execute_count += 1;
     json(response, 200, await this.writes.execute(projectId, result.value));
+  }
+
+  async #importAsset(projectId: string, request: IncomingMessage, response: ServerResponse): Promise<void> {
+    const controller = new AbortController();
+    const onClose = (): void => { if (!response.writableEnded) controller.abort(); };
+    response.once("close", onClose);
+    try {
+      const result = await this.imports.importRequest(projectId, request, controller.signal);
+      json(response, result.status, result.response);
+    } finally { response.off("close", onClose); }
   }
 
   async #project(projectId: string): Promise<ProjectResponse> {

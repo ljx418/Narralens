@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { cp, mkdir, mkdtemp, readFile, stat, utimes, writeFile } from "node:fs/promises";
+import { cp, mkdir, mkdtemp, readFile, stat, unlink, utimes, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
@@ -123,6 +123,35 @@ describe("D4.2.1 AssetRegistry v2 transaction foundation", () => {
     await writeFile(mediaPath, media);
     await utimes(mediaPath, beforeStat.atime, beforeStat.mtime);
     await expect(registry.list("d1-30s")).rejects.toMatchObject({ status: 422, code: "MISSING_ASSET" });
+  }, 30_000);
+
+  it("returns a path-free ordered inventory and degrades tampered, missing and restricted entries independently", async () => {
+    const root = await mkdtemp(join(tmpdir(), "narralens-inventory-"));
+    const descriptor = JSON.parse(await readFile(resolve("fixtures/d1-30s/narralens.project.json"), "utf8"));
+    const descriptorPath = join(root, "narralens.project.json");
+    await writeFile(descriptorPath, `${JSON.stringify(descriptor)}\n`);
+    await mkdir(join(root, "assets/generated"), { recursive: true });
+    await cp(resolve("fixtures/d1-30s/assets/generated/visual-10s.mp4"), join(root, "assets/generated/visual-10s.mp4"));
+    await cp(resolve("fixtures/d1-30s/assets/generated/visual-alt-10s.mp4"), join(root, "assets/generated/visual-alt-10s.mp4"));
+    const manifestPath = join(root, "narralens.assets.json");
+    const manifest = JSON.parse(await readFile(resolve("fixtures/d1-30s/narralens.assets.json"), "utf8"));
+    await writeFile(manifestPath, `${JSON.stringify(manifest)}\n`);
+    const registry = new AssetRegistry(new ProjectCatalog(new Map([["d1-30s", descriptorPath]])));
+    const available = await registry.inventory("d1-30s");
+    expect(available.assets.map((asset) => [asset.asset_id, asset.availability, asset.eligible]))
+      .toEqual([["asset_visual_baseline", "available", true], ["asset_visual_d4_alt", "available", true]]);
+    expect(JSON.stringify(available)).not.toContain("project_path");
+    expect(JSON.stringify(available)).not.toContain(root);
+
+    manifest.assets[0].sha256 = "0".repeat(64);
+    manifest.assets[1].license = { status: "restricted", label: "editorial only", commercial_use: true };
+    await writeFile(manifestPath, `${JSON.stringify(manifest)}\n`);
+    await unlink(join(root, "assets/generated/visual-alt-10s.mp4"));
+    const degraded = await registry.inventory("d1-30s");
+    expect(degraded.assets[0]).toMatchObject({ availability: "unavailable", eligible: false,
+      blocking_reasons: ["HASH_MISMATCH"] });
+    expect(degraded.assets[1]).toMatchObject({ availability: "unavailable", eligible: false,
+      blocking_reasons: ["LICENSE_NOT_CLEARED", "BYTES_UNAVAILABLE"] });
   }, 30_000);
 
   it("uses stable semantic error codes when duplicate identities enter through read or publish", async () => {

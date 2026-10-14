@@ -181,18 +181,8 @@ export class RevisionStore {
     this.#db.exec("BEGIN IMMEDIATE");
     try {
       this.ensureProject(record.project_id, initialRevision);
-      const existing = this.#db.prepare("SELECT request_hash,state,response_status,response_json FROM asset_import_journal WHERE project_id=? AND idempotency_key=?")
-        .get(record.project_id, record.idempotency_key) as Record<string, unknown> | undefined;
-      if (existing !== undefined) {
-        if (String(existing.request_hash) !== record.request_hash) {
-          throw new HttpError(409, "IDEMPOTENCY_KEY_CONFLICT", "The idempotency key was used for a different asset import");
-        }
-        if (existing.state === "committed" && typeof existing.response_status === "number" && typeof existing.response_json === "string") {
-          this.#db.exec("COMMIT");
-          return { status: existing.response_status, response: JSON.parse(existing.response_json) as AssetImportResponse };
-        }
-        throw new HttpError(409, "IDEMPOTENCY_KEY_CONFLICT", "The asset import is incomplete and requires recovery");
-      }
+      const existing = this.assetImportIdempotent(record.project_id, record.idempotency_key, record.request_hash);
+      if (existing !== undefined) { this.#db.exec("COMMIT"); return existing; }
       const state = this.state(record.project_id, initialRevision);
       if (state.attention) throw new HttpError(423, "PROJECT_ATTENTION_REQUIRED", "The project requires transaction recovery");
       const now = new Date().toISOString();
@@ -209,6 +199,19 @@ export class RevisionStore {
     } catch (error) { this.#db.exec("ROLLBACK"); throw error; }
   }
 
+  assetImportIdempotent(projectId: string, key: string, requestHash: string): { status: number; response: AssetImportResponse } | undefined {
+    const existing = this.#db.prepare("SELECT request_hash,state,response_status,response_json FROM asset_import_journal WHERE project_id=? AND idempotency_key=?")
+      .get(projectId, key) as Record<string, unknown> | undefined;
+    if (existing === undefined) return undefined;
+    if (String(existing.request_hash) !== requestHash) {
+      throw new HttpError(409, "IDEMPOTENCY_KEY_CONFLICT", "The idempotency key was used for a different asset import");
+    }
+    if (existing.state === "committed" && typeof existing.response_status === "number" && typeof existing.response_json === "string") {
+      return { status: existing.response_status, response: JSON.parse(existing.response_json) as AssetImportResponse };
+    }
+    throw new HttpError(409, "IDEMPOTENCY_KEY_CONFLICT", "The asset import is incomplete and requires recovery");
+  }
+
   markAssetImportBytesInstalled(transactionId: string, created: boolean): void {
     const current = this.assetImportJournal(transactionId);
     if (current?.state !== "prepared") throw new Error("INVALID_ASSET_IMPORT_TRANSITION");
@@ -217,7 +220,7 @@ export class RevisionStore {
   }
 
   markAssetImportManifestPublished(transactionId: string): void {
-    this.#assetImportState(transactionId, "manifest_published", ["bytes_installed"]);
+    this.#assetImportState(transactionId, "manifest_published", ["bytes_installed", "attention"]);
   }
 
   commitAssetImport(transactionId: string, status: number, response: AssetImportResponse): void {

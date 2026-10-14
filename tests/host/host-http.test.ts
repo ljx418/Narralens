@@ -56,6 +56,20 @@ describe("D2 Host HTTP", () => {
     expect(createHash("sha256").update(await readFile(source)).digest("hex")).toBe(before);
   });
 
+  it("returns the complete current asset inventory without leaking project paths", async () => {
+    const { origin, token } = await started();
+    const response = await fetch(`${origin}/api/projects/d1-30s/assets`, { headers: headers(origin, token) });
+    expect(response.status).toBe(200);
+    const inventory = await response.json() as { manifest_format: string; assets: Array<{ asset_id: string; availability: string; eligible: boolean }> };
+    expect(inventory.manifest_format).toBe("narralens.asset-manifest@1");
+    expect(inventory.assets).toEqual([
+      expect.objectContaining({ asset_id: "asset_visual_baseline", availability: "available", eligible: true }),
+      expect.objectContaining({ asset_id: "asset_visual_d4_alt", availability: "available", eligible: true }),
+    ]);
+    expect(JSON.stringify(inventory)).not.toContain("project_path");
+    expect(JSON.stringify(inventory)).not.toContain("/mnt/");
+  }, 30_000);
+
   it("runs an asynchronous proposal job and replays monotonic SSE events", async () => {
     const { host, origin, token } = await started();
     const request = { base_revision: 2, selection: { shot_id: "shot-001", start_frame: 0, end_frame_exclusive: 300 }, intent: "强化因果关系", preserve: ["narration"], proposal_count: 3 };

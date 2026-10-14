@@ -1,11 +1,12 @@
 import { createHash, randomUUID } from "node:crypto";
 import { execFile } from "node:child_process";
+import { createReadStream } from "node:fs";
 import { open, readFile, realpath, rename, unlink } from "node:fs/promises";
 import { basename, dirname, resolve, sep } from "node:path";
 import { promisify } from "node:util";
 
 import { contractIds, validatorFor } from "../../contracts/validator.js";
-import type { AssetLicense, AssetManifest, AssetManifestEntry, AssetSource } from "../../contracts/types.js";
+import type { AssetBlockingReason, AssetInventoryResponse, AssetLicense, AssetManifest, AssetManifestEntry, AssetSource } from "../../contracts/types.js";
 import { HttpError } from "../api-error.js";
 import type { ProjectCatalog } from "./project-catalog.js";
 
@@ -116,9 +117,14 @@ export class AssetRegistry {
       throw new HttpError(422, "MISSING_ASSET", "Asset license is not cleared for D4.0");
     }
     const path = await containedPath(snapshot.root, asset.project_path);
-    const media = await readFile(path);
-    if (sha256(media) !== asset.sha256) throw new HttpError(422, "MISSING_ASSET", "Asset bytes do not match the manifest");
-    const frames = await videoFrames(path);
+    let mediaHash: string;
+    let verifiedHash: string;
+    let frames: number;
+    try { mediaHash = await hashFile(path); frames = await videoFrames(path); verifiedHash = await hashFile(path); }
+    catch { throw new HttpError(422, "MISSING_ASSET", "Registered asset could not be inspected"); }
+    if (mediaHash !== asset.sha256 || verifiedHash !== asset.sha256) {
+      throw new HttpError(422, "MISSING_ASSET", "Asset bytes do not match the manifest");
+    }
     if (frames !== asset.duration_frames) throw new HttpError(422, "MISSING_ASSET", "Asset duration does not match the manifest");
     return { asset_id: asset.asset_id, sha256: asset.sha256, duration_frames: asset.duration_frames,
       media_type: asset.media_type, manifest_sha256: snapshot.sha256, source_label: asset.source.label, license_label: asset.license.label };
@@ -135,6 +141,53 @@ export class AssetRegistry {
         source_label: resolved.source_label, license_label: resolved.license_label };
     }));
     return assets;
+  }
+
+  async inventory(projectId: string): Promise<AssetInventoryResponse> {
+    const [snapshot, descriptor] = await Promise.all([this.readManifest(projectId), this.catalog.readDescriptor(projectId)]);
+    const assets = await mapConcurrent(snapshot.manifest.assets, 2, async (asset) => {
+      let availability: "available" | "unavailable" = "available";
+      const blockingReasons: AssetBlockingReason[] = [];
+      if (asset.license.status !== "cleared") blockingReasons.push("LICENSE_NOT_CLEARED");
+      if (!asset.license.commercial_use) blockingReasons.push("COMMERCIAL_USE_NOT_ALLOWED");
+      try {
+        const path = await containedPath(snapshot.root, asset.project_path);
+        const firstHash = await hashFile(path);
+        if (firstHash !== asset.sha256) {
+          availability = "unavailable";
+          blockingReasons.push("HASH_MISMATCH");
+        } else {
+          const frames = await videoFrames(path, descriptor.frame_rate);
+          if (frames !== asset.duration_frames) {
+            availability = "unavailable";
+            blockingReasons.push("MEDIA_INVALID");
+          } else if (await hashFile(path) !== asset.sha256) {
+            availability = "unavailable";
+            blockingReasons.push("HASH_MISMATCH");
+          }
+        }
+      } catch (error) {
+        availability = "unavailable";
+        blockingReasons.push(error instanceof AssetMediaInvalid ? "MEDIA_INVALID" : "BYTES_UNAVAILABLE");
+      }
+      return {
+        asset_id: asset.asset_id,
+        sha256: asset.sha256,
+        media_type: asset.media_type,
+        duration_frames: asset.duration_frames,
+        source: asset.source,
+        license: asset.license,
+        availability,
+        eligible: availability === "available" && asset.license.status === "cleared" && asset.license.commercial_use,
+        blocking_reasons: [...new Set(blockingReasons)],
+      };
+    });
+    const response: AssetInventoryResponse = { format: "narralens.asset-inventory@1.0",
+      manifest_format: snapshot.manifest.format, manifest_sha256: snapshot.sha256, assets };
+    if (!validatorFor(contractIds.assetInventoryResponse)(response)) {
+      throw new HttpError(500, "INTERNAL_ERROR", "Asset inventory response does not satisfy the contract");
+    }
+    return response;
   }
 }
 
@@ -212,20 +265,57 @@ async function containedPath(root: string, relativePath: string): Promise<string
   return candidate;
 }
 
-async function videoFrames(path: string): Promise<number> {
+async function videoFrames(path: string, expectedFrameRate?: number): Promise<number> {
   try {
-    const { stdout } = await execute("ffprobe", ["-v", "error", "-count_frames", "-select_streams", "v:0",
-      "-show_entries", "format=format_name:stream=codec_type,nb_read_frames", "-of", "json", path],
+    const { stdout } = await execute("ffprobe", ["-v", "error", "-count_frames",
+      "-show_entries", "format=format_name:stream=codec_type,nb_read_frames,avg_frame_rate,r_frame_rate", "-of", "json", path],
     { timeout: 30_000, maxBuffer: 1024 * 1024, windowsHide: true });
-    const probe = JSON.parse(stdout) as { format?: { format_name?: unknown }; streams?: Array<{ codec_type?: unknown; nb_read_frames?: unknown }> };
+    const probe = JSON.parse(stdout) as { format?: { format_name?: unknown }; streams?: Array<{ codec_type?: unknown; nb_read_frames?: unknown;
+      avg_frame_rate?: unknown; r_frame_rate?: unknown }> };
     const names = typeof probe.format?.format_name === "string" ? probe.format.format_name.split(",") : [];
-    const video = probe.streams?.[0];
+    const videos = probe.streams?.filter((stream) => stream.codec_type === "video") ?? [];
+    const video = videos[0];
     const frames = Number(video?.nb_read_frames);
-    if (!names.includes("mp4") || video?.codec_type !== "video" || !Number.isSafeInteger(frames) || frames < 1) {
+    if (!names.includes("mp4") || videos.length !== 1 || !Number.isSafeInteger(frames) || frames < 1
+      || (expectedFrameRate !== undefined && (!sameRate(video?.avg_frame_rate, expectedFrameRate)
+        || !sameRate(video?.r_frame_rate, expectedFrameRate) || video?.avg_frame_rate !== video?.r_frame_rate))) {
       throw new Error("invalid MP4 video");
     }
     return frames;
-  } catch { throw new HttpError(422, "MISSING_ASSET", "Registered asset could not be inspected"); }
+  } catch { throw new AssetMediaInvalid(); }
 }
 
 function sha256(value: Uint8Array): string { return createHash("sha256").update(value).digest("hex"); }
+
+async function hashFile(path: string): Promise<string> {
+  const digest = createHash("sha256");
+  for await (const chunk of createReadStream(path)) digest.update(chunk as Buffer);
+  return digest.digest("hex");
+}
+
+function sameRate(value: unknown, expected: number): boolean {
+  if (typeof value !== "string") return false;
+  const match = /^(\d+)\/(\d+)$/u.exec(value);
+  if (match === null) return false;
+  const numerator = Number(match[1]);
+  const denominator = Number(match[2]);
+  return Number.isSafeInteger(numerator) && Number.isSafeInteger(denominator) && denominator > 0
+    && numerator === expected * denominator;
+}
+
+async function mapConcurrent<T, R>(values: T[], limit: number, operation: (value: T) => Promise<R>): Promise<R[]> {
+  const output = new Array<R>(values.length);
+  let next = 0;
+  const worker = async (): Promise<void> => {
+    for (;;) {
+      const index = next;
+      next += 1;
+      if (index >= values.length) return;
+      output[index] = await operation(values[index]!);
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(limit, values.length) }, worker));
+  return output;
+}
+
+class AssetMediaInvalid extends Error {}

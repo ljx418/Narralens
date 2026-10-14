@@ -12,6 +12,7 @@ export interface MediaValidationOptions {
   ffmpeg?: string;
   timeoutMs?: number;
   stderrBytes?: number;
+  signal?: AbortSignal;
 }
 
 export interface ValidatedMedia {
@@ -27,7 +28,7 @@ export async function validateImportedMedia(path: string, expectedFrameRate: num
   const maxBuffer = options.stderrBytes ?? 1024 * 1024;
   const probe = await runTool(options.ffprobe ?? "ffprobe", ["-v", "error", "-count_frames", "-show_entries",
     "format=format_name:stream=codec_type,avg_frame_rate,r_frame_rate,nb_read_frames,nb_frames,width,height", "-of", "json", path],
-  timeout, maxBuffer, "probe");
+  timeout, maxBuffer, "probe", options.signal);
   let value: ProbeOutput;
   try { value = JSON.parse(probe.stdout) as ProbeOutput; }
   catch { throw new HttpError(422, "INVALID_MEDIA", "ffprobe returned invalid media facts"); }
@@ -49,7 +50,7 @@ export async function validateImportedMedia(path: string, expectedFrameRate: num
     throw new HttpError(422, "INVALID_MEDIA", "Asset has invalid frame or dimension facts");
   }
   const decode = await runTool(options.ffmpeg ?? "ffmpeg", ["-hide_banner", "-nostats", "-loglevel", "info", "-i", path,
-    "-map", "0:v:0", "-vf", "vfrdet", "-f", "null", "-"], timeout, maxBuffer, "decode");
+    "-map", "0:v:0", "-vf", "vfrdet", "-f", "null", "-"], timeout, maxBuffer, "decode", options.signal);
   const vfr = /\bVFR:[^\s]+\s+\((\d+)\/(\d+)\)/u.exec(decode.stderr);
   if (vfr === null || Number(vfr[1]) !== 0) {
     throw new HttpError(422, "INVALID_MEDIA", "Asset must use a constant project frame rate");
@@ -60,11 +61,12 @@ export async function validateImportedMedia(path: string, expectedFrameRate: num
 }
 
 async function runTool(command: string, args: string[], timeout: number, maxBuffer: number,
-  action: "probe" | "decode"): Promise<{ stdout: string; stderr: string }> {
+  action: "probe" | "decode", signal?: AbortSignal): Promise<{ stdout: string; stderr: string }> {
   try {
-    return await execute(command, args, { timeout, maxBuffer, windowsHide: true, encoding: "utf8" });
+    return await execute(command, args, { timeout, maxBuffer, windowsHide: true, encoding: "utf8", ...(signal ? { signal } : {}) });
   } catch (error) {
     const facts = error as NodeJS.ErrnoException & { killed?: boolean; signal?: string; stderr?: string };
+    if (facts.code === "ABORT_ERR") throw new HttpError(400, "INVALID_REQUEST", `Media ${action} validation was cancelled`);
     if (facts.code === "ENOENT" || facts.code === "EACCES" || facts.code === "ENOEXEC" || facts.code === "ETIMEDOUT"
       || facts.code === "ERR_CHILD_PROCESS_STDIO_MAXBUFFER"
       || facts.killed || typeof facts.signal === "string") {
