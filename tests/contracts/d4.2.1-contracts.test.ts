@@ -26,7 +26,7 @@ describe("D4.2.1 runtime contracts", () => {
     const expected = {
       "asset-import-metadata.schema.json": "0b1b8f0edb4845f93ac8f166b90076d29bcf165c48449bda0103df15523f77d0",
       "asset-manifest.schema.json": "97fe0b86fcd02a035348f38081a1673318f61e2ae1a4b378993ab8d80c769a21",
-      "asset-import-response.schema.json": "6fc416112a23b1a0209444f2c6736b9c6317483ac4a9918d0287d3e7066f9060",
+      "asset-import-response.schema.json": "155df604c849a7644aa91d2a9a1edd99927cbe0a67fb8ba8bb9de37564d9f949",
       "asset-inventory-response.schema.json": "90232b3b18022ccbaa9256c24d55cbc5d43d558e391b6dbd5ce0385201bbc728",
     } as const;
     for (const [file, digest] of Object.entries(expected)) {
@@ -59,6 +59,16 @@ describe("D4.2.1 runtime contracts", () => {
     const importResponse = { format: "narralens.asset-import-response@1.0", asset_id: "asset_original",
       manifest_format: "narralens.asset-manifest@2", manifest_sha256: sha, created: true, migrated_from_v1: true };
     expect(validatorFor(contractIds.assetImportResponse)(importResponse)).toBe(true);
+    const v1DuplicateResponse = { ...importResponse,
+      manifest_format: "narralens.asset-manifest@1", created: false, migrated_from_v1: false };
+    expect(validatorFor(contractIds.assetImportResponse)(v1DuplicateResponse)).toBe(true);
+    expect(validatorFor(contractIds.assetImportResponse)({ ...importResponse,
+      created: false, migrated_from_v1: false })).toBe(true);
+    expect(validatorFor(contractIds.assetImportResponse)({ ...importResponse,
+      migrated_from_v1: false })).toBe(true);
+    expect(validatorFor(contractIds.assetImportResponse)({ ...v1DuplicateResponse, created: true })).toBe(false);
+    expect(validatorFor(contractIds.assetImportResponse)({ ...v1DuplicateResponse, migrated_from_v1: true })).toBe(false);
+    expect(validatorFor(contractIds.assetImportResponse)({ ...importResponse, created: false })).toBe(false);
     const inventory = { format: "narralens.asset-inventory@1.0", manifest_format: "narralens.asset-manifest@2", manifest_sha256: sha,
       assets: [{ asset_id: "asset_original", sha256: sha, media_type: "video/mp4", duration_frames: 30,
         source: v1Asset.source, license, availability: "available", eligible: true, blocking_reasons: [] }] };

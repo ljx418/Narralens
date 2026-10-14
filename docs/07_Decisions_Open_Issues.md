@@ -68,3 +68,4 @@
 2. `INVALID_MEDIA`（422）与 `MEDIA_TOOL_UNAVAILABLE`（503）是对 P0-08 本地媒体导入既有错误边界的稳定 API 细化，不增加 PRD 功能范围：前者表示输入内容不合格，后者表示 Host 的 ffprobe/ffmpeg 能力不可用。两项必须同步 TypeScript、api-error schema、HTTP 与 UI，不能复用 `MISSING_ASSET` 或 `HYPIT_UNAVAILABLE` 混淆责任。
 3. 库存 availability 在 D4.2.1 不做跨请求缓存；每次 GET 重验 realpath/stat/bytes SHA，并限制并发。该选择优先保证篡改可见性，接受最多 256 项时的读取成本；后续若引入缓存，必须另行设计可证明的新鲜度协议并通过安全复审。
 4. D4.2.1 不创建 `derived` 资产，但 @2 reader 必须兼容合法的既有 derived entry；import metadata 继续拒绝 derived。这样保持格式前向兼容，同时不把 D4.2.2 composite 能力提前实现。
+5. 2026-10-14：项目负责人批准 D4.2.1 导入响应采用路线 A。`manifest_format` 必须返回事务完成时唯一活跃清单的真实格式（`@1` 或 `@2`）；@1 工程命中既有相同 identity 时返回 200、`created=false`、`migrated_from_v1=false` 并保持 @1 原字节，不为迎合响应合同制造迁移。只有 @1 工程成功提交新 identity 才返回 @2、`created=true`、`migrated_from_v1=true`。幂等重放返回首次持久化的同一 status/body。

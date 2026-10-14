@@ -7,9 +7,23 @@
   "properties": {
     "format": { "const": "narralens.asset-import-response@1.0" },
     "asset_id": { "type": "string", "pattern": "^asset_[a-z0-9][a-z0-9_-]{0,63}$" },
-    "manifest_format": { "const": "narralens.asset-manifest@2" },
+    "manifest_format": { "enum": ["narralens.asset-manifest@1", "narralens.asset-manifest@2"] },
     "manifest_sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
     "created": { "type": "boolean" },
     "migrated_from_v1": { "type": "boolean" }
-  }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "manifest_format": { "const": "narralens.asset-manifest@1" } }, "required": ["manifest_format"] },
+      "then": { "properties": { "created": { "const": false }, "migrated_from_v1": { "const": false } } }
+    },
+    {
+      "if": { "properties": { "created": { "const": true } }, "required": ["created"] },
+      "then": { "properties": { "manifest_format": { "const": "narralens.asset-manifest@2" } } }
+    },
+    {
+      "if": { "properties": { "migrated_from_v1": { "const": true } }, "required": ["migrated_from_v1"] },
+      "then": { "properties": { "manifest_format": { "const": "narralens.asset-manifest@2" }, "created": { "const": true } } }
+    }
+  ]
 }

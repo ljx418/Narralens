@@ -192,7 +192,7 @@ export interface AssetManifest {
 export interface AssetImportResponse {
   format: "narralens.asset-import-response@1.0";
   asset_id: string;
-  manifest_format: "narralens.asset-manifest@2";
+  manifest_format: AssetManifest["format"];
   manifest_sha256: string;
   created: boolean;
   migrated_from_v1: boolean;
