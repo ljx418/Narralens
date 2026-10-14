@@ -1,0 +1,29 @@
+{
+  "format": "narralens.d421-large-upload-evidence@1",
+  "generated_at": "2026-10-14T12:15:31.669Z",
+  "command": "pnpm evidence:d421-large",
+  "fixture": {
+    "construction": "validated project MP4 plus one valid top-level free atom",
+    "filename": "real-64m.mp4",
+    "byte_length": 67108864,
+    "ffprobe_format": "mov,mp4,m4a,3gp,3g2,mj2"
+  },
+  "success": {
+    "status": 200,
+    "uploaded_bytes": 67108864,
+    "socket_backpressure_events": 1024,
+    "socket_drain_events": 1024,
+    "peak_rss_delta_bytes": 38432768,
+    "rss_limit_bytes": 50331648,
+    "decoded_frames": 300
+  },
+  "lowered_cap": {
+    "file_limit_bytes": 33554432,
+    "status": 413,
+    "staging_entries_after": 0
+  },
+  "cleanup": {
+    "temporary_project_removed": true,
+    "temporary_media_removed": true
+  }
+}

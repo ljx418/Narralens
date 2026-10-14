@@ -1,7 +1,7 @@
 {
   "format": "narralens.d421-substage-evidence@1",
-  "generated_at": "2026-10-14T20:10:58+08:00",
-  "stage": "D4.2.1 implementation evidence through streaming upload and media validation",
+  "generated_at": "2026-10-14T20:44:25+08:00",
+  "stage": "D4.2.1 implementation evidence through accessible UI and 64 MiB streaming proof",
   "status": "substage-passed-d4.2.1-remains-in-progress",
   "repositories": {
     "narralens_base_commit": "41fbbd504660df64c9270c0ededb24f89f8ea464",
@@ -10,6 +10,7 @@
     "upload_media_implementation_commit": "73f11f1abfa4d3729ce9f33585443e99a98c176d",
     "import_service_implementation_commit": "81c6c23f0d761fa417af99e16b10817bf5f12011",
     "upload_exact_limit_fix_commit": "e4f59bfc6e9b818906800f7d97d37f4b0c30c58c",
+    "ui_large_implementation_commit": "3ef11571222b4bff2e49b7f563ffea62ef98dc04",
     "hypit_commit": "6fdd8c0f02c17b9970aee6deb4550a70e9d57acf",
     "hypit_branch": "narralens/d4-typed-media-mutation",
     "worktree_note": "This manifest and status synchronization are finalized by the documentation commit after the implementation commit."
@@ -17,8 +18,8 @@
   "automated_gate": {
     "narralens_command": "corepack pnpm check",
     "narralens_exit_code": 0,
-    "narralens_test_files": 15,
-    "narralens_tests_passed": 116,
+    "narralens_test_files": 16,
+    "narralens_tests_passed": 121,
     "hypit_studio_tests_passed": 94,
     "hypit_studio_tests_failed": 0,
     "hypit_typescript": "passed",
@@ -75,15 +76,40 @@
     "review_artifact": "artifacts/d421-import-service-claude-review.md",
     "note": "Full-context Claude Code review retracted all six prior excerpt-based allegations."
   },
+  "ui_large_external_review": {
+    "result": "PASS",
+    "allow_ui_substage_close": true,
+    "critical_count": 0,
+    "major_count": 0,
+    "minor_count_after_followup": 0,
+    "review_artifact": "artifacts/d421-ui-claude-review.md"
+  },
+  "large_upload_evidence": {
+    "artifact": "artifacts/d421-large-upload.json",
+    "real_mp4_bytes": 67108864,
+    "decoded_frames": 300,
+    "backpressure_and_drain_events": 1024,
+    "peak_rss_delta_bytes": 38432768,
+    "rss_limit_bytes": 50331648,
+    "lowered_cap_status": 413,
+    "staging_entries_after_rejection": 0
+  },
   "artifact_sha256": {
     "artifacts/d4.0-real-media-regression.json": "5404457a4c4dad1a99d26ec491e44ce74a584f53cf0cdab79824f4d124b88cd3",
     "artifacts/busboy-1.6.0-LICENSE.txt": "9f75981e6039d13bf2e591c59e9c89a2641ca605fde59ba78974b11553f6c148",
     "artifacts/d421-dependency-audit.md": "e7594a638b77dacd3562abb61e7e572d73744e42baedf79461827cd7c28a1a6c",
-    "artifacts/d421-import-service-claude-review.md": "3f9f1656156514ed54549c3dc80bc1c37ffc9c923d6aec0f3e7e295d4cceeeb0"
+    "artifacts/d421-import-service-claude-review.md": "3f9f1656156514ed54549c3dc80bc1c37ffc9c923d6aec0f3e7e295d4cceeeb0",
+    "artifacts/d421-ui-claude-review.md": "c72a9ba9743e31ecd4451e80354438492e4c42c18277f9be51b33f566e4750cf",
+    "artifacts/d421-large-upload.json": "e5edb5cf66345e2c487f1f2d2024c6e12342030c930758fe0e38a69fbff694f4",
+    "screenshots/asset-library-360.png": "d963343de29f0824df42fa54f21275a4c7af6ccde05beec8379453ed55888aa7",
+    "screenshots/asset-library-768.png": "0b7d6a7e30c4a989a6e884ec0d581e19123ea79de793a33dfac6294a9aee5251",
+    "screenshots/asset-library-1440.png": "938bcc7f867473323ac76e19938a3e00336f458ab9c69d24fc9708debdd6b6b5",
+    "screenshots/asset-library-1920.png": "c78c5332a7afd2aa499d9ffdb6b2ad526b2ca5d22c22e34284c1c22e14df03b3",
+    "screenshots/asset-library-scale-2x.png": "c462c4477371e2792a3f0542a57175af604dc29aeeef501da81e97832702e350"
   },
   "remaining_scope": [
-    "bounded-memory and expanded fault-injection evidence",
-    "HostApiClient and accessible import/inventory UI",
+    "expanded disk, fsync, response-abort and concurrency fault/race evidence",
+    "real-browser interactive import, true 200% text zoom evidence and sanitized keyboard log",
     "final D4.2.1 regression, evidence and internal/external implementation audit"
   ]
 }
