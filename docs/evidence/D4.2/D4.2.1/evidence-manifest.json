@@ -1,0 +1,59 @@
+{
+  "format": "narralens.d421-substage-evidence@1",
+  "generated_at": "2026-10-14T14:45:00+08:00",
+  "stage": "D4.2.1 Hypit manifest lease and expected-SHA adapter",
+  "status": "substage-passed-d4.2.1-remains-in-progress",
+  "repositories": {
+    "narralens_base_commit": "41fbbd504660df64c9270c0ededb24f89f8ea464",
+    "narralens_implementation_commit": "ffbcc01b42d6bd8a05296078b5e3e8a3067a8eb2",
+    "hypit_commit": "6fdd8c0f02c17b9970aee6deb4550a70e9d57acf",
+    "hypit_branch": "narralens/d4-typed-media-mutation",
+    "worktree_note": "This manifest and status synchronization are finalized by the documentation commit after the implementation commit."
+  },
+  "automated_gate": {
+    "narralens_command": "corepack pnpm check",
+    "narralens_exit_code": 0,
+    "narralens_test_files": 12,
+    "narralens_tests_passed": 91,
+    "hypit_studio_tests_passed": 94,
+    "hypit_studio_tests_failed": 0,
+    "hypit_typescript": "passed",
+    "vite_production_build": "passed",
+    "git_diff_check": "passed"
+  },
+  "real_regression": {
+    "evidence": "artifacts/d4.0-real-media-regression.json",
+    "baseline_to_alternate_to_restart_to_baseline": true,
+    "source_byte_exact_restored": true,
+    "run_unchanged": true,
+    "narration_unchanged": true,
+    "non_target_assets_unchanged": true,
+    "provider_calls": 0,
+    "build_id": "bld_20261014T064122603Z_E6256F26FF",
+    "build_frames": 900,
+    "build_outcome": "complete",
+    "build_output_count": 13
+  },
+  "full_hypit_suite_boundary": {
+    "status": "not-all-green-under-full-parallel-load",
+    "summary": "1126 passed, 3 runtime-local process timeouts, 2 cancelled, 23 skipped",
+    "targeted_rerun": "affected concurrency-process 2/2 and execution-process 1/1 passed independently",
+    "claim": "No full-suite pass is claimed; the Studio substage suite and affected isolated tests passed."
+  },
+  "external_review": {
+    "result": "PASS",
+    "allow_next_substage": true,
+    "must_fix_count": 0,
+    "should_fix_count": 0
+  },
+  "artifact_sha256": {
+    "artifacts/d4.0-real-media-regression.json": "5404457a4c4dad1a99d26ec491e44ce74a584f53cf0cdab79824f4d124b88cd3"
+  },
+  "remaining_scope": [
+    "AssetRegistry v2 and persistent import journal",
+    "AssetImportService and strict multipart GET/POST routes",
+    "fault injection, restart recovery and real import evidence",
+    "HostApiClient and accessible import/inventory UI",
+    "final D4.2.1 regression, evidence and internal/external implementation audit"
+  ]
+}

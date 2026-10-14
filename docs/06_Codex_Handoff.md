@@ -1,6 +1,6 @@
 # 叙镜 Codex 开发交接 v1.0
 
-当前阶段：生产开发已批准，Gate D1、D2、D3、D4.0、D4.1 已通过。D4.0 路线 A 已实现并通过真实事务、构建、浏览器、内部审查和 Claude Code CLI 外部实现审查，Hypit fork/gitlink 已固定为 `ljx418/hypit@437563f977541002066e6ee961f83a67cbebd3c2`。D4.1 于 2026-10-13 完成生产实现、真实 Runner/浏览器/NOWRITE 验收及内外实现审查。D4.2 总体文档与子阶段边界已通过内外审；D4.2.1 合同/错误码/共享队列实现子阶段已通过 89/89、构建及外审 0/0/0，下一步是 Hypit manifest lease 与 Adapter expected SHA，import route 尚未开放。
+当前阶段：生产开发已批准，Gate D1、D2、D3、D4.0、D4.1 已通过。D4.1 于 2026-10-13 完成生产实现、真实 Runner/浏览器/NOWRITE 验收及内外实现审查。D4.2 总体文档与子阶段边界已通过内外审；D4.2.1 合同/错误码/共享队列以及 Hypit manifest lease/Adapter expected SHA 两个实现子阶段已分别通过门禁，Hypit fork/gitlink 固定为 `ljx418/hypit@6fdd8c0f02c17b9970aee6deb4550a70e9d57acf`。下一步是 AssetRegistry v2 与 import journal；import route 尚未开放。
 
 ## 你的角色
 你在本地仓库实现 Narralens。先做真实视频工程，再做体验包装。不要把已有 HTML 原型当生产系统。
@@ -74,14 +74,14 @@ docs/implementation/
 1. 先核对 `docs/evidence/D1`、`D2`、`D3` 的 manifest 和 `11_V1_Traceability.md`。
 2. 运行 `corepack pnpm check`；D3 基线为 38 tests + TypeScript + Vite build 全绿。
 3. 核对 fixture Source SHA `ae4edebf...fcab3a`、Run SHA `bff6a663...c738`、旁白 SHA `ca8d3773...07a`，确认没有遗留 Studio/Host/专用 Chrome 进程或临时数据库。
-4. D4.0 与 D4.1 已通过；D4.1 evidence manifest、内外实现审计均已落盘。D4.2 总体门禁已通过；D4.2.1 详细计划、七份相关审查 schema 与专项 Archify 图已形成。下一动作是 Claude Code CLI 只读外审，归零后才实现契约/本地导入/资产登记、共享队列及同批 Hypit manifest lease，不得提前实现 materialize/adopt。
+4. D4.0 与 D4.1 已通过；D4.2 总体门禁已通过。D4.2.1 合同/共享队列与 Hypit lease/expected-SHA 两个子阶段已实现并通过内外审；下一动作是 AssetRegistry v2 与 import journal，仍不得开放 import route 或提前实现 materialize/adopt。
 
-## 当前事实快照（2026-10-13）
+## 当前事实快照（2026-10-14）
 
 - V1 目标原型已批准；细化原型位于 `prototype-v1/`。
 - 全系统目标架构位于 `architecture/v1-target-system.architecture.html`。
 - 开发 GAP、计划、门限和风险位于 7 页 `Narralens-V1-Development-GAP.drawio`。
 - Git remote 已固定为 `https://github.com/ljx418/Narralens`；D4.1 基于 `e776eddd28c63d9a78f6b7c7797bcebaef542a1f` 开发，代码、测试与验证脚本冻结于实现提交 `44bd351c13d820b9e99bc13c39c2f1532dbee781`。
-- OpenMontage `9327439...`、Hypit fork `437563f...` 已固定为 submodule；Hypit upstream base 为 `85e01c...`。
+- OpenMontage `9327439...`、Hypit fork `6fdd8c0...` 已固定为 submodule；Hypit upstream base 为 `85e01c...`。
 - D1 真实 30 秒底座、D2 真实 Claude Code CLI 单提案链、D3 typed visual fit 写入事务均已通过并有证据。
 - D4.0 与 D4.1 的计划、schema、Archify 图、实现、内外审计与证据均已落盘并通过；D4.1 自动化为 80/80、真实 CLI/浏览器/NOWRITE 与 D4.0 回归通过。D4.2 计划位于 `implementation/D4.2-development-and-acceptance-plan.md`，外审记录位于 `implementation/D4.2-external-plan-audit.md`，目标图位于 `architecture/d4.2-materialize-adopt.architecture.html`；只允许从 D4.2.1 开始，不得跳到采用写入。

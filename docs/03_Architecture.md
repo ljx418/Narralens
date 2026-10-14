@@ -1,6 +1,6 @@
 # 叙镜架构设计 v1.0
 
-文档状态：目标架构已冻结到语义与代码实体层；Gate D1–D3、D4.0 与 D4.1 已通过。D4.0 路线 A 已产生生产源码、真实事务/构建/浏览器证据并通过内外实现审查，Hypit 薄 fork固定为 `ljx418/hypit@437563f977541002066e6ee961f83a67cbebd3c2`。D4.1 多提案比较已形成生产契约、Runner、Adapter/原子暂存、Host/Job、UI 和真实 Runner/浏览器/NOWRITE 证据，并通过内外实现审查；D4.2 总体方向和子阶段边界已通过内外文档审查。D4.2.1 正在实现，运行时合同/错误码/共享队列已通过，Hypit manifest lease、import journal/service/routes/UI 尚未完成。`docs/architecture/v1-target-system.architecture.html` 是目标系统架构视图，`architecture/d4.2-materialize-adopt.architecture.html` 是 D4.2 全景视图，`architecture/d4.2.1-import-transaction.architecture.html` 是导入事务专项视图，`Narralens-V1-Development-GAP.drawio` 是开发与验收审查视图。
+文档状态：目标架构已冻结到语义与代码实体层；Gate D1–D3、D4.0 与 D4.1 已通过。D4.1 多提案比较已形成生产契约、Runner、Adapter/原子暂存、Host/Job、UI 和真实 Runner/浏览器/NOWRITE 证据，并通过内外实现审查；D4.2 总体方向和子阶段边界已通过内外文档审查。D4.2.1 正在实现，运行时合同/错误码/共享队列与 Hypit manifest lease/Adapter expected SHA 已通过，fork 固定为 `6fdd8c0f02c17b9970aee6deb4550a70e9d57acf`；import journal/service/routes/UI 尚未完成。`docs/architecture/v1-target-system.architecture.html` 是目标系统架构视图，`architecture/d4.2-materialize-adopt.architecture.html` 是 D4.2 全景视图，`architecture/d4.2.1-import-transaction.architecture.html` 是导入事务专项视图，`Narralens-V1-Development-GAP.drawio` 是开发与验收审查视图。
 
 ## 1. 零层架构
 
@@ -96,7 +96,7 @@ narralens/
 | `ProjectWriteActor` | `src/host/projects/` | API → transaction → adapters | D3 fit 与 D4.0 单镜媒体替换已实现 revision、lock、幂等、补偿/attention/recovery | D4.1 禁止调用；提案采用待 D4.2 |
 | `SQLiteEventStore` | `src/host/projects/revision-store.ts` | actor/import ↔ revision/edit journal/import journal/idempotency | D3 已实现 revision/edit journal/event；asset import journal 为 D4.2.1 docs-only | 导入不得增加影片 revision event |
 | `OpenMontageAdapter` | `src/adapters/openmontage/` | Host ↔ ControlledAgentRunner | D2 单提案保留；D4.1 单次 CLI 多提案、完整 provider schema 与真实 audit 已实现 | 禁止直写 Hypit；D4.2 materialize 另阶段 |
-| `HypitAdapter` | `src/adapters/hypit/` | Actor ↔ Author Source + Run | D3 `parameter.adjust` 与 D4.0 `media.replace` 类型化写已实现；D4.2.1 计划加入 expected manifest SHA | fork commit `437563f...` 已固定；@1/@2 安全重载须与首次导入同批交付并重跑 D4.0 |
+| `HypitAdapter` | `src/adapters/hypit/` | Actor ↔ Author Source + Run | D3 `parameter.adjust`、D4.0 `media.replace` 与 D4.2.1 expected manifest SHA 已实现 | fork commit `6fdd8c0...` 已固定；@1/@2 安全重载、TOCTOU/Source 补偿与真实 D4.0 回归已通过 |
 | JSON contracts | `contracts/` | UI/Host/Adapters/Tests | D4.1 合同已实现；D4.2.1 四份 runtime 合同、@1/@2 manifest union 与两项错误码已实现 | 89/89、SHA pin、后续三合同未注册 |
 | D4.2 review contracts | `docs/contracts/d4.2-*` | 文档审查 → 后续运行时合同 | 七份审查快照；D4.2.1 四份已同步 runtime，materialize/adopt 三份仍 docs-only | `docs/contracts/README.md` 映射为权威 |
 
