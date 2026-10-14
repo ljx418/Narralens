@@ -1,0 +1,108 @@
+{
+  "format": "narralens.d40-real-media-e2e@1",
+  "at": "2026-10-14T06:36:04.633Z",
+  "project_id": "d1-30s",
+  "baseline": {
+    "source": "ae4edebf3bf05bb178efd2b264f101b744998c7d3bad29aa1ad7a1dd37fcab3a",
+    "run": "bff6a663f753ac97b546acd1561e95b1aa1aa1239fdd08867a3b28ad782dc738",
+    "narration": "ca8d3773b8dea14ff1950de9f4d991797f0d739743ab250e51a14e24eb2bb07a",
+    "studio_revision": 1,
+    "shot_assets": {
+      "shot-1": "asset_visual_baseline",
+      "shot-2": "asset_visual_baseline",
+      "shot-3": "asset_visual_baseline"
+    }
+  },
+  "alternate": {
+    "response": {
+      "transaction_id": "txn_cfdfc18e317f4a92add1e1ccde45e9de",
+      "project_id": "d1-30s",
+      "previous_revision": 2,
+      "new_revision": 3,
+      "operation": {
+        "op": "replace_visual_asset",
+        "shot_id": "shot-002",
+        "asset_id": "asset_visual_d4_alt"
+      },
+      "status": "committed",
+      "changed": true,
+      "source_sha256": "619dda000cb0cf12b62d5e895b9dad5d6529e574fe442c663460a97f58301944",
+      "run_sha256": "bff6a663f753ac97b546acd1561e95b1aa1aa1239fdd08867a3b28ad782dc738"
+    },
+    "source": "619dda000cb0cf12b62d5e895b9dad5d6529e574fe442c663460a97f58301944",
+    "run": "bff6a663f753ac97b546acd1561e95b1aa1aa1239fdd08867a3b28ad782dc738",
+    "narration": "ca8d3773b8dea14ff1950de9f4d991797f0d739743ab250e51a14e24eb2bb07a",
+    "studio_revision": 2,
+    "shot_assets": {
+      "shot-1": "asset_visual_baseline",
+      "shot-2": "asset_visual_d4_alt",
+      "shot-3": "asset_visual_baseline"
+    }
+  },
+  "idempotent_replay": {
+    "transaction_id": "txn_cfdfc18e317f4a92add1e1ccde45e9de",
+    "repeated_mutation": false
+  },
+  "stale": {
+    "status": 409,
+    "body": {
+      "code": "REVISION_CONFLICT",
+      "message": "Project revision has changed",
+      "correlation_id": "d605e7a7-617a-47e2-b68e-871819aef39a"
+    }
+  },
+  "reopen": {
+    "studio_revision": 1,
+    "host_revision": 3,
+    "shot_assets": {
+      "shot-1": "asset_visual_baseline",
+      "shot-2": "asset_visual_d4_alt",
+      "shot-3": "asset_visual_baseline"
+    }
+  },
+  "restore": {
+    "response": {
+      "transaction_id": "txn_7491138012d6422fb3a896ba465abcc1",
+      "project_id": "d1-30s",
+      "previous_revision": 3,
+      "new_revision": 4,
+      "operation": {
+        "op": "replace_visual_asset",
+        "shot_id": "shot-002",
+        "asset_id": "asset_visual_baseline"
+      },
+      "status": "committed",
+      "changed": true,
+      "source_sha256": "ae4edebf3bf05bb178efd2b264f101b744998c7d3bad29aa1ad7a1dd37fcab3a",
+      "run_sha256": "bff6a663f753ac97b546acd1561e95b1aa1aa1239fdd08867a3b28ad782dc738"
+    },
+    "source": "ae4edebf3bf05bb178efd2b264f101b744998c7d3bad29aa1ad7a1dd37fcab3a",
+    "run": "bff6a663f753ac97b546acd1561e95b1aa1aa1239fdd08867a3b28ad782dc738",
+    "narration": "ca8d3773b8dea14ff1950de9f4d991797f0d739743ab250e51a14e24eb2bb07a"
+  },
+  "final": {
+    "source": "ae4edebf3bf05bb178efd2b264f101b744998c7d3bad29aa1ad7a1dd37fcab3a",
+    "run": "bff6a663f753ac97b546acd1561e95b1aa1aa1239fdd08867a3b28ad782dc738",
+    "narration": "ca8d3773b8dea14ff1950de9f4d991797f0d739743ab250e51a14e24eb2bb07a",
+    "studio_revision": 2,
+    "shot_assets": {
+      "shot-1": "asset_visual_baseline",
+      "shot-2": "asset_visual_baseline",
+      "shot-3": "asset_visual_baseline"
+    },
+    "baseline_restored": true
+  },
+  "invariants": {
+    "frame_count": 900,
+    "target_window": [
+      300,
+      600
+    ],
+    "non_target_assets_unchanged": true,
+    "run_unchanged": true,
+    "narration_unchanged": true,
+    "source_byte_exact_restore": true,
+    "network_provider_calls": 0,
+    "cost": 0
+  }
+}

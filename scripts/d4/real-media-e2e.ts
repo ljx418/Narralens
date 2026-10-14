@@ -8,7 +8,9 @@ import { RevisionStore } from "../../src/host/projects/revision-store.js";
 const root = resolve(import.meta.dirname, "../..");
 const fixture = resolve(root, "fixtures/d1-30s");
 const dbPath = resolve(root, "var/d40-real-e2e.sqlite");
-const evidencePath = resolve(root, "docs/evidence/D4.0/artifacts/real-media-e2e.json");
+const evidencePath = process.env.NARRALENS_D4_EVIDENCE_PATH
+  ? resolve(root, process.env.NARRALENS_D4_EVIDENCE_PATH)
+  : resolve(root, "docs/evidence/D4.0/artifacts/real-media-e2e.json");
 const sourcePath = resolve(fixture, "authors/main.svml");
 const runPath = resolve(fixture, "runs/build.svrun");
 const narrationPath = resolve(fixture, "assets/generated/narration-30s.wav");

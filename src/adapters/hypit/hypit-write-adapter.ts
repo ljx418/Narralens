@@ -141,11 +141,12 @@ export class HypitWriteAdapter {
     return { status: response.status, ...(typeof body.revision === "number" ? { revision: body.revision } : {}), ...(typeof body.error === "string" ? { error: body.error } : {}) };
   }
 
-  async mutateMedia(capture: HypitMediaCapture, assetId: string): Promise<MutationResult> {
+  async mutateMedia(capture: HypitMediaCapture, assetId: string, manifestSha256: string): Promise<MutationResult> {
+    if (!/^[a-f0-9]{64}$/u.test(manifestSha256)) throw new HttpError(409, "MANIFEST_CHANGED", "The expected asset manifest sha256 is invalid");
     const response = await this.#fetch(`${capture.descriptor.studio_origin}/__studio/mutation`, {
       method: "POST", redirect: "manual",
       headers: { "content-type": "application/json", origin: capture.descriptor.studio_origin },
-      body: JSON.stringify({ type: "media.replace", revision: capture.snapshot.revision, itemId: capture.target.id, assetId }),
+      body: JSON.stringify({ type: "media.replace", revision: capture.snapshot.revision, itemId: capture.target.id, assetId, manifestSha256 }),
     });
     const body = await boundedJson(response);
     return { status: response.status, ...(typeof body.revision === "number" ? { revision: body.revision } : {}), ...(typeof body.error === "string" ? { error: body.error } : {}) };

@@ -35,6 +35,8 @@ class FakeMediaHypit {
   injectDrift = false;
   rejectCompensation = false;
   throwAfter = false;
+  driftBeforeError = false;
+  manifestShas: string[] = [];
 
   capture(): HypitMediaCapture {
     const source = `shot-1=${this.otherAsset};shot-2=${this.asset};shot-3=${baseline}`;
@@ -51,10 +53,14 @@ class FakeMediaHypit {
   }
 
   async inspectMedia(): Promise<HypitMediaCapture> { return this.capture(); }
-  async mutateMedia(_capture: HypitMediaCapture, assetId: string): Promise<MutationResult> {
+  async mutateMedia(_capture: HypitMediaCapture, assetId: string, manifestSha256: string): Promise<MutationResult> {
+    this.manifestShas.push(manifestSha256);
     this.mutations += 1;
     if (this.rejectCompensation && this.mutations > 1) return { status: 500 };
-    if (this.status !== 200) return { status: this.status, ...(this.error ? { error: this.error } : {}) };
+    if (this.status !== 200) {
+      if (this.driftBeforeError) this.asset = assetId;
+      return { status: this.status, ...(this.error ? { error: this.error } : {}) };
+    }
     this.asset = assetId;
     if (this.injectDrift) this.otherAsset = assetId === alternate ? alternate : baseline;
     if (this.throwAfter) throw new Error("response lost");
@@ -79,6 +85,7 @@ describe("D4 media ProjectWriteActor", () => {
     expect(first).toMatchObject({ previous_revision: 2, new_revision: 3, changed: true, operation: { op: "replace_visual_asset", asset_id: alternate } });
     expect(replay).toEqual(first);
     expect(value.fake.mutations).toBe(1);
+    expect(value.fake.manifestShas).toEqual([manifest]);
   });
 
   it("rejects a media edit under the visual lock before any mutation", async () => {
@@ -110,13 +117,34 @@ describe("D4 media ProjectWriteActor", () => {
     expect(compensation.store.state("d1-30s", 2).attention).toBe(true);
   });
 
-  it("requires evidence-based recovery when the manifest changes after prepare", async () => {
+  it("maps a manifest lease conflict after Hypit proves Source restoration", async () => {
     const value = setup();
     value.fake.status = 409;
     value.fake.error = "Asset manifest changed outside Studio.";
-    await expect(value.actor.execute("d1-30s", request("manifest-changed"))).rejects.toMatchObject({ status: 423, code: "PROJECT_ATTENTION_REQUIRED" });
+    await expect(value.actor.execute("d1-30s", request("manifest-changed"))).rejects.toMatchObject({ status: 409, code: "MANIFEST_CHANGED" });
     expect(value.fake.asset).toBe(baseline);
+    expect(value.store.state("d1-30s", 2).attention).toBe(false);
+  });
+
+  it("enters attention when a manifest conflict cannot prove Source restoration", async () => {
+    const value = setup();
+    value.fake.status = 409;
+    value.fake.error = "Asset manifest changed outside Studio.";
+    value.fake.driftBeforeError = true;
+    await expect(value.actor.execute("d1-30s", request("manifest-restore-unproved"))).rejects.toMatchObject({
+      status: 423, code: "PROJECT_ATTENTION_REQUIRED",
+    });
     expect(value.store.state("d1-30s", 2).attention).toBe(true);
+  });
+
+  it("keeps ordinary Hypit Source conflicts distinct from manifest conflicts", async () => {
+    const value = setup();
+    value.fake.status = 409;
+    value.fake.error = "The Source changed outside Studio.";
+    await expect(value.actor.execute("d1-30s", request("source-conflict"))).rejects.toMatchObject({
+      status: 409, code: "REVISION_CONFLICT",
+    });
+    expect(value.store.state("d1-30s", 2).attention).toBe(false);
   });
 
   it("enters attention when asset authorization changes after a successful mutation", async () => {
@@ -142,7 +170,7 @@ describe("D4 media ProjectWriteActor", () => {
       narration_before: before.narration_sha256, semantic_before: canonical(before.semantic), source_path: "authors/main.svml",
       source_expected: "", studio_revision_before: 1, compensation_attempt: 0, manifest_sha: manifest };
     value.store.prepare(record, req.idempotency_key, 2);
-    await value.fake.mutateMedia(before, alternate);
+    await value.fake.mutateMedia(before, alternate, manifest);
     await value.actor.recoverIncomplete();
     expect(value.store.state("d1-30s", 2)).toMatchObject({ revision: 3, attention: false });
     expect(value.store.journal(record.transaction_id)?.state).toBe("metadata_committed");

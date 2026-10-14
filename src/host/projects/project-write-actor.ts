@@ -137,7 +137,7 @@ export class ProjectWriteActor {
       return response;
     }
     let mutation;
-    try { mutation = await this.adapter.mutateMedia(before, operation.asset_id); }
+    try { mutation = await this.adapter.mutateMedia(before, operation.asset_id, record.manifest_sha!); }
     catch (error) { return await this.#mediaMutationException(record, before, operation, correlationId, error); }
     if (mutation.status !== 200) return await this.#mediaMutationFailure(record, before, operation, mutation.status, mutation.error, correlationId);
     try {
@@ -188,10 +188,7 @@ export class ProjectWriteActor {
 
   async #mediaMutationFailure(record: JournalRecord, before: HypitMediaCapture, operation: MediaEditOperation,
     status: number, upstreamError: string | undefined, correlationId: string): Promise<never> {
-    if (status === 409 && upstreamError?.toLowerCase().includes("manifest changed")) {
-      this.store.markAttention(record.project_id, record.transaction_id, "MEDIA_MANIFEST_CHANGED_AFTER_PREPARE");
-      throw new HttpError(423, "PROJECT_ATTENTION_REQUIRED", "The asset manifest changed after transaction prepare", undefined, correlationId);
-    }
+    const manifestChanged = status === 409 && upstreamError?.toLowerCase().includes("manifest changed");
     try {
       const current = await this.adapter.inspectMedia(record.project_id, operation.shot_id);
       if (!sameMediaState(current, before)) {
@@ -204,7 +201,8 @@ export class ProjectWriteActor {
       this.store.markAttention(record.project_id, record.transaction_id, "MEDIA_MUTATION_RESULT_UNREADABLE");
       throw new HttpError(423, "PROJECT_ATTENTION_REQUIRED", "Hypit media mutation result could not be verified", undefined, correlationId);
     }
-    if (status === 409) throw new HttpError(409, "REVISION_CONFLICT", "Hypit Studio or its asset manifest changed", undefined, correlationId);
+    if (manifestChanged) throw new HttpError(409, "MANIFEST_CHANGED", "The asset manifest changed before the media mutation completed", undefined, correlationId);
+    if (status === 409) throw new HttpError(409, "REVISION_CONFLICT", "Hypit Studio Source changed", undefined, correlationId);
     if (status === 422) throw new HttpError(422, "UNSUPPORTED_EDIT", "Hypit rejected the typed media edit", undefined, correlationId);
     throw new HttpError(500, "TRANSACTION_FAILED", "Hypit failed before changing the media Source", undefined, correlationId);
   }
@@ -215,7 +213,7 @@ export class ProjectWriteActor {
     try {
       const current = await this.adapter.inspectMedia(projectId, shotId);
       if (sameMediaState(current, before)) { this.store.markCompensated(record.transaction_id); return; }
-      const response = await this.adapter.mutateMedia(current, before.media_asset.asset_id);
+      const response = await this.adapter.mutateMedia(current, before.media_asset.asset_id, record.manifest_sha!);
       if (response.status !== 200) throw new Error("media compensation rejected");
       const restored = await this.adapter.inspectMedia(projectId, shotId);
       if (!sameMediaState(restored, before)) throw new Error("media compensation mismatch");
