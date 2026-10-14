@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://narralens.local/review/d4.2.1-asset-inventory-response.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["format", "manifest_format", "manifest_sha256", "assets"],
+  "properties": {
+    "format": { "const": "narralens.asset-inventory@1.0" },
+    "manifest_format": { "enum": ["narralens.asset-manifest@1", "narralens.asset-manifest@2"] },
+    "manifest_sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "assets": {
+      "type": "array",
+      "maxItems": 256,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["asset_id", "sha256", "media_type", "duration_frames", "source", "license", "availability", "eligible", "blocking_reasons"],
+        "properties": {
+          "asset_id": { "type": "string", "pattern": "^asset_[a-z0-9][a-z0-9_-]{0,63}$" },
+          "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "media_type": { "const": "video/mp4" },
+          "duration_frames": { "type": "integer", "minimum": 1 },
+          "source": {
+            "oneOf": [
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["kind", "label", "lineage"],
+                "properties": {
+                  "kind": { "const": "derived" },
+                  "label": { "type": "string", "minLength": 1, "maxLength": 2048 },
+                  "lineage": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 64,
+                    "uniqueItems": true,
+                    "items": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+                  }
+                }
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["kind", "label"],
+                "properties": {
+                  "kind": { "enum": ["owned", "generated", "licensed"] },
+                  "label": { "type": "string", "minLength": 1, "maxLength": 2048 },
+                  "uri": { "type": "string", "format": "uri", "maxLength": 2048 }
+                }
+              }
+            ]
+          },
+          "license": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["status", "label", "commercial_use"],
+            "properties": {
+              "status": { "enum": ["cleared", "restricted", "unknown"] },
+              "label": { "type": "string", "minLength": 1, "maxLength": 2048 },
+              "commercial_use": { "type": "boolean" }
+            }
+          },
+          "availability": { "enum": ["available", "unavailable"] },
+          "eligible": { "type": "boolean" },
+          "blocking_reasons": {
+            "type": "array",
+            "maxItems": 5,
+            "uniqueItems": true,
+            "items": {
+              "enum": ["LICENSE_NOT_CLEARED", "COMMERCIAL_USE_NOT_ALLOWED", "BYTES_UNAVAILABLE", "HASH_MISMATCH", "MEDIA_INVALID"]
+            }
+          }
+        }
+      }
+    }
+  }
+}

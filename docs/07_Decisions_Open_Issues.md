@@ -61,3 +61,10 @@
 - 2026-10-12：项目负责人批准路线 A，在 Hypit 薄 fork 新增 package-owned typed media mutation；Narralens 自建 SVML AST writer 路线不采用。
 - 固定 slot 覆盖和“只做 fit 提案”均为 No-Go。详见 `implementation/D4-capability-spike-and-route-decision.md`。
 - D4.0 类型化本地媒体替换的实现外审最终 PASS；负责人已创建 `ljx418/hypit`，实现固定在分支 `narralens/d4-typed-media-mutation` 的 commit `437563f977541002066e6ee961f83a67cbebd3c2`，主仓子模块指向该提交。
+
+## D4.2.1 导入与错误边界决策
+
+1. D4.2.1 只接收浏览器选择的本地 MP4 与用户填写的来源/许可声明；不接受远程 URL 导入、不解引用 `source.uri`、不下载、不检索、不生成，也不产生 provider 调用或费用。远程获取仍属于 P1/后续另行审批范围。
+2. `INVALID_MEDIA`（422）与 `MEDIA_TOOL_UNAVAILABLE`（503）是对 P0-08 本地媒体导入既有错误边界的稳定 API 细化，不增加 PRD 功能范围：前者表示输入内容不合格，后者表示 Host 的 ffprobe/ffmpeg 能力不可用。两项必须同步 TypeScript、api-error schema、HTTP 与 UI，不能复用 `MISSING_ASSET` 或 `HYPIT_UNAVAILABLE` 混淆责任。
+3. 库存 availability 在 D4.2.1 不做跨请求缓存；每次 GET 重验 realpath/stat/bytes SHA，并限制并发。该选择优先保证篡改可见性，接受最多 256 项时的读取成本；后续若引入缓存，必须另行设计可证明的新鲜度协议并通过安全复审。
+4. D4.2.1 不创建 `derived` 资产，但 @2 reader 必须兼容合法的既有 derived entry；import metadata 继续拒绝 derived。这样保持格式前向兼容，同时不把 D4.2.2 composite 能力提前实现。

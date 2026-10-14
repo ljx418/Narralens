@@ -1,0 +1,297 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Narralens D4.2.1 本地导入与 Manifest 事务架构",
+    "locale": "zh-CN",
+    "quality_profile": "showcase",
+    "viewBox": [1320, 720],
+    "repository": {
+      "url": "https://github.com/ljx418/Narralens",
+      "provider": "github",
+      "link_mode": "web",
+      "revision": "93c90af8e3266073ac4c218670e70efc7106a509"
+    },
+    "views": [
+      {
+        "id": "import-path",
+        "label": "真实导入",
+        "focus": ["user", "host-api", "asset-import", "project-queue", "asset-registry", "project-media", "import-journal"],
+        "note": "浏览器只上传 bytes 与受限元数据；Host 验证后在项目串行边界内原子登记，不接收绝对路径。"
+      },
+      {
+        "id": "concurrency-path",
+        "label": "并发与恢复",
+        "focus": ["asset-import", "project-queue", "asset-registry", "import-journal", "write-actor"],
+        "note": "导入提交和既有 Source 写共享 ProjectOperationQueue；journal 关闭幂等与崩溃窗口。"
+      },
+      {
+        "id": "compatibility-path",
+        "label": "D4.0 兼容",
+        "focus": ["project-media", "write-actor", "hypit-studio", "hypit-source"],
+        "note": "Hypit 同批支持 @1/@2、expected SHA 与 TOCTOU；restricted 条目可库存但不可 resolve。"
+      }
+    ]
+  },
+  "components": [
+    {
+      "id": "user",
+      "type": "external",
+      "label": "零号用户",
+      "sublabel": "选择 MP4、填写来源与许可",
+      "pos": [20, 222],
+      "size": [165, 78]
+    },
+    {
+      "id": "host-api",
+      "type": "backend",
+      "label": "Local Host API",
+      "sublabel": "same-origin session / multipart",
+      "tag": "需扩展",
+      "sources": [
+        {
+          "path": "src/host/server.ts",
+          "line": 1,
+          "label": "当前 API 与安全入口"
+        }
+      ],
+      "pos": [225, 220],
+      "size": [185, 82]
+    },
+    {
+      "id": "asset-import",
+      "type": "backend",
+      "label": "AssetImportService",
+      "sublabel": "stream / SHA / ffprobe / cleanup",
+      "tag": "D4.2.1 待新增",
+      "pos": [455, 80],
+      "size": [205, 82]
+    },
+    {
+      "id": "project-queue",
+      "type": "messagebus",
+      "label": "ProjectOperationQueue",
+      "sublabel": "import 与 Source 写同项目串行",
+      "tag": "从 Actor 抽取",
+      "sources": [
+        {
+          "path": "src/host/projects/project-write-actor.ts",
+          "line": 10,
+          "label": "当前私有 tails 基线"
+        }
+      ],
+      "pos": [475, 220],
+      "size": [205, 82]
+    },
+    {
+      "id": "asset-registry",
+      "type": "backend",
+      "label": "AssetRegistry",
+      "sublabel": "@1/@2、语义校验、原子迁移",
+      "tag": "需扩展写路径",
+      "sources": [
+        {
+          "path": "src/host/projects/asset-registry.ts",
+          "line": 1,
+          "label": "D4.0 只读基线"
+        }
+      ],
+      "pos": [735, 80],
+      "size": [205, 82]
+    },
+    {
+      "id": "project-media",
+      "type": "database",
+      "label": "Project Media + Manifest",
+      "sublabel": "content-addressed MP4 / 唯一活跃清单",
+      "tag": "原子发布",
+      "pos": [1015, 80],
+      "size": [225, 82]
+    },
+    {
+      "id": "write-actor",
+      "type": "backend",
+      "label": "ProjectWriteActor",
+      "sublabel": "D3/D4.0 已有 Source 事务",
+      "tag": "复用共享队列",
+      "sources": [
+        {
+          "path": "src/host/projects/project-write-actor.ts",
+          "line": 9,
+          "label": "现有写事务 Actor"
+        }
+      ],
+      "pos": [475, 430],
+      "size": [205, 82]
+    },
+    {
+      "id": "import-journal",
+      "type": "database",
+      "label": "RevisionStore + ImportJournal",
+      "sublabel": "idempotency / prepared / committed",
+      "tag": "不增加影片 revision",
+      "sources": [
+        {
+          "path": "src/host/projects/revision-store.ts",
+          "line": 1,
+          "label": "当前 SQLite 事务存储"
+        }
+      ],
+      "pos": [735, 430],
+      "size": [220, 82]
+    },
+    {
+      "id": "hypit-studio",
+      "type": "backend",
+      "label": "Hypit Manifest Lease",
+      "sublabel": "@1/@2 / eligible resolve / TOCTOU",
+      "tag": "fork 同批交付",
+      "pos": [995, 430],
+      "size": [220, 82]
+    },
+    {
+      "id": "hypit-source",
+      "type": "database",
+      "label": "Hypit Author Source + Run",
+      "sublabel": "唯一影片事实源；导入路径 NOWRITE",
+      "tag": "仅 typed mutation 可写",
+      "pos": [1050, 565],
+      "size": [210, 82]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "security-group",
+      "label": "Narralens 本地同源与工程边界",
+      "wraps": ["host-api", "asset-import", "project-queue", "asset-registry", "project-media", "write-actor", "import-journal"]
+    },
+    {
+      "kind": "region",
+      "label": "已有 Source 写入边界",
+      "wraps": ["write-actor", "hypit-studio", "hypit-source"]
+    }
+  ],
+  "connections": [
+    {
+      "id": "user-upload",
+      "from": "user",
+      "to": "host-api",
+      "label": "选择文件 + 元数据",
+      "variant": "emphasis",
+      "fromSide": "right",
+      "toSide": "left",
+      "labelAt": [205, 216]
+    },
+    {
+      "id": "api-import",
+      "from": "host-api",
+      "to": "asset-import",
+      "label": "受限 multipart 流",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "import-queue",
+      "from": "asset-import",
+      "to": "project-queue",
+      "label": "已验证 commit intent",
+      "variant": "security",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "queue-registry",
+      "from": "project-queue",
+      "to": "asset-registry",
+      "label": "单项目 manifest transaction",
+      "variant": "security",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "registry-media",
+      "from": "asset-registry",
+      "to": "project-media",
+      "label": "atomic install + @2",
+      "variant": "security",
+      "labelAt": [978, 176]
+    },
+    {
+      "id": "registry-journal",
+      "from": "asset-registry",
+      "to": "import-journal",
+      "label": "prepare / recover / commit",
+      "variant": "dashed",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "queue-actor",
+      "from": "project-queue",
+      "to": "write-actor",
+      "label": "既有 edit transaction",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelAt": [578, 316]
+    },
+    {
+      "id": "actor-hypit",
+      "from": "write-actor",
+      "to": "hypit-studio",
+      "label": "typed replace + expected SHA",
+      "variant": "emphasis",
+      "fromSide": "bottom",
+      "toSide": "bottom",
+      "via": [[577.5, 548], [970, 548], [970, 530], [1105, 530]],
+      "labelAt": [820, 543]
+    },
+    {
+      "id": "media-hypit",
+      "from": "project-media",
+      "to": "hypit-studio",
+      "label": "重读、租约、bytes 校验",
+      "variant": "security",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "hypit-source-write",
+      "from": "hypit-studio",
+      "to": "hypit-source",
+      "label": "仅既有 D4.0 回归写入",
+      "variant": "dashed",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelAt": [1195, 540]
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "D4.2.1 可见体验",
+      "items": [
+        "真实 MP4 可导入、重启后仍可从库存重读",
+        "来源、许可、synthetic 与阻断原因完整显示",
+        "本阶段不出现绑定、实体化或采用成功状态"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "原子与兼容门限",
+      "items": [
+        "@1 首次成功导入一次迁移 @2；失败保持或补偿原 bytes",
+        "fork 与导入同批交付，D4.0 全回归不得退化",
+        "manifest、导入 journal 与幂等事实可重启恢复"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "NO-GO",
+      "items": [
+        "不接收绝对路径、不访问来源 URI、不调用 Runner",
+        "不注册 materialize/adopt API，不创建 composite 或 record",
+        "导入路径不写 Source、Run、revision 或旁白"
+      ]
+    }
+  ]
+}

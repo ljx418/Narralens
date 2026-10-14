@@ -51,12 +51,26 @@ D3 已通过其中：单镜 visual fit 事务总帧数不变、非目标逐字�
 
 ### C.1 D4.2 素材实体化与采用门限（计划，未实现）
 
-- [ ] 浏览器真实选择本地 MP4；Host 流式导入且 API/证据不暴露绝对路径。
-- [ ] v1 manifest 可读；@1 工程第一次成功导入保留旧条目并原子迁移 v2，失败保持/补偿原 bytes 且无第二活跃清单；同批 Hypit fork 可安全读/重载 @2，D4.0 全回归；派生 composite 使用 `derived + lineage`，不误标 synthetic。
-- [ ] `generated + cleared` 仍明确显示 synthetic；许可可用不等于真实现场，截图与记录不得混淆两者。
+#### C.1.1 D4.2.1 契约、本地导入与资产登记
+
+- [ ] 浏览器真实选择本地 MP4；Host 以受限 multipart/backpressure 流式导入，真实 ffprobe + 完整 ffmpeg decode，API/日志/证据不暴露绝对路径。
+- [ ] @1 manifest 可读；第一次成功新增 identity 保留旧条目并原子迁移 @2，失败保持/补偿原 bytes 且无第二活跃清单；同批 Hypit fork 支持 @1/@2、expected SHA、四次 TOCTOU 复核，D4.0 全回归。
+- [ ] 完整库存不含 `project_path`/绝对路径；restricted/unknown 可见但不可采用。每次 GET 重验 realpath/stat/bytes SHA，无跨请求 availability 缓存；size/mtime 不变的篡改也在下一次读取被发现。
+- [ ] 导入/Source 写复用同一 FIFO `ProjectOperationQueue`；错误不毒化 tail，不同工程可并行；import journal 可重启恢复且不增加 revision event。
+- [ ] `INVALID_MEDIA`/`MEDIA_TOOL_UNAVAILABLE` 已进入 runtime union/schema/HTTP/UI；busboy 版本、lockfile、类型、许可证和供应链审计留证。
+- [ ] materialize route 与虚构 adopt route 仍为 404，向 edits 发送 adopt operation 为 422；无 Job/binding/composite/Source/revision 写。
+- [ ] `generated + cleared` 仍明确显示 synthetic；D4.2.1 不创建 derived，但可读取已有合法 @2 derived。许可可用不等于真实现场。
+- [ ] 专项 Archify 确定性交付保持 9/9、0 error、0 warning；官方 browser evidence 当前环境失败与补充单视口人工检查须分别陈述，不得把后者改写成自动通过。
+
+#### C.1.2 D4.2.2 只读实体化与确定性 composite
+
 - [ ] 每个 Proposal segment 绑定 cleared/commercial asset；短素材、缺许可、hash/MIME 错误均 422 且 Source 不变。
 - [ ] 异步 materialize Job 无假百分比，取消/晚到/Host 重启语义真实；成功 composite 精确覆盖选区且无音轨。
-- [ ] composite 的每个 segment 起点/中点/末帧抽样与输入/recipe 一致，真实 ffprobe 与完整解码通过。
+- [ ] composite 使用 `derived + lineage`，不误标 synthetic；每个 segment 起点/中点/末帧抽样与输入/recipe 一致，真实 ffprobe 与完整解码通过。
+- [ ] 成功只显示“已准备采用”；Source、Run、narration、revision 仍完全不变。
+
+#### C.1.3 D4.2.3 事务采用与交互闭环
+
 - [ ] 缺失或过期 impact approval 返回 428；服务端重算确认快照后才允许采用。
 - [ ] 采用复用 typed `media.replace`，revision 恰好 +1；原 shot Clip/Window identity、旁白、总时长和相邻镜头不变。
 - [ ] 旧 revision、manifest race、visual lock、写入/验证/metadata commit 失败分别产生稳定错误与 abort/compensate/attention 证据。

@@ -1,8 +1,8 @@
 # Narralens V1 规格—架构—开发—验收追踪矩阵
 
 版本：v1.0  
-状态：实际开发已批准；Gate D1、Gate D2、Gate D3、Gate D4.0、Gate D4.1 已通过；D4.2 总体文档方向和修订后的子阶段边界已通过内外审，允许进入 D4.2.1，生产实现未开始。
-事实日期：2026-10-13
+状态：实际开发已批准；Gate D1、Gate D2、Gate D3、Gate D4.0、Gate D4.1 已通过；D4.2 总体文档方向和子阶段边界已通过内外审；D4.2.1 文档整改后通过第二轮外审，允许进入实现守门，生产实现未开始。
+事实日期：2026-10-14
 
 ## 1. 使用规则
 
@@ -25,6 +25,16 @@
 | P0-11 重开与 MP4 | `HypitAdapter`、`RenderService` | D1、D6–D7 | `AT-EXPORT-01` 双导出、重开、改一镜 | MP4、ffprobe、工程哈希 | D1 30 秒夹具通过；真实母项目待 D6–D7 |
 | P0-12 标题/封面 | `DeliveryWorkspace` | 第 2 周 | `AT-DELIVERY-01` 8 标题/4 封面、正文一致性 | 候选记录、人工选择 | not-started |
 | P0-13 发布前检查 | `PreflightChecklist` | D6–D7 | `AT-PREFLIGHT-01` 黑帧/字幕/音量/来源 | 报告、抽样帧、许可清单 | not-started |
+
+### D4.2 子阶段测试映射
+
+| 子阶段 | 总体 D4.2 测试族 | 子阶段测试/证据 | 边界 |
+|---|---|---|---|
+| D4.2.1 | `D42-IMPORT`、`D42-LICENSE-01`、`D42-HYPIT-01`、`D42-SEC-01` 的导入/登记部分 | `D421-CONTRACT/ERRORCODE/HTTP/LIMIT/MEDIA/MIGRATE/IDEMP/QUEUE/HYPIT/INVENTORY/CACHE/NOWRITE/UI/SEC/LARGE/ROUTE/DEP/REG` | 只登记与库存；不 materialize、不 adopt、不写 Source/revision |
+| D4.2.2 | `D42-MAT`、`D42-FRAME`、`D42-JOB`、`D42-SYNTHETIC` | segment binding、recipe、composite、lineage、真实帧抽样与只读 NOWRITE | 只读实体化；只到“已准备采用” |
+| D4.2.3 | `D42-APPROVAL`、`D42-ADOPT`、`D42-ATOMIC`、`D42-E2E` | impact SHA、428、typed media.replace、revision +1、补偿/attention、build/restart | 唯一允许把已批准 composite 写入 Source 的子阶段 |
+
+因此 `D421-*` 只关闭相应 `D42-*` 的前置子集，不得据此把 P0-08、P0-09 或 Gate D4.2 标记为完成。
 
 ## 3. 非功能追踪
 

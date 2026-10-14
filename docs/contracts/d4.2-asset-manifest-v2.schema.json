@@ -46,7 +46,12 @@
                 "properties": {
                   "kind": { "enum": ["owned", "generated", "licensed"] },
                   "label": { "type": "string", "minLength": 1, "maxLength": 2048 },
-                  "uri": { "type": "string", "format": "uri", "maxLength": 2048, "pattern": "^https?://" }
+                  "uri": {
+                    "type": "string",
+                    "format": "uri",
+                    "maxLength": 2048,
+                    "$comment": "Migration compatibility: preserve any URI accepted by AssetManifest @1. New D4.2.1 imports remain restricted to http/https by the import metadata schema; Host never dereferences this field."
+                  }
                 }
               }
             ]
