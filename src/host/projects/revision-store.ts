@@ -1,5 +1,5 @@
 import { DatabaseSync } from "node:sqlite";
-import type { EditResponse } from "../../contracts/types.js";
+import type { AssetImportResponse, EditResponse } from "../../contracts/types.js";
 import { HttpError } from "../api-error.js";
 
 export type JournalState = "prepared" | "source_validated" | "metadata_committed" | "aborted" | "compensated" | "attention";
@@ -24,6 +24,28 @@ export interface JournalRecord {
   studio_revision_before: number;
   compensation_attempt: number;
   manifest_sha?: string;
+}
+
+export type AssetImportJournalState = "prepared" | "bytes_installed" | "manifest_published"
+  | "committed" | "aborted" | "compensated" | "attention";
+
+export interface AssetImportJournalRecord {
+  transaction_id: string;
+  project_id: string;
+  correlation_id: string;
+  idempotency_key: string;
+  request_hash: string;
+  state: AssetImportJournalState;
+  asset_id: string;
+  bytes_sha: string;
+  manifest_before_sha: string;
+  manifest_after_sha: string;
+  manifest_before_json: string;
+  manifest_after_json: string;
+  bytes_created: boolean;
+  response_status?: number;
+  response_json?: string;
+  error_code?: string;
 }
 
 export class RevisionStore {
@@ -55,6 +77,15 @@ export class RevisionStore {
         changed INTEGER NOT NULL, response_json TEXT NOT NULL, created_at TEXT NOT NULL,
         PRIMARY KEY(project_id, revision, transaction_id)
       );
+      CREATE TABLE IF NOT EXISTS asset_import_journal (
+        transaction_id TEXT PRIMARY KEY, project_id TEXT NOT NULL, correlation_id TEXT NOT NULL,
+        idempotency_key TEXT NOT NULL, request_hash TEXT NOT NULL, state TEXT NOT NULL,
+        asset_id TEXT NOT NULL, bytes_sha TEXT NOT NULL, manifest_before_sha TEXT NOT NULL,
+        manifest_after_sha TEXT NOT NULL, manifest_before_json TEXT NOT NULL, manifest_after_json TEXT NOT NULL,
+        bytes_created INTEGER NOT NULL DEFAULT 0, response_status INTEGER, response_json TEXT,
+        error_code TEXT, created_at TEXT NOT NULL, updated_at TEXT NOT NULL,
+        UNIQUE(project_id, idempotency_key)
+      );
     `);
     const columns = this.#db.prepare("PRAGMA table_info(edit_journal)").all() as Array<{ name: string }>;
     if (!columns.some((column) => column.name === "manifest_sha")) {
@@ -70,8 +101,8 @@ export class RevisionStore {
   state(projectId: string, initialRevision: number): { revision: number; visual_locked: boolean; attention: boolean } {
     this.ensureProject(projectId, initialRevision);
     const row = this.#db.prepare("SELECT revision, visual_locked, attention FROM project_state WHERE project_id=?").get(projectId) as Record<string, unknown>;
-    const pending = this.#db.prepare("SELECT 1 AS present FROM edit_journal WHERE project_id=? AND state IN ('prepared','source_validated','attention') LIMIT 1").get(projectId);
-    return { revision: Number(row.revision), visual_locked: Boolean(row.visual_locked), attention: Boolean(row.attention) || Boolean(pending) };
+    return { revision: Number(row.revision), visual_locked: Boolean(row.visual_locked),
+      attention: Boolean(row.attention) || this.#projectHasPending(projectId) };
   }
 
   setVisualLock(projectId: string, initialRevision: number, locked: boolean): void {
@@ -146,6 +177,98 @@ export class RevisionStore {
     } catch (error) { this.#db.exec("ROLLBACK"); throw error; }
   }
 
+  prepareAssetImport(record: AssetImportJournalRecord, initialRevision: number): { status: number; response: AssetImportResponse } | undefined {
+    this.#db.exec("BEGIN IMMEDIATE");
+    try {
+      this.ensureProject(record.project_id, initialRevision);
+      const existing = this.#db.prepare("SELECT request_hash,state,response_status,response_json FROM asset_import_journal WHERE project_id=? AND idempotency_key=?")
+        .get(record.project_id, record.idempotency_key) as Record<string, unknown> | undefined;
+      if (existing !== undefined) {
+        if (String(existing.request_hash) !== record.request_hash) {
+          throw new HttpError(409, "IDEMPOTENCY_KEY_CONFLICT", "The idempotency key was used for a different asset import");
+        }
+        if (existing.state === "committed" && typeof existing.response_status === "number" && typeof existing.response_json === "string") {
+          this.#db.exec("COMMIT");
+          return { status: existing.response_status, response: JSON.parse(existing.response_json) as AssetImportResponse };
+        }
+        throw new HttpError(409, "IDEMPOTENCY_KEY_CONFLICT", "The asset import is incomplete and requires recovery");
+      }
+      const state = this.state(record.project_id, initialRevision);
+      if (state.attention) throw new HttpError(423, "PROJECT_ATTENTION_REQUIRED", "The project requires transaction recovery");
+      const now = new Date().toISOString();
+      this.#db.prepare(`INSERT INTO asset_import_journal(
+        transaction_id,project_id,correlation_id,idempotency_key,request_hash,state,asset_id,bytes_sha,
+        manifest_before_sha,manifest_after_sha,manifest_before_json,manifest_after_json,bytes_created,
+        created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`)
+        .run(record.transaction_id, record.project_id, record.correlation_id, record.idempotency_key,
+          record.request_hash, "prepared", record.asset_id, record.bytes_sha, record.manifest_before_sha,
+          record.manifest_after_sha, record.manifest_before_json, record.manifest_after_json,
+          record.bytes_created ? 1 : 0, now, now);
+      this.#db.exec("COMMIT");
+      return undefined;
+    } catch (error) { this.#db.exec("ROLLBACK"); throw error; }
+  }
+
+  markAssetImportBytesInstalled(transactionId: string, created: boolean): void {
+    const current = this.assetImportJournal(transactionId);
+    if (current?.state !== "prepared") throw new Error("INVALID_ASSET_IMPORT_TRANSITION");
+    this.#db.prepare("UPDATE asset_import_journal SET state='bytes_installed',bytes_created=?,updated_at=? WHERE transaction_id=?")
+      .run(created ? 1 : 0, new Date().toISOString(), transactionId);
+  }
+
+  markAssetImportManifestPublished(transactionId: string): void {
+    this.#assetImportState(transactionId, "manifest_published", ["bytes_installed"]);
+  }
+
+  commitAssetImport(transactionId: string, status: number, response: AssetImportResponse): void {
+    this.#db.exec("BEGIN IMMEDIATE");
+    try {
+      const current = this.assetImportJournal(transactionId);
+      if (current?.state !== "manifest_published") {
+        throw new Error("INVALID_ASSET_IMPORT_TRANSITION");
+      }
+      this.#db.prepare("UPDATE asset_import_journal SET state='committed',response_status=?,response_json=?,updated_at=? WHERE transaction_id=?")
+        .run(status, JSON.stringify(response), new Date().toISOString(), transactionId);
+      const row = this.#db.prepare("SELECT project_id FROM asset_import_journal WHERE transaction_id=?").get(transactionId) as { project_id?: string } | undefined;
+      if (row?.project_id !== undefined && !this.#projectHasPending(row.project_id)) {
+        this.#db.prepare("UPDATE project_state SET attention=0,updated_at=? WHERE project_id=?")
+          .run(new Date().toISOString(), row.project_id);
+      }
+      this.#db.exec("COMMIT");
+    } catch (error) { this.#db.exec("ROLLBACK"); throw error; }
+  }
+
+  markAssetImportAborted(transactionId: string): void { this.#assetImportState(transactionId, "aborted", ["prepared", "bytes_installed"]); }
+  markAssetImportCompensated(transactionId: string): void {
+    this.#assetImportState(transactionId, "compensated", ["bytes_installed", "manifest_published", "attention"]);
+  }
+
+  markAssetImportAttention(projectId: string, transactionId: string, errorCode: string): void {
+    this.#db.exec("BEGIN IMMEDIATE");
+    try {
+      const current = this.assetImportJournal(transactionId);
+      if (current === undefined || current.project_id !== projectId
+        || !["prepared", "bytes_installed", "manifest_published", "attention"].includes(current.state)) {
+        throw new Error("INVALID_ASSET_IMPORT_TRANSITION");
+      }
+      this.#db.prepare("UPDATE asset_import_journal SET state='attention',error_code=?,updated_at=? WHERE transaction_id=?")
+        .run(errorCode, new Date().toISOString(), transactionId);
+      this.#db.prepare("UPDATE project_state SET attention=1,updated_at=? WHERE project_id=?")
+        .run(new Date().toISOString(), projectId);
+      this.#db.exec("COMMIT");
+    } catch (error) { this.#db.exec("ROLLBACK"); throw error; }
+  }
+
+  incompleteAssetImports(): AssetImportJournalRecord[] {
+    return (this.#db.prepare("SELECT * FROM asset_import_journal WHERE state IN ('prepared','bytes_installed','manifest_published','attention') ORDER BY created_at")
+      .all() as Array<Record<string, unknown>>).map(assetImportRecord);
+  }
+
+  assetImportJournal(transactionId: string): AssetImportJournalRecord | undefined {
+    const row = this.#db.prepare("SELECT * FROM asset_import_journal WHERE transaction_id=?").get(transactionId) as Record<string, unknown> | undefined;
+    return row === undefined ? undefined : assetImportRecord(row);
+  }
+
   commit(record: JournalRecord, idempotencyKey: string, response: EditResponse): void {
     this.#db.exec("BEGIN IMMEDIATE");
     try {
@@ -160,8 +283,7 @@ export class RevisionStore {
         .run(record.project_id, response.new_revision, record.transaction_id, response.changed ? 1 : 0, responseJson, new Date().toISOString());
       this.#db.prepare("UPDATE edit_journal SET state='metadata_committed', updated_at=? WHERE transaction_id=?")
         .run(new Date().toISOString(), record.transaction_id);
-      const pending = this.#db.prepare("SELECT 1 AS present FROM edit_journal WHERE project_id=? AND state IN ('prepared','source_validated','attention') LIMIT 1").get(record.project_id);
-      if (!pending) this.#db.prepare("UPDATE project_state SET attention=0, updated_at=? WHERE project_id=?")
+      if (!this.#projectHasPending(record.project_id)) this.#db.prepare("UPDATE project_state SET attention=0, updated_at=? WHERE project_id=?")
         .run(new Date().toISOString(), record.project_id);
       this.#db.exec("COMMIT");
     } catch (error) { this.#db.exec("ROLLBACK"); throw error; }
@@ -184,10 +306,42 @@ export class RevisionStore {
     if (["metadata_committed", "aborted", "compensated"].includes(state)) {
       const row = this.#db.prepare("SELECT project_id FROM edit_journal WHERE transaction_id=?").get(transactionId) as { project_id?: string } | undefined;
       if (row?.project_id !== undefined) {
-        const pending = this.#db.prepare("SELECT 1 AS present FROM edit_journal WHERE project_id=? AND state IN ('prepared','source_validated','attention') LIMIT 1").get(row.project_id);
-        if (!pending) this.#db.prepare("UPDATE project_state SET attention=0, updated_at=? WHERE project_id=?")
+        if (!this.#projectHasPending(row.project_id)) this.#db.prepare("UPDATE project_state SET attention=0, updated_at=? WHERE project_id=?")
           .run(new Date().toISOString(), row.project_id);
       }
     }
   }
+
+  #assetImportState(transactionId: string, state: AssetImportJournalState, allowed: AssetImportJournalState[]): void {
+    const current = this.assetImportJournal(transactionId);
+    if (current === undefined || !allowed.includes(current.state)) throw new Error("INVALID_ASSET_IMPORT_TRANSITION");
+    this.#db.prepare("UPDATE asset_import_journal SET state=?,updated_at=? WHERE transaction_id=?")
+      .run(state, new Date().toISOString(), transactionId);
+    if (["committed", "aborted", "compensated"].includes(state)) {
+      const row = this.#db.prepare("SELECT project_id FROM asset_import_journal WHERE transaction_id=?").get(transactionId) as { project_id?: string } | undefined;
+      if (row?.project_id !== undefined && !this.#projectHasPending(row.project_id)) {
+        this.#db.prepare("UPDATE project_state SET attention=0,updated_at=? WHERE project_id=?")
+          .run(new Date().toISOString(), row.project_id);
+      }
+    }
+  }
+
+  #projectHasPending(projectId: string): boolean {
+    const edit = this.#db.prepare("SELECT 1 AS present FROM edit_journal WHERE project_id=? AND state IN ('prepared','source_validated','attention') LIMIT 1").get(projectId);
+    const asset = this.#db.prepare("SELECT 1 AS present FROM asset_import_journal WHERE project_id=? AND state IN ('prepared','bytes_installed','manifest_published','attention') LIMIT 1").get(projectId);
+    return Boolean(edit) || Boolean(asset);
+  }
+}
+
+function assetImportRecord(row: Record<string, unknown>): AssetImportJournalRecord {
+  return {
+    transaction_id: String(row.transaction_id), project_id: String(row.project_id), correlation_id: String(row.correlation_id),
+    idempotency_key: String(row.idempotency_key), request_hash: String(row.request_hash), state: String(row.state) as AssetImportJournalState,
+    asset_id: String(row.asset_id), bytes_sha: String(row.bytes_sha), manifest_before_sha: String(row.manifest_before_sha),
+    manifest_after_sha: String(row.manifest_after_sha), manifest_before_json: String(row.manifest_before_json),
+    manifest_after_json: String(row.manifest_after_json), bytes_created: Boolean(row.bytes_created),
+    ...(typeof row.response_status === "number" ? { response_status: row.response_status } : {}),
+    ...(typeof row.response_json === "string" ? { response_json: row.response_json } : {}),
+    ...(typeof row.error_code === "string" ? { error_code: row.error_code } : {}),
+  };
 }
