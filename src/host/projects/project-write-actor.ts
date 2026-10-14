@@ -5,15 +5,18 @@ import { HttpError } from "../api-error.js";
 import type { ProjectCatalog } from "./project-catalog.js";
 import { RevisionStore, type JournalRecord } from "./revision-store.js";
 import { AssetRegistry } from "./asset-registry.js";
+import { InMemoryProjectOperationQueue, type ProjectOperationQueue } from "./project-operation-queue.js";
 
 export class ProjectWriteActor {
   readonly adapter: HypitWriteAdapter;
   readonly assets: AssetRegistry;
-  readonly #tails = new Map<string, Promise<void>>();
+  readonly operations: ProjectOperationQueue;
 
-  constructor(readonly catalog: ProjectCatalog, readonly store: RevisionStore, adapter?: HypitWriteAdapter) {
+  constructor(readonly catalog: ProjectCatalog, readonly store: RevisionStore, adapter?: HypitWriteAdapter,
+    operations: ProjectOperationQueue = new InMemoryProjectOperationQueue()) {
     this.adapter = adapter ?? new HypitWriteAdapter(catalog);
     this.assets = new AssetRegistry(catalog);
+    this.operations = operations;
   }
 
   async projectState(projectId: string): Promise<{ revision: number; visual_locked: boolean; attention: boolean }> {
@@ -26,12 +29,7 @@ export class ProjectWriteActor {
   }
 
   execute(projectId: string, request: EditRequest, correlationId = randomUUID()): Promise<EditResponse> {
-    const previous = this.#tails.get(projectId) ?? Promise.resolve();
-    const task = previous.catch(() => undefined).then(() => this.#execute(projectId, request, correlationId));
-    const tail = task.then(() => undefined, () => undefined);
-    this.#tails.set(projectId, tail);
-    void tail.finally(() => { if (this.#tails.get(projectId) === tail) this.#tails.delete(projectId); });
-    return task;
+    return this.operations.run(projectId, () => this.#execute(projectId, request, correlationId));
   }
 
   async #execute(projectId: string, request: EditRequest, correlationId: string): Promise<EditResponse> {

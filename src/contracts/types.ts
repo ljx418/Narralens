@@ -106,7 +106,7 @@ export type ApiErrorCode = "INVALID_REQUEST" | "INVALID_SESSION" | "ORIGIN_REJEC
   | "NOT_FOUND" | "REVISION_CONFLICT" | "INVALID_PROPOSAL" | "INVALID_PROPOSAL_SET" | "PROVIDER_REJECTED"
   | "PROVIDER_OVERLOADED" | "RUNNER_UNAVAILABLE"
   | "RUNNER_TIMEOUT" | "IDEMPOTENCY_KEY_CONFLICT" | "UNSUPPORTED_EDIT"
-  | "MISSING_ASSET" | "MANIFEST_CHANGED" | "AMBIGUOUS_TIME" | "APPROVAL_REQUIRED"
+  | "MISSING_ASSET" | "INVALID_MEDIA" | "MEDIA_TOOL_UNAVAILABLE" | "MANIFEST_CHANGED" | "AMBIGUOUS_TIME" | "APPROVAL_REQUIRED"
   | "TARGET_LOCKED" | "PROJECT_ATTENTION_REQUIRED" | "HYPIT_UNAVAILABLE"
   | "TRANSACTION_FAILED" | "INTERNAL_ERROR";
 
@@ -154,6 +154,61 @@ export interface ProjectResponse {
     duration_frames: number;
     source_label: string;
     license_label: string;
+  }>;
+}
+
+export type AssetSource =
+  | { kind: "owned" | "generated" | "licensed"; label: string; uri?: string }
+  | { kind: "derived"; label: string; lineage: string[] };
+
+export interface AssetLicense {
+  status: "cleared" | "restricted" | "unknown";
+  label: string;
+  commercial_use: boolean;
+}
+
+export interface AssetImportMetadata {
+  idempotency_key: string;
+  source: Exclude<AssetSource, { kind: "derived" }>;
+  license: AssetLicense;
+}
+
+export interface AssetManifestEntry {
+  asset_id: string;
+  project_path: string;
+  sha256: string;
+  media_type: "video/mp4";
+  kind: "video";
+  duration_frames: number;
+  source: AssetSource;
+  license: AssetLicense;
+}
+
+export interface AssetManifest {
+  format: "narralens.asset-manifest@1" | "narralens.asset-manifest@2";
+  assets: AssetManifestEntry[];
+}
+
+export interface AssetImportResponse {
+  format: "narralens.asset-import-response@1.0";
+  asset_id: string;
+  manifest_format: "narralens.asset-manifest@2";
+  manifest_sha256: string;
+  created: boolean;
+  migrated_from_v1: boolean;
+}
+
+export type AssetBlockingReason = "LICENSE_NOT_CLEARED" | "COMMERCIAL_USE_NOT_ALLOWED"
+  | "BYTES_UNAVAILABLE" | "HASH_MISMATCH" | "MEDIA_INVALID";
+
+export interface AssetInventoryResponse {
+  format: "narralens.asset-inventory@1.0";
+  manifest_format: AssetManifest["format"];
+  manifest_sha256: string;
+  assets: Array<Omit<AssetManifestEntry, "project_path" | "kind"> & {
+    availability: "available" | "unavailable";
+    eligible: boolean;
+    blocking_reasons: AssetBlockingReason[];
   }>;
 }
 

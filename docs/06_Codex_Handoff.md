@@ -1,6 +1,6 @@
 # 叙镜 Codex 开发交接 v1.0
 
-当前阶段：生产开发已批准，Gate D1、D2、D3、D4.0、D4.1 已通过。D4.0 路线 A 已实现并通过真实事务、构建、浏览器、内部审查和 Claude Code CLI 外部实现审查，Hypit fork/gitlink 已固定为 `ljx418/hypit@437563f977541002066e6ee961f83a67cbebd3c2`。D4.1 于 2026-10-13 完成生产实现、真实 Runner/浏览器/NOWRITE 验收及内外实现审查。D4.2 总体文档与子阶段边界已通过内外审；D4.2.1 文档整改后通过第二轮外审，允许进入实现守门，生产代码尚未开始。
+当前阶段：生产开发已批准，Gate D1、D2、D3、D4.0、D4.1 已通过。D4.0 路线 A 已实现并通过真实事务、构建、浏览器、内部审查和 Claude Code CLI 外部实现审查，Hypit fork/gitlink 已固定为 `ljx418/hypit@437563f977541002066e6ee961f83a67cbebd3c2`。D4.1 于 2026-10-13 完成生产实现、真实 Runner/浏览器/NOWRITE 验收及内外实现审查。D4.2 总体文档与子阶段边界已通过内外审；D4.2.1 合同/错误码/共享队列实现子阶段已通过 89/89、构建及外审 0/0/0，下一步是 Hypit manifest lease 与 Adapter expected SHA，import route 尚未开放。
 
 ## 你的角色
 你在本地仓库实现 Narralens。先做真实视频工程，再做体验包装。不要把已有 HTML 原型当生产系统。

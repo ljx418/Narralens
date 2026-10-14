@@ -13,6 +13,7 @@ import { HttpError, normalizeError } from "./api-error.js";
 import { JobStore } from "./job-store.js";
 import { ProjectCatalog } from "./projects/project-catalog.js";
 import { ProjectWriteActor } from "./projects/project-write-actor.js";
+import { InMemoryProjectOperationQueue, type ProjectOperationQueue } from "./projects/project-operation-queue.js";
 import { RevisionStore } from "./projects/revision-store.js";
 import { isAllowedBrowserRequest, tokenMatches } from "./security.js";
 
@@ -27,6 +28,7 @@ interface HostDependencies {
   comparisons?: ProposalComparisonAdapter;
   writes?: ProjectWriteActor;
   revisionStore?: RevisionStore;
+  operationQueue?: ProjectOperationQueue;
   sessionTtlMs?: number;
 }
 
@@ -38,6 +40,7 @@ export class NarralensHost {
   readonly comparisons: ProposalComparisonAdapter;
   readonly revisions: RevisionStore;
   readonly writes: ProjectWriteActor;
+  readonly operations: ProjectOperationQueue;
   readonly sessionToken = randomBytes(32).toString("base64url");
   readonly sessionExpiresAt: Date;
   readonly diagnostics = { write_actor_execute_count: 0 };
@@ -51,7 +54,8 @@ export class NarralensHost {
     this.proposals = dependencies.proposals ?? new ProposalAdapter(resolve(projectRoot, "var/proposals"));
     this.comparisons = dependencies.comparisons ?? new ProposalComparisonAdapter(resolve(projectRoot, "var/proposal-comparisons"));
     this.revisions = dependencies.revisionStore ?? new RevisionStore();
-    this.writes = dependencies.writes ?? new ProjectWriteActor(this.catalog, this.revisions);
+    this.operations = dependencies.operationQueue ?? new InMemoryProjectOperationQueue();
+    this.writes = dependencies.writes ?? new ProjectWriteActor(this.catalog, this.revisions, undefined, this.operations);
     this.sessionExpiresAt = new Date(Date.now() + (dependencies.sessionTtlMs ?? 3_600_000));
   }
 

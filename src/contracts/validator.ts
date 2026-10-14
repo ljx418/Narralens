@@ -15,6 +15,9 @@ import editOperationSchema from "../../contracts/edit-operation.schema.json" wit
 import editRequestSchema from "../../contracts/edit-request.schema.json" with { type: "json" };
 import editResponseSchema from "../../contracts/edit-response.schema.json" with { type: "json" };
 import assetManifestSchema from "../../contracts/asset-manifest.schema.json" with { type: "json" };
+import assetImportMetadataSchema from "../../contracts/asset-import-metadata.schema.json" with { type: "json" };
+import assetImportResponseSchema from "../../contracts/asset-import-response.schema.json" with { type: "json" };
+import assetInventoryResponseSchema from "../../contracts/asset-inventory-response.schema.json" with { type: "json" };
 import type { EditRequest, ProposalBundle, ProposalComparison, ProposalComparisonDraft, ProposalComparisonRequest, ProposalRequest } from "./types.js";
 
 const ajv = new Ajv2020({ allErrors: true, strict: true });
@@ -22,6 +25,7 @@ addFormats(ajv);
 for (const schema of [apiErrorSchema, cancelResponseSchema, jobEventSchema, jobResponseSchema,
   projectResponseSchema, proposalBundleSchema, proposalRequestSchema, sessionResponseSchema,
   editOperationSchema, editRequestSchema, editResponseSchema, assetManifestSchema,
+  assetImportMetadataSchema, assetImportResponseSchema, assetInventoryResponseSchema,
   proposalComparisonRequestSchema, proposalComparisonDraftSchema, proposalComparisonSchema]) {
   ajv.addSchema(schema);
 }
@@ -42,6 +46,9 @@ export const contractIds = {
   editRequest: editRequestSchema.$id,
   editResponse: editResponseSchema.$id,
   assetManifest: assetManifestSchema.$id,
+  assetImportMetadata: assetImportMetadataSchema.$id,
+  assetImportResponse: assetImportResponseSchema.$id,
+  assetInventoryResponse: assetInventoryResponseSchema.$id,
 } as const;
 
 export function validatorFor(id: string): ValidateFunction {

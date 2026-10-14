@@ -1,6 +1,6 @@
 # 叙镜架构设计 v1.0
 
-文档状态：目标架构已冻结到语义与代码实体层；Gate D1–D3、D4.0 与 D4.1 已通过。D4.0 路线 A 已产生生产源码、真实事务/构建/浏览器证据并通过内外实现审查，Hypit 薄 fork固定为 `ljx418/hypit@437563f977541002066e6ee961f83a67cbebd3c2`。D4.1 多提案比较已形成生产契约、Runner、Adapter/原子暂存、Host/Job、UI 和真实 Runner/浏览器/NOWRITE 证据，并通过内外实现审查；D4.2 总体方向和子阶段边界已通过内外文档审查。D4.2.1 文档与专项架构整改后通过第二轮外审，允许进入实现守门，生产代码尚未开始。`docs/architecture/v1-target-system.architecture.html` 是目标系统架构视图，`architecture/d4.2-materialize-adopt.architecture.html` 是 D4.2 全景视图，`architecture/d4.2.1-import-transaction.architecture.html` 是导入事务专项视图，`Narralens-V1-Development-GAP.drawio` 是开发与验收审查视图。
+文档状态：目标架构已冻结到语义与代码实体层；Gate D1–D3、D4.0 与 D4.1 已通过。D4.0 路线 A 已产生生产源码、真实事务/构建/浏览器证据并通过内外实现审查，Hypit 薄 fork固定为 `ljx418/hypit@437563f977541002066e6ee961f83a67cbebd3c2`。D4.1 多提案比较已形成生产契约、Runner、Adapter/原子暂存、Host/Job、UI 和真实 Runner/浏览器/NOWRITE 证据，并通过内外实现审查；D4.2 总体方向和子阶段边界已通过内外文档审查。D4.2.1 正在实现，运行时合同/错误码/共享队列已通过，Hypit manifest lease、import journal/service/routes/UI 尚未完成。`docs/architecture/v1-target-system.architecture.html` 是目标系统架构视图，`architecture/d4.2-materialize-adopt.architecture.html` 是 D4.2 全景视图，`architecture/d4.2.1-import-transaction.architecture.html` 是导入事务专项视图，`Narralens-V1-Development-GAP.drawio` 是开发与验收审查视图。
 
 ## 1. 零层架构
 
@@ -91,14 +91,14 @@ narralens/
 | `LocalHost API` | `src/host/server.ts` | UI ↔ actors/adapters | D4.1 comparison job、读取、revision 复核与 NOWRITE diagnostics 已实现 | D4.1 contract/HTTP/NOWRITE tests |
 | `ProposalComparisonAdapter` | `src/adapters/openmontage/` | Runner draft → Host 绑定 → atomic staging | D4.1 已实现 schema、GCD 语义差异、空来源白名单和全有或全无暂存 | D4.1 adapter/真实证据 |
 | `AssetImportService` | `src/host/assets/` | multipart → staging → ffprobe → AssetRegistry | D4.2 docs-only：流式导入，不接收本机绝对路径 | D4.2.1 文档门禁通过，待实现 |
-| `ProjectOperationQueue` | `src/host/projects/project-operation-queue.ts` | ImportService / ProjectWriteActor → 每项目串行 commit | D4.2.1 docs-only：从 Actor 私有 tails 抽取，共享同一实例 | D4.2.1 详细计划外审通过后实现 |
+| `ProjectOperationQueue` | `src/host/projects/project-operation-queue.ts` | ImportService / ProjectWriteActor → 每项目串行 commit | D4.2.1 已实现 interface、FIFO/错误隔离/跨工程并行，Host 单例已注入 Actor | ImportService 实现时必须复用同一实例 |
 | `MaterializeService` / `MaterializeRenderer` | `src/host/materialize/` | Proposal + bindings → ffmpeg composite → materialized staging | D4.2 docs-only：异步 Job、确定性 recipe、NOWRITE | D4.2.2 计划，受 D4.2.1 门禁约束 |
 | `ProjectWriteActor` | `src/host/projects/` | API → transaction → adapters | D3 fit 与 D4.0 单镜媒体替换已实现 revision、lock、幂等、补偿/attention/recovery | D4.1 禁止调用；提案采用待 D4.2 |
 | `SQLiteEventStore` | `src/host/projects/revision-store.ts` | actor/import ↔ revision/edit journal/import journal/idempotency | D3 已实现 revision/edit journal/event；asset import journal 为 D4.2.1 docs-only | 导入不得增加影片 revision event |
 | `OpenMontageAdapter` | `src/adapters/openmontage/` | Host ↔ ControlledAgentRunner | D2 单提案保留；D4.1 单次 CLI 多提案、完整 provider schema 与真实 audit 已实现 | 禁止直写 Hypit；D4.2 materialize 另阶段 |
 | `HypitAdapter` | `src/adapters/hypit/` | Actor ↔ Author Source + Run | D3 `parameter.adjust` 与 D4.0 `media.replace` 类型化写已实现；D4.2.1 计划加入 expected manifest SHA | fork commit `437563f...` 已固定；@1/@2 安全重载须与首次导入同批交付并重跑 D4.0 |
-| JSON contracts | `contracts/` | UI/Host/Adapters/Tests | D4.1 request/draft/final schema、TS 类型、AJV validator 与 comparison_id 已实现 | 生产契约测试与真实结果 |
-| D4.2 review contracts | `docs/contracts/d4.2-*` | 文档审查 → 后续运行时合同 | docs-only：import/materialize/manifest-v2/adopt approval；D4.2.1 增加 import/inventory response | 外审通过后按子阶段同步，不得提前宣称实现 |
+| JSON contracts | `contracts/` | UI/Host/Adapters/Tests | D4.1 合同已实现；D4.2.1 四份 runtime 合同、@1/@2 manifest union 与两项错误码已实现 | 89/89、SHA pin、后续三合同未注册 |
+| D4.2 review contracts | `docs/contracts/d4.2-*` | 文档审查 → 后续运行时合同 | 七份审查快照；D4.2.1 四份已同步 runtime，materialize/adopt 三份仍 docs-only | `docs/contracts/README.md` 映射为权威 |
 
 状态口径：`已实现` 只覆盖对应 Gate 的证据范围，不外推到完整 V1；`docs-only/待后续` 表示目标明确但尚无生产能力。
 
