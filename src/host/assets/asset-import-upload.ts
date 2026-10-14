@@ -3,7 +3,7 @@ import { createWriteStream } from "node:fs";
 import { lstat, mkdir, realpath, rm } from "node:fs/promises";
 import type { IncomingMessage } from "node:http";
 import { resolve, sep } from "node:path";
-import type { Readable } from "node:stream";
+import type { Readable, Writable } from "node:stream";
 import { pipeline } from "node:stream/promises";
 
 import Busboy from "busboy";
@@ -20,6 +20,10 @@ export interface AssetUploadLimits {
   totalBytes?: number;
 }
 
+export interface AssetUploadDependencies {
+  createStagingWrite?: (path: string) => Writable;
+}
+
 export interface StagedAssetUpload {
   metadata: AssetImportMetadata;
   stagingDirectory: string;
@@ -29,7 +33,7 @@ export interface StagedAssetUpload {
 }
 
 export async function receiveAssetUpload(request: IncomingMessage, projectRoot: string,
-  limits: AssetUploadLimits): Promise<StagedAssetUpload> {
+  limits: AssetUploadLimits, dependencies: AssetUploadDependencies = {}): Promise<StagedAssetUpload> {
   const totalLimit = limits.totalBytes ?? limits.fileBytes + transportOverhead;
   if (!Number.isSafeInteger(limits.fileBytes) || limits.fileBytes < 1 || limits.fileBytes >= Number.MAX_SAFE_INTEGER
     || !Number.isSafeInteger(totalLimit)
@@ -40,7 +44,8 @@ export async function receiveAssetUpload(request: IncomingMessage, projectRoot: 
   const stagingDirectory = await secureDirectory(root, [".narralens", "staging", `import-${randomUUID()}`]);
   const filePath = resolve(stagingDirectory, "source.mp4.part");
   try {
-    return await parseMultipart(request, root, stagingRoot, stagingDirectory, filePath, limits.fileBytes, totalLimit);
+    return await parseMultipart(request, root, stagingRoot, stagingDirectory, filePath, limits.fileBytes, totalLimit,
+      dependencies.createStagingWrite ?? ((path) => createWriteStream(path, { flags: "wx", mode: 0o600 })));
   } catch (error) {
     await rm(stagingDirectory, { recursive: true, force: true });
     throw normalizeUploadError(error);
@@ -52,7 +57,7 @@ export async function cleanupStagedAsset(upload: Pick<StagedAssetUpload, "stagin
 }
 
 async function parseMultipart(request: IncomingMessage, root: string, stagingRoot: string, stagingDirectory: string,
-  filePath: string, fileLimit: number, totalLimit: number): Promise<StagedAssetUpload> {
+  filePath: string, fileLimit: number, totalLimit: number, createStagingWrite: (path: string) => Writable): Promise<StagedAssetUpload> {
   let parser: ReturnType<typeof Busboy>;
   try {
     parser = Busboy({ headers: request.headers, limits: {
@@ -122,7 +127,7 @@ async function parseMultipart(request: IncomingMessage, root: string, stagingRoo
         fail(new HttpError(413, "INVALID_REQUEST", "Asset file exceeds the configured limit"));
       });
       stream.on("data", (chunk: Buffer) => { byteLength += chunk.length; digest.update(chunk); });
-      fileWrite = pipeline(stream, createWriteStream(filePath, { flags: "wx", mode: 0o600 })).then(() => undefined);
+      fileWrite = pipeline(stream, createStagingWrite(filePath)).then(() => undefined);
       void fileWrite.catch(fail);
     });
     parser.once("close", done);

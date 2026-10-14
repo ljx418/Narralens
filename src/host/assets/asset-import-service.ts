@@ -11,7 +11,7 @@ import { AssetManifestPublishUncertain, AssetRegistry, assetIdentity } from "../
 import type { ProjectCatalog } from "../projects/project-catalog.js";
 import type { ProjectOperationQueue } from "../projects/project-operation-queue.js";
 import type { AssetImportJournalRecord, RevisionStore } from "../projects/revision-store.js";
-import { cleanupStagedAsset, receiveAssetUpload, type AssetUploadLimits, type StagedAssetUpload } from "./asset-import-upload.js";
+import { cleanupStagedAsset, receiveAssetUpload, type AssetUploadDependencies, type AssetUploadLimits, type StagedAssetUpload } from "./asset-import-upload.js";
 import { validateImportedMedia, type MediaValidationOptions, type ValidatedMedia } from "./media-validator.js";
 
 export interface AssetImportResult {
@@ -21,23 +21,30 @@ export interface AssetImportResult {
 
 export interface AssetImportServiceOptions {
   upload?: AssetUploadLimits;
+  uploadDependencies?: AssetUploadDependencies;
   media?: MediaValidationOptions;
+  contentInstall?: { link?: typeof link };
 }
 
 const defaultUploadLimit = 2 * 1024 * 1024 * 1024;
 
 export class AssetImportService {
   readonly #uploadLimits: AssetUploadLimits;
+  readonly #uploadDependencies: AssetUploadDependencies;
   readonly #mediaOptions: MediaValidationOptions;
+  readonly #contentLink: typeof link;
 
   constructor(readonly catalog: ProjectCatalog, readonly registry: AssetRegistry, readonly revisions: RevisionStore,
     readonly operations: ProjectOperationQueue, options: AssetImportServiceOptions = {}) {
     this.#uploadLimits = options.upload ?? { fileBytes: defaultUploadLimit };
+    this.#uploadDependencies = options.uploadDependencies ?? {};
     this.#mediaOptions = options.media ?? {};
+    this.#contentLink = options.contentInstall?.link ?? link;
   }
 
   async importRequest(projectId: string, request: IncomingMessage, signal?: AbortSignal): Promise<AssetImportResult> {
-    const upload = await receiveAssetUpload(request, this.catalog.descriptorRoot(projectId), this.#uploadLimits);
+    const upload = await receiveAssetUpload(request, this.catalog.descriptorRoot(projectId), this.#uploadLimits,
+      this.#uploadDependencies);
     try {
       if (signal?.aborted) throw new HttpError(400, "INVALID_REQUEST", "Asset import was cancelled");
       const project = await this.catalog.read(projectId);
@@ -94,7 +101,7 @@ export class AssetImportService {
     if (replay !== undefined) return { status: replay.status as 200 | 201, response: replay.response };
 
     try {
-      const bytesCreated = await installContent(plan.before.root, upload.filePath, upload.bytesSha256);
+      const bytesCreated = await installContent(plan.before.root, upload.filePath, upload.bytesSha256, this.#contentLink);
       this.revisions.markAssetImportBytesInstalled(transactionId, bytesCreated);
       const published = plan.created
         ? await this.registry.publish(projectId, plan.before.sha256, plan.after_bytes)
@@ -211,7 +218,7 @@ export class AssetImportService {
   }
 }
 
-async function installContent(rootInput: string, stagedPath: string, bytesSha: string): Promise<boolean> {
+async function installContent(rootInput: string, stagedPath: string, bytesSha: string, installLink: typeof link): Promise<boolean> {
   const root = await realpath(rootInput);
   const stagingRoot = await realpath(resolve(root, ".narralens", "staging"));
   const lexicalSourceFacts = await lstat(stagedPath);
@@ -245,7 +252,7 @@ async function installContent(rootInput: string, stagedPath: string, bytesSha: s
     const sourceHandle = await open(source, "r");
     try { await sourceHandle.sync(); } finally { await sourceHandle.close(); }
     await chmod(source, 0o444);
-    await link(source, destination);
+    await installLink(source, destination);
     linked = true;
     const destinationHandle = await open(destination, "r");
     try { await destinationHandle.sync(); } finally { await destinationHandle.close(); }

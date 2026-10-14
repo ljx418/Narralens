@@ -47,8 +47,15 @@ export class AssetManifestPublishUncertain extends Error {
   }
 }
 
+export type AssetRegistryFaultPoint = "before_manifest_write" | "before_manifest_rename"
+  | "before_manifest_directory_fsync" | "before_manifest_readback";
+
+export interface AssetRegistryDependencies {
+  fault?: (point: AssetRegistryFaultPoint) => void | Promise<void>;
+}
+
 export class AssetRegistry {
-  constructor(private readonly catalog: ProjectCatalog) {}
+  constructor(private readonly catalog: ProjectCatalog, private readonly dependencies: AssetRegistryDependencies = {}) {}
 
   async readManifest(projectId: string): Promise<AssetManifestSnapshot> {
     const descriptor = await this.catalog.readDescriptor(projectId);
@@ -94,8 +101,9 @@ export class AssetRegistry {
     if (current.sha256 !== expectedSha256) throw new HttpError(409, "MANIFEST_CHANGED", "Asset manifest changed before publish");
     assertManifestBytes(bytes);
     const replacementSha = sha256(bytes);
-    await atomicReplace(current.path, bytes, replacementSha);
+    await atomicReplace(current.path, bytes, replacementSha, this.dependencies);
     try {
+      await this.dependencies.fault?.("before_manifest_readback");
       const published = await this.readManifest(projectId);
       if (published.sha256 !== replacementSha) throw new Error("published manifest hash mismatch");
       return published;
@@ -218,19 +226,23 @@ function assertManifestSemantics(manifest: AssetManifest): void {
   }
 }
 
-async function atomicReplace(path: string, bytes: Uint8Array, replacementSha: string): Promise<void> {
+async function atomicReplace(path: string, bytes: Uint8Array, replacementSha: string,
+  dependencies: AssetRegistryDependencies): Promise<void> {
   const directory = dirname(path);
   const temporary = resolve(directory, `.${basename(path)}.narralens-${randomUUID()}.tmp`);
   let handle: Awaited<ReturnType<typeof open>> | undefined;
   let renamed = false;
   try {
     handle = await open(temporary, "wx", 0o600);
+    await dependencies.fault?.("before_manifest_write");
     await handle.writeFile(bytes);
     await handle.sync();
     await handle.close();
     handle = undefined;
+    await dependencies.fault?.("before_manifest_rename");
     await rename(temporary, path);
     renamed = true;
+    await dependencies.fault?.("before_manifest_directory_fsync");
     const parent = await open(directory, "r");
     try { await parent.sync(); } finally { await parent.close(); }
   } catch (error) {

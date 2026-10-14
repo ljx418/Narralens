@@ -1,13 +1,16 @@
 import { createHash } from "node:crypto";
-import { cp, mkdir, mkdtemp, readFile, writeFile } from "node:fs/promises";
+import { cp, mkdir, mkdtemp, readFile, readdir, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 
 import type { AssetImportMetadata, AssetImportResponse, AssetManifest, AssetManifestEntry } from "../../src/contracts/types.js";
 import { NarralensHost } from "../../src/host/server.js";
-import { AssetRegistry, assetIdentity } from "../../src/host/projects/asset-registry.js";
+import { AssetImportService, type AssetImportServiceOptions } from "../../src/host/assets/asset-import-service.js";
+import { AssetRegistry, assetIdentity, type AssetRegistryDependencies } from "../../src/host/projects/asset-registry.js";
 import { ProjectCatalog } from "../../src/host/projects/project-catalog.js";
+import { InMemoryProjectOperationQueue } from "../../src/host/projects/project-operation-queue.js";
+import { ProjectWriteActor } from "../../src/host/projects/project-write-actor.js";
 import { RevisionStore, type AssetImportJournalRecord } from "../../src/host/projects/revision-store.js";
 
 const hosts: NarralensHost[] = [];
@@ -175,6 +178,123 @@ describe("D4.2.1 AssetImportService HTTP transaction", () => {
     await expect(readFile(contentPath)).rejects.toMatchObject({ code: "ENOENT" });
     expect(restartedStore.state("d1-30s", 2)).toMatchObject({ revision: 2, attention: false });
   }, 30_000);
+
+  it("serializes concurrent imports and replays the same key without losing either manifest entry", async () => {
+    const initial = JSON.parse(await readFile(resolve("fixtures/d1-30s/narralens.assets.json"), "utf8")) as AssetManifest;
+    const fixture = await projectFixture(initial);
+    const media = await readFile(resolve("fixtures/d1-30s/assets/generated/visual-alt-10s.mp4"));
+    const started = await startFixture(fixture);
+    const firstMetadata: AssetImportMetadata = { ...metadata, idempotency_key: "import:concurrent:001",
+      source: { kind: "owned", label: "concurrent camera A" } };
+    const secondMetadata: AssetImportMetadata = { ...metadata, idempotency_key: "import:concurrent:002",
+      source: { kind: "owned", label: "concurrent camera B" } };
+    const [first, second] = await Promise.all([
+      postImport(started.origin, started.token, media, firstMetadata),
+      postImport(started.origin, started.token, media, secondMetadata),
+    ]);
+    expect([first.status, second.status]).toEqual([201, 201]);
+    const [firstBody, secondBody] = await Promise.all([first.json() as Promise<AssetImportResponse>, second.json() as Promise<AssetImportResponse>]);
+    expect(firstBody.asset_id).not.toBe(secondBody.asset_id);
+    const manifest = JSON.parse(await readFile(fixture.manifestPath, "utf8")) as AssetManifest;
+    expect(manifest.assets.map((asset) => asset.asset_id)).toEqual(expect.arrayContaining([firstBody.asset_id, secondBody.asset_id]));
+    expect(new Set(manifest.assets.map((asset) => asset.asset_id)).size).toBe(manifest.assets.length);
+
+    const replayMetadata: AssetImportMetadata = { ...metadata, idempotency_key: "import:concurrent:replay",
+      source: { kind: "owned", label: "concurrent exact replay" } };
+    const beforeReplay = manifest.assets.length;
+    const [replayA, replayB] = await Promise.all([
+      postImport(started.origin, started.token, media, replayMetadata),
+      postImport(started.origin, started.token, media, replayMetadata),
+    ]);
+    expect([replayA.status, replayB.status]).toEqual([201, 201]);
+    expect(await replayA.json()).toEqual(await replayB.json());
+    const afterReplay = JSON.parse(await readFile(fixture.manifestPath, "utf8")) as AssetManifest;
+    expect(afterReplay.assets).toHaveLength(beforeReplay + 1);
+    expect(started.host.revisions.state("d1-30s", 2)).toMatchObject({ revision: 2, attention: false });
+    expect(started.host.diagnostics.write_actor_execute_count).toBe(0);
+  }, 60_000);
+
+  it("compensates content-install, manifest-temp and rename faults without changing authored or manifest facts", async () => {
+    for (const fault of ["content-link", "manifest-write", "manifest-rename"] as const) {
+      const initial = JSON.parse(await readFile(resolve("fixtures/d1-30s/narralens.assets.json"), "utf8")) as AssetManifest;
+      const fixture = await projectFixture(initial);
+      const media = withFreeAtom(await readFile(resolve("fixtures/d1-30s/assets/generated/visual-alt-10s.mp4")),
+        fault === "content-link" ? 1 : fault === "manifest-write" ? 2 : 3);
+      const bytesSha = createHash("sha256").update(media).digest("hex");
+      const beforeManifest = await readFile(fixture.manifestPath);
+      const beforeAuthored = await authoredHashes(fixture.root);
+      const started = await startFaultFixture(fixture, fault === "content-link"
+        ? { imports: { contentInstall: { link: async () => { throw injectedFsError("ENOSPC"); } } } }
+        : { registry: { fault: (point) => {
+          if (point === (fault === "manifest-write" ? "before_manifest_write" : "before_manifest_rename")) {
+            throw injectedFsError(fault === "manifest-write" ? "ENOSPC" : "EIO");
+          }
+        } } });
+      const response = await postImport(started.origin, started.token, media, { ...metadata,
+        idempotency_key: `import:fault:${fault}`, source: { kind: "owned", label: `fault ${fault}` } });
+      expect(response.status).toBe(500);
+      expect(await response.json()).toMatchObject({ code: "TRANSACTION_FAILED" });
+      expect(await readFile(fixture.manifestPath)).toEqual(beforeManifest);
+      await expect(readFile(join(fixture.root, "media", bytesSha, "source.mp4"))).rejects.toMatchObject({ code: "ENOENT" });
+      expect(await readdir(join(fixture.root, ".narralens/staging"))).toEqual([]);
+      expect(await authoredHashes(fixture.root)).toEqual(beforeAuthored);
+      expect(started.host.revisions.state("d1-30s", 2)).toMatchObject({ revision: 2, attention: false });
+      await started.host.close();
+      hosts.splice(hosts.indexOf(started.host), 1);
+    }
+  }, 60_000);
+
+  it("restores the exact manifest after one-shot post-publish faults and enters attention when durability stays unprovable", async () => {
+    for (const point of ["before_manifest_directory_fsync", "before_manifest_readback"] as const) {
+      const initial = JSON.parse(await readFile(resolve("fixtures/d1-30s/narralens.assets.json"), "utf8")) as AssetManifest;
+      const fixture = await projectFixture(initial);
+      const media = withFreeAtom(await readFile(resolve("fixtures/d1-30s/assets/generated/visual-alt-10s.mp4")),
+        point === "before_manifest_directory_fsync" ? 4 : 5);
+      const bytesSha = createHash("sha256").update(media).digest("hex");
+      const beforeManifest = await readFile(fixture.manifestPath);
+      let hits = 0;
+      const started = await startFaultFixture(fixture, { registry: { fault: (observed) => {
+        if (observed === point && hits++ === 0) throw injectedFsError("EIO");
+      } } });
+      const response = await postImport(started.origin, started.token, media, { ...metadata,
+        idempotency_key: `import:${point}:once`, source: { kind: "owned", label: `${point} once` } });
+      expect(response.status).toBe(500);
+      expect(await response.json()).toMatchObject({ code: "TRANSACTION_FAILED" });
+      expect(await readFile(fixture.manifestPath)).toEqual(beforeManifest);
+      await expect(readFile(join(fixture.root, "media", bytesSha, "source.mp4"))).rejects.toMatchObject({ code: "ENOENT" });
+      expect(await readdir(join(fixture.root, ".narralens/staging"))).toEqual([]);
+      expect(started.host.revisions.state("d1-30s", 2)).toMatchObject({ revision: 2, attention: false });
+      expect(started.host.diagnostics.write_actor_execute_count).toBe(0);
+      await started.host.close();
+      hosts.splice(hosts.indexOf(started.host), 1);
+    }
+
+    for (const persistent of [false, true]) {
+      const initial = JSON.parse(await readFile(resolve("fixtures/d1-30s/narralens.assets.json"), "utf8")) as AssetManifest;
+      const fixture = await projectFixture(initial);
+      const media = withFreeAtom(await readFile(resolve("fixtures/d1-30s/assets/generated/visual-alt-10s.mp4")),
+        persistent ? 6 : 7);
+      const bytesSha = createHash("sha256").update(media).digest("hex");
+      const beforeManifest = await readFile(fixture.manifestPath);
+      let hits = 0;
+      const started = await startFaultFixture(fixture, { registry: { fault: (point) => {
+        if (point === "before_manifest_directory_fsync" && (persistent || hits++ === 0)) throw injectedFsError("EIO");
+      } } });
+      const response = await postImport(started.origin, started.token, media, { ...metadata,
+        idempotency_key: `import:fsync:${persistent ? "persistent" : "once"}`,
+        source: { kind: "owned", label: `fsync ${persistent ? "persistent" : "once"}` } });
+      expect(response.status).toBe(persistent ? 423 : 500);
+      expect(await response.json()).toMatchObject({ code: persistent ? "PROJECT_ATTENTION_REQUIRED" : "TRANSACTION_FAILED" });
+      expect(await readFile(fixture.manifestPath)).toEqual(beforeManifest);
+      expect(started.host.revisions.state("d1-30s", 2)).toMatchObject({ revision: 2, attention: persistent });
+      if (persistent) expect(await readFile(join(fixture.root, "media", bytesSha, "source.mp4"))).toEqual(media);
+      else await expect(readFile(join(fixture.root, "media", bytesSha, "source.mp4"))).rejects.toMatchObject({ code: "ENOENT" });
+      expect(await readdir(join(fixture.root, ".narralens/staging"))).toEqual([]);
+      expect(started.host.diagnostics.write_actor_execute_count).toBe(0);
+      await started.host.close();
+      hosts.splice(hosts.indexOf(started.host), 1);
+    }
+  }, 60_000);
 });
 
 async function projectFixture(manifest: AssetManifest): Promise<{ root: string; descriptorPath: string; manifestPath: string }> {
@@ -189,6 +309,22 @@ async function projectFixture(manifest: AssetManifest): Promise<{ root: string; 
 async function startFixture(fixture: { descriptorPath: string }): Promise<{ host: NarralensHost; origin: string; token: string }> {
   const catalog = new ProjectCatalog(new Map([["d1-30s", fixture.descriptorPath]]));
   const host = new NarralensHost({ catalog, revisionStore: new RevisionStore() });
+  hosts.push(host);
+  const port = await host.listen(0);
+  const origin = `http://127.0.0.1:${port}`;
+  const session = await fetch(`${origin}/api/session`, { headers: { origin } });
+  return { host, origin, token: (await session.json() as { token: string }).token };
+}
+
+async function startFaultFixture(fixture: { descriptorPath: string }, faults:
+  { registry?: AssetRegistryDependencies; imports?: AssetImportServiceOptions }): Promise<{ host: NarralensHost; origin: string; token: string }> {
+  const catalog = new ProjectCatalog(new Map([["d1-30s", fixture.descriptorPath]]));
+  const revisions = new RevisionStore();
+  const operations = new InMemoryProjectOperationQueue();
+  const registry = new AssetRegistry(catalog, faults.registry);
+  const writes = new ProjectWriteActor(catalog, revisions, undefined, operations, registry);
+  const imports = new AssetImportService(catalog, registry, revisions, operations, faults.imports);
+  const host = new NarralensHost({ catalog, revisionStore: revisions, operationQueue: operations, writes, imports });
   hosts.push(host);
   const port = await host.listen(0);
   const origin = `http://127.0.0.1:${port}`;
@@ -215,4 +351,16 @@ async function authoredHashes(root: string): Promise<Record<string, string>> {
   const files = ["authors/main.svml", "runs/build.svrun", "assets/generated/narration-30s.wav"];
   return Object.fromEntries(await Promise.all(files.map(async (file) => [file,
     createHash("sha256").update(await readFile(join(root, file))).digest("hex")] as const)));
+}
+
+function injectedFsError(code: "ENOSPC" | "EIO"): NodeJS.ErrnoException {
+  return Object.assign(new Error(`injected ${code}`), { code });
+}
+
+function withFreeAtom(media: Buffer, marker: number): Buffer {
+  const atom = Buffer.alloc(9);
+  atom.writeUInt32BE(atom.length, 0);
+  atom.write("free", 4, "ascii");
+  atom[8] = marker;
+  return Buffer.concat([media, atom]);
 }

@@ -5,6 +5,7 @@ import { mkdir, mkdtemp, readFile, readdir, symlink, writeFile } from "node:fs/p
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { promisify } from "node:util";
+import { Writable } from "node:stream";
 import { afterEach, describe, expect, it } from "vitest";
 
 import { cleanupStagedAsset, receiveAssetUpload } from "../../src/host/assets/asset-import-upload.js";
@@ -78,6 +79,49 @@ describe("D4.2.1 streaming asset upload", () => {
     const body = multipartBody("chunked-boundary", Buffer.from("mp4"));
     const response = await postChunkedMultipart(root, body, "chunked-boundary", 20, 40);
     expect(response.status).toBe(413);
+    expect(await readdir(join(root, ".narralens/staging"))).toEqual([]);
+  });
+
+  it("cleans private staging when the client disconnects during a chunked file part", async () => {
+    const root = await mkdtemp(join(tmpdir(), "narralens-upload-abort-"));
+    const server = createUploadServer(root, 4 * 1024 * 1024);
+    servers.push(server);
+    await new Promise<void>((done) => server.listen(0, "127.0.0.1", done));
+    const address = server.address();
+    if (address === null || typeof address === "string") throw new Error("TEST_SERVER_ADDRESS_UNAVAILABLE");
+    const boundary = "abort-mid-file-boundary";
+    const outgoing = httpRequest({ hostname: "127.0.0.1", port: address.port, method: "POST", path: "/",
+      headers: { "content-type": `multipart/form-data; boundary=${boundary}`, "transfer-encoding": "chunked" } });
+    outgoing.on("error", () => undefined);
+    outgoing.write(fieldPart("metadata", JSON.stringify({
+      idempotency_key: "upload:abort:1", source: { kind: "owned", label: "abort fixture" },
+      license: { status: "cleared", label: "owned", commercial_use: true },
+    }), "application/json", boundary));
+    outgoing.write(Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="file"; filename="take.mp4"\r\nContent-Type: video/mp4\r\n\r\n`));
+    outgoing.write(Buffer.alloc(256 * 1024, 1));
+    await waitFor(async () => (await readdir(join(root, ".narralens/staging")).catch(() => [])).length > 0);
+    outgoing.destroy();
+    await waitFor(async () => (await readdir(join(root, ".narralens/staging")).catch(() => [])).length === 0);
+  });
+
+  it("maps a staging ENOSPC write failure and removes the private staging directory", async () => {
+    const root = await mkdtemp(join(tmpdir(), "narralens-upload-enospc-"));
+    const body = multipartBody("enospc-boundary", Buffer.from("mp4"));
+    const server = createUploadServer(root, 1024, undefined, () => new Writable({
+      write(_chunk, _encoding, callback) {
+        const error = Object.assign(new Error("injected staging full"), { code: "ENOSPC" });
+        callback(error);
+      },
+    }));
+    servers.push(server);
+    await new Promise<void>((done) => server.listen(0, "127.0.0.1", done));
+    const address = server.address();
+    if (address === null || typeof address === "string") throw new Error("TEST_SERVER_ADDRESS_UNAVAILABLE");
+    const response = await fetch(`http://127.0.0.1:${address.port}/`, { method: "POST",
+      headers: { "content-type": "multipart/form-data; boundary=enospc-boundary" },
+      body: body.buffer.slice(body.byteOffset, body.byteOffset + body.byteLength) as ArrayBuffer });
+    expect(response.status).toBe(500);
+    expect(await response.json()).toMatchObject({ code: "TRANSACTION_FAILED" });
     expect(await readdir(join(root, ".narralens/staging"))).toEqual([]);
   });
 
@@ -179,11 +223,13 @@ async function postChunkedMultipart(root: string, body: Buffer, boundary: string
   });
 }
 
-function createUploadServer(root: string, fileBytes: number, totalBytes?: number): ReturnType<typeof createServer> {
+function createUploadServer(root: string, fileBytes: number, totalBytes?: number,
+  createStagingWrite?: (path: string) => Writable): ReturnType<typeof createServer> {
   return createServer((request, response) => {
     void (async () => {
       try {
-        const upload = await receiveAssetUpload(request, root, { fileBytes, ...(totalBytes === undefined ? {} : { totalBytes }) });
+        const upload = await receiveAssetUpload(request, root, { fileBytes, ...(totalBytes === undefined ? {} : { totalBytes }) },
+          createStagingWrite ? { createStagingWrite } : {});
         await cleanupStagedAsset(upload);
         response.writeHead(200, { connection: "close" });
         response.end();
@@ -217,4 +263,12 @@ function fieldPart(name: string, value: string, type: string, boundary?: string)
 function filePart(name: string, filename: string, type: string, bytes: Buffer, boundary: string): Buffer {
   return Buffer.concat([Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="${name}"; filename="${filename}"\r\nContent-Type: ${type}\r\n\r\n`),
     bytes, Buffer.from("\r\n")]);
+}
+
+async function waitFor(predicate: () => Promise<boolean>, timeoutMs = 3_000): Promise<void> {
+  const deadline = Date.now() + timeoutMs;
+  while (!await predicate()) {
+    if (Date.now() >= deadline) throw new Error("TEST_WAIT_TIMEOUT");
+    await new Promise((done) => setTimeout(done, 10));
+  }
 }

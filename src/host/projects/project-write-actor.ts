@@ -13,9 +13,9 @@ export class ProjectWriteActor {
   readonly operations: ProjectOperationQueue;
 
   constructor(readonly catalog: ProjectCatalog, readonly store: RevisionStore, adapter?: HypitWriteAdapter,
-    operations: ProjectOperationQueue = new InMemoryProjectOperationQueue()) {
+    operations: ProjectOperationQueue = new InMemoryProjectOperationQueue(), assets?: AssetRegistry) {
     this.adapter = adapter ?? new HypitWriteAdapter(catalog);
-    this.assets = new AssetRegistry(catalog);
+    this.assets = assets ?? new AssetRegistry(catalog);
     this.operations = operations;
   }
 
