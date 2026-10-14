@@ -1,6 +1,6 @@
 {
   "format": "narralens.d421-substage-evidence@1",
-  "generated_at": "2026-10-14T14:45:00+08:00",
+  "generated_at": "2026-10-14T20:10:58+08:00",
   "stage": "D4.2.1 implementation evidence through streaming upload and media validation",
   "status": "substage-passed-d4.2.1-remains-in-progress",
   "repositories": {
@@ -9,6 +9,7 @@
     "registry_journal_implementation_commit": "a12a4e40e8d513681168e9dc4487536887d064b1",
     "upload_media_implementation_commit": "73f11f1abfa4d3729ce9f33585443e99a98c176d",
     "import_service_implementation_commit": "81c6c23f0d761fa417af99e16b10817bf5f12011",
+    "upload_exact_limit_fix_commit": "e4f59bfc6e9b818906800f7d97d37f4b0c30c58c",
     "hypit_commit": "6fdd8c0f02c17b9970aee6deb4550a70e9d57acf",
     "hypit_branch": "narralens/d4-typed-media-mutation",
     "worktree_note": "This manifest and status synchronization are finalized by the documentation commit after the implementation commit."
@@ -66,19 +67,21 @@
     "dependency_audit": "No known vulnerabilities found"
   },
   "import_service_external_review": {
-    "result": "BLOCKED_BY_CLAUDE_CODE_429",
-    "allow_ui": false,
-    "critical_count": null,
-    "major_count": null,
-    "note": "Full-context independent review did not complete; no PASS is claimed."
+    "result": "PASS",
+    "allow_ui": true,
+    "critical_count": 0,
+    "major_count": 0,
+    "minor_count": 0,
+    "review_artifact": "artifacts/d421-import-service-claude-review.md",
+    "note": "Full-context Claude Code review retracted all six prior excerpt-based allegations."
   },
   "artifact_sha256": {
     "artifacts/d4.0-real-media-regression.json": "5404457a4c4dad1a99d26ec491e44ce74a584f53cf0cdab79824f4d124b88cd3",
     "artifacts/busboy-1.6.0-LICENSE.txt": "9f75981e6039d13bf2e591c59e9c89a2641ca605fde59ba78974b11553f6c148",
-    "artifacts/d421-dependency-audit.md": "e7594a638b77dacd3562abb61e7e572d73744e42baedf79461827cd7c28a1a6c"
+    "artifacts/d421-dependency-audit.md": "e7594a638b77dacd3562abb61e7e572d73744e42baedf79461827cd7c28a1a6c",
+    "artifacts/d421-import-service-claude-review.md": "3f9f1656156514ed54549c3dc80bc1c37ffc9c923d6aec0f3e7e295d4cceeeb0"
   },
   "remaining_scope": [
-    "ImportService full-context external review and issue closure",
     "bounded-memory and expanded fault-injection evidence",
     "HostApiClient and accessible import/inventory UI",
     "final D4.2.1 regression, evidence and internal/external implementation audit"
