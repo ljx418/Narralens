@@ -10,6 +10,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import { cleanupStagedAsset, receiveAssetUpload } from "../../src/host/assets/asset-import-upload.js";
 import { validateImportedMedia } from "../../src/host/assets/media-validator.js";
 import { HttpError, normalizeError } from "../../src/host/api-error.js";
+import { buildAssetImportRequest } from "../../src/app/director/api/HostApiClient.js";
 
 const servers: Array<ReturnType<typeof createServer>> = [];
 const execute = promisify(execFile);
@@ -33,6 +34,18 @@ describe("D4.2.1 streaming asset upload", () => {
     const exact = await postMultipart(exactRoot, multipartBody("exact-limit-boundary", Buffer.from("mp4")),
       "exact-limit-boundary", 3);
     expect(exact.status).toBe(200);
+  });
+
+  it("accepts the browser client's exact multipart wire format", async () => {
+    const root = await mkdtemp(join(tmpdir(), "narralens-upload-browser-wire-"));
+    const file = Buffer.from("browser-mp4-wire-bytes");
+    const request = buildAssetImportRequest(new Blob([file]), {
+      idempotency_key: "upload:browser:1", source: { kind: "owned", label: "browser file" },
+      license: { status: "cleared", label: "owned", commercial_use: true },
+    });
+    const response = await postMultipart(root, Buffer.from(await request.body.arrayBuffer()), request.boundary, 1024);
+    expect(response.status).toBe(200);
+    expect(await response.json()).toMatchObject({ byteLength: file.length, idempotencyKey: "upload:browser:1" });
   });
 
   it("rejects unknown or duplicate parts, incorrect part MIME and file overflow without leaving staging", async () => {

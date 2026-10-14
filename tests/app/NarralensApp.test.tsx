@@ -1,10 +1,11 @@
 // @vitest-environment happy-dom
 import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import axe from "axe-core";
 import { afterEach, describe, expect, it } from "vitest";
 import { NarralensApp } from "../../src/app/director/NarralensApp.js";
 import { HostApiClient, HostApiError } from "../../src/app/director/api/HostApiClient.js";
-import type { EditRequest, EditResponse, JobEvent, JobResponse, ProjectResponse, ProposalComparison, ProposalComparisonRequest } from "../../src/contracts/types.js";
+import type { AssetImportMetadata, AssetImportResponse, AssetInventoryResponse, EditRequest, EditResponse, JobEvent, JobResponse, ProjectResponse, ProposalComparison, ProposalComparisonRequest } from "../../src/contracts/types.js";
 
 const project: ProjectResponse = { project_id: "d1-30s", revision: 2, frame_rate: 30, frame_count: 900,
   shots: [{ shot_id: "shot-001", start_frame: 0, end_frame_exclusive: 300 }], preview: { kind: "hypit-studio", url: "http://127.0.0.1:4174/" },
@@ -19,12 +20,27 @@ const comparison: ProposalComparison = { schema_version: "1.0", kind: "narralens
     strategy: { kind: (["chronology", "contrast", "evidence-led"] as const)[index - 1]!, rationale: `方案 ${index} 理由` }, summary: `方案 ${index} 摘要`,
     segments: [{ segment_id: `s${index}`, duration_frames: 300, role: "anchor" as const, intent: `方案 ${index} 视觉意图`, asset_requirement_ids: [] }],
     assets_needed: [], source_refs: [], materialization_cost: { status: "unknown" as const, currency: null, amount: null }, requires_materialization: true as const, renderable: false as const })) };
+const inventory: AssetInventoryResponse = {
+  format: "narralens.asset-inventory@1.0", manifest_format: "narralens.asset-manifest@2", manifest_sha256: "c".repeat(64),
+  assets: [
+    { asset_id: "asset_visual_baseline", sha256: "a".repeat(64), media_type: "video/mp4", duration_frames: 300,
+      source: { kind: "generated", label: "本地基线素材" }, license: { status: "cleared", label: "项目自生成", commercial_use: true },
+      availability: "available", eligible: true, blocking_reasons: [] },
+    { asset_id: "asset_restricted", sha256: "b".repeat(64), media_type: "video/mp4", duration_frames: 300,
+      source: { kind: "licensed", label: "审片参考素材" }, license: { status: "restricted", label: "仅内部审片", commercial_use: false },
+      availability: "available", eligible: false, blocking_reasons: ["LICENSE_NOT_CLEARED", "COMMERCIAL_USE_NOT_ALLOWED"] },
+    { asset_id: "asset_unavailable", sha256: "f".repeat(64), media_type: "video/mp4", duration_frames: 300,
+      source: { kind: "generated", label: "待恢复生成素材" }, license: { status: "unknown", label: "许可待确认", commercial_use: false },
+      availability: "unavailable", eligible: false, blocking_reasons: ["LICENSE_NOT_CLEARED", "COMMERCIAL_USE_NOT_ALLOWED", "BYTES_UNAVAILABLE"] },
+  ],
+};
 
 class FakeClient extends HostApiClient {
   request: ProposalComparisonRequest | undefined;
   constructor(private readonly fail = false) { super("http://unused"); }
   override async start(): Promise<void> {}
   override async project(): Promise<ProjectResponse> { return project; }
+  override async assets(): Promise<AssetInventoryResponse> { return inventory; }
   override async createProposal(_id: string, _request: ProposalComparisonRequest): Promise<JobResponse> {
     this.request = _request;
     if (this.fail) throw new HostApiError(529, "PROVIDER_OVERLOADED", "Provider is overloaded");
@@ -66,6 +82,35 @@ class MediaClient extends FakeClient {
     this.editRequest = request;
     return { transaction_id: "txn_media_ui", project_id: "d1-30s", previous_revision: 2, new_revision: 3,
       operation: request.operations[0], status: "committed", changed: true, source_sha256: "a".repeat(64), run_sha256: "b".repeat(64) };
+  }
+}
+
+class AssetClient extends FakeClient {
+  importedMetadata: AssetImportMetadata | undefined;
+  importedFile: File | undefined;
+  assetCalls = 0;
+  override async assets(): Promise<AssetInventoryResponse> {
+    this.assetCalls += 1;
+    if (this.assetCalls === 1) return inventory;
+    return { ...inventory, assets: [...inventory.assets, {
+      asset_id: "asset_imported", sha256: "d".repeat(64), media_type: "video/mp4", duration_frames: 300,
+      source: { kind: "owned", label: "我的实拍" }, license: { status: "cleared", label: "自有版权", commercial_use: true },
+      availability: "available", eligible: true, blocking_reasons: [],
+    }] };
+  }
+  override async importAsset(_id: string, file: File, value: AssetImportMetadata,
+    options: { signal?: AbortSignal; onUploadComplete?: () => void } = {}): Promise<AssetImportResponse> {
+    this.importedFile = file; this.importedMetadata = value; options.onUploadComplete?.();
+    return { format: "narralens.asset-import-response@1.0", asset_id: "asset_imported",
+      manifest_format: "narralens.asset-manifest@2", manifest_sha256: "e".repeat(64), created: true, migrated_from_v1: false };
+  }
+}
+
+class CancellableAssetClient extends FakeClient {
+  override async importAsset(_id: string, _file: File, _value: AssetImportMetadata,
+    options: { signal?: AbortSignal; onUploadComplete?: () => void } = {}): Promise<AssetImportResponse> {
+    return await new Promise((_resolve, reject) => options.signal?.addEventListener("abort",
+      () => reject(new DOMException("cancelled", "AbortError")), { once: true }));
   }
 }
 
@@ -130,5 +175,50 @@ describe("D2 Director UI", () => {
     await user.click(screen.getByRole("button", { name: "生成并比较提案" })); await user.click(await screen.findByRole("button", { name: "取消" }));
     await screen.findByText("已取消"); await user.click(screen.getByRole("button", { name: "生成并比较提案" }));
     expect((await screen.findAllByText("B方案 1", {}, { timeout: 1500 })).length).toBeGreaterThan(0); expect(screen.queryByText("A方案 1")).toBeNull();
+  });
+
+  it("imports a browser-selected MP4 with provenance and refreshes the public inventory", async () => {
+    const user = userEvent.setup(); const client = new AssetClient(); render(<NarralensApp client={client} />);
+    await screen.findByText("审片参考素材");
+    expect(screen.getAllByText("合成/生成画面")).toHaveLength(2);
+    expect(screen.getAllByText(/许可尚未清除；未声明可商业使用/)).toHaveLength(2);
+    expect(screen.getByText("待恢复生成素材")).toBeTruthy();
+    expect(screen.getByText("文件不可用")).toBeTruthy();
+    expect(screen.getByText("许可待确认 · 未知")).toBeTruthy();
+    expect(screen.getByText(/媒体文件不可用/)).toBeTruthy();
+    const file = new File(["real-browser-bytes"], "camera-take.mp4", { type: "video/mp4" });
+    await user.upload(screen.getByLabelText("本地 MP4 文件"), file);
+    await user.type(screen.getByLabelText("来源标签"), "我的实拍");
+    await user.type(screen.getByLabelText("许可标签"), "自有版权");
+    await user.click(screen.getByRole("button", { name: "验证并登记资产" }));
+    expect(await screen.findByText("资产已登记")).toBeTruthy();
+    expect(screen.getByText("已登记，未进入时间轴。")).toBeTruthy();
+    expect(screen.getByText("我的实拍")).toBeTruthy();
+    expect(client.importedFile).toBe(file);
+    expect(client.importedMetadata).toMatchObject({ source: { kind: "owned", label: "我的实拍" },
+      license: { status: "cleared", label: "自有版权", commercial_use: true } });
+  });
+
+  it("focuses a repairable import error and supports cancelling the browser request", async () => {
+    const user = userEvent.setup(); render(<NarralensApp client={new CancellableAssetClient()} />);
+    await screen.findByText("全部登记资产");
+    await user.click(screen.getByRole("button", { name: "验证并登记资产" }));
+    const error = await screen.findByRole("alert");
+    expect(error.textContent).toContain("请选择一个 MP4 文件");
+    await waitFor(() => expect(document.activeElement).toBe(error));
+    await user.upload(screen.getByLabelText("本地 MP4 文件"), new File(["bytes"], "take.mp4", { type: "video/mp4" }));
+    await user.type(screen.getByLabelText("来源标签"), "待取消实拍");
+    await user.type(screen.getByLabelText("许可标签"), "自有版权");
+    await user.click(screen.getByRole("button", { name: "验证并登记资产" }));
+    await user.click(await screen.findByRole("button", { name: "取消本次导入" }));
+    expect(await screen.findByText(/已取消浏览器请求/)).toBeTruthy();
+    expect((screen.getByLabelText("本地 MP4 文件") as HTMLInputElement).files?.[0]?.name).toBe("take.mp4");
+  });
+
+  it("has no critical or serious automated accessibility violations in the inventory state", async () => {
+    render(<NarralensApp client={new FakeClient()} />);
+    await screen.findByText("审片参考素材");
+    const result = await axe.run(document.body, { resultTypes: ["violations"] });
+    expect(result.violations.filter((violation) => violation.impact === "critical" || violation.impact === "serious")).toEqual([]);
   });
 });

@@ -12,6 +12,7 @@
     "build": "vite build",
     "start": "tsx src/host/start.ts",
     "recover": "tsx src/host/recover.ts",
+    "evidence:d421-large": "tsx tests/evidence/d421-large-upload-evidence.ts",
     "test": "vitest run --config vitest.config.ts",
     "test:contracts": "vitest run --config vitest.config.ts tests/contracts"
   },
