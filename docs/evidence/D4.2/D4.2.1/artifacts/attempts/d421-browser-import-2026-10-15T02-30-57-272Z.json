@@ -1,0 +1,209 @@
+{
+  "format": "narralens.d421-browser-import-evidence@1",
+  "executed_at": "2026-10-15T02:30:57.272Z",
+  "status": "passed",
+  "failures": [],
+  "browser": "Google Chrome headless via CDP",
+  "interaction": "file injected through CDP; remaining form path is Tab/text/Enter keyboard input",
+  "keyboard": [
+    {
+      "action": "CDP setFileInputFiles 后聚焦文件控件",
+      "focus": {
+        "tag": "INPUT",
+        "id": "asset-file",
+        "type": "file",
+        "text": ""
+      }
+    },
+    {
+      "action": "Tab",
+      "focus": {
+        "tag": "SELECT",
+        "id": "source-kind",
+        "type": null,
+        "text": "自有授权生成"
+      }
+    },
+    {
+      "action": "Tab",
+      "focus": {
+        "tag": "SELECT",
+        "id": "license-status",
+        "type": null,
+        "text": "已清除受限未知"
+      }
+    },
+    {
+      "action": "Tab",
+      "focus": {
+        "tag": "INPUT",
+        "id": "source-label",
+        "type": null,
+        "text": ""
+      }
+    },
+    {
+      "action": "键盘输入来源标签",
+      "focus": {
+        "tag": "INPUT",
+        "id": "source-label",
+        "type": null,
+        "text": ""
+      }
+    },
+    {
+      "action": "Tab",
+      "focus": {
+        "tag": "INPUT",
+        "id": "license-label",
+        "type": null,
+        "text": ""
+      }
+    },
+    {
+      "action": "键盘输入许可标签",
+      "focus": {
+        "tag": "INPUT",
+        "id": "license-label",
+        "type": null,
+        "text": ""
+      }
+    },
+    {
+      "action": "Tab",
+      "focus": {
+        "tag": "INPUT",
+        "id": "source-uri",
+        "type": "url",
+        "text": ""
+      }
+    },
+    {
+      "action": "Tab",
+      "focus": {
+        "tag": "BUTTON",
+        "id": null,
+        "type": "submit",
+        "text": "验证并登记资产"
+      }
+    },
+    {
+      "action": "Enter 提交",
+      "focus": {
+        "tag": "BUTTON",
+        "id": null,
+        "type": "submit",
+        "text": "上传中"
+      }
+    }
+  ],
+  "observed": {
+    "success_copy": true,
+    "imported": {
+      "asset_id": "asset_f9d3847f90b9ad02b6eda96b8db54963e584c99b0e999d863394d7ba38f23b35",
+      "duration_frames": 300,
+      "source": {
+        "kind": "owned",
+        "label": "浏览器键盘验收素材"
+      },
+      "license": {
+        "commercial_use": true,
+        "label": "自有商业使用许可",
+        "status": "cleared"
+      },
+      "availability": "available",
+      "eligible": true,
+      "blocking_reasons": []
+    },
+    "manifest_format": "narralens.asset-manifest@2",
+    "manifest_entry_present": true,
+    "project_revision": 2,
+    "database_state": {
+      "revision": 2,
+      "attention": 0
+    },
+    "journal": {
+      "state": "committed",
+      "response_status": 201,
+      "asset_id": "asset_f9d3847f90b9ad02b6eda96b8db54963e584c99b0e999d863394d7ba38f23b35",
+      "bytes_sha": "95b24adfd889fac7d63c5f7ead20d76595d63ef47aa5c17c55b5de7e621572aa",
+      "error_code": null
+    },
+    "authored_byte_exact_unchanged": true,
+    "manifest_changed": true,
+    "project_path_visible": false
+  },
+  "layout": {
+    "viewport_width": 1414,
+    "document_width": 1399,
+    "viewport_height": 1100,
+    "document_height": 2629,
+    "device_pixel_ratio": 1
+  },
+  "axe": {
+    "version": "4.10.3",
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "targets": [
+          [
+            "#intent"
+          ]
+        ]
+      }
+    ],
+    "incomplete_adjudicated": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "targets": [
+          [
+            "#intent"
+          ]
+        ],
+        "adjudication": "manual-computed-contrast-pass"
+      }
+    ]
+  },
+  "manual_checks": {
+    "color_contrast": [
+      {
+        "selector": ".frame > span",
+        "foreground": "rgb(237, 242, 247)",
+        "background": "rgb(9, 13, 18)",
+        "font_size_px": 42,
+        "font_weight": 800,
+        "minimum": 3,
+        "ratio": 17.3,
+        "pass": true
+      },
+      {
+        "selector": ".frame > strong",
+        "foreground": "rgb(237, 242, 247)",
+        "background": "rgb(9, 13, 18)",
+        "font_size_px": 12,
+        "font_weight": 700,
+        "minimum": 4.5,
+        "ratio": 17.3,
+        "pass": true
+      },
+      {
+        "selector": "#intent",
+        "foreground": "rgb(237, 242, 247)",
+        "background": "rgb(21, 27, 35)",
+        "font_size_px": 14,
+        "font_weight": 400,
+        "minimum": 4.5,
+        "ratio": 15.37,
+        "pass": true
+      }
+    ]
+  },
+  "claim_limits": [
+    "File chooser bytes were supplied with CDP setFileInputFiles because headless Chrome has no OS file dialog.",
+    "This artifact proves 100% browser interaction only; 200% Chrome page zoom is recorded separately.",
+    "No screen-reader compatibility claim is made by this artifact."
+  ]
+}

@@ -37,6 +37,6 @@
 
 如需改变以上口径，先更新 `07_Decisions_Open_Issues.md`，再改代码。
 
-## 当前阶段（2026-10-14）
+## 当前阶段（2026-10-15）
 
-V1 目标原型、开发计划与实际开发均已批准。Gate D1、D2、D3、D4.0、D4.1 已通过；P0-08 仍为 partial。D4.2 总体开发计划、跨阶段契约和 Archify 全景架构已通过文档门禁；D4.2.1 的合同/共享队列、Hypit lease/expected SHA、AssetRegistry/import journal 三个实现子阶段均通过，当前 100/100，fork 固定到 `6fdd8c0f02c17b9970aee6deb4550a70e9d57acf`；ImportService、multipart/routes/UI 仍未完成。D4.2 文档入口为 `implementation/D4.2-development-and-acceptance-plan.md`、`implementation/D4.2.1-development-and-acceptance-plan.md`、`implementation/D4.2.1-contract-queue-implementation-audit.md`、`implementation/D4.2.1-hypit-lease-implementation-audit.md`、`implementation/D4.2.1-registry-journal-implementation-audit.md`、`evidence/D4.2/D4.2.1/evidence-manifest.json`、`architecture/d4.2-materialize-adopt.architecture.html` 和 `architecture/d4.2.1-import-transaction.architecture.html`。原型入口仍为 `prototype-v1/index.html`，当前生产 UI 位于 `src/app/director/`。
+V1 目标原型、开发计划与实际开发均已批准。Gate D1、D2、D3、D4.0、D4.1 已通过；P0-08 仍为 partial。D4.2 总体开发计划、跨阶段契约和 Archify 全景架构已通过文档门禁。D4.2.1 生产实现及 Headless 浏览器 100%/原生 200% 交互证据已完成，全量门禁为 16 个测试文件、126/126；内部总审计已通过，正在等待独立外部总审计，因此尚未宣告 D4.2.1 Gate 通过，也尚未进入 D4.2.2。Hypit fork 固定到 `6fdd8c0f02c17b9970aee6deb4550a70e9d57acf`。D4.2 文档入口为 `implementation/D4.2-development-and-acceptance-plan.md`、`implementation/D4.2.1-development-and-acceptance-plan.md`、`implementation/D4.2.1-internal-implementation-audit.md`、`evidence/D4.2/D4.2.1/evidence-manifest.json`、`architecture/d4.2-materialize-adopt.architecture.html` 和 `architecture/d4.2.1-import-transaction.architecture.html`。原型入口仍为 `prototype-v1/index.html`，当前生产 UI 位于 `src/app/director/`。

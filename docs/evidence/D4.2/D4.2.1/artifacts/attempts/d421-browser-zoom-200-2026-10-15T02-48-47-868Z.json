@@ -1,0 +1,285 @@
+{
+  "format": "narralens.d421-browser-import-evidence@1",
+  "executed_at": "2026-10-15T02:48:47.868Z",
+  "status": "failed",
+  "failures": [
+    "core asset layout overlaps or leaves the viewport"
+  ],
+  "browser": "Google Chrome 155 headless with native profile zoom factor 2.0 from partition.default_zoom_level.x; CDP used only for observation and file injection",
+  "interaction": "file injected through CDP; remaining form path is Tab/text/Enter keyboard input",
+  "keyboard": [
+    {
+      "action": "CDP setFileInputFiles 后聚焦文件控件",
+      "focus": {
+        "tag": "INPUT",
+        "id": "asset-file",
+        "type": "file",
+        "text": ""
+      }
+    },
+    {
+      "action": "Tab",
+      "focus": {
+        "tag": "SELECT",
+        "id": "source-kind",
+        "type": null,
+        "text": "自有授权生成"
+      }
+    },
+    {
+      "action": "Tab",
+      "focus": {
+        "tag": "SELECT",
+        "id": "license-status",
+        "type": null,
+        "text": "已清除受限未知"
+      }
+    },
+    {
+      "action": "Tab",
+      "focus": {
+        "tag": "INPUT",
+        "id": "source-label",
+        "type": null,
+        "text": ""
+      }
+    },
+    {
+      "action": "键盘输入来源标签",
+      "focus": {
+        "tag": "INPUT",
+        "id": "source-label",
+        "type": null,
+        "text": ""
+      }
+    },
+    {
+      "action": "Tab",
+      "focus": {
+        "tag": "INPUT",
+        "id": "license-label",
+        "type": null,
+        "text": ""
+      }
+    },
+    {
+      "action": "键盘输入许可标签",
+      "focus": {
+        "tag": "INPUT",
+        "id": "license-label",
+        "type": null,
+        "text": ""
+      }
+    },
+    {
+      "action": "Tab",
+      "focus": {
+        "tag": "INPUT",
+        "id": "source-uri",
+        "type": "url",
+        "text": ""
+      }
+    },
+    {
+      "action": "Tab",
+      "focus": {
+        "tag": "BUTTON",
+        "id": null,
+        "type": "submit",
+        "text": "验证并登记资产"
+      }
+    },
+    {
+      "action": "Enter 提交",
+      "focus": {
+        "tag": "BODY",
+        "id": null,
+        "type": null,
+        "text": "叙NarralensAI 导演工作台想法精修交付浅深系统REAL PROJECT"
+      }
+    }
+  ],
+  "observed": {
+    "success_copy": true,
+    "imported": {
+      "asset_id": "asset_f9d3847f90b9ad02b6eda96b8db54963e584c99b0e999d863394d7ba38f23b35",
+      "duration_frames": 300,
+      "source": {
+        "kind": "owned",
+        "label": "浏览器键盘验收素材"
+      },
+      "license": {
+        "commercial_use": true,
+        "label": "自有商业使用许可",
+        "status": "cleared"
+      },
+      "availability": "available",
+      "eligible": true,
+      "blocking_reasons": []
+    },
+    "manifest_format": "narralens.asset-manifest@2",
+    "manifest_entry_present": true,
+    "project_revision": 2,
+    "database_state": {
+      "revision": 2,
+      "attention": 0
+    },
+    "journal": {
+      "state": "committed",
+      "response_status": 201,
+      "asset_id": "asset_f9d3847f90b9ad02b6eda96b8db54963e584c99b0e999d863394d7ba38f23b35",
+      "bytes_sha": "95b24adfd889fac7d63c5f7ead20d76595d63ef47aa5c17c55b5de7e621572aa",
+      "error_code": null
+    },
+    "authored_byte_exact_unchanged": true,
+    "manifest_changed": true,
+    "project_path_visible": false
+  },
+  "layout": {
+    "viewport_width": 707,
+    "document_width": 699,
+    "viewport_height": 550,
+    "document_height": 4301,
+    "device_pixel_ratio": 2,
+    "outer_width": 1440,
+    "outer_height": 1200,
+    "visual_viewport_scale": 1,
+    "core": {
+      "form": {
+        "x": 32,
+        "y": -160.3515625,
+        "width": 635.5,
+        "height": 813.5,
+        "top": -160.3515625,
+        "right": 667.5,
+        "bottom": 653.1484375,
+        "left": 32
+      },
+      "inventory": {
+        "x": 32,
+        "y": 677.1484375,
+        "width": 635.5,
+        "height": 615.5,
+        "top": 677.1484375,
+        "right": 667.5,
+        "bottom": 1292.6484375,
+        "left": 32
+      },
+      "file": {
+        "x": 51,
+        "y": -75.8515625,
+        "width": 597.5,
+        "height": 42,
+        "top": -75.8515625,
+        "right": 648.5,
+        "bottom": -33.8515625,
+        "left": 51
+      },
+      "submit": {
+        "x": 51,
+        "y": 509.1484375,
+        "width": 597.5,
+        "height": 41,
+        "top": 509.1484375,
+        "right": 648.5,
+        "bottom": 550.1484375,
+        "left": 51
+      }
+    },
+    "clipped_controls": []
+  },
+  "zoom": {
+    "expected_factor": 2,
+    "observed_factor_from_dpr": 2,
+    "baseline": {
+      "captured_at": "2026-10-15T02:48:42.612Z",
+      "browser": "Chrome/155.0.8059.40",
+      "url": "http://127.0.0.1:4174/",
+      "title": "Narralens · AI 导演工作台",
+      "device_pixel_ratio": 1,
+      "viewport_width": 1414,
+      "viewport_height": 1100,
+      "outer_width": 1440,
+      "outer_height": 1200,
+      "document_width": 1399,
+      "document_height": 1622,
+      "visual_viewport_scale": 1,
+      "native_zoom_marker": null,
+      "native_zoom_error": null
+    },
+    "outer_css_metrics_unchanged": true,
+    "configuration": {
+      "mechanism": "isolated Chrome profile native default zoom preference",
+      "preference": "partition.default_zoom_level.x",
+      "zoom_level": 3.8017840169239308,
+      "factor_from_preference": 2
+    },
+    "note": "The 100% and 200% Headless runs use the same outer window dimensions; native zoom is established by the isolated Chrome preference plus the DPR and CSS viewport ratios."
+  },
+  "axe": {
+    "version": "4.10.3",
+    "violations": [],
+    "incomplete": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "targets": [
+          [
+            "#intent"
+          ]
+        ]
+      }
+    ],
+    "incomplete_adjudicated": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "targets": [
+          [
+            "#intent"
+          ]
+        ],
+        "adjudication": "manual-computed-contrast-pass"
+      }
+    ]
+  },
+  "manual_checks": {
+    "color_contrast": [
+      {
+        "selector": ".frame > span",
+        "foreground": "rgb(237, 242, 247)",
+        "background": "rgb(9, 13, 18)",
+        "font_size_px": 22,
+        "font_weight": 800,
+        "minimum": 3,
+        "ratio": 17.3,
+        "pass": true
+      },
+      {
+        "selector": ".frame > strong",
+        "foreground": "rgb(237, 242, 247)",
+        "background": "rgb(9, 13, 18)",
+        "font_size_px": 12,
+        "font_weight": 700,
+        "minimum": 4.5,
+        "ratio": 17.3,
+        "pass": true
+      },
+      {
+        "selector": "#intent",
+        "foreground": "rgb(237, 242, 247)",
+        "background": "rgb(21, 27, 35)",
+        "font_size_px": 14,
+        "font_weight": 400,
+        "minimum": 4.5,
+        "ratio": 15.37,
+        "pass": true
+      }
+    ]
+  },
+  "claim_limits": [
+    "File chooser bytes were supplied with CDP setFileInputFiles because headless Chrome has no OS file dialog.",
+    "This artifact proves the keyboard import path at native Headless Chrome 200% page zoom configured in an isolated profile and independently read back through preference, DPR and viewport ratios.",
+    "No screen-reader compatibility claim is made by this artifact."
+  ]
+}

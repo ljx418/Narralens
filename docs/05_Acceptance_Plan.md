@@ -8,7 +8,7 @@
 | Gate DOC（已通过） | 从任一 P0 追踪到实体、阶段、测试和证据 | MD、7 页 Draw.io、Archify 全系统图、内审与 Claude Code CLI 外审 | 内审和外审均无未关闭致命/重大问题；实际开发已于 2026-10-12 获批 | 继续修订文档；未批准不得开发 |
 | Gate D1（已通过，限制已声明） | 30 秒预览→导出→关闭→重开→改一镜→再导出 | 双 MP4、日志、命令、SHA、license、哈希/帧样本 | 声画正确、改动持久、接口来自事实；无字幕夹具不得声称字幕通过 | 停止业务 UI |
 | Gate D4.1（已通过，限制已声明） | 同一真实镜头→真实生成三案→键盘比较 | CLI audit、Comparison、结构签名、四类工程 SHA、写 Actor 计数、浏览器截图 | 3–6 全有或全无；只读、无采用、无工程写；内外审 0 未关闭问题 | 打回 D4.1 文档或实现 |
-| Gate D4.2（文档门禁通过，代码未开始） | 选方案→本地导入/绑定→核对许可/影响→采用→真实预览 | import/ffprobe、composite recipe/边界帧、journal、Source/Run/MP4、浏览器证据 | revision +1；旁白/时长/相邻镜头/stable shot 不变；失败可补偿 | 打回 D4.2 文档或对应子阶段 |
+| Gate D4.2（D4.2.1 内审通过，外审待完成） | 选方案→本地导入/绑定→核对许可/影响→采用→真实预览 | import/ffprobe、composite recipe/边界帧、journal、Source/Run/MP4、浏览器证据 | revision +1；旁白/时长/相邻镜头/stable shot 不变；失败可补偿 | 打回 D4.2 文档或对应子阶段 |
 | Gate V1 | 真实章节定位→比较→保留旁白采用→锁→恢复→重开→再导出 | 3–5 分钟、20+ 镜头、3 处采用链、失败/性能证据 | PRD、架构、实现、证据一致 | 打回对应开发阶段 |
 
 只有自动化 Gate 与零号用户人工体验 Gate 同时通过，才可声明阶段完成。
@@ -49,18 +49,18 @@
 
 D3 已通过其中：单镜 visual fit 事务总帧数不变、非目标逐字段不变、`preserve=narration` 资产哈希不变、visual 锁 423、旧 revision 409、失败补偿/attention 与真实 Source baseline 恢复。它只证明 visual 这一项主动锁；narration/duration 主动锁、历史恢复和整个 C 章节均未通过，不能由追踪矩阵中的 `partial` 推导为 P0-07 完成。
 
-### C.1 D4.2 素材实体化与采用门限（计划，未实现）
+### C.1 D4.2 素材实体化与采用门限（D4.2.1 候选完成，D4.2.2–D4.2.3 未实现）
 
-#### C.1.1 D4.2.1 契约、本地导入与资产登记
+#### C.1.1 D4.2.1 契约、本地导入与资产登记（实现及内审通过，外审待完成）
 
-- [ ] 浏览器真实选择本地 MP4；Host 以受限 multipart/backpressure 流式导入，真实 ffprobe + 完整 ffmpeg decode，API/日志/证据不暴露绝对路径。
-- [ ] @1 manifest 可读；第一次成功新增 identity 保留旧条目并原子迁移 @2，失败保持/补偿原 bytes 且无第二活跃清单；同批 Hypit fork 支持 @1/@2、expected SHA、四次 TOCTOU 复核，D4.0 全回归。
-- [ ] 完整库存不含 `project_path`/绝对路径；restricted/unknown 可见但不可采用。每次 GET 重验 realpath/stat/bytes SHA，无跨请求 availability 缓存；size/mtime 不变的篡改也在下一次读取被发现。
-- [ ] 导入/Source 写复用同一 FIFO `ProjectOperationQueue`；错误不毒化 tail，不同工程可并行；import journal 可重启恢复且不增加 revision event。
-- [ ] `INVALID_MEDIA`/`MEDIA_TOOL_UNAVAILABLE` 已进入 runtime union/schema/HTTP/UI；busboy 版本、lockfile、类型、许可证和供应链审计留证。
-- [ ] materialize route 与虚构 adopt route 仍为 404，向 edits 发送 adopt operation 为 422；无 Job/binding/composite/Source/revision 写。
-- [ ] `generated + cleared` 仍明确显示 synthetic；D4.2.1 不创建 derived，但可读取已有合法 @2 derived。许可可用不等于真实现场。
-- [ ] 专项 Archify 确定性交付保持 9/9、0 error、0 warning；官方 browser evidence 当前环境失败与补充单视口人工检查须分别陈述，不得把后者改写成自动通过。
+- [x] 浏览器在 Headless Chrome 中真实选择本地 MP4；Host 以受限 multipart/backpressure 流式导入，真实 ffprobe + 完整 ffmpeg decode，API/日志/证据不暴露绝对路径。
+- [x] @1 manifest 可读；第一次成功新增 identity 保留旧条目并原子迁移 @2，失败保持/补偿原 bytes 且无第二活跃清单；同批 Hypit fork 支持 @1/@2、expected SHA、四次 TOCTOU 复核，D4.0 全回归。
+- [x] 完整库存不含 `project_path`/绝对路径；restricted/unknown 可见但不可采用。每次 GET 重验 realpath/stat/bytes SHA，无跨请求 availability 缓存；size/mtime 不变的篡改也在下一次读取被发现。
+- [x] 导入/Source 写复用同一 FIFO `ProjectOperationQueue`；错误不毒化 tail，不同工程可并行；import journal 可重启恢复且不增加 revision event。
+- [x] `INVALID_MEDIA`/`MEDIA_TOOL_UNAVAILABLE` 已进入 runtime union/schema/HTTP/UI；busboy 版本、lockfile、类型、许可证和供应链审计留证。
+- [x] materialize route 与虚构 adopt route 仍为 404，向 edits 发送 adopt operation 为 422；无 Job/binding/composite/Source/revision 写。
+- [x] `generated + cleared` 仍明确显示 synthetic；D4.2.1 不创建 derived，但可读取已有合法 @2 derived。许可可用不等于真实现场。
+- [x] 专项 Archify 确定性交付保持 9/9、0 error、0 warning；浏览器 100% 与原生 200% page zoom 均由隔离 Headless Chrome 留证，axe 无 violation，未声明真实屏幕阅读器兼容。
 
 #### C.1.2 D4.2.2 只读实体化与确定性 composite
 

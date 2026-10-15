@@ -69,3 +69,4 @@
 3. 库存 availability 在 D4.2.1 不做跨请求缓存；每次 GET 重验 realpath/stat/bytes SHA，并限制并发。该选择优先保证篡改可见性，接受最多 256 项时的读取成本；后续若引入缓存，必须另行设计可证明的新鲜度协议并通过安全复审。
 4. D4.2.1 不创建 `derived` 资产，但 @2 reader 必须兼容合法的既有 derived entry；import metadata 继续拒绝 derived。这样保持格式前向兼容，同时不把 D4.2.2 composite 能力提前实现。
 5. 2026-10-14：项目负责人批准 D4.2.1 导入响应采用路线 A。`manifest_format` 必须返回事务完成时唯一活跃清单的真实格式（`@1` 或 `@2`）；@1 工程命中既有相同 identity 时返回 200、`created=false`、`migrated_from_v1=false` 并保持 @1 原字节，不为迎合响应合同制造迁移。只有 @1 工程成功提交新 identity 才返回 @2、`created=true`、`migrated_from_v1=true`。幂等重放返回首次持久化的同一 status/body。
+6. 2026-10-15：所有自动化浏览器、交互、无障碍、截图和端到端验收固定为 Headless、无声、无弹窗、不抢焦点。200% 门限必须使用可读回的原生 Chrome page zoom；不得以 device scale、viewport 缩半、CSS 注入或 headed 自动化替代。可见浏览器仅用于项目负责人明确发起的人工验收。

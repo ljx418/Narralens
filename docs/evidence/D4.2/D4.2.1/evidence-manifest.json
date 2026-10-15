@@ -1,8 +1,8 @@
 {
   "format": "narralens.d421-substage-evidence@1",
-  "generated_at": "2026-10-14T21:05:00+08:00",
-  "stage": "D4.2.1 implementation evidence through fault and race recovery",
-  "status": "substage-passed-d4.2.1-remains-in-progress",
+  "generated_at": "2026-10-15T10:56:00+08:00",
+  "stage": "D4.2.1 final implementation candidate",
+  "status": "internal-audit-passed-external-audit-pending",
   "repositories": {
     "narralens_base_commit": "41fbbd504660df64c9270c0ededb24f89f8ea464",
     "narralens_implementation_commit": "ffbcc0175aa3f5b147b90c2e4782d8a3774459a2",
@@ -12,6 +12,7 @@
     "upload_exact_limit_fix_commit": "e4f59bfc6e9b818906800f7d97d37f4b0c30c58c",
     "ui_large_implementation_commit": "3ef11571222b4bff2e49b7f563ffea62ef98dc04",
     "fault_race_implementation_commit": "7872329",
+    "browser_gate_implementation_commit": "84775af32950b06c90ed7c2555cf9e46d0c5095c",
     "hypit_commit": "6fdd8c0f02c17b9970aee6deb4550a70e9d57acf",
     "hypit_branch": "narralens/d4-typed-media-mutation",
     "worktree_note": "This manifest and status synchronization are finalized by the documentation commit after the implementation commit."
@@ -105,6 +106,23 @@
     "lowered_cap_status": 413,
     "staging_entries_after_rejection": 0
   },
+  "headless_browser_evidence": {
+    "automation_constraint": "All automated browser, interaction, accessibility, screenshot and E2E work is Headless, silent, windowless and must not take desktop focus.",
+    "browser": "Chrome 155.0.8059.40 headless",
+    "normal_zoom_artifact": "artifacts/d421-browser-import.json",
+    "normal_zoom_screenshot": "screenshots/browser-import-success.png",
+    "normal_zoom_status": "passed",
+    "native_200_percent_artifact": "artifacts/d421-browser-zoom-200.json",
+    "native_200_percent_screenshot": "screenshots/d421-browser-zoom-200.png",
+    "native_200_percent_status": "passed",
+    "native_zoom_mechanism": "isolated Chrome profile partition.default_zoom_level.x",
+    "baseline_device_pixel_ratio": 1,
+    "zoomed_device_pixel_ratio": 2,
+    "outer_window_unchanged": true,
+    "clipped_controls": 0,
+    "axe_violations": 0,
+    "screen_reader_claim": "not claimed; semantics and axe were tested, but no real screen-reader compatibility run was performed"
+  },
   "artifact_sha256": {
     "artifacts/d4.0-real-media-regression.json": "5404457a4c4dad1a99d26ec491e44ce74a584f53cf0cdab79824f4d124b88cd3",
     "artifacts/busboy-1.6.0-LICENSE.txt": "9f75981e6039d13bf2e591c59e9c89a2641ca605fde59ba78974b11553f6c148",
@@ -113,14 +131,17 @@
     "artifacts/d421-ui-claude-review.md": "c72a9ba9743e31ecd4451e80354438492e4c42c18277f9be51b33f566e4750cf",
     "artifacts/d421-fault-race-claude-review.md": "83037e277accb0e5c989e9ae94034d7b23fcb06b39114ecaef4de2c2f39cd8b4",
     "artifacts/d421-large-upload.json": "e5edb5cf66345e2c487f1f2d2024c6e12342030c930758fe0e38a69fbff694f4",
+    "artifacts/d421-browser-import.json": "1be4a77c56218e3580520b89aa7ba39d08d80c91b19822201e41ab6ca240cef2",
+    "artifacts/d421-browser-zoom-200.json": "22954c7e92b0d5dce48abded72d04d51eb173b4bd815be00ac2dad462bdf4ff9",
     "screenshots/asset-library-360.png": "d963343de29f0824df42fa54f21275a4c7af6ccde05beec8379453ed55888aa7",
     "screenshots/asset-library-768.png": "0b7d6a7e30c4a989a6e884ec0d581e19123ea79de793a33dfac6294a9aee5251",
     "screenshots/asset-library-1440.png": "938bcc7f867473323ac76e19938a3e00336f458ab9c69d24fc9708debdd6b6b5",
     "screenshots/asset-library-1920.png": "c78c5332a7afd2aa499d9ffdb6b2ad526b2ca5d22c22e34284c1c22e14df03b3",
-    "screenshots/asset-library-scale-2x.png": "c462c4477371e2792a3f0542a57175af604dc29aeeef501da81e97832702e350"
+    "screenshots/asset-library-scale-2x.png": "c462c4477371e2792a3f0542a57175af604dc29aeeef501da81e97832702e350",
+    "screenshots/browser-import-success.png": "1358cf5c257a967f1d876fb5d3c1441ef91667b136588c7bb10d34d48863270f",
+    "screenshots/d421-browser-zoom-200.png": "eb3a96ca800afb0d823523ce29f6c2cacae9c6a52bd11f0c5015a079fb2ec7e5"
   },
   "remaining_scope": [
-    "real-browser interactive import, true 200% text zoom evidence and sanitized keyboard log",
-    "final D4.2.1 regression, evidence and internal/external implementation audit"
+    "independent read-only external final implementation audit and closure of any resulting findings"
   ]
 }
