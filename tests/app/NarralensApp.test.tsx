@@ -186,6 +186,7 @@ describe("D2 Director UI", () => {
     expect(screen.getByText("文件不可用")).toBeTruthy();
     expect(screen.getByText("许可待确认 · 未知")).toBeTruthy();
     expect(screen.getByText(/媒体文件不可用/)).toBeTruthy();
+    expect(screen.getByRole("region", { name: "公开资产库存" })).toBeTruthy();
     const file = new File(["real-browser-bytes"], "camera-take.mp4", { type: "video/mp4" });
     await user.upload(screen.getByLabelText("本地 MP4 文件"), file);
     await user.type(screen.getByLabelText("来源标签"), "我的实拍");

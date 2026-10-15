@@ -115,7 +115,7 @@ export function AssetLibrary({ api, projectId, onInventoryChanged }:
         {stage === "success" && result && <><b>{result.created ? "资产已登记" : "资产已存在"}</b><span><code>{result.asset_id}</code>{resultFrames ? ` · ${resultFrames} 帧` : ""}</span><small>已登记，未进入时间轴。</small></>}
       </div>
     </form>
-    <div className="inventory" aria-label="公开资产库存">
+    <div className="inventory" role="region" aria-label="公开资产库存">
       <header><h3>全部登记资产</h3><span>{inventory ? `${inventory.assets.length} 项` : "读取中"}</span></header>
       {inventory?.assets.map((asset) => <article key={asset.asset_id} className={asset.eligible ? "eligible" : "blocked"}>
         <div><b>{asset.source.label}</b><code>{asset.asset_id}</code></div>
