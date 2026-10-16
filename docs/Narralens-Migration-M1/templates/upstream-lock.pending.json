@@ -1,0 +1,29 @@
+{
+  "kind": "upstream_lock",
+  "status": "UNRESOLVED_NOT_A_LOCK",
+  "observed_openfilm_package": "0.1.7",
+  "repositories": [
+    {
+      "repository": "openfilm/openfilm",
+      "full_sha": null,
+      "lockfile_sha256": null,
+      "license_sha256": null,
+      "local_path": null
+    },
+    {
+      "repository": "EvanJYHe/vibe-movie",
+      "full_sha": null,
+      "lockfile_sha256": null,
+      "license_sha256": null,
+      "local_path": null
+    },
+    {
+      "repository": "heygen-com/hyperframes",
+      "full_sha": null,
+      "lockfile_sha256": null,
+      "license_sha256": null,
+      "local_path": null
+    }
+  ],
+  "rule": "OpenFilm mandatory at M1B; others pin only when actually reused. No latest in production."
+}

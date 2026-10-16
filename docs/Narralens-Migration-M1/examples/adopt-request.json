@@ -1,0 +1,25 @@
+{
+  "kind": "edit_request",
+  "schema_version": "migration/1",
+  "project_id": "example-openfilm-copy",
+  "base": {
+    "project_revision": 12,
+    "source_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "control_revision": 3
+  },
+  "idempotency_key": "example-adopt-unique-key",
+  "impact_id": "impact-example",
+  "impact_hash": "1111111111111111111111111111111111111111111111111111111111111111",
+  "intent": {
+    "operation": "replace_visual_segments",
+    "target_ids": [
+      "clip-S07"
+    ],
+    "selection": {
+      "start_frame": 1932,
+      "end_frame": 2100
+    },
+    "materialization_id": "mat-example",
+    "restore_snapshot_id": null
+  }
+}

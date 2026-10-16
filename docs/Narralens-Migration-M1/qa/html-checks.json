@@ -1,0 +1,200 @@
+{
+  "scope": "DOCUMENT_UI_ONLY",
+  "browser": "Chromium via Playwright; executable configurable with NARRALENS_DOC_CHROMIUM",
+  "mode": "headless",
+  "navigation": "set_content (direct file:// blocked by browser administration)",
+  "direct_file_navigation": "ERR_BLOCKED_BY_ADMINISTRATOR",
+  "viewport_desktop": [
+    1440,
+    1100
+  ],
+  "viewport_mobile": [
+    390,
+    844
+  ],
+  "native_200_percent_zoom_tested": false,
+  "narralens_business_tests_run": false,
+  "checks": [
+    {
+      "check": "Content-loaded HTML initializes with embedded data",
+      "result": "PASS"
+    },
+    {
+      "check": "97 planned cases, no implicit business results",
+      "result": "PASS"
+    },
+    {
+      "check": "Desktop has no horizontal body overflow",
+      "result": "PASS"
+    },
+    {
+      "check": "Target architecture switch",
+      "result": "PASS"
+    },
+    {
+      "check": "Transition view preserves single-engine constraint",
+      "result": "PASS"
+    },
+    {
+      "check": "M2 requires both M1A and M1B",
+      "result": "PASS"
+    },
+    {
+      "check": "Gate cannot be closed by UI",
+      "result": "PASS"
+    },
+    {
+      "check": "Full V1 not confused with M6",
+      "result": "PASS"
+    },
+    {
+      "check": "Materialization illustrative revision unchanged",
+      "result": "PASS"
+    },
+    {
+      "check": "Adoption illustrative revision increments once",
+      "result": "PASS"
+    },
+    {
+      "check": "Mock workbench is explicitly labeled",
+      "result": "PASS"
+    },
+    {
+      "check": "Full acceptance matrix",
+      "result": "PASS"
+    },
+    {
+      "check": "M1A filter covers 26 direct evidence scenarios",
+      "result": "PASS"
+    },
+    {
+      "check": "Combined keyword and Gate filter",
+      "result": "PASS"
+    },
+    {
+      "check": "Empty result state",
+      "result": "PASS"
+    },
+    {
+      "check": "Export is a plan, not manufactured evidence",
+      "result": "PASS"
+    },
+    {
+      "check": "Initial full specification visible",
+      "result": "PASS"
+    },
+    {
+      "check": "Document search includes body text",
+      "result": "PASS"
+    },
+    {
+      "check": "Contract document contains impact semantics",
+      "result": "PASS"
+    },
+    {
+      "check": "Standalone HTML export contains actual selected spec",
+      "result": "PASS"
+    },
+    {
+      "check": "Sources link opens source register",
+      "result": "PASS"
+    },
+    {
+      "check": "Prompt copied from package source exactly",
+      "result": "PASS"
+    },
+    {
+      "check": "Copy action has success or accessible manual fallback",
+      "result": "PASS"
+    },
+    {
+      "check": "Mobile body does not overflow",
+      "result": "PASS"
+    },
+    {
+      "check": "Mobile long-table page confined to scroll wrappers",
+      "result": "PASS"
+    },
+    {
+      "check": "Mobile Gate details accessible",
+      "result": "PASS"
+    },
+    {
+      "check": "Reduced motion is honored",
+      "result": "PASS"
+    },
+    {
+      "check": "Keyboard focus exists on an interactive element",
+      "result": "PASS"
+    },
+    {
+      "check": "No-JS independent HTML: 00_Read_First",
+      "result": "PASS"
+    },
+    {
+      "check": "No-JS independent HTML: 01_Baseline",
+      "result": "PASS"
+    },
+    {
+      "check": "No-JS independent HTML: 02_Architecture",
+      "result": "PASS"
+    },
+    {
+      "check": "No-JS independent HTML: 03_Spec_Delta",
+      "result": "PASS"
+    },
+    {
+      "check": "No-JS independent HTML: 04_Project_Migration",
+      "result": "PASS"
+    },
+    {
+      "check": "No-JS independent HTML: 05_Contracts",
+      "result": "PASS"
+    },
+    {
+      "check": "No-JS independent HTML: 06_Studio_UX",
+      "result": "PASS"
+    },
+    {
+      "check": "No-JS independent HTML: 07_Development_Plan",
+      "result": "PASS"
+    },
+    {
+      "check": "No-JS independent HTML: 08_Acceptance",
+      "result": "PASS"
+    },
+    {
+      "check": "No-JS independent HTML: 09_Plugins_Security",
+      "result": "PASS"
+    },
+    {
+      "check": "No-JS independent HTML: 10_Codex_Handoff",
+      "result": "PASS"
+    },
+    {
+      "check": "No-JS independent HTML: 11_Risks",
+      "result": "PASS"
+    },
+    {
+      "check": "No-JS independent HTML: 12_Sources",
+      "result": "PASS"
+    },
+    {
+      "check": "No-JS independent HTML: 13_Delivery_Verification",
+      "result": "PASS"
+    },
+    {
+      "check": "Print contains all specification chapters",
+      "result": "PASS"
+    },
+    {
+      "check": "No unhandled JavaScript exception",
+      "result": "PASS"
+    },
+    {
+      "check": "No external network requests",
+      "result": "PASS"
+    }
+  ],
+  "page_errors": []
+}

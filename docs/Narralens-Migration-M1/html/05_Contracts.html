@@ -1,0 +1,194 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>合同、状态机、事务、时间与错误语义 · 叙镜</title><style>
+:root{--bg:#f3f5f7;--paper:#fff;--ink:#162a39;--muted:#637481;--line:#dce4e9;--teal:#136d67;--mint:#e5f3ee;--blue:#4467a3;--nav:#102330;--amber:#956023;--soft:#edf1f5;--radius:16px;--mono:ui-monospace,SFMono-Regular,Consolas,monospace}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans CJK SC","Microsoft YaHei",sans-serif;font-size:14px;line-height:1.8}a{color:var(--teal);text-decoration:none}button,input,select,textarea{font:inherit}button,a{touch-action:manipulation}button{cursor:pointer}button:disabled{opacity:.5;cursor:not-allowed}button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #54b7a5;outline-offset:3px}[hidden]{display:none!important}h1,h2,h3,h4,p{margin:0}button{color:inherit}svg{max-width:100%}code{font-family:var(--mono);font-size:.92em;background:#eff3f5;border-radius:4px;padding:1px 5px}pre{white-space:pre;overflow:auto;padding:20px;background:#edf2f5;border-radius:12px;font-size:12px;line-height:1.85}pre code{padding:0;background:none}::selection{background:#c9e9dc}.skip{position:fixed;left:14px;top:-80px;background:white;padding:10px;z-index:99}.skip:focus{top:12px}
+.sidebar{position:fixed;width:234px;inset:0 auto 0 0;background:var(--nav);color:#b1c3ce;padding:28px 18px;display:flex;flex-direction:column;z-index:30}.brand{display:flex;gap:12px;align-items:center;margin:0 9px 36px;color:#fff}.brandmark{width:38px;height:42px;border:1px solid #67878d;border-radius:10px;display:grid;place-items:center;font-size:21px;font-weight:500;position:relative}.brandmark:after{content:"";position:absolute;bottom:7px;right:6px;width:7px;height:2px;background:#9cdfc9}.brand strong{display:block;font-size:21px;font-weight:650;letter-spacing:4px}.brand small{display:block;letter-spacing:1.5px;font-size:9px;color:#91a8b6}.navlabel{padding:0 12px;font-size:9px;letter-spacing:1.8px;color:#75909e;margin-bottom:12px}.nav{display:grid;gap:5px}.nav button{border:0;background:transparent;color:#b5c6ce;display:flex;align-items:center;gap:14px;padding:12px 14px;border-radius:10px;text-align:left;font-size:12px}.nav button span{font-family:var(--mono);font-size:10px;color:#6d8b9b}.nav button:hover{background:#1b3543}.nav button.active{background:#254440;color:#e1f8eb}.nav button.active span{color:#91c4b0}.sidebottom{margin-top:auto;border-top:1px solid #29404d;padding:19px 10px 0;font-size:10px;line-height:2;color:#85a0ad}.sidebottom strong{display:block;color:#d2e5e8;font-size:11px;font-weight:500}.sidebottom code{background:#29404d;color:#d4e2e6}.sidebottom .dot{background:#d9a96d}.dot{display:inline-block;width:6px;height:6px;background:var(--teal);border-radius:50%;margin-right:7px;vertical-align:middle}
+main{margin-left:234px;padding:26px 36px 50px;max-width:1880px}.topbar{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:27px}.crumb{font-size:11px;color:var(--muted)}.crumb strong{color:var(--ink);font-weight:550}.actions{display:flex;gap:8px;align-items:center}.btn{border:1px solid var(--line);background:white;padding:9px 14px;border-radius:8px;display:inline-flex;justify-content:center;align-items:center;gap:8px;font-size:11px;font-weight:550;white-space:nowrap}.btn:hover{background:#eaf2ef}.btn.primary{background:var(--teal);color:#fff;border-color:var(--teal)}.btn.dark{background:var(--nav);color:white;border-color:var(--nav)}.btn.small{padding:5px 10px;font-size:10px}.btn.ghost{background:none}.badge{display:inline-flex;align-items:center;gap:6px;border-radius:5px;padding:4px 8px;font-size:10px;background:var(--mint);color:var(--teal);white-space:nowrap}.badge.warn{background:#fcf1df;color:var(--amber)}.badge.blue{background:#e9eff9;color:var(--blue)}.badge.gray{background:#eaf0f4;color:var(--muted)}.page{display:none}.page.active{display:block;animation:in .2s ease-out}.eyebrow{font-size:10px;letter-spacing:1.6px;color:var(--teal);font-weight:700;margin-bottom:10px}.pagehead{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;margin-bottom:22px}.pagehead h1{font-size:29px;letter-spacing:-.8px;line-height:1.5}.pagehead p{font-size:12px;color:var(--muted);margin-top:7px;max-width:780px}.hero{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(260px,.75fr);gap:36px;background:#fff;border:1px solid var(--line);border-radius:22px;padding:34px 36px;position:relative;overflow:hidden}.hero:after{content:"";position:absolute;right:-70px;top:-145px;width:370px;height:370px;border:1px solid #d9e7e3;border-radius:50%;pointer-events:none}.hero h1{font-size:clamp(30px,3.2vw,46px);line-height:1.4;letter-spacing:-1.3px;font-weight:650;margin-bottom:17px}.hero h1 em{font-style:normal;color:var(--teal)}.hero p{color:var(--muted);font-size:13px;line-height:2;max-width:660px}.hero .actions{margin-top:24px;flex-wrap:wrap}.herostatus{background:#f2f6f5;border:1px solid #dbe7e1;border-radius:14px;padding:21px;z-index:1;align-self:center}.herostatus .label{font-size:9px;letter-spacing:1.4px;color:var(--teal);margin-bottom:12px}.herostatus .hash{font:26px var(--mono);letter-spacing:-1px;margin-bottom:12px}.herostatus p{font-size:11px}.herostatus .kv{padding-top:12px;border-top:1px solid #d4e0dc;margin-top:15px;display:grid;gap:5px}.kv div{display:flex;justify-content:space-between;gap:12px;font-size:10px}.kv span{color:var(--muted)}.notice{padding:15px 18px;border:1px solid #e9dbc4;background:#fdf7ec;color:#7d6038;border-radius:11px;font-size:11px;margin:17px 0 25px;line-height:1.95}.notice strong{font-weight:700}.section-title{display:flex;justify-content:space-between;align-items:center;gap:16px;margin:29px 0 15px}.section-title h2{font-size:18px;font-weight:650;letter-spacing:-.3px}.section-title small{font-size:10px;color:var(--muted)}.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px}.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:17px}.card{background:white;border:1px solid var(--line);border-radius:var(--radius);padding:23px;min-width:0}.card .num{font:10px var(--mono);color:var(--teal);letter-spacing:1px;margin-bottom:12px}.card h3{font-size:16px;margin-bottom:10px}.card p{font-size:12px;color:var(--muted);line-height:1.95}.card small{display:block;font-size:10px;color:var(--muted);margin-top:12px}.pillrow{display:flex;gap:6px;flex-wrap:wrap;margin-top:14px}.flowbar{display:grid;grid-template-columns:.65fr 1fr .85fr .85fr .85fr 1fr;gap:9px;align-items:center;background:#edf2f4;border:1px solid #d9e3e8;border-radius:15px;padding:19px}.flowitem{padding:14px 10px;background:white;border:1px solid var(--line);border-radius:9px;min-width:0}.flowitem b{font-size:12px;display:block}.flowitem small{font-size:9px;color:var(--muted);display:block;margin-top:5px;line-height:1.7}.flowitem.active{background:var(--nav);color:white;border-color:var(--nav)}.flowitem.active small{color:#b6c9d0}.fork{display:grid;gap:7px}.fork .flowitem{padding:9px 10px;border-color:#90b9a9}.note{font-size:11px;color:var(--muted);line-height:1.95;margin:13px 0}.inline-link{border:0;background:none;color:var(--teal);font-size:11px;text-decoration:underline;text-underline-offset:4px;padding:0}.statgrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;margin-top:18px;border-top:1px solid var(--line);padding-top:18px}.statgrid div+div{border-left:1px solid var(--line);padding-left:18px}.statgrid b{display:block;font-size:22px;line-height:1.5}.statgrid small{font-size:10px;color:var(--muted)}
+.toggle{display:inline-flex;background:#e8edf0;padding:4px;border-radius:9px;gap:3px}.toggle button{border:0;padding:8px 14px;background:transparent;color:var(--muted);border-radius:6px;font-size:11px}.toggle button.active{background:white;color:var(--ink);box-shadow:0 1px 4px #18333f12}.arch-board{padding:26px;background:white;border:1px solid var(--line);border-radius:16px}.arch-banner{display:flex;justify-content:space-between;align-items:center;gap:15px;padding-bottom:18px;border-bottom:1px solid var(--line);margin-bottom:21px}.arch-banner h2{font-size:19px}.layer{position:relative;border:1px solid #d6e1e6;border-radius:11px;padding:16px 20px;background:#f5f8fa;margin-top:26px}.layer:first-of-type{margin-top:0}.layer:not(:first-of-type):before{content:"↓";position:absolute;top:-27px;left:50%;font-size:17px;color:#a2b7c1}.layer strong{font-size:13px;display:block;margin-bottom:7px}.layer p{font-size:11px;color:var(--muted)}.layer.native{background:#eaf4ef;border-color:#adcdbf}.layer.core{background:#183543;border-color:#183543;color:#f0f9f8}.layer.core p{color:#a7c3cd}.layer.compact{margin-top:0}.split-layer{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:26px;position:relative}.split-layer:before{content:"↓";position:absolute;top:-27px;left:50%;color:#a2b7c1}.split-layer .layer:before{display:none}.arch-foot{border-left:3px solid var(--teal);background:var(--mint);padding:14px 17px;font-size:12px;margin-top:19px}.tablewrap{overflow:auto;border:1px solid var(--line);border-radius:10px;background:white;max-width:100%;margin:15px 0}table{border-collapse:collapse;width:100%;text-align:left;min-width:680px;font-size:11px}th{font-size:10px;background:#eef3f6;color:#5f7481;padding:12px 14px;font-weight:650}td{padding:13px 14px;border-top:1px solid var(--line);vertical-align:top;line-height:1.9}td:first-child{font-weight:600;color:var(--ink)}.road-layout{display:grid;grid-template-columns:252px minmax(0,1fr);gap:20px}.stage-list{display:grid;gap:8px;align-content:start}.stagebtn{border:1px solid var(--line);background:white;text-align:left;padding:14px;border-radius:10px;display:flex;gap:12px;align-items:start}.stagebtn .stage-id{font:11px var(--mono);padding-top:4px;color:var(--teal);width:39px;flex:none}.stagebtn b{font-size:11px;display:block}.stagebtn small{font-size:9px;color:var(--muted);display:block;margin-top:5px}.stagebtn.active{background:var(--nav);color:#edf8f7;border-color:var(--nav)}.stagebtn.active small{color:#a3bdc8}.stagebtn.active .stage-id{color:#a6dac4}.stage-detail{position:sticky;top:22px;align-self:start;padding:28px}.stage-detail h2{font-size:25px;margin:12px 0 10px}.stage-detail p{font-size:12px;color:var(--muted)}.ticket{padding:16px 0;border-bottom:1px solid var(--line)}.ticket b{font-size:12px;display:block;margin-bottom:7px}.ticket p{font-size:11px}.gatebox{padding:16px;border:1px solid #bbd6c7;border-radius:10px;background:#eef7f1;margin-top:18px}.gatebox h4{font-size:11px;color:var(--teal);margin-bottom:7px}.gatebox p{font-size:11px;color:#466954}.gatebox.stop{background:#fcf5eb;border-color:#e8d7b7}.gatebox.stop h4,.gatebox.stop p{color:#82602f}.scope-label{display:flex;gap:8px;flex-wrap:wrap;margin:13px 0}.toolbar{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin:16px 0}.toolbar input,.toolbar select{border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:12px;background:white;color:var(--ink);min-width:0}.toolbar input{flex:1;min-width:170px}.toolbar select{width:140px}.case-count{font-size:11px;color:var(--muted)}.caseid{font-family:var(--mono);white-space:nowrap}.case-status{display:inline-block;font-size:9px;padding:3px 7px;background:#edf2f5;color:#637785;border-radius:4px;white-space:nowrap}
+.workbench{background:#12252f;border:1px solid #243e4b;border-radius:15px;padding:13px;color:#cee0e6}.wb-top{display:flex;justify-content:space-between;padding:8px 9px 17px;gap:12px;font-size:10px}.wb-top small{font-size:9px;color:#8fafbb}.wb-main{display:grid;grid-template-columns:minmax(0,1.8fr) minmax(230px,1fr);gap:12px}.wb-preview{border:1px solid #456272;border-radius:8px;aspect-ratio:16/8.5;background:linear-gradient(120deg,#173a46,#1c2e3c);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px}.wb-preview .k{font-size:9px;letter-spacing:3px;color:#8baebb}.wb-preview strong{font-size:25px;margin:16px 0 12px;font-weight:450}.wb-preview p{font-size:11px;color:#9db9c5}.wb-preview .rule{width:40px;height:2px;background:#91cdb2;margin:0 auto 15px}.wb-director{border:1px solid #395361;border-radius:8px;padding:16px;background:#1a323e;display:flex;flex-direction:column;justify-content:space-between}.wb-director b{font-size:12px;display:block;margin-bottom:9px}.wb-director p{font-size:10px;color:#a1b9c3;line-height:1.9}.wb-chips{display:flex;gap:5px;flex-wrap:wrap;margin-top:12px}.wb-chips span{background:#254551;border:1px solid #3a5d69;padding:3px 6px;font-size:9px;border-radius:4px}.wb-chips span:first-child{background:#2f5d4e;border-color:#6a9f88;color:#def2e7}.wb-candidates{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}.wb-cand{background:#1a3542;border:1px solid #395460;border-radius:7px;padding:14px;font-size:10px}.wb-cand.chosen{border-color:#8bbaa4;background:#254b42}.wb-cand small{display:block;color:#98b2bd;font-size:9px;margin-top:8px}.wb-timeline{margin-top:13px;border-top:1px solid #36515e;padding:14px 8px 7px}.wb-ruler{display:flex;justify-content:space-between;font:9px var(--mono);color:#83a6b6}.wb-tracks{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin:12px 0}.wb-track{font-size:9px;padding:10px 8px;border:1px solid #486272;border-radius:4px;background:#2a4552}.wb-track:nth-child(3){background:#315e50;border-color:#82b296;color:#d5eee0}.wb-caption{font-size:9px;color:#96b3c0}.steprail{display:flex;gap:7px;flex-wrap:wrap;margin-top:20px}.steprail button{padding:8px 12px;border:1px solid var(--line);border-radius:7px;background:white;font-size:11px}.steprail button.active{background:var(--nav);color:white;border-color:var(--nav)}.sim-grid{display:grid;grid-template-columns:1.4fr 1fr;gap:18px;margin-top:14px}.sim-panel{border:1px solid var(--line);border-radius:12px;padding:22px;background:white}.sim-panel h3{font-size:16px;margin-bottom:9px}.sim-panel p{font-size:12px;color:var(--muted)}.sim-panel .rev{font:28px var(--mono);display:block;margin:13px 0;color:var(--teal)}.docs-layout{display:grid;grid-template-columns:230px minmax(0,1fr);gap:22px;align-items:start}.docnav{position:sticky;top:18px;display:grid;gap:4px;max-height:calc(100vh - 50px);overflow:auto;padding:10px;background:white;border:1px solid var(--line);border-radius:11px}.docnav input{width:100%;padding:9px;border:1px solid var(--line);border-radius:6px;font-size:11px;margin-bottom:8px}.docnav button{padding:10px 9px;text-align:left;border:0;background:none;font-size:11px;border-radius:6px;line-height:1.9}.docnav button.active{background:var(--mint);color:var(--teal)}.docnav .docid{font-family:var(--mono);font-size:9px;display:block;color:var(--muted)}.doc-body{padding:29px 32px;background:white;border:1px solid var(--line);border-radius:14px;min-width:0;font-size:13px;line-height:2;overflow-wrap:anywhere}.doc-body h1{font-size:27px;line-height:1.5;letter-spacing:-.5px;margin:0 0 24px}.doc-body h2{font-size:20px;line-height:1.5;margin:33px 0 14px;padding-bottom:9px;border-bottom:1px solid var(--line)}.doc-body h3{font-size:16px;margin:24px 0 10px}.doc-body p{margin:12px 0}.doc-body ul,.doc-body ol{padding-left:24px;margin:12px 0}.doc-body li{margin:7px 0}.doc-body table{min-width:660px;font-size:11px}.doc-body blockquote{border-left:3px solid var(--teal);background:var(--mint);padding:8px 17px;margin:18px 0}.doc-tools{display:flex;gap:8px;margin-bottom:12px}.empty{padding:25px;text-align:center;color:var(--muted)}.prompt{width:100%;height:390px;border:1px solid var(--line);padding:19px;background:#f8fafb;color:var(--ink);border-radius:12px;font-family:var(--mono);font-size:11px;line-height:1.9;resize:vertical}.foot{margin-top:33px;padding-top:17px;border-top:1px solid var(--line);font-size:10px;color:#7a8e9b;display:flex;justify-content:space-between;gap:15px}.toast{position:fixed;bottom:25px;left:calc(50% + 90px);transform:translateX(-50%);z-index:100;background:var(--nav);color:white;padding:12px 20px;border-radius:10px;font-size:12px;max-width:90vw;box-shadow:0 8px 35px #122a3e22}.mobile-nav{display:none}#print-docs{display:none}.sr-only{position:absolute;width:1px;height:1px;margin:-1px;clip:rect(0,0,0,0);overflow:hidden}.standalone{max-width:1100px;margin:35px auto;padding:0 24px}.standalone .doc-body{padding:40px}.standalone .foot{margin-bottom:30px}
+@keyframes in{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+@media(min-width:1750px){main{padding:32px 55px}.hero{padding:40px 45px}.hero h1{font-size:49px}}
+@media(max-width:1200px){.sidebar{width:204px;padding:24px 13px}main{margin-left:204px;padding:22px}.hero{padding:28px;gap:24px;grid-template-columns:1.3fr .9fr}.flowbar{grid-template-columns:.7fr 1fr .8fr .8fr .8fr}.flowbar>.flowitem:last-child{grid-column:1/-1;text-align:center}.docs-layout{grid-template-columns:190px minmax(0,1fr);gap:15px}.doc-body{padding:24px}.road-layout{grid-template-columns:215px minmax(0,1fr)}.wb-preview strong{font-size:20px}}
+@media(max-width:950px){.sidebar{position:sticky;top:0;width:100%;padding:10px 15px;border-bottom:1px solid #294958;display:block}.brand{margin:0 0 9px;gap:9px}.brandmark{width:24px;height:25px;border-radius:6px;font-size:13px}.brandmark:after{display:none}.brand strong{display:inline;font-size:14px;letter-spacing:2px}.brand small{display:inline;margin-left:10px;font-size:8px}.navlabel,.sidebottom{display:none}.nav{display:flex;gap:3px;overflow:auto}.nav button{padding:7px 10px;white-space:nowrap;font-size:10px;gap:7px}.nav button span{font-size:8px}main{margin-left:0;padding:24px}.topbar{margin-bottom:20px}.toast{left:50%}.hero h1{font-size:34px}.docs-layout{grid-template-columns:1fr}.docnav{position:static;max-height:235px;grid-template-columns:repeat(3,1fr);overflow:auto}.docnav input{grid-column:1/-1}.docnav .docid{display:none}.stage-detail{position:static}.wb-main{grid-template-columns:1.6fr 1fr}.grid3{gap:11px}.card{padding:19px}}
+@media(max-width:650px){main{padding:16px 13px 28px}.topbar{gap:10px;align-items:flex-start}.crumb{font-size:9px;line-height:1.8}.actions{gap:5px;flex-wrap:wrap;justify-content:flex-end}.btn{font-size:10px;padding:7px 10px}.actions .optional{display:none}.hero{grid-template-columns:1fr;padding:26px 22px;gap:22px;border-radius:16px}.hero h1{font-size:34px}.hero p{font-size:12px}.hero .actions{justify-content:flex-start}.herostatus{padding:17px}.herostatus .hash{font-size:22px}.herostatus .kv{margin-top:11px}.hero:after{display:none}.grid3,.grid2{grid-template-columns:1fr}.card{padding:21px}.section-title{margin-top:25px}.section-title h2{font-size:17px}.section-title small{max-width:130px;text-align:right;font-size:9px}.flowbar{grid-template-columns:1fr 1fr;padding:13px}.flowbar>.flowitem:last-child{grid-column:auto}.flowitem{height:100%}.fork{grid-column:2;grid-row:1}.flowitem b{font-size:11px}.flowitem small{font-size:9px}.notice{font-size:10px;padding:13px 15px}.pagehead{display:block}.pagehead h1{font-size:25px}.pagehead .badge{margin-top:12px}.road-layout{grid-template-columns:1fr;gap:15px}.stage-list{display:flex;overflow-x:auto;gap:7px;padding-bottom:7px}.stagebtn{min-width:190px;max-width:220px;padding:11px}.stage-detail{padding:21px}.stage-detail h2{font-size:22px}.arch-board{padding:19px}.arch-banner{display:block}.arch-banner .badge{margin-top:8px}.split-layer{grid-template-columns:1fr}.layer{padding:15px}.toggle{display:flex}.toggle button{flex:1;padding:8px;font-size:10px}.wb-main{grid-template-columns:1fr}.wb-preview{aspect-ratio:16/9}.wb-director{min-height:150px}.wb-preview strong{font-size:23px}.wb-candidates{gap:5px}.wb-cand{padding:10px 8px;font-size:9px}.wb-tracks{grid-template-columns:repeat(3,1fr)}.wb-top{font-size:9px}.sim-grid{grid-template-columns:1fr}.steprail{gap:5px}.steprail button{font-size:10px;padding:7px 10px}.toolbar{gap:7px}.toolbar input{min-width:100%;width:100%}.toolbar select{flex:1}.docnav{grid-template-columns:1fr 1fr;max-height:220px}.docnav button{font-size:10px}.doc-body{padding:23px 19px;font-size:12px}.doc-body h1{font-size:23px}.doc-body h2{font-size:18px}.doc-body pre{font-size:10px;padding:14px}.foot{font-size:9px;display:block;line-height:2}.statgrid b{font-size:19px}.statgrid small{font-size:9px}.prompt{font-size:10px;height:410px;padding:13px}.standalone{padding:0 12px;margin:15px auto}.standalone .doc-body{padding:23px 19px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{animation:none!important;transition:none!important}}
+@media print{@page{margin:16mm}body{background:#fff;color:#142937;font-size:10pt}.sidebar,main,.toast{display:none!important}#print-docs{display:block!important}.doc-body{padding:0;border:0;border-radius:0;font-size:10pt;line-height:1.7}.doc-body h1{font-size:22pt}.doc-body h2{font-size:15pt;break-after:avoid}.doc-body table{min-width:0;font-size:8pt}.tablewrap{overflow:visible;border-radius:0}.doc-body tr{break-inside:avoid}pre{white-space:pre-wrap;overflow:visible;font-size:8pt}.printchapter{break-before:page}.printchapter:first-child{break-before:auto}.standalone .doc-body{display:block}.standalone .doc-tools,.standalone .foot{display:none}.standalone{margin:0;padding:0}}
+</style></head><body><div class="standalone"><div class="doc-tools"><a class="btn" href="../Narralens-Migration-Control.html#documents">← 返回迁移控制台</a><span class="badge warn">设计文件 · 非运行证据</span></div><article class="doc-body"><h1>合同、状态机、事务、时间与错误语义</h1>
+<h2>1. 本包合同的性质</h2>
+<p><code>contracts/migration-contracts.schema.json</code> 是 <strong>拟议的 Narralens migration/1 合同</strong>，不宣称仓库现在已有这些路由/字段。本地Codex首先把现有D4.1、typed media.replace、import/manifest合同做映射，保留错误码与兼容客户端；新增命名空间使用 <code>/api/migration/v1/...</code>。已存在语义不新建同义接口。OpenFilm内部路由必须从固定SHA登记后调用。</p>
+<h2>2. 必须区分的版本</h2>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>名称</th>
+<th>意义</th>
+<th>改变条件</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>repo_commit</td>
+<td>开发代码版本，如用户报告304c891</td>
+<td>代码提交</td>
+</tr>
+<tr>
+<td>project_revision</td>
+<td>影片已提交编辑版本，单调递增</td>
+<td>一笔真实成功编辑/恢复一次+1</td>
+</tr>
+<tr>
+<td>source_digest</td>
+<td>source依赖闭包SHA256</td>
+<td>film/scenes/字幕/设置或引用资产改变</td>
+</tr>
+<tr>
+<td>asset_manifest_revision</td>
+<td>资产库存版本</td>
+<td>导入/登记；不会因此自动+project_revision</td>
+</tr>
+<tr>
+<td>control_revision</td>
+<td>锁/许可/预算等控制策略版本</td>
+<td>策略变更；旧impact需复核</td>
+</tr>
+<tr>
+<td>proposal/job_revision</td>
+<td>提案/任务状态</td>
+<td>不等于已采用影片变更</td>
+</tr>
+</tbody>
+</table></div>
+<p>OpenFilm自身短rev仅是native适配器的内部信息；不得覆盖Narralens的project_revision。所有幂等键按project、operation、请求摘要定位；同key同payload返回原结果，不重复commit；同key不同payload→409 IDEMPOTENCY_CONFLICT。</p>
+<h2>3. EnginePort目标接口</h2>
+<pre><code class="language-ts">interface EnginePort {
+  inspect(snapshot: SnapshotRef): Promise&lt;EngineProjection&gt;;
+  capabilities(): Promise&lt;CapabilityMap&gt;;
+  plan(snapshot: SnapshotRef, intent: TypedEdit): Promise&lt;EngineEditPlan&gt;;
+  stage(plan: EngineEditPlan, isolatedRoot: string): Promise&lt;StagedSource&gt;;
+  validate(staged: StagedSource): Promise&lt;ValidationReport&gt;;
+  preview(snapshot: SnapshotRef): Promise&lt;PreviewDescriptor&gt;;
+  render(snapshot: SnapshotRef, profile: RenderProfile): Promise&lt;JobRef&gt;;
+}
+</code></pre>
+<p>不是给任意shell command的接口。commit由Host拥有，port不自增revision、不改锁；Hypit和OpenFilm各自实现。真实模块落点由M0填code-map，类型以已存在合同扩展。</p>
+<h2>4. Proposed API和能力开关</h2>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>新语义（建议路由）</th>
+<th>输入/输出</th>
+<th>禁止副作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GET /api/migration/v1/projects/:id/engine</td>
+<td>binding/capabilities/snapshot</td>
+<td>不自动迁移</td>
+</tr>
+<tr>
+<td>POST .../:id/migrate-copy</td>
+<td>旧snapshot＋target engine → job</td>
+<td>不覆盖旧项目</td>
+</tr>
+<tr>
+<td>POST .../:id/proposals/:pid/materialize</td>
+<td>base＋bindings＋idempotency → job</td>
+<td>不写author source/revision</td>
+</tr>
+<tr>
+<td>POST .../:id/impact</td>
+<td>typed intent/ready materialization → server impact</td>
+<td>不采用，不生成付费资产</td>
+</tr>
+<tr>
+<td>POST .../:id/edits</td>
+<td>base＋impact id/hash＋intent＋idempotency → revision</td>
+<td>不越过锁/范围；复用现有edit语义</td>
+</tr>
+<tr>
+<td>POST .../:id/history/restore</td>
+<td>target snapshot＋current base＋impact → new revision</td>
+<td>不倒退revision、不绕锁</td>
+</tr>
+<tr>
+<td>GET .../jobs/:id / events</td>
+<td>状态、递增event seq；cursor恢复</td>
+<td>UI重复事件不能引起重复commit</td>
+</tr>
+</tbody>
+</table></div>
+<p>在M1A阶段 materialize/adopt 仍按旧冻结规范不可达（404），虚构operation为422。迁移新路由也默认关闭；M3才能开放materialize，M4才开放adopt。直接绕UI发HTTP必须得到相同结果。</p>
+<h2>5. 时间模型</h2>
+<p>所有选择/segment使用 <code>[start_frame,end_frame)</code>；fps为有理数num/den，源视频保留真实timebase/PTS，不默认源也30fps。<code>t=frame*den/num</code>，写入OpenFilm秒单位后重新解析，round-trip误差不能超过半个目标帧，最终边界必须回到相同整数帧。首个门只启用30/1目标规格；其他帧率在capabilities标未验，不静默重采样。</p>
+<p>例如镜头 <code>[1800,2100)</code>，选区 <code>[1932,2100)</code>；三镜方案为56+56+56帧，前132帧保持；采用后镜头数变化但全片帧数不变。每个segment保留独立source span和assetId，不能只剩一条合成视频。镜头不足时禁止隐式循环、冻结帧或变速填满；有意改变需在提案中声明。</p>
+<h2>6. source_digest 与影响快照</h2>
+<p>source manifest按规范化相对路径排序，记录role/path/sha256/size；覆盖film.html、被引用scene/html/js/css、字幕、设置、字体与实际媒体内容哈希。未引用候选/缓存不进入author digest。锁、rights、asset绑定版本单独纳入impact摘要。外部依赖必须vendor到固定资源或形成可校验的固定引用；未固定网络资源不允许声称可复现输出。</p>
+<p>impact由服务器从当前snapshot计算：目标范围、消费者、前后引用、允许操作、preserve项、expected_total_frames、base_revision/source_digest、control_revision、相关资产/许可摘要、费用授权引用、adapter版本、expiry。请求仅传回impact id/hash，不能相信客户端自己声称“影响为零”。全局asset库存追加无关素材不必使全部提案失效；被引用asset内容/许可改变必须拒绝或重审。</p>
+<h3>摘要算法与恢复边界的冻结规则</h3>
+<p>新增schema的摘要采用本项目明确的canonical规则，而不假称是上游协议：对象键按ASCII键名排序，数组保持语义顺序；files数组预先按UTF-8相对路径字节序排序；路径统一<code>/</code>但不改大小写、不擅自改Unicode文件名；UTF-8 JSON不含空白，所有合同数值为整数，FPS用有理数，不允许NaN/Infinity/浮点时间。source manifest摘要输入排除source_digest、snapshot_id和访问时间，只包含engine、engine_sha及每个已排序的path/role/sha256/bytes；加域前缀<code>narralens-source-v1\n</code>后SHA256。影响摘要另加<code>narralens-impact-v1\n</code>，排除impact_hash自身，包含server保存的完整规范化影响内容。M2提供TS/Python一致的黄金向量；既有摘要算法不破坏，必要时新增digest_version。</p>
+<p>恢复只恢复创作内容，不恢复过去的锁/许可/预算控制状态。当前控制策略持续生效；恢复也要重新计算受影响消费者和impact。运行中的导出固定旧snapshot并可继续，新编辑提交只影响下一次导出；不应把旧导出挂成新revision的结果。</p>
+<h2>7. 采用事务</h2>
+<p><code>received → preconditions_checked → staged → validated → prepared → committed</code>；失败分支为 <code>aborted/recovering/attention</code>。</p>
+<ol>
+<li>进入统一ProjectActor，查幂等结果；核对项目引擎、revision、完整digest、impact、控制状态和受影响锁。</li>
+<li>为本次snapshot生成隔离stage；native apply只改stage。实现帧范围、共享对象、素材和字幕等不变量检查。</li>
+<li>运行真实parse/look/必要preview样本；执行时间上限和取消检查。commit前重新确认active base与授权未过期。</li>
+<li>保存prepared不可变snapshot与journal；写单一持久commit-record，包含new revision、snapshot和可重放outbox。reader只通过已提交record选择源。</li>
+<li>发布事件和刷新投影；无论请求重试/晚回调，revision恰好+1。发布事件失败不反向重复commit，重启从outbox续送。</li>
+</ol>
+<p>多文件修改不假称一次rename能原子完成全部源和metadata。通过不可变snapshot＋一份active commit-record提供一致读取；metadata store若是数据库必须同事务提交revision/outbox。文件实现则原子替换单个commit-record且先fsync所需snapshot，平台支持在M2实测；不能确认durability则attention并阻止进一步写入。</p>
+<p>崩溃在prepared前：主工程不动，stage保留供审计或安全清理。prepared后、commit前：校验base仍一致后可恢复或放弃；不得无授权自动继续收费。commit后事件前：重放outbox，已提交状态不重复采用。commit不确定：attention，不猜成功也不自动覆盖。</p>
+<h2>8. Materialize 与任务状态</h2>
+<p>提案：<code>proposed → comparing → bindings_ready → materializing → ready_for_adoption → adopted</code>；可转 <code>stale/failed/cancelled</code>。materialize产物含native segment plan和proxy、lineage、source/selection/base hashes。完整组合中的每个片段均需范围匹配；artifact内容哈希固定。</p>
+<p>Job：<code>queued/running/cancel_requested/succeeded/failed/cancelled/attention</code>，CAS lease owner与attempt；事件seq持久单调。取消不等于立即停止。取消成功后晚到结果可作为quarantined artifact登记，但不能改变source或显示ready-for-adoption。外部服务未知完成态不得自动重发收费请求；记录provider receipt并待核对。</p>
+<p>最低持久Job/Event/lease/cancel先在M2完成，M3才能使用。模型调用、proxy准备、正式生成、最终渲染分别记job kind；浏览已有proxy不是一次新模型调用。</p>
+<h2>9. HTTP与错误优先级</h2>
+<p>先认证/Origin，再结构校验与能力，再幂等结果，再revision/digest，再控制锁/许可，再impact有效性，最后执行；同一个请求同时有多个错误时按此顺序稳定返回。</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>HTTP</th>
+<th>新设计错误语义</th>
+<th>条件</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>401/403</td>
+<td>AUTH_REQUIRED / ORIGIN_DENIED / DATA_POLICY_DENIED</td>
+<td>原有安全合同优先，不泄露工程信息</td>
+</tr>
+<tr>
+<td>404</td>
+<td>CAPABILITY_NOT_ENABLED/未开放路由</td>
+<td>不泄露待上线写路径</td>
+</tr>
+<tr>
+<td>409</td>
+<td>REVISION_CONFLICT / SOURCE_CHANGED / IDEMPOTENCY_CONFLICT</td>
+<td>source/base/请求重用冲突</td>
+</tr>
+<tr>
+<td>423</td>
+<td>TARGET_LOCKED / PROJECT_ATTENTION</td>
+<td>对象锁或恢复未决</td>
+</tr>
+<tr>
+<td>428</td>
+<td>IMPACT_REQUIRED / IMPACT_STALE / APPROVAL_REQUIRED</td>
+<td>缺少/过期影响确认或授权</td>
+</tr>
+<tr>
+<td>422</td>
+<td>UNSUPPORTED_EDIT / MISSING_ASSET / INVALID_RANGE</td>
+<td>类型/范围/能力无效</td>
+</tr>
+<tr>
+<td>503</td>
+<td>RUNNER_UNAVAILABLE / ENGINE_UNAVAILABLE</td>
+<td>工具缺失；不降级成假成功</td>
+</tr>
+</tbody>
+</table></div>
+<p>错误码名称为目标建议；M0不得打破现有兼容路由。差异以API compatibility表决定alias、新版本或保留旧码，不为“统一”随意改旧HTTP行为。</p>
+</article><footer class="foot"><span>Narralens — AI-Assisted Directing Studio</span><span>M1.0 · 2026-10-16</span></footer></div></body></html>

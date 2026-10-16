@@ -1,0 +1,169 @@
+{
+  "status": "PLANNED_NOT_EXECUTED",
+  "p0": [
+    {
+      "id": "P0-01",
+      "requirement": "项目创建/任务包导入",
+      "reported_status": "未开始",
+      "new_gate": "M5A",
+      "target": "CreativeTask表单/聊天文本/标准包→校验→新OpenFilm项目→重开；原始观点保留",
+      "cases": "UX-01,UX-02"
+    },
+    {
+      "id": "P0-02",
+      "requirement": "章节/脚本/镜头导航",
+      "reported_status": "部分",
+      "new_gate": "M5A",
+      "target": "稳定章/句/镜身份映射到实际片段；120镜数据不靠fixture数组下标",
+      "cases": "UX-03,UX-04"
+    },
+    {
+      "id": "P0-03",
+      "requirement": "真实播放器/统一时间码",
+      "reported_status": "部分",
+      "new_gate": "M1B,M2,M5A",
+      "target": "原生播放器绑定同一snapshot；逐帧往返；30fps确定性夹具",
+      "cases": "OF-02,TM-01,UX-05"
+    },
+    {
+      "id": "P0-04",
+      "requirement": "全片时间轴/局部精修",
+      "reported_status": "未开始",
+      "new_gate": "M5A,M5B",
+      "target": "复用原生Timeline；地图语义缩放；不建独立最终timeline",
+      "cases": "UX-06,PF-01"
+    },
+    {
+      "id": "P0-05",
+      "requirement": "镜头/区间/逐帧选择",
+      "reported_status": "部分",
+      "new_gate": "M2,M5A",
+      "target": "半开整数帧区间；任意区间可选择；超出支持编辑能力显式拒绝",
+      "cases": "TM-01,TM-02,UX-05"
+    },
+    {
+      "id": "P0-06",
+      "requirement": "3–6个结构化提案比较",
+      "reported_status": "完整（旧引擎）",
+      "new_gate": "M2,M3,M5B",
+      "target": "保留D4.1；engine-neutral提案；本地最多3路代理播放；比较不写source",
+      "cases": "PR-01,PR-02,UX-07"
+    },
+    {
+      "id": "P0-07",
+      "requirement": "visual/narration/duration锁",
+      "reported_status": "部分",
+      "new_gate": "M2,M4B",
+      "target": "三类锁在服务器及原生写路径主动校验；覆盖共享消费者",
+      "cases": "TX-03,TX-04,TX-13"
+    },
+    {
+      "id": "P0-08",
+      "requirement": "本地素材/来源/许可",
+      "reported_status": "部分",
+      "new_gate": "M1A,M2,M3",
+      "target": "导入收口；AssetManifest@2兼容；segment绑定、proxy lineage、审批",
+      "cases": "IM-01..IM-26,MT-01,MT-03"
+    },
+    {
+      "id": "P0-09",
+      "requirement": "局部差异确认",
+      "reported_status": "部分",
+      "new_gate": "M4A",
+      "target": "影响快照SHA含source闭包/资产/锁/范围；无snapshot返回428",
+      "cases": "TX-01,TX-02,TX-05"
+    },
+    {
+      "id": "P0-10",
+      "requirement": "版本/撤回/恢复/冲突",
+      "reported_status": "部分",
+      "new_gate": "M2,M4B",
+      "target": "原生undo/redo转受控commit；恢复旧内容生成新revision；并发/崩溃",
+      "cases": "TX-06..TX-12,JB-01..JB-06"
+    },
+    {
+      "id": "P0-11",
+      "requirement": "重开/真实MP4导出",
+      "reported_status": "部分",
+      "new_gate": "M1B,M4,M6",
+      "target": "30秒＋3–5分钟章节双导出；媒体/音轨/中文；导出绑定snapshot",
+      "cases": "OF-01..OF-06,DL-01"
+    },
+    {
+      "id": "P0-12",
+      "requirement": "标题/封面候选",
+      "reported_status": "未开始",
+      "new_gate": "M6",
+      "target": "8标题、4封面方向与可视候选；正文一致性与人工选择；provider没接入不算完成",
+      "cases": "DL-02,DL-03"
+    },
+    {
+      "id": "P0-13",
+      "requirement": "发布前检查",
+      "reported_status": "未开始",
+      "new_gate": "M6",
+      "target": "字幕/音量/黑帧/缺素材/许可/事实缺口分级检查；阻断导出发布版",
+      "cases": "DL-04,DL-05"
+    }
+  ],
+  "nfr": [
+    {
+      "id": "NFR-01",
+      "requirement": "本地优先",
+      "new_gate": "M2,M7C",
+      "target": "loopback/Origin/token、scene隔离、受控外传日志、钥匙不进前端"
+    },
+    {
+      "id": "NFR-02",
+      "requirement": "可恢复",
+      "new_gate": "M2,M4",
+      "target": "恢复优先于写入；stage与active隔离；不可识别状态attention"
+    },
+    {
+      "id": "NFR-03",
+      "requirement": "可观察",
+      "new_gate": "M2,M3",
+      "target": "Job和事件持久化；cursor去重；重启不把任务伪标成功"
+    },
+    {
+      "id": "NFR-04",
+      "requirement": "可测试",
+      "new_gate": "全部",
+      "target": "旧case保留；编号→实际测试→产物→reviewer；禁止以总数替代"
+    },
+    {
+      "id": "NFR-05",
+      "requirement": "性能",
+      "new_gate": "M5C,M7D",
+      "target": "120镜/900秒导航操作p95≤100ms；不把该指标用于渲染和生成"
+    },
+    {
+      "id": "NFR-06",
+      "requirement": "可访问",
+      "new_gate": "M5C,M6",
+      "target": "键盘/焦点/减少动效/100%与原生200%；headed与人工评审"
+    }
+  ],
+  "p1": [
+    {
+      "gate": "M7A",
+      "scope": "StyleProfile与长片内容",
+      "target": "版本化账号风格；母项目完整10–15分钟结构；修改不影响锁定项"
+    },
+    {
+      "gate": "M7B",
+      "scope": "TTS/ASR/字幕适配",
+      "target": "本人声音/授权合成；对齐失效与消费者追踪；真实provider往返"
+    },
+    {
+      "gate": "M7C",
+      "scope": "素材检索生成/预算/反馈",
+      "target": "有权限的远端来源、资产外传审批、成本上限、有限重试；评论绑定版本/镜头/范围"
+    },
+    {
+      "gate": "M7D",
+      "scope": "完整V1/P0+P1集成",
+      "target": "真实10–15分钟项目全流程；风格、声音、来源、反馈；完整回归与用户签署"
+    }
+  ]
+}

@@ -1,0 +1,67 @@
+{
+  "status": "NOT_DISCOVERED",
+  "engine_sha": null,
+  "categories": [
+    {
+      "category": "film-edit",
+      "actual_entrypoints": [],
+      "policy": "unknown",
+      "test_refs": []
+    },
+    {
+      "category": "timeline-trim-move-split-speed",
+      "actual_entrypoints": [],
+      "policy": "unknown",
+      "test_refs": []
+    },
+    {
+      "category": "inspector-overrides",
+      "actual_entrypoints": [],
+      "policy": "unknown",
+      "test_refs": []
+    },
+    {
+      "category": "subtitle-audio",
+      "actual_entrypoints": [],
+      "policy": "unknown",
+      "test_refs": []
+    },
+    {
+      "category": "asset-import-paste",
+      "actual_entrypoints": [],
+      "policy": "unknown",
+      "test_refs": []
+    },
+    {
+      "category": "history-undo-redo-restore",
+      "actual_entrypoints": [],
+      "policy": "unknown",
+      "test_refs": []
+    },
+    {
+      "category": "provider-generation",
+      "actual_entrypoints": [],
+      "policy": "unknown",
+      "test_refs": []
+    },
+    {
+      "category": "CLI-filesystem",
+      "actual_entrypoints": [],
+      "policy": "unknown",
+      "test_refs": []
+    },
+    {
+      "category": "project-rename-delete-template",
+      "actual_entrypoints": [],
+      "policy": "unknown",
+      "test_refs": []
+    },
+    {
+      "category": "export-autosave",
+      "actual_entrypoints": [],
+      "policy": "unknown",
+      "test_refs": []
+    }
+  ],
+  "gate_rule": "Every actual writable route/IPC/CLI entry must be translated or blocked with test evidence before M2 passes."
+}

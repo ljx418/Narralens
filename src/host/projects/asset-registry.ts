@@ -52,6 +52,8 @@ export type AssetRegistryFaultPoint = "before_manifest_write" | "before_manifest
 
 export interface AssetRegistryDependencies {
   fault?: (point: AssetRegistryFaultPoint) => void | Promise<void>;
+  hashFile?: (path: string) => Promise<string>;
+  videoFrames?: (path: string, expectedFrameRate?: number) => Promise<number>;
 }
 
 export class AssetRegistry {
@@ -128,7 +130,11 @@ export class AssetRegistry {
     let mediaHash: string;
     let verifiedHash: string;
     let frames: number;
-    try { mediaHash = await hashFile(path); frames = await videoFrames(path); verifiedHash = await hashFile(path); }
+    try {
+      mediaHash = await (this.dependencies.hashFile ?? hashFile)(path);
+      frames = await (this.dependencies.videoFrames ?? videoFrames)(path);
+      verifiedHash = await (this.dependencies.hashFile ?? hashFile)(path);
+    }
     catch { throw new HttpError(422, "MISSING_ASSET", "Registered asset could not be inspected"); }
     if (mediaHash !== asset.sha256 || verifiedHash !== asset.sha256) {
       throw new HttpError(422, "MISSING_ASSET", "Asset bytes do not match the manifest");
@@ -160,16 +166,16 @@ export class AssetRegistry {
       if (!asset.license.commercial_use) blockingReasons.push("COMMERCIAL_USE_NOT_ALLOWED");
       try {
         const path = await containedPath(snapshot.root, asset.project_path);
-        const firstHash = await hashFile(path);
+        const firstHash = await (this.dependencies.hashFile ?? hashFile)(path);
         if (firstHash !== asset.sha256) {
           availability = "unavailable";
           blockingReasons.push("HASH_MISMATCH");
         } else {
-          const frames = await videoFrames(path, descriptor.frame_rate);
+          const frames = await (this.dependencies.videoFrames ?? videoFrames)(path, descriptor.frame_rate);
           if (frames !== asset.duration_frames) {
             availability = "unavailable";
             blockingReasons.push("MEDIA_INVALID");
-          } else if (await hashFile(path) !== asset.sha256) {
+          } else if (await (this.dependencies.hashFile ?? hashFile)(path) !== asset.sha256) {
             availability = "unavailable";
             blockingReasons.push("HASH_MISMATCH");
           }

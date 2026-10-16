@@ -1,0 +1,91 @@
+{
+  "reviewed_at": "2026-10-16",
+  "review_type": "public_source_read_not_execution",
+  "pinned_sha": null,
+  "sources": [
+    {
+      "id": "R1",
+      "name": "OpenFilm官方贡献/源码布局",
+      "url": "https://raw.githubusercontent.com/openfilm/openfilm/main/CONTRIBUTING.md",
+      "supports": "React/Vite Studio、服务端/引擎模块、源码运行条件；M1B仍须本地固定。"
+    },
+    {
+      "id": "R2",
+      "name": "OpenFilm ProjectView",
+      "url": "https://raw.githubusercontent.com/openfilm/openfilm/main/packages/openfilm/studio/ui/src/components/ProjectView.tsx",
+      "supports": "现有Timeline/Preview/Inspector等实际集成位置；不是已接入Narralens。"
+    },
+    {
+      "id": "R3",
+      "name": "OpenFilm film.mjs",
+      "url": "https://raw.githubusercontent.com/openfilm/openfilm/main/packages/openfilm/studio/server/film.mjs",
+      "supports": "editProjectFilm使用当前value应用ops，返回rebased；不以base不同作为统一拒绝。"
+    },
+    {
+      "id": "R4",
+      "name": "OpenFilm SPEC",
+      "url": "https://raw.githubusercontent.com/openfilm/openfilm/main/packages/openfilm/SPEC.md",
+      "supports": "film.html/片段/场景frame(t)；工程语义依据。"
+    },
+    {
+      "id": "R5",
+      "name": "OpenFilm provider contract",
+      "url": "https://raw.githubusercontent.com/openfilm/openfilm/main/packages/openfilm/studio/server/providers/contract.mjs",
+      "supports": "多种媒体能力；Spend确认不含金额预算模型。"
+    },
+    {
+      "id": "R6",
+      "name": "VibeMovie prompt与解析",
+      "url": "https://raw.githubusercontent.com/EvanJYHe/vibe-movie/main/backend/prompts/geminiPrompts.js",
+      "supports": "完整JSON timeline编辑和解析；本项目只借鉴结构化提案方法。"
+    },
+    {
+      "id": "R7",
+      "name": "VibeMovie render",
+      "url": "https://raw.githubusercontent.com/EvanJYHe/vibe-movie/main/backend/src/services/render.js",
+      "supports": "Remotion bundle/selectComposition/renderMedia；不是OpenFilm通用后端。"
+    },
+    {
+      "id": "R8",
+      "name": "HyperFrames README",
+      "url": "https://raw.githubusercontent.com/heygen-com/hyperframes/main/README.md",
+      "supports": "HTML/媒体/seekable动画；可选素材/场景能力。"
+    },
+    {
+      "id": "R9",
+      "name": "OpenFilm LICENSE及商标",
+      "url": "https://raw.githubusercontent.com/openfilm/openfilm/main/TRADEMARK.md",
+      "supports": "MIT代码与名称标识另分；自有修改版使用Narralens品牌。"
+    },
+    {
+      "id": "R10",
+      "name": "VibeMovie LICENSE",
+      "url": "https://raw.githubusercontent.com/EvanJYHe/vibe-movie/main/LICENSE",
+      "supports": "代码MIT；不代表所有依赖相同许可。"
+    },
+    {
+      "id": "R11",
+      "name": "HyperFrames LICENSE",
+      "url": "https://raw.githubusercontent.com/heygen-com/hyperframes/main/LICENSE",
+      "supports": "Apache2.0；分发按具体条款处理。"
+    },
+    {
+      "id": "R12",
+      "name": "OpenFilm package.json",
+      "url": "https://raw.githubusercontent.com/openfilm/openfilm/main/packages/openfilm/package.json",
+      "supports": "本次看到0.1.7；exports/依赖是观察结果，不是选择或锁定的版本。"
+    },
+    {
+      "id": "R13",
+      "name": "OpenFilm LICENSE",
+      "url": "https://raw.githubusercontent.com/openfilm/openfilm/main/LICENSE",
+      "supports": "代码MIT通知与保留义务。"
+    },
+    {
+      "id": "R14",
+      "name": "VibeMovie timeline验证",
+      "url": "https://raw.githubusercontent.com/EvanJYHe/vibe-movie/main/backend/src/timeline.js",
+      "supports": "规范化和基础字段验证；不能替代领域级范围/资产/锁验证。"
+    }
+  ]
+}

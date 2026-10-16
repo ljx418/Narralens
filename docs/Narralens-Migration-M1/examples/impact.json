@@ -1,0 +1,34 @@
+{
+  "kind": "impact_snapshot",
+  "schema_version": "migration/1",
+  "id": "impact-example",
+  "project_id": "example-openfilm-copy",
+  "base": {
+    "project_revision": 12,
+    "source_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "control_revision": 3
+  },
+  "selection": {
+    "start_frame": 1932,
+    "end_frame": 2100
+  },
+  "fps": {
+    "num": 30,
+    "den": 1
+  },
+  "affected_ids": [
+    "clip-S07"
+  ],
+  "preserve": [
+    "visual_outside_selection",
+    "narration",
+    "duration",
+    "subtitle"
+  ],
+  "expected_total_frames": 7200,
+  "intent_digest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+  "asset_policy_digest": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+  "adapter_version": "example-adapter-not-installed",
+  "expires_at": "2030-01-01T00:00:00Z",
+  "impact_hash": "1111111111111111111111111111111111111111111111111111111111111111"
+}

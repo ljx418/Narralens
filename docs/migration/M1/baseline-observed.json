@@ -1,0 +1,39 @@
+{
+  "observed_at": "2026-10-16T00:00:00+08:00",
+  "status": "M0_OBSERVED",
+  "repository": {
+    "branch_before_m0": "main",
+    "implementation_branch": "migration/m1-m0-m1a",
+    "head": "304c89134fdf9f834f7d69e3f4d5c89a68044c60",
+    "origin_main": "304c89134fdf9f834f7d69e3f4d5c89a68044c60",
+    "remote": "https://github.com/ljx418/Narralens",
+    "worktree_clean": false,
+    "preserved_untracked": ["docs/Narralens-Migration-M1/"]
+  },
+  "submodules": {
+    "vendor/OpenMontage": "9327439db69021ab4b0e2776729bf3b58fdb5a87",
+    "vendor/hypit": "6fdd8c0f02c17b9970aee6deb4550a70e9d57acf"
+  },
+  "freeze_limits": {
+    "metadata_bytes": 16384,
+    "default_file_bytes": 2147483648,
+    "default_transport_overhead_bytes": 65536,
+    "media_tool_timeout_ms": 120000,
+    "media_tool_stderr_bytes": 1048576,
+    "inventory_media_timeout_ms": 30000,
+    "manifest_max_entries": 256,
+    "inventory_parallelism": 2
+  },
+  "reported_gate_state": {
+    "passed": ["D1", "D2", "D3", "D4.0", "D4.1"],
+    "candidate": ["D4.2.1"],
+    "not_started_or_not_closed": ["D4.2.2", "D4.2.3", "D5", "D6", "D7", "P1"]
+  },
+  "observed_d421_gap": "The recorded 126-test aggregate does not provide a direct local-test reference for every frozen D4.2.1 row or migration IM-01..IM-26 case.",
+  "backup": {
+    "kind": "complete_git_bundle",
+    "path": "/mnt/c/workspace/videoworkline/Narralens-migration-backups/2026-10-16-304c891/Narralens-legacy-304c891.bundle",
+    "sha256": "f2e6101e81cda07aba305615c66fbd32a4a9c21262194c5e505352e73a733ea0",
+    "verified": true
+  }
+}

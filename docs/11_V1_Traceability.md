@@ -1,8 +1,8 @@
 # Narralens V1 规格—架构—开发—验收追踪矩阵
 
 版本：v1.0  
-状态：实际开发已批准；Gate D1、Gate D2、Gate D3、Gate D4.0、Gate D4.1 已通过；D4.2 总体文档方向和子阶段边界已通过内外审；D4.2.1 生产实现、全量回归、Headless 浏览器证据及内部总审计已完成，独立外部总审计尚待关闭，整体仍未宣告通过。
-事实日期：2026-10-15
+状态：实际开发已批准；Gate D1、Gate D2、Gate D3、Gate D4.0、Gate D4.1 历史结论保留。D4.2.1 生产实现与内部总审计完成，但逐编号直接证据缺口及独立外部总审计尚未关闭。`CR-MIG-001` 已批准 OpenFilm 目标架构；当前执行 M1A/M1B 双门，禁止提前进入 M2 或旧 D4.2.2。
+事实日期：2026-10-16
 
 ## 1. 使用规则
 
@@ -35,6 +35,18 @@
 | D4.2.3 | `D42-APPROVAL`、`D42-ADOPT`、`D42-ATOMIC`、`D42-E2E` | impact SHA、428、typed media.replace、revision +1、补偿/attention、build/restart | 唯一允许把已批准 composite 写入 Source 的子阶段 |
 
 因此 `D421-*` 只关闭相应 `D42-*` 的前置子集，不得据此把 P0-08、P0-09 或 Gate D4.2 标记为完成。
+
+### 迁移 Gate 映射（CR-MIG-001）
+
+| 新 Gate | 目标 | 当前状态 | 出门约束 |
+|---|---|---|---|
+| M0 | 现场 SHA、代码/路由/阈值、备份与变更单 | observed | 不改变业务 Gate |
+| M1A | D4.2.1 冻结矩阵逐 case 真实证据与独立外审 | in-progress | 不能用测试总数替代逐编号证据 |
+| M1B | 固定 OpenFilm SHA、可编辑 30 秒链路、native 写入口清单与 stale-base 实证 | in-progress | 不写生产 Hypit，不用扁平 MP4 代替可编辑工程 |
+| M2 | EnginePort、单引擎绑定、写入治理、三类锁、持久 Job/SSE/lease、snapshot/journal/回退 | blocked-by-M1A+M1B | 双门都通过才允许开工 |
+| M3–M5 | 素材化、采用事务、同页原生 Studio UX | not-started | 顺序门禁，不顺跳 |
+| M6 | `Gate V1-P0` | not-started | 不等于 V1-Full |
+| M7A–D | P1 与完整长片证据 | not-started | P0/P1 全绿后才可声明 V1-Full |
 
 ## 3. 非功能追踪
 

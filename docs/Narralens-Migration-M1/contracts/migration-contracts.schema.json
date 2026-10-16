@@ -1,0 +1,985 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:narralens:migration:1",
+  "title": "Narralens migration/1 proposed contracts — not existing API",
+  "$defs": {
+    "Fps": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "num": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "den": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "num",
+        "den"
+      ]
+    },
+    "Range": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "start_frame": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "end_frame": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "start_frame",
+        "end_frame"
+      ]
+    },
+    "Base": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "project_revision": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "source_digest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "control_revision": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "project_revision",
+        "source_digest",
+        "control_revision"
+      ]
+    },
+    "Segment": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "asset_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "asset_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "range": {
+          "$ref": "#/$defs/Range"
+        },
+        "source_start_frame": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "source_frame_count": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "source_fps": {
+          "$ref": "#/$defs/Fps"
+        },
+        "fit": {
+          "enum": [
+            "cover",
+            "contain"
+          ]
+        },
+        "audio_policy": {
+          "enum": [
+            "muted",
+            "separate_original"
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "asset_id",
+        "asset_sha256",
+        "range",
+        "source_start_frame",
+        "source_frame_count",
+        "source_fps",
+        "fit",
+        "audio_policy"
+      ]
+    },
+    "EngineBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "engine_binding"
+        },
+        "schema_version": {
+          "const": "migration/1"
+        },
+        "project_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "engine": {
+          "enum": [
+            "hypit",
+            "openfilm"
+          ]
+        },
+        "engine_sha": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{40}$"
+        },
+        "active_snapshot_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "project_revision": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "migrated_from": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "project_id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "engine": {
+                  "enum": [
+                    "hypit",
+                    "openfilm"
+                  ]
+                },
+                "project_revision": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "source_digest": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                }
+              },
+              "required": [
+                "project_id",
+                "engine",
+                "project_revision",
+                "source_digest"
+              ]
+            }
+          ]
+        }
+      },
+      "required": [
+        "kind",
+        "schema_version",
+        "project_id",
+        "engine",
+        "engine_sha",
+        "active_snapshot_id",
+        "project_revision",
+        "migrated_from"
+      ]
+    },
+    "SourceManifest": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "source_manifest"
+        },
+        "schema_version": {
+          "const": "migration/1"
+        },
+        "snapshot_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "engine": {
+          "enum": [
+            "hypit",
+            "openfilm"
+          ]
+        },
+        "engine_sha": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{40}$"
+        },
+        "files": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "path": {
+                "type": "string",
+                "minLength": 1
+              },
+              "role": {
+                "enum": [
+                  "film",
+                  "scene",
+                  "script",
+                  "style",
+                  "subtitle",
+                  "settings",
+                  "font",
+                  "media"
+                ]
+              },
+              "sha256": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "bytes": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "required": [
+              "path",
+              "role",
+              "sha256",
+              "bytes"
+            ]
+          },
+          "minItems": 1
+        },
+        "source_digest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      },
+      "required": [
+        "kind",
+        "schema_version",
+        "snapshot_id",
+        "engine",
+        "engine_sha",
+        "files",
+        "source_digest"
+      ]
+    },
+    "ImpactSnapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "impact_snapshot"
+        },
+        "schema_version": {
+          "const": "migration/1"
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "project_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "base": {
+          "$ref": "#/$defs/Base"
+        },
+        "selection": {
+          "$ref": "#/$defs/Range"
+        },
+        "fps": {
+          "$ref": "#/$defs/Fps"
+        },
+        "affected_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1
+        },
+        "preserve": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "visual_outside_selection",
+              "narration",
+              "duration",
+              "subtitle"
+            ]
+          },
+          "minItems": 0
+        },
+        "expected_total_frames": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "intent_digest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "asset_policy_digest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "adapter_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "impact_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      },
+      "required": [
+        "kind",
+        "schema_version",
+        "id",
+        "project_id",
+        "base",
+        "selection",
+        "fps",
+        "affected_ids",
+        "preserve",
+        "expected_total_frames",
+        "intent_digest",
+        "asset_policy_digest",
+        "adapter_version",
+        "expires_at",
+        "impact_hash"
+      ]
+    },
+    "MaterializedProposal": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "materialized_proposal"
+        },
+        "schema_version": {
+          "const": "migration/1"
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "proposal_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "project_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "base": {
+          "$ref": "#/$defs/Base"
+        },
+        "status": {
+          "enum": [
+            "ready_for_adoption",
+            "stale",
+            "cancelled",
+            "failed"
+          ]
+        },
+        "selection": {
+          "$ref": "#/$defs/Range"
+        },
+        "fps": {
+          "$ref": "#/$defs/Fps"
+        },
+        "editability": {
+          "enum": [
+            "native_editable",
+            "parameterized_regenerate",
+            "flattened_media"
+          ]
+        },
+        "segments": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Segment"
+          },
+          "minItems": 1
+        },
+        "proxy_asset_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1
+        },
+        "lineage": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "parent_asset_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 1
+            },
+            "transform_digest": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "tool_version": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "parent_asset_ids",
+            "transform_digest",
+            "tool_version"
+          ]
+        },
+        "author_source_changed": {
+          "const": false
+        }
+      },
+      "required": [
+        "kind",
+        "schema_version",
+        "id",
+        "proposal_id",
+        "project_id",
+        "base",
+        "status",
+        "selection",
+        "fps",
+        "editability",
+        "segments",
+        "proxy_asset_ids",
+        "lineage",
+        "author_source_changed"
+      ]
+    },
+    "TypedIntent": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "operation": {
+          "enum": [
+            "visual.fit",
+            "media.replace",
+            "replace_visual_segments",
+            "restore_snapshot"
+          ]
+        },
+        "target_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1
+        },
+        "selection": {
+          "$ref": "#/$defs/Range"
+        },
+        "materialization_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "restore_snapshot_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "operation",
+        "target_ids",
+        "selection",
+        "materialization_id",
+        "restore_snapshot_id"
+      ]
+    },
+    "EditRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "edit_request"
+        },
+        "schema_version": {
+          "const": "migration/1"
+        },
+        "project_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "base": {
+          "$ref": "#/$defs/Base"
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1
+        },
+        "impact_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "impact_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "intent": {
+          "$ref": "#/$defs/TypedIntent"
+        }
+      },
+      "required": [
+        "kind",
+        "schema_version",
+        "project_id",
+        "base",
+        "idempotency_key",
+        "impact_id",
+        "impact_hash",
+        "intent"
+      ]
+    },
+    "MigrationReport": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "migration_report"
+        },
+        "schema_version": {
+          "const": "migration/1"
+        },
+        "old_project_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "new_project_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "old_source_digest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "new_source_digest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "strategy": {
+          "enum": [
+            "subset_conversion",
+            "rebuild_from_inputs",
+            "flattened_reference"
+          ]
+        },
+        "mapping": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "old_shot_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "new_clip_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "minItems": 1
+              }
+            },
+            "required": [
+              "old_shot_id",
+              "new_clip_ids"
+            ]
+          },
+          "minItems": 0
+        },
+        "unsupported": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 0
+        },
+        "old_source_unchanged": {
+          "type": "boolean"
+        },
+        "status": {
+          "enum": [
+            "planned",
+            "validated",
+            "blocked"
+          ]
+        },
+        "evidence_manifest_path": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "kind",
+        "schema_version",
+        "old_project_id",
+        "new_project_id",
+        "old_source_digest",
+        "new_source_digest",
+        "strategy",
+        "mapping",
+        "unsupported",
+        "old_source_unchanged",
+        "status",
+        "evidence_manifest_path"
+      ]
+    },
+    "PluginManifest": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "plugin_manifest"
+        },
+        "schema_version": {
+          "const": "migration/1"
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "upstream_sha": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{40}$"
+        },
+        "capability_kind": {
+          "enum": [
+            "planner",
+            "media",
+            "scene_post"
+          ]
+        },
+        "production_write": {
+          "const": false
+        },
+        "allowed_network": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 0
+        },
+        "allowed_roots": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "input_snapshot",
+              "staging_output"
+            ]
+          },
+          "minItems": 0
+        },
+        "output_editability": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "proposal_only",
+              "native_editable",
+              "parameterized_regenerate",
+              "flattened_media"
+            ]
+          },
+          "minItems": 0
+        },
+        "cost_policy": {
+          "enum": [
+            "local_only",
+            "approval_required"
+          ]
+        },
+        "timeout_seconds": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "cancel_policy": {
+          "enum": [
+            "kill_local_process",
+            "provider_cancel_or_quarantine"
+          ]
+        }
+      },
+      "required": [
+        "kind",
+        "schema_version",
+        "id",
+        "version",
+        "upstream_sha",
+        "capability_kind",
+        "production_write",
+        "allowed_network",
+        "allowed_roots",
+        "output_editability",
+        "cost_policy",
+        "timeout_seconds",
+        "cancel_policy"
+      ]
+    },
+    "EvidenceManifest": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "evidence_manifest"
+        },
+        "schema_version": {
+          "const": "migration/1"
+        },
+        "stage": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "enum": [
+            "NOT_RUN",
+            "FAILED",
+            "REVIEW_PENDING",
+            "PASSED"
+          ]
+        },
+        "repo_sha": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "engine_sha": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "cases": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "case_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "status": {
+                "enum": [
+                  "NOT_RUN",
+                  "FAILED",
+                  "PASSED"
+                ]
+              },
+              "local_test_ref": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "command": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "exit_code": {
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "artifact_paths": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "minItems": 0
+              }
+            },
+            "required": [
+              "case_id",
+              "status",
+              "local_test_ref",
+              "command",
+              "exit_code",
+              "artifact_paths"
+            ]
+          },
+          "minItems": 0
+        },
+        "artifacts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "path": {
+                "type": "string",
+                "minLength": 1
+              },
+              "sha256": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "role": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "path",
+              "sha256",
+              "role"
+            ]
+          },
+          "minItems": 0
+        },
+        "review": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "independent_reviewer": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "reviewed_repo_sha": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "report_path": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "decision": {
+              "enum": [
+                "NOT_RUN",
+                "GO",
+                "NO_GO"
+              ]
+            }
+          },
+          "required": [
+            "independent_reviewer",
+            "reviewed_repo_sha",
+            "report_path",
+            "decision"
+          ]
+        },
+        "human_review": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "required": {
+              "type": "boolean"
+            },
+            "reviewer": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "report_path": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "accepted": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "required",
+            "reviewer",
+            "report_path",
+            "accepted"
+          ]
+        }
+      },
+      "required": [
+        "kind",
+        "schema_version",
+        "stage",
+        "status",
+        "repo_sha",
+        "engine_sha",
+        "cases",
+        "artifacts",
+        "review",
+        "human_review"
+      ]
+    }
+  },
+  "oneOf": [
+    {
+      "$ref": "#/$defs/EngineBinding"
+    },
+    {
+      "$ref": "#/$defs/SourceManifest"
+    },
+    {
+      "$ref": "#/$defs/ImpactSnapshot"
+    },
+    {
+      "$ref": "#/$defs/MaterializedProposal"
+    },
+    {
+      "$ref": "#/$defs/EditRequest"
+    },
+    {
+      "$ref": "#/$defs/MigrationReport"
+    },
+    {
+      "$ref": "#/$defs/PluginManifest"
+    },
+    {
+      "$ref": "#/$defs/EvidenceManifest"
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "kind": "source_manifest",
+  "schema_version": "migration/1",
+  "snapshot_id": "example-snapshot-12",
+  "engine": "openfilm",
+  "engine_sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "files": [
+    {
+      "path": "film.html",
+      "role": "film",
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "bytes": 1234
+    },
+    {
+      "path": "assets/narration.wav",
+      "role": "media",
+      "sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "bytes": 2048
+    }
+  ],
+  "source_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+}

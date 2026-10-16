@@ -1,0 +1,21 @@
+{
+  "kind": "migration_report",
+  "schema_version": "migration/1",
+  "old_project_id": "example-hypit-old",
+  "new_project_id": "example-openfilm-copy",
+  "old_source_digest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+  "new_source_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "strategy": "subset_conversion",
+  "mapping": [
+    {
+      "old_shot_id": "S07",
+      "new_clip_ids": [
+        "clip-S07"
+      ]
+    }
+  ],
+  "unsupported": [],
+  "old_source_unchanged": true,
+  "status": "planned",
+  "evidence_manifest_path": null
+}

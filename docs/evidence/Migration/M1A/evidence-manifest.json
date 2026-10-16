@@ -1,0 +1,26 @@
+{
+  "stage": "M1A",
+  "date": "2026-10-16",
+  "status": "EXTERNAL_REVIEW_PENDING",
+  "baseline_commit": "304c89134fdf9f834f7d69e3f4d5c89a68044c60",
+  "automated_interaction": "headless_or_non_ui",
+  "headed_automation": "NOT_RUN",
+  "human_experience": "NOT_RUN",
+  "gates": {
+    "targeted": { "status": "PASS", "tests": 8, "skipped": 0 },
+    "full": { "status": "PASS", "files": 17, "tests": 134, "skipped": 0 },
+    "typescript": "PASS",
+    "production_build": "PASS",
+    "independent_external_review": "PENDING"
+  },
+  "artifacts": [
+    {
+      "path": "artifacts/pnpm-check.log",
+      "sha256": "5a7e5a8887d57e1d01763516ce9ef97ca379ea63c82d6a02bbdb6191218957a1"
+    },
+    {
+      "path": "artifacts/d421-large-upload.json",
+      "sha256": "2b0165bf2878b530b24e84df1a7620d4b73af9a82eb4f730681307d3442cd980"
+    }
+  ]
+}

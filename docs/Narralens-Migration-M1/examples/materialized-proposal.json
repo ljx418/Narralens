@@ -1,0 +1,88 @@
+{
+  "kind": "materialized_proposal",
+  "schema_version": "migration/1",
+  "id": "mat-example",
+  "proposal_id": "proposal-example",
+  "project_id": "example-openfilm-copy",
+  "base": {
+    "project_revision": 12,
+    "source_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "control_revision": 3
+  },
+  "status": "ready_for_adoption",
+  "selection": {
+    "start_frame": 1932,
+    "end_frame": 2100
+  },
+  "fps": {
+    "num": 30,
+    "den": 1
+  },
+  "editability": "native_editable",
+  "segments": [
+    {
+      "id": "seg-1",
+      "asset_id": "example-asset-1",
+      "asset_sha256": "2222222222222222222222222222222222222222222222222222222222222222",
+      "range": {
+        "start_frame": 1932,
+        "end_frame": 1988
+      },
+      "source_start_frame": 0,
+      "source_frame_count": 56,
+      "source_fps": {
+        "num": 30,
+        "den": 1
+      },
+      "fit": "cover",
+      "audio_policy": "muted"
+    },
+    {
+      "id": "seg-2",
+      "asset_id": "example-asset-2",
+      "asset_sha256": "3333333333333333333333333333333333333333333333333333333333333333",
+      "range": {
+        "start_frame": 1988,
+        "end_frame": 2044
+      },
+      "source_start_frame": 0,
+      "source_frame_count": 56,
+      "source_fps": {
+        "num": 30,
+        "den": 1
+      },
+      "fit": "cover",
+      "audio_policy": "muted"
+    },
+    {
+      "id": "seg-3",
+      "asset_id": "example-asset-3",
+      "asset_sha256": "4444444444444444444444444444444444444444444444444444444444444444",
+      "range": {
+        "start_frame": 2044,
+        "end_frame": 2100
+      },
+      "source_start_frame": 0,
+      "source_frame_count": 56,
+      "source_fps": {
+        "num": 30,
+        "den": 1
+      },
+      "fit": "cover",
+      "audio_policy": "muted"
+    }
+  ],
+  "proxy_asset_ids": [
+    "example-proxy"
+  ],
+  "lineage": {
+    "parent_asset_ids": [
+      "example-asset-1",
+      "example-asset-2",
+      "example-asset-3"
+    ],
+    "transform_digest": "5555555555555555555555555555555555555555555555555555555555555555",
+    "tool_version": "example-only-not-a-real-ffmpeg-run"
+  },
+  "author_source_changed": false
+}

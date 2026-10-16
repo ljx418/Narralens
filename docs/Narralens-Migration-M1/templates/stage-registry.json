@@ -1,0 +1,300 @@
+{
+  "status": "PLANNED_NOT_EXECUTED",
+  "stages": [
+    {
+      "id": "M0",
+      "name": "冻结事实与规格重基线",
+      "deps": [],
+      "state": "待本地执行",
+      "scope": "读取当前代码和证据；合并CR与ADR，建立分支和真实code-map。",
+      "tickets": [
+        [
+          "M0.1",
+          "只读盘点",
+          "完整SHA/工作树/11_V1_Traceability/冻结矩阵/实际routes/scripts/journal；对照用户报告写差异。"
+        ],
+        [
+          "M0.2",
+          "可回退基线",
+          "记录legacy app和业务工程完整备份；新migration worktree，遇到脏树停止修改，不reset。"
+        ],
+        [
+          "M0.3",
+          "规格合并",
+          "同步PRD/架构实体/API状态/traceability，保留旧Gate；填阈值和合同兼容表。"
+        ]
+      ],
+      "exit": "BASELINE_RECONCILED：源码定位、直接证据缺口、路径/阈值已确认；本包审计工具通过不等于业务通过。",
+      "stop": "代码版本或冻结规范与报告不一致且未解释；无法定位资产和journal；备份缺失。"
+    },
+    {
+      "id": "M1A",
+      "name": "D4.2.1旧门禁真正收口",
+      "deps": [
+        "M0"
+      ],
+      "state": "待补测试/外审",
+      "scope": "补直接测试、必要小修复；只关闭导入门，不实现materialize/adopt。",
+      "tickets": [
+        [
+          "M1A.1",
+          "multipart/媒体负向矩阵",
+          "逐冻结编号补输入组合、媒体流与工具失败；命令边界可注入，关键媒体用真实文件。"
+        ],
+        [
+          "M1A.2",
+          "库存与真实并发",
+          "256项/最多2并行/单项超时/重复GET；真实import commit与D4.0 edit争用同一ProjectActor。"
+        ],
+        [
+          "M1A.3",
+          "HTTP与审计收口",
+          "未开路由404、虚构op422；TS/legacy全量/生产构建；逐case证据；Claude独立外审与必要返修。"
+        ]
+      ],
+      "exit": "D4.2.1 CLOSED_ON_HYPIT：每个冻结条目直接证据＋内审＋独立外审，无未解释P0/P1阻断。",
+      "stop": "只有126/126汇总、外审不可用、native测试替换旧断言、伪实现未开路由。"
+    },
+    {
+      "id": "M1B",
+      "name": "OpenFilm隔离可行性与写入口探测",
+      "deps": [
+        "M0"
+      ],
+      "state": "待固定上游/探测",
+      "scope": "固定SHA和依赖；只用新临时项目；不接管生产。",
+      "tickets": [
+        [
+          "M1B.1",
+          "固定代码与启动",
+          "本机clone/fork、upstream锁、许可证、Node/pnpm/browser/ffmpeg；记录真实启动/渲染命令。"
+        ],
+        [
+          "M1B.2",
+          "30秒可编辑链",
+          "中文独立旁白/字幕/三镜；cover/replace/边界；导出重开后再改一镜导出。"
+        ],
+        [
+          "M1B.3",
+          "Studio接缝证明",
+          "列所有写入口；试验native请求转typed意图/只写stage；验证旧base不会靠rebased进入主工程。"
+        ]
+      ],
+      "exit": "OPENFILM_SPIKE_PASS：真实短片和编辑往返＋native mutation intercept proof＋运行边界清单。",
+      "stop": "只能render扁平MP4；无法接管native写路径；版本/许可/依赖不明确。探测超过约定timebox则输出ADR，不无止境换框架。"
+    },
+    {
+      "id": "M2",
+      "name": "受控双适配器与最小可靠运行时",
+      "deps": [
+        "M1A",
+        "M1B"
+      ],
+      "state": "未开始",
+      "scope": "新项目唯一OpenFilm；保留legacy；D5最小可靠性前移。",
+      "tickets": [
+        [
+          "M2.1",
+          "EnginePort与原生网关",
+          "Hypit/OpenFilm共同合同；map原生UI/CLI/history/import/provider写入口，未知禁用。"
+        ],
+        [
+          "M2.2",
+          "一致提交与持久任务",
+          "snapshot/commit-record/journal/outbox；复用Actor；Job lease/cancel/SSE；三类锁最小校验。"
+        ],
+        [
+          "M2.3",
+          "副本迁移与回退",
+          "迁移已知fixture，保留manifest@2；loss report；旧新各自导出；重启故障/rollback drill。"
+        ]
+      ],
+      "exit": "CONTROLLED_OPENFILM_READY：旧回归保留，新引擎base/conflict/lock/恢复/原生绕过全过；可激活已迁移副本。",
+      "stop": "native undo或provider可绕规则；项目双写；Job仅内存；无可验证回退。"
+    },
+    {
+      "id": "M3",
+      "name": "只读素材化与原生剪辑计划",
+      "deps": [
+        "M2"
+      ],
+      "state": "未开始",
+      "scope": "继承D4.2.2目标；seg绑定→proxy＋native edit plan＋lineage。",
+      "tickets": [
+        [
+          "M3.1",
+          "绑定与来源",
+          "区间整数帧、真实资产足长、依赖/rights摘要；绑定变更使旧job过期。"
+        ],
+        [
+          "M3.2",
+          "实际素材化",
+          "有限并行ffmpeg代理；生成native可编辑segments；持久job/cancel/late/restart。"
+        ],
+        [
+          "M3.3",
+          "只读验收",
+          "materialize前后source/revision不变；界面显示ready_for_adoption；三镜不是单一烘焙片段。"
+        ]
+      ],
+      "exit": "MATERIALIZATION_READY：至少3个候选真实预览；全部artifact lineage可查；author source保持不变。",
+      "stop": "素材化偷偷写source；取消后可自动采用；缺素材用模拟成功补齐。"
+    },
+    {
+      "id": "M4",
+      "name": "采用、原生编辑与恢复闭环",
+      "deps": [
+        "M3"
+      ],
+      "state": "未开始",
+      "scope": "D4.2.3和D5完成；所有修改走同一Coordinator。",
+      "tickets": [
+        [
+          "M4A",
+          "impact与事务采用",
+          "server snapshot/hash＋428、严格409、锁、idempotency；采用native多clip计划只+1。"
+        ],
+        [
+          "M4B",
+          "历史与声音不变量",
+          "native undo/redo/restore映射；恢复为新revision；共享语音/字幕/时长锁与复用。"
+        ],
+        [
+          "M4C",
+          "故障与实片回归",
+          "注入每个journal边界；重启/并发/外部文件变更；真正双导出和源依赖抽样。"
+        ]
+      ],
+      "exit": "ADOPTION_AND_RECOVERY_READY：compare→materialize→adopt→reopen→rerender一条真实链；无旁白/相邻区污染。",
+      "stop": "只单元测试；恢复直接回退数字；渲染读取可变source；自动rebase旧采用。"
+    },
+    {
+      "id": "M5",
+      "name": "同页叙事地图与原生精剪",
+      "deps": [
+        "M4"
+      ],
+      "state": "未开始",
+      "scope": "D6业务导航，停止自研底层NLE；6类候选按capability逐步落地。",
+      "tickets": [
+        [
+          "M5A",
+          "项目/章节/时间",
+          "CreativeTask创建、整片脚本/章节/镜頭映射；统一clock/selection，原生timeline联动。"
+        ],
+        [
+          "M5B",
+          "地图和决策",
+          "全片→章→镜→细节缩放；三路真实proxy；低风险一击采用、问题节点/检查点。"
+        ],
+        [
+          "M5C",
+          "性能和人工体验",
+          "120镜/900秒harness，p95；headed100%/原生200%/键盘；零号用户实际演练。"
+        ]
+      ],
+      "exit": "UNIFIED_STUDIO_USABLE：不是独立HTML；UI选择在native timeline/预览/导出一致；可访问与性能证据。",
+      "stop": "第二份timeline状态；autoplay只是动画；Headless冒充人工；只可编辑3个fixture。"
+    },
+    {
+      "id": "M6",
+      "name": "真实章节、后期、封面与P0交付",
+      "deps": [
+        "M5"
+      ],
+      "state": "未开始",
+      "scope": "D7与P0全部收口；内容与工程分开验收。",
+      "tickets": [
+        [
+          "M6.1",
+          "实片与后期",
+          "10–15分母项目章节/脚本/粗镜完整；其中3–5分20+镜真实音画字幕；基础调色/声音/转场范围。"
+        ],
+        [
+          "M6.2",
+          "封面/标题/发布检查",
+          "8标题/4封面方向及实际候选、事实一致性；缺媒体/许可/音量/黑帧/字幕检查和issue anchor。"
+        ],
+        [
+          "M6.3",
+          "P0外审与交付",
+          "3个真实位置从比较到导出；重开双导出；HTML证据报告；所有P0/NFR关闭且用户签署。"
+        ]
+      ],
+      "exit": "Gate V1-P0 ACCEPTED；只代表P0可交付，不能宣称P1或完整V1。",
+      "stop": "真实资料或生成授权缺失；P0落空；仅导出一个视频却无编辑/恢复证据。"
+    },
+    {
+      "id": "M7A",
+      "name": "账号风格与完整母项目",
+      "deps": [
+        "M6"
+      ],
+      "state": "未开始",
+      "scope": "StyleProfile版本/继承/例外与完整10–15分内容；冻结编辑测试集。",
+      "tickets": [
+        [
+          "M7A.1",
+          "风格版本",
+          "语气/字幕/画面/声音基线与局部override，锁定不被全片应用覆盖。"
+        ]
+      ],
+      "exit": "StyleProfile真实应用/回滚、长片项目可重开。",
+      "stop": "模板只是文本，未写入工程；批量改锁定内容。"
+    },
+    {
+      "id": "M7B",
+      "name": "声音与字幕正式适配",
+      "deps": [
+        "M7A"
+      ],
+      "state": "未开始",
+      "scope": "TTS/ASR/对齐的真实provider与本人声音路径。",
+      "tickets": [
+        [
+          "M7B.1",
+          "音声版本",
+          "text/audio/alignment关联，消费者追踪、试听/审核、费用/外传审批、只改画面不重算声音。"
+        ]
+      ],
+      "exit": "真实中文转录/配音/对齐及变更回归，声音许可登记。",
+      "stop": "只用mock/provider stub宣称集成；词变音不变却显示已对齐。"
+    },
+    {
+      "id": "M7C",
+      "name": "素材服务、预算与反馈",
+      "deps": [
+        "M7B"
+      ],
+      "state": "未开始",
+      "scope": "按来源白名单接入最少一个检索与生成能力；反馈锚点和完整队列。",
+      "tickets": [
+        [
+          "M7C.1",
+          "能力插件",
+          "最小插件manifest、费用保留额、外传清单、取消/未知完成态；评论proposal不自动改模板。"
+        ]
+      ],
+      "exit": "有授权真实请求/receipt；预算与失败/重试；反馈到下一版提案。",
+      "stop": "全量引入多个框架；raw provider能直接写source；未知费用按0。"
+    },
+    {
+      "id": "M7D",
+      "name": "P0＋P1完整V1验收",
+      "deps": [
+        "M7C"
+      ],
+      "state": "未开始",
+      "scope": "完整10–15分实片，全流程真实回归、质量/成本/人工记录与独立审查。",
+      "tickets": [
+        [
+          "M7D.1",
+          "完整V1",
+          "所有P0+P1条目都绑定证据；长片性能、历史/回退、标题封面、来源交付、人工发布。"
+        ]
+      ],
+      "exit": "V1-Full ACCEPTED；之后才规划批量/P2。",
+      "stop": "P1只列路线未实现；缺任何核心证据或用户质量签署。"
+    }
+  ]
+}

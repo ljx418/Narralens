@@ -1,0 +1,975 @@
+{
+  "status": "PLANNED_NOT_EXECUTED",
+  "cases": [
+    {
+      "id": "IM-01",
+      "gate": "M1A",
+      "name": "metadata→file",
+      "expected": "真实multipart依冻结字段成功；登记后source/revision不变",
+      "evidence_kind": "http+media",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "IM-02",
+      "gate": "M1A",
+      "name": "file→metadata",
+      "expected": "逆序与正序相同；流式过程不预信任缺失元数据",
+      "evidence_kind": "http+media",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "IM-03",
+      "gate": "M1A",
+      "name": "重复metadata相同/不同",
+      "expected": "两种值各测；按冻结合同拒绝且无半资产",
+      "evidence_kind": "http",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "IM-04",
+      "gate": "M1A",
+      "name": "重复file part",
+      "expected": "同名和不同名各测；不得只取最后一个",
+      "evidence_kind": "http",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "IM-05",
+      "gate": "M1A",
+      "name": "多文件",
+      "expected": "请求含多个文件拒绝；每个暂存均清理",
+      "evidence_kind": "http",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "IM-06",
+      "gate": "M1A",
+      "name": "缺metadata/缺file",
+      "expected": "两个缺项分别拒绝，状态不变",
+      "evidence_kind": "http",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "IM-07",
+      "gate": "M1A",
+      "name": "metadata大小边界",
+      "expected": "limit-1/limit/limit+1实际HTTP；limit读取冻结规格",
+      "evidence_kind": "http",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "IM-08",
+      "gate": "M1A",
+      "name": "非multipart/缺boundary/坏boundary",
+      "expected": "类型和解析错误分别断言",
+      "evidence_kind": "http",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "IM-09",
+      "gate": "M1A",
+      "name": "未知part/坏JSON/重复关键字段",
+      "expected": "按旧冻结规范明确拒绝或允许，不能默认吞掉",
+      "evidence_kind": "http",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "IM-10",
+      "gate": "M1A",
+      "name": "文件大小/中断流",
+      "expected": "阈值边界与客户端中断；受限内存，无泄漏/半commit",
+      "evidence_kind": "http+recovery",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "IM-11",
+      "gate": "M1A",
+      "name": "无视频流",
+      "expected": "真实音频-only文件不得按MP4视频登记",
+      "evidence_kind": "real_media",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "IM-12",
+      "gate": "M1A",
+      "name": "多个视频流",
+      "expected": "真实或可复现mux文件按冻结策略拒绝",
+      "evidence_kind": "real_media",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "IM-13",
+      "gate": "M1A",
+      "name": "零帧/损坏容器",
+      "expected": "可控探测fixture＋真实坏文件；不能以扩展名放行",
+      "evidence_kind": "media+unit",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "IM-14",
+      "gate": "M1A",
+      "name": "ffmpeg缺失",
+      "expected": "依赖注入/隔离PATH；稳定错误码/用户提示",
+      "evidence_kind": "process",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "IM-15",
+      "gate": "M1A",
+      "name": "ffprobe缺失",
+      "expected": "独立错误分支，不能伪造探测结果",
+      "evidence_kind": "process",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "IM-16",
+      "gate": "M1A",
+      "name": "媒体工具超时",
+      "expected": "进程及子进程终止/有界清理；退出原因可查",
+      "evidence_kind": "process",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "IM-17",
+      "gate": "M1A",
+      "name": "stderr上限/工具非零退出",
+      "expected": "超长输出截断及exit code保留；无内存无限增长",
+      "evidence_kind": "process",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "IM-18",
+      "gate": "M1A",
+      "name": "库存256项",
+      "expected": "真实注册/完整结果顺序和状态；第257按冻结规范",
+      "evidence_kind": "http",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "IM-19",
+      "gate": "M1A",
+      "name": "库存并发上限2",
+      "expected": "实际库存GET流程记录活跃探测，最大不超过2",
+      "evidence_kind": "integration",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "IM-20",
+      "gate": "M1A",
+      "name": "单项探测超时",
+      "expected": "只有该项降级，其余255保持结果；请求可完成",
+      "evidence_kind": "integration",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "IM-21",
+      "gate": "M1A",
+      "name": "重复GET重新验证",
+      "expected": "两次GET间修改/移走文件，第二次反映变化非过期缓存",
+      "evidence_kind": "integration",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "IM-22",
+      "gate": "M1A",
+      "name": "import与edit同项目并发",
+      "expected": "使用真实两条服务/HTTP入口和barrier；serializable，只一套ProjectActor",
+      "evidence_kind": "http+recovery",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "IM-23",
+      "gate": "M1A",
+      "name": "import commit故障恢复",
+      "expected": "在manifest与文件安装边界注入crash，恢复不丢旧清单",
+      "evidence_kind": "recovery",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "IM-24",
+      "gate": "M1A",
+      "name": "materialize/adopt路由关闭",
+      "expected": "直接HTTP全部旧目标路由404；不得返回模拟job",
+      "evidence_kind": "http",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "IM-25",
+      "gate": "M1A",
+      "name": "虚构adopt operation",
+      "expected": "走真实edit端点得到冻结422，无工程变化",
+      "evidence_kind": "http",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "IM-26",
+      "gate": "M1A",
+      "name": "Origin/token/路径/TOCTOU",
+      "expected": "非法Origin/token、恶意filename、替换文件和许可状态边界；旧安全行为不降级",
+      "evidence_kind": "security",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "OF-01",
+      "gate": "M1B",
+      "name": "原生30秒首导出",
+      "expected": "中文独立旁白/字幕/3镜可编辑工程；ffprobe/frame样本",
+      "evidence_kind": "real_render",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "OF-02",
+      "gate": "M1B",
+      "name": "重开与修改再导出",
+      "expected": "关闭服务/浏览器再开；fit/media原生改一镜，source和画面同步",
+      "evidence_kind": "real_render+headed",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "OF-03",
+      "gate": "M1B",
+      "name": "原生写入口探测",
+      "expected": "记录所有UI/API/CLI/history/provider入口；原生指令可截获/禁用",
+      "evidence_kind": "source+http",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "OF-04",
+      "gate": "M1B",
+      "name": "旧base行为实证",
+      "expected": "在临时副本复現rebased；叙镜网关拒绝过期采用",
+      "evidence_kind": "http",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "OF-05",
+      "gate": "M1B",
+      "name": "native scene可编辑",
+      "expected": "修改真实DOM文字/位置并再导出；不是一条烘焙MP4",
+      "evidence_kind": "real_render",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "OF-06",
+      "gate": "M1B",
+      "name": "版本和运行环境",
+      "expected": "完整上游sha/lock/license/ffmpeg/browser/字体；可复现命令",
+      "evidence_kind": "inventory",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "EN-01",
+      "gate": "M2",
+      "name": "双适配单引擎",
+      "expected": "同一project不能双写；legacy功能合同保留",
+      "evidence_kind": "integration",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "EN-02",
+      "gate": "M2",
+      "name": "原生绕过覆盖",
+      "expected": "timeline/inspector/subtitle/history/asset/provider/CLI逐入口translated或blocked",
+      "evidence_kind": "http+headed",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "EN-03",
+      "gate": "M2",
+      "name": "受限转换",
+      "expected": "三镜fixture loss report零未说明；旧工程hash不变",
+      "evidence_kind": "migration",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "EN-04",
+      "gate": "M2",
+      "name": "意外外部源修改",
+      "expected": "scenes/字幕/资产也改变digest；进入attention不是自动同步",
+      "evidence_kind": "security",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "EN-05",
+      "gate": "M2",
+      "name": "回退演练",
+      "expected": "旧应用+旧项目真正重开导出，新分支结果保留",
+      "evidence_kind": "real_render",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "EN-06",
+      "gate": "M2",
+      "name": "资源隔离",
+      "expected": "scene网络/任意文件/秘密不可读；数据与UI/Host执行域隔离",
+      "evidence_kind": "security",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "TM-01",
+      "gate": "M2",
+      "name": "帧往返",
+      "expected": "时间UI→engine seconds→整数帧，在起始/末尾/跨章点一致",
+      "evidence_kind": "integration",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "TM-02",
+      "gate": "M2",
+      "name": "区间能力",
+      "expected": "选择半开合法，零长/越界拒绝；unsupported跨镜编辑422不假改",
+      "evidence_kind": "http",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "TM-03",
+      "gate": "M2",
+      "name": "素材长度/变速",
+      "expected": "短asset不隐式循环/变速；显式速度才影响source span",
+      "evidence_kind": "integration",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "JB-01",
+      "gate": "M2",
+      "name": "Job持久与重启",
+      "expected": "重启保留真实状态，running无lease不假succeeded",
+      "evidence_kind": "recovery",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "JB-02",
+      "gate": "M2",
+      "name": "双worker lease",
+      "expected": "只有一个CAS owner；重复callback不重发commit",
+      "evidence_kind": "concurrency",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "JB-03",
+      "gate": "M2",
+      "name": "SSE断线",
+      "expected": "cursor去重/补发，render/proposal事件不执行编辑副作用",
+      "evidence_kind": "integration",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "JB-04",
+      "gate": "M2",
+      "name": "取消后晚到",
+      "expected": "cancelled仍终态或quarantine；无source/revision变化",
+      "evidence_kind": "recovery",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "JB-05",
+      "gate": "M2",
+      "name": "费用不确定",
+      "expected": "外部超时记录unknown，不自动重发付费调用",
+      "evidence_kind": "integration",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "JB-06",
+      "gate": "M2",
+      "name": "outbox提交后崩溃",
+      "expected": "commit一次；event续发不重采用",
+      "evidence_kind": "recovery",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "PR-01",
+      "gate": "M3",
+      "name": "沿用D4.1",
+      "expected": "真实Claude Runner返回3–6个结构提案，所有base/费用/模型审计完整",
+      "evidence_kind": "real_provider",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "PR-02",
+      "gate": "M3",
+      "name": "预览只读",
+      "expected": "开关比较、选候选、试听无source/revision变动，无新增收费",
+      "evidence_kind": "integration",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "PR-03",
+      "gate": "M3",
+      "name": "VibeMovie适配约束",
+      "expected": "引用未知asset/完整新timeline/锁定范围变更均拒绝",
+      "evidence_kind": "contract",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "MT-01",
+      "gate": "M3",
+      "name": "绑定资产",
+      "expected": "真实asset内容/source入出点/fps/rights，源长度不足拒绝",
+      "evidence_kind": "real_media",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "MT-02",
+      "gate": "M3",
+      "name": "三候选代理",
+      "expected": "至少3个真实proxy可解码；最终native segments独立存在",
+      "evidence_kind": "real_media",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "MT-03",
+      "gate": "M3",
+      "name": "derived lineage",
+      "expected": "hash、父资源、变换、工具版本、范围、审批链可追溯",
+      "evidence_kind": "contract",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "MT-04",
+      "gate": "M3",
+      "name": "只读素材化",
+      "expected": "source digest/revision前后完全相同；标ready_for_adoption",
+      "evidence_kind": "integration",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "MT-05",
+      "gate": "M3",
+      "name": "取消重启陈旧",
+      "expected": "改变binding/base/control时结果过期；重启不写主工程",
+      "evidence_kind": "recovery",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "MT-06",
+      "gate": "M3",
+      "name": "帧边界",
+      "expected": "split前后、first/last frame抽样；clip时长和目标范围一致",
+      "evidence_kind": "real_render",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "TX-01",
+      "gate": "M4",
+      "name": "缺impact",
+      "expected": "真实adopt HTTP无impact 428，工程不变",
+      "evidence_kind": "http",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "TX-02",
+      "gate": "M4",
+      "name": "impact篡改/过期",
+      "expected": "hash/范围/asset/expiry/control不匹配拒绝",
+      "evidence_kind": "http",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "TX-03",
+      "gate": "M4",
+      "name": "visual/narration锁",
+      "expected": "原生和导演/CLI路径都阻止相关写，未锁项可操作",
+      "evidence_kind": "http+headed",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "TX-04",
+      "gate": "M4",
+      "name": "duration与共享消费者",
+      "expected": "共享block任一受影响锁保护；长度不意外变更",
+      "evidence_kind": "integration",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "TX-05",
+      "gate": "M4",
+      "name": "过期source/base",
+      "expected": "409，不接受native rebased作为采用成功",
+      "evidence_kind": "http",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "TX-06",
+      "gate": "M4",
+      "name": "并发采用",
+      "expected": "同base两个请求只有一个commit；另一个409；相邻不变",
+      "evidence_kind": "concurrency",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "TX-07",
+      "gate": "M4",
+      "name": "幂等",
+      "expected": "同key同payload只+1并返同结果，同key异payload409",
+      "evidence_kind": "http",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "TX-08",
+      "gate": "M4",
+      "name": "逐journal故障",
+      "expected": "prepare/stage/validate/prepared/committed/outbox边界逐一注入恢复",
+      "evidence_kind": "recovery",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "TX-09",
+      "gate": "M4",
+      "name": "用户历史/撤回",
+      "expected": "恢复内容为新revision；锁仍生效；不删费用记录",
+      "evidence_kind": "headed+integration",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "TX-10",
+      "gate": "M4",
+      "name": "native undo/redo",
+      "expected": "原生按钮走Coordinator，不能直接改文件/git回退",
+      "evidence_kind": "headed+http",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "TX-11",
+      "gate": "M4",
+      "name": "真实两次导出",
+      "expected": "至少一条新工程改变后重开再导出；旁白/字幕保持",
+      "evidence_kind": "real_render",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "TX-12",
+      "gate": "M4",
+      "name": "多文件原子可见",
+      "expected": "读取固定snapshot；没有混合revision依赖；attention阻写",
+      "evidence_kind": "concurrency",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "TX-13",
+      "gate": "M4",
+      "name": "锁与外部变更竞争",
+      "expected": "lock控制更新和adopt共队列，commit前再核对授权/摘要",
+      "evidence_kind": "concurrency",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "TX-14",
+      "gate": "M4",
+      "name": "三镜仍可独立精修",
+      "expected": "采用三镜方案后native UI可独立裁每段，不仅播放composite",
+      "evidence_kind": "headed+real_render",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "UX-01",
+      "gate": "M5",
+      "name": "任务导入",
+      "expected": "真实CreativeTask/聊天文本校验、错误定位、保留原话",
+      "evidence_kind": "headed",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "UX-02",
+      "gate": "M5",
+      "name": "新项目重开",
+      "expected": "创建不是套三镜fixture，关闭后任务/章节/素材绑定仍在",
+      "evidence_kind": "headed",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "UX-03",
+      "gate": "M5",
+      "name": "章节镜头地图",
+      "expected": "真实6章/120镜导航；stable IDs，顺序改变不误配",
+      "evidence_kind": "headed",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "UX-04",
+      "gate": "M5",
+      "name": "语义到镜头",
+      "expected": "点击句子定位所有对应clip，返回上次选区",
+      "evidence_kind": "headed",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "UX-05",
+      "gate": "M5",
+      "name": "共享clock/selection",
+      "expected": "地图/时间码/native Timeline/Player双向一致，逐帧无跳镜",
+      "evidence_kind": "headed",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "UX-06",
+      "gate": "M5",
+      "name": "尺度连续",
+      "expected": "全片→章→镜→细节；平移不重排，空间分支不增片长",
+      "evidence_kind": "headed",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "UX-07",
+      "gate": "M5",
+      "name": "三路自动预览",
+      "expected": "真实video frame计数增长；max3 decoder；暂停/离屏/autoplay失败路径",
+      "evidence_kind": "browser_media",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "UX-08",
+      "gate": "M5",
+      "name": "六类选择",
+      "expected": "画面/解说/音乐/音效/台词/过场独立；不改其他类别",
+      "evidence_kind": "integration+headed",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "UX-09",
+      "gate": "M5",
+      "name": "一击采用/跳过",
+      "expected": "低风险仍取impact并服务端校验，成功才推进；失败保留上下文",
+      "evidence_kind": "headed",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "UX-10",
+      "gate": "M5",
+      "name": "导向原生精剪",
+      "expected": "同页切模式不重新载项目/失选区；native变更地图刷新",
+      "evidence_kind": "headed",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "UX-11",
+      "gate": "M5",
+      "name": "可访问",
+      "expected": "键盘/焦点/文字状态/原生200%/reduce-motion；无关卡强制阻塞",
+      "evidence_kind": "headed+axe",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "UX-12",
+      "gate": "M5",
+      "name": "用户实用",
+      "expected": "零号用户一分钟定位/三路比较，十秒找到撤回；独立填写体验记录",
+      "evidence_kind": "human",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "PF-01",
+      "gate": "M5",
+      "name": "120镜性能",
+      "expected": "900秒/6章/120镜，每类100次；event→paint p95≤100ms，原始样本",
+      "evidence_kind": "performance",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "PF-02",
+      "gate": "M5",
+      "name": "真实proxy负载",
+      "expected": "3路720p/规格固定，首帧/内存/丢帧记录；不推断4K表现",
+      "evidence_kind": "performance",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "PF-03",
+      "gate": "M5",
+      "name": "冷/热重开",
+      "expected": "分别测量、捕捉长期内存增长和任务抢占；无隐藏崩溃",
+      "evidence_kind": "performance",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "DL-01",
+      "gate": "M6",
+      "name": "真实章节",
+      "expected": "3–5min/20+镜与10–15min母项目关联，3真实位置比较→准备→采用→导出",
+      "evidence_kind": "real_render+human",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "DL-02",
+      "gate": "M6",
+      "name": "标题候选",
+      "expected": "实际8标题，基于正文事实；人工选择，不以占位符通过",
+      "evidence_kind": "real_provider+human",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "DL-03",
+      "gate": "M6",
+      "name": "封面候选",
+      "expected": "4方向并有可观看实际候选，来源/合成标识/许可和正文一致",
+      "evidence_kind": "real_provider+human",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "DL-04",
+      "gate": "M6",
+      "name": "发布检查",
+      "expected": "缺素材/字幕越界/音量/黑帧/未知许可/未决事实各独立fixture",
+      "evidence_kind": "integration+human",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "DL-05",
+      "gate": "M6",
+      "name": "后期与交付",
+      "expected": "声音/字幕/基本画面/过场效果在输出体现；问题可回镜头；同revision发布包",
+      "evidence_kind": "real_render",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "DL-06",
+      "gate": "M6",
+      "name": "P0终审",
+      "expected": "13P0/6NFR evidence无遗漏；中文HTML验收报告；独立审计和用户签署",
+      "evidence_kind": "independent+human",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "P1-01",
+      "gate": "M7D",
+      "name": "StyleProfile",
+      "expected": "全片风格版本/override/锁保护与恢复",
+      "evidence_kind": "integration+human",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "P1-02",
+      "gate": "M7D",
+      "name": "TTS/ASR对齐",
+      "expected": "真实服务生成/识别中文，文本变化使消费者stale并可局部更新",
+      "evidence_kind": "real_provider",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "P1-03",
+      "gate": "M7D",
+      "name": "远端来源/预算",
+      "expected": "至少一种许可检索和一种生成真实回执，外传/费用限额/unknown处理",
+      "evidence_kind": "real_provider",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "P1-04",
+      "gate": "M7D",
+      "name": "反馈锚点",
+      "expected": "评论绑定revision/shot/range，重剪迁移或orphan显式；不自动改生产模板",
+      "evidence_kind": "integration",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "P1-05",
+      "gate": "M7D",
+      "name": "完整长片",
+      "expected": "10–15min真实影片含全部P1；双导出/重开/恢复/风格/声音/内容评审",
+      "evidence_kind": "real_render+human",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    },
+    {
+      "id": "P1-06",
+      "gate": "M7D",
+      "name": "完整V1终审",
+      "expected": "P0和P1独立清单全关闭，真实运行与成本记录，不含自动发布/P2",
+      "evidence_kind": "independent+human",
+      "status": "NOT_RUN",
+      "local_test_ref": null,
+      "evidence": []
+    }
+  ]
+}
