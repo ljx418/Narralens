@@ -1,16 +1,21 @@
 {
   "format": "narralens.d421-browser-import-evidence@1",
-  "executed_at": "2026-10-16T15:33:21.326Z",
-  "source_commit": "8f7007d8df53ff15ac73fc73c70ddafb25ed5e2a",
+  "executed_at": "2026-10-16T16:05:32.613Z",
+  "source_commit": "c0f101b964f9cfe492095440eba1bb9b0edad42d",
   "status": "passed",
   "failures": [],
-  "browser": "Chrome for Testing 153.0.8010.12 headless; CSS viewport 768x1024",
+  "browser": "Chromium 1243 headless via CDP; silent isolated profile",
   "viewport_configuration": {
     "mechanism": "CDP CSS viewport override (not used for native 200% zoom)",
     "width": 768,
     "height": 1024
   },
   "interaction": "file injected through CDP; remaining form path is Tab/text/Enter keyboard input",
+  "screenshot_capture": {
+    "mechanism": "CSS document clip",
+    "input_zoom_factor": 1,
+    "output_scale": 1
+  },
   "keyboard": [
     {
       "action": "CDP setFileInputFiles 后聚焦文件控件",
@@ -96,10 +101,10 @@
     {
       "action": "Enter 提交",
       "focus": {
-        "tag": "BUTTON",
+        "tag": "BODY",
         "id": null,
-        "type": "submit",
-        "text": "上传中"
+        "type": null,
+        "text": "叙NarralensAI 导演工作台想法精修交付浅深系统REAL PROJECT"
       }
     }
   ],

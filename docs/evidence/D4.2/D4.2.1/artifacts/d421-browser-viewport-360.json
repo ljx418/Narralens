@@ -1,16 +1,21 @@
 {
   "format": "narralens.d421-browser-import-evidence@1",
-  "executed_at": "2026-10-16T15:32:52.613Z",
-  "source_commit": "8f7007d8df53ff15ac73fc73c70ddafb25ed5e2a",
+  "executed_at": "2026-10-16T16:05:11.051Z",
+  "source_commit": "c0f101b964f9cfe492095440eba1bb9b0edad42d",
   "status": "passed",
   "failures": [],
-  "browser": "Chrome for Testing 153.0.8010.12 headless; CSS viewport 360x900",
+  "browser": "Chromium 1243 headless via CDP; silent isolated profile",
   "viewport_configuration": {
     "mechanism": "CDP CSS viewport override (not used for native 200% zoom)",
     "width": 360,
-    "height": 900
+    "height": 800
   },
   "interaction": "file injected through CDP; remaining form path is Tab/text/Enter keyboard input",
+  "screenshot_capture": {
+    "mechanism": "CSS document clip",
+    "input_zoom_factor": 1,
+    "output_scale": 1
+  },
   "keyboard": [
     {
       "action": "CDP setFileInputFiles 后聚焦文件控件",
@@ -96,10 +101,10 @@
     {
       "action": "Enter 提交",
       "focus": {
-        "tag": "BUTTON",
+        "tag": "BODY",
         "id": null,
-        "type": "submit",
-        "text": "上传中"
+        "type": null,
+        "text": "叙NarralensAI 导演工作台想法精修交付浅深系统REAL PROJECT"
       }
     }
   ],
@@ -142,7 +147,7 @@
   "layout": {
     "viewport_width": 360,
     "document_width": 345,
-    "viewport_height": 900,
+    "viewport_height": 800,
     "document_height": 4843,
     "device_pixel_ratio": 1,
     "outer_width": 1920,
@@ -151,42 +156,42 @@
     "core": {
       "form": {
         "x": 16,
-        "y": -67.34375,
+        "y": -159.34375,
         "width": 313,
         "height": 837,
-        "top": -67.34375,
+        "top": -159.34375,
         "right": 329,
-        "bottom": 769.65625,
+        "bottom": 677.65625,
         "left": 16
       },
       "inventory": {
         "x": 16,
-        "y": 793.65625,
+        "y": 701.65625,
         "width": 313,
         "height": 630.5,
-        "top": 793.65625,
+        "top": 701.65625,
         "right": 329,
-        "bottom": 1424.15625,
+        "bottom": 1332.15625,
         "left": 16
       },
       "file": {
         "x": 35,
-        "y": 17.15625,
+        "y": -74.84375,
         "width": 275,
         "height": 38,
-        "top": 17.15625,
+        "top": -74.84375,
         "right": 310,
-        "bottom": 55.15625,
+        "bottom": -36.84375,
         "left": 35
       },
       "submit": {
         "x": 35,
-        "y": 590.15625,
+        "y": 498.15625,
         "width": 275,
         "height": 41,
-        "top": 590.15625,
+        "top": 498.15625,
         "right": 310,
-        "bottom": 631.15625,
+        "bottom": 539.15625,
         "left": 35
       }
     },

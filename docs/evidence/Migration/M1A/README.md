@@ -2,7 +2,7 @@
 
 日期：2026-10-16
 
-状态：`INTERNAL_R3_PASS / EXTERNAL_R3_PENDING / GATE_NOT_CLOSED`
+状态：`INTERNAL_R4_PASS / EXTERNAL_R4_PENDING / GATE_NOT_CLOSED`
 
 本目录补齐迁移包指出的逐编号直接证据缺口。它不以“134/134”替代冻结矩阵，也不改写 2026-10-15 的旧 Gate 历史。完整门禁在本轮真实执行，生产行为仅增加可注入测试端口；默认依赖仍是实际文件哈希、ffprobe 与 ffmpeg。
 
@@ -11,9 +11,9 @@
 | 命令 | 结果 | 产物 |
 |---|---|---|
 | `corepack pnpm exec vitest run tests/host/d4.2.1-migration-evidence.test.ts` | PASS，8/8 | 测试源码及全量门禁日志 |
-| `corepack pnpm check` | PASS，17 files、134/134、0 skipped；TypeScript 与 Vite production build PASS | `artifacts/pnpm-check-r5.log`（冻结实现最终门禁） |
-| `corepack pnpm evidence:d421-large` | PASS；64 MiB、1024 drain、RSS delta 39,915,520 < 50,331,648；32 MiB cap 返回 413；staging=0 | `artifacts/d421-large-upload-r5.json` |
-| Headless Chrome 360/768/1440/1920 + native 200% | PASS；五份 artifact 均绑定 `8f7007d8df53ff15ac73fc73c70ddafb25ed5e2a`；无水平溢出、无控件裁切、axe violation=0 | D4.2.1 viewport/zoom artifacts |
+| `corepack pnpm check` | PASS，17 files、134/134、0 skipped；TypeScript 与 Vite production build PASS | `artifacts/pnpm-check-r9.log`（冻结实现最终门禁） |
+| `corepack pnpm evidence:d421-large` | PASS；64 MiB、1024 drain、RSS delta 37,556,224 < 50,331,648；32 MiB cap 返回 413；staging=0 | `artifacts/d421-large-upload-r6.json` |
+| Headless Chrome 360/768/1440/1920 + native 200% | PASS；五份 artifact 均绑定 `c0f101b964f9cfe492095440eba1bb9b0edad42d`；全页面扫描无水平溢出、无内部裁切、axe violation=0；200% 截图覆盖完整页面 | D4.2.1 viewport/zoom artifacts |
 
 ## IM-01..IM-26 直接映射
 
@@ -60,14 +60,15 @@
 - 自动化交互：本轮以隔离临时工程重新执行 Headless 100%/native 200%，无可见窗口、静音、不抢焦点；失败尝试保留且没有覆盖成功前的事实。
 - Headed 自动化：本轮 `NOT_RUN`。
 - 人类体验：本轮 `NOT_RUN`。
-- 独立外审：必须绑定本轮冻结 commit；在 Claude Code 给出 PASS/YES 前，M1A 与 D4.2.1 均不能关闭。
+- 独立外审：R1、R2、R3 的 NO 结论与整改轨迹永久保留；必须由新的 Claude Code 会话绑定 `c0f101b...` 给出 PASS/YES，M1A 与 D4.2.1 才能关闭。
 
 ## SHA256
 
 - `artifacts/pnpm-check.log`: `5a7e5a8887d57e1d01763516ce9ef97ca379ea63c82d6a02bbdb6191218957a1`
-- `artifacts/d421-large-upload-r5.json`: `823774676ba7f1aa6fbb9ce7fafc0b8520a7a1fcf28a9d3575ee7298378bc367`
-- `artifacts/pnpm-check-r5.log`: `6f3b63e681fe47a53bc60d2f7dca0873d3bd9dd84da7996e57068e11d2d2776a`
-- viewport 360/768/1440/1920 JSON：`880364495e27b4c003e0fe6a704855163f36516a2c8b5691f9b69d4032f22b19` / `d973f28f2a95ea22492c576154614aa9382350d6f429a077806f51d4d6de1261` / `622450e9362fa9167275c8650e7c2813f31e8204a3a98a6b57e72d24c65b3708` / `2d5a9f5778c5949156d3d0f5de4ec3626a15501b19bffdaa0e1eb7d05e25301c`
-- native 200% JSON：`28c08fcee99a28d7d3e9c267154c54710a4e4ad4ab78c5077ff0d39d26e14301`
+- `artifacts/d421-large-upload-r6.json`: `1d3cacce15d3c9c5f8b13fd35b6fe970fb83f7b9bde895f52930af4c4048b76a`
+- `artifacts/pnpm-check-r9.log`: `78573412d73f41a95f3c0e9916ac1ef338d28eb4b706a440075d542d54e937f0`
+- viewport 360/768/1440/1920 JSON：`bde4c279a7cf3e755d101b8258941f164cd513f41d231fd31a5642a401e1aed9` / `0b9ed69e8dc66d85c537aa4428987e92921610be91a098a6fd171f9f94159b33` / `0eebfe9abf68fba9ef997897ffdf10678eec7ad815bf306068e23b07c88bdb52` / `54c39b3070b0d747a270a8fa5534915e84c5133bf10466121d8b0e76be2a5312`
+- native 200% JSON：`541769a70427cde7751092054646a46b6f4b227be7c0778d3abbf9508ffcec29`
+- native 200% 完整页面截图：`7bb174051f6d8920d022a87fe9a0eabbb6d6878a4b7f2db02083dc65836c685b`
 
-`pnpm-check.log`、`pnpm-check-r2.log`、`pnpm-check-r3.log`、`pnpm-check-r4.log` 是冻结前的历史门禁，均由 `pnpm-check-r5.log` 取代；它们只保留审计轨迹，不能作为 `8f7007d...` 的最终运行产物。
+`pnpm-check-r6.log` 记录 `/tmp` 残留夹具造成的 ENOMEM，`pnpm-check-r7.log` 记录资源受限时 5 秒测试超时；两者均为真实失败且未被覆盖。清理 423 个（约 14 GiB）测试临时目录并把该 I/O 密集证据项超时明确为 30 秒后，`pnpm-check-r8.log` 通过。随后修复 CDP 目标页等待竞态并冻结 `c0f101b...`，最终结果以 `pnpm-check-r9.log` 为准。

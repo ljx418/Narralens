@@ -1,0 +1,77 @@
+
+> narralens@0.1.0 check /mnt/c/workspace/videoworkline/Narralens
+> tsc --noEmit && vitest run --config vitest.config.ts && vite build
+
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens
+
+(node:1215970) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/host/project-operation-queue.test.ts (3 tests) 5ms
+ ✓ tests/host/host-core.test.ts (5 tests) 7ms
+ ✓ tests/adapters/d4.1-runner.test.ts (8 tests) 323ms
+ ✓ tests/adapters/runner.test.ts (6 tests) 647ms
+ ✓ tests/contracts/d4.2.1-contracts.test.ts (6 tests) 89ms
+ ✓ tests/adapters/proposal-comparison-adapter.test.ts (12 tests) 95ms
+ ✓ tests/contracts/contracts.test.ts (7 tests) 107ms
+ ✓ tests/contracts/d4.1-contracts.test.ts (8 tests) 57ms
+(node:1215950) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:1216001) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/host/d4-media-write-actor.test.ts (9 tests) 31ms
+ ✓ tests/host/d3-write-actor.test.ts (12 tests) 251ms
+(node:1215938) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:1215931) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:1215932) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/host/d4.2.1-upload-media.test.ts (12 tests) 2547ms
+   ✓ D4.2.1 imported media validation > proves a real MP4 has one CFR stream at the project rate and survives a second hash  1085ms
+   ✓ D4.2.1 imported media validation > maps wrong frame rate and corrupt bytes to INVALID_MEDIA  797ms
+ ✓ tests/host/d4.2.1-registry-journal.test.ts (10 tests) 2780ms
+   ✓ D4.2.1 AssetRegistry v2 transaction foundation > re-reads media facts when bytes change without size or mtime signals  1466ms
+   ✓ D4.2.1 AssetRegistry v2 transaction foundation > returns a path-free ordered inventory and degrades tampered, missing and restricted entries independently  760ms
+ ✓ tests/host/host-http.test.ts (10 tests) 10542ms
+   ✓ D2 Host HTTP > enforces same-origin session and auth without leaking a token  1093ms
+   ✓ D2 Host HTTP > rejects an oversized JSON body before contract parsing  938ms
+   ✓ D2 Host HTTP > reads the real D1 descriptor and leaves Source unchanged  841ms
+   ✓ D2 Host HTTP > returns the complete current asset inventory without leaking project paths  981ms
+   ✓ D2 Host HTTP > runs an asynchronous proposal job and replays monotonic SSE events  1318ms
+   ✓ D2 Host HTTP > accepts a registered selection independent of JSON property order  881ms
+   ✓ D2 Host HTTP > rejects invalid D4.1 counts, reverse ranges and extra fields before Runner  3385ms
+   ✓ D2 Host HTTP > maps a comparison provider 529 after exactly one invocation  1024ms
+ ✓ tests/app/HostApiClient.test.ts (1 test) 7ms
+ ✓ tests/host/d4.2.1-migration-evidence.test.ts (8 tests) 17430ms
+   ✓ M1A direct multipart and closed-route evidence > IM-02 accepts file before metadata through the real import route  3852ms
+   ✓ M1A direct multipart and closed-route evidence > IM-03..IM-09 rejects duplicate/missing/oversize/malformed multipart variants and cleans staging  458ms
+   ✓ M1A direct multipart and closed-route evidence > IM-24/IM-25 keeps materialize/adopt unavailable and rejects a fabricated edit operation without state change  4685ms
+   ✓ M1A direct media-tool evidence > IM-14..IM-17 distinguishes missing ffmpeg/ffprobe, timeout, stderr overflow and ordinary tool failure  1172ms
+   ✓ M1A inventory and shared-write-boundary evidence > IM-18..IM-21 serves 256 ordered items over HTTP, caps probes at 2, isolates one timeout, revalidates changed bytes and rejects the 257th  773ms
+   ✓ M1A inventory and shared-write-boundary evidence > IM-22 serializes real HTTP import commit with a real D4.0 edit and only the edit advances revision  6160ms
+ ✓ tests/app/NarralensApp.test.tsx (9 tests) 1053ms
+ ✓ tests/host/d4.2.1-import-service.test.ts (8 tests) 41276ms
+   ✓ D4.2.1 AssetImportService HTTP transaction > streams a real MP4, migrates @1 to @2, replays exactly and changes no authored project facts  5724ms
+   ✓ D4.2.1 AssetImportService HTTP transaction > returns a truthful @1 no-op for an exact duplicate without changing manifest bytes  3255ms
+   ✓ D4.2.1 AssetImportService HTTP transaction > rejects invalid media before journal or manifest mutation and removes private staging  4919ms
+   ✓ D4.2.1 AssetImportService HTTP transaction > commits a manifest-published journal deterministically before opening the HTTP port after restart  2787ms
+   ✓ D4.2.1 AssetImportService HTTP transaction > restores the exact manifest preimage and removes unreferenced new bytes after a publish-before-journal crash  3738ms
+   ✓ D4.2.1 AssetImportService HTTP transaction > serializes concurrent imports and replays the same key without losing either manifest entry  3443ms
+   ✓ D4.2.1 AssetImportService HTTP transaction > compensates content-install, manifest-temp and rename faults without changing authored or manifest facts  7801ms
+   ✓ D4.2.1 AssetImportService HTTP transaction > restores the exact manifest after one-shot post-publish faults and enters attention when durability stays unprovable  9607ms
+
+ Test Files  17 passed (17)
+      Tests  134 passed (134)
+   Start at  00:01:42
+   Duration  50.69s (transform 9.20s, setup 0ms, collect 76.88s, tests 77.25s, environment 32.04s, prepare 53.57s)
+
+vite v7.1.7 building for production...
+transforming...
+✓ 31 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                   0.46 kB │ gzip:  0.32 kB
+dist/assets/index-CuKclEQt.css   12.55 kB │ gzip:  3.06 kB
+dist/assets/index-BBJmxAtE.js   211.74 kB │ gzip: 67.69 kB │ map: 939.32 kB
+✓ built in 1.20s

@@ -1,9 +1,9 @@
 {
   "stage": "M1A",
   "date": "2026-10-16",
-  "status": "INTERNAL_R3_PASS_EXTERNAL_R3_PENDING",
+  "status": "INTERNAL_R4_PASS_EXTERNAL_R4_PENDING",
   "baseline_commit": "304c89134fdf9f834f7d69e3f4d5c89a68044c60",
-  "implementation_commit": "8f7007d8df53ff15ac73fc73c70ddafb25ed5e2a",
+  "implementation_commit": "c0f101b964f9cfe492095440eba1bb9b0edad42d",
   "automated_interaction": "headless_or_non_ui",
   "headed_automation": "NOT_RUN",
   "human_experience": "NOT_RUN",
@@ -14,7 +14,7 @@
     "production_build": "PASS",
     "headless_viewports_360_768_1440_1920": "PASS",
     "headless_native_200_percent": "PASS",
-    "independent_external_review": "R1_NO_R2_NO_R3_PENDING"
+    "independent_external_review": "R1_NO_R2_NO_R3_NO_R4_PENDING"
   },
   "artifacts": [
     {
@@ -22,38 +22,39 @@
       "sha256": "5a7e5a8887d57e1d01763516ce9ef97ca379ea63c82d6a02bbdb6191218957a1"
     },
     {
-      "path": "artifacts/d421-large-upload-r5.json",
-      "sha256": "823774676ba7f1aa6fbb9ce7fafc0b8520a7a1fcf28a9d3575ee7298378bc367",
-      "source_commit": "8f7007d8df53ff15ac73fc73c70ddafb25ed5e2a"
+      "path": "artifacts/d421-large-upload-r6.json",
+      "sha256": "1d3cacce15d3c9c5f8b13fd35b6fe970fb83f7b9bde895f52930af4c4048b76a",
+      "source_commit": "c0f101b964f9cfe492095440eba1bb9b0edad42d"
     },
     {
-      "path": "artifacts/pnpm-check-r5.log",
-      "sha256": "6f3b63e681fe47a53bc60d2f7dca0873d3bd9dd84da7996e57068e11d2d2776a"
+      "path": "artifacts/pnpm-check-r9.log",
+      "sha256": "78573412d73f41a95f3c0e9916ac1ef338d28eb4b706a440075d542d54e937f0",
+      "source_commit": "c0f101b964f9cfe492095440eba1bb9b0edad42d"
     },
     {
       "path": "../../D4.2/D4.2.1/artifacts/d421-browser-viewport-1440.json",
-      "sha256": "622450e9362fa9167275c8650e7c2813f31e8204a3a98a6b57e72d24c65b3708",
-      "source_commit": "8f7007d8df53ff15ac73fc73c70ddafb25ed5e2a"
+      "sha256": "0eebfe9abf68fba9ef997897ffdf10678eec7ad815bf306068e23b07c88bdb52",
+      "source_commit": "c0f101b964f9cfe492095440eba1bb9b0edad42d"
     },
     {
       "path": "../../D4.2/D4.2.1/artifacts/d421-browser-zoom-200.json",
-      "sha256": "28c08fcee99a28d7d3e9c267154c54710a4e4ad4ab78c5077ff0d39d26e14301",
-      "source_commit": "8f7007d8df53ff15ac73fc73c70ddafb25ed5e2a"
+      "sha256": "541769a70427cde7751092054646a46b6f4b227be7c0778d3abbf9508ffcec29",
+      "source_commit": "c0f101b964f9cfe492095440eba1bb9b0edad42d"
     },
     {
       "path": "../../D4.2/D4.2.1/artifacts/d421-browser-viewport-360.json",
-      "sha256": "880364495e27b4c003e0fe6a704855163f36516a2c8b5691f9b69d4032f22b19",
-      "source_commit": "8f7007d8df53ff15ac73fc73c70ddafb25ed5e2a"
+      "sha256": "bde4c279a7cf3e755d101b8258941f164cd513f41d231fd31a5642a401e1aed9",
+      "source_commit": "c0f101b964f9cfe492095440eba1bb9b0edad42d"
     },
     {
       "path": "../../D4.2/D4.2.1/artifacts/d421-browser-viewport-768.json",
-      "sha256": "d973f28f2a95ea22492c576154614aa9382350d6f429a077806f51d4d6de1261",
-      "source_commit": "8f7007d8df53ff15ac73fc73c70ddafb25ed5e2a"
+      "sha256": "0b9ed69e8dc66d85c537aa4428987e92921610be91a098a6fd171f9f94159b33",
+      "source_commit": "c0f101b964f9cfe492095440eba1bb9b0edad42d"
     },
     {
       "path": "../../D4.2/D4.2.1/artifacts/d421-browser-viewport-1920.json",
-      "sha256": "2d5a9f5778c5949156d3d0f5de4ec3626a15501b19bffdaa0e1eb7d05e25301c",
-      "source_commit": "8f7007d8df53ff15ac73fc73c70ddafb25ed5e2a"
+      "sha256": "54c39b3070b0d747a270a8fa5534915e84c5133bf10466121d8b0e76be2a5312",
+      "source_commit": "c0f101b964f9cfe492095440eba1bb9b0edad42d"
     }
   ]
 }
