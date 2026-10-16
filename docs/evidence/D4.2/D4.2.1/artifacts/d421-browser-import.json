@@ -1,9 +1,10 @@
 {
   "format": "narralens.d421-browser-import-evidence@1",
-  "executed_at": "2026-10-15T02:30:57.272Z",
+  "executed_at": "2026-10-16T15:21:37.670Z",
+  "source_commit": "84ecd6dcc2cd567865a7b03483b22c0cccb7176c",
   "status": "passed",
   "failures": [],
-  "browser": "Google Chrome headless via CDP",
+  "browser": "Chrome for Testing 153.0.8010.12 headless via CDP",
   "interaction": "file injected through CDP; remaining form path is Tab/text/Enter keyboard input",
   "keyboard": [
     {
@@ -90,10 +91,10 @@
     {
       "action": "Enter 提交",
       "focus": {
-        "tag": "BUTTON",
+        "tag": "BODY",
         "id": null,
-        "type": "submit",
-        "text": "上传中"
+        "type": null,
+        "text": "叙NarralensAI 导演工作台想法精修交付浅深系统REAL PROJECT"
       }
     }
   ],
@@ -134,11 +135,65 @@
     "project_path_visible": false
   },
   "layout": {
-    "viewport_width": 1414,
-    "document_width": 1399,
-    "viewport_height": 1100,
-    "document_height": 2629,
-    "device_pixel_ratio": 1
+    "viewport_width": 1440,
+    "document_width": 1425,
+    "viewport_height": 1057,
+    "document_height": 2639,
+    "device_pixel_ratio": 1,
+    "outer_width": 1440,
+    "outer_height": 1200,
+    "visual_viewport_scale": 1,
+    "core": {
+      "form": {
+        "x": 395.5625,
+        "y": 538.921875,
+        "width": 452.75,
+        "height": 662,
+        "top": 538.921875,
+        "right": 848.3125,
+        "bottom": 1200.921875,
+        "left": 395.5625
+      },
+      "inventory": {
+        "x": 872.3125,
+        "y": 538.921875,
+        "width": 520.671875,
+        "height": 662,
+        "top": 538.921875,
+        "right": 1392.984375,
+        "bottom": 1200.921875,
+        "left": 872.3125
+      },
+      "file": {
+        "x": 414.5625,
+        "y": 623.421875,
+        "width": 414.75,
+        "height": 38,
+        "top": 623.421875,
+        "right": 829.3125,
+        "bottom": 661.421875,
+        "left": 414.5625
+      },
+      "submit": {
+        "x": 414.5625,
+        "y": 1039.421875,
+        "width": 126,
+        "height": 41,
+        "top": 1039.421875,
+        "right": 540.5625,
+        "bottom": 1080.421875,
+        "left": 414.5625
+      }
+    },
+    "clipped_controls": []
+  },
+  "zoom": {
+    "expected_factor": 1,
+    "observed_factor_from_dpr": 1,
+    "baseline": null,
+    "outer_css_metrics_unchanged": null,
+    "configuration": null,
+    "note": "The 100% and 200% Headless runs use the same outer window dimensions; native zoom is established by the isolated Chrome preference plus the DPR and CSS viewport ratios."
   },
   "axe": {
     "version": "4.10.3",

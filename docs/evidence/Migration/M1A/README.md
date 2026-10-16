@@ -2,7 +2,7 @@
 
 日期：2026-10-16
 
-状态：`R1_EXTERNAL_NO / FINDINGS_FIXED_IN_WORKTREE / REVALIDATION_IN_PROGRESS / GATE_NOT_CLOSED`
+状态：`INTERNAL_R2_PASS / EXTERNAL_R2_PENDING / GATE_NOT_CLOSED`
 
 本目录补齐迁移包指出的逐编号直接证据缺口。它不以“134/134”替代冻结矩阵，也不改写 2026-10-15 的旧 Gate 历史。完整门禁在本轮真实执行，生产行为仅增加可注入测试端口；默认依赖仍是实际文件哈希、ffprobe 与 ffmpeg。
 
@@ -13,6 +13,7 @@
 | `corepack pnpm exec vitest run tests/host/d4.2.1-migration-evidence.test.ts` | PASS，8/8 | 测试源码及全量门禁日志 |
 | `corepack pnpm check` | PASS，17 files、134/134、0 skipped；TypeScript 与 Vite production build PASS | `artifacts/pnpm-check.log` |
 | `corepack pnpm exec tsx scripts/d4.2.1-large-evidence.ts` | PASS；64 MiB、1024 drain、RSS delta 38,400,000 < 50,331,648；32 MiB cap 返回 413；staging=0 | `artifacts/d421-large-upload.json` |
+| Headless Chrome 100% / native 200% | PASS；两份 artifact 均绑定 `84ecd6dcc2cd567865a7b03483b22c0cccb7176c`；200% 无水平溢出、无控件裁切、axe violation=0 | D4.2.1 canonical browser artifacts |
 
 ## IM-01..IM-26 直接映射
 
@@ -47,7 +48,7 @@
 | D421-HYPIT-01/02、D40-REG | PASS（继承并重跑） | `d4-media-write-actor.test.ts`、import-service/registry tests；本轮没有修改 Hypit |
 | D421-INVENTORY-01、CACHE-FRESHNESS-01/02 | PASS（新增 256/2/timeout/GET 直接项） | registry-journal；migration-evidence IM-18..21 |
 | D421-INV-DERIVED-01、NOWRITE-01 | PASS（继承并重跑） | contracts/import-service/host HTTP；route 负向 facts |
-| D421-UI-01/02 | PASS（继承证据，未重跑浏览器） | 既有 canonical headless evidence 与 `NarralensApp.test.tsx`；本轮无 UI 变更。headed/human 本轮 NOT_RUN |
+| D421-UI-01/02 | PASS（本轮重新 Headless 执行） | canonical 100%/native 200% evidence 均记录完整实现 SHA；修复并验证 grid/长 asset ID 在 200% 下不横向溢出。headed/human 本轮 NOT_RUN |
 | D421-SEC-01 | PASS（继承并重跑） | upload-media、host-http、既有扫描证据 |
 | D421-LARGE-01 | PASS（本轮重跑） | `artifacts/d421-large-upload.json` |
 | D421-ROUTE-404-MATERIALIZE/ADOPT | PASS（新增直接项） | migration-evidence IM-24/25 |
@@ -56,7 +57,7 @@
 
 ## 声明边界
 
-- 自动化交互：Headless 既有证据继承；本轮新增测试均无可见窗口、无声运行。
+- 自动化交互：本轮以隔离临时工程重新执行 Headless 100%/native 200%，无可见窗口、静音、不抢焦点；失败尝试保留且没有覆盖成功前的事实。
 - Headed 自动化：本轮 `NOT_RUN`。
 - 人类体验：本轮 `NOT_RUN`。
 - 独立外审：必须绑定本轮冻结 commit；在 Claude Code 给出 PASS/YES 前，M1A 与 D4.2.1 均不能关闭。
@@ -65,3 +66,6 @@
 
 - `artifacts/pnpm-check.log`: `5a7e5a8887d57e1d01763516ce9ef97ca379ea63c82d6a02bbdb6191218957a1`
 - `artifacts/d421-large-upload.json`: `2b0165bf2878b530b24e84df1a7620d4b73af9a82eb4f730681307d3442cd980`
+- `artifacts/pnpm-check-r4.log`: `9fa8d8377a57812b16e148136475b28ea40c02d46ffb6334e12360b156e73a27`
+- `D4.2/D4.2.1/artifacts/d421-browser-import.json`: `193953a286362144e8ef5d78bb8ddd65c9e99fc2b870507afda2872921a71407`
+- `D4.2/D4.2.1/artifacts/d421-browser-zoom-200.json`: `58b550ccbe33dd80d5a02d485d9018fdeec4b98fcd109776ef2873395c5a06e3`

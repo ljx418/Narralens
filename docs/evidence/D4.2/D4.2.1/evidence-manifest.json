@@ -13,6 +13,7 @@
     "ui_large_implementation_commit": "3ef11571222b4bff2e49b7f563ffea62ef98dc04",
     "fault_race_implementation_commit": "7872329",
     "browser_gate_implementation_commit": "84775af32950b06c90ed7c2555cf9e46d0c5095c",
+    "migration_m1a_implementation_commit": "84ecd6dcc2cd567865a7b03483b22c0cccb7176c",
     "hypit_commit": "6fdd8c0f02c17b9970aee6deb4550a70e9d57acf",
     "hypit_branch": "narralens/d4-typed-media-mutation",
     "worktree_note": "This manifest and status synchronization are finalized by the documentation commit after the implementation commit."
@@ -20,8 +21,8 @@
   "automated_gate": {
     "narralens_command": "corepack pnpm check",
     "narralens_exit_code": 0,
-    "narralens_test_files": 16,
-    "narralens_tests_passed": 126,
+    "narralens_test_files": 17,
+    "narralens_tests_passed": 134,
     "hypit_studio_tests_passed": 94,
     "hypit_studio_tests_failed": 0,
     "hypit_typescript": "passed",
@@ -108,7 +109,8 @@
   },
   "headless_browser_evidence": {
     "automation_constraint": "All automated browser, interaction, accessibility, screenshot and E2E work is Headless, silent, windowless and must not take desktop focus.",
-    "browser": "Chrome 155.0.8059.40 headless",
+    "browser": "Chrome for Testing 153.0.8010.12 headless",
+    "source_commit": "84ecd6dcc2cd567865a7b03483b22c0cccb7176c",
     "normal_zoom_artifact": "artifacts/d421-browser-import.json",
     "normal_zoom_screenshot": "screenshots/browser-import-success.png",
     "normal_zoom_status": "passed",
@@ -131,15 +133,15 @@
     "artifacts/d421-ui-claude-review.md": "c72a9ba9743e31ecd4451e80354438492e4c42c18277f9be51b33f566e4750cf",
     "artifacts/d421-fault-race-claude-review.md": "83037e277accb0e5c989e9ae94034d7b23fcb06b39114ecaef4de2c2f39cd8b4",
     "artifacts/d421-large-upload.json": "e5edb5cf66345e2c487f1f2d2024c6e12342030c930758fe0e38a69fbff694f4",
-    "artifacts/d421-browser-import.json": "1be4a77c56218e3580520b89aa7ba39d08d80c91b19822201e41ab6ca240cef2",
-    "artifacts/d421-browser-zoom-200.json": "22954c7e92b0d5dce48abded72d04d51eb173b4bd815be00ac2dad462bdf4ff9",
+    "artifacts/d421-browser-import.json": "193953a286362144e8ef5d78bb8ddd65c9e99fc2b870507afda2872921a71407",
+    "artifacts/d421-browser-zoom-200.json": "58b550ccbe33dd80d5a02d485d9018fdeec4b98fcd109776ef2873395c5a06e3",
     "screenshots/asset-library-360.png": "d963343de29f0824df42fa54f21275a4c7af6ccde05beec8379453ed55888aa7",
     "screenshots/asset-library-768.png": "0b7d6a7e30c4a989a6e884ec0d581e19123ea79de793a33dfac6294a9aee5251",
     "screenshots/asset-library-1440.png": "938bcc7f867473323ac76e19938a3e00336f458ab9c69d24fc9708debdd6b6b5",
     "screenshots/asset-library-1920.png": "c78c5332a7afd2aa499d9ffdb6b2ad526b2ca5d22c22e34284c1c22e14df03b3",
     "screenshots/asset-library-scale-2x.png": "c462c4477371e2792a3f0542a57175af604dc29aeeef501da81e97832702e350",
-    "screenshots/browser-import-success.png": "1358cf5c257a967f1d876fb5d3c1441ef91667b136588c7bb10d34d48863270f",
-    "screenshots/d421-browser-zoom-200.png": "eb3a96ca800afb0d823523ce29f6c2cacae9c6a52bd11f0c5015a079fb2ec7e5"
+    "screenshots/browser-import-success.png": "3e08a2be0ac0081c77d7fe06ac72c2a894809663f19b776cafdc9738a1cf23c7",
+    "screenshots/d421-browser-zoom-200.png": "e8d1108ac186606b65a0c0df3a819c286f4ee7fe12cd6bdc2af1c94d572b09fa"
   },
   "remaining_scope": [
     "independent read-only external final implementation audit and closure of any resulting findings"

@@ -1,8 +1,9 @@
 {
   "stage": "M1A",
   "date": "2026-10-16",
-  "status": "R1_EXTERNAL_NO_REMEDIATION_IN_PROGRESS",
+  "status": "INTERNAL_R2_PASS_EXTERNAL_R2_PENDING",
   "baseline_commit": "304c89134fdf9f834f7d69e3f4d5c89a68044c60",
+  "implementation_commit": "84ecd6dcc2cd567865a7b03483b22c0cccb7176c",
   "automated_interaction": "headless_or_non_ui",
   "headed_automation": "NOT_RUN",
   "human_experience": "NOT_RUN",
@@ -11,6 +12,8 @@
     "full": { "status": "PASS", "files": 17, "tests": 134, "skipped": 0 },
     "typescript": "PASS",
     "production_build": "PASS",
+    "headless_100_percent": "PASS",
+    "headless_native_200_percent": "PASS",
     "independent_external_review": "R1_NO_R2_PENDING"
   },
   "artifacts": [
@@ -21,6 +24,20 @@
     {
       "path": "artifacts/d421-large-upload.json",
       "sha256": "2b0165bf2878b530b24e84df1a7620d4b73af9a82eb4f730681307d3442cd980"
+    },
+    {
+      "path": "artifacts/pnpm-check-r4.log",
+      "sha256": "9fa8d8377a57812b16e148136475b28ea40c02d46ffb6334e12360b156e73a27"
+    },
+    {
+      "path": "../../D4.2/D4.2.1/artifacts/d421-browser-import.json",
+      "sha256": "193953a286362144e8ef5d78bb8ddd65c9e99fc2b870507afda2872921a71407",
+      "source_commit": "84ecd6dcc2cd567865a7b03483b22c0cccb7176c"
+    },
+    {
+      "path": "../../D4.2/D4.2.1/artifacts/d421-browser-zoom-200.json",
+      "sha256": "58b550ccbe33dd80d5a02d485d9018fdeec4b98fcd109776ef2873395c5a06e3",
+      "source_commit": "84ecd6dcc2cd567865a7b03483b22c0cccb7176c"
     }
   ]
 }
