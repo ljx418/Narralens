@@ -1,8 +1,8 @@
 {
   "stage": "M1B",
   "date": "2026-10-16",
-  "status": "TECHNICAL_SPIKE_PARTIAL",
-  "gate": "NO_GO",
+  "status": "OPENFILM_SPIKE_PASS",
+  "gate": "PASS",
   "narralens_base": "304c89134fdf9f834f7d69e3f4d5c89a68044c60",
   "openfilm": {
     "repository": "https://github.com/openfilm/openfilm.git",
@@ -17,8 +17,8 @@
     "human_experience": "NOT_RUN"
   },
   "cases": {
-    "OF-01": "PARTIAL_CHINESE_TEXT_AND_CAPTIONS_BUT_TONE_AUDIO",
-    "OF-02": "PARTIAL_HEADLESS_PASS_HUMAN_NOT_RUN",
+    "OF-01": "PASS_REAL_OFFLINE_CHINESE_VOICE_CAPTIONS_AND_EDITABLE_CLIPS",
+    "OF-02": "PASS_HEADLESS_HUMAN_NOT_RUN",
     "OF-03": "PASS_SOURCE_INVENTORY",
     "OF-04": "PASS_SPIKE",
     "OF-05": "PASS_SPIKE",
@@ -26,19 +26,24 @@
   },
   "upstream_tests": {
     "total": 910,
-    "passed": 905,
-    "failed": 1,
+    "passed": 906,
+    "failed": 0,
     "skipped": 4,
-    "exit_code": 1,
-    "isolated_failed_case_rerun": "PASS_1_OF_1"
+    "exit_code": 0,
+    "first_run": "FAIL_905_PASS_1_FAIL_4_SKIP",
+    "isolated_failed_case_rerun": "PASS_1_OF_1",
+    "second_full_run": "PASS_906_PASS_0_FAIL_4_SKIP"
   },
   "artifacts": {
-    "first_export_mp4": "98957a62157018e6d762ea014a94d90e3184c1d889b48fa99a4631f4d19dbe81",
-    "second_export_mp4": "c475d5b752b114438a2100d14a95ae4d5803bbcd0ece13103061f036ec502791",
+    "first_export_mp4": "91fe4598055abf094a851752f09b9f3150dafe50938fb9f43ee355491800fa0d",
+    "second_export_mp4": "5270eab70f7e276dd322b6c501934af0cbf01d97d78bef0eb3ace9c85c257ea3",
     "first_frame_png": "742244cd279ccd1f8f037fff8bde4c2534b1ce293a763d56057a1c679d15bd66",
     "second_frame_png": "783bcf5619bdb060e84da20569e30ef2374e528f3726ad4edd6cd123206219a3",
     "native_edit_and_stale_probe": "55256d997ba7ce132e43a27f6da0772ca4793bc36fb57463cd7a0cf203bc18fb",
     "openfilm_full_test_log": "47d0a61a258a1ba6503e16f8084a1929bf96bf998a0e253a9cec14936e32561a",
-    "openfilm_failed_case_rerun_log": "533175dc4fd44016a8d119f6211415b3185739ff77dd98750342b914d666817b"
+    "openfilm_failed_case_rerun_log": "533175dc4fd44016a8d119f6211415b3185739ff77dd98750342b914d666817b",
+    "openfilm_full_test_r2_log": "b842cd92103a3e33f32dc87220ea8b02c9a6b2ee05c5a45f64a1711854c7b4bc",
+    "chinese_narration_wav": "bb16b13361e0d5bc369798ee2b1b32fd471b86cdf686e8bac804037713afaec3",
+    "chinese_narration_raw_wav": "127c9dd0770545f7a3d5492e5b38e5849ecdafa6c65d3af9327ef17621fa9256"
   }
 }
