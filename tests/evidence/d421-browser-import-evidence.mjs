@@ -26,11 +26,15 @@ const databasePath = join(fixtureRoot, ".narralens/browser-evidence.sqlite");
 const authored = ["authors/main.svml", "runs/build.svrun", "assets/generated/narration-30s.wav"];
 const before = { manifest_sha256: await fileHash(manifestPath), authored_sha256: await fileHashes(fixtureRoot, authored) };
 
-let pages;
+let page;
 for (let attempt = 0; attempt < 80; attempt += 1) {
-  try { pages = await (await fetch(endpoint)).json(); break; } catch { await delay(250); }
+  try {
+    const pages = await (await fetch(endpoint)).json();
+    page = pages.find((item) => item.type === "page" && item.url.startsWith(origin));
+    if (page) break;
+  } catch { /* CDP may not be listening yet. */ }
+  await delay(250);
 }
-const page = pages?.find((item) => item.type === "page" && item.url.startsWith(origin));
 if (!page) throw new Error("Narralens D4.2.1 CDP page not found");
 const socket = new WebSocket(page.webSocketDebuggerUrl);
 await new Promise((open, reject) => { socket.addEventListener("open", open, { once: true }); socket.addEventListener("error", reject, { once: true }); });
