@@ -117,9 +117,16 @@ const layout = await evaluate(`({viewport_width:innerWidth,document_width:docume
   outer_width:outerWidth,outer_height:outerHeight,visual_viewport_scale:visualViewport?.scale??null,
   core:{form:document.querySelector('.asset-import')?.getBoundingClientRect().toJSON(),inventory:document.querySelector('.inventory')?.getBoundingClientRect().toJSON(),
     file:document.querySelector('#asset-file')?.getBoundingClientRect().toJSON(),submit:document.querySelector('.import-actions button')?.getBoundingClientRect().toJSON()},
-  clipped_controls:Array.from(document.querySelectorAll('.asset-library input,.asset-library select,.asset-library button,.asset-library label,.asset-library h2,.asset-library h3'))
-    .filter(e=>e.scrollWidth>e.clientWidth+1||e.scrollHeight>e.clientHeight+1).map(e=>({tag:e.tagName,id:e.id||null,text:(e.textContent||'').trim().slice(0,80),client:[e.clientWidth,e.clientHeight],scroll:[e.scrollWidth,e.scrollHeight]}))})`);
-const capture = await call("Page.captureScreenshot", { format: "png", captureBeyondViewport: true });
+  clipped_controls:Array.from(document.querySelectorAll('body *')).filter(e=>{const r=e.getBoundingClientRect(),s=getComputedStyle(e);if(r.width<=0||r.height<=0)return false;
+    const hiddenX=['hidden','clip','auto','scroll'].includes(s.overflowX)&&e.scrollWidth>e.clientWidth+1;
+    const hiddenY=['hidden','clip'].includes(s.overflowY)&&e.scrollHeight>e.clientHeight+1;
+    return hiddenX||hiddenY||r.left < -1||r.right > document.documentElement.clientWidth+1;})
+    .map(e=>{const r=e.getBoundingClientRect(),s=getComputedStyle(e);return {tag:e.tagName,class_name:typeof e.className==='string'?e.className:null,id:e.id||null,
+      text:(e.textContent||'').trim().slice(0,80),rect:[r.left,r.right,r.width,r.height],client:[e.clientWidth,e.clientHeight],scroll:[e.scrollWidth,e.scrollHeight],overflow:[s.overflowX,s.overflowY]};})})`);
+const screenshotZoom = expectedZoomFactor > 1 ? expectedZoomFactor : 1;
+const capture = await call("Page.captureScreenshot", { format: "png", captureBeyondViewport: true, fromSurface: true,
+  clip: { x: 0, y: 0, width: layout.document_width * screenshotZoom, height: layout.document_height * screenshotZoom,
+    scale: 1 / screenshotZoom } });
 const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
 const journalDb = new DatabaseSync(databasePath, { readOnly: true });
 const journal = journalDb.prepare("SELECT state,response_status,asset_id,bytes_sha,error_code FROM asset_import_journal ORDER BY created_at DESC LIMIT 1").get();
@@ -170,6 +177,8 @@ const report = {
   viewport_configuration: viewportWidth === null ? { mechanism: "browser-window" }
     : { mechanism: "CDP CSS viewport override (not used for native 200% zoom)", width: viewportWidth, height: viewportHeight },
   interaction: "file injected through CDP; remaining form path is Tab/text/Enter keyboard input",
+  screenshot_capture: { mechanism: expectedZoomFactor > 1 ? "native zoom surface: expanded CSS clip with inverse output scale" : "CSS document clip",
+    input_zoom_factor: screenshotZoom, output_scale: 1 / screenshotZoom },
   keyboard, observed: { success_copy: body.includes("已登记，未进入时间轴。"), imported, manifest_format: manifest.format,
     manifest_entry_present: manifest.assets.some((asset) => asset.asset_id === imported?.asset_id), project_revision: browserFacts.revision,
     database_state: state, journal, authored_byte_exact_unchanged: JSON.stringify(before.authored_sha256) === JSON.stringify(after.authored_sha256),
