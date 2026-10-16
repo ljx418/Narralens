@@ -1,0 +1,45 @@
+{
+  "format": "narralens.m2-readiness-evidence@1",
+  "date": "2026-10-17",
+  "status": "GO_M2_NOT_STARTED",
+  "combined_source_commit": "5210ec87fac4d6241c4771b672a8232f51f69db8",
+  "sources": {
+    "m1a_implementation": "c0f101b964f9cfe492095440eba1bb9b0edad42d",
+    "m1a_external_review_evidence": "5b5c5d67ef2fae7fa4efc52840071d1cddb8b3cf",
+    "m1b_source_branch": "6e9bdeeb49093a4b830c4bc4337f012662c3e89d",
+    "openfilm": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3"
+  },
+  "combined_regression": {
+    "command": "corepack pnpm check",
+    "test_files": 17,
+    "tests_passed": 134,
+    "tests_failed": 0,
+    "tests_skipped": 0,
+    "typescript": "PASS",
+    "production_build": "PASS",
+    "artifact": "pnpm-check-combined.log",
+    "sha256": "cfe91cf802be9793f8237a722d637f1b5cc8edc5ea5efe9f96de8d64b8cf6a07"
+  },
+  "native_write_smoke": {
+    "status": "PASS",
+    "artifact": "native-write-smoke.json",
+    "sha256": "669541167b017a328c98ceea64ba43bfc2e07ef0bfe1f75833da7c93b335b46b",
+    "revision_changed": true,
+    "editable_clip_count": 3,
+    "stale_gateway_status": 409,
+    "bytes_unchanged_after_reject": true
+  },
+  "package_validation": {
+    "status": "PACKAGE_ONLY_PASS",
+    "artifact": "package-validation.log",
+    "sha256": "6078607979d06ae88d11726c462f4f5d0b2c32efa4b0b6663025d1b7bd1cd1b8",
+    "claim": "Document/contract consistency only; not an application Gate."
+  },
+  "claim_limits": [
+    "M2 is allowed but not started.",
+    "No OpenFilm production integration exists yet.",
+    "Headless evidence passed; headed automation and human experience are NOT_RUN.",
+    "Legacy bundle verification is not a real legacy reopen/export in this turn.",
+    "Gate D4.2, Gate V1-P0 and V1-Full are not closed."
+  ]
+}
