@@ -12,8 +12,13 @@ const expectedZoomFactor = Number.parseFloat(process.env.D421_EXPECTED_ZOOM_FACT
 const zoomBaselinePath = process.env.D421_ZOOM_BASELINE_PATH;
 const zoomPreferencesPath = process.env.D421_ZOOM_PREFERENCES_PATH;
 const sourceCommit = process.env.D421_SOURCE_COMMIT;
+const viewportWidth = process.env.D421_VIEWPORT_WIDTH ? Number.parseInt(process.env.D421_VIEWPORT_WIDTH, 10) : null;
+const viewportHeight = process.env.D421_VIEWPORT_HEIGHT ? Number.parseInt(process.env.D421_VIEWPORT_HEIGHT, 10) : null;
 if (!uploadPath || !fixtureRoot) throw new Error("D421_UPLOAD_PATH and D421_FIXTURE_ROOT are required");
 if (!/^[0-9a-f]{40}$/.test(sourceCommit ?? "")) throw new Error("D421_SOURCE_COMMIT must be a full Git SHA");
+if ((viewportWidth !== null && (!Number.isSafeInteger(viewportWidth) || viewportWidth < 320))
+  || (viewportHeight !== null && (!Number.isSafeInteger(viewportHeight) || viewportHeight < 480))
+  || (viewportWidth === null) !== (viewportHeight === null)) throw new Error("D421_VIEWPORT_WIDTH/HEIGHT must be a valid pair");
 if (!Number.isFinite(expectedZoomFactor) || expectedZoomFactor < 1) throw new Error("D421_EXPECTED_ZOOM_FACTOR must be >= 1");
 const delay = (milliseconds) => new Promise((done) => setTimeout(done, milliseconds));
 const manifestPath = join(fixtureRoot, "narralens.assets.json");
@@ -56,6 +61,10 @@ const keyboard = [];
 
 await call("Page.enable");
 await call("DOM.enable");
+if (viewportWidth !== null && viewportHeight !== null) {
+  await call("Emulation.setDeviceMetricsOverride", { width: viewportWidth, height: viewportHeight,
+    deviceScaleFactor: 1, mobile: false, screenWidth: viewportWidth, screenHeight: viewportHeight });
+}
 await call("Page.reload", { ignoreCache: true });
 await waitFor(async () => (await evaluate("document.body.innerText")).includes("本地资产库存"));
 const fileObject = await evaluate("document.querySelector('#asset-file')", false);
@@ -158,6 +167,8 @@ const report = {
   source_commit: sourceCommit,
   status: failures.length ? "failed" : "passed", failures,
   browser: process.env.D421_BROWSER_DESCRIPTION ?? "Google Chrome headless via CDP",
+  viewport_configuration: viewportWidth === null ? { mechanism: "browser-window" }
+    : { mechanism: "CDP CSS viewport override (not used for native 200% zoom)", width: viewportWidth, height: viewportHeight },
   interaction: "file injected through CDP; remaining form path is Tab/text/Enter keyboard input",
   keyboard, observed: { success_copy: body.includes("已登记，未进入时间轴。"), imported, manifest_format: manifest.format,
     manifest_entry_present: manifest.assets.some((asset) => asset.asset_id === imported?.asset_id), project_revision: browserFacts.revision,
