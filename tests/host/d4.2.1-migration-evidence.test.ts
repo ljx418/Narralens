@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { execFile } from "node:child_process";
 import { createServer } from "node:http";
-import { cp, mkdir, mkdtemp, readFile, readdir, writeFile } from "node:fs/promises";
+import { chmod, cp, mkdir, mkdtemp, readFile, readdir, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { promisify } from "node:util";
@@ -13,7 +13,7 @@ import { cleanupStagedAsset, receiveAssetUpload } from "../../src/host/assets/as
 import { AssetImportService } from "../../src/host/assets/asset-import-service.js";
 import { validateImportedMedia, type ToolExecutor } from "../../src/host/assets/media-validator.js";
 import { HttpError, normalizeError } from "../../src/host/api-error.js";
-import { AssetRegistry } from "../../src/host/projects/asset-registry.js";
+import { AssetRegistry, assetIdentity } from "../../src/host/projects/asset-registry.js";
 import { ProjectCatalog, type ProjectDescriptor } from "../../src/host/projects/project-catalog.js";
 import { InMemoryProjectOperationQueue, type ProjectOperationQueue } from "../../src/host/projects/project-operation-queue.js";
 import { ProjectWriteActor } from "../../src/host/projects/project-write-actor.js";
@@ -51,6 +51,7 @@ describe("M1A direct multipart and closed-route evidence", () => {
     add("duplicate-metadata-same", [metadataPart("m1a-duplicate-metadata-same", valid), metadataPart("m1a-duplicate-metadata-same", valid), filePart("m1a-duplicate-metadata-same", Buffer.from("x"))]);
     add("duplicate-metadata-different", [metadataPart("m1a-duplicate-metadata-different", valid), metadataPart("m1a-duplicate-metadata-different", metadata("m1a:other")), filePart("m1a-duplicate-metadata-different", Buffer.from("x"))]);
     add("duplicate-file-same-name", [metadataPart("m1a-duplicate-file-same-name", valid), filePart("m1a-duplicate-file-same-name", Buffer.from("x")), filePart("m1a-duplicate-file-same-name", Buffer.from("x"))]);
+    add("duplicate-file-different-name", [metadataPart("m1a-duplicate-file-different-name", valid), filePart("m1a-duplicate-file-different-name", Buffer.from("x"), "first.mp4"), filePart("m1a-duplicate-file-different-name", Buffer.from("x"), "second.mp4")]);
     add("multiple-files", [metadataPart("m1a-multiple-files", valid), filePart("m1a-multiple-files", Buffer.from("x"), "first.mp4"), filePart("m1a-multiple-files", Buffer.from("y"), "second.mp4")]);
     add("missing-metadata", [filePart("m1a-missing-metadata", Buffer.from("x"))]);
     add("missing-file", [metadataPart("m1a-missing-file", valid)]);
@@ -133,15 +134,31 @@ describe("M1A direct media-tool evidence", () => {
     }
     const nonzero: ToolExecutor = async () => { throw Object.assign(new Error("exit 1"), { code: 1, stderr: "decode failed" }); };
     await expect(validateImportedMedia(path, 30, digest, { execute: nonzero })).rejects.toMatchObject({ status: 422, code: "INVALID_MEDIA" });
+
+    const root = await mkdtemp(join(tmpdir(), "narralens-real-tool-failure-"));
+    const pidPath = join(root, "tool.pid");
+    const timeoutTool = join(root, "timeout-tool.sh");
+    await writeFile(timeoutTool, `#!/bin/sh\necho $$ > "${pidPath}"\nwhile :; do sleep 1; done\n`);
+    await chmod(timeoutTool, 0o700);
+    await expect(validateImportedMedia(path, 30, digest, { ffprobe: timeoutTool, timeoutMs: 100 }))
+      .rejects.toMatchObject({ status: 503, code: "MEDIA_TOOL_UNAVAILABLE" });
+    const toolPid = Number(await readFile(pidPath, "utf8"));
+    await expectProcessGone(toolPid);
+
+    const stderrTool = join(root, "stderr-tool.sh");
+    await writeFile(stderrTool, "#!/bin/sh\nyes x | head -c 65536 >&2\nexit 1\n");
+    await chmod(stderrTool, 0o700);
+    await expect(validateImportedMedia(path, 30, digest, { ffprobe: stderrTool, stderrBytes: 128 }))
+      .rejects.toMatchObject({ status: 503, code: "MEDIA_TOOL_UNAVAILABLE" });
   }, 30_000);
 });
 
 describe("M1A inventory and shared-write-boundary evidence", () => {
-  it("IM-18..IM-21 returns 256 ordered items, caps probes at 2, isolates one timeout and revalidates each GET", async () => {
+  it("IM-18..IM-21 serves 256 ordered items over HTTP, caps probes at 2, isolates one timeout, revalidates changed bytes and rejects the 257th", async () => {
     const fixture = await inventoryFixture();
-    let active = 0; let maximum = 0; let probes = 0; let generation = 0;
+    let active = 0; let maximum = 0; let probes = 0;
     const registry = new AssetRegistry(fixture.catalog, {
-      hashFile: async (path) => path.endsWith("/asset-007/source.mp4") && generation > 0 ? "f".repeat(64) : "a".repeat(64),
+      hashFile: async (path) => sha(await readFile(path)),
       videoFrames: async (path) => {
         active += 1; maximum = Math.max(maximum, active); probes += 1;
         await new Promise((done) => setTimeout(done, 1));
@@ -150,20 +167,37 @@ describe("M1A inventory and shared-write-boundary evidence", () => {
         return 30;
       },
     });
-    const first = await registry.inventory("inventory-256");
+    const revisions = new RevisionStore();
+    const queue = new InMemoryProjectOperationQueue();
+    const actor = new ProjectWriteActor(fixture.catalog, revisions,
+      new FakeMediaHypit(await fixture.catalog.readDescriptor("inventory-256")) as never, queue, registry);
+    const imports = new AssetImportService(fixture.catalog, registry, revisions, queue);
+    const host = new NarralensHost({ catalog: fixture.catalog, revisionStore: revisions, operationQueue: queue, writes: actor, imports });
+    hosts.push(host);
+    const port = await host.listen(0); const origin = `http://127.0.0.1:${port}`;
+    const token = (await (await fetch(`${origin}/api/session`, { headers: { origin } })).json() as { token: string }).token;
+    const inventoryGet = async (): Promise<ReturnType<AssetRegistry["inventory"]> extends Promise<infer T> ? T : never> => {
+      const response = await fetch(`${origin}/api/projects/inventory-256/assets`, { headers: auth(origin, token) });
+      expect(response.status).toBe(200);
+      return await response.json() as Awaited<ReturnType<AssetRegistry["inventory"]>>;
+    };
+    const first = await inventoryGet();
     expect(first.assets).toHaveLength(256);
     expect(first.assets.map((asset) => asset.asset_id)).toEqual(Array.from({ length: 256 }, (_, index) => `asset_${index.toString().padStart(3, "0")}`));
     expect(maximum).toBe(2);
     expect(first.assets[42]).toMatchObject({ availability: "unavailable", eligible: false, blocking_reasons: ["BYTES_UNAVAILABLE"] });
     expect(first.assets.filter((asset) => asset.availability === "available")).toHaveLength(255);
-    generation = 1;
-    const second = await registry.inventory("inventory-256");
+    await writeFile(join(fixture.root, "media/asset-007/source.mp4"), "y");
+    const second = await inventoryGet();
     expect(second.assets[7]).toMatchObject({ availability: "unavailable", eligible: false, blocking_reasons: ["HASH_MISMATCH"] });
     expect(probes).toBeGreaterThanOrEqual(509);
 
-    const full = { format: "narralens.asset-manifest@2", assets: [...fixture.manifest.assets, fixture.manifest.assets[0]] };
-    await writeFile(fixture.manifestPath, `${JSON.stringify(full)}\n`);
-    await expect(registry.readManifest("inventory-256")).rejects.toMatchObject({ status: 422 });
+    const newSha = "b".repeat(64);
+    const source = { kind: "owned" as const, label: "257th asset" };
+    const license = { status: "cleared" as const, label: "owned", commercial_use: true };
+    await expect(registry.planAppend("inventory-256", { asset_id: assetIdentity(newSha, source, license),
+      project_path: `media/${newSha}/source.mp4`, sha256: newSha, media_type: "video/mp4", kind: "video",
+      duration_frames: 30, source, license })).rejects.toMatchObject({ status: 409, code: "MANIFEST_CHANGED" });
   }, 30_000);
 
   it("IM-22 serializes real HTTP import commit with a real D4.0 edit and only the edit advances revision", async () => {
@@ -226,7 +260,7 @@ class FakeMediaHypit {
   async mutateMedia(_capture: HypitMediaCapture, assetId: string): Promise<MutationResult> { this.asset = assetId; return { status: 200, revision: 2 }; }
 }
 
-async function inventoryFixture(): Promise<{ catalog: ProjectCatalog; manifest: AssetManifest; manifestPath: string }> {
+async function inventoryFixture(): Promise<{ root: string; catalog: ProjectCatalog; manifest: AssetManifest; manifestPath: string }> {
   const root = await mkdtemp(join(tmpdir(), "narralens-inventory-256-"));
   const descriptor = JSON.parse(await readFile(resolve("fixtures/d1-30s/narralens.project.json"), "utf8")) as ProjectDescriptor;
   descriptor.project_id = "inventory-256";
@@ -237,12 +271,24 @@ async function inventoryFixture(): Promise<{ catalog: ProjectCatalog; manifest: 
     const directory = join(root, "media", `asset-${index.toString().padStart(3, "0")}`);
     await mkdir(directory, { recursive: true }); await writeFile(join(directory, "source.mp4"), "x");
     assets.push({ asset_id: `asset_${index.toString().padStart(3, "0")}`, project_path: `media/asset-${index.toString().padStart(3, "0")}/source.mp4`,
-      sha256: "a".repeat(64), media_type: "video/mp4" as const, kind: "video" as const, duration_frames: 30,
+      sha256: sha("x"), media_type: "video/mp4" as const, kind: "video" as const, duration_frames: 30,
       source: { kind: "owned" as const, label: `asset ${index}` }, license: { status: "cleared" as const, label: "owned", commercial_use: true } });
   }
   const manifest: AssetManifest = { format: "narralens.asset-manifest@2", assets };
   const manifestPath = join(root, "narralens.assets.json"); await writeFile(manifestPath, `${JSON.stringify(manifest)}\n`);
-  return { catalog: new ProjectCatalog(new Map([["inventory-256", descriptorPath]])), manifest, manifestPath };
+  return { root, catalog: new ProjectCatalog(new Map([["inventory-256", descriptorPath]])), manifest, manifestPath };
+}
+
+async function expectProcessGone(pid: number): Promise<void> {
+  for (let attempt = 0; attempt < 40; attempt += 1) {
+    try { process.kill(pid, 0); }
+    catch (error) {
+      if ((error as NodeJS.ErrnoException).code === "ESRCH") return;
+      throw error;
+    }
+    await new Promise((done) => setTimeout(done, 25));
+  }
+  throw new Error(`timed-out media child process ${pid} remained alive`);
 }
 
 async function copiedProject(name: string): Promise<{ root: string; descriptorPath: string }> {

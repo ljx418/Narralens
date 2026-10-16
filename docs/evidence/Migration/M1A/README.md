@@ -2,7 +2,7 @@
 
 日期：2026-10-16
 
-状态：`INTERNAL_VERIFIED / EXTERNAL_REVIEW_PENDING / GATE_NOT_CLOSED`
+状态：`R1_EXTERNAL_NO / FINDINGS_FIXED_IN_WORKTREE / REVALIDATION_IN_PROGRESS / GATE_NOT_CLOSED`
 
 本目录补齐迁移包指出的逐编号直接证据缺口。它不以“134/134”替代冻结矩阵，也不改写 2026-10-15 的旧 Gate 历史。完整门禁在本轮真实执行，生产行为仅增加可注入测试端口；默认依赖仍是实际文件哈希、ffprobe 与 ffmpeg。
 
@@ -20,12 +20,12 @@
 |---|---|---|
 | IM-01 | PASS | `d4.2.1-import-service.test.ts` 正常真实 MP4 route/import/@1→@2 |
 | IM-02 | PASS | `d4.2.1-migration-evidence.test.ts` file-before-metadata 真实路由 |
-| IM-03..09 | PASS | 同文件逐 variant：重复 metadata（同/异）、重复 file、多个 file、缺 part、未知 part、坏 JSON、重复 JSON key、16383/16384/16385 边界、非 multipart、缺/坏 boundary；逐例检查 staging 清空 |
+| IM-03..09 | PASS | 同文件逐 variant：重复 metadata（同/异）、重复 file（同名/不同名）、多个 file、缺 part、未知 part、坏 JSON、重复 JSON key、16383/16384/16385 边界、非 multipart、缺/坏 boundary；逐例检查 staging 清空 |
 | IM-10 | PASS | `d4.2.1-upload-media.test.ts` chunked overflow/client abort/backpressure；64 MiB 证据另见 JSON |
 | IM-11..12 | PASS | 本轮由 ffmpeg 真实生成 audio-only 与双 video stream MP4，均 422 |
 | IM-13 | PASS | 可控零帧 probe 与真实损坏容器均 422 |
-| IM-14..17 | PASS | ffprobe 缺失、ffmpeg 缺失、超时、stderr overflow 均 503；普通非零媒体失败为 422 |
-| IM-18..21 | PASS | 256 项有序库存、并发最大值精确为 2、单项 probe timeout 独立降级、重复 GET 重验、257/重复 identity 拒绝 |
+| IM-14..17 | PASS | ffprobe 缺失、ffmpeg 缺失、真实子进程超时且 PID 消失、真实 stderr overflow 均 503；普通非零媒体失败为 422 |
+| IM-18..21 | PASS | 真实 HTTP GET 返回 256 项有序库存、并发最大值精确为 2、单项 probe timeout 独立降级、两次 GET 间真实同长度改写 bytes 并立即降级、合法唯一第 257 项命中容量 409 |
 | IM-22 | PASS | 真实 HTTP import 与 D4.0 edit 共享同项目 queue；最大活动数 1；仅 edit 令 revision 2→3 |
 | IM-23 | PASS | `d4.2.1-import-service.test.ts` 启动恢复、publish-before-journal crash、精确 preimage 补偿 |
 | IM-24 | PASS | materialize 路由 404，Project facts 与 Actor count 不变 |

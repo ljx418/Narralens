@@ -11,7 +11,9 @@ const evidenceVariant = process.env.D421_EVIDENCE_VARIANT ?? "browser-import";
 const expectedZoomFactor = Number.parseFloat(process.env.D421_EXPECTED_ZOOM_FACTOR ?? "1");
 const zoomBaselinePath = process.env.D421_ZOOM_BASELINE_PATH;
 const zoomPreferencesPath = process.env.D421_ZOOM_PREFERENCES_PATH;
+const sourceCommit = process.env.D421_SOURCE_COMMIT;
 if (!uploadPath || !fixtureRoot) throw new Error("D421_UPLOAD_PATH and D421_FIXTURE_ROOT are required");
+if (!/^[0-9a-f]{40}$/.test(sourceCommit ?? "")) throw new Error("D421_SOURCE_COMMIT must be a full Git SHA");
 if (!Number.isFinite(expectedZoomFactor) || expectedZoomFactor < 1) throw new Error("D421_EXPECTED_ZOOM_FACTOR must be >= 1");
 const delay = (milliseconds) => new Promise((done) => setTimeout(done, milliseconds));
 const manifestPath = join(fixtureRoot, "narralens.assets.json");
@@ -153,6 +155,7 @@ if (unresolvedIncomplete.length) failures.push(`unresolved axe incomplete: ${unr
 if (manualContrast.some((check) => !check.pass)) failures.push("manual contrast check failed");
 const report = {
   format: "narralens.d421-browser-import-evidence@1", executed_at: new Date().toISOString(),
+  source_commit: sourceCommit,
   status: failures.length ? "failed" : "passed", failures,
   browser: process.env.D421_BROWSER_DESCRIPTION ?? "Google Chrome headless via CDP",
   interaction: "file injected through CDP; remaining form path is Tab/text/Enter keyboard input",
