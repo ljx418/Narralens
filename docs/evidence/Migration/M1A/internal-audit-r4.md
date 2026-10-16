@@ -15,7 +15,7 @@ R4 针对独立外审 R3 的两个阻断项逐项复核。证据工具现对所�
 - `corepack pnpm check`：17 files、134/134、0 skipped；TypeScript 与 production build PASS。
 - `corepack pnpm evidence:d421-large`：64 MiB 真实 MP4、1024 次 drain、RSS delta 37,556,224 < 50,331,648；32 MiB cap=413；staging=0。
 
-R6/R7 两次门禁失败均保留：前者为 423 个遗留 `/tmp/narralens-*` 夹具（约 14 GiB）触发 ENOMEM；后者为同机资源压力下 I/O 密集的 closed-route 测试超过默认 5 秒。清理本项目测试临时目录并把该证据项的显式上限设为 30 秒后，目标项 4.176 秒通过，完整 R8/R9 均通过。没有降低业务阈值、跳过测试或修改生产行为。
+R6/R7 两次门禁失败均保留：前者为 423 个遗留 `/tmp/narralens-*` 夹具（约 14 GiB）触发 ENOMEM；后者为同机资源压力下 I/O 密集的 closed-route 测试超过默认 5 秒。清理本项目测试临时目录并把该证据项的显式上限设为 30 秒后，单项复跑 4.176 秒通过；完整 R8/R9 中该项分别为 4.685/4.068 秒，且两轮全量均通过。没有降低业务阈值、跳过测试或修改生产行为。
 
 ## 声明边界
 

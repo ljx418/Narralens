@@ -1,6 +1,6 @@
 # 叙镜架构设计 v1.0
 
-文档状态：Gate D1–D3、D4.0 与 D4.1 的历史结论保留。D4.2.1 的生产实现和内部总审计已完成，但完整冻结矩阵仍存在逐编号直接证据缺口，独立外部总审计也未关闭，因此仍是候选而非 Gate 通过。2026-10-16 经 `CR-MIG-001` 批准进入架构迁移：OpenFilm Studio 是目标原生 UI/默认渲染器，Hypit 降为 legacy/回退；M1A 与 M1B 双门通过前，当前运行时仍以 Hypit 为唯一生产剪辑事实源。旧 Gate 历史不被覆盖。
+文档状态：Gate D1–D3、D4.0 与 D4.1 的历史结论保留。D4.2.1 的 M1A 逐编号证据已完成并由独立 Claude Code R4 外审通过；这只关闭 D4.2.1 prerequisite subset，不关闭 Gate D4.2。2026-10-16 经 `CR-MIG-001` 批准进入架构迁移：OpenFilm Studio 是目标原生 UI/默认渲染器，Hypit 降为 legacy/回退；M1B 隔离 spike 已通过，现允许 M2 开工但尚未实现任何生产 OpenFilm 路径。当前运行时仍以 Hypit 为唯一生产剪辑事实源，旧 Gate 历史不被覆盖。
 
 ## 1. 零层架构
 
@@ -90,7 +90,7 @@ narralens/
 | `HostApiClient` | `src/app/director/api/` | UI ↔ Local Host | comparison 读取与原有 projects/jobs/events/proposals/edit 均已实现 | D4.1 HTTP/UI tests |
 | `LocalHost API` | `src/host/server.ts` | UI ↔ actors/adapters | D4.1 comparison job、读取、revision 复核与 NOWRITE diagnostics 已实现 | D4.1 contract/HTTP/NOWRITE tests |
 | `ProposalComparisonAdapter` | `src/adapters/openmontage/` | Runner draft → Host 绑定 → atomic staging | D4.1 已实现 schema、GCD 语义差异、空来源白名单和全有或全无暂存 | D4.1 adapter/真实证据 |
-| `AssetImportService` | `src/host/assets/` | multipart → staging → ffprobe → AssetRegistry | D4.2.1 已实现候选：流式导入，不接收本机绝对路径；逐 case 外审待闭环 | M1A 完整冻结矩阵 |
+| `AssetImportService` | `src/host/assets/` | multipart → staging → ffprobe → AssetRegistry | D4.2.1 已实现并完成 M1A 逐 case 独立外审：流式导入，不接收本机绝对路径 | M1A 完整冻结矩阵已关闭；后续变更须保留回归 |
 | `ProjectOperationQueue` | `src/host/projects/project-operation-queue.ts` | ImportService / ProjectWriteActor → 每项目串行 commit | D4.2.1 已实现 interface、FIFO/错误隔离/跨工程并行，Host 单例已注入 Actor | ImportService 实现时必须复用同一实例 |
 | `MaterializeService` / `MaterializeRenderer` | `src/host/materialize/` | Proposal + bindings → ffmpeg composite → materialized staging | D4.2 docs-only：异步 Job、确定性 recipe、NOWRITE | D4.2.2 计划，受 D4.2.1 门禁约束 |
 | `ProjectWriteActor` | `src/host/projects/` | API → transaction → adapters | D3 fit 与 D4.0 单镜媒体替换已实现 revision、lock、幂等、补偿/attention/recovery | D4.1 禁止调用；提案采用待 D4.2 |
@@ -151,8 +151,8 @@ AssetManifest v2 新增 `source.kind=derived` 和输入 SHA lineage：`generated
 - `POST /api/projects/:id/proposals`：选区 + 意图 + baseRevision → jobId。
 - `GET /api/jobs/:id` / SSE events：真实阶段、费用和结果。
 - `GET /api/proposal-comparisons/:id`：读取并重新校验 D4.1 原子暂存的 3–6 个只读候选，同时复核当前 revision；已实现。
-- `POST /api/projects/:id/assets/import`：D4.2.1 已实现候选；流式本地 MP4 + 来源/许可元数据，不接受客户端路径。
-- `GET /api/projects/:id/assets`：D4.2.1 已实现候选；返回 `AssetInventoryResponse` 公开库存，包含 cleared/restricted/unknown、source/license/availability/eligible/blocking，但不返回 `project_path`、绝对路径、原文件名或 token；每次请求重验 bytes SHA，不使用跨请求可用性缓存。
+- `POST /api/projects/:id/assets/import`：D4.2.1 已实现并通过 M1A 外审；流式本地 MP4 + 来源/许可元数据，不接受客户端路径。
+- `GET /api/projects/:id/assets`：D4.2.1 已实现并通过 M1A 外审；返回 `AssetInventoryResponse` 公开库存，包含 cleared/restricted/unknown、source/license/availability/eligible/blocking，但不返回 `project_path`、绝对路径、原文件名或 token；每次请求重验 bytes SHA，不使用跨请求可用性缓存。
 - `POST /api/proposals/:id/materialize`：D4.2 docs-only；本地绑定与 composite 异步 Job，不调用远程 provider。
 - `GET /api/materializations/:id`：D4.2 docs-only；重验并返回采用影响摘要与 current impact SHA。
 - `POST /api/projects/:id/edits`：typed operations + baseRevision → newRevision。

@@ -1,7 +1,7 @@
 # Narralens V1 规格—架构—开发—验收追踪矩阵
 
 版本：v1.0  
-状态：实际开发已批准；Gate D1、Gate D2、Gate D3、Gate D4.0、Gate D4.1 历史结论保留。D4.2.1 生产实现与内部总审计完成，但逐编号直接证据缺口及独立外部总审计尚未关闭。`CR-MIG-001` 已批准 OpenFilm 目标架构；当前执行 M1A/M1B 双门，禁止提前进入 M2 或旧 D4.2.2。
+状态：实际开发已批准；Gate D1、Gate D2、Gate D3、Gate D4.0、Gate D4.1 历史结论保留。D4.2.1 的 M1A 逐编号补证已由独立 Claude Code R4 外审关闭；M1B OpenFilm 隔离技术 spike 也已通过。`CR-MIG-001` 批准的 OpenFilm 目标架构现已到达 M2 开工边界；M2 尚未实现，旧 D4.2.2 不得顺跳。
 事实日期：2026-10-16
 
 ## 1. 使用规则
@@ -19,7 +19,7 @@
 | P0-05 镜头/区间/逐帧 | `SelectionCoordinator` | D3 | `AT-SELECTION-01` `[start,end)` 边界 | 首尾帧样本、契约测试 | partial：D3 单镜稳定选区/边界已通过；区间与逐帧 UI 待后续 |
 | P0-06 3–6 提案 | `DirectorPane`、`ProposalCompare`、`ProposalComparisonAdapter` | D2–D4 | `D41-CONTRACT/COUNT/DIVERSITY/DURATION/REF/TRUST/STAGING/REV/NOWRITE/CANCEL/PROVIDER/RUNNER/UI/A11Y/SEC/REGRESSION` 全族 | Runner 审计、ProposalComparison、结构签名、工程 SHA、Host 写调用计数、浏览器证据 | done：D4.1 生产实现、80/80、真实 CLI 三案、浏览器/NOWRITE 与内外实现审查通过；不包含 P0-07 采用 |
 | P0-07 分项锁 | `ProjectWriteActor`、`LockPolicy` | D3–D4 | `AT-LOCK-01` UI/Agent 同时被阻止 | 423 响应、资产哈希不变 | partial：仅 D3 visual 服务端主动锁这一项通过；D4.2 计划复验 visual lock，但 narration/duration 主动锁与完整 P0-07 仍待后续 |
-| P0-08 素材/来源/许可 | `AssetRegistry`、`AssetImportService`、`MaterializeService` | D4 | `D42-IMPORT/LICENSE/MAT/SEC` | import/ffprobe、manifest v2、lineage、422/428、许可清单 | partial：D4.2.1 本地导入、媒体验证、库存、许可展示、@2 transaction、journal、Hypit lease/TOCTOU、routes/UI 已实现并完成内部总审计，外部总审计待关闭；derived composite 与审批仍属于 D4.2.2–D4.2.3；外传/provider 不在本阶段 |
+| P0-08 素材/来源/许可 | `AssetRegistry`、`AssetImportService`、`MaterializeService` | D4 | `D42-IMPORT/LICENSE/MAT/SEC` | import/ffprobe、manifest v2、lineage、422/428、许可清单 | partial：D4.2.1 本地导入、媒体验证、库存、许可展示、@2 transaction、journal、Hypit lease/TOCTOU、routes/UI 已完成 M1A 独立外审；derived composite 与审批仍属于后续 M3/M4；外传/provider 不在本阶段 |
 | P0-09 局部差异确认 | `ImpactPreview`、`EditTransaction` | D3–D4 | `AT-DIFF-01`、`D42-APPROVAL/ADOPT` | before/after diff、impact SHA、帧数/边界帧 | partial：D3 fit before→after、精确 Source 与全 item 不变量通过；D4.2 当前只有采用影响确认计划 |
 | P0-10 版本/撤回/恢复/冲突 | `RevisionService`、journal | D3–D5 | `AT-REV-01` 409、恢复产生新 revision | event log、重开记录 | partial：D3 monotonic revision/409/journal/启动恢复通过；用户历史恢复待 D5 |
 | P0-11 重开与 MP4 | `HypitAdapter`、`RenderService` | D1、D6–D7 | `AT-EXPORT-01` 双导出、重开、改一镜 | MP4、ffprobe、工程哈希 | D1 30 秒夹具通过；真实母项目待 D6–D7 |
@@ -41,9 +41,9 @@
 | 新 Gate | 目标 | 当前状态 | 出门约束 |
 |---|---|---|---|
 | M0 | 现场 SHA、代码/路由/阈值、备份与变更单 | observed | 不改变业务 Gate |
-| M1A | D4.2.1 冻结矩阵逐 case 真实证据与独立外审 | in-progress | 不能用测试总数替代逐编号证据 |
-| M1B | 固定 OpenFilm SHA、可编辑 30 秒链路、native 写入口清单与 stale-base 实证 | in-progress | 不写生产 Hypit，不用扁平 MP4 代替可编辑工程 |
-| M2 | EnginePort、单引擎绑定、写入治理、三类锁、持久 Job/SSE/lease、snapshot/journal/回退 | blocked-by-M1A+M1B | 双门都通过才允许开工 |
+| M1A | D4.2.1 冻结矩阵逐 case 真实证据与独立外审 | passed（实现 `c0f101b...`；R4 YES） | Headless PASS；headed/human NOT_RUN；不扩张为 D4.2 总 Gate |
+| M1B | 固定 OpenFilm SHA、可编辑 30 秒链路、native 写入口清单与 stale-base 实证 | passed-spike（OpenFilm `e70d9d9...`） | 不写生产 Hypit；可编辑三 clip；生产 translate/block 仍待 M2 |
+| M2 | EnginePort、单引擎绑定、写入治理、三类锁、持久 Job/SSE/lease、snapshot/journal/回退 | allowed-not-started | 只允许按 M2.1→M2.3 开工；materialize/adopt 仍保持关闭 |
 | M3–M5 | 素材化、采用事务、同页原生 Studio UX | not-started | 顺序门禁，不顺跳 |
 | M6 | `Gate V1-P0` | not-started | 不等于 V1-Full |
 | M7A–D | P1 与完整长片证据 | not-started | P0/P1 全绿后才可声明 V1-Full |

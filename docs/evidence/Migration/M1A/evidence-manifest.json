@@ -1,7 +1,7 @@
 {
   "stage": "M1A",
   "date": "2026-10-16",
-  "status": "INTERNAL_R4_PASS_EXTERNAL_R4_PENDING",
+  "status": "M1A_CLOSED",
   "baseline_commit": "304c89134fdf9f834f7d69e3f4d5c89a68044c60",
   "implementation_commit": "c0f101b964f9cfe492095440eba1bb9b0edad42d",
   "automated_interaction": "headless_or_non_ui",
@@ -14,7 +14,7 @@
     "production_build": "PASS",
     "headless_viewports_360_768_1440_1920": "PASS",
     "headless_native_200_percent": "PASS",
-    "independent_external_review": "R1_NO_R2_NO_R3_NO_R4_PENDING"
+    "independent_external_review": "R1_NO_R2_NO_R3_NO_R4_YES"
   },
   "artifacts": [
     {
@@ -55,6 +55,26 @@
       "path": "../../D4.2/D4.2.1/artifacts/d421-browser-viewport-1920.json",
       "sha256": "54c39b3070b0d747a270a8fa5534915e84c5133bf10466121d8b0e76be2a5312",
       "source_commit": "c0f101b964f9cfe492095440eba1bb9b0edad42d"
+    },
+    {
+      "path": "../../D4.2/D4.2.1/screenshots/d421-browser-viewport-360.png",
+      "sha256": "3f6a5f260859f64f73941dc87da6316f72352487c9808b1d3adbd25b9770e14c"
+    },
+    {
+      "path": "../../D4.2/D4.2.1/screenshots/d421-browser-viewport-768.png",
+      "sha256": "029578efcef3ed1cf12c36b9fe5a4c06a988444461e8b113739f7c31d00160a6"
+    },
+    {
+      "path": "../../D4.2/D4.2.1/screenshots/d421-browser-viewport-1440.png",
+      "sha256": "3e08a2be0ac0081c77d7fe06ac72c2a894809663f19b776cafdc9738a1cf23c7"
+    },
+    {
+      "path": "../../D4.2/D4.2.1/screenshots/d421-browser-viewport-1920.png",
+      "sha256": "4960d11d736d62d86002f54b7fc1b0a09676a5be33d9cf5c2788e1eeb9bc3c57"
+    },
+    {
+      "path": "../../D4.2/D4.2.1/screenshots/d421-browser-zoom-200.png",
+      "sha256": "7bb174051f6d8920d022a87fe9a0eabbb6d6878a4b7f2db02083dc65836c685b"
     }
   ]
 }

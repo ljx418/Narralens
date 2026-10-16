@@ -2,7 +2,7 @@
 
 日期：2026-10-16
 
-状态：`INTERNAL_R4_PASS / EXTERNAL_R4_PENDING / GATE_NOT_CLOSED`
+状态：`INTERNAL_R4_PASS / EXTERNAL_R4_PASS / M1A_CLOSED`
 
 本目录补齐迁移包指出的逐编号直接证据缺口。它不以“134/134”替代冻结矩阵，也不改写 2026-10-15 的旧 Gate 历史。完整门禁在本轮真实执行，生产行为仅增加可注入测试端口；默认依赖仍是实际文件哈希、ffprobe 与 ffmpeg。
 
@@ -50,7 +50,7 @@
 | D421-INV-DERIVED-01、NOWRITE-01 | PASS（继承并重跑） | contracts/import-service/host HTTP；route 负向 facts |
 | D421-UI-01/02 | PASS（本轮重新 Headless 执行） | 360/768/1440/1920 与 native 200% 均记录完整实现 SHA；修复并验证 tablet 双列输入裁切、grid/长 asset ID 溢出。headed/human 本轮 NOT_RUN |
 | D421-SEC-01 | PASS（继承并重跑） | upload-media、host-http、既有扫描证据 |
-| D421-LARGE-01 | PASS（本轮重跑） | `artifacts/d421-large-upload.json` |
+| D421-LARGE-01 | PASS（本轮重跑） | `docs/evidence/Migration/M1A/artifacts/d421-large-upload-r6.json` |
 | D421-ROUTE-404-MATERIALIZE/ADOPT | PASS（新增直接项） | migration-evidence IM-24/25 |
 | D421-DEP-01 | PASS（继承并重跑） | lockfile/依赖合同及 `pnpm audit` 历史证据；本轮未改依赖 |
 | D421-REG-01 | PASS | 本轮 `pnpm check`：134/134、0 skipped、production build PASS |
@@ -60,7 +60,7 @@
 - 自动化交互：本轮以隔离临时工程重新执行 Headless 100%/native 200%，无可见窗口、静音、不抢焦点；失败尝试保留且没有覆盖成功前的事实。
 - Headed 自动化：本轮 `NOT_RUN`。
 - 人类体验：本轮 `NOT_RUN`。
-- 独立外审：R1、R2、R3 的 NO 结论与整改轨迹永久保留；必须由新的 Claude Code 会话绑定 `c0f101b...` 给出 PASS/YES，M1A 与 D4.2.1 才能关闭。
+- 独立外审：R1、R2、R3 的 NO 结论与整改轨迹永久保留；新的 Claude Code R4 会话绑定 `c0f101b...` 与证据提交 `5b5c5d6...`，结论为 `ALLOW_M1A_CLOSE=YES`。
 
 ## SHA256
 
