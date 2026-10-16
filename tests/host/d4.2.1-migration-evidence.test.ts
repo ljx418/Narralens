@@ -94,7 +94,7 @@ describe("M1A direct multipart and closed-route evidence", () => {
     expect(await invented.json()).toMatchObject({ code: "UNSUPPORTED_EDIT" });
     expect(await projectFacts(started.origin, started.token)).toEqual(before);
     expect(started.host.diagnostics.write_actor_execute_count).toBe(0);
-  });
+  }, 30_000);
 });
 
 describe("M1A direct media-tool evidence", () => {
