@@ -1,0 +1,23 @@
+{
+  "format": "narralens.d421-large-upload-evidence@1",
+  "generated_at": "2026-10-16T15:38:14.469Z",
+  "fixture": {
+    "filename": "real-64m.mp4",
+    "byte_length": 67108864,
+    "ffprobe_format": "mov,mp4,m4a,3gp,3g2,mj2"
+  },
+  "success": {
+    "status": 200,
+    "uploaded_bytes": 67108864,
+    "socket_backpressure_events": 1024,
+    "socket_drain_events": 1024,
+    "peak_rss_delta_bytes": 39915520,
+    "rss_limit_bytes": 50331648,
+    "decoded_frames": 300
+  },
+  "lowered_cap": {
+    "file_limit_bytes": 33554432,
+    "status": 413,
+    "staging_entries_after": 0
+  }
+}

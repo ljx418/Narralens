@@ -1,10 +1,13 @@
 {
   "format": "narralens.d421-browser-import-evidence@1",
-  "executed_at": "2026-10-16T15:22:02.231Z",
-  "source_commit": "84ecd6dcc2cd567865a7b03483b22c0cccb7176c",
+  "executed_at": "2026-10-16T15:35:09.266Z",
+  "source_commit": "8f7007d8df53ff15ac73fc73c70ddafb25ed5e2a",
   "status": "passed",
   "failures": [],
   "browser": "Chrome for Testing 153.0.8010.12 headless native 200% profile zoom",
+  "viewport_configuration": {
+    "mechanism": "browser-window"
+  },
   "interaction": "file injected through CDP; remaining form path is Tab/text/Enter keyboard input",
   "keyboard": [
     {
@@ -91,10 +94,10 @@
     {
       "action": "Enter 提交",
       "focus": {
-        "tag": "BUTTON",
+        "tag": "BODY",
         "id": null,
-        "type": "submit",
-        "text": "上传中"
+        "type": null,
+        "text": "叙NarralensAI 导演工作台想法精修交付浅深系统REAL PROJECT"
       }
     }
   ],
@@ -135,53 +138,53 @@
     "project_path_visible": false
   },
   "layout": {
-    "viewport_width": 720,
-    "document_width": 712,
+    "viewport_width": 960,
+    "document_width": 952,
     "viewport_height": 528,
-    "document_height": 4314,
+    "document_height": 3635,
     "device_pixel_ratio": 2,
-    "outer_width": 1440,
+    "outer_width": 1920,
     "outer_height": 1200,
     "visual_viewport_scale": 1,
     "core": {
       "form": {
         "x": 32,
-        "y": -170.7734375,
-        "width": 648.5,
-        "height": 802,
-        "top": -170.7734375,
-        "right": 680.5,
-        "bottom": 631.2265625,
+        "y": -138.7734375,
+        "width": 432.25,
+        "height": 662.5,
+        "top": -138.7734375,
+        "right": 464.25,
+        "bottom": 523.7265625,
         "left": 32
       },
       "inventory": {
-        "x": 32,
-        "y": 655.2265625,
-        "width": 648.5,
-        "height": 615.5,
-        "top": 655.2265625,
-        "right": 680.5,
-        "bottom": 1270.7265625,
-        "left": 32
+        "x": 488.25,
+        "y": -138.7734375,
+        "width": 432.25,
+        "height": 662.5,
+        "top": -138.7734375,
+        "right": 920.5,
+        "bottom": 523.7265625,
+        "left": 488.25
       },
       "file": {
         "x": 51,
-        "y": -86.2734375,
-        "width": 610.5,
+        "y": -54.2734375,
+        "width": 394.25,
         "height": 38,
-        "top": -86.2734375,
-        "right": 661.5,
-        "bottom": -48.2734375,
+        "top": -54.2734375,
+        "right": 445.25,
+        "bottom": -16.2734375,
         "left": 51
       },
       "submit": {
         "x": 51,
-        "y": 487.7265625,
-        "width": 610.5,
+        "y": 362.2265625,
+        "width": 126,
         "height": 41,
-        "top": 487.7265625,
-        "right": 661.5,
-        "bottom": 528.7265625,
+        "top": 362.2265625,
+        "right": 177,
+        "bottom": 403.2265625,
         "left": 51
       }
     },
@@ -191,17 +194,17 @@
     "expected_factor": 2,
     "observed_factor_from_dpr": 2,
     "baseline": {
-      "captured_at": "2026-10-16T15:21:37.760Z",
+      "captured_at": "2026-10-16T15:34:32.195Z",
       "browser": "Chrome/153.0.8010.12",
       "url": "http://127.0.0.1:4174/",
       "title": "Narralens · AI 导演工作台",
       "device_pixel_ratio": 1,
-      "viewport_width": 1440,
-      "viewport_height": 1057,
-      "outer_width": 1440,
+      "viewport_width": 1920,
+      "viewport_height": 1200,
+      "outer_width": 1920,
       "outer_height": 1200,
-      "document_width": 1440,
-      "document_height": 2639,
+      "document_width": 1920,
+      "document_height": 2620,
       "visual_viewport_scale": 1,
       "native_zoom_marker": null,
       "native_zoom_error": null
@@ -248,7 +251,7 @@
         "selector": ".frame > span",
         "foreground": "rgb(237, 242, 247)",
         "background": "rgb(9, 13, 18)",
-        "font_size_px": 22,
+        "font_size_px": 28.8,
         "font_weight": 800,
         "minimum": 3,
         "ratio": 17.3,

@@ -13,7 +13,7 @@
     "ui_large_implementation_commit": "3ef11571222b4bff2e49b7f563ffea62ef98dc04",
     "fault_race_implementation_commit": "7872329",
     "browser_gate_implementation_commit": "84775af32950b06c90ed7c2555cf9e46d0c5095c",
-    "migration_m1a_implementation_commit": "84ecd6dcc2cd567865a7b03483b22c0cccb7176c",
+    "migration_m1a_implementation_commit": "8f7007d8df53ff15ac73fc73c70ddafb25ed5e2a",
     "hypit_commit": "6fdd8c0f02c17b9970aee6deb4550a70e9d57acf",
     "hypit_branch": "narralens/d4-typed-media-mutation",
     "worktree_note": "This manifest and status synchronization are finalized by the documentation commit after the implementation commit."
@@ -110,9 +110,9 @@
   "headless_browser_evidence": {
     "automation_constraint": "All automated browser, interaction, accessibility, screenshot and E2E work is Headless, silent, windowless and must not take desktop focus.",
     "browser": "Chrome for Testing 153.0.8010.12 headless",
-    "source_commit": "84ecd6dcc2cd567865a7b03483b22c0cccb7176c",
-    "normal_zoom_artifact": "artifacts/d421-browser-import.json",
-    "normal_zoom_screenshot": "screenshots/browser-import-success.png",
+    "source_commit": "8f7007d8df53ff15ac73fc73c70ddafb25ed5e2a",
+    "normal_zoom_artifact": "artifacts/d421-browser-viewport-1440.json",
+    "normal_zoom_screenshot": "screenshots/d421-browser-viewport-1440.png",
     "normal_zoom_status": "passed",
     "native_200_percent_artifact": "artifacts/d421-browser-zoom-200.json",
     "native_200_percent_screenshot": "screenshots/d421-browser-zoom-200.png",
@@ -133,15 +133,21 @@
     "artifacts/d421-ui-claude-review.md": "c72a9ba9743e31ecd4451e80354438492e4c42c18277f9be51b33f566e4750cf",
     "artifacts/d421-fault-race-claude-review.md": "83037e277accb0e5c989e9ae94034d7b23fcb06b39114ecaef4de2c2f39cd8b4",
     "artifacts/d421-large-upload.json": "e5edb5cf66345e2c487f1f2d2024c6e12342030c930758fe0e38a69fbff694f4",
-    "artifacts/d421-browser-import.json": "193953a286362144e8ef5d78bb8ddd65c9e99fc2b870507afda2872921a71407",
-    "artifacts/d421-browser-zoom-200.json": "58b550ccbe33dd80d5a02d485d9018fdeec4b98fcd109776ef2873395c5a06e3",
+    "artifacts/d421-browser-viewport-360.json": "880364495e27b4c003e0fe6a704855163f36516a2c8b5691f9b69d4032f22b19",
+    "artifacts/d421-browser-viewport-768.json": "d973f28f2a95ea22492c576154614aa9382350d6f429a077806f51d4d6de1261",
+    "artifacts/d421-browser-viewport-1440.json": "622450e9362fa9167275c8650e7c2813f31e8204a3a98a6b57e72d24c65b3708",
+    "artifacts/d421-browser-viewport-1920.json": "2d5a9f5778c5949156d3d0f5de4ec3626a15501b19bffdaa0e1eb7d05e25301c",
+    "artifacts/d421-browser-zoom-200.json": "28c08fcee99a28d7d3e9c267154c54710a4e4ad4ab78c5077ff0d39d26e14301",
     "screenshots/asset-library-360.png": "d963343de29f0824df42fa54f21275a4c7af6ccde05beec8379453ed55888aa7",
     "screenshots/asset-library-768.png": "0b7d6a7e30c4a989a6e884ec0d581e19123ea79de793a33dfac6294a9aee5251",
     "screenshots/asset-library-1440.png": "938bcc7f867473323ac76e19938a3e00336f458ab9c69d24fc9708debdd6b6b5",
     "screenshots/asset-library-1920.png": "c78c5332a7afd2aa499d9ffdb6b2ad526b2ca5d22c22e34284c1c22e14df03b3",
     "screenshots/asset-library-scale-2x.png": "c462c4477371e2792a3f0542a57175af604dc29aeeef501da81e97832702e350",
-    "screenshots/browser-import-success.png": "3e08a2be0ac0081c77d7fe06ac72c2a894809663f19b776cafdc9738a1cf23c7",
-    "screenshots/d421-browser-zoom-200.png": "e8d1108ac186606b65a0c0df3a819c286f4ee7fe12cd6bdc2af1c94d572b09fa"
+    "screenshots/d421-browser-viewport-360.png": "3f6a5f260859f64f73941dc87da6316f72352487c9808b1d3adbd25b9770e14c",
+    "screenshots/d421-browser-viewport-768.png": "029578efcef3ed1cf12c36b9fe5a4c06a988444461e8b113739f7c31d00160a6",
+    "screenshots/d421-browser-viewport-1440.png": "3e08a2be0ac0081c77d7fe06ac72c2a894809663f19b776cafdc9738a1cf23c7",
+    "screenshots/d421-browser-viewport-1920.png": "4960d11d736d62d86002f54b7fc1b0a09676a5be33d9cf5c2788e1eeb9bc3c57",
+    "screenshots/d421-browser-zoom-200.png": "2f4448ed524d14ef0c068083438ee3084e5beccb482563823d719515fa58093a"
   },
   "remaining_scope": [
     "independent read-only external final implementation audit and closure of any resulting findings"
