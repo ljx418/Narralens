@@ -250,7 +250,8 @@ const manifest = {
     { command: "corepack pnpm exec tsx tools/m2.1-external-review-repro.mts symlink-alias", log: "logs/repro-m03.txt", exit_code: 0 },
   ],
   gate_artifacts: ["logs/check.txt", "logs/mutation-gates.txt", "logs/openfilm-probe.txt",
-    "logs/repro-b02.txt", "logs/repro-m03.txt", "logs/environment.txt"].map((path) => ({ path, sha256: sha256File(path) })),
+    "logs/repro-b02.txt", "logs/repro-m03.txt", "logs/environment.txt"]
+    .map((path) => ({ path, sha256: sha256File(resolve(EVIDENCE_ROOT, path)) })),
   code_paths: CODE_PATHS,
   case_count: cases.length,
   passed_count: cases.filter((entry) => entry.status === "PASSED").length,
