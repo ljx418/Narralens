@@ -33,13 +33,17 @@ interface Case {
   artifacts: Array<{ path: string; sha256: string }>;
 }
 
+/** Artifact paths are repository-relative, the same way git records them. */
 const artifact = (path: string): { path: string; sha256: string } => {
   assertTracked(path);
-  return { path, sha256: sha256File(path) };
+  return { path, sha256: sha256File(resolve(path)) };
 };
 
 const frozenSha = git("rev-parse", "HEAD");
-const dirty = git("status", "--porcelain").split("\n").filter((line) => line !== "");
+// The manifest measures dirtiness before it exists; writing it must not count as a change.
+const SELF = "docs/evidence/M2/M2.2/evidence-manifest.json";
+const dirty = git("status", "--porcelain").split("\n")
+  .filter((line) => line.trim() !== "" && !line.includes(SELF));
 
 const cases: Case[] = [
   {

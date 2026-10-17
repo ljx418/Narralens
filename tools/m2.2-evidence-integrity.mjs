@@ -34,9 +34,10 @@ const referenced = [];
 for (const entry of manifest.cases ?? []) {
   for (const artifact of entry.artifacts ?? []) {
     referenced.push(artifact.path);
-    const absolute = resolve(EVIDENCE_ROOT, artifact.path);
+    // Artifact paths are repository-relative; gate logs are relative to the evidence root.
+    const absolute = resolve(artifact.path);
     if (!existsSync(absolute)) { fail(`artifact is missing: ${artifact.path}`); continue; }
-    try { git("ls-files", "--error-unmatch", "--", `${EVIDENCE_ROOT}/${artifact.path}`); }
+    try { git("ls-files", "--error-unmatch", "--", artifact.path); }
     catch { fail(`artifact is not tracked by git: ${artifact.path}`); continue; }
     if (sha256(absolute) !== artifact.sha256) fail(`artifact digest changed: ${artifact.path}`);
   }
