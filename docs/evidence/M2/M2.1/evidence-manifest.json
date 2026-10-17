@@ -3,7 +3,7 @@
   "ticket": "M2.1",
   "title": "EnginePort 与原生写入治理",
   "declaration_ceiling": "M2_1_CONTROL_BOUNDARY_READY",
-  "captured_at": "2026-10-17T10:47:46.559Z",
+  "captured_at": "2026-10-17T10:48:18.390Z",
   "case_count": 20,
   "passed_count": 20,
   "screenshots": [],
@@ -16,7 +16,7 @@
     "M2.1 registers and decides at the gateway, but the gateway is not yet in front of a production write route: this ticket opens no write route, and the only existing write route (POST /api/projects/:id/edits) was already Host-owned via ProjectWriteActor before M2.1. That enforcement point becomes live with M2.2 Coordinator wiring or M4A (ADR-M2.1-001 D-12).",
     "Mocked boundaries: none of the assertions above rely on a mock. The only test doubles are the in-process upstream stub in two OpenFilm unit cases, which are labelled schema_unit and do not close any real gate."
   ],
-  "repo_sha": "488806e788c1c70943d51b887104b4249444862e",
+  "repo_sha": "c63e09d73fbb386fbdd43d474761c6ee787855db",
   "repo_branch": "migration/m2.1-engine-governance",
   "repo_dirty_at_capture": false,
   "frozen_code_sha": "3cdff441abe998d098e1b1a9a7403d667a74cf82",
@@ -40,8 +40,11 @@
   "fixture_manifest_sha256": "c8e5e9dc3009eaa3fc54d0b4a6b230cedce52f641f299594f78ec0c16072446b",
   "review": {
     "internal": "PASS",
-    "internal_record": "reviews/internal-review.md",
-    "external": "REVIEW_PENDING"
+    "internal_record": "reviews/internal-review-round3.md",
+    "external": "REVIEW_PENDING",
+    "external_candidate_sha": "3cdff441abe998d098e1b1a9a7403d667a74cf82",
+    "last_failed_external_candidate_sha": "971d02aac88b8f6f1513cbfa52b91923dd033d56",
+    "rework_implementation_sha": "ee58ab5c6a9d4bbdf05e8ac8a394fd75218cae59"
   },
   "cases": [
     {
@@ -726,7 +729,7 @@
         "package.json, pnpm-lock.yaml, LICENSE and all four loaded modules are pinned in a tracked production lock",
         "a test keeps the production lock consistent with the M1B recorded upstream lock",
         "the real probe tampers with an isolated COPY and is refused with ENGINE_UNAVAILABLE, leaving the original loadable",
-        "mutation MUT-J (digest verification removed) makes this gate fail"
+        "mutation MUT-J (digest verification removed) and MUT-L (git clean verification skipped) both make this gate fail"
       ],
       "artifacts": [
         {
@@ -740,6 +743,10 @@
         {
           "path": "logs/3cdff44/mutation-MUT-J.txt",
           "sha256": "a7bca98abaa7b324960e4bf17f8f1a1b87f09108d2270d13ba3013ec18a5586d"
+        },
+        {
+          "path": "logs/3cdff44/mutation-MUT-L.txt",
+          "sha256": "f70689c837fb9f1fe81a13c707d87a7c7092405cd2f9d5bb9fdc54a26b813e7e"
         }
       ]
     },
@@ -789,9 +796,9 @@
       "commands": [
         {
           "command": "node tools/m2.1-evidence-integrity.mjs",
-          "exit_code": 1,
+          "exit_code": 0,
           "stdout_stderr": "logs/3cdff44/integrity.txt",
-          "stdout_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          "stdout_stderr_sha256": "c68d1a32a8b50865eb4743053db09bcfc9276e5a0eab1242e9069cca14e6a89d"
         }
       ],
       "assertions": [
