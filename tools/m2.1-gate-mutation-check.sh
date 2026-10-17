@@ -178,5 +178,13 @@ cmp -s "$SCRATCH/k-before.ts" "$SCRATCH/k-after.ts" && { echo "MUT-K anchor not 
 run_case MUT-K "Host stops raising attention on an external change" src/host/server.ts \
   tests/m2.1/native-bypass.test.ts "$SCRATCH/k-before.ts" "$SCRATCH/k-after.ts"
 
+# L: inability to prove a clean checkout is treated as success again (R2-M-01).
+cp src/adapters/openfilm/openfilm-upstream.ts "$SCRATCH/l-before.ts"
+sed 's/  if (dirty === null) {/  if (false \&\& dirty === null) {/' \
+  "$SCRATCH/l-before.ts" > "$SCRATCH/l-after.ts"
+cmp -s "$SCRATCH/l-before.ts" "$SCRATCH/l-after.ts" && { echo "MUT-L anchor not found" >&2; exit 2; }
+run_case MUT-L "upstream loader skips clean verification when git status fails" src/adapters/openfilm/openfilm-upstream.ts \
+  tests/m2.1/openfilm-upstream-lock.test.ts "$SCRATCH/l-before.ts" "$SCRATCH/l-after.ts"
+
 echo "SUMMARY cases=$results gates_that_failed_as_required=$bites" | tee -a "$LOG"
 [ "$results" -eq "$bites" ] || exit 1

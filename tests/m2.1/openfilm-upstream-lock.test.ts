@@ -1,4 +1,4 @@
-import { cp, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { chmod, cp, mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { resolve } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
@@ -51,6 +51,25 @@ async function syntheticCheckout(mutate: (root: string) => Promise<void> = async
   return root;
 }
 
+async function checkoutWithPinnedHead(): Promise<string> {
+  const root = await syntheticCheckout();
+  await mkdir(resolve(root, ".git"), { recursive: true });
+  await writeFile(resolve(root, ".git/HEAD"), `${OPENFILM_PIN.full_sha}\n`, "utf8");
+  return root;
+}
+
+async function withFakeGit(body: string, run: (root: string) => Promise<void>): Promise<void> {
+  const bin = await mkdtemp(resolve(tmpdir(), "narralens-fake-git-"));
+  copies.push(bin);
+  const git = resolve(bin, "git");
+  await writeFile(git, `#!/bin/sh\n${body}\n`, "utf8");
+  await chmod(git, 0o755);
+  const previous = process.env.PATH;
+  process.env.PATH = bin;
+  try { await run(await checkoutWithPinnedHead()); }
+  finally { process.env.PATH = previous; }
+}
+
 describe("M-04 pinned OpenFilm checkout verification", () => {
   it("pins every file the loader is about to execute, plus package, lock and licence", () => {
     const files = Object.keys(OPENFILM_PIN.loaded_module_sha256);
@@ -80,6 +99,48 @@ describe("M-04 pinned OpenFilm checkout verification", () => {
     const availability = await openFilmAvailability(root);
     expect(availability.available).toBe(false);
     expect(availability.reason).toMatch(/git HEAD/u);
+  });
+
+  it("fails closed when git status cannot be executed", async () => {
+    const previous = process.env.PATH;
+    process.env.PATH = "/definitely/missing";
+    try {
+      const availability = await openFilmAvailability(await checkoutWithPinnedHead());
+      expect(availability.available).toBe(false);
+      expect(availability.reason).toMatch(/cannot verify.*clean/u);
+      expect(availability.checked).not.toContain("git_clean");
+    } finally { process.env.PATH = previous; }
+  });
+
+  it("fails closed when git status exits non-zero", async () => {
+    await withFakeGit("exit 7", async (root) => {
+      const availability = await openFilmAvailability(root);
+      expect(availability.available).toBe(false);
+      expect(availability.reason).toMatch(/cannot verify.*clean/u);
+    });
+  });
+
+  it("fails closed when git status times out", async () => {
+    await withFakeGit("/bin/sleep 1", async (root) => {
+      const availability = await openFilmAvailability(root, 10);
+      expect(availability.available).toBe(false);
+      expect(availability.reason).toMatch(/cannot verify.*clean/u);
+    });
+  });
+
+  it("rejects a tracked dirty checkout and records git_clean only after a successful check", async () => {
+    await withFakeGit("printf ' M packages/openfilm/studio/server/film.mjs\\n'", async (root) => {
+      const dirty = await openFilmAvailability(root);
+      expect(dirty.available).toBe(false);
+      expect(dirty.reason).toMatch(/local modifications/u);
+      expect(dirty.checked).toContain("git_clean");
+    });
+    await withFakeGit("exit 0", async (root) => {
+      const clean = await openFilmAvailability(root);
+      expect(clean.available).toBe(false);
+      expect(clean.checked).toContain("git_clean");
+      expect(clean.reason).toMatch(/not intact/u);
+    });
   });
 
   it("refuses when the seam module was tampered with", async () => {

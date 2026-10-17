@@ -119,7 +119,7 @@ async function readCheckoutSha(vendorRoot: string): Promise<string | null> {
  * independent facts: the HEAD is the pinned SHA, the checkout has no tracked modifications,
  * and every file this loader is about to execute hashes to its pinned digest.
  */
-export async function openFilmAvailability(vendorRoot: string): Promise<OpenFilmAvailability> {
+export async function openFilmAvailability(vendorRoot: string, gitStatusTimeoutMs = 10_000): Promise<OpenFilmAvailability> {
   const checked: string[] = [];
   let root: string;
   try { root = await realpath(vendorRoot); }
@@ -138,13 +138,15 @@ export async function openFilmAvailability(vendorRoot: string): Promise<OpenFilm
       reason: "pinned OpenFilm checkout is not at the pinned full SHA", checked };
   }
 
-  const dirty = await trackedModifications(root);
-  if (dirty !== null) {
-    checked.push("git_clean");
-    if (dirty.length > 0) {
-      return { available: false, vendor_root: root, observed_sha: observed, expected_sha: OPENFILM_PIN.full_sha,
-        reason: `pinned OpenFilm checkout has local modifications: ${dirty.slice(0, 5).join(", ")}`, checked };
-    }
+  const dirty = await trackedModifications(root, gitStatusTimeoutMs);
+  if (dirty === null) {
+    return { available: false, vendor_root: root, observed_sha: observed, expected_sha: OPENFILM_PIN.full_sha,
+      reason: "cannot verify that the pinned OpenFilm checkout is clean", checked };
+  }
+  checked.push("git_clean");
+  if (dirty.length > 0) {
+    return { available: false, vendor_root: root, observed_sha: observed, expected_sha: OPENFILM_PIN.full_sha,
+      reason: `pinned OpenFilm checkout has local modifications: ${dirty.slice(0, 5).join(", ")}`, checked };
   }
 
   const verdict = await verifyPinnedFiles(root);
@@ -201,9 +203,9 @@ export async function verifyPinnedFiles(root: string): Promise<PinnedFileVerdict
  * Tracked modifications, or `null` when git cannot answer. Fixed argv, never a shell: the
  * caller supplies no command, no flags and no paths of its own.
  */
-async function trackedModifications(root: string): Promise<string[] | null> {
+async function trackedModifications(root: string, timeout: number): Promise<string[] | null> {
   try {
-    const { stdout } = await run("git", ["-C", root, "status", "--porcelain", "--untracked-files=no"], { timeout: 10_000 });
+    const { stdout } = await run("git", ["-C", root, "status", "--porcelain", "--untracked-files=no"], { timeout });
     return stdout.split("\n").map((line) => line.trim()).filter((line) => line !== "");
   } catch { return null; }
 }
