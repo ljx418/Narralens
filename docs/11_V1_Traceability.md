@@ -44,7 +44,7 @@
 | M0 | 现场 SHA、代码/路由/阈值、备份与变更单 | observed | 不改变业务 Gate |
 | M1A | D4.2.1 冻结矩阵逐 case 真实证据与独立外审 | passed（实现 `c0f101b...`；R4 YES） | Headless PASS；headed/human NOT_RUN；不扩张为 D4.2 总 Gate |
 | M1B | 固定 OpenFilm SHA、可编辑 30 秒链路、native 写入口清单与 stale-base 实证 | passed-spike（OpenFilm `e70d9d9...`） | 不写生产 Hypit；可编辑三 clip；生产 translate/block 已由 M2.1 落地为 `NativeMutationRegistry`/`NativeWriteGateway`，M2.1 未提供任何 OpenFilm 写路径 |
-| M2 | EnginePort、单引擎绑定、写入治理、三类锁、持久 Job/SSE/lease、snapshot/journal/回退 | **M2.1 已实现并通过第三轮独立复审**（候选 `3cdff44`，声明上限 `M2_1_CONTROL_BOUNDARY_READY`）；M2.2/M2.3 未开始 | materialize/adopt/impact/migrate-copy/history restore 仍 404；M2.1 不实现 snapshot commit、持久 Job、三类锁闭环；按 Wave 1 进入 M2.2 |
+| M2 | EnginePort、单引擎绑定、写入治理、三类锁、持久 Job/SSE/lease、snapshot/journal/回退 | **M2.1 通过第三轮独立复审**（`3cdff44`，`M2_1_CONTROL_BOUNDARY_READY`）；**M2.2 已实现并内部四视角审查 BLOCKER=0 MAJOR=0**（`5e4c075`，待独立复审）；M2.3 未开始 | materialize/adopt/impact/migrate-copy/history restore 仍 404，虚构 operation 仍 422；AC-005 在 legacy Hypit 路径仍为「提交后捕获 snapshot」，完整 stage→snapshot→指针随 M2.3/M4A 落地 |
 | M3–M5 | 素材化、采用事务、同页原生 Studio UX | not-started | 顺序门禁，不顺跳 |
 | M6 | `Gate V1-P0` | not-started | 不等于 V1-Full |
 | M7A–D | P1 与完整长片证据 | not-started | P0/P1 全绿后才可声明 V1-Full |

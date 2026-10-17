@@ -109,6 +109,11 @@ narralens/
 | `HypitEngineAdapter` | `src/adapters/hypit/hypit-engine-adapter.ts` | EnginePort ↔ 现有 Hypit read/write | **M2.1 已实现**：包装既有 adapter，legacy 合同、入口与测试未改 | AC-019；134 条旧回归全绿 |
 | `OpenFilmAdapter` | `src/adapters/openfilm/openfilm-engine-adapter.ts`、`openfilm-upstream.ts` | EnginePort ↔ 固定上游接缝 | **M2.1 只读实现、独立复审待确认**：固定 HEAD、可证明 clean、package/lock/license/传递模块摘要三层校验；Git clean 无法证明即 `ENGINE_UNAVAILABLE`；OF-06a/b/c 分离真实 upstream、真实 adapter 与合同证据 | 外审 M-04/M-05、R2-M-01 返修基线 `ee58ab5c...` |
 
+| `ProjectCoordinator` | `src/host/projects/project-coordinator.ts` | Host 写入口 → 网关 → 基线 → 锁 → 事务机 → 单事务提交 | **M2.2 已实现、内审通过、待独立复审**：持有单例队列与单一事务机；revision + active_commit + idempotency + outbox 同事务 | `docs/evidence/M2/M2.2/reviews/internal-review.md` |
+| `SnapshotStore` | `src/host/projects/snapshot-store.ts` | source 闭包 → staging → 逐级 fsync → rename → 指针 | **M2.2 已实现**：内容寻址；durability 不可证明则完全不发布 | M2.2 SNAP/DUR |
+| `LockService` | `src/host/projects/lock-service.ts` | 服务端计算受影响锁 + control_revision | **M2.2 已实现**：visual/narration/duration；`preserve` 只作意图记录 | M2.2 LOCK（duration/narration 集成层 `NOT_APPLICABLE_APPROVED`） |
+| `PersistentJobStore` / `Outbox` | `src/host/persistent-job-store.ts`、`src/host/outbox.ts` | CAS lease / 事件 / at-most-once 投递 | **M2.2 已实现**：失 lease 不猜成功；未知费用不记 0；晚到结果 quarantine；重放不重跑 commit | M2.2 JB-01..07 |
+
 状态口径：`已实现` 只覆盖对应 Gate 的证据范围，不外推到完整 V1；`docs-only/待后续` 表示目标明确但尚无生产能力。
 
 ## 6. 核心数据模型
