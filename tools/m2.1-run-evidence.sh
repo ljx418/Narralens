@@ -9,10 +9,15 @@
 set -u
 cd "$(dirname "$0")/.." || exit 1
 
-LOGS="docs/evidence/M2/M2.1/logs"
+# Evidence is written under the commit it was captured at and never overwritten. Earlier
+# captures stay on disk as history, so a manifest always finds the exact log set it digested
+# and a rerun cannot silently invalidate a previous Gate's evidence (M-02).
+CAPTURE_SHA="$(git rev-parse --short HEAD)"
+LOGS="docs/evidence/M2/M2.1/logs/$CAPTURE_SHA"
 ARTIFACTS="docs/evidence/M2/M2.1/artifacts"
-rm -rf "$LOGS"
+if [ -d "$LOGS" ]; then echo "evidence directory $LOGS already exists; remove it or capture from a new commit" >&2; exit 2; fi
 mkdir -p "$LOGS" "$ARTIFACTS" docs/evidence/M2/M2.1/screenshots
+echo "capture_sha=$CAPTURE_SHA"
 
 PINNED_VENDOR="/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm"
 PINNED_PROJECT="/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/spikes/openfilm-m1b/project"

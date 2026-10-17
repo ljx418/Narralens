@@ -27,6 +27,8 @@ interface Manifest {
 }
 
 const manifest = JSON.parse(readFileSync(resolve(`${EVIDENCE_ROOT}/evidence-manifest.json`), "utf8")) as Manifest;
+/** Evidence logs live under the capture commit's short SHA and are never reused. */
+const captureDir = manifest.frozen_code_sha.slice(0, 7);
 const referenced = manifest.cases.flatMap((entry) => [
   ...entry.artifacts.map((artifact) => artifact.path),
   ...entry.commands.map((command) => command.stdout_stderr),
@@ -37,6 +39,12 @@ describe("M-02 evidence integrity", () => {
     expect(manifest.repo_dirty_at_capture).toBe(false);
     expect(manifest.frozen_code_sha).toMatch(/^[a-f0-9]{40}$/u);
     expect(git("cat-file", "-t", manifest.frozen_code_sha)).toBe("commit");
+  });
+
+  it("records logs under the capture commit so a rerun cannot invalidate them", () => {
+    const captured = manifest.cases.flatMap((entry) => entry.commands.map((command) => command.stdout_stderr));
+    for (const path of captured) expect(path.startsWith(`logs/${captureDir}/`), path).toBe(true);
+    expect(existsSync(resolve(`${EVIDENCE_ROOT}/logs/${captureDir}/check.txt`))).toBe(true);
   });
 
   it("references only files that exist, are tracked and match their recorded digest", () => {
