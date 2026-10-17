@@ -1,0 +1,48 @@
+
+ RUN  v3.2.4 /mnt/c/workSpace/videoWorkLine/Narralens
+
+(node:1078360) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/m2.1/native-write-gateway.test.ts (20 tests | 1 failed) 38ms
+   × NativeMutationRegistry completeness > AC-003 registers no unknown policy at all 24ms
+     → timeline.split: expected [ 'translated', …(3) ] to include 'unknown'
+   ✓ NativeMutationRegistry completeness > AC-003 every entry records transport, impact, lock, reason and a test id 3ms
+   ✓ NativeMutationRegistry completeness > AC-003 covers every row of the verified OpenFilm native inventory exactly once 2ms
+   ✓ NativeMutationRegistry completeness > AC-003 the WebSocket / callback row yields no writable entry, so an event cannot trigger a commit 0ms
+   ✓ NativeMutationRegistry completeness > AC-016 every provider and credential entry is blocked 0ms
+   ✓ NativeMutationRegistry completeness > AC-003 only the two already-shipped typed edits and the Host asset import are translated 0ms
+   ✓ NativeWriteGateway decisions > AC-003 translates a known entry to the legacy typed edit with no mapping layer 1ms
+   ✓ NativeWriteGateway decisions > AC-003 routes an asset import to the Host asset service rather than a film edit 0ms
+   ✓ NativeWriteGateway decisions > AC-003 blocks every registered blocked entry with its recorded reason 1ms
+   ✓ NativeWriteGateway decisions > AC-003 passes read_only entries with no typed edit and no security event 2ms
+   ✓ NativeWriteGateway decisions > AC-003 denies an unregistered entry by default and records a security event 0ms
+   ✓ NativeWriteGateway decisions > EN-02.b refuses a write whose capability the engine reports as unverified, whatever the policy 0ms
+   ✓ NativeWriteGateway decisions > AC-002 maps a refusal to a stable HTTP error and refuses to throw on a permitted decision 1ms
+   ✓ NativeWriteGateway decisions > AC-003 refuses a translated entry whose typed intent is incomplete instead of inventing it 0ms
+   ✓ M-01 capability completeness and fail-closed behaviour > every engine-owned registry operation has an entry in the capability map 2ms
+   ✓ M-01 capability completeness and fail-closed behaviour > OpenFilm reports its two film writes as blocked, never as supported 0ms
+   ✓ M-01 capability completeness and fail-closed behaviour > refuses a translated write when the capability map does not report the operation 0ms
+   ✓ M-01 capability completeness and fail-closed behaviour > refuses a translated write when no capability map is supplied at all 0ms
+   ✓ M-01 capability completeness and fail-closed behaviour > still translates when the engine positively reports the capability 0ms
+   ✓ M-01 capability completeness and fail-closed behaviour > expresses asset import as a Host service capability, not an engine write 0ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/m2.1/native-write-gateway.test.ts > NativeMutationRegistry completeness > AC-003 registers no unknown policy at all
+AssertionError: timeline.split: expected [ 'translated', …(3) ] to include 'unknown'
+ ❯ tests/m2.1/native-write-gateway.test.ts:27:48
+     25|     expect(NATIVE_MUTATION_REGISTRY.length).toBeGreaterThan(0);
+     26|     for (const entry of NATIVE_MUTATION_REGISTRY) {
+     27|       expect(ALLOWED_POLICIES, entry.entry_id).toContain(entry.policy);
+       |                                                ^
+     28|       expect((entry.policy as string), entry.entry_id).not.toBe("unkno…
+     29|     }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 19 passed (20)
+   Start at  14:41:03
+   Duration  6.49s (transform 446ms, setup 0ms, collect 3.45s, tests 38ms, environment 0ms, prepare 2.03s)
+

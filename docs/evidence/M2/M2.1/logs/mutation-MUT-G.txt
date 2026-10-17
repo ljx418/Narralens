@@ -1,0 +1,63 @@
+
+ RUN  v3.2.4 /mnt/c/workSpace/videoWorkLine/Narralens
+
+(node:1102679) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/m2.1/native-write-gateway.test.ts (20 tests | 2 failed) 23ms
+   ✓ NativeMutationRegistry completeness > AC-003 registers no unknown policy at all 4ms
+   ✓ NativeMutationRegistry completeness > AC-003 every entry records transport, impact, lock, reason and a test id 2ms
+   ✓ NativeMutationRegistry completeness > AC-003 covers every row of the verified OpenFilm native inventory exactly once 2ms
+   ✓ NativeMutationRegistry completeness > AC-003 the WebSocket / callback row yields no writable entry, so an event cannot trigger a commit 0ms
+   ✓ NativeMutationRegistry completeness > AC-016 every provider and credential entry is blocked 0ms
+   ✓ NativeMutationRegistry completeness > AC-003 only the two already-shipped typed edits and the Host asset import are translated 0ms
+   ✓ NativeWriteGateway decisions > AC-003 translates a known entry to the legacy typed edit with no mapping layer 0ms
+   ✓ NativeWriteGateway decisions > AC-003 routes an asset import to the Host asset service rather than a film edit 0ms
+   ✓ NativeWriteGateway decisions > AC-003 blocks every registered blocked entry with its recorded reason 1ms
+   ✓ NativeWriteGateway decisions > AC-003 passes read_only entries with no typed edit and no security event 0ms
+   ✓ NativeWriteGateway decisions > AC-003 denies an unregistered entry by default and records a security event 0ms
+   ✓ NativeWriteGateway decisions > EN-02.b refuses a write whose capability the engine reports as unverified, whatever the policy 0ms
+   ✓ NativeWriteGateway decisions > AC-002 maps a refusal to a stable HTTP error and refuses to throw on a permitted decision 1ms
+   ✓ NativeWriteGateway decisions > AC-003 refuses a translated entry whose typed intent is incomplete instead of inventing it 0ms
+   ✓ M-01 capability completeness and fail-closed behaviour > every engine-owned registry operation has an entry in the capability map 2ms
+   ✓ M-01 capability completeness and fail-closed behaviour > OpenFilm reports its two film writes as blocked, never as supported 0ms
+   × M-01 capability completeness and fail-closed behaviour > refuses a translated write when the capability map does not report the operation 8ms
+     → Cannot read properties of undefined (reading 'state')
+   × M-01 capability completeness and fail-closed behaviour > refuses a translated write when no capability map is supplied at all 0ms
+     → Cannot read properties of undefined (reading 'state')
+   ✓ M-01 capability completeness and fail-closed behaviour > still translates when the engine positively reports the capability 0ms
+   ✓ M-01 capability completeness and fail-closed behaviour > expresses asset import as a Host service capability, not an engine write 0ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/m2.1/native-write-gateway.test.ts > M-01 capability completeness and fail-closed behaviour > refuses a translated write when the capability map does not report the operation
+TypeError: Cannot read properties of undefined (reading 'state')
+ ❯ NativeWriteGateway.decide src/host/engine/native-write-gateway.ts:100:18
+     98|       return { kind: "blocked", entry, status: 422, code: "UNSUPPORTED…
+     99|     }
+    100|     if (reported.state === "unverified") {
+       |                  ^
+    101|       this.#record({ event: NATIVE_WRITE_DENIED_EVENT, entry_id: entry…
+    102|         reason: "capability is unverified" });
+ ❯ tests/m2.1/native-write-gateway.test.ts:213:18
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/m2.1/native-write-gateway.test.ts > M-01 capability completeness and fail-closed behaviour > refuses a translated write when no capability map is supplied at all
+TypeError: Cannot read properties of undefined (reading 'state')
+ ❯ NativeWriteGateway.decide src/host/engine/native-write-gateway.ts:100:18
+     98|       return { kind: "blocked", entry, status: 422, code: "UNSUPPORTED…
+     99|     }
+    100|     if (reported.state === "unverified") {
+       |                  ^
+    101|       this.#record({ event: NATIVE_WRITE_DENIED_EVENT, entry_id: entry…
+    102|         reason: "capability is unverified" });
+ ❯ tests/m2.1/native-write-gateway.test.ts:219:18
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 18 passed (20)
+   Start at  14:42:00
+   Duration  6.91s (transform 444ms, setup 0ms, collect 3.48s, tests 23ms, environment 0ms, prepare 2.30s)
+

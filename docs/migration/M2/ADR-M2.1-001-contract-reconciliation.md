@@ -193,6 +193,78 @@ M2.1 期间唯一存在的生产写路由仍是既有的 `POST /api/projects/:id
 任何把 M2.1 描述为「所有写入口已在网关后强制治理」的表述都是夸大。证据清单与最终报告
 按此口径书写。
 
+## 5.7 D-13 已提交 digest 基线由 Host 持有，且永不再采样
+
+外审 B-01 指出：`#engine` 每次请求先算当前 digest，再把同一个当前值当作 snapshot 基线传入
+adapter，于是外部变化永远无法被比较，也没有任何代码在 `SOURCE_CHANGED` 上置 attention。
+
+裁决：
+
+- `project_state` 新增 `source_digest`（已提交基线）、`source_digest_observed`、
+  `source_digest_detected_at`。基线**只在项目首次登记时写入**，之后只读不写。
+- adapter 的 `SnapshotRef.source_digest` 为 `""` 表示基线尚未建立；非空时它**就是**基线，
+  不匹配即 `409 SOURCE_CHANGED`。
+- 检测与置 attention 在既有 `ProjectOperationQueue` 的同一项目串行边界内完成，
+  不新建第二 actor/队列。
+- 外部修改后的 source bytes 一律不改写、不自动接受；后续 typed edit 由既有
+  `ProjectWriteActor` 以 `423 PROJECT_ATTENTION_REQUIRED` 拒绝。
+
+## 5.8 D-14 资产闭包哈希当前 bytes；与 manifest 记录不一致时 fail closed
+
+外审 B-02 指出：Hypit 闭包只覆盖 run/narration/manifest，从不读取 manifest 引用的视觉资产，
+因此给 `visual-10s.mp4` 追加一个 byte 后 digest 完全不变。
+
+裁决（两条同时成立，不互相削弱）：
+
+1. 闭包**重新读取**每个被引用资产的当前 bytes 并取其 SHA256，绝不只信 manifest 里的旧值。
+2. 若某个引用资产的 manifest 记录 hash 与磁盘 bytes 不一致，**立即抛错**而不是照旧计算摘要：
+   一个自身内容指纹与实际内容矛盾的 source 无法获得可信 digest。
+   这意味着「manifest 不变、只改资产 bytes」这一外部复现实验的**新**结果是拒绝，
+   而不是「digest 变了」——两者都是安全结果，但拒绝更强，且不会把损坏的 source 当作完整。
+3. 合法重新导入（先安装 bytes、再发布 manifest）照常改变 digest。
+
+## 5.9 D-15 缺失 capability 等价于 unverified
+
+外审 M-01 指出两个 adapter 的 `capabilities()` 都返回 `{}`，而网关只在显式
+`state === "unverified"` 时拦截，缺失条目会被当作可翻译。
+
+裁决：
+
+- 每个引擎对 registry 中**每条引擎自有 operation** 返回显式状态；缺失即视为未报告。
+- 网关 fail closed：未报告的能力、或根本没有传入能力表，一律拒绝，且在查询 registry
+  policy 之前就拒绝。
+- Host service 能力（`asset.import`）单独成表，不混进引擎能力表，避免把 Host 服务
+  冒充成引擎原生写能力。
+
+## 5.10 D-16 固定 SHA 必须同时固定将要执行的 bytes
+
+外审 M-04 指出加载器只读 `.git/HEAD`，于是 HEAD 正确但 `film.mjs` 被本地改过时仍会执行
+被改后的代码，而 `engine_upstream_sha` 仍声称是固定 commit。
+
+裁决：可用性需要三个独立事实同时成立——HEAD 等于固定 SHA、checkout 无 tracked 修改、
+**每一个将被执行或读取的文件**（含 `film.mjs` 及其传递依赖、`package.json`、
+`pnpm-lock.yaml`、`LICENSE`）的 SHA256 等于固定值。固定值存放在被跟踪的生产锁
+`contracts/openfilm-upstream-lock.json`，并由测试保证与 M1B 记录的
+`spikes/openfilm-m1b/upstream-lock.json` 一致（生产代码仍不 import spike）。
+
+## 5.11 D-17 identity 是 realpath，不是引用它的那个路径
+
+外审 M-03 指出 `visited` 以逻辑引用路径为键，导致内部 symlink 与其目标在 manifest 中出现两行。
+
+裁决：roots 在分配 role 之前先 canonical 化；每个引用在去重**之前**解析为 canonical 文件；
+manifest 中每个 canonical path 恰一行。同一文件经若干 alias、相对写法或 symlink 命中只算一次。
+
+## 5.12 D-18 证据必须可从 clone 复现
+
+外审 M-02 指出 manifest 记录的是被 `.gitignore` 排除的 `*.log` 文件 SHA256，
+这些文件不在 `git ls-files` 中，新克隆既取不到也无法核验。
+
+裁决：证据日志改用 `.txt`（stdout 与 stderr 合并记录），并另存 `.cmd` 与 `.exit`；
+`tools/m2.1-evidence-integrity.mjs` 断言每个被引用的文件存在、被 git 跟踪、未被 git-ignore、
+且 SHA256 仍一致，并断言捕获时工作树干净、冻结提交之后没有任何 `src/ tests/ contracts/
+tools/ package.json` 变更。冻结采用两阶段：先提交代码与日志（干净树），再生成绑定该 SHA 的
+manifest，最后单独提交 manifest。
+
 ## 6. 命名与顺序冻结
 
 - 网关模块名统一为 `src/host/engine/native-write-gateway.ts`（导出 `NativeWriteGateway`），

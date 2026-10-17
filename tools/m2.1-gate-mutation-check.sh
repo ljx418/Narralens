@@ -103,9 +103,11 @@ cp src/host/engine/source-digest-v1.ts "$SCRATCH/d-before.ts"
 python3 - "$SCRATCH/d-before.ts" "$SCRATCH/d-after.ts" <<'PY'
 import sys
 text = open(sys.argv[1], encoding="utf-8").read()
-anchor = "  for (const asset of input.declaredAssets ?? []) {\n    const relative = normalizeRelative(asset.path, correlationId);\n    if (assets.some((entry) => entry.path === relative)) continue;"
+anchor = "  for (const asset of input.declaredAssets ?? []) {\n    const relative = normalizeRelative(asset.path, correlationId);\n    const loaded = await read(relative, relative);\n    if (assets.some((entry) => entry.path === loaded.relative)) continue;"
 assert text.count(anchor) == 1, f"MUT-D anchor count {text.count(anchor)}"
-open(sys.argv[2], "w", encoding="utf-8").write(text.replace(anchor, "  for (const asset of [] as readonly DeclaredAsset[]) {\n    const relative = normalizeRelative(asset.path, correlationId);\n    if (assets.some((entry) => entry.path === relative)) continue;", 1))
+mutated = text.replace(anchor, "  for (const asset of [] as readonly DeclaredAsset[]) {\n    const relative = normalizeRelative(asset.path, correlationId);\n    const loaded = await read(relative, relative);\n    if (assets.some((entry) => entry.path === loaded.relative)) continue;", 1)
+assert mutated != text, "MUT-D mutation did not change anything"
+open(sys.argv[2], "w", encoding="utf-8").write(mutated)
 PY
 run_case MUT-D "digest silently skips declared assets" src/host/engine/source-digest-v1.ts \
   tests/m2.1/source-digest-v1.test.ts "$SCRATCH/d-before.ts" "$SCRATCH/d-after.ts"
@@ -132,6 +134,49 @@ open(sys.argv[2], "w", encoding="utf-8").write(text.replace(anchor, "    if (fal
 PY
 run_case MUT-F "stage drops the strict base check" src/adapters/openfilm/openfilm-engine-adapter.ts \
   tests/m2.1/engine-port.test.ts "$SCRATCH/f-before.ts" "$SCRATCH/f-after.ts"
+
+# ── Gates for the external-review rework (M2.1 round 2) ────────────────────────────────
+
+# G: the gateway stops failing closed on an unreported capability (M-01).
+cp src/host/engine/native-write-gateway.ts "$SCRATCH/g-before.ts"
+sed 's/    if (reported === undefined) {/    if (false \&\& reported === undefined) {/' \
+  "$SCRATCH/g-before.ts" > "$SCRATCH/g-after.ts"
+cmp -s "$SCRATCH/g-before.ts" "$SCRATCH/g-after.ts" && { echo "MUT-G anchor not found" >&2; exit 2; }
+run_case MUT-G "gateway stops failing closed on an unreported capability" src/host/engine/native-write-gateway.ts \
+  tests/m2.1/native-write-gateway.test.ts "$SCRATCH/g-before.ts" "$SCRATCH/g-after.ts"
+
+# H: the Hypit closure stops hashing referenced asset bytes (B-02).
+cp src/adapters/hypit/hypit-engine-adapter.ts "$SCRATCH/h-before.ts"
+sed 's/declaredAssets: await this.#referencedAssets(projectId, descriptor),/declaredAssets: [],/' \
+  "$SCRATCH/h-before.ts" > "$SCRATCH/h-after.ts"
+cmp -s "$SCRATCH/h-before.ts" "$SCRATCH/h-after.ts" && { echo "MUT-H anchor not found" >&2; exit 2; }
+run_case MUT-H "Hypit digest stops covering referenced asset bytes" src/adapters/hypit/hypit-engine-adapter.ts \
+  tests/m2.1/native-bypass.test.ts "$SCRATCH/h-before.ts" "$SCRATCH/h-after.ts"
+
+# I: digest identity falls back to the logical reference path (M-03). The load-bearing line is
+# the one that enqueues the canonical path; reverting it reproduces the original duplicate rows.
+cp src/host/engine/source-digest-v1.ts "$SCRATCH/i-before.ts"
+sed 's/queue.push({ relative: target.relative, referrer: item.relative });/queue.push({ relative: resolvedRelative, referrer: item.relative });/' \
+  "$SCRATCH/i-before.ts" > "$SCRATCH/i-after.ts"
+cmp -s "$SCRATCH/i-before.ts" "$SCRATCH/i-after.ts" && { echo "MUT-I anchor not found" >&2; exit 2; }
+run_case MUT-I "digest enqueues the logical reference path instead of the canonical one" src/host/engine/source-digest-v1.ts \
+  tests/m2.1/source-digest-v1.test.ts "$SCRATCH/i-before.ts" "$SCRATCH/i-after.ts"
+
+# J: the upstream loader stops verifying pinned file digests (M-04).
+cp src/adapters/openfilm/openfilm-upstream.ts "$SCRATCH/j-before.ts"
+sed 's/for (const \[relative, expected\] of digests) {/for (const [relative, expected] of [] as Array<[string, string]>) {/' \
+  "$SCRATCH/j-before.ts" > "$SCRATCH/j-after.ts"
+cmp -s "$SCRATCH/j-before.ts" "$SCRATCH/j-after.ts" && { echo "MUT-J anchor not found" >&2; exit 2; }
+run_case MUT-J "upstream loader stops verifying pinned file digests" src/adapters/openfilm/openfilm-upstream.ts \
+  tests/m2.1/openfilm-upstream-lock.test.ts "$SCRATCH/j-before.ts" "$SCRATCH/j-after.ts"
+
+# K: the Host stops raising attention when it detects an external change (B-01).
+cp src/host/server.ts "$SCRATCH/k-before.ts"
+sed 's/this.revisions.recordExternalSourceChange(projectId, "", descriptor.revision);/void descriptor;/' \
+  "$SCRATCH/k-before.ts" > "$SCRATCH/k-after.ts"
+cmp -s "$SCRATCH/k-before.ts" "$SCRATCH/k-after.ts" && { echo "MUT-K anchor not found" >&2; exit 2; }
+run_case MUT-K "Host stops raising attention on an external change" src/host/server.ts \
+  tests/m2.1/native-bypass.test.ts "$SCRATCH/k-before.ts" "$SCRATCH/k-after.ts"
 
 echo "SUMMARY cases=$results gates_that_failed_as_required=$bites" | tee -a "$LOG"
 [ "$results" -eq "$bites" ] || exit 1

@@ -1,7 +1,7 @@
 {
   "format": "narralens.m21-openfilm-probe@1.0",
   "evidence_kind": "real_upstream_probe",
-  "generated_at": "2026-10-17T05:04:27.331Z",
+  "generated_at": "2026-10-17T06:12:57.061Z",
   "upstream": {
     "repository": "https://github.com/openfilm/openfilm.git",
     "full_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
@@ -18,10 +18,21 @@
   "checks": [
     {
       "id": "PIN-01",
-      "assertion": "OpenFilm checkout is at the pinned full SHA",
+      "assertion": "OpenFilm checkout is at the pinned SHA and every loaded file matches its digest",
       "status": "PASS",
       "detail": {
-        "observed_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3"
+        "observed_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+        "checked": [
+          "git_head",
+          "git_clean",
+          "package.json",
+          "pnpm-lock.yaml",
+          "LICENSE",
+          "packages/openfilm/studio/server/film.mjs",
+          "packages/openfilm/studio/server/ops.mjs",
+          "packages/openfilm/studio/server/atomic.mjs",
+          "packages/openfilm/src/film-doc.mjs"
+        ]
       }
     },
     {
@@ -77,10 +88,14 @@
     },
     {
       "id": "OF-02",
-      "assertion": "capabilities reports no supported and no unverified OpenFilm write operation",
+      "assertion": "capabilities is complete and reports no supported or unverified OpenFilm write",
       "status": "PASS",
       "detail": {
-        "entries": {}
+        "operations": 48,
+        "writes": [
+          "timeline.set_visual_fit",
+          "timeline.replace_visual_asset"
+        ]
       }
     },
     {
@@ -123,12 +138,51 @@
       }
     },
     {
-      "id": "OF-06",
-      "assertion": "the upstream still rebases a stale base while Narralens refuses it",
+      "id": "OF-06a",
+      "assertion": "the real pinned upstream rebases a stale base",
       "status": "PASS",
       "detail": {
-        "upstream_rebased_flag": true,
-        "narralens_decision": "SOURCE_CHANGED (409)"
+        "evidence_kind": "real_upstream",
+        "base_rev": "e3498e74c075e623",
+        "result_rev": "3f753182406e5056",
+        "rebased": true
+      }
+    },
+    {
+      "id": "OF-06b",
+      "assertion": "the adapter refuses the same stale base on the real upstream and leaves author bytes untouched",
+      "status": "PASS",
+      "detail": {
+        "evidence_kind": "real_e2e",
+        "status": 409,
+        "code": "SOURCE_CHANGED",
+        "film_sha256": "3f753182406e50567ba21af102b6449cdd3c6898506858f9488e076e3b453618"
+      }
+    },
+    {
+      "id": "OF-06c",
+      "assertion": "an upstream rebased:true result is converted to 409 and never adopted",
+      "status": "PASS",
+      "detail": {
+        "evidence_kind": "adapter_contract",
+        "status": 409,
+        "code": "SOURCE_CHANGED"
+      }
+    },
+    {
+      "id": "PIN-03",
+      "assertion": "a tampered seam module at the pinned SHA is refused with ENGINE_UNAVAILABLE",
+      "status": "PASS",
+      "detail": {
+        "reason": "pinned OpenFilm checkout has local modifications: M packages/openfilm/studio/server/film.mjs"
+      }
+    },
+    {
+      "id": "PIN-04",
+      "assertion": "the original pinned checkout is unaffected by the tamper experiment",
+      "status": "PASS",
+      "detail": {
+        "observed_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3"
       }
     }
   ],

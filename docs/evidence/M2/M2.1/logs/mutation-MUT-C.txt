@@ -1,0 +1,28 @@
+
+ RUN  v3.2.4 /mnt/c/workSpace/videoWorkLine/Narralens
+
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/architecture/m2.1-fitness.test.ts [ tests/architecture/m2.1-fitness.test.ts ]
+RollupError: Parse failure: Expected ';', '}' or <eof>
+At file: /spikes/openfilm-m1b/native-mutation-inventory.md:1:11
+  File: /spikes/openfilm-m1b/native-mutation-inventory.md:1:11
+  1  |  # OpenFilm e70d9d93 原生写入口清单
+     |             ^
+  2  |  
+  3  |  这是 M1B 源码盘点，不代表生产适配器已实现。M2 必须逐项翻译到 Narralens Coordinator 或禁用。
+ ❯ getRollupError node_modules/.pnpm/rollup@4.64.5/node_modules/rollup/dist/es/shared/parseAst.js:319:41
+ ❯ convertProgram node_modules/.pnpm/rollup@4.64.5/node_modules/rollup/dist/es/shared/parseAst.js:1134:26
+ ❯ parseAstAsync node_modules/.pnpm/rollup@4.64.5/node_modules/rollup/dist/es/shared/parseAst.js:2124:106
+ ❯ ssrTransformScript node_modules/.pnpm/vite@7.1.7_@types+node@22.18.6_tsx@4.20.5/node_modules/vite/dist/node/chunks/dep-Bm2ujbhY.js:18890:9
+ ❯ loadAndTransform node_modules/.pnpm/vite@7.1.7_@types+node@22.18.6_tsx@4.20.5/node_modules/vite/dist/node/chunks/dep-Bm2ujbhY.js:26147:64
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  no tests
+   Start at  14:41:14
+   Duration  3.01s (transform 112ms, setup 0ms, collect 0ms, tests 0ms, environment 0ms, prepare 1.80s)
+

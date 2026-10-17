@@ -1,6 +1,6 @@
 === MUT-A: adapter declares a commit method ===
 command: corepack pnpm exec vitest run --config vitest.config.ts tests/architecture/m2.1-fitness.test.ts
-mutation applied (12674 -> 12749 bytes)
+mutation applied (13402 -> 13477 bytes)
 RESULT MUT-A: GATE_BITES (exit 1)
 
 === MUT-B: a registry entry claims an unknown policy ===
@@ -13,19 +13,24 @@ command: corepack pnpm exec vitest run --config vitest.config.ts tests/architect
 mutation applied (19229 -> 19298 bytes)
 RESULT MUT-C: GATE_BITES (exit 1)
 
+Traceback (most recent call last):
+  File "<stdin>", line 4, in <module>
+AssertionError: MUT-D anchor count 0
 === MUT-D: digest silently skips declared assets ===
 command: corepack pnpm exec vitest run --config vitest.config.ts tests/m2.1/source-digest-v1.test.ts
-mutation applied (15674 -> 15678 bytes)
-RESULT MUT-D: GATE_BITES (exit 1)
+Traceback (most recent call last):
+  File "<stdin>", line 7, in <module>
+FileNotFoundError: [Errno 2] No such file or directory: '/tmp/tmp.6Eq9W5yuz5/d-after.ts'
+RESULT MUT-D: GATE_DID_NOT_FAIL (exit 0)
 
 === MUT-E: digest sorts assets against the pinned rule ===
 command: corepack pnpm exec vitest run --config vitest.config.ts tests/m2.1/source-digest-v1.test.ts
-mutation applied (15753 -> 15821 bytes)
+mutation applied (17548 -> 17616 bytes)
 RESULT MUT-E: GATE_BITES (exit 1)
 
 === MUT-F: stage drops the strict base check ===
 command: corepack pnpm exec vitest run --config vitest.config.ts tests/m2.1/engine-port.test.ts
-mutation applied (12674 -> 12683 bytes)
+mutation applied (13402 -> 13411 bytes)
 RESULT MUT-F: GATE_BITES (exit 1)
 
-SUMMARY cases=6 gates_that_failed_as_required=6
+SUMMARY cases=6 gates_that_failed_as_required=5

@@ -1,1 +1,1 @@
-corepack pnpm evidence:m2.1:secret-scan
+corepack pnpm exec tsx tools/secret-scan.ts
