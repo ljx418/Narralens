@@ -1,8 +1,9 @@
 import { HttpError } from "../api-error.js";
-import type { CapabilityMap, TypedEdit } from "../../contracts/engine-types.js";
+import type { CapabilityEntry, CapabilityMap, TypedEdit } from "../../contracts/engine-types.js";
 import {
   NativeMutationRegistry, type NativeMutationEntry, type NativePolicy,
 } from "./native-mutation-registry.js";
+import { unreportedOperations } from "./engine-capabilities.js";
 
 /**
  * NativeWriteGateway (`03_M2_M4_MODULE_DESIGN.md` §1.4, AC-003).
@@ -56,9 +57,23 @@ export class NativeWriteGateway {
    * Decide without throwing so callers can render a reason, and so the deny path is
    * testable in isolation from HTTP.
    */
-  decide(request: NativeWriteRequest, capabilities?: CapabilityMap): GatewayDecision {
+  decide(request: NativeWriteRequest, capabilities?: CapabilityMap,
+    hostServices?: Readonly<Record<string, CapabilityEntry>>): GatewayDecision {
     const entry = this.#registry.find(request.entry_id);
     const transport = request.transport ?? entry?.transport ?? "unknown";
+
+    // A Host service capability is a different thing from an engine write capability, so it
+    // is looked up in its own map rather than in the engine's (M-01).
+    if (entry?.policy === "translated_host_service") {
+      const service = hostServices?.[entry.entry_id.replace(".", "_")];
+      if (service === undefined) {
+        this.#record({ event: NATIVE_WRITE_DENIED_EVENT, entry_id: entry.entry_id, transport,
+          reason: "host service capability is not reported" });
+        return { kind: "blocked", entry, status: 422, code: "UNSUPPORTED_EDIT",
+          reason: `Host service capability is not reported for ${entry.entry_id}` };
+      }
+      return this.#translate(entry, request, transport);
+    }
 
     if (!entry) {
       const decision: GatewayDecision = {
@@ -70,22 +85,38 @@ export class NativeWriteGateway {
       return decision;
     }
 
-    // A capability the engine reports as unverified is refused regardless of policy
-    // (`03_M2_M4_MODULE_DESIGN.md:11`: production write paths do not allow `unverified`).
+    // Fail closed (M-01). An operation the engine has not positively reported is not
+    // permitted: an absent entry means "unknown", and no capability map at all means the
+    // caller could not prove anything. Without this, a missing OpenFilm capability would
+    // inherit Hypit's translated policy from the shared registry.
     const reported = capabilities?.entries[entry.entry_id];
-    if (reported?.state === "unverified") {
+    if (reported === undefined) {
+      const reason = capabilities === undefined
+        ? `No capability map was supplied, so ${entry.entry_id} is unverified`
+        : `Capability is not reported for ${entry.entry_id}, so it is unverified`;
+      this.#record({ event: NATIVE_WRITE_DENIED_EVENT, entry_id: entry.entry_id, transport, reason: "capability unverified" });
+      return { kind: "blocked", entry, status: 422, code: "UNSUPPORTED_EDIT", reason };
+    }
+    if (reported.state === "unverified") {
       this.#record({ event: NATIVE_WRITE_DENIED_EVENT, entry_id: entry.entry_id, transport,
         reason: "capability is unverified" });
       return { kind: "blocked", entry, status: 422, code: "UNSUPPORTED_EDIT",
         reason: `Capability is unverified for ${entry.entry_id}` };
+    }
+    if (entry.policy === "translated" && reported.state !== "supported") {
+      this.#record({ event: NATIVE_WRITE_DENIED_EVENT, entry_id: entry.entry_id, transport,
+        reason: "capability is not supported" });
+      return { kind: "blocked", entry, status: 422, code: "UNSUPPORTED_EDIT",
+        reason: `Engine does not support ${entry.entry_id} (reported ${reported.state})` };
     }
 
     return this.#translate(entry, request, transport);
   }
 
   /** Same decision as `decide`, surfaced as an `HttpError` for the request path. */
-  enforce(request: NativeWriteRequest, capabilities?: CapabilityMap): Exclude<GatewayDecision, { kind: "translated" } | { kind: "translated_host_service" } | { kind: "read_only" }> {
-    const decision = this.decide(request, capabilities);
+  enforce(request: NativeWriteRequest, capabilities?: CapabilityMap,
+    hostServices?: Readonly<Record<string, CapabilityEntry>>): Exclude<GatewayDecision, { kind: "translated" } | { kind: "translated_host_service" } | { kind: "read_only" }> {
+    const decision = this.decide(request, capabilities, hostServices);
     if (decision.kind === "translated" || decision.kind === "translated_host_service" || decision.kind === "read_only") {
       throw new Error(`GATEWAY_ENFORCE_ON_PERMITTED_DECISION:${decision.kind}`);
     }

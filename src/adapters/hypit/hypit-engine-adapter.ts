@@ -11,6 +11,7 @@ import type {
 } from "../../host/engine/engine-port.js";
 import { FPS_30, fpsToLegacyNumber } from "../../host/engine/time-model.js";
 import { computeSourceDigest, type DeclaredAsset } from "../../host/engine/source-digest-v1.js";
+import { hypitCapabilityMap } from "../../host/engine/engine-capabilities.js";
 import type {
   CapabilityMap, EngineClip, EngineProjection, EngineTrack,
 } from "../../contracts/engine-types.js";
@@ -98,9 +99,10 @@ export class HypitEngineAdapter implements EnginePort {
   }
 
   async capabilities(_snapshot: SnapshotRef, _ctx: ReadContext): Promise<CapabilityMap> {
-    // Hypit already passes EN-06 and the credential scan, so its engine-scoped writes are
-    // verified. Transport-level policy lives in the NativeMutationRegistry.
-    return { entries: {}, fps: FPS_30, fps_verified: true };
+    // Hypit passes EN-06 and the credential scan, so the two typed edits the Host already
+    // commits are genuinely supported; every other engine operation stays blocked or
+    // read-only. Transport-level policy lives in the NativeMutationRegistry.
+    return hypitCapabilityMap();
   }
 
   async plan(snapshot: SnapshotRef, intent: EngineEditPlan["edit"], ctx: CommandContext): Promise<EngineEditPlan> {

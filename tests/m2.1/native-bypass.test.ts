@@ -10,6 +10,7 @@ import { RevisionStore } from "../../src/host/projects/revision-store.js";
 import { ProjectWriteActor } from "../../src/host/projects/project-write-actor.js";
 import { InMemoryProjectOperationQueue } from "../../src/host/projects/project-operation-queue.js";
 import { NativeWriteGateway } from "../../src/host/engine/native-write-gateway.js";
+import { hypitCapabilityMap } from "../../src/host/engine/engine-capabilities.js";
 import { computeSourceDigest } from "../../src/host/engine/source-digest-v1.js";
 import type { SnapshotRef } from "../../src/host/engine/engine-port.js";
 import { HypitWriteAdapter } from "../../src/adapters/hypit/hypit-write-adapter.js";
@@ -119,7 +120,7 @@ describe("EN-04 external change detection", () => {
 
   it("treats the file watcher as detection only and never as an accepted write", () => {
     const gateway = new NativeWriteGateway();
-    const decision = gateway.decide({ entry_id: "filewatch.external_change", transport: "filesystem" });
+    const decision = gateway.decide({ entry_id: "filewatch.external_change", transport: "filesystem" }, hypitCapabilityMap());
     expect(decision).toMatchObject({ kind: "read_only" });
     expect(decision).not.toHaveProperty("edit");
     expect(gateway.deniedCount()).toBe(0);

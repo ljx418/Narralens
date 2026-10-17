@@ -2,6 +2,9 @@ import { readFileSync, readdirSync, statSync } from "node:fs";
 import { extname, join, relative, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import { NATIVE_MUTATION_REGISTRY } from "../../src/host/engine/native-mutation-registry.js";
+import {
+  ENGINE_OWNED_OPERATION_IDS, hostServiceCapabilityMap, hypitCapabilityMap, openFilmCapabilityMap,
+} from "../../src/host/engine/engine-capabilities.js";
 import { ERROR_ALIAS_TABLE, ERROR_ALIAS_VERSION } from "../../src/host/engine/error-alias.js";
 import { validatorFor } from "../../src/contracts/validator.js";
 import apiErrorSchema from "../../contracts/api-error.schema.json" with { type: "json" };
@@ -194,10 +197,26 @@ describe("fitness 10-14: stage-specific invariants", () => {
     expect(readFileSync(resolve(REPO, "src/host/engine/source-digest-v1.ts"), "utf8")).not.toMatch(/<base\b/u);
   });
 
-  it("13. an unverified capability outranks any registry policy", () => {
+  it("13. capability is fail-closed and outranks any registry policy (M-01)", () => {
     const gateway = readFileSync(resolve(REPO, "src/host/engine/native-write-gateway.ts"), "utf8");
+    expect(gateway).toContain("const reported = capabilities?.entries[entry.entry_id]");
     expect(gateway).toContain('reported?.state === "unverified"');
-    expect(gateway.indexOf('reported?.state === "unverified"')).toBeLessThan(gateway.indexOf("#translate("));
+    // An unreported capability must be refused before any registry policy is consulted.
+    const guard = gateway.indexOf("if (reported === undefined) {");
+    expect(guard).toBeGreaterThan(-1);
+    expect(guard).toBeLessThan(gateway.indexOf('entry.policy === "translated" && reported.state !== "supported"'));
+    expect(guard).toBeLessThan(gateway.indexOf('reported?.state === "unverified"'));
+  });
+
+  it("13b. engine capability maps cover every engine-owned registry operation", () => {
+    const engineOwned = NATIVE_MUTATION_REGISTRY.filter((entry) => entry.policy !== "translated_host_service");
+    expect(ENGINE_OWNED_OPERATION_IDS).toEqual(engineOwned.map((entry) => entry.entry_id));
+    for (const map of [hypitCapabilityMap(), openFilmCapabilityMap()]) {
+      expect(Object.keys(map.entries).sort()).toEqual([...ENGINE_OWNED_OPERATION_IDS].sort());
+      expect(Object.values(map.entries).some((entry) => entry.state === "unverified")).toBe(false);
+    }
+    expect(Object.values(openFilmCapabilityMap().entries).some((entry) => entry.state === "supported")).toBe(false);
+    expect(Object.keys(hostServiceCapabilityMap().entries)).toEqual(["asset_import"]);
   });
 
   it("14. the binding is re-checked against the pinned upstream on every read", () => {

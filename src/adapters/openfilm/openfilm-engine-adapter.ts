@@ -10,6 +10,7 @@ import {
 } from "../../host/engine/engine-port.js";
 import { FPS_30, rationalFromNumber, secondsToFrame } from "../../host/engine/time-model.js";
 import { computeSourceDigest, type DeclaredAsset } from "../../host/engine/source-digest-v1.js";
+import { openFilmCapabilityMap } from "../../host/engine/engine-capabilities.js";
 import type {
   CapabilityMap, EngineAssetReference, EngineClip, EngineClipKind, EngineProjection,
   EngineSubtitle, EngineTrack, HalfOpenFrameRange,
@@ -181,12 +182,12 @@ export class OpenFilmEngineAdapter implements EnginePort {
   }
 
   /**
-   * M2.1 exposes no OpenFilm write capability, so no entry reports `supported`. Nothing
-   * reports `unverified` either: unverified is reserved for an engine whose evidence is
-   * missing entirely, which fails the binding check before reaching here.
+   * M2.1 exposes no OpenFilm write capability. The map is still complete: every registered
+   * operation gets an explicit state, so a caller cannot read an absent entry as permission
+   * and inherit Hypit's translated policy (M-01).
    */
   async capabilities(_snapshot: SnapshotRef, _ctx: ReadContext): Promise<CapabilityMap> {
-    return { entries: {}, fps: FPS_30, fps_verified: true };
+    return openFilmCapabilityMap();
   }
 
   async plan(snapshot: SnapshotRef, _edit: EngineEditPlan["edit"], ctx: CommandContext): Promise<EngineEditPlan> {
