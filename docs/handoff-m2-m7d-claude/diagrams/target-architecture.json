@@ -1,0 +1,68 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Narralens M2–M7D 目标 L0/L1 架构",
+    "locale": "zh-CN",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "https://github.com/ljx418/Narralens",
+      "provider": "github",
+      "link_mode": "web",
+      "revision": "1eec29062156356d29e5adc5016b5403a4e3002d"
+    },
+    "views": [
+      {
+        "id": "write_path",
+        "label": "受控写入主链",
+        "focus": ["studio", "host_api", "gateway", "coordinator", "engine_port", "openfilm"],
+        "note": "所有原生写入口先经过 Host 校验、锁与提交事务。"
+      },
+      {
+        "id": "state_path",
+        "label": "一致状态与恢复",
+        "focus": ["coordinator", "control_state", "assets"],
+        "note": "单引擎绑定、不可变快照、持久任务和资产事实共同决定可提交状态。"
+      },
+      {
+        "id": "engine_path",
+        "label": "双适配单绑定",
+        "focus": ["engine_port", "openfilm", "hypit", "control_state"],
+        "note": "OpenFilm 是目标默认引擎；Hypit 仅作 legacy/回退，同项目禁止双写。"
+      }
+    ]
+  },
+  "components": [
+    { "id": "user", "type": "external", "label": "创作者", "sublabel": "创作与导出", "pos": [35, 285], "size": [130, 64] },
+    { "id": "studio", "type": "frontend", "label": "Narralens Studio", "sublabel": "叙事地图 + 原生编辑面", "pos": [225, 285], "size": [156, 70], "tag": "M5 目标" },
+    { "id": "host_api", "type": "security", "label": "Host API", "sublabel": "Origin/Auth/合同/能力开关", "pos": [445, 285], "size": [160, 70], "tag": "既有 + 扩展", "sources": [{ "path": "src/host/server.ts", "label": "现有入口" }] },
+    { "id": "gateway", "type": "security", "label": "NativeWriteGateway", "sublabel": "translate 或 fail-closed", "pos": [665, 145], "size": [172, 72], "tag": "M2 新增" },
+    { "id": "coordinator", "type": "backend", "label": "ProjectCoordinator", "sublabel": "base/digest/锁/impact/事务", "pos": [665, 425], "size": [172, 72], "tag": "M2 演进", "sources": [{ "path": "src/host/projects/project-write-actor.ts", "label": "演进基线" }, { "path": "src/host/projects/project-operation-queue.ts", "label": "串行边界" }] },
+    { "id": "engine_port", "type": "backend", "label": "EnginePort", "sublabel": "inspect/plan/stage/render", "pos": [915, 285], "size": [180, 74], "tag": "M2 新增" },
+    { "id": "openfilm", "type": "frontend", "label": "OpenFilmAdapter", "sublabel": "固定 SHA 的原生 UI/渲染", "pos": [1145, 155], "size": [180, 74], "tag": "目标默认" },
+    { "id": "hypit", "type": "backend", "label": "HypitAdapter", "sublabel": "旧工程与回退", "pos": [1145, 415], "size": [180, 74], "tag": "legacy", "sources": [{ "path": "src/adapters/hypit/hypit-write-adapter.ts", "label": "现有写适配器" }] },
+    { "id": "control_state", "type": "database", "label": "Durable Control State", "sublabel": "binding/snapshot/journal/job/outbox", "pos": [665, 635], "size": [205, 72], "tag": "M2 持久化" },
+    { "id": "assets", "type": "database", "label": "AssetRegistry + Lineage", "sublabel": "Manifest@2/许可/依赖摘要", "pos": [915, 455], "size": [190, 72], "tag": "D4.2.1 + M3", "sources": [{ "path": "src/host/projects/asset-registry.ts", "label": "现有资产注册表" }] }
+  ],
+  "boundaries": [
+    { "kind": "security-group", "label": "本机可信 UI 边界", "wraps": ["studio", "host_api"], "pad": 18 },
+    { "kind": "region", "label": "Host 事务与策略边界", "wraps": ["gateway", "coordinator", "engine_port", "control_state", "assets"], "pad": 22 },
+    { "kind": "security-group", "label": "受控引擎适配层", "wraps": ["openfilm", "hypit"], "pad": 18 }
+  ],
+  "connections": [
+    { "from": "user", "to": "studio", "label": "本机交互", "variant": "emphasis" },
+    { "from": "studio", "to": "host_api", "label": "typed HTTP + SSE", "variant": "security", "labelAt": [413, 369] },
+    { "from": "host_api", "to": "gateway", "label": "原生意图", "variant": "security" },
+    { "from": "gateway", "to": "coordinator", "label": "受控 TypedEdit", "variant": "emphasis", "labelAt": [805, 321] },
+    { "from": "coordinator", "to": "engine_port", "label": "plan/stage/validate", "variant": "emphasis" },
+    { "from": "engine_port", "to": "openfilm", "label": "绑定为 openfilm", "variant": "emphasis" },
+    { "from": "engine_port", "to": "hypit", "label": "绑定为 hypit", "variant": "dashed" },
+    { "from": "coordinator", "to": "control_state", "label": "单引擎 + 恰好一次提交", "variant": "security", "fromSide": "bottom", "toSide": "top" },
+    { "from": "assets", "to": "coordinator", "label": "rights + digest + lineage", "variant": "security", "labelAt": [876, 541] }
+  ],
+  "cards": [
+    { "dot": "rose", "title": "不可绕过的不变量", "items": ["同一项目只绑定一个引擎且禁止双写", "native rebase 不能绕过 Narralens 严格 409", "所有导出绑定已提交不可变 snapshot"] },
+    { "dot": "cyan", "title": "演进顺序", "items": ["M2 建立治理、持久化与回退", "M3 只做素材化和 lineage，不写 author source", "M4 才开放采用、历史与恢复闭环"] },
+    { "dot": "emerald", "title": "体验终点", "items": ["M5 在同页连接叙事地图与原生精剪", "M6 只允许声明 Gate V1-P0", "M7A–D 和全部 P1 通过后才可声明 V1-Full"] }
+  ]
+}

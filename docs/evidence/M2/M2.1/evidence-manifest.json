@@ -3,7 +3,7 @@
   "ticket": "M2.1",
   "title": "EnginePort 与原生写入治理",
   "declaration_ceiling": "M2_1_CONTROL_BOUNDARY_READY",
-  "captured_at": "2026-10-17T04:54:14.218Z",
+  "captured_at": "2026-10-17T05:06:41.829Z",
   "case_count": 13,
   "passed_count": 13,
   "screenshots": [],
@@ -13,9 +13,10 @@
     "Gate D4.2 is not closed. Gate V1-P0 and V1-Full are not claimed.",
     "vendor/openfilm is not a registered submodule of this repository; the real upstream evidence comes from the isolated M1B worktree and is not a production integration.",
     "Headed browser automation and human experience are NOT_RUN for this ticket.",
+    "M2.1 registers and decides at the gateway, but the gateway is not yet in front of a production write route: this ticket opens no write route, and the only existing write route (POST /api/projects/:id/edits) was already Host-owned via ProjectWriteActor before M2.1. That enforcement point becomes live with M2.2 Coordinator wiring or M4A (ADR-M2.1-001 D-12).",
     "Mocked boundaries: none of the assertions above rely on a mock. The only test doubles are the in-process upstream stub in two OpenFilm unit cases, which are labelled schema_unit and do not close any real gate."
   ],
-  "repo_sha": "905c4335e3c7a7838d3a2d4132f732707f9a6a08",
+  "repo_sha": "7879e4c2bc4f0131ede65ebbe329bd673903b9ea",
   "repo_branch": "migration/m2.1-engine-governance",
   "repo_dirty_at_capture": true,
   "upstream_shas": {
@@ -36,7 +37,8 @@
   },
   "fixture_manifest_sha256": "c8e5e9dc3009eaa3fc54d0b4a6b230cedce52f641f299594f78ec0c16072446b",
   "review": {
-    "internal": "PENDING",
+    "internal": "PASS",
+    "internal_record": "reviews/internal-review.md",
     "external": "REVIEW_PENDING"
   },
   "cases": [
@@ -73,11 +75,11 @@
       "artifacts": [
         {
           "path": "logs/m21.log",
-          "sha256": "549417bba69b4b8fbddf233afe7d1e384d0ff29d4fcf75eb9bd8325dd58d4556"
+          "sha256": "665849e241a38599853327482809654c24ec16930e904f7a94c1f63b8d389746"
         },
         {
           "path": "logs/check.log",
-          "sha256": "8381f829868eb4f3e5fd683d1a8005dbdac1020dc53bdc086571f7648c417c27"
+          "sha256": "c24fe4532d3b0f4ae9f50cfb5ca89ac19a56bb1ef04c6c1d2b0c1b3cd658edd4"
         }
       ]
     },
@@ -103,7 +105,7 @@
       "artifacts": [
         {
           "path": "logs/m21.log",
-          "sha256": "549417bba69b4b8fbddf233afe7d1e384d0ff29d4fcf75eb9bd8325dd58d4556"
+          "sha256": "665849e241a38599853327482809654c24ec16930e904f7a94c1f63b8d389746"
         }
       ]
     },
@@ -141,15 +143,15 @@
       "artifacts": [
         {
           "path": "logs/m21.log",
-          "sha256": "549417bba69b4b8fbddf233afe7d1e384d0ff29d4fcf75eb9bd8325dd58d4556"
+          "sha256": "665849e241a38599853327482809654c24ec16930e904f7a94c1f63b8d389746"
         },
         {
           "path": "logs/gate-mutation-check.log",
-          "sha256": "68db33977001b5f58a1edc3c9c0319dee8d49c317bff10a2502cdfac81b9c453"
+          "sha256": "f4a724144ae9546025d5ce5d3e768639c35217edac5552a9063b8125bd55d62a"
         },
         {
           "path": "logs/mutation-MUT-B.log",
-          "sha256": "a04bd797644479e720d6c34f6a4f42e8e5256c39990a5a334a9ee6be305b492c"
+          "sha256": "c3c1e3e6e6198687a443c3577a26a8cf0636fb5f4921d96adf3b7cb642b6e603"
         }
       ]
     },
@@ -181,11 +183,11 @@
       "artifacts": [
         {
           "path": "artifacts/openfilm-upstream-probe.json",
-          "sha256": "a27f3be3a9741f25afcb86d76bad15003ac9e0a7687d7ccb1498773822150852"
+          "sha256": "417ab97868174a68cd11d5a200fa1fdc5a93740546844e24e301bfbb4ceb3532"
         },
         {
           "path": "logs/openfilm-probe.log",
-          "sha256": "3bfcff3647e7f2f9cb0147b75748ff3e8bd75e1e4cdb019984321eec2039b3ea"
+          "sha256": "6881134628252638f9ee30649c2aadee0fa3771cf1a03167905eab9984992133"
         }
       ]
     },
@@ -231,15 +233,15 @@
         },
         {
           "path": "artifacts/openfilm-upstream-probe.json",
-          "sha256": "a27f3be3a9741f25afcb86d76bad15003ac9e0a7687d7ccb1498773822150852"
+          "sha256": "417ab97868174a68cd11d5a200fa1fdc5a93740546844e24e301bfbb4ceb3532"
         },
         {
           "path": "logs/mutation-MUT-D.log",
-          "sha256": "22516f238915b21504e3aa1235fe681f9f52eba25e73ecc4f5bfb18963493b87"
+          "sha256": "ee074b1fc795452eb9149b327f703b7bce5618b5680a33d59daa5450e1871513"
         },
         {
           "path": "logs/mutation-MUT-E.log",
-          "sha256": "a1ae1da224162a6dbec56eace29566e7081e1fd62178fcf62ff3347dd5eb392e"
+          "sha256": "d3c1b594105e4373f77db9ea2cd0a2e21e16d594d75109e567a924689bb786b8"
         },
         {
           "path": "../../../../tests/m2.1-golden/source-digest-v1.vectors.json",
@@ -282,15 +284,15 @@
       "artifacts": [
         {
           "path": "security/credential-scan.json",
-          "sha256": "ccb9c4fc1bd088cb18e4ce4cf6bcada4bdb4f008a47a72f12ef636bc86bdbd96"
+          "sha256": "0d76c3fce737cae5b05195c36c572cd40cc8e801b4c9eb035626bf5a816194a7"
         },
         {
           "path": "logs/secret-scan.log",
-          "sha256": "01984307d13a8eea15e9d5401ac3d34eda989e856c51ac8d1a840aa0ca11434d"
+          "sha256": "8eaa0e5f0515a0c792201157241824f89f9699c5a3703ca08b14474bd3eccd6b"
         },
         {
           "path": "logs/mutation-MUT-C.log",
-          "sha256": "3849c41435337b77ffdbda6f34e8ce96a1b8b37aaf5ae232c41fd156534c9010"
+          "sha256": "6532022dd4108aec4db0354b3d15f61553fb319e29671532b67b311c40b78a8a"
         }
       ]
     },
@@ -321,7 +323,7 @@
       "artifacts": [
         {
           "path": "logs/m21.log",
-          "sha256": "549417bba69b4b8fbddf233afe7d1e384d0ff29d4fcf75eb9bd8325dd58d4556"
+          "sha256": "665849e241a38599853327482809654c24ec16930e904f7a94c1f63b8d389746"
         }
       ]
     },
@@ -351,7 +353,7 @@
       "artifacts": [
         {
           "path": "logs/m21.log",
-          "sha256": "549417bba69b4b8fbddf233afe7d1e384d0ff29d4fcf75eb9bd8325dd58d4556"
+          "sha256": "665849e241a38599853327482809654c24ec16930e904f7a94c1f63b8d389746"
         }
       ]
     },
@@ -377,7 +379,7 @@
       "artifacts": [
         {
           "path": "logs/m21.log",
-          "sha256": "549417bba69b4b8fbddf233afe7d1e384d0ff29d4fcf75eb9bd8325dd58d4556"
+          "sha256": "665849e241a38599853327482809654c24ec16930e904f7a94c1f63b8d389746"
         }
       ]
     },
@@ -409,11 +411,11 @@
       "artifacts": [
         {
           "path": "logs/contracts.log",
-          "sha256": "fa8a8293b754ccb661ee6b599f01a7c4f38dcc70772015967d28eae17ff67949"
+          "sha256": "5800787992e98a11dc72c236cd74cfdca7b4740b41459444d4879b38e9202bbd"
         },
         {
           "path": "logs/check.log",
-          "sha256": "8381f829868eb4f3e5fd683d1a8005dbdac1020dc53bdc086571f7648c417c27"
+          "sha256": "c24fe4532d3b0f4ae9f50cfb5ca89ac19a56bb1ef04c6c1d2b0c1b3cd658edd4"
         }
       ]
     },
@@ -445,11 +447,11 @@
       "artifacts": [
         {
           "path": "logs/check.log",
-          "sha256": "8381f829868eb4f3e5fd683d1a8005dbdac1020dc53bdc086571f7648c417c27"
+          "sha256": "c24fe4532d3b0f4ae9f50cfb5ca89ac19a56bb1ef04c6c1d2b0c1b3cd658edd4"
         },
         {
           "path": "logs/build.log",
-          "sha256": "a3bcf6b80628095e4c815a71f54fd5f8ea4b5e55506a275670d013ac99782704"
+          "sha256": "a58cb93a80f7369c253ee162c1af95e71ceefb64a06669463fd79096161f94b3"
         }
       ]
     },
@@ -481,15 +483,15 @@
       "artifacts": [
         {
           "path": "logs/gate-mutation-check.log",
-          "sha256": "68db33977001b5f58a1edc3c9c0319dee8d49c317bff10a2502cdfac81b9c453"
+          "sha256": "f4a724144ae9546025d5ce5d3e768639c35217edac5552a9063b8125bd55d62a"
         },
         {
           "path": "logs/mutation-MUT-A.log",
-          "sha256": "413862d7208dc2ee4ce45d74f6cb79533d2c2b8f5e15e763539bd34707d97a59"
+          "sha256": "1f55a24fd806d7989f045ea52dc16ede1e628874919c23a0cf89461b3fac20e8"
         },
         {
           "path": "logs/mutation-MUT-F.log",
-          "sha256": "48a2daaff5a73848839a88abe48a6fe6abb8ce42e0d975908fe5587d3314f4a5"
+          "sha256": "df7a6a05bf6ab9fc93603c66278b675cc4e2fd5f0d5e16bf6d691d792ed528e8"
         }
       ]
     },
@@ -517,11 +519,11 @@
       "artifacts": [
         {
           "path": "artifacts/openfilm-upstream-probe.json",
-          "sha256": "a27f3be3a9741f25afcb86d76bad15003ac9e0a7687d7ccb1498773822150852"
+          "sha256": "417ab97868174a68cd11d5a200fa1fdc5a93740546844e24e301bfbb4ceb3532"
         },
         {
           "path": "logs/openfilm-probe.log",
-          "sha256": "3bfcff3647e7f2f9cb0147b75748ff3e8bd75e1e4cdb019984321eec2039b3ea"
+          "sha256": "6881134628252638f9ee30649c2aadee0fa3771cf1a03167905eab9984992133"
         }
       ]
     }

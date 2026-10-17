@@ -5,7 +5,7 @@ RESULT MUT-A: GATE_BITES (exit 1)
 
 === MUT-B: a registry entry claims an unknown policy ===
 command: corepack pnpm exec vitest run --config vitest.config.ts tests/m2.1/native-write-gateway.test.ts
-mutation applied (18898 -> 18907 bytes)
+mutation applied (19229 -> 19238 bytes)
 RESULT MUT-B: GATE_BITES (exit 1)
 
 === MUT-C: production code imports a spike ===
@@ -15,7 +15,7 @@ RESULT MUT-C: GATE_BITES (exit 1)
 
 === MUT-D: digest silently skips declared assets ===
 command: corepack pnpm exec vitest run --config vitest.config.ts tests/m2.1/source-digest-v1.test.ts
-mutation applied (15753 -> 15757 bytes)
+mutation applied (15674 -> 15678 bytes)
 RESULT MUT-D: GATE_BITES (exit 1)
 
 === MUT-E: digest sorts assets against the pinned rule ===

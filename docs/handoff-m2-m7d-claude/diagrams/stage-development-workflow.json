@@ -1,0 +1,58 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "Narralens 四波次垂直开发与组合验收",
+    "locale": "zh-CN",
+    "quality_profile": "showcase",
+    "viewBox": [1100, 528],
+    "views": [
+      { "id": "freeze", "label": "一次冻结", "focus": ["scope", "contracts"], "note": "先冻结跨波次架构、合同、验收与禁止项，减少实现期反复改方向。" },
+      { "id": "vertical_waves", "label": "垂直波次", "focus": ["wave1", "wave2", "wave3", "wave4"], "note": "波次内连续实现模块；自动检查点快速失败，不反复等待人工审查。" },
+      { "id": "combined_gates", "label": "组合验收", "focus": ["m2_gate", "m4_gate", "p0_gate", "full_gate"], "note": "每个波次末统一全量回归、真实场景、冻结证据和一次独立外审。" }
+    ]
+  },
+  "lanes": [
+    { "id": "planning", "label": "规格、架构与合同" },
+    { "id": "development", "label": "Claude Code 实现" },
+    { "id": "verification", "label": "验收、证据与独立审查" }
+  ],
+  "phases": [
+    { "id": "freeze_input", "label": "规格与契约一次冻结", "fromCol": 0, "toCol": 1 },
+    { "id": "controlled_runtime", "label": "波次一至二：运行时与采用", "fromCol": 2, "toCol": 3, "variant": "emphasis" },
+    { "id": "product_delivery", "label": "波次三至四：P0 与完整 V1", "fromCol": 4, "toCol": 5, "variant": "security" }
+  ],
+  "mainPath": ["scope", "contracts", "wave1", "m2_gate", "wave2", "m4_gate", "wave3", "p0_gate", "wave4", "full_gate"],
+  "semanticChecks": {
+    "allowedRoots": ["scope"],
+    "allowedTerminals": ["full_gate"],
+    "requiredPaths": [
+      { "from": "scope", "to": "wave1" },
+      { "from": "wave1", "to": "wave3" },
+      { "from": "wave3", "to": "full_gate" }
+    ]
+  },
+  "nodes": [
+    { "id": "scope", "lane": "planning", "col": 0, "type": "frontend", "label": "冻结剩余范围", "sublabel": "PRD、架构、禁止项" },
+    { "id": "contracts", "lane": "planning", "col": 1, "type": "security", "label": "锁定跨波次契约", "sublabel": "API、状态机、Case" },
+    { "id": "wave1", "lane": "development", "col": 2, "type": "backend", "label": "波次一 M2", "sublabel": "受控运行时与回退" },
+    { "id": "m2_gate", "lane": "verification", "col": 2, "type": "security", "label": "M2 组合 Gate", "sublabel": "EN/TM/JB＋旧回归" },
+    { "id": "wave2", "lane": "development", "col": 3, "type": "backend", "label": "波次二：M3＋M4", "sublabel": "素材化到采用恢复" },
+    { "id": "m4_gate", "lane": "verification", "col": 3, "type": "security", "label": "编辑闭环 Gate", "sublabel": "PR/MT/TX 真实链" },
+    { "id": "wave3", "lane": "development", "col": 4, "type": "frontend", "label": "波次三：M5＋M6", "sublabel": "同页 Studio 与 P0" },
+    { "id": "p0_gate", "lane": "verification", "col": 4, "type": "security", "label": "Gate V1-P0", "sublabel": "UX/PF/DL＋人工签署" },
+    { "id": "wave4", "lane": "development", "col": 5, "type": "cloud", "label": "波次四：M7A–D", "sublabel": "P1 Provider 与长片" },
+    { "id": "full_gate", "lane": "verification", "col": 5, "type": "external", "label": "V1-Full Gate", "sublabel": "P0＋P1 完整证据" }
+  ],
+  "edges": [
+    { "from": "scope", "to": "contracts", "variant": "emphasis" },
+    { "from": "contracts", "to": "wave1", "label": "一次开工审查", "variant": "security" },
+    { "from": "wave1", "to": "m2_gate", "route": "drop", "fromSide": "bottom", "toSide": "top" },
+    { "from": "m2_gate", "to": "wave2", "label": "组合 PASS", "variant": "security" },
+    { "from": "wave2", "to": "m4_gate", "route": "drop", "fromSide": "bottom", "toSide": "top" },
+    { "from": "m4_gate", "to": "wave3", "label": "真实闭环 PASS", "variant": "security" },
+    { "from": "wave3", "to": "p0_gate", "route": "drop", "fromSide": "bottom", "toSide": "top" },
+    { "from": "p0_gate", "to": "wave4", "label": "用户批准 P0", "variant": "security" },
+    { "from": "wave4", "to": "full_gate", "variant": "emphasis", "route": "drop", "fromSide": "bottom", "toSide": "top" }
+  ]
+}

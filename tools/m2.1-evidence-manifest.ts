@@ -65,7 +65,7 @@ const base = {
   upstream_shas: { openfilm: OPENFILM_SHA, hypit: HYPIT_SHA },
   environment: env,
   fixture_manifest_sha256: treeSha("tests/fixtures/m2.1/openfilm-project"),
-  review: { internal: "PENDING", external: "REVIEW_PENDING" },
+  review: { internal: "PASS", internal_record: "reviews/internal-review.md", external: "REVIEW_PENDING" },
 };
 
 type Case = Record<string, unknown> & { case_id: string };
