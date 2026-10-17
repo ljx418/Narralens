@@ -200,12 +200,12 @@ describe("fitness 10-14: stage-specific invariants", () => {
   it("13. capability is fail-closed and outranks any registry policy (M-01)", () => {
     const gateway = readFileSync(resolve(REPO, "src/host/engine/native-write-gateway.ts"), "utf8");
     expect(gateway).toContain("const reported = capabilities?.entries[entry.entry_id]");
-    expect(gateway).toContain('reported?.state === "unverified"');
+    expect(gateway).toContain('reported.state === "unverified"');
     // An unreported capability must be refused before any registry policy is consulted.
     const guard = gateway.indexOf("if (reported === undefined) {");
     expect(guard).toBeGreaterThan(-1);
     expect(guard).toBeLessThan(gateway.indexOf('entry.policy === "translated" && reported.state !== "supported"'));
-    expect(guard).toBeLessThan(gateway.indexOf('reported?.state === "unverified"'));
+    expect(guard).toBeLessThan(gateway.indexOf('reported.state === "unverified"'));
   });
 
   it("13b. engine capability maps cover every engine-owned registry operation", () => {
