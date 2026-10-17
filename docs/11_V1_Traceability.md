@@ -104,7 +104,11 @@
   （篡改隔离副本被 `ENGINE_UNAVAILABLE` 拒绝，原 checkout 仍可加载）；生产代码无 `vendor/` 静态 import。
 - 外审返修：B-01/B-02/M-01..M-05 各自的修复提交、失败测试与复验证据见 manifest 的 `ER-*` case；
   外审的两个复现实验现为可执行脚本 `tools/m2.1-external-review-repro.mts`，断言的是修复后的行为。
-- 返修后冻结候选提交：`d5355919ce246afdcff53822b9207b209b241103`（证据捕获于干净树）。
+- 返修后冻结候选提交：`4f2dfea`（证据捕获提交 `172321c831793e4674bbd157468068c16c13bfe7`，
+  证据日志目录 `docs/evidence/M2/M2.1/logs/172321c/`，捕获时工作树干净）。
+  完整性四项检查全通过：26 个被引用文件存在/被跟踪/未被 ignore/摘要一致；捕获环境独立记录干净；
+  冻结提交之后无任何 `src/ tests/ contracts/ tools/ package.json` 变更。
+- 证据按捕获提交分目录保存且永不覆盖，历史捕获保留在 `logs/d535591/`。
   历史候选 `fc3efb4a53e19bca5ad939bd93e40b1af50a428d` 与 `905c4335e3c7a7838d3a2d4132f732707f9a6a08`
   保留不改写。
 - 变异测试：11 条架构门逐条注入违规并确认会失败（MUT-A..MUT-K）；MUT-G..MUT-K 分别覆盖 M-01、B-02、

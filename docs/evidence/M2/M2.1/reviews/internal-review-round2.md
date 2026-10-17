@@ -66,6 +66,17 @@
   不再返回 `file://` 绝对路径；测试断言响应中无 `file://`、无 `/mnt/`、无盘符、无 `project_path`。
 - materialize / impact / adopt / migrate-copy / history restore 仍全部 404，未提前开放。
 
+## 4.1 证据冻结过程（公开记录）
+
+冻结采用「先提交代码与日志、再生成绑定该 SHA 的 manifest、最后单独提交 manifest」三步，
+并记录过程中暴露并修复的三处工具自身缺陷：
+
+1. `git ls-files` 的 pathspec 从仓库根解析，早期按 evidence 根解析导致 manifest 永远无法在干净树上生成。
+2. 证据日志原本被覆盖式重写，使已提交的 manifest 不可解析；改为按捕获提交的短 SHA 分目录且永不覆盖。
+3. 「捕获时是否干净」原先在 manifest 生成时刻测量，于是 manifest 的写入动作本身被算作脏；
+   改为读取捕获环境独立记录的值，并由完整性校验交叉核对。
+4. 证据目录本身在被创建时出现在 `git status` 中，导致每次捕获都自报脏；改为在计数时排除该目录。
+
 ## 5. 内部审查结论
 
 - BLOCKER = 0
