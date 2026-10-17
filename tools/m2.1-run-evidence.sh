@@ -42,7 +42,8 @@ echo "== environment =="
   echo "os=$(uname -sr)"
   echo "git_head=$(git rev-parse HEAD)"
   echo "git_branch=$(git rev-parse --abbrev-ref HEAD)"
-  echo "git_status_porcelain_lines=$(git status --porcelain | wc -l)"
+  # The capture directory being written is not a pre-existing change, so it is excluded.
+  echo "git_status_porcelain_lines=$(git status --porcelain | grep -v '^?? docs/evidence/M2/M2.1/logs/' | wc -l)"
 } > "$LOGS/environment.txt"
 
 echo "== gates =="
