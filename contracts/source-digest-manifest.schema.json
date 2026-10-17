@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://narralens.local/schemas/source-digest-manifest.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["format", "engine", "engine_upstream_sha", "files", "assets"],
+  "properties": {
+    "format": { "const": "narralens.source-digest-manifest@1.0" },
+    "engine": { "enum": ["hypit", "openfilm"] },
+    "engine_upstream_sha": { "type": "string", "pattern": "^[a-f0-9]{40}$" },
+    "files": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["path", "role", "sha256", "size"],
+        "properties": {
+          "path": { "type": "string", "minLength": 1 },
+          "role": { "enum": ["entry", "scene", "html", "js", "css", "subtitle", "settings", "font"] },
+          "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "size": { "type": "integer", "minimum": 0 }
+        }
+      }
+    },
+    "assets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["path", "asset_id", "sha256", "size"],
+        "properties": {
+          "path": { "type": "string", "minLength": 1 },
+          "asset_id": { "type": ["string", "null"] },
+          "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "size": { "type": "integer", "minimum": 0 }
+        }
+      }
+    }
+  }
+}

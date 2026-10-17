@@ -14,7 +14,11 @@
     "recover": "tsx src/host/recover.ts",
     "evidence:d421-large": "tsx tests/evidence/d421-large-upload-evidence.ts",
     "test": "vitest run --config vitest.config.ts",
-    "test:contracts": "vitest run --config vitest.config.ts tests/contracts"
+    "test:contracts": "vitest run --config vitest.config.ts tests/contracts",
+    "test:m2.1": "vitest run --config vitest.config.ts tests/m2.1 tests/architecture",
+    "test:m2.1:golden-vectors": "tsx tests/m2.1-golden/generate-vectors.ts",
+    "test:m2.1:golden-python": "python3 -I tests/m2.1-golden/source-digest-v1.golden.py tests/m2.1-golden/source-digest-v1.vectors.json",
+    "evidence:m2.1:secret-scan": "tsx tools/secret-scan.ts"
   },
   "dependencies": {
     "ajv": "8.18.0",

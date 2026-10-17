@@ -1,0 +1,145 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://narralens.local/schemas/engine-response.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["format", "project_id", "binding", "capabilities", "projection"],
+  "properties": {
+    "format": { "const": "narralens.engine-response@1.0" },
+    "project_id": { "type": "string", "minLength": 1, "pattern": "^[A-Za-z0-9_-]+$" },
+    "binding": { "$ref": "#/$defs/binding" },
+    "capabilities": { "$ref": "#/$defs/capabilityMap" },
+    "projection": { "$ref": "#/$defs/projection" }
+  },
+  "$defs": {
+    "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "commitSha": { "type": "string", "pattern": "^[a-f0-9]{40}$" },
+    "frame": { "type": "integer", "minimum": 0 },
+    "fps": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["num", "den"],
+      "properties": { "num": { "type": "integer", "exclusiveMinimum": 0 }, "den": { "type": "integer", "exclusiveMinimum": 0 } }
+    },
+    "range": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["start_frame", "end_frame_exclusive"],
+      "properties": { "start_frame": { "$ref": "#/$defs/frame" }, "end_frame_exclusive": { "$ref": "#/$defs/frame" } }
+    },
+    "binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["project_id", "engine", "engine_upstream_sha", "binding_version", "created_at", "migrated_from"],
+      "properties": {
+        "project_id": { "type": "string", "minLength": 1 },
+        "engine": { "enum": ["hypit", "openfilm"] },
+        "engine_upstream_sha": { "$ref": "#/$defs/commitSha" },
+        "binding_version": { "type": "integer", "minimum": 1 },
+        "created_at": { "type": "string", "format": "date-time" },
+        "migrated_from": { "type": ["string", "null"] }
+      }
+    },
+    "capabilityMap": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["entries", "fps", "fps_verified"],
+      "properties": {
+        "entries": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["state", "reason"],
+            "properties": {
+              "state": { "enum": ["supported", "blocked", "read_only", "unverified"] },
+              "reason": { "type": "string" }
+            }
+          }
+        },
+        "fps": { "$ref": "#/$defs/fps" },
+        "fps_verified": { "type": "boolean" }
+      }
+    },
+    "clip": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["clip_id", "track_id", "kind", "frame_range", "source_frame_range", "source_ref", "overrides_digest"],
+      "properties": {
+        "clip_id": { "type": "string", "minLength": 1 },
+        "track_id": { "type": "string", "minLength": 1 },
+        "kind": { "enum": ["page", "video", "sound", "still"] },
+        "frame_range": { "$ref": "#/$defs/range" },
+        "source_frame_range": { "anyOf": [{ "$ref": "#/$defs/range" }, { "type": "null" }] },
+        "source_ref": { "type": "string", "minLength": 1 },
+        "overrides_digest": { "anyOf": [{ "$ref": "#/$defs/sha256" }, { "type": "null" }] }
+      }
+    },
+    "track": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["track_id", "index", "clip_ids"],
+      "properties": {
+        "track_id": { "type": "string", "minLength": 1 },
+        "index": { "type": "integer", "minimum": 0 },
+        "clip_ids": { "type": "array", "items": { "type": "string", "minLength": 1 } }
+      }
+    },
+    "projection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["engine", "engine_upstream_sha", "snapshot_id", "project_revision", "control_revision",
+        "source_digest", "fps", "frame_count", "clips", "tracks", "subtitles", "asset_references",
+        "editable_capabilities", "preview", "problems"],
+      "properties": {
+        "engine": { "enum": ["hypit", "openfilm"] },
+        "engine_upstream_sha": { "$ref": "#/$defs/commitSha" },
+        "snapshot_id": { "type": "string", "minLength": 1 },
+        "project_revision": { "type": "integer", "minimum": 0 },
+        "control_revision": { "type": "integer", "minimum": 0 },
+        "source_digest": { "$ref": "#/$defs/sha256" },
+        "fps": { "$ref": "#/$defs/fps" },
+        "frame_count": { "type": "integer", "minimum": 0 },
+        "clips": { "type": "array", "items": { "$ref": "#/$defs/clip" } },
+        "tracks": { "type": "array", "items": { "$ref": "#/$defs/track" } },
+        "subtitles": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["subtitle_id", "source_ref", "content_sha256"],
+            "properties": {
+              "subtitle_id": { "type": "string", "minLength": 1 },
+              "source_ref": { "type": "string", "minLength": 1 },
+              "content_sha256": { "$ref": "#/$defs/sha256" }
+            }
+          }
+        },
+        "asset_references": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["asset_id", "path", "content_sha256"],
+            "properties": {
+              "asset_id": { "type": ["string", "null"] },
+              "path": { "type": "string", "minLength": 1 },
+              "content_sha256": { "$ref": "#/$defs/sha256" }
+            }
+          }
+        },
+        "editable_capabilities": { "$ref": "#/$defs/capabilityMap" },
+        "preview": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "url"],
+          "properties": {
+            "kind": { "enum": ["hypit-studio", "openfilm-studio"] },
+            "url": { "type": "string", "minLength": 1 }
+          }
+        },
+        "problems": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  }
+}

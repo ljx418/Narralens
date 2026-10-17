@@ -18,7 +18,10 @@ import assetManifestSchema from "../../contracts/asset-manifest.schema.json" wit
 import assetImportMetadataSchema from "../../contracts/asset-import-metadata.schema.json" with { type: "json" };
 import assetImportResponseSchema from "../../contracts/asset-import-response.schema.json" with { type: "json" };
 import assetInventoryResponseSchema from "../../contracts/asset-inventory-response.schema.json" with { type: "json" };
+import engineResponseSchema from "../../contracts/engine-response.schema.json" with { type: "json" };
+import sourceDigestManifestSchema from "../../contracts/source-digest-manifest.schema.json" with { type: "json" };
 import type { EditRequest, ProposalBundle, ProposalComparison, ProposalComparisonDraft, ProposalComparisonRequest, ProposalRequest } from "./types.js";
+import type { EngineResponse, SourceDigestManifest } from "./engine-types.js";
 
 const ajv = new Ajv2020({ allErrors: true, strict: true });
 addFormats(ajv);
@@ -26,7 +29,8 @@ for (const schema of [apiErrorSchema, cancelResponseSchema, jobEventSchema, jobR
   projectResponseSchema, proposalBundleSchema, proposalRequestSchema, sessionResponseSchema,
   editOperationSchema, editRequestSchema, editResponseSchema, assetManifestSchema,
   assetImportMetadataSchema, assetImportResponseSchema, assetInventoryResponseSchema,
-  proposalComparisonRequestSchema, proposalComparisonDraftSchema, proposalComparisonSchema]) {
+  proposalComparisonRequestSchema, proposalComparisonDraftSchema, proposalComparisonSchema,
+  engineResponseSchema, sourceDigestManifestSchema]) {
   ajv.addSchema(schema);
 }
 
@@ -49,6 +53,8 @@ export const contractIds = {
   assetImportMetadata: assetImportMetadataSchema.$id,
   assetImportResponse: assetImportResponseSchema.$id,
   assetInventoryResponse: assetInventoryResponseSchema.$id,
+  engineResponse: engineResponseSchema.$id,
+  sourceDigestManifest: sourceDigestManifestSchema.$id,
 } as const;
 
 export function validatorFor(id: string): ValidateFunction {
@@ -118,4 +124,16 @@ export function validateProposalBundle(value: unknown): { ok: true; value: Propo
 
 function formatErrors(errors: ErrorObject[] | null | undefined): string[] {
   return (errors ?? []).map((error) => `${error.instancePath || "/"} ${error.message ?? "is invalid"}`);
+}
+
+export function validateEngineResponse(value: unknown): { ok: true; value: EngineResponse } | { ok: false; errors: string[] } {
+  const validate = validatorFor(contractIds.engineResponse);
+  if (!validate(value)) return { ok: false, errors: formatErrors(validate.errors) };
+  return { ok: true, value: value as EngineResponse };
+}
+
+export function validateSourceDigestManifest(value: unknown): { ok: true; value: SourceDigestManifest } | { ok: false; errors: string[] } {
+  const validate = validatorFor(contractIds.sourceDigestManifest);
+  if (!validate(value)) return { ok: false, errors: formatErrors(validate.errors) };
+  return { ok: true, value: value as SourceDigestManifest };
 }

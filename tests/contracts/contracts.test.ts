@@ -4,9 +4,20 @@ import { contractIds, validateEditRequest, validateProposalBundle, validatePropo
 
 const proposal = JSON.parse(readFileSync(new URL("../../docs/contracts/proposal-bundle.example.json", import.meta.url), "utf8"));
 
+/** The 18 schema ids frozen by D2-D4.2.1, asserted individually so the count can grow
+ *  without any of them silently disappearing (AC-019). */
+const D2_D421_SCHEMA_IDS = [
+  "apiError", "cancelResponse", "jobEvent", "jobResponse", "projectResponse", "proposalBundle",
+  "proposalRequest", "sessionResponse", "editOperation", "editRequest", "editResponse",
+  "assetManifest", "assetImportMetadata", "assetImportResponse", "assetInventoryResponse",
+  "proposalComparisonRequest", "proposalComparisonDraft", "proposalComparison",
+] as const;
+
 describe("API contracts", () => {
   it("registers the D2-D4.0 frozen schemas", () => {
-    expect(Object.keys(contractIds)).toHaveLength(18);
+    // M2.1 adds engineResponse and sourceDigestManifest; the legacy set must stay intact.
+    expect(Object.keys(contractIds)).toHaveLength(20);
+    for (const key of D2_D421_SCHEMA_IDS) expect(contractIds[key]).toBeTypeOf("string");
     for (const id of Object.values(contractIds)) expect(validatorFor(id)).toBeTypeOf("function");
   });
 
