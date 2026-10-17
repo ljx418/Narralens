@@ -1,7 +1,7 @@
 # Narralens V1 规格—架构—开发—验收追踪矩阵
 
 版本：v1.0  
-状态：实际开发已批准；Gate D1、Gate D2、Gate D3、Gate D4.0、Gate D4.1 历史结论保留。D4.2.1 的 M1A 逐编号补证已由独立 Claude Code R4 外审关闭；M1B OpenFilm 隔离技术 spike 也已通过。`CR-MIG-001` 批准的 OpenFilm 目标架构现已到达 M2 开工边界；M2.1 已实现（EnginePort、单引擎绑定、NativeMutationRegistry/Gateway、SourceDigestV1、整数帧时间模型、只读 engine 路由），M2.2/M2.3 未实现，旧 D4.2.2 不得顺跳。M2.1 的出门声明上限是 `M2_1_CONTROL_BOUNDARY_READY`，不等于 M2 完成，更不等于 Gate D4.2、`Gate V1-P0` 或 `V1-Full`。
+状态：实际开发已批准；Gate D1、Gate D2、Gate D3、Gate D4.0、Gate D4.1 历史结论保留。D4.2.1 的 M1A 逐编号补证已由独立 Claude Code R4 外审关闭；M1B OpenFilm 隔离技术 spike 也已通过。`CR-MIG-001` 批准的 OpenFilm 目标架构现已到达 M2 开工边界；M2.1 已形成候选实现，但冻结候选 `fc3efb4a53e19bca5ad939bd93e40b1af50a428d` 被独立 Codex 外审以 `BLOCKER=2 / MAJOR=5` 打回，尚未达到 `M2_1_CONTROL_BOUNDARY_READY`。M2.2/M2.3 未实现，旧 D4.2.2 不得顺跳；更不得宣称 Gate D4.2、`Gate V1-P0` 或 `V1-Full`。
 事实日期：2026-10-17
 
 ## 1. 使用规则
@@ -43,7 +43,7 @@
 | M0 | 现场 SHA、代码/路由/阈值、备份与变更单 | observed | 不改变业务 Gate |
 | M1A | D4.2.1 冻结矩阵逐 case 真实证据与独立外审 | passed（实现 `c0f101b...`；R4 YES） | Headless PASS；headed/human NOT_RUN；不扩张为 D4.2 总 Gate |
 | M1B | 固定 OpenFilm SHA、可编辑 30 秒链路、native 写入口清单与 stale-base 实证 | passed-spike（OpenFilm `e70d9d9...`） | 不写生产 Hypit；可编辑三 clip；生产 translate/block 已由 M2.1 落地为 `NativeMutationRegistry`/`NativeWriteGateway`，M2.1 未提供任何 OpenFilm 写路径 |
-| M2 | EnginePort、单引擎绑定、写入治理、三类锁、持久 Job/SSE/lease、snapshot/journal/回退 | **进行中：M2.1 已实现并内部通过**（`M2_1_CONTROL_BOUNDARY_READY`，未外审）；M2.2/M2.3 未开始 | materialize/adopt 仍 404；M2.1 不实现 snapshot commit、持久 Job、三类锁闭环；下一个允许 ticket 仍是 M2.2 |
+| M2 | EnginePort、单引擎绑定、写入治理、三类锁、持久 Job/SSE/lease、snapshot/journal/回退 | **进行中：M2.1 候选已被独立外审打回**；M2.2/M2.3 未开始 | 先关闭 `external-review-codex.md` 的 2 BLOCKER/5 MAJOR；复审通过后按 Wave 1 连续进入 M2.2 |
 | M3–M5 | 素材化、采用事务、同页原生 Studio UX | not-started | 顺序门禁，不顺跳 |
 | M6 | `Gate V1-P0` | not-started | 不等于 V1-Full |
 | M7A–D | P1 与完整长片证据 | not-started | P0/P1 全绿后才可声明 V1-Full |
@@ -94,7 +94,7 @@
 
 ### Gate M2.1（当前）
 
-- 冻结提交：`905c4335e3c7a7838d3a2d4132f732707f9a6a08`（分支 `migration/m2.1-engine-governance`）。
+- 外审候选：`fc3efb4a53e19bca5ad939bd93e40b1af50a428d`（分支 `migration/m2.1-engine-governance`）；独立 Codex 外审结论 `FAIL_REWORK_REQUIRED`。
 - 证据索引：`docs/evidence/M2/M2.1/evidence-manifest.json`，13 个 case 逐条记录命令、exit code、环境、
   repo/upstream full SHA、fixture hash、断言与 artifact SHA256；不使用测试总数替代逐 case 状态。
 - 全量回归：`corepack pnpm check` exit 0，25 files / 227 tests，`tsc --noEmit` 与生产 `vite build` 通过；
@@ -103,7 +103,7 @@
   含 stale base 409 且 `film.html` bytes 不变；生产代码无 `vendor/` 静态 import。
 - 变异测试：6 条架构门逐条注入违规并确认会失败（MUT-A..MUT-F）。
 - 限制：headed 与人类体验 `NOT_RUN`；`vendor/openfilm` 未登记为 submodule，真实接缝依赖隔离 worktree。
-- 外审：实现会话内部审查已完成；独立外审状态见 evidence manifest 的 `review.external`。
+- 外审：实现会话内部审查已完成；独立外审发现 2 个 BLOCKER、5 个 MAJOR，详见 `docs/evidence/M2/M2.1/reviews/external-review-codex.md`。修复并重新冻结前不得声明出门。
 
 ## 5. 变更控制
 
