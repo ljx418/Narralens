@@ -222,5 +222,13 @@ cmp -s "$SCRATCH/t-before.ts" "$SCRATCH/t-after.ts" && { echo "MUT-T anchor not 
 run_case MUT-T "snapshot stops re-hashing the copied bytes" src/host/projects/snapshot-store.ts \
   tests/m2.2/snapshot-store.test.ts "$SCRATCH/t-before.ts" "$SCRATCH/t-after.ts"
 
+# R: the lock check trusts the client reason text instead of the lock class (M2.2 LOCK).
+cp src/host/projects/lock-service.ts "$SCRATCH/r-before.ts"
+sed 's/        candidate.lock_type === lock.lock_type/        candidate.lock_type === lock.lock_type \&\& lock.reason.includes(candidate.lock_type)/' \
+  "$SCRATCH/r-before.ts" > "$SCRATCH/r-after.ts"
+cmp -s "$SCRATCH/r-before.ts" "$SCRATCH/r-after.ts" && { echo "MUT-R anchor not found" >&2; exit 2; }
+run_case MUT-R "lock check consults the client reason text" src/host/projects/lock-service.ts \
+  tests/m2.2/lock-service.test.ts "$SCRATCH/r-before.ts" "$SCRATCH/r-after.ts"
+
 echo "SUMMARY cases=$results gates_that_failed_as_required=$bites" | tee -a "$LOG"
 [ "$results" -eq "$bites" ] || exit 1

@@ -43,6 +43,22 @@ export type BeginTransactionInput = Pick<ProjectTransactionRow,
   "transaction_id" | "project_id" | "kind" | "correlation_id" | "request_json" | "request_hash" | "base_revision">
   & { createdAt?: Date };
 
+export interface EngineLockRecord {
+  lock_id: string; project_id: string; lock_type: string; scope: string; target_id: string;
+  start_frame: number; end_frame_exclusive: number; owner: string; reason: string;
+  control_revision: number; active: boolean;
+}
+
+function engineLock(row: Record<string, unknown>): EngineLockRecord {
+  return {
+    lock_id: String(row.lock_id), project_id: String(row.project_id), lock_type: String(row.lock_type),
+    scope: String(row.scope), target_id: String(row.target_id ?? ""),
+    start_frame: Number(row.start_frame), end_frame_exclusive: Number(row.end_frame_exclusive),
+    owner: String(row.owner ?? ""), reason: String(row.reason ?? ""),
+    control_revision: Number(row.control_revision), active: Boolean(row.active),
+  };
+}
+
 export interface EngineBindingRecord {
   project_id: string; engine: string; engine_upstream_sha: string;
   binding_version: number; created_at: string; migrated_from: string | null;
@@ -343,6 +359,37 @@ export class RevisionStore {
       this.#db.exec("COMMIT");
     } catch (error) { this.#db.exec("ROLLBACK"); throw error; }
     return this.controlRevision(projectId, initialRevision);
+  }
+
+  // ── locks (M2.2 §5) ────────────────────────────────────────────────────────────────
+
+  upsertLock(row: {
+    lock_id: string; project_id: string; lock_type: string; scope: string; target_id: string;
+    start_frame: number; end_frame_exclusive: number; owner: string; reason: string;
+    control_revision: number; active: boolean; created_at: string; updated_at: string;
+  }): void {
+    this.#db.prepare(`INSERT INTO project_lock(
+      lock_id, project_id, lock_type, scope, target_id, start_frame, end_frame_exclusive,
+      owner, reason, control_revision, active, created_at, updated_at)
+      VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)`)
+      .run(row.lock_id, row.project_id, row.lock_type, row.scope, row.target_id, row.start_frame,
+        row.end_frame_exclusive, row.owner, row.reason, row.control_revision, row.active ? 1 : 0,
+        row.created_at, row.updated_at);
+  }
+
+  deactivateLock(lockId: string, now = new Date()): void {
+    this.#db.prepare("UPDATE project_lock SET active=0, updated_at=? WHERE lock_id=? AND active=1")
+      .run(now.toISOString(), lockId);
+  }
+
+  readLock(lockId: string): EngineLockRecord | undefined {
+    const row = this.#db.prepare("SELECT * FROM project_lock WHERE lock_id=?").get(lockId) as Record<string, unknown> | undefined;
+    return row === undefined ? undefined : engineLock(row);
+  }
+
+  activeLocks(projectId: string): EngineLockRecord[] {
+    return (this.#db.prepare("SELECT * FROM project_lock WHERE project_id=? AND active=1 ORDER BY created_at")
+      .all(projectId) as Array<Record<string, unknown>>).map(engineLock);
   }
 
   // ── engine bindings (folded in from the M2.1 store so there is one database) ──────────
