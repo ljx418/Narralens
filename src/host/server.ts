@@ -13,14 +13,13 @@ import type { ApiError, ProjectResponse, ProposalComparisonRequest } from "../co
 import { HttpError, normalizeError } from "./api-error.js";
 import { AssetImportService } from "./assets/asset-import-service.js";
 import { JobStore } from "./job-store.js";
-import { ProjectCatalog } from "./projects/project-catalog.js";
+import { ProjectCatalog, type ProjectDescriptor } from "./projects/project-catalog.js";
 import { ProjectWriteActor } from "./projects/project-write-actor.js";
 import { InMemoryProjectOperationQueue, type ProjectOperationQueue } from "./projects/project-operation-queue.js";
 import { RevisionStore } from "./projects/revision-store.js";
 import { isAllowedBrowserRequest, tokenMatches } from "./security.js";
 import { EngineBindingStore, upstreamShaFor } from "./engine/engine-binding-store.js";
 import { EngineRegistry } from "./engine/engine-registry.js";
-import { computeSourceDigest } from "./engine/source-digest-v1.js";
 import { HypitEngineAdapter } from "../adapters/hypit/hypit-engine-adapter.js";
 import { HypitReadAdapter } from "../adapters/hypit/hypit-read-adapter.js";
 
@@ -210,20 +209,31 @@ export class NarralensHost {
     if (binding.engine_upstream_sha !== expectedSha) {
       throw new HttpError(423, "PROJECT_ATTENTION_REQUIRED", "Engine binding does not match its pinned upstream");
     }
-    if (typeof descriptor.asset_manifest !== "string" || descriptor.asset_manifest === "") {
-      throw new HttpError(500, "INTERNAL_ERROR", "Project descriptor has no asset manifest");
-    }
-    const digest = await computeSourceDigest({
-      root: this.catalog.descriptorRoot(projectId),
-      roots: [descriptor.run_file, descriptor.narration_asset, descriptor.asset_manifest],
-      engine: resolved.engine,
-      engineUpstreamSha: expectedSha,
-    });
     const state = await this.writes.projectState(projectId);
-    const snapshot = { project_id: projectId, engine: resolved.engine, source_digest: digest.source_digest };
     const ctx = { correlationId: randomBytes(8).toString("hex"), projectId, signal: AbortSignal.timeout(10_000) };
-    const projection = await resolved.port.inspect(snapshot, ctx);
-    const capabilities = await resolved.port.capabilities(snapshot, ctx);
+
+    // The comparison baseline is the digest the Host committed, not the digest this request
+    // happens to observe. Recomputing the current value and passing it as its own baseline
+    // would make an external change undetectable, which is the closure the external review
+    // rejected as B-01. Detection and the attention it raises run inside the existing
+    // per-project serial boundary, so they cannot interleave with a project write.
+    const { projection, capabilities } = await this.operations.run(projectId, async () => {
+      const committed = this.revisions.sourceBaseline(projectId).committed;
+      const snapshot = { project_id: projectId, engine: resolved.engine, source_digest: committed };
+      let read: Awaited<ReturnType<typeof resolved.port.inspect>>;
+      try {
+        read = await resolved.port.inspect(snapshot, ctx);
+      } catch (error) {
+        throw this.#externalChange(projectId, descriptor, error);
+      }
+      const baseline = this.revisions.ensureSourceBaseline(projectId, descriptor.revision, read.source_digest);
+      if (baseline !== read.source_digest) {
+        // The source moved between reading the baseline and reading the projection.
+        throw this.#externalChange(projectId, descriptor,
+          new HttpError(409, "SOURCE_CHANGED", "Project source changed while it was being read"));
+      }
+      return { projection: read, capabilities: await resolved.port.capabilities(snapshot, ctx) };
+    });
     const response: EngineResponse = {
       format: "narralens.engine-response@1.0",
       project_id: projectId,
@@ -234,6 +244,17 @@ export class NarralensHost {
     const validated = validateEngineResponse(response);
     if (!validated.ok) throw new HttpError(500, "INTERNAL_ERROR", "Engine response does not satisfy its contract");
     return validated.value;
+  }
+
+  /**
+   * Turn an adapter's refusal into a durable, visible condition. Attention is raised on the
+   * project's own serial boundary; the external bytes are never rewritten and the baseline
+   * is never re-sampled, so the condition stays visible until an explicit recovery.
+   */
+  #externalChange(projectId: string, descriptor: ProjectDescriptor, error: unknown): unknown {
+    if (!(error instanceof HttpError) || error.code !== "SOURCE_CHANGED") return error;
+    this.revisions.recordExternalSourceChange(projectId, "", descriptor.revision);
+    return error;
   }
 
   async #project(projectId: string): Promise<ProjectResponse> {

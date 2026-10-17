@@ -57,7 +57,11 @@ export class RevisionStore {
     this.#db.exec(`
       CREATE TABLE IF NOT EXISTS project_state (
         project_id TEXT PRIMARY KEY, revision INTEGER NOT NULL, visual_locked INTEGER NOT NULL DEFAULT 0,
-        attention INTEGER NOT NULL DEFAULT 0, updated_at TEXT NOT NULL
+        attention INTEGER NOT NULL DEFAULT 0,
+        source_digest TEXT NOT NULL DEFAULT '',
+        source_digest_observed TEXT NOT NULL DEFAULT '',
+        source_digest_detected_at TEXT NOT NULL DEFAULT '',
+        updated_at TEXT NOT NULL
       );
       CREATE TABLE IF NOT EXISTS edit_journal (
         transaction_id TEXT PRIMARY KEY, project_id TEXT NOT NULL, correlation_id TEXT NOT NULL,
@@ -91,6 +95,54 @@ export class RevisionStore {
     if (!columns.some((column) => column.name === "manifest_sha")) {
       this.#db.exec("ALTER TABLE edit_journal ADD COLUMN manifest_sha TEXT NOT NULL DEFAULT ''");
     }
+    const stateColumns = this.#db.prepare("PRAGMA table_info(project_state)").all() as Array<{ name: string }>;
+    for (const column of ["source_digest", "source_digest_observed", "source_digest_detected_at"]) {
+      if (!stateColumns.some((existing) => existing.name === column)) {
+        this.#db.exec(`ALTER TABLE project_state ADD COLUMN ${column} TEXT NOT NULL DEFAULT ''`);
+      }
+    }
+  }
+
+  /**
+   * The committed source digest for a project, recorded once and never re-sampled.
+   *
+   * A read must compare the current source against THIS value. Recording the current value
+   * as its own comparison baseline would make an external change undetectable, which is the
+   * failure mode the external review raised as B-01. The baseline is what M2.2's commit
+   * record will own; here it is established when the project is first registered.
+   */
+  ensureSourceBaseline(projectId: string, initialRevision: number, digest: string): string {
+    this.ensureProject(projectId, initialRevision);
+    const row = this.#db.prepare("SELECT source_digest FROM project_state WHERE project_id=?").get(projectId) as { source_digest?: string };
+    const existing = row.source_digest ?? "";
+    if (existing !== "") return existing;
+    this.#db.prepare("UPDATE project_state SET source_digest=?, updated_at=? WHERE project_id=? AND source_digest=''")
+      .run(digest, new Date().toISOString(), projectId);
+    const committed = this.#db.prepare("SELECT source_digest FROM project_state WHERE project_id=?").get(projectId) as { source_digest: string };
+    return committed.source_digest;
+  }
+
+  /**
+   * Record an out-of-band source change and raise attention in one transaction. The
+   * committed baseline is left untouched so the condition stays visible until recovery.
+   */
+  recordExternalSourceChange(projectId: string, observedDigest: string, initialRevision: number): void {
+    this.ensureProject(projectId, initialRevision);
+    this.#db.exec("BEGIN IMMEDIATE");
+    try {
+      this.#db.prepare(`UPDATE project_state
+        SET attention=1, source_digest_observed=?, source_digest_detected_at=?, updated_at=?
+        WHERE project_id=?`).run(observedDigest, new Date().toISOString(), new Date().toISOString(), projectId);
+      this.#db.exec("COMMIT");
+    } catch (error) { this.#db.exec("ROLLBACK"); throw error; }
+  }
+
+  sourceBaseline(projectId: string): { committed: string; observed: string; detected_at: string } {
+    const row = this.#db.prepare("SELECT source_digest, source_digest_observed, source_digest_detected_at FROM project_state WHERE project_id=?")
+      .get(projectId) as Record<string, unknown> | undefined;
+    if (!row) return { committed: "", observed: "", detected_at: "" };
+    return { committed: String(row.source_digest ?? ""), observed: String(row.source_digest_observed ?? ""),
+      detected_at: String(row.source_digest_detected_at ?? "") };
   }
 
   ensureProject(projectId: string, initialRevision: number): void {

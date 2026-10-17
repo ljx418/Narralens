@@ -1,3 +1,6 @@
+import { createHash } from "node:crypto";
+import { readFile, realpath } from "node:fs/promises";
+import { resolve, sep } from "node:path";
 import { HttpError } from "../../host/api-error.js";
 import {
   HYPIT_UPSTREAM_SHA,
@@ -7,7 +10,7 @@ import type {
   PreviewDescriptor, ReadContext, RenderProfile, SnapshotRef, StagedSource, ValidationReport,
 } from "../../host/engine/engine-port.js";
 import { FPS_30, fpsToLegacyNumber } from "../../host/engine/time-model.js";
-import { computeSourceDigest } from "../../host/engine/source-digest-v1.js";
+import { computeSourceDigest, type DeclaredAsset } from "../../host/engine/source-digest-v1.js";
 import type {
   CapabilityMap, EngineClip, EngineProjection, EngineTrack,
 } from "../../contracts/engine-types.js";
@@ -56,8 +59,11 @@ export class HypitEngineAdapter implements EnginePort {
     if (fpsToLegacyNumber(fps) !== descriptor.frame_rate) {
       throw new HttpError(422, "INVALID_MEDIA", "Project frame rate does not match the verified target specification", undefined, ctx.correlationId);
     }
+    // An empty `source_digest` means the Host has not established a committed baseline yet;
+    // this read establishes it. Otherwise the snapshot's digest IS the committed baseline
+    // and a mismatch is an external change, never a silent re-baseline.
     const digest = await this.sourceDigestFor(snapshot.project_id, descriptor);
-    if (digest.source_digest !== snapshot.source_digest) {
+    if (snapshot.source_digest !== "" && digest.source_digest !== snapshot.source_digest) {
       throw new HttpError(409, "SOURCE_CHANGED", "Project source changed since the snapshot was taken", undefined, ctx.correlationId);
     }
     const clips: EngineClip[] = descriptor.shots.map((shot) => ({
@@ -149,13 +155,54 @@ export class HypitEngineAdapter implements EnginePort {
     throw new HttpError(404, "CAPABILITY_NOT_ENABLED", "Snapshot-bound render opens in M6");
   }
 
-  async sourceDigestFor(projectId: string, descriptor: ProjectDescriptor) {
+  async sourceDigestFor(projectId: string, descriptor: ProjectDescriptor, correlationId?: string) {
     return await computeSourceDigest({
       root: this.#catalog.descriptorRoot(projectId),
-      roots: hypitDigestRoots(descriptor),
+      roots: hypitDigestRoots(descriptor, correlationId),
       engine: "hypit",
       engineUpstreamSha: this.#engineUpstreamSha,
-    });
+      declaredAssets: await this.#referencedAssets(projectId, descriptor),
+    }, correlationId);
+  }
+
+  /**
+   * B-02: the assets the project's manifest actually references.
+   *
+   * The manifest records a sha256 for each asset, but a recorded hash is a claim, not a
+   * fact: a referenced visual asset can be replaced, truncated or corrupted on disk while
+   * the manifest is untouched. The closure therefore re-reads every referenced file and
+   * hashes the bytes that are actually there. A manifest entry whose recorded hash
+   * disagrees with the bytes on disk is a source that cannot be trusted, so it fails
+   * closed rather than being digested as if it were intact.
+   */
+  async #referencedAssets(projectId: string, descriptor: ProjectDescriptor): Promise<DeclaredAsset[]> {
+    const manifestPath = descriptor.asset_manifest;
+    if (typeof manifestPath !== "string" || manifestPath === "") return [];
+    const root = await realpath(this.#catalog.descriptorRoot(projectId));
+    let parsed: unknown;
+    try { parsed = JSON.parse(await readFile(resolve(root, manifestPath), "utf8")); }
+    catch { throw new HttpError(422, "UNSUPPORTED_EDIT", "SOURCE_MANIFEST_UNREADABLE: asset manifest is unreadable"); }
+    if (!parsed || typeof parsed !== "object" || !Array.isArray((parsed as { assets?: unknown }).assets)) {
+      throw new HttpError(422, "UNSUPPORTED_EDIT", "SOURCE_MANIFEST_UNREADABLE: asset manifest has no assets array");
+    }
+    const referenced: DeclaredAsset[] = [];
+    for (const entry of (parsed as { assets: unknown[] }).assets) {
+      if (!entry || typeof entry !== "object") {
+        throw new HttpError(422, "UNSUPPORTED_EDIT", "SOURCE_MANIFEST_UNREADABLE: asset manifest entry is not an object");
+      }
+      const record = entry as { project_path?: unknown; sha256?: unknown; asset_id?: unknown };
+      if (typeof record.project_path !== "string" || record.project_path === "") {
+        throw new HttpError(422, "UNSUPPORTED_EDIT", "SOURCE_MANIFEST_UNREADABLE: asset entry has no project_path");
+      }
+      const assetId = typeof record.asset_id === "string" && record.asset_id !== "" ? record.asset_id : null;
+      const actual = await hashProjectAsset(root, record.project_path);
+      if (typeof record.sha256 === "string" && record.sha256 !== "" && record.sha256 !== actual) {
+        throw new HttpError(422, "SOURCE_CHANGED",
+          `SOURCE_MANIFEST_MISMATCH: ${record.project_path} does not match its recorded hash`);
+      }
+      referenced.push({ path: record.project_path, asset_id: assetId ?? record.project_path });
+    }
+    return referenced;
   }
 
 }
@@ -170,4 +217,22 @@ function hypitDigestRoots(descriptor: ProjectDescriptor, correlationId?: string)
     throw new HttpError(500, "INTERNAL_ERROR", "Project descriptor has no asset manifest", undefined, correlationId);
   }
   return [descriptor.run_file, descriptor.narration_asset, descriptor.asset_manifest];
+}
+
+/**
+ * Hash the bytes a manifest entry points at, right now. A missing file or a path that
+ * leaves the project root fails closed: an asset the source references but cannot be read
+ * is a hole in the closure, not a detail to skip.
+ */
+async function hashProjectAsset(root: string, relativePath: string): Promise<string> {
+  if (relativePath.startsWith("/") || relativePath.includes("\\") || relativePath.split("/").includes("..")) {
+    throw new HttpError(422, "UNSUPPORTED_EDIT", `SOURCE_PATH_ESCAPE: ${relativePath}`);
+  }
+  const candidate = await realpath(resolve(root, relativePath)).catch(() => {
+    throw new HttpError(422, "UNSUPPORTED_EDIT", `SOURCE_REFERENCE_UNRESOLVED: ${relativePath}`);
+  });
+  if (candidate !== root && !candidate.startsWith(`${root}${sep}`)) {
+    throw new HttpError(422, "UNSUPPORTED_EDIT", `SOURCE_PATH_ESCAPE: ${relativePath}`);
+  }
+  return createHash("sha256").update(await readFile(candidate)).digest("hex");
 }
