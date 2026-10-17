@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { execFileSync, execSync } from "node:child_process";
-import { readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import { join, relative, resolve } from "node:path";
 
 /**
@@ -14,11 +14,32 @@ import { join, relative, resolve } from "node:path";
  */
 
 const EVIDENCE_ROOT = resolve("docs/evidence/M2/M2.1");
-/** Logs live under the short SHA of the commit they were captured at and are never reused. */
-const CAPTURE_DIR = readFileSync(resolve("docs/evidence/M2/M2.1/logs/environment.txt"), "utf8")
-  .split("\n").find((line) => line.startsWith("git_head="))?.slice("git_head=".length).trim().slice(0, 7) ?? "";
-const LOG_DIR = `logs/${CAPTURE_DIR}`;
-if (CAPTURE_DIR === "") throw new Error("evidence environment.txt does not record a git_head");
+
+/**
+ * Logs live under the short SHA of the commit they were captured at and are never reused, so
+ * a rerun cannot invalidate an earlier candidate's evidence. The capture directory is the
+ * most recent committed capture that is an ancestor of HEAD: directory names are short SHAs,
+ * so a lexicographic sort would pick the wrong one.
+ */
+const LOG_ROOT = resolve("docs/evidence/M2/M2.1/logs");
+const distanceToHead = (sha: string): number => {
+  try { return Number.parseInt(execSync(`git rev-list --count ${sha}..HEAD`, { encoding: "utf8" }).trim(), 10); }
+  catch { return Number.POSITIVE_INFINITY; }
+};
+const captureDirName = readdirSync(LOG_ROOT)
+  .filter((entry) => statSync(resolve(LOG_ROOT, entry)).isDirectory())
+  .map((entry) => {
+    const environmentPath = resolve(LOG_ROOT, entry, "environment.txt");
+    const head = existsSync(environmentPath)
+      ? readFileSync(environmentPath, "utf8").split("\n").find((line) => line.startsWith("git_head="))?.slice("git_head=".length).trim()
+      : undefined;
+    return { entry, head, distance: head === undefined ? Number.POSITIVE_INFINITY : distanceToHead(head) };
+  })
+  .filter((candidate) => candidate.head !== undefined && Number.isFinite(candidate.distance))
+  .sort((left, right) => left.distance - right.distance)[0]?.entry;
+if (captureDirName === undefined) throw new Error("no committed capture log directory is an ancestor of HEAD");
+const LOG_DIR = `logs/${captureDirName}`;
+const CAPTURE_DIR = captureDirName;
 const OPENFILM_SHA = "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3";
 const HYPIT_SHA = "6fdd8c0f02c17b9970aee6deb4550a70e9d57acf";
 
@@ -115,7 +136,7 @@ const cases: Case[] = [
       "the projection reports 3 stable clip ids, integer half-open ranges 0-300/300-600/600-900 and fps 30/1",
       "the legacy 134-test D2-D4.2.1 suite still passes unchanged",
     ],
-    artifacts: artifacts("docs/evidence/M2/M2.1/logs/" + CAPTURE_DIR + "/" + CAPTURE_DIR + "/m21.txt", "docs/evidence/M2/M2.1/logs/" + CAPTURE_DIR + "/check.txt"),
+    artifacts: artifacts("docs/evidence/M2/M2.1/logs/" + CAPTURE_DIR + "/m21.txt", "docs/evidence/M2/M2.1/logs/" + CAPTURE_DIR + "/check.txt"),
   },
   {
     case_id: "EN-01.a",
@@ -128,7 +149,7 @@ const cases: Case[] = [
       "a binding whose engine_upstream_sha differs from the pinned upstream throws PROJECT_ATTENTION_REQUIRED",
       "the store exposes no migration mutator, because that belongs to M2.3",
     ],
-    artifacts: artifacts("docs/evidence/M2/M2.1/logs/" + CAPTURE_DIR + "/" + CAPTURE_DIR + "/m21.txt"),
+    artifacts: artifacts("docs/evidence/M2/M2.1/logs/" + CAPTURE_DIR + "/m21.txt"),
   },
   {
     case_id: "EN-02",
@@ -145,7 +166,7 @@ const cases: Case[] = [
       "materialize, adopt, impact, migrate-copy and history restore all answer 404",
       "mutation MUT-B (an entry forced to policy=unknown) makes this gate fail, so the gate bites",
     ],
-    artifacts: artifacts("docs/evidence/M2/M2.1/logs/" + CAPTURE_DIR + "/" + CAPTURE_DIR + "/m21.txt",
+    artifacts: artifacts("docs/evidence/M2/M2.1/logs/" + CAPTURE_DIR + "/m21.txt",
       "docs/evidence/M2/M2.1/logs/" + CAPTURE_DIR + "/mutation-gates.txt",
       "docs/evidence/M2/M2.1/logs/" + CAPTURE_DIR + "/mutation-MUT-B.txt"),
   },
@@ -178,7 +199,7 @@ const cases: Case[] = [
       "against the real pinned upstream, a stale base is refused with 409 before the mutator runs and film.html is unchanged",
       "mutation MUT-D (declared assets silently skipped) and MUT-E (assets sorted) both make this gate fail",
     ],
-    artifacts: artifacts("docs/evidence/M2/M2.1/logs/" + CAPTURE_DIR + "/" + CAPTURE_DIR + "/golden-python.txt",
+    artifacts: artifacts("docs/evidence/M2/M2.1/logs/" + CAPTURE_DIR + "/golden-python.txt",
       "docs/evidence/M2/M2.1/artifacts/openfilm-upstream-probe.json",
       "docs/evidence/M2/M2.1/logs/" + CAPTURE_DIR + "/mutation-MUT-D.txt",
       "docs/evidence/M2/M2.1/logs/" + CAPTURE_DIR + "/mutation-MUT-E.txt",
@@ -217,7 +238,7 @@ const cases: Case[] = [
       "30/1 is the only verified frame rate; any other rate is refused rather than degraded",
       "the legacy float frame_rate field is untouched and derived one way only",
     ],
-    artifacts: artifacts("docs/evidence/M2/M2.1/logs/" + CAPTURE_DIR + "/" + CAPTURE_DIR + "/m21.txt"),
+    artifacts: artifacts("docs/evidence/M2/M2.1/logs/" + CAPTURE_DIR + "/m21.txt"),
   },
   {
     case_id: "TM-02",
@@ -232,7 +253,7 @@ const cases: Case[] = [
       "a range crossing a clip boundary is rejected when the operation is scoped to one clip",
       "the legacy end_frame_exclusive naming is unchanged and end_frame is not introduced",
     ],
-    artifacts: artifacts("docs/evidence/M2/M2.1/logs/" + CAPTURE_DIR + "/" + CAPTURE_DIR + "/m21.txt"),
+    artifacts: artifacts("docs/evidence/M2/M2.1/logs/" + CAPTURE_DIR + "/m21.txt"),
   },
   {
     case_id: "TM-03",
@@ -245,7 +266,7 @@ const cases: Case[] = [
       "a shorter asset is refused with 422 MISSING_ASSET stating that Narralens does not loop, freeze or retime",
       "a non-integer or non-positive asset length is refused as INVALID_MEDIA rather than treated as short",
     ],
-    artifacts: artifacts("docs/evidence/M2/M2.1/logs/" + CAPTURE_DIR + "/" + CAPTURE_DIR + "/m21.txt"),
+    artifacts: artifacts("docs/evidence/M2/M2.1/logs/" + CAPTURE_DIR + "/m21.txt"),
   },
   {
     case_id: "AT-CONTRACT-01",
@@ -259,7 +280,7 @@ const cases: Case[] = [
       "the ApiErrorCode union, the JSON Schema enum and the alias table all carry the same 29 codes",
       "the engine route response is validated against its schema before it is returned",
     ],
-    artifacts: artifacts("docs/evidence/M2/M2.1/logs/" + CAPTURE_DIR + "/" + CAPTURE_DIR + "/contracts.txt", "docs/evidence/M2/M2.1/logs/" + CAPTURE_DIR + "/check.txt"),
+    artifacts: artifacts("docs/evidence/M2/M2.1/logs/" + CAPTURE_DIR + "/contracts.txt", "docs/evidence/M2/M2.1/logs/" + CAPTURE_DIR + "/check.txt"),
   },
   {
     case_id: "AT-E2E-01",
@@ -272,7 +293,7 @@ const cases: Case[] = [
       "external-change detection runs against a throwaway copy of the real D1 fixture and never mutates the repository's own project bytes",
       "the full suite reports 25 files and 227 tests passing with the production Vite build succeeding",
     ],
-    artifacts: artifacts("docs/evidence/M2/M2.1/logs/" + CAPTURE_DIR + "/" + CAPTURE_DIR + "/check.txt", "docs/evidence/M2/M2.1/logs/" + CAPTURE_DIR + "/build.txt"),
+    artifacts: artifacts("docs/evidence/M2/M2.1/logs/" + CAPTURE_DIR + "/check.txt", "docs/evidence/M2/M2.1/logs/" + CAPTURE_DIR + "/build.txt"),
   },
   {
     case_id: "GATE-FITNESS",
@@ -285,7 +306,7 @@ const cases: Case[] = [
       "6 deliberate violations were introduced one at a time and every owning suite failed as required (MUT-A..MUT-F)",
       "each mutation was reverted and the source tree was verified clean afterwards",
     ],
-    artifacts: artifacts("docs/evidence/M2/M2.1/logs/" + CAPTURE_DIR + "/" + CAPTURE_DIR + "/mutation-gates.txt",
+    artifacts: artifacts("docs/evidence/M2/M2.1/logs/" + CAPTURE_DIR + "/mutation-gates.txt",
       "docs/evidence/M2/M2.1/logs/" + CAPTURE_DIR + "/mutation-MUT-A.txt",
       "docs/evidence/M2/M2.1/logs/" + CAPTURE_DIR + "/mutation-MUT-F.txt"),
   },
@@ -305,7 +326,7 @@ const cases: Case[] = [
       "the test drives real HTTP and never calls markAttention to stand in for detection",
       "mutation MUT-K (Host stops raising attention) makes this gate fail",
     ],
-    artifacts: artifacts("docs/evidence/M2/M2.1/logs/" + CAPTURE_DIR + "/" + CAPTURE_DIR + "/m21.txt",
+    artifacts: artifacts("docs/evidence/M2/M2.1/logs/" + CAPTURE_DIR + "/m21.txt",
       "docs/evidence/M2/M2.1/logs/" + CAPTURE_DIR + "/mutation-MUT-K.txt"),
   },
   {
@@ -322,7 +343,7 @@ const cases: Case[] = [
       "a missing referenced asset, a path escaping the project, or a manifest hash that disagrees with its bytes fails closed",
       "mutation MUT-H (asset closure removed) makes this gate fail",
     ],
-    artifacts: artifacts("docs/evidence/M2/M2.1/logs/" + CAPTURE_DIR + "/" + CAPTURE_DIR + "/m21.txt",
+    artifacts: artifacts("docs/evidence/M2/M2.1/logs/" + CAPTURE_DIR + "/m21.txt",
       "docs/evidence/M2/M2.1/logs/" + CAPTURE_DIR + "/repro-b02.txt",
       "docs/evidence/M2/M2.1/logs/" + CAPTURE_DIR + "/mutation-MUT-H.txt"),
   },
@@ -340,7 +361,7 @@ const cases: Case[] = [
       "asset import lives in a Host service capability map and appears in no engine capability map",
       "mutation MUT-G (fail-closed guard removed) makes this gate fail",
     ],
-    artifacts: artifacts("docs/evidence/M2/M2.1/logs/" + CAPTURE_DIR + "/" + CAPTURE_DIR + "/m21.txt",
+    artifacts: artifacts("docs/evidence/M2/M2.1/logs/" + CAPTURE_DIR + "/m21.txt",
       "docs/evidence/M2/M2.1/artifacts/openfilm-upstream-probe.json",
       "docs/evidence/M2/M2.1/logs/" + CAPTURE_DIR + "/mutation-MUT-G.txt"),
   },
@@ -357,7 +378,7 @@ const cases: Case[] = [
       "cycles still count once; Windows/WSL path shapes are refused rather than normalised",
       "mutation MUT-I (canonical enqueue reverted) makes this gate fail",
     ],
-    artifacts: artifacts("docs/evidence/M2/M2.1/logs/" + CAPTURE_DIR + "/" + CAPTURE_DIR + "/m21.txt",
+    artifacts: artifacts("docs/evidence/M2/M2.1/logs/" + CAPTURE_DIR + "/m21.txt",
       "docs/evidence/M2/M2.1/logs/" + CAPTURE_DIR + "/repro-m03.txt",
       "docs/evidence/M2/M2.1/logs/" + CAPTURE_DIR + "/mutation-MUT-I.txt"),
   },
@@ -409,7 +430,7 @@ const cases: Case[] = [
       "no src/, tests/, contracts/, tools/ or package.json file changed after that commit",
       "tools/m2.1-evidence-integrity.mjs re-verifies all of the above",
     ],
-    artifacts: artifacts("docs/evidence/M2/M2.1/logs/" + CAPTURE_DIR + "/" + CAPTURE_DIR + "/environment.txt"),
+    artifacts: artifacts("docs/evidence/M2/M2.1/logs/" + CAPTURE_DIR + "/environment.txt"),
   },
   {
     case_id: "OF-REAL-UPSTREAM",
