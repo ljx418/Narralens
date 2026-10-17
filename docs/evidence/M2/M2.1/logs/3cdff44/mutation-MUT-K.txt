@@ -1,0 +1,68 @@
+
+ RUN  v3.2.4 /mnt/c/workSpace/videoWorkLine/Narralens
+
+(node:334715) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/m2.1/native-bypass.test.ts (13 tests | 2 failed) 9675ms
+   ✓ EN-02 bypass paths > denies every unregistered native entry point by default 2ms
+   ✓ EN-02 bypass paths > rejects a native_operation smuggled into the legacy edit contract 7ms
+   ✓ EN-02 bypass paths > never hands the writer a shell, a URL or an arbitrary path through the gateway 1ms
+   ✓ EN-04 external change detection > refuses a stale digest after an out-of-band source edit and leaves the bytes untouched  1098ms
+   ✓ EN-04 external change detection > treats the file watcher as detection only and never as an accepted write 1ms
+   ✓ EN-04 external change detection > changes the digest when a declared asset, not only a source file, changes  886ms
+   × B-01 external source change reaches attention through the production path > 409, then attention=true, then the next typed edit is 423, without touching the edited bytes 1131ms
+     → expected false to be true // Object.is equality
+   × B-01 external source change reaches attention through the production path > never re-samples the committed baseline: reading again stays 409 and attention stays set 939ms
+     → expected false to be true // Object.is equality
+   ✓ B-02 referenced Hypit asset bytes are inside the source digest > covers both referenced visual assets in the closure  918ms
+   ✓ B-02 referenced Hypit asset bytes are inside the source digest > changes the digest when a referenced asset is legitimately re-imported (bytes and manifest together)  1031ms
+   ✓ B-02 referenced Hypit asset bytes are inside the source digest > never digests a source whose bytes disagree with its manifest  891ms
+   ✓ B-02 referenced Hypit asset bytes are inside the source digest > fails closed when a referenced asset is missing or its path escapes the project  1905ms
+   ✓ B-02 referenced Hypit asset bytes are inside the source digest > fails closed when a manifest hash no longer matches the bytes it describes  863ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/m2.1/native-bypass.test.ts > B-01 external source change reaches attention through the production path > 409, then attention=true, then the next typed edit is 423, without touching the edited bytes
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ tests/m2.1/native-bypass.test.ts:199:68
+    197| 
+    198|     // The refusal raised persistent attention on its own.
+    199|     expect((await host.writes.projectState(PROJECT_ID)).attention).toB…
+       |                                                                    ^
+    200| 
+    201|     // A typed edit is now refused, and the external bytes are still e…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/m2.1/native-bypass.test.ts > B-01 external source change reaches attention through the production path > never re-samples the committed baseline: reading again stays 409 and attention stays set
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ tests/m2.1/native-bypass.test.ts:227:68
+    225|       expect(response.status, `attempt ${attempt}`).toBe(409);
+    226|     }
+    227|     expect((await host.writes.projectState(PROJECT_ID)).attention).toB…
+       |                                                                    ^
+    228|   }, 60_000);
+    229| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 11 passed (13)
+   Start at  18:44:49
+   Duration  15.16s (transform 530ms, setup 0ms, collect 2.95s, tests 9.67s, environment 0ms, prepare 1.67s)
+

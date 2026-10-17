@@ -1,0 +1,107 @@
+
+ RUN  v3.2.4 /mnt/c/workSpace/videoWorkLine/Narralens
+
+ ❯ tests/m2.1/openfilm-upstream-lock.test.ts (12 tests | 4 failed) 90ms
+   ✓ M-04 pinned OpenFilm checkout verification > pins every file the loader is about to execute, plus package, lock and licence 1ms
+   ✓ M-04 pinned OpenFilm checkout verification > keeps the production lock consistent with the M1B recorded upstream lock 0ms
+   ✓ M-04 pinned OpenFilm checkout verification > refuses a checkout with no git HEAD 9ms
+   ✓ M-04 pinned OpenFilm checkout verification > fails closed when git status cannot be executed 8ms
+   ✓ M-04 pinned OpenFilm checkout verification > fails closed when git status exits non-zero 9ms
+   ✓ M-04 pinned OpenFilm checkout verification > fails closed when git status times out 17ms
+   × M-04 pinned OpenFilm checkout verification > rejects a tracked dirty checkout and records git_clean only after a successful check 23ms
+     → expected true to be false // Object.is equality
+   × M-04 pinned OpenFilm checkout verification > refuses when the seam module was tampered with 5ms
+     → expected true to be false // Object.is equality
+   × M-04 pinned OpenFilm checkout verification > refuses when any other loaded module, package, lock or licence changes 5ms
+     → packages/openfilm/studio/server/film.mjs: expected true to be false // Object.is equality
+   × M-04 pinned OpenFilm checkout verification > reports a missing pinned file as missing rather than as a digest mismatch 5ms
+     → expected true to be false // Object.is equality
+   ✓ M-04 pinned OpenFilm checkout verification > refuses to load rather than loading a module whose digest does not match 5ms
+   ✓ M-04 pinned OpenFilm checkout verification > never lets a caller supply the vendor path through a request 2ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/m2.1/openfilm-upstream-lock.test.ts > M-04 pinned OpenFilm checkout verification > rejects a tracked dirty checkout and records git_clean only after a successful check
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ tests/m2.1/openfilm-upstream-lock.test.ts:140:31
+    138|     await withFakeGit("exit 0", async (root) => {
+    139|       const clean = await openFilmAvailability(root);
+    140|       expect(clean.available).toBe(false);
+       |                               ^
+    141|       expect(clean.checked).toContain("git_clean");
+    142|       expect(clean.reason).toMatch(/not intact/u);
+ ❯ withFakeGit tests/m2.1/openfilm-upstream-lock.test.ts:69:9
+ ❯ tests/m2.1/openfilm-upstream-lock.test.ts:138:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  tests/m2.1/openfilm-upstream-lock.test.ts > M-04 pinned OpenFilm checkout verification > refuses when the seam module was tampered with
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ tests/m2.1/openfilm-upstream-lock.test.ts:149:22
+    147|     const root = await syntheticCheckout();
+    148|     const clean = await verifyPinnedFiles(root);
+    149|     expect(clean.ok).toBe(false);
+       |                      ^
+    150|     await writeFile(resolve(root, "packages/openfilm/studio/server/fil…
+    151|       "export const readProjectFilm = () => ({});\n", "utf8");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  tests/m2.1/openfilm-upstream-lock.test.ts > M-04 pinned OpenFilm checkout verification > refuses when any other loaded module, package, lock or licence changes
+AssertionError: packages/openfilm/studio/server/film.mjs: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ tests/m2.1/openfilm-upstream-lock.test.ts:164:36
+    162|       await writeFile(resolve(root, relative), "tampered", "utf8");
+    163|       const verdict = await verifyPinnedFiles(root);
+    164|       expect(verdict.ok, relative).toBe(false);
+       |                                    ^
+    165|       expect([...verdict.mismatched, ...verdict.missing], relative).to…
+    166|     }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  tests/m2.1/openfilm-upstream-lock.test.ts > M-04 pinned OpenFilm checkout verification > reports a missing pinned file as missing rather than as a digest mismatch
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ tests/m2.1/openfilm-upstream-lock.test.ts:173:24
+    171|     await rm(resolve(root, OPENFILM_PIN.lockfile_file));
+    172|     const verdict = await verifyPinnedFiles(root);
+    173|     expect(verdict.ok).toBe(false);
+       |                        ^
+    174|     expect(verdict.missing).toContain(OPENFILM_PIN.lockfile_file);
+    175|     expect(verdict.reason).toMatch(/missing pnpm-lock\.yaml/u);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  4 failed | 8 passed (12)
+   Start at  18:44:40
+   Duration  2.95s (transform 89ms, setup 0ms, collect 205ms, tests 90ms, environment 0ms, prepare 1.66s)
+

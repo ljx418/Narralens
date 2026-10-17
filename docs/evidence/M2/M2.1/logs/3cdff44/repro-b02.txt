@@ -1,0 +1,19 @@
+(node:337732) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+{
+  "experiment": "external-review B-02 reproduction",
+  "question": "does appending one byte to a referenced visual asset, with the manifest untouched, change the digest?",
+  "manifest_unchanged": true,
+  "referenced_visual_bytes_changed": true,
+  "referenced_assets_in_closure": [
+    "assets/generated/narration-30s.wav",
+    "assets/generated/visual-10s.mp4",
+    "assets/generated/visual-alt-10s.mp4"
+  ],
+  "mode": "refused",
+  "status": 422,
+  "code": "SOURCE_CHANGED",
+  "message": "SOURCE_MANIFEST_MISMATCH: assets/generated/visual-10s.mp4 does not match its recorded hash",
+  "passed": true
+}
+scenarios=1 failed=0

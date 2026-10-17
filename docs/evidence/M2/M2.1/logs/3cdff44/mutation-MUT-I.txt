@@ -1,0 +1,51 @@
+
+ RUN  v3.2.4 /mnt/c/workSpace/videoWorkLine/Narralens
+
+ ❯ tests/m2.1/source-digest-v1.test.ts (18 tests | 1 failed) 1360ms
+   ✓ SourceDigestV1 closure > EN-04 covers the entry, every scene, css, subtitle, settings, font and referenced asset 86ms
+   ✓ SourceDigestV1 closure > EN-04 gives the same digest whatever order the Host declares the roots in 223ms
+   ✓ SourceDigestV1 closure > EN-04 changes the digest when a scene, subtitle, setting, font or referenced asset changes 281ms
+   ✓ SourceDigestV1 closure > EN-04 resolves an OpenFilm time fragment to the same closure entry 111ms
+   ✓ SourceDigestV1 closure > EN-04 counts a cycle once and refuses a reference that does not resolve 67ms
+   ✓ SourceDigestV1 closure > AC-006 refuses absolute paths, traversal, symlink escape, query strings and unknown roles 160ms
+   ✓ SourceDigestV1 closure > keeps assets in discovery order, so sorting them is a real behaviour change 79ms
+   ✓ SourceDigestV1 closure > counts external references without following them and without letting them reach the digest 33ms
+   ✓ SourceDigestV1 reference extraction > extracts only the pinned attribute set and never a form action or data attribute 0ms
+   ✓ SourceDigestV1 reference extraction > extracts quoted and unquoted url() from css and ignores settings and font leaves 0ms
+   ✓ SourceDigestV1 reference extraction > extracts only cue URI lines from a WebVTT body, not the header or a bare path 0ms
+   ✓ SourceDigestV1 canonical form > sorts object keys by UTF-8 byte order and refuses floats 0ms
+   ✓ SourceDigestV1 canonical form > matches every committed golden vector 2ms
+   × M-03 canonical identity is the realpath > counts an internal symlink alias and its target once 54ms
+     → expected [ 'assets/tokens.css', …(1) ] to have a length of 1 but got 2
+   ✓ M-03 canonical identity is the realpath > counts one canonical file once however many distinct paths reach it 39ms
+   ✓ M-03 canonical identity is the realpath > resolves a declared root through a symlink to its canonical path 36ms
+   ✓ M-03 canonical identity is the realpath > still counts a cycle exactly once 46ms
+   ✓ M-03 canonical identity is the realpath > refuses Windows and WSL path shapes instead of normalising them silently 140ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/m2.1/source-digest-v1.test.ts > M-03 canonical identity is the realpath > counts an internal symlink alias and its target once
+AssertionError: expected [ 'assets/tokens.css', …(1) ] to have a length of 1 but got 2
+
+- Expected
++ Received
+
+- 1
++ 2
+
+ ❯ tests/m2.1/source-digest-v1.test.ts:237:66
+    235|     const result = await computeSourceDigest({ root, roots: ROOTS, eng…
+    236|     const paths = result.manifest.files.map((file) => file.path);
+    237|     expect(paths.filter((path) => path === "assets/tokens.css")).toHav…
+       |                                                                  ^
+    238|     expect(paths).not.toContain("assets/alias.css");
+    239|     expect(new Set(paths).size).toBe(paths.length);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 17 passed (18)
+   Start at  18:44:30
+   Duration  6.17s (transform 192ms, setup 0ms, collect 2.31s, tests 1.36s, environment 0ms, prepare 1.60s)
+

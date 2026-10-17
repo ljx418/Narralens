@@ -1,0 +1,205 @@
+=== MUT-A: adapter declares a commit method ===
+command: corepack pnpm exec vitest run --config vitest.config.ts tests/architecture/m2.1-fitness.test.ts
+mutation applied (13402 -> 13477 bytes)
+       |                       ^
+     94|   });
+     95| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 21 passed (22)
+   Start at  18:43:05
+   Duration  5.28s (transform 229ms, setup 0ms, collect 2.50s, tests 244ms, environment 0ms, prepare 1.55s)
+
+RESULT MUT-A: GATE_BITES (exit 1)
+
+=== MUT-B: a registry entry claims an unknown policy ===
+command: corepack pnpm exec vitest run --config vitest.config.ts tests/m2.1/native-write-gateway.test.ts
+mutation applied (19229 -> 19238 bytes)
+       |                                                ^
+     28|       expect((entry.policy as string), entry.entry_id).not.toBe("unkno…
+     29|     }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 19 passed (20)
+   Start at  18:43:14
+   Duration  5.02s (transform 351ms, setup 0ms, collect 2.53s, tests 36ms, environment 0ms, prepare 1.47s)
+
+RESULT MUT-B: GATE_BITES (exit 1)
+
+=== MUT-C: production code imports a spike ===
+command: corepack pnpm exec vitest run --config vitest.config.ts tests/architecture/m2.1-fitness.test.ts
+mutation applied (19229 -> 19298 bytes)
+ ❯ parseAstAsync node_modules/.pnpm/rollup@4.64.5/node_modules/rollup/dist/es/shared/parseAst.js:2124:106
+ ❯ ssrTransformScript node_modules/.pnpm/vite@7.1.7_@types+node@22.18.6_tsx@4.20.5/node_modules/vite/dist/node/chunks/dep-Bm2ujbhY.js:18890:9
+ ❯ loadAndTransform node_modules/.pnpm/vite@7.1.7_@types+node@22.18.6_tsx@4.20.5/node_modules/vite/dist/node/chunks/dep-Bm2ujbhY.js:26147:64
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  no tests
+   Start at  18:43:23
+   Duration  2.69s (transform 108ms, setup 0ms, collect 0ms, tests 0ms, environment 0ms, prepare 1.59s)
+
+RESULT MUT-C: GATE_BITES (exit 1)
+
+=== MUT-D: digest silently skips declared assets ===
+command: corepack pnpm exec vitest run --config vitest.config.ts tests/m2.1/source-digest-v1.test.ts
+mutation applied (17548 -> 17552 bytes)
+       |                                                               ^
+     50|       "assets/narration.m4a", "assets/poster.png", "assets/aaa-narrati…
+     51|       "assets/registered-only.m4a",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 17 passed (18)
+   Start at  18:43:29
+   Duration  6.72s (transform 207ms, setup 0ms, collect 2.59s, tests 1.49s, environment 0ms, prepare 1.64s)
+
+RESULT MUT-D: GATE_BITES (exit 1)
+
+=== MUT-E: digest sorts assets against the pinned rule ===
+command: corepack pnpm exec vitest run --config vitest.config.ts tests/m2.1/source-digest-v1.test.ts
+mutation applied (17548 -> 17616 bytes)
+       |                                  ^
+    170|   });
+    171| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 16 passed (18)
+   Start at  18:43:43
+   Duration  6.59s (transform 200ms, setup 0ms, collect 2.53s, tests 1.45s, environment 0ms, prepare 1.67s)
+
+RESULT MUT-E: GATE_BITES (exit 1)
+
+=== MUT-F: stage drops the strict base check ===
+command: corepack pnpm exec vitest run --config vitest.config.ts tests/m2.1/engine-port.test.ts
+mutation applied (13402 -> 13411 bytes)
+       |       ^
+    151|         .rejects.toMatchObject({ status: 409, code: "SOURCE_CHANGED" }…
+    152|       expect(mutatorCalls).toBe(0);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 9 passed (10)
+   Start at  18:43:53
+   Duration  3.25s (transform 194ms, setup 0ms, collect 346ms, tests 551ms, environment 0ms, prepare 1.49s)
+
+RESULT MUT-F: GATE_BITES (exit 1)
+
+=== MUT-G: gateway stops failing closed on an unreported capability ===
+command: corepack pnpm exec vitest run --config vitest.config.ts tests/m2.1/native-write-gateway.test.ts
+mutation applied (8750 -> 8759 bytes)
+    101|       this.#record({ event: NATIVE_WRITE_DENIED_EVENT, entry_id: entry…
+    102|         reason: "capability is unverified" });
+ ❯ tests/m2.1/native-write-gateway.test.ts:219:18
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 18 passed (20)
+   Start at  18:44:00
+   Duration  4.93s (transform 371ms, setup 0ms, collect 2.53s, tests 23ms, environment 0ms, prepare 1.48s)
+
+RESULT MUT-G: GATE_BITES (exit 1)
+
+=== MUT-H: Hypit digest stops covering referenced asset bytes ===
+command: corepack pnpm exec vitest run --config vitest.config.ts tests/m2.1/native-bypass.test.ts
+mutation applied (12221 -> 12172 bytes)
+       |                                                                 ^
+    326|       .rejects.toMatchObject({ code: "SOURCE_CHANGED", message: expect…
+    327|   }, 30_000);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  5 failed | 8 passed (13)
+   Start at  18:44:09
+   Duration  14.82s (transform 601ms, setup 0ms, collect 3.42s, tests 8.84s, environment 0ms, prepare 1.59s)
+
+RESULT MUT-H: GATE_BITES (exit 1)
+
+=== MUT-I: digest enqueues the logical reference path instead of the canonical one ===
+command: corepack pnpm exec vitest run --config vitest.config.ts tests/m2.1/source-digest-v1.test.ts
+mutation applied (17548 -> 17549 bytes)
+       |                                                                  ^
+    238|     expect(paths).not.toContain("assets/alias.css");
+    239|     expect(new Set(paths).size).toBe(paths.length);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 17 passed (18)
+   Start at  18:44:30
+   Duration  6.17s (transform 192ms, setup 0ms, collect 2.31s, tests 1.36s, environment 0ms, prepare 1.60s)
+
+RESULT MUT-I: GATE_BITES (exit 1)
+
+=== MUT-J: upstream loader stops verifying pinned file digests ===
+command: corepack pnpm exec vitest run --config vitest.config.ts tests/m2.1/openfilm-upstream-lock.test.ts
+mutation applied (11038 -> 11060 bytes)
+       |                        ^
+    174|     expect(verdict.missing).toContain(OPENFILM_PIN.lockfile_file);
+    175|     expect(verdict.reason).toMatch(/missing pnpm-lock\.yaml/u);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  4 failed | 8 passed (12)
+   Start at  18:44:40
+   Duration  2.95s (transform 89ms, setup 0ms, collect 205ms, tests 90ms, environment 0ms, prepare 1.66s)
+
+RESULT MUT-J: GATE_BITES (exit 1)
+
+=== MUT-K: Host stops raising attention on an external change ===
+command: corepack pnpm exec vitest run --config vitest.config.ts tests/m2.1/native-bypass.test.ts
+mutation applied (23222 -> 23160 bytes)
+       |                                                                    ^
+    228|   }, 60_000);
+    229| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 11 passed (13)
+   Start at  18:44:49
+   Duration  15.16s (transform 530ms, setup 0ms, collect 2.95s, tests 9.67s, environment 0ms, prepare 1.67s)
+
+RESULT MUT-K: GATE_BITES (exit 1)
+
+=== MUT-L: upstream loader skips clean verification when git status fails ===
+command: corepack pnpm exec vitest run --config vitest.config.ts tests/m2.1/openfilm-upstream-lock.test.ts
+mutation applied (11038 -> 11047 bytes)
+ ❯ tests/m2.1/openfilm-upstream-lock.test.ts:125:28
+ ❯ withFakeGit tests/m2.1/openfilm-upstream-lock.test.ts:69:9
+ ❯ tests/m2.1/openfilm-upstream-lock.test.ts:124:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 9 passed (12)
+   Start at  18:45:09
+   Duration  3.26s (transform 98ms, setup 0ms, collect 305ms, tests 155ms, environment 0ms, prepare 1.79s)
+
+RESULT MUT-L: GATE_BITES (exit 1)
+
+SUMMARY cases=12 gates_that_failed_as_required=12
