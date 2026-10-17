@@ -3,24 +3,68 @@
   "ticket": "M2.2",
   "title": "一致提交、三类锁、持久任务",
   "declaration_ceiling": "M2_2_DURABILITY_READY",
-  "captured_at": "2026-10-17T18:31:30.157Z",
+  "captured_at": "2026-10-17T18:35:23.112Z",
   "repo_branch": "migration/m2.2-coordinator-persistence",
-  "repo_sha": "9f8c5b2e7f1de8465b7492548359e0cd67eb8078",
-  "frozen_code_sha": "9f8c5b2e7f1de8465b7492548359e0cd67eb8078",
+  "repo_sha": "0ced98dbb170b6e34c699136cefef0c8ffde6caa",
+  "frozen_code_sha": "0ced98dbb170b6e34c699136cefef0c8ffde6caa",
   "repo_dirty_at_capture": true,
   "dirty_paths_at_capture": [
-    "?? tools/m2.2-evidence-manifest.ts"
+    "M docs/evidence/M2/M2.2/evidence-manifest.json"
   ],
   "node": "v22.22.1",
   "pnpm": "10.33.0",
   "gates": [
-    "check",
-    "test:m2.1",
-    "test:contracts",
-    "check:m2.1-docs",
-    "test:m2.1:golden-python",
-    "test:m2.1:mutation",
-    "openfilm-probe"
+    {
+      "command": "corepack pnpm check",
+      "log": "logs/check.txt",
+      "exit_code": 0
+    },
+    {
+      "command": "bash tools/m2.1-gate-mutation-check.sh <tmp>",
+      "log": "logs/mutation-gates.txt",
+      "exit_code": 0
+    },
+    {
+      "command": "corepack pnpm exec tsx tests/m2.1-probe/openfilm-upstream-probe.mjs <vendorRoot> <projectDir> /tmp/probe.json",
+      "log": "logs/openfilm-probe.txt",
+      "exit_code": 0
+    },
+    {
+      "command": "corepack pnpm exec tsx tools/m2.1-external-review-repro.mts hypit-visual-asset",
+      "log": "logs/repro-b02.txt",
+      "exit_code": 0
+    },
+    {
+      "command": "corepack pnpm exec tsx tools/m2.1-external-review-repro.mts symlink-alias",
+      "log": "logs/repro-m03.txt",
+      "exit_code": 0
+    }
+  ],
+  "gate_artifacts": [
+    {
+      "path": "logs/check.txt",
+      "sha256": "b1bfd08d54b6d1301395c2708ea181cc121d5f0a73de8a9a87d001465594e07f"
+    },
+    {
+      "path": "logs/mutation-gates.txt",
+      "sha256": "975359738fc2a825624ccb7dd5687687caf490204a39c2287ec9ad1e0f8ff2e0"
+    },
+    {
+      "path": "logs/openfilm-probe.txt",
+      "sha256": "4d81da00bc893939f3fd87bb762715ed5959cee0d8d7f5970295eab73852a13b"
+    },
+    {
+      "path": "logs/repro-b02.txt",
+      "sha256": "d04b9d325810b14b7362d67d3849336183f0059c85794a81ba8a7a77f88fff13"
+    },
+    {
+      "path": "logs/repro-m03.txt",
+      "sha256": "3ca607f5b09e15f7e175d1da69eb8bcadf60767180d48b9cd57b7f16c14b66a8"
+    },
+    {
+      "path": "logs/environment.txt",
+      "sha256": "5f40c860d88b0b7b3df8ff20999f16d6e4e6f6ff67e6c3fb766a2122100d90dd"
+    }
   ],
   "code_paths": [
     "src",
