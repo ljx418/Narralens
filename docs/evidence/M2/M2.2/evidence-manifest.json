@@ -1,0 +1,442 @@
+{
+  "format": "narralens.m22-evidence-manifest@1.0",
+  "ticket": "M2.2",
+  "title": "一致提交、三类锁、持久任务",
+  "declaration_ceiling": "M2_2_DURABILITY_READY",
+  "captured_at": "2026-10-17T18:31:30.157Z",
+  "repo_branch": "migration/m2.2-coordinator-persistence",
+  "repo_sha": "9f8c5b2e7f1de8465b7492548359e0cd67eb8078",
+  "frozen_code_sha": "9f8c5b2e7f1de8465b7492548359e0cd67eb8078",
+  "repo_dirty_at_capture": true,
+  "dirty_paths_at_capture": [
+    "?? tools/m2.2-evidence-manifest.ts"
+  ],
+  "node": "v22.22.1",
+  "pnpm": "10.33.0",
+  "gates": [
+    "check",
+    "test:m2.1",
+    "test:contracts",
+    "check:m2.1-docs",
+    "test:m2.1:golden-python",
+    "test:m2.1:mutation",
+    "openfilm-probe"
+  ],
+  "code_paths": [
+    "src",
+    "tests",
+    "contracts",
+    "tools",
+    "package.json"
+  ],
+  "case_count": 17,
+  "passed_count": 16,
+  "screenshots": [],
+  "claim_limits": [
+    "This evidence supports M2_2_DURABILITY_READY only.",
+    "M2 is NOT complete: M2.3 (migration copy, rollback) is not implemented.",
+    "AC-005 is only partially satisfied on the legacy Hypit path: the snapshot is a post-hoc capture of committed bytes, not an isolated-stage preimage. The full stage→snapshot→pointer flow lands with M2.3 and M4A.",
+    "duration and narration lock integration is NOT_APPLICABLE_APPROVED: no M2.2 typed edit can change either.",
+    "render and snapshot_publish have no runner in M2.2; only their storage, lease, event, recovery and NOWRITE semantics are proven.",
+    "vendor/openfilm is not a registered submodule; the real upstream evidence comes from the isolated M1B worktree and is not a production integration.",
+    "Headed browser automation and human experience are NOT_RUN; this ticket ran no UI automation."
+  ],
+  "review": {
+    "internal": "PASS",
+    "internal_record": "reviews/internal-review.md",
+    "external": "REVIEW_PENDING"
+  },
+  "cases": [
+    {
+      "case_id": "JRNL",
+      "module": "1-persistence",
+      "status": "PASSED",
+      "evidence_kind": [
+        "schema_unit",
+        "mutation_test"
+      ],
+      "title": "唯一权威事务状态机 + 旧 journal 带前态推进",
+      "assertions": [
+        "received→preconditions_checked→staged→validated→prepared→committed 逐步推进，每步断言 changes===1",
+        "表外的前后态一律拒绝；committed 无后继",
+        "recovering 只能经 markRecovering()，在线 transition() 不可达",
+        "journal 首行仍由 actor 的 prepare() 写入，协调器不重复插入",
+        "MUT-M/MUT-J 退化后对应套件失败"
+      ],
+      "artifacts": [
+        {
+          "path": "tests/m2.2/transaction-state-machine.test.ts",
+          "sha256": "3e9fe29f2ce374f39ee45a1d455b786d76bb02db2a95001ef2d5ab42159edda0"
+        },
+        {
+          "path": "tests/m2.2/journal-predecessor.test.ts",
+          "sha256": "c4cc6ca0e1cf9845930247cd2a94456e7d9b0055131efddc5eeba3388d02afc2"
+        }
+      ]
+    },
+    {
+      "case_id": "SNAP",
+      "module": "2-snapshot",
+      "status": "PASSED",
+      "evidence_kind": [
+        "integration",
+        "mutation_test"
+      ],
+      "title": "内容寻址、原子发布、reader 只认 active_commit",
+      "assertions": [
+        "snapshot_id = SHA256('narralens-snapshot-v1\\n' + canonical({project_id, source_digest}))",
+        "相同内容重复发布为空操作而非 ENOTEMPTY",
+        "复制后重新哈希，不符即拒绝发布",
+        "reader 只能按 snapshot_id 读取，目录枚举不作为来源",
+        "MUT-S/MUT-T 退化后套件失败"
+      ],
+      "artifacts": [
+        {
+          "path": "tests/m2.2/snapshot-store.test.ts",
+          "sha256": "575d910ab837591fdcc0b0816181fee883bbbc71be2b1a43df6f8cb197400565"
+        },
+        {
+          "path": "src/host/projects/snapshot-store.ts",
+          "sha256": "5e1417401133b441a8b40aec9bb3ca7d006cf014aa2714bc848aca6f41953982"
+        }
+      ]
+    },
+    {
+      "case_id": "DUR",
+      "module": "2-snapshot",
+      "status": "PASSED",
+      "evidence_kind": [
+        "fault_injection"
+      ],
+      "title": "durability 不可证明即完全不发布",
+      "assertions": [
+        "逐一在每个 fsync 步骤注入失败，全部 11 个位置都拒绝发布",
+        "父目录 fsync 失败时已发生的 rename 被撤销，不留无指针目录",
+        "durability 由注入函数驱动，真实路径也走同一顺序"
+      ],
+      "artifacts": [
+        {
+          "path": "tests/m2.2/snapshot-store.test.ts",
+          "sha256": "575d910ab837591fdcc0b0816181fee883bbbc71be2b1a43df6f8cb197400565"
+        }
+      ]
+    },
+    {
+      "case_id": "LOCK",
+      "module": "3-locks",
+      "status": "PASSED",
+      "evidence_kind": [
+        "schema_unit",
+        "mutation_test"
+      ],
+      "title": "三类锁由服务端计算，preserve 不授权",
+      "assertions": [
+        "visual 恒命中；range/position 变更额外命中 duration；字幕/音频变更命中 project 作用域 narration",
+        "锁冲突 423 TARGET_LOCKED；相邻半开区间不冲突",
+        "同类锁不阻塞只影响其他类的写",
+        "MUT-R 把检查改成看 reason 文本后套件失败"
+      ],
+      "artifacts": [
+        {
+          "path": "tests/m2.2/lock-service.test.ts",
+          "sha256": "8deebdb32f651e4f5f4eb14d65c88592df8ed21fe105aae53744ab0a8de7a595"
+        },
+        {
+          "path": "tests/m2.2/lock-service.test.ts",
+          "sha256": "8deebdb32f651e4f5f4eb14d65c88592df8ed21fe105aae53744ab0a8de7a595"
+        }
+      ]
+    },
+    {
+      "case_id": "LOCK-NA",
+      "module": "3-locks",
+      "status": "NOT_APPLICABLE_APPROVED",
+      "evidence_kind": [
+        "scope"
+      ],
+      "title": "duration / narration 锁的集成层",
+      "assertions": [
+        "M2.2 没有任何 typed edit 能改变时长或旁白（replace_visual_asset 要求资产帧长恰好等于选区）",
+        "分类器以合成载荷单测；集成层无任何可达用例",
+        "不以不可达的集成断言冒充 PASS"
+      ],
+      "artifacts": [
+        {
+          "path": "docs/migration/M2/M2.2-development-and-acceptance-plan.md",
+          "sha256": "2702b6fc54914cdddba9214facfce84a3d498214b613077e28d49e9b7be45bd2"
+        }
+      ]
+    },
+    {
+      "case_id": "BYP",
+      "module": "4-coordinator",
+      "status": "PASSED",
+      "evidence_kind": [
+        "http_integration",
+        "mutation_test"
+      ],
+      "title": "网关在所有生产写路径之前",
+      "assertions": [
+        "attention 项目 423 且 actor 从未被调用",
+        "基线不符 409 且自行置 attention",
+        "锁定范围 423 且 actor 从未被调用",
+        "把项目绑到 OpenFilm 后请求写片，网关依引擎能力表拒绝 422",
+        "MUT-Q 移除网关检查后套件失败"
+      ],
+      "artifacts": [
+        {
+          "path": "tests/m2.2/project-coordinator.test.ts",
+          "sha256": "e8d3334919dfb101d9284d4580e3edee65eab02568ad6160b8f60505be4963d8"
+        },
+        {
+          "path": "tests/m2.1/native-bypass.test.ts",
+          "sha256": "31eafa42886283430f841d88c8a4a53596da83faed16e4c8994c3f6925eac18f"
+        }
+      ]
+    },
+    {
+      "case_id": "SER",
+      "module": "4-coordinator",
+      "status": "PASSED",
+      "evidence_kind": [
+        "concurrency"
+      ],
+      "title": "同项目串行、跨项目并行",
+      "assertions": [
+        "同项目两次写按单例队列串行，revision 单调",
+        "另一项目不被本项目队列阻塞"
+      ],
+      "artifacts": [
+        {
+          "path": "tests/m2.2/project-coordinator.test.ts",
+          "sha256": "e8d3334919dfb101d9284d4580e3edee65eab02568ad6160b8f60505be4963d8"
+        }
+      ]
+    },
+    {
+      "case_id": "JB-01",
+      "module": "5-jobs",
+      "status": "PASSED",
+      "evidence_kind": [
+        "restart",
+        "schema_unit"
+      ],
+      "title": "重启保留 Job，失 lease 的 running 不假成功",
+      "assertions": [
+        "重启后 Job 与事件仍在（真实数据库文件）",
+        "失 lease 回队列；尝试用尽进 attention，任何分支都不是 succeeded",
+        "记明原因与平台限制"
+      ],
+      "artifacts": [
+        {
+          "path": "tests/m2.2/persistent-job-store.test.ts",
+          "sha256": "57c945123a0b8ae1eb30171434d925f42302a99f56431ec47b27f0c7d0b1887c"
+        }
+      ]
+    },
+    {
+      "case_id": "JB-02",
+      "module": "5-jobs",
+      "status": "PASSED",
+      "evidence_kind": [
+        "concurrency",
+        "mutation_test"
+      ],
+      "title": "双 worker CAS 只有一个 owner",
+      "assertions": [
+        "两个竞争者恰好一个成功",
+        "lease 未过期时不可被夺取，包括 lease 已死但尚未回收的 running",
+        "MUT-O 去掉 state='queued' 条件后套件失败"
+      ],
+      "artifacts": [
+        {
+          "path": "tests/m2.2/persistent-job-store.test.ts",
+          "sha256": "57c945123a0b8ae1eb30171434d925f42302a99f56431ec47b27f0c7d0b1887c"
+        }
+      ]
+    },
+    {
+      "case_id": "JB-03",
+      "module": "5-jobs",
+      "status": "PASSED",
+      "evidence_kind": [
+        "integration"
+      ],
+      "title": "SSE cursor 补发与去重",
+      "assertions": [
+        "每 job 单调 seq；全局 event_id 不复用",
+        "after=seq 只补发之后的事件且不重复",
+        "线上事件同时带 seq（续传用）与 event_id（去重用）"
+      ],
+      "artifacts": [
+        {
+          "path": "tests/m2.2/persistent-job-store.test.ts",
+          "sha256": "57c945123a0b8ae1eb30171434d925f42302a99f56431ec47b27f0c7d0b1887c"
+        },
+        {
+          "path": "contracts/job-event.schema.json",
+          "sha256": "0034811cc6e4e598a16f5e7dbbb7bbe28ecbbabffc7b3598ea17b7b8072dd9e4"
+        }
+      ]
+    },
+    {
+      "case_id": "JB-04",
+      "module": "5-jobs",
+      "status": "PASSED",
+      "evidence_kind": [
+        "schema_unit"
+      ],
+      "title": "取消后的晚到结果 quarantine 且 NOWRITE",
+      "assertions": [
+        "job 已移动时不改状态，只写 quarantined_artifact / quarantined_receipt",
+        "事件 message 以 'quarantined:' 开头，type 取当前状态",
+        "completed_after_cancel 不再被写入，但仍是可读字面量"
+      ],
+      "artifacts": [
+        {
+          "path": "tests/m2.2/persistent-job-store.test.ts",
+          "sha256": "57c945123a0b8ae1eb30171434d925f42302a99f56431ec47b27f0c7d0b1887c"
+        }
+      ]
+    },
+    {
+      "case_id": "JB-05",
+      "module": "5-jobs",
+      "status": "PASSED",
+      "evidence_kind": [
+        "schema_unit"
+      ],
+      "title": "未知费用不重发、不记 0",
+      "assertions": [
+        "cost_status 初始为 unknown，仅在拿到明确金额后转 known",
+        "provider 类 kind 上限为 1，失 lease 直接 attention，不再提供第二次尝试",
+        "可显式覆盖上限"
+      ],
+      "artifacts": [
+        {
+          "path": "tests/m2.2/persistent-job-store.test.ts",
+          "sha256": "57c945123a0b8ae1eb30171434d925f42302a99f56431ec47b27f0c7d0b1887c"
+        },
+        {
+          "path": "src/host/job-defaults.ts",
+          "sha256": "7a6e4744581c005c8e72b2ca716d1ad658b29709fce5b74828cf529f75dd96fa"
+        }
+      ]
+    },
+    {
+      "case_id": "JB-07",
+      "module": "5-jobs",
+      "status": "PASSED",
+      "evidence_kind": [
+        "concurrency"
+      ],
+      "title": "孤儿 lease 可在进程内被回收",
+      "assertions": [
+        "同进程两个竞争者对已回收 job 恰好一个成功"
+      ],
+      "artifacts": [
+        {
+          "path": "tests/m2.2/persistent-job-store.test.ts",
+          "sha256": "57c945123a0b8ae1eb30171434d925f42302a99f56431ec47b27f0c7d0b1887c"
+        }
+      ]
+    },
+    {
+      "case_id": "JB-06",
+      "module": "6-outbox",
+      "status": "PASSED",
+      "evidence_kind": [
+        "fault_injection",
+        "mutation_test"
+      ],
+      "title": "commit 后崩溃只续发 outbox，不重复 commit",
+      "assertions": [
+        "同一事件对同一消费者无论重放多少次只投递一次",
+        "一个消费者失败不回滚已成功的消费者",
+        "达到重试上限关闭事件并留下原因，置 attention 而非静默丢弃",
+        "重放从不重新执行 commit",
+        "MUT-P 去掉消费者去重后套件失败"
+      ],
+      "artifacts": [
+        {
+          "path": "tests/m2.2/outbox.test.ts",
+          "sha256": "6a9b2a7b945139e5a1264c48402830bfcb1d58654b18532b131d144789903d66"
+        },
+        {
+          "path": "src/host/outbox.ts",
+          "sha256": "d81675fd7d30c39feb77bb621eee10a45cab1cb4d099886863081199da6e4a25"
+        }
+      ]
+    },
+    {
+      "case_id": "RECOVERY",
+      "module": "6-outbox",
+      "status": "PASSED",
+      "evidence_kind": [
+        "restart"
+      ],
+      "title": "启动顺序与写门",
+      "assertions": [
+        "journal 恢复 → outbox 重放 → 回收 lease → 报告 attention",
+        "存在 attention 时 recoverStatus 为 false，写入口 423 且 actor 从未被调用"
+      ],
+      "artifacts": [
+        {
+          "path": "tests/m2.2/project-coordinator.test.ts",
+          "sha256": "e8d3334919dfb101d9284d4580e3edee65eab02568ad6160b8f60505be4963d8"
+        },
+        {
+          "path": "src/host/projects/project-coordinator.ts",
+          "sha256": "dc2ade1a1ce1fe25fc3a184fac26448651d2a4017be83629f852de585cbdf984"
+        }
+      ]
+    },
+    {
+      "case_id": "GATE-FITNESS",
+      "module": "all",
+      "status": "PASSED",
+      "evidence_kind": [
+        "architecture_fitness",
+        "mutation_test"
+      ],
+      "title": "架构 fitness 与变异门",
+      "assertions": [
+        "20 条变异用例逐条注入并全部按预期失败",
+        "fitness 断言：单一状态机写入点、单队列、单数据库、actor 不持 commit、路由保持关闭"
+      ],
+      "artifacts": [
+        {
+          "path": "tests/architecture/m2.2-fitness.test.ts",
+          "sha256": "7a1f3e55365ac5f8a0868eab012846d6f77512ab9d80a76de4744bddfe557ef5"
+        },
+        {
+          "path": "tests/architecture/m2.1-fitness.test.ts",
+          "sha256": "9acc7e3f0a9b7c27f8dad90c240eb1b299dd4132d9de313e44fc036bbf0a0189"
+        }
+      ]
+    },
+    {
+      "case_id": "REG",
+      "module": "all",
+      "status": "PASSED",
+      "evidence_kind": [
+        "regression"
+      ],
+      "title": "旧 D1–M2.1 回归",
+      "assertions": [
+        "corepack pnpm check 34 files / 344 tests 全绿",
+        "旧 JobStore 及其测试未改；/edits 响应字段一字未加未删"
+      ],
+      "artifacts": [
+        {
+          "path": "tests/host/host-http.test.ts",
+          "sha256": "11a2e9128d9586e5eefdc529be9ab8c56c62d8beb22dd5478c3fe7e2ace4ad9f"
+        },
+        {
+          "path": "src/host/job-store.ts",
+          "sha256": "b14ceb646df5a4e17f049d815999419624aa6e7cf831e408bc57d452b1c8cbe0"
+        }
+      ]
+    }
+  ]
+}
