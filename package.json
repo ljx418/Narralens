@@ -18,7 +18,11 @@
     "test:m2.1": "vitest run --config vitest.config.ts tests/m2.1 tests/architecture",
     "test:m2.1:golden-vectors": "tsx tests/m2.1-golden/generate-vectors.ts",
     "test:m2.1:golden-python": "python3 -I tests/m2.1-golden/source-digest-v1.golden.py tests/m2.1-golden/source-digest-v1.vectors.json",
-    "evidence:m2.1:secret-scan": "tsx tools/secret-scan.ts"
+    "evidence:m2.1:secret-scan": "tsx tools/secret-scan.ts",
+    "evidence:m2.1": "bash tools/m2.1-run-evidence.sh",
+    "evidence:m2.1:manifest": "tsx tools/m2.1-evidence-manifest.ts",
+    "evidence:m2.1:integrity": "node tools/m2.1-evidence-integrity.mjs",
+    "evidence:m2.1:repro": "tsx tools/m2.1-external-review-repro.mts"
   },
   "dependencies": {
     "ajv": "8.18.0",

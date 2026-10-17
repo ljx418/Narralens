@@ -35,15 +35,35 @@ function treeSha(root: string): string {
 
 const git = (...args: string[]): string => execSync(`git ${args.join(" ")}`, { encoding: "utf8" }).trim();
 
-const commands = (name: string): Array<{ command: string; exit_code: number; log: string }> => {
-  const logPath = join(EVIDENCE_ROOT, "logs", `${name}.log`);
+/**
+ * M-02: evidence must be reproducible from a clone. `.log` is excluded by the repository's
+ * .gitignore, so every command writes `.txt` (stdout and stderr together), `.exit` and
+ * `.cmd`, all of which are tracked.
+ */
+const commands = (name: string): Array<{ command: string; exit_code: number; stdout_stderr: string }> => {
+  const text = join(EVIDENCE_ROOT, "logs", `${name}.txt`);
   const cmd = readFileSync(join(EVIDENCE_ROOT, "logs", `${name}.cmd`), "utf8").trim();
   const exit = Number.parseInt(readFileSync(join(EVIDENCE_ROOT, "logs", `${name}.exit`), "utf8").trim(), 10);
-  return [{ command: cmd, exit_code: exit, log: relative(EVIDENCE_ROOT, logPath).replaceAll("\\", "/") }];
+  return [{
+    command: cmd,
+    exit_code: exit,
+    stdout_stderr: relative(EVIDENCE_ROOT, text).replaceAll("\\", "/"),
+    stdout_stderr_sha256: sha256File(text),
+  }];
 };
 
+/** Everything the manifest points at must be a file git actually tracks. */
+function assertTracked(relativePath: string): void {
+  const tracked = execSync(`git ls-files --error-unmatch -- ${JSON.stringify(relativePath)}`, { encoding: "utf8" });
+  if (!tracked.includes(relativePath)) throw new Error(`EVIDENCE_NOT_TRACKED:${relativePath}`);
+}
+
 const artifacts = (...paths: string[]): Array<{ path: string; sha256: string }> =>
-  paths.map((path) => ({ path: relative(EVIDENCE_ROOT, resolve(path)).replaceAll("\\", "/"), sha256: sha256File(path) }));
+  paths.map((path) => {
+    const relativePath = relative(EVIDENCE_ROOT, resolve(path)).replaceAll("\\", "/");
+    assertTracked(relativePath);
+    return { path: relativePath, sha256: sha256File(path) };
+  });
 
 const env = {
   node: process.version,
@@ -62,6 +82,8 @@ const base = {
   repo_sha: git("rev-parse", "HEAD"),
   repo_branch: git("rev-parse", "--abbrev-ref", "HEAD"),
   repo_dirty_at_capture: git("status", "--porcelain").length > 0,
+  frozen_code_sha: git("rev-parse", "HEAD"),
+  frozen_commit_note: "Evidence ran against this commit with a clean tree. The manifest itself is committed on top and changes no src/, tests/, contracts/, tools/ or package.json file; tools/m2.1-evidence-integrity.mjs verifies that.",
   upstream_shas: { openfilm: OPENFILM_SHA, hypit: HYPIT_SHA },
   environment: env,
   fixture_manifest_sha256: treeSha("tests/fixtures/m2.1/openfilm-project"),
@@ -85,7 +107,7 @@ const cases: Case[] = [
       "the projection reports 3 stable clip ids, integer half-open ranges 0-300/300-600/600-900 and fps 30/1",
       "the legacy 134-test D2-D4.2.1 suite still passes unchanged",
     ],
-    artifacts: artifacts("docs/evidence/M2/M2.1/logs/m21.log", "docs/evidence/M2/M2.1/logs/check.log"),
+    artifacts: artifacts("docs/evidence/M2/M2.1/logs/m21.txt", "docs/evidence/M2/M2.1/logs/check.txt"),
   },
   {
     case_id: "EN-01.a",
@@ -98,7 +120,7 @@ const cases: Case[] = [
       "a binding whose engine_upstream_sha differs from the pinned upstream throws PROJECT_ATTENTION_REQUIRED",
       "the store exposes no migration mutator, because that belongs to M2.3",
     ],
-    artifacts: artifacts("docs/evidence/M2/M2.1/logs/m21.log"),
+    artifacts: artifacts("docs/evidence/M2/M2.1/logs/m21.txt"),
   },
   {
     case_id: "EN-02",
@@ -106,7 +128,7 @@ const cases: Case[] = [
     title: "每个 native 写入口 direct bypass 均 translated 或拒绝",
     status: "PASSED",
     evidence_kind: ["schema_unit", "http_integration"],
-    commands: [...commands("m21"), ...commands("gate-mutation-check")],
+    commands: [...commands("m21"), ...commands("mutation-gates")],
     assertions: [
       "all 10 rows of the verified OpenFilm inventory plus the audio dimension are registered, each exactly once",
       "every production policy is translated, translated_host_service, blocked or read_only; zero unknown",
@@ -115,9 +137,9 @@ const cases: Case[] = [
       "materialize, adopt, impact, migrate-copy and history restore all answer 404",
       "mutation MUT-B (an entry forced to policy=unknown) makes this gate fail, so the gate bites",
     ],
-    artifacts: artifacts("docs/evidence/M2/M2.1/logs/m21.log",
-      "docs/evidence/M2/M2.1/logs/gate-mutation-check.log",
-      "docs/evidence/M2/M2.1/logs/mutation-MUT-B.log"),
+    artifacts: artifacts("docs/evidence/M2/M2.1/logs/m21.txt",
+      "docs/evidence/M2/M2.1/logs/mutation-gates.txt",
+      "docs/evidence/M2/M2.1/logs/mutation-MUT-B.txt"),
   },
   {
     case_id: "EN-02.b",
@@ -131,7 +153,7 @@ const cases: Case[] = [
       "the real upstream probe reports no supported and no unverified OpenFilm write operation",
     ],
     artifacts: artifacts("docs/evidence/M2/M2.1/artifacts/openfilm-upstream-probe.json",
-      "docs/evidence/M2/M2.1/logs/openfilm-probe.log"),
+      "docs/evidence/M2/M2.1/logs/openfilm-probe.txt"),
   },
   {
     case_id: "EN-04",
@@ -148,10 +170,10 @@ const cases: Case[] = [
       "against the real pinned upstream, a stale base is refused with 409 before the mutator runs and film.html is unchanged",
       "mutation MUT-D (declared assets silently skipped) and MUT-E (assets sorted) both make this gate fail",
     ],
-    artifacts: artifacts("docs/evidence/M2/M2.1/logs/golden-python.log",
+    artifacts: artifacts("docs/evidence/M2/M2.1/logs/golden-python.txt",
       "docs/evidence/M2/M2.1/artifacts/openfilm-upstream-probe.json",
-      "docs/evidence/M2/M2.1/logs/mutation-MUT-D.log",
-      "docs/evidence/M2/M2.1/logs/mutation-MUT-E.log",
+      "docs/evidence/M2/M2.1/logs/mutation-MUT-D.txt",
+      "docs/evidence/M2/M2.1/logs/mutation-MUT-E.txt",
       "tests/m2.1-golden/source-digest-v1.vectors.json"),
   },
   {
@@ -160,7 +182,7 @@ const cases: Case[] = [
     title: "scene/worker 不读 secret、任意文件或未授权网络；凭据扫描留证",
     status: "PASSED",
     evidence_kind: ["security_scan", "credential_scan", "real_upstream_probe"],
-    commands: [...commands("secret-scan"), ...commands("gate-mutation-check")],
+    commands: [...commands("secret-scan"), ...commands("mutation-gates")],
     assertions: [
       "the pinned upstream is refused unless its checkout HEAD equals the full SHA e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
       "the upstream module is loaded through a guarded dynamic import after that check, never a static vendor import",
@@ -170,8 +192,8 @@ const cases: Case[] = [
       "mutation MUT-C (a production import of a spike) makes the dependency gate fail",
     ],
     artifacts: artifacts("docs/evidence/M2/M2.1/security/credential-scan.json",
-      "docs/evidence/M2/M2.1/logs/secret-scan.log",
-      "docs/evidence/M2/M2.1/logs/mutation-MUT-C.log"),
+      "docs/evidence/M2/M2.1/logs/secret-scan.txt",
+      "docs/evidence/M2/M2.1/logs/mutation-MUT-C.txt"),
   },
   {
     case_id: "TM-01",
@@ -187,7 +209,7 @@ const cases: Case[] = [
       "30/1 is the only verified frame rate; any other rate is refused rather than degraded",
       "the legacy float frame_rate field is untouched and derived one way only",
     ],
-    artifacts: artifacts("docs/evidence/M2/M2.1/logs/m21.log"),
+    artifacts: artifacts("docs/evidence/M2/M2.1/logs/m21.txt"),
   },
   {
     case_id: "TM-02",
@@ -202,7 +224,7 @@ const cases: Case[] = [
       "a range crossing a clip boundary is rejected when the operation is scoped to one clip",
       "the legacy end_frame_exclusive naming is unchanged and end_frame is not introduced",
     ],
-    artifacts: artifacts("docs/evidence/M2/M2.1/logs/m21.log"),
+    artifacts: artifacts("docs/evidence/M2/M2.1/logs/m21.txt"),
   },
   {
     case_id: "TM-03",
@@ -215,7 +237,7 @@ const cases: Case[] = [
       "a shorter asset is refused with 422 MISSING_ASSET stating that Narralens does not loop, freeze or retime",
       "a non-integer or non-positive asset length is refused as INVALID_MEDIA rather than treated as short",
     ],
-    artifacts: artifacts("docs/evidence/M2/M2.1/logs/m21.log"),
+    artifacts: artifacts("docs/evidence/M2/M2.1/logs/m21.txt"),
   },
   {
     case_id: "AT-CONTRACT-01",
@@ -229,7 +251,7 @@ const cases: Case[] = [
       "the ApiErrorCode union, the JSON Schema enum and the alias table all carry the same 29 codes",
       "the engine route response is validated against its schema before it is returned",
     ],
-    artifacts: artifacts("docs/evidence/M2/M2.1/logs/contracts.log", "docs/evidence/M2/M2.1/logs/check.log"),
+    artifacts: artifacts("docs/evidence/M2/M2.1/logs/contracts.txt", "docs/evidence/M2/M2.1/logs/check.txt"),
   },
   {
     case_id: "AT-E2E-01",
@@ -242,22 +264,22 @@ const cases: Case[] = [
       "external-change detection runs against a throwaway copy of the real D1 fixture and never mutates the repository's own project bytes",
       "the full suite reports 25 files and 227 tests passing with the production Vite build succeeding",
     ],
-    artifacts: artifacts("docs/evidence/M2/M2.1/logs/check.log", "docs/evidence/M2/M2.1/logs/build.log"),
+    artifacts: artifacts("docs/evidence/M2/M2.1/logs/check.txt", "docs/evidence/M2/M2.1/logs/build.txt"),
   },
   {
     case_id: "GATE-FITNESS",
     title: "14 条架构 fitness 规则逐条断言，并用变异测试证明门会失败",
     status: "PASSED",
     evidence_kind: ["architecture_fitness", "mutation_test"],
-    commands: [...commands("gate-mutation-check"), ...commands("check")],
+    commands: [...commands("mutation-gates"), ...commands("check")],
     assertions: [
       "all 14 fitness rules are asserted individually, not sampled",
       "6 deliberate violations were introduced one at a time and every owning suite failed as required (MUT-A..MUT-F)",
       "each mutation was reverted and the source tree was verified clean afterwards",
     ],
-    artifacts: artifacts("docs/evidence/M2/M2.1/logs/gate-mutation-check.log",
-      "docs/evidence/M2/M2.1/logs/mutation-MUT-A.log",
-      "docs/evidence/M2/M2.1/logs/mutation-MUT-F.log"),
+    artifacts: artifacts("docs/evidence/M2/M2.1/logs/mutation-gates.txt",
+      "docs/evidence/M2/M2.1/logs/mutation-MUT-A.txt",
+      "docs/evidence/M2/M2.1/logs/mutation-MUT-F.txt"),
   },
   {
     case_id: "OF-REAL-UPSTREAM",
@@ -273,7 +295,7 @@ const cases: Case[] = [
       "the upstream still returns rebased:true for a stale base, and Narralens still refuses it",
     ],
     artifacts: artifacts("docs/evidence/M2/M2.1/artifacts/openfilm-upstream-probe.json",
-      "docs/evidence/M2/M2.1/logs/openfilm-probe.log"),
+      "docs/evidence/M2/M2.1/logs/openfilm-probe.txt"),
   },
 ];
 

@@ -10,7 +10,7 @@ set -u
 cd "$(dirname "$0")/.." || exit 1
 EVIDENCE="${1:-docs/evidence/M2/M2.1/logs}"
 mkdir -p "$EVIDENCE"
-LOG="$EVIDENCE/gate-mutation-check.log"
+LOG="$EVIDENCE/gate-mutation-check.txt"
 : > "$LOG"
 
 results=0
@@ -41,9 +41,9 @@ assert open(path, encoding="utf-8").read() == mutated, "MUTATION_WRITE_MISMATCH"
 print(f"mutation applied ({len(current)} -> {len(mutated)} bytes)")
 PY
 
-  corepack pnpm exec vitest run --config vitest.config.ts "$suite" > "$EVIDENCE/mutation-$id.log" 2>&1
+  corepack pnpm exec vitest run --config vitest.config.ts "$suite" > "$EVIDENCE/mutation-$id.txt" 2>&1
   local status=$?
-  tail -n 12 "$EVIDENCE/mutation-$id.log" >> "$LOG"
+  tail -n 12 "$EVIDENCE/mutation-$id.txt" >> "$LOG"
 
   git checkout -- "$file" 2>/dev/null
   git checkout HEAD -- "$file" 2>/dev/null
