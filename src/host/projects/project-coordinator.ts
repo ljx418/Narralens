@@ -13,6 +13,8 @@ import type { NativeWriteGateway } from "../engine/native-write-gateway.js";
 import { SnapshotStore } from "./snapshot-store.js";
 import type { ProjectDescriptor } from "./project-catalog.js";
 import type { SourceDigestResult } from "../engine/source-digest-v1.js";
+import type { Outbox } from "../outbox.js";
+import type { PersistentJobStore } from "../persistent-job-store.js";
 
 /**
  * ProjectCoordinator (M2.2 plan §1).
@@ -39,6 +41,8 @@ export interface CoordinatorDeps {
   readonly gateway: NativeWriteGateway;
   readonly locks: LockService;
   readonly snapshots: SnapshotStore;
+  readonly outbox: Outbox;
+  readonly jobs: PersistentJobStore;
   /** Reads the project's current source closure. Injected so the engine owns its closure. */
   readonly sourceFor: (projectId: string) => Promise<ResolvedSource>;
   /** The same closure, computed now. Used to detect an out-of-band change. */
@@ -59,6 +63,7 @@ export interface CommitInput {
 export interface RecoveryReport {
   readonly transactions_marked_recovering: number;
   readonly outbox_pending: number;
+  readonly outbox_delivered: number;
   readonly leases_expired: number;
   readonly attention_projects: string[];
 }
@@ -269,18 +274,33 @@ export class ProjectCoordinator {
 
   // ── recovery order (plan §8) ────────────────────────────────────────────────────────
 
-  /** Journal recovery → outbox replay → lease reclaim → report attention. */
+  /**
+   * The frozen startup order (plan §8):
+   * open stores → journal recovery → outbox replay → reclaim leases → report attention.
+   *
+   * Write routes must stay closed while anything is in attention, which is what
+   * `recoverStatus` decides per project afterwards.
+   */
   async recoverOnStart(now = new Date()): Promise<RecoveryReport> {
     let transactionsMarkedRecovering = 0;
     for (const transaction of this.deps.store.incompleteTransactions()) {
       this.deps.store.markRecovering(transaction.transaction_id, "CRASH_RECOVERY_REQUIRED", now);
       transactionsMarkedRecovering += 1;
     }
+    const delivery = await this.deps.outbox.replay(now);
+    const leasesExpired = this.deps.jobs.reapExpiredLeases(now);
+    const attention = new Set(this.deps.store.projectsInAttention());
+    for (const abandoned of delivery.abandoned) {
+      // An event nobody could deliver is a condition an operator must see, not a silent drop.
+      this.deps.store.markAttention("outbox", `txn_outbox_${abandoned.event_id}`,
+        "OUTBOX_DELIVERY_EXHAUSTED", `${abandoned.topic}/${abandoned.consumer} abandoned after ${delivery.abandoned.length} event(s)`);
+    }
     return {
       transactions_marked_recovering: transactionsMarkedRecovering,
       outbox_pending: this.deps.store.pendingOutboxCount(),
-      leases_expired: this.deps.store.expireStaleLeases(now),
-      attention_projects: this.deps.store.projectsInAttention(),
+      outbox_delivered: delivery.delivered,
+      leases_expired: leasesExpired.length,
+      attention_projects: [...attention],
     };
   }
 

@@ -17,6 +17,8 @@ import { HypitReadAdapter } from "../../src/adapters/hypit/hypit-read-adapter.js
 import { HypitWriteAdapter } from "../../src/adapters/hypit/hypit-write-adapter.js";
 import { computeSourceDigest, type SourceDigestResult } from "../../src/host/engine/source-digest-v1.js";
 import { projectDigestRoots } from "../../src/host/projects/snapshot-store.js";
+import { Outbox } from "../../src/host/outbox.js";
+import { PersistentJobStore } from "../../src/host/persistent-job-store.js";
 import type { EditRequest, EditResponse } from "../../src/contracts/types.js";
 import type { ProjectWriteActor } from "../../src/host/projects/project-write-actor.js";
 import type { ResolvedSource } from "../../src/host/projects/project-coordinator.js";
@@ -98,6 +100,8 @@ async function harness(options: { sourceRoot?: string } = {}): Promise<Harness> 
     gateway: new NativeWriteGateway(new NativeMutationRegistry()),
     locks: new LockService(store),
     snapshots: new SnapshotStore({ snapshotsRoot }),
+    outbox: new Outbox(store),
+    jobs: new PersistentJobStore(store),
     sourceFor, digestFor,
   });
   return { coordinator, store, actor, digest: harnessDigest };
@@ -135,6 +139,8 @@ describe("BYP the gateway is in front of every write", () => {
       gateway: new NativeWriteGateway(new NativeMutationRegistry()),
       locks: new LockService(store),
       snapshots: new SnapshotStore({ snapshotsRoot: "var/snapshots" }),
+      outbox: new Outbox(store),
+      jobs: new PersistentJobStore(store),
       sourceFor: async () => ({ engine: "openfilm" as const, engineUpstreamSha: "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
         descriptor: undefined as never, sourceRoot: resolve("fixtures/d1-30s") }),
       digestFor: async () => ({ manifest: { format: "narralens.source-digest-manifest@1.0", engine: "openfilm",

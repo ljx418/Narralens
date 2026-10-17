@@ -269,7 +269,8 @@ export class RevisionStore {
       );
       CREATE TABLE IF NOT EXISTS outbox (
         event_id INTEGER PRIMARY KEY AUTOINCREMENT, topic TEXT NOT NULL, project_id TEXT NOT NULL DEFAULT '',
-        payload_json TEXT NOT NULL, created_at TEXT NOT NULL, delivered_at TEXT, attempts INTEGER NOT NULL DEFAULT 0
+        payload_json TEXT NOT NULL, created_at TEXT NOT NULL, delivered_at TEXT,
+        attempts INTEGER NOT NULL DEFAULT 0, terminal_reason TEXT NOT NULL DEFAULT ''
       );
       CREATE TABLE IF NOT EXISTS outbox_delivery (
         event_id INTEGER NOT NULL, consumer TEXT NOT NULL, delivered_at TEXT NOT NULL,
@@ -474,16 +475,23 @@ export class RevisionStore {
       .get(eventId, consumer) !== undefined;
   }
 
-  /** Returns true when this was the first delivery for that consumer. */
-  recordDelivery(eventId: number, consumer: string, now = new Date()): boolean {
+  /**
+   * Returns true when this was the first delivery for that consumer. The event is closed
+   * only once `expectedConsumers` distinct consumers have acknowledged it — counting rows
+   * alone would never close a one-consumer event.
+   */
+  recordDelivery(eventId: number, consumer: string, expectedConsumers: number, now = new Date()): boolean {
     if (this.consumerAlreadySaw(eventId, consumer)) return false;
     this.#db.exec("BEGIN IMMEDIATE");
     try {
       this.#db.prepare("INSERT OR IGNORE INTO outbox_delivery(event_id, consumer, delivered_at) VALUES(?,?,?)")
         .run(eventId, consumer, now.toISOString());
       this.#db.prepare("UPDATE outbox SET attempts=attempts+1 WHERE event_id=?").run(eventId);
-      const remaining = this.#outboxConsumerCount(eventId);
-      if (remaining === 0) {
+      const acknowledged = Number((this.#db.prepare(
+        "SELECT COUNT(*) AS n FROM outbox_delivery WHERE event_id=?").get(eventId) as { n: number }).n);
+      if (expectedConsumers <= 0) {
+        this.#db.prepare("UPDATE outbox SET delivered_at=? WHERE event_id=?").run(now.toISOString(), eventId);
+      } else if (acknowledged >= expectedConsumers) {
         this.#db.prepare("UPDATE outbox SET delivered_at=? WHERE event_id=?").run(now.toISOString(), eventId);
       }
       this.#db.exec("COMMIT");
@@ -491,8 +499,27 @@ export class RevisionStore {
     return true;
   }
 
-  #outboxConsumerCount(eventId: number): number {
-    return Number((this.#db.prepare("SELECT COUNT(*) AS n FROM outbox_delivery WHERE event_id=?").get(eventId) as { n: number }).n);
+  countOutboxAttempt(eventId: number): void {
+    this.#db.prepare("UPDATE outbox SET attempts=attempts+1 WHERE event_id=?").run(eventId);
+  }
+
+  outboxAttempts(eventId: number): number {
+    return Number((this.#db.prepare("SELECT attempts FROM outbox WHERE event_id=?").get(eventId) as { attempts: number }).attempts);
+  }
+
+  /**
+   * Give up on an event after the attempt ceiling. The row is closed with the reason so
+   * the condition is auditable; it is never deleted, and the commit it came from stands.
+   */
+  abandonOutbox(eventId: number, reason: string, now = new Date()): void {
+    this.#db.prepare("UPDATE outbox SET delivered_at=?, terminal_reason=? WHERE event_id=?")
+      .run(now.toISOString(), reason, eventId);
+  }
+
+  /** Why an event was closed without every consumer seeing it; empty when normal. */
+  outboxClosedReason(eventId: number): string {
+    const row = this.#db.prepare("SELECT terminal_reason FROM outbox WHERE event_id=?").get(eventId) as { terminal_reason?: string };
+    return row?.terminal_reason ?? "";
   }
 
   /** Leases whose owner stopped reporting. Running jobs never become succeeded here. */

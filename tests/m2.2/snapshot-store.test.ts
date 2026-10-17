@@ -1,4 +1,4 @@
-import { mkdir, mkdtemp, readFile, readdir, rm, writeFile } from "node:fs/promises";
+import { cp, mkdir, mkdtemp, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, resolve } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
@@ -23,7 +23,10 @@ afterEach(async () => { await Promise.all(created.splice(0).map((path) => rm(pat
 async function workspace(): Promise<{ sourceRoot: string; snapshotsRoot: string }> {
   const base = await mkdtemp(resolve(tmpdir(), "narralens-m22-snap-"));
   created.push(base);
-  await import("node:fs/promises").then(async (fs) => { await fs.cp("fixtures/d1-30s", resolve(base, "project"), { recursive: true }); });
+  // A dedicated six-file fixture, not the 135 MB D1 project: these tests fsync every file
+  // in the closure eleven times over, and copying a 135 MB tree made them time out under a
+  // fully parallel run for no extra coverage.
+  await cp("tests/fixtures/m2.1/snapshot-project", resolve(base, "project"), { recursive: true });
   return { sourceRoot: resolve(base, "project"), snapshotsRoot: resolve(base, "snapshots") };
 }
 

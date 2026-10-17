@@ -253,5 +253,13 @@ cmp -s "$SCRATCH/o-before.ts" "$SCRATCH/o-after.ts" && { echo "MUT-O anchor not 
 run_case MUT-O "lease CAS stops requiring a queued job" src/host/projects/revision-store.ts \
   tests/m2.2/persistent-job-store.test.ts "$SCRATCH/o-before.ts" "$SCRATCH/o-after.ts"
 
+# P: outbox replay stops deduplicating by consumer (M2.2 JB-06).
+cp src/host/outbox.ts "$SCRATCH/p-before.ts"
+sed 's/        if (this.#store.consumerAlreadySaw(event.event_id, registration.consumer)) {/        if (false \&\& this.#store.consumerAlreadySaw(event.event_id, registration.consumer)) {/' \
+  "$SCRATCH/p-before.ts" > "$SCRATCH/p-after.ts"
+cmp -s "$SCRATCH/p-before.ts" "$SCRATCH/p-after.ts" && { echo "MUT-P anchor not found" >&2; exit 2; }
+run_case MUT-P "outbox replay stops deduplicating by consumer" src/host/outbox.ts \
+  tests/m2.2/outbox.test.ts "$SCRATCH/p-before.ts" "$SCRATCH/p-after.ts"
+
 echo "SUMMARY cases=$results gates_that_failed_as_required=$bites" | tee -a "$LOG"
 [ "$results" -eq "$bites" ] || exit 1

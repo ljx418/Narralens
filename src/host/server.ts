@@ -14,6 +14,7 @@ import { HttpError, normalizeError } from "./api-error.js";
 import { AssetImportService } from "./assets/asset-import-service.js";
 import { JobStore } from "./job-store.js";
 import { PersistentJobStore } from "./persistent-job-store.js";
+import { Outbox } from "./outbox.js";
 import { ProjectCatalog, type ProjectDescriptor } from "./projects/project-catalog.js";
 import { ProjectWriteActor } from "./projects/project-write-actor.js";
 import { InMemoryProjectOperationQueue, type ProjectOperationQueue } from "./projects/project-operation-queue.js";
@@ -45,6 +46,7 @@ export class NarralensHost {
   readonly catalog: ProjectCatalog;
   /** M2.2: durable by default; the in-memory JobStore stays as the legacy implementation. */
   readonly jobs: PersistentJobStore | JobStore;
+  readonly outbox: Outbox;
   readonly runner: ControlledAgentRunner;
   readonly proposals: ProposalAdapter;
   readonly comparisons: ProposalComparisonAdapter;
@@ -75,6 +77,7 @@ export class NarralensHost {
       || dependencies.imports.revisions !== this.revisions || dependencies.imports.operations !== this.operations
       || dependencies.imports.registry !== this.writes.assets)) throw new Error("HOST_IMPORT_DEPENDENCY_MISMATCH");
     this.jobs = dependencies.jobs ?? new PersistentJobStore(this.revisions);
+    this.outbox = new Outbox(this.revisions);
     this.imports = dependencies.imports ?? new AssetImportService(this.catalog, this.writes.assets, this.revisions, this.operations);
     this.engines = dependencies.engines ?? defaultEngineRegistry(this);
     this.sessionExpiresAt = new Date(Date.now() + (dependencies.sessionTtlMs ?? 3_600_000));
