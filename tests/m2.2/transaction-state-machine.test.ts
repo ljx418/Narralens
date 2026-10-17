@@ -44,12 +44,13 @@ describe("JRNL coordinator transaction state machine", () => {
     begin(target);
     const illegal: Array<[string, string]> = [
       ["received", "committed"],        // skipping stages
-      ["received", "prepared"],
-      ["committed", "prepared"],        // committed is terminal
+      ["received", "prepared"],         // skipping stages
+      ["committed", "prepared"],        // committed is terminal, no successor
       ["prepared", "validated"],        // backwards
+      ["received", "recovering"],       // recovery-only, unreachable from transition()
       ["received", "recovering"],       // recovery-only state, unreachable from transition()
       ["committed", "attention"],       // committed is terminal
-      ["preconditions_checked", "attention"],
+      ["preconditions_checked", "committed"],      // attention is a sibling of committed, not a step
     ];
     for (const [from, to] of illegal) {
       expect(() => target.transition("txn_1", from as never, to as never), `${from}->${to}`)

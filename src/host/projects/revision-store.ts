@@ -155,11 +155,16 @@ export class RevisionStore {
       this.#db.exec("ALTER TABLE edit_journal ADD COLUMN manifest_sha TEXT NOT NULL DEFAULT ''");
     }
     const stateColumns = this.#db.prepare("PRAGMA table_info(project_state)").all() as Array<{ name: string }>;
+    // Text columns and the counter are added separately: control_revision takes part in
+    // comparisons, so it must be INTEGER and must never be stored as TEXT (M2.2 plan §2).
     for (const column of ["source_digest", "source_digest_observed", "source_digest_detected_at",
-      "control_revision", "attention_reason"]) {
+      "attention_reason"]) {
       if (!stateColumns.some((existing) => existing.name === column)) {
         this.#db.exec(`ALTER TABLE project_state ADD COLUMN ${column} TEXT NOT NULL DEFAULT ''`);
       }
+    }
+    if (!stateColumns.some((existing) => existing.name === "control_revision")) {
+      this.#db.exec("ALTER TABLE project_state ADD COLUMN control_revision INTEGER NOT NULL DEFAULT 0");
     }
     // M2.2 durable layer. One database, no second revision scale, no second timeline.
     this.#db.exec(`
@@ -333,7 +338,7 @@ export class RevisionStore {
     this.ensureProject(projectId, initialRevision);
     this.#db.exec("BEGIN IMMEDIATE");
     try {
-      this.#db.prepare("UPDATE project_state SET control_revision=control_revision+1, updated_at=? WHERE project_id=?")
+      this.#db.prepare("UPDATE project_state SET control_revision=CAST(control_revision AS INTEGER)+1, updated_at=? WHERE project_id=?")
         .run(now.toISOString(), projectId);
       this.#db.exec("COMMIT");
     } catch (error) { this.#db.exec("ROLLBACK"); throw error; }
