@@ -370,7 +370,7 @@ function json(response: ServerResponse, status: number, value: unknown): void {
  * project can never resolve to two engines (AC-001).
  */
 function defaultEngineRegistry(host: NarralensHost): EngineRegistry {
-  const bindings = new EngineBindingStore();
+  const bindings = new EngineBindingStore(host.revisions);
   bindings.bind("d1-30s", "hypit", { createdAt: "1970-01-01T00:00:00.000Z" });
   const hypit = new HypitEngineAdapter({
     catalog: host.catalog,

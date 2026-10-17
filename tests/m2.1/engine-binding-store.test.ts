@@ -4,13 +4,24 @@ import {
   EngineBindingStore, HYPIT_UPSTREAM_SHA, OPENFILM_UPSTREAM_SHA, upstreamShaFor,
 } from "../../src/host/engine/engine-binding-store.js";
 import { EngineRegistry } from "../../src/host/engine/engine-registry.js";
+import { RevisionStore } from "../../src/host/projects/revision-store.js";
 import type { EnginePort } from "../../src/host/engine/engine-port.js";
 
 /** AC-001: exactly one writable engine per project, enforced by the schema. */
 
 const stores: EngineBindingStore[] = [];
-function store(): EngineBindingStore { const created = new EngineBindingStore(); stores.push(created); return created; }
-afterEach(() => { while (stores.length > 0) stores.pop()!.close(); });
+const revisionStores: RevisionStore[] = [];
+function store(): EngineBindingStore {
+  const revisions = new RevisionStore();
+  revisionStores.push(revisions);
+  const created = new EngineBindingStore(revisions);
+  stores.push(created);
+  return created;
+}
+afterEach(() => {
+  while (stores.length > 0) stores.pop();
+  while (revisionStores.length > 0) revisionStores.pop()!.close();
+});
 
 describe("EngineBindingStore", () => {
   it("AC-001 writes one binding and refuses a second for the same project", () => {

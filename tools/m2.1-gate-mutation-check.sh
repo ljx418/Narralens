@@ -23,7 +23,8 @@ run_case() {
     echo "command: corepack pnpm exec vitest run --config vitest.config.ts $suite"
   } | tee -a "$LOG"
 
-  # Apply the mutation.
+  # Snapshot the pristine file, then apply the mutation.
+  cp "$file" "$SCRATCH/$(basename "$file").pristine"
   python3 - "$file" "$@" <<'PY' 2>&1 | tee -a "$LOG"
 import sys, io
 path, before_path, after_path = sys.argv[1], sys.argv[2], sys.argv[3]
@@ -45,8 +46,11 @@ PY
   local status=$?
   tail -n 12 "$EVIDENCE/mutation-$id.txt" >> "$LOG"
 
-  git checkout -- "$file" 2>/dev/null
-  git checkout HEAD -- "$file" 2>/dev/null
+  # Restore from the copy taken before the mutation, never from git: `git checkout` restores
+  # from the index and would silently discard uncommitted work in the file under test.
+  if [ -f "$SCRATCH/$(basename "$file").pristine" ]; then
+    cp "$SCRATCH/$(basename "$file").pristine" "$file"
+  fi
 
   results=$((results + 1))
   if [ "$status" -ne 0 ]; then
@@ -185,6 +189,22 @@ sed 's/  if (dirty === null) {/  if (false \&\& dirty === null) {/' \
 cmp -s "$SCRATCH/l-before.ts" "$SCRATCH/l-after.ts" && { echo "MUT-L anchor not found" >&2; exit 2; }
 run_case MUT-L "upstream loader skips clean verification when git status fails" src/adapters/openfilm/openfilm-upstream.ts \
   tests/m2.1/openfilm-upstream-lock.test.ts "$SCRATCH/l-before.ts" "$SCRATCH/l-after.ts"
+
+# M: the coordinator state machine stops checking its predecessor (M2.2 JRNL).
+cp src/host/projects/revision-store.ts "$SCRATCH/m-before.ts"
+sed 's/WHERE transaction_id=? AND state=?`)/WHERE transaction_id=?`)/' \
+  "$SCRATCH/m-before.ts" > "$SCRATCH/m-after.ts"
+cmp -s "$SCRATCH/m-before.ts" "$SCRATCH/m-after.ts" && { echo "MUT-M anchor not found" >&2; exit 2; }
+run_case MUT-M "transition stops requiring its predecessor" src/host/projects/revision-store.ts \
+  tests/m2.2/transaction-state-machine.test.ts "$SCRATCH/m-before.ts" "$SCRATCH/m-after.ts"
+
+# N: a journal step stops requiring its predecessor (M2.2 JRNL, legacy journal half).
+cp src/host/projects/revision-store.ts "$SCRATCH/n-before.ts"
+sed 's/WHERE transaction_id=? AND state IN (\${placeholders})`)/WHERE transaction_id=?`)/' \
+  "$SCRATCH/n-before.ts" > "$SCRATCH/n-after.ts"
+cmp -s "$SCRATCH/n-before.ts" "$SCRATCH/n-after.ts" && { echo "MUT-N anchor not found" >&2; exit 2; }
+run_case MUT-N "advanceJournal stops requiring its predecessor" src/host/projects/revision-store.ts \
+  tests/m2.2/journal-predecessor.test.ts "$SCRATCH/n-before.ts" "$SCRATCH/n-after.ts"
 
 echo "SUMMARY cases=$results gates_that_failed_as_required=$bites" | tee -a "$LOG"
 [ "$results" -eq "$bites" ] || exit 1

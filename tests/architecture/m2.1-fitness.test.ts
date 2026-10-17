@@ -222,9 +222,14 @@ describe("fitness 10-14: stage-specific invariants", () => {
   it("14. the binding is re-checked against the pinned upstream on every read", () => {
     const registrySource = readFileSync(resolve(REPO, "src/host/engine/engine-registry.ts"), "utf8");
     expect(registrySource).toContain("resolveVerified");
-    const storeSource = readFileSync(resolve(REPO, "src/host/engine/engine-binding-store.ts"), "utf8");
-    expect(storeSource).toMatch(/PRIMARY KEY/u);
-    expect(storeSource).toMatch(/CREATE UNIQUE INDEX[\s\S]*engine_binding_single_active/u);
+    // M2.2 folded the table and its statements into RevisionStore, so the single-binding
+    // guarantee now lives there; the store class is a typed face over it.
+    const storeSource = readFileSync(resolve(REPO, "src/host/projects/revision-store.ts"), "utf8");
+    expect(storeSource).toMatch(/CREATE TABLE IF NOT EXISTS engine_binding \([\s\S]*?project_id TEXT PRIMARY KEY/u);
+    expect(storeSource).toMatch(/CREATE UNIQUE INDEX IF NOT EXISTS engine_binding_single_active/u);
+    const facade = readFileSync(resolve(REPO, "src/host/engine/engine-binding-store.ts"), "utf8");
+    expect(facade).not.toMatch(/DatabaseSync/u);
+    expect(facade).not.toMatch(/CREATE TABLE/u);
   });
 });
 
