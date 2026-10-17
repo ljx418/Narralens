@@ -154,6 +154,25 @@ BFS 顺序本身由「roots 按字节序 + 文件内引用按匹配偏移」固�
 
 两者均为 40 位小写 hex；`engine_upstream_sha` 的运行时校验只接受该形状，不静默放宽到 64 位。
 
+## 5.5 D-11 实现中发现并固定的两处确定性细节
+
+实现 §5.4 时发现两处「两个实现者可能做出不同选择」的空隙，已在计划 §5.4.2/§5.4.1a/§5.4.1 中钉死：
+
+1. **`entry` 是 Host 声明的第一个 root，不是排序后的第一个。**
+   原措辞「roots 排序…第一个 root → entry」在实现时会把 `assets/narration.vtt` 这类
+   按字节序更靠前的附属文件提升为 `entry`，把真正的 `film.html` 降级为 `html`。
+   排序只决定遍历顺序；`entry` 由声明顺序决定。
+2. **被引用文件允许相对目录使用 `..`。**
+   scene 引用 `../assets/theme.css` 是正常工程结构。`..` 只在**声明的 roots** 中禁止；
+   引用中的 `..` 被消解后必须仍落在 root 内，由 §5.4.2 第 7 条的 realpath 包含性判定兜底。
+3. **`url( … )` 的未加引号形式必须抽取。**
+   `url(a.png)` 与 `url("a.png")` 在真实 CSS 中同样常见；只匹配带引号形式会让闭包漏文件，
+   直接违反 AC-006「完整引用闭包」。
+
+同时澄清：数组排序属于 **manifest 构造**（进入 canonical 之前），`canonicalJson` 自身不重排数组。
+因此黄金向量 V03（`files[]` 重排）期望 digest **改变**，而「声明 root 顺序不影响结果」
+属于解析器性质，由 `tests/m2.1/source-digest-v1.test.ts` 断言，不属于 manifest 向量。
+
 ## 6. 命名与顺序冻结
 
 - 网关模块名统一为 `src/host/engine/native-write-gateway.ts`（导出 `NativeWriteGateway`），
