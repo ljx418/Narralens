@@ -200,7 +200,7 @@ run_case MUT-M "transition stops requiring its predecessor" src/host/projects/re
 
 # N: a journal step stops requiring its predecessor (M2.2 JRNL, legacy journal half).
 cp src/host/projects/revision-store.ts "$SCRATCH/n-before.ts"
-sed 's/WHERE transaction_id=? AND state IN (\${placeholders})`)/WHERE transaction_id=?`)/' \
+sed 's/    if (changed !== 1) throw new Error(`INVALID_JOURNAL_TRANSITION:/    if (false) throw new Error(`INVALID_JOURNAL_TRANSITION:/' \
   "$SCRATCH/n-before.ts" > "$SCRATCH/n-after.ts"
 cmp -s "$SCRATCH/n-before.ts" "$SCRATCH/n-after.ts" && { echo "MUT-N anchor not found" >&2; exit 2; }
 run_case MUT-N "advanceJournal stops requiring its predecessor" src/host/projects/revision-store.ts \
