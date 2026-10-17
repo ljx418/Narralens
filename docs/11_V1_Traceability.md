@@ -95,15 +95,26 @@
 ### Gate M2.1（当前）
 
 - 外审候选：`fc3efb4a53e19bca5ad939bd93e40b1af50a428d`（分支 `migration/m2.1-engine-governance`）；独立 Codex 外审结论 `FAIL_REWORK_REQUIRED`。
-- 证据索引：`docs/evidence/M2/M2.1/evidence-manifest.json`，13 个 case 逐条记录命令、exit code、环境、
-  repo/upstream full SHA、fixture hash、断言与 artifact SHA256；不使用测试总数替代逐 case 状态。
-- 全量回归：`corepack pnpm check` exit 0，25 files / 227 tests，`tsc --noEmit` 与生产 `vite build` 通过；
+- 证据索引：`docs/evidence/M2/M2.1/evidence-manifest.json`，20 个 case（含 `ER-*` 外审返修 case）逐条记录
+  命令、exit code、stdout/stderr、环境、repo/upstream full SHA、fixture hash、断言与 artifact SHA256；
+  不使用测试总数替代逐 case 状态。
+- 全量回归：`corepack pnpm check` exit 0，26 files / 254 tests，`tsc --noEmit` 与生产 `vite build` 通过；
   134 条 D2–D4.2.1 旧回归保持通过。
-- 真实上游：`e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3` 隔离 worktree 探针 8 项通过，
-  含 stale base 409 且 `film.html` bytes 不变；生产代码无 `vendor/` 静态 import。
-- 变异测试：6 条架构门逐条注入违规并确认会失败（MUT-A..MUT-F）。
+- 真实上游：`e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3` 隔离 worktree 探针 12 项通过，含 tamper 负向探针
+  （篡改隔离副本被 `ENGINE_UNAVAILABLE` 拒绝，原 checkout 仍可加载）；生产代码无 `vendor/` 静态 import。
+- 外审返修：B-01/B-02/M-01..M-05 各自的修复提交、失败测试与复验证据见 manifest 的 `ER-*` case；
+  外审的两个复现实验现为可执行脚本 `tools/m2.1-external-review-repro.mts`，断言的是修复后的行为。
+- 返修后冻结候选提交：`d5355919ce246afdcff53822b9207b209b241103`（证据捕获于干净树）。
+  历史候选 `fc3efb4a53e19bca5ad939bd93e40b1af50a428d` 与 `905c4335e3c7a7838d3a2d4132f732707f9a6a08`
+  保留不改写。
+- 变异测试：11 条架构门逐条注入违规并确认会失败（MUT-A..MUT-K）；MUT-G..MUT-K 分别覆盖 M-01、B-02、
+  M-03、M-04、B-01 的新门。
+- 证据完整性：`node tools/m2.1-evidence-integrity.mjs` 与 `tests/m2.1/evidence-integrity.test.ts` 断言每个
+  被引用文件存在、被 git 跟踪、未被 git-ignore 且摘要仍一致，并断言冻结提交之后无任何
+  `src/ tests/ contracts/ tools/ package.json` 变更。
 - 限制：headed 与人类体验 `NOT_RUN`；`vendor/openfilm` 未登记为 submodule，真实接缝依赖隔离 worktree。
-- 外审：实现会话内部审查已完成；独立外审发现 2 个 BLOCKER、5 个 MAJOR，详见 `docs/evidence/M2/M2.1/reviews/external-review-codex.md`。修复并重新冻结前不得声明出门。
+- 外审：第一轮独立外审 `FAIL_REWORK_REQUIRED`（2 BLOCKER、5 MAJOR）已完成返修；返修后的独立复审结论见
+  manifest 的 `review.external`，复审通过前不得进入 M2.2，也不得声明任何出门。
 
 ## 5. 变更控制
 
