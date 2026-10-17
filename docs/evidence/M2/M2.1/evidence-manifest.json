@@ -3,7 +3,7 @@
   "ticket": "M2.1",
   "title": "EnginePort 与原生写入治理",
   "declaration_ceiling": "M2_1_CONTROL_BOUNDARY_READY",
-  "captured_at": "2026-10-17T09:44:41.984Z",
+  "captured_at": "2026-10-17T10:47:46.559Z",
   "case_count": 20,
   "passed_count": 20,
   "screenshots": [],
@@ -16,10 +16,10 @@
     "M2.1 registers and decides at the gateway, but the gateway is not yet in front of a production write route: this ticket opens no write route, and the only existing write route (POST /api/projects/:id/edits) was already Host-owned via ProjectWriteActor before M2.1. That enforcement point becomes live with M2.2 Coordinator wiring or M4A (ADR-M2.1-001 D-12).",
     "Mocked boundaries: none of the assertions above rely on a mock. The only test doubles are the in-process upstream stub in two OpenFilm unit cases, which are labelled schema_unit and do not close any real gate."
   ],
-  "repo_sha": "5b52b6247e8153c0de81a8e9b66d9482943ca90d",
+  "repo_sha": "488806e788c1c70943d51b887104b4249444862e",
   "repo_branch": "migration/m2.1-engine-governance",
   "repo_dirty_at_capture": false,
-  "frozen_code_sha": "172321c831793e4674bbd157468068c16c13bfe7",
+  "frozen_code_sha": "3cdff441abe998d098e1b1a9a7403d667a74cf82",
   "frozen_commit_note": "Evidence ran against this commit with a clean tree. The manifest itself is committed on top and changes no src/, tests/, contracts/, tools/ or package.json file; tools/m2.1-evidence-integrity.mjs verifies that.",
   "upstream_shas": {
     "openfilm": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
@@ -41,10 +41,7 @@
   "review": {
     "internal": "PASS",
     "internal_record": "reviews/internal-review.md",
-    "external": "REVIEW_PENDING",
-    "external_record": "reviews/external-review-codex.md",
-    "last_external_candidate_sha": "971d02aac88b8f6f1513cbfa52b91923dd033d56",
-    "rework_implementation_sha": "ee58ab5c6a9d4bbdf05e8ac8a394fd75218cae59"
+    "external": "REVIEW_PENDING"
   },
   "cases": [
     {
@@ -62,14 +59,14 @@
         {
           "command": "corepack pnpm test:m2.1",
           "exit_code": 0,
-          "stdout_stderr": "logs/172321c/m21.txt",
-          "stdout_stderr_sha256": "8c30b84ce35ecfe3800a5612a74ae6451155c805a1327d1943ce782f56b9e8c9"
+          "stdout_stderr": "logs/3cdff44/m21.txt",
+          "stdout_stderr_sha256": "9750517b3d9c33c0e5c2803eb2ca9fc02d0cacc179ca80dd802de4d8d8535833"
         },
         {
           "command": "corepack pnpm check",
           "exit_code": 0,
-          "stdout_stderr": "logs/172321c/check.txt",
-          "stdout_stderr_sha256": "bd1a64cd25b6253ea171fdbf535e49949fcc899a4816231c1ca60b5c1105ce09"
+          "stdout_stderr": "logs/3cdff44/check.txt",
+          "stdout_stderr_sha256": "283ad01e70dab2244cf7ccd2310650a75f0d0cd725ef8265ca48695e01b32d77"
         }
       ],
       "assertions": [
@@ -81,12 +78,12 @@
       ],
       "artifacts": [
         {
-          "path": "logs/172321c/m21.txt",
-          "sha256": "8c30b84ce35ecfe3800a5612a74ae6451155c805a1327d1943ce782f56b9e8c9"
+          "path": "logs/3cdff44/m21.txt",
+          "sha256": "9750517b3d9c33c0e5c2803eb2ca9fc02d0cacc179ca80dd802de4d8d8535833"
         },
         {
-          "path": "logs/172321c/check.txt",
-          "sha256": "bd1a64cd25b6253ea171fdbf535e49949fcc899a4816231c1ca60b5c1105ce09"
+          "path": "logs/3cdff44/check.txt",
+          "sha256": "283ad01e70dab2244cf7ccd2310650a75f0d0cd725ef8265ca48695e01b32d77"
         }
       ]
     },
@@ -101,8 +98,8 @@
         {
           "command": "corepack pnpm test:m2.1",
           "exit_code": 0,
-          "stdout_stderr": "logs/172321c/m21.txt",
-          "stdout_stderr_sha256": "8c30b84ce35ecfe3800a5612a74ae6451155c805a1327d1943ce782f56b9e8c9"
+          "stdout_stderr": "logs/3cdff44/m21.txt",
+          "stdout_stderr_sha256": "9750517b3d9c33c0e5c2803eb2ca9fc02d0cacc179ca80dd802de4d8d8535833"
         }
       ],
       "assertions": [
@@ -112,8 +109,8 @@
       ],
       "artifacts": [
         {
-          "path": "logs/172321c/m21.txt",
-          "sha256": "8c30b84ce35ecfe3800a5612a74ae6451155c805a1327d1943ce782f56b9e8c9"
+          "path": "logs/3cdff44/m21.txt",
+          "sha256": "9750517b3d9c33c0e5c2803eb2ca9fc02d0cacc179ca80dd802de4d8d8535833"
         }
       ]
     },
@@ -132,14 +129,14 @@
         {
           "command": "corepack pnpm test:m2.1",
           "exit_code": 0,
-          "stdout_stderr": "logs/172321c/m21.txt",
-          "stdout_stderr_sha256": "8c30b84ce35ecfe3800a5612a74ae6451155c805a1327d1943ce782f56b9e8c9"
+          "stdout_stderr": "logs/3cdff44/m21.txt",
+          "stdout_stderr_sha256": "9750517b3d9c33c0e5c2803eb2ca9fc02d0cacc179ca80dd802de4d8d8535833"
         },
         {
-          "command": "bash tools/m2.1-gate-mutation-check.sh docs/evidence/M2/M2.1/logs/172321c",
+          "command": "bash tools/m2.1-gate-mutation-check.sh docs/evidence/M2/M2.1/logs/3cdff44",
           "exit_code": 0,
-          "stdout_stderr": "logs/172321c/mutation-gates.txt",
-          "stdout_stderr_sha256": "e911a2cc59e1a1f0bacdd17993ef2dbe02ba2c2a32577b04927c43aef88c0d8a"
+          "stdout_stderr": "logs/3cdff44/mutation-gates.txt",
+          "stdout_stderr_sha256": "a6007e68eb64e8b57c197ace42a3cbdf07356e6e1d11e80d86eaf75af5e2fc51"
         }
       ],
       "assertions": [
@@ -152,16 +149,16 @@
       ],
       "artifacts": [
         {
-          "path": "logs/172321c/m21.txt",
-          "sha256": "8c30b84ce35ecfe3800a5612a74ae6451155c805a1327d1943ce782f56b9e8c9"
+          "path": "logs/3cdff44/m21.txt",
+          "sha256": "9750517b3d9c33c0e5c2803eb2ca9fc02d0cacc179ca80dd802de4d8d8535833"
         },
         {
-          "path": "logs/172321c/mutation-gates.txt",
-          "sha256": "e911a2cc59e1a1f0bacdd17993ef2dbe02ba2c2a32577b04927c43aef88c0d8a"
+          "path": "logs/3cdff44/mutation-gates.txt",
+          "sha256": "a6007e68eb64e8b57c197ace42a3cbdf07356e6e1d11e80d86eaf75af5e2fc51"
         },
         {
-          "path": "logs/172321c/mutation-MUT-B.txt",
-          "sha256": "bdbf18099fe3d50f4645be1d2d3b46fd63e8cdbcd5a710ad17d3fcafb7e86ebc"
+          "path": "logs/3cdff44/mutation-MUT-B.txt",
+          "sha256": "03e0cb44c95aee6927f323447200f85c8f6a8a9e953c5f81eb30fab4710afc07"
         }
       ]
     },
@@ -177,14 +174,14 @@
         {
           "command": "corepack pnpm test:m2.1",
           "exit_code": 0,
-          "stdout_stderr": "logs/172321c/m21.txt",
-          "stdout_stderr_sha256": "8c30b84ce35ecfe3800a5612a74ae6451155c805a1327d1943ce782f56b9e8c9"
+          "stdout_stderr": "logs/3cdff44/m21.txt",
+          "stdout_stderr_sha256": "9750517b3d9c33c0e5c2803eb2ca9fc02d0cacc179ca80dd802de4d8d8535833"
         },
         {
-          "command": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3  <isolated-worktree>/vendor/openfilm\ncorepack pnpm exec tsx tests/m2.1-probe/openfilm-upstream-probe.mjs <vendorRoot> <projectDir> docs/evidence/M2/M2.1/artifacts/openfilm-upstream-probe.json",
+          "command": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3  /mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm",
           "exit_code": 0,
-          "stdout_stderr": "logs/172321c/openfilm-probe.txt",
-          "stdout_stderr_sha256": "2109e6640c511d3a4610fb0b932f3149c849a192b37708e80407db0f91b92a63"
+          "stdout_stderr": "logs/3cdff44/openfilm-probe.txt",
+          "stdout_stderr_sha256": "b64d2c48570005826cdda7a369cc6ce70fe4b457343909f80c381c7ab7b4a7c9"
         }
       ],
       "assertions": [
@@ -195,11 +192,11 @@
       "artifacts": [
         {
           "path": "artifacts/openfilm-upstream-probe.json",
-          "sha256": "99f11511a8299ca40c7bb9fdb3b35c82c349a41aa643914777784d298e3f8c50"
+          "sha256": "a9c7612246448cb23510ec14d9b35990e93a45f64430f53fda994c579909b617"
         },
         {
-          "path": "logs/172321c/openfilm-probe.txt",
-          "sha256": "2109e6640c511d3a4610fb0b932f3149c849a192b37708e80407db0f91b92a63"
+          "path": "logs/3cdff44/openfilm-probe.txt",
+          "sha256": "b64d2c48570005826cdda7a369cc6ce70fe4b457343909f80c381c7ab7b4a7c9"
         }
       ]
     },
@@ -216,20 +213,20 @@
         {
           "command": "corepack pnpm test:m2.1",
           "exit_code": 0,
-          "stdout_stderr": "logs/172321c/m21.txt",
-          "stdout_stderr_sha256": "8c30b84ce35ecfe3800a5612a74ae6451155c805a1327d1943ce782f56b9e8c9"
+          "stdout_stderr": "logs/3cdff44/m21.txt",
+          "stdout_stderr_sha256": "9750517b3d9c33c0e5c2803eb2ca9fc02d0cacc179ca80dd802de4d8d8535833"
         },
         {
           "command": "python3 -I tests/m2.1-golden/source-digest-v1.golden.py tests/m2.1-golden/source-digest-v1.vectors.json",
           "exit_code": 0,
-          "stdout_stderr": "logs/172321c/golden-python.txt",
+          "stdout_stderr": "logs/3cdff44/golden-python.txt",
           "stdout_stderr_sha256": "8f2c5a37249b1947e403135b6a25029eeb1190b4d094cbb927cc9a3c81c97525"
         },
         {
-          "command": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3  <isolated-worktree>/vendor/openfilm\ncorepack pnpm exec tsx tests/m2.1-probe/openfilm-upstream-probe.mjs <vendorRoot> <projectDir> docs/evidence/M2/M2.1/artifacts/openfilm-upstream-probe.json",
+          "command": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3  /mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm",
           "exit_code": 0,
-          "stdout_stderr": "logs/172321c/openfilm-probe.txt",
-          "stdout_stderr_sha256": "2109e6640c511d3a4610fb0b932f3149c849a192b37708e80407db0f91b92a63"
+          "stdout_stderr": "logs/3cdff44/openfilm-probe.txt",
+          "stdout_stderr_sha256": "b64d2c48570005826cdda7a369cc6ce70fe4b457343909f80c381c7ab7b4a7c9"
         }
       ],
       "assertions": [
@@ -243,20 +240,20 @@
       ],
       "artifacts": [
         {
-          "path": "logs/172321c/golden-python.txt",
+          "path": "logs/3cdff44/golden-python.txt",
           "sha256": "8f2c5a37249b1947e403135b6a25029eeb1190b4d094cbb927cc9a3c81c97525"
         },
         {
           "path": "artifacts/openfilm-upstream-probe.json",
-          "sha256": "99f11511a8299ca40c7bb9fdb3b35c82c349a41aa643914777784d298e3f8c50"
+          "sha256": "a9c7612246448cb23510ec14d9b35990e93a45f64430f53fda994c579909b617"
         },
         {
-          "path": "logs/172321c/mutation-MUT-D.txt",
-          "sha256": "ff0a08799e683b93dcadbc374bcf7cf989e1f0336752799579d86ae7f773ac61"
+          "path": "logs/3cdff44/mutation-MUT-D.txt",
+          "sha256": "dc85a333e6d5f2a55fc8a4a7235a234755c61b989ccdb7040bae9da8c18c5707"
         },
         {
-          "path": "logs/172321c/mutation-MUT-E.txt",
-          "sha256": "21374aeb7e0e3fe68e4da911fe664a5696cea3cc74a41e0d7ccce9ba9f54ba92"
+          "path": "logs/3cdff44/mutation-MUT-E.txt",
+          "sha256": "3a738c5e6c599a099353088570246d8cc336563ab77032ffeafcf2c04f0fce2c"
         },
         {
           "path": "../../../../tests/m2.1-golden/source-digest-v1.vectors.json",
@@ -280,14 +277,14 @@
         {
           "command": "corepack pnpm exec tsx tools/secret-scan.ts",
           "exit_code": 0,
-          "stdout_stderr": "logs/172321c/secret-scan.txt",
-          "stdout_stderr_sha256": "e5acf6bcae1559b3e31685deef72a91f5f264442c00e3d8b8c79ebb86063097e"
+          "stdout_stderr": "logs/3cdff44/secret-scan.txt",
+          "stdout_stderr_sha256": "20df6ba2f32063fab2dc57408774fd79886280ea6d48e8a5ed41dde8263654ec"
         },
         {
-          "command": "bash tools/m2.1-gate-mutation-check.sh docs/evidence/M2/M2.1/logs/172321c",
+          "command": "bash tools/m2.1-gate-mutation-check.sh docs/evidence/M2/M2.1/logs/3cdff44",
           "exit_code": 0,
-          "stdout_stderr": "logs/172321c/mutation-gates.txt",
-          "stdout_stderr_sha256": "e911a2cc59e1a1f0bacdd17993ef2dbe02ba2c2a32577b04927c43aef88c0d8a"
+          "stdout_stderr": "logs/3cdff44/mutation-gates.txt",
+          "stdout_stderr_sha256": "a6007e68eb64e8b57c197ace42a3cbdf07356e6e1d11e80d86eaf75af5e2fc51"
         }
       ],
       "assertions": [
@@ -301,15 +298,15 @@
       "artifacts": [
         {
           "path": "security/credential-scan.json",
-          "sha256": "7345d23a9fc55df9a79c03aa485f546cdf235317526fb55f6160af0f6a5cc8cc"
+          "sha256": "1cf8513a558984278d923486f683248cb6d4d7660da6695bddc847eb08b21f50"
         },
         {
-          "path": "logs/172321c/secret-scan.txt",
-          "sha256": "e5acf6bcae1559b3e31685deef72a91f5f264442c00e3d8b8c79ebb86063097e"
+          "path": "logs/3cdff44/secret-scan.txt",
+          "sha256": "20df6ba2f32063fab2dc57408774fd79886280ea6d48e8a5ed41dde8263654ec"
         },
         {
-          "path": "logs/172321c/mutation-MUT-C.txt",
-          "sha256": "b323d9b160cce67400f1bc46aea7d79717c4b1a1ae383418c33f69a216d7698c"
+          "path": "logs/3cdff44/mutation-MUT-C.txt",
+          "sha256": "cad121ca0defc31cf4114c869554e906c120fb730f5c97d69620476a451d832d"
         }
       ]
     },
@@ -327,8 +324,8 @@
         {
           "command": "corepack pnpm test:m2.1",
           "exit_code": 0,
-          "stdout_stderr": "logs/172321c/m21.txt",
-          "stdout_stderr_sha256": "8c30b84ce35ecfe3800a5612a74ae6451155c805a1327d1943ce782f56b9e8c9"
+          "stdout_stderr": "logs/3cdff44/m21.txt",
+          "stdout_stderr_sha256": "9750517b3d9c33c0e5c2803eb2ca9fc02d0cacc179ca80dd802de4d8d8535833"
         }
       ],
       "assertions": [
@@ -340,8 +337,8 @@
       ],
       "artifacts": [
         {
-          "path": "logs/172321c/m21.txt",
-          "sha256": "8c30b84ce35ecfe3800a5612a74ae6451155c805a1327d1943ce782f56b9e8c9"
+          "path": "logs/3cdff44/m21.txt",
+          "sha256": "9750517b3d9c33c0e5c2803eb2ca9fc02d0cacc179ca80dd802de4d8d8535833"
         }
       ]
     },
@@ -359,8 +356,8 @@
         {
           "command": "corepack pnpm test:m2.1",
           "exit_code": 0,
-          "stdout_stderr": "logs/172321c/m21.txt",
-          "stdout_stderr_sha256": "8c30b84ce35ecfe3800a5612a74ae6451155c805a1327d1943ce782f56b9e8c9"
+          "stdout_stderr": "logs/3cdff44/m21.txt",
+          "stdout_stderr_sha256": "9750517b3d9c33c0e5c2803eb2ca9fc02d0cacc179ca80dd802de4d8d8535833"
         }
       ],
       "assertions": [
@@ -371,8 +368,8 @@
       ],
       "artifacts": [
         {
-          "path": "logs/172321c/m21.txt",
-          "sha256": "8c30b84ce35ecfe3800a5612a74ae6451155c805a1327d1943ce782f56b9e8c9"
+          "path": "logs/3cdff44/m21.txt",
+          "sha256": "9750517b3d9c33c0e5c2803eb2ca9fc02d0cacc179ca80dd802de4d8d8535833"
         }
       ]
     },
@@ -387,8 +384,8 @@
         {
           "command": "corepack pnpm test:m2.1",
           "exit_code": 0,
-          "stdout_stderr": "logs/172321c/m21.txt",
-          "stdout_stderr_sha256": "8c30b84ce35ecfe3800a5612a74ae6451155c805a1327d1943ce782f56b9e8c9"
+          "stdout_stderr": "logs/3cdff44/m21.txt",
+          "stdout_stderr_sha256": "9750517b3d9c33c0e5c2803eb2ca9fc02d0cacc179ca80dd802de4d8d8535833"
         }
       ],
       "assertions": [
@@ -398,8 +395,8 @@
       ],
       "artifacts": [
         {
-          "path": "logs/172321c/m21.txt",
-          "sha256": "8c30b84ce35ecfe3800a5612a74ae6451155c805a1327d1943ce782f56b9e8c9"
+          "path": "logs/3cdff44/m21.txt",
+          "sha256": "9750517b3d9c33c0e5c2803eb2ca9fc02d0cacc179ca80dd802de4d8d8535833"
         }
       ]
     },
@@ -414,14 +411,14 @@
         {
           "command": "corepack pnpm test:contracts",
           "exit_code": 0,
-          "stdout_stderr": "logs/172321c/contracts.txt",
-          "stdout_stderr_sha256": "9e2f1f63d87076b6ee248f872b4c8fa04b88624bf1448f9df7c11c6d07729ec7"
+          "stdout_stderr": "logs/3cdff44/contracts.txt",
+          "stdout_stderr_sha256": "8a0f1f5f87b54ba0ec0dea26a9b72ad8c9a28dd5538abea7a713397e386330d5"
         },
         {
           "command": "corepack pnpm check",
           "exit_code": 0,
-          "stdout_stderr": "logs/172321c/check.txt",
-          "stdout_stderr_sha256": "bd1a64cd25b6253ea171fdbf535e49949fcc899a4816231c1ca60b5c1105ce09"
+          "stdout_stderr": "logs/3cdff44/check.txt",
+          "stdout_stderr_sha256": "283ad01e70dab2244cf7ccd2310650a75f0d0cd725ef8265ca48695e01b32d77"
         }
       ],
       "assertions": [
@@ -432,12 +429,12 @@
       ],
       "artifacts": [
         {
-          "path": "logs/172321c/contracts.txt",
-          "sha256": "9e2f1f63d87076b6ee248f872b4c8fa04b88624bf1448f9df7c11c6d07729ec7"
+          "path": "logs/3cdff44/contracts.txt",
+          "sha256": "8a0f1f5f87b54ba0ec0dea26a9b72ad8c9a28dd5538abea7a713397e386330d5"
         },
         {
-          "path": "logs/172321c/check.txt",
-          "sha256": "bd1a64cd25b6253ea171fdbf535e49949fcc899a4816231c1ca60b5c1105ce09"
+          "path": "logs/3cdff44/check.txt",
+          "sha256": "283ad01e70dab2244cf7ccd2310650a75f0d0cd725ef8265ca48695e01b32d77"
         }
       ]
     },
@@ -453,14 +450,14 @@
         {
           "command": "corepack pnpm check",
           "exit_code": 0,
-          "stdout_stderr": "logs/172321c/check.txt",
-          "stdout_stderr_sha256": "bd1a64cd25b6253ea171fdbf535e49949fcc899a4816231c1ca60b5c1105ce09"
+          "stdout_stderr": "logs/3cdff44/check.txt",
+          "stdout_stderr_sha256": "283ad01e70dab2244cf7ccd2310650a75f0d0cd725ef8265ca48695e01b32d77"
         },
         {
           "command": "corepack pnpm test:m2.1",
           "exit_code": 0,
-          "stdout_stderr": "logs/172321c/m21.txt",
-          "stdout_stderr_sha256": "8c30b84ce35ecfe3800a5612a74ae6451155c805a1327d1943ce782f56b9e8c9"
+          "stdout_stderr": "logs/3cdff44/m21.txt",
+          "stdout_stderr_sha256": "9750517b3d9c33c0e5c2803eb2ca9fc02d0cacc179ca80dd802de4d8d8535833"
         }
       ],
       "assertions": [
@@ -470,12 +467,12 @@
       ],
       "artifacts": [
         {
-          "path": "logs/172321c/check.txt",
-          "sha256": "bd1a64cd25b6253ea171fdbf535e49949fcc899a4816231c1ca60b5c1105ce09"
+          "path": "logs/3cdff44/check.txt",
+          "sha256": "283ad01e70dab2244cf7ccd2310650a75f0d0cd725ef8265ca48695e01b32d77"
         },
         {
-          "path": "logs/172321c/build.txt",
-          "sha256": "02c5422fc15c5a6b83db91a08fb981696c8ffcd46e9038d73ac7da5e88525631"
+          "path": "logs/3cdff44/build.txt",
+          "sha256": "91839afb1fe28a4161c5092fe806f4b26aa8bfaff3e8d9c61c06413f50011115"
         }
       ]
     },
@@ -489,16 +486,16 @@
       ],
       "commands": [
         {
-          "command": "bash tools/m2.1-gate-mutation-check.sh docs/evidence/M2/M2.1/logs/172321c",
+          "command": "bash tools/m2.1-gate-mutation-check.sh docs/evidence/M2/M2.1/logs/3cdff44",
           "exit_code": 0,
-          "stdout_stderr": "logs/172321c/mutation-gates.txt",
-          "stdout_stderr_sha256": "e911a2cc59e1a1f0bacdd17993ef2dbe02ba2c2a32577b04927c43aef88c0d8a"
+          "stdout_stderr": "logs/3cdff44/mutation-gates.txt",
+          "stdout_stderr_sha256": "a6007e68eb64e8b57c197ace42a3cbdf07356e6e1d11e80d86eaf75af5e2fc51"
         },
         {
           "command": "corepack pnpm check",
           "exit_code": 0,
-          "stdout_stderr": "logs/172321c/check.txt",
-          "stdout_stderr_sha256": "bd1a64cd25b6253ea171fdbf535e49949fcc899a4816231c1ca60b5c1105ce09"
+          "stdout_stderr": "logs/3cdff44/check.txt",
+          "stdout_stderr_sha256": "283ad01e70dab2244cf7ccd2310650a75f0d0cd725ef8265ca48695e01b32d77"
         }
       ],
       "assertions": [
@@ -508,16 +505,16 @@
       ],
       "artifacts": [
         {
-          "path": "logs/172321c/mutation-gates.txt",
-          "sha256": "e911a2cc59e1a1f0bacdd17993ef2dbe02ba2c2a32577b04927c43aef88c0d8a"
+          "path": "logs/3cdff44/mutation-gates.txt",
+          "sha256": "a6007e68eb64e8b57c197ace42a3cbdf07356e6e1d11e80d86eaf75af5e2fc51"
         },
         {
-          "path": "logs/172321c/mutation-MUT-A.txt",
-          "sha256": "8835de9eaa3f53cc139e6025111c84354678c4f5b18dcbb848568f4a42192b01"
+          "path": "logs/3cdff44/mutation-MUT-A.txt",
+          "sha256": "dc81f7fc5deecbc6967692bb66db31c316ebee8ff4b1fb5df672d82f3f0669e3"
         },
         {
-          "path": "logs/172321c/mutation-MUT-F.txt",
-          "sha256": "cfbeee43795fae8a81d2ee737633f2d67b599f7d7f0863f1068992de6fb345b8"
+          "path": "logs/3cdff44/mutation-MUT-F.txt",
+          "sha256": "a473458a70fabc74e659ac5a40cfc9bbed50407981eca6957829fcfc483ef660"
         }
       ]
     },
@@ -535,14 +532,14 @@
         {
           "command": "corepack pnpm test:m2.1",
           "exit_code": 0,
-          "stdout_stderr": "logs/172321c/m21.txt",
-          "stdout_stderr_sha256": "8c30b84ce35ecfe3800a5612a74ae6451155c805a1327d1943ce782f56b9e8c9"
+          "stdout_stderr": "logs/3cdff44/m21.txt",
+          "stdout_stderr_sha256": "9750517b3d9c33c0e5c2803eb2ca9fc02d0cacc179ca80dd802de4d8d8535833"
         },
         {
           "command": "corepack pnpm exec tsx tools/m2.1-external-review-repro.mts hypit-visual-asset",
           "exit_code": 0,
-          "stdout_stderr": "logs/172321c/repro-b02.txt",
-          "stdout_stderr_sha256": "694ca5e5b87bc71523551d159c9d9bb5243f90ca645d3c420c2a48d989a8c13b"
+          "stdout_stderr": "logs/3cdff44/repro-b02.txt",
+          "stdout_stderr_sha256": "a51ffc9ccf7f61f4522955ecc44d0f8cfcc5d821a812244312ec03d5c722ac01"
         }
       ],
       "assertions": [
@@ -556,12 +553,12 @@
       ],
       "artifacts": [
         {
-          "path": "logs/172321c/m21.txt",
-          "sha256": "8c30b84ce35ecfe3800a5612a74ae6451155c805a1327d1943ce782f56b9e8c9"
+          "path": "logs/3cdff44/m21.txt",
+          "sha256": "9750517b3d9c33c0e5c2803eb2ca9fc02d0cacc179ca80dd802de4d8d8535833"
         },
         {
-          "path": "logs/172321c/mutation-MUT-K.txt",
-          "sha256": "137125ef81fc557fc6bb4d74aaf71fdb83917986f207cadc118f4ccabec7a671"
+          "path": "logs/3cdff44/mutation-MUT-K.txt",
+          "sha256": "97db4a29f67af288ef90a49296dd6fac1970c85d52bb85bbff11d3d1b0e7612b"
         }
       ]
     },
@@ -578,14 +575,14 @@
         {
           "command": "corepack pnpm test:m2.1",
           "exit_code": 0,
-          "stdout_stderr": "logs/172321c/m21.txt",
-          "stdout_stderr_sha256": "8c30b84ce35ecfe3800a5612a74ae6451155c805a1327d1943ce782f56b9e8c9"
+          "stdout_stderr": "logs/3cdff44/m21.txt",
+          "stdout_stderr_sha256": "9750517b3d9c33c0e5c2803eb2ca9fc02d0cacc179ca80dd802de4d8d8535833"
         },
         {
           "command": "corepack pnpm exec tsx tools/m2.1-external-review-repro.mts hypit-visual-asset",
           "exit_code": 0,
-          "stdout_stderr": "logs/172321c/repro-b02.txt",
-          "stdout_stderr_sha256": "694ca5e5b87bc71523551d159c9d9bb5243f90ca645d3c420c2a48d989a8c13b"
+          "stdout_stderr": "logs/3cdff44/repro-b02.txt",
+          "stdout_stderr_sha256": "a51ffc9ccf7f61f4522955ecc44d0f8cfcc5d821a812244312ec03d5c722ac01"
         }
       ],
       "assertions": [
@@ -597,16 +594,16 @@
       ],
       "artifacts": [
         {
-          "path": "logs/172321c/m21.txt",
-          "sha256": "8c30b84ce35ecfe3800a5612a74ae6451155c805a1327d1943ce782f56b9e8c9"
+          "path": "logs/3cdff44/m21.txt",
+          "sha256": "9750517b3d9c33c0e5c2803eb2ca9fc02d0cacc179ca80dd802de4d8d8535833"
         },
         {
-          "path": "logs/172321c/repro-b02.txt",
-          "sha256": "694ca5e5b87bc71523551d159c9d9bb5243f90ca645d3c420c2a48d989a8c13b"
+          "path": "logs/3cdff44/repro-b02.txt",
+          "sha256": "a51ffc9ccf7f61f4522955ecc44d0f8cfcc5d821a812244312ec03d5c722ac01"
         },
         {
-          "path": "logs/172321c/mutation-MUT-H.txt",
-          "sha256": "c12e30443453bc8164e0cf6175443e317ef8e6fe7479762b2c753809dd5d2c9b"
+          "path": "logs/3cdff44/mutation-MUT-H.txt",
+          "sha256": "e86e025edd81fe0e29133fa1e1ea9bce0387e1c356affa4c437d33db75f7636f"
         }
       ]
     },
@@ -624,14 +621,14 @@
         {
           "command": "corepack pnpm test:m2.1",
           "exit_code": 0,
-          "stdout_stderr": "logs/172321c/m21.txt",
-          "stdout_stderr_sha256": "8c30b84ce35ecfe3800a5612a74ae6451155c805a1327d1943ce782f56b9e8c9"
+          "stdout_stderr": "logs/3cdff44/m21.txt",
+          "stdout_stderr_sha256": "9750517b3d9c33c0e5c2803eb2ca9fc02d0cacc179ca80dd802de4d8d8535833"
         },
         {
-          "command": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3  <isolated-worktree>/vendor/openfilm\ncorepack pnpm exec tsx tests/m2.1-probe/openfilm-upstream-probe.mjs <vendorRoot> <projectDir> docs/evidence/M2/M2.1/artifacts/openfilm-upstream-probe.json",
+          "command": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3  /mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm",
           "exit_code": 0,
-          "stdout_stderr": "logs/172321c/openfilm-probe.txt",
-          "stdout_stderr_sha256": "2109e6640c511d3a4610fb0b932f3149c849a192b37708e80407db0f91b92a63"
+          "stdout_stderr": "logs/3cdff44/openfilm-probe.txt",
+          "stdout_stderr_sha256": "b64d2c48570005826cdda7a369cc6ce70fe4b457343909f80c381c7ab7b4a7c9"
         }
       ],
       "assertions": [
@@ -643,16 +640,16 @@
       ],
       "artifacts": [
         {
-          "path": "logs/172321c/m21.txt",
-          "sha256": "8c30b84ce35ecfe3800a5612a74ae6451155c805a1327d1943ce782f56b9e8c9"
+          "path": "logs/3cdff44/m21.txt",
+          "sha256": "9750517b3d9c33c0e5c2803eb2ca9fc02d0cacc179ca80dd802de4d8d8535833"
         },
         {
           "path": "artifacts/openfilm-upstream-probe.json",
-          "sha256": "99f11511a8299ca40c7bb9fdb3b35c82c349a41aa643914777784d298e3f8c50"
+          "sha256": "a9c7612246448cb23510ec14d9b35990e93a45f64430f53fda994c579909b617"
         },
         {
-          "path": "logs/172321c/mutation-MUT-G.txt",
-          "sha256": "22de4ac60df7fbf7057ac207be11faaaefdce6976f15fe13748c739f652e7144"
+          "path": "logs/3cdff44/mutation-MUT-G.txt",
+          "sha256": "71e153c39838f3977d1b1ee83316579b77ef6e6da64cae0124f5ec344e72b4d0"
         }
       ]
     },
@@ -669,14 +666,14 @@
         {
           "command": "corepack pnpm test:m2.1",
           "exit_code": 0,
-          "stdout_stderr": "logs/172321c/m21.txt",
-          "stdout_stderr_sha256": "8c30b84ce35ecfe3800a5612a74ae6451155c805a1327d1943ce782f56b9e8c9"
+          "stdout_stderr": "logs/3cdff44/m21.txt",
+          "stdout_stderr_sha256": "9750517b3d9c33c0e5c2803eb2ca9fc02d0cacc179ca80dd802de4d8d8535833"
         },
         {
           "command": "corepack pnpm exec tsx tools/m2.1-external-review-repro.mts symlink-alias",
           "exit_code": 0,
-          "stdout_stderr": "logs/172321c/repro-m03.txt",
-          "stdout_stderr_sha256": "4a5e9d75227c52fd67f9a955c20e9cb3cee97c035ad64dff3e6290180c984b64"
+          "stdout_stderr": "logs/3cdff44/repro-m03.txt",
+          "stdout_stderr_sha256": "230797f61a93159df6df45cf8db37b25594125ad11ce943d44f4415fca9e8690"
         }
       ],
       "assertions": [
@@ -687,16 +684,16 @@
       ],
       "artifacts": [
         {
-          "path": "logs/172321c/m21.txt",
-          "sha256": "8c30b84ce35ecfe3800a5612a74ae6451155c805a1327d1943ce782f56b9e8c9"
+          "path": "logs/3cdff44/m21.txt",
+          "sha256": "9750517b3d9c33c0e5c2803eb2ca9fc02d0cacc179ca80dd802de4d8d8535833"
         },
         {
-          "path": "logs/172321c/repro-m03.txt",
-          "sha256": "4a5e9d75227c52fd67f9a955c20e9cb3cee97c035ad64dff3e6290180c984b64"
+          "path": "logs/3cdff44/repro-m03.txt",
+          "sha256": "230797f61a93159df6df45cf8db37b25594125ad11ce943d44f4415fca9e8690"
         },
         {
-          "path": "logs/172321c/mutation-MUT-I.txt",
-          "sha256": "b84cf4308cabc7301af2299a0d47824acbfaad3e72cd5e49706b27ef8a607ef6"
+          "path": "logs/3cdff44/mutation-MUT-I.txt",
+          "sha256": "1a8286dbb0e6e7f8153cb0741763417fc0cb2a98b7981634f96055bd6d233596"
         }
       ]
     },
@@ -712,16 +709,16 @@
       ],
       "commands": [
         {
-          "command": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3  <isolated-worktree>/vendor/openfilm\ncorepack pnpm exec tsx tests/m2.1-probe/openfilm-upstream-probe.mjs <vendorRoot> <projectDir> docs/evidence/M2/M2.1/artifacts/openfilm-upstream-probe.json",
+          "command": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3  /mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm",
           "exit_code": 0,
-          "stdout_stderr": "logs/172321c/openfilm-probe.txt",
-          "stdout_stderr_sha256": "2109e6640c511d3a4610fb0b932f3149c849a192b37708e80407db0f91b92a63"
+          "stdout_stderr": "logs/3cdff44/openfilm-probe.txt",
+          "stdout_stderr_sha256": "b64d2c48570005826cdda7a369cc6ce70fe4b457343909f80c381c7ab7b4a7c9"
         },
         {
           "command": "corepack pnpm test:m2.1",
           "exit_code": 0,
-          "stdout_stderr": "logs/172321c/m21.txt",
-          "stdout_stderr_sha256": "8c30b84ce35ecfe3800a5612a74ae6451155c805a1327d1943ce782f56b9e8c9"
+          "stdout_stderr": "logs/3cdff44/m21.txt",
+          "stdout_stderr_sha256": "9750517b3d9c33c0e5c2803eb2ca9fc02d0cacc179ca80dd802de4d8d8535833"
         }
       ],
       "assertions": [
@@ -734,15 +731,15 @@
       "artifacts": [
         {
           "path": "artifacts/openfilm-upstream-probe.json",
-          "sha256": "99f11511a8299ca40c7bb9fdb3b35c82c349a41aa643914777784d298e3f8c50"
+          "sha256": "a9c7612246448cb23510ec14d9b35990e93a45f64430f53fda994c579909b617"
         },
         {
-          "path": "logs/172321c/openfilm-probe.txt",
-          "sha256": "2109e6640c511d3a4610fb0b932f3149c849a192b37708e80407db0f91b92a63"
+          "path": "logs/3cdff44/openfilm-probe.txt",
+          "sha256": "b64d2c48570005826cdda7a369cc6ce70fe4b457343909f80c381c7ab7b4a7c9"
         },
         {
-          "path": "logs/172321c/mutation-MUT-J.txt",
-          "sha256": "1e2add51c787804ab3971a32eb58ae2342141fe8a60c8c4e86d96b571dd05b94"
+          "path": "logs/3cdff44/mutation-MUT-J.txt",
+          "sha256": "a7bca98abaa7b324960e4bf17f8f1a1b87f09108d2270d13ba3013ec18a5586d"
         }
       ]
     },
@@ -758,10 +755,10 @@
       ],
       "commands": [
         {
-          "command": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3  <isolated-worktree>/vendor/openfilm\ncorepack pnpm exec tsx tests/m2.1-probe/openfilm-upstream-probe.mjs <vendorRoot> <projectDir> docs/evidence/M2/M2.1/artifacts/openfilm-upstream-probe.json",
+          "command": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3  /mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm",
           "exit_code": 0,
-          "stdout_stderr": "logs/172321c/openfilm-probe.txt",
-          "stdout_stderr_sha256": "2109e6640c511d3a4610fb0b932f3149c849a192b37708e80407db0f91b92a63"
+          "stdout_stderr": "logs/3cdff44/openfilm-probe.txt",
+          "stdout_stderr_sha256": "b64d2c48570005826cdda7a369cc6ce70fe4b457343909f80c381c7ab7b4a7c9"
         }
       ],
       "assertions": [
@@ -773,11 +770,11 @@
       "artifacts": [
         {
           "path": "artifacts/openfilm-upstream-probe.json",
-          "sha256": "99f11511a8299ca40c7bb9fdb3b35c82c349a41aa643914777784d298e3f8c50"
+          "sha256": "a9c7612246448cb23510ec14d9b35990e93a45f64430f53fda994c579909b617"
         },
         {
-          "path": "logs/172321c/openfilm-probe.txt",
-          "sha256": "2109e6640c511d3a4610fb0b932f3149c849a192b37708e80407db0f91b92a63"
+          "path": "logs/3cdff44/openfilm-probe.txt",
+          "sha256": "b64d2c48570005826cdda7a369cc6ce70fe4b457343909f80c381c7ab7b4a7c9"
         }
       ]
     },
@@ -792,9 +789,9 @@
       "commands": [
         {
           "command": "node tools/m2.1-evidence-integrity.mjs",
-          "exit_code": 0,
-          "stdout_stderr": "logs/172321c/integrity.txt",
-          "stdout_stderr_sha256": "ae6d6aeaa4a6d4941b4cdc14924dfab64b3ff6d6bb68ba550f0c942271687c9a"
+          "exit_code": 1,
+          "stdout_stderr": "logs/3cdff44/integrity.txt",
+          "stdout_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
         }
       ],
       "assertions": [
@@ -806,8 +803,8 @@
       ],
       "artifacts": [
         {
-          "path": "logs/172321c/environment.txt",
-          "sha256": "8e74b4149b5a46990f0344e76f5554f01392513de989f1b55499d12357eedb0c"
+          "path": "logs/3cdff44/environment.txt",
+          "sha256": "d617b8b3f6787083829806c5f6515efd2736dbfa688c04b1a40c018fcff503cc"
         }
       ]
     },
@@ -820,10 +817,10 @@
       ],
       "commands": [
         {
-          "command": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3  <isolated-worktree>/vendor/openfilm\ncorepack pnpm exec tsx tests/m2.1-probe/openfilm-upstream-probe.mjs <vendorRoot> <projectDir> docs/evidence/M2/M2.1/artifacts/openfilm-upstream-probe.json",
+          "command": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3  /mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm",
           "exit_code": 0,
-          "stdout_stderr": "logs/172321c/openfilm-probe.txt",
-          "stdout_stderr_sha256": "2109e6640c511d3a4610fb0b932f3149c849a192b37708e80407db0f91b92a63"
+          "stdout_stderr": "logs/3cdff44/openfilm-probe.txt",
+          "stdout_stderr_sha256": "b64d2c48570005826cdda7a369cc6ce70fe4b457343909f80c381c7ab7b4a7c9"
         }
       ],
       "assertions": [
@@ -836,11 +833,11 @@
       "artifacts": [
         {
           "path": "artifacts/openfilm-upstream-probe.json",
-          "sha256": "99f11511a8299ca40c7bb9fdb3b35c82c349a41aa643914777784d298e3f8c50"
+          "sha256": "a9c7612246448cb23510ec14d9b35990e93a45f64430f53fda994c579909b617"
         },
         {
-          "path": "logs/172321c/openfilm-probe.txt",
-          "sha256": "2109e6640c511d3a4610fb0b932f3149c849a192b37708e80407db0f91b92a63"
+          "path": "logs/3cdff44/openfilm-probe.txt",
+          "sha256": "b64d2c48570005826cdda7a369cc6ce70fe4b457343909f80c381c7ab7b4a7c9"
         }
       ]
     }
