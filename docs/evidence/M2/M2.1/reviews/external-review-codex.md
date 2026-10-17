@@ -117,3 +117,68 @@
 `fc3efb4a53e19bca5ad939bd93e40b1af50a428d` 不通过独立外审，不能声明 `M2_1_CONTROL_BOUNDARY_READY`。允许的下一动作是修复 B-01/B-02/M-01..M-05、补齐失败测试、重新跑 25/227 基线及 M2.1/真实探针/变异门、生成绑定新冻结 SHA 的 tracked evidence，然后由独立会话复审。
 
 根据最新四波次授权，修复后的 M2.1 是 Wave 1 模块检查点，不要求单独等待第二次人工批准；但上述 BLOCKER/MAJOR 未关闭前不得进入 M2.2 实质实现。
+
+---
+
+## 5. 第二轮独立复审（返修候选 `971d02a`）
+
+- 复审日期：2026-10-17（Asia/Shanghai）
+- 复审对象：`971d02aac88b8f6f1513cbfa52b91923dd033d56`
+- 证据捕获代码提交：`172321c831793e4674bbd157468068c16c13bfe7`
+- 分支：`migration/m2.1-engine-governance`
+- 复审角色：独立 Codex 外审；不是实现会话自签
+- 结论：`FAIL_REWORK_REQUIRED`
+- 本轮新增严重度：`BLOCKER=0, MAJOR=2, MINOR=0`
+
+### 5.1 独立复验通过项
+
+| 命令/检查 | 独立结果 |
+|---|---|
+| `corepack pnpm check` | exit 0；26 files / 254 tests；TypeScript 与 production build 通过 |
+| `corepack pnpm test:m2.1` | exit 0；9 files / 120 tests |
+| `corepack pnpm test:contracts` | exit 0；3 files / 21 tests |
+| Python SourceDigestV1 黄金向量 | exit 0；10/10 |
+| `hypit-visual-asset` 复现实验 | exit 0；manifest 不变而资产变化时以 `SOURCE_CHANGED` fail closed |
+| `symlink-alias` 复现实验 | exit 0；canonical occurrence = 1 |
+| 固定 OpenFilm 真实上游探针 | exit 0；PIN-01/02/03/04、OF-01..05、OF-06a/b/c 共 12 项 PASS |
+| `node tools/m2.1-evidence-integrity.mjs` | exit 0；26 个引用证据文件可取得、受跟踪、摘要一致；冻结后代码未变 |
+| `tools/m2.1-gate-mutation-check.sh`（独立 `/tmp` 输出） | exit 0；MUT-A..K 11/11 均使所属门失败；完成后工作树干净 |
+
+上述结果确认第一轮 B-01/B-02/M-01/M-02/M-03/M-05 的目标行为已得到实质修复，M-04 的固定文件摘要与 tamper 拒绝也有效。但现有断言仍漏掉下述 fail-closed 分支，且权威状态文档未完成同步，因此不能仅凭全绿测试签署 Gate。
+
+### 5.2 R2-M-01 MAJOR：无法证明 checkout clean 时加载器会跳过该条件并继续接受
+
+冻结 ADR D-16 明确要求 OpenFilm 可用性由三个独立事实**同时**成立：固定 HEAD、无 tracked 修改、每个被执行/读取文件摘要匹配。生产实现 `trackedModifications()` 在 Git 调用失败时返回 `null`，而 `openFilmAvailability()` 只在结果非 `null` 时检查 dirty；因此“无法证明 clean”被当成“可以跳过”。
+
+独立最小复现保持真实固定 checkout 和所有固定文件 bytes 不变，只在调用前令子进程无法找到 `git`：
+
+```text
+process.env.PATH='/definitely/missing'
+openFilmAvailability(<real pinned checkout>)
+=> available=true, reason="all pinned files match their digests"
+=> checked 中没有 git_clean
+```
+
+复现命令以 exit 42 标记错误接受路径，真实输出确认为 `available: true`。现有 `openfilm-upstream-lock.test.ts` 只检查源码包含固定 `git status` 调用，没有模拟该调用失败；MUT-J 也仅移除摘要校验，未覆盖 clean-verification unavailable。
+
+影响：实现和 manifest 对 ER-M-04 的“availability requires ... no tracked modifications”声明不成立。虽然固定的执行文件摘要仍能阻止已知加载文件被篡改，但 ADR 要求的第三方 checkout 完整状态证明会在 Git 故障、超时或不可用时 fail open。
+
+修复门限：`trackedModifications()` 失败必须使 availability 返回 `available:false`（`ENGINE_UNAVAILABLE`），不得返回可跳过的 `null`；新增 Git 不可执行/超时/非零退出的失败测试，并增加对应变异门。真实上游正向探针仍须确认 `checked` 包含 `git_clean`。
+
+### 5.3 R2-M-02 MAJOR：主 traceability 与架构状态仍描述第一轮旧实现，和当前候选冲突
+
+独立检查发现：
+
+- `docs/11_V1_Traceability.md` 顶部和 M2 表仍把 `fc3efb4...` 写作当前候选，并要求关闭已经返修的 2 BLOCKER/5 MAJOR；Gate M2.1 小节又写“返修后候选 `4f2dfea`”，并非本轮冻结候选 `971d02a...`。
+- `docs/03_Architecture.md` 的 EnginePort/EngineBindingStore/NativeWriteGateway/SourceDigest/OpenFilmAdapter 状态表仍声称 Host-only path 未关闭、生产 attention 未接线、CapabilityMap 为空、视觉资产未进闭包、realpath alias 重复、加载器只验 HEAD、OF-06 oracle 未修复；这些描述与当前源码和本轮复验结果相反。
+- 同一组权威文档因此同时表达“已返修”和“仍是旧缺陷”，无法作为 M2.2 的可靠输入。
+
+影响：后续 Claude Code 可能重复实现已经完成的修复、依据错误架构状态设计 M2.2，或错误识别当前冻结点，正是迁移流程要求避免的返工与规格漂移风险。
+
+修复门限：逐项同步 `docs/11_V1_Traceability.md` 与 `docs/03_Architecture.md`，明确区分第一轮历史结论、第二轮返修事实和仍未关闭的 R2-M-01；当前候选使用完整 SHA `971d02a...`，证据捕获点继续使用 `172321c...`，旧 Gate 历史保留但不得冒充当前状态。增加文档一致性检查，至少机械拒绝“当前候选 SHA 多值”和已关闭 finding 在当前架构表中仍标为未实现。
+
+### 5.4 第二轮出门判定
+
+`971d02aac88b8f6f1513cbfa52b91923dd033d56` 不通过第二轮独立外审。第一轮 2 BLOCKER/5 MAJOR 的核心代码缺陷大部分已关闭，但 R2-M-01 与 R2-M-02 未关闭前仍不得声明 `M2_1_CONTROL_BOUNDARY_READY`，不得进入 M2.2，更不得声明 M2、Gate D4.2、Gate V1-P0 或 V1-Full。
+
+下一允许动作仅为：修复 Git clean 检查的 fail-closed 分支与测试/变异门；同步两份权威状态文档；重新冻结并跑受影响专项、全量 check、真实探针、完整性门，然后由独立会话做第三轮复审。
