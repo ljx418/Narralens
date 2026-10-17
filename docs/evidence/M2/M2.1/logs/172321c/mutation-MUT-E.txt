@@ -1,0 +1,69 @@
+
+ RUN  v3.2.4 /mnt/c/workSpace/videoWorkLine/Narralens
+
+ ❯ tests/m2.1/source-digest-v1.test.ts (18 tests | 2 failed) 2498ms
+   × SourceDigestV1 closure > EN-04 covers the entry, every scene, css, subtitle, settings, font and referenced asset 158ms
+     → expected [ Array(4) ] to deeply equal [ 'assets/narration.m4a', …(3) ]
+   ✓ SourceDigestV1 closure > EN-04 gives the same digest whatever order the Host declares the roots in  452ms
+   ✓ SourceDigestV1 closure > EN-04 changes the digest when a scene, subtitle, setting, font or referenced asset changes  540ms
+   ✓ SourceDigestV1 closure > EN-04 resolves an OpenFilm time fragment to the same closure entry 214ms
+   ✓ SourceDigestV1 closure > EN-04 counts a cycle once and refuses a reference that does not resolve 128ms
+   ✓ SourceDigestV1 closure > AC-006 refuses absolute paths, traversal, symlink escape, query strings and unknown roles 291ms
+   × SourceDigestV1 closure > keeps assets in discovery order, so sorting them is a real behaviour change 144ms
+     → expected '367703c6fd925d53b3c1fcc3fd3ae54000e28…' not to be '367703c6fd925d53b3c1fcc3fd3ae54000e28…' // Object.is equality
+   ✓ SourceDigestV1 closure > counts external references without following them and without letting them reach the digest 62ms
+   ✓ SourceDigestV1 reference extraction > extracts only the pinned attribute set and never a form action or data attribute 0ms
+   ✓ SourceDigestV1 reference extraction > extracts quoted and unquoted url() from css and ignores settings and font leaves 0ms
+   ✓ SourceDigestV1 reference extraction > extracts only cue URI lines from a WebVTT body, not the header or a bare path 0ms
+   ✓ SourceDigestV1 canonical form > sorts object keys by UTF-8 byte order and refuses floats 1ms
+   ✓ SourceDigestV1 canonical form > matches every committed golden vector 5ms
+   ✓ M-03 canonical identity is the realpath > counts an internal symlink alias and its target once 61ms
+   ✓ M-03 canonical identity is the realpath > counts one canonical file once however many distinct paths reach it 62ms
+   ✓ M-03 canonical identity is the realpath > resolves a declared root through a symlink to its canonical path 63ms
+   ✓ M-03 canonical identity is the realpath > still counts a cycle exactly once 66ms
+   ✓ M-03 canonical identity is the realpath > refuses Windows and WSL path shapes instead of normalising them silently 250ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/m2.1/source-digest-v1.test.ts > SourceDigestV1 closure > EN-04 covers the entry, every scene, css, subtitle, settings, font and referenced asset
+AssertionError: expected [ Array(4) ] to deeply equal [ 'assets/narration.m4a', …(3) ]
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  [[22m
+[31m+   "assets/aaa-narration-alt.m4a",[39m
+[2m    "assets/narration.m4a",[22m
+[2m    "assets/poster.png",[22m
+[32m-   "assets/aaa-narration-alt.m4a",[39m
+[2m    "assets/registered-only.m4a",[22m
+[2m  ][22m
+
+ ❯ tests/m2.1/source-digest-v1.test.ts:49:63
+     47|     // assets[] keeps breadth-first discovery order, not path order: `…
+     48|     // sorts first by path but is only reached from the third scene, s…
+     49|     expect(result.manifest.assets.map((asset) => asset.path)).toEqual([
+       |                                                               ^
+     50|       "assets/narration.m4a", "assets/poster.png", "assets/aaa-narrati…
+     51|       "assets/registered-only.m4a",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/m2.1/source-digest-v1.test.ts > SourceDigestV1 closure > keeps assets in discovery order, so sorting them is a real behaviour change
+AssertionError: expected '367703c6fd925d53b3c1fcc3fd3ae54000e28…' not to be '367703c6fd925d53b3c1fcc3fd3ae54000e28…' // Object.is equality
+ ❯ tests/m2.1/source-digest-v1.test.ts:169:34
+    167|     const sorted = { ...result.manifest, assets: [...result.manifest.a…
+    168|       .sort((left, right) => (left.path < right.path ? -1 : 1)) };
+    169|     expect(digestOf(sorted)).not.toBe(result.source_digest);
+       |                                  ^
+    170|   });
+    171| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 16 passed (18)
+   Start at  17:39:23
+   Duration  11.73s (transform 385ms, setup 0ms, collect 4.74s, tests 2.50s, environment 0ms, prepare 3.05s)
+

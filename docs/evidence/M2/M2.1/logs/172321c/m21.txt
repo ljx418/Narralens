@@ -1,0 +1,51 @@
+
+> narralens@0.1.0 test:m2.1 /mnt/c/workSpace/videoWorkLine/Narralens
+> vitest run --config vitest.config.ts tests/m2.1 tests/architecture
+
+
+ RUN  v3.2.4 /mnt/c/workSpace/videoWorkLine/Narralens
+
+(node:239043) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:238995) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.1/openfilm-upstream-lock.test.ts (8 tests) 137ms
+(node:238987) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.1/engine-binding-store.test.ts (10 tests) 11ms
+ ✓ tests/m2.1/time-model.test.ts (11 tests) 37ms
+(node:239027) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.1/engine-port.test.ts (10 tests) 1310ms
+   ✓ OpenFilmEngineAdapter staging > AC-004 refuses a stale base before the upstream mutator is ever called  384ms
+   ✓ OpenFilmEngineAdapter staging > AC-004 never accepts an upstream rebased result as success  867ms
+(node:238994) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.1/native-write-gateway.test.ts (20 tests) 23ms
+ ✓ tests/architecture/m2.1-fitness.test.ts (22 tests) 744ms
+   ✓ fitness 1-3: dependency direction > 3. production code never imports a spike, statically or dynamically  341ms
+ ✓ tests/m2.1/engine-route.test.ts (8 tests) 1997ms
+   ✓ M2.1 route activation > AC-019 leaves every legacy route in place  1388ms
+ ✓ tests/m2.1/source-digest-v1.test.ts (18 tests) 3842ms
+   ✓ SourceDigestV1 closure > EN-04 covers the entry, every scene, css, subtitle, settings, font and referenced asset  305ms
+   ✓ SourceDigestV1 closure > EN-04 gives the same digest whatever order the Host declares the roots in  807ms
+   ✓ SourceDigestV1 closure > EN-04 changes the digest when a scene, subtitle, setting, font or referenced asset changes  797ms
+   ✓ SourceDigestV1 closure > EN-04 resolves an OpenFilm time fragment to the same closure entry  347ms
+   ✓ SourceDigestV1 closure > AC-006 refuses absolute paths, traversal, symlink escape, query strings and unknown roles  457ms
+   ✓ M-03 canonical identity is the realpath > refuses Windows and WSL path shapes instead of normalising them silently  311ms
+ ✓ tests/m2.1/native-bypass.test.ts (13 tests) 17458ms
+   ✓ EN-04 external change detection > refuses a stale digest after an out-of-band source edit and leaves the bytes untouched  2808ms
+   ✓ EN-04 external change detection > changes the digest when a declared asset, not only a source file, changes  1894ms
+   ✓ B-01 external source change reaches attention through the production path > 409, then attention=true, then the next typed edit is 423, without touching the edited bytes  1750ms
+   ✓ B-01 external source change reaches attention through the production path > never re-samples the committed baseline: reading again stays 409 and attention stays set  1678ms
+   ✓ B-02 referenced Hypit asset bytes are inside the source digest > covers both referenced visual assets in the closure  1541ms
+   ✓ B-02 referenced Hypit asset bytes are inside the source digest > changes the digest when a referenced asset is legitimately re-imported (bytes and manifest together)  1567ms
+   ✓ B-02 referenced Hypit asset bytes are inside the source digest > never digests a source whose bytes disagree with its manifest  1529ms
+   ✓ B-02 referenced Hypit asset bytes are inside the source digest > fails closed when a referenced asset is missing or its path escapes the project  3061ms
+   ✓ B-02 referenced Hypit asset bytes are inside the source digest > fails closed when a manifest hash no longer matches the bytes it describes  1613ms
+
+ Test Files  9 passed (9)
+      Tests  120 passed (120)
+   Start at  17:37:18
+   Duration  26.39s (transform 4.35s, setup 0ms, collect 22.79s, tests 25.56s, environment 2ms, prepare 28.57s)
+

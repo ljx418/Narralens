@@ -1,0 +1,55 @@
+
+ RUN  v3.2.4 /mnt/c/workSpace/videoWorkLine/Narralens
+
+ ❯ tests/m2.1/source-digest-v1.test.ts (18 tests | 1 failed) 2920ms
+   × SourceDigestV1 closure > EN-04 covers the entry, every scene, css, subtitle, settings, font and referenced asset 197ms
+     → expected [ 'assets/narration.m4a', …(2) ] to deeply equal [ 'assets/narration.m4a', …(3) ]
+   ✓ SourceDigestV1 closure > EN-04 gives the same digest whatever order the Host declares the roots in  528ms
+   ✓ SourceDigestV1 closure > EN-04 changes the digest when a scene, subtitle, setting, font or referenced asset changes  621ms
+   ✓ SourceDigestV1 closure > EN-04 resolves an OpenFilm time fragment to the same closure entry 241ms
+   ✓ SourceDigestV1 closure > EN-04 counts a cycle once and refuses a reference that does not resolve 145ms
+   ✓ SourceDigestV1 closure > AC-006 refuses absolute paths, traversal, symlink escape, query strings and unknown roles  351ms
+   ✓ SourceDigestV1 closure > keeps assets in discovery order, so sorting them is a real behaviour change 162ms
+   ✓ SourceDigestV1 closure > counts external references without following them and without letting them reach the digest 82ms
+   ✓ SourceDigestV1 reference extraction > extracts only the pinned attribute set and never a form action or data attribute 0ms
+   ✓ SourceDigestV1 reference extraction > extracts quoted and unquoted url() from css and ignores settings and font leaves 0ms
+   ✓ SourceDigestV1 reference extraction > extracts only cue URI lines from a WebVTT body, not the header or a bare path 0ms
+   ✓ SourceDigestV1 canonical form > sorts object keys by UTF-8 byte order and refuses floats 1ms
+   ✓ SourceDigestV1 canonical form > matches every committed golden vector 5ms
+   ✓ M-03 canonical identity is the realpath > counts an internal symlink alias and its target once 78ms
+   ✓ M-03 canonical identity is the realpath > counts one canonical file once however many distinct paths reach it 73ms
+   ✓ M-03 canonical identity is the realpath > resolves a declared root through a symlink to its canonical path 73ms
+   ✓ M-03 canonical identity is the realpath > still counts a cycle exactly once 73ms
+   ✓ M-03 canonical identity is the realpath > refuses Windows and WSL path shapes instead of normalising them silently 288ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/m2.1/source-digest-v1.test.ts > SourceDigestV1 closure > EN-04 covers the entry, every scene, css, subtitle, settings, font and referenced asset
+AssertionError: expected [ 'assets/narration.m4a', …(2) ] to deeply equal [ 'assets/narration.m4a', …(3) ]
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  [[22m
+[2m    "assets/narration.m4a",[22m
+[2m    "assets/poster.png",[22m
+[2m    "assets/aaa-narration-alt.m4a",[22m
+[32m-   "assets/registered-only.m4a",[39m
+[2m  ][22m
+
+ ❯ tests/m2.1/source-digest-v1.test.ts:49:63
+     47|     // assets[] keeps breadth-first discovery order, not path order: `…
+     48|     // sorts first by path but is only reached from the third scene, s…
+     49|     expect(result.manifest.assets.map((asset) => asset.path)).toEqual([
+       |                                                               ^
+     50|       "assets/narration.m4a", "assets/poster.png", "assets/aaa-narrati…
+     51|       "assets/registered-only.m4a",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 17 passed (18)
+   Start at  17:39:00
+   Duration  14.12s (transform 372ms, setup 0ms, collect 5.17s, tests 2.92s, environment 0ms, prepare 4.58s)
+
