@@ -7,7 +7,8 @@ import { fileURLToPath } from "node:url";
 import { ControlledAgentRunner, type ComparisonRunnerInput } from "../adapters/openmontage/controlled-agent-runner.js";
 import { ProposalAdapter } from "../adapters/openmontage/proposal-adapter.js";
 import { ProposalComparisonAdapter } from "../adapters/openmontage/proposal-comparison-adapter.js";
-import { validateEditRequest, validateProposalComparisonRequest } from "../contracts/validator.js";
+import { validateEditRequest, validateEngineResponse, validateProposalComparisonRequest } from "../contracts/validator.js";
+import type { EngineResponse } from "../contracts/engine-types.js";
 import type { ApiError, ProjectResponse, ProposalComparisonRequest } from "../contracts/types.js";
 import { HttpError, normalizeError } from "./api-error.js";
 import { AssetImportService } from "./assets/asset-import-service.js";
@@ -17,6 +18,11 @@ import { ProjectWriteActor } from "./projects/project-write-actor.js";
 import { InMemoryProjectOperationQueue, type ProjectOperationQueue } from "./projects/project-operation-queue.js";
 import { RevisionStore } from "./projects/revision-store.js";
 import { isAllowedBrowserRequest, tokenMatches } from "./security.js";
+import { EngineBindingStore, upstreamShaFor } from "./engine/engine-binding-store.js";
+import { EngineRegistry } from "./engine/engine-registry.js";
+import { computeSourceDigest } from "./engine/source-digest-v1.js";
+import { HypitEngineAdapter } from "../adapters/hypit/hypit-engine-adapter.js";
+import { HypitReadAdapter } from "../adapters/hypit/hypit-read-adapter.js";
 
 const bodyLimit = 65_536;
 const projectRoot = resolve(fileURLToPath(new URL("../..", import.meta.url)));
@@ -31,6 +37,7 @@ interface HostDependencies {
   revisionStore?: RevisionStore;
   operationQueue?: ProjectOperationQueue;
   imports?: AssetImportService;
+  engines?: EngineRegistry;
   sessionTtlMs?: number;
 }
 
@@ -44,6 +51,7 @@ export class NarralensHost {
   readonly writes: ProjectWriteActor;
   readonly operations: ProjectOperationQueue;
   readonly imports: AssetImportService;
+  readonly engines: EngineRegistry;
   readonly sessionToken = randomBytes(32).toString("base64url");
   readonly sessionExpiresAt: Date;
   readonly diagnostics = { write_actor_execute_count: 0 };
@@ -65,6 +73,7 @@ export class NarralensHost {
       || dependencies.imports.revisions !== this.revisions || dependencies.imports.operations !== this.operations
       || dependencies.imports.registry !== this.writes.assets)) throw new Error("HOST_IMPORT_DEPENDENCY_MISMATCH");
     this.imports = dependencies.imports ?? new AssetImportService(this.catalog, this.writes.assets, this.revisions, this.operations);
+    this.engines = dependencies.engines ?? defaultEngineRegistry(this);
     this.sessionExpiresAt = new Date(Date.now() + (dependencies.sessionTtlMs ?? 3_600_000));
   }
 
@@ -108,7 +117,9 @@ export class NarralensHost {
         return json(response, 200, { token: this.sessionToken, expires_at: this.sessionExpiresAt.toISOString() });
       }
       this.#authenticate(request);
-      let match = url.pathname.match(/^\/api\/projects\/([A-Za-z0-9_-]+)$/);
+      let match = url.pathname.match(/^\/api\/migration\/v1\/projects\/([A-Za-z0-9_-]+)\/engine$/);
+      if (request.method === "GET" && match?.[1]) return json(response, 200, await this.#engine(match[1]));
+      match = url.pathname.match(/^\/api\/projects\/([A-Za-z0-9_-]+)$/);
       if (request.method === "GET" && match?.[1]) return json(response, 200, await this.#project(match[1]));
       match = url.pathname.match(/^\/api\/projects\/([A-Za-z0-9_-]+)\/assets$/);
       if (request.method === "GET" && match?.[1]) return json(response, 200, await this.writes.assets.inventory(match[1]));
@@ -183,6 +194,46 @@ export class NarralensHost {
       const result = await this.imports.importRequest(projectId, request, controller.signal);
       json(response, result.status, result.response);
     } finally { response.off("close", onClose); }
+  }
+
+
+  /**
+   * Read-only engine surface opened by M2.1 (`05_API_INTERFACE_SPEC.md` §5).
+   * It returns the project's single binding, its capability map and a read-only projection.
+   * It never migrates, never writes, and never opens materialize, adopt or impact.
+   */
+  async #engine(projectId: string): Promise<EngineResponse> {
+    const descriptor = await this.catalog.readDescriptor(projectId);
+    const resolved = this.engines.resolve(projectId);
+    const binding = resolved.binding!;
+    const expectedSha = upstreamShaFor(resolved.engine);
+    if (binding.engine_upstream_sha !== expectedSha) {
+      throw new HttpError(423, "PROJECT_ATTENTION_REQUIRED", "Engine binding does not match its pinned upstream");
+    }
+    if (typeof descriptor.asset_manifest !== "string" || descriptor.asset_manifest === "") {
+      throw new HttpError(500, "INTERNAL_ERROR", "Project descriptor has no asset manifest");
+    }
+    const digest = await computeSourceDigest({
+      root: this.catalog.descriptorRoot(projectId),
+      roots: [descriptor.run_file, descriptor.narration_asset, descriptor.asset_manifest],
+      engine: resolved.engine,
+      engineUpstreamSha: expectedSha,
+    });
+    const state = await this.writes.projectState(projectId);
+    const snapshot = { project_id: projectId, engine: resolved.engine, source_digest: digest.source_digest };
+    const ctx = { correlationId: randomBytes(8).toString("hex"), projectId, signal: AbortSignal.timeout(10_000) };
+    const projection = await resolved.port.inspect(snapshot, ctx);
+    const capabilities = await resolved.port.capabilities(snapshot, ctx);
+    const response: EngineResponse = {
+      format: "narralens.engine-response@1.0",
+      project_id: projectId,
+      binding,
+      capabilities,
+      projection: { ...projection, project_revision: state.revision },
+    };
+    const validated = validateEngineResponse(response);
+    if (!validated.ok) throw new HttpError(500, "INTERNAL_ERROR", "Engine response does not satisfy its contract");
+    return validated.value;
   }
 
   async #project(projectId: string): Promise<ProjectResponse> {
@@ -284,4 +335,20 @@ function json(response: ServerResponse, status: number, value: unknown): void {
   if (response.headersSent) return;
   response.writeHead(status, { "content-type": "application/json; charset=utf-8", "cache-control": "no-store", "x-content-type-options": "nosniff" });
   response.end(`${JSON.stringify(value)}\n`);
+}
+
+/**
+ * Default Host composition: one Hypit engine port and the bindings it serves.
+ * An OpenFilm port is only present once a pinned upstream checkout is supplied, so a
+ * project can never resolve to two engines (AC-001).
+ */
+function defaultEngineRegistry(host: NarralensHost): EngineRegistry {
+  const bindings = new EngineBindingStore();
+  bindings.bind("d1-30s", "hypit", { createdAt: "1970-01-01T00:00:00.000Z" });
+  const hypit = new HypitEngineAdapter({
+    catalog: host.catalog,
+    reader: new HypitReadAdapter(host.catalog),
+    writer: host.writes.adapter,
+  });
+  return new EngineRegistry(bindings, { hypit });
 }
