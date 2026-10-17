@@ -46,6 +46,8 @@ describe("M2.2 fitness: one state machine, no arbitrary state writes", () => {
       for (const match of text.matchAll(/UPDATE\s+(\w+)\s+SET\s+([^;]*?)\bstate\s*=/giu)) {
         const table = match[1] ?? "";
         const assignments = match[2] ?? "";
+        // Only the SET list counts: a `state='...'` in the WHERE clause is a predicate.
+        if (/\bWHERE\b/iu.test(assignments)) continue;
         // Find the enclosing method by looking at the text just before the statement.
         const before = text.slice(Math.max(0, match.index! - 4000), match.index!);
         const enclosing = [...before.matchAll(/^\s{2}(?:async\s+)?(\w+)\s*\(/gmu)].pop()?.[1] ?? "";

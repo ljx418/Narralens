@@ -230,5 +230,13 @@ cmp -s "$SCRATCH/r-before.ts" "$SCRATCH/r-after.ts" && { echo "MUT-R anchor not 
 run_case MUT-R "lock check consults the client reason text" src/host/projects/lock-service.ts \
   tests/m2.2/lock-service.test.ts "$SCRATCH/r-before.ts" "$SCRATCH/r-after.ts"
 
+# Q: the coordinator stops consulting the gateway before writing (M2.2 BYP).
+cp src/host/projects/project-coordinator.ts "$SCRATCH/q-before.ts"
+sed 's/    if (decision.kind !== "translated") {/    if (false \&\& decision.kind !== "translated") {/' \
+  "$SCRATCH/q-before.ts" > "$SCRATCH/q-after.ts"
+cmp -s "$SCRATCH/q-before.ts" "$SCRATCH/q-after.ts" && { echo "MUT-Q anchor not found" >&2; exit 2; }
+run_case MUT-Q "coordinator stops consulting the native write gateway" src/host/projects/project-coordinator.ts \
+  tests/m2.2/project-coordinator.test.ts "$SCRATCH/q-before.ts" "$SCRATCH/q-after.ts"
+
 echo "SUMMARY cases=$results gates_that_failed_as_required=$bites" | tee -a "$LOG"
 [ "$results" -eq "$bites" ] || exit 1

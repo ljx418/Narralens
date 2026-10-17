@@ -41,7 +41,7 @@ export interface ProjectTransactionRow {
 
 export type BeginTransactionInput = Pick<ProjectTransactionRow,
   "transaction_id" | "project_id" | "kind" | "correlation_id" | "request_json" | "request_hash" | "base_revision">
-  & { createdAt?: Date };
+  & { createdAt?: Date | undefined };
 
 export interface EngineLockRecord {
   lock_id: string; project_id: string; lock_type: string; scope: string; target_id: string;
@@ -361,6 +361,121 @@ export class RevisionStore {
     return this.controlRevision(projectId, initialRevision);
   }
 
+  // ── commit pointer, outbox, leases and recovery queries (M2.2 §4/§6/§7/§8) ───────────
+
+  /**
+   * The one commit. Revision, the active commit record, the idempotency entry and the
+   * outbox row move together; anything that fails rolls the whole thing back, so a reader
+   * can never see a revision whose pointer was not published.
+   */
+  commitWithPointer(input: {
+    transactionId: string; projectId: string; revision: number; snapshotId: string;
+    sourceDigestAfter: string; engine: string; idempotencyKey: string; response: EditResponse;
+    outboxTopic: string; outboxPayload: string; now?: Date;
+  }): void {
+    const now = input.now ?? new Date();
+    const at = now.toISOString();
+    this.#db.exec("BEGIN IMMEDIATE");
+    try {
+      this.#db.prepare("UPDATE project_state SET revision=?, updated_at=? WHERE project_id=?")
+        .run(input.revision, at, input.projectId);
+      this.#db.prepare(`INSERT INTO snapshot(snapshot_id, project_id, source_digest, engine, created_at)
+        VALUES(?,?,?,?,?) ON CONFLICT(snapshot_id) DO NOTHING`)
+        .run(input.snapshotId, input.projectId, input.sourceDigestAfter, input.engine, at);
+      this.#db.prepare(`INSERT INTO active_commit(project_id, revision, snapshot_id, source_digest, engine, transaction_id, created_at)
+        VALUES(?,?,?,?,?,?,?) ON CONFLICT(project_id) DO UPDATE SET
+          revision=excluded.revision, snapshot_id=excluded.snapshot_id,
+          source_digest=excluded.source_digest, engine=excluded.engine,
+          transaction_id=excluded.transaction_id, created_at=excluded.created_at`)
+        .run(input.projectId, input.revision, input.snapshotId, input.sourceDigestAfter,
+          input.engine, input.transactionId, at);
+      this.#db.prepare("INSERT OR IGNORE INTO edit_idempotency(project_id, idempotency_key, request_hash, response_json) VALUES(?,?,?,?)")
+        .run(input.projectId, input.idempotencyKey, "", JSON.stringify(input.response));
+      this.#db.prepare("INSERT INTO outbox(topic, project_id, payload_json, created_at) VALUES(?,?,?,?)")
+        .run(input.outboxTopic, input.projectId, input.outboxPayload, at);
+      this.transition(input.transactionId, "prepared", "committed", {
+        snapshot_id: input.snapshotId, source_digest_after: input.sourceDigestAfter,
+      }, now);
+      this.#db.exec("COMMIT");
+    } catch (error) { this.#db.exec("ROLLBACK"); throw error; }
+  }
+
+  /** The single pointer a reader resolves. Undefined means the project has never committed. */
+  activeCommit(projectId: string): { project_id: string; revision: number; snapshot_id: string;
+    source_digest: string; engine: string; transaction_id: string; created_at: string } | undefined {
+    const row = this.#db.prepare("SELECT * FROM active_commit WHERE project_id=?").get(projectId) as Record<string, unknown> | undefined;
+    if (row === undefined) return undefined;
+    return {
+      project_id: String(row.project_id), revision: Number(row.revision), snapshot_id: String(row.snapshot_id),
+      source_digest: String(row.source_digest), engine: String(row.engine),
+      transaction_id: String(row.transaction_id), created_at: String(row.created_at),
+    };
+  }
+
+  enqueueOutbox(topic: string, projectId: string, payload: string, now = new Date()): number {
+    const result = this.#db.prepare("INSERT INTO outbox(topic, project_id, payload_json, created_at) VALUES(?,?,?,?)")
+      .run(topic, projectId, payload, now.toISOString());
+    return Number(result.lastInsertRowid);
+  }
+
+  pendingOutboxCount(): number {
+    return Number((this.#db.prepare("SELECT COUNT(*) AS n FROM outbox WHERE delivered_at IS NULL").get() as { n: number }).n);
+  }
+
+  undeliveredOutbox(limit = 100): Array<{ event_id: number; topic: string; project_id: string;
+    payload_json: string; attempts: number }> {
+    return (this.#db.prepare(`SELECT event_id, topic, project_id, payload_json, attempts FROM outbox
+      WHERE delivered_at IS NULL ORDER BY event_id LIMIT ?`).all(limit) as Array<Record<string, unknown>>)
+      .map((row) => ({
+        event_id: Number(row.event_id), topic: String(row.topic), project_id: String(row.project_id),
+        payload_json: String(row.payload_json), attempts: Number(row.attempts),
+      }));
+  }
+
+  consumerAlreadySaw(eventId: number, consumer: string): boolean {
+    return this.#db.prepare("SELECT 1 AS seen FROM outbox_delivery WHERE event_id=? AND consumer=?")
+      .get(eventId, consumer) !== undefined;
+  }
+
+  /** Returns true when this was the first delivery for that consumer. */
+  recordDelivery(eventId: number, consumer: string, now = new Date()): boolean {
+    if (this.consumerAlreadySaw(eventId, consumer)) return false;
+    this.#db.exec("BEGIN IMMEDIATE");
+    try {
+      this.#db.prepare("INSERT OR IGNORE INTO outbox_delivery(event_id, consumer, delivered_at) VALUES(?,?,?)")
+        .run(eventId, consumer, now.toISOString());
+      this.#db.prepare("UPDATE outbox SET attempts=attempts+1 WHERE event_id=?").run(eventId);
+      const remaining = this.#outboxConsumerCount(eventId);
+      if (remaining === 0) {
+        this.#db.prepare("UPDATE outbox SET delivered_at=? WHERE event_id=?").run(now.toISOString(), eventId);
+      }
+      this.#db.exec("COMMIT");
+    } catch (error) { this.#db.exec("ROLLBACK"); throw error; }
+    return true;
+  }
+
+  #outboxConsumerCount(eventId: number): number {
+    return Number((this.#db.prepare("SELECT COUNT(*) AS n FROM outbox_delivery WHERE event_id=?").get(eventId) as { n: number }).n);
+  }
+
+  /** Leases whose owner stopped reporting. Running jobs never become succeeded here. */
+  expireStaleLeases(now = new Date()): number {
+    const result = this.#db.prepare(`UPDATE job SET lease_owner=NULL, lease_expires_at=NULL
+      WHERE state='running' AND lease_expires_at IS NOT NULL AND lease_expires_at <= ?`).run(now.getTime());
+    return Number(result.changes);
+  }
+
+  incompleteTransactions(): Array<{ transaction_id: string; project_id: string }> {
+    return (this.#db.prepare(`SELECT transaction_id, project_id FROM project_transaction
+      WHERE state IN ('received','preconditions_checked','staged','validated','prepared','attention') ORDER BY created_at`)
+      .all() as Array<{ transaction_id: string; project_id: string }>);
+  }
+
+  projectsInAttention(): string[] {
+    return (this.#db.prepare("SELECT project_id FROM project_state WHERE attention=1 ORDER BY project_id")
+      .all() as Array<{ project_id: string }>).map((row) => row.project_id);
+  }
+
   // ── locks (M2.2 §5) ────────────────────────────────────────────────────────────────
 
   upsertLock(row: {
@@ -536,14 +651,17 @@ export class RevisionStore {
 
   markAttention(projectId: string, transactionId: string, errorCode: string, reason?: string, now = new Date()): void {
     const at = now.toISOString();
+    // Attention can be raised before anything else has registered the project; without
+    // this the UPDATE below would silently match nothing and the condition would be lost.
+    this.ensureProject(projectId, 0);
     this.#db.exec("BEGIN IMMEDIATE");
     try {
+      // The journal row is the actor's; an external change may be detected before any
+      // transaction exists. The project flag must be set either way, so a missing or
+      // already-terminal row is tolerated rather than rejected.
       const current = this.journal(transactionId);
-      if (current === undefined || !["prepared", "source_validated", "metadata_committed",
-        "aborted", "compensated", "attention"].includes(current.state)) {
-        throw new Error("INVALID_JOURNAL_TRANSITION");
-      }
-      if (current.state !== "attention") {
+      if (current !== undefined && current.state !== "attention"
+        && ["prepared", "source_validated", "metadata_committed", "aborted", "compensated"].includes(current.state)) {
         this.advanceJournal("edit_journal", transactionId,
           ["prepared", "source_validated", "metadata_committed", "aborted", "compensated"],
           "attention", { error_code: errorCode }, now);

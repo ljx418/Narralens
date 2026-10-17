@@ -13,10 +13,10 @@ import type { EnginePort } from "./engine-port.js";
  */
 export class EngineRegistry {
   readonly #ports = new Map<EngineKind, EnginePort>();
-  readonly #bindings: EngineBindingStore;
+  readonly bindings: EngineBindingStore;
 
   constructor(bindings: EngineBindingStore, ports: Partial<Record<EngineKind, EnginePort>> = {}) {
-    this.#bindings = bindings;
+    this.bindings = bindings;
     for (const [kind, port] of Object.entries(ports)) this.#ports.set(kind as EngineKind, port);
   }
 
@@ -29,7 +29,7 @@ export class EngineRegistry {
 
   /** The one engine this project may write through. Throws rather than guessing. */
   resolve(projectId: string, correlationId?: string): { engine: EngineKind; port: EnginePort; binding: EngineBinding } {
-    const binding = this.#bindings.require(projectId, undefined, correlationId);
+    const binding = this.bindings.require(projectId, undefined, correlationId);
     const port = this.#ports.get(binding.engine);
     if (!port) {
       throw new HttpError(503, "ENGINE_UNAVAILABLE",
@@ -41,7 +41,7 @@ export class EngineRegistry {
   /** Re-check the pinned upstream on every read, so drift becomes attention (fitness rule 14). */
   resolveVerified(projectId: string, expectedUpstreamSha: string, correlationId?: string): { engine: EngineKind; port: EnginePort; binding: EngineBinding } {
     const resolved = this.resolve(projectId, correlationId);
-    const binding = this.#bindings.require(projectId, expectedUpstreamSha, correlationId);
+    const binding = this.bindings.require(projectId, expectedUpstreamSha, correlationId);
     return { ...resolved, binding };
   }
 }
