@@ -1,12 +1,12 @@
 
  RUN  v3.2.4 /mnt/c/workSpace/videoWorkLine/Narralens
 
-(node:1102679) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(node:1289839) ExperimentalWarning: SQLite is an experimental feature and might change at any time
 (Use `node --trace-warnings ...` to show where the warning was created)
  ❯ tests/m2.1/native-write-gateway.test.ts (20 tests | 2 failed) 23ms
-   ✓ NativeMutationRegistry completeness > AC-003 registers no unknown policy at all 4ms
+   ✓ NativeMutationRegistry completeness > AC-003 registers no unknown policy at all 3ms
    ✓ NativeMutationRegistry completeness > AC-003 every entry records transport, impact, lock, reason and a test id 2ms
-   ✓ NativeMutationRegistry completeness > AC-003 covers every row of the verified OpenFilm native inventory exactly once 2ms
+   ✓ NativeMutationRegistry completeness > AC-003 covers every row of the verified OpenFilm native inventory exactly once 3ms
    ✓ NativeMutationRegistry completeness > AC-003 the WebSocket / callback row yields no writable entry, so an event cannot trigger a commit 0ms
    ✓ NativeMutationRegistry completeness > AC-016 every provider and credential entry is blocked 0ms
    ✓ NativeMutationRegistry completeness > AC-003 only the two already-shipped typed edits and the Host asset import are translated 0ms
@@ -25,7 +25,7 @@
    × M-01 capability completeness and fail-closed behaviour > refuses a translated write when no capability map is supplied at all 0ms
      → Cannot read properties of undefined (reading 'state')
    ✓ M-01 capability completeness and fail-closed behaviour > still translates when the engine positively reports the capability 0ms
-   ✓ M-01 capability completeness and fail-closed behaviour > expresses asset import as a Host service capability, not an engine write 0ms
+   ✓ M-01 capability completeness and fail-closed behaviour > expresses asset import as a Host service capability, not an engine write 1ms
 
 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
 
@@ -58,6 +58,6 @@ TypeError: Cannot read properties of undefined (reading 'state')
 
  Test Files  1 failed (1)
       Tests  2 failed | 18 passed (20)
-   Start at  14:42:00
-   Duration  6.91s (transform 444ms, setup 0ms, collect 3.48s, tests 23ms, environment 0ms, prepare 2.30s)
+   Start at  14:52:02
+   Duration  5.36s (transform 360ms, setup 0ms, collect 2.66s, tests 23ms, environment 0ms, prepare 1.71s)
 

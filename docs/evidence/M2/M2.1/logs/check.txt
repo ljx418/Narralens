@@ -5,106 +5,105 @@
 
  RUN  v3.2.4 /mnt/c/workSpace/videoWorkLine/Narralens
 
-(node:359394) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(node:1236994) ExperimentalWarning: SQLite is an experimental feature and might change at any time
 (Use `node --trace-warnings ...` to show where the warning was created)
-(node:359324) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(node:1237050) ExperimentalWarning: SQLite is an experimental feature and might change at any time
 (Use `node --trace-warnings ...` to show where the warning was created)
-(node:359261) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+ ✓ tests/m2.1/time-model.test.ts (11 tests) 30ms
+(node:1236925) ExperimentalWarning: SQLite is an experimental feature and might change at any time
 (Use `node --trace-warnings ...` to show where the warning was created)
-(node:359316) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(node:1236918) ExperimentalWarning: SQLite is an experimental feature and might change at any time
 (Use `node --trace-warnings ...` to show where the warning was created)
- ✓ tests/m2.1/time-model.test.ts (11 tests) 26ms
-(node:359382) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(node:1236937) ExperimentalWarning: SQLite is an experimental feature and might change at any time
 (Use `node --trace-warnings ...` to show where the warning was created)
- ✓ tests/m2.1/engine-binding-store.test.ts (10 tests) 8ms
+ ✓ tests/adapters/d4.1-runner.test.ts (8 tests) 162ms
+ ✓ tests/m2.1/openfilm-upstream-lock.test.ts (8 tests) 105ms
  ✓ tests/host/host-core.test.ts (5 tests) 4ms
- ✓ tests/adapters/d4.1-runner.test.ts (8 tests) 191ms
- ✓ tests/m2.1/openfilm-upstream-lock.test.ts (8 tests) 166ms
- ✓ tests/adapters/runner.test.ts (6 tests) 453ms
- ✓ tests/m2.1/engine-port.test.ts (10 tests) 1666ms
-   ✓ OpenFilmEngineAdapter staging > AC-004 refuses a stale base before the upstream mutator is ever called  454ms
-   ✓ OpenFilmEngineAdapter staging > AC-004 never accepts an upstream rebased result as success  1132ms
- ✓ tests/m2.1/native-write-gateway.test.ts (20 tests) 20ms
- ✓ tests/contracts/d4.1-contracts.test.ts (8 tests) 30ms
- ✓ tests/contracts/d4.2.1-contracts.test.ts (6 tests) 58ms
- ✓ tests/contracts/contracts.test.ts (7 tests) 81ms
-(node:359286) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+ ✓ tests/m2.1/engine-binding-store.test.ts (10 tests) 12ms
+ ✓ tests/adapters/runner.test.ts (6 tests) 402ms
+ ✓ tests/m2.1/engine-port.test.ts (10 tests) 1313ms
+   ✓ OpenFilmEngineAdapter staging > AC-004 refuses a stale base before the upstream mutator is ever called  357ms
+   ✓ OpenFilmEngineAdapter staging > AC-004 never accepts an upstream rebased result as success  878ms
+ ✓ tests/contracts/d4.1-contracts.test.ts (8 tests) 27ms
+ ✓ tests/adapters/proposal-comparison-adapter.test.ts (12 tests) 60ms
+ ✓ tests/contracts/d4.2.1-contracts.test.ts (6 tests) 63ms
+(node:1236975) ExperimentalWarning: SQLite is an experimental feature and might change at any time
 (Use `node --trace-warnings ...` to show where the warning was created)
-(node:359377) ExperimentalWarning: SQLite is an experimental feature and might change at any time
-(Use `node --trace-warnings ...` to show where the warning was created)
- ✓ tests/host/d4-media-write-actor.test.ts (9 tests) 17ms
-(node:359267) ExperimentalWarning: SQLite is an experimental feature and might change at any time
-(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/contracts/contracts.test.ts (7 tests) 74ms
  ✓ tests/host/d3-write-actor.test.ts (12 tests) 256ms
-(node:359260) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(node:1237042) ExperimentalWarning: SQLite is an experimental feature and might change at any time
 (Use `node --trace-warnings ...` to show where the warning was created)
-(node:359268) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+ ✓ tests/host/d4-media-write-actor.test.ts (9 tests) 25ms
+ ✓ tests/m2.1/native-write-gateway.test.ts (20 tests) 17ms
+(node:1236982) ExperimentalWarning: SQLite is an experimental feature and might change at any time
 (Use `node --trace-warnings ...` to show where the warning was created)
-(node:359280) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(node:1236974) ExperimentalWarning: SQLite is an experimental feature and might change at any time
 (Use `node --trace-warnings ...` to show where the warning was created)
- ✓ tests/architecture/m2.1-fitness.test.ts (22 tests) 1473ms
-   ✓ fitness 1-3: dependency direction > 3. production code never imports a spike, statically or dynamically  621ms
-   ✓ fitness 10-14: stage-specific invariants > 11. no production path reaches editProjectFilm from a translated write  464ms
- ✓ tests/host/d4.2.1-registry-journal.test.ts (10 tests) 2023ms
-   ✓ D4.2.1 AssetRegistry v2 transaction foundation > re-reads media facts when bytes change without size or mtime signals  1009ms
-   ✓ D4.2.1 AssetRegistry v2 transaction foundation > returns a path-free ordered inventory and degrades tampered, missing and restricted entries independently  549ms
- ✓ tests/host/d4.2.1-upload-media.test.ts (12 tests) 1977ms
-   ✓ D4.2.1 imported media validation > proves a real MP4 has one CFR stream at the project rate and survives a second hash  831ms
-   ✓ D4.2.1 imported media validation > maps wrong frame rate and corrupt bytes to INVALID_MEDIA  580ms
- ✓ tests/m2.1/engine-route.test.ts (8 tests) 1967ms
-   ✓ M2.1 route activation > EN-01 opens GET /api/migration/v1/projects/:id/engine as a read-only projection  306ms
-   ✓ M2.1 route activation > AC-019 leaves every legacy route in place  1325ms
- ✓ tests/adapters/proposal-comparison-adapter.test.ts (12 tests) 67ms
- ✓ tests/host/project-operation-queue.test.ts (3 tests) 3ms
- ✓ tests/m2.1/source-digest-v1.test.ts (18 tests) 6045ms
-   ✓ SourceDigestV1 closure > EN-04 covers the entry, every scene, css, subtitle, settings, font and referenced asset  490ms
-   ✓ SourceDigestV1 closure > EN-04 gives the same digest whatever order the Host declares the roots in  1689ms
-   ✓ SourceDigestV1 closure > EN-04 changes the digest when a scene, subtitle, setting, font or referenced asset changes  1308ms
-   ✓ SourceDigestV1 closure > EN-04 resolves an OpenFilm time fragment to the same closure entry  535ms
-   ✓ SourceDigestV1 closure > AC-006 refuses absolute paths, traversal, symlink escape, query strings and unknown roles  531ms
-   ✓ M-03 canonical identity is the realpath > refuses Windows and WSL path shapes instead of normalising them silently  373ms
- ✓ tests/host/host-http.test.ts (10 tests) 7339ms
-   ✓ D2 Host HTTP > enforces same-origin session and auth without leaking a token  838ms
-   ✓ D2 Host HTTP > rejects an oversized JSON body before contract parsing  705ms
-   ✓ D2 Host HTTP > reads the real D1 descriptor and leaves Source unchanged  704ms
-   ✓ D2 Host HTTP > returns the complete current asset inventory without leaking project paths  629ms
-   ✓ D2 Host HTTP > runs an asynchronous proposal job and replays monotonic SSE events  780ms
-   ✓ D2 Host HTTP > accepts a registered selection independent of JSON property order  632ms
-   ✓ D2 Host HTTP > rejects invalid D4.1 counts, reverse ranges and extra fields before Runner  2331ms
-   ✓ D2 Host HTTP > maps a comparison provider 529 after exactly one invocation  656ms
- ✓ tests/host/d4.2.1-migration-evidence.test.ts (8 tests) 12643ms
-   ✓ M1A direct multipart and closed-route evidence > IM-02 accepts file before metadata through the real import route  4244ms
-   ✓ M1A direct multipart and closed-route evidence > IM-03..IM-09 rejects duplicate/missing/oversize/malformed multipart variants and cleans staging  374ms
-   ✓ M1A direct multipart and closed-route evidence > IM-24/IM-25 keeps materialize/adopt unavailable and rejects a fabricated edit operation without state change  3186ms
-   ✓ M1A direct media-tool evidence > IM-14..IM-17 distinguishes missing ffmpeg/ffprobe, timeout, stderr overflow and ordinary tool failure  706ms
-   ✓ M1A inventory and shared-write-boundary evidence > IM-18..IM-21 serves 256 ordered items over HTTP, caps probes at 2, isolates one timeout, revalidates changed bytes and rejects the 257th  530ms
-   ✓ M1A inventory and shared-write-boundary evidence > IM-22 serializes real HTTP import commit with a real D4.0 edit and only the edit advances revision  3385ms
+(node:1236956) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:1236958) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/host/d4.2.1-registry-journal.test.ts (10 tests) 2133ms
+   ✓ D4.2.1 AssetRegistry v2 transaction foundation > re-reads media facts when bytes change without size or mtime signals  1070ms
+   ✓ D4.2.1 AssetRegistry v2 transaction foundation > returns a path-free ordered inventory and degrades tampered, missing and restricted entries independently  545ms
+ ✓ tests/architecture/m2.1-fitness.test.ts (22 tests) 1231ms
+   ✓ fitness 1-3: dependency direction > 3. production code never imports a spike, statically or dynamically  683ms
+ ✓ tests/m2.1/engine-route.test.ts (8 tests) 1989ms
+   ✓ M2.1 route activation > EN-01 opens GET /api/migration/v1/projects/:id/engine as a read-only projection  343ms
+   ✓ M2.1 route activation > AC-019 leaves every legacy route in place  1312ms
+ ✓ tests/host/project-operation-queue.test.ts (3 tests) 4ms
+ ✓ tests/host/d4.2.1-upload-media.test.ts (12 tests) 1698ms
+   ✓ D4.2.1 imported media validation > proves a real MP4 has one CFR stream at the project rate and survives a second hash  669ms
+   ✓ D4.2.1 imported media validation > maps wrong frame rate and corrupt bytes to INVALID_MEDIA  509ms
+ ✓ tests/m2.1/source-digest-v1.test.ts (18 tests) 5140ms
+   ✓ SourceDigestV1 closure > EN-04 covers the entry, every scene, css, subtitle, settings, font and referenced asset  416ms
+   ✓ SourceDigestV1 closure > EN-04 gives the same digest whatever order the Host declares the roots in  1155ms
+   ✓ SourceDigestV1 closure > EN-04 changes the digest when a scene, subtitle, setting, font or referenced asset changes  1187ms
+   ✓ SourceDigestV1 closure > EN-04 resolves an OpenFilm time fragment to the same closure entry  363ms
+   ✓ SourceDigestV1 closure > AC-006 refuses absolute paths, traversal, symlink escape, query strings and unknown roles  581ms
+   ✓ M-03 canonical identity is the realpath > refuses Windows and WSL path shapes instead of normalising them silently  386ms
+ ✓ tests/host/host-http.test.ts (10 tests) 6881ms
+   ✓ D2 Host HTTP > enforces same-origin session and auth without leaking a token  781ms
+   ✓ D2 Host HTTP > rejects an oversized JSON body before contract parsing  661ms
+   ✓ D2 Host HTTP > reads the real D1 descriptor and leaves Source unchanged  638ms
+   ✓ D2 Host HTTP > returns the complete current asset inventory without leaking project paths  607ms
+   ✓ D2 Host HTTP > runs an asynchronous proposal job and replays monotonic SSE events  737ms
+   ✓ D2 Host HTTP > accepts a registered selection independent of JSON property order  607ms
+   ✓ D2 Host HTTP > rejects invalid D4.1 counts, reverse ranges and extra fields before Runner  2225ms
+   ✓ D2 Host HTTP > maps a comparison provider 529 after exactly one invocation  573ms
  ✓ tests/app/HostApiClient.test.ts (1 test) 4ms
- ✓ tests/m2.1/native-bypass.test.ts (13 tests) 20134ms
-   ✓ EN-04 external change detection > refuses a stale digest after an out-of-band source edit and leaves the bytes untouched  3752ms
-   ✓ EN-04 external change detection > changes the digest when a declared asset, not only a source file, changes  2420ms
-   ✓ B-01 external source change reaches attention through the production path > 409, then attention=true, then the next typed edit is 423, without touching the edited bytes  2191ms
-   ✓ B-01 external source change reaches attention through the production path > never re-samples the committed baseline: reading again stays 409 and attention stays set  1945ms
-   ✓ B-02 referenced Hypit asset bytes are inside the source digest > covers both referenced visual assets in the closure  1751ms
-   ✓ B-02 referenced Hypit asset bytes are inside the source digest > changes the digest when a referenced asset is legitimately re-imported (bytes and manifest together)  1737ms
-   ✓ B-02 referenced Hypit asset bytes are inside the source digest > never digests a source whose bytes disagree with its manifest  1548ms
-   ✓ B-02 referenced Hypit asset bytes are inside the source digest > fails closed when a referenced asset is missing or its path escapes the project  3317ms
-   ✓ B-02 referenced Hypit asset bytes are inside the source digest > fails closed when a manifest hash no longer matches the bytes it describes  1458ms
- ✓ tests/app/NarralensApp.test.tsx (9 tests) 680ms
- ✓ tests/host/d4.2.1-import-service.test.ts (8 tests) 27749ms
-   ✓ D4.2.1 AssetImportService HTTP transaction > streams a real MP4, migrates @1 to @2, replays exactly and changes no authored project facts  5259ms
-   ✓ D4.2.1 AssetImportService HTTP transaction > returns a truthful @1 no-op for an exact duplicate without changing manifest bytes  2452ms
-   ✓ D4.2.1 AssetImportService HTTP transaction > rejects invalid media before journal or manifest mutation and removes private staging  1930ms
-   ✓ D4.2.1 AssetImportService HTTP transaction > commits a manifest-published journal deterministically before opening the HTTP port after restart  2146ms
-   ✓ D4.2.1 AssetImportService HTTP transaction > restores the exact manifest preimage and removes unreferenced new bytes after a publish-before-journal crash  2153ms
-   ✓ D4.2.1 AssetImportService HTTP transaction > serializes concurrent imports and replays the same key without losing either manifest entry  2190ms
-   ✓ D4.2.1 AssetImportService HTTP transaction > compensates content-install, manifest-temp and rename faults without changing authored or manifest facts  5636ms
-   ✓ D4.2.1 AssetImportService HTTP transaction > restores the exact manifest after one-shot post-publish faults and enters attention when durability stays unprovable  5984ms
+ ✓ tests/host/d4.2.1-migration-evidence.test.ts (8 tests) 10943ms
+   ✓ M1A direct multipart and closed-route evidence > IM-02 accepts file before metadata through the real import route  3204ms
+   ✓ M1A direct multipart and closed-route evidence > IM-03..IM-09 rejects duplicate/missing/oversize/malformed multipart variants and cleans staging  338ms
+   ✓ M1A direct multipart and closed-route evidence > IM-24/IM-25 keeps materialize/adopt unavailable and rejects a fabricated edit operation without state change  2676ms
+   ✓ M1A direct media-tool evidence > IM-14..IM-17 distinguishes missing ffmpeg/ffprobe, timeout, stderr overflow and ordinary tool failure  724ms
+   ✓ M1A inventory and shared-write-boundary evidence > IM-18..IM-21 serves 256 ordered items over HTTP, caps probes at 2, isolates one timeout, revalidates changed bytes and rejects the 257th  528ms
+   ✓ M1A inventory and shared-write-boundary evidence > IM-22 serializes real HTTP import commit with a real D4.0 edit and only the edit advances revision  3260ms
+ ✓ tests/m2.1/native-bypass.test.ts (13 tests) 16844ms
+   ✓ EN-04 external change detection > refuses a stale digest after an out-of-band source edit and leaves the bytes untouched  2977ms
+   ✓ EN-04 external change detection > changes the digest when a declared asset, not only a source file, changes  1997ms
+   ✓ B-01 external source change reaches attention through the production path > 409, then attention=true, then the next typed edit is 423, without touching the edited bytes  1800ms
+   ✓ B-01 external source change reaches attention through the production path > never re-samples the committed baseline: reading again stays 409 and attention stays set  1889ms
+   ✓ B-02 referenced Hypit asset bytes are inside the source digest > covers both referenced visual assets in the closure  1633ms
+   ✓ B-02 referenced Hypit asset bytes are inside the source digest > changes the digest when a referenced asset is legitimately re-imported (bytes and manifest together)  1508ms
+   ✓ B-02 referenced Hypit asset bytes are inside the source digest > never digests a source whose bytes disagree with its manifest  1332ms
+   ✓ B-02 referenced Hypit asset bytes are inside the source digest > fails closed when a referenced asset is missing or its path escapes the project  2552ms
+   ✓ B-02 referenced Hypit asset bytes are inside the source digest > fails closed when a manifest hash no longer matches the bytes it describes  1137ms
+ ✓ tests/app/NarralensApp.test.tsx (9 tests) 601ms
+ ✓ tests/host/d4.2.1-import-service.test.ts (8 tests) 23802ms
+   ✓ D4.2.1 AssetImportService HTTP transaction > streams a real MP4, migrates @1 to @2, replays exactly and changes no authored project facts  5117ms
+   ✓ D4.2.1 AssetImportService HTTP transaction > returns a truthful @1 no-op for an exact duplicate without changing manifest bytes  1942ms
+   ✓ D4.2.1 AssetImportService HTTP transaction > rejects invalid media before journal or manifest mutation and removes private staging  1849ms
+   ✓ D4.2.1 AssetImportService HTTP transaction > commits a manifest-published journal deterministically before opening the HTTP port after restart  1977ms
+   ✓ D4.2.1 AssetImportService HTTP transaction > restores the exact manifest preimage and removes unreferenced new bytes after a publish-before-journal crash  1754ms
+   ✓ D4.2.1 AssetImportService HTTP transaction > serializes concurrent imports and replays the same key without losing either manifest entry  1941ms
+   ✓ D4.2.1 AssetImportService HTTP transaction > compensates content-install, manifest-temp and rename faults without changing authored or manifest facts  4133ms
+   ✓ D4.2.1 AssetImportService HTTP transaction > restores the exact manifest after one-shot post-publish faults and enters attention when durability stays unprovable  5086ms
 
  Test Files  26 passed (26)
       Tests  254 passed (254)
-   Start at  14:08:10
-   Duration  35.31s (transform 12.24s, setup 0ms, collect 87.48s, tests 85.08s, environment 18.26s, prepare 67.28s)
+   Start at  14:49:56
+   Duration  31.42s (transform 9.60s, setup 0ms, collect 79.62s, tests 73.82s, environment 16.03s, prepare 62.67s)
 
 vite v7.1.7 building for production...
 transforming...
@@ -114,4 +113,4 @@ computing gzip size...
 dist/index.html                   0.46 kB │ gzip:  0.32 kB
 dist/assets/index-CuKclEQt.css   12.55 kB │ gzip:  3.06 kB
 dist/assets/index-BBJmxAtE.js   211.74 kB │ gzip: 67.69 kB │ map: 939.32 kB
-✓ built in 1.21s
+✓ built in 734ms

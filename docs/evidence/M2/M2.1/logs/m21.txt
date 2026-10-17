@@ -5,41 +5,41 @@
 
  RUN  v3.2.4 /mnt/c/workSpace/videoWorkLine/Narralens
 
- ✓ tests/m2.1/openfilm-upstream-lock.test.ts (8 tests) 84ms
- ✓ tests/m2.1/time-model.test.ts (11 tests) 29ms
-(node:377091) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(node:1255915) ExperimentalWarning: SQLite is an experimental feature and might change at any time
 (Use `node --trace-warnings ...` to show where the warning was created)
-(node:377083) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(node:1255867) ExperimentalWarning: SQLite is an experimental feature and might change at any time
 (Use `node --trace-warnings ...` to show where the warning was created)
-(node:377123) ExperimentalWarning: SQLite is an experimental feature and might change at any time
-(Use `node --trace-warnings ...` to show where the warning was created)
-(node:377139) ExperimentalWarning: SQLite is an experimental feature and might change at any time
-(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.1/time-model.test.ts (11 tests) 30ms
  ✓ tests/m2.1/engine-binding-store.test.ts (10 tests) 8ms
- ✓ tests/m2.1/engine-port.test.ts (10 tests) 870ms
-   ✓ OpenFilmEngineAdapter staging > AC-004 never accepts an upstream rebased result as success  581ms
- ✓ tests/m2.1/native-write-gateway.test.ts (20 tests) 15ms
- ✓ tests/architecture/m2.1-fitness.test.ts (22 tests) 602ms
-(node:377090) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(node:1255859) ExperimentalWarning: SQLite is an experimental feature and might change at any time
 (Use `node --trace-warnings ...` to show where the warning was created)
- ✓ tests/m2.1/source-digest-v1.test.ts (18 tests) 2754ms
-   ✓ SourceDigestV1 closure > EN-04 gives the same digest whatever order the Host declares the roots in  598ms
-   ✓ SourceDigestV1 closure > EN-04 changes the digest when a scene, subtitle, setting, font or referenced asset changes  621ms
- ✓ tests/m2.1/engine-route.test.ts (8 tests) 1485ms
-   ✓ M2.1 route activation > AC-019 leaves every legacy route in place  1024ms
- ✓ tests/m2.1/native-bypass.test.ts (13 tests) 12268ms
-   ✓ EN-04 external change detection > refuses a stale digest after an out-of-band source edit and leaves the bytes untouched  2043ms
-   ✓ EN-04 external change detection > changes the digest when a declared asset, not only a source file, changes  1407ms
-   ✓ B-01 external source change reaches attention through the production path > 409, then attention=true, then the next typed edit is 423, without touching the edited bytes  1194ms
-   ✓ B-01 external source change reaches attention through the production path > never re-samples the committed baseline: reading again stays 409 and attention stays set  1114ms
-   ✓ B-02 referenced Hypit asset bytes are inside the source digest > covers both referenced visual assets in the closure  1044ms
-   ✓ B-02 referenced Hypit asset bytes are inside the source digest > changes the digest when a referenced asset is legitimately re-imported (bytes and manifest together)  1084ms
-   ✓ B-02 referenced Hypit asset bytes are inside the source digest > never digests a source whose bytes disagree with its manifest  1119ms
-   ✓ B-02 referenced Hypit asset bytes are inside the source digest > fails closed when a referenced asset is missing or its path escapes the project  2078ms
-   ✓ B-02 referenced Hypit asset bytes are inside the source digest > fails closed when a manifest hash no longer matches the bytes it describes  1173ms
+(node:1255886) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.1/openfilm-upstream-lock.test.ts (8 tests) 85ms
+ ✓ tests/m2.1/engine-port.test.ts (10 tests) 531ms
+   ✓ OpenFilmEngineAdapter staging > AC-004 never accepts an upstream rebased result as success  331ms
+(node:1255866) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/architecture/m2.1-fitness.test.ts (22 tests) 535ms
+ ✓ tests/m2.1/native-write-gateway.test.ts (20 tests) 16ms
+ ✓ tests/m2.1/engine-route.test.ts (8 tests) 1473ms
+   ✓ M2.1 route activation > AC-019 leaves every legacy route in place  1054ms
+ ✓ tests/m2.1/source-digest-v1.test.ts (18 tests) 2302ms
+   ✓ SourceDigestV1 closure > EN-04 gives the same digest whatever order the Host declares the roots in  441ms
+   ✓ SourceDigestV1 closure > EN-04 changes the digest when a scene, subtitle, setting, font or referenced asset changes  557ms
+ ✓ tests/m2.1/native-bypass.test.ts (13 tests) 10290ms
+   ✓ EN-04 external change detection > refuses a stale digest after an out-of-band source edit and leaves the bytes untouched  1662ms
+   ✓ EN-04 external change detection > changes the digest when a declared asset, not only a source file, changes  1137ms
+   ✓ B-01 external source change reaches attention through the production path > 409, then attention=true, then the next typed edit is 423, without touching the edited bytes  1073ms
+   ✓ B-01 external source change reaches attention through the production path > never re-samples the committed baseline: reading again stays 409 and attention stays set  968ms
+   ✓ B-02 referenced Hypit asset bytes are inside the source digest > covers both referenced visual assets in the closure  915ms
+   ✓ B-02 referenced Hypit asset bytes are inside the source digest > changes the digest when a referenced asset is legitimately re-imported (bytes and manifest together)  900ms
+   ✓ B-02 referenced Hypit asset bytes are inside the source digest > never digests a source whose bytes disagree with its manifest  910ms
+   ✓ B-02 referenced Hypit asset bytes are inside the source digest > fails closed when a referenced asset is missing or its path escapes the project  1777ms
+   ✓ B-02 referenced Hypit asset bytes are inside the source digest > fails closed when a manifest hash no longer matches the bytes it describes  935ms
 
  Test Files  9 passed (9)
       Tests  120 passed (120)
-   Start at  14:09:14
-   Duration  18.07s (transform 3.00s, setup 0ms, collect 15.37s, tests 18.12s, environment 1ms, prepare 17.87s)
+   Start at  14:50:43
+   Duration  15.32s (transform 2.35s, setup 0ms, collect 12.98s, tests 15.27s, environment 1ms, prepare 17.81s)
 
