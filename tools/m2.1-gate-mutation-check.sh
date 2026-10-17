@@ -198,13 +198,29 @@ cmp -s "$SCRATCH/m-before.ts" "$SCRATCH/m-after.ts" && { echo "MUT-M anchor not 
 run_case MUT-M "transition stops requiring its predecessor" src/host/projects/revision-store.ts \
   tests/m2.2/transaction-state-machine.test.ts "$SCRATCH/m-before.ts" "$SCRATCH/m-after.ts"
 
-# N: a journal step stops requiring its predecessor (M2.2 JRNL, legacy journal half).
+# J: a journal step stops requiring its predecessor (M2.2 JRNL, legacy journal half).
 cp src/host/projects/revision-store.ts "$SCRATCH/n-before.ts"
 sed 's/    if (changed !== 1) throw new Error(`INVALID_JOURNAL_TRANSITION:/    if (false) throw new Error(`INVALID_JOURNAL_TRANSITION:/' \
   "$SCRATCH/n-before.ts" > "$SCRATCH/n-after.ts"
-cmp -s "$SCRATCH/n-before.ts" "$SCRATCH/n-after.ts" && { echo "MUT-N anchor not found" >&2; exit 2; }
-run_case MUT-N "advanceJournal stops requiring its predecessor" src/host/projects/revision-store.ts \
+cmp -s "$SCRATCH/n-before.ts" "$SCRATCH/n-after.ts" && { echo "MUT-J anchor not found" >&2; exit 2; }
+run_case MUT-J "advanceJournal stops requiring its predecessor" src/host/projects/revision-store.ts \
   tests/m2.2/journal-predecessor.test.ts "$SCRATCH/n-before.ts" "$SCRATCH/n-after.ts"
+
+# S: the snapshot stops proving the parent directory entry before publishing (M2.2 DUR).
+cp src/host/projects/snapshot-store.ts "$SCRATCH/s-before.ts"
+sed 's/      await this.#fsync(projectRoot);/      \/\* mutated: parent fsync removed *\//' \
+  "$SCRATCH/s-before.ts" > "$SCRATCH/s-after.ts"
+cmp -s "$SCRATCH/s-before.ts" "$SCRATCH/s-after.ts" && { echo "MUT-S anchor not found" >&2; exit 2; }
+run_case MUT-S "snapshot skips the parent directory fsync" src/host/projects/snapshot-store.ts \
+  tests/m2.2/snapshot-store.test.ts "$SCRATCH/s-before.ts" "$SCRATCH/s-after.ts"
+
+# T: the snapshot stops re-hashing what it actually copied (M2.2 SNAP).
+cp src/host/projects/snapshot-store.ts "$SCRATCH/t-before.ts"
+sed 's/      if (landed !== entry.sha256) {/      if (false \&\& landed !== entry.sha256) {/' \
+  "$SCRATCH/t-before.ts" > "$SCRATCH/t-after.ts"
+cmp -s "$SCRATCH/t-before.ts" "$SCRATCH/t-after.ts" && { echo "MUT-T anchor not found" >&2; exit 2; }
+run_case MUT-T "snapshot stops re-hashing the copied bytes" src/host/projects/snapshot-store.ts \
+  tests/m2.2/snapshot-store.test.ts "$SCRATCH/t-before.ts" "$SCRATCH/t-after.ts"
 
 echo "SUMMARY cases=$results gates_that_failed_as_required=$bites" | tee -a "$LOG"
 [ "$results" -eq "$bites" ] || exit 1
