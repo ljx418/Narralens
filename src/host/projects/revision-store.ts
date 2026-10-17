@@ -1,5 +1,5 @@
 import { DatabaseSync, type SQLInputValue } from "node:sqlite";
-import type { AssetImportResponse, EditResponse } from "../../contracts/types.js";
+import type { ApiError, AssetImportResponse, EditResponse, JobEvent, JobState } from "../../contracts/types.js";
 import { HttpError } from "../api-error.js";
 
 export type JournalState = "prepared" | "source_validated" | "metadata_committed" | "aborted" | "compensated" | "attention";
@@ -42,6 +42,40 @@ export interface ProjectTransactionRow {
 export type BeginTransactionInput = Pick<ProjectTransactionRow,
   "transaction_id" | "project_id" | "kind" | "correlation_id" | "request_json" | "request_hash" | "base_revision">
   & { createdAt?: Date | undefined };
+
+export interface JobRow {
+  job_id: string; project_id: string; kind: string; payload_digest: string; state: JobState;
+  lease_owner: string | null; lease_expires_at: number | null; attempt: number; max_attempts: number;
+  cost_status: "unknown" | "known";
+  proposal_id: string | null; comparison_id: string | null; error_json: string | null;
+  quarantined_artifact_json: string | null; quarantined_receipt_json: string | null;
+  created_at: string; updated_at: string; terminal_reason: string;
+}
+
+export interface JobEventRecord {
+  event_id: number; job_id: string; seq: number; type: JobState; at: string;
+  message?: string; proposal_id?: string; comparison_id?: string; error?: { code: string; message: string };
+}
+
+function jobRow(row: Record<string, unknown>): JobRow {
+  return {
+    job_id: String(row.job_id), project_id: String(row.project_id), kind: String(row.kind),
+    payload_digest: String(row.payload_digest), state: String(row.state) as JobState,
+    lease_owner: row.lease_owner === null || row.lease_owner === undefined ? null : String(row.lease_owner),
+    lease_expires_at: row.lease_expires_at === null || row.lease_expires_at === undefined ? null : Number(row.lease_expires_at),
+    attempt: Number(row.attempt), max_attempts: Number(row.max_attempts),
+    cost_status: String(row.cost_status) as "unknown" | "known",
+    proposal_id: row.proposal_id === null || row.proposal_id === undefined ? null : String(row.proposal_id),
+    comparison_id: row.comparison_id === null || row.comparison_id === undefined ? null : String(row.comparison_id),
+    error_json: row.error_json === null || row.error_json === undefined ? null : String(row.error_json),
+    quarantined_artifact_json: row.quarantined_artifact_json === null || row.quarantined_artifact_json === undefined
+      ? null : String(row.quarantined_artifact_json),
+    quarantined_receipt_json: row.quarantined_receipt_json === null || row.quarantined_receipt_json === undefined
+      ? null : String(row.quarantined_receipt_json),
+    created_at: String(row.created_at), updated_at: String(row.updated_at),
+    terminal_reason: String(row.terminal_reason ?? ""),
+  };
+}
 
 export interface EngineLockRecord {
   lock_id: string; project_id: string; lock_type: string; scope: string; target_id: string;
@@ -222,6 +256,9 @@ export class RevisionStore {
         attempt INTEGER NOT NULL DEFAULT 0, max_attempts INTEGER NOT NULL DEFAULT 1,
         provider_receipt_json TEXT, cost_status TEXT NOT NULL DEFAULT 'unknown',
         quarantined_artifact_json TEXT, quarantined_receipt_json TEXT,
+        proposal_id TEXT, comparison_id TEXT,
+        -- Carried so GET /api/jobs/:id keeps the error the legacy in-memory store returned.
+        error_json TEXT,
         created_at TEXT NOT NULL, updated_at TEXT NOT NULL, terminal_reason TEXT NOT NULL DEFAULT '',
         CHECK (cost_status IN ('unknown','known'))
       );
@@ -474,6 +511,136 @@ export class RevisionStore {
   projectsInAttention(): string[] {
     return (this.#db.prepare("SELECT project_id FROM project_state WHERE attention=1 ORDER BY project_id")
       .all() as Array<{ project_id: string }>).map((row) => row.project_id);
+  }
+
+  // ── jobs, leases and events (M2.2 §6) ───────────────────────────────────────────────
+
+  createJobRow(row: {
+    job_id: string; project_id: string; kind: string; payload_digest: string; state: string;
+    lease_owner: string | null; lease_expires_at: number | null; attempt: number;
+    max_attempts: number; cost_status: "unknown" | "known"; created_at: string; updated_at: string;
+  }): void {
+    this.#db.prepare(`INSERT INTO job(
+      job_id, project_id, kind, payload_digest, state, lease_owner, lease_expires_at,
+      attempt, max_attempts, cost_status, created_at, updated_at)
+      VALUES(?,?,?,?,?,?,?,?,?,?,?,?)`)
+      .run(row.job_id, row.project_id, row.kind, row.payload_digest, row.state, row.lease_owner,
+        row.lease_expires_at, row.attempt, row.max_attempts, row.cost_status, row.created_at, row.updated_at);
+  }
+
+  /**
+   * Safe during shutdown: a job may still be in flight when the Host closes, and a read
+   * against a closed handle must report "gone" rather than crash the process.
+   */
+  readJob(jobId: string): JobRow | undefined {
+    try {
+      const row = this.#db.prepare("SELECT * FROM job WHERE job_id=?").get(jobId) as Record<string, unknown> | undefined;
+      return row === undefined ? undefined : jobRow(row);
+    } catch (error) {
+      if (String(error).includes("database is not open")) return undefined;
+      throw error;
+    }
+  }
+
+  /** Compare-and-set: only a queued job with no live lease can be taken. */
+  tryAcquireLease(jobId: string, owner: string, now: number, expiresAt: number): boolean {
+    const result = this.#db.prepare(`UPDATE job SET state='running', lease_owner=?, lease_expires_at=?,
+      attempt=attempt+1, updated_at=? WHERE job_id=? AND state='queued'
+      AND (lease_owner IS NULL OR lease_expires_at IS NULL OR lease_expires_at<=?)`)
+      .run(owner, expiresAt, new Date(now).toISOString(), jobId, now);
+    return Number(result.changes) === 1;
+  }
+
+  releaseLease(jobId: string, owner: string, now: number): boolean {
+    const result = this.#db.prepare(`UPDATE job SET lease_owner=NULL, lease_expires_at=NULL, updated_at=?
+      WHERE job_id=? AND lease_owner=? AND state='running'`)
+      .run(new Date(now).toISOString(), jobId, owner);
+    return Number(result.changes) === 1;
+  }
+
+  expiredLeases(now: number): Array<{ job_id: string; project_id: string; attempt: number; max_attempts: number }> {
+    return (this.#db.prepare(`SELECT job_id, project_id, attempt, max_attempts FROM job
+      WHERE state='running' AND lease_expires_at IS NOT NULL AND lease_expires_at<=? ORDER BY job_id`)
+      .all(now) as Array<{ job_id: string; project_id: string; attempt: number; max_attempts: number }>);
+  }
+
+  /**
+   * Take a lease nobody is holding any more. Returns it to `queued` while attempts remain so
+   * another worker can pick it up; the caller turns exhaustion into attention. A reclaimed
+   * job is never `succeeded` and never silently retried past its ceiling.
+   */
+  reclaimLease(jobId: string, requeue: boolean, now = new Date()): boolean {
+    const result = this.#db.prepare(`UPDATE job SET lease_owner=NULL, lease_expires_at=NULL,
+      state=?, updated_at=? WHERE job_id=? AND state='running'`)
+      .run(requeue ? "queued" : "running", now.toISOString(), jobId);
+    return Number(result.changes) === 1;
+  }
+
+  setJobState(jobId: string, state: JobState, at: string, terminalReason = "",
+    links: { proposal_id?: string; comparison_id?: string; error_json?: string } = {}): void {
+    // The result identifiers and the error live on the job so GET /api/jobs/:id keeps
+    // returning exactly what the legacy in-memory store returned (AC-019).
+    this.#db.prepare(`UPDATE job SET state=?, terminal_reason=?, updated_at=?,
+      proposal_id=COALESCE(?, proposal_id), comparison_id=COALESCE(?, comparison_id),
+      error_json=COALESCE(?, error_json) WHERE job_id=?`)
+      .run(state, terminalReason, at, links.proposal_id ?? null, links.comparison_id ?? null,
+        links.error_json ?? null, jobId);
+  }
+
+  /** Only a running job may be finalised; returns false when it moved on underneath us. */
+  completeCallback(jobId: string, state: JobState, costStatus: "unknown" | "known",
+    providerReceipt: string, terminalReason: string, now = new Date()): boolean {
+    const result = this.#db.prepare(`UPDATE job SET state=?, cost_status=?, provider_receipt_json=?,
+      terminal_reason=?, updated_at=? WHERE job_id=? AND state='running'`)
+      .run(state, costStatus, providerReceipt, terminalReason, now.toISOString(), jobId);
+    return Number(result.changes) === 1;
+  }
+
+  quarantine(jobId: string, artifact: string, receipt: string, now = new Date()): void {
+    this.#db.prepare(`UPDATE job SET quarantined_artifact_json=?, quarantined_receipt_json=?, updated_at=?
+      WHERE job_id=?`).run(artifact, receipt, now.toISOString(), jobId);
+  }
+
+  appendJobEvent(jobId: string, type: JobState, at: string,
+    extra: { message?: string; proposal_id?: string; comparison_id?: string; error?: unknown } = {}): JobEventRecord {
+    this.#db.exec("BEGIN IMMEDIATE");
+    try {
+      const next = Number((this.#db.prepare(
+        "SELECT COALESCE(MAX(seq), 0) + 1 AS next FROM job_event WHERE job_id=?").get(jobId) as { next: number }).next);
+      const payload = { message: extra.message, proposal_id: extra.proposal_id,
+        comparison_id: extra.comparison_id, error: extra.error };
+      const result = this.#db.prepare(
+        "INSERT INTO job_event(job_id, seq, type, payload_json, created_at) VALUES(?,?,?,?,?)")
+        .run(jobId, next, type, JSON.stringify(payload), at);
+      this.#db.exec("COMMIT");
+      // Assign rather than spread, so an absent optional is absent rather than undefined.
+      const record: JobEventRecord = {
+        event_id: Number(result.lastInsertRowid), job_id: jobId, seq: next, type, at,
+      };
+      if (extra.message !== undefined) record.message = extra.message;
+      if (extra.proposal_id !== undefined) record.proposal_id = extra.proposal_id;
+      if (extra.comparison_id !== undefined) record.comparison_id = extra.comparison_id;
+      if (extra.error !== undefined) record.error = extra.error as ApiError;
+      return record;
+    } catch (error) { this.#db.exec("ROLLBACK"); throw error; }
+  }
+
+  jobEventsAfter(jobId: string, after: number, limit: number): JobEventRecord[] {
+    return (this.#db.prepare(
+      "SELECT * FROM job_event WHERE job_id=? AND seq > ? ORDER BY seq LIMIT ?").all(jobId, after, limit) as Array<Record<string, unknown>>)
+      .map((row) => {
+        const payload = JSON.parse(String(row.payload_json)) as {
+          message?: string; proposal_id?: string; comparison_id?: string; error?: JobEventRecord["error"];
+        };
+        return {
+          event_id: Number(row.event_id), job_id: String(row.job_id), seq: Number(row.seq),
+          type: String(row.type) as JobState, at: String(row.created_at),
+          ...(payload.message === undefined ? {} : { message: payload.message }),
+          ...(payload.proposal_id === undefined ? {} : { proposal_id: payload.proposal_id }),
+          ...(payload.comparison_id === undefined ? {} : { comparison_id: payload.comparison_id }),
+          ...(payload.error === undefined ? {} : { error: payload.error }),
+        };
+      });
   }
 
   // ── locks (M2.2 §5) ────────────────────────────────────────────────────────────────

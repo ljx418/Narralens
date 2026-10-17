@@ -9,10 +9,11 @@ import { ProposalAdapter } from "../adapters/openmontage/proposal-adapter.js";
 import { ProposalComparisonAdapter } from "../adapters/openmontage/proposal-comparison-adapter.js";
 import { validateEditRequest, validateEngineResponse, validateProposalComparisonRequest } from "../contracts/validator.js";
 import type { EngineResponse } from "../contracts/engine-types.js";
-import type { ApiError, ProjectResponse, ProposalComparisonRequest } from "../contracts/types.js";
+import type { ApiError, JobEvent, ProjectResponse, ProposalComparisonRequest } from "../contracts/types.js";
 import { HttpError, normalizeError } from "./api-error.js";
 import { AssetImportService } from "./assets/asset-import-service.js";
 import { JobStore } from "./job-store.js";
+import { PersistentJobStore } from "./persistent-job-store.js";
 import { ProjectCatalog, type ProjectDescriptor } from "./projects/project-catalog.js";
 import { ProjectWriteActor } from "./projects/project-write-actor.js";
 import { InMemoryProjectOperationQueue, type ProjectOperationQueue } from "./projects/project-operation-queue.js";
@@ -28,7 +29,6 @@ const projectRoot = resolve(fileURLToPath(new URL("../..", import.meta.url)));
 
 interface HostDependencies {
   catalog?: ProjectCatalog;
-  jobs?: JobStore;
   runner?: ControlledAgentRunner;
   proposals?: ProposalAdapter;
   comparisons?: ProposalComparisonAdapter;
@@ -37,12 +37,14 @@ interface HostDependencies {
   operationQueue?: ProjectOperationQueue;
   imports?: AssetImportService;
   engines?: EngineRegistry;
+  jobs?: PersistentJobStore | JobStore;
   sessionTtlMs?: number;
 }
 
 export class NarralensHost {
   readonly catalog: ProjectCatalog;
-  readonly jobs: JobStore;
+  /** M2.2: durable by default; the in-memory JobStore stays as the legacy implementation. */
+  readonly jobs: PersistentJobStore | JobStore;
   readonly runner: ControlledAgentRunner;
   readonly proposals: ProposalAdapter;
   readonly comparisons: ProposalComparisonAdapter;
@@ -61,7 +63,6 @@ export class NarralensHost {
 
   constructor(dependencies: HostDependencies = {}) {
     this.catalog = dependencies.catalog ?? new ProjectCatalog();
-    this.jobs = dependencies.jobs ?? new JobStore();
     this.runner = dependencies.runner ?? new ControlledAgentRunner({ cwd: projectRoot });
     this.proposals = dependencies.proposals ?? new ProposalAdapter(resolve(projectRoot, "var/proposals"));
     this.comparisons = dependencies.comparisons ?? new ProposalComparisonAdapter(resolve(projectRoot, "var/proposal-comparisons"));
@@ -73,6 +74,7 @@ export class NarralensHost {
     if (dependencies.imports !== undefined && (dependencies.imports.catalog !== this.catalog
       || dependencies.imports.revisions !== this.revisions || dependencies.imports.operations !== this.operations
       || dependencies.imports.registry !== this.writes.assets)) throw new Error("HOST_IMPORT_DEPENDENCY_MISMATCH");
+    this.jobs = dependencies.jobs ?? new PersistentJobStore(this.revisions);
     this.imports = dependencies.imports ?? new AssetImportService(this.catalog, this.writes.assets, this.revisions, this.operations);
     this.engines = dependencies.engines ?? defaultEngineRegistry(this);
     this.sessionExpiresAt = new Date(Date.now() + (dependencies.sessionTtlMs ?? 3_600_000));
@@ -97,8 +99,13 @@ export class NarralensHost {
   async close(): Promise<void> {
     const server = this.#server;
     this.#server = undefined;
-    if (!server) return;
+    // Stop in-flight jobs before the store goes away, so a durable job never touches a
+    // closed database while it is still running.
+    for (const controller of this.#controllers.values()) controller.abort();
+    this.#controllers.clear();
+    if (!server) { this.revisions.close(); return; }
     await new Promise<void>((resolvePromise, reject) => server.close((error) => error ? reject(error) : resolvePromise()));
+    await new Promise((resolvePromise) => setImmediate(resolvePromise));
     this.revisions.close();
   }
 
@@ -288,10 +295,27 @@ export class NarralensHost {
       if (currentRevision !== request.base_revision) throw new HttpError(409, "REVISION_CONFLICT", "Project revision has changed");
       await this.comparisons.save(comparison);
       const current = this.jobs.get(jobId);
-      this.jobs.transition(jobId, current?.state === "cancel_requested" ? "completed_after_cancel" : "succeeded", {
-        comparison_id: comparison.comparison_id,
-        message: `Proposal comparison validated; runner stdout sha256 ${output.raw_sha256}`,
-      });
+      if (current?.state === "cancel_requested") {
+        // The work finished after cancellation. M2.2 never writes
+        // `completed_after_cancel` again: the job is cancelled and the result is quarantined
+        // so nothing downstream can treat it as adoptable.
+        if (this.jobs instanceof PersistentJobStore) {
+          this.jobs.recordCallback(jobId, { state: "cancelled",
+            providerReceipt: { comparison_id: comparison.comparison_id },
+            artifact: { comparison_id: comparison.comparison_id },
+            message: "Comparison finished after cancellation" });
+        } else {
+          this.jobs.transition(jobId, "completed_after_cancel", {
+            comparison_id: comparison.comparison_id,
+            message: "Comparison finished after cancellation",
+          });
+        }
+      } else {
+        this.jobs.transition(jobId, "succeeded", {
+          comparisonId: comparison.comparison_id,
+          message: `Proposal comparison validated; runner stdout sha256 ${output.raw_sha256}`,
+        });
+      }
     } catch (error) {
       const current = this.jobs.get(jobId);
       if (current?.state === "cancel_requested" && controller.signal.aborted && error instanceof HttpError && error.code === "RUNNER_TIMEOUT") {
@@ -310,9 +334,9 @@ export class NarralensHost {
     const after = Number.parseInt(afterValue, 10);
     if (!Number.isSafeInteger(after) || after < 0) throw new HttpError(400, "INVALID_REQUEST", "Invalid event cursor");
     response.writeHead(200, { "content-type": "text/event-stream", "cache-control": "no-store", connection: "close" });
-    const write = (event: ReturnType<JobStore["eventsAfter"]>[number]): void => { response.write(`id: ${event.event_id}\nevent: ${event.type}\ndata: ${JSON.stringify(event)}\n\n`); };
+    const write = (event: JobEvent): void => { response.write(`id: ${event.event_id}\nevent: ${event.type}\ndata: ${JSON.stringify(event)}\n\n`); };
     for (const event of this.jobs.eventsAfter(jobId, after)) write(event);
-    const terminal = new Set(["cancelled", "succeeded", "failed", "completed_after_cancel"]);
+    const terminal = new Set(["cancelled", "succeeded", "failed", "attention", "completed_after_cancel"]);
     if (terminal.has(snapshot.state)) { response.end(); return; }
     let unsubscribe = (): void => {};
     const close = (): void => { clearInterval(heartbeat); unsubscribe(); if (!response.writableEnded) response.end(); };
@@ -326,7 +350,8 @@ export class NarralensHost {
     if (!current) throw new HttpError(404, "NOT_FOUND", "Job not found");
     const job = this.jobs.requestCancel(jobId);
     this.#controllers.get(jobId)?.abort();
-    const state = job.state === "cancelled" || job.state === "completed_after_cancel" ? job.state : "cancel_requested";
+    const state = job.state === "cancelled" || job.state === "attention" || job.state === "completed_after_cancel"
+      ? job.state : "cancel_requested";
     json(response, 200, { job_id: jobId, state });
   }
 }

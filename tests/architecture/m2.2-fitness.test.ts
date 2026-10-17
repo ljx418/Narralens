@@ -48,6 +48,8 @@ describe("M2.2 fitness: one state machine, no arbitrary state writes", () => {
         const assignments = match[2] ?? "";
         // Only the SET list counts: a `state='...'` in the WHERE clause is a predicate.
         if (/\bWHERE\b/iu.test(assignments)) continue;
+        // The job table has its own documented transition table; rule 13 owns that one.
+        if (table === "job") continue;
         // Find the enclosing method by looking at the text just before the statement.
         const before = text.slice(Math.max(0, match.index! - 4000), match.index!);
         const enclosing = [...before.matchAll(/^\s{2}(?:async\s+)?(\w+)\s*\(/gmu)].pop()?.[1] ?? "";
@@ -56,6 +58,21 @@ describe("M2.2 fitness: one state machine, no arbitrary state writes", () => {
       }
     }
     expect(offenders).toEqual([]);
+  });
+
+  it("13. every job state write goes through the store that owns the transition table", () => {
+    const owner = "src/host/persistent-job-store.ts";
+    const offenders: string[] = [];
+    for (const file of SOURCE_FILES) {
+      if (file.endsWith("revision-store.ts")) continue;
+      if (/UPDATE\s+job\s+SET[^;]*?\bstate\s*=/iu.test(sourceOf(file))) offenders.push(relative(REPO, file));
+    }
+    expect(offenders).toEqual([]);
+    // The statements live in the store, and the legal pairs are declared once.
+    expect(sourceOf(resolve(REPO, owner))).not.toMatch(/JOB_TRANSITIONS\s*=/u);
+    const defaults = sourceOf(resolve(REPO, "src/host/job-defaults.ts"));
+    expect(defaults).toContain("export const JOB_TRANSITIONS");
+    expect(defaults).toContain("completed_after_cancel: []");
   });
 
   it("2. no production DELETE on a journal row; rows are evidence, not scratch", () => {

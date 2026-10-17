@@ -99,8 +99,13 @@ export interface RunnerGenerationAudit {
   service_tier: string | null;
 }
 
+/**
+ * `completed_after_cancel` is readable for legacy clients but is never written again: a
+ * cancelled job whose work finished late is `cancelled` plus a quarantined artifact
+ * (M2.2 plan §6). `attention` is the terminal state for an outcome nobody can classify.
+ */
 export type JobState = "queued" | "running" | "cancel_requested" | "cancelled"
-  | "succeeded" | "failed" | "completed_after_cancel";
+  | "succeeded" | "failed" | "attention" | "completed_after_cancel";
 
 export type ApiErrorCode = "INVALID_REQUEST" | "INVALID_SESSION" | "ORIGIN_REJECTED"
   | "NOT_FOUND" | "REVISION_CONFLICT" | "INVALID_PROPOSAL" | "INVALID_PROPOSAL_SET" | "PROVIDER_REJECTED"
@@ -134,6 +139,11 @@ export interface JobResponse {
 
 export interface JobEvent {
   event_id: number;
+  /**
+   * Per-job monotonic sequence. `event_id` is global and is what a client dedupes on;
+   * `seq` is what `?after=` resumes from. Optional so an older producer still validates.
+   */
+  seq?: number;
   job_id: string;
   type: JobState;
   at: string;

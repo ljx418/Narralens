@@ -238,5 +238,20 @@ cmp -s "$SCRATCH/q-before.ts" "$SCRATCH/q-after.ts" && { echo "MUT-Q anchor not 
 run_case MUT-Q "coordinator stops consulting the native write gateway" src/host/projects/project-coordinator.ts \
   tests/m2.2/project-coordinator.test.ts "$SCRATCH/q-before.ts" "$SCRATCH/q-after.ts"
 
+# O: the lease CAS stops requiring a queued job (M2.2 JB-02).
+cp src/host/projects/revision-store.ts "$SCRATCH/o-before.ts"
+sed "s/      .run(owner, expiresAt, new Date(now).toISOString(), jobId, now);/      .run(owner, expiresAt, new Date(now).toISOString(), jobId, now);/" \
+  "$SCRATCH/o-before.ts" > "$SCRATCH/o-after.ts"
+python3 - "$SCRATCH/o-before.ts" "$SCRATCH/o-after.ts" <<'PYEOF'
+import sys
+text = open(sys.argv[1], encoding="utf-8").read()
+anchor = "WHERE job_id=? AND state='queued'"
+assert text.count(anchor) == 1, f"MUT-O anchor count {text.count(anchor)}"
+open(sys.argv[2], "w", encoding="utf-8").write(text.replace(anchor, "WHERE job_id=?", 1))
+PYEOF
+cmp -s "$SCRATCH/o-before.ts" "$SCRATCH/o-after.ts" && { echo "MUT-O anchor not found" >&2; exit 2; }
+run_case MUT-O "lease CAS stops requiring a queued job" src/host/projects/revision-store.ts \
+  tests/m2.2/persistent-job-store.test.ts "$SCRATCH/o-before.ts" "$SCRATCH/o-after.ts"
+
 echo "SUMMARY cases=$results gates_that_failed_as_required=$bites" | tee -a "$LOG"
 [ "$results" -eq "$bites" ] || exit 1
