@@ -61,12 +61,16 @@ const recordedHead = environment.split("\n").find((line) => line.startsWith("git
 if (recordedHead === manifest.frozen_code_sha) pass("the capture environment independently records the same commit");
 else fail(`environment head ${recordedHead} differs from frozen ${manifest.frozen_code_sha}`);
 
+const currentHead = git("rev-parse", "HEAD");
 const changed = git("diff", "--name-only", manifest.frozen_code_sha, "--", ...CODE_PATHS);
 if (changed === "") pass(`no code, test, contract, tool or package file changed after ${manifest.frozen_code_sha}`);
 else fail(`code changed after the frozen commit:\n${changed}`);
 
 const notApplicable = (manifest.cases ?? []).filter((entry) => entry.status !== "PASSED");
 pass(`${manifest.case_count} cases, ${manifest.passed_count} passed, ${notApplicable.length} declared not applicable: ${notApplicable.map((entry) => entry.case_id).join(",") || "none"}`);
+
+if (manifest.repo_sha === manifest.frozen_code_sha) pass("the manifest lives in the same commit as the frozen code");
+else pass(`the manifest is committed after the frozen code (${currentHead.slice(0, 7)}); only evidence moved`);
 
 console.log(`checks_failed=${failures} frozen_code_sha=${manifest.frozen_code_sha}`);
 process.exit(failures === 0 ? 0 : 1);

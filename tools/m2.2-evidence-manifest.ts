@@ -39,7 +39,14 @@ const artifact = (path: string): { path: string; sha256: string } => {
   return { path, sha256: sha256File(resolve(path)) };
 };
 
-const frozenSha = git("rev-parse", "HEAD");
+// A file cannot contain the SHA of the commit that contains it, so the frozen commit is
+// the one `environment.txt` recorded when the gates ran. The manifest then lives in a later
+// commit that changes nothing under src/, tests/, contracts/, tools/ or package.json — which
+// is exactly what the integrity validator re-checks.
+const recordedHead = readFileSync(resolve(EVIDENCE_ROOT, "logs/environment.txt"), "utf8")
+  .split("\n").find((line) => line.startsWith("git_head="))?.split("=")[1]?.trim();
+const frozenSha = recordedHead ?? git("rev-parse", "HEAD");
+if (recordedHead === undefined) throw new Error("evidence environment.txt does not record git_head");
 // The manifest measures dirtiness before it exists; writing it must not count as a change.
 const SELF = "docs/evidence/M2/M2.2/evidence-manifest.json";
 const dirty = git("status", "--porcelain").split("\n")
