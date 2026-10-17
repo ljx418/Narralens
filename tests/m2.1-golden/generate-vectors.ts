@@ -25,7 +25,12 @@ const fixture = await computeSourceDigest({
   roots: ["film.html", "assets/narration.vtt", "assets/settings.json"],
   engine: "openfilm",
   engineUpstreamSha: OPENFILM_SHA,
-  declaredAssets: [{ path: "assets/narration.m4a", asset_id: "asset_narration_m21" }],
+  declaredAssets: [
+    { path: "assets/narration.m4a", asset_id: "asset_narration_m21" },
+    // Registered by the Host but not referenced from film.html yet: a declared root is a
+    // Host assertion that the asset belongs to the project's source closure.
+    { path: "assets/registered-only.m4a", asset_id: "asset_registered_only" },
+  ],
 });
 const base = fixture.manifest;
 

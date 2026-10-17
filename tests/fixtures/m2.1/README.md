@@ -38,6 +38,17 @@ Reference closure this fixture is built to exercise:
 | `assets/settings.json` | `settings` | declared root |
 | `assets/poster.png` | asset | `url(...)` from `theme.css` |
 | `assets/narration.m4a` | asset | `<audio src>` from the entry |
+| `assets/aaa-narration-alt.m4a` | asset | `<link rel="preload" href>` from `scenes/shot-03.html` |
+| `assets/registered-only.m4a` | asset | **declared root only** — the Host registers it, `film.html` does not reference it |
+
+The last row exists to make discovery order differ from path order: `aaa-narration-alt.m4a`
+sorts first by UTF-8 path but is only reachable from the third scene, so it is discovered last.
+That is what makes "assets keep semantic order, only files get sorted" observable rather than
+untested.
+
+`registered-only.m4a` covers the other side: a declared asset that nothing in the film references.
+It proves the declared-asset path is load-bearing, so that unreferenced *cache* files are excluded
+only because the Host never declares them — not because the resolver silently dropped them.
 
 Regenerate nothing here by hand: any edit changes the fixture SHA recorded in
 `docs/evidence/M2/M2.1/evidence-manifest.json`.

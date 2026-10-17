@@ -29,7 +29,8 @@ function digestOf(manifest: SourceDigestManifest): string {
 describe("SourceDigestV1 closure", () => {
   it("EN-04 covers the entry, every scene, css, subtitle, settings, font and referenced asset", async () => {
     const result = await computeSourceDigest({ root: fixtureRoot, roots: ROOTS, engine: "openfilm", engineUpstreamSha: OPENFILM_SHA,
-      declaredAssets: [{ path: "assets/narration.m4a", asset_id: "asset_narration_m21" }] });
+      declaredAssets: [{ path: "assets/narration.m4a", asset_id: "asset_narration_m21" },
+        { path: "assets/registered-only.m4a", asset_id: "asset_registered_only" }] });
     const files = result.manifest.files.map((file) => `${file.role}:${file.path}`);
     expect(files).toEqual([
       "font:assets/font.woff2",
@@ -42,7 +43,16 @@ describe("SourceDigestV1 closure", () => {
       "scene:scenes/shot-02.html",
       "scene:scenes/shot-03.html",
     ]);
-    expect(result.manifest.assets.map((asset) => asset.path)).toEqual(["assets/narration.m4a", "assets/poster.png"]);
+    // assets[] keeps breadth-first discovery order, not path order: `aaa-narration-alt.m4a`
+    // sorts first by path but is only reached from the third scene, so it is discovered last.
+    expect(result.manifest.assets.map((asset) => asset.path)).toEqual([
+      "assets/narration.m4a", "assets/poster.png", "assets/aaa-narration-alt.m4a",
+      "assets/registered-only.m4a",
+    ]);
+    // A Host-registered asset that film.html does not reference yet is still in the closure.
+    expect(result.manifest.assets.at(-1)).toMatchObject({ path: "assets/registered-only.m4a", asset_id: "asset_registered_only" });
+    expect(result.manifest.assets.map((asset) => asset.path)).not.toEqual(
+      [...result.manifest.assets].sort((left, right) => (left.path < right.path ? -1 : 1)).map((asset) => asset.path));
     expect(result.manifest.assets[0]!.asset_id).toBe("asset_narration_m21");
     expect(result.source_digest).toMatch(/^[a-f0-9]{64}$/u);
     expect(result.source_digest).toBe(digestOf(result.manifest));
@@ -147,6 +157,13 @@ describe("SourceDigestV1 closure", () => {
     await writeFile(resolve(unknown, "assets/theme.css"), '@import "notes.md";\n', "utf8");
     await expect(computeSourceDigest({ root: unknown, roots: ROOTS, engine: "openfilm", engineUpstreamSha: OPENFILM_SHA }))
       .rejects.toMatchObject({ details: { source_error: "SOURCE_FILE_ROLE_UNKNOWN" } });
+  });
+
+  it("keeps assets in discovery order, so sorting them is a real behaviour change", async () => {
+    const result = await computeSourceDigest({ root: fixtureRoot, roots: ROOTS, engine: "openfilm", engineUpstreamSha: OPENFILM_SHA });
+    const sorted = { ...result.manifest, assets: [...result.manifest.assets]
+      .sort((left, right) => (left.path < right.path ? -1 : 1)) };
+    expect(digestOf(sorted)).not.toBe(result.source_digest);
   });
 
   it("counts external references without following them and without letting them reach the digest", async () => {
