@@ -1,0 +1,45 @@
+
+> narralens@0.1.0 test:m2.1 /mnt/c/workSpace/videoWorkLine/Narralens
+> vitest run --config vitest.config.ts tests/m2.1 tests/architecture
+
+
+ RUN  v3.2.4 /mnt/c/workSpace/videoWorkLine/Narralens
+
+(node:101860) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.1/time-model.test.ts (11 tests) 28ms
+ ✓ tests/m2.1/engine-binding-store.test.ts (10 tests) 11ms
+ ✓ tests/m2.1/openfilm-upstream-lock.test.ts (8 tests) 101ms
+(node:101804) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:101836) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:101818) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.1/engine-port.test.ts (10 tests) 817ms
+   ✓ OpenFilmEngineAdapter staging > AC-004 never accepts an upstream rebased result as success  551ms
+ ✓ tests/m2.1/native-write-gateway.test.ts (20 tests) 16ms
+(node:101811) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/architecture/m2.1-fitness.test.ts (22 tests) 516ms
+ ✓ tests/m2.1/engine-route.test.ts (8 tests) 1466ms
+   ✓ M2.1 route activation > AC-019 leaves every legacy route in place  1073ms
+ ✓ tests/m2.1/source-digest-v1.test.ts (18 tests) 2738ms
+   ✓ SourceDigestV1 closure > EN-04 gives the same digest whatever order the Host declares the roots in  558ms
+   ✓ SourceDigestV1 closure > EN-04 changes the digest when a scene, subtitle, setting, font or referenced asset changes  694ms
+ ✓ tests/m2.1/native-bypass.test.ts (13 tests) 11576ms
+   ✓ EN-04 external change detection > refuses a stale digest after an out-of-band source edit and leaves the bytes untouched  1745ms
+   ✓ EN-04 external change detection > changes the digest when a declared asset, not only a source file, changes  1243ms
+   ✓ B-01 external source change reaches attention through the production path > 409, then attention=true, then the next typed edit is 423, without touching the edited bytes  1159ms
+   ✓ B-01 external source change reaches attention through the production path > never re-samples the committed baseline: reading again stays 409 and attention stays set  1126ms
+   ✓ B-02 referenced Hypit asset bytes are inside the source digest > covers both referenced visual assets in the closure  1048ms
+   ✓ B-02 referenced Hypit asset bytes are inside the source digest > changes the digest when a referenced asset is legitimately re-imported (bytes and manifest together)  1068ms
+   ✓ B-02 referenced Hypit asset bytes are inside the source digest > never digests a source whose bytes disagree with its manifest  1084ms
+   ✓ B-02 referenced Hypit asset bytes are inside the source digest > fails closed when a referenced asset is missing or its path escapes the project  2088ms
+   ✓ B-02 referenced Hypit asset bytes are inside the source digest > fails closed when a manifest hash no longer matches the bytes it describes  1004ms
+
+ Test Files  9 passed (9)
+      Tests  120 passed (120)
+   Start at  17:12:13
+   Duration  16.79s (transform 2.58s, setup 0ms, collect 13.58s, tests 17.27s, environment 1ms, prepare 15.26s)
+
