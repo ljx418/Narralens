@@ -1,0 +1,92 @@
+
+> narralens@0.1.0 test:m2.1 /mnt/c/workSpace/videoWorkLine/Narralens
+> vitest run --config vitest.config.ts tests/m2.1 tests/architecture
+
+
+ RUN  v3.2.4 /mnt/c/workSpace/videoWorkLine/Narralens
+
+(node:87238) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/m2.1/evidence-integrity.test.ts (5 tests | 2 failed) 379ms
+   ✓ M-02 evidence integrity > records a clean tree and a real frozen commit 62ms
+   × M-02 evidence integrity > references only files that exist, are tracked and match their recorded digest 44ms
+     → logs/m21.txt: expected '18c72a5db3d5c20b50f999b7104fc52b68173…' to be '1be60172caa9b2654e9eaa1f0d6e5a3ccd354…' // Object.is equality
+   ✓ M-02 evidence integrity > records every command with an exit code 1ms
+   × M-02 evidence integrity > has no code change after the frozen commit 271ms
+     → expected 'tests/m2.1/evidence-integrity.test.ts' to be '' // Object.is equality
+   ✓ M-02 evidence integrity > still reports external review as pending until an independent session decides 0ms
+(node:87200) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:87237) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.1/openfilm-upstream-lock.test.ts (8 tests) 79ms
+ ✓ tests/m2.1/engine-binding-store.test.ts (10 tests) 7ms
+ ✓ tests/m2.1/time-model.test.ts (11 tests) 25ms
+(node:87182) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.1/engine-port.test.ts (10 tests) 759ms
+   ✓ OpenFilmEngineAdapter staging > AC-004 never accepts an upstream rebased result as success  492ms
+ ✓ tests/m2.1/native-write-gateway.test.ts (20 tests) 14ms
+ ✓ tests/architecture/m2.1-fitness.test.ts (22 tests) 466ms
+(node:87194) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.1/engine-route.test.ts (8 tests) 1473ms
+   ✓ M2.1 route activation > AC-019 leaves every legacy route in place  1029ms
+ ✓ tests/m2.1/source-digest-v1.test.ts (18 tests) 2567ms
+   ✓ SourceDigestV1 closure > EN-04 gives the same digest whatever order the Host declares the roots in  484ms
+   ✓ SourceDigestV1 closure > EN-04 changes the digest when a scene, subtitle, setting, font or referenced asset changes  511ms
+   ✓ SourceDigestV1 closure > AC-006 refuses absolute paths, traversal, symlink escape, query strings and unknown roles  384ms
+ ✓ tests/m2.1/native-bypass.test.ts (13 tests) 12086ms
+   ✓ EN-04 external change detection > refuses a stale digest after an out-of-band source edit and leaves the bytes untouched  1486ms
+   ✓ EN-04 external change detection > changes the digest when a declared asset, not only a source file, changes  1191ms
+   ✓ B-01 external source change reaches attention through the production path > 409, then attention=true, then the next typed edit is 423, without touching the edited bytes  1148ms
+   ✓ B-01 external source change reaches attention through the production path > never re-samples the committed baseline: reading again stays 409 and attention stays set  1126ms
+   ✓ B-02 referenced Hypit asset bytes are inside the source digest > covers both referenced visual assets in the closure  1291ms
+   ✓ B-02 referenced Hypit asset bytes are inside the source digest > changes the digest when a referenced asset is legitimately re-imported (bytes and manifest together)  1060ms
+   ✓ B-02 referenced Hypit asset bytes are inside the source digest > never digests a source whose bytes disagree with its manifest  1150ms
+   ✓ B-02 referenced Hypit asset bytes are inside the source digest > fails closed when a referenced asset is missing or its path escapes the project  2263ms
+   ✓ B-02 referenced Hypit asset bytes are inside the source digest > fails closed when a manifest hash no longer matches the bytes it describes  1358ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/m2.1/evidence-integrity.test.ts > M-02 evidence integrity > references only files that exist, are tracked and match their recorded digest
+AssertionError: logs/m21.txt: expected '18c72a5db3d5c20b50f999b7104fc52b68173…' to be '1be60172caa9b2654e9eaa1f0d6e5a3ccd354…' // Object.is equality
+
+Expected: [32m"1[7mbe60172caa9b2654e9eaa1f0d6e5a3ccd354ceb744169821d2a283f562dbc5f[27m"[39m
+Received: [31m"1[7m8c72a5db3d5c20b50f999b7104fc52b681736d009ca153f260ccac32cfd1e64[27m"[39m
+
+ ❯ tests/m2.1/evidence-integrity.test.ts:52:74
+     50|       const recorded = manifest.cases.flatMap((entry) => entry.artifac…
+     51|         ?? manifest.cases.flatMap((entry) => entry.commands).find((com…
+     52|       if (recorded !== undefined) expect(sha256(absolute), relativePat…
+       |                                                                          ^
+     53|     }
+     54|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/m2.1/evidence-integrity.test.ts > M-02 evidence integrity > has no code change after the frozen commit
+AssertionError: expected 'tests/m2.1/evidence-integrity.test.ts' to be '' // Object.is equality
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[31m+ tests/m2.1/evidence-integrity.test.ts[39m
+
+ ❯ tests/m2.1/evidence-integrity.test.ts:66:87
+     64| 
+     65|   it("has no code change after the frozen commit", () => {
+     66|     expect(git("diff", "--name-only", manifest.frozen_code_sha, "--", …
+       |                                                                                       ^
+     67|   });
+     68| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed | 9 passed (10)
+      Tests  2 failed | 123 passed (125)
+   Start at  17:06:24
+   Duration  17.98s (transform 2.25s, setup 0ms, collect 13.51s, tests 17.86s, environment 1ms, prepare 16.97s)
+
+ ELIFECYCLE  Command failed with exit code 1.

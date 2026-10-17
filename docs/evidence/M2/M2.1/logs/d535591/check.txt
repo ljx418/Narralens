@@ -1,0 +1,157 @@
+
+> narralens@0.1.0 check /mnt/c/workSpace/videoWorkLine/Narralens
+> tsc --noEmit && vitest run --config vitest.config.ts && vite build
+
+
+ RUN  v3.2.4 /mnt/c/workSpace/videoWorkLine/Narralens
+
+(node:84234) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.1/time-model.test.ts (11 tests) 26ms
+(node:84292) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:84157) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:84161) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/m2.1/evidence-integrity.test.ts (5 tests | 2 failed) 310ms
+   ✓ M-02 evidence integrity > records a clean tree and a real frozen commit 48ms
+   × M-02 evidence integrity > references only files that exist, are tracked and match their recorded digest 10ms
+     → logs/m21.txt: expected false to be true // Object.is equality
+   ✓ M-02 evidence integrity > records every command with an exit code 1ms
+   × M-02 evidence integrity > has no code change after the frozen commit 250ms
+     → expected 'tests/m2.1/evidence-integrity.test.ts' to be '' // Object.is equality
+   ✓ M-02 evidence integrity > still reports external review as pending until an independent session decides 0ms
+(node:84171) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.1/engine-binding-store.test.ts (10 tests) 7ms
+ ✓ tests/m2.1/openfilm-upstream-lock.test.ts (8 tests) 87ms
+ ✓ tests/adapters/runner.test.ts (6 tests) 494ms
+ ✓ tests/adapters/d4.1-runner.test.ts (8 tests) 183ms
+ ✓ tests/m2.1/engine-port.test.ts (10 tests) 1578ms
+   ✓ OpenFilmEngineAdapter staging > AC-004 refuses a stale base before the upstream mutator is ever called  424ms
+   ✓ OpenFilmEngineAdapter staging > AC-004 never accepts an upstream rebased result as success  1074ms
+ ✓ tests/contracts/d4.1-contracts.test.ts (8 tests) 24ms
+ ✓ tests/contracts/d4.2.1-contracts.test.ts (6 tests) 53ms
+ ✓ tests/contracts/contracts.test.ts (7 tests) 65ms
+ ✓ tests/adapters/proposal-comparison-adapter.test.ts (12 tests) 49ms
+(node:84274) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:84215) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/host/d4-media-write-actor.test.ts (9 tests) 15ms
+ ✓ tests/host/d3-write-actor.test.ts (12 tests) 233ms
+ ✓ tests/m2.1/native-write-gateway.test.ts (20 tests) 16ms
+(node:84222) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:84213) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:84188) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:84189) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/architecture/m2.1-fitness.test.ts (22 tests) 1411ms
+   ✓ fitness 1-3: dependency direction > 3. production code never imports a spike, statically or dynamically  567ms
+   ✓ fitness 10-14: stage-specific invariants > 11. no production path reaches editProjectFilm from a translated write  393ms
+ ✓ tests/host/d4.2.1-registry-journal.test.ts (10 tests) 1885ms
+   ✓ D4.2.1 AssetRegistry v2 transaction foundation > re-reads media facts when bytes change without size or mtime signals  919ms
+   ✓ D4.2.1 AssetRegistry v2 transaction foundation > returns a path-free ordered inventory and degrades tampered, missing and restricted entries independently  537ms
+ ✓ tests/host/d4.2.1-upload-media.test.ts (12 tests) 1915ms
+   ✓ D4.2.1 imported media validation > proves a real MP4 has one CFR stream at the project rate and survives a second hash  778ms
+   ✓ D4.2.1 imported media validation > maps wrong frame rate and corrupt bytes to INVALID_MEDIA  528ms
+ ✓ tests/m2.1/engine-route.test.ts (8 tests) 2032ms
+   ✓ M2.1 route activation > EN-01 opens GET /api/migration/v1/projects/:id/engine as a read-only projection  334ms
+   ✓ M2.1 route activation > AC-019 leaves every legacy route in place  1352ms
+ ✓ tests/host/project-operation-queue.test.ts (3 tests) 3ms
+ ✓ tests/host/host-core.test.ts (5 tests) 5ms
+ ✓ tests/m2.1/source-digest-v1.test.ts (18 tests) 5626ms
+   ✓ SourceDigestV1 closure > EN-04 covers the entry, every scene, css, subtitle, settings, font and referenced asset  456ms
+   ✓ SourceDigestV1 closure > EN-04 gives the same digest whatever order the Host declares the roots in  1651ms
+   ✓ SourceDigestV1 closure > EN-04 changes the digest when a scene, subtitle, setting, font or referenced asset changes  1162ms
+   ✓ SourceDigestV1 closure > EN-04 resolves an OpenFilm time fragment to the same closure entry  469ms
+   ✓ SourceDigestV1 closure > AC-006 refuses absolute paths, traversal, symlink escape, query strings and unknown roles  517ms
+   ✓ M-03 canonical identity is the realpath > refuses Windows and WSL path shapes instead of normalising them silently  366ms
+ ✓ tests/host/host-http.test.ts (10 tests) 6902ms
+   ✓ D2 Host HTTP > enforces same-origin session and auth without leaking a token  769ms
+   ✓ D2 Host HTTP > rejects an oversized JSON body before contract parsing  740ms
+   ✓ D2 Host HTTP > reads the real D1 descriptor and leaves Source unchanged  640ms
+   ✓ D2 Host HTTP > returns the complete current asset inventory without leaking project paths  567ms
+   ✓ D2 Host HTTP > runs an asynchronous proposal job and replays monotonic SSE events  705ms
+   ✓ D2 Host HTTP > accepts a registered selection independent of JSON property order  665ms
+   ✓ D2 Host HTTP > rejects invalid D4.1 counts, reverse ranges and extra fields before Runner  2127ms
+   ✓ D2 Host HTTP > maps a comparison provider 529 after exactly one invocation  640ms
+ ✓ tests/host/d4.2.1-migration-evidence.test.ts (8 tests) 11284ms
+   ✓ M1A direct multipart and closed-route evidence > IM-02 accepts file before metadata through the real import route  3551ms
+   ✓ M1A direct multipart and closed-route evidence > IM-03..IM-09 rejects duplicate/missing/oversize/malformed multipart variants and cleans staging  336ms
+   ✓ M1A direct multipart and closed-route evidence > IM-24/IM-25 keeps materialize/adopt unavailable and rejects a fabricated edit operation without state change  3015ms
+   ✓ M1A direct media-tool evidence > IM-14..IM-17 distinguishes missing ffmpeg/ffprobe, timeout, stderr overflow and ordinary tool failure  653ms
+   ✓ M1A inventory and shared-write-boundary evidence > IM-18..IM-21 serves 256 ordered items over HTTP, caps probes at 2, isolates one timeout, revalidates changed bytes and rejects the 257th  501ms
+   ✓ M1A inventory and shared-write-boundary evidence > IM-22 serializes real HTTP import commit with a real D4.0 edit and only the edit advances revision  3018ms
+ ✓ tests/app/HostApiClient.test.ts (1 test) 4ms
+ ✓ tests/m2.1/native-bypass.test.ts (13 tests) 15887ms
+   ✓ EN-04 external change detection > refuses a stale digest after an out-of-band source edit and leaves the bytes untouched  2305ms
+   ✓ EN-04 external change detection > changes the digest when a declared asset, not only a source file, changes  1852ms
+   ✓ B-01 external source change reaches attention through the production path > 409, then attention=true, then the next typed edit is 423, without touching the edited bytes  1716ms
+   ✓ B-01 external source change reaches attention through the production path > never re-samples the committed baseline: reading again stays 409 and attention stays set  1702ms
+   ✓ B-02 referenced Hypit asset bytes are inside the source digest > covers both referenced visual assets in the closure  1622ms
+   ✓ B-02 referenced Hypit asset bytes are inside the source digest > changes the digest when a referenced asset is legitimately re-imported (bytes and manifest together)  1441ms
+   ✓ B-02 referenced Hypit asset bytes are inside the source digest > never digests a source whose bytes disagree with its manifest  1419ms
+   ✓ B-02 referenced Hypit asset bytes are inside the source digest > fails closed when a referenced asset is missing or its path escapes the project  2619ms
+   ✓ B-02 referenced Hypit asset bytes are inside the source digest > fails closed when a manifest hash no longer matches the bytes it describes  1194ms
+ ✓ tests/app/NarralensApp.test.tsx (9 tests) 651ms
+ ✓ tests/host/d4.2.1-import-service.test.ts (8 tests) 24956ms
+   ✓ D4.2.1 AssetImportService HTTP transaction > streams a real MP4, migrates @1 to @2, replays exactly and changes no authored project facts  4780ms
+   ✓ D4.2.1 AssetImportService HTTP transaction > returns a truthful @1 no-op for an exact duplicate without changing manifest bytes  2341ms
+   ✓ D4.2.1 AssetImportService HTTP transaction > rejects invalid media before journal or manifest mutation and removes private staging  1641ms
+   ✓ D4.2.1 AssetImportService HTTP transaction > commits a manifest-published journal deterministically before opening the HTTP port after restart  1846ms
+   ✓ D4.2.1 AssetImportService HTTP transaction > restores the exact manifest preimage and removes unreferenced new bytes after a publish-before-journal crash  1873ms
+   ✓ D4.2.1 AssetImportService HTTP transaction > serializes concurrent imports and replays the same key without losing either manifest entry  2042ms
+   ✓ D4.2.1 AssetImportService HTTP transaction > compensates content-install, manifest-temp and rename faults without changing authored or manifest facts  4718ms
+   ✓ D4.2.1 AssetImportService HTTP transaction > restores the exact manifest after one-shot post-publish faults and enters attention when durability stays unprovable  5715ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/m2.1/evidence-integrity.test.ts > M-02 evidence integrity > references only files that exist, are tracked and match their recorded digest
+AssertionError: logs/m21.txt: expected false to be true // Object.is equality
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- true[39m
+[31m+ false[39m
+
+ ❯ tests/m2.1/evidence-integrity.test.ts:47:50
+     45|       expect(relativePath.endsWith(".log"), `${relativePath} must not …
+     46|       const absolute = resolve(EVIDENCE_ROOT, relativePath);
+     47|       expect(existsSync(absolute), relativePath).toBe(true);
+       |                                                  ^
+     48|       expect(() => git("ls-files", "--error-unmatch", "--", `${EVIDENC…
+     49|         `${relativePath} is not tracked by git`).not.toThrow();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/m2.1/evidence-integrity.test.ts > M-02 evidence integrity > has no code change after the frozen commit
+AssertionError: expected 'tests/m2.1/evidence-integrity.test.ts' to be '' // Object.is equality
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[31m+ tests/m2.1/evidence-integrity.test.ts[39m
+
+ ❯ tests/m2.1/evidence-integrity.test.ts:66:87
+     64| 
+     65|   it("has no code change after the frozen commit", () => {
+     66|     expect(git("diff", "--name-only", manifest.frozen_code_sha, "--", …
+       |                                                                                       ^
+     67|   });
+     68| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed | 26 passed (27)
+      Tests  2 failed | 257 passed (259)
+   Start at  17:05:35
+   Duration  32.36s (transform 12.49s, setup 0ms, collect 83.00s, tests 75.70s, environment 13.73s, prepare 71.45s)
+
+ ELIFECYCLE  Command failed with exit code 1.
