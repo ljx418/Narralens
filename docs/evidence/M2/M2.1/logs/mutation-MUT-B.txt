@@ -1,10 +1,10 @@
 
  RUN  v3.2.4 /mnt/c/workSpace/videoWorkLine/Narralens
 
-(node:1267186) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(node:44143) ExperimentalWarning: SQLite is an experimental feature and might change at any time
 (Use `node --trace-warnings ...` to show where the warning was created)
- ❯ tests/m2.1/native-write-gateway.test.ts (20 tests | 1 failed) 29ms
-   × NativeMutationRegistry completeness > AC-003 registers no unknown policy at all 16ms
+ ❯ tests/m2.1/native-write-gateway.test.ts (20 tests | 1 failed) 42ms
+   × NativeMutationRegistry completeness > AC-003 registers no unknown policy at all 28ms
      → timeline.split: expected [ 'translated', …(3) ] to include 'unknown'
    ✓ NativeMutationRegistry completeness > AC-003 every entry records transport, impact, lock, reason and a test id 3ms
    ✓ NativeMutationRegistry completeness > AC-003 covers every row of the verified OpenFilm native inventory exactly once 2ms
@@ -14,12 +14,12 @@
    ✓ NativeWriteGateway decisions > AC-003 translates a known entry to the legacy typed edit with no mapping layer 1ms
    ✓ NativeWriteGateway decisions > AC-003 routes an asset import to the Host asset service rather than a film edit 0ms
    ✓ NativeWriteGateway decisions > AC-003 blocks every registered blocked entry with its recorded reason 1ms
-   ✓ NativeWriteGateway decisions > AC-003 passes read_only entries with no typed edit and no security event 0ms
+   ✓ NativeWriteGateway decisions > AC-003 passes read_only entries with no typed edit and no security event 1ms
    ✓ NativeWriteGateway decisions > AC-003 denies an unregistered entry by default and records a security event 0ms
    ✓ NativeWriteGateway decisions > EN-02.b refuses a write whose capability the engine reports as unverified, whatever the policy 0ms
    ✓ NativeWriteGateway decisions > AC-002 maps a refusal to a stable HTTP error and refuses to throw on a permitted decision 1ms
    ✓ NativeWriteGateway decisions > AC-003 refuses a translated entry whose typed intent is incomplete instead of inventing it 0ms
-   ✓ M-01 capability completeness and fail-closed behaviour > every engine-owned registry operation has an entry in the capability map 2ms
+   ✓ M-01 capability completeness and fail-closed behaviour > every engine-owned registry operation has an entry in the capability map 3ms
    ✓ M-01 capability completeness and fail-closed behaviour > OpenFilm reports its two film writes as blocked, never as supported 0ms
    ✓ M-01 capability completeness and fail-closed behaviour > refuses a translated write when the capability map does not report the operation 0ms
    ✓ M-01 capability completeness and fail-closed behaviour > refuses a translated write when no capability map is supplied at all 0ms
@@ -43,6 +43,6 @@ AssertionError: timeline.split: expected [ 'translated', …(3) ] to include 'un
 
  Test Files  1 failed (1)
       Tests  1 failed | 19 passed (20)
-   Start at  14:51:17
-   Duration  5.00s (transform 345ms, setup 0ms, collect 2.42s, tests 29ms, environment 0ms, prepare 1.66s)
+   Start at  16:58:37
+   Duration  7.71s (transform 539ms, setup 0ms, collect 3.99s, tests 42ms, environment 0ms, prepare 2.52s)
 

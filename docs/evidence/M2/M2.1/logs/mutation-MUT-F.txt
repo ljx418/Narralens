@@ -1,20 +1,20 @@
 
  RUN  v3.2.4 /mnt/c/workSpace/videoWorkLine/Narralens
 
-(node:1282398) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(node:50595) ExperimentalWarning: SQLite is an experimental feature and might change at any time
 (Use `node --trace-warnings ...` to show where the warning was created)
- ❯ tests/m2.1/engine-port.test.ts (10 tests | 1 failed) 319ms
+ ❯ tests/m2.1/engine-port.test.ts (10 tests | 1 failed) 489ms
    ✓ EnginePort shape > AC-002 exposes exactly the seven governed operations 1ms
    ✓ EnginePort shape > AC-002 declares no commit, revision write, lock write or command execution on the port 0ms
-   ✓ EnginePort shape > AC-002 accepts only Host-constructed absolute paths, never a client-supplied one 8ms
-   ✓ Engine adapters hold no commit power > AC-002 no adapter declares a commit, revision or lock mutator 6ms
+   ✓ EnginePort shape > AC-002 accepts only Host-constructed absolute paths, never a client-supplied one 9ms
+   ✓ Engine adapters hold no commit power > AC-002 no adapter declares a commit, revision or lock mutator 7ms
    ✓ Engine adapters hold no commit power > AC-002 both adapters implement the whole port or none of it 0ms
    ✓ Engine adapters hold no commit power > AC-004 the OpenFilm adapter refuses to plan any write instead of inventing one 1ms
-   ✓ Engine adapters hold no commit power > AC-004 the OpenFilm adapter surfaces an unreadable film as ENGINE_UNAVAILABLE, not a guess 2ms
+   ✓ Engine adapters hold no commit power > AC-004 the OpenFilm adapter surfaces an unreadable film as ENGINE_UNAVAILABLE, not a guess 4ms
    ✓ Engine adapters hold no commit power > EN-06 an unregistered project layout is unavailable rather than defaulted 0ms
-   × OpenFilmEngineAdapter staging > AC-004 refuses a stale base before the upstream mutator is ever called 124ms
+   × OpenFilmEngineAdapter staging > AC-004 refuses a stale base before the upstream mutator is ever called 173ms
      → expected Error: must not be called to match object { status: 409, code: 'SOURCE_CHANGED' }
-   ✓ OpenFilmEngineAdapter staging > AC-004 never accepts an upstream rebased result as success 176ms
+   ✓ OpenFilmEngineAdapter staging > AC-004 never accepts an upstream rebased result as success 292ms
 
 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
 
@@ -44,6 +44,6 @@ AssertionError: expected Error: must not be called to match object { status: 409
 
  Test Files  1 failed (1)
       Tests  1 failed | 9 passed (10)
-   Start at  14:51:54
-   Duration  3.24s (transform 212ms, setup 0ms, collect 371ms, tests 319ms, environment 0ms, prepare 1.58s)
+   Start at  16:59:35
+   Duration  4.15s (transform 274ms, setup 0ms, collect 514ms, tests 489ms, environment 0ms, prepare 2.14s)
 
