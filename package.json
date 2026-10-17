@@ -24,7 +24,9 @@
     "evidence:m2.1:manifest": "tsx tools/m2.1-evidence-manifest.ts",
     "evidence:m2.1:integrity": "node tools/m2.1-evidence-integrity.mjs",
     "evidence:m2.1:repro": "tsx tools/m2.1-external-review-repro.mts",
-    "evidence:m2.1:finalize": "bash tools/m2.1-finalize-evidence.sh"
+    "evidence:m2.1:finalize": "bash tools/m2.1-finalize-evidence.sh",
+    "evidence:m2.2:manifest": "tsx tools/m2.2-evidence-manifest.ts",
+    "evidence:m2.2:integrity": "node tools/m2.2-evidence-integrity.mjs"
   },
   "dependencies": {
     "ajv": "8.18.0",
