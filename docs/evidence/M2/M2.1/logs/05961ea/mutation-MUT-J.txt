@@ -1,11 +1,11 @@
 
  RUN  v3.2.4 /mnt/c/workSpace/videoWorkLine/Narralens
 
- ❯ tests/m2.1/openfilm-upstream-lock.test.ts (8 tests | 3 failed) 41ms
+ ❯ tests/m2.1/openfilm-upstream-lock.test.ts (8 tests | 3 failed) 42ms
    ✓ M-04 pinned OpenFilm checkout verification > pins every file the loader is about to execute, plus package, lock and licence 1ms
    ✓ M-04 pinned OpenFilm checkout verification > keeps the production lock consistent with the M1B recorded upstream lock 0ms
-   ✓ M-04 pinned OpenFilm checkout verification > refuses a checkout with no git HEAD 8ms
-   × M-04 pinned OpenFilm checkout verification > refuses when the seam module was tampered with 13ms
+   ✓ M-04 pinned OpenFilm checkout verification > refuses a checkout with no git HEAD 7ms
+   × M-04 pinned OpenFilm checkout verification > refuses when the seam module was tampered with 16ms
      → expected true to be false // Object.is equality
    × M-04 pinned OpenFilm checkout verification > refuses when any other loaded module, package, lock or licence changes 5ms
      → packages/openfilm/studio/server/film.mjs: expected true to be false // Object.is equality
@@ -76,6 +76,6 @@ AssertionError: expected true to be false // Object.is equality
 
  Test Files  1 failed (1)
       Tests  3 failed | 5 passed (8)
-   Start at  17:14:51
-   Duration  3.16s (transform 92ms, setup 0ms, collect 234ms, tests 41ms, environment 0ms, prepare 1.88s)
+   Start at  17:25:25
+   Duration  2.91s (transform 92ms, setup 0ms, collect 216ms, tests 42ms, environment 0ms, prepare 1.62s)
 

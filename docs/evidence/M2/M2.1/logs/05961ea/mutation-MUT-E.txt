@@ -1,27 +1,27 @@
 
  RUN  v3.2.4 /mnt/c/workSpace/videoWorkLine/Narralens
 
- ❯ tests/m2.1/source-digest-v1.test.ts (18 tests | 2 failed) 1761ms
-   × SourceDigestV1 closure > EN-04 covers the entry, every scene, css, subtitle, settings, font and referenced asset 121ms
+ ❯ tests/m2.1/source-digest-v1.test.ts (18 tests | 2 failed) 2070ms
+   × SourceDigestV1 closure > EN-04 covers the entry, every scene, css, subtitle, settings, font and referenced asset 184ms
      → expected [ Array(4) ] to deeply equal [ 'assets/narration.m4a', …(3) ]
-   ✓ SourceDigestV1 closure > EN-04 gives the same digest whatever order the Host declares the roots in  312ms
-   ✓ SourceDigestV1 closure > EN-04 changes the digest when a scene, subtitle, setting, font or referenced asset changes  370ms
-   ✓ SourceDigestV1 closure > EN-04 resolves an OpenFilm time fragment to the same closure entry 159ms
-   ✓ SourceDigestV1 closure > EN-04 counts a cycle once and refuses a reference that does not resolve 82ms
-   ✓ SourceDigestV1 closure > AC-006 refuses absolute paths, traversal, symlink escape, query strings and unknown roles 208ms
-   × SourceDigestV1 closure > keeps assets in discovery order, so sorting them is a real behaviour change 99ms
+   ✓ SourceDigestV1 closure > EN-04 gives the same digest whatever order the Host declares the roots in  383ms
+   ✓ SourceDigestV1 closure > EN-04 changes the digest when a scene, subtitle, setting, font or referenced asset changes  380ms
+   ✓ SourceDigestV1 closure > EN-04 resolves an OpenFilm time fragment to the same closure entry 162ms
+   ✓ SourceDigestV1 closure > EN-04 counts a cycle once and refuses a reference that does not resolve 128ms
+   ✓ SourceDigestV1 closure > AC-006 refuses absolute paths, traversal, symlink escape, query strings and unknown roles 267ms
+   × SourceDigestV1 closure > keeps assets in discovery order, so sorting them is a real behaviour change 139ms
      → expected '367703c6fd925d53b3c1fcc3fd3ae54000e28…' not to be '367703c6fd925d53b3c1fcc3fd3ae54000e28…' // Object.is equality
-   ✓ SourceDigestV1 closure > counts external references without following them and without letting them reach the digest 42ms
+   ✓ SourceDigestV1 closure > counts external references without following them and without letting them reach the digest 52ms
    ✓ SourceDigestV1 reference extraction > extracts only the pinned attribute set and never a form action or data attribute 0ms
    ✓ SourceDigestV1 reference extraction > extracts quoted and unquoted url() from css and ignores settings and font leaves 0ms
    ✓ SourceDigestV1 reference extraction > extracts only cue URI lines from a WebVTT body, not the header or a bare path 0ms
    ✓ SourceDigestV1 canonical form > sorts object keys by UTF-8 byte order and refuses floats 1ms
    ✓ SourceDigestV1 canonical form > matches every committed golden vector 3ms
-   ✓ M-03 canonical identity is the realpath > counts an internal symlink alias and its target once 43ms
-   ✓ M-03 canonical identity is the realpath > counts one canonical file once however many distinct paths reach it 43ms
-   ✓ M-03 canonical identity is the realpath > resolves a declared root through a symlink to its canonical path 42ms
-   ✓ M-03 canonical identity is the realpath > still counts a cycle exactly once 47ms
-   ✓ M-03 canonical identity is the realpath > refuses Windows and WSL path shapes instead of normalising them silently 189ms
+   ✓ M-03 canonical identity is the realpath > counts an internal symlink alias and its target once 56ms
+   ✓ M-03 canonical identity is the realpath > counts one canonical file once however many distinct paths reach it 53ms
+   ✓ M-03 canonical identity is the realpath > resolves a declared root through a symlink to its canonical path 52ms
+   ✓ M-03 canonical identity is the realpath > still counts a cycle exactly once 44ms
+   ✓ M-03 canonical identity is the realpath > refuses Windows and WSL path shapes instead of normalising them silently 164ms
 
 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
 
@@ -64,6 +64,6 @@ AssertionError: expected '367703c6fd925d53b3c1fcc3fd3ae54000e28…' not to be '3
 
  Test Files  1 failed (1)
       Tests  2 failed | 16 passed (18)
-   Start at  17:13:39
-   Duration  7.95s (transform 202ms, setup 0ms, collect 3.19s, tests 1.76s, environment 0ms, prepare 1.98s)
+   Start at  17:24:20
+   Duration  7.53s (transform 241ms, setup 0ms, collect 2.96s, tests 2.07s, environment 0ms, prepare 1.58s)
 

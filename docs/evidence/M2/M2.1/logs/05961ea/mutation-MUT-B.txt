@@ -1,10 +1,10 @@
 
  RUN  v3.2.4 /mnt/c/workSpace/videoWorkLine/Narralens
 
-(node:103427) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(node:168048) ExperimentalWarning: SQLite is an experimental feature and might change at any time
 (Use `node --trace-warnings ...` to show where the warning was created)
- ❯ tests/m2.1/native-write-gateway.test.ts (20 tests | 1 failed) 35ms
-   × NativeMutationRegistry completeness > AC-003 registers no unknown policy at all 21ms
+ ❯ tests/m2.1/native-write-gateway.test.ts (20 tests | 1 failed) 27ms
+   × NativeMutationRegistry completeness > AC-003 registers no unknown policy at all 17ms
      → timeline.split: expected [ 'translated', …(3) ] to include 'unknown'
    ✓ NativeMutationRegistry completeness > AC-003 every entry records transport, impact, lock, reason and a test id 2ms
    ✓ NativeMutationRegistry completeness > AC-003 covers every row of the verified OpenFilm native inventory exactly once 2ms
@@ -19,7 +19,7 @@
    ✓ NativeWriteGateway decisions > EN-02.b refuses a write whose capability the engine reports as unverified, whatever the policy 0ms
    ✓ NativeWriteGateway decisions > AC-002 maps a refusal to a stable HTTP error and refuses to throw on a permitted decision 1ms
    ✓ NativeWriteGateway decisions > AC-003 refuses a translated entry whose typed intent is incomplete instead of inventing it 0ms
-   ✓ M-01 capability completeness and fail-closed behaviour > every engine-owned registry operation has an entry in the capability map 3ms
+   ✓ M-01 capability completeness and fail-closed behaviour > every engine-owned registry operation has an entry in the capability map 2ms
    ✓ M-01 capability completeness and fail-closed behaviour > OpenFilm reports its two film writes as blocked, never as supported 0ms
    ✓ M-01 capability completeness and fail-closed behaviour > refuses a translated write when the capability map does not report the operation 0ms
    ✓ M-01 capability completeness and fail-closed behaviour > refuses a translated write when no capability map is supplied at all 0ms
@@ -43,6 +43,6 @@ AssertionError: timeline.split: expected [ 'translated', …(3) ] to include 'un
 
  Test Files  1 failed (1)
       Tests  1 failed | 19 passed (20)
-   Start at  17:13:03
-   Duration  6.52s (transform 455ms, setup 0ms, collect 3.26s, tests 35ms, environment 0ms, prepare 2.16s)
+   Start at  17:23:51
+   Duration  4.84s (transform 335ms, setup 0ms, collect 2.40s, tests 27ms, environment 0ms, prepare 1.51s)
 

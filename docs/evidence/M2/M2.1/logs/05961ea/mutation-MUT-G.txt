@@ -1,9 +1,9 @@
 
  RUN  v3.2.4 /mnt/c/workSpace/videoWorkLine/Narralens
 
-(node:110106) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(node:175477) ExperimentalWarning: SQLite is an experimental feature and might change at any time
 (Use `node --trace-warnings ...` to show where the warning was created)
- ❯ tests/m2.1/native-write-gateway.test.ts (20 tests | 2 failed) 25ms
+ ❯ tests/m2.1/native-write-gateway.test.ts (20 tests | 2 failed) 31ms
    ✓ NativeMutationRegistry completeness > AC-003 registers no unknown policy at all 4ms
    ✓ NativeMutationRegistry completeness > AC-003 every entry records transport, impact, lock, reason and a test id 2ms
    ✓ NativeMutationRegistry completeness > AC-003 covers every row of the verified OpenFilm native inventory exactly once 2ms
@@ -20,7 +20,7 @@
    ✓ NativeWriteGateway decisions > AC-003 refuses a translated entry whose typed intent is incomplete instead of inventing it 0ms
    ✓ M-01 capability completeness and fail-closed behaviour > every engine-owned registry operation has an entry in the capability map 2ms
    ✓ M-01 capability completeness and fail-closed behaviour > OpenFilm reports its two film writes as blocked, never as supported 0ms
-   × M-01 capability completeness and fail-closed behaviour > refuses a translated write when the capability map does not report the operation 9ms
+   × M-01 capability completeness and fail-closed behaviour > refuses a translated write when the capability map does not report the operation 16ms
      → Cannot read properties of undefined (reading 'state')
    × M-01 capability completeness and fail-closed behaviour > refuses a translated write when no capability map is supplied at all 0ms
      → Cannot read properties of undefined (reading 'state')
@@ -58,6 +58,6 @@ TypeError: Cannot read properties of undefined (reading 'state')
 
  Test Files  1 failed (1)
       Tests  2 failed | 18 passed (20)
-   Start at  17:14:01
-   Duration  6.46s (transform 419ms, setup 0ms, collect 3.29s, tests 25ms, environment 0ms, prepare 2.08s)
+   Start at  17:24:41
+   Duration  5.72s (transform 409ms, setup 0ms, collect 2.94s, tests 31ms, environment 0ms, prepare 1.61s)
 
