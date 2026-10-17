@@ -3,9 +3,9 @@
   "ticket": "M2.1",
   "title": "EnginePort 与原生写入治理",
   "declaration_ceiling": "M2_1_CONTROL_BOUNDARY_READY",
-  "captured_at": "2026-10-17T05:06:41.829Z",
-  "case_count": 13,
-  "passed_count": 13,
+  "captured_at": "2026-10-17T06:59:55.646Z",
+  "case_count": 20,
+  "passed_count": 20,
   "screenshots": [],
   "claim_limits": [
     "This evidence supports M2_1_CONTROL_BOUNDARY_READY only.",
@@ -16,9 +16,11 @@
     "M2.1 registers and decides at the gateway, but the gateway is not yet in front of a production write route: this ticket opens no write route, and the only existing write route (POST /api/projects/:id/edits) was already Host-owned via ProjectWriteActor before M2.1. That enforcement point becomes live with M2.2 Coordinator wiring or M4A (ADR-M2.1-001 D-12).",
     "Mocked boundaries: none of the assertions above rely on a mock. The only test doubles are the in-process upstream stub in two OpenFilm unit cases, which are labelled schema_unit and do not close any real gate."
   ],
-  "repo_sha": "7879e4c2bc4f0131ede65ebbe329bd673903b9ea",
+  "repo_sha": "226c255246b649a5b5fa67000ee2c4ea2a5a93e4",
   "repo_branch": "migration/m2.1-engine-governance",
   "repo_dirty_at_capture": true,
+  "frozen_code_sha": "c58232511faa098c7e385be43b37e3640c274a34",
+  "frozen_commit_note": "Evidence ran against this commit with a clean tree. The manifest itself is committed on top and changes no src/, tests/, contracts/, tools/ or package.json file; tools/m2.1-evidence-integrity.mjs verifies that.",
   "upstream_shas": {
     "openfilm": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
     "hypit": "6fdd8c0f02c17b9970aee6deb4550a70e9d57acf"
@@ -39,9 +41,7 @@
   "review": {
     "internal": "PASS",
     "internal_record": "reviews/internal-review.md",
-    "external": "FAIL_REWORK_REQUIRED",
-    "external_record": "reviews/external-review-codex.md",
-    "external_candidate_sha": "fc3efb4a53e19bca5ad939bd93e40b1af50a428d"
+    "external": "REVIEW_PENDING"
   },
   "cases": [
     {
@@ -59,12 +59,14 @@
         {
           "command": "corepack pnpm test:m2.1",
           "exit_code": 0,
-          "log": "logs/m21.log"
+          "stdout_stderr": "logs/m21.txt",
+          "stdout_stderr_sha256": "1f2806e65c54ad7626189f6692817c9b45c7d41777d1924b792dfd9ff74a0124"
         },
         {
           "command": "corepack pnpm check",
           "exit_code": 0,
-          "log": "logs/check.log"
+          "stdout_stderr": "logs/check.txt",
+          "stdout_stderr_sha256": "47d13e9b9d68c5fa87a74d6c26204a3f6e8abd311102a78a87964ba85235fa57"
         }
       ],
       "assertions": [
@@ -76,12 +78,12 @@
       ],
       "artifacts": [
         {
-          "path": "logs/m21.log",
-          "sha256": "665849e241a38599853327482809654c24ec16930e904f7a94c1f63b8d389746"
+          "path": "logs/m21.txt",
+          "sha256": "1f2806e65c54ad7626189f6692817c9b45c7d41777d1924b792dfd9ff74a0124"
         },
         {
-          "path": "logs/check.log",
-          "sha256": "c24fe4532d3b0f4ae9f50cfb5ca89ac19a56bb1ef04c6c1d2b0c1b3cd658edd4"
+          "path": "logs/check.txt",
+          "sha256": "47d13e9b9d68c5fa87a74d6c26204a3f6e8abd311102a78a87964ba85235fa57"
         }
       ]
     },
@@ -96,7 +98,8 @@
         {
           "command": "corepack pnpm test:m2.1",
           "exit_code": 0,
-          "log": "logs/m21.log"
+          "stdout_stderr": "logs/m21.txt",
+          "stdout_stderr_sha256": "1f2806e65c54ad7626189f6692817c9b45c7d41777d1924b792dfd9ff74a0124"
         }
       ],
       "assertions": [
@@ -106,8 +109,8 @@
       ],
       "artifacts": [
         {
-          "path": "logs/m21.log",
-          "sha256": "665849e241a38599853327482809654c24ec16930e904f7a94c1f63b8d389746"
+          "path": "logs/m21.txt",
+          "sha256": "1f2806e65c54ad7626189f6692817c9b45c7d41777d1924b792dfd9ff74a0124"
         }
       ]
     },
@@ -126,12 +129,14 @@
         {
           "command": "corepack pnpm test:m2.1",
           "exit_code": 0,
-          "log": "logs/m21.log"
+          "stdout_stderr": "logs/m21.txt",
+          "stdout_stderr_sha256": "1f2806e65c54ad7626189f6692817c9b45c7d41777d1924b792dfd9ff74a0124"
         },
         {
           "command": "bash tools/m2.1-gate-mutation-check.sh docs/evidence/M2/M2.1/logs",
           "exit_code": 0,
-          "log": "logs/gate-mutation-check.log"
+          "stdout_stderr": "logs/mutation-gates.txt",
+          "stdout_stderr_sha256": "e911a2cc59e1a1f0bacdd17993ef2dbe02ba2c2a32577b04927c43aef88c0d8a"
         }
       ],
       "assertions": [
@@ -144,16 +149,16 @@
       ],
       "artifacts": [
         {
-          "path": "logs/m21.log",
-          "sha256": "665849e241a38599853327482809654c24ec16930e904f7a94c1f63b8d389746"
+          "path": "logs/m21.txt",
+          "sha256": "1f2806e65c54ad7626189f6692817c9b45c7d41777d1924b792dfd9ff74a0124"
         },
         {
-          "path": "logs/gate-mutation-check.log",
-          "sha256": "f4a724144ae9546025d5ce5d3e768639c35217edac5552a9063b8125bd55d62a"
+          "path": "logs/mutation-gates.txt",
+          "sha256": "e911a2cc59e1a1f0bacdd17993ef2dbe02ba2c2a32577b04927c43aef88c0d8a"
         },
         {
-          "path": "logs/mutation-MUT-B.log",
-          "sha256": "c3c1e3e6e6198687a443c3577a26a8cf0636fb5f4921d96adf3b7cb642b6e603"
+          "path": "logs/mutation-MUT-B.txt",
+          "sha256": "438ed75f1ab32f2a0f6018c1a16cad4bbe3865b9501b5924ff5ef2e16ef6b56e"
         }
       ]
     },
@@ -169,12 +174,14 @@
         {
           "command": "corepack pnpm test:m2.1",
           "exit_code": 0,
-          "log": "logs/m21.log"
+          "stdout_stderr": "logs/m21.txt",
+          "stdout_stderr_sha256": "1f2806e65c54ad7626189f6692817c9b45c7d41777d1924b792dfd9ff74a0124"
         },
         {
-          "command": "corepack pnpm exec tsx tests/m2.1-probe/openfilm-upstream-probe.mjs <pinned-vendor-root> <openfilm-project-dir> docs/evidence/M2/M2.1/artifacts/openfilm-upstream-probe.json",
+          "command": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3  /mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm",
           "exit_code": 0,
-          "log": "logs/openfilm-probe.log"
+          "stdout_stderr": "logs/openfilm-probe.txt",
+          "stdout_stderr_sha256": "6ab61473c9055e2228dcce7439a044686c5a81fd5b05aa03f6818f8040866b43"
         }
       ],
       "assertions": [
@@ -185,11 +192,11 @@
       "artifacts": [
         {
           "path": "artifacts/openfilm-upstream-probe.json",
-          "sha256": "417ab97868174a68cd11d5a200fa1fdc5a93740546844e24e301bfbb4ceb3532"
+          "sha256": "2269f2427615998fd08cdfb3b10cdf2be4fb3e2f651fcb1c31f852b9151ed36a"
         },
         {
-          "path": "logs/openfilm-probe.log",
-          "sha256": "6881134628252638f9ee30649c2aadee0fa3771cf1a03167905eab9984992133"
+          "path": "logs/openfilm-probe.txt",
+          "sha256": "6ab61473c9055e2228dcce7439a044686c5a81fd5b05aa03f6818f8040866b43"
         }
       ]
     },
@@ -206,17 +213,20 @@
         {
           "command": "corepack pnpm test:m2.1",
           "exit_code": 0,
-          "log": "logs/m21.log"
+          "stdout_stderr": "logs/m21.txt",
+          "stdout_stderr_sha256": "1f2806e65c54ad7626189f6692817c9b45c7d41777d1924b792dfd9ff74a0124"
         },
         {
           "command": "python3 -I tests/m2.1-golden/source-digest-v1.golden.py tests/m2.1-golden/source-digest-v1.vectors.json",
           "exit_code": 0,
-          "log": "logs/golden-python.log"
+          "stdout_stderr": "logs/golden-python.txt",
+          "stdout_stderr_sha256": "8f2c5a37249b1947e403135b6a25029eeb1190b4d094cbb927cc9a3c81c97525"
         },
         {
-          "command": "corepack pnpm exec tsx tests/m2.1-probe/openfilm-upstream-probe.mjs <pinned-vendor-root> <openfilm-project-dir> docs/evidence/M2/M2.1/artifacts/openfilm-upstream-probe.json",
+          "command": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3  /mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm",
           "exit_code": 0,
-          "log": "logs/openfilm-probe.log"
+          "stdout_stderr": "logs/openfilm-probe.txt",
+          "stdout_stderr_sha256": "6ab61473c9055e2228dcce7439a044686c5a81fd5b05aa03f6818f8040866b43"
         }
       ],
       "assertions": [
@@ -230,20 +240,20 @@
       ],
       "artifacts": [
         {
-          "path": "logs/golden-python.log",
+          "path": "logs/golden-python.txt",
           "sha256": "8f2c5a37249b1947e403135b6a25029eeb1190b4d094cbb927cc9a3c81c97525"
         },
         {
           "path": "artifacts/openfilm-upstream-probe.json",
-          "sha256": "417ab97868174a68cd11d5a200fa1fdc5a93740546844e24e301bfbb4ceb3532"
+          "sha256": "2269f2427615998fd08cdfb3b10cdf2be4fb3e2f651fcb1c31f852b9151ed36a"
         },
         {
-          "path": "logs/mutation-MUT-D.log",
-          "sha256": "ee074b1fc795452eb9149b327f703b7bce5618b5680a33d59daa5450e1871513"
+          "path": "logs/mutation-MUT-D.txt",
+          "sha256": "7dd659affd7ba15b5c8b048c6b4df95ee493d40ed6ae42d0417b787b98888283"
         },
         {
-          "path": "logs/mutation-MUT-E.log",
-          "sha256": "d3c1b594105e4373f77db9ea2cd0a2e21e16d594d75109e567a924689bb786b8"
+          "path": "logs/mutation-MUT-E.txt",
+          "sha256": "4ff37b463b2504f39e1ae4423226299fa9aaef0fd79cbb131bf6098c8b7e8752"
         },
         {
           "path": "../../../../tests/m2.1-golden/source-digest-v1.vectors.json",
@@ -265,14 +275,16 @@
       ],
       "commands": [
         {
-          "command": "corepack pnpm evidence:m2.1:secret-scan",
+          "command": "corepack pnpm exec tsx tools/secret-scan.ts",
           "exit_code": 0,
-          "log": "logs/secret-scan.log"
+          "stdout_stderr": "logs/secret-scan.txt",
+          "stdout_stderr_sha256": "993cbf666277d07f24bb5ca7ead8dc04ba3e1ea894676d47acbfe8319c72dbb8"
         },
         {
           "command": "bash tools/m2.1-gate-mutation-check.sh docs/evidence/M2/M2.1/logs",
           "exit_code": 0,
-          "log": "logs/gate-mutation-check.log"
+          "stdout_stderr": "logs/mutation-gates.txt",
+          "stdout_stderr_sha256": "e911a2cc59e1a1f0bacdd17993ef2dbe02ba2c2a32577b04927c43aef88c0d8a"
         }
       ],
       "assertions": [
@@ -286,15 +298,15 @@
       "artifacts": [
         {
           "path": "security/credential-scan.json",
-          "sha256": "0d76c3fce737cae5b05195c36c572cd40cc8e801b4c9eb035626bf5a816194a7"
+          "sha256": "44d173c9d3ddebd2d3dfdfb821e9fa87a3828d4133e5e16c567278944837f9a6"
         },
         {
-          "path": "logs/secret-scan.log",
-          "sha256": "8eaa0e5f0515a0c792201157241824f89f9699c5a3703ca08b14474bd3eccd6b"
+          "path": "logs/secret-scan.txt",
+          "sha256": "993cbf666277d07f24bb5ca7ead8dc04ba3e1ea894676d47acbfe8319c72dbb8"
         },
         {
-          "path": "logs/mutation-MUT-C.log",
-          "sha256": "6532022dd4108aec4db0354b3d15f61553fb319e29671532b67b311c40b78a8a"
+          "path": "logs/mutation-MUT-C.txt",
+          "sha256": "0d5ae86e948b1b8d7b3e13f8af4d78b5e799ce91e8c43b0a07574c0023d1145c"
         }
       ]
     },
@@ -312,7 +324,8 @@
         {
           "command": "corepack pnpm test:m2.1",
           "exit_code": 0,
-          "log": "logs/m21.log"
+          "stdout_stderr": "logs/m21.txt",
+          "stdout_stderr_sha256": "1f2806e65c54ad7626189f6692817c9b45c7d41777d1924b792dfd9ff74a0124"
         }
       ],
       "assertions": [
@@ -324,8 +337,8 @@
       ],
       "artifacts": [
         {
-          "path": "logs/m21.log",
-          "sha256": "665849e241a38599853327482809654c24ec16930e904f7a94c1f63b8d389746"
+          "path": "logs/m21.txt",
+          "sha256": "1f2806e65c54ad7626189f6692817c9b45c7d41777d1924b792dfd9ff74a0124"
         }
       ]
     },
@@ -343,7 +356,8 @@
         {
           "command": "corepack pnpm test:m2.1",
           "exit_code": 0,
-          "log": "logs/m21.log"
+          "stdout_stderr": "logs/m21.txt",
+          "stdout_stderr_sha256": "1f2806e65c54ad7626189f6692817c9b45c7d41777d1924b792dfd9ff74a0124"
         }
       ],
       "assertions": [
@@ -354,8 +368,8 @@
       ],
       "artifacts": [
         {
-          "path": "logs/m21.log",
-          "sha256": "665849e241a38599853327482809654c24ec16930e904f7a94c1f63b8d389746"
+          "path": "logs/m21.txt",
+          "sha256": "1f2806e65c54ad7626189f6692817c9b45c7d41777d1924b792dfd9ff74a0124"
         }
       ]
     },
@@ -370,7 +384,8 @@
         {
           "command": "corepack pnpm test:m2.1",
           "exit_code": 0,
-          "log": "logs/m21.log"
+          "stdout_stderr": "logs/m21.txt",
+          "stdout_stderr_sha256": "1f2806e65c54ad7626189f6692817c9b45c7d41777d1924b792dfd9ff74a0124"
         }
       ],
       "assertions": [
@@ -380,8 +395,8 @@
       ],
       "artifacts": [
         {
-          "path": "logs/m21.log",
-          "sha256": "665849e241a38599853327482809654c24ec16930e904f7a94c1f63b8d389746"
+          "path": "logs/m21.txt",
+          "sha256": "1f2806e65c54ad7626189f6692817c9b45c7d41777d1924b792dfd9ff74a0124"
         }
       ]
     },
@@ -396,12 +411,14 @@
         {
           "command": "corepack pnpm test:contracts",
           "exit_code": 0,
-          "log": "logs/contracts.log"
+          "stdout_stderr": "logs/contracts.txt",
+          "stdout_stderr_sha256": "bef1223bfbd214087f42c2e2160eb791494ead240e7601f3ddb1a486831c396a"
         },
         {
           "command": "corepack pnpm check",
           "exit_code": 0,
-          "log": "logs/check.log"
+          "stdout_stderr": "logs/check.txt",
+          "stdout_stderr_sha256": "47d13e9b9d68c5fa87a74d6c26204a3f6e8abd311102a78a87964ba85235fa57"
         }
       ],
       "assertions": [
@@ -412,12 +429,12 @@
       ],
       "artifacts": [
         {
-          "path": "logs/contracts.log",
-          "sha256": "5800787992e98a11dc72c236cd74cfdca7b4740b41459444d4879b38e9202bbd"
+          "path": "logs/contracts.txt",
+          "sha256": "bef1223bfbd214087f42c2e2160eb791494ead240e7601f3ddb1a486831c396a"
         },
         {
-          "path": "logs/check.log",
-          "sha256": "c24fe4532d3b0f4ae9f50cfb5ca89ac19a56bb1ef04c6c1d2b0c1b3cd658edd4"
+          "path": "logs/check.txt",
+          "sha256": "47d13e9b9d68c5fa87a74d6c26204a3f6e8abd311102a78a87964ba85235fa57"
         }
       ]
     },
@@ -433,12 +450,14 @@
         {
           "command": "corepack pnpm check",
           "exit_code": 0,
-          "log": "logs/check.log"
+          "stdout_stderr": "logs/check.txt",
+          "stdout_stderr_sha256": "47d13e9b9d68c5fa87a74d6c26204a3f6e8abd311102a78a87964ba85235fa57"
         },
         {
           "command": "corepack pnpm test:m2.1",
           "exit_code": 0,
-          "log": "logs/m21.log"
+          "stdout_stderr": "logs/m21.txt",
+          "stdout_stderr_sha256": "1f2806e65c54ad7626189f6692817c9b45c7d41777d1924b792dfd9ff74a0124"
         }
       ],
       "assertions": [
@@ -448,12 +467,12 @@
       ],
       "artifacts": [
         {
-          "path": "logs/check.log",
-          "sha256": "c24fe4532d3b0f4ae9f50cfb5ca89ac19a56bb1ef04c6c1d2b0c1b3cd658edd4"
+          "path": "logs/check.txt",
+          "sha256": "47d13e9b9d68c5fa87a74d6c26204a3f6e8abd311102a78a87964ba85235fa57"
         },
         {
-          "path": "logs/build.log",
-          "sha256": "a58cb93a80f7369c253ee162c1af95e71ceefb64a06669463fd79096161f94b3"
+          "path": "logs/build.txt",
+          "sha256": "186c28db5657da37bbac45930acf58c258a5860a79f8520bcc92371dad34dc93"
         }
       ]
     },
@@ -469,12 +488,14 @@
         {
           "command": "bash tools/m2.1-gate-mutation-check.sh docs/evidence/M2/M2.1/logs",
           "exit_code": 0,
-          "log": "logs/gate-mutation-check.log"
+          "stdout_stderr": "logs/mutation-gates.txt",
+          "stdout_stderr_sha256": "e911a2cc59e1a1f0bacdd17993ef2dbe02ba2c2a32577b04927c43aef88c0d8a"
         },
         {
           "command": "corepack pnpm check",
           "exit_code": 0,
-          "log": "logs/check.log"
+          "stdout_stderr": "logs/check.txt",
+          "stdout_stderr_sha256": "47d13e9b9d68c5fa87a74d6c26204a3f6e8abd311102a78a87964ba85235fa57"
         }
       ],
       "assertions": [
@@ -484,16 +505,305 @@
       ],
       "artifacts": [
         {
-          "path": "logs/gate-mutation-check.log",
-          "sha256": "f4a724144ae9546025d5ce5d3e768639c35217edac5552a9063b8125bd55d62a"
+          "path": "logs/mutation-gates.txt",
+          "sha256": "e911a2cc59e1a1f0bacdd17993ef2dbe02ba2c2a32577b04927c43aef88c0d8a"
         },
         {
-          "path": "logs/mutation-MUT-A.log",
-          "sha256": "1f55a24fd806d7989f045ea52dc16ede1e628874919c23a0cf89461b3fac20e8"
+          "path": "logs/mutation-MUT-A.txt",
+          "sha256": "e614936cc5039417494e533164ab2c5c42ef1b344ce23054e752364faa5e2c21"
         },
         {
-          "path": "logs/mutation-MUT-F.log",
-          "sha256": "df7a6a05bf6ab9fc93603c66278b675cc4e2fd5f0d5e16bf6d691d792ed528e8"
+          "path": "logs/mutation-MUT-F.txt",
+          "sha256": "dc3647e2f14663d19652d874669250afc0d60ecb1c455a96c01bc0c272589751"
+        }
+      ]
+    },
+    {
+      "case_id": "ER-B-01",
+      "external_review_finding": "B-01 BLOCKER: external source change had no production wiring into attention",
+      "title": "外部 source 变化经真实 Host 检测后进入持久 attention",
+      "status": "PASSED",
+      "evidence_kind": [
+        "http_integration",
+        "integration",
+        "mutation_test"
+      ],
+      "commands": [
+        {
+          "command": "corepack pnpm test:m2.1",
+          "exit_code": 0,
+          "stdout_stderr": "logs/m21.txt",
+          "stdout_stderr_sha256": "1f2806e65c54ad7626189f6692817c9b45c7d41777d1924b792dfd9ff74a0124"
+        },
+        {
+          "command": "corepack pnpm exec tsx tools/m2.1-external-review-repro.mts hypit-visual-asset",
+          "exit_code": 0,
+          "stdout_stderr": "logs/repro-b02.txt",
+          "stdout_stderr_sha256": "6701f9be7c8a916b709a5e7698552b5f75d287a55a9876f4d6a83b5549e77414"
+        }
+      ],
+      "assertions": [
+        "the engine route compares against a Host-owned committed baseline, never against the digest it just observed",
+        "the baseline is recorded once and never re-sampled: three consecutive reads after one external edit all return 409",
+        "detection runs inside the existing per-project serial boundary and raises attention on its own",
+        "the next typed edit is refused with 423 PROJECT_ATTENTION_REQUIRED",
+        "the externally edited bytes are byte-identical after the refusal",
+        "the test drives real HTTP and never calls markAttention to stand in for detection",
+        "mutation MUT-K (Host stops raising attention) makes this gate fail"
+      ],
+      "artifacts": [
+        {
+          "path": "logs/m21.txt",
+          "sha256": "1f2806e65c54ad7626189f6692817c9b45c7d41777d1924b792dfd9ff74a0124"
+        },
+        {
+          "path": "logs/mutation-MUT-K.txt",
+          "sha256": "3c0334c340b4b772221e49e20d96a0824d32c5f4e9f9f8739b37c83fd9064e89"
+        }
+      ]
+    },
+    {
+      "case_id": "ER-B-02",
+      "external_review_finding": "B-02 BLOCKER: SourceDigestV1 did not cover referenced Hypit visual assets",
+      "title": "被引用资产的当前 bytes 进入摘要；与 manifest 不符时 fail closed",
+      "status": "PASSED",
+      "evidence_kind": [
+        "integration",
+        "mutation_test"
+      ],
+      "commands": [
+        {
+          "command": "corepack pnpm test:m2.1",
+          "exit_code": 0,
+          "stdout_stderr": "logs/m21.txt",
+          "stdout_stderr_sha256": "1f2806e65c54ad7626189f6692817c9b45c7d41777d1924b792dfd9ff74a0124"
+        },
+        {
+          "command": "corepack pnpm exec tsx tools/m2.1-external-review-repro.mts hypit-visual-asset",
+          "exit_code": 0,
+          "stdout_stderr": "logs/repro-b02.txt",
+          "stdout_stderr_sha256": "6701f9be7c8a916b709a5e7698552b5f75d287a55a9876f4d6a83b5549e77414"
+        }
+      ],
+      "assertions": [
+        "the closure re-reads every manifest entry and hashes the bytes on disk rather than trusting the recorded hash",
+        "the reproduction the external review ran now refuses instead of reporting an unchanged digest",
+        "a legitimate re-import (bytes and manifest published together) changes the digest normally",
+        "a missing referenced asset, a path escaping the project, or a manifest hash that disagrees with its bytes fails closed",
+        "mutation MUT-H (asset closure removed) makes this gate fail"
+      ],
+      "artifacts": [
+        {
+          "path": "logs/m21.txt",
+          "sha256": "1f2806e65c54ad7626189f6692817c9b45c7d41777d1924b792dfd9ff74a0124"
+        },
+        {
+          "path": "logs/repro-b02.txt",
+          "sha256": "6701f9be7c8a916b709a5e7698552b5f75d287a55a9876f4d6a83b5549e77414"
+        },
+        {
+          "path": "logs/mutation-MUT-H.txt",
+          "sha256": "a1ae23aa82be4dc0256508f16d191f34f4bf2ace97d3d704d582573a78197c96"
+        }
+      ]
+    },
+    {
+      "case_id": "ER-M-01",
+      "external_review_finding": "M-01 MAJOR: CapabilityMap was empty, so a missing capability read as translatable",
+      "title": "能力表完整且 fail closed；Host service 能力单独表达",
+      "status": "PASSED",
+      "evidence_kind": [
+        "schema_unit",
+        "mutation_test",
+        "real_upstream_probe"
+      ],
+      "commands": [
+        {
+          "command": "corepack pnpm test:m2.1",
+          "exit_code": 0,
+          "stdout_stderr": "logs/m21.txt",
+          "stdout_stderr_sha256": "1f2806e65c54ad7626189f6692817c9b45c7d41777d1924b792dfd9ff74a0124"
+        },
+        {
+          "command": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3  /mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm",
+          "exit_code": 0,
+          "stdout_stderr": "logs/openfilm-probe.txt",
+          "stdout_stderr_sha256": "6ab61473c9055e2228dcce7439a044686c5a81fd5b05aa03f6818f8040866b43"
+        }
+      ],
+      "assertions": [
+        "every engine-owned registry operation has an explicit entry in both engines' capability map",
+        "no entry is unverified; OpenFilm reports no supported write at all in M2.1",
+        "an unreported capability, or no capability map at all, refuses the write before any registry policy is consulted",
+        "asset import lives in a Host service capability map and appears in no engine capability map",
+        "mutation MUT-G (fail-closed guard removed) makes this gate fail"
+      ],
+      "artifacts": [
+        {
+          "path": "logs/m21.txt",
+          "sha256": "1f2806e65c54ad7626189f6692817c9b45c7d41777d1924b792dfd9ff74a0124"
+        },
+        {
+          "path": "artifacts/openfilm-upstream-probe.json",
+          "sha256": "2269f2427615998fd08cdfb3b10cdf2be4fb3e2f651fcb1c31f852b9151ed36a"
+        },
+        {
+          "path": "logs/mutation-MUT-G.txt",
+          "sha256": "3e6e597b659eedca3d3468ff6f461685b3d5a4bd254d509b4a728e620be17a6c"
+        }
+      ]
+    },
+    {
+      "case_id": "ER-M-03",
+      "external_review_finding": "M-03 MAJOR: realpath identity was not used for visited, so symlink aliases duplicated rows",
+      "title": "identity 是 realpath，manifest 每个 canonical path 恰一行",
+      "status": "PASSED",
+      "evidence_kind": [
+        "schema_unit",
+        "mutation_test"
+      ],
+      "commands": [
+        {
+          "command": "corepack pnpm test:m2.1",
+          "exit_code": 0,
+          "stdout_stderr": "logs/m21.txt",
+          "stdout_stderr_sha256": "1f2806e65c54ad7626189f6692817c9b45c7d41777d1924b792dfd9ff74a0124"
+        },
+        {
+          "command": "corepack pnpm exec tsx tools/m2.1-external-review-repro.mts symlink-alias",
+          "exit_code": 0,
+          "stdout_stderr": "logs/repro-m03.txt",
+          "stdout_stderr_sha256": "f3523fdf88f48b6d768b6488c589471fdaf91cd06efcf8ea4323e7f50170b78a"
+        }
+      ],
+      "assertions": [
+        "the reproduction the external review ran now yields one canonical row and a unique manifest",
+        "an internal symlink alias and its target count once; a declared root behind a symlink resolves to its canonical path",
+        "cycles still count once; Windows/WSL path shapes are refused rather than normalised",
+        "mutation MUT-I (canonical enqueue reverted) makes this gate fail"
+      ],
+      "artifacts": [
+        {
+          "path": "logs/m21.txt",
+          "sha256": "1f2806e65c54ad7626189f6692817c9b45c7d41777d1924b792dfd9ff74a0124"
+        },
+        {
+          "path": "logs/repro-m03.txt",
+          "sha256": "f3523fdf88f48b6d768b6488c589471fdaf91cd06efcf8ea4323e7f50170b78a"
+        },
+        {
+          "path": "logs/mutation-MUT-I.txt",
+          "sha256": "ffbf7257cf4131faef504a23b794916de3b4d8c34e872714ea13c16c392f2103"
+        }
+      ]
+    },
+    {
+      "case_id": "ER-M-04",
+      "external_review_finding": "M-04 MAJOR: only .git/HEAD was verified, so a tampered module still loaded",
+      "title": "固定 SHA 同时固定将要执行的 bytes",
+      "status": "PASSED",
+      "evidence_kind": [
+        "security_scan",
+        "real_upstream_probe",
+        "mutation_test"
+      ],
+      "commands": [
+        {
+          "command": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3  /mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm",
+          "exit_code": 0,
+          "stdout_stderr": "logs/openfilm-probe.txt",
+          "stdout_stderr_sha256": "6ab61473c9055e2228dcce7439a044686c5a81fd5b05aa03f6818f8040866b43"
+        },
+        {
+          "command": "corepack pnpm test:m2.1",
+          "exit_code": 0,
+          "stdout_stderr": "logs/m21.txt",
+          "stdout_stderr_sha256": "1f2806e65c54ad7626189f6692817c9b45c7d41777d1924b792dfd9ff74a0124"
+        }
+      ],
+      "assertions": [
+        "availability requires the pinned HEAD, a checkout with no tracked modifications, and a matching digest for every loaded file",
+        "package.json, pnpm-lock.yaml, LICENSE and all four loaded modules are pinned in a tracked production lock",
+        "a test keeps the production lock consistent with the M1B recorded upstream lock",
+        "the real probe tampers with an isolated COPY and is refused with ENGINE_UNAVAILABLE, leaving the original loadable",
+        "mutation MUT-J (digest verification removed) makes this gate fail"
+      ],
+      "artifacts": [
+        {
+          "path": "artifacts/openfilm-upstream-probe.json",
+          "sha256": "2269f2427615998fd08cdfb3b10cdf2be4fb3e2f651fcb1c31f852b9151ed36a"
+        },
+        {
+          "path": "logs/openfilm-probe.txt",
+          "sha256": "6ab61473c9055e2228dcce7439a044686c5a81fd5b05aa03f6818f8040866b43"
+        },
+        {
+          "path": "logs/mutation-MUT-J.txt",
+          "sha256": "875735668513fcdbf17d39455cfec33e1d93734f3227e046c44dc0be4f4f217b"
+        }
+      ]
+    },
+    {
+      "case_id": "ER-M-05",
+      "external_review_finding": "M-05 MAJOR: OF-06 recorded PASS without asserting the upstream rebases",
+      "title": "rebase oracle 显式断言，并把真实上游与 adapter 合同分开记账",
+      "status": "PASSED",
+      "evidence_kind": [
+        "real_upstream_probe",
+        "real_e2e",
+        "adapter_contract"
+      ],
+      "commands": [
+        {
+          "command": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3  /mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm",
+          "exit_code": 0,
+          "stdout_stderr": "logs/openfilm-probe.txt",
+          "stdout_stderr_sha256": "6ab61473c9055e2228dcce7439a044686c5a81fd5b05aa03f6818f8040866b43"
+        }
+      ],
+      "assertions": [
+        "OF-06a asserts rebased === true on the real pinned upstream; if the upstream changes, the probe fails",
+        "OF-06b proves the production adapter refuses that same scenario on the real upstream and leaves author bytes untouched with no staging left behind",
+        "OF-06c records the rebased-to-409 conversion as an adapter_contract, because it needs a stub once the real path refuses",
+        "the probe no longer records a single undifferentiated end-to-end claim"
+      ],
+      "artifacts": [
+        {
+          "path": "artifacts/openfilm-upstream-probe.json",
+          "sha256": "2269f2427615998fd08cdfb3b10cdf2be4fb3e2f651fcb1c31f852b9151ed36a"
+        },
+        {
+          "path": "logs/openfilm-probe.txt",
+          "sha256": "6ab61473c9055e2228dcce7439a044686c5a81fd5b05aa03f6818f8040866b43"
+        }
+      ]
+    },
+    {
+      "case_id": "ER-M-02",
+      "external_review_finding": "M-02 MAJOR: manifest pointed at git-ignored .log files and was not bound to the reviewed commit",
+      "title": "证据可从 clone 复现，并由校验脚本强制",
+      "status": "PASSED",
+      "evidence_kind": [
+        "evidence_integrity"
+      ],
+      "commands": [
+        {
+          "command": "bash tools/m2.1-run-evidence.sh   # writes logs/environment.txt plus every gate below",
+          "exit_code": 0,
+          "stdout_stderr": "logs/environment.txt",
+          "stdout_stderr_sha256": "f144b42ffc4fff4ce48307ada5864e29240fa6f1c95e4d59b1387cac6d2e06e1"
+        }
+      ],
+      "assertions": [
+        "every referenced artifact and log exists, is git-tracked, is not git-ignored and still matches its recorded SHA256",
+        "the manifest records a clean tree at capture and the commit the gates ran against",
+        "no src/, tests/, contracts/, tools/ or package.json file changed after that commit",
+        "tools/m2.1-evidence-integrity.mjs re-verifies all of the above"
+      ],
+      "artifacts": [
+        {
+          "path": "logs/environment.txt",
+          "sha256": "f144b42ffc4fff4ce48307ada5864e29240fa6f1c95e4d59b1387cac6d2e06e1"
         }
       ]
     },
@@ -506,9 +816,10 @@
       ],
       "commands": [
         {
-          "command": "corepack pnpm exec tsx tests/m2.1-probe/openfilm-upstream-probe.mjs <pinned-vendor-root> <openfilm-project-dir> docs/evidence/M2/M2.1/artifacts/openfilm-upstream-probe.json",
+          "command": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3  /mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm",
           "exit_code": 0,
-          "log": "logs/openfilm-probe.log"
+          "stdout_stderr": "logs/openfilm-probe.txt",
+          "stdout_stderr_sha256": "6ab61473c9055e2228dcce7439a044686c5a81fd5b05aa03f6818f8040866b43"
         }
       ],
       "assertions": [
@@ -521,11 +832,11 @@
       "artifacts": [
         {
           "path": "artifacts/openfilm-upstream-probe.json",
-          "sha256": "417ab97868174a68cd11d5a200fa1fdc5a93740546844e24e301bfbb4ceb3532"
+          "sha256": "2269f2427615998fd08cdfb3b10cdf2be4fb3e2f651fcb1c31f852b9151ed36a"
         },
         {
-          "path": "logs/openfilm-probe.log",
-          "sha256": "6881134628252638f9ee30649c2aadee0fa3771cf1a03167905eab9984992133"
+          "path": "logs/openfilm-probe.txt",
+          "sha256": "6ab61473c9055e2228dcce7439a044686c5a81fd5b05aa03f6818f8040866b43"
         }
       ]
     }

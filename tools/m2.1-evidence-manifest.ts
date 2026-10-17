@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { execSync } from "node:child_process";
+import { execFileSync, execSync } from "node:child_process";
 import { readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import { join, relative, resolve } from "node:path";
 
@@ -54,8 +54,9 @@ const commands = (name: string): Array<{ command: string; exit_code: number; std
 
 /** Everything the manifest points at must be a file git actually tracks. */
 function assertTracked(relativePath: string): void {
-  const tracked = execSync(`git ls-files --error-unmatch -- ${JSON.stringify(relativePath)}`, { encoding: "utf8" });
-  if (!tracked.includes(relativePath)) throw new Error(`EVIDENCE_NOT_TRACKED:${relativePath}`);
+  // git resolves pathspecs from the repository root, not from the evidence root.
+  const fromRepoRoot = `${EVIDENCE_ROOT}/${relativePath}`.replaceAll("\\", "/");
+  execFileSync("git", ["ls-files", "--error-unmatch", "--", fromRepoRoot], { encoding: "utf8" });
 }
 
 const artifacts = (...paths: string[]): Array<{ path: string; sha256: string }> =>
@@ -82,7 +83,9 @@ const base = {
   repo_sha: git("rev-parse", "HEAD"),
   repo_branch: git("rev-parse", "--abbrev-ref", "HEAD"),
   repo_dirty_at_capture: git("status", "--porcelain").length > 0,
-  frozen_code_sha: git("rev-parse", "HEAD"),
+  /** The commit the gates actually ran against, read from the recorded environment. */
+  frozen_code_sha: readFileSync(join(EVIDENCE_ROOT, "logs", "environment.txt"), "utf8")
+    .split("\n").find((line) => line.startsWith("git_head="))?.slice("git_head=".length).trim() ?? "",
   frozen_commit_note: "Evidence ran against this commit with a clean tree. The manifest itself is committed on top and changes no src/, tests/, contracts/, tools/ or package.json file; tools/m2.1-evidence-integrity.mjs verifies that.",
   upstream_shas: { openfilm: OPENFILM_SHA, hypit: HYPIT_SHA },
   environment: env,
@@ -280,6 +283,127 @@ const cases: Case[] = [
     artifacts: artifacts("docs/evidence/M2/M2.1/logs/mutation-gates.txt",
       "docs/evidence/M2/M2.1/logs/mutation-MUT-A.txt",
       "docs/evidence/M2/M2.1/logs/mutation-MUT-F.txt"),
+  },
+  {
+    case_id: "ER-B-01",
+    external_review_finding: "B-01 BLOCKER: external source change had no production wiring into attention",
+    title: "外部 source 变化经真实 Host 检测后进入持久 attention",
+    status: "PASSED",
+    evidence_kind: ["http_integration", "integration", "mutation_test"],
+    commands: [...commands("m21"), ...commands("repro-b02")],
+    assertions: [
+      "the engine route compares against a Host-owned committed baseline, never against the digest it just observed",
+      "the baseline is recorded once and never re-sampled: three consecutive reads after one external edit all return 409",
+      "detection runs inside the existing per-project serial boundary and raises attention on its own",
+      "the next typed edit is refused with 423 PROJECT_ATTENTION_REQUIRED",
+      "the externally edited bytes are byte-identical after the refusal",
+      "the test drives real HTTP and never calls markAttention to stand in for detection",
+      "mutation MUT-K (Host stops raising attention) makes this gate fail",
+    ],
+    artifacts: artifacts("docs/evidence/M2/M2.1/logs/m21.txt",
+      "docs/evidence/M2/M2.1/logs/mutation-MUT-K.txt"),
+  },
+  {
+    case_id: "ER-B-02",
+    external_review_finding: "B-02 BLOCKER: SourceDigestV1 did not cover referenced Hypit visual assets",
+    title: "被引用资产的当前 bytes 进入摘要；与 manifest 不符时 fail closed",
+    status: "PASSED",
+    evidence_kind: ["integration", "mutation_test"],
+    commands: [...commands("m21"), ...commands("repro-b02")],
+    assertions: [
+      "the closure re-reads every manifest entry and hashes the bytes on disk rather than trusting the recorded hash",
+      "the reproduction the external review ran now refuses instead of reporting an unchanged digest",
+      "a legitimate re-import (bytes and manifest published together) changes the digest normally",
+      "a missing referenced asset, a path escaping the project, or a manifest hash that disagrees with its bytes fails closed",
+      "mutation MUT-H (asset closure removed) makes this gate fail",
+    ],
+    artifacts: artifacts("docs/evidence/M2/M2.1/logs/m21.txt",
+      "docs/evidence/M2/M2.1/logs/repro-b02.txt",
+      "docs/evidence/M2/M2.1/logs/mutation-MUT-H.txt"),
+  },
+  {
+    case_id: "ER-M-01",
+    external_review_finding: "M-01 MAJOR: CapabilityMap was empty, so a missing capability read as translatable",
+    title: "能力表完整且 fail closed；Host service 能力单独表达",
+    status: "PASSED",
+    evidence_kind: ["schema_unit", "mutation_test", "real_upstream_probe"],
+    commands: [...commands("m21"), ...commands("openfilm-probe")],
+    assertions: [
+      "every engine-owned registry operation has an explicit entry in both engines' capability map",
+      "no entry is unverified; OpenFilm reports no supported write at all in M2.1",
+      "an unreported capability, or no capability map at all, refuses the write before any registry policy is consulted",
+      "asset import lives in a Host service capability map and appears in no engine capability map",
+      "mutation MUT-G (fail-closed guard removed) makes this gate fail",
+    ],
+    artifacts: artifacts("docs/evidence/M2/M2.1/logs/m21.txt",
+      "docs/evidence/M2/M2.1/artifacts/openfilm-upstream-probe.json",
+      "docs/evidence/M2/M2.1/logs/mutation-MUT-G.txt"),
+  },
+  {
+    case_id: "ER-M-03",
+    external_review_finding: "M-03 MAJOR: realpath identity was not used for visited, so symlink aliases duplicated rows",
+    title: "identity 是 realpath，manifest 每个 canonical path 恰一行",
+    status: "PASSED",
+    evidence_kind: ["schema_unit", "mutation_test"],
+    commands: [...commands("m21"), ...commands("repro-m03")],
+    assertions: [
+      "the reproduction the external review ran now yields one canonical row and a unique manifest",
+      "an internal symlink alias and its target count once; a declared root behind a symlink resolves to its canonical path",
+      "cycles still count once; Windows/WSL path shapes are refused rather than normalised",
+      "mutation MUT-I (canonical enqueue reverted) makes this gate fail",
+    ],
+    artifacts: artifacts("docs/evidence/M2/M2.1/logs/m21.txt",
+      "docs/evidence/M2/M2.1/logs/repro-m03.txt",
+      "docs/evidence/M2/M2.1/logs/mutation-MUT-I.txt"),
+  },
+  {
+    case_id: "ER-M-04",
+    external_review_finding: "M-04 MAJOR: only .git/HEAD was verified, so a tampered module still loaded",
+    title: "固定 SHA 同时固定将要执行的 bytes",
+    status: "PASSED",
+    evidence_kind: ["security_scan", "real_upstream_probe", "mutation_test"],
+    commands: [...commands("openfilm-probe"), ...commands("m21")],
+    assertions: [
+      "availability requires the pinned HEAD, a checkout with no tracked modifications, and a matching digest for every loaded file",
+      "package.json, pnpm-lock.yaml, LICENSE and all four loaded modules are pinned in a tracked production lock",
+      "a test keeps the production lock consistent with the M1B recorded upstream lock",
+      "the real probe tampers with an isolated COPY and is refused with ENGINE_UNAVAILABLE, leaving the original loadable",
+      "mutation MUT-J (digest verification removed) makes this gate fail",
+    ],
+    artifacts: artifacts("docs/evidence/M2/M2.1/artifacts/openfilm-upstream-probe.json",
+      "docs/evidence/M2/M2.1/logs/openfilm-probe.txt",
+      "docs/evidence/M2/M2.1/logs/mutation-MUT-J.txt"),
+  },
+  {
+    case_id: "ER-M-05",
+    external_review_finding: "M-05 MAJOR: OF-06 recorded PASS without asserting the upstream rebases",
+    title: "rebase oracle 显式断言，并把真实上游与 adapter 合同分开记账",
+    status: "PASSED",
+    evidence_kind: ["real_upstream_probe", "real_e2e", "adapter_contract"],
+    commands: commands("openfilm-probe"),
+    assertions: [
+      "OF-06a asserts rebased === true on the real pinned upstream; if the upstream changes, the probe fails",
+      "OF-06b proves the production adapter refuses that same scenario on the real upstream and leaves author bytes untouched with no staging left behind",
+      "OF-06c records the rebased-to-409 conversion as an adapter_contract, because it needs a stub once the real path refuses",
+      "the probe no longer records a single undifferentiated end-to-end claim",
+    ],
+    artifacts: artifacts("docs/evidence/M2/M2.1/artifacts/openfilm-upstream-probe.json",
+      "docs/evidence/M2/M2.1/logs/openfilm-probe.txt"),
+  },
+  {
+    case_id: "ER-M-02",
+    external_review_finding: "M-02 MAJOR: manifest pointed at git-ignored .log files and was not bound to the reviewed commit",
+    title: "证据可从 clone 复现，并由校验脚本强制",
+    status: "PASSED",
+    evidence_kind: ["evidence_integrity"],
+    commands: commands("environment"),
+    assertions: [
+      "every referenced artifact and log exists, is git-tracked, is not git-ignored and still matches its recorded SHA256",
+      "the manifest records a clean tree at capture and the commit the gates ran against",
+      "no src/, tests/, contracts/, tools/ or package.json file changed after that commit",
+      "tools/m2.1-evidence-integrity.mjs re-verifies all of the above",
+    ],
+    artifacts: artifacts("docs/evidence/M2/M2.1/logs/environment.txt"),
   },
   {
     case_id: "OF-REAL-UPSTREAM",
