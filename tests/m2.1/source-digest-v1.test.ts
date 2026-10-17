@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { cp, mkdtemp, readFile, rm, symlink, writeFile } from "node:fs/promises";
+import { cp, mkdir, mkdtemp, readFile, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { resolve } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
@@ -217,5 +217,77 @@ describe("SourceDigestV1 canonical form", () => {
     for (const vector of vectors.vectors) {
       expect(digestOf(vector.manifest), vector.id).toBe(vector.source_digest);
     }
+  });
+});
+
+/**
+ * M-03 (external review): identity is the realpath, not the reference that found it.
+ *
+ * The reproduction: an internal symlink `assets/alias.css -> assets/tokens.css` referenced
+ * alongside `tokens.css` produced two identical `assets/tokens.css` rows, because `visited`
+ * was keyed on the logical reference path instead of the canonical one.
+ */
+describe("M-03 canonical identity is the realpath", () => {
+  it("counts an internal symlink alias and its target once", async () => {
+    const root = await copyFixture();
+    await symlink(resolve(root, "assets/tokens.css"), resolve(root, "assets/alias.css"));
+    await writeFile(resolve(root, "assets/theme.css"), '@import "tokens.css";\n@import "alias.css";\n', "utf8");
+    const result = await computeSourceDigest({ root, roots: ROOTS, engine: "openfilm", engineUpstreamSha: OPENFILM_SHA });
+    const paths = result.manifest.files.map((file) => file.path);
+    expect(paths.filter((path) => path === "assets/tokens.css")).toHaveLength(1);
+    expect(paths).not.toContain("assets/alias.css");
+    expect(new Set(paths).size).toBe(paths.length);
+  });
+
+  it("counts one canonical file once however many distinct paths reach it", async () => {
+    const root = await copyFixture();
+    await writeFile(resolve(root, "assets/dup.css"), '@import "tokens.css";\n@import "./tokens.css";\n@import "sub/../tokens.css";\n', "utf8");
+    await mkdir(resolve(root, "assets/sub"), { recursive: true });
+    await writeFile(resolve(root, "assets/theme.css"), '@import "dup.css";\n', "utf8");
+    const result = await computeSourceDigest({ root, roots: ROOTS, engine: "openfilm", engineUpstreamSha: OPENFILM_SHA });
+    const paths = result.manifest.files.map((file) => file.path);
+    expect(paths.filter((path) => path === "assets/tokens.css")).toHaveLength(1);
+    expect(paths.filter((path) => path === "assets/dup.css")).toHaveLength(1);
+    expect(new Set(paths).size).toBe(paths.length);
+  });
+
+  it("resolves a declared root through a symlink to its canonical path", async () => {
+    const root = await copyFixture();
+    await symlink(resolve(root, "assets/settings.json"), resolve(root, "settings-link.json"));
+    const result = await computeSourceDigest({
+      root, roots: ["film.html", "settings-link.json"], engine: "openfilm", engineUpstreamSha: OPENFILM_SHA,
+    });
+    const settings = result.manifest.files.filter((file) => file.role === "settings");
+    expect(settings).toHaveLength(1);
+    expect(settings[0]!.path).toBe("assets/settings.json");
+  });
+
+  it("still counts a cycle exactly once", async () => {
+    const root = await copyFixture();
+    await writeFile(resolve(root, "assets/theme.css"), '@import "tokens.css";\n@import "cycle-a.css";\n', "utf8");
+    await writeFile(resolve(root, "assets/cycle-a.css"), '@import "cycle-b.css";\n', "utf8");
+    await writeFile(resolve(root, "assets/cycle-b.css"), '@import "cycle-a.css";\n@import "tokens.css";\n', "utf8");
+    const result = await computeSourceDigest({ root, roots: ROOTS, engine: "openfilm", engineUpstreamSha: OPENFILM_SHA });
+    const paths = result.manifest.files.map((file) => file.path);
+    expect(paths.filter((path) => path === "assets/cycle-a.css")).toHaveLength(1);
+    expect(paths.filter((path) => path === "assets/cycle-b.css")).toHaveLength(1);
+    expect(paths.filter((path) => path === "assets/tokens.css")).toHaveLength(1);
+  });
+
+  it("refuses Windows and WSL path shapes instead of normalising them silently", async () => {
+    const root = await copyFixture();
+    for (const [label, body] of [
+      ["backslash", '@import "assets\\\\tokens.css";\n'],
+      ["drive letter", '@import "C:/assets/tokens.css";\n'],
+      ["unc", '@import "//server/share/tokens.css";\n'],
+    ] as const) {
+      const isolated = await copyFixture();
+      await writeFile(resolve(isolated, "assets/theme.css"), body, "utf8");
+      await expect(computeSourceDigest({ root: isolated, roots: ROOTS, engine: "openfilm", engineUpstreamSha: OPENFILM_SHA }),
+        label).rejects.toMatchObject({ details: { source_error: expect.stringMatching(/^SOURCE_(PATH_ESCAPE|REFERENCE_UNSUPPORTED)$/u) } });
+    }
+    await writeFile(resolve(root, "assets/theme.css"), '@import "tokens.css";\n', "utf8");
+    const ok = await computeSourceDigest({ root, roots: ROOTS, engine: "openfilm", engineUpstreamSha: OPENFILM_SHA });
+    expect(ok.source_digest).toMatch(/^[a-f0-9]{64}$/u);
   });
 });

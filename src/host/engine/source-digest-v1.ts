@@ -226,6 +226,16 @@ export async function computeSourceDigest(input: SourceDigestInput, correlationI
   const assets: Array<{ path: string; asset_id: string | null; sha256: Sha256; size: number }> = [];
   let externalReferenceCount = 0;
 
+  const cache = new Map<string, ResolvedFile>();
+  /** Read through the cache so a file reached by several aliases is hashed once. */
+  const read = async (relative: string, label: string): Promise<ResolvedFile> => {
+    const cached = cache.get(relative);
+    if (cached) return cached;
+    const file = await loadFile(rootAbsolute, resolve(rootAbsolute, relative), label, correlationId);
+    cache.set(relative, file);
+    return file;
+  };
+
   // Declared roots: sorted, deduplicated, roles fixed before any traversal (§5.4.2 step 2).
   const normalizedRoots = [...new Set(input.roots.map((root) => normalizeRelative(root, correlationId)))];
   // The entry is the root the Host declared first. Sorting fixes traversal order only; it
@@ -241,11 +251,17 @@ export async function computeSourceDigest(input: SourceDigestInput, correlationI
       external_reference_count: 0,
     };
   }
+  // Identity is the realpath, not the reference that found it (M-03). Roots are canonicalised
+  // first so a symlinked root is recorded under the file it actually is.
+  const canonicalRoots: string[] = [];
   for (const relative of [...normalizedRoots].sort(compareUtf8)) {
+    canonicalRoots.push((await read(relative, relative)).relative);
+  }
+  const canonicalEntry = (await read(entryRelative, entryRelative)).relative;
+  for (const relative of [...new Set(canonicalRoots)].sort(compareUtf8)) {
     const extension = extensionOf(relative);
     if (ASSET_EXTENSIONS.has(extension)) { queue.push({ relative, referrer: "" }); continue; }
-    const role: SourceFileRole = relative === entryRelative ? "entry" : roleFor(extension, false, correlationId);
-    roles.set(relative, role);
+    roles.set(relative, relative === canonicalEntry ? "entry" : roleFor(extension, false, correlationId));
     queue.push({ relative, referrer: "" });
   }
   while (queue.length > 0) {
@@ -253,18 +269,20 @@ export async function computeSourceDigest(input: SourceDigestInput, correlationI
     if (visited.has(item.relative)) continue;
     visited.add(item.relative);
 
-    const extension = extensionOf(item.relative);
+    // Identity is the canonical path returned by realpath, so an alias and its target are
+    // the same file (M-03).
+    const loaded = await read(item.relative, item.relative);
+    const extension = extensionOf(loaded.relative);
     const isAsset = ASSET_EXTENSIONS.has(extension);
-    const loaded = await loadFile(rootAbsolute, resolve(rootAbsolute, item.relative), item.relative, correlationId);
     if (isAsset) {
       assets.push({ path: loaded.relative, asset_id: declaredByPath.get(loaded.relative) ?? null,
         sha256: loaded.sha256, size: loaded.bytes.length });
       continue;
     }
 
-    const role = roles.get(item.relative)
-      ?? roleFor(extension, item.referrer === entryRelative, correlationId);
-    roles.set(item.relative, role);
+    const role = roles.get(loaded.relative)
+      ?? roleFor(extension, item.referrer === canonicalEntry, correlationId);
+    roles.set(loaded.relative, role);
     files.push({ path: loaded.relative, role, sha256: loaded.sha256, size: loaded.bytes.length });
 
     for (const reference of extractReferences(role, loaded.bytes.toString("utf8"))) {
@@ -273,24 +291,33 @@ export async function computeSourceDigest(input: SourceDigestInput, correlationI
       if (withoutFragment.includes("?")) {
         throw fail("SOURCE_REFERENCE_UNSUPPORTED", `query string in ${reference} (from ${item.relative})`, correlationId);
       }
+      // Shape first, then scheme: `C:/x` is a local Windows path, not a `c:` URL, and
+      // treating it as an external scheme would silently skip a file the source needs.
+      assertLocalPathShape(withoutFragment, correlationId);
       if (EXTERNAL_SCHEME.test(withoutFragment)) { externalReferenceCount += 1; continue; }
       const resolvedRelative = resolveReference(item.relative, withoutFragment, correlationId);
-      if (visited.has(resolvedRelative)) continue;
-      const targetExtension = extensionOf(resolvedRelative);
-      if (!ASSET_EXTENSIONS.has(targetExtension) && !ROLE_BY_EXTENSION.has(targetExtension)) {
-        throw fail("SOURCE_FILE_ROLE_UNKNOWN", `.${targetExtension} (${resolvedRelative})`, correlationId);
+      // Classify the reference before touching the filesystem: an extension with no role is
+      // refused with the clearer reason, and no file is read for a path we will reject.
+      const referenceExtension = extensionOf(resolvedRelative);
+      if (!ASSET_EXTENSIONS.has(referenceExtension) && !ROLE_BY_EXTENSION.has(referenceExtension)) {
+        throw fail("SOURCE_FILE_ROLE_UNKNOWN", `.${referenceExtension} (${resolvedRelative})`, correlationId);
       }
-      // Existence and containment are proven now so the queue only holds real files.
-      await loadFile(rootAbsolute, resolve(rootAbsolute, resolvedRelative),
-        `${resolvedRelative} (from ${item.relative})`, correlationId);
-      queue.push({ relative: resolvedRelative, referrer: item.relative });
+      // Resolve to the canonical file BEFORE deduping: two references that differ only by
+      // an alias or a symlink are one file and must occupy one manifest row (M-03).
+      const target = await read(resolvedRelative, `${resolvedRelative} (from ${item.relative})`);
+      if (visited.has(target.relative)) continue;
+      const targetExtension = extensionOf(target.relative);
+      if (!ASSET_EXTENSIONS.has(targetExtension) && !ROLE_BY_EXTENSION.has(targetExtension)) {
+        throw fail("SOURCE_FILE_ROLE_UNKNOWN", `.${targetExtension} (${target.relative})`, correlationId);
+      }
+      queue.push({ relative: target.relative, referrer: item.relative });
     }
   }
 
   for (const asset of input.declaredAssets ?? []) {
     const relative = normalizeRelative(asset.path, correlationId);
-    if (assets.some((entry) => entry.path === relative)) continue;
-    const loaded = await loadFile(rootAbsolute, resolve(rootAbsolute, relative), relative, correlationId);
+    const loaded = await read(relative, relative);
+    if (assets.some((entry) => entry.path === loaded.relative)) continue;
     assets.push({ path: loaded.relative, asset_id: asset.asset_id, sha256: loaded.sha256, size: loaded.bytes.length });
   }
 
@@ -318,11 +345,14 @@ export async function computeSourceDigest(input: SourceDigestInput, correlationI
  * the result must still land inside the root — proven lexically first, then by realpath
  * containment in `loadFile`. Absolute and backslash references are refused outright.
  */
-function resolveReference(referrer: string, raw: string, correlationId?: string): string {
+function assertLocalPathShape(raw: string, correlationId?: string): void {
   if (raw.includes("\\")) throw fail("SOURCE_PATH_ESCAPE", `backslash separator in ${raw}`, correlationId);
-  if (raw.startsWith("/") || /^[a-z]:/iu.test(raw)) {
-    throw fail("SOURCE_PATH_ESCAPE", `absolute path ${raw}`, correlationId);
-  }
+  if (raw.startsWith("/")) throw fail("SOURCE_PATH_ESCAPE", `absolute path ${raw}`, correlationId);
+  if (/^[a-z]:/iu.test(raw)) throw fail("SOURCE_PATH_ESCAPE", `drive-qualified path ${raw}`, correlationId);
+}
+
+function resolveReference(referrer: string, raw: string, correlationId?: string): string {
+  assertLocalPathShape(raw, correlationId);
   const joined = joinRelative(referrer, raw);
   if (joined === "" || joined === ".." || joined.startsWith("../")) {
     throw fail("SOURCE_PATH_ESCAPE", `${raw} (from ${referrer}) escapes the project root`, correlationId);
