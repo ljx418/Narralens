@@ -16,6 +16,7 @@
     "test": "vitest run --config vitest.config.ts",
     "test:contracts": "vitest run --config vitest.config.ts tests/contracts",
     "test:m2.1": "vitest run --config vitest.config.ts tests/m2.1 tests/architecture",
+    "check:m2.1-docs": "node tools/m2.1-doc-consistency.mjs",
     "test:m2.1:golden-vectors": "tsx tests/m2.1-golden/generate-vectors.ts",
     "test:m2.1:golden-python": "python3 -I tests/m2.1-golden/source-digest-v1.golden.py tests/m2.1-golden/source-digest-v1.vectors.json",
     "evidence:m2.1:secret-scan": "tsx tools/secret-scan.ts",

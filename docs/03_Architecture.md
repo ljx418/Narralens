@@ -1,4 +1,5 @@
 # 叙镜架构设计 v1.0
+<!-- M2.1_REWORK_BASE_SHA=ee58ab5c6a9d4bbdf05e8ac8a394fd75218cae59 REVIEW_STATUS=REVIEW_PENDING -->
 
 文档状态：Gate D1–D3、D4.0 与 D4.1 的历史结论保留。D4.2.1 的 M1A 逐编号证据已完成并由独立 Claude Code R4 外审通过；这只关闭 D4.2.1 prerequisite subset，不关闭 Gate D4.2。2026-10-16 经 `CR-MIG-001` 批准进入架构迁移：OpenFilm Studio 是目标原生 UI/默认渲染器，Hypit 降为 legacy/回退；M1B 隔离 spike 已通过，现允许 M2 开工但尚未实现任何生产 OpenFilm 路径。当前运行时仍以 Hypit 为唯一生产剪辑事实源，旧 Gate 历史不被覆盖。
 
@@ -100,13 +101,13 @@ narralens/
 | JSON contracts | `contracts/` | UI/Host/Adapters/Tests | D4.1 合同已实现；D4.2.1 四份 runtime 合同、@1/@2 manifest union 与两项错误码已实现 | 89/89、SHA pin、后续三合同未注册 |
 | D4.2 review contracts | `docs/contracts/d4.2-*` | 文档审查 → 后续运行时合同 | 七份审查快照；D4.2.1 四份已同步 runtime，materialize/adopt 三份仍 docs-only | `docs/contracts/README.md` 映射为权威 |
 
-| `EnginePort` | `src/host/engine/engine-port.ts` | ProjectCoordinator ↔ 引擎 | **M2.1 候选，外审打回**：七方法与无 commit 门已实现；Host-only path brand 仍可由 adapter 构造，须在 M2.2 接线前关闭 | `docs/evidence/M2/M2.1/reviews/external-review-codex.md` |
-| `EngineBindingStore` / `EngineRegistry` | `src/host/engine/engine-binding-store.ts`、`engine-registry.ts` | project_id → 唯一引擎 + `EnginePort` | **M2.1 候选，外审打回**：主键单引擎已实现；外部变化检测尚未从生产路径持久进入 attention | 外审 B-01 |
-| `NativeMutationRegistry` / `NativeWriteGateway` | `src/host/engine/native-mutation-registry.ts`、`native-write-gateway.ts` | native 入口 → TypedEdit 或拒绝 | **M2.1 候选，外审打回**：入口登记已完成；CapabilityMap 为空且缺失能力未 fail-closed，尚不能作为生产强制点 | 外审 M-01 |
-| `SourceDigestV1` | `src/host/engine/source-digest-v1.ts` | source 引用闭包 → canonical → SHA256 | **M2.1 候选，外审打回**：基础闭包/黄金向量已实现；Hypit 视觉资产 bytes 未进入闭包，realpath alias 会重复 canonical path | 外审 B-02/M-03 |
+| `EnginePort` | `src/host/engine/engine-port.ts` | ProjectCoordinator ↔ 引擎 | **M2.1 已实现、独立复审待确认**：七方法与无 commit 门已实现；`absoluteServerPath` 已移入 Host-only 模块，adapter 只回传相对 staging 目录名 | M2.1 AC-001/002；第二轮返修基线 `ee58ab5c...` |
+| `EngineBindingStore` / `EngineRegistry` | `src/host/engine/engine-binding-store.ts`、`engine-registry.ts` | project_id → 唯一引擎 + `EnginePort` | **M2.1 已实现、独立复审待确认**：主键保证单项目单引擎；Host 持有只写一次的 source digest 基线，生产读取检测外部变化并持久进入 attention | 外审 B-01 返修证据 ER-B-01 |
+| `NativeMutationRegistry` / `NativeWriteGateway` | `src/host/engine/native-mutation-registry.ts`、`native-write-gateway.ts` | native 入口 → TypedEdit 或拒绝 | **M2.1 已实现、生产强制接线待 M2.2/M4A**：每引擎 capability map 完整；缺失/未验证能力 fail closed；Host service 能力单独表达 | 外审 M-01 返修证据 ER-M-01；ADR D-12 限制保留 |
+| `SourceDigestV1` | `src/host/engine/source-digest-v1.ts` | source 引用闭包 → canonical → SHA256 | **M2.1 已实现、独立复审待确认**：Hypit 引用资产当前 bytes 纳入闭包，不一致 fail closed；identity 使用 realpath，alias 每个 canonical path 恰一行 | 外审 B-02/M-03 返修证据 ER-B-02/ER-M-03 |
 | 时间模型 | `src/host/engine/time-model.ts` | 整数半开帧 ↔ rational fps | **M2.1 已实现**：精确 BigInt 有理换算；已验仅 30/1；短素材拒绝而不循环/冻结/变速 | TM-01/02/03（`AT-PREVIEW-01`/`AT-SELECTION-01`） |
 | `HypitEngineAdapter` | `src/adapters/hypit/hypit-engine-adapter.ts` | EnginePort ↔ 现有 Hypit read/write | **M2.1 已实现**：包装既有 adapter，legacy 合同、入口与测试未改 | AC-019；134 条旧回归全绿 |
-| `OpenFilmAdapter` | `src/adapters/openfilm/openfilm-engine-adapter.ts`、`openfilm-upstream.ts` | EnginePort ↔ 固定上游接缝 | **M2.1 候选，外审打回（只读）**：真实接缝可运行；加载器只验 HEAD、未验 dirty/lock/license 摘要，OF-06 oracle 需修复 | 外审 M-04/M-05 |
+| `OpenFilmAdapter` | `src/adapters/openfilm/openfilm-engine-adapter.ts`、`openfilm-upstream.ts` | EnginePort ↔ 固定上游接缝 | **M2.1 只读实现、独立复审待确认**：固定 HEAD、可证明 clean、package/lock/license/传递模块摘要三层校验；Git clean 无法证明即 `ENGINE_UNAVAILABLE`；OF-06a/b/c 分离真实 upstream、真实 adapter 与合同证据 | 外审 M-04/M-05、R2-M-01 返修基线 `ee58ab5c...` |
 
 状态口径：`已实现` 只覆盖对应 Gate 的证据范围，不外推到完整 V1；`docs-only/待后续` 表示目标明确但尚无生产能力。
 

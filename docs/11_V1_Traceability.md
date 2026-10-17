@@ -1,8 +1,9 @@
 # Narralens V1 规格—架构—开发—验收追踪矩阵
 
 版本：v1.0  
-状态：实际开发已批准；Gate D1、Gate D2、Gate D3、Gate D4.0、Gate D4.1 历史结论保留。D4.2.1 的 M1A 逐编号补证已由独立 Claude Code R4 外审关闭；M1B OpenFilm 隔离技术 spike 也已通过。`CR-MIG-001` 批准的 OpenFilm 目标架构现已到达 M2 开工边界；M2.1 已形成候选实现，但冻结候选 `fc3efb4a53e19bca5ad939bd93e40b1af50a428d` 被独立 Codex 外审以 `BLOCKER=2 / MAJOR=5` 打回，尚未达到 `M2_1_CONTROL_BOUNDARY_READY`。M2.2/M2.3 未实现，旧 D4.2.2 不得顺跳；更不得宣称 Gate D4.2、`Gate V1-P0` 或 `V1-Full`。
+状态：实际开发已批准；Gate D1、Gate D2、Gate D3、Gate D4.0、Gate D4.1 历史结论保留。D4.2.1 的 M1A 逐编号补证已由独立 Claude Code R4 外审关闭；M1B OpenFilm 隔离技术 spike 也已通过。`CR-MIG-001` 批准的 OpenFilm 目标架构现已到达 M2 开工边界。M2.1 第一轮候选 `fc3efb4...` 的 2 BLOCKER/5 MAJOR 已在第二轮候选 `971d02a...` 中关闭；第二轮独立复审新发现的 2 MAJOR 已由返修实现 `ee58ab5c6a9d4bbdf05e8ac8a394fd75218cae59` 修复并完成内部复验，独立复审仍为 `REVIEW_PENDING`，尚未达到 `M2_1_CONTROL_BOUNDARY_READY`。M2.2/M2.3 未实现，旧 D4.2.2 不得顺跳；更不得宣称 Gate D4.2、`Gate V1-P0` 或 `V1-Full`。
 事实日期：2026-10-17
+<!-- M2.1_REWORK_BASE_SHA=ee58ab5c6a9d4bbdf05e8ac8a394fd75218cae59 REVIEW_STATUS=REVIEW_PENDING -->
 
 ## 1. 使用规则
 
@@ -43,7 +44,7 @@
 | M0 | 现场 SHA、代码/路由/阈值、备份与变更单 | observed | 不改变业务 Gate |
 | M1A | D4.2.1 冻结矩阵逐 case 真实证据与独立外审 | passed（实现 `c0f101b...`；R4 YES） | Headless PASS；headed/human NOT_RUN；不扩张为 D4.2 总 Gate |
 | M1B | 固定 OpenFilm SHA、可编辑 30 秒链路、native 写入口清单与 stale-base 实证 | passed-spike（OpenFilm `e70d9d9...`） | 不写生产 Hypit；可编辑三 clip；生产 translate/block 已由 M2.1 落地为 `NativeMutationRegistry`/`NativeWriteGateway`，M2.1 未提供任何 OpenFilm 写路径 |
-| M2 | EnginePort、单引擎绑定、写入治理、三类锁、持久 Job/SSE/lease、snapshot/journal/回退 | **进行中：M2.1 候选已被独立外审打回**；M2.2/M2.3 未开始 | 先关闭 `external-review-codex.md` 的 2 BLOCKER/5 MAJOR；复审通过后按 Wave 1 连续进入 M2.2 |
+| M2 | EnginePort、单引擎绑定、写入治理、三类锁、持久 Job/SSE/lease、snapshot/journal/回退 | **进行中：M2.1 第二轮 2 MAJOR 已返修，独立复审待执行**；M2.2/M2.3 未开始 | 独立复审确认 R2-M-01/R2-M-02 后，按 Wave 1 连续进入 M2.2 |
 | M3–M5 | 素材化、采用事务、同页原生 Studio UX | not-started | 顺序门禁，不顺跳 |
 | M6 | `Gate V1-P0` | not-started | 不等于 V1-Full |
 | M7A–D | P1 与完整长片证据 | not-started | P0/P1 全绿后才可声明 V1-Full |
@@ -92,9 +93,10 @@
 - 媒体重关联缺失引用为 0，并记录总耗时、重试次数、失败率及 D6 前冻结的性能预算。
 - 交付包：MP4、字幕、来源/许可、标题、封面、版本与生成记录。
 
-### Gate M2.1（当前）
+### Gate M2.1（当前：第二轮返修后，独立复审待执行）
 
-- 外审候选：`fc3efb4a53e19bca5ad939bd93e40b1af50a428d`（分支 `migration/m2.1-engine-governance`）；独立 Codex 外审结论 `FAIL_REWORK_REQUIRED`。
+- 历史外审：第一轮候选 `fc3efb4a53e19bca5ad939bd93e40b1af50a428d` 为 2 BLOCKER/5 MAJOR；第二轮候选 `971d02aac88b8f6f1513cbfa52b91923dd033d56` 的核心代码问题已大部关闭，但独立 Codex 又发现 R2-M-01/R2-M-02 两项 MAJOR。
+- 当前返修实现基线：`ee58ab5c6a9d4bbdf05e8ac8a394fd75218cae59`；Git clean 无法证明时现已 fail closed，并覆盖不可执行、非零退出、超时、dirty/clean 分支。权威文档已同步；下一状态为独立复审 `REVIEW_PENDING`。
 - 证据索引：`docs/evidence/M2/M2.1/evidence-manifest.json`，20 个 case（含 `ER-*` 外审返修 case）逐条记录
   命令、exit code、stdout/stderr、环境、repo/upstream full SHA、fixture hash、断言与 artifact SHA256；
   不使用测试总数替代逐 case 状态。
@@ -104,21 +106,20 @@
   （篡改隔离副本被 `ENGINE_UNAVAILABLE` 拒绝，原 checkout 仍可加载）；生产代码无 `vendor/` 静态 import。
 - 外审返修：B-01/B-02/M-01..M-05 各自的修复提交、失败测试与复验证据见 manifest 的 `ER-*` case；
   外审的两个复现实验现为可执行脚本 `tools/m2.1-external-review-repro.mts`，断言的是修复后的行为。
-- 返修后冻结候选提交：`4f2dfea`（证据捕获提交 `172321c831793e4674bbd157468068c16c13bfe7`，
+- 第二轮证据封装提交：`4f2dfea`（证据捕获提交 `172321c831793e4674bbd157468068c16c13bfe7`，
   证据日志目录 `docs/evidence/M2/M2.1/logs/172321c/`，捕获时工作树干净）。
   完整性四项检查全通过：26 个被引用文件存在/被跟踪/未被 ignore/摘要一致；捕获环境独立记录干净；
   冻结提交之后无任何 `src/ tests/ contracts/ tools/ package.json` 变更。
 - 证据按捕获提交分目录保存且永不覆盖，历史捕获保留在 `logs/d535591/`。
   历史候选 `fc3efb4a53e19bca5ad939bd93e40b1af50a428d` 与 `905c4335e3c7a7838d3a2d4132f732707f9a6a08`
   保留不改写。
-- 变异测试：11 条架构门逐条注入违规并确认会失败（MUT-A..MUT-K）；MUT-G..MUT-K 分别覆盖 M-01、B-02、
-  M-03、M-04、B-01 的新门。
+- 变异测试：原 11 条 MUT-A..K 保留；新增 MUT-L，专门证明 Git clean 检查不可用时若退回 fail-open，门禁会失败。
 - 证据完整性：`node tools/m2.1-evidence-integrity.mjs` 与 `tests/m2.1/evidence-integrity.test.ts` 断言每个
   被引用文件存在、被 git 跟踪、未被 git-ignore 且摘要仍一致，并断言冻结提交之后无任何
   `src/ tests/ contracts/ tools/ package.json` 变更。
 - 限制：headed 与人类体验 `NOT_RUN`；`vendor/openfilm` 未登记为 submodule，真实接缝依赖隔离 worktree。
-- 外审：第一轮独立外审 `FAIL_REWORK_REQUIRED`（2 BLOCKER、5 MAJOR）已完成返修；返修后的独立复审结论见
-  manifest 的 `review.external`，复审通过前不得进入 M2.2，也不得声明任何出门。
+- 外审：第一轮 2 BLOCKER/5 MAJOR 与第二轮新增 2 MAJOR 均已有返修实现和内部复验；独立复审仍为
+  `REVIEW_PENDING`。复审通过前不得进入 M2.2，也不得声明任何出门。
 
 ## 5. 变更控制
 
