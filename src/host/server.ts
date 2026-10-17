@@ -205,7 +205,7 @@ export class NarralensHost {
   async #engine(projectId: string): Promise<EngineResponse> {
     const descriptor = await this.catalog.readDescriptor(projectId);
     const resolved = this.engines.resolve(projectId);
-    const binding = resolved.binding!;
+    const binding = resolved.binding;
     const expectedSha = upstreamShaFor(resolved.engine);
     if (binding.engine_upstream_sha !== expectedSha) {
       throw new HttpError(423, "PROJECT_ATTENTION_REQUIRED", "Engine binding does not match its pinned upstream");

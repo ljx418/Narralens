@@ -4,6 +4,7 @@ import { tmpdir } from "node:os";
 import { resolve } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { canonicalJson, computeSourceDigest, extractReferences, SOURCE_DIGEST_DOMAIN } from "../../src/host/engine/source-digest-v1.js";
+import { validateSourceDigestManifest } from "../../src/contracts/validator.js";
 import type { SourceDigestManifest } from "../../src/contracts/engine-types.js";
 
 /** AC-006 / EN-04: the digest must cover the whole referenced closure, deterministically. */
@@ -56,6 +57,8 @@ describe("SourceDigestV1 closure", () => {
     expect(result.manifest.assets[0]!.asset_id).toBe("asset_narration_m21");
     expect(result.source_digest).toMatch(/^[a-f0-9]{64}$/u);
     expect(result.source_digest).toBe(digestOf(result.manifest));
+    // The manifest that is hashed is the same one the runtime contract accepts.
+    expect(validateSourceDigestManifest(result.manifest)).toEqual({ ok: true, value: result.manifest });
   });
 
   it("EN-04 gives the same digest whatever order the Host declares the roots in", async () => {

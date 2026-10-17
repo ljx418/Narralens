@@ -100,6 +100,14 @@ narralens/
 | JSON contracts | `contracts/` | UI/Host/Adapters/Tests | D4.1 合同已实现；D4.2.1 四份 runtime 合同、@1/@2 manifest union 与两项错误码已实现 | 89/89、SHA pin、后续三合同未注册 |
 | D4.2 review contracts | `docs/contracts/d4.2-*` | 文档审查 → 后续运行时合同 | 七份审查快照；D4.2.1 四份已同步 runtime，materialize/adopt 三份仍 docs-only | `docs/contracts/README.md` 映射为权威 |
 
+| `EnginePort` | `src/host/engine/engine-port.ts` | ProjectCoordinator ↔ 引擎 | **M2.1 已实现**：只暴露 `inspect/capabilities/plan/stage/validate/preview/render`，无 commit、无 revision/lock 写、无任意命令或路径 | `docs/evidence/M2/M2.1/`；fitness 规则 4 + 变异用例 MUT-A/F |
+| `EngineBindingStore` / `EngineRegistry` | `src/host/engine/engine-binding-store.ts`、`engine-registry.ts` | project_id → 唯一引擎 + `EnginePort` | **M2.1 已实现**：`engine_binding.project_id` 主键即单引擎约束；缺失/不匹配 → attention，不猜默认 | EN-01/EN-01.a；fitness 规则 14 |
+| `NativeMutationRegistry` / `NativeWriteGateway` | `src/host/engine/native-mutation-registry.ts`、`native-write-gateway.ts` | native 入口 → TypedEdit 或拒绝 | **M2.1 已实现**：覆盖 M1B 清单 10 行 + audio 维度，生产条目无 `unknown`，未登记操作默认拒绝并记安全事件 | EN-02/EN-02.b；fitness 规则 5；MUT-B/C |
+| `SourceDigestV1` | `src/host/engine/source-digest-v1.ts` | source 引用闭包 → canonical → SHA256 | **M2.1 已实现**：entry/scene/html/js/css/字幕/设置/字体/引用资产全闭包；失败一律抛出，无部分 manifest | EN-04；10 条黄金向量 TS/Python 互校；MUT-D/E |
+| 时间模型 | `src/host/engine/time-model.ts` | 整数半开帧 ↔ rational fps | **M2.1 已实现**：精确 BigInt 有理换算；已验仅 30/1；短素材拒绝而不循环/冻结/变速 | TM-01/02/03（`AT-PREVIEW-01`/`AT-SELECTION-01`） |
+| `HypitEngineAdapter` | `src/adapters/hypit/hypit-engine-adapter.ts` | EnginePort ↔ 现有 Hypit read/write | **M2.1 已实现**：包装既有 adapter，legacy 合同、入口与测试未改 | AC-019；134 条旧回归全绿 |
+| `OpenFilmAdapter` | `src/adapters/openfilm/openfilm-engine-adapter.ts`、`openfilm-upstream.ts` | EnginePort ↔ 固定上游接缝 | **M2.1 已实现（只读）**：固定 `e70d9d93...` SHA 校验后动态加载 `readProjectFilm`/`editProjectFilm`；M2.1 不暴露任何 OpenFilm 写路径 | 真实上游探针 8 项；stale base 409 且 bytes 不变 |
+
 状态口径：`已实现` 只覆盖对应 Gate 的证据范围，不外推到完整 V1；`docs-only/待后续` 表示目标明确但尚无生产能力。
 
 ## 6. 核心数据模型
@@ -228,6 +236,13 @@ journal 目标状态为 `prepared → source_validated → metadata_committed`�
 - Hypit Adapter 是唯一可安装 typed patch 的边界；正则写 Source、数组下标 identity、任意路径写入均由架构测试拒绝。
 - SQLite/Event Log 只能保存任务、事件、修订、锁、审批与映射；测试必须证明它不保存可独立重建影片的最终时间轴。
 - 所有外部调用携带 correlation/job/revision 标识；SSE 重连必须按事件 ID 去重。
+- M2.1 起由 `tests/architecture/m2.1-fitness.test.ts` 机械执行：`app/**` 不 import host/adapters/vendor；
+  `contracts/**` 不 import React/Node/adapters/host；生产代码不 import `spikes/**`；
+  `EnginePort` 成员恰为 7 个且 adapter 无 commit/lock/process 方法；registry policy 四选一且 `unknown` 计数为 0；
+  `/api/migration/v1` 下只挂载 engine 只读路由；`ApiErrorCode` union / JSON Schema / alias 表三者一致；
+  legacy `frame_rate` 仍为 number 且 `end_frame_exclusive` 未被改名。
+- 每条 fitness 规则都由 `tools/m2.1-gate-mutation-check.sh` 的变异用例证明会失败（MUT-A..MUT-F），
+  避免出现「永远不会红的绿灯」。
 
 ## 14. D1 允许与不允许调整的范围
 

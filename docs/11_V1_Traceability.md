@@ -1,8 +1,8 @@
 # Narralens V1 规格—架构—开发—验收追踪矩阵
 
 版本：v1.0  
-状态：实际开发已批准；Gate D1、Gate D2、Gate D3、Gate D4.0、Gate D4.1 历史结论保留。D4.2.1 的 M1A 逐编号补证已由独立 Claude Code R4 外审关闭；M1B OpenFilm 隔离技术 spike 也已通过。`CR-MIG-001` 批准的 OpenFilm 目标架构现已到达 M2 开工边界；M2 尚未实现，旧 D4.2.2 不得顺跳。
-事实日期：2026-10-16
+状态：实际开发已批准；Gate D1、Gate D2、Gate D3、Gate D4.0、Gate D4.1 历史结论保留。D4.2.1 的 M1A 逐编号补证已由独立 Claude Code R4 外审关闭；M1B OpenFilm 隔离技术 spike 也已通过。`CR-MIG-001` 批准的 OpenFilm 目标架构现已到达 M2 开工边界；M2.1 已实现（EnginePort、单引擎绑定、NativeMutationRegistry/Gateway、SourceDigestV1、整数帧时间模型、只读 engine 路由），M2.2/M2.3 未实现，旧 D4.2.2 不得顺跳。M2.1 的出门声明上限是 `M2_1_CONTROL_BOUNDARY_READY`，不等于 M2 完成，更不等于 Gate D4.2、`Gate V1-P0` 或 `V1-Full`。
+事实日期：2026-10-17
 
 ## 1. 使用规则
 
@@ -14,9 +14,9 @@
 |---|---|---|---|---|---|
 | P0-01 项目创建/任务包 | `IdeaWorkspace`、`CreativeTaskSchema`、`ProjectActor` | D2 | `AT-IDEA-01` 导入合法/非法包并重开 | 工程目录、校验日志、重开截图 | not-started |
 | P0-02 章节/脚本/镜头 | `ChapterNavigator`、`SelectionCoordinator` | D2–D3 | `AT-NAV-01` 三种入口定位同一对象 | stable ID/时间范围对照 | partial：D2/D3 三个稳定 shot 与单镜选区可用；章节与三入口仍待后续阶段 |
-| P0-03 真实播放器/时间码 | `RealPreviewSurface`、`HypitAdapter` | D1–D2 | `AT-PREVIEW-01` 帧时间往返 | 真实 Run、时间码/抽样帧 | partial：D2 真实 descriptor/900 帧/30fps/预览入口；完整播放器待后续 |
+| P0-03 真实播放器/时间码 | `RealPreviewSurface`、`HypitAdapter` | D1–D2（时间模型 M2.1） | `AT-PREVIEW-01` 帧时间往返 | 真实 Run、时间码/抽样帧 | partial：D2 真实 descriptor/900 帧/30fps/预览入口；M2.1 已以 `TM-01` 关闭 rational fps 与整数半开帧往返（901 帧 floor/half_up/ceil 全等）；完整播放器待后续 |
 | P0-04 全片/局部时间轴 | `TimelineSurface` | D2–D3 | `AT-TIMELINE-01` 缩放不改变选区 | 120 镜头 trace、选区日志 | not-started；D1 前置已清除 |
-| P0-05 镜头/区间/逐帧 | `SelectionCoordinator` | D3 | `AT-SELECTION-01` `[start,end)` 边界 | 首尾帧样本、契约测试 | partial：D3 单镜稳定选区/边界已通过；区间与逐帧 UI 待后续 |
+| P0-05 镜头/区间/逐帧 | `SelectionCoordinator` | D3（区间语义 M2.1） | `AT-SELECTION-01` `[start,end)` 边界 | 首尾帧样本、契约测试 | partial：D3 单镜稳定选区/边界已通过；M2.1 已以 `TM-02` 关闭零长/倒序/越界/跨镜拒绝（422 `INVALID_RANGE`）与 `TM-03` 短素材拒绝；区间与逐帧 UI 待后续 |
 | P0-06 3–6 提案 | `DirectorPane`、`ProposalCompare`、`ProposalComparisonAdapter` | D2–D4 | `D41-CONTRACT/COUNT/DIVERSITY/DURATION/REF/TRUST/STAGING/REV/NOWRITE/CANCEL/PROVIDER/RUNNER/UI/A11Y/SEC/REGRESSION` 全族 | Runner 审计、ProposalComparison、结构签名、工程 SHA、Host 写调用计数、浏览器证据 | done：D4.1 生产实现、80/80、真实 CLI 三案、浏览器/NOWRITE 与内外实现审查通过；不包含 P0-07 采用 |
 | P0-07 分项锁 | `ProjectWriteActor`、`LockPolicy` | D3–D4 | `AT-LOCK-01` UI/Agent 同时被阻止 | 423 响应、资产哈希不变 | partial：仅 D3 visual 服务端主动锁这一项通过；D4.2 计划复验 visual lock，但 narration/duration 主动锁与完整 P0-07 仍待后续 |
 | P0-08 素材/来源/许可 | `AssetRegistry`、`AssetImportService`、`MaterializeService` | D4 | `D42-IMPORT/LICENSE/MAT/SEC` | import/ffprobe、manifest v2、lineage、422/428、许可清单 | partial：D4.2.1 本地导入、媒体验证、库存、许可展示、@2 transaction、journal、Hypit lease/TOCTOU、routes/UI 已完成 M1A 独立外审；derived composite 与审批仍属于后续 M3/M4；外传/provider 不在本阶段 |
@@ -42,8 +42,8 @@
 |---|---|---|---|
 | M0 | 现场 SHA、代码/路由/阈值、备份与变更单 | observed | 不改变业务 Gate |
 | M1A | D4.2.1 冻结矩阵逐 case 真实证据与独立外审 | passed（实现 `c0f101b...`；R4 YES） | Headless PASS；headed/human NOT_RUN；不扩张为 D4.2 总 Gate |
-| M1B | 固定 OpenFilm SHA、可编辑 30 秒链路、native 写入口清单与 stale-base 实证 | passed-spike（OpenFilm `e70d9d9...`） | 不写生产 Hypit；可编辑三 clip；生产 translate/block 仍待 M2 |
-| M2 | EnginePort、单引擎绑定、写入治理、三类锁、持久 Job/SSE/lease、snapshot/journal/回退 | allowed-not-started | 只允许按 M2.1→M2.3 开工；materialize/adopt 仍保持关闭 |
+| M1B | 固定 OpenFilm SHA、可编辑 30 秒链路、native 写入口清单与 stale-base 实证 | passed-spike（OpenFilm `e70d9d9...`） | 不写生产 Hypit；可编辑三 clip；生产 translate/block 已由 M2.1 落地为 `NativeMutationRegistry`/`NativeWriteGateway`，M2.1 未提供任何 OpenFilm 写路径 |
+| M2 | EnginePort、单引擎绑定、写入治理、三类锁、持久 Job/SSE/lease、snapshot/journal/回退 | **进行中：M2.1 已实现并内部通过**（`M2_1_CONTROL_BOUNDARY_READY`，未外审）；M2.2/M2.3 未开始 | materialize/adopt 仍 404；M2.1 不实现 snapshot commit、持久 Job、三类锁闭环；下一个允许 ticket 仍是 M2.2 |
 | M3–M5 | 素材化、采用事务、同页原生 Studio UX | not-started | 顺序门禁，不顺跳 |
 | M6 | `Gate V1-P0` | not-started | 不等于 V1-Full |
 | M7A–D | P1 与完整长片证据 | not-started | P0/P1 全绿后才可声明 V1-Full |
@@ -52,7 +52,7 @@
 
 | PRD | 架构控制 | 测试 | 门限 | 当前状态 |
 |---|---|---|---|---|
-| NFR-01 本地优先 | loopback Host、受控 Runner、AssetRef 审批 | `AT-SEC-01` Origin/token、路径穿越、锁定版本 gitleaks 或等价扫描器 | 无凭据进入前端/JSON/日志；记录工具/版本/规则集/时间与 `docs/evidence/<phase>/security/credential-scan.json`；外传逐任务记录 | partial：D2 loopback/Origin/token/路径/外传清单通过；AssetRef 审批待 D4 |
+| NFR-01 本地优先 | loopback Host、受控 Runner、AssetRef 审批、`SourceDigestV1` | `AT-SEC-01` Origin/token、路径穿越、锁定版本 gitleaks 或等价扫描器 | 无凭据进入前端/JSON/日志；记录工具/版本/规则集/时间与 `docs/evidence/<phase>/security/credential-scan.json`；外传逐任务记录 | partial：D2 loopback/Origin/token/路径/外传清单通过；M2.1 已补 `AT-SEC-01` 的引用闭包与凭据扫描部分（固定规则集扫描器，0 命中，`docs/evidence/M2/M2.1/security/credential-scan.json`；上游固定 SHA 校验后才动态加载，绝对路径/穿越/symlink 逃逸/外部引用全部拒绝）；AssetRef 审批待 D4/M3 |
 | NFR-02 可恢复 | ProjectWriteActor + journal + append-only event log | `AT-RECOVERY-01` 在四个 journal 状态注入崩溃 | 重启恢复到最后提交 revision，主 Source 不损坏 | partial：D3 prepared/target/committed/attention 路径通过；D4.1 只保证 comparison 原子可见且如实声明在途任务可丢失，不推进本项；完整任务/历史恢复待 D5 |
 | NFR-03 可观察 | Job state + SSE + correlation ID | `AT-OBS-01` 断线重连/晚到/取消 | 无重复事件；费用与“已请求取消”如实显示；无假百分比 | partial：D2 event replay/live、取消状态、correlation ID 与 Runner audit 通过；持久事件待 D5 |
 | NFR-04 可测试 | schema/contract/fixture/ffprobe/frame sampling | `AT-CONTRACT-01`、`AT-E2E-01` | 每个 phase 的 evidence manifest 完整 | partial：D4.1 达到 80/80、真实 CLI/浏览器/NOWRITE/evidence manifest；V1 全阶段未完成 |
@@ -91,6 +91,19 @@
 - 409/422/423/428/503、写入失败、崩溃恢复、重开、锁定复用、性能、可访问性证据。
 - 媒体重关联缺失引用为 0，并记录总耗时、重试次数、失败率及 D6 前冻结的性能预算。
 - 交付包：MP4、字幕、来源/许可、标题、封面、版本与生成记录。
+
+### Gate M2.1（当前）
+
+- 冻结提交：`905c4335e3c7a7838d3a2d4132f732707f9a6a08`（分支 `migration/m2.1-engine-governance`）。
+- 证据索引：`docs/evidence/M2/M2.1/evidence-manifest.json`，13 个 case 逐条记录命令、exit code、环境、
+  repo/upstream full SHA、fixture hash、断言与 artifact SHA256；不使用测试总数替代逐 case 状态。
+- 全量回归：`corepack pnpm check` exit 0，25 files / 227 tests，`tsc --noEmit` 与生产 `vite build` 通过；
+  134 条 D2–D4.2.1 旧回归保持通过。
+- 真实上游：`e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3` 隔离 worktree 探针 8 项通过，
+  含 stale base 409 且 `film.html` bytes 不变；生产代码无 `vendor/` 静态 import。
+- 变异测试：6 条架构门逐条注入违规并确认会失败（MUT-A..MUT-F）。
+- 限制：headed 与人类体验 `NOT_RUN`；`vendor/openfilm` 未登记为 submodule，真实接缝依赖隔离 worktree。
+- 外审：实现会话内部审查已完成；独立外审状态见 evidence manifest 的 `review.external`。
 
 ## 5. 变更控制
 

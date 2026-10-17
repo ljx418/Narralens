@@ -58,9 +58,3 @@ export const ERROR_ALIAS_TABLE: readonly ErrorAliasEntry[] = Object.freeze([
   { code: "DATA_POLICY_DENIED", http_status: 403, legacy: false, introduced_by: "M2.1", distinguishes_from: "ORIGIN_REJECTED",
     distinction: "An egress, cost or credential policy refused the operation; ORIGIN_REJECTED is the same-origin check refusing the request." },
 ]);
-
-export function errorAlias(code: ApiErrorCode): ErrorAliasEntry {
-  const entry = ERROR_ALIAS_TABLE.find((candidate) => candidate.code === code);
-  if (!entry) throw new Error(`ERROR_ALIAS_MISSING:${code}`);
-  return entry;
-}

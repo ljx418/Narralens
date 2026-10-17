@@ -292,6 +292,7 @@ const manifest = {
     "Gate D4.2 is not closed. Gate V1-P0 and V1-Full are not claimed.",
     "vendor/openfilm is not a registered submodule of this repository; the real upstream evidence comes from the isolated M1B worktree and is not a production integration.",
     "Headed browser automation and human experience are NOT_RUN for this ticket.",
+    "M2.1 registers and decides at the gateway, but the gateway is not yet in front of a production write route: this ticket opens no write route, and the only existing write route (POST /api/projects/:id/edits) was already Host-owned via ProjectWriteActor before M2.1. That enforcement point becomes live with M2.2 Coordinator wiring or M4A (ADR-M2.1-001 D-12).",
     "Mocked boundaries: none of the assertions above rely on a mock. The only test doubles are the in-process upstream stub in two OpenFilm unit cases, which are labelled schema_unit and do not close any real gate.",
   ],
   ...base,

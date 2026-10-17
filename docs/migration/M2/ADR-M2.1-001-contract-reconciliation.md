@@ -173,6 +173,26 @@ BFS 顺序本身由「roots 按字节序 + 文件内引用按匹配偏移」固�
 因此黄金向量 V03（`files[]` 重排）期望 digest **改变**，而「声明 root 顺序不影响结果」
 属于解析器性质，由 `tests/m2.1/source-digest-v1.test.ts` 断言，不属于 manifest 向量。
 
+## 5.6 D-12 M2.1 网关的强制点尚未落在生产写路由之前（必须如实声明）
+
+M2.1 的 `NativeWriteGateway` 完成的是**登记与判定**：它对每个入口给出
+translated / translated_host_service / blocked / read_only / denied，并对未登记入口默认拒绝。
+但 M2.1 **没有新开任何写路由**，因此网关目前并不位于某个生产写请求的前置位置上。
+
+M2.1 期间唯一存在的生产写路由仍是既有的 `POST /api/projects/:id/edits`，
+它在 M2.1 之前就已经由 `ProjectWriteActor` 独占提交；M2.1 包装 Hypit 时没有改变这条路径。
+
+因此必须区分两件事，不得混为一谈：
+
+- **已证明**：入口清单完整、无 `unknown`、未登记默认拒绝、translated 的类型与既有
+  `EditOperation` 完全一致（零映射）、asset import 走 Host 资产服务、直接 HTTP 直传
+  `native_operation` 被 schema 拒绝。这些都由可执行断言与变异用例证明。
+- **尚未证明**：网关在一个真实写路由上拦截并拒绝请求。这一强制点随
+  `POST /api/migration/v1/projects/:id/edits`（M4A）或 M2.2 的 Coordinator 接线而生效。
+
+任何把 M2.1 描述为「所有写入口已在网关后强制治理」的表述都是夸大。证据清单与最终报告
+按此口径书写。
+
 ## 6. 命名与顺序冻结
 
 - 网关模块名统一为 `src/host/engine/native-write-gateway.ts`（导出 `NativeWriteGateway`），

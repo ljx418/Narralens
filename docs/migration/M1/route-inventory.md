@@ -18,6 +18,21 @@
 | POST | `/api/proposals/:id/materialize` | 未注册，预期 404 | M1A 必须直接证明无 Job/Source/revision 副作用 |
 | POST | 任意 proposal adopt 路由 | 未注册，预期 404 | M1A 必须直接证明 |
 | POST | `/api/projects/:id/edits` + `adopt_materialized_proposal` | operation 未注册，预期 422 | M1A 必须证明无工程变化 |
-| ALL | `/api/migration/v1/*` | 未实现且默认关闭 | 仅目标草案；M2 以后按 ticket 开放 |
+| ALL | `/api/migration/v1/*` | M2.1 起仅一条只读路由开放 | 仅目标草案；M2 以后按 ticket 逐条开放 |
+
+## M2.1 追加（基线提交 `16add72` 之后的增量，不改写上方 M0 观察）
+
+| Method | 路由 | 状态 | 写入所有者/副作用 |
+|---|---|---|---|
+| GET | `/api/migration/v1/projects/:id/engine` | **M2.1 已实现，只读** | 返回该项目唯一 engine binding、capability map 与只读 `EngineProjection`；不写 source/revision/lock，无自动迁移 |
+| POST | `/api/migration/v1/projects/:id/materializations/...` | 仍未注册，404 | M3 才开放 |
+| POST | `/api/migration/v1/projects/:id/impact` | 仍未注册，404 | M4A 才开放 |
+| POST | `/api/migration/v1/projects/:id/edits` | 仍未注册，404 | M4A 才开放 |
+| POST | `/api/migration/v1/projects/:id/history/restore` | 仍未注册，404 | M4B 才开放 |
+| POST | `/api/migration/v1/projects/:id/migrate-copy` | 仍未注册，404 | M2.3 才开放 |
+
+非 HTTP 写入口治理：`NativeMutationRegistry` 已登记 M1B 清单 10 行 + audio 维度，
+每条为 `translated`/`translated_host_service`/`blocked`/`read_only`，未登记操作默认拒绝并记录安全事件。
+证据：`docs/evidence/M2/M2.1/evidence-manifest.json`（EN-02）。
 
 非 HTTP 写入口：当前 Hypit Studio server 的 native mutation、Hypit CLI/文件系统、history/undo/redo 等由 M1B 盘点；M0 不把包内推测当实证。

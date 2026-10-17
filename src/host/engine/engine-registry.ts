@@ -1,5 +1,5 @@
 import { HttpError } from "../api-error.js";
-import type { EngineKind } from "../../contracts/engine-types.js";
+import type { EngineBinding, EngineKind } from "../../contracts/engine-types.js";
 import { EngineBindingStore } from "./engine-binding-store.js";
 import type { EnginePort } from "./engine-port.js";
 
@@ -28,7 +28,7 @@ export class EngineRegistry {
   kinds(): EngineKind[] { return [...this.#ports.keys()]; }
 
   /** The one engine this project may write through. Throws rather than guessing. */
-  resolve(projectId: string, correlationId?: string): { engine: EngineKind; port: EnginePort; binding: ReturnType<EngineBindingStore["read"]> } {
+  resolve(projectId: string, correlationId?: string): { engine: EngineKind; port: EnginePort; binding: EngineBinding } {
     const binding = this.#bindings.require(projectId, undefined, correlationId);
     const port = this.#ports.get(binding.engine);
     if (!port) {
@@ -39,7 +39,7 @@ export class EngineRegistry {
   }
 
   /** Re-check the pinned upstream on every read, so drift becomes attention (fitness rule 14). */
-  resolveVerified(projectId: string, expectedUpstreamSha: string, correlationId?: string) {
+  resolveVerified(projectId: string, expectedUpstreamSha: string, correlationId?: string): { engine: EngineKind; port: EnginePort; binding: EngineBinding } {
     const resolved = this.resolve(projectId, correlationId);
     const binding = this.#bindings.require(projectId, expectedUpstreamSha, correlationId);
     return { ...resolved, binding };

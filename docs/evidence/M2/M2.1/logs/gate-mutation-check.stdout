@@ -1,0 +1,31 @@
+=== MUT-A: adapter declares a commit method ===
+command: corepack pnpm exec vitest run --config vitest.config.ts tests/architecture/m2.1-fitness.test.ts
+mutation applied (12674 -> 12749 bytes)
+RESULT MUT-A: GATE_BITES (exit 1)
+
+=== MUT-B: a registry entry claims an unknown policy ===
+command: corepack pnpm exec vitest run --config vitest.config.ts tests/m2.1/native-write-gateway.test.ts
+mutation applied (18898 -> 18907 bytes)
+RESULT MUT-B: GATE_BITES (exit 1)
+
+=== MUT-C: production code imports a spike ===
+command: corepack pnpm exec vitest run --config vitest.config.ts tests/architecture/m2.1-fitness.test.ts
+mutation applied (19229 -> 19298 bytes)
+RESULT MUT-C: GATE_BITES (exit 1)
+
+=== MUT-D: digest silently skips declared assets ===
+command: corepack pnpm exec vitest run --config vitest.config.ts tests/m2.1/source-digest-v1.test.ts
+mutation applied (15753 -> 15757 bytes)
+RESULT MUT-D: GATE_BITES (exit 1)
+
+=== MUT-E: digest sorts assets against the pinned rule ===
+command: corepack pnpm exec vitest run --config vitest.config.ts tests/m2.1/source-digest-v1.test.ts
+mutation applied (15753 -> 15821 bytes)
+RESULT MUT-E: GATE_BITES (exit 1)
+
+=== MUT-F: stage drops the strict base check ===
+command: corepack pnpm exec vitest run --config vitest.config.ts tests/m2.1/engine-port.test.ts
+mutation applied (12674 -> 12683 bytes)
+RESULT MUT-F: GATE_BITES (exit 1)
+
+SUMMARY cases=6 gates_that_failed_as_required=6
