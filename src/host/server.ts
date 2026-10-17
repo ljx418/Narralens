@@ -52,6 +52,8 @@ export class NarralensHost {
   readonly imports: AssetImportService;
   readonly engines: EngineRegistry;
   readonly sessionToken = randomBytes(32).toString("base64url");
+  /** Loopback origin once `listen` has bound, used to bind preview descriptors. */
+  origin = "";
   readonly sessionExpiresAt: Date;
   readonly diagnostics = { write_actor_execute_count: 0 };
   readonly #controllers = new Map<string, AbortController>();
@@ -88,6 +90,7 @@ export class NarralensHost {
     });
     const address = this.#server.address();
     if (!address || typeof address === "string") throw new Error("HOST_ADDRESS_UNAVAILABLE");
+    this.origin = `http://127.0.0.1:${address.port}`;
     return address.port;
   }
 
@@ -234,12 +237,15 @@ export class NarralensHost {
       }
       return { projection: read, capabilities: await resolved.port.capabilities(snapshot, ctx) };
     });
+    // A projection never carries a server filesystem path; the Host binds the preview to
+    // its own loopback origin so the client only ever sees a Host address it can call.
+    const preview = { ...projection.preview, url: `${this.origin}/api/migration/v1/projects/${projectId}/preview` };
     const response: EngineResponse = {
       format: "narralens.engine-response@1.0",
       project_id: projectId,
       binding,
       capabilities,
-      projection: { ...projection, project_revision: state.revision },
+      projection: { ...projection, preview, project_revision: state.revision },
     };
     const validated = validateEngineResponse(response);
     if (!validated.ok) throw new HttpError(500, "INTERNAL_ERROR", "Engine response does not satisfy its contract");

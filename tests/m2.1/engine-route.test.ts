@@ -3,6 +3,7 @@ import { resolve } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { NarralensHost } from "../../src/host/server.js";
 import { contractIds, validateEngineResponse } from "../../src/contracts/validator.js";
+import type { EngineResponse } from "../../src/contracts/engine-types.js";
 
 /** Route activation table for M2.1: only the read-only engine surface opens. */
 
@@ -103,4 +104,20 @@ describe("M2.1 route activation", () => {
     expect(contractIds.engineResponse).toBe("https://narralens.local/schemas/engine-response.schema.json");
     expect(contractIds.sourceDigestManifest).toBe("https://narralens.local/schemas/source-digest-manifest.schema.json");
   });
+});
+
+describe("M2.1 projection leaks no server path", () => {
+  it("returns a Host loopback preview and no filesystem path", async () => {
+    const { call } = await started();
+    const response = await call("/api/migration/v1/projects/d1-30s/engine");
+    expect(response.status).toBe(200);
+    const body = await response.json() as EngineResponse;
+    expect(body.projection.preview.kind).toBe("hypit-studio");
+    expect(body.projection.preview.url).toMatch(/^http:\/\/127\.0\.0\.1:\d+\/api\/migration\/v1\/projects\/d1-30s\/preview$/u);
+    const serialised = JSON.stringify(body);
+    expect(serialised).not.toContain("file://");
+    expect(serialised).not.toContain("/mnt/");
+    expect(serialised).not.toContain("C:\\\\");
+    expect(serialised).not.toContain("project_path");
+  }, 30_000);
 });

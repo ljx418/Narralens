@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { readFile, realpath } from "node:fs/promises";
-import { resolve, sep } from "node:path";
+import { basename, resolve, sep } from "node:path";
 import { HttpError } from "../../host/api-error.js";
 import {
   HYPIT_UPSTREAM_SHA,
@@ -133,7 +133,7 @@ export class HypitEngineAdapter implements EnginePort {
       throw new HttpError(409, "SOURCE_CHANGED", "Project source changed before staging", undefined, ctx.correlationId);
     }
     return {
-      isolated_root: isolatedRoot,
+      isolated_relative_root: basename(isolatedRoot.value),
       relative_entry: descriptor.run_file,
       source_digest: current.source_digest,
       revision: String(plan.base_revision),

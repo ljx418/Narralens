@@ -1,13 +1,13 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
-import { cp, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { cp, mkdtemp, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 
 import { createPinnedOpenFilmUpstream, openFilmAvailability } from "../../src/adapters/openfilm/openfilm-upstream.js";
 import { OpenFilmEngineAdapter } from "../../src/adapters/openfilm/openfilm-engine-adapter.js";
 import { computeSourceDigest } from "../../src/host/engine/source-digest-v1.js";
-import { absoluteServerPath } from "../../src/host/engine/engine-port.js";
+import { absoluteServerPath } from "../../src/host/engine/isolated-root.js";
 
 /**
  * Real upstream probe for M2.1 (evidence kind `real_upstream_probe`).
@@ -34,7 +34,11 @@ const sha256 = (bytes) => createHash("sha256").update(bytes).digest("hex");
 const availability = await openFilmAvailability(resolve(vendorRoot));
 assert.equal(availability.available, true, `pinned upstream unavailable: ${availability.reason}`);
 assert.equal(availability.observed_sha, "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3");
-record("PIN-01", "OpenFilm checkout is at the pinned full SHA", { observed_sha: availability.observed_sha });
+assert.ok(availability.checked.includes("packages/openfilm/studio/server/film.mjs"),
+  `the seam module digest must be verified, checked=${availability.checked.join(",")}`);
+assert.ok(availability.checked.includes("package.json") && availability.checked.includes("LICENSE"));
+record("PIN-01", "OpenFilm checkout is at the pinned SHA and every loaded file matches its digest",
+  { observed_sha: availability.observed_sha, checked: availability.checked });
 
 const upstream = await createPinnedOpenFilmUpstream(resolve(vendorRoot));
 assert.equal(typeof upstream.readProjectFilm, "function");
@@ -91,14 +95,25 @@ record("OF-01", "inspect reads three native page clips, one narration sound clip
 
 // ── 2. capabilities: no OpenFilm operation is translated or unverified in M2.1 ────────
 const capabilities = await adapter.capabilities({ project_id: "probe-openfilm", engine: "openfilm", source_digest: firstDigest.source_digest }, ctx);
-assert.deepEqual(capabilities.entries, {});
+// M-01: the map is complete, and no OpenFilm write is reported as supported.
+const reported = Object.entries(capabilities.entries);
+assert.ok(reported.length > 0, "the OpenFilm capability map must not be empty");
+for (const [operation, entry] of reported) {
+  assert.notEqual(entry.state, "supported", `${operation} must not be supported on OpenFilm in M2.1`);
+  assert.notEqual(entry.state, "unverified", `${operation} must not be unverified`);
+}
+for (const operation of ["timeline.set_visual_fit", "timeline.replace_visual_asset"]) {
+  assert.equal(capabilities.entries[operation].state, "blocked", operation);
+}
 assert.equal(capabilities.fps_verified, true);
 assert.deepEqual(capabilities.fps, { num: 30, den: 1 });
-record("OF-02", "capabilities reports no supported and no unverified OpenFilm write operation", { entries: capabilities.entries });
+record("OF-02", "capabilities is complete and reports no supported or unverified OpenFilm write",
+  { operations: reported.length, writes: ["timeline.set_visual_fit", "timeline.replace_visual_asset"] });
 
 // ── 3. plan: no OpenFilm write path exists in M2.1 ───────────────────────────────────
-const commandCtx = { ...ctx, idempotencyKey: "probe", baseRevision: 0,
-  expectedSourceDigest: firstDigest.source_digest, controlRevision: 0 };
+const commandCtx = { ...ctx, idempotencyKey: "m21-openfilm-probe", baseRevision: 0,
+  expectedSourceDigest: firstDigest.source_digest, controlRevision: 0,
+  isolatedRoot: absoluteServerPath(stageRoot) };
 const planRefusal = await adapter.plan({ project_id: "probe-openfilm", engine: "openfilm", source_digest: firstDigest.source_digest },
   { op: "set_visual_fit", shot_id: "shot-01", value: "contain" }, commandCtx)
   .then(() => null, (error) => error);
@@ -140,23 +155,119 @@ assert.ok(afterChange.manifest.assets.some((asset) => asset.path === "assets/nar
 record("OF-05", "the real project's digest closure covers entry, scenes, subtitle and referenced audio",
   { roles, assets: afterChange.manifest.assets.map((asset) => asset.path), digest_before: firstDigest.source_digest, digest_after: afterChange.source_digest });
 
-// ── 6. the upstream really does rebase a stale base; Narralens still refuses it ───────
-const current = await upstream.readProjectFilm(project);
-const rebased = await upstream.editProjectFilm(project, current.rev,
-  [{ op: "set", clip: "shot-03", field: "at", value: 21 }]);
-await upstream.readProjectFilm(project);
-const withStaleBase = await upstream.readProjectFilm(project);
-const nativeRebase = await upstream.editProjectFilm(project, withStaleBase.rev,
-  [{ op: "set", clip: "shot-01", field: "at", value: 1 }]);
-const afterRebase = await upstream.readProjectFilm(project);
-const narralensRebase = await upstream.editProjectFilm(project, withStaleBase.rev,
-  [{ op: "set", clip: "shot-02", field: "at", value: 11 }]);
-const nativeRebasedTrue = await upstream.editProjectFilm(project, withStaleBase.rev,
-  [{ op: "set", clip: "shot-03", field: "at", value: 22 }]);
-void afterRebase;
-void narralensRebase;
-record("OF-06", "the upstream still rebases a stale base while Narralens refuses it",
-  { upstream_rebased_flag: nativeRebasedTrue.rebased, narralens_decision: "SOURCE_CHANGED (409)" });
+// ── 6. M-05: what the upstream actually does, and what the adapter does about it ───────
+// Two different facts are proved here and are recorded as two different kinds of evidence.
+//   (a) real_upstream: the pinned upstream really does rebase a stale base. Asserted, not assumed.
+//   (b) real_e2e:      the adapter refuses that same scenario on the real upstream, and the
+//                     author source bytes are exactly as the external edit left them.
+//   (c) adapter_contract: a rebased:true result is converted to 409. This one needs a stub,
+//                     because a rebased result cannot be produced through the real adapter
+//                     once (b) refuses to let the mutator run at all.
+{
+  const baseFilm = join(project, "film.html");
+  const digestBeforeRebase = await computeSourceDigest({ root: project, roots: layout.roots,
+    engine: "openfilm", engineUpstreamSha: "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+    declaredAssets: layout.declaredAssets });
+
+  // A stale base: read the rev, then let the source move underneath it.
+  const staleBase = await upstream.readProjectFilm(project);
+  await writeFile(baseFilm,
+    (await readFile(baseFilm, "utf8")).replace('<section data-track="picture">',
+      '<section data-track="picture" data-external="1">'), "utf8");
+  const bytesAfterExternalEdit = sha256(await readFile(baseFilm));
+
+  const nativeRebased = await upstream.editProjectFilm(project, staleBase.rev,
+    [{ op: "set", clip: "shot-03", field: "at", value: 21 }]);
+  // The oracle the previous version of this probe was missing.
+  assert.equal(nativeRebased.rebased, true,
+    "the pinned upstream is expected to rebase a stale base; if this fails the upstream changed");
+  assert.notEqual(nativeRebased.rev, staleBase.rev);
+  // Step (a) deliberately drove a real upstream write into the isolated copy; everything
+  // after this point must leave those bytes exactly as they are.
+  const authorBytesBeforeAdapter = sha256(await readFile(baseFilm));
+  assert.notEqual(authorBytesBeforeAdapter, bytesAfterExternalEdit,
+    "the deliberate upstream rebase should have modified the isolated author source");
+  record("OF-06a", "the real pinned upstream rebases a stale base", {
+    evidence_kind: "real_upstream",
+    base_rev: staleBase.rev,
+    result_rev: nativeRebased.rev,
+    rebased: nativeRebased.rebased,
+  });
+
+  // (b) The same scenario through the production adapter, on the real upstream.
+  const realPlan = { engine: "openfilm", base_source_digest: digestBeforeRebase.source_digest, base_revision: 0,
+    edit: { op: "set_visual_fit", shot_id: "shot-01", value: "contain" },
+    ops: [{ op: "set", clip: "shot-01", field: "at", value: 1 }] };
+  const realStageRoot = await mkdtemp(join(stageRoot, "stale-"));
+  const realRefusal = await adapter.stage(realPlan, absoluteServerPath(realStageRoot), commandCtx)
+    .then(() => null, (error) => error);
+  assert.ok(realRefusal, "the adapter must refuse the stale base");
+  assert.equal(realRefusal.status, 409);
+  assert.equal(realRefusal.code, "SOURCE_CHANGED");
+  assert.equal(sha256(await readFile(baseFilm)), authorBytesBeforeAdapter,
+    "the adapter must not have written to the author source");
+  assert.notEqual(authorBytesBeforeAdapter, bytesAfterExternalEdit);
+  assert.deepEqual(await readdir(realStageRoot), [], "the refusal must leave no staging behind");
+  record("OF-06b", "the adapter refuses the same stale base on the real upstream and leaves author bytes untouched",
+    { evidence_kind: "real_e2e", status: realRefusal.status, code: realRefusal.code,
+      film_sha256: authorBytesBeforeAdapter });
+
+  // (c) Converting a rebased result into a refusal needs a stub: with (b) in place the real
+  // mutator is never reached, so this is an adapter contract, recorded as such.
+  const rebasedAdapter = new OpenFilmEngineAdapter({
+    revOf: upstream.revOf,
+    readProjectFilm: upstream.readProjectFilm,
+    editProjectFilm: async (root, base, ops) => {
+      const result = await upstream.editProjectFilm(root, base, ops);
+      return { ...result, rebased: true };
+    },
+  });
+  rebasedAdapter.registerLayout("probe-openfilm", layout);
+  const rebasedPlan = { engine: "openfilm", base_source_digest: digestBeforeRebase.source_digest, base_revision: 0,
+    edit: { op: "set_visual_fit", shot_id: "shot-01", value: "contain" },
+    ops: [{ op: "set", clip: "shot-01", field: "at", value: 2 }] };
+  const rebasedStageRoot = await mkdtemp(join(stageRoot, "rebased-"));
+  const rebasedRefusal = await rebasedAdapter.stage(rebasedPlan, absoluteServerPath(rebasedStageRoot), commandCtx)
+    .then(() => null, (error) => error);
+  assert.ok(rebasedRefusal, "a rebased upstream result must be refused");
+  assert.equal(rebasedRefusal.status, 409);
+  assert.equal(rebasedRefusal.code, "SOURCE_CHANGED");
+  record("OF-06c", "an upstream rebased:true result is converted to 409 and never adopted",
+    { evidence_kind: "adapter_contract", status: rebasedRefusal.status, code: rebasedRefusal.code });
+}
+
+// ── 7. M-04: a tampered copy of the pinned checkout must be refused ────────────────────
+// An isolated COPY of the real checkout is tampered with; the original is never touched.
+// This is the negative half of M-04 and runs against the real loader, not a stub.
+{
+  const tampered = await mkdtemp(join(tmpdir(), "narralens-m21-tamper-"));
+  try {
+    await cp(resolve(vendorRoot), resolve(tampered, "openfilm"), { recursive: true, filter: () => true });
+    const tamperRoot = resolve(tampered, "openfilm");
+    const modulePath = resolve(tamperRoot, "packages/openfilm/studio/server/film.mjs");
+    await writeFile(modulePath, `${await readFile(modulePath, "utf8")}\\n// tampered by the M2.1 negative probe\\n`, "utf8");
+
+    const tamperAvailability = await openFilmAvailability(tamperRoot);
+    assert.equal(tamperAvailability.available, false, "a tampered seam module must not be loadable");
+    assert.match(tamperAvailability.reason, /digest mismatch|not intact|modifications/u);
+
+    const refusal = await createPinnedOpenFilmUpstream(tamperRoot)
+      .then(() => null, (error) => error);
+    assert.ok(refusal, "loading a tampered checkout must refuse");
+    assert.equal(refusal.status, 503);
+    assert.equal(refusal.code, "ENGINE_UNAVAILABLE");
+    record("PIN-03", "a tampered seam module at the pinned SHA is refused with ENGINE_UNAVAILABLE",
+      { reason: tamperAvailability.reason, mismatch: tamperAvailability.mismatched });
+
+    // The real, untouched checkout is still loadable after the tamper experiment.
+    const after = await openFilmAvailability(resolve(vendorRoot));
+    assert.equal(after.available, true, "the original pinned checkout must remain loadable");
+    record("PIN-04", "the original pinned checkout is unaffected by the tamper experiment",
+      { observed_sha: after.observed_sha });
+  } finally {
+    await rm(tampered, { recursive: true, force: true });
+  }
+}
 
 await rm(isolated, { recursive: true, force: true });
 

@@ -1,9 +1,13 @@
 import { createHash } from "node:crypto";
-import { realpath } from "node:fs/promises";
+import { execFile } from "node:child_process";
+import { readFile, realpath } from "node:fs/promises";
 import { resolve } from "node:path";
+import { promisify } from "node:util";
 import { pathToFileURL } from "node:url";
+import lock from "../../../contracts/openfilm-upstream-lock.json" with { type: "json" };
 import { HttpError } from "../../host/api-error.js";
-import { OPENFILM_UPSTREAM_SHA } from "../../host/engine/engine-binding-store.js";
+
+const run = promisify(execFile);
 
 /**
  * The OpenFilm upstream seam.
@@ -20,11 +24,20 @@ import { OPENFILM_UPSTREAM_SHA } from "../../host/engine/engine-binding-store.js
  */
 
 export const OPENFILM_PIN = Object.freeze({
-  repository: "https://github.com/openfilm/openfilm.git",
-  full_sha: OPENFILM_UPSTREAM_SHA,
-  package: "openfilm@0.1.7",
-  license: "MIT",
+  repository: lock.repository,
+  full_sha: lock.full_sha,
+  package: lock.package,
+  license: lock.license,
   module_path: "packages/openfilm/studio/server/film.mjs",
+  /** Every file whose bytes are about to be executed, pinned before any dynamic import. */
+  loaded_module_sha256: lock.loaded_module_sha256,
+  package_json_sha256: lock.package_json_sha256,
+  lockfile_sha256: lock.lockfile_sha256,
+  license_sha256: lock.license_sha256,
+  package_file: lock.package_file,
+  lockfile_file: lock.lockfile_file,
+  license_file: lock.license_file,
+  seam_exports: lock.seam_exports,
 });
 
 export interface OpenFilmFilmRead {
@@ -72,7 +85,11 @@ export interface OpenFilmAvailability {
   readonly observed_sha: string | null;
   readonly expected_sha: string;
   readonly reason: string;
+  readonly checked: readonly string[];
 }
+
+const sha256File = async (path: string): Promise<string> =>
+  createHash("sha256").update(await readFile(path)).digest("hex");
 
 const SHA_PATTERN = /^[a-f0-9]{40}$/u;
 
@@ -94,23 +111,101 @@ async function readCheckoutSha(vendorRoot: string): Promise<string | null> {
   }
 }
 
+/**
+ * M-04: a pinned commit is a claim about a tree, not about the bytes that will run.
+ *
+ * A checkout can sit at the right HEAD with locally modified files, and a dynamic import
+ * would then execute bytes that no commit ever contained. So availability requires three
+ * independent facts: the HEAD is the pinned SHA, the checkout has no tracked modifications,
+ * and every file this loader is about to execute hashes to its pinned digest.
+ */
 export async function openFilmAvailability(vendorRoot: string): Promise<OpenFilmAvailability> {
+  const checked: string[] = [];
   let root: string;
   try { root = await realpath(vendorRoot); }
   catch {
     return { available: false, vendor_root: vendorRoot, observed_sha: null, expected_sha: OPENFILM_PIN.full_sha,
-      reason: "pinned OpenFilm checkout is absent" };
+      reason: "pinned OpenFilm checkout is absent", checked };
   }
   const observed = await readCheckoutSha(root);
   if (observed === null) {
     return { available: false, vendor_root: root, observed_sha: null, expected_sha: OPENFILM_PIN.full_sha,
-      reason: "pinned OpenFilm checkout has no readable git HEAD" };
+      reason: "pinned OpenFilm checkout has no readable git HEAD", checked };
   }
+  checked.push("git_head");
   if (observed !== OPENFILM_PIN.full_sha) {
     return { available: false, vendor_root: root, observed_sha: observed, expected_sha: OPENFILM_PIN.full_sha,
-      reason: "pinned OpenFilm checkout is not at the pinned full SHA" };
+      reason: "pinned OpenFilm checkout is not at the pinned full SHA", checked };
   }
-  return { available: true, vendor_root: root, observed_sha: observed, expected_sha: OPENFILM_PIN.full_sha, reason: "ok" };
+
+  const dirty = await trackedModifications(root);
+  if (dirty !== null) {
+    checked.push("git_clean");
+    if (dirty.length > 0) {
+      return { available: false, vendor_root: root, observed_sha: observed, expected_sha: OPENFILM_PIN.full_sha,
+        reason: `pinned OpenFilm checkout has local modifications: ${dirty.slice(0, 5).join(", ")}`, checked };
+    }
+  }
+
+  const verdict = await verifyPinnedFiles(root);
+  checked.push(...verdict.checked);
+
+  return { available: verdict.ok, vendor_root: root, observed_sha: observed, expected_sha: OPENFILM_PIN.full_sha,
+    reason: verdict.reason, checked };
+}
+
+export interface PinnedFileVerdict {
+  readonly ok: boolean;
+  readonly reason: string;
+  readonly checked: readonly string[];
+  readonly missing: readonly string[];
+  readonly mismatched: readonly string[];
+}
+
+/**
+ * Hash every file this loader will execute or read, plus package, lock and licence.
+ *
+ * Split out from the git checks so the digest gate itself is directly testable: a synthetic
+ * tree can never satisfy the real pins, which is exactly what proves the gate refuses.
+ */
+export async function verifyPinnedFiles(root: string): Promise<PinnedFileVerdict> {
+  const digests: Array<[string, string]> = [
+    [OPENFILM_PIN.package_file, OPENFILM_PIN.package_json_sha256],
+    [OPENFILM_PIN.lockfile_file, OPENFILM_PIN.lockfile_sha256],
+    [OPENFILM_PIN.license_file, OPENFILM_PIN.license_sha256],
+    ...Object.entries(OPENFILM_PIN.loaded_module_sha256),
+  ];
+  const checked: string[] = [];
+  const missing: string[] = [];
+  const mismatched: string[] = [];
+  // Every pinned file is checked, not just the first failure, so an operator sees the whole
+  // picture of what a tampered checkout contains.
+  for (const [relative, expected] of digests) {
+    checked.push(relative);
+    const actual = await sha256File(resolve(root, relative)).catch(() => null);
+    if (actual === null) missing.push(relative);
+    else if (actual !== expected) mismatched.push(relative);
+  }
+  if (missing.length > 0 || mismatched.length > 0) {
+    const parts = [
+      ...missing.map((relative) => `missing ${relative}`),
+      ...mismatched.map((relative) => `digest mismatch ${relative}`),
+    ];
+    return { ok: false, reason: `pinned OpenFilm checkout is not intact: ${parts.join("; ")}`,
+      checked, missing, mismatched };
+  }
+  return { ok: true, reason: "all pinned files match their digests", checked, missing, mismatched };
+}
+
+/**
+ * Tracked modifications, or `null` when git cannot answer. Fixed argv, never a shell: the
+ * caller supplies no command, no flags and no paths of its own.
+ */
+async function trackedModifications(root: string): Promise<string[] | null> {
+  try {
+    const { stdout } = await run("git", ["-C", root, "status", "--porcelain", "--untracked-files=no"], { timeout: 10_000 });
+    return stdout.split("\n").map((line) => line.trim()).filter((line) => line !== "");
+  } catch { return null; }
 }
 
 /**
@@ -127,7 +222,7 @@ export async function createPinnedOpenFilmUpstream(vendorRoot: string): Promise<
   let loaded: Record<string, unknown>;
   try { loaded = await import(/* @vite-ignore */ moduleUrl) as Record<string, unknown>; }
   catch { throw new HttpError(503, "ENGINE_UNAVAILABLE", "OpenFilm upstream seam could not be loaded"); }
-  for (const name of ["revOf", "readProjectFilm", "editProjectFilm"]) {
+  for (const name of OPENFILM_PIN.seam_exports) {
     if (typeof loaded[name] !== "function") {
       throw new HttpError(503, "ENGINE_UNAVAILABLE", `OpenFilm upstream seam is missing export ${name}`);
     }

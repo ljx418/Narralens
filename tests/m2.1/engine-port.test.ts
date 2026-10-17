@@ -5,7 +5,7 @@ import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import { HypitEngineAdapter } from "../../src/adapters/hypit/hypit-engine-adapter.js";
 import { OpenFilmEngineAdapter } from "../../src/adapters/openfilm/openfilm-engine-adapter.js";
-import { absoluteServerPath } from "../../src/host/engine/engine-port.js";
+import { absoluteServerPath } from "../../src/host/engine/isolated-root.js";
 
 /** AC-002: the Host owns commit, revision and locks. No adapter may hold that power. */
 
@@ -35,9 +35,16 @@ describe("EnginePort shape", () => {
   });
 
   it("AC-002 accepts only Host-constructed absolute paths, never a client-supplied one", () => {
-    expect(source).toContain("export function absoluteServerPath");
-    expect(source).toContain("const absoluteServerPathBrand: unique symbol = Symbol(");
-    expect(source).not.toMatch(/export const absoluteServerPathBrand/u);
+    const constructor = readFileSync("src/host/engine/isolated-root.ts", "utf8");
+    expect(constructor).toContain("export function absoluteServerPath");
+    // No adapter may construct one: the constructor lives in a Host-only module.
+    for (const adapter of ["src/adapters/hypit/hypit-engine-adapter.ts", "src/adapters/openfilm/openfilm-engine-adapter.ts",
+      "src/adapters/openfilm/openfilm-upstream.ts"]) {
+      expect(readFileSync(adapter, "utf8"), adapter).not.toMatch(/isolated-root|absoluteServerPath/u);
+    }
+    // The brand is type-only here; the constructor lives in a Host-only module.
+    expect(source).toContain("declare const absoluteServerPathBrand: unique symbol");
+    expect(source).not.toMatch(/export function absoluteServerPath/u);
   });
 });
 
@@ -76,7 +83,9 @@ describe("Engine adapters hold no commit power", () => {
       { project_id: "of-1", engine: "openfilm", source_digest: "0".repeat(64) },
       { op: "set_visual_fit", shot_id: "shot-01", value: "contain" },
       { correlationId: "test-correlation-id", projectId: "of-1", idempotencyKey: "k",
-        baseRevision: 1, expectedSourceDigest: "0".repeat(64), controlRevision: 0, signal: AbortSignal.timeout(1000) },
+        baseRevision: 1, expectedSourceDigest: "0".repeat(64), controlRevision: 0,
+        isolatedRoot: absoluteServerPath(resolve("tests/fixtures/m2.1/openfilm-project")),
+        signal: AbortSignal.timeout(1000) },
     )).rejects.toMatchObject({ status: 422, code: "UNSUPPORTED_EDIT" });
   });
 
@@ -119,8 +128,9 @@ describe("OpenFilmEngineAdapter staging", () => {
     return new OpenFilmEngineAdapter(upstream as never);
   }
 
-  const ctx = { correlationId: "m21-stage-test", projectId: "of-stage", idempotencyKey: "k",
-    baseRevision: 0, expectedSourceDigest: "0".repeat(64), controlRevision: 0, signal: AbortSignal.timeout(5_000) };
+  const ctx = { correlationId: "m21-stage-test", projectId: "of-stage", idempotencyKey: "m21-stage",
+    baseRevision: 0, expectedSourceDigest: "0".repeat(64), controlRevision: 0,
+    isolatedRoot: absoluteServerPath(fixtureRoot), signal: AbortSignal.timeout(5_000) };
 
   it("AC-004 refuses a stale base before the upstream mutator is ever called", async () => {
     let mutatorCalls = 0;

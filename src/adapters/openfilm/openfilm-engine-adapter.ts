@@ -1,11 +1,11 @@
 import { createHash } from "node:crypto";
 import { cp, mkdtemp, readFile, realpath, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join, resolve } from "node:path";
+import { basename, join, resolve } from "node:path";
 import { HttpError } from "../../host/api-error.js";
 import { OPENFILM_UPSTREAM_SHA } from "../../host/engine/engine-binding-store.js";
-import {
-  absoluteServerPath, type AbsoluteServerPath, type CommandContext, type EngineEditPlan, type EnginePort, type JobRef,
+import type {
+  AbsoluteServerPath, CommandContext, EngineEditPlan, EnginePort, JobRef,
   PreviewDescriptor, ReadContext, RenderProfile, SnapshotRef, StagedSource, ValidationReport,
 } from "../../host/engine/engine-port.js";
 import { FPS_30, rationalFromNumber, secondsToFrame } from "../../host/engine/time-model.js";
@@ -176,7 +176,10 @@ export class OpenFilmEngineAdapter implements EnginePort {
       subtitles,
       asset_references: assetReferences,
       editable_capabilities: await this.capabilities(snapshot, ctx),
-      preview: { kind: "openfilm-studio", url: `file://${join(root, "film.html")}` },
+      // Host-relative, never a filesystem path: the Host resolves it against its own
+      // loopback origin and token when it answers. Exposing an absolute server path in a
+      // projection would disclose the filesystem layout to the client.
+      preview: { kind: "openfilm-studio", url: `/api/migration/v1/projects/${snapshot.project_id}/preview` },
       problems: [],
     };
   }
@@ -208,44 +211,52 @@ export class OpenFilmEngineAdapter implements EnginePort {
   async stage(plan: EngineEditPlan, isolatedRoot: AbsoluteServerPath, ctx: CommandContext): Promise<StagedSource> {
     const layout = this.#layout(ctx.projectId, ctx.correlationId);
     const sourceRoot = await realpath(layout.root);
-    const stagedRoot = await mkdtemp(join(isolatedRoot.value, "openfilm-"));
-    await cp(sourceRoot, stagedRoot, { recursive: true });
 
-    const before = await this.#upstream.readProjectFilm(sourceRoot);
-    if (before.problems.length > 0) {
-      throw new HttpError(503, "ENGINE_UNAVAILABLE", "OpenFilm reports the project film does not read", undefined, ctx.correlationId);
-    }
+    // The strict base check runs before anything is copied or written, so a stale base
+    // costs no I/O, touches no file and can never reach the upstream mutator (AC-004).
     const currentDigest = await computeSourceDigest({
       root: sourceRoot, roots: layout.roots, engine: "openfilm", engineUpstreamSha: OPENFILM_UPSTREAM_SHA,
       declaredAssets: layout.declaredAssets,
     }, ctx.correlationId);
     if (plan.base_source_digest !== currentDigest.source_digest) {
-      await rm(stagedRoot, { recursive: true, force: true });
       throw new HttpError(409, "SOURCE_CHANGED", "OpenFilm source changed before staging", undefined, ctx.correlationId);
     }
-    const ops = plan.ops as readonly OpenFilmOp[];
-    const edited = await this.#upstream.editProjectFilm(stagedRoot, before.rev, ops);
-    if (edited.rebased) {
-      // Upstream replayed onto a newer file. Narralens never adopts that as success.
-      await rm(stagedRoot, { recursive: true, force: true });
-      throw new HttpError(409, "SOURCE_CHANGED",
-        "OpenFilm rebased the edit onto a newer film; Narralens does not accept a rebased write",
-        undefined, ctx.correlationId);
+    const before = await this.#upstream.readProjectFilm(sourceRoot);
+    if (before.problems.length > 0) {
+      throw new HttpError(503, "ENGINE_UNAVAILABLE", "OpenFilm reports the project film does not read", undefined, ctx.correlationId);
     }
-    const stagedDigest = await computeSourceDigest({
-      root: stagedRoot, roots: layout.roots, engine: "openfilm", engineUpstreamSha: OPENFILM_UPSTREAM_SHA,
-      declaredAssets: layout.declaredAssets,
-    }, ctx.correlationId);
-    return {
-      isolated_root: absoluteServerPath(stagedRoot),
-      relative_entry: "film.html",
-      source_digest: stagedDigest.source_digest,
-      revision: edited.rev,
-    };
+
+    const stagedRoot = await mkdtemp(join(isolatedRoot.value, "openfilm-"));
+    let handedOver = false;
+    try {
+      await cp(sourceRoot, stagedRoot, { recursive: true });
+      const edited = await this.#upstream.editProjectFilm(stagedRoot, before.rev, plan.ops as readonly OpenFilmOp[]);
+      if (edited.rebased) {
+        // Upstream replayed onto a newer file. Narralens never adopts that as success.
+        throw new HttpError(409, "SOURCE_CHANGED",
+          "OpenFilm rebased the edit onto a newer film; Narralens does not accept a rebased write",
+          undefined, ctx.correlationId);
+      }
+      const stagedDigest = await computeSourceDigest({
+        root: stagedRoot, roots: layout.roots, engine: "openfilm", engineUpstreamSha: OPENFILM_UPSTREAM_SHA,
+        declaredAssets: layout.declaredAssets,
+      }, ctx.correlationId);
+      // Only the directory NAME crosses back: an adapter never hands out a server path.
+      handedOver = true;
+      return {
+        isolated_relative_root: basename(stagedRoot),
+        relative_entry: "film.html",
+        source_digest: stagedDigest.source_digest,
+        revision: edited.rev,
+      };
+    } finally {
+      // Every failure path leaves nothing behind; success transfers ownership to the caller.
+      if (!handedOver) await rm(stagedRoot, { recursive: true, force: true });
+    }
   }
 
-  async validate(staged: StagedSource, _ctx: CommandContext): Promise<ValidationReport> {
-    const stagedRoot = staged.isolated_root.value;
+  async validate(staged: StagedSource, ctx: CommandContext): Promise<ValidationReport> {
+    const stagedRoot = join(ctx.isolatedRoot.value, staged.isolated_relative_root);
     const read = await this.#upstream.readProjectFilm(stagedRoot);
     if (read.problems.length > 0) {
       return { ok: false, problems: ["staged film does not read upstream"], source_digest: null };

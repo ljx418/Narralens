@@ -1,0 +1,21 @@
+{
+  "$comment": "Production supply-chain lock for the pinned OpenFilm upstream. `spikes/openfilm-m1b/upstream-lock.json` is the recorded source of truth for the upstream SHA, package, lockfile and licence; `loaded_module_sha256` is recorded here as well because M2.1 loads these files directly and their bytes must be pinned before any dynamic import.",
+  "kind": "narralens.openfilm_upstream_lock@1.0",
+  "repository": "https://github.com/openfilm/openfilm.git",
+  "full_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+  "package": "openfilm@0.1.7",
+  "license": "MIT",
+  "package_json_sha256": "80301a283538721f513ef57c6fccb1b01dd8a0a49c1793554aecac3a91a77452",
+  "lockfile_sha256": "d9faf24e9480b847be99b61ec2b220ef5290530a54b1f6f667845fb8ac2905f9",
+  "license_sha256": "4f39fecc5d074a4795bb7c55c5aaad1a4505b5e022ae6c2c3b55b4f26e7c43fc",
+  "loaded_module_sha256": {
+    "packages/openfilm/studio/server/film.mjs": "eb0aab3a4770082a0b273f448b6bda3b0ca043aee791d5444148c459af855d85",
+    "packages/openfilm/studio/server/ops.mjs": "e44a93286d500391cd61b6f27cc426ecb6fd49f777f816593c17133f0bd15957",
+    "packages/openfilm/studio/server/atomic.mjs": "61374e50c67d76e03d70d73e05ed307378d866d579847c316c4203fbc9cde94f",
+    "packages/openfilm/src/film-doc.mjs": "feef7be8181e7ec63cf2b8760f3a32b7b7e22cd851d4e5a233c04f1768cf719d"
+  },
+  "license_file": "LICENSE",
+  "lockfile_file": "pnpm-lock.yaml",
+  "package_file": "package.json",
+  "seam_exports": ["revOf", "readProjectFilm", "editProjectFilm"]
+}

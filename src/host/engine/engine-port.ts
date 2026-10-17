@@ -11,8 +11,13 @@ import type {
  * file and fails if the member set changes or a forbidden member appears.
  */
 
-/** Opaque server path. Only the Host constructs one; it never appears in a request schema. */
-const absoluteServerPathBrand: unique symbol = Symbol("narralens.AbsoluteServerPath");
+/**
+ * Opaque server path. Only Host composition code constructs one — see
+ * `src/host/engine/isolated-root.ts` — and it never appears in a request schema. The brand is
+ * type-only: there is deliberately no runtime constructor in this module for an adapter to
+ * reach.
+ */
+declare const absoluteServerPathBrand: unique symbol;
 
 export interface AbsoluteServerPath {
   readonly [absoluteServerPathBrand]: true;
@@ -37,11 +42,16 @@ export interface CommandContext extends ReadContext {
   readonly baseRevision: number;
   readonly expectedSourceDigest: Sha256;
   readonly controlRevision: number;
+  /** Host-allocated isolated root for this transaction, used to resolve a staged name. */
+  readonly isolatedRoot: AbsoluteServerPath;
 }
 
 export type StagedSource = Readonly<{
-  /** Path under the isolated root the Host allocated for this transaction. */
-  readonly isolated_root: AbsoluteServerPath;
+  /**
+   * The staged directory's name *relative to* the isolated root the Host allocated. An
+   * adapter returns a name, never an absolute path: constructing one is Host-only.
+   */
+  readonly isolated_relative_root: string;
   readonly relative_entry: string;
   readonly source_digest: Sha256;
   readonly revision: string;
@@ -83,9 +93,4 @@ export interface EnginePort {
   validate(staged: StagedSource, ctx: CommandContext): Promise<ValidationReport>;
   preview(snapshot: SnapshotRef, ctx: ReadContext): Promise<PreviewDescriptor>;
   render(snapshot: SnapshotRef, profile: RenderProfile, ctx: CommandContext): Promise<JobRef>;
-}
-
-/** Host-only constructor for an `AbsoluteServerPath`; adapters can never forge one. */
-export function absoluteServerPath(value: string): AbsoluteServerPath {
-  return { [absoluteServerPathBrand]: true, value } as AbsoluteServerPath;
 }
