@@ -66,6 +66,13 @@ if (problems.length === 0) pass(`${referenced.size} referenced evidence files ex
 if (manifest.repo_dirty_at_capture === false) pass("manifest records a clean tree at capture");
 else fail(`manifest.repo_dirty_at_capture is ${manifest.repo_dirty_at_capture}, expected false`);
 
+// The claim must match the independently recorded environment, not just the manifest field.
+const captureDir = manifest.frozen_code_sha.slice(0, 7);
+const environment = readFileSync(resolve(EVIDENCE_ROOT, "logs", captureDir, "environment.txt"), "utf8");
+const recordedLines = Number(environment.split("\n").find((line) => line.startsWith("git_status_porcelain_lines="))?.split("=")[1] ?? "-1");
+if (recordedLines === 0) pass("the capture environment independently records a clean tree");
+else fail(`the capture environment recorded ${recordedLines} dirty paths`);
+
 // 5 — no code changed after the captured commit.
 const frozen = manifest.frozen_code_sha ?? manifest.repo_sha;
 try {

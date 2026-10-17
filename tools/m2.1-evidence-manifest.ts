@@ -108,7 +108,13 @@ const env = {
 const base = {
   repo_sha: git("rev-parse", "HEAD"),
   repo_branch: git("rev-parse", "--abbrev-ref", "HEAD"),
-  repo_dirty_at_capture: git("status", "--porcelain").length > 0,
+  /**
+   * Whether the tree was clean WHEN THE GATES RAN, read from the recorded environment rather
+   * than from the moment the manifest is generated. Writing the manifest is itself a change,
+   * so measuring dirtiness at generation time would report the manifest's own act.
+   */
+  repo_dirty_at_capture: Number(readFileSync(resolve(EVIDENCE_ROOT, LOG_DIR, "environment.txt"), "utf8")
+    .split("\n").find((line) => line.startsWith("git_status_porcelain_lines="))?.split("=")[1] ?? "1") > 0,
   /** The commit the gates actually ran against, read from the recorded environment. */
   frozen_code_sha: readFileSync(join(EVIDENCE_ROOT, LOG_DIR, "environment.txt"), "utf8")
     .split("\n").find((line) => line.startsWith("git_head="))?.slice("git_head=".length).trim() ?? "",
