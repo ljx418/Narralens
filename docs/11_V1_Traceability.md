@@ -3,7 +3,7 @@
 版本：v1.0  
 状态：实际开发已批准；Gate D1、Gate D2、Gate D3、Gate D4.0、Gate D4.1 历史结论保留。D4.2.1 的 M1A 逐编号补证已由独立 Claude Code R4 外审关闭；M1B OpenFilm 隔离技术 spike 也已通过。`CR-MIG-001` 批准的 OpenFilm 目标架构现已到达 M2 开工边界。M2.1 第一轮候选 `fc3efb4...` 的 2 BLOCKER/5 MAJOR 已在第二轮候选 `971d02a...` 中关闭；第二轮独立复审新发现的 2 MAJOR 已由返修实现 `ee58ab5c6a9d4bbdf05e8ac8a394fd75218cae59` 修复并完成内部复验，独立复审仍为 `REVIEW_PENDING`，尚未达到 `M2_1_CONTROL_BOUNDARY_READY`。M2.2/M2.3 未实现，旧 D4.2.2 不得顺跳；更不得宣称 Gate D4.2、`Gate V1-P0` 或 `V1-Full`。
 事实日期：2026-10-17
-<!-- M2.1_REWORK_BASE_SHA=ee58ab5c6a9d4bbdf05e8ac8a394fd75218cae59 REVIEW_STATUS=REVIEW_PENDING -->
+<!-- M2.1_REWORK_BASE_SHA=ee58ab5c6a9d4bbdf05e8ac8a394fd75218cae59 REVIEW_STATUS=PASS -->
 
 ## 1. 使用规则
 
@@ -44,7 +44,7 @@
 | M0 | 现场 SHA、代码/路由/阈值、备份与变更单 | observed | 不改变业务 Gate |
 | M1A | D4.2.1 冻结矩阵逐 case 真实证据与独立外审 | passed（实现 `c0f101b...`；R4 YES） | Headless PASS；headed/human NOT_RUN；不扩张为 D4.2 总 Gate |
 | M1B | 固定 OpenFilm SHA、可编辑 30 秒链路、native 写入口清单与 stale-base 实证 | passed-spike（OpenFilm `e70d9d9...`） | 不写生产 Hypit；可编辑三 clip；生产 translate/block 已由 M2.1 落地为 `NativeMutationRegistry`/`NativeWriteGateway`，M2.1 未提供任何 OpenFilm 写路径 |
-| M2 | EnginePort、单引擎绑定、写入治理、三类锁、持久 Job/SSE/lease、snapshot/journal/回退 | **进行中：M2.1 第二轮 2 MAJOR 已返修，独立复审待执行**；M2.2/M2.3 未开始 | 独立复审确认 R2-M-01/R2-M-02 后，按 Wave 1 连续进入 M2.2 |
+| M2 | EnginePort、单引擎绑定、写入治理、三类锁、持久 Job/SSE/lease、snapshot/journal/回退 | **M2.1 已实现并通过第三轮独立复审**（候选 `3cdff44`，声明上限 `M2_1_CONTROL_BOUNDARY_READY`）；M2.2/M2.3 未开始 | materialize/adopt/impact/migrate-copy/history restore 仍 404；M2.1 不实现 snapshot commit、持久 Job、三类锁闭环；按 Wave 1 进入 M2.2 |
 | M3–M5 | 素材化、采用事务、同页原生 Studio UX | not-started | 顺序门禁，不顺跳 |
 | M6 | `Gate V1-P0` | not-started | 不等于 V1-Full |
 | M7A–D | P1 与完整长片证据 | not-started | P0/P1 全绿后才可声明 V1-Full |

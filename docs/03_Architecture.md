@@ -1,5 +1,5 @@
 # 叙镜架构设计 v1.0
-<!-- M2.1_REWORK_BASE_SHA=ee58ab5c6a9d4bbdf05e8ac8a394fd75218cae59 REVIEW_STATUS=REVIEW_PENDING -->
+<!-- M2.1_REWORK_BASE_SHA=ee58ab5c6a9d4bbdf05e8ac8a394fd75218cae59 REVIEW_STATUS=PASS -->
 
 文档状态：Gate D1–D3、D4.0 与 D4.1 的历史结论保留。D4.2.1 的 M1A 逐编号证据已完成并由独立 Claude Code R4 外审通过；这只关闭 D4.2.1 prerequisite subset，不关闭 Gate D4.2。2026-10-16 经 `CR-MIG-001` 批准进入架构迁移：OpenFilm Studio 是目标原生 UI/默认渲染器，Hypit 降为 legacy/回退；M1B 隔离 spike 已通过，现允许 M2 开工但尚未实现任何生产 OpenFilm 路径。当前运行时仍以 Hypit 为唯一生产剪辑事实源，旧 Gate 历史不被覆盖。
 

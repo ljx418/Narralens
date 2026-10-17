@@ -182,3 +182,85 @@ openFilmAvailability(<real pinned checkout>)
 `971d02aac88b8f6f1513cbfa52b91923dd033d56` 不通过第二轮独立外审。第一轮 2 BLOCKER/5 MAJOR 的核心代码缺陷大部分已关闭，但 R2-M-01 与 R2-M-02 未关闭前仍不得声明 `M2_1_CONTROL_BOUNDARY_READY`，不得进入 M2.2，更不得声明 M2、Gate D4.2、Gate V1-P0 或 V1-Full。
 
 下一允许动作仅为：修复 Git clean 检查的 fail-closed 分支与测试/变异门；同步两份权威状态文档；重新冻结并跑受影响专项、全量 check、真实探针、完整性门，然后由独立会话做第三轮复审。
+
+---
+
+## 6. 第三轮独立复审（返修候选 `3cdff44`）
+
+- 复审日期：2026-10-17（Asia/Shanghai）
+- 复审对象：`3cdff441abe998d098e1b1a9a7403d667a74cf82`
+- R2-M-01 核心修复：`ee58ab5c6a9d4bbdf05e8ac8a394fd75218cae59`
+- 上一失败候选：`971d02aac88b8f6f1513cbfa52b91923dd033d56`
+- 证据捕获代码提交：`3cdff441abe998d098e1b1a9a7403d667a74cf82`
+- 分支：`migration/m2.1-engine-governance`
+- 复审角色：独立只读复审；不是实现会话自签
+- 结论：`PASS`
+- 本轮严重度：`BLOCKER=0, MAJOR=0, MINOR=1`
+
+### 6.1 复验通过的门（实际命令与 exit code）
+
+| 命令 | exit | 结果 |
+|---|---|---|
+| `corepack pnpm check` | 0 | 26 files / 258 tests，`tsc --noEmit` 与生产 `vite build` 通过 |
+| `corepack pnpm test:m2.1` | 0 | 9 files / 124 tests |
+| `corepack pnpm test:contracts` | 0 | 3 files / 21 tests |
+| `corepack pnpm check:m2.1-docs` | 0 | PASS `rework=ee58ab5c6a9d4bbdf05e8ac8a394fd75218cae59 review=REVIEW_PENDING` |
+| `python3 -I tests/m2.1-golden/source-digest-v1.golden.py tests/m2.1-golden/source-digest-v1.vectors.json` | 0 | 10/10 vectors，跨语言一致 |
+| `bash tools/m2.1-gate-mutation-check.sh <tmp>` | 0 | MUT-A..L，**12/12 GATE_BITES** |
+| OpenFilm 真实上游探针（含 tamper 负向） | 0 | 12 checks PASS：PIN-01/02/03/04、OF-01..05、OF-06a/b/c |
+| `corepack pnpm exec tsx tools/m2.1-external-review-repro.mts hypit-visual-asset` | 0 | `mode=refused`、`passed=true` |
+| `corepack pnpm exec tsx tools/m2.1-external-review-repro.mts symlink-alias` | 0 | `canonical_occurrences=1`、`unique=true`、`passed=true` |
+| `node tools/m2.1-evidence-integrity.mjs` | 0 | 27 referenced files、clean capture、冻结后无代码变化 |
+| `git diff --check` / `git status --porcelain` | 0 / 空 | 无空白错误，工作树干净 |
+
+### 6.2 R2-M-01：checkout cleanliness 无法证明即 fail closed
+
+逐条核对（`src/adapters/openfilm/openfilm-upstream.ts`）：
+
+| # | 要求 | 结论 | 依据 |
+|---|---|---|---|
+| 1 | git 不可执行 → `available=false` | PASS | `trackedModifications` 捕获后返回 `null` → `openFilmAvailability` 返回 `false`，reason=`cannot verify that the pinned OpenFilm checkout is clean`；测试「fails closed when git status cannot be executed」把 `PATH` 置为 `/definitely/missing` |
+| 2 | `git status` 非零退出 → `available=false` | PASS | 同上；测试用 fake git `exit 7` |
+| 3 | `git status` 超时 → `available=false` | PASS | `execFile` 的 `timeout` 触发拒绝 → `null`；测试用 fake git `sleep 1` 配 `gitStatusTimeoutMs=10` |
+| 4 | tracked dirty checkout 被拒绝 | PASS | `dirty.length > 0` 早退；测试用 fake git 输出 ` M packages/.../film.mjs` |
+| 5 | 仅成功且为空才记录 `git_clean` | **部分** | 成功执行即记录，但 dirty 结果也记录；见 MINOR-1 |
+| 6 | `createPinnedOpenFilmUpstream` 映射 503 `ENGINE_UNAVAILABLE` | PASS | `if (!availability.available) throw new HttpError(503, "ENGINE_UNAVAILABLE", …)`，所有 fail-closed 分支共用此出口 |
+| 7 | 固定 HEAD + clean + 文件 SHA256 三项同时成立 | PASS | 顺序早退：HEAD（`readCheckoutSha`）→ clean（`trackedModifications`）→ 摘要（`verifyPinnedFiles`） |
+| 8 | 请求不能提供 vendor path / 命令 / shell | PASS | `createPinnedOpenFilmUpstream(vendorRoot)` 的唯一调用方是组合期代码，`src/**` 内无任何路由引用该加载器；`execFile` 固定 argv、无 `shell:true`；测试含源码扫描断言 |
+| 9 | MUT-L 退化后测试必须失败 | PASS | MUT-L 把 `if (dirty === null)` 改为 `if (false && …)`，三条 fail-closed 用例以 `Cannot read properties of null (reading 'length')` 失败，失败原因即目标行为 |
+
+补充人工核对（超出测试总数）：固定 SHA 覆盖的四个模块
+（`film.mjs`、`ops.mjs`、`atomic.mjs`、`film-doc.mjs`）**恰好等于** `film.mjs` 的本地 import 闭包
+（`film.mjs → film-doc.mjs / ops.mjs / atomic.mjs`；`ops.mjs → film-doc.mjs`；`atomic.mjs` 与
+`film-doc.mjs` 无本地相对 import），因此不存在未固定却会被执行的代码。
+
+### 6.3 R2-M-02：权威文档与实现一致
+
+`tools/m2.1-doc-consistency.mjs` PASS，且人工核对：
+
+- `docs/03_Architecture.md:2` 与 `docs/11_V1_Traceability.md:6` 的当前状态标记一致，
+  均为 `M2.1_REWORK_BASE_SHA=ee58ab5… REVIEW_STATUS=REVIEW_PENDING`，与 manifest 的
+  `review.rework_implementation_sha` / `review.external` 相符。
+- 旧问题均不再作为当前事实出现：能力表完整且 fail closed、引用资产当前 bytes 进闭包且不一致即拒绝、
+  identity 使用 realpath、外部变化经生产路径持久进入 attention、上游校验为 HEAD + clean + 三类摘要、
+  OF-06 显式断言 `rebased`。`docs/03_Architecture.md:104-110` 逐实体给出当前口径并各自引用返修证据。
+- 第一轮（`fc3efb4`，2 BLOCKER/5 MAJOR）与第二轮（`971d02a`，2 MAJOR）的失败历史完整保留在
+  本文第 2–5 节；当前状态、返修 SHA 与审核状态在两处权威文档中各只有一套口径。
+
+### 6.4 MINOR-1（非阻塞）
+
+`src/adapters/openfilm/openfilm-upstream.ts:146`：成功执行 `git status` 后，无论结果是否为空都会
+`checked.push("git_clean")`，因此一个 dirty checkout 的诊断里也会出现 `git_clean` 字样。
+R2-M-01 第 5 条要求「只有成功执行且结果为空时才记录」。该字段只用于诊断、不参与任何判定
+（`available` 在任一分支都正确），已发布的 `PIN-01` 证据取自真实干净 checkout，因此现有证据不受影响。
+建议：仅在 `dirty.length === 0` 时记录，或把标签改为 `git_status_ok`。留待下一轮处理，不阻塞本结论。
+
+### 6.5 出门判定
+
+`3cdff441abe998d098e1b1a9a7403d667a74cf82` **通过**第三轮独立复审，可声明
+`M2_1_CONTROL_BOUNDARY_READY`。
+
+- 本结论**不**声明：M2 完成、Gate D4.2、`Gate V1-P0`、`V1-Full`。
+- 允许的下一 ticket：M2.2（一致提交、三类锁、持久 Job/Event/lease、outbox），
+  分支 `migration/m2.2-coordinator-persistence`。
+- headed 与人类体验：`NOT_RUN`；M2.1 无任何 UI 自动化，本轮全部为 headless、静音、无窗口。
