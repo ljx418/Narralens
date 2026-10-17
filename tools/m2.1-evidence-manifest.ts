@@ -396,14 +396,15 @@ const cases: Case[] = [
       "docs/evidence/M2/M2.1/logs/" + CAPTURE_DIR + "/openfilm-probe.txt"),
   },
   {
-    case_id: "ER-M-02",
+    case_id: "ER-M-02-INTEGRITY",
     external_review_finding: "M-02 MAJOR: manifest pointed at git-ignored .log files and was not bound to the reviewed commit",
     title: "证据可从 clone 复现，并由校验脚本强制",
     status: "PASSED",
     evidence_kind: ["evidence_integrity"],
-    commands: commands("environment"),
+    commands: commands("integrity"),
     assertions: [
       "every referenced artifact and log exists, is git-tracked, is not git-ignored and still matches its recorded SHA256",
+      "logs are stored under the capture commit and are never overwritten by a rerun",
       "the manifest records a clean tree at capture and the commit the gates ran against",
       "no src/, tests/, contracts/, tools/ or package.json file changed after that commit",
       "tools/m2.1-evidence-integrity.mjs re-verifies all of the above",
