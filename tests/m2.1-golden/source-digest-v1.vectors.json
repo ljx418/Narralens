@@ -1,0 +1,747 @@
+{
+  "format": "narralens.source-digest-vectors@1.0",
+  "domain_prefix": "narralens-source-v1\\n",
+  "algorithm": "SHA256(domain_prefix || canonical_json(manifest))",
+  "fixture_root": "tests/fixtures/m2.1/openfilm-project",
+  "vector_count": 10,
+  "vectors": [
+    {
+      "id": "V01-fixture-closure",
+      "note": "Full closure of the M2.1 OpenFilm fixture",
+      "manifest": {
+        "format": "narralens.source-digest-manifest@1.0",
+        "engine": "openfilm",
+        "engine_upstream_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+        "files": [
+          {
+            "path": "assets/font.woff2",
+            "role": "font",
+            "sha256": "b6b2f6433123d9763f025be593a0824248739107b7d81c0bf3b1c18b252efe3a",
+            "size": 23
+          },
+          {
+            "path": "assets/narration.vtt",
+            "role": "subtitle",
+            "sha256": "df6bc72cdd914d2da877a5ccbc8929cdd2f1335b57e74ad768aea7a881052b49",
+            "size": 128
+          },
+          {
+            "path": "assets/settings.json",
+            "role": "settings",
+            "sha256": "d518cccd5e3c6b0be33bf7d9e9bfe748aefdd8c99763e616d25eac0c65fe3a31",
+            "size": 69
+          },
+          {
+            "path": "assets/theme.css",
+            "role": "css",
+            "sha256": "4541370f600859326649db7ea6a339166839b30f699960605c621d7d172956a1",
+            "size": 132
+          },
+          {
+            "path": "assets/tokens.css",
+            "role": "css",
+            "sha256": "b03659a2daf5dbd20ca0e603cae0d68970c9217e9a176d91977fc79847a8bf83",
+            "size": 37
+          },
+          {
+            "path": "film.html",
+            "role": "entry",
+            "sha256": "b3e96acbeb7c4ed4487ba6c6441254293353b99ffd9f28c07a4e2856b09522a5",
+            "size": 632
+          },
+          {
+            "path": "scenes/shot-01.html",
+            "role": "scene",
+            "sha256": "ffd7b19b16f0ec96efd3433f2b815b408c53c02504d1fe98399d391b97c0dbb1",
+            "size": 293
+          },
+          {
+            "path": "scenes/shot-02.html",
+            "role": "scene",
+            "sha256": "8b0d4561068a735a01cc212f56fb5adc9ef4465bb28223744c18c527c99e0edb",
+            "size": 185
+          },
+          {
+            "path": "scenes/shot-03.html",
+            "role": "scene",
+            "sha256": "9b5ce166b708010a2fbfb7e47fafdc78939ae510a2a7e767760380dc3a5f76fb",
+            "size": 185
+          }
+        ],
+        "assets": [
+          {
+            "path": "assets/narration.m4a",
+            "asset_id": "asset_narration_m21",
+            "sha256": "df3a86408ab47f05957abddd3b122052fb1ee5649bb20f4575b3fc57529f5a28",
+            "size": 24
+          },
+          {
+            "path": "assets/poster.png",
+            "asset_id": null,
+            "sha256": "61e26367a652a3db0896d25e5305fa7f9edd0c36e3993d06e3782593e95636cd",
+            "size": 22
+          }
+        ]
+      },
+      "source_digest": "05f9dffce7e1d205034a0b874196befe60d88be929bd03e292d0fa914adb1fff"
+    },
+    {
+      "id": "V02-key-order",
+      "note": "Object keys reordered; the digest must not change",
+      "manifest": {
+        "engine_upstream_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+        "files": [
+          {
+            "path": "assets/font.woff2",
+            "role": "font",
+            "sha256": "b6b2f6433123d9763f025be593a0824248739107b7d81c0bf3b1c18b252efe3a",
+            "size": 23
+          },
+          {
+            "path": "assets/narration.vtt",
+            "role": "subtitle",
+            "sha256": "df6bc72cdd914d2da877a5ccbc8929cdd2f1335b57e74ad768aea7a881052b49",
+            "size": 128
+          },
+          {
+            "path": "assets/settings.json",
+            "role": "settings",
+            "sha256": "d518cccd5e3c6b0be33bf7d9e9bfe748aefdd8c99763e616d25eac0c65fe3a31",
+            "size": 69
+          },
+          {
+            "path": "assets/theme.css",
+            "role": "css",
+            "sha256": "4541370f600859326649db7ea6a339166839b30f699960605c621d7d172956a1",
+            "size": 132
+          },
+          {
+            "path": "assets/tokens.css",
+            "role": "css",
+            "sha256": "b03659a2daf5dbd20ca0e603cae0d68970c9217e9a176d91977fc79847a8bf83",
+            "size": 37
+          },
+          {
+            "path": "film.html",
+            "role": "entry",
+            "sha256": "b3e96acbeb7c4ed4487ba6c6441254293353b99ffd9f28c07a4e2856b09522a5",
+            "size": 632
+          },
+          {
+            "path": "scenes/shot-01.html",
+            "role": "scene",
+            "sha256": "ffd7b19b16f0ec96efd3433f2b815b408c53c02504d1fe98399d391b97c0dbb1",
+            "size": 293
+          },
+          {
+            "path": "scenes/shot-02.html",
+            "role": "scene",
+            "sha256": "8b0d4561068a735a01cc212f56fb5adc9ef4465bb28223744c18c527c99e0edb",
+            "size": 185
+          },
+          {
+            "path": "scenes/shot-03.html",
+            "role": "scene",
+            "sha256": "9b5ce166b708010a2fbfb7e47fafdc78939ae510a2a7e767760380dc3a5f76fb",
+            "size": 185
+          }
+        ],
+        "assets": [
+          {
+            "path": "assets/narration.m4a",
+            "asset_id": "asset_narration_m21",
+            "sha256": "df3a86408ab47f05957abddd3b122052fb1ee5649bb20f4575b3fc57529f5a28",
+            "size": 24
+          },
+          {
+            "path": "assets/poster.png",
+            "asset_id": null,
+            "sha256": "61e26367a652a3db0896d25e5305fa7f9edd0c36e3993d06e3782593e95636cd",
+            "size": 22
+          }
+        ],
+        "engine": "openfilm",
+        "format": "narralens.source-digest-manifest@1.0"
+      },
+      "source_digest": "05f9dffce7e1d205034a0b874196befe60d88be929bd03e292d0fa914adb1fff"
+    },
+    {
+      "id": "V03-files-array-order",
+      "note": "files[] order is part of the manifest: sorting happens before canonical, not inside it, so a reordered array digests differently",
+      "manifest": {
+        "format": "narralens.source-digest-manifest@1.0",
+        "engine": "openfilm",
+        "engine_upstream_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+        "files": [
+          {
+            "path": "assets/narration.vtt",
+            "role": "subtitle",
+            "sha256": "df6bc72cdd914d2da877a5ccbc8929cdd2f1335b57e74ad768aea7a881052b49",
+            "size": 128
+          },
+          {
+            "path": "assets/theme.css",
+            "role": "css",
+            "sha256": "4541370f600859326649db7ea6a339166839b30f699960605c621d7d172956a1",
+            "size": 132
+          },
+          {
+            "path": "scenes/shot-01.html",
+            "role": "scene",
+            "sha256": "ffd7b19b16f0ec96efd3433f2b815b408c53c02504d1fe98399d391b97c0dbb1",
+            "size": 293
+          },
+          {
+            "path": "scenes/shot-02.html",
+            "role": "scene",
+            "sha256": "8b0d4561068a735a01cc212f56fb5adc9ef4465bb28223744c18c527c99e0edb",
+            "size": 185
+          },
+          {
+            "path": "scenes/shot-03.html",
+            "role": "scene",
+            "sha256": "9b5ce166b708010a2fbfb7e47fafdc78939ae510a2a7e767760380dc3a5f76fb",
+            "size": 185
+          },
+          {
+            "path": "assets/settings.json",
+            "role": "settings",
+            "sha256": "d518cccd5e3c6b0be33bf7d9e9bfe748aefdd8c99763e616d25eac0c65fe3a31",
+            "size": 69
+          },
+          {
+            "path": "assets/tokens.css",
+            "role": "css",
+            "sha256": "b03659a2daf5dbd20ca0e603cae0d68970c9217e9a176d91977fc79847a8bf83",
+            "size": 37
+          },
+          {
+            "path": "assets/font.woff2",
+            "role": "font",
+            "sha256": "b6b2f6433123d9763f025be593a0824248739107b7d81c0bf3b1c18b252efe3a",
+            "size": 23
+          },
+          {
+            "path": "film.html",
+            "role": "entry",
+            "sha256": "b3e96acbeb7c4ed4487ba6c6441254293353b99ffd9f28c07a4e2856b09522a5",
+            "size": 632
+          }
+        ],
+        "assets": [
+          {
+            "path": "assets/narration.m4a",
+            "asset_id": "asset_narration_m21",
+            "sha256": "df3a86408ab47f05957abddd3b122052fb1ee5649bb20f4575b3fc57529f5a28",
+            "size": 24
+          },
+          {
+            "path": "assets/poster.png",
+            "asset_id": null,
+            "sha256": "61e26367a652a3db0896d25e5305fa7f9edd0c36e3993d06e3782593e95636cd",
+            "size": 22
+          }
+        ]
+      },
+      "source_digest": "85b1c81d006a84b2acfcd3c80a94415e4b6a5c910bcf1dac6e8bd029a2b279a3"
+    },
+    {
+      "id": "V04-assets-array-order",
+      "note": "assets[] reordered; semantic order is preserved so the digest MUST change",
+      "manifest": {
+        "format": "narralens.source-digest-manifest@1.0",
+        "engine": "openfilm",
+        "engine_upstream_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+        "files": [
+          {
+            "path": "assets/font.woff2",
+            "role": "font",
+            "sha256": "b6b2f6433123d9763f025be593a0824248739107b7d81c0bf3b1c18b252efe3a",
+            "size": 23
+          },
+          {
+            "path": "assets/narration.vtt",
+            "role": "subtitle",
+            "sha256": "df6bc72cdd914d2da877a5ccbc8929cdd2f1335b57e74ad768aea7a881052b49",
+            "size": 128
+          },
+          {
+            "path": "assets/settings.json",
+            "role": "settings",
+            "sha256": "d518cccd5e3c6b0be33bf7d9e9bfe748aefdd8c99763e616d25eac0c65fe3a31",
+            "size": 69
+          },
+          {
+            "path": "assets/theme.css",
+            "role": "css",
+            "sha256": "4541370f600859326649db7ea6a339166839b30f699960605c621d7d172956a1",
+            "size": 132
+          },
+          {
+            "path": "assets/tokens.css",
+            "role": "css",
+            "sha256": "b03659a2daf5dbd20ca0e603cae0d68970c9217e9a176d91977fc79847a8bf83",
+            "size": 37
+          },
+          {
+            "path": "film.html",
+            "role": "entry",
+            "sha256": "b3e96acbeb7c4ed4487ba6c6441254293353b99ffd9f28c07a4e2856b09522a5",
+            "size": 632
+          },
+          {
+            "path": "scenes/shot-01.html",
+            "role": "scene",
+            "sha256": "ffd7b19b16f0ec96efd3433f2b815b408c53c02504d1fe98399d391b97c0dbb1",
+            "size": 293
+          },
+          {
+            "path": "scenes/shot-02.html",
+            "role": "scene",
+            "sha256": "8b0d4561068a735a01cc212f56fb5adc9ef4465bb28223744c18c527c99e0edb",
+            "size": 185
+          },
+          {
+            "path": "scenes/shot-03.html",
+            "role": "scene",
+            "sha256": "9b5ce166b708010a2fbfb7e47fafdc78939ae510a2a7e767760380dc3a5f76fb",
+            "size": 185
+          }
+        ],
+        "assets": [
+          {
+            "path": "assets/poster.png",
+            "asset_id": null,
+            "sha256": "61e26367a652a3db0896d25e5305fa7f9edd0c36e3993d06e3782593e95636cd",
+            "size": 22
+          },
+          {
+            "path": "assets/narration.m4a",
+            "asset_id": "asset_narration_m21",
+            "sha256": "df3a86408ab47f05957abddd3b122052fb1ee5649bb20f4575b3fc57529f5a28",
+            "size": 24
+          }
+        ]
+      },
+      "source_digest": "648a7b67c67cab251a0d4c2f231bd8729ce0919576cfe8946ce6da3f4f43dc70"
+    },
+    {
+      "id": "V05-file-bytes",
+      "note": "One referenced file's content digest changes",
+      "manifest": {
+        "format": "narralens.source-digest-manifest@1.0",
+        "engine": "openfilm",
+        "engine_upstream_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+        "files": [
+          {
+            "path": "assets/font.woff2",
+            "role": "font",
+            "sha256": "b6b2f6433123d9763f025be593a0824248739107b7d81c0bf3b1c18b252efe3a",
+            "size": 23
+          },
+          {
+            "path": "assets/narration.vtt",
+            "role": "subtitle",
+            "sha256": "df6bc72cdd914d2da877a5ccbc8929cdd2f1335b57e74ad768aea7a881052b49",
+            "size": 128
+          },
+          {
+            "path": "assets/settings.json",
+            "role": "settings",
+            "sha256": "d518cccd5e3c6b0be33bf7d9e9bfe748aefdd8c99763e616d25eac0c65fe3a31",
+            "size": 69
+          },
+          {
+            "path": "assets/theme.css",
+            "role": "css",
+            "sha256": "4541370f600859326649db7ea6a339166839b30f699960605c621d7d172956a1",
+            "size": 132
+          },
+          {
+            "path": "assets/tokens.css",
+            "role": "css",
+            "sha256": "b03659a2daf5dbd20ca0e603cae0d68970c9217e9a176d91977fc79847a8bf83",
+            "size": 37
+          },
+          {
+            "path": "film.html",
+            "role": "entry",
+            "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+            "size": 632
+          },
+          {
+            "path": "scenes/shot-01.html",
+            "role": "scene",
+            "sha256": "ffd7b19b16f0ec96efd3433f2b815b408c53c02504d1fe98399d391b97c0dbb1",
+            "size": 293
+          },
+          {
+            "path": "scenes/shot-02.html",
+            "role": "scene",
+            "sha256": "8b0d4561068a735a01cc212f56fb5adc9ef4465bb28223744c18c527c99e0edb",
+            "size": 185
+          },
+          {
+            "path": "scenes/shot-03.html",
+            "role": "scene",
+            "sha256": "9b5ce166b708010a2fbfb7e47fafdc78939ae510a2a7e767760380dc3a5f76fb",
+            "size": 185
+          }
+        ],
+        "assets": [
+          {
+            "path": "assets/narration.m4a",
+            "asset_id": "asset_narration_m21",
+            "sha256": "df3a86408ab47f05957abddd3b122052fb1ee5649bb20f4575b3fc57529f5a28",
+            "size": 24
+          },
+          {
+            "path": "assets/poster.png",
+            "asset_id": null,
+            "sha256": "61e26367a652a3db0896d25e5305fa7f9edd0c36e3993d06e3782593e95636cd",
+            "size": 22
+          }
+        ]
+      },
+      "source_digest": "4401c0b93cef08f376fd48322c47e7183dc3f194b176abf160703afb8af13fe9"
+    },
+    {
+      "id": "V06-closure-extended",
+      "note": "An extra referenced file joins the closure",
+      "manifest": {
+        "format": "narralens.source-digest-manifest@1.0",
+        "engine": "openfilm",
+        "engine_upstream_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+        "files": [
+          {
+            "path": "assets/font.woff2",
+            "role": "font",
+            "sha256": "b6b2f6433123d9763f025be593a0824248739107b7d81c0bf3b1c18b252efe3a",
+            "size": 23
+          },
+          {
+            "path": "assets/narration.vtt",
+            "role": "subtitle",
+            "sha256": "df6bc72cdd914d2da877a5ccbc8929cdd2f1335b57e74ad768aea7a881052b49",
+            "size": 128
+          },
+          {
+            "path": "assets/settings.json",
+            "role": "settings",
+            "sha256": "d518cccd5e3c6b0be33bf7d9e9bfe748aefdd8c99763e616d25eac0c65fe3a31",
+            "size": 69
+          },
+          {
+            "path": "assets/theme.css",
+            "role": "css",
+            "sha256": "4541370f600859326649db7ea6a339166839b30f699960605c621d7d172956a1",
+            "size": 132
+          },
+          {
+            "path": "assets/tokens.css",
+            "role": "css",
+            "sha256": "b03659a2daf5dbd20ca0e603cae0d68970c9217e9a176d91977fc79847a8bf83",
+            "size": 37
+          },
+          {
+            "path": "film.html",
+            "role": "entry",
+            "sha256": "b3e96acbeb7c4ed4487ba6c6441254293353b99ffd9f28c07a4e2856b09522a5",
+            "size": 632
+          },
+          {
+            "path": "scenes/shot-01.html",
+            "role": "scene",
+            "sha256": "ffd7b19b16f0ec96efd3433f2b815b408c53c02504d1fe98399d391b97c0dbb1",
+            "size": 293
+          },
+          {
+            "path": "scenes/shot-02.html",
+            "role": "scene",
+            "sha256": "8b0d4561068a735a01cc212f56fb5adc9ef4465bb28223744c18c527c99e0edb",
+            "size": 185
+          },
+          {
+            "path": "scenes/shot-03.html",
+            "role": "scene",
+            "sha256": "9b5ce166b708010a2fbfb7e47fafdc78939ae510a2a7e767760380dc3a5f76fb",
+            "size": 185
+          },
+          {
+            "path": "assets/extra.css",
+            "role": "css",
+            "sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+            "size": 12
+          }
+        ],
+        "assets": [
+          {
+            "path": "assets/narration.m4a",
+            "asset_id": "asset_narration_m21",
+            "sha256": "df3a86408ab47f05957abddd3b122052fb1ee5649bb20f4575b3fc57529f5a28",
+            "size": 24
+          },
+          {
+            "path": "assets/poster.png",
+            "asset_id": null,
+            "sha256": "61e26367a652a3db0896d25e5305fa7f9edd0c36e3993d06e3782593e95636cd",
+            "size": 22
+          }
+        ]
+      },
+      "source_digest": "547a3be7d301222f23c15f6a45a5dea0fc16912a8570972a21abf67581f8ecd0"
+    },
+    {
+      "id": "V07-upstream-sha",
+      "note": "The pinned upstream commit changes",
+      "manifest": {
+        "format": "narralens.source-digest-manifest@1.0",
+        "engine": "openfilm",
+        "engine_upstream_sha": "6fdd8c0f02c17b9970aee6deb4550a70e9d57acf",
+        "files": [
+          {
+            "path": "assets/font.woff2",
+            "role": "font",
+            "sha256": "b6b2f6433123d9763f025be593a0824248739107b7d81c0bf3b1c18b252efe3a",
+            "size": 23
+          },
+          {
+            "path": "assets/narration.vtt",
+            "role": "subtitle",
+            "sha256": "df6bc72cdd914d2da877a5ccbc8929cdd2f1335b57e74ad768aea7a881052b49",
+            "size": 128
+          },
+          {
+            "path": "assets/settings.json",
+            "role": "settings",
+            "sha256": "d518cccd5e3c6b0be33bf7d9e9bfe748aefdd8c99763e616d25eac0c65fe3a31",
+            "size": 69
+          },
+          {
+            "path": "assets/theme.css",
+            "role": "css",
+            "sha256": "4541370f600859326649db7ea6a339166839b30f699960605c621d7d172956a1",
+            "size": 132
+          },
+          {
+            "path": "assets/tokens.css",
+            "role": "css",
+            "sha256": "b03659a2daf5dbd20ca0e603cae0d68970c9217e9a176d91977fc79847a8bf83",
+            "size": 37
+          },
+          {
+            "path": "film.html",
+            "role": "entry",
+            "sha256": "b3e96acbeb7c4ed4487ba6c6441254293353b99ffd9f28c07a4e2856b09522a5",
+            "size": 632
+          },
+          {
+            "path": "scenes/shot-01.html",
+            "role": "scene",
+            "sha256": "ffd7b19b16f0ec96efd3433f2b815b408c53c02504d1fe98399d391b97c0dbb1",
+            "size": 293
+          },
+          {
+            "path": "scenes/shot-02.html",
+            "role": "scene",
+            "sha256": "8b0d4561068a735a01cc212f56fb5adc9ef4465bb28223744c18c527c99e0edb",
+            "size": 185
+          },
+          {
+            "path": "scenes/shot-03.html",
+            "role": "scene",
+            "sha256": "9b5ce166b708010a2fbfb7e47fafdc78939ae510a2a7e767760380dc3a5f76fb",
+            "size": 185
+          }
+        ],
+        "assets": [
+          {
+            "path": "assets/narration.m4a",
+            "asset_id": "asset_narration_m21",
+            "sha256": "df3a86408ab47f05957abddd3b122052fb1ee5649bb20f4575b3fc57529f5a28",
+            "size": 24
+          },
+          {
+            "path": "assets/poster.png",
+            "asset_id": null,
+            "sha256": "61e26367a652a3db0896d25e5305fa7f9edd0c36e3993d06e3782593e95636cd",
+            "size": 22
+          }
+        ]
+      },
+      "source_digest": "4ae83fbecdd2cfa3d10cd063933423bde2e55ff1331f66003d5f2566eb03ab58"
+    },
+    {
+      "id": "V08-role-change",
+      "note": "A file's role changes; the closure is the same bytes but not the same manifest",
+      "manifest": {
+        "format": "narralens.source-digest-manifest@1.0",
+        "engine": "openfilm",
+        "engine_upstream_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+        "files": [
+          {
+            "path": "assets/font.woff2",
+            "role": "font",
+            "sha256": "b6b2f6433123d9763f025be593a0824248739107b7d81c0bf3b1c18b252efe3a",
+            "size": 23
+          },
+          {
+            "path": "assets/narration.vtt",
+            "role": "subtitle",
+            "sha256": "df6bc72cdd914d2da877a5ccbc8929cdd2f1335b57e74ad768aea7a881052b49",
+            "size": 128
+          },
+          {
+            "path": "assets/settings.json",
+            "role": "settings",
+            "sha256": "d518cccd5e3c6b0be33bf7d9e9bfe748aefdd8c99763e616d25eac0c65fe3a31",
+            "size": 69
+          },
+          {
+            "path": "assets/theme.css",
+            "role": "css",
+            "sha256": "4541370f600859326649db7ea6a339166839b30f699960605c621d7d172956a1",
+            "size": 132
+          },
+          {
+            "path": "assets/tokens.css",
+            "role": "css",
+            "sha256": "b03659a2daf5dbd20ca0e603cae0d68970c9217e9a176d91977fc79847a8bf83",
+            "size": 37
+          },
+          {
+            "path": "film.html",
+            "role": "entry",
+            "sha256": "b3e96acbeb7c4ed4487ba6c6441254293353b99ffd9f28c07a4e2856b09522a5",
+            "size": 632
+          },
+          {
+            "path": "scenes/shot-01.html",
+            "role": "html",
+            "sha256": "ffd7b19b16f0ec96efd3433f2b815b408c53c02504d1fe98399d391b97c0dbb1",
+            "size": 293
+          },
+          {
+            "path": "scenes/shot-02.html",
+            "role": "scene",
+            "sha256": "8b0d4561068a735a01cc212f56fb5adc9ef4465bb28223744c18c527c99e0edb",
+            "size": 185
+          },
+          {
+            "path": "scenes/shot-03.html",
+            "role": "scene",
+            "sha256": "9b5ce166b708010a2fbfb7e47fafdc78939ae510a2a7e767760380dc3a5f76fb",
+            "size": 185
+          }
+        ],
+        "assets": [
+          {
+            "path": "assets/narration.m4a",
+            "asset_id": "asset_narration_m21",
+            "sha256": "df3a86408ab47f05957abddd3b122052fb1ee5649bb20f4575b3fc57529f5a28",
+            "size": 24
+          },
+          {
+            "path": "assets/poster.png",
+            "asset_id": null,
+            "sha256": "61e26367a652a3db0896d25e5305fa7f9edd0c36e3993d06e3782593e95636cd",
+            "size": 22
+          }
+        ]
+      },
+      "source_digest": "f3339ea5fb418de625ba64faa73f1db085e528fc217a1c49226d90d0ac9620ad"
+    },
+    {
+      "id": "V09-empty-closure",
+      "note": "An empty but well-formed closure still has a stable digest",
+      "manifest": {
+        "format": "narralens.source-digest-manifest@1.0",
+        "engine": "hypit",
+        "engine_upstream_sha": "6fdd8c0f02c17b9970aee6deb4550a70e9d57acf",
+        "files": [],
+        "assets": []
+      },
+      "source_digest": "84dd6bf451f88e6ad36c73ce9673e111d731fe6f1d51fd5abea77542048bb502"
+    },
+    {
+      "id": "V10-format-change",
+      "note": "The manifest format identifier is part of the digested content",
+      "manifest": {
+        "format": "narralens.source-digest-manifest@2.0",
+        "engine": "openfilm",
+        "engine_upstream_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+        "files": [
+          {
+            "path": "assets/font.woff2",
+            "role": "font",
+            "sha256": "b6b2f6433123d9763f025be593a0824248739107b7d81c0bf3b1c18b252efe3a",
+            "size": 23
+          },
+          {
+            "path": "assets/narration.vtt",
+            "role": "subtitle",
+            "sha256": "df6bc72cdd914d2da877a5ccbc8929cdd2f1335b57e74ad768aea7a881052b49",
+            "size": 128
+          },
+          {
+            "path": "assets/settings.json",
+            "role": "settings",
+            "sha256": "d518cccd5e3c6b0be33bf7d9e9bfe748aefdd8c99763e616d25eac0c65fe3a31",
+            "size": 69
+          },
+          {
+            "path": "assets/theme.css",
+            "role": "css",
+            "sha256": "4541370f600859326649db7ea6a339166839b30f699960605c621d7d172956a1",
+            "size": 132
+          },
+          {
+            "path": "assets/tokens.css",
+            "role": "css",
+            "sha256": "b03659a2daf5dbd20ca0e603cae0d68970c9217e9a176d91977fc79847a8bf83",
+            "size": 37
+          },
+          {
+            "path": "film.html",
+            "role": "entry",
+            "sha256": "b3e96acbeb7c4ed4487ba6c6441254293353b99ffd9f28c07a4e2856b09522a5",
+            "size": 632
+          },
+          {
+            "path": "scenes/shot-01.html",
+            "role": "scene",
+            "sha256": "ffd7b19b16f0ec96efd3433f2b815b408c53c02504d1fe98399d391b97c0dbb1",
+            "size": 293
+          },
+          {
+            "path": "scenes/shot-02.html",
+            "role": "scene",
+            "sha256": "8b0d4561068a735a01cc212f56fb5adc9ef4465bb28223744c18c527c99e0edb",
+            "size": 185
+          },
+          {
+            "path": "scenes/shot-03.html",
+            "role": "scene",
+            "sha256": "9b5ce166b708010a2fbfb7e47fafdc78939ae510a2a7e767760380dc3a5f76fb",
+            "size": 185
+          }
+        ],
+        "assets": [
+          {
+            "path": "assets/narration.m4a",
+            "asset_id": "asset_narration_m21",
+            "sha256": "df3a86408ab47f05957abddd3b122052fb1ee5649bb20f4575b3fc57529f5a28",
+            "size": 24
+          },
+          {
+            "path": "assets/poster.png",
+            "asset_id": null,
+            "sha256": "61e26367a652a3db0896d25e5305fa7f9edd0c36e3993d06e3782593e95636cd",
+            "size": 22
+          }
+        ]
+      },
+      "source_digest": "95ae36c29d8462a80a6c42d4b51875b213f5c4c6633a78b9e0ac8ca04db9c088"
+    }
+  ]
+}
