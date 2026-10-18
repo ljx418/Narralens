@@ -1,0 +1,37 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens
+
+(node:1908742) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:1908743) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:1908767) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:1908766) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.2/lock-service.test.ts (12 tests) 13ms
+(node:1908760) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:1908735) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.2/outbox.test.ts (9 tests) 15ms
+ ✓ tests/m2.2/persistent-job-store.test.ts (19 tests) 507ms
+   ✓ JB-01 a lost lease never becomes a success > keeps a running job and its events across a restart  479ms
+ ✓ tests/m2.2/transaction-state-machine.test.ts (8 tests) 479ms
+   ✓ JRNL coordinator transaction state machine > keeps its own persistent record across a store reopen  468ms
+ ✓ tests/m2.2/journal-predecessor.test.ts (9 tests) 11ms
+(node:1908750) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.2/snapshot-store.test.ts (9 tests) 1072ms
+   ✓ DUR durability cannot be assumed > publishes nothing when any fsync step fails, and names the platform reason  330ms
+ ✓ tests/m2.2/host-coordinator-integration.test.ts (2 tests) 679ms
+   ✓ M2.2 production Host composition > routes repeated HTTP edits through Coordinator and publishes the complete snapshot closure  652ms
+ ✓ tests/m2.2/project-coordinator.test.ts (12 tests) 2057ms
+   ✓ BYP the gateway is in front of every write > an accepted edit reaches the actor exactly once and returns its response unchanged  323ms
+   ✓ LOCK the coordinator consults locks before the actor > serializes lock changes behind an in-flight edit on the shared project queue  540ms
+
+ Test Files  8 passed (8)
+      Tests  80 passed (80)
+   Start at  00:57:47
+   Duration  6.43s (transform 1.82s, setup 0ms, collect 10.13s, tests 4.83s, environment 1ms, prepare 11.56s)
+

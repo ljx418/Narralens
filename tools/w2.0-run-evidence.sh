@@ -56,28 +56,45 @@ echo "== W2.0 correction gates at $SHORT_SHA (dirty=$DIRTY) =="
 # different file each run, never on an assertion, always passing in isolation. Re-running
 # once and recording only the green result would be a re-roll, so the attempts are all
 # written to disk with their exit codes and the summary says plainly what happened.
+# The summary reports, per attempt: exit code, how many ENOMEM occurrences the output
+# contained, and which test files failed. It deliberately does NOT classify failures as
+# "assertion" vs "other" — a test that expected 200 and got a 500 because an allocation
+# failed prints an assertion-shaped line, so a keyword count would mislabel an
+# out-of-memory failure as a logic failure. The raw output is kept either way.
 CHECK_ATTEMPTS=3
 check_pass=0
-check_assertion_failures=0
 for attempt in $(seq 1 "$CHECK_ATTEMPTS"); do
   printf '%s\n' "corepack pnpm check  # attempt $attempt of $CHECK_ATTEMPTS" > "$LOGS/check-$attempt.cmd"
   corepack pnpm check > "$LOGS/check-$attempt.txt" 2>&1
   code=$?
   printf '%s\n' "$code" > "$LOGS/check-$attempt.exit"
   printf '%-24s attempt %s exit=%s\n' "check" "$attempt" "$code"
-  # An assertion failure would show as a named test; ENOMEM shows as a filesystem error.
-  if grep -qE "AssertionError|expected .* to (be|match|equal)" "$LOGS/check-$attempt.txt" 2>/dev/null; then
-    check_assertion_failures=$((check_assertion_failures + 1))
-  fi
+  enomem=$(grep -c "ENOMEM" "$LOGS/check-$attempt.txt" 2>/dev/null || true)
+  failed_files=$(grep -oE "^ (FAIL|❯) +tests/[^ ]+" "$LOGS/check-$attempt.txt" 2>/dev/null | sort -u | tr '\n' ' ')
+  printf '%s\n' "attempt=$attempt exit=$code enomem_occurrences=$enomem failing_files=[$failed_files]" \
+    >> "$LOGS/check-attempts.txt"
   if [ "$code" -eq 0 ]; then check_pass=$((check_pass + 1)); fi
 done
-cp "$LOGS/check-1.txt" "$LOGS/check.txt" 2>/dev/null || true
-cp "$LOGS/check-1.exit" "$LOGS/check.exit" 2>/dev/null || true
+# `check.txt` / `check.exit` name the *first passing* attempt, so anything reading them
+# sees the gate's result rather than whichever attempt happened to run first. Every attempt
+# keeps its own `check-<n>.txt`, and the summary lists all of them.
+first_pass=0
+for attempt in $(seq 1 "$CHECK_ATTEMPTS"); do
+  if [ "$(cat "$LOGS/check-$attempt.exit")" -eq 0 ]; then first_pass=$attempt; break; fi
+done
+if [ "$first_pass" -ne 0 ]; then
+  cp "$LOGS/check-$first_pass.txt" "$LOGS/check.txt"
+  cp "$LOGS/check-$first_pass.exit" "$LOGS/check.exit"
+  cp "$LOGS/check-$first_pass.cmd" "$LOGS/check.cmd"
+else
+  cp "$LOGS/check-$CHECK_ATTEMPTS.txt" "$LOGS/check.txt"
+  cp "$LOGS/check-$CHECK_ATTEMPTS.exit" "$LOGS/check.exit"
+  cp "$LOGS/check-$CHECK_ATTEMPTS.cmd" "$LOGS/check.cmd"
+fi
 {
   echo "attempts=$CHECK_ATTEMPTS"
   echo "attempts_passed=$check_pass"
-  echo "attempts_with_assertion_failures=$check_assertion_failures"
-  for attempt in $(seq 1 "$CHECK_ATTEMPTS"); do printf 'attempt_%s_exit=%s\n' "$attempt" "$(cat "$LOGS/check-$attempt.exit")"; done
+  cat "$LOGS/check-attempts.txt"
 } > "$LOGS/check-summary.txt"
 if [ "$check_pass" -eq 0 ]; then overall=1; fi
 run contracts          corepack pnpm test:contracts
