@@ -1,0 +1,196 @@
+{
+  "format": "narralens.m21-openfilm-probe@1.0",
+  "evidence_kind": "real_upstream_probe",
+  "generated_at": "2026-10-18T07:19:08.644Z",
+  "upstream": {
+    "repository": "https://github.com/openfilm/openfilm.git",
+    "full_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+    "package": "openfilm@0.1.7",
+    "license": "MIT"
+  },
+  "production_modules_exercised": [
+    "src/adapters/openfilm/openfilm-upstream.ts",
+    "src/adapters/openfilm/openfilm-engine-adapter.ts",
+    "src/host/engine/source-digest-v1.ts",
+    "src/host/engine/engine-port.ts"
+  ],
+  "project_source_sha256": "cc5ad804621626d3fa1ae5dc981de812b70ffcc4e2492bc5bd690f2181474915",
+  "checks": [
+    {
+      "id": "PIN-01",
+      "assertion": "OpenFilm checkout is at the pinned SHA and every loaded file matches its digest",
+      "status": "PASS",
+      "detail": {
+        "observed_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+        "checked": [
+          "git_head",
+          "git_clean",
+          "package.json",
+          "pnpm-lock.yaml",
+          "LICENSE",
+          "packages/openfilm/studio/server/film.mjs",
+          "packages/openfilm/studio/server/ops.mjs",
+          "packages/openfilm/studio/server/atomic.mjs",
+          "packages/openfilm/src/film-doc.mjs"
+        ]
+      }
+    },
+    {
+      "id": "PIN-02",
+      "assertion": "the three M1B-verified seam exports load from the pinned upstream",
+      "status": "PASS",
+      "detail": {
+        "module": "packages/openfilm/studio/server/film.mjs"
+      }
+    },
+    {
+      "id": "OF-01",
+      "assertion": "inspect reads three native page clips, one narration sound clip, 30/1 and 900 frames from the real film",
+      "status": "PASS",
+      "detail": {
+        "frame_count": 900,
+        "tracks": 2,
+        "clips": [
+          [
+            "shot-01",
+            "page",
+            {
+              "start_frame": 0,
+              "end_frame_exclusive": 300
+            }
+          ],
+          [
+            "shot-02",
+            "page",
+            {
+              "start_frame": 300,
+              "end_frame_exclusive": 600
+            }
+          ],
+          [
+            "shot-03",
+            "page",
+            {
+              "start_frame": 600,
+              "end_frame_exclusive": 900
+            }
+          ],
+          [
+            "narration",
+            "sound",
+            {
+              "start_frame": 0,
+              "end_frame_exclusive": 900
+            }
+          ]
+        ]
+      }
+    },
+    {
+      "id": "OF-02",
+      "assertion": "capabilities is complete and reports no supported or unverified OpenFilm write",
+      "status": "PASS",
+      "detail": {
+        "operations": 48,
+        "writes": [
+          "timeline.set_visual_fit",
+          "timeline.replace_visual_asset"
+        ]
+      }
+    },
+    {
+      "id": "OF-03",
+      "assertion": "plan refuses every OpenFilm write instead of inventing an operation",
+      "status": "PASS",
+      "detail": {
+        "status": 422,
+        "code": "UNSUPPORTED_EDIT"
+      }
+    },
+    {
+      "id": "OF-04",
+      "assertion": "a stale base is refused with 409 before the upstream mutator runs and bytes are unchanged",
+      "status": "PASS",
+      "detail": {
+        "status": 409,
+        "code": "SOURCE_CHANGED",
+        "film_sha256_before": "e3498e74c075e623e311d6db99989ec4a6b03b13fa811733e247774e9faceca1",
+        "film_sha256_after": "e3498e74c075e623e311d6db99989ec4a6b03b13fa811733e247774e9faceca1"
+      }
+    },
+    {
+      "id": "OF-05",
+      "assertion": "the real project's digest closure covers entry, scenes, subtitle and referenced audio",
+      "status": "PASS",
+      "detail": {
+        "roles": [
+          "subtitle:assets/narration.vtt",
+          "entry:film.html",
+          "scene:scenes/shot-01.html",
+          "scene:scenes/shot-02.html",
+          "scene:scenes/shot-03.html"
+        ],
+        "assets": [
+          "assets/narration.wav"
+        ],
+        "digest_before": "5acfd6c9bbdb13cf6ada4d54bd9732f0276b0545d2c047d0448e5c9c1d136494",
+        "digest_after": "ed5f5f81369840662bab415c625592bf0f1c98d8e71df76405e2ba632221b781"
+      }
+    },
+    {
+      "id": "OF-06a",
+      "assertion": "the real pinned upstream rebases a stale base",
+      "status": "PASS",
+      "detail": {
+        "evidence_kind": "real_upstream",
+        "base_rev": "e3498e74c075e623",
+        "result_rev": "3f753182406e5056",
+        "rebased": true
+      }
+    },
+    {
+      "id": "OF-06b",
+      "assertion": "the adapter refuses the same stale base on the real upstream and leaves author bytes untouched",
+      "status": "PASS",
+      "detail": {
+        "evidence_kind": "real_e2e",
+        "status": 409,
+        "code": "SOURCE_CHANGED",
+        "film_sha256": "3f753182406e50567ba21af102b6449cdd3c6898506858f9488e076e3b453618"
+      }
+    },
+    {
+      "id": "OF-06c",
+      "assertion": "an upstream rebased:true result is converted to 409 and never adopted",
+      "status": "PASS",
+      "detail": {
+        "evidence_kind": "adapter_contract",
+        "status": 409,
+        "code": "SOURCE_CHANGED"
+      }
+    },
+    {
+      "id": "PIN-03",
+      "assertion": "a tampered seam module at the pinned SHA is refused with ENGINE_UNAVAILABLE",
+      "status": "PASS",
+      "detail": {
+        "reason": "pinned OpenFilm checkout has local modifications: M packages/openfilm/studio/server/film.mjs"
+      }
+    },
+    {
+      "id": "PIN-04",
+      "assertion": "the original pinned checkout is unaffected by the tamper experiment",
+      "status": "PASS",
+      "detail": {
+        "observed_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3"
+      }
+    }
+  ],
+  "failures": 0,
+  "status": "PASS",
+  "limitations": [
+    "Runs headless and silent; no window is opened and no audio device is used.",
+    "Headed and human-experience validation are NOT_RUN for M2.1.",
+    "This probe exercises the production adapter against the real pinned upstream. It is not a production integration: vendor/openfilm is not a registered submodule of the main worktree."
+  ]
+}

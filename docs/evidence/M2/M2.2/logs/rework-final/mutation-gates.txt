@@ -1,0 +1,101 @@
+=== MUT-A: adapter declares a commit method ===
+command: corepack pnpm exec vitest run --config vitest.config.ts tests/architecture/m2.1-fitness.test.ts
+mutation applied (13402 -> 13477 bytes)
+RESULT MUT-A: GATE_BITES (exit 1)
+
+=== MUT-B: a registry entry claims an unknown policy ===
+command: corepack pnpm exec vitest run --config vitest.config.ts tests/m2.1/native-write-gateway.test.ts
+mutation applied (19229 -> 19238 bytes)
+RESULT MUT-B: GATE_BITES (exit 1)
+
+=== MUT-C: production code imports a spike ===
+command: corepack pnpm exec vitest run --config vitest.config.ts tests/architecture/m2.1-fitness.test.ts
+mutation applied (19229 -> 19298 bytes)
+RESULT MUT-C: GATE_BITES (exit 1)
+
+=== MUT-D: digest silently skips declared assets ===
+command: corepack pnpm exec vitest run --config vitest.config.ts tests/m2.1/source-digest-v1.test.ts
+mutation applied (17548 -> 17552 bytes)
+RESULT MUT-D: GATE_BITES (exit 1)
+
+=== MUT-E: digest sorts assets against the pinned rule ===
+command: corepack pnpm exec vitest run --config vitest.config.ts tests/m2.1/source-digest-v1.test.ts
+mutation applied (17548 -> 17616 bytes)
+RESULT MUT-E: GATE_BITES (exit 1)
+
+=== MUT-F: stage drops the strict base check ===
+command: corepack pnpm exec vitest run --config vitest.config.ts tests/m2.1/engine-port.test.ts
+mutation applied (13402 -> 13411 bytes)
+RESULT MUT-F: GATE_BITES (exit 1)
+
+=== MUT-G: gateway stops failing closed on an unreported capability ===
+command: corepack pnpm exec vitest run --config vitest.config.ts tests/m2.1/native-write-gateway.test.ts
+mutation applied (8750 -> 8759 bytes)
+RESULT MUT-G: GATE_BITES (exit 1)
+
+=== MUT-H: Hypit digest stops covering referenced asset bytes ===
+command: corepack pnpm exec vitest run --config vitest.config.ts tests/m2.1/native-bypass.test.ts
+mutation applied (12221 -> 12172 bytes)
+RESULT MUT-H: GATE_BITES (exit 1)
+
+=== MUT-I: digest enqueues the logical reference path instead of the canonical one ===
+command: corepack pnpm exec vitest run --config vitest.config.ts tests/m2.1/source-digest-v1.test.ts
+mutation applied (17548 -> 17549 bytes)
+RESULT MUT-I: GATE_BITES (exit 1)
+
+=== MUT-J: upstream loader stops verifying pinned file digests ===
+command: corepack pnpm exec vitest run --config vitest.config.ts tests/m2.1/openfilm-upstream-lock.test.ts
+mutation applied (11038 -> 11060 bytes)
+RESULT MUT-J: GATE_BITES (exit 1)
+
+=== MUT-K: Host stops raising attention on an external change ===
+command: corepack pnpm exec vitest run --config vitest.config.ts tests/m2.1/native-bypass.test.ts
+mutation applied (29267 -> 29205 bytes)
+RESULT MUT-K: GATE_BITES (exit 1)
+
+=== MUT-L: upstream loader skips clean verification when git status fails ===
+command: corepack pnpm exec vitest run --config vitest.config.ts tests/m2.1/openfilm-upstream-lock.test.ts
+mutation applied (11038 -> 11047 bytes)
+RESULT MUT-L: GATE_BITES (exit 1)
+
+=== MUT-M: transition stops requiring its predecessor ===
+command: corepack pnpm exec vitest run --config vitest.config.ts tests/m2.2/transaction-state-machine.test.ts
+mutation applied (65971 -> 65959 bytes)
+RESULT MUT-M: GATE_BITES (exit 1)
+
+=== MUT-J: advanceJournal stops requiring its predecessor ===
+command: corepack pnpm exec vitest run --config vitest.config.ts tests/m2.2/journal-predecessor.test.ts
+mutation applied (65971 -> 65963 bytes)
+RESULT MUT-J: GATE_BITES (exit 1)
+
+=== MUT-S: snapshot skips the parent directory fsync ===
+command: corepack pnpm exec vitest run --config vitest.config.ts tests/m2.2/snapshot-store.test.ts
+mutation applied (9762 -> 9766 bytes)
+RESULT MUT-S: GATE_BITES (exit 1)
+
+=== MUT-T: snapshot stops re-hashing the copied bytes ===
+command: corepack pnpm exec vitest run --config vitest.config.ts tests/m2.2/snapshot-store.test.ts
+mutation applied (9762 -> 9771 bytes)
+RESULT MUT-T: GATE_BITES (exit 1)
+
+=== MUT-R: lock check consults the client reason text ===
+command: corepack pnpm exec vitest run --config vitest.config.ts tests/m2.2/lock-service.test.ts
+mutation applied (6994 -> 7039 bytes)
+RESULT MUT-R: GATE_BITES (exit 1)
+
+=== MUT-Q: coordinator stops consulting the native write gateway ===
+command: corepack pnpm exec vitest run --config vitest.config.ts tests/m2.2/project-coordinator.test.ts
+mutation applied (16546 -> 16555 bytes)
+RESULT MUT-Q: GATE_BITES (exit 1)
+
+=== MUT-O: lease CAS stops requiring a queued job ===
+command: corepack pnpm exec vitest run --config vitest.config.ts tests/m2.2/persistent-job-store.test.ts
+mutation applied (65971 -> 65952 bytes)
+RESULT MUT-O: GATE_BITES (exit 1)
+
+=== MUT-P: outbox replay stops deduplicating by consumer ===
+command: corepack pnpm exec vitest run --config vitest.config.ts tests/m2.2/outbox.test.ts
+mutation applied (4142 -> 4151 bytes)
+RESULT MUT-P: GATE_BITES (exit 1)
+
+SUMMARY cases=20 gates_that_failed_as_required=20
