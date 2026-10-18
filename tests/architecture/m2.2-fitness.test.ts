@@ -39,7 +39,11 @@ function classBody(source: string, className: string): string {
 
 describe("M2.2 fitness: one state machine, no arbitrary state writes", () => {
   it("1. every production `UPDATE ... SET state` lives in transition, advanceJournal or markRecovering", () => {
-    const helpers = ["transition", "advanceJournal", "markRecovering", "#state", "#assetImportState"];
+    // W2.0 adds the asset-ledger bootstrap machine. It is registered here rather than
+    // exempted: `transitionBootstrap` writes `UPDATE ... SET state=? ... WHERE state=<from>`
+    // and throws unless exactly one row changed, which is the property this rule protects.
+    const helpers = ["transition", "advanceJournal", "markRecovering", "#state", "#assetImportState",
+      "transitionBootstrap"];
     const offenders: string[] = [];
     for (const file of SOURCE_FILES) {
       const text = sourceOf(file);

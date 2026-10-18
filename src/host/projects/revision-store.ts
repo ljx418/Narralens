@@ -291,6 +291,16 @@ export class RevisionStore {
     `);
   }
 
+  /**
+   * Composes a store over *this* connection.
+   *
+   * Wave 2 adds stores that must live in the same database. Handing out the handle rather
+   * than letting each store open its own is what keeps "one SQLite, one revision scale"
+   * true by construction instead of by review; `tests/wave2` asserts that no other
+   * production module constructs a `DatabaseSync`.
+   */
+  compose<T>(factory: (db: DatabaseSync) => T): T { return factory(this.#db); }
+
   atomic<T>(operation: () => T): T {
     this.#db.exec("BEGIN IMMEDIATE");
     try {
