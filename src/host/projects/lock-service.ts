@@ -114,14 +114,14 @@ export class LockService {
    */
   acquire(input: AcquireLockInput, initialRevision: number, now = new Date()): EngineLock {
     const lockId = `lock_${randomUUID().replaceAll("-", "")}`;
-    const controlRevision = this.store.bumpControlRevision(input.projectId, initialRevision, now);
     const at = now.toISOString();
-    this.store.upsertLock({
+    const row = {
       lock_id: lockId, project_id: input.projectId, lock_type: input.lockType, scope: input.scope,
       target_id: input.targetId ?? "", start_frame: input.startFrame ?? 0,
       end_frame_exclusive: input.endFrameExclusive ?? 0, owner: input.owner, reason: input.reason,
-      control_revision: controlRevision, active: true, created_at: at, updated_at: at,
-    });
+      created_at: at, updated_at: at,
+    };
+    this.store.createLockWithControlRevision(row, initialRevision);
     return this.lock(lockId)!;
   }
 
@@ -129,9 +129,7 @@ export class LockService {
   release(lockId: string, initialRevision: number, now = new Date()): number {
     const lock = this.lock(lockId);
     if (lock === undefined) throw new HttpError(404, "NOT_FOUND", "Lock not found");
-    this.store.bumpControlRevision(lock.project_id, initialRevision, now);
-    this.store.deactivateLock(lockId, now);
-    return this.store.controlRevision(lock.project_id, initialRevision);
+    return this.store.deactivateLockWithControlRevision(lockId, initialRevision, now);
   }
 
   lock(lockId: string): EngineLock | undefined {
