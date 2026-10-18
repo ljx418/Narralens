@@ -1079,6 +1079,57 @@ export class RevisionStore {
     return this.#db.prepare("SELECT * FROM edit_journal WHERE transaction_id=?").get(transactionId) as unknown as (JournalRecord & { error_code?: string }) | undefined;
   }
 
+  /**
+   * M2.3 rollback: stop new writes for a project and quarantine what is in flight.
+   * Returns the ids of the jobs that were moved to attention, so the rollback record can
+   * name them instead of quietly dropping them.
+   */
+  stopWritesFor(projectId: string, at: string): string[] {
+    const pending = (this.#db.prepare(
+      "SELECT job_id FROM job WHERE project_id=? AND state IN ('queued','running','cancel_requested')")
+      .all(projectId) as Array<{ job_id: string }>);
+    this.#db.exec("BEGIN IMMEDIATE");
+    try {
+      for (const job of pending) {
+        this.#db.prepare(`UPDATE job SET state='attention', lease_owner=NULL, lease_expires_at=NULL,
+          terminal_reason='QUARANTINED_FOR_ROLLBACK', updated_at=? WHERE job_id=?`).run(at, job.job_id);
+      }
+      this.#db.prepare("UPDATE project_state SET attention=1, attention_reason=?, updated_at=? WHERE project_id=?")
+        .run("ROLLED_BACK_WRITES_STOPPED", at, projectId);
+      this.#db.exec("COMMIT");
+    } catch (error) { this.#db.exec("ROLLBACK"); throw error; }
+    return pending.map((job) => job.job_id);
+  }
+
+  /**
+   * M2.3 activation: the new project's single active commit, its engine binding and its
+   * committed source baseline, all in one transaction. The source project's rows are not
+   * touched by this statement.
+   */
+  commitMigrationTarget(input: {
+    migrationId: string; projectId: string; revision: number; snapshotId: string;
+    sourceDigest: string; engine: string; now?: Date;
+  }): void {
+    const at = (input.now ?? new Date()).toISOString();
+    this.#db.exec("BEGIN IMMEDIATE");
+    try {
+      this.#db.prepare("INSERT INTO project_state(project_id, revision, updated_at) VALUES(?,?,?) ON CONFLICT(project_id) DO UPDATE SET revision=excluded.revision, updated_at=excluded.updated_at")
+        .run(input.projectId, input.revision, at);
+      this.#db.prepare("INSERT INTO snapshot(snapshot_id, project_id, source_digest, engine, created_at) VALUES(?,?,?,?,?) ON CONFLICT(snapshot_id) DO NOTHING")
+        .run(input.snapshotId, input.projectId, input.sourceDigest, input.engine, at);
+      this.#db.prepare(`INSERT INTO active_commit(project_id, revision, snapshot_id, source_digest, engine, transaction_id, created_at)
+        VALUES(?,?,?,?,?,?,?) ON CONFLICT(project_id) DO UPDATE SET
+          revision=excluded.revision, snapshot_id=excluded.snapshot_id,
+          source_digest=excluded.source_digest, engine=excluded.engine,
+          transaction_id=excluded.transaction_id, created_at=excluded.created_at`)
+        .run(input.projectId, input.revision, input.snapshotId, input.sourceDigest, input.engine,
+          input.migrationId, at);
+      this.#db.prepare("UPDATE project_state SET source_digest=?, updated_at=? WHERE project_id=?")
+        .run(input.sourceDigest, at, input.projectId);
+      this.#db.exec("COMMIT");
+    } catch (error) { this.#db.exec("ROLLBACK"); throw error; }
+  }
+
   close(): void { this.#db.close(); }
 
   #state(transactionId: string, state: JournalState, now = new Date()): void {

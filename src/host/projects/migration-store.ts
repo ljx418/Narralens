@@ -31,6 +31,8 @@ const TRANSITION_KEYS: readonly string[] = [
   ...FORWARD.map((to, index): string => `${index === 0 ? "plan_written" : FORWARD[index - 1]}->${to}`),
   ...ABORTABLE.flatMap((from): string[] => [`${from}->aborted`, `${from}->attention`]),
   ...RECOVERABLE_FROM.map((from): string => `${from}->recovering`),
+  // Recovery resolves a migration that a restart interrupted; it is never a silent guess.
+  "recovering->activated", "recovering->aborted", "recovering->attention",
 ];
 
 export const ALLOWED_MIGRATION_TRANSITIONS: Readonly<Record<string, true>> = Object.freeze(
@@ -142,7 +144,7 @@ export class MigrationStore {
 
   // ── reads ───────────────────────────────────────────────────────────────────────────
 
-  get(migrationId: string): MigrationRow | undefined { return this.#select("migration_id", migrationId); }
+  get(migrationId: string): MigrationRow | undefined { return this.#select("migration_id = ?", migrationId); }
 
   require(migrationId: string): MigrationRow | undefined { return this.get(migrationId); }
 

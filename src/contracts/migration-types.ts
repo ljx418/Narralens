@@ -79,12 +79,10 @@ export interface MigrationPlanV1 {
   readonly source_project_id: string;
   readonly source_revision: number;
   readonly source_digest: string;
-  readonly source_snapshot_id: string;
   readonly source_engine: string;
   readonly target_project_id: string;
   readonly target_engine: MigrationTargetEngine;
   readonly target_engine_upstream_sha: string;
-  readonly target_source_digest: string;
   readonly identity_map: readonly MigrationIdentityEntry[];
   readonly features: readonly MigrationFeature[];
   readonly assets: readonly MigrationAssetMapping[];

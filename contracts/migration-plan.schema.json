@@ -11,12 +11,10 @@
     "source_project_id",
     "source_revision",
     "source_digest",
-    "source_snapshot_id",
     "source_engine",
     "target_project_id",
     "target_engine",
     "target_engine_upstream_sha",
-    "target_source_digest",
     "identity_map",
     "features",
     "assets",
@@ -54,10 +52,6 @@
       "type": "string",
       "pattern": "^[a-f0-9]{64}$"
     },
-    "source_snapshot_id": {
-      "type": "string",
-      "minLength": 1
-    },
     "source_engine": {
       "type": "string",
       "minLength": 1
@@ -72,10 +66,6 @@
     "target_engine_upstream_sha": {
       "type": "string",
       "pattern": "^[a-f0-9]{40}$"
-    },
-    "target_source_digest": {
-      "type": "string",
-      "pattern": "^[a-f0-9]{64}$"
     },
     "identity_map": {
       "type": "array",

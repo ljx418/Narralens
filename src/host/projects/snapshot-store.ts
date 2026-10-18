@@ -56,6 +56,12 @@ export interface SnapshotSource {
   readonly declaredAssets?: readonly DeclaredAsset[];
   /** Engine-owned closure computed from the current source after the mutation. */
   readonly digest?: SourceDigestResult;
+  /**
+   * Declared digest roots for this source. A migrated OpenFilm copy has film.html and its
+   * assets, not the Hypit Run file, so deriving the roots from the engine kind would look
+   * for a file the copy does not have.
+   */
+  readonly roots?: readonly string[] | undefined;
 }
 
 export interface PublishedSnapshot {
@@ -113,7 +119,7 @@ export class SnapshotStore {
   async publish(source: SnapshotSource): Promise<PublishedSnapshot> {
     const digest = source.digest ?? await computeSourceDigest({
       root: source.sourceRoot,
-      roots: projectDigestRoots(source.descriptor, source.engine),
+      roots: source.roots ?? projectDigestRoots(source.descriptor, source.engine),
       engine: source.engine,
       engineUpstreamSha: source.engineUpstreamSha,
       declaredAssets: source.declaredAssets,
