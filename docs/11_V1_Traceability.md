@@ -1,7 +1,7 @@
 # Narralens V1 规格—架构—开发—验收追踪矩阵
 
 版本：v1.0  
-状态：实际开发已批准；Gate D1、Gate D2、Gate D3、Gate D4.0、Gate D4.1 历史结论保留。D4.2.1 的 M1A 逐编号补证已由独立 Claude Code R4 外审关闭；M1B OpenFilm 隔离技术 spike 也已通过。M2.1 已在第三轮独立复审后达到 `M2_1_CONTROL_BOUNDARY_READY`。M2.2 与 M2.3 已组成 Wave 1 候选并通过独立外审，两条外审 MINOR 已在冻结代码 `e2dec5c...` 关闭，现达到 `CONTROLLED_OPENFILM_READY`。Wave 2 W2.0–M4 文档已完成三轮内部独立复审并冻结，代码尚未开始；下一允许阶段为 W2.0 激活兼容层后连续实现 M3→M4。Gate D4.2、`Gate V1-P0` 与 `V1-Full` 均未关闭。
+状态：实际开发已批准；Gate D1、Gate D2、Gate D3、Gate D4.0、Gate D4.1 历史结论保留。D4.2.1 的 M1A 逐编号补证已由独立 Claude Code R4 外审关闭；M1B OpenFilm 隔离技术 spike 也已通过。M2.1 已在第三轮独立复审后达到 `M2_1_CONTROL_BOUNDARY_READY`。M2.2 与 M2.3 已组成 Wave 1 候选并通过独立外审，两条外审 MINOR 已在冻结代码 `e2dec5c...` 关闭，现达到 `CONTROLLED_OPENFILM_READY`。Wave 2 W2.0 激活兼容层已实现并通过 correction 复验，状态 `INTERNAL_EVIDENCED`：运行时合同与错误码、`ProjectResolver`、`MigratedAssetLedger`、`AssetInventoryPort`、`job.kind` 受控前向迁移、pinned OpenFilm port 组装，均装配进生产 Host；ACT-01/02、ASSET-01/02/03 关闭。下一允许阶段为 M3。Gate D4.2、`Gate V1-P0` 与 `V1-Full` 均未关闭。
 事实日期：2026-10-18
 <!-- M2.1_REWORK_BASE_SHA=ee58ab5c6a9d4bbdf05e8ac8a394fd75218cae59 REVIEW_STATUS=PASS -->
 

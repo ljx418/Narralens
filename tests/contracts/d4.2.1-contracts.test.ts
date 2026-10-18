@@ -12,18 +12,25 @@ const v1Asset = {
 } as const;
 
 describe("D4.2.1 runtime contracts", () => {
-  it("registers exactly the four stage contracts and keeps later-stage contracts absent", () => {
+  it("registers the four D4.2.1 stage contracts and keeps the D4.2 composite retired", () => {
     expect(validatorFor(contractIds.assetImportMetadata)).toBeTypeOf("function");
     expect(validatorFor(contractIds.assetManifest)).toBeTypeOf("function");
     expect(validatorFor(contractIds.assetImportResponse)).toBeTypeOf("function");
     expect(validatorFor(contractIds.assetInventoryResponse)).toBeTypeOf("function");
+    // Exact ids, not `contains`: a `toContain` would pass while an extra or renamed
+    // contract slipped in beside the four.
+    expect(contractIds.assetImportMetadata).toBe("https://narralens.local/schemas/asset-import-metadata.schema.json");
+    expect(contractIds.assetManifest).toBe("https://narralens.local/schemas/asset-manifest.schema.json");
+    expect(contractIds.assetImportResponse).toBe("https://narralens.local/schemas/asset-import-response.schema.json");
+    expect(contractIds.assetInventoryResponse).toBe("https://narralens.local/schemas/asset-inventory-response.schema.json");
     // C-01: the D4.2 single-composite contracts are retired. They must never be registered
     // again, whatever stage the code is at, so this assertion outlives W2.0.
     expect(Object.keys(contractIds)).not.toContain("materializedProposal");
     expect(Object.keys(contractIds)).not.toContain("adoptMaterializedProposal");
     // W2.0 supersedes the old "materialize must be absent" gate with the real one: the
     // registered contract is the native three-clip materialization, not a composite.
-    expect(contractIds.materializeRequest).toContain("materialize-request");
+    expect(contractIds.materializeRequest).toBe("https://narralens.local/schemas/materialize-request.schema.json");
+    expect(contractIds.materialization).toBe("https://narralens.local/schemas/materialization.schema.json");
     expect(validatorFor(contractIds.materialization)).toBeTypeOf("function");
   });
 
