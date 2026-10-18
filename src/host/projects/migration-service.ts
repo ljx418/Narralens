@@ -71,6 +71,9 @@ const VALIDATION_STEPS: readonly MigrationValidationStep[] = [
 ];
 
 export class MigrationService {
+  /** Roots the Host registered for each project, so nothing has to guess a path. */
+  readonly #roots = new Map<string, string>();
+
   constructor(private readonly deps: MigrationDeps) {}
 
   // ── plan ────────────────────────────────────────────────────────────────────────────
@@ -326,6 +329,7 @@ export class MigrationService {
 
   #commitTarget(plan: MigrationPlanV1, published: { snapshot_id: string; source_digest: string }, now: Date): string {
     const root = resolve(this.deps.migrationRoot, plan.migration_id);
+    this.#roots.set(plan.target_project_id, root);
     this.deps.registerProject(plan.target_project_id, root, 0);
     this.deps.revisions.commitMigrationTarget({
       migrationId: plan.migration_id, projectId: plan.target_project_id, revision: 1,
@@ -351,7 +355,8 @@ export class MigrationService {
     if (this.deps.exportProject === undefined) return [];
     const artifacts: MigrationReportV1["export_artifacts"][number][] = [];
     for (const projectId of projectIds) {
-      const root = resolve(this.deps.projectRoot, projectId);
+      // The root the Host registered, never a guessed path: a copy lives where it was built.
+      const root = this.#roots.get(projectId) ?? resolve(this.deps.projectRoot, projectId);
       const exported = await this.deps.exportProject(root, `${migrationId}:${projectId}`);
       artifacts.push({ label: `${projectId}`, sha256: exported.sha256, duration_frames: exported.durationFrames });
     }
@@ -379,6 +384,10 @@ async function inventoryOf(catalog: ProjectCatalog, descriptor: ProjectDescripto
     source_path: path, target_path: `assets/${basenameOf(path)}`,
     sha256: await sha256File(resolve(sourceRoot, path)), asset_id: null,
   })));
+  const subtitles = await Promise.all(manifest.subtitles.map(async (path) => ({
+    source_path: path, target_path: `assets/${basenameOf(path)}`,
+    sha256: await sha256File(resolve(sourceRoot, path)),
+  })));
   return {
     features: [
       { id: "timeline.shot_clips", status: "mapped", note: `${descriptor.shots.length} shots to ${descriptor.shots.length} page clips` },
@@ -388,7 +397,7 @@ async function inventoryOf(catalog: ProjectCatalog, descriptor: ProjectDescripto
         note: manifest.subtitles.length === 0 ? "source has no subtitles" : `${manifest.subtitles.length} carried unchanged` },
     ],
     assets,
-    subtitles: manifest.subtitles.map((path) => ({ source_path: path, target_path: `assets/${basenameOf(path)}`, sha256: "" })),
+    subtitles,
   };
 }
 

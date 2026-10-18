@@ -61,7 +61,12 @@ function escapeAttribute(value: string): string {
   return value.replace(/&/gu, "&amp;").replace(/"/gu, "&quot;").replace(/</gu, "&lt;").replace(/>/gu, "&gt;");
 }
 
-const clipHtml = (title: string, stage: { width: number; height: number }): string => `<!doctype html>
+/**
+ * A page clip is not just markup: the renderer loads it and calls `window.film.frame(t)`.
+ * A scene without that contract parses as a valid clip and then fails at render time, which
+ * is why this is written here rather than discovered by a real export.
+ */
+const clipHtml = (title: string, stage: { width: number; height: number }, durationSeconds: number): string => `<!doctype html>
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8">
@@ -77,6 +82,17 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#071a2b;col
 <div class="k">叙镜 · 迁移副本</div>
 <div class="t" id="title">${escapeAttribute(title)}</div>
 </main>
+<script>
+window.film = {
+  duration: ${durationSeconds},
+  width: ${stage.width},
+  height: ${stage.height},
+  frame(t) {
+    const root = document.documentElement;
+    root.style.filter = \`brightness(\${0.9 + Math.min(t, 3) * 0.03})\`;
+  },
+};
+</script>
 </body>
 </html>
 `;
@@ -134,7 +150,8 @@ export async function migrateToOpenFilm(input: MigrateInput): Promise<MigratedPr
     const clipId = clipIdFor(clip.source_id);
     const clipPath = join(target, "scenes", `${clipId}.html`);
     await mkdir(dirname(clipPath), { recursive: true });
-    await writeFile(clipPath, clipHtml(clip.title, input.stage), "utf8");
+    const durationSeconds = (clip.end_frame_exclusive - clip.start_frame) / input.fps.num * input.fps.den;
+    await writeFile(clipPath, clipHtml(clip.title, input.stage, durationSeconds), "utf8");
     identity.push({
       source_id: clip.source_id, target_id: clipId,
       start_frame: clip.start_frame, end_frame_exclusive: clip.end_frame_exclusive,
