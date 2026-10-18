@@ -30,6 +30,7 @@ import { RevisionStore } from "./projects/revision-store.js";
 import { isAllowedBrowserRequest, tokenMatches } from "./security.js";
 import { EngineBindingStore, OPENFILM_UPSTREAM_SHA, upstreamShaFor } from "./engine/engine-binding-store.js";
 import { EngineRegistry } from "./engine/engine-registry.js";
+import { composeOpenFilmPort, type OpenFilmComposition } from "./engine/openfilm-composition.js";
 import { HypitEngineAdapter } from "../adapters/hypit/hypit-engine-adapter.js";
 import { HypitReadAdapter } from "../adapters/hypit/hypit-read-adapter.js";
 
@@ -81,6 +82,11 @@ export class NarralensHost {
   readonly engines: EngineRegistry;
   readonly coordinator: ProjectCoordinator;
   readonly migrations: MigrationService;
+  /**
+   * What the pinned OpenFilm composition decided, recorded so a failed capability is
+   * diagnosable without re-running verification by hand.
+   */
+  openFilmComposition: OpenFilmComposition | null = null;
   /** Where migrated copies are built. Composition-time only, never a request field. */
   readonly migrationRoot: string;
   readonly sessionToken = randomBytes(32).toString("base64url");
@@ -185,6 +191,12 @@ export class NarralensHost {
     // A migration interrupted by a crash is decided here, in production, not only in tests:
     // it either completes, stays retryable, or lands in attention. Nothing is guessed.
     this.migrations.recover();
+    // W2.0 composes the OpenFilm port at the pinned upstream (R2-07). Verification is
+    // async so it cannot live in the constructor; a checkout that does not verify leaves
+    // the capability closed and is recorded rather than loaded.
+    this.openFilmComposition = await composeOpenFilmPort({
+      registry: this.engines, vendorRoot: openfilmVendorRoot(),
+    });
     // A migrated copy must survive a restart: re-seed its root from the durable record.
     for (const migration of this.revisions.migrations.all()) {
       if (this.revisions.migrations.isTerminal(migration.state) && migration.state !== "aborted") {
