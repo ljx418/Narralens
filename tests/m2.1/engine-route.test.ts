@@ -66,7 +66,6 @@ describe("M2.1 route activation", () => {
       "/api/projects/d1-30s/proposals/proposal_x/materialize",
       "/api/migration/v1/projects/d1-30s/materializations/mat_1",
       "/api/migration/v1/projects/d1-30s/impact",
-      "/api/migration/v1/projects/d1-30s/migrate-copy",
       "/api/migration/v1/projects/d1-30s/edits",
       "/api/migration/v1/projects/d1-30s/history/restore",
     ]) {

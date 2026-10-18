@@ -108,13 +108,20 @@ describe("fitness 5: registry completeness and policy legality", () => {
 describe("fitness 6: route activation matches the stage gate", () => {
   const serverSource = readFileSync(resolve(REPO, "src/host/server.ts"), "utf8");
 
-  it("6. only the read-only engine route is mounted under /api/migration/v1", () => {
+  it("6. /api/migration/v1 exposes exactly the routes the current stage froze", () => {
     const migrationRoutes = [...serverSource.matchAll(/\^\\\/api\\\/migration\\\/v1\\\/([^$]*)\$/gu)].map((match) => match[1]!);
-    expect(migrationRoutes).toEqual(["projects\\/([A-Za-z0-9_-]+)\\/engine"]);
+    // M2.1 opened one read route; M2.3 adds migration copy, report and rollback. Any other
+    // addition has to be justified by its own stage, not slipped in here.
+    expect(migrationRoutes).toEqual([
+      "projects\\/([A-Za-z0-9_-]+)\\/engine",
+      "projects\\/([A-Za-z0-9_-]+)\\/migrate-copy",
+      "migrations\\/([A-Za-z0-9_-]+)",
+      "migrations\\/([A-Za-z0-9_-]+)\\/rollback",
+    ]);
   });
 
-  it("6. materialize, adopt, impact, migrate-copy and history restore are not mounted", () => {
-    for (const closed of ["materialize", "adopt", "impact", "migrate-copy", "history"]) {
+  it("6. materialize, adopt, impact and history restore are never mounted", () => {
+    for (const closed of ["materialize", "adopt", "impact", "history"]) {
       expect(serverSource.includes(`/api/migration/v1/projects/([A-Za-z0-9_-]+)\\/${closed}`), closed).toBe(false);
     }
     expect(serverSource).not.toContain("CAPABILITY_NOT_ENABLED\"");

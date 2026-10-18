@@ -130,13 +130,18 @@ describe("M2.2 fitness: no second actor, queue, store or timeline", () => {
 describe("M2.2 fitness: routes that must stay closed stay unmounted", () => {
   const server = sourceOf(resolve(REPO, "src/host/server.ts"));
 
-  it("8. only the read-only engine route exists under /api/migration/v1", () => {
+  it("8. /api/migration/v1 holds exactly the frozen route set, including M2.3's three", () => {
     const routes = [...server.matchAll(/\^\\\/api\\\/migration\\\/v1\\\/([^$]*)\$/gu)].map((match) => match[1]!);
-    expect(routes).toEqual(["projects\\/([A-Za-z0-9_-]+)\\/engine"]);
+    expect(routes).toEqual([
+      "projects\\/([A-Za-z0-9_-]+)\\/engine",
+      "projects\\/([A-Za-z0-9_-]+)\\/migrate-copy",
+      "migrations\\/([A-Za-z0-9_-]+)",
+      "migrations\\/([A-Za-z0-9_-]+)\\/rollback",
+    ]);
   });
 
-  it("9. materialize, adopt, impact, migrate-copy and history restore appear nowhere as routes", () => {
-    for (const closed of ["materialize", "adopt", "impact", "migrate-copy", "history"]) {
+  it("9. materialize, adopt, impact and history restore appear nowhere as routes", () => {
+    for (const closed of ["materialize", "adopt", "impact", "history"]) {
       expect(server.includes(`/api/migration/v1/projects/([A-Za-z0-9_-]+)\\/${closed}`), closed).toBe(false);
     }
   });

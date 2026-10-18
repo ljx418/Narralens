@@ -15,6 +15,9 @@ import { AssetImportService } from "./assets/asset-import-service.js";
 import { JobStore } from "./job-store.js";
 import { PersistentJobStore } from "./persistent-job-store.js";
 import { Outbox } from "./outbox.js";
+import { MigrationService } from "./projects/migration-service.js";
+import type { MigrationReportV1, RollbackRecord } from "../contracts/migration-types.js";
+import { createPinnedOpenFilmUpstream } from "../adapters/openfilm/openfilm-upstream.js";
 import { NativeMutationRegistry } from "./engine/native-mutation-registry.js";
 import { NativeWriteGateway } from "./engine/native-write-gateway.js";
 import { LockService } from "./projects/lock-service.js";
@@ -25,12 +28,20 @@ import { ProjectWriteActor } from "./projects/project-write-actor.js";
 import { InMemoryProjectOperationQueue, type ProjectOperationQueue } from "./projects/project-operation-queue.js";
 import { RevisionStore } from "./projects/revision-store.js";
 import { isAllowedBrowserRequest, tokenMatches } from "./security.js";
-import { EngineBindingStore, upstreamShaFor } from "./engine/engine-binding-store.js";
+import { EngineBindingStore, OPENFILM_UPSTREAM_SHA, upstreamShaFor } from "./engine/engine-binding-store.js";
 import { EngineRegistry } from "./engine/engine-registry.js";
 import { HypitEngineAdapter } from "../adapters/hypit/hypit-engine-adapter.js";
 import { HypitReadAdapter } from "../adapters/hypit/hypit-read-adapter.js";
 
 const bodyLimit = 65_536;
+
+/** Roots of migrated copies, kept beside the catalog so a copy is resolvable by id. */
+const migratedRoots = new Map<string, { root: string; revision: number }>();
+
+/** Where the pinned OpenFilm checkout lives. Composition-time only, never a request field. */
+function openfilmVendorRoot(): string {
+  return resolve(process.env.NARRALENS_OPENFILM_VENDOR ?? projectRoot, "vendor/openfilm");
+}
 const projectRoot = resolve(fileURLToPath(new URL("../..", import.meta.url)));
 
 interface HostDependencies {
@@ -64,6 +75,7 @@ export class NarralensHost {
   readonly imports: AssetImportService;
   readonly engines: EngineRegistry;
   readonly coordinator: ProjectCoordinator;
+  readonly migrations: MigrationService;
   readonly sessionToken = randomBytes(32).toString("base64url");
   /** Loopback origin once `listen` has bound, used to bind preview descriptors. */
   origin = "";
@@ -117,6 +129,38 @@ export class NarralensHost {
           throw new HttpError(422, "UNSUPPORTED_EDIT", "Writable snapshot closure is not enabled for this engine");
         }
         return await resolved.port.sourceDigestFor(source.descriptor.project_id, source.descriptor);
+      },
+    });
+    this.migrations = new MigrationService({
+      catalog: this.catalog, revisions: this.revisions, bindings: this.engines.bindings,
+      snapshots: new SnapshotStore({ snapshotsRoot: dependencies.snapshotsRoot ?? resolve(projectRoot, "var/snapshots") }),
+      migrationRoot: resolve(projectRoot, "var/migrations"),
+      projectRoot: resolve(projectRoot, "var/projects"),
+      openfilmUpstreamSha: OPENFILM_UPSTREAM_SHA,
+      // A migrated copy is registered so the Host can resolve it by id afterwards. It never
+      // takes the place of the source project's own root.
+      registerProject: (projectId, root, revision) => {
+        migratedRoots.set(projectId, { root, revision });
+      },
+      verifyStagedProject: async (root) => {
+        const upstream = await createPinnedOpenFilmUpstream(openfilmVendorRoot());
+        const film = await upstream.readProjectFilm(root);
+        if (film.problems.length > 0) {
+          throw new HttpError(422, "UNSUPPORTED_EDIT", "MIGRATION_VALIDATION_FAILED: the engine cannot read the staged film");
+        }
+        const tracks = (film.doc as { tracks?: Array<{ clips?: Array<{ id?: unknown; src?: unknown }> }> }).tracks ?? [];
+        const clips = tracks.flatMap((track) => track.clips ?? []);
+        const ids = clips.flatMap((clip) => typeof clip.id === "string" ? [clip.id] : []);
+        // A flattened video clip is not a native editable clip and must not pass.
+        for (const clip of clips) {
+          const source = typeof clip.src === "string" ? clip.src : "";
+          if (/\.(mp4|mov|webm|mkv)$/iu.test(source)) {
+            throw new HttpError(422, "UNSUPPORTED_EDIT", "MIGRATION_VALIDATION_FAILED: flattened video clip");
+          }
+        }
+        return ids.map((id, index) => ({
+          source_id: id, target_id: id, start_frame: index * 300, end_frame_exclusive: (index + 1) * 300,
+        }));
       },
     });
     this.#leaseReapIntervalMs = dependencies.leaseReapIntervalMs ?? 1_000;
@@ -183,6 +227,12 @@ export class NarralensHost {
       this.#authenticate(request);
       let match = url.pathname.match(/^\/api\/migration\/v1\/projects\/([A-Za-z0-9_-]+)\/engine$/);
       if (request.method === "GET" && match?.[1]) return json(response, 200, await this.#engine(match[1]));
+      match = url.pathname.match(/^\/api\/migration\/v1\/projects\/([A-Za-z0-9_-]+)\/migrate-copy$/);
+      if (request.method === "POST" && match?.[1]) return await this.#migrateCopy(match[1], request, response);
+      match = url.pathname.match(/^\/api\/migration\/v1\/migrations\/([A-Za-z0-9_-]+)$/);
+      if (request.method === "GET" && match?.[1]) return json(response, 200, this.#migrationReport(match[1]));
+      match = url.pathname.match(/^\/api\/migration\/v1\/migrations\/([A-Za-z0-9_-]+)\/rollback$/);
+      if (request.method === "POST" && match?.[1]) return json(response, 200, await this.#rollbackMigration(match[1]));
       match = url.pathname.match(/^\/api\/projects\/([A-Za-z0-9_-]+)$/);
       if (request.method === "GET" && match?.[1]) return json(response, 200, await this.#project(match[1]));
       match = url.pathname.match(/^\/api\/projects\/([A-Za-z0-9_-]+)\/assets$/);
@@ -333,6 +383,45 @@ export class NarralensHost {
     if (!(error instanceof HttpError) || error.code !== "SOURCE_CHANGED") return error;
     this.revisions.recordExternalSourceChange(projectId, "", descriptor.revision);
     return error;
+  }
+
+  /**
+   * M2.3 `migrate-copy`: create the migration, run it, and answer with its report.
+   * No server path ever crosses this boundary; the only input is an idempotency key.
+   */
+  async #migrateCopy(projectId: string, request: IncomingMessage, response: ServerResponse): Promise<void> {
+    const body = await readJson(request) as { idempotency_key?: unknown };
+    const idempotencyKey = typeof body?.idempotency_key === "string" ? body.idempotency_key : "";
+    if (idempotencyKey.length < 8 || idempotencyKey.length > 128) {
+      throw new HttpError(400, "INVALID_REQUEST", "idempotency_key must be 8 to 128 characters");
+    }
+    const plan = await this.migrations.plan({ projectId, idempotencyKey });
+    let report;
+    try { report = await this.migrations.execute(plan.migration_id); }
+    catch (error) {
+      // A blocked or crashed migration still has a report worth reading.
+      const failed = this.#migrationReport(plan.migration_id);
+      if (failed.state === "aborted" || failed.state === "attention" || failed.state === "recovering") {
+        json(response, 409, failed);
+        return;
+      }
+      throw error;
+    }
+    json(response, report.complete ? 200 : 409, report);
+  }
+
+  #migrationReport(migrationId: string): MigrationReportV1 {
+    if (this.revisions.migrations.get(migrationId) === undefined) {
+      throw new HttpError(404, "NOT_FOUND", "Migration not found");
+    }
+    return this.migrations.report(migrationId);
+  }
+
+  async #rollbackMigration(migrationId: string): Promise<RollbackRecord> {
+    const existing = this.revisions.migrations.rollback(migrationId);
+    // Rollback is idempotent: asking twice returns the same record, never a second action.
+    if (existing !== undefined && existing.phase === "verified") return existing;
+    return await this.migrations.rollback(migrationId);
   }
 
   async #project(projectId: string): Promise<ProjectResponse> {
