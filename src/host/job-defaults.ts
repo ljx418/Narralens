@@ -8,12 +8,15 @@ import type { JobState } from "../contracts/types.js";
  * creation, so the boundary survives a restart and can be asserted.
  */
 
-export type JobKind = "proposal_comparison" | "render" | "snapshot_publish";
+export type JobKind = "proposal_comparison" | "render" | "snapshot_publish" | "materialize";
 
 export const DEFAULT_MAX_ATTEMPTS: Readonly<Record<JobKind, number>> = Object.freeze({
   proposal_comparison: 1,
   render: 3,
   snapshot_publish: 3,
+  // M3's materialize job is local, restartable work: it can be re-acquired after a lost
+  // lease, and reaching the ceiling means a human decides rather than an infinite retry.
+  materialize: 3,
 });
 
 export function maxAttemptsFor(kind: JobKind, override?: number): number {

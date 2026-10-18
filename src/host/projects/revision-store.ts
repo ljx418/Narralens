@@ -1,5 +1,6 @@
 import { DatabaseSync, type SQLInputValue } from "node:sqlite";
 import { MigrationStore } from "./migration-store.js";
+import { migrateJobKind } from "./job-kind-migration.js";
 import type { ApiError, AssetImportResponse, EditResponse, JobEvent, JobState } from "../../contracts/types.js";
 import { HttpError } from "../api-error.js";
 
@@ -165,6 +166,9 @@ export class RevisionStore {
 
   constructor(path = ":memory:") {
     this.#db = new DatabaseSync(path);
+    // W2.0's one permitted table migration runs before anything reads the job table, and
+    // throws rather than repairing itself if a recorded migration cannot be verified.
+    migrateJobKind(this.#db, path);
     this.migrations = new MigrationStore(this.#db);
     this.#db.exec("PRAGMA journal_mode=WAL; PRAGMA foreign_keys=ON; PRAGMA busy_timeout=5000;");
     this.#db.exec(`
