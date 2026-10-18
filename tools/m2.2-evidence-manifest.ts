@@ -15,6 +15,9 @@ import { join, resolve } from "node:path";
  */
 
 const EVIDENCE_ROOT = resolve("docs/evidence/M2/M2.2");
+// Keep the original candidate's flat logs immutable. The rework capture has its own
+// namespace, so a rerun cannot silently replace the historical evidence.
+const LOG_ROOT = "logs/rework-final";
 const CODE_PATHS = ["src", "tests", "contracts", "tools", "package.json"];
 const sha256File = (path: string): string => createHash("sha256").update(readFileSync(path)).digest("hex");
 const git = (...args: string[]): string => execFileSync("git", args, { encoding: "utf8" }).trim();
@@ -43,7 +46,7 @@ const artifact = (path: string): { path: string; sha256: string } => {
 // the one `environment.txt` recorded when the gates ran. The manifest then lives in a later
 // commit that changes nothing under src/, tests/, contracts/, tools/ or package.json — which
 // is exactly what the integrity validator re-checks.
-const recordedHead = readFileSync(resolve(EVIDENCE_ROOT, "logs/environment.txt"), "utf8")
+const recordedHead = readFileSync(resolve(EVIDENCE_ROOT, LOG_ROOT, "environment.txt"), "utf8")
   .split("\n").find((line) => line.startsWith("git_head="))?.split("=")[1]?.trim();
 const frozenSha = recordedHead ?? git("rev-parse", "HEAD");
 if (recordedHead === undefined) throw new Error("evidence environment.txt does not record git_head");
@@ -261,15 +264,21 @@ const manifest = {
   node: process.version,
   pnpm: execFileSync("corepack", ["pnpm", "-v"], { encoding: "utf8" }).trim(),
   gates: [
-    { command: "corepack pnpm check", log: "logs/check.txt", exit_code: 0 },
-    { command: "bash tools/m2.1-gate-mutation-check.sh <tmp>", log: "logs/mutation-gates.txt", exit_code: 0 },
+    { command: "corepack pnpm check", log: `${LOG_ROOT}/check.txt`, exit_code: 0 },
+    { command: "corepack pnpm test:m2.1", log: `${LOG_ROOT}/test-m2.1.txt`, exit_code: 0 },
+    { command: "corepack pnpm test:contracts", log: `${LOG_ROOT}/test-contracts.txt`, exit_code: 0 },
+    { command: "corepack pnpm check:m2.1-docs", log: `${LOG_ROOT}/check-m2.1-docs.txt`, exit_code: 0 },
+    { command: "python3 -I tests/m2.1-golden/source-digest-v1.golden.py tests/m2.1-golden/source-digest-v1.vectors.json",
+      log: `${LOG_ROOT}/golden-python.txt`, exit_code: 0 },
+    { command: "bash tools/m2.1-gate-mutation-check.sh <tmp>", log: `${LOG_ROOT}/mutation-gates.txt`, exit_code: 0 },
     { command: "corepack pnpm exec tsx tests/m2.1-probe/openfilm-upstream-probe.mjs <vendorRoot> <projectDir> /tmp/probe.json",
-      log: "logs/openfilm-probe.txt", exit_code: 0 },
-    { command: "corepack pnpm exec tsx tools/m2.1-external-review-repro.mts hypit-visual-asset", log: "logs/repro-b02.txt", exit_code: 0 },
-    { command: "corepack pnpm exec tsx tools/m2.1-external-review-repro.mts symlink-alias", log: "logs/repro-m03.txt", exit_code: 0 },
+      log: `${LOG_ROOT}/openfilm-probe.txt`, exit_code: 0 },
+    { command: "corepack pnpm exec tsx tools/m2.1-external-review-repro.mts hypit-visual-asset", log: `${LOG_ROOT}/repro-b02.txt`, exit_code: 0 },
+    { command: "corepack pnpm exec tsx tools/m2.1-external-review-repro.mts symlink-alias", log: `${LOG_ROOT}/repro-m03.txt`, exit_code: 0 },
   ],
-  gate_artifacts: ["logs/check.txt", "logs/mutation-gates.txt", "logs/openfilm-probe.txt",
-    "logs/repro-b02.txt", "logs/repro-m03.txt", "logs/environment.txt"]
+  gate_artifacts: [`${LOG_ROOT}/check.txt`, `${LOG_ROOT}/test-m2.1.txt`, `${LOG_ROOT}/test-contracts.txt`,
+    `${LOG_ROOT}/check-m2.1-docs.txt`, `${LOG_ROOT}/golden-python.txt`, `${LOG_ROOT}/mutation-gates.txt`, `${LOG_ROOT}/openfilm-probe.txt`,
+    `${LOG_ROOT}/repro-b02.txt`, `${LOG_ROOT}/repro-m03.txt`, `${LOG_ROOT}/environment.txt`]
     .map((path) => ({ path, sha256: sha256File(resolve(EVIDENCE_ROOT, path)) })),
   code_paths: CODE_PATHS,
   case_count: cases.length,
