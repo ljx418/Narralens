@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { cp, mkdtemp, readFile, rm } from "node:fs/promises";
+import { cp, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
@@ -261,4 +261,35 @@ describe("EN-05 the source project still reopens and exports after migration", (
     expect(rollback.export_sha256).toMatch(/^[a-f0-9]{64}$/u);
     expect(exported.length).toBe(2);
   });
+});
+
+describe("MIG-04 an external change in the copy conflicts instead of being accepted", () => {
+  const INJECT: ReadonlyArray<[string, string]> = [
+    ["scene", "scenes/shot-002.html"],
+    ["subtitle", "assets/narration.vtt"],
+    ["asset", "assets/visual-10s.mp4"],
+  ];
+
+  for (const [label, relative] of INJECT) {
+    it(`refuses after the ${label} changed outside the Host`, async () => {
+      const { service, revisions, roots } = await harness();
+      const plan = await service.plan({ projectId: PROJECT, idempotencyKey: `mig-key-ext-${label}` });
+      await service.execute(plan.migration_id);
+      const targetRoot = roots.get(plan.target_project_id)!;
+
+      // The copy is intact immediately after migration.
+      expect(await service.verifyCopy(plan.migration_id)).toMatchObject({ ok: true });
+
+      await writeFile(resolve(targetRoot, relative), "\n<!-- changed outside the Host -->\n", "utf8");
+
+      const verdict = await service.verifyCopy(plan.migration_id);
+      expect(verdict, label).toMatchObject({ ok: false, reason: "SOURCE_CHANGED" });
+      // Persistent attention, and the migration never quietly re-baselined.
+      expect(revisions.projectsInAttention()).toContain(plan.target_project_id);
+      // The migration keeps its historical state; the copy loses its writability.
+      expect(revisions.migrations.get(plan.migration_id)!.state).toBe("reported");
+      // The externally changed bytes are left as they are, not repaired.
+      expect(await readFile(resolve(targetRoot, relative), "utf8")).toContain("changed outside the Host");
+    });
+  }
 });

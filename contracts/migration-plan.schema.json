@@ -21,7 +21,8 @@
     "subtitles",
     "validation_steps",
     "blocking",
-    "created_at"
+    "created_at",
+    "narration"
   ],
   "properties": {
     "format": {
@@ -221,6 +222,41 @@
     "created_at": {
       "type": "string",
       "minLength": 1
+    },
+    "narration": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/subtitle"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "$defs": {
+    "subtitle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_path",
+        "target_path",
+        "sha256"
+      ],
+      "properties": {
+        "source_path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "target_path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      }
     }
   }
 }

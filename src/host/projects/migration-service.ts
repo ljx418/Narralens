@@ -10,6 +10,7 @@ import type {
 import { MIGRATION_TARGET_ENGINE } from "../../contracts/migration-types.js";
 import { HttpError } from "../api-error.js";
 import { migrateToOpenFilm, sha256File, treeDigest, type MigrateInput, type SourceClip } from "./openfilm-migrator.js";
+import { computeSourceDigest } from "../engine/source-digest-v1.js";
 import { SnapshotStore } from "./snapshot-store.js";
 import type { ProjectCatalog, ProjectDescriptor } from "./project-catalog.js";
 import type { EngineBindingStore } from "../engine/engine-binding-store.js";
@@ -87,6 +88,7 @@ export class MigrationService {
     const fps = request.fps ?? { num: 30, den: 1 };
 
     const inventory = await inventoryOf(this.deps.catalog, descriptor, sourceRoot);
+    const narration = inventory.narration;
     // The copy's identity depends on the source content, not on which key asked for it: the
     // same unchanged source always migrates to the same copy, and a second key asking for a
     // source that is already migrated is a conflict rather than a duplicate copy.
@@ -121,6 +123,7 @@ export class MigrationService {
       features: inventory.features,
       assets: inventory.assets,
       subtitles: inventory.subtitles,
+      narration,
       validation_steps: VALIDATION_STEPS,
       blocking,
       created_at: now.toISOString(),
@@ -238,6 +241,49 @@ export class MigrationService {
       targetClips: extras.targetClips ?? [], exportArtifacts: extras.exportArtifacts ?? [],
       blocking: [], ...(extras.now === undefined ? {} : { now: extras.now }),
     });
+  }
+
+  /**
+   * MIG-04: prove the migrated copy still matches what was committed.
+   *
+   * A scene, subtitle, setting or referenced asset changed outside the Host must produce a
+   * conflict and persistent attention — never a silent re-baseline, and never a native
+   * "rebased" write being accepted as the new normal.
+   */
+  async verifyCopy(migrationId: string, now = new Date()): Promise<{ ok: boolean; digest: string; reason: string }> {
+    const store = this.deps.revisions.migrations;
+    const row = store.require(migrationId);
+    if (row === undefined) throw new HttpError(404, "NOT_FOUND", "Migration not found");
+    const root = this.#roots.get(row.target_project_id) ?? resolve(this.deps.migrationRoot, migrationId);
+    const committed = store.targetSnapshot(migrationId).sourceDigest ?? "";
+    // Recompute exactly what the snapshot recorded: the SourceDigestV1 closure of the copy,
+    // not a plain tree hash, or the two could never be comparable.
+    const plan = store.plan(migrationId)!;
+    const observed = (await computeSourceDigest({
+      root,
+      roots: openFilmRoots({
+        narration: plan.narration === null ? null : { source_path: plan.narration.source_path, target_path: plan.narration.target_path },
+        subtitles: plan.subtitles.map((subtitle) => ({ source_path: subtitle.target_path, target_path: subtitle.target_path })),
+        assets: plan.assets.map((asset) => ({ source_path: asset.target_path, target_path: asset.target_path, asset_id: null })),
+      }),
+      engine: plan.target_engine,
+      engineUpstreamSha: plan.target_engine_upstream_sha,
+    })).source_digest;
+    if (committed !== "" && observed !== committed) {
+      // A completed migration keeps its historical state; what changes is the copy's
+      // writability. Rewriting a reported migration would be rewriting the record.
+      if (!store.isTerminal(row.state)) {
+        store.markRecovering(migrationId, "external change detected in the migrated copy", now);
+        store.transition(migrationId, "recovering", "attention", now);
+      }
+      this.deps.revisions.markAttention(row.target_project_id, `txn_mig_${migrationId}`,
+        "SOURCE_CHANGED", "the migrated copy changed outside the Host");
+      store.recordStep(migrationId, { id: "commit", status: "failed",
+        detail: `copy digest ${observed.slice(0, 12)} does not match committed ${committed.slice(0, 12)}`,
+        artifact_sha256: observed, at: now.toISOString() });
+      return { ok: false, digest: observed, reason: "SOURCE_CHANGED" };
+    }
+    return { ok: true, digest: observed, reason: "committed" };
   }
 
   // ── rollback ───────────────────────────────────────────────────────────────────────
@@ -378,6 +424,7 @@ function clipsOf(descriptor: ProjectDescriptor): SourceClip[] {
 
 async function inventoryOf(catalog: ProjectCatalog, descriptor: ProjectDescriptor, sourceRoot: string): Promise<{
   features: MigrationPlanV1["features"]; assets: MigrationPlanV1["assets"]; subtitles: MigrationPlanV1["subtitles"];
+  narration: MigrationPlanV1["narration"];
 }> {
   const manifest = await readManifest(catalog, descriptor);
   const assets = await Promise.all(manifest.assets.map(async (path) => ({
@@ -398,6 +445,11 @@ async function inventoryOf(catalog: ProjectCatalog, descriptor: ProjectDescripto
     ],
     assets,
     subtitles,
+    narration: descriptor.narration_asset === "" ? null : {
+      source_path: descriptor.narration_asset,
+      target_path: `assets/${basenameOf(descriptor.narration_asset)}`,
+      sha256: await sha256File(resolve(sourceRoot, descriptor.narration_asset)),
+    },
   };
 }
 
@@ -422,13 +474,14 @@ async function readManifest(catalog: ProjectCatalog, descriptor: ProjectDescript
 }
 
 /** film.html plus every subtitle and asset the migration carried into the copy. */
-function openFilmRoots(input: MigrateInput): string[] {
+function openFilmRoots(input: Pick<MigrateInput, "narration" | "subtitles" | "assets">): string[] {
   const roots = ["film.html"];
   if (input.narration !== null) roots.push(input.narration.target_path);
   for (const subtitle of input.subtitles) roots.push(subtitle.target_path);
   for (const asset of input.assets) roots.push(asset.target_path);
   return [...new Set(roots)];
 }
+
 
 const basenameOf = (path: string): string => path.slice(path.lastIndexOf("/") + 1);
 const hashOf = (value: unknown): string => createHash("sha256").update(JSON.stringify(value)).digest("hex");

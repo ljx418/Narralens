@@ -87,6 +87,8 @@ export interface MigrationPlanV1 {
   readonly features: readonly MigrationFeature[];
   readonly assets: readonly MigrationAssetMapping[];
   readonly subtitles: readonly MigrationSubtitleMapping[];
+  /** The narration the copy carries, or null when the source had none. */
+  readonly narration: MigrationSubtitleMapping | null;
   readonly validation_steps: readonly MigrationValidationStep[];
   /**
    * Anything the plan could not place. A non-empty list blocks activation: an unknown item
