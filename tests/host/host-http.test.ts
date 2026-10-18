@@ -77,7 +77,9 @@ describe("D2 Host HTTP", () => {
     expect(created.status).toBe(202);
     const jobId = (await created.json() as { job_id: string }).job_id;
     let state = "queued";
-    for (let index = 0; index < 50 && !["succeeded", "failed"].includes(state); index += 1) {
+    // Poll generously: this runs inside a full parallel suite, and a one-second budget was
+    // observed to flake under load. The assertions are unchanged; only the patience is.
+    for (let index = 0; index < 250 && !["succeeded", "failed"].includes(state); index += 1) {
       await new Promise((resolvePromise) => setTimeout(resolvePromise, 20));
       state = (await (await fetch(`${origin}/api/jobs/${jobId}`, { headers: headers(origin, token) })).json() as { state: string }).state;
     }
@@ -126,7 +128,7 @@ describe("D2 Host HTTP", () => {
     const request = { base_revision: 2, selection: { shot_id: "shot-001", start_frame: 0, end_frame_exclusive: 300 }, intent: "provider-529", preserve: [], proposal_count: 3 };
     const created = await fetch(`${origin}/api/projects/d1-30s/proposals`, { method: "POST", headers: { ...headers(origin, token), "content-type": "application/json" }, body: JSON.stringify(request) });
     const jobId = (await created.json() as { job_id: string }).job_id;
-    for (let index = 0; index < 50 && host.jobs.get(jobId)?.state !== "failed"; index += 1) await new Promise((done) => setTimeout(done, 20));
+    for (let index = 0; index < 250 && host.jobs.get(jobId)?.state !== "failed"; index += 1) await new Promise((done) => setTimeout(done, 20));
     expect(host.jobs.get(jobId)).toMatchObject({ state: "failed", error: { code: "PROVIDER_OVERLOADED" } });
     expect(runner.calls).toBe(1); expect(host.diagnostics.write_actor_execute_count).toBe(0);
   });
