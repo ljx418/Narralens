@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { cp, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { resolve } from "node:path";
+import { basename, resolve } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { HypitEngineAdapter } from "../../src/adapters/hypit/hypit-engine-adapter.js";
 import { HypitReadAdapter } from "../../src/adapters/hypit/hypit-read-adapter.js";
@@ -34,10 +34,22 @@ afterEach(async () => {
   while (stores.length > 0) stores.pop()!.close();
 });
 
+/**
+ * The D1 fixture is 135 MB, almost all of it the Hypit runtime cache (`.hypit/results`)
+ * and rendered output. No assertion here reads either: the source digest closure covers the
+ * Run, the narration, the asset manifest and the assets it references. Copying only what the
+ * closure needs keeps the same assertions while removing the per-test copy cost that made
+ * the parallel suite time out intermittently.
+ */
+const EXCLUDED_FROM_COPY = new Set([".hypit", "output"]);
+
 async function copiedFixture(): Promise<string> {
   const target = await mkdtemp(resolve(tmpdir(), "narralens-m21-bypass-"));
   copies.push(target);
-  await cp(resolve("fixtures/d1-30s"), target, { recursive: true });
+  await cp(resolve("fixtures/d1-30s"), target, {
+    recursive: true,
+    filter: (source) => !EXCLUDED_FROM_COPY.has(basename(source)),
+  });
   return target;
 }
 
