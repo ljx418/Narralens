@@ -11,9 +11,10 @@
 | snapshot 提交与恢复 | Wave 1 | typed edit/history | SnapshotStore、Journal、Outbox | Approved / Wave 1 外审 PASS；legacy AC-005 边界保留 |
 | 持久 Job/Event | Wave 1 | proposal/render/migration job | PersistentJobStore、Lease、SSE | Approved / Wave 1 外审 PASS；部分业务 runner 待后续 |
 | migrate-copy 与回退 | Wave 1 | 显式迁移副本 | MigrationService | Approved / `CONTROLLED_OPENFILM_READY` |
-| proposal 素材化 | Wave 2 | 用户绑定已登记素材 | MaterializeService | Draft |
-| impact 与采用 | Wave 2 | 用户选择 ready proposal | ImpactService、AdoptionCoordinator | Draft |
-| 历史/撤回 | Wave 2 | undo/redo/restore | HistoryService | Draft |
+| 迁移目标激活兼容 | Wave 2 | terminal migration 启动/旧目标 bootstrap | ProjectResolver、MigratedAssetLedger | Spec Approved / code not-started |
+| proposal 素材化 | Wave 2 | 用户绑定已登记素材 | MaterializeService | Spec Approved / code not-started |
+| impact 与采用 | Wave 2 | 用户选择 ready proposal | ImpactService、AdoptionCoordinator | Spec Approved / code not-started |
+| 历史/撤回 | Wave 2 | undo/redo/restore | HistoryService | Spec Approved / code not-started |
 | 项目/章节/选择 | Wave 3 | 创建项目或定位内容 | StoryProjection、SelectionCoordinator | Draft |
 | 三路候选与原生精剪 | Wave 3 | 用户比较/采用/精修 | CandidateFocus、NativeEditBridge | Draft |
 | 发布检查与交付 | Wave 3 | 固定 snapshot 导出 | Preflight、DeliveryWorkspace | Draft |
@@ -30,7 +31,7 @@
 | `RevisionStore/SnapshotStore` | 提交、恢复、历史、导出绑定 |
 | `PersistentJobStore` | proposal、materialize、render、provider、migration |
 | `EnginePort` | OpenFilm/Hypit inspect/plan/stage/validate/preview/render |
-| `AssetRegistry` | 导入、binding、materialize、provider 产物、交付许可 |
+| `AssetInventoryPort` | legacy AssetRegistry/Manifest@2 或 OpenFilm MigratedAssetLedger；binding、materialize、许可复核 |
 | Studio shared stores | 项目导航、候选、原生精剪、交付 |
 
 ## 3. 按用户旅程

@@ -1,6 +1,6 @@
 # 叙镜开发计划 v1.0
 
-状态：实际开发已批准；Gate D1、D2、D3、D4.0、D4.1 已通过。D4.2 总体文档及子阶段边界已通过内外审。D4.2.1 生产实现、全量 126/126 回归及 Headless 浏览器 100%/原生 200% 证据已完成，内部总审计通过；仅待独立外部总审计，关闭前不得宣告 Gate 通过或进入 D4.2.2。总览见 `Narralens-V1-Development-GAP.drawio` 第 5 页，需求追踪见 `11_V1_Traceability.md`。
+状态：实际开发已批准；Gate D1、D2、D3、D4.0、D4.1 已通过。D4.2.1 的 M1A 逐编号证据和独立 R4 外审已关闭；M2.1–M2.3 已组成 Wave 1 并通过组合独立外审，达到 `CONTROLLED_OPENFILM_READY`。Wave 2 的 W2.0–M4 文档已冻结并完成三轮内部独立复审，代码尚未开始。Gate D4.2、Gate V1-P0 与 V1-Full 均未关闭。总览见 `Narralens-V1-Development-GAP.drawio` 第 5 页，最新需求追踪见 `11_V1_Traceability.md`。
 
 ## 当前前置阶段 — V1 前端体验冻结（文档中）
 
@@ -107,7 +107,7 @@ M5：多账号模板与稳定批量。
 | Gate D4.1 实现 | 通过（限制已声明） | 3–6 多提案只读比较、真实 CLI audit、GCD 差异、原子暂存、80/80、浏览器/NOWRITE、内外实现审查均通过；不含 materialize/采用 |
 | Gate D4.2.1 实现 | 通过（限制已声明） | M1A 逐编号证据与独立 R4 外审已关闭；不含 materialize/采用 |
 | Wave 1 / M2.1–M2.3 | 通过（`CONTROLLED_OPENFILM_READY`） | EnginePort、单引擎治理、持久 Job/lease/outbox、snapshot/锁、OpenFilm 三 clip 迁移副本、重启/再导出/回退；组合外审 PASS，冻结代码 `e2dec5c...` |
-| Wave 2 / M3–M4 | 下一允许阶段 / 未开始 | M3 materialize → M4 impact/adopt/history；Gate D4.2 仍未关闭 |
+| Wave 2 / W2.0–M4 | 文档已冻结 / 实现未开始 | 先补目标 project resolver、固定 OpenFilm port 和迁移资产账本，再连续完成 M3 materialize → M4 impact/adopt/history；三轮内部文档复审 PASS，交接入口 `docs/migration/WAVE2/00_READ_FIRST.md`；Gate D4.2 仍未关闭 |
 | M5–M7 | 未开始 | 依赖前置 Gate，不得提前声称实现 |
 
 ## 工程纪律

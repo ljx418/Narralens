@@ -1,0 +1,165 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Narralens Wave 2：可编辑采用闭环",
+    "locale": "zh-CN",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "https://github.com/ljx418/Narralens",
+      "provider": "github",
+      "link_mode": "web",
+      "revision": "36473c89c2a26acba8161226e6066b4b9fdb69d0"
+    },
+    "viewBox": [1220, 850]
+  },
+  "components": [
+    {
+      "id": "studio",
+      "type": "frontend",
+      "label": "OpenFilm Studio",
+      "sublabel": "绑定素材、查看影响、采用与历史恢复",
+      "pos": [30, 310],
+      "size": [190, 76]
+    },
+    {
+      "id": "host_api",
+      "type": "security",
+      "label": "Local Host API",
+      "sublabel": "Origin/session、schema、能力开关",
+      "sources": [{"path": "src/host/server.ts"}],
+      "pos": [270, 310],
+      "size": [190, 76]
+    },
+    {
+      "id": "proposal_store",
+      "type": "database",
+      "label": "ProjectResolver + Target Facts",
+      "sublabel": "目标投影、提案、迁移资产账本与许可",
+      "sources": [
+        {"path": "src/host/projects/project-catalog.ts"},
+        {"path": "src/host/projects/migration-store.ts"}
+      ],
+      "tag": "W2.0 / M3 输入",
+      "pos": [510, 60],
+      "size": [190, 82]
+    },
+    {
+      "id": "materialize",
+      "type": "backend",
+      "label": "M3 MaterializeService",
+      "sublabel": "proxy / plan / lineage（只读）",
+      "tag": "M3",
+      "pos": [510, 310],
+      "size": [190, 82]
+    },
+    {
+      "id": "job_runtime",
+      "type": "messagebus",
+      "label": "Persistent Job + SSE",
+      "sublabel": "lease、取消、晚到隔离、outbox replay",
+      "sources": [
+        {"path": "src/host/persistent-job-store.ts"},
+        {"path": "src/host/outbox.ts"}
+      ],
+      "tag": "M3/M4 基础设施",
+      "pos": [270, 590],
+      "size": [190, 82]
+    },
+    {
+      "id": "media_store",
+      "type": "database",
+      "label": "内容寻址媒体区",
+      "sublabel": "proxy + lineage；source 只读",
+      "tag": "M3 产物",
+      "pos": [510, 590],
+      "size": [190, 82]
+    },
+    {
+      "id": "impact",
+      "type": "backend",
+      "label": "M4A ImpactService",
+      "sublabel": "服务端 impact/hash、锁与许可复核",
+      "tag": "M4A",
+      "pos": [750, 60],
+      "size": [190, 82]
+    },
+    {
+      "id": "adoption",
+      "type": "backend",
+      "label": "M4B AdoptionCoordinator",
+      "sublabel": "base/锁/许可/幂等；revision 恰好 +1",
+      "tag": "M4B",
+      "pos": [750, 310],
+      "size": [190, 82]
+    },
+    {
+      "id": "history",
+      "type": "backend",
+      "label": "M4C HistoryService",
+      "sublabel": "恢复生成新 revision；晚到不采用",
+      "tag": "M4C",
+      "pos": [750, 590],
+      "size": [190, 82]
+    },
+    {
+      "id": "coordinator",
+      "type": "security",
+      "label": "ProjectCoordinator",
+      "sublabel": "唯一提交权、三类锁、NativeWriteGateway",
+      "sources": [
+        {"path": "src/host/projects/project-coordinator.ts"},
+        {"path": "src/host/engine/native-write-gateway.ts"}
+      ],
+      "pos": [990, 310],
+      "size": [190, 82]
+    },
+    {
+      "id": "engine",
+      "type": "external",
+      "label": "单项目单引擎",
+      "sublabel": "OpenFilm 默认目标；Hypit legacy 回退",
+      "sources": [{"path": "src/host/engine/engine-port.ts"}],
+      "pos": [990, 60],
+      "size": [190, 82]
+    },
+    {
+      "id": "revision_store",
+      "type": "database",
+      "label": "Revision / Snapshot / Journal",
+      "sublabel": "commit / snapshot / journal",
+      "sources": [
+        {"path": "src/host/projects/revision-store.ts"},
+        {"path": "src/host/projects/snapshot-store.ts"}
+      ],
+      "pos": [990, 590],
+      "size": [190, 82]
+    }
+  ],
+  "connections": [
+    {"id": "ui_api", "from": "studio", "to": "host_api", "label": "loopback HTTP / SSE", "variant": "security", "labelDy": -35},
+    {"id": "api_materialize", "from": "host_api", "to": "materialize", "label": "materialize request", "labelDy": -35},
+    {"id": "facts_materialize", "from": "proposal_store", "to": "materialize", "label": "target proposal + ledger + rights", "labelAt": [605, 205]},
+    {"id": "materialize_jobs", "from": "materialize", "to": "job_runtime", "label": "持久任务 / lease", "fromSide": "bottom", "toSide": "top"},
+    {"id": "materialize_media", "from": "materialize", "to": "media_store", "label": "proxy + lineage", "variant": "dashed", "fromSide": "bottom", "toSide": "top", "labelAt": [660, 490]},
+    {"id": "materialize_impact", "from": "materialize", "to": "impact", "label": "ready_for_adoption", "labelDy": -35},
+    {"id": "impact_adoption", "from": "impact", "to": "adoption", "label": "approved impact SHA", "variant": "emphasis", "labelAt": [845, 205]},
+    {"id": "adoption_commit", "from": "adoption", "to": "coordinator", "label": "typed native plan", "variant": "security", "labelDy": -35},
+    {"id": "history_commit", "from": "history", "to": "coordinator", "label": "new revision restore", "variant": "security"},
+    {"id": "coordinator_engine", "from": "coordinator", "to": "engine", "label": "EnginePort plan/stage/validate", "labelDy": -42},
+    {"id": "coordinator_revision", "from": "coordinator", "to": "revision_store", "label": "atomic pointer + outbox", "labelAt": [1085, 490]},
+    {"id": "revision_history", "from": "revision_store", "to": "history", "label": "committed history", "variant": "dashed", "labelAt": [965, 710]}
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "出门体验",
+      "items": ["三案仍对应三个原生可编辑 clip", "采用后 revision 恰好 +1", "关闭重开、改单镜、再次导出"]
+    },
+    {
+      "dot": "rose",
+      "title": "硬性禁止",
+      "items": ["M3 写 author source 或 project revision", "adapter 裸 commit 或双写", "取消后的晚到结果自动采用"]
+    }
+  ]
+}

@@ -5,7 +5,7 @@
 - D3 文件只描述 D3 当时冻结的 `set_visual_fit`，不会在 D4.0 后反向改写历史快照。
 - D4 文件描述新增 `replace_visual_asset`、AssetManifest 与 descriptor 增量；生产 `contracts/edit-operation.schema.json` 将 D3/D4 operation 合并成当前 union。
 - D4.1 文件描述多提案 request、Runner draft 与 Host 包装后的 ProposalComparison；当前只是外审快照，内外文档审查通过后才同步到生产 `contracts/`、TypeScript 与 validator。
-- D4.2 五份跨子阶段文件描述本地导入元数据、实体化请求、MaterializedProposal、带影响确认的采用 operation 和 AssetManifest v2；D4.2.1 另有导入响应与公开库存响应两份合同，避免用完整 manifest 暴露 `project_path`，并让 restricted/unknown 条目可见但不可采用。D4.2.1 的 import metadata、@1/@2 manifest union、import response、inventory response 已同步生产 `contracts/`、注册 AJV 并固定 SHA；materialize request、MaterializedProposal、adopt operation 仍为 docs-only，未注册。v2 兼容读取 v1，并以 `derived + lineage` 区分普通本地 composite 与 AI `generated`。
+- D4.2 五份跨子阶段文件描述本地导入元数据、旧 Hypit composite 实体化路线、带影响确认的采用 operation 和 AssetManifest v2；D4.2.1 另有导入响应与公开库存响应两份合同。D4.2.1 的 import metadata、@1/@2 manifest union、import response、inventory response 已同步生产 `contracts/`、注册 AJV 并固定 SHA。三份 materialize/adopt docs-only 文件从未注册，现保留为历史审查快照；Wave 2 已裁决为 OpenFilm `NativePlanV1 clips[] + optional proxy`，权威目标合同见 `docs/migration/WAVE2/02_ARCHITECTURE_AND_CONTRACTS.md`，不得再把旧 `composite_asset_id` schema 复制到 runtime。
 - 生产 AssetManifest schema 与 D4 参考 schema 都在 schema 层拒绝绝对路径和 `..` 段；Host 与 Hypit 仍必须做 realpath containment，不能只信正则。
 - 若参考合同与生产合同在同一当前字段上发生语义冲突，以生产合同、TypeScript 类型和 validator 测试为准，并必须在对应阶段审计中记录差异与修订。
 
@@ -17,8 +17,8 @@
 | `d4.2-asset-manifest-v2.schema.json` | `16ba862f27b0b595491a49875e7b749df50789a4353b3c2bc6c197536cac3b02` | `AssetManifest`（@1/@2 union） | 已同步：`contracts/asset-manifest.schema.json`，runtime SHA `97fe0b86fcd02a035348f38081a1673318f61e2ae1a4b378993ab8d80c769a21`（保留 @1 并合入 @2 严格分支） |
 | `d4.2.1-asset-import-response.schema.json` | `9496733341675becdee796f1da398bb6a56ace83b1f7f5d2c8b5864f6d3806e9` | `AssetImportResponse` | 已同步：`contracts/asset-import-response.schema.json`，runtime SHA `155df604c849a7644aa91d2a9a1edd99927cbe0a67fb8ba8bb9de37564d9f949`（仅 `$id` 生产化）；路线 A 允许真实返回 @1/@2，并约束 created/migrated 组合 |
 | `d4.2.1-asset-inventory-response.schema.json` | `243a1e685260a95fc1914b1bcd14fabc9444ec8a3fc557be04daf57a346bd999` | `AssetInventoryResponse` | 已同步：`contracts/asset-inventory-response.schema.json`，runtime SHA `90232b3b18022ccbaa9256c24d55cbc5d43d558e391b6dbd5ce0385201bbc728`（复用 runtime manifest source/license 定义） |
-| `d4.2-materialize-request.schema.json` | `1094a0b6da0e33b396279a1979349657b68eec08435166dbe12361809e0566c6` | `MaterializeRequest` | 未创建；D4.2.2 前不得注册 |
-| `d4.2-materialized-proposal.schema.json` | `d094857365837af26994a57e5e4effce6df2e2ebbdcdc8cfee9b1ff65cbc107e` | `MaterializedProposal` | 未创建；D4.2.2 前不得注册 |
-| `d4.2-adopt-operation.schema.json` | `220e139a97920d67f06b1a3ab6014fe6b953f8ad4c4db65e58c92b7ffa3e261c` | `AdoptMaterializedProposal` | 未创建；D4.2.3 前不得注册 |
+| `d4.2-materialize-request.schema.json` | `1094a0b6da0e33b396279a1979349657b68eec08435166dbe12361809e0566c6` | 历史 `MaterializeRequest` | 未创建；已由 Wave 2 合同取代，不得注册 |
+| `d4.2-materialized-proposal.schema.json` | `d094857365837af26994a57e5e4effce6df2e2ebbdcdc8cfee9b1ff65cbc107e` | 历史 `MaterializedProposal` | 未创建；单 composite 模型已弃用，不得注册 |
+| `d4.2-adopt-operation.schema.json` | `220e139a97920d67f06b1a3ab6014fe6b953f8ad4c4db65e58c92b7ffa3e261c` | 历史 `AdoptMaterializedProposal` | 未创建；由 Wave 2 impact/adopt 合同取代，不得注册 |
 
-D4.2.1 四份 runtime 合同已由 `D421-CONTRACT-04` 固定 SHA、`contractIds`、AJV 可解析性和三份后续合同未注册边界；后续三份合同仍保持有意未创建，不能由本次同步推导为 materialize/adopt 已实现。
+D4.2.1 四份 runtime 合同已由 `D421-CONTRACT-04` 固定 SHA、`contractIds`、AJV 可解析性和三份后续合同未注册边界；三份历史合同保持未注册。Wave 2 实现必须新建 versioned runtime schema，不能修改历史文件后冒充原 Gate 证据。

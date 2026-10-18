@@ -1,7 +1,7 @@
 # 叙镜架构设计 v1.0
 <!-- M2.1_REWORK_BASE_SHA=ee58ab5c6a9d4bbdf05e8ac8a394fd75218cae59 REVIEW_STATUS=PASS -->
 
-文档状态：Gate D1–D3、D4.0 与 D4.1 的历史结论保留。D4.2.1 的 M1A 逐编号证据已完成并由独立 Claude Code R4 外审通过；这只关闭 D4.2.1 prerequisite subset，不关闭 Gate D4.2。2026-10-16 经 `CR-MIG-001` 批准进入架构迁移；M1B 隔离 spike 与 M2.1 第三轮独立复审已经通过。M2.2 与 M2.3 已组成 Wave 1 候选并通过独立外审，两条外审 MINOR 已在冻结代码 `e2dec5c...` 关闭，状态为 `CONTROLLED_OPENFILM_READY`。生产 `/edits`、持久 Job/lease、outbox、snapshot、锁控制及受控 OpenFilm 迁移副本已经接线；旧 Hypit 工程保持不变且可回退。Gate D4.2 仍未关闭，materialize/impact/adopt/history restore 仍未实现，下一允许阶段为 M3，旧 Gate 历史不被覆盖。
+文档状态：Gate D1–D3、D4.0 与 D4.1 的历史结论保留。D4.2.1 的 M1A 逐编号证据已完成并由独立 Claude Code R4 外审通过；这只关闭 D4.2.1 prerequisite subset，不关闭 Gate D4.2。2026-10-16 经 `CR-MIG-001` 批准进入架构迁移；M1B 隔离 spike 与 M2.1 第三轮独立复审已经通过。M2.2 与 M2.3 已组成 Wave 1 候选并通过独立外审，两条外审 MINOR 已在冻结代码 `e2dec5c...` 关闭，状态为 `CONTROLLED_OPENFILM_READY`。生产 `/edits`、持久 Job/lease、outbox、snapshot、锁控制及受控 OpenFilm 迁移副本已经接线；旧 Hypit 工程保持不变且可回退。Wave 2 的 M3–M4 文档包已冻结并完成三轮内部独立复审，权威入口为 `docs/migration/WAVE2/00_READ_FIRST.md`；实现尚未开始。Gate D4.2 仍未关闭，materialize/impact/adopt/history restore 仍未实现，下一允许阶段为 W2.0 激活兼容层后连续实现 M3→M4，旧 Gate 历史不被覆盖。
 
 ## 1. 零层架构
 
@@ -95,7 +95,9 @@ narralens/
 | `ProposalComparisonAdapter` | `src/adapters/openmontage/` | Runner draft → Host 绑定 → atomic staging | D4.1 已实现 schema、GCD 语义差异、空来源白名单和全有或全无暂存 | D4.1 adapter/真实证据 |
 | `AssetImportService` | `src/host/assets/` | multipart → staging → ffprobe → AssetRegistry | D4.2.1 已实现并完成 M1A 逐 case 独立外审：流式导入，不接收本机绝对路径 | M1A 完整冻结矩阵已关闭；后续变更须保留回归 |
 | `ProjectOperationQueue` | `src/host/projects/project-operation-queue.ts` | ImportService / ProjectWriteActor → 每项目串行 commit | D4.2.1 已实现 interface、FIFO/错误隔离/跨工程并行，Host 单例已注入 Actor | ImportService 实现时必须复用同一实例 |
-| `MaterializeService` / `MaterializeRenderer` | `src/host/materialize/` | Proposal + bindings → ffmpeg composite → materialized staging | D4.2 docs-only：异步 Job、确定性 recipe、NOWRITE | D4.2.2 计划，受 D4.2.1 门禁约束 |
+| `ProjectResolver` / `MigratedAssetLedger` | 目标 `src/host/projects/` | terminal migration + binding + active commit → OpenFilm target view/asset facts | **Wave 2 文档冻结、未实现**：修复当前 `migratedRoots` 未进入 catalog、目标无 Manifest@2 的接缝；旧目标可证明 bootstrap，新 migration 激活时播种 | W2.0 ACT-01/02、ASSET-01..03；失败关闭能力 |
+| `MaterializeService` / `ProxyRenderer` | 目标 `src/host/materialize/` | target proposal + bindings → native plan + proxy + lineage | **Wave 2 文档冻结、未实现**：异步持久 Job、确定性 real-media proxy、NOWRITE；不再采用旧单 composite/Hypit replace 草案 | M3 PR-01..03、MT-01..06 |
+| `ImpactService` / `AdoptionCoordinator` / `HistoryService` | 目标 `src/host/projects/` | committed projection → impact/hash → controlled write → new revision | **Wave 2 文档冻结、未实现**：server impact、三类锁、OpenFilm stage/validate、采用与恢复均恰好 +1 | M4 TX-01..14 |
 | `ProjectWriteActor` | `src/host/projects/` | API → transaction → adapters | D3 fit 与 D4.0 单镜媒体替换已实现 revision、lock、幂等、补偿/attention/recovery | D4.1 禁止调用；提案采用待 D4.2 |
 | `SQLiteEventStore` | `src/host/projects/revision-store.ts` | actor/import/coordinator/migration ↔ revision/journal/job/outbox | D3/D4.2.1 历史 journal 保留；M2.2 已实现持久 Job/lease/event/outbox，M2.3 migration/migration_step 与既有 store 共用同一数据库句柄 | 导入不增加影片 revision；迁移激活只提交新副本，不改旧工程 |
 | `OpenMontageAdapter` | `src/adapters/openmontage/` | Host ↔ ControlledAgentRunner | D2 单提案保留；D4.1 单次 CLI 多提案、完整 provider schema 与真实 audit 已实现 | 禁止直写 Hypit；D4.2 materialize 另阶段 |
@@ -155,11 +157,17 @@ Runner 只产生不带项目绑定和费用事实的 `ProposalComparisonDraft`�
 
 `generated` 与许可 `cleared` 是正交事实：前者要求 UI/证据标记为 synthetic，后者只表示当前使用已获许可，不得被解释为真实现场或事实证据。`restricted/unknown` 即使声明可商业使用也不能进入采用链，因为仍可能存在其他使用限制。
 
-### MaterializedProposal（D4.2 docs-only）
+### Wave 2 native plan 与素材事实
 
-D4.2 不把一个 registered shot 拆成新的顶层 Hypit items。`AssetImportService` 流式登记本地 MP4；`MaterializeRenderer` 将所选 Proposal 的每个 segment 绑定到 cleared/commercial input asset，以固定 ffmpeg argv 从第 0 帧确定性裁切、缩放/letterbox、去音频并拼成一个精确帧数 composite。`MaterializedProposal` 保存 proposal/manifest/composite/recipe SHA、segment 输出范围与输入 lineage，只作采用与审计，不是可独立渲染的第二时间轴。
+旧 D4.2 单 composite/Hypit replace 方案只保留为历史草案。Wave 2 的权威结果是
+`NativePlanV1.clips[] + optional proxy + lineage`：每个 proposal segment 对应一个稳定的 OpenFilm 原生 clip，
+三镜采用后仍有三个可独立编辑的 clip。proxy 只供比较，不是最终 timeline，也不能作为迁移成功证据。
 
-AssetManifest v2 新增 `source.kind=derived` 和输入 SHA lineage：`generated` 继续表示合成/生成来源，`derived` 表示由已清除本地素材确定性加工而来，二者不得混用。AssetRegistry 兼容读取 v1，@1 工程第一次成功提交的 D4.2.1 导入在同一原子 transaction 中保留旧条目、加入新条目并迁移到 v2；失败保持或补偿原始 bytes，成功后不维护第二份活跃清单。当前 Hypit 启动后会固定 @1 manifest SHA 且因任一未清除条目拒绝整表，因此 D4.2.1 必须在开放导入前同批把薄 fork扩展为 @1/@2 安全重载：`media.replace` 携带 expected manifest SHA，Studio 在写 Source 前完整重读并复核，只在 resolve 目标资产时要求 cleared/commercial，且 TOCTOU 变化继续拒绝。采用时 `ProjectWriteActor` 重验当前 revision、visual lock、impact approval、materialization、manifest 和 composite bytes，再调用这一窄扩展后的 D4.0 `media.replace`。因此原 shot Clip/Window identity、旁白与总时长保持，Hypit Source 仍是唯一影片事实源。
+legacy Hypit 继续由 AssetRegistry/Manifest@2 持有素材事实。迁移后的 OpenFilm target 当前没有被复制的
+Manifest@2，因此 W2.0 必须通过 terminal migration、source tree digest、migration plan/report、目标 bytes 与
+源许可一一核对，播种 target-owned `MigratedAssetLedger`；它位于 Host 同一 SQLite，不写 author source。
+两种账本经 `AssetInventoryPort` 提供统一只读输入。M3 不改变任何 active ledger；M4 采用时才把新引用写入
+隔离 stage，并与 revision/pointer/ledger/idempotency/impact/outbox 在 Coordinator 唯一提交边界推进。
 
 ### Revision
 单调递增。恢复旧内容也创建新 revision，不回退数字。
@@ -170,8 +178,11 @@ AssetManifest v2 新增 `source.kind=derived` 和输入 SHA lineage：`generated
 - `GET /api/proposal-comparisons/:id`：读取并重新校验 D4.1 原子暂存的 3–6 个只读候选，同时复核当前 revision；已实现。
 - `POST /api/projects/:id/assets/import`：D4.2.1 已实现并通过 M1A 外审；流式本地 MP4 + 来源/许可元数据，不接受客户端路径。
 - `GET /api/projects/:id/assets`：D4.2.1 已实现并通过 M1A 外审；返回 `AssetInventoryResponse` 公开库存，包含 cleared/restricted/unknown、source/license/availability/eligible/blocking，但不返回 `project_path`、绝对路径、原文件名或 token；每次请求重验 bytes SHA，不使用跨请求可用性缓存。
-- `POST /api/proposals/:id/materialize`：D4.2 docs-only；本地绑定与 composite 异步 Job，不调用远程 provider。
-- `GET /api/materializations/:id`：D4.2 docs-only；重验并返回采用影响摘要与 current impact SHA。
+- `POST /api/migration/v1/projects/:id/proposals/:proposalId/materialize`：Wave 2 冻结、未实现；target-owned proposal + binding → 持久 Job，不调用远程 provider。
+- `GET /api/migration/v1/materializations/:materializationId`：Wave 2 冻结、未实现；重验 base/source/control/inventory/rights/bytes。
+- `POST /api/migration/v1/projects/:id/impact`：Wave 2 冻结、未实现；服务端计算 canonical impact/hash，15 分钟 TTL。
+- `POST /api/migration/v1/projects/:id/edits`：Wave 2 冻结、未实现；仅接收带有效 impact 的 adopt typed edit。
+- `POST /api/migration/v1/projects/:id/history/restore`：Wave 2 冻结、未实现；恢复旧内容但生成新 revision。
 - `POST /api/projects/:id/edits`：typed operations + baseRevision → newRevision。
 - `POST /api/projects/:id/renders`：revision + profile → jobId。
 - `POST /api/jobs/:id/cancel`：尽力取消，已产生外部费用如实记录。
