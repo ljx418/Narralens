@@ -2,7 +2,7 @@
  RUN  v3.2.4 /mnt/c/workSpace/videoWorkLine/Narralens
 
  ❯ tests/m2.1/native-write-gateway.test.ts (20 tests | 2 failed) 24ms
-   ✓ NativeMutationRegistry completeness > AC-003 registers no unknown policy at all 4ms
+   ✓ NativeMutationRegistry completeness > AC-003 registers no unknown policy at all 3ms
    ✓ NativeMutationRegistry completeness > AC-003 every entry records transport, impact, lock, reason and a test id 2ms
    ✓ NativeMutationRegistry completeness > AC-003 covers every row of the verified OpenFilm native inventory exactly once 2ms
    ✓ NativeMutationRegistry completeness > AC-003 the WebSocket / callback row yields no writable entry, so an event cannot trigger a commit 0ms
@@ -14,7 +14,7 @@
    ✓ NativeWriteGateway decisions > AC-003 passes read_only entries with no typed edit and no security event 0ms
    ✓ NativeWriteGateway decisions > AC-003 denies an unregistered entry by default and records a security event 0ms
    ✓ NativeWriteGateway decisions > EN-02.b refuses a write whose capability the engine reports as unverified, whatever the policy 0ms
-   ✓ NativeWriteGateway decisions > AC-002 maps a refusal to a stable HTTP error and refuses to throw on a permitted decision 1ms
+   ✓ NativeWriteGateway decisions > AC-002 maps a refusal to a stable HTTP error and refuses to throw on a permitted decision 0ms
    ✓ NativeWriteGateway decisions > AC-003 refuses a translated entry whose typed intent is incomplete instead of inventing it 0ms
    ✓ M-01 capability completeness and fail-closed behaviour > every engine-owned registry operation has an entry in the capability map 2ms
    ✓ M-01 capability completeness and fail-closed behaviour > OpenFilm reports its two film writes as blocked, never as supported 0ms
@@ -56,6 +56,6 @@ TypeError: Cannot read properties of undefined (reading 'state')
 
  Test Files  1 failed (1)
       Tests  2 failed | 18 passed (20)
-   Start at  16:48:58
-   Duration  5.22s (transform 361ms, setup 0ms, collect 2.64s, tests 24ms, environment 0ms, prepare 1.57s)
+   Start at  17:24:27
+   Duration  5.03s (transform 360ms, setup 0ms, collect 2.53s, tests 24ms, environment 0ms, prepare 1.55s)
 

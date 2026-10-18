@@ -1,0 +1,33 @@
+
+ RUN  v3.2.4 /mnt/c/workSpace/videoWorkLine/Narralens
+
+(node:1729708) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:1729715) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:1729691) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.2/outbox.test.ts (9 tests) 14ms
+(node:1729696) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.2/lock-service.test.ts (12 tests) 18ms
+ ✓ tests/m2.2/persistent-job-store.test.ts (19 tests) 298ms
+(node:1729676) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:1729689) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.2/transaction-state-machine.test.ts (8 tests) 280ms
+ ✓ tests/m2.2/journal-predecessor.test.ts (9 tests) 11ms
+(node:1729683) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.2/snapshot-store.test.ts (9 tests) 849ms
+ ✓ tests/m2.2/host-coordinator-integration.test.ts (2 tests) 199ms
+ ✓ tests/m2.2/project-coordinator.test.ts (12 tests) 2115ms
+   ✓ BYP the gateway is in front of every write > an accepted edit reaches the actor exactly once and returns its response unchanged  338ms
+   ✓ SER one queue, serial per project, parallel across projects > orders two writes on the same project and lets two projects run at once  378ms
+
+ Test Files  8 passed (8)
+      Tests  80 passed (80)
+   Start at  17:21:30
+   Duration  7.96s (transform 2.85s, setup 0ms, collect 11.85s, tests 3.78s, environment 1ms, prepare 16.95s)
+

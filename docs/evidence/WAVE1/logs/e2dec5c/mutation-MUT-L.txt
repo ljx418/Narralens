@@ -1,20 +1,20 @@
 
  RUN  v3.2.4 /mnt/c/workSpace/videoWorkLine/Narralens
 
- ❯ tests/m2.1/openfilm-upstream-lock.test.ts (12 tests | 3 failed) 142ms
+ ❯ tests/m2.1/openfilm-upstream-lock.test.ts (12 tests | 3 failed) 134ms
    ✓ M-04 pinned OpenFilm checkout verification > pins every file the loader is about to execute, plus package, lock and licence 1ms
    ✓ M-04 pinned OpenFilm checkout verification > keeps the production lock consistent with the M1B recorded upstream lock 0ms
-   ✓ M-04 pinned OpenFilm checkout verification > refuses a checkout with no git HEAD 10ms
-   × M-04 pinned OpenFilm checkout verification > fails closed when git status cannot be executed 18ms
+   ✓ M-04 pinned OpenFilm checkout verification > refuses a checkout with no git HEAD 8ms
+   × M-04 pinned OpenFilm checkout verification > fails closed when git status cannot be executed 17ms
      → Cannot read properties of null (reading 'length')
-   × M-04 pinned OpenFilm checkout verification > fails closed when git status exits non-zero 10ms
+   × M-04 pinned OpenFilm checkout verification > fails closed when git status exits non-zero 8ms
      → Cannot read properties of null (reading 'length')
-   × M-04 pinned OpenFilm checkout verification > fails closed when git status times out 20ms
+   × M-04 pinned OpenFilm checkout verification > fails closed when git status times out 18ms
      → Cannot read properties of null (reading 'length')
-   ✓ M-04 pinned OpenFilm checkout verification > rejects a tracked dirty checkout and records git_clean only after a successful check 19ms
-   ✓ M-04 pinned OpenFilm checkout verification > refuses when the seam module was tampered with 10ms
-   ✓ M-04 pinned OpenFilm checkout verification > refuses when any other loaded module, package, lock or licence changes 38ms
-   ✓ M-04 pinned OpenFilm checkout verification > reports a missing pinned file as missing rather than as a digest mismatch 8ms
+   ✓ M-04 pinned OpenFilm checkout verification > rejects a tracked dirty checkout and records git_clean only after a successful check 16ms
+   ✓ M-04 pinned OpenFilm checkout verification > refuses when the seam module was tampered with 8ms
+   ✓ M-04 pinned OpenFilm checkout verification > refuses when any other loaded module, package, lock or licence changes 41ms
+   ✓ M-04 pinned OpenFilm checkout verification > reports a missing pinned file as missing rather than as a digest mismatch 7ms
    ✓ M-04 pinned OpenFilm checkout verification > refuses to load rather than loading a module whose digest does not match 6ms
    ✓ M-04 pinned OpenFilm checkout verification > never lets a caller supply the vendor path through a request 2ms
 
@@ -66,6 +66,6 @@ TypeError: Cannot read properties of null (reading 'length')
 
  Test Files  1 failed (1)
       Tests  3 failed | 9 passed (12)
-   Start at  16:49:52
-   Duration  3.30s (transform 98ms, setup 0ms, collect 242ms, tests 142ms, environment 0ms, prepare 1.89s)
+   Start at  17:25:15
+   Duration  3.11s (transform 100ms, setup 0ms, collect 230ms, tests 134ms, environment 0ms, prepare 1.81s)
 

@@ -1,24 +1,24 @@
 
  RUN  v3.2.4 /mnt/c/workSpace/videoWorkLine/Narralens
 
-(node:1643403) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(node:1742457) ExperimentalWarning: SQLite is an experimental feature and might change at any time
 (Use `node --trace-warnings ...` to show where the warning was created)
- ❯ tests/m2.1/native-bypass.test.ts (13 tests | 2 failed) 1217ms
+ ❯ tests/m2.1/native-bypass.test.ts (13 tests | 2 failed) 1176ms
    ✓ EN-02 bypass paths > denies every unregistered native entry point by default 2ms
-   ✓ EN-02 bypass paths > rejects a native_operation smuggled into the legacy edit contract 6ms
+   ✓ EN-02 bypass paths > rejects a native_operation smuggled into the legacy edit contract 7ms
    ✓ EN-02 bypass paths > never hands the writer a shell, a URL or an arbitrary path through the gateway 1ms
-   ✓ EN-04 external change detection > refuses a stale digest after an out-of-band source edit and leaves the bytes untouched 167ms
+   ✓ EN-04 external change detection > refuses a stale digest after an out-of-band source edit and leaves the bytes untouched 168ms
    ✓ EN-04 external change detection > treats the file watcher as detection only and never as an accepted write 1ms
-   ✓ EN-04 external change detection > changes the digest when a declared asset, not only a source file, changes 109ms
-   × B-01 external source change reaches attention through the production path > 409, then attention=true, then the next typed edit is 423, without touching the edited bytes 184ms
+   ✓ EN-04 external change detection > changes the digest when a declared asset, not only a source file, changes 108ms
+   × B-01 external source change reaches attention through the production path > 409, then attention=true, then the next typed edit is 423, without touching the edited bytes 175ms
      → expected false to be true // Object.is equality
-   × B-01 external source change reaches attention through the production path > never re-samples the committed baseline: reading again stays 409 and attention stays set 172ms
+   × B-01 external source change reaches attention through the production path > never re-samples the committed baseline: reading again stays 409 and attention stays set 173ms
      → expected false to be true // Object.is equality
-   ✓ B-02 referenced Hypit asset bytes are inside the source digest > covers both referenced visual assets in the closure 102ms
-   ✓ B-02 referenced Hypit asset bytes are inside the source digest > changes the digest when a referenced asset is legitimately re-imported (bytes and manifest together) 115ms
-   ✓ B-02 referenced Hypit asset bytes are inside the source digest > never digests a source whose bytes disagree with its manifest 90ms
-   ✓ B-02 referenced Hypit asset bytes are inside the source digest > fails closed when a referenced asset is missing or its path escapes the project 178ms
-   ✓ B-02 referenced Hypit asset bytes are inside the source digest > fails closed when a manifest hash no longer matches the bytes it describes 89ms
+   ✓ B-02 referenced Hypit asset bytes are inside the source digest > covers both referenced visual assets in the closure 93ms
+   ✓ B-02 referenced Hypit asset bytes are inside the source digest > changes the digest when a referenced asset is legitimately re-imported (bytes and manifest together) 109ms
+   ✓ B-02 referenced Hypit asset bytes are inside the source digest > never digests a source whose bytes disagree with its manifest 86ms
+   ✓ B-02 referenced Hypit asset bytes are inside the source digest > fails closed when a referenced asset is missing or its path escapes the project 162ms
+   ✓ B-02 referenced Hypit asset bytes are inside the source digest > fails closed when a manifest hash no longer matches the bytes it describes 90ms
 
 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
 
@@ -63,6 +63,6 @@ AssertionError: expected false to be true // Object.is equality
 
  Test Files  1 failed (1)
       Tests  2 failed | 11 passed (13)
-   Start at  16:49:40
-   Duration  7.59s (transform 813ms, setup 0ms, collect 3.56s, tests 1.22s, environment 0ms, prepare 1.85s)
+   Start at  17:25:04
+   Duration  6.80s (transform 747ms, setup 0ms, collect 3.13s, tests 1.18s, environment 0ms, prepare 1.54s)
 

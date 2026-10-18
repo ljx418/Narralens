@@ -1,21 +1,21 @@
 
  RUN  v3.2.4 /mnt/c/workSpace/videoWorkLine/Narralens
 
-(node:1647697) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(node:1746726) ExperimentalWarning: SQLite is an experimental feature and might change at any time
 (Use `node --trace-warnings ...` to show where the warning was created)
- ❯ tests/m2.2/project-coordinator.test.ts (12 tests | 1 failed) 1542ms
-   ✓ BYP the gateway is in front of every write > an accepted edit reaches the actor exactly once and returns its response unchanged 245ms
+ ❯ tests/m2.2/project-coordinator.test.ts (12 tests | 1 failed) 4272ms
+   ✓ BYP the gateway is in front of every write > an accepted edit reaches the actor exactly once and returns its response unchanged 266ms
    ✓ BYP the gateway is in front of every write > a write refused by the gate never reaches the actor 2ms
-   × BYP the gateway is in front of every write > a write the engine does not govern is refused by the gateway before the actor 19ms
+   × BYP the gateway is in front of every write > a write the engine does not govern is refused by the gateway before the actor 23ms
      → expected Error: Engine openfilm is bound but not i… { …(4) } to match object { status: 422, …(1) }
 (2 matching properties omitted from actual)
-   ✓ BYP the gateway is in front of every write > a stale baseline is refused with 409 and the actor is never called 37ms
-   ✓ LOCK the coordinator consults locks before the actor > a locked range refuses the write with 423 and the actor is never called 121ms
-   ✓ LOCK the coordinator consults locks before the actor > serializes lock changes behind an in-flight edit on the shared project queue 206ms
-   ✓ SNAP the commit pointer and the outbox move together > publishes a snapshot and points active_commit at it in one commit 283ms
-   ✓ SNAP the commit pointer and the outbox move together > rolls the snapshot back and raises attention when the commit transaction fails 217ms
-   ✓ SNAP the commit pointer and the outbox move together > raises durable attention when snapshot publication cannot be proven 191ms
-   ✓ SER one queue, serial per project, parallel across projects > orders two writes on the same project and lets two projects run at once 214ms
+   ✓ BYP the gateway is in front of every write > a stale baseline is refused with 409 and the actor is never called 43ms
+   ✓ LOCK the coordinator consults locks before the actor > a locked range refuses the write with 423 and the actor is never called 149ms
+   ✓ LOCK the coordinator consults locks before the actor > serializes lock changes behind an in-flight edit on the shared project queue 262ms
+   ✓ SNAP the commit pointer and the outbox move together > publishes a snapshot and points active_commit at it in one commit  2767ms
+   ✓ SNAP the commit pointer and the outbox move together > rolls the snapshot back and raises attention when the commit transaction fails 274ms
+   ✓ SNAP the commit pointer and the outbox move together > raises durable attention when snapshot publication cannot be proven 227ms
+   ✓ SER one queue, serial per project, parallel across projects > orders two writes on the same project and lets two projects run at once 253ms
    ✓ JRNL recovery order > marks unfinished transactions recovering and reports what is outstanding 2ms
    ✓ JRNL recovery order > write routes stay closed while anything is in attention 2ms
 
@@ -49,6 +49,6 @@ AssertionError: expected Error: Engine openfilm is bound but not i… { …(4) }
 
  Test Files  1 failed (1)
       Tests  1 failed | 11 passed (12)
-   Start at  16:50:43
-   Duration  6.64s (transform 473ms, setup 0ms, collect 2.68s, tests 1.54s, environment 0ms, prepare 1.50s)
+   Start at  17:26:10
+   Duration  10.41s (transform 552ms, setup 0ms, collect 3.25s, tests 4.27s, environment 0ms, prepare 1.89s)
 

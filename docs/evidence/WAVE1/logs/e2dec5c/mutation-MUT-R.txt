@@ -1,16 +1,16 @@
 
  RUN  v3.2.4 /mnt/c/workSpace/videoWorkLine/Narralens
 
-(node:1647082) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(node:1746162) ExperimentalWarning: SQLite is an experimental feature and might change at any time
 (Use `node --trace-warnings ...` to show where the warning was created)
- ❯ tests/m2.2/lock-service.test.ts (12 tests | 4 failed) 31ms
+ ❯ tests/m2.2/lock-service.test.ts (12 tests | 4 failed) 38ms
    ✓ LOCK the three classes are computed on the server > visual: a fit or asset change touches the visual lock on that clip's range 1ms
    ✓ LOCK the three classes are computed on the server > duration: a range or position change also touches duration 0ms
    ✓ LOCK the three classes are computed on the server > narration: a subtitle or audio change hits the narration consumer at project scope 0ms
    ✓ LOCK the three classes are computed on the server > maps the two real typed edits onto the classifier vocabulary 0ms
-   × LOCK enforcement over a real service > refuses a write that touches a locked range and allows one that does not 18ms
+   × LOCK enforcement over a real service > refuses a write that touches a locked range and allows one that does not 24ms
      → expected [Function] to throw an error
-   ✓ LOCK enforcement over a real service > a lock of one class does not block a write that only affects another 1ms
+   ✓ LOCK enforcement over a real service > a lock of one class does not block a write that only affects another 2ms
    × LOCK enforcement over a real service > only overlapping ranges collide; adjacent half-open ranges do not 2ms
      → expected [Function] to throw an error
    ✓ LOCK enforcement over a real service > a project-scoped lock covers every target 1ms
@@ -95,6 +95,6 @@ undefined
 
  Test Files  1 failed (1)
       Tests  4 failed | 8 passed (12)
-   Start at  16:50:37
-   Duration  2.69s (transform 130ms, setup 0ms, collect 255ms, tests 31ms, environment 0ms, prepare 1.53s)
+   Start at  17:26:02
+   Duration  3.20s (transform 143ms, setup 0ms, collect 292ms, tests 38ms, environment 0ms, prepare 1.88s)
 

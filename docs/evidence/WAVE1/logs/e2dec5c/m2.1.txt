@@ -1,0 +1,38 @@
+
+> narralens@0.1.0 test:m2.1 /mnt/c/workSpace/videoWorkLine/Narralens
+> vitest run --config vitest.config.ts tests/m2.1 tests/architecture
+
+
+ RUN  v3.2.4 /mnt/c/workSpace/videoWorkLine/Narralens
+
+(node:1728940) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.1/time-model.test.ts (11 tests) 27ms
+ ✓ tests/m2.1/engine-binding-store.test.ts (10 tests) 16ms
+ ✓ tests/m2.1/openfilm-upstream-lock.test.ts (12 tests) 164ms
+ ✓ tests/m2.1/engine-port.test.ts (10 tests) 1078ms
+   ✓ OpenFilmEngineAdapter staging > AC-004 never accepts an upstream rebased result as success  731ms
+ ✓ tests/m2.1/native-write-gateway.test.ts (20 tests) 16ms
+ ✓ tests/architecture/m2.2-fitness.test.ts (15 tests) 1486ms
+(node:1728879) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/architecture/m2.1-fitness.test.ts (22 tests) 832ms
+   ✓ fitness 1-3: dependency direction > 3. production code never imports a spike, statically or dynamically  375ms
+(node:1728885) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.1/native-bypass.test.ts (13 tests) 2139ms
+   ✓ B-01 external source change reaches attention through the production path > 409, then attention=true, then the next typed edit is 423, without touching the edited bytes  308ms
+   ✓ B-02 referenced Hypit asset bytes are inside the source digest > fails closed when a referenced asset is missing or its path escapes the project  326ms
+ ✓ tests/m2.1/source-digest-v1.test.ts (18 tests) 3457ms
+   ✓ SourceDigestV1 closure > EN-04 gives the same digest whatever order the Host declares the roots in  710ms
+   ✓ SourceDigestV1 closure > EN-04 changes the digest when a scene, subtitle, setting, font or referenced asset changes  851ms
+   ✓ SourceDigestV1 closure > EN-04 resolves an OpenFilm time fragment to the same closure entry  309ms
+   ✓ SourceDigestV1 closure > AC-006 refuses absolute paths, traversal, symlink escape, query strings and unknown roles  379ms
+ ✓ tests/m2.1/engine-route.test.ts (8 tests) 1631ms
+   ✓ M2.1 route activation > AC-019 leaves every legacy route in place  1138ms
+
+ Test Files  10 passed (10)
+      Tests  139 passed (139)
+   Start at  17:21:15
+   Duration  9.83s (transform 3.68s, setup 0ms, collect 20.96s, tests 10.85s, environment 1ms, prepare 22.10s)
+
