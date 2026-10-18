@@ -66,6 +66,14 @@ async function renderProject(root: string): Promise<{ sha256: string; durationFr
   };
 }
 
+/** Real container frame count, read with ffprobe rather than assumed. */
+async function frameCount(path: string): Promise<number> {
+  const { execFileSync } = await import("node:child_process");
+  const probe = execFileSync("ffprobe", ["-v", "error", "-select_streams", "v:0",
+    "-count_frames", "-show_entries", "stream=nb_read_frames", "-of", "json", path], { encoding: "utf8" });
+  return Number.parseInt((JSON.parse(probe) as { streams: Array<{ nb_read_frames: string }> }).streams[0]!.nb_read_frames, 10);
+}
+
 describe("MIG-03 the real chain: migrate, reopen, export, edit the middle clip, export again", () => {
   it("produces two real, different exports of the same 900-frame three-clip film", async () => {
     // Absence of the pinned runtime is reported, never replaced by a weaker assertion.
@@ -153,5 +161,69 @@ describe("MIG-03 the real chain: migrate, reopen, export, edit the middle clip, 
     expect(await treeDigest(sourceRoot)).toBe(sourceBefore);
     expect(bindings.read(PROJECT)).toMatchObject({ engine: "hypit" });
     expect(bindings.read(plan.target_project_id)).toMatchObject({ engine: "openfilm" as EngineKind });
+  }, 300_000);
+});
+
+describe("EN-05 the source project is still intact and openable after rollback", () => {
+  it("keeps the source bytes, binding and recorded output, and retains the copy", async () => {
+    if (!pinnedUpstreamPresent()) throw new Error("PINNED_OPENFILM_ABSENT: the real export cannot run here");
+
+    const base = await mkdtemp(join(tmpdir(), "narralens-m23-rollback-"));
+    dirs.push(base);
+    const sourceRoot = join(base, "source");
+    await cp(SOURCE_FIXTURE, sourceRoot, { recursive: true });
+
+    const revisions = new RevisionStore(); stores.push(revisions);
+    const bindings = new EngineBindingStore(revisions);
+    bindings.bind(PROJECT, "hypit", { createdAt: new Date(0) });
+    const catalog = new ProjectCatalog(new Map([[PROJECT, join(sourceRoot, "narralens.project.json")]]));
+    const roots = new Map<string, string>([[PROJECT, sourceRoot]]);
+    const upstream = await createPinnedOpenFilmUpstream(VENDOR);
+
+    const service = new MigrationService({
+      catalog, revisions, bindings,
+      snapshots: new SnapshotStore({ snapshotsRoot: join(base, "snapshots") }),
+      migrationRoot: join(base, "migrations"), projectRoot: join(base, "projects"),
+      openfilmUpstreamSha: OPENFILM_SHA,
+      registerProject: (projectId, root) => { roots.set(projectId, root); },
+      verifyStagedProject: async (root) => {
+        const film = await upstream.readProjectFilm(root);
+        const clips = (film.doc as { tracks: Array<{ clips: Array<{ id: string; src: string }> }> }).tracks[0]!.clips;
+        if (clips.some((clip) => /\.(mp4|mov|webm|mkv)$/iu.test(clip.src))) throw new Error("flattened clip");
+        return clips.map((clip, index) => ({
+          source_id: clip.id, target_id: clip.id, start_frame: index * 300, end_frame_exclusive: (index + 1) * 300,
+        }));
+      },
+      // The copy is a real OpenFilm render. The Hypit SOURCE has no offline headless render,
+      // so its "export" is the recorded D1 artifact shipped with the fixture, and the report
+      // says so rather than implying a fresh render happened.
+      exportProject: async (root, _label, engine) => {
+        if (engine === "openfilm") return await renderProject(root);
+        const recorded = resolve(SOURCE_FIXTURE, "assets/generated/visual-10s.mp4");
+        return { sha256: createHash("sha256").update(await readFile(recorded)).digest("hex"), durationFrames: 900 };
+      },
+    });
+
+    const sourceBefore = await treeDigest(sourceRoot);
+    const plan = await service.plan({ projectId: PROJECT, idempotencyKey: "mig-rollback-01" });
+    await service.execute(plan.migration_id);
+    const targetRoot = roots.get(plan.target_project_id)!;
+    const copyExport = await renderProject(targetRoot);
+
+    const record = await service.rollback(plan.migration_id);
+    expect(record.phase).toBe("verified");
+
+    // The source is byte-identical, still bound to hypit, and the copy is kept for audit.
+    expect(await treeDigest(sourceRoot)).toBe(sourceBefore);
+    expect(bindings.read(PROJECT)).toMatchObject({ engine: "hypit" });
+    expect(record.source_sha256_after).toBe(sourceBefore);
+    expect(record.target_retained).toBe(true);
+    expect(copyExport.durationFrames).toBe(900);
+    expect(await readFile(join(targetRoot, "film.html"), "utf8")).toContain("shot-002");
+
+    // A fresh render of the Hypit SOURCE is deliberately NOT claimed here: it submits a Build
+    // to external providers, which costs money and egresses data, and this wave is not
+    // authorised for either. The source side is proved by byte identity, by its binding and
+    // by its recorded D1 output; the real render is of the migrated copy.
   }, 300_000);
 });

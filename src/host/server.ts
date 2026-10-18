@@ -182,6 +182,9 @@ export class NarralensHost {
     await this.writes.recoverIncomplete();
     await this.comparisons.cleanupStaleTemporaryFiles();
     await this.coordinator.recoverOnStart();
+    // A migration interrupted by a crash is decided here, in production, not only in tests:
+    // it either completes, stays retryable, or lands in attention. Nothing is guessed.
+    this.migrations.recover();
     // A migrated copy must survive a restart: re-seed its root from the durable record.
     for (const migration of this.revisions.migrations.all()) {
       if (this.revisions.migrations.isTerminal(migration.state) && migration.state !== "aborted") {

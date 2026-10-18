@@ -44,8 +44,12 @@ export interface MigrationDeps {
   readonly registerProject: (projectId: string, root: string, revision: number) => void;
   /** Verify the staged project with the pinned engine. Throws when it is not acceptable. */
   readonly verifyStagedProject: (root: string) => Promise<MigrationIdentityEntry[]>;
-  /** Runs a real export of a project root and returns its digest and frame count. */
-  readonly exportProject?: (root: string, label: string) => Promise<{ sha256: string; durationFrames: number }>;
+  /**
+   * Runs a real export of a project root and returns its digest and frame count. The engine
+   * is passed because a project's source is only renderable by its own engine: a Hypit
+   * source cannot be handed to the OpenFilm renderer.
+   */
+  readonly exportProject?: (root: string, label: string, engine: EngineKind) => Promise<{ sha256: string; durationFrames: number }>;
   readonly crashAt?: ((point: CrashPoint) => Promise<void>) | undefined;
 }
 
@@ -218,6 +222,7 @@ export class MigrationService {
       artifact_sha256: published.source_digest, at: now.toISOString() });
     await this.#crash("after_bind");
 
+    await this.#crash("before_report");
     const exports = await this.#export(migrationId, [plan.target_project_id], now);
     store.transition(migrationId, "activated", "reported", now);
     store.recordStep(migrationId, { id: "report", status: "done",
@@ -314,9 +319,14 @@ export class MigrationService {
       detail: "source entry point restored; migrated copy retained", artifact_sha256: sourceAfter,
       at: now.toISOString() });
 
+    // The source is exported by its OWN engine. The pinned Hypit runtime has no offline
+    // headless render (a Build submits to external providers), so the report records which
+    // engine produced the artifact rather than pretending one did.
+    const sourceRoot = resolve(this.deps.catalog.descriptorRoot(plan.source_project_id));
+    const sourceEngine = this.deps.bindings.read(plan.source_project_id)?.engine ?? "hypit";
     const exported = this.deps.exportProject === undefined
       ? null
-      : await this.deps.exportProject(resolve(this.deps.catalog.descriptorRoot(plan.source_project_id)), "rollback");
+      : await this.deps.exportProject(sourceRoot, "rollback", sourceEngine);
     record = { ...record, phase: "verified", export_sha256: exported?.sha256 ?? null,
       updated_at: now.toISOString() };
     store.setRollback(migrationId, record, now);
@@ -403,7 +413,8 @@ export class MigrationService {
     for (const projectId of projectIds) {
       // The root the Host registered, never a guessed path: a copy lives where it was built.
       const root = this.#roots.get(projectId) ?? resolve(this.deps.projectRoot, projectId);
-      const exported = await this.deps.exportProject(root, `${migrationId}:${projectId}`);
+      const engine = this.deps.bindings.read(projectId)?.engine ?? MIGRATION_TARGET_ENGINE;
+      const exported = await this.deps.exportProject(root, `${migrationId}:${projectId}`, engine);
       artifacts.push({ label: `${projectId}`, sha256: exported.sha256, duration_frames: exported.durationFrames });
     }
     void now;

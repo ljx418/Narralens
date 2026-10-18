@@ -147,7 +147,7 @@ describe("MIG-01 a new project id, one binding, and an untouched source", () => 
 describe("MIG-05 a crash at each boundary converges after a restart", () => {
   const BOUNDARIES: readonly CrashPoint[] = [
     "after_plan", "after_stage", "after_validate", "after_snapshot",
-    "before_commit", "after_commit", "before_bind", "after_bind",
+    "before_commit", "after_commit", "before_bind", "after_bind", "before_report",
   ];
 
   for (const point of BOUNDARIES) {
