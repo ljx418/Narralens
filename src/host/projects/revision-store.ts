@@ -1,4 +1,5 @@
 import { DatabaseSync, type SQLInputValue } from "node:sqlite";
+import { MigrationStore } from "./migration-store.js";
 import type { ApiError, AssetImportResponse, EditResponse, JobEvent, JobState } from "../../contracts/types.js";
 import { HttpError } from "../api-error.js";
 
@@ -159,9 +160,12 @@ export interface AssetImportJournalRecord {
 
 export class RevisionStore {
   readonly #db: DatabaseSync;
+  /** M2.3 migration facts live in this same database, never a second one. */
+  readonly migrations: MigrationStore;
 
   constructor(path = ":memory:") {
     this.#db = new DatabaseSync(path);
+    this.migrations = new MigrationStore(this.#db);
     this.#db.exec("PRAGMA journal_mode=WAL; PRAGMA foreign_keys=ON; PRAGMA busy_timeout=5000;");
     this.#db.exec(`
       CREATE TABLE IF NOT EXISTS project_state (

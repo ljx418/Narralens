@@ -20,8 +20,12 @@ import assetImportResponseSchema from "../../contracts/asset-import-response.sch
 import assetInventoryResponseSchema from "../../contracts/asset-inventory-response.schema.json" with { type: "json" };
 import engineResponseSchema from "../../contracts/engine-response.schema.json" with { type: "json" };
 import sourceDigestManifestSchema from "../../contracts/source-digest-manifest.schema.json" with { type: "json" };
+import migrationPlanSchema from "../../contracts/migration-plan.schema.json" with { type: "json" };
+import rollbackRecordSchema from "../../contracts/rollback-record.schema.json" with { type: "json" };
+import migrationReportSchema from "../../contracts/migration-report.schema.json" with { type: "json" };
 import type { EditRequest, ProposalBundle, ProposalComparison, ProposalComparisonDraft, ProposalComparisonRequest, ProposalRequest } from "./types.js";
 import type { EngineResponse, SourceDigestManifest } from "./engine-types.js";
+import type { MigrationPlanV1, MigrationReportV1, RollbackRecord } from "./migration-types.js";
 
 const ajv = new Ajv2020({ allErrors: true, strict: true });
 addFormats(ajv);
@@ -30,7 +34,8 @@ for (const schema of [apiErrorSchema, cancelResponseSchema, jobEventSchema, jobR
   editOperationSchema, editRequestSchema, editResponseSchema, assetManifestSchema,
   assetImportMetadataSchema, assetImportResponseSchema, assetInventoryResponseSchema,
   proposalComparisonRequestSchema, proposalComparisonDraftSchema, proposalComparisonSchema,
-  engineResponseSchema, sourceDigestManifestSchema]) {
+  engineResponseSchema, sourceDigestManifestSchema,
+  migrationPlanSchema, rollbackRecordSchema, migrationReportSchema]) {
   ajv.addSchema(schema);
 }
 
@@ -55,6 +60,9 @@ export const contractIds = {
   assetInventoryResponse: assetInventoryResponseSchema.$id,
   engineResponse: engineResponseSchema.$id,
   sourceDigestManifest: sourceDigestManifestSchema.$id,
+  migrationPlan: migrationPlanSchema.$id,
+  migrationReport: migrationReportSchema.$id,
+  rollbackRecord: rollbackRecordSchema.$id,
 } as const;
 
 export function validatorFor(id: string): ValidateFunction {
@@ -136,4 +144,22 @@ export function validateSourceDigestManifest(value: unknown): { ok: true; value:
   const validate = validatorFor(contractIds.sourceDigestManifest);
   if (!validate(value)) return { ok: false, errors: formatErrors(validate.errors) };
   return { ok: true, value: value as SourceDigestManifest };
+}
+
+export function validateMigrationPlan(value: unknown): { ok: true; value: MigrationPlanV1 } | { ok: false; errors: string[] } {
+  const validate = validatorFor(contractIds.migrationPlan);
+  if (!validate(value)) return { ok: false, errors: formatErrors(validate.errors) };
+  return { ok: true, value: value as MigrationPlanV1 };
+}
+
+export function validateMigrationReport(value: unknown): { ok: true; value: MigrationReportV1 } | { ok: false; errors: string[] } {
+  const validate = validatorFor(contractIds.migrationReport);
+  if (!validate(value)) return { ok: false, errors: formatErrors(validate.errors) };
+  return { ok: true, value: value as MigrationReportV1 };
+}
+
+export function validateRollbackRecord(value: unknown): { ok: true; value: RollbackRecord } | { ok: false; errors: string[] } {
+  const validate = validatorFor(contractIds.rollbackRecord);
+  if (!validate(value)) return { ok: false, errors: formatErrors(validate.errors) };
+  return { ok: true, value: value as RollbackRecord };
 }

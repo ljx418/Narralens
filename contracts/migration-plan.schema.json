@@ -1,0 +1,236 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://narralens.local/schemas/migration-plan.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "format",
+    "migration_id",
+    "idempotency_key",
+    "request_digest",
+    "source_project_id",
+    "source_revision",
+    "source_digest",
+    "source_snapshot_id",
+    "source_engine",
+    "target_project_id",
+    "target_engine",
+    "target_engine_upstream_sha",
+    "target_source_digest",
+    "identity_map",
+    "features",
+    "assets",
+    "subtitles",
+    "validation_steps",
+    "blocking",
+    "created_at"
+  ],
+  "properties": {
+    "format": {
+      "const": "narralens.migration-plan@1.0"
+    },
+    "migration_id": {
+      "type": "string",
+      "pattern": "^mig_[A-Za-z0-9_-]+$"
+    },
+    "idempotency_key": {
+      "type": "string",
+      "minLength": 8,
+      "maxLength": 128
+    },
+    "request_digest": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "source_project_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_revision": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "source_digest": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "source_snapshot_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_engine": {
+      "type": "string",
+      "minLength": 1
+    },
+    "target_project_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "target_engine": {
+      "const": "openfilm"
+    },
+    "target_engine_upstream_sha": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{40}$"
+    },
+    "target_source_digest": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "identity_map": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "source_id",
+          "target_id",
+          "start_frame",
+          "end_frame_exclusive"
+        ],
+        "properties": {
+          "source_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "target_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "start_frame": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "end_frame_exclusive": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      }
+    },
+    "features": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "status",
+          "note"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "status": {
+            "enum": [
+              "mapped",
+              "lossy",
+              "unsupported"
+            ]
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "assets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "source_path",
+          "target_path",
+          "sha256",
+          "asset_id"
+        ],
+        "properties": {
+          "source_path": {
+            "type": "string",
+            "minLength": 1
+          },
+          "target_path": {
+            "type": "string",
+            "minLength": 1
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "asset_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      }
+    },
+    "subtitles": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "source_path",
+          "target_path",
+          "sha256"
+        ],
+        "properties": {
+          "source_path": {
+            "type": "string",
+            "minLength": 1
+          },
+          "target_path": {
+            "type": "string",
+            "minLength": 1
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        }
+      }
+    },
+    "validation_steps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "description",
+          "asserts"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1
+          },
+          "asserts": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "blocking": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "created_at": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}

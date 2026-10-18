@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://narralens.local/schemas/rollback-record.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "format",
+    "migration_id",
+    "phase",
+    "writes_stopped_at",
+    "quarantined_jobs",
+    "source_sha256_before",
+    "source_sha256_after",
+    "target_retained",
+    "target_project_id",
+    "export_sha256",
+    "updated_at"
+  ],
+  "properties": {
+    "format": {
+      "const": "narralens.rollback-record@1.0"
+    },
+    "migration_id": {
+      "type": "string",
+      "pattern": "^mig_[A-Za-z0-9_-]+$"
+    },
+    "phase": {
+      "enum": [
+        "requested",
+        "writes_stopped",
+        "in_flight_quarantined",
+        "source_restored",
+        "verified",
+        "failed"
+      ]
+    },
+    "writes_stopped_at": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "quarantined_jobs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "source_sha256_before": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "source_sha256_after": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "target_retained": {
+      "const": true
+    },
+    "target_project_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "export_sha256": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "updated_at": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}

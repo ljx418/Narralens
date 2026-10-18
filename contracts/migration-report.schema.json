@@ -1,0 +1,207 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://narralens.local/schemas/migration-report.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "format",
+    "migration_id",
+    "state",
+    "plan",
+    "steps",
+    "complete",
+    "source_before_sha256",
+    "source_after_sha256",
+    "target_snapshot_id",
+    "target_source_digest",
+    "target_clips",
+    "export_artifacts",
+    "rollback",
+    "blocking",
+    "updated_at"
+  ],
+  "properties": {
+    "format": {
+      "const": "narralens.migration-report@1.0"
+    },
+    "migration_id": {
+      "type": "string",
+      "pattern": "^mig_[A-Za-z0-9_-]+$"
+    },
+    "state": {
+      "enum": [
+        "plan_written",
+        "staged",
+        "validated",
+        "snapshot_published",
+        "committed",
+        "activated",
+        "reported",
+        "aborted",
+        "recovering",
+        "attention"
+      ]
+    },
+    "plan": {
+      "$ref": "migration-plan.schema.json"
+    },
+    "steps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "status",
+          "detail",
+          "artifact_sha256",
+          "at"
+        ],
+        "properties": {
+          "id": {
+            "enum": [
+              "plan",
+              "stage",
+              "validate",
+              "snapshot",
+              "commit",
+              "bind",
+              "report",
+              "rollback"
+            ]
+          },
+          "status": {
+            "enum": [
+              "done",
+              "failed",
+              "blocked"
+            ]
+          },
+          "detail": {
+            "type": "string"
+          },
+          "artifact_sha256": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "at": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "complete": {
+      "type": "boolean"
+    },
+    "source_before_sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "source_after_sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "target_snapshot_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "target_source_digest": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "target_clips": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "source_id",
+          "target_id",
+          "start_frame",
+          "end_frame_exclusive"
+        ],
+        "properties": {
+          "source_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "target_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "start_frame": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "end_frame_exclusive": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      }
+    },
+    "export_artifacts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "label",
+          "sha256",
+          "duration_frames"
+        ],
+        "properties": {
+          "label": {
+            "type": "string",
+            "minLength": 1
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "duration_frames": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    "rollback": {
+      "anyOf": [
+        {
+          "$ref": "rollback-record.schema.json"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "blocking": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "updated_at": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}
