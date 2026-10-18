@@ -1,0 +1,6 @@
+command=corepack pnpm evidence:m2.2:integrity
+exit_code=1
+frozen_code_sha=2ff89bd32feec901d199792e6014048153b35548
+failure=validator read the historical flat logs/environment.txt instead of the manifest-selected capture environment
+action=changed the validator to resolve the environment record from gate_artifacts; preserved the old capture; reserved logs/final; re-ran every gate on 21974bf22f89cc47caa1d1ecea95d60e4916b854
+business_code_impact=none

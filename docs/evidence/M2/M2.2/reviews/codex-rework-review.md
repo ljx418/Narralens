@@ -38,6 +38,11 @@
 
 BLOCKER=0，MAJOR=0。M2.2 可按压缩流程进入 M2.3，但不能单独声明完整 M2 或外审 PASS。
 
+证据冻结期间完整性校验曾返回 exit 1：校验器固定读取原候选的平铺 `logs/environment.txt`，没有
+读取新 manifest 选择的 capture namespace。该工具缺陷已改为从 `gate_artifacts` 解析环境记录；旧
+capture 未被覆盖，所有门禁随后在最终冻结 SHA 上重跑。失败记录见
+`logs/final/integrity-pre-final.txt`，不得从审计历史中删除。
+
 ## 4. 明示边界
 
 1. legacy Hypit 仍先由 actor 就地提交 author source，再捕获 immutable snapshot；这不是完整 AC-005。
