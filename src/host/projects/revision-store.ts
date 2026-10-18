@@ -1,6 +1,6 @@
 import { DatabaseSync, type SQLInputValue } from "node:sqlite";
 import { MigrationStore } from "./migration-store.js";
-import { migrateJobKind } from "./job-kind-migration.js";
+import { JOB_TABLE_DDL, migrateJobKind } from "./job-kind-migration.js";
 import type { ApiError, AssetImportResponse, EditResponse, JobEvent, JobState } from "../../contracts/types.js";
 import { HttpError } from "../api-error.js";
 
@@ -166,9 +166,6 @@ export class RevisionStore {
 
   constructor(path = ":memory:") {
     this.#db = new DatabaseSync(path);
-    // W2.0's one permitted table migration runs before anything reads the job table, and
-    // throws rather than repairing itself if a recorded migration cannot be verified.
-    migrateJobKind(this.#db, path);
     this.migrations = new MigrationStore(this.#db);
     this.#db.exec("PRAGMA journal_mode=WAL; PRAGMA foreign_keys=ON; PRAGMA busy_timeout=5000;");
     this.#db.exec(`
@@ -256,20 +253,10 @@ export class RevisionStore {
         active INTEGER NOT NULL DEFAULT 1, created_at TEXT NOT NULL, updated_at TEXT NOT NULL
       );
       CREATE INDEX IF NOT EXISTS project_lock_by_project ON project_lock (project_id, active);
-      CREATE TABLE IF NOT EXISTS job (
-        job_id TEXT PRIMARY KEY, project_id TEXT NOT NULL,
-        kind TEXT NOT NULL CHECK (kind IN ('proposal_comparison','render','snapshot_publish')),
-        payload_digest TEXT NOT NULL, state TEXT NOT NULL,
-        lease_owner TEXT, lease_expires_at INTEGER,
-        attempt INTEGER NOT NULL DEFAULT 0, max_attempts INTEGER NOT NULL DEFAULT 1,
-        provider_receipt_json TEXT, cost_status TEXT NOT NULL DEFAULT 'unknown',
-        quarantined_artifact_json TEXT, quarantined_receipt_json TEXT,
-        proposal_id TEXT, comparison_id TEXT,
-        -- Carried so GET /api/jobs/:id keeps the error the legacy in-memory store returned.
-        error_json TEXT,
-        created_at TEXT NOT NULL, updated_at TEXT NOT NULL, terminal_reason TEXT NOT NULL DEFAULT '',
-        CHECK (cost_status IN ('unknown','known'))
-      );
+      -- The job definition is shared with the forward migration, so a fresh database and a
+      -- migrated one cannot drift apart: error_json is carried here so GET /api/jobs/:id
+      -- keeps the error the legacy in-memory store returned.
+      ${JOB_TABLE_DDL.replace("CREATE TABLE job (", "CREATE TABLE IF NOT EXISTS job (")};
       CREATE TABLE IF NOT EXISTS job_event (
         event_id INTEGER PRIMARY KEY AUTOINCREMENT, job_id TEXT NOT NULL, seq INTEGER NOT NULL,
         type TEXT NOT NULL, payload_json TEXT NOT NULL DEFAULT '{}', created_at TEXT NOT NULL,
@@ -293,6 +280,11 @@ export class RevisionStore {
       CREATE UNIQUE INDEX IF NOT EXISTS engine_binding_single_active
         ON engine_binding (project_id) WHERE project_id IS NOT NULL;
     `);
+    // W2.0's one permitted table migration runs *after* the tables exist, so a brand-new
+    // database is already at version 2 by construction and a legacy one is migrated in
+    // place. Running it before creation is what left fresh databases on the old CHECK.
+    // It throws rather than repairing itself if a recorded migration cannot be verified.
+    migrateJobKind(this.#db, path);
   }
 
   /**

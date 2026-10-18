@@ -29,6 +29,31 @@ export const JOB_KIND_MIGRATION_ID = "job_kind_materialize";
 export const JOB_KIND_FROM_VERSION = 1;
 export const JOB_KIND_TO_VERSION = 2;
 
+/**
+ * The one `job` definition, at version 2.
+ *
+ * Both paths must produce this exact table: a brand-new database, which creates it from
+ * here, and a legacy database, which copies into `job_v2` built from here. Two literals
+ * would drift, and the drift is invisible until a Host refuses a job it should accept.
+ */
+export const JOB_TABLE_DDL = `CREATE TABLE job (
+  job_id TEXT PRIMARY KEY, project_id TEXT NOT NULL,
+  kind TEXT NOT NULL CHECK (kind IN ('proposal_comparison','render','snapshot_publish','materialize')),
+  payload_digest TEXT NOT NULL, state TEXT NOT NULL,
+  lease_owner TEXT, lease_expires_at INTEGER,
+  attempt INTEGER NOT NULL DEFAULT 0, max_attempts INTEGER NOT NULL DEFAULT 1,
+  provider_receipt_json TEXT, cost_status TEXT NOT NULL DEFAULT 'unknown',
+  quarantined_artifact_json TEXT, quarantined_receipt_json TEXT,
+  proposal_id TEXT, comparison_id TEXT, error_json TEXT,
+  created_at TEXT NOT NULL, updated_at TEXT NOT NULL, terminal_reason TEXT NOT NULL DEFAULT '',
+  CHECK (cost_status IN ('unknown','known'))
+)`;
+
+/** The kinds the table accepts, and nothing else. */
+export const JOB_KINDS_V2 = Object.freeze(
+  ["proposal_comparison", "render", "snapshot_publish", "materialize"] as const,
+);
+
 /** Columns copied explicitly. Adding a column here without migrating it is deliberate. */
 const JOB_COLUMNS = [
   "job_id", "project_id", "kind", "payload_digest", "state", "lease_owner", "lease_expires_at",
@@ -82,6 +107,11 @@ export function migrateJobKind(db: DatabaseSync, databasePath: string,
     return;
   }
   if (!tableExists(db, "job")) return;
+  // A database whose `job` table is already at v2 has nothing to migrate. This is the
+  // brand-new path: `RevisionStore` creates the table from `JOB_TABLE_DDL` first, so a
+  // fresh database arrives here already correct, and claiming a migration ran would be a
+  // false audit record.
+  if (jobTableIsAtV2(db)) return;
 
   const backupPath = takeBackup(db, databasePath);
   runMigration(db, backupPath, dependencies);
@@ -97,6 +127,17 @@ function ensureSchemaMigrationTable(db: DatabaseSync): void {
 function tableExists(db: DatabaseSync, name: string): boolean {
   const row = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name=?").get(name);
   return row !== undefined;
+}
+
+/**
+ * Reads the compiled DDL rather than trusting a version row. A table can reach version 2
+ * two ways — created fresh, or migrated — and only the second is worth an audit record.
+ */
+function jobTableIsAtV2(db: DatabaseSync): boolean {
+  const row = db.prepare("SELECT sql FROM sqlite_master WHERE type='table' AND name='job'").get() as
+    { sql?: unknown } | undefined;
+  const sql = row === undefined ? "" : String(row.sql ?? "");
+  return JOB_KINDS_V2.every((kind) => sql.includes(`'${kind}'`));
 }
 
 /**
@@ -121,18 +162,7 @@ function runMigration(db: DatabaseSync, backupPath: string,
   const before = db.prepare("SELECT * FROM job ORDER BY job_id").all() as Array<Record<string, unknown>>;
   db.exec("BEGIN IMMEDIATE");
   try {
-    db.exec(`CREATE TABLE job_v2 (
-      job_id TEXT PRIMARY KEY, project_id TEXT NOT NULL,
-      kind TEXT NOT NULL CHECK (kind IN ('proposal_comparison','render','snapshot_publish','materialize')),
-      payload_digest TEXT NOT NULL, state TEXT NOT NULL,
-      lease_owner TEXT, lease_expires_at INTEGER,
-      attempt INTEGER NOT NULL DEFAULT 0, max_attempts INTEGER NOT NULL DEFAULT 1,
-      provider_receipt_json TEXT, cost_status TEXT NOT NULL DEFAULT 'unknown',
-      quarantined_artifact_json TEXT, quarantined_receipt_json TEXT,
-      proposal_id TEXT, comparison_id TEXT, error_json TEXT,
-      created_at TEXT NOT NULL, updated_at TEXT NOT NULL, terminal_reason TEXT NOT NULL DEFAULT '',
-      CHECK (cost_status IN ('unknown','known'))
-    )`);
+    db.exec(JOB_TABLE_DDL.replace("CREATE TABLE job (", "CREATE TABLE job_v2 ("));
     const insert = db.prepare(
       `INSERT INTO job_v2(${columns}) VALUES(${JOB_COLUMNS.map(() => "?").join(",")})`,
     );
