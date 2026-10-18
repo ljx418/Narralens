@@ -105,8 +105,10 @@ M5：多账号模板与稳定批量。
 | Gate D4.0 | 通过（限制已声明） | 注册本地视频资产的类型化单镜替换、许可/来源展示、事务恢复、真实重建与精确恢复已验；Hypit fork/gitlink 已固定；不含 D4.1 多提案和 D4.2 素材化采用 |
 | Gate D4.1 文档 | 通过 / 允许实现 | 多提案 request/draft/comparison schema、只读比较架构和开发验收计划已建立；内部复审 PASS，Claude Code CLI 第二轮 17/17 CLOSED |
 | Gate D4.1 实现 | 通过（限制已声明） | 3–6 多提案只读比较、真实 CLI audit、GCD 差异、原子暂存、80/80、浏览器/NOWRITE、内外实现审查均通过；不含 materialize/采用 |
-| Gate D4.2.1 实现 | 内审通过 / 外审待完成 | 本地流式导入、@1→@2、库存、Hypit lease/TOCTOU、故障恢复、Headless 100%/原生 200%、126/126 已留证；不含 materialize/采用 |
-| M3–M5 | 未开始 | 依赖前置 Gate，不得提前声称实现 |
+| Gate D4.2.1 实现 | 通过（限制已声明） | M1A 逐编号证据与独立 R4 外审已关闭；不含 materialize/采用 |
+| Wave 1 / M2.1–M2.3 | 通过（`CONTROLLED_OPENFILM_READY`） | EnginePort、单引擎治理、持久 Job/lease/outbox、snapshot/锁、OpenFilm 三 clip 迁移副本、重启/再导出/回退；组合外审 PASS，冻结代码 `e2dec5c...` |
+| Wave 2 / M3–M4 | 下一允许阶段 / 未开始 | M3 materialize → M4 impact/adopt/history；Gate D4.2 仍未关闭 |
+| M5–M7 | 未开始 | 依赖前置 Gate，不得提前声称实现 |
 
 ## 工程纪律
 - 每个提交只有一个可观察能力 + 测试 + 复现步骤。
@@ -116,3 +118,4 @@ M5：多账号模板与稳定批量。
 - 不重复开发渲染器。
 - 未验证能力文档标注 `planned/blocked`，不能写 `ready`。
 - 自动化开发每个子阶段必须执行“验收标准 → 审计闭环 → 实现 → 真实数据 E2E → PRD 检视 → 证据落盘”；发现重大偏差或虚假验收风险立即停止并报告。
+- 默认连续推进，仅在需要人工核验、人工高风险决策/授权或移交 Claude Code 实际开发时停止；若移交 Claude Code，必须同步提供包含现场、范围、合同、实现顺序、逐 case 验收、证据、回退和声明上限的可复制详细提示词。
