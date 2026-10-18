@@ -31,6 +31,9 @@ import { isAllowedBrowserRequest, tokenMatches } from "./security.js";
 import { EngineBindingStore, OPENFILM_UPSTREAM_SHA, upstreamShaFor } from "./engine/engine-binding-store.js";
 import { EngineRegistry } from "./engine/engine-registry.js";
 import { composeOpenFilmPort, type OpenFilmComposition } from "./engine/openfilm-composition.js";
+import { AssetInventoryPort } from "./projects/asset-inventory-port.js";
+import { MigratedAssetLedger } from "./projects/migrated-asset-ledger.js";
+import { ProjectResolver } from "./projects/project-resolver.js";
 import { HypitEngineAdapter } from "../adapters/hypit/hypit-engine-adapter.js";
 import { HypitReadAdapter } from "../adapters/hypit/hypit-read-adapter.js";
 
@@ -62,6 +65,9 @@ interface HostDependencies {
   engines?: EngineRegistry;
   jobs?: PersistentJobStore | JobStore;
   snapshotsRoot?: string;
+  /** Overrides for tests and for a Host whose working directory is not the repository. */
+  migrationsRoot?: string;
+  dbPath?: string;
   leaseReapIntervalMs?: number;
   outboxReplayIntervalMs?: number;
   sessionTtlMs?: number;
@@ -89,6 +95,17 @@ export class NarralensHost {
   openFilmComposition: OpenFilmComposition | null = null;
   /** Where migrated copies are built. Composition-time only, never a request field. */
   readonly migrationRoot: string;
+  /**
+   * W2.0 activation layer (blocker 4).
+   *
+   * These three exist so a later Wave 2 route has exactly one project authority to bind
+   * to. They are composed here, over the *same* `RevisionStore`, `ProjectCatalog` and
+   * `migrationRoot` the rest of the Host uses — a second catalog, a second connection or
+   * an in-memory map would be a second authority, which is what C-05 rules out.
+   */
+  readonly projectResolver: ProjectResolver;
+  readonly assetLedger: MigratedAssetLedger;
+  readonly assetInventory: AssetInventoryPort;
   readonly sessionToken = randomBytes(32).toString("base64url");
   /** Loopback origin once `listen` has bound, used to bind preview descriptors. */
   origin = "";
@@ -106,7 +123,7 @@ export class NarralensHost {
     this.runner = dependencies.runner ?? new ControlledAgentRunner({ cwd: projectRoot });
     this.proposals = dependencies.proposals ?? new ProposalAdapter(resolve(projectRoot, "var/proposals"));
     this.comparisons = dependencies.comparisons ?? new ProposalComparisonAdapter(resolve(projectRoot, "var/proposal-comparisons"));
-    this.revisions = dependencies.revisionStore ?? new RevisionStore();
+    this.revisions = dependencies.revisionStore ?? new RevisionStore(dependencies.dbPath ?? ":memory:");
     this.operations = dependencies.operationQueue ?? dependencies.writes?.operations ?? new InMemoryProjectOperationQueue();
     if (dependencies.writes !== undefined && dependencies.operationQueue !== undefined
       && dependencies.writes.operations !== dependencies.operationQueue) throw new Error("HOST_OPERATION_QUEUE_MISMATCH");
@@ -144,7 +161,19 @@ export class NarralensHost {
         return await resolved.port.sourceDigestFor(source.descriptor.project_id, source.descriptor);
       },
     });
-    this.migrationRoot = resolve(projectRoot, "var/migrations");
+    this.migrationRoot = dependencies.migrationsRoot ?? resolve(projectRoot, "var/migrations");
+    this.projectResolver = new ProjectResolver({
+      catalog: this.catalog, revisions: this.revisions, migrationRoot: this.migrationRoot,
+    });
+    this.assetLedger = MigratedAssetLedger.create({
+      revisions: this.revisions,
+      registry: this.imports.registry,
+      catalog: this.catalog,
+      migrationRoot: this.migrationRoot,
+    });
+    this.assetInventory = new AssetInventoryPort({
+      resolver: this.projectResolver, registry: this.imports.registry, ledger: this.assetLedger,
+    });
     this.migrations = new MigrationService({
       catalog: this.catalog, revisions: this.revisions, bindings: this.engines.bindings,
       snapshots: new SnapshotStore({ snapshotsRoot: dependencies.snapshotsRoot ?? resolve(projectRoot, "var/snapshots") }),
@@ -597,7 +626,19 @@ function json(response: ServerResponse, status: number, value: unknown): void {
  */
 function defaultEngineRegistry(host: NarralensHost): EngineRegistry {
   const bindings = new EngineBindingStore(host.revisions);
-  bindings.bind("d1-30s", "hypit", { createdAt: "1970-01-01T00:00:00.000Z" });
+  // Seeding is idempotent on purpose. The binding is a durable fact with a primary key, and
+  // an unconditional `bind` makes a file-backed Host impossible to restart: the second start
+  // hits ENGINE_BINDING_ALREADY_EXISTS. That never showed with the in-memory default, which
+  // is precisely how a restart bug survives a green suite.
+  //
+  // Re-binding is still refused: if the row says something else, that is a contradiction to
+  // investigate, not something to overwrite.
+  const existing = bindings.read("d1-30s");
+  if (existing === undefined) {
+    bindings.bind("d1-30s", "hypit", { createdAt: "1970-01-01T00:00:00.000Z" });
+  } else if (existing.engine !== "hypit") {
+    throw new HttpError(500, "TRANSACTION_FAILED", "ENGINE_BINDING_CONTRADICTS_SEED");
+  }
   const hypit = new HypitEngineAdapter({
     catalog: host.catalog,
     reader: new HypitReadAdapter(host.catalog),
