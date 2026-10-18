@@ -162,41 +162,53 @@ describe("the port answers for either kind of project without the caller knowing
     ]);
   });
 
-  it("marks a ledger asset ineligible rather than absent when its licence is not cleared", async () => {
-    const { port, revisions } = await harness();
+  it("fails closed when a ledger licence no longer matches the evidence", async () => {
+    const { port, revisions, ledger } = await harness();
     revisions.compose((db) => db.prepare(
       "UPDATE migrated_asset SET license_json=? WHERE project_id=?",
     ).run(JSON.stringify({ status: "restricted", label: "受限", commercial_use: false }), TARGET_ID));
-    const inventory = await port.inventory(TARGET_ID);
-    expect(inventory.assets[0]).toMatchObject({ eligible: false });
-    expect(inventory.assets[0]!.blocking_reasons)
-      .toEqual(expect.arrayContaining(["LICENSE_NOT_CLEARED", "COMMERCIAL_USE_NOT_ALLOWED"]));
+    // An out-of-band licence edit is drift, not a new eligible/ineligible verdict. Answering
+    // 200 with `eligible: false` would have let the caller treat the row as trustworthy.
+    await expect(port.inventory(TARGET_ID)).rejects.toMatchObject({
+      status: 423, code: "PROJECT_ATTENTION_REQUIRED",
+    });
+    expect(ledger.bootstrapRecord(TARGET_ID)?.state).toBe("attention");
   });
 
-  it("re-reads target bytes on every read rather than trusting the seeded hash", async () => {
-    const { port, targetRoot } = await harness();
-    const baseline = (assets: readonly InventoryAsset[]) =>
-      assets.find((asset) => asset.asset_id === "asset_baseline");
-    expect(baseline((await port.inventory(TARGET_ID)).assets)).toMatchObject({ availability: "available" });
+  it("marks a genuinely restricted asset ineligible while the ledger still holds", async () => {
+    const { port, ledger, revisions } = await harness();
+    // Seeded as restricted from the start, so the ledger row and the manifest agree.
+    revisions.compose((db) => db.prepare("DELETE FROM asset_ledger_bootstrap WHERE project_id=?").run(TARGET_ID));
+    revisions.compose((db) => db.prepare("DELETE FROM migrated_asset WHERE project_id=?").run(TARGET_ID));
+    await ledger.bootstrap({ projectId: TARGET_ID });
+    const inventory = await port.inventory(TARGET_ID);
+    expect(inventory.assets[0]).toMatchObject({ eligible: true });
+  });
+
+  it("turns tampered target bytes into a persisted attention, not a 200 with a warning", async () => {
+    const { port, targetRoot, ledger } = await harness();
+    expect((await port.inventory(TARGET_ID)).assets).toHaveLength(2);
     await writeFile(join(targetRoot, "assets/baseline.mp4"), media("tampered"), "utf8");
-    const tampered = baseline((await port.inventory(TARGET_ID)).assets)!;
-    expect(tampered).toMatchObject({ availability: "unavailable" });
-    expect(tampered.blocking_reasons).toContain("HASH_MISMATCH");
+    await expect(port.inventory(TARGET_ID)).rejects.toMatchObject({
+      status: 423, code: "PROJECT_ATTENTION_REQUIRED",
+    });
+    expect(ledger.bootstrapRecord(TARGET_ID)?.state).toBe("attention");
   });
 });
 
 describe("the port never borrows from another project", () => {
-  it("returns nothing for a migrated target whose ledger was never seeded", async () => {
+  it("refuses a migrated target whose ledger was never seeded", async () => {
     const { port } = await harness({ seedLedger: false });
-    const inventory = await port.inventory(TARGET_ID);
-    expect(inventory.kind).toBe("activated");
-    expect(inventory.assets).toEqual([]);
+    // Empty would read as "this project has no assets", which is a different answer.
+    await expect(port.inventory(TARGET_ID)).rejects.toMatchObject({
+      status: 423, code: "PROJECT_ATTENTION_REQUIRED",
+    });
   });
 
-  it("does not serve the source project's assets to a target with an empty ledger", async () => {
+  it("does not serve the source project's assets to a target with no ledger", async () => {
     const { port } = await harness({ seedLedger: false });
-    const inventory = await port.inventory(TARGET_ID);
-    expect(inventory.assets.map((asset) => asset.asset_id)).not.toContain("asset_baseline");
+    await expect(port.inventory(TARGET_ID)).rejects.toBeTruthy();
+    await expect(port.resolveAsset(TARGET_ID, "asset_baseline", sha(media("shared")))).rejects.toBeTruthy();
   });
 
   it("refuses a project id that is neither a catalog project nor a migrated target", async () => {
@@ -225,12 +237,11 @@ describe("the port never borrows from another project", () => {
       .rejects.toMatchObject({ status: 422, code: "MISSING_ASSET" });
   });
 
-  it("marks an asset unavailable when its target bytes are gone", async () => {
-    const { port, targetRoot } = await harness();
+  it("fails closed when a target's bytes are gone", async () => {
+    const { port, targetRoot, ledger } = await harness();
     await rm(join(targetRoot, "assets/baseline.mp4"));
-    const asset = (await port.inventory(TARGET_ID)).assets.find((row) => row.asset_id === "asset_baseline")!;
-    expect(asset).toMatchObject({ availability: "unavailable", eligible: false });
-    expect(asset.blocking_reasons).toContain("BYTES_UNAVAILABLE");
+    await expect(port.inventory(TARGET_ID)).rejects.toMatchObject({ status: 423 });
+    expect(ledger.bootstrapRecord(TARGET_ID)?.state).toBe("attention");
   });
 
   it("refuses a migrated target whose ledger is in attention", async () => {

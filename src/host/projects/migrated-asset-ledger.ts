@@ -208,12 +208,22 @@ export class MigratedAssetLedger {
    * This can only ever move a ledger *into* `attention`. It never moves one out: a ledger
    * that has already been called a human's attention is a decision, not an observation,
    * and re-proving the bytes does not retract it.
+   *
+   * It also never *creates* a ledger. C-06 requires the legacy-target bootstrap to happen
+   * once, before any Wave 2 write, and forbids it being triggered lazily by a request; a
+   * read path that seeds itself is precisely that.
    */
   async reverify(request: BootstrapRequest): Promise<BootstrapResult> {
     const now = request.now ?? new Date();
     const current = this.bootstrapRecord(request.projectId);
     if (current === undefined) {
-      return await this.bootstrap(request);
+      // Verification never creates. C-06 requires the legacy-target bootstrap to happen
+      // once, before any Wave 2 write, and explicitly forbids it being triggered lazily by
+      // a request — a read that seeds itself is exactly that. An activated project with no
+      // ledger has facts that were never established, so it fails closed.
+      throw new HttpError(423, "PROJECT_ATTENTION_REQUIRED",
+        "Migrated project has no asset ledger; its asset facts are not established",
+        undefined, request.projectId);
     }
     if (current.state === "attention") {
       // Already a decision. Re-deriving the facts cannot retract it, and reading the

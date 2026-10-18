@@ -112,39 +112,55 @@ export class AssetInventoryPort {
     };
   }
 
+  /**
+   * ASSET-02 on the production read path.
+   *
+   * Every read of an activated project re-proves the ledger before answering. The stored
+   * rows are a claim made at bootstrap, and a claim that is never checked is a cache: the
+   * previous version re-hashed target bytes and reported `HASH_MISMATCH` as an
+   * `availability` field on an otherwise successful 200, which let a write proceed on facts
+   * that had been contradicted.
+   *
+   * So drift is now a *persisted transition*, not an observation. `reverify` moves the
+   * ledger `active -> attention` and the request that detected it gets the 423. `attention`
+   * is terminal, so restoring the bytes does not silently reopen the project — reversing
+   * that decision is a separate, audited operation that does not exist yet.
+   */
   async #fromLedger(projectId: string, targetRoot: string, kind: "activated"): Promise<AssetInventory> {
+    const reverified = await this.#ledger.reverify({ projectId });
+    if (reverified.state === "attention") {
+      throw new HttpError(423, "PROJECT_ATTENTION_REQUIRED",
+        `Migrated asset ledger is in attention: ${reverified.reason ?? "unknown"}`,
+        undefined, projectId);
+    }
+
     const bootstrap = this.#ledger.bootstrapRecord(projectId);
     if (bootstrap === undefined) {
-      // Not seeded is not the same as empty-but-fine. It is a capability that has not been
-      // established, and the caller must be able to see that.
-      return { kind, project_id: projectId, store: "migrated_asset_ledger",
-        inventory_sha256: inventoryDigest([], ""), assets: [] };
-    }
-    if (bootstrap.state === "attention") {
+      // Unreachable: `reverify` above already refuses a project with no record. Kept as a
+      // fail-closed assertion rather than a trust in the caller's ordering.
       throw new HttpError(423, "PROJECT_ATTENTION_REQUIRED",
-        `Migrated asset ledger is in attention: ${bootstrap.attention_reason ?? "unknown"}`,
+        "Migrated project has no asset ledger; its asset facts are not established",
         undefined, projectId);
     }
 
     const rows = this.#ledger.assets(projectId);
+    // `reverify` already proved the rows match the evidence. An empty row set under an
+    // active record means the rows were removed underneath us, which is drift of the same
+    // kind and must not read as "no assets".
+    if (rows.length === 0) {
+      throw new HttpError(423, "PROJECT_ATTENTION_REQUIRED",
+        "Migrated asset ledger is active but holds no asset rows", undefined, projectId);
+    }
+
     const assets: InventoryAsset[] = [];
     for (const row of rows) {
       const blocking: AssetBlockingReason[] = [];
-      let availability: "available" | "unavailable" = "available";
       if (row.license.status !== "cleared") blocking.push("LICENSE_NOT_CLEARED");
       if (!row.license.commercial_use) blocking.push("COMMERCIAL_USE_NOT_ALLOWED");
-      const hash = await this.#targetHash(targetRoot, row.target_path);
-      if (hash === null) {
-        availability = "unavailable";
-        blocking.push("BYTES_UNAVAILABLE");
-      } else if (hash !== row.target_sha256) {
-        availability = "unavailable";
-        blocking.push("HASH_MISMATCH");
-      }
       assets.push({
         asset_id: row.asset_id, sha256: row.target_sha256, media_type: row.media_type,
         duration_frames: row.duration_frames, source: row.source, license: row.license,
-        availability, eligible: availability === "available" && blocking.length === 0,
+        availability: "available", eligible: blocking.length === 0,
         blocking_reasons: [...new Set(blocking)],
       });
     }
