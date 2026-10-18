@@ -1,7 +1,7 @@
 # 叙镜架构设计 v1.0
 <!-- M2.1_REWORK_BASE_SHA=ee58ab5c6a9d4bbdf05e8ac8a394fd75218cae59 REVIEW_STATUS=PASS -->
 
-文档状态：Gate D1–D3、D4.0 与 D4.1 的历史结论保留。D4.2.1 的 M1A 逐编号证据已完成并由独立 Claude Code R4 外审通过；这只关闭 D4.2.1 prerequisite subset，不关闭 Gate D4.2。2026-10-16 经 `CR-MIG-001` 批准进入架构迁移；M1B 隔离 spike 与 M2.1 第三轮独立复审已经通过。M2.2 返修实现已完成内部复验，生产 `/edits`、持久 Job/lease、outbox、snapshot 与锁控制已接线；它是 Wave 1 内部检查点，独立外审合并到 M2.3 后的完整 M2 组合候选。当前生产剪辑事实源仍为 Hypit，OpenFilm 生产迁移副本尚未实现，旧 Gate 历史不被覆盖。
+文档状态：Gate D1–D3、D4.0 与 D4.1 的历史结论保留。D4.2.1 的 M1A 逐编号证据已完成并由独立 Claude Code R4 外审通过；这只关闭 D4.2.1 prerequisite subset，不关闭 Gate D4.2。2026-10-16 经 `CR-MIG-001` 批准进入架构迁移；M1B 隔离 spike 与 M2.1 第三轮独立复审已经通过。M2.2 与 M2.3 已组成 Wave 1 候选并通过独立外审，两条外审 MINOR 已在冻结代码 `e2dec5c...` 关闭，状态为 `CONTROLLED_OPENFILM_READY`。生产 `/edits`、持久 Job/lease、outbox、snapshot、锁控制及受控 OpenFilm 迁移副本已经接线；旧 Hypit 工程保持不变且可回退。Gate D4.2 仍未关闭，materialize/impact/adopt/history restore 仍未实现，下一允许阶段为 M3，旧 Gate 历史不被覆盖。
 
 ## 1. 零层架构
 
@@ -34,7 +34,9 @@ ProposalBundle / Evidence / AssetManifest
           └──> 暂存区 → 审批/校验 → Source Adapter → 唯一主工程
 ```
 
-**唯一剪辑事实源：Hypit Author Source + Run。** Narralens DB 不是第二条时间轴；OpenMontage 不直接写主工程。
+**每个项目只绑定一个可写引擎事实源。** legacy 项目保持 Hypit Author Source + Run；通过受控迁移验证并
+激活的新副本以 OpenFilm 原生工程为事实源。Narralens DB 只保存绑定、revision、snapshot、journal 与
+审计事实，不是第二条时间轴；两个引擎之间不双写，OpenMontage 不直接写任何主工程。
 
 ## 2. 为什么这样集成
 OpenMontage 的公开架构是 agent-first：编码智能体读取 YAML pipeline、Markdown skills，调用 Python tools，并通过 checkpoint 推进；它不是一个现成的单一 HTTP 视频生成 API。Backlot 是只读制作看板。因此我们复用它的制作方法、工具和产物，不把 Backlot 当编辑器。
@@ -95,7 +97,7 @@ narralens/
 | `ProjectOperationQueue` | `src/host/projects/project-operation-queue.ts` | ImportService / ProjectWriteActor → 每项目串行 commit | D4.2.1 已实现 interface、FIFO/错误隔离/跨工程并行，Host 单例已注入 Actor | ImportService 实现时必须复用同一实例 |
 | `MaterializeService` / `MaterializeRenderer` | `src/host/materialize/` | Proposal + bindings → ffmpeg composite → materialized staging | D4.2 docs-only：异步 Job、确定性 recipe、NOWRITE | D4.2.2 计划，受 D4.2.1 门禁约束 |
 | `ProjectWriteActor` | `src/host/projects/` | API → transaction → adapters | D3 fit 与 D4.0 单镜媒体替换已实现 revision、lock、幂等、补偿/attention/recovery | D4.1 禁止调用；提案采用待 D4.2 |
-| `SQLiteEventStore` | `src/host/projects/revision-store.ts` | actor/import ↔ revision/edit journal/import journal/idempotency | D3 revision/edit journal/event 与 D4.2.1 import journal 已实现；Job/SSE 仍为内存态 | 导入不得增加影片 revision；持久 Job/outbox 待 M2 |
+| `SQLiteEventStore` | `src/host/projects/revision-store.ts` | actor/import/coordinator/migration ↔ revision/journal/job/outbox | D3/D4.2.1 历史 journal 保留；M2.2 已实现持久 Job/lease/event/outbox，M2.3 migration/migration_step 与既有 store 共用同一数据库句柄 | 导入不增加影片 revision；迁移激活只提交新副本，不改旧工程 |
 | `OpenMontageAdapter` | `src/adapters/openmontage/` | Host ↔ ControlledAgentRunner | D2 单提案保留；D4.1 单次 CLI 多提案、完整 provider schema 与真实 audit 已实现 | 禁止直写 Hypit；D4.2 materialize 另阶段 |
 | `HypitAdapter` | `src/adapters/hypit/` | Actor ↔ Author Source + Run | D3 `parameter.adjust`、D4.0 `media.replace` 与 D4.2.1 expected manifest SHA 已实现 | fork commit `6fdd8c0...` 已固定；@1/@2 安全重载、TOCTOU/Source 补偿与真实 D4.0 回归已通过 |
 | JSON contracts | `contracts/` | UI/Host/Adapters/Tests | D4.1 合同已实现；D4.2.1 四份 runtime 合同、@1/@2 manifest union 与两项错误码已实现 | 89/89、SHA pin、后续三合同未注册 |
@@ -107,12 +109,13 @@ narralens/
 | `SourceDigestV1` | `src/host/engine/source-digest-v1.ts` | source 引用闭包 → canonical → SHA256 | **M2.1 已实现并通过独立复审**：Hypit 引用资产当前 bytes 纳入闭包，不一致 fail closed；identity 使用 realpath，alias 每个 canonical path 恰一行 | 外审 B-02/M-03 返修证据 ER-B-02/ER-M-03 |
 | 时间模型 | `src/host/engine/time-model.ts` | 整数半开帧 ↔ rational fps | **M2.1 已实现**：精确 BigInt 有理换算；已验仅 30/1；短素材拒绝而不循环/冻结/变速 | TM-01/02/03（`AT-PREVIEW-01`/`AT-SELECTION-01`） |
 | `HypitEngineAdapter` | `src/adapters/hypit/hypit-engine-adapter.ts` | EnginePort ↔ 现有 Hypit read/write | **M2.1 已实现**：包装既有 adapter，legacy 合同、入口与测试未改 | AC-019；134 条旧回归全绿 |
-| `OpenFilmAdapter` | `src/adapters/openfilm/openfilm-engine-adapter.ts`、`openfilm-upstream.ts` | EnginePort ↔ 固定上游接缝 | **M2.1 只读实现并通过独立复审**：固定 HEAD、可证明 clean、package/lock/license/传递模块摘要三层校验；Git clean 无法证明即 `ENGINE_UNAVAILABLE`；生产迁移写链待 M2.3 | 外审 M-04/M-05、R2-M-01；固定上游 `e70d9d9...` |
+| `OpenFilmAdapter` | `src/adapters/openfilm/openfilm-engine-adapter.ts`、`openfilm-upstream.ts` | EnginePort ↔ 固定上游接缝 | **M2.1 治理 + M2.3 受控迁移已通过组合外审**：固定 HEAD、clean/package/lock/license/传递模块摘要校验；迁移 stage 生成三个含 `window.film.frame()` 的原生 page clip，可重开、编辑并真实再导出 | Wave 1 MIG-02/03；固定上游 `e70d9d9...` |
 
-| `ProjectCoordinator` | `src/host/projects/project-coordinator.ts` | Host 写入口 → 网关 → 基线 → 锁 → 事务机 → commit record | **M2.2 返修已内部复验**：生产 `/edits` 已接线；与 actor/import 共用队列；幂等重放不新建事务；source baseline、active commit、snapshot 指针和 outbox 一致推进 | `docs/evidence/M2/M2.2/reviews/codex-rework-review.md`；Wave 1 组合外审待 M2.3 后执行 |
+| `ProjectCoordinator` | `src/host/projects/project-coordinator.ts` | Host 写入口 → 网关 → 基线 → 锁 → 事务机 → commit record | **M2.2 已通过 Wave 1 组合外审**：生产 `/edits` 已接线；与 actor/import/migration 共用队列；幂等重放不新建事务；source baseline、active commit、snapshot 指针和 outbox 一致推进 | Wave 1 JRNL/SNAP/DUR/BYP/SER；legacy AC-005 事后捕获边界保留 |
 | `SnapshotStore` | `src/host/projects/snapshot-store.ts` | engine source 闭包 → staging → 逐级 fsync → rename → 指针 | **M2.2 返修已内部复验**：内容寻址、完整引用资产闭包、复用快照不误回滚；durability 不可证明进入 attention | M2.2 SNAP/DUR；AC-005 legacy 事后捕获边界保留到 M2.3/M4A |
 | `LockService` | `src/host/projects/lock-service.ts` | 服务端计算受影响锁 + control_revision | **M2.2 返修已内部复验**：增删锁与 edit 共用队列，锁、control revision、outbox 同事务；commit 前复核 | M2.2 LOCK（duration/narration 集成层 `NOT_APPLICABLE_APPROVED`） |
-| `PersistentJobStore` / `Outbox` | `src/host/persistent-job-store.ts`、`src/host/outbox.ts` | CAS lease / 事件 / 幂等消费 | **M2.2 返修已内部复验**：生产 runner 先取 owner+attempt lease；旧 worker 晚到隔离；状态/事件原子；启动回收与周期 replay 已接线 | M2.2 JB-01..07；完整 Wave 1 独立外审待 M2.3 后执行 |
+| `PersistentJobStore` / `Outbox` | `src/host/persistent-job-store.ts`、`src/host/outbox.ts` | CAS lease / 事件 / 幂等消费 | **M2.2 已通过 Wave 1 组合外审**：生产 runner 先取 owner+attempt lease；旧 worker 晚到隔离；状态/事件原子；启动回收与周期 replay 已接线 | Wave 1 JB-01..07；render/snapshot_publish 尚无业务 runner |
+| `MigrationService` / `MigrationStore` / `OpenFilmMigrator` | `src/host/projects/migration-service.ts`、`migration-store.ts`、`openfilm-migrator.ts` | Hypit snapshot → isolated stage → OpenFilm validate/snapshot/bind/report/rollback | **M2.3 已通过 Wave 1 组合外审**：确定 plan、三原生 clip、9 个崩溃边界恢复、幂等、外改 attention、旧工程字节不变及可验证回退；生产 `listen()` 已接线恢复 | EN-03/05、MIG-01..07；冻结代码 `e2dec5c...`，证据 `docs/evidence/WAVE1/` |
 
 状态口径：`已实现` 只覆盖对应 Gate 的证据范围，不外推到完整 V1；`docs-only/待后续` 表示目标明确但尚无生产能力。
 

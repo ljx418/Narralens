@@ -1,15 +1,15 @@
 # Wave 1 内部四视角审查
 
-审查对象：Wave 1 组合候选 `a2b32b9`（证据捕获提交 `4184d0e`）
+审查对象：Wave 1 组合候选 `cb87a2c`；外审后修复/冻结代码 `e2dec5c`；证据捕获提交 `fd64762`
 分支：`migration/m2.2-coordinator-persistence`
 审查人：实现会话。**不签署独立外审。**
 范围：M2.1 引擎治理 + M2.2 一致提交/三类锁/持久任务 + M2.3 迁移副本与可验证回退。
 
-## 0. 门禁（组合捕获 `logs/4184d0e/`）
+## 0. 门禁（最终组合捕获 `logs/e2dec5c/`）
 
 | 命令 | exit |
 |---|---|
-| `corepack pnpm check` | 0（38 files / 381 tests，连续多次全绿） |
+| `corepack pnpm check` | 0（38 files / 383 tests，连续多次全绿） |
 | `corepack pnpm test:contracts` | 0 |
 | `corepack pnpm test:m2.1` | 0 |
 | `vitest tests/m2.2` | 0 |
@@ -21,8 +21,9 @@
 | `evidence:m2.2:integrity` | **1（信息项）** |
 
 **关于最后一项**：M2.2 的完整性校验断言「M2.2 冻结之后没有代码变化」，而 M2.3 是在其上构建的，
-因此它按预期报告了移动。其输出逐字记录在 `logs/4184d0e/m2.2-integrity.txt`，未把门调绿，
-manifest 的 `claim_limits` 明确写出「本组合捕获重跑了 M2.2 自身的门」。
+因此它按预期报告了移动。其输出逐字记录在 `logs/e2dec5c/m2.2-integrity.txt`，未把门调绿，
+manifest 的 `claim_limits` 明确写出「本组合捕获重跑了 M2.2 自身的门」。该项是 NOTE，不是
+Wave 1 组合 Gate 的失败。
 
 ## 1. 架构视角
 
@@ -90,18 +91,21 @@ manifest 的 `claim_limits` 明确写出「本组合捕获重跑了 M2.2 自身�
 
 - BLOCKER = 0
 - MAJOR = 0
-- MINOR = 3（均为已声明的边界，不是未发现缺陷）
+- 未关闭 BLOCKER / MAJOR / 外审 MINOR = 0
+- 已声明产品边界 = 3；信息项 = 1
 
-**MINOR 明细**：
+**已声明产品边界**：
 
 1. **AC-005 在 legacy Hypit edit 路径仍是事后捕获**。actor 仍就地提交 author source，协调器随后
    捕获 snapshot。保留是为不改 D3/D4.2.1 已验证行为。**迁移路径**才是完整的 stage→snapshot→pointer。
 2. **duration / narration 锁集成层 `NOT_APPLICABLE_APPROVED`**。M2.2 无可改变二者的 typed edit。
 3. **`render` / `snapshot_publish` 无业务 runner**，只证明存储/lease/事件/恢复/NOWRITE。
-   4. **M2.2 完整性校验在本组合下按预期报 1**（已被 M2.3 取代），见 §0。
 
-**实现层结论：PASS，可冻结组合候选，交独立外审。独立外审 PASS 前不得声明
-`CONTROLLED_OPENFILM_READY`。**
+信息项：**M2.2 完整性校验在本组合下按预期报 1**（M2.3 已在其冻结点之后继续开发），见 §0。
+
+**最终结论：PASS。独立外审为 PASS（BLOCKER=0、MAJOR=0、MINOR=2、NOTE=2），两条 MINOR 已在
+`e2dec5c...` 关闭并完成组合捕获，因此允许声明 `CONTROLLED_OPENFILM_READY`。外审结论记录见
+`docs/evidence/WAVE1/reviews/external-review.md`。**
 
 ## 6. 残余风险
 

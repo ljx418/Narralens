@@ -1,7 +1,7 @@
 # Narralens V1 规格—架构—开发—验收追踪矩阵
 
 版本：v1.0  
-状态：实际开发已批准；Gate D1、Gate D2、Gate D3、Gate D4.0、Gate D4.1 历史结论保留。D4.2.1 的 M1A 逐编号补证已由独立 Claude Code R4 外审关闭；M1B OpenFilm 隔离技术 spike 也已通过。M2.1 已在第三轮独立复审后达到 `M2_1_CONTROL_BOUNDARY_READY`（冻结 `ca7dbf3...`）。M2.2 原候选经独立审视发现生产接线、lease、snapshot 闭包和锁事务缺口，现已返修并完成内部复验；按四波次压缩策略，它只进入 `INTERNAL_EVIDENCED`，与 M2.3 在完整 M2 组合候选上统一独立外审。M2.3 尚未实现，旧 D4.2.2 不得顺跳；更不得宣称 M2 完成、Gate D4.2、`Gate V1-P0` 或 `V1-Full`。
+状态：实际开发已批准；Gate D1、Gate D2、Gate D3、Gate D4.0、Gate D4.1 历史结论保留。D4.2.1 的 M1A 逐编号补证已由独立 Claude Code R4 外审关闭；M1B OpenFilm 隔离技术 spike 也已通过。M2.1 已在第三轮独立复审后达到 `M2_1_CONTROL_BOUNDARY_READY`。M2.2 与 M2.3 已组成 Wave 1 候选并通过独立外审，两条外审 MINOR 已在冻结代码 `e2dec5c...` 关闭，现达到 `CONTROLLED_OPENFILM_READY`。下一允许阶段为 M3（materialize）；Gate D4.2、`Gate V1-P0` 与 `V1-Full` 均未关闭。
 事实日期：2026-10-18
 <!-- M2.1_REWORK_BASE_SHA=ee58ab5c6a9d4bbdf05e8ac8a394fd75218cae59 REVIEW_STATUS=PASS -->
 
@@ -44,7 +44,7 @@
 | M0 | 现场 SHA、代码/路由/阈值、备份与变更单 | observed | 不改变业务 Gate |
 | M1A | D4.2.1 冻结矩阵逐 case 真实证据与独立外审 | passed（实现 `c0f101b...`；R4 YES） | Headless PASS；headed/human NOT_RUN；不扩张为 D4.2 总 Gate |
 | M1B | 固定 OpenFilm SHA、可编辑 30 秒链路、native 写入口清单与 stale-base 实证 | passed-spike（OpenFilm `e70d9d9...`） | 不写生产 Hypit；可编辑三 clip；生产 translate/block 已由 M2.1 落地为 `NativeMutationRegistry`/`NativeWriteGateway`，M2.1 未提供任何 OpenFilm 写路径 |
-| M2 | EnginePort、单引擎绑定、写入治理、三类锁、持久 Job/SSE/lease、snapshot/journal/回退 | **M2.1 已通过第三轮独立复审**（冻结 `ca7dbf3...`）；**M2.2 已达 `INTERNAL_EVIDENCED`**（最终代码/工具冻结 `21974bf22f89cc47caa1d1ecea95d60e4916b854`，17 case：16 PASS + 1 `NOT_APPLICABLE_APPROVED`）；M2.3 已完成开工设计、实现未开始 | M2.2 独立外审合并到 M2.3 后的 Wave 1 候选；materialize/adopt/impact/migrate-copy/history restore 仍 404；AC-005 legacy 事后捕获缺口随 M2.3/M4A 闭环 |
+| M2 | EnginePort、单引擎绑定、写入治理、三类锁、持久 Job/SSE/lease、snapshot/journal、迁移副本与回退 | **Wave 1 组合外审 PASS，`CONTROLLED_OPENFILM_READY`**：冻结代码 `e2dec5c...`，证据捕获 `fd64762...`，21 case 为 20 PASS + 1 `NOT_APPLICABLE_APPROVED` | migrate-copy/report/rollback 已实现；materialize/impact/adopt/history restore 仍未实现；AC-005 legacy edit 仍为事后 snapshot，headed/human NOT_RUN |
 | M3–M5 | 素材化、采用事务、同页原生 Studio UX | not-started | 顺序门禁，不顺跳 |
 | M6 | `Gate V1-P0` | not-started | 不等于 V1-Full |
 | M7A–D | P1 与完整长片证据 | not-started | P0/P1 全绿后才可声明 V1-Full |
@@ -54,8 +54,8 @@
 | PRD | 架构控制 | 测试 | 门限 | 当前状态 |
 |---|---|---|---|---|
 | NFR-01 本地优先 | loopback Host、受控 Runner、AssetRef 审批、`SourceDigestV1` | `AT-SEC-01` Origin/token、路径穿越、锁定版本 gitleaks 或等价扫描器 | 无凭据进入前端/JSON/日志；记录工具/版本/规则集/时间与 `docs/evidence/<phase>/security/credential-scan.json`；外传逐任务记录 | partial：D2 loopback/Origin/token/路径/外传清单通过；M2.1 已补 `AT-SEC-01` 的引用闭包与凭据扫描部分（固定规则集扫描器，0 命中，`docs/evidence/M2/M2.1/security/credential-scan.json`；上游固定 SHA 校验后才动态加载，绝对路径/穿越/symlink 逃逸/外部引用全部拒绝）；AssetRef 审批待 D4/M3 |
-| NFR-02 可恢复 | ProjectWriteActor + journal + append-only event log | `AT-RECOVERY-01` 在四个 journal 状态注入崩溃 | 重启恢复到最后提交 revision，主 Source 不损坏 | partial：D3 prepared/target/committed/attention 路径通过；D4.1 只保证 comparison 原子可见且如实声明在途任务可丢失，不推进本项；完整任务/历史恢复待 D5 |
-| NFR-03 可观察 | Job state + SSE + correlation ID | `AT-OBS-01` 断线重连/晚到/取消 | 无重复事件；费用与“已请求取消”如实显示；无假百分比 | partial：D2 event replay/live、取消状态、correlation ID 与 Runner audit 通过；持久事件待 D5 |
+| NFR-02 可恢复 | ProjectWriteActor + journal + append-only event log | `AT-RECOVERY-01` 在 journal/迁移边界注入崩溃 | 重启恢复到最后提交 revision，主 Source 不损坏 | partial：D3 四状态恢复保持通过；M2.2 持久任务/lease/outbox 恢复已接线，M2.3 迁移 9 个崩溃边界可收敛；用户历史恢复仍待 D5 |
+| NFR-03 可观察 | Job state + SSE + correlation ID | `AT-OBS-01` 断线重连/晚到/取消 | 无重复事件；费用与“已请求取消”如实显示；无假百分比 | partial：D2 既有链保持；M2.2 已实现持久 Job/event/SSE/outbox、owner+attempt lease、晚到隔离与 replay；render/snapshot_publish 业务 runner 尚未实现 |
 | NFR-04 可测试 | schema/contract/fixture/ffprobe/frame sampling | `AT-CONTRACT-01`、`AT-E2E-01` | 每个 phase 的 evidence manifest 完整 | partial：D4.1 达到 80/80、真实 CLI/浏览器/NOWRITE/evidence manifest；V1 全阶段未完成 |
 | NFR-05 性能 | Timeline virtualization + async jobs | `AT-PERF-01` 120 镜头 reference fixture | 选择反馈 p95 ≤100ms；无 >100ms UI 长任务；机器与 trace 已记录 | not-started |
 | NFR-06 可访问 | focus management、键盘映射、reduced motion、文本状态 | `AT-A11Y-01` axe + keyboard + 200% text + 人工审查 | 无阻塞级问题；全部核心路径可用键盘完成 | partial：D4.1 axe-core 4.10.3、键盘提交/切换、四视口、200% 重排与人工对比度通过；V1 其余路径待验 |
@@ -121,16 +121,19 @@
 - 外审：第一轮 2 BLOCKER/5 MAJOR 与第二轮新增 2 MAJOR 均已返修；第三轮独立复审通过，冻结点
   `ca7dbf38ae9cd401b84f4bb7fe4e2ec3d0f0c523`，允许进入 M2.2，但不外推为完整 M2。
 
-### Gate M2.2（当前：返修后内部检查点）
+### Gate M2.2–M2.3 / Wave 1（已通过组合独立外审）
 
-- 原冻结候选 `12c52c6...` 的证据保留为历史；其后独立审视发现生产 `/edits` 未经过 Coordinator、
-  runner 未持 lease、旧 worker callback 可越过新 lease、snapshot 未覆盖引用视觉资产等缺口。
-- 返修已把生产写路由、启动恢复/outbox/reaper、owner+attempt CAS、完整引擎 digest 闭包、锁事务与
-  control revision 复核接入真实 Host，并增加 Host HTTP 组合、重启、故障注入和并发测试。
-- 当前只允许声明 `M2_2_INTERNAL_EVIDENCED`；按 `13_ACCELERATED_DELIVERY_STRATEGY.md`，不再为模块
-  单独重复外审，M2.3 完成后在完整 M2 组合 commit 上统一独立复审。
-- 已知边界：legacy Hypit 仍先就地提交再捕获 snapshot；duration/narration 无可达 typed edit；
-  headed/human `NOT_RUN`。这些边界不得写成 AC-005/完整三类锁体验已全部关闭。
+- M2.2 已把生产 `/edits`、启动恢复/outbox/reaper、owner+attempt CAS、完整引擎 digest 闭包、锁事务与
+  control revision 复核接入真实 Host；M2.3 已实现确定迁移计划、隔离 stage、三原生 OpenFilm clip、
+  snapshot/bind/report、9 个崩溃边界恢复、幂等、外改 attention 与可验证回退。
+- Wave 1 冻结代码为 `e2dec5ca03ee881b55f92b920ee6df2c676aeb26`，证据捕获提交为
+  `fd64762dbcff4e1577529a00991049b59bf2c1e7`，首次组合 manifest 封存为 `44b294d...`。
+- 独立外审结论 PASS（BLOCKER=0、MAJOR=0、MINOR=2、NOTE=2）；两条 MINOR 已在冻结代码中关闭。
+  证据见 `docs/evidence/WAVE1/`：38 files / 383 tests，完整性 6/6 PASS，21 case 为 20 PASS +
+  1 `NOT_APPLICABLE_APPROVED`。
+- 当前允许声明 `CONTROLLED_OPENFILM_READY`。已知边界：legacy Hypit edit 仍先就地提交再捕获 snapshot；
+  duration/narration 锁集成层为 `NOT_APPLICABLE_APPROVED`；render/snapshot_publish 无业务 runner；
+  headed/human `NOT_RUN`；只实测 900 帧短片。不得扩张为 Gate D4.2、V1-P0 或 V1-Full。
 
 ## 5. 变更控制
 
