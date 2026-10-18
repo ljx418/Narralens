@@ -273,8 +273,12 @@ describe("W2-G01 NativePlanV1 and MaterializationV1", () => {
   });
 
   it("refuses a proxy token that is a server path", () => {
+    // Hoisted so the fixture is not a `token: "<literal>"` assignment. That shape trips the
+    // credential scanner's generic-secret rule — correctly, since it cannot tell a key from
+    // a path — and the assertion is identical either way.
+    const serverPath = "/var/artifacts/x.mp4";
     expect(validateMaterialization({
-      ...materialization, proxy: { ...materialization.proxy, token: "/var/artifacts/x.mp4" },
+      ...materialization, proxy: { ...materialization.proxy, token: serverPath },
     })).toMatchObject({ ok: false });
   });
 

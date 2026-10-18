@@ -1,0 +1,35 @@
+
+> narralens@0.1.0 test:m2.1 /mnt/c/workspace/videoworkline/Narralens
+> vitest run --config vitest.config.ts tests/m2.1 tests/architecture
+
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens
+
+ ✓ tests/m2.1/openfilm-upstream-lock.test.ts (12 tests) 139ms
+ ✓ tests/m2.1/time-model.test.ts (11 tests) 25ms
+ ✓ tests/architecture/m2.2-fitness.test.ts (15 tests) 1194ms
+ ✓ tests/m2.1/engine-port.test.ts (10 tests) 815ms
+   ✓ OpenFilmEngineAdapter staging > AC-004 never accepts an upstream rebased result as success  545ms
+(node:77723) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:77719) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/architecture/m2.1-fitness.test.ts (22 tests) 770ms
+   ✓ fitness 1-3: dependency direction > 3. production code never imports a spike, statically or dynamically  408ms
+ ✓ tests/m2.1/engine-route.test.ts (8 tests) 1535ms
+   ✓ M2.1 route activation > AC-019 leaves every legacy route in place  1095ms
+ ✓ tests/m2.1/native-bypass.test.ts (13 tests) 1895ms
+ ✓ tests/m2.1/source-digest-v1.test.ts (18 tests) 3222ms
+   ✓ SourceDigestV1 closure > EN-04 gives the same digest whatever order the Host declares the roots in  658ms
+   ✓ SourceDigestV1 closure > EN-04 changes the digest when a scene, subtitle, setting, font or referenced asset changes  667ms
+   ✓ SourceDigestV1 closure > AC-006 refuses absolute paths, traversal, symlink escape, query strings and unknown roles  393ms
+(node:77994) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.1/engine-binding-store.test.ts (10 tests) 13ms
+ ✓ tests/m2.1/native-write-gateway.test.ts (20 tests) 14ms
+
+ Test Files  10 passed (10)
+      Tests  139 passed (139)
+   Start at  00:03:30
+   Duration  12.83s (transform 2.11s, setup 0ms, collect 15.46s, tests 9.62s, environment 1ms, prepare 28.56s)
+

@@ -1,0 +1,34 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens
+
+(node:78550) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.2/outbox.test.ts (9 tests) 15ms
+(node:78544) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:78518) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:78537) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:78531) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.2/persistent-job-store.test.ts (19 tests) 180ms
+ ✓ tests/m2.2/transaction-state-machine.test.ts (8 tests) 165ms
+(node:78553) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.2/lock-service.test.ts (12 tests) 15ms
+(node:78525) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.2/journal-predecessor.test.ts (9 tests) 12ms
+ ✓ tests/m2.2/snapshot-store.test.ts (9 tests) 720ms
+ ✓ tests/m2.2/host-coordinator-integration.test.ts (2 tests) 194ms
+ ✓ tests/m2.2/project-coordinator.test.ts (12 tests) 2224ms
+   ✓ BYP the gateway is in front of every write > an accepted edit reaches the actor exactly once and returns its response unchanged  370ms
+   ✓ LOCK the coordinator consults locks before the actor > serializes lock changes behind an in-flight edit on the shared project queue  378ms
+   ✓ SER one queue, serial per project, parallel across projects > orders two writes on the same project and lets two projects run at once  301ms
+
+ Test Files  8 passed (8)
+      Tests  80 passed (80)
+   Start at  00:03:49
+   Duration  8.09s (transform 3.09s, setup 0ms, collect 14.39s, tests 3.52s, environment 1ms, prepare 16.98s)
+

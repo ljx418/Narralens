@@ -115,7 +115,12 @@ export function scan(root: string): ScanReport {
   };
 }
 
-const outputPath = resolve("docs/evidence/M2/M2.1/security/credential-scan.json");
+// Defaults to the M2.1 report, which is what that stage's script expects. A later stage
+// passes `NARRALENS_SECRET_SCAN_OUT` so its capture cannot overwrite an earlier stage's
+// historical report — re-running a scan must never rewrite recorded evidence.
+const outputPath = resolve(
+  process.env.NARRALENS_SECRET_SCAN_OUT ?? "docs/evidence/M2/M2.1/security/credential-scan.json",
+);
 const report = scan(process.cwd());
 writeFileSync(outputPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
 console.log(`${report.status} findings=${report.findings_count} files=${report.scope.scanned_files} -> ${relative(process.cwd(), outputPath)}`);

@@ -59,7 +59,13 @@ run m2.3               corepack pnpm exec vitest run tests/m2.3
 run wave2              corepack pnpm test:wave2:w2.0
 run wave2-fitness      corepack pnpm test:wave2:fitness
 run wave1-historical   corepack pnpm evidence:wave1:historical
-run credential-scan    corepack pnpm evidence:m2.1:secret-scan
+# Writes to W2.0's own directory. The default output path is M2.1's historical report,
+# and overwriting an earlier stage's recorded evidence is not this stage's to do.
+NARRALENS_SECRET_SCAN_OUT=docs/evidence/WAVE2/security/credential-scan.json \
+  corepack pnpm exec tsx tools/secret-scan.ts > "$LOGS/credential-scan.txt" 2>&1
+printf '%s\n' "$?" > "$LOGS/credential-scan.exit"
+printf '%-24s exit=%s\n' "credential-scan" "$(cat "$LOGS/credential-scan.exit")"
+[ "$(cat "$LOGS/credential-scan.exit")" -eq 0 ] || overall=1
 run doc-consistency    corepack pnpm check:m2.1-docs
 
 # Expected to fail, and that is the finding: this gate asserts no code changed after the

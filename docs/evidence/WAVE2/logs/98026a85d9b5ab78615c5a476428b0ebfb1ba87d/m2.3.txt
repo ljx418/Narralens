@@ -1,0 +1,20 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens
+
+(node:79184) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:79191) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.3/openfilm-migrator.test.ts (7 tests) 1923ms
+   ✓ MIG-02 the migrated project is a native three-clip film > writes a film the pinned upstream reads back as three editable clips  1822ms
+ ✓ tests/m2.3/migration-service.test.ts (21 tests) 2389ms
+   ✓ MIG-05 a crash at each boundary converges after a restart > recovers cleanly after a crash at before_report  1004ms
+ ✓ tests/m2.3/migration-real-export.test.ts (2 tests) 63667ms
+   ✓ MIG-03 the real chain: migrate, reopen, export, edit the middle clip, export again > produces two real, different exports of the same 900-frame three-clip film  38799ms
+   ✓ EN-05 the source project is still intact and openable after rollback > keeps the source bytes, binding and recorded output, and retains the copy  24867ms
+
+ Test Files  3 passed (3)
+      Tests  30 passed (30)
+   Start at  00:04:02
+   Duration  68.37s (transform 911ms, setup 0ms, collect 4.24s, tests 67.98s, environment 0ms, prepare 5.96s)
+
