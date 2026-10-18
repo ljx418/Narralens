@@ -31,7 +31,8 @@
     "evidence:m2.2:integrity": "node tools/m2.2-evidence-integrity.mjs",
     "evidence:wave1": "bash tools/wave1-run-evidence.sh",
     "evidence:wave1:manifest": "tsx tools/wave1-evidence-manifest.ts",
-    "evidence:wave1:integrity": "node tools/wave1-evidence-integrity.mjs"
+    "evidence:wave1:integrity": "node tools/wave1-evidence-integrity.mjs",
+    "evidence:wave1:historical": "node tools/wave1-evidence-historical.mjs"
   },
   "dependencies": {
     "ajv": "8.18.0",
