@@ -1,0 +1,41 @@
+
+> narralens@0.1.0 evidence:m2.2:integrity /mnt/c/workSpace/videoWorkLine/Narralens
+> node tools/m2.2-evidence-integrity.mjs
+
+FAIL artifact digest changed: src/host/projects/snapshot-store.ts
+FAIL artifact digest changed: tests/m2.1/native-bypass.test.ts
+FAIL artifact digest changed: tests/architecture/m2.2-fitness.test.ts
+FAIL artifact digest changed: tests/architecture/m2.1-fitness.test.ts
+PASS 10 gate logs exist, are tracked and match their digests
+PASS manifest records a clean tree at capture
+PASS the capture environment independently records the same commit
+FAIL code changed after the frozen commit:
+contracts/migration-plan.schema.json
+contracts/migration-report.schema.json
+contracts/rollback-record.schema.json
+package.json
+src/contracts/migration-types.ts
+src/contracts/validator.ts
+src/host/projects/migration-service.ts
+src/host/projects/migration-store.ts
+src/host/projects/openfilm-migrator.ts
+src/host/projects/revision-store.ts
+src/host/projects/snapshot-store.ts
+src/host/server.ts
+tests/architecture/m2.1-fitness.test.ts
+tests/architecture/m2.2-fitness.test.ts
+tests/contracts/contracts.test.ts
+tests/fixtures/m2.1/snapshot-project/assets/narration.vtt
+tests/fixtures/m2.1/snapshot-project/narralens.assets.json
+tests/m2.1/engine-route.test.ts
+tests/m2.1/native-bypass.test.ts
+tests/m2.3/migration-real-export.test.ts
+tests/m2.3/migration-service.test.ts
+tests/m2.3/openfilm-migrator.test.ts
+tools/wave1-evidence-integrity.mjs
+tools/wave1-evidence-manifest.ts
+tools/wave1-run-evidence.sh
+PASS 17 cases, 16 passed, 1 declared not applicable: LOCK-NA
+PASS the manifest lives in the same commit as the frozen code
+checks_failed=5 frozen_code_sha=21974bf22f89cc47caa1d1ecea95d60e4916b854
+ ELIFECYCLE  Command failed with exit code 1.

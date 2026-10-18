@@ -1,0 +1,47 @@
+
+ RUN  v3.2.4 /mnt/c/workSpace/videoWorkLine/Narralens
+
+(node:1463707) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/m2.2/outbox.test.ts (9 tests | 1 failed) 24ms
+   ✓ JB-06 a crash after commit only replays the outbox > delivers each event to each consumer exactly once, however often it replays 3ms
+   ✓ JB-06 a crash after commit only replays the outbox > a commit is never re-executed by a replay, only the consumers are told 1ms
+   × JB-06 a crash after commit only replays the outbox > keeps delivering to the consumers that succeeded when one fails 11ms
+     → expected [ 'audited', 'audited', 'audited' ] to deeply equal [ 'audited' ]
+   ✓ JB-06 a crash after commit only replays the outbox > waits for every registered consumer before calling the event delivered 1ms
+   ✓ JB-06 a crash after commit only replays the outbox > stops retrying at the ceiling and closes the event with a reason instead of dropping it 2ms
+   ✓ JB-06 a crash after commit only replays the outbox > refuses to register the same consumer twice for one topic 1ms
+   ✓ JB-06 a crash after commit only replays the outbox > ignores a topic nobody registered rather than dropping it 1ms
+   ✓ JB-06 a crash after commit only replays the outbox > delivers oldest first so a consumer sees history in order 1ms
+   ✓ JB-06 a crash after commit only replays the outbox > gives the consumer a stable event id so a retried side effect can deduplicate 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/m2.2/outbox.test.ts > JB-06 a crash after commit only replays the outbox > keeps delivering to the consumers that succeeded when one fails
+AssertionError: expected [ 'audited', 'audited', 'audited' ] to deeply equal [ 'audited' ]
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  [[22m
+[2m    "audited",[22m
+[31m+   "audited",[39m
+[31m+   "audited",[39m
+[2m  ][22m
+
+ ❯ tests/m2.2/outbox.test.ts:72:21
+     70|     expect(passes).toBeGreaterThan(1);
+     71|     // The healthy consumer ran exactly once, however many retries the…
+     72|     expect(healthy).toEqual(["audited"]);
+       |                     ^
+     73|     expect(attempts).toBe(3);
+     74|     expect(store.pendingOutboxCount()).toBe(0);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 8 passed (9)
+   Start at  16:27:18
+   Duration  3.28s (transform 130ms, setup 0ms, collect 259ms, tests 24ms, environment 0ms, prepare 2.12s)
+

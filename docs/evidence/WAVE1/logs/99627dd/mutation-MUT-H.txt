@@ -1,0 +1,218 @@
+
+ RUN  v3.2.4 /mnt/c/workSpace/videoWorkLine/Narralens
+
+(node:1449415) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/m2.1/native-bypass.test.ts (13 tests | 5 failed) 919ms
+   ✓ EN-02 bypass paths > denies every unregistered native entry point by default 1ms
+   ✓ EN-02 bypass paths > rejects a native_operation smuggled into the legacy edit contract 6ms
+   ✓ EN-02 bypass paths > never hands the writer a shell, a URL or an arbitrary path through the gateway 1ms
+   ✓ EN-04 external change detection > refuses a stale digest after an out-of-band source edit and leaves the bytes untouched 125ms
+   ✓ EN-04 external change detection > treats the file watcher as detection only and never as an accepted write 1ms
+   × EN-04 external change detection > changes the digest when a declared asset, not only a source file, changes 96ms
+     → expected [ Array(1) ] to include 'assets/generated/visual-10s.mp4'
+   ✓ B-01 external source change reaches attention through the production path > 409, then attention=true, then the next typed edit is 423, without touching the edited bytes 145ms
+   ✓ B-01 external source change reaches attention through the production path > never re-samples the committed baseline: reading again stays 409 and attention stays set 129ms
+   × B-02 referenced Hypit asset bytes are inside the source digest > covers both referenced visual assets in the closure 82ms
+     → expected [ Array(1) ] to deeply equal ArrayContaining{…}
+   ✓ B-02 referenced Hypit asset bytes are inside the source digest > changes the digest when a referenced asset is legitimately re-imported (bytes and manifest together) 88ms
+   × B-02 referenced Hypit asset bytes are inside the source digest > never digests a source whose bytes disagree with its manifest 84ms
+     → promise resolved "{ manifest: { …(5) }, …(2) }" instead of rejecting
+   × B-02 referenced Hypit asset bytes are inside the source digest > fails closed when a referenced asset is missing or its path escapes the project 78ms
+     → promise resolved "{ manifest: { …(5) }, …(2) }" instead of rejecting
+   × B-02 referenced Hypit asset bytes are inside the source digest > fails closed when a manifest hash no longer matches the bytes it describes 82ms
+     → promise resolved "{ manifest: { …(5) }, …(2) }" instead of rejecting
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/m2.1/native-bypass.test.ts > EN-04 external change detection > changes the digest when a declared asset, not only a source file, changes
+AssertionError: expected [ Array(1) ] to include 'assets/generated/visual-10s.mp4'
+ ❯ tests/m2.1/native-bypass.test.ts:149:63
+    147|     });
+    148|     const before = await adapter.sourceDigestFor(PROJECT_ID, descripto…
+    149|     expect(before.manifest.assets.map((asset) => asset.path)).toContai…
+       |                                                               ^
+    150|     const manifest = resolve(root, "narralens.assets.json");
+    151|     await writeFile(manifest, JSON.stringify({ format: "narralens.asse…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  tests/m2.1/native-bypass.test.ts > B-02 referenced Hypit asset bytes are inside the source digest > covers both referenced visual assets in the closure
+AssertionError: expected [ Array(1) ] to deeply equal ArrayContaining{…}
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- ArrayContaining [[39m
+[32m-   "assets/generated/visual-10s.mp4",[39m
+[32m-   "assets/generated/visual-alt-10s.mp4",[39m
+[31m+ [[39m
+[31m+   "assets/generated/narration-30s.wav",[39m
+[2m  ][22m
+
+ ❯ tests/m2.1/native-bypass.test.ts:266:63
+    264|     const { adapter, descriptor } = await adapterFor(root);
+    265|     const before = await adapter.sourceDigestFor(PROJECT_ID, descripto…
+    266|     expect(before.manifest.assets.map((asset) => asset.path)).toEqual(…
+       |                                                               ^
+    267|       "assets/generated/visual-10s.mp4", "assets/generated/visual-alt-…
+    268|     ]));
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  tests/m2.1/native-bypass.test.ts > B-02 referenced Hypit asset bytes are inside the source digest > never digests a source whose bytes disagree with its manifest
+AssertionError: promise resolved "{ manifest: { …(5) }, …(2) }" instead of rejecting
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- Error {[39m
+[32m-   "message": "rejected promise",[39m
+[31m+ {[39m
+[31m+   "external_reference_count": 0,[39m
+[31m+   "manifest": {[39m
+[31m+     "assets": [[39m
+[31m+       {[39m
+[31m+         "asset_id": null,[39m
+[31m+         "path": "assets/generated/narration-30s.wav",[39m
+[31m+         "sha256": "ca8d3773b8dea14ff1950de9f4d991797f0d739743ab250e51a14e24eb2bb07a",[39m
+[31m+         "size": 5760078,[39m
+[31m+       },[39m
+[31m+     ],[39m
+[31m+     "engine": "hypit",[39m
+[31m+     "engine_upstream_sha": "6fdd8c0f02c17b9970aee6deb4550a70e9d57acf",[39m
+[31m+     "files": [[39m
+[31m+       {[39m
+[31m+         "path": "narralens.assets.json",[39m
+[31m+         "role": "settings",[39m
+[31m+         "sha256": "bbf00c5ef213b4000bd1c01fca8f3cf6e140f99930d39225abab699c6cf1b210",[39m
+[31m+         "size": 1025,[39m
+[31m+       },[39m
+[31m+       {[39m
+[31m+         "path": "runs/build.svrun",[39m
+[31m+         "role": "entry",[39m
+[31m+         "sha256": "bff6a663f753ac97b546acd1561e95b1aa1aa1239fdd08867a3b28ad782dc738",[39m
+[31m+         "size": 141,[39m
+[31m+       },[39m
+[31m+     ],[39m
+[31m+     "format": "narralens.source-digest-manifest@1.0",[39m
+[31m+   },[39m
+[31m+   "source_digest": "57259ca4111d991f769524b65eb2b3765e007ff86a237d8a2054623cd9305307",[39m
+[2m  }[22m
+
+ ❯ tests/m2.1/native-bypass.test.ts:311:65
+    309|     // The manifest is byte-identical to before, yet the source cannot…
+    310|     expect(await sha256Of(manifestFile)).toBe(manifestBefore);
+    311|     await expect(adapter.sourceDigestFor(PROJECT_ID, descriptor))
+       |                                                                 ^
+    312|       .rejects.toMatchObject({ code: "SOURCE_CHANGED", message: expect…
+    313|   }, 30_000);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ FAIL  tests/m2.1/native-bypass.test.ts > B-02 referenced Hypit asset bytes are inside the source digest > fails closed when a referenced asset is missing or its path escapes the project
+AssertionError: promise resolved "{ manifest: { …(5) }, …(2) }" instead of rejecting
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- Error {[39m
+[32m-   "message": "rejected promise",[39m
+[31m+ {[39m
+[31m+   "external_reference_count": 0,[39m
+[31m+   "manifest": {[39m
+[31m+     "assets": [[39m
+[31m+       {[39m
+[31m+         "asset_id": null,[39m
+[31m+         "path": "assets/generated/narration-30s.wav",[39m
+[31m+         "sha256": "ca8d3773b8dea14ff1950de9f4d991797f0d739743ab250e51a14e24eb2bb07a",[39m
+[31m+         "size": 5760078,[39m
+[31m+       },[39m
+[31m+     ],[39m
+[31m+     "engine": "hypit",[39m
+[31m+     "engine_upstream_sha": "6fdd8c0f02c17b9970aee6deb4550a70e9d57acf",[39m
+[31m+     "files": [[39m
+[31m+       {[39m
+[31m+         "path": "narralens.assets.json",[39m
+[31m+         "role": "settings",[39m
+[31m+         "sha256": "bbf00c5ef213b4000bd1c01fca8f3cf6e140f99930d39225abab699c6cf1b210",[39m
+[31m+         "size": 1025,[39m
+[31m+       },[39m
+[31m+       {[39m
+[31m+         "path": "runs/build.svrun",[39m
+[31m+         "role": "entry",[39m
+[31m+         "sha256": "bff6a663f753ac97b546acd1561e95b1aa1aa1239fdd08867a3b28ad782dc738",[39m
+[31m+         "size": 141,[39m
+[31m+       },[39m
+[31m+     ],[39m
+[31m+     "format": "narralens.source-digest-manifest@1.0",[39m
+[31m+   },[39m
+[31m+   "source_digest": "57259ca4111d991f769524b65eb2b3765e007ff86a237d8a2054623cd9305307",[39m
+[2m  }[22m
+
+ ❯ tests/m2.1/native-bypass.test.ts:319:79
+    317|     const { adapter: missingAdapter, descriptor: missingDescriptor } =…
+    318|     await rm(resolve(missing, "assets/generated/visual-10s.mp4"));
+    319|     await expect(missingAdapter.sourceDigestFor(PROJECT_ID, missingDes…
+       |                                                                               ^
+    320|       .rejects.toMatchObject({ details: undefined, message: expect.str…
+    321| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+
+ FAIL  tests/m2.1/native-bypass.test.ts > B-02 referenced Hypit asset bytes are inside the source digest > fails closed when a manifest hash no longer matches the bytes it describes
+AssertionError: promise resolved "{ manifest: { …(5) }, …(2) }" instead of rejecting
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- Error {[39m
+[32m-   "message": "rejected promise",[39m
+[31m+ {[39m
+[31m+   "external_reference_count": 0,[39m
+[31m+   "manifest": {[39m
+[31m+     "assets": [[39m
+[31m+       {[39m
+[31m+         "asset_id": null,[39m
+[31m+         "path": "assets/generated/narration-30s.wav",[39m
+[31m+         "sha256": "ca8d3773b8dea14ff1950de9f4d991797f0d739743ab250e51a14e24eb2bb07a",[39m
+[31m+         "size": 5760078,[39m
+[31m+       },[39m
+[31m+     ],[39m
+[31m+     "engine": "hypit",[39m
+[31m+     "engine_upstream_sha": "6fdd8c0f02c17b9970aee6deb4550a70e9d57acf",[39m
+[31m+     "files": [[39m
+[31m+       {[39m
+[31m+         "path": "narralens.assets.json",[39m
+[31m+         "role": "settings",[39m
+[31m+         "sha256": "bbf00c5ef213b4000bd1c01fca8f3cf6e140f99930d39225abab699c6cf1b210",[39m
+[31m+         "size": 1025,[39m
+[31m+       },[39m
+[31m+       {[39m
+[31m+         "path": "runs/build.svrun",[39m
+[31m+         "role": "entry",[39m
+[31m+         "sha256": "bff6a663f753ac97b546acd1561e95b1aa1aa1239fdd08867a3b28ad782dc738",[39m
+[31m+         "size": 141,[39m
+[31m+       },[39m
+[31m+     ],[39m
+[31m+     "format": "narralens.source-digest-manifest@1.0",[39m
+[31m+   },[39m
+[31m+   "source_digest": "57259ca4111d991f769524b65eb2b3765e007ff86a237d8a2054623cd9305307",[39m
+[2m  }[22m
+
+ ❯ tests/m2.1/native-bypass.test.ts:337:65
+    335|     const visual = resolve(root, "assets/generated/visual-10s.mp4");
+    336|     await writeFile(visual, Buffer.concat([await readFile(visual), Buf…
+    337|     await expect(adapter.sourceDigestFor(PROJECT_ID, descriptor))
+       |                                                                 ^
+    338|       .rejects.toMatchObject({ code: "SOURCE_CHANGED", message: expect…
+    339|   }, 30_000);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  5 failed | 8 passed (13)
+   Start at  16:25:42
+   Duration  5.92s (transform 661ms, setup 0ms, collect 2.78s, tests 919ms, environment 0ms, prepare 1.35s)
+

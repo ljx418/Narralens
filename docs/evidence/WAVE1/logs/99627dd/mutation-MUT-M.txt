@@ -1,0 +1,79 @@
+
+ RUN  v3.2.4 /mnt/c/workSpace/videoWorkLine/Narralens
+
+(node:1456007) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/m2.2/transaction-state-machine.test.ts (8 tests | 4 failed) 255ms
+   × JRNL coordinator transaction state machine > starts at received and walks the documented happy path 10ms
+     → column index out of range
+   ✓ JRNL coordinator transaction state machine > refuses any pair that is not in the frozen transition table 2ms
+   ✓ JRNL coordinator transaction state machine > accepts exactly the pairs the table declares 1ms
+   × JRNL coordinator transaction state machine > rejects a transition whose predecessor no longer holds, so a second writer cannot win 2ms
+     → column index out of range
+   ✓ JRNL coordinator transaction state machine > reaches recovering only through the recovery helper, never online 1ms
+   × JRNL coordinator transaction state machine > records why a transaction entered attention 1ms
+     → column index out of range
+   ✓ JRNL coordinator transaction state machine > keeps one row per transaction id and lists them per project 1ms
+   × JRNL coordinator transaction state machine > keeps its own persistent record across a store reopen 235ms
+     → column index out of range
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/m2.2/transaction-state-machine.test.ts > JRNL coordinator transaction state machine > starts at received and walks the documented happy path
+Error: column index out of range
+ ❯ RevisionStore.transition src/host/projects/revision-store.ts:321:8
+    319|     this.#db.prepare(`UPDATE project_transaction SET ${assignments.joi…
+    320|       WHERE transaction_id=?`)
+    321|       .run(to, ...named.map(([, value]) => value as SQLInputValue), at…
+       |        ^
+    322|     const changed = Number((this.#db.prepare("SELECT changes() AS n").…
+    323|     if (changed !== 1) throw new Error(`INVALID_TRANSITION:${from}->${…
+ ❯ tests/m2.2/transaction-state-machine.test.ts:29:12
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  tests/m2.2/transaction-state-machine.test.ts > JRNL coordinator transaction state machine > rejects a transition whose predecessor no longer holds, so a second writer cannot win
+Error: column index out of range
+ ❯ RevisionStore.transition src/host/projects/revision-store.ts:321:8
+    319|     this.#db.prepare(`UPDATE project_transaction SET ${assignments.joi…
+    320|       WHERE transaction_id=?`)
+    321|       .run(to, ...named.map(([, value]) => value as SQLInputValue), at…
+       |        ^
+    322|     const changed = Number((this.#db.prepare("SELECT changes() AS n").…
+    323|     if (changed !== 1) throw new Error(`INVALID_TRANSITION:${from}->${…
+ ❯ tests/m2.2/transaction-state-machine.test.ts:74:12
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  tests/m2.2/transaction-state-machine.test.ts > JRNL coordinator transaction state machine > records why a transaction entered attention
+Error: column index out of range
+ ❯ RevisionStore.transition src/host/projects/revision-store.ts:321:8
+    319|     this.#db.prepare(`UPDATE project_transaction SET ${assignments.joi…
+    320|       WHERE transaction_id=?`)
+    321|       .run(to, ...named.map(([, value]) => value as SQLInputValue), at…
+       |        ^
+    322|     const changed = Number((this.#db.prepare("SELECT changes() AS n").…
+    323|     if (changed !== 1) throw new Error(`INVALID_TRANSITION:${from}->${…
+ ❯ tests/m2.2/transaction-state-machine.test.ts:92:12
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  tests/m2.2/transaction-state-machine.test.ts > JRNL coordinator transaction state machine > keeps its own persistent record across a store reopen
+Error: column index out of range
+ ❯ RevisionStore.transition src/host/projects/revision-store.ts:321:8
+    319|     this.#db.prepare(`UPDATE project_transaction SET ${assignments.joi…
+    320|       WHERE transaction_id=?`)
+    321|       .run(to, ...named.map(([, value]) => value as SQLInputValue), at…
+       |        ^
+    322|     const changed = Number((this.#db.prepare("SELECT changes() AS n").…
+    323|     if (changed !== 1) throw new Error(`INVALID_TRANSITION:${from}->${…
+ ❯ tests/m2.2/transaction-state-machine.test.ts:112:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  4 failed | 4 passed (8)
+   Start at  16:26:25
+   Duration  2.63s (transform 112ms, setup 0ms, collect 212ms, tests 255ms, environment 0ms, prepare 1.26s)
+

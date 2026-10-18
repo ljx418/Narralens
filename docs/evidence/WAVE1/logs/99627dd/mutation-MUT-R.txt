@@ -1,0 +1,100 @@
+
+ RUN  v3.2.4 /mnt/c/workSpace/videoWorkLine/Narralens
+
+(node:1458326) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/m2.2/lock-service.test.ts (12 tests | 4 failed) 28ms
+   ✓ LOCK the three classes are computed on the server > visual: a fit or asset change touches the visual lock on that clip's range 1ms
+   ✓ LOCK the three classes are computed on the server > duration: a range or position change also touches duration 0ms
+   ✓ LOCK the three classes are computed on the server > narration: a subtitle or audio change hits the narration consumer at project scope 0ms
+   ✓ LOCK the three classes are computed on the server > maps the two real typed edits onto the classifier vocabulary 0ms
+   × LOCK enforcement over a real service > refuses a write that touches a locked range and allows one that does not 16ms
+     → expected [Function] to throw an error
+   ✓ LOCK enforcement over a real service > a lock of one class does not block a write that only affects another 1ms
+   × LOCK enforcement over a real service > only overlapping ranges collide; adjacent half-open ranges do not 1ms
+     → expected [Function] to throw an error
+   ✓ LOCK enforcement over a real service > a project-scoped lock covers every target 1ms
+   × LOCK preserve is intent, never authority > records preserve as a reason without letting it waive a lock 1ms
+     → expected [Function] to throw an error
+   × LOCK preserve is intent, never authority > a mutation that trusts the reason text instead of the lock list must fail the suite 1ms
+     → expected [Function] to throw an error
+   ✓ LOCK control revision > moves when a lock is taken or released and is what commit re-checks 1ms
+   ✓ LOCK control revision > does not move on a read 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/m2.2/lock-service.test.ts > LOCK enforcement over a real service > refuses a write that touches a locked range and allows one that does not
+AssertionError: expected [Function] to throw an error
+
+[32m- Expected:[39m 
+null
+
+[31m+ Received:[39m 
+undefined
+
+ ❯ tests/m2.2/lock-service.test.ts:71:57
+     69|     const visual = computeAffectedLocks(
+     70|       { op: "timeline.set_visual_fit", clip_id: "shot-002", range: SHO…
+     71|     expect(() => locks.assertUnlocked(PROJECT, visual)).toThrow(/visua…
+       |                                                         ^
+     72|     expect(() => locks.assertUnlocked(PROJECT, [{ ...visual[0]!, targe…
+     73|       .not.toThrow();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  tests/m2.2/lock-service.test.ts > LOCK enforcement over a real service > only overlapping ranges collide; adjacent half-open ranges do not
+AssertionError: expected [Function] to throw an error
+ ❯ tests/m2.2/lock-service.test.ts:100:53
+     98|       .not.toThrow();
+     99|     expect(() => locks.assertUnlocked(PROJECT, [{ lock_type: "visual",…
+    100|       start_frame: 0, end_frame_exclusive: 900 }])).toThrow();
+       |                                                     ^
+    101|   });
+    102| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  tests/m2.2/lock-service.test.ts > LOCK preserve is intent, never authority > records preserve as a reason without letting it waive a lock
+AssertionError: expected [Function] to throw an error
+
+[32m- Expected:[39m 
+null
+
+[31m+ Received:[39m 
+undefined
+
+ ❯ tests/m2.2/lock-service.test.ts:127:57
+    125|     // The same request still collides: the reason text granted nothin…
+    126|     const visual = computeAffectedLocks({ op: "timeline.set_visual_fit…
+    127|     expect(() => locks.assertUnlocked(PROJECT, visual)).toThrow(/visua…
+       |                                                         ^
+    128|   });
+    129| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  tests/m2.2/lock-service.test.ts > LOCK preserve is intent, never authority > a mutation that trusts the reason text instead of the lock list must fail the suite
+AssertionError: expected [Function] to throw an error
+
+[32m- Expected:[39m 
+null
+
+[31m+ Received:[39m 
+undefined
+
+ ❯ tests/m2.2/lock-service.test.ts:136:57
+    134|     // Matching on the reason string rather than on lock_type would wr…
+    135|     const visual = computeAffectedLocks({ op: "timeline.set_visual_fit…
+    136|     expect(() => locks.assertUnlocked(PROJECT, visual)).toThrow(/visua…
+       |                                                         ^
+    137|   });
+    138| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  4 failed | 8 passed (12)
+   Start at  16:26:54
+   Duration  2.54s (transform 126ms, setup 0ms, collect 245ms, tests 28ms, environment 0ms, prepare 1.38s)
+
