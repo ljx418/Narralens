@@ -1,0 +1,111 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://narralens.local/schemas/impact.schema.json",
+  "description": "Server-computed authorization for one controlled write. Clients may echo it back; they may never author it.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "format",
+    "impact_id",
+    "project_id",
+    "operation",
+    "materialization_id",
+    "target_snapshot_id",
+    "base_revision",
+    "source_digest",
+    "control_revision",
+    "engine",
+    "engine_upstream_sha",
+    "affected_ranges",
+    "affected_consumers",
+    "locks_checked",
+    "rights_digest",
+    "native_plan_sha256",
+    "approvals_required",
+    "expires_at",
+    "impact_hash"
+  ],
+  "properties": {
+    "format": { "const": "narralens.impact@1.0" },
+    "impact_id": { "type": "string", "minLength": 1 },
+    "project_id": { "type": "string", "minLength": 1 },
+    "operation": { "enum": ["adopt_materialization", "restore_snapshot"] },
+    "materialization_id": { "type": ["string", "null"] },
+    "target_snapshot_id": { "type": ["string", "null"] },
+    "base_revision": { "type": "integer", "minimum": 0 },
+    "source_digest": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "control_revision": { "type": "integer", "minimum": 0 },
+    "engine": { "const": "openfilm" },
+    "engine_upstream_sha": { "type": "string", "pattern": "^[a-f0-9]{40}$" },
+    "affected_ranges": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 64,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["clip_id", "start_frame", "end_frame_exclusive"],
+        "properties": {
+          "clip_id": { "type": "string", "minLength": 1 },
+          "start_frame": { "type": "integer", "minimum": 0 },
+          "end_frame_exclusive": { "type": "integer", "minimum": 1 }
+        }
+      }
+    },
+    "affected_consumers": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 256,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["kind", "id", "action"],
+        "properties": {
+          "kind": {
+            "enum": ["visual", "narration", "subtitle", "audio", "transition", "shared_asset"]
+          },
+          "id": { "type": "string", "minLength": 1 },
+          "action": { "enum": ["preserve", "replace", "relink"] }
+        }
+      }
+    },
+    "locks_checked": {
+      "type": "array",
+      "maxItems": 64,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["lock_id", "control_revision"],
+        "properties": {
+          "lock_id": { "type": "string", "minLength": 1 },
+          "control_revision": { "type": "integer", "minimum": 0 }
+        }
+      }
+    },
+    "rights_digest": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "native_plan_sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "approvals_required": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+    "expires_at": { "type": "string", "minLength": 1 },
+    "impact_hash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "operation": { "const": "adopt_materialization" } } },
+      "then": {
+        "properties": {
+          "materialization_id": { "type": "string", "minLength": 1 },
+          "target_snapshot_id": { "type": "null" }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "operation": { "const": "restore_snapshot" } } },
+      "then": {
+        "properties": {
+          "materialization_id": { "type": "null" },
+          "target_snapshot_id": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
+  ]
+}

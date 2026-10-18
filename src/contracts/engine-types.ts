@@ -1,4 +1,4 @@
-import type { EditOperation } from "./types.js";
+import type { ControlledEditOperation, EditOperation } from "./types.js";
 
 /**
  * M2.1 engine-layer wire types.
@@ -27,11 +27,15 @@ export interface HalfOpenFrameRange {
 }
 
 /**
- * M2.1 opens no new edit semantics. The gateway's `translated` output is exactly the
+ * M2.1 opened no new edit semantics. The gateway's `translated` output is exactly the
  * legacy typed edit so `ProjectWriteActor` stays the sole commit owner and no
  * translation layer exists that could itself be bypassed (ADR D-07, AC-019).
+ *
+ * W2.0 adds the two controlled operations (W2-G03). Both carry an `impact_id`/`impact_hash`
+ * pair by construction, so an adapter cannot be handed an adoption or a restore that the
+ * Host never authorized; there is no "native" form of either operation that skips them.
  */
-export type TypedEdit = EditOperation;
+export type TypedEdit = EditOperation | ControlledEditOperation;
 
 export type CapabilityState = "supported" | "blocked" | "read_only" | "unverified";
 

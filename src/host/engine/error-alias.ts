@@ -57,4 +57,8 @@ export const ERROR_ALIAS_TABLE: readonly ErrorAliasEntry[] = Object.freeze([
     distinction: "The frame range is structurally invalid (zero length, negative start, out of bounds, crossing a clip); AMBIGUOUS_TIME means a time could not be determined uniquely." },
   { code: "DATA_POLICY_DENIED", http_status: 403, legacy: false, introduced_by: "M2.1", distinguishes_from: "ORIGIN_REJECTED",
     distinction: "An egress, cost or credential policy refused the operation; ORIGIN_REJECTED is the same-origin check refusing the request." },
+  { code: "IMPACT_REQUIRED", http_status: 428, legacy: false, introduced_by: "W2.0", distinguishes_from: "APPROVAL_REQUIRED",
+    distinction: "No server-computed impact exists for this write, so the request was refused before any staging; APPROVAL_REQUIRED is the legacy code that tells a client to collect a human approval." },
+  { code: "IMPACT_STALE", http_status: 428, legacy: false, introduced_by: "W2.0", distinguishes_from: "IMPACT_REQUIRED",
+    distinction: "An impact exists but its TTL expired or one of the base/source/control/rights/plan facts it was computed against has changed; IMPACT_REQUIRED means no impact was ever computed." },
 ]);

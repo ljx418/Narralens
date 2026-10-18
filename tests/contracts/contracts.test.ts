@@ -17,7 +17,9 @@ describe("API contracts", () => {
   it("registers the D2-D4.0 frozen schemas", () => {
     // M2.1 adds engineResponse and sourceDigestManifest, M2.3 the migration set; the
     // legacy set must stay intact.
-    expect(Object.keys(contractIds)).toHaveLength(23);
+    // 23 through M2.3; W2.0 registers the six Wave 2 contracts in the same commit as their
+    // schemas and types so the three cannot drift apart.
+    expect(Object.keys(contractIds)).toHaveLength(29);
     for (const key of D2_D421_SCHEMA_IDS) expect(contractIds[key]).toBeTypeOf("string");
     expect(contractIds.migrationPlan).toBe("https://narralens.local/schemas/migration-plan.schema.json");
     expect(contractIds.migrationReport).toBe("https://narralens.local/schemas/migration-report.schema.json");

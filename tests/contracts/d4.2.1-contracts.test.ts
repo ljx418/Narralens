@@ -17,9 +17,14 @@ describe("D4.2.1 runtime contracts", () => {
     expect(validatorFor(contractIds.assetManifest)).toBeTypeOf("function");
     expect(validatorFor(contractIds.assetImportResponse)).toBeTypeOf("function");
     expect(validatorFor(contractIds.assetInventoryResponse)).toBeTypeOf("function");
-    expect(Object.keys(contractIds)).not.toContain("materializeRequest");
+    // C-01: the D4.2 single-composite contracts are retired. They must never be registered
+    // again, whatever stage the code is at, so this assertion outlives W2.0.
     expect(Object.keys(contractIds)).not.toContain("materializedProposal");
     expect(Object.keys(contractIds)).not.toContain("adoptMaterializedProposal");
+    // W2.0 supersedes the old "materialize must be absent" gate with the real one: the
+    // registered contract is the native three-clip materialization, not a composite.
+    expect(contractIds.materializeRequest).toContain("materialize-request");
+    expect(validatorFor(contractIds.materialization)).toBeTypeOf("function");
   });
 
   it("pins the four runtime schema bytes reviewed for this implementation step", () => {

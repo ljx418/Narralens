@@ -15,7 +15,8 @@ export type NativeTransport = "http" | "websocket" | "cli" | "filesystem" | "ipc
 
 export type NativePolicy = "translated" | "translated_host_service" | "blocked" | "read_only";
 
-export type TypedEditOperation = "set_visual_fit" | "replace_visual_asset";
+export type TypedEditOperation = "set_visual_fit" | "replace_visual_asset"
+  | "adopt_materialization" | "restore_snapshot";
 
 export type NativeImpactClass =
   | "picture" | "narration" | "subtitle" | "audio" | "settings" | "markers" | "project_lifecycle" | "none";

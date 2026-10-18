@@ -113,6 +113,11 @@ export class HypitEngineAdapter implements EnginePort {
       return { engine: "hypit", base_source_digest: ctx.expectedSourceDigest, base_revision: ctx.baseRevision, edit: intent,
         ops: [{ type: "parameter.adjust", shot: intent.shot_id, parameter: "fit", value: intent.value }] };
     }
+    if (intent.op !== "replace_visual_asset") {
+      // The Wave 2 controlled operations are OpenFilm-only. Falling through here would plan a
+      // `media.replace` from an operation that has no shot, so refuse by name instead.
+      throw new HttpError(422, "UNSUPPORTED_EDIT", `Hypit cannot plan a ${intent.op} operation`, undefined, ctx.correlationId);
+    }
     return { engine: "hypit", base_source_digest: ctx.expectedSourceDigest, base_revision: ctx.baseRevision, edit: intent,
       ops: [{ type: "media.replace", shot: intent.shot_id, asset: intent.asset_id }] };
   }

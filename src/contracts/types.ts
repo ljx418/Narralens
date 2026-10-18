@@ -18,6 +18,34 @@ export interface MediaEditOperation {
 
 export type EditOperation = FitEditOperation | MediaEditOperation;
 
+/**
+ * Wave 2 controlled operations (W2-G03).
+ *
+ * They are deliberately *not* members of `EditOperation`: that union feeds the frozen
+ * legacy `POST /api/projects/:id/edits` contract, whose `selection` and single-operation
+ * shape has no place for an authorization id. Widening it would let a legacy client submit
+ * an adoption without an impact, which is exactly the bypass the frozen plan refuses.
+ *
+ * `TypedEdit` is the union an adapter may be handed, and it grows here instead.
+ */
+export interface AdoptMaterializationEditOperation {
+  op: "adopt_materialization";
+  materialization_id: string;
+  impact_id: string;
+  impact_hash: string;
+  approval: { confirmed: true };
+}
+
+export interface RestoreSnapshotEditOperation {
+  op: "restore_snapshot";
+  target_snapshot_id: string;
+  impact_id: string;
+  impact_hash: string;
+  approval: { confirmed: true };
+}
+
+export type ControlledEditOperation = AdoptMaterializationEditOperation | RestoreSnapshotEditOperation;
+
 export interface EditRequest {
   base_revision: number;
   idempotency_key: string;
@@ -117,7 +145,11 @@ export type ApiErrorCode = "INVALID_REQUEST" | "INVALID_SESSION" | "ORIGIN_REJEC
   // Introduced by M2.1; alias/version table in
   // docs/migration/M2/ADR-M2.1-001-contract-reconciliation.md section 2.
   | "CAPABILITY_NOT_ENABLED" | "SOURCE_CHANGED" | "ENGINE_UNAVAILABLE"
-  | "INVALID_RANGE" | "DATA_POLICY_DENIED";
+  | "INVALID_RANGE" | "DATA_POLICY_DENIED"
+  // Introduced by W2.0; the Wave 2 controlled-write path separates "you never asked what
+  // this changes" from "you asked, but what you asked about has moved on". APPROVAL_REQUIRED
+  // predates both and is the legacy code a human-approval client already handles.
+  | "IMPACT_REQUIRED" | "IMPACT_STALE";
 
 export interface ApiError {
   code: ApiErrorCode;

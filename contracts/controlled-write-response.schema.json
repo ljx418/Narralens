@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://narralens.local/schemas/controlled-write-response.schema.json",
+  "description": "200 response of both controlled writes. The validator, not this schema, enforces new_revision = previous_revision + 1; a failure produces no revision at all.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "format",
+    "transaction_id",
+    "project_id",
+    "operation",
+    "previous_revision",
+    "new_revision",
+    "snapshot_id",
+    "source_digest",
+    "outbox_event_id",
+    "status"
+  ],
+  "properties": {
+    "format": { "const": "narralens.controlled-write-response@1.0" },
+    "transaction_id": { "type": "string", "minLength": 1 },
+    "project_id": { "type": "string", "minLength": 1 },
+    "operation": { "enum": ["adopt_materialization", "restore_snapshot"] },
+    "previous_revision": { "type": "integer", "minimum": 0 },
+    "new_revision": { "type": "integer", "minimum": 1 },
+    "snapshot_id": { "type": "string", "minLength": 1 },
+    "source_digest": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "outbox_event_id": { "type": "integer", "minimum": 1 },
+    "status": { "const": "committed" }
+  }
+}
