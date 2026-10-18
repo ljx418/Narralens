@@ -1,0 +1,33 @@
+
+ RUN  v3.2.4 /mnt/c/workSpace/videoWorkLine/Narralens
+
+(node:1557692) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:1557697) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:1557699) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:1557672) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.2/lock-service.test.ts (12 tests) 14ms
+ ✓ tests/m2.2/outbox.test.ts (9 tests) 16ms
+(node:1557678) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:1557665) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.2/persistent-job-store.test.ts (19 tests) 362ms
+   ✓ JB-01 a lost lease never becomes a success > keeps a running job and its events across a restart  337ms
+ ✓ tests/m2.2/transaction-state-machine.test.ts (8 tests) 342ms
+   ✓ JRNL coordinator transaction state machine > keeps its own persistent record across a store reopen  329ms
+ ✓ tests/m2.2/journal-predecessor.test.ts (9 tests) 13ms
+(node:1557684) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.2/snapshot-store.test.ts (9 tests) 624ms
+ ✓ tests/m2.2/host-coordinator-integration.test.ts (2 tests) 168ms
+ ✓ tests/m2.2/project-coordinator.test.ts (12 tests) 1598ms
+
+ Test Files  8 passed (8)
+      Tests  80 passed (80)
+   Start at  16:39:33
+   Duration  5.58s (transform 1.72s, setup 0ms, collect 7.55s, tests 3.14s, environment 1ms, prepare 10.86s)
+

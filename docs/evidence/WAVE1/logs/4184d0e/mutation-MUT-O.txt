@@ -1,27 +1,27 @@
 
  RUN  v3.2.4 /mnt/c/workSpace/videoWorkLine/Narralens
 
-(node:1459555) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(node:1584364) ExperimentalWarning: SQLite is an experimental feature and might change at any time
 (Use `node --trace-warnings ...` to show where the warning was created)
- ❯ tests/m2.2/persistent-job-store.test.ts (19 tests | 1 failed) 294ms
-   ✓ JB-01 a lost lease never becomes a success > keeps a running job and its events across a restart 258ms
+ ❯ tests/m2.2/persistent-job-store.test.ts (19 tests | 1 failed) 295ms
+   ✓ JB-01 a lost lease never becomes a success > keeps a running job and its events across a restart 256ms
    ✓ JB-01 a lost lease never becomes a success > returns an expired lease to the queue while attempts remain, and to attention once they do not 3ms
    ✓ JB-01 a lost lease never becomes a success > records why the job ran out of attempts 1ms
-   ✓ JB-02 only one worker can own a job > gives the lease to exactly one of two contenders 1ms
-   × JB-02 only one worker can own a job > will not let a second worker steal a running job whose lease merely expired 11ms
+   ✓ JB-02 only one worker can own a job > gives the lease to exactly one of two contenders 2ms
+   × JB-02 only one worker can own a job > will not let a second worker steal a running job whose lease merely expired 12ms
      → expected true to be false // Object.is equality
    ✓ JB-02 only one worker can own a job > keeps the owner until the lease is released or expires 1ms
    ✓ JB-03 SSE replays by cursor without repeating > gives each event a monotonic per-job sequence and never repeats one after a reconnect 2ms
    ✓ JB-03 SSE replays by cursor without repeating > numbers events globally so an id is never reused 1ms
-   ✓ JB-04 a late result is quarantined, never adopted > moves a cancelled job with a lost worker lease to attention instead of retrying it 1ms
-   ✓ JB-04 a late result is quarantined, never adopted > rejects the previous owner's callback after a new lease attempt starts 1ms
-   ✓ JB-04 a late result is quarantined, never adopted > records the result without changing the state of a job that moved on 1ms
-   ✓ JB-04 a late result is quarantined, never adopted > applies a callback that arrives while the job is still running 1ms
-   ✓ JB-04 a late result is quarantined, never adopted > never writes the legacy late-result state again 2ms
+   ✓ JB-04 a late result is quarantined, never adopted > moves a cancelled job with a lost worker lease to attention instead of retrying it 2ms
+   ✓ JB-04 a late result is quarantined, never adopted > rejects the previous owner's callback after a new lease attempt starts 2ms
+   ✓ JB-04 a late result is quarantined, never adopted > records the result without changing the state of a job that moved on 2ms
+   ✓ JB-04 a late result is quarantined, never adopted > applies a callback that arrives while the job is still running 2ms
+   ✓ JB-04 a late result is quarantined, never adopted > never writes the legacy late-result state again 3ms
    ✓ JB-05 an unknown cost is never recorded as zero and never retried > starts at unknown and only becomes known on an explicit amount 1ms
-   ✓ JB-05 an unknown cost is never recorded as zero and never retried > gives a provider job a ceiling of one, so nothing is resent automatically 2ms
+   ✓ JB-05 an unknown cost is never recorded as zero and never retried > gives a provider job a ceiling of one, so nothing is resent automatically 1ms
    ✓ JB-05 an unknown cost is never recorded as zero and never retried > honours an explicit override of the ceiling 1ms
-   ✓ JB-07 an orphan lease is reclaimable in the same process > gives a reclaimed job to exactly one of two contenders 2ms
+   ✓ JB-07 an orphan lease is reclaimable in the same process > gives a reclaimed job to exactly one of two contenders 1ms
    ✓ the transition table is the only source of truth > has no path out of a terminal state and no path into the legacy one 0ms
    ✓ the transition table is the only source of truth > refuses a transition the table does not allow 1ms
 
@@ -49,6 +49,6 @@ AssertionError: expected true to be false // Object.is equality
 
  Test Files  1 failed (1)
       Tests  1 failed | 18 passed (19)
-   Start at  16:27:11
-   Duration  3.21s (transform 156ms, setup 0ms, collect 314ms, tests 294ms, environment 0ms, prepare 1.70s)
+   Start at  16:43:02
+   Duration  3.26s (transform 164ms, setup 0ms, collect 312ms, tests 295ms, environment 0ms, prepare 1.59s)
 

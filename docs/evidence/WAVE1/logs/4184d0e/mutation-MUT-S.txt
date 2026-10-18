@@ -1,16 +1,16 @@
 
  RUN  v3.2.4 /mnt/c/workSpace/videoWorkLine/Narralens
 
- ❯ tests/m2.2/snapshot-store.test.ts (9 tests | 1 failed) 432ms
-   ✓ SNAP content-addressed publication > publishes the whole closure under a deterministic id and can read it back 45ms
-   ✓ SNAP content-addressed publication > publishes every manifest-referenced visual when given the engine-owned closure 39ms
-   ✓ SNAP content-addressed publication > gives the same id for the same source and a different id when any byte changes 48ms
-   × SNAP content-addressed publication > proves files first, then directories from the leaves up, then renames and proves the parent 50ms
+ ❯ tests/m2.2/snapshot-store.test.ts (9 tests | 1 failed) 433ms
+   ✓ SNAP content-addressed publication > publishes the whole closure under a deterministic id and can read it back 44ms
+   ✓ SNAP content-addressed publication > publishes every manifest-referenced visual when given the engine-owned closure 41ms
+   ✓ SNAP content-addressed publication > gives the same id for the same source and a different id when any byte changes 47ms
+   × SNAP content-addressed publication > proves files first, then directories from the leaves up, then renames and proves the parent 51ms
      → expected [ …(8) ] to include '<proj>'
-   ✓ SNAP content-addressed publication > leaves the snapshot readable only through its id, never by listing for the newest 33ms
+   ✓ SNAP content-addressed publication > leaves the snapshot readable only through its id, never by listing for the newest 34ms
    ✓ SNAP content-addressed publication > refuses a snapshot read that escapes the snapshot directory 33ms
-   ✓ DUR durability cannot be assumed > publishes nothing when any fsync step fails, and names the platform reason 121ms
-   ✓ DUR durability cannot be assumed > rolls a published snapshot back when the caller's transaction fails 38ms
+   ✓ DUR durability cannot be assumed > publishes nothing when any fsync step fails, and names the platform reason 123ms
+   ✓ DUR durability cannot be assumed > rolls a published snapshot back when the caller's transaction fails 34ms
    ✓ DUR durability cannot be assumed > refuses to publish a copy whose bytes do not match the digest it was taken from 24ms
 
 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
@@ -30,6 +30,6 @@ AssertionError: expected [ …(8) ] to include '<proj>'
 
  Test Files  1 failed (1)
       Tests  1 failed | 8 passed (9)
-   Start at  16:26:38
-   Duration  4.68s (transform 209ms, setup 0ms, collect 2.05s, tests 432ms, environment 0ms, prepare 1.30s)
+   Start at  16:42:28
+   Duration  4.61s (transform 212ms, setup 0ms, collect 2.01s, tests 433ms, environment 0ms, prepare 1.21s)
 

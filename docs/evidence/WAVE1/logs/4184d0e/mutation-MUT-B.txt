@@ -1,11 +1,11 @@
 
  RUN  v3.2.4 /mnt/c/workSpace/videoWorkLine/Narralens
 
- ❯ tests/m2.1/native-write-gateway.test.ts (20 tests | 1 failed) 28ms
+ ❯ tests/m2.1/native-write-gateway.test.ts (20 tests | 1 failed) 27ms
    × NativeMutationRegistry completeness > AC-003 registers no unknown policy at all 16ms
      → timeline.split: expected [ 'translated', …(3) ] to include 'unknown'
-   ✓ NativeMutationRegistry completeness > AC-003 every entry records transport, impact, lock, reason and a test id 3ms
-   ✓ NativeMutationRegistry completeness > AC-003 covers every row of the verified OpenFilm native inventory exactly once 3ms
+   ✓ NativeMutationRegistry completeness > AC-003 every entry records transport, impact, lock, reason and a test id 2ms
+   ✓ NativeMutationRegistry completeness > AC-003 covers every row of the verified OpenFilm native inventory exactly once 2ms
    ✓ NativeMutationRegistry completeness > AC-003 the WebSocket / callback row yields no writable entry, so an event cannot trigger a commit 0ms
    ✓ NativeMutationRegistry completeness > AC-016 every provider and credential entry is blocked 0ms
    ✓ NativeMutationRegistry completeness > AC-003 only the two already-shipped typed edits and the Host asset import are translated 0ms
@@ -41,6 +41,6 @@ AssertionError: timeline.split: expected [ 'translated', …(3) ] to include 'un
 
  Test Files  1 failed (1)
       Tests  1 failed | 19 passed (20)
-   Start at  16:24:52
-   Duration  4.52s (transform 333ms, setup 0ms, collect 2.24s, tests 28ms, environment 0ms, prepare 1.35s)
+   Start at  16:40:36
+   Duration  4.43s (transform 340ms, setup 0ms, collect 2.17s, tests 27ms, environment 0ms, prepare 1.36s)
 

@@ -1,26 +1,26 @@
 
  RUN  v3.2.4 /mnt/c/workSpace/videoWorkLine/Narralens
 
- ❯ tests/architecture/m2.1-fitness.test.ts (22 tests | 1 failed) 269ms
-   ✓ fitness 1-3: dependency direction > 1. app code never imports host, adapters or vendor 9ms
+ ❯ tests/architecture/m2.1-fitness.test.ts (22 tests | 1 failed) 259ms
+   ✓ fitness 1-3: dependency direction > 1. app code never imports host, adapters or vendor 6ms
    ✓ fitness 1-3: dependency direction > 2. contracts stay free of React, Node filesystem, database and adapter code 5ms
-   ✓ fitness 1-3: dependency direction > 3. production code never imports a spike, statically or dynamically 126ms
-   ✓ fitness 4: EnginePort purity > 4. the port declares exactly seven operations and no commit, lock or shell surface 0ms
-   × fitness 4: EnginePort purity > 4. no adapter declares a commit, revision, lock or process method 20ms
+   ✓ fitness 1-3: dependency direction > 3. production code never imports a spike, statically or dynamically 120ms
+   ✓ fitness 4: EnginePort purity > 4. the port declares exactly seven operations and no commit, lock or shell surface 1ms
+   × fitness 4: EnginePort purity > 4. no adapter declares a commit, revision, lock or process method 19ms
      → expected [ Array(1) ] to deeply equal []
    ✓ fitness 5: registry completeness and policy legality > 5. no production entry is unknown and every policy is one of the four governed values 0ms
    ✓ fitness 5: registry completeness and policy legality > 5. the websocket transport carries no writable entry 0ms
    ✓ fitness 6: route activation matches the stage gate > 6. /api/migration/v1 exposes exactly the routes the current stage froze 0ms
    ✓ fitness 6: route activation matches the stage gate > 6. materialize, adopt, impact and history restore are never mounted 0ms
    ✓ fitness 7: error code union, schema and alias table agree > 7. the TypeScript union and the JSON Schema enum are equal in both directions 1ms
-   ✓ fitness 7: error code union, schema and alias table agree > 7. the machine alias table covers every code and distinguishes each new one 0ms
+   ✓ fitness 7: error code union, schema and alias table agree > 7. the machine alias table covers every code and distinguishes each new one 1ms
    ✓ fitness 8: SourceDigestV1 golden vectors > 8. every committed vector recomputes and the cross-language file exists 3ms
    ✓ fitness 9: legacy contract invariants > 9. the legacy project response keeps a float frame_rate and half-open frame names 0ms
-   ✓ fitness 9: legacy contract invariants > 9. the digest manifest schema and the TypeScript manifest shape agree 3ms
-   ✓ fitness 10-14: stage-specific invariants > 10. the engine read route never mutates and the legacy actor stays the only commit owner 4ms
-   ✓ fitness 10-14: stage-specific invariants > 11. no production path reaches editProjectFilm from a translated write 60ms
+   ✓ fitness 9: legacy contract invariants > 9. the digest manifest schema and the TypeScript manifest shape agree 4ms
+   ✓ fitness 10-14: stage-specific invariants > 10. the engine read route never mutates and the legacy actor stays the only commit owner 5ms
+   ✓ fitness 10-14: stage-specific invariants > 11. no production path reaches editProjectFilm from a translated write 59ms
    ✓ fitness 10-14: stage-specific invariants > 12. no <base href> handling creeps into the digest resolver 2ms
-   ✓ fitness 10-14: stage-specific invariants > 13. capability is fail-closed and outranks any registry policy (M-01) 2ms
+   ✓ fitness 10-14: stage-specific invariants > 13. capability is fail-closed and outranks any registry policy (M-01) 1ms
    ✓ fitness 10-14: stage-specific invariants > 13b. engine capability maps cover every engine-owned registry operation 1ms
    ✓ fitness 10-14: stage-specific invariants > 14. the binding is re-checked against the pinned upstream on every read 4ms
    ✓ fitness: no test-only shortcut in production > production engine code contains no skip, todo or vitest import 26ms
@@ -52,6 +52,6 @@ AssertionError: expected [ Array(1) ] to deeply equal []
 
  Test Files  1 failed (1)
       Tests  1 failed | 21 passed (22)
-   Start at  16:24:44
-   Duration  4.65s (transform 210ms, setup 0ms, collect 2.12s, tests 269ms, environment 0ms, prepare 1.34s)
+   Start at  16:40:28
+   Duration  5.09s (transform 212ms, setup 0ms, collect 2.07s, tests 259ms, environment 0ms, prepare 1.78s)
 

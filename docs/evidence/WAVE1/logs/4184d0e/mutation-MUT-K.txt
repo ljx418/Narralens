@@ -1,24 +1,24 @@
 
  RUN  v3.2.4 /mnt/c/workSpace/videoWorkLine/Narralens
 
-(node:1454842) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(node:1575689) ExperimentalWarning: SQLite is an experimental feature and might change at any time
 (Use `node --trace-warnings ...` to show where the warning was created)
- ❯ tests/m2.1/native-bypass.test.ts (13 tests | 2 failed) 1410ms
+ ❯ tests/m2.1/native-bypass.test.ts (13 tests | 2 failed) 1171ms
    ✓ EN-02 bypass paths > denies every unregistered native entry point by default 2ms
    ✓ EN-02 bypass paths > rejects a native_operation smuggled into the legacy edit contract 8ms
    ✓ EN-02 bypass paths > never hands the writer a shell, a URL or an arbitrary path through the gateway 1ms
-   ✓ EN-04 external change detection > refuses a stale digest after an out-of-band source edit and leaves the bytes untouched 233ms
+   ✓ EN-04 external change detection > refuses a stale digest after an out-of-band source edit and leaves the bytes untouched 152ms
    ✓ EN-04 external change detection > treats the file watcher as detection only and never as an accepted write 1ms
-   ✓ EN-04 external change detection > changes the digest when a declared asset, not only a source file, changes 182ms
-   × B-01 external source change reaches attention through the production path > 409, then attention=true, then the next typed edit is 423, without touching the edited bytes 241ms
+   ✓ EN-04 external change detection > changes the digest when a declared asset, not only a source file, changes 101ms
+   × B-01 external source change reaches attention through the production path > 409, then attention=true, then the next typed edit is 423, without touching the edited bytes 191ms
      → expected false to be true // Object.is equality
-   × B-01 external source change reaches attention through the production path > never re-samples the committed baseline: reading again stays 409 and attention stays set 205ms
+   × B-01 external source change reaches attention through the production path > never re-samples the committed baseline: reading again stays 409 and attention stays set 166ms
      → expected false to be true // Object.is equality
-   ✓ B-02 referenced Hypit asset bytes are inside the source digest > covers both referenced visual assets in the closure 91ms
-   ✓ B-02 referenced Hypit asset bytes are inside the source digest > changes the digest when a referenced asset is legitimately re-imported (bytes and manifest together) 109ms
-   ✓ B-02 referenced Hypit asset bytes are inside the source digest > never digests a source whose bytes disagree with its manifest 85ms
-   ✓ B-02 referenced Hypit asset bytes are inside the source digest > fails closed when a referenced asset is missing or its path escapes the project 159ms
-   ✓ B-02 referenced Hypit asset bytes are inside the source digest > fails closed when a manifest hash no longer matches the bytes it describes 92ms
+   ✓ B-02 referenced Hypit asset bytes are inside the source digest > covers both referenced visual assets in the closure 92ms
+   ✓ B-02 referenced Hypit asset bytes are inside the source digest > changes the digest when a referenced asset is legitimately re-imported (bytes and manifest together) 115ms
+   ✓ B-02 referenced Hypit asset bytes are inside the source digest > never digests a source whose bytes disagree with its manifest 88ms
+   ✓ B-02 referenced Hypit asset bytes are inside the source digest > fails closed when a referenced asset is missing or its path escapes the project 167ms
+   ✓ B-02 referenced Hypit asset bytes are inside the source digest > fails closed when a manifest hash no longer matches the bytes it describes 87ms
 
 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
 
@@ -63,6 +63,6 @@ AssertionError: expected false to be true // Object.is equality
 
  Test Files  1 failed (1)
       Tests  2 failed | 11 passed (13)
-   Start at  16:26:09
-   Duration  6.54s (transform 775ms, setup 0ms, collect 2.92s, tests 1.41s, environment 0ms, prepare 1.33s)
+   Start at  16:41:56
+   Duration  7.56s (transform 865ms, setup 0ms, collect 3.63s, tests 1.17s, environment 0ms, prepare 1.71s)
 

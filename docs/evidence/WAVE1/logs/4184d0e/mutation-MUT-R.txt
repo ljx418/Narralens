@@ -1,24 +1,24 @@
 
  RUN  v3.2.4 /mnt/c/workSpace/videoWorkLine/Narralens
 
-(node:1458326) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(node:1583060) ExperimentalWarning: SQLite is an experimental feature and might change at any time
 (Use `node --trace-warnings ...` to show where the warning was created)
- ❯ tests/m2.2/lock-service.test.ts (12 tests | 4 failed) 28ms
+ ❯ tests/m2.2/lock-service.test.ts (12 tests | 4 failed) 30ms
    ✓ LOCK the three classes are computed on the server > visual: a fit or asset change touches the visual lock on that clip's range 1ms
    ✓ LOCK the three classes are computed on the server > duration: a range or position change also touches duration 0ms
    ✓ LOCK the three classes are computed on the server > narration: a subtitle or audio change hits the narration consumer at project scope 0ms
    ✓ LOCK the three classes are computed on the server > maps the two real typed edits onto the classifier vocabulary 0ms
-   × LOCK enforcement over a real service > refuses a write that touches a locked range and allows one that does not 16ms
+   × LOCK enforcement over a real service > refuses a write that touches a locked range and allows one that does not 17ms
      → expected [Function] to throw an error
    ✓ LOCK enforcement over a real service > a lock of one class does not block a write that only affects another 1ms
-   × LOCK enforcement over a real service > only overlapping ranges collide; adjacent half-open ranges do not 1ms
+   × LOCK enforcement over a real service > only overlapping ranges collide; adjacent half-open ranges do not 2ms
      → expected [Function] to throw an error
    ✓ LOCK enforcement over a real service > a project-scoped lock covers every target 1ms
-   × LOCK preserve is intent, never authority > records preserve as a reason without letting it waive a lock 1ms
+   × LOCK preserve is intent, never authority > records preserve as a reason without letting it waive a lock 2ms
      → expected [Function] to throw an error
    × LOCK preserve is intent, never authority > a mutation that trusts the reason text instead of the lock list must fail the suite 1ms
      → expected [Function] to throw an error
-   ✓ LOCK control revision > moves when a lock is taken or released and is what commit re-checks 1ms
+   ✓ LOCK control revision > moves when a lock is taken or released and is what commit re-checks 2ms
    ✓ LOCK control revision > does not move on a read 1ms
 
 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
@@ -95,6 +95,6 @@ undefined
 
  Test Files  1 failed (1)
       Tests  4 failed | 8 passed (12)
-   Start at  16:26:54
-   Duration  2.54s (transform 126ms, setup 0ms, collect 245ms, tests 28ms, environment 0ms, prepare 1.38s)
+   Start at  16:42:44
+   Duration  2.68s (transform 126ms, setup 0ms, collect 235ms, tests 30ms, environment 0ms, prepare 1.56s)
 

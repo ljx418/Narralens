@@ -1,26 +1,26 @@
 
  RUN  v3.2.4 /mnt/c/workSpace/videoWorkLine/Narralens
 
-(node:1449415) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(node:1573705) ExperimentalWarning: SQLite is an experimental feature and might change at any time
 (Use `node --trace-warnings ...` to show where the warning was created)
- ❯ tests/m2.1/native-bypass.test.ts (13 tests | 5 failed) 919ms
+ ❯ tests/m2.1/native-bypass.test.ts (13 tests | 5 failed) 930ms
    ✓ EN-02 bypass paths > denies every unregistered native entry point by default 1ms
    ✓ EN-02 bypass paths > rejects a native_operation smuggled into the legacy edit contract 6ms
    ✓ EN-02 bypass paths > never hands the writer a shell, a URL or an arbitrary path through the gateway 1ms
-   ✓ EN-04 external change detection > refuses a stale digest after an out-of-band source edit and leaves the bytes untouched 125ms
+   ✓ EN-04 external change detection > refuses a stale digest after an out-of-band source edit and leaves the bytes untouched 117ms
    ✓ EN-04 external change detection > treats the file watcher as detection only and never as an accepted write 1ms
-   × EN-04 external change detection > changes the digest when a declared asset, not only a source file, changes 96ms
+   × EN-04 external change detection > changes the digest when a declared asset, not only a source file, changes 95ms
      → expected [ Array(1) ] to include 'assets/generated/visual-10s.mp4'
-   ✓ B-01 external source change reaches attention through the production path > 409, then attention=true, then the next typed edit is 423, without touching the edited bytes 145ms
-   ✓ B-01 external source change reaches attention through the production path > never re-samples the committed baseline: reading again stays 409 and attention stays set 129ms
-   × B-02 referenced Hypit asset bytes are inside the source digest > covers both referenced visual assets in the closure 82ms
+   ✓ B-01 external source change reaches attention through the production path > 409, then attention=true, then the next typed edit is 423, without touching the edited bytes 148ms
+   ✓ B-01 external source change reaches attention through the production path > never re-samples the committed baseline: reading again stays 409 and attention stays set 131ms
+   × B-02 referenced Hypit asset bytes are inside the source digest > covers both referenced visual assets in the closure 85ms
      → expected [ Array(1) ] to deeply equal ArrayContaining{…}
-   ✓ B-02 referenced Hypit asset bytes are inside the source digest > changes the digest when a referenced asset is legitimately re-imported (bytes and manifest together) 88ms
-   × B-02 referenced Hypit asset bytes are inside the source digest > never digests a source whose bytes disagree with its manifest 84ms
+   ✓ B-02 referenced Hypit asset bytes are inside the source digest > changes the digest when a referenced asset is legitimately re-imported (bytes and manifest together) 91ms
+   × B-02 referenced Hypit asset bytes are inside the source digest > never digests a source whose bytes disagree with its manifest 85ms
      → promise resolved "{ manifest: { …(5) }, …(2) }" instead of rejecting
-   × B-02 referenced Hypit asset bytes are inside the source digest > fails closed when a referenced asset is missing or its path escapes the project 78ms
+   × B-02 referenced Hypit asset bytes are inside the source digest > fails closed when a referenced asset is missing or its path escapes the project 84ms
      → promise resolved "{ manifest: { …(5) }, …(2) }" instead of rejecting
-   × B-02 referenced Hypit asset bytes are inside the source digest > fails closed when a manifest hash no longer matches the bytes it describes 82ms
+   × B-02 referenced Hypit asset bytes are inside the source digest > fails closed when a manifest hash no longer matches the bytes it describes 85ms
      → promise resolved "{ manifest: { …(5) }, …(2) }" instead of rejecting
 
 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
@@ -213,6 +213,6 @@ AssertionError: promise resolved "{ manifest: { …(5) }, …(2) }" instead of r
 
  Test Files  1 failed (1)
       Tests  5 failed | 8 passed (13)
-   Start at  16:25:42
-   Duration  5.92s (transform 661ms, setup 0ms, collect 2.78s, tests 919ms, environment 0ms, prepare 1.35s)
+   Start at  16:41:28
+   Duration  6.18s (transform 701ms, setup 0ms, collect 2.99s, tests 930ms, environment 0ms, prepare 1.28s)
 

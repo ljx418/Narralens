@@ -6,6 +6,7 @@ FAIL artifact digest changed: src/host/projects/snapshot-store.ts
 FAIL artifact digest changed: tests/m2.1/native-bypass.test.ts
 FAIL artifact digest changed: tests/architecture/m2.2-fitness.test.ts
 FAIL artifact digest changed: tests/architecture/m2.1-fitness.test.ts
+FAIL artifact digest changed: tests/host/host-http.test.ts
 PASS 10 gate logs exist, are tracked and match their digests
 PASS manifest records a clean tree at capture
 PASS the capture environment independently records the same commit
@@ -27,6 +28,7 @@ tests/architecture/m2.2-fitness.test.ts
 tests/contracts/contracts.test.ts
 tests/fixtures/m2.1/snapshot-project/assets/narration.vtt
 tests/fixtures/m2.1/snapshot-project/narralens.assets.json
+tests/host/host-http.test.ts
 tests/m2.1/engine-route.test.ts
 tests/m2.1/native-bypass.test.ts
 tests/m2.3/migration-real-export.test.ts
@@ -37,5 +39,5 @@ tools/wave1-evidence-manifest.ts
 tools/wave1-run-evidence.sh
 PASS 17 cases, 16 passed, 1 declared not applicable: LOCK-NA
 PASS the manifest lives in the same commit as the frozen code
-checks_failed=5 frozen_code_sha=21974bf22f89cc47caa1d1ecea95d60e4916b854
+checks_failed=6 frozen_code_sha=21974bf22f89cc47caa1d1ecea95d60e4916b854
  ELIFECYCLE  Command failed with exit code 1.
