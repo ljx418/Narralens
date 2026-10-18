@@ -1,0 +1,32 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens
+
+(node:2223151) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:2223150) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:2223168) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:2223177) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.2/outbox.test.ts (9 tests) 17ms
+ ✓ tests/m2.2/lock-service.test.ts (12 tests) 13ms
+(node:2223143) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.2/transaction-state-machine.test.ts (8 tests) 286ms
+ ✓ tests/m2.2/persistent-job-store.test.ts (19 tests) 311ms
+(node:2223183) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:2223157) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.2/snapshot-store.test.ts (9 tests) 560ms
+ ✓ tests/m2.2/host-coordinator-integration.test.ts (2 tests) 172ms
+ ✓ tests/m2.2/journal-predecessor.test.ts (9 tests) 12ms
+ ✓ tests/m2.2/project-coordinator.test.ts (12 tests) 2319ms
+   ✓ SER one queue, serial per project, parallel across projects > orders two writes on the same project and lets two projects run at once  730ms
+
+ Test Files  8 passed (8)
+      Tests  80 passed (80)
+   Start at  01:05:47
+   Duration  6.35s (transform 2.02s, setup 0ms, collect 10.10s, tests 3.69s, environment 1ms, prepare 11.10s)
+

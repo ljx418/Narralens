@@ -70,8 +70,14 @@ for attempt in $(seq 1 "$CHECK_ATTEMPTS"); do
   printf '%s\n' "$code" > "$LOGS/check-$attempt.exit"
   printf '%-24s attempt %s exit=%s\n' "check" "$attempt" "$code"
   enomem=$(grep -c "ENOMEM" "$LOGS/check-$attempt.txt" 2>/dev/null || true)
+  # A Host route normalises internal failures to INTERNAL_ERROR on purpose, so an
+  # out-of-memory failure behind an HTTP call leaves no ENOMEM text in the output at all.
+  # A failing test with zero ENOMEM occurrences is therefore reported as `unknown`, not as
+  # "not memory" — claiming otherwise would be reading a gap in the evidence as a result.
+  unknown=0
+  if [ "$code" -ne 0 ] && [ "$enomem" -eq 0 ]; then unknown=1; fi
   failed_files=$(grep -oE "^ (FAIL|❯) +tests/[^ ]+" "$LOGS/check-$attempt.txt" 2>/dev/null | sort -u | tr '\n' ' ')
-  printf '%s\n' "attempt=$attempt exit=$code enomem_occurrences=$enomem failing_files=[$failed_files]" \
+  printf '%s\n' "attempt=$attempt exit=$code enomem_occurrences=$enomem cause=unknown=$unknown failing_files=[$failed_files]" \
     >> "$LOGS/check-attempts.txt"
   if [ "$code" -eq 0 ]; then check_pass=$((check_pass + 1)); fi
 done
