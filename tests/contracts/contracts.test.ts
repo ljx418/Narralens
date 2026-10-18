@@ -15,9 +15,13 @@ const D2_D421_SCHEMA_IDS = [
 
 describe("API contracts", () => {
   it("registers the D2-D4.0 frozen schemas", () => {
-    // M2.1 adds engineResponse and sourceDigestManifest; the legacy set must stay intact.
-    expect(Object.keys(contractIds)).toHaveLength(20);
+    // M2.1 adds engineResponse and sourceDigestManifest, M2.3 the migration set; the
+    // legacy set must stay intact.
+    expect(Object.keys(contractIds)).toHaveLength(23);
     for (const key of D2_D421_SCHEMA_IDS) expect(contractIds[key]).toBeTypeOf("string");
+    expect(contractIds.migrationPlan).toBe("https://narralens.local/schemas/migration-plan.schema.json");
+    expect(contractIds.migrationReport).toBe("https://narralens.local/schemas/migration-report.schema.json");
+    expect(contractIds.rollbackRecord).toBe("https://narralens.local/schemas/rollback-record.schema.json");
     for (const id of Object.values(contractIds)) expect(validatorFor(id)).toBeTypeOf("function");
   });
 
