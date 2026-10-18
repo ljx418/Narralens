@@ -56,7 +56,13 @@ pass(`${(manifest.gate_artifacts ?? []).length} gate logs exist, are tracked and
 if (manifest.repo_dirty_at_capture === false) pass("manifest records a clean tree at capture");
 else fail(`manifest.repo_dirty_at_capture is ${manifest.repo_dirty_at_capture}, expected false`);
 
-const environment = readFileSync(resolve(EVIDENCE_ROOT, "logs/environment.txt"), "utf8");
+const environmentArtifact = (manifest.gate_artifacts ?? [])
+  .find((artifact) => typeof artifact.path === "string" && artifact.path.endsWith("/environment.txt"));
+if (environmentArtifact === undefined) {
+  fail("manifest does not identify its capture environment");
+}
+const environment = environmentArtifact === undefined ? ""
+  : readFileSync(resolve(EVIDENCE_ROOT, environmentArtifact.path), "utf8");
 const recordedHead = environment.split("\n").find((line) => line.startsWith("git_head="))?.split("=")[1];
 if (recordedHead === manifest.frozen_code_sha) pass("the capture environment independently records the same commit");
 else fail(`environment head ${recordedHead} differs from frozen ${manifest.frozen_code_sha}`);
