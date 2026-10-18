@@ -174,20 +174,29 @@ export class MigratedAssetLedger {
    */
   async bootstrap(request: BootstrapRequest): Promise<BootstrapResult> {
     const now = request.now ?? new Date();
+    // Read the record first. Whether `attention` is terminal is decided from the stored
+    // state, not from what a fresh evidence gather happens to conclude this time.
+    const existing = this.bootstrapRecord(request.projectId);
+    if (existing?.state === "attention") {
+      return {
+        state: "attention", project_id: existing.project_id, migration_id: existing.migration_id,
+        input_digest: existing.input_digest, seeded: 0, already_seeded: true,
+        reason: existing.attention_reason,
+      };
+    }
     const evidence = await this.#gatherEvidence(request, now);
-    if (evidence.state === "attention") return this.#attention(evidence, now);
+    if (evidence.state === "attention") return this.#attention(evidence, now, existing);
     if (evidence.state === "blocked") {
       throw new HttpError(404, "NOT_FOUND", "No migration produced this project", undefined, request.projectId);
     }
 
-    const existing = this.bootstrapRecord(evidence.projectId);
-    if (existing !== undefined && existing.state === "active") {
+    if (existing !== undefined) {
       if (existing.input_digest === evidence.inputDigest) {
         return { ...summary(evidence), state: "active", seeded: this.assets(evidence.projectId).length, already_seeded: true };
       }
       // The evidence changed under an active ledger. That is drift, not an update.
       return this.#attention({ state: "attention", projectId: evidence.projectId,
-        migrationId: evidence.migrationId, reason: "EVIDENCE_CHANGED_AFTER_BOOTSTRAP" }, now);
+        migrationId: evidence.migrationId, reason: "EVIDENCE_CHANGED_AFTER_BOOTSTRAP" }, now, existing);
     }
 
     return this.#seed(evidence, now);
@@ -196,9 +205,9 @@ export class MigratedAssetLedger {
   /**
    * ASSET-02. Re-reads every proof against the live filesystem and manifest.
    *
-   * Nothing here repairs anything. A ledger row is a claim that was true when it was
-   * written; if a proof no longer holds, the honest state is `attention`, and the Wave 2
-   * capabilities that depend on this ledger stay closed until a human decides.
+   * This can only ever move a ledger *into* `attention`. It never moves one out: a ledger
+   * that has already been called a human's attention is a decision, not an observation,
+   * and re-proving the bytes does not retract it.
    */
   async reverify(request: BootstrapRequest): Promise<BootstrapResult> {
     const now = request.now ?? new Date();
@@ -206,38 +215,45 @@ export class MigratedAssetLedger {
     if (current === undefined) {
       return await this.bootstrap(request);
     }
+    if (current.state === "attention") {
+      // Already a decision. Re-deriving the facts cannot retract it, and reading the
+      // evidence again here would only risk rewriting the reason a human was called in.
+      return {
+        state: "attention", project_id: current.project_id, migration_id: current.migration_id,
+        input_digest: current.input_digest, seeded: 0, already_seeded: true,
+        reason: current.attention_reason,
+      };
+    }
     const evidence = await this.#gatherEvidence(request, now);
-    if (evidence.state === "attention") return this.#attention(evidence, now, current);
-    if (evidence.state === "blocked") return this.#attention(evidence, now, current);
-    const drift = this.#driftAgainst(current!, evidence);
-    if (drift !== null) {
-      return this.#attention({ state: "attention", projectId: evidence.projectId,
-        migrationId: evidence.migrationId, reason: drift }, now, current);
+    if (evidence.state !== "verified") return this.#attention(evidence, now, current);
+    const drift = this.#driftAgainst(current, evidence);
+    if (drift === null) {
+      return { ...summary(evidence), state: "active",
+        seeded: this.assets(request.projectId).length, already_seeded: true };
     }
-    if (current!.state === "attention") {
-      return this.transitionBootstrap(request.projectId, current!.state, "active", now, "");
-    }
-    return { ...summary(evidence), state: "active", seeded: this.assets(request.projectId).length, already_seeded: true };
+    return this.#attention({ state: "attention", projectId: evidence.projectId,
+      migrationId: evidence.migrationId, reason: drift }, now, current);
   }
 
   /**
-   * Predecessor-checked.
+   * Predecessor-checked, and the complete state machine.
    *
-   * `02_ARCHITECTURE_AND_CONTRACTS.md` §4 says a bootstrap record allows only
-   * `prepared -> active|attention`. Read literally that makes ASSET-02 unimplementable:
-   * the case requires a *later* change of source manifest, target bytes or licence to move
-   * the project into attention, and a live ledger could never get there, so it would keep
-   * asserting facts that stopped being true.
+   * Three edges exist and no others: `prepared -> active`, `prepared -> attention`,
+   * `active -> attention`. Every self-loop, every edge back to `prepared`, and every exit
+   * from `attention` are refused.
    *
-   * So `active -> attention` is admitted, and only that. The bootstrap itself still starts
-   * at `prepared` and still resolves to exactly one of the two; the extra edge exists solely
-   * so re-verification can withdraw a claim. Recorded as a W2.0 deviation note rather than
-   * taken silently.
+   * `attention` is terminal on purpose. An earlier version allowed `attention -> active`,
+   * which made the state meaningless: an operator could not rely on a ledger staying in
+   * attention, and the licence judgement behind it was overwritten by the next read.
+   * Reversing it requires a separate, explicit, audited operation carrying its own base
+   * and control revision. That belongs to a later stage and is deliberately absent here.
+   *
+   * `active -> attention` is the one way out of `active`, and it exists precisely so a
+   * contradicted fact can withdraw a claim, which is what ASSET-02 requires.
    */
   transitionBootstrap(projectId: string, from: LedgerBootstrapState, to: LedgerBootstrapState,
     now = new Date(), reason = ""): BootstrapResult {
     if (!((from === "prepared" && (to === "active" || to === "attention"))
-      || (from === "attention" && to === "active")
       || (from === "active" && to === "attention"))) {
       throw new Error(`INVALID_LEDGER_BOOTSTRAP_TRANSITION:${from}->${to}`);
     }
