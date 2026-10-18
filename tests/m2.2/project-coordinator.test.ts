@@ -4,7 +4,7 @@ import { resolve } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { ProjectCoordinator } from "../../src/host/projects/project-coordinator.js";
 import { LockService } from "../../src/host/projects/lock-service.js";
-import { SnapshotStore } from "../../src/host/projects/snapshot-store.js";
+import { SnapshotStore, type FsyncPath } from "../../src/host/projects/snapshot-store.js";
 import { EngineBindingStore, HYPIT_UPSTREAM_SHA } from "../../src/host/engine/engine-binding-store.js";
 import { EngineRegistry } from "../../src/host/engine/engine-registry.js";
 import { NativeWriteGateway } from "../../src/host/engine/native-write-gateway.js";
@@ -52,7 +52,8 @@ afterEach(async () => {
   await Promise.all(dirs.splice(0).map((path) => rm(path, { recursive: true, force: true })));
 });
 
-async function harness(options: { sourceRoot?: string } = {}): Promise<Harness> {
+async function harness(options: { sourceRoot?: string; snapshotFsync?: FsyncPath;
+  onActorStart?: () => void; actorGate?: Promise<void> } = {}): Promise<Harness> {
   const root = options.sourceRoot ?? resolve("fixtures/d1-30s");
   const base = await mkdtemp(resolve(tmpdir(), "narralens-m22-coord-"));
   dirs.push(base);
@@ -69,8 +70,11 @@ async function harness(options: { sourceRoot?: string } = {}): Promise<Harness> 
 
   const actor = { calls: 0 };
   const stubActor = {
-    execute: async (projectId: string, request: EditRequest, correlationId?: string): Promise<EditResponse> => {
+    executeInCurrentOperation: async (projectId: string, request: EditRequest,
+      correlationId?: string): Promise<EditResponse> => {
       actor.calls += 1;
+      options.onActorStart?.();
+      await options.actorGate;
       void projectId; void request; void correlationId;
       return {
         transaction_id: `txn_actor_${actor.calls}`, project_id: PROJECT, previous_revision: 2,
@@ -99,7 +103,7 @@ async function harness(options: { sourceRoot?: string } = {}): Promise<Harness> 
     queue: new InMemoryProjectOperationQueue(), store, actor: stubActor, bindings, engines,
     gateway: new NativeWriteGateway(new NativeMutationRegistry()),
     locks: new LockService(store),
-    snapshots: new SnapshotStore({ snapshotsRoot }),
+    snapshots: new SnapshotStore({ snapshotsRoot, ...(options.snapshotFsync ? { fsync: options.snapshotFsync } : {}) }),
     outbox: new Outbox(store),
     jobs: new PersistentJobStore(store),
     sourceFor, digestFor,
@@ -134,7 +138,7 @@ describe("BYP the gateway is in front of every write", () => {
     store.bindEngine("openfilm-project", "openfilm", "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3", null, new Date(0));
     const openFilmCoordinator = new ProjectCoordinator({
       queue: new InMemoryProjectOperationQueue(), store,
-      actor: { execute: async () => { actor.calls += 1; throw new Error("actor must not run"); } } as unknown as ProjectWriteActor,
+      actor: { executeInCurrentOperation: async () => { actor.calls += 1; throw new Error("actor must not run"); } } as unknown as ProjectWriteActor,
       bindings, engines: new EngineRegistry(bindings),
       gateway: new NativeWriteGateway(new NativeMutationRegistry()),
       locks: new LockService(store),
@@ -177,6 +181,25 @@ describe("LOCK the coordinator consults locks before the actor", () => {
       .rejects.toMatchObject({ status: 423, code: "TARGET_LOCKED" });
     expect(actor.calls).toBe(0);
   });
+
+  it("serializes lock changes behind an in-flight edit on the shared project queue", async () => {
+    let releaseActor!: () => void;
+    const actorGate = new Promise<void>((resolvePromise) => { releaseActor = resolvePromise; });
+    let actorStarted!: () => void;
+    const started = new Promise<void>((resolvePromise) => { actorStarted = resolvePromise; });
+    const { coordinator } = await harness({ actorGate, onActorStart: actorStarted });
+    const edit = coordinator.executeEdit(PROJECT, REQUEST);
+    await started;
+    let lockResolved = false;
+    const lock = coordinator.acquireLock({ projectId: PROJECT, lockType: "visual", scope: "shot",
+      targetId: "shot-001", startFrame: 0, endFrameExclusive: 300,
+      owner: "operator", reason: "after edit" }, 2).then((value) => { lockResolved = true; return value; });
+    await new Promise((resolvePromise) => setImmediate(resolvePromise));
+    expect(lockResolved).toBe(false);
+    releaseActor();
+    await expect(edit).resolves.toMatchObject({ status: "committed" });
+    await expect(lock).resolves.toMatchObject({ owner: "operator" });
+  });
 });
 
 describe("SNAP the commit pointer and the outbox move together", () => {
@@ -189,6 +212,7 @@ describe("SNAP the commit pointer and the outbox move together", () => {
     expect(commit!.transaction_id).toMatch(/^txn_/u);
     expect(store.state(PROJECT, 2).revision).toBe(response.new_revision);
     expect(store.pendingOutboxCount()).toBe(1);
+    expect(store.sourceBaseline(PROJECT).committed).toBe(commit!.source_digest);
     const transaction = store.projectTransaction(commit!.transaction_id);
     expect(transaction).toMatchObject({ state: "committed", snapshot_id: commit!.snapshot_id });
   });
@@ -201,7 +225,16 @@ describe("SNAP the commit pointer and the outbox move together", () => {
     expect(actor.calls).toBe(1);
     expect(store.pendingOutboxCount()).toBe(0);
     expect(store.activeCommit(PROJECT)).toBeUndefined();
+    expect(store.projectsInAttention()).toContain(PROJECT);
     void original;
+  });
+
+  it("raises durable attention when snapshot publication cannot be proven", async () => {
+    const { coordinator, store } = await harness({ snapshotFsync: async () => { throw new Error("fsync denied"); } });
+    await expect(coordinator.executeEdit(PROJECT, REQUEST)).rejects.toMatchObject({ code: "SOURCE_CHANGED" });
+    expect(store.projectsInAttention()).toContain(PROJECT);
+    expect(store.activeCommit(PROJECT)).toBeUndefined();
+    expect(store.attentionReason(PROJECT)).toMatch(/fsync denied/u);
   });
 });
 

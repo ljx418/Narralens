@@ -154,11 +154,11 @@ describe("M2.2 fitness: the write gate and the store agree", () => {
   it("11. state() and the recovery gate read one predicate", () => {
     const store = sourceOf(resolve(REPO, "src/host/projects/revision-store.ts"));
     const state = store.slice(store.indexOf("  state(projectId: string"), store.indexOf("  setVisualLock("));
-    expect(state).toContain("this.recoveryGate(projectId, initialRevision)");
+    expect(state).toContain("this.recoveryGate(projectId, initialRevision, ignoredTransactionId)");
     expect(state).not.toContain("#projectHasPending");
     // The predicate itself lives in exactly one place.
-    expect((store.match(/recoveryGate\(projectId: string, initialRevision: number\): boolean \{/gu) ?? []).length).toBe(1);
-    expect((store.match(/Boolean\(row\.attention\) \|\| this\.#projectHasPending\(projectId\)/gu) ?? []).length).toBe(1);
+    expect((store.match(/recoveryGate\(projectId: string, initialRevision: number, ignoredTransactionId\?: string\): boolean \{/gu) ?? []).length).toBe(1);
+    expect((store.match(/Boolean\(row\?\.attention\) \|\| this\.#projectHasPending\(projectId, ignoredTransactionId\)/gu) ?? []).length).toBe(1);
   });
 
   it("12. attention_reason never reaches a response as an empty string", () => {
@@ -170,5 +170,13 @@ describe("M2.2 fitness: the write gate and the store agree", () => {
     const actor = classBody(sourceOf(resolve(REPO, "src/host/projects/project-write-actor.ts")), "ProjectWriteActor");
     expect(actor).not.toMatch(/project_transaction|transition\(|advanceJournal\(|markRecovering\(/u);
     expect(actor).not.toMatch(/\blease_owner\b|\breaper\b/u);
+  });
+
+  it("14. production edits and startup recovery are wired through the coordinator", () => {
+    const server = sourceOf(resolve(REPO, "src/host/server.ts"));
+    expect(server).toContain("await this.coordinator.recoverOnStart()");
+    expect(server).toContain("await this.coordinator.executeEdit(projectId, result.value)");
+    expect(server).not.toContain("await this.writes.execute(projectId, result.value)");
+    expect(server).toContain("this.jobs.acquireLease(job.job_id");
   });
 });

@@ -32,6 +32,7 @@ export interface CallbackResult {
   readonly terminalReason?: string;
   readonly message?: string;
   readonly error?: ApiError;
+  readonly comparisonId?: string;
 }
 
 export interface JobRecord extends JobResponse {
@@ -50,6 +51,11 @@ export interface AcquireLeaseOptions {
   readonly now?: Date;
 }
 
+export interface LeaseIdentity {
+  readonly owner: string;
+  readonly attempt: number;
+}
+
 const DEFAULT_LEASE_MS = 30_000;
 type Listener = (event: JobEvent) => void;
 
@@ -66,14 +72,17 @@ export class PersistentJobStore {
     const resolved: JobSpec = typeof spec === "string" ? { projectId: spec, kind: "proposal_comparison", payload: {} } : spec;
     const jobId = `job_${randomUUID().replaceAll("-", "")}`;
     const at = now.toISOString();
-    this.#store.createJobRow({
-      job_id: jobId, project_id: resolved.projectId, kind: resolved.kind,
-      payload_digest: createHash("sha256").update(JSON.stringify(resolved.payload ?? null)).digest("hex"),
-      state: "queued", lease_owner: null, lease_expires_at: null, attempt: 0,
-      max_attempts: maxAttemptsFor(resolved.kind, resolved.maxAttempts), cost_status: "unknown",
-      created_at: at, updated_at: at,
+    const event = this.#store.atomic(() => {
+      this.#store.createJobRow({
+        job_id: jobId, project_id: resolved.projectId, kind: resolved.kind,
+        payload_digest: createHash("sha256").update(JSON.stringify(resolved.payload ?? null)).digest("hex"),
+        state: "queued", lease_owner: null, lease_expires_at: null, attempt: 0,
+        max_attempts: maxAttemptsFor(resolved.kind, resolved.maxAttempts), cost_status: "unknown",
+        created_at: at, updated_at: at,
+      });
+      return this.#store.appendJobEvent(jobId, "queued", at, { message: "Job queued" }, true);
     });
-    this.#appendEvent(jobId, "queued", at, { message: "Job queued" });
+    this.#notify(event as unknown as JobEvent);
     return this.#toResponse(this.require(jobId));
   }
 
@@ -97,15 +106,28 @@ export class PersistentJobStore {
   acquireLease(jobId: string, options: AcquireLeaseOptions): boolean {
     const now = options.now ?? new Date();
     const expires = now.getTime() + (options.leaseMs ?? DEFAULT_LEASE_MS);
-    const won = this.#store.tryAcquireLease(jobId, options.owner, now.getTime(), expires);
+    let event: ReturnType<RevisionStore["appendJobEvent"]> | undefined;
+    const won = this.#store.atomic(() => {
+      const acquired = this.#store.tryAcquireLease(jobId, options.owner, now.getTime(), expires);
+      if (acquired) event = this.#store.appendJobEvent(jobId, "running", now.toISOString(),
+        { message: `Lease acquired by ${options.owner}` }, true);
+      return acquired;
+    });
     if (!won) return false;
-    this.#appendEvent(jobId, "running", now.toISOString(),
-      { message: `Lease acquired by ${options.owner}` });
+    this.#notify(event as unknown as JobEvent);
     return true;
   }
 
   releaseLease(jobId: string, owner: string, now = new Date()): boolean {
-    return this.#store.releaseLease(jobId, owner, now.getTime());
+    let event: ReturnType<RevisionStore["appendJobEvent"]> | undefined;
+    const released = this.#store.atomic(() => {
+      const changed = this.#store.releaseLease(jobId, owner, now.getTime());
+      if (changed) event = this.#store.appendJobEvent(jobId, "queued", now.toISOString(),
+        { message: `Lease released by ${owner}` }, true);
+      return changed;
+    });
+    if (event !== undefined) this.#notify(event as unknown as JobEvent);
+    return released;
   }
 
   /**
@@ -115,20 +137,25 @@ export class PersistentJobStore {
   reapExpiredLeases(now = new Date()): Array<{ job_id: string; requeued: boolean; attention: boolean }> {
     const expired = this.#store.expiredLeases(now.getTime());
     for (const job of expired) {
-      const requeue = job.attempt < job.max_attempts;
-      if (!this.#store.reclaimLease(job.job_id, requeue, now)) continue;
-      if (requeue) {
-        this.#appendEvent(job.job_id, "queued", now.toISOString(),
-          { message: "Lease expired; returned to the queue for another attempt" });
-      } else {
-        this.#transition(job.job_id, "attention", now,
-          { message: `Lease expired and attempts are exhausted (${job.attempt}/${job.max_attempts})` });
+      const requeue = job.state === "running" && job.attempt < job.max_attempts;
+      let event: ReturnType<RevisionStore["appendJobEvent"]> | undefined;
+      const reclaimed = this.#store.atomic(() => {
+        if (!this.#store.reclaimLease(job.job_id, requeue, now)) return false;
+        event = this.#store.appendJobEvent(job.job_id, requeue ? "queued" : "attention", now.toISOString(),
+          { message: requeue ? "Lease expired; returned to the queue for another attempt"
+            : `Lease expired and attempts are exhausted (${job.attempt}/${job.max_attempts})` }, true);
+        return true;
+      });
+      if (!reclaimed) continue;
+      this.#notify(event as unknown as JobEvent);
+      if (!requeue) {
         this.#store.markAttention(job.project_id, `txn_job_${job.job_id}`, "JOB_LEASE_LOST_EXHAUSTED",
           `失 lease 且已达 max_attempts 的 job ${job.job_id}`);
       }
     }
     return expired.map((job) => ({ job_id: job.job_id,
-      requeued: job.attempt < job.max_attempts, attention: job.attempt >= job.max_attempts }));
+      requeued: job.state === "running" && job.attempt < job.max_attempts,
+      attention: job.state === "cancel_requested" || job.attempt >= job.max_attempts }));
   }
 
   // ── state ───────────────────────────────────────────────────────────────────────────
@@ -162,26 +189,47 @@ export class PersistentJobStore {
    * late arrival from a worker whose lease was reclaimed, so it is quarantined and the
    * current state is left alone.
    */
-  recordCallback(jobId: string, result: CallbackResult, now = new Date()): { applied: boolean; quarantined: boolean } {
+  recordCallback(jobId: string, lease: LeaseIdentity, result: CallbackResult,
+    now = new Date()): { applied: boolean; quarantined: boolean } {
     const current = this.require(jobId);
-    if (current.state !== "running") {
-      this.#store.quarantine(jobId, JSON.stringify(result.artifact ?? null),
-        JSON.stringify(result.providerReceipt ?? null), now);
-      this.#appendEvent(jobId, current.state, now.toISOString(),
-        { message: `${QUARANTINE_MESSAGE_PREFIX} result arrived for a job that is ${current.state}` });
-      return { applied: false, quarantined: true };
+    if (current.state === "cancel_requested" && current.lease_owner === lease.owner
+      && current.attempt === lease.attempt) {
+      let event: ReturnType<RevisionStore["appendJobEvent"]> | undefined;
+      const applied = this.#store.atomic(() => {
+        this.#store.quarantine(jobId, JSON.stringify(result.artifact ?? null),
+          JSON.stringify(result.providerReceipt ?? null), now);
+        const changed = this.#store.completeCancelledCallback(jobId, lease.owner, lease.attempt, now);
+        if (changed) event = this.#store.appendJobEvent(jobId, "cancelled", now.toISOString(),
+          { message: `${QUARANTINE_MESSAGE_PREFIX} result arrived after cancellation` }, true);
+        return changed;
+      });
+      if (applied) {
+        this.#notify(event as unknown as JobEvent);
+        return { applied: false, quarantined: true };
+      }
     }
-    const applied = this.#store.completeCallback(jobId, result.state, result.costStatus ?? "unknown",
-      JSON.stringify(result.providerReceipt ?? null), result.terminalReason ?? "", now);
-    if (!applied) {
-      this.#store.quarantine(jobId, JSON.stringify(result.artifact ?? null),
-        JSON.stringify(result.providerReceipt ?? null), now);
-      this.#appendEvent(jobId, current.state, now.toISOString(),
-        { message: `${QUARANTINE_MESSAGE_PREFIX} the job moved on while the callback was in flight` });
-      return { applied: false, quarantined: true };
-    }
-    this.#appendEvent(jobId, result.state, now.toISOString(),
-      { message: result.message ?? `Job ${result.state}`, ...(result.error === undefined ? {} : { error: result.error }) });
+    let event: ReturnType<RevisionStore["appendJobEvent"]> | undefined;
+    const applied = this.#store.atomic(() => {
+      const changed = current.state === "running"
+        ? this.#store.completeCallback(jobId, lease.owner, lease.attempt, result.state,
+          result.costStatus ?? "unknown", JSON.stringify(result.providerReceipt ?? null),
+          result.terminalReason ?? "", result.comparisonId, result.error, now)
+        : false;
+      if (!changed) {
+        this.#store.quarantine(jobId, JSON.stringify(result.artifact ?? null),
+          JSON.stringify(result.providerReceipt ?? null), now);
+        const latest = this.require(jobId);
+        event = this.#store.appendJobEvent(jobId, latest.state, now.toISOString(),
+          { message: `${QUARANTINE_MESSAGE_PREFIX} lease owner or attempt no longer matches` }, true);
+      } else {
+        event = this.#store.appendJobEvent(jobId, result.state, now.toISOString(),
+          { message: result.message ?? `Job ${result.state}`,
+            ...(result.error === undefined ? {} : { error: result.error }) }, true);
+      }
+      return changed;
+    });
+    this.#notify(event as unknown as JobEvent);
+    if (!applied) return { applied: false, quarantined: true };
     return { applied: true, quarantined: false };
   }
 
@@ -217,25 +265,32 @@ export class PersistentJobStore {
   #transition(jobId: string, to: JobState, now: Date, extra: Partial<CallbackResult>
     & { message?: string; proposalId?: string; comparisonId?: string }): void {
     const at = now.toISOString();
-    this.#store.setJobState(jobId, to, at, extra.terminalReason ?? "", {
-      ...(extra.proposalId === undefined ? {} : { proposal_id: extra.proposalId }),
-      ...(extra.comparisonId === undefined ? {} : { comparison_id: extra.comparisonId }),
-      ...(extra.error === undefined ? {} : { error_json: JSON.stringify(extra.error) }),
-    });
     const message = extra.message
       ?? (extra.proposalId === undefined ? undefined : `proposal ${extra.proposalId}`);
-    this.#appendEvent(jobId, to, at, {
-      ...(message === undefined ? {} : { message }),
-      ...(extra.proposalId === undefined ? {} : { proposal_id: extra.proposalId }),
-      ...(extra.comparisonId === undefined ? {} : { comparison_id: extra.comparisonId }),
-      ...(extra.error === undefined ? {} : { error: extra.error }),
+    const event = this.#store.atomic(() => {
+      this.#store.setJobState(jobId, to, at, extra.terminalReason ?? "", {
+        ...(extra.proposalId === undefined ? {} : { proposal_id: extra.proposalId }),
+        ...(extra.comparisonId === undefined ? {} : { comparison_id: extra.comparisonId }),
+        ...(extra.error === undefined ? {} : { error_json: JSON.stringify(extra.error) }),
+      });
+      return this.#store.appendJobEvent(jobId, to, at, {
+        ...(message === undefined ? {} : { message }),
+        ...(extra.proposalId === undefined ? {} : { proposal_id: extra.proposalId }),
+        ...(extra.comparisonId === undefined ? {} : { comparison_id: extra.comparisonId }),
+        ...(extra.error === undefined ? {} : { error: extra.error }),
+      }, true);
     });
+    this.#notify(event as unknown as JobEvent);
   }
 
   #appendEvent(jobId: string, type: JobState, at: string,
     extra: { message?: string; proposal_id?: string; comparison_id?: string; error?: ApiError } = {}): void {
     const event = this.#store.appendJobEvent(jobId, type, at, extra);
-    for (const listener of this.#listeners.get(jobId) ?? []) listener(event as unknown as JobEvent);
+    this.#notify(event as unknown as JobEvent);
+  }
+
+  #notify(event: JobEvent): void {
+    for (const listener of this.#listeners.get(event.job_id) ?? []) listener(event);
   }
 
   #toResponse(row: JobRow): JobResponse {

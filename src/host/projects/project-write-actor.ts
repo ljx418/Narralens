@@ -32,7 +32,14 @@ export class ProjectWriteActor {
     return this.operations.run(projectId, () => this.#execute(projectId, request, correlationId));
   }
 
-  async #execute(projectId: string, request: EditRequest, correlationId: string): Promise<EditResponse> {
+  /** Coordinator-only entry point when the shared project queue is already held. */
+  executeInCurrentOperation(projectId: string, request: EditRequest, correlationId: string,
+    transactionId: string): Promise<EditResponse> {
+    return this.#execute(projectId, request, correlationId, transactionId);
+  }
+
+  async #execute(projectId: string, request: EditRequest, correlationId: string,
+    coordinatedTransactionId?: string): Promise<EditResponse> {
     const descriptor = await this.catalog.readDescriptor(projectId);
     const operation = request.operations[0];
     const shot = descriptor.shots.find((candidate) => candidate.shot_id === request.selection.shot_id);
@@ -43,19 +50,20 @@ export class ProjectWriteActor {
     const requestHash = sha256(requestJson);
     const cached = this.store.idempotent(projectId, request.idempotency_key, requestHash);
     if (cached) return cached;
-    const state = this.store.state(projectId, descriptor.revision);
+    const state = this.store.state(projectId, descriptor.revision, coordinatedTransactionId);
     if (state.attention) throw new HttpError(423, "PROJECT_ATTENTION_REQUIRED", "The project requires transaction recovery", undefined, correlationId);
     if (state.visual_locked) throw new HttpError(423, "TARGET_LOCKED", "The visual target is locked", undefined, correlationId);
     if (state.revision !== request.base_revision) throw new HttpError(409, "REVISION_CONFLICT", "Project revision has changed", undefined, correlationId);
 
     if (operation.op === "replace_visual_asset") {
-      return await this.#executeMedia(projectId, descriptor.revision, request, operation, shot.authoring_id, requestJson, requestHash, correlationId);
+      return await this.#executeMedia(projectId, descriptor.revision, request, operation, shot.authoring_id,
+        requestJson, requestHash, correlationId, coordinatedTransactionId);
     }
 
     const before = await this.adapter.inspect(projectId, operation.shot_id, operation.value);
     const expectedSource = this.adapter.predictedSource(before, operation.value);
     const record: JournalRecord = {
-      transaction_id: `txn_${randomUUID().replaceAll("-", "")}`,
+      transaction_id: coordinatedTransactionId ?? `txn_${randomUUID().replaceAll("-", "")}`,
       project_id: projectId,
       correlation_id: correlationId,
       state: "prepared",
@@ -110,7 +118,8 @@ export class ProjectWriteActor {
   }
 
   async #executeMedia(projectId: string, descriptorRevision: number, request: EditRequest, operation: MediaEditOperation,
-    authoringId: string, requestJson: string, requestHash: string, correlationId: string): Promise<EditResponse> {
+    authoringId: string, requestJson: string, requestHash: string, correlationId: string,
+    coordinatedTransactionId?: string): Promise<EditResponse> {
     const targetAsset = await this.assets.resolve(projectId, operation.asset_id);
     const selectedFrames = request.selection.end_frame_exclusive - request.selection.start_frame;
     if (targetAsset.duration_frames !== selectedFrames) {
@@ -122,7 +131,8 @@ export class ProjectWriteActor {
       throw new HttpError(409, "MANIFEST_CHANGED", "The asset manifest changed during prepare", undefined, correlationId);
     }
     const record: JournalRecord = {
-      transaction_id: `txn_${randomUUID().replaceAll("-", "")}`, project_id: projectId, correlation_id: correlationId,
+      transaction_id: coordinatedTransactionId ?? `txn_${randomUUID().replaceAll("-", "")}`,
+      project_id: projectId, correlation_id: correlationId,
       state: "prepared", request_json: requestJson, request_hash: requestHash, base_revision: request.base_revision,
       authoring_id: authoringId, before_fit: before.media_asset.asset_id, target_fit: operation.asset_id,
       source_before: before.source_sha256, run_before: before.run_sha256, narration_before: before.narration_sha256,

@@ -112,7 +112,8 @@ describe("JB-03 SSE replays by cursor without repeating", () => {
     const { jobs } = harness();
     const job = jobs.create({ projectId: "p1", kind: "render", payload: {} });
     jobs.acquireLease(job.job_id, { owner: "a", now: AT });
-    jobs.recordCallback(job.job_id, { state: "succeeded", costStatus: "known" }, AT);
+    jobs.recordCallback(job.job_id, { owner: "a", attempt: 1 },
+      { state: "succeeded", costStatus: "known" }, AT);
 
     const all = jobs.eventsAfter(job.job_id, 0);
     expect(all.map((event) => event.seq)).toEqual([1, 2, 3]);
@@ -136,6 +137,30 @@ describe("JB-03 SSE replays by cursor without repeating", () => {
 });
 
 describe("JB-04 a late result is quarantined, never adopted", () => {
+  it("moves a cancelled job with a lost worker lease to attention instead of retrying it", () => {
+    const { jobs } = harness();
+    const job = jobs.create({ projectId: "p1", kind: "render", payload: {} });
+    jobs.acquireLease(job.job_id, { owner: "worker-a", now: AT, leaseMs: 1 });
+    jobs.requestCancel(job.job_id, AT);
+    expect(jobs.reapExpiredLeases(later(2))).toContainEqual({
+      job_id: job.job_id, requeued: false, attention: true,
+    });
+    expect(jobs.record(job.job_id)?.state).toBe("attention");
+  });
+
+  it("rejects the previous owner's callback after a new lease attempt starts", () => {
+    const { jobs } = harness();
+    const job = jobs.create({ projectId: "p1", kind: "render", payload: {} });
+    expect(jobs.acquireLease(job.job_id, { owner: "worker-a", now: AT, leaseMs: 1 })).toBe(true);
+    jobs.reapExpiredLeases(later(2));
+    expect(jobs.acquireLease(job.job_id, { owner: "worker-b", now: later(3) })).toBe(true);
+
+    expect(jobs.recordCallback(job.job_id, { owner: "worker-a", attempt: 1 },
+      { state: "succeeded", artifact: { worker: "a" } }, later(4)))
+      .toEqual({ applied: false, quarantined: true });
+    expect(jobs.record(job.job_id)).toMatchObject({ state: "running", lease_owner: "worker-b", attempt: 2 });
+  });
+
   it("records the result without changing the state of a job that moved on", () => {
     const { jobs } = harness();
     const job = jobs.create({ projectId: "p1", kind: "render", payload: {} });
@@ -144,7 +169,7 @@ describe("JB-04 a late result is quarantined, never adopted", () => {
     jobs.releaseLease(job.job_id, "a", AT);
     jobs.reapExpiredLeases(later(60_000));
 
-    const outcome = jobs.recordCallback(job.job_id,
+    const outcome = jobs.recordCallback(job.job_id, { owner: "a", attempt: 1 },
       { state: "succeeded", artifact: { frame: 42 }, providerReceipt: { charged: true } }, later(60_001));
     expect(outcome).toEqual({ applied: false, quarantined: true });
 
@@ -159,7 +184,8 @@ describe("JB-04 a late result is quarantined, never adopted", () => {
     const { jobs } = harness();
     const job = jobs.create({ projectId: "p1", kind: "render", payload: {} });
     jobs.acquireLease(job.job_id, { owner: "a", now: AT });
-    expect(jobs.recordCallback(job.job_id, { state: "succeeded", artifact: { frame: 1 } }, AT))
+    expect(jobs.recordCallback(job.job_id, { owner: "a", attempt: 1 },
+      { state: "succeeded", artifact: { frame: 1 } }, AT))
       .toEqual({ applied: true, quarantined: false });
     expect(jobs.get(job.job_id)!.state).toBe("succeeded");
   });
@@ -181,7 +207,7 @@ describe("JB-05 an unknown cost is never recorded as zero and never retried", ()
     const job = jobs.create({ projectId: "p1", kind: "proposal_comparison", payload: {} });
     expect(jobs.record(job.job_id)!.cost_status).toBe("unknown");
     jobs.acquireLease(job.job_id, { owner: "a", now: AT });
-    jobs.recordCallback(job.job_id, { state: "succeeded" }, AT);
+    jobs.recordCallback(job.job_id, { owner: "a", attempt: 1 }, { state: "succeeded" }, AT);
     // The provider returned no amount, so the cost stays unknown rather than becoming 0.
     expect(jobs.record(job.job_id)!.cost_status).toBe("unknown");
   });

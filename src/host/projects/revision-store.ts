@@ -287,6 +287,15 @@ export class RevisionStore {
     `);
   }
 
+  atomic<T>(operation: () => T): T {
+    this.#db.exec("BEGIN IMMEDIATE");
+    try {
+      const result = operation();
+      this.#db.exec("COMMIT");
+      return result;
+    } catch (error) { this.#db.exec("ROLLBACK"); throw error; }
+  }
+
   // ── M2.2: one authoritative transaction machine, predecessor-checked everywhere ───────
 
   /**
@@ -370,10 +379,10 @@ export class RevisionStore {
    * The single attention predicate, shared by `state()` and the request gate so the two can
    * never disagree about whether a project is writable (M2.2 plan §8).
    */
-  recoveryGate(projectId: string, initialRevision: number): boolean {
-    this.ensureProject(projectId, initialRevision);
-    const row = this.#db.prepare("SELECT attention FROM project_state WHERE project_id=?").get(projectId) as { attention?: number };
-    return Boolean(row.attention) || this.#projectHasPending(projectId);
+  recoveryGate(projectId: string, initialRevision: number, ignoredTransactionId?: string): boolean {
+    void initialRevision;
+    const row = this.#db.prepare("SELECT attention FROM project_state WHERE project_id=?").get(projectId) as { attention?: number } | undefined;
+    return Boolean(row?.attention) || this.#projectHasPending(projectId, ignoredTransactionId);
   }
 
   attentionReason(projectId: string): string {
@@ -415,8 +424,9 @@ export class RevisionStore {
     const at = now.toISOString();
     this.#db.exec("BEGIN IMMEDIATE");
     try {
-      this.#db.prepare("UPDATE project_state SET revision=?, updated_at=? WHERE project_id=?")
-        .run(input.revision, at, input.projectId);
+      this.#db.prepare(`UPDATE project_state SET revision=?, source_digest=?,
+        source_digest_observed='', source_digest_detected_at='', updated_at=? WHERE project_id=?`)
+        .run(input.revision, input.sourceDigestAfter, at, input.projectId);
       this.#db.prepare(`INSERT INTO snapshot(snapshot_id, project_id, source_digest, engine, created_at)
         VALUES(?,?,?,?,?) ON CONFLICT(snapshot_id) DO NOTHING`)
         .run(input.snapshotId, input.projectId, input.sourceDigestAfter, input.engine, at);
@@ -529,10 +539,10 @@ export class RevisionStore {
     return Number(result.changes);
   }
 
-  incompleteTransactions(): Array<{ transaction_id: string; project_id: string }> {
-    return (this.#db.prepare(`SELECT transaction_id, project_id FROM project_transaction
+  incompleteTransactions(): Array<{ transaction_id: string; project_id: string; state: ProjectTransactionState }> {
+    return (this.#db.prepare(`SELECT transaction_id, project_id, state FROM project_transaction
       WHERE state IN ('received','preconditions_checked','staged','validated','prepared','attention') ORDER BY created_at`)
-      .all() as Array<{ transaction_id: string; project_id: string }>);
+      .all() as Array<{ transaction_id: string; project_id: string; state: ProjectTransactionState }>);
   }
 
   projectsInAttention(): string[] {
@@ -579,16 +589,19 @@ export class RevisionStore {
   }
 
   releaseLease(jobId: string, owner: string, now: number): boolean {
-    const result = this.#db.prepare(`UPDATE job SET lease_owner=NULL, lease_expires_at=NULL, updated_at=?
+    const result = this.#db.prepare(`UPDATE job SET state='queued', lease_owner=NULL, lease_expires_at=NULL, updated_at=?
       WHERE job_id=? AND lease_owner=? AND state='running'`)
       .run(new Date(now).toISOString(), jobId, owner);
     return Number(result.changes) === 1;
   }
 
-  expiredLeases(now: number): Array<{ job_id: string; project_id: string; attempt: number; max_attempts: number }> {
-    return (this.#db.prepare(`SELECT job_id, project_id, attempt, max_attempts FROM job
-      WHERE state='running' AND lease_expires_at IS NOT NULL AND lease_expires_at<=? ORDER BY job_id`)
-      .all(now) as Array<{ job_id: string; project_id: string; attempt: number; max_attempts: number }>);
+  expiredLeases(now: number): Array<{ job_id: string; project_id: string; state: JobState;
+    attempt: number; max_attempts: number }> {
+    return (this.#db.prepare(`SELECT job_id, project_id, state, attempt, max_attempts FROM job
+      WHERE state IN ('running','cancel_requested') AND lease_expires_at IS NOT NULL
+      AND lease_expires_at<=? ORDER BY job_id`)
+      .all(now) as Array<{ job_id: string; project_id: string; state: JobState;
+        attempt: number; max_attempts: number }>);
   }
 
   /**
@@ -598,8 +611,8 @@ export class RevisionStore {
    */
   reclaimLease(jobId: string, requeue: boolean, now = new Date()): boolean {
     const result = this.#db.prepare(`UPDATE job SET lease_owner=NULL, lease_expires_at=NULL,
-      state=?, updated_at=? WHERE job_id=? AND state='running'`)
-      .run(requeue ? "queued" : "running", now.toISOString(), jobId);
+      state=?, updated_at=? WHERE job_id=? AND state IN ('running','cancel_requested')`)
+      .run(requeue ? "queued" : "attention", now.toISOString(), jobId);
     return Number(result.changes) === 1;
   }
 
@@ -615,11 +628,22 @@ export class RevisionStore {
   }
 
   /** Only a running job may be finalised; returns false when it moved on underneath us. */
-  completeCallback(jobId: string, state: JobState, costStatus: "unknown" | "known",
-    providerReceipt: string, terminalReason: string, now = new Date()): boolean {
+  completeCallback(jobId: string, owner: string, attempt: number, state: JobState, costStatus: "unknown" | "known",
+    providerReceipt: string, terminalReason: string, comparisonId?: string, error?: ApiError,
+    now = new Date()): boolean {
     const result = this.#db.prepare(`UPDATE job SET state=?, cost_status=?, provider_receipt_json=?,
-      terminal_reason=?, updated_at=? WHERE job_id=? AND state='running'`)
-      .run(state, costStatus, providerReceipt, terminalReason, now.toISOString(), jobId);
+      terminal_reason=?, comparison_id=COALESCE(?, comparison_id), error_json=COALESCE(?, error_json),
+      lease_owner=NULL, lease_expires_at=NULL, updated_at=?
+      WHERE job_id=? AND state='running' AND lease_owner=? AND attempt=?`)
+      .run(state, costStatus, providerReceipt, terminalReason, comparisonId ?? null,
+        error === undefined ? null : JSON.stringify(error), now.toISOString(), jobId, owner, attempt);
+    return Number(result.changes) === 1;
+  }
+
+  completeCancelledCallback(jobId: string, owner: string, attempt: number, now = new Date()): boolean {
+    const result = this.#db.prepare(`UPDATE job SET state='cancelled', lease_owner=NULL,
+      lease_expires_at=NULL, updated_at=? WHERE job_id=? AND state='cancel_requested'
+      AND lease_owner=? AND attempt=?`).run(now.toISOString(), jobId, owner, attempt);
     return Number(result.changes) === 1;
   }
 
@@ -629,8 +653,9 @@ export class RevisionStore {
   }
 
   appendJobEvent(jobId: string, type: JobState, at: string,
-    extra: { message?: string; proposal_id?: string; comparison_id?: string; error?: unknown } = {}): JobEventRecord {
-    this.#db.exec("BEGIN IMMEDIATE");
+    extra: { message?: string; proposal_id?: string; comparison_id?: string; error?: unknown } = {},
+    withinTransaction = false): JobEventRecord {
+    if (!withinTransaction) this.#db.exec("BEGIN IMMEDIATE");
     try {
       const next = Number((this.#db.prepare(
         "SELECT COALESCE(MAX(seq), 0) + 1 AS next FROM job_event WHERE job_id=?").get(jobId) as { next: number }).next);
@@ -639,7 +664,7 @@ export class RevisionStore {
       const result = this.#db.prepare(
         "INSERT INTO job_event(job_id, seq, type, payload_json, created_at) VALUES(?,?,?,?,?)")
         .run(jobId, next, type, JSON.stringify(payload), at);
-      this.#db.exec("COMMIT");
+      if (!withinTransaction) this.#db.exec("COMMIT");
       // Assign rather than spread, so an absent optional is absent rather than undefined.
       const record: JobEventRecord = {
         event_id: Number(result.lastInsertRowid), job_id: jobId, seq: next, type, at,
@@ -649,7 +674,10 @@ export class RevisionStore {
       if (extra.comparison_id !== undefined) record.comparison_id = extra.comparison_id;
       if (extra.error !== undefined) record.error = extra.error as ApiError;
       return record;
-    } catch (error) { this.#db.exec("ROLLBACK"); throw error; }
+    } catch (error) {
+      if (!withinTransaction) this.#db.exec("ROLLBACK");
+      throw error;
+    }
   }
 
   jobEventsAfter(jobId: string, after: number, limit: number): JobEventRecord[] {
@@ -684,6 +712,45 @@ export class RevisionStore {
       .run(row.lock_id, row.project_id, row.lock_type, row.scope, row.target_id, row.start_frame,
         row.end_frame_exclusive, row.owner, row.reason, row.control_revision, row.active ? 1 : 0,
         row.created_at, row.updated_at);
+  }
+
+  createLockWithControlRevision(row: {
+    lock_id: string; project_id: string; lock_type: string; scope: string; target_id: string;
+    start_frame: number; end_frame_exclusive: number; owner: string; reason: string;
+    created_at: string; updated_at: string;
+  }, initialRevision: number): number {
+    this.ensureProject(row.project_id, initialRevision);
+    this.#db.exec("BEGIN IMMEDIATE");
+    try {
+      this.#db.prepare("UPDATE project_state SET control_revision=control_revision+1, updated_at=? WHERE project_id=?")
+        .run(row.updated_at, row.project_id);
+      const controlRevision = this.controlRevision(row.project_id, initialRevision);
+      this.upsertLock({ ...row, control_revision: controlRevision, active: true });
+      this.#db.prepare("INSERT INTO outbox(topic, project_id, payload_json, created_at) VALUES('lock.changed',?,?,?)")
+        .run(row.project_id, JSON.stringify({ project_id: row.project_id, lock_id: row.lock_id,
+          active: true, control_revision: controlRevision }), row.updated_at);
+      this.#db.exec("COMMIT");
+      return controlRevision;
+    } catch (error) { this.#db.exec("ROLLBACK"); throw error; }
+  }
+
+  deactivateLockWithControlRevision(lockId: string, initialRevision: number, now = new Date()): number {
+    const lock = this.readLock(lockId);
+    if (lock === undefined) throw new HttpError(404, "NOT_FOUND", "Lock not found");
+    this.ensureProject(lock.project_id, initialRevision);
+    const at = now.toISOString();
+    this.#db.exec("BEGIN IMMEDIATE");
+    try {
+      this.#db.prepare("UPDATE project_state SET control_revision=control_revision+1, updated_at=? WHERE project_id=?")
+        .run(at, lock.project_id);
+      this.deactivateLock(lockId, now);
+      const controlRevision = this.controlRevision(lock.project_id, initialRevision);
+      this.#db.prepare("INSERT INTO outbox(topic, project_id, payload_json, created_at) VALUES('lock.changed',?,?,?)")
+        .run(lock.project_id, JSON.stringify({ project_id: lock.project_id, lock_id: lockId,
+          active: false, control_revision: controlRevision }), at);
+      this.#db.exec("COMMIT");
+      return controlRevision;
+    } catch (error) { this.#db.exec("ROLLBACK"); throw error; }
   }
 
   deactivateLock(lockId: string, now = new Date()): void {
@@ -775,12 +842,13 @@ export class RevisionStore {
       .run(projectId, initialRevision, new Date().toISOString());
   }
 
-  state(projectId: string, initialRevision: number): { revision: number; visual_locked: boolean; attention: boolean } {
+  state(projectId: string, initialRevision: number,
+    ignoredTransactionId?: string): { revision: number; visual_locked: boolean; attention: boolean } {
     this.ensureProject(projectId, initialRevision);
     const row = this.#db.prepare("SELECT revision, visual_locked FROM project_state WHERE project_id=?").get(projectId) as Record<string, unknown>;
     // The attention predicate lives in one place; the request gate and this read cannot drift.
     return { revision: Number(row.revision), visual_locked: Boolean(row.visual_locked),
-      attention: this.recoveryGate(projectId, initialRevision) };
+      attention: this.recoveryGate(projectId, initialRevision, ignoredTransactionId) };
   }
 
   setVisualLock(projectId: string, initialRevision: number, locked: boolean): void {
@@ -807,7 +875,7 @@ export class RevisionStore {
       this.ensureProject(record.project_id, initialRevision);
       const cached = this.idempotent(record.project_id, idempotencyKey, record.request_hash);
       if (cached) { this.#db.exec("COMMIT"); return cached; }
-      const state = this.state(record.project_id, initialRevision);
+      const state = this.state(record.project_id, initialRevision, record.transaction_id);
       if (state.attention) throw new HttpError(423, "PROJECT_ATTENTION_REQUIRED", "The project requires transaction recovery");
       if (state.visual_locked) throw new HttpError(423, "TARGET_LOCKED", "The visual target is locked");
       if (state.revision !== record.base_revision) throw new HttpError(409, "REVISION_CONFLICT", "Project revision has changed");
@@ -1034,10 +1102,15 @@ export class RevisionStore {
     }
   }
 
-  #projectHasPending(projectId: string): boolean {
+  #projectHasPending(projectId: string, ignoredTransactionId?: string): boolean {
     const edit = this.#db.prepare("SELECT 1 AS present FROM edit_journal WHERE project_id=? AND state IN ('prepared','source_validated','attention') LIMIT 1").get(projectId);
     const asset = this.#db.prepare("SELECT 1 AS present FROM asset_import_journal WHERE project_id=? AND state IN ('prepared','bytes_installed','manifest_published','attention') LIMIT 1").get(projectId);
-    return Boolean(edit) || Boolean(asset);
+    const transaction = ignoredTransactionId === undefined
+      ? this.#db.prepare(`SELECT 1 AS present FROM project_transaction WHERE project_id=?
+          AND state NOT IN ('committed','aborted') LIMIT 1`).get(projectId)
+      : this.#db.prepare(`SELECT 1 AS present FROM project_transaction WHERE project_id=? AND transaction_id<>?
+          AND state NOT IN ('committed','aborted') LIMIT 1`).get(projectId, ignoredTransactionId);
+    return Boolean(edit) || Boolean(asset) || Boolean(transaction);
   }
 }
 

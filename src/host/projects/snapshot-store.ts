@@ -7,6 +7,7 @@ import { HttpError } from "../api-error.js";
 import type { EngineKind } from "../../contracts/engine-types.js";
 import {
   canonicalJson, computeSourceDigest, SOURCE_DIGEST_DOMAIN, type DeclaredAsset,
+  type SourceDigestResult,
 } from "../engine/source-digest-v1.js";
 import type { ProjectDescriptor } from "./project-catalog.js";
 
@@ -53,6 +54,8 @@ export interface SnapshotSource {
   readonly descriptor: ProjectDescriptor;
   readonly sourceRoot: string;
   readonly declaredAssets?: readonly DeclaredAsset[];
+  /** Engine-owned closure computed from the current source after the mutation. */
+  readonly digest?: SourceDigestResult;
 }
 
 export interface PublishedSnapshot {
@@ -62,6 +65,7 @@ export interface PublishedSnapshot {
   readonly engine: EngineKind;
   readonly file_count: number;
   readonly asset_count: number;
+  readonly created: boolean;
 }
 
 /** Copies one closure file. Replaceable in tests so a bad copy can be exercised. */
@@ -107,7 +111,7 @@ export class SnapshotStore {
    * happens here — the caller publishes the pointer only after this returns.
    */
   async publish(source: SnapshotSource): Promise<PublishedSnapshot> {
-    const digest = await computeSourceDigest({
+    const digest = source.digest ?? await computeSourceDigest({
       root: source.sourceRoot,
       roots: projectDigestRoots(source.descriptor, source.engine),
       engine: source.engine,
@@ -124,6 +128,7 @@ export class SnapshotStore {
       return {
         snapshot_id: snapshotId, project_id: source.projectId, source_digest: digest.source_digest,
         engine: source.engine, file_count: digest.manifest.files.length, asset_count: digest.manifest.assets.length,
+        created: false,
       };
     }
     const stagingRoot = resolve(projectRoot, `.staging-${randomUUID()}`);
@@ -159,6 +164,7 @@ export class SnapshotStore {
     return {
       snapshot_id: snapshotId, project_id: source.projectId, source_digest: digest.source_digest,
       engine: source.engine, file_count: digest.manifest.files.length, asset_count: digest.manifest.assets.length,
+      created: true,
     };
   }
 

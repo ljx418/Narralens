@@ -25,7 +25,7 @@ describe("JB-06 a crash after commit only replays the outbox", () => {
   it("delivers each event to each consumer exactly once, however often it replays", async () => {
     const { store, outbox } = harness();
     const audit: unknown[] = [];
-    outbox.register("project.committed", "commit-audit", (payload) => { audit.push(payload); });
+    outbox.register("project.committed", "commit-audit", (_eventId, payload) => { audit.push(payload); });
     store.enqueueOutbox("project.committed", "p1", JSON.stringify({ revision: 3 }));
 
     expect((await outbox.replay(now)).delivered).toBe(1);
@@ -119,7 +119,7 @@ describe("JB-06 a crash after commit only replays the outbox", () => {
   it("delivers oldest first so a consumer sees history in order", async () => {
     const { store, outbox } = harness();
     const order: number[] = [];
-    outbox.register("project.committed", "commit-audit", (payload) => {
+    outbox.register("project.committed", "commit-audit", (_eventId, payload) => {
       order.push((payload as { revision: number }).revision);
     });
     for (const revision of [1, 2, 3]) {
@@ -127,5 +127,20 @@ describe("JB-06 a crash after commit only replays the outbox", () => {
     }
     await outbox.replay(now);
     expect(order).toEqual([1, 2, 3]);
+  });
+
+  it("gives the consumer a stable event id so a retried side effect can deduplicate", async () => {
+    const { store, outbox } = harness();
+    const sideEffects = new Set<number>();
+    let first = true;
+    outbox.register("project.committed", "commit-audit", (eventId) => {
+      sideEffects.add(eventId);
+      if (first) { first = false; throw new Error("crash before acknowledgement"); }
+    });
+    store.enqueueOutbox("project.committed", "p1", "{}");
+    await outbox.replay(now);
+    await outbox.replay(now);
+    expect([...sideEffects]).toHaveLength(1);
+    expect(store.pendingOutboxCount()).toBe(0);
   });
 });

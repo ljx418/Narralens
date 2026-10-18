@@ -15,6 +15,11 @@ import { AssetImportService } from "./assets/asset-import-service.js";
 import { JobStore } from "./job-store.js";
 import { PersistentJobStore } from "./persistent-job-store.js";
 import { Outbox } from "./outbox.js";
+import { NativeMutationRegistry } from "./engine/native-mutation-registry.js";
+import { NativeWriteGateway } from "./engine/native-write-gateway.js";
+import { LockService } from "./projects/lock-service.js";
+import { ProjectCoordinator, type ResolvedSource } from "./projects/project-coordinator.js";
+import { SnapshotStore } from "./projects/snapshot-store.js";
 import { ProjectCatalog, type ProjectDescriptor } from "./projects/project-catalog.js";
 import { ProjectWriteActor } from "./projects/project-write-actor.js";
 import { InMemoryProjectOperationQueue, type ProjectOperationQueue } from "./projects/project-operation-queue.js";
@@ -39,6 +44,9 @@ interface HostDependencies {
   imports?: AssetImportService;
   engines?: EngineRegistry;
   jobs?: PersistentJobStore | JobStore;
+  snapshotsRoot?: string;
+  leaseReapIntervalMs?: number;
+  outboxReplayIntervalMs?: number;
   sessionTtlMs?: number;
 }
 
@@ -55,12 +63,17 @@ export class NarralensHost {
   readonly operations: ProjectOperationQueue;
   readonly imports: AssetImportService;
   readonly engines: EngineRegistry;
+  readonly coordinator: ProjectCoordinator;
   readonly sessionToken = randomBytes(32).toString("base64url");
   /** Loopback origin once `listen` has bound, used to bind preview descriptors. */
   origin = "";
   readonly sessionExpiresAt: Date;
   readonly diagnostics = { write_actor_execute_count: 0 };
   readonly #controllers = new Map<string, AbortController>();
+  readonly #leaseReapIntervalMs: number;
+  readonly #outboxReplayIntervalMs: number;
+  #stopOutbox: (() => void) | undefined;
+  #leaseReaper: ReturnType<typeof setInterval> | undefined;
   #server: Server | undefined;
 
   constructor(dependencies: HostDependencies = {}) {
@@ -80,6 +93,34 @@ export class NarralensHost {
     this.outbox = new Outbox(this.revisions);
     this.imports = dependencies.imports ?? new AssetImportService(this.catalog, this.writes.assets, this.revisions, this.operations);
     this.engines = dependencies.engines ?? defaultEngineRegistry(this);
+    for (const [topic, consumer] of [
+      ["project.committed", "commit-audit"], ["job.state_changed", "job-sse"],
+      ["lock.changed", "lock-audit"], ["recovery.attention", "recovery-audit"],
+    ] as const) this.outbox.register(topic, consumer, (_eventId, _payload) => undefined);
+    const locks = new LockService(this.revisions);
+    this.coordinator = new ProjectCoordinator({
+      queue: this.operations, store: this.revisions, actor: this.writes,
+      bindings: this.engines.bindings, engines: this.engines,
+      gateway: new NativeWriteGateway(new NativeMutationRegistry()), locks,
+      snapshots: new SnapshotStore({ snapshotsRoot: dependencies.snapshotsRoot ?? resolve(projectRoot, "var/snapshots") }),
+      outbox: this.outbox,
+      jobs: this.jobs instanceof PersistentJobStore ? this.jobs : new PersistentJobStore(this.revisions),
+      sourceFor: async (projectId) => {
+        const resolved = this.engines.resolve(projectId);
+        const descriptor = await this.catalog.readDescriptor(projectId);
+        return { engine: resolved.engine, engineUpstreamSha: resolved.binding.engine_upstream_sha,
+          descriptor, sourceRoot: this.catalog.descriptorRoot(projectId) };
+      },
+      digestFor: async (source: ResolvedSource) => {
+        const resolved = this.engines.resolve(source.descriptor.project_id);
+        if (!(resolved.port instanceof HypitEngineAdapter)) {
+          throw new HttpError(422, "UNSUPPORTED_EDIT", "Writable snapshot closure is not enabled for this engine");
+        }
+        return await resolved.port.sourceDigestFor(source.descriptor.project_id, source.descriptor);
+      },
+    });
+    this.#leaseReapIntervalMs = dependencies.leaseReapIntervalMs ?? 1_000;
+    this.#outboxReplayIntervalMs = dependencies.outboxReplayIntervalMs ?? 250;
     this.sessionExpiresAt = new Date(Date.now() + (dependencies.sessionTtlMs ?? 3_600_000));
   }
 
@@ -88,6 +129,13 @@ export class NarralensHost {
     await this.imports.recoverIncomplete();
     await this.writes.recoverIncomplete();
     await this.comparisons.cleanupStaleTemporaryFiles();
+    await this.coordinator.recoverOnStart();
+    this.#stopOutbox = this.outbox.start(this.#outboxReplayIntervalMs);
+    if (this.jobs instanceof PersistentJobStore) {
+      this.#leaseReaper = setInterval(() => this.jobs instanceof PersistentJobStore
+        && this.jobs.reapExpiredLeases(), this.#leaseReapIntervalMs);
+      this.#leaseReaper.unref?.();
+    }
     this.#server = createServer((request, response) => { void this.#handle(request, response); });
     await new Promise<void>((resolvePromise, reject) => {
       this.#server!.once("error", reject);
@@ -106,6 +154,10 @@ export class NarralensHost {
     // closed database while it is still running.
     for (const controller of this.#controllers.values()) controller.abort();
     this.#controllers.clear();
+    this.#stopOutbox?.();
+    this.#stopOutbox = undefined;
+    if (this.#leaseReaper !== undefined) clearInterval(this.#leaseReaper);
+    this.#leaseReaper = undefined;
     if (!server) { this.revisions.close(); return; }
     await new Promise<void>((resolvePromise, reject) => server.close((error) => error ? reject(error) : resolvePromise()));
     await new Promise((resolvePromise) => setImmediate(resolvePromise));
@@ -183,10 +235,20 @@ export class NarralensHost {
     if (!project.shots.some((shot) => shot.shot_id === result.value.selection.shot_id && shot.start_frame === result.value.selection.start_frame && shot.end_frame_exclusive === result.value.selection.end_frame_exclusive)) {
       throw new HttpError(400, "INVALID_REQUEST", "Selection is not a registered project shot");
     }
-    const job = this.jobs.create(projectId);
+    const job = this.jobs instanceof PersistentJobStore
+      ? this.jobs.create({ projectId, kind: "proposal_comparison", payload: result.value })
+      : this.jobs.create(projectId);
     const controller = new AbortController();
     this.#controllers.set(job.job_id, controller);
-    queueMicrotask(() => { void this.#runJob(job.job_id, project, result.value, controller); });
+    let lease: { owner: string; attempt: number } | undefined;
+    if (this.jobs instanceof PersistentJobStore) {
+      const owner = `host_${randomBytes(12).toString("hex")}`;
+      if (!this.jobs.acquireLease(job.job_id, { owner })) {
+        throw new HttpError(500, "TRANSACTION_FAILED", "Created job could not acquire its worker lease");
+      }
+      lease = { owner, attempt: this.jobs.record(job.job_id)!.attempt };
+    }
+    queueMicrotask(() => { void this.#runJob(job.job_id, project, result.value, controller, lease); });
     json(response, 202, job);
   }
 
@@ -195,7 +257,7 @@ export class NarralensHost {
     const result = validateEditRequest(body);
     if (!result.ok) throw new HttpError(422, "UNSUPPORTED_EDIT", "Edit request is invalid", { errors: result.errors });
     this.diagnostics.write_actor_execute_count += 1;
-    json(response, 200, await this.writes.execute(projectId, result.value));
+    json(response, 200, await this.coordinator.executeEdit(projectId, result.value));
   }
 
   async #importAsset(projectId: string, request: IncomingMessage, response: ServerResponse): Promise<void> {
@@ -287,9 +349,12 @@ export class NarralensHost {
       ...(availableAssets ? { available_visual_assets: availableAssets } : {}) };
   }
 
-  async #runJob(jobId: string, project: ProjectResponse, request: ProposalComparisonRequest, controller: AbortController): Promise<void> {
+  async #runJob(jobId: string, project: ProjectResponse, request: ProposalComparisonRequest,
+    controller: AbortController, lease?: { owner: string; attempt: number }): Promise<void> {
     try {
-      this.jobs.transition(jobId, "running", { message: "Provider request started" });
+      if (!(this.jobs instanceof PersistentJobStore)) {
+        this.jobs.transition(jobId, "running", { message: "Provider request started" });
+      }
       const input: ComparisonRunnerInput = { project: { project_id: project.project_id, revision: project.revision, frame_rate: project.frame_rate, frame_count: project.frame_count }, request,
         fixed_context: { product: "Narralens", output_contract: "narralens.proposal_comparison_draft@1.0", upstream: "OpenMontage", pipeline: "proposal-comparison-only", allowed_source_refs: [] } };
       const output = await this.runner.runComparison(input, controller.signal);
@@ -303,7 +368,7 @@ export class NarralensHost {
         // `completed_after_cancel` again: the job is cancelled and the result is quarantined
         // so nothing downstream can treat it as adoptable.
         if (this.jobs instanceof PersistentJobStore) {
-          this.jobs.recordCallback(jobId, { state: "cancelled",
+          this.jobs.recordCallback(jobId, lease!, { state: "cancelled",
             providerReceipt: { comparison_id: comparison.comparison_id },
             artifact: { comparison_id: comparison.comparison_id },
             message: "Comparison finished after cancellation" });
@@ -314,18 +379,31 @@ export class NarralensHost {
           });
         }
       } else {
-        this.jobs.transition(jobId, "succeeded", {
-          comparisonId: comparison.comparison_id,
-          message: `Proposal comparison validated; runner stdout sha256 ${output.raw_sha256}`,
-        });
+        if (this.jobs instanceof PersistentJobStore) {
+          this.jobs.recordCallback(jobId, lease!, { state: "succeeded", costStatus: "unknown",
+            providerReceipt: { comparison_id: comparison.comparison_id },
+            comparisonId: comparison.comparison_id,
+            message: `Proposal comparison validated; runner stdout sha256 ${output.raw_sha256}` });
+        } else {
+          this.jobs.transition(jobId, "succeeded", {
+            comparison_id: comparison.comparison_id,
+            message: `Proposal comparison validated; runner stdout sha256 ${output.raw_sha256}`,
+          });
+        }
       }
     } catch (error) {
       const current = this.jobs.get(jobId);
       if (current?.state === "cancel_requested" && controller.signal.aborted && error instanceof HttpError && error.code === "RUNNER_TIMEOUT") {
-        this.jobs.transition(jobId, "cancelled", { message: "Runner stopped after cancellation request" });
+        if (this.jobs instanceof PersistentJobStore) {
+          this.jobs.recordCallback(jobId, lease!, { state: "cancelled",
+            message: "Runner stopped after cancellation request" });
+        } else this.jobs.transition(jobId, "cancelled", { message: "Runner stopped after cancellation request" });
       } else {
         const normalized = normalizeError(error);
-        this.jobs.transition(jobId, "failed", { error: normalized.body(), message: normalized.message });
+        if (this.jobs instanceof PersistentJobStore) {
+          this.jobs.recordCallback(jobId, lease!, { state: "failed", error: normalized.body(),
+            message: normalized.message });
+        } else this.jobs.transition(jobId, "failed", { error: normalized.body(), message: normalized.message });
       }
     } finally { this.#controllers.delete(jobId); }
   }

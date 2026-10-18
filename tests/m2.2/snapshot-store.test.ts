@@ -6,6 +6,7 @@ import {
   projectDigestRoots, snapshotIdFor, SnapshotStore, type FsyncPath,
 } from "../../src/host/projects/snapshot-store.js";
 import { ProjectCatalog } from "../../src/host/projects/project-catalog.js";
+import { computeSourceDigest } from "../../src/host/engine/source-digest-v1.js";
 
 /**
  * SNAP and DUR (M2.2 plan §4).
@@ -73,12 +74,34 @@ describe("SNAP content-addressed publication", () => {
       .toEqual(expect.arrayContaining(["narration-30s.wav"]));
   });
 
+  it("publishes every manifest-referenced visual when given the engine-owned closure", async () => {
+    const { sourceRoot, snapshotsRoot } = await workspace();
+    const descriptor = await descriptorFor(sourceRoot);
+    const manifest = JSON.parse(await readFile(resolve(sourceRoot, "narralens.assets.json"), "utf8")) as {
+      assets: Array<{ asset_id: string; project_path: string }>;
+    };
+    const declaredAssets = manifest.assets.map((asset) => ({ asset_id: asset.asset_id, path: asset.project_path }));
+    const digest = await computeSourceDigest({ root: sourceRoot,
+      roots: projectDigestRoots(descriptor, "hypit"), engine: "hypit",
+      engineUpstreamSha: HYPIT_SHA, declaredAssets });
+    const store = new SnapshotStore({ snapshotsRoot });
+    const published = await store.publish({ ...(await source(sourceRoot)), digest });
+
+    expect(published.asset_count).toBeGreaterThanOrEqual(2);
+    await expect(store.read(PROJECT_ID, published.snapshot_id, "assets/generated/visual-10s.mp4"))
+      .resolves.toEqual(await readFile(resolve(sourceRoot, "assets/generated/visual-10s.mp4")));
+    await expect(store.read(PROJECT_ID, published.snapshot_id, "assets/generated/visual-alt-10s.mp4"))
+      .resolves.toEqual(await readFile(resolve(sourceRoot, "assets/generated/visual-alt-10s.mp4")));
+  });
+
   it("gives the same id for the same source and a different id when any byte changes", async () => {
     const { sourceRoot, snapshotsRoot } = await workspace();
     const store = new SnapshotStore({ snapshotsRoot });
     const first = await store.publish(await source(sourceRoot));
     const again = await store.publish(await source(sourceRoot));
     expect(again.snapshot_id).toBe(first.snapshot_id);
+    expect(first.created).toBe(true);
+    expect(again.created).toBe(false);
 
     await writeFile(resolve(sourceRoot, "runs/build.svrun"), "changed", "utf8");
     const changed = await store.publish(await source(sourceRoot));

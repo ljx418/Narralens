@@ -14,7 +14,7 @@ import type { RevisionStore } from "./projects/revision-store.js";
 
 export const MAX_OUTBOX_ATTEMPTS = 20;
 
-export type OutboxHandler = (payload: unknown) => Promise<void> | void;
+export type OutboxHandler = (eventId: number, payload: unknown) => Promise<void> | void;
 
 export interface OutboxDeliveryReport {
   readonly considered: number;
@@ -71,7 +71,7 @@ export class Outbox {
           continue;
         }
         try {
-          await registration.handler(payload);
+          await registration.handler(event.event_id, payload);
           this.#store.recordDelivery(event.event_id, registration.consumer, registrations.length, now);
           delivered += 1;
         } catch {

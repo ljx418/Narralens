@@ -1,4 +1,4 @@
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { HttpError } from "../api-error.js";
 import type { EditRequest, EditResponse } from "../../contracts/types.js";
 import type { EngineKind } from "../../contracts/engine-types.js";
@@ -13,6 +13,7 @@ import type { NativeWriteGateway } from "../engine/native-write-gateway.js";
 import { SnapshotStore } from "./snapshot-store.js";
 import type { ProjectDescriptor } from "./project-catalog.js";
 import type { SourceDigestResult } from "../engine/source-digest-v1.js";
+import { canonicalJson } from "../engine/source-digest-v1.js";
 import type { Outbox } from "../outbox.js";
 import type { PersistentJobStore } from "../persistent-job-store.js";
 
@@ -143,12 +144,16 @@ export class ProjectCoordinator {
 
   computeAffectedLocks = computeAffectedLocks;
 
-  acquireLock(input: Parameters<LockService["acquire"]>[0], initialRevision: number): EngineLock {
-    return this.deps.locks.acquire(input, initialRevision);
+  acquireLock(input: Parameters<LockService["acquire"]>[0], initialRevision: number): Promise<EngineLock> {
+    return this.deps.queue.run(input.projectId,
+      async () => this.deps.locks.acquire(input, initialRevision));
   }
 
-  releaseLock(lockId: string, initialRevision: number): number {
-    return this.deps.locks.release(lockId, initialRevision);
+  releaseLock(lockId: string, initialRevision: number): Promise<number> {
+    const lock = this.deps.locks.lock(lockId);
+    if (lock === undefined) throw new HttpError(404, "NOT_FOUND", "Lock not found");
+    return this.deps.queue.run(lock.project_id,
+      async () => this.deps.locks.release(lockId, initialRevision));
   }
 
   // ── commit (plan §4.2 step 7) ───────────────────────────────────────────────────────
@@ -196,6 +201,10 @@ export class ProjectCoordinator {
     }
 
     return await this.deps.queue.run(projectId, async () => {
+      const requestJson = canonicalJson(request);
+      const requestHash = createHash("sha256").update(requestJson).digest("hex");
+      const cached = this.deps.store.idempotent(projectId, request.idempotency_key, requestHash);
+      if (cached !== undefined) return cached;
       const source = await this.deps.sourceFor(projectId);
       const baseline = this.deps.store.sourceBaseline(projectId).committed;
       const now = await this.deps.digestFor(source);
@@ -212,10 +221,11 @@ export class ProjectCoordinator {
       const projection = await this.#projectionFor(projectId, source, correlationId);
       this.#assertUnlocked(projectId,
         computeAffectedLocks(impactForEdit(operation, range), projection), correlationId);
+      const controlRevision = this.deps.locks.controlRevision(projectId, request.base_revision);
 
       // ② the transaction and its baseline
       const transactionId = this.beginTransaction({
-        projectId, kind: "edit", requestJson: JSON.stringify(request), requestHash: baseline,
+        projectId, kind: "edit", requestJson, requestHash,
         baseRevision: request.base_revision, correlationId,
       });
       this.preconditionsChecked(transactionId, baseline);
@@ -223,7 +233,7 @@ export class ProjectCoordinator {
       // ③ the actor, unchanged
       let response: EditResponse;
       try {
-        response = await this.deps.actor.execute(projectId, request, correlationId);
+        response = await this.deps.actor.executeInCurrentOperation(projectId, request, correlationId, transactionId);
       } catch (error) {
         const code = error instanceof HttpError ? error.code : "TRANSACTION_FAILED";
         if (code === "PROJECT_ATTENTION_REQUIRED") this.attention(transactionId, code, "actor reported attention");
@@ -235,10 +245,22 @@ export class ProjectCoordinator {
       this.stage(transactionId);
       this.validate(transactionId);
       this.prepare(transactionId);
-      const published = await this.deps.snapshots.publish({
-        projectId, engine: source.engine, engineUpstreamSha: source.engineUpstreamSha,
-        descriptor: source.descriptor, sourceRoot: source.sourceRoot,
-      });
+      if (this.deps.locks.controlRevision(projectId, request.base_revision) !== controlRevision) {
+        this.attention(transactionId, "REVISION_CONFLICT", "lock control revision changed while the edit was running");
+        throw new HttpError(409, "REVISION_CONFLICT", "Project locks changed while the edit was running", undefined, correlationId);
+      }
+      let published;
+      try {
+        const after = await this.deps.digestFor(source);
+        published = await this.deps.snapshots.publish({
+          projectId, engine: source.engine, engineUpstreamSha: source.engineUpstreamSha,
+          descriptor: source.descriptor, sourceRoot: source.sourceRoot, digest: after,
+        });
+      } catch (error) {
+        this.attention(transactionId, "SNAPSHOT_DURABILITY_UNPROVABLE",
+          `${process.platform}: ${error instanceof Error ? error.message : String(error)}`);
+        throw error;
+      }
       try {
         this.commit({
           transactionId, snapshotId: published.snapshot_id, sourceDigestAfter: published.source_digest,
@@ -248,7 +270,7 @@ export class ProjectCoordinator {
             revision: response.new_revision, snapshot_id: published.snapshot_id, changed: response.changed }),
         });
       } catch (error) {
-        await this.deps.snapshots.rollback(projectId, published.snapshot_id);
+        if (published.created) await this.deps.snapshots.rollback(projectId, published.snapshot_id);
         this.attention(transactionId, "TRANSACTION_FAILED", error instanceof Error ? error.message : String(error));
         throw error;
       }
@@ -284,17 +306,24 @@ export class ProjectCoordinator {
   async recoverOnStart(now = new Date()): Promise<RecoveryReport> {
     let transactionsMarkedRecovering = 0;
     for (const transaction of this.deps.store.incompleteTransactions()) {
-      this.deps.store.markRecovering(transaction.transaction_id, "CRASH_RECOVERY_REQUIRED", now);
-      transactionsMarkedRecovering += 1;
+      if (["received", "preconditions_checked", "staged"].includes(transaction.state)) {
+        this.deps.store.markRecovering(transaction.transaction_id, "CRASH_RECOVERY_REQUIRED", now);
+        this.deps.store.markAttention(transaction.project_id, transaction.transaction_id,
+          "CRASH_RECOVERY_REQUIRED", "incomplete coordinator transaction requires recovery", now);
+        transactionsMarkedRecovering += 1;
+      } else if (transaction.state !== "attention") {
+        this.attention(transaction.transaction_id, "CRASH_RECOVERY_REQUIRED",
+          "prepared coordinator transaction requires operator recovery", now);
+      }
     }
     const delivery = await this.deps.outbox.replay(now);
     const leasesExpired = this.deps.jobs.reapExpiredLeases(now);
-    const attention = new Set(this.deps.store.projectsInAttention());
     for (const abandoned of delivery.abandoned) {
       // An event nobody could deliver is a condition an operator must see, not a silent drop.
       this.deps.store.markAttention("outbox", `txn_outbox_${abandoned.event_id}`,
         "OUTBOX_DELIVERY_EXHAUSTED", `${abandoned.topic}/${abandoned.consumer} abandoned after ${delivery.abandoned.length} event(s)`);
     }
+    const attention = new Set(this.deps.store.projectsInAttention());
     return {
       transactions_marked_recovering: transactionsMarkedRecovering,
       outbox_pending: this.deps.store.pendingOutboxCount(),
