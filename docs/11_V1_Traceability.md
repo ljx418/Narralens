@@ -1,8 +1,8 @@
 # Narralens V1 规格—架构—开发—验收追踪矩阵
 
 版本：v1.0  
-状态：实际开发已批准；Gate D1、Gate D2、Gate D3、Gate D4.0、Gate D4.1 历史结论保留。D4.2.1 的 M1A 逐编号补证已由独立 Claude Code R4 外审关闭；M1B OpenFilm 隔离技术 spike 也已通过。`CR-MIG-001` 批准的 OpenFilm 目标架构现已到达 M2 开工边界。M2.1 第一轮候选 `fc3efb4...` 的 2 BLOCKER/5 MAJOR 已在第二轮候选 `971d02a...` 中关闭；第二轮独立复审新发现的 2 MAJOR 已由返修实现 `ee58ab5c6a9d4bbdf05e8ac8a394fd75218cae59` 修复并完成内部复验，独立复审仍为 `REVIEW_PENDING`，尚未达到 `M2_1_CONTROL_BOUNDARY_READY`。M2.2/M2.3 未实现，旧 D4.2.2 不得顺跳；更不得宣称 Gate D4.2、`Gate V1-P0` 或 `V1-Full`。
-事实日期：2026-10-17
+状态：实际开发已批准；Gate D1、Gate D2、Gate D3、Gate D4.0、Gate D4.1 历史结论保留。D4.2.1 的 M1A 逐编号补证已由独立 Claude Code R4 外审关闭；M1B OpenFilm 隔离技术 spike 也已通过。M2.1 已在第三轮独立复审后达到 `M2_1_CONTROL_BOUNDARY_READY`（冻结 `ca7dbf3...`）。M2.2 原候选经独立审视发现生产接线、lease、snapshot 闭包和锁事务缺口，现已返修并完成内部复验；按四波次压缩策略，它只进入 `INTERNAL_EVIDENCED`，与 M2.3 在完整 M2 组合候选上统一独立外审。M2.3 尚未实现，旧 D4.2.2 不得顺跳；更不得宣称 M2 完成、Gate D4.2、`Gate V1-P0` 或 `V1-Full`。
+事实日期：2026-10-18
 <!-- M2.1_REWORK_BASE_SHA=ee58ab5c6a9d4bbdf05e8ac8a394fd75218cae59 REVIEW_STATUS=PASS -->
 
 ## 1. 使用规则
@@ -44,7 +44,7 @@
 | M0 | 现场 SHA、代码/路由/阈值、备份与变更单 | observed | 不改变业务 Gate |
 | M1A | D4.2.1 冻结矩阵逐 case 真实证据与独立外审 | passed（实现 `c0f101b...`；R4 YES） | Headless PASS；headed/human NOT_RUN；不扩张为 D4.2 总 Gate |
 | M1B | 固定 OpenFilm SHA、可编辑 30 秒链路、native 写入口清单与 stale-base 实证 | passed-spike（OpenFilm `e70d9d9...`） | 不写生产 Hypit；可编辑三 clip；生产 translate/block 已由 M2.1 落地为 `NativeMutationRegistry`/`NativeWriteGateway`，M2.1 未提供任何 OpenFilm 写路径 |
-| M2 | EnginePort、单引擎绑定、写入治理、三类锁、持久 Job/SSE/lease、snapshot/journal/回退 | **M2.1 通过第三轮独立复审**（`3cdff44`，`M2_1_CONTROL_BOUNDARY_READY`）；**M2.2 已实现并内部四视角审查 BLOCKER=0 MAJOR=0**（`5e4c075`，待独立复审）；M2.3 未开始 | materialize/adopt/impact/migrate-copy/history restore 仍 404，虚构 operation 仍 422；AC-005 在 legacy Hypit 路径仍为「提交后捕获 snapshot」，完整 stage→snapshot→指针随 M2.3/M4A 落地 |
+| M2 | EnginePort、单引擎绑定、写入治理、三类锁、持久 Job/SSE/lease、snapshot/journal/回退 | **M2.1 已通过第三轮独立复审**（冻结 `ca7dbf3...`）；**M2.2 返修实现已完成内部复验**（实现基线 `7a9c08d...` 之后补幂等 hash 贯穿，最终证据冻结待本轮生成）；M2.3 未开始 | M2.2 仅 `INTERNAL_EVIDENCED`，独立外审合并到 M2.3 后的 Wave 1 候选；materialize/adopt/impact/migrate-copy/history restore 仍 404；AC-005 legacy 事后捕获缺口随 M2.3/M4A 闭环 |
 | M3–M5 | 素材化、采用事务、同页原生 Studio UX | not-started | 顺序门禁，不顺跳 |
 | M6 | `Gate V1-P0` | not-started | 不等于 V1-Full |
 | M7A–D | P1 与完整长片证据 | not-started | P0/P1 全绿后才可声明 V1-Full |
@@ -93,10 +93,10 @@
 - 媒体重关联缺失引用为 0，并记录总耗时、重试次数、失败率及 D6 前冻结的性能预算。
 - 交付包：MP4、字幕、来源/许可、标题、封面、版本与生成记录。
 
-### Gate M2.1（当前：第二轮返修后，独立复审待执行）
+### Gate M2.1（已通过第三轮独立复审）
 
 - 历史外审：第一轮候选 `fc3efb4a53e19bca5ad939bd93e40b1af50a428d` 为 2 BLOCKER/5 MAJOR；第二轮候选 `971d02aac88b8f6f1513cbfa52b91923dd033d56` 的核心代码问题已大部关闭，但独立 Codex 又发现 R2-M-01/R2-M-02 两项 MAJOR。
-- 当前返修实现基线：`ee58ab5c6a9d4bbdf05e8ac8a394fd75218cae59`；Git clean 无法证明时现已 fail closed，并覆盖不可执行、非零退出、超时、dirty/clean 分支。权威文档已同步；下一状态为独立复审 `REVIEW_PENDING`。
+- 返修实现基线：`ee58ab5c6a9d4bbdf05e8ac8a394fd75218cae59`；Git clean 无法证明时已 fail closed，并覆盖不可执行、非零退出、超时、dirty/clean 分支；其后第三轮独立复审已在冻结点 `ca7dbf3...` 通过。
 - 证据索引：`docs/evidence/M2/M2.1/evidence-manifest.json`，20 个 case（含 `ER-*` 外审返修 case）逐条记录
   命令、exit code、stdout/stderr、环境、repo/upstream full SHA、fixture hash、断言与 artifact SHA256；
   不使用测试总数替代逐 case 状态。
@@ -118,8 +118,19 @@
   被引用文件存在、被 git 跟踪、未被 git-ignore 且摘要仍一致，并断言冻结提交之后无任何
   `src/ tests/ contracts/ tools/ package.json` 变更。
 - 限制：headed 与人类体验 `NOT_RUN`；`vendor/openfilm` 未登记为 submodule，真实接缝依赖隔离 worktree。
-- 外审：第一轮 2 BLOCKER/5 MAJOR 与第二轮新增 2 MAJOR 均已有返修实现和内部复验；独立复审仍为
-  `REVIEW_PENDING`。复审通过前不得进入 M2.2，也不得声明任何出门。
+- 外审：第一轮 2 BLOCKER/5 MAJOR 与第二轮新增 2 MAJOR 均已返修；第三轮独立复审通过，冻结点
+  `ca7dbf38ae9cd401b84f4bb7fe4e2ec3d0f0c523`，允许进入 M2.2，但不外推为完整 M2。
+
+### Gate M2.2（当前：返修后内部检查点）
+
+- 原冻结候选 `12c52c6...` 的证据保留为历史；其后独立审视发现生产 `/edits` 未经过 Coordinator、
+  runner 未持 lease、旧 worker callback 可越过新 lease、snapshot 未覆盖引用视觉资产等缺口。
+- 返修已把生产写路由、启动恢复/outbox/reaper、owner+attempt CAS、完整引擎 digest 闭包、锁事务与
+  control revision 复核接入真实 Host，并增加 Host HTTP 组合、重启、故障注入和并发测试。
+- 当前只允许声明 `M2_2_INTERNAL_EVIDENCED`；按 `13_ACCELERATED_DELIVERY_STRATEGY.md`，不再为模块
+  单独重复外审，M2.3 完成后在完整 M2 组合 commit 上统一独立复审。
+- 已知边界：legacy Hypit 仍先就地提交再捕获 snapshot；duration/narration 无可达 typed edit；
+  headed/human `NOT_RUN`。这些边界不得写成 AC-005/完整三类锁体验已全部关闭。
 
 ## 5. 变更控制
 

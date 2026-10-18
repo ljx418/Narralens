@@ -56,6 +56,7 @@ export interface CommitInput {
   readonly sourceDigestAfter: string;
   readonly revision: number;
   readonly idempotencyKey: string;
+  readonly requestHash: string;
   readonly response: EditResponse;
   readonly outboxTopic: string;
   readonly outboxPayload: string;
@@ -169,7 +170,7 @@ export class ProjectCoordinator {
       transactionId: input.transactionId, projectId: current.project_id, revision: input.revision,
       snapshotId: input.snapshotId, sourceDigestAfter: input.sourceDigestAfter,
       engine: this.deps.bindings.read(current.project_id)?.engine ?? "hypit",
-      idempotencyKey: input.idempotencyKey, response: input.response,
+      idempotencyKey: input.idempotencyKey, requestHash: input.requestHash, response: input.response,
       outboxTopic: input.outboxTopic, outboxPayload: input.outboxPayload, now,
     });
   }
@@ -264,7 +265,7 @@ export class ProjectCoordinator {
       try {
         this.commit({
           transactionId, snapshotId: published.snapshot_id, sourceDigestAfter: published.source_digest,
-          revision: response.new_revision, idempotencyKey: request.idempotency_key, response,
+          revision: response.new_revision, idempotencyKey: request.idempotency_key, requestHash, response,
           outboxTopic: "project.committed",
           outboxPayload: JSON.stringify({ project_id: projectId, transaction_id: transactionId,
             revision: response.new_revision, snapshot_id: published.snapshot_id, changed: response.changed }),

@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { resolve } from "node:path";
@@ -15,7 +16,7 @@ import { ProjectCatalog } from "../../src/host/projects/project-catalog.js";
 import { HypitEngineAdapter } from "../../src/adapters/hypit/hypit-engine-adapter.js";
 import { HypitReadAdapter } from "../../src/adapters/hypit/hypit-read-adapter.js";
 import { HypitWriteAdapter } from "../../src/adapters/hypit/hypit-write-adapter.js";
-import { computeSourceDigest, type SourceDigestResult } from "../../src/host/engine/source-digest-v1.js";
+import { canonicalJson, computeSourceDigest, type SourceDigestResult } from "../../src/host/engine/source-digest-v1.js";
 import { projectDigestRoots } from "../../src/host/projects/snapshot-store.js";
 import { Outbox } from "../../src/host/outbox.js";
 import { PersistentJobStore } from "../../src/host/persistent-job-store.js";
@@ -213,6 +214,8 @@ describe("SNAP the commit pointer and the outbox move together", () => {
     expect(store.state(PROJECT, 2).revision).toBe(response.new_revision);
     expect(store.pendingOutboxCount()).toBe(1);
     expect(store.sourceBaseline(PROJECT).committed).toBe(commit!.source_digest);
+    expect(store.idempotencyEntry(PROJECT, REQUEST.idempotency_key)?.request_hash)
+      .toBe(createHash("sha256").update(canonicalJson(REQUEST)).digest("hex"));
     const transaction = store.projectTransaction(commit!.transaction_id);
     expect(transaction).toMatchObject({ state: "committed", snapshot_id: commit!.snapshot_id });
   });

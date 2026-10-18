@@ -417,7 +417,7 @@ export class RevisionStore {
    */
   commitWithPointer(input: {
     transactionId: string; projectId: string; revision: number; snapshotId: string;
-    sourceDigestAfter: string; engine: string; idempotencyKey: string; response: EditResponse;
+    sourceDigestAfter: string; engine: string; idempotencyKey: string; requestHash: string; response: EditResponse;
     outboxTopic: string; outboxPayload: string; now?: Date;
   }): void {
     const now = input.now ?? new Date();
@@ -438,7 +438,7 @@ export class RevisionStore {
         .run(input.projectId, input.revision, input.snapshotId, input.sourceDigestAfter,
           input.engine, input.transactionId, at);
       this.#db.prepare("INSERT OR IGNORE INTO edit_idempotency(project_id, idempotency_key, request_hash, response_json) VALUES(?,?,?,?)")
-        .run(input.projectId, input.idempotencyKey, "", JSON.stringify(input.response));
+        .run(input.projectId, input.idempotencyKey, input.requestHash, JSON.stringify(input.response));
       this.#db.prepare("INSERT INTO outbox(topic, project_id, payload_json, created_at) VALUES(?,?,?,?)")
         .run(input.outboxTopic, input.projectId, input.outboxPayload, at);
       this.transition(input.transactionId, "prepared", "committed", {

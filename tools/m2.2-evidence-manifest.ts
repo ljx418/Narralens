@@ -74,9 +74,11 @@ const cases: Case[] = [
       "相同内容重复发布为空操作而非 ENOTEMPTY",
       "复制后重新哈希，不符即拒绝发布",
       "reader 只能按 snapshot_id 读取，目录枚举不作为来源",
+      "生产 Host 快照包含 manifest 引用的视觉资产；相同内容复用时不会误删既有 active snapshot",
       "MUT-S/MUT-T 退化后套件失败",
     ],
     artifacts: [artifact("tests/m2.2/snapshot-store.test.ts"),
+      artifact("tests/m2.2/host-coordinator-integration.test.ts"),
       artifact("src/host/projects/snapshot-store.ts")],
   },
   {
@@ -119,9 +121,11 @@ const cases: Case[] = [
       "基线不符 409 且自行置 attention",
       "锁定范围 423 且 actor 从未被调用",
       "把项目绑到 OpenFilm 后请求写片，网关依引擎能力表拒绝 422",
+      "真实 Host /edits 进入 Coordinator，提交后的 source baseline 与 active commit 一致",
       "MUT-Q 移除网关检查后套件失败",
     ],
     artifacts: [artifact("tests/m2.2/project-coordinator.test.ts"),
+      artifact("tests/m2.2/host-coordinator-integration.test.ts"),
       artifact("tests/m2.1/native-bypass.test.ts")],
   },
   {
@@ -130,6 +134,7 @@ const cases: Case[] = [
     assertions: [
       "同项目两次写按单例队列串行，revision 单调",
       "另一项目不被本项目队列阻塞",
+      "锁增删与 edit 共用同一项目队列；幂等重放不新建 transaction/snapshot/outbox",
     ],
     artifacts: [artifact("tests/m2.2/project-coordinator.test.ts")],
   },
@@ -139,9 +144,11 @@ const cases: Case[] = [
     assertions: [
       "重启后 Job 与事件仍在（真实数据库文件）",
       "失 lease 回队列；尝试用尽进 attention，任何分支都不是 succeeded",
+      "Host 启动时回收过期 lease，生产 runner 在执行前取得 owner+attempt lease",
       "记明原因与平台限制",
     ],
-    artifacts: [artifact("tests/m2.2/persistent-job-store.test.ts")],
+    artifacts: [artifact("tests/m2.2/persistent-job-store.test.ts"),
+      artifact("tests/m2.2/host-coordinator-integration.test.ts")],
   },
   {
     case_id: "JB-02", module: "5-jobs", status: "PASSED", evidence_kind: ["concurrency", "mutation_test"],
@@ -149,6 +156,7 @@ const cases: Case[] = [
     assertions: [
       "两个竞争者恰好一个成功",
       "lease 未过期时不可被夺取，包括 lease 已死但尚未回收的 running",
+      "旧 worker 的 owner/attempt 在新 lease 生效后不能结束 job，只能隔离晚到结果",
       "MUT-O 去掉 state='queued' 条件后套件失败",
     ],
     artifacts: [artifact("tests/m2.2/persistent-job-store.test.ts")],
@@ -229,7 +237,7 @@ const cases: Case[] = [
     case_id: "REG", module: "all", status: "PASSED", evidence_kind: ["regression"],
     title: "旧 D1–M2.1 回归",
     assertions: [
-      "corepack pnpm check 34 files / 344 tests 全绿",
+      "corepack pnpm check 35 files / 353 tests 全绿，包含 tsc 与 production build",
       "旧 JobStore 及其测试未改；/edits 响应字段一字未加未删",
     ],
     artifacts: [artifact("tests/host/host-http.test.ts"), artifact("src/host/job-store.ts")],
@@ -243,7 +251,7 @@ const manifest = {
   format: "narralens.m22-evidence-manifest@1.0",
   ticket: "M2.2",
   title: "一致提交、三类锁、持久任务",
-  declaration_ceiling: "M2_2_DURABILITY_READY",
+  declaration_ceiling: "M2_2_INTERNAL_EVIDENCED",
   captured_at: new Date().toISOString(),
   repo_branch: git("rev-parse", "--abbrev-ref", "HEAD"),
   repo_sha: frozenSha,
@@ -268,7 +276,7 @@ const manifest = {
   passed_count: cases.filter((entry) => entry.status === "PASSED").length,
   screenshots: [],
   claim_limits: [
-    "This evidence supports M2_2_DURABILITY_READY only.",
+    "This evidence supports the M2_2_INTERNAL_EVIDENCED module checkpoint only; independent review is deferred to the complete Wave 1 candidate.",
     "M2 is NOT complete: M2.3 (migration copy, rollback) is not implemented.",
     "AC-005 is only partially satisfied on the legacy Hypit path: the snapshot is a post-hoc capture of committed bytes, not an isolated-stage preimage. The full stage→snapshot→pointer flow lands with M2.3 and M4A.",
     "duration and narration lock integration is NOT_APPLICABLE_APPROVED: no M2.2 typed edit can change either.",
@@ -276,7 +284,8 @@ const manifest = {
     "vendor/openfilm is not a registered submodule; the real upstream evidence comes from the isolated M1B worktree and is not a production integration.",
     "Headed browser automation and human experience are NOT_RUN; this ticket ran no UI automation.",
   ],
-  review: { internal: "PASS", internal_record: "reviews/internal-review.md", external: "REVIEW_PENDING" },
+  review: { internal: "PASS", internal_record: "reviews/codex-rework-review.md",
+    external: "DEFERRED_TO_WAVE1_COMBINATION_REVIEW" },
   cases,
 };
 
