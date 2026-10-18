@@ -1,16 +1,16 @@
 
  RUN  v3.2.4 /mnt/c/workSpace/videoWorkLine/Narralens
 
-(node:1581187) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(node:1645246) ExperimentalWarning: SQLite is an experimental feature and might change at any time
 (Use `node --trace-warnings ...` to show where the warning was created)
- ❯ tests/m2.2/journal-predecessor.test.ts (9 tests | 1 failed) 25ms
+ ❯ tests/m2.2/journal-predecessor.test.ts (9 tests | 1 failed) 29ms
    ✓ JRNL journal transitions carry an explicit predecessor > opens a journal row through the insert helper 3ms
    ✓ JRNL journal transitions carry an explicit predecessor > refuses an unknown table 1ms
    ✓ JRNL journal transitions carry an explicit predecessor > accepts both predecessors for metadata_committed, including the no-change edit path 1ms
-   × JRNL journal transitions carry an explicit predecessor > rejects a transition whose predecessor does not hold 15ms
+   × JRNL journal transitions carry an explicit predecessor > rejects a transition whose predecessor does not hold 18ms
      → expected [Function] to throw an error
    ✓ JRNL journal transitions carry an explicit predecessor > carries patch columns through the predecessor-checked update 1ms
-   ✓ JRNL recovery gate is a single shared predicate > reports the same attention answer as state() before and after a pending journal exists 2ms
+   ✓ JRNL recovery gate is a single shared predicate > reports the same attention answer as state() before and after a pending journal exists 1ms
    ✓ JRNL recovery gate is a single shared predicate > never reports an empty attention reason 1ms
    ✓ JRNL recovery gate is a single shared predicate > increments the control revision monotonically 1ms
    ✓ JRNL recovery gate is a single shared predicate > leaves the legacy catalog untouched 0ms
@@ -39,6 +39,6 @@ undefined
 
  Test Files  1 failed (1)
       Tests  1 failed | 8 passed (9)
-   Start at  16:42:21
-   Duration  4.34s (transform 237ms, setup 0ms, collect 2.08s, tests 25ms, environment 0ms, prepare 1.40s)
+   Start at  16:50:07
+   Duration  5.41s (transform 267ms, setup 0ms, collect 2.60s, tests 29ms, environment 0ms, prepare 1.64s)
 

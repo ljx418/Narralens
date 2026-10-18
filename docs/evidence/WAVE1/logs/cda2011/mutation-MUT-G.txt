@@ -1,16 +1,16 @@
 
  RUN  v3.2.4 /mnt/c/workSpace/videoWorkLine/Narralens
 
- ❯ tests/m2.1/native-write-gateway.test.ts (20 tests | 2 failed) 25ms
+ ❯ tests/m2.1/native-write-gateway.test.ts (20 tests | 2 failed) 24ms
    ✓ NativeMutationRegistry completeness > AC-003 registers no unknown policy at all 4ms
    ✓ NativeMutationRegistry completeness > AC-003 every entry records transport, impact, lock, reason and a test id 2ms
-   ✓ NativeMutationRegistry completeness > AC-003 covers every row of the verified OpenFilm native inventory exactly once 3ms
+   ✓ NativeMutationRegistry completeness > AC-003 covers every row of the verified OpenFilm native inventory exactly once 2ms
    ✓ NativeMutationRegistry completeness > AC-003 the WebSocket / callback row yields no writable entry, so an event cannot trigger a commit 0ms
-   ✓ NativeMutationRegistry completeness > AC-016 every provider and credential entry is blocked 1ms
+   ✓ NativeMutationRegistry completeness > AC-016 every provider and credential entry is blocked 0ms
    ✓ NativeMutationRegistry completeness > AC-003 only the two already-shipped typed edits and the Host asset import are translated 0ms
    ✓ NativeWriteGateway decisions > AC-003 translates a known entry to the legacy typed edit with no mapping layer 1ms
    ✓ NativeWriteGateway decisions > AC-003 routes an asset import to the Host asset service rather than a film edit 0ms
-   ✓ NativeWriteGateway decisions > AC-003 blocks every registered blocked entry with its recorded reason 1ms
+   ✓ NativeWriteGateway decisions > AC-003 blocks every registered blocked entry with its recorded reason 2ms
    ✓ NativeWriteGateway decisions > AC-003 passes read_only entries with no typed edit and no security event 0ms
    ✓ NativeWriteGateway decisions > AC-003 denies an unregistered entry by default and records a security event 0ms
    ✓ NativeWriteGateway decisions > EN-02.b refuses a write whose capability the engine reports as unverified, whatever the policy 0ms
@@ -23,7 +23,7 @@
    × M-01 capability completeness and fail-closed behaviour > refuses a translated write when no capability map is supplied at all 0ms
      → Cannot read properties of undefined (reading 'state')
    ✓ M-01 capability completeness and fail-closed behaviour > still translates when the engine positively reports the capability 0ms
-   ✓ M-01 capability completeness and fail-closed behaviour > expresses asset import as a Host service capability, not an engine write 1ms
+   ✓ M-01 capability completeness and fail-closed behaviour > expresses asset import as a Host service capability, not an engine write 0ms
 
 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
 
@@ -56,6 +56,6 @@ TypeError: Cannot read properties of undefined (reading 'state')
 
  Test Files  1 failed (1)
       Tests  2 failed | 18 passed (20)
-   Start at  16:41:20
-   Duration  5.05s (transform 345ms, setup 0ms, collect 2.24s, tests 25ms, environment 0ms, prepare 1.80s)
+   Start at  16:48:58
+   Duration  5.22s (transform 361ms, setup 0ms, collect 2.64s, tests 24ms, environment 0ms, prepare 1.57s)
 

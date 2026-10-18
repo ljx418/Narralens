@@ -1,0 +1,35 @@
+
+ RUN  v3.2.4 /mnt/c/workSpace/videoWorkLine/Narralens
+
+ ❯ tests/m2.2/snapshot-store.test.ts (9 tests | 1 failed) 527ms
+   ✓ SNAP content-addressed publication > publishes the whole closure under a deterministic id and can read it back 47ms
+   ✓ SNAP content-addressed publication > publishes every manifest-referenced visual when given the engine-owned closure 42ms
+   ✓ SNAP content-addressed publication > gives the same id for the same source and a different id when any byte changes 51ms
+   × SNAP content-addressed publication > proves files first, then directories from the leaves up, then renames and proves the parent 54ms
+     → expected [ …(8) ] to include '<proj>'
+   ✓ SNAP content-addressed publication > leaves the snapshot readable only through its id, never by listing for the newest 36ms
+   ✓ SNAP content-addressed publication > refuses a snapshot read that escapes the snapshot directory 35ms
+   ✓ DUR durability cannot be assumed > publishes nothing when any fsync step fails, and names the platform reason 197ms
+   ✓ DUR durability cannot be assumed > rolls a published snapshot back when the caller's transaction fails 37ms
+   ✓ DUR durability cannot be assumed > refuses to publish a copy whose bytes do not match the digest it was taken from 27ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/m2.2/snapshot-store.test.ts > SNAP content-addressed publication > proves files first, then directories from the leaves up, then renames and proves the parent
+AssertionError: expected [ …(8) ] to include '<proj>'
+ ❯ tests/m2.2/snapshot-store.test.ts:128:31
+    126|     // The staging tree is proven before the rename, and the project d…
+    127|     expect(calls.some((path) => path.includes(".staging-"))).toBe(true…
+    128|     expect(calls.map(suffix)).toContain(`<proj>`);
+       |                               ^
+    129|     expect(suffix(calls.at(-1)!)).toBe("<proj>");
+    130|     // No staging directory is left behind.
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 8 passed (9)
+   Start at  16:50:17
+   Duration  5.87s (transform 245ms, setup 0ms, collect 2.59s, tests 527ms, environment 0ms, prepare 1.70s)
+

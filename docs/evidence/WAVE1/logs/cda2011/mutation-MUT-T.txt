@@ -1,16 +1,16 @@
 
  RUN  v3.2.4 /mnt/c/workSpace/videoWorkLine/Narralens
 
- ❯ tests/m2.2/snapshot-store.test.ts (9 tests | 1 failed) 519ms
-   ✓ SNAP content-addressed publication > publishes the whole closure under a deterministic id and can read it back 55ms
-   ✓ SNAP content-addressed publication > publishes every manifest-referenced visual when given the engine-owned closure 43ms
-   ✓ SNAP content-addressed publication > gives the same id for the same source and a different id when any byte changes 57ms
-   ✓ SNAP content-addressed publication > proves files first, then directories from the leaves up, then renames and proves the parent 40ms
-   ✓ SNAP content-addressed publication > leaves the snapshot readable only through its id, never by listing for the newest 37ms
-   ✓ SNAP content-addressed publication > refuses a snapshot read that escapes the snapshot directory 38ms
-   ✓ DUR durability cannot be assumed > publishes nothing when any fsync step fails, and names the platform reason 144ms
-   ✓ DUR durability cannot be assumed > rolls a published snapshot back when the caller's transaction fails 39ms
-   × DUR durability cannot be assumed > refuses to publish a copy whose bytes do not match the digest it was taken from 65ms
+ ❯ tests/m2.2/snapshot-store.test.ts (9 tests | 1 failed) 601ms
+   ✓ SNAP content-addressed publication > publishes the whole closure under a deterministic id and can read it back 58ms
+   ✓ SNAP content-addressed publication > publishes every manifest-referenced visual when given the engine-owned closure 56ms
+   ✓ SNAP content-addressed publication > gives the same id for the same source and a different id when any byte changes 65ms
+   ✓ SNAP content-addressed publication > proves files first, then directories from the leaves up, then renames and proves the parent 47ms
+   ✓ SNAP content-addressed publication > leaves the snapshot readable only through its id, never by listing for the newest 45ms
+   ✓ SNAP content-addressed publication > refuses a snapshot read that escapes the snapshot directory 45ms
+   ✓ DUR durability cannot be assumed > publishes nothing when any fsync step fails, and names the platform reason 158ms
+   ✓ DUR durability cannot be assumed > rolls a published snapshot back when the caller's transaction fails 47ms
+   × DUR durability cannot be assumed > refuses to publish a copy whose bytes do not match the digest it was taken from 78ms
      → promise resolved "{ …(7) }" instead of rejecting
 
 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
@@ -46,6 +46,6 @@ AssertionError: promise resolved "{ …(7) }" instead of rejecting
 
  Test Files  1 failed (1)
       Tests  1 failed | 8 passed (9)
-   Start at  16:42:36
-   Duration  4.79s (transform 205ms, setup 0ms, collect 2.07s, tests 519ms, environment 0ms, prepare 1.28s)
+   Start at  16:50:27
+   Duration  5.85s (transform 239ms, setup 0ms, collect 2.60s, tests 601ms, environment 0ms, prepare 1.67s)
 

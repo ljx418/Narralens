@@ -50,7 +50,7 @@ RESULT MUT-J: GATE_BITES (exit 1)
 
 === MUT-K: Host stops raising attention on an external change ===
 command: corepack pnpm exec vitest run --config vitest.config.ts tests/m2.1/native-bypass.test.ts
-mutation applied (34356 -> 34294 bytes)
+mutation applied (35057 -> 34995 bytes)
 RESULT MUT-K: GATE_BITES (exit 1)
 
 === MUT-L: upstream loader skips clean verification when git status fails ===

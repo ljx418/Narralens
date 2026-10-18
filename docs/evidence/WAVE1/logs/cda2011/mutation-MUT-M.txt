@@ -1,20 +1,20 @@
 
  RUN  v3.2.4 /mnt/c/workSpace/videoWorkLine/Narralens
 
-(node:1580552) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(node:1644615) ExperimentalWarning: SQLite is an experimental feature and might change at any time
 (Use `node --trace-warnings ...` to show where the warning was created)
- ❯ tests/m2.2/transaction-state-machine.test.ts (8 tests | 4 failed) 267ms
-   × JRNL coordinator transaction state machine > starts at received and walks the documented happy path 11ms
+ ❯ tests/m2.2/transaction-state-machine.test.ts (8 tests | 4 failed) 286ms
+   × JRNL coordinator transaction state machine > starts at received and walks the documented happy path 12ms
      → column index out of range
    ✓ JRNL coordinator transaction state machine > refuses any pair that is not in the frozen transition table 2ms
    ✓ JRNL coordinator transaction state machine > accepts exactly the pairs the table declares 1ms
-   × JRNL coordinator transaction state machine > rejects a transition whose predecessor no longer holds, so a second writer cannot win 2ms
+   × JRNL coordinator transaction state machine > rejects a transition whose predecessor no longer holds, so a second writer cannot win 1ms
      → column index out of range
-   ✓ JRNL coordinator transaction state machine > reaches recovering only through the recovery helper, never online 2ms
+   ✓ JRNL coordinator transaction state machine > reaches recovering only through the recovery helper, never online 3ms
    × JRNL coordinator transaction state machine > records why a transaction entered attention 1ms
      → column index out of range
    ✓ JRNL coordinator transaction state machine > keeps one row per transaction id and lists them per project 1ms
-   × JRNL coordinator transaction state machine > keeps its own persistent record across a store reopen 247ms
+   × JRNL coordinator transaction state machine > keeps its own persistent record across a store reopen 264ms
      → column index out of range
 
 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
@@ -74,6 +74,6 @@ Error: column index out of range
 
  Test Files  1 failed (1)
       Tests  4 failed | 4 passed (8)
-   Start at  16:42:14
-   Duration  2.68s (transform 113ms, setup 0ms, collect 217ms, tests 267ms, environment 0ms, prepare 1.34s)
+   Start at  16:50:00
+   Duration  3.10s (transform 129ms, setup 0ms, collect 274ms, tests 286ms, environment 0ms, prepare 1.61s)
 

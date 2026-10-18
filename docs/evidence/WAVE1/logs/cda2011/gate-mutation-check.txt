@@ -10,8 +10,8 @@ mutation applied (13402 -> 13477 bytes)
 
  Test Files  1 failed (1)
       Tests  1 failed | 21 passed (22)
-   Start at  16:40:28
-   Duration  5.09s (transform 212ms, setup 0ms, collect 2.07s, tests 259ms, environment 0ms, prepare 1.78s)
+   Start at  16:48:04
+   Duration  5.56s (transform 278ms, setup 0ms, collect 2.77s, tests 311ms, environment 0ms, prepare 1.50s)
 
 RESULT MUT-A: GATE_BITES (exit 1)
 
@@ -27,8 +27,8 @@ mutation applied (19229 -> 19238 bytes)
 
  Test Files  1 failed (1)
       Tests  1 failed | 19 passed (20)
-   Start at  16:40:36
-   Duration  4.43s (transform 340ms, setup 0ms, collect 2.17s, tests 27ms, environment 0ms, prepare 1.36s)
+   Start at  16:48:13
+   Duration  4.97s (transform 364ms, setup 0ms, collect 2.56s, tests 32ms, environment 0ms, prepare 1.45s)
 
 RESULT MUT-B: GATE_BITES (exit 1)
 
@@ -44,8 +44,8 @@ mutation applied (19229 -> 19298 bytes)
 
  Test Files  1 failed (1)
       Tests  no tests
-   Start at  16:40:44
-   Duration  2.65s (transform 98ms, setup 0ms, collect 0ms, tests 0ms, environment 0ms, prepare 1.51s)
+   Start at  16:48:22
+   Duration  2.77s (transform 110ms, setup 0ms, collect 0ms, tests 0ms, environment 0ms, prepare 1.62s)
 
 RESULT MUT-C: GATE_BITES (exit 1)
 
@@ -61,8 +61,8 @@ mutation applied (17548 -> 17552 bytes)
 
  Test Files  1 failed (1)
       Tests  1 failed | 17 passed (18)
-   Start at  16:40:50
-   Duration  6.42s (transform 194ms, setup 0ms, collect 2.16s, tests 1.81s, environment 0ms, prepare 1.52s)
+   Start at  16:48:29
+   Duration  6.61s (transform 190ms, setup 0ms, collect 2.40s, tests 1.63s, environment 0ms, prepare 1.63s)
 
 RESULT MUT-D: GATE_BITES (exit 1)
 
@@ -78,8 +78,8 @@ mutation applied (17548 -> 17616 bytes)
 
  Test Files  1 failed (1)
       Tests  2 failed | 16 passed (18)
-   Start at  16:41:01
-   Duration  7.07s (transform 205ms, setup 0ms, collect 2.41s, tests 1.64s, environment 0ms, prepare 2.07s)
+   Start at  16:48:40
+   Duration  7.81s (transform 195ms, setup 0ms, collect 2.28s, tests 1.32s, environment 0ms, prepare 2.57s)
 
 RESULT MUT-E: GATE_BITES (exit 1)
 
@@ -95,8 +95,8 @@ mutation applied (13402 -> 13411 bytes)
 
  Test Files  1 failed (1)
       Tests  1 failed | 9 passed (10)
-   Start at  16:41:13
-   Duration  3.29s (transform 209ms, setup 0ms, collect 362ms, tests 348ms, environment 0ms, prepare 1.56s)
+   Start at  16:48:51
+   Duration  3.15s (transform 195ms, setup 0ms, collect 337ms, tests 328ms, environment 0ms, prepare 1.57s)
 
 RESULT MUT-F: GATE_BITES (exit 1)
 
@@ -112,8 +112,8 @@ mutation applied (8750 -> 8759 bytes)
 
  Test Files  1 failed (1)
       Tests  2 failed | 18 passed (20)
-   Start at  16:41:20
-   Duration  5.05s (transform 345ms, setup 0ms, collect 2.24s, tests 25ms, environment 0ms, prepare 1.80s)
+   Start at  16:48:58
+   Duration  5.22s (transform 361ms, setup 0ms, collect 2.64s, tests 24ms, environment 0ms, prepare 1.57s)
 
 RESULT MUT-G: GATE_BITES (exit 1)
 
@@ -129,8 +129,8 @@ mutation applied (12221 -> 12172 bytes)
 
  Test Files  1 failed (1)
       Tests  5 failed | 8 passed (13)
-   Start at  16:41:28
-   Duration  6.18s (transform 701ms, setup 0ms, collect 2.99s, tests 930ms, environment 0ms, prepare 1.28s)
+   Start at  16:49:08
+   Duration  7.35s (transform 805ms, setup 0ms, collect 3.43s, tests 1.11s, environment 0ms, prepare 1.78s)
 
 RESULT MUT-H: GATE_BITES (exit 1)
 
@@ -146,8 +146,8 @@ mutation applied (17548 -> 17549 bytes)
 
  Test Files  1 failed (1)
       Tests  1 failed | 17 passed (18)
-   Start at  16:41:38
-   Duration  5.73s (transform 191ms, setup 0ms, collect 2.08s, tests 1.43s, environment 0ms, prepare 1.28s)
+   Start at  16:49:20
+   Duration  7.78s (transform 216ms, setup 0ms, collect 2.66s, tests 1.85s, environment 0ms, prepare 2.00s)
 
 RESULT MUT-I: GATE_BITES (exit 1)
 
@@ -163,14 +163,14 @@ mutation applied (11038 -> 11060 bytes)
 
  Test Files  1 failed (1)
       Tests  4 failed | 8 passed (12)
-   Start at  16:41:48
-   Duration  3.20s (transform 94ms, setup 0ms, collect 230ms, tests 173ms, environment 0ms, prepare 1.64s)
+   Start at  16:49:33
+   Duration  3.10s (transform 98ms, setup 0ms, collect 230ms, tests 98ms, environment 0ms, prepare 1.73s)
 
 RESULT MUT-J: GATE_BITES (exit 1)
 
 === MUT-K: Host stops raising attention on an external change ===
 command: corepack pnpm exec vitest run --config vitest.config.ts tests/m2.1/native-bypass.test.ts
-mutation applied (34356 -> 34294 bytes)
+mutation applied (35057 -> 34995 bytes)
        |                                                                    ^
     240|   }, 60_000);
     241| });
@@ -180,8 +180,8 @@ mutation applied (34356 -> 34294 bytes)
 
  Test Files  1 failed (1)
       Tests  2 failed | 11 passed (13)
-   Start at  16:41:56
-   Duration  7.56s (transform 865ms, setup 0ms, collect 3.63s, tests 1.17s, environment 0ms, prepare 1.71s)
+   Start at  16:49:40
+   Duration  7.59s (transform 813ms, setup 0ms, collect 3.56s, tests 1.22s, environment 0ms, prepare 1.85s)
 
 RESULT MUT-K: GATE_BITES (exit 1)
 
@@ -197,8 +197,8 @@ mutation applied (11038 -> 11047 bytes)
 
  Test Files  1 failed (1)
       Tests  3 failed | 9 passed (12)
-   Start at  16:42:07
-   Duration  2.89s (transform 89ms, setup 0ms, collect 200ms, tests 123ms, environment 0ms, prepare 1.61s)
+   Start at  16:49:52
+   Duration  3.30s (transform 98ms, setup 0ms, collect 242ms, tests 142ms, environment 0ms, prepare 1.89s)
 
 RESULT MUT-L: GATE_BITES (exit 1)
 
@@ -214,8 +214,8 @@ mutation applied (69125 -> 69113 bytes)
 
  Test Files  1 failed (1)
       Tests  4 failed | 4 passed (8)
-   Start at  16:42:14
-   Duration  2.68s (transform 113ms, setup 0ms, collect 217ms, tests 267ms, environment 0ms, prepare 1.34s)
+   Start at  16:50:00
+   Duration  3.10s (transform 129ms, setup 0ms, collect 274ms, tests 286ms, environment 0ms, prepare 1.61s)
 
 RESULT MUT-M: GATE_BITES (exit 1)
 
@@ -231,8 +231,8 @@ mutation applied (69125 -> 69117 bytes)
 
  Test Files  1 failed (1)
       Tests  1 failed | 8 passed (9)
-   Start at  16:42:21
-   Duration  4.34s (transform 237ms, setup 0ms, collect 2.08s, tests 25ms, environment 0ms, prepare 1.40s)
+   Start at  16:50:07
+   Duration  5.41s (transform 267ms, setup 0ms, collect 2.60s, tests 29ms, environment 0ms, prepare 1.64s)
 
 RESULT MUT-J: GATE_BITES (exit 1)
 
@@ -248,8 +248,8 @@ mutation applied (10062 -> 10066 bytes)
 
  Test Files  1 failed (1)
       Tests  1 failed | 8 passed (9)
-   Start at  16:42:28
-   Duration  4.61s (transform 212ms, setup 0ms, collect 2.01s, tests 433ms, environment 0ms, prepare 1.21s)
+   Start at  16:50:17
+   Duration  5.87s (transform 245ms, setup 0ms, collect 2.59s, tests 527ms, environment 0ms, prepare 1.70s)
 
 RESULT MUT-S: GATE_BITES (exit 1)
 
@@ -265,8 +265,8 @@ mutation applied (10062 -> 10071 bytes)
 
  Test Files  1 failed (1)
       Tests  1 failed | 8 passed (9)
-   Start at  16:42:36
-   Duration  4.79s (transform 205ms, setup 0ms, collect 2.07s, tests 519ms, environment 0ms, prepare 1.28s)
+   Start at  16:50:27
+   Duration  5.85s (transform 239ms, setup 0ms, collect 2.60s, tests 601ms, environment 0ms, prepare 1.67s)
 
 RESULT MUT-T: GATE_BITES (exit 1)
 
@@ -282,8 +282,8 @@ mutation applied (6994 -> 7039 bytes)
 
  Test Files  1 failed (1)
       Tests  4 failed | 8 passed (12)
-   Start at  16:42:44
-   Duration  2.68s (transform 126ms, setup 0ms, collect 235ms, tests 30ms, environment 0ms, prepare 1.56s)
+   Start at  16:50:37
+   Duration  2.69s (transform 130ms, setup 0ms, collect 255ms, tests 31ms, environment 0ms, prepare 1.53s)
 
 RESULT MUT-R: GATE_BITES (exit 1)
 
@@ -299,8 +299,8 @@ mutation applied (16546 -> 16555 bytes)
 
  Test Files  1 failed (1)
       Tests  1 failed | 11 passed (12)
-   Start at  16:42:51
-   Duration  7.07s (transform 569ms, setup 0ms, collect 3.19s, tests 1.51s, environment 0ms, prepare 1.41s)
+   Start at  16:50:43
+   Duration  6.64s (transform 473ms, setup 0ms, collect 2.68s, tests 1.54s, environment 0ms, prepare 1.50s)
 
 RESULT MUT-Q: GATE_BITES (exit 1)
 
@@ -316,8 +316,8 @@ mutation applied (69125 -> 69106 bytes)
 
  Test Files  1 failed (1)
       Tests  1 failed | 18 passed (19)
-   Start at  16:43:02
-   Duration  3.26s (transform 164ms, setup 0ms, collect 312ms, tests 295ms, environment 0ms, prepare 1.59s)
+   Start at  16:50:54
+   Duration  3.05s (transform 143ms, setup 0ms, collect 269ms, tests 288ms, environment 0ms, prepare 1.57s)
 
 RESULT MUT-O: GATE_BITES (exit 1)
 
@@ -333,8 +333,8 @@ mutation applied (4142 -> 4151 bytes)
 
  Test Files  1 failed (1)
       Tests  1 failed | 8 passed (9)
-   Start at  16:43:09
-   Duration  2.47s (transform 121ms, setup 0ms, collect 231ms, tests 24ms, environment 0ms, prepare 1.35s)
+   Start at  16:51:01
+   Duration  2.66s (transform 123ms, setup 0ms, collect 243ms, tests 23ms, environment 0ms, prepare 1.49s)
 
 RESULT MUT-P: GATE_BITES (exit 1)
 
