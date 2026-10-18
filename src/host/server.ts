@@ -35,7 +35,12 @@ import { HypitReadAdapter } from "../adapters/hypit/hypit-read-adapter.js";
 
 const bodyLimit = 65_536;
 
-/** Roots of migrated copies, kept beside the catalog so a copy is resolvable by id. */
+/**
+ * Roots of migrated copies.
+ *
+ * Re-seeded from the migration store on every startup so a copy stays resolvable after a
+ * restart; keeping only an in-process map would strand migrated projects.
+ */
 const migratedRoots = new Map<string, { root: string; revision: number }>();
 
 /** Where the pinned OpenFilm checkout lives. Composition-time only, never a request field. */
@@ -76,6 +81,8 @@ export class NarralensHost {
   readonly engines: EngineRegistry;
   readonly coordinator: ProjectCoordinator;
   readonly migrations: MigrationService;
+  /** Where migrated copies are built. Composition-time only, never a request field. */
+  readonly migrationRoot: string;
   readonly sessionToken = randomBytes(32).toString("base64url");
   /** Loopback origin once `listen` has bound, used to bind preview descriptors. */
   origin = "";
@@ -131,10 +138,11 @@ export class NarralensHost {
         return await resolved.port.sourceDigestFor(source.descriptor.project_id, source.descriptor);
       },
     });
+    this.migrationRoot = resolve(projectRoot, "var/migrations");
     this.migrations = new MigrationService({
       catalog: this.catalog, revisions: this.revisions, bindings: this.engines.bindings,
       snapshots: new SnapshotStore({ snapshotsRoot: dependencies.snapshotsRoot ?? resolve(projectRoot, "var/snapshots") }),
-      migrationRoot: resolve(projectRoot, "var/migrations"),
+      migrationRoot: this.migrationRoot,
       projectRoot: resolve(projectRoot, "var/projects"),
       openfilmUpstreamSha: OPENFILM_UPSTREAM_SHA,
       // A migrated copy is registered so the Host can resolve it by id afterwards. It never
@@ -174,6 +182,14 @@ export class NarralensHost {
     await this.writes.recoverIncomplete();
     await this.comparisons.cleanupStaleTemporaryFiles();
     await this.coordinator.recoverOnStart();
+    // A migrated copy must survive a restart: re-seed its root from the durable record.
+    for (const migration of this.revisions.migrations.all()) {
+      if (this.revisions.migrations.isTerminal(migration.state) && migration.state !== "aborted") {
+        migratedRoots.set(migration.target_project_id, {
+          root: resolve(this.migrationRoot, migration.migration_id), revision: 1,
+        });
+      }
+    }
     this.#stopOutbox = this.outbox.start(this.#outboxReplayIntervalMs);
     if (this.jobs instanceof PersistentJobStore) {
       this.#leaseReaper = setInterval(() => this.jobs instanceof PersistentJobStore
