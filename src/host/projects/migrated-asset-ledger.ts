@@ -1,8 +1,9 @@
 import { createHash } from "node:crypto";
-import { realpath, stat } from "node:fs/promises";
+import { readFile, realpath, stat } from "node:fs/promises";
 import type { DatabaseSync, SQLInputValue } from "node:sqlite";
 import { resolve, sep } from "node:path";
 import { canonicalJson } from "../engine/source-digest-v1.js";
+import { contractIds, validatorFor } from "../../contracts/validator.js";
 import { sha256File, treeDigest } from "./openfilm-migrator.js";
 import { HttpError } from "../api-error.js";
 import type { AssetLicense, AssetManifestEntry, AssetSource } from "../../contracts/types.js";
@@ -68,6 +69,13 @@ export interface LedgerBootstrapRecord {
   readonly created_at: string;
 }
 
+/**
+ * A source manifest row, carrying whether it satisfies the runtime contract on its own.
+ * Kept off the persisted row: it is a fact about the *source* manifest, and the ledger's
+ * own rows are only ever built from entries where it is true.
+ */
+type SourceManifestEntry = AssetManifestEntry & { readonly __contract_valid: boolean };
+
 export interface BootstrapResult {
   readonly state: LedgerBootstrapState;
   readonly project_id: string;
@@ -81,6 +89,8 @@ export interface BootstrapResult {
 export interface MigratedAssetLedgerDeps {
   /** Used for its migration records; the connection itself is composed from it. */
   readonly revisions: RevisionStore;
+  /** Test-only seam for proving the seeding transaction is all-or-nothing. */
+  readonly fault?: (point: LedgerBootstrapFaultPoint) => void;
   /** The legacy source of truth for the pre-migration project. */
   readonly registry: AssetRegistry;
   readonly catalog: ProjectCatalog;
@@ -88,15 +98,53 @@ export interface MigratedAssetLedgerDeps {
   readonly migrationRoot: string;
 }
 
+/**
+ * Injected so the atomicity claim is observable rather than asserted.
+ *
+ * These points sit *inside* the seeding transaction, so a fault here must leave nothing
+ * behind at all — no `prepared` record, no asset rows. That is the property ASSET-03 is
+ * about, and it cannot be proven by reading the code.
+ */
+/**
+ * Migration states an activation-time seed may run at. It deliberately excludes `aborted`,
+ * `attention` and `recovering`: seeding against a migration that failed, or that needs a
+ * human to decide, is never right.
+ */
+const IN_FLIGHT_ACTIVATION: ReadonlySet<string> = new Set([
+  "staged", "validated", "snapshot_published", "committed", "activated", "reported",
+]);
+
+export type LedgerBootstrapFaultPoint =
+  | "after_prepared"
+  | "after_rows"
+  | "before_active";
+
+export interface MigratedAssetLedgerDependencies {
+  readonly fault?: (point: LedgerBootstrapFaultPoint) => void;
+}
+
 export interface BootstrapRequest {
   readonly projectId: string;
   /** Only seed when this is the migration that produced the target. */
   readonly migrationId?: string;
+  /**
+   * Declares that the caller is seeding *as part of* activation, before the migration
+   * reaches its terminal state.
+   *
+   * ASSET-03 requires the ledger to exist before the migration becomes terminal, otherwise
+   * there is a window where the project resolves and its ledger does not. That ordering
+   * means the ledger must accept a migration that is still `committed` — but only when the
+   * caller says so, and only for a migration on its forward path. The reverse situation is
+   * harmless: a ledger whose migration never reached terminal leaves the project
+   * unresolvable, because resolution requires the terminal state.
+   */
+  readonly activationPhase?: boolean;
   readonly now?: Date;
 }
 
 export class MigratedAssetLedger {
   readonly #db: DatabaseSync;
+  readonly #dependencies: MigratedAssetLedgerDependencies;
   readonly #revisions: RevisionStore;
   readonly #registry: AssetRegistry;
   readonly #catalog: ProjectCatalog;
@@ -108,6 +156,7 @@ export class MigratedAssetLedger {
    */
   private constructor(db: DatabaseSync, deps: MigratedAssetLedgerDeps) {
     this.#db = db;
+    this.#dependencies = { ...(deps.fault === undefined ? {} : { fault: deps.fault }) };
     this.#revisions = deps.revisions;
     this.#registry = deps.registry;
     this.#catalog = deps.catalog;
@@ -286,13 +335,30 @@ export class MigratedAssetLedger {
    * ASSET-03. Activation and seeding share one outcome: either the ledger rows and the
    * active bootstrap record are both durable, or neither is.
    */
-  #seed(evidence: Extract<Evidence, { state: "verified" }>, now: Date): BootstrapResult {
+  /**
+   * ASSET-03. The bootstrap record, every asset row and the `active` transition commit in
+   * one `RevisionStore.atomic` transaction.
+   *
+   * The first implementation committed `prepared` plus the rows, then transitioned to
+   * `active` in a second transaction. A crash between them left a durable `prepared`
+   * record: a project that looked bootstrapped, held no usable facts, and could never
+   * leave `prepared` because nothing moves it forward. That is the "either fully visible or
+   * nothing" requirement stated as a half-state nobody can classify.
+   *
+   * The `prepared -> active` move still happens through a predecessor-checked UPDATE, it
+   * just happens inside the same transaction, so there is no instant at which the record
+   * is committed as `prepared`.
+   */
+  #seed(evidence: Extract<Evidence, { state: "verified" }>, now: Date,
+    dependencies: MigratedAssetLedgerDependencies = this.#dependencies): BootstrapResult {
     const at = now.toISOString();
     this.#revisions.atomic(() => {
       this.#db.prepare(
         `INSERT INTO asset_ledger_bootstrap(project_id, migration_id, state, input_digest, control_revision, attention_reason, created_at)
          VALUES(?,?,'prepared',?,?,'',?)`,
       ).run(evidence.projectId, evidence.migrationId, evidence.inputDigest, evidence.controlRevision, at);
+      dependencies.fault?.("after_prepared");
+
       for (const row of evidence.rows) {
         this.#db.prepare(
           `INSERT INTO migrated_asset(project_id, asset_id, migration_id, source_project_id, source_manifest_sha256,
@@ -305,8 +371,21 @@ export class MigratedAssetLedger {
           row.media_type, canonicalJson(row.source), canonicalJson(row.license), at,
         );
       }
+      dependencies.fault?.("after_rows");
+      dependencies.fault?.("before_active");
+
+      const moved = this.#db.prepare(
+        "UPDATE asset_ledger_bootstrap SET state='active', control_revision=control_revision+1 WHERE project_id=? AND state='prepared'",
+      ).run(evidence.projectId);
+      if (Number(moved.changes) !== 1) {
+        throw new Error(`INVALID_LEDGER_BOOTSTRAP_TRANSITION:prepared->active:${evidence.projectId}`);
+      }
     });
-    return this.transitionBootstrap(evidence.projectId, "prepared", "active", now);
+    return {
+      state: "active", project_id: evidence.projectId, migration_id: evidence.migrationId,
+      input_digest: evidence.inputDigest, seeded: evidence.rows.length,
+      already_seeded: false, reason: null,
+    };
   }
 
   #attention(evidence: NotVerified, now: Date, existing?: LedgerBootstrapRecord): BootstrapResult {
@@ -345,7 +424,9 @@ export class MigratedAssetLedger {
     const candidates = this.#revisions.migrations.all().filter((row) => row.target_project_id === projectId);
     if (candidates.length === 0) return { state: "blocked", projectId, migrationId: "", reason: "NO_MIGRATION" };
 
-    const usable = candidates.filter((row) => row.state === "reported");
+    const activation = request.activationPhase === true;
+    const usable = candidates.filter((row) => row.state === "reported"
+      || (activation && IN_FLIGHT_ACTIVATION.has(row.state)));
     if (usable.length !== 1) {
       return {
         state: "attention", projectId, migrationId: usable[0]?.migration_id ?? candidates[0]!.migration_id,
@@ -376,10 +457,14 @@ export class MigratedAssetLedger {
       return { state: "attention", projectId, migrationId: migration.migration_id, reason: "SOURCE_TREE_CHANGED" };
     }
 
-    let manifest: { sha256: string; assets: AssetManifestEntry[] };
+    // Read the source manifest directly rather than through `AssetRegistry`. The registry
+    // validates against `Manifest@2`, which admits only `video/mp4`; a real legacy project
+    // carries a `Manifest@1` that also lists its narration audio and subtitles. Requiring
+    // the registry's stricter reader here would make a perfectly ordinary source project
+    // unmigratable, which would break MIG-01..04 to satisfy a W2.0 ledger.
+    let manifest: { sha256: string; assets: SourceManifestEntry[] };
     try {
-      const snapshot = await this.#registry.readManifest(sourceProjectId);
-      manifest = { sha256: snapshot.sha256, assets: snapshot.manifest.assets };
+      manifest = await this.#readSourceManifest(sourceProjectId);
     } catch {
       return { state: "attention", projectId, migrationId: migration.migration_id, reason: "SOURCE_MANIFEST_UNREADABLE" };
     }
@@ -392,7 +477,7 @@ export class MigratedAssetLedger {
 
     // One-to-one in both directions. A manifest asset nobody copied, or a plan asset with no
     // manifest entry, both mean the mapping is not provable.
-    const bySourcePath = new Map<string, AssetManifestEntry[]>();
+    const bySourcePath = new Map<string, SourceManifestEntry[]>();
     for (const entry of manifest.assets) {
       bySourcePath.set(entry.project_path, [...(bySourcePath.get(entry.project_path) ?? []), entry]);
     }
@@ -404,20 +489,31 @@ export class MigratedAssetLedger {
     const rows: Array<MigratedAssetRecord | { reason: string }> = [];
     for (const asset of planned) {
       const sources = bySourcePath.get(asset.source_path) ?? [];
-      if (sources.length === 1 && byTargetPath.get(asset.target_path)!.length === 1) {
-        rows.push(await this.#verifyOne(projectId, migration.migration_id, sourceProjectId,
-          manifest.sha256, asset, sources[0]!));
-        continue;
+      if (sources.length !== 1 || byTargetPath.get(asset.target_path)!.length !== 1) {
+        return {
+          state: "attention", projectId, migrationId: migration.migration_id,
+          reason: sources.length > 1 ? "SOURCE_PATH_AMBIGUOUS" : "TARGET_PATH_COLLISION",
+        };
       }
-      return {
-        state: "attention", projectId, migrationId: migration.migration_id,
-        reason: sources.length > 1 ? "SOURCE_PATH_AMBIGUOUS" : "TARGET_PATH_COLLISION",
-      };
+      if (!sources[0]!.__contract_valid) {
+        // The plan copied an asset whose source fact does not satisfy the runtime contract.
+        return { state: "attention", projectId, migrationId: migration.migration_id,
+          reason: "SOURCE_MANIFEST_ENTRY_INVALID" };
+      }
+      rows.push(await this.#verifyOne(projectId, migration.migration_id, sourceProjectId,
+        manifest.sha256, asset, sources[0]!));
+      continue;
     }
 
+    // Bijection over the media the migration actually copied. A source manifest also lists
+    // narration audio and subtitle files, which the migration carries in `narration` and
+    // `subtitles` rather than `assets`; demanding they appear in `plan.assets` would be
+    // demanding the plan contradict itself. What must hold is that every *video* asset the
+    // source registered has a provable row in the ledger.
     const mappedSourcePaths = new Set(planned.map((asset) => asset.source_path));
     for (const entry of manifest.assets) {
       if (mappedSourcePaths.has(entry.project_path)) continue;
+      if (!entry.__contract_valid || !isMigratedMedia(entry)) continue;
       return { state: "attention", projectId, migrationId: migration.migration_id, reason: "MANIFEST_ASSET_UNMAPPED" };
     }
 
@@ -440,9 +536,50 @@ export class MigratedAssetLedger {
     };
   }
 
+  /**
+   * Reads the source project's asset manifest as a source fact, accepting `@1` and `@2`.
+   *
+   * The digest is taken over the file bytes, so it identifies exactly the manifest the
+   * migration-time licence facts came from.
+   */
+  async #readSourceManifest(sourceProjectId: string): Promise<{ sha256: string; assets: SourceManifestEntry[] }> {
+    const descriptor = await this.#catalog.readDescriptor(sourceProjectId);
+    if (descriptor.asset_manifest === undefined || descriptor.asset_manifest === "") {
+      throw new HttpError(422, "MISSING_ASSET", "Project has no asset manifest");
+    }
+    const root = await realpath(this.#catalog.descriptorRoot(sourceProjectId));
+    const path = resolve(root, descriptor.asset_manifest);
+    if (!path.startsWith(`${root}${sep}`)) throw new HttpError(403, "ORIGIN_REJECTED", "Manifest path escapes the project");
+    const bytes = await readFile(path);
+    if (bytes.byteLength > 1024 * 1024) throw new HttpError(422, "MISSING_ASSET", "Asset manifest exceeds the allowed size");
+    let value: unknown;
+    try { value = JSON.parse(bytes.toString("utf8")); }
+    catch { throw new HttpError(422, "MISSING_ASSET", "Asset manifest is invalid"); }
+    // Entries are validated individually, and only the ones the ledger actually maps.
+    // A real legacy `Manifest@1` can carry a subtitle or narration row whose `media_type`
+    // the `@2` contract does not admit; that says nothing about the video entries beside
+    // it, and the ledger has no proof obligation over a row it never claims. Every entry a
+    // row *is* built from is still checked against the runtime contract on its own, so
+    // nothing slips through on the strength of its neighbours.
+    const parsed = value as { assets?: unknown };
+    if (!Array.isArray(parsed.assets)) {
+      throw new HttpError(422, "MISSING_ASSET", "Asset manifest is not a Manifest@1/@2 document");
+    }
+    const format = valueFormatOf(value);
+    const validateEntry = validatorFor(contractIds.assetManifest);
+    const assets: SourceManifestEntry[] = (parsed.assets as Array<Record<string, unknown>>).map((candidate) => {
+      const entry = candidate as unknown as AssetManifestEntry;
+      return {
+        ...entry,
+        __contract_valid: validateEntry({ format, assets: [candidate] }),
+      };
+    });
+    return { sha256: createHash("sha256").update(bytes).digest("hex"), assets };
+  }
+
   /** One file, three records. Returns a row, or null plus the reason it is not provable. */
   async #verifyOne(projectId: string, migrationId: string, sourceProjectId: string,
-    sourceManifestSha256: string, asset: MigrationAssetMapping, entry: AssetManifestEntry):
+    sourceManifestSha256: string, asset: MigrationAssetMapping, entry: SourceManifestEntry):
     Promise<MigratedAssetRecord | { reason: string }> {
     const targetPath = await this.#containedTarget(projectId, migrationId, asset.target_path);
     if (targetPath === null) return { reason: "TARGET_OUTSIDE_ROOT" };
@@ -581,6 +718,22 @@ function bootstrapRow(row: Record<string, unknown>): LedgerBootstrapRecord {
     attention_reason: String(row.attention_reason) === "" ? null : String(row.attention_reason),
     created_at: String(row.created_at),
   };
+}
+
+function valueFormatOf(value: unknown): "narralens.asset-manifest@1" | "narralens.asset-manifest@2" {
+  const format = (value as { format?: unknown }).format;
+  if (format === "narralens.asset-manifest@1" || format === "narralens.asset-manifest@2") return format;
+  throw new HttpError(422, "MISSING_ASSET", "Asset manifest has an unknown format");
+}
+
+/**
+ * Whether a source manifest entry is one of the media the migration copies into
+ * `plan.assets`. Narration audio and subtitle files are carried in the plan's own
+ * `narration`/`subtitles` rows and are not target asset rows.
+ */
+function isMigratedMedia(entry: SourceManifestEntry): boolean {
+  if (/\.(vtt|srt|wav|mp3|m4a|aac|flac|ogg)$/iu.test(entry.project_path)) return false;
+  return entry.media_type.startsWith("video/");
 }
 
 function rowsOf(rows: unknown): Array<Record<string, unknown>> {

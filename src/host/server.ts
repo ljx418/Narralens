@@ -176,6 +176,10 @@ export class NarralensHost {
     });
     this.migrations = new MigrationService({
       catalog: this.catalog, revisions: this.revisions, bindings: this.engines.bindings,
+      // The same ledger instance the Host exposes, so a migration seeds the ledger the
+      // asset inventory will later re-verify. Two instances over one connection would be
+      // two authorities reading one table.
+      ledger: this.assetLedger,
       snapshots: new SnapshotStore({ snapshotsRoot: dependencies.snapshotsRoot ?? resolve(projectRoot, "var/snapshots") }),
       migrationRoot: this.migrationRoot,
       projectRoot: resolve(projectRoot, "var/projects"),

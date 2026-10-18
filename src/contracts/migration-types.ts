@@ -99,7 +99,7 @@ export interface MigrationPlanV1 {
 }
 
 export type MigrationStepId =
-  | "plan" | "stage" | "validate" | "snapshot" | "commit" | "bind" | "report" | "rollback";
+  | "plan" | "stage" | "validate" | "snapshot" | "commit" | "asset_ledger" | "bind" | "report" | "rollback";
 
 export interface MigrationStepRecord {
   readonly id: MigrationStepId;

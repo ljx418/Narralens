@@ -7,6 +7,8 @@ import { join, resolve } from "node:path";
 import { promisify } from "node:util";
 import { afterEach, describe, expect, it } from "vitest";
 import { MigrationService } from "../../src/host/projects/migration-service.js";
+import { AssetRegistry } from "../../src/host/projects/asset-registry.js";
+import { MigratedAssetLedger } from "../../src/host/projects/migrated-asset-ledger.js";
 import { ProjectCatalog } from "../../src/host/projects/project-catalog.js";
 import { RevisionStore } from "../../src/host/projects/revision-store.js";
 import { SnapshotStore } from "../../src/host/projects/snapshot-store.js";
@@ -93,6 +95,11 @@ describe("MIG-03 the real chain: migrate, reopen, export, edit the middle clip, 
     const upstream = await createPinnedOpenFilmUpstream(VENDOR);
     const service = new MigrationService({
       catalog, revisions, bindings,
+      // ASSET-03: activation seeds the target's asset ledger, so a real migration carries it.
+      ledger: MigratedAssetLedger.create({
+        revisions, registry: new AssetRegistry(catalog, { videoFrames: async () => 900 }),
+        catalog, migrationRoot: join(base, "migrations"),
+      }),
       snapshots: new SnapshotStore({ snapshotsRoot: join(base, "snapshots") }),
       migrationRoot: join(base, "migrations"), projectRoot: join(base, "projects"),
       openfilmUpstreamSha: OPENFILM_SHA,
@@ -182,6 +189,11 @@ describe("EN-05 the source project is still intact and openable after rollback",
 
     const service = new MigrationService({
       catalog, revisions, bindings,
+      // ASSET-03: activation seeds the target's asset ledger, so a real migration carries it.
+      ledger: MigratedAssetLedger.create({
+        revisions, registry: new AssetRegistry(catalog, { videoFrames: async () => 900 }),
+        catalog, migrationRoot: join(base, "migrations"),
+      }),
       snapshots: new SnapshotStore({ snapshotsRoot: join(base, "snapshots") }),
       migrationRoot: join(base, "migrations"), projectRoot: join(base, "projects"),
       openfilmUpstreamSha: OPENFILM_SHA,

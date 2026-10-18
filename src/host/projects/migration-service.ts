@@ -15,6 +15,7 @@ import { SnapshotStore } from "./snapshot-store.js";
 import type { ProjectCatalog, ProjectDescriptor } from "./project-catalog.js";
 import type { EngineBindingStore } from "../engine/engine-binding-store.js";
 import type { RevisionStore } from "./revision-store.js";
+import type { MigratedAssetLedger } from "./migrated-asset-ledger.js";
 
 /**
  * MigrationService (`M2.3 plan §2, §3, §5`).
@@ -28,12 +29,21 @@ import type { RevisionStore } from "./revision-store.js";
 /** Injectable so a crash can be forced at any boundary without touching real code paths. */
 export type CrashPoint =
   | "after_plan" | "after_stage" | "after_validate" | "after_snapshot"
-  | "before_commit" | "after_commit" | "before_bind" | "after_bind" | "before_report";
+  | "before_commit" | "after_commit" | "before_bind" | "after_bind"
+  // ASSET-03: the two boundaries around seeding the target's asset ledger.
+  | "after_bind_before_ledger" | "after_ledger" | "before_report";
 
 export interface MigrationDeps {
   readonly catalog: ProjectCatalog;
   readonly revisions: RevisionStore;
   readonly bindings: EngineBindingStore;
+  /**
+   * The target-owned asset ledger, seeded as part of activation (ASSET-03). Required rather
+   * than optional: a migration that reported itself activated without establishing its
+   * target's asset facts is exactly the half-state the frozen plan forbids, and an optional
+   * dependency would let a caller skip it silently.
+   */
+  readonly ledger: MigratedAssetLedger;
   readonly snapshots: SnapshotStore;
   /** Absolute directory under which migrated project copies are built. Host-internal only. */
   readonly migrationRoot: string;
@@ -216,6 +226,15 @@ export class MigrationService {
 
     await this.#crash("before_bind");
     this.#bindTarget(plan, now);
+    await this.#crash("after_bind_before_ledger");
+
+    // ASSET-03. The target's asset facts are established *before* the migration becomes
+    // terminal. `ProjectResolver` requires a terminal migration, so until this point the
+    // target is not resolvable at all — which is the safe direction. Doing it the other way
+    // round would open a window where the project resolves and its ledger does not exist.
+    await this.#seedLedger(plan, now);
+    await this.#crash("after_ledger");
+
     store.transition(migrationId, "committed", "activated", now);
     store.recordStep(migrationId, { id: "bind", status: "done",
       detail: `bound ${plan.target_project_id} to ${plan.target_engine}@${plan.target_engine_upstream_sha}`,
@@ -394,6 +413,27 @@ export class MigrationService {
     });
     void now;
     return published.snapshot_id;
+  }
+
+  /**
+   * Seeding is idempotent on the evidence hash, so a crash between the ledger commit and
+   * the `activated` transition re-runs it as a no-op rather than colliding with itself.
+   */
+  async #seedLedger(plan: MigrationPlanV1, now: Date): Promise<void> {
+    const result = await this.deps.ledger.bootstrap({
+      projectId: plan.target_project_id, migrationId: plan.migration_id,
+      activationPhase: true, now,
+    });
+    if (result.state !== "active") {
+      // A migration may not report itself activated while its asset facts are unproven.
+      throw new HttpError(422, "UNSUPPORTED_EDIT",
+        `MIGRATION_ASSET_LEDGER_UNPROVABLE:${result.reason ?? "unknown"}`);
+    }
+    this.deps.revisions.migrations.recordStep(plan.migration_id, {
+      id: "asset_ledger", status: "done",
+      detail: `seeded target asset ledger with ${result.seeded} row(s)`,
+      artifact_sha256: result.input_digest, at: now.toISOString(),
+    });
   }
 
   #bindTarget(plan: MigrationPlanV1, now: Date): void {

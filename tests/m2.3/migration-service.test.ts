@@ -4,6 +4,8 @@ import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { MigrationService, type CrashPoint } from "../../src/host/projects/migration-service.js";
+import { AssetRegistry } from "../../src/host/projects/asset-registry.js";
+import { MigratedAssetLedger } from "../../src/host/projects/migrated-asset-ledger.js";
 import { ProjectCatalog } from "../../src/host/projects/project-catalog.js";
 import { RevisionStore } from "../../src/host/projects/revision-store.js";
 import { SnapshotStore } from "../../src/host/projects/snapshot-store.js";
@@ -58,8 +60,13 @@ async function harness(options: { exportProject?: (root: string, label: string) 
   const roots = new Map<string, string>([[PROJECT, sourceRoot]]);
   const crashes: CrashPoint[] = [];
 
+  // The fixture's registered assets all declare 900 frames. The ledger cross-checks the
+  // manifest against a real probe; here the probe is a constant, which satisfies that check
+  // without proving it. The disagreement case is proven in tests/wave2/w2-asset-ledger.
+  const registry = new AssetRegistry(catalog, { videoFrames: async () => 900 });
+  const ledger = MigratedAssetLedger.create({ revisions, registry, catalog, migrationRoot: join(base, "migrations") });
   const deps: Deps = {
-    catalog, revisions, bindings,
+    catalog, revisions, bindings, ledger,
     snapshots: new SnapshotStore({ snapshotsRoot: join(base, "snapshots") }),
     migrationRoot: join(base, "migrations"), projectRoot: join(base, "projects"),
     openfilmUpstreamSha: OPENFILM_SHA,
