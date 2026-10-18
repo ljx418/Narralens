@@ -17,7 +17,7 @@ import { join, resolve } from "node:path";
 const EVIDENCE_ROOT = resolve("docs/evidence/M2/M2.2");
 // Keep the original candidate's flat logs immutable. The rework capture has its own
 // namespace, so a rerun cannot silently replace the historical evidence.
-const LOG_ROOT = "logs/rework-final";
+const LOG_ROOT = "logs/final";
 const CODE_PATHS = ["src", "tests", "contracts", "tools", "package.json"];
 const sha256File = (path: string): string => createHash("sha256").update(readFileSync(path)).digest("hex");
 const git = (...args: string[]): string => execFileSync("git", args, { encoding: "utf8" }).trim();
