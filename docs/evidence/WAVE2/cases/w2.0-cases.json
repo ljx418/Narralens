@@ -1,0 +1,228 @@
+[
+  {
+    "case_id": "ACT-01",
+    "title": "a terminal migrated target resolves from durable facts alone",
+    "status": "PASSED",
+    "rework_blocker": "4",
+    "production_seam": "yes",
+    "tests": [
+      "tests/wave2/w2-project-resolver.test.ts::resolves after the process that migrated it is gone",
+      "tests/wave2/w2-project-resolver.test.ts::reaches the same answer through a store reopened on the same database file",
+      "tests/wave2/w2-host-composition.test.ts::resolves a target the Host's own migration service created, after a restart",
+      "tests/wave2/w2-host-composition.test.ts::resolves after the Host that created the target is closed and reopened"
+    ],
+    "assertions": [
+      "resolution needs terminal migration + binding at the pinned upstream + active commit + root realpath inside the migration root",
+      "the same answer is reached through a fresh RevisionStore over the same file, so no in-process map is the authority",
+      "frame_count comes from the value recorded when the film was written, not from the plan, which predates the copy"
+    ]
+  },
+  {
+    "case_id": "ACT-02",
+    "title": "every way a migrated target must not resolve is closed",
+    "status": "PASSED",
+    "rework_blocker": "4",
+    "production_seam": "yes",
+    "tests": [
+      "tests/wave2/w2-project-resolver.test.ts::refuses a migration that has not reached a terminal state",
+      "tests/wave2/w2-project-resolver.test.ts::refuses an aborted migration even though it is terminal",
+      "tests/wave2/w2-project-resolver.test.ts::refuses a migration in attention, and a recovery-parked one, with 423",
+      "tests/wave2/w2-project-resolver.test.ts::refuses a migration root entry that is a symlink out of the migration root",
+      "tests/wave2/w2-project-resolver.test.ts::refuses a target with no engine binding and one with no active commit",
+      "tests/wave2/w2-project-resolver.test.ts::refuses a binding to an engine the migration did not target",
+      "tests/wave2/w2-project-resolver.test.ts::refuses a binding pinned to an OpenFilm upstream other than the frozen one",
+      "tests/wave2/w2-project-resolver.test.ts::refuses a migration that placed no content at all",
+      "tests/wave2/w2-project-resolver.test.ts::refuses an ambiguous target that two terminal migrations both claim",
+      "tests/wave2/w2-project-resolver.test.ts::refuses a target that is a directory rather than a file",
+      "tests/wave2/w2-host-composition.test.ts::fails closed through the same seam when the binding is missing",
+      "tests/wave2/w2-host-composition.test.ts::fails closed when the active commit is missing",
+      "tests/wave2/w2-host-composition.test.ts::fails closed when the migration is still moving"
+    ],
+    "mutation_tested": "8 guards applied one at a time; 2 initially did not fail the suite and their tests were added rather than the guards dropped"
+  },
+  {
+    "case_id": "ASSET-01",
+    "title": "a provable bootstrap writes a bijective ledger and touches nothing authored",
+    "status": "PASSED",
+    "rework_blocker": "3, 5",
+    "production_seam": "partial — component level; the Host instance is covered by W2-G11 and W2-REG-RECOVERY",
+    "tests": [
+      "tests/wave2/w2-asset-ledger.test.ts::seeds every target asset with its source manifest, licence and byte lineage",
+      "tests/wave2/w2-asset-ledger.test.ts::changes no author source, revision, active commit or source tree digest",
+      "tests/wave2/w2-asset-ledger.test.ts::is idempotent: the same input digest re-seeds nothing and reports the same fact",
+      "tests/wave2/w2-asset-ledger.test.ts::records a frame count only when the target bytes agree with the manifest"
+    ],
+    "assertions": [
+      "a row exists only when the source manifest entry, the migration plan row and the target bytes on disk agree",
+      "source tree digest, revision, active commit and the source manifest bytes are unchanged across a bootstrap"
+    ]
+  },
+  {
+    "case_id": "ASSET-02",
+    "title": "ambiguity and drift go to attention, attention never clears itself, and the drift is enforced on the production read",
+    "status": "PASSED",
+    "rework_blocker": "2, 3",
+    "production_seam": "yes",
+    "production_path": "AssetInventoryPort.#fromLedger calls ledger.reverify on every activated-project read; drift is persisted active->attention and the detecting request gets 423.",
+    "tests": [
+      "tests/wave2/w2-asset-ledger.test.ts::refuses a basename collision that would map two source assets onto one target path",
+      "tests/wave2/w2-asset-ledger.test.ts::refuses a source manifest with two entries claiming one project path",
+      "tests/wave2/w2-asset-ledger.test.ts::refuses when the target bytes disagree with the plan's recorded hash",
+      "tests/wave2/w2-asset-ledger.test.ts::refuses when the source manifest's hash disagrees with the target bytes",
+      "tests/wave2/w2-asset-ledger.test.ts::refuses a manifest asset the migration never copied",
+      "tests/wave2/w2-asset-ledger.test.ts::refuses a plan asset with no manifest entry behind it",
+      "tests/wave2/w2-asset-ledger.test.ts::refuses when the source tree has changed since the migration captured it",
+      "tests/wave2/w2-ledger-attention.test.ts::refuses attention -> active",
+      "tests/wave2/w2-ledger-attention.test.ts::refuses attention -> prepared and active -> prepared and every self-loop",
+      "tests/wave2/w2-ledger-attention.test.ts::stays in attention after the target bytes are restored and re-verified",
+      "tests/wave2/w2-ledger-attention.test.ts::stays in attention after the licence is restored and re-verified",
+      "tests/wave2/w2-asset-02-production.test.ts::target bytes changed -> attention and 423 on the very same call",
+      "tests/wave2/w2-asset-02-production.test.ts::source manifest changed -> attention and 423",
+      "tests/wave2/w2-asset-02-production.test.ts::keeps returning 423 on every later request",
+      "tests/wave2/w2-asset-02-production.test.ts::restoring the bytes does not let the project back in",
+      "tests/wave2/w2-asset-02-production.test.ts::does not merely report HASH_MISMATCH while staying usable",
+      "tests/wave2/w2-host-composition.test.ts::seeds through the real migration, then fails closed on drift, permanently"
+    ],
+    "deviation": "ADR-W2.0-001"
+  },
+  {
+    "case_id": "ASSET-03",
+    "title": "activation and the ledger share one outcome",
+    "status": "PASSED",
+    "rework_blocker": "5",
+    "production_seam": "yes",
+    "tests": [
+      "tests/wave2/w2-asset-03-atomic.test.ts::commits the record, the rows and the active state in one transaction",
+      "tests/wave2/w2-asset-03-atomic.test.ts::leaves nothing behind when it faults at after_prepared",
+      "tests/wave2/w2-asset-03-atomic.test.ts::leaves nothing behind when it faults at after_rows",
+      "tests/wave2/w2-asset-03-atomic.test.ts::leaves nothing behind when it faults at before_active",
+      "tests/wave2/w2-asset-03-atomic.test.ts::is retryable after a fault, because nothing was left to collide with",
+      "tests/wave2/w2-asset-03-atomic.test.ts::never reports active with a missing or partial row set",
+      "tests/wave2/w2-asset-03-atomic.test.ts::keeps the source project byte-identical through a seeding failure",
+      "tests/wave2/w2-asset-03-atomic.test.ts::seeds the ledger before the migration becomes resolvable",
+      "tests/wave2/w2-asset-03-atomic.test.ts::leaves the migration, binding and active commit agreeing on one target",
+      "tests/wave2/w2-asset-03-atomic.test.ts::a failed seed leaves the resolver still refusing, not half-open",
+      "tests/wave2/w2-host-composition.test.ts::seeds through the real migration, then fails closed on drift, permanently"
+    ],
+    "assertions": [
+      "record + rows + active commit in one RevisionStore.atomic; a fault at any point inside leaves nothing",
+      "MigrationService seeds after binding and before the migration reaches 'activated', so a resolvable target always has a ledger",
+      "a migration whose ledger cannot be proven raises rather than reporting itself activated",
+      "the same transaction covers the attention path, so a torn record cannot be reported as active",
+      "proven end to end on the Host: the real migrate-copy route seeds host.assetLedger, and the same test asserts the Host's ledger is active before reading the inventory"
+    ]
+  },
+  {
+    "case_id": "W2-G01",
+    "title": "Wave 2 runtime contracts, types, validators and error codes agree",
+    "status": "PASSED",
+    "rework_blocker": null,
+    "production_seam": "n/a — contracts",
+    "tests": [
+      "tests/wave2/w2-contracts.test.ts",
+      "tests/contracts/contracts.test.ts",
+      "tests/contracts/d4.2.1-contracts.test.ts"
+    ],
+    "mutation_tested": "nativePlanErrors caught a bug on first run: it compared the first clip's start against null instead of 0"
+  },
+  {
+    "case_id": "W2-G02",
+    "title": "job.kind gains materialize on both the fresh and the legacy path",
+    "status": "PASSED",
+    "rework_blocker": "1",
+    "production_seam": "partial — the constraint is enforced by SQLite on the Host's own connection",
+    "tests": [
+      "tests/wave2/w2-job-kind-fresh.test.ts::creates the job table with all four kinds on the very first construction",
+      "tests/wave2/w2-job-kind-fresh.test.ts::creates a materialize job immediately, with no close-and-reopen",
+      "tests/wave2/w2-job-kind-fresh.test.ts::still refuses an unknown kind through the SQLite CHECK",
+      "tests/wave2/w2-job-kind-fresh.test.ts::records no schema migration for a database that never needed one",
+      "tests/wave2/w2-job-kind-fresh.test.ts::keeps the fresh and migrated schemas semantically identical",
+      "tests/wave2/w2-job-kind-migration.test.ts::refuses the swap when the row count differs",
+      "tests/wave2/w2-job-kind-migration.test.ts::refuses the swap when a copied value does not match, keeping the old table and the backup",
+      "tests/wave2/w2-job-kind-migration.test.ts::replaces a stale backup when the previous attempt provably did not complete"
+    ],
+    "note": "The first version of this case was green and proved nothing: its 'fresh' fixtures were built through a RevisionStore that had already been widened. Every fixture here is built by hand."
+  },
+  {
+    "case_id": "W2-G03",
+    "title": "TypedEdit grows; the legacy EditOperation contract does not",
+    "status": "PASSED",
+    "rework_blocker": null,
+    "production_seam": "n/a — contracts",
+    "tests": [
+      "tests/wave2/w2-typed-edit.test.ts"
+    ]
+  },
+  {
+    "case_id": "W2-G11",
+    "title": "W2.0 components exist in the production Host",
+    "status": "PASSED",
+    "rework_blocker": "4",
+    "production_seam": "yes",
+    "tests": [
+      "tests/wave2/w2-host-composition.test.ts::exposes the three W2.0 components from composition",
+      "tests/wave2/w2-host-composition.test.ts::opens the one database and the one catalog in exactly one place each",
+      "tests/wave2/w2-host-composition.test.ts::keeps the legacy route answering exactly as before",
+      "tests/wave2/w2-host-composition.test.ts::keeps all five Wave 2 routes closed",
+      "tests/wave2/w2-host-composition.test.ts::still exposes the Wave 1 migration routes",
+      "tests/wave2/w2-host-composition.test.ts::seeds through the real migration, then fails closed on drift, permanently"
+    ],
+    "defect_found": "A Host with a file-backed database could not be restarted at all: defaultEngineRegistry bound unconditionally and hit ENGINE_BINDING_ALREADY_EXISTS. Hidden by the in-memory default."
+  },
+  {
+    "case_id": "W2-G12",
+    "title": "one read-only asset seam over two stores, with no cross-project fallback",
+    "status": "PASSED",
+    "rework_blocker": "3",
+    "production_seam": "partial — the Host composes it; the read behaviour is proven at component level",
+    "tests": [
+      "tests/wave2/w2-asset-inventory-port.test.ts::reads a legacy project from its Manifest@2",
+      "tests/wave2/w2-asset-inventory-port.test.ts::reads a migrated target from the ledger",
+      "tests/wave2/w2-asset-inventory-port.test.ts::refuses a migrated target whose ledger was never seeded",
+      "tests/wave2/w2-asset-inventory-port.test.ts::does not serve the source project's assets to a target with no ledger",
+      "tests/wave2/w2-asset-02-production.test.ts::the legacy path is untouched"
+    ]
+  },
+  {
+    "case_id": "W2-REG-RECOVERY",
+    "title": "a crash at every migration boundary converges, and never strands a target",
+    "status": "PASSED",
+    "rework_blocker": "1 (correctness review)",
+    "production_seam": "partial — MigrationService with its real dependencies",
+    "tests": [
+      "tests/m2.3/migration-service.test.ts::recovers cleanly after a crash at after_bind_before_ledger",
+      "tests/m2.3/migration-service.test.ts::recovers cleanly after a crash at after_ledger",
+      "tests/m2.3/migration-service.test.ts::converges to a resolvable target after a crash between binding and the ledger"
+    ],
+    "note": "Added because two new crash boundaries shipped untested. Recovery now completes the activation tail instead of stopping at 'activated', which no resolver accepts."
+  },
+  {
+    "case_id": "R2-07",
+    "title": "the pinned OpenFilm port is composed only from a verified checkout",
+    "status": "PASSED",
+    "rework_blocker": null,
+    "production_seam": "yes — composed by NarralensHost.listen",
+    "tests": [
+      "tests/wave2/w2-openfilm-composition.test.ts::registers a port against the real pinned upstream when one is present",
+      "tests/wave2/w2-openfilm-composition.test.ts::leaves the capability closed when the checkout does not verify",
+      "tests/wave2/w2-openfilm-composition.test.ts::refuses to install twice, so a port can never shadow another"
+    ],
+    "real_probe": "openfilm-availability.txt: available=true, observed_sha equals the pinned full sha, 9 files verified including LICENSE"
+  },
+  {
+    "case_id": "W2-REG",
+    "title": "Wave 1, D1-D4.2.1 and legacy routes/contracts stay green",
+    "status": "PASSED",
+    "rework_blocker": null,
+    "production_seam": "n/a — regression",
+    "tests": [
+      "corepack pnpm check",
+      "corepack pnpm test:contracts",
+      "corepack pnpm test:m2.1",
+      "tests/m2.2",
+      "tests/m2.3",
+      "corepack pnpm check:m2.1-docs"
+    ],
+    "note": "The D4.2.1 four schema files remain byte-identical to their frozen review digests."
+  }
+]
