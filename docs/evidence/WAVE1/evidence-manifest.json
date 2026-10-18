@@ -1,0 +1,591 @@
+{
+  "format": "narralens.wave1-evidence-manifest@1.0",
+  "scope": "Wave 1: M2.1 engine governance, M2.2 durability, M2.3 controlled migration",
+  "declaration_ceiling": "CONTROLLED_OPENFILM_READY",
+  "captured_at": "2026-10-18T08:28:16.013Z",
+  "repo_branch": "migration/m2.2-coordinator-persistence",
+  "repo_sha": "c5aa0457a8b3690828db3dd0f177fe76586a19a4",
+  "frozen_code_sha": "99627ddb9eac8b135aeccf0b3f17d0779f6f9bd8",
+  "repo_dirty_at_capture": false,
+  "dirty_paths_at_capture": [],
+  "openfilm_upstream_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+  "hypit_upstream_sha": "6fdd8c0f02c17b9970aee6deb4550a70e9d57acf",
+  "node": "v22.22.1",
+  "pnpm": "10.33.0",
+  "code_paths": [
+    "src",
+    "tests",
+    "contracts",
+    "tools",
+    "package.json"
+  ],
+  "gate_artifacts": [
+    {
+      "command": "corepack pnpm check",
+      "log": "docs/evidence/WAVE1/logs/99627dd/check.txt",
+      "sha256": "b55992c37ac4428d11338ad10b954c4c79c1b00c1eb23c61bbbb4c66eaacf0c1"
+    },
+    {
+      "command": "corepack pnpm test:contracts",
+      "log": "docs/evidence/WAVE1/logs/99627dd/contracts.txt",
+      "sha256": "6328eb4104676b8cb2a2434f675a086604eeaaabeb952d869bfc6306a660b72a"
+    },
+    {
+      "command": "corepack pnpm test:m2.1",
+      "log": "docs/evidence/WAVE1/logs/99627dd/m2.1.txt",
+      "sha256": "52dfbafd9bd4b2f3c78db1684353361678845adbe3ac73dfeab1799797d0a8e2"
+    },
+    {
+      "command": "corepack pnpm exec vitest run --config vitest.config.ts tests/m2.2",
+      "log": "docs/evidence/WAVE1/logs/99627dd/m2.2.txt",
+      "sha256": "2735e6a883ce74ca25438b369ee2ae9457548598f34bb9250cd7659a34b6adcb"
+    },
+    {
+      "command": "corepack pnpm exec vitest run --config vitest.config.ts tests/m2.3",
+      "log": "docs/evidence/WAVE1/logs/99627dd/m2.3.txt",
+      "sha256": "4d98384d8dc83e637184fc6e5254d428808fe9cecfbc1c3d506e0aac79ec76f4"
+    },
+    {
+      "command": "python3 -I tests/m2.1-golden/source-digest-v1.golden.py tests/m2.1-golden/source-digest-v1.vectors.json",
+      "log": "docs/evidence/WAVE1/logs/99627dd/golden.txt",
+      "sha256": "8f2c5a37249b1947e403135b6a25029eeb1190b4d094cbb927cc9a3c81c97525"
+    },
+    {
+      "command": "bash tools/m2.1-gate-mutation-check.sh <tmp>",
+      "log": "docs/evidence/WAVE1/logs/99627dd/mutation.txt",
+      "sha256": "fac8ea63305d8baca60ae0676ddd62f11d376acdaf2f8189aa616592a32aba45"
+    },
+    {
+      "command": "corepack pnpm check:m2.1-docs",
+      "log": "docs/evidence/WAVE1/logs/99627dd/doc-consistency.txt",
+      "sha256": "cd1ffc9573a5bbe4f141f7f1733ac9aa3c363b5d866846a88c3b19642d1e78a1"
+    },
+    {
+      "command": "corepack pnpm evidence:m2.2:integrity (informational; see claim_limits)",
+      "log": "docs/evidence/WAVE1/logs/99627dd/m2.2-integrity.txt",
+      "sha256": "df6d15d97b94844d0fa53b6c9060a6c3bccf5180ace7d9d8a1ca62a9fead75d0"
+    }
+  ],
+  "case_count": 21,
+  "passed_count": 20,
+  "screenshots": [],
+  "claim_limits": [
+    "This evidence supports CONTROLLED_OPENFILM_READY only, and only after the combined external review passes.",
+    "Gate D4.2 is NOT closed: materialization and adoption remain unimplemented.",
+    "Gate V1-P0 and V1-Full are NOT claimed.",
+    "duration and narration lock integration is NOT_APPLICABLE_APPROVED; no M2.2 typed edit can change either.",
+    "render and snapshot_publish have no business runner; only their storage, lease, event and recovery semantics are proven.",
+    "AC-005 on the legacy Hypit edit path remains a post-hoc snapshot capture; the migration path is the one that publishes from an isolated stage.",
+    "Headed browser automation and human experience are NOT_RUN; no UI automation ran in Wave 1.",
+    "The M2.2 per-ticket integrity validator returns non-zero in this capture, and that is expected: it asserts no code changed after M2.2's freeze, and M2.3 deliberately built on it. Its output is recorded verbatim in logs/<sha>/m2.2-integrity.txt rather than tuned to green. This combined capture re-ran M2.2's own gates instead."
+  ],
+  "review": {
+    "internal": "PENDING",
+    "internal_record": "reviews/internal-review.md",
+    "external": "REVIEW_PENDING"
+  },
+  "cases": [
+    {
+      "case_id": "EN-01",
+      "ticket": "M2.1",
+      "status": "PASSED",
+      "evidence_kind": [
+        "schema_unit",
+        "http_integration"
+      ],
+      "title": "one writable engine per project; legacy Hypit contract intact",
+      "assertions": [
+        "one binding per project, enforced by a primary key",
+        "a migrated copy binds OpenFilm without displacing the source",
+        "the legacy D1-D4.2.1 suite still passes"
+      ],
+      "artifacts": [
+        {
+          "path": "tests/m2.1/engine-binding-store.test.ts",
+          "sha256": "d61917d175550455acd03c31532230139a1889fc3e7ab9548ab6b7d230d6de64"
+        },
+        {
+          "path": "src/host/engine/engine-binding-store.ts",
+          "sha256": "99dee875d8268e1c596dfab47ccfa520eb202a2f1e9be4093f9c07928b3d862d"
+        }
+      ]
+    },
+    {
+      "case_id": "EN-02",
+      "ticket": "M2.1",
+      "status": "PASSED",
+      "evidence_kind": [
+        "schema_unit",
+        "mutation_test"
+      ],
+      "title": "every native write entry is translated or refused",
+      "assertions": [
+        "every inventory row registered",
+        "no unknown policy",
+        "an unregistered operation is denied and recorded"
+      ],
+      "artifacts": [
+        {
+          "path": "tests/m2.1/native-write-gateway.test.ts",
+          "sha256": "9882ed716cf30adf34c4cdfabd3d8ebe6ccbe0eacfd61a5a8c72c735517ff700"
+        },
+        {
+          "path": "src/host/engine/native-mutation-registry.ts",
+          "sha256": "f1d4feecea6e298854735800e6221e4c78cd7ea71b66479d986663f79177ae19"
+        }
+      ]
+    },
+    {
+      "case_id": "EN-04",
+      "ticket": "M2.1",
+      "status": "PASSED",
+      "evidence_kind": [
+        "integration",
+        "mutation_test"
+      ],
+      "title": "a source change outside the Host conflicts and raises attention",
+      "assertions": [
+        "the comparison uses the committed baseline, never a freshly observed digest",
+        "the project enters attention and the next write is refused",
+        "external bytes are left untouched"
+      ],
+      "artifacts": [
+        {
+          "path": "tests/m2.1/native-bypass.test.ts",
+          "sha256": "3d16445ce35215e28b11de83b23dcd8abaf6a535d7a26f8703156e57d930f2c4"
+        },
+        {
+          "path": "src/host/projects/revision-store.ts",
+          "sha256": "8bc7889d137fb67eb1d959124a57cb432748294d7864648ee308110beafd95c0"
+        }
+      ]
+    },
+    {
+      "case_id": "EN-06",
+      "ticket": "M2.1",
+      "status": "PASSED",
+      "evidence_kind": [
+        "security_scan",
+        "real_upstream_probe"
+      ],
+      "title": "the pinned upstream is verified byte for byte",
+      "assertions": [
+        "HEAD pinned, checkout clean, and every loaded file hashed",
+        "a tampered copy is refused and the original still loads",
+        "credential scan reports no findings"
+      ],
+      "artifacts": [
+        {
+          "path": "tests/m2.1/openfilm-upstream-lock.test.ts",
+          "sha256": "60207d69f1b29df795d6bfa0ca748f04b60c4bbe65c909321f967e446bcb0766"
+        },
+        {
+          "path": "contracts/openfilm-upstream-lock.json",
+          "sha256": "668d52da19afb3153bbcc9ab35d561b8795ec3ac4a3156d1c46df7078eec9976"
+        }
+      ]
+    },
+    {
+      "case_id": "TM-01/02/03",
+      "ticket": "M2.1",
+      "status": "PASSED",
+      "evidence_kind": [
+        "schema_unit"
+      ],
+      "title": "integer half-open frames at a rational fps, verified as 30/1",
+      "assertions": [
+        "every frame round trips exactly",
+        "invalid ranges are refused, never clamped",
+        "a short asset is refused rather than looped, frozen or retimed"
+      ],
+      "artifacts": [
+        {
+          "path": "tests/m2.1/time-model.test.ts",
+          "sha256": "b00bfc7915287dbc184856f385aa8b97d82df97c1aaf9e813c2be91c21367475"
+        },
+        {
+          "path": "src/host/engine/time-model.ts",
+          "sha256": "32b0d96b820f1c3d2d5959d62fa103e5707cb399c2de21cd298b623c9d0b17ea"
+        }
+      ]
+    },
+    {
+      "case_id": "JRNL",
+      "ticket": "M2.2",
+      "status": "PASSED",
+      "evidence_kind": [
+        "schema_unit",
+        "mutation_test"
+      ],
+      "title": "one authoritative transaction machine with predecessor-checked steps",
+      "assertions": [
+        "every transition names its predecessor",
+        "legacy journals advance only through the checked helper",
+        "no path writes a state without naming where it came from"
+      ],
+      "artifacts": [
+        {
+          "path": "tests/m2.2/transaction-state-machine.test.ts",
+          "sha256": "3e9fe29f2ce374f39ee45a1d455b786d76bb02db2a95001ef2d5ab42159edda0"
+        },
+        {
+          "path": "src/host/projects/revision-store.ts",
+          "sha256": "8bc7889d137fb67eb1d959124a57cb432748294d7864648ee308110beafd95c0"
+        }
+      ]
+    },
+    {
+      "case_id": "SNAP/DUR",
+      "ticket": "M2.2",
+      "status": "PASSED",
+      "evidence_kind": [
+        "integration",
+        "fault_injection"
+      ],
+      "title": "content-addressed snapshots published only when durability is proven",
+      "assertions": [
+        "files then directories bottom-up, then rename, then the parent entry",
+        "an unproven step publishes nothing and undoes a rename that already happened"
+      ],
+      "artifacts": [
+        {
+          "path": "tests/m2.2/snapshot-store.test.ts",
+          "sha256": "23755ee9695025d30038155560f5fffd3e063290ddc0da8acfdb1c907410a0b7"
+        },
+        {
+          "path": "src/host/projects/snapshot-store.ts",
+          "sha256": "86d24471ee9e982521aae1b4e03359ec5441c8098f32b5a65c0aa22d06b2536d"
+        }
+      ]
+    },
+    {
+      "case_id": "LOCK",
+      "ticket": "M2.2",
+      "status": "PASSED",
+      "evidence_kind": [
+        "schema_unit",
+        "mutation_test"
+      ],
+      "title": "three server-computed lock classes; preserve is intent, not authority",
+      "assertions": [
+        "visual always; duration for range changes; narration for subtitle and audio",
+        "the client reason text grants nothing",
+        "control revision moves with the lock"
+      ],
+      "artifacts": [
+        {
+          "path": "tests/m2.2/lock-service.test.ts",
+          "sha256": "8deebdb32f651e4f5f4eb14d65c88592df8ed21fe105aae53744ab0a8de7a595"
+        },
+        {
+          "path": "src/host/projects/lock-service.ts",
+          "sha256": "3ade6518101d1c991d164bda1e748b282c84306d769e14b11abfc47f65942a80"
+        }
+      ]
+    },
+    {
+      "case_id": "LOCK-NA",
+      "ticket": "M2.2",
+      "status": "NOT_APPLICABLE_APPROVED",
+      "evidence_kind": [
+        "scope"
+      ],
+      "title": "duration and narration lock integration",
+      "assertions": [
+        "no M2.2 typed edit can change duration or narration",
+        "the classifier is unit tested with synthetic payloads",
+        "an unreachable integration is not recorded as a pass"
+      ],
+      "artifacts": [
+        {
+          "path": "docs/migration/M2/M2.2-development-and-acceptance-plan.md",
+          "sha256": "e7cfac5a8f97bcaa66af7307a11f5f9a39fe1a0934d616911667f0faa0b385cf"
+        }
+      ]
+    },
+    {
+      "case_id": "JB-01..07",
+      "ticket": "M2.2",
+      "status": "PASSED",
+      "evidence_kind": [
+        "restart",
+        "concurrency",
+        "schema_unit",
+        "mutation_test"
+      ],
+      "title": "durable jobs with CAS leases, monotonic events and quarantined late results",
+      "assertions": [
+        "a restart keeps jobs and events",
+        "a lost lease never becomes a success",
+        "two workers cannot both own a job",
+        "an unknown cost stays unknown",
+        "a late result is quarantined rather than adopted",
+        "replay never re-runs a commit"
+      ],
+      "artifacts": [
+        {
+          "path": "tests/m2.2/persistent-job-store.test.ts",
+          "sha256": "6912a2b97983e7492541442e44d6162913602f6eb9634e01c1d5760c94c94ff7"
+        },
+        {
+          "path": "tests/m2.2/outbox.test.ts",
+          "sha256": "2a9d755208ae7e8462ef94d5977f9a1b01cabd6f8da3e99c9448b01467629409"
+        },
+        {
+          "path": "src/host/persistent-job-store.ts",
+          "sha256": "7e6bc8e7d658a6b4cdc047afdc2b33de377618b64f26480f704085e47ebcd831"
+        },
+        {
+          "path": "src/host/outbox.ts",
+          "sha256": "6419f96754adbab68f974eb3b16e1855356bba71aef60754412361def6b49e97"
+        }
+      ]
+    },
+    {
+      "case_id": "BYP",
+      "ticket": "M2.2",
+      "status": "PASSED",
+      "evidence_kind": [
+        "http_integration",
+        "mutation_test"
+      ],
+      "title": "the native write gateway is in front of every production write path",
+      "assertions": [
+        "an attention project never reaches the actor",
+        "a locked range never reaches the actor",
+        "an engine that does not report the capability refuses"
+      ],
+      "artifacts": [
+        {
+          "path": "tests/m2.2/project-coordinator.test.ts",
+          "sha256": "063f73f4a5bd836e0054632b4268aac91faba52ead48a472c713e57bb3d255ba"
+        },
+        {
+          "path": "src/host/projects/project-coordinator.ts",
+          "sha256": "eb48f8007c606df8974cffbdcebe5c3119285e1a726728594428ba8677525c74"
+        }
+      ]
+    },
+    {
+      "case_id": "EN-03",
+      "ticket": "M2.3",
+      "status": "PASSED",
+      "evidence_kind": [
+        "schema_unit"
+      ],
+      "title": "a deterministic migration plan that blocks what it cannot place",
+      "assertions": [
+        "a valid plan with a stable identity map and a pinned upstream",
+        "the same unchanged source always yields the same copy identity",
+        "a second key for a migrated source is a conflict, not a duplicate copy"
+      ],
+      "artifacts": [
+        {
+          "path": "tests/m2.3/migration-service.test.ts",
+          "sha256": "51292354abe6cd092048f9b94ddd92b9afd4a03ceef546ba539636eba57882e7"
+        },
+        {
+          "path": "contracts/migration-plan.schema.json",
+          "sha256": "5c98e244e39221b2eed2d04b71468887d4e7013a043b232b612c43aaf8d9cc4f"
+        }
+      ]
+    },
+    {
+      "case_id": "EN-05",
+      "ticket": "M2.3",
+      "status": "PASSED",
+      "evidence_kind": [
+        "integration"
+      ],
+      "title": "the source project reopens and exports after migration, bytes unchanged",
+      "assertions": [
+        "the source digest is identical before and after",
+        "the source stays bound to hypit",
+        "the copy is exported through the pinned renderer"
+      ],
+      "artifacts": [
+        {
+          "path": "tests/m2.3/migration-service.test.ts",
+          "sha256": "51292354abe6cd092048f9b94ddd92b9afd4a03ceef546ba539636eba57882e7"
+        }
+      ]
+    },
+    {
+      "case_id": "MIG-01",
+      "ticket": "M2.3",
+      "status": "PASSED",
+      "evidence_kind": [
+        "integration"
+      ],
+      "title": "a new project id and one OpenFilm binding, with the source untouched",
+      "assertions": [
+        "the copy has its own project id, revision and binding",
+        "the source project's bytes and binding are unchanged"
+      ],
+      "artifacts": [
+        {
+          "path": "tests/m2.3/migration-service.test.ts",
+          "sha256": "51292354abe6cd092048f9b94ddd92b9afd4a03ceef546ba539636eba57882e7"
+        }
+      ]
+    },
+    {
+      "case_id": "MIG-02",
+      "ticket": "M2.3",
+      "status": "PASSED",
+      "evidence_kind": [
+        "real_upstream_probe"
+      ],
+      "title": "three native clips the pinned engine reads and can edit",
+      "assertions": [
+        "the pinned upstream reads the film as three addressable clips",
+        "the middle clip is editable through the native mutator",
+        "no clip source is a flattened video"
+      ],
+      "artifacts": [
+        {
+          "path": "tests/m2.3/openfilm-migrator.test.ts",
+          "sha256": "983251287fd8eae2d4db69f5b93ad3a32de0362acf3cd9a9e7143ab8fb2eee0f"
+        },
+        {
+          "path": "src/host/projects/openfilm-migrator.ts",
+          "sha256": "d92f06524f58e2bcef9ebdc801d633636dcd760d1b6240ad5781f338591158f6"
+        }
+      ]
+    },
+    {
+      "case_id": "MIG-03",
+      "ticket": "M2.3",
+      "status": "PASSED",
+      "evidence_kind": [
+        "real_media"
+      ],
+      "title": "reopen, export, edit the middle clip, export again",
+      "assertions": [
+        "two real 900-frame MP4s produced by the pinned renderer",
+        "the two exports differ; the film is the same length with the same three clips",
+        "subtitles and narration travelled with the film"
+      ],
+      "artifacts": [
+        {
+          "path": "tests/m2.3/migration-real-export.test.ts",
+          "sha256": "d26c2b7144ca67511407ab4aef0c5b7173cc51593bae37539ec1c6cbdcb4989e"
+        }
+      ]
+    },
+    {
+      "case_id": "MIG-04",
+      "ticket": "M2.3",
+      "status": "PASSED",
+      "evidence_kind": [
+        "fault_injection"
+      ],
+      "title": "an external change in the copy conflicts instead of being accepted",
+      "assertions": [
+        "a changed scene, subtitle or asset produces a conflict",
+        "the copy loses writability while the migration keeps its historical state",
+        "the changed bytes are left as they are"
+      ],
+      "artifacts": [
+        {
+          "path": "tests/m2.3/migration-service.test.ts",
+          "sha256": "51292354abe6cd092048f9b94ddd92b9afd4a03ceef546ba539636eba57882e7"
+        }
+      ]
+    },
+    {
+      "case_id": "MIG-05",
+      "ticket": "M2.3",
+      "status": "PASSED",
+      "evidence_kind": [
+        "restart",
+        "fault_injection"
+      ],
+      "title": "a crash at every boundary converges after a restart",
+      "assertions": [
+        "eight boundaries each leave durable, readable state",
+        "no state is written without its predecessor",
+        "the source is untouched whatever happened"
+      ],
+      "artifacts": [
+        {
+          "path": "tests/m2.3/migration-service.test.ts",
+          "sha256": "51292354abe6cd092048f9b94ddd92b9afd4a03ceef546ba539636eba57882e7"
+        },
+        {
+          "path": "src/host/projects/migration-store.ts",
+          "sha256": "eceb3640e898af541c1cdab807b4efcf3d2937838c554f80d1c8e8da7157bebc"
+        }
+      ]
+    },
+    {
+      "case_id": "MIG-06",
+      "ticket": "M2.3",
+      "status": "PASSED",
+      "evidence_kind": [
+        "integration",
+        "real_media"
+      ],
+      "title": "rollback stops writes, restores the source and keeps the copy",
+      "assertions": [
+        "in-flight work is quarantined by id",
+        "the source digest equals its pre-migration value",
+        "the copy and its report are retained",
+        "the source is exported again after rollback"
+      ],
+      "artifacts": [
+        {
+          "path": "tests/m2.3/migration-service.test.ts",
+          "sha256": "51292354abe6cd092048f9b94ddd92b9afd4a03ceef546ba539636eba57882e7"
+        }
+      ]
+    },
+    {
+      "case_id": "MIG-07",
+      "ticket": "M2.3",
+      "status": "PASSED",
+      "evidence_kind": [
+        "http_integration"
+      ],
+      "title": "the same key replays; a different request conflicts",
+      "assertions": [
+        "replaying a key returns the same migration rather than migrating twice"
+      ],
+      "artifacts": [
+        {
+          "path": "tests/m2.3/migration-service.test.ts",
+          "sha256": "51292354abe6cd092048f9b94ddd92b9afd4a03ceef546ba539636eba57882e7"
+        }
+      ]
+    },
+    {
+      "case_id": "W1-REG",
+      "ticket": "WAVE1",
+      "status": "PASSED",
+      "evidence_kind": [
+        "regression"
+      ],
+      "title": "EN/TM/JB and the D1-M1 regression on one frozen commit",
+      "assertions": [
+        "corepack pnpm check green on the combined candidate",
+        "no D1-M1 test deleted, skipped or weakened",
+        "materialize, adopt, impact and history restore still closed",
+        "a fictional operation is still 422"
+      ],
+      "artifacts": [
+        {
+          "path": "tests/architecture/m2.1-fitness.test.ts",
+          "sha256": "1eaa946ad1f1ecec6b3315cfe48ef7dc7d3275d5ac739b630fac063ef7ab3b8d"
+        },
+        {
+          "path": "tests/architecture/m2.2-fitness.test.ts",
+          "sha256": "fd8b8de157e883a10fdf4f680d461a8f163b35db3b7208805de81a32c7c26cd2"
+        },
+        {
+          "path": "tests/architecture/m2.1-fitness.test.ts",
+          "sha256": "1eaa946ad1f1ecec6b3315cfe48ef7dc7d3275d5ac739b630fac063ef7ab3b8d"
+        }
+      ]
+    }
+  ]
+}
