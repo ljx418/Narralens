@@ -176,7 +176,7 @@ const GATE_NAMES = [
   ["golden", "python3 -I tests/m2.1-golden/source-digest-v1.golden.py tests/m2.1-golden/source-digest-v1.vectors.json"],
   ["mutation", "bash tools/m2.1-gate-mutation-check.sh <tmp>"],
   ["doc-consistency", "corepack pnpm check:m2.1-docs"],
-  ["m2.2-integrity", "corepack pnpm evidence:m2.2:integrity"],
+  ["m2.2-integrity", "corepack pnpm evidence:m2.2:integrity (informational; see claim_limits)"],
 ] as const;
 const gateArtifacts = GATE_NAMES.map(([name, command]) => {
   const log = `docs/evidence/WAVE1/logs/${CAPTURE_SHORT}/${name}.txt`;
@@ -212,6 +212,7 @@ const manifest = {
     "render and snapshot_publish have no business runner; only their storage, lease, event and recovery semantics are proven.",
     "AC-005 on the legacy Hypit edit path remains a post-hoc snapshot capture; the migration path is the one that publishes from an isolated stage.",
     "Headed browser automation and human experience are NOT_RUN; no UI automation ran in Wave 1.",
+    "The M2.2 per-ticket integrity validator returns non-zero in this capture, and that is expected: it asserts no code changed after M2.2's freeze, and M2.3 deliberately built on it. Its output is recorded verbatim in logs/<sha>/m2.2-integrity.txt rather than tuned to green. This combined capture re-ran M2.2's own gates instead.",
   ],
   review: { internal: "PENDING", internal_record: "reviews/internal-review.md", external: "REVIEW_PENDING" },
   cases,
