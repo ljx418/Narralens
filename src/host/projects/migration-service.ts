@@ -86,8 +86,29 @@ const VALIDATION_STEPS: readonly MigrationValidationStep[] = [
 ];
 
 export class MigrationService {
-  /** Roots the Host registered for each project, so nothing has to guess a path. */
-  readonly #roots = new Map<string, string>();
+  /**
+   * Target roots, derived rather than remembered.
+   *
+   * A copy lives at `migrationRoot/<migration_id>`, which is the same rule
+   * `ProjectResolver` applies and the same rule that survives a restart. Caching them in a
+   * Map made a second authority that could disagree with the migration record and that
+   * vanished on restart — and the call sites already fell back to the derived path, so the
+   * cache bought nothing but the possibility of being wrong.
+   */
+  #targetRoot(migrationId: string): string {
+    return resolve(this.deps.migrationRoot, migrationId);
+  }
+
+  /**
+   * The same rule for a target identified only by project id: find its migration record.
+   * Falls back to the legacy per-project root only for the *source* side, which is what
+   * `projectRoot` is for.
+   */
+  #targetRootFor(projectId: string): string {
+    const migration = this.deps.revisions.migrations.all().find((row) => row.target_project_id === projectId);
+    if (migration !== undefined) return this.#targetRoot(migration.migration_id);
+    return resolve(this.deps.projectRoot, projectId);
+  }
 
   constructor(private readonly deps: MigrationDeps) {}
 
@@ -209,7 +230,7 @@ export class MigrationService {
       // for the Hypit Run file, which the copy does not have.
       roots: openFilmRoots(input),
     });
-    store.setTargetSnapshot(migrationId, published.snapshot_id, published.source_digest, now);
+    store.setTargetSnapshot(migrationId, published.snapshot_id, published.source_digest, now, migrated.totalFrames);
     store.transition(migrationId, "validated", "snapshot_published", now);
     store.recordStep(migrationId, { id: "snapshot", status: "done",
       detail: `published snapshot ${published.snapshot_id}`, artifact_sha256: published.source_digest,
@@ -278,7 +299,7 @@ export class MigrationService {
     const store = this.deps.revisions.migrations;
     const row = store.require(migrationId);
     if (row === undefined) throw new HttpError(404, "NOT_FOUND", "Migration not found");
-    const root = this.#roots.get(row.target_project_id) ?? resolve(this.deps.migrationRoot, migrationId);
+    const root = this.#targetRoot(migrationId);
     const committed = store.targetSnapshot(migrationId).sourceDigest ?? "";
     // Recompute exactly what the snapshot recorded: the SourceDigestV1 closure of the copy,
     // not a plain tree hash, or the two could never be comparable.
@@ -360,10 +381,23 @@ export class MigrationService {
    * report can be rebuilt, or something is uncertain and everything stops in attention.
    * Guessing success is never an option.
    */
-  recover(now = new Date()): { recovering: string[]; attention: string[] } {
+  /**
+   * Startup recovery.
+   *
+   * A migration that reached `activated` is finished as far as the *project* is concerned:
+   * its snapshot is published, its commit recorded and its binding written. What may be
+   * missing is the tail — the asset ledger seeding and the report. Both are re-runnable and
+   * idempotent, and both must be re-run here, because a migration left at `activated` is
+   * invisible: `ProjectResolver` only resolves a *terminal* migration, so stopping there
+   * strands the target permanently with no route back and no error explaining why.
+   *
+   * Anything that cannot be completed is left in attention rather than guessed at.
+   */
+  async recover(now = new Date()): Promise<{ recovering: string[]; attention: string[]; completed: string[] }> {
     const store = this.deps.revisions.migrations;
     const recovering: string[] = [];
     const attention: string[] = [];
+    const completed: string[] = [];
     for (const row of store.incomplete()) {
       if (row.state === "recovering") { recovering.push(row.migration_id); continue; }
       if (row.state === "attention") { attention.push(row.migration_id); continue; }
@@ -371,17 +405,71 @@ export class MigrationService {
       const snapshot = store.targetSnapshot(row.migration_id);
       if (row.state === "activated" || row.state === "reported"
         || (bound !== undefined && snapshot.snapshotId !== null)) {
-        // The copy is already published and pointed at; the report can be rebuilt.
-        store.markRecovering(row.migration_id, "rebuild report for an activated migration", now);
-        store.transition(row.migration_id, "recovering", "activated", now);
-        store.recordStep(row.migration_id, { id: "report", status: "done",
-          detail: "report rebuilt after restart", artifact_sha256: snapshot.sourceDigest, at: now.toISOString() });
+        const finished = await this.#finishActivated(row.migration_id, now);
+        (finished ? completed : recovering).push(row.migration_id);
         continue;
       }
       store.markRecovering(row.migration_id, "unfinished before activation; safe to retry", now);
       recovering.push(row.migration_id);
     }
-    return { recovering, attention };
+    return { recovering, attention, completed };
+  }
+
+  /**
+   * Finishes a migration that got as far as `activated`. Both steps are idempotent: the
+   * ledger is keyed by evidence digest, and the export already on disk is reused.
+   *
+   * Returns false when the tail could not be completed, which is a real failure and is
+   * reported as `recovering` rather than being papered over with a synthetic report step.
+   */
+  async #finishActivated(migrationId: string, now: Date): Promise<boolean> {
+    const store = this.deps.revisions.migrations;
+    const row = store.require(migrationId);
+    if (row === undefined) return false;
+    const plan = store.plan(migrationId);
+    if (plan === undefined) return false;
+    const snapshot = store.targetSnapshot(migrationId);
+
+    // `committed` is included because a crash between binding and seeding leaves the
+    // migration exactly there, with its snapshot published and its binding written. The
+    // remaining work is the same tail, so it is the same recovery.
+    if (row.state === "committed" || row.state === "activated") {
+      const resumeTo = row.state;
+      try {
+        // Seed *before* `markRecovering`. The ledger deliberately refuses to seed against a
+        // migration in `recovering`, because that state means "a human or a restart owns
+        // this". Marking first and seeding second therefore always fails, and the failure
+        // looked like the tail being unprovable rather than like an ordering mistake.
+        await this.#seedLedger(plan, now);
+        store.markRecovering(migrationId, "resume activation tail after restart", now);
+        // From `recovering` the only forward exit is `activated`, which is also the honest
+        // one: by the time recovery runs, the snapshot is published, the commit is recorded
+        // and the binding is written. Activation is complete the moment the ledger exists.
+        store.transition(migrationId, "recovering", "activated", now);
+        void resumeTo;
+        const exports = await this.#export(migrationId, [plan.target_project_id], now);
+        store.transition(migrationId, "activated", "reported", now);
+        store.recordStep(migrationId, { id: "report", status: "done",
+          detail: `report rebuilt after restart with ${exports.length} export artifact(s)`,
+          artifact_sha256: exports[0]?.sha256 ?? snapshot.sourceDigest, at: now.toISOString() });
+        return true;
+      } catch {
+        // Cannot prove the tail. Park it where a human will see it rather than reporting a
+        // migration as finished whose asset facts were never established.
+        if (store.require(migrationId)?.state === "recovering") {
+          store.transition(migrationId, "recovering", "attention", now);
+        }
+        return false;
+      }
+    }
+    if (row.state === "reported") {
+      // Terminal already; recovery must not move it, and must not claim a rebuild.
+      store.recordStep(migrationId, { id: "report", status: "done",
+        detail: "already reported before the restart; nothing to rebuild",
+        artifact_sha256: snapshot.sourceDigest, at: now.toISOString() });
+      return true;
+    }
+    return false;
   }
 
   // ── internals ──────────────────────────────────────────────────────────────────────
@@ -404,7 +492,7 @@ export class MigrationService {
 
   #commitTarget(plan: MigrationPlanV1, published: { snapshot_id: string; source_digest: string }, now: Date): string {
     const root = resolve(this.deps.migrationRoot, plan.migration_id);
-    this.#roots.set(plan.target_project_id, root);
+    void root;
     this.deps.registerProject(plan.target_project_id, root, 0);
     this.deps.revisions.commitMigrationTarget({
       migrationId: plan.migration_id, projectId: plan.target_project_id, revision: 1,
@@ -452,7 +540,7 @@ export class MigrationService {
     const artifacts: MigrationReportV1["export_artifacts"][number][] = [];
     for (const projectId of projectIds) {
       // The root the Host registered, never a guessed path: a copy lives where it was built.
-      const root = this.#roots.get(projectId) ?? resolve(this.deps.projectRoot, projectId);
+      const root = this.#targetRootFor(projectId);
       const engine = this.deps.bindings.read(projectId)?.engine ?? MIGRATION_TARGET_ENGINE;
       const exported = await this.deps.exportProject(root, `${migrationId}:${projectId}`, engine);
       artifacts.push({ label: `${projectId}`, sha256: exported.sha256, duration_frames: exported.durationFrames });

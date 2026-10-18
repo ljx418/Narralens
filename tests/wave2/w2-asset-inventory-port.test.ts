@@ -240,7 +240,10 @@ describe("the port never borrows from another project", () => {
   it("fails closed when a target's bytes are gone", async () => {
     const { port, targetRoot, ledger } = await harness();
     await rm(join(targetRoot, "assets/baseline.mp4"));
-    await expect(port.inventory(TARGET_ID)).rejects.toMatchObject({ status: 423 });
+    // Assert the code, not just the status: any 423 would satisfy a status-only check.
+    await expect(port.inventory(TARGET_ID)).rejects.toMatchObject({
+      status: 423, code: "PROJECT_ATTENTION_REQUIRED",
+    });
     expect(ledger.bootstrapRecord(TARGET_ID)?.state).toBe("attention");
   });
 

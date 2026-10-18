@@ -129,9 +129,16 @@ export class AssetInventoryPort {
   async #fromLedger(projectId: string, targetRoot: string, kind: "activated"): Promise<AssetInventory> {
     const reverified = await this.#ledger.reverify({ projectId });
     if (reverified.state === "attention") {
+      // The message says what happened *and* that restoring the bytes will not help, because
+      // `attention` is terminal. Leaving that out turns a permanent condition into a user
+      // tidying up files in a loop and wondering why it keeps coming back. The machine-
+      // readable half is in `details` so a client does not have to parse prose.
       throw new HttpError(423, "PROJECT_ATTENTION_REQUIRED",
-        `Migrated asset ledger is in attention: ${reverified.reason ?? "unknown"}`,
-        undefined, projectId);
+        `Migrated asset ledger is in attention (${reverified.reason ?? "unknown"}). `
+        + "Restoring the bytes or licence does not clear this: it needs an explicit, audited "
+        + "recovery operation, which this version does not provide.",
+        { reason: reverified.reason ?? "unknown", recoverable: false, ledger: "asset_ledger_bootstrap" },
+        projectId);
     }
 
     const bootstrap = this.#ledger.bootstrapRecord(projectId);
@@ -140,7 +147,15 @@ export class AssetInventoryPort {
       // fail-closed assertion rather than a trust in the caller's ordering.
       throw new HttpError(423, "PROJECT_ATTENTION_REQUIRED",
         "Migrated project has no asset ledger; its asset facts are not established",
-        undefined, projectId);
+        { recoverable: false, ledger: "asset_ledger_bootstrap" }, projectId);
+    }
+    if (bootstrap.state === "attention") {
+      // `reverify` moved it to attention while this request was between reads.
+      throw new HttpError(423, "PROJECT_ATTENTION_REQUIRED",
+        `Migrated asset ledger is in attention (${bootstrap.attention_reason ?? "unknown"}). `
+        + "Restoring the bytes or licence does not clear this: it needs an explicit, audited "
+        + "recovery operation, which this version does not provide.",
+        { reason: bootstrap.attention_reason ?? "unknown", recoverable: false }, projectId);
     }
 
     const rows = this.#ledger.assets(projectId);

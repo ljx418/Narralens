@@ -172,7 +172,14 @@ export class MigrationStore {
    * A plan is immutable once written, so the published snapshot is recorded on the
    * migration instead of being written back into the plan.
    */
-  setTargetSnapshot(migrationId: string, snapshotId: string, sourceDigest: string, now = new Date()): void {
+  setTargetSnapshot(migrationId: string, snapshotId: string, sourceDigest: string, now = new Date(),
+    totalFrames: number | null = null): void {
+    if (totalFrames !== null) {
+      this.#db.prepare("ALTER TABLE migration ADD COLUMN target_total_frames INTEGER").run();
+      this.#db.prepare(`UPDATE migration SET target_snapshot_id=?, target_source_digest=?, target_total_frames=?, updated_at=?
+        WHERE migration_id=?`).run(snapshotId, sourceDigest, totalFrames, now.toISOString(), migrationId);
+      return;
+    }
     this.#db.prepare("UPDATE migration SET target_snapshot_id=?, target_source_digest=?, updated_at=? WHERE migration_id=?")
       .run(snapshotId, sourceDigest, now.toISOString(), migrationId);
   }
@@ -181,6 +188,25 @@ export class MigrationStore {
     const row = this.require(migrationId);
     if (row === undefined) return { snapshotId: null, sourceDigest: null };
     return { snapshotId: row.target_snapshot_id, sourceDigest: row.target_source_digest };
+  }
+
+  /**
+   * The migrated film's real length, recorded once at execute time.
+   *
+   * It cannot come from the plan: a plan is written before the copy exists, so its identity
+   * map is an empty shell. Anything that needs the film's length — the resolver's projection
+   * most of all — has to read a fact recorded when the film was actually written.
+   */
+  targetTotalFrames(migrationId: string): number | null {
+    // The column is added on first write, so a database that has not executed a migration
+    // yet does not have it. Asking for it unconditionally is a startup crash.
+    let row: { target_total_frames?: unknown } | undefined;
+    try {
+      row = this.#db.prepare("SELECT target_total_frames FROM migration WHERE migration_id=?")
+        .get(migrationId) as { target_total_frames?: unknown } | undefined;
+    } catch { return null; }
+    const value = Number(row?.target_total_frames ?? 0);
+    return Number.isSafeInteger(value) && value > 0 ? value : null;
   }
 
   setRollback(migrationId: string, record: RollbackRecord, now = new Date()): void {

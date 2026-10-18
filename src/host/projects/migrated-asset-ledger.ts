@@ -106,12 +106,16 @@ export interface MigratedAssetLedgerDeps {
  * about, and it cannot be proven by reading the code.
  */
 /**
- * Migration states an activation-time seed may run at. It deliberately excludes `aborted`,
- * `attention` and `recovering`: seeding against a migration that failed, or that needs a
- * human to decide, is never right.
+ * Migration states an activation-time seed may run at.
+ *
+ * It starts at `snapshot_published`, not `staged`: the ledger's proof includes the target's
+ * bytes and their hash, and before the snapshot is published the copy is still being staged,
+ * so seeding then would verify a tree that is about to change. It deliberately excludes
+ * `aborted`, `attention` and `recovering` — seeding against a migration that failed, or that
+ * needs a human to decide, is never right.
  */
 const IN_FLIGHT_ACTIVATION: ReadonlySet<string> = new Set([
-  "staged", "validated", "snapshot_published", "committed", "activated", "reported",
+  "snapshot_published", "committed", "activated", "reported",
 ]);
 
 export type LedgerBootstrapFaultPoint =
@@ -240,6 +244,14 @@ export class MigratedAssetLedger {
     }
 
     if (existing !== undefined) {
+      // Only an *active* record may be reported active. A `prepared` record is a torn
+      // write: reporting it as active would hand a caller an "everything is seeded" answer
+      // over a ledger that holds nothing, which is how a migration could go terminal with
+      // no asset facts behind it.
+      if (existing.state !== "active") {
+        return this.#attention({ state: "attention", projectId: existing.project_id,
+          migrationId: existing.migration_id, reason: "TORN_BOOTSTRAP_RECORD" }, now, existing);
+      }
       if (existing.input_digest === evidence.inputDigest) {
         return { ...summary(evidence), state: "active", seeded: this.assets(evidence.projectId).length, already_seeded: true };
       }
@@ -272,7 +284,7 @@ export class MigratedAssetLedger {
       // ledger has facts that were never established, so it fails closed.
       throw new HttpError(423, "PROJECT_ATTENTION_REQUIRED",
         "Migrated project has no asset ledger; its asset facts are not established",
-        undefined, request.projectId);
+        { recoverable: false, ledger: "asset_ledger_bootstrap" }, request.projectId);
     }
     if (current.state === "attention") {
       // Already a decision. Re-deriving the facts cannot retract it, and reading the
@@ -405,13 +417,20 @@ export class MigratedAssetLedger {
       assets: [{ source_path: reason, target_path: "", sha256: "", asset_id: null }],
     });
     const at = now.toISOString();
+    // Insert and resolve in ONE transaction. Doing the insert here and the transition in a
+    // second one left a durable `prepared` record if the process died between them, which
+    // is the half-state ASSET-03 forbids: it looks bootstrapped, holds nothing, and nothing
+    // can move it forward. `#seed` learned this the same way.
     this.#revisions.atomic(() => {
       this.#db.prepare(
         `INSERT INTO asset_ledger_bootstrap(project_id, migration_id, state, input_digest, control_revision, attention_reason, created_at)
-         VALUES(?,?,'prepared',?,?,'',?)`,
-      ).run(evidence.projectId, evidence.migrationId, inputDigest, 0, at);
+         VALUES(?,?,'attention',?,?,?,?)`,
+      ).run(evidence.projectId, evidence.migrationId, inputDigest, 1, reason, at);
     });
-    return this.transitionBootstrap(evidence.projectId, "prepared", "attention", now, reason);
+    return {
+      state: "attention", project_id: evidence.projectId, migration_id: evidence.migrationId,
+      input_digest: inputDigest, seeded: 0, already_seeded: false, reason,
+    };
   }
 
   // ── evidence ────────────────────────────────────────────────────────────────────────
@@ -632,12 +651,7 @@ export class MigratedAssetLedger {
   }
 
   async #probeFrames(path: string): Promise<number> {
-    const registry = this.#registry as unknown as { dependencies?: { videoFrames?: (p: string) => Promise<number> } };
-    const probe = registry.dependencies?.videoFrames;
-    if (probe === undefined) {
-      throw new HttpError(503, "MEDIA_TOOL_UNAVAILABLE", "No media probe is configured for the ledger");
-    }
-    return await probe(path);
+    return await this.#registry.probeFrames(path);
   }
 
   /** What changed between what a live ledger claims and what the current evidence proves. */

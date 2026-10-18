@@ -1,4 +1,4 @@
-import { existsSync } from "node:fs";
+import { existsSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import type { DatabaseSync, SQLInputValue } from "node:sqlite";
 
@@ -133,21 +133,60 @@ function tableExists(db: DatabaseSync, name: string): boolean {
  * Reads the compiled DDL rather than trusting a version row. A table can reach version 2
  * two ways — created fresh, or migrated — and only the second is worth an audit record.
  */
+/**
+ * Reads the compiled `CHECK` for the `kind` column rather than searching the whole DDL.
+ *
+ * The first version tested `sql.includes("'materialize'")` over the whole statement, which a
+ * SQL comment or a string default could satisfy — a table whose `CHECK` still said three
+ * kinds would have been reported as already migrated, and the first materialize job would
+ * then be refused by SQLite. Scanning only inside `CHECK (kind IN (...))` cannot be fooled
+ * by a comment anywhere else.
+ */
 function jobTableIsAtV2(db: DatabaseSync): boolean {
   const row = db.prepare("SELECT sql FROM sqlite_master WHERE type='table' AND name='job'").get() as
     { sql?: unknown } | undefined;
-  const sql = row === undefined ? "" : String(row.sql ?? "");
-  return JOB_KINDS_V2.every((kind) => sql.includes(`'${kind}'`));
+  if (row === undefined) return false;
+  const sql = String(row.sql ?? "");
+  // Not split on commas: the CHECK's own argument list is comma-separated, so splitting
+  // first would truncate it after the first kind and report a v2 table as v1.
+  const check = /CHECK\s*\(\s*kind\s+IN\s*\(([^)]*)\)\s*\)/iu.exec(sql)?.[1] ?? "";
+  if (check.length === 0) return false;
+  const kinds = new Set([...check.matchAll(/'([a-z_]+)'/gu)].map((match) => match[1]!));
+  return JOB_KINDS_V2.every((kind) => kinds.has(kind));
+}
+
+function migrationIsRecorded(db: DatabaseSync): boolean {
+  const row = db.prepare("SELECT 1 FROM schema_migration WHERE id=?").get(JOB_KIND_MIGRATION_ID);
+  return row !== undefined;
 }
 
 /**
  * `VACUUM INTO` produces a whole-file copy that SQLite itself wrote, so it is verifiable
  * rather than a best-effort byte copy of a live database.
  */
+/**
+ * The backup is taken before the transaction opens, so a migration that fails verification
+ * leaves it behind. The first version refused to proceed if one already existed, which
+ * turned a single failed migration into a Host that could never start again — the operator's
+ * only recourse was to find and delete a file the Host had told them nothing about.
+ *
+ * A leftover backup is therefore only a problem when it is the *current* one. With no
+ * `schema_migration` row and the table still at version 1, the previous attempt provably did
+ * not complete, and the safe thing is to take a fresh backup and try again. Anything else —
+ * a recorded migration, or a table already at v2 — means something else is going on and the
+ * refusal stands.
+ */
 function takeBackup(db: DatabaseSync, databasePath: string): string {
   const backupPath = `${databasePath}.pre-job-kind-v${JOB_KIND_TO_VERSION}.bak`;
   if (existsSync(backupPath)) {
-    throw new JobKindMigrationUnverifiable("a backup for this migration already exists", backupPath);
+    if (jobTableIsAtV2(db) || migrationIsRecorded(db)) {
+      throw new JobKindMigrationUnverifiable("a backup for this migration already exists", backupPath);
+    }
+    // Provably a leftover from an attempt that never completed: no recorded migration, and
+    // the table is still v1, so nothing this Host depends on has changed. `VACUUM INTO`
+    // refuses to overwrite, so the stale copy is removed first — and only this file, only
+    // when it cannot be the backup of a completed migration.
+    rmSync(backupPath);
   }
   db.exec(`VACUUM INTO '${backupPath.replaceAll("'", "''")}'`);
   if (!existsSync(backupPath)) {

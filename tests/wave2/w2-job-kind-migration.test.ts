@@ -1,4 +1,6 @@
+import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
+import { readFileSync } from "node:fs";
 import { existsSync } from "node:fs";
 import { mkdtemp, readdir, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
@@ -313,12 +315,32 @@ describe("the verification actually fires", () => {
     } finally { handle.close(); }
   });
 
-  it("refuses to overwrite an existing backup", async () => {
+  it("replaces a stale backup when the previous attempt provably did not complete", async () => {
     const { dbPath } = await wave1Database();
     const handle = new DatabaseSync(dbPath);
     try {
-      await writeFile(`${dbPath}.pre-job-kind-v2.bak`, "stale", "utf8");
-      expect(() => migrateJobKind(handle, dbPath)).toThrow(/already exists/u);
+      // Simulates a crash between `VACUUM INTO` and the commit: the backup is a real
+      // database, but no migration was recorded and `job` is still v1.
+      execFileSync("cp", [dbPath, `${dbPath}.pre-job-kind-v2.bak`]);
+      expect(() => migrateJobKind(handle, dbPath)).not.toThrow();
+      expect(handle.prepare("SELECT COUNT(*) AS n FROM job").get()).toMatchObject({ n: 4 });
+      expect(handle.prepare("SELECT id FROM schema_migration WHERE id='job_kind_materialize'").get())
+        .toMatchObject({ id: "job_kind_materialize" });
+    } finally { handle.close(); }
+  });
+
+  it("leaves a backup alone once its migration is recorded", async () => {
+    const { dbPath } = await wave1Database();
+    open(dbPath);
+    const handle = new DatabaseSync(dbPath);
+    try {
+      const backupPath = `${dbPath}.pre-job-kind-v2.bak`;
+      execFileSync("cp", [dbPath, backupPath]);
+      const before = createHash("sha256").update(readFileSync(backupPath)).digest("hex");
+      // A recorded, verified migration short-circuits before any backup work, so an
+      // operator's backup file is never touched or deleted on a later start.
+      expect(() => migrateJobKind(handle, dbPath)).not.toThrow();
+      expect(createHash("sha256").update(readFileSync(backupPath)).digest("hex")).toBe(before);
       expect(handle.prepare("SELECT COUNT(*) AS n FROM job").get()).toMatchObject({ n: 4 });
     } finally { handle.close(); }
   });

@@ -157,6 +157,18 @@ export class AssetRegistry {
     return assets;
   }
 
+  /**
+   * Counts the frames in a real file.
+   *
+   * Exposed so another Host-owned store can cross-check a frame count without reaching into
+   * `dependencies`, which is private and is often empty — the default ffprobe implementation
+   * lives in this module and a caller that only knew about the injected override would
+   * conclude, wrongly, that no probe exists.
+   */
+  async probeFrames(path: string, expectedFrameRate?: number): Promise<number> {
+    return await (this.dependencies.videoFrames ?? videoFrames)(path, expectedFrameRate);
+  }
+
   async inventory(projectId: string): Promise<AssetInventoryResponse> {
     const [snapshot, descriptor] = await Promise.all([this.readManifest(projectId), this.catalog.readDescriptor(projectId)]);
     const assets = await mapConcurrent(snapshot.manifest.assets, 2, async (asset) => {

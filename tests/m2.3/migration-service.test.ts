@@ -152,9 +152,13 @@ describe("MIG-01 a new project id, one binding, and an untouched source", () => 
 });
 
 describe("MIG-05 a crash at each boundary converges after a restart", () => {
+  // Every boundary in the plan, including the two ASSET-03 added around seeding the
+  // target's asset ledger. A crash point that no test injects is a crash point nobody has
+  // reasoned about, which is how C1 survived: the boundaries existed and were untested.
   const BOUNDARIES: readonly CrashPoint[] = [
     "after_plan", "after_stage", "after_validate", "after_snapshot",
-    "before_commit", "after_commit", "before_bind", "after_bind", "before_report",
+    "before_commit", "after_commit", "before_bind", "after_bind",
+    "after_bind_before_ledger", "after_ledger", "before_report",
   ];
 
   for (const point of BOUNDARIES) {
@@ -173,9 +177,11 @@ describe("MIG-05 a crash at each boundary converges after a restart", () => {
 
       // A restart sees durable state, never a half-known migration.
       const revived = new MigrationService({ ...deps, crashAt: undefined });
-      const outcome = revived.recover();
+      const outcome = await revived.recover();
       const row = revisions.migrations.get(plan.migration_id)!;
-      expect(["recovering", "activated", "aborted", "attention"]).toContain(row.state);
+      //  is now a reachable recovery outcome: the tail is re-runnable, and a
+      // target nobody can resolve is worse than one that took an extra restart.
+      expect(["recovering", "activated", "reported", "aborted", "attention"]).toContain(row.state);
 
       // Whatever happened, the source is untouched and nothing was guessed into existence.
       expect(await treeDigest(sourceRoot)).toBe(before);
@@ -184,8 +190,41 @@ describe("MIG-05 a crash at each boundary converges after a restart", () => {
         expect(targetBound.engine).toBe("openfilm");
       }
       expect(outcome.attention.every((id) => revisions.migrations.get(id)!.state === "attention")).toBe(true);
+
+      // ASSET-03, after a restart: the target must never be resolvable with a ledger that is
+      // absent, torn or still `prepared`. `reported` is what makes it resolvable at all, so
+      // a migration that reached `reported` must have a usable ledger beside it.
+      const ledger = deps.ledger.bootstrapRecord(plan.target_project_id);
+      if (row.state === "reported") {
+        expect(ledger, `a reported migration must have an asset ledger`).toBeDefined();
+        expect(["active", "attention"]).toContain(ledger!.state);
+        expect(["active", "attention"].includes(ledger!.state) ? true : false).toBe(true);
+      } else {
+        expect(ledger?.state ?? "absent").not.toBe("prepared");
+      }
     });
   }
+
+  it("converges to a resolvable target after a crash between binding and the ledger", async () => {
+    const { deps, revisions } = await harness();
+    const crashing = new MigrationService({
+      ...deps, crashAt: async (candidate) => {
+        if (candidate === "after_bind_before_ledger") throw new Error("CRASH:after_bind_before_ledger");
+      },
+    });
+    const plan = await crashing.plan({ projectId: PROJECT, idempotencyKey: "mig-tail-crash" });
+    await expect(crashing.execute(plan.migration_id)).rejects.toThrow("CRASH:after_bind_before_ledger");
+
+    const revived = new MigrationService({ ...deps, crashAt: undefined });
+    const outcome = await revived.recover();
+    const row = revisions.migrations.get(plan.migration_id)!;
+    expect(outcome.attention, "a crash after binding must not park in attention").not.toContain(plan.migration_id);
+    // The point of the fix: recovery finishes the tail so the target is actually usable,
+    // rather than stopping at `activated`, which no resolver will accept.
+    expect(row.state).toBe("reported");
+    expect(revisions.migrations.get(plan.migration_id)!.state).toBe("reported");
+    expect(deps.ledger.bootstrapRecord(plan.target_project_id)?.state).toBe("active");
+  });
 
   it("never writes a migration state without its predecessor", async () => {
     const { service, revisions } = await harness();

@@ -209,9 +209,14 @@ describe("blocker 3b: an activated project with no ledger fails closed", () => {
 
   it("does not fall back to the source project's assets", async () => {
     const { port } = await harness({ seed: false });
-    await expect(port.inventory(TARGET_ID)).rejects.toBeTruthy();
-    // And the failure is not a 200 carrying the source's asset ids.
-    await expect(port.inventory(TARGET_ID)).rejects.not.toMatchObject({ status: 200 });
+    // Assert the specific refusal, not merely that something threw: a bare `rejects
+    // .toBeTruthy()` is satisfied by an unrelated 500 and would let a cross-project
+    // fallback hide behind a different failure.
+    await expect(port.inventory(TARGET_ID)).rejects.toMatchObject({
+      status: 423, code: "PROJECT_ATTENTION_REQUIRED",
+    });
+    await expect(port.resolveAsset(TARGET_ID, "asset_only", sha(media("only"))))
+      .rejects.toMatchObject({ status: 423, code: "PROJECT_ATTENTION_REQUIRED" });
   });
 
   it("fails closed when the bootstrap record is deleted but rows remain", async () => {

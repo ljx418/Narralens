@@ -208,11 +208,14 @@ export class ProjectResolver {
     commit: { revision: number; snapshot_id: string; source_digest: string },
     sourceRoot: AbsoluteServerPath,
   ): ActivatedProjectView {
-    const plan = this.#revisions.migrations.plan(migration.migration_id);
-    // The migrated film's length is the end of the identity map the migration itself wrote.
-    // It is read from the migration, not re-derived from the OpenFilm source, because this
-    // resolver does not parse engine documents.
-    const frameCount = (plan?.identity_map ?? []).reduce((max, entry) => Math.max(max, entry.end_frame_exclusive), 0);
+    // The migrated film's real length, recorded when the copy was written. It cannot be read
+    // from the plan: a plan predates the copy, so its identity map is an empty shell, and
+    // deriving a project's length from an empty list would make every target unreadable.
+    // Nor is it re-derived from the OpenFilm source, because this resolver does not parse
+    // engine documents.
+    const frameCount = this.#revisions.migrations.targetTotalFrames(migration.migration_id)
+      ?? (this.#revisions.migrations.plan(migration.migration_id)?.identity_map ?? [])
+        .reduce((max, entry) => Math.max(max, entry.end_frame_exclusive), 0);
     if (frameCount <= 0) {
       throw new HttpError(423, "PROJECT_ATTENTION_REQUIRED",
         "Migration recorded no placed content", undefined, projectId);

@@ -4,6 +4,7 @@ import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { NarralensHost } from "../../src/host/server.js";
+import { RevisionStore } from "../../src/host/projects/revision-store.js";
 import { AssetInventoryPort } from "../../src/host/projects/asset-inventory-port.js";
 import { MigratedAssetLedger } from "../../src/host/projects/migrated-asset-ledger.js";
 import { ProjectResolver } from "../../src/host/projects/project-resolver.js";
@@ -26,6 +27,8 @@ import { readFileSync } from "node:fs";
  */
 
 const SOURCE_FIXTURE = resolve("fixtures/d1-30s");
+/** The Host treats this as the *parent* of `vendor/openfilm`, not the checkout. */
+const REAL_UPSTREAM_PARENT = "/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b";
 const OPENFILM_SHA = "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3";
 
 const dirs: string[] = [];
@@ -265,3 +268,77 @@ describe("blocker 4b: a migrated target resolves through the production seam aft
       .rejects.toMatchObject({ status: 404, code: "NOT_FOUND" });
   });
 });
+
+describe("ASSET-02 and ASSET-03 through the Host's own instances", () => {
+  /**
+   * The blocker-3 review found the real gap: ASSET-02 and ASSET-03 were proven on components
+   * the test constructed itself, so nothing proved the Host's *own* inventory instance —
+   * built from the Host's RevisionStore, catalog and migration root — behaves that way.
+   *
+   * So: run the Host's real `migrate-copy` route, which seeds the ledger through
+   * MigrationService, then read and drift it through `host.assetInventory`. No Wave 2 route
+   * is opened, so this stays inside W2.0's closed surface.
+   */
+  it("seeds through the real migration, then fails closed on drift, permanently", async () => {
+    // The Host resolves its pinned checkout from this variable; the repository-local
+    // `vendor/openfilm` is not where the isolated worktree lives.
+    const previousVendor = process.env.NARRALENS_OPENFILM_VENDOR;
+    process.env.NARRALENS_OPENFILM_VENDOR = REAL_UPSTREAM_PARENT;
+    try {
+      await assertDriftIsTerminal();
+    } finally {
+      if (previousVendor === undefined) delete process.env.NARRALENS_OPENFILM_VENDOR;
+      else process.env.NARRALENS_OPENFILM_VENDOR = previousVendor;
+    }
+  }, 180_000);
+
+  async function assertDriftIsTerminal(): Promise<void> {
+    const { host, origin, token, base } = await started();
+    const migrated = await fetch(`${origin}/api/migration/v1/projects/d1-30s/migrate-copy`, {
+      method: "POST", headers: headers(origin, token),
+      body: JSON.stringify({ idempotency_key: "w2-host-asset-000001" }),
+    });
+    expect(migrated.status, await migrated.clone().text()).toBe(200);
+    const report = await migrated.json() as { plan: { target_project_id: string } };
+    const targetId = report.plan.target_project_id;
+
+    // ASSET-03: activation seeded the Host's own ledger.
+    expect(host.assetLedger.bootstrapRecord(targetId)?.state).toBe("active");
+
+    // ASSET-02, first read: available.
+    const inventory = await host.assetInventory.inventory(targetId);
+    expect(inventory.kind).toBe("activated");
+    expect(inventory.assets.length).toBeGreaterThan(0);
+
+    // Drift a target byte the migration wrote, through the filesystem, as an operator would.
+    const targetRoot = join(base, "migrations", report_target_migration(base, targetId));
+    // Tamper the file the ledger actually recorded, not a name guessed from the asset id —
+    // a guess that does not exist would drift nothing and the test would pass vacuously.
+    const recorded = host.assetLedger.assets(targetId)[0]!;
+    expect(recorded.target_path).toMatch(/^assets\//u);
+    await writeFile(join(targetRoot, recorded.target_path), media("tampered"));
+
+    // The same call that detects it persists attention and refuses.
+    await expect(host.assetInventory.inventory(targetId)).rejects.toMatchObject({
+      status: 423, code: "PROJECT_ATTENTION_REQUIRED",
+    });
+    expect(host.assetLedger.bootstrapRecord(targetId)?.state).toBe("attention");
+
+    // And it does not come back on its own.
+    await expect(host.assetInventory.inventory(targetId)).rejects.toMatchObject({
+      status: 423, code: "PROJECT_ATTENTION_REQUIRED",
+    });
+    // Legacy projects are untouched by any of this.
+    expect((await host.assetInventory.inventory("d1-30s")).kind).toBe("legacy");
+  }
+});
+
+/** Finds the migration id that produced a target, the same way the resolver does. */
+function report_target_migration(base: string, targetId: string): string {
+  const store = new RevisionStore(join(base, "narralens.sqlite"));
+  try {
+    const row = store.migrations.all().find((candidate) => candidate.target_project_id === targetId);
+    if (row === undefined) throw new Error("NO_MIGRATION_FOR_TARGET");
+    return row.migration_id;
+  } finally { store.close(); }
+}

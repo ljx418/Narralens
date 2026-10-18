@@ -39,14 +39,6 @@ import { HypitReadAdapter } from "../adapters/hypit/hypit-read-adapter.js";
 
 const bodyLimit = 65_536;
 
-/**
- * Roots of migrated copies.
- *
- * Re-seeded from the migration store on every startup so a copy stays resolvable after a
- * restart; keeping only an in-process map would strand migrated projects.
- */
-const migratedRoots = new Map<string, { root: string; revision: number }>();
-
 /** Where the pinned OpenFilm checkout lives. Composition-time only, never a request field. */
 function openfilmVendorRoot(): string {
   return resolve(process.env.NARRALENS_OPENFILM_VENDOR ?? projectRoot, "vendor/openfilm");
@@ -93,6 +85,11 @@ export class NarralensHost {
    * diagnosable without re-running verification by hand.
    */
   openFilmComposition: OpenFilmComposition | null = null;
+  /**
+   * Why composition could not even be attempted, when the failure was something other than
+   * "the checkout did not verify". Null means the path was not reached or did not fail.
+   */
+  openFilmCompositionFailure: string | null = null;
   /** Where migrated copies are built. Composition-time only, never a request field. */
   readonly migrationRoot: string;
   /**
@@ -184,11 +181,13 @@ export class NarralensHost {
       migrationRoot: this.migrationRoot,
       projectRoot: resolve(projectRoot, "var/projects"),
       openfilmUpstreamSha: OPENFILM_UPSTREAM_SHA,
-      // A migrated copy is registered so the Host can resolve it by id afterwards. It never
-      // takes the place of the source project's own root.
-      registerProject: (projectId, root, revision) => {
-        migratedRoots.set(projectId, { root, revision });
-      },
+      // Resolution of a migrated copy is `ProjectResolver`'s job, and it derives the root
+      // from the migration record rather than being told one. This callback therefore
+      // records nothing: W2.0 replaced the old `migratedRoots` map, which was written on
+      // every migration and read by nothing, while its own comment claimed it was what kept
+      // migrated projects resolvable across a restart. A write-only map whose comment
+      // contradicts it is a trap for the next person.
+      registerProject: () => undefined,
       verifyStagedProject: async (root) => {
         const upstream = await createPinnedOpenFilmUpstream(openfilmVendorRoot());
         const film = await upstream.readProjectFilm(root);
@@ -197,13 +196,29 @@ export class NarralensHost {
         }
         const tracks = (film.doc as { tracks?: Array<{ clips?: Array<{ id?: unknown; src?: unknown }> }> }).tracks ?? [];
         const clips = tracks.flatMap((track) => track.clips ?? []);
-        const ids = clips.flatMap((clip) => typeof clip.id === "string" ? [clip.id] : []);
-        // A flattened video clip is not a native editable clip and must not pass.
+        // A flattened video clip is not a native editable clip and must not pass. Checked
+        // across every track, because that is where such a clip would hide.
         for (const clip of clips) {
           const source = typeof clip.src === "string" ? clip.src : "";
           if (/\.(mp4|mov|webm|mkv)$/iu.test(source)) {
             throw new HttpError(422, "UNSUPPORTED_EDIT", "MIGRATION_VALIDATION_FAILED: flattened video clip");
           }
+        }
+        // `target_clips` means *visual* shots, one per source shot. The migrated film also
+        // carries a narration audio clip, and counting it made the real route abort at
+        // validation with "engine reported clips shot-001,shot-002,shot-003,narration". The
+        // Wave 1 suite missed this because its harness supplied its own verifier that
+        // filtered to the picture track; the production verifier did not.
+        //
+        // Identity comes from `src`: a picture clip references a page, so it is identified as
+        // the clip whose source is not an audio media file. Ordering is the engine's.
+        const pictureClips = clips.filter((clip) => {
+          const source = typeof clip.src === "string" ? clip.src : "";
+          return !/\.(wav|mp3|m4a|aac|flac|ogg)$/iu.test(source);
+        });
+        const ids = pictureClips.flatMap((clip) => typeof clip.id === "string" ? [clip.id] : []);
+        if (ids.length === 0) {
+          throw new HttpError(422, "UNSUPPORTED_EDIT", "MIGRATION_VALIDATION_FAILED: no picture clips");
         }
         return ids.map((id, index) => ({
           source_id: id, target_id: id, start_frame: index * 300, end_frame_exclusive: (index + 1) * 300,
@@ -223,21 +238,29 @@ export class NarralensHost {
     await this.coordinator.recoverOnStart();
     // A migration interrupted by a crash is decided here, in production, not only in tests:
     // it either completes, stays retryable, or lands in attention. Nothing is guessed.
-    this.migrations.recover();
-    // W2.0 composes the OpenFilm port at the pinned upstream (R2-07). Verification is
-    // async so it cannot live in the constructor; a checkout that does not verify leaves
-    // the capability closed and is recorded rather than loaded.
-    this.openFilmComposition = await composeOpenFilmPort({
-      registry: this.engines, vendorRoot: openfilmVendorRoot(),
-    });
-    // A migrated copy must survive a restart: re-seed its root from the durable record.
-    for (const migration of this.revisions.migrations.all()) {
-      if (this.revisions.migrations.isTerminal(migration.state) && migration.state !== "aborted") {
-        migratedRoots.set(migration.target_project_id, {
-          root: resolve(this.migrationRoot, migration.migration_id), revision: 1,
-        });
-      }
+    // Composed *before* recovery, and the failure is contained.
+    //
+    // The upstream checkout is the one thing in startup that can fail for reasons outside
+    // this process — a missing vendor directory, a drifted commit, a hung `git status`. If
+    // it were verified after recovery had already advanced migrations, a throw would leave
+    // durable state changed with no listening server and no retry path, and the next start
+    // would run recovery against rows it has already moved.
+    //
+    // Composing first means the worst case is a Host that starts without the OpenFilm
+    // capability — which is exactly what `CAPABILITY_NOT_ENABLED` and `ENGINE_UNAVAILABLE`
+    // already describe — rather than a Host wedged half-recovered.
+    try {
+      this.openFilmComposition = await composeOpenFilmPort({
+        registry: this.engines, vendorRoot: openfilmVendorRoot(),
+      });
+    } catch (error) {
+      this.openFilmComposition = null;
+      this.openFilmCompositionFailure = error instanceof Error ? error.message : String(error);
     }
+    await this.migrations.recover();
+    // A migrated copy survives a restart because `ProjectResolver` re-derives it from the
+    // migration record on every call. There is nothing to re-seed, and a cache here would be
+    // a second authority that could disagree with the record it claims to mirror.
     this.#stopOutbox = this.outbox.start(this.#outboxReplayIntervalMs);
     if (this.jobs instanceof PersistentJobStore) {
       this.#leaseReaper = setInterval(() => this.jobs instanceof PersistentJobStore
