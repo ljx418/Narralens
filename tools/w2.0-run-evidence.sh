@@ -112,6 +112,7 @@ run wave2-fitness      corepack pnpm test:wave2:fitness
 run wave1-historical   corepack pnpm evidence:wave1:historical
 # Writes to W2.0's own directory. The default output path is M2.1's historical report,
 # and overwriting an earlier stage's recorded evidence is not this stage's to do.
+printf '%s\n' "NARRALENS_SECRET_SCAN_OUT=docs/evidence/WAVE2/security/credential-scan.json corepack pnpm exec tsx tools/secret-scan.ts" > "$LOGS/credential-scan.cmd"
 NARRALENS_SECRET_SCAN_OUT=docs/evidence/WAVE2/security/credential-scan.json \
   corepack pnpm exec tsx tools/secret-scan.ts > "$LOGS/credential-scan.txt" 2>&1
 printf '%s\n' "$?" > "$LOGS/credential-scan.exit"
