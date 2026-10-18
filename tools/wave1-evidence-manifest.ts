@@ -1,6 +1,6 @@
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { writeFileSync } from "node:fs";
 
@@ -26,12 +26,16 @@ const artifact = (repoRelative: string): { path: string; sha256: string } => {
 };
 
 const SELF = "docs/evidence/WAVE1/evidence-manifest.json";
-const recordedHead = (() => {
-  const path = resolve(ROOT, "logs/environment.txt");
-  if (!existsSync(path)) return undefined;
-  return readFileSync(path, "utf8").split("\n").find((line) => line.startsWith("git_head="))?.split("=")[1]?.trim();
-})();
-if (recordedHead === undefined) throw new Error("docs/evidence/WAVE1/logs/environment.txt does not record git_head");
+// The environment record lives beside the gate logs, under the capture commit's short SHA.
+const captureDirs = existsSync(resolve(ROOT, "logs"))
+  ? readdirSync(resolve(ROOT, "logs")).filter((entry) => /^[a-f0-9]{7,}$/u.test(entry)).sort()
+  : [];
+if (captureDirs.length === 0) throw new Error("no Wave 1 capture directory; run tools/wave1-run-evidence.sh first");
+const CAPTURE_SHORT = captureDirs[captureDirs.length - 1]!;
+const environmentPath = resolve(ROOT, "logs", CAPTURE_SHORT, "environment.txt");
+const recordedHead = readFileSync(environmentPath, "utf8").split("\n")
+  .find((line) => line.startsWith("git_head="))?.split("=")[1]?.trim();
+if (recordedHead === undefined) throw new Error(`${environmentPath} does not record git_head`);
 const dirty = git("status", "--porcelain").split("\n").filter((line) => line.trim() !== "" && !line.includes(SELF));
 
 interface Case {
@@ -165,8 +169,6 @@ const cases: Case[] = [
       artifact("tests/architecture/m2.1-fitness.test.ts")] },
 ];
 
-// Gate logs live under the short SHA of the commit that produced them.
-const CAPTURE_SHORT = recordedHead.slice(0, 7);
 const GATE_NAMES = [
   ["check", "corepack pnpm check"],
   ["contracts", "corepack pnpm test:contracts"],
