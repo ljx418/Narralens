@@ -2,10 +2,10 @@
   "format": "narralens.wave1-evidence-manifest@1.0",
   "scope": "Wave 1: M2.1 engine governance, M2.2 durability, M2.3 controlled migration",
   "declaration_ceiling": "CONTROLLED_OPENFILM_READY",
-  "captured_at": "2026-10-18T08:51:20.901Z",
+  "captured_at": "2026-10-18T09:26:56.103Z",
   "repo_branch": "migration/m2.2-coordinator-persistence",
-  "repo_sha": "d0ada93c5da781d06a1227681c6564048f2616b2",
-  "frozen_code_sha": "cda2011403afcffa2c143f96c7d70ffeb18c8acf",
+  "repo_sha": "fd64762dbcff4e1577529a00991049b59bf2c1e7",
+  "frozen_code_sha": "e2dec5ca03ee881b55f92b920ee6df2c676aeb26",
   "repo_dirty_at_capture": false,
   "dirty_paths_at_capture": [],
   "openfilm_upstream_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
@@ -22,47 +22,47 @@
   "gate_artifacts": [
     {
       "command": "corepack pnpm check",
-      "log": "docs/evidence/WAVE1/logs/cda2011/check.txt",
-      "sha256": "42af3db11a69f35d39d5e5002bf031d0cb616c317b69c7d52c21e6323a10d468"
+      "log": "docs/evidence/WAVE1/logs/e2dec5c/check.txt",
+      "sha256": "177167f88eb0e0d034b7ddaf0e274adacb9cb1993ede3da7318fce4e3dc7d9a0"
     },
     {
       "command": "corepack pnpm test:contracts",
-      "log": "docs/evidence/WAVE1/logs/cda2011/contracts.txt",
-      "sha256": "bf32a5912759fe21a3a82ba88fb2b97a2c2a67cc2ec0b9c48446ef1d07a20712"
+      "log": "docs/evidence/WAVE1/logs/e2dec5c/contracts.txt",
+      "sha256": "dda11bccbc607099de8c260000927a5be407c0687d936d339dc2d7bc22d721cb"
     },
     {
       "command": "corepack pnpm test:m2.1",
-      "log": "docs/evidence/WAVE1/logs/cda2011/m2.1.txt",
-      "sha256": "aa0028a5b30943f0c192bd6da6911a91022dcfc357290023bd98297995e6a2b4"
+      "log": "docs/evidence/WAVE1/logs/e2dec5c/m2.1.txt",
+      "sha256": "7b8e7b8be2dbe9351f99e118e4ab63b653df06b832dbb9b47e564ea6353c873c"
     },
     {
       "command": "corepack pnpm exec vitest run --config vitest.config.ts tests/m2.2",
-      "log": "docs/evidence/WAVE1/logs/cda2011/m2.2.txt",
-      "sha256": "8211353ca5b8e41b7e507d78e453b727fe3468b884ba44c737c2252dee85fbdb"
+      "log": "docs/evidence/WAVE1/logs/e2dec5c/m2.2.txt",
+      "sha256": "9bce7010085341d503dfa6e149786884a1aaeb53c4abf087a725f64597e6b145"
     },
     {
       "command": "corepack pnpm exec vitest run --config vitest.config.ts tests/m2.3",
-      "log": "docs/evidence/WAVE1/logs/cda2011/m2.3.txt",
-      "sha256": "5932be9d2c35dfecb41e71803932bce5233490b2168e0a573ebff172caf980a5"
+      "log": "docs/evidence/WAVE1/logs/e2dec5c/m2.3.txt",
+      "sha256": "354a604a1d49d52a7b20fbb756a9611958c79eff60f8469252f5ee4f964dd313"
     },
     {
       "command": "python3 -I tests/m2.1-golden/source-digest-v1.golden.py tests/m2.1-golden/source-digest-v1.vectors.json",
-      "log": "docs/evidence/WAVE1/logs/cda2011/golden.txt",
+      "log": "docs/evidence/WAVE1/logs/e2dec5c/golden.txt",
       "sha256": "8f2c5a37249b1947e403135b6a25029eeb1190b4d094cbb927cc9a3c81c97525"
     },
     {
       "command": "bash tools/m2.1-gate-mutation-check.sh <tmp>",
-      "log": "docs/evidence/WAVE1/logs/cda2011/mutation.txt",
-      "sha256": "6321f14edcfd9094cbbbc276d0cb903cfd37ed9bd0ea3a9192d681cc63478b14"
+      "log": "docs/evidence/WAVE1/logs/e2dec5c/mutation.txt",
+      "sha256": "7daa8229bc421f056656f99fde24fc6962a85531f4fb74ff28a9ab7553d35b8d"
     },
     {
       "command": "corepack pnpm check:m2.1-docs",
-      "log": "docs/evidence/WAVE1/logs/cda2011/doc-consistency.txt",
+      "log": "docs/evidence/WAVE1/logs/e2dec5c/doc-consistency.txt",
       "sha256": "cd1ffc9573a5bbe4f141f7f1733ac9aa3c363b5d866846a88c3b19642d1e78a1"
     },
     {
       "command": "corepack pnpm evidence:m2.2:integrity (informational; see claim_limits)",
-      "log": "docs/evidence/WAVE1/logs/cda2011/m2.2-integrity.txt",
+      "log": "docs/evidence/WAVE1/logs/e2dec5c/m2.2-integrity.txt",
       "sha256": "424be1aacf596659ce4f9fe6dedbdc900fe0ae58552c8a7f079f6b02d1ae341e"
     }
   ],
@@ -382,7 +382,7 @@
       "artifacts": [
         {
           "path": "tests/m2.3/migration-service.test.ts",
-          "sha256": "51292354abe6cd092048f9b94ddd92b9afd4a03ceef546ba539636eba57882e7"
+          "sha256": "cc2aa01b4e0960386919ac1a4efe8f45c108bfcc68a922ff674f845a5a50405d"
         },
         {
           "path": "contracts/migration-plan.schema.json",
@@ -395,18 +395,24 @@
       "ticket": "M2.3",
       "status": "PASSED",
       "evidence_kind": [
-        "integration"
+        "integration",
+        "real_media"
       ],
-      "title": "the source project reopens and exports after migration, bytes unchanged",
+      "title": "the source project stays intact after migration and rollback",
       "assertions": [
-        "the source digest is identical before and after",
+        "the source digest is identical before migration and after rollback",
         "the source stays bound to hypit",
-        "the copy is exported through the pinned renderer"
+        "the migrated copy is exported through the pinned renderer",
+        "NOT claimed: a fresh render of the Hypit SOURCE. The pinned Hypit runtime exports by submitting a Build to external providers, which costs money and egresses data, and this wave is authorised for neither; the source side is proved by byte identity, by its binding and by its recorded D1 output instead"
       ],
       "artifacts": [
         {
           "path": "tests/m2.3/migration-service.test.ts",
-          "sha256": "51292354abe6cd092048f9b94ddd92b9afd4a03ceef546ba539636eba57882e7"
+          "sha256": "cc2aa01b4e0960386919ac1a4efe8f45c108bfcc68a922ff674f845a5a50405d"
+        },
+        {
+          "path": "tests/m2.3/migration-real-export.test.ts",
+          "sha256": "6f297f67e9662085fb8c659a6241c55df379b2703fdf726c5fdc9b51582ed68b"
         }
       ]
     },
@@ -425,7 +431,7 @@
       "artifacts": [
         {
           "path": "tests/m2.3/migration-service.test.ts",
-          "sha256": "51292354abe6cd092048f9b94ddd92b9afd4a03ceef546ba539636eba57882e7"
+          "sha256": "cc2aa01b4e0960386919ac1a4efe8f45c108bfcc68a922ff674f845a5a50405d"
         }
       ]
     },
@@ -469,7 +475,7 @@
       "artifacts": [
         {
           "path": "tests/m2.3/migration-real-export.test.ts",
-          "sha256": "d26c2b7144ca67511407ab4aef0c5b7173cc51593bae37539ec1c6cbdcb4989e"
+          "sha256": "6f297f67e9662085fb8c659a6241c55df379b2703fdf726c5fdc9b51582ed68b"
         }
       ]
     },
@@ -489,7 +495,7 @@
       "artifacts": [
         {
           "path": "tests/m2.3/migration-service.test.ts",
-          "sha256": "51292354abe6cd092048f9b94ddd92b9afd4a03ceef546ba539636eba57882e7"
+          "sha256": "cc2aa01b4e0960386919ac1a4efe8f45c108bfcc68a922ff674f845a5a50405d"
         }
       ]
     },
@@ -510,7 +516,7 @@
       "artifacts": [
         {
           "path": "tests/m2.3/migration-service.test.ts",
-          "sha256": "51292354abe6cd092048f9b94ddd92b9afd4a03ceef546ba539636eba57882e7"
+          "sha256": "cc2aa01b4e0960386919ac1a4efe8f45c108bfcc68a922ff674f845a5a50405d"
         },
         {
           "path": "src/host/projects/migration-store.ts",
@@ -536,7 +542,7 @@
       "artifacts": [
         {
           "path": "tests/m2.3/migration-service.test.ts",
-          "sha256": "51292354abe6cd092048f9b94ddd92b9afd4a03ceef546ba539636eba57882e7"
+          "sha256": "cc2aa01b4e0960386919ac1a4efe8f45c108bfcc68a922ff674f845a5a50405d"
         }
       ]
     },
@@ -554,7 +560,7 @@
       "artifacts": [
         {
           "path": "tests/m2.3/migration-service.test.ts",
-          "sha256": "51292354abe6cd092048f9b94ddd92b9afd4a03ceef546ba539636eba57882e7"
+          "sha256": "cc2aa01b4e0960386919ac1a4efe8f45c108bfcc68a922ff674f845a5a50405d"
         }
       ]
     },
