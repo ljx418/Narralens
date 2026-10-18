@@ -2,10 +2,10 @@
   "format": "narralens.wave1-evidence-manifest@1.0",
   "scope": "Wave 1: M2.1 engine governance, M2.2 durability, M2.3 controlled migration",
   "declaration_ceiling": "CONTROLLED_OPENFILM_READY",
-  "captured_at": "2026-10-18T08:43:27.043Z",
+  "captured_at": "2026-10-18T08:51:20.901Z",
   "repo_branch": "migration/m2.2-coordinator-persistence",
-  "repo_sha": "fbcaa184dbe322c7447181d68301a8ac1acdb32e",
-  "frozen_code_sha": "4184d0e10ccdeef20020deec9cd065db8378178d",
+  "repo_sha": "d0ada93c5da781d06a1227681c6564048f2616b2",
+  "frozen_code_sha": "cda2011403afcffa2c143f96c7d70ffeb18c8acf",
   "repo_dirty_at_capture": false,
   "dirty_paths_at_capture": [],
   "openfilm_upstream_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
@@ -22,47 +22,47 @@
   "gate_artifacts": [
     {
       "command": "corepack pnpm check",
-      "log": "docs/evidence/WAVE1/logs/4184d0e/check.txt",
-      "sha256": "408343cefef76968ef94694e1443c2fff264ccc4cec06fa6ceb963b46c03f451"
+      "log": "docs/evidence/WAVE1/logs/cda2011/check.txt",
+      "sha256": "42af3db11a69f35d39d5e5002bf031d0cb616c317b69c7d52c21e6323a10d468"
     },
     {
       "command": "corepack pnpm test:contracts",
-      "log": "docs/evidence/WAVE1/logs/4184d0e/contracts.txt",
-      "sha256": "f6d50a15d4872c11ee39b1da68afce4a8973825effb76f9dd916fc1ca721748c"
+      "log": "docs/evidence/WAVE1/logs/cda2011/contracts.txt",
+      "sha256": "bf32a5912759fe21a3a82ba88fb2b97a2c2a67cc2ec0b9c48446ef1d07a20712"
     },
     {
       "command": "corepack pnpm test:m2.1",
-      "log": "docs/evidence/WAVE1/logs/4184d0e/m2.1.txt",
-      "sha256": "b218001710bf069e4434e6bdf10221205b96b3390dd46b4406543bb40be6aa3d"
+      "log": "docs/evidence/WAVE1/logs/cda2011/m2.1.txt",
+      "sha256": "aa0028a5b30943f0c192bd6da6911a91022dcfc357290023bd98297995e6a2b4"
     },
     {
       "command": "corepack pnpm exec vitest run --config vitest.config.ts tests/m2.2",
-      "log": "docs/evidence/WAVE1/logs/4184d0e/m2.2.txt",
-      "sha256": "e559cad9acc0ce3e974aa4f9203e4039b8516b07bf44f49d7bb72474597c1eef"
+      "log": "docs/evidence/WAVE1/logs/cda2011/m2.2.txt",
+      "sha256": "8211353ca5b8e41b7e507d78e453b727fe3468b884ba44c737c2252dee85fbdb"
     },
     {
       "command": "corepack pnpm exec vitest run --config vitest.config.ts tests/m2.3",
-      "log": "docs/evidence/WAVE1/logs/4184d0e/m2.3.txt",
-      "sha256": "af8aa98a6cd6cac5f088169ee2ec07109d4652a33f7d6769bf3a7ac7117736d0"
+      "log": "docs/evidence/WAVE1/logs/cda2011/m2.3.txt",
+      "sha256": "5932be9d2c35dfecb41e71803932bce5233490b2168e0a573ebff172caf980a5"
     },
     {
       "command": "python3 -I tests/m2.1-golden/source-digest-v1.golden.py tests/m2.1-golden/source-digest-v1.vectors.json",
-      "log": "docs/evidence/WAVE1/logs/4184d0e/golden.txt",
+      "log": "docs/evidence/WAVE1/logs/cda2011/golden.txt",
       "sha256": "8f2c5a37249b1947e403135b6a25029eeb1190b4d094cbb927cc9a3c81c97525"
     },
     {
       "command": "bash tools/m2.1-gate-mutation-check.sh <tmp>",
-      "log": "docs/evidence/WAVE1/logs/4184d0e/mutation.txt",
-      "sha256": "fac8ea63305d8baca60ae0676ddd62f11d376acdaf2f8189aa616592a32aba45"
+      "log": "docs/evidence/WAVE1/logs/cda2011/mutation.txt",
+      "sha256": "6321f14edcfd9094cbbbc276d0cb903cfd37ed9bd0ea3a9192d681cc63478b14"
     },
     {
       "command": "corepack pnpm check:m2.1-docs",
-      "log": "docs/evidence/WAVE1/logs/4184d0e/doc-consistency.txt",
+      "log": "docs/evidence/WAVE1/logs/cda2011/doc-consistency.txt",
       "sha256": "cd1ffc9573a5bbe4f141f7f1733ac9aa3c363b5d866846a88c3b19642d1e78a1"
     },
     {
       "command": "corepack pnpm evidence:m2.2:integrity (informational; see claim_limits)",
-      "log": "docs/evidence/WAVE1/logs/4184d0e/m2.2-integrity.txt",
+      "log": "docs/evidence/WAVE1/logs/cda2011/m2.2-integrity.txt",
       "sha256": "424be1aacf596659ce4f9fe6dedbdc900fe0ae58552c8a7f079f6b02d1ae341e"
     }
   ],
