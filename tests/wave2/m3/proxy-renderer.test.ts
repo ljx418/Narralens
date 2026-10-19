@@ -39,13 +39,9 @@ async function workspace(): Promise<string> {
   return base;
 }
 
-function sha256Of(path: string): Promise<string> {
-  return new Promise((resolvePromise, rejectPromise) => {
-    execFile("sha256sum", [path], (error, stdout) => {
-      if (error) { rejectPromise(error); return; }
-      resolvePromise(stdout.split(/\s+/u)[0] ?? "");
-    });
-  });
+/** Hashed in-process: one fewer subprocess under this box's memory pressure. */
+async function sha256Of(path: string): Promise<string> {
+  return createHash("sha256").update(await readFile(path)).digest("hex");
 }
 
 async function probe(path: string): Promise<{

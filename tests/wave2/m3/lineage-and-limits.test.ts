@@ -1,9 +1,7 @@
 import { createHash } from "node:crypto";
-import { execFile } from "node:child_process";
-import { mkdtemp, rm } from "node:fs/promises";
+import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
-import { promisify } from "node:util";
 import { afterEach, describe, expect, it } from "vitest";
 import { DerivedArtifactStore } from "../../../src/host/materialize/derived-artifact-store.js";
 import { ProxyRenderer, lineageDigest } from "../../../src/host/materialize/proxy-renderer.js";
@@ -26,7 +24,6 @@ import type { LineageEntryV1, NativePlanV1 } from "../../../src/contracts/wave2-
  * having them and not.
  */
 
-const run = promisify(execFile);
 const SOURCE_A = resolve("fixtures/d1-30s/assets/generated/visual-10s.mp4");
 const SOURCE_B = resolve("fixtures/d1-30s/assets/generated/visual-alt-10s.mp4");
 const PROFILE = "wave2-proxy-720p30-v1";
@@ -42,9 +39,14 @@ async function workspace(): Promise<string> {
   return base;
 }
 
+/**
+ * Hashes in-process rather than shelling out to `sha256sum`.
+ *
+ * The subprocess was one more thing to fail under this box's memory pressure, and a
+ * hashing helper does not need to be one: the assertion it serves is identical.
+ */
 async function sha256Of(path: string): Promise<string> {
-  const { stdout } = await run("sha256sum", [path]);
-  return stdout.split(/\s+/u)[0] ?? "";
+  return createHash("sha256").update(await readFile(path)).digest("hex");
 }
 
 function oneClipPlan(total = 300): NativePlanV1 {
