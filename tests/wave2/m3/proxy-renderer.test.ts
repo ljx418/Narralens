@@ -160,7 +160,7 @@ describe("M3.2 the proxy is real media with the frames the plan promised", () =>
     const renderer = new ProxyRenderer({ artifacts: store, profile: PROFILE });
 
     const result = await renderer.render({
-      materializationId: "mat_1", plan: planFor(),
+      materializationId: "mat_1", projectId: "p1", plan: planFor(),
       segments: [
         { segment_id: "seg-1", asset_path: SOURCE_A, sha256: await sha256Of(SOURCE_A),
           start_frame: 0, end_frame_exclusive: 300,
@@ -186,7 +186,7 @@ describe("M3.2 the proxy is real media with the frames the plan promised", () =>
     const renderer = new ProxyRenderer({ artifacts: store, profile: PROFILE });
 
     const result = await renderer.render({
-      materializationId: "mat_1", plan: planFor(),
+      materializationId: "mat_1", projectId: "p1", plan: planFor(),
       segments: [
         { segment_id: "seg-1", asset_path: SOURCE_A, sha256: await sha256Of(SOURCE_A),
           start_frame: 0, end_frame_exclusive: 300,
@@ -227,7 +227,7 @@ describe("M3.2 the proxy is real media with the frames the plan promised", () =>
     const store = new DerivedArtifactStore(join(base, "derived"));
     const renderer = new ProxyRenderer({ artifacts: store, profile: PROFILE });
     const result = await renderer.render({
-      materializationId: "mat_1", plan: planFor(),
+      materializationId: "mat_1", projectId: "p1", plan: planFor(),
       segments: [{ segment_id: "seg-1", asset_path: SOURCE_A, sha256: await sha256Of(SOURCE_A),
         start_frame: 0, end_frame_exclusive: 300,
         license_status: "cleared", commercial_use: true }],
@@ -248,7 +248,7 @@ describe("M3.2 lineage accounts for every output and cannot be quietly rewritten
     const bSha = await sha256Of(SOURCE_B);
 
     const result = await renderer.render({
-      materializationId: "mat_1", plan: planFor(),
+      materializationId: "mat_1", projectId: "p1", plan: planFor(),
       segments: [
         { segment_id: "seg-1", asset_path: SOURCE_A, sha256: aSha,
           start_frame: 0, end_frame_exclusive: 300, license_status: "cleared", commercial_use: true },
@@ -273,7 +273,7 @@ describe("M3.2 lineage accounts for every output and cannot be quietly rewritten
     const store = new DerivedArtifactStore(join(base, "derived"));
     const renderer = new ProxyRenderer({ artifacts: store, profile: PROFILE });
     await expect(renderer.render({
-      materializationId: "mat_1", plan: planFor(),
+      materializationId: "mat_1", projectId: "p1", plan: planFor(),
       segments: [{ segment_id: "seg-1", asset_path: SOURCE_A, sha256: "0".repeat(64),
         start_frame: 0, end_frame_exclusive: 300,
         license_status: "cleared", commercial_use: true }],
@@ -285,7 +285,7 @@ describe("M3.2 lineage accounts for every output and cannot be quietly rewritten
     const store = new DerivedArtifactStore(join(base, "derived"));
     const renderer = new ProxyRenderer({ artifacts: store, profile: PROFILE });
     await expect(renderer.render({
-      materializationId: "mat_1", plan: planFor(),
+      materializationId: "mat_1", projectId: "p1", plan: planFor(),
       segments: [{ segment_id: "seg-1", asset_path: SOURCE_A, sha256: await sha256Of(SOURCE_A),
         start_frame: 0, end_frame_exclusive: 300,
         license_status: "restricted", commercial_use: false }],
@@ -298,7 +298,7 @@ describe("M3.2 lineage accounts for every output and cannot be quietly rewritten
     const renderer = new ProxyRenderer({ artifacts: store, profile: PROFILE });
     // SOURCE_B is 300 frames; asking for 400 would need a loop or a freeze.
     await expect(renderer.render({
-      materializationId: "mat_1", plan: planFor(),
+      materializationId: "mat_1", projectId: "p1", plan: planFor(),
       segments: [{ segment_id: "seg-1", asset_path: SOURCE_B, sha256: await sha256Of(SOURCE_B),
         start_frame: 0, end_frame_exclusive: 400,
         license_status: "cleared", commercial_use: true }],
@@ -311,7 +311,7 @@ describe("M3.2 lineage accounts for every output and cannot be quietly rewritten
     const renderer = new ProxyRenderer({ artifacts: store, profile: PROFILE });
     const sha = await sha256Of(SOURCE_B);
     await expect(renderer.render({
-      materializationId: "mat_1", plan: planFor(),
+      materializationId: "mat_1", projectId: "p1", plan: planFor(),
       // The ceiling exists so a single request cannot turn into an unbounded encoder run.
       segments: Array.from({ length: 65 }, (_, index) => ({
         segment_id: `seg-${index}`, asset_path: SOURCE_B, sha256: sha,
@@ -326,7 +326,7 @@ describe("M3.2 lineage accounts for every output and cannot be quietly rewritten
     const store = new DerivedArtifactStore(join(base, "derived"));
     const renderer = new ProxyRenderer({ artifacts: store, profile: PROFILE });
     const result = await renderer.render({
-      materializationId: "mat_1", plan: planFor(),
+      materializationId: "mat_1", projectId: "p1", plan: planFor(),
       segments: [{ segment_id: "seg-1", asset_path: SOURCE_A, sha256: await sha256Of(SOURCE_A),
         start_frame: 0, end_frame_exclusive: 300,
         license_status: "cleared", commercial_use: true }],
@@ -345,7 +345,7 @@ describe("M3.2 the renderer cannot be steered by its arguments", () => {
     // A segment id that looks like a flag must still end up as a map entry, never as an
     // argument that changes what ffmpeg does.
     await expect(renderer.render({
-      materializationId: "mat_1",
+      materializationId: "mat_1", projectId: "p1",
       plan: { ...planFor(), clips: [{ ...planFor().clips[0]!, clip_id: "clip-x", segment_id: "seg-x" }],
         total_frames: 300 },
       segments: [{ segment_id: "seg-x", asset_path: SOURCE_A, sha256: await sha256Of(SOURCE_A),
@@ -360,7 +360,7 @@ describe("M3.2 the renderer cannot be steered by its arguments", () => {
     const renderer = new ProxyRenderer({ artifacts: store, profile: PROFILE });
     const sourceBefore = await sha256Of(SOURCE_A);
     await renderer.render({
-      materializationId: "mat_1", plan: planFor(),
+      materializationId: "mat_1", projectId: "p1", plan: planFor(),
       segments: [{ segment_id: "seg-1", asset_path: SOURCE_A, sha256: await sha256Of(SOURCE_A),
         start_frame: 0, end_frame_exclusive: 300,
         license_status: "cleared", commercial_use: true }],

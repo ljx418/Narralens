@@ -2,6 +2,7 @@ import { execFile } from "node:child_process";
 import { createHash } from "node:crypto";
 import { readFile, writeFile } from "node:fs/promises";
 import { promisify } from "node:util";
+import { canonicalJson } from "../engine/source-digest-v1.js";
 import { HttpError } from "../api-error.js";
 import type { LineageEntryV1, MaterializationProxy, NativePlanV1 } from "../../contracts/wave2-types.js";
 import type { DerivedArtifactStore } from "./derived-artifact-store.js";
@@ -34,6 +35,9 @@ const run = promisify(execFile);
 export const SEGMENT_TIMEOUT_MS = 120_000;
 export const MAX_SEGMENTS = 64;
 export const MAX_OUTPUT_FRAMES = 64 * 60 * 30;
+/** Frozen ceilings: two encoders overall, one per project. */
+export const GLOBAL_CONCURRENCY = 2;
+export const PER_PROJECT_CONCURRENCY = 1;
 
 export interface ProxySegmentInput {
   readonly segment_id: string;
@@ -47,6 +51,18 @@ export interface ProxySegmentInput {
   readonly commercial_use: boolean;
 }
 
+/**
+ * Notified when a render is admitted and when it leaves.
+ *
+ * The limiter has to be observable from outside or it cannot be tested: a caller counting
+ * its own promises measures the caller, and would report the ceilings as satisfied by a
+ * renderer that has none.
+ */
+export interface ProxyRenderObserver {
+  readonly entered?: (projectId: string) => void;
+  readonly exited?: (projectId: string) => void;
+}
+
 export interface ProxyRenderResult {
   readonly proxy: MaterializationProxy;
   readonly lineage: readonly LineageEntryV1[];
@@ -57,13 +73,85 @@ export class ProxyRenderer {
   readonly #artifacts: DerivedArtifactStore;
   readonly #profile: string;
 
-  constructor(deps: { artifacts: DerivedArtifactStore; profile: string }) {
+  readonly #observer: ProxyRenderObserver;
+  readonly #globalSlots: Semaphore;
+  readonly #projectSlots: Map<string, Semaphore>;
+
+  constructor(deps: {
+    artifacts: DerivedArtifactStore;
+    profile: string;
+    concurrency?: { global: number; perProject: number };
+    observer?: ProxyRenderObserver;
+  }) {
+    const concurrency = deps.concurrency;
     this.#artifacts = deps.artifacts;
     this.#profile = deps.profile;
+    this.#observer = deps.observer ?? {};
+    this.#globalSlots = new Semaphore(concurrency?.global ?? GLOBAL_CONCURRENCY);
+    this.#projectSlots = new Map();
+    this.#perProjectLimit = concurrency?.perProject ?? PER_PROJECT_CONCURRENCY;
+  }
+
+  readonly #perProjectLimit: number;
+
+  static limits(): { global: number; per_project: number } {
+    return { global: GLOBAL_CONCURRENCY, per_project: PER_PROJECT_CONCURRENCY };
+  }
+
+  #slotsFor(projectId: string): Semaphore {
+    let slots = this.#projectSlots.get(projectId);
+    if (slots === undefined) {
+      slots = new Semaphore(this.#perProjectLimit);
+      this.#projectSlots.set(projectId, slots);
+    }
+    return slots;
+  }
+
+  /**
+   * Global slot first, then the project's. The order matters: taking the global slot first
+   * means a project waiting for its own slot is not holding a global one, so a busy project
+   * cannot starve every other project.
+   */
+  async #admit(projectId: string): Promise<() => void> {
+    const project = this.#slotsFor(projectId);
+    await project.acquire();
+    try {
+      await this.#globalSlots.acquire();
+    } catch (error) {
+      // Give the project slot back: holding it after a failed global acquire would wedge
+      // this project forever while other projects carried on.
+      project.release();
+      throw error;
+    }
+    this.#observer.entered?.(projectId);
+    let released = false;
+    return () => {
+      if (released) return;
+      released = true;
+      this.#observer.exited?.(projectId);
+      this.#globalSlots.release();
+      project.release();
+    };
   }
 
   async render(input: {
     materializationId: string;
+    /** Which project's budget this render spends. */
+    projectId: string;
+    plan: NativePlanV1;
+    segments: readonly ProxySegmentInput[];
+  }): Promise<ProxyRenderResult> {
+    const release = await this.#admit(input.projectId);
+    try {
+      return await this.#renderWithinSlot(input);
+    } finally {
+      release();
+    }
+  }
+
+  async #renderWithinSlot(input: {
+    materializationId: string;
+    projectId: string;
     plan: NativePlanV1;
     segments: readonly ProxySegmentInput[];
   }): Promise<ProxyRenderResult> {
@@ -229,6 +317,66 @@ export class ProxyRenderer {
 /** The proxy profile is frozen at 720p. Anything else is a different profile. */
 const WIDTH_OF_PROFILE = 1280;
 const HEIGHT_OF_PROFILE = 720;
+
+/**
+ * A counting semaphore.
+ *
+ * The release is idempotent because the limiter's own correctness must not depend on a
+ * caller getting `finally` right: a double release would let three encoders run when two
+ * were promised.
+ */
+class Semaphore {
+  #available: number;
+  readonly #waiting: Array<() => void> = [];
+
+  constructor(permits: number) {
+    if (!Number.isSafeInteger(permits) || permits < 1) {
+      throw new Error(`SEMAPHORE_PERMITS_INVALID:${permits}`);
+    }
+    this.#available = permits;
+  }
+
+  async acquire(): Promise<void> {
+    if (this.#available > 0) { this.#available -= 1; return; }
+    await new Promise<void>((resolvePromise) => { this.#waiting.push(resolvePromise); });
+  }
+
+  release(): void {
+    const next = this.#waiting.shift();
+    if (next !== undefined) { next(); return; }
+    this.#available += 1;
+  }
+}
+
+/**
+ * Digest over the lineage and the tool that produced it (MT-03).
+ *
+ * Both are folded in: the same entries rendered by a different encoder are a different
+ * answer, and a proxy whose provenance cannot name its tool has not been traced. Entry
+ * order is not part of it, because the order is an accident of how the request was written
+ * rather than a fact about the film — but every value each entry carries is.
+ */
+export function lineageDigest(
+  entries: readonly LineageEntryV1[],
+  tool: { readonly profile_id: string; readonly version: string },
+): string {
+  const digest = createHash("sha256");
+  digest.update("narralens-lineage-v1\n");
+  digest.update(canonicalJson({
+    tool: { profile_id: tool.profile_id, version: tool.version },
+    entries: [...entries]
+      .map((entry) => ({
+        output_sha256: entry.output_sha256,
+        input_asset_id: entry.input_asset_id,
+        input_sha256: entry.input_sha256,
+        source: { start_frame: entry.source.start_frame, end_frame_exclusive: entry.source.end_frame_exclusive },
+        output: { start_frame: entry.output.start_frame, end_frame_exclusive: entry.output.end_frame_exclusive },
+      }))
+      .sort((a, b) => a.input_asset_id.localeCompare(b.input_asset_id)
+        || a.source.start_frame - b.source.start_frame),
+  }));
+  return digest.digest("hex");
+}
 
 /**
  * A path inside a concat list is single-quoted; an embedded quote would end the entry and
