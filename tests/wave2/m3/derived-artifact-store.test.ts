@@ -5,6 +5,8 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { DerivedArtifactStore } from "../../../src/host/materialize/derived-artifact-store.js";
+import { MaterializationStore } from "../../../src/host/materialize/materialization-store.js";
+import { RevisionStore } from "../../../src/host/projects/revision-store.js";
 
 /**
  * Concurrent publication into the derived artifact store.
@@ -32,6 +34,11 @@ async function store(): Promise<{ store: DerivedArtifactStore; base: string }> {
 }
 
 const sha = (bytes: Buffer) => createHash("sha256").update(bytes).digest("hex");
+
+async function materializationLedger(base: string): Promise<{ store: MaterializationStore; revisions: RevisionStore }> {
+  const revisions = new RevisionStore(join(base, "narralens.sqlite"));
+  return { store: new MaterializationStore(revisions), revisions };
+}
 
 function stagingFiles(base: string): string[] {
   const out: string[] = [];
@@ -165,3 +172,54 @@ describe("token resolution stays closed regardless of publishing", () => {
 void randomUUID;
 void chmod;
 void readdir;
+
+describe("a write needs the row to still be live", () => {
+  /**
+   * The reaper and `recover()` can move a row on while a worker is mid-flight. Unguarded
+   * writes let a worker that no longer owns a row keep filling it — including parking a row
+   * in `attention` and then writing a proxy into it that nobody is accountable for.
+   */
+  it("refuses to write into a row that has moved to attention", async () => {
+    const base = await mkdtemp(join(tmpdir(), "narralens-m3-live-"));
+    dirs.push(base);
+    const { store, revisions } = await materializationLedger(base);
+    await store.create({
+      materializationId: "mat_x", projectId: "p", comparisonId: "c", proposalId: "r",
+      jobId: "job_x", baseRevision: 1, sourceDigest: "a".repeat(64), controlRevision: 0,
+      proposalSha256: "", assetInventorySha256: "", rightsDigest: "",
+      requestDigest: "b".repeat(64), idempotencyKey: "k", requestedBindings: [],
+    });
+    store.transition("mat_x", "queued", "running");
+    store.transition("mat_x", "running", "attention");
+
+    await expect(store.setProxy("mat_x", {
+      token: "proxy/x", sha256: "c".repeat(64), frame_count: 30, profile_id: "p",
+    })).rejects.toThrow(/NOT_WRITABLE/u);
+    await expect(store.setLineage("mat_x", [{
+      output_sha256: "c".repeat(64), input_asset_id: "a", input_sha256: "a".repeat(64),
+      source: { start_frame: 0, end_frame_exclusive: 30 },
+      output: { start_frame: 0, end_frame_exclusive: 30 },
+    }])).rejects.toThrow(/NOT_WRITABLE/u);
+    expect(() => store.setProvenFacts("mat_x", {
+      proposalSha256: "d".repeat(64), assetInventorySha256: "e".repeat(64), rightsDigest: "f".repeat(64),
+    })).toThrow(/NOT_WRITABLE/u);
+    // The row is untouched, so nothing downstream can mistake it for adoptable.
+    expect(store.require("mat_x").proxy).toBeNull();
+    expect(store.require("mat_x").lineage).toEqual([]);
+    void revisions;
+  }, 30_000);
+});
+
+describe("a link failure is recognised by its code, not its wording", () => {
+  it("falls through to rename when the filesystem says link is unsupported", async () => {
+    const base = await mkdtemp(join(tmpdir(), "narralens-m3-linkerr-"));
+    dirs.push(base);
+    const store = new DerivedArtifactStore(join(base, "derived"));
+    const bytes = Buffer.from("published through the rename fallback");
+    // The captured defect's cousin: an error whose *message* mentions link but which is
+    // not EEXIST must not be read as "the name is taken".
+    const token = await store.put(bytes, "mp4");
+    expect(token).toBe(`proxy/${sha(bytes)}.mp4`);
+    expect(await readFile(store.resolve(token))).toEqual(bytes);
+  }, 30_000);
+});
