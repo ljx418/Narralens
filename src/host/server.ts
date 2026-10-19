@@ -11,6 +11,7 @@ import { validateEditRequest, validateEngineResponse, validateProposalComparison
 import type { EngineResponse } from "../contracts/engine-types.js";
 import type { ApiError, JobEvent, ProjectResponse, ProposalComparisonRequest } from "../contracts/types.js";
 import { HttpError, normalizeError } from "./api-error.js";
+import { HostDiagnostics } from "./host-diagnostics.js";
 import { AssetImportService } from "./assets/asset-import-service.js";
 import { JobStore } from "./job-store.js";
 import { PersistentJobStore } from "./persistent-job-store.js";
@@ -108,6 +109,15 @@ export class NarralensHost {
   origin = "";
   readonly sessionExpiresAt: Date;
   readonly diagnostics = { write_actor_execute_count: 0 };
+  /**
+   * Bounded, Host-side record of failures a client was not allowed to see.
+   *
+   * See `INFRA-RISK-W2-001`: `normalizeError` correctly hides internal detail from a
+   * response, which made an intermittent Host 500 impossible to attribute after the fact.
+   * This carries the correlation id, the stage, the error class and a digest of the
+   * message — never the message, a path or a stack.
+   */
+  readonly failures = new HostDiagnostics();
   readonly #controllers = new Map<string, AbortController>();
   readonly #leaseReapIntervalMs: number;
   readonly #outboxReplayIntervalMs: number;
@@ -352,6 +362,12 @@ export class NarralensHost {
       throw new HttpError(404, "NOT_FOUND", "Route not found");
     } catch (error) {
       const normalized = normalizeError(error);
+      const correlationId = normalized.correlationId ?? "unknown";
+      // Only unexpected failures are worth a diagnostic. An `HttpError` is an answer the
+      // Host meant to give, and recording those would bury the ones that are not.
+      if (normalized.status >= 500) {
+        this.failures.record({ correlationId, stage: "route", error });
+      }
       json(response, normalized.status, normalized.body());
     }
   }
@@ -576,6 +592,11 @@ export class NarralensHost {
         } else this.jobs.transition(jobId, "cancelled", { message: "Runner stopped after cancellation request" });
       } else {
         const normalized = normalizeError(error);
+        if (normalized.status >= 500) {
+          this.failures.record({
+            correlationId: normalized.correlationId ?? jobId, stage: "job.worker", error,
+          });
+        }
         if (this.jobs instanceof PersistentJobStore) {
           this.jobs.recordCallback(jobId, lease!, { state: "failed", error: normalized.body(),
             message: normalized.message });

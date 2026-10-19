@@ -20,7 +20,18 @@ export class HttpError extends Error {
   }
 }
 
+/**
+ * Turns anything unexpected into a response-safe error.
+ *
+ * The correlation id is generated *here* and attached to the error, not left to
+ * `body()`: a diagnostic recorded by the Host has to be matchable against the id the client
+ * was actually given, and generating it twice makes the two disagree. `body()` keeps its
+ * fallback for errors constructed directly rather than normalized.
+ */
 export function normalizeError(error: unknown): HttpError {
-  if (error instanceof HttpError) return error;
-  return new HttpError(500, "INTERNAL_ERROR", "Internal host error");
+  if (error instanceof HttpError) {
+    if (error.correlationId !== undefined) return error;
+    return new HttpError(error.status, error.code, error.message, error.details, randomUUID());
+  }
+  return new HttpError(500, "INTERNAL_ERROR", "Internal host error", undefined, randomUUID());
 }

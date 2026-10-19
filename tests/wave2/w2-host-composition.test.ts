@@ -298,7 +298,22 @@ describe("ASSET-02 and ASSET-03 through the Host's own instances", () => {
       method: "POST", headers: headers(origin, token),
       body: JSON.stringify({ idempotency_key: "w2-host-asset-000001" }),
     });
-    expect(migrated.status, await migrated.clone().text()).toBe(200);
+    if (migrated.status !== 200) {
+      // INFRA-RISK-W2-001. The Host answers a bare 500 by design so nothing internal leaks;
+      // that leaves an intermittent failure unattributable after the fact. The Host keeps a
+      // bounded diagnostic for exactly this, so a failure prints the stage and the root
+      // cause class instead of just "expected 500 to be 200".
+      const body = await migrated.clone().json().catch(() => ({})) as { correlation_id?: string };
+      const diagnostic = body.correlation_id === undefined
+        ? undefined : host.failures.byCorrelationId(body.correlation_id);
+      throw new Error(
+        `MIGRATE_COPY_${migrated.status} correlation_id=${body.correlation_id ?? "none"} `
+        + `stage=${diagnostic?.stage ?? "unrecorded"} kind=${diagnostic?.kind ?? "unrecorded"} `
+        + `message_sha256=${diagnostic?.message_sha256?.slice(0, 16) ?? "unrecorded"} `
+        + `recent=${JSON.stringify(host.failures.recent(3).map((e) => `${e.stage}:${e.kind}`))}`,
+      );
+    }
+    expect(migrated.status).toBe(200);
     const report = await migrated.json() as { plan: { target_project_id: string } };
     const targetId = report.plan.target_project_id;
 
