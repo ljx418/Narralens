@@ -4,6 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { BindingService, bindingDigest, rightsDigest } from "../../../src/host/materialize/binding-service.js";
+import { MaterializationStore } from "../../../src/host/materialize/materialization-store.js";
 import { AssetInventoryPort } from "../../../src/host/projects/asset-inventory-port.js";
 import { AssetRegistry } from "../../../src/host/projects/asset-registry.js";
 import { MigratedAssetLedger } from "../../../src/host/projects/migrated-asset-ledger.js";
@@ -50,6 +51,7 @@ interface Harness {
   inventory: AssetInventoryPort;
   comparisons: Map<string, ProposalComparison>;
   targetRoot: string;
+  sourceRoot: string;
 }
 
 async function harness(options: { seed?: boolean | "restricted" } = {}): Promise<Harness> {
@@ -127,7 +129,7 @@ async function harness(options: { seed?: boolean | "restricted" } = {}): Promise
       return found;
     },
   });
-  return { service, revisions, ledger, inventory, comparisons, targetRoot };
+  return { service, revisions, ledger, inventory, comparisons, targetRoot, sourceRoot };
 }
 
 function comparison(over: Partial<ProposalComparison> = {}): ProposalComparison {
@@ -338,5 +340,68 @@ describe("M3.1 the inventory is re-read, so drift blocks binding", () => {
   it("refuses to bind when the target has no established ledger", async () => {
     const h = await harness({ seed: false });
     await expect(bind(h)).rejects.toMatchObject({ status: 423, code: "PROJECT_ATTENTION_REQUIRED" });
+  });
+});
+
+describe("MT-04 binding changes no author fact (NOWRITE)", () => {
+  /**
+   * The acceptance condition is literal: before and after, the author source closure, the
+   * project revision, the active commit, the engine binding and the active asset ledger are
+   * byte-for-byte or value-for-value identical. Only the materialization read model may
+   * change, and binding does not even write that.
+   *
+   * Every fact is captured by reading it from the store and the filesystem rather than
+   * from a value the test happened to hold, so a change has to actually happen to be seen.
+   */
+  it("leaves the source closure, revision, commit, binding and ledger untouched", async () => {
+    const h = await harness();
+    const snapshot = async () => ({
+      sourceTree: await treeDigest(h.sourceRoot),
+      revision: h.revisions.activeCommit(TARGET_ID)?.revision,
+      commit: h.revisions.activeCommit(TARGET_ID)?.snapshot_id,
+      commitDigest: h.revisions.activeCommit(TARGET_ID)?.source_digest,
+      binding: h.revisions.readEngineBinding(TARGET_ID),
+      ledger: h.ledger.assets(TARGET_ID),
+      ledgerRecord: h.ledger.bootstrapRecord(TARGET_ID),
+    });
+
+    const before = await snapshot();
+    await bind(h);
+    await bind(h, [
+      { segment_id: "seg-1", asset_id: "asset_a", source_start_frame: 30, source_end_frame_exclusive: 330 },
+      FULL[1]!, FULL[2]!,
+    ]);
+    const after = await snapshot();
+
+    expect(after.sourceTree).toBe(before.sourceTree);
+    expect(after.revision).toBe(before.revision);
+    expect(after.commit).toBe(before.commit);
+    expect(after.commitDigest).toBe(before.commitDigest);
+    expect(after.binding).toEqual(before.binding);
+    expect(after.ledger).toEqual(before.ledger);
+    expect(after.ledgerRecord).toEqual(before.ledgerRecord);
+  });
+
+  it("writes nothing at all, including into the table M3.2 will use", async () => {
+    const h = await harness();
+    // Constructing the store creates the tables, so their counts can be compared. Without
+    // this the assertion would pass vacuously against tables that do not exist.
+    const store = new MaterializationStore(h.revisions);
+    expect(store.byProject(TARGET_ID)).toEqual([]);
+    const counts = () => h.revisions.compose((db) => db.prepare(
+      `SELECT (SELECT COUNT(*) FROM materialization) AS materialization,
+              (SELECT COUNT(*) FROM operation_idempotency) AS idempotency,
+              (SELECT COUNT(*) FROM migrated_asset) AS assets,
+              (SELECT COUNT(*) FROM asset_ledger_bootstrap) AS ledger_bootstrap,
+              (SELECT COUNT(*) FROM migration) AS migration,
+              (SELECT COUNT(*) FROM active_commit) AS active_commit,
+              (SELECT COUNT(*) FROM engine_binding) AS engine_binding,
+              (SELECT COUNT(*) FROM job) AS job`,
+    ).get());
+    const before = counts();
+    await bind(h);
+    await bind(h, [FULL[0]!, FULL[1]!, FULL[2]!]);
+    expect(counts()).toEqual(before);
+    expect(store.byProject(TARGET_ID)).toEqual([]);
   });
 });
