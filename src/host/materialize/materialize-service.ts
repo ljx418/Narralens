@@ -361,6 +361,9 @@ export class MaterializeService {
       await this.#deps.fault?.("after_lineage");
 
       if (this.#deps.materializations.require(materializationId).state === "running") {
+        // Guarded like every other write here: a late worker must not advance the row.
+        const beforeValidating = this.#mayPublish(jobId, identity, materializationId, rendered.lineage);
+        if (beforeValidating !== undefined) return beforeValidating;
         this.#deps.materializations.transition(materializationId, "running", "validating");
       }
       await this.#deps.fault?.("before_ready");
@@ -398,8 +401,12 @@ export class MaterializeService {
       // interrupted. Marking it stale would discard a proxy that is already encoded and
       // content-addressed. It is left where it is for a retry to promote.
       if (current !== undefined && this.#deps.materializations.isComplete(materializationId)) {
-        this.#deps.jobs.transition(jobId, "failed",
-          { terminalReason: `promotion interrupted: ${message.slice(0, 160)}`, artifact });
+        // The job is deliberately left `running`. The `finally` releases the lease, which
+        // puts it back to `queued`, and that is the *only* state a new attempt can lease
+        // from. Marking it `failed` here made the retry the comment promised impossible:
+        // `acquireLease` accepts only `queued`, and `recover()` treats a failed job as a row
+        // to park. The row keeps its artefacts and the next attempt promotes it.
+        void message;
         return { state: current.state, quarantined: false };
       }
       const published = current?.proxy !== undefined && current?.proxy !== null;
@@ -533,7 +540,20 @@ export class MaterializeService {
    * Called on a timer by the Host. Returns how many rows it attempted, so a caller (and a
    * test) can tell a drained queue from one that is merely empty right now.
    */
+  #draining = false;
+
   async drain(limit = 8): Promise<{ attempted: number; ready: number; failed: number }> {
+    // Single-flight for real. `acquireLease` would stop two workers rendering the same row,
+    // but two overlapping scans still double the scan cost and make the outcome depend on
+    // which tick got there first; the flag removes the ambiguity rather than relying on the
+    // CAS to absorb it.
+    if (this.#draining) return { attempted: 0, ready: 0, failed: 0 };
+    this.#draining = true;
+    try { return await this.#drainOnce(limit); }
+    finally { this.#draining = false; }
+  }
+
+  async #drainOnce(limit: number): Promise<{ attempted: number; ready: number; failed: number }> {
     let attempted = 0;
     let ready = 0;
     let failed = 0;

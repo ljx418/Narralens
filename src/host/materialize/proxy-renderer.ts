@@ -310,8 +310,12 @@ export class ProxyRenderer {
    * escape into one. The concat list arrives on stdin rather than as a filename precisely so
    * that no path can become an argument.
    */
-  async #runFixed(args: readonly string[]): Promise<void> {
+  async #runFixed(args: readonly string[], signal?: AbortSignal): Promise<void> {
     await new Promise<void>((resolvePromise, rejectPromise) => {
+      if (signal?.aborted === true) {
+        rejectPromise(new HttpError(503, "MEDIA_TOOL_UNAVAILABLE", "Materialization was stopped before rendering"));
+        return;
+      }
       // `execFile` with no shell and an argument array: nothing in `args` can become shell
       // syntax, and nothing can reach the network because no protocol that could is passed.
       const child = execFile("ffmpeg", [...args], {
@@ -319,6 +323,9 @@ export class ProxyRenderer {
         maxBuffer: 4 * 1024 * 1024,
         windowsHide: true,
         env: { PATH: process.env.PATH ?? "/usr/bin:/bin", LANG: "C" },
+        // Without this the signal travels from the Host's abort controller into a field
+        // nobody reads, and a closing Host leaves ffmpeg encoding for up to two minutes.
+        ...(signal === undefined ? {} : { signal }),
       }, (error, _stdout, stderr) => {
         // The callback fires on *exit*, which is what makes reading the output file safe:
         // awaiting the ChildProcess object instead would resolve immediately and the file

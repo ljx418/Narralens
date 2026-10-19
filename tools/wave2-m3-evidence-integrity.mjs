@@ -67,6 +67,20 @@ for (const entry of manifest.commands ?? []) {
     fail(`command log changed since capture: ${entry.log}`);
     commandsOk = false;
   }
+  // The exit code the harness recorded, read from the file beside the log rather than from
+  // the manifest. A manifest that claims a passing exit for a command that failed would
+  // otherwise pass this gate, which is the one thing it exists to prevent.
+  const exitFile = entry.log.replace(/\.txt$/u, ".exit");
+  if (existsSync(resolve(REPO, exitFile))) {
+    const recorded = Number(readFileSync(resolve(REPO, exitFile), "utf8").trim());
+    if (recorded !== entry.exit) {
+      fail(`manifest says ${entry.name} exited ${entry.exit} but ${exitFile} records ${recorded}`);
+      commandsOk = false;
+    }
+  } else {
+    fail(`no recorded exit code beside the log: ${exitFile}`);
+    commandsOk = false;
+  }
 }
 if (commandsOk) pass(`${(manifest.commands ?? []).length} command logs exist and match their digests`);
 
