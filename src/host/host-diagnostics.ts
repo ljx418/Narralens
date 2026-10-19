@@ -5,9 +5,14 @@ import { createHash } from "node:crypto";
  *
  * `normalizeError` deliberately turns every unexpected failure into a bare
  * `500 INTERNAL_ERROR` so no path, command line or credential can leak. That is the right
- * behaviour for a response body and the wrong one for diagnosing a test: an intermittent
- * Host 500 during a parallel run was unattributable, because by the time anyone looked at
- * the failure the only record was "Internal host error".
+ * behaviour for a response body and the wrong one for diagnosing a test.
+ *
+ * INFRA-RISK-W2-001 is what this exists for. The intermittent Host 500 during a parallel
+ * full run was unattributable: the only record was "Internal host error". With a digest
+ * alone it was still unattributable — the digest proved *which* failure but not *what* it
+ * was, and identifying it by re-running until it recurred is the re-rolling this channel
+ * exists to stop. Redaction closed it on the third reproduction:
+ * `stage=route kind=Error message=ENOMEM: not enough memory, read`.
  *
  * So this is a bounded ring on the Host, not a response field. It records what a responder
  * can act on — the correlation id the client already holds, the stage that was running, the
@@ -28,9 +33,43 @@ export interface FailureDiagnostic {
   readonly kind: string;
   /** SHA-256 of the message. Same digest means the same underlying failure. */
   readonly message_sha256: string;
-  /** Length of the message, so "empty" and "huge" are distinguishable. */
-  readonly message_length: number;
+  /**
+   * The message with paths, URLs, tokens and command lines replaced by placeholders.
+   *
+   * A digest alone was not enough: it tells two failures apart and nothing else. An
+   * intermittent `500` whose only record was `kind=Error message_sha256=3623d37b…` could
+   * not be attributed to anything, so attributing it meant re-running until it recurred —
+   * precisely the re-rolling this channel exists to stop. Redaction keeps the sentence that
+   * identifies the failure while refusing to store what must not be kept.
+   */
+  readonly message_redacted: string;
   readonly at: string;
+}
+
+/** A path with at least two segments, so `/tmp` alone is not noisy but `/a/b` is. */
+const ABSOLUTE_PATH = /(?:[A-Za-z]:[\\/]|\/)[^\s'"`,;:()\[\]]*[^\s'"`,;:()\[\]\s]/gu;
+const URL_LIKE = /\b[a-z][a-z0-9+.-]*:\/\/[^\s"'`]+/giu;
+/** Long opaque runs: API keys, tokens, digests pasted into a message. */
+const OPAQUE_TOKEN = /\b[A-Za-z0-9_-]{24,}\b/gu;
+const CONTROLLED_TOKEN = /\b(?:sk|pk)-[A-Za-z0-9_-]{8,}\b/gu;
+const REDACTED_MESSAGE_LIMIT = 400;
+
+/**
+ * Removes what must not be stored, keeps what identifies the failure.
+ *
+ * Order matters: URLs are removed before paths so a URL's `//host/path` is not left half
+ * rewritten, and long opaque runs last so a path that survived as `<path>/deep/...` has its
+ * remaining segments collapsed too.
+ */
+export function redact(message: string): string {
+  const withoutUrls = message.replace(URL_LIKE, "<url>");
+  const withoutPaths = withoutUrls.replace(ABSOLUTE_PATH, "<path>");
+  const withoutTokens = withoutPaths
+    .replace(CONTROLLED_TOKEN, "<redacted>")
+    .replace(OPAQUE_TOKEN, "<redacted>");
+  return withoutTokens.length > REDACTED_MESSAGE_LIMIT
+    ? `${withoutTokens.slice(0, REDACTED_MESSAGE_LIMIT)}…`
+    : withoutTokens;
 }
 
 export class HostDiagnostics {
@@ -52,7 +91,7 @@ export class HostDiagnostics {
         stage: input.stage,
         kind,
         message_sha256: createHash("sha256").update(message).digest("hex"),
-        message_length: message.length,
+        message_redacted: redact(message),
         at: (input.now ?? new Date()).toISOString(),
       });
       while (this.#entries.length > this.#limit) this.#entries.shift();

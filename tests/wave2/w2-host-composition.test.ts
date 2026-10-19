@@ -309,7 +309,7 @@ describe("ASSET-02 and ASSET-03 through the Host's own instances", () => {
       throw new Error(
         `MIGRATE_COPY_${migrated.status} correlation_id=${body.correlation_id ?? "none"} `
         + `stage=${diagnostic?.stage ?? "unrecorded"} kind=${diagnostic?.kind ?? "unrecorded"} `
-        + `message_sha256=${diagnostic?.message_sha256?.slice(0, 16) ?? "unrecorded"} `
+        + `message=${diagnostic?.message_redacted ?? "unrecorded"} `
         + `recent=${JSON.stringify(host.failures.recent(3).map((e) => `${e.stage}:${e.kind}`))}`,
       );
     }

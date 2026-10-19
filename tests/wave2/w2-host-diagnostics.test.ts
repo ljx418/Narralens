@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { HostDiagnostics } from "../../src/host/host-diagnostics.js";
+import { HostDiagnostics, redact } from "../../src/host/host-diagnostics.js";
 import { HttpError, normalizeError } from "../../src/host/api-error.js";
 
 /**
@@ -16,20 +16,32 @@ import { HttpError, normalizeError } from "../../src/host/api-error.js";
  */
 
 describe("INFRA-RISK-W2-001 the Host diagnostic channel", () => {
-  it("records the correlation id, stage, class and a digest — and not the message", () => {
+  it("keeps the sentence that identifies the failure and none of what must not be stored", () => {
     const diagnostics = new HostDiagnostics();
-    const secret = "/mnt/c/workspace/private/asset.mp4 and token sk-ant-abcdef";
-    diagnostics.record({ correlationId: "corr_1", stage: "migration.execute",
-      error: new RangeError(secret) });
+    diagnostics.record({ correlationId: "corr_1", stage: "migration.execute", error: new RangeError(
+      "cannot open /mnt/c/workspace/private/asset.mp4 for https://example.test/x with key sk-ant-abcdef0123456789") });
 
     const [entry] = diagnostics.recent();
     expect(entry).toMatchObject({ correlation_id: "corr_1", stage: "migration.execute", kind: "RangeError" });
     expect(entry!.message_sha256).toMatch(/^[a-f0-9]{64}$/u);
-    expect(entry!.message_length).toBe(secret.length);
-    // The two things a diagnostic must never carry.
-    expect(JSON.stringify(entry)).not.toContain(secret);
-    expect(JSON.stringify(entry)).not.toContain("/mnt/");
-    expect(JSON.stringify(entry)).not.toContain("sk-ant-");
+    // The part that identifies it survives, because a digest alone could not attribute it.
+    expect(entry!.message_redacted).toContain("cannot open");
+    // The three things a diagnostic must never carry.
+    expect(entry!.message_redacted).not.toContain("/mnt/c/workspace/private");
+    expect(entry!.message_redacted).not.toContain("example.test");
+    expect(entry!.message_redacted).not.toContain("sk-ant-");
+  });
+
+  it("redacts a Windows-style path and a bare long digest too", () => {
+    expect(redact("failed at C:\\Users\\me\\project\\file.mp4"))
+      .toBe("failed at <path>");
+    expect(redact(`digest ${"a".repeat(64)} did not match`)).toBe("digest <redacted> did not match");
+  });
+
+  it("bounds a very long message rather than storing all of it", () => {
+    const entry = new HostDiagnostics();
+    entry.record({ correlationId: "corr_1", stage: "route", error: new Error("x".repeat(5000)) });
+    expect(entry.recent()[0]!.message_redacted.length).toBeLessThanOrEqual(401);
   });
 
   it("tells two different failures apart without reproducing either", () => {
