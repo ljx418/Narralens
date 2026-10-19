@@ -1,0 +1,232 @@
+{
+  "format": "narralens.wave2-m3-evidence-manifest@1.0",
+  "scope": "M3 materialize: POST .../materialize and GET /materializations/:id, plus the W2.0 activation layer they depend on",
+  "declaration": "M3_REVIEW_PENDING",
+  "declaration_note": "M4A, M4B and M4C are not implemented. This session may not claim WAVE2_COMBINED_REVIEW_PENDING or WAVE2_EDITABLE_ADOPTION_READY.",
+  "capture_commit": "b6207c8c61db5d9c3b5c8f875db274a3d033a7b4",
+  "capture_logs": "docs/evidence/WAVE2/logs/b6207c8c61db5d9c3b5c8f875db274a3d033a7b4",
+  "repo_dirty_at_capture": 0,
+  "environment": {
+    "date_utc": "2026-10-19T08:55:50Z",
+    "node": "v22.22.1",
+    "pnpm": "10.33.0",
+    "os": "Linux 6.18.40.1-microsoft-standard-WSL2",
+    "git_head": "b6207c8c61db5d9c3b5c8f875db274a3d033a7b4",
+    "git_branch": "migration/m2.2-coordinator-persistence",
+    "repo_dirty_at_capture": "0",
+    "origin_main": "304c89134fdf9f834f7d69e3f4d5c89a68044c60",
+    "openfilm_upstream": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+    "vitest_max_workers": "2"
+  },
+  "route_status": {
+    "materialize": true,
+    "materializations": true,
+    "impact": false,
+    "edits": false,
+    "history_restore": false
+  },
+  "commands": [
+    {
+      "name": "check-1",
+      "command": "corepack pnpm check",
+      "exit": 0,
+      "log": "docs/evidence/WAVE2/logs/b6207c8c61db5d9c3b5c8f875db274a3d033a7b4/check-1.txt",
+      "log_sha256": "709e99b9466715424cae16dba19c289df688b0a6385eedfaf300e4da433b6e9d"
+    },
+    {
+      "name": "check-2",
+      "command": "corepack pnpm check",
+      "exit": 0,
+      "log": "docs/evidence/WAVE2/logs/b6207c8c61db5d9c3b5c8f875db274a3d033a7b4/check-2.txt",
+      "log_sha256": "baab1505a08e007b268774b8e2128252357ee69bb259842d05bc643a539669fc"
+    },
+    {
+      "name": "contracts",
+      "command": "corepack pnpm test:contracts",
+      "exit": 0,
+      "log": "docs/evidence/WAVE2/logs/b6207c8c61db5d9c3b5c8f875db274a3d033a7b4/contracts.txt",
+      "log_sha256": "e0adfc63b3a6c75bf83858dc5414e9c81044b0a2e3805b7b307fee97990bc5d6"
+    },
+    {
+      "name": "credential-scan",
+      "command": "NARRALENS_SECRET_SCAN_OUT=docs/evidence/WAVE2/security/credential-scan-m3.json corepack pnpm exec tsx tools/secret-scan.ts",
+      "exit": 0,
+      "log": "docs/evidence/WAVE2/logs/b6207c8c61db5d9c3b5c8f875db274a3d033a7b4/credential-scan.txt",
+      "log_sha256": "4e62b2efcfb74275fba75628da749e7f9de06e6c8418acdbb3fcef090234c613"
+    },
+    {
+      "name": "m2.1",
+      "command": "corepack pnpm test:m2.1",
+      "exit": 0,
+      "log": "docs/evidence/WAVE2/logs/b6207c8c61db5d9c3b5c8f875db274a3d033a7b4/m2.1.txt",
+      "log_sha256": "5c669723965d744cd8eb0bd7c33602d291ae25a3f9d75d991b308dcaf29b570a"
+    },
+    {
+      "name": "m2.2",
+      "command": "corepack pnpm exec vitest run tests/m2.2",
+      "exit": 0,
+      "log": "docs/evidence/WAVE2/logs/b6207c8c61db5d9c3b5c8f875db274a3d033a7b4/m2.2.txt",
+      "log_sha256": "091302418b3b12e80c016372ffa2d2c6b67eafdbad4d462eee0ad7eabc0b3b08"
+    },
+    {
+      "name": "m2.3",
+      "command": "corepack pnpm exec vitest run tests/m2.3",
+      "exit": 0,
+      "log": "docs/evidence/WAVE2/logs/b6207c8c61db5d9c3b5c8f875db274a3d033a7b4/m2.3.txt",
+      "log_sha256": "7647462002e39dc137f2706b2bba497decd9a4ea59ed883cbd6d06e5068bafc1"
+    },
+    {
+      "name": "openfilm",
+      "command": "corepack pnpm exec tsx tools/openfilm-availability-probe.mjs",
+      "exit": 0,
+      "log": "docs/evidence/WAVE2/logs/b6207c8c61db5d9c3b5c8f875db274a3d033a7b4/openfilm.txt",
+      "log_sha256": "3de30e2fd64151df1e39cedc634c6df01fa290a2fcee86d964d75b9e52fe0b97"
+    },
+    {
+      "name": "wave1-historical",
+      "command": "corepack pnpm evidence:wave1:historical",
+      "exit": 0,
+      "log": "docs/evidence/WAVE2/logs/b6207c8c61db5d9c3b5c8f875db274a3d033a7b4/wave1-historical.txt",
+      "log_sha256": "ac02c2f38ba9a726fb621990c9b21c159f1fa6fc65ff0fe1fbfcd3d7e6d8a062"
+    },
+    {
+      "name": "wave1-integrity",
+      "command": "corepack pnpm evidence:wave1:integrity",
+      "exit": 1,
+      "log": "docs/evidence/WAVE2/logs/b6207c8c61db5d9c3b5c8f875db274a3d033a7b4/wave1-integrity.txt",
+      "log_sha256": "86c38502e20524c3681a67c2fc2e766aaacee2a0a68ac2070b70bbf5eee10d28",
+      "expected_failure": true
+    },
+    {
+      "name": "wave2-fitness",
+      "command": "corepack pnpm test:wave2:fitness",
+      "exit": 0,
+      "log": "docs/evidence/WAVE2/logs/b6207c8c61db5d9c3b5c8f875db274a3d033a7b4/wave2-fitness.txt",
+      "log_sha256": "5e4dae1fbef0242227ae5bebc9cf40985b88c8a637ddb99af282f2f0f78dbdca"
+    },
+    {
+      "name": "wave2-m3",
+      "command": "corepack pnpm test:wave2:m3",
+      "exit": 0,
+      "log": "docs/evidence/WAVE2/logs/b6207c8c61db5d9c3b5c8f875db274a3d033a7b4/wave2-m3.txt",
+      "log_sha256": "33bbabde4f56991c98f34db554ea86573e1762d569ffc06076c87c7af295566e"
+    },
+    {
+      "name": "wave2-w2.0",
+      "command": "corepack pnpm test:wave2:w2.0",
+      "exit": 0,
+      "log": "docs/evidence/WAVE2/logs/b6207c8c61db5d9c3b5c8f875db274a3d033a7b4/wave2-w2.0.txt",
+      "log_sha256": "f2fda4705ea26a5d69ab4f7b6d0482f7662ef77e2ba9bda7f3d54535c87caa5a"
+    }
+  ],
+  "cases": [
+    {
+      "case_id": "PR-01",
+      "title": "a replayed D4.1 comparison is labelled and both digests kept",
+      "status": "PASSED",
+      "production_seam": "yes — NarralensHost route",
+      "tests": [
+        "tests/wave2/m3/materialize-routes.test.ts::stamps RECORDED_PROVIDER_OUTPUT_REPLAY with both digests",
+        "tests/wave2/m3/materialize-routes.test.ts::refuses a replay that cannot be substantiated"
+      ],
+      "notes": "The recorded stdout digest comes from the comparison's own generation_audit, so a client cannot relabel a live provider call as a replay. The payload digest is required."
+    },
+    {
+      "case_id": "PR-02",
+      "title": "materialize changes no author fact",
+      "status": "PASSED",
+      "production_seam": "yes — diffed around a real end-to-end run",
+      "tests": [
+        "tests/wave2/m3/materialize-routes.test.ts::changes no author fact while a real materialize runs end to end"
+      ]
+    },
+    {
+      "case_id": "PR-03",
+      "title": "a locked range refuses the operation; no second timeline",
+      "status": "CLOSED",
+      "production_seam": "yes — real LockService",
+      "tests": [
+        "tests/wave2/m3/materialize-routes.test.ts::refuses a POST prepared before the range was locked",
+        "tests/wave2/m3/materialize-routes.test.ts::moves a ready materialization stale when the range is locked afterwards",
+        "tests/wave2/m3/materialization-store.test.ts::holds no frame timeline of its own",
+        "tests/wave2/m3/binding-service.test.ts"
+      ],
+      "notes": "Locks move the control revision through LockService; no test writes that number by hand."
+    },
+    {
+      "case_id": "MT-01",
+      "title": "rights, hash, MIME, frame length and source span re-read; short media refused",
+      "status": "PASSED",
+      "production_seam": "partial — renderer and binding re-read; the Host composes both",
+      "tests": [
+        "tests/wave2/m3/proxy-renderer.test.ts",
+        "tests/wave2/m3/binding-service.test.ts"
+      ]
+    },
+    {
+      "case_id": "MT-02",
+      "title": "three stable independent clips; no composite may pass as a native plan",
+      "status": "PASSED",
+      "production_seam": "yes",
+      "tests": [
+        "tests/wave2/m3/native-plan.test.ts",
+        "tests/wave2/m3/proxy-renderer.test.ts"
+      ]
+    },
+    {
+      "case_id": "MT-03",
+      "title": "every output traces to input bytes, span, rights and tool profile, tamper-evident",
+      "status": "PASSED",
+      "production_seam": "partial — component level; the Host composes the same renderer",
+      "tests": [
+        "tests/wave2/m3/lineage-and-limits.test.ts",
+        "tests/wave2/m3/proxy-renderer.test.ts::names the input bytes, span and rights behind every clip"
+      ]
+    },
+    {
+      "case_id": "MT-04",
+      "title": "source, revision, active commit, binding and active asset ledger all unchanged",
+      "status": "PASSED",
+      "production_seam": "yes — real Host, real route, real media",
+      "tests": [
+        "tests/wave2/m3/materialize-routes.test.ts::changes no author fact while a real materialize runs end to end",
+        "tests/wave2/m3/binding-service.test.ts::MT-04 binding changes no author fact (NOWRITE)"
+      ]
+    },
+    {
+      "case_id": "MT-05",
+      "title": "cancel, late result, lost lease, restart and drift all quarantine or go stale",
+      "status": "PASSED",
+      "production_seam": "yes",
+      "tests": [
+        "tests/wave2/m3/lease-and-recovery.test.ts::refuses renewal from a different attempt even with the same owner",
+        "tests/wave2/m3/lease-and-recovery.test.ts::extends the expiry from now, so repeated renewal keeps a long render alive",
+        "tests/wave2/m3/lease-and-recovery.test.ts::resumes a complete row at validating so it can be promoted without re-encoding",
+        "tests/wave2/m3/materialize-service.test.ts::every defect the internal review raised has a test that fails without its fix",
+        "tests/wave2/m3/materialize-routes.test.ts::classifies rows left behind when the Host restarts",
+        "tests/wave2/m3/materialize-routes.test.ts::a client never has to call the worker itself"
+      ],
+      "notes": "Lease timing is driven by an injected clock and a manual scheduler, so the tests cannot be skipped on a busy machine."
+    },
+    {
+      "case_id": "MT-06",
+      "title": "real ffprobe: total frames, segment boundaries, first and last frames, full decode",
+      "status": "PASSED",
+      "production_seam": "partial — real media through the Host's own renderer",
+      "tests": [
+        "tests/wave2/m3/proxy-renderer.test.ts"
+      ],
+      "notes": "Boundaries are proved by nearest-source comparison at a 32x18 grayscale probe; a re-encoded proxy cannot match source bytes, so proximity is the strongest available evidence."
+    }
+  ],
+  "artifacts": [],
+  "claim_limits": [
+    "M4A/M4B/M4C are not implemented. impact, versioned edits and history restore remain 404 and are asserted so.",
+    "evidence:wave1:integrity exits 1 by design: it asserts no code moved after the Wave 1 freeze, and Wave 2 moved code. Its output is kept verbatim.",
+    "The full gate runs at maxWorkers=2. That changes nothing about what is asserted, how long a test may take, or which tests run; it was chosen because this machine cannot sustain the aggregate load of every suite at once.",
+    "MT-05's lease timing uses an injected clock and a manual scheduler, not sleeping. A wall-clock lease test would be skipped on a busy machine.",
+    "PR-03 is closed on LockService. No test writes a control revision by hand to stand in for a lock.",
+    "headed/human experience is NOT_RUN: this wave changes no UI.",
+    "Two remaining guards are defence-in-depth and not independently provable, and are recorded rather than given a contrived test: the produced-frame-count check after encoding, and the semaphore release idempotence."
+  ]
+}
