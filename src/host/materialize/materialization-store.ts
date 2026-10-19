@@ -262,11 +262,14 @@ export class MaterializationStore {
   setProvenFacts(materializationId: string, facts: {
     proposalSha256: string; assetInventorySha256: string; rightsDigest: string;
   }, now = new Date()): void {
-    this.#db.prepare(
+    const changes = Number(this.#db.prepare(
       `UPDATE materialization SET proposal_sha256=?, asset_inventory_sha256=?, rights_digest=?, updated_at=?
-       WHERE materialization_id=?`,
+       WHERE materialization_id=? AND state IN ('queued','running','validating')`,
     ).run(facts.proposalSha256, facts.assetInventorySha256, facts.rightsDigest,
-      now.toISOString(), materializationId);
+      now.toISOString(), materializationId).changes);
+    // Unguarded, a worker whose lease had been reaped would overwrite the digests another
+    // attempt had just proven, then carry on rendering against facts that are no longer its.
+    if (changes !== 1) throw new Error(`MATERIALIZATION_NOT_WRITABLE:${materializationId}:proven_facts`);
   }
 
   /**
@@ -332,20 +335,35 @@ export class MaterializationStore {
     ).run(now.toISOString(), materializationId);
   }
 
+  /**
+   * Payload writes are guarded by the row's own state.
+   *
+   * They were unguarded, which let a worker whose lease had been reaped keep writing into a
+   * row that another attempt had since moved on — or parked in `attention`. The CAS in
+   * `transition` protected the state; nothing protected the payloads, so a row could end up
+   * `attention` and still carrying a proxy and lineage nobody is accountable for.
+   */
+  #writeIfLive(materializationId: string, column: "plan_json" | "proxy_json" | "lineage_json", value: string): void {
+    const at = new Date().toISOString();
+    const changes = Number(this.#db.prepare(
+      `UPDATE materialization SET ${column}=?, updated_at=? WHERE materialization_id=? AND state IN ('queued','running','validating')`,
+    ).run(value, at, materializationId).changes);
+    if (changes !== 1) {
+      throw new Error(`MATERIALIZATION_NOT_WRITABLE:${materializationId}:${column}`);
+    }
+  }
+
   async setPlan(materializationId: string, plan: NativePlanV1): Promise<void> {
     assertValidPlan(plan);
-    this.#db.prepare("UPDATE materialization SET plan_json=?, updated_at=? WHERE materialization_id=?")
-      .run(JSON.stringify(plan), new Date().toISOString(), materializationId);
+    this.#writeIfLive(materializationId, "plan_json", JSON.stringify(plan));
   }
 
   async setProxy(materializationId: string, proxy: MaterializationProxy): Promise<void> {
-    this.#db.prepare("UPDATE materialization SET proxy_json=?, updated_at=? WHERE materialization_id=?")
-      .run(JSON.stringify(proxy), new Date().toISOString(), materializationId);
+    this.#writeIfLive(materializationId, "proxy_json", JSON.stringify(proxy));
   }
 
   async setLineage(materializationId: string, lineage: readonly LineageEntryV1[]): Promise<void> {
-    this.#db.prepare("UPDATE materialization SET lineage_json=?, updated_at=? WHERE materialization_id=?")
-      .run(JSON.stringify(lineage), new Date().toISOString(), materializationId);
+    this.#writeIfLive(materializationId, "lineage_json", JSON.stringify(lineage));
   }
 
   // ── state machine ──────────────────────────────────────────────────────────────────

@@ -389,6 +389,10 @@ export class MaterializeService {
       }
 
       const bound = await this.#bind(this.#deps.materializations.require(materializationId));
+      // Binding is an await, so the lease may have been reaped while it ran. The proven
+      // facts must not be written by an attempt that no longer owns the row.
+      const beforeFacts = this.#mayPublish(jobId, identity, materializationId, []);
+      if (beforeFacts !== undefined) return beforeFacts;
       this.#deps.materializations.setProvenFacts(materializationId, {
         proposalSha256: bound.binding_digest,
         assetInventorySha256: bound.asset_inventory_sha256,
@@ -500,7 +504,10 @@ export class MaterializeService {
       }
       this.#deps.jobs.transition(jobId, "failed",
         { terminalReason: message.slice(0, 200), artifact });
-      if (this.#deps.materializations.find(materializationId)?.state === "running") {
+      const live = this.#deps.materializations.find(materializationId)?.state;
+      // Only `running` was covered, so a row that failed after its lineage was written sat
+      // in `validating` with a failed job: invisible to the drain, unmarked until a restart.
+      if (live === "running" || live === "validating") {
         const reason = reasonOf(error);
         this.#deps.materializations.markStale(materializationId, [reason]);
         // The ledger's own reason travels with it: "the inventory went to attention" is not
@@ -685,9 +692,12 @@ export class MaterializeService {
       this.#rerunRequested = true;
       return await inFlight;
     }
-    const identity = this.#drainLoop(limit);
-    this.#current = identity;
+    // Entered inside the guard rather than before it: a synchronous throw from the loop would
+    // otherwise install a rejected promise in the slot and every later drain would inherit it.
+    let identity: Promise<{ attempted: number; ready: number; failed: number }> | undefined;
     try {
+      identity = this.#drainLoop(limit);
+      this.#current = identity;
       return await identity;
     } finally {
       // Only the identity this invocation installed may clear the slot, and only after any

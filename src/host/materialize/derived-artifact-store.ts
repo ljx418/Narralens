@@ -231,13 +231,16 @@ export class DerivedArtifactStore {
   }
 }
 
-/** Whether an error is the filesystem saying "that name is taken". */
+/**
+ * Whether an error is the filesystem saying "that name is taken".
+ *
+ * The name must be recognised by an error *code*. Matching on message text was a trap: any
+ * filesystem whose error mentioned "link" without a code — a FUSE or Windows wrapper — was
+ * read as a collision, so a publish that should have fallen through to rename instead
+ * concluded the destination existed and failed as unreadable.
+ */
 function isAlreadyExists(error: unknown): boolean {
-  const code = (error as { code?: unknown }).code;
-  if (code === "EEXIST") return true;
-  // Windows and some filesystems report a cross-device link attempt differently.
-  const message = error instanceof Error ? error.message : String(error);
-  return /EEXIST|EPERM|EXDEV|not supported|link/i.test(message) && code === undefined;
+  return (error as { code?: unknown }).code === "EEXIST";
 }
 
 function assertKind(kind: string): void {

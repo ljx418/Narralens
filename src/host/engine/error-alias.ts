@@ -59,6 +59,8 @@ export const ERROR_ALIAS_TABLE: readonly ErrorAliasEntry[] = Object.freeze([
     distinction: "An egress, cost or credential policy refused the operation; ORIGIN_REJECTED is the same-origin check refusing the request." },
   { code: "IMPACT_REQUIRED", http_status: 428, legacy: false, introduced_by: "W2.0", distinguishes_from: "APPROVAL_REQUIRED",
     distinction: "No server-computed impact exists for this write, so the request was refused before any staging; APPROVAL_REQUIRED is the legacy code that tells a client to collect a human approval." },
+  { code: "HOST_RESOURCE_EXHAUSTED", http_status: 503, legacy: false, introduced_by: "W2.0", distinguishes_from: "MEDIA_TOOL_UNAVAILABLE",
+    distinction: "The Host could not complete a request because a host resource was momentarily unavailable (memory, descriptors, a busy filesystem). MEDIA_TOOL_UNAVAILABLE is specifically ffprobe/ffmpeg missing, failing to start, or exceeding its timeout — a working tool under a working Host." },
   { code: "IMPACT_STALE", http_status: 428, legacy: false, introduced_by: "W2.0", distinguishes_from: "IMPACT_REQUIRED",
     distinction: "An impact exists but its TTL expired or one of the base/source/control/rights/plan facts it was computed against has changed; IMPACT_REQUIRED means no impact was ever computed." },
 ]);

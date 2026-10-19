@@ -50,7 +50,7 @@ export function normalizeError(error: unknown): HttpError {
   if (typeof code === "string" && TRANSIENT_CODES.has(code)) {
     // Retryable and labelled as such: `recoverable` is what the ledger and the
     // materialization service already trust, so one meaning travels the whole way up.
-    return new HttpError(503, "MEDIA_TOOL_UNAVAILABLE",
+    return new HttpError(503, "HOST_RESOURCE_EXHAUSTED",
       "The Host could not complete this right now",
       { reason: `TRANSIENT:${code}`, recoverable: true }, randomUUID());
   }

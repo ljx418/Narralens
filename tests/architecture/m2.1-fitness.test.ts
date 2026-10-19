@@ -138,9 +138,10 @@ describe("fitness 7: error code union, schema and alias table agree", () => {
     const unionCodes = new Set([...block.matchAll(/"([A-Z][A-Z0-9_]+)"/gu)].map((match) => match[1]!));
     const schemaCodes = new Set<string>(apiErrorSchema.properties.code.enum);
     expect([...unionCodes].sort()).toEqual([...schemaCodes].sort());
-    // 29 through M2.1; W2.0 adds IMPACT_REQUIRED and IMPACT_STALE in the same commit as
-    // the schema enum and the alias table, which is what the equality above is checking.
-    expect(unionCodes.size).toBe(31);
+    // 29 through M2.1; W2.0 adds IMPACT_REQUIRED, IMPACT_STALE and
+    // HOST_RESOURCE_EXHAUSTED, each in the same commit as the schema enum and the alias
+    // table, which is what the equality above is checking.
+    expect(unionCodes.size).toBe(32);
   });
 
   it("7. the machine alias table covers every code and distinguishes each new one", () => {
@@ -149,8 +150,8 @@ describe("fitness 7: error code union, schema and alias table agree", () => {
     expect(tableCodes.size).toBe(ERROR_ALIAS_TABLE.length);
     const introduced = ERROR_ALIAS_TABLE.filter((entry) => !entry.legacy);
     expect(introduced.map((entry) => entry.code).sort())
-      .toEqual(["CAPABILITY_NOT_ENABLED", "DATA_POLICY_DENIED", "ENGINE_UNAVAILABLE", "IMPACT_REQUIRED",
-        "IMPACT_STALE", "INVALID_RANGE", "SOURCE_CHANGED"]);
+      .toEqual(["CAPABILITY_NOT_ENABLED", "DATA_POLICY_DENIED", "ENGINE_UNAVAILABLE", "HOST_RESOURCE_EXHAUSTED",
+        "IMPACT_REQUIRED", "IMPACT_STALE", "INVALID_RANGE", "SOURCE_CHANGED"]);
     for (const entry of introduced) {
       expect(entry.distinguishes_from, entry.code).toBeTruthy();
       expect(entry.distinction?.length ?? 0, entry.code).toBeGreaterThan(20);

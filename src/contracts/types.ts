@@ -149,7 +149,10 @@ export type ApiErrorCode = "INVALID_REQUEST" | "INVALID_SESSION" | "ORIGIN_REJEC
   // Introduced by W2.0; the Wave 2 controlled-write path separates "you never asked what
   // this changes" from "you asked, but what you asked about has moved on". APPROVAL_REQUIRED
   // predates both and is the legacy code a human-approval client already handles.
-  | "IMPACT_REQUIRED" | "IMPACT_STALE";
+  | "IMPACT_REQUIRED" | "IMPACT_STALE"
+  // W2.0: a transient host resource failure is not a media-tool failure, and folding one
+  // into the other would make one code carry two meanings across the API.
+  | "HOST_RESOURCE_EXHAUSTED";
 
 export interface ApiError {
   code: ApiErrorCode;
