@@ -1,0 +1,31 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens
+
+(node:2211591) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.2/snapshot-store.test.ts (9 tests) 469ms
+ ✓ tests/m2.2/project-coordinator.test.ts (12 tests) 1305ms
+(node:2211647) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.2/persistent-job-store.test.ts (19 tests) 170ms
+(node:2211670) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.2/transaction-state-machine.test.ts (8 tests) 154ms
+(node:2211722) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.2/outbox.test.ts (9 tests) 17ms
+(node:2211702) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.2/host-coordinator-integration.test.ts (2 tests) 151ms
+(node:2213555) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.2/lock-service.test.ts (12 tests) 14ms
+(node:2215515) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.2/journal-predecessor.test.ts (9 tests) 11ms
+
+ Test Files  8 passed (8)
+      Tests  80 passed (80)
+   Start at  04:27:45
+   Duration  13.19s (transform 1.28s, setup 0ms, collect 7.85s, tests 2.29s, environment 1ms, prepare 8.50s)
+
