@@ -80,6 +80,9 @@ export function redact(message: string): string {
     : withoutTokens;
 }
 
+/** An already-formed entry, for callers holding structured facts and no Error object. */
+type RecordInput = Omit<FailureDiagnostic, "at"> & { at?: string };
+
 export class HostDiagnostics {
   readonly #entries: FailureDiagnostic[] = [];
   readonly #limit: number;
@@ -89,21 +92,31 @@ export class HostDiagnostics {
   }
 
   /** Records a failure. Never throws: a diagnostic failure must not become the failure. */
-  record(input: { correlationId: string; stage: string; error: unknown; now?: Date }): void {
+  record(input: RecordInput | { correlationId: string; stage: string; error: unknown; now?: Date }): void {
+    // A caller holding structured facts and no Error object passes an entry directly. The
+    // materialization service is that caller, and routing its outcomes through a synthetic
+    // Error would have thrown away the ids it had gone to the trouble of collecting.
+    if ("correlation_id" in input) {
+      this.#push({ ...input, at: input.at ?? new Date().toISOString() });
+      return;
+    }
     try {
       const error = input.error;
       const message = error instanceof Error ? error.message : String(error);
-      const kind = error instanceof Error ? error.constructor.name : typeof error;
-      this.#entries.push({
+      this.#push({
         correlation_id: input.correlationId,
         stage: input.stage,
-        kind,
+        kind: error instanceof Error ? error.constructor.name : typeof error,
         message_sha256: createHash("sha256").update(message).digest("hex"),
         message_redacted: redact(message),
         at: (input.now ?? new Date()).toISOString(),
       });
-      while (this.#entries.length > this.#limit) this.#entries.shift();
     } catch { /* a diagnostic must never mask the failure it describes */ }
+  }
+
+  #push(entry: FailureDiagnostic): void {
+    this.#entries.push(entry);
+    while (this.#entries.length > this.#limit) this.#entries.shift();
   }
 
   /** Newest first. */

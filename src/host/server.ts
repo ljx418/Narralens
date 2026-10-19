@@ -32,6 +32,7 @@ import { isAllowedBrowserRequest, tokenMatches } from "./security.js";
 import { EngineBindingStore, OPENFILM_UPSTREAM_SHA, upstreamShaFor } from "./engine/engine-binding-store.js";
 import { EngineRegistry } from "./engine/engine-registry.js";
 import { composeOpenFilmPort, type OpenFilmComposition } from "./engine/openfilm-composition.js";
+import type { FailureDiagnostic } from "./host-diagnostics.js";
 import { AssetInventoryPort } from "./projects/asset-inventory-port.js";
 import { MigratedAssetLedger } from "./projects/migrated-asset-ledger.js";
 import { BindingService } from "./materialize/binding-service.js";
@@ -304,6 +305,9 @@ export class NarralensHost {
       proxies: new ProxyRenderer({ artifacts: this.derivedArtifacts, profile: "wave2-proxy-720p30-v1" }),
       readComparison: (comparisonId) => this.comparisons.read(comparisonId),
       resolveMedia: (projectId, assetId) => this.#targetMediaPath(projectId, assetId),
+      // Materialization outcomes are the Host's business. Without this they were computed
+      // and dropped, so a row that went stale or was quarantined had no explanation anywhere.
+      onDiagnostic: (entry: FailureDiagnostic) => { this.failures.record(entry); },
     });
     this.migrations = new MigrationService({
       catalog: this.catalog, revisions: this.revisions, bindings: this.engines.bindings,

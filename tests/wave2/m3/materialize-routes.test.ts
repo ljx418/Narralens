@@ -69,6 +69,15 @@ interface Started {
   base: string;
 }
 
+/** The Host's own account of what happened to one materialization, for a failure message. */
+function recent(running: Started, materializationId: string): unknown {
+  return running.host.failures.recent(8)
+    .filter((entry) => entry.context?.materialization_id === materializationId
+      || entry.correlation_id === materializationId)
+    .map((entry) => ({ stage: entry.stage, reason: entry.context?.reason, boundary: entry.context?.boundary,
+      attempt: entry.context?.attempt, lease_owner: entry.context?.lease_owner, message: entry.message_redacted }));
+}
+
 function headers(origin: string, token: string): Record<string, string> {
   return { origin, authorization: `Bearer ${token}`, "content-type": "application/json" };
 }
@@ -250,7 +259,10 @@ describe("M3.3 the two routes, over HTTP, against a real migrated target", () =>
       await new Promise((resolvePromise) => setTimeout(resolvePromise, 250));
       ready = await running.host.materialize.read(job.materialization_id);
     }
-    expect(ready?.state, `comparison=${comparisonId}`).toBe("ready_for_adoption");
+    // The Host's diagnostics are attached to the assertion so a failure names the row, the
+    // attempt and the boundary rather than leaving a reader to guess from a state.
+    expect(ready?.state, `comparison=${comparisonId} ${JSON.stringify(recent(running, job.materialization_id))}`)
+      .toBe("ready_for_adoption");
 
     const read = await fetch(`${running.origin}/api/migration/v1/materializations/${job.materialization_id}`,
       { headers: headers(running.origin, running.token) });
