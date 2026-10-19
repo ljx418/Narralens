@@ -1,0 +1,5 @@
+attempts=3
+attempts_passed=1
+attempt=1 exit=1 enomem_occurrences=4 cause=unknown=0 failing_files=[ FAIL  tests/host/host-http.test.ts  FAIL  tests/wave2/m3/materialize-routes.test.ts  FAIL  tests/wave2/m3/proxy-renderer.test.ts  FAIL  tests/wave2/w2-host-composition.test.ts  ❯ tests/host/host-http.test.ts  ❯ tests/host/host-http.test.ts:114:3  ❯ tests/wave2/m3/materialize-routes.test.ts  ❯ tests/wave2/m3/materialize-routes.test.ts:171:65  ❯ tests/wave2/m3/proxy-renderer.test.ts  ❯ tests/wave2/m3/proxy-renderer.test.ts:256:20  ❯ tests/wave2/w2-host-composition.test.ts  ❯ tests/wave2/w2-host-composition.test.ts:288:7 ]
+attempt=2 exit=1 enomem_occurrences=0 cause=unknown=1 failing_files=[ FAIL  tests/host/host-http.test.ts  ❯ tests/host/host-http.test.ts  ❯ tests/host/host-http.test.ts:114:3 ]
+attempt=3 exit=0 enomem_occurrences=0 cause=unknown=0 failing_files=[]

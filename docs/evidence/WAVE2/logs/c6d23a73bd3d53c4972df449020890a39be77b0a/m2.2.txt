@@ -1,0 +1,41 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens
+
+(node:1274149) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:1274171) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:1274154) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.2/lock-service.test.ts (12 tests) 17ms
+(node:1274177) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.2/persistent-job-store.test.ts (19 tests) 350ms
+   ✓ JB-01 a lost lease never becomes a success > keeps a running job and its events across a restart  315ms
+ ✓ tests/m2.2/transaction-state-machine.test.ts (8 tests) 333ms
+   ✓ JRNL coordinator transaction state machine > keeps its own persistent record across a store reopen  318ms
+ ✓ tests/m2.2/outbox.test.ts (9 tests) 19ms
+(node:1274146) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:1274179) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:1274165) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.2/snapshot-store.test.ts (9 tests) 1270ms
+   ✓ DUR durability cannot be assumed > publishes nothing when any fsync step fails, and names the platform reason  345ms
+ ✓ tests/m2.2/journal-predecessor.test.ts (9 tests) 22ms
+ ✓ tests/m2.2/host-coordinator-integration.test.ts (2 tests) 333ms
+ ✓ tests/m2.2/project-coordinator.test.ts (12 tests) 3356ms
+   ✓ BYP the gateway is in front of every write > an accepted edit reaches the actor exactly once and returns its response unchanged  511ms
+   ✓ LOCK the coordinator consults locks before the actor > a locked range refuses the write with 423 and the actor is never called  334ms
+   ✓ LOCK the coordinator consults locks before the actor > serializes lock changes behind an in-flight edit on the shared project queue  543ms
+   ✓ SNAP the commit pointer and the outbox move together > publishes a snapshot and points active_commit at it in one commit  524ms
+   ✓ SNAP the commit pointer and the outbox move together > rolls the snapshot back and raises attention when the commit transaction fails  485ms
+   ✓ SNAP the commit pointer and the outbox move together > raises durable attention when snapshot publication cannot be proven  404ms
+   ✓ SER one queue, serial per project, parallel across projects > orders two writes on the same project and lets two projects run at once  447ms
+
+ Test Files  8 passed (8)
+      Tests  80 passed (80)
+   Start at  15:05:56
+   Duration  11.72s (transform 4.19s, setup 0ms, collect 19.69s, tests 5.70s, environment 1ms, prepare 23.99s)
+

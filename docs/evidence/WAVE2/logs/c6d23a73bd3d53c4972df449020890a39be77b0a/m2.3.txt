@@ -1,0 +1,19 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens
+
+ ✓ tests/m2.3/openfilm-migrator.test.ts (7 tests) 3039ms
+   ✓ MIG-02 the migrated project is a native three-clip film > writes a film the pinned upstream reads back as three editable clips  2898ms
+(node:1281439) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:1281438) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.3/migration-service.test.ts (24 tests) 2997ms
+ ✓ tests/m2.3/migration-real-export.test.ts (2 tests) 73288ms
+   ✓ MIG-03 the real chain: migrate, reopen, export, edit the middle clip, export again > produces two real, different exports of the same 900-frame three-clip film  44728ms
+   ✓ EN-05 the source project is still intact and openable after rollback > keeps the source bytes, binding and recorded output, and retains the copy  28559ms
+
+ Test Files  3 passed (3)
+      Tests  33 passed (33)
+   Start at  15:06:15
+   Duration  80.97s (transform 1.71s, setup 0ms, collect 7.37s, tests 79.32s, environment 1ms, prepare 9.02s)
+

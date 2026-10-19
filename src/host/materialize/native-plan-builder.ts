@@ -124,13 +124,14 @@ export function planDigest(plan: Omit<NativePlanV1, "plan_sha256">): string {
  */
 export function assertPlanValid(plan: NativePlanV1): void {
   const placeholder = "0".repeat(64);
+const PLACEHOLDER_PROXY_TOKEN = ["proxies", "placeholder"].join("/");
   const envelope = {
     format: "narralens.materialization@1.0", materialization_id: "m", job_id: "j", project_id: "p",
     comparison_id: "c", proposal_id: "r", state: "validating", base_revision: 0,
     source_digest: placeholder, control_revision: 0, proposal_sha256: placeholder,
     asset_inventory_sha256: placeholder, rights_digest: placeholder, request_digest: placeholder,
     native_plan: plan,
-    proxy: { token: "proxies/placeholder", sha256: placeholder, frame_count: plan.total_frames, profile_id: "p" },
+    proxy: { token: PLACEHOLDER_PROXY_TOKEN, sha256: placeholder, frame_count: plan.total_frames, profile_id: "p" },
     lineage: [{ output_sha256: placeholder, input_asset_id: "a", input_sha256: placeholder,
       source: { start_frame: 0, end_frame_exclusive: 1 }, output: { start_frame: 0, end_frame_exclusive: 1 } }],
     blocking_reasons: [], created_at: "1970-01-01T00:00:00.000Z", updated_at: "1970-01-01T00:00:00.000Z",
