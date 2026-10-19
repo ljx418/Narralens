@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { canonicalJson } from "../engine/source-digest-v1.js";
+import { redact, type FailureDiagnostic } from "../host-diagnostics.js";
 import { HttpError } from "../api-error.js";
 import type { ProposalComparison } from "../../contracts/types.js";
 import type { MaterializationV1 } from "../../contracts/wave2-types.js";
@@ -69,6 +70,8 @@ export interface MaterializeServiceDeps {
   readonly fault?: (point: MaterializeFaultPoint) => void | Promise<void>;
   /** Notified when a job row is created, so a harness can cancel it mid-run. */
   readonly onJob?: (job: { job_id: string }) => void;
+  /** Where scheduler-level failures go. Never a silent `.catch`. */
+  readonly onDiagnostic?: (entry: FailureDiagnostic) => void;
   readonly now?: () => Date;
 }
 
@@ -428,6 +431,8 @@ export class MaterializeService {
     } catch (error) {
       const cancelled = this.#deps.jobs.require(jobId).state === "cancel_requested";
       if (cancelled) {
+        this.#record("materialize.cancelled", materializationId, jobId, identity, "cancelled after the work finished",
+          { boundary: "render" });
         const outcome = this.#deps.jobs.recordCallback(jobId, identity,
           { state: "cancelled", artifact, message: "materialize finished after cancellation" });
         if (!outcome.applied) this.#deps.materializations.quarantine(materializationId, []);
@@ -444,6 +449,9 @@ export class MaterializeService {
         // from. Marking it `failed` here made the retry the comment promised impossible:
         // `acquireLease` accepts only `queued`, and `recover()` treats a failed job as a row
         // to park. The row keeps its artefacts and the next attempt promotes it.
+        this.#record("materialize.promotion_interrupted", materializationId, jobId, identity,
+          "the promotion was interrupted and the row was left for a retry",
+          { boundary: "promotion" });
         void message;
         return { state: current.state, quarantined: false };
       }
@@ -458,6 +466,8 @@ export class MaterializeService {
         { terminalReason: message.slice(0, 200), artifact });
       if (this.#deps.materializations.find(materializationId)?.state === "running") {
         this.#deps.materializations.markStale(materializationId, [codeOf(error)]);
+        this.#record("materialize.stale", materializationId, jobId, identity, codeOf(error),
+          { boundary: "render" });
       }
       return { state: this.#deps.jobs.require(jobId).state, quarantined: false };
     } finally {
@@ -497,6 +507,34 @@ export class MaterializeService {
     return undefined;
   }
 
+  /**
+   * Records a structured diagnostic for a materialization event.
+   *
+   * Every row that leaves the queue for any reason other than success is recorded here
+   * with the identifiers an operator needs. Without this, a row that went stale or was
+   * quarantined was only visible by reading the database and inferring what had happened.
+   */
+  #record(stage: string, materializationId: string, jobId: string,
+    identity: LeaseIdentity | undefined, reason: string, extra: Record<string, string> = {}): void {
+    const message = `${stage}: ${reason}`;
+    this.#deps.onDiagnostic?.({
+      correlation_id: materializationId,
+      stage,
+      kind: "MaterializationOutcome",
+      message_sha256: "",
+      message_redacted: redact(message),
+      context: {
+        materialization_id: materializationId,
+        job_id: jobId,
+        attempt: identity === undefined ? "unknown" : String(identity.attempt),
+        lease_owner: identity === undefined ? "unknown" : identity.owner,
+        reason,
+        ...extra,
+      },
+      at: new Date().toISOString(),
+    });
+  }
+
   /** Keeps this attempt's lease alive while it works. */
   #startHeartbeat(jobId: string, identity: LeaseIdentity, leaseMs: number): { stop: () => void } {
     const scheduler = this.#deps.scheduler ?? realScheduler;
@@ -521,6 +559,7 @@ export class MaterializeService {
    */
   #quarantineOrphan(jobId: string, identity: LeaseIdentity, materializationId: string,
     lineage: readonly LineageEntryV1[], why: string): { state: string; quarantined: boolean } {
+    this.#record("materialize.quarantine", materializationId, jobId, identity, why);
     const current = this.#deps.materializations.find(materializationId);
     if (current !== undefined && (current.state === "running" || current.state === "validating")) {
       this.#deps.materializations.quarantine(materializationId, lineage);
@@ -582,36 +621,104 @@ export class MaterializeService {
    * Called on a timer by the Host. Returns how many rows it attempted, so a caller (and a
    * test) can tell a drained queue from one that is merely empty right now.
    */
-  #draining = false;
+  /**
+   * The drain in flight, and whether one is owed.
+   *
+   * A bare boolean could not express "I am still working but more work arrived": the flag
+   * stayed true for as long as a slow render took, and every later tick returned nothing at
+   * all. The queue was then starved for the length of the hang, with no error anywhere —
+   * a Host that had stopped working looked exactly like a Host with nothing to do.
+   *
+   * So the state is a promise plus a coalesced rerun flag. A tick that arrives during a
+   * drain joins the current one and marks a rerun; when the drain finishes, `finally` runs
+   * exactly one more pass if the flag is set, and only then releases the identity it owns. A
+   * drain that finishes later than a later drain started cannot clear the newer one, because
+   * only the promise that owns the current identity clears it.
+   */
+  #current: Promise<{ attempted: number; ready: number; failed: number }> | null = null;
+  #rerunRequested = false;
 
   async drain(limit = 8): Promise<{ attempted: number; ready: number; failed: number }> {
-    // Single-flight for real. `acquireLease` would stop two workers rendering the same row,
-    // but two overlapping scans still double the scan cost and make the outcome depend on
-    // which tick got there first; the flag removes the ambiguity rather than relying on the
-    // CAS to absorb it.
-    if (this.#draining) return { attempted: 0, ready: 0, failed: 0 };
-    this.#draining = true;
-    try { return await this.#drainOnce(limit); }
-    finally { this.#draining = false; }
+    if (!this.#accepting) return { attempted: 0, ready: 0, failed: 0 };
+    const inFlight = this.#current;
+    if (inFlight !== null) {
+      // Join it, and owe a pass for whatever arrived while it was running.
+      this.#rerunRequested = true;
+      return await inFlight;
+    }
+    const identity = this.#drainLoop(limit);
+    this.#current = identity;
+    try {
+      return await identity;
+    } finally {
+      // Only the identity this invocation installed may clear the slot, and only after any
+      // coalesced rerun has been handed off.
+      if (this.#current === identity) this.#current = null;
+    }
   }
 
+  async #drainLoop(limit: number): Promise<{ attempted: number; ready: number; failed: number }> {
+    let totals = { attempted: 0, ready: 0, failed: 0 };
+    for (;;) {
+      try {
+        const pass = await this.#drainOnce(limit);
+        totals = {
+          attempted: totals.attempted + pass.attempted,
+          ready: totals.ready + pass.ready,
+          failed: totals.failed + pass.failed,
+        };
+      } catch (error) {
+        // Recorded rather than thrown into a timer that may already be torn down. The Host
+        // used to swallow this entirely, which made a stopped scheduler indistinguishable
+        // from an idle one.
+        this.#deps.onDiagnostic?.({
+          correlation_id: `drain-${randomUUID().slice(0, 8)}`,
+          stage: "materialize.drain",
+          kind: error instanceof Error ? error.constructor.name : typeof error,
+          message_sha256: "",
+          message_redacted: redact(error instanceof Error ? error.message : String(error)),
+          at: new Date().toISOString(),
+        });
+      }
+      if (!this.#rerunRequested) return totals;
+      this.#rerunRequested = false;
+      // Refuse to spin: a rerun is owed for work that arrived during a pass, not forever.
+      if (!this.#accepting) return totals;
+    }
+  }
+
+  /**
+   * One pass over the queue.
+   *
+   * The runs are started together rather than awaited one at a time. Awaiting them
+   * serially meant a single slow render held the whole queue behind it: the pass was still
+   * inside the first `await` when every other row should have been picked up. The actual
+   * concurrency ceiling is the renderer's — two overall and one per project — so starting
+   * several runs here costs nothing and the limit is still enforced in one place.
+   *
+   * Each row's own lease is what stops two workers taking the same row, so starting them
+   * together cannot double-run anything.
+   */
   async #drainOnce(limit: number): Promise<{ attempted: number; ready: number; failed: number }> {
-    let attempted = 0;
-    let ready = 0;
-    let failed = 0;
+    const pending: Array<Promise<{ state: string; quarantined: boolean }>> = [];
     for (const row of this.#deps.materializations.runnable()) {
-      if (attempted >= limit) break;
+      if (pending.length >= limit) break;
       if (row.state === "cancel_requested") {
         this.#deps.materializations.quarantine(row.materialization_id, []);
         continue;
       }
       if (this.#deps.jobs.require(row.job_id).state !== "queued") continue;
-      attempted += 1;
-      const outcome = await this.run(row.materialization_id);
-      if (outcome.state === "ready_for_adoption") ready += 1;
-      else if (outcome.state !== "ready_for_adoption") failed += 1;
+      pending.push(this.run(row.materialization_id));
     }
-    return { attempted, ready, failed };
+    const outcomes = await Promise.allSettled(pending);
+    let ready = 0;
+    let failed = 0;
+    for (const outcome of outcomes) {
+      if (outcome.status === "rejected") { failed += 1; continue; }
+      if (outcome.value.state === "ready_for_adoption") ready += 1;
+      else failed += 1;
+    }
+    return { attempted: pending.length, ready, failed };
   }
 
   /** Startup recovery: anything left running is retried or quarantined, never assumed done. */

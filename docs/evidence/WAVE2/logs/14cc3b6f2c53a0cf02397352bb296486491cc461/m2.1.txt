@@ -1,0 +1,34 @@
+
+> narralens@0.1.0 test:m2.1 /mnt/c/workspace/videoworkline/Narralens
+> vitest run --config vitest.config.ts tests/m2.1 tests/architecture
+
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens
+
+(node:32006) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.1/source-digest-v1.test.ts (18 tests) 1501ms
+   ✓ SourceDigestV1 closure > EN-04 changes the digest when a scene, subtitle, setting, font or referenced asset changes  310ms
+ ✓ tests/m2.1/engine-route.test.ts (8 tests) 1438ms
+   ✓ M2.1 route activation > AC-019 leaves every legacy route in place  1020ms
+ ✓ tests/architecture/m2.2-fitness.test.ts (15 tests) 1553ms
+   ✓ M2.2 fitness: one state machine, no arbitrary state writes > 3. only project_state ever changes the current revision  348ms
+   ✓ M2.2 fitness: no second actor, queue, store or timeline > 5. no production class extends or duplicates ProjectWriteActor  379ms
+   ✓ M2.2 fitness: no second actor, queue, store or timeline > 6. the revision store owns one database handle; no second DatabaseSync for project state  362ms
+(node:35311) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.1/native-bypass.test.ts (13 tests) 1272ms
+ ✓ tests/m2.1/engine-port.test.ts (10 tests) 340ms
+ ✓ tests/architecture/m2.1-fitness.test.ts (22 tests) 406ms
+ ✓ tests/m2.1/openfilm-upstream-lock.test.ts (12 tests) 126ms
+ ✓ tests/m2.1/time-model.test.ts (11 tests) 26ms
+(node:47670) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.1/engine-binding-store.test.ts (10 tests) 14ms
+ ✓ tests/m2.1/native-write-gateway.test.ts (20 tests) 15ms
+
+ Test Files  10 passed (10)
+      Tests  139 passed (139)
+   Start at  19:06:54
+   Duration  21.23s (transform 1.50s, setup 0ms, collect 13.76s, tests 6.69s, environment 2ms, prepare 12.80s)
+

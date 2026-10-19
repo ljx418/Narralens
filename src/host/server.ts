@@ -398,9 +398,21 @@ export class NarralensHost {
     // a second authority that could disagree with the record it claims to mirror.
     // M3's worker. Without this a POST returns 202 and the row sits `queued` forever: no
     // scheduler, no poll loop, and nothing in the response that says so.
-    await this.materialize.recover();
+    const recovery = await this.materialize.recover();
+    if (recovery.retried.length > 0 || recovery.quarantined.length > 0 || recovery.ownedElsewhere.length > 0) {
+      this.failures.record({
+        correlationId: `recover-${this.revisions.compose((db) => db.prepare("SELECT 1 AS ok").get() as unknown as { ok?: number } ? "recover" : "recover")}`,
+        stage: "materialize.recover",
+        error: new Error(
+          `recovered ${recovery.retried.length} retried, ${recovery.quarantined.length} quarantined, ${recovery.ownedElsewhere.length} owned elsewhere`,
+        ),
+      });
+    }
     this.#materializeDrainTimer = setInterval(() => {
-      void this.materialize.drain().catch(() => undefined);
+      // `drain()` records its own failures through the diagnostic channel; swallowing them
+      // here is what made a scheduler that had stopped working indistinguishable from one
+      // with nothing to do.
+      void this.materialize.drain();
     }, this.#materializeDrainIntervalMs);
     this.#materializeDrainTimer.unref?.();
 

@@ -43,6 +43,14 @@ export interface FailureDiagnostic {
    * identifies the failure while refusing to store what must not be kept.
    */
   readonly message_redacted: string;
+  /**
+   * Structured facts about the failure, when the caller has them.
+   *
+   * A reason without the row it happened to is not actionable: "the materialization went
+   * stale" says nothing about *which* one, on which attempt, under which lease, and at
+   * which boundary. These are identifiers and short labels, never payloads.
+   */
+  readonly context?: Readonly<Record<string, string>>;
   readonly at: string;
 }
 

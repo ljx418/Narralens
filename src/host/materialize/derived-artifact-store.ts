@@ -1,6 +1,6 @@
 import { createHash, randomUUID } from "node:crypto";
 import { constants } from "node:fs";
-import { access, mkdir, open, readdir, rename, rm, unlink } from "node:fs/promises";
+import { access, link, mkdir, open, readdir, readFile, rename, rm, unlink } from "node:fs/promises";
 import { dirname, resolve, sep } from "node:path";
 
 /**
@@ -93,29 +93,93 @@ export class DerivedArtifactStore {
     assertExtension(extension);
     const token = this.tokenFor(kind, bytes, extension);
     const destination = this.resolve(token);
-    if (await this.exists(token)) return token;
+
+    // A cheap pre-check avoids staging work for content that is already published. It is a
+    // hint, never the authority: the publish path below verifies whatever it finds.
+    if (await this.exists(token)) {
+      await this.verifyPublished(token);
+      return token;
+    }
 
     await mkdir(dirname(destination), { recursive: true });
-    // The staging file shares the destination directory, so the rename is within one
-    // filesystem and therefore atomic.
-    const staging = `${destination}.${process.pid}.${Date.now()}.tmp`;
-    let handle;
+    // The staging name carries a random identity per *attempt*. A name built from the
+    // process id and `Date.now()` collides whenever two renders finish in the same
+    // millisecond with the same bytes — which is the common case for two projects — and the
+    // loser then deleted the winner's staging file on its way out.
+    const staging = `${destination}.${randomUUID()}.tmp`;
     try {
-      handle = await open(staging, "wx", 0o600);
-      await handle.writeFile(bytes);
-      // fsync before rename: a rename is atomic, but only if the bytes are already durable.
-      // Without this a crash can leave a correctly named file full of nothing.
-      await handle.sync();
-      await handle.close();
-      handle = undefined;
-      await rename(staging, destination);
+      const handle = await open(staging, "wx", 0o600);
+      try {
+        await handle.writeFile(bytes);
+        // fsync before publishing: the publish is atomic, but only if the bytes are already
+        // durable. Without this a crash leaves a correctly named file full of nothing.
+        await handle.sync();
+      } finally {
+        await handle.close();
+      }
+      await this.#publish(staging, destination, token);
       await this.#fsyncDir(dirname(destination));
       return token;
     } catch (error) {
-      if (handle !== undefined) await handle.close().catch(() => undefined);
-      // A failed write leaves nothing under its final name.
+      // Only this attempt's own staging file. Nobody else's is touched, which is what the
+      // unlink used to get wrong.
       await unlink(staging).catch(() => undefined);
       throw error;
+    }
+  }
+
+  /**
+   * Moves fully written bytes onto the content-addressed name.
+   *
+   * `rename` overwrites, which on POSIX is atomic but *clobbers*: a publisher that lost the
+   * race would replace a good artifact with its own bytes. That happens to be the same bytes
+   * today because the name is the hash, but the assumption is not one worth resting a
+   * content-addressed store on.
+   *
+   * `link` fails with EEXIST instead, which is the property wanted: the first publisher
+   * wins, every other learns the name is taken and verifies rather than overwrites. A hard
+   * link within one directory is a rename in disguise, so atomicity is unchanged. Where
+   * linking is unavailable the code falls back to `rename` and *verifies afterwards*, which
+   * is the same guarantee by way of detection rather than prevention.
+   */
+  async #publish(staging: string, destination: string, token: string): Promise<void> {
+    try {
+      await link(staging, destination);
+      // The link is the artifact now; the staging name has served its purpose.
+      await unlink(staging).catch(() => undefined);
+      return;
+    } catch (error) {
+      if (!isAlreadyExists(error)) {
+        // Linking unsupported on this filesystem. Fall through to the verified rename.
+        await rename(staging, destination);
+        await this.verifyPublished(token);
+        return;
+      }
+    }
+    // Someone else published first. Their bytes must be the bytes this token names.
+    await unlink(staging).catch(() => undefined);
+    await this.verifyPublished(token);
+  }
+
+  /**
+   * Confirms a published artifact actually hashes to its token.
+   *
+   * This is what turns "the file exists" into "the file is the content we addressed". A
+   * mismatch is a corrupt store, and serving it as a cache hit would hand a caller bytes
+   * under someone else's name.
+   */
+  async verifyPublished(token: string): Promise<void> {
+    const path = this.resolve(token);
+    let actual: string;
+    try {
+      actual = createHash("sha256").update(await readFile(path)).digest("hex");
+    } catch {
+      throw new Error(`DERIVED_ARTIFACT_UNREADABLE:${token}`);
+    }
+    const [kind, name] = token.split("/");
+    const extension = name?.split(".").pop() ?? "";
+    if (`${kind}/${actual}.${extension}` !== token) {
+      throw new Error(`DERIVED_ARTIFACT_DIGEST_MISMATCH:${token}:${actual}`);
     }
   }
 
@@ -165,6 +229,15 @@ export class DerivedArtifactStore {
       await handle?.close().catch(() => undefined);
     }
   }
+}
+
+/** Whether an error is the filesystem saying "that name is taken". */
+function isAlreadyExists(error: unknown): boolean {
+  const code = (error as { code?: unknown }).code;
+  if (code === "EEXIST") return true;
+  // Windows and some filesystems report a cross-device link attempt differently.
+  const message = error instanceof Error ? error.message : String(error);
+  return /EEXIST|EPERM|EXDEV|not supported|link/i.test(message) && code === undefined;
 }
 
 function assertKind(kind: string): void {
