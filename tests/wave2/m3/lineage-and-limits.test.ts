@@ -247,7 +247,11 @@ async function renderConcurrently(
         await renderer.render({
           materializationId: `mat_${index}`, projectId: project, plan: oneClipPlan(),
           segments: [{ segment_id: "seg-1", asset_path: SOURCE_A, sha256: sourceSha,
-            start_frame: 0, end_frame_exclusive: 300,
+            // Thirty frames, not the source's full three hundred. What is under test here is
+            // how many renders run at once and whether a slot is released; the frame count is
+            // irrelevant to that, and six full-length encodes of a 3.4 MB clip made this file
+            // the heaviest in the suite for no additional evidence.
+            start_frame: 0, end_frame_exclusive: 30,
             license_status: "cleared", commercial_use: true }],
         });
         peak.succeeded += 1;

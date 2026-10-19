@@ -29,7 +29,10 @@ const TRANSITIONS: Readonly<Record<string, readonly MaterializationState[]>> = O
   queued: ["running", "cancel_requested", "failed", "attention", "stale"],
   running: ["validating", "cancel_requested", "failed", "attention", "stale"],
   validating: ["ready_for_adoption", "cancel_requested", "failed", "attention", "stale"],
-  ready_for_adoption: ["stale", "cancelled"],
+  // `attention` as well as `stale`: a worker that promoted and *then* lost its lease has to
+  // be able to withdraw what it published. Without this edge the withdrawal throws and the
+  // row is left advertised as ready by a worker nobody can attribute.
+  ready_for_adoption: ["stale", "cancelled", "attention"],
   stale: ["cancelled"],
   cancel_requested: ["cancelled", "attention"],
   cancelled: [],

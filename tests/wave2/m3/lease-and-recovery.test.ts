@@ -5,6 +5,8 @@ import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { NarralensHost } from "../../../src/host/server.js";
 import { PersistentJobStore } from "../../../src/host/persistent-job-store.js";
+import { DerivedArtifactStore } from "../../../src/host/materialize/derived-artifact-store.js";
+import { MaterializeService } from "../../../src/host/materialize/materialize-service.js";
 import { RevisionStore } from "../../../src/host/projects/revision-store.js";
 import { MaterializationStore } from "../../../src/host/materialize/materialization-store.js";
 import type { Scheduler } from "../../../src/host/materialize/materialize-service.js";
@@ -264,6 +266,17 @@ describe("B3: close stops work, waits for it, and leaves a restartable state", (
   });
 });
 
+function comparisonTwoSegments(): unknown {
+  return {
+    comparison_id: "c", project_id: "p", base_revision: 1,
+    selection: { shot_id: "shot-001", start_frame: 0, end_frame_exclusive: 600 },
+    proposals: [{ proposal_id: "r", segments: [
+      { segment_id: "seg-1", duration_frames: 300 },
+      { segment_id: "seg-2", duration_frames: 300 },
+    ] }],
+  };
+}
+
 function planOfTwoClips(): NativePlanV1 {
   return {
     format: "narralens.native-plan@1.0", engine: "openfilm", fps: { num: 30, den: 1 },
@@ -422,3 +435,136 @@ describe("B1/M1: an interrupted promotion leaves the job leasable, not failed", 
     expect(jobs.require(job.job_id).attempt).toBe(2);
   }, 120_000);
 });
+
+/**
+ * D5: the heartbeat path itself, driven through a real `MaterializeService`.
+ *
+ * The tests above prove the lease CAS and the recovery decision on their own. None of them
+ * proved that a *running worker* keeps its lease alive, because `#startHeartbeat` was not
+ * reachable from any test: a regression in the scheduler argument, the clock source or the
+ * period clamp would have shipped green.
+ */
+describe("D5: a running worker's heartbeat is what keeps the lease", () => {
+  /** A renderer that holds the render open until the test lets it finish. */
+  function controllableRenderer() {
+    let release: (() => void) | undefined;
+    const gate = new Promise<void>((resolvePromise) => { release = resolvePromise; });
+    let entered = false;
+    let onEnter: (() => void) | undefined;
+    const proxy = {
+      render: async (input: { segments: readonly unknown[] }) => {
+        entered = true;
+        onEnter?.();
+        await gate;
+        return {
+          proxy: { token: "proxy/x", sha256: "f".repeat(64), frame_count: 600, profile_id: "p" },
+          lineage: [{ output_sha256: "f".repeat(64), input_asset_id: "asset_0", input_sha256: "a".repeat(64),
+            source: { start_frame: 0, end_frame_exclusive: 300 },
+            output: { start_frame: 0, end_frame_exclusive: 300 } }],
+          tool: { profile_id: "p", version: "test", argv_is_fixed: true as const },
+        };
+      },
+      release: () => release?.(),
+      isEntered: () => entered,
+      setOnEnter: (fn: () => void) => { onEnter = fn; },
+    };
+    return proxy;
+  }
+
+  async function serviceHarness(options: { leaseMs: number; heartbeatMs: number }): Promise<{
+    run: (id: string, owner: string) => Promise<{ state: string; quarantined: boolean }>;
+    jobId: string;
+    jobs: PersistentJobStore;
+    store: MaterializationStore;
+    clock: ReturnType<typeof fakeClock>;
+    timers: ReturnType<typeof manualScheduler>;
+    renderer: ReturnType<typeof controllableRenderer>;
+    reaped: (now: Date) => number;
+  }> {
+    const base = await mkdtemp(join(tmpdir(), "narralens-m3-hb-"));
+    dirs.push(base);
+    const revisions = new RevisionStore(join(base, "narralens.sqlite"));
+    stores.push(revisions);
+    const clock = fakeClock();
+    const timers = manualScheduler();
+    const renderer = controllableRenderer();
+    const jobs = new PersistentJobStore(revisions);
+    const store = new MaterializationStore(revisions);
+    const service = new MaterializeService({
+      jobs, materializations: store,
+      artifacts: new DerivedArtifactStore(join(base, "derived")),
+      resolver: { resolve: async () => ({ kind: "activated" }) } as never,
+      inventory: {} as never,
+      // Minimal but real: the run has to reach the renderer for a heartbeat test to mean
+      // anything, and a stub that throws earlier would test nothing.
+      bindings: { bind: async () => ({
+        project_id: "p", comparison_id: "c", proposal_id: "r", base_revision: 1,
+        selection: { shot_id: "shot-001", start_frame: 0, end_frame_exclusive: 600 },
+        bindings: [{ segment_id: "seg-1", asset_id: "asset_0", source_start_frame: 0,
+          source_end_frame_exclusive: 300, target_start_frame: 0, target_end_frame_exclusive: 300,
+          asset_sha256: "a".repeat(64), duration_frames: 300,
+          license_status: "cleared", commercial_use: true }],
+        binding_digest: "c".repeat(64), rights_digest: "e".repeat(64),
+        asset_inventory_sha256: "d".repeat(64), total_frames: 600,
+      }) } as never,
+      plans: { build: () => planOfTwoClips() } as never,
+      proxies: renderer as never,
+      readComparison: async () => comparisonTwoSegments() as never,
+      resolveMedia: async () => "/dev/null",
+      leaseMs: options.leaseMs, heartbeatMs: options.heartbeatMs,
+      scheduler: timers.scheduler, now: clock.now,
+    });
+    const job = jobs.create({ projectId: "p", kind: "materialize", payload: {} });
+    await store.create({
+      materializationId: "mat_1", projectId: "p", comparisonId: "c", proposalId: "r",
+      jobId: job.job_id, baseRevision: 1, sourceDigest: "a".repeat(64), controlRevision: 0,
+      proposalSha256: "c".repeat(64), assetInventorySha256: "d".repeat(64), rightsDigest: "e".repeat(64),
+      requestDigest: "b".repeat(64), idempotencyKey: "k", requestedBindings: [],
+    });
+    return {
+      run: (id, owner) => service.run(id, owner),
+      jobId: job.job_id,
+      jobs, store, clock, timers, renderer,
+      reaped: (now: Date) => jobs.reapExpiredLeases(now).length,
+    };
+  }
+
+  it("renews while the run is in flight, so the reaper never sees it expire", async () => {
+    const h = await serviceHarness({ leaseMs: 30_000, heartbeatMs: 10_000 });
+    const running = h.run("mat_1", "worker-a");
+    await waitFor(() => h.timers.liveCount() === 1);
+    // Ninety seconds of wall clock in three-tenths of a lease: with the heartbeat ticking
+    // the reaper never sees this job, and without it the job is taken three times over.
+    for (let tick = 0; tick < 9; tick += 1) {
+      h.clock.advance(10_000);
+      h.timers.tick();
+      expect(h.reaped(h.clock.now())).toBe(0);
+      expect(h.jobs.require(h.jobId).state).toBe("running");
+    }
+    h.renderer.release();
+    await running.catch(() => undefined);
+    // The heartbeat stopped with the worker; nothing is left renewing a dead lease.
+    expect(h.timers.liveCount()).toBe(0);
+  }, 120_000);
+
+  it("lets the reaper take a worker whose heartbeat never ticked", async () => {
+    const h = await serviceHarness({ leaseMs: 30_000, heartbeatMs: 10_000 });
+    const running = h.run("mat_1", "worker-a");
+    await waitFor(() => h.timers.liveCount() === 1);
+    // The clock moves past the lease with the heartbeat deliberately not ticked. This is the
+    // exact shape of a process that was suspended: the lease lapses and the row is taken.
+    h.clock.advance(31_000);
+    expect(h.reaped(h.clock.now())).toBe(1);
+    h.renderer.release();
+    await running.catch(() => undefined);
+  }, 120_000);
+});
+
+/** Waits for a condition without a fixed sleep, so a slow machine does not fail the test. */
+async function waitFor(condition: () => boolean, timeoutMs = 20_000): Promise<void> {
+  const deadline = Date.now() + timeoutMs;
+  while (!condition() && Date.now() < deadline) {
+    await new Promise((resolvePromise) => setTimeout(resolvePromise, 10));
+  }
+  if (!condition()) throw new Error("WAIT_FOR_TIMEOUT");
+}

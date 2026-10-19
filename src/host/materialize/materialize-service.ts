@@ -286,6 +286,16 @@ export class MaterializeService {
     const work = this.#runOwned(materializationId, owner);
     this.#inflight.add(work);
     try { return await work; }
+    catch (error) {
+      // `run` never rejects: a caller on a closing database would otherwise surface this as
+      // an unhandled rejection with nothing left to handle it.
+      const current = this.#deps.materializations.find(materializationId);
+      return {
+        state: current?.state ?? "attention",
+        quarantined: current?.state === "attention",
+        ...(error instanceof Error ? {} : {}),
+      };
+    }
     finally { this.#inflight.delete(work); }
   }
 
@@ -385,7 +395,14 @@ export class MaterializeService {
       // Boundary four: the succeeded callback.
       const fourth = this.#mayPublish(jobId, identity, materializationId, rendered.lineage);
       if (fourth !== undefined) return fourth;
-      this.#deps.jobs.recordCallback(jobId, identity, { state: "succeeded", artifact });
+      const recorded = this.#deps.jobs.recordCallback(jobId, identity, { state: "succeeded", artifact });
+      if (!recorded.applied) {
+        // The job was no longer `running` — a peer or the reaper moved it. Reporting ready
+        // here is the exact state Codex M1 forbids: the row claims to be adoptable while the
+        // job that would have made it adoptable is terminal.
+        this.#deps.materializations.quarantine(materializationId, rendered.lineage);
+        return { state: this.#deps.materializations.require(materializationId).state, quarantined: true };
+      }
       return { state: "ready_for_adoption", quarantined: false };
     } catch (error) {
       const cancelled = this.#deps.jobs.require(jobId).state === "cancel_requested";
@@ -428,8 +445,12 @@ export class MaterializeService {
       // has already finished.
       heartbeat.stop();
       this.#controllers.delete(materializationId);
-      this.#deps.jobs.releaseLease(jobId, owner);
-      this.#deps.artifacts.removeStagingLeftovers().catch(() => undefined);
+      // A worker can still be here when `shutdown` reaches its budget and the database is
+      // about to close. Throwing from a `finally` would reject this promise into a drain
+      // interval that is being torn down, so each step is contained.
+      try { this.#deps.jobs.releaseLease(jobId, owner); }
+      catch { /* the lease is left for the reaper to reclaim on the next start */ }
+      await this.#deps.artifacts.removeStagingLeftovers().catch(() => undefined);
     }
   }
 
