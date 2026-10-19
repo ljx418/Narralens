@@ -39,11 +39,12 @@ function classBody(source: string, className: string): string {
 
 describe("M2.2 fitness: one state machine, no arbitrary state writes", () => {
   it("1. every production `UPDATE ... SET state` lives in transition, advanceJournal or markRecovering", () => {
-    // W2.0 adds the asset-ledger bootstrap machine. It is registered here rather than
-    // exempted: `transitionBootstrap` writes `UPDATE ... SET state=? ... WHERE state=<from>`
-    // and throws unless exactly one row changed, which is the property this rule protects.
+    // Registered, not exempted. Each of these writes `UPDATE ... SET state=... WHERE
+    // ... AND state=<expected>` and throws unless exactly one row changed, which is the
+    // property this rule protects. `transitionFrom`, `markStale` and `quarantine` are M3.1's
+    // materialization machine; `transitionBootstrap` is W2.0's asset-ledger bootstrap.
     const helpers = ["transition", "advanceJournal", "markRecovering", "#state", "#assetImportState",
-      "transitionBootstrap"];
+      "transitionBootstrap", "transitionFrom", "markStale", "quarantine"];
     const offenders: string[] = [];
     for (const file of SOURCE_FILES) {
       const text = sourceOf(file);
