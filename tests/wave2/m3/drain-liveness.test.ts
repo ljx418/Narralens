@@ -1,10 +1,17 @@
-import { mkdtemp, rm } from "node:fs/promises";
+import { createHash } from "node:crypto";
+import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { DerivedArtifactStore } from "../../../src/host/materialize/derived-artifact-store.js";
 import { MaterializationStore } from "../../../src/host/materialize/materialization-store.js";
 import { MaterializeService } from "../../../src/host/materialize/materialize-service.js";
+import { HttpError } from "../../../src/host/api-error.js";
+import { MigratedAssetLedger } from "../../../src/host/projects/migrated-asset-ledger.js";
+import { AssetRegistry } from "../../../src/host/projects/asset-registry.js";
+import { ProjectCatalog } from "../../../src/host/projects/project-catalog.js";
+import { treeDigest } from "../../../src/host/projects/openfilm-migrator.js";
+import type { MigrationPlanV1 } from "../../../src/contracts/migration-types.js";
 import { NarralensHost } from "../../../src/host/server.js";
 import { PersistentJobStore } from "../../../src/host/persistent-job-store.js";
 import { RevisionStore } from "../../../src/host/projects/revision-store.js";
@@ -55,6 +62,7 @@ function gatedRenderer() {
   const entered: string[] = [];
   let failNext: Error | undefined;
   return {
+    failWith: (error: Error) => { failNext = error; },
     render: async (input: { materializationId: string }) => {
       entered.push(input.materializationId);
       if (failNext !== undefined) {
@@ -342,5 +350,195 @@ describe("an attempt that lost its lease cannot publish", () => {
     // Worker A's late attempt cannot publish: the lease is not its attempt any more.
     expect(h.jobs.holdsLease(job.job_id, { owner: "worker-a", attempt: attemptA })).toBe(false);
     expect(h.jobs.holdsLease(job.job_id, { owner: "worker-b", attempt: attemptB })).toBe(true);
+  }, 60_000);
+});
+
+describe("an unreadable ledger is not a proven drift", () => {
+  /**
+   * ADR-W2.0-001 makes `attention` terminal, so this classification is the difference
+   * between a retry and a permanently unusable project.
+   *
+   * The captured chain was: `SOURCE_TREE_UNREADABLE:ENOMEM` -> terminal attention -> the
+   * worker marked its materialization stale against it -> every later read a 423 nobody
+   * could clear. One allocation failure, one bricked project.
+   */
+  it("treats a transient read failure as unverified and leaves the ledger alone", async () => {
+    const { ledger, projectId, before, arm } = await ledgerWithDigest(["ENOMEM", "out of memory"]);
+    arm();
+    const result = await ledger.reverify({ projectId }).catch((error: unknown) => error);
+    expect(result).toMatchObject({ status: 503, code: "MEDIA_TOOL_UNAVAILABLE",
+      details: { recoverable: true } });
+    // Not attention. The facts were not disproven; they were not read.
+    expect(ledger.bootstrapRecord(projectId)).toEqual(before);
+    // The rows seeded by the bootstrap are untouched; only the *verdict* could have moved.
+    expect(ledger.assets(projectId).length).toBeGreaterThan(0);
+  }, 60_000);
+
+  it("treats a completed read that disagrees as drift, and does move to attention", async () => {
+    // The migration captured a digest the source no longer has: a completed read that
+    // disagrees, which is the finding a transient failure must not be confused with.
+    const { ledger, projectId } = await ledgerWithDigest(null, undefined, true);
+    const result = await ledger.reverify({ projectId });
+    expect(result.state).toBe("attention");
+    expect(ledger.bootstrapRecord(projectId)?.state).toBe("attention");
+  }, 60_000);
+
+  it("still treats an unreadable *manifest* the same way", async () => {
+    const { ledger, projectId, before, arm } = await ledgerWithDigest(null, "EIO");
+    arm();
+    const result = await ledger.reverify({ projectId }).catch((error: unknown) => error);
+    expect(result).toMatchObject({ status: 503, code: "MEDIA_TOOL_UNAVAILABLE" });
+    expect(ledger.bootstrapRecord(projectId)).toEqual(before);
+  }, 60_000);
+});
+
+/**
+ * A real ledger over a real migrated target, with the digest read forced to fail.
+ *
+ * The first argument fails the source-tree digest with that code; the second fails the
+ * manifest read. Passing neither exercises the real digest, which then disagrees with the
+ * migration's captured one — the drift case.
+ */
+async function ledgerWithDigest(failTree: [string, string] | null, failManifest?: string,
+  driftDigest = false): Promise<{
+  ledger: MigratedAssetLedger; projectId: string; before: unknown; arm: () => void;
+}> {
+  const base = await mkdtemp(join(tmpdir(), "narralens-m3-unread-"));
+  dirs.push(base);
+  const sourceRoot = join(base, "source");
+  const targetRoot = join(base, "migrations", "mig_1");
+  await mkdir(join(sourceRoot, "media"), { recursive: true });
+  await mkdir(join(targetRoot, "assets"), { recursive: true });
+  const bytes = Buffer.from("real enough bytes for a digest");
+  await writeFile(join(sourceRoot, "media/only.mp4"), bytes);
+  await writeFile(join(targetRoot, "assets/only.mp4"), bytes);
+  await writeFile(join(sourceRoot, "assets.manifest.json"), JSON.stringify({
+    format: "narralens.asset-manifest@2",
+    assets: [{ asset_id: "asset_only", project_path: "media/only.mp4", sha256: createHash("sha256").update(bytes).digest("hex"),
+      media_type: "video/mp4", kind: "video", duration_frames: 30,
+      source: { kind: "owned", label: "fixture" },
+      license: { status: "cleared", label: "fixture", commercial_use: true } }],
+  }));
+  await writeFile(join(sourceRoot, "narralens.project.json"), JSON.stringify({
+    project_id: "of_src", revision: 3, frame_rate: 30, frame_count: 900,
+    shots: [{ shot_id: "shot-001", authoring_id: "shot-1", start_frame: 0, end_frame_exclusive: 900 }],
+    preview: { kind: "hypit-studio", url: "http://127.0.0.1:4174/" },
+    run_file: "runs/build.svrun", studio_origin: "http://127.0.0.1:4174",
+    narration_asset: "narration.wav", asset_manifest: "assets.manifest.json",
+  }));
+  await mkdir(join(sourceRoot, "runs"), { recursive: true });
+
+  const revisions = new RevisionStore(join(base, "narralens.sqlite"));
+  stores.push(revisions);
+  const catalog = new ProjectCatalog(new Map([["of_src", join(sourceRoot, "narralens.project.json")]]));
+  const registry = new AssetRegistry(catalog, { videoFrames: async () => 30 });
+  const projectId = "of_target_unread";
+
+  const plan: MigrationPlanV1 = {
+    format: "narralens.migration-plan@1.0", migration_id: "mig_1", idempotency_key: "k",
+    request_digest: "b".repeat(64), source_project_id: "of_src", source_revision: 3,
+    source_digest: "5".repeat(64), source_engine: "hypit", target_project_id: projectId,
+    target_engine: "openfilm", target_engine_upstream_sha: "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+    identity_map: [{ source_id: "s1", target_id: "shot-001", start_frame: 0, end_frame_exclusive: 900 }],
+    features: [], assets: [{ source_path: "media/only.mp4", target_path: "assets/only.mp4",
+      sha256: createHash("sha256").update(bytes).digest("hex"), asset_id: null }],
+    subtitles: [], narration: null, validation_steps: [], blocking: [],
+    created_at: new Date(0).toISOString(),
+  };
+  // `driftDigest` makes the migration record a digest the source cannot match, so the next
+  // read completes and disagrees.
+  const sourceDigest = driftDigest ? "9".repeat(64) : await treeDigest(sourceRoot);
+  revisions.migrations.create({
+    migrationId: "mig_1", projectId: "of_src", idempotencyKey: "k",
+    requestDigest: "b".repeat(64), plan, sourceSha256Before: sourceDigest,
+  });
+  for (const to of ["staged", "validated", "snapshot_published", "committed", "activated", "reported"] as const) {
+    revisions.migrations.transition("mig_1", revisions.migrations.require("mig_1")!.state, to, new Date(0));
+  }
+  revisions.bindEngine(projectId, "openfilm", "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3", "of_src", new Date(0));
+  revisions.commitMigrationTarget({
+    migrationId: "mig_1", projectId, revision: 1, snapshotId: "snap_1",
+    sourceDigest: "4".repeat(64), engine: "openfilm", now: new Date(0),
+  });
+
+  // The failure is armed *after* the bootstrap, so the ledger exists and the next read is the
+  // one under test. Arming it earlier would only prove bootstrap refuses.
+  let armed = false;
+  const ledger = MigratedAssetLedger.create({
+    revisions, registry, catalog, migrationRoot: join(base, "migrations"),
+    readSourceTreeDigest: async (root: string) => {
+      if (armed && failTree !== null) throw Object.assign(new Error(failTree[1]), { code: failTree[0] });
+      return await treeDigest(root);
+    },
+    readSourceManifest: async (id: string) => {
+      if (armed && failManifest !== undefined) {
+        throw Object.assign(new Error("read failed"), { code: failManifest });
+      }
+      return await readManifestThrough(ledger, id);
+    },
+  });
+  await ledger.bootstrap({ projectId, activationPhase: true });
+  const before = ledger.bootstrapRecord(projectId);
+  return { ledger, projectId, before, arm: () => { armed = true; } };
+}
+
+/**
+ * The default manifest read, reached through the same instance so the override above can
+ * fall back to the real implementation rather than a second copy of it.
+ */
+async function readManifestThrough(
+  ledger: MigratedAssetLedger, projectId: string,
+): Promise<{ sha256: string; assets: never[] }> {
+  return await (ledger as unknown as {
+    readManifestForTest(projectId: string): Promise<{ sha256: string; assets: never[] }>;
+  }).readManifestForTest(projectId);
+}
+
+describe("a retryable failure must not strand the materialization either", () => {
+  /**
+   * The same classification, one layer up.
+   *
+   * Fixing only the ledger left the row itself stranded: `stale` is terminal for a
+   * materialization too, so a transient read still produced a permanently unusable row —
+   * the captured chain showed exactly that, with `recoverable: true` in the cause and the
+   * row marked `stale` regardless.
+   */
+  it("leaves the row retryable when the layer below says the facts were not verified", async () => {
+    const h = await harness();
+    const inventory = h.service as unknown as { deps?: never };
+    void inventory;
+    const retryable = Object.assign(new HttpError(503, "MEDIA_TOOL_UNAVAILABLE",
+      "the source tree could not be read right now",
+      { reason: "SOURCE_TREE_UNREADABLE:ENOMEM", recoverable: true }), {});
+
+    // Force the render to observe that failure, which is where the row would have been lost.
+    (h as unknown as { renderer: { failWith: (error: Error) => void } }).renderer.failWith(retryable);
+    const drain = h.service.drain();
+    // The rows after the failing one park in the renderer; releasing them lets the pass end.
+    await waitFor(() => h.renderer.entered.length >= 2);
+    h.renderer.releaseAll();
+    await drain;
+
+    const states = ["p1", "p2", "p3"].flatMap((project) => h.store.byProject(project).map((row) => row.state));
+    // Never stale and never attention: the row was never disproven, only unchecked.
+    expect(states).not.toContain("stale");
+    expect(states).not.toContain("attention");
+    // And it is recorded as unverified, with the reason and the boundary.
+    const entry = h.diagnostics.find((candidate) => candidate.stage === "materialize.unverified");
+    expect(entry, JSON.stringify(h.diagnostics.map((d) => d.stage))).toBeDefined();
+    expect(entry!.context).toMatchObject({ boundary: "render" });
+    expect(entry!.context!.reason).toContain("SOURCE_TREE_UNREADABLE");
+  }, 60_000);
+
+  it("still strands a row when the facts were genuinely disproven", async () => {
+    const h = await harness();
+    (h as unknown as { renderer: { failWith: (error: Error) => void } }).renderer
+      .failWith(new HttpError(422, "INVALID_MEDIA", "the media is not an MP4 container"));
+    const drain = h.service.drain();
+    await waitFor(() => h.renderer.entered.length >= 2);
+    h.renderer.releaseAll();
+    await drain;
+    const states = ["p1", "p2", "p3"].flatMap((project) => h.store.byProject(project).map((row) => row.state));
+    expect(states.some((state) => state === "stale" || state === "attention")).toBe(true);
   }, 60_000);
 });

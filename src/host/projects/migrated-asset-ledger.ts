@@ -96,6 +96,16 @@ export interface MigratedAssetLedgerDeps {
   readonly catalog: ProjectCatalog;
   /** Root under which every migrated copy lives; target paths resolve inside it. */
   readonly migrationRoot: string;
+  /**
+   * How the source tree's digest is read.
+   *
+   * Injected for the same reason the media probe is: the distinction between "the read came
+   * back different" and "the read did not happen" is the whole safety property here, and it
+   * cannot be tested against a filesystem by asking it to fail on purpose.
+   */
+  readonly readSourceTreeDigest?: (root: string) => Promise<string>;
+  /** Injected so a manifest read that fails can be told from one that disagrees. */
+  readonly readSourceManifest?: (projectId: string) => Promise<{ sha256: string; assets: SourceManifestEntry[] }>;
 }
 
 /**
@@ -153,6 +163,8 @@ export class MigratedAssetLedger {
   readonly #registry: AssetRegistry;
   readonly #catalog: ProjectCatalog;
   readonly #migrationRoot: string;
+  readonly #readSourceTreeDigest: (root: string) => Promise<string>;
+  readonly #readSourceManifestOverride?: MigratedAssetLedgerDeps["readSourceManifest"];
 
   /**
    * Composed over the store's own connection so the ledger cannot become a second
@@ -165,6 +177,8 @@ export class MigratedAssetLedger {
     this.#registry = deps.registry;
     this.#catalog = deps.catalog;
     this.#migrationRoot = deps.migrationRoot;
+    this.#readSourceTreeDigest = deps.readSourceTreeDigest ?? treeDigest;
+    this.#readSourceManifestOverride = deps.readSourceManifest;
     this.#migrate();
   }
 
@@ -470,16 +484,20 @@ export class MigratedAssetLedger {
     // licence facts we are about to copy across are no longer migration-time facts.
     const sourceRoot = this.#catalog.descriptorRoot(sourceProjectId);
     let sourceTreeNow: string;
-    try { sourceTreeNow = await treeDigest(sourceRoot); }
+    try { sourceTreeNow = await this.#readSourceTreeDigest(sourceRoot); }
     catch (error) {
-      // Distinct from the manifest failure below, and distinguished again by class: two
-      // different reads failing for two different reasons were both reported as
-      // "SOURCE_UNREADABLE", which made a transient I/O failure indistinguishable from a
-      // corrupt manifest.
-      return {
-        state: "attention", projectId, migrationId: migration.migration_id,
-        reason: `SOURCE_TREE_UNREADABLE:${failureClass(error)}`,
-      };
+      // A read that did not happen is not a read that came back different.
+      //
+      // ADR-W2.0-001 makes `attention` terminal and irreversible, so sending a transient
+      // failure there turns one allocation failure into a permanently unusable project. The
+      // captured chain was exactly that: `SOURCE_TREE_UNREADABLE:ENOMEM` became a terminal
+      // ledger, the worker marked its materialization stale against it, and every later read
+      // was a 423 nobody could clear.
+      //
+      // So a transient read failure is reported as unverified and leaves the ledger exactly
+      // as it was. Only a completed read that disagrees is drift.
+      throwUnverified(error, projectId, "SOURCE_TREE");
+      return { state: "attention", projectId, migrationId: migration.migration_id, reason: "SOURCE_TREE_DRIFT" };
     }
     if (sourceTreeNow !== migration.source_sha256_before) {
       return { state: "attention", projectId, migrationId: migration.migration_id, reason: "SOURCE_TREE_CHANGED" };
@@ -492,15 +510,10 @@ export class MigratedAssetLedger {
     // unmigratable, which would break MIG-01..04 to satisfy a W2.0 ledger.
     let manifest: { sha256: string; assets: SourceManifestEntry[] };
     try {
-      manifest = await this.#readSourceManifest(sourceProjectId);
+      manifest = await (this.#readSourceManifestOverride ?? this.#readSourceManifest).call(this, sourceProjectId);
     } catch (error) {
-      // The reason carries the *class* of failure, never its message: "unreadable" and
-      // "out of memory" call for completely different responses, and collapsing them made
-      // a memory failure look like a data problem.
-      return {
-        state: "attention", projectId, migrationId: migration.migration_id,
-        reason: `SOURCE_MANIFEST_UNREADABLE:${failureClass(error)}`,
-      };
+      throwUnverified(error, projectId, "SOURCE_MANIFEST");
+      return { state: "attention", projectId, migrationId: migration.migration_id, reason: "SOURCE_MANIFEST_INVALID" };
     }
 
     const plan = this.#revisions.migrations.plan(migration.migration_id);
@@ -576,6 +589,9 @@ export class MigratedAssetLedger {
    * The digest is taken over the file bytes, so it identifies exactly the manifest the
    * migration-time licence facts came from.
    */
+  /** The default manifest read, reachable so an injected reader can fall back to it. */
+  async readManifestForTest(sourceProjectId: string) { return await this.#readSourceManifest(sourceProjectId); }
+
   async #readSourceManifest(sourceProjectId: string): Promise<{ sha256: string; assets: SourceManifestEntry[] }> {
     const descriptor = await this.#catalog.readDescriptor(sourceProjectId);
     if (descriptor.asset_manifest === undefined || descriptor.asset_manifest === "") {
@@ -749,6 +765,33 @@ function bootstrapRow(row: Record<string, unknown>): LedgerBootstrapRecord {
     attention_reason: String(row.attention_reason) === "" ? null : String(row.attention_reason),
     created_at: String(row.created_at),
   };
+}
+
+/**
+ * Failures that mean "not checked right now" rather than "checked and wrong".
+ *
+ * The list is deliberately short and concrete: allocation pressure, a busy or unreadable
+ * filesystem, a descriptor that ran out. Anything outside it is treated as a real finding,
+ * because defaulting the other way would let a corrupt store pass as healthy.
+ */
+const TRANSIENT_CODES: ReadonlySet<string> = new Set([
+  "ENOMEM", "EMFILE", "ENFILE", "EBUSY", "EAGAIN", "EIO", "ETXTBSY", "ENOSPC", "ECONNRESET",
+]);
+
+/**
+ * Turns a transient read failure into a retryable refusal.
+ *
+ * The ledger is *not* moved to attention: attention means the facts were proven wrong, and
+ * these failures prove nothing either way. Making them terminal was how one allocation
+ * failure became a permanently unusable project.
+ */
+function throwUnverified(error: unknown, projectId: string, what: string): void {
+  const code = failureClass(error);
+  if (TRANSIENT_CODES.has(code)) {
+    throw new HttpError(503, "MEDIA_TOOL_UNAVAILABLE",
+      `${what} could not be read right now, so its facts were not verified`,
+      { reason: `${what}_UNREADABLE:${code}`, recoverable: true }, projectId);
+  }
 }
 
 /** A Node error code, or the error's constructor name. Never the message. */

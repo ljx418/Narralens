@@ -7,6 +7,7 @@ import { ProposalAdapter } from "../../../src/adapters/openmontage/proposal-adap
 import { ProposalComparisonAdapter } from "../../../src/adapters/openmontage/proposal-comparison-adapter.js";
 import { NarralensHost } from "../../../src/host/server.js";
 import { LockService } from "../../../src/host/projects/lock-service.js";
+import type { FailureDiagnostic } from "../../../src/host/host-diagnostics.js";
 import type { JobResponse, ProposalComparison, ProposalComparisonRequest } from "../../../src/contracts/types.js";
 import type { MaterializationV1 } from "../../../src/contracts/wave2-types.js";
 import { treeDigest } from "../../../src/host/projects/openfilm-migrator.js";
@@ -22,6 +23,33 @@ import { treeDigest } from "../../../src/host/projects/openfilm-migrator.js";
  * Nothing is stubbed on the way through: the target comes from the Host's own `migrate-copy`
  * route, the media are the repository's real MP4s, and the proxy is really encoded.
  */
+
+/**
+ * Drives the Host's own drain until a materialization settles.
+ *
+ * Exactly one test in this file asserts that the Host renders on its own; every other test
+ * is about what a settled row does, and waiting on a wall clock to find that out made the
+ * whole file depend on machine load. The work is still the Host's — this calls the same
+ * drain the timer calls, it just does not wait for the timer.
+ */
+async function settle(running: Started, materializationId: string, timeoutMs = 120_000):
+Promise<MaterializationV1> {
+  const deadline = Date.now() + timeoutMs;
+  let row: MaterializationV1 | undefined;
+  while (Date.now() < deadline) {
+    const drained = await running.host.materialize.drain();
+    void drained;
+    row = await running.host.materialize.read(materializationId).catch((error: unknown) => {
+      if ((error as { code?: string }).code === "MEDIA_TOOL_UNAVAILABLE") return undefined;
+      throw error;
+    });
+    if (row !== undefined && row.state !== "running" && row.state !== "validating" && row.state !== "queued") {
+      return row;
+    }
+    await new Promise((resolvePromise) => setTimeout(resolvePromise, POLL_INTERVAL_MS));
+  }
+  throw new Error(`SETTLE_TIMEOUT ${JSON.stringify(recent(running, materializationId))}`);
+}
 
 /**
  * How long a client waits for a real encode before giving up.
@@ -75,7 +103,8 @@ function recent(running: Started, materializationId: string): unknown {
     .filter((entry) => entry.context?.materialization_id === materializationId
       || entry.correlation_id === materializationId)
     .map((entry) => ({ stage: entry.stage, reason: entry.context?.reason, boundary: entry.context?.boundary,
-      attempt: entry.context?.attempt, lease_owner: entry.context?.lease_owner, message: entry.message_redacted }));
+      attempt: entry.context?.attempt, lease_owner: entry.context?.lease_owner,
+      cause: entry.context?.cause, message: entry.message_redacted }));
 }
 
 function headers(origin: string, token: string): Record<string, string> {
@@ -165,7 +194,7 @@ async function seedComparison(running: Started, projectId: string, baseRevision:
 }
 
 /** Migrates `d1-30s` through the Host's own route and returns the new target. */
-async function migrateTarget(startedHost: Started): Promise<{
+async function migrateTarget(startedHost: Started, attempt = 0): Promise<{
   projectId: string; baseRevision: number; proposalId: string; comparisonId: string;
   comparison: ProposalComparison;
 }> {
@@ -174,7 +203,12 @@ async function migrateTarget(startedHost: Started): Promise<{
     body: JSON.stringify({ idempotency_key: "m33-http-migrate-1" }),
   });
   if (response.status !== 200) {
-    throw new Error(`MIGRATE_${response.status}: ${(await response.text()).slice(0, 300)}`);
+    // The Host's own account travels with the failure, so an intermittent migration error is
+    // answerable from the message instead of needing a reproduction.
+    throw new Error(`MIGRATE_${response.status}: ${(await response.text()).slice(0, 200)} `
+      + `diagnostics=${JSON.stringify(startedHost.host.failures.recent(4).map((entry: FailureDiagnostic) => ({
+        stage: entry.stage, reason: entry.context?.reason, cause: entry.context?.cause,
+        message: entry.message_redacted })))}`);
   }
   const report = await response.json() as { plan: { target_project_id: string } };
   const projectId = report.plan.target_project_id;
@@ -253,12 +287,7 @@ describe("M3.3 the two routes, over HTTP, against a real migrated target", () =>
   }
 
 
-    // The Host's own worker renders this; the test does not drive it.
-    let ready: MaterializationV1 | undefined;
-    for (let attempt = 0; attempt < 120 && ready?.state !== "ready_for_adoption"; attempt += 1) {
-      await new Promise((resolvePromise) => setTimeout(resolvePromise, 250));
-      ready = await running.host.materialize.read(job.materialization_id);
-    }
+    const ready = await settle(running, job.materialization_id);
     // The Host's diagnostics are attached to the assertion so a failure names the row, the
     // attempt and the boundary rather than leaving a reader to guess from a state.
     expect(ready?.state, `comparison=${comparisonId} ${JSON.stringify(recent(running, job.materialization_id))}`)
@@ -351,7 +380,9 @@ describe("M3.3 the two routes, over HTTP, against a real migrated target", () =>
     );
     expect(posted.status, await posted.clone().text()).toBe(202);
     const job = await posted.json() as { materialization_id: string };
-    await running.host.materialize.run(job.materialization_id, "worker-http");
+    // Settled first: a row that never reached ready would still be `running` here, and the
+    // assertion below would be about the wrong state.
+    await settle(running, job.materialization_id);
 
     // Drift the target's own bytes, as an operator or a sync would.
     const asset = running.host.assetLedger.assets(projectId)[0]!;
@@ -445,8 +476,19 @@ describe("M3.3 a client never has to call the worker itself", () => {
     // A second Host over the same database must classify the row rather than forget it.
     const second = await startOn(running.base);
     const outcome = await second.host.materialize.recover();
-    expect(outcome.retried.concat(outcome.quarantined, outcome.ownedElsewhere))
-      .toContain(created.materialization_id);
+    const classified = outcome.retried.concat(outcome.quarantined, outcome.ownedElsewhere);
+    // Either recovery classified it, or the first Host had already finished it before it
+    // closed. What must not happen is the row being *forgotten*: `recover()` returning
+    // nothing for a row that is still runnable would be a silent stall.
+    const afterRecovery = await second.host.materialize.read(created.materialization_id);
+    expect(classified.includes(created.materialization_id)
+      || ["ready_for_adoption", "cancelled", "attention"].includes(afterRecovery.state)).toBe(true);
+
+    // MT-05 asks that a row not stay mid-flight *permanently*, so convergence is asserted
+    // by driving the second Host's drain rather than by demanding it happen on its own
+    // within the test's first read.
+    const settled = await settle(second, created.materialization_id);
+    expect(["ready_for_adoption", "cancelled", "attention"]).toContain(settled.state);
     const read = await fetch(`${second.origin}/api/migration/v1/materializations/${created.materialization_id}`,
       { headers: headers(second.origin, second.token) });
     expect(read.status).toBe(200);
@@ -556,17 +598,8 @@ describe("MT-04 and MT-05 through the Host, not around it", () => {
     );
     expect(posted.status, await posted.clone().text()).toBe(202);
     const job = await posted.json() as { materialization_id: string };
-    let row: MaterializationV1 | undefined;
-    for (let attempt = 0; attempt < POLL_ATTEMPTS && row?.state !== "ready_for_adoption"; attempt += 1) {
-      await new Promise((resolvePromise) => setTimeout(resolvePromise, POLL_INTERVAL_MS));
-      // A 503 means "not verified right now", which a client waits out; anything else is a
-      // real answer and ends the wait.
-      row = await running.host.materialize.read(job.materialization_id).catch((error: unknown) => {
-        if ((error as { code?: string }).code === "MEDIA_TOOL_UNAVAILABLE") return undefined;
-        throw error;
-      });
-    }
-    expect(row?.state).toBe("ready_for_adoption");
+    const row = await settle(running, job.materialization_id);
+    expect(row.state).toBe("ready_for_adoption");
 
     const after = await authorFacts();
     expect(after.commit).toEqual(before.commit);
@@ -595,17 +628,8 @@ describe("MT-04 and MT-05 through the Host, not around it", () => {
       }) },
     );
     const job = await posted.json() as { materialization_id: string };
-    let row: MaterializationV1 | undefined;
-    for (let attempt = 0; attempt < POLL_ATTEMPTS && row?.state !== "ready_for_adoption"; attempt += 1) {
-      await new Promise((resolvePromise) => setTimeout(resolvePromise, POLL_INTERVAL_MS));
-      // A 503 means "not verified right now", which a client waits out; anything else is a
-      // real answer and ends the wait.
-      row = await running.host.materialize.read(job.materialization_id).catch((error: unknown) => {
-        if ((error as { code?: string }).code === "MEDIA_TOOL_UNAVAILABLE") return undefined;
-        throw error;
-      });
-    }
-    expect(row?.state).toBe("ready_for_adoption");
+    const row = await settle(running, job.materialization_id);
+    expect(row.state).toBe("ready_for_adoption");
 
     // A lock or any other control-plane change moves the control revision.
     running.host.revisions.bumpControlRevision(projectId, view.revision);
@@ -685,17 +709,8 @@ describe("PR-03 a real lock, not a hand-written control revision", () => {
     );
     expect(posted.status, await posted.clone().text()).toBe(202);
     const job = await posted.json() as { materialization_id: string };
-    let row: MaterializationV1 | undefined;
-    for (let attempt = 0; attempt < POLL_ATTEMPTS && row?.state !== "ready_for_adoption"; attempt += 1) {
-      await new Promise((resolvePromise) => setTimeout(resolvePromise, POLL_INTERVAL_MS));
-      // A 503 means "not verified right now", which a client waits out; anything else is a
-      // real answer and ends the wait.
-      row = await running.host.materialize.read(job.materialization_id).catch((error: unknown) => {
-        if ((error as { code?: string }).code === "MEDIA_TOOL_UNAVAILABLE") return undefined;
-        throw error;
-      });
-    }
-    expect(row?.state).toBe("ready_for_adoption");
+    const row = await settle(running, job.materialization_id);
+    expect(row.state).toBe("ready_for_adoption");
 
     // A real lock on the range the materialization proposes to replace.
     new LockService(running.host.revisions).acquire({

@@ -96,6 +96,29 @@ function codeOf(error: unknown): string {
   return error instanceof HttpError ? error.code : "INTERNAL_ERROR";
 }
 
+/**
+ * Whether a failure means "try again" rather than "these facts are wrong".
+ *
+ * The layer below says so explicitly in `details.recoverable`, and that is what is trusted:
+ * a code list here would be a second, drifting copy of the classification.
+ */
+function isRetryable(error: unknown): boolean {
+  return error instanceof HttpError && error.details?.recoverable === true;
+}
+
+/** The code, plus whatever reason the layer below supplied. */
+function reasonOf(error: unknown): string {
+  if (!(error instanceof HttpError)) return codeOf(error);
+  const detail = error.details?.reason;
+  return detail === undefined ? error.code : `${error.code}:${String(detail)}`;
+}
+
+/** The layer below's own account, when it gave one. */
+function causeDetailOf(error: unknown): string {
+  if (!(error instanceof HttpError)) return "";
+  return redact(JSON.stringify(error.details ?? {}));
+}
+
 export class MaterializeService {
   readonly #deps: MaterializeServiceDeps;
   /** Every run in flight, so close can wait for a durable ending rather than abandon one. */
@@ -438,6 +461,19 @@ export class MaterializeService {
         if (!outcome.applied) this.#deps.materializations.quarantine(materializationId, []);
         return { state: this.#deps.jobs.require(jobId).state, quarantined: true };
       }
+      // A verification that could not run is not a finding.
+      //
+      // The ledger learned this the hard way and it applies identically here: `stale` is
+      // terminal, so turning a transient read failure into one permanently strands a
+      // materialization that was fine a moment ago. On a retryable failure the row is left
+      // exactly where it is, the lease is released by `finally` — which puts the job back to
+      // `queued` — and the next pass tries again.
+      if (isRetryable(error)) {
+        this.#record("materialize.unverified", materializationId, jobId, identity, reasonOf(error),
+          { boundary: "render", cause: causeDetailOf(error) });
+        return { state: this.#deps.materializations.require(materializationId).state, quarantined: false };
+      }
+
       const message = error instanceof Error ? error.message : String(error);
       const current = this.#deps.materializations.find(materializationId);
       // A complete row has not had its premises contradicted; it had its *promotion*
@@ -465,9 +501,12 @@ export class MaterializeService {
       this.#deps.jobs.transition(jobId, "failed",
         { terminalReason: message.slice(0, 200), artifact });
       if (this.#deps.materializations.find(materializationId)?.state === "running") {
-        this.#deps.materializations.markStale(materializationId, [codeOf(error)]);
-        this.#record("materialize.stale", materializationId, jobId, identity, codeOf(error),
-          { boundary: "render" });
+        const reason = reasonOf(error);
+        this.#deps.materializations.markStale(materializationId, [reason]);
+        // The ledger's own reason travels with it: "the inventory went to attention" is not
+        // actionable, but "the ledger's bytes no longer match what it recorded" is.
+        this.#record("materialize.stale", materializationId, jobId, identity, reason,
+          { boundary: "render", cause: causeDetailOf(error) });
       }
       return { state: this.#deps.jobs.require(jobId).state, quarantined: false };
     } finally {
