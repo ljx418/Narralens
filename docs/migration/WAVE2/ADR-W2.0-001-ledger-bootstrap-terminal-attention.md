@@ -1,7 +1,8 @@
 # ADR-W2.0-001：`asset_ledger_bootstrap` 的终态边
 
-状态：`RATIFIED_BY_REWORK`
+状态：`APPROVED_BY_DOCUMENT_OWNER`
 日期：2026-10-18
+文档所有者裁决：2026-10-19
 适用范围：`docs/migration/WAVE2/02_ARCHITECTURE_AND_CONTRACTS.md` §4 持久模型（`asset_ledger_bootstrap`）
 实现提交：本文件随 W2.0 correction 一同提交
 
@@ -80,3 +81,14 @@ W2.0 首版为了让 ASSET-02 可实现，把 `active -> attention` 加进状态
 - 已在 attention 时再次漂移不覆盖原 reason；
 - control_revision 每次真实转移恰好 +1，无变化时不递增；
 - `bootstrap()` 不能绕过 attention。
+
+## 7. 文档所有者批准记录
+
+2026-10-19 批准本 ADR，并作为
+`02_ARCHITECTURE_AND_CONTRACTS.md` §4 的追加权威裁决。批准范围仅限：
+
+- 允许 `active -> attention`，用于撤销已被后续事实推翻的资产/许可/字节声明；
+- `attention` 保持终态，禁止 `reverify()`、`bootstrap()` 或读请求自动退出；
+- 未来如需恢复，必须另行冻结带 base/control revision 和审计记录的显式操作。
+
+本批准关闭 `ARCHITECTURE_DEVIATION_BLOCKED`，M3 可建立在该状态机上。
