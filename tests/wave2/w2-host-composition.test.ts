@@ -95,11 +95,11 @@ describe("blocker 4a: the Host owns one resolver, one ledger and one inventory",
     expect(project.shots).toHaveLength(3);
   });
 
-  it("keeps all five Wave 2 routes closed", async () => {
+  it("keeps the three Wave 2 routes that M4 has not opened closed", async () => {
     const { origin, token } = await started();
+    // M3.3 opened materialize and the materialization read; impact, adopt and restore
+    // belong to M4 and must still be invisible to a client.
     for (const path of [
-      "/api/migration/v1/projects/d1-30s/proposals/proposal_1/materialize",
-      "/api/migration/v1/materializations/mat_1",
       "/api/migration/v1/projects/d1-30s/impact",
       "/api/migration/v1/projects/d1-30s/edits",
       "/api/migration/v1/projects/d1-30s/history/restore",

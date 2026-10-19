@@ -73,6 +73,9 @@ const NEW = {
   rightsDigest: SHA,
   requestDigest: OTHER_SHA,
   idempotencyKey: "materialize-0001",
+  requestedBindings: [
+    { segment_id: "seg-1", asset_id: "asset_a", source_start_frame: 0, source_end_frame_exclusive: 300 },
+  ],
 };
 
 describe("M3.1 the materialization row", () => {
@@ -278,6 +281,12 @@ describe("M3.1 the materialization row", () => {
     // second authoritative timeline.
     expect(source.sql).toContain("plan_json");
     expect(source.sql).not.toMatch(/start_frame|end_frame_exclusive|clip_order|track_id/u);
+  });
+
+  it("keeps the requested bindings verbatim, so the worker re-reads what was asked", async () => {
+    const { store } = await harness();
+    await store.create(NEW);
+    expect(store.requestedBindingsOf("mat_1")).toEqual(NEW.requestedBindings);
   });
 
   it("records the replay lineage when a comparison was rebuilt from recorded provider output", async () => {

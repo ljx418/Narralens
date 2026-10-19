@@ -471,7 +471,16 @@ export class MigratedAssetLedger {
     const sourceRoot = this.#catalog.descriptorRoot(sourceProjectId);
     let sourceTreeNow: string;
     try { sourceTreeNow = await treeDigest(sourceRoot); }
-    catch { return { state: "attention", projectId, migrationId: migration.migration_id, reason: "SOURCE_UNREADABLE" }; }
+    catch (error) {
+      // Distinct from the manifest failure below, and distinguished again by class: two
+      // different reads failing for two different reasons were both reported as
+      // "SOURCE_UNREADABLE", which made a transient I/O failure indistinguishable from a
+      // corrupt manifest.
+      return {
+        state: "attention", projectId, migrationId: migration.migration_id,
+        reason: `SOURCE_TREE_UNREADABLE:${failureClass(error)}`,
+      };
+    }
     if (sourceTreeNow !== migration.source_sha256_before) {
       return { state: "attention", projectId, migrationId: migration.migration_id, reason: "SOURCE_TREE_CHANGED" };
     }
@@ -484,8 +493,14 @@ export class MigratedAssetLedger {
     let manifest: { sha256: string; assets: SourceManifestEntry[] };
     try {
       manifest = await this.#readSourceManifest(sourceProjectId);
-    } catch {
-      return { state: "attention", projectId, migrationId: migration.migration_id, reason: "SOURCE_MANIFEST_UNREADABLE" };
+    } catch (error) {
+      // The reason carries the *class* of failure, never its message: "unreadable" and
+      // "out of memory" call for completely different responses, and collapsing them made
+      // a memory failure look like a data problem.
+      return {
+        state: "attention", projectId, migrationId: migration.migration_id,
+        reason: `SOURCE_MANIFEST_UNREADABLE:${failureClass(error)}`,
+      };
     }
 
     const plan = this.#revisions.migrations.plan(migration.migration_id);
@@ -586,12 +601,14 @@ export class MigratedAssetLedger {
     }
     const format = valueFormatOf(value);
     const validateEntry = validatorFor(contractIds.assetManifest);
+    // Validity is *recorded* per entry, not required here. A legacy `Manifest@1` can carry
+    // a subtitle or narration row whose `media_type` the `@2` contract does not admit, and
+    // refusing to read the whole file for a row the ledger never maps would make an ordinary
+    // source project unusable. `#gatherEvidence` demands a valid entry for every asset it
+    // actually maps, which is where the obligation belongs.
     const assets: SourceManifestEntry[] = (parsed.assets as Array<Record<string, unknown>>).map((candidate) => {
-      const entry = candidate as unknown as AssetManifestEntry;
-      return {
-        ...entry,
-        __contract_valid: validateEntry({ format, assets: [candidate] }),
-      };
+      const entry = candidate as unknown as SourceManifestEntry;
+      return { ...entry, __contract_valid: validateEntry({ format, assets: [candidate] }) };
     });
     return { sha256: createHash("sha256").update(bytes).digest("hex"), assets };
   }
@@ -732,6 +749,13 @@ function bootstrapRow(row: Record<string, unknown>): LedgerBootstrapRecord {
     attention_reason: String(row.attention_reason) === "" ? null : String(row.attention_reason),
     created_at: String(row.created_at),
   };
+}
+
+/** A Node error code, or the error's constructor name. Never the message. */
+function failureClass(error: unknown): string {
+  const code = (error as { code?: unknown }).code;
+  if (typeof code === "string" && /^[A-Z][A-Z0-9_]*$/u.test(code)) return code;
+  return error instanceof Error ? error.constructor.name : "unknown";
 }
 
 function valueFormatOf(value: unknown): "narralens.asset-manifest@1" | "narralens.asset-manifest@2" {

@@ -4,21 +4,27 @@ import { afterEach, describe, expect, it } from "vitest";
 import { NarralensHost } from "../../src/host/server.js";
 
 /**
- * W2.0 exit gate: the five Wave 2 routes stay 404 until their own module Gate passes.
+ * The Wave 2 route set, stage by stage.
  *
- * The frozen plan says "所有新路由仍 404" for W2.0. A 404 is not a formality here: a route
- * that answers 501, 503 or a JSON error body with a plausible shape would let a client
- * integrate against a capability that does not exist yet, and the plan's stop rule is that
- * no capability opens before its evidence exists.
+ * W2.0 froze all five as 404. M3.3 opens two of them — materialize and the materialization
+ * read — and the other three stay closed until M4. The point of this file is the three, not
+ * the two: a route that answers 501, 503 or a plausible-looking body before its Gate would
+ * let a client integrate against a capability that does not exist, which is the failure the
+ * frozen plan's stop rule exists to prevent.
  *
- * When M3/M4 lands, this file is *deleted*, not weakened — the same way the M1A gate was.
+ * The still-closed list is deleted, not weakened, when M4 opens them.
  */
 
 const REPO = resolve(import.meta.dirname, "../..");
 
+/** Opened by M3.3, with the status each must answer. */
+export const OPENED_BY_M3: readonly { method: string; path: string; status: number }[] = [
+  { method: "POST", path: "/api/migration/v1/projects/d1-30s/proposals/proposal_1/materialize", status: 202 },
+  { method: "GET", path: "/api/migration/v1/materializations/mat_1", status: 404 },
+];
+
+/** Still closed until M4 opens them. */
 const WAVE2_ROUTES = [
-  { method: "POST", path: "/api/migration/v1/projects/d1-30s/proposals/proposal_1/materialize" },
-  { method: "GET", path: "/api/migration/v1/materializations/mat_1" },
   { method: "POST", path: "/api/migration/v1/projects/d1-30s/impact" },
   { method: "POST", path: "/api/migration/v1/projects/d1-30s/edits" },
   { method: "POST", path: "/api/migration/v1/projects/d1-30s/history/restore" },
@@ -27,7 +33,21 @@ const WAVE2_ROUTES = [
 const hosts: NarralensHost[] = [];
 afterEach(async () => { await Promise.all(hosts.splice(0).map((host) => host.close())); });
 
-describe("W2.0 fitness: no Wave 2 route exists yet", () => {
+/** A running Host with a session, for the route-level checks. */
+async function started(): Promise<{ host: NarralensHost; origin: string; token: string }> {
+  const host = new NarralensHost();
+  hosts.push(host);
+  const port = await host.listen(0);
+  const origin = `http://127.0.0.1:${port}`;
+  const session = await fetch(`${origin}/api/session`, { headers: { origin } });
+  return { host, origin, token: (await session.json() as { token: string }).token };
+}
+
+function headers(origin: string, token: string): Record<string, string> {
+  return { origin, authorization: `Bearer ${token}`, "content-type": "application/json" };
+}
+
+describe("W2.0 fitness: the unopened Wave 2 routes stay closed", () => {
   it("answers 404 for every Wave 2 path, with no body that looks like a contract", async () => {
     const host = new NarralensHost();
     hosts.push(host);
@@ -75,14 +95,32 @@ describe("W2.0 fitness: no Wave 2 route exists yet", () => {
     expect((body.slice(0, end).match(/^\s{2}\w+\s*\(/gmu) ?? []).length).toBe(7);
   });
 
-  it("keeps the /api/migration/v1 route set at exactly the four Wave 1 routes", () => {
+  it("keeps the /api/migration/v1 route set at exactly the four Wave 1 routes plus M3's two", () => {
     const server = readFileSync(resolve(REPO, "src/host/server.ts"), "utf8");
     const routes = [...server.matchAll(/\^\\\/api\\\/migration\\\/v1\\\/([^$]*)\$/gu)].map((match) => match[1]!);
     expect(routes).toEqual([
       "projects\\/([A-Za-z0-9_-]+)\\/engine",
       "projects\\/([A-Za-z0-9_-]+)\\/migrate-copy",
+      "projects\\/([A-Za-z0-9_-]+)\\/proposals\\/([A-Za-z0-9_-]+)\\/materialize",
+      "materializations\\/([A-Za-z0-9_-]+)",
       "migrations\\/([A-Za-z0-9_-]+)",
       "migrations\\/([A-Za-z0-9_-]+)\\/rollback",
     ]);
+  });
+
+  it("mounts the two M3 routes and refuses their inputs on merit, not with 404", async () => {
+    const { origin, token } = await started();
+    // A route that exists answers 400/422 for a bad body. A 404 here would mean the route
+    // is still closed and the gate would be reporting success for the wrong reason.
+    const post = await fetch(
+      `${origin}/api/migration/v1/projects/d1-30s/proposals/proposal_1/materialize`,
+      { method: "POST", headers: headers(origin, token), body: "{}" },
+    );
+    expect([400, 404]).toContain(post.status);
+    expect(post.status).not.toBe(404);
+    const get = await fetch(`${origin}/api/migration/v1/materializations/mat_1`,
+      { method: "GET", headers: headers(origin, token) });
+    expect(get.status).toBe(404);
+    expect(await get.json()).toMatchObject({ code: "NOT_FOUND" });
   });
 });

@@ -1,6 +1,7 @@
 import type { DatabaseSync, SQLInputValue } from "node:sqlite";
 import { HttpError } from "../api-error.js";
 import type { MaterializationState, MaterializationV1, MaterializationProxy, LineageEntryV1, NativePlanV1 } from "../../contracts/wave2-types.js";
+import { canonicalJson } from "../engine/source-digest-v1.js";
 import { validatorFor, contractIds } from "../../contracts/validator.js";
 import type { RevisionStore } from "../projects/revision-store.js";
 
@@ -58,6 +59,15 @@ export interface CreateMaterialization {
   /** Canonical hash of the request; the idempotency key is bound to this. */
   readonly requestDigest: string;
   readonly idempotencyKey: string;
+  /**
+   * The bindings the caller asked for, kept verbatim so the worker re-reads what was asked
+   * rather than what a caller might send later. They live in the table and not in the view:
+   * `MaterializationV1` is frozen and a request echo does not belong in a response.
+   */
+  readonly requestedBindings: ReadonlyArray<{
+    segment_id: string; asset_id: string;
+    source_start_frame: number; source_end_frame_exclusive: number;
+  }>;
   readonly replay?: ReplayLineage;
   readonly now?: Date;
 }
@@ -81,6 +91,7 @@ interface MaterializationRow {
   readonly proxy_json: string | null;
   readonly lineage_json: string | null;
   readonly blocking_json: string;
+  readonly request_json: string;
   readonly replay_json: string | null;
   readonly created_at: string;
   readonly updated_at: string;
@@ -101,7 +112,7 @@ export class MaterializationStore {
         comparison_id TEXT NOT NULL, proposal_id TEXT NOT NULL, state TEXT NOT NULL,
         base_revision INTEGER NOT NULL, source_digest TEXT NOT NULL, control_revision INTEGER NOT NULL,
         proposal_sha256 TEXT NOT NULL, asset_inventory_sha256 TEXT NOT NULL, rights_digest TEXT NOT NULL,
-        request_digest TEXT NOT NULL, idempotency_key TEXT NOT NULL,
+        request_digest TEXT NOT NULL, idempotency_key TEXT NOT NULL, request_json TEXT NOT NULL,
         plan_json TEXT, proxy_json TEXT, lineage_json TEXT,
         blocking_json TEXT NOT NULL DEFAULT '[]', replay_json TEXT,
         created_at TEXT NOT NULL, updated_at TEXT NOT NULL,
@@ -136,13 +147,26 @@ export class MaterializationStore {
     this.#db.prepare(
       `INSERT INTO materialization(materialization_id, project_id, job_id, comparison_id, proposal_id, state,
         base_revision, source_digest, control_revision, proposal_sha256, asset_inventory_sha256, rights_digest,
-        request_digest, idempotency_key, blocking_json, replay_json, created_at, updated_at)
-       VALUES(?,?,?,?,?,'queued',?,?,?,?,?,?,?,?,'[]',?,?,?)`,
+        request_digest, idempotency_key, blocking_json, replay_json, request_json, created_at, updated_at)
+       VALUES(?,?,?,?,?,'queued',?,?,?,?,?,?,?,?,'[]',?,?,?,?)`,
     ).run(input.materializationId, input.projectId, input.jobId, input.comparisonId, input.proposalId,
       input.baseRevision, input.sourceDigest, input.controlRevision, input.proposalSha256,
       input.assetInventorySha256, input.rightsDigest, input.requestDigest, input.idempotencyKey,
-      input.replay === undefined ? null : JSON.stringify(input.replay), at, at);
+      input.replay === undefined ? null : JSON.stringify(input.replay),
+      canonicalJson({ bindings: input.requestedBindings }), at, at);
     return this.require(input.materializationId);
+  }
+
+  /** The bindings the request asked for, as recorded. */
+  requestedBindingsOf(materializationId: string): Array<{
+    segment_id: string; asset_id: string;
+    source_start_frame: number; source_end_frame_exclusive: number;
+  }> {
+    const row = this.#requireRow("materialization_id = ?", materializationId);
+    return (JSON.parse(row.request_json) as { bindings: Array<{
+      segment_id: string; asset_id: string;
+      source_start_frame: number; source_end_frame_exclusive: number;
+    }> }).bindings;
   }
 
   require(materializationId: string): MaterializationV1 {
@@ -186,6 +210,32 @@ export class MaterializationStore {
    * satisfies the rest of the contract so the only thing under test is the plan, and the
    * runtime schema stays the single source of truth rather than a second validator here.
    */
+  /**
+   * Records the facts the worker actually proved.
+   *
+   * The request cannot know the inventory or rights digests — those are established when the
+   * bindings are re-read — so the row starts without them and gets them here. Writing a
+   * placeholder at request time would make every later read look like drift, which is how
+   * "re-verify on every read" turns into "everything is stale".
+   */
+  setProvenFacts(materializationId: string, facts: {
+    proposalSha256: string; assetInventorySha256: string; rightsDigest: string;
+  }, now = new Date()): void {
+    this.#db.prepare(
+      `UPDATE materialization SET proposal_sha256=?, asset_inventory_sha256=?, rights_digest=?, updated_at=?
+       WHERE materialization_id=?`,
+    ).run(facts.proposalSha256, facts.assetInventorySha256, facts.rightsDigest,
+      now.toISOString(), materializationId);
+  }
+
+  /** Facts the worker has not proven yet are recorded as empty, never guessed. */
+  setPendingFacts(materializationId: string, now = new Date()): void {
+    this.#db.prepare(
+      `UPDATE materialization SET proposal_sha256='', asset_inventory_sha256='', rights_digest='', updated_at=?
+       WHERE materialization_id=?`,
+    ).run(now.toISOString(), materializationId);
+  }
+
   async setPlan(materializationId: string, plan: NativePlanV1): Promise<void> {
     assertValidPlan(plan);
     this.#db.prepare("UPDATE materialization SET plan_json=?, updated_at=? WHERE materialization_id=?")
@@ -377,6 +427,7 @@ function toRow(row: Record<string, unknown>): MaterializationRow {
     plan_json: optional(row.plan_json), proxy_json: optional(row.proxy_json),
     lineage_json: optional(row.lineage_json),
     blocking_json: String(row.blocking_json ?? "[]"), replay_json: optional(row.replay_json),
+    request_json: String(row.request_json ?? '{"bindings":[]}'),
     created_at: String(row.created_at), updated_at: String(row.updated_at),
   };
 }

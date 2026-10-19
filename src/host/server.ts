@@ -1,4 +1,4 @@
-import { randomBytes } from "node:crypto";
+import { createHash, randomBytes } from "node:crypto";
 import { createReadStream } from "node:fs";
 import { stat } from "node:fs/promises";
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from "node:http";
@@ -34,11 +34,48 @@ import { EngineRegistry } from "./engine/engine-registry.js";
 import { composeOpenFilmPort, type OpenFilmComposition } from "./engine/openfilm-composition.js";
 import { AssetInventoryPort } from "./projects/asset-inventory-port.js";
 import { MigratedAssetLedger } from "./projects/migrated-asset-ledger.js";
+import { BindingService } from "./materialize/binding-service.js";
+import { DerivedArtifactStore } from "./materialize/derived-artifact-store.js";
+import { MaterializationStore } from "./materialize/materialization-store.js";
+import { MaterializeService } from "./materialize/materialize-service.js";
+import { NativePlanBuilder } from "./materialize/native-plan-builder.js";
+import { ProxyRenderer } from "./materialize/proxy-renderer.js";
+import { canonicalJson } from "./engine/source-digest-v1.js";
 import { ProjectResolver } from "./projects/project-resolver.js";
 import { HypitEngineAdapter } from "../adapters/hypit/hypit-engine-adapter.js";
 import { HypitReadAdapter } from "../adapters/hypit/hypit-read-adapter.js";
 
 const bodyLimit = 65_536;
+
+/**
+ * Parses the segment bindings a materialize request carries.
+ *
+ * Rejecting rather than coercing is the point: a client that sends a string where a number
+ * belongs gets a 422, not a binding that silently means something else.
+ */
+function parseSegmentBindings(value: unknown): Array<{
+  segment_id: string; asset_id: string;
+  source_start_frame: number; source_end_frame_exclusive: number;
+}> | undefined {
+  if (!Array.isArray(value) || value.length === 0) return undefined;
+  const bindings: Array<{
+    segment_id: string; asset_id: string;
+    source_start_frame: number; source_end_frame_exclusive: number;
+  }> = [];
+  for (const entry of value) {
+    if (typeof entry !== "object" || entry === null) return undefined;
+    const record = entry as Record<string, unknown>;
+    if (typeof record.segment_id !== "string" || typeof record.asset_id !== "string") return undefined;
+    if (!Number.isSafeInteger(record.source_start_frame)
+      || !Number.isSafeInteger(record.source_end_frame_exclusive)) return undefined;
+    bindings.push({
+      segment_id: record.segment_id, asset_id: record.asset_id,
+      source_start_frame: Number(record.source_start_frame),
+      source_end_frame_exclusive: Number(record.source_end_frame_exclusive),
+    });
+  }
+  return bindings;
+}
 
 /** Where the pinned OpenFilm checkout lives. Composition-time only, never a request field. */
 function openfilmVendorRoot(): string {
@@ -61,6 +98,7 @@ interface HostDependencies {
   /** Overrides for tests and for a Host whose working directory is not the repository. */
   migrationsRoot?: string;
   dbPath?: string;
+  derivedRoot?: string;
   leaseReapIntervalMs?: number;
   outboxReplayIntervalMs?: number;
   sessionTtlMs?: number;
@@ -104,6 +142,10 @@ export class NarralensHost {
   readonly projectResolver: ProjectResolver;
   readonly assetLedger: MigratedAssetLedger;
   readonly assetInventory: AssetInventoryPort;
+  /** M3's read-only preparation layer. Writes only its own read model and derived artifacts. */
+  readonly materializations: MaterializationStore;
+  readonly materialize: MaterializeService;
+  readonly derivedArtifacts: DerivedArtifactStore;
   readonly sessionToken = randomBytes(32).toString("base64url");
   /** Loopback origin once `listen` has bound, used to bind preview descriptors. */
   origin = "";
@@ -180,6 +222,27 @@ export class NarralensHost {
     });
     this.assetInventory = new AssetInventoryPort({
       resolver: this.projectResolver, registry: this.imports.registry, ledger: this.assetLedger,
+    });
+    this.materializations = new MaterializationStore(this.revisions);
+    this.derivedArtifacts = new DerivedArtifactStore(
+      dependencies.derivedRoot ?? resolve(projectRoot, "var/derived"));
+    this.materialize = new MaterializeService({
+      jobs: this.jobs instanceof PersistentJobStore ? this.jobs : new PersistentJobStore(this.revisions),
+      materializations: this.materializations,
+      artifacts: this.derivedArtifacts,
+      resolver: this.projectResolver,
+      inventory: this.assetInventory,
+      bindings: new BindingService({
+        resolver: this.projectResolver,
+        inventory: this.assetInventory,
+        // The comparison is read from the Host's own staging area for this project. A
+        // comparison whose `project_id` is not this target is refused by `BindingService`,
+        // never rebound.
+        readComparison: (comparisonId) => this.comparisons.read(comparisonId),
+      }),
+      plans: new NativePlanBuilder(),
+      proxies: new ProxyRenderer({ artifacts: this.derivedArtifacts, profile: "wave2-proxy-720p30-v1" }),
+      resolveMedia: (projectId, assetId) => this.#targetMediaPath(projectId, assetId),
     });
     this.migrations = new MigrationService({
       catalog: this.catalog, revisions: this.revisions, bindings: this.engines.bindings,
@@ -326,6 +389,14 @@ export class NarralensHost {
       if (request.method === "GET" && match?.[1]) return json(response, 200, await this.#engine(match[1]));
       match = url.pathname.match(/^\/api\/migration\/v1\/projects\/([A-Za-z0-9_-]+)\/migrate-copy$/);
       if (request.method === "POST" && match?.[1]) return await this.#migrateCopy(match[1], request, response);
+      match = url.pathname.match(
+        /^\/api\/migration\/v1\/projects\/([A-Za-z0-9_-]+)\/proposals\/([A-Za-z0-9_-]+)\/materialize$/,
+      );
+      if (request.method === "POST" && match?.[1] && match[2]) {
+        return await this.#materializeProposal(match[1], match[2], request, response);
+      }
+      match = url.pathname.match(/^\/api\/migration\/v1\/materializations\/([A-Za-z0-9_-]+)$/);
+      if (request.method === "GET" && match?.[1]) return await this.#readMaterialization(match[1], response);
       match = url.pathname.match(/^\/api\/migration\/v1\/migrations\/([A-Za-z0-9_-]+)$/);
       if (request.method === "GET" && match?.[1]) return json(response, 200, this.#migrationReport(match[1]));
       match = url.pathname.match(/^\/api\/migration\/v1\/migrations\/([A-Za-z0-9_-]+)\/rollback$/);
@@ -492,6 +563,58 @@ export class NarralensHost {
    * M2.3 `migrate-copy`: create the migration, run it, and answer with its report.
    * No server path ever crosses this boundary; the only input is an idempotency key.
    */
+  /**
+   * Where a bound asset's bytes live inside the target.
+   *
+   * Derived from the ledger row that was proven at bootstrap, then re-checked to be inside
+   * the target root. Nothing here accepts a path from a request, and a guess would be the
+   * difference between rendering the proposal's media and rendering whatever was on disk.
+   */
+  async #targetMediaPath(projectId: string, assetId: string): Promise<string> {
+    const row = this.assetLedger.assets(projectId).find((candidate) => candidate.asset_id === assetId);
+    if (row === undefined) throw new HttpError(422, "MISSING_ASSET", "Asset is not registered for this project", undefined, projectId);
+    const view = await this.projectResolver.resolveActivated(projectId);
+    const path = resolve(view.source_root.value, row.target_path);
+    if (path !== view.source_root.value && !path.startsWith(`${view.source_root.value}/`)) {
+      throw new HttpError(403, "ORIGIN_REJECTED", "Asset path escapes the target root", undefined, projectId);
+    }
+    return path;
+  }
+
+  async #materializeProposal(projectId: string, proposalId: string,
+    request: IncomingMessage, response: ServerResponse): Promise<void> {
+    const body = await readJson(request) as {
+      comparison_id?: unknown; base_revision?: unknown; expected_source_digest?: unknown;
+      control_revision?: unknown; segment_bindings?: unknown; idempotency_key?: unknown;
+    };
+    const idempotencyKey = typeof body?.idempotency_key === "string" ? body.idempotency_key : "";
+    if (idempotencyKey.length < 8 || idempotencyKey.length > 128) {
+      throw new HttpError(400, "INVALID_REQUEST", "idempotency_key must be 8 to 128 characters");
+    }
+    const bindings = parseSegmentBindings(body?.segment_bindings);
+    if (bindings === undefined) {
+      throw new HttpError(422, "INVALID_REQUEST", "segment_bindings is required");
+    }
+    const requestDigest = createHash("sha256").update(canonicalJson({
+      comparison_id: body.comparison_id, base_revision: body.base_revision,
+      expected_source_digest: body.expected_source_digest, bindings,
+    })).digest("hex");
+    const created = await this.materialize.request({
+      projectId, comparisonId: String(body.comparison_id ?? ""), proposalId,
+      baseRevision: Number(body.base_revision), sourceDigest: String(body.expected_source_digest ?? ""),
+      controlRevision: Number(body.control_revision), bindings, idempotencyKey, requestDigest,
+    });
+    const job = this.jobs.get(created.job_id);
+    json(response, 202, {
+      ...(job as unknown as Record<string, unknown>),
+      materialization_id: created.materialization_id,
+    });
+  }
+
+  async #readMaterialization(materializationId: string, response: ServerResponse): Promise<void> {
+    json(response, 200, await this.materialize.read(materializationId));
+  }
+
   async #migrateCopy(projectId: string, request: IncomingMessage, response: ServerResponse): Promise<void> {
     const body = await readJson(request) as { idempotency_key?: unknown };
     const idempotencyKey = typeof body?.idempotency_key === "string" ? body.idempotency_key : "";
