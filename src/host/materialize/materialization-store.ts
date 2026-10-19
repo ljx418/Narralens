@@ -279,6 +279,48 @@ export class MaterializationStore {
       && row.proposal_sha256 !== "" && row.asset_inventory_sha256 !== "" && row.rights_digest !== "";
   }
 
+  /**
+   * Joint recovery decision, B2.
+   *
+   * A worker that lost its lease leaves the materialization in `running` or `validating`
+   * while the reaper has already put the job back to `queued`. The next attempt then finds a
+   * row that is not `queued` and used to treat the new attempt as a late callback, which
+   * meant a lost lease was never actually retried — the requeue existed only on paper.
+   *
+   * The rules, in order:
+   *
+   * - a row whose job is `cancel_requested` is cancelled, never resumed;
+   * - an incomplete row resumes at `running` under the new attempt: nothing was published, so
+   *   there is nothing to reconcile;
+   * - a *complete* row — plan, proxy and lineage all present and its facts still recorded —
+   *   resumes at `validating`, so the new attempt can promote it without re-encoding;
+   * - a complete row whose facts were superseded is stale, not resumed;
+   * - anything else is `attention`: this worker cannot tell whose it was, and guessing is the
+   *   one thing the frozen plan forbids.
+   */
+  resumeOrReset(materializationId: string, now = new Date()):
+    "running" | "validating" | "stale" | "cancelled" | "attention" | "ready" {
+    const row = this.#requireRow("materialization_id = ?", materializationId);
+    // `stale` means the premises moved. Re-opening it would re-assert facts nobody
+    // re-verified, so it is left exactly as it is.
+    if (row.state === "stale") return "stale";
+    if (row.state === "ready_for_adoption") return "ready";
+    if (row.state === "cancel_requested") return "cancelled";
+    if (row.state === "attention" || row.state === "failed" || row.state === "cancelled") {
+      return row.state === "attention" ? "attention" : "cancelled";
+    }
+    const complete = row.plan_json !== null && row.proxy_json !== null && row.lineage_json !== null
+      && row.proposal_sha256 !== "" && row.asset_inventory_sha256 !== "" && row.rights_digest !== "";
+    const target = complete ? "validating" : "running";
+    if (row.state === target) return target;
+
+    const changes = Number(this.#db.prepare(
+      `UPDATE materialization SET state=?, updated_at=? WHERE materialization_id=? AND state=?`,
+    ).run(target, now.toISOString(), materializationId, row.state).changes);
+    if (changes !== 1) throw new Error(`INVALID_MATERIALIZATION_TRANSITION:${row.state}->${target}`);
+    return target;
+  }
+
   /** Facts the worker has not proven yet are recorded as empty, never guessed. */
   setPendingFacts(materializationId: string, now = new Date()): void {
     this.#db.prepare(

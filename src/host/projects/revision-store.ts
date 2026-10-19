@@ -598,6 +598,37 @@ export class RevisionStore {
     return Number(result.changes) === 1;
   }
 
+  /**
+   * Compare-and-set lease renewal.
+   *
+   * Every predicate matters and each one has bitten: `state='running'` so a terminal or
+   * cancelled job cannot be resurrected, `lease_owner=?` so a different worker cannot keep
+   * a lease alive, and `attempt=?` so an owner whose attempt was superseded cannot renew —
+   * a worker that lost its lease and was requeued comes back with the *same* owner name and
+   * would otherwise hold the lease forever. The expiry is extended from now, not from the
+   * old value, so a renewal cannot resurrect an already-expired lease.
+   */
+  renewLease(jobId: string, owner: string, attempt: number, now: number, expiresAt: number): boolean {
+    const result = this.#db.prepare(`UPDATE job SET lease_expires_at=?, updated_at=?
+      WHERE job_id=? AND state='running' AND lease_owner=? AND attempt=? AND lease_expires_at>?`)
+      // Epoch milliseconds, matching every other lease timestamp in this table. Writing an
+      // ISO string here puts TEXT into an INTEGER-affinity column, and every later numeric
+      // comparison against it then succeeds vacuously.
+      .run(expiresAt, new Date(now).toISOString(), jobId, owner, attempt, now);
+    return Number(result.changes) === 1;
+  }
+
+  /**
+   * Whether this worker still holds an unexpired lease. Called at every boundary where a
+   * late worker could otherwise publish something nobody can attribute.
+   */
+  holdsLease(jobId: string, owner: string, attempt: number, now: number): boolean {
+    const row = this.#db.prepare(`SELECT 1 FROM job
+      WHERE job_id=? AND state='running' AND lease_owner=? AND attempt=? AND lease_expires_at>?`)
+      .get(jobId, owner, attempt, now);
+    return row !== undefined;
+  }
+
   releaseLease(jobId: string, owner: string, now: number): boolean {
     const result = this.#db.prepare(`UPDATE job SET state='queued', lease_owner=NULL, lease_expires_at=NULL, updated_at=?
       WHERE job_id=? AND lease_owner=? AND state='running'`)

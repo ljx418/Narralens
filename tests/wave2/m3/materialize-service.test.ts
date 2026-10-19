@@ -342,8 +342,9 @@ describe("M3.3 a late or cancelled result is quarantined, never adopted", () => 
     const created = await requestMaterialization(h);
     h.cancelAt("after_lease");
     await h.service.run(created.materialization_id, "worker-a");
-    const job = h.jobs.require(created.job_id);
-    expect(job.quarantined_artifact_json === null || job.quarantined_artifact_json !== undefined).toBe(true);
+    // The orphan is recorded, not merely left behind: an operator asking "what did that
+    // cancelled worker produce?" has to find the answer.
+    expect(h.jobs.require(created.job_id).state).toBe("cancelled");
     expect(h.jobs.eventsAfter(created.job_id, 0).some((event) => /quarantined/i.test(event.message ?? "")))
       .toBe(true);
   }, 300_000);

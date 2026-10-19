@@ -146,6 +146,8 @@ export class ProxyRenderer {
     projectId: string;
     plan: NativePlanV1;
     segments: readonly ProxySegmentInput[];
+    /** Aborts the encoder and discards staging, so close() can stop a render promptly. */
+    signal?: AbortSignal;
   }): Promise<ProxyRenderResult> {
     const release = await this.#admit(input.projectId);
     try {
@@ -160,6 +162,8 @@ export class ProxyRenderer {
     projectId: string;
     plan: NativePlanV1;
     segments: readonly ProxySegmentInput[];
+    /** Aborts the encoder and discards staging, so close() can stop a render promptly. */
+    signal?: AbortSignal;
   }): Promise<ProxyRenderResult> {
     if (input.segments.length === 0) throw new HttpError(422, "INVALID_MEDIA", "A proxy needs at least one segment");
     if (input.segments.length > MAX_SEGMENTS) {

@@ -6,6 +6,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import { ProposalAdapter } from "../../../src/adapters/openmontage/proposal-adapter.js";
 import { ProposalComparisonAdapter } from "../../../src/adapters/openmontage/proposal-comparison-adapter.js";
 import { NarralensHost } from "../../../src/host/server.js";
+import { LockService } from "../../../src/host/projects/lock-service.js";
 import type { JobResponse, ProposalComparison, ProposalComparisonRequest } from "../../../src/contracts/types.js";
 import type { MaterializationV1 } from "../../../src/contracts/wave2-types.js";
 import { treeDigest } from "../../../src/host/projects/openfilm-migrator.js";
@@ -554,5 +555,97 @@ describe("MT-04 and MT-05 through the Host, not around it", () => {
     const read = await running.host.materialize.read(job.materialization_id);
     expect(read.state).toBe("stale");
     expect(read.blocking_reasons).toContain("CONTROL_REVISION_CHANGED");
+  }, 600_000);
+});
+
+/**
+ * M2: PR-03, "锁定范围变化拒绝".
+ *
+ * The acceptance matrix asks for proof that a locked range refuses the operation, and it
+ * explicitly forbids standing in for it by bumping the control revision by hand. These go
+ * through the real `LockService`, which is what a lock actually is here: a row plus a
+ * control revision that every write re-checks.
+ */
+describe("PR-03 a real lock, not a hand-written control revision", () => {
+  async function withTarget(): Promise<{
+    running: Started; projectId: string; proposalId: string; comparisonId: string;
+    comparison: ProposalComparison; assets: string[]; view: { revision: number; control_revision: number; source_digest: string };
+  }> {
+    const running = await started();
+    const migrated = await migrateTarget(running);
+    const assets = await targetAssetIds(running.host, migrated.projectId);
+    const view = await running.host.projectResolver.resolveActivated(migrated.projectId);
+    return { running, ...migrated, assets, view };
+  }
+
+  function body(fields: Record<string, unknown>): Record<string, unknown> {
+    return {
+      format: "narralens.materialize-request@1.0",
+      profile: { profile_id: "wave2-proxy-720p30-v1" }, ...fields,
+    };
+  }
+
+  it("refuses a POST prepared before the range was locked", async () => {
+    const { running, projectId, proposalId, comparisonId, comparison, assets, view } = await withTarget();
+    const request = body({
+      comparison_id: comparisonId, base_revision: view.revision,
+      expected_source_digest: view.source_digest, control_revision: view.control_revision,
+      segment_bindings: bindingsFor(comparison, proposalId, assets),
+      idempotency_key: "m33-lock-before-1",
+    });
+    // The client composed its request against this control revision…
+    expect(running.host.revisions.controlRevision(projectId, view.revision)).toBe(view.control_revision);
+
+    // …and a lock on the very range it wants to change now exists.
+    const locks = new LockService(running.host.revisions);
+    locks.acquire({
+      projectId, lockType: "visual", scope: "shot", targetId: "shot-001",
+      startFrame: 0, endFrameExclusive: 600, owner: "editor-1", reason: "user is editing shot 1",
+    }, view.revision);
+    expect(running.host.revisions.controlRevision(projectId, view.revision))
+      .toBeGreaterThan(view.control_revision);
+
+    const response = await fetch(
+      `${running.origin}/api/migration/v1/projects/${projectId}/proposals/${proposalId}/materialize`,
+      { method: "POST", headers: headers(running.origin, running.token), body: JSON.stringify(request) },
+    );
+    // The stale control revision is refused, and nothing is created.
+    expect(response.status).toBe(409);
+    expect(await response.json()).toMatchObject({ code: "REVISION_CONFLICT" });
+    expect(running.host.materializations.byProject(projectId)).toEqual([]);
+  }, 300_000);
+
+  it("moves a ready materialization stale when the range is locked afterwards", async () => {
+    const { running, projectId, proposalId, comparisonId, comparison, assets, view } = await withTarget();
+    const posted = await fetch(
+      `${running.origin}/api/migration/v1/projects/${projectId}/proposals/${proposalId}/materialize`,
+      { method: "POST", headers: headers(running.origin, running.token), body: JSON.stringify(body({
+        comparison_id: comparisonId, base_revision: view.revision,
+        expected_source_digest: view.source_digest, control_revision: view.control_revision,
+        segment_bindings: bindingsFor(comparison, proposalId, assets),
+        idempotency_key: "m33-lock-after-1",
+      })) },
+    );
+    expect(posted.status, await posted.clone().text()).toBe(202);
+    const job = await posted.json() as { materialization_id: string };
+    let row: MaterializationV1 | undefined;
+    for (let attempt = 0; attempt < 120 && row?.state !== "ready_for_adoption"; attempt += 1) {
+      await new Promise((resolvePromise) => setTimeout(resolvePromise, 250));
+      row = await running.host.materialize.read(job.materialization_id);
+    }
+    expect(row?.state).toBe("ready_for_adoption");
+
+    // A real lock on the range the materialization proposes to replace.
+    new LockService(running.host.revisions).acquire({
+      projectId, lockType: "visual", scope: "shot", targetId: "shot-001",
+      startFrame: 0, endFrameExclusive: 600, owner: "editor-2", reason: "user is editing shot 1",
+    }, view.revision);
+
+    const read = await fetch(`${running.origin}/api/migration/v1/materializations/${job.materialization_id}`,
+      { headers: headers(running.origin, running.token) });
+    expect(read.status).toBe(200);
+    const after = await read.json() as MaterializationV1;
+    expect(after.state).toBe("stale");
+    expect(after.blocking_reasons).toContain("CONTROL_REVISION_CHANGED");
   }, 600_000);
 });

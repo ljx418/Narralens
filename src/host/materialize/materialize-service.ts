@@ -4,7 +4,9 @@ import { HttpError } from "../api-error.js";
 import type { ProposalComparison } from "../../contracts/types.js";
 import type { MaterializationV1 } from "../../contracts/wave2-types.js";
 import type { PersistentJobStore } from "../persistent-job-store.js";
+import type { LeaseIdentity } from "../persistent-job-store.js";
 import type { MaterializationStore, ReplayLineage } from "./materialization-store.js";
+import type { LineageEntryV1 } from "../../contracts/wave2-types.js";
 import type { BindingService, BindingResult } from "./binding-service.js";
 import type { NativePlanBuilder } from "./native-plan-builder.js";
 import type { ProxyRenderer } from "./proxy-renderer.js";
@@ -60,6 +62,10 @@ export interface MaterializeServiceDeps {
   /** The media file behind an asset id, resolved from the target's own tree. */
   readonly resolveMedia: (projectId: string, assetId: string) => Promise<string>;
   readonly leaseMs?: number;
+  /** How often a running worker renews its lease. Must be well under `leaseMs`. */
+  readonly heartbeatMs?: number;
+  /** Injected so tests can drive a render past its lease deterministically. */
+  readonly scheduler?: Scheduler;
   readonly fault?: (point: MaterializeFaultPoint) => void | Promise<void>;
   /** Notified when a job row is created, so a harness can cancel it mid-run. */
   readonly onJob?: (job: { job_id: string }) => void;
@@ -67,17 +73,63 @@ export interface MaterializeServiceDeps {
 }
 
 export const MATERIALIZE_LEASE_MS = 30_000;
+/** A third of the lease: several renewals fit inside one expiry even if one is delayed. */
+export const MATERIALIZE_HEARTBEAT_MS = MATERIALIZE_LEASE_MS / 3;
+
+/**
+ * The timer surface, injected so tests can hold a render open across its lease expiry.
+ */
+export interface Scheduler {
+  setInterval(handler: () => void, ms: number): { unref?: () => void };
+  clearInterval(handle: { unref?: () => void }): void;
+}
+
+export const realScheduler: Scheduler = {
+  setInterval: (handler, ms) => setInterval(handler, ms) as unknown as { unref?: () => void },
+  clearInterval: (handle) => clearInterval(handle as unknown as ReturnType<typeof setInterval>),
+};
+
+function codeOf(error: unknown): string {
+  return error instanceof HttpError ? error.code : "INTERNAL_ERROR";
+}
 
 export class MaterializeService {
   readonly #deps: MaterializeServiceDeps;
-  readonly #inflight = new Map<string, Promise<void>>();
+  /** Every run in flight, so close can wait for a durable ending rather than abandon one. */
+  readonly #inflight = new Set<Promise<unknown>>();
+  readonly #controllers = new Map<string, AbortController>();
+  #accepting = true;
 
   constructor(deps: MaterializeServiceDeps) {
     this.#deps = deps;
   }
 
-  /** Recorded intents, keyed by the id the POST returned. */
-  readonly inflight = this.#inflight;
+  /** In-flight runs, for close() to await. Previously declared and never written. */
+  get inflight(): number { return this.#inflight.size; }
+
+  get acceptingWork(): boolean { return this.#accepting; }
+
+  /**
+   * Stop taking new work and tell running workers to finish.
+   *
+   * A worker that is mid-encoder gets an abort so close does not have to wait for it, and
+   * every one of them reaches a durable ending — a released lease, or one a restart can
+   * reclaim — before the caller may close the database.
+   */
+  async shutdown(timeoutMs = 5_000): Promise<void> {
+    this.#accepting = false;
+    for (const controller of this.#controllers.values()) controller.abort();
+    const deadline = Date.now() + timeoutMs;
+    while (this.#inflight.size > 0 && Date.now() < deadline) {
+      await Promise.race([
+        Promise.allSettled([...this.#inflight]),
+        new Promise((resolvePromise) => setTimeout(resolvePromise, 25)),
+      ]);
+      if (Date.now() >= deadline) break;
+    }
+    // Anything still running past the deadline keeps its lease, which is precisely what
+    // makes it recoverable on the next start rather than orphaned.
+  }
 
   /**
    * `POST .../materialize`. Records the intent, creates the job, and returns both.
@@ -216,31 +268,70 @@ export class MaterializeService {
    * could not be proven is `failed` or `attention`, both of which are answers a client can
    * act on, not exceptions it has to guess at.
    */
+  /**
+   * Runs one materialization to completion under a lease it keeps.
+   *
+   * The lease is renewed on a timer for as long as this worker is alive, and re-checked by
+   * CAS at every boundary where a late worker could otherwise publish something nobody can
+   * attribute: before the proxy is promoted into the row, before lineage is written, before
+   * `ready_for_adoption`, and before the `succeeded` callback. Losing the lease at any of
+   * them means this attempt is over: the materialization may not be promoted, the job may not
+   * be succeeded, and whatever it produced is quarantined rather than discarded — the bytes
+   * exist and their premises are unknown, which is the definition of an orphan.
+   */
   async run(materializationId: string, owner = `worker-${process.pid}`): Promise<{
     state: string; quarantined: boolean;
   }> {
-    const jobId = this.#deps.materializations.require(materializationId).job_id;
+    if (!this.#accepting) return { state: "attention", quarantined: false };
+    const work = this.#runOwned(materializationId, owner);
+    this.#inflight.add(work);
+    try { return await work; }
+    finally { this.#inflight.delete(work); }
+  }
+
+  async #runOwned(materializationId: string, owner: string): Promise<{
+    state: string; quarantined: boolean;
+  }> {
+    const row = this.#deps.materializations.require(materializationId);
+    const jobId = row.job_id;
     const now = this.#deps.now?.() ?? new Date();
-    const lease = { owner, leaseMs: this.#deps.leaseMs ?? MATERIALIZE_LEASE_MS, now };
-    if (!this.#deps.jobs.acquireLease(jobId, lease)) {
+    const leaseMs = this.#deps.leaseMs ?? MATERIALIZE_LEASE_MS;
+    if (!this.#deps.jobs.acquireLease(jobId, { owner, leaseMs, now })) {
       // Another worker holds it. That is a normal outcome, not an error.
       return { state: this.#deps.jobs.require(jobId).state, quarantined: false };
     }
     const attempt = this.#deps.jobs.require(jobId).attempt;
-    await this.#deps.fault?.("after_lease");
+    const identity = { owner, attempt };
+
+    const heartbeat = this.#startHeartbeat(jobId, identity, leaseMs);
+    const controller = new AbortController();
+    this.#controllers.set(materializationId, controller);
 
     let artifact: unknown = null;
     try {
-      const row = this.#deps.materializations.require(materializationId);
-      if (row.state !== "queued") {
-        // A worker whose materialization already moved on must not advance it.
-        this.#deps.jobs.recordCallback(jobId, { owner, attempt },
-          { state: "cancelled", message: "materialization already left queued" });
+      await this.#deps.fault?.("after_lease");
+
+      // Joint recovery: a row left `running` or `validating` by a worker that lost its lease
+      // is resumable, provided nothing about it contradicts what is recorded. `resumeOrReset`
+      // decides, and it is the only thing allowed to move a row off `queued` here.
+      const resumed = this.#deps.materializations.resumeOrReset(materializationId, now);
+      if (resumed === "cancelled") {
+        this.#deps.jobs.recordCallback(jobId, identity,
+          { state: "cancelled", message: "materialization was cancelled before this attempt" });
         return { state: this.#deps.materializations.require(materializationId).state, quarantined: true };
       }
-      this.#deps.materializations.transition(materializationId, "queued", "running");
+      if (resumed === "stale" || resumed === "ready") {
+        // Its premises moved, or it was already promoted. Either way this attempt has
+        // nothing to add, and touching it would re-open a row the reader already moved.
+        return { state: this.#deps.materializations.require(materializationId).state, quarantined: false };
+      }
+      if (resumed === "attention") {
+        this.#deps.jobs.recordCallback(jobId, identity,
+          { state: "attention", terminalReason: "materialization ownership could not be established" });
+        return { state: "attention", quarantined: true };
+      }
 
-      const bound = await this.#bind(row);
+      const bound = await this.#bind(this.#deps.materializations.require(materializationId));
       this.#deps.materializations.setProvenFacts(materializationId, {
         proposalSha256: bound.binding_digest,
         assetInventorySha256: bound.asset_inventory_sha256,
@@ -251,75 +342,143 @@ export class MaterializeService {
       await this.#deps.fault?.("after_plan");
 
       const rendered = await this.#deps.proxies.render({
-        materializationId, projectId: row.project_id, plan,
+        materializationId, projectId: row.project_id, plan, signal: controller.signal,
         segments: await this.#segments(bound),
       });
       artifact = rendered.proxy;
+
+      // Boundary one: the proxy has been encoded. Before it becomes part of the row, this
+      // attempt must still own the job.
+      const first = this.#mayPublish(jobId, identity, materializationId, rendered.lineage);
+      if (first !== undefined) return first;
       await this.#deps.materializations.setProxy(materializationId, rendered.proxy);
+
+      // Boundary two: before lineage is written.
+      const second = this.#mayPublish(jobId, identity, materializationId, rendered.lineage);
+      if (second !== undefined) return second;
       await this.#deps.materializations.setLineage(materializationId, rendered.lineage);
       await this.#deps.fault?.("after_proxy");
       await this.#deps.fault?.("after_lineage");
 
-      this.#deps.materializations.transition(materializationId, "running", "validating");
+      if (this.#deps.materializations.require(materializationId).state === "running") {
+        this.#deps.materializations.transition(materializationId, "running", "validating");
+      }
       await this.#deps.fault?.("before_ready");
-      // The cancellation check and the promotion share one synchronous window: every read
-      // between them was an `await`, and a cancel landing in one of those gaps produced a
-      // `ready_for_adoption` row sitting on a `cancelled` job.
+
+      // Boundary three: the promotion. Checked with no `await` between the check and the
+      // write, so a cancellation or a requeue cannot land in the gap.
       const jobState = this.#deps.jobs.require(jobId).state;
       if (jobState === "cancel_requested") {
-        const cancelled = this.#deps.jobs.recordCallback(jobId, { owner, attempt },
+        const cancelled = this.#deps.jobs.recordCallback(jobId, identity,
           { state: "cancelled", artifact });
         if (!cancelled.applied) this.#deps.materializations.quarantine(materializationId, rendered.lineage);
         return { state: this.#deps.jobs.require(jobId).state, quarantined: true };
       }
+      const third = this.#mayPublish(jobId, identity, materializationId, rendered.lineage);
+      if (third !== undefined) return third;
       this.#deps.materializations.transition(materializationId, "validating", "ready_for_adoption");
       await this.#deps.fault?.("after_ready");
 
-      this.#deps.jobs.recordCallback(jobId, { owner, attempt }, { state: "succeeded", artifact });
+      // Boundary four: the succeeded callback.
+      const fourth = this.#mayPublish(jobId, identity, materializationId, rendered.lineage);
+      if (fourth !== undefined) return fourth;
+      this.#deps.jobs.recordCallback(jobId, identity, { state: "succeeded", artifact });
       return { state: "ready_for_adoption", quarantined: false };
     } catch (error) {
       const cancelled = this.#deps.jobs.require(jobId).state === "cancel_requested";
-      const code = error instanceof HttpError ? error.code : "INTERNAL_ERROR";
       if (cancelled) {
-        // Late and cancelled: the bytes exist, the premises do not. Recorded, not adopted.
-        const outcome = this.#deps.jobs.recordCallback(jobId, { owner, attempt },
+        const outcome = this.#deps.jobs.recordCallback(jobId, identity,
           { state: "cancelled", artifact, message: "materialize finished after cancellation" });
-        if (!outcome.applied && this.#deps.materializations.find(materializationId) !== undefined) {
-          this.#deps.materializations.quarantine(materializationId, []);
-        }
+        if (!outcome.applied) this.#deps.materializations.quarantine(materializationId, []);
         return { state: this.#deps.jobs.require(jobId).state, quarantined: true };
       }
       const message = error instanceof Error ? error.message : String(error);
       const current = this.#deps.materializations.find(materializationId);
       // A complete row has not had its premises contradicted; it had its *promotion*
       // interrupted. Marking it stale would discard a proxy that is already encoded and
-      // content-addressed, and `stale` is terminal, so the bytes would be unreachable.
-      // It is left where it is for a retry to promote.
+      // content-addressed. It is left where it is for a retry to promote.
       if (current !== undefined && this.#deps.materializations.isComplete(materializationId)) {
-        this.#deps.jobs.recordCallback(jobId, { owner, attempt },
-          { state: "failed", terminalReason: `promotion interrupted: ${message.slice(0, 160)}`,
-            artifact });
+        this.#deps.jobs.transition(jobId, "failed",
+          { terminalReason: `promotion interrupted: ${message.slice(0, 160)}`, artifact });
         return { state: current.state, quarantined: false };
       }
-      // Otherwise something was published that cannot be attributed. Attention, not failure.
       const published = current?.proxy !== undefined && current?.proxy !== null;
       if (published && (await this.#deps.artifacts.stagingLeftovers()).length > 0) {
         this.#deps.materializations.quarantine(materializationId, []);
-        this.#deps.jobs.recordCallback(jobId, { owner, attempt },
-          { state: "attention", terminalReason: "materialize left artifacts it cannot classify" });
+        this.#deps.jobs.transition(jobId, "attention",
+          { terminalReason: "materialize left artifacts it cannot classify" });
         return { state: "attention", quarantined: true };
       }
-      this.#deps.jobs.recordCallback(jobId, { owner, attempt },
-        { state: "failed", terminalReason: message.slice(0, 200),
-          error: { code, message: message.slice(0, 200), correlation_id: "materialize" } });
+      this.#deps.jobs.transition(jobId, "failed",
+        { terminalReason: message.slice(0, 200), artifact });
       if (this.#deps.materializations.find(materializationId)?.state === "running") {
-        this.#deps.materializations.markStale(materializationId, [code]);
+        this.#deps.materializations.markStale(materializationId, [codeOf(error)]);
       }
       return { state: this.#deps.jobs.require(jobId).state, quarantined: false };
     } finally {
-      this.#deps.artifacts.removeStagingLeftovers().catch(() => undefined);
+      // Every exit — success, failure, cancellation, a thrown abort — releases the heartbeat
+      // and the abort controller. A timer left running would renew a lease for a worker that
+      // has already finished.
+      heartbeat.stop();
+      this.#controllers.delete(materializationId);
       this.#deps.jobs.releaseLease(jobId, owner);
+      this.#deps.artifacts.removeStagingLeftovers().catch(() => undefined);
     }
+  }
+
+  /**
+   * Whether this attempt may still publish, and what to do when it may not.
+   *
+   * Cancellation is checked *before* the lease, and the order matters: a cancelled job fails
+   * the lease test too, so testing the lease first sent every cancellation down the "lost
+   * lease" path, which left the job in `cancel_requested` forever instead of closing it.
+   * Returns undefined when the attempt may proceed.
+   */
+  #mayPublish(jobId: string, identity: LeaseIdentity, materializationId: string,
+    lineage: readonly LineageEntryV1[]): { state: string; quarantined: boolean } | undefined {
+    if (this.#deps.jobs.require(jobId).state === "cancel_requested") {
+      const cancelled = this.#deps.jobs.recordCallback(jobId, identity,
+        { state: "cancelled", artifact: this.#deps.materializations.require(materializationId).proxy });
+      if (!cancelled.applied) this.#deps.materializations.quarantine(materializationId, lineage);
+      return { state: this.#deps.jobs.require(jobId).state, quarantined: true };
+    }
+    if (!this.#ownsJob(jobId, identity)) {
+      return this.#quarantineOrphan(jobId, identity, materializationId, lineage, "lost lease");
+    }
+    return undefined;
+  }
+
+  /** Keeps this attempt's lease alive while it works. */
+  #startHeartbeat(jobId: string, identity: LeaseIdentity, leaseMs: number): { stop: () => void } {
+    const scheduler = this.#deps.scheduler ?? realScheduler;
+    const period = Math.max(1, Math.min(this.#deps.heartbeatMs ?? MATERIALIZE_HEARTBEAT_MS, Math.floor(leaseMs / 2)));
+    const handle = scheduler.setInterval(() => {
+      const now = this.#deps.now?.() ?? new Date();
+      this.#deps.jobs.renewLease(jobId, identity, leaseMs, now);
+    }, period);
+    handle.unref?.();
+    let stopped = false;
+    return { stop: () => { if (stopped) return; stopped = true; scheduler.clearInterval(handle); } };
+  }
+
+  #ownsJob(jobId: string, identity: LeaseIdentity): boolean {
+    return this.#deps.jobs.holdsLease(jobId, identity, this.#deps.now?.() ?? new Date());
+  }
+
+  /**
+   * This attempt is over. The materialization is parked in `attention` with the lineage that
+   * was produced, and the job is left alone: the next attempt owns it now, and an old
+   * attempt writing to either row is exactly what the lease exists to prevent.
+   */
+  #quarantineOrphan(jobId: string, identity: LeaseIdentity, materializationId: string,
+    lineage: readonly LineageEntryV1[], why: string): { state: string; quarantined: boolean } {
+    const current = this.#deps.materializations.find(materializationId);
+    if (current !== undefined && (current.state === "running" || current.state === "validating")) {
+      this.#deps.materializations.quarantine(materializationId, lineage);
+    }
+    void jobId;
+    void identity;
+    return { state: this.#deps.materializations.require(materializationId).state, quarantined: true };
   }
 
   async #bind(row: MaterializationV1): Promise<BindingResult> {

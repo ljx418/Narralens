@@ -434,6 +434,9 @@ export class NarralensHost {
       clearInterval(this.#materializeDrainTimer);
       this.#materializeDrainTimer = undefined;
     }
+    // Stop accepting, tell running workers to finish, and wait for a durable ending —
+    // before anything closes the database underneath them.
+    await this.materialize.shutdown();
     if (this.#leaseReaper !== undefined) clearInterval(this.#leaseReaper);
     this.#leaseReaper = undefined;
     if (!server) { this.revisions.close(); return; }

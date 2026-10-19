@@ -118,6 +118,22 @@ export class PersistentJobStore {
     return true;
   }
 
+  /**
+   * Extend a lease this worker still owns, for an attempt it still holds.
+   *
+   * A long render outlives the lease unless it says otherwise, and the lease is the only
+   * thing that distinguishes this worker from the next one.
+   */
+  renewLease(jobId: string, identity: LeaseIdentity, leaseMs = DEFAULT_LEASE_MS, now = new Date()): boolean {
+    return this.#store.renewLease(jobId, identity.owner, identity.attempt, now.getTime(),
+      now.getTime() + leaseMs);
+  }
+
+  /** Whether this worker may still act on the job. Checked at every publishing boundary. */
+  holdsLease(jobId: string, identity: LeaseIdentity, now = new Date()): boolean {
+    return this.#store.holdsLease(jobId, identity.owner, identity.attempt, now.getTime());
+  }
+
   releaseLease(jobId: string, owner: string, now = new Date()): boolean {
     let event: ReturnType<RevisionStore["appendJobEvent"]> | undefined;
     const released = this.#store.atomic(() => {

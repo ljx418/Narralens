@@ -248,13 +248,15 @@
   {
     "case_id": "PR-03",
     "title": "negative coverage: unknown asset, duplicate/out-of-range binding, second timeline",
-    "status": "PARTIAL",
-    "production_seam": "yes",
+    "status": "CLOSED",
+    "production_seam": "yes — real LockService through NarralensHost",
     "tests": [
+      "tests/wave2/m3/materialize-routes.test.ts::refuses a POST prepared before the range was locked",
+      "tests/wave2/m3/materialize-routes.test.ts::moves a ready materialization stale when the range is locked afterwards",
       "tests/wave2/m3/binding-service.test.ts",
       "tests/wave2/m3/materialization-store.test.ts::holds no frame timeline of its own"
     ],
-    "claim_limit": "Locked ranges are not modelled in M3; they belong to M4's three lock classes. Recorded rather than faked."
+    "notes": "Locks are taken through the real LockService, so the control revision moves because a lock moved, not because a test wrote a number. A lock before the POST gives 409; a lock after ready drives the materialization stale with CONTROL_REVISION_CHANGED on read."
   },
   {
     "case_id": "MT-01",
