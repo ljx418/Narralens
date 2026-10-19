@@ -108,6 +108,7 @@ run m2.1               corepack pnpm test:m2.1
 run m2.2               corepack pnpm exec vitest run tests/m2.2
 run m2.3               corepack pnpm exec vitest run tests/m2.3
 run wave2              corepack pnpm test:wave2:w2.0
+run wave2-m3           corepack pnpm test:wave2:m3
 run wave2-fitness      corepack pnpm test:wave2:fitness
 run wave1-historical   corepack pnpm evidence:wave1:historical
 # Writes to W2.0's own directory. The default output path is M2.1's historical report,
