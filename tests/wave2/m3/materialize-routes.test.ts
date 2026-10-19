@@ -31,6 +31,24 @@ import { treeDigest } from "../../../src/host/projects/openfilm-migrator.js";
  * early would see `validating` and call it a failure. Waiting longer costs nothing when the
  * answer is already there; it changes no assertion.
  */
+/**
+ * Segment length for the seam tests.
+ *
+ * These tests assert that the Host renders on its own, that drift and a lock move a ready
+ * row to stale, and that nothing authored changes. None of that depends on the film being
+ * long, and three tests each encoding six hundred real frames made this file the most
+ * expensive in the suite for no additional evidence — real-media fidelity is MT-06's job and
+ * is proven there against the same renderer and the same fixture.
+ */
+const SEAM_SEGMENT_FRAMES = [30, 30];
+
+/** Splits a duration vector so the parts still sum to the whole. */
+function split(durations: number[], firstShare: number): number[] {
+  const [first, ...rest] = durations;
+  const head = Math.max(1, Math.round((first ?? 1) * firstShare));
+  const tail = Math.max(1, (first ?? 1) - head);
+  return [head, ...rest.map((frames) => tail === frames ? frames + 1 : frames), tail];
+}
 const POLL_ATTEMPTS = 400;
 const POLL_INTERVAL_MS = 250;
 
@@ -93,7 +111,7 @@ const sha = (bytes: Buffer): string => createHash("sha256").update(bytes).digest
  * comparison is built against the *target's* facts, so the adapter — not this file — is
  * what sets the project id.
  */
-async function seedComparison(running: Started, projectId: string, baseRevision: number): Promise<{ comparisonId: string; proposalId: string; built: ProposalComparison }> {
+async function seedComparison(running: Started, projectId: string, baseRevision: number, durations = SEAM_SEGMENT_FRAMES): Promise<{ comparisonId: string; proposalId: string; built: ProposalComparison }> {
   const role = (index: number): "anchor" | "context" | "evidence" | "conclusion" =>
     (["anchor", "context", "evidence", "conclusion"] as const)[index % 4]!;
   const option = (index: number, durations: number[]) => ({
@@ -112,14 +130,17 @@ async function seedComparison(running: Started, projectId: string, baseRevision:
     // D4.1 requires three to six candidates and refuses a structurally identical set, so
     // the recorded draft has three that differ in segmentation as well as in strategy.
     proposals: [
-      option(1, [300, 300]),
-      option(2, [150, 150, 150, 150]),
-      option(3, [200, 200, 200]),
+      // D4.1 requires every candidate to cover the selection exactly and to differ
+      // structurally, so all three sum to `total` and no two share a duration vector.
+      option(1, durations),
+      option(2, split(durations, 0.6)),
+      option(3, split(durations, 0.4)),
     ],
   };
+  const total = durations.reduce((sum, frames) => sum + frames, 0);
   const request: ProposalComparisonRequest = {
     base_revision: baseRevision,
-    selection: { shot_id: "shot-001", start_frame: 0, end_frame_exclusive: 600 },
+    selection: { shot_id: "shot-001", start_frame: 0, end_frame_exclusive: total },
     intent: "recorded", preserve: ["narration"], proposal_count: 3,
   };
   const built = running.host.comparisons.build(draft, projectId, request, {
@@ -237,7 +258,8 @@ describe("M3.3 the two routes, over HTTP, against a real migrated target", () =>
     const row = await read.json() as MaterializationV1;
     expect(row).toMatchObject({ format: "narralens.materialization@1.0", state: "ready_for_adoption" });
     expect(row.native_plan?.clips).toHaveLength(2);
-    expect(row.proxy?.frame_count).toBe(600);
+    // The proxy matches the plan that was bound, whatever length that plan is.
+    expect(row.proxy?.frame_count).toBe(SEAM_SEGMENT_FRAMES.reduce((sum, frames) => sum + frames, 0));
     expect(row.lineage).toHaveLength(2);
     // No locator ever crosses the wire. `video/mp4` legitimately contains a slash, so the
     // assertion is about locator shapes rather than the character.
@@ -382,7 +404,9 @@ describe("M3.3 a client never has to call the worker itself", () => {
     }
 
     expect(row?.state, "the Host must render without anyone calling run()").toBe("ready_for_adoption");
-    expect(row?.proxy?.frame_count).toBe(600);
+    // The proxy matches the plan that was bound, whatever length that plan is.
+    const planned = SEAM_SEGMENT_FRAMES.reduce((sum, frames) => sum + frames, 0);
+    expect(row?.proxy?.frame_count).toBe(planned);
     expect(row?.native_plan?.clips).toHaveLength(2);
   }, 300_000);
 
@@ -523,7 +547,12 @@ describe("MT-04 and MT-05 through the Host, not around it", () => {
     let row: MaterializationV1 | undefined;
     for (let attempt = 0; attempt < POLL_ATTEMPTS && row?.state !== "ready_for_adoption"; attempt += 1) {
       await new Promise((resolvePromise) => setTimeout(resolvePromise, POLL_INTERVAL_MS));
-      row = await running.host.materialize.read(job.materialization_id);
+      // A 503 means "not verified right now", which a client waits out; anything else is a
+      // real answer and ends the wait.
+      row = await running.host.materialize.read(job.materialization_id).catch((error: unknown) => {
+        if ((error as { code?: string }).code === "MEDIA_TOOL_UNAVAILABLE") return undefined;
+        throw error;
+      });
     }
     expect(row?.state).toBe("ready_for_adoption");
 
@@ -557,7 +586,12 @@ describe("MT-04 and MT-05 through the Host, not around it", () => {
     let row: MaterializationV1 | undefined;
     for (let attempt = 0; attempt < POLL_ATTEMPTS && row?.state !== "ready_for_adoption"; attempt += 1) {
       await new Promise((resolvePromise) => setTimeout(resolvePromise, POLL_INTERVAL_MS));
-      row = await running.host.materialize.read(job.materialization_id);
+      // A 503 means "not verified right now", which a client waits out; anything else is a
+      // real answer and ends the wait.
+      row = await running.host.materialize.read(job.materialization_id).catch((error: unknown) => {
+        if ((error as { code?: string }).code === "MEDIA_TOOL_UNAVAILABLE") return undefined;
+        throw error;
+      });
     }
     expect(row?.state).toBe("ready_for_adoption");
 
@@ -642,7 +676,12 @@ describe("PR-03 a real lock, not a hand-written control revision", () => {
     let row: MaterializationV1 | undefined;
     for (let attempt = 0; attempt < POLL_ATTEMPTS && row?.state !== "ready_for_adoption"; attempt += 1) {
       await new Promise((resolvePromise) => setTimeout(resolvePromise, POLL_INTERVAL_MS));
-      row = await running.host.materialize.read(job.materialization_id);
+      // A 503 means "not verified right now", which a client waits out; anything else is a
+      // real answer and ends the wait.
+      row = await running.host.materialize.read(job.materialization_id).catch((error: unknown) => {
+        if ((error as { code?: string }).code === "MEDIA_TOOL_UNAVAILABLE") return undefined;
+        throw error;
+      });
     }
     expect(row?.state).toBe("ready_for_adoption");
 

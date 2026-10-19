@@ -241,23 +241,44 @@ export class MaterializeService {
     return this.#deps.materializations.require(materializationId);
   }
 
-  /** Facts that no longer hold, by name, so a client can say why rather than just that. */
+  /**
+   * Facts that no longer hold, by name, so a client can say why rather than just that.
+   *
+   * Only a completed verification may produce a verdict. If the inventory cannot be read the
+   * honest answer is "not checked right now", not "the premises moved" — treating an
+   * unreadable ledger as proof of drift made one transient read failure permanently strand a
+   * healthy row, because `stale` is terminal.
+   */
   async #drift(row: MaterializationV1): Promise<string[]> {
     const reasons: string[] = [];
-    const view = await this.#deps.resolver.resolve(row.project_id).catch(() => undefined);
-    if (view === undefined || view.kind !== "activated") {
-      reasons.push("TARGET_NOT_RESOLVABLE");
-      return reasons;
+    const view = await this.#deps.resolver.resolve(row.project_id).catch((error: unknown) => {
+      throw new HttpError(503, "ENGINE_UNAVAILABLE",
+        "The target could not be resolved, so its premises could not be checked",
+        undefined, row.project_id);
+    });
+    if (view.kind !== "activated") {
+      throw new HttpError(423, "PROJECT_ATTENTION_REQUIRED",
+        "The target is no longer an activated OpenFilm project", undefined, row.project_id);
     }
     if (view.revision !== row.base_revision) reasons.push("BASE_REVISION_CHANGED");
     if (view.source_digest !== row.source_digest) reasons.push("SOURCE_DIGEST_CHANGED");
     if (view.control_revision !== row.control_revision) reasons.push("CONTROL_REVISION_CHANGED");
-    const inventory = await this.#deps.inventory.inventory(row.project_id).catch(() => undefined);
-    if (inventory === undefined) {
-      reasons.push("INVENTORY_UNREADABLE");
-    } else if (inventory.inventory_sha256 !== row.asset_inventory_sha256) {
-      reasons.push("ASSET_INVENTORY_CHANGED");
+
+    let inventory;
+    try {
+      inventory = await this.#deps.inventory.inventory(row.project_id);
+    } catch (error) {
+      if (error instanceof HttpError && error.code === "PROJECT_ATTENTION_REQUIRED") {
+        // The ledger proved its own facts wrong. That is real drift, and this row was built
+        // on them, so it goes stale — the project's own attention is recorded separately.
+        reasons.push("ASSET_LEDGER_ATTENTION");
+        return reasons;
+      }
+      throw new HttpError(503, "MEDIA_TOOL_UNAVAILABLE",
+        "The asset inventory could not be read, so this materialization could not be verified",
+        undefined, row.project_id);
     }
+    if (inventory.inventory_sha256 !== row.asset_inventory_sha256) reasons.push("ASSET_INVENTORY_CHANGED");
     return reasons;
   }
 

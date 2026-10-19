@@ -255,7 +255,8 @@ async function renderConcurrently(
             license_status: "cleared", commercial_use: true }],
         });
         peak.succeeded += 1;
-      } catch {
+      } catch (error) {
+        console.error("CONCURRENCY_RENDER_FAILED", String(error));
         peak.failed += 1;
       } finally {
         active -= 1;
