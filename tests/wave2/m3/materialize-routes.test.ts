@@ -23,6 +23,17 @@ import { treeDigest } from "../../../src/host/projects/openfilm-migrator.js";
  * route, the media are the repository's real MP4s, and the proxy is really encoded.
  */
 
+/**
+ * How long a client waits for a real encode before giving up.
+ *
+ * The Host does the work on its own timer, and that work is a real 600-frame transcode. On
+ * a loaded machine thirty seconds is not always enough, and a client that stopped polling
+ * early would see `validating` and call it a failure. Waiting longer costs nothing when the
+ * answer is already there; it changes no assertion.
+ */
+const POLL_ATTEMPTS = 400;
+const POLL_INTERVAL_MS = 250;
+
 const SOURCE_FIXTURE = resolve("fixtures/d1-30s");
 const REAL_UPSTREAM_PARENT = "/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b";
 
@@ -362,8 +373,8 @@ describe("M3.3 a client never has to call the worker itself", () => {
 
     // Poll the way a client would, and let the Host's own worker do the work.
     let row: MaterializationV1 | undefined;
-    for (let attempt = 0; attempt < 120 && row?.state !== "ready_for_adoption"; attempt += 1) {
-      await new Promise((resolvePromise) => setTimeout(resolvePromise, 250));
+    for (let attempt = 0; attempt < POLL_ATTEMPTS && row?.state !== "ready_for_adoption"; attempt += 1) {
+      await new Promise((resolvePromise) => setTimeout(resolvePromise, POLL_INTERVAL_MS));
       const read = await fetch(`${running.origin}/api/migration/v1/materializations/${job.materialization_id}`,
         { headers: headers(running.origin, running.token) });
       expect(read.status).toBe(200);
@@ -510,8 +521,8 @@ describe("MT-04 and MT-05 through the Host, not around it", () => {
     expect(posted.status, await posted.clone().text()).toBe(202);
     const job = await posted.json() as { materialization_id: string };
     let row: MaterializationV1 | undefined;
-    for (let attempt = 0; attempt < 120 && row?.state !== "ready_for_adoption"; attempt += 1) {
-      await new Promise((resolvePromise) => setTimeout(resolvePromise, 250));
+    for (let attempt = 0; attempt < POLL_ATTEMPTS && row?.state !== "ready_for_adoption"; attempt += 1) {
+      await new Promise((resolvePromise) => setTimeout(resolvePromise, POLL_INTERVAL_MS));
       row = await running.host.materialize.read(job.materialization_id);
     }
     expect(row?.state).toBe("ready_for_adoption");
@@ -544,8 +555,8 @@ describe("MT-04 and MT-05 through the Host, not around it", () => {
     );
     const job = await posted.json() as { materialization_id: string };
     let row: MaterializationV1 | undefined;
-    for (let attempt = 0; attempt < 120 && row?.state !== "ready_for_adoption"; attempt += 1) {
-      await new Promise((resolvePromise) => setTimeout(resolvePromise, 250));
+    for (let attempt = 0; attempt < POLL_ATTEMPTS && row?.state !== "ready_for_adoption"; attempt += 1) {
+      await new Promise((resolvePromise) => setTimeout(resolvePromise, POLL_INTERVAL_MS));
       row = await running.host.materialize.read(job.materialization_id);
     }
     expect(row?.state).toBe("ready_for_adoption");
@@ -629,8 +640,8 @@ describe("PR-03 a real lock, not a hand-written control revision", () => {
     expect(posted.status, await posted.clone().text()).toBe(202);
     const job = await posted.json() as { materialization_id: string };
     let row: MaterializationV1 | undefined;
-    for (let attempt = 0; attempt < 120 && row?.state !== "ready_for_adoption"; attempt += 1) {
-      await new Promise((resolvePromise) => setTimeout(resolvePromise, 250));
+    for (let attempt = 0; attempt < POLL_ATTEMPTS && row?.state !== "ready_for_adoption"; attempt += 1) {
+      await new Promise((resolvePromise) => setTimeout(resolvePromise, POLL_INTERVAL_MS));
       row = await running.host.materialize.read(job.materialization_id);
     }
     expect(row?.state).toBe("ready_for_adoption");
