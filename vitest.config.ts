@@ -20,6 +20,18 @@ export default defineConfig({
      * times, and the wall clock was the same or better (94.65s bounded against 88.24s
      * unbounded, with unbounded being the run that also had to survive the flake).
      */
-    maxWorkers: 8,
+    /**
+     * Reduced from the 24-core default, then from 8, on measurement rather than on hope.
+     *
+     * This machine cannot sustain the aggregate load of every suite at once: the full gate
+     * failed on ENOMEM repeatedly, in `readdir`, in a 135 MB fixture copy, and in an ffmpeg
+     * open — never on an assertion. Codex rejected "retry until a green run appears", and
+     * agreed that lowering worker concurrency is the legitimate lever: it changes nothing
+     * about what is asserted, how long a test may take, or which tests run.
+     *
+     * At 2 workers every suite runs, every attempt runs, and the wall clock is dominated by
+     * the media work rather than by contention.
+     */
+    maxWorkers: 2,
   },
 });

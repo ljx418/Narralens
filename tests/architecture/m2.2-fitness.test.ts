@@ -44,7 +44,10 @@ describe("M2.2 fitness: one state machine, no arbitrary state writes", () => {
     // property this rule protects. `transitionFrom`, `markStale` and `quarantine` are M3.1's
     // materialization machine; `transitionBootstrap` is W2.0's asset-ledger bootstrap.
     const helpers = ["transition", "advanceJournal", "markRecovering", "#state", "#assetImportState",
-      "transitionBootstrap", "transitionFrom", "markStale", "quarantine"];
+      "transitionBootstrap", "transitionFrom", "markStale", "quarantine",
+      // M3's joint recovery: carries the expected state in its WHERE clause and throws
+      // unless exactly one row changed, like every other entry here.
+      "resumeOrReset"];
     const offenders: string[] = [];
     for (const file of SOURCE_FILES) {
       const text = sourceOf(file);
