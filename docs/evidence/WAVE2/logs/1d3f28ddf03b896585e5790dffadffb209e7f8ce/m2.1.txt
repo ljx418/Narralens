@@ -1,0 +1,50 @@
+
+> narralens@0.1.0 test:m2.1 /mnt/c/workspace/videoworkline/Narralens
+> vitest run --config vitest.config.ts tests/m2.1 tests/architecture
+
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens
+
+ ✓ tests/m2.1/openfilm-upstream-lock.test.ts (12 tests) 210ms
+ ✓ tests/m2.1/engine-port.test.ts (10 tests) 1086ms
+   ✓ OpenFilmEngineAdapter staging > AC-004 refuses a stale base before the upstream mutator is ever called  318ms
+   ✓ OpenFilmEngineAdapter staging > AC-004 never accepts an upstream rebased result as success  719ms
+ ✓ tests/architecture/m2.2-fitness.test.ts (15 tests) 2101ms
+   ✓ M2.2 fitness: one state machine, no arbitrary state writes > 1. every production `UPDATE ... SET state` lives in transition, advanceJournal or markRecovering  334ms
+   ✓ M2.2 fitness: one state machine, no arbitrary state writes > 13. every job state write goes through the store that owns the transition table  362ms
+   ✓ M2.2 fitness: one state machine, no arbitrary state writes > 2. no production DELETE on a journal row; rows are evidence, not scratch  343ms
+   ✓ M2.2 fitness: one state machine, no arbitrary state writes > 3. only project_state ever changes the current revision  343ms
+   ✓ M2.2 fitness: no second actor, queue, store or timeline > 5. no production class extends or duplicates ProjectWriteActor  343ms
+   ✓ M2.2 fitness: no second actor, queue, store or timeline > 6. the revision store owns one database handle; no second DatabaseSync for project state  328ms
+ ✓ tests/m2.1/native-write-gateway.test.ts (20 tests) 20ms
+(node:2009631) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:2009643) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/architecture/m2.1-fitness.test.ts (22 tests) 1099ms
+   ✓ fitness 1-3: dependency direction > 3. production code never imports a spike, statically or dynamically  514ms
+   ✓ fitness 10-14: stage-specific invariants > 11. no production path reaches editProjectFilm from a translated write  311ms
+ ✓ tests/m2.1/engine-route.test.ts (8 tests) 1944ms
+   ✓ M2.1 route activation > AC-019 leaves every legacy route in place  1360ms
+ ✓ tests/m2.1/native-bypass.test.ts (13 tests) 2550ms
+   ✓ EN-04 external change detection > refuses a stale digest after an out-of-band source edit and leaves the bytes untouched  334ms
+   ✓ B-01 external source change reaches attention through the production path > 409, then attention=true, then the next typed edit is 423, without touching the edited bytes  331ms
+   ✓ B-01 external source change reaches attention through the production path > never re-samples the committed baseline: reading again stays 409 and attention stays set  338ms
+   ✓ B-02 referenced Hypit asset bytes are inside the source digest > fails closed when a referenced asset is missing or its path escapes the project  410ms
+ ✓ tests/m2.1/source-digest-v1.test.ts (18 tests) 4190ms
+   ✓ SourceDigestV1 closure > EN-04 covers the entry, every scene, css, subtitle, settings, font and referenced asset  342ms
+   ✓ SourceDigestV1 closure > EN-04 gives the same digest whatever order the Host declares the roots in  838ms
+   ✓ SourceDigestV1 closure > EN-04 changes the digest when a scene, subtitle, setting, font or referenced asset changes  912ms
+   ✓ SourceDigestV1 closure > EN-04 resolves an OpenFilm time fragment to the same closure entry  384ms
+   ✓ SourceDigestV1 closure > AC-006 refuses absolute paths, traversal, symlink escape, query strings and unknown roles  443ms
+   ✓ M-03 canonical identity is the realpath > refuses Windows and WSL path shapes instead of normalising them silently  318ms
+ ✓ tests/m2.1/time-model.test.ts (11 tests) 38ms
+(node:2012503) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.1/engine-binding-store.test.ts (10 tests) 20ms
+
+ Test Files  10 passed (10)
+      Tests  139 passed (139)
+   Start at  15:39:05
+   Duration  12.36s (transform 4.55s, setup 0ms, collect 23.33s, tests 13.26s, environment 2ms, prepare 28.76s)
+
