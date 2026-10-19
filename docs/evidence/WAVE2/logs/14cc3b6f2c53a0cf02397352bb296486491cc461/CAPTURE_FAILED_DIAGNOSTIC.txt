@@ -1,0 +1,53 @@
+FAILED_DIAGNOSTIC_CAPTURE
+==========================
+
+This capture is kept **as a failure**, deliberately and byte-for-byte. It is the
+evidence that located the two defects this correction closed, and overwriting it
+would have destroyed the only record of what was actually observed.
+
+Result at capture time
+----------------------
+  check-1              exit=1
+  check-2              exit=1
+  contracts            exit=0
+  credential-scan      exit=0
+  m2.1 / m2.2 / m2.3  exit=0
+  wave2-w2.0           exit=0
+  wave2-m3             exit=0
+  wave2-fitness        exit=0
+  wave1-historical     exit=0
+  wave1-integrity      exit=1   (expected: asserts no code moved after the Wave 1 freeze)
+  openfilm             exit=0
+
+`check` failed on every attempt. This is **not** an ENOMEM-only capture: `check-1.txt`
+contains zero occurrences of ENOMEM, so at that time the failure had not yet been
+attributed. It is now.
+
+What the capture actually shows
+------------------------------
+1. `check-2.txt` records the publishing collision directly:
+
+     CONCURRENCY_RENDER_FAILED Error: EEXIST: file already exists, open
+       '.../proxy/1325fbf4....mp4.4141030.1792407852458.tmp'
+     CONCURRENCY_RENDER_FAILED Error: ENOENT: no such file or directory, rename
+       '.../proxy/1325fbf4....mp4.4141030.1792407852458.tmp' -> '.../proxy/1325fbf4....mp4'
+
+   Same process id, same millisecond, same content hash: two renders produced the
+   identical staging path. One publisher's `unlink` in its `catch` removed the
+   *other* publisher's staging file.
+
+2. The stale rows the run reported were, once the diagnostics existed, this chain:
+
+     materialize.stale
+       reason   PROJECT_ATTENTION_REQUIRED:SOURCE_TREE_UNREADABLE:ENOMEM
+       boundary render
+       attempt  1
+       cause    {"reason":"SOURCE_TREE_UNREADABLE:ENOMEM","recoverable":false}
+
+   A read that did not happen had been recorded as a read that came back wrong,
+   and `attention` is terminal by ADR-W2.0-001.
+
+Both are fixed in `9f713a4` and `3f13416`. The evidence here is *not* superseded —
+it is what the fixes were written against.
+
+Do not treat any exit above as a pass, and do not delete this directory.
