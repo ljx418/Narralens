@@ -224,5 +224,97 @@
       "corepack pnpm check:m2.1-docs"
     ],
     "note": "The D4.2.1 four schema files remain byte-identical to their frozen review digests."
+  },
+  {
+    "case_id": "PR-01",
+    "title": "a replayed D4.1 comparison is labelled and both digests kept",
+    "status": "PASSED",
+    "production_seam": "yes — NarralensHost route",
+    "tests": [
+      "tests/wave2/m3/materialize-routes.test.ts::stamps RECORDED_PROVIDER_OUTPUT_REPLAY with both digests",
+      "tests/wave2/m3/materialize-routes.test.ts::refuses a replay that cannot be substantiated"
+    ],
+    "notes": "The stdout digest is taken from the comparison's own generation_audit, so a client cannot relabel a live provider call as a replay. The payload digest is required and recorded."
+  },
+  {
+    "case_id": "PR-02",
+    "title": "materialize changes no author fact",
+    "status": "PASSED",
+    "production_seam": "yes — diffed around a real end-to-end run",
+    "tests": [
+      "tests/wave2/m3/materialize-routes.test.ts::changes no author fact while a real materialize runs end to end"
+    ]
+  },
+  {
+    "case_id": "PR-03",
+    "title": "negative coverage: unknown asset, duplicate/out-of-range binding, second timeline",
+    "status": "PARTIAL",
+    "production_seam": "yes",
+    "tests": [
+      "tests/wave2/m3/binding-service.test.ts",
+      "tests/wave2/m3/materialization-store.test.ts::holds no frame timeline of its own"
+    ],
+    "claim_limit": "Locked ranges are not modelled in M3; they belong to M4's three lock classes. Recorded rather than faked."
+  },
+  {
+    "case_id": "MT-01",
+    "title": "rights, hash, MIME, frame length and source span re-read; short media refused",
+    "status": "PASSED",
+    "production_seam": "partial — renderer and binding re-read; the Host seam composes both",
+    "tests": [
+      "tests/wave2/m3/proxy-renderer.test.ts",
+      "tests/wave2/m3/binding-service.test.ts"
+    ]
+  },
+  {
+    "case_id": "MT-02",
+    "title": "three stable independent clips; no composite may pass as a native plan",
+    "status": "PASSED",
+    "production_seam": "yes",
+    "tests": [
+      "tests/wave2/m3/native-plan.test.ts",
+      "tests/wave2/m3/proxy-renderer.test.ts::refuses a target reached through a symlink out of the target root"
+    ]
+  },
+  {
+    "case_id": "MT-03",
+    "title": "every output traces to input bytes, span, rights and tool profile, tamper-evident",
+    "status": "PASSED",
+    "production_seam": "partial — component level; the Host composes the same renderer",
+    "tests": [
+      "tests/wave2/m3/lineage-and-limits.test.ts",
+      "tests/wave2/m3/proxy-renderer.test.ts::names the input bytes, span and rights behind every clip"
+    ]
+  },
+  {
+    "case_id": "MT-04",
+    "title": "source, revision, active commit, binding and active asset ledger all unchanged",
+    "status": "PASSED",
+    "production_seam": "yes — real Host, real route, real media",
+    "tests": [
+      "tests/wave2/m3/materialize-routes.test.ts::changes no author fact while a real materialize runs end to end",
+      "tests/wave2/m3/binding-service.test.ts::MT-04 binding changes no author fact (NOWRITE)"
+    ]
+  },
+  {
+    "case_id": "MT-05",
+    "title": "cancel, late result, lost lease, restart and drift all quarantine or go stale",
+    "status": "PASSED",
+    "production_seam": "yes",
+    "tests": [
+      "tests/wave2/m3/materialize-service.test.ts::every defect the internal review raised has a test that fails without its fix",
+      "tests/wave2/m3/materialize-routes.test.ts::goes stale when the control revision moves under a ready materialization",
+      "tests/wave2/m3/materialize-routes.test.ts::classifies rows left behind when the Host restarts"
+    ]
+  },
+  {
+    "case_id": "MT-06",
+    "title": "real ffprobe: total frames, segment boundaries, first and last frames, full decode",
+    "status": "PASSED",
+    "production_seam": "partial — real media through the Host's own renderer",
+    "tests": [
+      "tests/wave2/m3/proxy-renderer.test.ts"
+    ],
+    "notes": "Boundaries are proved by nearest-source comparison at a 32x18 grayscale probe. A re-encoded proxy cannot match source bytes, so proximity is the strongest available evidence and the choice is deliberate."
   }
 ]
