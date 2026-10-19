@@ -1,8 +1,10 @@
 import { randomUUID } from "node:crypto";
+import { canonicalJson } from "../engine/source-digest-v1.js";
 import { HttpError } from "../api-error.js";
+import type { ProposalComparison } from "../../contracts/types.js";
 import type { MaterializationV1 } from "../../contracts/wave2-types.js";
 import type { PersistentJobStore } from "../persistent-job-store.js";
-import type { MaterializationStore } from "./materialization-store.js";
+import type { MaterializationStore, ReplayLineage } from "./materialization-store.js";
 import type { BindingService, BindingResult } from "./binding-service.js";
 import type { NativePlanBuilder } from "./native-plan-builder.js";
 import type { ProxyRenderer } from "./proxy-renderer.js";
@@ -53,6 +55,8 @@ export interface MaterializeServiceDeps {
   readonly artifacts: DerivedArtifactStore;
   readonly resolver: ProjectResolver;
   readonly inventory: AssetInventoryPort;
+  /** Reads a target-owned comparison. Never the source project's. */
+  readonly readComparison: (comparisonId: string) => Promise<ProposalComparison>;
   /** The media file behind an asset id, resolved from the target's own tree. */
   readonly resolveMedia: (projectId: string, assetId: string) => Promise<string>;
   readonly leaseMs?: number;
@@ -94,6 +98,9 @@ export class MaterializeService {
     }>;
     idempotencyKey: string;
     requestDigest: string;
+    /** The comparison as it stands now, read to pin its digest and its replay provenance. */
+    comparison: ProposalComparison;
+    replay?: ReplayLineage;
   }): Promise<{ job_id: string; materialization_id: string; replayed: boolean }> {
     const view = await this.#deps.resolver.resolve(input.projectId);
     if (view.kind !== "activated") {
@@ -119,6 +126,19 @@ export class MaterializeService {
         { expected: controlRevision, supplied: input.controlRevision }, input.projectId);
     }
 
+    // Idempotency is decided before any side effect. Creating the job first meant a
+    // concurrent replay — same key, same digest, so `create` returns the original row
+    // rather than throwing — left a second queued job nobody would ever run.
+    const replayed = this.#deps.materializations.byIdempotencyKey(input.projectId, input.idempotencyKey);
+    if (replayed !== undefined) {
+      if (replayed.request_digest !== input.requestDigest) {
+        throw new HttpError(409, "IDEMPOTENCY_KEY_CONFLICT",
+          "This idempotency key was used with a different request",
+          { materialization_id: replayed.materialization_id }, input.projectId);
+      }
+      return { job_id: replayed.job_id, materialization_id: replayed.materialization_id, replayed: true };
+    }
+
     const job = this.#deps.jobs.create({
       projectId: input.projectId, kind: "materialize",
       payload: { comparison_id: input.comparisonId, proposal_id: input.proposalId },
@@ -126,17 +146,30 @@ export class MaterializeService {
     this.#deps.onJob?.({ job_id: job.job_id });
     await this.#deps.fault?.("after_job_create");
 
-    const row = await this.#deps.materializations.create({
-      materializationId: `mat_${randomUUID().replaceAll("-", "")}`,
-      projectId: input.projectId, comparisonId: input.comparisonId, proposalId: input.proposalId,
-      jobId: job.job_id, baseRevision: view.revision, sourceDigest: view.source_digest,
-      controlRevision,
+    let row;
+    try {
+      row = await this.#deps.materializations.create({
+        materializationId: `mat_${randomUUID().replaceAll("-", "")}`,
+        projectId: input.projectId, comparisonId: input.comparisonId, proposalId: input.proposalId,
+        jobId: job.job_id, baseRevision: view.revision, sourceDigest: view.source_digest,
+        controlRevision,
       // Left empty on purpose: these are facts the worker proves when it re-reads the
       // bindings, not things the request can assert.
       proposalSha256: "", assetInventorySha256: "", rightsDigest: "",
-      requestDigest: input.requestDigest, idempotencyKey: input.idempotencyKey,
-      requestedBindings: input.bindings,
-    });
+        requestDigest: input.requestDigest, idempotencyKey: input.idempotencyKey,
+        requestedBindings: input.bindings,
+        comparisonSha256: canonicalJson(input.comparison),
+        ...(input.replay === undefined ? {} : { replay: input.replay }),
+      });
+    } catch (error) {
+      // The job row is already durable. Leaving it queued would orphan it: nothing reaps a
+      // queued job, because reaping is for leases, and the client has just been told the
+      // request failed. `recordCallback` is the wrong tool here — it only applies to a job
+      // holding a lease, and this one never acquired one, so it silently did nothing.
+      this.#deps.jobs.transition(job.job_id, "failed",
+        { terminalReason: "materialization row was not created" });
+      throw error;
+    }
     return { job_id: job.job_id, materialization_id: row.materialization_id, replayed: false };
   }
 
@@ -227,17 +260,18 @@ export class MaterializeService {
       await this.#deps.fault?.("after_proxy");
       await this.#deps.fault?.("after_lineage");
 
-      // The cancellation may have landed while this worker was rendering. The bytes exist
-      // and the premises do not, so the result is recorded and never promoted.
-      if (this.#deps.jobs.require(jobId).state === "cancel_requested") {
+      this.#deps.materializations.transition(materializationId, "running", "validating");
+      await this.#deps.fault?.("before_ready");
+      // The cancellation check and the promotion share one synchronous window: every read
+      // between them was an `await`, and a cancel landing in one of those gaps produced a
+      // `ready_for_adoption` row sitting on a `cancelled` job.
+      const jobState = this.#deps.jobs.require(jobId).state;
+      if (jobState === "cancel_requested") {
         const cancelled = this.#deps.jobs.recordCallback(jobId, { owner, attempt },
           { state: "cancelled", artifact });
         if (!cancelled.applied) this.#deps.materializations.quarantine(materializationId, rendered.lineage);
         return { state: this.#deps.jobs.require(jobId).state, quarantined: true };
       }
-
-      this.#deps.materializations.transition(materializationId, "running", "validating");
-      await this.#deps.fault?.("before_ready");
       this.#deps.materializations.transition(materializationId, "validating", "ready_for_adoption");
       await this.#deps.fault?.("after_ready");
 
@@ -256,10 +290,19 @@ export class MaterializeService {
         return { state: this.#deps.jobs.require(jobId).state, quarantined: true };
       }
       const message = error instanceof Error ? error.message : String(error);
-      // Whether this is a failure or attention depends on whether anything was published:
-      // a torn state nobody can classify is attention, not a failure.
-      const published = this.#deps.materializations.find(materializationId)?.proxy !== undefined
-        && this.#deps.materializations.find(materializationId)?.proxy !== null;
+      const current = this.#deps.materializations.find(materializationId);
+      // A complete row has not had its premises contradicted; it had its *promotion*
+      // interrupted. Marking it stale would discard a proxy that is already encoded and
+      // content-addressed, and `stale` is terminal, so the bytes would be unreachable.
+      // It is left where it is for a retry to promote.
+      if (current !== undefined && this.#deps.materializations.isComplete(materializationId)) {
+        this.#deps.jobs.recordCallback(jobId, { owner, attempt },
+          { state: "failed", terminalReason: `promotion interrupted: ${message.slice(0, 160)}`,
+            artifact });
+        return { state: current.state, quarantined: false };
+      }
+      // Otherwise something was published that cannot be attributed. Attention, not failure.
+      const published = current?.proxy !== undefined && current?.proxy !== null;
       if (published && (await this.#deps.artifacts.stagingLeftovers()).length > 0) {
         this.#deps.materializations.quarantine(materializationId, []);
         this.#deps.jobs.recordCallback(jobId, { owner, attempt },
@@ -280,6 +323,16 @@ export class MaterializeService {
   }
 
   async #bind(row: MaterializationV1): Promise<BindingResult> {
+    // The comparison is pinned at request time. A rebuild at the same base revision keeps
+    // every client-supplied field identical while changing the segment content, so nothing
+    // else in the request would notice.
+    const pinned = this.#deps.materializations.comparisonSha256Of(row.materialization_id);
+    const current = await this.#deps.readComparison(row.comparison_id);
+    if (pinned !== "" && canonicalJson(current) !== pinned) {
+      throw new HttpError(409, "REVISION_CONFLICT",
+        "The comparison was rebuilt after this materialization was prepared",
+        { comparison_id: row.comparison_id }, row.project_id);
+    }
     return await this.#deps.bindings.bind({
       projectId: row.project_id, comparisonId: row.comparison_id, proposalId: row.proposal_id,
       baseRevision: row.base_revision,
@@ -315,6 +368,31 @@ export class MaterializeService {
     return segments;
   }
 
+  /**
+   * Drains the queue: takes one runnable row at a time and runs it.
+   *
+   * Called on a timer by the Host. Returns how many rows it attempted, so a caller (and a
+   * test) can tell a drained queue from one that is merely empty right now.
+   */
+  async drain(limit = 8): Promise<{ attempted: number; ready: number; failed: number }> {
+    let attempted = 0;
+    let ready = 0;
+    let failed = 0;
+    for (const row of this.#deps.materializations.runnable()) {
+      if (attempted >= limit) break;
+      if (row.state === "cancel_requested") {
+        this.#deps.materializations.quarantine(row.materialization_id, []);
+        continue;
+      }
+      if (this.#deps.jobs.require(row.job_id).state !== "queued") continue;
+      attempted += 1;
+      const outcome = await this.run(row.materialization_id);
+      if (outcome.state === "ready_for_adoption") ready += 1;
+      else if (outcome.state !== "ready_for_adoption") failed += 1;
+    }
+    return { attempted, ready, failed };
+  }
+
   /** Startup recovery: anything left running is retried or quarantined, never assumed done. */
   /**
    * Startup recovery. Every runnable row gets one of two answers, never a shrug.
@@ -339,6 +417,14 @@ export class MaterializeService {
         // Someone still holds it. Whether that is a live worker or a corpse is the lease's
         // question, not recovery's.
         ownedElsewhere.push(row.materialization_id);
+        continue;
+      }
+      if (job.state === "failed" || job.state === "attention") {
+        // `acquireLease` only takes a *queued* job, so this row can never be retried by
+        // anyone. Calling it "retried" promised something no caller could deliver.
+        this.#deps.materializations.markStale(row.materialization_id,
+          [`JOB_${job.state.toUpperCase()}`]);
+        quarantined.push(row.materialization_id);
         continue;
       }
       retried.push(row.materialization_id);

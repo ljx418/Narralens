@@ -86,6 +86,16 @@ function meanDifference(a: Buffer, b: Buffer): number {
   return total / a.length;
 }
 
+/** A one-clip plan, for the cases that render exactly one segment. */
+function firstClipPlan(): NativePlanV1 {
+  const plan = planFor();
+  return {
+    ...plan,
+    clips: [plan.clips[0]!],
+    total_frames: 300,
+  };
+}
+
 function planFor(): NativePlanV1 {
   return {
     format: "narralens.native-plan@1.0", engine: "openfilm", fps: { num: 30, den: 1 },
@@ -223,7 +233,7 @@ describe("M3.2 the proxy is real media with the frames the plan promised", () =>
     const store = new DerivedArtifactStore(join(base, "derived"));
     const renderer = new ProxyRenderer({ artifacts: store, profile: PROFILE });
     const result = await renderer.render({
-      materializationId: "mat_1", projectId: "p1", plan: planFor(),
+      materializationId: "mat_1", projectId: "p1", plan: firstClipPlan(),
       segments: [{ segment_id: "seg-1", asset_path: SOURCE_A, sha256: await sha256Of(SOURCE_A),
         start_frame: 0, end_frame_exclusive: 300,
         license_status: "cleared", commercial_use: true }],
@@ -307,7 +317,7 @@ describe("M3.2 lineage accounts for every output and cannot be quietly rewritten
     const renderer = new ProxyRenderer({ artifacts: store, profile: PROFILE });
     const sha = await sha256Of(SOURCE_B);
     await expect(renderer.render({
-      materializationId: "mat_1", projectId: "p1", plan: planFor(),
+      materializationId: "mat_1", projectId: "p1", plan: firstClipPlan(),
       // The ceiling exists so a single request cannot turn into an unbounded encoder run.
       segments: Array.from({ length: 65 }, (_, index) => ({
         segment_id: `seg-${index}`, asset_path: SOURCE_B, sha256: sha,
@@ -322,7 +332,7 @@ describe("M3.2 lineage accounts for every output and cannot be quietly rewritten
     const store = new DerivedArtifactStore(join(base, "derived"));
     const renderer = new ProxyRenderer({ artifacts: store, profile: PROFILE });
     const result = await renderer.render({
-      materializationId: "mat_1", projectId: "p1", plan: planFor(),
+      materializationId: "mat_1", projectId: "p1", plan: firstClipPlan(),
       segments: [{ segment_id: "seg-1", asset_path: SOURCE_A, sha256: await sha256Of(SOURCE_A),
         start_frame: 0, end_frame_exclusive: 300,
         license_status: "cleared", commercial_use: true }],
@@ -356,7 +366,7 @@ describe("M3.2 the renderer cannot be steered by its arguments", () => {
     const renderer = new ProxyRenderer({ artifacts: store, profile: PROFILE });
     const sourceBefore = await sha256Of(SOURCE_A);
     await renderer.render({
-      materializationId: "mat_1", projectId: "p1", plan: planFor(),
+      materializationId: "mat_1", projectId: "p1", plan: firstClipPlan(),
       segments: [{ segment_id: "seg-1", asset_path: SOURCE_A, sha256: await sha256Of(SOURCE_A),
         start_frame: 0, end_frame_exclusive: 300,
         license_status: "cleared", commercial_use: true }],

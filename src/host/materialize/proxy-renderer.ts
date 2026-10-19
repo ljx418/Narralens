@@ -108,9 +108,10 @@ export class ProxyRenderer {
   }
 
   /**
-   * Global slot first, then the project's. The order matters: taking the global slot first
-   * means a project waiting for its own slot is not holding a global one, so a busy project
-   * cannot starve every other project.
+   * The project's slot first, then the global one.
+   *
+   * That order matters: a project waiting on its own slot is not holding a global one, so a
+   * busy project cannot starve every other project.
    */
   async #admit(projectId: string): Promise<() => void> {
     const project = this.#slotsFor(projectId);
@@ -123,15 +124,20 @@ export class ProxyRenderer {
       project.release();
       throw error;
     }
-    this.#observer.entered?.(projectId);
+    // The observer is diagnostic code, and diagnostic code must never be able to wedge the
+    // renderer. Both callbacks run inside a `try` whose `finally` releases the slots, so a
+    // throwing observer costs a measurement rather than both permits for the life of the
+    // process.
     let released = false;
-    return () => {
-      if (released) return;
-      released = true;
-      this.#observer.exited?.(projectId);
-      this.#globalSlots.release();
-      project.release();
-    };
+    try { this.#observer.entered?.(projectId); }
+    finally {
+      return () => {
+        if (released) return;
+        released = true;
+        try { this.#observer.exited?.(projectId); }
+        finally { this.#globalSlots.release(); project.release(); }
+      };
+    }
   }
 
   async render(input: {
@@ -175,7 +181,21 @@ export class ProxyRenderer {
           `Segment ${segment.segment_id} no longer matches the bytes its binding recorded`,
           undefined, input.materializationId);
       }
-      const available = await this.#countFrames(segment.asset_path);
+      // MT-01 requires the media type to be re-read too. Hashing the bytes proves the file
+      // is the one the binding named; it does not prove the file is still the video that was
+      // registered, and a manifest row is not a substitute for asking the container.
+      const probed = await this.#probe(segment.asset_path);
+      if (!probed.container.includes("mp4")) {
+        throw new HttpError(422, "INVALID_MEDIA",
+          `Segment ${segment.segment_id} is not an MP4 container (${probed.container})`,
+          undefined, input.materializationId);
+      }
+      if (probed.videoStreams !== 1) {
+        throw new HttpError(422, "INVALID_MEDIA",
+          `Segment ${segment.segment_id} has ${probed.videoStreams} video stream(s); exactly one is required`,
+          undefined, input.materializationId);
+      }
+      const available = probed.frames;
       const wanted = segment.end_frame_exclusive - segment.start_frame;
       if (segment.start_frame < 0 || wanted <= 0 || !Number.isSafeInteger(segment.start_frame)
         || !Number.isSafeInteger(segment.end_frame_exclusive)) {
@@ -241,6 +261,22 @@ export class ProxyRenderer {
         { produced_frames: produced, expected_frames: totalFrames }, input.materializationId);
     }
 
+    // The plan and the segments must describe the same film. A fallback from a missing clip
+    // to the segment id produced a lineage whose `input_asset_id` named a segment, and a
+    // clip with no segment simply vanished from it — both would have looked like a valid
+    // proxy to anything downstream.
+    const clipIds = new Set(input.plan.clips.map((clip) => clip.segment_id));
+    const segmentIds = new Set(prepared.map((entry) => entry.segment.segment_id));
+    const unmatchedClips = input.plan.clips.filter((clip) => !segmentIds.has(clip.segment_id));
+    const unmatchedSegments = prepared.filter((entry) => !clipIds.has(entry.segment.segment_id));
+    if (unmatchedClips.length > 0 || unmatchedSegments.length > 0) {
+      throw new HttpError(422, "INVALID_MEDIA",
+        "The native plan and the rendered segments describe different films",
+        { clips_without_segments: unmatchedClips.map((clip) => clip.segment_id),
+          segments_without_clips: unmatchedSegments.map((entry) => entry.segment.segment_id) },
+        input.materializationId);
+    }
+
     const proxySha = createHash("sha256").update(bytes).digest("hex");
     let cursor = input.plan.clips[0]?.timeline.start_frame ?? 0;
     const lineage: LineageEntryV1[] = prepared.map((entry) => {
@@ -293,17 +329,32 @@ export class ProxyRenderer {
     });
   }
 
-  async #countFrames(path: string): Promise<number> {
+  /** Container and stream shape, read from the media itself rather than trusted. */
+  async #probe(path: string): Promise<{ frames: number; container: string; videoStreams: number }> {
     try {
-      const { stdout } = await run("ffprobe", ["-v", "error", "-count_frames", "-select_streams", "v:0",
-        "-show_entries", "stream=nb_read_frames", "-of", "csv=p=0", path],
-      { timeout: SEGMENT_TIMEOUT_MS, maxBuffer: 1024 * 1024, windowsHide: true });
-      const frames = Number(stdout.trim());
+      const { stdout } = await run("ffprobe", ["-v", "error", "-count_frames",
+        "-show_entries", "format=format_name:stream=codec_type,nb_read_frames", "-of", "json", path],
+      { timeout: SEGMENT_TIMEOUT_MS, maxBuffer: 4 * 1024 * 1024, windowsHide: true });
+      const parsed = JSON.parse(stdout) as {
+        format?: { format_name?: unknown };
+        streams?: Array<{ codec_type?: unknown; nb_read_frames?: unknown }>;
+      };
+      const streams = parsed.streams ?? [];
+      const video = streams.find((stream) => stream.codec_type === "video");
+      const frames = Number(video?.nb_read_frames);
       if (!Number.isSafeInteger(frames) || frames < 1) throw new Error("no frame count");
-      return frames;
+      return {
+        frames,
+        container: String(parsed.format?.format_name ?? ""),
+        videoStreams: streams.filter((stream) => stream.codec_type === "video").length,
+      };
     } catch {
       throw new HttpError(422, "INVALID_MEDIA", "The source media could not be probed");
     }
+  }
+
+  async #countFrames(path: string): Promise<number> {
+    return (await this.#probe(path)).frames;
   }
 
   async #ffmpegVersion(): Promise<string> {

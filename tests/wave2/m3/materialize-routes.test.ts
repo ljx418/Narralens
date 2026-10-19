@@ -8,6 +8,7 @@ import { ProposalComparisonAdapter } from "../../../src/adapters/openmontage/pro
 import { NarralensHost } from "../../../src/host/server.js";
 import type { JobResponse, ProposalComparison, ProposalComparisonRequest } from "../../../src/contracts/types.js";
 import type { MaterializationV1 } from "../../../src/contracts/wave2-types.js";
+import { treeDigest } from "../../../src/host/projects/openfilm-migrator.js";
 
 /**
  * M3.3 over HTTP: the two routes, against a Host that really migrated a project.
@@ -35,6 +36,7 @@ interface Started {
   host: NarralensHost;
   origin: string;
   token: string;
+  base: string;
 }
 
 function headers(origin: string, token: string): Record<string, string> {
@@ -44,6 +46,11 @@ function headers(origin: string, token: string): Record<string, string> {
 async function started(): Promise<Started> {
   const base = await mkdtemp(join(tmpdir(), "narralens-m33-http-"));
   dirs.push(base);
+  return await startOn(base);
+}
+
+/** A Host over an existing working directory, which is how a restart is modelled. */
+async function startOn(base: string): Promise<Started> {
   const previousVendor = process.env.NARRALENS_OPENFILM_VENDOR;
   // The Host treats this as the *parent* of `vendor/openfilm`, not the checkout itself.
   process.env.NARRALENS_OPENFILM_VENDOR = REAL_UPSTREAM_PARENT;
@@ -62,7 +69,7 @@ async function started(): Promise<Started> {
   const session = await fetch(`${origin}/api/session`, { headers: { origin } });
   const token = (await session.json() as { token: string }).token;
   void previousVendor;
-  return { host, origin, token };
+  return { host, origin, token, base };
 }
 
 const sha = (bytes: Buffer): string => createHash("sha256").update(bytes).digest("hex");
@@ -169,6 +176,8 @@ describe("M3.3 the two routes, over HTTP, against a real migrated target", () =>
     const body = {
       comparison_id: comparisonId, base_revision: view.revision,
       expected_source_digest: view.source_digest, control_revision: view.control_revision,
+      format: "narralens.materialize-request@1.0",
+      profile: { profile_id: "wave2-proxy-720p30-v1" },
       segment_bindings: bindingsFor(comparison, proposalId, assets),
       idempotency_key: "m33-http-materialize-1",
     };
@@ -202,11 +211,13 @@ describe("M3.3 the two routes, over HTTP, against a real migrated target", () =>
   }
 
 
-    const outcome = await running.host.materialize.run(job.materialization_id, "worker-http");
-    if (outcome.state !== "ready_for_adoption") {
-      const row = await running.host.materialize.read(job.materialization_id);
-      throw new Error(`RUN_${outcome.state} row=${JSON.stringify({ state: row.state, blocking: row.blocking_reasons, comparison: comparisonId })}`);
+    // The Host's own worker renders this; the test does not drive it.
+    let ready: MaterializationV1 | undefined;
+    for (let attempt = 0; attempt < 120 && ready?.state !== "ready_for_adoption"; attempt += 1) {
+      await new Promise((resolvePromise) => setTimeout(resolvePromise, 250));
+      ready = await running.host.materialize.read(job.materialization_id);
     }
+    expect(ready?.state, `comparison=${comparisonId}`).toBe("ready_for_adoption");
 
     const read = await fetch(`${running.origin}/api/migration/v1/materializations/${job.materialization_id}`,
       { headers: headers(running.origin, running.token) });
@@ -262,6 +273,8 @@ describe("M3.3 the two routes, over HTTP, against a real migrated target", () =>
       `${running.origin}/api/migration/v1/projects/${projectId}/proposals/${proposalId}/materialize`,
       { method: "POST", headers: headers(running.origin, running.token),
         body: JSON.stringify({
+          format: "narralens.materialize-request@1.0",
+          profile: { profile_id: "wave2-proxy-720p30-v1" },
           comparison_id: comparisonId, base_revision: view.revision + 5,
           expected_source_digest: view.source_digest, control_revision: view.control_revision,
           // Valid bindings, so the refusal is about the revision and not about the body.
@@ -284,6 +297,8 @@ describe("M3.3 the two routes, over HTTP, against a real migrated target", () =>
       { method: "POST", headers: headers(running.origin, running.token), body: JSON.stringify({
         comparison_id: comparisonId, base_revision: view.revision,
         expected_source_digest: view.source_digest, control_revision: view.control_revision,
+        format: "narralens.materialize-request@1.0",
+        profile: { profile_id: "wave2-proxy-720p30-v1" },
         segment_bindings: bindingsFor(comparison, proposalId, assets),
         idempotency_key: "m33-http-materialize-4",
       }) },
@@ -314,3 +329,230 @@ describe("M3.3 the two routes, over HTTP, against a real migrated target", () =>
 void readFile;
 void mkdir;
 void SOURCE_FIXTURE;
+
+describe("M3.3 a client never has to call the worker itself", () => {
+  /**
+   * The review found the feature was unreachable: POST returned 202 and the row stayed
+   * `queued` forever, because nothing scheduled a worker. Every other test in this file
+   * called `host.materialize.run()` by hand, so they proved the renderer worked and proved
+   * nothing about whether a user could use it.
+   *
+   * This one does not call `run()`. It POSTs, then polls the GET like a client would.
+   */
+  it("renders on its own after a POST, with no manual worker call", async () => {
+    const running = await started();
+    const { projectId, proposalId, comparisonId, comparison } = await migrateTarget(running);
+    const view = await running.host.projectResolver.resolveActivated(projectId);
+    const assets = await targetAssetIds(running.host, projectId);
+
+    const posted = await fetch(
+      `${running.origin}/api/migration/v1/projects/${projectId}/proposals/${proposalId}/materialize`,
+      { method: "POST", headers: headers(running.origin, running.token), body: JSON.stringify({
+        format: "narralens.materialize-request@1.0",
+        profile: { profile_id: "wave2-proxy-720p30-v1" },
+        comparison_id: comparisonId, base_revision: view.revision,
+        expected_source_digest: view.source_digest, control_revision: view.control_revision,
+        segment_bindings: bindingsFor(comparison, proposalId, assets),
+        idempotency_key: "m33-http-autonomous-1",
+      }) },
+    );
+    expect(posted.status, await posted.clone().text()).toBe(202);
+    const job = await posted.json() as { materialization_id: string };
+
+    // Poll the way a client would, and let the Host's own worker do the work.
+    let row: MaterializationV1 | undefined;
+    for (let attempt = 0; attempt < 120 && row?.state !== "ready_for_adoption"; attempt += 1) {
+      await new Promise((resolvePromise) => setTimeout(resolvePromise, 250));
+      const read = await fetch(`${running.origin}/api/migration/v1/materializations/${job.materialization_id}`,
+        { headers: headers(running.origin, running.token) });
+      expect(read.status).toBe(200);
+      row = await read.json() as MaterializationV1;
+    }
+
+    expect(row?.state, "the Host must render without anyone calling run()").toBe("ready_for_adoption");
+    expect(row?.proxy?.frame_count).toBe(600);
+    expect(row?.native_plan?.clips).toHaveLength(2);
+  }, 300_000);
+
+  it("classifies rows left behind when the Host restarts", async () => {
+    const running = await started();
+    const { projectId, proposalId, comparisonId, comparison } = await migrateTarget(running);
+    const view = await running.host.projectResolver.resolveActivated(projectId);
+    const assets = await targetAssetIds(running.host, projectId);
+    const posted = await fetch(
+      `${running.origin}/api/migration/v1/projects/${projectId}/proposals/${proposalId}/materialize`,
+      { method: "POST", headers: headers(running.origin, running.token), body: JSON.stringify({
+        format: "narralens.materialize-request@1.0",
+        profile: { profile_id: "wave2-proxy-720p30-v1" },
+        comparison_id: comparisonId, base_revision: view.revision,
+        expected_source_digest: view.source_digest, control_revision: view.control_revision,
+        segment_bindings: bindingsFor(comparison, proposalId, assets),
+        idempotency_key: "m33-http-recover-1",
+      }) },
+    );
+    const created = await posted.json() as { materialization_id: string; job_id: string };
+    await running.host.close();
+    hosts.splice(0);
+
+    // A second Host over the same database must classify the row rather than forget it.
+    const second = await startOn(running.base);
+    const outcome = await second.host.materialize.recover();
+    expect(outcome.retried.concat(outcome.quarantined, outcome.ownedElsewhere))
+      .toContain(created.materialization_id);
+    const read = await fetch(`${second.origin}/api/migration/v1/materializations/${created.materialization_id}`,
+      { headers: headers(second.origin, second.token) });
+    expect(read.status).toBe(200);
+    void created.job_id;
+  }, 300_000);
+});
+
+describe("PR-01 a replayed comparison is labelled and both digests are kept", () => {
+  /**
+   * C-07 requires the lineage to distinguish a replay from a fresh provider call, and to
+   * carry both the recorded runner's stdout digest and the digest of the draft that was
+   * replayed. The marker is now produced by the route rather than written straight into a
+   * row by a unit test.
+   */
+  it("stamps RECORDED_PROVIDER_OUTPUT_REPLAY with both digests", async () => {
+    const running = await started();
+    const { projectId, proposalId, comparisonId, comparison } = await migrateTarget(running);
+    const view = await running.host.projectResolver.resolveActivated(projectId);
+    const assets = await targetAssetIds(running.host, projectId);
+    const payloadSha = createHash("sha256").update(JSON.stringify(comparison.proposals)).digest("hex");
+
+    const posted = await fetch(
+      `${running.origin}/api/migration/v1/projects/${projectId}/proposals/${proposalId}/materialize`,
+      { method: "POST", headers: headers(running.origin, running.token), body: JSON.stringify({
+        format: "narralens.materialize-request@1.0",
+        profile: { profile_id: "wave2-proxy-720p30-v1" },
+        comparison_id: comparisonId, base_revision: view.revision,
+        expected_source_digest: view.source_digest, control_revision: view.control_revision,
+        segment_bindings: bindingsFor(comparison, proposalId, assets),
+        idempotency_key: "m33-http-replay-1",
+        replay: { mode: "RECORDED_PROVIDER_OUTPUT_REPLAY", recorded_payload_sha256: payloadSha },
+      }) },
+    );
+    expect(posted.status, await posted.clone().text()).toBe(202);
+    const job = await posted.json() as { materialization_id: string };
+
+    const replay = running.host.materializations.replayOf(job.materialization_id);
+    expect(replay).toEqual({
+      mode: "RECORDED_PROVIDER_OUTPUT_REPLAY",
+      recorded_stdout_sha256: comparison.generation_audit.stdout_sha256,
+      recorded_payload_sha256: payloadSha,
+    });
+  }, 300_000);
+
+  it("refuses a replay that cannot be substantiated", async () => {
+    const running = await started();
+    const { projectId, proposalId, comparisonId, comparison } = await migrateTarget(running);
+    const view = await running.host.projectResolver.resolveActivated(projectId);
+    const assets = await targetAssetIds(running.host, projectId);
+    const base = {
+      format: "narralens.materialize-request@1.0",
+      profile: { profile_id: "wave2-proxy-720p30-v1" },
+      comparison_id: comparisonId, base_revision: view.revision,
+      expected_source_digest: view.source_digest, control_revision: view.control_revision,
+      segment_bindings: bindingsFor(comparison, proposalId, assets),
+    };
+    // A claimed replay with no digest, and one with an undeclared mode, are both refused:
+    // the marker must be earned, not asserted.
+    for (const replay of [
+      { mode: "RECORDED_PROVIDER_OUTPUT_REPLAY" },
+      { recorded_payload_sha256: createHash("sha256").update("draft").digest("hex") },
+    ]) {
+      const response = await fetch(
+        `${running.origin}/api/migration/v1/projects/${projectId}/proposals/${proposalId}/materialize`,
+        { method: "POST", headers: headers(running.origin, running.token),
+          body: JSON.stringify({ ...base, idempotency_key: "m33-http-replay-2", replay }) },
+      );
+      expect([400, 422], JSON.stringify(replay)).toContain(response.status);
+    }
+  }, 300_000);
+});
+
+describe("MT-04 and MT-05 through the Host, not around it", () => {
+  /**
+   * The acceptance review was right that MT-04 was proven only against a hand-built
+   * harness. This runs the real route, through the real Host, and diffs the author facts
+   * around it — the only version of that claim that means anything.
+   */
+  it("changes no author fact while a real materialize runs end to end", async () => {
+    const running = await started();
+    const { projectId, proposalId, comparisonId, comparison } = await migrateTarget(running);
+    const view = await running.host.projectResolver.resolveActivated(projectId);
+    const assets = await targetAssetIds(running.host, projectId);
+
+    const authorFacts = async () => ({
+      commit: running.host.revisions.activeCommit(projectId),
+      binding: running.host.revisions.readEngineBinding(projectId),
+      ledger: running.host.revisions.compose((db) => db.prepare(
+        "SELECT * FROM migrated_asset WHERE project_id=? ORDER BY asset_id").all(projectId)),
+      ledgerRecord: running.host.revisions.compose((db) => db.prepare(
+        "SELECT * FROM asset_ledger_bootstrap WHERE project_id=?").all(projectId)),
+      targetTree: await treeDigest(view.source_root.value),
+      sourceTree: await treeDigest(resolve("fixtures/d1-30s")),
+    });
+    const before = await authorFacts();
+
+    const posted = await fetch(
+      `${running.origin}/api/migration/v1/projects/${projectId}/proposals/${proposalId}/materialize`,
+      { method: "POST", headers: headers(running.origin, running.token), body: JSON.stringify({
+        format: "narralens.materialize-request@1.0",
+        profile: { profile_id: "wave2-proxy-720p30-v1" },
+        comparison_id: comparisonId, base_revision: view.revision,
+        expected_source_digest: view.source_digest, control_revision: view.control_revision,
+        segment_bindings: bindingsFor(comparison, proposalId, assets),
+        idempotency_key: "m33-http-nowrite-1",
+      }) },
+    );
+    expect(posted.status, await posted.clone().text()).toBe(202);
+    const job = await posted.json() as { materialization_id: string };
+    let row: MaterializationV1 | undefined;
+    for (let attempt = 0; attempt < 120 && row?.state !== "ready_for_adoption"; attempt += 1) {
+      await new Promise((resolvePromise) => setTimeout(resolvePromise, 250));
+      row = await running.host.materialize.read(job.materialization_id);
+    }
+    expect(row?.state).toBe("ready_for_adoption");
+
+    const after = await authorFacts();
+    expect(after.commit).toEqual(before.commit);
+    expect(after.binding).toEqual(before.binding);
+    expect(after.ledger).toEqual(before.ledger);
+    expect(after.ledgerRecord).toEqual(before.ledgerRecord);
+    // The target tree itself is untouched: the proxy lives in the derived root, not here.
+    expect(after.targetTree).toBe(before.targetTree);
+    expect(after.sourceTree).toBe(before.sourceTree);
+  }, 600_000);
+
+  it("goes stale when the control revision moves under a ready materialization", async () => {
+    const running = await started();
+    const { projectId, proposalId, comparisonId, comparison } = await migrateTarget(running);
+    const view = await running.host.projectResolver.resolveActivated(projectId);
+    const assets = await targetAssetIds(running.host, projectId);
+    const posted = await fetch(
+      `${running.origin}/api/migration/v1/projects/${projectId}/proposals/${proposalId}/materialize`,
+      { method: "POST", headers: headers(running.origin, running.token), body: JSON.stringify({
+        format: "narralens.materialize-request@1.0",
+        profile: { profile_id: "wave2-proxy-720p30-v1" },
+        comparison_id: comparisonId, base_revision: view.revision,
+        expected_source_digest: view.source_digest, control_revision: view.control_revision,
+        segment_bindings: bindingsFor(comparison, proposalId, assets),
+        idempotency_key: "m33-http-control-1",
+      }) },
+    );
+    const job = await posted.json() as { materialization_id: string };
+    let row: MaterializationV1 | undefined;
+    for (let attempt = 0; attempt < 120 && row?.state !== "ready_for_adoption"; attempt += 1) {
+      await new Promise((resolvePromise) => setTimeout(resolvePromise, 250));
+      row = await running.host.materialize.read(job.materialization_id);
+    }
+    expect(row?.state).toBe("ready_for_adoption");
+
+    // A lock or any other control-plane change moves the control revision.
+    running.host.revisions.bumpControlRevision(projectId, view.revision);
+    const read = await running.host.materialize.read(job.materialization_id);
+    expect(read.state).toBe("stale");
+    expect(read.blocking_reasons).toContain("CONTROL_REVISION_CHANGED");
+  }, 600_000);
+});

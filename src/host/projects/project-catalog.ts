@@ -65,6 +65,9 @@ export class ProjectCatalog {
     return descriptor;
   }
 
+  /** The projects this catalog can resolve, so composition can check root containment. */
+  knownProjectIds(): string[] { return [...this.entries.keys()]; }
+
   descriptorRoot(projectId: string): string {
     const descriptor = this.entries.get(projectId);
     if (!descriptor) throw new HttpError(404, "NOT_FOUND", "Project not found");

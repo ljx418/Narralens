@@ -40,6 +40,8 @@ import { MaterializationStore } from "./materialize/materialization-store.js";
 import { MaterializeService } from "./materialize/materialize-service.js";
 import { NativePlanBuilder } from "./materialize/native-plan-builder.js";
 import { ProxyRenderer } from "./materialize/proxy-renderer.js";
+import { validateMaterializeRequest } from "../contracts/validator.js";
+import type { ProposalComparison } from "../contracts/types.js";
 import { canonicalJson } from "./engine/source-digest-v1.js";
 import { ProjectResolver } from "./projects/project-resolver.js";
 import { HypitEngineAdapter } from "../adapters/hypit/hypit-engine-adapter.js";
@@ -53,6 +55,57 @@ const bodyLimit = 65_536;
  * Rejecting rather than coercing is the point: a client that sends a string where a number
  * belongs gets a 422, not a binding that silently means something else.
  */
+/**
+ * Refuses a derived root that sits inside a project or a migration tree.
+ *
+ * Both are author content: a project source closure and a migrated target tree. Writing
+ * derived bytes into either changes a source digest and would break the guarantee M3 exists
+ * to keep, so it is rejected where the root is chosen.
+ */
+function assertDerivedRootIsolated(derivedRoot: string, migrationRoot: string,
+  catalog: ProjectCatalog): void {
+  const inside = (parent: string, child: string): boolean =>
+    child === parent || child.startsWith(`${resolve(parent)}${sep}`);
+  if (inside(derivedRoot, resolve(migrationRoot)) || inside(migrationRoot, derivedRoot)) {
+    throw new Error("DERIVED_ROOT_OVERLAPS_MIGRATION_ROOT");
+  }
+  for (const projectId of catalog.knownProjectIds()) {
+    if (inside(derivedRoot, resolve(catalog.descriptorRoot(projectId)))
+      || inside(resolve(catalog.descriptorRoot(projectId)), derivedRoot)) {
+      throw new Error(`DERIVED_ROOT_OVERLAPS_PROJECT:${projectId}`);
+    }
+  }
+}
+
+/**
+ * Reads a client-declared replay marker and checks it against the comparison it names.
+ *
+ * The client may claim a replay; it may not invent one. The recorded stdout digest is taken
+ * from the comparison's own audit rather than trusted, so a client cannot relabel a live
+ * provider call as a replay — and the payload digest, which the client is the only holder
+ * of, must be the digest of the draft that was actually replayed.
+ */
+function parseReplay(value: unknown, comparison: ProposalComparison): {
+  recorded_stdout_sha256: string; recorded_payload_sha256: string;
+  mode: "RECORDED_PROVIDER_OUTPUT_REPLAY";
+} {
+  const record = value as Record<string, unknown>;
+  const payloadSha = typeof record?.recorded_payload_sha256 === "string" ? record.recorded_payload_sha256 : "";
+  if (!/^[a-f0-9]{64}$/u.test(payloadSha)) {
+    throw new HttpError(422, "INVALID_REQUEST",
+      "recorded_payload_sha256 must be the digest of the replayed draft");
+  }
+  if (record?.mode !== "RECORDED_PROVIDER_OUTPUT_REPLAY") {
+    throw new HttpError(422, "INVALID_REQUEST",
+      "a replay must declare mode RECORDED_PROVIDER_OUTPUT_REPLAY");
+  }
+  return {
+    recorded_stdout_sha256: comparison.generation_audit.stdout_sha256,
+    recorded_payload_sha256: payloadSha,
+    mode: "RECORDED_PROVIDER_OUTPUT_REPLAY",
+  };
+}
+
 function parseSegmentBindings(value: unknown): Array<{
   segment_id: string; asset_id: string;
   source_start_frame: number; source_end_frame_exclusive: number;
@@ -99,6 +152,7 @@ interface HostDependencies {
   migrationsRoot?: string;
   dbPath?: string;
   derivedRoot?: string;
+  materializeDrainIntervalMs?: number;
   leaseReapIntervalMs?: number;
   outboxReplayIntervalMs?: number;
   sessionTtlMs?: number;
@@ -162,6 +216,8 @@ export class NarralensHost {
   readonly failures = new HostDiagnostics();
   readonly #controllers = new Map<string, AbortController>();
   readonly #leaseReapIntervalMs: number;
+  readonly #materializeDrainIntervalMs: number;
+  #materializeDrainTimer: ReturnType<typeof setInterval> | undefined;
   readonly #outboxReplayIntervalMs: number;
   #stopOutbox: (() => void) | undefined;
   #leaseReaper: ReturnType<typeof setInterval> | undefined;
@@ -224,8 +280,12 @@ export class NarralensHost {
       resolver: this.projectResolver, registry: this.imports.registry, ledger: this.assetLedger,
     });
     this.materializations = new MaterializationStore(this.revisions);
-    this.derivedArtifacts = new DerivedArtifactStore(
-      dependencies.derivedRoot ?? resolve(projectRoot, "var/derived"));
+    const derivedRoot = resolve(dependencies.derivedRoot ?? resolve(projectRoot, "var/derived"));
+    // NOWRITE is a property of the layout, not of convention. A derived root inside a
+    // project would put proxy bytes into author source and change the source closure, so
+    // the containment is checked at composition rather than left to every caller.
+    assertDerivedRootIsolated(derivedRoot, this.migrationRoot, this.catalog);
+    this.derivedArtifacts = new DerivedArtifactStore(derivedRoot);
     this.materialize = new MaterializeService({
       jobs: this.jobs instanceof PersistentJobStore ? this.jobs : new PersistentJobStore(this.revisions),
       materializations: this.materializations,
@@ -242,6 +302,7 @@ export class NarralensHost {
       }),
       plans: new NativePlanBuilder(),
       proxies: new ProxyRenderer({ artifacts: this.derivedArtifacts, profile: "wave2-proxy-720p30-v1" }),
+      readComparison: (comparisonId) => this.comparisons.read(comparisonId),
       resolveMedia: (projectId, assetId) => this.#targetMediaPath(projectId, assetId),
     });
     this.migrations = new MigrationService({
@@ -299,6 +360,7 @@ export class NarralensHost {
       },
     });
     this.#leaseReapIntervalMs = dependencies.leaseReapIntervalMs ?? 1_000;
+    this.#materializeDrainIntervalMs = dependencies.materializeDrainIntervalMs ?? 250;
     this.#outboxReplayIntervalMs = dependencies.outboxReplayIntervalMs ?? 250;
     this.sessionExpiresAt = new Date(Date.now() + (dependencies.sessionTtlMs ?? 3_600_000));
   }
@@ -334,6 +396,14 @@ export class NarralensHost {
     // A migrated copy survives a restart because `ProjectResolver` re-derives it from the
     // migration record on every call. There is nothing to re-seed, and a cache here would be
     // a second authority that could disagree with the record it claims to mirror.
+    // M3's worker. Without this a POST returns 202 and the row sits `queued` forever: no
+    // scheduler, no poll loop, and nothing in the response that says so.
+    await this.materialize.recover();
+    this.#materializeDrainTimer = setInterval(() => {
+      void this.materialize.drain().catch(() => undefined);
+    }, this.#materializeDrainIntervalMs);
+    this.#materializeDrainTimer.unref?.();
+
     this.#stopOutbox = this.outbox.start(this.#outboxReplayIntervalMs);
     if (this.jobs instanceof PersistentJobStore) {
       this.#leaseReaper = setInterval(() => this.jobs instanceof PersistentJobStore
@@ -360,6 +430,10 @@ export class NarralensHost {
     this.#controllers.clear();
     this.#stopOutbox?.();
     this.#stopOutbox = undefined;
+    if (this.#materializeDrainTimer !== undefined) {
+      clearInterval(this.#materializeDrainTimer);
+      this.#materializeDrainTimer = undefined;
+    }
     if (this.#leaseReaper !== undefined) clearInterval(this.#leaseReaper);
     this.#leaseReaper = undefined;
     if (!server) { this.revisions.close(); return; }
@@ -586,23 +660,45 @@ export class NarralensHost {
     const body = await readJson(request) as {
       comparison_id?: unknown; base_revision?: unknown; expected_source_digest?: unknown;
       control_revision?: unknown; segment_bindings?: unknown; idempotency_key?: unknown;
+      replay?: unknown;
     };
     const idempotencyKey = typeof body?.idempotency_key === "string" ? body.idempotency_key : "";
     if (idempotencyKey.length < 8 || idempotencyKey.length > 128) {
       throw new HttpError(400, "INVALID_REQUEST", "idempotency_key must be 8 to 128 characters");
     }
-    const bindings = parseSegmentBindings(body?.segment_bindings);
-    if (bindings === undefined) {
-      throw new HttpError(422, "INVALID_REQUEST", "segment_bindings is required");
+    // The frozen body contract is enforced at the boundary: `format`, the profile literal,
+    // the digest pattern and the 64-segment ceiling all live there, and a route that parses
+    // the body by hand enforces none of them.
+    const parsed = validateMaterializeRequest({
+      format: "narralens.materialize-request@1.0",
+      comparison_id: body?.comparison_id,
+      base_revision: body?.base_revision,
+      expected_source_digest: body?.expected_source_digest,
+      control_revision: body?.control_revision,
+      profile: { profile_id: "wave2-proxy-720p30-v1" },
+      segment_bindings: body?.segment_bindings,
+      idempotency_key: body?.idempotency_key,
+    });
+    if (!parsed.ok) {
+      throw new HttpError(422, "INVALID_REQUEST", "The materialize request does not satisfy its contract",
+        { errors: parsed.errors.slice(0, 8) }, projectId);
     }
+    const bindings = parsed.value.segment_bindings.map((entry) => ({ ...entry }));
     const requestDigest = createHash("sha256").update(canonicalJson({
-      comparison_id: body.comparison_id, base_revision: body.base_revision,
-      expected_source_digest: body.expected_source_digest, bindings,
+      comparison_id: parsed.value.comparison_id, base_revision: parsed.value.base_revision,
+      expected_source_digest: parsed.value.expected_source_digest, bindings,
     })).digest("hex");
+    const comparison = await this.comparisons.read(parsed.value.comparison_id);
+    // PR-01. When a comparison was rebuilt from recorded provider output rather than a new
+    // call, the lineage must say so and carry both digests. Without this the evidence could
+    // not distinguish a replay from a fresh provider call, which is the forgery C-07 names.
+    const replay = body?.replay === undefined || body?.replay === null ? undefined : parseReplay(body.replay, comparison);
     const created = await this.materialize.request({
-      projectId, comparisonId: String(body.comparison_id ?? ""), proposalId,
-      baseRevision: Number(body.base_revision), sourceDigest: String(body.expected_source_digest ?? ""),
-      controlRevision: Number(body.control_revision), bindings, idempotencyKey, requestDigest,
+      projectId, comparisonId: parsed.value.comparison_id, proposalId,
+      baseRevision: parsed.value.base_revision, sourceDigest: parsed.value.expected_source_digest,
+      controlRevision: parsed.value.control_revision, bindings, idempotencyKey, requestDigest,
+      comparison,
+      ...(replay === undefined ? {} : { replay }),
     });
     const job = this.jobs.get(created.job_id);
     json(response, 202, {

@@ -68,7 +68,20 @@ export interface CreateMaterialization {
     segment_id: string; asset_id: string;
     source_start_frame: number; source_end_frame_exclusive: number;
   }>;
+  /**
+   * Present when the comparison behind this intent was rebuilt from recorded provider
+   * output rather than produced by a new call. C-07 requires the lineage to be recorded and
+   * the replay to be labelled; neither may be inferred after the fact.
+   */
   readonly replay?: ReplayLineage;
+  /**
+   * Digest of the comparison as it stood at request time, re-checked by the worker.
+   *
+   * A comparison can be rebuilt at the same base revision with different segment content,
+   * which every client-supplied field would miss. Pinning the comparison itself is what
+   * makes "re-read what was asked" mean something.
+   */
+  readonly comparisonSha256?: string;
   readonly now?: Date;
 }
 
@@ -92,6 +105,7 @@ interface MaterializationRow {
   readonly lineage_json: string | null;
   readonly blocking_json: string;
   readonly request_json: string;
+  readonly comparison_sha256: string;
   readonly replay_json: string | null;
   readonly created_at: string;
   readonly updated_at: string;
@@ -99,8 +113,10 @@ interface MaterializationRow {
 
 export class MaterializationStore {
   readonly #db: DatabaseSync;
+  readonly #revisions: RevisionStore;
 
   constructor(revisions: RevisionStore) {
+    this.#revisions = revisions;
     this.#db = revisions.compose((db) => db);
     this.#migrate();
   }
@@ -113,6 +129,7 @@ export class MaterializationStore {
         base_revision INTEGER NOT NULL, source_digest TEXT NOT NULL, control_revision INTEGER NOT NULL,
         proposal_sha256 TEXT NOT NULL, asset_inventory_sha256 TEXT NOT NULL, rights_digest TEXT NOT NULL,
         request_digest TEXT NOT NULL, idempotency_key TEXT NOT NULL, request_json TEXT NOT NULL,
+        comparison_sha256 TEXT NOT NULL DEFAULT '',
         plan_json TEXT, proxy_json TEXT, lineage_json TEXT,
         blocking_json TEXT NOT NULL DEFAULT '[]', replay_json TEXT,
         created_at TEXT NOT NULL, updated_at TEXT NOT NULL,
@@ -134,27 +151,42 @@ export class MaterializationStore {
    * row; a different digest is a conflict the caller has to resolve, not a replacement.
    */
   async create(input: CreateMaterialization): Promise<MaterializationV1> {
-    const existing = this.#byKey(input.projectId, input.idempotencyKey);
-    if (existing !== undefined) {
-      if (existing.request_digest !== input.requestDigest) {
-        throw new HttpError(409, "IDEMPOTENCY_KEY_CONFLICT",
-          "This idempotency key was used with a different request",
-          { materialization_id: existing.materialization_id }, input.projectId);
+    // The lookup and the insert share one IMMEDIATE transaction. A client that retries a
+    // POST concurrently is the normal case, not the exotic one, and a SELECT followed by an
+    // unguarded INSERT let the loser through to a raw UNIQUE error that surfaced as a 500.
+    return this.#revisions.atomic(() => {
+      const existing = this.#byKey(input.projectId, input.idempotencyKey);
+      if (existing !== undefined) {
+        if (existing.request_digest !== input.requestDigest) {
+          throw new HttpError(409, "IDEMPOTENCY_KEY_CONFLICT",
+            "This idempotency key was used with a different request",
+            { materialization_id: existing.materialization_id }, input.projectId);
+        }
+        return toView(existing);
       }
-      return toView(existing);
-    }
+      return this.#insert(input);
+    });
+  }
+
+  #insert(input: CreateMaterialization): MaterializationV1 {
     const at = (input.now ?? new Date()).toISOString();
     this.#db.prepare(
       `INSERT INTO materialization(materialization_id, project_id, job_id, comparison_id, proposal_id, state,
         base_revision, source_digest, control_revision, proposal_sha256, asset_inventory_sha256, rights_digest,
-        request_digest, idempotency_key, blocking_json, replay_json, request_json, created_at, updated_at)
-       VALUES(?,?,?,?,?,'queued',?,?,?,?,?,?,?,?,'[]',?,?,?,?)`,
+        request_digest, idempotency_key, blocking_json, replay_json, request_json, comparison_sha256,
+        created_at, updated_at)
+       VALUES(?,?,?,?,?,'queued',?,?,?,?,?,?,?,?,'[]',?,?,?,?,?)`,
     ).run(input.materializationId, input.projectId, input.jobId, input.comparisonId, input.proposalId,
       input.baseRevision, input.sourceDigest, input.controlRevision, input.proposalSha256,
       input.assetInventorySha256, input.rightsDigest, input.requestDigest, input.idempotencyKey,
       input.replay === undefined ? null : JSON.stringify(input.replay),
-      canonicalJson({ bindings: input.requestedBindings }), at, at);
+      canonicalJson({ bindings: input.requestedBindings }), input.comparisonSha256 ?? "", at, at);
     return this.require(input.materializationId);
+  }
+
+  /** The digest of the comparison this intent was prepared against. */
+  comparisonSha256Of(materializationId: string): string {
+    return this.#requireRow("materialization_id = ?", materializationId).comparison_sha256;
   }
 
   /** The bindings the request asked for, as recorded. */
@@ -173,6 +205,12 @@ export class MaterializationStore {
     const row = this.#select("materialization_id = ?", materializationId);
     if (row === undefined) throw new HttpError(404, "NOT_FOUND", "Materialization not found");
     return toView(row);
+  }
+
+  /** The row this project already has for an idempotency key, if any. */
+  byIdempotencyKey(projectId: string, idempotencyKey: string): MaterializationV1 | undefined {
+    const row = this.#byKey(projectId, idempotencyKey);
+    return row === undefined ? undefined : toView(row);
   }
 
   find(materializationId: string): MaterializationV1 | undefined {
@@ -226,6 +264,19 @@ export class MaterializationStore {
        WHERE materialization_id=?`,
     ).run(facts.proposalSha256, facts.assetInventorySha256, facts.rightsDigest,
       now.toISOString(), materializationId);
+  }
+
+  /**
+   * Whether every artefact and every proven fact is present.
+   *
+   * The service needs this to decide what a crash means. A row that is complete has not had
+   * its premises contradicted — it had its *promotion* interrupted — and discarding it would
+   * throw away a proxy that is already on disk and content-addressed.
+   */
+  isComplete(materializationId: string): boolean {
+    const row = this.#requireRow("materialization_id = ?", materializationId);
+    return row.plan_json !== null && row.proxy_json !== null && row.lineage_json !== null
+      && row.proposal_sha256 !== "" && row.asset_inventory_sha256 !== "" && row.rights_digest !== "";
   }
 
   /** Facts the worker has not proven yet are recorded as empty, never guessed. */
@@ -288,6 +339,12 @@ export class MaterializationStore {
     if (row.plan_json === null) missing.push("native_plan");
     if (row.proxy_json === null) missing.push("proxy");
     if (row.lineage_json === null) missing.push("lineage");
+    // The digests are what an impact or an adoption will bind to, and they are written only
+    // when the worker re-proved them. `ready_for_adoption` over empty ones would promise a
+    // binding to nothing.
+    if (row.proposal_sha256 === "") missing.push("proposal_sha256");
+    if (row.asset_inventory_sha256 === "") missing.push("asset_inventory_sha256");
+    if (row.rights_digest === "") missing.push("rights_digest");
     if (missing.length > 0) {
       throw new HttpError(422, "INVALID_MEDIA", `Materialization is not complete: ${missing.join(",")}`,
         { missing }, materializationId);
@@ -367,25 +424,27 @@ export class MaterializationStore {
     projectId: string; operationKind: string; idempotencyKey: string;
     requestDigest: string; response: unknown; transactionId?: string; now?: Date;
   }): { replayed: boolean; response: unknown } {
-    const found = this.#db.prepare(
-      "SELECT request_digest, response_json FROM operation_idempotency WHERE project_id=? AND operation_kind=? AND idempotency_key=?",
-    ).get(input.projectId, input.operationKind, input.idempotencyKey) as
-      { request_digest?: unknown; response_json?: unknown } | undefined;
-    if (found !== undefined) {
-      if (String(found.request_digest) !== input.requestDigest) {
-        throw new HttpError(409, "IDEMPOTENCY_KEY_CONFLICT",
-          "This idempotency key was used with a different request",
-          { operation_kind: input.operationKind }, input.projectId);
+    return this.#revisions.atomic(() => {
+      const found = this.#db.prepare(
+        "SELECT request_digest, response_json FROM operation_idempotency WHERE project_id=? AND operation_kind=? AND idempotency_key=?",
+      ).get(input.projectId, input.operationKind, input.idempotencyKey) as
+        { request_digest?: unknown; response_json?: unknown } | undefined;
+      if (found !== undefined) {
+        if (String(found.request_digest) !== input.requestDigest) {
+          throw new HttpError(409, "IDEMPOTENCY_KEY_CONFLICT",
+            "This idempotency key was used with a different request",
+            { operation_kind: input.operationKind }, input.projectId);
+        }
+        return { replayed: true, response: JSON.parse(String(found.response_json)) as unknown };
       }
-      return { replayed: true, response: JSON.parse(String(found.response_json)) as unknown };
-    }
-    this.#db.prepare(
-      `INSERT INTO operation_idempotency(project_id, operation_kind, idempotency_key, request_digest, response_json, transaction_id, created_at)
-       VALUES(?,?,?,?,?,?,?)`,
-    ).run(input.projectId, input.operationKind, input.idempotencyKey, input.requestDigest,
-      JSON.stringify(input.response), input.transactionId ?? "",
-      (input.now ?? new Date()).toISOString());
-    return { replayed: false, response: input.response };
+      this.#db.prepare(
+        `INSERT INTO operation_idempotency(project_id, operation_kind, idempotency_key, request_digest, response_json, transaction_id, created_at)
+         VALUES(?,?,?,?,?,?,?)`,
+      ).run(input.projectId, input.operationKind, input.idempotencyKey, input.requestDigest,
+        JSON.stringify(input.response), input.transactionId ?? "",
+        (input.now ?? new Date()).toISOString());
+      return { replayed: false, response: input.response };
+    });
   }
 
   forgetOperation(projectId: string, operationKind: string, idempotencyKey: string): void {
@@ -428,6 +487,7 @@ function toRow(row: Record<string, unknown>): MaterializationRow {
     lineage_json: optional(row.lineage_json),
     blocking_json: String(row.blocking_json ?? "[]"), replay_json: optional(row.replay_json),
     request_json: String(row.request_json ?? '{"bindings":[]}'),
+    comparison_sha256: String(row.comparison_sha256 ?? ""),
     created_at: String(row.created_at), updated_at: String(row.updated_at),
   };
 }

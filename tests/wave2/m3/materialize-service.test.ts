@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { existsSync } from "node:fs";
 import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
@@ -20,6 +21,7 @@ import { treeDigest } from "../../../src/host/projects/openfilm-migrator.js";
 import { OPENFILM_UPSTREAM_SHA } from "../../../src/host/engine/engine-binding-store.js";
 import type { AssetLicense, AssetManifestEntry, AssetSource, ProposalComparison } from "../../../src/contracts/types.js";
 import type { MigrationAssetMapping, MigrationPlanV1 } from "../../../src/contracts/migration-types.js";
+import type { NativePlanV1 } from "../../../src/contracts/wave2-types.js";
 
 /**
  * M3.3: the worker, the lease, and what happens when things arrive late.
@@ -58,6 +60,11 @@ interface Harness {
   revisions: RevisionStore;
   targetRoot: string;
   base: string;
+  comparisons: Map<string, ProposalComparison>;
+  /** The plan a completed run would have written, for the readiness test. */
+  planOf: (materializationId: string) => Promise<NativePlanV1>;
+  /** Rewrites an asset row's recorded bytes, so the container check is what rejects it. */
+  rebindAssetBytes: (assetId: string, sha256: string) => void;
   faults: MaterializeFaultPoint[];
   /** Arms a one-shot crash at a fault point, the way a real interruption would. */
   crashAt: (point: MaterializeFaultPoint) => void;
@@ -143,19 +150,25 @@ async function harness(): Promise<Harness> {
   let job: { job_id: string } | undefined;
   const state = { crashAt: null as MaterializeFaultPoint | null };
   let cancelPoint: MaterializeFaultPoint | null = null;
+  const bindingsService = new BindingService({
+    resolver, inventory,
+    readComparison: async (id) => {
+      const found = comparisons.get(id);
+      if (found === undefined) throw Object.assign(new Error("not found"), { status: 404 });
+      return found;
+    },
+  });
   const service = new MaterializeService({
     jobs, materializations, artifacts, resolver, inventory,
-    bindings: new BindingService({
-      resolver, inventory,
-      readComparison: async (id) => {
-        const found = comparisons.get(id);
-        if (found === undefined) throw Object.assign(new Error("not found"), { status: 404 });
-        return found;
-      },
-    }),
+    bindings: bindingsService,
     plans: new NativePlanBuilder(),
     proxies: new ProxyRenderer({ artifacts, profile: "wave2-proxy-720p30-v1" }),
     resolveMedia: async (_projectId, assetId) => join(targetRoot, "assets", `${assetId}.mp4`),
+    readComparison: async (id) => {
+      const found = comparisons.get(id);
+      if (found === undefined) throw Object.assign(new Error("not found"), { status: 404 });
+      return found;
+    },
     onJob: (createdJob) => { job = createdJob; },
     fault: (point) => {
       faults.push(point);
@@ -167,12 +180,31 @@ async function harness(): Promise<Harness> {
     },
   });
   return {
-    service, jobs, materializations, inventory, revisions, targetRoot, base, faults,
+    service, jobs, materializations, inventory, revisions, targetRoot, base, faults, comparisons,
+    // The plan a run would have written, built the same way the worker builds it.
+    planOf: async (materializationId) => {
+      const row = materializations.require(materializationId);
+      const bound = await bindingsService.bind({
+        projectId: row.project_id, comparisonId: row.comparison_id, proposalId: row.proposal_id,
+        baseRevision: row.base_revision,
+        requested: materializations.requestedBindingsOf(materializationId),
+      });
+      return new NativePlanBuilder().build(bound);
+    },
+    rebindAssetBytes: (assetId, sha256) => {
+      revisions.compose((db) => db.prepare(
+        "UPDATE migrated_asset SET target_sha256=?, source_sha256=? WHERE project_id=? AND asset_id=?",
+      ).run(sha256, sha256, TARGET_ID, assetId));
+      revisions.compose((db) => db.prepare(
+        "UPDATE asset_ledger_bootstrap SET state='attention', attention_reason='TEST_REBIND' WHERE project_id=? AND state='active'",
+      ).run(TARGET_ID));
+    },
     crashAt: (point: MaterializeFaultPoint) => { state.crashAt = point; },
     cancelAt: (point: MaterializeFaultPoint) => { cancelPoint = point; },
   };
 }
 
+/** Exposed so a test can rebuild the comparison and watch the pinned digest notice. */
 function comparison(): ProposalComparison {
   return {
     schema_version: "1.0", kind: "narralens.proposal_comparison", comparison_id: COMPARISON_ID,
@@ -208,6 +240,7 @@ async function requestMaterialization(h: Harness, key = "materialize-0001"): Pro
     baseRevision: 4, sourceDigest: "5".repeat(64), controlRevision: 0,
     bindings: BINDINGS, idempotencyKey: key,
     requestDigest: createHash("sha256").update(JSON.stringify(BINDINGS)).digest("hex"),
+    comparison: comparison(),
   });
 }
 
@@ -430,7 +463,113 @@ describe("M3.3 the intent is recorded idempotently", () => {
       projectId: SOURCE_ID, comparisonId: COMPARISON_ID, proposalId: PROPOSAL_ID,
       baseRevision: 4, sourceDigest: "5".repeat(64), controlRevision: 0,
       bindings: BINDINGS, idempotencyKey: "materialize-legacy",
-      requestDigest: "a".repeat(64),
+      requestDigest: "a".repeat(64), comparison: comparison(),
     })).rejects.toMatchObject({ status: 422, code: "UNSUPPORTED_EDIT" });
   }, 120_000);
+});
+
+
+/**
+ * One test per defect the internal review raised.
+ *
+ * Each of these was a way for the product to be wrong rather than merely unusual: a
+ * duplicate request becoming a 500, a finished proxy being thrown away, a promotion
+ * happening after a cancellation, a body the frozen contract forbids being accepted.
+ * A fix without a test that fails without it is a comment.
+ */
+describe("every defect the internal review raised has a test that fails without its fix", () => {
+  it("concurrent identical requests create one row and one job, not a 500", async () => {
+    const h = await harness();
+    const [first, second] = await Promise.all([requestMaterialization(h), requestMaterialization(h)]);
+    expect(first.materialization_id).toBe(second.materialization_id);
+    expect(h.materializations.byProject(TARGET_ID)).toHaveLength(1);
+    // One *live* job. The loser of the race may leave a failed row behind — the job is
+    // created before the materialization — but nothing will ever run it.
+    expect(h.revisions.compose((db) => db.prepare("SELECT COUNT(*) AS n FROM job").get()))
+      .toMatchObject({ n: 1 });
+  }, 300_000);
+
+  it("keeps a completed materialization when only the promotion is interrupted", async () => {
+    const h = await harness();
+    const created = await requestMaterialization(h);
+    h.crashAt("after_lineage");
+    const outcome = await h.service.run(created.materialization_id, "worker-a");
+    const row = h.materializations.require(created.materialization_id);
+    // The proxy is encoded and content-addressed. Marking it stale would discard it for a
+    // reason that has nothing to do with its premises, and stale is terminal.
+    expect(row.state).not.toBe("stale");
+    expect(h.materializations.isComplete(created.materialization_id)).toBe(true);
+    expect(outcome.state).toBe(row.state);
+  }, 300_000);
+
+  it("cannot reach ready without the facts the worker proved", async () => {
+    const h = await harness();
+    const created = await requestMaterialization(h);
+    h.materializations.transition(created.materialization_id, "queued", "running");
+    h.materializations.transition(created.materialization_id, "running", "validating");
+    await h.materializations.setPlan(created.materialization_id, (await h.planOf(created.materialization_id)));
+    await h.materializations.setProxy(created.materialization_id, {
+      token: "proxy/x", sha256: "a".repeat(64), frame_count: 600, profile_id: "p",
+    });
+    await h.materializations.setLineage(created.materialization_id, [{
+      output_sha256: "a".repeat(64), input_asset_id: "asset_0", input_sha256: "b".repeat(64),
+      source: { start_frame: 0, end_frame_exclusive: 300 },
+      output: { start_frame: 0, end_frame_exclusive: 300 },
+    }]);
+    // Every artefact is present; the digests the worker proves were never written.
+    expect(() => h.materializations.transition(created.materialization_id, "validating", "ready_for_adoption"))
+      .toThrow(/not complete/u);
+  }, 120_000);
+
+  it("refuses a comparison rebuilt after the intent was prepared", async () => {
+    const h = await harness();
+    const created = await requestMaterialization(h);
+    // Same project, same base revision, different content: every client-supplied field is
+    // unchanged, so only the pinned comparison digest can notice.
+    h.comparisons.set(COMPARISON_ID, { ...comparison(), intent_sha256: "f".repeat(64) });
+    const outcome = await h.service.run(created.materialization_id, "worker-a");
+    expect(outcome.state).not.toBe("ready_for_adoption");
+    expect(h.materializations.require(created.materialization_id).state).toBe("stale");
+  }, 300_000);
+
+  it("recovery parks a row whose job is terminal instead of promising a retry", async () => {
+    const h = await harness();
+    const created = await requestMaterialization(h);
+    h.jobs.transition(created.job_id, "failed", { terminalReason: "test: job gave up" });
+    expect(h.jobs.require(created.job_id).state).toBe("failed");
+    const outcome = await h.service.recover();
+    // `acquireLease` only takes a queued job, so calling this "retried" promised a retry
+    // no caller could perform.
+    expect(outcome.retried).not.toContain(created.materialization_id);
+    expect(h.materializations.require(created.materialization_id).state).toBe("stale");
+  }, 120_000);
+
+  it("cleans a staging file left by an encoder that was killed", async () => {
+    const h = await harness();
+    const artifacts = new DerivedArtifactStore(join(h.base, "derived"));
+    await mkdir(join(h.base, "derived", "staging"), { recursive: true });
+    const staging = join(h.base, "derived", "staging", "render-1-dead.mp4");
+    await writeFile(staging, "half a movie");
+    expect(existsSync(staging)).toBe(true);
+    // `stagingPath` writes under `staging/`, so scanning only the per-kind directories
+    // found nothing and the file survived every cleanup.
+    expect(await artifacts.stagingLeftovers()).not.toEqual([]);
+    expect(await artifacts.removeStagingLeftovers()).toBeGreaterThan(0);
+    expect(await artifacts.stagingLeftovers()).toEqual([]);
+  }, 120_000);
+
+  it("refuses media that is not an MP4 container even when its bytes match", async () => {
+    const h = await harness();
+    const created = await requestMaterialization(h);
+    // Same bytes, wrong container: hashing proves the file is the one the binding named,
+    // and only asking the container proves it is still the video that was registered.
+    const target = join(h.targetRoot, "assets", "asset_0.mp4");
+    const bytes = await readFile(target);
+    await rm(target);
+    await writeFile(join(h.targetRoot, "assets", "asset_0.mp4"), `not a container: ${bytes.length}`);
+    h.rebindAssetBytes("asset_0", createHash("sha256").update(
+      await readFile(join(h.targetRoot, "assets", "asset_0.mp4"))).digest("hex"));
+    const outcome = await h.service.run(created.materialization_id, "worker-a");
+    expect(outcome.state).not.toBe("ready_for_adoption");
+  }, 300_000);
 });

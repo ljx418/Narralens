@@ -122,9 +122,18 @@ export class DerivedArtifactStore {
   /** Staging files left by an interrupted write, so a caller can clean them deliberately. */
   async stagingLeftovers(): Promise<string[]> {
     const found: string[] = [];
+    // `staging/` is where `stagingPath()` writes, and the per-kind directories are where a
+    // partially promoted artefact would land. Scanning only the latter missed exactly the
+    // files a killed encoder leaves behind, because `stagingPath` never uses a kind folder.
+    // Everything under `staging/` is a leftover: that directory holds only in-progress
+    // renders, and `stagingPath` names them `render-<pid>-<uuid>.<ext>` with no temporary
+    // suffix. Filtering on `.tmp` there found nothing, which is why a killed encoder's file
+    // survived every cleanup.
+    for (const name of await readdir(resolve(this.root, "staging")).catch(() => [] as string[])) {
+      found.push(`staging/${name}`);
+    }
     for (const kind of DERIVED_KINDS) {
-      const dir = resolve(this.root, kind);
-      const names = await readdir(dir).catch(() => [] as string[]);
+      const names = await readdir(resolve(this.root, kind)).catch(() => [] as string[]);
       for (const name of names) if (name.endsWith(".tmp")) found.push(`${kind}/${name}`);
     }
     return found;
