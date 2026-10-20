@@ -11,6 +11,9 @@ import { MIGRATION_TARGET_ENGINE } from "../../contracts/migration-types.js";
 import { HttpError } from "../api-error.js";
 import { migrateToOpenFilm, sha256File, treeDigest, type MigrateInput, type SourceClip } from "./openfilm-migrator.js";
 import { computeSourceDigest } from "../engine/source-digest-v1.js";
+// One implementation of "which files does a migrated target declare", shared with the
+// production projection seam. Two copies would be two digests.
+import { openFilmRoots } from "./openfilm-layout-facts.js";
 import { SnapshotStore } from "./snapshot-store.js";
 import type { ProjectCatalog, ProjectDescriptor } from "./project-catalog.js";
 import type { EngineBindingStore } from "../engine/engine-binding-store.js";
@@ -611,16 +614,6 @@ async function readManifest(catalog: ProjectCatalog, descriptor: ProjectDescript
     assets: assets.filter((path) => !/\.(vtt|srt)$/iu.test(path)),
   };
 }
-
-/** film.html plus every subtitle and asset the migration carried into the copy. */
-function openFilmRoots(input: Pick<MigrateInput, "narration" | "subtitles" | "assets">): string[] {
-  const roots = ["film.html"];
-  if (input.narration !== null) roots.push(input.narration.target_path);
-  for (const subtitle of input.subtitles) roots.push(subtitle.target_path);
-  for (const asset of input.assets) roots.push(asset.target_path);
-  return [...new Set(roots)];
-}
-
 
 const basenameOf = (path: string): string => path.slice(path.lastIndexOf("/") + 1);
 const hashOf = (value: unknown): string => createHash("sha256").update(JSON.stringify(value)).digest("hex");

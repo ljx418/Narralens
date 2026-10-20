@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://narralens.local/schemas/impact-request.schema.json",
+  "description": "The client's request for the Host to compute an ImpactSpecV1. It carries only what a client is allowed to assert: the base it was prepared against, a typed intent, and an idempotency key. Every fact about what the write would affect — ranges, consumers, locks, rights, engine SHA, expiry and the impact hash — is re-read by the Host, and asking for any of them here is an error rather than a value.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "format",
+    "base_revision",
+    "expected_source_digest",
+    "control_revision",
+    "intent",
+    "idempotency_key"
+  ],
+  "properties": {
+    "format": { "const": "narralens.impact-request@1.0" },
+    "base_revision": { "type": "integer", "minimum": 0 },
+    "expected_source_digest": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "control_revision": { "type": "integer", "minimum": 0 },
+    "intent": {
+      "type": "object",
+      "required": ["op"],
+      "oneOf": [
+        {
+          "additionalProperties": false,
+          "required": ["op", "materialization_id"],
+          "properties": {
+            "op": { "const": "adopt_materialization" },
+            "materialization_id": { "type": "string", "minLength": 1, "maxLength": 200 }
+          }
+        },
+        {
+          "additionalProperties": false,
+          "required": ["op", "target_snapshot_id"],
+          "properties": {
+            "op": { "const": "restore_snapshot" },
+            "target_snapshot_id": { "type": "string", "minLength": 1, "maxLength": 200 }
+          }
+        }
+      ]
+    },
+    "idempotency_key": { "type": "string", "minLength": 1, "maxLength": 200 }
+  }
+}

@@ -26,14 +26,15 @@ import migrationReportSchema from "../../contracts/migration-report.schema.json"
 import materializeRequestSchema from "../../contracts/materialize-request.schema.json" with { type: "json" };
 import materializationSchema from "../../contracts/materialization.schema.json" with { type: "json" };
 import impactSpecSchema from "../../contracts/impact.schema.json" with { type: "json" };
+import impactRequestSchema from "../../contracts/impact-request.schema.json" with { type: "json" };
 import adoptRequestSchema from "../../contracts/adopt-request.schema.json" with { type: "json" };
 import restoreRequestSchema from "../../contracts/restore-request.schema.json" with { type: "json" };
 import controlledWriteResponseSchema from "../../contracts/controlled-write-response.schema.json" with { type: "json" };
 import type { EditRequest, ProposalBundle, ProposalComparison, ProposalComparisonDraft, ProposalComparisonRequest, ProposalRequest } from "./types.js";
 import type { EngineResponse, SourceDigestManifest } from "./engine-types.js";
 import type { MigrationPlanV1, MigrationReportV1, RollbackRecord } from "./migration-types.js";
-import type { AdoptRequestV1, ControlledWriteResponseV1, ImpactSpecV1, MaterializationV1,
-  MaterializeRequestV1, NativePlanV1, RestoreRequestV1 } from "./wave2-types.js";
+import type { AdoptRequestV1, ControlledWriteResponseV1, ImpactRequestV1, ImpactSpecV1,
+  MaterializationV1, MaterializeRequestV1, NativePlanV1, RestoreRequestV1 } from "./wave2-types.js";
 
 const ajv = new Ajv2020({ allErrors: true, strict: true });
 addFormats(ajv);
@@ -44,7 +45,7 @@ for (const schema of [apiErrorSchema, cancelResponseSchema, jobEventSchema, jobR
   proposalComparisonRequestSchema, proposalComparisonDraftSchema, proposalComparisonSchema,
   engineResponseSchema, sourceDigestManifestSchema,
   migrationPlanSchema, rollbackRecordSchema, migrationReportSchema,
-  materializeRequestSchema, materializationSchema, impactSpecSchema, adoptRequestSchema,
+  materializeRequestSchema, materializationSchema, impactSpecSchema, impactRequestSchema, adoptRequestSchema,
   restoreRequestSchema, controlledWriteResponseSchema]) {
   ajv.addSchema(schema);
 }
@@ -76,6 +77,7 @@ export const contractIds = {
   materializeRequest: materializeRequestSchema.$id,
   materialization: materializationSchema.$id,
   impactSpec: impactSpecSchema.$id,
+  impactRequest: impactRequestSchema.$id,
   adoptRequest: adoptRequestSchema.$id,
   restoreRequest: restoreRequestSchema.$id,
   controlledWriteResponse: controlledWriteResponseSchema.$id,
@@ -256,6 +258,35 @@ export function validateMaterialization(value: unknown): { ok: true; value: Mate
     errors.push("every lineage entry must account for a produced output");
   }
   return errors.length ? { ok: false, errors } : { ok: true, value: materialization };
+}
+
+/**
+ * `ImpactRequestV1` (ADR-W2.0-004 §2).
+ *
+ * The schema is the contract's own statement about what a client may assert, so the extra
+ * checks here are about *shape the schema cannot express*: that the intent names exactly one
+ * reference, and that neither arm has borrowed a field from the other. Both would otherwise
+ * pass `additionalProperties` on the wrong branch of a `oneOf`.
+ */
+export function validateImpactRequest(value: unknown): { ok: true; value: ImpactRequestV1 } | { ok: false; errors: string[] } {
+  const validate = validatorFor(contractIds.impactRequest);
+  if (!validate(value)) return { ok: false, errors: formatErrors(validate.errors) };
+  const request = value as ImpactRequestV1;
+  const errors: string[] = [];
+  const intent = request.intent as Record<string, unknown>;
+  if (intent.op === "adopt_materialization") {
+    if (typeof intent.target_snapshot_id !== "undefined") {
+      errors.push("an adopt_materialization intent must not name a target_snapshot_id");
+    }
+  } else if (intent.op === "restore_snapshot") {
+    if (typeof intent.materialization_id !== "undefined") {
+      errors.push("a restore_snapshot intent must not name a materialization_id");
+    }
+  } else {
+    errors.push("intent.op must be adopt_materialization or restore_snapshot");
+  }
+  if (request.idempotency_key.trim() === "") errors.push("idempotency_key must not be blank");
+  return errors.length ? { ok: false, errors } : { ok: true, value: request };
 }
 
 export function validateImpactSpec(value: unknown): { ok: true; value: ImpactSpecV1 } | { ok: false; errors: string[] } {

@@ -4,6 +4,7 @@ import type { MaterializationState, MaterializationV1, MaterializationProxy, Lin
 import { canonicalJson } from "../engine/source-digest-v1.js";
 import { validatorFor, contractIds } from "../../contracts/validator.js";
 import type { RevisionStore } from "../projects/revision-store.js";
+import { OperationIdempotencyStore } from "../projects/operation-idempotency-store.js";
 
 /**
  * The materialization read model (M3.1).
@@ -116,11 +117,16 @@ interface MaterializationRow {
 
 export class MaterializationStore {
   readonly #db: DatabaseSync;
+  readonly #operations: OperationIdempotencyStore;
   readonly #revisions: RevisionStore;
 
-  constructor(revisions: RevisionStore) {
+  constructor(revisions: RevisionStore, idempotency: OperationIdempotencyStore = new OperationIdempotencyStore(revisions.compose((db) => db))) {
     this.#revisions = revisions;
     this.#db = revisions.compose((db) => db);
+    // Wave 2's single idempotency authority. The table's DDL now lives here (M4A); an
+    // existing M3 database opens unchanged because the statement is still `IF NOT EXISTS`
+    // over an identical shape.
+    this.#operations = idempotency;
     this.#migrate();
   }
 
@@ -137,12 +143,6 @@ export class MaterializationStore {
         blocking_json TEXT NOT NULL DEFAULT '[]', replay_json TEXT,
         created_at TEXT NOT NULL, updated_at TEXT NOT NULL,
         UNIQUE (project_id, idempotency_key)
-      );
-      CREATE TABLE IF NOT EXISTS operation_idempotency (
-        project_id TEXT NOT NULL, operation_kind TEXT NOT NULL, idempotency_key TEXT NOT NULL,
-        request_digest TEXT NOT NULL, response_json TEXT NOT NULL,
-        transaction_id TEXT NOT NULL DEFAULT '', created_at TEXT NOT NULL,
-        PRIMARY KEY (project_id, operation_kind, idempotency_key)
       );
       CREATE INDEX IF NOT EXISTS materialization_by_job ON materialization (job_id);
       CREATE INDEX IF NOT EXISTS materialization_by_state ON materialization (state, updated_at);
@@ -482,38 +482,23 @@ export class MaterializationStore {
 
   // ── generic operation idempotency (project + kind + key) ───────────────────────────
 
-  /** The single authority for Wave 2 idempotency; never writes the legacy edit table. */
+  /**
+   * The single authority for Wave 2 idempotency; never writes the legacy edit table.
+   *
+   * The implementation moved to `OperationIdempotencyStore` in M4A so that impact and
+   * materialize share one table and one definition of a replay. The signature, the
+   * conflict code and the replay-vs-create return are unchanged, and M3's own suite is the
+   * regression gate on that.
+   */
   rememberOperation(input: {
     projectId: string; operationKind: string; idempotencyKey: string;
     requestDigest: string; response: unknown; transactionId?: string; now?: Date;
   }): { replayed: boolean; response: unknown } {
-    return this.#revisions.atomic(() => {
-      const found = this.#db.prepare(
-        "SELECT request_digest, response_json FROM operation_idempotency WHERE project_id=? AND operation_kind=? AND idempotency_key=?",
-      ).get(input.projectId, input.operationKind, input.idempotencyKey) as
-        { request_digest?: unknown; response_json?: unknown } | undefined;
-      if (found !== undefined) {
-        if (String(found.request_digest) !== input.requestDigest) {
-          throw new HttpError(409, "IDEMPOTENCY_KEY_CONFLICT",
-            "This idempotency key was used with a different request",
-            { operation_kind: input.operationKind }, input.projectId);
-        }
-        return { replayed: true, response: JSON.parse(String(found.response_json)) as unknown };
-      }
-      this.#db.prepare(
-        `INSERT INTO operation_idempotency(project_id, operation_kind, idempotency_key, request_digest, response_json, transaction_id, created_at)
-         VALUES(?,?,?,?,?,?,?)`,
-      ).run(input.projectId, input.operationKind, input.idempotencyKey, input.requestDigest,
-        JSON.stringify(input.response), input.transactionId ?? "",
-        (input.now ?? new Date()).toISOString());
-      return { replayed: false, response: input.response };
-    });
+    return this.#operations.rememberOperation(this.#revisions, input);
   }
 
   forgetOperation(projectId: string, operationKind: string, idempotencyKey: string): void {
-    this.#db.prepare(
-      "DELETE FROM operation_idempotency WHERE project_id=? AND operation_kind=? AND idempotency_key=?",
-    ).run(projectId, operationKind, idempotencyKey);
+    this.#operations.forgetOperation(projectId, operationKind, idempotencyKey);
   }
 
   // ── internals ──────────────────────────────────────────────────────────────────────

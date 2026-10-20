@@ -1,4 +1,4 @@
-import { OpenFilmEngineAdapter } from "../../adapters/openfilm/openfilm-engine-adapter.js";
+import { OpenFilmEngineAdapter, type OpenFilmProjectLayout } from "../../adapters/openfilm/openfilm-engine-adapter.js";
 import { createPinnedOpenFilmUpstream, openFilmAvailability, type OpenFilmAvailability } from "../../adapters/openfilm/openfilm-upstream.js";
 import type { EngineRegistry } from "./engine-registry.js";
 
@@ -28,6 +28,21 @@ export interface OpenFilmComposition {
   readonly availability: OpenFilmAvailability;
   readonly vendor_root: string;
   readonly reason: string;
+  /**
+   * Host-only handle on the concrete adapter, so Host composition can hand it a layout.
+   *
+   * M4A-0: before this existed, the only way to make an activated target inspectable was
+   * for a test to call `registerLayout()` itself, so a restarted Host could not read its own
+   * migrated project. The registrar is deliberately *not* on `EnginePort` — the port stays at
+   * seven methods, and this is a Host-composition seam that no client and no adapter can
+   * reach. It is absent when the port is not installed, so calling it is a capability check
+   * rather than a silent no-op.
+   */
+  readonly registrar?: OpenFilmLayoutRegistrar;
+}
+
+export interface OpenFilmLayoutRegistrar {
+  registerLayout(projectId: string, layout: OpenFilmProjectLayout): void;
 }
 
 export async function composeOpenFilmPort(input: {
@@ -44,6 +59,8 @@ export async function composeOpenFilmPort(input: {
   // Loading is the last step and the only one that can execute anything, so it happens
   // only once the checkout has already been proven.
   const upstream = await createPinnedOpenFilmUpstream(input.vendorRoot);
-  input.registry.register("openfilm", new OpenFilmEngineAdapter(upstream));
-  return { installed: true, availability, vendor_root: availability.vendor_root, reason: availability.reason };
+  const adapter = new OpenFilmEngineAdapter(upstream);
+  input.registry.register("openfilm", adapter);
+  return { installed: true, availability, vendor_root: availability.vendor_root,
+    reason: availability.reason, registrar: adapter };
 }

@@ -59,6 +59,24 @@ const STILL_EXTENSIONS = /\.(png|jpe?g|webp|gif|avif)$/iu;
 const VIDEO_EXTENSIONS = /\.(mp4|m4v|mov|webm|mkv|avi|ogv)$/iu;
 const SOUND_EXTENSIONS = /\.(mp3|m4a|wav|aac|ogg|oga|opus|flac|aif|aiff|weba)$/iu;
 
+/**
+ * Every clip attribute this projection models. A new upstream attribute is therefore a
+ * deliberate decision to model or to report, never something that is quietly ignored.
+ */
+const MODELLED_CLIP_FIELDS: ReadonlySet<string> = new Set(["id", "src", "at", "time", "overrides"]);
+
+/**
+ * Track kinds the consumer graph can classify. `data-track` outside this set is a hint the
+ * graph cannot act on, so it is reported instead of being treated as "some track".
+ */
+const KNOWN_TRACK_KINDS: ReadonlySet<string> = new Set([
+  "picture", "video", "still", "narration", "subtitle", "audio", "sound",
+]);
+
+/** Prefix on every completeness problem, so a consumer can recognise one without a parser. */
+export const OPENFILM_PROJECTION_PROBLEM_PREFIX = "OPENFILM_PROJECTION:";
+const PROBLEM_PREFIX = OPENFILM_PROJECTION_PROBLEM_PREFIX;
+
 function clipKind(sourceRef: string): EngineClipKind | null {
   if (PAGE_EXTENSIONS.test(sourceRef)) return "page";
   if (STILL_EXTENSIONS.test(sourceRef)) return "still";
@@ -118,14 +136,49 @@ export class OpenFilmEngineAdapter implements EnginePort {
     const doc = (read.doc ?? {}) as UpstreamDoc;
     const tracks: EngineTrack[] = [];
     const clips: EngineClip[] = [];
+    // M4A-0 projection completeness. Every reason a node failed to reach the projection is
+    // recorded instead of being skipped, because "the projection does not mention it" is not
+    // evidence that the upstream film does not contain it — it is exactly what a silent
+    // skip looks like. A consumer that trusted this projection would then compute an impact
+    // that silently omits a clip, a transition or an override.
+    const problems: string[] = [];
     let frameCount = 0;
+    const seenClipIds = new Set<string>();
     (doc.tracks ?? []).forEach((track, index) => {
       const trackId = `track_${index}`;
       const clipIds: string[] = [];
-      for (const clip of track.clips ?? []) {
+      // `attrs` carries `data-track`, which is the only track-level fact this projection
+      // models. Anything else is a hint about structure the consumer graph cannot express.
+      const attrs = track.attrs ?? {};
+      for (const key of Object.keys(attrs).sort()) {
+        if (key !== "data-track") problems.push(`${PROBLEM_PREFIX}TRACK_UNMODELED_ATTR:${trackId}:${key}`);
+      }
+      const declaredKind = attrs["data-track"];
+      if (typeof declaredKind === "string" && !KNOWN_TRACK_KINDS.has(declaredKind)) {
+        problems.push(`${PROBLEM_PREFIX}TRACK_UNKNOWN_KIND:${trackId}:${declaredKind}`);
+      }
+      for (const [clipIndex, clip] of (track.clips ?? []).entries()) {
+        for (const field of Object.keys(clip).sort()) {
+          if (!MODELLED_CLIP_FIELDS.has(field)) {
+            const id = typeof clip.id === "string" && clip.id !== "" ? clip.id : `${trackId}#${clipIndex}`;
+            problems.push(`${PROBLEM_PREFIX}CLIP_UNMODELED_FIELD:${id}:${field}`);
+          }
+        }
         const sourceRef = typeof clip.src === "string" ? clip.src : "";
         const kind = sourceRef === "" ? null : clipKind(sourceRef.split("#")[0] ?? "");
-        if (typeof clip.id !== "string" || clip.id === "" || kind === null) continue;
+        if (typeof clip.id !== "string" || clip.id === "") {
+          problems.push(`${PROBLEM_PREFIX}CLIP_NO_ID:${trackId}`);
+          continue;
+        }
+        if (kind === null) {
+          problems.push(`${PROBLEM_PREFIX}CLIP_UNKNOWN_SOURCE:${clip.id}`);
+          continue;
+        }
+        if (seenClipIds.has(clip.id)) {
+          problems.push(`${PROBLEM_PREFIX}DUPLICATE_CLIP_ID:${clip.id}`);
+          continue;
+        }
+        seenClipIds.add(clip.id);
         // The upstream omits `at` for a clip that starts at the beginning of its track.
         const start = finite(clip.at) ?? 0;
         const startFrame = secondsToFrame(rationalFromNumber(start), FPS_30, "floor");
@@ -147,6 +200,11 @@ export class OpenFilmEngineAdapter implements EnginePort {
             ? createHash("sha256").update(JSON.stringify(clip.overrides)).digest("hex")
             : null,
         });
+        // An override is a per-clip rendering change M4A's consumer graph cannot reason
+        // about, so its presence is reported rather than reduced to a digest nobody reads.
+        if (Array.isArray(clip.overrides) && clip.overrides.length > 0) {
+          problems.push(`${PROBLEM_PREFIX}CLIP_OVERRIDES:${clip.id}`);
+        }
       }
       tracks.push({ track_id: trackId, index, clip_ids: clipIds });
     });
@@ -180,7 +238,7 @@ export class OpenFilmEngineAdapter implements EnginePort {
       // loopback origin and token when it answers. Exposing an absolute server path in a
       // projection would disclose the filesystem layout to the client.
       preview: { kind: "openfilm-studio", url: `/api/migration/v1/projects/${snapshot.project_id}/preview` },
-      problems: [],
+      problems,
     };
   }
 

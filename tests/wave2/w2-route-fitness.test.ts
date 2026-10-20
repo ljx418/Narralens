@@ -6,13 +6,14 @@ import { NarralensHost } from "../../src/host/server.js";
 /**
  * The Wave 2 route set, stage by stage.
  *
- * W2.0 froze all five as 404. M3.3 opens two of them — materialize and the materialization
- * read — and the other three stay closed until M4. The point of this file is the three, not
- * the two: a route that answers 501, 503 or a plausible-looking body before its Gate would
- * let a client integrate against a capability that does not exist, which is the failure the
- * frozen plan's stop rule exists to prevent.
+ * W2.0 froze all five as 404. M3.3 opened two — materialize and the materialization read.
+ * M4A opens one more, impact, and *only* impact: versioned edits and history restore belong
+ * to M4B and M4C and stay closed. The point of this file is the two that remain closed, not
+ * the three that opened: a route that answers 501, 503 or a plausible-looking body before
+ * its Gate would let a client integrate against a capability that does not exist, which is
+ * the failure the frozen plan's stop rule exists to prevent.
  *
- * The still-closed list is deleted, not weakened, when M4 opens them.
+ * The still-closed list is deleted, not weakened, when M4B/M4C open them.
  */
 
 const REPO = resolve(import.meta.dirname, "../..");
@@ -23,9 +24,21 @@ export const OPENED_BY_M3: readonly { method: string; path: string; status: numb
   { method: "GET", path: "/api/migration/v1/materializations/mat_1", status: 404 },
 ];
 
-/** Still closed until M4 opens them. */
+/**
+ * Opened by M4A. Impact is served for an activated project; `d1-30s` is still a *legacy*
+ * catalog project, so the honest answer for it is 404 — the route is mounted, and this
+ * project is not the one it can serve. The mounted-ness is asserted by the malformed-body
+ * test below, which proves the route answers 400 rather than 404 for input it can parse.
+ */
+export const OPENED_BY_M4A: readonly { method: string; path: string; status: number }[] = [
+  { method: "POST", path: "/api/migration/v1/projects/d1-30s/impact", status: 404 },
+];
+
+/**
+ * Still closed until M4B and M4C open them. M4A deliberately does not: an impact is an
+ * authorization, and the writes it authorizes are the next module.
+ */
 const WAVE2_ROUTES = [
-  { method: "POST", path: "/api/migration/v1/projects/d1-30s/impact" },
   { method: "POST", path: "/api/migration/v1/projects/d1-30s/edits" },
   { method: "POST", path: "/api/migration/v1/projects/d1-30s/history/restore" },
 ] as const;
@@ -95,17 +108,30 @@ describe("W2.0 fitness: the unopened Wave 2 routes stay closed", () => {
     expect((body.slice(0, end).match(/^\s{2}\w+\s*\(/gmu) ?? []).length).toBe(7);
   });
 
-  it("keeps the /api/migration/v1 route set at exactly the four Wave 1 routes plus M3's two", () => {
+  it("keeps the /api/migration/v1 route set at exactly the Wave 1 routes plus M3's two and M4A's one", () => {
     const server = readFileSync(resolve(REPO, "src/host/server.ts"), "utf8");
     const routes = [...server.matchAll(/\^\\\/api\\\/migration\\\/v1\\\/([^$]*)\$/gu)].map((match) => match[1]!);
     expect(routes).toEqual([
       "projects\\/([A-Za-z0-9_-]+)\\/engine",
       "projects\\/([A-Za-z0-9_-]+)\\/migrate-copy",
       "projects\\/([A-Za-z0-9_-]+)\\/proposals\\/([A-Za-z0-9_-]+)\\/materialize",
+      "projects\\/([A-Za-z0-9_-]+)\\/impact",
       "materializations\\/([A-Za-z0-9_-]+)",
       "migrations\\/([A-Za-z0-9_-]+)",
       "migrations\\/([A-Za-z0-9_-]+)\\/rollback",
     ]);
+  });
+
+  it("mounts the impact route and refuses its inputs on merit, not with 404", async () => {
+    const { origin, token } = await started();
+    // A route that exists answers 400 for a body it can parse and reject. A 404 here would
+    // mean the route is still closed, and this gate would be passing for the wrong reason.
+    for (const body of [{}, { format: "narralens.impact-request@1.0" }, { idempotency_key: "k" }]) {
+      const post = await fetch(`${origin}/api/migration/v1/projects/d1-30s/impact`,
+        { method: "POST", headers: headers(origin, token), body: JSON.stringify(body) });
+      expect(post.status, JSON.stringify(body)).toBe(400);
+      expect(await post.json()).toMatchObject({ code: "INVALID_REQUEST" });
+    }
   });
 
   it("mounts the two M3 routes and refuses their inputs on merit, not with 404", async () => {

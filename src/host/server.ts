@@ -7,7 +7,8 @@ import { fileURLToPath } from "node:url";
 import { ControlledAgentRunner, type ComparisonRunnerInput } from "../adapters/openmontage/controlled-agent-runner.js";
 import { ProposalAdapter } from "../adapters/openmontage/proposal-adapter.js";
 import { ProposalComparisonAdapter } from "../adapters/openmontage/proposal-comparison-adapter.js";
-import { validateEditRequest, validateEngineResponse, validateProposalComparisonRequest } from "../contracts/validator.js";
+import { validateEditRequest, validateEngineResponse, validateImpactRequest, validateImpactSpec,
+  validateProposalComparisonRequest } from "../contracts/validator.js";
 import type { EngineResponse } from "../contracts/engine-types.js";
 import type { ApiError, JobEvent, ProjectResponse, ProposalComparisonRequest } from "../contracts/types.js";
 import { HttpError, normalizeError } from "./api-error.js";
@@ -38,6 +39,10 @@ import { MigratedAssetLedger } from "./projects/migrated-asset-ledger.js";
 import { BindingService } from "./materialize/binding-service.js";
 import { DerivedArtifactStore } from "./materialize/derived-artifact-store.js";
 import { MaterializationStore } from "./materialize/materialization-store.js";
+import { ActivatedProjectionService } from "./engine/activated-projection-service.js";
+import { OperationIdempotencyStore } from "./projects/operation-idempotency-store.js";
+import { ImpactStore } from "./impact/impact-store.js";
+import { ImpactService } from "./impact/impact-service.js";
 import { MaterializeService } from "./materialize/materialize-service.js";
 import { NativePlanBuilder } from "./materialize/native-plan-builder.js";
 import { ProxyRenderer } from "./materialize/proxy-renderer.js";
@@ -157,6 +162,15 @@ interface HostDependencies {
   leaseReapIntervalMs?: number;
   outboxReplayIntervalMs?: number;
   sessionTtlMs?: number;
+  /**
+   * M4A. The impact TTL is fifteen minutes from an injected clock, so the clock is a
+   * dependency rather than a call to `Date.now()`: a boundary case has to be provable
+   * without a fifteen-minute test, and a slow machine must not decide whether a
+   * thirty-second-old impact is valid.
+   */
+  impactClock?: () => Date;
+  /** Test-only race seam; see `ImpactServiceDeps.fault`. */
+  impactFault?: (point: string) => Promise<void> | void;
 }
 
 export class NarralensHost {
@@ -201,6 +215,19 @@ export class NarralensHost {
   readonly materializations: MaterializationStore;
   readonly materialize: MaterializeService;
   readonly derivedArtifacts: DerivedArtifactStore;
+  /**
+   * M4A's three layers, over the same stores as everything above.
+   *
+   * `projections` is the seam that makes an activated target inspectable after a restart
+   * with no test hook; `impacts` owns the additive table and the shared idempotency
+   * authority; `impact` computes the authorization. Exactly one of each is composed here,
+   * so there is no second store, no second actor and no second timeline.
+   */
+  readonly projections: ActivatedProjectionService;
+  readonly impacts: ImpactStore;
+  readonly impact: ImpactService;
+  /** Injected so impact TTL is testable without waiting fifteen minutes. */
+  readonly impactClock: () => Date;
   readonly sessionToken = randomBytes(32).toString("base64url");
   /** Loopback origin once `listen` has bound, used to bind preview descriptors. */
   origin = "";
@@ -363,6 +390,24 @@ export class NarralensHost {
         }));
       },
     });
+    this.projections = new ActivatedProjectionService({
+      revisions: this.revisions, ledger: this.assetLedger,
+    });
+    // One `OperationIdempotencyStore` shared with `MaterializationStore`, so impact and
+    // materialize replay against the same table and the same definition of a conflict.
+    const idempotency = new OperationIdempotencyStore(this.revisions.compose((db) => db));
+    this.impacts = new ImpactStore(this.revisions, idempotency);
+    this.impactClock = dependencies.impactClock ?? ((): Date => new Date());
+    this.impact = new ImpactService({
+      resolver: this.projectResolver, operations: this.operations, engines: this.engines,
+      projections: this.projections, materializations: this.materializations,
+      materialize: this.materialize, inventory: this.assetInventory, locks,
+      ledger: this.assetLedger, migrations: this.revisions.migrations,
+      impacts: this.impacts, idempotency,
+      clock: this.impactClock,
+      correlationId: () => randomBytes(8).toString("hex"),
+      ...(dependencies.impactFault === undefined ? {} : { fault: dependencies.impactFault }),
+    });
     this.#leaseReapIntervalMs = dependencies.leaseReapIntervalMs ?? 1_000;
     this.#materializeDrainIntervalMs = dependencies.materializeDrainIntervalMs ?? 250;
     this.#outboxReplayIntervalMs = dependencies.outboxReplayIntervalMs ?? 250;
@@ -396,6 +441,10 @@ export class NarralensHost {
       this.openFilmComposition = null;
       this.openFilmCompositionFailure = error instanceof Error ? error.message : String(error);
     }
+    // M4A-0: the projection seam learns the concrete adapter only once composition has
+    // proved the pinned checkout. Before this line a restarted Host had no way to inspect
+    // its own migrated target, because only a test could call `registerLayout()`.
+    this.projections.attachRegistrar(this.openFilmComposition?.registrar);
     await this.migrations.recover();
     // A migrated copy survives a restart because `ProjectResolver` re-derives it from the
     // migration record on every call. There is nothing to re-seed, and a cache here would be
@@ -488,6 +537,8 @@ export class NarralensHost {
       if (request.method === "POST" && match?.[1] && match[2]) {
         return await this.#materializeProposal(match[1], match[2], request, response);
       }
+      match = url.pathname.match(/^\/api\/migration\/v1\/projects\/([A-Za-z0-9_-]+)\/impact$/);
+      if (request.method === "POST" && match?.[1]) return await this.#impact(match[1], request, response);
       match = url.pathname.match(/^\/api\/migration\/v1\/materializations\/([A-Za-z0-9_-]+)$/);
       if (request.method === "GET" && match?.[1]) return await this.#readMaterialization(match[1], response);
       match = url.pathname.match(/^\/api\/migration\/v1\/migrations\/([A-Za-z0-9_-]+)$/);
@@ -672,6 +723,35 @@ export class NarralensHost {
       throw new HttpError(403, "ORIGIN_REJECTED", "Asset path escapes the target root", undefined, projectId);
     }
     return path;
+  }
+
+  /**
+   * M4A: `POST /api/migration/v1/projects/:id/impact`.
+   *
+   * The route is deliberately thin. Auth, Origin and the body-size ceiling have already run
+   * above; the contract is enforced here rather than inside the service, because a service
+   * that validates its own input is a service whose validation a caller can skip. Everything
+   * else — the project's facts, the graph, the locks, the transaction — belongs to
+   * `ImpactService`, and the response is checked against `ImpactSpecV1` before it leaves, so
+   * a spec that would not satisfy its own schema is a 500 rather than a client's problem.
+   */
+  async #impact(projectId: string, request: IncomingMessage, response: ServerResponse): Promise<void> {
+    // The body is validated *as sent*. Rebuilding a known-field-only object here would drop
+    // anything extra before `additionalProperties` ever saw it, which would make the
+    // contract's central rule — a client may not carry an impact fact — unenforced by
+    // exactly the code that exists to enforce it.
+    const parsed = validateImpactRequest(await readJson(request));
+    if (!parsed.ok) {
+      throw new HttpError(400, "INVALID_REQUEST", "The impact request does not satisfy its contract",
+        { errors: parsed.errors.slice(0, 8) }, projectId);
+    }
+    const created = await this.impact.create(projectId, parsed.value);
+    const validated = validateImpactSpec(created.spec);
+    if (!validated.ok) {
+      throw new HttpError(500, "INTERNAL_ERROR", "The computed impact does not satisfy its contract",
+        { errors: validated.errors.slice(0, 8) }, projectId);
+    }
+    json(response, created.status, validated.value);
   }
 
   async #materializeProposal(projectId: string, proposalId: string,

@@ -60,18 +60,29 @@ describe("M2.1 route activation", () => {
     expect(await response.json()).toMatchObject({ code: "NOT_FOUND" });
   });
 
-  it("keeps materialize, adopt and impact closed", async () => {
+  it("keeps adopt and history restore closed, and impact refused rather than absent", async () => {
     const { call } = await started();
     for (const path of [
-      "/api/projects/d1-30s/proposals/proposal_x/materialize",
-      "/api/migration/v1/projects/d1-30s/materializations/mat_1",
-      "/api/migration/v1/projects/d1-30s/impact",
       "/api/migration/v1/projects/d1-30s/edits",
       "/api/migration/v1/projects/d1-30s/history/restore",
     ]) {
       const response = await call(path, { method: "POST", headers: { "content-type": "application/json" }, body: "{}" });
       expect([404, 405], path).toContain(response.status);
       expect(await response.json(), path).toMatchObject({ code: "NOT_FOUND" });
+    }
+    // M4A mounted impact, so a malformed body is a 400 about the body — not a 404 for a route
+    // that does not exist. A 404 here would mean the gate was reporting the wrong thing.
+    const impact = await call("/api/migration/v1/projects/d1-30s/impact",
+      { method: "POST", headers: { "content-type": "application/json" }, body: "{}" });
+    expect(impact.status).toBe(400);
+    expect(await impact.json()).toMatchObject({ code: "INVALID_REQUEST" });
+    // And the paths that were never real stay 404.
+    for (const path of [
+      "/api/projects/d1-30s/proposals/proposal_x/materialize",
+      "/api/migration/v1/projects/d1-30s/materializations/mat_1",
+    ]) {
+      const response = await call(path, { method: "POST", headers: { "content-type": "application/json" }, body: "{}" });
+      expect([404, 405], path).toContain(response.status);
     }
     const read = await call("/api/migration/v1/materializations/mat_1");
     expect(read.status).toBe(404);

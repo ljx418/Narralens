@@ -138,23 +138,35 @@ describe("M2.2 fitness: no second actor, queue, store or timeline", () => {
 describe("M2.2 fitness: routes that must stay closed stay unmounted", () => {
   const server = sourceOf(resolve(REPO, "src/host/server.ts"));
 
-  it("8. /api/migration/v1 holds exactly the frozen route set, including M2.3's three", () => {
+  it("8. /api/migration/v1 holds exactly the frozen route set, opened stage by stage", () => {
     const routes = [...server.matchAll(/\^\\\/api\\\/migration\\\/v1\\\/([^$]*)\$/gu)].map((match) => match[1]!);
     expect(routes).toEqual([
       "projects\\/([A-Za-z0-9_-]+)\\/engine",
       "projects\\/([A-Za-z0-9_-]+)\\/migrate-copy",
-      // M3 opens these two; the rest stay closed until their own Gate.
+      // M3 opened these two; M4A opened impact; adopt and history restore stay closed
+      // until M4B and M4C, and this list is what proves they were not opened early.
       "projects\\/([A-Za-z0-9_-]+)\\/proposals\\/([A-Za-z0-9_-]+)\\/materialize",
+      "projects\\/([A-Za-z0-9_-]+)\\/impact",
       "materializations\\/([A-Za-z0-9_-]+)",
       "migrations\\/([A-Za-z0-9_-]+)",
       "migrations\\/([A-Za-z0-9_-]+)\\/rollback",
     ]);
   });
 
-  it("9. materialize, adopt, impact and history restore appear nowhere as routes", () => {
-    for (const closed of ["materialize", "adopt", "impact", "history"]) {
-      expect(server.includes(`/api/migration/v1/projects/([A-Za-z0-9_-]+)\\/${closed}`), closed).toBe(false);
+  it("9. the write routes M4A does not own appear nowhere, checked against the source's own escaping", () => {
+    // This used to search for unescaped slashes against source that escapes every one, so
+    // it matched nothing and passed for `materialize` even after M3 opened it. It now looks
+    // for the escaped form the file actually contains, and only for what is still closed:
+    // adopt and history restore are M4B's and M4C's, and the legacy edit route is not
+    // versioned.
+    const escaped = (suffix: string): string =>
+      `\\/api\\/migration\\/v1\\/projects\\/([A-Za-z0-9_-]+)\\/${suffix}`;
+    for (const closed of ["adopt", "history", "edits"]) {
+      expect(server.includes(escaped(closed)), closed).toBe(false);
     }
+    // And the opposite direction, so the check cannot be satisfied by an unrelated edit:
+    // impact really is mounted, spelled the way the closed-route check above would find.
+    expect(server.includes(escaped("impact"))).toBe(true);
   });
 
   it("10. a frozen fictional operation is still a 422, not a new state", () => {

@@ -147,6 +147,27 @@ export interface ImpactSpecV1 {
   impact_hash: Sha256;
 }
 
+/**
+ * What a client is allowed to say when it asks for an impact (ADR-W2.0-004 §2).
+ *
+ * The union is discriminated on `op` and closed on both arms, so an intent cannot carry a
+ * second reference id, and a client cannot smuggle one in through an extra property. The
+ * snapshot arm exists so M4B and M4C share one request; whether it can be *served* is a
+ * capability question the service answers, not a field the client sets.
+ */
+export type ImpactIntentV1 =
+  | { readonly op: "adopt_materialization"; readonly materialization_id: string }
+  | { readonly op: "restore_snapshot"; readonly target_snapshot_id: string };
+
+export interface ImpactRequestV1 {
+  format: "narralens.impact-request@1.0";
+  base_revision: number;
+  expected_source_digest: Sha256;
+  control_revision: number;
+  intent: ImpactIntentV1;
+  idempotency_key: string;
+}
+
 export interface AdoptRequestV1 {
   format: "narralens.adopt-request@1.0";
   base_revision: number;

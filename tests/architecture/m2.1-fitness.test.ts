@@ -110,24 +110,31 @@ describe("fitness 6: route activation matches the stage gate", () => {
 
   it("6. /api/migration/v1 exposes exactly the routes the current stage froze", () => {
     const migrationRoutes = [...serverSource.matchAll(/\^\\\/api\\\/migration\\\/v1\\\/([^$]*)\$/gu)].map((match) => match[1]!);
-    // M2.1 opened one read route; M2.3 adds migration copy, report and rollback. Any other
-    // addition has to be justified by its own stage, not slipped in here.
+    // M2.1 opened one read route; M2.3 adds migration copy, report and rollback; M3 opens
+    // materialize and its read; M4A opens impact. Any other addition has to be justified by
+    // its own stage, not slipped in here.
     expect(migrationRoutes).toEqual([
       "projects\\/([A-Za-z0-9_-]+)\\/engine",
       "projects\\/([A-Za-z0-9_-]+)\\/migrate-copy",
-      // M3 opens these two; the rest stay closed until their own Gate.
       "projects\\/([A-Za-z0-9_-]+)\\/proposals\\/([A-Za-z0-9_-]+)\\/materialize",
+      // M4A opens impact and only impact. Adopt and history restore are M4B's and M4C's.
+      "projects\\/([A-Za-z0-9_-]+)\\/impact",
       "materializations\\/([A-Za-z0-9_-]+)",
       "migrations\\/([A-Za-z0-9_-]+)",
       "migrations\\/([A-Za-z0-9_-]+)\\/rollback",
     ]);
   });
 
-  it("6. materialize, adopt, impact and history restore are never mounted", () => {
-    for (const closed of ["materialize", "adopt", "impact", "history"]) {
-      expect(serverSource.includes(`/api/migration/v1/projects/([A-Za-z0-9_-]+)\\/${closed}`), closed).toBe(false);
+  it("6. the write routes this stage does not own are never mounted", () => {
+    // Searched in the escaped form `server.ts` actually contains. The previous unescaped
+    // pattern matched nothing even for `materialize` after M3 opened it, so it was a check
+    // that could not fail; this one can.
+    const escaped = (suffix: string): string =>
+      `\\/api\\/migration\\/v1\\/projects\\/([A-Za-z0-9_-]+)\\/${suffix}`;
+    for (const closed of ["adopt", "history"]) {
+      expect(serverSource.includes(escaped(closed)), closed).toBe(false);
     }
-    expect(serverSource).not.toContain("CAPABILITY_NOT_ENABLED\"");
+    expect(serverSource.includes(escaped("impact"))).toBe(true);
   });
 });
 

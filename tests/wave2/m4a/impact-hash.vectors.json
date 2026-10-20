@@ -1,0 +1,539 @@
+{
+  "format": "narralens.impact-hash-vectors@1",
+  "note": "Frozen M4A-H01 vectors. Regenerate only with a deliberate decision to change the canonical rules, and re-run tests/wave2/m4a/impact-hash.golden.py against the result.",
+  "domain": "narralens-impact-v1\\n",
+  "vectors": [
+    {
+      "name": "base",
+      "spec": {
+        "format": "narralens.impact@1.0",
+        "impact_id": "imp_00000000000000000000000000000000",
+        "project_id": "of_d1-30s_0123456789abcdef",
+        "operation": "adopt_materialization",
+        "materialization_id": "mat_0123456789abcdef",
+        "target_snapshot_id": null,
+        "base_revision": 1,
+        "source_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "control_revision": 0,
+        "engine": "openfilm",
+        "engine_upstream_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+        "affected_ranges": [
+          {
+            "clip_id": "shot-001",
+            "start_frame": 0,
+            "end_frame_exclusive": 300
+          },
+          {
+            "clip_id": "shot-002",
+            "start_frame": 300,
+            "end_frame_exclusive": 600
+          },
+          {
+            "clip_id": "shot-003",
+            "start_frame": 600,
+            "end_frame_exclusive": 900
+          }
+        ],
+        "affected_consumers": [
+          {
+            "kind": "narration",
+            "id": "narration",
+            "action": "preserve"
+          },
+          {
+            "kind": "visual",
+            "id": "shot-001",
+            "action": "replace"
+          },
+          {
+            "kind": "visual",
+            "id": "shot-002",
+            "action": "replace"
+          },
+          {
+            "kind": "visual",
+            "id": "shot-003",
+            "action": "replace"
+          }
+        ],
+        "locks_checked": [
+          {
+            "lock_id": "lock_0000000000000000000000000000000a",
+            "control_revision": 0
+          }
+        ],
+        "rights_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "native_plan_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "approvals_required": [
+          "human_confirmation"
+        ],
+        "expires_at": "2026-10-20T12:15:00.000Z"
+      },
+      "impact_hash": "00034911e962084caab26b2d8bf8a3fa55cc51b475630628908c11a78e28f42a",
+      "preimage": "narralens-impact-v1\n{\"affected_consumers\":[{\"action\":\"preserve\",\"id\":\"narration\",\"kind\":\"narration\"},{\"action\":\"replace\",\"id\":\"shot-001\",\"kind\":\"visual\"},{\"action\":\"replace\",\"id\":\"shot-002\",\"kind\":\"visual\"},{\"action\":\"replace\",\"id\":\"shot-003\",\"kind\":\"visual\"}],\"affected_ranges\":[{\"clip_id\":\"shot-001\",\"end_frame_exclusive\":300,\"start_frame\":0},{\"clip_id\":\"shot-002\",\"end_frame_exclusive\":600,\"start_frame\":300},{\"clip_id\":\"shot-003\",\"end_frame_exclusive\":900,\"start_frame\":600}],\"approvals_required\":[\"human_confirmation\"],\"base_revision\":1,\"control_revision\":0,\"engine\":\"openfilm\",\"engine_upstream_sha\":\"e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3\",\"expires_at\":\"2026-10-20T12:15:00.000Z\",\"format\":\"narralens.impact@1.0\",\"impact_id\":\"imp_00000000000000000000000000000000\",\"locks_checked\":[{\"control_revision\":0,\"lock_id\":\"lock_0000000000000000000000000000000a\"}],\"materialization_id\":\"mat_0123456789abcdef\",\"native_plan_sha256\":\"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc\",\"operation\":\"adopt_materialization\",\"project_id\":\"of_d1-30s_0123456789abcdef\",\"rights_digest\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"source_digest\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"target_snapshot_id\":null}"
+    },
+    {
+      "name": "arrays-reversed",
+      "spec": {
+        "format": "narralens.impact@1.0",
+        "impact_id": "imp_00000000000000000000000000000000",
+        "project_id": "of_d1-30s_0123456789abcdef",
+        "operation": "adopt_materialization",
+        "materialization_id": "mat_0123456789abcdef",
+        "target_snapshot_id": null,
+        "base_revision": 1,
+        "source_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "control_revision": 0,
+        "engine": "openfilm",
+        "engine_upstream_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+        "affected_ranges": [
+          {
+            "clip_id": "shot-003",
+            "start_frame": 600,
+            "end_frame_exclusive": 900
+          },
+          {
+            "clip_id": "shot-002",
+            "start_frame": 300,
+            "end_frame_exclusive": 600
+          },
+          {
+            "clip_id": "shot-001",
+            "start_frame": 0,
+            "end_frame_exclusive": 300
+          }
+        ],
+        "affected_consumers": [
+          {
+            "kind": "visual",
+            "id": "shot-003",
+            "action": "replace"
+          },
+          {
+            "kind": "visual",
+            "id": "shot-002",
+            "action": "replace"
+          },
+          {
+            "kind": "visual",
+            "id": "shot-001",
+            "action": "replace"
+          },
+          {
+            "kind": "narration",
+            "id": "narration",
+            "action": "preserve"
+          }
+        ],
+        "locks_checked": [
+          {
+            "lock_id": "lock_0000000000000000000000000000000a",
+            "control_revision": 0
+          }
+        ],
+        "rights_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "native_plan_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "approvals_required": [
+          "human_confirmation"
+        ],
+        "expires_at": "2026-10-20T12:15:00.000Z"
+      },
+      "impact_hash": "00034911e962084caab26b2d8bf8a3fa55cc51b475630628908c11a78e28f42a",
+      "preimage": "narralens-impact-v1\n{\"affected_consumers\":[{\"action\":\"preserve\",\"id\":\"narration\",\"kind\":\"narration\"},{\"action\":\"replace\",\"id\":\"shot-001\",\"kind\":\"visual\"},{\"action\":\"replace\",\"id\":\"shot-002\",\"kind\":\"visual\"},{\"action\":\"replace\",\"id\":\"shot-003\",\"kind\":\"visual\"}],\"affected_ranges\":[{\"clip_id\":\"shot-001\",\"end_frame_exclusive\":300,\"start_frame\":0},{\"clip_id\":\"shot-002\",\"end_frame_exclusive\":600,\"start_frame\":300},{\"clip_id\":\"shot-003\",\"end_frame_exclusive\":900,\"start_frame\":600}],\"approvals_required\":[\"human_confirmation\"],\"base_revision\":1,\"control_revision\":0,\"engine\":\"openfilm\",\"engine_upstream_sha\":\"e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3\",\"expires_at\":\"2026-10-20T12:15:00.000Z\",\"format\":\"narralens.impact@1.0\",\"impact_id\":\"imp_00000000000000000000000000000000\",\"locks_checked\":[{\"control_revision\":0,\"lock_id\":\"lock_0000000000000000000000000000000a\"}],\"materialization_id\":\"mat_0123456789abcdef\",\"native_plan_sha256\":\"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc\",\"operation\":\"adopt_materialization\",\"project_id\":\"of_d1-30s_0123456789abcdef\",\"rights_digest\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"source_digest\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"target_snapshot_id\":null}"
+    },
+    {
+      "name": "split-range",
+      "spec": {
+        "format": "narralens.impact@1.0",
+        "impact_id": "imp_00000000000000000000000000000000",
+        "project_id": "of_d1-30s_0123456789abcdef",
+        "operation": "adopt_materialization",
+        "materialization_id": "mat_0123456789abcdef",
+        "target_snapshot_id": null,
+        "base_revision": 1,
+        "source_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "control_revision": 0,
+        "engine": "openfilm",
+        "engine_upstream_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+        "affected_ranges": [
+          {
+            "clip_id": "shot-001",
+            "start_frame": 0,
+            "end_frame_exclusive": 150
+          },
+          {
+            "clip_id": "shot-001",
+            "start_frame": 150,
+            "end_frame_exclusive": 300
+          }
+        ],
+        "affected_consumers": [
+          {
+            "kind": "narration",
+            "id": "narration",
+            "action": "preserve"
+          },
+          {
+            "kind": "visual",
+            "id": "shot-001",
+            "action": "replace"
+          },
+          {
+            "kind": "visual",
+            "id": "shot-002",
+            "action": "replace"
+          },
+          {
+            "kind": "visual",
+            "id": "shot-003",
+            "action": "replace"
+          }
+        ],
+        "locks_checked": [
+          {
+            "lock_id": "lock_0000000000000000000000000000000a",
+            "control_revision": 0
+          }
+        ],
+        "rights_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "native_plan_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "approvals_required": [
+          "human_confirmation"
+        ],
+        "expires_at": "2026-10-20T12:15:00.000Z"
+      },
+      "impact_hash": "06ff9bc9b1c11c7ffbba01e009d5f50b75e5e79a8926b844fc49a06af072617b",
+      "preimage": "narralens-impact-v1\n{\"affected_consumers\":[{\"action\":\"preserve\",\"id\":\"narration\",\"kind\":\"narration\"},{\"action\":\"replace\",\"id\":\"shot-001\",\"kind\":\"visual\"},{\"action\":\"replace\",\"id\":\"shot-002\",\"kind\":\"visual\"},{\"action\":\"replace\",\"id\":\"shot-003\",\"kind\":\"visual\"}],\"affected_ranges\":[{\"clip_id\":\"shot-001\",\"end_frame_exclusive\":150,\"start_frame\":0},{\"clip_id\":\"shot-001\",\"end_frame_exclusive\":300,\"start_frame\":150}],\"approvals_required\":[\"human_confirmation\"],\"base_revision\":1,\"control_revision\":0,\"engine\":\"openfilm\",\"engine_upstream_sha\":\"e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3\",\"expires_at\":\"2026-10-20T12:15:00.000Z\",\"format\":\"narralens.impact@1.0\",\"impact_id\":\"imp_00000000000000000000000000000000\",\"locks_checked\":[{\"control_revision\":0,\"lock_id\":\"lock_0000000000000000000000000000000a\"}],\"materialization_id\":\"mat_0123456789abcdef\",\"native_plan_sha256\":\"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc\",\"operation\":\"adopt_materialization\",\"project_id\":\"of_d1-30s_0123456789abcdef\",\"rights_digest\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"source_digest\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"target_snapshot_id\":null}"
+    },
+    {
+      "name": "no-locks",
+      "spec": {
+        "format": "narralens.impact@1.0",
+        "impact_id": "imp_00000000000000000000000000000000",
+        "project_id": "of_d1-30s_0123456789abcdef",
+        "operation": "adopt_materialization",
+        "materialization_id": "mat_0123456789abcdef",
+        "target_snapshot_id": null,
+        "base_revision": 1,
+        "source_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "control_revision": 0,
+        "engine": "openfilm",
+        "engine_upstream_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+        "affected_ranges": [
+          {
+            "clip_id": "shot-001",
+            "start_frame": 0,
+            "end_frame_exclusive": 300
+          },
+          {
+            "clip_id": "shot-002",
+            "start_frame": 300,
+            "end_frame_exclusive": 600
+          },
+          {
+            "clip_id": "shot-003",
+            "start_frame": 600,
+            "end_frame_exclusive": 900
+          }
+        ],
+        "affected_consumers": [
+          {
+            "kind": "narration",
+            "id": "narration",
+            "action": "preserve"
+          },
+          {
+            "kind": "visual",
+            "id": "shot-001",
+            "action": "replace"
+          },
+          {
+            "kind": "visual",
+            "id": "shot-002",
+            "action": "replace"
+          },
+          {
+            "kind": "visual",
+            "id": "shot-003",
+            "action": "replace"
+          }
+        ],
+        "locks_checked": [],
+        "rights_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "native_plan_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "approvals_required": [
+          "human_confirmation"
+        ],
+        "expires_at": "2026-10-20T12:15:00.000Z"
+      },
+      "impact_hash": "10f97dad52ddc35ed6a6cdb1350d227c0329df2525c0842c50e37f274d171586",
+      "preimage": "narralens-impact-v1\n{\"affected_consumers\":[{\"action\":\"preserve\",\"id\":\"narration\",\"kind\":\"narration\"},{\"action\":\"replace\",\"id\":\"shot-001\",\"kind\":\"visual\"},{\"action\":\"replace\",\"id\":\"shot-002\",\"kind\":\"visual\"},{\"action\":\"replace\",\"id\":\"shot-003\",\"kind\":\"visual\"}],\"affected_ranges\":[{\"clip_id\":\"shot-001\",\"end_frame_exclusive\":300,\"start_frame\":0},{\"clip_id\":\"shot-002\",\"end_frame_exclusive\":600,\"start_frame\":300},{\"clip_id\":\"shot-003\",\"end_frame_exclusive\":900,\"start_frame\":600}],\"approvals_required\":[\"human_confirmation\"],\"base_revision\":1,\"control_revision\":0,\"engine\":\"openfilm\",\"engine_upstream_sha\":\"e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3\",\"expires_at\":\"2026-10-20T12:15:00.000Z\",\"format\":\"narralens.impact@1.0\",\"impact_id\":\"imp_00000000000000000000000000000000\",\"locks_checked\":[],\"materialization_id\":\"mat_0123456789abcdef\",\"native_plan_sha256\":\"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc\",\"operation\":\"adopt_materialization\",\"project_id\":\"of_d1-30s_0123456789abcdef\",\"rights_digest\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"source_digest\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"target_snapshot_id\":null}"
+    },
+    {
+      "name": "restore-operation",
+      "spec": {
+        "format": "narralens.impact@1.0",
+        "impact_id": "imp_00000000000000000000000000000000",
+        "project_id": "of_d1-30s_0123456789abcdef",
+        "operation": "restore_snapshot",
+        "materialization_id": null,
+        "target_snapshot_id": "snap_abc",
+        "base_revision": 1,
+        "source_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "control_revision": 0,
+        "engine": "openfilm",
+        "engine_upstream_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+        "affected_ranges": [
+          {
+            "clip_id": "shot-001",
+            "start_frame": 0,
+            "end_frame_exclusive": 300
+          },
+          {
+            "clip_id": "shot-002",
+            "start_frame": 300,
+            "end_frame_exclusive": 600
+          },
+          {
+            "clip_id": "shot-003",
+            "start_frame": 600,
+            "end_frame_exclusive": 900
+          }
+        ],
+        "affected_consumers": [
+          {
+            "kind": "narration",
+            "id": "narration",
+            "action": "preserve"
+          },
+          {
+            "kind": "visual",
+            "id": "shot-001",
+            "action": "replace"
+          },
+          {
+            "kind": "visual",
+            "id": "shot-002",
+            "action": "replace"
+          },
+          {
+            "kind": "visual",
+            "id": "shot-003",
+            "action": "replace"
+          }
+        ],
+        "locks_checked": [
+          {
+            "lock_id": "lock_0000000000000000000000000000000a",
+            "control_revision": 0
+          }
+        ],
+        "rights_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "native_plan_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "approvals_required": [
+          "human_confirmation"
+        ],
+        "expires_at": "2026-10-20T12:15:00.000Z"
+      },
+      "impact_hash": "3bdb7f3ec2dc2771a89e5488e018b24c5f4533f59bf029a7add7cf7e1e3d2659",
+      "preimage": "narralens-impact-v1\n{\"affected_consumers\":[{\"action\":\"preserve\",\"id\":\"narration\",\"kind\":\"narration\"},{\"action\":\"replace\",\"id\":\"shot-001\",\"kind\":\"visual\"},{\"action\":\"replace\",\"id\":\"shot-002\",\"kind\":\"visual\"},{\"action\":\"replace\",\"id\":\"shot-003\",\"kind\":\"visual\"}],\"affected_ranges\":[{\"clip_id\":\"shot-001\",\"end_frame_exclusive\":300,\"start_frame\":0},{\"clip_id\":\"shot-002\",\"end_frame_exclusive\":600,\"start_frame\":300},{\"clip_id\":\"shot-003\",\"end_frame_exclusive\":900,\"start_frame\":600}],\"approvals_required\":[\"human_confirmation\"],\"base_revision\":1,\"control_revision\":0,\"engine\":\"openfilm\",\"engine_upstream_sha\":\"e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3\",\"expires_at\":\"2026-10-20T12:15:00.000Z\",\"format\":\"narralens.impact@1.0\",\"impact_id\":\"imp_00000000000000000000000000000000\",\"locks_checked\":[{\"control_revision\":0,\"lock_id\":\"lock_0000000000000000000000000000000a\"}],\"materialization_id\":null,\"native_plan_sha256\":\"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc\",\"operation\":\"restore_snapshot\",\"project_id\":\"of_d1-30s_0123456789abcdef\",\"rights_digest\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"source_digest\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"target_snapshot_id\":\"snap_abc\"}"
+    },
+    {
+      "name": "unicode-consumer",
+      "spec": {
+        "format": "narralens.impact@1.0",
+        "impact_id": "imp_00000000000000000000000000000000",
+        "project_id": "of_d1-30s_0123456789abcdef",
+        "operation": "adopt_materialization",
+        "materialization_id": "mat_0123456789abcdef",
+        "target_snapshot_id": null,
+        "base_revision": 1,
+        "source_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "control_revision": 0,
+        "engine": "openfilm",
+        "engine_upstream_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+        "affected_ranges": [
+          {
+            "clip_id": "shot-001",
+            "start_frame": 0,
+            "end_frame_exclusive": 300
+          },
+          {
+            "clip_id": "shot-002",
+            "start_frame": 300,
+            "end_frame_exclusive": 600
+          },
+          {
+            "clip_id": "shot-003",
+            "start_frame": 600,
+            "end_frame_exclusive": 900
+          }
+        ],
+        "affected_consumers": [
+          {
+            "kind": "subtitle",
+            "id": "字幕-1",
+            "action": "preserve"
+          },
+          {
+            "kind": "visual",
+            "id": "shot-001",
+            "action": "replace"
+          }
+        ],
+        "locks_checked": [
+          {
+            "lock_id": "lock_0000000000000000000000000000000a",
+            "control_revision": 0
+          }
+        ],
+        "rights_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "native_plan_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "approvals_required": [
+          "human_confirmation"
+        ],
+        "expires_at": "2026-10-20T12:15:00.000Z"
+      },
+      "impact_hash": "02dec3582c77cd79ec1a8e2398ea5c070583a6278acc8c1103dda95fd0bad387",
+      "preimage": "narralens-impact-v1\n{\"affected_consumers\":[{\"action\":\"preserve\",\"id\":\"字幕-1\",\"kind\":\"subtitle\"},{\"action\":\"replace\",\"id\":\"shot-001\",\"kind\":\"visual\"}],\"affected_ranges\":[{\"clip_id\":\"shot-001\",\"end_frame_exclusive\":300,\"start_frame\":0},{\"clip_id\":\"shot-002\",\"end_frame_exclusive\":600,\"start_frame\":300},{\"clip_id\":\"shot-003\",\"end_frame_exclusive\":900,\"start_frame\":600}],\"approvals_required\":[\"human_confirmation\"],\"base_revision\":1,\"control_revision\":0,\"engine\":\"openfilm\",\"engine_upstream_sha\":\"e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3\",\"expires_at\":\"2026-10-20T12:15:00.000Z\",\"format\":\"narralens.impact@1.0\",\"impact_id\":\"imp_00000000000000000000000000000000\",\"locks_checked\":[{\"control_revision\":0,\"lock_id\":\"lock_0000000000000000000000000000000a\"}],\"materialization_id\":\"mat_0123456789abcdef\",\"native_plan_sha256\":\"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc\",\"operation\":\"adopt_materialization\",\"project_id\":\"of_d1-30s_0123456789abcdef\",\"rights_digest\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"source_digest\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"target_snapshot_id\":null}"
+    },
+    {
+      "name": "later-expiry",
+      "spec": {
+        "format": "narralens.impact@1.0",
+        "impact_id": "imp_00000000000000000000000000000000",
+        "project_id": "of_d1-30s_0123456789abcdef",
+        "operation": "adopt_materialization",
+        "materialization_id": "mat_0123456789abcdef",
+        "target_snapshot_id": null,
+        "base_revision": 1,
+        "source_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "control_revision": 0,
+        "engine": "openfilm",
+        "engine_upstream_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+        "affected_ranges": [
+          {
+            "clip_id": "shot-001",
+            "start_frame": 0,
+            "end_frame_exclusive": 300
+          },
+          {
+            "clip_id": "shot-002",
+            "start_frame": 300,
+            "end_frame_exclusive": 600
+          },
+          {
+            "clip_id": "shot-003",
+            "start_frame": 600,
+            "end_frame_exclusive": 900
+          }
+        ],
+        "affected_consumers": [
+          {
+            "kind": "narration",
+            "id": "narration",
+            "action": "preserve"
+          },
+          {
+            "kind": "visual",
+            "id": "shot-001",
+            "action": "replace"
+          },
+          {
+            "kind": "visual",
+            "id": "shot-002",
+            "action": "replace"
+          },
+          {
+            "kind": "visual",
+            "id": "shot-003",
+            "action": "replace"
+          }
+        ],
+        "locks_checked": [
+          {
+            "lock_id": "lock_0000000000000000000000000000000a",
+            "control_revision": 0
+          }
+        ],
+        "rights_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "native_plan_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "approvals_required": [
+          "human_confirmation"
+        ],
+        "expires_at": "2026-10-20T13:15:00.000Z"
+      },
+      "impact_hash": "574c56dc2c90a0d4601dc9ef35797244f845ce7b85e9eee10f4d150d984bf224",
+      "preimage": "narralens-impact-v1\n{\"affected_consumers\":[{\"action\":\"preserve\",\"id\":\"narration\",\"kind\":\"narration\"},{\"action\":\"replace\",\"id\":\"shot-001\",\"kind\":\"visual\"},{\"action\":\"replace\",\"id\":\"shot-002\",\"kind\":\"visual\"},{\"action\":\"replace\",\"id\":\"shot-003\",\"kind\":\"visual\"}],\"affected_ranges\":[{\"clip_id\":\"shot-001\",\"end_frame_exclusive\":300,\"start_frame\":0},{\"clip_id\":\"shot-002\",\"end_frame_exclusive\":600,\"start_frame\":300},{\"clip_id\":\"shot-003\",\"end_frame_exclusive\":900,\"start_frame\":600}],\"approvals_required\":[\"human_confirmation\"],\"base_revision\":1,\"control_revision\":0,\"engine\":\"openfilm\",\"engine_upstream_sha\":\"e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3\",\"expires_at\":\"2026-10-20T13:15:00.000Z\",\"format\":\"narralens.impact@1.0\",\"impact_id\":\"imp_00000000000000000000000000000000\",\"locks_checked\":[{\"control_revision\":0,\"lock_id\":\"lock_0000000000000000000000000000000a\"}],\"materialization_id\":\"mat_0123456789abcdef\",\"native_plan_sha256\":\"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc\",\"operation\":\"adopt_materialization\",\"project_id\":\"of_d1-30s_0123456789abcdef\",\"rights_digest\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"source_digest\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"target_snapshot_id\":null}"
+    },
+    {
+      "name": "control-revision",
+      "spec": {
+        "format": "narralens.impact@1.0",
+        "impact_id": "imp_00000000000000000000000000000000",
+        "project_id": "of_d1-30s_0123456789abcdef",
+        "operation": "adopt_materialization",
+        "materialization_id": "mat_0123456789abcdef",
+        "target_snapshot_id": null,
+        "base_revision": 1,
+        "source_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "control_revision": 4,
+        "engine": "openfilm",
+        "engine_upstream_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+        "affected_ranges": [
+          {
+            "clip_id": "shot-001",
+            "start_frame": 0,
+            "end_frame_exclusive": 300
+          },
+          {
+            "clip_id": "shot-002",
+            "start_frame": 300,
+            "end_frame_exclusive": 600
+          },
+          {
+            "clip_id": "shot-003",
+            "start_frame": 600,
+            "end_frame_exclusive": 900
+          }
+        ],
+        "affected_consumers": [
+          {
+            "kind": "narration",
+            "id": "narration",
+            "action": "preserve"
+          },
+          {
+            "kind": "visual",
+            "id": "shot-001",
+            "action": "replace"
+          },
+          {
+            "kind": "visual",
+            "id": "shot-002",
+            "action": "replace"
+          },
+          {
+            "kind": "visual",
+            "id": "shot-003",
+            "action": "replace"
+          }
+        ],
+        "locks_checked": [
+          {
+            "lock_id": "lock_0000000000000000000000000000000a",
+            "control_revision": 0
+          }
+        ],
+        "rights_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "native_plan_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "approvals_required": [
+          "human_confirmation"
+        ],
+        "expires_at": "2026-10-20T12:15:00.000Z"
+      },
+      "impact_hash": "ca4fca0424d1f817b41805998e7d1616c204c024fd45ca84f35cd01966cb66cf",
+      "preimage": "narralens-impact-v1\n{\"affected_consumers\":[{\"action\":\"preserve\",\"id\":\"narration\",\"kind\":\"narration\"},{\"action\":\"replace\",\"id\":\"shot-001\",\"kind\":\"visual\"},{\"action\":\"replace\",\"id\":\"shot-002\",\"kind\":\"visual\"},{\"action\":\"replace\",\"id\":\"shot-003\",\"kind\":\"visual\"}],\"affected_ranges\":[{\"clip_id\":\"shot-001\",\"end_frame_exclusive\":300,\"start_frame\":0},{\"clip_id\":\"shot-002\",\"end_frame_exclusive\":600,\"start_frame\":300},{\"clip_id\":\"shot-003\",\"end_frame_exclusive\":900,\"start_frame\":600}],\"approvals_required\":[\"human_confirmation\"],\"base_revision\":1,\"control_revision\":4,\"engine\":\"openfilm\",\"engine_upstream_sha\":\"e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3\",\"expires_at\":\"2026-10-20T12:15:00.000Z\",\"format\":\"narralens.impact@1.0\",\"impact_id\":\"imp_00000000000000000000000000000000\",\"locks_checked\":[{\"control_revision\":0,\"lock_id\":\"lock_0000000000000000000000000000000a\"}],\"materialization_id\":\"mat_0123456789abcdef\",\"native_plan_sha256\":\"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc\",\"operation\":\"adopt_materialization\",\"project_id\":\"of_d1-30s_0123456789abcdef\",\"rights_digest\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"source_digest\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"target_snapshot_id\":null}"
+    }
+  ]
+}
