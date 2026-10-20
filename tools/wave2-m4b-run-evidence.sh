@@ -61,8 +61,8 @@ run m4a-historical        corepack pnpm evidence:wave2:m4a:historical
 record_expected_failure wave1-integrity corepack pnpm evidence:wave1:integrity
 record_expected_failure m4a-integrity corepack pnpm evidence:wave2:m4a:integrity
 
-printf '%s\n' "NARRALENS_SECRET_SCAN_OUT=docs/evidence/WAVE2/security/credential-scan-m4b.json corepack pnpm exec tsx tools/secret-scan.ts" > "$LOGS/credential-scan.cmd"
-NARRALENS_SECRET_SCAN_OUT=docs/evidence/WAVE2/security/credential-scan-m4b.json \
+printf '%s\n' "NARRALENS_SECRET_SCAN_OUT=$LOGS/credential-scan.json corepack pnpm exec tsx tools/secret-scan.ts" > "$LOGS/credential-scan.cmd"
+NARRALENS_SECRET_SCAN_OUT="$LOGS/credential-scan.json" \
   corepack pnpm exec tsx tools/secret-scan.ts > "$LOGS/credential-scan.txt" 2>&1
 code=$?
 printf '%s\n' "$code" > "$LOGS/credential-scan.exit"

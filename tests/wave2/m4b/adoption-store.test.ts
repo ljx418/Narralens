@@ -20,17 +20,18 @@ function preparedStore() {
 describe("M4B adoption durable facts", () => {
   it("atomically inserts the immutable fact and advances to prepared", () => {
     const { revisions, adoption } = preparedStore();
+    const assetToken = "assets/abc/source.mp4";
     adoption.prepare({
       transaction_id: "txn_adopt", source_before_sha256: sha("a"), source_after_sha256: sha("b"),
       staged_source_digest: sha("c"), snapshot_id: "snapshot_after",
-      installed_assets: [{ token: "assets/abc/source.mp4", sha256: sha("d") }],
+      installed_assets: [{ token: assetToken, sha256: sha("d") }],
       film_temp_token: ".narralens-txn/txn_adopt/film.html", publish_intent_created_at: new Date(0).toISOString(),
     });
     expect(revisions.projectTransaction("txn_adopt")).toMatchObject({
       state: "prepared", snapshot_id: "snapshot_after", source_digest_after: sha("c"),
     });
     expect(adoption.adoptionFact("txn_adopt")?.installed_assets).toEqual([
-      { token: "assets/abc/source.mp4", sha256: sha("d") },
+      { token: assetToken, sha256: sha("d") },
     ]);
   });
 
