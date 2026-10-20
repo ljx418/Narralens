@@ -311,13 +311,21 @@ export class ImpactService {
       throw new HttpError(409, "SOURCE_CHANGED",
         "The migrated source changed while the impact was being computed", undefined, projectId);
     }
-    // And the materialization's proven facts are re-read, not carried: `rights_digest` and
-    // `plan_sha256` are what the spec is about to bind to, and a row whose facts moved after
-    // the first read would otherwise be described by a spec built from the older values.
-    const finalMaterialization = this.#deps.materializations.find(row.materialization_id);
-    if (finalMaterialization === undefined) {
-      throw new HttpError(409, "REVISION_CONFLICT",
-        "The materialization is gone", undefined, projectId);
+    // And the materialization's proven facts are re-read through the public service, not
+    // carried or fetched from the raw store. The public read revalidates the project's live
+    // asset/rights ledger and marks the materialization stale when those facts moved. A raw
+    // row read here used to miss a rights change injected after the first inventory check,
+    // issue a 201, and leave an active impact whose rights digest was already false.
+    let finalMaterialization: MaterializationV1;
+    try {
+      finalMaterialization = await this.#readMaterialization(projectId, row.materialization_id);
+    } catch (error) {
+      if (error instanceof HttpError && error.status === 404) {
+        throw new HttpError(428, "IMPACT_STALE",
+          "The materialization disappeared while the impact was being computed",
+          { materialization_id: row.materialization_id }, projectId);
+      }
+      throw error;
     }
     if (finalMaterialization.state !== "ready_for_adoption") {
       throw new HttpError(428, "IMPACT_STALE",

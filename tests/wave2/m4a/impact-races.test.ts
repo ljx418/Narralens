@@ -408,6 +408,34 @@ describe("TX-05A: a change between the first check and the insert leaves no acti
     }, 600_000);
   }
 
+  for (const point of ["after_graph", "after_locks", "before_insert"] as const) {
+    it(`refuses, stales the materialization, and writes no impact when ledger rights move at ${point}`, async () => {
+      let changed = false;
+      let projectId = "";
+      const running = await started({
+        impactFault: (name: string): void => {
+          if (name !== point || changed) return;
+          changed = true;
+          running.host.revisions.compose((handle) => handle)
+            .prepare("UPDATE migrated_asset SET license_json=? WHERE project_id=?")
+            .run(JSON.stringify({ status: "restricted", label: "changed", commercial_use: false }), projectId);
+        },
+      });
+      const migrated = await migrate(running);
+      projectId = migrated.projectId;
+      const materialization = await readyMaterialization(running.host, projectId, `tx05a-ledger-${point}`);
+
+      const response = await postImpact(running, projectId,
+        adoptBody(migrated.view, materialization.materialization_id, `tx05a-ledger-${point}`));
+
+      expect(changed, `the rights fault at ${point} must have fired`).toBe(true);
+      expect(response.status, JSON.stringify(response.body)).toBe(428);
+      expect(response.body.code).toBe("IMPACT_STALE");
+      expect(running.host.materializations.require(materialization.materialization_id).state).toBe("stale");
+      expect(running.host.impacts.byProject(projectId)).toHaveLength(0);
+    }, 600_000);
+  }
+
   it("refuses and writes no row when the control revision moves at before_insert", async () => {
     let moved = false;
     let fired = false;

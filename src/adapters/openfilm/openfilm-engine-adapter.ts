@@ -117,11 +117,10 @@ export class OpenFilmEngineAdapter implements EnginePort {
   async inspect(snapshot: SnapshotRef, ctx: ReadContext): Promise<EngineProjection> {
     const layout = this.#layout(snapshot.project_id, ctx.correlationId);
     const root = await realpath(layout.root);
-    const read = await this.#upstream.readProjectFilm(root);
-    if (read.problems.length > 0) {
-      throw new HttpError(503, "ENGINE_UNAVAILABLE", "OpenFilm reports the project film does not read",
-        { problem_count: read.problems.length }, ctx.correlationId);
-    }
+    // Recompute the byte-level source identity before interpreting the document. If a
+    // previously committed film becomes malformed, that is still a deterministic source
+    // change and must be reported as such; parsing first used to turn it into a transient
+    // 503 and leave an authorization active indefinitely.
     const digest = await computeSourceDigest({
       root,
       roots: layout.roots,
@@ -131,6 +130,12 @@ export class OpenFilmEngineAdapter implements EnginePort {
     }, ctx.correlationId);
     if (snapshot.source_digest !== "" && digest.source_digest !== snapshot.source_digest) {
       throw new HttpError(409, "SOURCE_CHANGED", "OpenFilm source changed since the snapshot was taken", undefined, ctx.correlationId);
+    }
+
+    const read = await this.#upstream.readProjectFilm(root);
+    if (read.problems.length > 0) {
+      throw new HttpError(503, "ENGINE_UNAVAILABLE", "OpenFilm reports the project film does not read",
+        { problem_count: read.problems.length }, ctx.correlationId);
     }
 
     const doc = (read.doc ?? {}) as UpstreamDoc;

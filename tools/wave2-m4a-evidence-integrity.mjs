@@ -61,7 +61,6 @@ else fail(`the manifest records ${manifest.repo_dirty_at_capture} dirty path(s) 
 // ── 3. every command has a log whose digest still matches ────────────────────────────
 let commandsOk = true;
 for (const entry of manifest.commands ?? []) {
-  if (entry.expected_failure === true) continue;
   if (!existsSync(resolve(REPO, entry.log))) { fail(`command log is missing: ${entry.log}`); commandsOk = false; continue; }
   const digest = sha256(resolve(REPO, entry.log));
   if (entry.log_sha256 !== undefined && digest !== entry.log_sha256) {

@@ -51,3 +51,21 @@ materialization 的写入权威。
 - M4B 写入口尚未实现，因此 impact 重验和 commit 之间的最终竞争仍未关闭；
 - restore_snapshot 仍 capability blocked；
 - headed/human 仍为 `NOT_RUN`；本阶段没有 UI。
+
+## 独立外审一轮与 Codex 闭环
+
+全新只读 Claude Code 会话绑定 `0a2c47b...` 实现捕获与 `bcfd09a...` 证据封存执行复审，实际重跑
+M4A 98/98、fitness 44/44 与完整性门。结论为 `M4A_EXTERNAL_REVIEW_FAILED`：`BLOCKER=0 / MAJOR=1`。
+
+唯一 MAJOR 是创建方向的 rights 竞态：第一次 inventory 读取之后若项目资产账本许可发生变化，最终检查仍
+通过 `MaterializationStore.find()` 读取旧行，因而返回 201 并留下 active impact。返修改为最终检查再次走
+`MaterializeService.read()`，由生产 drift 逻辑复核实时账本、持久化 materialization stale，并向调用者返回
+428；materialization 消失也统一映射为 428，而不是把已失效授权描述为普通 404/409。
+
+新增三个确定性 fault-boundary 用例，分别在 `after_graph`、`after_locks`、`before_insert` 修改真实
+`migrated_asset.license_json`，均要求：HTTP 428、materialization=`stale`、impact 零落行。专项文件返修后
+42/42 通过。同行关闭的 MINOR：expected-failure 命令仍校验日志、摘要、命令和 exit 记录；OpenFilm inspect
+先计算 source digest 再解析，使已提交源变为不可解析内容时归类为确定性 source drift，而不是可重试 503。
+
+本节仍不是独立外审签署。新冻结提交、完整证据捕获与第二个全新只读外审会话通过前，最高状态保持
+`M4A_INTERNAL_EVIDENCED`。

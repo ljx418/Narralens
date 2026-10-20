@@ -117,6 +117,9 @@
    "tests/wave2/m4a/impact-races.test.ts::refuses and writes no row when a visual lock appears at after_graph",
    "tests/wave2/m4a/impact-races.test.ts::refuses and writes no row when a visual lock appears at after_locks",
    "tests/wave2/m4a/impact-races.test.ts::refuses and writes no row when a visual lock appears at before_insert",
+   "tests/wave2/m4a/impact-races.test.ts::refuses, stales the materialization, and writes no impact when ledger rights move at after_graph",
+   "tests/wave2/m4a/impact-races.test.ts::refuses, stales the materialization, and writes no impact when ledger rights move at after_locks",
+   "tests/wave2/m4a/impact-races.test.ts::refuses, stales the materialization, and writes no impact when ledger rights move at before_insert",
    "tests/wave2/m4a/impact-races.test.ts::refuses and writes no row when the control revision moves at before_insert",
    "tests/wave2/m4a/impact-races.test.ts::answers 423 TARGET_LOCKED for a lock that is already held, and creates nothing",
    "tests/wave2/m4a/impact-races.test.ts::records every active lock it checked, and refuses a project with more than 64"
@@ -163,7 +166,7 @@
    "tests/wave2/m4a/impact-races.test.ts::refuses and writes no row when the source bytes move mid-computation",
    "tests/wave2/m4a/impact-races.test.ts::refuses and writes no row when the materialization's proven facts move mid-computation"
   ],
-  "notes": "Injected through named fault points rather than by racing two promises, because a timing race only fails on the machine's schedule and would be asserting that nothing happened rather than that the ordering is right. TX-05's own pre-commit race closure is M4B's. Source-drift and rights-drift arms were missing, and writing them found two real defects: the final currentness check compared two readings of the same database row, so a file edited on disk was invisible to it; and the materialization's proven facts were read once and carried. Both now re-read before the insert. Refusals are also asserted against ADR §7's code list rather than `>= 400`, which a TypeError would have satisfied."
+  "notes": "Injected through named fault points rather than by racing two promises, because a timing race only fails on the machine's schedule and would be asserting that nothing happened rather than that the ordering is right. TX-05's own pre-commit race closure is M4B's. Independent external review found that the final materialization check still used the raw store, so a project-ledger rights change after the first inventory read returned 201. The final check now goes through MaterializeService.read; after_graph, after_locks and before_insert each prove 428, persistent materialization stale, and zero impact rows. Source bytes and stored materialization facts are also re-read before insert. Refusals are asserted against ADR §7's code list rather than `>= 400`, which a TypeError would have satisfied."
  },
  {
   "case_id": "M4A-NW01",
