@@ -101,22 +101,43 @@ for (const entry of cases) {
 }
 if (testRefsOk) pass("every case names test files that exist");
 
-// ── 5. the route claims agree with the source ────────────────────────────────────────
-const server = readFileSync(resolve(REPO, "src/host/server.ts"), "utf8");
-const routes = [...server.matchAll(/\^\\\/api\\\/migration\\\/v1\\\/([^$]*)\$/gu)].map((match) => match[1]);
-const open = {
-  materialize: routes.some((route) => route.includes("materialize")),
-  materializations: routes.some((route) => route.startsWith("materializations")),
-  impact: routes.some((route) => /\/impact$/.test(route)),
-  edits: routes.some((route) => /\/edits$/.test(route)),
-  history_restore: routes.some((route) => route.includes("history")),
+// ── 5. the route claims agree with the tree the capture was taken from ────────────────
+//
+// Read from the *capture commit*, not from the tip. This gate asks whether the capture still
+// describes the tree it was taken from, and the tip is a different question: M4A legitimately
+// opened `impact` after M3 was frozen, and reading the tip made a frozen historical record
+// fail for doing its job. The manifest, the logs and the M3 capture itself are untouched —
+// only the tree this check compares against is corrected.
+let routesOk = true;
+const routeStatusAt = (source) => {
+  const found = [...source.matchAll(/\^\\\/api\\\/migration\\\/v1\\\/([^$]*)\$/gu)].map((match) => match[1]);
+  return {
+    materialize: found.some((route) => route.includes("materialize")),
+    materializations: found.some((route) => route.startsWith("materializations")),
+    impact: found.some((route) => /\/impact$/.test(route)),
+    edits: found.some((route) => /\/edits$/.test(route)),
+    history_restore: found.some((route) => route.includes("history")),
+  };
 };
+let captureServer;
+try {
+  captureServer = git("show", `${capture}:src/host/server.ts`);
+} catch {
+  fail(`cannot read src/host/server.ts at the capture commit ${capture}`);
+}
+const atCapture = captureServer === undefined ? {} : routeStatusAt(captureServer);
 for (const [name, claimed] of Object.entries(manifest.route_status ?? {})) {
-  if (claimed !== open[name]) {
-    fail(`route claim for ${name} says ${claimed} but the source says ${open[name]}`);
+  if (claimed !== atCapture[name]) {
+    fail(`route claim for ${name} says ${claimed} but the capture tree says ${atCapture[name]}`);
+    routesOk = false;
   }
 }
-if (manifest.route_status !== undefined) pass("the recorded route status agrees with src/host/server.ts");
+if (routesOk) {
+  const tip = routeStatusAt(readFileSync(resolve(REPO, "src/host/server.ts"), "utf8"));
+  const moved = Object.keys(atCapture).filter((name) => atCapture[name] !== tip[name]);
+  pass(`the recorded route status agrees with src/host/server.ts at the capture commit`
+    + (moved.length > 0 ? ` (opened since, at the tip: ${moved.join(", ")})` : ""));
+}
 
 // ── 6. the real-media artefacts exist and hash as recorded ───────────────────────────
 let artifactsOk = true;

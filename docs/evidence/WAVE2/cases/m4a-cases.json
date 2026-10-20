@@ -1,0 +1,170 @@
+[
+  {
+    "case_id": "M4A-P01",
+    "title": "a restarted Host rebuilds the active OpenFilm layout from durable facts and inspects it with no test hook",
+    "status": "CLOSED",
+    "production_seam": "yes — ActivatedProjectionService composed by NarralensHost; the raw port call is shown to fail without it",
+    "tests": [
+      "tests/wave2/m4a/activated-projection.test.ts::cannot inspect an activated target at all without a layout — the gap M4A closes",
+      "tests/wave2/m4a/activated-projection.test.ts::inspects a restarted Host's own migrated target, with no test hook anywhere",
+      "tests/wave2/m4a/activated-projection.test.ts::keys its cache by project, snapshot and source digest",
+      "tests/wave2/m4a/activated-projection.test.ts::fails closed when the migrated copy's bytes move under it",
+      "tests/wave2/m4a/activated-projection.test.ts::refuses a layout whose declared root escapes the target",
+      "tests/wave2/m4a/activated-projection.test.ts::refuses when the ledger names a target the plan does not cover",
+      "tests/wave2/m4a/activated-projection.test.ts::derives exactly the roots the migration published, from one implementation"
+    ],
+    "notes": "The restart test starts a second Host over the first one's directory with an empty in-process cache, and the digest it reproduces is the one the migration committed — which is what proves the roots, assets and closure were all derived correctly. No EnginePort method was added; the registrar is a Host-composition seam."
+  },
+  {
+    "case_id": "M4A-C01",
+    "title": "the request contract holds, and a client cannot author an impact fact",
+    "status": "CLOSED",
+    "production_seam": "yes — POST /api/migration/v1/projects/:id/impact",
+    "tests": [
+      "tests/wave2/m4a/impact-end-to-end.test.ts::accepts both intent arms and nothing else",
+      "tests/wave2/m4a/impact-end-to-end.test.ts::rejects every attempt to carry an impact fact in the request",
+      "tests/wave2/m4a/impact-end-to-end.test.ts::rejects an intent that borrows the other arm's reference",
+      "tests/wave2/m4a/impact-end-to-end.test.ts::holds the shape of the fields it does accept",
+      "tests/wave2/m4a/impact-end-to-end.test.ts::returns 400 for a client that names its own scope, consumers, locks, rights or hash",
+      "tests/wave2/m4a/impact-end-to-end.test.ts::computes a spec that satisfies its own contract, and 201s it"
+    ],
+    "notes": "The HTTP half caught a real defect: the route rebuilt a known-field-only object before validating, so additionalProperties never fired. It now validates the body as sent."
+  },
+  {
+    "case_id": "M4A-DB01",
+    "title": "the impact table is additive, CAS-only, one database, and shares the one idempotency authority",
+    "status": "CLOSED",
+    "production_seam": "yes — same RevisionStore connection as M3's materialization table",
+    "tests": [
+      "tests/wave2/m4a/impact-store.test.ts::opens a database written before it existed, without rewriting what was there",
+      "tests/wave2/m4a/impact-store.test.ts::refuses an unknown operation or state at the database, not only in code",
+      "tests/wave2/m4a/impact-store.test.ts::moves only from active, and only to a state the machine allows",
+      "tests/wave2/m4a/impact-store.test.ts::creates the impact row and the idempotent response in one transaction, or neither",
+      "tests/wave2/m4a/impact-store.test.ts::keeps one authority: no second key column or constraint on the impact table",
+      "tests/wave2/m4a/impact-store.test.ts::leaves M3's materialize idempotency behaving exactly as before",
+      "tests/wave2/m4a/impact-store.test.ts::survives a reopen with its rows intact"
+    ],
+    "notes": "The atomicity test injects a failure in the response write after the row insert and asserts both are absent. M3's own suite is the regression gate on the extracted OperationIdempotencyStore."
+  },
+  {
+    "case_id": "M4A-H01",
+    "title": "the impact hash is a content hash with a domain prefix, checked against an independent implementation",
+    "status": "CLOSED",
+    "production_seam": "yes — the hash every stored spec is verified against",
+    "tests": [
+      "tests/wave2/m4a/impact-store.test.ts::is stable under key and array reordering, and changes under any semantic change",
+      "tests/wave2/m4a/impact-store.test.ts::is not the hash of the bytes without the domain prefix",
+      "tests/wave2/m4a/impact-hash-vectors.test.ts::reproduces every vector's hash and preimage byte for byte",
+      "tests/wave2/m4a/impact-hash-vectors.test.ts::records that array order is not part of the identity",
+      "tests/wave2/m4a/impact-hash-vectors.test.ts::carries the domain prefix it claims",
+      "tests/wave2/m4a/impact-hash.golden.py (run as `pnpm test:wave2:m4a:golden-python`)"
+    ],
+    "notes": "Fourteen mutations are asserted to change the hash: range boundary, clip id, consumer action, locks, rights, plan, base, source, control, engine sha, expiry, approvals, impact id and operation. The Python implementation was written from ADR §4 and agrees on all eight vectors including the preimage bytes."
+  },
+  {
+    "case_id": "M4A-TTL01",
+    "title": "fifteen minutes from an injected clock, expiring at the boundary, never resurrected",
+    "status": "CLOSED",
+    "production_seam": "yes — NarralensHost.impactClock is a dependency, not a call to Date.now()",
+    "tests": [
+      "tests/wave2/m4a/impact-store.test.ts::expires exactly at the boundary, from the injected clock alone",
+      "tests/wave2/m4a/impact-store.test.ts::marks an expired row expired rather than leaving it active with a past deadline",
+      "tests/wave2/m4a/impact-store.test.ts::refuses a row whose stored bytes no longer hash to its stored hash",
+      "tests/wave2/m4a/impact-races.test.ts::expires at exactly fifteen minutes and is not revived by a replay with the same key"
+    ],
+    "notes": "The boundary is `now >= expires_at`. A replay one millisecond early returns the identical spec and identical expiry; at the deadline the same key returns 428 and the row's state is corrected to expired, so a later reader does not see an active row with a past deadline."
+  },
+  {
+    "case_id": "TX-02A",
+    "title": "a change to any premise makes requireCurrent return 428",
+    "status": "INTERNAL_EVIDENCED_SUBSET",
+    "production_seam": "partial — the read side is proven here; the write-entry re-check belongs to M4B",
+    "tests": [
+      "tests/wave2/m4a/impact-races.test.ts::returns 428 from requireCurrent once the source has moved, and marks the row stale",
+      "tests/wave2/m4a/impact-races.test.ts::rejects a stale base, source or control before it computes anything",
+      "tests/wave2/m4a/impact-store.test.ts::refuses a row whose stored bytes no longer hash to its stored hash",
+      "tests/wave2/m4a/impact-store.test.ts::expires exactly at the boundary, from the injected clock alone"
+    ],
+    "notes": "Deliberately NOT marked PASSED. The commit-time final re-check is M4B's write entry, and TX-02's closure at that entry is out of scope for M4A."
+  },
+  {
+    "case_id": "TX-03A",
+    "title": "a real visual lock is refused; a preserved consumer is never turned into a change",
+    "status": "INTERNAL_EVIDENCED_SUBSET",
+    "production_seam": "yes — LockService.assertUnlocked, the same function a write will use",
+    "tests": [
+      "tests/wave2/m4a/consumer-graph.test.ts::affects a visual lock on exactly the clips it replaces",
+      "tests/wave2/m4a/consumer-graph.test.ts::never names a plan clip id as a lock target",
+      "tests/wave2/m4a/impact-races.test.ts::refuses and writes no row when a visual lock appears at after_inspect",
+      "tests/wave2/m4a/impact-races.test.ts::refuses and writes no row when a visual lock appears at after_graph",
+      "tests/wave2/m4a/impact-races.test.ts::refuses and writes no row when a visual lock appears at after_locks",
+      "tests/wave2/m4a/impact-races.test.ts::refuses and writes no row when a visual lock appears at before_insert",
+      "tests/wave2/m4a/impact-races.test.ts::refuses and writes no row when the control revision moves at before_insert"
+    ],
+    "notes": "The last of these found a real defect: a lock taken at the final injection point was not caught, because only the first lock assertion existed and locks_checked recorded the first read. The final block now re-reads the project and re-asserts the lock set. No narration or duration lock is ever claimed, because neither changes under a preserve policy."
+  },
+  {
+    "case_id": "TX-04A",
+    "title": "duration, shared subtitle/audio/transition/asset are fully classified, and an unknown graph fails closed",
+    "status": "INTERNAL_EVIDENCED_SUBSET",
+    "production_seam": "yes — ConsumerGraph is called by ImpactService on every compute",
+    "tests": [
+      "tests/wave2/m4a/consumer-graph.test.ts::intersects the plan with the committed projection and reports current clip ids",
+      "tests/wave2/m4a/consumer-graph.test.ts::merges two plan segments that land on one current clip into one range",
+      "tests/wave2/m4a/consumer-graph.test.ts::reaches every visual clip of a full-length plan, and refuses any plan that would not",
+      "tests/wave2/m4a/consumer-graph.test.ts::records a replaced visual clip, a preserved narration clip and no phantom audio",
+      "tests/wave2/m4a/consumer-graph.test.ts::refuses a plan that would change duration, which M4A cannot express",
+      "tests/wave2/m4a/consumer-graph.test.ts::classifies a non-narration sound clip as audio, and a narration clip as narration",
+      "tests/wave2/m4a/consumer-graph.test.ts::reports a shared asset as relinked when one of its users is replaced and another is not",
+      "tests/wave2/m4a/consumer-graph.test.ts::refuses a dangling media reference rather than treating it as no consumer",
+      "tests/wave2/m4a/consumer-graph.test.ts::refuses an ambiguous ledger: two rows naming one target path",
+      "tests/wave2/m4a/consumer-graph.test.ts::refuses a plan that binds an asset the project does not own",
+      "tests/wave2/m4a/consumer-graph.test.ts::refuses the whole capability when the projection is not complete",
+      "tests/wave2/m4a/consumer-graph.test.ts::refuses a clip kind it cannot classify",
+      "tests/wave2/m4a/consumer-graph.test.ts::refuses when the plan reaches no visual clip at all",
+      "tests/wave2/m4a/consumer-graph.test.ts::refuses a plan that is not a contiguous cover of its own timeline"
+    ],
+    "notes": "Narration is matched on the migration's recorded target path before any ledger lookup, because the migration deliberately keeps the narration track out of the asset ledger — demanding a ledger row for it refused every migrated target with narration, which the first run of these tests surfaced."
+  },
+  {
+    "case_id": "TX-05A",
+    "title": "a change between the first check and the insert is refused and leaves no active row",
+    "status": "INTERNAL_EVIDENCED_SUBSET",
+    "production_seam": "yes — through the real route, with the change injected at a named boundary inside the request",
+    "tests": [
+      "tests/wave2/m4a/impact-races.test.ts::refuses and writes no row when a visual lock appears at after_inspect",
+      "tests/wave2/m4a/impact-races.test.ts::refuses and writes no row when a visual lock appears at after_graph",
+      "tests/wave2/m4a/impact-races.test.ts::refuses and writes no row when a visual lock appears at after_locks",
+      "tests/wave2/m4a/impact-races.test.ts::refuses and writes no row when a visual lock appears at before_insert",
+      "tests/wave2/m4a/impact-races.test.ts::refuses and writes no row when the control revision moves at before_insert",
+      "tests/wave2/m4a/impact-races.test.ts::refuses and writes no row when the materialization goes stale mid-computation"
+    ],
+    "notes": "Injected through named fault points rather than by racing two promises, because a timing race only fails on the machine's schedule and would be asserting that nothing happened rather than that the ordering is right. TX-05's own pre-commit race closure is M4B's."
+  },
+  {
+    "case_id": "M4A-NW01",
+    "title": "an impact changes no author fact and nothing but its own two rows",
+    "status": "CLOSED",
+    "production_seam": "yes — diffed around a real request against a real migrated target",
+    "tests": [
+      "tests/wave2/m4a/impact-races.test.ts::leaves source, revision, commit, pointer, binding, ledger, materialization, job and outbox identical",
+      "tests/wave2/m4a/impact-races.test.ts::leaves the migrated copy's bytes byte-for-byte identical"
+    ],
+    "notes": "Nine authority reads are compared before and after, plus a byte-level hash of every file under the migrated copy. The replay is included, so an idempotent second call is proven to be as inert as the first."
+  },
+  {
+    "case_id": "M4A-R01",
+    "title": "adopt creates and replays at 201; restore is capability blocked; versioned edits and history restore stay 404",
+    "status": "CLOSED",
+    "production_seam": "yes — the whole chain, including a real migrate and a real proxy encode",
+    "tests": [
+      "tests/wave2/m4a/impact-races.test.ts::replays the whole spec for the same key and digest, and 409s a different digest",
+      "tests/wave2/m4a/impact-races.test.ts::binds the digest to the request with the idempotency key removed",
+      "tests/wave2/m4a/impact-races.test.ts::blocks a restore intent rather than passing the active source off as an old snapshot",
+      "tests/wave2/m4a/impact-races.test.ts::refuses a materialization that does not exist, and one that belongs elsewhere, the same way",
+      "tests/wave2/m4a/impact-races.test.ts::keeps versioned edits and history restore unmounted, and the legacy routes working",
+      "tests/wave2/m4a/impact-real-chain.test.ts::migrates, materializes for real, and then gets a valid impact — twice, idempotently"
+    ],
+    "notes": "The cross-project case found a real defect: ownership was checked after re-verification, so a row belonging to another project failed inside MaterializeService.read with a 503 and the 'not yours' answer never existed. Ownership is now settled from one cheap row first, and both cases return an identical body."
+  }
+]
