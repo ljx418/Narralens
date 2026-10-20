@@ -62,6 +62,8 @@ export interface MaterializeServiceDeps {
   readonly readComparison: (comparisonId: string) => Promise<ProposalComparison>;
   /** The media file behind an asset id, resolved from the target's own tree. */
   readonly resolveMedia: (projectId: string, assetId: string) => Promise<string>;
+  /** Production supplies stable native identities from the current pinned projection. */
+  readonly targetClipIds?: (projectId: string, sourceDigest: string) => Promise<readonly string[]>;
   readonly leaseMs?: number;
   /** How often a running worker renews its lease. Must be well under `leaseMs`. */
   readonly heartbeatMs?: number;
@@ -409,7 +411,8 @@ export class MaterializeService {
         assetInventorySha256: bound.asset_inventory_sha256,
         rightsDigest: bound.rights_digest,
       });
-      const plan = this.#deps.plans.build(bound);
+      const targetClipIds = await this.#deps.targetClipIds?.(row.project_id, row.source_digest);
+      const plan = this.#deps.plans.build(bound, targetClipIds);
       await this.#deps.materializations.setPlan(materializationId, plan);
       await this.#deps.fault?.("after_plan");
 

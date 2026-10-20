@@ -332,6 +332,18 @@ export class NarralensHost {
       proxies: new ProxyRenderer({ artifacts: this.derivedArtifacts, profile: "wave2-proxy-720p30-v1" }),
       readComparison: (comparisonId) => this.comparisons.read(comparisonId),
       resolveMedia: (projectId, assetId) => this.#targetMediaPath(projectId, assetId),
+      targetClipIds: async (projectId, sourceDigest) => {
+        const view = await this.projectResolver.resolveActivated(projectId);
+        await this.projections.layoutFor(view, `materialize-clips-${projectId}`);
+        const resolved = this.engines.resolve(projectId);
+        const projection = await resolved.port.inspect({ project_id: projectId, engine: "openfilm",
+          source_digest: sourceDigest }, { correlationId: `materialize-clips-${projectId}`, projectId,
+          signal: AbortSignal.timeout(20_000) });
+        if (projection.problems.length > 0) {
+          throw new HttpError(422, "UNSUPPORTED_EDIT", "Target projection is incomplete");
+        }
+        return projection.clips.filter((clip) => clip.kind !== "sound").map((clip) => clip.clip_id);
+      },
       // Materialization outcomes are the Host's business. Without this they were computed
       // and dropped, so a row that went stale or was quarantined had no explanation anywhere.
       onDiagnostic: (entry: FailureDiagnostic) => { this.failures.record(entry); },

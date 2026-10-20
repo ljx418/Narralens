@@ -39,6 +39,12 @@ function bound(over: Partial<BindingResult> = {}): BindingResult {
 }
 
 describe("M3.2 a three-shot binding becomes three independent clips", () => {
+  it("uses Host-proven target clip identities when supplied for controlled adoption", () => {
+    const plan = new NativePlanBuilder().build(bound(), ["shot-001", "shot-002", "shot-003"]);
+    expect(plan.clips.map((clip) => clip.clip_id)).toEqual(["shot-001", "shot-002", "shot-003"]);
+    expect(() => new NativePlanBuilder().build(bound(), ["shot-001", "shot-001", "shot-003"]))
+      .toThrow("target clip identity");
+  });
   it("produces one clip per segment, with unique stable ids", () => {
     const plan = new NativePlanBuilder().build(bound());
     expect(plan.clips).toHaveLength(3);

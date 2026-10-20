@@ -30,7 +30,7 @@ export const MAX_SEGMENTS = 64;
 export const VISUAL_TRACK_ID = "track_visual";
 
 export class NativePlanBuilder {
-  build(result: BindingResult): NativePlanV1 {
+  build(result: BindingResult, targetClipIds?: readonly string[]): NativePlanV1 {
     const bindings = result.bindings;
     if (bindings.length === 0) {
       throw new Error("A native plan needs at least one bound segment");
@@ -43,6 +43,11 @@ export class NativePlanBuilder {
     }
     if (bindings.length > MAX_SEGMENTS) {
       throw new Error(`A proposal may contribute at most ${MAX_SEGMENTS} segments; got ${bindings.length}`);
+    }
+    if (targetClipIds !== undefined
+      && (targetClipIds.length !== bindings.length || new Set(targetClipIds).size !== targetClipIds.length
+        || targetClipIds.some((id) => id.trim() === ""))) {
+      throw new Error("The target clip identity set does not match the bound segments");
     }
 
     // The timeline must be a contiguous, gapless, overlap-free cover of the selection. The
@@ -78,8 +83,8 @@ export class NativePlanBuilder {
       );
     }
 
-    const clips: NativePlanClipV1[] = ordered.map((entry) => ({
-      clip_id: `clip-${entry.segment_id}`,
+    const clips: NativePlanClipV1[] = ordered.map((entry, index) => ({
+      clip_id: targetClipIds?.[index] ?? `clip-${entry.segment_id}`,
       segment_id: entry.segment_id,
       asset_id: entry.asset_id,
       asset_sha256: entry.asset_sha256,
