@@ -200,7 +200,7 @@ impact: active → consumed | expired | stale
 
 controlled write:
 received → preconditions_checked → staged → validated → prepared → committed
-  ├→ aborted（prepared 前可证明无发布）
+  ├→ aborted（任何可证明未发布的合法前态，包含 source 仍为 before 的 prepared）
   ├→ recovering
   └→ attention（发布/commit 不确定）
 ```

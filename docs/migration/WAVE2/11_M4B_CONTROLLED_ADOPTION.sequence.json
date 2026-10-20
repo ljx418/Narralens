@@ -22,7 +22,7 @@
   "segments": [
     { "from": 150, "to": 300, "label": "入口与授权" },
     { "from": 310, "to": 475, "label": "隔离计划与验证" },
-    { "from": 485, "to": 675, "label": "最终复核与原子提交" }
+    { "from": 485, "to": 700, "label": "最终复核、发布与恢复" }
   ],
   "messages": [
     { "id": "post-edit", "from": "client", "to": "host", "y": 165, "label": "POST versioned edits + approval", "variant": "emphasis" },
@@ -30,41 +30,42 @@
     { "id": "current-impact", "from": "coordinator", "to": "impact", "y": 225, "label": "requireCurrent(impact_id)", "variant": "security" },
     { "id": "impact-spec", "from": "impact", "to": "coordinator", "y": 255, "label": "current spec / 428", "variant": "return" },
     { "id": "read-authority", "from": "coordinator", "to": "store", "y": 290, "label": "base + locks + rights + idempotency", "variant": "default" },
-    { "id": "native-plan", "from": "coordinator", "to": "engine", "y": 320, "label": "plan pinned native operation", "variant": "emphasis" },
+    { "id": "native-plan", "from": "coordinator", "to": "engine", "y": 320, "label": "plan 9 closed set ops", "variant": "emphasis" },
     { "id": "isolated-stage", "from": "engine", "to": "source", "y": 355, "label": "stage in isolated copy", "variant": "default" },
-    { "id": "validate-stage", "from": "coordinator", "to": "engine", "y": 390, "label": "validate three editable clips", "variant": "security" },
+    { "id": "validate-stage", "from": "coordinator", "to": "engine", "y": 390, "label": "validate 3 visual clips + narration", "variant": "security" },
     { "id": "stage-report", "from": "engine", "to": "coordinator", "y": 425, "label": "validated digest + projection", "variant": "return" },
     { "id": "prepare-snapshot", "from": "coordinator", "to": "store", "y": 460, "label": "prepare snapshot / journal", "variant": "default" },
     { "id": "final-impact", "from": "coordinator", "to": "impact", "y": 500, "label": "commit-boundary requireCurrent", "variant": "security" },
     { "id": "final-authority", "from": "coordinator", "to": "store", "y": 535, "label": "CAS base + locks + rights + idempotency", "variant": "security" },
-    { "id": "publish-source", "from": "coordinator", "to": "source", "y": 570, "label": "atomic publish staged source", "variant": "emphasis" },
-    { "id": "commit-revision", "from": "coordinator", "to": "store", "y": 605, "label": "revision +1, consume impact, outbox", "variant": "emphasis" },
-    { "id": "committed", "from": "coordinator", "to": "host", "y": 640, "label": "ControlledWriteResponseV1", "variant": "return" },
-    { "id": "http-response", "from": "host", "to": "client", "y": 670, "label": "200 committed / deterministic refusal", "variant": "return" }
+    { "id": "publish-source", "from": "coordinator", "to": "source", "y": 570, "label": "atomic film.html publish", "variant": "emphasis" },
+    { "id": "published-proof", "from": "source", "to": "coordinator", "y": 600, "label": "after bytes proof / recovery fact", "variant": "return" },
+    { "id": "commit-revision", "from": "coordinator", "to": "store", "y": 630, "label": "revision +1, consume impact, outbox", "variant": "emphasis" },
+    { "id": "committed", "from": "coordinator", "to": "host", "y": 660, "label": "200 committed or controlled 423", "variant": "return" },
+    { "id": "http-response", "from": "host", "to": "client", "y": 690, "label": "same key never republishes", "variant": "return" }
   ],
   "activations": [
-    { "participant": "host", "from": 160, "to": 680, "type": "backend" },
-    { "participant": "coordinator", "from": 190, "to": 650, "type": "security" },
+    { "participant": "host", "from": 160, "to": 700, "type": "backend" },
+    { "participant": "coordinator", "from": 190, "to": 670, "type": "security" },
     { "participant": "impact", "from": 220, "to": 265, "type": "security" },
     { "participant": "engine", "from": 315, "to": 435, "type": "backend" },
-    { "participant": "store", "from": 280, "to": 620, "type": "database" },
-    { "participant": "source", "from": 350, "to": 585, "type": "database" }
+    { "participant": "store", "from": 280, "to": 645, "type": "database" },
+    { "participant": "source", "from": 350, "to": 610, "type": "database" }
   ],
   "cards": [
     {
       "dot": "emerald",
       "title": "成功不变量",
-      "items": ["只允许一个受控写入口", "采用成功恰好 revision +1", "采用后三个 clip 仍可独立编辑"]
+      "items": ["只允许一个受控写入口", "采用成功恰好 revision +1", "三个视觉 clip 可编辑且 narration 保持"]
     },
     {
       "dot": "rose",
       "title": "失败不变量",
-      "items": ["任何失败 revision +0", "过期 impact、锁或 rights 漂移均拒绝", "不得把 proxy 或扁平 MP4 当 author source"]
+      "items": ["发布前失败 revision +0", "锁或 rights 漂移均拒绝", "不得把 proxy 或扁平 MP4 当 author source"]
     },
     {
       "dot": "amber",
       "title": "恢复边界",
-      "items": ["journal 覆盖 stage、publish、commit 边界", "取消或失 lease 的晚到结果只能 quarantine", "重启必须收敛到提交、可重试或 attention"]
+      "items": ["专用 recovery 先于通用 recovery", "before→aborted；after+可证→committed", "不可证明→terminal attention；受控 423"]
     }
   ]
 }

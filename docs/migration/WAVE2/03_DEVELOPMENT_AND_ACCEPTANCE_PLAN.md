@@ -82,14 +82,15 @@ versioned edits route、operation idempotency、snapshot/commit/outbox。legacy 
 | TX-05 | HTTP/upstream | stale base/source/control 409；OpenFilm rebased 不绕过 | revision 增加 |
 | TX-06 | concurrency | 双采用仅一个 commit，另一方 replay 或 409 | 双 revision/混合 source |
 | TX-07 | idempotency | 同 kind/key/digest 完整重放；不同 digest 409 | 第二次 stage/commit |
-| TX-08 | crash matrix | 每个 journal 边界重启收敛为 abort/committed/attention | 猜成功/孤儿 running |
+| TX-08B | M4B crash matrix | 每个 adopt journal 边界由专用恢复先于通用恢复，收敛为 aborted/committed/terminal attention | 猜成功/孤儿 running/recovering |
 | TX-09 | history | 恢复旧内容产生当前 revision+1，历史不删 | revision 倒退/换指针 |
 | TX-10 | bypass | native undo/redo/restore 只能 translation 或拒绝 | 裸 native write |
-| TX-11 | real render | 首次采用导出与重开后改单镜再导出 SHA 不同、帧数符合批准 impact | 只测 fixture JSON |
+| TX-11B | real harness render | 采用后由测试 harness 调固定上游 renderer 并完整 decode；不开放 M6 生产 render route | 只测 fixture JSON/proxy，或偷开生产 render |
 | TX-12 | concurrency | 在途导出绑定 committed snapshot，新 revision 不改变其输入 | render latest |
 | TX-13 | race | lock/external source/rights 在 stage 期间变化，commit 前复核阻止 | TOCTOU 成功 |
 | TX-14 | native inspect | 采用后仍三个原生 clip，可独立修改中镜且两侧 identity 不变 | flattened MP4 |
-| W2-REG | full regression | Wave 1、D1–D4.2.1、legacy routes/contracts 全绿 | 删除/弱化旧测试 |
+| M4B-NW | failure diff | 每个失败路径 source/revision/pointer/ledger/impact/idempotency/outbox 与允许残留逐项记录 | 不实 NOWRITE |
+| REG | full regression | Wave 1、D1–D4.2.1、legacy routes/contracts 全绿 | 删除/弱化旧测试 |
 
 W2.0 另设不可合并为总数的兼容门：`ACT-01` terminal migration 重启解析；`ACT-02` 非 terminal、root escape、
 binding/commit 缺失拒绝；`ASSET-01` 旧目标 ledger bootstrap 验证 source tree digest、输入一一对应且 NOWRITE；`ASSET-02` 映射歧义、

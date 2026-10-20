@@ -34,8 +34,9 @@ Codex 完成替换，则不得自行改回旧 SHA。
 5. `docs/migration/WAVE2/11_M4B_CONTROLLED_ADOPTION.html` 与 `.sequence.json`
 6. `docs/migration/WAVE2/ADR-W2.0-004-m4a-impact-request-and-consumer-graph.md`
 7. `docs/evidence/WAVE2/reviews/m4a-external-review-claude.md`
-8. 当前 `docs/03_Architecture.md`、`docs/11_V1_Traceability.md`
-9. 实际 ProjectCoordinator、RevisionStore、SnapshotStore、ImpactService、MaterializeService、LockService、
+8. `docs/migration/WAVE2/15_M4B_OPENFILM_OP_SPIKE.md` 与 `docs/evidence/WAVE2/reviews/m4b-document-external-review-*.md`
+9. 当前 `docs/03_Architecture.md`、`docs/11_V1_Traceability.md`
+10. 实际 ProjectCoordinator、RevisionStore、SnapshotStore、ImpactService、MaterializeService、LockService、
    EnginePort、NativeWriteGateway/registry/capability、OpenFilm adapter、route/validator/schema 和全部 M4A case/evidence。
 
 如旧文与 `12_M4B_DEVELOPMENT_GATE.md` 冲突，先记录差异；不得静默裁决。只有会改变产品权威/数据模型的冲突才
@@ -76,6 +77,9 @@ legacy `ProjectWriteActor` 行为或使用 proxy/flattened MP4 作为 author sou
 11. M4B 专用恢复必须先于通用 `recoverOnStart()`、位于项目队列内；恢复只能由 before/after bytes、snapshot、
     journal、immutable fact、impact/DB 权威事实判定。可证明 after 则不重复 stage/publish、完成同一 commit；可证明
     before 则 abort；不确定才进入 terminal attention。禁止先标 recovering/attention 后再尝试成功，也禁止猜成功。
+12. prepared 前或 source=before 的 abort 必须在同一事务记录唯一幂等失败 response；同 key/digest 永久重放失败、
+    不再次 stage/publish，新 key 才可重试。source=after 的 prepared recovery 只有在到期前 prepared、impact 仍 active
+    且所有当前事实重验不变时才可忽略墙钟 TTL 完成 commit，否则 terminal attention。
 
 ## 实施顺序
 
@@ -87,9 +91,11 @@ legacy `ProjectWriteActor` 行为或使用 proxy/flattened MP4 作为 author sou
 
 ### M4B-1 OpenFilm 受控写
 
-registry/capability/gateway 必须同一子阶段开放且 default deny 保持。adapter.plan 只接收服务端
-`adopt_materialization`，把 NativePlanV1 三 clip 映射为冻结的三个 closed `OpenFilmOp.insert` golden vector；stage 只在
-Host isolated root 调 pinned `editProjectFilm`；validate 用固定上游重读、以 `openFilmRoots` 重算而非回显 source
+registry/capability/gateway 必须同一子阶段开放且 default deny 保持；gateway entry/capability 固定为
+`timeline.adopt_materialization`。adapter.plan 只接收服务端 `adopt_materialization`，按
+`15_M4B_OPENFILM_OP_SPIKE.md` 把每个既有视觉 clip 映射为 `src/time/overrides=null` 三条 closed set op（总计九条），
+不得 insert/remove；stage 复制 active source 后只在 Host isolated root 调
+`editProjectFilm(stagedRoot, before.rev, ops)`；validate 用固定上游重读、以基线 roots ∪ 新 target assets 重算而非回显 source
 digest，并证明三 clip、frame ranges、assets、total frames、narration/subtitle/audio/neighbours 与闭包。
 
 ### M4B-2 source publisher / recovery
