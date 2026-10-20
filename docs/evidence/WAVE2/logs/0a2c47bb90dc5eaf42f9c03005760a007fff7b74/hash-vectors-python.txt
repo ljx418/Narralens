@@ -1,0 +1,13 @@
+
+> narralens@0.1.0 test:wave2:m4a:golden-python /mnt/c/workspace/videoworkline/Narralens
+> python3 -I tests/wave2/m4a/impact-hash.golden.py tests/wave2/m4a/impact-hash.vectors.json
+
+OK base 00034911e962084caab26b2d8bf8a3fa55cc51b475630628908c11a78e28f42a
+OK arrays-reversed 00034911e962084caab26b2d8bf8a3fa55cc51b475630628908c11a78e28f42a
+OK split-range 06ff9bc9b1c11c7ffbba01e009d5f50b75e5e79a8926b844fc49a06af072617b
+OK no-locks 10f97dad52ddc35ed6a6cdb1350d227c0329df2525c0842c50e37f274d171586
+OK restore-operation 3bdb7f3ec2dc2771a89e5488e018b24c5f4533f59bf029a7add7cf7e1e3d2659
+OK unicode-consumer 02dec3582c77cd79ec1a8e2398ea5c070583a6278acc8c1103dda95fd0bad387
+OK later-expiry 574c56dc2c90a0d4601dc9ef35797244f845ce7b85e9eee10f4d150d984bf224
+OK control-revision ca4fca0424d1f817b41805998e7d1616c204c024fd45ca84f35cd01966cb66cf
+vectors=8 failures=0

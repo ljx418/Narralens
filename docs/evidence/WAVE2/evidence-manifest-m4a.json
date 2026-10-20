@@ -2,22 +2,22 @@
   "format": "narralens.wave2-evidence-manifest@1",
   "stage": "M4A",
   "module": "ImpactService",
-  "capture_commit": "cec51dd167de6c21619d8b8b08533b07776333ff",
-  "capture_logs": "docs/evidence/WAVE2/logs/cec51dd167de6c21619d8b8b08533b07776333ff",
-  "captured_at_utc": "2026-10-20T06:07:04Z",
+  "capture_commit": "0a2c47bb90dc5eaf42f9c03005760a007fff7b74",
+  "capture_logs": "docs/evidence/WAVE2/logs/0a2c47bb90dc5eaf42f9c03005760a007fff7b74",
+  "captured_at_utc": "2026-10-20T08:33:34Z",
   "repo_dirty_at_capture": 0,
   "environment": {
-    "date_utc": "2026-10-20T06:07:04Z",
+    "date_utc": "2026-10-20T08:33:34Z",
     "node": "v22.22.1",
     "pnpm": "10.33.0",
     "python": "Python 3.12.3",
     "os": "Linux 6.18.40.1-microsoft-standard-WSL2",
-    "git_head": "cec51dd167de6c21619d8b8b08533b07776333ff",
+    "git_head": "0a2c47bb90dc5eaf42f9c03005760a007fff7b74",
     "git_branch": "migration/m2.2-coordinator-persistence",
     "repo_dirty_at_capture": "0",
     "origin_main": "304c89134fdf9f834f7d69e3f4d5c89a68044c60",
     "openfilm_upstream": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
-    "vitest_max_workers": "2",
+    "vitest_max_workers": "1",
     "declaration_ceiling": "M4A_INTERNAL_EVIDENCED",
     "interaction": "headless,muted,no-window,no-focus-steal,no-network,no-payment"
   },
@@ -29,77 +29,77 @@
       "name": "check-1",
       "command": "corepack pnpm check",
       "exit": 0,
-      "log": "docs/evidence/WAVE2/logs/cec51dd167de6c21619d8b8b08533b07776333ff/check-1.txt",
-      "log_sha256": "6020ed2f1a4f2e123fe93943d233fd038766eae34ff5fe54c9d672b2b1913dd8"
+      "log": "docs/evidence/WAVE2/logs/0a2c47bb90dc5eaf42f9c03005760a007fff7b74/check-1.txt",
+      "log_sha256": "567854be6a164f14ac6f56b8cfc12a8edfdc377679ac1cb00b42acf7966a16f1"
     },
     {
       "name": "check-2",
       "command": "corepack pnpm check",
       "exit": 0,
-      "log": "docs/evidence/WAVE2/logs/cec51dd167de6c21619d8b8b08533b07776333ff/check-2.txt",
-      "log_sha256": "37f12992be87ca1f8853a98352af25a26212ae6dc0a65a1d4edf5e1b2ff6053f"
+      "log": "docs/evidence/WAVE2/logs/0a2c47bb90dc5eaf42f9c03005760a007fff7b74/check-2.txt",
+      "log_sha256": "77aed35db6f8861bc0e82cdbb56b332d1fd3199419d95c17483c0db98ea24a67"
     },
     {
       "name": "contracts",
       "command": "corepack pnpm test:contracts",
       "exit": 0,
-      "log": "docs/evidence/WAVE2/logs/cec51dd167de6c21619d8b8b08533b07776333ff/contracts.txt",
-      "log_sha256": "1c3d49aaff6696383e41391722ec4f2bf87100ed4dbc111ce5f2aa1d960e34aa"
+      "log": "docs/evidence/WAVE2/logs/0a2c47bb90dc5eaf42f9c03005760a007fff7b74/contracts.txt",
+      "log_sha256": "4cb4fe8e3f0f99e791bc15e1a95feba403bc1e5afecf140216cb2bcfdc9ce396"
     },
     {
       "name": "credential-scan",
       "command": "NARRALENS_SECRET_SCAN_OUT=docs/evidence/WAVE2/security/credential-scan-m4a.json corepack pnpm exec tsx tools/secret-scan.ts",
       "exit": 0,
-      "log": "docs/evidence/WAVE2/logs/cec51dd167de6c21619d8b8b08533b07776333ff/credential-scan.txt",
+      "log": "docs/evidence/WAVE2/logs/0a2c47bb90dc5eaf42f9c03005760a007fff7b74/credential-scan.txt",
       "log_sha256": "b9094be9ad8994e249018558ff62883d01ab4f4c8dbfaa880f03312a9e616cc4"
     },
     {
       "name": "hash-vectors-python",
       "command": "corepack pnpm test:wave2:m4a:golden-python",
       "exit": 0,
-      "log": "docs/evidence/WAVE2/logs/cec51dd167de6c21619d8b8b08533b07776333ff/hash-vectors-python.txt",
+      "log": "docs/evidence/WAVE2/logs/0a2c47bb90dc5eaf42f9c03005760a007fff7b74/hash-vectors-python.txt",
       "log_sha256": "a18275a601ac37610dbb7d167b11b90b4197aaf1c01407f01b0a43e74beb686a"
     },
     {
       "name": "hash-vectors-regen",
-      "command": "corepack pnpm test:wave2:m4a:vectors /tmp/tmp.QESj7ghSjq/impact-hash.vectors.json",
+      "command": "corepack pnpm test:wave2:m4a:vectors /tmp/tmp.k2ihhii6DT/impact-hash.vectors.json",
       "exit": 0,
-      "log": "docs/evidence/WAVE2/logs/cec51dd167de6c21619d8b8b08533b07776333ff/hash-vectors-regen.txt",
-      "log_sha256": "9b74ddfb23d533b99bbbdf1509e00c6b084da19c7d7439c3efb04eb374d07405"
+      "log": "docs/evidence/WAVE2/logs/0a2c47bb90dc5eaf42f9c03005760a007fff7b74/hash-vectors-regen.txt",
+      "log_sha256": "2b5a13d8b798070a99d4144849d4e71b098dc3d053a9c6fa63260d7365404fef"
     },
     {
       "name": "m2.1",
       "command": "corepack pnpm test:m2.1",
       "exit": 0,
-      "log": "docs/evidence/WAVE2/logs/cec51dd167de6c21619d8b8b08533b07776333ff/m2.1.txt",
-      "log_sha256": "a8c0716307dac44685f0a0c6d43b972079741fa2b9682378e95040c52198593e"
+      "log": "docs/evidence/WAVE2/logs/0a2c47bb90dc5eaf42f9c03005760a007fff7b74/m2.1.txt",
+      "log_sha256": "2db51e969b0c09b9895d1c23f38b9fdd176e2f5015170d1534a2b4172236ca5f"
     },
     {
       "name": "openfilm",
       "command": "corepack pnpm exec tsx tools/openfilm-availability-probe.mjs",
       "exit": 0,
-      "log": "docs/evidence/WAVE2/logs/cec51dd167de6c21619d8b8b08533b07776333ff/openfilm.txt",
+      "log": "docs/evidence/WAVE2/logs/0a2c47bb90dc5eaf42f9c03005760a007fff7b74/openfilm.txt",
       "log_sha256": "3de30e2fd64151df1e39cedc634c6df01fa290a2fcee86d964d75b9e52fe0b97"
     },
     {
       "name": "typecheck",
       "command": "corepack pnpm exec tsc --noEmit",
       "exit": 0,
-      "log": "docs/evidence/WAVE2/logs/cec51dd167de6c21619d8b8b08533b07776333ff/typecheck.txt",
+      "log": "docs/evidence/WAVE2/logs/0a2c47bb90dc5eaf42f9c03005760a007fff7b74/typecheck.txt",
       "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     {
       "name": "wave1-historical",
       "command": "corepack pnpm evidence:wave1:historical",
       "exit": 0,
-      "log": "docs/evidence/WAVE2/logs/cec51dd167de6c21619d8b8b08533b07776333ff/wave1-historical.txt",
+      "log": "docs/evidence/WAVE2/logs/0a2c47bb90dc5eaf42f9c03005760a007fff7b74/wave1-historical.txt",
       "log_sha256": "ac02c2f38ba9a726fb621990c9b21c159f1fa6fc65ff0fe1fbfcd3d7e6d8a062"
     },
     {
       "name": "wave1-integrity",
       "command": "corepack pnpm evidence:wave1:integrity",
       "exit": 1,
-      "log": "docs/evidence/WAVE2/logs/cec51dd167de6c21619d8b8b08533b07776333ff/wave1-integrity.txt",
+      "log": "docs/evidence/WAVE2/logs/0a2c47bb90dc5eaf42f9c03005760a007fff7b74/wave1-integrity.txt",
       "log_sha256": "518fd3455d80ff2d43271af4df3d0af76997e627c69390a332bcd031b8913e94",
       "expected_failure": true
     },
@@ -107,29 +107,29 @@
       "name": "wave2-fitness",
       "command": "corepack pnpm test:wave2:fitness",
       "exit": 0,
-      "log": "docs/evidence/WAVE2/logs/cec51dd167de6c21619d8b8b08533b07776333ff/wave2-fitness.txt",
-      "log_sha256": "19e023b837244eb1ed0e4f841da94ae520ca4ed0c12ae15e2769c7de9cfff1ba"
+      "log": "docs/evidence/WAVE2/logs/0a2c47bb90dc5eaf42f9c03005760a007fff7b74/wave2-fitness.txt",
+      "log_sha256": "dbe6c672f4f34cce6318067866b8167eafbb255372dc7fc2d4aaf5bc5dc23d76"
     },
     {
       "name": "wave2-m3",
       "command": "corepack pnpm test:wave2:m3",
       "exit": 0,
-      "log": "docs/evidence/WAVE2/logs/cec51dd167de6c21619d8b8b08533b07776333ff/wave2-m3.txt",
-      "log_sha256": "a6a2b336004f70466d8b408a27c5cdc79f453c49135cf061978cca9ef055036f"
+      "log": "docs/evidence/WAVE2/logs/0a2c47bb90dc5eaf42f9c03005760a007fff7b74/wave2-m3.txt",
+      "log_sha256": "690bd583b0e1c01a3d1edca043aa03a3860e1f4f394571b554381b9a9c64ebbd"
     },
     {
       "name": "wave2-m4a",
       "command": "corepack pnpm test:wave2:m4a",
       "exit": 0,
-      "log": "docs/evidence/WAVE2/logs/cec51dd167de6c21619d8b8b08533b07776333ff/wave2-m4a.txt",
-      "log_sha256": "43c358a0673872250a16327282d9917d056ab165adbb81686047e6906708dc61"
+      "log": "docs/evidence/WAVE2/logs/0a2c47bb90dc5eaf42f9c03005760a007fff7b74/wave2-m4a.txt",
+      "log_sha256": "ffebc90a44d257f54aa173516cd871611380275d1284c381c5aa9ac5267f4a80"
     },
     {
       "name": "wave2-w2.0",
       "command": "corepack pnpm test:wave2:w2.0",
       "exit": 0,
-      "log": "docs/evidence/WAVE2/logs/cec51dd167de6c21619d8b8b08533b07776333ff/wave2-w2.0.txt",
-      "log_sha256": "2487b283c6eed0f4a12560a70ce19bd675032a64a7e47581cfc5afb15732e6ba"
+      "log": "docs/evidence/WAVE2/logs/0a2c47bb90dc5eaf42f9c03005760a007fff7b74/wave2-w2.0.txt",
+      "log_sha256": "b07a08ad2ffcb03cad08b9b9b320f948f76cb4c551788b844586f913c13fd10a"
     }
   ],
   "hash_vectors": "tests/wave2/m4a/impact-hash.vectors.json",
@@ -208,13 +208,14 @@
     "The layout is roots-only and carries no declaredAssets, because computeSourceDigest folds declaredAssets into the manifest and adding them would change source_digest. ADR-W2.0-005 records this; the ledger is checked against the roots rather than merged into them.",
     "The proxy encode is real in impact-real-chain.test.ts and stored-row-built everywhere else. The shortcut exercises M4A's own arithmetic, not M3's renderer; M3's suite is the gate on the renderer.",
     "The frozen hash vectors agree with an independently written Python implementation over the same eight vectors, including the preimage bytes. Agreement is evidence the canonical rules were transcribed correctly twice, not proof no shared misconception exists.",
-    "The full gate runs at maxWorkers=2. That changes nothing about what is asserted, how long a test may take, or which tests run; it was chosen because this machine cannot sustain every suite at once.",
+    "The full gate runs at maxWorkers=1. That changes nothing about what is asserted, how long a test may take, or which tests run; the failed 002461b capture proved that two independent media-heavy Hosts can still produce a retryable 503 under aggregate load.",
     "evidence:wave1:integrity exits 1 by design: it asserts no code moved after the Wave 1 freeze, and Wave 2 moved code. Its output is kept verbatim and was never tuned green.",
     "The M3 integrity checker was changed to compare route claims against the tree at M3's own capture commit rather than the tip, and to stop printing PASS after a failed check. M3's manifest, logs and failed captures are untouched. Without that change a frozen historical record fails for later stages doing their job.",
     "headed/human experience is NOT_RUN: this stage adds no UI. Automation is headless, muted, windowless, offline and non-focus-stealing; no provider call, no payment, and no read of J:\\.",
-    "No production crash-recovery GC exists for impact rows; no long-film performance, streaming-hash or full-render behaviour has been exercised."
+    "No production crash-recovery GC exists for impact rows; no long-film performance, streaming-hash or full-render behaviour has been exercised.",
+    "Post-insert currentness now re-runs pinned OpenFilm inspect and MaterializeService.read. Real source, asset or rights drift invalidates the impact; a retryable read failure remains 503 and does not permanently stale an authorization whose facts were not disproven."
   ],
   "supersedes": {
-    "note": "This is the first M4A capture. The M3 captures at b6207c8, 4721381 and the failed 14cc3b6 remain exactly where they are."
+    "note": "This capture supersedes the first M4A capture at cec51dd for the two Codex external-review findings only. The earlier capture and all M3 captures remain append-only historical records."
   }
 }
