@@ -291,7 +291,9 @@ describe("M3.3 the two routes, over HTTP, against a real migrated target", () =>
     const ready = await settle(running, job.materialization_id);
     // The Host's diagnostics are attached to the assertion so a failure names the row, the
     // attempt and the boundary rather than leaving a reader to guess from a state.
-    expect(ready?.state, `comparison=${comparisonId} ${JSON.stringify(recent(running, job.materialization_id))}`)
+    const terminal = running.host.revisions.compose((db) => db.prepare(
+      "SELECT terminal_reason FROM job WHERE job_id=?").get(job.job_id) as { terminal_reason?: string } | undefined);
+    expect(ready?.state, `comparison=${comparisonId} terminal=${terminal?.terminal_reason ?? ""} job=${JSON.stringify(running.host.jobs.get(job.job_id))} ${JSON.stringify(recent(running, job.materialization_id))}`)
       .toBe("ready_for_adoption");
 
     const read = await fetch(`${running.origin}/api/migration/v1/materializations/${job.materialization_id}`,

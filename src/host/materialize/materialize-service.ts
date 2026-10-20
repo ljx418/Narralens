@@ -412,7 +412,13 @@ export class MaterializeService {
         rightsDigest: bound.rights_digest,
       });
       const targetClipIds = await this.#deps.targetClipIds?.(row.project_id, row.source_digest);
-      const plan = this.#deps.plans.build(bound, targetClipIds);
+      // M4B can reuse native identities only when the proposal already has one segment per
+      // current clip. A two-segment proposal over a three-clip film is still a valid M3
+      // preparation, but it is not adoptable by M4B's fixed no-insert recipe; retaining
+      // derived ids lets impact/adoption reject it on capability instead of corrupting or
+      // failing the materialization worker itself.
+      const compatibleTargetIds = targetClipIds?.length === bound.bindings.length ? targetClipIds : undefined;
+      const plan = this.#deps.plans.build(bound, compatibleTargetIds);
       await this.#deps.materializations.setPlan(materializationId, plan);
       await this.#deps.fault?.("after_plan");
 
