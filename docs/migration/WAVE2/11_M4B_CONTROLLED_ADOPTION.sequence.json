@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "M4B 受控采用事务",
+    "locale": "zh-CN",
+    "output": "docs/migration/WAVE2/11_M4B_CONTROLLED_ADOPTION.html",
+    "viewBox": [1080, 780],
+    "column_fit": "spread",
+    "animation": "none",
+    "quality_profile": "showcase"
+  },
+  "participants": [
+    { "id": "client", "type": "frontend", "label": "Studio 客户端", "sublabel": "确认 impact" },
+    { "id": "host", "type": "backend", "label": "Host 路由", "sublabel": "auth / contract" },
+    { "id": "coordinator", "type": "security", "label": "采用协调器", "sublabel": "AdoptionCoordinator" },
+    { "id": "impact", "type": "security", "label": "ImpactService", "sublabel": "requireCurrent" },
+    { "id": "engine", "type": "backend", "label": "OpenFilmAdapter", "sublabel": "plan / stage / validate" },
+    { "id": "store", "type": "database", "label": "RevisionStore", "sublabel": "同一 SQLite 事务" },
+    { "id": "source", "type": "database", "label": "隔离 stage", "sublabel": "原子发布 source" }
+  ],
+  "segments": [
+    { "from": 150, "to": 300, "label": "入口与授权" },
+    { "from": 310, "to": 475, "label": "隔离计划与验证" },
+    { "from": 485, "to": 675, "label": "最终复核与原子提交" }
+  ],
+  "messages": [
+    { "id": "post-edit", "from": "client", "to": "host", "y": 165, "label": "POST versioned edits + approval", "variant": "emphasis" },
+    { "id": "validate-request", "from": "host", "to": "coordinator", "y": 195, "label": "validated adopt_materialization", "variant": "security" },
+    { "id": "current-impact", "from": "coordinator", "to": "impact", "y": 225, "label": "requireCurrent(impact_id)", "variant": "security" },
+    { "id": "impact-spec", "from": "impact", "to": "coordinator", "y": 255, "label": "current spec / 428", "variant": "return" },
+    { "id": "read-authority", "from": "coordinator", "to": "store", "y": 290, "label": "base + locks + rights + idempotency", "variant": "default" },
+    { "id": "native-plan", "from": "coordinator", "to": "engine", "y": 320, "label": "plan pinned native operation", "variant": "emphasis" },
+    { "id": "isolated-stage", "from": "engine", "to": "source", "y": 355, "label": "stage in isolated copy", "variant": "default" },
+    { "id": "validate-stage", "from": "coordinator", "to": "engine", "y": 390, "label": "validate three editable clips", "variant": "security" },
+    { "id": "stage-report", "from": "engine", "to": "coordinator", "y": 425, "label": "validated digest + projection", "variant": "return" },
+    { "id": "prepare-snapshot", "from": "coordinator", "to": "store", "y": 460, "label": "prepare snapshot / journal", "variant": "default" },
+    { "id": "final-impact", "from": "coordinator", "to": "impact", "y": 500, "label": "commit-boundary requireCurrent", "variant": "security" },
+    { "id": "final-authority", "from": "coordinator", "to": "store", "y": 535, "label": "CAS base + locks + rights + idempotency", "variant": "security" },
+    { "id": "publish-source", "from": "coordinator", "to": "source", "y": 570, "label": "atomic publish staged source", "variant": "emphasis" },
+    { "id": "commit-revision", "from": "coordinator", "to": "store", "y": 605, "label": "revision +1, consume impact, outbox", "variant": "emphasis" },
+    { "id": "committed", "from": "coordinator", "to": "host", "y": 640, "label": "ControlledWriteResponseV1", "variant": "return" },
+    { "id": "http-response", "from": "host", "to": "client", "y": 670, "label": "200 committed / deterministic refusal", "variant": "return" }
+  ],
+  "activations": [
+    { "participant": "host", "from": 160, "to": 680, "type": "backend" },
+    { "participant": "coordinator", "from": 190, "to": 650, "type": "security" },
+    { "participant": "impact", "from": 220, "to": 265, "type": "security" },
+    { "participant": "engine", "from": 315, "to": 435, "type": "backend" },
+    { "participant": "store", "from": 280, "to": 620, "type": "database" },
+    { "participant": "source", "from": 350, "to": 585, "type": "database" }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "成功不变量",
+      "items": ["只允许一个受控写入口", "采用成功恰好 revision +1", "采用后三个 clip 仍可独立编辑"]
+    },
+    {
+      "dot": "rose",
+      "title": "失败不变量",
+      "items": ["任何失败 revision +0", "过期 impact、锁或 rights 漂移均拒绝", "不得把 proxy 或扁平 MP4 当 author source"]
+    },
+    {
+      "dot": "amber",
+      "title": "恢复边界",
+      "items": ["journal 覆盖 stage、publish、commit 边界", "取消或失 lease 的晚到结果只能 quarantine", "重启必须收敛到提交、可重试或 attention"]
+    }
+  ]
+}

@@ -218,7 +218,9 @@ received → preconditions_checked → staged → validated → prepared → com
 | `POST /api/migration/v1/projects/:id/history/restore` | M4C | 200 ControlledWriteResponseV1 | 同上，另 422 snapshot 不属于项目 |
 
 错误优先级保持：auth/origin → schema/capability → idempotency → base/source/control → attention/locks/rights
-→ impact/approval → execution。请求 body 上限 1 MiB；不接受 path、URL、shell 参数或客户端 rights/hash 事实。
+→ impact/approval → execution。Wave 2 versioned 写请求沿用 Host 已落地的 64 KiB body 上限；不接受 path、URL、
+shell 参数或客户端 rights/hash 事实。旧版 1 MiB 文案已被实际 Host 限制与 M4A 外审观察取代，不为文档对齐而
+放宽生产入口。
 
 ## 7. M3 NOWRITE 清单
 
