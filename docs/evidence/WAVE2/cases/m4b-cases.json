@@ -17,7 +17,7 @@
     "case_id": "TX-03",
     "status": "CLOSED",
     "production_seam": true,
-    "tests": ["tests/wave2/m4a/openfilm-upstream-lock.test.ts", "tests/wave2/m4b/adoption-route.test.ts"],
+    "tests": ["tests/m2.1/openfilm-upstream-lock.test.ts", "tests/wave2/m4b/adoption-route.test.ts"],
     "evidence": "M4A 三类锁分类保持；stage 后新取得 visual 锁在最终边界返回 428、revision +0。"
   },
   {
@@ -87,7 +87,7 @@
     "case_id": "REG",
     "status": "CLOSED",
     "production_seam": true,
-    "tests": ["tests/wave2/m4b/adoption-route.test.ts", "tests/wave2/m3/materialize-routes.test.ts", "tests/wave2/m4a/routes.test.ts", "tests/architecture/m2.2-fitness.test.ts"],
+    "tests": ["tests/wave2/m4b/adoption-route.test.ts", "tests/wave2/m3/materialize-routes.test.ts", "tests/wave2/m4a/impact-races.test.ts", "tests/architecture/m2.2-fitness.test.ts"],
     "evidence": "M4B、M4A、M3、M2.1、contracts、fitness 与全量 check 均纳入冻结捕获；历史证据不覆盖。"
   }
 ]
