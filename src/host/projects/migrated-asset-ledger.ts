@@ -309,7 +309,10 @@ export class MigratedAssetLedger {
         reason: current.attention_reason,
       };
     }
-    const evidence = await this.#gatherEvidence(request, now);
+    // A transaction forbids *late first bootstrap*; it cannot forbid verification of the
+    // already-active ledger or every legitimate controlled write would condemn its own
+    // project as soon as it wrote `project_transaction.received`.
+    const evidence = await this.#gatherEvidence(request, now, true);
     if (evidence.state !== "verified") return this.#attention(evidence, now, current);
     const drift = this.#driftAgainst(current, evidence);
     if (drift === null) {
@@ -452,7 +455,8 @@ export class MigratedAssetLedger {
   /**
    * Every proof, or a reason. Nothing here writes; the caller decides what a reason means.
    */
-  async #gatherEvidence(request: BootstrapRequest, _now: Date): Promise<Evidence> {
+  async #gatherEvidence(request: BootstrapRequest, _now: Date,
+    allowExistingTransactions = false): Promise<Evidence> {
     const projectId = request.projectId;
     const candidates = this.#revisions.migrations.all().filter((row) => row.target_project_id === projectId);
     if (candidates.length === 0) return { state: "blocked", projectId, migrationId: "", reason: "NO_MIGRATION" };
@@ -473,7 +477,7 @@ export class MigratedAssetLedger {
 
     // A target that already has a Wave 2 transaction has moved past the point where a
     // bootstrap may be inferred for it. Refuse rather than reconcile.
-    if (this.#revisions.projectTransactions(projectId).length > 0) {
+    if (!allowExistingTransactions && this.#revisions.projectTransactions(projectId).length > 0) {
       return { state: "attention", projectId, migrationId: migration.migration_id, reason: "TARGET_ALREADY_WRITTEN" };
     }
 

@@ -704,10 +704,9 @@ describe("M4A-R01: the route answers a client consistently and idempotently", ()
     expect(running.host.impacts.byProject(projectId)).toHaveLength(0);
   }, 600_000);
 
-  it("keeps versioned edits and history restore unmounted, and the legacy routes working", async () => {
+  it("keeps history restore unmounted, and the legacy routes working", async () => {
     const running = await started();
     for (const path of [
-      "/api/migration/v1/projects/d1-30s/edits",
       "/api/migration/v1/projects/d1-30s/history/restore",
     ]) {
       const response = await fetch(`${running.origin}${path}`, {

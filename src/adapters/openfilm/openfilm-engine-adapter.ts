@@ -447,7 +447,11 @@ export class OpenFilmEngineAdapter implements EnginePort {
       if (clip === undefined || clip.src !== assetToken(planned.asset_sha256)) problems.push(`clip ${planned.clip_id} source mismatch`);
       if (range?.start_frame !== planned.source.start_frame
         || range?.end_frame_exclusive !== planned.source.end_frame_exclusive) problems.push(`clip ${planned.clip_id} frame range mismatch`);
-      if (clip?.overrides !== null) problems.push(`clip ${planned.clip_id} overrides were not cleared`);
+      // The pinned upstream canonicalises `set overrides=null` by omitting the property.
+      // Both representations mean the same closed fact: no retained override entries.
+      if (clip?.overrides !== null && clip?.overrides !== undefined) {
+        problems.push(`clip ${planned.clip_id} overrides were not cleared`);
+      }
     }
     if (proof.native_plan.clips.length !== 3) problems.push("adoption does not preserve three visual clips");
     if (proof.non_visual_sha256 !== nonVisualDigest(doc)) problems.push("narration/audio changed during adoption");

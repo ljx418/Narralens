@@ -15,6 +15,8 @@ export interface PublishAuthorSourceInput {
   readonly activeRoot: string;
   readonly stagedRoot: string;
   readonly transactionId: string;
+  /** Durable, transaction-scoped basename recorded before publication for recovery. */
+  readonly filmTempToken: string;
   readonly installedAssets: readonly InstalledAdoptionAsset[];
   readonly expectedFilmBeforeSha256: string;
   readonly expectedFilmAfterSha256: string;
@@ -76,7 +78,11 @@ export class AuthorSourcePublisher {
     }
     for (const asset of assets) await this.#installAsset(activeRoot, stagedRoot, asset);
 
-    const filmTemp = inside(activeRoot, `.narralens-${input.transactionId}-${randomUUID()}.film.tmp`);
+    const expectedTempToken = `.narralens-${input.transactionId}.film.tmp`;
+    if (input.filmTempToken !== expectedTempToken) {
+      throw new HttpError(422, "UNSUPPORTED_EDIT", "Film publication token is not transaction scoped");
+    }
+    const filmTemp = inside(activeRoot, input.filmTempToken);
     try {
       await copyFile(stagedFilm, filmTemp, constants.COPYFILE_EXCL);
       await fsync(filmTemp);

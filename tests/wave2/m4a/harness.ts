@@ -55,7 +55,8 @@ export async function start(options: {
   process.env.NARRALENS_OPENFILM_VENDOR = REAL_UPSTREAM_PARENT;
   const host = new NarralensHost({
     migrationsRoot: join(base, "migrations"), dbPath: join(base, "narralens.sqlite"),
-    derivedRoot: join(base, "derived"),
+    derivedRoot: join(base, "derived"), snapshotsRoot: join(base, "snapshots"),
+    adoptionStagingRoot: join(base, "adoption-stage"),
     // Comparisons live in the test's own tree; the default `var/` belongs to the repository
     // and this suite must not write to it.
     proposals: new ProposalAdapter(join(base, "proposals")),
@@ -77,7 +78,8 @@ export async function startOn(base: string, options: {
   process.env.NARRALENS_OPENFILM_VENDOR = REAL_UPSTREAM_PARENT;
   const host = new NarralensHost({
     migrationsRoot: join(base, "migrations"), dbPath: join(base, "narralens.sqlite"),
-    derivedRoot: join(base, "derived"),
+    derivedRoot: join(base, "derived"), snapshotsRoot: join(base, "snapshots"),
+    adoptionStagingRoot: join(base, "adoption-stage"),
     proposals: new ProposalAdapter(join(base, "proposals")),
     comparisons: new ProposalComparisonAdapter(join(base, "proposal-comparisons")),
     ...options,

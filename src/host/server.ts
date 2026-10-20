@@ -7,7 +7,8 @@ import { fileURLToPath } from "node:url";
 import { ControlledAgentRunner, type ComparisonRunnerInput } from "../adapters/openmontage/controlled-agent-runner.js";
 import { ProposalAdapter } from "../adapters/openmontage/proposal-adapter.js";
 import { ProposalComparisonAdapter } from "../adapters/openmontage/proposal-comparison-adapter.js";
-import { validateEditRequest, validateEngineResponse, validateImpactRequest, validateImpactSpec,
+import { validateAdoptRequest, validateControlledWriteResponse, validateEditRequest,
+  validateEngineResponse, validateImpactRequest, validateImpactSpec,
   validateProposalComparisonRequest } from "../contracts/validator.js";
 import type { EngineResponse } from "../contracts/engine-types.js";
 import type { ApiError, JobEvent, ProjectResponse, ProposalComparisonRequest } from "../contracts/types.js";
@@ -52,6 +53,9 @@ import { canonicalJson } from "./engine/source-digest-v1.js";
 import { ProjectResolver } from "./projects/project-resolver.js";
 import { HypitEngineAdapter } from "../adapters/hypit/hypit-engine-adapter.js";
 import { HypitReadAdapter } from "../adapters/hypit/hypit-read-adapter.js";
+import { AdoptionStore } from "./adoption/adoption-store.js";
+import { AuthorSourcePublisher } from "./adoption/author-source-publisher.js";
+import { AdoptionCoordinator } from "./adoption/adoption-coordinator.js";
 
 const bodyLimit = 65_536;
 
@@ -154,6 +158,7 @@ interface HostDependencies {
   engines?: EngineRegistry;
   jobs?: PersistentJobStore | JobStore;
   snapshotsRoot?: string;
+  adoptionStagingRoot?: string;
   /** Overrides for tests and for a Host whose working directory is not the repository. */
   migrationsRoot?: string;
   dbPath?: string;
@@ -187,6 +192,9 @@ export class NarralensHost {
   readonly imports: AssetImportService;
   readonly engines: EngineRegistry;
   readonly coordinator: ProjectCoordinator;
+  readonly locks: LockService;
+  readonly snapshots: SnapshotStore;
+  readonly idempotency: OperationIdempotencyStore;
   readonly migrations: MigrationService;
   /**
    * What the pinned OpenFilm composition decided, recorded so a failed capability is
@@ -226,6 +234,8 @@ export class NarralensHost {
   readonly projections: ActivatedProjectionService;
   readonly impacts: ImpactStore;
   readonly impact: ImpactService;
+  readonly adoptionFacts: AdoptionStore;
+  readonly adoption: AdoptionCoordinator;
   /** Injected so impact TTL is testable without waiting fifteen minutes. */
   readonly impactClock: () => Date;
   readonly sessionToken = randomBytes(32).toString("base64url");
@@ -272,12 +282,13 @@ export class NarralensHost {
       ["project.committed", "commit-audit"], ["job.state_changed", "job-sse"],
       ["lock.changed", "lock-audit"], ["recovery.attention", "recovery-audit"],
     ] as const) this.outbox.register(topic, consumer, (_eventId, _payload) => undefined);
-    const locks = new LockService(this.revisions);
+    this.locks = new LockService(this.revisions);
+    this.snapshots = new SnapshotStore({ snapshotsRoot: dependencies.snapshotsRoot ?? resolve(projectRoot, "var/snapshots") });
     this.coordinator = new ProjectCoordinator({
       queue: this.operations, store: this.revisions, actor: this.writes,
       bindings: this.engines.bindings, engines: this.engines,
-      gateway: new NativeWriteGateway(new NativeMutationRegistry()), locks,
-      snapshots: new SnapshotStore({ snapshotsRoot: dependencies.snapshotsRoot ?? resolve(projectRoot, "var/snapshots") }),
+      gateway: new NativeWriteGateway(new NativeMutationRegistry()), locks: this.locks,
+      snapshots: this.snapshots,
       outbox: this.outbox,
       jobs: this.jobs instanceof PersistentJobStore ? this.jobs : new PersistentJobStore(this.revisions),
       sourceFor: async (projectId) => {
@@ -354,7 +365,7 @@ export class NarralensHost {
       // asset inventory will later re-verify. Two instances over one connection would be
       // two authorities reading one table.
       ledger: this.assetLedger,
-      snapshots: new SnapshotStore({ snapshotsRoot: dependencies.snapshotsRoot ?? resolve(projectRoot, "var/snapshots") }),
+      snapshots: this.snapshots,
       migrationRoot: this.migrationRoot,
       projectRoot: resolve(projectRoot, "var/projects"),
       openfilmUpstreamSha: OPENFILM_UPSTREAM_SHA,
@@ -402,24 +413,32 @@ export class NarralensHost {
         }));
       },
     });
+    this.adoptionFacts = new AdoptionStore(this.revisions);
     this.projections = new ActivatedProjectionService({
-      revisions: this.revisions, ledger: this.assetLedger,
+      revisions: this.revisions, ledger: this.assetLedger, adoption: this.adoptionFacts,
     });
     // One `OperationIdempotencyStore` shared with `MaterializationStore`, so impact and
     // materialize replay against the same table and the same definition of a conflict.
-    const idempotency = new OperationIdempotencyStore(this.revisions.compose((db) => db));
-    this.impacts = new ImpactStore(this.revisions, idempotency);
+    this.idempotency = new OperationIdempotencyStore(this.revisions.compose((db) => db));
+    this.impacts = new ImpactStore(this.revisions, this.idempotency);
     this.impactClock = dependencies.impactClock ?? ((): Date => new Date());
     this.impact = new ImpactService({
       resolver: this.projectResolver, operations: this.operations, engines: this.engines,
       projections: this.projections, materializations: this.materializations,
-      materialize: this.materialize, inventory: this.assetInventory, locks,
+      materialize: this.materialize, inventory: this.assetInventory, locks: this.locks,
       ledger: this.assetLedger, migrations: this.revisions.migrations,
-      impacts: this.impacts, idempotency,
+      impacts: this.impacts, idempotency: this.idempotency,
       clock: this.impactClock,
       correlationId: () => randomBytes(8).toString("hex"),
       ...(dependencies.impactFault === undefined ? {} : { fault: dependencies.impactFault }),
     });
+    this.adoption = new AdoptionCoordinator({ coordinator: this.coordinator, revisions: this.revisions,
+      idempotency: this.idempotency, resolver: this.projectResolver, materialize: this.materialize,
+      impact: this.impact, projections: this.projections, engines: this.engines,
+      gateway: new NativeWriteGateway(new NativeMutationRegistry()), locks: this.locks,
+      ledger: this.assetLedger, snapshots: this.snapshots, adoption: this.adoptionFacts,
+      publisher: new AuthorSourcePublisher(),
+      stagingRoot: dependencies.adoptionStagingRoot ?? resolve(projectRoot, "var/adoption-stage") });
     this.#leaseReapIntervalMs = dependencies.leaseReapIntervalMs ?? 1_000;
     this.#materializeDrainIntervalMs = dependencies.materializeDrainIntervalMs ?? 250;
     this.#outboxReplayIntervalMs = dependencies.outboxReplayIntervalMs ?? 250;
@@ -551,6 +570,8 @@ export class NarralensHost {
       }
       match = url.pathname.match(/^\/api\/migration\/v1\/projects\/([A-Za-z0-9_-]+)\/impact$/);
       if (request.method === "POST" && match?.[1]) return await this.#impact(match[1], request, response);
+      match = url.pathname.match(/^\/api\/migration\/v1\/projects\/([A-Za-z0-9_-]+)\/edits$/);
+      if (request.method === "POST" && match?.[1]) return await this.#adoptMaterialization(match[1], request, response);
       match = url.pathname.match(/^\/api\/migration\/v1\/materializations\/([A-Za-z0-9_-]+)$/);
       if (request.method === "GET" && match?.[1]) return await this.#readMaterialization(match[1], response);
       match = url.pathname.match(/^\/api\/migration\/v1\/migrations\/([A-Za-z0-9_-]+)$/);
@@ -764,6 +785,24 @@ export class NarralensHost {
         { errors: validated.errors.slice(0, 8) }, projectId);
     }
     json(response, created.status, validated.value);
+  }
+
+  /** M4B's only production author-source write route. */
+  async #adoptMaterialization(projectId: string, request: IncomingMessage,
+    response: ServerResponse): Promise<void> {
+    const parsed = validateAdoptRequest(await readJson(request));
+    if (!parsed.ok) {
+      throw new HttpError(400, "INVALID_REQUEST", "The adoption request does not satisfy its contract",
+        { errors: parsed.errors.slice(0, 8) }, projectId);
+    }
+    const committed = await this.adoption.adopt(projectId, parsed.value);
+    const validated = validateControlledWriteResponse(committed);
+    if (!validated.ok) {
+      throw new HttpError(500, "INTERNAL_ERROR", "The controlled write response does not satisfy its contract",
+        { errors: validated.errors.slice(0, 8) }, projectId);
+    }
+    this.projections.forget(projectId);
+    json(response, 200, validated.value);
   }
 
   async #materializeProposal(projectId: string, proposalId: string,

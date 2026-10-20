@@ -85,6 +85,15 @@ export class ProjectCoordinator {
     return !this.deps.store.recoveryGate(projectId, 0);
   }
 
+  /** M4B controlled writes share the one project queue and the same recovery gate. */
+  async controlledWrite<T>(projectId: string, correlationId: string, operation: () => Promise<T>): Promise<T> {
+    if (!this.recoverStatus(projectId)) {
+      throw new HttpError(423, "PROJECT_ATTENTION_REQUIRED", "Project requires recovery before it can be written",
+        { attention_reason: this.deps.store.attentionReason(projectId) }, correlationId);
+    }
+    return await this.deps.queue.run(projectId, operation);
+  }
+
   // ── the transaction machine (plan §3) ────────────────────────────────────────────────
 
   beginTransaction(input: {

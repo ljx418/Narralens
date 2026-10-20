@@ -33,6 +33,7 @@ describe("M4B AuthorSourcePublisher", () => {
     const seen: PublishBoundary[] = [];
     await new AuthorSourcePublisher({ fault: (boundary) => { seen.push(boundary); } }).publish({
       activeRoot: f.active, stagedRoot: f.staged, transactionId: "txn_1",
+      filmTempToken: ".narralens-txn_1.film.tmp",
       installedAssets: [{ token: f.token, sha256: f.digest }],
       expectedFilmBeforeSha256: sha(f.before), expectedFilmAfterSha256: sha(f.after),
     });
@@ -48,6 +49,7 @@ describe("M4B AuthorSourcePublisher", () => {
         if (boundary === failure) throw new Error(`FAULT:${failure}`);
       } });
       await expect(publisher.publish({ activeRoot: f.active, stagedRoot: f.staged, transactionId: "txn_2",
+        filmTempToken: ".narralens-txn_2.film.tmp",
         installedAssets: [{ token: f.token, sha256: f.digest }],
         expectedFilmBeforeSha256: sha(f.before), expectedFilmAfterSha256: sha(f.after) })).rejects.toThrow(`FAULT:${failure}`);
       expect(await readFile(resolve(f.active, "film.html"), "utf8")).toBe(f.before);
@@ -59,6 +61,7 @@ describe("M4B AuthorSourcePublisher", () => {
       if (boundary === "film_renamed") throw new Error("FAULT:film_renamed");
     } });
     await expect(publisher.publish({ activeRoot: f.active, stagedRoot: f.staged, transactionId: "txn_3",
+      filmTempToken: ".narralens-txn_3.film.tmp",
       installedAssets: [{ token: f.token, sha256: f.digest }],
       expectedFilmBeforeSha256: sha(f.before), expectedFilmAfterSha256: sha(f.after) })).rejects.toThrow("FAULT:film_renamed");
     expect(await readFile(resolve(f.active, "film.html"), "utf8")).toBe(f.after);
@@ -68,12 +71,14 @@ describe("M4B AuthorSourcePublisher", () => {
     const f = await fixture();
     const publisher = new AuthorSourcePublisher();
     await expect(publisher.publish({ activeRoot: f.active, stagedRoot: f.staged, transactionId: "txn_4",
+      filmTempToken: ".narralens-txn_4.film.tmp",
       installedAssets: [{ token: "../escape.mp4", sha256: f.digest }],
       expectedFilmBeforeSha256: sha(f.before), expectedFilmAfterSha256: sha(f.after) }))
       .rejects.toMatchObject({ status: 422, code: "UNSUPPORTED_EDIT" });
     await mkdir(resolve(f.active, "assets", f.digest), { recursive: true });
     await writeFile(resolve(f.active, f.token), "corrupt");
     await expect(publisher.publish({ activeRoot: f.active, stagedRoot: f.staged, transactionId: "txn_5",
+      filmTempToken: ".narralens-txn_5.film.tmp",
       installedAssets: [{ token: f.token, sha256: f.digest }],
       expectedFilmBeforeSha256: sha(f.before), expectedFilmAfterSha256: sha(f.after) }))
       .rejects.toMatchObject({ status: 423, code: "PROJECT_ATTENTION_REQUIRED" });

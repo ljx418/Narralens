@@ -8,6 +8,7 @@ import {
   assertLedgerWithinRoots, assertRelativeInsideRoot, openFilmLayoutFacts,
 } from "../projects/openfilm-layout-facts.js";
 import type { OpenFilmLayoutRegistrar } from "./openfilm-composition.js";
+import type { AdoptionStore } from "../adoption/adoption-store.js";
 
 /**
  * ActivatedProjectionService (ADR-W2.0-004 §6, M4A-P01).
@@ -53,6 +54,7 @@ const LAYOUT_CACHE_CEILING = 256;
 export interface ActivatedProjectionDeps {
   readonly revisions: RevisionStore;
   readonly ledger: MigratedAssetLedger;
+  readonly adoption?: AdoptionStore | undefined;
   /**
    * Host composition's handle on the concrete OpenFilm adapter, when one is installed.
    *
@@ -75,12 +77,14 @@ export interface ActivatedLayout {
 export class ActivatedProjectionService {
   readonly #revisions: RevisionStore;
   readonly #ledger: MigratedAssetLedger;
+  readonly #adoption: AdoptionStore | undefined;
   readonly #cache = new Map<string, OpenFilmProjectLayout>();
   #registrar: OpenFilmLayoutRegistrar | undefined;
 
   constructor(deps: ActivatedProjectionDeps) {
     this.#revisions = deps.revisions;
     this.#ledger = deps.ledger;
+    this.#adoption = deps.adoption;
     this.#registrar = deps.registrar;
   }
 
@@ -134,6 +138,29 @@ export class ActivatedProjectionService {
 
   #rebuild(view: ActivatedProjectView, correlationId?: string): OpenFilmProjectLayout {
     const projectId = view.project_id;
+    const adopted = this.#adoption?.projectionFact(view.snapshot_id);
+    if (adopted !== undefined) {
+      if (adopted.project_id !== projectId || adopted.migration_id !== view.migration_id
+        || adopted.source_digest !== view.source_digest
+        || adopted.engine_upstream_sha !== view.engine_upstream_sha
+        || adopted.frame_count !== view.frame_count) {
+        throw new HttpError(409, "SOURCE_CHANGED",
+          "The active adoption projection contradicts the committed project view", undefined,
+          correlationId ?? projectId);
+      }
+      for (const root of adopted.roots) assertRelativeInsideRoot(root, projectId, "adoption root");
+      for (const subtitle of adopted.subtitles) {
+        assertRelativeInsideRoot(subtitle.path, projectId, "adoption subtitle path");
+      }
+      const facts = { roots: adopted.roots, subtitles: adopted.subtitles };
+      const bootstrap = this.#ledger.bootstrapRecord(projectId);
+      if (bootstrap === undefined || bootstrap.state !== "active") {
+        throw new HttpError(423, "PROJECT_ATTENTION_REQUIRED",
+          "The asset ledger for this adopted project is not active", undefined, correlationId ?? projectId);
+      }
+      assertLedgerWithinRoots(facts, this.#ledger.assets(projectId).map((asset) => asset.target_path), projectId);
+      return { root: view.source_root.value, roots: adopted.roots, subtitles: adopted.subtitles };
+    }
     const store = this.#revisions.migrations;
     const migration = store.get(view.migration_id);
     if (migration === undefined) {

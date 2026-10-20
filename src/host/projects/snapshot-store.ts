@@ -51,7 +51,7 @@ export interface SnapshotSource {
   readonly projectId: string;
   readonly engine: EngineKind;
   readonly engineUpstreamSha: string;
-  readonly descriptor: ProjectDescriptor;
+  readonly descriptor?: ProjectDescriptor;
   readonly sourceRoot: string;
   readonly declaredAssets?: readonly DeclaredAsset[];
   /** Engine-owned closure computed from the current source after the mutation. */
@@ -119,7 +119,9 @@ export class SnapshotStore {
   async publish(source: SnapshotSource): Promise<PublishedSnapshot> {
     const digest = source.digest ?? await computeSourceDigest({
       root: source.sourceRoot,
-      roots: source.roots ?? projectDigestRoots(source.descriptor, source.engine),
+      roots: source.roots ?? (source.descriptor === undefined
+        ? (() => { throw new Error("SNAPSHOT_ROOTS_REQUIRED_WITHOUT_DESCRIPTOR"); })()
+        : projectDigestRoots(source.descriptor, source.engine)),
       engine: source.engine,
       engineUpstreamSha: source.engineUpstreamSha,
       declaredAssets: source.declaredAssets,
