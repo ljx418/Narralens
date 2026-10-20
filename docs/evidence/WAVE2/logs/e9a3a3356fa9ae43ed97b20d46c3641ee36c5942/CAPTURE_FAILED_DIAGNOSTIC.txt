@@ -1,0 +1,15 @@
+M4B FAILED CAPTURE — DO NOT USE AS PASS EVIDENCE
+
+Capture commit: e9a3a3356fa9ae43ed97b20d46c3641ee36c5942
+Capture began clean: yes. Result: FAILED / INCOMPLETE.
+
+The corrected M4B route gates passed inside the full run. The prior M4A ENOMEM cases also passed.
+Full check finished 75/76 files and 890/891 tests; the sole failure was a Host startup whose
+fixed-argv `git status --porcelain --untracked-files=no` against the pinned OpenFilm checkout did
+not finish inside the production 10-second cleanliness-verification budget under aggregate I/O.
+The Host failed closed with ENGINE_UNAVAILABLE; no source or database write occurred.
+
+The same impact-races file had just passed independently 42/42, including the failed case. This is
+still not counted as a full-gate pass. The capture was interrupted after independent typecheck
+passed while contracts was running; incomplete commands have no fabricated .exit. The capture is
+retained append-only.
