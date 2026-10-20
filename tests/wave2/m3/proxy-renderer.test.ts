@@ -7,7 +7,7 @@ import { join, resolve } from "node:path";
 import { promisify } from "node:util";
 import { afterEach, describe, expect, it } from "vitest";
 import { DerivedArtifactStore } from "../../../src/host/materialize/derived-artifact-store.js";
-import { classifyProxyToolError, ProxyRenderer } from "../../../src/host/materialize/proxy-renderer.js";
+import { classifyProxyToolError, ENCODER_THREADS, ProxyRenderer } from "../../../src/host/materialize/proxy-renderer.js";
 import type { NativePlanV1 } from "../../../src/contracts/wave2-types.js";
 
 /**
@@ -34,6 +34,10 @@ afterEach(async () => {
 });
 
 describe("M3.2 proxy tool failure classification", () => {
+  it("bounds each admitted encoder's own worker pool", () => {
+    expect(ENCODER_THREADS).toBe(1);
+  });
+
   it.each(["ENOMEM", "EMFILE", "EAGAIN"])(
     "keeps raw %s retryable instead of declaring the source invalid",
     (code) => {

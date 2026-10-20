@@ -38,6 +38,8 @@ export const MAX_OUTPUT_FRAMES = 64 * 60 * 30;
 /** Frozen ceilings: two encoders overall, one per project. */
 export const GLOBAL_CONCURRENCY = 2;
 export const PER_PROJECT_CONCURRENCY = 1;
+/** Each admitted encoder is itself bounded; two unbounded libx264 thread pools are not a ceiling. */
+export const ENCODER_THREADS = 1;
 
 export interface ProxySegmentInput {
   readonly segment_id: string;
@@ -243,8 +245,10 @@ export class ProxyRenderer {
         "-protocol_whitelist", "file,pipe",
         "-f", "concat", "-safe", "0", "-i", listPath,
         "-an",
+        "-filter_threads", String(ENCODER_THREADS),
+        "-filter_complex_threads", String(ENCODER_THREADS),
         "-vf", `fps=${input.plan.fps.num}/${input.plan.fps.den},scale=${WIDTH_OF_PROFILE}:${HEIGHT_OF_PROFILE}`,
-        "-c:v", "libx264", "-preset", "veryfast", "-crf", "23",
+        "-c:v", "libx264", "-threads", String(ENCODER_THREADS), "-preset", "veryfast", "-crf", "23",
         "-pix_fmt", "yuv420p", "-r", `${input.plan.fps.num}/${input.plan.fps.den}`,
         "-frames:v", String(totalFrames),
         "-movflags", "+faststart",
@@ -260,9 +264,12 @@ export class ProxyRenderer {
     if (produced !== totalFrames) {
       // The proxy says one length and the bytes say another. Answering with either would be
       // a guess; the caller has to decide.
-      throw new HttpError(422, "INVALID_MEDIA",
+      // The source was probed above and supplied the requested span. A successful encoder
+      // exit that emits fewer frames is therefore a tool/host failure, not proof that the
+      // user's source is invalid. Keep the row retryable instead of making it terminal.
+      throw new HttpError(503, "MEDIA_TOOL_UNAVAILABLE",
         `The rendered proxy has ${produced} frame(s) but the plan describes ${totalFrames}`,
-        { produced_frames: produced, expected_frames: totalFrames }, input.materializationId);
+        { produced_frames: produced, expected_frames: totalFrames, recoverable: true }, input.materializationId);
     }
 
     // The plan and the segments must describe the same film. A fallback from a missing clip
