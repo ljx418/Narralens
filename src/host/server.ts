@@ -798,7 +798,16 @@ export class NarralensHost {
   /** M4B's only production author-source write route. */
   async #adoptMaterialization(projectId: string, request: IncomingMessage,
     response: ServerResponse): Promise<void> {
-    const parsed = validateAdoptRequest(await readJson(request));
+    const body = await readJson(request);
+    const record = body !== null && typeof body === "object" && !Array.isArray(body)
+      ? body as Record<string, unknown> : undefined;
+    if (record === undefined || typeof record.impact_id !== "string"
+      || typeof record.impact_hash !== "string"
+      || (record.approval as { confirmed?: unknown } | undefined)?.confirmed !== true) {
+      throw new HttpError(428, "IMPACT_REQUIRED",
+        "A current impact and explicit confirmation are required before adoption", undefined, projectId);
+    }
+    const parsed = validateAdoptRequest(body);
     if (!parsed.ok) {
       throw new HttpError(400, "INVALID_REQUEST", "The adoption request does not satisfy its contract",
         { errors: parsed.errors.slice(0, 8) }, projectId);

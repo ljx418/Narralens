@@ -176,6 +176,12 @@ export class AdoptionCoordinator {
           return this.#abort(transactionId, projectId, request, requestDigest, error);
         }
         if (transaction?.state === "prepared") {
+          const fact = this.deps.adoption.adoptionFact(transactionId);
+          const current = await this.deps.resolver.resolveActivated(projectId);
+          if (fact !== undefined
+            && sha256(await readFile(join(current.source_root.value, "film.html"))) === fact.source_before_sha256) {
+            return this.#abort(transactionId, projectId, request, requestDigest, error);
+          }
           return await this.#recoverTransaction(transactionId, request, requestDigest, correlationId);
         }
         throw error;

@@ -44,16 +44,30 @@ async function postAdoption(running: Started, projectId: string, request: object
 }
 
 describe("M4B production adoption route", () => {
+  it("returns 428 before resource lookup when impact or approval is missing", async () => {
+    const running = await start();
+    hosts.push(running.host); dirs.push(running.base);
+    for (const body of [{}, { impact_id: "imp_missing", impact_hash: "0".repeat(64) }]) {
+      const response = await postAdoption(running, "d1-30s", body);
+      expect(response.status).toBe(428);
+      expect(response.body.code).toBe("IMPACT_REQUIRED");
+    }
+    expect(running.host.revisions.projectTransactions("d1-30s")).toEqual([]);
+  });
+
   it("adopts three native clips once, replays exactly, and rebuilds after restart", async () => {
     const running = await start();
     hosts.push(running.host); dirs.push(running.base);
     const { projectId, view, materialization, request } = await authorizedAdoption(running, "happy");
-    const committed = await postAdoption(running, projectId, request);
+    const [committed, concurrentReplay] = await Promise.all([
+      postAdoption(running, projectId, request), postAdoption(running, projectId, request),
+    ]);
     expect(committed.status, JSON.stringify({ body: committed.body,
       materialization: running.host.materializations.require(materialization.materialization_id) })).toBe(200);
     expect(validateControlledWriteResponse(committed.body).ok).toBe(true);
     expect(committed.body).toMatchObject({ previous_revision: 1, new_revision: 2, status: "committed" });
     expect(committed.body.source_digest).not.toBe(view.source_digest);
+    expect(concurrentReplay).toEqual(committed);
     expect(await postAdoption(running, projectId, request)).toEqual(committed);
 
     const current = await running.host.projectResolver.resolveActivated(projectId);
@@ -101,5 +115,29 @@ describe("M4B production adoption route", () => {
     expect(replay.body.status).toBe(state);
     expect((await restarted.host.projectResolver.resolveActivated(prepared.projectId)).revision).toBe(revision);
     expect(restarted.host.revisions.projectsInAttention()).not.toContain(prepared.projectId);
+    expect(await postAdoption(restarted, prepared.projectId, prepared.request)).toEqual(replay);
+    const conflict = await postAdoption(restarted, prepared.projectId,
+      { ...prepared.request, base_revision: prepared.view.revision + 1 });
+    expect(conflict.status).toBe(409);
+  }, 900_000);
+
+  it("rejects a visual lock acquired after staging with revision +0", async () => {
+    let host: NarralensHost | undefined;
+    let projectId = "";
+    const running = await start({ adoptionFault: (point) => {
+      if (point === "after_prepared") {
+        host!.locks.acquire({ projectId, lockType: "visual", scope: "shot", targetId: "shot-002",
+          startFrame: 300, endFrameExclusive: 600, owner: "race", reason: "TX-13" }, 1);
+      }
+    } });
+    host = running.host;
+    hosts.push(running.host); dirs.push(running.base);
+    const prepared = await authorizedAdoption(running, "lock-race");
+    projectId = prepared.projectId;
+    const rejected = await postAdoption(running, projectId, prepared.request);
+    expect(rejected.status).toBe(428);
+    expect(rejected.body).toMatchObject({ status: "aborted", previous_revision: 1, new_revision: 1 });
+    expect((await running.host.projectResolver.resolveActivated(projectId)).revision).toBe(1);
+    expect(running.host.revisions.projectTransactions(projectId).at(-1)?.state).toBe("aborted");
   }, 900_000);
 });
