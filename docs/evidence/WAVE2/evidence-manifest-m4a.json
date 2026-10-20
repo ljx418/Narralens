@@ -1,0 +1,220 @@
+{
+  "format": "narralens.wave2-evidence-manifest@1",
+  "stage": "M4A",
+  "module": "ImpactService",
+  "capture_commit": "cec51dd167de6c21619d8b8b08533b07776333ff",
+  "capture_logs": "docs/evidence/WAVE2/logs/cec51dd167de6c21619d8b8b08533b07776333ff",
+  "captured_at_utc": "2026-10-20T06:07:04Z",
+  "repo_dirty_at_capture": 0,
+  "environment": {
+    "date_utc": "2026-10-20T06:07:04Z",
+    "node": "v22.22.1",
+    "pnpm": "10.33.0",
+    "python": "Python 3.12.3",
+    "os": "Linux 6.18.40.1-microsoft-standard-WSL2",
+    "git_head": "cec51dd167de6c21619d8b8b08533b07776333ff",
+    "git_branch": "migration/m2.2-coordinator-persistence",
+    "repo_dirty_at_capture": "0",
+    "origin_main": "304c89134fdf9f834f7d69e3f4d5c89a68044c60",
+    "openfilm_upstream": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+    "vitest_max_workers": "2",
+    "declaration_ceiling": "M4A_INTERNAL_EVIDENCED",
+    "interaction": "headless,muted,no-window,no-focus-steal,no-network,no-payment"
+  },
+  "openfilm_upstream": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+  "origin_main": "304c89134fdf9f834f7d69e3f4d5c89a68044c60",
+  "branch": "migration/m2.2-coordinator-persistence",
+  "commands": [
+    {
+      "name": "check-1",
+      "command": "corepack pnpm check",
+      "exit": 0,
+      "log": "docs/evidence/WAVE2/logs/cec51dd167de6c21619d8b8b08533b07776333ff/check-1.txt",
+      "log_sha256": "6020ed2f1a4f2e123fe93943d233fd038766eae34ff5fe54c9d672b2b1913dd8"
+    },
+    {
+      "name": "check-2",
+      "command": "corepack pnpm check",
+      "exit": 0,
+      "log": "docs/evidence/WAVE2/logs/cec51dd167de6c21619d8b8b08533b07776333ff/check-2.txt",
+      "log_sha256": "37f12992be87ca1f8853a98352af25a26212ae6dc0a65a1d4edf5e1b2ff6053f"
+    },
+    {
+      "name": "contracts",
+      "command": "corepack pnpm test:contracts",
+      "exit": 0,
+      "log": "docs/evidence/WAVE2/logs/cec51dd167de6c21619d8b8b08533b07776333ff/contracts.txt",
+      "log_sha256": "1c3d49aaff6696383e41391722ec4f2bf87100ed4dbc111ce5f2aa1d960e34aa"
+    },
+    {
+      "name": "credential-scan",
+      "command": "NARRALENS_SECRET_SCAN_OUT=docs/evidence/WAVE2/security/credential-scan-m4a.json corepack pnpm exec tsx tools/secret-scan.ts",
+      "exit": 0,
+      "log": "docs/evidence/WAVE2/logs/cec51dd167de6c21619d8b8b08533b07776333ff/credential-scan.txt",
+      "log_sha256": "b9094be9ad8994e249018558ff62883d01ab4f4c8dbfaa880f03312a9e616cc4"
+    },
+    {
+      "name": "hash-vectors-python",
+      "command": "corepack pnpm test:wave2:m4a:golden-python",
+      "exit": 0,
+      "log": "docs/evidence/WAVE2/logs/cec51dd167de6c21619d8b8b08533b07776333ff/hash-vectors-python.txt",
+      "log_sha256": "a18275a601ac37610dbb7d167b11b90b4197aaf1c01407f01b0a43e74beb686a"
+    },
+    {
+      "name": "hash-vectors-regen",
+      "command": "corepack pnpm test:wave2:m4a:vectors /tmp/tmp.QESj7ghSjq/impact-hash.vectors.json",
+      "exit": 0,
+      "log": "docs/evidence/WAVE2/logs/cec51dd167de6c21619d8b8b08533b07776333ff/hash-vectors-regen.txt",
+      "log_sha256": "9b74ddfb23d533b99bbbdf1509e00c6b084da19c7d7439c3efb04eb374d07405"
+    },
+    {
+      "name": "m2.1",
+      "command": "corepack pnpm test:m2.1",
+      "exit": 0,
+      "log": "docs/evidence/WAVE2/logs/cec51dd167de6c21619d8b8b08533b07776333ff/m2.1.txt",
+      "log_sha256": "a8c0716307dac44685f0a0c6d43b972079741fa2b9682378e95040c52198593e"
+    },
+    {
+      "name": "openfilm",
+      "command": "corepack pnpm exec tsx tools/openfilm-availability-probe.mjs",
+      "exit": 0,
+      "log": "docs/evidence/WAVE2/logs/cec51dd167de6c21619d8b8b08533b07776333ff/openfilm.txt",
+      "log_sha256": "3de30e2fd64151df1e39cedc634c6df01fa290a2fcee86d964d75b9e52fe0b97"
+    },
+    {
+      "name": "typecheck",
+      "command": "corepack pnpm exec tsc --noEmit",
+      "exit": 0,
+      "log": "docs/evidence/WAVE2/logs/cec51dd167de6c21619d8b8b08533b07776333ff/typecheck.txt",
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "wave1-historical",
+      "command": "corepack pnpm evidence:wave1:historical",
+      "exit": 0,
+      "log": "docs/evidence/WAVE2/logs/cec51dd167de6c21619d8b8b08533b07776333ff/wave1-historical.txt",
+      "log_sha256": "ac02c2f38ba9a726fb621990c9b21c159f1fa6fc65ff0fe1fbfcd3d7e6d8a062"
+    },
+    {
+      "name": "wave1-integrity",
+      "command": "corepack pnpm evidence:wave1:integrity",
+      "exit": 1,
+      "log": "docs/evidence/WAVE2/logs/cec51dd167de6c21619d8b8b08533b07776333ff/wave1-integrity.txt",
+      "log_sha256": "518fd3455d80ff2d43271af4df3d0af76997e627c69390a332bcd031b8913e94",
+      "expected_failure": true
+    },
+    {
+      "name": "wave2-fitness",
+      "command": "corepack pnpm test:wave2:fitness",
+      "exit": 0,
+      "log": "docs/evidence/WAVE2/logs/cec51dd167de6c21619d8b8b08533b07776333ff/wave2-fitness.txt",
+      "log_sha256": "19e023b837244eb1ed0e4f841da94ae520ca4ed0c12ae15e2769c7de9cfff1ba"
+    },
+    {
+      "name": "wave2-m3",
+      "command": "corepack pnpm test:wave2:m3",
+      "exit": 0,
+      "log": "docs/evidence/WAVE2/logs/cec51dd167de6c21619d8b8b08533b07776333ff/wave2-m3.txt",
+      "log_sha256": "a6a2b336004f70466d8b408a27c5cdc79f453c49135cf061978cca9ef055036f"
+    },
+    {
+      "name": "wave2-m4a",
+      "command": "corepack pnpm test:wave2:m4a",
+      "exit": 0,
+      "log": "docs/evidence/WAVE2/logs/cec51dd167de6c21619d8b8b08533b07776333ff/wave2-m4a.txt",
+      "log_sha256": "43c358a0673872250a16327282d9917d056ab165adbb81686047e6906708dc61"
+    },
+    {
+      "name": "wave2-w2.0",
+      "command": "corepack pnpm test:wave2:w2.0",
+      "exit": 0,
+      "log": "docs/evidence/WAVE2/logs/cec51dd167de6c21619d8b8b08533b07776333ff/wave2-w2.0.txt",
+      "log_sha256": "2487b283c6eed0f4a12560a70ce19bd675032a64a7e47581cfc5afb15732e6ba"
+    }
+  ],
+  "hash_vectors": "tests/wave2/m4a/impact-hash.vectors.json",
+  "hash_vectors_sha256": "d45ffd04b2a46ac07991287f161ead27c2a411febc6e997a19c0d048e1bc5bda",
+  "cases": [
+    {
+      "case_id": "M4A-P01",
+      "status": "CLOSED",
+      "production_seam": "yes — ActivatedProjectionService composed by NarralensHost; the raw port call is shown to fail without it"
+    },
+    {
+      "case_id": "M4A-C01",
+      "status": "CLOSED",
+      "production_seam": "yes — POST /api/migration/v1/projects/:id/impact"
+    },
+    {
+      "case_id": "M4A-DB01",
+      "status": "CLOSED",
+      "production_seam": "yes — same RevisionStore connection as M3's materialization table"
+    },
+    {
+      "case_id": "M4A-H01",
+      "status": "CLOSED",
+      "production_seam": "yes — the hash every stored spec is verified against"
+    },
+    {
+      "case_id": "M4A-TTL01",
+      "status": "CLOSED",
+      "production_seam": "yes — NarralensHost.impactClock is a dependency, not a call to Date.now()"
+    },
+    {
+      "case_id": "TX-02A",
+      "status": "INTERNAL_EVIDENCED_SUBSET",
+      "production_seam": "partial — the read side is proven here; the write-entry re-check belongs to M4B"
+    },
+    {
+      "case_id": "TX-03A",
+      "status": "INTERNAL_EVIDENCED_SUBSET",
+      "production_seam": "yes — LockService.assertUnlocked, the same function a write will use"
+    },
+    {
+      "case_id": "TX-04A",
+      "status": "INTERNAL_EVIDENCED_SUBSET",
+      "production_seam": "yes — ConsumerGraph is called by ImpactService on every compute"
+    },
+    {
+      "case_id": "TX-05A",
+      "status": "INTERNAL_EVIDENCED_SUBSET",
+      "production_seam": "yes — through the real route, with the change injected at a named boundary inside the request"
+    },
+    {
+      "case_id": "M4A-NW01",
+      "status": "CLOSED",
+      "production_seam": "yes — diffed around a real request against a real migrated target"
+    },
+    {
+      "case_id": "M4A-R01",
+      "status": "CLOSED",
+      "production_seam": "yes — the whole chain, including a real migrate and a real proxy encode"
+    }
+  ],
+  "route_status": {
+    "materialize": true,
+    "materializations": true,
+    "impact": true,
+    "edits": false,
+    "history_restore": false
+  },
+  "declaration": "M4A_INTERNAL_EVIDENCED",
+  "claim_limits": [
+    "The highest declaration is M4A_INTERNAL_EVIDENCED. Nothing here closes Wave 2, Gate D4.2, Gate V1-P0, V1-Full, M5 or M6, and nothing here is an external review.",
+    "M4B (adopt) and M4C (history restore) are not implemented. Their routes are unmounted, and the integrity gate fails if either is ever mounted.",
+    "restore_snapshot intent is capability-blocked with 422 CAPABILITY_NOT_ENABLED. M4A has no independent read path for an immutable historical snapshot, because a SnapshotRef carries only a source digest.",
+    "TX-02A, TX-03A, TX-04A and TX-05A are INTERNAL_EVIDENCED_SUBSET, not PASSED. TX-01 and the commit-time final re-check of TX-02..05 belong to M4B's write entry.",
+    "TX-03A and TX-05A prove the *read* side of a lock and of a mid-computation change. A lock taken between the final check and a real commit is M4B's race, and M4A cannot close it.",
+    "The layout is roots-only and carries no declaredAssets, because computeSourceDigest folds declaredAssets into the manifest and adding them would change source_digest. ADR-W2.0-005 records this; the ledger is checked against the roots rather than merged into them.",
+    "The proxy encode is real in impact-real-chain.test.ts and stored-row-built everywhere else. The shortcut exercises M4A's own arithmetic, not M3's renderer; M3's suite is the gate on the renderer.",
+    "The frozen hash vectors agree with an independently written Python implementation over the same eight vectors, including the preimage bytes. Agreement is evidence the canonical rules were transcribed correctly twice, not proof no shared misconception exists.",
+    "The full gate runs at maxWorkers=2. That changes nothing about what is asserted, how long a test may take, or which tests run; it was chosen because this machine cannot sustain every suite at once.",
+    "evidence:wave1:integrity exits 1 by design: it asserts no code moved after the Wave 1 freeze, and Wave 2 moved code. Its output is kept verbatim and was never tuned green.",
+    "The M3 integrity checker was changed to compare route claims against the tree at M3's own capture commit rather than the tip, and to stop printing PASS after a failed check. M3's manifest, logs and failed captures are untouched. Without that change a frozen historical record fails for later stages doing their job.",
+    "headed/human experience is NOT_RUN: this stage adds no UI. Automation is headless, muted, windowless, offline and non-focus-stealing; no provider call, no payment, and no read of J:\\.",
+    "No production crash-recovery GC exists for impact rows; no long-film performance, streaming-hash or full-render behaviour has been exercised."
+  ],
+  "supersedes": {
+    "note": "This is the first M4A capture. The M3 captures at b6207c8, 4721381 and the failed 14cc3b6 remain exactly where they are."
+  }
+}

@@ -101,7 +101,11 @@ let testRefsOk = true;
 for (const entry of cases) {
   if ((entry.tests ?? []).length === 0) { fail(`case ${entry.case_id} names no tests`); testRefsOk = false; }
   for (const reference of entry.tests ?? []) {
-    const file = String(reference).split("::")[0];
+    // A reference may be `file`, `file::test name`, or `file (note)`. Take the path as the
+    // first token either way, so an annotated entry is checked against its file rather than
+    // against the whole sentence — which is how two annotated entries here were being read as
+    // filenames that do not exist.
+    const file = String(reference).split("::")[0].split(/\s/u)[0];
     if (!existsSync(resolve(REPO, file))) { fail(`case ${entry.case_id} names a test file that does not exist: ${file}`); testRefsOk = false; }
   }
 }
