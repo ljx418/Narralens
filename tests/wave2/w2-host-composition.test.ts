@@ -95,19 +95,19 @@ describe("blocker 4a: the Host owns one resolver, one ledger and one inventory",
     expect(project.shots).toHaveLength(3);
   });
 
-  it("keeps the two Wave 2 routes that M4A does not open closed", async () => {
+  it("keeps M4C history restore closed while M4B edits are mounted", async () => {
     const { origin, token } = await started();
     // M3.3 opened materialize and the materialization read; M4A opened impact and *only*
     // impact. Versioned edits and history restore are M4B's and M4C's and must still be
     // invisible to a client, on both methods.
-    for (const path of [
-      "/api/migration/v1/projects/d1-30s/edits",
-      "/api/migration/v1/projects/d1-30s/history/restore",
-    ]) {
+    for (const path of ["/api/migration/v1/projects/d1-30s/history/restore"]) {
       const init: RequestInit = { method: "POST", headers: headers(origin, token), body: "{}" };
       expect((await fetch(`${origin}${path}`, init)).status, path).toBe(404);
       expect((await fetch(`${origin}${path}`, { method: "GET", headers: headers(origin, token) })).status, path).toBe(404);
     }
+    const edits = await fetch(`${origin}/api/migration/v1/projects/d1-30s/edits`,
+      { method: "POST", headers: headers(origin, token), body: "{}" });
+    expect(edits.status).toBe(428);
     // Impact is mounted, so its malformed body is refused on merit rather than by absence.
     const impact = await fetch(`${origin}/api/migration/v1/projects/d1-30s/impact`,
       { method: "POST", headers: headers(origin, token), body: "{}" });

@@ -45,6 +45,9 @@ describe("M2.2 fitness: one state machine, no arbitrary state writes", () => {
     // materialization machine; `transitionBootstrap` is W2.0's asset-ledger bootstrap.
     const helpers = ["transition", "advanceJournal", "markRecovering", "#state", "#assetImportState",
       "transitionBootstrap", "transitionFrom", "markStale", "quarantine",
+      // M4B's two multi-fact transactions keep the predecessor in the UPDATE predicate
+      // and roll every state/business fact back together.
+      "commitAdoption", "abortAdoption",
       // M3's joint recovery: carries the expected state in its WHERE clause and throws
       // unless exactly one row changed, like every other entry here.
       "resumeOrReset"];
@@ -59,7 +62,7 @@ describe("M2.2 fitness: one state machine, no arbitrary state writes", () => {
         // The job table has its own documented transition table; rule 13 owns that one.
         if (table === "job") continue;
         // Find the enclosing method by looking at the text just before the statement.
-        const before = text.slice(Math.max(0, match.index! - 4000), match.index!);
+        const before = text.slice(0, match.index!);
         const enclosing = [...before.matchAll(/^\s{2}(?:async\s+)?(\w+)\s*\(/gmu)].pop()?.[1] ?? "";
         if (helpers.includes(enclosing)) continue;
         offenders.push(`${relative(REPO, file)} ${table}: ${assignments.trim().slice(0, 40)} (in ${enclosing || "<top level>"})`);
@@ -143,17 +146,17 @@ describe("M2.2 fitness: routes that must stay closed stay unmounted", () => {
     expect(routes).toEqual([
       "projects\\/([A-Za-z0-9_-]+)\\/engine",
       "projects\\/([A-Za-z0-9_-]+)\\/migrate-copy",
-      // M3 opened these two; M4A opened impact; adopt and history restore stay closed
-      // until M4B and M4C, and this list is what proves they were not opened early.
+      // M3 opened two, M4A opened impact, and M4B opened controlled edits.
       "projects\\/([A-Za-z0-9_-]+)\\/proposals\\/([A-Za-z0-9_-]+)\\/materialize",
       "projects\\/([A-Za-z0-9_-]+)\\/impact",
+      "projects\\/([A-Za-z0-9_-]+)\\/edits",
       "materializations\\/([A-Za-z0-9_-]+)",
       "migrations\\/([A-Za-z0-9_-]+)",
       "migrations\\/([A-Za-z0-9_-]+)\\/rollback",
     ]);
   });
 
-  it("9. the write routes M4A does not own appear nowhere, checked against the source's own escaping", () => {
+  it("9. M4C routes stay closed while M4B edits are present", () => {
     // This used to search for unescaped slashes against source that escapes every one, so
     // it matched nothing and passed for `materialize` even after M3 opened it. It now looks
     // for the escaped form the file actually contains, and only for what is still closed:
@@ -161,12 +164,13 @@ describe("M2.2 fitness: routes that must stay closed stay unmounted", () => {
     // versioned.
     const escaped = (suffix: string): string =>
       `\\/api\\/migration\\/v1\\/projects\\/([A-Za-z0-9_-]+)\\/${suffix}`;
-    for (const closed of ["adopt", "history", "edits"]) {
+    for (const closed of ["adopt", "history"]) {
       expect(server.includes(escaped(closed)), closed).toBe(false);
     }
     // And the opposite direction, so the check cannot be satisfied by an unrelated edit:
     // impact really is mounted, spelled the way the closed-route check above would find.
     expect(server.includes(escaped("impact"))).toBe(true);
+    expect(server.includes(escaped("edits"))).toBe(true);
   });
 
   it("10. a frozen fictional operation is still a 422, not a new state", () => {

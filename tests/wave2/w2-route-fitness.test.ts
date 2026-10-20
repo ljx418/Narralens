@@ -7,8 +7,8 @@ import { NarralensHost } from "../../src/host/server.js";
  * The Wave 2 route set, stage by stage.
  *
  * W2.0 froze all five as 404. M3.3 opened two — materialize and the materialization read.
- * M4A opens one more, impact, and *only* impact: versioned edits and history restore belong
- * to M4B and M4C and stay closed. The point of this file is the two that remain closed, not
+ * M4A opens impact; M4B opens versioned edits; history restore belongs to M4C and stays
+ * closed. The point of this file is the route that remains closed, not
  * the three that opened: a route that answers 501, 503 or a plausible-looking body before
  * its Gate would let a client integrate against a capability that does not exist, which is
  * the failure the frozen plan's stop rule exists to prevent.
@@ -41,7 +41,6 @@ export const OPENED_BY_M4A: readonly { method: string; path: string; status: num
  * authorization, and the writes it authorizes are the next module.
  */
 const WAVE2_ROUTES = [
-  { method: "POST", path: "/api/migration/v1/projects/d1-30s/edits" },
   { method: "POST", path: "/api/migration/v1/projects/d1-30s/history/restore" },
 ] as const;
 
@@ -110,7 +109,7 @@ describe("W2.0 fitness: the unopened Wave 2 routes stay closed", () => {
     expect((body.slice(0, end).match(/^\s{2}\w+\s*\(/gmu) ?? []).length).toBe(7);
   });
 
-  it("keeps the /api/migration/v1 route set at exactly the Wave 1 routes plus M3's two and M4A's one", () => {
+  it("keeps the /api/migration/v1 route set at exactly the stage-approved routes", () => {
     const server = readFileSync(resolve(REPO, "src/host/server.ts"), "utf8");
     const routes = [...server.matchAll(/\^\\\/api\\\/migration\\\/v1\\\/([^$]*)\$/gu)].map((match) => match[1]!);
     expect(routes).toEqual([
@@ -118,10 +117,19 @@ describe("W2.0 fitness: the unopened Wave 2 routes stay closed", () => {
       "projects\\/([A-Za-z0-9_-]+)\\/migrate-copy",
       "projects\\/([A-Za-z0-9_-]+)\\/proposals\\/([A-Za-z0-9_-]+)\\/materialize",
       "projects\\/([A-Za-z0-9_-]+)\\/impact",
+      "projects\\/([A-Za-z0-9_-]+)\\/edits",
       "materializations\\/([A-Za-z0-9_-]+)",
       "migrations\\/([A-Za-z0-9_-]+)",
       "migrations\\/([A-Za-z0-9_-]+)\\/rollback",
     ]);
+  });
+
+  it("mounts M4B edits while history restore remains absent", async () => {
+    const { origin, token } = await started();
+    const edits = await fetch(`${origin}/api/migration/v1/projects/d1-30s/edits`,
+      { method: "POST", headers: headers(origin, token), body: "{}" });
+    expect(edits.status).toBe(428);
+    expect(await edits.json()).toMatchObject({ code: "IMPACT_REQUIRED" });
   });
 
   it("answers what OPENED_BY_M3 and OPENED_BY_M4A record, so those lists are assertions", async () => {
