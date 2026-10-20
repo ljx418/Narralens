@@ -428,7 +428,7 @@ describe("TX-05A: a change between the first check and the insert leaves no acti
       const response = await postImpact(running, projectId,
         adoptBody(migrated.view, materialization.materialization_id, `tx05a-ledger-${point}`));
 
-      expect(changed, `the rights fault at ${point} must have fired`).toBe(true);
+      expect(changed, `the rights fault at ${point} must have fired; response=${JSON.stringify(response.body)}`).toBe(true);
       expect(response.status, JSON.stringify(response.body)).toBe(428);
       expect(response.body.code).toBe("IMPACT_STALE");
       expect(running.host.materializations.require(materialization.materialization_id).state).toBe("stale");
