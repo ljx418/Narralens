@@ -2,6 +2,7 @@ import { DatabaseSync, type SQLInputValue } from "node:sqlite";
 import { MigrationStore } from "./migration-store.js";
 import { JOB_TABLE_DDL, migrateJobKind } from "./job-kind-migration.js";
 import type { ApiError, AssetImportResponse, EditResponse, JobEvent, JobState } from "../../contracts/types.js";
+import type { ControlledWriteResponseV1 } from "../../contracts/wave2-types.js";
 import { HttpError } from "../api-error.js";
 
 export type JournalState = "prepared" | "source_validated" | "metadata_committed" | "aborted" | "compensated" | "attention";
@@ -98,6 +99,18 @@ function engineLock(row: Record<string, unknown>): EngineLockRecord {
 export interface EngineBindingRecord {
   project_id: string; engine: string; engine_upstream_sha: string;
   binding_version: number; created_at: string; migrated_from: string | null;
+}
+
+export interface AdoptionLedgerRow {
+  asset_id: string; migration_id: string; source_project_id: string;
+  source_manifest_sha256: string; source_path: string; target_path: string;
+  source_sha256: string; target_sha256: string; duration_frames: number;
+  media_type: string; source_json: string; license_json: string;
+}
+
+export interface AdoptionProjectionFactInput {
+  migration_id: string; engine_upstream_sha: string; roots_json: string;
+  subtitles_json: string; frame_count: number;
 }
 
 const FORWARD = ["preconditions_checked", "staged", "validated", "prepared", "committed"] as const;
@@ -455,6 +468,86 @@ export class RevisionStore {
         snapshot_id: input.snapshotId, source_digest_after: input.sourceDigestAfter,
       }, now);
       this.#db.exec("COMMIT");
+    } catch (error) { this.#db.exec("ROLLBACK"); throw error; }
+  }
+
+  /**
+   * M4B's one authoritative database commit. Every business fact, the real outbox id and
+   * the replay response become visible together, or none do.
+   */
+  commitAdoption(input: {
+    transactionId: string; projectId: string; previousRevision: number;
+    expectedSourceDigest: string; expectedControlRevision: number;
+    snapshotId: string; sourceDigestAfter: string; impactId: string; impactHash: string;
+    idempotencyKey: string; requestDigest: string; projection: AdoptionProjectionFactInput;
+    ledgerRows: readonly AdoptionLedgerRow[]; now?: Date;
+  }): ControlledWriteResponseV1 {
+    const at = (input.now ?? new Date()).toISOString();
+    this.#db.exec("BEGIN IMMEDIATE");
+    try {
+      const fact = this.#db.prepare(`SELECT 1 AS present FROM adoption_transaction_fact
+        WHERE transaction_id=? AND snapshot_id=? AND staged_source_digest=?`).get(
+        input.transactionId, input.snapshotId, input.sourceDigestAfter) as { present?: number } | undefined;
+      if (fact?.present !== 1) throw new Error("ADOPTION_PREPARED_FACT_MISMATCH");
+      const state = this.#db.prepare(`UPDATE project_state SET revision=revision+1, source_digest=?,
+        source_digest_observed='', source_digest_detected_at='', updated_at=?
+        WHERE project_id=? AND revision=? AND source_digest=? AND control_revision=? AND attention=0`)
+        .run(input.sourceDigestAfter, at, input.projectId, input.previousRevision,
+          input.expectedSourceDigest, input.expectedControlRevision);
+      if (Number(state.changes) !== 1) throw new Error("ADOPTION_PROJECT_CAS_FAILED");
+
+      const impact = this.#db.prepare(`UPDATE impact SET state='consumed', updated_at=?
+        WHERE impact_id=? AND project_id=? AND impact_hash=? AND state='active'`)
+        .run(at, input.impactId, input.projectId, input.impactHash);
+      if (Number(impact.changes) !== 1) throw new Error("ADOPTION_IMPACT_CAS_FAILED");
+
+      this.#db.prepare(`INSERT INTO snapshot(snapshot_id, project_id, source_digest, engine, created_at)
+        VALUES(?,?,?,'openfilm',?) ON CONFLICT(snapshot_id) DO NOTHING`)
+        .run(input.snapshotId, input.projectId, input.sourceDigestAfter, at);
+      this.#db.prepare(`INSERT INTO openfilm_projection_fact(project_id, snapshot_id, migration_id,
+        source_digest, engine_upstream_sha, roots_json, subtitles_json, frame_count, transaction_id)
+        VALUES(?,?,?,?,?,?,?,?,?)`).run(input.projectId, input.snapshotId, input.projection.migration_id,
+        input.sourceDigestAfter, input.projection.engine_upstream_sha, input.projection.roots_json,
+        input.projection.subtitles_json, input.projection.frame_count, input.transactionId);
+      for (const row of input.ledgerRows) {
+        this.#db.prepare(`INSERT INTO migrated_asset(project_id, asset_id, migration_id, source_project_id,
+          source_manifest_sha256, source_path, target_path, source_sha256, target_sha256,
+          duration_frames, media_type, source_json, license_json, created_at)
+          VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)`).run(input.projectId, row.asset_id, row.migration_id,
+          row.source_project_id, row.source_manifest_sha256, row.source_path, row.target_path,
+          row.source_sha256, row.target_sha256, row.duration_frames, row.media_type,
+          row.source_json, row.license_json, at);
+      }
+      this.#db.prepare(`INSERT INTO active_commit(project_id, revision, snapshot_id, source_digest,
+        engine, transaction_id, created_at) VALUES(?,?,?,?,'openfilm',?,?)
+        ON CONFLICT(project_id) DO UPDATE SET revision=excluded.revision, snapshot_id=excluded.snapshot_id,
+        source_digest=excluded.source_digest, engine=excluded.engine,
+        transaction_id=excluded.transaction_id, created_at=excluded.created_at`)
+        .run(input.projectId, input.previousRevision + 1, input.snapshotId,
+          input.sourceDigestAfter, input.transactionId, at);
+      const outbox = this.#db.prepare(`INSERT INTO outbox(topic, project_id, payload_json, created_at)
+        VALUES('project.committed',?,?,?)`).run(input.projectId, JSON.stringify({
+        project_id: input.projectId, transaction_id: input.transactionId,
+        revision: input.previousRevision + 1, snapshot_id: input.snapshotId,
+        operation: "adopt_materialization",
+      }), at);
+      const response: ControlledWriteResponseV1 = {
+        format: "narralens.controlled-write-response@1.0", transaction_id: input.transactionId,
+        project_id: input.projectId, operation: "adopt_materialization",
+        previous_revision: input.previousRevision, new_revision: input.previousRevision + 1,
+        snapshot_id: input.snapshotId, source_digest: input.sourceDigestAfter,
+        outbox_event_id: Number(outbox.lastInsertRowid), status: "committed",
+      };
+      this.#db.prepare(`INSERT INTO operation_idempotency(project_id, operation_kind, idempotency_key,
+        request_digest, response_json, transaction_id, created_at) VALUES(?,?,?,?,?,?,?)`)
+        .run(input.projectId, "controlled_write.adopt_materialization", input.idempotencyKey,
+          input.requestDigest, JSON.stringify(response), input.transactionId, at);
+      const transaction = this.#db.prepare(`UPDATE project_transaction SET state='committed',
+        source_digest_after=?, snapshot_id=?, updated_at=? WHERE transaction_id=? AND project_id=? AND state='prepared'`)
+        .run(input.sourceDigestAfter, input.snapshotId, at, input.transactionId, input.projectId);
+      if (Number(transaction.changes) !== 1) throw new Error("ADOPTION_TRANSACTION_CAS_FAILED");
+      this.#db.exec("COMMIT");
+      return response;
     } catch (error) { this.#db.exec("ROLLBACK"); throw error; }
   }
 
