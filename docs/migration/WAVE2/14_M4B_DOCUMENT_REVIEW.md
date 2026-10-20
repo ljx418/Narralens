@@ -88,3 +88,13 @@ film=after/DB 未提交的 423 与同 key 收敛语义；transaction 三列 + im
 `455d7ca455f71289d5e689e95206489a54722ef2600f97107c17ba047779c3b8`，HTML SHA256 为
 `2939d0e7f01545d22aaaf47824711e910bf3d9027e4ef957dbb4d5d979b0f87a`。browser visual-check 仍因本机无
 Chrome/Chromium 而 `SKIPPED`，未伪称视觉通过。
+
+## 最终外审 R3 新发现与闭环
+
+R3 在 `98a70e3...` 发现 1 BLOCKER / 2 MAJOR：采用后 active snapshot 不再等于 migration target snapshot，现有
+`ActivatedProjectionService` 会同时在 snapshot、source digest、ledger roots 三处拒绝重开；aborted 幂等失败响应
+无 wire shape；`evidence:wave2:m4b` 未列入执行清单。现已冻结 `openfilm_projection_fact`：migration 首快照走旧
+plan，adoption snapshot 必须在 commit 同事务写 exact roots/subtitles/frame/source fact，projection 按 active pointer
+选择并严格重算，不动态合并 ledger、不放宽 mismatch。另新增 `ControlledWriteFailureResponseV1`，并把主捕获脚本
+补入全部命令表。R3 的 MINOR 也已同步：真实可复验 spike 脚本/结果、数值 time、MP4 扩展名、prepared 前态、
+帧秒取整与 adopted projection 必读路径。

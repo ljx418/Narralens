@@ -18,15 +18,19 @@ adapter 对三个既有视觉 clip 各生成三条 closed `set` op，顺序固�
 ```json
 [
   {"op":"set","clip":"<stable-clip-id>","field":"src","value":"assets/<sha256>/source.mp4"},
-  {"op":"set","clip":"<stable-clip-id>","field":"time","value":["<source-start-sec>","<source-end-sec>"]},
+  {"op":"set","clip":"shot-01","field":"time","value":[0,10]},
   {"op":"set","clip":"<stable-clip-id>","field":"overrides","value":null}
 ]
 ```
 
-真实调用为 `editProjectFilm(stagedRoot, before.rev, ops)`。探针结果：`rebased=false`、`problems=[]`、视觉 clip
+真实调用为 `editProjectFilm(stagedRoot, before.rev, ops)`，随后用 `readProjectFilm(stagedRoot)` 回读问题清单。探针
+结果：edit 返回 `rebased=false`，回读返回 `problems=[]`，视觉 clip
 仍恰好三个，ID 与 timeline `at=0/10/20` 不变，source time 均为 `[0,10]`，narration clip 与 1280×720 stage
 保持不变。该结果只证明 op 语义可行；M4B-1 仍须以三个不同 materialized asset/source range、完整渲染与边界帧
 作为正式证据。
+
+可复验脚本：`docs/migration/WAVE2/tools/m4b-openfilm-op-spike.mjs`；本轮结果：
+`docs/evidence/WAVE2/spikes/m4b-openfilm-op-spike.json`。脚本只在 OS 临时目录复制并在 finally 清理，不修改输入工程。
 
 Host-specific validator 只接受上述 `set` 三元组：field 仅允许 `src/time/overrides`，src 必须是 Host 生成的
 content-addressed token，time 必须由 NativePlan 帧区间和 rational fps 确定，overrides 必须为 null。不能把固定

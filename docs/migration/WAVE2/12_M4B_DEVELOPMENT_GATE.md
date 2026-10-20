@@ -54,6 +54,7 @@ Studio/Headless client
 | `AdoptionJournal` | `project_transaction` + 1:1 additive fact row | `project_transaction.state` 是唯一状态权威；fact row 只记录 before/after film SHA、staged digest、snapshot、installed assets 与 publish receipt | 在 fact row 再建 state；新建平行事务权威；覆盖旧行 |
 | `AuthorSourcePublisher` | `src/host/projects/author-source-publisher.ts` | 验证允许 diff；安装内容寻址资产；原子切换 `film.html`；fsync；恢复判定 | 递归覆盖 active root；删除旧资产；接收客户端路径 |
 | `RevisionStore.commitAdoption` | `src/host/projects/revision-store.ts` | 单事务 revision、pointer、ledger、impact consumed、idempotency、outbox、transaction committed | 多次事务拼接；失败后补写“成功” |
+| `OpenFilmProjectionFact` / `ActivatedProjectionService` | additive `openfilm_projection_fact` + `src/host/engine/activated-projection-service.ts` | active snapshot → 精确 roots/subtitles/frame facts，支持采用后重启重建 | 永远假定 migration snapshot；把 ledger 动态并入 digest；放宽 mismatch |
 | `OpenFilmEngineAdapter` | `src/adapters/openfilm/openfilm-engine-adapter.ts` | 将 `adopt_materialization` 转成固定 upstream ops；stage 仅隔离 root；validate 完整投影 | rebased 当成功；未知 op；commit/rename active source |
 | `NativeWriteGateway` / registry | 既有文件 | 只开放明确 adopt entry；未知/restore/native history 继续 fail closed | 全局开放 OpenFilm 写；裸转发 payload |
 | HTTP route | `src/host/server.ts` | 原样验证 `AdoptRequestV1`，auth/origin 在资源查找前，调用 coordinator | 复用 legacy `/edits` 请求结构；回显绝对路径 |
@@ -121,11 +122,37 @@ active root 当前重算的 film SHA + SourceDigestV1。是否已 rename 由这�
 绝对路径不得入库。除上述 fact+prepared 原子组合外，每个 journal transition 各自提交，最终业务事实才由
 `commitAdoption` 一笔事务提交。
 
+### 3.2 post-adoption projection 权威
+
+M4B 不得让 `ActivatedProjectionService` 永远绑定 `migration.target_snapshot_id`。新增不可变 additive 表：
+
+```sql
+CREATE TABLE openfilm_projection_fact (
+  project_id TEXT NOT NULL,
+  snapshot_id TEXT PRIMARY KEY,
+  migration_id TEXT NOT NULL,
+  source_digest TEXT NOT NULL,
+  engine_upstream_sha TEXT NOT NULL,
+  roots_json TEXT NOT NULL,
+  subtitles_json TEXT NOT NULL,
+  frame_count INTEGER NOT NULL,
+  transaction_id TEXT NOT NULL REFERENCES project_transaction(transaction_id)
+);
+```
+
+首次 migration snapshot 沿用 immutable migration plan；每次 adoption 的新 snapshot 必须在 `commitAdoption` 同一事务
+插入一条 projection fact，roots 正是该 snapshot 计算 SourceDigestV1 时用的“迁移基线 roots ∪ 本次及历史已采用
+target assets”，subtitles/frame_count 因 preserve policy 与前态相等。读取规则是：active commit 等于 migration
+target snapshot 且无 projection fact 时走 legacy plan；否则必须存在与 active commit 的 snapshot/source digest、
+migration id、pinned upstream 完全一致的 fact，roots/subtitles 为 canonical closed relative-path JSON，重算当前
+SourceDigestV1 必须等于 active commit。ledger 每个 target_path 必须属于 fact roots；不能把 ledger 临时并入 roots、
+不能放宽 mismatch。这样 active commit 是选择哪份 projection fact 的唯一 pointer，fact 不是第二 timeline/state。
+
 ## 4. active source 原子发布契约
 
 M4B v1 的 native plan 只能产生两类 active-root 变化：
 
-- 新增 `assets/<sha256>/source.<approved-ext>` 内容寻址文件；
+- 新增 `assets/<sha256>/source.mp4` 内容寻址文件（M4B v1 只采用 materialize 的固定 MP4 profile）；
 - 替换 `film.html`。
 
 不得修改/删除既有内容寻址资产、字幕、设置、旁白或其他 root；若 staged diff 超出白名单，422
@@ -201,6 +228,7 @@ replay-or-conflict
 - CAS project current revision/control/source 与请求基线；
 - revision 恰好 `previous + 1`；
 - 写 snapshot 与 active_commit pointer；
+- 为新 snapshot 写上述 immutable `openfilm_projection_fact`，其 roots 必须与 snapshot publish 使用的 roots 逐项相同；
 - 只加入本次 native plan 真正引用的新 target asset ledger 行/引用事实，且许可仍 cleared/commercial；
 - impact `active→consumed` CAS，任何其他前态使整个事务回滚；
 - 写唯一 `operation_idempotency` 完整 response；
@@ -225,11 +253,26 @@ response 前。每点独立故障注入，结论只能是：
 
 | 观察事实 | 恢复结论 |
 |---|---|
-| prepared 前，DB 未 commit | 结构上尚未调用 publisher；从当前合法前态 CAS 到 aborted，清理 stage/temp，revision +0；同一 abort 事务写唯一 operation idempotency 失败 response |
+| prepared 前，DB 未 commit | 结构上尚未调用 publisher；仅允许 received/preconditions_checked/staged/validated 从当前合法前态 CAS 到 aborted，清理 stage/temp，revision +0；同一 abort 事务写唯一 operation idempotency 失败 response |
 | prepared 后 active film 为 before，DB 未 commit | 从 prepared CAS 到 aborted，清理 stage/temp，revision +0；同 key/digest 永久重放已记录失败且不得再次 stage/publish，新 key 才允许新尝试 |
 | active film 为 after，DB 未 commit，transaction before/after/snapshot、immutable fact、impact/current facts 全可证明 | 本次请求若可立即完成则完成同一 `commitAdoption` 后返回 200；否则返回 423 `PROJECT_ATTENTION_REQUIRED`（不是 500），保留 after source，重启/同 key 重试先恢复且不得再次 stage/publish；只有满足下述 recovery-current 规则才最终 revision +1 |
 | active film 不是 before/after，或 snapshot/rights/impact 无法证明 | project attention；禁止猜成功、禁止自动重试写源 |
 | DB committed | 从唯一 operation idempotency 行重放同一完整 response；不得再次 stage/publish/加 revision |
+
+幂等失败响应合同固定为 `ControlledWriteFailureResponseV1`：
+
+```ts
+interface ControlledWriteFailureResponseV1 {
+  format: "narralens.controlled-write-failure@1.0";
+  transaction_id: string; project_id: string; operation: "adopt_materialization";
+  previous_revision: number; new_revision: number; source_digest: Sha256;
+  status: "aborted";
+  error: { http_status: 409|422|423|428|500; code: ApiErrorCode; message: string; details?: JsonValue };
+}
+```
+
+abort 事务把该 canonical body 写入唯一 `operation_idempotency`；route 首次及重放均用 `error.http_status` 返回完全
+相同的公开 JSON body，`new_revision===previous_revision`。不得把它解析为成功 `ControlledWriteResponseV1`。
 
 Impact TTL 只限制新写开始，不撤销已经在到期前进入 `prepared` 且发布了 after source 的授权。M4B 新增 Host-only
 `ImpactService.requirePreparedRecoveryCurrent(transactionId, impactId, hash)`：仅当 immutable fact 的
@@ -255,7 +298,9 @@ expired/stale/consumed 或未在到期前 prepared 都进入 attention，不承�
 隔离探针 `15_M4B_OPENFILM_OP_SPIKE.md` 已否决 insert 配方。生成机制冻结为：adapter `plan()` 对三个既有视觉
 clip（ID 必须与 active projection 和 NativePlan 一致）按 plan 顺序各生成三条 Host-closed `set` op：`src` = Host
 生成的 content-addressed asset token（不带 fragment）、`time` = NativePlan source 半开帧换算的秒区间、
-`overrides` = null；timeline `at`、track、stable id、stage 与 narration clip 不写，从 active source 原样保留。
+`overrides` = null；`time` 数组元素必须是有限 number，以 rational fps 从帧换算，并按固定上游毫秒规范化；validate
+用最近帧取整回算且要求与 NativePlan 帧区间完全相等（30fps 下上游 ≤0.5ms 误差不跨帧）。timeline `at`、track、
+stable id、stage 与 narration clip 不写，从 active source 原样保留。
 总计恰好九条 op，不 remove/insert、不新增 clip。随后 `stage()` 复制 active source 到 Host isolated root，并调用
 固定签名 `editProjectFilm(stagedRoot, before.rev, ops)` 生成 staged `film.html`。禁止直接拼写 active film.html。
 Host-specific validator 只接受上述 9 条 `set` op 及字段/值形状；固定上游宽 `OpenFilmOp` 不是安全边界。
@@ -320,6 +365,7 @@ corepack pnpm evidence:wave1:historical
 corepack pnpm evidence:wave1:integrity # 期望历史 current-tip 非零，逐字保留
 corepack pnpm evidence:wave2:m4a:historical
 corepack pnpm evidence:wave2:m4a:integrity # M4B 开路由后期望非零，逐字保留
+corepack pnpm evidence:wave2:m4b
 corepack pnpm evidence:wave2:m4b:integrity
 ```
 

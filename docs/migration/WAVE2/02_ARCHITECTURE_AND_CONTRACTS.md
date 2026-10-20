@@ -153,11 +153,18 @@ interface ControlledWriteResponseV1 {
   previous_revision: number; new_revision: number; snapshot_id: string;
   source_digest: Sha256; outbox_event_id: number; status: "committed";
 }
+interface ControlledWriteFailureResponseV1 {
+  format: "narralens.controlled-write-failure@1.0";
+  transaction_id: string; project_id: string; operation: "adopt_materialization";
+  previous_revision: number; new_revision: number; source_digest: Sha256; status: "aborted";
+  error: { http_status: 409|422|423|428|500; code: ApiErrorCode; message: string; details?: JsonValue };
+}
 ```
 
 成功必须 `new_revision=previous_revision+1`；失败 0。恢复旧内容仍生成新 snapshot/commit/revision，不能
 复用旧 active pointer 作为“成功”。同 project+operation+key 同 digest 重放完整响应；不同 digest 409。
 `approval.confirmed` 只在有效 loopback session、未过期且 hash 匹配的 impact 上生效；它不授权费用或外传。
+aborted 事务以 failure response 的 `error.http_status` 首次返回并逐字重放，且 new=previous；不得冒充 committed。
 
 ## 4. 持久模型
 

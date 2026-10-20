@@ -122,6 +122,7 @@ corepack pnpm evidence:wave1:historical
 corepack pnpm evidence:wave1:integrity # current-tip 历史门预期非零，原样保存
 corepack pnpm evidence:wave2:m4a:historical # M4B-0 新增
 corepack pnpm evidence:wave2:m4a:integrity # M4B 开路由后预期非零，原样保存
+corepack pnpm evidence:wave2:m4b # M4B 实现时新增并生成主捕获
 corepack pnpm evidence:wave2:m4b:integrity # M4B 实现时新增
 ```
 

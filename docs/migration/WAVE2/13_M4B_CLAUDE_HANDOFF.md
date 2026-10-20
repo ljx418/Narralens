@@ -37,7 +37,8 @@ Codex 完成替换，则不得自行改回旧 SHA。
 8. `docs/migration/WAVE2/15_M4B_OPENFILM_OP_SPIKE.md` 与 `docs/evidence/WAVE2/reviews/m4b-document-external-review-*.md`
 9. 当前 `docs/03_Architecture.md`、`docs/11_V1_Traceability.md`
 10. 实际 ProjectCoordinator、RevisionStore、SnapshotStore、ImpactService、MaterializeService、LockService、
-   EnginePort、NativeWriteGateway/registry/capability、OpenFilm adapter、route/validator/schema 和全部 M4A case/evidence。
+   EnginePort、NativeWriteGateway/registry/capability、OpenFilm adapter、`ActivatedProjectionService`、
+   `src/host/projects/openfilm-layout-facts.ts`、route/validator/schema 和全部 M4A case/evidence。
 
 如旧文与 `12_M4B_DEVELOPMENT_GATE.md` 冲突，先记录差异；不得静默裁决。只有会改变产品权威/数据模型的冲突才
 停给人类，普通实现细节按最新门文档执行。
@@ -71,7 +72,9 @@ legacy `ProjectWriteActor` 行为或使用 proxy/flattened MP4 作为 author sou
 7. SnapshotStore 先从 staged source 发布 immutable snapshot；active film publish 后再由 pinned adapter inspect；DB
    commit 只能在两者与批准 impact 一致时发生。
 8. `RevisionStore.commitAdoption` 一个 `BEGIN IMMEDIATE` 同时完成 revision 恰好 +1、active pointer、ledger 新引用、
-   impact active→consumed CAS、唯一 operation idempotency 完整 response、outbox 与 transaction committed。
+   immutable post-adoption projection fact、impact active→consumed CAS、唯一 operation idempotency 完整 response、
+   outbox 与 transaction committed。采用后 projection 必须由 active snapshot 对应的 exact roots fact 重建，不再
+   强制等于 migration target snapshot，也不得把 ledger 动态并入 roots 或放宽 digest mismatch。
 9. 同 kind/key/digest 重放不得再次 stage/publish；异 digest 409。失败 revision +0。
 10. rebased=true、未知 upstream field/op、projection problems、三 clip/总帧/identity/consumer 不变量不成立均 fail closed。
 11. M4B 专用恢复必须先于通用 `recoverOnStart()`、位于项目队列内；恢复只能由 before/after bytes、snapshot、
@@ -147,6 +150,7 @@ corepack pnpm evidence:wave1:historical
 corepack pnpm evidence:wave1:integrity # 期望 current-tip 非零，原样保存
 corepack pnpm evidence:wave2:m4a:historical
 corepack pnpm evidence:wave2:m4a:integrity # 开放 M4B 后期望 current-tip 非零，原样保存
+corepack pnpm evidence:wave2:m4b
 corepack pnpm evidence:wave2:m4b:integrity
 ```
 
