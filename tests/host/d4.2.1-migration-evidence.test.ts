@@ -135,6 +135,13 @@ describe("M1A direct media-tool evidence", () => {
     const nonzero: ToolExecutor = async () => { throw Object.assign(new Error("exit 1"), { code: 1, stderr: "decode failed" }); };
     await expect(validateImportedMedia(path, 30, digest, { execute: nonzero })).rejects.toMatchObject({ status: 422, code: "INVALID_MEDIA" });
 
+    for (const code of ["ENOMEM", "EMFILE", "EAGAIN"] as const) {
+      const exhausted: ToolExecutor = async () => { throw Object.assign(new Error(code), { code }); };
+      await expect(validateImportedMedia(path, 30, digest, { execute: exhausted }))
+        .rejects.toMatchObject({ status: 503, code: "HOST_RESOURCE_EXHAUSTED",
+          details: { reason: `TRANSIENT:${code}`, recoverable: true } });
+    }
+
     const root = await mkdtemp(join(tmpdir(), "narralens-real-tool-failure-"));
     const pidPath = join(root, "tool.pid");
     const timeoutTool = join(root, "timeout-tool.sh");

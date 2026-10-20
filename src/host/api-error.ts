@@ -41,18 +41,27 @@ const TRANSIENT_CODES: ReadonlySet<string> = new Set([
   "ENOMEM", "EMFILE", "ENFILE", "EBUSY", "EAGAIN", "EIO", "ETXTBSY", "ENOSPC", "ECONNRESET",
 ]);
 
+/**
+ * Preserve retryable host-resource failures across subsystem boundaries.
+ *
+ * Media tooling, filesystem adapters and child-process wrappers must call this before
+ * translating an error into a domain-specific failure. Otherwise a raw `ENOMEM` from
+ * ffmpeg becomes `INVALID_MEDIA`, which incorrectly makes an unchanged project terminal.
+ */
+export function asHostResourceError(error: unknown, correlationId?: string): HttpError | undefined {
+  const code = (error as { code?: unknown }).code;
+  if (typeof code !== "string" || !TRANSIENT_CODES.has(code)) return undefined;
+  return new HttpError(503, "HOST_RESOURCE_EXHAUSTED",
+    "The Host could not complete this right now",
+    { reason: `TRANSIENT:${code}`, recoverable: true }, correlationId ?? randomUUID());
+}
+
 export function normalizeError(error: unknown): HttpError {
   if (error instanceof HttpError) {
     if (error.correlationId !== undefined) return error;
     return new HttpError(error.status, error.code, error.message, error.details, randomUUID());
   }
-  const code = (error as { code?: unknown }).code;
-  if (typeof code === "string" && TRANSIENT_CODES.has(code)) {
-    // Retryable and labelled as such: `recoverable` is what the ledger and the
-    // materialization service already trust, so one meaning travels the whole way up.
-    return new HttpError(503, "HOST_RESOURCE_EXHAUSTED",
-      "The Host could not complete this right now",
-      { reason: `TRANSIENT:${code}`, recoverable: true }, randomUUID());
-  }
+  const resourceError = asHostResourceError(error);
+  if (resourceError !== undefined) return resourceError;
   return new HttpError(500, "INTERNAL_ERROR", "Internal host error", undefined, randomUUID());
 }

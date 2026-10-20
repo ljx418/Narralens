@@ -3,7 +3,7 @@ import { createHash } from "node:crypto";
 import { readFile, writeFile } from "node:fs/promises";
 import { promisify } from "node:util";
 import { canonicalJson } from "../engine/source-digest-v1.js";
-import { HttpError } from "../api-error.js";
+import { asHostResourceError, HttpError } from "../api-error.js";
 import type { LineageEntryV1, MaterializationProxy, NativePlanV1 } from "../../contracts/wave2-types.js";
 import type { DerivedArtifactStore } from "./derived-artifact-store.js";
 
@@ -332,7 +332,7 @@ export class ProxyRenderer {
         // would not exist yet.
         if (error === null) { resolvePromise(); return; }
         const detail = String(stderr ?? "").trim();
-        rejectPromise(new HttpError(422, "INVALID_MEDIA",
+        rejectPromise(classifyProxyToolError(error,
           `The proxy encoder failed${detail.length > 0 ? `: ${detail.slice(0, 200)}` : ""}`));
       });
       // `-nostdin` above means ffmpeg reads no stdin, so closing it is enough.
@@ -342,10 +342,15 @@ export class ProxyRenderer {
 
   /** Container and stream shape, read from the media itself rather than trusted. */
   async #probe(path: string): Promise<{ frames: number; container: string; videoStreams: number }> {
+    let stdout: string;
     try {
-      const { stdout } = await run("ffprobe", ["-v", "error", "-count_frames",
+      ({ stdout } = await run("ffprobe", ["-v", "error", "-count_frames",
         "-show_entries", "format=format_name:stream=codec_type,nb_read_frames", "-of", "json", path],
-      { timeout: SEGMENT_TIMEOUT_MS, maxBuffer: 4 * 1024 * 1024, windowsHide: true });
+      { timeout: SEGMENT_TIMEOUT_MS, maxBuffer: 4 * 1024 * 1024, windowsHide: true }));
+    } catch (error) {
+      throw classifyProxyToolError(error, "The source media could not be probed");
+    }
+    try {
       const parsed = JSON.parse(stdout) as {
         format?: { format_name?: unknown };
         streams?: Array<{ codec_type?: unknown; nb_read_frames?: unknown }>;
@@ -359,7 +364,8 @@ export class ProxyRenderer {
         container: String(parsed.format?.format_name ?? ""),
         videoStreams: streams.filter((stream) => stream.codec_type === "video").length,
       };
-    } catch {
+    } catch (error) {
+      if (error instanceof HttpError) throw error;
       throw new HttpError(422, "INVALID_MEDIA", "The source media could not be probed");
     }
   }
@@ -372,8 +378,34 @@ export class ProxyRenderer {
     try {
       const { stdout } = await run("ffmpeg", ["-version"], { timeout: 15_000, maxBuffer: 256 * 1024 });
       return /ffmpeg version [^\s]+/u.exec(stdout)?.[0] ?? "unknown";
-    } catch { return "unknown"; }
+    } catch (error) {
+      const resourceError = asHostResourceError(error);
+      if (resourceError !== undefined) throw resourceError;
+      return "unknown";
+    }
   }
+}
+
+const TOOL_UNAVAILABLE_CODES: ReadonlySet<string> = new Set([
+  "ENOENT", "EACCES", "ENOEXEC", "ETIMEDOUT", "ERR_CHILD_PROCESS_STDIO_MAXBUFFER", "ABORT_ERR",
+]);
+
+/**
+ * Translate process-launch failures without erasing retryability.
+ *
+ * Exported because the raw child-process boundary is nondeterministic to fault-inject on
+ * every platform. Tests exercise this exact function, while real rendering calls it at
+ * both the encoder and probe boundaries.
+ */
+export function classifyProxyToolError(error: unknown, invalidMessage: string): HttpError {
+  const resourceError = asHostResourceError(error);
+  if (resourceError !== undefined) return resourceError;
+  const facts = error as NodeJS.ErrnoException & { killed?: boolean; signal?: string };
+  if ((typeof facts.code === "string" && TOOL_UNAVAILABLE_CODES.has(facts.code))
+    || facts.killed === true || typeof facts.signal === "string") {
+    return new HttpError(503, "MEDIA_TOOL_UNAVAILABLE", "The proxy media tool is unavailable");
+  }
+  return new HttpError(422, "INVALID_MEDIA", invalidMessage);
 }
 
 /** The proxy profile is frozen at 720p. Anything else is a different profile. */

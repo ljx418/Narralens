@@ -7,7 +7,7 @@ import { join, resolve } from "node:path";
 import { promisify } from "node:util";
 import { afterEach, describe, expect, it } from "vitest";
 import { DerivedArtifactStore } from "../../../src/host/materialize/derived-artifact-store.js";
-import { ProxyRenderer } from "../../../src/host/materialize/proxy-renderer.js";
+import { classifyProxyToolError, ProxyRenderer } from "../../../src/host/materialize/proxy-renderer.js";
 import type { NativePlanV1 } from "../../../src/contracts/wave2-types.js";
 
 /**
@@ -31,6 +31,27 @@ const PROFILE = "wave2-proxy-720p30-v1";
 const dirs: string[] = [];
 afterEach(async () => {
   await Promise.all(dirs.splice(0).map((path) => rm(path, { recursive: true, force: true })));
+});
+
+describe("M3.2 proxy tool failure classification", () => {
+  it.each(["ENOMEM", "EMFILE", "EAGAIN"])(
+    "keeps raw %s retryable instead of declaring the source invalid",
+    (code) => {
+      const error = classifyProxyToolError(Object.assign(new Error(code), { code }), "invalid proxy");
+      expect(error).toMatchObject({
+        status: 503,
+        code: "HOST_RESOURCE_EXHAUSTED",
+        details: { reason: `TRANSIENT:${code}`, recoverable: true },
+      });
+    },
+  );
+
+  it("keeps missing tools distinct from invalid media", () => {
+    expect(classifyProxyToolError(Object.assign(new Error("missing"), { code: "ENOENT" }), "invalid proxy"))
+      .toMatchObject({ status: 503, code: "MEDIA_TOOL_UNAVAILABLE" });
+    expect(classifyProxyToolError(Object.assign(new Error("bad bytes"), { code: 1 }), "invalid proxy"))
+      .toMatchObject({ status: 422, code: "INVALID_MEDIA", message: "invalid proxy" });
+  });
 });
 
 async function workspace(): Promise<string> {

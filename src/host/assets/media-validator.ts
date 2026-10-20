@@ -3,7 +3,7 @@ import { execFile } from "node:child_process";
 import { createReadStream } from "node:fs";
 import { promisify } from "node:util";
 
-import { HttpError } from "../api-error.js";
+import { asHostResourceError, HttpError } from "../api-error.js";
 
 const execute = promisify(execFile);
 
@@ -73,6 +73,8 @@ async function runTool(command: string, args: string[], timeout: number, maxBuff
   } catch (error) {
     const facts = error as NodeJS.ErrnoException & { killed?: boolean; signal?: string; stderr?: string };
     if (facts.code === "ABORT_ERR") throw new HttpError(400, "INVALID_REQUEST", `Media ${action} validation was cancelled`);
+    const resourceError = asHostResourceError(error);
+    if (resourceError !== undefined) throw resourceError;
     if (facts.code === "ENOENT" || facts.code === "EACCES" || facts.code === "ENOEXEC" || facts.code === "ETIMEDOUT"
       || facts.code === "ERR_CHILD_PROCESS_STDIO_MAXBUFFER"
       || facts.killed || typeof facts.signal === "string") {
