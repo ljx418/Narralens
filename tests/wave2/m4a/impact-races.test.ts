@@ -269,6 +269,28 @@ describe("M4A-R01: the route answers a client consistently and idempotently", ()
       impactRequestDigest({ ...request, base_revision: 2 }));
   });
 
+  it("refuses to replay an impact the row says is no longer active", async () => {
+    const running = await started();
+    const { projectId, view } = await migrate(running);
+    const materialization = await readyMaterialization(running.host, projectId);
+    const body = adoptBody(view, materialization.materialization_id, "r01-state");
+    const created = await postImpact(running, projectId, body);
+    expect(created.status).toBe(201);
+    const impactId = String(created.body.impact_id);
+
+    // The spec a replay reads lives in the idempotency response, which is a *different*
+    // column from the impact row's own bytes. Moving the row to stale moves no revision and
+    // no source, so without a state check the replay would hand back a dead authorization.
+    running.host.impacts.markStale(impactId, new Date());
+    const replay = await postImpact(running, projectId, body);
+    expect(replay.status, JSON.stringify(replay.body)).toBe(428);
+    expect(replay.body.code).toBe("IMPACT_STALE");
+    expect(replay.body.details).toMatchObject({ state: "stale" });
+    // The same is true of an expired row, reached through its own terminal state.
+    running.host.impacts.require(impactId);
+    expect(running.host.impacts.byProject(projectId)).toHaveLength(1);
+  }, 600_000);
+
   it("blocks a restore intent rather than passing the active source off as an old snapshot", async () => {
     const running = await started();
     const { projectId, view } = await migrate(running);

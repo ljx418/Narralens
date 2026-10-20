@@ -144,12 +144,22 @@ export class OpenFilmEngineAdapter implements EnginePort {
     const problems: string[] = [];
     let frameCount = 0;
     const seenClipIds = new Set<string>();
-    (doc.tracks ?? []).forEach((track, index) => {
+    // `doc` is whatever the upstream returned, cast here. A malformed document must be
+    // *reported*, not crashed on: a `null` track or clip used to reach `track.attrs` and
+    // throw a TypeError out of the adapter, which is a 500 where the whole point of this
+    // block is a `problems[]` entry. Every node is coerced to an object first, so the most
+    // malformed document still produces a diagnosable answer.
+    for (const [index, rawTrack] of (Array.isArray(doc.tracks) ? doc.tracks : []).entries()) {
       const trackId = `track_${index}`;
       const clipIds: string[] = [];
+      if (rawTrack === null || typeof rawTrack !== "object") {
+        problems.push(`${PROBLEM_PREFIX}TRACK_UNREADABLE:${trackId}`);
+        tracks.push({ track_id: trackId, index, clip_ids: clipIds });
+        continue;
+      }
       // `attrs` carries `data-track`, which is the only track-level fact this projection
       // models. Anything else is a hint about structure the consumer graph cannot express.
-      const attrs = track.attrs ?? {};
+      const attrs = rawTrack.attrs ?? {};
       for (const key of Object.keys(attrs).sort()) {
         if (key !== "data-track") problems.push(`${PROBLEM_PREFIX}TRACK_UNMODELED_ATTR:${trackId}:${key}`);
       }
@@ -157,7 +167,12 @@ export class OpenFilmEngineAdapter implements EnginePort {
       if (typeof declaredKind === "string" && !KNOWN_TRACK_KINDS.has(declaredKind)) {
         problems.push(`${PROBLEM_PREFIX}TRACK_UNKNOWN_KIND:${trackId}:${declaredKind}`);
       }
-      for (const [clipIndex, clip] of (track.clips ?? []).entries()) {
+      for (const [clipIndex, rawClip] of (Array.isArray(rawTrack.clips) ? rawTrack.clips : []).entries()) {
+        if (rawClip === null || typeof rawClip !== "object") {
+          problems.push(`${PROBLEM_PREFIX}CLIP_UNREADABLE:${trackId}#${clipIndex}`);
+          continue;
+        }
+        const clip = rawClip as UpstreamClip;
         for (const field of Object.keys(clip).sort()) {
           if (!MODELLED_CLIP_FIELDS.has(field)) {
             const id = typeof clip.id === "string" && clip.id !== "" ? clip.id : `${trackId}#${clipIndex}`;
@@ -207,7 +222,7 @@ export class OpenFilmEngineAdapter implements EnginePort {
         }
       }
       tracks.push({ track_id: trackId, index, clip_ids: clipIds });
-    });
+    }
 
     const subtitles: EngineSubtitle[] = [];
     for (const subtitle of layout.subtitles ?? []) {

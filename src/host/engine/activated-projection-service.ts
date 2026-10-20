@@ -41,6 +41,15 @@ import type { OpenFilmLayoutRegistrar } from "./openfilm-composition.js";
 /** Terminal, non-aborted, and the only state `ProjectResolver` will resolve from. */
 const ACTIVATABLE = new Set(["reported"]);
 
+/**
+ * How many layouts one Host keeps memoised.
+ *
+ * Only the newest key per project can be hit again, so this is a ceiling on memory, never on
+ * correctness: an evicted entry is rebuilt from the database on the next call, and that is
+ * exactly what happens after a restart anyway.
+ */
+const LAYOUT_CACHE_CEILING = 256;
+
 export interface ActivatedProjectionDeps {
   readonly revisions: RevisionStore;
   readonly ledger: MigratedAssetLedger;
@@ -86,7 +95,18 @@ export class ActivatedProjectionService {
     const cacheKey = `${view.project_id}|${view.snapshot_id}|${view.source_digest}`;
     const cached = this.#cache.get(cacheKey);
     const layout = cached ?? this.#rebuild(view, correlationId);
-    if (cached === undefined) this.#cache.set(cacheKey, layout);
+    if (cached === undefined) {
+      this.#cache.set(cacheKey, layout);
+      // Bounded, because only the newest key per project can ever be hit again and a Host
+      // that re-commits or re-migrates a project N times would otherwise retain N layouts
+      // for the life of the process. Eviction is a cache eviction, not a correctness event:
+      // the entry is rebuildable from the database, which is what makes dropping it safe.
+      while (this.#cache.size > LAYOUT_CACHE_CEILING) {
+        const oldest = this.#cache.keys().next();
+        if (oldest.done === true) break;
+        this.#cache.delete(oldest.value);
+      }
+    }
     // Registered on every call, not only on a rebuild: `forget()` exists, and a cache that
     // holds a layout the adapter does not is exactly the split-brain this seam removes.
     this.#registrar?.registerLayout(view.project_id, layout);

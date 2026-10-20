@@ -75,11 +75,14 @@ export interface CreatedImpact {
 export class ImpactStore {
   readonly #db: DatabaseSync;
   readonly #revisions: RevisionStore;
-  readonly #operations: OperationIdempotencyStore;
 
   constructor(revisions: RevisionStore, operations: OperationIdempotencyStore) {
+    // `operations` is taken so the store can be composed only alongside the shared authority
+    // and so its table is created exactly once per connection, but the writes go through the
+    // caller's `commit` callback: the row and the response belong to the caller's transaction,
+    // not to this one.
+    void operations;
     this.#revisions = revisions;
-    this.#operations = operations;
     this.#db = revisions.compose((db) => db);
     this.#migrate();
   }
@@ -110,7 +113,6 @@ export class ImpactStore {
         updated_at TEXT NOT NULL,
         UNIQUE(project_id, impact_hash)
       );
-      CREATE INDEX IF NOT EXISTS impact_by_project ON impact (project_id, state);
     `);
   }
 
@@ -175,13 +177,26 @@ export class ImpactStore {
     const result = this.#db.prepare("UPDATE impact SET state=?, updated_at=? WHERE impact_id=? AND state=?")
       .run(to, now.toISOString(), impactId, from);
     if (Number(result.changes) !== 1) throw new Error(`INVALID_IMPACT_TRANSITION:${from}->${to}`);
-    return this.get(impactId)!;
+    // `require`, not `get(…)!`: the CAS above already proved the row exists, so this is free,
+    // and it turns a hypothetical break of that invariant into a 404 rather than an undefined
+    // deref inside the caller.
+    return this.require(impactId);
   }
 
-  /** Move to `expired` only if it is genuinely past its deadline; never before. */
-  markExpired(impactId: string, now = new Date()): ImpactRow {
+  /**
+   * Move to `expired` only if it is genuinely past its deadline; never before.
+   *
+   * `now` is required rather than defaulted. A default of `new Date()` would make the TTL
+   * quietly machine-time-dependent for any caller that forgets the argument, which is the
+   * opposite of what an injected clock is for.
+   */
+  markExpired(impactId: string, now: Date): ImpactRow {
     const row = this.require(impactId);
-    if (!isExpired(row.expires_at, now)) return row;
+    // Two guards, both needed. Past the deadline but already terminal is not a second
+    // transition to make — `stale -> expired` is not in the machine — and before the
+    // deadline nothing is expired at all. Idempotent for the same reason `markStale` is:
+    // two readers noticing the same drift is normal.
+    if (!isExpired(row.expires_at, now) || row.state !== "active") return row;
     return this.transition(impactId, "active", "expired", now);
   }
 
@@ -230,9 +245,6 @@ export class ImpactStore {
     }
     return spec;
   }
-
-  /** Exposed so `ImpactService` can write the response row inside `create`'s transaction. */
-  get operations(): OperationIdempotencyStore { return this.#operations; }
 }
 
 function parseCanonical(row: ImpactRow): ImpactSpecV1 {

@@ -170,6 +170,17 @@ export class ImpactService {
    * authorization, and never a renewed window.
    */
   async #replay(spec: ImpactSpecV1, now: Date): Promise<ImpactSpecV1> {
+    // The impact row's own state gates the replay. The spec above came from the *idempotency*
+    // response, which is a different column from the impact row's canonical bytes, and a row
+    // that has gone stale or — in M4B — consumed moves no revision and no source. Without
+    // this check a spent authorization replays as fresh, which is the one thing an
+    // authorization must never do.
+    const row = this.#deps.impacts.require(spec.impact_id);
+    if (row.state !== "active") {
+      throw new HttpError(428, "IMPACT_STALE",
+        `The impact is ${row.state} and can no longer authorise a write`,
+        { impact_id: spec.impact_id, state: row.state }, spec.project_id);
+    }
     if (!verifyImpactHash(spec)) {
       throw new HttpError(428, "IMPACT_STALE", "The stored impact does not match its own hash",
         { impact_id: spec.impact_id });
@@ -414,10 +425,15 @@ export class ImpactService {
     if (view.source_digest !== spec.source_digest) stale("the source changed");
     if (view.control_revision !== spec.control_revision) stale("the control revision moved");
     if (spec.materialization_id !== null) {
-      const row = this.#deps.materializations.require(spec.materialization_id);
-      if (row.state !== "ready_for_adoption") stale("the materialization is no longer ready for adoption");
-      if (row.rights_digest !== spec.rights_digest) stale("the rights digest moved");
-      if (row.native_plan === null || row.native_plan.plan_sha256 !== spec.native_plan_sha256) {
+      // `find`, not `require`: a materialization that has been removed is *drift*, and
+      // drift is 428. `require` would raise 404 out of a check whose whole purpose is to say
+      // "this authorization is no longer usable", which is a different message to the caller
+      // and the wrong one.
+      const row = this.#deps.materializations.find(spec.materialization_id);
+      if (row === undefined) stale("the materialization is gone");
+      else if (row.state !== "ready_for_adoption") stale("the materialization is no longer ready for adoption");
+      else if (row.rights_digest !== spec.rights_digest) stale("the rights digest moved");
+      else if (row.native_plan === null || row.native_plan.plan_sha256 !== spec.native_plan_sha256) {
         stale("the native plan changed");
       }
     }

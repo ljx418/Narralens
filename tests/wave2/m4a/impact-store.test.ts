@@ -121,11 +121,16 @@ describe("M4A-DB01: the impact table is additive, CAS-only, and shares one idemp
     newImpact(store);
     expect(Object.keys(ALLOWED_IMPACT_TRANSITIONS).sort()).toEqual(["active->consumed", "active->expired", "active->stale"]);
     expect(() => store.transition("imp_test", "active", "active")).toThrow(/INVALID_IMPACT_TRANSITION/u);
+    // Before the deadline the row stays active: `markExpired` never expires an impact that
+    // has not actually reached its TTL.
+    expect(store.markExpired("imp_test", NOW).state).toBe("active");
     expect(store.transition("imp_test", "active", "stale").state).toBe("stale");
     // A terminal row is not a starting point, so a stale impact cannot be resurrected.
     expect(() => store.transition("imp_test", "stale", "active")).toThrow(/INVALID_IMPACT_TRANSITION/u);
+    // And both terminalising helpers are idempotent, because two consumers noticing the same
+    // drift is normal and neither should get an error for having noticed.
     expect(store.markStale("imp_test").state).toBe("stale");
-    expect(store.markExpired("imp_test").state).toBe("stale");
+    expect(store.markExpired("imp_test", new Date(NOW.getTime() + IMPACT_TTL_MS)).state).toBe("stale");
     close();
   });
 
