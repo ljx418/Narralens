@@ -1,9 +1,15 @@
+import { createHash } from "node:crypto";
+import { execFile } from "node:child_process";
+import { readFile } from "node:fs/promises";
+import { basename, join, resolve } from "node:path";
+import { promisify } from "node:util";
 import { afterEach, describe, expect, it } from "vitest";
 import { planDigest } from "../../../src/host/materialize/native-plan-builder.js";
 import type { NativePlanV1 } from "../../../src/contracts/wave2-types.js";
 import { validateControlledWriteResponse } from "../../../src/contracts/validator.js";
 import { NarralensHost } from "../../../src/host/server.js";
 import { SimulatedAdoptionCrash } from "../../../src/host/adoption/adoption-coordinator.js";
+import { createPinnedOpenFilmUpstream } from "../../../src/adapters/openfilm/openfilm-upstream.js";
 import {
   adoptBody, coveringPlan, headers, migrate, postImpact, readyMaterialization,
   start, startOn, stopAll, type Started,
@@ -11,6 +17,8 @@ import {
 
 const hosts: NarralensHost[] = [];
 const dirs: string[] = [];
+const VENDOR = "/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm";
+const run = promisify(execFile);
 afterEach(async () => { await stopAll(hosts.splice(0), dirs.splice(0)); });
 
 function stableThreeClipPlan(running: Started, projectId: string): NativePlanV1 {
@@ -41,6 +49,16 @@ async function postAdoption(running: Started, projectId: string, request: object
     method: "POST", headers: headers(running.origin, running.token), body: JSON.stringify(request),
   });
   return { status: response.status, body: JSON.parse(await response.text()) as Record<string, unknown> };
+}
+
+async function render(root: string): Promise<{ digest: string; frames: number }> {
+  await run(process.execPath || "node", [resolve(VENDOR, "packages/openfilm/bin/openfilm.mjs"), "render"],
+    { cwd: root, timeout: 600_000, maxBuffer: 8 * 1024 * 1024 });
+  const output = join(root, `${basename(root)}.mp4`);
+  const probe = await run("ffprobe", ["-v", "error", "-select_streams", "v:0", "-count_frames",
+    "-show_entries", "stream=nb_read_frames", "-of", "json", output], { timeout: 60_000 });
+  return { digest: createHash("sha256").update(await readFile(output)).digest("hex"),
+    frames: Number.parseInt((JSON.parse(probe.stdout) as { streams: Array<{ nb_read_frames: string }> }).streams[0]!.nb_read_frames, 10) };
 }
 
 describe("M4B production adoption route", () => {
@@ -92,6 +110,26 @@ describe("M4B production adoption route", () => {
     const restartedLayout = await restarted.host.projections.layoutFor(restartedView, "m4b-restart-test");
     expect(restartedView).toMatchObject({ revision: 2, source_digest: committed.body.source_digest });
     expect(restartedLayout.layout.roots).toEqual(layout.layout.roots);
+
+    // TX-11B/TX-14: the adopted author source really renders, and remains a native film
+    // whose middle clip can be edited without replacing either neighbouring identity.
+    const first = await render(restartedView.source_root.value);
+    expect(first.frames).toBe(900);
+    const upstream = await createPinnedOpenFilmUpstream(VENDOR);
+    const beforeNativeEdit = await upstream.readProjectFilm(restartedView.source_root.value);
+    const beforeIds = (beforeNativeEdit.doc as { tracks: Array<{ clips: Array<{ id: string }> }> })
+      .tracks[0]!.clips.map((clip) => clip.id);
+    const edited = await upstream.editProjectFilm(restartedView.source_root.value, beforeNativeEdit.rev,
+      [{ op: "set", clip: "shot-002", field: "overrides", value: [{ fade: [0.2, 0.2] }] }]);
+    expect(edited.rebased).toBe(false);
+    const afterNativeEdit = await upstream.readProjectFilm(restartedView.source_root.value);
+    const afterIds = (afterNativeEdit.doc as { tracks: Array<{ clips: Array<{ id: string }> }> })
+      .tracks[0]!.clips.map((clip) => clip.id);
+    expect(beforeIds).toEqual(["shot-001", "shot-002", "shot-003"]);
+    expect(afterIds).toEqual(beforeIds);
+    const second = await render(restartedView.source_root.value);
+    expect(second.frames).toBe(900);
+    expect(second.digest).not.toBe(first.digest);
   }, 900_000);
 
   it.each([
