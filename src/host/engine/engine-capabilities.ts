@@ -16,7 +16,7 @@ import { FPS_30 } from "./time-model.js";
 
 const ENGINE_OWNED = NATIVE_MUTATION_REGISTRY.filter((entry) => entry.policy !== "translated_host_service");
 
-const OPENFILM_NO_WRITE_PATH = "OpenFilm has no translated write path in M2.1";
+const OPENFILM_NO_WRITE_PATH = "OpenFilm permits only the M4B controlled adoption write path";
 
 function mapFor(engine: EngineKind): CapabilityMap {
   const entries: Record<string, CapabilityEntry> = {};
@@ -26,6 +26,11 @@ function mapFor(engine: EngineKind): CapabilityMap {
 
 function stateFor(engine: EngineKind, entry: NativeMutationEntry): CapabilityEntry {
   if (entry.policy === "read_only") return { state: "read_only", reason: entry.reason };
+  if (entry.entry_id === "timeline.adopt_materialization") {
+    return engine === "openfilm"
+      ? { state: "supported", reason: entry.reason }
+      : { state: "blocked", reason: "Adoption targets the controlled OpenFilm project only" };
+  }
   if (engine === "openfilm") return { state: "blocked", reason: OPENFILM_NO_WRITE_PATH };
   // Hypit already owns the two typed edits the Host commits; everything else stays blocked.
   return entry.policy === "translated"

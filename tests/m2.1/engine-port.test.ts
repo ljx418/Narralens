@@ -1,5 +1,6 @@
+import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
-import { mkdtemp, readdir, rm } from "node:fs/promises";
+import { mkdir, mkdtemp, readdir, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
@@ -171,14 +172,35 @@ describe("OpenFilmEngineAdapter staging", () => {
       engine: "openfilm", engineUpstreamSha: "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
       declaredAssets: LAYOUT.declaredAssets });
 
-    const plan = { engine: "openfilm" as const, base_source_digest: real.source_digest, base_revision: 0,
-      edit: { op: "set_visual_fit" as const, shot_id: "shot-01", value: "contain" as const }, ops: OPS };
-
     const isolated = await mkdtemp(resolve(tmpdir(), "narralens-m21-rebase-"));
     try {
+      const clips = await Promise.all(["shot-01", "shot-02", "shot-03"].map(async (clipId, index) => {
+        const bytes = Buffer.from(`m4b-rebase-${index}`);
+        const digest = createHash("sha256").update(bytes).digest("hex");
+        const input = resolve(isolated, "inputs", digest, "source.mp4");
+        await mkdir(resolve(isolated, "inputs", digest), { recursive: true });
+        await writeFile(input, bytes);
+        return { clip_id: clipId, segment_id: `segment-${index}`, asset_id: `asset-${index}`,
+          asset_sha256: digest, timeline: { start_frame: index * 300, end_frame_exclusive: (index + 1) * 300 },
+          source: { start_frame: 0, end_frame_exclusive: 300 }, track_id: "track_0" };
+      }));
+      const nativePlan = { format: "narralens.native-plan@1.0" as const, engine: "openfilm" as const,
+        fps: { num: 30 as const, den: 1 as const }, clips, narration_policy: "preserve" as const,
+        duration_policy: "preserve" as const, total_frames: 900, plan_sha256: "f".repeat(64) };
+      const edit = { op: "adopt_materialization" as const, materialization_id: "mat-rebase",
+        impact_id: "impact-rebase", impact_hash: "e".repeat(64), approval: { confirmed: true as const } };
+      const plan = { engine: "openfilm" as const, base_source_digest: real.source_digest, base_revision: 0,
+        edit: { edit, native_plan: nativePlan, materialization_id: "mat-rebase",
+          rights_digest: "d".repeat(64), impact_hash: "e".repeat(64) },
+        ops: clips.flatMap((clip) => [
+          { op: "set", clip: clip.clip_id, field: "src", value: `assets/${clip.asset_sha256}/source.mp4` },
+          { op: "set", clip: clip.clip_id, field: "time", value: [0, 10] },
+          { op: "set", clip: clip.clip_id, field: "overrides", value: null },
+        ]) };
       await expect(adapter.stage(plan, absoluteServerPath(isolated), rebaseCtx))
         .rejects.toMatchObject({ status: 409, code: "SOURCE_CHANGED" });
-      expect(await readdir(isolated)).toEqual([]);
+      // Host-owned immutable inputs remain; the adapter-created openfilm-* stage is removed.
+      expect(await readdir(isolated)).toEqual(["inputs"]);
     } finally { await rm(isolated, { recursive: true, force: true }); }
   }, 30_000);
 });

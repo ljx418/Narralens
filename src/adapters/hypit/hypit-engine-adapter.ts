@@ -9,6 +9,7 @@ import type {
   AbsoluteServerPath, CommandContext, EngineEditPlan, EnginePort, JobRef,
   PreviewDescriptor, ReadContext, RenderProfile, SnapshotRef, StagedSource, ValidationReport,
 } from "../../host/engine/engine-port.js";
+import { isAdoptEnginePlanIntent } from "../../host/engine/engine-plan-intent.js";
 import { FPS_30, fpsToLegacyNumber } from "../../host/engine/time-model.js";
 import { computeSourceDigest, type DeclaredAsset } from "../../host/engine/source-digest-v1.js";
 import { hypitCapabilityMap } from "../../host/engine/engine-capabilities.js";
@@ -108,6 +109,9 @@ export class HypitEngineAdapter implements EnginePort {
   async plan(snapshot: SnapshotRef, intent: EngineEditPlan["edit"], ctx: CommandContext): Promise<EngineEditPlan> {
     if (snapshot.project_id !== ctx.projectId) {
       throw new HttpError(409, "REVISION_CONFLICT", "Snapshot does not belong to the requested project", undefined, ctx.correlationId);
+    }
+    if (isAdoptEnginePlanIntent(intent)) {
+      throw new HttpError(422, "UNSUPPORTED_EDIT", "Hypit cannot plan an OpenFilm adoption", undefined, ctx.correlationId);
     }
     if (intent.op === "set_visual_fit") {
       return { engine: "hypit", base_source_digest: ctx.expectedSourceDigest, base_revision: ctx.baseRevision, edit: intent,

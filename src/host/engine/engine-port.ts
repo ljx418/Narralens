@@ -1,6 +1,7 @@
 import type {
-  CapabilityMap, EngineProjection, EngineKind, Sha256, TypedEdit,
+  CapabilityMap, EngineProjection, EngineKind, Sha256,
 } from "../../contracts/engine-types.js";
+import type { EnginePlanIntent } from "./engine-plan-intent.js";
 
 /**
  * EnginePort (`03_M2_M4_MODULE_DESIGN.md` §1.1, `05_API_INTERFACE_SPEC.md` §4).
@@ -55,6 +56,8 @@ export type StagedSource = Readonly<{
   readonly relative_entry: string;
   readonly source_digest: Sha256;
   readonly revision: string;
+  /** Engine-private validation proof; it must never contain an absolute server path. */
+  readonly validation_proof?: unknown;
 }>;
 
 /** Internal preimage an engine uses while writing; never a Narralens revision. */
@@ -62,7 +65,7 @@ export interface EngineEditPlan {
   readonly engine: EngineKind;
   readonly base_source_digest: Sha256;
   readonly base_revision: number;
-  readonly edit: TypedEdit;
+  readonly edit: EnginePlanIntent;
   readonly ops: readonly unknown[];
 }
 
@@ -88,7 +91,7 @@ export interface JobRef {
 export interface EnginePort {
   inspect(snapshot: SnapshotRef, ctx: ReadContext): Promise<EngineProjection>;
   capabilities(snapshot: SnapshotRef, ctx: ReadContext): Promise<CapabilityMap>;
-  plan(snapshot: SnapshotRef, intent: TypedEdit, ctx: CommandContext): Promise<EngineEditPlan>;
+  plan(snapshot: SnapshotRef, intent: EnginePlanIntent, ctx: CommandContext): Promise<EngineEditPlan>;
   stage(plan: EngineEditPlan, isolatedRoot: AbsoluteServerPath, ctx: CommandContext): Promise<StagedSource>;
   validate(staged: StagedSource, ctx: CommandContext): Promise<ValidationReport>;
   preview(snapshot: SnapshotRef, ctx: ReadContext): Promise<PreviewDescriptor>;

@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
-import { cp, mkdtemp, readFile, realpath, rm } from "node:fs/promises";
+import { copyFile, cp, mkdir, mkdtemp, readFile, realpath, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { basename, join, resolve } from "node:path";
+import { basename, dirname, join, resolve } from "node:path";
 import { HttpError } from "../../host/api-error.js";
 import { OPENFILM_UPSTREAM_SHA } from "../../host/engine/engine-binding-store.js";
 import type {
@@ -16,6 +16,8 @@ import type {
   EngineSubtitle, EngineTrack, HalfOpenFrameRange,
 } from "../../contracts/engine-types.js";
 import type { OpenFilmOp, OpenFilmUpstream } from "./openfilm-upstream.js";
+import { isAdoptEnginePlanIntent, type AdoptEnginePlanIntent } from "../../host/engine/engine-plan-intent.js";
+import type { NativePlanV1 } from "../../contracts/wave2-types.js";
 
 /**
  * OpenFilmEngineAdapter (`03_M2_M4_MODULE_DESIGN.md` §1.3).
@@ -54,6 +56,20 @@ interface UpstreamClip {
   overrides?: unknown;
 }
 
+export interface M4BOpenFilmSetOp {
+  readonly op: "set";
+  readonly clip: string;
+  readonly field: "src" | "time" | "overrides";
+  readonly value: string | readonly [number, number] | null;
+}
+
+interface AdoptionValidationProof {
+  readonly kind: "m4b-adoption";
+  readonly native_plan: NativePlanV1;
+  readonly roots: readonly string[];
+  readonly non_visual_sha256: string;
+}
+
 const PAGE_EXTENSIONS = /\.html?$/iu;
 const STILL_EXTENSIONS = /\.(png|jpe?g|webp|gif|avif)$/iu;
 const VIDEO_EXTENSIONS = /\.(mp4|m4v|mov|webm|mkv|avi|ogv)$/iu;
@@ -76,6 +92,32 @@ const KNOWN_TRACK_KINDS: ReadonlySet<string> = new Set([
 /** Prefix on every completeness problem, so a consumer can recognise one without a parser. */
 export const OPENFILM_PROJECTION_PROBLEM_PREFIX = "OPENFILM_PROJECTION:";
 const PROBLEM_PREFIX = OPENFILM_PROJECTION_PROBLEM_PREFIX;
+
+const sha256 = (bytes: Uint8Array | string): string => createHash("sha256").update(bytes).digest("hex");
+const assetToken = (digest: string): string => `assets/${digest}/source.mp4`;
+const secondsAtMillisecondPrecision = (frame: number): number => Math.round((frame / 30) * 1_000) / 1_000;
+
+function nonVisualDigest(doc: UpstreamDoc): string {
+  const preserved = (doc.tracks ?? []).flatMap((track, trackIndex) => (track.clips ?? [])
+    .filter((clip) => typeof clip.src === "string" && SOUND_EXTENSIONS.test(clip.src.split("#")[0] ?? ""))
+    .map((clip) => ({ track: trackIndex, clip })));
+  return sha256(JSON.stringify(preserved));
+}
+
+function isClosedAdoptionOps(value: readonly unknown[], plan: NativePlanV1): value is readonly M4BOpenFilmSetOp[] {
+  if (value.length !== plan.clips.length * 3 || plan.clips.length !== 3) return false;
+  return plan.clips.every((clip, index) => {
+    const group = value.slice(index * 3, index * 3 + 3) as Array<Partial<M4BOpenFilmSetOp>>;
+    const allowed = new Set(["op", "clip", "field", "value"]);
+    if (group.some((op) => Object.keys(op).some((key) => !allowed.has(key)))) return false;
+    return group[0]?.op === "set" && group[0].clip === clip.clip_id && group[0].field === "src"
+      && group[0].value === assetToken(clip.asset_sha256)
+      && group[1]?.op === "set" && group[1].clip === clip.clip_id && group[1].field === "time"
+      && Array.isArray(group[1].value) && group[1].value.length === 2
+      && group[2]?.op === "set" && group[2].clip === clip.clip_id && group[2].field === "overrides"
+      && group[2].value === null;
+  });
+}
 
 function clipKind(sourceRef: string): EngineClipKind | null {
   if (PAGE_EXTENSIONS.test(sourceRef)) return "page";
@@ -271,14 +313,36 @@ export class OpenFilmEngineAdapter implements EnginePort {
     return openFilmCapabilityMap();
   }
 
-  async plan(snapshot: SnapshotRef, _edit: EngineEditPlan["edit"], ctx: CommandContext): Promise<EngineEditPlan> {
+  async plan(snapshot: SnapshotRef, intent: EngineEditPlan["edit"], ctx: CommandContext): Promise<EngineEditPlan> {
     if (snapshot.project_id !== ctx.projectId) {
       throw new HttpError(409, "REVISION_CONFLICT", "Snapshot does not belong to the requested project", undefined, ctx.correlationId);
     }
-    // M2.1 opens no OpenFilm edit semantics; the two typed edits are Hypit's. This refuses
-    // rather than inventing an operation, so nothing can reach `editProjectFilm` from here.
-    throw new HttpError(422, "UNSUPPORTED_EDIT",
-      "OpenFilm has no translated write path in M2.1", undefined, ctx.correlationId);
+    if (!isAdoptEnginePlanIntent(intent)) {
+      throw new HttpError(422, "UNSUPPORTED_EDIT",
+        "OpenFilm accepts only the Host-injected M4B adoption intent", undefined, ctx.correlationId);
+    }
+    this.#assertAdoptionIntent(intent, ctx.correlationId);
+    const projection = await this.inspect(snapshot, ctx);
+    if (projection.problems.length > 0) {
+      throw new HttpError(422, "UNSUPPORTED_EDIT", "The active OpenFilm projection is incomplete",
+        { problem_count: projection.problems.length }, ctx.correlationId);
+    }
+    const visual = projection.clips.filter((clip) => clip.kind !== "sound");
+    if (visual.length !== 3 || visual.some((clip, index) => clip.clip_id !== intent.native_plan.clips[index]?.clip_id)) {
+      throw new HttpError(422, "UNSUPPORTED_EDIT",
+        "The adoption plan must address the three existing visual clips in stable order", undefined, ctx.correlationId);
+    }
+    const ops: M4BOpenFilmSetOp[] = intent.native_plan.clips.flatMap((clip) => [
+      { op: "set", clip: clip.clip_id, field: "src", value: assetToken(clip.asset_sha256) },
+      { op: "set", clip: clip.clip_id, field: "time", value: [
+        secondsAtMillisecondPrecision(clip.source.start_frame),
+        secondsAtMillisecondPrecision(clip.source.end_frame_exclusive),
+      ] as const },
+      { op: "set", clip: clip.clip_id, field: "overrides", value: null },
+    ]);
+    if (!isClosedAdoptionOps(ops, intent.native_plan)) throw new Error("M4B_CLOSED_OP_CONSTRUCTION_FAILED");
+    return { engine: "openfilm", base_source_digest: ctx.expectedSourceDigest,
+      base_revision: ctx.baseRevision, edit: intent, ops };
   }
 
   /**
@@ -308,6 +372,20 @@ export class OpenFilmEngineAdapter implements EnginePort {
     let handedOver = false;
     try {
       await cp(sourceRoot, stagedRoot, { recursive: true });
+      if (!isAdoptEnginePlanIntent(plan.edit) || !isClosedAdoptionOps(plan.ops, plan.edit.native_plan)) {
+        throw new HttpError(422, "UNSUPPORTED_EDIT", "OpenFilm adoption ops are not the closed nine-op plan", undefined, ctx.correlationId);
+      }
+      for (const clip of plan.edit.native_plan.clips) {
+        const input = join(isolatedRoot.value, "inputs", clip.asset_sha256, "source.mp4");
+        const bytes = await readFile(input);
+        if (sha256(bytes) !== clip.asset_sha256) {
+          throw new HttpError(422, "INVALID_MEDIA", "A staged adoption asset does not match its content address",
+            { clip_id: clip.clip_id }, ctx.correlationId);
+        }
+        const target = join(stagedRoot, assetToken(clip.asset_sha256));
+        await mkdir(dirname(target), { recursive: true });
+        await copyFile(input, target);
+      }
       const edited = await this.#upstream.editProjectFilm(stagedRoot, before.rev, plan.ops as readonly OpenFilmOp[]);
       if (edited.rebased) {
         // Upstream replayed onto a newer file. Narralens never adopts that as success.
@@ -315,8 +393,9 @@ export class OpenFilmEngineAdapter implements EnginePort {
           "OpenFilm rebased the edit onto a newer film; Narralens does not accept a rebased write",
           undefined, ctx.correlationId);
       }
+      const roots = [...new Set([...layout.roots, ...plan.edit.native_plan.clips.map((clip) => assetToken(clip.asset_sha256))])].sort();
       const stagedDigest = await computeSourceDigest({
-        root: stagedRoot, roots: layout.roots, engine: "openfilm", engineUpstreamSha: OPENFILM_UPSTREAM_SHA,
+        root: stagedRoot, roots, engine: "openfilm", engineUpstreamSha: OPENFILM_UPSTREAM_SHA,
         declaredAssets: layout.declaredAssets,
       }, ctx.correlationId);
       // Only the directory NAME crosses back: an adapter never hands out a server path.
@@ -326,6 +405,8 @@ export class OpenFilmEngineAdapter implements EnginePort {
         relative_entry: "film.html",
         source_digest: stagedDigest.source_digest,
         revision: edited.rev,
+        validation_proof: { kind: "m4b-adoption", native_plan: plan.edit.native_plan,
+          roots, non_visual_sha256: nonVisualDigest((before.doc ?? {}) as UpstreamDoc) } satisfies AdoptionValidationProof,
       };
     } finally {
       // Every failure path leaves nothing behind; success transfers ownership to the caller.
@@ -339,7 +420,28 @@ export class OpenFilmEngineAdapter implements EnginePort {
     if (read.problems.length > 0) {
       return { ok: false, problems: ["staged film does not read upstream"], source_digest: null };
     }
-    return { ok: read.rev.length > 0, problems: [], source_digest: staged.source_digest };
+    const proof = staged.validation_proof as Partial<AdoptionValidationProof> | undefined;
+    if (proof?.kind !== "m4b-adoption" || proof.native_plan === undefined || proof.roots === undefined) {
+      return { ok: false, problems: ["staged source has no M4B validation proof"], source_digest: null };
+    }
+    const layout = this.#layout(ctx.projectId, ctx.correlationId);
+    const digest = await computeSourceDigest({ root: stagedRoot, roots: proof.roots,
+      engine: "openfilm", engineUpstreamSha: OPENFILM_UPSTREAM_SHA, declaredAssets: layout.declaredAssets }, ctx.correlationId);
+    const doc = (read.doc ?? {}) as UpstreamDoc;
+    const clips = (doc.tracks ?? []).flatMap((track) => track.clips ?? []);
+    const problems: string[] = [];
+    for (const planned of proof.native_plan.clips) {
+      const clip = clips.find((candidate) => candidate.id === planned.clip_id);
+      const range = asRange(clip?.time);
+      if (clip === undefined || clip.src !== assetToken(planned.asset_sha256)) problems.push(`clip ${planned.clip_id} source mismatch`);
+      if (range?.start_frame !== planned.source.start_frame
+        || range?.end_frame_exclusive !== planned.source.end_frame_exclusive) problems.push(`clip ${planned.clip_id} frame range mismatch`);
+      if (clip?.overrides !== null) problems.push(`clip ${planned.clip_id} overrides were not cleared`);
+    }
+    if (proof.native_plan.clips.length !== 3) problems.push("adoption does not preserve three visual clips");
+    if (proof.non_visual_sha256 !== nonVisualDigest(doc)) problems.push("narration/audio changed during adoption");
+    if (digest.source_digest !== staged.source_digest) problems.push("staged source digest was not independently reproduced");
+    return { ok: problems.length === 0 && read.rev.length > 0, problems, source_digest: digest.source_digest };
   }
 
   async preview(_snapshot: SnapshotRef, _ctx: ReadContext): Promise<PreviewDescriptor> {
@@ -359,5 +461,33 @@ export class OpenFilmEngineAdapter implements EnginePort {
       throw new HttpError(503, "ENGINE_UNAVAILABLE", "OpenFilm project layout is not registered", undefined, correlationId);
     }
     return layout;
+  }
+
+  #assertAdoptionIntent(intent: AdoptEnginePlanIntent, correlationId?: string): void {
+    const plan = intent.native_plan;
+    const validSha = /^[a-f0-9]{64}$/u;
+    if (intent.edit.materialization_id !== intent.materialization_id
+      || intent.edit.impact_hash !== intent.impact_hash
+      || !validSha.test(intent.rights_digest) || !validSha.test(intent.impact_hash)
+      || plan.engine !== "openfilm" || plan.fps.num !== 30 || plan.fps.den !== 1
+      || plan.narration_policy !== "preserve" || plan.duration_policy !== "preserve"
+      || plan.clips.length !== 3 || !validSha.test(plan.plan_sha256)) {
+      throw new HttpError(422, "UNSUPPORTED_EDIT", "The Host adoption intent is incomplete or inconsistent", undefined, correlationId);
+    }
+    let end = 0;
+    const ids = new Set<string>();
+    for (const clip of plan.clips) {
+      const duration = clip.timeline.end_frame_exclusive - clip.timeline.start_frame;
+      const sourceDuration = clip.source.end_frame_exclusive - clip.source.start_frame;
+      if (ids.has(clip.clip_id) || !validSha.test(clip.asset_sha256)
+        || clip.timeline.start_frame !== end || duration <= 0 || sourceDuration !== duration) {
+        throw new HttpError(422, "UNSUPPORTED_EDIT", "The native plan is not a closed three-clip replacement", undefined, correlationId);
+      }
+      ids.add(clip.clip_id);
+      end = clip.timeline.end_frame_exclusive;
+    }
+    if (end !== plan.total_frames) {
+      throw new HttpError(422, "UNSUPPORTED_EDIT", "The native plan does not cover its declared duration", undefined, correlationId);
+    }
   }
 }

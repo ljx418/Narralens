@@ -27,6 +27,10 @@ export interface NativeWriteRequest {
   readonly shot_id?: string;
   readonly asset_id?: string;
   readonly value?: "contain" | "cover";
+  readonly materialization_id?: string;
+  readonly impact_id?: string;
+  readonly impact_hash?: string;
+  readonly approval_confirmed?: true;
 }
 
 export type GatewayDecision =
@@ -133,6 +137,16 @@ export class NativeWriteGateway {
         if (entry.typed_intent === "replace_visual_asset") {
           if (!request.shot_id || !request.asset_id) return this.#invalid(entry, "replace_visual_asset requires shot_id and asset_id");
           return { kind: "translated", entry, edit: { op: "replace_visual_asset", shot_id: request.shot_id, asset_id: request.asset_id } };
+        }
+        if (entry.typed_intent === "adopt_materialization") {
+          if (!request.materialization_id || !request.impact_id || !request.impact_hash || request.approval_confirmed !== true) {
+            return this.#invalid(entry, "adopt_materialization requires materialization, impact hash, and confirmed approval");
+          }
+          return { kind: "translated", entry, edit: {
+            op: "adopt_materialization", materialization_id: request.materialization_id,
+            impact_id: request.impact_id, impact_hash: request.impact_hash,
+            approval: { confirmed: true },
+          } };
         }
         return this.#invalid(entry, "translated entry has no typed intent");
       }
