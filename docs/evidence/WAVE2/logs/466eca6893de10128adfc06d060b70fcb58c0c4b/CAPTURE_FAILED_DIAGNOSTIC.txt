@@ -1,0 +1,21 @@
+M4B FAILED CAPTURE — DO NOT USE AS PASS EVIDENCE
+
+Capture commit: 466eca6893de10128adfc06d060b70fcb58c0c4b
+Capture began clean: yes (environment.txt repo_dirty_at_capture=0)
+Result: FAILED / INCOMPLETE
+
+check exited 1 after 73/76 files passed, with 5 failed tests:
+
+1. tests/architecture/m2.1-fitness.test.ts still froze the M4A seven-route list and rejected the
+   legitimate M4B /edits route.
+2. tests/m2.1/engine-route.test.ts still expected M4B /edits to be 404 instead of the mounted
+   route's pre-resource 428 IMPACT_REQUIRED response.
+3–5. tests/wave2/m4a/impact-races.test.ts encountered transient host resource failures. Two
+   responses explicitly recorded HOST_RESOURCE_EXHAUSTED / ENOMEM; the third did not reach its
+   before_insert seam (fired=false) in the same resource-degraded run.
+
+The capture was interrupted after the independent typecheck passed, while contracts was still
+running. contracts has .cmd/.txt but deliberately has no .exit; no later gate is claimed.
+All generated files are retained append-only. The route assertions are corrected only after this
+capture. Resource-sensitive M4A tests must pass in their independent suite and in a new clean full
+capture before M4B can freeze. This file does not reclassify ENOMEM as success.
