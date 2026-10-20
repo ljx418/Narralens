@@ -236,7 +236,9 @@ describe("fitness 10-14: stage-specific invariants", () => {
       expect(Object.keys(map.entries).sort()).toEqual([...ENGINE_OWNED_OPERATION_IDS].sort());
       expect(Object.values(map.entries).some((entry) => entry.state === "unverified")).toBe(false);
     }
-    expect(Object.values(openFilmCapabilityMap().entries).some((entry) => entry.state === "supported")).toBe(false);
+    expect(Object.entries(openFilmCapabilityMap().entries)
+      .filter(([, entry]) => entry.state === "supported").map(([id]) => id))
+      .toEqual(["timeline.adopt_materialization"]);
     expect(Object.keys(hostServiceCapabilityMap().entries)).toEqual(["asset_import"]);
   });
 

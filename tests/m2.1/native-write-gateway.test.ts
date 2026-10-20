@@ -36,7 +36,7 @@ describe("NativeMutationRegistry completeness", () => {
       expect(entry.impact_class, entry.entry_id).toBeTruthy();
       expect(entry.lock_class, entry.entry_id).toBeTruthy();
       expect(entry.reason.length, entry.entry_id).toBeGreaterThan(10);
-      expect(entry.test_id, entry.entry_id).toMatch(/^EN-\d+$/u);
+      expect(entry.test_id, entry.entry_id).toMatch(/^(?:EN|TX)-\d+$/u);
     }
   });
 
@@ -71,10 +71,11 @@ describe("NativeMutationRegistry completeness", () => {
     }
   });
 
-  it("AC-003 only the two already-shipped typed edits and the Host asset import are translated", () => {
+  it("AC-003 translates only the shipped edits, M4B adoption, and Host asset import", () => {
     const translated = NATIVE_MUTATION_REGISTRY.filter((entry) => entry.policy.startsWith("translated"));
     expect(translated.map((entry) => [entry.entry_id, entry.typed_intent]).sort()).toEqual([
       ["asset.import", null],
+      ["timeline.adopt_materialization", "adopt_materialization"],
       ["timeline.replace_visual_asset", "replace_visual_asset"],
       ["timeline.set_visual_fit", "set_visual_fit"],
     ]);
@@ -202,9 +203,10 @@ describe("M-01 capability completeness and fail-closed behaviour", () => {
       { correlationId: "m21-openfilm-capability", projectId: "of", signal: AbortSignal.timeout(1_000) });
     for (const operation of ["timeline.set_visual_fit", "timeline.replace_visual_asset"]) {
       expect(map.entries[operation], operation).toMatchObject({ state: "blocked" });
-      expect(map.entries[operation]!.reason, operation).toMatch(/M2\.1|translated write path/u);
+      expect(map.entries[operation]!.reason, operation).toMatch(/controlled adoption write path/u);
     }
-    expect(Object.values(map.entries).some((entry) => entry.state === "supported")).toBe(false);
+    expect(Object.entries(map.entries).filter(([, entry]) => entry.state === "supported").map(([id]) => id))
+      .toEqual(["timeline.adopt_materialization"]);
   });
 
   it("refuses a translated write when the capability map does not report the operation", () => {

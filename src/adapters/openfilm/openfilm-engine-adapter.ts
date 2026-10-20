@@ -141,6 +141,17 @@ function asRange(value: unknown): HalfOpenFrameRange | null {
   return to > from ? { start_frame: from, end_frame_exclusive: to } : null;
 }
 
+/** M4B upstream seconds are millisecond-normalised; nearest-frame proves the round trip. */
+function asNearestFrameRange(value: unknown): HalfOpenFrameRange | null {
+  if (!Array.isArray(value) || value.length !== 2) return null;
+  const start = finite(value[0]);
+  const end = finite(value[1]);
+  if (start === null || end === null || end <= start || start < 0) return null;
+  const from = secondsToFrame(rationalFromNumber(start), FPS_30, "half_up");
+  const to = secondsToFrame(rationalFromNumber(end), FPS_30, "half_up");
+  return to > from ? { start_frame: from, end_frame_exclusive: to } : null;
+}
+
 export class OpenFilmEngineAdapter implements EnginePort {
   readonly #upstream: OpenFilmUpstream;
   readonly #layouts = new Map<string, OpenFilmProjectLayout>();
@@ -432,7 +443,7 @@ export class OpenFilmEngineAdapter implements EnginePort {
     const problems: string[] = [];
     for (const planned of proof.native_plan.clips) {
       const clip = clips.find((candidate) => candidate.id === planned.clip_id);
-      const range = asRange(clip?.time);
+      const range = asNearestFrameRange(clip?.time);
       if (clip === undefined || clip.src !== assetToken(planned.asset_sha256)) problems.push(`clip ${planned.clip_id} source mismatch`);
       if (range?.start_frame !== planned.source.start_frame
         || range?.end_frame_exclusive !== planned.source.end_frame_exclusive) problems.push(`clip ${planned.clip_id} frame range mismatch`);
