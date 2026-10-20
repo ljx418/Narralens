@@ -7,7 +7,7 @@ import { fileURLToPath } from "node:url";
 import { ControlledAgentRunner, type ComparisonRunnerInput } from "../adapters/openmontage/controlled-agent-runner.js";
 import { ProposalAdapter } from "../adapters/openmontage/proposal-adapter.js";
 import { ProposalComparisonAdapter } from "../adapters/openmontage/proposal-comparison-adapter.js";
-import { validateAdoptRequest, validateControlledWriteResponse, validateEditRequest,
+import { validateAdoptRequest, validateControlledWriteFailure, validateControlledWriteResponse, validateEditRequest,
   validateEngineResponse, validateImpactRequest, validateImpactSpec,
   validateProposalComparisonRequest } from "../contracts/validator.js";
 import type { EngineResponse } from "../contracts/engine-types.js";
@@ -56,6 +56,7 @@ import { HypitReadAdapter } from "../adapters/hypit/hypit-read-adapter.js";
 import { AdoptionStore } from "./adoption/adoption-store.js";
 import { AuthorSourcePublisher } from "./adoption/author-source-publisher.js";
 import { AdoptionCoordinator } from "./adoption/adoption-coordinator.js";
+import type { PublishBoundary } from "./adoption/author-source-publisher.js";
 
 const bodyLimit = 65_536;
 
@@ -176,6 +177,8 @@ interface HostDependencies {
   impactClock?: () => Date;
   /** Test-only race seam; see `ImpactServiceDeps.fault`. */
   impactFault?: (point: string) => Promise<void> | void;
+  adoptionFault?: (boundary: "after_prepared" | "after_published" | "after_committed") => Promise<void> | void;
+  adoptionPublishFault?: (boundary: PublishBoundary) => Promise<void> | void;
 }
 
 export class NarralensHost {
@@ -437,8 +440,10 @@ export class NarralensHost {
       impact: this.impact, projections: this.projections, engines: this.engines,
       gateway: new NativeWriteGateway(new NativeMutationRegistry()), locks: this.locks,
       ledger: this.assetLedger, snapshots: this.snapshots, adoption: this.adoptionFacts,
-      publisher: new AuthorSourcePublisher(),
-      stagingRoot: dependencies.adoptionStagingRoot ?? resolve(projectRoot, "var/adoption-stage") });
+      publisher: new AuthorSourcePublisher({ ...(dependencies.adoptionPublishFault === undefined
+        ? {} : { fault: dependencies.adoptionPublishFault }) }),
+      stagingRoot: dependencies.adoptionStagingRoot ?? resolve(projectRoot, "var/adoption-stage"),
+      ...(dependencies.adoptionFault === undefined ? {} : { fault: dependencies.adoptionFault }) });
     this.#leaseReapIntervalMs = dependencies.leaseReapIntervalMs ?? 1_000;
     this.#materializeDrainIntervalMs = dependencies.materializeDrainIntervalMs ?? 250;
     this.#outboxReplayIntervalMs = dependencies.outboxReplayIntervalMs ?? 250;
@@ -450,7 +455,6 @@ export class NarralensHost {
     await this.imports.recoverIncomplete();
     await this.writes.recoverIncomplete();
     await this.comparisons.cleanupStaleTemporaryFiles();
-    await this.coordinator.recoverOnStart();
     // A migration interrupted by a crash is decided here, in production, not only in tests:
     // it either completes, stays retryable, or lands in attention. Nothing is guessed.
     // Composed *before* recovery, and the failure is contained.
@@ -476,6 +480,10 @@ export class NarralensHost {
     // proved the pinned checkout. Before this line a restarted Host had no way to inspect
     // its own migrated target, because only a test could call `registerLayout()`.
     this.projections.attachRegistrar(this.openFilmComposition?.registrar);
+    // M4B owns its publication boundary and must decide it before the generic journal
+    // recovery can turn the row into recovering/attention and erase the recoverable path.
+    await this.adoption.recoverOnStart();
+    await this.coordinator.recoverOnStart();
     await this.migrations.recover();
     // A migrated copy survives a restart because `ProjectResolver` re-derives it from the
     // migration record on every call. There is nothing to re-seed, and a cache here would be
@@ -796,6 +804,14 @@ export class NarralensHost {
         { errors: parsed.errors.slice(0, 8) }, projectId);
     }
     const committed = await this.adoption.adopt(projectId, parsed.value);
+    if (committed.status === "aborted") {
+      const failed = validateControlledWriteFailure(committed);
+      if (!failed.ok) {
+        throw new HttpError(500, "INTERNAL_ERROR", "The controlled write failure does not satisfy its contract",
+          { errors: failed.errors.slice(0, 8) }, projectId);
+      }
+      return json(response, failed.value.error.http_status, failed.value);
+    }
     const validated = validateControlledWriteResponse(committed);
     if (!validated.ok) {
       throw new HttpError(500, "INTERNAL_ERROR", "The controlled write response does not satisfy its contract",

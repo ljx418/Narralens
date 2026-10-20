@@ -94,6 +94,16 @@ export class ProjectCoordinator {
     return await this.deps.queue.run(projectId, operation);
   }
 
+  /** Startup-only slot for the exact transaction whose pending row is being recovered. */
+  async controlledRecovery<T>(projectId: string, transactionId: string, correlationId: string,
+    operation: () => Promise<T>): Promise<T> {
+    if (this.deps.store.recoveryGate(projectId, 0, transactionId)) {
+      throw new HttpError(423, "PROJECT_ATTENTION_REQUIRED", "Another condition blocks adoption recovery",
+        { attention_reason: this.deps.store.attentionReason(projectId) }, correlationId);
+    }
+    return await this.deps.queue.run(projectId, operation);
+  }
+
   // ── the transaction machine (plan §3) ────────────────────────────────────────────────
 
   beginTransaction(input: {

@@ -18,6 +18,8 @@ export interface PublishAuthorSourceInput {
   /** Durable, transaction-scoped basename recorded before publication for recovery. */
   readonly filmTempToken: string;
   readonly installedAssets: readonly InstalledAdoptionAsset[];
+  /** Existing digest roots that adoption is required to preserve byte-for-byte. */
+  readonly protectedTokens: readonly string[];
   readonly expectedFilmBeforeSha256: string;
   readonly expectedFilmAfterSha256: string;
 }
@@ -70,6 +72,12 @@ export class AuthorSourcePublisher {
     }
     if (await hashFile(stagedFilm) !== input.expectedFilmAfterSha256) {
       throw new HttpError(422, "SOURCE_CHANGED", "Staged film does not match its validated publication fact");
+    }
+    for (const token of input.protectedTokens) {
+      if (token === "film.html") continue;
+      if (await hashFile(inside(activeRoot, token)) !== await hashFile(inside(stagedRoot, token))) {
+        throw new HttpError(422, "UNSUPPORTED_EDIT", "Adoption changed a protected author-source root");
+      }
     }
 
     const assets = [...input.installedAssets].sort((left, right) => left.token.localeCompare(right.token));

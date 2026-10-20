@@ -2,7 +2,7 @@ import { DatabaseSync, type SQLInputValue } from "node:sqlite";
 import { MigrationStore } from "./migration-store.js";
 import { JOB_TABLE_DDL, migrateJobKind } from "./job-kind-migration.js";
 import type { ApiError, AssetImportResponse, EditResponse, JobEvent, JobState } from "../../contracts/types.js";
-import type { ControlledWriteResponseV1 } from "../../contracts/wave2-types.js";
+import type { ControlledWriteFailureResponseV1, ControlledWriteResponseV1 } from "../../contracts/wave2-types.js";
 import { HttpError } from "../api-error.js";
 
 export type JournalState = "prepared" | "source_validated" | "metadata_committed" | "aborted" | "compensated" | "attention";
@@ -551,6 +551,39 @@ export class RevisionStore {
     } catch (error) { this.#db.exec("ROLLBACK"); throw error; }
   }
 
+  /** Abort an unpublished M4B write and bind its public failure to the sole replay key. */
+  abortAdoption(input: { transactionId: string; projectId: string; idempotencyKey: string;
+    requestDigest: string; httpStatus: 409 | 422 | 423 | 428 | 500; code: ApiError["code"];
+    message: string; details?: unknown; now?: Date }): ControlledWriteFailureResponseV1 {
+    const row = this.projectTransaction(input.transactionId);
+    if (row === undefined || row.project_id !== input.projectId
+      || !["received", "preconditions_checked", "staged", "validated", "prepared"].includes(row.state)) {
+      throw new Error("ADOPTION_ABORT_PREDECESSOR_MISMATCH");
+    }
+    const at = (input.now ?? new Date()).toISOString();
+    const response: ControlledWriteFailureResponseV1 = {
+      format: "narralens.controlled-write-failure@1.0", transaction_id: input.transactionId,
+      project_id: input.projectId, operation: "adopt_materialization",
+      previous_revision: row.base_revision, new_revision: row.base_revision,
+      source_digest: row.source_digest_before, status: "aborted",
+      error: { http_status: input.httpStatus, code: input.code, message: input.message,
+        ...(input.details === undefined ? {} : { details: input.details }) },
+    };
+    this.#db.exec("BEGIN IMMEDIATE");
+    try {
+      const moved = this.#db.prepare(`UPDATE project_transaction SET state='aborted', error_code=?,
+        terminal_reason=?, updated_at=? WHERE transaction_id=? AND state=?`).run(
+        input.code, input.message, at, input.transactionId, row.state);
+      if (Number(moved.changes) !== 1) throw new Error("ADOPTION_ABORT_CAS_FAILED");
+      this.#db.prepare(`INSERT INTO operation_idempotency(project_id, operation_kind, idempotency_key,
+        request_digest, response_json, transaction_id, created_at) VALUES(?,?,?,?,?,?,?)`)
+        .run(input.projectId, "controlled_write.adopt_materialization", input.idempotencyKey,
+          input.requestDigest, JSON.stringify(response), input.transactionId, at);
+      this.#db.exec("COMMIT");
+      return response;
+    } catch (error) { this.#db.exec("ROLLBACK"); throw error; }
+  }
+
   /** The single pointer a reader resolves. Undefined means the project has never committed. */
   activeCommit(projectId: string): { project_id: string; revision: number; snapshot_id: string;
     source_digest: string; engine: string; transaction_id: string; created_at: string } | undefined {
@@ -642,10 +675,10 @@ export class RevisionStore {
     return Number(result.changes);
   }
 
-  incompleteTransactions(): Array<{ transaction_id: string; project_id: string; state: ProjectTransactionState }> {
-    return (this.#db.prepare(`SELECT transaction_id, project_id, state FROM project_transaction
+  incompleteTransactions(): ProjectTransactionRow[] {
+    return (this.#db.prepare(`SELECT * FROM project_transaction
       WHERE state IN ('received','preconditions_checked','staged','validated','prepared','attention') ORDER BY created_at`)
-      .all() as Array<{ transaction_id: string; project_id: string; state: ProjectTransactionState }>);
+      .all() as Array<Record<string, unknown>>).map(projectTransaction);
   }
 
   projectsInAttention(): string[] {

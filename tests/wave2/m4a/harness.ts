@@ -50,6 +50,7 @@ export function headers(origin: string, token: string): Record<string, string> {
 export async function start(options: {
   readonly impactClock?: () => Date;
   readonly impactFault?: (point: string) => Promise<void> | void;
+  readonly adoptionFault?: (boundary: "after_prepared" | "after_published" | "after_committed") => Promise<void> | void;
 } = {}): Promise<Started> {
   const base = await mkdtemp(join(tmpdir(), "narralens-m4a-"));
   process.env.NARRALENS_OPENFILM_VENDOR = REAL_UPSTREAM_PARENT;
@@ -74,6 +75,7 @@ export async function start(options: {
 export async function startOn(base: string, options: {
   readonly impactClock?: () => Date;
   readonly impactFault?: (point: string) => Promise<void> | void;
+  readonly adoptionFault?: (boundary: "after_prepared" | "after_published" | "after_committed") => Promise<void> | void;
 } = {}): Promise<Started> {
   process.env.NARRALENS_OPENFILM_VENDOR = REAL_UPSTREAM_PARENT;
   const host = new NarralensHost({

@@ -467,6 +467,41 @@ export class ImpactService {
     return spec;
   }
 
+  /**
+   * Recovery-only authorization check after the source publication point.
+   *
+   * The ordinary check must reject the new source bytes because the database pointer still
+   * names the before snapshot. Here the immutable adoption fact proves publication happened
+   * before expiry; every database/materialization premise is still re-read, while the caller
+   * independently proves the active bytes equal the recorded after closure.
+   */
+  async requirePreparedRecoveryCurrent(transactionId: string, impactId: string, impactHash: string,
+    publishIntentCreatedAt: string): Promise<ImpactSpecV1> {
+    const row = this.#deps.impacts.require(impactId);
+    const intentAt = new Date(publishIntentCreatedAt);
+    const expiresAt = new Date(row.expires_at);
+    if (!Number.isFinite(intentAt.getTime()) || intentAt.getTime() >= expiresAt.getTime()
+      || row.state !== "active" || row.impact_hash !== impactHash) {
+      throw new HttpError(428, "IMPACT_STALE", "Prepared adoption no longer has a recoverable impact",
+        { transaction_id: transactionId, impact_id: impactId });
+    }
+    const spec = this.#deps.impacts.requireActive(impactId, new Date(expiresAt.getTime() - 1));
+    const view = await this.#deps.resolver.resolveActivated(spec.project_id);
+    if (view.revision !== spec.base_revision || view.source_digest !== spec.source_digest
+      || view.control_revision !== spec.control_revision || spec.materialization_id === null) {
+      throw new HttpError(428, "IMPACT_STALE", "Prepared adoption database premises moved",
+        { transaction_id: transactionId, impact_id: impactId });
+    }
+    const materialization = await this.#deps.materialize.read(spec.materialization_id);
+    if (materialization.state !== "ready_for_adoption"
+      || materialization.rights_digest !== spec.rights_digest
+      || materialization.native_plan?.plan_sha256 !== spec.native_plan_sha256) {
+      throw new HttpError(428, "IMPACT_STALE", "Prepared adoption materialization premises moved",
+        { transaction_id: transactionId, impact_id: impactId });
+    }
+    return spec;
+  }
+
   /** Everything an authorization was computed against, re-read. */
   async #assertSpecStillCurrent(spec: ImpactSpecV1, view: ActivatedProjectView, now: Date): Promise<void> {
     const stale = (why: string): never => {
