@@ -8,6 +8,7 @@ import { NarralensHost } from "../../../src/host/server.js";
 import { planDigest, VISUAL_TRACK_ID } from "../../../src/host/materialize/native-plan-builder.js";
 import type { MaterializationV1, NativePlanV1 } from "../../../src/contracts/wave2-types.js";
 import type { ActivatedProjectView } from "../../../src/host/projects/project-resolver.js";
+import type { PublishBoundary } from "../../../src/host/adoption/author-source-publisher.js";
 
 /**
  * The M4A test harness.
@@ -51,6 +52,7 @@ export async function start(options: {
   readonly impactClock?: () => Date;
   readonly impactFault?: (point: string) => Promise<void> | void;
   readonly adoptionFault?: (boundary: "after_prepared" | "after_published" | "after_committed") => Promise<void> | void;
+  readonly adoptionPublishFault?: (boundary: PublishBoundary) => Promise<void> | void;
 } = {}): Promise<Started> {
   const base = await mkdtemp(join(tmpdir(), "narralens-m4a-"));
   process.env.NARRALENS_OPENFILM_VENDOR = REAL_UPSTREAM_PARENT;
@@ -76,6 +78,7 @@ export async function startOn(base: string, options: {
   readonly impactClock?: () => Date;
   readonly impactFault?: (point: string) => Promise<void> | void;
   readonly adoptionFault?: (boundary: "after_prepared" | "after_published" | "after_committed") => Promise<void> | void;
+  readonly adoptionPublishFault?: (boundary: PublishBoundary) => Promise<void> | void;
 } = {}): Promise<Started> {
   process.env.NARRALENS_OPENFILM_VENDOR = REAL_UPSTREAM_PARENT;
   const host = new NarralensHost({

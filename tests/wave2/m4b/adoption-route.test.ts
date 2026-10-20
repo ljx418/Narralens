@@ -9,6 +9,7 @@ import type { NativePlanV1 } from "../../../src/contracts/wave2-types.js";
 import { validateControlledWriteResponse } from "../../../src/contracts/validator.js";
 import { NarralensHost } from "../../../src/host/server.js";
 import { SimulatedAdoptionCrash } from "../../../src/host/adoption/adoption-coordinator.js";
+import type { PublishBoundary } from "../../../src/host/adoption/author-source-publisher.js";
 import { createPinnedOpenFilmUpstream } from "../../../src/adapters/openfilm/openfilm-upstream.js";
 import {
   adoptBody, coveringPlan, headers, migrate, postImpact, readyMaterialization,
@@ -159,6 +160,32 @@ describe("M4B production adoption route", () => {
     const conflict = await postAdoption(restarted, prepared.projectId,
       { ...prepared.request, base_revision: prepared.view.revision + 1 });
     expect(conflict.status).toBe(409);
+  }, 900_000);
+
+  it.each([
+    ["asset_temp_fsynced", "aborted", 1, 500],
+    ["asset_installed", "aborted", 1, 500],
+    ["film_temp_fsynced", "aborted", 1, 500],
+    ["film_renamed", "committed", 2, 200],
+    ["parent_fsynced", "committed", 2, 200],
+  ] as const)("recovers the author-source publication boundary %s", async (boundary, state, revision, status) => {
+    const running = await start({ adoptionPublishFault: (point: PublishBoundary) => {
+      if (point === boundary) throw new SimulatedAdoptionCrash(`PUBLISH_CRASH:${point}`);
+    } });
+    hosts.push(running.host); dirs.push(running.base);
+    const prepared = await authorizedAdoption(running, `publish-${boundary}`);
+    expect((await postAdoption(running, prepared.projectId, prepared.request)).status).toBe(500);
+    await running.host.close();
+    hosts.splice(hosts.indexOf(running.host), 1);
+
+    const restarted = await startOn(running.base);
+    hosts.push(restarted.host);
+    const replay = await postAdoption(restarted, prepared.projectId, prepared.request);
+    expect(replay.status, JSON.stringify(replay.body)).toBe(status);
+    expect(replay.body.status).toBe(state);
+    expect((await restarted.host.projectResolver.resolveActivated(prepared.projectId)).revision).toBe(revision);
+    expect(restarted.host.revisions.projectsInAttention()).not.toContain(prepared.projectId);
+    expect(await postAdoption(restarted, prepared.projectId, prepared.request)).toEqual(replay);
   }, 900_000);
 
   it("rejects a visual lock acquired after staging with revision +0", async () => {
