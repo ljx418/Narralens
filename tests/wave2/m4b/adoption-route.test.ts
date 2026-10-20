@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { execFile } from "node:child_process";
-import { readFile } from "node:fs/promises";
+import { readFile, writeFile } from "node:fs/promises";
 import { basename, join, resolve } from "node:path";
 import { promisify } from "node:util";
 import { afterEach, describe, expect, it } from "vitest";
@@ -160,6 +160,32 @@ describe("M4B production adoption route", () => {
     const conflict = await postAdoption(restarted, prepared.projectId,
       { ...prepared.request, base_revision: prepared.view.revision + 1 });
     expect(conflict.status).toBe(409);
+  }, 900_000);
+
+  it("latches terminal attention when recovery can prove neither publication boundary", async () => {
+    const running = await start({ adoptionPublishFault: (point) => {
+      if (point === "film_renamed") throw new SimulatedAdoptionCrash("PUBLISH_CRASH:film_renamed");
+    } });
+    hosts.push(running.host); dirs.push(running.base);
+    const prepared = await authorizedAdoption(running, "publish-unprovable");
+    const sourceRoot = (await running.host.projectResolver.resolveActivated(prepared.projectId)).source_root.value;
+    expect((await postAdoption(running, prepared.projectId, prepared.request)).status).toBe(500);
+    await running.host.close();
+    hosts.splice(hosts.indexOf(running.host), 1);
+
+    // Model external damage after atomic publication but before the database commit. Recovery
+    // must not guess whether before or after won.
+    await writeFile(join(sourceRoot, "film.html"), "<!doctype html><title>unprovable</title>\n");
+    const restarted = await startOn(running.base);
+    hosts.push(restarted.host);
+    expect(restarted.host.revisions.projectsInAttention()).toContain(prepared.projectId);
+    const transaction = restarted.host.revisions.projectTransactions(prepared.projectId).at(-1);
+    expect(transaction).toMatchObject({ state: "attention", error_code: "ADOPTION_RECOVERY_UNPROVABLE" });
+    expect(transaction?.terminal_reason).toContain("neither adoption boundary");
+    const blocked = await postAdoption(restarted, prepared.projectId,
+      { ...prepared.request, idempotency_key: "m4b-after-attention" });
+    expect(blocked.status).toBe(423);
+    expect(blocked.body.code).toBe("PROJECT_ATTENTION_REQUIRED");
   }, 900_000);
 
   it.each([
