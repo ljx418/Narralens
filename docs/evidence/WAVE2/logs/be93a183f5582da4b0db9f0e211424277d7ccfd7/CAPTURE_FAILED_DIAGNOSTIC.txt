@@ -1,0 +1,12 @@
+M4B FAILED CAPTURE — DO NOT USE AS PASS EVIDENCE
+
+Capture commit: be93a183f5582da4b0db9f0e211424277d7ccfd7
+Capture began clean. Full check, typecheck, contracts, M2.1, W2.0, M3, M4A, M4B,
+fitness, build, Wave 1 historical and M4A historical all exited 0. Wave 1 and M4A
+current-tip integrity exited 1 as expected and were preserved verbatim.
+
+The sole unexpected failure was credential-scan: two GENERIC_SECRET_ASSIGNMENT findings in
+tests/wave2/m4b/adoption-store.test.ts. Both values were the non-secret relative asset path
+"assets/abc/source.mp4" assigned to the domain field named `token`. The scanner behaved as
+configured; this capture remains failed. The test fixture is changed to pass the same path through
+a named variable, without weakening or excluding the credential rule.
