@@ -193,7 +193,14 @@ export class ImpactService {
         { impact_id: spec.impact_id });
     }
     const current = await this.#deps.resolver.resolveActivated(spec.project_id);
-    await this.#assertSpecStillCurrent(spec, current, now);
+    try {
+      await this.#assertSpecStillCurrent(spec, current, now);
+    } catch (error) {
+      if (error instanceof HttpError && error.code === "IMPACT_STALE") {
+        this.#deps.impacts.markStale(spec.impact_id, now);
+      }
+      throw error;
+    }
     return spec;
   }
 
@@ -431,7 +438,12 @@ export class ImpactService {
     } catch (error) {
       // A row that is still `active` but is dead must be marked, not merely reported.
       if (error instanceof HttpError && error.code === "IMPACT_STALE") {
-        this.#deps.impacts.markStale(impactId, now);
+        const row = this.#deps.impacts.get(impactId);
+        if (row !== undefined && isExpired(row.expires_at, now)) {
+          this.#deps.impacts.markExpired(impactId, now);
+        } else {
+          this.#deps.impacts.markStale(impactId, now);
+        }
       }
       throw error;
     }
@@ -439,7 +451,9 @@ export class ImpactService {
     try {
       await this.#assertSpecStillCurrent(spec, view, now);
     } catch (error) {
-      this.#deps.impacts.markStale(impactId, now);
+      if (error instanceof HttpError && error.code === "IMPACT_STALE") {
+        this.#deps.impacts.markStale(impactId, now);
+      }
       throw error;
     }
     return spec;
@@ -456,14 +470,38 @@ export class ImpactService {
     if (view.revision !== spec.base_revision) stale("the project revision moved");
     if (view.source_digest !== spec.source_digest) stale("the source changed");
     if (view.control_revision !== spec.control_revision) stale("the control revision moved");
+
+    const correlationId = this.#deps.correlationId();
+    await this.#deps.projections.layoutFor(view, correlationId);
+    const resolved = this.#deps.engines.resolve(spec.project_id);
+    try {
+      const projection = await resolved.port.inspect({
+        project_id: spec.project_id, engine: "openfilm", source_digest: spec.source_digest,
+      }, {
+        correlationId, projectId: spec.project_id,
+        signal: AbortSignal.timeout(20_000),
+      });
+      if (projection.source_digest !== spec.source_digest) stale("the source bytes changed");
+    } catch (error) {
+      if (error instanceof HttpError && error.code === "SOURCE_CHANGED") {
+        stale("the source bytes changed");
+      }
+      throw error;
+    }
+
     if (spec.materialization_id !== null) {
       // `find`, not `require`: a materialization that has been removed is *drift*, and
       // drift is 428. `require` would raise 404 out of a check whose whole purpose is to say
       // "this authorization is no longer usable", which is a different message to the caller
       // and the wrong one.
-      const row = this.#deps.materializations.find(spec.materialization_id);
-      if (row === undefined) stale("the materialization is gone");
-      else if (row.state !== "ready_for_adoption") stale("the materialization is no longer ready for adoption");
+      let row: MaterializationV1;
+      try {
+        row = await this.#deps.materialize.read(spec.materialization_id);
+      } catch (error) {
+        if (error instanceof HttpError && error.status === 404) stale("the materialization is gone");
+        throw error;
+      }
+      if (row.state !== "ready_for_adoption") stale("the materialization is no longer ready for adoption");
       else if (row.rights_digest !== spec.rights_digest) stale("the rights digest moved");
       else if (row.native_plan === null || row.native_plan.plan_sha256 !== spec.native_plan_sha256) {
         stale("the native plan changed");

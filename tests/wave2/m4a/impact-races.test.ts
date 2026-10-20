@@ -4,6 +4,7 @@ import { join, relative } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { LockService } from "../../../src/host/projects/lock-service.js";
 import { NarralensHost } from "../../../src/host/server.js";
+import { HttpError } from "../../../src/host/api-error.js";
 import { IMPACT_TTL_MS } from "../../../src/host/impact/impact-canonical.js";
 import { impactRequestDigest } from "../../../src/host/impact/impact-service.js";
 import {
@@ -89,6 +90,22 @@ describe("TX-02A / M4A-TTL01: an impact outlives nothing it was computed from", 
     expect(fresh.status).toBe(201);
     expect(fresh.body.impact_id).not.toBe(first.body.impact_id);
     expect(running.host.impacts.get(String(first.body.impact_id))?.state).toBe("expired");
+  }, 600_000);
+
+  it("marks a direct consumer at the TTL boundary expired rather than stale", async () => {
+    const clock = clockAt(T0);
+    const running = await started({ impactClock: clock.now });
+    const { projectId, view } = await migrate(running);
+    const materialization = await readyMaterialization(running.host, projectId, "ttl-direct");
+    const created = await postImpact(running, projectId,
+      adoptBody(view, materialization.materialization_id, "ttl-direct"));
+    expect(created.status).toBe(201);
+    const impactId = String(created.body.impact_id);
+
+    clock.set(new Date(T0.getTime() + IMPACT_TTL_MS));
+    await expect(running.host.impact.requireCurrent(impactId))
+      .rejects.toMatchObject({ code: "IMPACT_STALE", status: 428 });
+    expect(running.host.impacts.get(impactId)?.state).toBe("expired");
   }, 600_000);
 
   /**
@@ -231,6 +248,94 @@ describe("TX-02A / M4A-TTL01: an impact outlives nothing it was computed from", 
     expect(created.status).toBe(201);
     const impactId = String(created.body.impact_id);
     await expect(running.host.impact.requireCurrent(impactId)).resolves.toMatchObject({ impact_id: impactId });
+    expect(running.host.impacts.get(impactId)?.state).toBe("active");
+  }, 600_000);
+
+  it("rejects real source bytes changed after insertion", async () => {
+    const running = await started();
+    const { projectId, view } = await migrate(running);
+    const materialization = await readyMaterialization(running.host, projectId, "post-source-drift");
+    const created = await postImpact(running, projectId,
+      adoptBody(view, materialization.materialization_id, "post-source-drift"));
+    expect(created.status).toBe(201);
+    const impactId = String(created.body.impact_id);
+
+    await writeFile(join(view.source_root.value, "film.html"), "<!doctype html><html></html>\n", "utf8");
+    await expect(running.host.impact.requireCurrent(impactId))
+      .rejects.toMatchObject({ code: "IMPACT_STALE", status: 428 });
+    expect(running.host.impacts.get(impactId)?.state).toBe("stale");
+  }, 600_000);
+
+  it("rejects replay after real source bytes changed after insertion", async () => {
+    const running = await started();
+    const { projectId, view } = await migrate(running);
+    const materialization = await readyMaterialization(running.host, projectId, "post-source-replay");
+    const body = adoptBody(view, materialization.materialization_id, "post-source-replay");
+    const created = await postImpact(running, projectId, body);
+    expect(created.status).toBe(201);
+    const impactId = String(created.body.impact_id);
+
+    await writeFile(join(view.source_root.value, "film.html"), "<!doctype html><html></html>\n", "utf8");
+    const replay = await postImpact(running, projectId, body);
+    expect(replay.status).toBe(428);
+    expect(replay.body.code).toBe("IMPACT_STALE");
+    expect(running.host.impacts.get(impactId)?.state).toBe("stale");
+  }, 600_000);
+
+  it("rejects real asset bytes changed after insertion", async () => {
+    const running = await started();
+    const { projectId, view } = await migrate(running);
+    const materialization = await readyMaterialization(running.host, projectId, "post-asset-drift");
+    const created = await postImpact(running, projectId,
+      adoptBody(view, materialization.materialization_id, "post-asset-drift"));
+    expect(created.status).toBe(201);
+    const impactId = String(created.body.impact_id);
+    const asset = running.host.assetLedger.assets(projectId)
+      .find((candidate) => !/\.(vtt|srt)$/iu.test(candidate.target_path));
+    expect(asset).toBeDefined();
+
+    await writeFile(join(view.source_root.value, asset!.target_path), "changed after impact\n", "utf8");
+    await expect(running.host.impact.requireCurrent(impactId))
+      .rejects.toMatchObject({ code: "IMPACT_STALE", status: 428 });
+    expect(running.host.impacts.get(impactId)?.state).toBe("stale");
+  }, 600_000);
+
+  it("rejects rights changed after insertion through materialization re-verification", async () => {
+    const running = await started();
+    const { projectId, view } = await migrate(running);
+    const materialization = await readyMaterialization(running.host, projectId, "post-rights-drift");
+    const created = await postImpact(running, projectId,
+      adoptBody(view, materialization.materialization_id, "post-rights-drift"));
+    expect(created.status).toBe(201);
+    const impactId = String(created.body.impact_id);
+    running.host.revisions.compose((db) => db.prepare(
+      "UPDATE migrated_asset SET license_json=? WHERE project_id=?",
+    ).run(JSON.stringify({ status: "restricted", label: "changed", commercial_use: false }), projectId));
+
+    await expect(running.host.impact.requireCurrent(impactId))
+      .rejects.toMatchObject({ code: "IMPACT_STALE", status: 428 });
+    expect(running.host.materializations.require(materialization.materialization_id).state).toBe("stale");
+    expect(running.host.impacts.get(impactId)?.state).toBe("stale");
+  }, 600_000);
+
+  it("keeps the impact active when currentness cannot be checked transiently", async () => {
+    const running = await started();
+    const { projectId, view } = await migrate(running);
+    const materialization = await readyMaterialization(running.host, projectId, "post-transient");
+    const created = await postImpact(running, projectId,
+      adoptBody(view, materialization.materialization_id, "post-transient"));
+    expect(created.status).toBe(201);
+    const impactId = String(created.body.impact_id);
+    const inventory = running.host.assetInventory as unknown as {
+      inventory(projectId: string): Promise<never>;
+    };
+    inventory.inventory = async () => {
+      throw new HttpError(503, "HOST_RESOURCE_EXHAUSTED", "transient test failure",
+        { recoverable: true }, projectId);
+    };
+
+    await expect(running.host.impact.requireCurrent(impactId))
+      .rejects.toMatchObject({ code: "HOST_RESOURCE_EXHAUSTED", status: 503 });
     expect(running.host.impacts.get(impactId)?.state).toBe("active");
   }, 600_000);
 });

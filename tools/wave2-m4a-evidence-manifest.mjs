@@ -105,10 +105,11 @@ const manifest = {
     "The M3 integrity checker was changed to compare route claims against the tree at M3's own capture commit rather than the tip, and to stop printing PASS after a failed check. M3's manifest, logs and failed captures are untouched. Without that change a frozen historical record fails for later stages doing their job.",
     "headed/human experience is NOT_RUN: this stage adds no UI. Automation is headless, muted, windowless, offline and non-focus-stealing; no provider call, no payment, and no read of J:\\.",
     "No production crash-recovery GC exists for impact rows; no long-film performance, streaming-hash or full-render behaviour has been exercised.",
+    "Post-insert currentness now re-runs pinned OpenFilm inspect and MaterializeService.read. Real source, asset or rights drift invalidates the impact; a retryable read failure remains 503 and does not permanently stale an authorization whose facts were not disproven.",
   ],
   supersedes: {
     // M4A's own earlier state, for a reader who finds the tree mid-flight.
-    note: "This is the first M4A capture. The M3 captures at b6207c8, 4721381 and the failed 14cc3b6 remain exactly where they are.",
+    note: "This capture supersedes the first M4A capture at cec51dd for the two Codex external-review findings only. The earlier capture and all M3 captures remain append-only historical records.",
   },
 };
 

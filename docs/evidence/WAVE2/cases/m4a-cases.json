@@ -71,9 +71,10 @@
    "tests/wave2/m4a/impact-store.test.ts::expires exactly at the boundary, from the injected clock alone",
    "tests/wave2/m4a/impact-store.test.ts::marks an expired row expired rather than leaving it active with a past deadline",
    "tests/wave2/m4a/impact-store.test.ts::refuses a row whose stored bytes no longer hash to its stored hash",
-   "tests/wave2/m4a/impact-races.test.ts::expires at exactly fifteen minutes and is not revived by a replay with the same key"
+   "tests/wave2/m4a/impact-races.test.ts::expires at exactly fifteen minutes and is not revived by a replay with the same key",
+   "tests/wave2/m4a/impact-races.test.ts::marks a direct consumer at the TTL boundary expired rather than stale"
   ],
-  "notes": "The boundary is `now >= expires_at`. A replay one millisecond early returns the identical spec and identical expiry; at the deadline the same key returns 428 and the row's state is corrected to expired, so a later reader does not see an active row with a past deadline."
+  "notes": "The boundary is `now >= expires_at`. A replay one millisecond early returns the identical spec and identical expiry; at the deadline both replay and the direct M4B/M4C consumption seam return 428 and CAS active to expired, not stale, so a later reader does not see an active row with a past deadline."
  },
  {
   "case_id": "TX-02A",
@@ -90,6 +91,11 @@
    "tests/wave2/m4a/impact-races.test.ts::returns 428 and marks the row stale when materialization removed has moved",
    "tests/wave2/m4a/impact-races.test.ts::returns 428 and marks the row stale when the stored bytes has moved",
    "tests/wave2/m4a/impact-races.test.ts::still answers an unchanged impact, so the arms above are not vacuously failing",
+   "tests/wave2/m4a/impact-races.test.ts::rejects real source bytes changed after insertion",
+   "tests/wave2/m4a/impact-races.test.ts::rejects replay after real source bytes changed after insertion",
+   "tests/wave2/m4a/impact-races.test.ts::rejects real asset bytes changed after insertion",
+   "tests/wave2/m4a/impact-races.test.ts::rejects rights changed after insertion through materialization re-verification",
+   "tests/wave2/m4a/impact-races.test.ts::keeps the impact active when currentness cannot be checked transiently",
    "tests/wave2/m4a/impact-races.test.ts::refuses a materialization whose base_revision no longer matches the project",
    "tests/wave2/m4a/impact-races.test.ts::refuses a materialization whose source_digest no longer matches the project",
    "tests/wave2/m4a/impact-races.test.ts::refuses a materialization whose control_revision no longer matches the project",
@@ -97,7 +103,7 @@
    "tests/wave2/m4a/impact-store.test.ts::expires exactly at the boundary, from the injected clock alone",
    "tests/wave2/m4a/impact-store.test.ts::refuses a row whose stored bytes no longer hash to its stored hash"
   ],
-  "notes": "Deliberately NOT marked PASSED: the commit-time final re-check is M4B's write entry. The earlier version of this case drove one of eight arms while claiming another — it moved the materialization, so `requireCurrent` fired on its state rather than on the source, and `rights`/`plan` were never driven. All eight are now driven one fact at a time, plus a control case proving the arms are not vacuously failing."
+  "notes": "Deliberately NOT marked PASSED: the commit-time final re-check is M4B's write entry. Codex external review proved that the previous source arm only rewrote active_commit and that the test named stored bytes only changed impact.canonical_json: real film.html drift after insertion remained authorized. The production seam now re-runs pinned EnginePort.inspect and MaterializeService.read. Real source, asset and rights drift each return 428 and CAS stale; a retryable 503 leaves the impact active because an unreadable premise is not proof it moved."
  },
  {
   "case_id": "TX-03A",
