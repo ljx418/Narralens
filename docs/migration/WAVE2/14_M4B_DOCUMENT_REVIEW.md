@@ -1,6 +1,6 @@
 # M4B 开工包多轮独立文档审查
 
-状态：`M4A_EXTERNAL_REVIEW_PASS_SATISFIED / M4B_DOCUMENT_REWORKED_PENDING_FINAL_REVIEW`。
+状态：`M4A_EXTERNAL_REVIEW_PASS_SATISFIED / M4B_DOCUMENT_GATE_PASS`。
 
 审查对象：`02_ARCHITECTURE_AND_CONTRACTS.md`、`03_DEVELOPMENT_AND_ACCEPTANCE_PLAN.md`、
 `11_M4B_CONTROLLED_ADOPTION.*`、`12_M4B_DEVELOPMENT_GATE.md`、`13_M4B_CLAUDE_HANDOFF.md`，以及当前生产
@@ -98,3 +98,7 @@ plan，adoption snapshot 必须在 commit 同事务写 exact roots/subtitles/fra
 选择并严格重算，不动态合并 ledger、不放宽 mismatch。另新增 `ControlledWriteFailureResponseV1`，并把主捕获脚本
 补入全部命令表。R3 的 MINOR 也已同步：真实可复验 spike 脚本/结果、数值 time、MP4 扩展名、prepared 前态、
 帧秒取整与 adopted projection 必读路径。
+
+R4 在 `32c9a00...` 独立复审为 `BLOCKER=0 / MAJOR=0`，正式结论 `M4B_DOCUMENT_GATE_PASS`。R4 剩余 8 项
+MINOR 已在封存前同步，不改变权威边界：累计 roots、恢复 roots、outbox/response 顺序、临时 423 不写终态幂等、
+failure schema 登记、spike 完整证据、edit/read problems 职责和 ADR-W2.0-005 的 M4B 例外。

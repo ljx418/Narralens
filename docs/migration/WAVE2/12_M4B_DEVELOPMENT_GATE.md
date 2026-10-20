@@ -170,7 +170,7 @@ M4B v1 的 native plan 只能产生两类 active-root 变化：
    `rights_digest` 字符串相等本身不算现场 rights 重验；
 5. 以同目录 rename 原子替换 `film.html`，随后 fsync parent；该 rename 是 source publish point；
 6. 重新由 pinned adapter inspect active root，必须与 staged projection/source digest 一致；OpenFilm snapshot/digest 的
-   roots = `openFilmRoots` 得到的迁移基线 roots ∪ 本次 NativePlan 新引用的 target asset token，排序去重后覆盖
+   roots = `openFilmRoots` 得到的迁移基线 roots ∪ 本次及历史已采用 target asset token，排序去重后覆盖
    film、字幕/设置与全部引用资产；不得只复用旧 migration plan 漏掉 adopted assets；
 7. 一个 SQLite `BEGIN IMMEDIATE` 完成第 7 节列出的全部事实。
 
@@ -231,8 +231,8 @@ replay-or-conflict
 - 为新 snapshot 写上述 immutable `openfilm_projection_fact`，其 roots 必须与 snapshot publish 使用的 roots 逐项相同；
 - 只加入本次 native plan 真正引用的新 target asset ledger 行/引用事实，且许可仍 cleared/commercial；
 - impact `active→consumed` CAS，任何其他前态使整个事务回滚；
-- 写唯一 `operation_idempotency` 完整 response；
 - 直接插入一条 `project.committed` outbox，以该 INSERT 的 `lastInsertRowid` 作为真实 event id；
+- 用真实 event id 构造并写唯一 `operation_idempotency` 完整 response；
 - project_transaction `prepared→committed`。
 
 不得继续使用 legacy `edit_idempotency` 作为 M4B 第二权威。`ControlledWriteResponseV1.outbox_event_id` 必须是同一
@@ -273,6 +273,8 @@ interface ControlledWriteFailureResponseV1 {
 
 abort 事务把该 canonical body 写入唯一 `operation_idempotency`；route 首次及重放均用 `error.http_status` 返回完全
 相同的公开 JSON body，`new_revision===previous_revision`。不得把它解析为成功 `ControlledWriteResponseV1`。
+受控 423“source=after、等待恢复”不是终态，不写 `operation_idempotency`；同 key 请求必须先接管原 transaction
+恢复，成功后才写 committed response，不得把临时 423 固化为永久重放。
 
 Impact TTL 只限制新写开始，不撤销已经在到期前进入 `prepared` 且发布了 after source 的授权。M4B 新增 Host-only
 `ImpactService.requirePreparedRecoveryCurrent(transactionId, impactId, hash)`：仅当 immutable fact 的
@@ -281,6 +283,10 @@ Impact TTL 只限制新写开始，不撤销已经在到期前进入 `prepared` 
 全部现场重验不变时，恢复可忽略墙钟 TTL 并在最终事务 CAS active→consumed。任何事实变化、impact 已
 expired/stale/consumed 或未在到期前 prepared 都进入 attention，不承诺 +1。写路由在 recovery 完成前不得调用
 普通 `requireCurrent()` 提前把该 impact 标 expired。
+
+恢复时即使 stage/temp 已清理，也从 immutable fact/transaction 得到 snapshot、before/after 和 transaction id，并以
+“迁移基线 roots ∪ 当前 ledger 已提交 target paths ∪ 本次 fact installed assets”重建 cumulative roots；重算结果必须
+等于 staged_source_digest/source_after，不能依赖临时目录继续存在。
 
 若 active 为 after 但证据不可证明，保持 source=after，不做未经证明的自动回滚；CAS 进入 terminal attention 并返回
 423。此状态允许差异明确为：source=after、revision/pointer/ledger/impact/outbox/idempotency 均未提交；M4B-NW 必须
@@ -321,6 +327,13 @@ validate 必须由 pinned upstream 重新读取 staged `film.html`，并使用�
 - projection `problems=[]`；
 - source digest 闭包包含 film、scene/字幕/设置和全部引用资产；
 - staged 输出可真实渲染/完整 decode，不以 JSON shape 代替。
+
+`ControlledWriteFailureResponseV1` 必须同时新增 TypeScript 类型、closed runtime schema
+`contracts/controlled-write-failure.schema.json`、validator import/函数与 `contractIds` 注册；合同测试需证明额外字段、
+非法 http_status/code、new!=previous 均被拒绝。
+
+M4C restore 将来必须为其新 snapshot 写同类 projection fact 或显式版本化扩展；M4B 不开放 restore，缺 fact 必须
+fail closed。若 before/after digest 相同，在进入 prepared 前以 422 `UNSUPPORTED_EDIT` 拒绝，不碰 DDL CHECK。
 
 ## 9. 逐 case 验收
 

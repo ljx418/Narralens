@@ -1,17 +1,20 @@
 {
   "format": "narralens.m4b-openfilm-op-spike@1.0",
   "captured_at": "2026-10-20",
-  "command": "node docs/migration/WAVE2/tools/m4b-openfilm-op-spike.mjs <pinned-vendor-root> <m1b-project-root> <first-export.mp4>",
+  "command": "node docs/migration/WAVE2/tools/m4b-openfilm-op-spike.mjs /mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm /mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/spikes/openfilm-m1b/project /mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/spikes/openfilm-m1b/evidence/first-export.mp4",
+  "repo_head_verified": "32c9a0054260296f304e9c6211ded6fbd64840b0",
   "openfilm_upstream": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+  "openfilm_tracked_clean": true,
+  "vendor_root_basename": "openfilm",
   "media_sha256": "91fe4598055abf094a851752f09b9f3150dafe50938fb9f43ee355491800fa0d",
   "operation_count": 9,
   "rebased": false,
   "read_problems": [],
   "stage": { "w": 1280, "h": 720 },
   "visual": [
-    { "id": "shot-01", "time": [0, 10], "at": 0 },
-    { "id": "shot-02", "time": [0, 10], "at": 10 },
-    { "id": "shot-03", "time": [0, 10], "at": 20 }
+    { "id": "shot-01", "src": "assets/91fe4598055abf094a851752f09b9f3150dafe50938fb9f43ee355491800fa0d/source.mp4", "time": [0, 10], "at": 0 },
+    { "id": "shot-02", "src": "assets/91fe4598055abf094a851752f09b9f3150dafe50938fb9f43ee355491800fa0d/source.mp4", "time": [0, 10], "at": 10 },
+    { "id": "shot-03", "src": "assets/91fe4598055abf094a851752f09b9f3150dafe50938fb9f43ee355491800fa0d/source.mp4", "time": [0, 10], "at": 20 }
   ],
   "narration_preserved": true,
   "exit": 0,

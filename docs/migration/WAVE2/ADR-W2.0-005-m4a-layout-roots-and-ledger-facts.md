@@ -1,5 +1,9 @@
 # ADR-W2.0-005：M4A 生产 layout 的 roots 与账本事实
 
+> M4B 例外：本文的 immutable migration-plan roots 规则只覆盖 migration 首快照。采用后 snapshot 的 roots 权威由
+> `12_M4B_DEVELOPMENT_GATE.md` §3.2 的 immutable `openfilm_projection_fact` 版本化扩展；仍保持 roots-only、
+> ledger 必须是 roots 子集、不得把 ledger 当 declaredAssets 或动态改变 digest。
+
 状态：`ACCEPTED_M4A`
 日期：2026-10-20
 影响契约：AC-006、AC-008；不改变 EnginePort 七方法、单引擎或唯一提交权

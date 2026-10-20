@@ -24,7 +24,7 @@ adapter 对三个既有视觉 clip 各生成三条 closed `set` op，顺序固�
 ```
 
 真实调用为 `editProjectFilm(stagedRoot, before.rev, ops)`，随后用 `readProjectFilm(stagedRoot)` 回读问题清单。探针
-结果：edit 返回 `rebased=false`，回读返回 `problems=[]`，视觉 clip
+结果：edit 返回类型本身不含 `problems`，其 `rebased=false`；权威回读返回 `problems=[]`，视觉 clip
 仍恰好三个，ID 与 timeline `at=0/10/20` 不变，source time 均为 `[0,10]`，narration clip 与 1280×720 stage
 保持不变。该结果只证明 op 语义可行；M4B-1 仍须以三个不同 materialized asset/source range、完整渲染与边界帧
 作为正式证据。
