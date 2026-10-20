@@ -1,8 +1,8 @@
 # Narralens V1 规格—架构—开发—验收追踪矩阵
 
 版本：v1.0  
-状态：实际开发已批准；Gate D1、Gate D2、Gate D3、Gate D4.0、Gate D4.1 历史结论保留。D4.2.1 的 M1A 逐编号补证已由独立 Claude Code R4 外审关闭；M1B OpenFilm 隔离技术 spike 也已通过。M2.1 已在第三轮独立复审后达到 `M2_1_CONTROL_BOUNDARY_READY`。M2.2 与 M2.3 已组成 Wave 1 候选并通过独立外审，两条外审 MINOR 已在冻结代码 `e2dec5c...` 关闭，现达到 `CONTROLLED_OPENFILM_READY`。Wave 2 W2.0 激活兼容层已实现并通过 correction 复验，状态 `INTERNAL_EVIDENCED`：运行时合同与错误码、`ProjectResolver`、`MigratedAssetLedger`、`AssetInventoryPort`、`job.kind` 受控前向迁移、pinned OpenFilm port 组装，均装配进生产 Host；ACT-01/02、ASSET-01/02/03 关闭。下一允许阶段为 M3。Gate D4.2、`Gate V1-P0` 与 `V1-Full` 均未关闭。
-事实日期：2026-10-18
+状态：实际开发已批准；Gate D1、Gate D2、Gate D3、Gate D4.0、Gate D4.1 历史结论保留。D4.2.1 的 M1A 逐编号补证已由独立 Claude Code R4 外审关闭；M1B OpenFilm 隔离技术 spike 也已通过。Wave 1 已达到 `CONTROLLED_OPENFILM_READY`。Wave 2 W2.0 与 M3 已实现：ACT-01/02、ASSET-01..03、PR-01..03、MT-01..06 均有直接证据；M3 候选 `fa08fe4...` 的独立外审为 PASS，正式捕获绑定 `f2a41ff...`，两次全量门均为 62 files / 750 tests。下一允许阶段为 M4A ImpactService。Gate D4.2、`Gate V1-P0` 与 `V1-Full` 均未关闭。
+事实日期：2026-10-20
 <!-- M2.1_REWORK_BASE_SHA=ee58ab5c6a9d4bbdf05e8ac8a394fd75218cae59 REVIEW_STATUS=PASS -->
 
 ## 1. 使用规则
@@ -44,8 +44,9 @@
 | M0 | 现场 SHA、代码/路由/阈值、备份与变更单 | observed | 不改变业务 Gate |
 | M1A | D4.2.1 冻结矩阵逐 case 真实证据与独立外审 | passed（实现 `c0f101b...`；R4 YES） | Headless PASS；headed/human NOT_RUN；不扩张为 D4.2 总 Gate |
 | M1B | 固定 OpenFilm SHA、可编辑 30 秒链路、native 写入口清单与 stale-base 实证 | passed-spike（OpenFilm `e70d9d9...`） | 不写生产 Hypit；可编辑三 clip；生产 translate/block 已由 M2.1 落地为 `NativeMutationRegistry`/`NativeWriteGateway`，M2.1 未提供任何 OpenFilm 写路径 |
-| M2 | EnginePort、单引擎绑定、写入治理、三类锁、持久 Job/SSE/lease、snapshot/journal、迁移副本与回退 | **Wave 1 组合外审 PASS，`CONTROLLED_OPENFILM_READY`**：冻结代码 `e2dec5c...`，证据捕获 `fd64762...`，21 case 为 20 PASS + 1 `NOT_APPLICABLE_APPROVED` | migrate-copy/report/rollback 已实现；materialize/impact/adopt/history restore 仍未实现；AC-005 legacy edit 仍为事后 snapshot，headed/human NOT_RUN |
-| W2.0–M4 | 目标工程解析/资产账本兼容、素材化、影响、采用与历史事务 | docs-ready / code not-started | `docs/migration/WAVE2/`；ACT/ASSET、PR、MT、TX 逐 case，组合外审前不得声明 ready |
+| M2 | EnginePort、单引擎绑定、写入治理、三类锁、持久 Job/SSE/lease、snapshot/journal、迁移副本与回退 | **Wave 1 组合外审 PASS，`CONTROLLED_OPENFILM_READY`**：冻结代码 `e2dec5c...`，证据捕获 `fd64762...`，21 case 为 20 PASS + 1 `NOT_APPLICABLE_APPROVED` | migrate-copy/report/rollback 已实现；AC-005 legacy edit 仍为事后 snapshot，headed/human NOT_RUN |
+| W2.0–M3 | 目标工程解析、资产账本、素材化、真实 proxy/native plan/lineage | **M3 独立外审 PASS**：候选 `fa08fe4...`，捕获 `f2a41ff...`；ACT/ASSET、PR、MT 全部关闭 | materialize POST/GET 已开放；NOWRITE；impact/adopt/history 仍 404；M3 不等于 D4.2 完成 |
+| M4A–M4C | server impact、采用与历史事务 | **M4A 文档达到 Claude Code 开发门；代码未实现** | ADR-W2.0-004 + `08_M4A_DEVELOPMENT_GATE.md`；TX-01..14 在 Wave 2 组合外审前不得宣称 PASSED |
 | M5 | 同页原生 Studio UX | not-started | 依赖 Wave 2 组合外审，不顺跳 |
 | M6 | `Gate V1-P0` | not-started | 不等于 V1-Full |
 | M7A–D | P1 与完整长片证据 | not-started | P0/P1 全绿后才可声明 V1-Full |

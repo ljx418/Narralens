@@ -11,9 +11,9 @@
 | snapshot 提交与恢复 | Wave 1 | typed edit/history | SnapshotStore、Journal、Outbox | Approved / Wave 1 外审 PASS；legacy AC-005 边界保留 |
 | 持久 Job/Event | Wave 1 | proposal/render/migration job | PersistentJobStore、Lease、SSE | Approved / Wave 1 外审 PASS；部分业务 runner 待后续 |
 | migrate-copy 与回退 | Wave 1 | 显式迁移副本 | MigrationService | Approved / `CONTROLLED_OPENFILM_READY` |
-| 迁移目标激活兼容 | Wave 2 | terminal migration 启动/旧目标 bootstrap | ProjectResolver、MigratedAssetLedger | Spec Approved / code not-started |
-| proposal 素材化 | Wave 2 | 用户绑定已登记素材 | MaterializeService | Spec Approved / code not-started |
-| impact 与采用 | Wave 2 | 用户选择 ready proposal | ImpactService、AdoptionCoordinator | Spec Approved / code not-started |
+| 迁移目标激活兼容 | Wave 2 | terminal migration 启动/旧目标 bootstrap | ProjectResolver、MigratedAssetLedger | Implemented / W2.0 INTERNAL_EVIDENCED |
+| proposal 素材化 | Wave 2 | 用户绑定已登记素材 | MaterializeService | Implemented / M3 external review PASS |
+| impact 与采用 | Wave 2 | 用户选择 ready proposal | ImpactService、AdoptionCoordinator | M4A READY_FOR_CLAUDE_CODE_IMPLEMENTATION；adopt not-started |
 | 历史/撤回 | Wave 2 | undo/redo/restore | HistoryService | Spec Approved / code not-started |
 | 项目/章节/选择 | Wave 3 | 创建项目或定位内容 | StoryProjection、SelectionCoordinator | Draft |
 | 三路候选与原生精剪 | Wave 3 | 用户比较/采用/精修 | CandidateFocus、NativeEditBridge | Draft |

@@ -1,7 +1,7 @@
 # 叙镜架构设计 v1.0
 <!-- M2.1_REWORK_BASE_SHA=ee58ab5c6a9d4bbdf05e8ac8a394fd75218cae59 REVIEW_STATUS=PASS -->
 
-文档状态：Gate D1–D3、D4.0 与 D4.1 的历史结论保留。D4.2.1 的 M1A 逐编号证据已完成并由独立 Claude Code R4 外审通过；这只关闭 D4.2.1 prerequisite subset，不关闭 Gate D4.2。2026-10-16 经 `CR-MIG-001` 批准进入架构迁移；M1B 隔离 spike 与 M2.1 第三轮独立复审已经通过。M2.2 与 M2.3 已组成 Wave 1 候选并通过独立外审，两条外审 MINOR 已在冻结代码 `e2dec5c...` 关闭，状态为 `CONTROLLED_OPENFILM_READY`。生产 `/edits`、持久 Job/lease、outbox、snapshot、锁控制及受控 OpenFilm 迁移副本已经接线；旧 Hypit 工程保持不变且可回退。Wave 2 的 M3–M4 文档包已冻结并完成三轮内部独立复审，权威入口为 `docs/migration/WAVE2/00_READ_FIRST.md`；实现尚未开始。Gate D4.2 仍未关闭，materialize/impact/adopt/history restore 仍未实现，下一允许阶段为 W2.0 激活兼容层后连续实现 M3→M4，旧 Gate 历史不被覆盖。
+文档状态：Gate D1–D3、D4.0 与 D4.1 的历史结论保留。D4.2.1 的 M1A 逐编号证据已完成并由独立 Claude Code R4 外审通过；这只关闭 D4.2.1 prerequisite subset，不关闭 Gate D4.2。2026-10-16 经 `CR-MIG-001` 批准进入架构迁移；M1B 隔离 spike 与 M2.1 第三轮独立复审已经通过。M2.2 与 M2.3 已组成 Wave 1 候选并通过独立外审，状态为 `CONTROLLED_OPENFILM_READY`。Wave 2 的 W2.0 与 M3 已实现：迁移目标解析、目标资产账本、持久 materialize worker、三个原生 clip plan、真实 proxy/lineage、lease/恢复与 NOWRITE 均已接入生产 Host；M3 最终候选 `fa08fe4...` 于 2026-10-20 独立外审 PASS（BLOCKER=0、MAJOR=0）。Gate D4.2 仍未关闭；impact、versioned adopt 与 history restore 仍未实现。下一允许阶段为 M4A，契约入口为 `docs/migration/WAVE2/08_M4A_DEVELOPMENT_GATE.md`，旧 Gate 历史不被覆盖。
 
 ## 1. 零层架构
 
@@ -97,8 +97,8 @@ narralens/
 | `ProjectOperationQueue` | `src/host/projects/project-operation-queue.ts` | ImportService / ProjectWriteActor → 每项目串行 commit | D4.2.1 已实现 interface、FIFO/错误隔离/跨工程并行，Host 单例已注入 Actor | ImportService 实现时必须复用同一实例 |
 | `ProjectResolver` / `MigratedAssetLedger` | `src/host/projects/project-resolver.ts`、`migrated-asset-ledger.ts` | terminal migration + binding + active commit + root containment → OpenFilm target view/asset facts | **W2.0 已实现并通过 correction 复验**：修复 `migratedRoots` 未进入 catalog、目标无 Manifest@2 的接缝。bootstrap 可证明、原子、`attention` 终态不可自清；激活流程在 `activated` 之前播种，同一 outcome | W2.0 ACT-01/02、ASSET-01..03；`pnpm test:wave2:w2.0`；ADR-W2.0-001 |
 | `AssetInventoryPort` | `src/host/projects/asset-inventory-port.ts` | legacy `AssetRegistry` 与目标 `MigratedAssetLedger` → 同一只读输入 | **W2.0 已实现**：activated 项目每次读取重验证并把漂移持久化为 `active→attention`，触发请求即 423；无账本 fail closed，不跨项目 fallback | W2-G12；`tests/wave2/w2-asset-02-production.test.ts` |
-| `MaterializeService` / `ProxyRenderer` | 目标 `src/host/materialize/` | target proposal + bindings → native plan + proxy + lineage | **Wave 2 文档冻结、未实现**：异步持久 Job、确定性 real-media proxy、NOWRITE；不再采用旧单 composite/Hypit replace 草案 | M3 PR-01..03、MT-01..06 |
-| `ImpactService` / `AdoptionCoordinator` / `HistoryService` | 目标 `src/host/projects/` | committed projection → impact/hash → controlled write → new revision | **Wave 2 文档冻结、未实现**：server impact、三类锁、OpenFilm stage/validate、采用与恢复均恰好 +1 | M4 TX-01..14 |
+| `MaterializeService` / `ProxyRenderer` | `src/host/materialize/` | target proposal + bindings → native plan + proxy + lineage | **M3 已实现并独立外审 PASS**：持久 Job/lease/Host 自动 drain、三 clip native plan、真实 720p proxy、lineage、内容寻址发布、取消/重启/stale 与 NOWRITE；捕获提交 `f2a41ff...` 两次全量 750/750 | M3 PR-01..03、MT-01..06 PASSED；证据 `docs/evidence/WAVE2/evidence-manifest-m3.json` |
+| `ImpactService` / `AdoptionCoordinator` / `HistoryService` | 目标 `src/host/projects/` | committed projection → impact/hash → controlled write → new revision | **M4A 已达到开发门、代码未实现**：ImpactRequest/ConsumerGraph/ImpactStore 的收口见 ADR-W2.0-004；M4B/M4C 仍为冻结设计 | M4A `08_M4A_DEVELOPMENT_GATE.md`；M4 TX-01..14 |
 | `ProjectWriteActor` | `src/host/projects/` | API → transaction → adapters | D3 fit 与 D4.0 单镜媒体替换已实现 revision、lock、幂等、补偿/attention/recovery | D4.1 禁止调用；提案采用待 D4.2 |
 | `SQLiteEventStore` | `src/host/projects/revision-store.ts` | actor/import/coordinator/migration ↔ revision/journal/job/outbox | D3/D4.2.1 历史 journal 保留；M2.2 已实现持久 Job/lease/event/outbox，M2.3 migration/migration_step 与既有 store 共用同一数据库句柄 | 导入不增加影片 revision；迁移激活只提交新副本，不改旧工程 |
 | `OpenMontageAdapter` | `src/adapters/openmontage/` | Host ↔ ControlledAgentRunner | D2 单提案保留；D4.1 单次 CLI 多提案、完整 provider schema 与真实 audit 已实现 | 禁止直写 Hypit；D4.2 materialize 另阶段 |
@@ -179,9 +179,9 @@ Manifest@2，因此 W2.0 必须通过 terminal migration、source tree digest、
 - `GET /api/proposal-comparisons/:id`：读取并重新校验 D4.1 原子暂存的 3–6 个只读候选，同时复核当前 revision；已实现。
 - `POST /api/projects/:id/assets/import`：D4.2.1 已实现并通过 M1A 外审；流式本地 MP4 + 来源/许可元数据，不接受客户端路径。
 - `GET /api/projects/:id/assets`：D4.2.1 已实现并通过 M1A 外审；返回 `AssetInventoryResponse` 公开库存，包含 cleared/restricted/unknown、source/license/availability/eligible/blocking，但不返回 `project_path`、绝对路径、原文件名或 token；每次请求重验 bytes SHA，不使用跨请求可用性缓存。
-- `POST /api/migration/v1/projects/:id/proposals/:proposalId/materialize`：Wave 2 冻结、未实现；target-owned proposal + binding → 持久 Job，不调用远程 provider。
-- `GET /api/migration/v1/materializations/:materializationId`：Wave 2 冻结、未实现；重验 base/source/control/inventory/rights/bytes。
-- `POST /api/migration/v1/projects/:id/impact`：Wave 2 冻结、未实现；服务端计算 canonical impact/hash，15 分钟 TTL。
+- `POST /api/migration/v1/projects/:id/proposals/:proposalId/materialize`：M3 已实现；target-owned proposal + binding → 持久 Job，不调用远程 provider，成功只到 ready_for_adoption。
+- `GET /api/migration/v1/materializations/:materializationId`：M3 已实现；每次重验 base/source/control/inventory/rights/bytes，变化后只向 stale 收敛。
+- `POST /api/migration/v1/projects/:id/impact`：M4A 开发门已冻结、代码未实现；服务端计算 canonical impact/hash，15 分钟 TTL，仅允许同事务写 impact row 与既有通用 operation-idempotency response。
 - `POST /api/migration/v1/projects/:id/edits`：Wave 2 冻结、未实现；仅接收带有效 impact 的 adopt typed edit。
 - `POST /api/migration/v1/projects/:id/history/restore`：Wave 2 冻结、未实现；恢复旧内容但生成新 revision。
 - `POST /api/projects/:id/edits`：typed operations + baseRevision → newRevision。
