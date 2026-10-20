@@ -13,7 +13,11 @@ import type { ImpactSpecV1 } from "../../../src/contracts/wave2-types.js";
  * the TypeScript still produces the same bytes. A change to the canonical rules therefore
  * has to change this file deliberately, which is what makes the cross-check a check.
  *
- * Run with `pnpm test:wave2:m4a:vectors`.
+ * Run with `pnpm test:wave2:m4a:vectors [output-path]`. The default writes the committed
+ * file; the evidence capture passes a temporary path and *diffs* it against the committed
+ * one, so the gate detects drift rather than causing it. A generator that overwrote the
+ * frozen evidence in place would bake any change to the canonical rules into the very file
+ * that is supposed to catch that change.
  */
 
 function unsigned(overrides: Partial<Omit<ImpactSpecV1, "impact_hash">> = {}): Omit<ImpactSpecV1, "impact_hash"> {
@@ -86,6 +90,6 @@ const document = {
   })),
 };
 
-const target = resolve("tests/wave2/m4a/impact-hash.vectors.json");
+const target = resolve(process.argv[2] ?? "tests/wave2/m4a/impact-hash.vectors.json");
 writeFileSync(target, `${JSON.stringify(document, null, 2)}\n`, "utf8");
 process.stdout.write(`wrote ${document.vectors.length} vectors to ${target}\n`);

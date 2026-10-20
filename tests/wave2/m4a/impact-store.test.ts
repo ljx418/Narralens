@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { DatabaseSync } from "node:sqlite";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
@@ -10,6 +11,7 @@ import { ALLOWED_IMPACT_TRANSITIONS, ImpactStore } from "../../../src/host/impac
 import {
   computeImpactHash, IMPACT_TTL_MS, isExpired, sortImpactArrays, verifyImpactHash,
 } from "../../../src/host/impact/impact-canonical.js";
+import { canonicalJson } from "../../../src/host/engine/source-digest-v1.js";
 import type { ImpactSpecV1 } from "../../../src/contracts/wave2-types.js";
 
 /**
@@ -162,9 +164,19 @@ describe("M4A-DB01: the impact table is additive, CAS-only, and shares one idemp
     const columns = (db.prepare("PRAGMA table_info(impact)").all() as Array<{ name: string }>).map((c) => c.name);
     expect(columns).not.toContain("idempotency_key");
     expect(columns).toContain("request_digest");
-    // The uniqueness that does exist is on content, which is a different question from replay.
-    const indexes = (db.prepare("PRAGMA index_list(impact)").all() as Array<{ name: string }>).map((i) => i.name);
-    expect(indexes.length).toBeGreaterThan(0);
+    // The uniqueness that does exist is on *content*, which is a different question from
+    // replay. Asserting the columns rather than merely that an index exists, so deleting the
+    // UNIQUE constraint would fail here.
+    const unique = (db.prepare("PRAGMA index_list(impact)").all() as Array<{ name: string; unique: number }>)
+      .filter((entry) => entry.unique === 1).map((entry) => entry.name);
+    expect(unique.length).toBeGreaterThan(0);
+    // Two unique indexes exist: the primary key on `impact_id`, and the ADR's
+    // `UNIQUE(project_id, impact_hash)`. Assert the column *sets* so deleting the content
+    // uniqueness — which would let two different rows claim one authorization — fails here.
+    const columnSets = unique.map((name) => (db.prepare(`PRAGMA index_info(${JSON.stringify(name)})`)
+      .all() as Array<{ name: string }>).map((entry) => entry.name));
+    expect(columnSets).toContainEqual(["project_id", "impact_hash"]);
+    expect(columnSets).toContainEqual(["impact_id"]);
     close();
   });
 
@@ -284,14 +296,14 @@ describe("M4A-H01: the impact hash is a content hash with a domain separator", (
     }
   });
 
-  it("is not the hash of the bytes without the domain prefix", () => {
+  it("is not the hash of the same canonical bytes without the domain prefix", () => {
     // A spec hash that collided with any other domain's hash over the same canonical bytes
-    // would let a caller present one domain's artifact as another's.
+    // would let a caller present one domain's artifact as another's. Compared against the
+    // real unprefixed hash, so deleting the prefix would actually fail this test.
     const base = spec();
     const { impact_hash, ...rest } = base;
-    void impact_hash;
-    const withPrefix = computeImpactHash(rest);
-    expect(withPrefix).toBe(base.impact_hash);
-    expect(withPrefix).not.toBe(rest.affected_ranges.length.toString(16).padEnd(64, "0"));
+    const unprefixed = createHash("sha256").update(canonicalJson(sortImpactArrays(rest))).digest("hex");
+    expect(computeImpactHash(rest)).toBe(base.impact_hash);
+    expect(base.impact_hash).not.toBe(unprefixed);
   });
 });

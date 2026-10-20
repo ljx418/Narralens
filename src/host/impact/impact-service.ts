@@ -291,6 +291,38 @@ export class ImpactService {
       throw new HttpError(409, "REVISION_CONFLICT",
         "The project changed while the impact was being computed", undefined, projectId);
     }
+    // The database reading the *same row twice* cannot detect anything that happens on disk.
+    // `view.source_digest` is the digest the active commit recorded; a file edited after that
+    // commit leaves both readings identical, so without re-deriving it from the source the
+    // final check is a tautology for exactly the change ADR §5 names first. The projection is
+    // recomputed from the committed snapshot, which is the only thing here that touches the
+    // bytes.
+    const recheck = await resolved.port.inspect({
+      project_id: projectId, engine: "openfilm", source_digest: view.source_digest,
+    }, { correlationId, projectId, signal: AbortSignal.timeout(20_000) });
+    if (recheck.source_digest !== view.source_digest) {
+      throw new HttpError(409, "SOURCE_CHANGED",
+        "The migrated source changed while the impact was being computed", undefined, projectId);
+    }
+    // And the materialization's proven facts are re-read, not carried: `rights_digest` and
+    // `plan_sha256` are what the spec is about to bind to, and a row whose facts moved after
+    // the first read would otherwise be described by a spec built from the older values.
+    const finalMaterialization = this.#deps.materializations.find(row.materialization_id);
+    if (finalMaterialization === undefined) {
+      throw new HttpError(409, "REVISION_CONFLICT",
+        "The materialization is gone", undefined, projectId);
+    }
+    if (finalMaterialization.state !== "ready_for_adoption") {
+      throw new HttpError(428, "IMPACT_STALE",
+        "The materialization is no longer ready for adoption",
+        { materialization_id: row.materialization_id, state: finalMaterialization.state }, projectId);
+    }
+    if (finalMaterialization.rights_digest !== row.rights_digest
+      || finalMaterialization.native_plan?.plan_sha256 !== row.native_plan.plan_sha256) {
+      throw new HttpError(409, "REVISION_CONFLICT",
+        "The materialization's proven facts changed while the impact was being computed",
+        undefined, projectId);
+    }
     // Locks are re-read and re-asserted here, not only at the first check. `locks_checked` is
     // part of the spec the client is about to be handed, so a lock that appeared during the
     // computation makes that spec wrong — and the first assertion, made before the graph

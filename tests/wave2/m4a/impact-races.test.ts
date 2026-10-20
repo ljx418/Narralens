@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { readdir, readFile } from "node:fs/promises";
+import { readdir, readFile, writeFile } from "node:fs/promises";
 import { join, relative } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { LockService } from "../../../src/host/projects/lock-service.js";
@@ -11,6 +11,7 @@ import {
 } from "./harness.js";
 import type { Started } from "./harness.js";
 import type { ImpactRequestV1 } from "../../../src/contracts/wave2-types.js";
+import type { ActivatedProjectView } from "../../../src/host/projects/project-resolver.js";
 
 /**
  * TX-02A, TX-05A and the race/fault matrix.
@@ -40,6 +41,13 @@ const T0 = new Date(Date.UTC(2026, 9, 20, 12, 0, 0));
 
 /** A fixed instant for the fault-injection cases, so their timing is not the wall clock's. */
 const clockNow = (): Date => new Date(Date.UTC(2026, 9, 20, 12, 0, 0));
+
+/** The codes ADR-W2.0-004 §7 defines for a refusal. An internal error is not one of them. */
+const REFUSAL_CODES: readonly string[] = [
+  "REVISION_CONFLICT", "SOURCE_CHANGED", "IDEMPOTENCY_KEY_CONFLICT", "INVALID_REQUEST",
+  "PROJECT_ATTENTION_REQUIRED", "TARGET_LOCKED", "IMPACT_STALE", "MISSING_ASSET",
+  "CAPABILITY_NOT_ENABLED", "ORIGIN_REJECTED", "ENGINE_UNAVAILABLE",
+];
 
 async function started(options: { impactClock?: () => Date; impactFault?: (point: string) => Promise<void> | void } = {}): Promise<Started> {
   const running = await start(options);
@@ -83,6 +91,43 @@ describe("TX-02A / M4A-TTL01: an impact outlives nothing it was computed from", 
     expect(running.host.impacts.get(String(first.body.impact_id))?.state).toBe("expired");
   }, 600_000);
 
+  /**
+   * The materialization's own premises, each falsifiable.
+   *
+   * `readyMaterialization` builds its row from the *same live view* the request will use, so
+   * the service's "materialization vs project" and "inventory vs row" comparisons could not
+   * be false in any harness-backed test. Each case below rewrites one stored fact directly,
+   * which is the only way to make those comparisons reachable.
+   */
+  const materializationArms: ReadonlyArray<readonly [string, string, string]> = [
+    ["base_revision", "base_revision", "9"],
+    ["source_digest", "source_digest", "'b".concat("b".repeat(63), "'")],
+    ["control_revision", "control_revision", "7"],
+    ["asset_inventory_sha256", "asset_inventory_sha256", "'c".concat("c".repeat(63), "'")],
+  ];
+  for (const [what, column, value] of materializationArms) {
+    it(`refuses a materialization whose ${what} no longer matches the project`, async () => {
+      const running = await started();
+      const { projectId, view } = await migrate(running);
+      const key = `tx02a-mat-${what}`;
+      const materialization = await readyMaterialization(running.host, projectId, key);
+      running.host.revisions.compose((handle) => handle)
+        .prepare(`UPDATE materialization SET ${column}=? WHERE materialization_id=?`)
+        .run(column === "base_revision" || column === "control_revision"
+          ? Number(value) : value, materialization.materialization_id);
+
+      const response = await postImpact(running, projectId,
+        adoptBody(view, materialization.materialization_id, key));
+      // Two codes are correct here. `MaterializeService.read` re-verifies before the service's
+      // own comparison runs, and a row whose base/source/control no longer match goes stale on
+      // that re-verification — 428. The inventory arm never reaches it and answers 409. Both
+      // refuse, neither writes, and the difference is which existing check noticed first.
+      expect([409, 428], `${what}: ${JSON.stringify(response.body)}`).toContain(response.status);
+      expect(["REVISION_CONFLICT", "SOURCE_CHANGED", "IMPACT_STALE"], what).toContain(response.body.code);
+      expect(running.host.impacts.byProject(projectId)).toHaveLength(0);
+    }, 600_000);
+  }
+
   it("rejects a stale base, source or control before it computes anything", async () => {
     const running = await started();
     const { projectId, view } = await migrate(running);
@@ -104,33 +149,108 @@ describe("TX-02A / M4A-TTL01: an impact outlives nothing it was computed from", 
     expect(running.host.impacts.byProject(projectId)).toHaveLength(0);
   }, 600_000);
 
-  it("returns 428 from requireCurrent once the source has moved, and marks the row stale", async () => {
-    const clock = clockAt(T0);
-    const running = await started({ impactClock: clock.now });
+  /**
+   * One arm per premise, driven through the function the gate names.
+   *
+   * The earlier version of this test moved the *materialization*, so it exercised one of the
+   * eight arms while claiming another; `base`/`source`/`control` were proven through `create`
+   * (which answers 409, not the 428 this case is about) and `rights`/`plan` were not driven
+   * at all. Each row below mutates exactly one durable fact and asserts the same outcome.
+   */
+  const requireCurrentArms: ReadonlyArray<
+    readonly [string, (host: NarralensHost, projectId: string, view: ActivatedProjectView, materializationId: string) => void]
+  > = [
+    ["base revision", (host, projectId) => {
+      // `resolveActivated` reads the revision from the active commit, not from
+      // `project_state`, so this has to move the row the resolver actually reads.
+      host.revisions.compose((handle) => handle)
+        .prepare("UPDATE active_commit SET revision=revision+1 WHERE project_id=?").run(projectId);
+    }],
+    ["source digest", (host, projectId) => {
+      host.revisions.compose((handle) => handle)
+        .prepare("UPDATE active_commit SET source_digest=? WHERE project_id=?")
+        .run("7".repeat(64), projectId);
+    }],
+    ["control revision", (host, projectId) => {
+      new LockService(host.revisions).acquire({
+        projectId, lockType: "duration", scope: "project", owner: "racer", reason: "move control",
+      }, 1);
+    }],
+    ["rights digest", (host, _projectId, _view, materializationId) => {
+      host.revisions.compose((handle) => handle)
+        .prepare("UPDATE materialization SET rights_digest=? WHERE materialization_id=?")
+        .run("6".repeat(64), materializationId);
+    }],
+    ["native plan", (host, _projectId, _view, materializationId) => {
+      host.revisions.compose((handle) => handle)
+        .prepare("UPDATE materialization SET plan_json=? WHERE materialization_id=?")
+        .run(JSON.stringify({ format: "narralens.native-plan@1.0", engine: "openfilm",
+          fps: { num: 30, den: 1 }, clips: [], narration_policy: "preserve",
+          duration_policy: "preserve", total_frames: 1, plan_sha256: "5".repeat(64) }),
+        materializationId);
+    }],
+    ["materialization state", (host, _projectId, _view, materializationId) => {
+      host.materializations.markStale(materializationId, ["SOURCE_DIGEST_CHANGED"], new Date());
+    }],
+    ["materialization removed", (host, _projectId, _view, materializationId) => {
+      host.revisions.compose((handle) => handle)
+        .prepare("DELETE FROM materialization WHERE materialization_id=?").run(materializationId);
+    }],
+    ["the stored bytes", (host, _projectId, _view, materializationId) => {
+      host.revisions.compose((handle) => handle)
+        .prepare("UPDATE impact SET canonical_json=? WHERE impact_id=?")
+        .run("{}", impactIdFor(host, materializationId));
+    }],
+  ];
+
+  for (const [arm, mutate] of requireCurrentArms) {
+    it(`returns 428 and marks the row stale when ${arm} has moved`, async () => {
+      const key = `tx02a-${arm.replace(/ /gu, "-")}`;
+      const running = await started();
+      const { projectId, view } = await migrate(running);
+      const materialization = await readyMaterialization(running.host, projectId, key);
+      const created = await postImpact(running, projectId,
+        adoptBody(view, materialization.materialization_id, key));
+      expect(created.status, JSON.stringify(created.body)).toBe(201);
+      const impactId = String(created.body.impact_id);
+
+      mutate(running.host, projectId, view, materialization.materialization_id);
+
+      await expect(running.host.impact.requireCurrent(impactId))
+        .rejects.toMatchObject({ code: "IMPACT_STALE", status: 428 });
+      expect(running.host.impacts.get(impactId)?.state, arm).toBe("stale");
+    }, 600_000);
+  }
+
+  it("still answers an unchanged impact, so the arms above are not vacuously failing", async () => {
+    const running = await started();
     const { projectId, view } = await migrate(running);
-    const materialization = await readyMaterialization(running.host, projectId);
+    const materialization = await readyMaterialization(running.host, projectId, "tx02a-clean");
     const created = await postImpact(running, projectId,
-      adoptBody(view, materialization.materialization_id, "tx02a-require"));
+      adoptBody(view, materialization.materialization_id, "tx02a-clean"));
     expect(created.status).toBe(201);
     const impactId = String(created.body.impact_id);
-
-    // Still current: a consume would be allowed.
-    await expect(running.host.impact.requireCurrent(impactId, clock.now())).resolves
-      .toMatchObject({ impact_id: impactId });
-
-    // Now the materialization stops being ready. That happened *after* the insert, so no
-    // transaction could have rolled it back; `requireCurrent` is where it is caught.
-    running.host.materializations.markStale(materialization.materialization_id,
-      ["SOURCE_DIGEST_CHANGED"], clock.now());
-    await expect(running.host.impact.requireCurrent(impactId, clock.now()))
-      .rejects.toMatchObject({ code: "IMPACT_STALE", status: 428 });
-    expect(running.host.impacts.get(impactId)?.state).toBe("stale");
-    // And a stale impact is never handed out again, even by its own replay path.
-    const replay = await postImpact(running, projectId,
-      adoptBody(view, materialization.materialization_id, "tx02a-require"));
-    expect(replay.status).toBe(428);
+    await expect(running.host.impact.requireCurrent(impactId)).resolves.toMatchObject({ impact_id: impactId });
+    expect(running.host.impacts.get(impactId)?.state).toBe("active");
   }, 600_000);
 });
+
+/** 65 non-overlapping shot locks, each on a target the projection does not use. */
+function locks65(host: NarralensHost, projectId: string, index: number): void {
+  new LockService(host.revisions).acquire({
+    projectId, lockType: "visual", scope: "shot", targetId: `unused_shot_${index}`,
+    startFrame: index * 10, endFrameExclusive: index * 10 + 5, owner: "crowd", reason: "ceiling",
+  }, 1);
+}
+
+/** The impact id recorded against a materialization, read through the store. */
+function impactIdFor(host: NarralensHost, materializationId: string): string {
+  const row = host.revisions.compose((handle) => handle)
+    .prepare("SELECT impact_id FROM impact WHERE reference_id=? ORDER BY created_at LIMIT 1")
+    .get(materializationId) as { impact_id?: unknown } | undefined;
+  return String(row?.impact_id ?? "");
+}
+
 
 describe("TX-05A: a change between the first check and the insert leaves no active impact", () => {
   /**
@@ -171,8 +291,12 @@ describe("TX-05A: a change between the first check and the insert leaves no acti
       // Acquiring a lock also moves the control revision, which the materialization's own
       // re-verification may notice first and answer 428 with. The claim under test is "no
       // authorization is issued", not "this particular code is the one that fires".
-      expect([409, 423, 428], `${point}: ${JSON.stringify(response.body)}`).toContain(response.status);
       expect(running.host.impacts.byProject(projectId), point).toHaveLength(0);
+      // Refusal, and a refusal that is one of the answers the ADR §7 table defines — not a
+      // 500. `toBeGreaterThanOrEqual(400)` was too wide: a TypeError surfacing as an
+      // internal error would have satisfied it.
+      expect(REFUSAL_CODES, `${point}: ${JSON.stringify(response.body)}`).toContain(response.body.code);
+      expect(response.status, point).toBeLessThan(500);
       // Acquiring a lock legitimately moves the control revision, and M3's own re-verification
       // marks a prepared materialization stale when it does. So the row *may* be stale here —
       // what must never happen is an authorization surviving the refusal.
@@ -209,6 +333,121 @@ describe("TX-05A: a change between the first check and the insert leaves no acti
     expect(running.host.impacts.byProject(projectId)).toHaveLength(0);
   }, 600_000);
 
+  it("answers 423 TARGET_LOCKED for a lock that is already held, and creates nothing", async () => {
+    // The fault-point tests below inject a lock *inside* a request, and the refusal they
+    // observe may come from the lock check, the control revision or the materialization's
+    // own re-verification. That is correct behaviour but it cannot say which check fired, and
+    // it meant deleting both `assertUnlocked` calls left the whole suite green. So the
+    // production shape gets its own test: the lock is held *before* the request, the client
+    // re-reads the project's facts and prepares against them, and only the lock can refuse.
+    const running = await started();
+    const { projectId } = await migrate(running);
+    const view = await running.host.projectResolver.resolveActivated(projectId);
+    new LockService(running.host.revisions).acquire({
+      projectId, lockType: "visual", scope: "shot", targetId: "shot-002",
+      startFrame: 300, endFrameExclusive: 600, owner: "editor", reason: "shot under edit",
+    }, view.revision);
+
+    // A materialization prepared *after* the lock, so every other premise genuinely holds.
+    const materialization = await readyMaterialization(running.host, projectId, "tx03a-locked");
+    const current = await running.host.projectResolver.resolveActivated(projectId);
+    const response = await postImpact(running, projectId,
+      adoptBody(current, materialization.materialization_id, "tx03a-locked"));
+
+    expect(response.status, JSON.stringify(response.body)).toBe(423);
+    expect(response.body.code).toBe("TARGET_LOCKED");
+    expect(response.body.details).toMatchObject({ lock_type: "visual", target_id: "shot-002" });
+    expect(running.host.impacts.byProject(projectId)).toHaveLength(0);
+  }, 600_000);
+
+  it("records every active lock it checked, and refuses a project with more than 64", async () => {
+    const running = await started();
+    const { projectId, view } = await migrate(running);
+    const locks = new LockService(running.host.revisions);
+    // A lock on a range nothing touches: it must be *recorded* without blocking, which is
+    // the other half of the claim — `locks_checked` is a snapshot, not a filter.
+    locks.acquire({ projectId, lockType: "narration", scope: "project", targetId: "",
+      owner: "narrator", reason: "narration pass" }, view.revision);
+    const materialization = await readyMaterialization(running.host, projectId, "tx03a-recorded");
+    // Re-read: acquiring a lock moves the control revision, and a client prepares against
+    // what is current rather than against what it read before its own lock.
+    const current = await running.host.projectResolver.resolveActivated(projectId);
+    const response = await postImpact(running, projectId,
+      adoptBody(current, materialization.materialization_id, "tx03a-recorded"));
+    expect(response.status, JSON.stringify(response.body)).toBe(201);
+    const active = locks.activeLocks(projectId);
+    expect(response.body.locks_checked).toHaveLength(active.length);
+    expect(response.body.locks_checked).toEqual(active!
+      .map((lock) => ({ lock_id: lock.lock_id, control_revision: lock.control_revision }))
+      .sort((left, right) => (left.lock_id < right.lock_id ? -1 : 1)));
+    expect(running.host.impacts.byProject(projectId)).toHaveLength(1);
+
+    // And past the contract's ceiling it refuses rather than recording a truncated snapshot.
+    const crowded = await start();
+    hosts.push(crowded.host); dirs.push(crowded.base);
+    const second = await migrate(crowded, "tx03a-crowded");
+    for (let index = 0; index < 65; index += 1) {
+      locks65(crowded.host, second.projectId, index);
+    }
+    const ready = await readyMaterialization(crowded.host, second.projectId, "tx03a-crowded");
+    // Re-read: 65 acquisitions moved the control revision, and the request has to be
+    // prepared against the current facts or it is refused for the wrong reason.
+    const crowdedView = await crowded.host.projectResolver.resolveActivated(second.projectId);
+    const refused = await postImpact(crowded, second.projectId,
+      adoptBody(crowdedView, ready.materialization_id, "tx03a-crowded"));
+    expect(refused.status, JSON.stringify(refused.body)).toBe(422);
+    expect(refused.body.code).toBe("INVALID_REQUEST");
+    expect(crowded.host.impacts.byProject(second.projectId)).toHaveLength(0);
+  }, 900_000);
+
+  it("refuses and writes no row when the source bytes move mid-computation", async () => {
+    let moved = false;
+    const running = await started({
+      impactFault: (name: string): void => {
+        if (name !== "after_graph" || moved) return;
+        moved = true;
+        // Real bytes, on disk, under a declared root. Everything the request has read so far
+        // is now out of date, and the final re-read is what has to notice.
+        void writeFile(join(view.source_root.value, "film.html"), "<!doctype html><html></html>\n", "utf8");
+      },
+    });
+    const { projectId, view } = await migrate(running);
+    const materialization = await readyMaterialization(running.host, projectId);
+
+    const response = await postImpact(running, projectId,
+      adoptBody(view, materialization.materialization_id, "tx05a-source"));
+    expect(moved).toBe(true);
+    expect(REFUSAL_CODES, JSON.stringify(response.body)).toContain(response.body.code);
+    expect(response.status).toBeLessThan(500);
+    expect(running.host.impacts.byProject(projectId)).toHaveLength(0);
+  }, 600_000);
+
+  it("refuses and writes no row when the materialization's proven facts move mid-computation", async () => {
+    let moved = false;
+    const running = await started({
+      impactFault: (name: string): void => {
+        if (name !== "after_locks" || moved) return;
+        moved = true;
+        // The rights digest is one of the facts an impact binds to. `setProvenFacts` is
+        // deliberately guarded to non-terminal rows — a `ready_for_adoption` row's facts are
+        // not rewritable through the public API — so the honest injection is the one a bad
+        // migration or a tampered row would be: a direct UPDATE behind the guard.
+        running.host.revisions.compose((handle) => handle)
+          .prepare("UPDATE materialization SET rights_digest=? WHERE materialization_id=?")
+          .run("8".repeat(64), materialization.materialization_id);
+      },
+    });
+    const { projectId, view } = await migrate(running);
+    const materialization = await readyMaterialization(running.host, projectId);
+
+    const response = await postImpact(running, projectId,
+      adoptBody(view, materialization.materialization_id, "tx05a-rights"));
+    expect(moved).toBe(true);
+    expect(REFUSAL_CODES, JSON.stringify(response.body)).toContain(response.body.code);
+    expect(response.status).toBeLessThan(500);
+    expect(running.host.impacts.byProject(projectId)).toHaveLength(0);
+  }, 600_000);
+
   it("refuses and writes no row when the materialization goes stale mid-computation", async () => {
     let moved = false;
     const running = await started({
@@ -224,7 +463,7 @@ describe("TX-05A: a change between the first check and the insert leaves no acti
 
     const response = await postImpact(running, projectId,
       adoptBody(view, materialization.materialization_id, "tx05a-stale"));
-    expect(response.status, JSON.stringify(response.body)).toBeGreaterThanOrEqual(400);
+    expect(response.body.code, JSON.stringify(response.body)).toBe("IMPACT_STALE");
     expect(running.host.impacts.byProject(projectId)).toHaveLength(0);
   }, 600_000);
 });
@@ -335,7 +574,7 @@ describe("M4A-R01: the route answers a client consistently and idempotently", ()
   it("keeps versioned edits and history restore unmounted, and the legacy routes working", async () => {
     const running = await started();
     for (const path of [
-      `/api/migration/v1/projects/${running.host.projectResolver ? "d1-30s" : "d1-30s"}/edits`,
+      "/api/migration/v1/projects/d1-30s/edits",
       "/api/migration/v1/projects/d1-30s/history/restore",
     ]) {
       const response = await fetch(`${running.origin}${path}`, {

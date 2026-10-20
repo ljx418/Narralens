@@ -53,7 +53,7 @@ describe("M4A-P01: a fresh Host rebuilds the active layout from durable facts", 
     const { layout } = await restarted.host.projections.layoutFor(
       await restarted.host.projectResolver.resolveActivated(projectId), "p01-restart");
     expect(layout.roots[0]).toBe("film.html");
-    expect(layout.root).toBe(view.source_root === undefined ? "" : layout.root);
+    expect(layout.root).toBe(view.source_root.value);
 
     const resolved = restarted.host.engines.resolve(projectId);
     const projection = await resolved.port.inspect({
@@ -127,12 +127,19 @@ describe("M4A-P01: a fresh Host rebuilds the active layout from durable facts", 
     const running = await start();
     hosts.push(running.host); dirs.push(running.base);
     const { projectId } = await migrate(running);
+    // A ledger row with no matching root is a contradiction between two durable records, and
+    // is refused rather than absorbed. (Ledger *ambiguity* — two rows on one path — is the
+    // graph's question, and is tested in `consumer-graph.test.ts`.)
     expect(() => assertLedgerWithinRoots(
       { roots: ["film.html"], subtitles: [] }, ["assets/unknown.mp4"], projectId))
       .toThrow(/does not cover/u);
-    // Two ledger rows on one path is ambiguity, and the map construction is what catches it.
-    expect(() => assertLedgerWithinRoots({ roots: ["film.html"], subtitles: [] }, [], projectId))
+    expect(() => assertLedgerWithinRoots(
+      { roots: ["film.html", "assets/known.mp4"], subtitles: [] }, ["assets/known.mp4"], projectId))
       .not.toThrow();
+    // And a ledger path that escapes the target is refused before it is ever joined to a root.
+    expect(() => assertLedgerWithinRoots(
+      { roots: ["film.html"], subtitles: [] }, ["../../etc/passwd"], projectId))
+      .toThrow(/inside the migrated target/u);
   }, 300_000);
 
   it("derives exactly the roots the migration published, from one implementation", async () => {

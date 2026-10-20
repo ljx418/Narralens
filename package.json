@@ -8,7 +8,7 @@
     "node": ">=22.15.0"
   },
   "scripts": {
-    "check": "tsc --noEmit && vitest run --config vitest.config.ts && vite build",
+    "check": "tsc --noEmit && vitest run --config vitest.config.ts && python3 -I tests/wave2/m4a/impact-hash.golden.py tests/wave2/m4a/impact-hash.vectors.json && vite build",
     "build": "vite build",
     "start": "tsx src/host/start.ts",
     "recover": "tsx src/host/recover.ts",

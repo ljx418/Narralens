@@ -170,6 +170,35 @@ describe("TX-04A: consumers are classified, and unknown means unknown", () => {
     expect(result.affected_consumers.some((c) => c.kind === "transition")).toBe(false);
   });
 
+  it("records a declared subtitle as a preserved consumer", () => {
+    // Every other fixture has an empty `subtitles` array, which left this loop unexecuted.
+    // The subtitle files a migration carries are roots, so they really do appear in a real
+    // projection; a preserved subtitle under an adopted picture is a real relationship and has
+    // to be named rather than omitted.
+    const withSubtitles = projection({
+      subtitles: [
+        { subtitle_id: "narration", source_ref: "assets/narration.vtt", content_sha256: "0".repeat(64) },
+        { subtitle_id: "captions", source_ref: "assets/captions.vtt", content_sha256: "1".repeat(64) },
+      ],
+    });
+    const result = graph({ projection: withSubtitles,
+      plan: plan([{ clip_id: "clip-0", asset_id: "asset_a", start: 0, end: 900 }]) });
+    expect(result.affected_consumers).toContainEqual({ kind: "subtitle", id: "narration", action: "preserve" });
+    expect(result.affected_consumers).toContainEqual({ kind: "subtitle", id: "captions", action: "preserve" });
+    // Preserved, so it never becomes a narration lock — the plan preserves narration.
+    expect(result.affected_locks.some((lock) => lock.lock_type === "narration")).toBe(false);
+  });
+
+  it("never invents a transition consumer, because a projection carries no transitions", () => {
+    // `transition` is a legal `AffectedConsumer.kind`, and `EngineProjection` has no field
+    // for one. So the honest position is the narrow one: none is emitted, and a transition
+    // that appeared upstream would arrive as a completeness problem rather than as a consumer
+    // — which `refuses the whole capability when the projection is not complete` covers.
+    const result = graph({ projection: projection(),
+      plan: plan([{ clip_id: "clip-0", asset_id: "asset_a", start: 0, end: 900 }]) });
+    expect(result.affected_consumers.some((consumer) => consumer.kind === "transition")).toBe(false);
+  });
+
   it("refuses a plan that would change duration, which M4A cannot express", () => {
     expect(() => graph({ projection: projection(),
       plan: plan([{ clip_id: "clip-0", asset_id: "asset_a", start: 0, end: 600 }], 600) }))

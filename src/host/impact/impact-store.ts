@@ -234,8 +234,13 @@ export class ImpactStore {
         `The impact is ${row.state} and can no longer authorise a write`,
         { impact_id: impactId, state: row.state });
     }
-    const spec = parseCanonical(row);
-    if (!verifyImpactHash(spec)) {
+    // Parsing and verification are one fail-closed step. Bytes that are not a spec — a row
+    // edited into `{}`, truncated by a bad migration — make `canonicalJson` throw a
+    // TypeError, and a TypeError out of this function would be a 500 for a row that is
+    // exactly as unusable as an expired one. Anything that goes wrong here is a hash
+    // mismatch, which is what it is.
+    const spec = parseAndVerify(row);
+    if (spec === undefined) {
       throw new HttpError(428, "IMPACT_STALE",
         "The stored impact does not match its own hash", { impact_id: impactId });
     }
@@ -247,9 +252,15 @@ export class ImpactStore {
   }
 }
 
-function parseCanonical(row: ImpactRow): ImpactSpecV1 {
-  const parsed = JSON.parse(row.canonical_json) as Omit<ImpactSpecV1, "impact_hash">;
-  return { ...parsed, impact_hash: row.impact_hash };
+/** The stored bytes as a spec, or `undefined` when they are not one that hashes to `impact_hash`. */
+function parseAndVerify(row: ImpactRow): ImpactSpecV1 | undefined {
+  let parsed: Omit<ImpactSpecV1, "impact_hash">;
+  try {
+    parsed = JSON.parse(row.canonical_json) as Omit<ImpactSpecV1, "impact_hash">;
+  } catch { return undefined; }
+  if (parsed === null || typeof parsed !== "object" || Array.isArray(parsed)) return undefined;
+  const spec = { ...parsed, impact_hash: row.impact_hash } as ImpactSpecV1;
+  try { return verifyImpactHash(spec) ? spec : undefined; } catch { return undefined; }
 }
 
 function toRow(row: Record<string, unknown>): ImpactRow {

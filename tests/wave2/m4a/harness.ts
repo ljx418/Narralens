@@ -158,7 +158,11 @@ export async function readyMaterialization(host: NarralensHost, projectId: strin
     jobId: `job_${key}`, baseRevision: view.revision, sourceDigest: view.source_digest,
     controlRevision: view.control_revision,
     // Bound to the *current* inventory so the impact's rights check has something real to
-    // agree with; `rightsDigest` uses the same domain and shape the binding service does.
+    // agree with. The digest below is a shape-correct *stand-in*, not the binding service's
+    // real digest: the impact only ever compares it for equality with the row, and the real
+    // `BindingService` path — which does produce a production `rights_digest` — is exercised
+    // end to end in `impact-real-chain.test.ts`. Saying it "uses the same shape" would have
+    // been true of the 64 hex characters and false of the value.
     proposalSha256: "0".repeat(64), assetInventorySha256: inventory.inventory_sha256,
     rightsDigest: testRightsDigest(inventory.inventory_sha256, plan),
     requestDigest: "1".repeat(64), idempotencyKey: key,

@@ -25,13 +25,15 @@ export const OPENED_BY_M3: readonly { method: string; path: string; status: numb
 ];
 
 /**
- * Opened by M4A. Impact is served for an activated project; `d1-30s` is still a *legacy*
- * catalog project, so the honest answer for it is 404 — the route is mounted, and this
- * project is not the one it can serve. The mounted-ness is asserted by the malformed-body
- * test below, which proves the route answers 400 rather than 404 for input it can parse.
+ * Opened by M4A.
+ *
+ * The status recorded here is what a *bodyless* POST gets, and 400 is the interesting answer:
+ * it means the route is mounted and parsed its body, rather than being unmounted and 404ing.
+ * Impact is served for an activated migrated project; `d1-30s` is still a legacy catalog
+ * project, so a well-formed request for it is 404 — asserted in the test below, not here.
  */
 export const OPENED_BY_M4A: readonly { method: string; path: string; status: number }[] = [
-  { method: "POST", path: "/api/migration/v1/projects/d1-30s/impact", status: 404 },
+  { method: "POST", path: "/api/migration/v1/projects/d1-30s/impact", status: 400 },
 ];
 
 /**
@@ -120,6 +122,26 @@ describe("W2.0 fitness: the unopened Wave 2 routes stay closed", () => {
       "migrations\\/([A-Za-z0-9_-]+)",
       "migrations\\/([A-Za-z0-9_-]+)\\/rollback",
     ]);
+  });
+
+  it("answers what OPENED_BY_M3 and OPENED_BY_M4A record, so those lists are assertions", async () => {
+    // Both lists were exported and imported by nobody, which reads like a claim while
+    // asserting nothing. Iterated here so the recorded statuses are checked rather than
+    // merely written down.
+    const { origin, token } = await started();
+    // Only the bodyless entries can be checked this way: `OPENED_BY_M3` records 202 for a
+    // *well-formed* materialize, and a POST with no body is 400 for it. So the loop covers the
+    // reads and M4A's own entry, and the materialize POST is asserted where it belongs.
+    const bodyless = [...OPENED_BY_M3, ...OPENED_BY_M4A]
+      .filter((route) => route.method === "GET" || route.path.endsWith("/impact"));
+    for (const route of bodyless) {
+      const response = await fetch(`${origin}${route.path}`, {
+        method: route.method, headers: headers(origin, token),
+      });
+      expect(response.status, `${route.method} ${route.path}`).toBe(route.status);
+    }
+    expect(bodyless.map((route) => route.path)).toEqual(OPENED_BY_M3.filter((r) => r.method === "GET").map((r) => r.path)
+      .concat(OPENED_BY_M4A.map((r) => r.path)));
   });
 
   it("mounts the impact route and refuses its inputs on merit, not with 404", async () => {

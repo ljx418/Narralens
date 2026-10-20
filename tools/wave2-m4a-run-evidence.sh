@@ -66,9 +66,24 @@ run openfilm        corepack pnpm exec tsx tools/openfilm-availability-probe.mjs
 # same frozen vectors: the TypeScript proving it is deterministic is not the claim.
 run hash-vectors-python corepack pnpm test:wave2:m4a:golden-python
 
-# The frozen vector file is regenerated into a scratch copy and compared, so a drift in the
-# canonical rules cannot pass unnoticed just because both sides moved together.
-run hash-vectors-regen corepack pnpm test:wave2:m4a:vectors
+# The frozen vector file is regenerated into a *temporary* copy and compared, so a drift in
+# the canonical rules is detected rather than caused. Regenerating the committed file in
+# place — which this used to do — would bake any change to the canonical rules into the very
+# file whose job is to catch that change.
+SCRATCH="$(mktemp -d)"
+printf '%s\n' "corepack pnpm test:wave2:m4a:vectors $SCRATCH/impact-hash.vectors.json" \
+  > "$LOGS/hash-vectors-regen.cmd"
+corepack pnpm test:wave2:m4a:vectors "$SCRATCH/impact-hash.vectors.json" > "$LOGS/hash-vectors-regen.txt" 2>&1
+code=$?
+if [ "$code" -eq 0 ]; then
+  diff -u tests/wave2/m4a/impact-hash.vectors.json "$SCRATCH/impact-hash.vectors.json" \
+    >> "$LOGS/hash-vectors-regen.txt" 2>&1
+  code=$?
+fi
+rm -rf "$SCRATCH"
+printf '%s\n' "$code" > "$LOGS/hash-vectors-regen.exit"
+printf '%-22s exit=%s (0 means the committed vectors still reproduce byte for byte)\n' "hash-vectors-regen" "$code"
+[ "$code" -eq 0 ] || overall=1
 
 printf '%s\n' "NARRALENS_SECRET_SCAN_OUT=docs/evidence/WAVE2/security/credential-scan-m4a.json corepack pnpm exec tsx tools/secret-scan.ts" > "$LOGS/credential-scan.cmd"
 NARRALENS_SECRET_SCAN_OUT=docs/evidence/WAVE2/security/credential-scan-m4a.json \
