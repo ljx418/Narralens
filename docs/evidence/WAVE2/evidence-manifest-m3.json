@@ -3,15 +3,15 @@
   "scope": "M3 materialize: POST .../materialize and GET /materializations/:id, plus the W2.0 activation layer they depend on",
   "declaration": "M3_REVIEW_PENDING",
   "declaration_note": "M4A, M4B and M4C are not implemented. This session may not claim WAVE2_COMBINED_REVIEW_PENDING or WAVE2_EDITABLE_ADOPTION_READY.",
-  "capture_commit": "b55ca6addb5c92a7abd20f8170ad20bfa000c4af",
-  "capture_logs": "docs/evidence/WAVE2/logs/b55ca6addb5c92a7abd20f8170ad20bfa000c4af",
+  "capture_commit": "f2a41ff9f5613dc083ea89082505a496163175eb",
+  "capture_logs": "docs/evidence/WAVE2/logs/f2a41ff9f5613dc083ea89082505a496163175eb",
   "repo_dirty_at_capture": 0,
   "environment": {
-    "date_utc": "2026-10-20T00:45:25Z",
+    "date_utc": "2026-10-20T01:26:25Z",
     "node": "v22.22.1",
     "pnpm": "10.33.0",
     "os": "Linux 6.18.40.1-microsoft-standard-WSL2",
-    "git_head": "b55ca6addb5c92a7abd20f8170ad20bfa000c4af",
+    "git_head": "f2a41ff9f5613dc083ea89082505a496163175eb",
     "git_branch": "migration/m2.2-coordinator-persistence",
     "repo_dirty_at_capture": "0",
     "origin_main": "304c89134fdf9f834f7d69e3f4d5c89a68044c60",
@@ -30,93 +30,100 @@
       "name": "check-1",
       "command": "corepack pnpm check",
       "exit": 0,
-      "log": "docs/evidence/WAVE2/logs/b55ca6addb5c92a7abd20f8170ad20bfa000c4af/check-1.txt",
-      "log_sha256": "a0a48c8db48e81914b50de6d25daa45f8f67f7ecd533fdb8d12b6dfc8f94ac0d"
+      "log": "docs/evidence/WAVE2/logs/f2a41ff9f5613dc083ea89082505a496163175eb/check-1.txt",
+      "log_sha256": "2875b2853bcfa9d4cb294d70ae04441680c6c2c2e6c35b0761cba5a1320abdfe"
     },
     {
       "name": "check-2",
       "command": "corepack pnpm check",
       "exit": 0,
-      "log": "docs/evidence/WAVE2/logs/b55ca6addb5c92a7abd20f8170ad20bfa000c4af/check-2.txt",
-      "log_sha256": "7102ee53dced224daa171553278b28c8f1f4fc1054e1bac75ed7e3b1484b02f3"
+      "log": "docs/evidence/WAVE2/logs/f2a41ff9f5613dc083ea89082505a496163175eb/check-2.txt",
+      "log_sha256": "836ea89a160646841e59a951ea4e61de5215ddc45e9c3cf37daa3939f077ef51"
     },
     {
       "name": "contracts",
       "command": "corepack pnpm test:contracts",
       "exit": 0,
-      "log": "docs/evidence/WAVE2/logs/b55ca6addb5c92a7abd20f8170ad20bfa000c4af/contracts.txt",
-      "log_sha256": "544be79e76ea863879b88111e2a4b272704f38c3042aa3039e263e31a6775181"
+      "log": "docs/evidence/WAVE2/logs/f2a41ff9f5613dc083ea89082505a496163175eb/contracts.txt",
+      "log_sha256": "6bdfe597b450247dfb13ce9344f7f55619483d1b3ca464f21c764f2b8831de76"
     },
     {
       "name": "credential-scan",
       "command": "NARRALENS_SECRET_SCAN_OUT=docs/evidence/WAVE2/security/credential-scan-m3.json corepack pnpm exec tsx tools/secret-scan.ts",
       "exit": 0,
-      "log": "docs/evidence/WAVE2/logs/b55ca6addb5c92a7abd20f8170ad20bfa000c4af/credential-scan.txt",
+      "log": "docs/evidence/WAVE2/logs/f2a41ff9f5613dc083ea89082505a496163175eb/credential-scan.txt",
       "log_sha256": "07d74464f539d62885dc246ba31e19d00472eaaa3f9b9c0e0bf2db28675a19a6"
     },
     {
       "name": "m2.1",
       "command": "corepack pnpm test:m2.1",
       "exit": 0,
-      "log": "docs/evidence/WAVE2/logs/b55ca6addb5c92a7abd20f8170ad20bfa000c4af/m2.1.txt",
-      "log_sha256": "1382d9af89b39b4a5b6ce2cac63c1c745b0bb496405e6149efc9c93c292fd089"
+      "log": "docs/evidence/WAVE2/logs/f2a41ff9f5613dc083ea89082505a496163175eb/m2.1.txt",
+      "log_sha256": "79d6d6cdbbf30601138f2ea0f046ab7ba51dc92e5c4b6a10bbe7d5ee101dc612"
     },
     {
       "name": "m2.2",
       "command": "corepack pnpm exec vitest run tests/m2.2",
       "exit": 0,
-      "log": "docs/evidence/WAVE2/logs/b55ca6addb5c92a7abd20f8170ad20bfa000c4af/m2.2.txt",
-      "log_sha256": "fb4b69bdb3f8f215063e3d14d9aa04b22533583d7504240bf99d6300f681abd5"
+      "log": "docs/evidence/WAVE2/logs/f2a41ff9f5613dc083ea89082505a496163175eb/m2.2.txt",
+      "log_sha256": "7fcecbcec7ed5dd9d7a4ee6ae405e6c12cf55a0083985a64a016b9373258f002"
     },
     {
       "name": "m2.3",
       "command": "corepack pnpm exec vitest run tests/m2.3",
       "exit": 0,
-      "log": "docs/evidence/WAVE2/logs/b55ca6addb5c92a7abd20f8170ad20bfa000c4af/m2.3.txt",
-      "log_sha256": "2faa1a1fc246129a99fdd29fdef70724d826e3b3edefb7857e1a60611ae69c09"
+      "log": "docs/evidence/WAVE2/logs/f2a41ff9f5613dc083ea89082505a496163175eb/m2.3.txt",
+      "log_sha256": "9c864cd12c91045f5ada450571fc20be1426f4c0d14ee450862f4b9c656971c8"
+    },
+    {
+      "name": "m3-integrity",
+      "command": "corepack pnpm evidence:wave2:m3:integrity",
+      "exit": 0,
+      "log": "docs/evidence/WAVE2/logs/f2a41ff9f5613dc083ea89082505a496163175eb/m3-integrity.txt",
+      "log_sha256": "8ce7be812d2a6606747c0ed8ee3f47a47a9245b39a9d1f2226bb1e69f2b5f37e"
     },
     {
       "name": "openfilm",
       "command": "corepack pnpm exec tsx tools/openfilm-availability-probe.mjs",
       "exit": 0,
-      "log": "docs/evidence/WAVE2/logs/b55ca6addb5c92a7abd20f8170ad20bfa000c4af/openfilm.txt",
+      "log": "docs/evidence/WAVE2/logs/f2a41ff9f5613dc083ea89082505a496163175eb/openfilm.txt",
       "log_sha256": "3de30e2fd64151df1e39cedc634c6df01fa290a2fcee86d964d75b9e52fe0b97"
     },
     {
       "name": "wave1-historical",
       "command": "corepack pnpm evidence:wave1:historical",
       "exit": 0,
-      "log": "docs/evidence/WAVE2/logs/b55ca6addb5c92a7abd20f8170ad20bfa000c4af/wave1-historical.txt",
+      "log": "docs/evidence/WAVE2/logs/f2a41ff9f5613dc083ea89082505a496163175eb/wave1-historical.txt",
       "log_sha256": "ac02c2f38ba9a726fb621990c9b21c159f1fa6fc65ff0fe1fbfcd3d7e6d8a062"
     },
     {
       "name": "wave1-integrity",
       "command": "corepack pnpm evidence:wave1:integrity",
       "exit": 1,
-      "log": "docs/evidence/WAVE2/logs/b55ca6addb5c92a7abd20f8170ad20bfa000c4af/wave1-integrity.txt",
-      "log_sha256": "0c02d6f12356eb5141a925ee0346789e00ed14701b63788828d4a5b2891e4a1d",
+      "log": "docs/evidence/WAVE2/logs/f2a41ff9f5613dc083ea89082505a496163175eb/wave1-integrity.txt",
+      "log_sha256": "ff35ae130fe91cd3a32a9053442de50a16c3da9251ff9cded9b4bf4e8debf68e",
       "expected_failure": true
     },
     {
       "name": "wave2-fitness",
       "command": "corepack pnpm test:wave2:fitness",
       "exit": 0,
-      "log": "docs/evidence/WAVE2/logs/b55ca6addb5c92a7abd20f8170ad20bfa000c4af/wave2-fitness.txt",
-      "log_sha256": "ddf640171c31a75be08fa88ede51cc2f3fb911b35306258e81b2146fee7b17b9"
+      "log": "docs/evidence/WAVE2/logs/f2a41ff9f5613dc083ea89082505a496163175eb/wave2-fitness.txt",
+      "log_sha256": "804d797a382fa2b4b3a088dc927fc88d2e05eb9bdff9f25ac535711d328c2c15"
     },
     {
       "name": "wave2-m3",
       "command": "corepack pnpm test:wave2:m3",
       "exit": 0,
-      "log": "docs/evidence/WAVE2/logs/b55ca6addb5c92a7abd20f8170ad20bfa000c4af/wave2-m3.txt",
-      "log_sha256": "6105da318961e87da0862841326acb25ac418e8894d7841481fd328a84cfd336"
+      "log": "docs/evidence/WAVE2/logs/f2a41ff9f5613dc083ea89082505a496163175eb/wave2-m3.txt",
+      "log_sha256": "2317f127c24b1c68324cebd0ca09cbd00a09fd07126eee903b2abe123c860783"
     },
     {
       "name": "wave2-w2.0",
       "command": "corepack pnpm test:wave2:w2.0",
       "exit": 0,
-      "log": "docs/evidence/WAVE2/logs/b55ca6addb5c92a7abd20f8170ad20bfa000c4af/wave2-w2.0.txt",
-      "log_sha256": "21adb43db4ea05a082d829d262c75aabc2e46acdf8da77919191296b91acf791"
+      "log": "docs/evidence/WAVE2/logs/f2a41ff9f5613dc083ea89082505a496163175eb/wave2-w2.0.txt",
+      "log_sha256": "9368fd780ba56b36c8c69f93355f28aecfe253841ec0873121e8d3ad302ed598"
     }
   ],
   "cases": [
@@ -224,13 +231,16 @@
     "M4A, M4B and M4C are not implemented. impact, versioned edits and history restore remain 404 and are asserted so by the integrity gate against src/host/server.ts.",
     "evidence:wave1:integrity exits 1 by design: it asserts no code moved after the Wave 1 freeze, and Wave 2 moved code. Its output is kept verbatim and was never tuned green.",
     "evidence:wave1:historical exits 0 and reads the frozen commit's tree rather than the tip.",
-    "The full gate runs at maxWorkers=2. That changes nothing about what is asserted, how long a test may take, or which tests run; it was chosen because this machine cannot sustain every suite at once.",
+    "The full gate runs at maxWorkers=2 and each admitted libx264 encoder/filter pool is fixed at one thread. These resource ceilings change neither the assertions nor which tests run; they prevent two accepted encoders from creating unbounded internal worker pools.",
     "HOST_RESOURCE_EXHAUSTED (503, ADR-W2.0-003) means a host resource was momentarily unavailable and the request may be retried. It is deliberately distinct from MEDIA_TOOL_UNAVAILABLE, which is a media-tool failure.",
     "MT-05's lease timing uses an injected clock and a manual scheduler rather than sleeping, so a wall-clock lease test cannot be skipped on a busy machine or fail on a slow one.",
     "PR-03 is closed on LockService: the control revision moves because a lock moved. No test writes a control revision by hand to stand in for a lock.",
     "headed/human experience is NOT_RUN: this wave changes no UI.",
     "Two guards are defence-in-depth and not independently provable, and are recorded rather than given contrived tests: the produced-frame-count check after encoding, and semaphore release idempotence.",
     "The capture at 14cc3b6 is a FAILED diagnostic capture, kept deliberately; its directory says so. It is the evidence the two root causes were written against.",
-    "This capture supersedes the earlier M3 captures at b6207c8 and 4721381. All captures are retained."
+    "Crash-orphan staging collection has no production scheduler in M3. Per-attempt cleanup is safe and active workers are never swept; a later age/lease-aware garbage collector must be specified before orphan collection is claimed.",
+    "The route-status integrity check covers the Wave 2 migration namespace only. The pre-existing legacy /api/projects/:id/edits route remains mounted and is not the unopened versioned Wave 2 edit route.",
+    "Long-film performance and streaming hashes are not claimed: current validation may buffer individual source assets, while the evidenced fixture is the bounded V1 media set.",
+    "This capture supersedes the earlier M3 captures at b6207c8, 4721381 and b55ca6a. All captures are retained."
   ]
 }

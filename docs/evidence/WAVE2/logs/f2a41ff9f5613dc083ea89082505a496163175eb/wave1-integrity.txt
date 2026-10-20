@@ -1,0 +1,104 @@
+
+> narralens@0.1.0 evidence:wave1:integrity /mnt/c/workspace/videoworkline/Narralens
+> node tools/wave1-evidence-integrity.mjs
+
+FAIL artifact digest changed: src/host/engine/native-mutation-registry.ts
+FAIL artifact digest changed: src/host/projects/revision-store.ts
+FAIL artifact digest changed: src/host/projects/revision-store.ts
+FAIL artifact digest changed: src/host/persistent-job-store.ts
+FAIL artifact digest changed: tests/m2.3/migration-service.test.ts
+FAIL artifact digest changed: tests/m2.3/migration-service.test.ts
+FAIL artifact digest changed: tests/m2.3/migration-real-export.test.ts
+FAIL artifact digest changed: tests/m2.3/migration-service.test.ts
+FAIL artifact digest changed: tests/m2.3/migration-real-export.test.ts
+FAIL artifact digest changed: tests/m2.3/migration-service.test.ts
+FAIL artifact digest changed: tests/m2.3/migration-service.test.ts
+FAIL artifact digest changed: src/host/projects/migration-store.ts
+FAIL artifact digest changed: tests/m2.3/migration-service.test.ts
+FAIL artifact digest changed: tests/m2.3/migration-service.test.ts
+FAIL artifact digest changed: tests/architecture/m2.1-fitness.test.ts
+FAIL artifact digest changed: tests/architecture/m2.2-fitness.test.ts
+FAIL artifact digest changed: tests/architecture/m2.1-fitness.test.ts
+PASS 9 gate logs exist, are tracked and match their digests
+PASS manifest records a clean tree at capture
+PASS the capture environment independently records the same commit
+FAIL code changed after the frozen commit:
+contracts/adopt-request.schema.json
+contracts/api-error.schema.json
+contracts/controlled-write-response.schema.json
+contracts/impact.schema.json
+contracts/materialization.schema.json
+contracts/materialize-request.schema.json
+contracts/migration-report.schema.json
+contracts/restore-request.schema.json
+package.json
+src/adapters/hypit/hypit-engine-adapter.ts
+src/contracts/engine-types.ts
+src/contracts/migration-types.ts
+src/contracts/types.ts
+src/contracts/validator.ts
+src/contracts/wave2-types.ts
+src/host/api-error.ts
+src/host/assets/media-validator.ts
+src/host/engine/error-alias.ts
+src/host/engine/native-mutation-registry.ts
+src/host/engine/openfilm-composition.ts
+src/host/host-diagnostics.ts
+src/host/job-defaults.ts
+src/host/materialize/binding-service.ts
+src/host/materialize/derived-artifact-store.ts
+src/host/materialize/materialization-store.ts
+src/host/materialize/materialize-service.ts
+src/host/materialize/native-plan-builder.ts
+src/host/materialize/proxy-renderer.ts
+src/host/persistent-job-store.ts
+src/host/projects/asset-inventory-port.ts
+src/host/projects/asset-registry.ts
+src/host/projects/job-kind-migration.ts
+src/host/projects/migrated-asset-ledger.ts
+src/host/projects/migration-service.ts
+src/host/projects/migration-store.ts
+src/host/projects/project-catalog.ts
+src/host/projects/project-resolver.ts
+src/host/projects/revision-store.ts
+src/host/server.ts
+tests/architecture/m2.1-fitness.test.ts
+tests/architecture/m2.2-fitness.test.ts
+tests/contracts/contracts.test.ts
+tests/contracts/d4.2.1-contracts.test.ts
+tests/host/d4.2.1-migration-evidence.test.ts
+tests/m2.3/migration-real-export.test.ts
+tests/m2.3/migration-service.test.ts
+tests/wave2/m3/binding-service.test.ts
+tests/wave2/m3/derived-artifact-store.test.ts
+tests/wave2/m3/drain-liveness.test.ts
+tests/wave2/m3/lease-and-recovery.test.ts
+tests/wave2/m3/lineage-and-limits.test.ts
+tests/wave2/m3/materialization-store.test.ts
+tests/wave2/m3/materialize-routes.test.ts
+tests/wave2/m3/materialize-service.test.ts
+tests/wave2/m3/native-plan.test.ts
+tests/wave2/m3/proxy-renderer.test.ts
+tests/wave2/w2-asset-02-production.test.ts
+tests/wave2/w2-asset-03-atomic.test.ts
+tests/wave2/w2-asset-inventory-port.test.ts
+tests/wave2/w2-asset-ledger.test.ts
+tests/wave2/w2-contracts.test.ts
+tests/wave2/w2-host-composition.test.ts
+tests/wave2/w2-host-diagnostics.test.ts
+tests/wave2/w2-job-kind-fresh.test.ts
+tests/wave2/w2-job-kind-migration.test.ts
+tests/wave2/w2-ledger-attention.test.ts
+tests/wave2/w2-openfilm-composition.test.ts
+tests/wave2/w2-project-resolver.test.ts
+tests/wave2/w2-route-fitness.test.ts
+tests/wave2/w2-typed-edit.test.ts
+tools/openfilm-availability-probe.mjs
+tools/secret-scan.ts
+tools/w2.0-run-evidence.sh
+tools/wave1-evidence-historical.mjs
+tools/wave2-m3-evidence-integrity.mjs
+tools/wave2-m3-run-evidence.sh
+PASS 21 cases, 20 passed, 1 declared otherwise: LOCK-NA=NOT_APPLICABLE_APPROVED
+checks_failed=18 frozen_code_sha=e2dec5ca03ee881b55f92b920ee6df2c676aeb26
+ ELIFECYCLE  Command failed with exit code 1.

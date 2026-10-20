@@ -1,0 +1,98 @@
+
+> narralens@0.1.0 test:wave2:w2.0 /mnt/c/workspace/videoworkline/Narralens
+> vitest run --config vitest.config.ts tests/wave2/w2-asset-02-production.test.ts tests/wave2/w2-asset-03-atomic.test.ts tests/wave2/w2-asset-inventory-port.test.ts tests/wave2/w2-asset-ledger.test.ts tests/wave2/w2-contracts.test.ts tests/wave2/w2-host-composition.test.ts tests/wave2/w2-host-diagnostics.test.ts tests/wave2/w2-job-kind-fresh.test.ts tests/wave2/w2-job-kind-migration.test.ts tests/wave2/w2-ledger-attention.test.ts tests/wave2/w2-openfilm-composition.test.ts tests/wave2/w2-project-resolver.test.ts tests/wave2/w2-route-fitness.test.ts tests/wave2/w2-typed-edit.test.ts
+
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens
+
+(node:497772) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:497771) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/w2-project-resolver.test.ts (16 tests) 11940ms
+   ✓ ACT-01 a terminal migrated target resolves from durable facts alone > resolves after the process that migrated it is gone  745ms
+   ✓ ACT-01 a terminal migrated target resolves from durable facts alone > reaches the same answer through a store reopened on the same database file  1324ms
+   ✓ ACT-01 a terminal migrated target resolves from durable facts alone > resolves a legacy catalog project through the same seam, without inventing a migration  829ms
+   ✓ ACT-01 a terminal migrated target resolves from durable facts alone > carries no path, URL or shell argument in the client-visible projection  788ms
+   ✓ ACT-02 every way a migrated target must not resolve is closed > refuses a migration that has not reached a terminal state  629ms
+   ✓ ACT-02 every way a migrated target must not resolve is closed > refuses an aborted migration even though it is terminal  698ms
+   ✓ ACT-02 every way a migrated target must not resolve is closed > refuses a migration in attention, and a recovery-parked one, with 423  1108ms
+   ✓ ACT-02 every way a migrated target must not resolve is closed > refuses when the target root does not exist on disk  576ms
+   ✓ ACT-02 every way a migrated target must not resolve is closed > refuses a migration root entry that is a symlink out of the migration root  684ms
+   ✓ ACT-02 every way a migrated target must not resolve is closed > never adopts a symlinked path as the target's own tree  682ms
+   ✓ ACT-02 every way a migrated target must not resolve is closed > refuses a target with no engine binding and one with no active commit  1401ms
+   ✓ ACT-02 every way a migrated target must not resolve is closed > refuses a binding to an engine the migration did not target  691ms
+   ✓ ACT-02 every way a migrated target must not resolve is closed > refuses a binding pinned to an OpenFilm upstream other than the frozen one  578ms
+   ✓ ACT-02 every way a migrated target must not resolve is closed > refuses a migration that placed no content at all  354ms
+   ✓ ACT-02 every way a migrated target must not resolve is closed > refuses an unknown project id the same way whether or not a migration exists  425ms
+   ✓ ACT-02 every way a migrated target must not resolve is closed > refuses an ambiguous target that two terminal migrations both claim  425ms
+(node:502288) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/w2-host-composition.test.ts (12 tests) 23499ms
+   ✓ blocker 4a: the Host owns one resolver, one ledger and one inventory > exposes the three W2.0 components from composition  850ms
+   ✓ blocker 4a: the Host owns one resolver, one ledger and one inventory > shares exactly one RevisionStore, catalog and migration root across them  712ms
+   ✓ blocker 4a: the Host owns one resolver, one ledger and one inventory > keeps the legacy route answering exactly as before  1528ms
+   ✓ blocker 4a: the Host owns one resolver, one ledger and one inventory > keeps the three Wave 2 routes that M4 has not opened closed  703ms
+   ✓ blocker 4a: the Host owns one resolver, one ledger and one inventory > still exposes the Wave 1 migration routes  1004ms
+   ✓ blocker 4b: a migrated target resolves through the production seam after a restart > resolves after the Host that created the target is closed and reopened  834ms
+   ✓ blocker 4b: a migrated target resolves through the production seam after a restart > fails closed through the same seam when the binding is missing  750ms
+   ✓ blocker 4b: a migrated target resolves through the production seam after a restart > fails closed when the active commit is missing  813ms
+   ✓ blocker 4b: a migrated target resolves through the production seam after a restart > fails closed when the migration is still moving  719ms
+   ✓ blocker 4b: a migrated target resolves through the production seam after a restart > answers an unknown project as NOT_FOUND through the same seam  663ms
+   ✓ ASSET-02 and ASSET-03 through the Host's own instances > seeds through the real migration, then fails closed on drift, permanently  14872ms
+ ✓ tests/wave2/w2-job-kind-migration.test.ts (17 tests) 10293ms
+   ✓ W2-G02 the job table gains `materialize` without losing a row > reopens a Wave 1 database and keeps every job field value exactly  920ms
+   ✓ W2-G02 the job table gains `materialize` without losing a row > leaves events and the outbox untouched  912ms
+   ✓ W2-G02 the job table gains `materialize` without losing a row > accepts a materialize job after the migration and still rejects an unknown kind  889ms
+   ✓ W2-G02 the job table gains `materialize` without losing a row > is idempotent: reopening again performs no further migration and keeps the data  677ms
+   ✓ W2-G02 the job table gains `materialize` without losing a row > leaves the old table in place until the swap is proven, and records why  548ms
+   ✓ W2-G02 the job table gains `materialize` without losing a row > writes the backup beside the database it migrated  535ms
+   ✓ W2-G02 the job table gains `materialize` without losing a row > does not rebuild or recreate the job table on a second open  520ms
+   ✓ W2-G02 the job table gains `materialize` without losing a row > fails startup loudly rather than silently skipping a half-migrated table  482ms
+   ✓ the copy is by explicit column list, not by position > drops an unknown column rather than shifting every value after it  868ms
+   ✓ the verification actually fires > refuses the swap when a copied value does not match, keeping the old table and the backup  485ms
+   ✓ the verification actually fires > refuses the swap when the row count differs  592ms
+   ✓ the verification actually fires > refuses the swap when a payload digest is altered  560ms
+   ✓ the verification actually fires > leaves a verifiable backup behind after refusing  640ms
+   ✓ the verification actually fires > replaces a stale backup when the previous attempt provably did not complete  663ms
+   ✓ the verification actually fires > leaves a backup alone once its migration is recorded  1000ms
+(node:507457) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:508330) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/w2-openfilm-composition.test.ts (6 tests) 2749ms
+   ✓ R2-07 the OpenFilm port is composed only from a verified pinned checkout > registers a port against the real pinned upstream when one is present  2730ms
+ ✓ tests/wave2/w2-job-kind-fresh.test.ts (8 tests) 2902ms
+   ✓ blocker 1a: a fresh database accepts materialize on its first open > creates the job table with all four kinds on the very first construction  498ms
+   ✓ blocker 1a: a fresh database accepts materialize on its first open > creates a materialize job immediately, with no close-and-reopen  314ms
+   ✓ blocker 1a: a fresh database accepts materialize on its first open > keeps the fresh and migrated schemas semantically identical  609ms
+   ✓ blocker 1b: the old Wave 1 path still migrates under controlled rules > migrates a legacy DDL database and then accepts materialize  322ms
+   ✓ blocker 1b: the old Wave 1 path still migrates under controlled rules > keeps every legacy kind usable after the migration  340ms
+(node:509180) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/w2-route-fitness.test.ts (5 tests) 903ms
+   ✓ W2.0 fitness: the unopened Wave 2 routes stay closed > keeps the Wave 1 migration routes answering, so 404 means unmounted and not broken  804ms
+(node:511229) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/w2-asset-ledger.test.ts (30 tests) 465ms
+(node:513374) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/w2-asset-03-atomic.test.ts (13 tests) 229ms
+(node:515613) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/w2-asset-inventory-port.test.ts (14 tests) 296ms
+(node:517876) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/w2-asset-02-production.test.ts (13 tests) 222ms
+(node:519258) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/w2-ledger-attention.test.ts (9 tests) 140ms
+ ✓ tests/wave2/w2-contracts.test.ts (28 tests) 47ms
+ ✓ tests/wave2/w2-typed-edit.test.ts (5 tests) 14ms
+ ✓ tests/wave2/w2-host-diagnostics.test.ts (10 tests) 6ms
+
+ Test Files  14 passed (14)
+      Tests  186 passed (186)
+   Start at  09:46:57
+   Duration  65.31s (transform 3.90s, setup 0ms, collect 30.17s, tests 53.70s, environment 2ms, prepare 29.84s)
+
