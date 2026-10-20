@@ -51,7 +51,7 @@ export async function composeOpenFilmPort(input: {
   /** Bounded so a hung `git status` cannot hold startup open. */
   readonly gitStatusTimeoutMs?: number;
 }): Promise<OpenFilmComposition> {
-  const availability = await openFilmAvailability(input.vendorRoot, input.gitStatusTimeoutMs ?? 10_000);
+  const availability = await openFilmAvailability(input.vendorRoot, input.gitStatusTimeoutMs ?? 30_000);
   if (!availability.available) {
     return { installed: false, availability, vendor_root: availability.vendor_root,
       reason: availability.reason };

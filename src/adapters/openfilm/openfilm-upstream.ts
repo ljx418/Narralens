@@ -119,7 +119,7 @@ async function readCheckoutSha(vendorRoot: string): Promise<string | null> {
  * independent facts: the HEAD is the pinned SHA, the checkout has no tracked modifications,
  * and every file this loader is about to execute hashes to its pinned digest.
  */
-export async function openFilmAvailability(vendorRoot: string, gitStatusTimeoutMs = 10_000): Promise<OpenFilmAvailability> {
+export async function openFilmAvailability(vendorRoot: string, gitStatusTimeoutMs = 30_000): Promise<OpenFilmAvailability> {
   const checked: string[] = [];
   let root: string;
   try { root = await realpath(vendorRoot); }

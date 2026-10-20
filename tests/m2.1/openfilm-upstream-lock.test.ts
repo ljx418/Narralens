@@ -128,6 +128,14 @@ describe("M-04 pinned OpenFilm checkout verification", () => {
     });
   });
 
+  it("uses a 30 second production default without weakening an explicit fail-closed budget", async () => {
+    const upstreamSource = await readFile(resolve("src/adapters/openfilm/openfilm-upstream.ts"), "utf8");
+    const compositionSource = await readFile(resolve("src/host/engine/openfilm-composition.ts"), "utf8");
+    expect(upstreamSource).toContain("gitStatusTimeoutMs = 30_000");
+    expect(compositionSource).toContain("gitStatusTimeoutMs ?? 30_000");
+    // The explicit 10ms test above remains the proof that any caller-supplied budget fails closed.
+  });
+
   it("rejects a tracked dirty checkout and records git_clean only after a successful check", async () => {
     await withFakeGit("printf ' M packages/openfilm/studio/server/film.mjs\\n'", async (root) => {
       const dirty = await openFilmAvailability(root);
