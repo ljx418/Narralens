@@ -29,9 +29,12 @@ export default defineConfig({
      * agreed that lowering worker concurrency is the legitimate lever: it changes nothing
      * about what is asserted, how long a test may take, or which tests run.
      *
-     * At 2 workers every suite runs, every attempt runs, and the wall clock is dominated by
-     * the media work rather than by contention.
+     * M4A added a second live OpenFilm inspect at authorization consumption. With 2 workers,
+     * the combined gate produced one retryable 503 in 850 tests while the same commit's
+     * second full run and isolated M4A run were green. One worker keeps every test and every
+     * timeout unchanged while preventing independent Hosts, ffmpeg and the 135 MB fixture
+     * from competing for the same machine resources.
      */
-    maxWorkers: 2,
+    maxWorkers: 1,
   },
 });

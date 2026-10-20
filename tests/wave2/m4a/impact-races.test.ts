@@ -706,7 +706,7 @@ describe("M4A-NW01: an impact changes nothing but its own two rows", () => {
 
     const created = await postImpact(running, projectId,
       adoptBody(view, materialization.materialization_id, "nw01-1"));
-    expect(created.status).toBe(201);
+    expect(created.status, JSON.stringify(created.body)).toBe(201);
     // And a replay changes nothing either.
     expect((await postImpact(running, projectId,
       adoptBody(view, materialization.materialization_id, "nw01-1"))).status).toBe(201);
