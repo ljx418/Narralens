@@ -205,4 +205,21 @@ export interface ControlledWriteResponseV1 {
   status: "committed";
 }
 
+export interface ControlledWriteFailureResponseV1 {
+  format: "narralens.controlled-write-failure@1.0";
+  transaction_id: string;
+  project_id: string;
+  operation: "adopt_materialization";
+  previous_revision: number;
+  new_revision: number;
+  source_digest: Sha256;
+  status: "aborted";
+  error: {
+    http_status: 409 | 422 | 423 | 428 | 500;
+    code: import("./types.js").ApiErrorCode;
+    message: string;
+    details?: unknown;
+  };
+}
+
 export type ControlledWriteRequestV1 = AdoptRequestV1 | RestoreRequestV1;

@@ -30,10 +30,11 @@ import impactRequestSchema from "../../contracts/impact-request.schema.json" wit
 import adoptRequestSchema from "../../contracts/adopt-request.schema.json" with { type: "json" };
 import restoreRequestSchema from "../../contracts/restore-request.schema.json" with { type: "json" };
 import controlledWriteResponseSchema from "../../contracts/controlled-write-response.schema.json" with { type: "json" };
+import controlledWriteFailureSchema from "../../contracts/controlled-write-failure.schema.json" with { type: "json" };
 import type { EditRequest, ProposalBundle, ProposalComparison, ProposalComparisonDraft, ProposalComparisonRequest, ProposalRequest } from "./types.js";
 import type { EngineResponse, SourceDigestManifest } from "./engine-types.js";
 import type { MigrationPlanV1, MigrationReportV1, RollbackRecord } from "./migration-types.js";
-import type { AdoptRequestV1, ControlledWriteResponseV1, ImpactRequestV1, ImpactSpecV1,
+import type { AdoptRequestV1, ControlledWriteFailureResponseV1, ControlledWriteResponseV1, ImpactRequestV1, ImpactSpecV1,
   MaterializationV1, MaterializeRequestV1, NativePlanV1, RestoreRequestV1 } from "./wave2-types.js";
 
 const ajv = new Ajv2020({ allErrors: true, strict: true });
@@ -46,7 +47,7 @@ for (const schema of [apiErrorSchema, cancelResponseSchema, jobEventSchema, jobR
   engineResponseSchema, sourceDigestManifestSchema,
   migrationPlanSchema, rollbackRecordSchema, migrationReportSchema,
   materializeRequestSchema, materializationSchema, impactSpecSchema, impactRequestSchema, adoptRequestSchema,
-  restoreRequestSchema, controlledWriteResponseSchema]) {
+  restoreRequestSchema, controlledWriteResponseSchema, controlledWriteFailureSchema]) {
   ajv.addSchema(schema);
 }
 
@@ -81,6 +82,7 @@ export const contractIds = {
   adoptRequest: adoptRequestSchema.$id,
   restoreRequest: restoreRequestSchema.$id,
   controlledWriteResponse: controlledWriteResponseSchema.$id,
+  controlledWriteFailure: controlledWriteFailureSchema.$id,
 } as const;
 
 export function validatorFor(id: string): ValidateFunction {
@@ -320,6 +322,16 @@ export function validateControlledWriteResponse(value: unknown): { ok: true; val
   const response = value as ControlledWriteResponseV1;
   if (response.new_revision !== response.previous_revision + 1) {
     return { ok: false, errors: ["a committed controlled write advances the revision by exactly one"] };
+  }
+  return { ok: true, value: response };
+}
+
+export function validateControlledWriteFailure(value: unknown): { ok: true; value: ControlledWriteFailureResponseV1 } | { ok: false; errors: string[] } {
+  const validate = validatorFor(contractIds.controlledWriteFailure);
+  if (!validate(value)) return { ok: false, errors: formatErrors(validate.errors) };
+  const response = value as ControlledWriteFailureResponseV1;
+  if (response.new_revision !== response.previous_revision) {
+    return { ok: false, errors: ["an aborted controlled write must not advance the revision"] };
   }
   return { ok: true, value: response };
 }
