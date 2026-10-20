@@ -36,3 +36,12 @@
 证据：`docs/evidence/M2/M2.1/evidence-manifest.json`（EN-02）。
 
 非 HTTP 写入口：当前 Hypit Studio server 的 native mutation、Hypit CLI/文件系统、history/undo/redo 等由 M1B 盘点；M0 不把包内推测当实证。
+
+## M4B 追加（当前实现，不改写上方历史观察）
+
+| Method | 路由 | 当前状态 | 写入所有者/副作用 |
+|---|---|---|---|
+| POST | `/api/migration/v1/projects/:id/edits` | **M4B 已实现；只接受 `narralens.adopt-request@1.0`** | `AdoptionCoordinator` → `NativeWriteGateway` → pinned `OpenFilmEngineAdapter` → Host-only `AuthorSourcePublisher` → `RevisionStore.commitAdoption`；revision 恰好 +1，impact/idempotency/projection/ledger/outbox 同事务 |
+| POST | `/api/migration/v1/projects/:id/history/restore` | 仍未注册，404 | M4C 才允许开放；M4B 不提供 restore/undo/redo |
+
+M4B 不改变 legacy `/api/projects/:id/edits` 的既有 typed-edit 所有权，也不开放任意 native op。当前唯一新增写入口由项目队列串行化，发布前重查 source/control/rights/impact/锁；恢复先于通用 journal recovery。

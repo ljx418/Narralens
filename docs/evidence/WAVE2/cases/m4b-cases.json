@@ -1,0 +1,93 @@
+[
+  {
+    "case_id": "TX-01",
+    "status": "CLOSED",
+    "production_seam": true,
+    "tests": ["tests/wave2/m4b/adoption-route.test.ts"],
+    "evidence": "缺 impact 或确认在资源查找与 transaction 创建前返回 428，零落行。"
+  },
+  {
+    "case_id": "TX-02",
+    "status": "CLOSED",
+    "production_seam": true,
+    "tests": ["tests/wave2/m4a/impact-races.test.ts", "tests/wave2/m4b/adoption-route.test.ts"],
+    "evidence": "入口 requireCurrent 与发布前二次 requireCurrent 共用 active/TTL/hash/CAS 权威；commit 原子消费 impact。"
+  },
+  {
+    "case_id": "TX-03",
+    "status": "CLOSED",
+    "production_seam": true,
+    "tests": ["tests/wave2/m4a/openfilm-upstream-lock.test.ts", "tests/wave2/m4b/adoption-route.test.ts"],
+    "evidence": "M4A 三类锁分类保持；stage 后新取得 visual 锁在最终边界返回 428、revision +0。"
+  },
+  {
+    "case_id": "TX-04",
+    "status": "CLOSED",
+    "production_seam": true,
+    "tests": ["tests/wave2/m4a/consumer-graph.test.ts", "tests/wave2/m4a/openfilm-projection-completeness.test.ts", "tests/wave2/m4b/governance.test.ts"],
+    "evidence": "ConsumerGraph 未知依赖 fail closed；M4B 网关仅翻译 closed adopt_materialization。"
+  },
+  {
+    "case_id": "TX-05",
+    "status": "CLOSED",
+    "production_seam": true,
+    "tests": ["tests/m2.1/openfilm-upstream-lock.test.ts", "tests/wave2/m4a/impact-races.test.ts", "tests/wave2/m4b/adoption-route.test.ts"],
+    "evidence": "rebased、source/control/rights 漂移沿既有门拒绝；最终锁竞态直接证明 revision +0。"
+  },
+  {
+    "case_id": "TX-06",
+    "status": "CLOSED",
+    "production_seam": true,
+    "tests": ["tests/wave2/m4b/adoption-route.test.ts"],
+    "evidence": "相同请求并发只有一个 commit，另一响应与 durable replay 逐字相同。"
+  },
+  {
+    "case_id": "TX-07",
+    "status": "CLOSED",
+    "production_seam": true,
+    "tests": ["tests/wave2/m4b/adoption-route.test.ts", "tests/wave2/m4b/commit-adoption.test.ts"],
+    "evidence": "committed/aborted 都持久化同 kind/key/digest 响应；相同 key 异请求为 409。"
+  },
+  {
+    "case_id": "TX-08B",
+    "status": "CLOSED",
+    "production_seam": true,
+    "tests": ["tests/wave2/m4b/adoption-route.test.ts", "tests/wave2/m4b/author-source-publisher.test.ts"],
+    "evidence": "协调器 3 个边界与 publisher 5 个边界逐一重启；before/after 收敛，均不匹配则 terminal attention。"
+  },
+  {
+    "case_id": "TX-11B",
+    "status": "CLOSED",
+    "production_seam": true,
+    "tests": ["tests/wave2/m4b/adoption-route.test.ts"],
+    "evidence": "真实固定上游渲染采用前后两个 900 帧 MP4，并由 ffprobe 完整计帧。"
+  },
+  {
+    "case_id": "TX-13",
+    "status": "CLOSED",
+    "production_seam": true,
+    "tests": ["tests/wave2/m4b/adoption-route.test.ts", "tests/wave2/m4a/impact-races.test.ts"],
+    "evidence": "发布前重读 impact/materialization/view/rights，并重查锁；竞态不进入 commit。"
+  },
+  {
+    "case_id": "TX-14",
+    "status": "CLOSED",
+    "production_seam": true,
+    "tests": ["tests/wave2/m4b/adoption-route.test.ts"],
+    "evidence": "采用后仍为三个 native clip；只改中镜 overrides 后两侧 ID 不变、第二次真实渲染摘要变化。"
+  },
+  {
+    "case_id": "M4B-NW",
+    "status": "CLOSED",
+    "production_seam": true,
+    "tests": ["tests/wave2/m4b/adoption-route.test.ts", "tests/wave2/m4b/commit-adoption.test.ts", "tests/wave2/m4b/author-source-publisher.test.ts"],
+    "evidence": "before 失败为原 source/revision；after 崩溃按 durable facts 补交；不确定字节锁为 attention，不猜成功。"
+  },
+  {
+    "case_id": "REG",
+    "status": "CLOSED",
+    "production_seam": true,
+    "tests": ["tests/wave2/m4b/adoption-route.test.ts", "tests/wave2/m3/materialize-routes.test.ts", "tests/wave2/m4a/routes.test.ts", "tests/architecture/m2.2-fitness.test.ts"],
+    "evidence": "M4B、M4A、M3、M2.1、contracts、fitness 与全量 check 均纳入冻结捕获；历史证据不覆盖。"
+  }
+]
