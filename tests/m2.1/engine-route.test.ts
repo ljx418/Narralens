@@ -60,16 +60,17 @@ describe("M2.1 route activation", () => {
     expect(await response.json()).toMatchObject({ code: "NOT_FOUND" });
   });
 
-  it("keeps adopt and history restore closed, and impact refused rather than absent", async () => {
+  it("keeps history restore closed while impact and controlled adoption are mounted", async () => {
     const { call } = await started();
-    for (const path of [
-      "/api/migration/v1/projects/d1-30s/edits",
-      "/api/migration/v1/projects/d1-30s/history/restore",
-    ]) {
-      const response = await call(path, { method: "POST", headers: { "content-type": "application/json" }, body: "{}" });
-      expect([404, 405], path).toContain(response.status);
-      expect(await response.json(), path).toMatchObject({ code: "NOT_FOUND" });
-    }
+    const history = await call("/api/migration/v1/projects/d1-30s/history/restore",
+      { method: "POST", headers: { "content-type": "application/json" }, body: "{}" });
+    expect([404, 405]).toContain(history.status);
+    expect(await history.json()).toMatchObject({ code: "NOT_FOUND" });
+    // M4B mounts controlled adoption, and rejects missing authorization before project lookup.
+    const adopt = await call("/api/migration/v1/projects/d1-30s/edits",
+      { method: "POST", headers: { "content-type": "application/json" }, body: "{}" });
+    expect(adopt.status).toBe(428);
+    expect(await adopt.json()).toMatchObject({ code: "IMPACT_REQUIRED" });
     // M4A mounted impact, so a malformed body is a 400 about the body — not a 404 for a route
     // that does not exist. A 404 here would mean the gate was reporting the wrong thing.
     const impact = await call("/api/migration/v1/projects/d1-30s/impact",

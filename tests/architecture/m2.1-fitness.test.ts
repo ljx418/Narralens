@@ -111,14 +111,15 @@ describe("fitness 6: route activation matches the stage gate", () => {
   it("6. /api/migration/v1 exposes exactly the routes the current stage froze", () => {
     const migrationRoutes = [...serverSource.matchAll(/\^\\\/api\\\/migration\\\/v1\\\/([^$]*)\$/gu)].map((match) => match[1]!);
     // M2.1 opened one read route; M2.3 adds migration copy, report and rollback; M3 opens
-    // materialize and its read; M4A opens impact. Any other addition has to be justified by
-    // its own stage, not slipped in here.
+    // materialize and its read; M4A opens impact; M4B opens the single controlled-adoption
+    // edit route. Any other addition has to be justified by its own stage.
     expect(migrationRoutes).toEqual([
       "projects\\/([A-Za-z0-9_-]+)\\/engine",
       "projects\\/([A-Za-z0-9_-]+)\\/migrate-copy",
       "projects\\/([A-Za-z0-9_-]+)\\/proposals\\/([A-Za-z0-9_-]+)\\/materialize",
-      // M4A opens impact and only impact. Adopt and history restore are M4B's and M4C's.
+      // M4A opens impact; M4B opens controlled adoption. History restore belongs to M4C.
       "projects\\/([A-Za-z0-9_-]+)\\/impact",
+      "projects\\/([A-Za-z0-9_-]+)\\/edits",
       "materializations\\/([A-Za-z0-9_-]+)",
       "migrations\\/([A-Za-z0-9_-]+)",
       "migrations\\/([A-Za-z0-9_-]+)\\/rollback",
@@ -131,7 +132,7 @@ describe("fitness 6: route activation matches the stage gate", () => {
     // that could not fail; this one can.
     const escaped = (suffix: string): string =>
       `\\/api\\/migration\\/v1\\/projects\\/([A-Za-z0-9_-]+)\\/${suffix}`;
-    for (const closed of ["adopt", "history"]) {
+    for (const closed of ["history"]) {
       expect(serverSource.includes(escaped(closed)), closed).toBe(false);
     }
     expect(serverSource.includes(escaped("impact"))).toBe(true);
