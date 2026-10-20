@@ -107,7 +107,7 @@ asset/rights、ConsumerGraph 和 locks 计算 ImpactSpecV1，持久化 15 分钟
    inspect committed snapshot→materialization/snapshot currentness→asset/rights/bytes→graph→locks→二次
    currentness→insert 顺序。
 6. Host composition + POST /api/migration/v1/projects/:id/impact；201 返回 validateImpactSpec 可接受的完整 spec；
-   body 1 MiB、session、Origin 与 correlation 语义保持。
+   body 64 KiB、session、Origin 与 correlation 语义保持。
 7. 同步架构/traceability/route inventory/workflow；新增 test:wave2:m4a 和只追加 M4A evidence。
 
 restore_snapshot intent 可以在 M4A 共用 request/store/hash，但只有当 immutable historical snapshot 能由 pinned
@@ -123,7 +123,7 @@ adapter 真实 inspect 并完整构图时才开放；否则明确 capability blo
 - TX-02A：hash/TTL/materialization/base/source/control/rights/plan 任一变化 requireCurrent→428。
 - TX-03A：真实 visual lock→423，preserve 不虚构变化。
 - TX-04A：duration/shared subtitle/audio/transition/asset 完整分类；未知图 fail closed。
-- TX-05A：HTTP stale/race 拒绝，revision 0 增长。
+- TX-05A：HTTP stale/race 拒绝，revision 零增长。
 - M4A-NW01：source/revision/commit/pointer/binding/ledger/materialization/job/outbox 前后相等。
 - M4A-R01：adopt impact 新建/同 key 同 digest 重放=201；restore intent capability blocked；versioned
   edits/history=404；legacy/materialize routes 保持。

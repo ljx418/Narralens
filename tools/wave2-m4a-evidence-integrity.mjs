@@ -63,8 +63,19 @@ let commandsOk = true;
 for (const entry of manifest.commands ?? []) {
   if (!existsSync(resolve(REPO, entry.log))) { fail(`command log is missing: ${entry.log}`); commandsOk = false; continue; }
   const digest = sha256(resolve(REPO, entry.log));
-  if (entry.log_sha256 !== undefined && digest !== entry.log_sha256) {
+  if (typeof entry.log_sha256 !== "string" || entry.log_sha256.length === 0) {
+    fail(`command log has no required digest: ${entry.log}`);
+    commandsOk = false;
+  } else if (digest !== entry.log_sha256) {
     fail(`command log changed since capture: ${entry.log}`);
+    commandsOk = false;
+  }
+  if (entry.expected_failure === true && entry.exit === 0) {
+    fail(`command ${entry.name} is marked expected_failure but recorded exit 0`);
+    commandsOk = false;
+  }
+  if (entry.expected_failure !== true && entry.exit !== 0) {
+    fail(`command ${entry.name} recorded unexpected non-zero exit ${entry.exit}`);
     commandsOk = false;
   }
   // Read from the file beside the log, not from the manifest: a manifest claiming a passing

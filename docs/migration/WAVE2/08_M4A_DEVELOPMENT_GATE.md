@@ -20,7 +20,7 @@
 
 ```text
 POST /api/migration/v1/projects/:projectId/impact
-  └─ auth/origin + 1 MiB JSON + ImpactRequestV1 validator
+  └─ auth/origin + 64 KiB JSON + ImpactRequestV1 validator
      └─ ProjectOperationQueue.run(projectId)             # 与锁/写串行的读屏障
         └─ ProjectResolver.resolveActivated(projectId)    # 唯一 target/root/base
            ├─ RevisionStore active commit/control revision
