@@ -512,8 +512,8 @@ export class RevisionStore {
       for (const row of input.ledgerRows) {
         this.#db.prepare(`INSERT INTO migrated_asset(project_id, asset_id, migration_id, source_project_id,
           source_manifest_sha256, source_path, target_path, source_sha256, target_sha256,
-          duration_frames, media_type, source_json, license_json, created_at)
-          VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)`).run(input.projectId, row.asset_id, row.migration_id,
+          duration_frames, media_type, source_json, license_json, created_at, provenance)
+          VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,'adoption')`).run(input.projectId, row.asset_id, row.migration_id,
           row.source_project_id, row.source_manifest_sha256, row.source_path, row.target_path,
           row.source_sha256, row.target_sha256, row.duration_frames, row.media_type,
           row.source_json, row.license_json, at);

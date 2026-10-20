@@ -90,6 +90,8 @@ describe("M4B production adoption route", () => {
 
     const current = await running.host.projectResolver.resolveActivated(projectId);
     expect(current.revision).toBe(2);
+    expect((await running.host.assetInventory.inventory(projectId)).assets.length).toBeGreaterThanOrEqual(2);
+    expect(running.host.assetLedger.bootstrapRecord(projectId)?.state).toBe("active");
     const layout = await running.host.projections.layoutFor(current, "m4b-route-test");
     for (const clip of materialization.native_plan!.clips) {
       expect(layout.layout.roots).toContain(`assets/${clip.asset_sha256}/source.mp4`);

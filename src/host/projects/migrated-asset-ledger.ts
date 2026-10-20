@@ -208,6 +208,11 @@ export class MigratedAssetLedger {
         UNIQUE (project_id, input_digest)
       );
     `);
+    const columns = this.#db.prepare("PRAGMA table_info(migrated_asset)").all() as Array<{ name: string }>;
+    if (!columns.some((column) => column.name === "provenance")) {
+      this.#db.exec(`ALTER TABLE migrated_asset ADD COLUMN provenance TEXT NOT NULL DEFAULT 'migration'
+        CHECK(provenance IN ('migration','adoption'))`);
+    }
   }
 
   // ── reads ───────────────────────────────────────────────────────────────────────────
@@ -695,7 +700,13 @@ export class MigratedAssetLedger {
   #driftAgainst(current: LedgerBootstrapRecord,
     evidence: Extract<Evidence, { state: "verified" }>): string | null {
     if (current.input_digest !== evidence.inputDigest) return "EVIDENCE_CHANGED_AFTER_BOOTSTRAP";
-    const rows = this.assets(current.project_id);
+    // Adoption extends the same ledger with independently proven content-addressed rows.
+    // The migration baseline remains a bijection with the immutable migration plan, so its
+    // re-verification compares only rows whose provenance is migration; adopted rows are
+    // still byte-checked by AssetInventoryPort on every read.
+    const rows = (this.#db.prepare(
+      "SELECT * FROM migrated_asset WHERE project_id=? AND provenance='migration' ORDER BY asset_id")
+      .all(current.project_id) as Array<Record<string, unknown>>).map(migratedAssetRow);
     const proven = new Map(evidence.rows.map((row) => [row.asset_id, row]));
     if (rows.length !== proven.size) return "LEDGER_ROW_COUNT_CHANGED";
     for (const row of rows) {
