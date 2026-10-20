@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
@@ -90,8 +90,10 @@ interface Harness {
   service: MaterializeService;
   jobs: PersistentJobStore;
   store: MaterializationStore;
+  artifacts: DerivedArtifactStore;
   renderer: ReturnType<typeof gatedRenderer>;
   diagnostics: FailureDiagnostic[];
+  failInventoryWith: (error: Error) => void;
 }
 
 async function harness(): Promise<Harness> {
@@ -101,24 +103,29 @@ async function harness(): Promise<Harness> {
   stores.push(revisions);
   const jobs = new PersistentJobStore(revisions);
   const store = new MaterializationStore(revisions);
+  const artifacts = new DerivedArtifactStore(join(base, "derived"));
   const renderer = gatedRenderer();
   const diagnostics: FailureDiagnostic[] = [];
+  let inventoryFailure: Error | undefined;
   const service = new MaterializeService({
     jobs, materializations: store,
-    artifacts: new DerivedArtifactStore(join(base, "derived")),
+    artifacts,
     resolver: { resolve: async () => ({ kind: "activated" }) } as never,
     // The service re-reads the inventory to resolve each bound asset to its media, so a
     // stub without one stops the run before the renderer is ever reached.
-    inventory: { inventory: async () => ({
-      kind: "activated", project_id: "p", store: "migrated_asset_ledger",
-      inventory_sha256: "d".repeat(64),
-      assets: [0, 1].map((index) => ({
-        asset_id: `asset_${index}`, sha256: "a".repeat(64), media_type: "video/mp4",
-        duration_frames: 30, source: { kind: "owned", label: "fixture" },
-        license: { status: "cleared", label: "fixture", commercial_use: true },
-        availability: "available", eligible: true, blocking_reasons: [],
-      })),
-    }) } as never,
+    inventory: { inventory: async () => {
+      if (inventoryFailure !== undefined) throw inventoryFailure;
+      return {
+        kind: "activated", project_id: "p", store: "migrated_asset_ledger",
+        inventory_sha256: "d".repeat(64),
+        assets: [0, 1].map((index) => ({
+          asset_id: `asset_${index}`, sha256: "a".repeat(64), media_type: "video/mp4",
+          duration_frames: 30, source: { kind: "owned", label: "fixture" },
+          license: { status: "cleared", label: "fixture", commercial_use: true },
+          availability: "available", eligible: true, blocking_reasons: [],
+        })),
+      };
+    } } as never,
     bindings: { bind: async () => bindingResult() } as never,
     plans: { build: () => plan() } as never,
     proxies: renderer as never,
@@ -139,7 +146,10 @@ async function harness(): Promise<Harness> {
       requestDigest: "b".repeat(64), idempotencyKey: `k-${id}`, requestedBindings: [],
     });
   }
-  return { service, jobs, store, renderer, diagnostics };
+  return {
+    service, jobs, store, artifacts, renderer, diagnostics,
+    failInventoryWith: (error: Error) => { inventoryFailure = error; },
+  };
 }
 
 function bindingResult() {
@@ -220,6 +230,34 @@ describe("a hung render must not starve the queue", () => {
 });
 
 describe("a drain failure is a record, not a shrug", () => {
+  it("does not sweep a staging file owned by another active worker", async () => {
+    const h = await harness();
+    const activeStaging = await h.artifacts.stagingPath("mp4");
+    await writeFile(activeStaging, "another worker is still encoding");
+
+    const drain = h.service.drain();
+    await waitFor(() => h.renderer.parked() === 3);
+    h.renderer.releaseAll();
+    await drain;
+
+    await expect(readFile(activeStaging, "utf8")).resolves.toBe("another worker is still encoding");
+    await h.artifacts.discardStaging(activeStaging);
+  }, 60_000);
+
+  it("records an unexpected failure outside the owned-run catch", async () => {
+    const h = await harness();
+    const store = h.store as unknown as { require: (id: string) => never };
+    store.require = () => { throw new Error("the database handle closed before the row was read"); };
+
+    await expect(h.service.run("mat_a")).resolves.toMatchObject({ state: "attention" });
+    expect(h.diagnostics).toContainEqual(expect.objectContaining({
+      correlation_id: "mat_a",
+      stage: "materialize.run.unhandled",
+      message_sha256: expect.stringMatching(/^[a-f0-9]{64}$/u),
+      context: expect.objectContaining({ materialization_id: "mat_a" }),
+    }));
+  }, 60_000);
+
   it("records a scheduler failure, which is different from a row failing", async () => {
     const h = await harness();
     // The store itself throws while the pass is scanning: that is the scheduler failing,
@@ -366,7 +404,7 @@ describe("an unreadable ledger is not a proven drift", () => {
     const { ledger, projectId, before, arm } = await ledgerWithDigest(["ENOMEM", "out of memory"]);
     arm();
     const result = await ledger.reverify({ projectId }).catch((error: unknown) => error);
-    expect(result).toMatchObject({ status: 503, code: "MEDIA_TOOL_UNAVAILABLE",
+    expect(result).toMatchObject({ status: 503, code: "HOST_RESOURCE_EXHAUSTED",
       details: { recoverable: true } });
     // Not attention. The facts were not disproven; they were not read.
     expect(ledger.bootstrapRecord(projectId)).toEqual(before);
@@ -387,7 +425,7 @@ describe("an unreadable ledger is not a proven drift", () => {
     const { ledger, projectId, before, arm } = await ledgerWithDigest(null, "EIO");
     arm();
     const result = await ledger.reverify({ projectId }).catch((error: unknown) => error);
-    expect(result).toMatchObject({ status: 503, code: "MEDIA_TOOL_UNAVAILABLE" });
+    expect(result).toMatchObject({ status: 503, code: "HOST_RESOURCE_EXHAUSTED" });
     expect(ledger.bootstrapRecord(projectId)).toEqual(before);
   }, 60_000);
 });
@@ -507,7 +545,7 @@ describe("a retryable failure must not strand the materialization either", () =>
     const h = await harness();
     const inventory = h.service as unknown as { deps?: never };
     void inventory;
-    const retryable = Object.assign(new HttpError(503, "MEDIA_TOOL_UNAVAILABLE",
+    const retryable = Object.assign(new HttpError(503, "HOST_RESOURCE_EXHAUSTED",
       "the source tree could not be read right now",
       { reason: "SOURCE_TREE_UNREADABLE:ENOMEM", recoverable: true }), {});
 
@@ -528,6 +566,25 @@ describe("a retryable failure must not strand the materialization either", () =>
     expect(entry, JSON.stringify(h.diagnostics.map((d) => d.stage))).toBeDefined();
     expect(entry!.context).toMatchObject({ boundary: "render" });
     expect(entry!.context!.reason).toContain("SOURCE_TREE_UNREADABLE");
+  }, 60_000);
+
+  it("preserves the host-resource code when a ready row cannot be reverified", async () => {
+    const h = await harness();
+    const drain = h.service.drain();
+    await waitFor(() => h.renderer.parked() === 3);
+    h.renderer.releaseAll();
+    await drain;
+    expect(h.store.require("mat_a").state).toBe("ready_for_adoption");
+
+    h.failInventoryWith(new HttpError(503, "HOST_RESOURCE_EXHAUSTED",
+      "the inventory could not be read right now",
+      { reason: "SOURCE_TREE_UNREADABLE:ENOMEM", recoverable: true }));
+    await expect(h.service.read("mat_a")).rejects.toMatchObject({
+      status: 503,
+      code: "HOST_RESOURCE_EXHAUSTED",
+      details: { recoverable: true },
+    });
+    expect(h.store.require("mat_a").state).toBe("ready_for_adoption");
   }, 60_000);
 
   it("still strands a row when the facts were genuinely disproven", async () => {

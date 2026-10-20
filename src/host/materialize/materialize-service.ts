@@ -1,4 +1,4 @@
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { canonicalJson } from "../engine/source-digest-v1.js";
 import { redact, type FailureDiagnostic } from "../host-diagnostics.js";
 import { HttpError } from "../api-error.js";
@@ -300,7 +300,8 @@ export class MaterializeService {
         reasons.push("ASSET_LEDGER_ATTENTION");
         return reasons;
       }
-      throw new HttpError(503, "MEDIA_TOOL_UNAVAILABLE",
+      if (error instanceof HttpError && error.details?.recoverable === true) throw error;
+      throw new HttpError(503, "ENGINE_UNAVAILABLE",
         "The asset inventory could not be read, so this materialization could not be verified",
         undefined, row.project_id);
     }
@@ -335,12 +336,22 @@ export class MaterializeService {
     try { return await work; }
     catch (error) {
       // `run` never rejects: a caller on a closing database would otherwise surface this as
-      // an unhandled rejection with nothing left to handle it.
-      const current = this.#deps.materializations.find(materializationId);
+      // an unhandled rejection with nothing left to handle it. It must not disappear either:
+      // this catch covers failures before the owned-run catch exists (for example a closed
+      // store while resolving the row), so it records without touching the database again.
+      const message = error instanceof Error ? error.message : String(error);
+      this.#deps.onDiagnostic?.({
+        correlation_id: materializationId,
+        stage: "materialize.run.unhandled",
+        kind: error instanceof Error ? error.constructor.name : typeof error,
+        message_sha256: createHash("sha256").update(message).digest("hex"),
+        message_redacted: redact(message),
+        context: { materialization_id: materializationId, accepting: String(this.#accepting) },
+        at: new Date().toISOString(),
+      });
       return {
-        state: current?.state ?? "attention",
-        quarantined: current?.state === "attention",
-        ...(error instanceof Error ? {} : {}),
+        state: "attention",
+        quarantined: false,
       };
     }
     finally { this.#inflight.delete(work); }
@@ -527,7 +538,6 @@ export class MaterializeService {
       // interval that is being torn down, so each step is contained.
       try { this.#deps.jobs.releaseLease(jobId, owner); }
       catch { /* the lease is left for the reaper to reclaim on the next start */ }
-      await this.#deps.artifacts.removeStagingLeftovers().catch(() => undefined);
     }
   }
 
@@ -567,7 +577,7 @@ export class MaterializeService {
       correlation_id: materializationId,
       stage,
       kind: "MaterializationOutcome",
-      message_sha256: "",
+      message_sha256: createHash("sha256").update(message).digest("hex"),
       message_redacted: redact(message),
       context: {
         materialization_id: materializationId,
@@ -724,7 +734,8 @@ export class MaterializeService {
           correlation_id: `drain-${randomUUID().slice(0, 8)}`,
           stage: "materialize.drain",
           kind: error instanceof Error ? error.constructor.name : typeof error,
-          message_sha256: "",
+          message_sha256: createHash("sha256")
+            .update(error instanceof Error ? error.message : String(error)).digest("hex"),
           message_redacted: redact(error instanceof Error ? error.message : String(error)),
           at: new Date().toISOString(),
         });

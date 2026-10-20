@@ -211,15 +211,19 @@ describe("a write needs the row to still be live", () => {
 });
 
 describe("a link failure is recognised by its code, not its wording", () => {
-  it("falls through to rename when the filesystem says link is unsupported", async () => {
+  it("fails closed on a non-collision link error instead of falling through to clobbering rename", async () => {
     const base = await mkdtemp(join(tmpdir(), "narralens-m3-linkerr-"));
     dirs.push(base);
-    const store = new DerivedArtifactStore(join(base, "derived"));
-    const bytes = Buffer.from("published through the rename fallback");
-    // The captured defect's cousin: an error whose *message* mentions link but which is
-    // not EEXIST must not be read as "the name is taken".
-    const token = await store.put(bytes, "mp4");
-    expect(token).toBe(`proxy/${sha(bytes)}.mp4`);
-    expect(await readFile(store.resolve(token))).toEqual(bytes);
+    const store = new DerivedArtifactStore(join(base, "derived"), {
+      publishLink: async () => {
+        throw Object.assign(new Error("link failed because the filesystem is unavailable"), { code: "EIO" });
+      },
+    });
+    const bytes = Buffer.from("must never be published after the link failure");
+    const token = `proxy/${sha(bytes)}.mp4`;
+
+    await expect(store.put(bytes, "mp4")).rejects.toMatchObject({ code: "EIO" });
+    expect(existsSync(store.resolve(token))).toBe(false);
+    expect(stagingFiles(base)).toEqual([]);
   }, 30_000);
 });

@@ -788,7 +788,7 @@ const TRANSIENT_CODES: ReadonlySet<string> = new Set([
 function throwUnverified(error: unknown, projectId: string, what: string): void {
   const code = failureClass(error);
   if (TRANSIENT_CODES.has(code)) {
-    throw new HttpError(503, "MEDIA_TOOL_UNAVAILABLE",
+    throw new HttpError(503, "HOST_RESOURCE_EXHAUSTED",
       `${what} could not be read right now, so its facts were not verified`,
       { reason: `${what}_UNREADABLE:${code}`, recoverable: true }, projectId);
   }

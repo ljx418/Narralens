@@ -40,7 +40,8 @@ Promise<MaterializationV1> {
     const drained = await running.host.materialize.drain();
     void drained;
     row = await running.host.materialize.read(materializationId).catch((error: unknown) => {
-      if ((error as { code?: string }).code === "MEDIA_TOOL_UNAVAILABLE") return undefined;
+      if (["MEDIA_TOOL_UNAVAILABLE", "HOST_RESOURCE_EXHAUSTED"]
+        .includes(String((error as { code?: string }).code))) return undefined;
       throw error;
     });
     if (row !== undefined && row.state !== "running" && row.state !== "validating" && row.state !== "queued") {

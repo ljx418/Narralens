@@ -1,6 +1,6 @@
 import { createHash, randomUUID } from "node:crypto";
 import { constants } from "node:fs";
-import { access, link, mkdir, open, readdir, readFile, rename, rm, unlink } from "node:fs/promises";
+import { access, link, mkdir, open, readdir, readFile, rm, unlink } from "node:fs/promises";
 import { dirname, resolve, sep } from "node:path";
 
 /**
@@ -20,13 +20,20 @@ import { dirname, resolve, sep } from "node:path";
 export const DERIVED_KINDS = ["proxy", "segment"] as const;
 export type DerivedKind = (typeof DERIVED_KINDS)[number];
 
+export interface DerivedArtifactStoreDeps {
+  /** Test seam for proving fail-closed publication errors without depending on a filesystem. */
+  readonly publishLink?: typeof link;
+}
+
 const KIND_PATTERN = /^(?:proxy|segment)\/[a-f0-9]{64}\.[a-z0-9]{2,5}$/u;
 
 export class DerivedArtifactStore {
   readonly root: string;
+  readonly #publishLink: typeof link;
 
-  constructor(root: string) {
+  constructor(root: string, deps: DerivedArtifactStoreDeps = {}) {
     this.root = resolve(root);
+    this.#publishLink = deps.publishLink ?? link;
   }
 
   /**
@@ -138,23 +145,19 @@ export class DerivedArtifactStore {
    *
    * `link` fails with EEXIST instead, which is the property wanted: the first publisher
    * wins, every other learns the name is taken and verifies rather than overwrites. A hard
-   * link within one directory is a rename in disguise, so atomicity is unchanged. Where
-   * linking is unavailable the code falls back to `rename` and *verifies afterwards*, which
-   * is the same guarantee by way of detection rather than prevention.
+   * link within one directory publishes one fully fsynced inode under a second name, so a
+   * reader never observes a partial file. If the filesystem cannot provide this primitive,
+   * publication fails closed: falling back to POSIX `rename` would overwrite a destination
+   * that appeared after the pre-check and defeat the no-clobber guarantee.
    */
   async #publish(staging: string, destination: string, token: string): Promise<void> {
     try {
-      await link(staging, destination);
+      await this.#publishLink(staging, destination);
       // The link is the artifact now; the staging name has served its purpose.
       await unlink(staging).catch(() => undefined);
       return;
     } catch (error) {
-      if (!isAlreadyExists(error)) {
-        // Linking unsupported on this filesystem. Fall through to the verified rename.
-        await rename(staging, destination);
-        await this.verifyPublished(token);
-        return;
-      }
+      if (!isAlreadyExists(error)) throw error;
     }
     // Someone else published first. Their bytes must be the bytes this token names.
     await unlink(staging).catch(() => undefined);
