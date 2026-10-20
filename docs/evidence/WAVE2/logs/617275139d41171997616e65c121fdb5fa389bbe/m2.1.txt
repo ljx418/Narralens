@@ -1,0 +1,32 @@
+
+> narralens@0.1.0 test:m2.1 /mnt/c/workspace/videoworkline/Narralens
+> vitest run --config vitest.config.ts tests/m2.1 tests/architecture
+
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens
+
+(node:3997263) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.1/engine-route.test.ts (8 tests) 1439ms
+   ✓ M2.1 route activation > AC-019 leaves every legacy route in place  1051ms
+ ✓ tests/m2.1/source-digest-v1.test.ts (18 tests) 1260ms
+(node:4001642) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.1/native-bypass.test.ts (13 tests) 1016ms
+ ✓ tests/architecture/m2.2-fitness.test.ts (15 tests) 592ms
+ ✓ tests/architecture/m2.1-fitness.test.ts (22 tests) 342ms
+ ✓ tests/m2.1/engine-port.test.ts (10 tests) 1884ms
+   ✓ OpenFilmEngineAdapter staging > AC-004 refuses a stale base before the upstream mutator is ever called  479ms
+   ✓ OpenFilmEngineAdapter staging > AC-004 never accepts an upstream rebased result as success  1137ms
+ ✓ tests/m2.1/openfilm-upstream-lock.test.ts (12 tests) 122ms
+ ✓ tests/m2.1/time-model.test.ts (11 tests) 25ms
+ ✓ tests/m2.1/native-write-gateway.test.ts (20 tests) 18ms
+(node:4024797) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.1/engine-binding-store.test.ts (10 tests) 15ms
+
+ Test Files  10 passed (10)
+      Tests  139 passed (139)
+   Start at  20:50:08
+   Duration  43.41s (transform 1.28s, setup 0ms, collect 12.70s, tests 6.71s, environment 1ms, prepare 14.93s)
+

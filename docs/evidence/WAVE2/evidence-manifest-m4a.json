@@ -2,17 +2,17 @@
   "format": "narralens.wave2-evidence-manifest@1",
   "stage": "M4A",
   "module": "ImpactService",
-  "capture_commit": "0a2c47bb90dc5eaf42f9c03005760a007fff7b74",
-  "capture_logs": "docs/evidence/WAVE2/logs/0a2c47bb90dc5eaf42f9c03005760a007fff7b74",
-  "captured_at_utc": "2026-10-20T08:33:34Z",
+  "capture_commit": "617275139d41171997616e65c121fdb5fa389bbe",
+  "capture_logs": "docs/evidence/WAVE2/logs/617275139d41171997616e65c121fdb5fa389bbe",
+  "captured_at_utc": "2026-10-20T11:49:35Z",
   "repo_dirty_at_capture": 0,
   "environment": {
-    "date_utc": "2026-10-20T08:33:34Z",
+    "date_utc": "2026-10-20T11:49:35Z",
     "node": "v22.22.1",
     "pnpm": "10.33.0",
     "python": "Python 3.12.3",
     "os": "Linux 6.18.40.1-microsoft-standard-WSL2",
-    "git_head": "0a2c47bb90dc5eaf42f9c03005760a007fff7b74",
+    "git_head": "617275139d41171997616e65c121fdb5fa389bbe",
     "git_branch": "migration/m2.2-coordinator-persistence",
     "repo_dirty_at_capture": "0",
     "origin_main": "304c89134fdf9f834f7d69e3f4d5c89a68044c60",
@@ -29,77 +29,77 @@
       "name": "check-1",
       "command": "corepack pnpm check",
       "exit": 0,
-      "log": "docs/evidence/WAVE2/logs/0a2c47bb90dc5eaf42f9c03005760a007fff7b74/check-1.txt",
-      "log_sha256": "567854be6a164f14ac6f56b8cfc12a8edfdc377679ac1cb00b42acf7966a16f1"
+      "log": "docs/evidence/WAVE2/logs/617275139d41171997616e65c121fdb5fa389bbe/check-1.txt",
+      "log_sha256": "93f1e4b733a8dbd8fe514502d099b63881b34a55623ce7290003b44c5a9e5ced"
     },
     {
       "name": "check-2",
       "command": "corepack pnpm check",
       "exit": 0,
-      "log": "docs/evidence/WAVE2/logs/0a2c47bb90dc5eaf42f9c03005760a007fff7b74/check-2.txt",
-      "log_sha256": "77aed35db6f8861bc0e82cdbb56b332d1fd3199419d95c17483c0db98ea24a67"
+      "log": "docs/evidence/WAVE2/logs/617275139d41171997616e65c121fdb5fa389bbe/check-2.txt",
+      "log_sha256": "95d67871e479b3b7c8060c4ae71e7d22e3bb90ad4324afe9c7da7a3706322a36"
     },
     {
       "name": "contracts",
       "command": "corepack pnpm test:contracts",
       "exit": 0,
-      "log": "docs/evidence/WAVE2/logs/0a2c47bb90dc5eaf42f9c03005760a007fff7b74/contracts.txt",
-      "log_sha256": "4cb4fe8e3f0f99e791bc15e1a95feba403bc1e5afecf140216cb2bcfdc9ce396"
+      "log": "docs/evidence/WAVE2/logs/617275139d41171997616e65c121fdb5fa389bbe/contracts.txt",
+      "log_sha256": "321dd04add283d6f557f82d5668d65d0501abdc64b59104a556f0a976aacaf42"
     },
     {
       "name": "credential-scan",
       "command": "NARRALENS_SECRET_SCAN_OUT=docs/evidence/WAVE2/security/credential-scan-m4a.json corepack pnpm exec tsx tools/secret-scan.ts",
       "exit": 0,
-      "log": "docs/evidence/WAVE2/logs/0a2c47bb90dc5eaf42f9c03005760a007fff7b74/credential-scan.txt",
+      "log": "docs/evidence/WAVE2/logs/617275139d41171997616e65c121fdb5fa389bbe/credential-scan.txt",
       "log_sha256": "b9094be9ad8994e249018558ff62883d01ab4f4c8dbfaa880f03312a9e616cc4"
     },
     {
       "name": "hash-vectors-python",
       "command": "corepack pnpm test:wave2:m4a:golden-python",
       "exit": 0,
-      "log": "docs/evidence/WAVE2/logs/0a2c47bb90dc5eaf42f9c03005760a007fff7b74/hash-vectors-python.txt",
+      "log": "docs/evidence/WAVE2/logs/617275139d41171997616e65c121fdb5fa389bbe/hash-vectors-python.txt",
       "log_sha256": "a18275a601ac37610dbb7d167b11b90b4197aaf1c01407f01b0a43e74beb686a"
     },
     {
       "name": "hash-vectors-regen",
-      "command": "corepack pnpm test:wave2:m4a:vectors /tmp/tmp.k2ihhii6DT/impact-hash.vectors.json",
+      "command": "corepack pnpm test:wave2:m4a:vectors /tmp/tmp.SyZp1QQZMX/impact-hash.vectors.json",
       "exit": 0,
-      "log": "docs/evidence/WAVE2/logs/0a2c47bb90dc5eaf42f9c03005760a007fff7b74/hash-vectors-regen.txt",
-      "log_sha256": "2b5a13d8b798070a99d4144849d4e71b098dc3d053a9c6fa63260d7365404fef"
+      "log": "docs/evidence/WAVE2/logs/617275139d41171997616e65c121fdb5fa389bbe/hash-vectors-regen.txt",
+      "log_sha256": "1c2d1ace11d88cf0bd5ef07b0a0f02f199d8fde293a61748082c52311ea18459"
     },
     {
       "name": "m2.1",
       "command": "corepack pnpm test:m2.1",
       "exit": 0,
-      "log": "docs/evidence/WAVE2/logs/0a2c47bb90dc5eaf42f9c03005760a007fff7b74/m2.1.txt",
-      "log_sha256": "2db51e969b0c09b9895d1c23f38b9fdd176e2f5015170d1534a2b4172236ca5f"
+      "log": "docs/evidence/WAVE2/logs/617275139d41171997616e65c121fdb5fa389bbe/m2.1.txt",
+      "log_sha256": "917537aa0dca60ca58f1d9c3c5b9ef62c1b1280eda2b09b9b66e7a05952caadc"
     },
     {
       "name": "openfilm",
       "command": "corepack pnpm exec tsx tools/openfilm-availability-probe.mjs",
       "exit": 0,
-      "log": "docs/evidence/WAVE2/logs/0a2c47bb90dc5eaf42f9c03005760a007fff7b74/openfilm.txt",
+      "log": "docs/evidence/WAVE2/logs/617275139d41171997616e65c121fdb5fa389bbe/openfilm.txt",
       "log_sha256": "3de30e2fd64151df1e39cedc634c6df01fa290a2fcee86d964d75b9e52fe0b97"
     },
     {
       "name": "typecheck",
       "command": "corepack pnpm exec tsc --noEmit",
       "exit": 0,
-      "log": "docs/evidence/WAVE2/logs/0a2c47bb90dc5eaf42f9c03005760a007fff7b74/typecheck.txt",
+      "log": "docs/evidence/WAVE2/logs/617275139d41171997616e65c121fdb5fa389bbe/typecheck.txt",
       "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     {
       "name": "wave1-historical",
       "command": "corepack pnpm evidence:wave1:historical",
       "exit": 0,
-      "log": "docs/evidence/WAVE2/logs/0a2c47bb90dc5eaf42f9c03005760a007fff7b74/wave1-historical.txt",
+      "log": "docs/evidence/WAVE2/logs/617275139d41171997616e65c121fdb5fa389bbe/wave1-historical.txt",
       "log_sha256": "ac02c2f38ba9a726fb621990c9b21c159f1fa6fc65ff0fe1fbfcd3d7e6d8a062"
     },
     {
       "name": "wave1-integrity",
       "command": "corepack pnpm evidence:wave1:integrity",
       "exit": 1,
-      "log": "docs/evidence/WAVE2/logs/0a2c47bb90dc5eaf42f9c03005760a007fff7b74/wave1-integrity.txt",
+      "log": "docs/evidence/WAVE2/logs/617275139d41171997616e65c121fdb5fa389bbe/wave1-integrity.txt",
       "log_sha256": "518fd3455d80ff2d43271af4df3d0af76997e627c69390a332bcd031b8913e94",
       "expected_failure": true
     },
@@ -107,29 +107,29 @@
       "name": "wave2-fitness",
       "command": "corepack pnpm test:wave2:fitness",
       "exit": 0,
-      "log": "docs/evidence/WAVE2/logs/0a2c47bb90dc5eaf42f9c03005760a007fff7b74/wave2-fitness.txt",
-      "log_sha256": "dbe6c672f4f34cce6318067866b8167eafbb255372dc7fc2d4aaf5bc5dc23d76"
+      "log": "docs/evidence/WAVE2/logs/617275139d41171997616e65c121fdb5fa389bbe/wave2-fitness.txt",
+      "log_sha256": "70fc6bafc712e8503cf81f5091907078956291b82fdbaaa0d3852390fced4190"
     },
     {
       "name": "wave2-m3",
       "command": "corepack pnpm test:wave2:m3",
       "exit": 0,
-      "log": "docs/evidence/WAVE2/logs/0a2c47bb90dc5eaf42f9c03005760a007fff7b74/wave2-m3.txt",
-      "log_sha256": "690bd583b0e1c01a3d1edca043aa03a3860e1f4f394571b554381b9a9c64ebbd"
+      "log": "docs/evidence/WAVE2/logs/617275139d41171997616e65c121fdb5fa389bbe/wave2-m3.txt",
+      "log_sha256": "00c013f571f5624920dce37e1454c5be51d57ba2795b2bebe94d12eeb7decf73"
     },
     {
       "name": "wave2-m4a",
       "command": "corepack pnpm test:wave2:m4a",
       "exit": 0,
-      "log": "docs/evidence/WAVE2/logs/0a2c47bb90dc5eaf42f9c03005760a007fff7b74/wave2-m4a.txt",
-      "log_sha256": "ffebc90a44d257f54aa173516cd871611380275d1284c381c5aa9ac5267f4a80"
+      "log": "docs/evidence/WAVE2/logs/617275139d41171997616e65c121fdb5fa389bbe/wave2-m4a.txt",
+      "log_sha256": "e1c1543e0691f77f97652e1c7c4a314f4a34c585fd8f2957ba88323cac57f945"
     },
     {
       "name": "wave2-w2.0",
       "command": "corepack pnpm test:wave2:w2.0",
       "exit": 0,
-      "log": "docs/evidence/WAVE2/logs/0a2c47bb90dc5eaf42f9c03005760a007fff7b74/wave2-w2.0.txt",
-      "log_sha256": "b07a08ad2ffcb03cad08b9b9b320f948f76cb4c551788b844586f913c13fd10a"
+      "log": "docs/evidence/WAVE2/logs/617275139d41171997616e65c121fdb5fa389bbe/wave2-w2.0.txt",
+      "log_sha256": "8e469acb616c64ec1c9a3652885268edc7c2f0c695f5bd0a955b536ed24c420c"
     }
   ],
   "hash_vectors": "tests/wave2/m4a/impact-hash.vectors.json",
