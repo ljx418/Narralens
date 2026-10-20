@@ -1,6 +1,6 @@
 # M4B 开工包三轮独立文档审查
 
-状态：`DOCUMENT_READY_PENDING_M4A_EXTERNAL_PASS`。
+状态：`M4A_EXTERNAL_REVIEW_PASS_SATISFIED / M4B_DOCUMENT_REWORKED_PENDING_FINAL_REVIEW`。
 
 审查对象：`02_ARCHITECTURE_AND_CONTRACTS.md`、`03_DEVELOPMENT_AND_ACCEPTANCE_PLAN.md`、
 `11_M4B_CONTROLLED_ADOPTION.*`、`12_M4B_DEVELOPMENT_GATE.md`、`13_M4B_CLAUDE_HANDOFF.md`，以及当前生产
@@ -60,5 +60,23 @@ OpenFilm active source 是唯一 timeline；legacy ProjectWriteActor 不重写�
 
 ## 最终判断
 
-文档已能支撑 Claude Code 从 M4B-0 连续推进到 M4B-5，无需模块级反复外审。唯一前置条件是新的 M4A 冻结
-候选取得独立 `M4A_EXTERNAL_REVIEW_PASS` 并把完整封存 HEAD 写入交接提示词。未满足此前不得开工。
+M4A 已在外审记录提交 `cac16d754deafe93c468519d82c7860ec2a40b74` 取得
+`M4A_EXTERNAL_REVIEW_PASS`。首次 M4B 外审随后发现 1 BLOCKER / 3 MAJOR / 16 MINOR；本文件前三轮内部结论不再
+被用作开工依据。第四轮修订已明确：M4B 专用恢复先于通用 journal recovery 且不扩张 terminal attention；
+film=after/DB 未提交的 423 与同 key 收敛语义；transaction 三列 + immutable fact 的恢复判据；固定三条
+`OpenFilmOp.insert` 生成机制；以及外审列出的接口、route、命令、错误码和证据细节。必须以第四轮独立复审
+`BLOCKER=0 / MAJOR=0` 才允许开工。
+
+## 第四轮：首次外审问题闭环
+
+- BLOCKER-01：不新增 `recovering/attention` 出边。Host 启动先执行 M4B 专用恢复，再执行通用 recovery；可证明
+  before 从原合法前态 abort，可证明 after 从原合法前态 commit，不可证明才进入 terminal attention。
+- MAJOR-01：source 已 after、DB 未 commit 时不返回虚假 500；能立即收敛则 200，否则 423，同 key 后续不再次
+  stage/publish并完成唯一 commit。
+- MAJOR-02：`adoption_transaction_fact` 完整 DDL、单次插入时点、不可变边界已冻结；恢复以 transaction
+  before/after/snapshot 三列与当前 bytes 为准，不用 timestamp 猜 rename。
+- MAJOR-03：adapter plan 固定把三个 NativePlan clip 映射为三个 closed insert op，stage 只在 isolated root 调
+  pinned upstream；op golden vector 与真实三镜渲染为 M4B-1 门。
+- MINOR-01..16：错误优先级、operation kind、精确 route inventory、命令表、SHA 角色、模块路径、intent/plan
+  形状、openFilmRoots/digest 重算、rights/lock/binding API、commitAdoption 禁止嵌套事务、case 全表、错误码与
+  journal 独立提交均已落盘；native history reason 的 M4C 防呆文字列为 M4B-1 首个红灯修复，不提前改生产代码。

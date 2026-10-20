@@ -100,7 +100,7 @@ narralens/
 | `MaterializeService` / `ProxyRenderer` | `src/host/materialize/` | target proposal + bindings → native plan + proxy + lineage | **M3 已实现并独立外审 PASS**：持久 Job/lease/Host 自动 drain、三 clip native plan、真实 720p proxy、lineage、内容寻址发布、取消/重启/stale 与 NOWRITE；捕获提交 `f2a41ff...` 两次全量 750/750 | M3 PR-01..03、MT-01..06 PASSED；证据 `docs/evidence/WAVE2/evidence-manifest-m3.json` |
 | `ActivatedProjectionService` | `src/host/engine/activated-projection-service.ts` | 持久迁移事实 → 当前 active OpenFilm layout | **M4A 已实现**：terminal migration + immutable plan + target snapshot facts + asset ledger 重建 layout 并交给 adapter inspect；不新增 EnginePort 方法、不接受请求路径、不让内存 layout 成为权威；缓存键 = project + active_commit.snapshot_id + source_digest，Host 重启后可完全重建；缺事实/root escape/ledger 漂移 fail closed |
 | `ImpactService` / `ImpactStore` / `ConsumerGraph` | `src/host/impact/`、`src/host/projects/consumer-graph.ts` | committed facts + intent → canonical `ImpactSpecV1` | **M4A 已实现**：先 resolveActivated → 幂等 replay/conflict → base/source/control → inspect committed snapshot → materialization 重验 → 资产/许可/bytes → ConsumerGraph → 锁 → 二次 currentness → 单事务 insert；TTL 15 分钟、仅 `active→consumed\|expired\|stale` CAS、复用 `operation_idempotency` 唯一权威、`restore_snapshot` capability blocked |
-| `AdoptionCoordinator` / `AuthorSourcePublisher` / `HistoryService` | 目标 `src/host/projects/` | committed projection → impact/hash → controlled write → new revision | **M4A 已实现并外审通过；M4B 已冻结开发合同但尚未实现；M4C 仍禁止进入**：M4B 只允许 `adopt_materialization`，由 Coordinator、单队列、三类锁、Host-only publisher 与单事务 `commitAdoption` 完成 author source 原子发布、revision 恰好 +1、impact 消费和恢复闭环 | M4B `11_M4B_CONTROLLED_ADOPTION.*`、`12_M4B_DEVELOPMENT_GATE.md`；M4 TX-01..14 |
+| `AdoptionCoordinator` / `AuthorSourcePublisher` / `HistoryService` | 目标 `src/host/adoption/`、`src/host/projects/author-source-publisher.ts`、后续 M4C history 模块 | committed projection → impact/hash → controlled write → new revision | **M4A 已实现并外审通过；M4B 已冻结开发合同但尚未实现；M4C 仍禁止进入**：M4B 只允许 `adopt_materialization`，由 Coordinator、单队列、三类锁、Host-only publisher 与单事务 `commitAdoption` 完成 author source 原子发布、revision 恰好 +1、impact 消费和恢复闭环 | M4B `11_M4B_CONTROLLED_ADOPTION.*`、`12_M4B_DEVELOPMENT_GATE.md`；M4 TX-01..14 |
 | `ProjectWriteActor` | `src/host/projects/` | API → transaction → adapters | D3 fit 与 D4.0 单镜媒体替换已实现 revision、lock、幂等、补偿/attention/recovery | D4.1 禁止调用；提案采用待 D4.2 |
 | `SQLiteEventStore` | `src/host/projects/revision-store.ts` | actor/import/coordinator/migration ↔ revision/journal/job/outbox | D3/D4.2.1 历史 journal 保留；M2.2 已实现持久 Job/lease/event/outbox，M2.3 migration/migration_step 与既有 store 共用同一数据库句柄 | 导入不增加影片 revision；迁移激活只提交新副本，不改旧工程 |
 | `OpenMontageAdapter` | `src/adapters/openmontage/` | Host ↔ ControlledAgentRunner | D2 单提案保留；D4.1 单次 CLI 多提案、完整 provider schema 与真实 audit 已实现 | 禁止直写 Hypit；D4.2 materialize 另阶段 |
@@ -211,6 +211,8 @@ Manifest@2，因此 W2.0 必须通过 terminal migration、source tree digest、
 | 423 | `TARGET_LOCKED` | 分项锁阻断 |
 | 423 | `PROJECT_ATTENTION_REQUIRED` | 未完成/不确定事务阻断写入 |
 | 428 | `APPROVAL_REQUIRED` | 当前影响/许可快照未确认或已过期；未来外传/费用仍需额外 provider 审批事实 |
+| 428 | `IMPACT_REQUIRED` | versioned 写缺少对应的 server-computed impact |
+| 428 | `IMPACT_STALE` | impact 已过期、消费或其 revision/source/control/materialization/rights/native-plan 事实已变化 |
 | 500 | `TRANSACTION_FAILED` | 内部失败且已证明未写或已补偿 |
 | 503 | `HYPIT_UNAVAILABLE` / `RUNNER_UNAVAILABLE` | 已登记本地依赖不可达 |
 | 504 | `RUNNER_TIMEOUT` | 受控 Runner 超时或取消终止；费用未知时不得伪造为零 |

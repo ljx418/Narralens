@@ -13,7 +13,7 @@ provider 调用或任何付费/外传。本门不重写 legacy `ProjectWriteActo
 本门最高允许声明 `M4B_INTERNAL_EVIDENCED`。只有以下条件同时满足才可停止并交 Codex 独立复核：
 
 1. M4A 外审已通过，且修复后的新证据绑定当前祖先提交；
-2. TX-01、TX-02、TX-03、TX-04、TX-05、TX-06、TX-07、TX-11、TX-13、TX-14 的 M4B 适用部分逐项有直接证据；
+2. 第 9 节全表（TX-01..08B、TX-11B、TX-13/14、M4B-NW、REG）逐项有直接证据；
 3. 成功采用恰好 `revision + 1`，所有失败路径 `revision + 0`；
 4. 三镜采用后仍是三个 OpenFilm 原生可编辑 clip，不得用 proxy/flattened MP4 替代；
 5. source、snapshot、revision、active pointer、asset ledger、impact、idempotency、outbox 的发布顺序和恢复结论可证明；
@@ -76,15 +76,35 @@ type EnginePlanIntent = {
 };
 ```
 
-`EnginePort.plan` 的第二参数由 `TypedEdit` 收窄/扩充为该显式 server intent 联合，但方法总数不变。HTTP validator
+该类型放在 `src/host/engine/engine-plan-intent.ts`，不得进入 `contracts/*.schema.json`。目标形状冻结为
+`EnginePlanIntent = TypedEdit | AdoptEnginePlanIntent`；`EnginePort.plan` 第二参数与 `EngineEditPlan.edit` 均使用
+`EnginePlanIntent`，方法总数不变。`EngineEditPlan.ops` 保持 engine-private，但 OpenFilm adapter 必须先构造并在 stage
+前按 closed `OpenFilmOp` 联合逐字段复验，未知字段/op 一律 422，不能把 `unknown[]` 当裸转发逃生口。HTTP validator
 永远不能接受 `native_plan/rights_digest`；Coordinator 在 public read/impact 重验后组装 intent。Gateway 只批准
 `adopt_materialization` 入口并输出最小 typed edit，Coordinator 再注入受信事实；adapter 必须拒绝缺 plan、plan
 hash 不符或 edit/materialization/impact 不一致。这样既不隐藏读取 Host store，也不允许客户端自报 ops。
 
-推荐将恢复事实放入 `adoption_transaction_fact(transaction_id PRIMARY KEY REFERENCES project_transaction)`；它没有
-`state` 字段，不能独立决定流程。最小字段为 `source_before_sha256`、`source_after_sha256`、
-`staged_source_digest`、`snapshot_id`、`installed_assets_json`、`film_temp_token`、`source_published_at`。所有 JSON
-必须 canonical、closed-shape，并在读取时校验；绝对路径不得入库。
+恢复事实表冻结为：
+
+```sql
+CREATE TABLE adoption_transaction_fact (
+  transaction_id TEXT PRIMARY KEY REFERENCES project_transaction(transaction_id),
+  source_before_sha256 TEXT NOT NULL,
+  source_after_sha256 TEXT NOT NULL,
+  staged_source_digest TEXT NOT NULL,
+  snapshot_id TEXT NOT NULL,
+  installed_assets_json TEXT NOT NULL,
+  film_temp_token TEXT NOT NULL,
+  publish_intent_created_at TEXT NOT NULL
+);
+```
+
+该行在 `prepared` 之前、已得到 staged film 的 after SHA 与 immutable snapshot 后一次插入，此后不可 UPDATE；它没有
+`state` 或“已发布”字段，不能独立决定流程。真正恢复判据联合使用：同一 `project_transaction` 在 `prepared` 时
+持久写入的闭包 `source_digest_before/source_digest_after/snapshot_id`；fact row 的 film before/after bytes SHA；以及
+active root 当前重算的 film SHA + SourceDigestV1。是否已 rename 由这些 bytes/闭包事实推断，不使用时间戳猜测。
+`installed_assets_json` 为 canonical、closed-shape 的相对 token+SHA 数组，读取时重验；
+绝对路径不得入库。每个 journal transition 各自提交，最终业务事实才由 `commitAdoption` 一笔事务提交。
 
 ## 4. active source 原子发布契约
 
@@ -99,10 +119,13 @@ M4B v1 的 native plan 只能产生两类 active-root 变化：
 1. stage 内验证每个新增资产 bytes 等于 plan/ledger SHA；
 2. 以独立 temp + fsync + no-clobber link/rename 安装新资产；已存在则重新验 hash；旧 film 尚未引用它们；
 3. 将 staged `film.html` 复制到 active root 同目录的 transaction temp，验 hash、fsync；
-4. commit-boundary 再跑 base/source/control、`ImpactService.requireCurrent()`、materialization public read、rights、
-   active locks、engine binding/upstream SHA；
+4. commit-boundary 逐项再跑：`ImpactService.requireCurrent()`；`MaterializeService.read()`；从
+   `AssetInventoryPort` 现场重算包含 license status/commercial_use 的 inventory/rights 摘要并与 materialization/impact
+   比对；`LockService.assertUnlocked()`；`EngineBindingStore` 的 engine/upstream SHA；以及 base/source/control。
+   `rights_digest` 字符串相等本身不算现场 rights 重验；
 5. 以同目录 rename 原子替换 `film.html`，随后 fsync parent；该 rename 是 source publish point；
-6. 重新由 pinned adapter inspect active root，必须与 staged projection/source digest 一致；
+6. 重新由 pinned adapter inspect active root，必须与 staged projection/source digest 一致；OpenFilm snapshot/digest 的
+   roots 必须复用 `openFilmRoots`（`src/host/projects/openfilm-layout-facts.ts`），覆盖 film、字幕/设置与全部引用资产；
 7. 一个 SQLite `BEGIN IMMEDIATE` 完成第 7 节列出的全部事实。
 
 新增内容寻址资产在 film publish 前崩溃只会成为未引用、安全可回收文件，不构成 adopted source。禁止以递归目录
@@ -115,7 +138,8 @@ M4B v1 的 native plan 只能产生两类 active-root 变化：
 
 1. auth/origin；
 2. schema 与 operation capability；
-3. 同 project + `operation_kind=adopt_materialization` + idempotency key/digest 重放或冲突；
+3. 同 project + `operation_kind=controlled_write.adopt_materialization` + idempotency key/digest 重放或冲突；该 kind
+   必须与 M4A 的 `impact.adopt_materialization` 分离，同一客户端 key 在两个 kind 下互不冲突；
 4. project/materialization/impact 归属，跨项目与不存在返回相同 404；
 5. base/source/control 与 attention；
 6. materialization public read、rights/bytes、impact id/hash/TTL/approval；
@@ -144,7 +168,7 @@ replay-or-conflict
 → EnginePort.validate + native inspect invariants
 → validated
 → SnapshotStore.publish(staged source)
-→ prepared(snapshot id + staged/source publish facts)
+→ prepared（各 journal transition 独立持久提交；写 transaction before/after/snapshot + immutable fact row）
 → final requireCurrent + base/source/control/rights/locks/binding recheck
 → AuthorSourcePublisher.publish
 → inspect active source equals staged proof
@@ -152,7 +176,8 @@ replay-or-conflict
 → committed response
 ```
 
-`commitAdoption` 的同一事务必须：
+`commitAdoption` 自行开启唯一一个 `BEGIN IMMEDIATE`；不得调用自带事务且写 legacy `edit_idempotency` 的
+`commitWithPointer()`，不得嵌套 `atomic()`。它在同一事务内必须：
 
 - CAS project current revision/control/source 与请求基线；
 - revision 恰好 `previous + 1`；
@@ -160,7 +185,7 @@ replay-or-conflict
 - 只加入本次 native plan 真正引用的新 target asset ledger 行/引用事实，且许可仍 cleared/commercial；
 - impact `active→consumed` CAS，任何其他前态使整个事务回滚；
 - 写唯一 `operation_idempotency` 完整 response；
-- 写一条 `project.committed` outbox 并取得 event id；
+- 直接插入一条 `project.committed` outbox，以该 INSERT 的 `lastInsertRowid` 作为真实 event id；
 - project_transaction `prepared→committed`。
 
 不得继续使用 legacy `edit_idempotency` 作为 M4B 第二权威。`ControlledWriteResponseV1.outbox_event_id` 必须是同一
@@ -168,18 +193,27 @@ replay-or-conflict
 
 ## 7. 恢复与故障矩阵
 
+M4B 专用恢复器必须在 Host 启动的 legacy `ProjectCoordinator.recoverOnStart()` 通用 journal 恢复之前运行，并在同一
+`ProjectOperationQueue.run(projectId)` 内完成。M4B 行在可证明路径上不得先被通用恢复标为 `recovering` 或
+`attention`；因此无需给冻结的 terminal `attention` 新增出边，也不得自动清除既有 `project_state.attention`。
+进程重启后队列为空，由专用恢复器取得该项目的首个队列槽后再开放写路由。
+
 边界至少包括：received、preconditions_checked、plan 后、stage 后、validate 后、snapshot rename 前/后、asset
 install 前/后、film temp fsync 后、film rename 前/后、active inspect 后、DB commit 前/后、outbox insert 前/后、
 response 前。每点独立故障注入，结论只能是：
 
 | 观察事实 | 恢复结论 |
 |---|---|
-| active film 为 before，DB 未 commit | 清理 stage/temp；aborted 或安全重试；revision +0 |
-| active film 为 after，DB 未 commit，snapshot/impact/current facts 全可证明 | 重启在项目队列内完成同一幂等 commit；revision 恰好 +1 |
+| active film 为 before，DB 未 commit | 从当前合法前态 CAS 到 aborted，清理 stage/temp；revision +0；同 key 后续按 aborted 的已记录结果或新明确请求策略处理，不猜成功 |
+| active film 为 after，DB 未 commit，transaction before/after/snapshot、immutable fact、impact/current facts 全可证明 | 本次请求若可立即完成则完成同一 `commitAdoption` 后返回 200；否则返回 423 `PROJECT_ATTENTION_REQUIRED`（不是 500），保留 after source，重启/同 key 重试先恢复且不得再次 stage/publish，最终 revision 恰好 +1 并返回同一 response |
 | active film 不是 before/after，或 snapshot/rights/impact 无法证明 | project attention；禁止猜成功、禁止自动重试写源 |
-| DB committed | 重放同一完整 response；不得再次 stage/publish/加 revision |
+| DB committed | 从唯一 operation idempotency 行重放同一完整 response；不得再次 stage/publish/加 revision |
 
-恢复时先 journal，再 outbox，再 lease，再开放路由。stage/temp 可清理；immutable snapshot、旧 source bytes、旧
+若 active 为 after 但证据不可证明，保持 source=after，不做未经证明的自动回滚；CAS 进入 terminal attention 并返回
+423。此状态允许差异明确为：source=after、revision/pointer/ledger/impact/outbox/idempotency 均未提交；M4B-NW 必须
+逐字段记录。`TRANSACTION_FAILED` 500 仅用于已证明 source 仍 before 或已完成 byte-exact 补偿的情况。
+
+恢复时先 M4B 专用 journal，再通用 journal/outbox/lease，再开放路由。stage/temp 可清理；immutable snapshot、旧 source bytes、旧
 ledger/history 不删除。取消或失去执行权后的晚到结果只能 quarantine，不能进入 source publish/commit。
 
 ## 8. OpenFilm plan / validate 冻结
@@ -187,11 +221,19 @@ ledger/history 不删除。取消或失去执行权后的晚到结果只能 quar
 `TypedEdit` 已有 `adopt_materialization` 类型，但 registry、capability、gateway translator 与 adapter plan 需一起开放，
 不得留下“类型存在、生产不可达”或“capability 全开、translator 未限定”的半状态。
 
-plan 输入只来自服务端已重验的 `NativePlanV1`，固定生成三个 page/media clip 操作及对应 content-addressed asset
-token；不得接收客户端 ops。adapter 必须拒绝非 OpenFilm、project mismatch、base/source/control mismatch、未知
+生成机制冻结为：adapter `plan()` 把三个 `NativePlanV1.clips` 按 plan 顺序映射成三个 closed `OpenFilmOp.insert`
+（稳定 `clip_id`、content-addressed `src` token、timeline/source 半开帧、track 与 page/media 类型均显式赋值）；随后
+`stage()` 只能在 Host 分配的 isolated root 内调用 pinned upstream `editProjectFilm(baseRev, ops)` 生成 staged
+`film.html`。禁止 Host/adapter 绕过该配方直接拼写 active `film.html`；既有 `openfilm-migrator.ts` 仅作为 page clip
+结构事实参考，不成为第二生产写路径。M4B-1 必读 `openfilm-migrator.ts`、`openfilm-upstream.ts`、
+`tests/m2.3/openfilm-migrator.test.ts` 与 `migration-real-export.test.ts` 的真实上游样例，并冻结一份 op golden vector。
+
+plan 不得接收客户端 ops。adapter 必须拒绝非 OpenFilm、project mismatch、base/source/control mismatch、未知
 字段、未知 clip/track、重复 ID、重叠/缺口、总帧变化、narration policy 非 preserve、duration policy 非 preserve。
 
-validate 必须由 pinned upstream 重新读取 staged `film.html`，再证明：
+validate 必须由 pinned upstream 重新读取 staged `film.html`，并使用与 stage 相同的 `openFilmRoots` 自行重算
+`SourceDigestV1`；禁止回显 `StagedSource.source_digest` 冒充重算结果。digest 计算由 Host 提供的纯函数/roots input
+完成，adapter 不得反向读取 Host store。再证明：
 
 - 恰好三个原生 clip，稳定 ID 与 plan 一致；
 - 每个 clip 的 timeline/source 半开帧区间、asset SHA、track、总帧一致；
@@ -211,11 +253,11 @@ validate 必须由 pinned upstream 重新读取 staged `film.html`，再证明�
 | TX-05 | stale/rebased/source/control/rights 变化 revision +0 | rebased 当成功 |
 | TX-06 | 双采用只有一个 commit；另一方完整 replay 或确定 409 | 双 revision、混合 source |
 | TX-07 | 同 kind/key/digest 完整 response 逐字重放；异 digest 409 | 第二次 stage/publish |
-| TX-08B | 本文第 7 节每个 M4B 边界收敛 | 孤儿 running、猜成功 |
+| TX-08B | 本文第 7 节每个 M4B 边界重启后收敛为 committed 或 aborted 且项目可继续写；不可证明者 terminal attention 且具有明确人工修复事实；不得留下无合法出边的 running/recovering | 孤儿 running、猜成功、成功后 attention latch 仍阻断 |
 | TX-11B | 真实采用后由测试 harness 调固定上游 renderer，产物可完整 decode；不开放 M6 生产 render route | 只测 fixture JSON/proxy，或偷开生产 render |
 | TX-13 | stage 期间 lock/source/rights/active commit 变化，final check 拒绝 | TOCTOU 成功 |
 | TX-14 | adopt 后 inspect 仍三 clip；改中镜再验证两侧 ID 不变 | flattened MP4 |
-| M4B-NW | 每个失败路径 source/revision/pointer/ledger/impact/outbox 的允许差异明确 | 不实 NOWRITE |
+| M4B-NW | 每个失败路径 source/revision/pointer/ledger/impact/idempotency/outbox 的允许差异明确；特别记录 film=after/DB 未 commit 的受控 423 过渡态 | 不实 NOWRITE |
 | REG | M4A、M3、Wave1、legacy routes/contracts 均保持 | 删除/弱化旧门 |
 
 真实媒体使用仓库固定、无隐私 fixture；不得读取 `J:\`。真实 upstream 使用固定
@@ -235,10 +277,11 @@ corepack pnpm test:wave2:m4a
 corepack pnpm test:wave2:m4b
 corepack pnpm test:wave2:fitness
 corepack pnpm check
-corepack pnpm check
 corepack pnpm build
 corepack pnpm evidence:wave1:historical
+corepack pnpm evidence:wave1:integrity # 期望历史 current-tip 非零，逐字保留
 corepack pnpm evidence:wave2:m4a:historical
+corepack pnpm evidence:wave2:m4a:integrity # M4B 开路由后期望非零，逐字保留
 corepack pnpm evidence:wave2:m4b:integrity
 ```
 
@@ -262,8 +305,10 @@ manifest/log/case/hash及当时 route 状态。原 current-tip integrity 的非�
 
 ## 12. 开发顺序
 
-1. `M4B-0`：状态同步、合同/route/fitness 红灯、journal 字段与原子 commit API 测试；
-2. `M4B-1`：registry/capability/gateway/adapter plan-stage-validate，真实 pinned upstream；
+1. `M4B-0`：状态同步、合同/route/fitness 红灯、journal 字段与原子 commit API 测试；route inventory 精确加入唯一
+   新路由 `projects/([A-Za-z0-9_-]+)/edits`，history restore 仍须关闭，不得把精确相等放宽为 contains；
+2. `M4B-1`：registry/capability/gateway/adapter plan-stage-validate，冻结 op golden vector 并跑真实 pinned upstream；
+   同时把 registry 中 history restore/undo/redo 的旧 “M4B” reason 改为 M4C，但保持其 capability blocked；
 3. `M4B-2`：`AuthorSourcePublisher` 与崩溃矩阵；
 4. `M4B-3`：`AdoptionCoordinator` + ProjectCoordinator controlled-write + HTTP route；
 5. `M4B-4`：并发、幂等、commit-time drift、真实三镜采用/重开/改单镜验证；

@@ -14,7 +14,11 @@ Codex 完成替换，则不得自行改回旧 SHA。
 仓库：`/mnt/c/workspace/videoworkline/Narralens`
 
 - 预期分支：`migration/m2.2-coordinator-persistence`
-- M4A 外审封存 HEAD：`cac16d754deafe93c468519d82c7860ec2a40b74`
+- M4A 正式捕获提交（historical 脚本唯一读取对象）：`617275139d41171997616e65c121fdb5fa389bbe`
+- M4A 证据封存提交：`62a737cd4a3d4c35840f5c20da067a46cad386da`
+- M4A 外审记录提交（前置条件证明）：`cac16d754deafe93c468519d82c7860ec2a40b74`
+- M4B 首轮文档审查基线祖先：`87304330993798055f2e14fe521e2f2b0734940e`；实际开工 HEAD 可包含其后的
+  文档修订/复审封存提交，必须列出祖先后的 diff，不得把祖先 reset 成当前 HEAD
 - origin/main：`304c89134fdf9f834f7d69e3f4d5c89a68044c60`
 - OpenFilm 固定上游：`e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3`
 
@@ -59,7 +63,7 @@ legacy `ProjectWriteActor` 行为或使用 proxy/flattened MP4 作为 author sou
 2. 整个 adopt 位于既有 `ProjectOperationQueue`；所有会过期的检查必须在队列内，commit 前再次执行。
 3. M4A impact 只能通过 `ImpactService.requireCurrent()` 消费；不得只看 stored active flag。
 4. materialization 必须走 `MaterializeService.read()`，不得 raw store 绕过 ledger/rights/source drift。
-5. HTTP `AdoptRequestV1` 不携带 native plan。按开发门 §3.1 新增 server-only `EnginePlanIntent`：Coordinator
+5. HTTP `AdoptRequestV1` 不携带 native plan。按开发门 §3.1 在 Host engine 层新增 server-only `EnginePlanIntent`：Coordinator
    在重验后注入 `NativePlanV1/rights_digest/impact_hash`，adapter 不得依赖 Host store 或客户端 ops；
 6. active source 只允许新增内容寻址 asset 与同目录原子替换 `film.html`：新 asset 先 no-clobber 安装并验 hash/fsync，
    film temp 验 hash/fsync 后 rename + parent fsync。禁止递归覆盖 active root。
@@ -69,7 +73,9 @@ legacy `ProjectWriteActor` 行为或使用 proxy/flattened MP4 作为 author sou
    impact active→consumed CAS、唯一 operation idempotency 完整 response、outbox 与 transaction committed。
 9. 同 kind/key/digest 重放不得再次 stage/publish；异 digest 409。失败 revision +0。
 10. rebased=true、未知 upstream field/op、projection problems、三 clip/总帧/identity/consumer 不变量不成立均 fail closed。
-11. 恢复只能由 before/after bytes、snapshot、journal、DB 权威事实判定；不确定即 attention，禁止猜成功。
+11. M4B 专用恢复必须先于通用 `recoverOnStart()`、位于项目队列内；恢复只能由 before/after bytes、snapshot、
+    journal、immutable fact、impact/DB 权威事实判定。可证明 after 则不重复 stage/publish、完成同一 commit；可证明
+    before 则 abort；不确定才进入 terminal attention。禁止先标 recovering/attention 后再尝试成功，也禁止猜成功。
 
 ## 实施顺序
 
@@ -82,14 +88,16 @@ legacy `ProjectWriteActor` 行为或使用 proxy/flattened MP4 作为 author sou
 ### M4B-1 OpenFilm 受控写
 
 registry/capability/gateway 必须同一子阶段开放且 default deny 保持。adapter.plan 只接收服务端
-`adopt_materialization`，从已重验 NativePlanV1 生成固定 ops；stage 只写 Host isolated root；validate 用固定上游
-重读并证明三 clip、frame ranges、assets、total frames、narration/subtitle/audio/neighbours 与 source digest 闭包。
+`adopt_materialization`，把 NativePlanV1 三 clip 映射为冻结的三个 closed `OpenFilmOp.insert` golden vector；stage 只在
+Host isolated root 调 pinned `editProjectFilm`；validate 用固定上游重读、以 `openFilmRoots` 重算而非回显 source
+digest，并证明三 clip、frame ranges、assets、total frames、narration/subtitle/audio/neighbours 与闭包。
 
 ### M4B-2 source publisher / recovery
 
 实现 `AuthorSourcePublisher` 白名单 diff、realpath containment、no-clobber asset install、hash/fsync、film 同目录
-rename、active re-inspect。覆盖 received 到 response 的全部故障点；film before→abort/retry，film after+可证明→
-幂等完成 commit，其余 attention。旧 bytes/snapshot/history 不删。
+rename、active re-inspect。覆盖 received 到 response 的全部故障点；film before→合法前态 abort，film after+可证明→
+不重复 stage/publish并幂等完成 commit，film after 但当次无法 commit 返回 423 而非虚假 500，其余 terminal attention。
+专用恢复先于通用 journal 恢复；旧 bytes/snapshot/history 不删。
 
 ### M4B-3 coordinator / route
 
@@ -128,10 +136,11 @@ corepack pnpm test:wave2:m4a
 corepack pnpm test:wave2:m4b
 corepack pnpm test:wave2:fitness
 corepack pnpm check
-corepack pnpm check
 corepack pnpm build
 corepack pnpm evidence:wave1:historical
+corepack pnpm evidence:wave1:integrity # 期望 current-tip 非零，原样保存
 corepack pnpm evidence:wave2:m4a:historical
+corepack pnpm evidence:wave2:m4a:integrity # 开放 M4B 后期望 current-tip 非零，原样保存
 corepack pnpm evidence:wave2:m4b:integrity
 ```
 

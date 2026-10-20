@@ -206,6 +206,10 @@ received → preconditions_checked → staged → validated → prepared → com
 ```
 
 每个 transition 必须以允许前态写入 `WHERE`/CAS；不得任意 UPDATE state。
+M4B 不扩张 terminal `attention` 的出边：专用 adoption recovery 必须在通用 `recoverOnStart()` 之前、项目队列内
+检查 active `film.html` 的 before/after bytes 与 transaction/snapshot/fact/impact 权威事实。可证明 after 时直接从
+原合法前态完成 commit；可证明 before 时从原合法前态 abort；不可证明才进入 terminal attention。不得先把 M4B
+prepared 行改成 recovering/attention 再尝试恢复，也不得为“恢复成功”自动清除既有 project attention latch。
 
 ## 6. API 冻结
 
@@ -217,8 +221,9 @@ received → preconditions_checked → staged → validated → prepared → com
 | `POST /api/migration/v1/projects/:id/edits` | M4B | 200 ControlledWriteResponseV1 | 409 base/source/idempotency；423 lock；428 impact/approval |
 | `POST /api/migration/v1/projects/:id/history/restore` | M4C | 200 ControlledWriteResponseV1 | 同上，另 422 snapshot 不属于项目 |
 
-错误优先级保持：auth/origin → schema/capability → idempotency → base/source/control → attention/locks/rights
-→ impact/approval → execution。Wave 2 versioned 写请求沿用 Host 已落地的 64 KiB body 上限；不接受 path、URL、
+错误优先级保持：auth/origin → schema/capability → idempotency → project/resource ownership → base/source/control
+→ attention → materialization/rights/impact/approval → locks → execution；M4B 的更细调用顺序以
+`12_M4B_DEVELOPMENT_GATE.md` §5 为唯一权威。Wave 2 versioned 写请求沿用 Host 已落地的 64 KiB body 上限；不接受 path、URL、
 shell 参数或客户端 rights/hash 事实。旧版 1 MiB 文案已被实际 Host 限制与 M4A 外审观察取代，不为文档对齐而
 放宽生产入口。
 

@@ -112,13 +112,16 @@ impact state、outbox。无法判断发布状态即 attention，禁止猜测 abo
 corepack pnpm check
 corepack pnpm test:contracts
 corepack pnpm test:m2.1
-corepack pnpm exec vitest run --config vitest.config.ts tests/m2.2 tests/m2.3
+corepack pnpm test:wave2:w2.0
 corepack pnpm test:wave2:m3
-corepack pnpm test:wave2:m4
+corepack pnpm test:wave2:m4a
+corepack pnpm test:wave2:m4b # M4B 实现时新增
 corepack pnpm test:wave2:fitness
-corepack pnpm evidence:wave1:integrity
-corepack pnpm evidence:wave2
-corepack pnpm evidence:wave2:integrity
+corepack pnpm evidence:wave1:historical
+corepack pnpm evidence:wave1:integrity # current-tip 历史门预期非零，原样保存
+corepack pnpm evidence:wave2:m4a:historical # M4B-0 新增
+corepack pnpm evidence:wave2:m4a:integrity # M4B 开路由后预期非零，原样保存
+corepack pnpm evidence:wave2:m4b:integrity # M4B 实现时新增
 ```
 
 若 script 尚不存在，W2.0 新增后再运行，不得在报告中把计划命令写成已执行。真实媒体另记录固定 argv、
