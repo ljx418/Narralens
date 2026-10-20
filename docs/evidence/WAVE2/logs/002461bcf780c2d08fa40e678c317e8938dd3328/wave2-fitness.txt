@@ -1,0 +1,19 @@
+
+> narralens@0.1.0 test:wave2:fitness /mnt/c/workspace/videoworkline/Narralens
+> vitest run --config vitest.config.ts tests/architecture tests/wave2/*fitness*
+
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens
+
+ ✓ tests/architecture/m2.2-fitness.test.ts (15 tests) 686ms
+(node:2530085) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/w2-route-fitness.test.ts (7 tests) 908ms
+   ✓ W2.0 fitness: the unopened Wave 2 routes stay closed > keeps the Wave 1 migration routes answering, so 404 means unmounted and not broken  783ms
+ ✓ tests/architecture/m2.1-fitness.test.ts (22 tests) 402ms
+
+ Test Files  3 passed (3)
+      Tests  44 passed (44)
+   Start at  16:31:36
+   Duration  7.50s (transform 1.23s, setup 0ms, collect 6.81s, tests 2.00s, environment 0ms, prepare 3.06s)
+
