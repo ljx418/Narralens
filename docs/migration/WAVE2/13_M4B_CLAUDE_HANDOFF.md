@@ -14,7 +14,7 @@ Codex 完成替换，则不得自行改回旧 SHA。
 仓库：`/mnt/c/workspace/videoworkline/Narralens`
 
 - 预期分支：`migration/m2.2-coordinator-persistence`
-- M4A 外审封存 HEAD：`__M4A_EXTERNAL_REVIEW_HEAD__`
+- M4A 外审封存 HEAD：`cac16d754deafe93c468519d82c7860ec2a40b74`
 - origin/main：`304c89134fdf9f834f7d69e3f4d5c89a68044c60`
 - OpenFilm 固定上游：`e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3`
 
