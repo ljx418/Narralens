@@ -1,6 +1,6 @@
 # Wave 2 开发与验收计划
 
-状态：`READY_FOR_CLAUDE_CODE_IMPLEMENTATION`
+状态：`M4C_FROZEN_FOR_IMPLEMENTATION`（M3/M4A 已通过；M4B 内部冻结、外审待签；M4C 代码待实现）
 执行模式：一个波次连续实现，模块检查点自动继续，波次末一次组合内审和一次独立外审。
 
 ## 1. 提交与依赖顺序
@@ -52,10 +52,15 @@ versioned edits route、operation idempotency、snapshot/commit/outbox。legacy 
 
 ### M4C HistoryService
 
-交付：`restore_snapshot`、restore route、native history undo/redo translation、当前策略重新计算 impact、恢复
-产生新 snapshot/revision、取消晚到不采用、启动恢复。
+直接权威：`ADR-W2.0-006-m4c-history-restore.md` 与 `17_M4C_DEVELOPMENT_GATE.md`。
 
-出门：TX-08/09/10/12/13；旧 snapshot 内容可恢复但 revision 只增不减。
+交付：M4B 独立外审前置；`HistoricalSnapshotResolver`、`HistoryRestorePlanV1`、restore impact、精确 consumer/
+三类锁、`HistoryStore/HistoryService`、restore route、native history restore/undo/redo translation、当前策略重新计算
+rights/impact、content-addressed snapshot 引用、revision 恰好 +1、取消晚到不采用、专用启动恢复。内容相同允许复用
+旧 snapshot id，但必须创建新 transaction/commit/revision，禁止指针回拨。
+
+出门：`17_M4C_DEVELOPMENT_GATE.md` §8 的 20 个 case；旧 snapshot 内容可恢复但 revision 只增不减。
+TX-12C 只证明 snapshot-bound input immutable，生产 render 仍由 M6 关闭。
 
 ### Wave 2 组合冻结
 
@@ -117,6 +122,7 @@ corepack pnpm test:wave2:w2.0
 corepack pnpm test:wave2:m3
 corepack pnpm test:wave2:m4a
 corepack pnpm test:wave2:m4b # M4B 实现时新增
+corepack pnpm test:wave2:m4c # M4C 实现时新增
 corepack pnpm test:wave2:fitness
 corepack pnpm evidence:wave1:historical
 corepack pnpm evidence:wave1:integrity # current-tip 历史门预期非零，原样保存
@@ -124,6 +130,9 @@ corepack pnpm evidence:wave2:m4a:historical # M4B-0 新增
 corepack pnpm evidence:wave2:m4a:integrity # M4B 开路由后预期非零，原样保存
 corepack pnpm evidence:wave2:m4b # M4B 实现时新增并生成主捕获
 corepack pnpm evidence:wave2:m4b:integrity # M4B 实现时新增
+corepack pnpm evidence:wave2:m4b:historical # M4C-0 新增
+corepack pnpm evidence:wave2:m4c # M4C 实现时新增
+corepack pnpm evidence:wave2:m4c:integrity # M4C 实现时新增
 ```
 
 若 script 尚不存在，W2.0 新增后再运行，不得在报告中把计划命令写成已执行。真实媒体另记录固定 argv、

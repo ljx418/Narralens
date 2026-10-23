@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "M4C 历史快照受控恢复链路",
+    "locale": "zh-CN",
+    "output": "docs/migration/WAVE2/16_M4C_HISTORY_RESTORE.html",
+    "viewBox": [980, 1180],
+    "quality_profile": "showcase",
+    "column_fit": "spread"
+  },
+  "participants": [
+    { "id": "client", "type": "frontend", "label": "Studio", "sublabel": "OpenFilm 历史恢复" },
+    { "id": "host", "type": "backend", "label": "Host Route", "sublabel": "认证与合同校验" },
+    { "id": "history", "type": "backend", "label": "History", "sublabel": "唯一恢复协调器" },
+    { "id": "resolver", "type": "security", "label": "快照解析器", "sublabel": "归属与不可变事实" },
+    { "id": "impact", "type": "security", "label": "Guards", "sublabel": "impact 与三类锁" },
+    { "id": "engine", "type": "backend", "label": "EnginePort", "sublabel": "inspect / stage" },
+    { "id": "publisher", "type": "backend", "label": "Publisher", "sublabel": "原子发布与补偿" },
+    { "id": "store", "type": "database", "label": "RevisionStore", "sublabel": "事务、快照、revision" }
+  ],
+  "segments": [
+    { "from": 150, "to": 410, "label": "只读授权与确定性计划" },
+    { "from": 430, "to": 720, "label": "隔离 staging 与提交前复核" },
+    { "from": 740, "to": 1010, "label": "原子发布、revision +1 与恢复" }
+  ],
+  "messages": [
+    { "id": "restore_request", "from": "client", "to": "host", "y": 180, "label": "POST /history/restore + RestoreRequestV1", "variant": "emphasis" },
+    { "id": "contract_guard", "from": "host", "to": "history", "y": 225, "label": "认证、Origin、严格 schema、幂等键", "variant": "security" },
+    { "id": "resolve_snapshot", "from": "history", "to": "resolver", "y": 270, "label": "读取同项目 committed 历史快照", "variant": "security" },
+    { "id": "snapshot_facts", "from": "resolver", "to": "history", "y": 315, "label": "不可变 projection / source / rights facts", "variant": "return" },
+    { "id": "recompute_impact", "from": "history", "to": "impact", "y": 360, "label": "按当前策略重算 impact 并消费授权", "variant": "security" },
+    { "id": "impact_ok", "from": "impact", "to": "history", "y": 405, "label": "base、control、source、rights、locks 全部匹配", "variant": "return" },
+    { "id": "inspect_current", "from": "history", "to": "engine", "y": 465, "label": "inspect 当前原生工程", "variant": "default" },
+    { "id": "stage_restore", "from": "history", "to": "engine", "y": 510, "label": "隔离复制目标快照并生成 RestorePlanV1", "variant": "emphasis" },
+    { "id": "validate_stage", "from": "history", "to": "engine", "y": 555, "label": "validate：三镜、字幕、旁白、资产闭包", "variant": "security" },
+    { "id": "prepare_txn", "from": "history", "to": "store", "y": 600, "label": "持久 prepared transaction + restore facts", "variant": "emphasis" },
+    { "id": "final_guard", "from": "history", "to": "impact", "y": 645, "label": "提交前重读源、许可、基线和三类锁", "variant": "security" },
+    { "id": "publish_source", "from": "history", "to": "publisher", "y": 690, "label": "no-clobber 安装资产并原子替换 film.html", "variant": "emphasis" },
+    { "id": "snapshot_commit", "from": "history", "to": "store", "y": 780, "label": "创建新 snapshot 与 committed revision（恰好 +1）", "variant": "emphasis" },
+    { "id": "append_history", "from": "store", "to": "history", "y": 825, "label": "保留旧历史；不回拨 active pointer", "variant": "return" },
+    { "id": "return_success", "from": "history", "to": "client", "y": 870, "label": "200 + 新 revision / snapshot / source digest", "variant": "return" },
+    { "id": "crash_recovery", "from": "store", "to": "history", "y": 930, "label": "重启恢复：完成提交、补偿或 attention", "variant": "dashed" },
+    { "id": "cancel_boundary", "from": "client", "to": "history", "y": 975, "label": "取消仅阻止未发布结果；晚到结果不得自动采用", "variant": "security" }
+  ],
+  "activations": [
+    { "participant": "host", "from": 174, "to": 238, "type": "backend" },
+    { "participant": "history", "from": 219, "to": 890, "type": "backend" },
+    { "participant": "resolver", "from": 264, "to": 321, "type": "security" },
+    { "participant": "impact", "from": 354, "to": 411, "type": "security" },
+    { "participant": "engine", "from": 459, "to": 565, "type": "backend" },
+    { "participant": "store", "from": 594, "to": 835, "type": "database" },
+    { "participant": "impact", "from": 639, "to": 655, "type": "security" },
+    { "participant": "publisher", "from": 684, "to": 706, "type": "backend" }
+  ],
+  "cards": [
+    { "dot": "cyan", "title": "单一真相源", "items": ["历史快照只通过 Host-only resolver 读取", "恢复是新受控写入，不是 active pointer 回拨", "一个项目仍只绑定一个引擎"] },
+    { "dot": "amber", "title": "提交前不可绕过", "items": ["impact 必须按当前策略重算", "base、source、rights、control 与三类锁全部复核", "staging 不得写 author source 或 project revision"] },
+    { "dot": "emerald", "title": "可恢复结果", "items": ["成功只产生一个新 snapshot 与 revision +1", "崩溃后收敛到 committed、aborted 或 attention", "取消后的晚到结果永不自动采用"] }
+  ]
+}

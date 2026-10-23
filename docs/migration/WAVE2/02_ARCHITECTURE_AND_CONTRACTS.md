@@ -155,14 +155,15 @@ interface ControlledWriteResponseV1 {
 }
 interface ControlledWriteFailureResponseV1 {
   format: "narralens.controlled-write-failure@1.0";
-  transaction_id: string; project_id: string; operation: "adopt_materialization";
+  transaction_id: string; project_id: string; operation: "adopt_materialization"|"restore_snapshot";
   previous_revision: number; new_revision: number; source_digest: Sha256; status: "aborted";
   error: { http_status: 409|422|423|428|500; code: ApiErrorCode; message: string; details?: JsonValue };
 }
 ```
 
-成功必须 `new_revision=previous_revision+1`；失败 0。恢复旧内容仍生成新 snapshot/commit/revision，不能
-复用旧 active pointer 作为“成功”。同 project+operation+key 同 digest 重放完整响应；不同 digest 409。
+成功必须 `new_revision=previous_revision+1`；失败 0。恢复旧内容生成新 transaction/commit/revision；若内容与旧
+snapshot 相同，按 content-addressed identity 复用同一 snapshot id，但绝不把旧 active pointer 静默回拨。同
+project+operation+key 同 digest 重放完整响应；不同 digest 409。M4C 的完整裁决见 ADR-W2.0-006。
 `approval.confirmed` 只在有效 loopback session、未过期且 hash 匹配的 impact 上生效；它不授权费用或外传。
 aborted 事务以 failure response 的 `error.http_status` 首次返回并逐字重放，且 new=previous；不得冒充 committed。
 
@@ -184,6 +185,7 @@ CHECK 无法原地扩展，因此是唯一允许的受控表迁移：先用 `VAC
 | `consumer_edge` | PK(project,snapshot,kind,consumer,producer) | range、relation；可由 projection 重建，不含完整 timeline |
 | `migrated_asset` | PK(project,asset)；UNIQUE(project,target_path) | migration/source project/source tree+manifest、target path/bytes、frames、source/license canonical JSON |
 | `asset_ledger_bootstrap` | PK project；UNIQUE(project,input_digest) | migration、state、control revision、created_at；只允许 prepared→active/attention |
+| `history_restore_fact` | PK transaction；FK project_transaction | target/source-before/result snapshot、before/after film SHA、staged digest、restore plan SHA、installed assets、temp token、publish intent；immutable、无 state |
 
 `job.kind` CHECK 与 `JobKind` 增加 `materialize`，默认 max attempts=3、lease=30 秒；失 lease 可重排，
 达到上限进入 attention。全局 materialize worker 并发 2，同项目 active materialize 1；每 segment 本地工具
@@ -218,6 +220,10 @@ M4B 不扩张 terminal `attention` 的出边：专用 adoption recovery 必须�
 原合法前态完成 commit；可证明 before 时从原合法前态 abort；不可证明才进入 terminal attention。不得先把 M4B
 prepared 行改成 recovering/attention 再尝试恢复，也不得为“恢复成功”自动清除既有 project attention latch。
 
+M4C 同样以 `project_transaction.state` 为唯一状态机；history 专用恢复按 transaction created_at 在项目队列内先于
+通用恢复处理。prepared 后只能凭 before/after film、immutable restore fact、target/result snapshot 与当前 impact/
+rights/locks/source facts 收敛；不可证明才进入 terminal attention。
+
 ## 6. API 冻结
 
 | Route | M3/M4 | 成功 | 主要错误 |
@@ -226,7 +232,7 @@ prepared 行改成 recovering/attention 再尝试恢复，也不得为“恢复�
 | `GET /api/migration/v1/materializations/:materializationId` | M3 | 200 MaterializationV1 | 404；读取发现变化则 200 stale |
 | `POST /api/migration/v1/projects/:id/impact` | M4A | 201 ImpactSpecV1 | 409 base/source；422 ref；423 lock/attention |
 | `POST /api/migration/v1/projects/:id/edits` | M4B | 200 ControlledWriteResponseV1 | 409 base/source/idempotency；423 lock；428 impact/approval |
-| `POST /api/migration/v1/projects/:id/history/restore` | M4C | 200 ControlledWriteResponseV1 | 同上，另 422 snapshot 不属于项目 |
+| `POST /api/migration/v1/projects/:id/history/restore` | M4C | 200 ControlledWriteResponseV1 | 同上；跨项目/不存在 snapshot 同 404；不可恢复 snapshot/diff 422 |
 
 错误优先级保持：auth/origin → schema/capability → idempotency → project/resource ownership → base/source/control
 → attention → materialization/rights/impact/approval → locks → execution；M4B 的更细调用顺序以
@@ -257,6 +263,15 @@ materialize 请求中懒执行。
 8. publish immutable snapshot；
 9. 再次复核 control/base，单事务 revision +1、active pointer、目标 asset ledger 新引用、幂等、impact consumed、outbox；
 10. 失败清理 stage；发布不确定进入 attention；callback/晚到不得执行第 9 步。
+
+### 8.1 M4C 历史恢复特化
+
+历史 target 只能由 Host-only `HistoricalSnapshotResolver` 从同项目 committed snapshot 及其 immutable projection
+facts 重建；不得用 current source 代替。`HistoryRestorePlanV1` 对 current/target projection 做 canonical diff，
+`ImpactSpecV1.native_plan_sha256` 在 restore arm 中绑定该 plan hash。restore 只允许安装缺失内容寻址资产与原子替换
+`film.html`；其他可变 root 不一致时 fail closed。最终由 `RevisionStore.commitHistoryRestore()` 一个事务完成
+revision+1、impact consumed、snapshot/projection exact insert-or-verify、active commit、outbox、operation idempotency 与
+transaction committed。详细合同与逐 case 门见 ADR-W2.0-006 与 `17_M4C_DEVELOPMENT_GATE.md`。
 
 ## 9. 回退
 
