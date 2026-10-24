@@ -83,11 +83,16 @@ export class AdoptionCoordinator {
         // Re-read inside the queue slot. The pre-read named the transaction the gate was
         // told to ignore; if the pending set has changed since, the write must not proceed
         // on a project that has another unfinished transaction.
-        const pending = this.#unfinishedAdoption(projectId);
+        let pending = this.#unfinishedAdoption(projectId);
         if (pending !== undefined && pending.transaction_id !== unfinished.transaction_id) {
           throw new HttpError(423, "PROJECT_ATTENTION_REQUIRED",
             "Another unfinished adoption appeared for this project",
             { transaction_id: pending.transaction_id }, correlationId);
+        }
+        if (pending !== undefined && pending.claims_adoption === false) {
+          // The pending row is not an adoption — the legacy edit route's row. It belongs to
+          // the generic recovery, so this module does not take it over.
+          pending = undefined;
         }
         if (pending !== undefined) {
           // **The request's identity is settled before any recovery is taken over.**
@@ -107,13 +112,28 @@ export class AdoptionCoordinator {
               "This idempotency key was used with a different request",
               { operation_kind: OPERATION_KIND }, correlationId);
           } else {
-            await this.#takeOverRecovery(pending, request, correlationId);
+            // A different key: the pending row is still this project's unfinished write and
+            // still has to be recovered, but the error it raises concerns *that*
+            // transaction, not this request. The message says so, so the client does not
+            // read the old transaction's problem as its own.
+            try {
+              await this.#takeOverRecovery(pending, request, correlationId);
+            } catch (error) {
+              if (error instanceof HttpError) {
+                throw new HttpError(error.status, error.code,
+                  `An unfinished adoption for this project could not be recovered: ${error.message}`,
+                  { ...(error.details ?? {}), transaction_id: pending.transaction_id },
+                  correlationId);
+              }
+              throw error;
+            }
           }
         }
       }
       const replay = this.deps.idempotency.recall(projectId, OPERATION_KIND, request.idempotency_key);
       if (replay !== undefined) {
-        this.deps.idempotency.assertSameRequest(replay, requestDigest, OPERATION_KIND, projectId);
+        this.deps.idempotency.assertSameRequest(replay, requestDigest, OPERATION_KIND, projectId,
+          correlationId);
         return JSON.parse(replay.response_json) as ControlledWriteResponseV1 | ControlledWriteFailureResponseV1;
       }
 
@@ -313,7 +333,11 @@ export class AdoptionCoordinator {
             // is latched rather than reported as a transient 503 that leaves the row
             // `prepared` forever and the project silently closed.
             if (/^(ADOPTION_[A-Z_]*MISSING|HISTORY_[A-Z_]*MISSING)$/u.test(reason)) {
+              // The fact is latched as terminal, so the answer is terminal too. Telling the
+              // client to retry a state that cannot be retried is worse than a 423.
               this.deps.coordinator.attention(transactionId, "ADOPTION_FACT_MISSING", reason);
+              throw new HttpError(423, "PROJECT_ATTENTION_REQUIRED",
+                "The published adoption's immutable fact is missing", { reason }, correlationId);
             }
             throw new HttpError(503, "ENGINE_UNAVAILABLE",
               "The published adoption could not be recovered right now", { reason }, correlationId);
@@ -334,16 +358,21 @@ export class AdoptionCoordinator {
    */
   #unfinishedAdoption(projectId: string): {
     transaction_id: string; request_hash: string; idempotency_key: string;
+    /** Whether the row claims to be an adoption. A row that does not is not M4B's. */
+    claims_adoption: boolean;
   } | undefined {
     for (const transaction of this.deps.revisions.projectTransactions(projectId)) {
       if (transaction.state !== "prepared") continue;
       let key = "";
+      let claims = false;
       try {
-        key = String((JSON.parse(transaction.request_json) as { idempotency_key?: unknown })
-          .idempotency_key ?? "");
-      } catch { key = ""; }
+        const parsed = JSON.parse(transaction.request_json) as
+          { idempotency_key?: unknown; format?: unknown };
+        key = String(parsed.idempotency_key ?? "");
+        claims = parsed.format === "narralens.adopt-request@1.0";
+      } catch { key = ""; claims = false; }
       return { transaction_id: transaction.transaction_id, request_hash: transaction.request_hash,
-        idempotency_key: key };
+        idempotency_key: key, claims_adoption: claims };
     }
     return undefined;
   }
@@ -432,18 +461,42 @@ export class AdoptionCoordinator {
         report.attention += 1;
         continue;
       }
+      // **Only a row that claims to be an adoption is M4B's to decide.**
+      //
+      // The legacy edit route writes `project_transaction` rows with a non-adoption
+      // `request_json`, and the generic recovery — which gate §7 orders *after* this one —
+      // owns them. Deciding them here would make one module answer for another's
+      // transaction, with a reason that is false about a perfectly readable request.
+      //
+      // A row that cannot be parsed at all is a different case: it *may* be M4B's, and the
+      // generic recovery would move a pre-publish row to `recovering`, which has no legal
+      // outgoing edge. So an unreadable row is latched, and a readable non-adoption row is
+      // left alone.
       let value: unknown;
-      try { value = JSON.parse(transaction.request_json); } catch {
-        // The row is M4B's, but its request cannot be read. Leaving it for the generic
-        // recovery would move it to `recovering`, which has no legal outgoing edge — a row
-        // with no way out, which TX-08B forbids. Latching it is a decided state.
+      let readable = true;
+      try { value = JSON.parse(transaction.request_json); } catch { readable = false; }
+      if (!readable) {
+        // The request cannot be read. That *may* be M4B's row, and leaving it for the
+        // generic recovery would move it to `recovering`, which has no legal outgoing edge.
         this.deps.coordinator.attention(transaction.transaction_id, "ADOPTION_REQUEST_UNREADABLE",
           "the unfinished adoption's request cannot be read");
         report.attention += 1;
         continue;
       }
+      // **Only a row that claims to be an adoption is M4B's to decide.**
+      //
+      // The legacy edit route writes `project_transaction` rows with a non-adoption
+      // `request_json`, and the generic recovery — which gate §7 orders *after* this one —
+      // owns them. Deciding them here would make one module answer for another's
+      // transaction, with a reason that is false about a perfectly readable request.
+      const claimsAdoption = (value as { format?: unknown } | null)?.format
+        === "narralens.adopt-request@1.0";
+      if (!claimsAdoption) continue;
       const parsed = validateAdoptRequest(value);
       if (!parsed.ok) {
+        // It is M4B's row and it cannot be recovered. Latching it is a decided state, and
+        // the generic recovery would have moved it to `recovering` — which has no legal
+        // outgoing edge, and TX-08B forbids leaving one.
         this.deps.coordinator.attention(transaction.transaction_id, "ADOPTION_REQUEST_UNREADABLE",
           "the unfinished adoption's request does not satisfy its contract");
         report.attention += 1;
@@ -487,7 +540,12 @@ export class AdoptionCoordinator {
         // close a project that a later boot could have recovered, and `commitAdoption`'s CAS
         // requires `attention = 0`, so nothing could ever write it again.
         report.attention += 1;
-        void error;
+        // The refusal's cause is recorded on the row without marking the project: the
+        // project is closed either way, but a row that says nothing about why it was
+        // skipped is a row nobody can act on.
+        this.deps.revisions.noteTransactionOutcome(transaction.transaction_id, transaction.state,
+          "ADOPTION_RECOVERY_BLOCKED",
+          error instanceof Error ? error.message : String(error));
       }
     }
     return report;

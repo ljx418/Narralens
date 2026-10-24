@@ -65,11 +65,15 @@ export class OperationIdempotencyStore {
    * conflict the client has to resolve with a new key — never a replacement that quietly
    * discards the original authorization.
    */
-  assertSameRequest(found: OperationResponse, requestDigest: string, operationKind: string, projectId: string): void {
+  assertSameRequest(found: OperationResponse, requestDigest: string, operationKind: string,
+    projectId: string, correlationId?: string): void {
     if (found.request_digest !== requestDigest) {
+      // The correlation id is the request's, not the project's. The project id was being put
+      // in the correlation-id slot, so the same conflict could be answered with two different
+      // bodies depending on which path noticed it.
       throw new HttpError(409, "IDEMPOTENCY_KEY_CONFLICT",
         "This idempotency key was used with a different request",
-        { operation_kind: operationKind }, projectId);
+        { operation_kind: operationKind }, correlationId ?? projectId);
     }
   }
 

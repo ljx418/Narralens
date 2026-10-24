@@ -166,7 +166,10 @@ export function defaultAdoptionStagingRoot(dbPath: string | undefined): string {
   if (dbPath === undefined || dbPath === ":memory:" || dbPath === "") {
     return resolve(base, `ephemeral-${process.pid}-${randomBytes(6).toString("hex")}`);
   }
-  return resolve(base, createHash("sha256").update(resolve(dbPath)).digest("hex").slice(0, 16));
+  // The process id is part of the name as well as the database's. Two Hosts over one
+  // database are not a supported deployment, but they *are* two processes, and one of
+  // them's startup sweep must not delete the other's in-flight tree.
+  return resolve(base, `${createHash("sha256").update(resolve(dbPath)).digest("hex").slice(0, 16)}-${process.pid}`);
 }
 
 /**

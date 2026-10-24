@@ -481,6 +481,21 @@ export class RevisionStore {
   }
 
   /**
+   * Record why a transaction was left where it was, without moving it.
+   *
+   * The write is predecessor-guarded like every other state write here: the caller names
+   * the state it expects to find, and a row that has moved is not touched. A transaction
+   * that was skipped with no reason recorded is a row nobody can act on, and an
+   * unconditional update would be exactly the "read then write" the state machine forbids.
+   */
+  noteTransactionOutcome(transactionId: string, expectedState: ProjectTransactionState,
+    errorCode: string, terminalReason: string, now = new Date()): void {
+    const at = now.toISOString();
+    this.#db.prepare(`UPDATE project_transaction SET error_code=?, terminal_reason=?, updated_at=?
+      WHERE transaction_id=? AND state=?`).run(errorCode, terminalReason, at, transactionId, expectedState);
+  }
+
+  /**
    * M4B's one authoritative database commit. Every business fact, the real outbox id and
    * the replay response become visible together, or none do.
    */

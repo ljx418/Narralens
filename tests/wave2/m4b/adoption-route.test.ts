@@ -537,6 +537,39 @@ describe("M4B production adoption route", () => {
     expect(await readdir(expected).catch(() => [])).not.toContain("adopt-orphaned");
   }, 300_000);
 
+  it("leaves another module's transaction alone: a legacy edit row is not M4B's to decide", async () => {
+    // The legacy edit route writes `project_transaction` rows with a non-adoption
+    // `request_json`, and the generic recovery — which runs *after* M4B's — owns them.
+    // M4B deciding them would be one module answering for another's transaction, with a
+    // reason that is false about a perfectly readable request.
+    const running = await start();
+    hosts.push(running.host); dirs.push(running.base);
+    const projectId = "of_legacy_project";
+    const db = running.host.revisions.compose((handle) => handle);
+    running.host.revisions.beginTransaction({
+      transaction_id: "txn_legacy", project_id: projectId, kind: "edit",
+      request_json: JSON.stringify({ format: "narralens.edit-request@1.0", shot_id: "shot-001" }),
+      request_hash: "0".repeat(64), correlation_id: "corr-legacy", base_revision: 0,
+    });
+    // The row is left in `received`, which is where an interrupted legacy write lands.
+    expect((db.prepare("SELECT state FROM project_transaction WHERE transaction_id='txn_legacy'")
+      .get() as { state: string }).state).toBe("received");
+
+    await running.host.close();
+    hosts.splice(hosts.indexOf(running.host), 1);
+    const restarted = await startOn(running.base);
+    hosts.push(restarted.host);
+
+    const after = restarted.host.revisions.compose((handle) => handle)
+      .prepare("SELECT state, error_code FROM project_transaction WHERE transaction_id='txn_legacy'")
+      .get() as { state: string; error_code: string };
+    // Not latched by M4B, and not carrying M4B's reason.
+    expect(after.error_code).not.toBe("ADOPTION_REQUEST_UNREADABLE");
+    // The generic recovery owns it now, so the row is either recovered or decided by the
+    // generic path — never by the adoption's recovery.
+    expect(["received", "recovering", "attention", "aborted"]).toContain(after.state);
+  }, 300_000);
+
   it("answers one idempotency key with one body, whatever the request body is", async () => {
     // The root cause of the third review round's MAJOR: the recovery takeover ran *before*
     // the request's own identity was settled, so a request with the same key and a different

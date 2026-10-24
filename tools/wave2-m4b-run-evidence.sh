@@ -87,6 +87,35 @@ printf '%-24s exit=%s\n' m4b-integrity "$code"
 [ "$code" -eq 0 ] || overall=1
 
 git status --porcelain > "$LOGS/git-status-after.txt"
+
+# The capture's own outcome, recorded in the capture. The manifest reads it to build the
+# index of failed captures, so a failure is findable from the index rather than only by
+# listing directories — and so the index cannot omit a failure that nobody wrote a note for.
+printf '%s\n' "$overall" > "$LOGS/overall.txt"
+
+if [ "$overall" -ne 0 ]; then
+  # A failed capture says so, in the capture. A diagnostic written by hand can be forgotten;
+  # one the script writes cannot.
+  {
+    echo "# M4B 捕获失败"
+    echo
+    echo "本目录是失败捕获，禁止作为冻结证据或改写为全绿。"
+    echo
+    echo "- capture commit：\`$CAPTURE_SHA\`"
+    echo "- overall：\`$overall\`"
+    echo "- 失败的命令："
+    for exit_file in "$LOGS"/*.exit; do
+      [ -e "$exit_file" ] || continue
+      code="$(cat "$exit_file")"
+      [ "$code" -eq 0 ] && continue
+      name="$(basename "$exit_file" .exit)"
+      echo "  - \`$name\` exit=$code"
+    done
+    echo
+    echo "逐条输出见本目录的 \`.txt\` 日志。失败捕获只追加，不覆盖、不删除。"
+  } > "$LOGS/CAPTURE_FAILED_DIAGNOSTIC.md"
+fi
+
 echo "overall=$overall"
 echo "logs=$LOGS"
 exit "$overall"

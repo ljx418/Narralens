@@ -77,12 +77,20 @@
   "status": "CLOSED",
   "production_seam": true,
   "tests": [
-   "tests/wave2/m4b/adoption-route.test.ts::starts again after latching terminal attention, because one blocked project must not stop the Host",
+   "tests/wave2/m4b/adoption-route.test.ts::converges the pre-publish crash boundary after_received to aborted with revision +0",
+   "tests/wave2/m4b/adoption-route.test.ts::converges the pre-publish crash boundary after_preconditions to aborted with revision +0",
+   "tests/wave2/m4b/adoption-route.test.ts::converges the pre-publish crash boundary after_plan to aborted with revision +0",
+   "tests/wave2/m4b/adoption-route.test.ts::converges the pre-publish crash boundary after_stage to aborted with revision +0",
+   "tests/wave2/m4b/adoption-route.test.ts::converges the pre-publish crash boundary after_validate to aborted with revision +0",
+   "tests/wave2/m4b/adoption-route.test.ts::converges the pre-publish crash boundary after_snapshot_publish to aborted with revision +0",
+   "tests/wave2/m4b/adoption-route.test.ts::converges the crash boundary after_active_inspect to a decided state with revision +1",
    "tests/wave2/m4b/adoption-route.test.ts::recovers the author-source publication boundary film_renamed",
    "tests/wave2/m4b/adoption-route.test.ts::recovers the author-source publication boundary parent_fsynced",
+   "tests/wave2/m4b/adoption-route.test.ts::starts again after latching terminal attention, because one blocked project must not stop the Host",
    "tests/wave2/m4b/adoption-route.test.ts::sweeps an adoption staging tree left behind by a hard crash",
-   "tests/wave2/m4b/adoption-route.test.ts::converges the crash boundary after_active_inspect to a decided state with revision +1",
-   "tests/wave2/m4b/adoption-route.test.ts::converges the crash boundary after_active_inspect to a decided state with revision +1"
+   "tests/wave2/m4b/adoption-route.test.ts::recovers a simulated crash at %s to one durable outcome",
+   "tests/wave2/m4b/adoption-route.test.ts::latches terminal attention when recovery can prove neither publication boundary",
+   "tests/wave2/m4b/adoption-route.test.ts::reclaims a crashed staging tree through the production composition, where the database path is the store's"
   ],
   "evidence": "协调器 10 个边界（received/preconditions/plan/stage/validate/snapshot publish/prepared/published/active inspect/committed）与 publisher 5 个边界逐一重启；发布前收敛为 aborted 且 revision +0，发布后收敛为 committed；两者都不匹配则 terminal attention，且 Host 仍能再次启动（被阻断的是项目，不是整个 Host）；无法读取的未终结行被 latch 为终态，不会被通用恢复挪进无出边的 recovering；只有自称是采用请求的行才由 M4B 裁决，其余行归通用恢复。",
   "notes": "发布前的崩溃在崩溃当场不清理（进程死了），收敛由重启后的恢复完成——这正是「重启后收敛」的要求；恢复把每个 pre-publish 合法前态 CAS 到 aborted，并清理 stage/temp。只有 request_json 自称 adopt-request 的行才由 M4B 裁决：legacy edit 路由写的行归通用恢复，M4B 不替别的模块决定它的事务的命运。"

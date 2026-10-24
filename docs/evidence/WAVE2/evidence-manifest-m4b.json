@@ -227,54 +227,70 @@
     "Headed and human experience are NOT_RUN; automation is headless, muted, windowless and loopback-only.",
     "The real media proof is a fixed 900-frame three-clip film, not a long-film performance claim or a production render route.",
     "Wave 1 and M4A current-tip integrity checks fail by design after later stages move code; their historical gates pass and their non-zero logs are preserved.",
-    "A film matching neither durable before nor after digest is terminal attention and needs explicit later repair tooling; M4B does not auto-clear it."
+    "A film matching neither durable before nor after digest is terminal attention and needs explicit later repair tooling; M4B does not auto-clear it.",
+    "A recoverable resource failure is published as a controlled failure with http_status 500, because the frozen failure union is 409|422|423|428|500 and has no 503, while HOST_RESOURCE_EXHAUSTED is aliased to 503 elsewhere. The record therefore says 500 and carries recoverable:true in its details. Changing it means amending a frozen contract, so it is recorded here as a known boundary instead."
   ],
   "known_failed_captures": [
     {
       "capture_commit": "002461bcf780c2d08fa40e678c317e8938dd3328",
       "diagnostic": "docs/evidence/WAVE2/logs/002461bcf780c2d08fa40e678c317e8938dd3328/CAPTURE_FAILED_DIAGNOSTIC.md",
+      "recorded_outcome": null,
       "kept": true,
       "note": "A failed capture, kept verbatim. It is not evidence of a passing run and is never counted as one."
     },
     {
       "capture_commit": "14cc3b6f2c53a0cf02397352bb296486491cc461",
       "diagnostic": "docs/evidence/WAVE2/logs/14cc3b6f2c53a0cf02397352bb296486491cc461/CAPTURE_FAILED_DIAGNOSTIC.txt",
+      "recorded_outcome": null,
+      "kept": true,
+      "note": "A failed capture, kept verbatim. It is not evidence of a passing run and is never counted as one."
+    },
+    {
+      "capture_commit": "1c0703bd8621d9a4002fa67b2080edf25bab37c4",
+      "diagnostic": "docs/evidence/WAVE2/logs/1c0703bd8621d9a4002fa67b2080edf25bab37c4/CAPTURE_FAILED_DIAGNOSTIC.md",
+      "recorded_outcome": null,
       "kept": true,
       "note": "A failed capture, kept verbatim. It is not evidence of a passing run and is never counted as one."
     },
     {
       "capture_commit": "2fe36433fc2182abc8bd959ec1bee8e1048d4b5a",
       "diagnostic": "docs/evidence/WAVE2/logs/2fe36433fc2182abc8bd959ec1bee8e1048d4b5a/CAPTURE_FAILED_DIAGNOSTIC.md",
+      "recorded_outcome": null,
       "kept": true,
       "note": "A failed capture, kept verbatim. It is not evidence of a passing run and is never counted as one."
     },
     {
       "capture_commit": "466eca6893de10128adfc06d060b70fcb58c0c4b",
       "diagnostic": "docs/evidence/WAVE2/logs/466eca6893de10128adfc06d060b70fcb58c0c4b/CAPTURE_FAILED_DIAGNOSTIC.txt",
+      "recorded_outcome": null,
       "kept": true,
       "note": "A failed capture, kept verbatim. It is not evidence of a passing run and is never counted as one."
     },
     {
       "capture_commit": "be93a183f5582da4b0db9f0e211424277d7ccfd7",
       "diagnostic": "docs/evidence/WAVE2/logs/be93a183f5582da4b0db9f0e211424277d7ccfd7/CAPTURE_FAILED_DIAGNOSTIC.txt",
+      "recorded_outcome": null,
       "kept": true,
       "note": "A failed capture, kept verbatim. It is not evidence of a passing run and is never counted as one."
     },
     {
       "capture_commit": "c90a6bfa9fde997ba59c2be5ccd0552fa72bdb43",
       "diagnostic": "docs/evidence/WAVE2/logs/c90a6bfa9fde997ba59c2be5ccd0552fa72bdb43/CAPTURE_FAILED_DIAGNOSTIC.md",
+      "recorded_outcome": null,
       "kept": true,
       "note": "A failed capture, kept verbatim. It is not evidence of a passing run and is never counted as one."
     },
     {
       "capture_commit": "d52dd95879bb282f8e0f628cc5f36455f2ca025b",
       "diagnostic": "docs/evidence/WAVE2/logs/d52dd95879bb282f8e0f628cc5f36455f2ca025b/CAPTURE_FAILED_DIAGNOSTIC.md",
+      "recorded_outcome": null,
       "kept": true,
       "note": "A failed capture, kept verbatim. It is not evidence of a passing run and is never counted as one."
     },
     {
       "capture_commit": "e9a3a3356fa9ae43ed97b20d46c3641ee36c5942",
       "diagnostic": "docs/evidence/WAVE2/logs/e9a3a3356fa9ae43ed97b20d46c3641ee36c5942/CAPTURE_FAILED_DIAGNOSTIC.txt",
+      "recorded_outcome": null,
       "kept": true,
       "note": "A failed capture, kept verbatim. It is not evidence of a passing run and is never counted as one."
     }
