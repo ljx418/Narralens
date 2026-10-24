@@ -46,6 +46,28 @@ const manifest = {
 // The output path is an argument so the capture can produce a manifest *inside* its own
 // log directory and check it there, rather than the committed file — which cannot exist yet
 // for a capture that has not been committed.
+/**
+ * The captures that failed, and why.
+ *
+ * A manifest is the index a reader starts from, and an index that only names the successful
+ * captures hides the fact that one failed. The failed directory is kept and marked; this
+ * entry makes it findable from the index rather than only from a directory listing.
+ */
+const knownFailedCaptures = readdirSync(resolve(root, "docs/evidence/WAVE2/logs"), { withFileTypes: true })
+  .filter((entry) => entry.isDirectory())
+  .map((entry) => `docs/evidence/WAVE2/logs/${entry.name}`)
+  .filter((directory) => existsSync(resolve(root, directory, "CAPTURE_FAILED_DIAGNOSTIC.md"))
+    || existsSync(resolve(root, directory, "CAPTURE_FAILED_DIAGNOSTIC.txt")))
+  .map((directory) => ({
+    capture_commit: directory.split("/").pop(),
+    diagnostic: existsSync(resolve(root, directory, "CAPTURE_FAILED_DIAGNOSTIC.md"))
+      ? `${directory}/CAPTURE_FAILED_DIAGNOSTIC.md`
+      : `${directory}/CAPTURE_FAILED_DIAGNOSTIC.txt`,
+    kept: true,
+    note: "A failed capture, kept verbatim. It is not evidence of a passing run and is never counted as one.",
+  }));
+manifest.known_failed_captures = knownFailedCaptures;
+
 const target = resolve(root, process.argv[3] ?? "docs/evidence/WAVE2/evidence-manifest-m4b.json");
 writeFileSync(target, `${JSON.stringify(manifest, null, 2)}\n`);
 console.log(`wrote M4B manifest: commands=${commands.length} cases=${cases.length}`);

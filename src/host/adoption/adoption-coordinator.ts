@@ -77,6 +77,8 @@ export class AdoptionCoordinator {
     // refusing a project that another condition has closed.
     const unfinished = this.#unfinishedAdoption(projectId);
     return await this.deps.coordinator.controlledWrite(projectId, correlationId, async () => {
+      const requestJson = canonicalJson(request);
+      const requestDigest = sha256(requestJson);
       if (unfinished !== undefined) {
         // Re-read inside the queue slot. The pre-read named the transaction the gate was
         // told to ignore; if the pending set has changed since, the write must not proceed
@@ -87,11 +89,28 @@ export class AdoptionCoordinator {
             "Another unfinished adoption appeared for this project",
             { transaction_id: pending.transaction_id }, correlationId);
         }
-        const failure = await this.#takeOverRecovery(unfinished, request, correlationId);
-        if (failure !== undefined) return failure;
+        if (pending !== undefined) {
+          // **The request's identity is settled before any recovery is taken over.**
+          //
+          // The pending row records the digest of the request that created it. A request
+          // with the *same* digest is that transaction and may take it over. A request with
+          // the same key and a *different* digest is a conflict, and answering it with the
+          // old transaction's failure would give one key two different public bodies: the
+          // old failure the first time, a 409 the second. A request with a *different* key
+          // is a different attempt; the pending row is still this project's unfinished
+          // write and still has to be recovered, but the answer belongs to this request.
+          if (pending.request_hash === requestDigest) {
+            const failure = await this.#takeOverRecovery(pending, request, correlationId);
+            if (failure !== undefined) return failure;
+          } else if (pending.idempotency_key === request.idempotency_key) {
+            throw new HttpError(409, "IDEMPOTENCY_KEY_CONFLICT",
+              "This idempotency key was used with a different request",
+              { operation_kind: OPERATION_KIND }, correlationId);
+          } else {
+            await this.#takeOverRecovery(pending, request, correlationId);
+          }
+        }
       }
-      const requestJson = canonicalJson(request);
-      const requestDigest = sha256(requestJson);
       const replay = this.deps.idempotency.recall(projectId, OPERATION_KIND, request.idempotency_key);
       if (replay !== undefined) {
         this.deps.idempotency.assertSameRequest(replay, requestDigest, OPERATION_KIND, projectId);
@@ -290,6 +309,12 @@ export class AdoptionCoordinator {
               throw recoveryError;
             }
             const reason = recoveryError instanceof Error ? recoveryError.message : String(recoveryError);
+            // A missing immutable fact cannot be recovered by a later attempt either, so it
+            // is latched rather than reported as a transient 503 that leaves the row
+            // `prepared` forever and the project silently closed.
+            if (/^(ADOPTION_[A-Z_]*MISSING|HISTORY_[A-Z_]*MISSING)$/u.test(reason)) {
+              this.deps.coordinator.attention(transactionId, "ADOPTION_FACT_MISSING", reason);
+            }
             throw new HttpError(503, "ENGINE_UNAVAILABLE",
               "The published adoption could not be recovered right now", { reason }, correlationId);
           }
@@ -307,11 +332,18 @@ export class AdoptionCoordinator {
    * Only `prepared` counts. A row in `received`…`validated` never published anything, and a
    * row in `attention` is decided; neither is a recovery this request could take over.
    */
-  #unfinishedAdoption(projectId: string): { transaction_id: string; request_hash: string } | undefined {
+  #unfinishedAdoption(projectId: string): {
+    transaction_id: string; request_hash: string; idempotency_key: string;
+  } | undefined {
     for (const transaction of this.deps.revisions.projectTransactions(projectId)) {
-      if (transaction.state === "prepared") {
-        return { transaction_id: transaction.transaction_id, request_hash: transaction.request_hash };
-      }
+      if (transaction.state !== "prepared") continue;
+      let key = "";
+      try {
+        key = String((JSON.parse(transaction.request_json) as { idempotency_key?: unknown })
+          .idempotency_key ?? "");
+      } catch { key = ""; }
+      return { transaction_id: transaction.transaction_id, request_hash: transaction.request_hash,
+        idempotency_key: key };
     }
     return undefined;
   }
@@ -344,7 +376,7 @@ export class AdoptionCoordinator {
    * A request with a *new* key is not answered with the old transaction's failure — that
    * failure belongs to the old key — and is allowed to start its own attempt.
    */
-  async #takeOverRecovery(unfinished: { transaction_id: string; request_hash: string },
+  async #takeOverRecovery(unfinished: { transaction_id: string; request_hash: string; idempotency_key: string },
     request: AdoptRequestV1, correlationId: string): Promise<ControlledWriteFailureResponseV1 | undefined> {
     const row = this.deps.revisions.projectTransaction(unfinished.transaction_id);
     let value: unknown;
@@ -430,8 +462,13 @@ export class AdoptionCoordinator {
             // Only evidence that cannot be proven, or a fact that changed, is terminal. A
             // held lock will clear and a transient failure may not reproduce, so latching
             // either of them closes a project a later boot could have recovered.
-            const terminal = error instanceof HttpError
-              && (error.code === "PROJECT_ATTENTION_REQUIRED" || error.code === "IMPACT_STALE");
+            // A missing immutable fact is unrecoverable by any later attempt, so it is
+            // terminal even though it is not an `HttpError`: leaving the row `prepared`
+            // would close the project with nothing in `projectsInAttention()`.
+            const missingFact = error instanceof Error
+              && /^(ADOPTION_[A-Z_]*MISSING|HISTORY_[A-Z_]*MISSING)$/u.test(error.message);
+            const terminal = missingFact || (error instanceof HttpError
+              && (error.code === "PROJECT_ATTENTION_REQUIRED" || error.code === "IMPACT_STALE"));
             if (terminal && current !== undefined && current.state !== "attention") {
               this.deps.coordinator.attention(transaction.transaction_id, "ADOPTION_RECOVERY_UNPROVABLE",
                 error instanceof Error ? error.message : String(error));
@@ -443,9 +480,14 @@ export class AdoptionCoordinator {
         // The recovery gate refused: something else is in the way for this project. That is
         // this transaction's problem to wait for, not a reason to refuse to serve the rest
         // of the deployment, and not a reason to throw out of startup.
+        //
+        // The *project* is deliberately not latched. The gate refuses either because the
+        // project is already in attention — in which case it is flagged already — or because
+        // another transaction is pending, which can resolve. Latching on the second would
+        // close a project that a later boot could have recovered, and `commitAdoption`'s CAS
+        // requires `attention = 0`, so nothing could ever write it again.
         report.attention += 1;
-        this.deps.coordinator.attentionForProject(transaction.project_id, transaction.transaction_id,
-          "ADOPTION_RECOVERY_BLOCKED", error instanceof Error ? error.message : String(error));
+        void error;
       }
     }
     return report;

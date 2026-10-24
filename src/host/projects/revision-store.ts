@@ -175,11 +175,19 @@ export interface AssetImportJournalRecord {
 
 export class RevisionStore {
   readonly #db: DatabaseSync;
+  /** The path this store was opened on; `":memory:"` for an in-memory database. */
+  readonly databasePath: string;
   /** M2.3 migration facts live in this same database, never a second one. */
   readonly migrations: MigrationStore;
 
   constructor(path = ":memory:") {
     this.#db = new DatabaseSync(path);
+    // The path this store was opened on, so a composition can derive its own storage from
+    // the database it actually uses rather than from a constructor parameter that the
+    // production entry point may not pass. The M4B staging root depends on that: deriving
+    // it from a parameter production leaves unset gave every boot a fresh directory, and the
+    // crash sweep could never reclaim anything.
+    this.databasePath = path;
     this.migrations = new MigrationStore(this.#db);
     this.#db.exec("PRAGMA journal_mode=WAL; PRAGMA foreign_keys=ON; PRAGMA busy_timeout=5000;");
     this.#db.exec(`

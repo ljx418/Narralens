@@ -169,6 +169,21 @@ export function defaultAdoptionStagingRoot(dbPath: string | undefined): string {
   return resolve(base, createHash("sha256").update(resolve(dbPath)).digest("hex").slice(0, 16));
 }
 
+/**
+ * The staging root for a Host, derived from the database it actually opened.
+ *
+ * The parameter the composition used to consult was `dependencies.dbPath`, and the
+ * production entry point passes a `revisionStore` instead — so the parameter was undefined
+ * in production and every boot got a fresh random directory. That is precisely the case the
+ * sweep exists for: a crashed tree has to be reclaimable by the *next* boot, which it
+ * cannot be if the next boot looks somewhere else. The store knows its own path, so the
+ * derivation asks the store rather than the constructor.
+ */
+function adoptionStagingRootFor(revisions: RevisionStore, configured: string | undefined): string {
+  if (configured !== undefined) return configured;
+  return defaultAdoptionStagingRoot(revisions.databasePath);
+}
+
 interface HostDependencies {
   catalog?: ProjectCatalog;
   runner?: ControlledAgentRunner;
@@ -464,7 +479,7 @@ export class NarralensHost {
       ledger: this.assetLedger, snapshots: this.snapshots, adoption: this.adoptionFacts,
       publisher: new AuthorSourcePublisher({ ...(dependencies.adoptionPublishFault === undefined
         ? {} : { fault: dependencies.adoptionPublishFault }) }),
-      stagingRoot: dependencies.adoptionStagingRoot ?? defaultAdoptionStagingRoot(dependencies.dbPath),
+      stagingRoot: adoptionStagingRootFor(this.revisions, dependencies.adoptionStagingRoot),
       ...(dependencies.adoptionFault === undefined ? {} : { fault: dependencies.adoptionFault }) });
     this.#leaseReapIntervalMs = dependencies.leaseReapIntervalMs ?? 1_000;
     this.#materializeDrainIntervalMs = dependencies.materializeDrainIntervalMs ?? 250;

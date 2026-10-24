@@ -1,13 +1,15 @@
 import { createHash } from "node:crypto";
 import { execFile } from "node:child_process";
-import { mkdir, readFile, readdir, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import { basename, join, resolve } from "node:path";
+import { tmpdir } from "node:os";
 import { promisify } from "node:util";
 import { afterEach, describe, expect, it } from "vitest";
 import { planDigest } from "../../../src/host/materialize/native-plan-builder.js";
 import type { NativePlanV1 } from "../../../src/contracts/wave2-types.js";
 import { validateControlledWriteResponse } from "../../../src/contracts/validator.js";
 import { defaultAdoptionStagingRoot, NarralensHost } from "../../../src/host/server.js";
+import { RevisionStore } from "../../../src/host/projects/revision-store.js";
 import { SimulatedAdoptionCrash } from "../../../src/host/adoption/adoption-coordinator.js";
 import type { PublishBoundary } from "../../../src/host/adoption/author-source-publisher.js";
 import { createPinnedOpenFilmUpstream } from "../../../src/adapters/openfilm/openfilm-upstream.js";
@@ -54,14 +56,37 @@ async function authorizedAdoption(running: Started, suffix: string) {
  * a behavioural failure. The retry reuses the same idempotency key, so a retry is a replay
  * rather than a second adoption — which is the behaviour the same key is supposed to have.
  */
+/**
+ * A Host built the way production builds one: a `revisionStore` and nothing else.
+ *
+ * The production entry point passes a store, not a `dbPath`, so anything derived from a
+ * constructor parameter alone is undefined in production. This helper is what makes that
+ * class of mistake observable.
+ */
+async function startWithStore(database: string): Promise<Started> {
+  process.env.NARRALENS_OPENFILM_VENDOR = "/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b";
+  const host = new NarralensHost({ revisionStore: new RevisionStore(database) });
+  const port = await host.listen(0);
+  const origin = `http://127.0.0.1:${port}`;
+  const token = (await (await fetch(`${origin}/api/session`, { headers: { origin } })).json() as
+    { token: string }).token;
+  return { host, origin, token, base: database };
+}
+
 async function postAdoption(running: Started, projectId: string, request: object) {
   for (let attempt = 0; attempt < 3; attempt += 1) {
     const response = await fetch(`${running.origin}/api/migration/v1/projects/${projectId}/edits`, {
       method: "POST", headers: headers(running.origin, running.token), body: JSON.stringify(request),
     });
     const body = JSON.parse(await response.text()) as Record<string, unknown>;
-    const error = body.error as { code?: string; details?: { recoverable?: boolean } } | undefined;
-    const recoverable = error?.code === "HOST_RESOURCE_EXHAUSTED" && error.details?.recoverable !== false;
+    // Two shapes carry a recoverable resource failure: the canonical controlled-failure
+    // body, whose code is nested under `error`, and the generic error body, whose code is
+    // at the top level. Only the generic one is worth retrying — the canonical one is a
+    // *recorded* failure, so retrying it replays the same bytes and changes nothing.
+    const nested = body.error as { code?: string; details?: { recoverable?: boolean } } | undefined;
+    const top = body as { code?: string; details?: { recoverable?: boolean } };
+    const recoverable = top.code === "HOST_RESOURCE_EXHAUSTED" && top.details?.recoverable !== false
+      || nested?.code === "HOST_RESOURCE_EXHAUSTED" && nested.details?.recoverable !== false;
     if (!recoverable || attempt === 2) return { status: response.status, body };
     await new Promise((done) => setTimeout(done, 500 * (attempt + 1)));
   }
@@ -365,7 +390,7 @@ describe("M4B production adoption route", () => {
     expect((await readdir(sourceRoot)).filter((name) => name.includes(".film.tmp"))).toEqual([]);
   }, 900_000);
 
-  it("converges the crash boundary after_active_inspect to a decided state with revision +0", async () => {
+  it("converges the crash boundary after_active_inspect to a decided state with revision +1", async () => {
     // The publication boundary's own last check. A crash here leaves the source published
     // and the database uncommitted — the same transition state as `after_published`, but
     // after the active source has been re-read and re-proved.
@@ -486,6 +511,58 @@ describe("M4B production adoption route", () => {
     expect((db.prepare("SELECT count(*) AS n FROM outbox WHERE project_id=? AND topic='project.committed'")
       .get(prepared.projectId) as { n: number }).n).toBe(0);
     expect((db.prepare("SELECT state FROM impact WHERE project_id=?").get(prepared.projectId) as { state: string }).state).toBe("active");
+  }, 900_000);
+
+  it("reclaims a crashed staging tree through the production composition, where the database path is the store's", async () => {
+    // The root cause of the second review round's MAJOR: the staging root was derived from a
+    // constructor parameter the production entry point never passes, so production got a fresh
+    // random directory on every boot and the sweep could reclaim nothing. This test builds
+    // the Host the way production does — a `revisionStore`, no `dbPath`, no explicit staging
+    // root — and asserts that a crashed tree is gone after the next start.
+    const base = await mkdtemp(join(tmpdir(), "narralens-m4b-prod-"));
+    dirs.push(base);
+    const database = join(base, "narralens.sqlite");
+    const running = await startWithStore(database);
+    hosts.push(running.host);
+
+    const expected = defaultAdoptionStagingRoot(database);
+    const orphan = join(expected, "adopt-orphaned");
+    await mkdir(orphan, { recursive: true });
+    await writeFile(join(orphan, "film.html"), "<!doctype html><title>orphan</title>\n");
+    await running.host.close();
+    hosts.splice(hosts.indexOf(running.host), 1);
+
+    const restarted = await startWithStore(database);
+    hosts.push(restarted.host);
+    expect(await readdir(expected).catch(() => [])).not.toContain("adopt-orphaned");
+  }, 300_000);
+
+  it("answers one idempotency key with one body, whatever the request body is", async () => {
+    // The root cause of the third review round's MAJOR: the recovery takeover ran *before*
+    // the request's own identity was settled, so a request with the same key and a different
+    // body was answered with the old transaction's failure, and a later attempt with that
+    // body got a 409. One key, two public bodies.
+    const running = await start({ adoptionFault: (point) => {
+      if (point === "after_prepared") throw new SimulatedAdoptionCrash("PUBLISH_CRASH:after_prepared");
+    } });
+    hosts.push(running.host); dirs.push(running.base);
+    const prepared = await authorizedAdoption(running, "one-key-one-body");
+    const crashed = await postAdoption(running, prepared.projectId, prepared.request);
+    expect(crashed.status).toBeGreaterThanOrEqual(400);
+
+    // The same key with a *different* body is a conflict, and the conflict is the same
+    // answer the replay path gives — not the old transaction's failure.
+    const conflicting = await postAdoption(running, prepared.projectId,
+      { ...prepared.request, impact_hash: "0".repeat(64) });
+    expect(conflicting.status).toBe(409);
+    expect(conflicting.body.code).toBe("IDEMPOTENCY_KEY_CONFLICT");
+
+    // And the original request still gets exactly one answer, every time.
+    const first = await postAdoption(running, prepared.projectId, prepared.request);
+    const second = await postAdoption(running, prepared.projectId, prepared.request);
+    expect(first.status).toBe(second.status);
+    expect(first.body).toEqual(second.body);
+    expect(first.body.format).toBe("narralens.controlled-write-failure@1.0");
   }, 900_000);
 
   it("gives two Hosts with different databases different staging roots, so one sweep cannot touch the other", async () => {

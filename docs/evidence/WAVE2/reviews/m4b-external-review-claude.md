@@ -148,4 +148,51 @@ per-Host 声明已由实现取代。
 
 > 本节由**第二个**全新独立上下文复审填写。该上下文同样没有参与第一轮审查或任何修复。
 
+**裁决：NOT PASS —— BLOCKER = 0，MAJOR = 2，MINOR = 8。**
+
+复审确认第一轮修复的九项**全部真实且在正确的层**（含 takeover 返回 canonical body、staging root 按数据库派生、
+四种失败分流、无法读取的行被 latch、队列槽内重读未终结行、单一插入写入者、显式 timeout、证据过度声明已改、
+夹具只重试可恢复资源失败）。
+
+两个 MAJOR 与八项 MINOR 全部已修。其中两项值得逐字记录，因为它们是**同一个根因的两次显形**：
+
+- **MAJOR-1（staging root）**：派生的输入是**构造参数** `dependencies.dbPath`，而生产入口
+  `src/host/start.ts` 只传 `revisionStore`，不传 `dbPath`。于是生产每次启动都拿到一个新的随机目录，
+  崩溃回收——正是这个清扫存在的理由——在生产里**完全失效**。第一轮的修复制造了第二轮的这个缺陷。
+- **MAJOR-2（takeover）**：接管发生在**请求自身身份被确认之前**。待决行带着创建它的请求摘要；同 key 异摘要的
+  请求被回以旧事务的失败体，而稍后同 key 的重放得到 409 —— 同一个 key，两个公开 body。
+
+**根因闭环**（第三次返工按规则要求的不只是补丁）：
+
+> 这两个反复出现的 MAJOR 有同一个根因：**M4B 的恢复/接管路径与 staging root 是照着测试夹具的形状写的，
+> 而不是照着生产组合的形状写的。** 因此每一轮的修复都在夹具里成立、在生产里不成立。
+
+据此，加了两道**穿过生产组合**的防回归门：
+
+1. `reclaims a crashed staging tree through the production composition, where the database path is
+   the store's` —— 用 `new NarralensHost({ revisionStore: new RevisionStore(file) })`（生产真正用的形状）
+   构造 Host，断言崩溃留下的树在下次启动后被回收。派生改为读 `RevisionStore.databasePath`
+   （store 知道自己开在哪个文件上），而不是读一个生产不传的构造参数。
+2. `answers one idempotency key with one body, whatever the request body is` —— 断言同 key 异 body 是 409
+   （与重放路径同一个答案），而同 key 同 body 每次得到**同一个** body。请求身份现在**先于**接管被确认：
+   摘要相同才是同一笔事务，摘要不同且 key 相同是冲突，key 不同则是另一次尝试。
+
+其余 MINOR 的处置：M4B 夹具的重试改为同时识别通用 body 形状（原来只认 canonical 形状，而 canonical 形状是
+**已记录**的失败，重放它不会改变任何事，所以那个重试是惰性的）；`after_active_inspect` 测试名由
+「revision +0」改为「revision +1」（它证明的是 +1）；**只有自称 adopt-request 的行**才由 M4B 裁决
+（legacy edit 路由的行归通用恢复）；启动时 gate 拒绝**不再 latch project**（那会关掉一个本可恢复的项目）；
+`ADOPTION_*_MISSING` 这类损坏级失败被当作终态；TX-08B 的引用补齐到它自己声称的 15 个边界；
+manifest 新增 `known_failed_captures`，把 Wave 2 历史上**全部 8 个**失败捕获从索引里点出来。
+
+m8（可恢复资源失败被发布为 `http_status: 500`）**没有改**：门 §7 冻结的失败联合类型是
+`409|422|423|428|500`，没有 503，而 `HOST_RESOURCE_EXHAUSTED` 在错误别名表里绑的是 503。改它就要改一个
+已冻结的合同，超出 M4B 的范围；这里记录为已知边界，并说明触发它的正是 M4B 自己。
+
+**第三轮裁决：BLOCKER=0、MAJOR=2 → 仍不满足 M4B 外审 PASS 的条件。**
+修复后再次捕获并再次由新的独立上下文复审，见第 7 节。
+
+## 7. 第三轮复审与最终裁决
+
+> 本节由**第三个**全新独立上下文复审填写。该上下文没有参与任何前轮审查或修复。
+
 见下。

@@ -87,10 +87,11 @@
    "tests/wave2/m4b/adoption-route.test.ts::recovers the author-source publication boundary film_renamed",
    "tests/wave2/m4b/adoption-route.test.ts::recovers the author-source publication boundary parent_fsynced",
    "tests/wave2/m4b/adoption-route.test.ts::sweeps an adoption staging tree left behind by a hard crash",
-   "tests/wave2/m4b/adoption-route.test.ts::converges the crash boundary after_active_inspect to a decided state with revision +0"
+   "tests/wave2/m4b/adoption-route.test.ts::converges the crash boundary after_active_inspect to a decided state with revision +0",
+   "tests/wave2/m4b/adoption-route.test.ts::converges the crash boundary after_active_inspect to a decided state with revision +1"
   ],
-  "evidence": "协调器 10 个边界（received/preconditions/plan/stage/validate/snapshot publish/prepared/published/active inspect/committed）与 publisher 5 个边界逐一重启；发布前收敛为 aborted 且 revision +0，发布后收敛为 committed；两者都不匹配则 terminal attention，且 Host 仍能再次启动（被阻断的是项目，不是整个 Host）；无法读取的未终结行被 latch 为终态，不会被通用恢复挪进无出边的 recovering。",
-  "notes": "发布前的崩溃在崩溃当场不清理（进程死了），收敛由重启后的恢复完成——这正是「重启后收敛」的要求；恢复把每个 pre-publish 合法前态 CAS 到 aborted，并清理 stage/temp。"
+  "evidence": "协调器 10 个边界（received/preconditions/plan/stage/validate/snapshot publish/prepared/published/active inspect/committed）与 publisher 5 个边界逐一重启；发布前收敛为 aborted 且 revision +0，发布后收敛为 committed；两者都不匹配则 terminal attention，且 Host 仍能再次启动（被阻断的是项目，不是整个 Host）；无法读取的未终结行被 latch 为终态，不会被通用恢复挪进无出边的 recovering；只有自称是采用请求的行才由 M4B 裁决，其余行归通用恢复。",
+  "notes": "发布前的崩溃在崩溃当场不清理（进程死了），收敛由重启后的恢复完成——这正是「重启后收敛」的要求；恢复把每个 pre-publish 合法前态 CAS 到 aborted，并清理 stage/temp。只有 request_json 自称 adopt-request 的行才由 M4B 裁决：legacy edit 路由写的行归通用恢复，M4B 不替别的模块决定它的事务的命运。"
  },
  {
   "case_id": "TX-11B",
@@ -132,9 +133,10 @@
    "tests/wave2/m4b/adoption-route.test.ts::starts again after latching terminal attention, because one blocked project must not stop the Host",
    "tests/wave2/m4b/author-source-publisher.test.ts::removes the temporary film when a publish fails, so no half-written source is left behind",
    "tests/wave2/m4b/commit-adoption.test.ts::rolls every business fact back when",
-   "tests/wave2/m4b/adoption-route.test.ts::answers the same key with the same body whether the recovery just ran or was replayed"
+   "tests/wave2/m4b/adoption-route.test.ts::answers the same key with the same body whether the recovery just ran or was replayed",
+   "tests/wave2/m4b/adoption-route.test.ts::answers one idempotency key with one body, whatever the request body is"
   ],
-  "evidence": "逐字段记录：before 失败为原 source/revision；after 崩溃为 source=after 且 revision/pointer/ledger/impact/outbox/idempotency 全部未提交，并记录该受控过渡态；同 key 接管恢复后补交，且首次回答与持久重放逐字节相同；证据不可证明则 terminal attention，不猜成功。",
+  "evidence": "逐字段记录：before 失败为原 source/revision；after 崩溃为 source=after 且 revision/pointer/ledger/impact/outbox/idempotency 全部未提交，并记录该受控过渡态；同 key 同 body 接管恢复后补交，且首次回答与持久重放逐字节相同；同 key 异 body 是 409；证据不可证明则 terminal attention，不猜成功。",
   "notes": "「受控 423 过渡态」= source=after、DB 未 commit、revision/pointer/ledger/impact/outbox/idempotency 全部未提交。同 key 重试接管原 transaction 并完成；证据不可证明时进入 terminal attention，绝不猜成功。"
  },
  {
