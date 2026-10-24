@@ -1,0 +1,218 @@
+{
+  "format": "narralens.wave2-evidence-manifest@1",
+  "stage": "M4B",
+  "module": "ControlledAdoption",
+  "capture_commit": "d6fadfbf53c90ce33d95cc19a7d100631d8184c6",
+  "capture_logs": "docs/evidence/WAVE2/logs/d6fadfbf53c90ce33d95cc19a7d100631d8184c6",
+  "captured_at_utc": "2026-10-24T09:15:30Z",
+  "repo_dirty_at_capture": 0,
+  "environment": {
+    "date_utc": "2026-10-24T09:15:30Z",
+    "node": "v22.22.1",
+    "pnpm": "10.33.0",
+    "git_head": "d6fadfbf53c90ce33d95cc19a7d100631d8184c6",
+    "git_branch": "migration/m2.2-coordinator-persistence",
+    "repo_dirty_at_capture": "0",
+    "origin_main": "304c89134fdf9f834f7d69e3f4d5c89a68044c60",
+    "openfilm_upstream": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+    "declaration_ceiling": "M4B_INTERNAL_EVIDENCED",
+    "interaction": "headless,muted,no-window,no-focus-steal,no-network,no-payment"
+  },
+  "origin_main": "304c89134fdf9f834f7d69e3f4d5c89a68044c60",
+  "branch": "migration/m2.2-coordinator-persistence",
+  "commands": [
+    {
+      "name": "build",
+      "command": "corepack pnpm build",
+      "exit": 0,
+      "log": "docs/evidence/WAVE2/logs/d6fadfbf53c90ce33d95cc19a7d100631d8184c6/build.txt",
+      "log_sha256": "52eb174ae0c5f29f94a46b9a36082d604c976e7e0fe8215af32cee1f227081ed"
+    },
+    {
+      "name": "check",
+      "command": "corepack pnpm check",
+      "exit": 0,
+      "log": "docs/evidence/WAVE2/logs/d6fadfbf53c90ce33d95cc19a7d100631d8184c6/check.txt",
+      "log_sha256": "6527eea28615a3101bece786c03f8818207ff12f4d48d8327be7b75c8b7cb3c0"
+    },
+    {
+      "name": "contracts",
+      "command": "corepack pnpm test:contracts",
+      "exit": 0,
+      "log": "docs/evidence/WAVE2/logs/d6fadfbf53c90ce33d95cc19a7d100631d8184c6/contracts.txt",
+      "log_sha256": "fef8d847fd52a3464ac8e56c678c30d32dca6ae3307eb4c32f0362c11a45d411"
+    },
+    {
+      "name": "credential-scan",
+      "command": "NARRALENS_SECRET_SCAN_OUT=docs/evidence/WAVE2/logs/d6fadfbf53c90ce33d95cc19a7d100631d8184c6/credential-scan.json corepack pnpm exec tsx tools/secret-scan.ts",
+      "exit": 0,
+      "log": "docs/evidence/WAVE2/logs/d6fadfbf53c90ce33d95cc19a7d100631d8184c6/credential-scan.txt",
+      "log_sha256": "4cdc6f569a4e600e85a5459dba07ed9fcbc5eb464542adb55ead56b9a4a9418a"
+    },
+    {
+      "name": "m2.1",
+      "command": "corepack pnpm test:m2.1",
+      "exit": 0,
+      "log": "docs/evidence/WAVE2/logs/d6fadfbf53c90ce33d95cc19a7d100631d8184c6/m2.1.txt",
+      "log_sha256": "914e4af5e743c5aaed41d9b6e5573df6ce77c71a8844332fd29f18093275c084"
+    },
+    {
+      "name": "m4a-historical",
+      "command": "corepack pnpm evidence:wave2:m4a:historical",
+      "exit": 0,
+      "log": "docs/evidence/WAVE2/logs/d6fadfbf53c90ce33d95cc19a7d100631d8184c6/m4a-historical.txt",
+      "log_sha256": "a2c821b374a558fae9c5e214ee8c62ef3db687c77d2d46bf97cbaa866749eaea"
+    },
+    {
+      "name": "m4a-integrity",
+      "command": "corepack pnpm evidence:wave2:m4a:integrity",
+      "exit": 1,
+      "log": "docs/evidence/WAVE2/logs/d6fadfbf53c90ce33d95cc19a7d100631d8184c6/m4a-integrity.txt",
+      "log_sha256": "8f1ff8fc34b5c6f8e276b826ac025ca4c68645a7ae61ebc58824f358d8348e34",
+      "expected_failure": true
+    },
+    {
+      "name": "typecheck",
+      "command": "corepack pnpm exec tsc --noEmit",
+      "exit": 0,
+      "log": "docs/evidence/WAVE2/logs/d6fadfbf53c90ce33d95cc19a7d100631d8184c6/typecheck.txt",
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "wave1-historical",
+      "command": "corepack pnpm evidence:wave1:historical",
+      "exit": 0,
+      "log": "docs/evidence/WAVE2/logs/d6fadfbf53c90ce33d95cc19a7d100631d8184c6/wave1-historical.txt",
+      "log_sha256": "0b81fb585f05f08396028ffe96466ee45deda38b890baca1e271d425aebb4f1d"
+    },
+    {
+      "name": "wave1-integrity",
+      "command": "corepack pnpm evidence:wave1:integrity",
+      "exit": 1,
+      "log": "docs/evidence/WAVE2/logs/d6fadfbf53c90ce33d95cc19a7d100631d8184c6/wave1-integrity.txt",
+      "log_sha256": "9dc94745d271d5a30b85961d00497aab463623b52cded88426c87e873f73654b",
+      "expected_failure": true
+    },
+    {
+      "name": "wave2-fitness",
+      "command": "corepack pnpm test:wave2:fitness",
+      "exit": 0,
+      "log": "docs/evidence/WAVE2/logs/d6fadfbf53c90ce33d95cc19a7d100631d8184c6/wave2-fitness.txt",
+      "log_sha256": "b02b08bfdd56a537be9636dcee40f8e2b55e75b3df9fff9c50051f652d91c453"
+    },
+    {
+      "name": "wave2-m3",
+      "command": "corepack pnpm test:wave2:m3",
+      "exit": 0,
+      "log": "docs/evidence/WAVE2/logs/d6fadfbf53c90ce33d95cc19a7d100631d8184c6/wave2-m3.txt",
+      "log_sha256": "ace1b241658310a6ac1ae13d4d01eba4f34acf1933b1eb51f9423a995abbf8f0"
+    },
+    {
+      "name": "wave2-m4a",
+      "command": "corepack pnpm test:wave2:m4a",
+      "exit": 0,
+      "log": "docs/evidence/WAVE2/logs/d6fadfbf53c90ce33d95cc19a7d100631d8184c6/wave2-m4a.txt",
+      "log_sha256": "392d41434b1e1ed3adfe37cb1dd9e165a1636566b92a6136de2a33faae5c385c"
+    },
+    {
+      "name": "wave2-m4b",
+      "command": "corepack pnpm test:wave2:m4b",
+      "exit": 0,
+      "log": "docs/evidence/WAVE2/logs/d6fadfbf53c90ce33d95cc19a7d100631d8184c6/wave2-m4b.txt",
+      "log_sha256": "a511639903dd815d9cd74642798d41afbde660079d612390c8005ff5d8644b48"
+    },
+    {
+      "name": "wave2-w2.0",
+      "command": "corepack pnpm test:wave2:w2.0",
+      "exit": 0,
+      "log": "docs/evidence/WAVE2/logs/d6fadfbf53c90ce33d95cc19a7d100631d8184c6/wave2-w2.0.txt",
+      "log_sha256": "290f61cc5bed9f0655eabd083a9c15923f4014539ec2747ef99ea1ed21bc87b3"
+    }
+  ],
+  "cases": [
+    {
+      "case_id": "TX-01",
+      "status": "CLOSED",
+      "production_seam": true
+    },
+    {
+      "case_id": "TX-02",
+      "status": "CLOSED",
+      "production_seam": true
+    },
+    {
+      "case_id": "TX-03",
+      "status": "CLOSED",
+      "production_seam": true
+    },
+    {
+      "case_id": "TX-04",
+      "status": "CLOSED",
+      "production_seam": true
+    },
+    {
+      "case_id": "TX-05",
+      "status": "CLOSED",
+      "production_seam": true
+    },
+    {
+      "case_id": "TX-06",
+      "status": "CLOSED",
+      "production_seam": true
+    },
+    {
+      "case_id": "TX-07",
+      "status": "CLOSED",
+      "production_seam": true
+    },
+    {
+      "case_id": "TX-08B",
+      "status": "CLOSED",
+      "production_seam": true
+    },
+    {
+      "case_id": "TX-11B",
+      "status": "CLOSED",
+      "production_seam": true
+    },
+    {
+      "case_id": "TX-13",
+      "status": "CLOSED",
+      "production_seam": true
+    },
+    {
+      "case_id": "TX-14",
+      "status": "CLOSED",
+      "production_seam": true
+    },
+    {
+      "case_id": "M4B-NW",
+      "status": "CLOSED",
+      "production_seam": true
+    },
+    {
+      "case_id": "REG",
+      "status": "CLOSED",
+      "production_seam": true
+    }
+  ],
+  "route_status": {
+    "materialize": true,
+    "impact": true,
+    "edits": true,
+    "history_restore": false
+  },
+  "declaration": "M4B_INTERNAL_EVIDENCED",
+  "review": {
+    "internal": "PASS",
+    "external": "REVIEW_PENDING"
+  },
+  "claim_limits": [
+    "M4B internal evidence does not close M4C, Wave 2, Gate D4.2, Gate V1-P0 or V1-Full.",
+    "History restore, undo and redo remain capability-blocked and their HTTP route remains unmounted.",
+    "Headed and human experience are NOT_RUN; automation is headless, muted, windowless and loopback-only.",
+    "The real media proof is a fixed 900-frame three-clip film, not a long-film performance claim or a production render route.",
+    "Wave 1 and M4A current-tip integrity checks fail by design after later stages move code; their historical gates pass and their non-zero logs are preserved.",
+    "A film matching neither durable before nor after digest is terminal attention and needs explicit later repair tooling; M4B does not auto-clear it."
+  ]
+}
