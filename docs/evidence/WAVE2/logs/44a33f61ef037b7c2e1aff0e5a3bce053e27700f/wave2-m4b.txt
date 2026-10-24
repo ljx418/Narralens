@@ -1,0 +1,48 @@
+
+> narralens@0.1.0 test:wave2:m4b /mnt/c/workspace/videoworkline/Narralens
+> vitest run --config vitest.config.ts tests/wave2/m4b
+
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens
+
+(node:916901) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/m4b/adoption-route.test.ts (23 tests) 646800ms
+   ✓ M4B production adoption route > returns 428 before resource lookup when impact or approval is missing  3679ms
+   ✓ M4B production adoption route > adopts three native clips once, replays exactly, and rebuilds after restart  62229ms
+   ✓ M4B production adoption route > recovers a simulated crash at after_prepared to one durable outcome  21330ms
+   ✓ M4B production adoption route > recovers a simulated crash at after_published to one durable outcome  29342ms
+   ✓ M4B production adoption route > recovers a simulated crash at after_committed to one durable outcome  30200ms
+   ✓ M4B production adoption route > latches terminal attention when recovery can prove neither publication boundary  27705ms
+   ✓ M4B production adoption route > starts again after latching terminal attention, because one blocked project must not stop the Host  28446ms
+   ✓ M4B production adoption route > recovers the author-source publication boundary asset_temp_fsynced  31400ms
+   ✓ M4B production adoption route > recovers the author-source publication boundary asset_installed  36027ms
+   ✓ M4B production adoption route > recovers the author-source publication boundary film_temp_fsynced  34368ms
+   ✓ M4B production adoption route > recovers the author-source publication boundary film_renamed  36684ms
+   ✓ M4B production adoption route > recovers the author-source publication boundary parent_fsynced  32907ms
+   ✓ M4B production adoption route > rejects a visual lock acquired after staging with revision +0  21481ms
+   ✓ M4B production adoption route > does not over-block an adoption that preserves narration while a narration lock is held  25770ms
+   ✓ M4B production adoption route > converges the pre-publish crash boundary after_received to aborted with revision +0  27043ms
+   ✓ M4B production adoption route > converges the pre-publish crash boundary after_preconditions to aborted with revision +0  26529ms
+   ✓ M4B production adoption route > converges the pre-publish crash boundary after_plan to aborted with revision +0  24102ms
+   ✓ M4B production adoption route > converges the pre-publish crash boundary after_stage to aborted with revision +0  24328ms
+   ✓ M4B production adoption route > converges the pre-publish crash boundary after_validate to aborted with revision +0  26431ms
+   ✓ M4B production adoption route > converges the pre-publish crash boundary after_snapshot_publish to aborted with revision +0  28961ms
+   ✓ M4B production adoption route > records the source=after / DB-not-committed transition state field by field  33680ms
+   ✓ M4B production adoption route > answers a visual lock held during recovery with a controlled 423 and nothing committed  27488ms
+   ✓ M4B production adoption route > sweeps an adoption staging tree left behind by a hard crash  6666ms
+ ✓ tests/wave2/m4b/author-source-publisher.test.ts (8 tests) 213ms
+(node:1143258) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/m4b/commit-adoption.test.ts (5 tests) 18ms
+(node:1144105) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/m4b/adoption-store.test.ts (4 tests) 14ms
+ ✓ tests/wave2/m4b/contracts.test.ts (5 tests) 7ms
+ ✓ tests/wave2/m4b/governance.test.ts (3 tests) 5ms
+
+ Test Files  6 passed (6)
+      Tests  48 passed (48)
+   Start at  13:42:23
+   Duration  679.35s (transform 2.08s, setup 0ms, collect 10.03s, tests 647.06s, environment 1ms, prepare 15.37s)
+
