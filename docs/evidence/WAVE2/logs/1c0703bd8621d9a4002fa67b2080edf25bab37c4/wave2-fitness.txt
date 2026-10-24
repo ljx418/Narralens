@@ -1,0 +1,22 @@
+
+> narralens@0.1.0 test:wave2:fitness /mnt/c/workspace/videoworkline/Narralens
+> vitest run --config vitest.config.ts tests/architecture tests/wave2/*fitness*
+
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens
+
+ ✓ tests/architecture/m2.2-fitness.test.ts (15 tests) 1851ms
+   ✓ M2.2 fitness: one state machine, no arbitrary state writes > 1. every production `UPDATE ... SET state` lives in transition, advanceJournal or markRecovering  338ms
+   ✓ M2.2 fitness: one state machine, no arbitrary state writes > 3. only project_state ever changes the current revision  304ms
+(node:2373112) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/w2-route-fitness.test.ts (8 tests) 1118ms
+   ✓ W2.0 fitness: the unopened Wave 2 routes stay closed > keeps the Wave 1 migration routes answering, so 404 means unmounted and not broken  925ms
+ ✓ tests/architecture/m2.1-fitness.test.ts (22 tests) 933ms
+   ✓ fitness 1-3: dependency direction > 3. production code never imports a spike, statically or dynamically  503ms
+
+ Test Files  3 passed (3)
+      Tests  45 passed (45)
+   Start at  20:46:23
+   Duration  34.52s (transform 2.56s, setup 0ms, collect 14.29s, tests 3.90s, environment 0ms, prepare 10.80s)
+
