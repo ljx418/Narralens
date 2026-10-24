@@ -1,0 +1,39 @@
+
+> narralens@0.1.0 evidence:wave1:historical /mnt/c/workspace/videoworkline/Narralens
+> node tools/wave1-evidence-historical.mjs
+
+PASS 30 referenced artifacts are tracked and hash as the frozen commit recorded
+INFO 21 frozen artifact(s) have moved on the current tip, which a later wave is allowed to do:
+INFO   tests/m2.1/native-write-gateway.test.ts
+INFO   src/host/engine/native-mutation-registry.ts
+INFO   src/host/projects/revision-store.ts
+INFO   tests/m2.1/openfilm-upstream-lock.test.ts
+INFO   src/host/projects/revision-store.ts
+INFO   src/host/projects/snapshot-store.ts
+INFO   src/host/persistent-job-store.ts
+INFO   src/host/projects/project-coordinator.ts
+INFO   tests/m2.3/migration-service.test.ts
+INFO   tests/m2.3/migration-service.test.ts
+INFO   tests/m2.3/migration-real-export.test.ts
+INFO   tests/m2.3/migration-service.test.ts
+INFO   tests/m2.3/migration-real-export.test.ts
+INFO   tests/m2.3/migration-service.test.ts
+INFO   tests/m2.3/migration-service.test.ts
+INFO   src/host/projects/migration-store.ts
+INFO   tests/m2.3/migration-service.test.ts
+INFO   tests/m2.3/migration-service.test.ts
+INFO   tests/architecture/m2.1-fitness.test.ts
+INFO   tests/architecture/m2.2-fitness.test.ts
+INFO   tests/architecture/m2.1-fitness.test.ts
+PASS 9 gate logs exist, are tracked and match their digests
+PASS the manifest records a clean tree at capture
+PASS the capture environment independently records the same commit
+PASS the manifest freezes the expected Wave 1 commit e2dec5c
+PASS the frozen commit exists and is reachable
+PASS 5 frozen code path(s) hold 154 file(s) at e2dec5c
+PASS 21 cases recorded as: 20 PASSED, 1 NOT_APPLICABLE_APPROVED
+checks_failed=0 frozen_code_sha=e2dec5ca03ee881b55f92b920ee6df2c676aeb26
+note: this gate answers 'is the Wave 1 evidence still intact'. It deliberately does
+      not assert that code is unchanged since the freeze — use
+      `pnpm evidence:wave1:integrity` for that, which is expected to report movement
+      on any later wave tip.
