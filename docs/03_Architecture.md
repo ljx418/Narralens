@@ -1,7 +1,7 @@
 # 叙镜架构设计 v1.0
 <!-- M2.1_REWORK_BASE_SHA=ee58ab5c6a9d4bbdf05e8ac8a394fd75218cae59 REVIEW_STATUS=PASS -->
 
-文档状态：Gate D1–D3、D4.0 与 D4.1 的历史结论保留。D4.2.1、Wave 1、M3 与 M4A 的历史外审结论保留。**M4B controlled adoption 已在 `b2a4efb...` 内部冻结**：唯一 versioned adopt 路由、closed native op、Host-only 原子 publisher、单事务 revision/impact/projection/ledger/outbox/idempotency、专用崩溃恢复、真实三镜采用/重开/改单镜/双渲染均已落地；最高仅允许 `M4B_INTERNAL_EVIDENCED`，独立外审尚未签署。M4C 的架构、合同、状态机、逐 case 门与 Claude 交接已冻结，生产实现尚未开始；Gate D4.2 仍未关闭。
+文档状态：Gate D1–D3、D4.0 与 D4.1 的历史结论保留。D4.2.1、Wave 1、M3 与 M4A 的历史外审结论保留。**M4B controlled adoption 已在 `docs/evidence/WAVE2/evidence-manifest-m4b.json` 记录的捕获提交内部冻结**：唯一 versioned adopt 路由、closed native op、Host-only 原子 publisher、单事务 revision/impact/projection/ledger/outbox/idempotency、专用崩溃恢复、真实三镜采用/重开/改单镜/双渲染均已落地；最高仅允许 `M4B_INTERNAL_EVIDENCED`，独立外审尚未签署。M4C 的架构、合同、状态机、逐 case 门与 Claude 交接已冻结，生产实现尚未开始；Gate D4.2 仍未关闭。
 
 ## 1. 零层架构
 

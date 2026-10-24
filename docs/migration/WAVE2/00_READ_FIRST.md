@@ -2,7 +2,7 @@
 
 状态：`M4C_FROZEN_FOR_IMPLEMENTATION`（M4B 内部冻结候选已形成、独立外审待签；M4C 文档门已冻结）
 范围：M3 materialize + M4A impact + M4B adopt + M4C history/restore
-当前实现基线：`b2a4efb8be7f4b1c02f973ff32ea04b097196649`（M4B 内部冻结候选）
+当前实现基线：`docs/evidence/WAVE2/evidence-manifest-m4b.json` 的 `capture_commit`（M4B 内部冻结候选；外审每轮修复后重新捕获，指针以 manifest 为准，避免再次过时）
 Wave 1 冻结代码：`e2dec5ca03ee881b55f92b920ee6df2c676aeb26`
 目标声明上限：`WAVE2_EDITABLE_ADOPTION_READY`
 

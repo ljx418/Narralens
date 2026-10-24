@@ -6,7 +6,7 @@ restore，禁止 git reset、数据库 pointer 手改或删除历史行。
 
 日期：2026-10-23
 
-适用基线：M4B 内部冻结候选 `b2a4efb8be7f4b1c02f973ff32ea04b097196649`。M4B 独立外审仍是 M4C
+适用基线：M4B 内部冻结候选，由 `docs/evidence/WAVE2/evidence-manifest-m4b.json` 的 `capture_commit` 记录。M4B 独立外审仍是 M4C
 开工前置门，不因本文而自动通过。
 
 ## 1. 决策背景

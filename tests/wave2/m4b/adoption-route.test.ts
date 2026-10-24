@@ -595,10 +595,12 @@ describe("M4B production adoption route", () => {
       request_json: JSON.stringify(validAdoptRequest("k")),
       request_hash: "0".repeat(64), correlation_id: "corr-blocked", base_revision: 0,
     });
-    // A second pending row for the same project closes the recovery gate.
+    // A pending row of **another module** closes the recovery gate. M4B's own rows do not:
+    // a recovery blocked by its own siblings could never resolve them, so the gate ignores
+    // the ones this recovery is about to resolve.
     running.host.revisions.beginTransaction({
       transaction_id: "txn_other", project_id: projectId, kind: "edit",
-      request_json: JSON.stringify(validAdoptRequest("k2")),
+      request_json: JSON.stringify({ format: "narralens.edit-request@1.0", shot_id: "shot-001" }),
       request_hash: "1".repeat(64), correlation_id: "corr-other", base_revision: 0,
     });
     await running.host.close();
@@ -609,11 +611,18 @@ describe("M4B production adoption route", () => {
     const row = restarted.host.revisions.compose((handle) => handle)
       .prepare("SELECT state, error_code FROM project_transaction WHERE transaction_id='txn_blocked'")
       .get() as { state: string; error_code: string };
+    // Latched, with its reason, rather than left to a recovery that would move it into
+    // `recovering` — a state with no legal outgoing edge.
+    expect(row.state).toBe("attention");
     expect(row.error_code).toBe("ADOPTION_RECOVERY_BLOCKED");
-    // And *M4B* did not flag the project for a condition that can resolve. The generic
-    // recovery, which runs afterwards and owns these rows, may still latch it — with its own
-    // reason. What must not happen is M4B's reason becoming the project's.
-    expect(restarted.host.revisions.attentionReason(projectId)).not.toMatch(/adoption recovery/iu);
+    // M4B's reason is on the **row**, where the next operator will look for it. The
+    // project's own attention reason comes from the generic recovery, which runs afterwards
+    // and owns the foreign row that did the blocking.
+    const row2 = restarted.host.revisions.compose((handle) => handle)
+      .prepare("SELECT terminal_reason FROM project_transaction WHERE transaction_id='txn_blocked'")
+      .get() as { terminal_reason: string };
+    expect(row2.terminal_reason).toMatch(/adoption recovery/iu);
+    expect(restarted.host.revisions.projectsInAttention()).toContain(projectId);
   }, 300_000);
 
   it("leaves another module's transaction alone: a legacy edit row is not M4B's to decide", async () => {
@@ -648,6 +657,29 @@ describe("M4B production adoption route", () => {
     // generic path — never by the adoption's recovery.
     expect(["received", "recovering", "attention", "aborted"]).toContain(after.state);
   }, 300_000);
+
+  it("answers a conflicting idempotency key with the request's correlation id", async () => {
+    // The project id used to be put in the correlation-id slot, so the same conflict could be
+    // answered with two different bodies depending on which path noticed it — one of them
+    // carrying something that is not a correlation id at all.
+    const running = await start();
+    hosts.push(running.host); dirs.push(running.base);
+    // A real, committed adoption records a response under its key. The conflict is then the
+    // same key with a different body, which is exactly the case the replay path answers.
+    const prepared = await authorizedAdoption(running, "corr-adopt");
+    const committed = await postAdoption(running, prepared.projectId, prepared.request);
+    expect(committed.status).toBe(200);
+
+    // The same key with a different body is a conflict, and it must carry the request's
+    // correlation id rather than the project's.
+    const conflict = await postAdoption(running, prepared.projectId,
+      { ...prepared.request, impact_hash: "b".repeat(64) });
+    expect(conflict.status).toBe(409);
+    expect(conflict.body.code).toBe("IDEMPOTENCY_KEY_CONFLICT");
+    // The Host's own correlation id for this request — not the project id.
+    expect(conflict.body.correlation_id).not.toBe(prepared.projectId);
+    expect(String(conflict.body.correlation_id ?? "")).toMatch(/^[0-9a-f-]{8,}$/iu);
+  }, 600_000);
 
   it("answers one idempotency key with one body, whatever the request body is", async () => {
     // The root cause of the third review round's MAJOR: the recovery takeover ran *before*

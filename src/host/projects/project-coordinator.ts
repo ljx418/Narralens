@@ -105,8 +105,11 @@ export class ProjectCoordinator {
 
   /** Startup-only slot for the exact transaction whose pending row is being recovered. */
   async controlledRecovery<T>(projectId: string, transactionId: string, correlationId: string,
-    operation: () => Promise<T>): Promise<T> {
-    if (this.deps.store.recoveryGate(projectId, 0, transactionId)) {
+    operation: () => Promise<T>, ignoredTransactionIds?: readonly string[]): Promise<T> {
+    // The transactions this recovery is about to resolve are excluded from the pending check.
+    // A recovery blocked by its own sibling rows could never resolve them.
+    if (this.deps.store.recoveryGate(projectId, 0,
+      ignoredTransactionIds ?? [transactionId])) {
       throw new HttpError(423, "PROJECT_ATTENTION_REQUIRED", "Another condition blocks adoption recovery",
         { attention_reason: this.deps.store.attentionReason(projectId) }, correlationId);
     }

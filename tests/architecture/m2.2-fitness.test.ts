@@ -192,11 +192,15 @@ describe("M2.2 fitness: the write gate and the store agree", () => {
   it("11. state() and the recovery gate read one predicate", () => {
     const store = sourceOf(resolve(REPO, "src/host/projects/revision-store.ts"));
     const state = store.slice(store.indexOf("  state(projectId: string"), store.indexOf("  setVisualLock("));
-    expect(state).toContain("this.recoveryGate(projectId, initialRevision, ignoredTransactionId)");
+    // The read and the gate must go through the *same* predicate. The ignored-transaction
+    // argument grew from one id to a set, because a recovery that owns several of a project's
+    // rows would otherwise be blocked by its own siblings — but the rule this test protects
+    // is unchanged, so the assertion follows the name rather than a literal signature.
+    expect(state).toContain("this.recoveryGate(projectId, initialRevision, ignoredTransactionId");
     expect(state).not.toContain("#projectHasPending");
     // The predicate itself lives in exactly one place.
-    expect((store.match(/recoveryGate\(projectId: string, initialRevision: number, ignoredTransactionId\?: string\): boolean \{/gu) ?? []).length).toBe(1);
-    expect((store.match(/Boolean\(row\?\.attention\) \|\| this\.#projectHasPending\(projectId, ignoredTransactionId\)/gu) ?? []).length).toBe(1);
+    expect((store.match(/recoveryGate\(projectId: string, initialRevision: number,/gu) ?? []).length).toBe(1);
+    expect((store.match(/Boolean\(row\?\.attention\) \|\| this\.#projectHasPending\(projectId, ignored\)/gu) ?? []).length).toBe(1);
   });
 
   it("12. attention_reason never reaches a response as an empty string", () => {

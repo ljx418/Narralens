@@ -210,6 +210,7 @@
       "production_seam": true
     }
   ],
+  "checked_manifest": "docs/evidence/WAVE2/logs/9741e82472a32c65d462cb6d21b9ed10d54bcbcf/manifest.json",
   "route_status": {
     "materialize": true,
     "impact": true,
@@ -272,6 +273,15 @@
       "note": "A failed capture, kept verbatim. It is not evidence of a passing run and is never counted as one."
     },
     {
+      "capture_commit": "2fe36433fc2182abc8bd959ec1bee8e1048d4b5a",
+      "failed_commands": [
+        "check-1 did not finish (no exit file)"
+      ],
+      "diagnostic": "docs/evidence/WAVE2/logs/2fe36433fc2182abc8bd959ec1bee8e1048d4b5a/CAPTURE_FAILED_DIAGNOSTIC.md",
+      "kept": true,
+      "note": "A failed capture, kept verbatim. It is not evidence of a passing run and is never counted as one."
+    },
+    {
       "capture_commit": "39f86a0108b6c49166cff2ca2e4259789d62bd1b",
       "failed_commands": [
         "check-3 exit=1"
@@ -283,7 +293,8 @@
     {
       "capture_commit": "466eca6893de10128adfc06d060b70fcb58c0c4b",
       "failed_commands": [
-        "check exit=1"
+        "check exit=1",
+        "contracts did not finish (no exit file)"
       ],
       "diagnostic": "docs/evidence/WAVE2/logs/466eca6893de10128adfc06d060b70fcb58c0c4b/CAPTURE_FAILED_DIAGNOSTIC.txt",
       "kept": true,
@@ -379,7 +390,8 @@
     {
       "capture_commit": "e9a3a3356fa9ae43ed97b20d46c3641ee36c5942",
       "failed_commands": [
-        "check exit=1"
+        "check exit=1",
+        "contracts did not finish (no exit file)"
       ],
       "diagnostic": "docs/evidence/WAVE2/logs/e9a3a3356fa9ae43ed97b20d46c3641ee36c5942/CAPTURE_FAILED_DIAGNOSTIC.txt",
       "kept": true,

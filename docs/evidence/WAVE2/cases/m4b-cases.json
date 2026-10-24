@@ -103,7 +103,7 @@
    "tests/wave2/m4b/adoption-route.test.ts::reclaims a crashed staging tree through the production composition, where the database path is the store's",
    "tests/wave2/m4b/adoption-route.test.ts::answers one idempotency key with one body, whatever the request body is"
   ],
-  "evidence": "协调器 10 个边界（received/preconditions/plan/stage/validate/snapshot publish/prepared/published/active inspect/committed）与 publisher 5 个边界逐一重启，逐行引用；发布前收敛为 aborted 且 revision +0，发布后收敛为 committed；两者都不匹配则 terminal attention，且 Host 仍能再次启动（被阻断的是项目，不是整个 Host）；无法读取的未终结行被 latch 为终态，不会被通用恢复挪进无出边的 recovering；只有自称是采用请求的行才由 M4B 裁决，其余行归通用恢复；被 gate 挡住的恢复把原因写在行上，但不 latch project。",
+  "evidence": "协调器 10 个边界（received/preconditions/plan/stage/validate/snapshot publish/prepared/published/active inspect/committed）与 publisher 5 个边界逐一重启，逐行引用；发布前收敛为 aborted 且 revision +0，发布后收敛为 committed；两者都不匹配则 terminal attention，且 Host 仍能再次启动（被阻断的是项目，不是整个 Host）；无法读取的未终结行被 latch 为终态，不会被通用恢复挪进无出边的 recovering；只有自称是采用请求的行才由 M4B 裁决，其余行归通用恢复；被别的模块的未终结行挡住的恢复被 latch 为终态并把原因写在行上——项目因此关闭，但关闭是可见的，而不是被通用恢复静默挪进 recovering。",
   "notes": "发布前的崩溃在崩溃当场不清理（进程死了），收敛由重启后的恢复完成——这正是「重启后收敛」的要求；恢复把每个 pre-publish 合法前态 CAS 到 aborted，并清理 stage/temp。只有 request_json 自称 adopt-request 的行才由 M4B 裁决：legacy edit 路由写的行归通用恢复，M4B 不替别的模块决定它的事务的命运。"
  },
  {

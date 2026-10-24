@@ -47,7 +47,9 @@ const required = new Set(["TX-01", "TX-02", "TX-03", "TX-04", "TX-05", "TX-06", 
     const text = readFileSync(resolve(root, "tests/wave2/m4b", file.name), "utf8");
     // A table-driven crash test counts as **one row per row**: citing one row of a five-row
     // table does not evidence the other four, and the case's own text says each is restarted.
-    for (const match of text.matchAll(/it\.each\(\[([\s\S]*?)\]\s*as const\)\("([^"]+)"/gu)) {
+    // The `as const` is optional: a table-driven crash test written without it must still be
+    // visible to this gate, or TX-08B could silently stop citing it.
+    for (const match of text.matchAll(/it\.each\(\[([\s\S]*?)\]\s*(?:as const\s*)?\)\("([^"]+)"/gu)) {
       const template = match[2] ?? "";
       if (!/boundary|crash/iu.test(template)) continue;
       // The template's `%s` is the table's **first** column. Taking every quoted string in
@@ -78,9 +80,10 @@ const required = new Set(["TX-01", "TX-02", "TX-03", "TX-04", "TX-05", "TX-06", 
  * Gate B: every capture that failed is in the index.
  *
  * The index used to be built from the presence of a hand-written diagnostic, so a failure
- * nobody wrote a note for was invisible. The index is now built from each capture's own
- * recorded outcome, and this gate checks the two agree: a capture whose `overall.txt` says
- * non-zero, or that carries a diagnostic, must be listed.
+ * nobody wrote a note for was invisible; and a later version read only the `.exit` files,
+ * which is a strict *subset* — a capture killed mid-command leaves no `.exit` at all, and it
+ * was silently dropped. The rule is now a union, in `wave2-capture-outcome.mjs`, and this
+ * gate recomputes it from the logs rather than reading the manifest it audits.
  */
 {
   // Recomputed from the captures' own exit files, **not** from the manifest's list. The

@@ -365,6 +365,26 @@ export class AdoptionCoordinator {
    * Only `prepared` counts. A row in `received`…`validated` never published anything, and a
    * row in `attention` is decided; neither is a recovery this request could take over.
    */
+  /**
+   * The pending rows of *this* module for a project.
+   *
+   * A row is M4B's when its request claims the adopt-request format; a legacy edit row is
+   * not, and it keeps blocking the gate — which is right, because the legacy module owns it.
+   */
+  #ownPendingRows(projectId: string): string[] {
+    const own: string[] = [];
+    for (const transaction of this.deps.revisions.projectTransactions(projectId)) {
+      if (transaction.state === "committed" || transaction.state === "aborted") continue;
+      let claims = false;
+      try {
+        claims = (JSON.parse(transaction.request_json) as { format?: unknown }).format
+          === "narralens.adopt-request@1.0";
+      } catch { claims = false; }
+      if (claims) own.push(transaction.transaction_id);
+    }
+    return own;
+  }
+
   #unfinishedAdoption(projectId: string): {
     transaction_id: string; request_hash: string; idempotency_key: string;
     /** Whether the row claims to be an adoption. A row that does not is not M4B's. */
@@ -511,6 +531,11 @@ export class AdoptionCoordinator {
         report.attention += 1;
         continue;
       }
+      // Every one of *this* module's own pending rows for the project is excluded from the
+      // recovery gate. A recovery that is blocked by its own sibling rows could never
+      // resolve them: the gate sees a pending transaction, refuses, and the row it was
+      // supposed to recover stays exactly as it was.
+      const ownRows = this.#ownPendingRows(transaction.project_id);
       try {
         await this.deps.coordinator.controlledRecovery(transaction.project_id, transaction.transaction_id,
           transaction.correlation_id, async () => {
@@ -537,7 +562,7 @@ export class AdoptionCoordinator {
             }
             report.attention += 1;
           }
-        });
+        }, ownRows);
       } catch (error) {
         // The recovery gate refused: something else is in the way for this project. That is
         // this transaction's problem to wait for, not a reason to refuse to serve the rest
@@ -549,11 +574,13 @@ export class AdoptionCoordinator {
         // close a project that a later boot could have recovered, and `commitAdoption`'s CAS
         // requires `attention = 0`, so nothing could ever write it again.
         report.attention += 1;
-        // The refusal's cause is recorded on the row without marking the project: the
-        // project is closed either way, but a row that says nothing about why it was
-        // skipped is a row nobody can act on.
-        this.deps.revisions.noteTransactionOutcome(transaction.transaction_id, transaction.state,
-          "ADOPTION_RECOVERY_BLOCKED",
+        // The row is latched as a terminal state with its reason. Leaving it alone would let
+        // the generic recovery move it to `recovering` — which has no legal outgoing edge,
+        // the very outcome TX-08B forbids — and the project would be closed silently, with
+        // nothing in `projectsInAttention()` naming why. Latching it makes the condition
+        // visible; the project is closed either way, because the foreign row that blocks it
+        // belongs to another module's recovery.
+        this.deps.coordinator.attention(transaction.transaction_id, "ADOPTION_RECOVERY_BLOCKED",
           error instanceof Error ? error.message : String(error));
       }
     }

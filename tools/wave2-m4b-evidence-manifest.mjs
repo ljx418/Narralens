@@ -33,6 +33,11 @@ const manifest = {
   repo_dirty_at_capture: Number(environment.repo_dirty_at_capture), environment,
   origin_main: git("rev-parse", "origin/main"), branch: git("branch", "--show-current"), commands,
   cases: cases.map(({ case_id, status, production_seam }) => ({ case_id, status, production_seam })),
+  // The manifest the capture checks is the one inside its own log directory; the committed
+  // copy is regenerated from it afterwards and therefore lists more commands. This names the
+  // file the gate actually read, so a reader does not think the committed file was the one
+  // that was checked.
+  checked_manifest: `docs/evidence/WAVE2/logs/${capture}/manifest.json`,
   route_status: { materialize: true, impact: true, edits: true, history_restore: false },
   declaration: "M4B_INTERNAL_EVIDENCED", review: { internal: "PASS", external: "REVIEW_PENDING" },
   claim_limits: [
@@ -63,7 +68,9 @@ manifest.known_failed_captures = failedCaptures(root).map((entry) => {
   const diagnostic = diagnosticFor(entry.directory);
   return {
     capture_commit: entry.capture_commit,
-    failed_commands: entry.failures.map((failure) => `${failure.name} exit=${failure.exit}`),
+    failed_commands: entry.failures.map((failure) => failure.exit === null
+      ? `${failure.name} did not finish (no exit file)`
+      : `${failure.name} exit=${failure.exit}`),
     diagnostic: diagnostic === null ? null : relative + "/" + diagnostic.split("/").pop(),
     kept: true,
     note: "A failed capture, kept verbatim. It is not evidence of a passing run and is never counted as one.",

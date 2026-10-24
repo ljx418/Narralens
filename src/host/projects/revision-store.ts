@@ -411,10 +411,13 @@ export class RevisionStore {
    * The single attention predicate, shared by `state()` and the request gate so the two can
    * never disagree about whether a project is writable (M2.2 plan §8).
    */
-  recoveryGate(projectId: string, initialRevision: number, ignoredTransactionId?: string): boolean {
+  recoveryGate(projectId: string, initialRevision: number,
+    ignoredTransactionIds?: string | readonly string[]): boolean {
     void initialRevision;
     const row = this.#db.prepare("SELECT attention FROM project_state WHERE project_id=?").get(projectId) as { attention?: number } | undefined;
-    return Boolean(row?.attention) || this.#projectHasPending(projectId, ignoredTransactionId);
+    const ignored = ignoredTransactionIds === undefined
+      ? [] : (typeof ignoredTransactionIds === "string" ? [ignoredTransactionIds] : [...ignoredTransactionIds]);
+    return Boolean(row?.attention) || this.#projectHasPending(projectId, ignored);
   }
 
   attentionReason(projectId: string): string {
@@ -1347,14 +1350,24 @@ export class RevisionStore {
     }
   }
 
-  #projectHasPending(projectId: string, ignoredTransactionId?: string): boolean {
+  /**
+   * Whether the project has work in flight that a write must wait for.
+   *
+   * `ignoredTransactionIds` names the transactions the caller is *about to resolve*. It is a
+   * set rather than one id because a recovery that owns several of a project's rows would
+   * otherwise be blocked by its own siblings — and a recovery that is blocked by its own
+   * rows can never resolve them.
+   */
+  #projectHasPending(projectId: string, ignoredTransactionIds?: readonly string[]): boolean {
     const edit = this.#db.prepare("SELECT 1 AS present FROM edit_journal WHERE project_id=? AND state IN ('prepared','source_validated','attention') LIMIT 1").get(projectId);
     const asset = this.#db.prepare("SELECT 1 AS present FROM asset_import_journal WHERE project_id=? AND state IN ('prepared','bytes_installed','manifest_published','attention') LIMIT 1").get(projectId);
-    const transaction = ignoredTransactionId === undefined
+    const ignored = ignoredTransactionIds ?? [];
+    const transaction = ignored.length === 0
       ? this.#db.prepare(`SELECT 1 AS present FROM project_transaction WHERE project_id=?
           AND state NOT IN ('committed','aborted') LIMIT 1`).get(projectId)
-      : this.#db.prepare(`SELECT 1 AS present FROM project_transaction WHERE project_id=? AND transaction_id<>?
-          AND state NOT IN ('committed','aborted') LIMIT 1`).get(projectId, ignoredTransactionId);
+      : this.#db.prepare(`SELECT 1 AS present FROM project_transaction WHERE project_id=?
+          AND transaction_id NOT IN (${ignored.map(() => "?").join(",")})
+          AND state NOT IN ('committed','aborted') LIMIT 1`).get(projectId, ...ignored);
     return Boolean(edit) || Boolean(asset) || Boolean(transaction);
   }
 }

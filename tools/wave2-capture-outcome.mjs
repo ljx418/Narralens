@@ -5,38 +5,59 @@ import { join, resolve } from "node:path";
  * One rule for "did this capture fail", shared by the manifest generator and the integrity
  * gate.
  *
- * It is read from the capture's **own exit files**. Two earlier versions got this wrong in
- * opposite directions: one built the index from the presence of a hand-written diagnostic —
- * so a failure nobody wrote a note for was invisible — and one had the gate re-apply the
- * generator's own predicate to the manifest it was auditing, which cannot fail for any
- * capture the script produced.
+ * It is a **union**, and that matters: an earlier version of this rule looked only at the
+ * `.exit` files, which is a strict *subset* of the signals a capture can leave behind. A
+ * capture killed mid-command leaves its `.cmd` and a partial `.txt` and nothing else — no
+ * `.exit`, no `overall.txt`, no diagnostic — and that capture was silently dropped from the
+ * index this rule is supposed to keep complete. A narrower rule is not a better rule.
  *
- * The rule is therefore the simplest one that cannot be wrong: a capture failed when a
- * command other than the two documented expected failures exited non-zero. The exits are
- * written by the capture itself, so they cannot disagree with what happened.
+ * So a capture failed when **any** of these is true:
+ *
+ *   1. a command other than the two documented expected failures exited non-zero;
+ *   2. one of those two *succeeded* — it is expected to fail, so a success is a failure of
+ *      the expectation;
+ *   3. a `CAPTURE_FAILED_DIAGNOSTIC.*` file is present;
+ *   4. `overall.txt` exists and is non-zero;
+ *   5. the capture is **incomplete**: a `.cmd` with no matching `.exit`.
+ *
+ * The fifth is the one that catches a capture that died mid-command, and the third and
+ * fourth catch the ones that were noted by hand. The gate recomputes this from the logs
+ * rather than reading the manifest it audits, so the audit is not circular.
  */
 
-/** The commands whose non-zero exit is expected, and therefore not a failure. */
+/** The commands whose non-zero exit is expected, and therefore not a failure by themselves. */
 export const EXPECTED_FAILURE_COMMANDS = new Set(["wave1-integrity", "m4a-integrity"]);
 
 /**
  * The failing commands of a capture directory.
  *
  * @param {string} directory the capture's log directory
- * @returns {{ name: string, exit: number }[]} the commands that failed unexpectedly
+ * @returns {{ name: string, exit: number | null }[]} the commands that failed unexpectedly
  */
 export function failedCommands(directory) {
   const failures = [];
   let entries;
   try { entries = readdirSync(directory); }
   catch { return failures; }
-  for (const entry of entries) {
-    if (!entry.endsWith(".exit")) continue;
+  const exits = new Set(entries.filter((name) => name.endsWith(".exit")));
+  for (const entry of exits) {
     const name = entry.slice(0, -".exit".length);
-    if (EXPECTED_FAILURE_COMMANDS.has(name)) continue;
     const raw = readFileSync(join(directory, entry), "utf8").trim();
-    const code = Number(raw);
-    if (Number.isFinite(code) && code !== 0) failures.push({ name, exit: code });
+    // A truncated or empty `.exit` is not a success. It is the absence of a result.
+    const code = /^\d+$/u.test(raw) ? Number(raw) : null;
+    if (EXPECTED_FAILURE_COMMANDS.has(name)) {
+      // These are expected to fail. One that *succeeded* is a failure of the expectation.
+      if (code === 0) failures.push({ name, exit: 0 });
+      continue;
+    }
+    if (code !== 0) failures.push({ name, exit: code });
+  }
+  // A command that was started and never finished. The capture died while it ran.
+  for (const entry of entries) {
+    if (!entry.endsWith(".cmd")) continue;
+    const name = entry.slice(0, -".cmd".length);
+    if (exits.has(`${name}.exit`)) continue;
+    failures.push({ name, exit: null });
   }
   return failures;
 }
@@ -45,7 +66,7 @@ export function failedCommands(directory) {
  * Every capture under `docs/evidence/WAVE2/logs` that failed.
  *
  * @param {string} root the repository root
- * @returns {{ capture_commit: string, directory: string, failures: { name: string, exit: number }[] }[]}
+ * @returns {{ capture_commit: string, directory: string, failures: { name: string, exit: number | null }[] }[]}
  */
 export function failedCaptures(root) {
   const logs = resolve(root, "docs/evidence/WAVE2/logs");
@@ -57,7 +78,11 @@ export function failedCaptures(root) {
     if (!entry.isDirectory()) continue;
     const directory = join(logs, entry.name);
     const failures = failedCommands(directory);
-    if (failures.length === 0) continue;
+    const diagnostic = diagnosticFor(directory) !== null;
+    const outcome = resolve(directory, "overall.txt");
+    const recorded = existsSync(outcome) ? readFileSync(outcome, "utf8").trim() : null;
+    const recordedFailure = recorded !== null && recorded !== "" && recorded !== "0";
+    if (failures.length === 0 && !diagnostic && !recordedFailure) continue;
     out.push({ capture_commit: entry.name, directory, failures });
   }
   return out;

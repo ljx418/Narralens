@@ -2,7 +2,7 @@
 
 状态：`FROZEN_FOR_IMPLEMENTATION`
 
-代码前置：M4B 内部冻结候选 `b2a4efb8be7f4b1c02f973ff32ea04b097196649`，独立外审必须先得到
+代码前置：M4B 内部冻结候选，由 `docs/evidence/WAVE2/evidence-manifest-m4b.json` 的 `capture_commit` 记录，独立外审必须先得到
 `M4B_EXTERNAL_REVIEW_PASS`。若外审发现 BLOCKER/MAJOR，先修复、重捕获并由新的干净上下文复审，再进入 M4C。
 
 范围：只完成历史 snapshot 的受控 restore，以及 native history restore/undo/redo 到 Host 的翻译。禁止 M5 UI、M6

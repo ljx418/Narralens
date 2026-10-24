@@ -66,7 +66,7 @@ MAJOR=0 / MINOR=0。
    snapshot-immutability subset：在途 harness 绑定旧 committed snapshot，restore 后输入 bytes/digest 不变；生产 render
    与正式 MP4 留给 M6，不冒充。
 2. **MAJOR：M4B 独立外审仍 pending，直接写 M4C 会把未签基线继续放大。** Claude handoff 首阶段固定为对
-   `b2a4efb...` 的独立外审；有 BLOCKER/MAJOR 则修复、重捕获并用新干净上下文复审，PASS 后才实现 M4C。
+   M4B frozen（manifest 的 `capture_commit`）的独立外审；有 BLOCKER/MAJOR 则修复、重捕获并用新干净上下文复审，PASS 后才实现 M4C。
 3. **MAJOR：初稿写“M4C-01..18”，实际混用 M4C/TX 编号且不存在 M4C-07..13，容易制造虚假总数。** 改为 gate
    §8 的 20 个显式 case，不以连续编号或总测试数替代逐项证据。
 4. **MAJOR：只有 current-tip integrity 会在后续代码变化后必然红，容易再次发生“调绿历史门”。** M4C-0 必须新增

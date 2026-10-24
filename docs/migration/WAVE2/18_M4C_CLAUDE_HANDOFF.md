@@ -12,14 +12,14 @@
 仓库：`/mnt/c/workspace/videoworkline/Narralens`
 
 - 预期分支：`migration/m2.2-coordinator-persistence`
-- M4B 内部冻结候选：`b2a4efb8be7f4b1c02f973ff32ea04b097196649`
+- M4B 内部冻结候选：`docs/evidence/WAVE2/evidence-manifest-m4b.json` 的 `capture_commit`（M4B 外审经过多轮修复与重新捕获；不要硬编码某个提交，用 manifest 读当前值）
 - M4B 证据捕获提交：`0da4ba23d35f3371ce89572529f4ba20151ca4d8`
 - origin/main：`304c89134fdf9f834f7d69e3f4d5c89a68044c60`
 - OpenFilm upstream：`e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3`
 - Hypit upstream：`6fdd8c0f02c17b9970aee6deb4550a70e9d57acf`
 
 先只读输出完整 HEAD/branch/status/remotes/merge-base。当前 HEAD 应包含 Codex 的 M4C 文档冻结提交，不能 reset 回
-`b2a4efb...`；用 ancestry/diff 验证从 M4B frozen 到当前仅有文档/diagram 变化。保护所有用户工作，不 reset/stash/
+M4B frozen（manifest 的 `capture_commit`）；用 ancestry/diff 验证从 M4B frozen 到当前仅有文档/diagram 变化。保护所有用户工作，不 reset/stash/
 force push，不改 origin/main，不覆盖旧 evidence。
 
 完整阅读顺序：
@@ -43,7 +43,7 @@ force push，不改 origin/main，不覆盖旧 evidence。
 
 ## 第一步：M4B 独立外审
 
-你不是 M4B 实现会话，可签 M4B 外审，但必须绑定 `b2a4efb...`，不能仅复述报告：
+你不是 M4B 实现会话，可签 M4B 外审，但必须绑定 manifest 记录的 `capture_commit`（当前捕获提交），不能仅复述报告：
 
 1. 验证 frozen/capture ancestry、工作树与证据摘要；
 2. 运行 `pnpm test:wave2:m4b`、M4B integrity、全量 check/build、凭据扫描及关键真实上游/真实媒体链；

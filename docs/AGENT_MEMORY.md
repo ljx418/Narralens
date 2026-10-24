@@ -37,7 +37,7 @@
 
 ## 当前阶段交接基线
 
-- M4B 内部冻结候选为 `b2a4efb8be7f4b1c02f973ff32ea04b097196649`，独立外审待完成；
+- M4B 内部冻结候选由 `docs/evidence/WAVE2/evidence-manifest-m4b.json` 的 `capture_commit` 记录（外审每轮修复后重新捕获并重签），独立外审待完成；
 - M4C 必须先完成 M4B 独立外审，再按 `docs/migration/WAVE2/17_M4C_DEVELOPMENT_GATE.md` 连续实现；
 - M4C 内容相同的历史恢复复用 content-addressed snapshot id，但必须创建新 transaction/commit/revision+1；
 - M4C 完成后先做 Wave 2 组合外审，不顺跳 M5；最近正式人工体验门在 M5C 后。
