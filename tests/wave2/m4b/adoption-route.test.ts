@@ -45,11 +45,27 @@ async function authorizedAdoption(running: Started, suffix: string) {
   } };
 }
 
+/**
+ * Post an adoption.
+ *
+ * A *recoverable* resource failure is retried rather than reported: this box runs several
+ * sessions at once and has run out of memory during a capture, and the Host answers that
+ * with `HOST_RESOURCE_EXHAUSTED` and `recoverable: true` precisely so it is not mistaken for
+ * a behavioural failure. The retry reuses the same idempotency key, so a retry is a replay
+ * rather than a second adoption — which is the behaviour the same key is supposed to have.
+ */
 async function postAdoption(running: Started, projectId: string, request: object) {
-  const response = await fetch(`${running.origin}/api/migration/v1/projects/${projectId}/edits`, {
-    method: "POST", headers: headers(running.origin, running.token), body: JSON.stringify(request),
-  });
-  return { status: response.status, body: JSON.parse(await response.text()) as Record<string, unknown> };
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    const response = await fetch(`${running.origin}/api/migration/v1/projects/${projectId}/edits`, {
+      method: "POST", headers: headers(running.origin, running.token), body: JSON.stringify(request),
+    });
+    const body = JSON.parse(await response.text()) as Record<string, unknown>;
+    const error = body.error as { code?: string; details?: { recoverable?: boolean } } | undefined;
+    const recoverable = error?.code === "HOST_RESOURCE_EXHAUSTED" && error.details?.recoverable !== false;
+    if (!recoverable || attempt === 2) return { status: response.status, body };
+    await new Promise((done) => setTimeout(done, 500 * (attempt + 1)));
+  }
+  throw new Error("UNREACHABLE");
 }
 
 async function render(root: string): Promise<{ digest: string; frames: number }> {

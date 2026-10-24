@@ -102,15 +102,51 @@ export async function stopAll(hosts: readonly NarralensHost[], dirs: readonly st
   await Promise.all(dirs.map((dir) => rm(dir, { recursive: true, force: true })));
 }
 
+/**
+ * Retry a *recoverable* resource failure.
+ *
+ * The Host maps ENOMEM and its siblings to `HOST_RESOURCE_EXHAUSTED` with
+ * `recoverable: true` precisely so that a transient machine condition is not reported as a
+ * behavioural failure. This box runs several sessions at once and has run out of memory
+ * during a capture more than once; a test that treats that as "the feature is broken" is
+ * wrong in both directions.
+ *
+ * It is a retry on a *recoverable* error only. An assertion about behaviour is never
+ * relaxed: if the second attempt fails for any reason, the failure stands.
+ */
+async function retryRecoverable<T>(operation: () => Promise<T>, attempts = 3): Promise<T> {
+  let last: unknown;
+  for (let attempt = 0; attempt < attempts; attempt += 1) {
+    try { return await operation(); }
+    catch (error) {
+      const code = (error as { code?: string }).code;
+      const details = (error as { details?: { recoverable?: boolean } }).details;
+      const recoverable = code === "HOST_RESOURCE_EXHAUSTED" && details?.recoverable !== false;
+      if (!recoverable || attempt === attempts - 1) throw error;
+      last = error;
+      await new Promise((done) => setTimeout(done, 500 * (attempt + 1)));
+    }
+  }
+  throw last;
+}
+
 /** Migrate the real fixture through the Host's own route. */
 export async function migrate(running: Started, idempotencyKey = "m4a-migrate-1"): Promise<Migrated> {
-  const response = await fetch(`${running.origin}/api/migration/v1/projects/d1-30s/migrate-copy`, {
-    method: "POST", headers: headers(running.origin, running.token),
-    body: JSON.stringify({ idempotency_key: idempotencyKey }),
+  const response = await retryRecoverable(async () => {
+    const attempt = await fetch(`${running.origin}/api/migration/v1/projects/d1-30s/migrate-copy`, {
+      method: "POST", headers: headers(running.origin, running.token),
+      body: JSON.stringify({ idempotency_key: idempotencyKey }),
+    });
+    if (attempt.status !== 200) {
+      const text = await attempt.text();
+      const parsed = (() => { try { return JSON.parse(text) as { code?: string; details?: { recoverable?: boolean } }; } catch { return {}; } })();
+      if (parsed.code === "HOST_RESOURCE_EXHAUSTED" && parsed.details?.recoverable !== false) {
+        throw Object.assign(new Error(`MIGRATE_${attempt.status}: ${text.slice(0, 300)}`), parsed);
+      }
+      throw new Error(`MIGRATE_${attempt.status}: ${text.slice(0, 300)}`);
+    }
+    return attempt;
   });
-  if (response.status !== 200) {
-    throw new Error(`MIGRATE_${response.status}: ${(await response.text()).slice(0, 300)}`);
-  }
   const report = await response.json() as { plan: { target_project_id: string } };
   const projectId = report.plan.target_project_id;
   return { projectId, view: await running.host.projectResolver.resolveActivated(projectId) };
