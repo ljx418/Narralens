@@ -249,14 +249,30 @@ function testRightsDigest(inventorySha256: string, plan: NativePlanV1): string {
 }
 
 /** POST the impact route and return the raw response plus its parsed body. */
+/**
+ * POST the impact route.
+ *
+ * A *recoverable* resource failure is retried. The Host maps ENOMEM and its siblings to
+ * `HOST_RESOURCE_EXHAUSTED` with `recoverable: true` precisely so that a transient machine
+ * condition is not reported as a behavioural failure, and this box runs several sessions at
+ * once. The retry reuses the same idempotency key, so it is a replay rather than a second
+ * impact — the same thing the key is for.
+ */
 export async function postImpact(running: Started, projectId: string, body: unknown): Promise<{
   status: number; body: Record<string, unknown>;
 }> {
-  const response = await fetch(`${running.origin}/api/migration/v1/projects/${projectId}/impact`, {
-    method: "POST", headers: headers(running.origin, running.token), body: JSON.stringify(body),
-  });
-  const text = await response.text();
-  return { status: response.status, body: text === "" ? {} : JSON.parse(text) as Record<string, unknown> };
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    const response = await fetch(`${running.origin}/api/migration/v1/projects/${projectId}/impact`, {
+      method: "POST", headers: headers(running.origin, running.token), body: JSON.stringify(body),
+    });
+    const text = await response.text();
+    const parsed = (text === "" ? {} : JSON.parse(text)) as Record<string, unknown>;
+    const recoverable = parsed.code === "HOST_RESOURCE_EXHAUSTED"
+      && (parsed.details as { recoverable?: boolean } | undefined)?.recoverable !== false;
+    if (!recoverable || attempt === 2) return { status: response.status, body: parsed };
+    await new Promise((done) => setTimeout(done, 500 * (attempt + 1)));
+  }
+  throw new Error("UNREACHABLE");
 }
 
 /** The body a client builds from the project's own facts — never anything it computed. */

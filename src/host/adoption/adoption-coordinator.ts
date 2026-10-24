@@ -70,6 +70,15 @@ export type AdoptionFaultBoundary =
 export class AdoptionCoordinator {
   constructor(private readonly deps: AdoptionCoordinatorDeps) {}
 
+  /**
+   * The staging root this coordinator actually uses.
+   *
+   * Exposed so a test can *observe* the root rather than recompute it. A test that recomputes
+   * it proves the derivation is pure, which is not the property that matters: what matters is
+   * that the next boot sweeps the directory the previous boot wrote to.
+   */
+  get stagingRoot(): string { return this.deps.stagingRoot; }
+
   async adopt(projectId: string, request: AdoptRequestV1, correlationId = randomUUID()): Promise<ControlledWriteResponseV1 | ControlledWriteFailureResponseV1> {
     // Gate §7: every versioned edit HTTP must complete this project's unfinished M4B
     // recovery *before* it handles a replay. The unfinished transaction is named up front so

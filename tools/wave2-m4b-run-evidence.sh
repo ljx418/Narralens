@@ -69,6 +69,10 @@ printf '%s\n' "$code" > "$LOGS/credential-scan.exit"
 printf '%-24s exit=%s\n' credential-scan "$code"
 [ "$code" -eq 0 ] || overall=1
 
+# The capture's own outcome, recorded *before* the manifest and the gate run, so a failing
+# capture's gate can see that it failed and so the index can name it.
+printf '%s\n' "$overall" > "$LOGS/overall.txt"
+
 # The manifest for this capture, produced and checked *inside* the capture. The committed
 # manifest cannot exist yet for a capture that has not been committed, so the capture proves
 # its own evidence is internally consistent and records that proof as a log.
@@ -91,8 +95,6 @@ git status --porcelain > "$LOGS/git-status-after.txt"
 # The capture's own outcome, recorded in the capture. The manifest reads it to build the
 # index of failed captures, so a failure is findable from the index rather than only by
 # listing directories — and so the index cannot omit a failure that nobody wrote a note for.
-printf '%s\n' "$overall" > "$LOGS/overall.txt"
-
 if [ "$overall" -ne 0 ]; then
   # A failed capture says so, in the capture. A diagnostic written by hand can be forgotten;
   # one the script writes cannot.

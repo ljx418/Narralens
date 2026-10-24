@@ -56,6 +56,16 @@ async function authorizedAdoption(running: Started, suffix: string) {
  * a behavioural failure. The retry reuses the same idempotency key, so a retry is a replay
  * rather than a second adoption — which is the behaviour the same key is supposed to have.
  */
+/** A request that satisfies the adopt contract, for seeding a transaction row by hand. */
+function validAdoptRequest(idempotencyKey: string): Record<string, unknown> {
+  return {
+    format: "narralens.adopt-request@1.0", base_revision: 1,
+    expected_source_digest: "a".repeat(64), control_revision: 0,
+    materialization_id: "mat_1", impact_id: "imp_1", impact_hash: "b".repeat(64),
+    approval: { confirmed: true }, idempotency_key: idempotencyKey,
+  };
+}
+
 /**
  * A Host built the way production builds one: a `revisionStore` and nothing else.
  *
@@ -525,7 +535,11 @@ describe("M4B production adoption route", () => {
     const running = await startWithStore(database);
     hosts.push(running.host);
 
-    const expected = defaultAdoptionStagingRoot(database);
+    // The root the Host **actually used**, observed rather than recomputed: what has to be
+    // true is that the next boot sweeps the directory this one wrote to, and recomputing the
+    // derivation would prove only that the derivation is pure.
+    const expected = running.host.adoption.stagingRoot;
+    expect(expected).toBe(defaultAdoptionStagingRoot(database));
     const orphan = join(expected, "adopt-orphaned");
     await mkdir(orphan, { recursive: true });
     await writeFile(join(orphan, "film.html"), "<!doctype html><title>orphan</title>\n");
@@ -534,7 +548,72 @@ describe("M4B production adoption route", () => {
 
     const restarted = await startWithStore(database);
     hosts.push(restarted.host);
+    // The second Host must be using the same root, or the sweep is looking elsewhere.
+    expect(restarted.host.adoption.stagingRoot).toBe(expected);
     expect(await readdir(expected).catch(() => [])).not.toContain("adopt-orphaned");
+  }, 300_000);
+
+  it("latches a row whose request cannot be read, rather than leaving it to a recovery with no way out", async () => {
+    // The generic recovery moves a pre-publish row to `recovering`, which has no legal
+    // outgoing edge — TX-08B forbids leaving one. So a row M4B cannot read is latched as a
+    // decided state. The behaviour existed; nothing produced the condition.
+    const running = await start();
+    hosts.push(running.host); dirs.push(running.base);
+    const projectId = "of_corrupt_request";
+    const db = running.host.revisions.compose((handle) => handle);
+    running.host.revisions.beginTransaction({
+      transaction_id: "txn_corrupt", project_id: projectId, kind: "edit",
+      request_json: "{not json at all", request_hash: "0".repeat(64),
+      correlation_id: "corr-corrupt", base_revision: 0,
+    });
+    await running.host.close();
+    hosts.splice(hosts.indexOf(running.host), 1);
+
+    const restarted = await startOn(running.base);
+    hosts.push(restarted.host);
+    const row = restarted.host.revisions.compose((handle) => handle)
+      .prepare("SELECT state, error_code FROM project_transaction WHERE transaction_id='txn_corrupt'")
+      .get() as { state: string; error_code: string };
+    // A decided state with a reason, never `recovering`.
+    expect(row.state).toBe("attention");
+    expect(row.error_code).toBe("ADOPTION_REQUEST_UNREADABLE");
+  }, 300_000);
+
+  it("records why a recovery was blocked, without latching the project", async () => {
+    // The reason has to be on the row: a transaction that was skipped with nothing recorded
+    // is a row nobody can act on. And the *project* must not be latched — the gate refuses
+    // either because the project is already in attention or because another transaction is
+    // pending, and the second can resolve.
+    const running = await start();
+    hosts.push(running.host); dirs.push(running.base);
+    const projectId = "of_blocked_recovery";
+    const db = running.host.revisions.compose((handle) => handle);
+    running.host.revisions.beginTransaction({
+      transaction_id: "txn_blocked", project_id: projectId, kind: "edit",
+      // A *valid* adopt request: a request that fails the contract is latched as
+      // unreadable, which is a different path from the one this test is about.
+      request_json: JSON.stringify(validAdoptRequest("k")),
+      request_hash: "0".repeat(64), correlation_id: "corr-blocked", base_revision: 0,
+    });
+    // A second pending row for the same project closes the recovery gate.
+    running.host.revisions.beginTransaction({
+      transaction_id: "txn_other", project_id: projectId, kind: "edit",
+      request_json: JSON.stringify(validAdoptRequest("k2")),
+      request_hash: "1".repeat(64), correlation_id: "corr-other", base_revision: 0,
+    });
+    await running.host.close();
+    hosts.splice(hosts.indexOf(running.host), 1);
+
+    const restarted = await startOn(running.base);
+    hosts.push(restarted.host);
+    const row = restarted.host.revisions.compose((handle) => handle)
+      .prepare("SELECT state, error_code FROM project_transaction WHERE transaction_id='txn_blocked'")
+      .get() as { state: string; error_code: string };
+    expect(row.error_code).toBe("ADOPTION_RECOVERY_BLOCKED");
+    // And *M4B* did not flag the project for a condition that can resolve. The generic
+    // recovery, which runs afterwards and owns these rows, may still latch it — with its own
+    // reason. What must not happen is M4B's reason becoming the project's.
+    expect(restarted.host.revisions.attentionReason(projectId)).not.toMatch(/adoption recovery/iu);
   }, 300_000);
 
   it("leaves another module's transaction alone: a legacy edit row is not M4B's to decide", async () => {

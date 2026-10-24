@@ -156,20 +156,29 @@ const projectRoot = resolve(fileURLToPath(new URL("../..", import.meta.url)));
  * ones the test suite starts — the same directory, so one Host's sweep would delete
  * another's in-flight tree. Deriving it from the database path gives:
  *
- * - a durable, restart-stable root for a Host with a durable database, which is what lets
- *   the sweep reclaim what a crash left behind;
+ * - a root keyed on the database and on nothing else, so it is the *same* after a restart.
+ *   That is what lets the sweep reclaim what a crash left behind: a per-process name would
+ *   send the next boot looking in a different directory, and every crash would leak a full
+ *   copy of the source and its media forever.
  * - a private, per-process root for a Host with an in-memory database, which has no history
  *   to reclaim and must not share a directory with anybody.
  */
 export function defaultAdoptionStagingRoot(dbPath: string | undefined): string {
   const base = resolve(projectRoot, "var/adoption-stage");
   if (dbPath === undefined || dbPath === ":memory:" || dbPath === "") {
+    // An in-memory database has no history to reclaim, and nothing to key a shared root on.
     return resolve(base, `ephemeral-${process.pid}-${randomBytes(6).toString("hex")}`);
   }
-  // The process id is part of the name as well as the database's. Two Hosts over one
-  // database are not a supported deployment, but they *are* two processes, and one of
-  // them's startup sweep must not delete the other's in-flight tree.
-  return resolve(base, `${createHash("sha256").update(resolve(dbPath)).digest("hex").slice(0, 16)}-${process.pid}`);
+  // A durable database gets a root keyed on the database and on **nothing else**.
+  //
+  // It has to be the same across restarts, because the startup sweep is what reclaims the
+  // staging tree a crash left behind: a per-process name means the next boot looks in a
+  // different directory and the orphan — a full copy of the source plus its input media —
+  // stays on disk forever, one per crash. An earlier version of this put the process id in
+  // the name to isolate two Hosts over one database, and that broke the reclaim it was
+  // meant to serve. Two Hosts over one database are not a supported deployment; the
+  // architecture is one Host and one database, and the sweep relies on exactly that.
+  return resolve(base, createHash("sha256").update(resolve(dbPath)).digest("hex").slice(0, 16));
 }
 
 /**

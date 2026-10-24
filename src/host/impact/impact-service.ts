@@ -116,7 +116,8 @@ export class ImpactService {
       // ── 2. idempotency: replay or conflict, decided before any side effect ──────────
       const remembered = this.#deps.idempotency.recall(projectId, operationKind, request.idempotency_key);
       if (remembered !== undefined) {
-        this.#deps.idempotency.assertSameRequest(remembered, requestDigest, operationKind, projectId);
+        this.#deps.idempotency.assertSameRequest(remembered, requestDigest, operationKind,
+          projectId, correlationId);
         const spec = await this.#replay(JSON.parse(remembered.response_json) as ImpactSpecV1, now);
         return { status: 201, spec, replayed: true };
       }

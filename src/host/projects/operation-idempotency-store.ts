@@ -96,11 +96,14 @@ export class OperationIdempotencyStore {
   rememberOperation(revisions: RevisionStore, input: {
     projectId: string; operationKind: string; idempotencyKey: string;
     requestDigest: string; response: unknown; transactionId?: string; now?: Date;
+    /** The request's correlation id, so a conflict is answered the same way everywhere. */
+    correlationId?: string;
   }): { replayed: boolean; response: unknown } {
     return revisions.atomic(() => {
       const found = this.recall(input.projectId, input.operationKind, input.idempotencyKey);
       if (found !== undefined) {
-        this.assertSameRequest(found, input.requestDigest, input.operationKind, input.projectId);
+        this.assertSameRequest(found, input.requestDigest, input.operationKind, input.projectId,
+          input.correlationId);
         return { replayed: true, response: JSON.parse(found.response_json) as unknown };
       }
       this.record(input);

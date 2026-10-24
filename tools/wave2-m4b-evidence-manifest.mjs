@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { diagnosticFor, failedCaptures } from "./wave2-capture-outcome.mjs";
 
 const capture = process.argv[2];
 if (capture === undefined || !/^[a-f0-9]{40}$/u.test(capture)) {
@@ -54,36 +55,20 @@ const manifest = {
  * captures hides the fact that one failed. The failed directory is kept and marked; this
  * entry makes it findable from the index rather than only from a directory listing.
  */
-const knownFailedCaptures = readdirSync(resolve(root, "docs/evidence/WAVE2/logs"), { withFileTypes: true })
-  .filter((entry) => entry.isDirectory())
-  .map((entry) => `docs/evidence/WAVE2/logs/${entry.name}`)
-  .filter((directory) => {
-    // Two signals, and a capture is a failed capture if *either* says so. The recorded
-    // outcome is the authoritative one — it is what the capture itself wrote — and the
-    // diagnostic is the older signal, kept so the captures taken before the script recorded
-    // its outcome are still indexed. Deriving the list from a hand-written note alone is
-    // exactly how this stage's own failed capture went missing from the index.
-    const outcome = resolve(root, directory, "overall.txt");
-    if (existsSync(outcome) && Number(readFileSync(outcome, "utf8").trim()) !== 0) return true;
-    return existsSync(resolve(root, directory, "CAPTURE_FAILED_DIAGNOSTIC.md"))
-      || existsSync(resolve(root, directory, "CAPTURE_FAILED_DIAGNOSTIC.txt"));
-  })
-  .map((directory) => {
-    const diagnostic = existsSync(resolve(root, directory, "CAPTURE_FAILED_DIAGNOSTIC.md"))
-      ? `${directory}/CAPTURE_FAILED_DIAGNOSTIC.md`
-      : existsSync(resolve(root, directory, "CAPTURE_FAILED_DIAGNOSTIC.txt"))
-        ? `${directory}/CAPTURE_FAILED_DIAGNOSTIC.txt`
-        : null;
-    const outcome = resolve(root, directory, "overall.txt");
-    return {
-      capture_commit: directory.split("/").pop(),
-      diagnostic,
-      recorded_outcome: existsSync(outcome) ? Number(readFileSync(outcome, "utf8").trim()) : null,
-      kept: true,
-      note: "A failed capture, kept verbatim. It is not evidence of a passing run and is never counted as one.",
-    };
-  });
-manifest.known_failed_captures = knownFailedCaptures;
+// The failed captures, derived from each capture's own exit files by the shared rule. The
+// diagnostic is looked up for the reader's convenience, but its *presence* is not the
+// criterion: a failure nobody wrote a note for is still a failure.
+manifest.known_failed_captures = failedCaptures(root).map((entry) => {
+  const relative = `docs/evidence/WAVE2/logs/${entry.capture_commit}`;
+  const diagnostic = diagnosticFor(entry.directory);
+  return {
+    capture_commit: entry.capture_commit,
+    failed_commands: entry.failures.map((failure) => `${failure.name} exit=${failure.exit}`),
+    diagnostic: diagnostic === null ? null : relative + "/" + diagnostic.split("/").pop(),
+    kept: true,
+    note: "A failed capture, kept verbatim. It is not evidence of a passing run and is never counted as one.",
+  };
+});
 
 const target = resolve(root, process.argv[3] ?? "docs/evidence/WAVE2/evidence-manifest-m4b.json");
 writeFileSync(target, `${JSON.stringify(manifest, null, 2)}\n`);

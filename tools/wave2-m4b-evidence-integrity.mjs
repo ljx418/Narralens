@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
+import { failedCaptures } from "./wave2-capture-outcome.mjs";
 import { resolve } from "node:path";
 
 const root = resolve(".");
@@ -44,17 +45,30 @@ const required = new Set(["TX-01", "TX-02", "TX-03", "TX-04", "TX-05", "TX-06", 
   for (const file of readdirSync(resolve(root, "tests/wave2/m4b"), { withFileTypes: true })) {
     if (!file.isFile() || !file.name.endsWith(".test.ts")) continue;
     const text = readFileSync(resolve(root, "tests/wave2/m4b", file.name), "utf8");
-    for (const match of text.matchAll(/it\.each\(\[[\s\S]*?\]\s*as const\)\("([^"]+)"|it\("([^"]+)"/gu)) {
-      const title = match[1] ?? match[2] ?? "";
+    // A table-driven crash test counts as **one row per row**: citing one row of a five-row
+    // table does not evidence the other four, and the case's own text says each is restarted.
+    for (const match of text.matchAll(/it\.each\(\[([\s\S]*?)\]\s*as const\)\("([^"]+)"/gu)) {
+      const template = match[2] ?? "";
+      if (!/boundary|crash/iu.test(template)) continue;
+      // The template's `%s` is the table's **first** column. Taking every quoted string in
+      // the table instead would invent titles like "recovers … at aborted", which are not
+      // tests at all.
+      const rows = [...match[1].matchAll(/\[([^\]]*)\]/gu)]
+        .map((row) => (row[1].match(/"([^"]+)"/u) ?? [])[1])
+        .filter((row) => row !== undefined);
+      for (const row of rows) crashTests.push({ file: `tests/wave2/m4b/${file.name}`,
+        title: template.replace("%s", row) });
+    }
+    for (const match of text.matchAll(/it\("([^"]+)"/gu)) {
+      const title = match[1] ?? "";
       if (!/boundary|crash/iu.test(title)) continue;
       crashTests.push({ file: `tests/wave2/m4b/${file.name}`, title });
     }
   }
   const cited = (cases.find((entry) => entry.case_id === "TX-08B")?.tests ?? []).join(" ");
-  const uncited = crashTests.filter((entry) => !cited.includes(entry.title)
-    && !cited.includes(entry.title.split("%")[0].trim()));
+  const uncited = crashTests.filter((entry) => !cited.includes(entry.title));
   if (crashTests.length === 0) fail("no crash-boundary test was found to check the citations against");
-  else if (uncited.length === 0) pass(`TX-08B cites all ${crashTests.length} crash-boundary tests`);
+  else if (uncited.length === 0) pass(`TX-08B cites all ${crashTests.length} crash-boundary rows`);
   else {
     for (const entry of uncited) fail(`TX-08B does not cite the crash test "${entry.title}"`);
   }
@@ -69,19 +83,22 @@ const required = new Set(["TX-01", "TX-02", "TX-03", "TX-04", "TX-05", "TX-06", 
  * non-zero, or that carries a diagnostic, must be listed.
  */
 {
+  // Recomputed from the captures' own exit files, **not** from the manifest's list. The
+  // manifest is what this gate audits; reading its answer back would make the audit
+  // circular, and an earlier version of this check shared the generator's predicate and
+  // therefore could not fail for any capture the script produced.
   const listed = new Set((manifest.known_failed_captures ?? []).map((entry) => entry.capture_commit));
-  const unlisted = [];
-  for (const entry of readdirSync(resolve(root, "docs/evidence/WAVE2/logs"), { withFileTypes: true })) {
-    if (!entry.isDirectory()) continue;
-    const directory = resolve(root, "docs/evidence/WAVE2/logs", entry.name);
-    const outcome = resolve(directory, "overall.txt");
-    const failed = (existsSync(outcome) && Number(readFileSync(outcome, "utf8").trim()) !== 0)
-      || existsSync(resolve(directory, "CAPTURE_FAILED_DIAGNOSTIC.md"))
-      || existsSync(resolve(directory, "CAPTURE_FAILED_DIAGNOSTIC.txt"));
-    if (failed && !listed.has(entry.name)) unlisted.push(entry.name);
-  }
+  const computed = failedCaptures(root);
+  const unlisted = computed.filter((entry) => !listed.has(entry.capture_commit));
+  const spurious = [...listed].filter((commit) => !computed.some((entry) => entry.capture_commit === commit));
   if (unlisted.length === 0) pass(`every failed capture is indexed (${listed.size} listed)`);
-  else fail(`a failed capture is not in the index: ${unlisted.join(", ")}`);
+  else {
+    for (const entry of unlisted) {
+      fail(`a failed capture is not in the index: ${entry.capture_commit} (${entry.failures.map((f) => `${f.name}=${f.exit}`).join(", ")})`);
+    }
+  }
+  if (spurious.length === 0) pass("the index names no capture that did not fail");
+  else fail(`the index names a capture that did not fail: ${spurious.join(", ")}`);
 }
 for (const entry of cases) {
   required.delete(entry.case_id);

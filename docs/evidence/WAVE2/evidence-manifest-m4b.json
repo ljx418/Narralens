@@ -233,64 +233,155 @@
   "known_failed_captures": [
     {
       "capture_commit": "002461bcf780c2d08fa40e678c317e8938dd3328",
+      "failed_commands": [
+        "check-1 exit=1"
+      ],
       "diagnostic": "docs/evidence/WAVE2/logs/002461bcf780c2d08fa40e678c317e8938dd3328/CAPTURE_FAILED_DIAGNOSTIC.md",
-      "recorded_outcome": null,
       "kept": true,
       "note": "A failed capture, kept verbatim. It is not evidence of a passing run and is never counted as one."
     },
     {
       "capture_commit": "14cc3b6f2c53a0cf02397352bb296486491cc461",
+      "failed_commands": [
+        "check-1 exit=1",
+        "check-2 exit=1"
+      ],
       "diagnostic": "docs/evidence/WAVE2/logs/14cc3b6f2c53a0cf02397352bb296486491cc461/CAPTURE_FAILED_DIAGNOSTIC.txt",
-      "recorded_outcome": null,
       "kept": true,
       "note": "A failed capture, kept verbatim. It is not evidence of a passing run and is never counted as one."
     },
     {
       "capture_commit": "1c0703bd8621d9a4002fa67b2080edf25bab37c4",
+      "failed_commands": [
+        "m4b-integrity exit=1"
+      ],
       "diagnostic": "docs/evidence/WAVE2/logs/1c0703bd8621d9a4002fa67b2080edf25bab37c4/CAPTURE_FAILED_DIAGNOSTIC.md",
-      "recorded_outcome": null,
       "kept": true,
       "note": "A failed capture, kept verbatim. It is not evidence of a passing run and is never counted as one."
     },
     {
-      "capture_commit": "2fe36433fc2182abc8bd959ec1bee8e1048d4b5a",
-      "diagnostic": "docs/evidence/WAVE2/logs/2fe36433fc2182abc8bd959ec1bee8e1048d4b5a/CAPTURE_FAILED_DIAGNOSTIC.md",
-      "recorded_outcome": null,
+      "capture_commit": "1d3f28ddf03b896585e5790dffadffb209e7f8ce",
+      "failed_commands": [
+        "check-1 exit=1",
+        "check-2 exit=1",
+        "check-3 exit=1",
+        "check exit=1"
+      ],
+      "diagnostic": null,
+      "kept": true,
+      "note": "A failed capture, kept verbatim. It is not evidence of a passing run and is never counted as one."
+    },
+    {
+      "capture_commit": "39f86a0108b6c49166cff2ca2e4259789d62bd1b",
+      "failed_commands": [
+        "check-3 exit=1"
+      ],
+      "diagnostic": null,
       "kept": true,
       "note": "A failed capture, kept verbatim. It is not evidence of a passing run and is never counted as one."
     },
     {
       "capture_commit": "466eca6893de10128adfc06d060b70fcb58c0c4b",
+      "failed_commands": [
+        "check exit=1"
+      ],
       "diagnostic": "docs/evidence/WAVE2/logs/466eca6893de10128adfc06d060b70fcb58c0c4b/CAPTURE_FAILED_DIAGNOSTIC.txt",
-      "recorded_outcome": null,
+      "kept": true,
+      "note": "A failed capture, kept verbatim. It is not evidence of a passing run and is never counted as one."
+    },
+    {
+      "capture_commit": "63369755f2754507d6361fd95ed2767285dbb2eb",
+      "failed_commands": [
+        "check-3 exit=1"
+      ],
+      "diagnostic": null,
+      "kept": true,
+      "note": "A failed capture, kept verbatim. It is not evidence of a passing run and is never counted as one."
+    },
+    {
+      "capture_commit": "88072915b7fe2d5c6d4780e913f4287989558efa",
+      "failed_commands": [
+        "check-1 exit=1",
+        "check-2 exit=1",
+        "check exit=1"
+      ],
+      "diagnostic": null,
+      "kept": true,
+      "note": "A failed capture, kept verbatim. It is not evidence of a passing run and is never counted as one."
+    },
+    {
+      "capture_commit": "8b55aa95ccbfe7480010870fcd43b4e513b976cd",
+      "failed_commands": [
+        "check-1 exit=1",
+        "check-3 exit=1"
+      ],
+      "diagnostic": null,
+      "kept": true,
+      "note": "A failed capture, kept verbatim. It is not evidence of a passing run and is never counted as one."
+    },
+    {
+      "capture_commit": "98026a85d9b5ab78615c5a476428b0ebfb1ba87d",
+      "failed_commands": [
+        "credential-scan exit=1"
+      ],
+      "diagnostic": null,
       "kept": true,
       "note": "A failed capture, kept verbatim. It is not evidence of a passing run and is never counted as one."
     },
     {
       "capture_commit": "be93a183f5582da4b0db9f0e211424277d7ccfd7",
+      "failed_commands": [
+        "credential-scan exit=1"
+      ],
       "diagnostic": "docs/evidence/WAVE2/logs/be93a183f5582da4b0db9f0e211424277d7ccfd7/CAPTURE_FAILED_DIAGNOSTIC.txt",
-      "recorded_outcome": null,
+      "kept": true,
+      "note": "A failed capture, kept verbatim. It is not evidence of a passing run and is never counted as one."
+    },
+    {
+      "capture_commit": "c6d23a73bd3d53c4972df449020890a39be77b0a",
+      "failed_commands": [
+        "check-1 exit=1",
+        "check-2 exit=1",
+        "credential-scan exit=1"
+      ],
+      "diagnostic": null,
+      "kept": true,
+      "note": "A failed capture, kept verbatim. It is not evidence of a passing run and is never counted as one."
+    },
+    {
+      "capture_commit": "c7153a465d07f62d318d4553e3600288965adf3c",
+      "failed_commands": [
+        "check exit=1"
+      ],
+      "diagnostic": null,
       "kept": true,
       "note": "A failed capture, kept verbatim. It is not evidence of a passing run and is never counted as one."
     },
     {
       "capture_commit": "c90a6bfa9fde997ba59c2be5ccd0552fa72bdb43",
+      "failed_commands": [
+        "check-2 exit=1"
+      ],
       "diagnostic": "docs/evidence/WAVE2/logs/c90a6bfa9fde997ba59c2be5ccd0552fa72bdb43/CAPTURE_FAILED_DIAGNOSTIC.md",
-      "recorded_outcome": null,
       "kept": true,
       "note": "A failed capture, kept verbatim. It is not evidence of a passing run and is never counted as one."
     },
     {
       "capture_commit": "d52dd95879bb282f8e0f628cc5f36455f2ca025b",
+      "failed_commands": [
+        "m4b-integrity exit=1",
+        "wave2-m4b exit=1"
+      ],
       "diagnostic": "docs/evidence/WAVE2/logs/d52dd95879bb282f8e0f628cc5f36455f2ca025b/CAPTURE_FAILED_DIAGNOSTIC.md",
-      "recorded_outcome": null,
       "kept": true,
       "note": "A failed capture, kept verbatim. It is not evidence of a passing run and is never counted as one."
     },
     {
       "capture_commit": "e9a3a3356fa9ae43ed97b20d46c3641ee36c5942",
+      "failed_commands": [
+        "check exit=1"
+      ],
       "diagnostic": "docs/evidence/WAVE2/logs/e9a3a3356fa9ae43ed97b20d46c3641ee36c5942/CAPTURE_FAILED_DIAGNOSTIC.txt",
-      "recorded_outcome": null,
       "kept": true,
       "note": "A failed capture, kept verbatim. It is not evidence of a passing run and is never counted as one."
     }
