@@ -18,11 +18,14 @@ import { join, resolve } from "node:path";
  *      the expectation;
  *   3. a `CAPTURE_FAILED_DIAGNOSTIC.*` file is present;
  *   4. `overall.txt` exists and is non-zero;
- *   5. the capture is **incomplete**: a `.cmd` with no matching `.exit`.
+ *   5. the capture is **incomplete**: a `.cmd` with no matching `.exit`;
+ *   6. the capture **never reached the end of its script**.
  *
- * The fifth is the one that catches a capture that died mid-command, and the third and
- * fourth catch the ones that were noted by hand. The gate recomputes this from the logs
- * rather than reading the manifest it audits, so the audit is not circular.
+ * The sixth is the one that closes the residual hole: a capture killed after its last
+ * command's `.exit` but before the script finished leaves every exit green, no diagnostic
+ * and no outcome file, and would otherwise be classified as a clean capture. The end
+ * markers are `overall.txt` (the current scripts) and `git-status-after.txt` (the older
+ * ones, which wrote it last) — a capture with neither never finished.
  */
 
 /** The commands whose non-zero exit is expected, and therefore not a failure by themselves. */
@@ -82,6 +85,12 @@ export function failedCaptures(root) {
     const outcome = resolve(directory, "overall.txt");
     const recorded = existsSync(outcome) ? readFileSync(outcome, "utf8").trim() : null;
     const recordedFailure = recorded !== null && recorded !== "" && recorded !== "0";
+    // The capture must have reached the end of its script to be classified at all.
+    const reachedTheEnd = recorded !== null
+      || existsSync(resolve(directory, "git-status-after.txt"));
+    if (!reachedTheEnd) {
+      failures.push({ name: "the capture", exit: null });
+    }
     if (failures.length === 0 && !diagnostic && !recordedFailure) continue;
     out.push({ capture_commit: entry.name, directory, failures });
   }

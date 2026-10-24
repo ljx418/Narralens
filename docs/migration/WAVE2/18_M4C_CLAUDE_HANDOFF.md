@@ -13,7 +13,7 @@
 
 - 预期分支：`migration/m2.2-coordinator-persistence`
 - M4B 内部冻结候选：`docs/evidence/WAVE2/evidence-manifest-m4b.json` 的 `capture_commit`（M4B 外审经过多轮修复与重新捕获；不要硬编码某个提交，用 manifest 读当前值）
-- M4B 证据捕获提交：`0da4ba23d35f3371ce89572529f4ba20151ca4d8`
+- M4B 证据捕获提交：`docs/evidence/WAVE2/evidence-manifest-m4b.json` 的 `capture_commit`（不要硬编码）
 - origin/main：`304c89134fdf9f834f7d69e3f4d5c89a68044c60`
 - OpenFilm upstream：`e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3`
 - Hypit upstream：`6fdd8c0f02c17b9970aee6deb4550a70e9d57acf`

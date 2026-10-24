@@ -108,8 +108,13 @@ export class ProjectCoordinator {
     operation: () => Promise<T>, ignoredTransactionIds?: readonly string[]): Promise<T> {
     // The transactions this recovery is about to resolve are excluded from the pending check.
     // A recovery blocked by its own sibling rows could never resolve them.
-    if (this.deps.store.recoveryGate(projectId, 0,
-      ignoredTransactionIds ?? [transactionId])) {
+    // An explicitly empty set is not nullish, so `??` would silently fall through to an
+    // unfiltered gate — and the row being recovered would then block itself. An empty set
+    // means "ignore nothing", which for a *recovery* is never what the caller meant.
+    const ignored = ignoredTransactionIds !== undefined && ignoredTransactionIds.length > 0
+      ? ignoredTransactionIds
+      : [transactionId];
+    if (this.deps.store.recoveryGate(projectId, 0, ignored)) {
       throw new HttpError(423, "PROJECT_ATTENTION_REQUIRED", "Another condition blocks adoption recovery",
         { attention_reason: this.deps.store.attentionReason(projectId) }, correlationId);
     }

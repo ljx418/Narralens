@@ -579,11 +579,11 @@ describe("M4B production adoption route", () => {
     expect(row.error_code).toBe("ADOPTION_REQUEST_UNREADABLE");
   }, 300_000);
 
-  it("records why a recovery was blocked, without latching the project", async () => {
+  it("records why a recovery was blocked, and closes the project visibly", async () => {
     // The reason has to be on the row: a transaction that was skipped with nothing recorded
-    // is a row nobody can act on. And the *project* must not be latched — the gate refuses
-    // either because the project is already in attention or because another transaction is
-    // pending, and the second can resolve.
+    // is a row nobody can act on. And the project *is* closed — by the generic recovery,
+    // which owns the foreign row that did the blocking. What matters is that the closure is
+    // visible rather than a row stranded in `recovering`.
     const running = await start();
     hosts.push(running.host); dirs.push(running.base);
     const projectId = "of_blocked_recovery";
@@ -623,6 +623,41 @@ describe("M4B production adoption route", () => {
       .get() as { terminal_reason: string };
     expect(row2.terminal_reason).toMatch(/adoption recovery/iu);
     expect(restarted.host.revisions.projectsInAttention()).toContain(projectId);
+  }, 300_000);
+
+  it("does not let one of its own pending rows block the recovery of another", async () => {
+    // The recovery gate refuses while the project has pending work. If M4B's own rows
+    // counted, a project with two of them could never recover either — the gate would see
+    // a pending transaction and refuse, and the row it was supposed to recover would stay
+    // exactly as it was. The gate therefore excludes the rows this recovery is about to
+    // resolve.
+    const running = await start();
+    hosts.push(running.host); dirs.push(running.base);
+    const projectId = "of_two_own_rows";
+    const db = running.host.revisions.compose((handle) => handle);
+    for (const [id, key] of [["txn_first", "k1"], ["txn_second", "k2"]] as const) {
+      running.host.revisions.beginTransaction({
+        transaction_id: id, project_id: projectId, kind: "edit",
+        request_json: JSON.stringify(validAdoptRequest(key)),
+        request_hash: "0".repeat(64), correlation_id: `corr-${id}`, base_revision: 0,
+      });
+    }
+    await running.host.close();
+    hosts.splice(hosts.indexOf(running.host), 1);
+
+    const restarted = await startOn(running.base);
+    hosts.push(restarted.host);
+    // Neither row may be left waiting for the other: both are decided.
+    for (const id of ["txn_first", "txn_second"]) {
+      const row = restarted.host.revisions.compose((handle) => handle)
+        .prepare("SELECT state, error_code FROM project_transaction WHERE transaction_id=?")
+        .get(id) as { state: string; error_code: string };
+      expect(["aborted", "attention"], `${id}: ${row.state}/${row.error_code}`).toContain(row.state);
+      // In particular, not the refusal that says one blocked the other.
+      expect(row.error_code).not.toBe("ADOPTION_RECOVERY_BLOCKED");
+      // And never the state with no legal outgoing edge.
+      expect(row.state).not.toBe("recovering");
+    }
   }, 300_000);
 
   it("leaves another module's transaction alone: a legacy edit row is not M4B's to decide", async () => {

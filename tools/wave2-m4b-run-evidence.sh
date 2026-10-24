@@ -82,7 +82,7 @@ printf '%s\n' "$overall" > "$LOGS/overall.txt"
 # The manifest the capture checks is this one — the file inside the log directory. The
 # *committed* manifest is regenerated from it after the capture is committed, and therefore
 # lists two more commands than the capture's own copy; that is why the committed manifest's
-# `capture_commands` names the file the gate actually checked.
+# `checked_manifest` names the file the gate actually checked.
 printf '%s\n' "node tools/wave2-m4b-evidence-manifest.mjs $CAPTURE_SHA $LOGS/manifest.json" > "$LOGS/manifest.cmd"
 node tools/wave2-m4b-evidence-manifest.mjs "$CAPTURE_SHA" "$LOGS/manifest.json" > "$LOGS/manifest.txt" 2>&1
 code=$?

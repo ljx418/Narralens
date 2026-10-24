@@ -568,11 +568,16 @@ export class AdoptionCoordinator {
         // this transaction's problem to wait for, not a reason to refuse to serve the rest
         // of the deployment, and not a reason to throw out of startup.
         //
-        // The *project* is deliberately not latched. The gate refuses either because the
-        // project is already in attention — in which case it is flagged already — or because
-        // another transaction is pending, which can resolve. Latching on the second would
-        // close a project that a later boot could have recovered, and `commitAdoption`'s CAS
-        // requires `attention = 0`, so nothing could ever write it again.
+        // The row is latched terminal, with its reason, and the project with it.
+        //
+        // The gate refuses because *another module's* transaction is pending — this module's
+        // own rows are excluded, so a recovery is never blocked by the rows it is about to
+        // resolve. A foreign pending row is the generic recovery's to resolve, and the
+        // generic recovery would move this row to `recovering`, a state with no legal
+        // outgoing edge. Latching it here instead makes the condition visible: the project is
+        // closed, and `projectsInAttention()` names why. The closure is permanent — no M4B
+        // path clears `attention` — which is the price of a decided state over a stranded
+        // one.
         report.attention += 1;
         // The row is latched as a terminal state with its reason. Leaving it alone would let
         // the generic recovery move it to `recovering` — which has no legal outgoing edge,

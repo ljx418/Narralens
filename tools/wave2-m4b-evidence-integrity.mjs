@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { failedCaptures } from "./wave2-capture-outcome.mjs";
+import { join } from "node:path";
 import { resolve } from "node:path";
 
 const root = resolve(".");
@@ -86,22 +87,76 @@ const required = new Set(["TX-01", "TX-02", "TX-03", "TX-04", "TX-05", "TX-06", 
  * gate recomputes it from the logs rather than reading the manifest it audits.
  */
 {
-  // Recomputed from the captures' own exit files, **not** from the manifest's list. The
-  // manifest is what this gate audits; reading its answer back would make the audit
-  // circular, and an earlier version of this check shared the generator's predicate and
-  // therefore could not fail for any capture the script produced.
+  // **The gate's own implementation of the rule**, written here rather than imported.
+  //
+  // An earlier version of this check imported the generator's function. Moving the rule into
+  // a shared module made the *data source* independent — the logs, not the manifest's list —
+  // but the *predicate* was still the generator's, so the two could never disagree and the
+  // audit was blind to exactly the class of defect the last two rounds' MAJORs lived in. Two
+  // independent implementations that agree are a check; one implementation called twice is
+  // a tautology.
+  const expectedFailures = new Set(["wave1-integrity", "m4a-integrity"]);
+  const failuresOf = (directory) => {
+    const names = readdirSync(directory);
+    const exits = new Set(names.filter((name) => name.endsWith(".exit")));
+    const failures = [];
+    for (const entry of exits) {
+      const name = entry.slice(0, -".exit".length);
+      const raw = readFileSync(join(directory, entry), "utf8").trim();
+      const code = /^\d+$/u.test(raw) ? Number(raw) : null;
+      if (expectedFailures.has(name)) {
+        // Expected to fail. One that succeeded is a failure of the expectation.
+        if (code === 0) failures.push(`${name} unexpectedly succeeded`);
+        continue;
+      }
+      if (code !== 0) failures.push(`${name} exit=${code}`);
+    }
+    for (const entry of names) {
+      if (!entry.endsWith(".cmd")) continue;
+      const name = entry.slice(0, -".cmd".length);
+      if (exits.has(`${name}.exit`)) continue;
+      failures.push(`${name} did not finish`);
+    }
+    const diagnostic = names.some((name) => name.startsWith("CAPTURE_FAILED_DIAGNOSTIC."));
+    const outcomePath = join(directory, "overall.txt");
+    const recorded = existsSync(outcomePath) ? readFileSync(outcomePath, "utf8").trim() : null;
+    const recordedFailure = recorded !== null && recorded !== "" && recorded !== "0";
+    // The end markers are `overall.txt` (the current scripts) and `git-status-after.txt`
+    // (the older ones, which wrote it last). A capture with neither never finished, and
+    // cannot be assumed clean.
+    const reachedTheEnd = recorded !== null
+      || existsSync(join(directory, "git-status-after.txt"));
+    if (!reachedTheEnd) failures.push("the capture never reached the end of its script");
+    else if (recordedFailure) failures.push("the capture recorded a failed outcome");
+    else if (diagnostic) failures.push("the capture carries a failure diagnostic");
+    return failures;
+  };
+
   const listed = new Set((manifest.known_failed_captures ?? []).map((entry) => entry.capture_commit));
-  const computed = failedCaptures(root);
-  const unlisted = computed.filter((entry) => !listed.has(entry.capture_commit));
-  const spurious = [...listed].filter((commit) => !computed.some((entry) => entry.capture_commit === commit));
+  const computed = new Map();
+  for (const entry of readdirSync(resolve(root, "docs/evidence/WAVE2/logs"), { withFileTypes: true })) {
+    if (!entry.isDirectory()) continue;
+    const failures = failuresOf(resolve(root, "docs/evidence/WAVE2/logs", entry.name));
+    if (failures.length > 0) computed.set(entry.name, failures);
+  }
+  const unlisted = [...computed.entries()].filter(([commit]) => !listed.has(commit));
+  const spurious = [...listed].filter((commit) => !computed.has(commit));
   if (unlisted.length === 0) pass(`every failed capture is indexed (${listed.size} listed)`);
   else {
-    for (const entry of unlisted) {
-      fail(`a failed capture is not in the index: ${entry.capture_commit} (${entry.failures.map((f) => `${f.name}=${f.exit}`).join(", ")})`);
+    for (const [commit, failures] of unlisted) {
+      fail(`a failed capture is not in the index: ${commit} (${failures.join(", ")})`);
     }
   }
   if (spurious.length === 0) pass("the index names no capture that did not fail");
   else fail(`the index names a capture that did not fail: ${spurious.join(", ")}`);
+  // And the two implementations must agree, or one of them is wrong.
+  const shared = failedCaptures(root).map((entry) => entry.capture_commit).sort();
+  const own = [...computed.keys()].sort();
+  if (JSON.stringify(shared) === JSON.stringify(own)) {
+    pass("the gate's own rule and the shared rule agree on every capture");
+  } else {
+    fail("the gate's own rule and the shared rule disagree; one of them is wrong");
+  }
 }
 for (const entry of cases) {
   required.delete(entry.case_id);
