@@ -147,6 +147,28 @@ function openfilmVendorRoot(): string {
 }
 const projectRoot = resolve(fileURLToPath(new URL("../..", import.meta.url)));
 
+/**
+ * Where a Host's adoption staging trees live, when the composition does not say.
+ *
+ * It is derived from the *database*, not from the checkout, because the startup sweep removes
+ * orphaned staging trees and a sweep must never touch a tree another Host is using. A
+ * checkout-level default would give every Host on the machine — including the in-memory
+ * ones the test suite starts — the same directory, so one Host's sweep would delete
+ * another's in-flight tree. Deriving it from the database path gives:
+ *
+ * - a durable, restart-stable root for a Host with a durable database, which is what lets
+ *   the sweep reclaim what a crash left behind;
+ * - a private, per-process root for a Host with an in-memory database, which has no history
+ *   to reclaim and must not share a directory with anybody.
+ */
+export function defaultAdoptionStagingRoot(dbPath: string | undefined): string {
+  const base = resolve(projectRoot, "var/adoption-stage");
+  if (dbPath === undefined || dbPath === ":memory:" || dbPath === "") {
+    return resolve(base, `ephemeral-${process.pid}-${randomBytes(6).toString("hex")}`);
+  }
+  return resolve(base, createHash("sha256").update(resolve(dbPath)).digest("hex").slice(0, 16));
+}
+
 interface HostDependencies {
   catalog?: ProjectCatalog;
   runner?: ControlledAgentRunner;
@@ -442,7 +464,7 @@ export class NarralensHost {
       ledger: this.assetLedger, snapshots: this.snapshots, adoption: this.adoptionFacts,
       publisher: new AuthorSourcePublisher({ ...(dependencies.adoptionPublishFault === undefined
         ? {} : { fault: dependencies.adoptionPublishFault }) }),
-      stagingRoot: dependencies.adoptionStagingRoot ?? resolve(projectRoot, "var/adoption-stage"),
+      stagingRoot: dependencies.adoptionStagingRoot ?? defaultAdoptionStagingRoot(dependencies.dbPath),
       ...(dependencies.adoptionFault === undefined ? {} : { fault: dependencies.adoptionFault }) });
     this.#leaseReapIntervalMs = dependencies.leaseReapIntervalMs ?? 1_000;
     this.#materializeDrainIntervalMs = dependencies.materializeDrainIntervalMs ?? 250;

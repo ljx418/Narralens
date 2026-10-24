@@ -7,7 +7,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import { planDigest } from "../../../src/host/materialize/native-plan-builder.js";
 import type { NativePlanV1 } from "../../../src/contracts/wave2-types.js";
 import { validateControlledWriteResponse } from "../../../src/contracts/validator.js";
-import { NarralensHost } from "../../../src/host/server.js";
+import { defaultAdoptionStagingRoot, NarralensHost } from "../../../src/host/server.js";
 import { SimulatedAdoptionCrash } from "../../../src/host/adoption/adoption-coordinator.js";
 import type { PublishBoundary } from "../../../src/host/adoption/author-source-publisher.js";
 import { createPinnedOpenFilmUpstream } from "../../../src/adapters/openfilm/openfilm-upstream.js";
@@ -72,7 +72,8 @@ describe("M4B production adoption route", () => {
       expect(response.body.code).toBe("IMPACT_REQUIRED");
     }
     expect(running.host.revisions.projectTransactions("d1-30s")).toEqual([]);
-  });
+  }, 900_000);
+
 
   it("adopts three native clips once, replays exactly, and rebuilds after restart", async () => {
     const running = await start();
@@ -348,6 +349,57 @@ describe("M4B production adoption route", () => {
     expect((await readdir(sourceRoot)).filter((name) => name.includes(".film.tmp"))).toEqual([]);
   }, 900_000);
 
+  it("converges the crash boundary after_active_inspect to a decided state with revision +0", async () => {
+    // The publication boundary's own last check. A crash here leaves the source published
+    // and the database uncommitted — the same transition state as `after_published`, but
+    // after the active source has been re-read and re-proved.
+    const running = await start({ adoptionFault: (point) => {
+      if (point === "after_active_inspect") throw new SimulatedAdoptionCrash("PUBLISH_CRASH:after_active_inspect");
+    } });
+    hosts.push(running.host); dirs.push(running.base);
+    const prepared = await authorizedAdoption(running, "after-active-inspect");
+    const crashed = await postAdoption(running, prepared.projectId, prepared.request);
+    expect(crashed.status).toBeGreaterThanOrEqual(400);
+    expect((await running.host.projectResolver.resolveActivated(prepared.projectId)).revision).toBe(1);
+    await running.host.close();
+    hosts.splice(hosts.indexOf(running.host), 1);
+
+    const restarted = await startOn(running.base);
+    hosts.push(restarted.host);
+    // The recovery completes it: the source is provably the after state, so the commit is
+    // the only conclusion left, and it is the same one the original request would have had.
+    expect((await restarted.host.projectResolver.resolveActivated(prepared.projectId)).revision).toBe(2);
+    expect(restarted.host.revisions.projectTransactions(prepared.projectId).at(-1)?.state).toBe("committed");
+  }, 900_000);
+
+  it("answers the same key with the same body whether the recovery just ran or was replayed", async () => {
+    // Gate §7: "route 首次及重放均用 error.http_status 返回完全相同的公开 JSON body". The
+    // takeover used to answer a generic `{code,message,correlation_id}` while the durable
+    // replay of the same key answered the canonical controlled-failure body — two different
+    // public bodies for one key.
+    const running = await start({ adoptionFault: (point) => {
+      if (point === "after_prepared") throw new SimulatedAdoptionCrash("PUBLISH_CRASH:after_prepared");
+    } });
+    hosts.push(running.host); dirs.push(running.base);
+    const prepared = await authorizedAdoption(running, "same-key-body");
+    expect((await postAdoption(running, prepared.projectId, prepared.request)).status).toBeGreaterThanOrEqual(400);
+
+    // The next request with the same key takes the recovery over. It must answer the
+    // canonical failure body...
+    const takeover = await postAdoption(running, prepared.projectId, prepared.request);
+    const failure = takeover.body.error as { http_status: number } | undefined;
+    expect(failure).toBeDefined();
+    expect(takeover.status).toBe(failure!.http_status);
+    expect(takeover.body.format).toBe("narralens.controlled-write-failure@1.0");
+    expect(takeover.body.status).toBe("aborted");
+    expect(takeover.body.new_revision).toBe(takeover.body.previous_revision);
+
+    // ...and the durable replay must be byte-identical to it.
+    const replay = await postAdoption(running, prepared.projectId, prepared.request);
+    expect(replay.status).toBe(takeover.status);
+    expect(replay.body).toEqual(takeover.body);
+  }, 900_000);
+
   it("records the source=after / DB-not-committed transition state field by field", async () => {
     // M4B-NW names this transition state specifically: the author source has been replaced,
     // the database commit has not happened, and every other business fact must still be
@@ -419,6 +471,25 @@ describe("M4B production adoption route", () => {
       .get(prepared.projectId) as { n: number }).n).toBe(0);
     expect((db.prepare("SELECT state FROM impact WHERE project_id=?").get(prepared.projectId) as { state: string }).state).toBe("active");
   }, 900_000);
+
+  it("gives two Hosts with different databases different staging roots, so one sweep cannot touch the other", async () => {
+    // The sweep removes orphaned staging trees, so it must not be able to reach a tree
+    // another Host is using. A checkout-level staging root would be shared by every Host
+    // on the machine — including the in-memory ones the suite starts — and one Host's
+    // startup would delete another's in-flight adoption.
+    const durableA = defaultAdoptionStagingRoot("/var/lib/narralens/one.sqlite");
+    const durableB = defaultAdoptionStagingRoot("/var/lib/narralens/two.sqlite");
+    const durableAAgain = defaultAdoptionStagingRoot("/var/lib/narralens/one.sqlite");
+    expect(durableA).not.toBe(durableB);
+    // A durable database keeps the same root across a restart, which is what lets the sweep
+    // reclaim what a crash left behind.
+    expect(durableAAgain).toBe(durableA);
+    // An in-memory database has no history to reclaim, so it gets a private root.
+    const memoryA = defaultAdoptionStagingRoot(":memory:");
+    const memoryB = defaultAdoptionStagingRoot(":memory:");
+    expect(memoryA).not.toBe(memoryB);
+    expect(memoryA).not.toBe(durableA);
+  }, 300_000);
 
   it("sweeps an adoption staging tree left behind by a hard crash", async () => {
     // A crash cannot run the `finally` that removes the isolated tree, so every hard kill

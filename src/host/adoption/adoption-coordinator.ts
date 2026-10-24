@@ -78,7 +78,17 @@ export class AdoptionCoordinator {
     const unfinished = this.#unfinishedAdoption(projectId);
     return await this.deps.coordinator.controlledWrite(projectId, correlationId, async () => {
       if (unfinished !== undefined) {
-        await this.#takeOverRecovery(unfinished, correlationId);
+        // Re-read inside the queue slot. The pre-read named the transaction the gate was
+        // told to ignore; if the pending set has changed since, the write must not proceed
+        // on a project that has another unfinished transaction.
+        const pending = this.#unfinishedAdoption(projectId);
+        if (pending !== undefined && pending.transaction_id !== unfinished.transaction_id) {
+          throw new HttpError(423, "PROJECT_ATTENTION_REQUIRED",
+            "Another unfinished adoption appeared for this project",
+            { transaction_id: pending.transaction_id }, correlationId);
+        }
+        const failure = await this.#takeOverRecovery(unfinished, request, correlationId);
+        if (failure !== undefined) return failure;
       }
       const requestJson = canonicalJson(request);
       const requestDigest = sha256(requestJson);
@@ -258,13 +268,30 @@ export class AdoptionCoordinator {
           try {
             return await this.#recoverTransaction(transactionId, request, requestDigest, correlationId);
           } catch (recoveryError) {
-            if (recoveryError instanceof HttpError && recoveryError.code === "TARGET_LOCKED") {
+            // Four different answers, because four different things can go wrong here and
+            // only one of them is terminal. Latching attention for all of them used to
+            // strand a *recoverable* project: a busy database or a full disk would close
+            // the project for good, with no operator remedy and no retry that could help.
+            //
+            // - a held lock is a live conflict: the client can release it and come back;
+            // - unprovable evidence (423) and a changed fact (428) are terminal, because
+            //   no later attempt can prove them either;
+            // - a conflict (409) means somebody else moved the project: the write simply
+            //   did not happen, and the client retries against fresh facts;
+            // - anything else is transient, and is reported as recoverable so a retry can
+            //   try again.
+            if (recoveryError instanceof HttpError) {
+              if (recoveryError.code === "TARGET_LOCKED") throw recoveryError;
+              if (recoveryError.code === "PROJECT_ATTENTION_REQUIRED"
+                || recoveryError.code === "IMPACT_STALE") {
+                this.deps.coordinator.attention(transactionId, "ADOPTION_RECOVERY_UNPROVABLE",
+                  recoveryError.message);
+              }
               throw recoveryError;
             }
             const reason = recoveryError instanceof Error ? recoveryError.message : String(recoveryError);
-            this.deps.coordinator.attention(transactionId, "ADOPTION_RECOVERY_UNPROVABLE", reason);
-            throw new HttpError(423, "PROJECT_ATTENTION_REQUIRED",
-              "Published adoption source cannot be proven", undefined, correlationId);
+            throw new HttpError(503, "ENGINE_UNAVAILABLE",
+              "The published adoption could not be recovered right now", { reason }, correlationId);
           }
         }
         throw error;
@@ -298,23 +325,54 @@ export class AdoptionCoordinator {
    * recovery that completes commits and returns 200; one that cannot proves nothing and is
    * answered with the same controlled 423, with the source left as it is.
    */
+  /**
+   * Take over an unfinished adoption and drive it to a decision.
+   *
+   * The controlled 423 that gate §7 names — "source=after, waiting for recovery" — is not a
+   * terminal state and writes no idempotency row, so the client's next move is the same key
+   * again. That request has to *recover* first, not be answered by the generic gate. A
+   * recovery that completes commits and returns 200; one that cannot proves nothing and is
+   * answered with the same controlled 423, with the source left as it is.
+   *
+   * When the recovery concludes that the old write was *abandoned*, the answer is the
+   * canonical `ControlledWriteFailureResponseV1` — byte for byte the body the durable replay
+   * of that key returns. It used to be thrown as a generic `HttpError`, which the route
+   * renders as `{code,message,correlation_id}`: the same key then had two different public
+   * bodies, and a client validating against the frozen failure contract rejected the first
+   * and accepted the second.
+   *
+   * A request with a *new* key is not answered with the old transaction's failure — that
+   * failure belongs to the old key — and is allowed to start its own attempt.
+   */
   async #takeOverRecovery(unfinished: { transaction_id: string; request_hash: string },
-    correlationId: string): Promise<void> {
+    request: AdoptRequestV1, correlationId: string): Promise<ControlledWriteFailureResponseV1 | undefined> {
+    const row = this.deps.revisions.projectTransaction(unfinished.transaction_id);
     let value: unknown;
     try {
-      value = JSON.parse(this.deps.revisions.projectTransaction(unfinished.transaction_id)?.request_json ?? "null") as unknown;
-    } catch { return; }
+      value = JSON.parse(row?.request_json ?? "null") as unknown;
+    } catch {
+      throw new HttpError(423, "PROJECT_ATTENTION_REQUIRED",
+        "The unfinished adoption's request cannot be read, so it cannot be recovered",
+        { transaction_id: unfinished.transaction_id }, correlationId);
+    }
     const parsed = validateAdoptRequest(value);
-    if (!parsed.ok) return;
+    if (!parsed.ok) {
+      // Silently giving up here would leave the old row `prepared` forever, and the next
+      // boot would refuse the project for it. The row is latched instead, so it is a decided
+      // state rather than one the generic recovery would strand.
+      this.deps.coordinator.attention(unfinished.transaction_id, "ADOPTION_REQUEST_UNREADABLE",
+        "the unfinished adoption's request does not satisfy its contract");
+      throw new HttpError(423, "PROJECT_ATTENTION_REQUIRED",
+        "The unfinished adoption's request cannot be recovered",
+        { transaction_id: unfinished.transaction_id }, correlationId);
+    }
     const outcome = await this.#recoverTransaction(unfinished.transaction_id, parsed.value,
       unfinished.request_hash, correlationId);
-    if (outcome.status === "aborted") {
-      // The recovery decided the write was abandoned. The client asked for a *new* attempt
-      // with its own key, so this one is refused with the recorded failure rather than
-      // silently continued.
-      throw new HttpError(outcome.error.http_status, outcome.error.code, outcome.error.message,
-        outcome.error.details as Record<string, unknown> | undefined, correlationId);
+    if (outcome.status === "aborted"
+      && parsed.value.idempotency_key === request.idempotency_key) {
+      return outcome;
     }
+    return undefined;
   }
 
   /**
@@ -343,9 +401,22 @@ export class AdoptionCoordinator {
         continue;
       }
       let value: unknown;
-      try { value = JSON.parse(transaction.request_json); } catch { continue; }
+      try { value = JSON.parse(transaction.request_json); } catch {
+        // The row is M4B's, but its request cannot be read. Leaving it for the generic
+        // recovery would move it to `recovering`, which has no legal outgoing edge — a row
+        // with no way out, which TX-08B forbids. Latching it is a decided state.
+        this.deps.coordinator.attention(transaction.transaction_id, "ADOPTION_REQUEST_UNREADABLE",
+          "the unfinished adoption's request cannot be read");
+        report.attention += 1;
+        continue;
+      }
       const parsed = validateAdoptRequest(value);
-      if (!parsed.ok) continue;
+      if (!parsed.ok) {
+        this.deps.coordinator.attention(transaction.transaction_id, "ADOPTION_REQUEST_UNREADABLE",
+          "the unfinished adoption's request does not satisfy its contract");
+        report.attention += 1;
+        continue;
+      }
       try {
         await this.deps.coordinator.controlledRecovery(transaction.project_id, transaction.transaction_id,
           transaction.correlation_id, async () => {
@@ -356,11 +427,12 @@ export class AdoptionCoordinator {
             else report.aborted += 1;
           } catch (error) {
             const current = this.deps.revisions.projectTransaction(transaction.transaction_id);
-            // A lock held right now is a live conflict, not an unprovable fact: it will
-            // clear, so latching terminal attention would close a project that a later boot
-            // could have recovered. Anything else is evidence that cannot be proven.
-            const liveConflict = error instanceof HttpError && error.code === "TARGET_LOCKED";
-            if (!liveConflict && current !== undefined && current.state !== "attention") {
+            // Only evidence that cannot be proven, or a fact that changed, is terminal. A
+            // held lock will clear and a transient failure may not reproduce, so latching
+            // either of them closes a project a later boot could have recovered.
+            const terminal = error instanceof HttpError
+              && (error.code === "PROJECT_ATTENTION_REQUIRED" || error.code === "IMPACT_STALE");
+            if (terminal && current !== undefined && current.state !== "attention") {
               this.deps.coordinator.attention(transaction.transaction_id, "ADOPTION_RECOVERY_UNPROVABLE",
                 error instanceof Error ? error.message : String(error));
             }

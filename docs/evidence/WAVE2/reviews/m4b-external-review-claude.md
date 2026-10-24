@@ -113,4 +113,39 @@ M4B 证据捕获提交：`0da4ba23d35f3371ce89572529f4ba20151ca4d8`
 > 本节由修复完成后的**全新独立上下文**复审填写。该上下文没有参与第一轮审查，也没有参与
 > 修复，因此它对修复后代码的结论不来自任何既有的结论。
 
-见下文（由复审上下文产出）。
+**复审上下文**：`45c3880`，全新独立上下文，未参与第一轮审查，也未参与修复。
+
+**裁决：NOT PASS —— BLOCKER = 0，MAJOR = 2。**
+
+复审确认八项修复**全部真实且在正确的层**：attention 跳过与 try/catch 包裹（`:340-377`）、
+在线 423 与 terminal attention 的区分（`:225-268`）、同 key 接管（`:78`+`:81`，且 `_projectHasPending`
+只排除被指定的那一行、另一条 pending 仍会挡住）、六个发布前缝隙与重启收敛、锁检查先于 currentness
+（在线 `:176-181`、恢复 `:448-452`，且所有候选都是 `lock_type:"visual"`，所以 narration 不会过度阻塞）、
+`outbox_event_id` 对着真实行断言、`frame_count` 改为采用源自身长度、生产写入路径真的执行校验。
+复审还独立验证了「接管不会二次提交、不会提交错误的 transaction」：revision CAS 与
+`prepared→committed` CAS 在同一事务里，接管复用的是**旧行**自己的 request/hash。
+
+复审发现的两项 MAJOR：
+
+| # | 摘要 | 处置 |
+|---|---|---|
+| MAJOR-1 | 接管的 `aborted` 结果被当作普通 `HttpError` 抛出，路由渲染成通用 `{code,message,correlation_id}`；于是**同一个 key 的首次回答与持久重放是两个不同的公开 body**，违反门 §7「route 首次及重放均用 error.http_status 返回完全相同的公开 JSON body」 | 已修：接管返回 canonical `ControlledWriteFailureResponseV1`；新增回归测试断言首次回答与持久重放逐字节相同 |
+| MAJOR-2 | 修复声称「staging root 变为 per-Host」，实际默认路径是 checkout 级固定路径，同一台机器上任何 Host 的启动清扫都可能删掉另一个 Host 正在使用的树 | 已修：默认 staging root 改为**按数据库派生**（durable 数据库 → 跨重启稳定；内存数据库 → 每进程私有），并新增回归测试 |
+
+复审另记录 9 项 MINOR（D3 新 key 后的 409 不写幂等行；D4 attention latch 过宽；D5 未终结行的读取在队列之外；
+D6 通用恢复可能把 M4B 行挪进无出边的 `recovering`；D7 接管在旧请求不可读时静默放弃；D8 插入路径重复；
+D9 一个测试没有显式 timeout）——**全部已修**，其中 D4 的修法是区分四种失败：锁冲突是活的、不可证明的证据与
+改变的事实是终态、冲突只是没写成、其余是瞬时的（503 可重试），不再一律 latch 成终态。
+
+复审记录的证据过度声明同样已改：TX-08B 原来声称 10 个边界而只有 9 个有测试（现补上 `after_active_inspect`
+的测试）；TX-11B 原来暗示渲染了采用前后的两个源（实际两次渲染都是采用**后**的源，已改写）；staging root 的
+per-Host 声明已由实现取代。
+
+**第二轮裁决：BLOCKER=0、MAJOR=2 → 仍不满足 M4B 外审 PASS 的条件。**
+修复后再次捕获并再次由新的独立上下文复审，见第 6 节。
+
+## 6. 第二轮复审与最终裁决
+
+> 本节由**第二个**全新独立上下文复审填写。该上下文同样没有参与第一轮审查或任何修复。
+
+见下。

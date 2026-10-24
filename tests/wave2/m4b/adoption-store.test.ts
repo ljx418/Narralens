@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { AdoptionStore } from "../../../src/host/adoption/adoption-store.js";
+import { AdoptionStore, insertProjectionFact } from "../../../src/host/adoption/adoption-store.js";
 import { RevisionStore } from "../../../src/host/projects/revision-store.js";
 
 const sha = (character: string) => character.repeat(64);
@@ -64,7 +64,7 @@ describe("M4B adoption durable facts", () => {
       staged_source_digest: sha("c"), snapshot_id: "snapshot_after", installed_assets: [],
       film_temp_token: ".narralens-txn/txn_adopt/film.html", publish_intent_created_at: new Date(0).toISOString(),
     });
-    adoption.insertProjectionFact({
+    insertProjectionFact(revisions.compose((handle) => handle), {
       project_id: "target", snapshot_id: "snapshot_after", migration_id: "migration_1",
       source_digest: sha("c"), engine_upstream_sha: sha("e"), roots: ["film.html", "assets/abc/source.mp4"],
       subtitles: [{ subtitle_id: "sub_1", path: "captions.vtt" }], frame_count: 900,

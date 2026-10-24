@@ -66,6 +66,23 @@ export function assertProjectionFact(fact: OpenFilmProjectionFact): void {
   for (const subtitle of subtitles) assertToken(subtitle.path, "subtitle_path");
 }
 
+/**
+ * The one insert for `openfilm_projection_fact`.
+ *
+ * It lives here so there is a single writer: the production path calls it from inside
+ * `RevisionStore.commitAdoption`'s open transaction, and the validation runs first, so the
+ * checks cannot be bypassed by a second copy of the statement.
+ */
+export function insertProjectionFact(db: DatabaseSync, fact: OpenFilmProjectionFact): void {
+  assertProjectionFact(fact);
+  db.prepare(`INSERT INTO openfilm_projection_fact(
+    project_id, snapshot_id, migration_id, source_digest, engine_upstream_sha,
+    roots_json, subtitles_json, frame_count, transaction_id) VALUES(?,?,?,?,?,?,?,?,?)`)
+    .run(fact.project_id, fact.snapshot_id, fact.migration_id, fact.source_digest,
+      fact.engine_upstream_sha, canonicalJson([...fact.roots]), canonicalJson([...fact.subtitles]),
+      fact.frame_count, fact.transaction_id);
+}
+
 export class AdoptionStore {
   readonly #db: DatabaseSync;
   readonly #revisions: RevisionStore;
@@ -153,17 +170,6 @@ export class AdoptionStore {
       film_temp_token: String(row.film_temp_token),
       publish_intent_created_at: String(row.publish_intent_created_at),
     };
-  }
-
-  /** Raw insert for RevisionStore.commitAdoption's already-open transaction. */
-  insertProjectionFact(fact: OpenFilmProjectionFact): void {
-    assertProjectionFact(fact);
-    this.#db.prepare(`INSERT INTO openfilm_projection_fact(
-      project_id, snapshot_id, migration_id, source_digest, engine_upstream_sha,
-      roots_json, subtitles_json, frame_count, transaction_id) VALUES(?,?,?,?,?,?,?,?,?)`)
-      .run(fact.project_id, fact.snapshot_id, fact.migration_id, fact.source_digest,
-        fact.engine_upstream_sha, canonicalJson([...fact.roots]), canonicalJson([...fact.subtitles]),
-        fact.frame_count, fact.transaction_id);
   }
 
   projectionFact(snapshotId: string): OpenFilmProjectionFact | undefined {
