@@ -4,6 +4,7 @@ import { JOB_TABLE_DDL, migrateJobKind } from "./job-kind-migration.js";
 import type { ApiError, AssetImportResponse, EditResponse, JobEvent, JobState } from "../../contracts/types.js";
 import type { ControlledWriteFailureResponseV1, ControlledWriteResponseV1 } from "../../contracts/wave2-types.js";
 import { HttpError } from "../api-error.js";
+import { assertProjectionFact } from "../adoption/adoption-store.js";
 
 export type JournalState = "prepared" | "source_validated" | "metadata_committed" | "aborted" | "compensated" | "attention";
 
@@ -504,6 +505,14 @@ export class RevisionStore {
       this.#db.prepare(`INSERT INTO snapshot(snapshot_id, project_id, source_digest, engine, created_at)
         VALUES(?,?,?,'openfilm',?) ON CONFLICT(snapshot_id) DO NOTHING`)
         .run(input.snapshotId, input.projectId, input.sourceDigestAfter, at);
+      // The validated insert, not an inline copy of it. The copy left the checks — token
+      // shape, duplicate roots, frame count — written down and never run.
+      assertProjectionFact({ project_id: input.projectId, snapshot_id: input.snapshotId,
+        migration_id: input.projection.migration_id, source_digest: input.sourceDigestAfter,
+        engine_upstream_sha: input.projection.engine_upstream_sha,
+        roots: JSON.parse(input.projection.roots_json) as string[],
+        subtitles: JSON.parse(input.projection.subtitles_json) as Array<{ subtitle_id: string; path: string }>,
+        frame_count: input.projection.frame_count, transaction_id: input.transactionId });
       this.#db.prepare(`INSERT INTO openfilm_projection_fact(project_id, snapshot_id, migration_id,
         source_digest, engine_upstream_sha, roots_json, subtitles_json, frame_count, transaction_id)
         VALUES(?,?,?,?,?,?,?,?,?)`).run(input.projectId, input.snapshotId, input.projection.migration_id,

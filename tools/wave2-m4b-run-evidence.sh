@@ -69,6 +69,23 @@ printf '%s\n' "$code" > "$LOGS/credential-scan.exit"
 printf '%-24s exit=%s\n' credential-scan "$code"
 [ "$code" -eq 0 ] || overall=1
 
+# The manifest for this capture, produced and checked *inside* the capture. The committed
+# manifest cannot exist yet for a capture that has not been committed, so the capture proves
+# its own evidence is internally consistent and records that proof as a log.
+printf '%s\n' "node tools/wave2-m4b-evidence-manifest.mjs $CAPTURE_SHA $LOGS/manifest.json" > "$LOGS/manifest.cmd"
+node tools/wave2-m4b-evidence-manifest.mjs "$CAPTURE_SHA" "$LOGS/manifest.json" > "$LOGS/manifest.txt" 2>&1
+code=$?
+printf '%s\n' "$code" > "$LOGS/manifest.exit"
+printf '%-24s exit=%s\n' manifest "$code"
+[ "$code" -eq 0 ] || overall=1
+
+printf '%s\n' "node tools/wave2-m4b-evidence-integrity.mjs $LOGS/manifest.json" > "$LOGS/m4b-integrity.cmd"
+node tools/wave2-m4b-evidence-integrity.mjs "$LOGS/manifest.json" > "$LOGS/m4b-integrity.txt" 2>&1
+code=$?
+printf '%s\n' "$code" > "$LOGS/m4b-integrity.exit"
+printf '%-24s exit=%s\n' m4b-integrity "$code"
+[ "$code" -eq 0 ] || overall=1
+
 git status --porcelain > "$LOGS/git-status-after.txt"
 echo "overall=$overall"
 echo "logs=$LOGS"

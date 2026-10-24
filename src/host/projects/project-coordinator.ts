@@ -81,13 +81,22 @@ export class ProjectCoordinator {
   // ── the write gate (plan §8) ────────────────────────────────────────────────────────
 
   /** False means this project must not be written to. Same predicate the store uses. */
-  recoverStatus(projectId: string): boolean {
-    return !this.deps.store.recoveryGate(projectId, 0);
+  recoverStatus(projectId: string, ignoredTransactionId?: string): boolean {
+    return !this.deps.store.recoveryGate(projectId, 0, ignoredTransactionId);
   }
 
-  /** M4B controlled writes share the one project queue and the same recovery gate. */
-  async controlledWrite<T>(projectId: string, correlationId: string, operation: () => Promise<T>): Promise<T> {
-    if (!this.recoverStatus(projectId)) {
+  /**
+   * M4B controlled writes share the one project queue and the same recovery gate.
+   *
+   * `ignoredTransactionId` names the one transaction the caller is about to take over and
+   * recover. The gate ignores it, because a transaction that is itself pending is exactly
+   * what the caller is there to resolve — without that, a same-key retry after a controlled
+   * 423 was answered by this gate instead of by the recovery, and the adoption could not
+   * complete until somebody restarted the Host.
+   */
+  async controlledWrite<T>(projectId: string, correlationId: string, operation: () => Promise<T>,
+    ignoredTransactionId?: string): Promise<T> {
+    if (!this.recoverStatus(projectId, ignoredTransactionId)) {
       throw new HttpError(423, "PROJECT_ATTENTION_REQUIRED", "Project requires recovery before it can be written",
         { attention_reason: this.deps.store.attentionReason(projectId) }, correlationId);
     }

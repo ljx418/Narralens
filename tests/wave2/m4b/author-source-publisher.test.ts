@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdtemp, mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { resolve } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
@@ -70,13 +70,43 @@ describe("M4B AuthorSourcePublisher", () => {
     expect(await readFile(resolve(f.active, "film.html"), "utf8")).toBe(f.after);
   });
 
-  it("fails closed on path escape and corrupted pre-existing content", async () => {
+  it("removes the temporary film when a publish fails, so no half-written source is left behind", async () => {
+    // Gate §7 row 2: the stage and the temp are cleaned up. A `.narralens-<txn>.film.tmp` left
+    // in the active root would be a second copy of the film in the author's source, and the
+    // next publish would find it already there.
+    const f = await fixture();
+    const publisher = new AuthorSourcePublisher({
+      fault: (boundary) => { if (boundary === "film_temp_fsynced") throw new Error("PUBLISH_FAILED"); },
+    });
+    await expect(publisher.publish({ activeRoot: f.active, stagedRoot: f.staged, transactionId: "txn_tmp",
+      filmTempToken: ".narralens-txn_tmp.film.tmp",
+      protectedTokens: ["film.html"], installedAssets: [],
+      expectedFilmBeforeSha256: sha(f.before), expectedFilmAfterSha256: sha(f.after) }))
+      .rejects.toThrow(/PUBLISH_FAILED/u);
+    expect((await readdir(f.active)).filter((name) => name.includes(".film.tmp"))).toEqual([]);
+    // And the film itself is untouched: the failure happened before the rename.
+    expect(await readFile(resolve(f.active, "film.html"), "utf8")).toBe(f.before);
+  });
+
+  it("refuses an asset token that is not content addressed, and corrupted pre-existing content", async () => {
     const f = await fixture();
     const publisher = new AuthorSourcePublisher();
+    // `../escape.mp4` is refused by the *content-addressed token* rule, not by a realpath
+    // containment check: a token that is not `assets/<sha>/source.mp4` never reaches the
+    // join. The name used to say "path escape", which described a check this file never
+    // exercised.
     await expect(publisher.publish({ activeRoot: f.active, stagedRoot: f.staged, transactionId: "txn_4",
       filmTempToken: ".narralens-txn_4.film.tmp",
       protectedTokens: ["film.html"],
       installedAssets: [{ token: "../escape.mp4", sha256: f.digest }],
+      expectedFilmBeforeSha256: sha(f.before), expectedFilmAfterSha256: sha(f.after) }))
+      .rejects.toMatchObject({ status: 422, code: "UNSUPPORTED_EDIT" });
+    // A token that *is* content addressed but whose digest does not match its path is also
+    // refused, and the two are refused for different reasons.
+    await expect(publisher.publish({ activeRoot: f.active, stagedRoot: f.staged, transactionId: "txn_4b",
+      filmTempToken: ".narralens-txn_4b.film.tmp",
+      protectedTokens: ["film.html"],
+      installedAssets: [{ token: `assets/${"0".repeat(64)}/source.mp4`, sha256: f.digest }],
       expectedFilmBeforeSha256: sha(f.before), expectedFilmAfterSha256: sha(f.after) }))
       .rejects.toMatchObject({ status: 422, code: "UNSUPPORTED_EDIT" });
     await mkdir(resolve(f.active, "assets", f.digest), { recursive: true });

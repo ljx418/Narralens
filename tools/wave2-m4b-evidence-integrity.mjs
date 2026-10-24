@@ -4,7 +4,9 @@ import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 const root = resolve(".");
-const manifestPath = resolve(root, "docs/evidence/WAVE2/evidence-manifest-m4b.json");
+// The manifest path is an argument so the capture can check the manifest it produced
+// itself, inside its own log directory, and record that proof as evidence.
+const manifestPath = resolve(root, process.argv[2] ?? "docs/evidence/WAVE2/evidence-manifest-m4b.json");
 const casesPath = resolve(root, "docs/evidence/WAVE2/cases/m4b-cases.json");
 let failures = 0;
 const fail = (message) => { failures += 1; console.error(`FAIL ${message}`); };
@@ -30,7 +32,27 @@ const required = new Set(["TX-01", "TX-02", "TX-03", "TX-04", "TX-05", "TX-06", 
 for (const entry of cases) {
   required.delete(entry.case_id);
   if (entry.status !== "CLOSED") fail(`${entry.case_id} is not CLOSED`);
-  for (const ref of entry.tests ?? []) if (!existsSync(resolve(root, ref))) fail(`missing test reference: ${ref}`);
+  // A reference may be a bare file or `file::test name`. When it names a test, the name has
+  // to exist in that file: a case that points at a test which was renamed or deleted is
+  // exactly the drift this gate exists to catch.
+  for (const ref of entry.tests ?? []) {
+    const [file, ...rest] = String(ref).split("::");
+    if (!existsSync(resolve(root, file))) { fail(`missing test reference: ${ref}`); continue; }
+    const name = rest.join("::").trim();
+    if (name === "") continue;
+    if (name.includes("%s")) continue; // a table-driven case: the file is the evidence
+    const text = readFileSync(resolve(root, file), "utf8");
+    if (text.includes(name)) continue;
+    // A table-driven case: the file holds a template with `%s` and the reference names one
+    // of its rows. The reference has to start with the template's prefix, so it still has to
+    // be a row of *that* table rather than of any test in the file.
+    const templates = [
+      ...[...text.matchAll(/"([^"]*%s[^"]*)"/gu)].map((match) => match[1].split("%s")[0]),
+      ...[...text.matchAll(/`([^`]*\$\{[^`]*`)/gu)].map((match) => match[1].split("${")[0]),
+    ];
+    const matches = templates.some((prefix) => prefix !== "" && name.startsWith(prefix));
+    if (!matches) fail(`test reference names a test that does not exist: ${ref}`);
+  }
 }
 required.size === 0 ? pass("all required M4B cases are directly mapped") : fail(`missing cases: ${[...required].join(",")}`);
 const serverAtCapture = execFileSync("git", ["show", `${manifest.capture_commit}:src/host/server.ts`], { encoding: "utf8", maxBuffer: 16 * 1024 * 1024 });

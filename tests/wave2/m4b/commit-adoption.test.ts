@@ -42,8 +42,17 @@ const input = () => ({ transactionId: "txn_adopt", projectId: "target", previous
 describe("M4B RevisionStore.commitAdoption", () => {
   it("commits revision, pointer, impact, projection, outbox and replay response exactly once", () => {
     const { revisions, operations, db } = harness();
+    // A preceding outbox row, so the committed event's id is *not* 1. Asserting `1` would be
+    // satisfied by a constant, and by a post-hoc lookup — and gate §6 requires the id to be
+    // the row number of the insert that happened inside this very transaction.
+    db.prepare("INSERT INTO outbox(topic, project_id, payload_json, created_at) VALUES('other','target','{}','2026-01-01T00:00:00.000Z')").run();
     const response = revisions.commitAdoption(input());
-    expect(response).toMatchObject({ previous_revision: 4, new_revision: 5, outbox_event_id: 1, status: "committed" });
+    expect(response).toMatchObject({ previous_revision: 4, new_revision: 5, status: "committed" });
+    // The id is the row that carries this transaction's committed event, and no other.
+    const committed = db.prepare("SELECT event_id FROM outbox WHERE payload_json LIKE ?")
+      .get(`%"transaction_id":"txn_adopt"%`) as { event_id?: number } | undefined;
+    expect(response.outbox_event_id).toBe(Number(committed?.event_id));
+    expect(response.outbox_event_id).toBeGreaterThan(1);
     expect(revisions.state("target", 0).revision).toBe(5);
     expect(revisions.activeCommit("target")).toMatchObject({ revision: 5, snapshot_id: "snap_after", source_digest: s("3") });
     expect(revisions.projectTransaction("txn_adopt")?.state).toBe("committed");

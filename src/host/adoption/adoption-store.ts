@@ -49,6 +49,23 @@ function assertToken(value: string, name: string): void {
  * Neither table has a state column. `project_transaction` is the sole state machine; these
  * rows are immutable evidence selected by its transaction/snapshot pointers.
  */
+/**
+ * Validate a projection fact before it is written.
+ *
+ * Exported so the *production* writer validates too. The insert inside
+ * `RevisionStore.commitAdoption` used to be an inline copy of this statement, which made
+ * the validated path dead code: the checks existed, and nothing ran them.
+ */
+export function assertProjectionFact(fact: OpenFilmProjectionFact): void {
+  assertSha(fact.source_digest, "source_digest");
+  if (!Number.isSafeInteger(fact.frame_count) || fact.frame_count <= 0) throw new Error("INVALID_FRAME_COUNT");
+  const roots = [...fact.roots];
+  for (const root of roots) assertToken(root, "projection_root");
+  if (new Set(roots).size !== roots.length) throw new Error("DUPLICATE_PROJECTION_ROOT");
+  const subtitles = [...fact.subtitles];
+  for (const subtitle of subtitles) assertToken(subtitle.path, "subtitle_path");
+}
+
 export class AdoptionStore {
   readonly #db: DatabaseSync;
   readonly #revisions: RevisionStore;
@@ -140,18 +157,12 @@ export class AdoptionStore {
 
   /** Raw insert for RevisionStore.commitAdoption's already-open transaction. */
   insertProjectionFact(fact: OpenFilmProjectionFact): void {
-    assertSha(fact.source_digest, "source_digest");
-    if (!Number.isSafeInteger(fact.frame_count) || fact.frame_count <= 0) throw new Error("INVALID_FRAME_COUNT");
-    const roots = [...fact.roots];
-    for (const root of roots) assertToken(root, "projection_root");
-    if (new Set(roots).size !== roots.length) throw new Error("DUPLICATE_PROJECTION_ROOT");
-    const subtitles = [...fact.subtitles];
-    for (const subtitle of subtitles) assertToken(subtitle.path, "subtitle_path");
+    assertProjectionFact(fact);
     this.#db.prepare(`INSERT INTO openfilm_projection_fact(
       project_id, snapshot_id, migration_id, source_digest, engine_upstream_sha,
       roots_json, subtitles_json, frame_count, transaction_id) VALUES(?,?,?,?,?,?,?,?,?)`)
       .run(fact.project_id, fact.snapshot_id, fact.migration_id, fact.source_digest,
-        fact.engine_upstream_sha, canonicalJson(roots), canonicalJson(subtitles),
+        fact.engine_upstream_sha, canonicalJson([...fact.roots]), canonicalJson([...fact.subtitles]),
         fact.frame_count, fact.transaction_id);
   }
 

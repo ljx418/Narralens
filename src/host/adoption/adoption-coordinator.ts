@@ -1,5 +1,5 @@
 import { createHash, randomUUID } from "node:crypto";
-import { copyFile, mkdir, mkdtemp, readFile, realpath, rm } from "node:fs/promises";
+import { copyFile, mkdir, mkdtemp, readdir, readFile, realpath, rm } from "node:fs/promises";
 import { dirname, join, resolve, sep } from "node:path";
 import type { AdoptRequestV1, ControlledWriteFailureResponseV1, ControlledWriteResponseV1,
   ImpactSpecV1, MaterializationV1 } from "../../contracts/wave2-types.js";
@@ -39,8 +39,19 @@ export interface AdoptionCoordinatorDeps {
   readonly adoption: AdoptionStore;
   readonly publisher: AuthorSourcePublisher;
   readonly stagingRoot: string;
-  /** Test-only crash seam; production composition omits it. */
-  readonly fault?: (boundary: "after_prepared" | "after_published" | "after_committed") => void | Promise<void>;
+  /**
+   * Test-only crash seams; production composition omits them.
+   *
+   * Gate §7 names the boundaries the crash matrix has to cover independently: received,
+   * preconditions_checked, after plan, after stage, after validate, either side of the
+   * snapshot rename, either side of the asset install, after the film temp fsync, either
+   * side of the film rename, after the active inspect, either side of the database commit,
+   * either side of the outbox insert, and before the response. The database-side ones are
+   * covered by `commitAdoption`'s single transaction and its rollback matrix rather than by
+   * a seam here; everything before the commit has its own seam, so the pre-publish abort
+   * rule is exercised rather than merely present.
+   */
+  readonly fault?: (boundary: AdoptionFaultBoundary) => void | Promise<void>;
 }
 
 /** Test-only marker that models process loss: online compensation must not run. */
@@ -51,11 +62,24 @@ const sha256 = (bytes: Uint8Array | string) => createHash("sha256").update(bytes
 const assetToken = (digest: string) => `assets/${digest}/source.mp4`;
 
 /** M4B's sole orchestration entry. It owns no source or database writer of its own. */
+export type AdoptionFaultBoundary =
+  | "after_received" | "after_preconditions" | "after_plan" | "after_stage" | "after_validate"
+  | "after_snapshot_publish" | "after_prepared" | "after_published" | "after_active_inspect"
+  | "after_committed";
+
 export class AdoptionCoordinator {
   constructor(private readonly deps: AdoptionCoordinatorDeps) {}
 
   async adopt(projectId: string, request: AdoptRequestV1, correlationId = randomUUID()): Promise<ControlledWriteResponseV1 | ControlledWriteFailureResponseV1> {
+    // Gate §7: every versioned edit HTTP must complete this project's unfinished M4B
+    // recovery *before* it handles a replay. The unfinished transaction is named up front so
+    // the recovery gate can ignore it — it is the very thing being resolved — while still
+    // refusing a project that another condition has closed.
+    const unfinished = this.#unfinishedAdoption(projectId);
     return await this.deps.coordinator.controlledWrite(projectId, correlationId, async () => {
+      if (unfinished !== undefined) {
+        await this.#takeOverRecovery(unfinished, correlationId);
+      }
       const requestJson = canonicalJson(request);
       const requestDigest = sha256(requestJson);
       const replay = this.deps.idempotency.recall(projectId, OPERATION_KIND, request.idempotency_key);
@@ -92,7 +116,9 @@ export class AdoptionCoordinator {
 
       const transactionId = this.deps.coordinator.beginTransaction({ projectId, kind: "edit",
         requestJson, requestHash: requestDigest, baseRevision: request.base_revision, correlationId });
+      await this.deps.fault?.("after_received");
       this.deps.coordinator.preconditionsChecked(transactionId, view.source_digest);
+      await this.deps.fault?.("after_preconditions");
       await mkdir(this.deps.stagingRoot, { recursive: true });
       const isolated = await mkdtemp(join(this.deps.stagingRoot, "adopt-"));
       try {
@@ -112,19 +138,23 @@ export class AdoptionCoordinator {
           source_digest: view.source_digest }, { edit: decision.edit, native_plan: materialization.native_plan,
           materialization_id: request.materialization_id, rights_digest: materialization.rights_digest,
           impact_hash: request.impact_hash }, ctx);
+        await this.deps.fault?.("after_plan");
         const staged = await resolved.port.stage(plan, absoluteServerPath(isolated), ctx);
         this.deps.coordinator.stage(transactionId);
+        await this.deps.fault?.("after_stage");
         const report = await resolved.port.validate(staged, ctx);
         if (!report.ok || report.source_digest === null || report.source_digest !== staged.source_digest) {
           throw new HttpError(422, "UNSUPPORTED_EDIT", "Staged OpenFilm adoption failed validation",
             { problems: report.problems }, correlationId);
         }
         this.deps.coordinator.validate(transactionId);
+        await this.deps.fault?.("after_validate");
         const stagedRoot = await realpath(join(isolated, staged.isolated_relative_root));
         const previousLayout = await this.deps.projections.layoutFor(view, correlationId);
         const roots = [...new Set([...previousLayout.layout.roots, ...installed.map((asset) => asset.token)])].sort();
         const publishedSnapshot = await this.deps.snapshots.publish({ projectId, engine: "openfilm",
           engineUpstreamSha: view.engine_upstream_sha, sourceRoot: stagedRoot, roots });
+        await this.deps.fault?.("after_snapshot_publish");
         const beforeFilm = sha256(await readFile(join(view.source_root.value, "film.html")));
         const afterFilm = sha256(await readFile(join(stagedRoot, "film.html")));
         const filmTempToken = `.narralens-${transactionId}.film.tmp`;
@@ -136,6 +166,18 @@ export class AdoptionCoordinator {
         await this.deps.fault?.("after_prepared");
 
         // Final, live authorization checks at the publication boundary.
+        //
+        // The lock check comes *first*, and that order is the point. Acquiring a lock moves
+        // the control revision, and the control revision is one of the facts `requireCurrent`
+        // re-reads — so a currentness check first answers a held visual lock as a stale
+        // impact, which is both less specific and less actionable. Checking the locks first
+        // means a visual lock is reported as `TARGET_LOCKED`, and it means the lock check is
+        // the thing under test rather than a line the control check always pre-empts.
+        const lockScope = await this.deps.impact.read(request.impact_id);
+        this.deps.locks.assertUnlocked(projectId, lockScope.affected_ranges.map((range) => ({
+          lock_type: "visual" as const, scope: "shot" as const, target_id: range.clip_id,
+          start_frame: range.start_frame, end_frame_exclusive: range.end_frame_exclusive,
+        })));
         const finalImpact = await this.deps.impact.requireCurrent(request.impact_id);
         const finalMaterialization = await this.deps.materialize.read(request.materialization_id);
         const finalView = await this.deps.resolver.resolveActivated(projectId);
@@ -158,6 +200,7 @@ export class AdoptionCoordinator {
         if (activeProjection.problems.length > 0 || activeProjection.source_digest !== staged.source_digest) {
           throw new HttpError(423, "PROJECT_ATTENTION_REQUIRED", "Published source cannot be proven", undefined, correlationId);
         }
+        await this.deps.fault?.("after_active_inspect");
         const committed = this.deps.revisions.commitAdoption({ transactionId, projectId,
           previousRevision: request.base_revision, expectedSourceDigest: request.expected_source_digest,
           expectedControlRevision: request.control_revision, snapshotId: publishedSnapshot.snapshot_id,
@@ -165,7 +208,11 @@ export class AdoptionCoordinator {
           idempotencyKey: request.idempotency_key, requestDigest,
           projection: { migration_id: view.migration_id, engine_upstream_sha: view.engine_upstream_sha,
             roots_json: canonicalJson(roots), subtitles_json: canonicalJson(previousLayout.layout.subtitles ?? []),
-            frame_count: view.frame_count }, ledgerRows: stagedInputs.ledgerRows,
+            // The adopted source's *own* length, not the project's. Recording the project's
+            // value made the projection guard a tautology — it compared a copy with the
+            // thing it was copied from, so it could never fail. This way the guard proves
+            // that the adoption did not change the duration, which is a fact worth proving.
+            frame_count: materialization.native_plan.total_frames }, ledgerRows: stagedInputs.ledgerRows,
         });
         await this.deps.fault?.("after_committed");
         return committed;
@@ -178,45 +225,179 @@ export class AdoptionCoordinator {
         if (transaction?.state === "prepared") {
           const fact = this.deps.adoption.adoptionFact(transactionId);
           const current = await this.deps.resolver.resolveActivated(projectId);
-          if (fact !== undefined
-            && sha256(await readFile(join(current.source_root.value, "film.html"))) === fact.source_before_sha256) {
+          const activeFilmSha = fact === undefined ? null
+            : sha256(await readFile(join(current.source_root.value, "film.html")));
+          if (fact !== undefined && activeFilmSha === fact.source_before_sha256) {
+            // Nothing was published: the write can be abandoned cleanly.
             return this.#abort(transactionId, projectId, request, requestDigest, error);
           }
-          return await this.#recoverTransaction(transactionId, request, requestDigest, correlationId);
+          if (fact !== undefined && activeFilmSha !== null && activeFilmSha !== fact.source_after_sha256) {
+            // The active film is neither the bytes we staged nor the bytes we prepared to
+            // publish, and no future boot can prove it either — something outside the Host
+            // changed it. That is a terminal condition, and it is latched *here* with its
+            // reason. Leaving the row `prepared` with an empty `error_code` threw the reason
+            // away and left the next boot to rediscover it from scratch.
+            this.deps.coordinator.attention(transactionId, "ADOPTION_RECOVERY_UNPROVABLE",
+              "Active film matches neither adoption boundary");
+            throw new HttpError(423, "PROJECT_ATTENTION_REQUIRED",
+              "Active film matches neither adoption boundary", undefined, correlationId);
+          }
+          // The active film is the *after* bytes, so the publication happened and only the
+          // database commit is outstanding. Gate §7 fixes the two answers for this state and
+          // they are not interchangeable:
+          //
+          //   - a live conflict (a lock is held right now) is a *controlled* 423: not
+          //     terminal, no idempotency row, and the same key may take the recovery over;
+          //   - evidence that cannot be proven (the impact expired, a snapshot or an asset
+          //     cannot be re-proved) is *terminal attention*: the source stays as it is and
+          //     nobody retries the write automatically.
+          //
+          // `TRANSACTION_FAILED` 500 is reserved for the case where the source is provably
+          // still `before`, so a 500 here would be the gate saying the opposite of what it
+          // means.
+          try {
+            return await this.#recoverTransaction(transactionId, request, requestDigest, correlationId);
+          } catch (recoveryError) {
+            if (recoveryError instanceof HttpError && recoveryError.code === "TARGET_LOCKED") {
+              throw recoveryError;
+            }
+            const reason = recoveryError instanceof Error ? recoveryError.message : String(recoveryError);
+            this.deps.coordinator.attention(transactionId, "ADOPTION_RECOVERY_UNPROVABLE", reason);
+            throw new HttpError(423, "PROJECT_ATTENTION_REQUIRED",
+              "Published adoption source cannot be proven", undefined, correlationId);
+          }
         }
         throw error;
       } finally {
         await rm(isolated, { recursive: true, force: true }).catch(() => undefined);
       }
-    });
+    }, unfinished?.transaction_id);
   }
 
-  /** Runs before generic journal recovery and takes every unfinished M4B row terminal. */
+  /**
+   * The project's one unfinished adoption transaction, if it has one.
+   *
+   * Only `prepared` counts. A row in `received`…`validated` never published anything, and a
+   * row in `attention` is decided; neither is a recovery this request could take over.
+   */
+  #unfinishedAdoption(projectId: string): { transaction_id: string; request_hash: string } | undefined {
+    for (const transaction of this.deps.revisions.projectTransactions(projectId)) {
+      if (transaction.state === "prepared") {
+        return { transaction_id: transaction.transaction_id, request_hash: transaction.request_hash };
+      }
+    }
+    return undefined;
+  }
+
+  /**
+   * Take over an unfinished adoption and drive it to a decision.
+   *
+   * The controlled 423 that gate §7 names — "source=after, waiting for recovery" — is not a
+   * terminal state and writes no idempotency row, so the client's next move is the same key
+   * again. That request has to *recover* first, not be answered by the generic gate. A
+   * recovery that completes commits and returns 200; one that cannot proves nothing and is
+   * answered with the same controlled 423, with the source left as it is.
+   */
+  async #takeOverRecovery(unfinished: { transaction_id: string; request_hash: string },
+    correlationId: string): Promise<void> {
+    let value: unknown;
+    try {
+      value = JSON.parse(this.deps.revisions.projectTransaction(unfinished.transaction_id)?.request_json ?? "null") as unknown;
+    } catch { return; }
+    const parsed = validateAdoptRequest(value);
+    if (!parsed.ok) return;
+    const outcome = await this.#recoverTransaction(unfinished.transaction_id, parsed.value,
+      unfinished.request_hash, correlationId);
+    if (outcome.status === "aborted") {
+      // The recovery decided the write was abandoned. The client asked for a *new* attempt
+      // with its own key, so this one is refused with the recorded failure rather than
+      // silently continued.
+      throw new HttpError(outcome.error.http_status, outcome.error.code, outcome.error.message,
+        outcome.error.details as Record<string, unknown> | undefined, correlationId);
+    }
+  }
+
+  /**
+   * Runs before generic journal recovery and takes every unfinished M4B row terminal.
+   *
+   * Two properties this method has to have, and both were defects:
+   *
+   * - **One blocked project must not stop the Host.** A transaction already in `attention` is
+   *   terminal by the state machine and has nothing left to recover, so it is skipped. And
+   *   the recovery gate's refusal — which is what a latched project produces — is caught
+   *   here rather than allowed to escape. It used to escape, and it escaped `listen()` with
+   *   it, so a single latched project took every other project in the deployment down with
+   *   it: the Host could not start a second time.
+   * - **An unprovable boundary must be decided, not rediscovered.** When the active film
+   *   matches neither the pre-publication nor the post-publication bytes, no future boot can
+   *   prove it either. That is latched as terminal attention with its reason, instead of
+   *   leaving the row `prepared` with an empty `error_code` for the next boot to trip over.
+   */
   async recoverOnStart(): Promise<{ recovered: number; aborted: number; attention: number }> {
     const report = { recovered: 0, aborted: 0, attention: 0 };
+    await this.#sweepOrphanedStaging();
     for (const transaction of this.deps.revisions.incompleteTransactions()) {
+      if (transaction.state === "attention") {
+        // Terminal by the state machine: there is no outgoing edge and nothing to recover.
+        report.attention += 1;
+        continue;
+      }
       let value: unknown;
       try { value = JSON.parse(transaction.request_json); } catch { continue; }
       const parsed = validateAdoptRequest(value);
       if (!parsed.ok) continue;
-      await this.deps.coordinator.controlledRecovery(transaction.project_id, transaction.transaction_id,
-        transaction.correlation_id, async () => {
-        try {
-          const outcome = await this.#recoverTransaction(transaction.transaction_id, parsed.value,
-            transaction.request_hash, transaction.correlation_id);
-          if (outcome.status === "committed") report.recovered += 1;
-          else report.aborted += 1;
-        } catch (error) {
-          const current = this.deps.revisions.projectTransaction(transaction.transaction_id);
-          if (current !== undefined && current.state !== "attention") {
-            this.deps.coordinator.attention(transaction.transaction_id, "ADOPTION_RECOVERY_UNPROVABLE",
-              error instanceof Error ? error.message : String(error));
+      try {
+        await this.deps.coordinator.controlledRecovery(transaction.project_id, transaction.transaction_id,
+          transaction.correlation_id, async () => {
+          try {
+            const outcome = await this.#recoverTransaction(transaction.transaction_id, parsed.value,
+              transaction.request_hash, transaction.correlation_id);
+            if (outcome.status === "committed") report.recovered += 1;
+            else report.aborted += 1;
+          } catch (error) {
+            const current = this.deps.revisions.projectTransaction(transaction.transaction_id);
+            // A lock held right now is a live conflict, not an unprovable fact: it will
+            // clear, so latching terminal attention would close a project that a later boot
+            // could have recovered. Anything else is evidence that cannot be proven.
+            const liveConflict = error instanceof HttpError && error.code === "TARGET_LOCKED";
+            if (!liveConflict && current !== undefined && current.state !== "attention") {
+              this.deps.coordinator.attention(transaction.transaction_id, "ADOPTION_RECOVERY_UNPROVABLE",
+                error instanceof Error ? error.message : String(error));
+            }
+            report.attention += 1;
           }
-          report.attention += 1;
-        }
-      });
+        });
+      } catch (error) {
+        // The recovery gate refused: something else is in the way for this project. That is
+        // this transaction's problem to wait for, not a reason to refuse to serve the rest
+        // of the deployment, and not a reason to throw out of startup.
+        report.attention += 1;
+        this.deps.coordinator.attentionForProject(transaction.project_id, transaction.transaction_id,
+          "ADOPTION_RECOVERY_BLOCKED", error instanceof Error ? error.message : String(error));
+      }
     }
     return report;
+  }
+
+  /**
+   * Remove adoption staging trees left behind by a process that died.
+   *
+   * A crash cannot run the `finally` that removes the isolated tree, so every hard kill left
+   * a full copy of the source plus its input media on disk with nothing that would ever
+   * reclaim it — the staging path is not in the adoption fact, which is immutable. The
+   * sweep runs at startup, when no adoption of this process is in flight, so every
+   * `adopt-*` directory under the staging root is by definition an orphan of a previous
+   * process. Under the frozen "one Host, one database" architecture there is no second
+   * process whose in-flight tree this could delete.
+   */
+  async #sweepOrphanedStaging(): Promise<void> {
+    let entries: string[];
+    try { entries = await readdir(this.deps.stagingRoot); }
+    catch { return; }
+    for (const entry of entries) {
+      if (!entry.startsWith("adopt-")) continue;
+      await rm(join(this.deps.stagingRoot, entry), { recursive: true, force: true }).catch(() => undefined);
+    }
   }
 
   #abort(transactionId: string, projectId: string, request: AdoptRequestV1, requestDigest: string,
@@ -255,6 +436,20 @@ export class AdoptionCoordinator {
     if (activeFilmSha !== fact.source_after_sha256) {
       throw new HttpError(423, "PROJECT_ATTENTION_REQUIRED", "Active film matches neither adoption boundary");
     }
+    // The lock check comes before the recovery-current check, for the same reason it does in
+    // the online path: acquiring a lock moves the control revision, and the control revision
+    // is one of the facts the recovery-current check re-reads. A currentness check first would
+    // answer a held visual lock as a stale impact and would never reach the lock check at all.
+    //
+    // It also decides the two different answers gate §7 wants for "source=after". A held lock
+    // is a *live* conflict — the client can release it and retry, so it is a controlled 423
+    // and the transaction stays `prepared`. An impact that expired or a fact that moved is
+    // terminal, and the recovery-current check below is what says so.
+    const scope = await this.deps.impact.readScope(request.impact_id);
+    this.deps.locks.assertUnlocked(transaction.project_id, scope.affected_ranges.map((range) => ({
+      lock_type: "visual" as const, scope: "shot" as const, target_id: range.clip_id,
+      start_frame: range.start_frame, end_frame_exclusive: range.end_frame_exclusive,
+    })));
     const impact = await this.deps.impact.requirePreparedRecoveryCurrent(transactionId,
       request.impact_id, request.impact_hash, fact.publish_intent_created_at);
     const materialization = await this.deps.materialize.read(request.materialization_id);
@@ -291,7 +486,8 @@ export class AdoptionCoordinator {
       idempotencyKey: request.idempotency_key, requestDigest,
       projection: { migration_id: view.migration_id, engine_upstream_sha: view.engine_upstream_sha,
         roots_json: canonicalJson(roots), subtitles_json: canonicalJson(previous.layout.subtitles ?? []),
-        frame_count: view.frame_count }, ledgerRows,
+        // The adopted source's own length, for the same reason as the online path.
+        frame_count: materialization.native_plan?.total_frames ?? view.frame_count }, ledgerRows,
     });
   }
 

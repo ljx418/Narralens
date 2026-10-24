@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { execFile } from "node:child_process";
-import { readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, readdir, writeFile } from "node:fs/promises";
 import { basename, join, resolve } from "node:path";
 import { promisify } from "node:util";
 import { afterEach, describe, expect, it } from "vitest";
@@ -188,6 +188,44 @@ describe("M4B production adoption route", () => {
     expect(blocked.body.code).toBe("PROJECT_ATTENTION_REQUIRED");
   }, 900_000);
 
+  it("starts again after latching terminal attention, because one blocked project must not stop the Host", async () => {
+    // The attention latch is a *project* condition. It used to be a *Host* condition as well:
+    // the M4B recovery re-entered transactions that were already terminal, the recovery gate
+    // then refused them, and that refusal was thrown outside the recovery's own error
+    // handling — so it propagated out of `listen()` and the Host did not start. Every other
+    // project in the deployment went down with it.
+    const running = await start({ adoptionPublishFault: (point) => {
+      if (point === "film_renamed") throw new SimulatedAdoptionCrash("PUBLISH_CRASH:film_renamed");
+    } });
+    hosts.push(running.host); dirs.push(running.base);
+    const prepared = await authorizedAdoption(running, "attention-restart");
+    const sourceRoot = (await running.host.projectResolver.resolveActivated(prepared.projectId)).source_root.value;
+    expect((await postAdoption(running, prepared.projectId, prepared.request)).status).toBe(500);
+    await running.host.close();
+    hosts.splice(hosts.indexOf(running.host), 1);
+    await writeFile(join(sourceRoot, "film.html"), "<!doctype html><title>unprovable</title>\n");
+
+    // First restart: the recovery cannot prove either publication boundary, so it latches
+    // terminal attention on this project.
+    const first = await startOn(running.base);
+    hosts.push(first.host);
+    expect(first.host.revisions.projectsInAttention()).toContain(prepared.projectId);
+    await first.host.close();
+    hosts.splice(hosts.indexOf(first.host), 1);
+
+    // Second restart: the Host must come up. The project is still closed for writes — that
+    // is the point of the attention — but a latched condition on one project is not a reason
+    // to refuse to serve every other project.
+    const second = await startOn(running.base);
+    hosts.push(second.host);
+    expect(second.host.revisions.projectsInAttention()).toContain(prepared.projectId);
+    // And the blocked project is still blocked, rather than silently reopened.
+    const blocked = await postAdoption(second, prepared.projectId,
+      { ...prepared.request, idempotency_key: "m4b-attention-restart-blocked" });
+    expect(blocked.status).toBe(423);
+    expect(blocked.body.code).toBe("PROJECT_ATTENTION_REQUIRED");
+  }, 900_000);
+
   it.each([
     ["asset_temp_fsynced", "aborted", 1, 500],
     ["asset_installed", "aborted", 1, 500],
@@ -228,9 +266,180 @@ describe("M4B production adoption route", () => {
     const prepared = await authorizedAdoption(running, "lock-race");
     projectId = prepared.projectId;
     const rejected = await postAdoption(running, projectId, prepared.request);
-    expect(rejected.status).toBe(428);
+    // `TARGET_LOCKED`, not a stale impact. Acquiring a lock moves the control revision, and
+    // the control revision is one of the facts a currentness check re-reads — so a currentness
+    // check first would answer this as `IMPACT_STALE`, and the lock check would be a line
+    // nothing could ever reach. The lock is now checked first, so it is the lock that is
+    // reported, and removing the lock check changes this answer.
+    expect(rejected.status).toBe(423);
+    expect((rejected.body.error as { code?: string } | undefined)?.code).toBe("TARGET_LOCKED");
     expect(rejected.body).toMatchObject({ status: "aborted", previous_revision: 1, new_revision: 1 });
     expect((await running.host.projectResolver.resolveActivated(projectId)).revision).toBe(1);
     expect(running.host.revisions.projectTransactions(projectId).at(-1)?.state).toBe("aborted");
   }, 900_000);
+
+  it("does not over-block an adoption that preserves narration while a narration lock is held", async () => {
+    // The other half of TX-03. A narration lock is not a lock this adoption touches — the
+    // plan preserves narration — so it must not block it. The lock is taken *before* the
+    // impact, so the control revision has already moved when the impact is computed and the
+    // adoption is prepared against current facts; a lock taken afterwards would move the
+    // control revision under the request, which is drift of a different kind.
+    const running = await start();
+    hosts.push(running.host); dirs.push(running.base);
+    const { projectId, view } = await migrate(running, "m4b-narration-lock");
+    running.host.locks.acquire({ projectId, lockType: "narration", scope: "project",
+      targetId: "", owner: "narrator", reason: "narration pass" }, view.revision);
+    const materialization = await readyMaterialization(running.host, projectId, "m4b-narration-lock",
+      stableThreeClipPlan(running, projectId));
+    const current = await running.host.projectResolver.resolveActivated(projectId);
+    const impact = await postImpact(running, projectId,
+      adoptBody(current, materialization.materialization_id, "m4b-narration-impact"));
+    expect(impact.status, JSON.stringify(impact.body)).toBe(201);
+    // The lock is recorded — `locks_checked` is a snapshot, not a filter — and it did not
+    // block the authorization.
+    expect((impact.body.locks_checked as unknown[]).length).toBe(1);
+
+    const committed = await postAdoption(running, projectId, {
+      format: "narralens.adopt-request@1.0", base_revision: current.revision,
+      expected_source_digest: current.source_digest, control_revision: current.control_revision,
+      materialization_id: materialization.materialization_id,
+      impact_id: impact.body.impact_id, impact_hash: impact.body.impact_hash,
+      approval: { confirmed: true }, idempotency_key: "m4b-narration-adopt",
+    });
+    expect(committed.status, JSON.stringify(committed.body)).toBe(200);
+    expect((await running.host.projectResolver.resolveActivated(projectId)).revision).toBe(2);
+  }, 900_000);
+
+  it.each([
+    ["after_received", "received"],
+    ["after_preconditions", "preconditions_checked"],
+    ["after_plan", "preconditions_checked"],
+    ["after_stage", "staged"],
+    ["after_validate", "validated"],
+    ["after_snapshot_publish", "validated"],
+  ] as const)("converges the pre-publish crash boundary %s to aborted with revision +0", async (boundary, state) => {
+    // Gate §7's first row: before `prepared` the publisher has not been called at all, so the
+    // only legal conclusion is a CAS from the current legal predecessor to `aborted`, with
+    // revision +0, the stage and temp cleaned up, and one idempotency failure response that
+    // replays verbatim. These boundaries were unreachable before: the abort rule could only
+    // be entered from `after_prepared`, where the row was already `prepared`.
+    const running = await start({ adoptionFault: (point) => {
+      if (point === boundary) throw new SimulatedAdoptionCrash(`PUBLISH_CRASH:${boundary}`);
+    } });
+    hosts.push(running.host); dirs.push(running.base);
+    const prepared = await authorizedAdoption(running, `pre-${boundary}`);
+    // A crash is a crash: the process dies where it died, so the row is still in its
+    // pre-publish state and nothing has been cleaned up. The convergence is the *recovery's*
+    // job, and it happens on the next boot.
+    const crashed = await postAdoption(running, prepared.projectId, prepared.request);
+    expect(crashed.status).toBeGreaterThanOrEqual(400);
+    expect(running.host.revisions.projectTransactions(prepared.projectId).at(-1)?.state).toBe(state);
+    await running.host.close();
+    hosts.splice(hosts.indexOf(running.host), 1);
+
+    const restarted = await startOn(running.base);
+    hosts.push(restarted.host);
+    const transaction = restarted.host.revisions.projectTransactions(prepared.projectId).at(-1);
+    expect(transaction?.state).toBe("aborted");
+    expect((await restarted.host.projectResolver.resolveActivated(prepared.projectId)).revision).toBe(1);
+    // No staging tree and no temp file survive the recovery.
+    expect(await readdir(join(running.base, "adoption-stage")).catch(() => [])).toEqual([]);
+    const sourceRoot = (await restarted.host.projectResolver.resolveActivated(prepared.projectId)).source_root.value;
+    expect((await readdir(sourceRoot)).filter((name) => name.includes(".film.tmp"))).toEqual([]);
+  }, 900_000);
+
+  it("records the source=after / DB-not-committed transition state field by field", async () => {
+    // M4B-NW names this transition state specifically: the author source has been replaced,
+    // the database commit has not happened, and every other business fact must still be
+    // exactly where it was. It is the state a reader of the evidence has to be able to
+    // reconstruct, and the state a client sees as a controlled failure rather than a success.
+    const running = await start({ adoptionFault: (point) => {
+      if (point === "after_published") throw new SimulatedAdoptionCrash("PUBLISH_CRASH:after_published");
+    } });
+    hosts.push(running.host); dirs.push(running.base);
+    const prepared = await authorizedAdoption(running, "nw-transition");
+    const sourceRoot = (await running.host.projectResolver.resolveActivated(prepared.projectId)).source_root.value;
+    const filmBefore = await readFile(join(sourceRoot, "film.html"), "utf8");
+
+    const crashed = await postAdoption(running, prepared.projectId, prepared.request);
+    expect(crashed.status).toBeGreaterThanOrEqual(400);
+    // The source *was* replaced: the author source is already the adopted one.
+    const filmAfter = await readFile(join(sourceRoot, "film.html"), "utf8");
+    expect(filmAfter).not.toBe(filmBefore);
+
+    // And nothing else moved. Every one of these is a separate table, read directly.
+    const db = running.host.revisions.compose((handle) => handle);
+    expect((db.prepare("SELECT revision FROM project_state WHERE project_id=?").get(prepared.projectId) as { revision: number }).revision).toBe(1);
+    expect((db.prepare("SELECT snapshot_id, revision FROM active_commit WHERE project_id=?").get(prepared.projectId) as { snapshot_id: string }).snapshot_id)
+      .not.toBe("snap_after");
+    expect((db.prepare("SELECT count(*) AS n FROM outbox WHERE project_id=?").get(prepared.projectId) as { n: number }).n).toBe(0);
+    expect((db.prepare("SELECT count(*) AS n FROM operation_idempotency WHERE project_id=? AND operation_kind=?")
+      .get(prepared.projectId, "controlled_write.adopt_materialization") as { n: number }).n).toBe(0);
+    expect((db.prepare("SELECT state FROM impact WHERE project_id=?").get(prepared.projectId) as { state: string }).state).toBe("active");
+    expect(running.host.revisions.projectTransactions(prepared.projectId).at(-1)?.state).toBe("prepared");
+    // The ledger is untouched: adoption adds rows only inside the commit transaction.
+    expect((db.prepare("SELECT count(*) AS n FROM migrated_asset WHERE project_id=? AND provenance='adoption'")
+      .get(prepared.projectId) as { n: number }).n).toBe(0);
+
+    // The same key takes the recovery over and finishes it. The gate is explicit that the
+    // request must not be answered by the generic "project requires recovery" gate, and that a
+    // temporary 423 must not be frozen into a permanent replay.
+    const retried = await postAdoption(running, prepared.projectId, prepared.request);
+    expect(retried.status, JSON.stringify(retried.body)).toBe(200);
+    expect(retried.body).toMatchObject({ status: "committed", previous_revision: 1, new_revision: 2 });
+    expect((await running.host.projectResolver.resolveActivated(prepared.projectId)).revision).toBe(2);
+  }, 900_000);
+
+  it("answers a visual lock held during recovery with a controlled 423 and nothing committed", async () => {
+    // The other half of TX-03 in the recovery path. A held visual lock is a *live* conflict:
+    // the client can release it and retry, so the answer is a controlled 423 and the
+    // transaction stays `prepared` — not terminal attention, and never a guess that the write
+    // succeeded. The source stays as it was published, because nothing may roll it back
+    // without proof.
+    const running = await start({ adoptionFault: (point) => {
+      if (point === "after_published") throw new SimulatedAdoptionCrash("PUBLISH_CRASH:after_published");
+    } });
+    hosts.push(running.host); dirs.push(running.base);
+    const prepared = await authorizedAdoption(running, "nw-lock-recovery");
+    expect((await postAdoption(running, prepared.projectId, prepared.request)).status).toBeGreaterThanOrEqual(400);
+
+    // The lock is taken before the retry, so the recovery is the thing that has to refuse it.
+    running.host.locks.acquire({ projectId: prepared.projectId, lockType: "visual", scope: "shot",
+      targetId: "shot-002", startFrame: 300, endFrameExclusive: 600, owner: "editor", reason: "editing" },
+    prepared.view.revision);
+
+    const retried = await postAdoption(running, prepared.projectId, prepared.request);
+    expect(retried.status, JSON.stringify(retried.body)).toBe(423);
+    // Nothing was committed: the revision, the pointer and the impact are where they were.
+    expect((await running.host.projectResolver.resolveActivated(prepared.projectId)).revision).toBe(1);
+    const db = running.host.revisions.compose((handle) => handle);
+    // Only the *commit* event counts here. A lock acquisition writes its own `lock.changed`
+    // event, which is not the adoption and must not be mistaken for one.
+    expect((db.prepare("SELECT count(*) AS n FROM outbox WHERE project_id=? AND topic='project.committed'")
+      .get(prepared.projectId) as { n: number }).n).toBe(0);
+    expect((db.prepare("SELECT state FROM impact WHERE project_id=?").get(prepared.projectId) as { state: string }).state).toBe("active");
+  }, 900_000);
+
+  it("sweeps an adoption staging tree left behind by a hard crash", async () => {
+    // A crash cannot run the `finally` that removes the isolated tree, so every hard kill
+    // left a full copy of the source plus its input media on disk with nothing that would
+    // ever reclaim it. The sweep runs at startup, where no adoption of this process is in
+    // flight, so every `adopt-*` directory under the staging root is an orphan.
+    const running = await start();
+    hosts.push(running.host); dirs.push(running.base);
+    const staging = join(running.base, "adoption-stage");
+    const orphan = join(staging, "adopt-orphaned");
+    await mkdir(orphan, { recursive: true });
+    await writeFile(join(orphan, "film.html"), "<!doctype html><title>orphan</title>\n");
+    // Something that is not an adoption staging tree is left alone.
+    const other = join(staging, "keep-me");
+    await mkdir(other, { recursive: true });
+    await running.host.close();
+    hosts.splice(hosts.indexOf(running.host), 1);
+
+    const restarted = await startOn(running.base);
+    hosts.push(restarted.host);
+    expect(await readdir(staging).catch(() => [])).not.toContain("adopt-orphaned");
+    expect(await readdir(staging).catch(() => [])).toContain("keep-me");
+  }, 300_000);
 });

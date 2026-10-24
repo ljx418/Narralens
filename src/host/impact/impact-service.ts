@@ -431,6 +431,36 @@ export class ImpactService {
   }
 
   /**
+   * The stored spec, read without re-verifying the project's current facts.
+   *
+   * The lock check needs the *scope* an impact claims — which ranges it says it touches —
+   * before it can decide whether a held lock conflicts. Requiring full currentness first
+   * would answer every lock conflict as a stale impact, because acquiring a lock moves the
+   * control revision and the control revision is one of the facts currentness re-reads. A
+   * held visual lock is a more specific and more actionable answer than "your impact is
+   * stale", so the caller checks the locks first and the facts second.
+   *
+   * The row's own state, hash and TTL are still checked: this is not a way to read a spent
+   * authorization.
+   */
+  async read(impactId: string): Promise<ImpactSpecV1> {
+    return this.#deps.impacts.requireActive(impactId, this.#deps.clock());
+  }
+
+  /**
+   * The scope an impact claims, read without its wall-clock TTL.
+   *
+   * The recovery path has to see which ranges an impact covered even after the wall clock
+   * has passed: the rule is that an impact that was prepared *before* its deadline may still
+   * back a recovery, and `requireActive` would refuse it on the TTL alone. The row's state
+   * and hash are still checked, so this is not a way to read a spent authorization.
+   */
+  async readScope(impactId: string): Promise<ImpactSpecV1> {
+    const row = this.#deps.impacts.require(impactId);
+    return this.#deps.impacts.requireActive(impactId, new Date(Date.parse(row.expires_at) - 1));
+  }
+
+  /**
    * `requireCurrent` for M4B/M4C (ADR-W2.0-004 §4, §5).
    *
    * This is the function that makes an inserted impact honest afterwards. SQLite cannot

@@ -55,7 +55,7 @@ import { HypitEngineAdapter } from "../adapters/hypit/hypit-engine-adapter.js";
 import { HypitReadAdapter } from "../adapters/hypit/hypit-read-adapter.js";
 import { AdoptionStore } from "./adoption/adoption-store.js";
 import { AuthorSourcePublisher } from "./adoption/author-source-publisher.js";
-import { AdoptionCoordinator } from "./adoption/adoption-coordinator.js";
+import { AdoptionCoordinator, type AdoptionFaultBoundary } from "./adoption/adoption-coordinator.js";
 import type { PublishBoundary } from "./adoption/author-source-publisher.js";
 
 const bodyLimit = 65_536;
@@ -177,7 +177,7 @@ interface HostDependencies {
   impactClock?: () => Date;
   /** Test-only race seam; see `ImpactServiceDeps.fault`. */
   impactFault?: (point: string) => Promise<void> | void;
-  adoptionFault?: (boundary: "after_prepared" | "after_published" | "after_committed") => Promise<void> | void;
+  adoptionFault?: (boundary: AdoptionFaultBoundary) => Promise<void> | void;
   adoptionPublishFault?: (boundary: PublishBoundary) => Promise<void> | void;
 }
 

@@ -43,5 +43,9 @@ const manifest = {
     "A film matching neither durable before nor after digest is terminal attention and needs explicit later repair tooling; M4B does not auto-clear it."
   ]
 };
-writeFileSync(resolve(root, "docs/evidence/WAVE2/evidence-manifest-m4b.json"), `${JSON.stringify(manifest, null, 2)}\n`);
+// The output path is an argument so the capture can produce a manifest *inside* its own
+// log directory and check it there, rather than the committed file — which cannot exist yet
+// for a capture that has not been committed.
+const target = resolve(root, process.argv[3] ?? "docs/evidence/WAVE2/evidence-manifest-m4b.json");
+writeFileSync(target, `${JSON.stringify(manifest, null, 2)}\n`);
 console.log(`wrote M4B manifest: commands=${commands.length} cases=${cases.length}`);

@@ -43,11 +43,16 @@ describe("M2.2 fitness: one state machine, no arbitrary state writes", () => {
     // ... AND state=<expected>` and throws unless exactly one row changed, which is the
     // property this rule protects. `transitionFrom`, `markStale` and `quarantine` are M3.1's
     // materialization machine; `transitionBootstrap` is W2.0's asset-ledger bootstrap.
+    const scopedHelpers = new Map<string, string[]>([
+      [resolve(REPO, "src/host/projects/revision-store.ts"), ["commitAdoption", "abortAdoption"]],
+    ]);
     const helpers = ["transition", "advanceJournal", "markRecovering", "#state", "#assetImportState",
       "transitionBootstrap", "transitionFrom", "markStale", "quarantine",
       // M4B's two multi-fact transactions keep the predecessor in the UPDATE predicate
-      // and roll every state/business fact back together.
-      "commitAdoption", "abortAdoption",
+      // and roll every state/business fact back together. They are exempted *by file*, not
+      // by name: exempting the name anywhere would let a method called `commitAdoption` in
+      // any other file escape this rule without anyone noticing.
+      // (See `scopedHelpers` below.)
       // M3's joint recovery: carries the expected state in its WHERE clause and throws
       // unless exactly one row changed, like every other entry here.
       "resumeOrReset"];
@@ -65,6 +70,7 @@ describe("M2.2 fitness: one state machine, no arbitrary state writes", () => {
         const before = text.slice(0, match.index!);
         const enclosing = [...before.matchAll(/^\s{2}(?:async\s+)?(\w+)\s*\(/gmu)].pop()?.[1] ?? "";
         if (helpers.includes(enclosing)) continue;
+        if ((scopedHelpers.get(file) ?? []).includes(enclosing)) continue;
         offenders.push(`${relative(REPO, file)} ${table}: ${assignments.trim().slice(0, 40)} (in ${enclosing || "<top level>"})`);
       }
     }
