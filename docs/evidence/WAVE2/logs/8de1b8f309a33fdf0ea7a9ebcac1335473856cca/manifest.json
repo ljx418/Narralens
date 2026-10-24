@@ -1,0 +1,284 @@
+{
+  "format": "narralens.wave2-evidence-manifest@1",
+  "stage": "M4B",
+  "module": "ControlledAdoption",
+  "capture_commit": "8de1b8f309a33fdf0ea7a9ebcac1335473856cca",
+  "capture_logs": "docs/evidence/WAVE2/logs/8de1b8f309a33fdf0ea7a9ebcac1335473856cca",
+  "captured_at_utc": "2026-10-24T15:21:08Z",
+  "repo_dirty_at_capture": 0,
+  "environment": {
+    "date_utc": "2026-10-24T15:21:08Z",
+    "node": "v22.22.1",
+    "pnpm": "10.33.0",
+    "git_head": "8de1b8f309a33fdf0ea7a9ebcac1335473856cca",
+    "git_branch": "migration/m2.2-coordinator-persistence",
+    "repo_dirty_at_capture": "0",
+    "origin_main": "304c89134fdf9f834f7d69e3f4d5c89a68044c60",
+    "openfilm_upstream": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+    "declaration_ceiling": "M4B_INTERNAL_EVIDENCED",
+    "interaction": "headless,muted,no-window,no-focus-steal,no-network,no-payment"
+  },
+  "origin_main": "304c89134fdf9f834f7d69e3f4d5c89a68044c60",
+  "branch": "migration/m2.2-coordinator-persistence",
+  "commands": [
+    {
+      "name": "build",
+      "command": "corepack pnpm build",
+      "exit": 0,
+      "log": "docs/evidence/WAVE2/logs/8de1b8f309a33fdf0ea7a9ebcac1335473856cca/build.txt",
+      "log_sha256": "9f8260f5eef73c18c7c9a8b5b5269291a107df25ca41ab441db1887eb124e211"
+    },
+    {
+      "name": "check",
+      "command": "corepack pnpm check",
+      "exit": 0,
+      "log": "docs/evidence/WAVE2/logs/8de1b8f309a33fdf0ea7a9ebcac1335473856cca/check.txt",
+      "log_sha256": "4cc7e6c911073e0c88a0d05a459866463327b9dd501cc8d15c1347ff508688f6"
+    },
+    {
+      "name": "contracts",
+      "command": "corepack pnpm test:contracts",
+      "exit": 0,
+      "log": "docs/evidence/WAVE2/logs/8de1b8f309a33fdf0ea7a9ebcac1335473856cca/contracts.txt",
+      "log_sha256": "dcada315088c0633f64bae432286b53e46ef2b63f80bc85cad284f2d8d9c14d8"
+    },
+    {
+      "name": "credential-scan",
+      "command": "NARRALENS_SECRET_SCAN_OUT=docs/evidence/WAVE2/logs/8de1b8f309a33fdf0ea7a9ebcac1335473856cca/credential-scan.json corepack pnpm exec tsx tools/secret-scan.ts",
+      "exit": 0,
+      "log": "docs/evidence/WAVE2/logs/8de1b8f309a33fdf0ea7a9ebcac1335473856cca/credential-scan.txt",
+      "log_sha256": "d3ed70431641380d3415d26e29245cb8a62c61b8b9b44302f8de7951ec709935"
+    },
+    {
+      "name": "m2.1",
+      "command": "corepack pnpm test:m2.1",
+      "exit": 0,
+      "log": "docs/evidence/WAVE2/logs/8de1b8f309a33fdf0ea7a9ebcac1335473856cca/m2.1.txt",
+      "log_sha256": "5c5448c9c5d627f24ca85836ae80ff119ccf05d9a3cfec46ba41afde9793e185"
+    },
+    {
+      "name": "m4a-historical",
+      "command": "corepack pnpm evidence:wave2:m4a:historical",
+      "exit": 0,
+      "log": "docs/evidence/WAVE2/logs/8de1b8f309a33fdf0ea7a9ebcac1335473856cca/m4a-historical.txt",
+      "log_sha256": "a2c821b374a558fae9c5e214ee8c62ef3db687c77d2d46bf97cbaa866749eaea"
+    },
+    {
+      "name": "m4a-integrity",
+      "command": "corepack pnpm evidence:wave2:m4a:integrity",
+      "exit": 1,
+      "log": "docs/evidence/WAVE2/logs/8de1b8f309a33fdf0ea7a9ebcac1335473856cca/m4a-integrity.txt",
+      "log_sha256": "8f1ff8fc34b5c6f8e276b826ac025ca4c68645a7ae61ebc58824f358d8348e34",
+      "expected_failure": true
+    },
+    {
+      "name": "typecheck",
+      "command": "corepack pnpm exec tsc --noEmit",
+      "exit": 0,
+      "log": "docs/evidence/WAVE2/logs/8de1b8f309a33fdf0ea7a9ebcac1335473856cca/typecheck.txt",
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "wave1-historical",
+      "command": "corepack pnpm evidence:wave1:historical",
+      "exit": 0,
+      "log": "docs/evidence/WAVE2/logs/8de1b8f309a33fdf0ea7a9ebcac1335473856cca/wave1-historical.txt",
+      "log_sha256": "0b81fb585f05f08396028ffe96466ee45deda38b890baca1e271d425aebb4f1d"
+    },
+    {
+      "name": "wave1-integrity",
+      "command": "corepack pnpm evidence:wave1:integrity",
+      "exit": 1,
+      "log": "docs/evidence/WAVE2/logs/8de1b8f309a33fdf0ea7a9ebcac1335473856cca/wave1-integrity.txt",
+      "log_sha256": "9dc94745d271d5a30b85961d00497aab463623b52cded88426c87e873f73654b",
+      "expected_failure": true
+    },
+    {
+      "name": "wave2-fitness",
+      "command": "corepack pnpm test:wave2:fitness",
+      "exit": 0,
+      "log": "docs/evidence/WAVE2/logs/8de1b8f309a33fdf0ea7a9ebcac1335473856cca/wave2-fitness.txt",
+      "log_sha256": "42544d0e0f757a7f77c730ef0c9c68ade0441a6f7619afd3c537fca3440b8999"
+    },
+    {
+      "name": "wave2-m3",
+      "command": "corepack pnpm test:wave2:m3",
+      "exit": 0,
+      "log": "docs/evidence/WAVE2/logs/8de1b8f309a33fdf0ea7a9ebcac1335473856cca/wave2-m3.txt",
+      "log_sha256": "6dfd4cecb624ad8eb8842184926bd0dbeca22b8ae2d6223c61fb11871c487881"
+    },
+    {
+      "name": "wave2-m4a",
+      "command": "corepack pnpm test:wave2:m4a",
+      "exit": 0,
+      "log": "docs/evidence/WAVE2/logs/8de1b8f309a33fdf0ea7a9ebcac1335473856cca/wave2-m4a.txt",
+      "log_sha256": "7f99191f5d699b29440d2b838aac6c13568cd34af1a95fa9302c73647e0064d0"
+    },
+    {
+      "name": "wave2-m4b",
+      "command": "corepack pnpm test:wave2:m4b",
+      "exit": 0,
+      "log": "docs/evidence/WAVE2/logs/8de1b8f309a33fdf0ea7a9ebcac1335473856cca/wave2-m4b.txt",
+      "log_sha256": "785b0435d06c7bc5811e2cd359eeaceafda7baa66554089c814f6976a3d52366"
+    },
+    {
+      "name": "wave2-w2.0",
+      "command": "corepack pnpm test:wave2:w2.0",
+      "exit": 0,
+      "log": "docs/evidence/WAVE2/logs/8de1b8f309a33fdf0ea7a9ebcac1335473856cca/wave2-w2.0.txt",
+      "log_sha256": "9ae0bff1acc6ac144302058923869dd53968dbefad1f6ce2c8c8f5039e4070c2"
+    }
+  ],
+  "cases": [
+    {
+      "case_id": "TX-01",
+      "status": "CLOSED",
+      "production_seam": true
+    },
+    {
+      "case_id": "TX-02",
+      "status": "CLOSED",
+      "production_seam": true
+    },
+    {
+      "case_id": "TX-03",
+      "status": "CLOSED",
+      "production_seam": true
+    },
+    {
+      "case_id": "TX-04",
+      "status": "CLOSED",
+      "production_seam": true
+    },
+    {
+      "case_id": "TX-05",
+      "status": "CLOSED",
+      "production_seam": true
+    },
+    {
+      "case_id": "TX-06",
+      "status": "CLOSED",
+      "production_seam": true
+    },
+    {
+      "case_id": "TX-07",
+      "status": "CLOSED",
+      "production_seam": true
+    },
+    {
+      "case_id": "TX-08B",
+      "status": "CLOSED",
+      "production_seam": true
+    },
+    {
+      "case_id": "TX-11B",
+      "status": "CLOSED",
+      "production_seam": true
+    },
+    {
+      "case_id": "TX-13",
+      "status": "CLOSED",
+      "production_seam": true
+    },
+    {
+      "case_id": "TX-14",
+      "status": "CLOSED",
+      "production_seam": true
+    },
+    {
+      "case_id": "M4B-NW",
+      "status": "CLOSED",
+      "production_seam": true
+    },
+    {
+      "case_id": "REG",
+      "status": "CLOSED",
+      "production_seam": true
+    }
+  ],
+  "route_status": {
+    "materialize": true,
+    "impact": true,
+    "edits": true,
+    "history_restore": false
+  },
+  "declaration": "M4B_INTERNAL_EVIDENCED",
+  "review": {
+    "internal": "PASS",
+    "external": "REVIEW_PENDING"
+  },
+  "claim_limits": [
+    "M4B internal evidence does not close M4C, Wave 2, Gate D4.2, Gate V1-P0 or V1-Full.",
+    "History restore, undo and redo remain capability-blocked and their HTTP route remains unmounted.",
+    "Headed and human experience are NOT_RUN; automation is headless, muted, windowless and loopback-only.",
+    "The real media proof is a fixed 900-frame three-clip film, not a long-film performance claim or a production render route.",
+    "Wave 1 and M4A current-tip integrity checks fail by design after later stages move code; their historical gates pass and their non-zero logs are preserved.",
+    "A film matching neither durable before nor after digest is terminal attention and needs explicit later repair tooling; M4B does not auto-clear it.",
+    "A recoverable resource failure is published as a controlled failure with http_status 500, because the frozen failure union is 409|422|423|428|500 and has no 503, while HOST_RESOURCE_EXHAUSTED is aliased to 503 elsewhere. The record therefore says 500 and carries recoverable:true in its details. Changing it means amending a frozen contract, so it is recorded here as a known boundary instead."
+  ],
+  "known_failed_captures": [
+    {
+      "capture_commit": "002461bcf780c2d08fa40e678c317e8938dd3328",
+      "diagnostic": "docs/evidence/WAVE2/logs/002461bcf780c2d08fa40e678c317e8938dd3328/CAPTURE_FAILED_DIAGNOSTIC.md",
+      "recorded_outcome": null,
+      "kept": true,
+      "note": "A failed capture, kept verbatim. It is not evidence of a passing run and is never counted as one."
+    },
+    {
+      "capture_commit": "14cc3b6f2c53a0cf02397352bb296486491cc461",
+      "diagnostic": "docs/evidence/WAVE2/logs/14cc3b6f2c53a0cf02397352bb296486491cc461/CAPTURE_FAILED_DIAGNOSTIC.txt",
+      "recorded_outcome": null,
+      "kept": true,
+      "note": "A failed capture, kept verbatim. It is not evidence of a passing run and is never counted as one."
+    },
+    {
+      "capture_commit": "1c0703bd8621d9a4002fa67b2080edf25bab37c4",
+      "diagnostic": "docs/evidence/WAVE2/logs/1c0703bd8621d9a4002fa67b2080edf25bab37c4/CAPTURE_FAILED_DIAGNOSTIC.md",
+      "recorded_outcome": null,
+      "kept": true,
+      "note": "A failed capture, kept verbatim. It is not evidence of a passing run and is never counted as one."
+    },
+    {
+      "capture_commit": "2fe36433fc2182abc8bd959ec1bee8e1048d4b5a",
+      "diagnostic": "docs/evidence/WAVE2/logs/2fe36433fc2182abc8bd959ec1bee8e1048d4b5a/CAPTURE_FAILED_DIAGNOSTIC.md",
+      "recorded_outcome": null,
+      "kept": true,
+      "note": "A failed capture, kept verbatim. It is not evidence of a passing run and is never counted as one."
+    },
+    {
+      "capture_commit": "466eca6893de10128adfc06d060b70fcb58c0c4b",
+      "diagnostic": "docs/evidence/WAVE2/logs/466eca6893de10128adfc06d060b70fcb58c0c4b/CAPTURE_FAILED_DIAGNOSTIC.txt",
+      "recorded_outcome": null,
+      "kept": true,
+      "note": "A failed capture, kept verbatim. It is not evidence of a passing run and is never counted as one."
+    },
+    {
+      "capture_commit": "be93a183f5582da4b0db9f0e211424277d7ccfd7",
+      "diagnostic": "docs/evidence/WAVE2/logs/be93a183f5582da4b0db9f0e211424277d7ccfd7/CAPTURE_FAILED_DIAGNOSTIC.txt",
+      "recorded_outcome": null,
+      "kept": true,
+      "note": "A failed capture, kept verbatim. It is not evidence of a passing run and is never counted as one."
+    },
+    {
+      "capture_commit": "c90a6bfa9fde997ba59c2be5ccd0552fa72bdb43",
+      "diagnostic": "docs/evidence/WAVE2/logs/c90a6bfa9fde997ba59c2be5ccd0552fa72bdb43/CAPTURE_FAILED_DIAGNOSTIC.md",
+      "recorded_outcome": null,
+      "kept": true,
+      "note": "A failed capture, kept verbatim. It is not evidence of a passing run and is never counted as one."
+    },
+    {
+      "capture_commit": "d52dd95879bb282f8e0f628cc5f36455f2ca025b",
+      "diagnostic": "docs/evidence/WAVE2/logs/d52dd95879bb282f8e0f628cc5f36455f2ca025b/CAPTURE_FAILED_DIAGNOSTIC.md",
+      "recorded_outcome": null,
+      "kept": true,
+      "note": "A failed capture, kept verbatim. It is not evidence of a passing run and is never counted as one."
+    },
+    {
+      "capture_commit": "e9a3a3356fa9ae43ed97b20d46c3641ee36c5942",
+      "diagnostic": "docs/evidence/WAVE2/logs/e9a3a3356fa9ae43ed97b20d46c3641ee36c5942/CAPTURE_FAILED_DIAGNOSTIC.txt",
+      "recorded_outcome": null,
+      "kept": true,
+      "note": "A failed capture, kept verbatim. It is not evidence of a passing run and is never counted as one."
+    }
+  ]
+}
