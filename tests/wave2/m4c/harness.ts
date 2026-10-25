@@ -149,19 +149,29 @@ export async function postRestore(running: Started, projectId: string, body: unk
 export async function getHistory(running: Started, projectId: string): Promise<{
   status: number; body: Record<string, unknown>;
 }> {
-  const response = await fetch(`${running.origin}/api/migration/v1/projects/${projectId}/history`, {
-    headers: headers(running.origin, running.token),
-  });
-  return { status: response.status, body: await response.json() as Record<string, unknown> };
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    const response = await fetch(`${running.origin}/api/migration/v1/projects/${projectId}/history`, {
+      headers: headers(running.origin, running.token),
+    });
+    const body = await response.json() as Record<string, unknown>;
+    if (!isRecoverableResourceFailure(body) || attempt === 2) return { status: response.status, body };
+    await new Promise((done) => setTimeout(done, 500 * (attempt + 1)));
+  }
+  throw new Error("UNREACHABLE");
 }
 
 export async function postIntent(running: Started, projectId: string,
   command: "undo" | "redo"): Promise<{ status: number; body: Record<string, unknown> }> {
-  const response = await fetch(`${running.origin}/api/migration/v1/projects/${projectId}/history/${command}`, {
-    method: "POST", headers: headers(running.origin, running.token), body: "{}",
-  });
-  const text = await response.text();
-  return { status: response.status, body: text === "" ? {} : JSON.parse(text) as Record<string, unknown> };
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    const response = await fetch(`${running.origin}/api/migration/v1/projects/${projectId}/history/${command}`, {
+      method: "POST", headers: headers(running.origin, running.token), body: "{}",
+    });
+    const text = await response.text();
+    const parsed = text === "" ? {} : JSON.parse(text) as Record<string, unknown>;
+    if (!isRecoverableResourceFailure(parsed) || attempt === 2) return { status: response.status, body: parsed };
+    await new Promise((done) => setTimeout(done, 500 * (attempt + 1)));
+  }
+  throw new Error("UNREACHABLE");
 }
 
 /** A temporary directory a test may use for its own scratch files. */

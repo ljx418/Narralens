@@ -71,10 +71,14 @@ describe("M4C production history route", () => {
     // spent, and a replay of the same impact cannot authorize a second write.
     expect(running.host.impacts.require(impact.body.impact_id as string).state).toBe("consumed");
     // And the outbox row names the operation, so a reader of the event stream can tell a
-    // restore from an adoption.
-    const event = running.host.revisions.undeliveredOutbox(100)
-      .find((entry: { payload_json: string }) => entry.payload_json.includes(restored.body.transaction_id as string));
-    expect(event?.payload_json).toContain('"operation":"restore_snapshot"');
+    // restore from an adoption. The row is read by its id rather than through the
+    // undelivered list: the Host delivers the outbox within a quarter of a second, so
+    // "undelivered" is a race, not a fact.
+    const payload = running.host.revisions.compose((db) => db.prepare(
+      "SELECT payload_json FROM outbox WHERE event_id=?").get(restored.body.outbox_event_id as number)) as
+      { payload_json?: string } | undefined;
+    expect(payload?.payload_json).toContain('"operation":"restore_snapshot"');
+    expect(payload?.payload_json).toContain(restored.body.transaction_id as string);
     // The film is still three native, individually editable clips.
     const after = await running.host.projectResolver.resolveActivated(projectId);
     expect(after.revision).toBe(view.revision + 1);

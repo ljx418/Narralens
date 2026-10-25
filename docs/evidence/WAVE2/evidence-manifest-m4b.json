@@ -244,6 +244,17 @@
       "note": "A failed capture, kept verbatim. It is not evidence of a passing run and is never counted as one."
     },
     {
+      "capture_commit": "0745d03925df92b856bf2ba4f2740555efcafedf",
+      "failed_commands": [
+        "m4c-integrity exit=1",
+        "wave2-m3 exit=1",
+        "wave2-m4c exit=1"
+      ],
+      "diagnostic": "docs/evidence/WAVE2/logs/0745d03925df92b856bf2ba4f2740555efcafedf/CAPTURE_FAILED_DIAGNOSTIC.md",
+      "kept": true,
+      "note": "A failed capture, kept verbatim. It is not evidence of a passing run and is never counted as one."
+    },
+    {
       "capture_commit": "14cc3b6f2c53a0cf02397352bb296486491cc461",
       "failed_commands": [
         "check-1 exit=1",

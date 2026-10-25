@@ -605,8 +605,23 @@ export class MaterializeService {
     const scheduler = this.#deps.scheduler ?? realScheduler;
     const period = Math.max(1, Math.min(this.#deps.heartbeatMs ?? MATERIALIZE_HEARTBEAT_MS, Math.floor(leaseMs / 2)));
     const handle = scheduler.setInterval(() => {
+      // **The heartbeat stops when the service stops accepting work.**
+      //
+      // `shutdown()` aborts the in-flight attempts and closes the database underneath them,
+      // and the abort is asynchronous: the interval can fire in that window. The renewal
+      // then hit a closed database and threw out of a timer callback, which Node reports as
+      // an uncaught exception — a failure of the *test run*, not of the behaviour under
+      // test. A lease that cannot be renewed is not an error: the lease simply expires and
+      // the next attempt takes the job, which is what the lease is for.
+      if (!this.#accepting) return;
       const now = this.#deps.now?.() ?? new Date();
-      this.#deps.jobs.renewLease(jobId, identity, leaseMs, now);
+      try {
+        this.#deps.jobs.renewLease(jobId, identity, leaseMs, now);
+      } catch (error) {
+        // The store may be closed between the check above and the write. Anything else is a
+        // real error and is left alone.
+        if (!/database is not open/u.test(String(error))) throw error;
+      }
     }, period);
     handle.unref?.();
     let stopped = false;

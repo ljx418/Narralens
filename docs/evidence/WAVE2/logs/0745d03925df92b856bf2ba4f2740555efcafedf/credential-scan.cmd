@@ -1,0 +1,1 @@
+NARRALENS_SECRET_SCAN_OUT=docs/evidence/WAVE2/logs/0745d03925df92b856bf2ba4f2740555efcafedf/credential-scan.json corepack pnpm exec tsx tools/secret-scan.ts

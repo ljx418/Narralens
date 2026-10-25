@@ -1,0 +1,506 @@
+{
+  "format": "narralens.wave2-evidence-manifest@1",
+  "stage": "M4C",
+  "module": "HistoryRestore",
+  "capture_commit": "0745d03925df92b856bf2ba4f2740555efcafedf",
+  "capture_logs": "docs/evidence/WAVE2/logs/0745d03925df92b856bf2ba4f2740555efcafedf",
+  "captured_at_utc": "2026-10-25T09:40:04Z",
+  "repo_dirty_at_capture": 0,
+  "environment": {
+    "date_utc": "2026-10-25T09:40:04Z",
+    "node": "v22.22.1",
+    "pnpm": "10.33.0",
+    "git_head": "0745d03925df92b856bf2ba4f2740555efcafedf",
+    "git_branch": "migration/m2.2-coordinator-persistence",
+    "repo_dirty_at_capture": "0",
+    "origin_main": "304c89134fdf9f834f7d69e3f4d5c89a68044c60",
+    "openfilm_upstream": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+    "declaration_ceiling": "M4C_INTERNAL_EVIDENCED",
+    "interaction": "headless,muted,no-window,no-focus-steal,no-network,no-payment",
+    "expected_failure_commands": "wave1-integrity,m4a-integrity"
+  },
+  "origin_main": "304c89134fdf9f834f7d69e3f4d5c89a68044c60",
+  "branch": "migration/m2.2-coordinator-persistence",
+  "commands": [
+    {
+      "name": "build",
+      "command": "corepack pnpm build",
+      "exit": 0,
+      "log": "docs/evidence/WAVE2/logs/0745d03925df92b856bf2ba4f2740555efcafedf/build.txt",
+      "log_sha256": "c5907e3077696d5196211fd50532414a23824b08f9a0bbae900d4d04563adad4"
+    },
+    {
+      "name": "check",
+      "command": "corepack pnpm check",
+      "exit": 0,
+      "log": "docs/evidence/WAVE2/logs/0745d03925df92b856bf2ba4f2740555efcafedf/check.txt",
+      "log_sha256": "7f6f94fe2ad6652598021502ca7951c0e15438c9c05c68d4fd6551146ca27259"
+    },
+    {
+      "name": "contracts",
+      "command": "corepack pnpm test:contracts",
+      "exit": 0,
+      "log": "docs/evidence/WAVE2/logs/0745d03925df92b856bf2ba4f2740555efcafedf/contracts.txt",
+      "log_sha256": "a37cff7bbf89cafd5b50673e6aee0cf72395d710a34fc8e8452ae9266475614c"
+    },
+    {
+      "name": "credential-scan",
+      "command": "NARRALENS_SECRET_SCAN_OUT=docs/evidence/WAVE2/logs/0745d03925df92b856bf2ba4f2740555efcafedf/credential-scan.json corepack pnpm exec tsx tools/secret-scan.ts",
+      "exit": 0,
+      "log": "docs/evidence/WAVE2/logs/0745d03925df92b856bf2ba4f2740555efcafedf/credential-scan.txt",
+      "log_sha256": "978b74cea28257d8ee9cdb3f329bfd5e2b62bd70e55798e8d0b85f87ded6bea8"
+    },
+    {
+      "name": "m2.1",
+      "command": "corepack pnpm test:m2.1",
+      "exit": 0,
+      "log": "docs/evidence/WAVE2/logs/0745d03925df92b856bf2ba4f2740555efcafedf/m2.1.txt",
+      "log_sha256": "46d3de8f9a5e991b8d2cc63014b0e39fc239d5d7d2bfd211d6a08a63d09e048d"
+    },
+    {
+      "name": "m4a-historical",
+      "command": "corepack pnpm evidence:wave2:m4a:historical",
+      "exit": 0,
+      "log": "docs/evidence/WAVE2/logs/0745d03925df92b856bf2ba4f2740555efcafedf/m4a-historical.txt",
+      "log_sha256": "a2c821b374a558fae9c5e214ee8c62ef3db687c77d2d46bf97cbaa866749eaea"
+    },
+    {
+      "name": "m4a-integrity",
+      "command": "corepack pnpm evidence:wave2:m4a:integrity",
+      "exit": 1,
+      "log": "docs/evidence/WAVE2/logs/0745d03925df92b856bf2ba4f2740555efcafedf/m4a-integrity.txt",
+      "log_sha256": "f9b4ed270b3df624373d77c23c8557c1facab0329baea009a2b801e17e251d3e",
+      "expected_failure": true
+    },
+    {
+      "name": "m4b-historical",
+      "command": "corepack pnpm evidence:wave2:m4b:historical",
+      "exit": 0,
+      "log": "docs/evidence/WAVE2/logs/0745d03925df92b856bf2ba4f2740555efcafedf/m4b-historical.txt",
+      "log_sha256": "00e256faf70eb81cfa1afd08e18fede1a9d2c3c810d12b257d94cd016d9fd075"
+    },
+    {
+      "name": "m4b-integrity",
+      "command": "corepack pnpm evidence:wave2:m4b:integrity",
+      "exit": 0,
+      "log": "docs/evidence/WAVE2/logs/0745d03925df92b856bf2ba4f2740555efcafedf/m4b-integrity.txt",
+      "log_sha256": "7c84feb64d9094f83d7fa415ecf2a522dc8bb424d7699430d431aa3c1bb049fe"
+    },
+    {
+      "name": "restore-plan-golden-python",
+      "command": "corepack pnpm test:wave2:m4c:golden-python",
+      "exit": 0,
+      "log": "docs/evidence/WAVE2/logs/0745d03925df92b856bf2ba4f2740555efcafedf/restore-plan-golden-python.txt",
+      "log_sha256": "3381389d78eb987d2761a21f5a6eeb3f6e4f19abe7f41388156bc0efe5eb4d91"
+    },
+    {
+      "name": "restore-plan-vectors",
+      "command": "corepack pnpm test:wave2:m4c:vectors /tmp/tmp.k7IUYETVQn/restore-plan.vectors.json",
+      "exit": 0,
+      "log": "docs/evidence/WAVE2/logs/0745d03925df92b856bf2ba4f2740555efcafedf/restore-plan-vectors.txt",
+      "log_sha256": "352ef23f204f90aa5abe7d495b48036ce8eee8618c2f04b9d0c101eda465c4a3"
+    },
+    {
+      "name": "typecheck",
+      "command": "corepack pnpm exec tsc --noEmit",
+      "exit": 0,
+      "log": "docs/evidence/WAVE2/logs/0745d03925df92b856bf2ba4f2740555efcafedf/typecheck.txt",
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "wave1-historical",
+      "command": "corepack pnpm evidence:wave1:historical",
+      "exit": 0,
+      "log": "docs/evidence/WAVE2/logs/0745d03925df92b856bf2ba4f2740555efcafedf/wave1-historical.txt",
+      "log_sha256": "0b81fb585f05f08396028ffe96466ee45deda38b890baca1e271d425aebb4f1d"
+    },
+    {
+      "name": "wave1-integrity",
+      "command": "corepack pnpm evidence:wave1:integrity",
+      "exit": 1,
+      "log": "docs/evidence/WAVE2/logs/0745d03925df92b856bf2ba4f2740555efcafedf/wave1-integrity.txt",
+      "log_sha256": "d6176152f7db79a5b66f646a595c11bfb5182cdc77a95ca6bba40305b500cf98",
+      "expected_failure": true
+    },
+    {
+      "name": "wave2-fitness",
+      "command": "corepack pnpm test:wave2:fitness",
+      "exit": 0,
+      "log": "docs/evidence/WAVE2/logs/0745d03925df92b856bf2ba4f2740555efcafedf/wave2-fitness.txt",
+      "log_sha256": "3bf70019f2e92aa465300721b748b262785b0ef97f2e6865d7cf6f4e8283c310"
+    },
+    {
+      "name": "wave2-m3",
+      "command": "corepack pnpm test:wave2:m3",
+      "exit": 1,
+      "log": "docs/evidence/WAVE2/logs/0745d03925df92b856bf2ba4f2740555efcafedf/wave2-m3.txt",
+      "log_sha256": "6e0e01db66107406404f2163692dcfc7a7e24f76c3c5ec0ed00ec22a57a91663"
+    },
+    {
+      "name": "wave2-m4a",
+      "command": "corepack pnpm test:wave2:m4a",
+      "exit": 0,
+      "log": "docs/evidence/WAVE2/logs/0745d03925df92b856bf2ba4f2740555efcafedf/wave2-m4a.txt",
+      "log_sha256": "83f0b2b7ed6f3484f24eabde5669b7e5fcb9fd449c37efee5107f4e436ec269a"
+    },
+    {
+      "name": "wave2-m4b",
+      "command": "corepack pnpm test:wave2:m4b",
+      "exit": 0,
+      "log": "docs/evidence/WAVE2/logs/0745d03925df92b856bf2ba4f2740555efcafedf/wave2-m4b.txt",
+      "log_sha256": "b972fa534cbfdad6a99a83995ac162c5f1a980645d66e494a920f282a3be9c04"
+    },
+    {
+      "name": "wave2-m4c",
+      "command": "corepack pnpm test:wave2:m4c",
+      "exit": 1,
+      "log": "docs/evidence/WAVE2/logs/0745d03925df92b856bf2ba4f2740555efcafedf/wave2-m4c.txt",
+      "log_sha256": "406dcf0ff0d76a3428828c94d5a87e373e542b2e45370cf1a0eca4392898a3e7"
+    },
+    {
+      "name": "wave2-w2.0",
+      "command": "corepack pnpm test:wave2:w2.0",
+      "exit": 0,
+      "log": "docs/evidence/WAVE2/logs/0745d03925df92b856bf2ba4f2740555efcafedf/wave2-w2.0.txt",
+      "log_sha256": "65d9f0bcb860acc705f3e5a4ff14cadf35a32f842ba95aed4591ce33f651f43e"
+    }
+  ],
+  "cases": [
+    {
+      "case_id": "M4C-01",
+      "status": "CLOSED",
+      "production_seam": true
+    },
+    {
+      "case_id": "M4C-02",
+      "status": "CLOSED",
+      "production_seam": true
+    },
+    {
+      "case_id": "M4C-03",
+      "status": "CLOSED",
+      "production_seam": true
+    },
+    {
+      "case_id": "M4C-04",
+      "status": "CLOSED",
+      "production_seam": true
+    },
+    {
+      "case_id": "M4C-05",
+      "status": "CLOSED",
+      "production_seam": true
+    },
+    {
+      "case_id": "M4C-06",
+      "status": "CLOSED",
+      "production_seam": true
+    },
+    {
+      "case_id": "TX-03C",
+      "status": "CLOSED",
+      "production_seam": true
+    },
+    {
+      "case_id": "TX-04C",
+      "status": "CLOSED",
+      "production_seam": true
+    },
+    {
+      "case_id": "TX-05C",
+      "status": "CLOSED",
+      "production_seam": true
+    },
+    {
+      "case_id": "TX-07C",
+      "status": "CLOSED",
+      "production_seam": true
+    },
+    {
+      "case_id": "TX-08C",
+      "status": "CLOSED",
+      "production_seam": true
+    },
+    {
+      "case_id": "TX-09",
+      "status": "CLOSED",
+      "production_seam": true
+    },
+    {
+      "case_id": "TX-10",
+      "status": "CLOSED",
+      "production_seam": true
+    },
+    {
+      "case_id": "TX-12C",
+      "status": "CLOSED",
+      "production_seam": true
+    },
+    {
+      "case_id": "TX-13C",
+      "status": "CLOSED",
+      "production_seam": true
+    },
+    {
+      "case_id": "M4C-14",
+      "status": "CLOSED",
+      "production_seam": true
+    },
+    {
+      "case_id": "M4C-15",
+      "status": "CLOSED",
+      "production_seam": true
+    },
+    {
+      "case_id": "M4C-16",
+      "status": "CLOSED",
+      "production_seam": true
+    },
+    {
+      "case_id": "M4C-17",
+      "status": "CLOSED",
+      "production_seam": true
+    },
+    {
+      "case_id": "M4C-18",
+      "status": "CLOSED",
+      "production_seam": true
+    }
+  ],
+  "checked_manifest": "docs/evidence/WAVE2/logs/0745d03925df92b856bf2ba4f2740555efcafedf/manifest.json",
+  "route_status": {
+    "materialize": true,
+    "impact": true,
+    "edits": true,
+    "history": true,
+    "history_restore": true
+  },
+  "declaration": "M4C_INTERNAL_EVIDENCED",
+  "review": {
+    "internal": "PASS",
+    "external": "REVIEW_PENDING"
+  },
+  "claim_limits": [
+    "M4C internal evidence does not close Wave 2, Gate D4.2, Gate V1-P0 or V1-Full.",
+    "History restore, undo and redo are translated into an impact-bound restore intent; they never move the active pointer and never create a revision without an impact and an explicit approval.",
+    "Headed and human experience are NOT_RUN; automation is headless, muted, windowless and loopback-only.",
+    "The real media proof is a fixed 900-frame three-clip film rendered by the pinned upstream, not a long-film performance claim or a production render route.",
+    "Wave 1, M4A and M4B current-tip integrity checks fail by design after later stages move code; their historical gates pass and their non-zero logs are preserved.",
+    "M4B's current-tip integrity gate is recorded verbatim in this capture; its verdict is about M4B's own evidence and does not open M4C.",
+    "M4C does not open a production render route and does not impersonate the full TX-12 acceptance.",
+    "A restore is a content-addressed reuse: the result snapshot id equals the target's, so the old content is restored as a new revision rather than as a new identity.",
+    "The restore plan supports the differences M4C models — the same clip identity and track topology, with the change inside src/time/overrides. A clip added, removed or moved to another track is refused.",
+    "The undo and redo translations resolve a target from the project's committed history; there is no redo stack, because this architecture has exactly one timeline."
+  ],
+  "known_failed_captures": [
+    {
+      "capture_commit": "002461bcf780c2d08fa40e678c317e8938dd3328",
+      "failed_commands": [
+        "check-1 exit=1"
+      ],
+      "diagnostic": "docs/evidence/WAVE2/logs/002461bcf780c2d08fa40e678c317e8938dd3328/CAPTURE_FAILED_DIAGNOSTIC.md",
+      "kept": true,
+      "note": "A failed capture, kept verbatim. It is not evidence of a passing run and is never counted as one."
+    },
+    {
+      "capture_commit": "0745d03925df92b856bf2ba4f2740555efcafedf",
+      "failed_commands": [
+        "wave2-m3 exit=1",
+        "wave2-m4c exit=1",
+        "manifest did not finish (no exit file)",
+        "the capture never reached the end of its script"
+      ],
+      "diagnostic": null,
+      "kept": true,
+      "note": "A failed capture, kept verbatim. It is not evidence of a passing run and is never counted as one."
+    },
+    {
+      "capture_commit": "14cc3b6f2c53a0cf02397352bb296486491cc461",
+      "failed_commands": [
+        "check-1 exit=1",
+        "check-2 exit=1"
+      ],
+      "diagnostic": "docs/evidence/WAVE2/logs/14cc3b6f2c53a0cf02397352bb296486491cc461/CAPTURE_FAILED_DIAGNOSTIC.txt",
+      "kept": true,
+      "note": "A failed capture, kept verbatim. It is not evidence of a passing run and is never counted as one."
+    },
+    {
+      "capture_commit": "1c0703bd8621d9a4002fa67b2080edf25bab37c4",
+      "failed_commands": [
+        "m4b-integrity exit=1"
+      ],
+      "diagnostic": "docs/evidence/WAVE2/logs/1c0703bd8621d9a4002fa67b2080edf25bab37c4/CAPTURE_FAILED_DIAGNOSTIC.md",
+      "kept": true,
+      "note": "A failed capture, kept verbatim. It is not evidence of a passing run and is never counted as one."
+    },
+    {
+      "capture_commit": "1d3f28ddf03b896585e5790dffadffb209e7f8ce",
+      "failed_commands": [
+        "check-1 exit=1",
+        "check-2 exit=1",
+        "check-3 exit=1",
+        "check exit=1"
+      ],
+      "diagnostic": null,
+      "kept": true,
+      "note": "A failed capture, kept verbatim. It is not evidence of a passing run and is never counted as one."
+    },
+    {
+      "capture_commit": "2fe36433fc2182abc8bd959ec1bee8e1048d4b5a",
+      "failed_commands": [
+        "check-1 did not finish (no exit file)",
+        "the capture never reached the end of its script"
+      ],
+      "diagnostic": "docs/evidence/WAVE2/logs/2fe36433fc2182abc8bd959ec1bee8e1048d4b5a/CAPTURE_FAILED_DIAGNOSTIC.md",
+      "kept": true,
+      "note": "A failed capture, kept verbatim. It is not evidence of a passing run and is never counted as one."
+    },
+    {
+      "capture_commit": "39f86a0108b6c49166cff2ca2e4259789d62bd1b",
+      "failed_commands": [
+        "check-3 exit=1"
+      ],
+      "diagnostic": null,
+      "kept": true,
+      "note": "A failed capture, kept verbatim. It is not evidence of a passing run and is never counted as one."
+    },
+    {
+      "capture_commit": "466eca6893de10128adfc06d060b70fcb58c0c4b",
+      "failed_commands": [
+        "check exit=1",
+        "contracts did not finish (no exit file)",
+        "the capture never reached the end of its script"
+      ],
+      "diagnostic": "docs/evidence/WAVE2/logs/466eca6893de10128adfc06d060b70fcb58c0c4b/CAPTURE_FAILED_DIAGNOSTIC.txt",
+      "kept": true,
+      "note": "A failed capture, kept verbatim. It is not evidence of a passing run and is never counted as one."
+    },
+    {
+      "capture_commit": "4f435f231db2d231caf12e5b416b27ef36e1bbe2",
+      "failed_commands": [
+        "m4c-integrity exit=1"
+      ],
+      "diagnostic": "docs/evidence/WAVE2/logs/4f435f231db2d231caf12e5b416b27ef36e1bbe2/CAPTURE_FAILED_DIAGNOSTIC.md",
+      "kept": true,
+      "note": "A failed capture, kept verbatim. It is not evidence of a passing run and is never counted as one."
+    },
+    {
+      "capture_commit": "63369755f2754507d6361fd95ed2767285dbb2eb",
+      "failed_commands": [
+        "check-3 exit=1"
+      ],
+      "diagnostic": null,
+      "kept": true,
+      "note": "A failed capture, kept verbatim. It is not evidence of a passing run and is never counted as one."
+    },
+    {
+      "capture_commit": "88072915b7fe2d5c6d4780e913f4287989558efa",
+      "failed_commands": [
+        "check-1 exit=1",
+        "check-2 exit=1",
+        "check exit=1"
+      ],
+      "diagnostic": null,
+      "kept": true,
+      "note": "A failed capture, kept verbatim. It is not evidence of a passing run and is never counted as one."
+    },
+    {
+      "capture_commit": "8b55aa95ccbfe7480010870fcd43b4e513b976cd",
+      "failed_commands": [
+        "check-1 exit=1",
+        "check-3 exit=1"
+      ],
+      "diagnostic": null,
+      "kept": true,
+      "note": "A failed capture, kept verbatim. It is not evidence of a passing run and is never counted as one."
+    },
+    {
+      "capture_commit": "98026a85d9b5ab78615c5a476428b0ebfb1ba87d",
+      "failed_commands": [
+        "credential-scan exit=1"
+      ],
+      "diagnostic": null,
+      "kept": true,
+      "note": "A failed capture, kept verbatim. It is not evidence of a passing run and is never counted as one."
+    },
+    {
+      "capture_commit": "be93a183f5582da4b0db9f0e211424277d7ccfd7",
+      "failed_commands": [
+        "credential-scan exit=1"
+      ],
+      "diagnostic": "docs/evidence/WAVE2/logs/be93a183f5582da4b0db9f0e211424277d7ccfd7/CAPTURE_FAILED_DIAGNOSTIC.txt",
+      "kept": true,
+      "note": "A failed capture, kept verbatim. It is not evidence of a passing run and is never counted as one."
+    },
+    {
+      "capture_commit": "bf84aaae66b4600defaa790fff37c72b03c2b0b8",
+      "failed_commands": [
+        "check exit=1",
+        "m4c-integrity exit=1"
+      ],
+      "diagnostic": "docs/evidence/WAVE2/logs/bf84aaae66b4600defaa790fff37c72b03c2b0b8/CAPTURE_FAILED_DIAGNOSTIC.md",
+      "kept": true,
+      "note": "A failed capture, kept verbatim. It is not evidence of a passing run and is never counted as one."
+    },
+    {
+      "capture_commit": "c6d23a73bd3d53c4972df449020890a39be77b0a",
+      "failed_commands": [
+        "check-1 exit=1",
+        "check-2 exit=1",
+        "credential-scan exit=1"
+      ],
+      "diagnostic": null,
+      "kept": true,
+      "note": "A failed capture, kept verbatim. It is not evidence of a passing run and is never counted as one."
+    },
+    {
+      "capture_commit": "c7153a465d07f62d318d4553e3600288965adf3c",
+      "failed_commands": [
+        "check exit=1"
+      ],
+      "diagnostic": null,
+      "kept": true,
+      "note": "A failed capture, kept verbatim. It is not evidence of a passing run and is never counted as one."
+    },
+    {
+      "capture_commit": "c90a6bfa9fde997ba59c2be5ccd0552fa72bdb43",
+      "failed_commands": [
+        "check-2 exit=1"
+      ],
+      "diagnostic": "docs/evidence/WAVE2/logs/c90a6bfa9fde997ba59c2be5ccd0552fa72bdb43/CAPTURE_FAILED_DIAGNOSTIC.md",
+      "kept": true,
+      "note": "A failed capture, kept verbatim. It is not evidence of a passing run and is never counted as one."
+    },
+    {
+      "capture_commit": "d52dd95879bb282f8e0f628cc5f36455f2ca025b",
+      "failed_commands": [
+        "m4b-integrity exit=1",
+        "wave2-m4b exit=1"
+      ],
+      "diagnostic": "docs/evidence/WAVE2/logs/d52dd95879bb282f8e0f628cc5f36455f2ca025b/CAPTURE_FAILED_DIAGNOSTIC.md",
+      "kept": true,
+      "note": "A failed capture, kept verbatim. It is not evidence of a passing run and is never counted as one."
+    },
+    {
+      "capture_commit": "e483fb4d302234af8205262412aa88fc904ac217",
+      "failed_commands": [
+        "check exit=1",
+        "m4c-integrity exit=1"
+      ],
+      "diagnostic": "docs/evidence/WAVE2/logs/e483fb4d302234af8205262412aa88fc904ac217/CAPTURE_FAILED_DIAGNOSTIC.md",
+      "kept": true,
+      "note": "A failed capture, kept verbatim. It is not evidence of a passing run and is never counted as one."
+    },
+    {
+      "capture_commit": "e9a3a3356fa9ae43ed97b20d46c3641ee36c5942",
+      "failed_commands": [
+        "check exit=1",
+        "contracts did not finish (no exit file)",
+        "the capture never reached the end of its script"
+      ],
+      "diagnostic": "docs/evidence/WAVE2/logs/e9a3a3356fa9ae43ed97b20d46c3641ee36c5942/CAPTURE_FAILED_DIAGNOSTIC.txt",
+      "kept": true,
+      "note": "A failed capture, kept verbatim. It is not evidence of a passing run and is never counted as one."
+    }
+  ]
+}
