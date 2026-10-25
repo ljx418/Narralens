@@ -4,15 +4,16 @@ import { readFile } from "node:fs/promises";
 import { basename, join, resolve } from "node:path";
 import { promisify } from "node:util";
 import { afterEach, describe, expect, it } from "vitest";
-import { planDigest } from "../../../src/host/materialize/native-plan-builder.js";
-import type { NativePlanV1 } from "../../../src/contracts/wave2-types.js";
 import { validateControlledWriteResponse } from "../../../src/contracts/validator.js";
 import { NarralensHost } from "../../../src/host/server.js";
 import { createPinnedOpenFilmUpstream } from "../../../src/adapters/openfilm/openfilm-upstream.js";
 import {
-  adoptBody, coveringPlan, headers, migrate, postImpact, readyMaterialization,
-  start, startOn, stopAll, type Started,
+  adoptBody, headers, postImpact, readyMaterialization, start, startOn, stopAll,
 } from "../m4a/harness.js";
+import {
+  adoptedProject, getHistory, postIntent, postRestore, restoreImpactBody, restoreRequestBody,
+  stableThreeClipPlan,
+} from "./harness.js";
 
 /**
  * M4C's production history route.
@@ -28,81 +29,6 @@ const dirs: string[] = [];
 const VENDOR = "/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm";
 const run = promisify(execFile);
 afterEach(async () => { await stopAll(hosts.splice(0), dirs.splice(0)); });
-
-function stableThreeClipPlan(running: Started, projectId: string): NativePlanV1 {
-  const base = coveringPlan(running.host, projectId, 900, 3);
-  const spec = { ...base, clips: base.clips.map((clip, index) => ({ ...clip, clip_id: `shot-00${index + 1}` })) };
-  const { plan_sha256: _old, ...preimage } = spec;
-  return { ...preimage, plan_sha256: planDigest(preimage) };
-}
-
-/** The snapshot the migration published — the project's own history entry zero. */
-function migrationSnapshot(running: Started, projectId: string): string {
-  for (const migration of running.host.revisions.migrations.all()) {
-    if (migration.target_project_id !== projectId) continue;
-    if (migration.target_snapshot_id === null) continue;
-    return migration.target_snapshot_id;
-  }
-  throw new Error(`NO_MIGRATION_SNAPSHOT:${projectId}`);
-}
-
-async function postRestore(running: Started, projectId: string, body: unknown) {
-  const response = await fetch(`${running.origin}/api/migration/v1/projects/${projectId}/history/restore`, {
-    method: "POST", headers: headers(running.origin, running.token), body: JSON.stringify(body),
-  });
-  const text = await response.text();
-  return { status: response.status, body: text === "" ? {} : JSON.parse(text) as Record<string, unknown> };
-}
-
-async function getHistory(running: Started, projectId: string) {
-  const response = await fetch(`${running.origin}/api/migration/v1/projects/${projectId}/history`, {
-    headers: headers(running.origin, running.token),
-  });
-  return { status: response.status, body: await response.json() as Record<string, unknown> };
-}
-
-async function postIntent(running: Started, projectId: string, command: "undo" | "redo") {
-  const response = await fetch(`${running.origin}/api/migration/v1/projects/${projectId}/history/${command}`, {
-    method: "POST", headers: headers(running.origin, running.token), body: "{}",
-  });
-  const text = await response.text();
-  return { status: response.status, body: text === "" ? {} : JSON.parse(text) as Record<string, unknown> };
-}
-
-/** Migrate, adopt, and return the facts a restore needs. */
-async function adoptedProject(running: Started, suffix: string) {
-  const { projectId, view } = await migrate(running, `m4c-migrate-${suffix}`);
-  const materialization = await readyMaterialization(running.host, projectId, `m4c-materialize-${suffix}`,
-    stableThreeClipPlan(running, projectId));
-  const impact = await postImpact(running, projectId,
-    adoptBody(view, materialization.materialization_id, `m4c-impact-${suffix}`));
-  expect(impact.status, JSON.stringify(impact.body)).toBe(201);
-  const adopted = await fetch(`${running.origin}/api/migration/v1/projects/${projectId}/edits`, {
-    method: "POST", headers: headers(running.origin, running.token),
-    body: JSON.stringify({
-      format: "narralens.adopt-request@1.0", base_revision: view.revision,
-      expected_source_digest: view.source_digest, control_revision: view.control_revision,
-      materialization_id: materialization.materialization_id,
-      impact_id: impact.body.impact_id, impact_hash: impact.body.impact_hash,
-      approval: { confirmed: true }, idempotency_key: `m4c-write-${suffix}`,
-    }),
-  });
-  expect(adopted.status, await adopted.text()).toBe(200);
-  const afterAdoption = await running.host.projectResolver.resolveActivated(projectId);
-  return { projectId, view: afterAdoption, migrationSnapshot: migrationSnapshot(running, projectId) };
-}
-
-function restoreImpactBody(view: { revision: number; source_digest: string; control_revision: number },
-  targetSnapshotId: string, key: string): Record<string, unknown> {
-  return {
-    format: "narralens.impact-request@1.0",
-    base_revision: view.revision,
-    expected_source_digest: view.source_digest,
-    control_revision: view.control_revision,
-    intent: { op: "restore_snapshot", target_snapshot_id: targetSnapshotId },
-    idempotency_key: key,
-  };
-}
 
 describe("M4C production history route", () => {
   it("restores an earlier snapshot as a new revision, and the film is still three native clips", async () => {
@@ -141,6 +67,14 @@ describe("M4C production history route", () => {
       snapshot_id: target,
     });
 
+    // **The impact was consumed by the commit**, not merely used: the authorization is
+    // spent, and a replay of the same impact cannot authorize a second write.
+    expect(running.host.impacts.require(impact.body.impact_id as string).state).toBe("consumed");
+    // And the outbox row names the operation, so a reader of the event stream can tell a
+    // restore from an adoption.
+    const event = running.host.revisions.undeliveredOutbox(100)
+      .find((entry: { payload_json: string }) => entry.payload_json.includes(restored.body.transaction_id as string));
+    expect(event?.payload_json).toContain('"operation":"restore_snapshot"');
     // The film is still three native, individually editable clips.
     const after = await running.host.projectResolver.resolveActivated(projectId);
     expect(after.revision).toBe(view.revision + 1);
@@ -212,6 +146,50 @@ describe("M4C production history route", () => {
     expect(second.body).toEqual(first.body);
     const after = await running.host.projectResolver.resolveActivated(projectId);
     expect(after.revision).toBe(view.revision + 1);
+  }, 900_000);
+
+  it("restores, and then adopts the same content again, without the projection fact refusing it", async () => {
+    // The flow a user actually walks: adopt the materialization, restore the older
+    // snapshot, and adopt the same materialization once more. The third write produces the
+    // **same content address** as the first — content addressing does not care that the
+    // bytes were published twice — so the projection fact for that address already exists.
+    // A blind insert would fail on the primary key and take the commit down with it, which
+    // is the one outcome this flow must not have.
+    const running = await start();
+    hosts.push(running.host); dirs.push(running.base);
+    const project = await adoptedProject(running, "re-adopt");
+    const impact = await postImpact(running, project.projectId,
+      restoreImpactBody(project.view, project.migrationSnapshot, "m4c-readopt-impact"));
+    expect(impact.status, JSON.stringify(impact.body)).toBe(201);
+    const restored = await postRestore(running, project.projectId, restoreRequestBody(
+      project.view, project.migrationSnapshot,
+      impact.body as { impact_id: string; impact_hash: string }, "m4c-readopt-restore"));
+    expect(restored.status, JSON.stringify(restored.body)).toBe(200);
+
+    // Now adopt the same three-clip materialization again, against the restored source.
+    const afterRestore = await running.host.projectResolver.resolveActivated(project.projectId);
+    const materialization = await readyMaterialization(running.host, project.projectId,
+      "m4c-readopt-materialize", stableThreeClipPlan(running, project.projectId));
+    const adoptImpact = await postImpact(running, project.projectId, adoptBody(
+      afterRestore, materialization.materialization_id, "m4c-readopt-adopt-impact"));
+    expect(adoptImpact.status, JSON.stringify(adoptImpact.body)).toBe(201);
+    const adopted = await fetch(`${running.origin}/api/migration/v1/projects/${project.projectId}/edits`, {
+      method: "POST", headers: headers(running.origin, running.token),
+      body: JSON.stringify({
+        format: "narralens.adopt-request@1.0", base_revision: afterRestore.revision,
+        expected_source_digest: afterRestore.source_digest, control_revision: afterRestore.control_revision,
+        materialization_id: materialization.materialization_id,
+        impact_id: adoptImpact.body.impact_id, impact_hash: adoptImpact.body.impact_hash,
+        approval: { confirmed: true }, idempotency_key: "m4c-readopt-adopt",
+      }),
+    });
+    const adoptedBody = await adopted.json() as Record<string, unknown>;
+    expect(adopted.status, JSON.stringify(adoptedBody)).toBe(200);
+    expect(adoptedBody.new_revision).toBe(afterRestore.revision + 1);
+    // And the content address is the first adoption's — the same bytes, the same id.
+    expect(adoptedBody.snapshot_id).toBe(project.adoptedSnapshot);
+    // The project is not in attention: the commit completed.
+    expect(running.host.revisions.projectsInAttention()).not.toContain(project.projectId);
   }, 900_000);
 
   it("refuses a snapshot of another project and a snapshot that does not exist with the same 404", async () => {

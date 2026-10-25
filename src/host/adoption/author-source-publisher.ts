@@ -48,8 +48,14 @@ function inside(root: string, token: string): string {
 }
 
 /**
- * Publishes only M4B's two allowed source changes: immutable content-addressed assets,
+ * Publishes only the two allowed source changes: immutable content-addressed assets,
  * followed by one same-directory atomic replacement of film.html.
+ *
+ * **M4C reuses this algorithm unchanged.** The gate asks for the *wording* to be
+ * operation-neutral and for the algorithm not to be relaxed, so the two refusals below now
+ * speak about "a controlled write" rather than about M4B's adoption. The rules they enforce
+ * are unchanged: distinct proven before and after bytes, and a protected root that may not
+ * move.
  */
 export class AuthorSourcePublisher {
   readonly #fault: (boundary: PublishBoundary) => void | Promise<void>;
@@ -61,7 +67,8 @@ export class AuthorSourcePublisher {
   async publish(input: PublishAuthorSourceInput): Promise<PublishedAuthorSource> {
     if (!SHA256.test(input.expectedFilmBeforeSha256) || !SHA256.test(input.expectedFilmAfterSha256)
       || input.expectedFilmBeforeSha256 === input.expectedFilmAfterSha256) {
-      throw new HttpError(422, "UNSUPPORTED_EDIT", "M4B requires distinct proven before and after film bytes");
+      throw new HttpError(422, "UNSUPPORTED_EDIT",
+        "A controlled write requires distinct proven before and after film bytes");
     }
     const activeRoot = await realpath(input.activeRoot);
     const stagedRoot = await realpath(input.stagedRoot);
@@ -76,7 +83,8 @@ export class AuthorSourcePublisher {
     for (const token of input.protectedTokens) {
       if (token === "film.html") continue;
       if (await hashFile(inside(activeRoot, token)) !== await hashFile(inside(stagedRoot, token))) {
-        throw new HttpError(422, "UNSUPPORTED_EDIT", "Adoption changed a protected author-source root");
+        throw new HttpError(422, "UNSUPPORTED_EDIT",
+          "The controlled write changed a protected author-source root");
       }
     }
 

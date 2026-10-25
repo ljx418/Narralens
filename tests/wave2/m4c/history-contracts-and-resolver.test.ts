@@ -1,4 +1,4 @@
-import { rm } from "node:fs/promises";
+import { cp, mkdir, rm } from "node:fs/promises";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { NarralensHost } from "../../../src/host/server.js";
@@ -132,12 +132,42 @@ describe("M4C-03: the negative matrix fails closed", () => {
     const running = await start();
     hosts.push(running.host); dirs.push(running.base);
     const project = await adoptedProject(running, "orphan");
-    // A snapshot row with no committed transaction and no migration behind it. The bytes
-    // exist; nothing ever committed them.
+    // A snapshot that is **entirely real** — the bytes are on disk under the managed root
+    // and the row carries the digest those bytes actually have — but *nothing ever
+    // committed it*: there is no transaction and no migration behind it.
+    //
+    // The bytes matter. An orphan whose bytes were missing would be refused by the
+    // "the bytes are gone" rule, and the test would pass without ever reaching the
+    // committed rule. This one can only be refused because nothing committed it.
     const orphan = "1".repeat(64);
+    const source = join(running.host.snapshots.snapshotRoot(project.projectId, project.migrationSnapshot),
+      "source");
+    const orphanRoot = join(running.host.snapshots.snapshotRoot(project.projectId, orphan), "source");
+    await mkdir(orphanRoot, { recursive: true });
+    await cp(source, orphanRoot, { recursive: true });
+    const digest = running.host.revisions.snapshotRow(project.migrationSnapshot)?.source_digest ?? "";
     running.host.revisions.compose((db) => db.prepare(
       "INSERT INTO snapshot(snapshot_id, project_id, source_digest, engine, created_at) VALUES(?,?,?,'openfilm',?)")
-      .run(orphan, project.projectId, "2".repeat(64), new Date().toISOString()));
+      .run(orphan, project.projectId, digest, new Date().toISOString()));
+    // The orphan even has a projection fact, so its roots can be derived and its digest
+    // recomputes: every other proof the resolver makes succeeds. The **only** thing left is
+    // that nothing ever committed it.
+    // The roots have to be the *migration's* roots, because the orphan's bytes are the
+    // migration's bytes: a projection fact with any other root set would be refused by the
+    // digest rule, and the test would again pass without reaching the committed rule.
+    const migration = await running.host.historical.resolve(project.projectId,
+      project.migrationSnapshot, "m4c-orphan-roots");
+    const transaction = running.host.revisions.projectTransactions(project.projectId)
+      .find((row) => row.state === "committed");
+    const frameCount = (await running.host.projectResolver.resolveActivated(project.projectId)).frame_count;
+    running.host.revisions.compose((db) => db.prepare(
+      `INSERT INTO openfilm_projection_fact(project_id, snapshot_id, migration_id, source_digest,
+        engine_upstream_sha, roots_json, subtitles_json, frame_count, transaction_id)
+       VALUES(?,?,?,?,?,?,?,?,?)`)
+      .run(project.projectId, orphan, "mig_orphan", digest,
+        "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+        JSON.stringify(migration.roots), JSON.stringify(migration.subtitles),
+        frameCount, transaction?.transaction_id ?? "txn_unknown"));
     await expect(running.host.historical.resolve(project.projectId, orphan, "m4c-orphan"))
       .rejects.toMatchObject({ status: 422 });
     // And the route refuses it too.

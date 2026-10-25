@@ -6,7 +6,7 @@
   "tests": [
    "tests/wave2/m4c/history-contracts-and-resolver.test.ts::accepts a well-formed restore request and refuses anything else",
    "tests/wave2/m4c/history-contracts-and-resolver.test.ts::names the operation in the failure body, and the schema accepts both operations",
-   "tests/wave2/m4c/history-route.test.ts::answers a restore request that carries an unknown field with 400"
+   "tests/wave2/m4c/history-contracts-and-resolver.test.ts::answers a restore request that carries an unknown field with 400"
   ],
   "evidence": "RestoreRequestV1 的 schema、TypeScript type 与 validator 同提交移动；未知字段 400；失败体的 operation 是封闭枚举 adopt_materialization|restore_snapshot，且 aborted 不推进 revision。"
  },

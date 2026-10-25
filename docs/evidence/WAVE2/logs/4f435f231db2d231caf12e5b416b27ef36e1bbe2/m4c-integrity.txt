@@ -1,0 +1,22 @@
+PASS capture commit exists
+PASS capture began from a clean tree
+PASS 20 command logs and exits match
+PASS the manifest lists all 17 required commands
+PASS the manifest lists every command that finished in the capture (21 finished)
+PASS the manifest names a checked manifest for the same capture, with no command lost
+FAIL test reference names a test that does not exist: tests/wave2/m4c/history-route.test.ts::answers a restore request that carries an unknown field with 400
+PASS all 20 required M4C cases are directly mapped
+PASS capture tree mounts the edits route
+PASS capture tree mounts the history route
+PASS capture tree mounts the restore route
+PASS capture tree mounts the undo route
+PASS capture tree mounts the redo route
+PASS the frozen restore-plan vectors carry the frozen domain
+PASS the frozen restore-plan vectors hold 18 cases
+PASS every one of the 15 single-field mutations moves the hash, and the reordered case does not
+PASS every failed capture is indexed (19 listed)
+PASS the index names no capture that did not fail
+PASS the gate's own rule and the shared rule agree on every capture
+PASS declaration stays within the M4C ceiling
+PASS the external review is not self-signed
+checks_failed=1 capture_commit=4f435f231db2d231caf12e5b416b27ef36e1bbe2

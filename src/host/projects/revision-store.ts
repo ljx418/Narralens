@@ -4,7 +4,7 @@ import { JOB_TABLE_DDL, migrateJobKind } from "./job-kind-migration.js";
 import type { ApiError, AssetImportResponse, EditResponse, JobEvent, JobState } from "../../contracts/types.js";
 import type { ControlledWriteFailureResponseV1, ControlledWriteResponseV1 } from "../../contracts/wave2-types.js";
 import { HttpError } from "../api-error.js";
-import { insertProjectionFact, verifyOrInsertProjectionFact } from "../adoption/adoption-store.js";
+import { verifyOrInsertProjectionFact } from "../adoption/adoption-store.js";
 
 export type JournalState = "prepared" | "source_validated" | "metadata_committed" | "aborted" | "compensated" | "attention";
 
@@ -533,7 +533,15 @@ export class RevisionStore {
         .run(input.snapshotId, input.projectId, input.sourceDigestAfter, at);
       // The one insert, with its validation, inside this transaction. A second copy of the
       // statement is how the checks came to exist without ever running.
-      insertProjectionFact(this.#db, { project_id: input.projectId, snapshot_id: input.snapshotId,
+      //
+      // **Inserted or verified, not blindly inserted.** M4C made a second adoption of the
+      // *same* content reachable — restore the old closure and adopt the same materialization
+      // again — and the content address is the same, so the projection fact for that
+      // snapshot id already exists. A plain INSERT would fail on the primary key and take
+      // the whole commit with it, which is the one outcome a restore-and-re-adopt must not
+      // have. A second writer that proves the *same* content may proceed; one that proves
+      // different content rolls the commit back.
+      verifyOrInsertProjectionFact(this.#db, { project_id: input.projectId, snapshot_id: input.snapshotId,
         migration_id: input.projection.migration_id, source_digest: input.sourceDigestAfter,
         engine_upstream_sha: input.projection.engine_upstream_sha,
         roots: JSON.parse(input.projection.roots_json) as string[],
