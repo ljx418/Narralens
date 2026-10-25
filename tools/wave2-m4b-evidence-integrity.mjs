@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { failedCaptures } from "./wave2-capture-outcome.mjs";
-import { join } from "node:path";
+import { join, dirname } from "node:path";
 import { resolve } from "node:path";
 
 const root = resolve(".");
@@ -35,21 +35,70 @@ failures === 0 && pass(`${manifest.commands.length} command logs and exits match
 // manifest regenerated from a capture that was killed before its own manifest step would list
 // fewer commands and pass every other check.
 {
+  // **The required set is the commands that are finished before the manifest is generated.**
+  //
+  // An earlier version demanded seventeen names, including `manifest` and `m4b-integrity` —
+  // the two the capture writes *after* it has generated the manifest it is checking. A
+  // manifest generated inside a capture therefore physically cannot carry them, so the gate
+  // failed every capture it was part of, and re-capturing M4B evidence at the fixed commit
+  // could only produce a failed capture. The set below is what the manifest can contain when
+  // it is checked, and the two later commands are checked by the agreement rule below
+  // instead.
   const requiredCommands = [
     "check", "typecheck", "contracts", "m2.1", "wave2-w2.0", "wave2-m3", "wave2-m4a",
     "wave2-m4b", "wave2-fitness", "build", "wave1-historical", "m4a-historical",
-    "wave1-integrity", "m4a-integrity", "credential-scan", "manifest", "m4b-integrity",
+    "wave1-integrity", "m4a-integrity", "credential-scan",
   ];
+  // Written after the manifest is generated, so they may be absent from a manifest that was
+  // checked inside its own capture and present in the committed copy.
+  const writtenAfterTheManifest = new Set(["manifest", "m4b-integrity"]);
   const present = new Set((manifest.commands ?? []).map((entry) => entry.name));
   const absent = requiredCommands.filter((name) => !present.has(name));
   if (absent.length === 0) pass(`the manifest lists all ${requiredCommands.length} required commands`);
   else fail(`the manifest is missing commands: ${absent.join(", ")}`);
-  // And the file the gate read must exist, or the capture never ran its own manifest.
-  const checked = String(manifest.checked_manifest ?? "");
-  if (checked !== "" && existsSync(resolve(root, checked))) {
-    pass("the manifest names a checked manifest file that exists");
+  // And the manifest must agree with the capture directory: every command that finished
+  // there is listed, and nothing is listed that did not finish. This is the check that
+  // catches a manifest which quietly omits a command — the hole the fixed command set alone
+  // would leave.
+  const firstLog = manifest.commands?.[0]?.log;
+  if (typeof firstLog !== "string" || firstLog === "") {
+    fail("the manifest lists no command logs, so the capture directory cannot be found");
   } else {
+    const directory = dirname(resolve(root, firstLog));
+    const finished = readdirSync(directory).filter((name) => name.endsWith(".exit"))
+      .map((name) => name.slice(0, -".exit".length));
+    const unlisted = finished.filter((name) => !present.has(name) && !writtenAfterTheManifest.has(name));
+    if (unlisted.length === 0) {
+      pass(`the manifest lists every command that finished in the capture (${finished.length} finished)`);
+    } else {
+      fail(`the manifest omits commands that finished in the capture: ${unlisted.join(", ")}`);
+    }
+  }
+  // And the file the capture checked must exist, and must be a manifest for *this* capture.
+  // The committed manifest names the copy inside the capture's log directory, so the two
+  // files differ; what has to agree is the capture they describe.
+  const checked = String(manifest.checked_manifest ?? "");
+  if (checked === "" || !existsSync(resolve(root, checked))) {
     fail(`the manifest's checked_manifest is missing or does not exist: ${checked || "(unset)"}`);
+  } else {
+    try {
+      const checkedManifest = JSON.parse(readFileSync(resolve(root, checked), "utf8"));
+      const sameCapture = checkedManifest.capture_commit === manifest.capture_commit;
+      const checkedNames = new Set((checkedManifest.commands ?? []).map((entry) => entry.name));
+      // The capture checked the manifest inside its own log directory, which is generated
+      // before the two last commands finish, so it carries *fewer* commands than the
+      // committed copy. The direction that matters is the one below: nothing the capture
+      // checked may be missing from the manifest being read.
+      const lost = [...checkedNames].filter((name) => !present.has(name));
+      if (sameCapture && lost.length === 0) {
+        pass("the manifest names a checked manifest for the same capture, with no command lost");
+      } else {
+        if (!sameCapture) fail("the checked manifest describes a different capture");
+        if (lost.length > 0) fail(`the checked manifest lost commands: ${lost.join(", ")}`);
+      }
+    } catch {
+      fail(`the manifest's checked_manifest cannot be read: ${checked}`);
+    }
   }
 }
 const required = new Set(["TX-01", "TX-02", "TX-03", "TX-04", "TX-05", "TX-06", "TX-07", "TX-08B", "TX-11B", "TX-13", "TX-14", "M4B-NW", "REG"]);
@@ -147,10 +196,13 @@ const required = new Set(["TX-01", "TX-02", "TX-03", "TX-04", "TX-05", "TX-06", 
     const outcomePath = join(directory, "overall.txt");
     const recorded = existsSync(outcomePath) ? readFileSync(outcomePath, "utf8").trim() : null;
     const recordedFailure = recorded !== null && recorded !== "" && recorded !== "0";
-    // The end marker is `git-status-after.txt` alone: every capture script writes it last.
-    // `overall.txt` is written before the manifest and the gate, so it cannot mark the end.
-    const reachedTheEnd = recorded !== null
-      || existsSync(join(directory, "git-status-after.txt"));
+    // The end marker is `git-status-after.txt` alone. `overall.txt` is written *before* the
+    // manifest and the gate, so a capture killed in that window has every exit green and an
+    // outcome of "0" — and `recorded !== null` would have called that the end of the script.
+    // The comment used to say the new rule while the code still ran the old one, which is
+    // exactly the kind of drift this gate exists to catch; the code and the comment now say
+    // the same thing.
+    const reachedTheEnd = existsSync(join(directory, "git-status-after.txt"));
     if (!reachedTheEnd) failures.push("the capture never reached the end of its script");
     else if (recordedFailure) failures.push("the capture recorded a failed outcome");
     else if (diagnostic) failures.push("the capture carries a failure diagnostic");

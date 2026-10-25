@@ -22,11 +22,15 @@ import { join, resolve } from "node:path";
  *   6. the capture **never reached the end of its script**.
  *
  * The sixth is the one that closes the residual hole, and the end marker it uses is
- * `git-status-after.txt` **alone**, because every capture script writes it last. It is not
- * `overall.txt`: the current script writes that one *before* its own manifest and its own
+ * `git-status-after.txt` **alone**, because the Wave 2 capture scripts write it last. It is
+ * not `overall.txt`: the current script writes that one *before* its own manifest and its own
  * gate, so a capture killed in that window has every exit green, an outcome of "0" and no
  * diagnostic — and would be classified clean. `overall.txt` stays a failure *signal* (rule 4),
  * never an end marker.
+ *
+ * The Wave 1 and M2.1 capture scripts predate the end marker and do not write one. Their
+ * captures live under `docs/evidence/WAVE1/logs`, which this rule does not read, so the
+ * rule and the directories it reads stay in step.
  */
 
 /** The commands whose non-zero exit is expected, and therefore not a failure by themselves. */
@@ -105,11 +109,13 @@ export function diagnosticFor(directory) {
   // The prefix rule, so the gate and this module agree on what a diagnostic is. An earlier
   // version accepted only `.md` and `.txt` here while the gate accepted any extension,
   // which would make a `.json` diagnostic failed by one and clean by the other.
-  let names;
-  try { names = readdirSync(directory); } catch { return null; }
-  for (const name of names) {
-    if (!name.startsWith("CAPTURE_FAILED_DIAGNOSTIC.")) continue;
-    return join(directory, name);
-  }
-  return null;
+  let entries;
+  try { entries = readdirSync(directory, { withFileTypes: true }); } catch { return null; }
+  // Sorted, and files only. The read order is not a specification, so an index that named
+  // "the" diagnostic by read order would name a different file on a different machine; and a
+  // *directory* with the diagnostic's prefix is not a diagnostic at all.
+  const names = entries.filter((entry) => entry.isFile() && entry.name.startsWith("CAPTURE_FAILED_DIAGNOSTIC."))
+    .map((entry) => entry.name).sort();
+  if (names.length === 0) return null;
+  return join(directory, names[0]);
 }

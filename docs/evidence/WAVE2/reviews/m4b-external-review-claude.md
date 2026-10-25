@@ -303,4 +303,287 @@ src/adapters/hypit/hypit-engine-adapter.ts`），并作为 M4C 的补丁保存�
 
 > 本节由**第九个**全新独立上下文复审填写。该上下文没有参与任何前轮审查或修复。
 
-见下。
+**裁决：NOT PASS（BLOCKER=0，MAJOR=2，MINOR=4）。**
+
+### 10.0 方法与边界
+
+复审对象是 `4d85cbd`（HEAD），冻结候选 `b2a4efb`，M4B 捕获 `10d96e5`。所有判定只依据
+`git show 4d85cbd:<path>` 与 `git diff 10d96e5 4d85cbd -- <paths>`，不在真实树上执行任何写命令；
+需要实跑的部分在 `/home/administrator/m4c-review9` 的副本里做。
+
+实跑结果（在 HEAD 的副本上）：
+
+| 项目 | 结果 |
+| --- | --- |
+| `pnpm check`（HEAD 全量） | **76 个测试文件 / 914 个测试全过**（1180.5s）+ golden 向量 8/8 + `vite build` 成功 |
+| `pnpm test:wave2:m4b` | 6 个文件 / **58 个测试全过**（372.6s） |
+| `tsc --noEmit` | 通过 |
+| 凭据扫描 `tools/secret-scan.ts` | **findings=0 / 260 files**（捕获时同样是 0 / 260） |
+| 完整性门（已提交 manifest） | **14 PASS / 0 FAIL** |
+| 已提交 manifest vs 现场重新生成 | **逐字节相同**（`diff` 为空，可复现） |
+| vendor checkout | `e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3`，工作树干净 |
+
+本轮的两个 MAJOR 都**不是** M4B 的采用逻辑，而是第八轮那四个修复本身：**修复 1 只做了一半，
+修复 2 把捕获脚本弄坏了。** 采用逻辑本身我在这一轮重新读了
+`adoption-coordinator.ts` / `adoption-store.ts` / `author-source-publisher.ts` /
+`revision-store.ts#commitAdoption` / `activated-projection-service.ts` / `impact-service.ts`，
+逐条核了发布原子性、prepared 恢复、`commitAdoption` 的单事务、projection fact、
+发布边界的 rights/锁/源重查、失败重放与三个原生可编辑 clip——**没有发现新的产品缺陷。**
+
+### 10.1 四项修复的逐条裁决
+
+#### 修复 1：末尾标记只用 `git-status-after.txt` —— **只做了一半（MAJOR-1）**
+
+共享规则做对了：
+
+- `tools/wave2-capture-outcome.mjs:93`
+  `const reachedTheEnd = existsSync(resolve(directory, "git-status-after.txt"));`
+- 同一文件 `:89-92` 的注释与之一致。
+
+**门自己的那份实现没有改，只改了注释**：
+
+- `tools/wave2-m4b-evidence-integrity.mjs:150-153`
+  ```js
+  // The end marker is `git-status-after.txt` alone: every capture script writes it last.
+  // `overall.txt` is written before the manifest and the gate, so it cannot mark the end.
+  const reachedTheEnd = recorded !== null
+    || existsSync(join(directory, "git-status-after.txt"));
+  ```
+  注释写的是新规则，**代码仍然是旧的「`overall.txt` 或 `git-status-after.txt`」**。
+  第八轮的 diff 里，这一处只有注释行变了，代码行原封不动。
+
+所以「两份实现都用 `git-status-after.txt` 单独作末尾标记」这句话对门不成立；
+这正是本轮要查的那一项，而它是假的。详细失败场景与修法见 10.2 的 MAJOR-1。
+
+#### 修复 2：门要求 17 条命令名 + `checked_manifest` 指向存在的文件 —— **做了一半，且弄坏了捕获脚本（MAJOR-2）**
+
+两条检查确实存在（`tools/wave2-m4b-evidence-integrity.mjs:34-54`），`checked_manifest` 的存在性那半条
+工作正常（实测 `PASS the manifest names a checked manifest file that exists`）。
+
+但**「17 条命令名」那半条会让每一次新的 M4B 捕获都失败**，因为捕获脚本交给门的那份 manifest
+**只能有 15 条**：
+
+- `tools/wave2-m4b-run-evidence.sh:86` 写 `manifest.cmd`，`:87` 跑生成器写出 `$LOGS/manifest.json`，
+  `:89` 才写 `manifest.exit`；`:93`/`:94` 才跑门，`:96` 才写 `m4b-integrity.exit`。
+- 生成器 `tools/wave2-m4b-evidence-manifest.mjs:22` 的 `commands` 是**目录里现存的 `.exit` 文件**。
+  于是 manifest 生成的那一刻，`manifest.exit` 与 `m4b-integrity.exit` 都还不存在 → 最多 15 条。
+- 实测：已提交的捕获里那份 `manifest.json` 恰好就是 15 条（`build, check, contracts,
+  credential-scan, m2.1, m4a-historical, m4a-integrity, typecheck, wave1-historical,
+  wave1-integrity, wave2-fitness, wave2-m3, wave2-m4a, wave2-m4b, wave2-w2.0`）。
+
+这条检查对**已提交的** manifest 是对的（被杀的截断捕获确实会被抓到），错在它被无差别地用在了
+捕获**自己**的那一份上。详细失败场景与修法见 10.2 的 MAJOR-2。
+
+#### 修复 3：两份实现对「诊断」的判定一致；索引不再用一句话描述两种失败 —— **已做（PASS）**
+
+- `tools/wave2-capture-outcome.mjs:104-115`：`diagnosticFor` 用前缀 `CAPTURE_FAILED_DIAGNOSTIC.`；
+- `tools/wave2-m4b-evidence-integrity.mjs:146`：`names.some((name) => name.startsWith("CAPTURE_FAILED_DIAGNOSTIC."))`；
+  两者是**同一条前缀规则**，`.json` 之类的扩展名不再一边失败一边干净。✓
+- `tools/wave2-m4b-evidence-manifest.mjs:72-76`：「捕获没有跑到脚本末尾」与「某条命令没有 `.exit`」
+  现在是两句话，不再共用一句 `did not finish (no exit file)`。✓
+
+#### 修复 4：M4C 的范围泄漏已移出 M4B 树，且 M4B 行为未变 —— **已做（PASS）**
+
+- `git grep RestoreEnginePlanIntent 4d85cbd -- src/ tests/ contracts/` → **0 命中**。
+  类型、类型守卫、以及 Hypit adapter 里那一行都不在了；`docs/migration/WAVE2/17_M4C_DEVELOPMENT_GATE.md`
+  等文档里还提到它，但那是 M4C 自己的设计文档，不是 M4B 的代码。
+- 行为不变：类型既然没了，Hypit adapter 里那行 `isRestoreEnginePlanIntent` 本来也编译不过；
+  现在 `restore_snapshot` 落到 `intent.op !== "replace_visual_asset"` 分支，仍是 **422 UNSUPPORTED_EDIT**，
+  只是措辞从「cannot plan an OpenFilm controlled operation」变成「cannot plan a restore_snapshot operation」。
+  没有任何测试断言旧措辞（`git grep "OpenFilm controlled operation"` 在 `tests/` 下 0 命中）。
+  M4B 从不规划 restore（`history_restore` 未挂载，门已核 `serverAtCapture`）。
+- `git diff 10d96e5 4d85cbd -- src/ tests/ contracts/ tools/` 共 **6 个文件，全部在 M4B 范围内**：
+  `src/` 只有上面那两处移除，`tools/` 是证据机器本身（`wave2-capture-outcome.mjs`、
+  `wave2-m4b-evidence-integrity.mjs`、`wave2-m4b-evidence-manifest.mjs`、`wave2-m4b-run-evidence.sh`）。
+
+### 10.2 本轮引入的新缺陷
+
+#### MAJOR-1：门自己那份末尾标记规则没有跟着改，只改了注释
+
+**位置**：`tools/wave2-m4b-evidence-integrity.mjs:150-153`
+
+**具体失败场景**：一次捕获在脚本写完 `m4b-integrity.exit`（`:96`）之后、`git status --porcelain >
+"$LOGS/git-status-after.txt"`（`:100`）之前被杀。此时该目录里有：每一份 `.exit`（含
+`manifest.exit`、`m4b-integrity.exit`）、`overall.txt` 内容为 `0`、没有 `.cmd` 缺 `.exit`、没有诊断文件、
+**没有 `git-status-after.txt`**。
+
+- 共享规则（`wave2-capture-outcome.mjs:93-96`）→ 末尾标记缺失 → 判为失败并进索引。**正确。**
+- 门自己的实现（`:152-153`）→ `recorded !== null` 为真 → `reachedTheEnd` 为真 → 不判失败；
+  `recordedFailure` 为假（`overall.txt` 是 `0`）、无诊断 → **门判它干净**。
+
+两份实现因此**不一致**。好消息是它不是静默的：门自己的交叉检查（`:178-184`）会报
+「the gate's own rule and the shared rule disagree」，门以非零退出；坏消息是这个交叉检查给出的诊断是
+「两份实现不一致，其中一份错了」，而不是「末尾标记规则被改了一半」，而且门自己的实现因为是**更弱**的那一份
+（旧规则），**再也无法独立地发现共享规则的多报**——两份实现的价值恰恰在于各自能发现对方的错，
+而现在在这一维度上门是旧规则的副本。
+
+更直接的缺陷是：**门的注释（`:150-151`）说的规则和它下面的代码相反。** 「注释说的和代码相反」
+正是前几轮反复点名的缺陷类别。
+
+我也核对了当前语料：32 个捕获目录里，**没有一个**是「有 `overall.txt` 而没有 `git-status-after.txt`」
+（有 `overall.txt` 的 4 个全都有 `git-status-after.txt`；缺 `git-status-after.txt` 的 3 个都没有
+`overall.txt`，且都带诊断）。所以今天两份规则仍然一致（门输出
+`PASS the gate's own rule and the shared rule agree on every capture`），**但这是语料的巧合，不是规则的等价**。
+
+**修法**（一行）：
+
+```js
+// tools/wave2-m4b-evidence-integrity.mjs:152-153
+const reachedTheEnd = existsSync(join(directory, "git-status-after.txt"));
+```
+
+（删掉 `recorded !== null ||` 那一支。`recordedFailure` 仍然是独立的失败信号，保留不动。）
+
+#### MAJOR-2：门新加的「17 条命令名」检查让每一次新的 M4B 捕获都失败
+
+**位置**：`tools/wave2-m4b-evidence-integrity.mjs:38-46` 与
+`tools/wave2-m4b-run-evidence.sh:86-98`
+
+**具体失败场景**：在 `4d85cbd` 上跑 `pnpm evidence:wave2:m4b`。
+
+1. 脚本 `:86-87` 写 `manifest.cmd` 并跑生成器写出 `$LOGS/manifest.json`。生成器的 `commands`
+   来自目录里现存的 `.exit` 文件；此时只有 15 个 `.exit`（`manifest.exit` 在 `:89` 才写，
+   `m4b-integrity.exit` 在 `:96` 才写）→ 这份 manifest **必然只有 15 条**。
+2. 脚本 `:93-94` 把这份 manifest 交给门。门的新检查 `:38-46` 要求 17 条
+   （`..., "manifest", "m4b-integrity"`）→ **`FAIL the manifest is missing commands: manifest, m4b-integrity`**。
+3. 门以 1 退出 → 脚本 `:98` 把 `overall` 置 1 → `:105-126` 写出 `CAPTURE_FAILED_DIAGNOSTIC.md` →
+   脚本以 1 退出。这份捕获会被共享规则索引成**一次失败的捕获**。
+
+我在副本里按脚本的行序复现了这两步（把捕获目录还原到「`manifest.cmd` 已写、`manifest.exit` 未写、
+`m4b-integrity.*` 未写」的状态，再跑生成器与门），门输出：
+
+```
+PASS 15 command logs and exits match
+FAIL the manifest is missing commands: manifest, m4b-integrity
+PASS the manifest names a checked manifest file that exists
+...
+checks_failed=1 capture_commit=10d96e571e8f13d564f619c426fdf5781dc4f9be
+GATE_EXIT=1
+```
+
+**后果**：**在 `4d85cbd` 上，冻结证据已经无法重新捕获**——每次捕获都必然是一次失败捕获。
+已提交的 `10d96e5` 之所以是绿的，是因为它是用**上一版**门捕获的（它的 `m4b-integrity.txt` 里没有
+那条新检查）。这条 MAJOR 正好落在「证据机器」这一层，也就是前八轮 MAJOR 反复出现的同一层。
+
+**修法**（二选一）：
+
+- 让门区分两份 manifest：捕获**自己**那份用 15 条的必需集合（`manifest` 与 `m4b-integrity` 是
+  它自己正在跑的两步，在生成它的那一刻还不存在），**已提交**那份用 17 条；或者
+- 调整脚本顺序（例如先写 `manifest.exit` 再跑门、门对自己的那份只要求除 `m4b-integrity` 外的 16 条），
+  并让生成器把「捕获自己那份」标注出来供门判断。
+
+无论哪种，都必须让「必需命令集合」与「这份 manifest 在被检查时物理上可能包含哪些命令」一致。
+
+#### MINOR-1：「每个捕获脚本都最后写 `git-status-after.txt`」这句话不成立
+
+`tools/wave1-run-evidence.sh`、`tools/m2.1-run-evidence.sh`、`tools/m2.1-finalize-evidence.sh`
+都不写 `git-status-after.txt`（grep 计数 0；只有 `w2.0`、`wave2-m3`、`wave2-m4a`、`wave2-m4b` 写）。
+共享规则只扫 `docs/evidence/WAVE2/logs`，而 Wave 1 的捕获在 `docs/evidence/WAVE1/logs`，
+所以今天只是潜在的；但只要这些脚本的捕获被放进那棵树，就会被误判成「没有跑到脚本末尾」。
+修法：把注释改成「WAVE2 的捕获脚本都最后写它」，或给那三个脚本补上这个标记。
+
+#### MINOR-2：`checked_manifest` 只查「存在」，不查「是捕获自己那份」
+
+门从不读 `manifest.checked_manifest` 的内容，只做 `existsSync`（`:48-53`）。
+而 `tools/wave2-m4b-run-evidence.sh:84-85` 的注释说这个字段「names the file the gate actually read」——
+门并没有读它，它读的是 `argv[2]`。一份手工改过的 manifest 把 `checked_manifest` 指向任何已存在的文件都能过这道检查。
+修法：门读它、并核对它的 `capture_commit` 与 `commands` 是否与被审的那份一致。
+
+#### MINOR-3：TX-13 的「重读 rights」没有被任何 M4B 行为测试钉住
+
+case 的 evidence 文本声称「发布前重读 impact/materialization/view/rights，并重查锁」，
+但它引用的三条测试证明的全是**锁**；`tests/wave2/m4b/adoption-route.test.ts` 里没有一处提到 rights
+（`grep rights` 0 命中）。代码确实重读了 rights（`adoption-coordinator.ts:244` 比对
+`finalMaterialization.rights_digest !== materialization.rights_digest`；
+`impact-service.ts` 的 `#assertSpecStillCurrent` 比对 `row.rights_digest !== spec.rights_digest`），
+且 `materialization.rights_digest` 是可写的（`materialization-store.ts:266` 的 UPDATE），
+所以这条主张为真、不是恒真式——但它没有回归测试保护。另外 M4B 路线测试用的 rights digest 是 harness 的
+`testRightsDigest(...)` 占位值，不是生产 `BindingService` 的真值（harness 自己在注释里说明了这一点）。
+
+#### MINOR-4：`diagnosticFor` 返回 readdir 顺序里的第一个前缀命中，且不排除目录
+
+`tools/wave2-capture-outcome.mjs:108-113`。同一目录里同时有 `.md` 与 `.txt` 时，索引里记哪一个是不确定的；
+一个恰好叫 `CAPTURE_FAILED_DIAGNOSTIC.foo` 的**目录**也会被当成诊断。不影响判定（门只看「有没有」），
+但索引里的路径不是确定的。
+
+### 10.3 证据是否诚实
+
+**总体判断：证据本身是诚实的、可复现的、内部一致的；不诚实的是它对**当前 HEAD**的可重新捕获性，
+而那正是 MAJOR-2。** 逐条：
+
+- **可复现**：已提交的 `docs/evidence/WAVE2/evidence-manifest-m4b.json` 与现场重新生成的
+  `node tools/wave2-m4b-evidence-manifest.mjs 10d96e5… <out>` **逐字节相同**。✓
+- **门通过**：在 HEAD 上对已提交的 manifest 跑门 → **14 PASS / 0 FAIL**。✓
+- **捕获日志完整**：`10d96e5` 的 17 条命令全部有 `.cmd`/`.txt`/`.exit`；`wave1-integrity` 与
+  `m4a-integrity` 按设计为 1、其余全为 0；`check.txt` 记录 76 个测试文件 / 914 个测试全过，
+  `wave2-m4b.txt` 记录 58 个测试全过；`credential-scan.txt` 记录 findings=0 / 260 files，
+  我在 HEAD 上重跑同样是 0 / 260。✓
+- **失败索引**：`known_failed_captures` 17 条，与两份规则在当前语料上一致；每条带 `kept: true` 与
+  「它不是一次通过的运行的证据，也永远不会被当作一次」这句说明。✓
+- **`route_status.history_restore: false`**：门对**捕获树**核过 `/history/restore` 未挂载；
+  `src/host/server.ts` 自 `10d96e5` 起未变，HEAD 仍然如此。✓
+- **`claim_limits` 逐条核对**：
+  - 冻结失败并集确实是 `409 | 422 | 423 | 428 | 500`（`src/contracts/wave2-types.ts:218`），
+    所以关于 500/503 的边界说明属实；`HOST_RESOURCE_EXHAUSTED` 的别名在别处确实是 503。✓
+  - 「900 帧三片段」属实：测试用固定上游真的跑 `openfilm.mjs render`，再用
+    `ffprobe -count_frames` 数出**解码**帧数为 900；我核了 vendor checkout 就在
+    `e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3` 且工作树干净。✓
+  - 「Wave 1 / M4A 的 current-tip 完整性检查按设计失败，历史门通过且非零日志被保留」：与
+    `wave1-integrity exit=1`、`m4a-integrity exit=1`、`wave1-historical exit=0`、
+    `m4a-historical exit=0` 一致。✓
+  - 「不匹配任一 digest 即终态 attention，M4B 不自动清除」：与
+    `adoption-coordinator.ts:292-302`（latch `ADOPTION_RECOVERY_UNPROVABLE`）一致。✓
+  - 关于 `docs/evidence/WAVE2/security/credential-scan-m4b.json` 是 `be93a183…` 那次 FAIL 扫描的说法：
+    与索引里 `be93a183` 的 `credential-scan exit=1` 一致；但那份 JSON **内部没有 capture id**，
+    所以「它就是那一次扫描的产物」只能由时间戳与内容推断，无法从文件本身证明。**记为观察，不是缺陷。**
+- **case 文件**：
+  - TX-11B / TX-14 的媒体主张站得住：渲染两次、`ffprobe` 数出 900 帧、只改中镜 `overrides` 后
+    两侧 clip id 不变（`["shot-001","shot-002","shot-003"]`）、第二次渲染摘要改变——测试逐条断言了这些。
+  - TX-11B 的 notes 老实交代「采用**前**的源没有被渲染」。✓
+  - TX-01/02/03/04/05/06/07/08B/M4B-NW/REG 的引用都被门核对过（引用的测试名确实存在；
+    TX-08B 引了全部 **18** 条 crash 边界行）。✓
+  - 唯一的证据缺口是 MINOR-3 里的 TX-13 rights 部分。
+- **捕获与 HEAD 的差距**：`git diff 10d96e5 4d85cbd -- src/ tests/ contracts/ tools/` **不为空**
+  （6 个文件）。`src/` 的两处是 Fix 4 说的 M4C 类型移除，对 M4B 行为无影响（我在 HEAD 上重跑了
+  **完整 `pnpm check`：76 个测试文件 / 914 个测试全过**，golden 向量 8/8，构建成功）。
+  所以**产品侧的证据仍然成立**。
+  但**证据机器**在 HEAD 上已经变了，而按 MAJOR-2，它现在连一次绿色捕获都产不出来——
+  也就是说「冻结证据可以被重新捕获」这个前提在 HEAD 上**不成立**，而已提交的证据仍然是绿的
+  （它是用上一版门捕获的）。这一条必须写进模块的已知边界，否则读者会以为那份 manifest 可以随时重放。
+
+### 10.4 未能判定的事项
+
+1. **HEAD 上的完整 `pnpm check` 已在副本上跑完并通过**（76 个测试文件 / 914 个测试、golden 向量
+   8/8、`vite build` 成功）。所以「捕获 `10d96e5` 早于 HEAD」这一点**不再影响产品侧结论**：
+   HEAD 的树是绿的，`src/` 的那两处移除对 M4B 行为无影响，已被这 914 个测试覆盖。
+   未复现的只有**证据机器本身**在 HEAD 上的行为（见本节第 2 条）。
+2. **我没有真正重跑一次 `pnpm evidence:wave2:m4b`**（那会写真实树）。MAJOR-2 的失败是**按脚本行序
+   在副本里逐行复现**「写 `manifest.cmd` → 跑生成器 → 跑门」这三步，并直接读到了门的那一行 FAIL
+   与退出码 1；不是完整跑一次脚本。
+3. `docs/evidence/WAVE2/security/credential-scan-m4b.json` 与 `be93a183…` 的对应关系是**推断**，不是证明
+   （文件内部没有 capture id）。
+4. 按本轮要求，我在形成裁决之前**没有读** `docs/evidence/WAVE2/reviews/m4b-external-review-claude.md`
+   的前九节；第 9 节对四项修复的描述是按源码独立核对后才对照的，结论是**其中三项成立、
+   一项（修复 1）只做了一半**，且修复 2 引入了 MAJOR-2。
+5. 我没有独立复核 900 帧的真实媒体内容本身（除通过测试里那次真实渲染 + `ffprobe` 帧计数）；
+   「三片段、两侧 id 不变、中镜可原生编辑」这些断言来自测试本身，我没有另写一份独立的复现脚本。
+
+### 10.5 结论
+
+**第九轮裁决：BLOCKER=0、MAJOR=2 → 不满足 M4B 外审 PASS 的条件。**
+
+M4B 的采用逻辑本身，这一轮重新读下来是站得住的：发布的原子性、prepared 恢复的四分法、
+`commitAdoption` 的单事务与回滚矩阵、projection fact 的非恒真守卫、发布边界的锁/rights/源重查、
+失败重放的同键同体、以及三个原生可编辑 clip 的真实渲染证据，我没有找到新的产品缺陷。
+两个 MAJOR 都在**证据机器**这一层，而且都是第八轮那两个修复本身带进来的：
+
+- **MAJOR-1**：门自己的末尾标记规则只改了注释、没改代码，于是「两份独立实现」在一处退化成了
+  「一份新规则 + 一份旧规则」，靠语料巧合保持一致；门的注释还与自己的代码相反。
+- **MAJOR-2**：门新加的「17 条命令名」检查用在了捕获自己那份**物理上只有 15 条**的 manifest 上，
+  于是 **在 `4d85cbd` 上重新捕获 M4B 证据必然得到一份失败捕获**。
+
+两处修法都很小：MAJOR-1 删掉 `recorded !== null ||` 那一支；MAJOR-2 让「必需命令集合」与
+「这份 manifest 在被检查时可能包含哪些命令」一致（捕获自己那份 15 条、已提交那份 17 条，或调整脚本顺序）。
+
+修完这两处之后，**冻结证据需要重新捕获**：当前 `10d96e5` 是用上一版门捕获的，
+它证明不了 `4d85cbd` 这一版门的行为；而且按现状，新捕获根本产不出来。

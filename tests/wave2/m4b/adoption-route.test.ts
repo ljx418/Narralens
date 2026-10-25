@@ -330,6 +330,35 @@ describe("M4B production adoption route", () => {
     expect(running.host.revisions.projectTransactions(projectId).at(-1)?.state).toBe("aborted");
   }, 900_000);
 
+  it("re-reads the rights before publication, so a rights change after the impact stops it", async () => {
+    // TX-13 names two re-checks at the publication boundary: the locks and the rights. The
+    // lock half had a regression test; the rights half did not, so a change that dropped the
+    // rights re-read would have left every test green. This is that test.
+    let host: NarralensHost | undefined;
+    let materializationId = "";
+    const running = await start({ adoptionFault: (point) => {
+      if (point !== "after_prepared") return;
+      // The rights move after the impact was computed and after the stage was validated.
+      // The row is written directly because no production path may change a materialization's
+      // proven rights — that is exactly the event this test has to simulate.
+      host!.revisions.compose((db) => db.prepare(
+        "UPDATE materialization SET rights_digest=? WHERE materialization_id=?")
+        .run("9".repeat(64), materializationId));
+    } });
+    host = running.host;
+    hosts.push(running.host); dirs.push(running.base);
+    const prepared = await authorizedAdoption(running, "rights-drift");
+    materializationId = prepared.materialization.materialization_id;
+    const refused = await postAdoption(running, prepared.projectId, prepared.request);
+    // `IMPACT_STALE`, not a silent success: the publication boundary re-read the rights and
+    // found them moved.
+    expect(refused.status).toBe(428);
+    expect((refused.body.error as { code?: string } | undefined)?.code).toBe("IMPACT_STALE");
+    expect(refused.body).toMatchObject({ status: "aborted", previous_revision: 1, new_revision: 1 });
+    // **Nothing was published and the revision did not move.**
+    expect((await running.host.projectResolver.resolveActivated(prepared.projectId)).revision).toBe(1);
+  }, 900_000);
+
   it("does not over-block an adoption that preserves narration while a narration lock is held", async () => {
     // The other half of TX-03. A narration lock is not a lock this adoption touches — the
     // plan preserves narration — so it must not block it. The lock is taken *before* the
