@@ -40,7 +40,12 @@ describe("M4B AuthorSourcePublisher", () => {
     });
     expect(await readFile(resolve(f.active, "film.html"), "utf8")).toBe(f.after);
     expect(await readFile(resolve(f.active, f.token), "utf8")).toBe("asset-bytes");
-    expect(seen).toEqual(["asset_temp_fsynced", "asset_installed", "film_temp_fsynced", "film_renamed", "parent_fsynced"]);
+    // The exact sequence, still exact. M4C's fault matrix needs the boundary *before* the
+    // film is renamed over the active one — the window where the temporary file is durable
+    // but the active film is still the before bytes — so the publisher now reports it. The
+    // assertion is not loosened: it still pins the whole order, one element longer.
+    expect(seen).toEqual(["asset_temp_fsynced", "asset_installed", "film_temp_fsynced",
+      "before_film_rename", "film_renamed", "parent_fsynced"]);
   });
 
   it.each(["asset_temp_fsynced", "asset_installed", "film_temp_fsynced"] as const)(

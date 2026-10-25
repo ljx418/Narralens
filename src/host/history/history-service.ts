@@ -23,6 +23,7 @@ import { claimsControlledWrite, claimsHistoryRestore } from "../projects/control
 import type { HistoryCommandTranslator, HistoryIntentV1 } from "./history-command-translator.js";
 import type { HistoryStore } from "./history-store.js";
 import type { RestorePlanContext, RestorePlanner } from "./restore-planner.js";
+import { PUBLISHER_FAULT_POINTS } from "./history-fault-registry.js";
 
 /**
  * `HistoryService` (M4C gate §2, §4, §6).
@@ -62,26 +63,6 @@ export const HISTORY_OPERATION_KIND = "controlled_write.restore_snapshot";
  * Every one of them is a seam a test can fire at, so the rule each boundary implies can be
  * exercised rather than merely present.
  */
-export type HistoryFaultBoundary =
-  | "after_received" | "after_preconditions" | "after_target_resolved" | "after_plan"
-  | "after_stage" | "after_validate" | "after_snapshot_publish" | "after_prepared"
-  | "after_published" | "after_active_inspect" | "after_committed";
-
-/**
- * The publisher's own boundaries, in the registry's vocabulary.
- *
- * The publisher is shared with M4B and its boundary names are its own, so the mapping lives
- * here rather than in the publisher: the publisher must not grow a vocabulary for one
- * caller's test matrix.
- */
-const PUBLISHER_FAULT_POINTS: Readonly<Record<string, string>> = Object.freeze({
-  asset_temp_fsynced: "before_asset_install",
-  asset_installed: "after_asset_install",
-  film_temp_fsynced: "after_film_temp_fsync",
-  film_renamed: "after_film_rename",
-  parent_fsynced: "after_parent_fsync",
-});
-
 export interface HistoryServiceDeps {
   readonly coordinator: ProjectCoordinator;
   readonly revisions: RevisionStore;
@@ -536,7 +517,13 @@ export class HistoryService {
    */
   readonly #publisherFault = (boundary: string): void => {
     const mapped = PUBLISHER_FAULT_POINTS[boundary];
-    if (mapped === undefined) return;
+    if (mapped === undefined) {
+      // A publisher boundary this table does not know about would be *unreachable* for the
+      // fault matrix, and the matrix would then record a boundary as covered that no test
+      // ever reached. That is the "标绿" the gate forbids, so it is refused here instead of
+      // being skipped in silence.
+      throw new Error(`UNMAPPED_PUBLISHER_FAULT_POINT:${boundary}`);
+    }
     this.#deps.fault?.(mapped);
   };
 

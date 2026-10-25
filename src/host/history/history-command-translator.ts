@@ -19,9 +19,12 @@ import type { ProjectResolver } from "../projects/project-resolver.js";
  *
  * - **restore** names its target explicitly.
  * - **undo** names the nearest committed snapshot *below* the current revision.
- * - **redo** names the snapshot that was active before the most recent committed restore.
- *   There is no redo stack: a stack would be a second timeline, and this architecture has
- *   exactly one.
+ * - **redo** names the snapshot that was active before the restore — but only when the
+ *   **current commit is itself a committed restore**. After an adoption or an edit has been
+ *   committed on top of the restore, there is no redo: the current commit is not a restore,
+ *   and ADR-W2.0-006 §D-08 says the redo is derived from the current commit's immutable
+ *   fact. There is no redo stack: a stack would be a second timeline, and this architecture
+ *   has exactly one.
  */
 
 export type HistoryCommand = "restore" | "undo" | "redo";

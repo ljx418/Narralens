@@ -108,6 +108,8 @@ const FAULT_DESCRIPTORS: readonly HistoryFaultDescriptor[] = Object.freeze([
     description: "The replacement film has been renamed over the active one." },
   { point: "after_parent_fsync", stage: "publisher",
     description: "The active root's directory entry has been made durable." },
+  { point: "after_published", stage: "service",
+    description: "The author source has been published into the active root." },
   { point: "after_active_inspect", stage: "service",
     description: "The pinned upstream has read the published active source." },
   { point: "before_response", stage: "service",
@@ -130,6 +132,23 @@ export const HISTORY_DB_FAULT_POINTS: readonly string[] = Object.freeze(
     historyDbFaultPoint(statement, "before"),
     historyDbFaultPoint(statement, "after"),
   ]));
+
+/**
+ * The publisher's own boundary names, in the registry's vocabulary.
+ *
+ * The publisher is M4B's module and its vocabulary is its own. The mapping lives here so
+ * that the fault matrix and the service read **one** table: a boundary the table does not
+ * know about would be unreachable for the matrix, and the matrix would then record a
+ * boundary as covered that no test ever reached.
+ */
+export const PUBLISHER_FAULT_POINTS: Readonly<Record<string, string>> = Object.freeze({
+  asset_temp_fsynced: "before_asset_install",
+  asset_installed: "after_asset_install",
+  film_temp_fsynced: "after_film_temp_fsync",
+  before_film_rename: "before_film_rename",
+  film_renamed: "after_film_rename",
+  parent_fsynced: "after_parent_fsync",
+});
 
 /** Every boundary, service and database together. */
 export const HISTORY_ALL_FAULT_POINTS: readonly string[] = Object.freeze([

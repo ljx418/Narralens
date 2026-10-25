@@ -118,7 +118,24 @@ failures === 0 && pass(`${manifest.commands.length} command logs and exits match
       const name = rest.join("::").trim();
       if (name === "") continue;
       if (name.includes("%s")) continue; // a table-driven case: the file is the evidence
+      // **The citation is checked against the capture, not against the working tree.** A case
+      // that names a test the capture did not contain is a claim the capture does not back,
+      // and the working tree would hide exactly that.
       const text = readFileSync(resolve(root, file), "utf8");
+      let frozen = null;
+      try {
+        frozen = execFileSync("git", ["show", `${manifest.capture_commit}:${file}`], {
+          encoding: "utf8", maxBuffer: 16 * 1024 * 1024,
+        });
+      } catch { frozen = null; }
+      if (frozen === null) {
+        fail(`the cited file is not in the capture: ${ref}`);
+        continue;
+      }
+      if (!frozen.includes(name)) {
+        fail(`the cited test is not in the capture: ${ref}`);
+        continue;
+      }
       if (text.includes(name)) continue;
       const templates = [
         ...[...text.matchAll(/"([^"]*%s[^"]*)"/gu)].map((match) => match[1].split("%s")[0]),

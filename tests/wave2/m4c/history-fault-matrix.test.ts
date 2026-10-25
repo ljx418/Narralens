@@ -1,4 +1,6 @@
 import { createHash } from "node:crypto";
+import { readFileSync } from "node:fs";
+import { rm } from "node:fs/promises";
 import { readFile, readdir } from "node:fs/promises";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
@@ -6,6 +8,7 @@ import { NarralensHost } from "../../../src/host/server.js";
 import { SimulatedHistoryCrash } from "../../../src/host/history/history-service.js";
 import {
   HISTORY_ALL_FAULT_POINTS, HISTORY_DB_FAULT_POINTS, HISTORY_SERVICE_FAULT_POINTS,
+  PUBLISHER_FAULT_POINTS, historyDbFaultPoint,
 } from "../../../src/host/history/history-fault-registry.js";
 import {
   adoptedProject, postImpact, postRestore, restoreImpactBody, restoreRequestBody, start, startOn,
@@ -108,6 +111,9 @@ const BEFORE_PUBLICATION: ReadonlySet<string> = new Set([
   "after_stage_copy", "after_stage", "after_validate", "before_snapshot_publish",
   "after_snapshot_publish", "before_prepared", "after_prepared",
   "after_film_temp_fsync", "before_film_rename",
+  // The assets are installed before the film is renamed, so a fault there leaves the active
+  // film on the before bytes — the same answer as every other pre-publication boundary.
+  "before_asset_install", "after_asset_install",
 ]);
 
 const AFTER_PUBLICATION: ReadonlySet<string> = new Set([
@@ -115,13 +121,17 @@ const AFTER_PUBLICATION: ReadonlySet<string> = new Set([
   "before_response", "after_committed",
 ]);
 
-/** The boundaries the ordinary flow does not reach. */
-const NOT_REACHED: ReadonlySet<string> = new Set([
+/**
+ * The two asset-install boundaries.
+ *
+ * They need an asset to install, so they get their own setup (see the test body) rather
+ * than being recorded as "not reached".
+ */
+const ASSET_BOUNDARIES: ReadonlySet<string> = new Set([
   "before_asset_install", "after_asset_install",
 ]);
 
 function expectedOutcome(point: string): ExpectedOutcome {
-  if (NOT_REACHED.has(point)) return "not_reached";
   if (BEFORE_THE_TRANSACTION.has(point)) return "nothing";
   if (BEFORE_PUBLICATION.has(point)) return "aborted";
   if (AFTER_PUBLICATION.has(point)) return "committed";
@@ -151,6 +161,36 @@ describe("M4C TX-08C: the fault matrix", () => {
       .toBe(HISTORY_SERVICE_FAULT_POINTS.length + HISTORY_DB_FAULT_POINTS.length);
   });
 
+  it("the registry and the production code name the same boundaries, in both directions", () => {
+    // The registry claims a two-way contract, so it is checked here rather than asserted:
+    // every boundary the service, the publisher or the commit names is in the registry, and
+    // every boundary in the registry is named by one of them.
+    const service = readFileSync("src/host/history/history-service.ts", "utf8");
+    const publisher = readFileSync("src/host/adoption/author-source-publisher.ts", "utf8");
+    const store = readFileSync("src/host/projects/revision-store.ts", "utf8");
+    const called = new Set<string>();
+    for (const match of service.matchAll(/#deps\.fault\?\.\("([^"]+)"\)/gu)) called.add(match[1]!);
+    for (const match of publisher.matchAll(/boundary\("([^"]+)"\)/gu)) {
+      const mapped = PUBLISHER_FAULT_POINTS[match[1]!];
+      expect(mapped, `the publisher's boundary ${match[1]!} is not in the registry's mapping`).toBeDefined();
+      called.add(mapped!);
+    }
+    for (const match of store.matchAll(/statement\("([^"]+)", "(before|after)"\)/gu)) {
+      called.add(historyDbFaultPoint(match[1]! as never, match[2]! as "before" | "after"));
+    }
+    const adapter = readFileSync("src/adapters/openfilm/openfilm-engine-adapter.ts", "utf8");
+    for (const match of adapter.matchAll(/#fault\("([^"]+)"\)/gu)) called.add(match[1]!);
+    const registered = new Set(HISTORY_ALL_FAULT_POINTS);
+    const uncalled = [...called].filter((point) => !registered.has(point)).sort();
+    const unreachable = [...registered].filter((point) => !called.has(point)).sort();
+    // A boundary the code names that the registry does not: the matrix would walk a
+    // boundary nobody can inject.
+    expect(uncalled).toEqual([]);
+    // A boundary the registry names that the code does not: the matrix would walk a
+    // boundary nobody can reach — and would record it as covered.
+    expect(unreachable).toEqual([]);
+  });
+
   it.each(HISTORY_ALL_FAULT_POINTS)("converges the boundary %s to a decided state", async (point) => {
     let fired = false;
     const running = await start({ historyFault: (at) => {
@@ -162,13 +202,39 @@ describe("M4C TX-08C: the fault matrix", () => {
     hosts.push(running.host); dirs.push(running.base);
 
     const project = await adoptedProject(running, `fault-${point.replace(/[^A-Za-z0-9]/gu, "-")}`);
+    // **The two asset-install boundaries need an asset to install.** The restore only
+    // installs a content-addressed asset the target references and the active root does not
+    // carry, so the ordinary flow — where the active root still has every asset the earlier
+    // adoption installed — never reaches the publisher's asset boundaries. These two cases
+    // therefore set that situation up: they restore the *older* snapshot first, delete the
+    // adopted asset from the active root, and then restore the adopted snapshot, whose
+    // closure needs the asset back.
+    const assetCase = ASSET_BOUNDARIES.has(point);
+    let target = project.migrationSnapshot;
+    let view = project.view;
+    if (assetCase) {
+      const toOld = await postImpact(running, project.projectId,
+        restoreImpactBody(project.view, project.migrationSnapshot, `m4c-fault-old-${point}`));
+      expect(toOld.status, JSON.stringify(toOld.body)).toBe(201);
+      const old = await postRestore(running, project.projectId, restoreRequestBody(
+        project.view, project.migrationSnapshot,
+        toOld.body as { impact_id: string; impact_hash: string }, `m4c-fault-old-restore-${point}`));
+      expect(old.status, JSON.stringify(old.body)).toBe(200);
+      const adoptedToken = running.host.adoptionFacts.projectionFact(project.adoptedSnapshot)
+        ?.roots.find((root) => /^assets\/[a-f0-9]{64}\/source\.mp4$/u.test(root));
+      expect(adoptedToken, "the adoption installed a content-addressed asset").toBeTruthy();
+      const current = await running.host.projectResolver.resolveActivated(project.projectId);
+      await rm(join(current.source_root.value, adoptedToken!), { force: true });
+      target = project.adoptedSnapshot;
+      view = await running.host.projectResolver.resolveActivated(project.projectId);
+    }
     const impact = await postImpact(running, project.projectId,
-      restoreImpactBody(project.view, project.migrationSnapshot, `m4c-fault-impact-${point}`));
+      restoreImpactBody(view, target, `m4c-fault-impact-${point}`));
     expect(impact.status, JSON.stringify(impact.body)).toBe(201);
     const impactId = impact.body.impact_id as string;
     const before = await facts(running.host, project.projectId, impactId);
 
-    const request = restoreRequestBody(project.view, project.migrationSnapshot,
+    const request = restoreRequestBody(view, target,
       impact.body as { impact_id: string; impact_hash: string }, `m4c-fault-${point}`);
     const response = await postRestore(running, project.projectId, request);
     const crashed = await facts(running.host, project.projectId, impactId);
@@ -192,9 +258,11 @@ describe("M4C TX-08C: the fault matrix", () => {
         expect(crashed.source_digest).toBe(before.source_digest);
       }
     } else {
-      // **The boundary was not reached by this flow**, and the write completed normally.
-      expect(response.status).toBe(200);
-      expect(crashed.transaction).toBe("committed");
+      // **The boundary did not fire and nobody said it would not.** That means the seam is
+      // unreachable — the registry names a boundary the code cannot reach — and the write
+      // completed without it. Recording that as a green "committed" would be exactly the
+      // over-claim the gate forbids, so it fails here instead.
+      throw new Error(`FAULT_POINT_UNREACHABLE:${point}`);
     }
 
     // ── the restart: the write must converge ───────────────────────────────────────────
@@ -205,27 +273,36 @@ describe("M4C TX-08C: the fault matrix", () => {
     const after = await facts(restarted.host, project.projectId, impactId);
 
     if (outcome === "aborted") {
-      // **Aborted.** The revision did not move, the pointer did not move, the impact was
-      // not consumed, and the temporary file is gone.
+      // **Aborted.** The revision did not move, the pointer did not move, the source did
+      // not move, the impact was not consumed, no outbox row was written, no snapshot was
+      // added, and the temporary file is gone.
       expect(after.transaction).toBe("aborted");
       expect(after.revision).toBe(before.revision);
       expect(after.pointer).toBe(before.pointer);
       expect(after.source_digest).toBe(before.source_digest);
       expect(after.impact).toBe("active");
+      expect(after.outbox).toBe(before.outbox);
+      expect(after.snapshots).toBe(before.snapshots);
       expect(after.temp).toEqual([]);
     } else if (outcome === "committed") {
       // **Committed.** Exactly one revision, the pointer moved once, the impact was consumed,
-      // and the temporary file is gone.
+      // exactly one outbox row was written, no new snapshot appeared — the restored content
+      // *is* the target's content, so that snapshot already existed — and the temporary file
+      // is gone.
       expect(after.transaction).toBe("committed");
       expect(after.revision).toBe((before.revision ?? 0) + 1);
       expect(after.pointer).not.toBe(before.pointer);
       expect(after.impact).toBe("consumed");
+      expect(after.outbox).toBe(before.outbox + 1);
+      expect(after.snapshots).toBe(before.snapshots);
       expect(after.temp).toEqual([]);
     } else if (outcome === "not_reached") {
       // **Not reached.** The write completed and nothing about it is in doubt.
       expect(after.transaction).toBe("committed");
       expect(after.revision).toBe((before.revision ?? 0) + 1);
       expect(after.impact).toBe("consumed");
+      expect(after.outbox).toBe(before.outbox + 1);
+      expect(after.snapshots).toBe(before.snapshots);
     } else {
       // **Nothing happened.** The boundary is before the transaction is opened, so there is
       // no row to abort, the revision did not move, the pointer did not move, the source did

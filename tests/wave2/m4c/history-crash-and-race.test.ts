@@ -134,6 +134,22 @@ describe("M4C TX-05C: a race never reaches the commit", () => {
       .filter((row) => row.kind === "history")).toEqual([]);
   }, 900_000);
 
+  it("refuses a restore whose base revision is stale, and the revision does not move", async () => {
+    // The fifth race the gate names: a stale *base*. The other four are the control
+    // revision, the source digest, the target's bytes and a rebased source; this one is the
+    // client's own claim about which revision it is writing against.
+    const running = await start();
+    hosts.push(running.host); dirs.push(running.base);
+    const prepared = await authorizedRestore(running, "base-moved");
+    const refused = await postRestore(running, prepared.projectId, {
+      ...prepared.request, base_revision: prepared.view.revision + 5,
+    });
+    expect(refused.status).toBe(409);
+    expect(refused.body.code).toBe("REVISION_CONFLICT");
+    const after = await running.host.projectResolver.resolveActivated(prepared.projectId);
+    expect(after.revision).toBe(prepared.view.revision);
+  }, 900_000);
+
   it("refuses a restore whose expected source digest is not the project's, and the revision does not move", async () => {
     const running = await start();
     hosts.push(running.host); dirs.push(running.base);

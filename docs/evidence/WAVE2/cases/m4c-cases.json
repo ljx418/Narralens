@@ -6,9 +6,10 @@
   "tests": [
    "tests/wave2/m4c/history-contracts-and-resolver.test.ts::accepts a well-formed restore request and refuses anything else",
    "tests/wave2/m4c/history-contracts-and-resolver.test.ts::names the operation in the failure body, and the schema accepts both operations",
-   "tests/wave2/m4c/history-contracts-and-resolver.test.ts::answers a restore request that carries an unknown field with 400"
+   "tests/wave2/m4c/history-contracts-and-resolver.test.ts::answers a restore request that carries an unknown field with 400",
+   "tests/wave2/m4c/history-media-and-failure.test.ts::leaves the source, the revision, the pointer, the impact, the outbox and the idempotency row as they were"
   ],
-  "evidence": "RestoreRequestV1 的 schema、TypeScript type 与 validator 同提交移动；未知字段 400；失败体的 operation 是封闭枚举 adopt_materialization|restore_snapshot，且 aborted 不推进 revision。"
+  "evidence": "RestoreRequestV1 的 schema、TypeScript type 与 validator 同提交移动；未知字段 400；失败体的 operation 是封闭枚举 adopt_materialization|restore_snapshot；失败体的 aborted 不推进 revision（previous_revision == new_revision），且幂等权威对该 key 只留一条答案——那条答案就是失败本身。"
  },
  {
   "case_id": "M4C-02",
@@ -27,9 +28,10 @@
    "tests/wave2/m4c/history-contracts-and-resolver.test.ts::answers a snapshot of another project and a snapshot that does not exist with the same 404",
    "tests/wave2/m4c/history-contracts-and-resolver.test.ts::refuses an orphan snapshot: bytes on disk that no committed write ever named",
    "tests/wave2/m4c/history-contracts-and-resolver.test.ts::refuses a snapshot whose source directory is a symlink to a directory outside the project",
-   "tests/wave2/m4c/history-contracts-and-resolver.test.ts::refuses a snapshot whose bytes are gone"
+   "tests/wave2/m4c/history-contracts-and-resolver.test.ts::refuses a snapshot whose bytes are gone",
+   "tests/wave2/m4c/history-contracts-and-resolver.test.ts::refuses a Hypit snapshot: this stage restores OpenFilm content only"
   ],
-  "evidence": "跨项目与不存在同 404（不能用来探测 id 是否存在）；orphan（有字节、无任何 committed 引用）与缺字节都 fail closed；**符号链接逃逸**（B-01）：snapshot 的 `source` 指向项目外的目录、且外部字节与数据库 digest 完全匹配时仍然拒绝——`lstat` 判定 source 不是本 Host 发布的目录，`realpath` 再判定 canonical source 必须位于 canonical snapshot 目录内；拒绝路径上 source/revision/pointer/impact/outbox/idempotency 均无越权写入。"
+  "evidence": "跨项目与不存在同 404（不能用来探测 id 是否存在）；orphan（有字节、无任何 committed 引用）、Hypit snapshot、缺字节都 fail closed；**符号链接逃逸**（B-01）：snapshot 的 `source` 指向项目外的目录、且外部字节与数据库 digest 完全匹配时仍然拒绝——`lstat` 判定 source 不是本 Host 发布的目录，`realpath` 再判定 canonical source 必须位于 canonical snapshot 目录内；拒绝路径上 source/revision/pointer/impact/outbox/idempotency 均无越权写入。"
  },
  {
   "case_id": "M4C-04",
@@ -46,13 +48,12 @@
   "status": "CLOSED",
   "production_seam": true,
   "tests": [
-   "tests/wave2/m4c/restore-plan.test.ts::carries the domain prefix it claims",
    "tests/wave2/m4c/restore-plan.test.ts::reproduces every vector's hash and preimage byte for byte",
    "tests/wave2/m4c/restore-plan.test.ts::moves the hash for every single-field mutation, and for nothing else",
-   "tests/wave2/m4c/restore-plan.test.ts::binds the affected ranges inside the hashed plan",
-   "tests/wave2/m4c/restore-plan.test.ts::ties the frozen bytes to what the builder produces"
+   "tests/wave2/m4c/restore-plan.test.ts::ties the frozen bytes to what the builder produces",
+   "tests/wave2/m4c/restore-plan.test.ts::binds the affected ranges inside the hashed plan"
   ],
-  "evidence": "16 个冻结向量（基础 + 13 个逐字段单点变异 + 乱序 + builder 产物），TypeScript 与独立 Python 实现逐字节一致；域前缀固定 narralens-history-restore-plan-v1\\n；乱序不改变 hash。计划合同回归冻结 ADR D-03 的形态：`affected_ranges` 现在**在 plan hash 内**，「impact 授权了这份计划」与「这份计划触及这些范围」是同一句话。"
+  "evidence": "16 个冻结向量（基础 + 13 个逐字段单点变异 + 乱序 + builder 产物），TypeScript 与独立 Python 实现逐字节一致；域前缀固定 narralens-history-restore-plan-v1\\n；乱序不改变 hash。计划合同回归冻结 ADR D-03 的形态：`affected_ranges` 现在**在 plan hash 内**，「impact 授权了这份计划」与「这份计划触及这些范围」是同一句话——把 ranges 从哈希输入里摘掉会让「reproduces every vector's hash and preimage byte for byte」变红。"
  },
  {
   "case_id": "M4C-06",
@@ -60,9 +61,10 @@
   "production_seam": true,
   "tests": [
    "tests/wave2/m4c/history-contracts-and-resolver.test.ts::creates the impact, replays it exactly, and writes no author fact",
-   "tests/wave2/m4c/history-contracts-and-resolver.test.ts::refuses the impact when a lock is held, and leaves no active row behind"
+   "tests/wave2/m4c/history-contracts-and-resolver.test.ts::refuses the impact when a lock is held, and leaves no active row behind",
+   "tests/wave2/m4c/history-contracts-and-resolver.test.ts::refuses the impact when the project's facts moved, and leaves no active row behind"
   ],
-  "evidence": "restore impact 201 且同 key 重放返回同一 hash 与同一过期时间；被锁挡住时 423 且没有任何 restore impact 行；impact 只是授权，不改作者事实。"
+  "evidence": "restore impact 201 且同 key 重放返回同一 hash 与同一过期时间；被锁挡住（423）与项目事实漂移（409）都被拒绝，且两种情况下都没有任何 restore impact 行；impact 只是授权，不改作者事实。"
  },
  {
   "case_id": "TX-03C",
@@ -74,22 +76,26 @@
    "tests/wave2/m4c/restore-plan.test.ts::asks for the project scope when the clips were reordered",
    "tests/wave2/m4c/restore-plan.test.ts::asks for the project scope when a clip was added or removed",
    "tests/wave2/m4c/restore-plan.test.ts::asks for the project scope when the total frame count changed",
+   "tests/wave2/m4c/restore-plan.test.ts::asks for a narration project lock when the narration changed, and not for a shot one",
+   "tests/wave2/m4c/restore-plan.test.ts::asks for a narration project lock and a subtitle consumer when a subtitle changed",
+   "tests/wave2/m4c/restore-plan.test.ts::records every consumer of a shared asset",
    "tests/wave2/m4c/restore-plan.test.ts::blocks the write with the real LockService when the plan asks for the project scope",
    "tests/wave2/m4c/restore-plan.test.ts::blocks the write with the real LockService when the plan asks for a shot scope",
    "tests/wave2/m4c/history-media-and-failure.test.ts::does not let a narration lock block a restore that preserves the narration"
   ],
-  "evidence": "锁模型与冻结 ADR-W2.0-006 D-04 对齐：内容/asset/fit/time 改变 → 当前 clip 的 visual **shot** 锁；clip 增删、重排、边界或总帧数改变 → **visual project + duration project** 锁；narration/audio 改变 → narration project 锁；subtitle 改变 → narration project 锁并记录 subtitle consumer；shared asset 记录全部消费者并按其实际视觉影响加锁。边界、重排、增删、总帧变化四类各有正向锁集合用例，且用**真实 LockService** 证明这些锁确实阻断写入，不依赖 project lock 偶然匹配 shot candidate。"
+  "evidence": "锁模型与冻结 ADR-W2.0-006 D-04 对齐：内容/asset/fit/time 改变 → 当前 clip 的 visual **shot** 锁；clip 增删、重排、边界或总帧数改变 → **visual project + duration project** 锁；narration/audio 改变 → narration project 锁；subtitle 改变 → narration project 锁并记录 subtitle consumer；shared asset 记录全部消费者并按其实际视觉影响加锁。边界、重排、增删、总帧变化四类各有正向锁集合用例，narration/subtitle/shared asset 三类各有正向用例，且用**真实 LockService** 证明这些锁确实阻断写入，不依赖 project lock 偶然匹配 shot candidate。"
  },
  {
   "case_id": "TX-04C",
   "status": "CLOSED",
   "production_seam": true,
   "tests": [
-   "tests/wave2/m4c/history-media-and-failure.test.ts::asks for a visual lock on every changed clip and no narration lock while the narration is preserved",
-   "tests/wave2/m4c/restore-plan.test.ts::refuses a target with a different clip identity, a different track, or an incomplete projection",
-   "tests/wave2/m4c/restore-plan.test.ts::refuses a restore that would change nothing"
+   "tests/wave2/m4c/restore-plan.test.ts::records every consumer of a shared asset",
+   "tests/wave2/m4c/restore-plan.test.ts::asks for a narration project lock and a subtitle consumer when a subtitle changed",
+   "tests/wave2/m4c/restore-plan.test.ts::describes a different clip identity rather than refusing to describe it",
+   "tests/wave2/m4c/restore-plan.test.ts::refuses what it cannot classify"
   ],
-  "evidence": "consumer 逐类给出：视觉镜 replace、narration preserve、字幕与共享资产单独分类；clip 身份不同、track 不同、投影不完整、没有任何差异都 422 fail closed。"
+  "evidence": "consumer 逐类给出：视觉镜 replace、narration preserve/replace、subtitle replace、共享资产 relink/replace；clip 身份不同的差异**被描述**（ADR D-04 的锁模型），而本阶段是否允许恢复是另一条规则（422 fail closed）；无法一一分类的差异（投影不完整、没有任何差异）都 422 fail closed。"
  },
  {
   "case_id": "TX-05C",
@@ -98,9 +104,10 @@
   "tests": [
    "tests/wave2/m4c/history-crash-and-race.test.ts::refuses a restore whose control revision moved, and the revision does not move",
    "tests/wave2/m4c/history-crash-and-race.test.ts::refuses a restore whose expected source digest is not the project's, and the revision does not move",
-   "tests/wave2/m4c/history-crash-and-race.test.ts::refuses a restore when the source changes during the stage, and the revision does not move"
+   "tests/wave2/m4c/history-crash-and-race.test.ts::refuses a restore when the source changes during the stage, and the revision does not move",
+   "tests/wave2/m4c/history-crash-and-race.test.ts::refuses a restore whose base revision is stale, and the revision does not move"
   ],
-  "evidence": "stale base/source/control 三种竞态都在 commit 之前被拒绝，revision +0，且连 transaction 都不创建。"
+  "evidence": "stale base/source/control 与 stage 期间的 source 变化都在 commit 之前被拒绝，revision +0；被拒的写没有留下 transaction（除 aborted 行外），幂等权威对该 key 只留一条失败答案。"
  },
  {
   "case_id": "TX-07C",
@@ -119,13 +126,14 @@
   "production_seam": true,
   "tests": [
    "tests/wave2/m4c/history-fault-matrix.test.ts::registers every boundary the gate names",
+   "tests/wave2/m4c/history-fault-matrix.test.ts::the registry and the production code name the same boundaries, in both directions",
    "tests/wave2/m4c/history-fault-matrix.test.ts::converges the boundary %s to a decided state",
    "tests/wave2/m4c/history-crash-and-race.test.ts::converges the pre-publish crash boundary %s to aborted with revision +0",
    "tests/wave2/m4c/history-crash-and-race.test.ts::converges a crash after the publication to one durable commit with revision +1",
    "tests/wave2/m4c/history-crash-and-race.test.ts::aborts with revision +0 when the crash came after the intent but before the publication"
   ],
-  "evidence": "按冻结门 §6 建立**枚举式 fault registry**（`src/host/history/history-fault-registry.ts`）：21 个 service/publisher 边界+ 单事务 9 条语句各前后共 18 个数据库边界，合计 39 个，每个都有直接注入与断言，不是代表性子集。每个边界记录并断言 source、revision、pointer、impact、outbox、idempotency、temp、snapshot 的 before/after，并逐边界证明重启后收敛到 committed/aborted/attention：发布前边界收敛为 aborted、revision +0、pointer 与 source 不动、impact 保持 active；发布之后（含 film rename 之后与事务内任一语句前后）收敛为唯一一次 commit、revision +1、impact consumed、temp 清理；没有孤儿进行态、没有重复发布、没有重复 revision。两个 asset install 边界在常规流程中不可达（恢复只在 active root 缺少目标引用的内容寻址资产时才安装），矩阵如实记录为 not_reached 并说明理由，而不是标绿。",
-  "notes": "registry 是契约：矩阵按它行走，服务里新增而 registry 没有的边界会让注册表检查失败；registry 里有而服务走不到的边界会让矩阵失败。"
+  "evidence": "按冻结门 §6 建立**枚举式 fault registry**（`src/host/history/history-fault-registry.ts`）：21 个 service/publisher 边界+ 单事务 9 条语句各前后共 18 个数据库边界，合计 39 个。矩阵按 registry 行走，不是代表性子集；并且 registry 与生产代码**双向核对**：代码里出现而 registry 没有的边界、以及 registry 里有而代码走不到的边界，都会让检查失败——所以「边界没接线」不可能再伪装成绿灯。每个边界记录并断言 source、revision、pointer、impact、outbox、idempotency、temp、snapshot 的 before/after，并逐边界证明重启后收敛到 committed/aborted：发布前边界收敛为 aborted、revision +0、pointer 与 source 不动、impact 保持 active、无 outbox 行；发布之后（含 film rename 之后与事务内任一语句前后）收敛为唯一一次 commit、revision +1、impact consumed、恰好一条 outbox 行、无新增 snapshot；没有孤儿进行态、没有重复发布、没有重复 revision。两个 asset install 边界用专门的前置条件（先恢复旧快照、删掉已采用的内容寻址资产、再恢复已采用的快照）真正触达，而不是记成 not_reached。",
+  "notes": "registry 是契约且被双向核对：矩阵按它行走，服务里新增而 registry 没有的边界会让注册表检查失败；registry 里有而服务走不到的边界会让矩阵失败——除非该边界被显式声明为 not_reached 并写明理由。"
  },
  {
   "case_id": "TX-09",
@@ -144,9 +152,11 @@
   "tests": [
    "tests/wave2/m4c/history-crash-and-race.test.ts::translates undo and redo into an intent and writes nothing",
    "tests/wave2/m4c/history-route.test.ts::translates undo and redo into an intent and never writes",
+   "tests/wave2/m4c/history-crash-and-race.test.ts::answers 422 after an adoption has been committed on top of the restore",
+   "tests/wave2/m4c/history-crash-and-race.test.ts::still answers the restore's own source-before snapshot right after the restore",
    "tests/wave2/m4b/governance.test.ts::translates a history entry into a typed restore intent that still needs an impact and an approval"
   ],
-  "evidence": "restore/undo/redo 只翻译成 typed intent（目标 snapshot + 授权 + 显式批准），本身不写任何东西；checkout/merge/discard/commit 仍然 blocked；没有裸 native history 通道。"
+  "evidence": "restore/undo/redo 只翻译成 typed intent（目标 snapshot + 授权 + 显式批准），本身不写任何东西；redo 仅在**当前 commit 本身是 committed restore** 时才从其不可变 fact 解析 source-before，restore → adoption → redo 返回 422 且 revision +0；checkout/merge/discard/commit 仍然 blocked；没有裸 native history 通道。"
  },
  {
   "case_id": "TX-12C",
@@ -193,9 +203,10 @@
   "status": "CLOSED",
   "production_seam": true,
   "tests": [
-   "tests/wave2/m4c/history-media-and-failure.test.ts::aborts with revision +0 and publishes nothing"
+   "tests/wave2/m4c/history-media-and-failure.test.ts::aborts with revision +0 and publishes nothing",
+   "tests/wave2/m4c/history-fault-matrix.test.ts::converges the boundary %s to a decided state"
   ],
-  "evidence": "prepared 前取消：abort + revision +0，不 prepare 不 publish，隔离目录被清理；晚到的 stage 结果不会被自动采用。prepared 之后取消则收敛（TX-08C）。"
+  "evidence": "prepared 前取消：abort + revision +0，不 prepare 不 publish，隔离目录被清理；晚到的 stage 结果**不会被自动采用**——取消后既没有不可变 restore fact，也没有为它发布的 snapshot；prepared 之后取消则收敛（见 TX-08C 的发布后边界）。"
  },
  {
   "case_id": "M4C-17",
@@ -206,7 +217,7 @@
    "tests/wave2/m4c/history-fault-matrix.test.ts::converges the boundary %s to a decided state",
    "tests/wave2/m4c/history-crash-and-race.test.ts::answers the same key with a different request with 409, and the revision does not move"
   ],
-  "evidence": "失败路径的差异明确：source、revision、pointer、impact、outbox 全部不变，只有失败自身的 idempotency 行新增。此前的代表性失败发生在 transaction 创建之前，因此没有断言 idempotency 行；现在失败矩阵在**每一个**边界上断言同一组事实（source/revision/pointer/impact/outbox/idempotency/temp/snapshot），并断言幂等权威对该 key 恰好持有一条答案、不存在孤儿进行态。",
+  "evidence": "失败路径的差异明确：source、revision、pointer、impact、outbox 全部不变，只有失败自身的 idempotency 行新增，而那一行的答案是 aborted 且 previous_revision == new_revision。此前的代表性失败发生在 transaction 创建之前，因此没有断言 idempotency 行；现在失败矩阵在**每一个**边界上断言同一组事实（source/revision/pointer/impact/outbox/idempotency/temp/snapshot），并断言幂等权威对该 key 恰好持有一条答案、不存在孤儿进行态。",
   "notes": "每个边界的失败路径都由同一条断言覆盖，不再用一条代表性失败冒充全集。"
  },
  {
@@ -223,6 +234,6 @@
    "tests/architecture/m2.2-fitness.test.ts",
    "tests/contracts/contracts.test.ts"
   ],
-  "evidence": "M2.1/M2.2/M2.3/M3/M4A/M4B、legacy、contracts、fitness 与生产构建在 M4C 之后全绿；旧门没有被删除或放宽（fitness 里被阶段打开的路由与能力表都写明了理由）。"
+  "evidence": "M2.1/M2.2/M3/M4A/M4B、legacy、contracts、fitness 与生产构建在 M4C 之后全绿；旧门没有被删除或放宽（fitness 里被阶段打开的路由与能力表都写明了理由；M4B publisher 的边界序列断言随 M4C 新增的 before_film_rename 边界**变长**而不是变松——它仍然钉住完整顺序）。"
  }
 ]

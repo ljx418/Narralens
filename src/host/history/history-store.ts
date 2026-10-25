@@ -55,10 +55,10 @@ export interface HistoryRestoreFact {
   /**
    * The assets the publication installed into the active source.
    *
-   * A restore installs none: the target's files are expected to be *already* in the active
-   * tree with identical bytes, which is the snapshot-eligibility rule. The list is recorded
-   * anyway, because the fact is the record of what the publication did, and a reader must
-   * not have to infer it.
+   * ADR-W2.0-006 §D-05 allows exactly one asset change in a restore: installing a
+   * content-addressed asset the target references and the active root does not carry. The
+   * list is empty for every target whose files are already present, which is the normal case,
+   * and it records what the publication did either way — a reader must not have to infer it.
    */
   readonly installed_assets: readonly { readonly token: string; readonly sha256: string }[];
   readonly film_temp_token: string;

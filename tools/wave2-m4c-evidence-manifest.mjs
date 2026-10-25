@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { diagnosticFor, failedCaptures } from "./wave2-capture-outcome.mjs";
+import { diagnosticFor, expectedFailureCommands, failedCaptures } from "./wave2-capture-outcome.mjs";
 
 const capture = process.argv[2];
 if (capture === undefined || !/^[a-f0-9]{40}$/u.test(capture)) {
@@ -15,7 +15,10 @@ if (!existsSync(resolve(root, logs))) process.exit(1);
 const hash = (path) => createHash("sha256").update(readFileSync(path)).digest("hex");
 const environment = Object.fromEntries(readFileSync(resolve(root, logs, "environment.txt"), "utf8")
   .split("\n").filter(Boolean).map((line) => [line.slice(0, line.indexOf("=")), line.slice(line.indexOf("=") + 1)]));
-const expected = new Set(["wave1-integrity", "m4a-integrity"]);
+// The set of commands this capture expects to fail comes from the capture's own record,
+// read through the shared rule — not from a second copy of the list. Two copies of the same
+// rule are two truths, and the gate only checks one of them.
+const expected = expectedFailureCommands(resolve(root, logs));
 const commands = readdirSync(resolve(root, logs)).filter((name) => name.endsWith(".exit")).sort().map((name) => {
   const stem = name.slice(0, -5);
   const log = `${logs}/${stem}.txt`;

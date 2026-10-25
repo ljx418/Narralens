@@ -223,10 +223,21 @@ export class RestorePlanner {
         // subtitle, a setting — is an external mutable root, and this stage refuses to
         // replace it.
         const digest = sha256(targetBytes);
-        if (!CONTENT_ADDRESSED_ASSET.test(root) || !root.endsWith("/source.mp4")) {
+        if (!CONTENT_ADDRESSED_ASSET.test(root)) {
           throw new HttpError(422, "UNSUPPORTED_EDIT",
             "The active source no longer carries a file the restore target needs", { root },
             correlationId);
+        }
+        // **The name has to be the content address.** A snapshot whose asset is filed under
+        // a digest that is not its own bytes is refused here, at the point where the plan is
+        // computed — which is before the client is asked to approve anything. The publisher
+        // makes the same check at the publication boundary, but a refusal there would arrive
+        // after the client had already approved the write and after the transaction was
+        // prepared, so the plan has to catch it first.
+        if (!root.startsWith(`assets/${digest}/`)) {
+          throw new HttpError(422, "UNSUPPORTED_EDIT",
+            "The restore target's asset is filed under a digest that is not its own content address",
+            { root }, correlationId);
         }
         missing.push({ token: root, sha256: digest });
         continue;

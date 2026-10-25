@@ -270,6 +270,23 @@ describe("M4C-03: the negative matrix fails closed", () => {
       .filter((row) => row.operation === "restore_snapshot")).toEqual([]);
   }, 900_000);
 
+  it("refuses a Hypit snapshot: this stage restores OpenFilm content only", async () => {
+    // The gate's negative matrix names Hypit explicitly: a snapshot of the other engine is
+    // not restorable, whatever its bytes say.
+    const running = await start();
+    hosts.push(running.host); dirs.push(running.base);
+    const project = await adoptedProject(running, "hypit-snapshot");
+    const hypit = "3".repeat(64);
+    running.host.revisions.compose((db) => db.prepare(
+      "INSERT INTO snapshot(snapshot_id, project_id, source_digest, engine, created_at) VALUES(?,?,?,'hypit',?)")
+      .run(hypit, project.projectId, "4".repeat(64), new Date().toISOString()));
+    await expect(running.host.historical.resolve(project.projectId, hypit, "m4c-hypit"))
+      .rejects.toMatchObject({ status: 422 });
+    // And no impact was written for it.
+    expect(running.host.impacts.byProject(project.projectId)
+      .filter((row) => row.operation === "restore_snapshot")).toEqual([]);
+  }, 900_000);
+
   it("refuses a snapshot whose bytes are gone", async () => {
     const running = await start();
     hosts.push(running.host); dirs.push(running.base);
@@ -300,6 +317,26 @@ describe("M4C-06: the restore impact is an authorization and writes nothing", ()
     expect(after.source_digest).toBe(before.source_digest);
     expect(running.host.revisions.projectTransactions(project.projectId)
       .filter((row) => row.kind === "history")).toEqual([]);
+  }, 900_000);
+
+  it("refuses the impact when the project's facts moved, and leaves no active row behind", async () => {
+    const running = await start();
+    hosts.push(running.host); dirs.push(running.base);
+    const project = await adoptedProject(running, "impact-drift");
+    // A lock moves the control revision, so the request's control revision is stale.
+    running.host.locks.acquire({ projectId: project.projectId, lockType: "visual", scope: "shot",
+      targetId: "shot-002", startFrame: 300, endFrameExclusive: 600, owner: "test",
+      reason: "m4c-06" }, project.view.revision);
+    const stale = await postImpact(running, project.projectId, {
+      ...restoreImpactBody(project.view, project.migrationSnapshot, "m4c-impact-drift"),
+      control_revision: project.view.control_revision,
+    });
+    expect(stale.status).toBe(409);
+    expect(stale.body.code).toBe("REVISION_CONFLICT");
+    // **Zero active rows.** A refused authorization leaves nothing that could be mistaken
+    // for one.
+    expect(running.host.impacts.byProject(project.projectId)
+      .filter((row) => row.operation === "restore_snapshot")).toEqual([]);
   }, 900_000);
 
   it("refuses the impact when a lock is held, and leaves no active row behind", async () => {
