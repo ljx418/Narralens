@@ -108,16 +108,42 @@ export function restoreRequestBody(view: { revision: number; source_digest: stri
   };
 }
 
+/**
+ * Is this body the Host's *recoverable* resource failure?
+ *
+ * The Host maps ENOMEM and its siblings to `HOST_RESOURCE_EXHAUSTED` with
+ * `recoverable: true` precisely so that a transient machine condition is not reported as a
+ * behavioural failure. This box runs several sessions at once and has run out of memory
+ * during a capture more than once.
+ */
+function isRecoverableResourceFailure(body: Record<string, unknown>): boolean {
+  const error = body.error as { code?: string; details?: { recoverable?: boolean } } | undefined;
+  const code = String(body.code ?? error?.code ?? "");
+  const details = (body.details ?? error?.details) as { recoverable?: boolean } | undefined;
+  return code === "HOST_RESOURCE_EXHAUSTED" && details?.recoverable !== false;
+}
+
 export async function postRestore(running: Started, projectId: string, body: unknown,
   signal?: AbortSignal): Promise<{
   status: number; body: Record<string, unknown>;
 }> {
-  const response = await fetch(`${running.origin}/api/migration/v1/projects/${projectId}/history/restore`, {
-    method: "POST", headers: headers(running.origin, running.token), body: JSON.stringify(body),
-    ...(signal === undefined ? {} : { signal }),
-  });
-  const text = await response.text();
-  return { status: response.status, body: text === "" ? {} : JSON.parse(text) as Record<string, unknown> };
+  // A recoverable resource failure is retried. The retry reuses the same idempotency key,
+  // so it is a replay rather than a second restore — which is exactly what the key is for.
+  // An assertion about behaviour is never relaxed: if the second attempt fails for any
+  // reason, the failure stands.
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    const response = await fetch(`${running.origin}/api/migration/v1/projects/${projectId}/history/restore`, {
+      method: "POST", headers: headers(running.origin, running.token), body: JSON.stringify(body),
+      ...(signal === undefined ? {} : { signal }),
+    });
+    const text = await response.text();
+    const parsed = text === "" ? {} : JSON.parse(text) as Record<string, unknown>;
+    if (!isRecoverableResourceFailure(parsed) || attempt === 2) {
+      return { status: response.status, body: parsed };
+    }
+    await new Promise((done) => setTimeout(done, 500 * (attempt + 1)));
+  }
+  throw new Error("UNREACHABLE");
 }
 
 export async function getHistory(running: Started, projectId: string): Promise<{
