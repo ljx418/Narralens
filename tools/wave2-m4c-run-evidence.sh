@@ -6,6 +6,16 @@ cd "$(dirname "$0")/.." || exit 1
 
 CAPTURE_SHA="$(git rev-parse HEAD)"
 
+# **The tree's state is read before anything touches it.**
+#
+# The capture's own log directory is created below, and an untracked file inside it makes
+# `git status` report a dirty tree — so measuring *after* the directory exists would record
+# the capture's own output as somebody else's work. The M4B script gets away with measuring
+# after the `mkdir` because its directory is empty at that point and git does not report
+# empty directories; this script copies M4B's gate output into the directory first, so it
+# has to measure before.
+DIRTY="$(git status --porcelain | wc -l | tr -d ' ')"
+
 # **M4B's current-tip integrity gate runs before this capture's log directory exists.**
 #
 # It has to. That gate checks that every failed capture under `docs/evidence/WAVE2/logs` is
@@ -32,7 +42,6 @@ mkdir -p "$LOGS"
 cp "$PRELOGS/m4b-integrity.cmd" "$PRELOGS/m4b-integrity.txt" "$PRELOGS/m4b-integrity.exit" "$LOGS/"
 rm -rf "$PRELOGS"
 
-DIRTY="$(git status --porcelain | wc -l | tr -d ' ')"
 {
   echo "date_utc=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
   echo "node=$(node -v)"
