@@ -47,6 +47,7 @@ const manifest = {
     "The real media proof is a fixed 900-frame three-clip film, not a long-film performance claim or a production render route.",
     "Wave 1 and M4A current-tip integrity checks fail by design after later stages move code; their historical gates pass and their non-zero logs are preserved.",
     "A film matching neither durable before nor after digest is terminal attention and needs explicit later repair tooling; M4B does not auto-clear it.",
+    "docs/evidence/WAVE2/security/credential-scan-m4b.json is the FAIL scan of the capture be93a183..., which the failed-capture index lists; the authoritative scan for the current capture is inside its own log directory and passes.",
     "A recoverable resource failure is published as a controlled failure with http_status 500, because the frozen failure union is 409|422|423|428|500 and has no 503, while HOST_RESOURCE_EXHAUSTED is aliased to 503 elsewhere. The record therefore says 500 and carries recoverable:true in its details. Changing it means amending a frozen contract, so it is recorded here as a known boundary instead."
   ]
 };
@@ -69,7 +70,9 @@ manifest.known_failed_captures = failedCaptures(root).map((entry) => {
   return {
     capture_commit: entry.capture_commit,
     failed_commands: entry.failures.map((failure) => failure.exit === null
-      ? `${failure.name} did not finish (no exit file)`
+      ? (failure.name === "the capture never reached the end of its script"
+        ? failure.name
+        : `${failure.name} did not finish (no exit file)`)
       : `${failure.name} exit=${failure.exit}`),
     diagnostic: diagnostic === null ? null : relative + "/" + diagnostic.split("/").pop(),
     kept: true,

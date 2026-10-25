@@ -69,20 +69,20 @@ printf '%s\n' "$code" > "$LOGS/credential-scan.exit"
 printf '%-24s exit=%s\n' credential-scan "$code"
 [ "$code" -eq 0 ] || overall=1
 
-# The capture's outcome at this point in the run. It is *not* the capture's final outcome —
-# the manifest and the gate run after it and can fail — so it is a record of where the run
-# had got to, not a verdict. The failed-capture index does not read it; it reads the exit
-# files, the diagnostics and whether any command was started and never finished.
+# The capture's outcome at this point in the run — which is *before* the manifest and the
+# gate, so it is a record of where the run had got to, not a verdict. The failed-capture
+# index reads it as a failure signal only; the end marker is `git-status-after.txt`, which
+# every script writes last.
 printf '%s\n' "$overall" > "$LOGS/overall.txt"
 
 # The manifest for this capture, produced and checked *inside* the capture. The committed
 # manifest cannot exist yet for a capture that has not been committed, so the capture proves
 # its own evidence is internally consistent and records that proof as a log.
 #
-# The manifest the capture checks is this one — the file inside the log directory. The
-# *committed* manifest is regenerated from it after the capture is committed, and therefore
-# lists two more commands than the capture's own copy; that is why the committed manifest's
-# `checked_manifest` names the file the gate actually checked.
+# The manifest the capture checks is the file inside the log directory. The *committed*
+# manifest is regenerated from the logs afterwards, so it lists the capture's commands plus
+# the two the committed copy adds — and its `checked_manifest` names the file the gate
+# actually read.
 printf '%s\n' "node tools/wave2-m4b-evidence-manifest.mjs $CAPTURE_SHA $LOGS/manifest.json" > "$LOGS/manifest.cmd"
 node tools/wave2-m4b-evidence-manifest.mjs "$CAPTURE_SHA" "$LOGS/manifest.json" > "$LOGS/manifest.txt" 2>&1
 code=$?

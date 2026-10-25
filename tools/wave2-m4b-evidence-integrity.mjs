@@ -30,6 +30,28 @@ for (const command of manifest.commands ?? []) {
   if (command.expected_failure === true ? command.exit === 0 : command.exit !== 0) fail(`unexpected exit: ${command.name}`);
 }
 failures === 0 && pass(`${manifest.commands.length} command logs and exits match`);
+
+// The gate must require a *command set*, not merely check whatever the manifest lists. A
+// manifest regenerated from a capture that was killed before its own manifest step would list
+// fewer commands and pass every other check.
+{
+  const requiredCommands = [
+    "check", "typecheck", "contracts", "m2.1", "wave2-w2.0", "wave2-m3", "wave2-m4a",
+    "wave2-m4b", "wave2-fitness", "build", "wave1-historical", "m4a-historical",
+    "wave1-integrity", "m4a-integrity", "credential-scan", "manifest", "m4b-integrity",
+  ];
+  const present = new Set((manifest.commands ?? []).map((entry) => entry.name));
+  const absent = requiredCommands.filter((name) => !present.has(name));
+  if (absent.length === 0) pass(`the manifest lists all ${requiredCommands.length} required commands`);
+  else fail(`the manifest is missing commands: ${absent.join(", ")}`);
+  // And the file the gate read must exist, or the capture never ran its own manifest.
+  const checked = String(manifest.checked_manifest ?? "");
+  if (checked !== "" && existsSync(resolve(root, checked))) {
+    pass("the manifest names a checked manifest file that exists");
+  } else {
+    fail(`the manifest's checked_manifest is missing or does not exist: ${checked || "(unset)"}`);
+  }
+}
 const required = new Set(["TX-01", "TX-02", "TX-03", "TX-04", "TX-05", "TX-06", "TX-07", "TX-08B", "TX-11B", "TX-13", "TX-14", "M4B-NW", "REG"]);
 
 /**
@@ -83,8 +105,12 @@ const required = new Set(["TX-01", "TX-02", "TX-03", "TX-04", "TX-05", "TX-06", 
  * The index used to be built from the presence of a hand-written diagnostic, so a failure
  * nobody wrote a note for was invisible; and a later version read only the `.exit` files,
  * which is a strict *subset* — a capture killed mid-command leaves no `.exit` at all, and it
- * was silently dropped. The rule is now a union, in `wave2-capture-outcome.mjs`, and this
- * gate recomputes it from the logs rather than reading the manifest it audits.
+ * was silently dropped. The rule is now a union, in `wave2-capture-outcome.mjs`.
+ *
+ * And this gate does not *import* that rule: it re-derives it here, from the logs, and
+ * requires the two to agree. An earlier version shared the generator's predicate, so the
+ * audit could never fail for a capture the script produced — one implementation called twice
+ * is a tautology, not a check.
  */
 {
   // **The gate's own implementation of the rule**, written here rather than imported.
@@ -121,9 +147,8 @@ const required = new Set(["TX-01", "TX-02", "TX-03", "TX-04", "TX-05", "TX-06", 
     const outcomePath = join(directory, "overall.txt");
     const recorded = existsSync(outcomePath) ? readFileSync(outcomePath, "utf8").trim() : null;
     const recordedFailure = recorded !== null && recorded !== "" && recorded !== "0";
-    // The end markers are `overall.txt` (the current scripts) and `git-status-after.txt`
-    // (the older ones, which wrote it last). A capture with neither never finished, and
-    // cannot be assumed clean.
+    // The end marker is `git-status-after.txt` alone: every capture script writes it last.
+    // `overall.txt` is written before the manifest and the gate, so it cannot mark the end.
     const reachedTheEnd = recorded !== null
       || existsSync(join(directory, "git-status-after.txt"));
     if (!reachedTheEnd) failures.push("the capture never reached the end of its script");

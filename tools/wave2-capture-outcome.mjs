@@ -21,11 +21,12 @@ import { join, resolve } from "node:path";
  *   5. the capture is **incomplete**: a `.cmd` with no matching `.exit`;
  *   6. the capture **never reached the end of its script**.
  *
- * The sixth is the one that closes the residual hole: a capture killed after its last
- * command's `.exit` but before the script finished leaves every exit green, no diagnostic
- * and no outcome file, and would otherwise be classified as a clean capture. The end
- * markers are `overall.txt` (the current scripts) and `git-status-after.txt` (the older
- * ones, which wrote it last) — a capture with neither never finished.
+ * The sixth is the one that closes the residual hole, and the end marker it uses is
+ * `git-status-after.txt` **alone**, because every capture script writes it last. It is not
+ * `overall.txt`: the current script writes that one *before* its own manifest and its own
+ * gate, so a capture killed in that window has every exit green, an outcome of "0" and no
+ * diagnostic — and would be classified clean. `overall.txt` stays a failure *signal* (rule 4),
+ * never an end marker.
  */
 
 /** The commands whose non-zero exit is expected, and therefore not a failure by themselves. */
@@ -85,11 +86,13 @@ export function failedCaptures(root) {
     const outcome = resolve(directory, "overall.txt");
     const recorded = existsSync(outcome) ? readFileSync(outcome, "utf8").trim() : null;
     const recordedFailure = recorded !== null && recorded !== "" && recorded !== "0";
-    // The capture must have reached the end of its script to be classified at all.
-    const reachedTheEnd = recorded !== null
-      || existsSync(resolve(directory, "git-status-after.txt"));
+    // The end marker is `git-status-after.txt` **alone**, because every capture script writes
+    // it last. `overall.txt` is not an end marker: the current script writes it before its own
+    // manifest and its own gate, so a capture killed in that window has every exit green, an
+    // outcome of "0" and no diagnostic — and would be classified clean.
+    const reachedTheEnd = existsSync(resolve(directory, "git-status-after.txt"));
     if (!reachedTheEnd) {
-      failures.push({ name: "the capture", exit: null });
+      failures.push({ name: "the capture never reached the end of its script", exit: null });
     }
     if (failures.length === 0 && !diagnostic && !recordedFailure) continue;
     out.push({ capture_commit: entry.name, directory, failures });
@@ -99,9 +102,14 @@ export function failedCaptures(root) {
 
 /** The diagnostic a capture carries, or `null` when it has none. */
 export function diagnosticFor(directory) {
-  for (const name of ["CAPTURE_FAILED_DIAGNOSTIC.md", "CAPTURE_FAILED_DIAGNOSTIC.txt"]) {
-    const path = join(directory, name);
-    if (existsSync(path)) return path;
+  // The prefix rule, so the gate and this module agree on what a diagnostic is. An earlier
+  // version accepted only `.md` and `.txt` here while the gate accepted any extension,
+  // which would make a `.json` diagnostic failed by one and clean by the other.
+  let names;
+  try { names = readdirSync(directory); } catch { return null; }
+  for (const name of names) {
+    if (!name.startsWith("CAPTURE_FAILED_DIAGNOSTIC.")) continue;
+    return join(directory, name);
   }
   return null;
 }
