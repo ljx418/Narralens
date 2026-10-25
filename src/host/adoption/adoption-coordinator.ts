@@ -22,6 +22,7 @@ import type { SnapshotStore } from "../projects/snapshot-store.js";
 import type { OperationIdempotencyStore } from "../projects/operation-idempotency-store.js";
 import { AdoptionStore, type InstalledAdoptionAsset } from "./adoption-store.js";
 import { AuthorSourcePublisher } from "./author-source-publisher.js";
+import { claimsControlledWrite } from "../projects/controlled-write-formats.js";
 
 export interface AdoptionCoordinatorDeps {
   readonly coordinator: ProjectCoordinator;
@@ -366,21 +367,20 @@ export class AdoptionCoordinator {
    * row in `attention` is decided; neither is a recovery this request could take over.
    */
   /**
-   * The pending rows of *this* module for a project.
+   * The pending controlled rows of a project, whatever module owns them.
    *
-   * A row is M4B's when its request claims the adopt-request format; a legacy edit row is
-   * not, and it keeps blocking the gate — which is right, because the legacy module owns it.
+   * M4C added a second controlled write path, and the recovery gate has to know about it:
+   * a pending *restore* row must not block this module's recovery, because the restore row
+   * is the history module's to decide and this module cannot decide it. A legacy edit row
+   * is not a controlled write and keeps blocking the gate — which is right, because the
+   * legacy module owns it.
    */
   #ownPendingRows(projectId: string): string[] {
     const own: string[] = [];
     for (const transaction of this.deps.revisions.projectTransactions(projectId)) {
       if (transaction.state === "committed" || transaction.state === "aborted") continue;
-      let claims = false;
-      try {
-        claims = (JSON.parse(transaction.request_json) as { format?: unknown }).format
-          === "narralens.adopt-request@1.0";
-      } catch { claims = false; }
-      if (claims) own.push(transaction.transaction_id);
+      if (!claimsControlledWrite(transaction.request_json)) continue;
+      own.push(transaction.transaction_id);
     }
     return own;
   }

@@ -112,14 +112,21 @@ describe("fitness 6: route activation matches the stage gate", () => {
     const migrationRoutes = [...serverSource.matchAll(/\^\\\/api\\\/migration\\\/v1\\\/([^$]*)\$/gu)].map((match) => match[1]!);
     // M2.1 opened one read route; M2.3 adds migration copy, report and rollback; M3 opens
     // materialize and its read; M4A opens impact; M4B opens the single controlled-adoption
-    // edit route. Any other addition has to be justified by its own stage.
+    // edit route; M4C opens the history read model, the controlled restore and the two
+    // history translations. Any other addition has to be justified by its own stage.
     expect(migrationRoutes).toEqual([
       "projects\\/([A-Za-z0-9_-]+)\\/engine",
       "projects\\/([A-Za-z0-9_-]+)\\/migrate-copy",
       "projects\\/([A-Za-z0-9_-]+)\\/proposals\\/([A-Za-z0-9_-]+)\\/materialize",
-      // M4A opens impact; M4B opens controlled adoption. History restore belongs to M4C.
+      // M4A opens impact; M4B opens controlled adoption.
       "projects\\/([A-Za-z0-9_-]+)\\/impact",
       "projects\\/([A-Za-z0-9_-]+)\\/edits",
+      // M4C opens the history read model, the controlled restore, and the undo and redo
+      // *translations*. The translations return a typed intent and commit nothing.
+      "projects\\/([A-Za-z0-9_-]+)\\/history",
+      "projects\\/([A-Za-z0-9_-]+)\\/history\\/restore",
+      "projects\\/([A-Za-z0-9_-]+)\\/history\\/undo",
+      "projects\\/([A-Za-z0-9_-]+)\\/history\\/redo",
       "materializations\\/([A-Za-z0-9_-]+)",
       "migrations\\/([A-Za-z0-9_-]+)",
       "migrations\\/([A-Za-z0-9_-]+)\\/rollback",
@@ -132,9 +139,13 @@ describe("fitness 6: route activation matches the stage gate", () => {
     // that could not fail; this one can.
     const escaped = (suffix: string): string =>
       `\\/api\\/migration\\/v1\\/projects\\/([A-Za-z0-9_-]+)\\/${suffix}`;
-    for (const closed of ["history"]) {
+    // **M4C opened the history routes**, so this stage no longer owns them. The list is
+    // empty on purpose: a route that is closed must be closed *by name*, and "history" is
+    // no longer one of them.
+    for (const closed of [] as string[]) {
       expect(serverSource.includes(escaped(closed)), closed).toBe(false);
     }
+    expect(serverSource.includes(escaped("history"))).toBe(true);
     expect(serverSource.includes(escaped("impact"))).toBe(true);
   });
 });
@@ -237,9 +248,12 @@ describe("fitness 10-14: stage-specific invariants", () => {
       expect(Object.keys(map.entries).sort()).toEqual([...ENGINE_OWNED_OPERATION_IDS].sort());
       expect(Object.values(map.entries).some((entry) => entry.state === "unverified")).toBe(false);
     }
+    // M4C added the three history entry points to the controlled write paths: the studio's
+    // own history buttons are translated by the Host into an impact-bound restore, and
+    // they are reported as supported so the gateway can judge them.
     expect(Object.entries(openFilmCapabilityMap().entries)
       .filter(([, entry]) => entry.state === "supported").map(([id]) => id))
-      .toEqual(["timeline.adopt_materialization"]);
+      .toEqual(["timeline.adopt_materialization", "history.restore", "history.undo", "history.redo"]);
     expect(Object.keys(hostServiceCapabilityMap().entries)).toEqual(["asset_import"]);
   });
 

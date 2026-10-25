@@ -125,3 +125,35 @@ export function assertLedgerWithinRoots(facts: OpenFilmLayoutFacts, ledgerTarget
     }
   }
 }
+
+/** A content-addressed asset the Host installed during an adoption. */
+const INSTALLED_ASSET = /^assets\/[a-f0-9]{64}\/source\.mp4$/u;
+
+/**
+ * The weaker ledger rule M4C needs, and why it is weaker.
+ *
+ * The subset rule above is right for a *migration*: the plan's closure and the ledger are
+ * two records of the same copy, and a disagreement between them is a contradiction. It is
+ * wrong after a **restore**, and M4C is what makes it wrong: a restore puts an older
+ * closure back into the active source, so the assets an earlier adoption installed are no
+ * longer referenced by the film — but they are still in the ledger, and they are still on
+ * disk. They are leftovers, and the gate permits them to be leftovers.
+ *
+ * So the rule becomes containment plus provenance: every ledger target must still be a
+ * relative path inside the project, and a target that is not among the roots must be an
+ * installed, content-addressed asset. A ledger row that points anywhere else is still a
+ * contradiction, and it is still refused.
+ */
+export function assertLedgerStaysInsideTheProject(facts: OpenFilmLayoutFacts,
+  ledgerTargetPaths: readonly string[], projectId: string): void {
+  const roots = new Set(facts.roots);
+  for (const target of ledgerTargetPaths) {
+    assertRelativeInsideRoot(target, projectId, "ledger target_path");
+    if (roots.has(target)) continue;
+    if (!INSTALLED_ASSET.test(target)) {
+      throw new HttpError(422, "UNSUPPORTED_EDIT",
+        "the asset ledger names a target that is neither in the closure nor an installed asset",
+        { ledger_target: target }, projectId);
+    }
+  }
+}

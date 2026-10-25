@@ -71,10 +71,16 @@ describe("NativeMutationRegistry completeness", () => {
     }
   });
 
-  it("AC-003 translates only the shipped edits, M4B adoption, and Host asset import", () => {
+  it("AC-003 translates only the shipped edits, the controlled writes, and Host asset import", () => {
     const translated = NATIVE_MUTATION_REGISTRY.filter((entry) => entry.policy.startsWith("translated"));
+    // **M4C added the three history entry points.** They translate into a typed restore
+    // intent — a target snapshot and the authorization that permits it — and never into a
+    // pointer move or a revision the client may name.
     expect(translated.map((entry) => [entry.entry_id, entry.typed_intent]).sort()).toEqual([
       ["asset.import", null],
+      ["history.redo", "restore_snapshot"],
+      ["history.restore", "restore_snapshot"],
+      ["history.undo", "restore_snapshot"],
       ["timeline.adopt_materialization", "adopt_materialization"],
       ["timeline.replace_visual_asset", "replace_visual_asset"],
       ["timeline.set_visual_fit", "set_visual_fit"],
@@ -203,10 +209,15 @@ describe("M-01 capability completeness and fail-closed behaviour", () => {
       { correlationId: "m21-openfilm-capability", projectId: "of", signal: AbortSignal.timeout(1_000) });
     for (const operation of ["timeline.set_visual_fit", "timeline.replace_visual_asset"]) {
       expect(map.entries[operation], operation).toMatchObject({ state: "blocked" });
-      expect(map.entries[operation]!.reason, operation).toMatch(/controlled adoption write path/u);
+      // M4C added the controlled history-restore path to the same set, so the reason names
+      // both of them.
+      expect(map.entries[operation]!.reason, operation)
+        .toMatch(/controlled adoption and history-restore write paths/u);
     }
+    // M4C opened the controlled history-restore path beside the adoption, so OpenFilm now
+    // reports four supported operations: the adoption and the three history entries.
     expect(Object.entries(map.entries).filter(([, entry]) => entry.state === "supported").map(([id]) => id))
-      .toEqual(["timeline.adopt_materialization"]);
+      .toEqual(["timeline.adopt_materialization", "history.restore", "history.undo", "history.redo"]);
   });
 
   it("refuses a translated write when the capability map does not report the operation", () => {

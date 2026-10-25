@@ -39,6 +39,9 @@ OpenFilm Studio / Headless client
 | `ImpactStore/Service` | 从 committed projection/plan/locks/rights 计算 canonical impact | 接受客户端自报消费者/影响 |
 | `AdoptionCoordinator` | 调用 ProjectCoordinator 的唯一受控写流程 | 自己写 revision/binding/source |
 | `HistoryService` | 将 old snapshot 内容转为新的 controlled write | 直接更新 active_commit 指向旧 snapshot |
+| `HistoricalSnapshotResolver` | 证明 target snapshot 归属本项目、已 committed、字节在盘、closure 可重算 | 从 active source 猜旧内容；返回客户端路径 |
+| `HistoryRestorePlanBuilder` | current/target 的 canonical 差异、consumer、三类锁、rights 与 plan hash | 全锁兜底；忽略未知字段 |
+| `HistoryStore` | 不可变 `history_restore_fact` 与 history 读模型 | 自建 state/pointer/revision |
 | `ConsumerGraph` | narration/subtitle/audio/transition/shared asset 消费关系 | 持久化第二时间线 |
 
 ## 3. 核心合同
@@ -232,7 +235,16 @@ rights/locks/source facts 收敛；不可证明才进入 terminal attention。
 | `GET /api/migration/v1/materializations/:materializationId` | M3 | 200 MaterializationV1 | 404；读取发现变化则 200 stale |
 | `POST /api/migration/v1/projects/:id/impact` | M4A | 201 ImpactSpecV1 | 409 base/source；422 ref；423 lock/attention |
 | `POST /api/migration/v1/projects/:id/edits` | M4B | 200 ControlledWriteResponseV1 | 409 base/source/idempotency；423 lock；428 impact/approval |
+| `GET /api/migration/v1/projects/:id/history` | M4C | 200 HistoryReadModelV1 | 404 非 activated project |
 | `POST /api/migration/v1/projects/:id/history/restore` | M4C | 200 ControlledWriteResponseV1 | 同上；跨项目/不存在 snapshot 同 404；不可恢复 snapshot/diff 422 |
+| `POST /api/migration/v1/projects/:id/history/undo` | M4C | 200 HistoryIntentResponseV1 | 422 无可撤销目标；不写任何东西 |
+| `POST /api/migration/v1/projects/:id/history/redo` | M4C | 200 HistoryIntentResponseV1 | 422 无可重做目标；不写任何东西 |
+
+M4C 的三个 history 路由里只有 `history/restore` 会写。它是受控写：先要一份以
+`intent={op:"restore_snapshot",target_snapshot_id}` 计算的 impact，再提交显式 approval。`history/undo` 与
+`history/redo` 只把命令翻译成 typed intent（目标 snapshot），不创建 impact、不写 revision、不动 active
+pointer；客户端拿到 intent 后仍要走同一套两步授权。历史读模型只列 committed snapshot 引用，按 revision 排序，
+不携带路径，也不携带任何可以移动指针的东西。
 
 错误优先级保持：auth/origin → schema/capability → idempotency → project/resource ownership → base/source/control
 → attention → materialization/rights/impact/approval → locks → execution；M4B 的更细调用顺序以

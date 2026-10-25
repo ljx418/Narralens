@@ -5,7 +5,8 @@ import type { MigratedAssetLedger } from "../projects/migrated-asset-ledger.js";
 import type { ActivatedProjectView } from "../projects/project-resolver.js";
 import type { RevisionStore } from "../projects/revision-store.js";
 import {
-  assertLedgerWithinRoots, assertRelativeInsideRoot, openFilmLayoutFacts,
+  assertLedgerStaysInsideTheProject, assertLedgerWithinRoots, assertRelativeInsideRoot,
+  openFilmLayoutFacts,
 } from "../projects/openfilm-layout-facts.js";
 import type { OpenFilmLayoutRegistrar } from "./openfilm-composition.js";
 import type { AdoptionStore } from "../adoption/adoption-store.js";
@@ -136,6 +137,33 @@ export class ActivatedProjectionService {
     }
   }
 
+  /**
+   * The registrar this service hands layouts to.
+   *
+   * Exposed so a caller that has just *published* a source can put the matching layout in
+   * front of the adapter without reaching for the concrete adapter itself. The registrar is
+   * absent when the OpenFilm port is not installed, so a caller can tell "no capability"
+   * from "registered".
+   */
+  get layoutRegistrar(): OpenFilmLayoutRegistrar | undefined { return this.#registrar; }
+
+  /**
+   * Register a layout the Host has just proven, for a project whose committed facts still
+   * name the *previous* snapshot.
+   *
+   * M4C publishes the restored source before it commits, so for a moment the active tree
+   * holds the restored closure while the committed facts still name the old one. The
+   * projection seam rebuilds from the committed facts, so without this the adapter would go
+   * on reading the previous closure after the publication.
+   *
+   * It registers and nothing else: the memo is *not* updated, because the memo is keyed by
+   * the committed snapshot and this layout is not yet the committed one. When the commit
+   * lands, `forget()` drops the memo and the next rebuild reads the committed facts.
+   */
+  useLayout(projectId: string, layout: OpenFilmProjectLayout): void {
+    this.#registrar?.registerLayout(projectId, layout);
+  }
+
   #rebuild(view: ActivatedProjectView, correlationId?: string): OpenFilmProjectLayout {
     const projectId = view.project_id;
     const adopted = this.#adoption?.projectionFact(view.snapshot_id);
@@ -158,7 +186,20 @@ export class ActivatedProjectionService {
         throw new HttpError(423, "PROJECT_ATTENTION_REQUIRED",
           "The asset ledger for this adopted project is not active", undefined, correlationId ?? projectId);
       }
-      assertLedgerWithinRoots(facts, this.#ledger.assets(projectId).map((asset) => asset.target_path), projectId);
+      // **Which ledger rule applies depends on how the projection fact was written.**
+      //
+      // An *adoption* adds every asset it installs to the closure, so the ledger's targets
+      // are a subset of the roots and the strict rule holds. A *restore* puts an older
+      // closure back, so the assets an earlier adoption installed are no longer referenced
+      // — they are leftovers, and the gate permits them to be leftovers. The strict rule
+      // would refuse every restored project, so the weaker containment rule applies there.
+      const origin = this.#revisions.projectTransaction(adopted.transaction_id);
+      const ledgerTargets = this.#ledger.assets(projectId).map((asset) => asset.target_path);
+      if (origin?.kind === "history") {
+        assertLedgerStaysInsideTheProject(facts, ledgerTargets, projectId);
+      } else {
+        assertLedgerWithinRoots(facts, ledgerTargets, projectId);
+      }
       return { root: view.source_root.value, roots: adopted.roots, subtitles: adopted.subtitles };
     }
     const store = this.#revisions.migrations;

@@ -44,7 +44,11 @@ describe("M2.2 fitness: one state machine, no arbitrary state writes", () => {
     // property this rule protects. `transitionFrom`, `markStale` and `quarantine` are M3.1's
     // materialization machine; `transitionBootstrap` is W2.0's asset-ledger bootstrap.
     const scopedHelpers = new Map<string, string[]>([
-      [resolve(REPO, "src/host/projects/revision-store.ts"), ["commitAdoption", "abortAdoption"]],
+      // M4C's two multi-fact transactions are the same shape as M4B's: the predecessor is
+      // in the UPDATE predicate, exactly one row must change, and every business fact
+      // rolls back with the state.
+      [resolve(REPO, "src/host/projects/revision-store.ts"),
+        ["commitAdoption", "abortAdoption", "commitHistoryRestore", "abortHistoryRestore"]],
     ]);
     const helpers = ["transition", "advanceJournal", "markRecovering", "#state", "#assetImportState",
       "transitionBootstrap", "transitionFrom", "markStale", "quarantine",
@@ -152,31 +156,41 @@ describe("M2.2 fitness: routes that must stay closed stay unmounted", () => {
     expect(routes).toEqual([
       "projects\\/([A-Za-z0-9_-]+)\\/engine",
       "projects\\/([A-Za-z0-9_-]+)\\/migrate-copy",
-      // M3 opened two, M4A opened impact, and M4B opened controlled edits.
+      // M3 opened two, M4A opened impact, M4B opened controlled edits, and M4C opened the
+      // history read model, the controlled restore and the two history translations.
       "projects\\/([A-Za-z0-9_-]+)\\/proposals\\/([A-Za-z0-9_-]+)\\/materialize",
       "projects\\/([A-Za-z0-9_-]+)\\/impact",
       "projects\\/([A-Za-z0-9_-]+)\\/edits",
+      "projects\\/([A-Za-z0-9_-]+)\\/history",
+      "projects\\/([A-Za-z0-9_-]+)\\/history\\/restore",
+      "projects\\/([A-Za-z0-9_-]+)\\/history\\/undo",
+      "projects\\/([A-Za-z0-9_-]+)\\/history\\/redo",
       "materializations\\/([A-Za-z0-9_-]+)",
       "migrations\\/([A-Za-z0-9_-]+)",
       "migrations\\/([A-Za-z0-9_-]+)\\/rollback",
     ]);
   });
 
-  it("9. M4C routes stay closed while M4B edits are present", () => {
+  it("9. the M4C history routes are mounted, and the ones M4C does not own stay closed", () => {
     // This used to search for unescaped slashes against source that escapes every one, so
     // it matched nothing and passed for `materialize` even after M3 opened it. It now looks
-    // for the escaped form the file actually contains, and only for what is still closed:
-    // adopt and history restore are M4B's and M4C's, and the legacy edit route is not
-    // versioned.
+    // for the escaped form the file actually contains.
+    //
+    // **M4C opened the history routes**, so "history" is no longer on the closed list. What
+    // is still closed is the *raw* upstream history surface: a checkout, a merge or a
+    // discard would move the source without a Narralens revision, and M4C does not mount
+    // any of them.
     const escaped = (suffix: string): string =>
       `\\/api\\/migration\\/v1\\/projects\\/([A-Za-z0-9_-]+)\\/${suffix}`;
-    for (const closed of ["adopt", "history"]) {
+    for (const closed of ["adopt"]) {
       expect(server.includes(escaped(closed)), closed).toBe(false);
     }
     // And the opposite direction, so the check cannot be satisfied by an unrelated edit:
-    // impact really is mounted, spelled the way the closed-route check above would find.
+    // impact, the controlled edits and the M4C history routes really are mounted, spelled
+    // the way the closed-route check above would find.
     expect(server.includes(escaped("impact"))).toBe(true);
     expect(server.includes(escaped("edits"))).toBe(true);
+    expect(server.includes(escaped("history"))).toBe(true);
   });
 
   it("10. a frozen fictional operation is still a 422, not a new state", () => {

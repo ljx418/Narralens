@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://narralens.local/schemas/history.schema.json",
+  "description": "The committed history of one project: the snapshots it has published, in revision order. It is a read model. It never names a path, never carries a pointer, and reading it cannot move the active pointer.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["format", "project_id", "entries"],
+  "properties": {
+    "format": { "const": "narralens.history@1.0" },
+    "project_id": { "type": "string", "minLength": 1 },
+    "entries": {
+      "type": "array",
+      "maxItems": 256,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["revision", "snapshot_id", "kind", "transaction_id"],
+        "properties": {
+          "revision": { "type": "integer", "minimum": 0 },
+          "snapshot_id": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "kind": { "enum": ["migration", "adoption", "restore"] },
+          "transaction_id": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
+  }
+}

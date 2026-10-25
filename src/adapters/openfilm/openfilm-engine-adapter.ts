@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { copyFile, cp, mkdir, mkdtemp, readFile, realpath, rm } from "node:fs/promises";
+import { copyFile, cp, mkdir, mkdtemp, readFile, realpath, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { basename, dirname, join, resolve } from "node:path";
 import { HttpError } from "../../host/api-error.js";
@@ -15,8 +15,9 @@ import type {
   CapabilityMap, EngineAssetReference, EngineClip, EngineClipKind, EngineProjection,
   EngineSubtitle, EngineTrack, HalfOpenFrameRange,
 } from "../../contracts/engine-types.js";
-import type { OpenFilmOp, OpenFilmUpstream } from "./openfilm-upstream.js";
-import { isAdoptEnginePlanIntent, type AdoptEnginePlanIntent } from "../../host/engine/engine-plan-intent.js";
+import { upstreamRevOf, type OpenFilmOp, type OpenFilmUpstream } from "./openfilm-upstream.js";
+import { isAdoptEnginePlanIntent, isRestoreEnginePlanIntent, type AdoptEnginePlanIntent,
+  type RestoreEnginePlanIntent } from "../../host/engine/engine-plan-intent.js";
 import type { NativePlanV1 } from "../../contracts/wave2-types.js";
 
 /**
@@ -68,6 +69,21 @@ interface AdoptionValidationProof {
   readonly native_plan: NativePlanV1;
   readonly roots: readonly string[];
   readonly non_visual_sha256: string;
+}
+
+/**
+ * The proof a restore hands back.
+ *
+ * It carries the *target's* facts, not the staged tree's: the staged film must be
+ * byte-identical to the target film, and the closure over the target's roots must
+ * reproduce the target's digest. Both are checkable without trusting the stage.
+ */
+interface RestoreValidationProof {
+  readonly kind: "m4c-restore";
+  readonly target_roots: readonly string[];
+  readonly target_entry_root: string;
+  readonly target_source_digest: string;
+  readonly target_film_sha256: string;
 }
 
 const PAGE_EXTENSIONS = /\.html?$/iu;
@@ -169,6 +185,30 @@ export class OpenFilmEngineAdapter implements EnginePort {
 
   async inspect(snapshot: SnapshotRef, ctx: ReadContext): Promise<EngineProjection> {
     const layout = this.#layout(snapshot.project_id, ctx.correlationId);
+    return await this.#inspectLayout(layout, snapshot, ctx);
+  }
+
+  /**
+   * Inspect an immutable snapshot's closure rather than the active source.
+   *
+   * Server-only, and deliberately **not** on `EnginePort`: the port has exactly seven
+   * operations, and "read a different project's historical closure" is not one of them.
+   * This is a Host-side seam for M4C's resolver, and it is the same code path as
+   * `inspect()` — one parser, one projection, one digest rule — so a historical closure
+   * and an active one are read by the same rules and cannot disagree.
+   *
+   * The digest is checked against the snapshot's *recorded* digest, so a snapshot whose
+   * bytes were altered after it was committed is refused here rather than read.
+   */
+  async inspectSnapshot(layout: OpenFilmProjectLayout, expectedSourceDigest: string,
+    ctx: ReadContext): Promise<EngineProjection> {
+    return await this.#inspectLayout(layout, {
+      project_id: ctx.projectId, engine: "openfilm", source_digest: expectedSourceDigest,
+    }, ctx);
+  }
+
+  async #inspectLayout(layout: OpenFilmProjectLayout, snapshot: SnapshotRef,
+    ctx: ReadContext): Promise<EngineProjection> {
     const root = await realpath(layout.root);
     // Recompute the byte-level source identity before interpreting the document. If a
     // previously committed film becomes malformed, that is still a deterministic source
@@ -328,9 +368,13 @@ export class OpenFilmEngineAdapter implements EnginePort {
     if (snapshot.project_id !== ctx.projectId) {
       throw new HttpError(409, "REVISION_CONFLICT", "Snapshot does not belong to the requested project", undefined, ctx.correlationId);
     }
+    if (isRestoreEnginePlanIntent(intent)) {
+      return this.#planRestore(snapshot, intent, ctx);
+    }
     if (!isAdoptEnginePlanIntent(intent)) {
       throw new HttpError(422, "UNSUPPORTED_EDIT",
-        "OpenFilm accepts only the Host-injected M4B adoption intent", undefined, ctx.correlationId);
+        "OpenFilm accepts only the Host-injected M4B adoption intent or the M4C restore intent",
+        undefined, ctx.correlationId);
     }
     this.#assertAdoptionIntent(intent, ctx.correlationId);
     const projection = await this.inspect(snapshot, ctx);
@@ -357,11 +401,52 @@ export class OpenFilmEngineAdapter implements EnginePort {
   }
 
   /**
+   * The M4C restore plan.
+   *
+   * The adapter's whole job here is to check the *target* it was handed: that the film text
+   * hashes to the digest the Host proved, that the declared roots are relative and include
+   * the entry, and that the plan carries the digests of the authorization. It does not
+   * decide what to restore — the Host does — and it holds no path.
+   */
+  #planRestore(snapshot: SnapshotRef, intent: RestoreEnginePlanIntent,
+    ctx: CommandContext): EngineEditPlan {
+    if (sha256(intent.target_film_text) !== intent.target_film_sha256) {
+      throw new HttpError(422, "UNSUPPORTED_EDIT",
+        "The restore target's film bytes do not match the digest the Host proved",
+        undefined, ctx.correlationId);
+    }
+    if (!intent.target_roots.includes("film.html")) {
+      throw new HttpError(422, "UNSUPPORTED_EDIT",
+        "The restore target does not declare a film document", undefined, ctx.correlationId);
+    }
+    if (!intent.target_roots.includes(intent.target_entry_root)) {
+      throw new HttpError(422, "UNSUPPORTED_EDIT",
+        "The restore target's entry root is not among its declared roots", undefined, ctx.correlationId);
+    }
+    for (const root of intent.target_roots) {
+      if (root.startsWith("/") || root.includes("\\") || /^[a-z]:/iu.test(root)
+        || root.split("/").some((segment) => segment === ".." || segment === "")) {
+        throw new HttpError(422, "UNSUPPORTED_EDIT",
+          "The restore target declares a root that is not a relative path inside the project",
+          undefined, ctx.correlationId);
+      }
+    }
+    void snapshot;
+    return { engine: "openfilm", base_source_digest: ctx.expectedSourceDigest,
+      base_revision: ctx.baseRevision, edit: intent,
+      ops: [{ op: "restore_film", target_snapshot_id: intent.target_snapshot_id,
+        target_film_sha256: intent.target_film_sha256, target_film_text: intent.target_film_text }] };
+  }
+
+  /**
    * Copy the project into the Host-allocated isolated root and apply ops there only.
    * The base check happens before the upstream is touched, so a stale base can never be
    * silently rebased (AC-004).
    */
   async stage(plan: EngineEditPlan, isolatedRoot: AbsoluteServerPath, ctx: CommandContext): Promise<StagedSource> {
+    if (isRestoreEnginePlanIntent(plan.edit)) {
+      return await this.#stageRestore(plan, isolatedRoot, ctx);
+    }
     const layout = this.#layout(ctx.projectId, ctx.correlationId);
     const sourceRoot = await realpath(layout.root);
 
@@ -426,6 +511,10 @@ export class OpenFilmEngineAdapter implements EnginePort {
   }
 
   async validate(staged: StagedSource, ctx: CommandContext): Promise<ValidationReport> {
+    const restoreProof = staged.validation_proof as Partial<RestoreValidationProof> | undefined;
+    if (restoreProof?.kind === "m4c-restore") {
+      return await this.#validateRestore(staged, restoreProof, ctx);
+    }
     const stagedRoot = join(ctx.isolatedRoot.value, staged.isolated_relative_root);
     const read = await this.#upstream.readProjectFilm(stagedRoot);
     if (read.problems.length > 0) {
@@ -457,6 +546,115 @@ export class OpenFilmEngineAdapter implements EnginePort {
     if (proof.non_visual_sha256 !== nonVisualDigest(doc)) problems.push("narration/audio changed during adoption");
     if (digest.source_digest !== staged.source_digest) problems.push("staged source digest was not independently reproduced");
     return { ok: problems.length === 0 && read.rev.length > 0, problems, source_digest: digest.source_digest };
+  }
+
+  /**
+   * Stage a restore.
+   *
+   * The current source is copied into the isolated root and the target's film document is
+   * written over it, byte for byte. Nothing else is touched: the target's other roots are
+   * expected to be *already present* in the current tree with identical bytes, which is the
+   * rule M4C's snapshot eligibility states ("every non-film mutable root has the same bytes
+   * as the current one"). Writing them again would be a second way for the stage to differ
+   * from the target.
+   *
+   * The closure is then recomputed over the *target's* roots, and it has to reproduce the
+   * target's own digest. That single comparison is the proof that the staged tree is the
+   * target and not merely something that looks like it.
+   */
+  async #stageRestore(plan: EngineEditPlan, isolatedRoot: AbsoluteServerPath,
+    ctx: CommandContext): Promise<StagedSource> {
+    const intent = plan.edit as RestoreEnginePlanIntent;
+    const layout = this.#layout(ctx.projectId, ctx.correlationId);
+    const sourceRoot = await realpath(layout.root);
+    const currentDigest = await computeSourceDigest({
+      root: sourceRoot, roots: layout.roots, engine: "openfilm", engineUpstreamSha: OPENFILM_UPSTREAM_SHA,
+      declaredAssets: layout.declaredAssets,
+    }, ctx.correlationId);
+    if (plan.base_source_digest !== currentDigest.source_digest) {
+      throw new HttpError(409, "SOURCE_CHANGED", "OpenFilm source changed before staging",
+        undefined, ctx.correlationId);
+    }
+    const stagedRoot = await mkdtemp(join(isolatedRoot.value, "openfilm-"));
+    let handedOver = false;
+    try {
+      await cp(sourceRoot, stagedRoot, { recursive: true });
+      const filmPath = join(stagedRoot, "film.html");
+      await writeFile(filmPath, intent.target_film_text, "utf8");
+      // The text went through a UTF-8 round trip on its way here. If the target's bytes were
+      // not valid UTF-8, the round trip would change them — and the digest would catch it
+      // here rather than at publication.
+      const stagedFilm = await readFile(filmPath);
+      if (sha256(stagedFilm) !== intent.target_film_sha256) {
+        throw new HttpError(422, "UNSUPPORTED_EDIT",
+          "The staged film is not byte-identical to the restore target", undefined, ctx.correlationId);
+      }
+      const roots = [intent.target_entry_root,
+        ...intent.target_roots.filter((root) => root !== intent.target_entry_root)];
+      const stagedDigest = await computeSourceDigest({
+        root: stagedRoot, roots, engine: "openfilm", engineUpstreamSha: OPENFILM_UPSTREAM_SHA,
+      }, ctx.correlationId);
+      if (stagedDigest.source_digest !== intent.target_source_digest) {
+        throw new HttpError(422, "UNSUPPORTED_EDIT",
+          "The staged closure does not reproduce the restore target's digest", undefined, ctx.correlationId);
+      }
+      handedOver = true;
+      return {
+        isolated_relative_root: basename(stagedRoot),
+        relative_entry: "film.html",
+        source_digest: stagedDigest.source_digest,
+        revision: upstreamRevOf(intent.target_film_text),
+        validation_proof: {
+          kind: "m4c-restore", target_roots: intent.target_roots,
+          target_entry_root: intent.target_entry_root,
+          target_source_digest: intent.target_source_digest,
+          target_film_sha256: intent.target_film_sha256,
+        } satisfies RestoreValidationProof,
+      };
+    } finally {
+      if (!handedOver) await rm(stagedRoot, { recursive: true, force: true });
+    }
+  }
+
+  /**
+   * Validate a staged restore.
+   *
+   * Three independent checks, and none of them trusts the stage: the staged film must be
+   * byte-identical to the target, the pinned upstream must read it, and the closure over
+   * the target's roots must reproduce the target's digest.
+   */
+  async #validateRestore(staged: StagedSource, proof: Partial<RestoreValidationProof>,
+    ctx: CommandContext): Promise<ValidationReport> {
+    const stagedRoot = join(ctx.isolatedRoot.value, staged.isolated_relative_root);
+    const problems: string[] = [];
+    let stagedFilm: Buffer = Buffer.alloc(0);
+    try { stagedFilm = await readFile(join(stagedRoot, "film.html")); }
+    catch { problems.push("the staged target film is missing"); }
+    if (problems.length === 0 && sha256(stagedFilm) !== proof.target_film_sha256) {
+      problems.push("the staged film is not byte-identical to the restore target");
+    }
+    const read = await this.#upstream.readProjectFilm(stagedRoot);
+    if (read.problems.length > 0) {
+      problems.push("the staged target film does not read upstream");
+    }
+    const entry = proof.target_entry_root ?? "";
+    const roots = [entry, ...(proof.target_roots ?? []).filter((root) => root !== entry)];
+    let digest: { source_digest: string } | null = null;
+    try {
+      digest = await computeSourceDigest({ root: stagedRoot, roots, engine: "openfilm",
+        engineUpstreamSha: OPENFILM_UPSTREAM_SHA }, ctx.correlationId);
+    } catch {
+      problems.push("the staged target closure could not be recomputed");
+    }
+    if (digest !== null) {
+      if (digest.source_digest !== proof.target_source_digest) {
+        problems.push("the staged closure does not reproduce the restore target's digest");
+      }
+      if (digest.source_digest !== staged.source_digest) {
+        problems.push("the staged source digest was not independently reproduced");
+      }
+    }
+    return { ok: problems.length === 0, problems, source_digest: digest?.source_digest ?? null };
   }
 
   async preview(_snapshot: SnapshotRef, _ctx: ReadContext): Promise<PreviewDescriptor> {

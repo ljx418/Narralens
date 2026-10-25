@@ -704,18 +704,18 @@ describe("M4A-R01: the route answers a client consistently and idempotently", ()
     expect(running.host.impacts.byProject(projectId)).toHaveLength(0);
   }, 600_000);
 
-  it("keeps history restore unmounted, and the legacy routes working", async () => {
+  it("keeps the legacy routes working, and the M4C restore route refusing on its merits", async () => {
     const running = await started();
-    for (const path of [
-      "/api/migration/v1/projects/d1-30s/history/restore",
-    ]) {
-      const response = await fetch(`${running.origin}${path}`, {
-        method: "POST", headers: { origin: running.origin, authorization: `Bearer ${running.token}`,
-          "content-type": "application/json" }, body: "{}",
-      });
-      expect(response.status, path).toBe(404);
-      expect(await response.text(), path).not.toMatch(/narralens\.\w+@/u);
-    }
+    // **M4C mounted the history restore route**, so a bodyless POST is refused for the
+    // authorization it is missing (428) rather than by absence. The answer must still not
+    // look like a contract: a client must not be able to bind to a shape before the Host
+    // has committed to one.
+    const response = await fetch(`${running.origin}/api/migration/v1/projects/d1-30s/history/restore`, {
+      method: "POST", headers: { origin: running.origin, authorization: `Bearer ${running.token}`,
+        "content-type": "application/json" }, body: "{}",
+    });
+    expect(response.status).toBe(428);
+    expect(await response.text()).not.toMatch(/narralens\.\w+@/u);
     // The Wave 1 and M3 routes still answer, so 404 above means "unmounted", not "broken".
     expect((await fetch(`${running.origin}/api/projects/d1-30s`, {
       headers: { origin: running.origin, authorization: `Bearer ${running.token}` } })).status).toBe(200);

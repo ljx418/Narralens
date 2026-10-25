@@ -19,6 +19,7 @@ import type {
 } from "../../contracts/wave2-types.js";
 import { ImpactStore } from "./impact-store.js";
 import { computeImpactHash, impactExpiry, isExpired, sortImpactArrays, verifyImpactHash } from "./impact-canonical.js";
+import type { RestorePlanner } from "../history/restore-planner.js";
 
 /**
  * ImpactService (ADR-W2.0-004 §5).
@@ -58,6 +59,11 @@ export interface ImpactServiceDeps {
   readonly migrations: MigrationStore;
   readonly impacts: ImpactStore;
   readonly idempotency: OperationIdempotencyStore;
+  /**
+   * M4C's planner. Absent in a Host that has no history capability, and then the restore
+   * arm stays closed — the M4A red light, kept.
+   */
+  readonly planner?: RestorePlanner | undefined;
   /** Injected so TTL is a decision, not a side effect of the machine's speed. */
   readonly clock: () => Date;
   readonly correlationId: () => string;
@@ -216,13 +222,7 @@ export class ImpactService {
   async #compute(projectId: string, view: ActivatedProjectView, request: ImpactRequestV1,
     impactId: string, correlationId: string, now: Date): Promise<ImpactSpecV1> {
     if (request.intent.op === "restore_snapshot") {
-      // M4A has no independent read path for an immutable historical snapshot: a
-      // `SnapshotRef` carries only a source digest, so there is no root or layout to
-      // resolve. Refusing is the honest answer; using the *current* source to stand in for
-      // an old snapshot would be the one substitution this whole module exists to prevent.
-      throw new HttpError(422, "CAPABILITY_NOT_ENABLED",
-        "Restoring an immutable historical snapshot is not computable from the active source",
-        { target_snapshot_id: request.intent.target_snapshot_id }, projectId);
+      return await this.#computeRestore(projectId, view, request, impactId, correlationId, now);
     }
 
     // ── the committed projection, rebuilt from durable facts ──────────────────────────
@@ -382,6 +382,110 @@ export class ImpactService {
     return { ...unsigned, impact_hash: computeImpactHash(unsigned) };
   }
 
+  /**
+   * The restore arm.
+   *
+   * M4C made this computable, and the only thing that changed is *where the difference
+   * comes from*: the target's own bytes, read by the pinned upstream, rather than the
+   * active source. Everything else — the read barrier, the idempotent replay, the
+   * base/source/control comparison, the lock check, the second currentness check — is the
+   * same machinery the adoption arm uses, because it is the same question: "what would this
+   * write touch, and is it still true?"
+   *
+   * The plan's own hash is what the spec carries as `native_plan_sha256`. It is not a
+   * placeholder and not the plan's *id*: it is the hash over the plan's canonical bytes, so
+   * the restore can rebuild the plan and compare the two hashes and know that it is
+   * restoring the difference the client was shown.
+   */
+  async #computeRestore(projectId: string, view: ActivatedProjectView, request: ImpactRequestV1,
+    impactId: string, correlationId: string, now: Date): Promise<ImpactSpecV1> {
+    if (request.intent.op !== "restore_snapshot") {
+      throw new HttpError(422, "INVALID_REQUEST",
+        "The restore arm needs a restore intent", undefined, projectId);
+    }
+    const planner = this.#deps.planner;
+    if (planner === undefined) {
+      // M4A has no independent read path for an immutable historical snapshot: a
+      // `SnapshotRef` carries only a source digest, so there is no root or layout to
+      // resolve. Refusing is the honest answer; using the *current* source to stand in for
+      // an old snapshot would be the one substitution this whole module exists to prevent.
+      throw new HttpError(422, "CAPABILITY_NOT_ENABLED",
+        "Restoring an immutable historical snapshot is not computable from the active source",
+        { target_snapshot_id: request.intent.target_snapshot_id }, projectId);
+    }
+    const context = await planner.plan(projectId, request.intent.target_snapshot_id, correlationId);
+    if (context.view.revision !== view.revision || context.view.source_digest !== view.source_digest
+      || context.view.control_revision !== view.control_revision) {
+      throw new HttpError(409, "REVISION_CONFLICT",
+        "The project changed while the restore was being planned", undefined, projectId);
+    }
+    // The locks: the real change, computed by the Host from the plan.
+    const activeLocks = this.#deps.locks.activeLocks(projectId);
+    if (activeLocks.length > MAX_LOCKS_CHECKED) {
+      throw new HttpError(422, "INVALID_REQUEST",
+        "The project has more active locks than an impact can record",
+        { active_lock_count: activeLocks.length, ceiling: MAX_LOCKS_CHECKED }, projectId);
+    }
+    // Throws 423 on a real conflict. No row has been written and none will be.
+    this.#deps.locks.assertUnlocked(projectId, context.plan.required_locks);
+    await this.#deps.fault?.("after_locks");
+
+    // Second currentness: nothing may have moved while the plan was built.
+    await this.#deps.fault?.("before_insert");
+    const second = await this.#deps.resolver.resolveActivated(projectId);
+    if (second.revision !== view.revision || second.source_digest !== view.source_digest
+      || second.control_revision !== view.control_revision || second.snapshot_id !== view.snapshot_id) {
+      throw new HttpError(409, "REVISION_CONFLICT",
+        "The project changed while the impact was being computed", undefined, projectId);
+    }
+    // And the bytes are re-read, not trusted: the database reading the same row twice
+    // cannot detect a file that changed on disk.
+    const resolved = this.#deps.engines.resolve(projectId);
+    const recheck = await resolved.port.inspect({
+      project_id: projectId, engine: "openfilm", source_digest: view.source_digest,
+    }, { correlationId, projectId, signal: AbortSignal.timeout(20_000) });
+    if (recheck.source_digest !== view.source_digest) {
+      throw new HttpError(409, "SOURCE_CHANGED",
+        "The source changed while the impact was being computed", undefined, projectId);
+    }
+    const finalLocks = this.#deps.locks.activeLocks(projectId);
+    if (finalLocks.length > MAX_LOCKS_CHECKED) {
+      throw new HttpError(422, "INVALID_REQUEST",
+        "The project has more active locks than an impact can record",
+        { active_lock_count: finalLocks.length, ceiling: MAX_LOCKS_CHECKED }, projectId);
+    }
+    this.#deps.locks.assertUnlocked(projectId, context.plan.required_locks);
+    const locksChecked: LockChecked[] = [...finalLocks]
+      .map((lock) => ({ lock_id: lock.lock_id, control_revision: lock.control_revision }))
+      .sort((left, right) => (left.lock_id < right.lock_id ? -1 : left.lock_id > right.lock_id ? 1 : 0));
+
+    const unsigned: Omit<ImpactSpecV1, "impact_hash"> = sortImpactArrays({
+      format: "narralens.impact@1.0",
+      impact_id: impactId,
+      project_id: projectId,
+      operation: "restore_snapshot",
+      materialization_id: null,
+      target_snapshot_id: context.target.snapshot_id,
+      base_revision: view.revision,
+      source_digest: view.source_digest,
+      control_revision: view.control_revision,
+      engine: "openfilm",
+      engine_upstream_sha: view.engine_upstream_sha,
+      // A restore whose difference is narration-only touches no visual range at all. The
+      // consumers below still name what it touches, so the authorization is not empty.
+      affected_ranges: context.affected_ranges,
+      affected_consumers: context.plan.consumers,
+      locks_checked: locksChecked,
+      rights_digest: context.rights.rights_digest,
+      // The restore plan's own hash. The restore rebuilds the plan and compares this value,
+      // so it has to be the hash over the plan's canonical bytes.
+      native_plan_sha256: context.plan.plan_sha256,
+      approvals_required: ["human_confirmation"],
+      expires_at: impactExpiry(now),
+    });
+    return { ...unsigned, impact_hash: computeImpactHash(unsigned) };
+  }
+
   #ledgerAssets(projectId: string): readonly MigratedAssetRecord[] {
     return this.#deps.ledger.assets(projectId);
   }
@@ -519,16 +623,21 @@ export class ImpactService {
     const spec = this.#deps.impacts.requireActive(impactId, new Date(expiresAt.getTime() - 1));
     const view = await this.#deps.resolver.resolveActivated(spec.project_id);
     if (view.revision !== spec.base_revision || view.source_digest !== spec.source_digest
-      || view.control_revision !== spec.control_revision || spec.materialization_id === null) {
-      throw new HttpError(428, "IMPACT_STALE", "Prepared adoption database premises moved",
+      || view.control_revision !== spec.control_revision) {
+      throw new HttpError(428, "IMPACT_STALE", "The prepared controlled write's database premises moved",
         { transaction_id: transactionId, impact_id: impactId });
     }
-    const materialization = await this.#deps.materialize.read(spec.materialization_id);
-    if (materialization.state !== "ready_for_adoption"
-      || materialization.rights_digest !== spec.rights_digest
-      || materialization.native_plan?.plan_sha256 !== spec.native_plan_sha256) {
-      throw new HttpError(428, "IMPACT_STALE", "Prepared adoption materialization premises moved",
-        { transaction_id: transactionId, impact_id: impactId });
+    // A restore names no materialization — there is nothing to re-read, and its plan and
+    // rights are re-proved by the caller against the immutable fact. An adoption does name
+    // one, and its proven facts must still hold.
+    if (spec.materialization_id !== null) {
+      const materialization = await this.#deps.materialize.read(spec.materialization_id);
+      if (materialization.state !== "ready_for_adoption"
+        || materialization.rights_digest !== spec.rights_digest
+        || materialization.native_plan?.plan_sha256 !== spec.native_plan_sha256) {
+        throw new HttpError(428, "IMPACT_STALE", "Prepared adoption materialization premises moved",
+          { transaction_id: transactionId, impact_id: impactId });
+      }
     }
     return spec;
   }

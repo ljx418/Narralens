@@ -95,16 +95,25 @@ describe("blocker 4a: the Host owns one resolver, one ledger and one inventory",
     expect(project.shots).toHaveLength(3);
   });
 
-  it("keeps M4C history restore closed while M4B edits are mounted", async () => {
+  it("mounts the M4C history routes while the M4B edits are mounted", async () => {
     const { origin, token } = await started();
     // M3.3 opened materialize and the materialization read; M4A opened impact and *only*
-    // impact. Versioned edits and history restore are M4B's and M4C's and must still be
-    // invisible to a client, on both methods.
-    for (const path of ["/api/migration/v1/projects/d1-30s/history/restore"]) {
-      const init: RequestInit = { method: "POST", headers: headers(origin, token), body: "{}" };
-      expect((await fetch(`${origin}${path}`, init)).status, path).toBe(404);
-      expect((await fetch(`${origin}${path}`, { method: "GET", headers: headers(origin, token) })).status, path).toBe(404);
-    }
+    // impact. M4B opened the versioned edits, and **M4C opened the history routes**: the
+    // controlled restore and the two history translations.
+    //
+    // The restore route is mounted, so a bodyless POST is refused on its merits (428, the
+    // impact it requires) rather than by absence. A 404 here would mean the route was still
+    // closed and this gate would be passing for the wrong reason.
+    const restore = await fetch(`${origin}/api/migration/v1/projects/d1-30s/history/restore`,
+      { method: "POST", headers: headers(origin, token), body: "{}" });
+    expect(restore.status).toBe(428);
+    expect(await restore.json()).toMatchObject({ code: "IMPACT_REQUIRED" });
+    // The read model is a read, and `d1-30s` is a legacy catalog project: 404, from the
+    // resolver, with the contract's own error code.
+    const history = await fetch(`${origin}/api/migration/v1/projects/d1-30s/history`,
+      { method: "GET", headers: headers(origin, token) });
+    expect(history.status).toBe(404);
+    expect(await history.json()).toMatchObject({ code: "NOT_FOUND" });
     const edits = await fetch(`${origin}/api/migration/v1/projects/d1-30s/edits`,
       { method: "POST", headers: headers(origin, token), body: "{}" });
     expect(edits.status).toBe(428);

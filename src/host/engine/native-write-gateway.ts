@@ -28,6 +28,8 @@ export interface NativeWriteRequest {
   readonly asset_id?: string;
   readonly value?: "contain" | "cover";
   readonly materialization_id?: string;
+  /** The snapshot a restore is about to put back. Never a path, never a revision. */
+  readonly target_snapshot_id?: string;
   readonly impact_id?: string;
   readonly impact_hash?: string;
   readonly approval_confirmed?: true;
@@ -148,6 +150,21 @@ export class NativeWriteGateway {
             approval: { confirmed: true },
           } };
         }
+        if (entry.typed_intent === "restore_snapshot") {
+          // A restore is only ever translated into a *typed intent*: a target snapshot, the
+          // authorization that permits it and an explicit approval. It is never a pointer
+          // move and never a revision the client may name.
+          if (!request.target_snapshot_id || !request.impact_id || !request.impact_hash
+            || request.approval_confirmed !== true) {
+            return this.#invalid(entry,
+              "restore_snapshot requires a target snapshot, an impact hash, and confirmed approval");
+          }
+          return { kind: "translated", entry, edit: {
+            op: "restore_snapshot", target_snapshot_id: request.target_snapshot_id,
+            impact_id: request.impact_id, impact_hash: request.impact_hash,
+            approval: { confirmed: true },
+          } };
+        }
         return this.#invalid(entry, "translated entry has no typed intent");
       }
       case "translated_host_service": {
@@ -170,6 +187,31 @@ export class NativeWriteGateway {
   #record(event: SecurityEvent): void {
     this.#events.push(event);
     if (this.#events.length > MAX_EVENTS) this.#events.splice(0, this.#events.length - MAX_EVENTS);
+  }
+
+  /**
+   * Whether an entry point may be used at all, without translating it into a write.
+   *
+   * The undo and redo entry points resolve to a *target*, and the target is only known
+   * once the project's history has been read — which happens after the entry has been
+   * judged permissible. This is that judgement and nothing more: it never produces an
+   * edit, so it can never be a write, and it never carries an impact.
+   */
+  permits(entryId: string, capabilities?: CapabilityMap): { permitted: boolean; reason: string } {
+    const entry = this.#registry.find(entryId);
+    if (entry === undefined) return { permitted: false, reason: "Unregistered native entry point" };
+    if (entry.policy === "blocked") return { permitted: false, reason: entry.reason };
+    const reported = capabilities?.entries[entry.entry_id];
+    if (reported === undefined) {
+      return { permitted: false, reason: `Capability is not reported for ${entry.entry_id}, so it is unverified` };
+    }
+    if (reported.state === "unverified") {
+      return { permitted: false, reason: `Capability is unverified for ${entry.entry_id}` };
+    }
+    if (entry.policy === "translated" && reported.state !== "supported") {
+      return { permitted: false, reason: `Engine does not support ${entry.entry_id} (reported ${reported.state})` };
+    }
+    return { permitted: true, reason: entry.reason };
   }
 
   /** Diagnostics only. Discards on restart; it is never a durable fact. */

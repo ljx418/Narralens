@@ -9,7 +9,7 @@
     "format": { "const": "narralens.controlled-write-failure@1.0" },
     "transaction_id": { "type": "string", "minLength": 1 },
     "project_id": { "type": "string", "minLength": 1 },
-    "operation": { "const": "adopt_materialization" },
+    "operation": { "enum": ["adopt_materialization", "restore_snapshot"] },
     "previous_revision": { "type": "integer", "minimum": 0 },
     "new_revision": { "type": "integer", "minimum": 0 },
     "source_digest": { "type": "string", "pattern": "^[a-f0-9]{64}$" },

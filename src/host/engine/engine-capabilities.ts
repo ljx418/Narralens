@@ -16,7 +16,19 @@ import { FPS_30 } from "./time-model.js";
 
 const ENGINE_OWNED = NATIVE_MUTATION_REGISTRY.filter((entry) => entry.policy !== "translated_host_service");
 
-const OPENFILM_NO_WRITE_PATH = "OpenFilm permits only the M4B controlled adoption write path";
+const OPENFILM_NO_WRITE_PATH =
+  "OpenFilm permits only the controlled adoption and history-restore write paths";
+
+/**
+ * The controlled write paths M4B and M4C own.
+ *
+ * They are OpenFilm-only: the controlled adoption replaces the clips of a migrated
+ * OpenFilm target, and the controlled restore puts an OpenFilm snapshot back. Hypit has
+ * neither, so reporting them there would be a capability the engine does not have.
+ */
+const OPENFILM_CONTROLLED_PATHS: ReadonlySet<string> = new Set([
+  "timeline.adopt_materialization", "history.restore", "history.undo", "history.redo",
+]);
 
 function mapFor(engine: EngineKind): CapabilityMap {
   const entries: Record<string, CapabilityEntry> = {};
@@ -26,10 +38,10 @@ function mapFor(engine: EngineKind): CapabilityMap {
 
 function stateFor(engine: EngineKind, entry: NativeMutationEntry): CapabilityEntry {
   if (entry.policy === "read_only") return { state: "read_only", reason: entry.reason };
-  if (entry.entry_id === "timeline.adopt_materialization") {
+  if (OPENFILM_CONTROLLED_PATHS.has(entry.entry_id)) {
     return engine === "openfilm"
       ? { state: "supported", reason: entry.reason }
-      : { state: "blocked", reason: "Adoption targets the controlled OpenFilm project only" };
+      : { state: "blocked", reason: "The controlled write paths target the controlled OpenFilm project only" };
   }
   if (engine === "openfilm") return { state: "blocked", reason: OPENFILM_NO_WRITE_PATH };
   // Hypit already owns the two typed edits the Host commits; everything else stays blocked.

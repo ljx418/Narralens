@@ -8,8 +8,8 @@ import { ControlledAgentRunner, type ComparisonRunnerInput } from "../adapters/o
 import { ProposalAdapter } from "../adapters/openmontage/proposal-adapter.js";
 import { ProposalComparisonAdapter } from "../adapters/openmontage/proposal-comparison-adapter.js";
 import { validateAdoptRequest, validateControlledWriteFailure, validateControlledWriteResponse, validateEditRequest,
-  validateEngineResponse, validateImpactRequest, validateImpactSpec,
-  validateProposalComparisonRequest } from "../contracts/validator.js";
+  validateEngineResponse, validateHistory, validateHistoryIntent, validateImpactRequest, validateImpactSpec,
+  validateProposalComparisonRequest, validateRestoreRequest } from "../contracts/validator.js";
 import type { EngineResponse } from "../contracts/engine-types.js";
 import type { ApiError, JobEvent, ProjectResponse, ProposalComparisonRequest } from "../contracts/types.js";
 import { HttpError, normalizeError } from "./api-error.js";
@@ -56,6 +56,11 @@ import { HypitReadAdapter } from "../adapters/hypit/hypit-read-adapter.js";
 import { AdoptionStore } from "./adoption/adoption-store.js";
 import { AuthorSourcePublisher } from "./adoption/author-source-publisher.js";
 import { AdoptionCoordinator, type AdoptionFaultBoundary } from "./adoption/adoption-coordinator.js";
+import { HistoryStore } from "./history/history-store.js";
+import { HistoricalSnapshotResolver } from "./history/historical-snapshot-resolver.js";
+import { HistoryCommandTranslator } from "./history/history-command-translator.js";
+import { HistoryService, type HistoryFaultBoundary } from "./history/history-service.js";
+import { RestorePlanner } from "./history/restore-planner.js";
 import type { PublishBoundary } from "./adoption/author-source-publisher.js";
 
 const bodyLimit = 65_536;
@@ -228,6 +233,9 @@ interface HostDependencies {
   impactFault?: (point: string) => Promise<void> | void;
   adoptionFault?: (boundary: AdoptionFaultBoundary) => Promise<void> | void;
   adoptionPublishFault?: (boundary: PublishBoundary) => Promise<void> | void;
+  /** M4C's crash seams; production composition omits them. */
+  historyFault?: (boundary: HistoryFaultBoundary) => Promise<void> | void;
+  historyPublishFault?: (boundary: PublishBoundary) => Promise<void> | void;
 }
 
 export class NarralensHost {
@@ -288,6 +296,20 @@ export class NarralensHost {
   readonly impact: ImpactService;
   readonly adoptionFacts: AdoptionStore;
   readonly adoption: AdoptionCoordinator;
+  /**
+   * M4C's history layer, over the same stores as everything above.
+   *
+   * `historyStore` owns the immutable restore facts and the read model; `historical` proves
+   * that a target snapshot is this project's, committed, and on disk; `planner` builds the
+   * one canonical difference the impact authorizes and the restore re-derives; `history` is
+   * the single orchestration for a controlled restore. Exactly one of each is composed
+   * here, so there is no second timeline and no second difference.
+   */
+  readonly historyStore: HistoryStore;
+  readonly historical: HistoricalSnapshotResolver;
+  readonly restorePlanner: RestorePlanner;
+  readonly historyTranslator: HistoryCommandTranslator;
+  readonly history: HistoryService;
   /** Injected so impact TTL is testable without waiting fifteen minutes. */
   readonly impactClock: () => Date;
   readonly sessionToken = randomBytes(32).toString("base64url");
@@ -474,15 +496,42 @@ export class NarralensHost {
     this.idempotency = new OperationIdempotencyStore(this.revisions.compose((db) => db));
     this.impacts = new ImpactStore(this.revisions, this.idempotency);
     this.impactClock = dependencies.impactClock ?? ((): Date => new Date());
+    // M4C's history layer, composed *before* the impact service: the impact's restore arm
+    // needs the planner, and the planner needs the projection seam.
+    this.historyStore = new HistoryStore(this.revisions);
+    this.historical = new HistoricalSnapshotResolver({
+      revisions: this.revisions, snapshots: this.snapshots, adoption: this.adoptionFacts,
+      ledger: this.assetLedger,
+    });
+    this.restorePlanner = new RestorePlanner({
+      resolver: this.projectResolver, historical: this.historical, engines: this.engines,
+      projections: this.projections, inventory: this.assetInventory, ledger: this.assetLedger,
+      migrations: this.revisions.migrations,
+    });
+    this.historyTranslator = new HistoryCommandTranslator({
+      history: this.historyStore, resolver: this.projectResolver,
+    });
     this.impact = new ImpactService({
       resolver: this.projectResolver, operations: this.operations, engines: this.engines,
       projections: this.projections, materializations: this.materializations,
       materialize: this.materialize, inventory: this.assetInventory, locks: this.locks,
       ledger: this.assetLedger, migrations: this.revisions.migrations,
       impacts: this.impacts, idempotency: this.idempotency,
+      planner: this.restorePlanner,
       clock: this.impactClock,
       correlationId: () => randomBytes(8).toString("hex"),
       ...(dependencies.impactFault === undefined ? {} : { fault: dependencies.impactFault }),
+    });
+    this.history = new HistoryService({
+      coordinator: this.coordinator, revisions: this.revisions, idempotency: this.idempotency,
+      resolver: this.projectResolver, impact: this.impact, projections: this.projections,
+      planner: this.restorePlanner, engines: this.engines,
+      gateway: new NativeWriteGateway(new NativeMutationRegistry()), locks: this.locks,
+      snapshots: this.snapshots, history: this.historyStore, translator: this.historyTranslator,
+      publisher: new AuthorSourcePublisher({ ...(dependencies.historyPublishFault === undefined
+        ? {} : { fault: dependencies.historyPublishFault }) }),
+      stagingRoot: adoptionStagingRootFor(this.revisions, dependencies.adoptionStagingRoot),
+      ...(dependencies.historyFault === undefined ? {} : { fault: dependencies.historyFault }),
     });
     this.adoption = new AdoptionCoordinator({ coordinator: this.coordinator, revisions: this.revisions,
       idempotency: this.idempotency, resolver: this.projectResolver, materialize: this.materialize,
@@ -529,9 +578,20 @@ export class NarralensHost {
     // proved the pinned checkout. Before this line a restarted Host had no way to inspect
     // its own migrated target, because only a test could call `registerLayout()`.
     this.projections.attachRegistrar(this.openFilmComposition?.registrar);
+    // M4C's history recovery runs first among the controlled recoveries. A provable prepared
+    // restore has to be decided by the module that owns it: the generic journal recovery
+    // would move it to `attention` and throw away the evidence that would have let it
+    // converge. The adoption recovery runs next, for the same reason, and the generic
+    // recovery then handles whatever is left.
+    await this.history.recoverOnStart();
     // M4B owns its publication boundary and must decide it before the generic journal
     // recovery can turn the row into recovering/attention and erase the recoverable path.
     await this.adoption.recoverOnStart();
+    // A second history pass decides the restore rows the first pass deferred because an
+    // *older* controlled row for the same project was still pending. The adoption's
+    // recovery has now taken its own rows, so the order the transactions were created in
+    // is the order they were decided in.
+    await this.history.recoverOnStart({ sweep: false });
     await this.coordinator.recoverOnStart();
     await this.migrations.recover();
     // A migrated copy survives a restart because `ProjectResolver` re-derives it from the
@@ -629,6 +689,14 @@ export class NarralensHost {
       if (request.method === "POST" && match?.[1]) return await this.#impact(match[1], request, response);
       match = url.pathname.match(/^\/api\/migration\/v1\/projects\/([A-Za-z0-9_-]+)\/edits$/);
       if (request.method === "POST" && match?.[1]) return await this.#adoptMaterialization(match[1], request, response);
+      match = url.pathname.match(/^\/api\/migration\/v1\/projects\/([A-Za-z0-9_-]+)\/history$/);
+      if (request.method === "GET" && match?.[1]) return await this.#history(match[1], response);
+      match = url.pathname.match(/^\/api\/migration\/v1\/projects\/([A-Za-z0-9_-]+)\/history\/restore$/);
+      if (request.method === "POST" && match?.[1]) return await this.#restoreSnapshot(match[1], request, response);
+      match = url.pathname.match(/^\/api\/migration\/v1\/projects\/([A-Za-z0-9_-]+)\/history\/undo$/);
+      if (request.method === "POST" && match?.[1]) return await this.#historyIntent(match[1], "undo", response);
+      match = url.pathname.match(/^\/api\/migration\/v1\/projects\/([A-Za-z0-9_-]+)\/history\/redo$/);
+      if (request.method === "POST" && match?.[1]) return await this.#historyIntent(match[1], "redo", response);
       match = url.pathname.match(/^\/api\/migration\/v1\/materializations\/([A-Za-z0-9_-]+)$/);
       if (request.method === "GET" && match?.[1]) return await this.#readMaterialization(match[1], response);
       match = url.pathname.match(/^\/api\/migration\/v1\/migrations\/([A-Za-z0-9_-]+)$/);
@@ -876,6 +944,97 @@ export class NarralensHost {
         { errors: validated.errors.slice(0, 8) }, projectId);
     }
     this.projections.forget(projectId);
+    json(response, 200, validated.value);
+  }
+
+  /**
+   * M4C's history read model.
+   *
+   * A read. It cannot move the active pointer and it cannot change a revision, and it says
+   * so in the contract: the model carries snapshot *addresses*, never a pointer and never a
+   * path.
+   */
+  async #history(projectId: string, response: ServerResponse): Promise<void> {
+    await this.projectResolver.resolveActivated(projectId);
+    const model = { format: "narralens.history@1.0" as const, project_id: projectId,
+      entries: this.history.history(projectId) };
+    const validated = validateHistory(model);
+    if (!validated.ok) {
+      throw new HttpError(500, "INTERNAL_ERROR", "The history model does not satisfy its contract",
+        { errors: validated.errors.slice(0, 8) }, projectId);
+    }
+    json(response, 200, validated.value);
+  }
+
+  /**
+   * M4C's controlled restore.
+   *
+   * The route is thin on purpose: the contract is enforced here, and everything else —
+   * the target's eligibility, the plan, the locks, the rights, the transaction, the
+   * publication and the single commit — belongs to `HistoryService`.
+   */
+  async #restoreSnapshot(projectId: string, request: IncomingMessage,
+    response: ServerResponse): Promise<void> {
+    const body = await readJson(request);
+    const record = body !== null && typeof body === "object" && !Array.isArray(body)
+      ? body as Record<string, unknown> : undefined;
+    if (record === undefined || typeof record.impact_id !== "string"
+      || typeof record.impact_hash !== "string"
+      || (record.approval as { confirmed?: unknown } | undefined)?.confirmed !== true) {
+      throw new HttpError(428, "IMPACT_REQUIRED",
+        "A current impact and explicit confirmation are required before a restore", undefined, projectId);
+    }
+    const parsed = validateRestoreRequest(body);
+    if (!parsed.ok) {
+      throw new HttpError(400, "INVALID_REQUEST", "The restore request does not satisfy its contract",
+        { errors: parsed.errors.slice(0, 8) }, projectId);
+    }
+    // A client that disconnects cancels the write — but only up to the publication intent.
+    // After that the atomic publication has begun, and the gate's rule is that it converges.
+    const controller = new AbortController();
+    const onClose = (): void => { if (!response.writableEnded) controller.abort(); };
+    response.once("close", onClose);
+    let committed;
+    try {
+      committed = await this.history.restore(projectId, parsed.value, undefined, controller.signal);
+    } finally {
+      response.off("close", onClose);
+    }
+    if (committed.status === "aborted") {
+      const failed = validateControlledWriteFailure(committed);
+      if (!failed.ok) {
+        throw new HttpError(500, "INTERNAL_ERROR",
+          "The controlled write failure does not satisfy its contract",
+          { errors: failed.errors.slice(0, 8) }, projectId);
+      }
+      return json(response, failed.value.error.http_status, failed.value);
+    }
+    const validated = validateControlledWriteResponse(committed);
+    if (!validated.ok) {
+      throw new HttpError(500, "INTERNAL_ERROR",
+        "The controlled write response does not satisfy its contract",
+        { errors: validated.errors.slice(0, 8) }, projectId);
+    }
+    this.projections.forget(projectId);
+    json(response, 200, validated.value);
+  }
+
+  /**
+   * The undo and redo translation.
+   *
+   * It returns a **typed intent** and nothing else: no impact is created, no approval is
+   * assumed, and nothing is written. The client still has to ask for an impact with the
+   * returned target and then submit an explicit approval, exactly as for any other
+   * controlled write. A native undo button that could do more than this would be a bypass.
+   */
+  async #historyIntent(projectId: string, command: "undo" | "redo",
+    response: ServerResponse): Promise<void> {
+    const intent = await this.history.intent(projectId, command);
+    const validated = validateHistoryIntent(intent);
+    if (!validated.ok) {
+      throw new HttpError(500, "INTERNAL_ERROR", "The history intent does not satisfy its contract",
+        { errors: validated.errors.slice(0, 8) }, projectId);
+    }
     json(response, 200, validated.value);
   }
 

@@ -39,7 +39,7 @@
     "engine_upstream_sha": { "type": "string", "pattern": "^[a-f0-9]{40}$" },
     "affected_ranges": {
       "type": "array",
-      "minItems": 1,
+      "minItems": 0,
       "maxItems": 64,
       "items": {
         "type": "object",
@@ -94,7 +94,8 @@
       "then": {
         "properties": {
           "materialization_id": { "type": "string", "minLength": 1 },
-          "target_snapshot_id": { "type": "null" }
+          "target_snapshot_id": { "type": "null" },
+          "affected_ranges": { "type": "array", "minItems": 1 }
         }
       }
     },

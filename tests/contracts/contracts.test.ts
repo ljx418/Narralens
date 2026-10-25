@@ -20,8 +20,9 @@ describe("API contracts", () => {
     // 23 through M2.3; W2.0 registers the six Wave 2 contracts in the same commit as their
     // schemas and types so the three cannot drift apart. Exact equality, never `contains`:
     // a registry that quietly gained a contract is exactly the drift this gate is for.
-    // 31 through M4B-0, which adds the terminal controlled-write failure response.
-    expect(Object.keys(contractIds)).toHaveLength(31);
+    // 31 through M4B-0, which adds the terminal controlled-write failure response; 33
+    // through M4C, which adds the history read model and the history intent.
+    expect(Object.keys(contractIds)).toHaveLength(33);
     // The full registry, named. Together with the count above this is exact equality, so
     // neither a missing nor an extra contract can pass.
     expect([...Object.keys(contractIds)].sort()).toEqual([
@@ -31,6 +32,7 @@ describe("API contracts", () => {
       "materializeRequest", "materialization", "impactSpec",
       "impactRequest",
       "adoptRequest", "restoreRequest", "controlledWriteResponse", "controlledWriteFailure",
+      "history", "historyIntent",
     ].sort());
     for (const key of D2_D421_SCHEMA_IDS) expect(contractIds[key]).toBeTypeOf("string");
     expect(contractIds.migrationPlan).toBe("https://narralens.local/schemas/migration-plan.schema.json");

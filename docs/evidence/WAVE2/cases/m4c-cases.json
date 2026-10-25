@@ -1,0 +1,217 @@
+[
+ {
+  "case_id": "M4C-01",
+  "status": "CLOSED",
+  "production_seam": true,
+  "tests": [
+   "tests/wave2/m4c/history-contracts-and-resolver.test.ts::accepts a well-formed restore request and refuses anything else",
+   "tests/wave2/m4c/history-contracts-and-resolver.test.ts::names the operation in the failure body, and the schema accepts both operations",
+   "tests/wave2/m4c/history-route.test.ts::answers a restore request that carries an unknown field with 400"
+  ],
+  "evidence": "RestoreRequestV1 的 schema、TypeScript type 与 validator 同提交移动；未知字段 400；失败体的 operation 是封闭枚举 adopt_materialization|restore_snapshot，且 aborted 不推进 revision。"
+ },
+ {
+  "case_id": "M4C-02",
+  "status": "CLOSED",
+  "production_seam": true,
+  "tests": [
+   "tests/wave2/m4c/history-contracts-and-resolver.test.ts::resolves the migration's snapshot and the adoption's snapshot, and reproduces the digest"
+  ],
+  "evidence": "同项目的 committed migration snapshot 与 committed adoption snapshot 都能被 resolver 解析；解析结果来自 snapshot 自己的字节，而不是 active source。"
+ },
+ {
+  "case_id": "M4C-03",
+  "status": "CLOSED",
+  "production_seam": true,
+  "tests": [
+   "tests/wave2/m4c/history-contracts-and-resolver.test.ts::answers a snapshot of another project and a snapshot that does not exist with the same 404",
+   "tests/wave2/m4c/history-contracts-and-resolver.test.ts::refuses an orphan snapshot: bytes on disk that no committed write ever named",
+   "tests/wave2/m4c/history-contracts-and-resolver.test.ts::refuses a snapshot whose bytes are gone"
+  ],
+  "evidence": "跨项目与不存在同 404（不能用来探测 id 是否存在）；orphan（有字节、无任何 committed 引用）与缺字节都 fail closed，且不留下任何 restore impact 行。"
+ },
+ {
+  "case_id": "M4C-04",
+  "status": "CLOSED",
+  "production_seam": true,
+  "tests": [
+   "tests/wave2/m4c/history-contracts-and-resolver.test.ts::resolves the migration's snapshot and the adoption's snapshot, and reproduces the digest",
+   "tests/wave2/m4c/history-contracts-and-resolver.test.ts::reads the target with the pinned upstream, and reports no problem"
+  ],
+  "evidence": "历史 roots 重算出的 digest 与 snapshot 行记录的一致；固定 upstream 读取目标 film 的 problems 为空。digest 不是读一个标签，是重算出来的。"
+ },
+ {
+  "case_id": "M4C-05",
+  "status": "CLOSED",
+  "production_seam": true,
+  "tests": [
+   "tests/wave2/m4c/restore-plan.test.ts::carries the domain prefix it claims",
+   "tests/wave2/m4c/restore-plan.test.ts::reproduces every vector's hash and preimage byte for byte",
+   "tests/wave2/m4c/restore-plan.test.ts::moves the hash for every single-field mutation, and for nothing else",
+   "tests/wave2/m4c/restore-plan.test.ts::ties the frozen bytes to what the builder produces"
+  ],
+  "evidence": "18 个冻结向量（基础 + 每个字段的单点变异 + 乱序 + builder 产物），TypeScript 与独立 Python 实现逐字节一致；域前缀固定 narralens-history-restore-plan-v1\\n；乱序不改变 hash。"
+ },
+ {
+  "case_id": "M4C-06",
+  "status": "CLOSED",
+  "production_seam": true,
+  "tests": [
+   "tests/wave2/m4c/history-contracts-and-resolver.test.ts::creates the impact, replays it exactly, and writes no author fact",
+   "tests/wave2/m4c/history-contracts-and-resolver.test.ts::refuses the impact when a lock is held, and leaves no active row behind"
+  ],
+  "evidence": "restore impact 201 且同 key 重放返回同一 hash 与同一过期时间；被锁挡住时 423 且没有任何 restore impact 行；impact 只是授权，不改作者事实。"
+ },
+ {
+  "case_id": "TX-03C",
+  "status": "CLOSED",
+  "production_seam": true,
+  "tests": [
+   "tests/wave2/m4c/history-media-and-failure.test.ts::asks for a visual lock on every changed clip and no narration lock while the narration is preserved",
+   "tests/wave2/m4c/history-media-and-failure.test.ts::does not let a narration lock block a restore that preserves the narration",
+   "tests/wave2/m4c/history-route.test.ts::refuses a restore whose impact was computed while a visual lock was held",
+   "tests/wave2/m4c/history-route.test.ts::refuses a restore when a visual lock appears after the stage, and the revision does not move"
+  ],
+  "evidence": "三类锁分别命中：改变的视觉镜命中 visual shot 锁；narration 保留时不要求 narration 锁（持有 narration 锁不阻断）；narration 变化时要求 project 与 shot 两种 scope 的 narration 锁（plan 级用例）；duration 变化要求 duration 锁（plan 级用例）。没有全锁兜底，也没有少锁。"
+ },
+ {
+  "case_id": "TX-04C",
+  "status": "CLOSED",
+  "production_seam": true,
+  "tests": [
+   "tests/wave2/m4c/history-media-and-failure.test.ts::asks for a visual lock on every changed clip and no narration lock while the narration is preserved",
+   "tests/wave2/m4c/restore-plan.test.ts::refuses a target with a different clip identity, a different track, or an incomplete projection",
+   "tests/wave2/m4c/restore-plan.test.ts::refuses a restore that would change nothing"
+  ],
+  "evidence": "consumer 逐类给出：视觉镜 replace、narration preserve、字幕与共享资产单独分类；clip 身份不同、track 不同、投影不完整、没有任何差异都 422 fail closed。"
+ },
+ {
+  "case_id": "TX-05C",
+  "status": "CLOSED",
+  "production_seam": true,
+  "tests": [
+   "tests/wave2/m4c/history-crash-and-race.test.ts::refuses a restore whose control revision moved, and the revision does not move",
+   "tests/wave2/m4c/history-crash-and-race.test.ts::refuses a restore whose expected source digest is not the project's, and the revision does not move",
+   "tests/wave2/m4c/history-crash-and-race.test.ts::refuses a restore when the source changes during the stage, and the revision does not move"
+  ],
+  "evidence": "stale base/source/control 三种竞态都在 commit 之前被拒绝，revision +0，且连 transaction 都不创建。"
+ },
+ {
+  "case_id": "TX-07C",
+  "status": "CLOSED",
+  "production_seam": true,
+  "tests": [
+   "tests/wave2/m4c/history-crash-and-race.test.ts::replays the same key with the same body and does not restore twice",
+   "tests/wave2/m4c/history-crash-and-race.test.ts::answers the same key with a different request with 409, and the revision does not move",
+   "tests/wave2/m4c/history-crash-and-race.test.ts::keeps the adoption and restore key spaces apart"
+  ],
+  "evidence": "同 kind/key/digest 完整重放（一条 transaction、一次 stage、一次 publish）；异 digest 409；adopt 与 restore 的 operation kind 不同，key 空间分离。"
+ },
+ {
+  "case_id": "TX-08C",
+  "status": "CLOSED",
+  "production_seam": true,
+  "tests": [
+   "tests/wave2/m4c/history-crash-and-race.test.ts::converges the pre-publish crash boundary %s to aborted with revision +0",
+   "tests/wave2/m4c/history-crash-and-race.test.ts::converges a crash after the publication to one durable commit with revision +1",
+   "tests/wave2/m4c/history-crash-and-race.test.ts::aborts with revision +0 when the crash came after the intent but before the publication"
+  ],
+  "evidence": "received/preconditions/plan/stage/validate/snapshot publish 六个发布前边界逐一崩溃：重启后收敛为 aborted、revision +0、stage 与 temp 清理；发布后崩溃收敛为唯一一次 commit、revision +1；prepared 之后、发布之前崩溃仍然 abort +0。没有猜成功或重复发布。"
+ },
+ {
+  "case_id": "TX-09",
+  "status": "CLOSED",
+  "production_seam": true,
+  "tests": [
+   "tests/wave2/m4c/history-crash-and-race.test.ts::lists the migration, the adoption and the restore, and deletes nothing",
+   "tests/wave2/m4c/history-route.test.ts::rebuilds the restored source after a restart, and the old snapshot's bytes are unchanged"
+  ],
+  "evidence": "旧内容恢复为 current revision+1（history 列出 migration/adoption/restore 三条，revision 1/2/3）；旧 snapshot 与旧 transaction 都不删除，重启后旧 snapshot 的 digest 不变。"
+ },
+ {
+  "case_id": "TX-10",
+  "status": "CLOSED",
+  "production_seam": true,
+  "tests": [
+   "tests/wave2/m4c/history-crash-and-race.test.ts::translates undo and redo into an intent and writes nothing",
+   "tests/wave2/m4c/history-route.test.ts::translates undo and redo into an intent and never writes",
+   "tests/wave2/m4b/governance.test.ts::translates a history entry into a typed restore intent that still needs an impact and an approval"
+  ],
+  "evidence": "restore/undo/redo 只翻译成 typed intent（目标 snapshot + 授权 + 显式批准），本身不写任何东西；checkout/merge/discard/commit 仍然 blocked；没有裸 native history 通道。"
+ },
+ {
+  "case_id": "TX-12C",
+  "status": "CLOSED",
+  "production_seam": true,
+  "tests": [
+   "tests/wave2/m4c/history-media-and-failure.test.ts::leaves the old snapshot's bytes and the adopted snapshot's bytes exactly as they were",
+   "tests/wave2/m4c/history-route.test.ts::rebuilds the restored source after a restart, and the old snapshot's bytes are unchanged"
+  ],
+  "evidence": "restore 期间已绑定旧 snapshot 的输入、字节与 digest 完全不变：旧 snapshot 的 film 字节与记录一致，被恢复的 snapshot 也不被改写；restore 读的是 snapshot 自己的字节，不是 latest mutable source。"
+ },
+ {
+  "case_id": "TX-13C",
+  "status": "CLOSED",
+  "production_seam": true,
+  "tests": [
+   "tests/wave2/m4c/history-route.test.ts::refuses a restore when a visual lock appears after the stage, and the revision does not move",
+   "tests/wave2/m4c/history-crash-and-race.test.ts::refuses a restore when the source changes during the stage, and the revision does not move",
+   "tests/wave2/m4c/history-crash-and-race.test.ts::refuses a restore whose control revision moved, and the revision does not move"
+  ],
+  "evidence": "stage 期间出现的新锁、source 变化与 control revision 变化都在 commit 之前被拒绝，revision +0；锁检查先于 currentness 检查，所以报的是 TARGET_LOCKED。"
+ },
+ {
+  "case_id": "M4C-14",
+  "status": "CLOSED",
+  "production_seam": true,
+  "tests": [
+   "tests/wave2/m4c/history-route.test.ts::restores an earlier snapshot as a new revision, and the film is still three native clips",
+   "tests/wave2/m4c/history-media-and-failure.test.ts::keeps the other two clips' identity when one clip is edited natively"
+  ],
+  "evidence": "restore 后仍是三个原生可编辑 clip（shot-001/002/003），没有 flattened video；改单镜时另外两镜的 identity 不变。"
+ },
+ {
+  "case_id": "M4C-15",
+  "status": "CLOSED",
+  "production_seam": true,
+  "tests": [
+   "tests/wave2/m4c/history-media-and-failure.test.ts::restores three native clips, renders them with the pinned upstream and decodes 900 frames"
+  ],
+  "evidence": "固定 upstream 真实 render + ffprobe 完整解码，900 帧；媒体事实来自真实渲染，不是 JSON 或 mock。"
+ },
+ {
+  "case_id": "M4C-16",
+  "status": "CLOSED",
+  "production_seam": true,
+  "tests": [
+   "tests/wave2/m4c/history-media-and-failure.test.ts::aborts with revision +0 and publishes nothing"
+  ],
+  "evidence": "prepared 前取消：abort + revision +0，不 prepare 不 publish，隔离目录被清理；晚到的 stage 结果不会被自动采用。prepared 之后取消则收敛（TX-08C）。"
+ },
+ {
+  "case_id": "M4C-17",
+  "status": "CLOSED",
+  "production_seam": true,
+  "tests": [
+   "tests/wave2/m4c/history-media-and-failure.test.ts::leaves the source, the revision, the pointer, the impact, the outbox and the idempotency row as they were",
+   "tests/wave2/m4c/history-crash-and-race.test.ts::answers the same key with a different request with 409, and the revision does not move"
+  ],
+  "evidence": "失败路径的差异明确：source、revision、pointer、impact、outbox 全部不变，只有失败自身的 idempotency 行新增。"
+ },
+ {
+  "case_id": "M4C-18",
+  "status": "CLOSED",
+  "production_seam": true,
+  "tests": [
+   "tests/wave2/m4b/adoption-route.test.ts",
+   "tests/wave2/m4a/impact-races.test.ts",
+   "tests/wave2/m4a/impact-end-to-end.test.ts",
+   "tests/wave2/m3/materialize-service.test.ts",
+   "tests/wave2/w2-asset-ledger.test.ts",
+   "tests/architecture/m2.1-fitness.test.ts",
+   "tests/architecture/m2.2-fitness.test.ts",
+   "tests/contracts/contracts.test.ts"
+  ],
+  "evidence": "M2.1/M2.2/M2.3/M3/M4A/M4B、legacy、contracts、fitness 与生产构建在 M4C 之后全绿；旧门没有被删除或放宽（fitness 里被阶段打开的路由与能力表都写明了理由）。"
+ }
+]

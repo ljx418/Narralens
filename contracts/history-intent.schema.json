@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://narralens.local/schemas/history-intent.schema.json",
+  "description": "The typed intent an undo or a redo translates into. It names a target snapshot and nothing else: no revision to move, no pointer to set, no approval. The client still has to ask for an impact with this target and then submit an explicit approval before anything is written.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["format", "op", "target_snapshot_id", "source", "current_revision"],
+  "properties": {
+    "format": { "const": "narralens.history-intent@1.0" },
+    "op": { "const": "restore_snapshot" },
+    "target_snapshot_id": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "source": { "enum": ["restore", "undo", "redo"] },
+    "current_revision": { "type": "integer", "minimum": 0 }
+  }
+}

@@ -31,10 +31,13 @@ import adoptRequestSchema from "../../contracts/adopt-request.schema.json" with 
 import restoreRequestSchema from "../../contracts/restore-request.schema.json" with { type: "json" };
 import controlledWriteResponseSchema from "../../contracts/controlled-write-response.schema.json" with { type: "json" };
 import controlledWriteFailureSchema from "../../contracts/controlled-write-failure.schema.json" with { type: "json" };
+import historySchema from "../../contracts/history.schema.json" with { type: "json" };
+import historyIntentSchema from "../../contracts/history-intent.schema.json" with { type: "json" };
 import type { EditRequest, ProposalBundle, ProposalComparison, ProposalComparisonDraft, ProposalComparisonRequest, ProposalRequest } from "./types.js";
 import type { EngineResponse, SourceDigestManifest } from "./engine-types.js";
 import type { MigrationPlanV1, MigrationReportV1, RollbackRecord } from "./migration-types.js";
-import type { AdoptRequestV1, ControlledWriteFailureResponseV1, ControlledWriteResponseV1, ImpactRequestV1, ImpactSpecV1,
+import type { AdoptRequestV1, ControlledWriteFailureResponseV1, ControlledWriteResponseV1, HistoryIntentResponseV1,
+  HistoryReadModelV1, ImpactRequestV1, ImpactSpecV1,
   MaterializationV1, MaterializeRequestV1, NativePlanV1, RestoreRequestV1 } from "./wave2-types.js";
 
 const ajv = new Ajv2020({ allErrors: true, strict: true });
@@ -47,7 +50,8 @@ for (const schema of [apiErrorSchema, cancelResponseSchema, jobEventSchema, jobR
   engineResponseSchema, sourceDigestManifestSchema,
   migrationPlanSchema, rollbackRecordSchema, migrationReportSchema,
   materializeRequestSchema, materializationSchema, impactSpecSchema, impactRequestSchema, adoptRequestSchema,
-  restoreRequestSchema, controlledWriteResponseSchema, controlledWriteFailureSchema]) {
+  restoreRequestSchema, controlledWriteResponseSchema, controlledWriteFailureSchema,
+  historySchema, historyIntentSchema]) {
   ajv.addSchema(schema);
 }
 
@@ -83,6 +87,8 @@ export const contractIds = {
   restoreRequest: restoreRequestSchema.$id,
   controlledWriteResponse: controlledWriteResponseSchema.$id,
   controlledWriteFailure: controlledWriteFailureSchema.$id,
+  history: historySchema.$id,
+  historyIntent: historyIntentSchema.$id,
 } as const;
 
 export function validatorFor(id: string): ValidateFunction {
@@ -301,6 +307,33 @@ export function validateImpactSpec(value: unknown): { ok: true; value: ImpactSpe
       errors.push(`affected range ${range.clip_id} is empty`);
     }
   }
+  // The two arms are closed on each other. An adoption names a materialization and no
+  // snapshot; a restore names a snapshot and no materialization. A spec that named both
+  // would be an authorization for two different writes.
+  if (impact.operation === "adopt_materialization") {
+    if (impact.materialization_id === null) {
+      errors.push("an adopt_materialization impact must name a materialization");
+    }
+    if (impact.target_snapshot_id !== null) {
+      errors.push("an adopt_materialization impact must not name a target snapshot");
+    }
+    if (impact.affected_ranges.length === 0) {
+      errors.push("an adopt_materialization impact must affect at least one range");
+    }
+  } else {
+    if (impact.materialization_id !== null) {
+      errors.push("a restore_snapshot impact must not name a materialization");
+    }
+    if (impact.target_snapshot_id === null || impact.target_snapshot_id === "") {
+      errors.push("a restore_snapshot impact must name a target snapshot");
+    }
+    // A restore whose difference is narration-only has no visual range at all. It must
+    // still name the consumers it touches, or the authorization would be saying that this
+    // write affects nothing.
+    if (impact.affected_consumers.length === 0) {
+      errors.push("a restore_snapshot impact must name at least one consumer");
+    }
+  }
   return errors.length ? { ok: false, errors } : { ok: true, value: impact };
 }
 
@@ -334,4 +367,40 @@ export function validateControlledWriteFailure(value: unknown): { ok: true; valu
     return { ok: false, errors: ["an aborted controlled write must not advance the revision"] };
   }
   return { ok: true, value: response };
+}
+
+/**
+ * The history read model.
+ *
+ * Beyond the schema: the entries must be in revision order and must not repeat a revision.
+ * A history that listed the same revision twice would offer the client two different
+ * snapshots for one point in the project's life, and "which one was it?" is exactly the
+ * question a history exists to answer.
+ */
+export function validateHistory(value: unknown): { ok: true; value: HistoryReadModelV1 } | { ok: false; errors: string[] } {
+  const validate = validatorFor(contractIds.history);
+  if (!validate(value)) return { ok: false, errors: formatErrors(validate.errors) };
+  const model = value as HistoryReadModelV1;
+  const errors: string[] = [];
+  let previous = -1;
+  for (const entry of model.entries) {
+    if (entry.revision <= previous) {
+      errors.push(`history entries must be in revision order (${entry.revision} after ${previous})`);
+      break;
+    }
+    previous = entry.revision;
+  }
+  return errors.length ? { ok: false, errors } : { ok: true, value: model };
+}
+
+/**
+ * The undo/redo intent.
+ *
+ * It names a target and nothing else. A schema that allowed a revision or an approval
+ * here would be a schema that let a native history button carry its own authority.
+ */
+export function validateHistoryIntent(value: unknown): { ok: true; value: HistoryIntentResponseV1 } | { ok: false; errors: string[] } {
+  const validate = validatorFor(contractIds.historyIntent);
+  if (!validate(value)) return { ok: false, errors: formatErrors(validate.errors) };
+  return { ok: true, value: value as HistoryIntentResponseV1 };
 }

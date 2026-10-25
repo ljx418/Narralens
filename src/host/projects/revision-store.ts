@@ -4,7 +4,7 @@ import { JOB_TABLE_DDL, migrateJobKind } from "./job-kind-migration.js";
 import type { ApiError, AssetImportResponse, EditResponse, JobEvent, JobState } from "../../contracts/types.js";
 import type { ControlledWriteFailureResponseV1, ControlledWriteResponseV1 } from "../../contracts/wave2-types.js";
 import { HttpError } from "../api-error.js";
-import { insertProjectionFact } from "../adoption/adoption-store.js";
+import { insertProjectionFact, verifyOrInsertProjectionFact } from "../adoption/adoption-store.js";
 
 export type JournalState = "prepared" | "source_validated" | "metadata_committed" | "aborted" | "compensated" | "attention";
 
@@ -581,6 +581,136 @@ export class RevisionStore {
     } catch (error) { this.#db.exec("ROLLBACK"); throw error; }
   }
 
+  /**
+   * M4C's one authoritative database commit.
+   *
+   * The order is the gate's order: the immutable fact is verified, the project state is
+   * compare-and-set to revision+1, the impact is consumed, the snapshot and the projection
+   * fact are inserted or verified exactly, the active pointer moves, the outbox row is
+   * written, the response is stored against the idempotency key, and the transaction is
+   * marked committed — all inside one `BEGIN IMMEDIATE`.
+   *
+   * Two properties matter beyond the order:
+   *
+   * - **The result snapshot id may equal the target's.** Content addressing means restoring
+   *   identical bytes produces an identical id, and fabricating a second id for identical
+   *   content would break the property the whole store rests on. So the snapshot row and
+   *   the projection fact are *inserted or verified*, never blindly inserted: a second
+   *   writer that proves the same content may proceed, and one that proves different
+   *   content rolls the whole transaction back.
+   * - **Nothing is caught and written afterwards.** A failure anywhere rolls back; there is
+   *   no path that commits half of this and repairs it later.
+   */
+  commitHistoryRestore(input: {
+    transactionId: string; projectId: string; previousRevision: number;
+    expectedSourceDigest: string; expectedControlRevision: number;
+    snapshotId: string; sourceDigestAfter: string; impactId: string; impactHash: string;
+    idempotencyKey: string; requestDigest: string; projection: AdoptionProjectionFactInput;
+    restorePlanSha256: string; now?: Date;
+  }): ControlledWriteResponseV1 {
+    const at = (input.now ?? new Date()).toISOString();
+    this.#db.exec("BEGIN IMMEDIATE");
+    try {
+      const fact = this.#db.prepare(`SELECT 1 AS present FROM history_restore_fact
+        WHERE transaction_id=? AND result_snapshot_id=? AND staged_source_digest=?
+        AND restore_plan_sha256=? AND impact_hash=?`).get(
+        input.transactionId, input.snapshotId, input.sourceDigestAfter,
+        input.restorePlanSha256, input.impactHash) as { present?: number } | undefined;
+      if (fact?.present !== 1) throw new Error("HISTORY_PREPARED_FACT_MISMATCH");
+      const state = this.#db.prepare(`UPDATE project_state SET revision=revision+1, source_digest=?,
+        source_digest_observed='', source_digest_detected_at='', updated_at=?
+        WHERE project_id=? AND revision=? AND source_digest=? AND control_revision=? AND attention=0`)
+        .run(input.sourceDigestAfter, at, input.projectId, input.previousRevision,
+          input.expectedSourceDigest, input.expectedControlRevision);
+      if (Number(state.changes) !== 1) throw new Error("HISTORY_PROJECT_CAS_FAILED");
+      const impact = this.#db.prepare(`UPDATE impact SET state='consumed', updated_at=?
+        WHERE impact_id=? AND project_id=? AND impact_hash=? AND state='active'`)
+        .run(at, input.impactId, input.projectId, input.impactHash);
+      if (Number(impact.changes) !== 1) throw new Error("HISTORY_IMPACT_CAS_FAILED");
+
+      const snapshot = this.#db.prepare(`SELECT project_id, source_digest FROM snapshot WHERE snapshot_id=?`)
+        .get(input.snapshotId) as { project_id?: string; source_digest?: string } | undefined;
+      if (snapshot === undefined) {
+        this.#db.prepare(`INSERT INTO snapshot(snapshot_id, project_id, source_digest, engine, created_at)
+          VALUES(?,?,?,'openfilm',?)`).run(input.snapshotId, input.projectId, input.sourceDigestAfter, at);
+      } else if (snapshot.project_id !== input.projectId || snapshot.source_digest !== input.sourceDigestAfter) {
+        // The same content address already names a different closure. That is a
+        // contradiction, not a no-op, and it rolls the whole commit back.
+        throw new Error("HISTORY_SNAPSHOT_MISMATCH");
+      }
+      verifyOrInsertProjectionFact(this.#db, { project_id: input.projectId, snapshot_id: input.snapshotId,
+        migration_id: input.projection.migration_id, source_digest: input.sourceDigestAfter,
+        engine_upstream_sha: input.projection.engine_upstream_sha,
+        roots: JSON.parse(input.projection.roots_json) as string[],
+        subtitles: JSON.parse(input.projection.subtitles_json) as Array<{ subtitle_id: string; path: string }>,
+        frame_count: input.projection.frame_count, transaction_id: input.transactionId });
+
+      this.#db.prepare(`INSERT INTO active_commit(project_id, revision, snapshot_id, source_digest,
+        engine, transaction_id, created_at) VALUES(?,?,?,?,'openfilm',?,?)
+        ON CONFLICT(project_id) DO UPDATE SET revision=excluded.revision, snapshot_id=excluded.snapshot_id,
+        source_digest=excluded.source_digest, engine=excluded.engine,
+        transaction_id=excluded.transaction_id, created_at=excluded.created_at`)
+        .run(input.projectId, input.previousRevision + 1, input.snapshotId,
+          input.sourceDigestAfter, input.transactionId, at);
+      const outbox = this.#db.prepare(`INSERT INTO outbox(topic, project_id, payload_json, created_at)
+        VALUES('project.committed',?,?,?)`).run(input.projectId, JSON.stringify({
+        project_id: input.projectId, transaction_id: input.transactionId,
+        revision: input.previousRevision + 1, snapshot_id: input.snapshotId,
+        operation: "restore_snapshot",
+      }), at);
+      const response: ControlledWriteResponseV1 = {
+        format: "narralens.controlled-write-response@1.0", transaction_id: input.transactionId,
+        project_id: input.projectId, operation: "restore_snapshot",
+        previous_revision: input.previousRevision, new_revision: input.previousRevision + 1,
+        snapshot_id: input.snapshotId, source_digest: input.sourceDigestAfter,
+        outbox_event_id: Number(outbox.lastInsertRowid), status: "committed",
+      };
+      this.#db.prepare(`INSERT INTO operation_idempotency(project_id, operation_kind, idempotency_key,
+        request_digest, response_json, transaction_id, created_at) VALUES(?,?,?,?,?,?,?)`)
+        .run(input.projectId, "controlled_write.restore_snapshot", input.idempotencyKey,
+          input.requestDigest, JSON.stringify(response), input.transactionId, at);
+      const transaction = this.#db.prepare(`UPDATE project_transaction SET state='committed',
+        source_digest_after=?, snapshot_id=?, updated_at=? WHERE transaction_id=? AND project_id=? AND state='prepared'`)
+        .run(input.sourceDigestAfter, input.snapshotId, at, input.transactionId, input.projectId);
+      if (Number(transaction.changes) !== 1) throw new Error("HISTORY_TRANSACTION_CAS_FAILED");
+      this.#db.exec("COMMIT");
+      return response;
+    } catch (error) { this.#db.exec("ROLLBACK"); throw error; }
+  }
+
+  /** Abort an unpublished restore and bind its public failure to the sole replay key. */
+  abortHistoryRestore(input: { transactionId: string; projectId: string; idempotencyKey: string;
+    requestDigest: string; httpStatus: 409 | 422 | 423 | 428 | 500; code: ApiError["code"];
+    message: string; details?: unknown; now?: Date }): ControlledWriteFailureResponseV1 {
+    const row = this.projectTransaction(input.transactionId);
+    if (row === undefined || row.project_id !== input.projectId
+      || !["received", "preconditions_checked", "staged", "validated", "prepared"].includes(row.state)) {
+      throw new Error("HISTORY_ABORT_PREDECESSOR_MISMATCH");
+    }
+    const at = (input.now ?? new Date()).toISOString();
+    const response: ControlledWriteFailureResponseV1 = {
+      format: "narralens.controlled-write-failure@1.0", transaction_id: input.transactionId,
+      project_id: input.projectId, operation: "restore_snapshot",
+      previous_revision: row.base_revision, new_revision: row.base_revision,
+      source_digest: row.source_digest_before, status: "aborted",
+      error: { http_status: input.httpStatus, code: input.code, message: input.message,
+        ...(input.details === undefined ? {} : { details: input.details }) },
+    };
+    this.#db.exec("BEGIN IMMEDIATE");
+    try {
+      const moved = this.#db.prepare(`UPDATE project_transaction SET state='aborted', error_code=?,
+        terminal_reason=?, updated_at=? WHERE transaction_id=? AND state=?`).run(
+        input.code, input.message, at, input.transactionId, row.state);
+      if (Number(moved.changes) !== 1) throw new Error("HISTORY_ABORT_CAS_FAILED");
+      this.#db.prepare(`INSERT INTO operation_idempotency(project_id, operation_kind, idempotency_key,
+        request_digest, response_json, transaction_id, created_at) VALUES(?,?,?,?,?,?,?)`)
+        .run(input.projectId, "controlled_write.restore_snapshot", input.idempotencyKey,
+          input.requestDigest, JSON.stringify(response), input.transactionId, at);
+      this.#db.exec("COMMIT");
+      return response;
+    } catch (error) { this.#db.exec("ROLLBACK"); throw error; }
+  }
+
   /** Abort an unpublished M4B write and bind its public failure to the sole replay key. */
   abortAdoption(input: { transactionId: string; projectId: string; idempotencyKey: string;
     requestDigest: string; httpStatus: 409 | 422 | 423 | 428 | 500; code: ApiError["code"];
@@ -612,6 +742,45 @@ export class RevisionStore {
       this.#db.exec("COMMIT");
       return response;
     } catch (error) { this.#db.exec("ROLLBACK"); throw error; }
+  }
+
+  /**
+   * One snapshot row, by id.
+   *
+   * M4C reads it to decide whether a target belongs to this project. The row is written by
+   * the three commits that publish a snapshot and by nothing else, so its presence is the
+   * first half of "this content was committed at some point".
+   */
+  snapshotRow(snapshotId: string): { snapshot_id: string; project_id: string; source_digest: string;
+    engine: string; created_at: string } | undefined {
+    const row = this.#db.prepare("SELECT * FROM snapshot WHERE snapshot_id=?").get(snapshotId) as
+      Record<string, unknown> | undefined;
+    if (row === undefined) return undefined;
+    return {
+      snapshot_id: String(row.snapshot_id), project_id: String(row.project_id),
+      source_digest: String(row.source_digest), engine: String(row.engine),
+      created_at: String(row.created_at),
+    };
+  }
+
+  /**
+   * Whether a snapshot was actually committed, as opposed to merely written.
+   *
+   * A snapshot row can exist without any committed write naming it — a publish that
+   * succeeded and whose database commit then failed leaves exactly that. Such a snapshot is
+   * an orphan: its bytes are on disk, nothing points at it, and M4C must not restore it.
+   *
+   * Two things can commit a snapshot: a controlled write that reached `committed`, and a
+   * migration that published the target copy and activated it.
+   */
+  snapshotIsCommitted(projectId: string, snapshotId: string): boolean {
+    const transaction = this.#db.prepare(`SELECT 1 AS present FROM project_transaction
+      WHERE project_id=? AND snapshot_id=? AND state='committed' LIMIT 1`).get(projectId, snapshotId);
+    if (transaction !== undefined) return true;
+    const migration = this.#db.prepare(`SELECT 1 AS present FROM migration
+      WHERE target_project_id=? AND target_snapshot_id=? AND state IN ('reported','activated','committed')
+      LIMIT 1`).get(projectId, snapshotId);
+    return migration !== undefined;
   }
 
   /** The single pointer a reader resolves. Undefined means the project has never committed. */

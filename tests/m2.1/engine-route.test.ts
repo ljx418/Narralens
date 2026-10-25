@@ -60,12 +60,16 @@ describe("M2.1 route activation", () => {
     expect(await response.json()).toMatchObject({ code: "NOT_FOUND" });
   });
 
-  it("keeps history restore closed while impact and controlled adoption are mounted", async () => {
+  it("mounts the M4C history restore while impact and controlled adoption are mounted", async () => {
     const { call } = await started();
+    // **M4C opened the history routes.** A bodyless restore is refused on its merits — it
+    // needs an impact and an approval — so the answer is 428, not the 404 a closed route
+    // would give. The order matters: the authorization is checked before the project is
+    // looked up, so a client cannot use the answer to probe which projects exist.
     const history = await call("/api/migration/v1/projects/d1-30s/history/restore",
       { method: "POST", headers: { "content-type": "application/json" }, body: "{}" });
-    expect([404, 405]).toContain(history.status);
-    expect(await history.json()).toMatchObject({ code: "NOT_FOUND" });
+    expect(history.status).toBe(428);
+    expect(await history.json()).toMatchObject({ code: "IMPACT_REQUIRED" });
     // M4B mounts controlled adoption, and rejects missing authorization before project lookup.
     const adopt = await call("/api/migration/v1/projects/d1-30s/edits",
       { method: "POST", headers: { "content-type": "application/json" }, body: "{}" });

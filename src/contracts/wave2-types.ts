@@ -209,7 +209,15 @@ export interface ControlledWriteFailureResponseV1 {
   format: "narralens.controlled-write-failure@1.0";
   transaction_id: string;
   project_id: string;
-  operation: "adopt_materialization";
+  /**
+   * Which controlled write failed.
+   *
+   * A closed enum, and M4C widened it from the single adoption value: a restore that
+   * aborts has to say it was a restore, because the failure body is the durable, replayable
+   * answer for that idempotency key, and an answer that misnamed the operation would be
+   * replayed to a client that asked for something else.
+   */
+  operation: ControlledOperation;
   previous_revision: number;
   new_revision: number;
   source_digest: Sha256;
@@ -223,3 +231,42 @@ export interface ControlledWriteFailureResponseV1 {
 }
 
 export type ControlledWriteRequestV1 = AdoptRequestV1 | RestoreRequestV1;
+
+/**
+ * One committed entry of a project's history.
+ *
+ * `snapshot_id` is a content address, not a pointer: it names bytes, and the *only* way to
+ * make those bytes the project's current content is a controlled restore, which adds a
+ * revision.
+ */
+export interface HistoryEntryV1 {
+  readonly revision: number;
+  readonly snapshot_id: Sha256;
+  readonly kind: "migration" | "adoption" | "restore";
+  readonly transaction_id: string;
+}
+
+/**
+ * The history read model.
+ *
+ * A read. It never moves the active pointer, and it never carries a path.
+ */
+export interface HistoryReadModelV1 {
+  readonly format: "narralens.history@1.0";
+  readonly project_id: string;
+  readonly entries: readonly HistoryEntryV1[];
+}
+
+/**
+ * The typed intent an undo or a redo translates into.
+ *
+ * It names a target and nothing else. There is no revision to move and no approval in it:
+ * the intent is an *input* to the two-stage authorization, never a substitute for it.
+ */
+export interface HistoryIntentResponseV1 {
+  readonly format: "narralens.history-intent@1.0";
+  readonly op: "restore_snapshot";
+  readonly target_snapshot_id: Sha256;
+  readonly source: "restore" | "undo" | "redo";
+  readonly current_revision: number;
+}

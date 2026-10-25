@@ -83,6 +83,38 @@ export function insertProjectionFact(db: DatabaseSync, fact: OpenFilmProjectionF
       fact.frame_count, fact.transaction_id);
 }
 
+/**
+ * Insert the projection fact, or verify that the one already there says the same thing.
+ *
+ * M4C needs this because a restore is *content addressed*: restoring a snapshot that was
+ * itself produced by an adoption produces the **same** snapshot id, and the projection
+ * fact for that id already exists. The fact is immutable, so the second writer cannot
+ * replace it — but it may prove that it would have written the same bytes, and then
+ * proceed.
+ *
+ * The comparison is over the fact's *content* and not over its provenance: the transaction
+ * that first wrote the row is part of the row's history, not part of what the row says
+ * about the source. A row that says something else is a contradiction and is refused, which
+ * rolls the whole commit back.
+ */
+export function verifyOrInsertProjectionFact(db: DatabaseSync, fact: OpenFilmProjectionFact): void {
+  assertProjectionFact(fact);
+  const existing = db.prepare("SELECT * FROM openfilm_projection_fact WHERE snapshot_id=?")
+    .get(fact.snapshot_id) as Record<string, unknown> | undefined;
+  if (existing === undefined) {
+    insertProjectionFact(db, fact);
+    return;
+  }
+  const same = String(existing.project_id) === fact.project_id
+    && String(existing.migration_id) === fact.migration_id
+    && String(existing.source_digest) === fact.source_digest
+    && String(existing.engine_upstream_sha) === fact.engine_upstream_sha
+    && String(existing.roots_json) === canonicalJson([...fact.roots])
+    && String(existing.subtitles_json) === canonicalJson([...fact.subtitles])
+    && Number(existing.frame_count) === fact.frame_count;
+  if (!same) throw new Error("PROJECTION_FACT_MISMATCH");
+}
+
 export class AdoptionStore {
   readonly #db: DatabaseSync;
   readonly #revisions: RevisionStore;

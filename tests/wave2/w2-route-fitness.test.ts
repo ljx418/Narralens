@@ -39,10 +39,12 @@ export const OPENED_BY_M4A: readonly { method: string; path: string; status: num
 /**
  * Still closed until M4B and M4C open them. M4A deliberately does not: an impact is an
  * authorization, and the writes it authorizes are the next module.
+ *
+ * **M4C opened the last one.** The list is empty, and it is *deleted* rather than
+ * weakened: a route that is closed must be closed by name, and there is no Wave 2 route
+ * left in this set that is.
  */
-const WAVE2_ROUTES = [
-  { method: "POST", path: "/api/migration/v1/projects/d1-30s/history/restore" },
-] as const;
+const WAVE2_ROUTES: readonly { method: string; path: string }[] = [];
 
 const hosts: NarralensHost[] = [];
 afterEach(async () => { await Promise.all(hosts.splice(0).map((host) => host.close())); });
@@ -62,7 +64,7 @@ function headers(origin: string, token: string): Record<string, string> {
 }
 
 describe("W2.0 fitness: the unopened Wave 2 routes stay closed", () => {
-  it("answers 404 for every Wave 2 path, with no body that looks like a contract", async () => {
+  it("answers 404 for every still-closed Wave 2 path, with no body that looks like a contract", async () => {
     const host = new NarralensHost();
     hosts.push(host);
     const port = await host.listen(0);
@@ -118,18 +120,34 @@ describe("W2.0 fitness: the unopened Wave 2 routes stay closed", () => {
       "projects\\/([A-Za-z0-9_-]+)\\/proposals\\/([A-Za-z0-9_-]+)\\/materialize",
       "projects\\/([A-Za-z0-9_-]+)\\/impact",
       "projects\\/([A-Za-z0-9_-]+)\\/edits",
+      "projects\\/([A-Za-z0-9_-]+)\\/history",
+      "projects\\/([A-Za-z0-9_-]+)\\/history\\/restore",
+      "projects\\/([A-Za-z0-9_-]+)\\/history\\/undo",
+      "projects\\/([A-Za-z0-9_-]+)\\/history\\/redo",
       "materializations\\/([A-Za-z0-9_-]+)",
       "migrations\\/([A-Za-z0-9_-]+)",
       "migrations\\/([A-Za-z0-9_-]+)\\/rollback",
     ]);
   });
 
-  it("mounts M4B edits while history restore remains absent", async () => {
+  it("mounts the M4B edits and the M4C history routes, and refuses their inputs on merit", async () => {
     const { origin, token } = await started();
     const edits = await fetch(`${origin}/api/migration/v1/projects/d1-30s/edits`,
       { method: "POST", headers: headers(origin, token), body: "{}" });
     expect(edits.status).toBe(428);
     expect(await edits.json()).toMatchObject({ code: "IMPACT_REQUIRED" });
+    // The M4C restore route answers the same way: mounted, and refusing the request on its
+    // merits rather than 404ing because it is not there.
+    const restore = await fetch(`${origin}/api/migration/v1/projects/d1-30s/history/restore`,
+      { method: "POST", headers: headers(origin, token), body: "{}" });
+    expect(restore.status).toBe(428);
+    expect(await restore.json()).toMatchObject({ code: "IMPACT_REQUIRED" });
+    // The history read model is a read: an unmounted route would 404, and this one answers
+    // with its own contract shape.
+    const history = await fetch(`${origin}/api/migration/v1/projects/d1-30s/history`,
+      { method: "GET", headers: headers(origin, token) });
+    expect(history.status).toBe(404);
+    expect(await history.json()).toMatchObject({ code: "NOT_FOUND" });
   });
 
   it("answers what OPENED_BY_M3 and OPENED_BY_M4A record, so those lists are assertions", async () => {
