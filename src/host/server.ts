@@ -59,7 +59,7 @@ import { AdoptionCoordinator, type AdoptionFaultBoundary } from "./adoption/adop
 import { HistoryStore } from "./history/history-store.js";
 import { HistoricalSnapshotResolver } from "./history/historical-snapshot-resolver.js";
 import { HistoryCommandTranslator } from "./history/history-command-translator.js";
-import { HistoryService, type HistoryFaultBoundary } from "./history/history-service.js";
+import { HistoryService } from "./history/history-service.js";
 import { RestorePlanner } from "./history/restore-planner.js";
 import type { PublishBoundary } from "./adoption/author-source-publisher.js";
 
@@ -234,7 +234,7 @@ interface HostDependencies {
   adoptionFault?: (boundary: AdoptionFaultBoundary) => Promise<void> | void;
   adoptionPublishFault?: (boundary: PublishBoundary) => Promise<void> | void;
   /** M4C's crash seams; production composition omits them. */
-  historyFault?: (boundary: HistoryFaultBoundary) => Promise<void> | void;
+  historyFault?: (boundary: string) => void;
   historyPublishFault?: (boundary: PublishBoundary) => Promise<void> | void;
 }
 
@@ -334,6 +334,13 @@ export class NarralensHost {
   #stopOutbox: (() => void) | undefined;
   #leaseReaper: ReturnType<typeof setInterval> | undefined;
   #server: Server | undefined;
+  /**
+   * M4C's fault seam, kept so the OpenFilm composition can be given it at listen time.
+   *
+   * The composition happens in `listen()`, after the constructor, so the seam cannot be
+   * handed to it there; it is kept on the instance instead.
+   */
+  readonly #historyFault: ((boundary: string) => void) | undefined;
 
   constructor(dependencies: HostDependencies = {}) {
     this.catalog = dependencies.catalog ?? new ProjectCatalog();
@@ -542,6 +549,7 @@ export class NarralensHost {
         ? {} : { fault: dependencies.adoptionPublishFault }) }),
       stagingRoot: adoptionStagingRootFor(this.revisions, dependencies.adoptionStagingRoot),
       ...(dependencies.adoptionFault === undefined ? {} : { fault: dependencies.adoptionFault }) });
+    this.#historyFault = dependencies.historyFault;
     this.#leaseReapIntervalMs = dependencies.leaseReapIntervalMs ?? 1_000;
     this.#materializeDrainIntervalMs = dependencies.materializeDrainIntervalMs ?? 250;
     this.#outboxReplayIntervalMs = dependencies.outboxReplayIntervalMs ?? 250;
@@ -569,6 +577,7 @@ export class NarralensHost {
     try {
       this.openFilmComposition = await composeOpenFilmPort({
         registry: this.engines, vendorRoot: openfilmVendorRoot(),
+        ...(this.#historyFault === undefined ? {} : { fault: this.#historyFault }),
       });
     } catch (error) {
       this.openFilmComposition = null;

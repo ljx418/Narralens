@@ -7,63 +7,23 @@
       "plan": {
         "format": "narralens.history-restore-plan@1.0",
         "project_id": "of_d1-30s_0123456789abcdef",
-        "current_snapshot_id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-        "current_revision": 2,
-        "current_source_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
         "target_snapshot_id": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
-        "target_source_digest": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
-        "target_film_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
-        "entry_root": "film.html",
-        "roots": [
-          "assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4",
-          "film.html",
-          "narration.wav"
-        ],
-        "assets": [
-          "assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4"
-        ],
-        "subtitles": [
-          {
-            "subtitle_id": "narration",
-            "path": "assets/narration.vtt",
-            "changed": false
-          }
-        ],
-        "clips": [
+        "current_snapshot_id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "current_projection_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+        "target_projection_sha256": "2222222222222222222222222222222222222222222222222222222222222222",
+        "affected_ranges": [
           {
             "clip_id": "shot-001",
-            "track_id": "track_0",
-            "kind": "visual",
             "start_frame": 0,
-            "end_frame_exclusive": 300,
-            "current_source_ref": "assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4",
-            "target_source_ref": "scenes/shot-001.html",
-            "current_source_start_frame": 0,
-            "current_source_end_frame_exclusive": 300,
-            "target_source_start_frame": 0,
-            "target_source_end_frame_exclusive": 300,
-            "current_overrides_sha256": null,
-            "target_overrides_sha256": null,
-            "changed": true
+            "end_frame_exclusive": 300
           },
           {
-            "clip_id": "narration",
-            "track_id": "track_1",
-            "kind": "sound",
-            "start_frame": 0,
-            "end_frame_exclusive": 900,
-            "current_source_ref": "narration.wav",
-            "target_source_ref": "narration.wav",
-            "current_source_start_frame": 0,
-            "current_source_end_frame_exclusive": 900,
-            "target_source_start_frame": 0,
-            "target_source_end_frame_exclusive": 900,
-            "current_overrides_sha256": null,
-            "target_overrides_sha256": null,
-            "changed": false
+            "clip_id": "shot-002",
+            "start_frame": 300,
+            "end_frame_exclusive": 600
           }
         ],
-        "consumers": [
+        "affected_consumers": [
           {
             "kind": "visual",
             "id": "shot-001",
@@ -84,73 +44,104 @@
             "end_frame_exclusive": 300
           }
         ],
+        "target_roots": [
+          "film.html",
+          "narration.wav",
+          "scenes/shot-001.html"
+        ],
+        "target_subtitles": [
+          {
+            "subtitle_id": "narration",
+            "path": "assets/narration.vtt"
+          }
+        ],
+        "target_frame_count": 900,
         "rights_digest": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
       },
-      "plan_sha256": "d56472881777e7bff9b1b3a9f149090be8d8ab2521be592d723e54466c88fb75",
-      "preimage": "narralens-history-restore-plan-v1\n{\"assets\":[\"assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4\"],\"clips\":[{\"changed\":false,\"clip_id\":\"narration\",\"current_overrides_sha256\":null,\"current_source_end_frame_exclusive\":900,\"current_source_ref\":\"narration.wav\",\"current_source_start_frame\":0,\"end_frame_exclusive\":900,\"kind\":\"sound\",\"start_frame\":0,\"target_overrides_sha256\":null,\"target_source_end_frame_exclusive\":900,\"target_source_ref\":\"narration.wav\",\"target_source_start_frame\":0,\"track_id\":\"track_1\"},{\"changed\":true,\"clip_id\":\"shot-001\",\"current_overrides_sha256\":null,\"current_source_end_frame_exclusive\":300,\"current_source_ref\":\"assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4\",\"current_source_start_frame\":0,\"end_frame_exclusive\":300,\"kind\":\"visual\",\"start_frame\":0,\"target_overrides_sha256\":null,\"target_source_end_frame_exclusive\":300,\"target_source_ref\":\"scenes/shot-001.html\",\"target_source_start_frame\":0,\"track_id\":\"track_0\"}],\"consumers\":[{\"action\":\"preserve\",\"id\":\"narration\",\"kind\":\"narration\"},{\"action\":\"replace\",\"id\":\"shot-001\",\"kind\":\"visual\"}],\"current_revision\":2,\"current_snapshot_id\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"current_source_digest\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"entry_root\":\"film.html\",\"format\":\"narralens.history-restore-plan@1.0\",\"project_id\":\"of_d1-30s_0123456789abcdef\",\"required_locks\":[{\"end_frame_exclusive\":300,\"lock_type\":\"visual\",\"scope\":\"shot\",\"start_frame\":0,\"target_id\":\"shot-001\"}],\"rights_digest\":\"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff\",\"roots\":[\"assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4\",\"film.html\",\"narration.wav\"],\"subtitles\":[{\"changed\":false,\"path\":\"assets/narration.vtt\",\"subtitle_id\":\"narration\"}],\"target_film_sha256\":\"eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee\",\"target_snapshot_id\":\"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc\",\"target_source_digest\":\"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd\"}"
+      "plan_sha256": "7ced735ad54a81799de404467eb072b2578dbe2f91d2a24e603077ecf7abe3d3",
+      "preimage": "narralens-history-restore-plan-v1\n{\"affected_consumers\":[{\"action\":\"preserve\",\"id\":\"narration\",\"kind\":\"narration\"},{\"action\":\"replace\",\"id\":\"shot-001\",\"kind\":\"visual\"}],\"affected_ranges\":[{\"clip_id\":\"shot-001\",\"end_frame_exclusive\":300,\"start_frame\":0},{\"clip_id\":\"shot-002\",\"end_frame_exclusive\":600,\"start_frame\":300}],\"current_projection_sha256\":\"1111111111111111111111111111111111111111111111111111111111111111\",\"current_snapshot_id\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"format\":\"narralens.history-restore-plan@1.0\",\"project_id\":\"of_d1-30s_0123456789abcdef\",\"required_locks\":[{\"end_frame_exclusive\":300,\"lock_type\":\"visual\",\"scope\":\"shot\",\"start_frame\":0,\"target_id\":\"shot-001\"}],\"rights_digest\":\"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff\",\"target_frame_count\":900,\"target_projection_sha256\":\"2222222222222222222222222222222222222222222222222222222222222222\",\"target_roots\":[\"film.html\",\"narration.wav\",\"scenes/shot-001.html\"],\"target_snapshot_id\":\"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc\",\"target_subtitles\":[{\"path\":\"assets/narration.vtt\",\"subtitle_id\":\"narration\"}]}"
+    },
+    {
+      "name": "mutated-format",
+      "plan": {
+        "format": "narralens.history-restore-plan@1.1",
+        "project_id": "of_d1-30s_0123456789abcdef",
+        "target_snapshot_id": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "current_snapshot_id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "current_projection_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+        "target_projection_sha256": "2222222222222222222222222222222222222222222222222222222222222222",
+        "affected_ranges": [
+          {
+            "clip_id": "shot-001",
+            "start_frame": 0,
+            "end_frame_exclusive": 300
+          },
+          {
+            "clip_id": "shot-002",
+            "start_frame": 300,
+            "end_frame_exclusive": 600
+          }
+        ],
+        "affected_consumers": [
+          {
+            "kind": "visual",
+            "id": "shot-001",
+            "action": "replace"
+          },
+          {
+            "kind": "narration",
+            "id": "narration",
+            "action": "preserve"
+          }
+        ],
+        "required_locks": [
+          {
+            "lock_type": "visual",
+            "scope": "shot",
+            "target_id": "shot-001",
+            "start_frame": 0,
+            "end_frame_exclusive": 300
+          }
+        ],
+        "target_roots": [
+          "film.html",
+          "narration.wav",
+          "scenes/shot-001.html"
+        ],
+        "target_subtitles": [
+          {
+            "subtitle_id": "narration",
+            "path": "assets/narration.vtt"
+          }
+        ],
+        "target_frame_count": 900,
+        "rights_digest": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+      },
+      "plan_sha256": "009a27e635d9aead47d543fa8fe5a4af1ac460c96f845f359ba63a69c92eacc0",
+      "preimage": "narralens-history-restore-plan-v1\n{\"affected_consumers\":[{\"action\":\"preserve\",\"id\":\"narration\",\"kind\":\"narration\"},{\"action\":\"replace\",\"id\":\"shot-001\",\"kind\":\"visual\"}],\"affected_ranges\":[{\"clip_id\":\"shot-001\",\"end_frame_exclusive\":300,\"start_frame\":0},{\"clip_id\":\"shot-002\",\"end_frame_exclusive\":600,\"start_frame\":300}],\"current_projection_sha256\":\"1111111111111111111111111111111111111111111111111111111111111111\",\"current_snapshot_id\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"format\":\"narralens.history-restore-plan@1.1\",\"project_id\":\"of_d1-30s_0123456789abcdef\",\"required_locks\":[{\"end_frame_exclusive\":300,\"lock_type\":\"visual\",\"scope\":\"shot\",\"start_frame\":0,\"target_id\":\"shot-001\"}],\"rights_digest\":\"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff\",\"target_frame_count\":900,\"target_projection_sha256\":\"2222222222222222222222222222222222222222222222222222222222222222\",\"target_roots\":[\"film.html\",\"narration.wav\",\"scenes/shot-001.html\"],\"target_snapshot_id\":\"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc\",\"target_subtitles\":[{\"path\":\"assets/narration.vtt\",\"subtitle_id\":\"narration\"}]}"
     },
     {
       "name": "mutated-project-id",
       "plan": {
         "format": "narralens.history-restore-plan@1.0",
         "project_id": "of_other_0123456789abcdef",
+        "target_snapshot_id": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
         "current_snapshot_id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-        "current_revision": 2,
-        "current_source_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
-        "target_snapshot_id": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
-        "target_source_digest": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
-        "target_film_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
-        "entry_root": "film.html",
-        "roots": [
-          "assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4",
-          "film.html",
-          "narration.wav"
-        ],
-        "assets": [
-          "assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4"
-        ],
-        "subtitles": [
-          {
-            "subtitle_id": "narration",
-            "path": "assets/narration.vtt",
-            "changed": false
-          }
-        ],
-        "clips": [
+        "current_projection_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+        "target_projection_sha256": "2222222222222222222222222222222222222222222222222222222222222222",
+        "affected_ranges": [
           {
             "clip_id": "shot-001",
-            "track_id": "track_0",
-            "kind": "visual",
             "start_frame": 0,
-            "end_frame_exclusive": 300,
-            "current_source_ref": "assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4",
-            "target_source_ref": "scenes/shot-001.html",
-            "current_source_start_frame": 0,
-            "current_source_end_frame_exclusive": 300,
-            "target_source_start_frame": 0,
-            "target_source_end_frame_exclusive": 300,
-            "current_overrides_sha256": null,
-            "target_overrides_sha256": null,
-            "changed": true
+            "end_frame_exclusive": 300
           },
           {
-            "clip_id": "narration",
-            "track_id": "track_1",
-            "kind": "sound",
-            "start_frame": 0,
-            "end_frame_exclusive": 900,
-            "current_source_ref": "narration.wav",
-            "target_source_ref": "narration.wav",
-            "current_source_start_frame": 0,
-            "current_source_end_frame_exclusive": 900,
-            "target_source_start_frame": 0,
-            "target_source_end_frame_exclusive": 900,
-            "current_overrides_sha256": null,
-            "target_overrides_sha256": null,
-            "changed": false
+            "clip_id": "shot-002",
+            "start_frame": 300,
+            "end_frame_exclusive": 600
           }
         ],
-        "consumers": [
+        "affected_consumers": [
           {
             "kind": "visual",
             "id": "shot-001",
@@ -171,334 +162,45 @@
             "end_frame_exclusive": 300
           }
         ],
-        "rights_digest": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
-      },
-      "plan_sha256": "ce264825c659aeee9c8421999d9d2d30caf68b030667fe4a299ed30154cd8bf5",
-      "preimage": "narralens-history-restore-plan-v1\n{\"assets\":[\"assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4\"],\"clips\":[{\"changed\":false,\"clip_id\":\"narration\",\"current_overrides_sha256\":null,\"current_source_end_frame_exclusive\":900,\"current_source_ref\":\"narration.wav\",\"current_source_start_frame\":0,\"end_frame_exclusive\":900,\"kind\":\"sound\",\"start_frame\":0,\"target_overrides_sha256\":null,\"target_source_end_frame_exclusive\":900,\"target_source_ref\":\"narration.wav\",\"target_source_start_frame\":0,\"track_id\":\"track_1\"},{\"changed\":true,\"clip_id\":\"shot-001\",\"current_overrides_sha256\":null,\"current_source_end_frame_exclusive\":300,\"current_source_ref\":\"assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4\",\"current_source_start_frame\":0,\"end_frame_exclusive\":300,\"kind\":\"visual\",\"start_frame\":0,\"target_overrides_sha256\":null,\"target_source_end_frame_exclusive\":300,\"target_source_ref\":\"scenes/shot-001.html\",\"target_source_start_frame\":0,\"track_id\":\"track_0\"}],\"consumers\":[{\"action\":\"preserve\",\"id\":\"narration\",\"kind\":\"narration\"},{\"action\":\"replace\",\"id\":\"shot-001\",\"kind\":\"visual\"}],\"current_revision\":2,\"current_snapshot_id\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"current_source_digest\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"entry_root\":\"film.html\",\"format\":\"narralens.history-restore-plan@1.0\",\"project_id\":\"of_other_0123456789abcdef\",\"required_locks\":[{\"end_frame_exclusive\":300,\"lock_type\":\"visual\",\"scope\":\"shot\",\"start_frame\":0,\"target_id\":\"shot-001\"}],\"rights_digest\":\"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff\",\"roots\":[\"assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4\",\"film.html\",\"narration.wav\"],\"subtitles\":[{\"changed\":false,\"path\":\"assets/narration.vtt\",\"subtitle_id\":\"narration\"}],\"target_film_sha256\":\"eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee\",\"target_snapshot_id\":\"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc\",\"target_source_digest\":\"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd\"}"
-    },
-    {
-      "name": "mutated-current-snapshot",
-      "plan": {
-        "format": "narralens.history-restore-plan@1.0",
-        "project_id": "of_d1-30s_0123456789abcdef",
-        "current_snapshot_id": "1111111111111111111111111111111111111111111111111111111111111111",
-        "current_revision": 2,
-        "current_source_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
-        "target_snapshot_id": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
-        "target_source_digest": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
-        "target_film_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
-        "entry_root": "film.html",
-        "roots": [
-          "assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4",
+        "target_roots": [
           "film.html",
-          "narration.wav"
+          "narration.wav",
+          "scenes/shot-001.html"
         ],
-        "assets": [
-          "assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4"
-        ],
-        "subtitles": [
+        "target_subtitles": [
           {
             "subtitle_id": "narration",
-            "path": "assets/narration.vtt",
-            "changed": false
+            "path": "assets/narration.vtt"
           }
         ],
-        "clips": [
-          {
-            "clip_id": "shot-001",
-            "track_id": "track_0",
-            "kind": "visual",
-            "start_frame": 0,
-            "end_frame_exclusive": 300,
-            "current_source_ref": "assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4",
-            "target_source_ref": "scenes/shot-001.html",
-            "current_source_start_frame": 0,
-            "current_source_end_frame_exclusive": 300,
-            "target_source_start_frame": 0,
-            "target_source_end_frame_exclusive": 300,
-            "current_overrides_sha256": null,
-            "target_overrides_sha256": null,
-            "changed": true
-          },
-          {
-            "clip_id": "narration",
-            "track_id": "track_1",
-            "kind": "sound",
-            "start_frame": 0,
-            "end_frame_exclusive": 900,
-            "current_source_ref": "narration.wav",
-            "target_source_ref": "narration.wav",
-            "current_source_start_frame": 0,
-            "current_source_end_frame_exclusive": 900,
-            "target_source_start_frame": 0,
-            "target_source_end_frame_exclusive": 900,
-            "current_overrides_sha256": null,
-            "target_overrides_sha256": null,
-            "changed": false
-          }
-        ],
-        "consumers": [
-          {
-            "kind": "visual",
-            "id": "shot-001",
-            "action": "replace"
-          },
-          {
-            "kind": "narration",
-            "id": "narration",
-            "action": "preserve"
-          }
-        ],
-        "required_locks": [
-          {
-            "lock_type": "visual",
-            "scope": "shot",
-            "target_id": "shot-001",
-            "start_frame": 0,
-            "end_frame_exclusive": 300
-          }
-        ],
+        "target_frame_count": 900,
         "rights_digest": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
       },
-      "plan_sha256": "35e8ba68bac0d813bd82703fcb87d424dfc1bedecd0276c2b3098cb5026cf60d",
-      "preimage": "narralens-history-restore-plan-v1\n{\"assets\":[\"assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4\"],\"clips\":[{\"changed\":false,\"clip_id\":\"narration\",\"current_overrides_sha256\":null,\"current_source_end_frame_exclusive\":900,\"current_source_ref\":\"narration.wav\",\"current_source_start_frame\":0,\"end_frame_exclusive\":900,\"kind\":\"sound\",\"start_frame\":0,\"target_overrides_sha256\":null,\"target_source_end_frame_exclusive\":900,\"target_source_ref\":\"narration.wav\",\"target_source_start_frame\":0,\"track_id\":\"track_1\"},{\"changed\":true,\"clip_id\":\"shot-001\",\"current_overrides_sha256\":null,\"current_source_end_frame_exclusive\":300,\"current_source_ref\":\"assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4\",\"current_source_start_frame\":0,\"end_frame_exclusive\":300,\"kind\":\"visual\",\"start_frame\":0,\"target_overrides_sha256\":null,\"target_source_end_frame_exclusive\":300,\"target_source_ref\":\"scenes/shot-001.html\",\"target_source_start_frame\":0,\"track_id\":\"track_0\"}],\"consumers\":[{\"action\":\"preserve\",\"id\":\"narration\",\"kind\":\"narration\"},{\"action\":\"replace\",\"id\":\"shot-001\",\"kind\":\"visual\"}],\"current_revision\":2,\"current_snapshot_id\":\"1111111111111111111111111111111111111111111111111111111111111111\",\"current_source_digest\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"entry_root\":\"film.html\",\"format\":\"narralens.history-restore-plan@1.0\",\"project_id\":\"of_d1-30s_0123456789abcdef\",\"required_locks\":[{\"end_frame_exclusive\":300,\"lock_type\":\"visual\",\"scope\":\"shot\",\"start_frame\":0,\"target_id\":\"shot-001\"}],\"rights_digest\":\"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff\",\"roots\":[\"assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4\",\"film.html\",\"narration.wav\"],\"subtitles\":[{\"changed\":false,\"path\":\"assets/narration.vtt\",\"subtitle_id\":\"narration\"}],\"target_film_sha256\":\"eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee\",\"target_snapshot_id\":\"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc\",\"target_source_digest\":\"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd\"}"
-    },
-    {
-      "name": "mutated-current-revision",
-      "plan": {
-        "format": "narralens.history-restore-plan@1.0",
-        "project_id": "of_d1-30s_0123456789abcdef",
-        "current_snapshot_id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-        "current_revision": 3,
-        "current_source_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
-        "target_snapshot_id": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
-        "target_source_digest": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
-        "target_film_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
-        "entry_root": "film.html",
-        "roots": [
-          "assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4",
-          "film.html",
-          "narration.wav"
-        ],
-        "assets": [
-          "assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4"
-        ],
-        "subtitles": [
-          {
-            "subtitle_id": "narration",
-            "path": "assets/narration.vtt",
-            "changed": false
-          }
-        ],
-        "clips": [
-          {
-            "clip_id": "shot-001",
-            "track_id": "track_0",
-            "kind": "visual",
-            "start_frame": 0,
-            "end_frame_exclusive": 300,
-            "current_source_ref": "assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4",
-            "target_source_ref": "scenes/shot-001.html",
-            "current_source_start_frame": 0,
-            "current_source_end_frame_exclusive": 300,
-            "target_source_start_frame": 0,
-            "target_source_end_frame_exclusive": 300,
-            "current_overrides_sha256": null,
-            "target_overrides_sha256": null,
-            "changed": true
-          },
-          {
-            "clip_id": "narration",
-            "track_id": "track_1",
-            "kind": "sound",
-            "start_frame": 0,
-            "end_frame_exclusive": 900,
-            "current_source_ref": "narration.wav",
-            "target_source_ref": "narration.wav",
-            "current_source_start_frame": 0,
-            "current_source_end_frame_exclusive": 900,
-            "target_source_start_frame": 0,
-            "target_source_end_frame_exclusive": 900,
-            "current_overrides_sha256": null,
-            "target_overrides_sha256": null,
-            "changed": false
-          }
-        ],
-        "consumers": [
-          {
-            "kind": "visual",
-            "id": "shot-001",
-            "action": "replace"
-          },
-          {
-            "kind": "narration",
-            "id": "narration",
-            "action": "preserve"
-          }
-        ],
-        "required_locks": [
-          {
-            "lock_type": "visual",
-            "scope": "shot",
-            "target_id": "shot-001",
-            "start_frame": 0,
-            "end_frame_exclusive": 300
-          }
-        ],
-        "rights_digest": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
-      },
-      "plan_sha256": "819ecf2339f462ab9344ecacc7e93868d591c4ea18dc794ddad39a4cc4e2ca72",
-      "preimage": "narralens-history-restore-plan-v1\n{\"assets\":[\"assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4\"],\"clips\":[{\"changed\":false,\"clip_id\":\"narration\",\"current_overrides_sha256\":null,\"current_source_end_frame_exclusive\":900,\"current_source_ref\":\"narration.wav\",\"current_source_start_frame\":0,\"end_frame_exclusive\":900,\"kind\":\"sound\",\"start_frame\":0,\"target_overrides_sha256\":null,\"target_source_end_frame_exclusive\":900,\"target_source_ref\":\"narration.wav\",\"target_source_start_frame\":0,\"track_id\":\"track_1\"},{\"changed\":true,\"clip_id\":\"shot-001\",\"current_overrides_sha256\":null,\"current_source_end_frame_exclusive\":300,\"current_source_ref\":\"assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4\",\"current_source_start_frame\":0,\"end_frame_exclusive\":300,\"kind\":\"visual\",\"start_frame\":0,\"target_overrides_sha256\":null,\"target_source_end_frame_exclusive\":300,\"target_source_ref\":\"scenes/shot-001.html\",\"target_source_start_frame\":0,\"track_id\":\"track_0\"}],\"consumers\":[{\"action\":\"preserve\",\"id\":\"narration\",\"kind\":\"narration\"},{\"action\":\"replace\",\"id\":\"shot-001\",\"kind\":\"visual\"}],\"current_revision\":3,\"current_snapshot_id\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"current_source_digest\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"entry_root\":\"film.html\",\"format\":\"narralens.history-restore-plan@1.0\",\"project_id\":\"of_d1-30s_0123456789abcdef\",\"required_locks\":[{\"end_frame_exclusive\":300,\"lock_type\":\"visual\",\"scope\":\"shot\",\"start_frame\":0,\"target_id\":\"shot-001\"}],\"rights_digest\":\"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff\",\"roots\":[\"assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4\",\"film.html\",\"narration.wav\"],\"subtitles\":[{\"changed\":false,\"path\":\"assets/narration.vtt\",\"subtitle_id\":\"narration\"}],\"target_film_sha256\":\"eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee\",\"target_snapshot_id\":\"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc\",\"target_source_digest\":\"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd\"}"
-    },
-    {
-      "name": "mutated-current-digest",
-      "plan": {
-        "format": "narralens.history-restore-plan@1.0",
-        "project_id": "of_d1-30s_0123456789abcdef",
-        "current_snapshot_id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-        "current_revision": 2,
-        "current_source_digest": "2222222222222222222222222222222222222222222222222222222222222222",
-        "target_snapshot_id": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
-        "target_source_digest": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
-        "target_film_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
-        "entry_root": "film.html",
-        "roots": [
-          "assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4",
-          "film.html",
-          "narration.wav"
-        ],
-        "assets": [
-          "assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4"
-        ],
-        "subtitles": [
-          {
-            "subtitle_id": "narration",
-            "path": "assets/narration.vtt",
-            "changed": false
-          }
-        ],
-        "clips": [
-          {
-            "clip_id": "shot-001",
-            "track_id": "track_0",
-            "kind": "visual",
-            "start_frame": 0,
-            "end_frame_exclusive": 300,
-            "current_source_ref": "assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4",
-            "target_source_ref": "scenes/shot-001.html",
-            "current_source_start_frame": 0,
-            "current_source_end_frame_exclusive": 300,
-            "target_source_start_frame": 0,
-            "target_source_end_frame_exclusive": 300,
-            "current_overrides_sha256": null,
-            "target_overrides_sha256": null,
-            "changed": true
-          },
-          {
-            "clip_id": "narration",
-            "track_id": "track_1",
-            "kind": "sound",
-            "start_frame": 0,
-            "end_frame_exclusive": 900,
-            "current_source_ref": "narration.wav",
-            "target_source_ref": "narration.wav",
-            "current_source_start_frame": 0,
-            "current_source_end_frame_exclusive": 900,
-            "target_source_start_frame": 0,
-            "target_source_end_frame_exclusive": 900,
-            "current_overrides_sha256": null,
-            "target_overrides_sha256": null,
-            "changed": false
-          }
-        ],
-        "consumers": [
-          {
-            "kind": "visual",
-            "id": "shot-001",
-            "action": "replace"
-          },
-          {
-            "kind": "narration",
-            "id": "narration",
-            "action": "preserve"
-          }
-        ],
-        "required_locks": [
-          {
-            "lock_type": "visual",
-            "scope": "shot",
-            "target_id": "shot-001",
-            "start_frame": 0,
-            "end_frame_exclusive": 300
-          }
-        ],
-        "rights_digest": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
-      },
-      "plan_sha256": "ac2ea2910fb398f18f56767e5cc171f1bfe3ea1143898cfc7ab2979117d0b003",
-      "preimage": "narralens-history-restore-plan-v1\n{\"assets\":[\"assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4\"],\"clips\":[{\"changed\":false,\"clip_id\":\"narration\",\"current_overrides_sha256\":null,\"current_source_end_frame_exclusive\":900,\"current_source_ref\":\"narration.wav\",\"current_source_start_frame\":0,\"end_frame_exclusive\":900,\"kind\":\"sound\",\"start_frame\":0,\"target_overrides_sha256\":null,\"target_source_end_frame_exclusive\":900,\"target_source_ref\":\"narration.wav\",\"target_source_start_frame\":0,\"track_id\":\"track_1\"},{\"changed\":true,\"clip_id\":\"shot-001\",\"current_overrides_sha256\":null,\"current_source_end_frame_exclusive\":300,\"current_source_ref\":\"assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4\",\"current_source_start_frame\":0,\"end_frame_exclusive\":300,\"kind\":\"visual\",\"start_frame\":0,\"target_overrides_sha256\":null,\"target_source_end_frame_exclusive\":300,\"target_source_ref\":\"scenes/shot-001.html\",\"target_source_start_frame\":0,\"track_id\":\"track_0\"}],\"consumers\":[{\"action\":\"preserve\",\"id\":\"narration\",\"kind\":\"narration\"},{\"action\":\"replace\",\"id\":\"shot-001\",\"kind\":\"visual\"}],\"current_revision\":2,\"current_snapshot_id\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"current_source_digest\":\"2222222222222222222222222222222222222222222222222222222222222222\",\"entry_root\":\"film.html\",\"format\":\"narralens.history-restore-plan@1.0\",\"project_id\":\"of_d1-30s_0123456789abcdef\",\"required_locks\":[{\"end_frame_exclusive\":300,\"lock_type\":\"visual\",\"scope\":\"shot\",\"start_frame\":0,\"target_id\":\"shot-001\"}],\"rights_digest\":\"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff\",\"roots\":[\"assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4\",\"film.html\",\"narration.wav\"],\"subtitles\":[{\"changed\":false,\"path\":\"assets/narration.vtt\",\"subtitle_id\":\"narration\"}],\"target_film_sha256\":\"eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee\",\"target_snapshot_id\":\"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc\",\"target_source_digest\":\"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd\"}"
+      "plan_sha256": "f03d3651cfe800141a636479f5e3548dcfa348a8cdd2d511bb92ca4e7463ae17",
+      "preimage": "narralens-history-restore-plan-v1\n{\"affected_consumers\":[{\"action\":\"preserve\",\"id\":\"narration\",\"kind\":\"narration\"},{\"action\":\"replace\",\"id\":\"shot-001\",\"kind\":\"visual\"}],\"affected_ranges\":[{\"clip_id\":\"shot-001\",\"end_frame_exclusive\":300,\"start_frame\":0},{\"clip_id\":\"shot-002\",\"end_frame_exclusive\":600,\"start_frame\":300}],\"current_projection_sha256\":\"1111111111111111111111111111111111111111111111111111111111111111\",\"current_snapshot_id\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"format\":\"narralens.history-restore-plan@1.0\",\"project_id\":\"of_other_0123456789abcdef\",\"required_locks\":[{\"end_frame_exclusive\":300,\"lock_type\":\"visual\",\"scope\":\"shot\",\"start_frame\":0,\"target_id\":\"shot-001\"}],\"rights_digest\":\"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff\",\"target_frame_count\":900,\"target_projection_sha256\":\"2222222222222222222222222222222222222222222222222222222222222222\",\"target_roots\":[\"film.html\",\"narration.wav\",\"scenes/shot-001.html\"],\"target_snapshot_id\":\"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc\",\"target_subtitles\":[{\"path\":\"assets/narration.vtt\",\"subtitle_id\":\"narration\"}]}"
     },
     {
       "name": "mutated-target-snapshot",
       "plan": {
         "format": "narralens.history-restore-plan@1.0",
         "project_id": "of_d1-30s_0123456789abcdef",
-        "current_snapshot_id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-        "current_revision": 2,
-        "current_source_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
         "target_snapshot_id": "3333333333333333333333333333333333333333333333333333333333333333",
-        "target_source_digest": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
-        "target_film_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
-        "entry_root": "film.html",
-        "roots": [
-          "assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4",
-          "film.html",
-          "narration.wav"
-        ],
-        "assets": [
-          "assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4"
-        ],
-        "subtitles": [
-          {
-            "subtitle_id": "narration",
-            "path": "assets/narration.vtt",
-            "changed": false
-          }
-        ],
-        "clips": [
+        "current_snapshot_id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "current_projection_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+        "target_projection_sha256": "2222222222222222222222222222222222222222222222222222222222222222",
+        "affected_ranges": [
           {
             "clip_id": "shot-001",
-            "track_id": "track_0",
-            "kind": "visual",
             "start_frame": 0,
-            "end_frame_exclusive": 300,
-            "current_source_ref": "assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4",
-            "target_source_ref": "scenes/shot-001.html",
-            "current_source_start_frame": 0,
-            "current_source_end_frame_exclusive": 300,
-            "target_source_start_frame": 0,
-            "target_source_end_frame_exclusive": 300,
-            "current_overrides_sha256": null,
-            "target_overrides_sha256": null,
-            "changed": true
+            "end_frame_exclusive": 300
           },
           {
-            "clip_id": "narration",
-            "track_id": "track_1",
-            "kind": "sound",
-            "start_frame": 0,
-            "end_frame_exclusive": 900,
-            "current_source_ref": "narration.wav",
-            "target_source_ref": "narration.wav",
-            "current_source_start_frame": 0,
-            "current_source_end_frame_exclusive": 900,
-            "target_source_start_frame": 0,
-            "target_source_end_frame_exclusive": 900,
-            "current_overrides_sha256": null,
-            "target_overrides_sha256": null,
-            "changed": false
+            "clip_id": "shot-002",
+            "start_frame": 300,
+            "end_frame_exclusive": 600
           }
         ],
-        "consumers": [
+        "affected_consumers": [
           {
             "kind": "visual",
             "id": "shot-001",
@@ -519,335 +221,45 @@
             "end_frame_exclusive": 300
           }
         ],
-        "rights_digest": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
-      },
-      "plan_sha256": "a856320ee750da5283b7bf22138592b1c4ee33906d9690dc339660040df69e1b",
-      "preimage": "narralens-history-restore-plan-v1\n{\"assets\":[\"assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4\"],\"clips\":[{\"changed\":false,\"clip_id\":\"narration\",\"current_overrides_sha256\":null,\"current_source_end_frame_exclusive\":900,\"current_source_ref\":\"narration.wav\",\"current_source_start_frame\":0,\"end_frame_exclusive\":900,\"kind\":\"sound\",\"start_frame\":0,\"target_overrides_sha256\":null,\"target_source_end_frame_exclusive\":900,\"target_source_ref\":\"narration.wav\",\"target_source_start_frame\":0,\"track_id\":\"track_1\"},{\"changed\":true,\"clip_id\":\"shot-001\",\"current_overrides_sha256\":null,\"current_source_end_frame_exclusive\":300,\"current_source_ref\":\"assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4\",\"current_source_start_frame\":0,\"end_frame_exclusive\":300,\"kind\":\"visual\",\"start_frame\":0,\"target_overrides_sha256\":null,\"target_source_end_frame_exclusive\":300,\"target_source_ref\":\"scenes/shot-001.html\",\"target_source_start_frame\":0,\"track_id\":\"track_0\"}],\"consumers\":[{\"action\":\"preserve\",\"id\":\"narration\",\"kind\":\"narration\"},{\"action\":\"replace\",\"id\":\"shot-001\",\"kind\":\"visual\"}],\"current_revision\":2,\"current_snapshot_id\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"current_source_digest\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"entry_root\":\"film.html\",\"format\":\"narralens.history-restore-plan@1.0\",\"project_id\":\"of_d1-30s_0123456789abcdef\",\"required_locks\":[{\"end_frame_exclusive\":300,\"lock_type\":\"visual\",\"scope\":\"shot\",\"start_frame\":0,\"target_id\":\"shot-001\"}],\"rights_digest\":\"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff\",\"roots\":[\"assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4\",\"film.html\",\"narration.wav\"],\"subtitles\":[{\"changed\":false,\"path\":\"assets/narration.vtt\",\"subtitle_id\":\"narration\"}],\"target_film_sha256\":\"eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee\",\"target_snapshot_id\":\"3333333333333333333333333333333333333333333333333333333333333333\",\"target_source_digest\":\"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd\"}"
-    },
-    {
-      "name": "mutated-target-digest",
-      "plan": {
-        "format": "narralens.history-restore-plan@1.0",
-        "project_id": "of_d1-30s_0123456789abcdef",
-        "current_snapshot_id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-        "current_revision": 2,
-        "current_source_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
-        "target_snapshot_id": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
-        "target_source_digest": "4444444444444444444444444444444444444444444444444444444444444444",
-        "target_film_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
-        "entry_root": "film.html",
-        "roots": [
-          "assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4",
-          "film.html",
-          "narration.wav"
-        ],
-        "assets": [
-          "assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4"
-        ],
-        "subtitles": [
-          {
-            "subtitle_id": "narration",
-            "path": "assets/narration.vtt",
-            "changed": false
-          }
-        ],
-        "clips": [
-          {
-            "clip_id": "shot-001",
-            "track_id": "track_0",
-            "kind": "visual",
-            "start_frame": 0,
-            "end_frame_exclusive": 300,
-            "current_source_ref": "assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4",
-            "target_source_ref": "scenes/shot-001.html",
-            "current_source_start_frame": 0,
-            "current_source_end_frame_exclusive": 300,
-            "target_source_start_frame": 0,
-            "target_source_end_frame_exclusive": 300,
-            "current_overrides_sha256": null,
-            "target_overrides_sha256": null,
-            "changed": true
-          },
-          {
-            "clip_id": "narration",
-            "track_id": "track_1",
-            "kind": "sound",
-            "start_frame": 0,
-            "end_frame_exclusive": 900,
-            "current_source_ref": "narration.wav",
-            "target_source_ref": "narration.wav",
-            "current_source_start_frame": 0,
-            "current_source_end_frame_exclusive": 900,
-            "target_source_start_frame": 0,
-            "target_source_end_frame_exclusive": 900,
-            "current_overrides_sha256": null,
-            "target_overrides_sha256": null,
-            "changed": false
-          }
-        ],
-        "consumers": [
-          {
-            "kind": "visual",
-            "id": "shot-001",
-            "action": "replace"
-          },
-          {
-            "kind": "narration",
-            "id": "narration",
-            "action": "preserve"
-          }
-        ],
-        "required_locks": [
-          {
-            "lock_type": "visual",
-            "scope": "shot",
-            "target_id": "shot-001",
-            "start_frame": 0,
-            "end_frame_exclusive": 300
-          }
-        ],
-        "rights_digest": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
-      },
-      "plan_sha256": "e8e2c138f88e07dd6c67284de560cbf1bddacdfd2acb0e3751f9880de7ea507f",
-      "preimage": "narralens-history-restore-plan-v1\n{\"assets\":[\"assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4\"],\"clips\":[{\"changed\":false,\"clip_id\":\"narration\",\"current_overrides_sha256\":null,\"current_source_end_frame_exclusive\":900,\"current_source_ref\":\"narration.wav\",\"current_source_start_frame\":0,\"end_frame_exclusive\":900,\"kind\":\"sound\",\"start_frame\":0,\"target_overrides_sha256\":null,\"target_source_end_frame_exclusive\":900,\"target_source_ref\":\"narration.wav\",\"target_source_start_frame\":0,\"track_id\":\"track_1\"},{\"changed\":true,\"clip_id\":\"shot-001\",\"current_overrides_sha256\":null,\"current_source_end_frame_exclusive\":300,\"current_source_ref\":\"assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4\",\"current_source_start_frame\":0,\"end_frame_exclusive\":300,\"kind\":\"visual\",\"start_frame\":0,\"target_overrides_sha256\":null,\"target_source_end_frame_exclusive\":300,\"target_source_ref\":\"scenes/shot-001.html\",\"target_source_start_frame\":0,\"track_id\":\"track_0\"}],\"consumers\":[{\"action\":\"preserve\",\"id\":\"narration\",\"kind\":\"narration\"},{\"action\":\"replace\",\"id\":\"shot-001\",\"kind\":\"visual\"}],\"current_revision\":2,\"current_snapshot_id\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"current_source_digest\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"entry_root\":\"film.html\",\"format\":\"narralens.history-restore-plan@1.0\",\"project_id\":\"of_d1-30s_0123456789abcdef\",\"required_locks\":[{\"end_frame_exclusive\":300,\"lock_type\":\"visual\",\"scope\":\"shot\",\"start_frame\":0,\"target_id\":\"shot-001\"}],\"rights_digest\":\"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff\",\"roots\":[\"assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4\",\"film.html\",\"narration.wav\"],\"subtitles\":[{\"changed\":false,\"path\":\"assets/narration.vtt\",\"subtitle_id\":\"narration\"}],\"target_film_sha256\":\"eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee\",\"target_snapshot_id\":\"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc\",\"target_source_digest\":\"4444444444444444444444444444444444444444444444444444444444444444\"}"
-    },
-    {
-      "name": "mutated-target-film",
-      "plan": {
-        "format": "narralens.history-restore-plan@1.0",
-        "project_id": "of_d1-30s_0123456789abcdef",
-        "current_snapshot_id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-        "current_revision": 2,
-        "current_source_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
-        "target_snapshot_id": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
-        "target_source_digest": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
-        "target_film_sha256": "5555555555555555555555555555555555555555555555555555555555555555",
-        "entry_root": "film.html",
-        "roots": [
-          "assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4",
-          "film.html",
-          "narration.wav"
-        ],
-        "assets": [
-          "assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4"
-        ],
-        "subtitles": [
-          {
-            "subtitle_id": "narration",
-            "path": "assets/narration.vtt",
-            "changed": false
-          }
-        ],
-        "clips": [
-          {
-            "clip_id": "shot-001",
-            "track_id": "track_0",
-            "kind": "visual",
-            "start_frame": 0,
-            "end_frame_exclusive": 300,
-            "current_source_ref": "assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4",
-            "target_source_ref": "scenes/shot-001.html",
-            "current_source_start_frame": 0,
-            "current_source_end_frame_exclusive": 300,
-            "target_source_start_frame": 0,
-            "target_source_end_frame_exclusive": 300,
-            "current_overrides_sha256": null,
-            "target_overrides_sha256": null,
-            "changed": true
-          },
-          {
-            "clip_id": "narration",
-            "track_id": "track_1",
-            "kind": "sound",
-            "start_frame": 0,
-            "end_frame_exclusive": 900,
-            "current_source_ref": "narration.wav",
-            "target_source_ref": "narration.wav",
-            "current_source_start_frame": 0,
-            "current_source_end_frame_exclusive": 900,
-            "target_source_start_frame": 0,
-            "target_source_end_frame_exclusive": 900,
-            "current_overrides_sha256": null,
-            "target_overrides_sha256": null,
-            "changed": false
-          }
-        ],
-        "consumers": [
-          {
-            "kind": "visual",
-            "id": "shot-001",
-            "action": "replace"
-          },
-          {
-            "kind": "narration",
-            "id": "narration",
-            "action": "preserve"
-          }
-        ],
-        "required_locks": [
-          {
-            "lock_type": "visual",
-            "scope": "shot",
-            "target_id": "shot-001",
-            "start_frame": 0,
-            "end_frame_exclusive": 300
-          }
-        ],
-        "rights_digest": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
-      },
-      "plan_sha256": "948cac6d1847c8ad76f6ee28a52d10d208101cbdbe11050a30b58e3ac794d072",
-      "preimage": "narralens-history-restore-plan-v1\n{\"assets\":[\"assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4\"],\"clips\":[{\"changed\":false,\"clip_id\":\"narration\",\"current_overrides_sha256\":null,\"current_source_end_frame_exclusive\":900,\"current_source_ref\":\"narration.wav\",\"current_source_start_frame\":0,\"end_frame_exclusive\":900,\"kind\":\"sound\",\"start_frame\":0,\"target_overrides_sha256\":null,\"target_source_end_frame_exclusive\":900,\"target_source_ref\":\"narration.wav\",\"target_source_start_frame\":0,\"track_id\":\"track_1\"},{\"changed\":true,\"clip_id\":\"shot-001\",\"current_overrides_sha256\":null,\"current_source_end_frame_exclusive\":300,\"current_source_ref\":\"assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4\",\"current_source_start_frame\":0,\"end_frame_exclusive\":300,\"kind\":\"visual\",\"start_frame\":0,\"target_overrides_sha256\":null,\"target_source_end_frame_exclusive\":300,\"target_source_ref\":\"scenes/shot-001.html\",\"target_source_start_frame\":0,\"track_id\":\"track_0\"}],\"consumers\":[{\"action\":\"preserve\",\"id\":\"narration\",\"kind\":\"narration\"},{\"action\":\"replace\",\"id\":\"shot-001\",\"kind\":\"visual\"}],\"current_revision\":2,\"current_snapshot_id\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"current_source_digest\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"entry_root\":\"film.html\",\"format\":\"narralens.history-restore-plan@1.0\",\"project_id\":\"of_d1-30s_0123456789abcdef\",\"required_locks\":[{\"end_frame_exclusive\":300,\"lock_type\":\"visual\",\"scope\":\"shot\",\"start_frame\":0,\"target_id\":\"shot-001\"}],\"rights_digest\":\"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff\",\"roots\":[\"assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4\",\"film.html\",\"narration.wav\"],\"subtitles\":[{\"changed\":false,\"path\":\"assets/narration.vtt\",\"subtitle_id\":\"narration\"}],\"target_film_sha256\":\"5555555555555555555555555555555555555555555555555555555555555555\",\"target_snapshot_id\":\"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc\",\"target_source_digest\":\"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd\"}"
-    },
-    {
-      "name": "mutated-entry-root",
-      "plan": {
-        "format": "narralens.history-restore-plan@1.0",
-        "project_id": "of_d1-30s_0123456789abcdef",
-        "current_snapshot_id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-        "current_revision": 2,
-        "current_source_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
-        "target_snapshot_id": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
-        "target_source_digest": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
-        "target_film_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
-        "entry_root": "narration.wav",
-        "roots": [
-          "assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4",
-          "film.html",
-          "narration.wav"
-        ],
-        "assets": [
-          "assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4"
-        ],
-        "subtitles": [
-          {
-            "subtitle_id": "narration",
-            "path": "assets/narration.vtt",
-            "changed": false
-          }
-        ],
-        "clips": [
-          {
-            "clip_id": "shot-001",
-            "track_id": "track_0",
-            "kind": "visual",
-            "start_frame": 0,
-            "end_frame_exclusive": 300,
-            "current_source_ref": "assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4",
-            "target_source_ref": "scenes/shot-001.html",
-            "current_source_start_frame": 0,
-            "current_source_end_frame_exclusive": 300,
-            "target_source_start_frame": 0,
-            "target_source_end_frame_exclusive": 300,
-            "current_overrides_sha256": null,
-            "target_overrides_sha256": null,
-            "changed": true
-          },
-          {
-            "clip_id": "narration",
-            "track_id": "track_1",
-            "kind": "sound",
-            "start_frame": 0,
-            "end_frame_exclusive": 900,
-            "current_source_ref": "narration.wav",
-            "target_source_ref": "narration.wav",
-            "current_source_start_frame": 0,
-            "current_source_end_frame_exclusive": 900,
-            "target_source_start_frame": 0,
-            "target_source_end_frame_exclusive": 900,
-            "current_overrides_sha256": null,
-            "target_overrides_sha256": null,
-            "changed": false
-          }
-        ],
-        "consumers": [
-          {
-            "kind": "visual",
-            "id": "shot-001",
-            "action": "replace"
-          },
-          {
-            "kind": "narration",
-            "id": "narration",
-            "action": "preserve"
-          }
-        ],
-        "required_locks": [
-          {
-            "lock_type": "visual",
-            "scope": "shot",
-            "target_id": "shot-001",
-            "start_frame": 0,
-            "end_frame_exclusive": 300
-          }
-        ],
-        "rights_digest": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
-      },
-      "plan_sha256": "c3610ba838832cb70f5bef8b49befd2fdc3f0a360f86288166395d55e51b9a37",
-      "preimage": "narralens-history-restore-plan-v1\n{\"assets\":[\"assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4\"],\"clips\":[{\"changed\":false,\"clip_id\":\"narration\",\"current_overrides_sha256\":null,\"current_source_end_frame_exclusive\":900,\"current_source_ref\":\"narration.wav\",\"current_source_start_frame\":0,\"end_frame_exclusive\":900,\"kind\":\"sound\",\"start_frame\":0,\"target_overrides_sha256\":null,\"target_source_end_frame_exclusive\":900,\"target_source_ref\":\"narration.wav\",\"target_source_start_frame\":0,\"track_id\":\"track_1\"},{\"changed\":true,\"clip_id\":\"shot-001\",\"current_overrides_sha256\":null,\"current_source_end_frame_exclusive\":300,\"current_source_ref\":\"assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4\",\"current_source_start_frame\":0,\"end_frame_exclusive\":300,\"kind\":\"visual\",\"start_frame\":0,\"target_overrides_sha256\":null,\"target_source_end_frame_exclusive\":300,\"target_source_ref\":\"scenes/shot-001.html\",\"target_source_start_frame\":0,\"track_id\":\"track_0\"}],\"consumers\":[{\"action\":\"preserve\",\"id\":\"narration\",\"kind\":\"narration\"},{\"action\":\"replace\",\"id\":\"shot-001\",\"kind\":\"visual\"}],\"current_revision\":2,\"current_snapshot_id\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"current_source_digest\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"entry_root\":\"narration.wav\",\"format\":\"narralens.history-restore-plan@1.0\",\"project_id\":\"of_d1-30s_0123456789abcdef\",\"required_locks\":[{\"end_frame_exclusive\":300,\"lock_type\":\"visual\",\"scope\":\"shot\",\"start_frame\":0,\"target_id\":\"shot-001\"}],\"rights_digest\":\"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff\",\"roots\":[\"assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4\",\"film.html\",\"narration.wav\"],\"subtitles\":[{\"changed\":false,\"path\":\"assets/narration.vtt\",\"subtitle_id\":\"narration\"}],\"target_film_sha256\":\"eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee\",\"target_snapshot_id\":\"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc\",\"target_source_digest\":\"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd\"}"
-    },
-    {
-      "name": "mutated-roots",
-      "plan": {
-        "format": "narralens.history-restore-plan@1.0",
-        "project_id": "of_d1-30s_0123456789abcdef",
-        "current_snapshot_id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-        "current_revision": 2,
-        "current_source_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
-        "target_snapshot_id": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
-        "target_source_digest": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
-        "target_film_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
-        "entry_root": "film.html",
-        "roots": [
-          "assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4",
+        "target_roots": [
           "film.html",
           "narration.wav",
           "scenes/shot-001.html"
         ],
-        "assets": [
-          "assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4"
-        ],
-        "subtitles": [
+        "target_subtitles": [
           {
             "subtitle_id": "narration",
-            "path": "assets/narration.vtt",
-            "changed": false
+            "path": "assets/narration.vtt"
           }
         ],
-        "clips": [
+        "target_frame_count": 900,
+        "rights_digest": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+      },
+      "plan_sha256": "89c6d10ced11e1dca427e4a81d1d75d4f4e971246ae412791d082adcdac6033f",
+      "preimage": "narralens-history-restore-plan-v1\n{\"affected_consumers\":[{\"action\":\"preserve\",\"id\":\"narration\",\"kind\":\"narration\"},{\"action\":\"replace\",\"id\":\"shot-001\",\"kind\":\"visual\"}],\"affected_ranges\":[{\"clip_id\":\"shot-001\",\"end_frame_exclusive\":300,\"start_frame\":0},{\"clip_id\":\"shot-002\",\"end_frame_exclusive\":600,\"start_frame\":300}],\"current_projection_sha256\":\"1111111111111111111111111111111111111111111111111111111111111111\",\"current_snapshot_id\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"format\":\"narralens.history-restore-plan@1.0\",\"project_id\":\"of_d1-30s_0123456789abcdef\",\"required_locks\":[{\"end_frame_exclusive\":300,\"lock_type\":\"visual\",\"scope\":\"shot\",\"start_frame\":0,\"target_id\":\"shot-001\"}],\"rights_digest\":\"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff\",\"target_frame_count\":900,\"target_projection_sha256\":\"2222222222222222222222222222222222222222222222222222222222222222\",\"target_roots\":[\"film.html\",\"narration.wav\",\"scenes/shot-001.html\"],\"target_snapshot_id\":\"3333333333333333333333333333333333333333333333333333333333333333\",\"target_subtitles\":[{\"path\":\"assets/narration.vtt\",\"subtitle_id\":\"narration\"}]}"
+    },
+    {
+      "name": "mutated-current-snapshot",
+      "plan": {
+        "format": "narralens.history-restore-plan@1.0",
+        "project_id": "of_d1-30s_0123456789abcdef",
+        "target_snapshot_id": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "current_snapshot_id": "4444444444444444444444444444444444444444444444444444444444444444",
+        "current_projection_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+        "target_projection_sha256": "2222222222222222222222222222222222222222222222222222222222222222",
+        "affected_ranges": [
           {
             "clip_id": "shot-001",
-            "track_id": "track_0",
-            "kind": "visual",
             "start_frame": 0,
-            "end_frame_exclusive": 300,
-            "current_source_ref": "assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4",
-            "target_source_ref": "scenes/shot-001.html",
-            "current_source_start_frame": 0,
-            "current_source_end_frame_exclusive": 300,
-            "target_source_start_frame": 0,
-            "target_source_end_frame_exclusive": 300,
-            "current_overrides_sha256": null,
-            "target_overrides_sha256": null,
-            "changed": true
+            "end_frame_exclusive": 300
           },
           {
-            "clip_id": "narration",
-            "track_id": "track_1",
-            "kind": "sound",
-            "start_frame": 0,
-            "end_frame_exclusive": 900,
-            "current_source_ref": "narration.wav",
-            "target_source_ref": "narration.wav",
-            "current_source_start_frame": 0,
-            "current_source_end_frame_exclusive": 900,
-            "target_source_start_frame": 0,
-            "target_source_end_frame_exclusive": 900,
-            "current_overrides_sha256": null,
-            "target_overrides_sha256": null,
-            "changed": false
+            "clip_id": "shot-002",
+            "start_frame": 300,
+            "end_frame_exclusive": 600
           }
         ],
-        "consumers": [
+        "affected_consumers": [
           {
             "kind": "visual",
             "id": "shot-001",
@@ -868,71 +280,45 @@
             "end_frame_exclusive": 300
           }
         ],
+        "target_roots": [
+          "film.html",
+          "narration.wav",
+          "scenes/shot-001.html"
+        ],
+        "target_subtitles": [
+          {
+            "subtitle_id": "narration",
+            "path": "assets/narration.vtt"
+          }
+        ],
+        "target_frame_count": 900,
         "rights_digest": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
       },
-      "plan_sha256": "f3b1851b41177ea1160435bebe86d75cbcf12b00a01e056a41049117f5f8517c",
-      "preimage": "narralens-history-restore-plan-v1\n{\"assets\":[\"assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4\"],\"clips\":[{\"changed\":false,\"clip_id\":\"narration\",\"current_overrides_sha256\":null,\"current_source_end_frame_exclusive\":900,\"current_source_ref\":\"narration.wav\",\"current_source_start_frame\":0,\"end_frame_exclusive\":900,\"kind\":\"sound\",\"start_frame\":0,\"target_overrides_sha256\":null,\"target_source_end_frame_exclusive\":900,\"target_source_ref\":\"narration.wav\",\"target_source_start_frame\":0,\"track_id\":\"track_1\"},{\"changed\":true,\"clip_id\":\"shot-001\",\"current_overrides_sha256\":null,\"current_source_end_frame_exclusive\":300,\"current_source_ref\":\"assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4\",\"current_source_start_frame\":0,\"end_frame_exclusive\":300,\"kind\":\"visual\",\"start_frame\":0,\"target_overrides_sha256\":null,\"target_source_end_frame_exclusive\":300,\"target_source_ref\":\"scenes/shot-001.html\",\"target_source_start_frame\":0,\"track_id\":\"track_0\"}],\"consumers\":[{\"action\":\"preserve\",\"id\":\"narration\",\"kind\":\"narration\"},{\"action\":\"replace\",\"id\":\"shot-001\",\"kind\":\"visual\"}],\"current_revision\":2,\"current_snapshot_id\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"current_source_digest\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"entry_root\":\"film.html\",\"format\":\"narralens.history-restore-plan@1.0\",\"project_id\":\"of_d1-30s_0123456789abcdef\",\"required_locks\":[{\"end_frame_exclusive\":300,\"lock_type\":\"visual\",\"scope\":\"shot\",\"start_frame\":0,\"target_id\":\"shot-001\"}],\"rights_digest\":\"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff\",\"roots\":[\"assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4\",\"film.html\",\"narration.wav\",\"scenes/shot-001.html\"],\"subtitles\":[{\"changed\":false,\"path\":\"assets/narration.vtt\",\"subtitle_id\":\"narration\"}],\"target_film_sha256\":\"eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee\",\"target_snapshot_id\":\"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc\",\"target_source_digest\":\"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd\"}"
+      "plan_sha256": "ece1c93100d12a509c2ed41c4e6c0e7038843e39a24decff34ee7003c3d73c6a",
+      "preimage": "narralens-history-restore-plan-v1\n{\"affected_consumers\":[{\"action\":\"preserve\",\"id\":\"narration\",\"kind\":\"narration\"},{\"action\":\"replace\",\"id\":\"shot-001\",\"kind\":\"visual\"}],\"affected_ranges\":[{\"clip_id\":\"shot-001\",\"end_frame_exclusive\":300,\"start_frame\":0},{\"clip_id\":\"shot-002\",\"end_frame_exclusive\":600,\"start_frame\":300}],\"current_projection_sha256\":\"1111111111111111111111111111111111111111111111111111111111111111\",\"current_snapshot_id\":\"4444444444444444444444444444444444444444444444444444444444444444\",\"format\":\"narralens.history-restore-plan@1.0\",\"project_id\":\"of_d1-30s_0123456789abcdef\",\"required_locks\":[{\"end_frame_exclusive\":300,\"lock_type\":\"visual\",\"scope\":\"shot\",\"start_frame\":0,\"target_id\":\"shot-001\"}],\"rights_digest\":\"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff\",\"target_frame_count\":900,\"target_projection_sha256\":\"2222222222222222222222222222222222222222222222222222222222222222\",\"target_roots\":[\"film.html\",\"narration.wav\",\"scenes/shot-001.html\"],\"target_snapshot_id\":\"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc\",\"target_subtitles\":[{\"path\":\"assets/narration.vtt\",\"subtitle_id\":\"narration\"}]}"
     },
     {
-      "name": "mutated-assets",
+      "name": "mutated-current-projection",
       "plan": {
         "format": "narralens.history-restore-plan@1.0",
         "project_id": "of_d1-30s_0123456789abcdef",
-        "current_snapshot_id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-        "current_revision": 2,
-        "current_source_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
         "target_snapshot_id": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
-        "target_source_digest": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
-        "target_film_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
-        "entry_root": "film.html",
-        "roots": [
-          "assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4",
-          "film.html",
-          "narration.wav"
-        ],
-        "assets": [],
-        "subtitles": [
-          {
-            "subtitle_id": "narration",
-            "path": "assets/narration.vtt",
-            "changed": false
-          }
-        ],
-        "clips": [
+        "current_snapshot_id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "current_projection_sha256": "5555555555555555555555555555555555555555555555555555555555555555",
+        "target_projection_sha256": "2222222222222222222222222222222222222222222222222222222222222222",
+        "affected_ranges": [
           {
             "clip_id": "shot-001",
-            "track_id": "track_0",
-            "kind": "visual",
             "start_frame": 0,
-            "end_frame_exclusive": 300,
-            "current_source_ref": "assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4",
-            "target_source_ref": "scenes/shot-001.html",
-            "current_source_start_frame": 0,
-            "current_source_end_frame_exclusive": 300,
-            "target_source_start_frame": 0,
-            "target_source_end_frame_exclusive": 300,
-            "current_overrides_sha256": null,
-            "target_overrides_sha256": null,
-            "changed": true
+            "end_frame_exclusive": 300
           },
           {
-            "clip_id": "narration",
-            "track_id": "track_1",
-            "kind": "sound",
-            "start_frame": 0,
-            "end_frame_exclusive": 900,
-            "current_source_ref": "narration.wav",
-            "target_source_ref": "narration.wav",
-            "current_source_start_frame": 0,
-            "current_source_end_frame_exclusive": 900,
-            "target_source_start_frame": 0,
-            "target_source_end_frame_exclusive": 900,
-            "current_overrides_sha256": null,
-            "target_overrides_sha256": null,
-            "changed": false
+            "clip_id": "shot-002",
+            "start_frame": 300,
+            "end_frame_exclusive": 600
           }
         ],
-        "consumers": [
+        "affected_consumers": [
           {
             "kind": "visual",
             "id": "shot-001",
@@ -953,73 +339,45 @@
             "end_frame_exclusive": 300
           }
         ],
+        "target_roots": [
+          "film.html",
+          "narration.wav",
+          "scenes/shot-001.html"
+        ],
+        "target_subtitles": [
+          {
+            "subtitle_id": "narration",
+            "path": "assets/narration.vtt"
+          }
+        ],
+        "target_frame_count": 900,
         "rights_digest": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
       },
-      "plan_sha256": "4a92b43f8fcf066f10b795649844c5d83a1fb05c40d9adb2cc31232939088389",
-      "preimage": "narralens-history-restore-plan-v1\n{\"assets\":[],\"clips\":[{\"changed\":false,\"clip_id\":\"narration\",\"current_overrides_sha256\":null,\"current_source_end_frame_exclusive\":900,\"current_source_ref\":\"narration.wav\",\"current_source_start_frame\":0,\"end_frame_exclusive\":900,\"kind\":\"sound\",\"start_frame\":0,\"target_overrides_sha256\":null,\"target_source_end_frame_exclusive\":900,\"target_source_ref\":\"narration.wav\",\"target_source_start_frame\":0,\"track_id\":\"track_1\"},{\"changed\":true,\"clip_id\":\"shot-001\",\"current_overrides_sha256\":null,\"current_source_end_frame_exclusive\":300,\"current_source_ref\":\"assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4\",\"current_source_start_frame\":0,\"end_frame_exclusive\":300,\"kind\":\"visual\",\"start_frame\":0,\"target_overrides_sha256\":null,\"target_source_end_frame_exclusive\":300,\"target_source_ref\":\"scenes/shot-001.html\",\"target_source_start_frame\":0,\"track_id\":\"track_0\"}],\"consumers\":[{\"action\":\"preserve\",\"id\":\"narration\",\"kind\":\"narration\"},{\"action\":\"replace\",\"id\":\"shot-001\",\"kind\":\"visual\"}],\"current_revision\":2,\"current_snapshot_id\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"current_source_digest\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"entry_root\":\"film.html\",\"format\":\"narralens.history-restore-plan@1.0\",\"project_id\":\"of_d1-30s_0123456789abcdef\",\"required_locks\":[{\"end_frame_exclusive\":300,\"lock_type\":\"visual\",\"scope\":\"shot\",\"start_frame\":0,\"target_id\":\"shot-001\"}],\"rights_digest\":\"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff\",\"roots\":[\"assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4\",\"film.html\",\"narration.wav\"],\"subtitles\":[{\"changed\":false,\"path\":\"assets/narration.vtt\",\"subtitle_id\":\"narration\"}],\"target_film_sha256\":\"eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee\",\"target_snapshot_id\":\"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc\",\"target_source_digest\":\"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd\"}"
+      "plan_sha256": "e1e70cf31246a394f52f350f8cea874f6ac4b90478d1c8ef24221fa8d05df7af",
+      "preimage": "narralens-history-restore-plan-v1\n{\"affected_consumers\":[{\"action\":\"preserve\",\"id\":\"narration\",\"kind\":\"narration\"},{\"action\":\"replace\",\"id\":\"shot-001\",\"kind\":\"visual\"}],\"affected_ranges\":[{\"clip_id\":\"shot-001\",\"end_frame_exclusive\":300,\"start_frame\":0},{\"clip_id\":\"shot-002\",\"end_frame_exclusive\":600,\"start_frame\":300}],\"current_projection_sha256\":\"5555555555555555555555555555555555555555555555555555555555555555\",\"current_snapshot_id\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"format\":\"narralens.history-restore-plan@1.0\",\"project_id\":\"of_d1-30s_0123456789abcdef\",\"required_locks\":[{\"end_frame_exclusive\":300,\"lock_type\":\"visual\",\"scope\":\"shot\",\"start_frame\":0,\"target_id\":\"shot-001\"}],\"rights_digest\":\"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff\",\"target_frame_count\":900,\"target_projection_sha256\":\"2222222222222222222222222222222222222222222222222222222222222222\",\"target_roots\":[\"film.html\",\"narration.wav\",\"scenes/shot-001.html\"],\"target_snapshot_id\":\"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc\",\"target_subtitles\":[{\"path\":\"assets/narration.vtt\",\"subtitle_id\":\"narration\"}]}"
     },
     {
-      "name": "mutated-subtitles",
+      "name": "mutated-target-projection",
       "plan": {
         "format": "narralens.history-restore-plan@1.0",
         "project_id": "of_d1-30s_0123456789abcdef",
-        "current_snapshot_id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-        "current_revision": 2,
-        "current_source_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
         "target_snapshot_id": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
-        "target_source_digest": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
-        "target_film_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
-        "entry_root": "film.html",
-        "roots": [
-          "assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4",
-          "film.html",
-          "narration.wav"
-        ],
-        "assets": [
-          "assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4"
-        ],
-        "subtitles": [
-          {
-            "subtitle_id": "narration",
-            "path": "assets/other.vtt",
-            "changed": false
-          }
-        ],
-        "clips": [
+        "current_snapshot_id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "current_projection_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+        "target_projection_sha256": "6666666666666666666666666666666666666666666666666666666666666666",
+        "affected_ranges": [
           {
             "clip_id": "shot-001",
-            "track_id": "track_0",
-            "kind": "visual",
             "start_frame": 0,
-            "end_frame_exclusive": 300,
-            "current_source_ref": "assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4",
-            "target_source_ref": "scenes/shot-001.html",
-            "current_source_start_frame": 0,
-            "current_source_end_frame_exclusive": 300,
-            "target_source_start_frame": 0,
-            "target_source_end_frame_exclusive": 300,
-            "current_overrides_sha256": null,
-            "target_overrides_sha256": null,
-            "changed": true
+            "end_frame_exclusive": 300
           },
           {
-            "clip_id": "narration",
-            "track_id": "track_1",
-            "kind": "sound",
-            "start_frame": 0,
-            "end_frame_exclusive": 900,
-            "current_source_ref": "narration.wav",
-            "target_source_ref": "narration.wav",
-            "current_source_start_frame": 0,
-            "current_source_end_frame_exclusive": 900,
-            "target_source_start_frame": 0,
-            "target_source_end_frame_exclusive": 900,
-            "current_overrides_sha256": null,
-            "target_overrides_sha256": null,
-            "changed": false
+            "clip_id": "shot-002",
+            "start_frame": 300,
+            "end_frame_exclusive": 600
           }
         ],
-        "consumers": [
+        "affected_consumers": [
           {
             "kind": "visual",
             "id": "shot-001",
@@ -1040,73 +398,40 @@
             "end_frame_exclusive": 300
           }
         ],
+        "target_roots": [
+          "film.html",
+          "narration.wav",
+          "scenes/shot-001.html"
+        ],
+        "target_subtitles": [
+          {
+            "subtitle_id": "narration",
+            "path": "assets/narration.vtt"
+          }
+        ],
+        "target_frame_count": 900,
         "rights_digest": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
       },
-      "plan_sha256": "021da168dd4ab280f3eb65d6e27c646fbe2e6127aa2103c93618979fa15b5fa5",
-      "preimage": "narralens-history-restore-plan-v1\n{\"assets\":[\"assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4\"],\"clips\":[{\"changed\":false,\"clip_id\":\"narration\",\"current_overrides_sha256\":null,\"current_source_end_frame_exclusive\":900,\"current_source_ref\":\"narration.wav\",\"current_source_start_frame\":0,\"end_frame_exclusive\":900,\"kind\":\"sound\",\"start_frame\":0,\"target_overrides_sha256\":null,\"target_source_end_frame_exclusive\":900,\"target_source_ref\":\"narration.wav\",\"target_source_start_frame\":0,\"track_id\":\"track_1\"},{\"changed\":true,\"clip_id\":\"shot-001\",\"current_overrides_sha256\":null,\"current_source_end_frame_exclusive\":300,\"current_source_ref\":\"assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4\",\"current_source_start_frame\":0,\"end_frame_exclusive\":300,\"kind\":\"visual\",\"start_frame\":0,\"target_overrides_sha256\":null,\"target_source_end_frame_exclusive\":300,\"target_source_ref\":\"scenes/shot-001.html\",\"target_source_start_frame\":0,\"track_id\":\"track_0\"}],\"consumers\":[{\"action\":\"preserve\",\"id\":\"narration\",\"kind\":\"narration\"},{\"action\":\"replace\",\"id\":\"shot-001\",\"kind\":\"visual\"}],\"current_revision\":2,\"current_snapshot_id\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"current_source_digest\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"entry_root\":\"film.html\",\"format\":\"narralens.history-restore-plan@1.0\",\"project_id\":\"of_d1-30s_0123456789abcdef\",\"required_locks\":[{\"end_frame_exclusive\":300,\"lock_type\":\"visual\",\"scope\":\"shot\",\"start_frame\":0,\"target_id\":\"shot-001\"}],\"rights_digest\":\"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff\",\"roots\":[\"assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4\",\"film.html\",\"narration.wav\"],\"subtitles\":[{\"changed\":false,\"path\":\"assets/other.vtt\",\"subtitle_id\":\"narration\"}],\"target_film_sha256\":\"eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee\",\"target_snapshot_id\":\"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc\",\"target_source_digest\":\"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd\"}"
+      "plan_sha256": "c5d94fb67bcf9082e8780123b62f2e0e0249e806823fe046cfc8f13fe7f4ffc5",
+      "preimage": "narralens-history-restore-plan-v1\n{\"affected_consumers\":[{\"action\":\"preserve\",\"id\":\"narration\",\"kind\":\"narration\"},{\"action\":\"replace\",\"id\":\"shot-001\",\"kind\":\"visual\"}],\"affected_ranges\":[{\"clip_id\":\"shot-001\",\"end_frame_exclusive\":300,\"start_frame\":0},{\"clip_id\":\"shot-002\",\"end_frame_exclusive\":600,\"start_frame\":300}],\"current_projection_sha256\":\"1111111111111111111111111111111111111111111111111111111111111111\",\"current_snapshot_id\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"format\":\"narralens.history-restore-plan@1.0\",\"project_id\":\"of_d1-30s_0123456789abcdef\",\"required_locks\":[{\"end_frame_exclusive\":300,\"lock_type\":\"visual\",\"scope\":\"shot\",\"start_frame\":0,\"target_id\":\"shot-001\"}],\"rights_digest\":\"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff\",\"target_frame_count\":900,\"target_projection_sha256\":\"6666666666666666666666666666666666666666666666666666666666666666\",\"target_roots\":[\"film.html\",\"narration.wav\",\"scenes/shot-001.html\"],\"target_snapshot_id\":\"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc\",\"target_subtitles\":[{\"path\":\"assets/narration.vtt\",\"subtitle_id\":\"narration\"}]}"
     },
     {
-      "name": "mutated-clips",
+      "name": "mutated-affected-ranges",
       "plan": {
         "format": "narralens.history-restore-plan@1.0",
         "project_id": "of_d1-30s_0123456789abcdef",
-        "current_snapshot_id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-        "current_revision": 2,
-        "current_source_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
         "target_snapshot_id": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
-        "target_source_digest": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
-        "target_film_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
-        "entry_root": "film.html",
-        "roots": [
-          "assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4",
-          "film.html",
-          "narration.wav"
-        ],
-        "assets": [
-          "assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4"
-        ],
-        "subtitles": [
-          {
-            "subtitle_id": "narration",
-            "path": "assets/narration.vtt",
-            "changed": false
-          }
-        ],
-        "clips": [
+        "current_snapshot_id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "current_projection_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+        "target_projection_sha256": "2222222222222222222222222222222222222222222222222222222222222222",
+        "affected_ranges": [
           {
             "clip_id": "shot-001",
-            "track_id": "track_0",
-            "kind": "visual",
             "start_frame": 0,
-            "end_frame_exclusive": 300,
-            "current_source_ref": "assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4",
-            "target_source_ref": "scenes/shot-001.html",
-            "current_source_start_frame": 0,
-            "current_source_end_frame_exclusive": 300,
-            "target_source_start_frame": 0,
-            "target_source_end_frame_exclusive": 300,
-            "current_overrides_sha256": null,
-            "target_overrides_sha256": null,
-            "changed": false
-          },
-          {
-            "clip_id": "narration",
-            "track_id": "track_1",
-            "kind": "sound",
-            "start_frame": 0,
-            "end_frame_exclusive": 900,
-            "current_source_ref": "narration.wav",
-            "target_source_ref": "narration.wav",
-            "current_source_start_frame": 0,
-            "current_source_end_frame_exclusive": 900,
-            "target_source_start_frame": 0,
-            "target_source_end_frame_exclusive": 900,
-            "current_overrides_sha256": null,
-            "target_overrides_sha256": null,
-            "changed": false
+            "end_frame_exclusive": 299
           }
         ],
-        "consumers": [
+        "affected_consumers": [
           {
             "kind": "visual",
             "id": "shot-001",
@@ -1127,73 +452,45 @@
             "end_frame_exclusive": 300
           }
         ],
+        "target_roots": [
+          "film.html",
+          "narration.wav",
+          "scenes/shot-001.html"
+        ],
+        "target_subtitles": [
+          {
+            "subtitle_id": "narration",
+            "path": "assets/narration.vtt"
+          }
+        ],
+        "target_frame_count": 900,
         "rights_digest": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
       },
-      "plan_sha256": "175f384859bef5a94a3c8c9e150682a645adf80e642aa3fd6bad573c49385510",
-      "preimage": "narralens-history-restore-plan-v1\n{\"assets\":[\"assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4\"],\"clips\":[{\"changed\":false,\"clip_id\":\"narration\",\"current_overrides_sha256\":null,\"current_source_end_frame_exclusive\":900,\"current_source_ref\":\"narration.wav\",\"current_source_start_frame\":0,\"end_frame_exclusive\":900,\"kind\":\"sound\",\"start_frame\":0,\"target_overrides_sha256\":null,\"target_source_end_frame_exclusive\":900,\"target_source_ref\":\"narration.wav\",\"target_source_start_frame\":0,\"track_id\":\"track_1\"},{\"changed\":false,\"clip_id\":\"shot-001\",\"current_overrides_sha256\":null,\"current_source_end_frame_exclusive\":300,\"current_source_ref\":\"assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4\",\"current_source_start_frame\":0,\"end_frame_exclusive\":300,\"kind\":\"visual\",\"start_frame\":0,\"target_overrides_sha256\":null,\"target_source_end_frame_exclusive\":300,\"target_source_ref\":\"scenes/shot-001.html\",\"target_source_start_frame\":0,\"track_id\":\"track_0\"}],\"consumers\":[{\"action\":\"preserve\",\"id\":\"narration\",\"kind\":\"narration\"},{\"action\":\"replace\",\"id\":\"shot-001\",\"kind\":\"visual\"}],\"current_revision\":2,\"current_snapshot_id\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"current_source_digest\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"entry_root\":\"film.html\",\"format\":\"narralens.history-restore-plan@1.0\",\"project_id\":\"of_d1-30s_0123456789abcdef\",\"required_locks\":[{\"end_frame_exclusive\":300,\"lock_type\":\"visual\",\"scope\":\"shot\",\"start_frame\":0,\"target_id\":\"shot-001\"}],\"rights_digest\":\"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff\",\"roots\":[\"assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4\",\"film.html\",\"narration.wav\"],\"subtitles\":[{\"changed\":false,\"path\":\"assets/narration.vtt\",\"subtitle_id\":\"narration\"}],\"target_film_sha256\":\"eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee\",\"target_snapshot_id\":\"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc\",\"target_source_digest\":\"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd\"}"
+      "plan_sha256": "01c2425ac308776afccbe5cff9d7b23a10da157ee845701b52677e49b96d428c",
+      "preimage": "narralens-history-restore-plan-v1\n{\"affected_consumers\":[{\"action\":\"preserve\",\"id\":\"narration\",\"kind\":\"narration\"},{\"action\":\"replace\",\"id\":\"shot-001\",\"kind\":\"visual\"}],\"affected_ranges\":[{\"clip_id\":\"shot-001\",\"end_frame_exclusive\":299,\"start_frame\":0}],\"current_projection_sha256\":\"1111111111111111111111111111111111111111111111111111111111111111\",\"current_snapshot_id\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"format\":\"narralens.history-restore-plan@1.0\",\"project_id\":\"of_d1-30s_0123456789abcdef\",\"required_locks\":[{\"end_frame_exclusive\":300,\"lock_type\":\"visual\",\"scope\":\"shot\",\"start_frame\":0,\"target_id\":\"shot-001\"}],\"rights_digest\":\"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff\",\"target_frame_count\":900,\"target_projection_sha256\":\"2222222222222222222222222222222222222222222222222222222222222222\",\"target_roots\":[\"film.html\",\"narration.wav\",\"scenes/shot-001.html\"],\"target_snapshot_id\":\"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc\",\"target_subtitles\":[{\"path\":\"assets/narration.vtt\",\"subtitle_id\":\"narration\"}]}"
     },
     {
-      "name": "mutated-consumers",
+      "name": "mutated-affected-consumers",
       "plan": {
         "format": "narralens.history-restore-plan@1.0",
         "project_id": "of_d1-30s_0123456789abcdef",
-        "current_snapshot_id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-        "current_revision": 2,
-        "current_source_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
         "target_snapshot_id": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
-        "target_source_digest": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
-        "target_film_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
-        "entry_root": "film.html",
-        "roots": [
-          "assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4",
-          "film.html",
-          "narration.wav"
-        ],
-        "assets": [
-          "assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4"
-        ],
-        "subtitles": [
-          {
-            "subtitle_id": "narration",
-            "path": "assets/narration.vtt",
-            "changed": false
-          }
-        ],
-        "clips": [
+        "current_snapshot_id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "current_projection_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+        "target_projection_sha256": "2222222222222222222222222222222222222222222222222222222222222222",
+        "affected_ranges": [
           {
             "clip_id": "shot-001",
-            "track_id": "track_0",
-            "kind": "visual",
             "start_frame": 0,
-            "end_frame_exclusive": 300,
-            "current_source_ref": "assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4",
-            "target_source_ref": "scenes/shot-001.html",
-            "current_source_start_frame": 0,
-            "current_source_end_frame_exclusive": 300,
-            "target_source_start_frame": 0,
-            "target_source_end_frame_exclusive": 300,
-            "current_overrides_sha256": null,
-            "target_overrides_sha256": null,
-            "changed": true
+            "end_frame_exclusive": 300
           },
           {
-            "clip_id": "narration",
-            "track_id": "track_1",
-            "kind": "sound",
-            "start_frame": 0,
-            "end_frame_exclusive": 900,
-            "current_source_ref": "narration.wav",
-            "target_source_ref": "narration.wav",
-            "current_source_start_frame": 0,
-            "current_source_end_frame_exclusive": 900,
-            "target_source_start_frame": 0,
-            "target_source_end_frame_exclusive": 900,
-            "current_overrides_sha256": null,
-            "target_overrides_sha256": null,
-            "changed": false
+            "clip_id": "shot-002",
+            "start_frame": 300,
+            "end_frame_exclusive": 600
           }
         ],
-        "consumers": [
+        "affected_consumers": [
           {
             "kind": "visual",
             "id": "shot-001",
@@ -1209,73 +506,45 @@
             "end_frame_exclusive": 300
           }
         ],
+        "target_roots": [
+          "film.html",
+          "narration.wav",
+          "scenes/shot-001.html"
+        ],
+        "target_subtitles": [
+          {
+            "subtitle_id": "narration",
+            "path": "assets/narration.vtt"
+          }
+        ],
+        "target_frame_count": 900,
         "rights_digest": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
       },
-      "plan_sha256": "8298f378de23c78feed452c4120b04e2b8e976693c8a5ed886c150fb9c535fab",
-      "preimage": "narralens-history-restore-plan-v1\n{\"assets\":[\"assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4\"],\"clips\":[{\"changed\":false,\"clip_id\":\"narration\",\"current_overrides_sha256\":null,\"current_source_end_frame_exclusive\":900,\"current_source_ref\":\"narration.wav\",\"current_source_start_frame\":0,\"end_frame_exclusive\":900,\"kind\":\"sound\",\"start_frame\":0,\"target_overrides_sha256\":null,\"target_source_end_frame_exclusive\":900,\"target_source_ref\":\"narration.wav\",\"target_source_start_frame\":0,\"track_id\":\"track_1\"},{\"changed\":true,\"clip_id\":\"shot-001\",\"current_overrides_sha256\":null,\"current_source_end_frame_exclusive\":300,\"current_source_ref\":\"assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4\",\"current_source_start_frame\":0,\"end_frame_exclusive\":300,\"kind\":\"visual\",\"start_frame\":0,\"target_overrides_sha256\":null,\"target_source_end_frame_exclusive\":300,\"target_source_ref\":\"scenes/shot-001.html\",\"target_source_start_frame\":0,\"track_id\":\"track_0\"}],\"consumers\":[{\"action\":\"preserve\",\"id\":\"shot-001\",\"kind\":\"visual\"}],\"current_revision\":2,\"current_snapshot_id\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"current_source_digest\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"entry_root\":\"film.html\",\"format\":\"narralens.history-restore-plan@1.0\",\"project_id\":\"of_d1-30s_0123456789abcdef\",\"required_locks\":[{\"end_frame_exclusive\":300,\"lock_type\":\"visual\",\"scope\":\"shot\",\"start_frame\":0,\"target_id\":\"shot-001\"}],\"rights_digest\":\"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff\",\"roots\":[\"assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4\",\"film.html\",\"narration.wav\"],\"subtitles\":[{\"changed\":false,\"path\":\"assets/narration.vtt\",\"subtitle_id\":\"narration\"}],\"target_film_sha256\":\"eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee\",\"target_snapshot_id\":\"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc\",\"target_source_digest\":\"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd\"}"
+      "plan_sha256": "f183f58d22a2ca79e8713268c1ac564108f337979a914dd004a06a39478198d4",
+      "preimage": "narralens-history-restore-plan-v1\n{\"affected_consumers\":[{\"action\":\"preserve\",\"id\":\"shot-001\",\"kind\":\"visual\"}],\"affected_ranges\":[{\"clip_id\":\"shot-001\",\"end_frame_exclusive\":300,\"start_frame\":0},{\"clip_id\":\"shot-002\",\"end_frame_exclusive\":600,\"start_frame\":300}],\"current_projection_sha256\":\"1111111111111111111111111111111111111111111111111111111111111111\",\"current_snapshot_id\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"format\":\"narralens.history-restore-plan@1.0\",\"project_id\":\"of_d1-30s_0123456789abcdef\",\"required_locks\":[{\"end_frame_exclusive\":300,\"lock_type\":\"visual\",\"scope\":\"shot\",\"start_frame\":0,\"target_id\":\"shot-001\"}],\"rights_digest\":\"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff\",\"target_frame_count\":900,\"target_projection_sha256\":\"2222222222222222222222222222222222222222222222222222222222222222\",\"target_roots\":[\"film.html\",\"narration.wav\",\"scenes/shot-001.html\"],\"target_snapshot_id\":\"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc\",\"target_subtitles\":[{\"path\":\"assets/narration.vtt\",\"subtitle_id\":\"narration\"}]}"
     },
     {
       "name": "mutated-required-locks",
       "plan": {
         "format": "narralens.history-restore-plan@1.0",
         "project_id": "of_d1-30s_0123456789abcdef",
-        "current_snapshot_id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-        "current_revision": 2,
-        "current_source_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
         "target_snapshot_id": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
-        "target_source_digest": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
-        "target_film_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
-        "entry_root": "film.html",
-        "roots": [
-          "assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4",
-          "film.html",
-          "narration.wav"
-        ],
-        "assets": [
-          "assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4"
-        ],
-        "subtitles": [
-          {
-            "subtitle_id": "narration",
-            "path": "assets/narration.vtt",
-            "changed": false
-          }
-        ],
-        "clips": [
+        "current_snapshot_id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "current_projection_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+        "target_projection_sha256": "2222222222222222222222222222222222222222222222222222222222222222",
+        "affected_ranges": [
           {
             "clip_id": "shot-001",
-            "track_id": "track_0",
-            "kind": "visual",
             "start_frame": 0,
-            "end_frame_exclusive": 300,
-            "current_source_ref": "assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4",
-            "target_source_ref": "scenes/shot-001.html",
-            "current_source_start_frame": 0,
-            "current_source_end_frame_exclusive": 300,
-            "target_source_start_frame": 0,
-            "target_source_end_frame_exclusive": 300,
-            "current_overrides_sha256": null,
-            "target_overrides_sha256": null,
-            "changed": true
+            "end_frame_exclusive": 300
           },
           {
-            "clip_id": "narration",
-            "track_id": "track_1",
-            "kind": "sound",
-            "start_frame": 0,
-            "end_frame_exclusive": 900,
-            "current_source_ref": "narration.wav",
-            "target_source_ref": "narration.wav",
-            "current_source_start_frame": 0,
-            "current_source_end_frame_exclusive": 900,
-            "target_source_start_frame": 0,
-            "target_source_end_frame_exclusive": 900,
-            "current_overrides_sha256": null,
-            "target_overrides_sha256": null,
-            "changed": false
+            "clip_id": "shot-002",
+            "start_frame": 300,
+            "end_frame_exclusive": 600
           }
         ],
-        "consumers": [
+        "affected_consumers": [
           {
             "kind": "visual",
             "id": "shot-001",
@@ -1287,74 +556,232 @@
             "action": "preserve"
           }
         ],
-        "required_locks": [],
+        "required_locks": [
+          {
+            "lock_type": "visual",
+            "scope": "project",
+            "target_id": "",
+            "start_frame": 0,
+            "end_frame_exclusive": 900
+          }
+        ],
+        "target_roots": [
+          "film.html",
+          "narration.wav",
+          "scenes/shot-001.html"
+        ],
+        "target_subtitles": [
+          {
+            "subtitle_id": "narration",
+            "path": "assets/narration.vtt"
+          }
+        ],
+        "target_frame_count": 900,
         "rights_digest": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
       },
-      "plan_sha256": "dd7bb40dfadb0c6f5536fc7b08af67e069722f477ec34a9a1480b85b418ee3db",
-      "preimage": "narralens-history-restore-plan-v1\n{\"assets\":[\"assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4\"],\"clips\":[{\"changed\":false,\"clip_id\":\"narration\",\"current_overrides_sha256\":null,\"current_source_end_frame_exclusive\":900,\"current_source_ref\":\"narration.wav\",\"current_source_start_frame\":0,\"end_frame_exclusive\":900,\"kind\":\"sound\",\"start_frame\":0,\"target_overrides_sha256\":null,\"target_source_end_frame_exclusive\":900,\"target_source_ref\":\"narration.wav\",\"target_source_start_frame\":0,\"track_id\":\"track_1\"},{\"changed\":true,\"clip_id\":\"shot-001\",\"current_overrides_sha256\":null,\"current_source_end_frame_exclusive\":300,\"current_source_ref\":\"assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4\",\"current_source_start_frame\":0,\"end_frame_exclusive\":300,\"kind\":\"visual\",\"start_frame\":0,\"target_overrides_sha256\":null,\"target_source_end_frame_exclusive\":300,\"target_source_ref\":\"scenes/shot-001.html\",\"target_source_start_frame\":0,\"track_id\":\"track_0\"}],\"consumers\":[{\"action\":\"preserve\",\"id\":\"narration\",\"kind\":\"narration\"},{\"action\":\"replace\",\"id\":\"shot-001\",\"kind\":\"visual\"}],\"current_revision\":2,\"current_snapshot_id\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"current_source_digest\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"entry_root\":\"film.html\",\"format\":\"narralens.history-restore-plan@1.0\",\"project_id\":\"of_d1-30s_0123456789abcdef\",\"required_locks\":[],\"rights_digest\":\"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff\",\"roots\":[\"assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4\",\"film.html\",\"narration.wav\"],\"subtitles\":[{\"changed\":false,\"path\":\"assets/narration.vtt\",\"subtitle_id\":\"narration\"}],\"target_film_sha256\":\"eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee\",\"target_snapshot_id\":\"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc\",\"target_source_digest\":\"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd\"}"
+      "plan_sha256": "64a3e4453281ca36a7093d7c74924cf78eeed0de3eadc47c325f9a128dc09305",
+      "preimage": "narralens-history-restore-plan-v1\n{\"affected_consumers\":[{\"action\":\"preserve\",\"id\":\"narration\",\"kind\":\"narration\"},{\"action\":\"replace\",\"id\":\"shot-001\",\"kind\":\"visual\"}],\"affected_ranges\":[{\"clip_id\":\"shot-001\",\"end_frame_exclusive\":300,\"start_frame\":0},{\"clip_id\":\"shot-002\",\"end_frame_exclusive\":600,\"start_frame\":300}],\"current_projection_sha256\":\"1111111111111111111111111111111111111111111111111111111111111111\",\"current_snapshot_id\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"format\":\"narralens.history-restore-plan@1.0\",\"project_id\":\"of_d1-30s_0123456789abcdef\",\"required_locks\":[{\"end_frame_exclusive\":900,\"lock_type\":\"visual\",\"scope\":\"project\",\"start_frame\":0,\"target_id\":\"\"}],\"rights_digest\":\"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff\",\"target_frame_count\":900,\"target_projection_sha256\":\"2222222222222222222222222222222222222222222222222222222222222222\",\"target_roots\":[\"film.html\",\"narration.wav\",\"scenes/shot-001.html\"],\"target_snapshot_id\":\"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc\",\"target_subtitles\":[{\"path\":\"assets/narration.vtt\",\"subtitle_id\":\"narration\"}]}"
+    },
+    {
+      "name": "mutated-target-roots",
+      "plan": {
+        "format": "narralens.history-restore-plan@1.0",
+        "project_id": "of_d1-30s_0123456789abcdef",
+        "target_snapshot_id": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "current_snapshot_id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "current_projection_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+        "target_projection_sha256": "2222222222222222222222222222222222222222222222222222222222222222",
+        "affected_ranges": [
+          {
+            "clip_id": "shot-001",
+            "start_frame": 0,
+            "end_frame_exclusive": 300
+          },
+          {
+            "clip_id": "shot-002",
+            "start_frame": 300,
+            "end_frame_exclusive": 600
+          }
+        ],
+        "affected_consumers": [
+          {
+            "kind": "visual",
+            "id": "shot-001",
+            "action": "replace"
+          },
+          {
+            "kind": "narration",
+            "id": "narration",
+            "action": "preserve"
+          }
+        ],
+        "required_locks": [
+          {
+            "lock_type": "visual",
+            "scope": "shot",
+            "target_id": "shot-001",
+            "start_frame": 0,
+            "end_frame_exclusive": 300
+          }
+        ],
+        "target_roots": [
+          "film.html",
+          "narration.wav",
+          "scenes/shot-001.html",
+          "settings.json"
+        ],
+        "target_subtitles": [
+          {
+            "subtitle_id": "narration",
+            "path": "assets/narration.vtt"
+          }
+        ],
+        "target_frame_count": 900,
+        "rights_digest": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+      },
+      "plan_sha256": "14839220b26037ec20f8700ac8b5729c7ad37064b2b932d4cf6bb1bc14f08499",
+      "preimage": "narralens-history-restore-plan-v1\n{\"affected_consumers\":[{\"action\":\"preserve\",\"id\":\"narration\",\"kind\":\"narration\"},{\"action\":\"replace\",\"id\":\"shot-001\",\"kind\":\"visual\"}],\"affected_ranges\":[{\"clip_id\":\"shot-001\",\"end_frame_exclusive\":300,\"start_frame\":0},{\"clip_id\":\"shot-002\",\"end_frame_exclusive\":600,\"start_frame\":300}],\"current_projection_sha256\":\"1111111111111111111111111111111111111111111111111111111111111111\",\"current_snapshot_id\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"format\":\"narralens.history-restore-plan@1.0\",\"project_id\":\"of_d1-30s_0123456789abcdef\",\"required_locks\":[{\"end_frame_exclusive\":300,\"lock_type\":\"visual\",\"scope\":\"shot\",\"start_frame\":0,\"target_id\":\"shot-001\"}],\"rights_digest\":\"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff\",\"target_frame_count\":900,\"target_projection_sha256\":\"2222222222222222222222222222222222222222222222222222222222222222\",\"target_roots\":[\"film.html\",\"narration.wav\",\"scenes/shot-001.html\",\"settings.json\"],\"target_snapshot_id\":\"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc\",\"target_subtitles\":[{\"path\":\"assets/narration.vtt\",\"subtitle_id\":\"narration\"}]}"
+    },
+    {
+      "name": "mutated-target-subtitles",
+      "plan": {
+        "format": "narralens.history-restore-plan@1.0",
+        "project_id": "of_d1-30s_0123456789abcdef",
+        "target_snapshot_id": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "current_snapshot_id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "current_projection_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+        "target_projection_sha256": "2222222222222222222222222222222222222222222222222222222222222222",
+        "affected_ranges": [
+          {
+            "clip_id": "shot-001",
+            "start_frame": 0,
+            "end_frame_exclusive": 300
+          },
+          {
+            "clip_id": "shot-002",
+            "start_frame": 300,
+            "end_frame_exclusive": 600
+          }
+        ],
+        "affected_consumers": [
+          {
+            "kind": "visual",
+            "id": "shot-001",
+            "action": "replace"
+          },
+          {
+            "kind": "narration",
+            "id": "narration",
+            "action": "preserve"
+          }
+        ],
+        "required_locks": [
+          {
+            "lock_type": "visual",
+            "scope": "shot",
+            "target_id": "shot-001",
+            "start_frame": 0,
+            "end_frame_exclusive": 300
+          }
+        ],
+        "target_roots": [
+          "film.html",
+          "narration.wav",
+          "scenes/shot-001.html"
+        ],
+        "target_subtitles": [
+          {
+            "subtitle_id": "narration",
+            "path": "assets/other.vtt"
+          }
+        ],
+        "target_frame_count": 900,
+        "rights_digest": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+      },
+      "plan_sha256": "0930c2ad7e9ba2ee8f8f252251f304586cc414e60d269a060f4591602196809c",
+      "preimage": "narralens-history-restore-plan-v1\n{\"affected_consumers\":[{\"action\":\"preserve\",\"id\":\"narration\",\"kind\":\"narration\"},{\"action\":\"replace\",\"id\":\"shot-001\",\"kind\":\"visual\"}],\"affected_ranges\":[{\"clip_id\":\"shot-001\",\"end_frame_exclusive\":300,\"start_frame\":0},{\"clip_id\":\"shot-002\",\"end_frame_exclusive\":600,\"start_frame\":300}],\"current_projection_sha256\":\"1111111111111111111111111111111111111111111111111111111111111111\",\"current_snapshot_id\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"format\":\"narralens.history-restore-plan@1.0\",\"project_id\":\"of_d1-30s_0123456789abcdef\",\"required_locks\":[{\"end_frame_exclusive\":300,\"lock_type\":\"visual\",\"scope\":\"shot\",\"start_frame\":0,\"target_id\":\"shot-001\"}],\"rights_digest\":\"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff\",\"target_frame_count\":900,\"target_projection_sha256\":\"2222222222222222222222222222222222222222222222222222222222222222\",\"target_roots\":[\"film.html\",\"narration.wav\",\"scenes/shot-001.html\"],\"target_snapshot_id\":\"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc\",\"target_subtitles\":[{\"path\":\"assets/other.vtt\",\"subtitle_id\":\"narration\"}]}"
+    },
+    {
+      "name": "mutated-target-frame-count",
+      "plan": {
+        "format": "narralens.history-restore-plan@1.0",
+        "project_id": "of_d1-30s_0123456789abcdef",
+        "target_snapshot_id": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "current_snapshot_id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "current_projection_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+        "target_projection_sha256": "2222222222222222222222222222222222222222222222222222222222222222",
+        "affected_ranges": [
+          {
+            "clip_id": "shot-001",
+            "start_frame": 0,
+            "end_frame_exclusive": 300
+          },
+          {
+            "clip_id": "shot-002",
+            "start_frame": 300,
+            "end_frame_exclusive": 600
+          }
+        ],
+        "affected_consumers": [
+          {
+            "kind": "visual",
+            "id": "shot-001",
+            "action": "replace"
+          },
+          {
+            "kind": "narration",
+            "id": "narration",
+            "action": "preserve"
+          }
+        ],
+        "required_locks": [
+          {
+            "lock_type": "visual",
+            "scope": "shot",
+            "target_id": "shot-001",
+            "start_frame": 0,
+            "end_frame_exclusive": 300
+          }
+        ],
+        "target_roots": [
+          "film.html",
+          "narration.wav",
+          "scenes/shot-001.html"
+        ],
+        "target_subtitles": [
+          {
+            "subtitle_id": "narration",
+            "path": "assets/narration.vtt"
+          }
+        ],
+        "target_frame_count": 901,
+        "rights_digest": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+      },
+      "plan_sha256": "fa793dc10859b064398a9702ec5b9260bd229bdc7d0da2726dfdf395b5602413",
+      "preimage": "narralens-history-restore-plan-v1\n{\"affected_consumers\":[{\"action\":\"preserve\",\"id\":\"narration\",\"kind\":\"narration\"},{\"action\":\"replace\",\"id\":\"shot-001\",\"kind\":\"visual\"}],\"affected_ranges\":[{\"clip_id\":\"shot-001\",\"end_frame_exclusive\":300,\"start_frame\":0},{\"clip_id\":\"shot-002\",\"end_frame_exclusive\":600,\"start_frame\":300}],\"current_projection_sha256\":\"1111111111111111111111111111111111111111111111111111111111111111\",\"current_snapshot_id\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"format\":\"narralens.history-restore-plan@1.0\",\"project_id\":\"of_d1-30s_0123456789abcdef\",\"required_locks\":[{\"end_frame_exclusive\":300,\"lock_type\":\"visual\",\"scope\":\"shot\",\"start_frame\":0,\"target_id\":\"shot-001\"}],\"rights_digest\":\"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff\",\"target_frame_count\":901,\"target_projection_sha256\":\"2222222222222222222222222222222222222222222222222222222222222222\",\"target_roots\":[\"film.html\",\"narration.wav\",\"scenes/shot-001.html\"],\"target_snapshot_id\":\"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc\",\"target_subtitles\":[{\"path\":\"assets/narration.vtt\",\"subtitle_id\":\"narration\"}]}"
     },
     {
       "name": "mutated-rights-digest",
       "plan": {
         "format": "narralens.history-restore-plan@1.0",
         "project_id": "of_d1-30s_0123456789abcdef",
-        "current_snapshot_id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-        "current_revision": 2,
-        "current_source_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
         "target_snapshot_id": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
-        "target_source_digest": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
-        "target_film_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
-        "entry_root": "film.html",
-        "roots": [
-          "assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4",
-          "film.html",
-          "narration.wav"
-        ],
-        "assets": [
-          "assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4"
-        ],
-        "subtitles": [
-          {
-            "subtitle_id": "narration",
-            "path": "assets/narration.vtt",
-            "changed": false
-          }
-        ],
-        "clips": [
+        "current_snapshot_id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "current_projection_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+        "target_projection_sha256": "2222222222222222222222222222222222222222222222222222222222222222",
+        "affected_ranges": [
           {
             "clip_id": "shot-001",
-            "track_id": "track_0",
-            "kind": "visual",
             "start_frame": 0,
-            "end_frame_exclusive": 300,
-            "current_source_ref": "assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4",
-            "target_source_ref": "scenes/shot-001.html",
-            "current_source_start_frame": 0,
-            "current_source_end_frame_exclusive": 300,
-            "target_source_start_frame": 0,
-            "target_source_end_frame_exclusive": 300,
-            "current_overrides_sha256": null,
-            "target_overrides_sha256": null,
-            "changed": true
+            "end_frame_exclusive": 300
           },
           {
-            "clip_id": "narration",
-            "track_id": "track_1",
-            "kind": "sound",
-            "start_frame": 0,
-            "end_frame_exclusive": 900,
-            "current_source_ref": "narration.wav",
-            "target_source_ref": "narration.wav",
-            "current_source_start_frame": 0,
-            "current_source_end_frame_exclusive": 900,
-            "target_source_start_frame": 0,
-            "target_source_end_frame_exclusive": 900,
-            "current_overrides_sha256": null,
-            "target_overrides_sha256": null,
-            "changed": false
+            "clip_id": "shot-002",
+            "start_frame": 300,
+            "end_frame_exclusive": 600
           }
         ],
-        "consumers": [
+        "affected_consumers": [
           {
             "kind": "visual",
             "id": "shot-001",
@@ -1375,73 +802,45 @@
             "end_frame_exclusive": 300
           }
         ],
-        "rights_digest": "6666666666666666666666666666666666666666666666666666666666666666"
+        "target_roots": [
+          "film.html",
+          "narration.wav",
+          "scenes/shot-001.html"
+        ],
+        "target_subtitles": [
+          {
+            "subtitle_id": "narration",
+            "path": "assets/narration.vtt"
+          }
+        ],
+        "target_frame_count": 900,
+        "rights_digest": "7777777777777777777777777777777777777777777777777777777777777777"
       },
-      "plan_sha256": "c7a76eca2563595d09115fc3d717b88d35627095d95321a67b0cdaf6b4891094",
-      "preimage": "narralens-history-restore-plan-v1\n{\"assets\":[\"assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4\"],\"clips\":[{\"changed\":false,\"clip_id\":\"narration\",\"current_overrides_sha256\":null,\"current_source_end_frame_exclusive\":900,\"current_source_ref\":\"narration.wav\",\"current_source_start_frame\":0,\"end_frame_exclusive\":900,\"kind\":\"sound\",\"start_frame\":0,\"target_overrides_sha256\":null,\"target_source_end_frame_exclusive\":900,\"target_source_ref\":\"narration.wav\",\"target_source_start_frame\":0,\"track_id\":\"track_1\"},{\"changed\":true,\"clip_id\":\"shot-001\",\"current_overrides_sha256\":null,\"current_source_end_frame_exclusive\":300,\"current_source_ref\":\"assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4\",\"current_source_start_frame\":0,\"end_frame_exclusive\":300,\"kind\":\"visual\",\"start_frame\":0,\"target_overrides_sha256\":null,\"target_source_end_frame_exclusive\":300,\"target_source_ref\":\"scenes/shot-001.html\",\"target_source_start_frame\":0,\"track_id\":\"track_0\"}],\"consumers\":[{\"action\":\"preserve\",\"id\":\"narration\",\"kind\":\"narration\"},{\"action\":\"replace\",\"id\":\"shot-001\",\"kind\":\"visual\"}],\"current_revision\":2,\"current_snapshot_id\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"current_source_digest\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"entry_root\":\"film.html\",\"format\":\"narralens.history-restore-plan@1.0\",\"project_id\":\"of_d1-30s_0123456789abcdef\",\"required_locks\":[{\"end_frame_exclusive\":300,\"lock_type\":\"visual\",\"scope\":\"shot\",\"start_frame\":0,\"target_id\":\"shot-001\"}],\"rights_digest\":\"6666666666666666666666666666666666666666666666666666666666666666\",\"roots\":[\"assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4\",\"film.html\",\"narration.wav\"],\"subtitles\":[{\"changed\":false,\"path\":\"assets/narration.vtt\",\"subtitle_id\":\"narration\"}],\"target_film_sha256\":\"eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee\",\"target_snapshot_id\":\"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc\",\"target_source_digest\":\"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd\"}"
+      "plan_sha256": "62b3ce38457c2aeb8e2396f36ceb27dc9eb8f3ddf092b2199f71b053d02d39e7",
+      "preimage": "narralens-history-restore-plan-v1\n{\"affected_consumers\":[{\"action\":\"preserve\",\"id\":\"narration\",\"kind\":\"narration\"},{\"action\":\"replace\",\"id\":\"shot-001\",\"kind\":\"visual\"}],\"affected_ranges\":[{\"clip_id\":\"shot-001\",\"end_frame_exclusive\":300,\"start_frame\":0},{\"clip_id\":\"shot-002\",\"end_frame_exclusive\":600,\"start_frame\":300}],\"current_projection_sha256\":\"1111111111111111111111111111111111111111111111111111111111111111\",\"current_snapshot_id\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"format\":\"narralens.history-restore-plan@1.0\",\"project_id\":\"of_d1-30s_0123456789abcdef\",\"required_locks\":[{\"end_frame_exclusive\":300,\"lock_type\":\"visual\",\"scope\":\"shot\",\"start_frame\":0,\"target_id\":\"shot-001\"}],\"rights_digest\":\"7777777777777777777777777777777777777777777777777777777777777777\",\"target_frame_count\":900,\"target_projection_sha256\":\"2222222222222222222222222222222222222222222222222222222222222222\",\"target_roots\":[\"film.html\",\"narration.wav\",\"scenes/shot-001.html\"],\"target_snapshot_id\":\"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc\",\"target_subtitles\":[{\"path\":\"assets/narration.vtt\",\"subtitle_id\":\"narration\"}]}"
     },
     {
       "name": "reordered-arrays",
       "plan": {
         "format": "narralens.history-restore-plan@1.0",
         "project_id": "of_d1-30s_0123456789abcdef",
-        "current_snapshot_id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-        "current_revision": 2,
-        "current_source_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
         "target_snapshot_id": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
-        "target_source_digest": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
-        "target_film_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
-        "entry_root": "film.html",
-        "roots": [
-          "narration.wav",
-          "film.html",
-          "assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4"
-        ],
-        "assets": [
-          "assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4"
-        ],
-        "subtitles": [
+        "current_snapshot_id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "current_projection_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+        "target_projection_sha256": "2222222222222222222222222222222222222222222222222222222222222222",
+        "affected_ranges": [
           {
-            "subtitle_id": "narration",
-            "path": "assets/narration.vtt",
-            "changed": false
-          }
-        ],
-        "clips": [
-          {
-            "clip_id": "narration",
-            "track_id": "track_1",
-            "kind": "sound",
-            "start_frame": 0,
-            "end_frame_exclusive": 900,
-            "current_source_ref": "narration.wav",
-            "target_source_ref": "narration.wav",
-            "current_source_start_frame": 0,
-            "current_source_end_frame_exclusive": 900,
-            "target_source_start_frame": 0,
-            "target_source_end_frame_exclusive": 900,
-            "current_overrides_sha256": null,
-            "target_overrides_sha256": null,
-            "changed": false
+            "clip_id": "shot-002",
+            "start_frame": 300,
+            "end_frame_exclusive": 600
           },
           {
             "clip_id": "shot-001",
-            "track_id": "track_0",
-            "kind": "visual",
             "start_frame": 0,
-            "end_frame_exclusive": 300,
-            "current_source_ref": "assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4",
-            "target_source_ref": "scenes/shot-001.html",
-            "current_source_start_frame": 0,
-            "current_source_end_frame_exclusive": 300,
-            "target_source_start_frame": 0,
-            "target_source_end_frame_exclusive": 300,
-            "current_overrides_sha256": null,
-            "target_overrides_sha256": null,
-            "changed": true
+            "end_frame_exclusive": 300
           }
         ],
-        "consumers": [
+        "affected_consumers": [
           {
             "kind": "narration",
             "id": "narration",
@@ -1462,48 +861,40 @@
             "end_frame_exclusive": 300
           }
         ],
+        "target_roots": [
+          "scenes/shot-001.html",
+          "narration.wav",
+          "film.html"
+        ],
+        "target_subtitles": [
+          {
+            "subtitle_id": "narration",
+            "path": "assets/narration.vtt"
+          }
+        ],
+        "target_frame_count": 900,
         "rights_digest": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
       },
-      "plan_sha256": "d56472881777e7bff9b1b3a9f149090be8d8ab2521be592d723e54466c88fb75",
-      "preimage": "narralens-history-restore-plan-v1\n{\"assets\":[\"assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4\"],\"clips\":[{\"changed\":false,\"clip_id\":\"narration\",\"current_overrides_sha256\":null,\"current_source_end_frame_exclusive\":900,\"current_source_ref\":\"narration.wav\",\"current_source_start_frame\":0,\"end_frame_exclusive\":900,\"kind\":\"sound\",\"start_frame\":0,\"target_overrides_sha256\":null,\"target_source_end_frame_exclusive\":900,\"target_source_ref\":\"narration.wav\",\"target_source_start_frame\":0,\"track_id\":\"track_1\"},{\"changed\":true,\"clip_id\":\"shot-001\",\"current_overrides_sha256\":null,\"current_source_end_frame_exclusive\":300,\"current_source_ref\":\"assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4\",\"current_source_start_frame\":0,\"end_frame_exclusive\":300,\"kind\":\"visual\",\"start_frame\":0,\"target_overrides_sha256\":null,\"target_source_end_frame_exclusive\":300,\"target_source_ref\":\"scenes/shot-001.html\",\"target_source_start_frame\":0,\"track_id\":\"track_0\"}],\"consumers\":[{\"action\":\"preserve\",\"id\":\"narration\",\"kind\":\"narration\"},{\"action\":\"replace\",\"id\":\"shot-001\",\"kind\":\"visual\"}],\"current_revision\":2,\"current_snapshot_id\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"current_source_digest\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"entry_root\":\"film.html\",\"format\":\"narralens.history-restore-plan@1.0\",\"project_id\":\"of_d1-30s_0123456789abcdef\",\"required_locks\":[{\"end_frame_exclusive\":300,\"lock_type\":\"visual\",\"scope\":\"shot\",\"start_frame\":0,\"target_id\":\"shot-001\"}],\"rights_digest\":\"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff\",\"roots\":[\"assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4\",\"film.html\",\"narration.wav\"],\"subtitles\":[{\"changed\":false,\"path\":\"assets/narration.vtt\",\"subtitle_id\":\"narration\"}],\"target_film_sha256\":\"eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee\",\"target_snapshot_id\":\"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc\",\"target_source_digest\":\"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd\"}"
+      "plan_sha256": "7ced735ad54a81799de404467eb072b2578dbe2f91d2a24e603077ecf7abe3d3",
+      "preimage": "narralens-history-restore-plan-v1\n{\"affected_consumers\":[{\"action\":\"preserve\",\"id\":\"narration\",\"kind\":\"narration\"},{\"action\":\"replace\",\"id\":\"shot-001\",\"kind\":\"visual\"}],\"affected_ranges\":[{\"clip_id\":\"shot-001\",\"end_frame_exclusive\":300,\"start_frame\":0},{\"clip_id\":\"shot-002\",\"end_frame_exclusive\":600,\"start_frame\":300}],\"current_projection_sha256\":\"1111111111111111111111111111111111111111111111111111111111111111\",\"current_snapshot_id\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"format\":\"narralens.history-restore-plan@1.0\",\"project_id\":\"of_d1-30s_0123456789abcdef\",\"required_locks\":[{\"end_frame_exclusive\":300,\"lock_type\":\"visual\",\"scope\":\"shot\",\"start_frame\":0,\"target_id\":\"shot-001\"}],\"rights_digest\":\"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff\",\"target_frame_count\":900,\"target_projection_sha256\":\"2222222222222222222222222222222222222222222222222222222222222222\",\"target_roots\":[\"film.html\",\"narration.wav\",\"scenes/shot-001.html\"],\"target_snapshot_id\":\"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc\",\"target_subtitles\":[{\"path\":\"assets/narration.vtt\",\"subtitle_id\":\"narration\"}]}"
     },
     {
       "name": "builder",
       "plan": {
         "format": "narralens.history-restore-plan@1.0",
         "project_id": "of_d1-30s_0123456789abcdef",
-        "current_snapshot_id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-        "current_revision": 2,
-        "current_source_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
         "target_snapshot_id": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
-        "target_source_digest": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
-        "target_film_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
-        "entry_root": "film.html",
-        "roots": [
-          "film.html",
-          "scenes/shot-001.html"
-        ],
-        "assets": [],
-        "subtitles": [],
-        "clips": [
+        "current_snapshot_id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "current_projection_sha256": "e60610f99e5a23ae0adc1262e3d0c4da120f563e03859e43851f98c0767cd0c5",
+        "target_projection_sha256": "e92c7df1a0b219c07b2445967150fcbbd0dcd5472f8ff3d62106b78362bb4e8c",
+        "affected_ranges": [
           {
             "clip_id": "shot-001",
-            "track_id": "track_0",
-            "kind": "visual",
             "start_frame": 0,
-            "end_frame_exclusive": 300,
-            "current_source_ref": "assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4",
-            "target_source_ref": "scenes/shot-001.html",
-            "current_source_start_frame": 0,
-            "current_source_end_frame_exclusive": 300,
-            "target_source_start_frame": 0,
-            "target_source_end_frame_exclusive": 300,
-            "current_overrides_sha256": null,
-            "target_overrides_sha256": null,
-            "changed": true
+            "end_frame_exclusive": 300
           }
         ],
-        "consumers": [
+        "affected_consumers": [
           {
             "kind": "visual",
             "id": "shot-001",
@@ -1519,10 +910,16 @@
             "end_frame_exclusive": 300
           }
         ],
+        "target_roots": [
+          "film.html",
+          "scenes/shot-001.html"
+        ],
+        "target_subtitles": [],
+        "target_frame_count": 300,
         "rights_digest": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
       },
-      "plan_sha256": "61bfdee85bcff316d1e441c247b7d31216a3ab7a759cec311190b7a0a6dc67e4",
-      "preimage": "narralens-history-restore-plan-v1\n{\"assets\":[],\"clips\":[{\"changed\":true,\"clip_id\":\"shot-001\",\"current_overrides_sha256\":null,\"current_source_end_frame_exclusive\":300,\"current_source_ref\":\"assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4\",\"current_source_start_frame\":0,\"end_frame_exclusive\":300,\"kind\":\"visual\",\"start_frame\":0,\"target_overrides_sha256\":null,\"target_source_end_frame_exclusive\":300,\"target_source_ref\":\"scenes/shot-001.html\",\"target_source_start_frame\":0,\"track_id\":\"track_0\"}],\"consumers\":[{\"action\":\"replace\",\"id\":\"shot-001\",\"kind\":\"visual\"}],\"current_revision\":2,\"current_snapshot_id\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"current_source_digest\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"entry_root\":\"film.html\",\"format\":\"narralens.history-restore-plan@1.0\",\"project_id\":\"of_d1-30s_0123456789abcdef\",\"required_locks\":[{\"end_frame_exclusive\":300,\"lock_type\":\"visual\",\"scope\":\"shot\",\"start_frame\":0,\"target_id\":\"shot-001\"}],\"rights_digest\":\"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff\",\"roots\":[\"film.html\",\"scenes/shot-001.html\"],\"subtitles\":[],\"target_film_sha256\":\"eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee\",\"target_snapshot_id\":\"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc\",\"target_source_digest\":\"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd\"}"
+      "plan_sha256": "c79a52e2a3dc420ace1e979af323f77f632b7b9c36a14be36294eb29b1a766b4",
+      "preimage": "narralens-history-restore-plan-v1\n{\"affected_consumers\":[{\"action\":\"replace\",\"id\":\"shot-001\",\"kind\":\"visual\"}],\"affected_ranges\":[{\"clip_id\":\"shot-001\",\"end_frame_exclusive\":300,\"start_frame\":0}],\"current_projection_sha256\":\"e60610f99e5a23ae0adc1262e3d0c4da120f563e03859e43851f98c0767cd0c5\",\"current_snapshot_id\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"format\":\"narralens.history-restore-plan@1.0\",\"project_id\":\"of_d1-30s_0123456789abcdef\",\"required_locks\":[{\"end_frame_exclusive\":300,\"lock_type\":\"visual\",\"scope\":\"shot\",\"start_frame\":0,\"target_id\":\"shot-001\"}],\"rights_digest\":\"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff\",\"target_frame_count\":300,\"target_projection_sha256\":\"e92c7df1a0b219c07b2445967150fcbbd0dcd5472f8ff3d62106b78362bb4e8c\",\"target_roots\":[\"film.html\",\"scenes/shot-001.html\"],\"target_snapshot_id\":\"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc\",\"target_subtitles\":[]}"
     }
   ]
 }

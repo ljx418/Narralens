@@ -6,13 +6,13 @@ once, it is committed, and this program recomputes every vector's preimage and h
 the *specification* rather than from the TypeScript. The TypeScript proving it is
 deterministic is not the claim; a second implementation agreeing with the frozen bytes is.
 
-The rules, transcribed from `17_M4C_DEVELOPMENT_GATE.md` §3.3 and
-`docs/migration/WAVE2/ADR-W2.0-006-m4c-history-restore.md`:
+The rules, transcribed from `docs/migration/WAVE2/ADR-W2.0-006-m4c-history-restore.md`
+§D-03 and `17_M4C_DEVELOPMENT_GATE.md` §3.3:
 
   canonical JSON: object keys in UTF-8 byte order, arrays in the semantic order the
-  specification names (clip by target timeline start/clip_id, consumer by kind/id/action,
-  lock by lock_type/scope/target/range, roots and assets lexicographic, subtitles by
-  subtitle_id/path), integers only, no whitespace.
+  specification names (range by start/clip_id, consumer by kind/id/action, lock by
+  lock_type/scope/target/range, roots lexicographic, subtitles by subtitle_id/path),
+  integers only, no whitespace.
 
   hash domain: "narralens-history-restore-plan-v1\\n"
 
@@ -82,12 +82,11 @@ def compare_locks(left, right):
 def sort_plan(plan):
     """The canonical order of every array that enters the hash."""
     ordered = dict(plan)
-    ordered["roots"] = sorted(plan["roots"], key=by_bytes)
-    ordered["assets"] = sorted(plan["assets"], key=by_bytes)
-    ordered["subtitles"] = sorted(plan["subtitles"], key=functools.cmp_to_key(compare_subtitles))
-    ordered["clips"] = sorted(plan["clips"], key=functools.cmp_to_key(compare_ranges))
-    ordered["consumers"] = sorted(plan["consumers"], key=functools.cmp_to_key(compare_consumers))
+    ordered["affected_ranges"] = sorted(plan["affected_ranges"], key=functools.cmp_to_key(compare_ranges))
+    ordered["affected_consumers"] = sorted(plan["affected_consumers"], key=functools.cmp_to_key(compare_consumers))
     ordered["required_locks"] = sorted(plan["required_locks"], key=functools.cmp_to_key(compare_locks))
+    ordered["target_roots"] = sorted(plan["target_roots"], key=by_bytes)
+    ordered["target_subtitles"] = sorted(plan["target_subtitles"], key=functools.cmp_to_key(compare_subtitles))
     return ordered
 
 

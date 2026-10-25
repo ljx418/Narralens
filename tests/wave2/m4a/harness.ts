@@ -6,7 +6,6 @@ import { ProposalAdapter } from "../../../src/adapters/openmontage/proposal-adap
 import { ProposalComparisonAdapter } from "../../../src/adapters/openmontage/proposal-comparison-adapter.js";
 import { NarralensHost } from "../../../src/host/server.js";
 import type { AdoptionFaultBoundary } from "../../../src/host/adoption/adoption-coordinator.js";
-import type { HistoryFaultBoundary } from "../../../src/host/history/history-service.js";
 import { planDigest, VISUAL_TRACK_ID } from "../../../src/host/materialize/native-plan-builder.js";
 import type { MaterializationV1, NativePlanV1 } from "../../../src/contracts/wave2-types.js";
 import type { ActivatedProjectView } from "../../../src/host/projects/project-resolver.js";
@@ -55,7 +54,7 @@ export async function start(options: {
   readonly impactFault?: (point: string) => Promise<void> | void;
   readonly adoptionFault?: (boundary: AdoptionFaultBoundary) => Promise<void> | void;
   readonly adoptionPublishFault?: (boundary: PublishBoundary) => Promise<void> | void;
-  readonly historyFault?: (boundary: HistoryFaultBoundary) => Promise<void> | void;
+  readonly historyFault?: (boundary: string) => void;
   readonly historyPublishFault?: (boundary: PublishBoundary) => Promise<void> | void;
 } = {}): Promise<Started> {
   const base = await mkdtemp(join(tmpdir(), "narralens-m4a-"));
@@ -83,7 +82,7 @@ export async function startOn(base: string, options: {
   readonly impactFault?: (point: string) => Promise<void> | void;
   readonly adoptionFault?: (boundary: AdoptionFaultBoundary) => Promise<void> | void;
   readonly adoptionPublishFault?: (boundary: PublishBoundary) => Promise<void> | void;
-  readonly historyFault?: (boundary: HistoryFaultBoundary) => Promise<void> | void;
+  readonly historyFault?: (boundary: string) => void;
   readonly historyPublishFault?: (boundary: PublishBoundary) => Promise<void> | void;
 } = {}): Promise<Started> {
   process.env.NARRALENS_OPENFILM_VENDOR = REAL_UPSTREAM_PARENT;

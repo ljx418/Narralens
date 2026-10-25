@@ -50,6 +50,8 @@ export async function composeOpenFilmPort(input: {
   readonly vendorRoot: string;
   /** Bounded so a hung `git status` cannot hold startup open. */
   readonly gitStatusTimeoutMs?: number;
+  /** Test-only seam for M4C's fault matrix; production composition omits it. */
+  readonly fault?: (point: string) => void | Promise<void>;
 }): Promise<OpenFilmComposition> {
   const availability = await openFilmAvailability(input.vendorRoot, input.gitStatusTimeoutMs ?? 30_000);
   if (!availability.available) {
@@ -59,7 +61,8 @@ export async function composeOpenFilmPort(input: {
   // Loading is the last step and the only one that can execute anything, so it happens
   // only once the checkout has already been proven.
   const upstream = await createPinnedOpenFilmUpstream(input.vendorRoot);
-  const adapter = new OpenFilmEngineAdapter(upstream);
+  const adapter = new OpenFilmEngineAdapter(upstream,
+    input.fault === undefined ? {} : { fault: input.fault });
   input.registry.register("openfilm", adapter);
   return { installed: true, availability, vendor_root: availability.vendor_root,
     reason: availability.reason, registrar: adapter };

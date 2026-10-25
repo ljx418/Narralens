@@ -3,17 +3,20 @@ import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
   buildHistoryRestorePlan, computeHistoryRestorePlanHash, historyRestorePlanPreimage,
-  HISTORY_RESTORE_PLAN_DOMAIN, restoreDigestRoots, verifyHistoryRestorePlanHash,
-  type HistoryRestorePlanPreimage,
+  HISTORY_RESTORE_PLAN_DOMAIN, projectionDigest, restoreTargetIsEligible,
+  verifyHistoryRestorePlanHash, type HistoryRestorePlanPreimage,
 } from "../../../src/host/history/history-restore-plan.js";
 import type { EngineClip, EngineProjection, EngineSubtitle } from "../../../src/contracts/engine-types.js";
+import { LockService } from "../../../src/host/projects/lock-service.js";
+import { RevisionStore } from "../../../src/host/projects/revision-store.js";
 
 /**
- * M4C-05: the restore plan's canonical rules.
+ * M4C-05 and M4C-02: the restore plan's canonical rules and ADR D-04's lock model.
  *
- * The frozen vectors are the evidence; this file is what keeps the TypeScript honest
- * against them. A change to the canonical rules has to change the committed vector file
- * deliberately, and the Python implementation has to agree with it.
+ * The frozen vectors are the evidence for the canonical form; the lock cases are the
+ * evidence for the *classification*. Both are checked here, and the lock cases use the
+ * **real** `LockService`, so "the plan asks for the project scope" and "a project-scope
+ * lock actually blocks the write" are the same statement rather than two hopes.
  */
 
 interface Vector {
@@ -58,8 +61,7 @@ function projection(clips: readonly EngineClip[], subtitles: readonly EngineSubt
     engine: "openfilm", engine_upstream_sha: "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
     snapshot_id: sha("9"), project_revision: 2, control_revision: 0, source_digest: sha("9"),
     fps: { num: 30, den: 1 }, frame_count: frameCount, clips, tracks: [],
-    subtitles, asset_references: [],
-    editable_capabilities: { entries: {}, fps: { num: 30, den: 1 }, fps_verified: true },
+    subtitles, asset_references: [], editable_capabilities: { entries: {}, fps: { num: 30, den: 1 }, fps_verified: true },
     preview: { kind: "openfilm-studio", url: "/api/migration/v1/projects/of/preview" },
     problems: [],
   };
@@ -67,11 +69,16 @@ function projection(clips: readonly EngineClip[], subtitles: readonly EngineSubt
 
 const baseInput = {
   project_id: "of_d1-30s_0123456789abcdef",
-  current_snapshot_id: sha("a"), current_revision: 2, current_source_digest: sha("b"),
-  target_snapshot_id: sha("c"), target_source_digest: sha("d"), target_film_sha256: sha("e"),
+  current_snapshot_id: sha("a"), target_snapshot_id: sha("c"),
   target_roots: ["film.html", "scenes/shot-001.html"], target_subtitles: [],
-  narration_target_path: null, rights_digest: sha("f"),
+  narration_target_path: null as string | null, rights_digest: sha("f"),
 };
+
+function plan(current: EngineProjection, target: EngineProjection,
+  overrides: Partial<typeof baseInput> = {}) {
+  return buildHistoryRestorePlan({ ...baseInput, ...overrides, current, target },
+    baseInput.project_id);
+}
 
 describe("M4C-05: the frozen restore-plan vectors", () => {
   it("carries the domain prefix it claims", () => {
@@ -101,118 +108,198 @@ describe("M4C-05: the frozen restore-plan vectors", () => {
     }
   });
 
+  it("binds the affected ranges inside the hashed plan", () => {
+    // The ranges used to be computed beside the plan, so the plan hash never covered them.
+    // The frozen vectors now carry a mutation for the ranges alone: moving one range moves
+    // the hash, so "the plan authorized these ranges" is inside the authorization.
+    const mutation = document.vectors.find((vector) => vector.name === "mutated-affected-ranges");
+    expect(mutation).toBeDefined();
+    const base = document.vectors.find((vector) => vector.name === "base")!;
+    expect(mutation!.plan_sha256).not.toBe(base.plan_sha256);
+    expect(mutation!.plan.affected_ranges).not.toEqual(base.plan.affected_ranges);
+  });
+
   it("ties the frozen bytes to what the builder produces", () => {
     const builder = document.vectors.find((vector) => vector.name === "builder")!;
-    const plan = buildHistoryRestorePlan({
-      ...baseInput,
-      current: projection([clip({ clip_id: "shot-001", kind: "video",
+    const built = plan(
+      projection([clip({ clip_id: "shot-001", kind: "video",
         source_ref: "assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4" })], [], 300),
-      target: projection([clip({ clip_id: "shot-001", kind: "page" })], [], 300),
-    }, "of_d1-30s_0123456789abcdef");
-    expect(computeHistoryRestorePlanHash(plan)).toBe(builder.plan_sha256);
-    expect(historyRestorePlanPreimage(plan)).toBe(builder.preimage);
-    expect(verifyHistoryRestorePlanHash(plan)).toBe(true);
+      projection([clip({ clip_id: "shot-001", kind: "page" })], [], 300));
+    expect(computeHistoryRestorePlanHash(built)).toBe(builder.plan_sha256);
+    expect(historyRestorePlanPreimage(built)).toBe(builder.preimage);
+    expect(verifyHistoryRestorePlanHash(built)).toBe(true);
   });
 });
 
-describe("M4C-05: the plan classifies the difference instead of counting it", () => {
-  it("names the changed visual clips, the preserved narration, and the visual lock they need", () => {
-    const plan = buildHistoryRestorePlan({
-      ...baseInput,
-      narration_target_path: "narration.wav",
-      current: projection([
-        clip({ clip_id: "shot-001", kind: "video", source_ref: "assets/aa/source.mp4" }),
-        clip({ clip_id: "narration", kind: "sound", track_id: "track_1", source_ref: "narration.wav",
-          frame_range: { start_frame: 0, end_frame_exclusive: 900 } }),
-      ]),
-      target: projection([
-        clip({ clip_id: "shot-001", kind: "page", source_ref: "scenes/shot-001.html" }),
-        clip({ clip_id: "narration", kind: "sound", track_id: "track_1", source_ref: "narration.wav",
-          frame_range: { start_frame: 0, end_frame_exclusive: 900 } }),
-      ]),
-    }, "of_d1-30s_0123456789abcdef");
-    expect(plan.consumers).toContainEqual({ kind: "visual", id: "shot-001", action: "replace" });
-    expect(plan.consumers).toContainEqual({ kind: "narration", id: "narration", action: "preserve" });
-    // The narration is preserved, so it must not require a narration lock: a blanket lock
-    // would block a restore that does not touch the narration.
-    expect(plan.required_locks.filter((lock) => lock.lock_type === "narration")).toEqual([]);
-    expect(plan.required_locks).toContainEqual({ lock_type: "visual", scope: "shot",
+describe("M4C-02: ADR D-04's lock model, and the real LockService", () => {
+  it("asks for a visual shot lock when only a clip's content changed", () => {
+    const built = plan(
+      projection([clip({ clip_id: "shot-001", source_ref: "assets/aa/source.mp4" })]),
+      projection([clip({ clip_id: "shot-001", source_ref: "assets/bb/source.mp4" })]));
+    expect(built.required_locks).toContainEqual({ lock_type: "visual", scope: "shot",
       target_id: "shot-001", start_frame: 0, end_frame_exclusive: 300 });
-    expect(plan.required_locks.length).toBeGreaterThan(0);
+    expect(built.required_locks.some((lock) => lock.scope === "project")).toBe(false);
   });
 
-  it("requires a narration lock when the narration itself changes", () => {
-    const plan = buildHistoryRestorePlan({
-      ...baseInput,
-      narration_target_path: "narration.wav",
-      current: projection([
-        clip({ clip_id: "shot-001", kind: "video", source_ref: "assets/aa/source.mp4" }),
-        clip({ clip_id: "narration", kind: "sound", track_id: "track_1", source_ref: "narration.wav" }),
+  it("asks for a visual project and a duration project lock when a clip's boundary moved", () => {
+    const built = plan(
+      projection([clip({ clip_id: "shot-001", frame_range: { start_frame: 0, end_frame_exclusive: 300 } })], [], 300),
+      projection([clip({ clip_id: "shot-001", frame_range: { start_frame: 0, end_frame_exclusive: 312 } })], [], 312));
+    expect(built.required_locks).toContainEqual({ lock_type: "visual", scope: "project",
+      target_id: "", start_frame: 0, end_frame_exclusive: 312 });
+    expect(built.required_locks).toContainEqual({ lock_type: "duration", scope: "project",
+      target_id: "", start_frame: 0, end_frame_exclusive: 312 });
+  });
+
+  it("asks for the project scope when the clips were reordered", () => {
+    const built = plan(
+      projection([
+        clip({ clip_id: "shot-001", frame_range: { start_frame: 0, end_frame_exclusive: 300 } }),
+        clip({ clip_id: "shot-002", frame_range: { start_frame: 300, end_frame_exclusive: 600 } }),
+      ], [], 600),
+      projection([
+        clip({ clip_id: "shot-002", frame_range: { start_frame: 0, end_frame_exclusive: 300 } }),
+        clip({ clip_id: "shot-001", frame_range: { start_frame: 300, end_frame_exclusive: 600 } }),
+      ], [], 600));
+    expect(built.required_locks).toContainEqual({ lock_type: "visual", scope: "project",
+      target_id: "", start_frame: 0, end_frame_exclusive: 600 });
+    expect(built.required_locks).toContainEqual({ lock_type: "duration", scope: "project",
+      target_id: "", start_frame: 0, end_frame_exclusive: 600 });
+  });
+
+  it("asks for the project scope when a clip was added or removed", () => {
+    const added = plan(
+      projection([clip({ clip_id: "shot-001" })], [], 600),
+      projection([clip({ clip_id: "shot-001" }), clip({ clip_id: "shot-002",
+        frame_range: { start_frame: 300, end_frame_exclusive: 600 } })], [], 600));
+    expect(added.required_locks).toContainEqual({ lock_type: "visual", scope: "project",
+      target_id: "", start_frame: 0, end_frame_exclusive: 600 });
+    expect(added.required_locks).toContainEqual({ lock_type: "duration", scope: "project",
+      target_id: "", start_frame: 0, end_frame_exclusive: 600 });
+
+    const removed = plan(
+      projection([clip({ clip_id: "shot-001" }), clip({ clip_id: "shot-002",
+        frame_range: { start_frame: 300, end_frame_exclusive: 600 } })], [], 600),
+      projection([clip({ clip_id: "shot-001" })], [], 600));
+    expect(removed.required_locks).toContainEqual({ lock_type: "visual", scope: "project",
+      target_id: "", start_frame: 0, end_frame_exclusive: 600 });
+  });
+
+  it("asks for the project scope when the total frame count changed", () => {
+    const built = plan(
+      projection([clip({ clip_id: "shot-001", frame_range: { start_frame: 0, end_frame_exclusive: 300 } })], [], 300),
+      projection([clip({ clip_id: "shot-001", frame_range: { start_frame: 0, end_frame_exclusive: 300 } })], [], 600));
+    // The frame count is the projection's own statement of the project's length, so a change
+    // in it is a change of the whole project.
+    expect(built.required_locks).toContainEqual({ lock_type: "duration", scope: "project",
+      target_id: "", start_frame: 0, end_frame_exclusive: 600 });
+  });
+
+  it("asks for a narration project lock when the narration changed, and not for a shot one", () => {
+    const built = plan(
+      projection([clip({ clip_id: "narration", kind: "sound", track_id: "track_1",
+        source_ref: "narration.wav" })]),
+      projection([clip({ clip_id: "narration", kind: "sound", track_id: "track_1",
+        source_ref: "other-narration.wav" })]),
+      { narration_target_path: "narration.wav" });
+    expect(built.required_locks).toContainEqual({ lock_type: "narration", scope: "project",
+      target_id: "", start_frame: 0, end_frame_exclusive: 900 });
+    expect(built.required_locks.some((lock) => lock.lock_type === "narration" && lock.scope === "shot"))
+      .toBe(false);
+    expect(built.affected_consumers).toContainEqual({ kind: "narration", id: "narration", action: "replace" });
+  });
+
+  it("asks for a narration project lock and a subtitle consumer when a subtitle changed", () => {
+    const built = plan(
+      projection([clip({ clip_id: "shot-001" })], [subtitle({ subtitle_id: "subs", content_sha256: sha("1") })]),
+      projection([clip({ clip_id: "shot-001" })], [subtitle({ subtitle_id: "subs", content_sha256: sha("2") })]));
+    expect(built.required_locks).toContainEqual({ lock_type: "narration", scope: "project",
+      target_id: "", start_frame: 0, end_frame_exclusive: 900 });
+    expect(built.affected_consumers).toContainEqual({ kind: "subtitle", id: "subs", action: "replace" });
+  });
+
+  it("records every consumer of a shared asset", () => {
+    const built = plan(
+      projection([
+        clip({ clip_id: "shot-001", source_ref: "assets/shared.mp4" }),
+        clip({ clip_id: "shot-002", frame_range: { start_frame: 300, end_frame_exclusive: 600 },
+          source_ref: "assets/shared.mp4" }),
       ]),
-      target: projection([
-        clip({ clip_id: "shot-001", kind: "video", source_ref: "assets/aa/source.mp4" }),
-        clip({ clip_id: "narration", kind: "sound", track_id: "track_1", source_ref: "other-narration.wav" }),
-      ]),
-    }, "of_d1-30s_0123456789abcdef");
-    expect(plan.consumers).toContainEqual({ kind: "narration", id: "narration", action: "replace" });
-    const narrationLocks = plan.required_locks.filter((lock) => lock.lock_type === "narration");
-    expect(narrationLocks.length).toBeGreaterThan(0);
-    // Both scopes: a project-scoped narration lock is only matched by a project-scoped
-    // candidate, and a shot-scoped one by a shot-scoped candidate.
-    expect(narrationLocks.some((lock) => lock.scope === "project")).toBe(true);
-    expect(narrationLocks.some((lock) => lock.scope === "shot")).toBe(true);
+      projection([
+        clip({ clip_id: "shot-001", source_ref: "scenes/shot-001.html" }),
+        clip({ clip_id: "shot-002", frame_range: { start_frame: 300, end_frame_exclusive: 600 },
+          source_ref: "assets/shared.mp4" }),
+      ]));
+    expect(built.affected_consumers).toContainEqual({ kind: "shared_asset", id: "assets/shared.mp4",
+      action: "relink" });
+    // The shared asset's other user is affected too, so it carries its own visual lock.
+    expect(built.required_locks).toContainEqual({ lock_type: "visual", scope: "shot",
+      target_id: "shot-002", start_frame: 300, end_frame_exclusive: 600 });
   });
 
-  it("requires a duration lock when the timeline changes", () => {
-    const plan = buildHistoryRestorePlan({
-      ...baseInput,
-      current: projection([clip({ clip_id: "shot-001" })], [], 300),
-      target: projection([clip({ clip_id: "shot-001",
-        frame_range: { start_frame: 0, end_frame_exclusive: 400 } })], [], 400),
-    }, "of_d1-30s_0123456789abcdef");
-    expect(plan.required_locks.some((lock) => lock.lock_type === "duration")).toBe(true);
+  it("blocks the write with the real LockService when the plan asks for the project scope", () => {
+    const revisions = new RevisionStore();
+    try {
+      const locks = new LockService(revisions);
+      const built = plan(
+        projection([clip({ clip_id: "shot-001", frame_range: { start_frame: 0, end_frame_exclusive: 300 } })]),
+        projection([clip({ clip_id: "shot-001", frame_range: { start_frame: 0, end_frame_exclusive: 312 } })], [], 312));
+      // A project-scope visual lock over the whole project.
+      locks.acquire({ projectId: "of_test", lockType: "visual", scope: "project", targetId: "",
+        startFrame: 0, endFrameExclusive: 900, owner: "test", reason: "m4c-02" }, 1);
+      expect(() => locks.assertUnlocked("of_test", built.required_locks)).toThrow(/locked/u);
+    } finally { revisions.close(); }
   });
 
-  it("refuses a target with a different clip identity, a different track, or an incomplete projection", () => {
-    const projectId = "of_d1-30s_0123456789abcdef";
-    const changed = (overrides: Partial<EngineClip> & { clip_id: string }): EngineClip =>
-      clip({ ...overrides, source_ref: overrides.source_ref ?? "assets/aa/source.mp4" });
-    expect(() => buildHistoryRestorePlan({
-      ...baseInput,
-      current: projection([changed({ clip_id: "shot-001" })]),
-      target: projection([changed({ clip_id: "shot-002" })]),
-    }, projectId)).toThrow(/clip identity/u);
-    expect(() => buildHistoryRestorePlan({
-      ...baseInput,
-      current: projection([changed({ clip_id: "shot-001", track_id: "track_0" })]),
-      target: projection([changed({ clip_id: "shot-001", track_id: "track_1" })]),
-    }, projectId)).toThrow(/another track/u);
-    const incomplete = { ...projection([changed({ clip_id: "shot-001" })]),
+  it("blocks the write with the real LockService when the plan asks for a shot scope", () => {
+    const revisions = new RevisionStore();
+    try {
+      const locks = new LockService(revisions);
+      const built = plan(
+        projection([clip({ clip_id: "shot-001", source_ref: "assets/aa/source.mp4" })]),
+        projection([clip({ clip_id: "shot-001", source_ref: "assets/bb/source.mp4" })]));
+      locks.acquire({ projectId: "of_test", lockType: "visual", scope: "shot", targetId: "shot-001",
+        startFrame: 0, endFrameExclusive: 300, owner: "test", reason: "m4c-02" }, 1);
+      expect(() => locks.assertUnlocked("of_test", built.required_locks)).toThrow(/locked/u);
+    } finally { revisions.close(); }
+  });
+});
+
+describe("M4C-03: what the plan may describe and what this stage may restore", () => {
+  it("describes a different clip identity rather than refusing to describe it", () => {
+    // ADR D-04 can classify a clip added or removed, so the plan says so. The eligibility
+    // rule below is a separate question, and this stage answers it with a 422.
+    const built = plan(
+      projection([clip({ clip_id: "shot-001" })]),
+      projection([clip({ clip_id: "shot-001" }), clip({ clip_id: "shot-002",
+        frame_range: { start_frame: 300, end_frame_exclusive: 600 } })], [], 600));
+    expect(built.required_locks.some((lock) => lock.lock_type === "visual" && lock.scope === "project"))
+      .toBe(true);
+    expect(restoreTargetIsEligible(projection([clip({ clip_id: "shot-001" })]),
+      projection([clip({ clip_id: "shot-001" }), clip({ clip_id: "shot-002" })]))).toBe(false);
+  });
+
+  it("accepts the same clip identity and track topology", () => {
+    expect(restoreTargetIsEligible(projection([clip({ clip_id: "shot-001" })]),
+      projection([clip({ clip_id: "shot-001", source_ref: "scenes/other.html" })]))).toBe(true);
+    // A clip that moved to another track is a different topology.
+    expect(restoreTargetIsEligible(projection([clip({ clip_id: "shot-001", track_id: "track_0" })]),
+      projection([clip({ clip_id: "shot-001", track_id: "track_1" })]))).toBe(false);
+  });
+
+  it("refuses what it cannot classify", () => {
+    const broken = { ...projection([clip({ clip_id: "shot-001" })]),
       problems: ["OPENFILM_PROJECTION:CLIP_NO_ID:track_0"] };
-    expect(() => buildHistoryRestorePlan({
-      ...baseInput,
-      current: incomplete,
-      target: projection([changed({ clip_id: "shot-001" })]),
-    }, projectId)).toThrow(/incomplete/u);
+    expect(() => plan(broken, projection([clip({ clip_id: "shot-001" })]))).toThrow(/incomplete/u);
+    expect(() => plan(projection([clip({ clip_id: "shot-001" })]),
+      projection([clip({ clip_id: "shot-001" })]))).toThrow(/nothing to restore/u);
   });
 
-  it("refuses a restore that would change nothing", () => {
-    expect(() => buildHistoryRestorePlan({
-      ...baseInput,
-      current: projection([clip({ clip_id: "shot-001" })]),
-      target: projection([clip({ clip_id: "shot-001" })]),
-    }, "of_d1-30s_0123456789abcdef")).toThrow(/nothing to restore/u);
-  });
-
-  it("reconstructs the digest roots from the entry and the root set", () => {
-    const plan = buildHistoryRestorePlan({
-      ...baseInput,
-      current: projection([clip({ clip_id: "shot-001", source_ref: "assets/aa/source.mp4" })]),
-      target: projection([clip({ clip_id: "shot-001" })]),
-    }, "of_d1-30s_0123456789abcdef");
-    const roots = restoreDigestRoots(plan);
-    expect(roots[0]).toBe(plan.entry_root);
-    expect([...roots].sort()).toEqual([...plan.roots].sort());
-    expect(new Set(roots).size).toBe(roots.length);
+  it("digests a projection by its content and not by the revision it was read at", () => {
+    const base = projection([clip({ clip_id: "shot-001" })]);
+    const moved = { ...base, project_revision: 99, control_revision: 7, snapshot_id: sha("8") };
+    expect(projectionDigest(moved)).toBe(projectionDigest(base));
+    const other = projection([clip({ clip_id: "shot-002" })]);
+    expect(projectionDigest(other)).not.toBe(projectionDigest(base));
   });
 });

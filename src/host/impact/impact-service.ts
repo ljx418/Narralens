@@ -471,10 +471,16 @@ export class ImpactService {
       control_revision: view.control_revision,
       engine: "openfilm",
       engine_upstream_sha: view.engine_upstream_sha,
-      // A restore whose difference is narration-only touches no visual range at all. The
-      // consumers below still name what it touches, so the authorization is not empty.
-      affected_ranges: context.affected_ranges,
-      affected_consumers: context.plan.consumers,
+      // **The ranges come out of the plan, not out of a second computation beside it.**
+      //
+      // They used to be computed here from the same projections, and the plan hash never
+      // covered them — so "the impact authorized this plan" and "this plan touches these
+      // ranges" were two separate statements that could drift apart without anything
+      // noticing. They are inside the hashed plan now, and the restore rebuilds the plan and
+      // compares the two hashes, so the ranges the client was shown are the ranges the
+      // write is checked against.
+      affected_ranges: context.plan.affected_ranges,
+      affected_consumers: context.plan.affected_consumers,
       locks_checked: locksChecked,
       rights_digest: context.rights.rights_digest,
       // The restore plan's own hash. The restore rebuilds the plan and compares this value,

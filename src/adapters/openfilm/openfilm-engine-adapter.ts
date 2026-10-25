@@ -168,12 +168,26 @@ function asNearestFrameRange(value: unknown): HalfOpenFrameRange | null {
   return to > from ? { start_frame: from, end_frame_exclusive: to } : null;
 }
 
+export interface OpenFilmAdapterOptions {
+  /**
+   * Test-only seam for M4C's fault matrix.
+   *
+   * `after_stage_copy` fires between the copy of the current source into the isolated root
+   * and the write of the target's film over it — the boundary the development gate calls
+   * "stage copy 中". It is a seam on the *adapter* because that is where the copy happens;
+   * the Host owns every decision, and this is only where a boundary can be observed.
+   */
+  readonly fault?: (point: string) => void | Promise<void>;
+}
+
 export class OpenFilmEngineAdapter implements EnginePort {
   readonly #upstream: OpenFilmUpstream;
   readonly #layouts = new Map<string, OpenFilmProjectLayout>();
+  readonly #fault: (point: string) => void | Promise<void>;
 
-  constructor(upstream: OpenFilmUpstream) {
+  constructor(upstream: OpenFilmUpstream, options: OpenFilmAdapterOptions = {}) {
     this.#upstream = upstream;
+    this.#fault = options.fault ?? (() => undefined);
   }
 
   get engineUpstreamSha(): string { return OPENFILM_UPSTREAM_SHA; }
@@ -579,6 +593,24 @@ export class OpenFilmEngineAdapter implements EnginePort {
     let handedOver = false;
     try {
       await cp(sourceRoot, stagedRoot, { recursive: true });
+      // The copy is done and the target's film is not written yet: a crash here leaves an
+      // isolated tree with the *current* source in it, which is the boundary the gate names.
+      await this.#fault("after_stage_copy");
+      // The content-addressed assets the active root is missing are staged from the
+      // Host's `inputs` area — the Host read them out of the snapshot and proved their
+      // digests. The adapter never reads a path it was not given.
+      for (const asset of intent.missing_assets) {
+        const input = join(isolatedRoot.value, "inputs", asset.sha256, "source.mp4");
+        const bytes = await readFile(input);
+        if (sha256(bytes) !== asset.sha256) {
+          throw new HttpError(422, "INVALID_MEDIA",
+            "A staged restore asset does not match its content address", { token: asset.token },
+            ctx.correlationId);
+        }
+        const destination = join(stagedRoot, asset.token);
+        await mkdir(dirname(destination), { recursive: true });
+        await copyFile(input, destination);
+      }
       const filmPath = join(stagedRoot, "film.html");
       await writeFile(filmPath, intent.target_film_text, "utf8");
       // The text went through a UTF-8 round trip on its way here. If the target's bytes were

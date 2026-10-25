@@ -254,22 +254,32 @@ export class HistoryStore {
   /**
    * The snapshot a redo would name.
    *
-   * Derived from the most recent committed *restore* and nothing else: the snapshot that
-   * was active before that restore is exactly what a redo returns to. There is no redo
-   * stack — a stack would be a second timeline, and this architecture has one.
+   * **The redo exists only when the *current* commit is itself a restore.**
+   *
+   * ADR-W2.0-006 §D-08 says so, and the previous implementation did not: it scanned the
+   * project's transactions for the most recent committed restore, so a "restore → adoption
+   * → redo" sequence still answered with the restore's source-before snapshot — a target
+   * that was two commits old and no longer what the project had just been restored to.
+   *
+   * So the redo is anchored on the **active commit**: the transaction that produced the
+   * project's current revision must be a committed history restore, and the target comes
+   * from *that* transaction's immutable fact. If the current commit is a migration, an
+   * adoption, an edit, or a restore whose fact is missing, there is no redo target and the
+   * caller answers 422.
+   *
+   * There is no redo stack: a stack would be a second timeline, and this architecture has
+   * exactly one.
    */
   redoTarget(projectId: string): HistoryEntry | undefined {
-    let latest: { revision: number; transaction_id: string } | undefined;
-    for (const transaction of this.#revisions.projectTransactions(projectId)) {
-      if (transaction.state !== "committed" || transaction.kind !== "history") continue;
-      if (latest !== undefined && transaction.base_revision <= latest.revision) continue;
-      latest = { revision: transaction.base_revision, transaction_id: transaction.transaction_id };
-    }
-    if (latest === undefined) return undefined;
-    const fact = this.restoreFact(latest.transaction_id);
+    const commit = this.#revisions.activeCommit(projectId);
+    if (commit === undefined) return undefined;
+    const transaction = this.#revisions.projectTransaction(commit.transaction_id);
+    if (transaction === undefined || transaction.state !== "committed"
+      || transaction.kind !== "history") return undefined;
+    const fact = this.restoreFact(commit.transaction_id);
     if (fact === undefined) return undefined;
-    return { revision: latest.revision + 1, snapshot_id: fact.source_before_snapshot_id,
-      kind: "restore", transaction_id: latest.transaction_id };
+    return { revision: commit.revision, snapshot_id: fact.source_before_snapshot_id,
+      kind: "restore", transaction_id: commit.transaction_id };
   }
 
   /** The canonical bytes of a fact, for evidence. */

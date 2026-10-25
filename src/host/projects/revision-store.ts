@@ -615,26 +615,42 @@ export class RevisionStore {
     snapshotId: string; sourceDigestAfter: string; impactId: string; impactHash: string;
     idempotencyKey: string; requestDigest: string; projection: AdoptionProjectionFactInput;
     restorePlanSha256: string; now?: Date;
-  }): ControlledWriteResponseV1 {
+  }, fault?: (point: string) => void): ControlledWriteResponseV1 {
     const at = (input.now ?? new Date()).toISOString();
+    // The fault seam fires before and after every statement of this one transaction.
+    //
+    // The gate asks for "each statement of the database transaction, before and after", and
+    // that is the only way to know that a fault in the middle rolls the *whole* thing
+    // back: the row it had already written has to disappear with the rest. A seam around
+    // the transaction as a whole would not tell us that.
+    const statement = (name: string, phase: "before" | "after"): void => {
+      fault?.(`${phase}_db_statement:${name}`);
+    };
     this.#db.exec("BEGIN IMMEDIATE");
     try {
+      statement("verify_fact", "before");
       const fact = this.#db.prepare(`SELECT 1 AS present FROM history_restore_fact
         WHERE transaction_id=? AND result_snapshot_id=? AND staged_source_digest=?
         AND restore_plan_sha256=? AND impact_hash=?`).get(
         input.transactionId, input.snapshotId, input.sourceDigestAfter,
         input.restorePlanSha256, input.impactHash) as { present?: number } | undefined;
       if (fact?.present !== 1) throw new Error("HISTORY_PREPARED_FACT_MISMATCH");
+      statement("verify_fact", "after");
+      statement("project_state", "before");
       const state = this.#db.prepare(`UPDATE project_state SET revision=revision+1, source_digest=?,
         source_digest_observed='', source_digest_detected_at='', updated_at=?
         WHERE project_id=? AND revision=? AND source_digest=? AND control_revision=? AND attention=0`)
         .run(input.sourceDigestAfter, at, input.projectId, input.previousRevision,
           input.expectedSourceDigest, input.expectedControlRevision);
       if (Number(state.changes) !== 1) throw new Error("HISTORY_PROJECT_CAS_FAILED");
+      statement("project_state", "after");
+      statement("impact", "before");
       const impact = this.#db.prepare(`UPDATE impact SET state='consumed', updated_at=?
         WHERE impact_id=? AND project_id=? AND impact_hash=? AND state='active'`)
         .run(at, input.impactId, input.projectId, input.impactHash);
       if (Number(impact.changes) !== 1) throw new Error("HISTORY_IMPACT_CAS_FAILED");
+      statement("impact", "after");
+      statement("snapshot", "before");
 
       const snapshot = this.#db.prepare(`SELECT project_id, source_digest FROM snapshot WHERE snapshot_id=?`)
         .get(input.snapshotId) as { project_id?: string; source_digest?: string } | undefined;
@@ -646,12 +662,16 @@ export class RevisionStore {
         // contradiction, not a no-op, and it rolls the whole commit back.
         throw new Error("HISTORY_SNAPSHOT_MISMATCH");
       }
+      statement("snapshot", "after");
+      statement("projection_fact", "before");
       verifyOrInsertProjectionFact(this.#db, { project_id: input.projectId, snapshot_id: input.snapshotId,
         migration_id: input.projection.migration_id, source_digest: input.sourceDigestAfter,
         engine_upstream_sha: input.projection.engine_upstream_sha,
         roots: JSON.parse(input.projection.roots_json) as string[],
         subtitles: JSON.parse(input.projection.subtitles_json) as Array<{ subtitle_id: string; path: string }>,
         frame_count: input.projection.frame_count, transaction_id: input.transactionId });
+      statement("projection_fact", "after");
+      statement("active_commit", "before");
 
       this.#db.prepare(`INSERT INTO active_commit(project_id, revision, snapshot_id, source_digest,
         engine, transaction_id, created_at) VALUES(?,?,?,?,'openfilm',?,?)
@@ -660,12 +680,16 @@ export class RevisionStore {
         transaction_id=excluded.transaction_id, created_at=excluded.created_at`)
         .run(input.projectId, input.previousRevision + 1, input.snapshotId,
           input.sourceDigestAfter, input.transactionId, at);
+      statement("active_commit", "after");
+      statement("outbox", "before");
       const outbox = this.#db.prepare(`INSERT INTO outbox(topic, project_id, payload_json, created_at)
         VALUES('project.committed',?,?,?)`).run(input.projectId, JSON.stringify({
         project_id: input.projectId, transaction_id: input.transactionId,
         revision: input.previousRevision + 1, snapshot_id: input.snapshotId,
         operation: "restore_snapshot",
       }), at);
+      statement("outbox", "after");
+      statement("idempotency", "before");
       const response: ControlledWriteResponseV1 = {
         format: "narralens.controlled-write-response@1.0", transaction_id: input.transactionId,
         project_id: input.projectId, operation: "restore_snapshot",
@@ -677,10 +701,13 @@ export class RevisionStore {
         request_digest, response_json, transaction_id, created_at) VALUES(?,?,?,?,?,?,?)`)
         .run(input.projectId, "controlled_write.restore_snapshot", input.idempotencyKey,
           input.requestDigest, JSON.stringify(response), input.transactionId, at);
+      statement("idempotency", "after");
+      statement("transaction", "before");
       const transaction = this.#db.prepare(`UPDATE project_transaction SET state='committed',
         source_digest_after=?, snapshot_id=?, updated_at=? WHERE transaction_id=? AND project_id=? AND state='prepared'`)
         .run(input.sourceDigestAfter, input.snapshotId, at, input.transactionId, input.projectId);
       if (Number(transaction.changes) !== 1) throw new Error("HISTORY_TRANSACTION_CAS_FAILED");
+      statement("transaction", "after");
       this.#db.exec("COMMIT");
       return response;
     } catch (error) { this.#db.exec("ROLLBACK"); throw error; }

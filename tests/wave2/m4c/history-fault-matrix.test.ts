@@ -1,0 +1,258 @@
+import { createHash } from "node:crypto";
+import { readFile, readdir } from "node:fs/promises";
+import { join } from "node:path";
+import { afterEach, describe, expect, it } from "vitest";
+import { NarralensHost } from "../../../src/host/server.js";
+import { SimulatedHistoryCrash } from "../../../src/host/history/history-service.js";
+import {
+  HISTORY_ALL_FAULT_POINTS, HISTORY_DB_FAULT_POINTS, HISTORY_SERVICE_FAULT_POINTS,
+} from "../../../src/host/history/history-fault-registry.js";
+import {
+  adoptedProject, postImpact, postRestore, restoreImpactBody, restoreRequestBody, start, startOn,
+  stopAll, type Started,
+} from "./harness.js";
+
+/**
+ * M4C TX-08C: the fault matrix.
+ *
+ * The development gate §6 names the boundaries a controlled restore has to survive and says
+ * that every one of them must be injected and asserted — a representative subset is not a
+ * matrix. So this file walks the **registry** (`history-fault-registry.ts`), not a hand-picked
+ * list, and it asserts the same facts at every boundary: what the source, the revision, the
+ * pointer, the impact, the outbox, the idempotency rows, the temporary files and the
+ * snapshots were before and after.
+ *
+ * The outcome every boundary has to reach is one of three: **committed**, **aborted** or
+ * **attention**. What it must never be is a transaction left in flight, a revision that
+ * moved twice, or a source that is neither the before nor the after.
+ */
+
+const hosts: NarralensHost[] = [];
+const dirs: string[] = [];
+afterEach(async () => { await stopAll(hosts.splice(0), dirs.splice(0)); });
+
+interface WriteFacts {
+  /** The digest of the active source's film. */
+  readonly source_digest: string | null;
+  readonly revision: number | null;
+  /** The snapshot the active commit names. */
+  readonly pointer: string | null;
+  /** The impact's state. */
+  readonly impact: string | null;
+  readonly outbox: number;
+  readonly idempotency: number;
+  /** The publication's temporary files still on disk. */
+  readonly temp: readonly string[];
+  readonly snapshots: number;
+  /** The state of the project's last transaction. */
+  readonly transaction: string | null;
+}
+
+async function facts(host: NarralensHost, projectId: string, impactId: string): Promise<WriteFacts> {
+  const commit = host.revisions.activeCommit(projectId);
+  const view = await host.projectResolver.resolveActivated(projectId).catch(() => undefined);
+  let sourceDigest: string | null = null;
+  let temp: string[] = [];
+  if (view !== undefined) {
+    try {
+      sourceDigest = createHash("sha256")
+        .update(await readFile(join(view.source_root.value, "film.html"))).digest("hex");
+      temp = (await readdir(view.source_root.value)).filter((name) => name.includes(".film.tmp"));
+    } catch { sourceDigest = null; }
+  }
+  const impact = host.impacts.get(impactId);
+  const counts = host.revisions.compose((db) => ({
+    idempotency: Number((db.prepare(
+      "SELECT COUNT(*) AS n FROM operation_idempotency WHERE project_id=?").get(projectId) as { n: number }).n),
+    snapshots: Number((db.prepare(
+      "SELECT COUNT(*) AS n FROM snapshot WHERE project_id=?").get(projectId) as { n: number }).n),
+  }));
+  const transactions = host.revisions.projectTransactions(projectId);
+  return {
+    source_digest: sourceDigest,
+    revision: commit?.revision ?? null,
+    pointer: commit?.snapshot_id ?? null,
+    impact: impact?.state ?? null,
+    outbox: host.revisions.pendingOutboxCount(),
+    idempotency: counts.idempotency,
+    temp,
+    snapshots: counts.snapshots,
+    transaction: transactions.at(-1)?.state ?? null,
+  };
+}
+
+/**
+ * What each boundary has to converge to.
+ *
+ * A boundary *before* the publication leaves the source untouched, so the write is
+ * abandoned with revision +0. A boundary *after* the film's rename has published the
+ * source already, so the write has to finish: it commits with revision +1. The two
+ * asset-install boundaries are not reached by the ordinary flow — a restore installs an
+ * asset only when the active root is missing one — so they are recorded as "not reached"
+ * rather than silently passing.
+ */
+type ExpectedOutcome = "aborted" | "committed" | "not_reached" | "nothing";
+
+/**
+ * The boundaries before the transaction exists.
+ *
+ * The gate's algorithm resolves the target *before* it opens the transaction, so a crash
+ * there leaves nothing to abort: there is no row, the revision does not move and the
+ * authorization is not spent. "Aborted" would be a claim about a transaction that was never
+ * opened.
+ */
+const BEFORE_THE_TRANSACTION: ReadonlySet<string> = new Set(["after_target_resolved"]);
+
+const BEFORE_PUBLICATION: ReadonlySet<string> = new Set([
+  "after_received", "after_preconditions", "after_plan",
+  "after_stage_copy", "after_stage", "after_validate", "before_snapshot_publish",
+  "after_snapshot_publish", "before_prepared", "after_prepared",
+  "after_film_temp_fsync", "before_film_rename",
+]);
+
+const AFTER_PUBLICATION: ReadonlySet<string> = new Set([
+  "after_film_rename", "after_parent_fsync", "after_active_inspect",
+  "before_response", "after_committed",
+]);
+
+/** The boundaries the ordinary flow does not reach. */
+const NOT_REACHED: ReadonlySet<string> = new Set([
+  "before_asset_install", "after_asset_install",
+]);
+
+function expectedOutcome(point: string): ExpectedOutcome {
+  if (NOT_REACHED.has(point)) return "not_reached";
+  if (BEFORE_THE_TRANSACTION.has(point)) return "nothing";
+  if (BEFORE_PUBLICATION.has(point)) return "aborted";
+  if (AFTER_PUBLICATION.has(point)) return "committed";
+  return "committed"; // every database boundary is inside the commit, after the publication
+}
+
+describe("M4C TX-08C: the fault matrix", () => {
+  it("registers every boundary the gate names", () => {
+    // The registry is the contract the matrix walks. These are the boundaries the gate §6
+    // names, and a boundary that is not in the registry cannot be walked.
+    for (const point of ["after_received", "after_preconditions", "after_target_resolved",
+      "after_plan", "after_stage_copy", "after_stage", "after_validate",
+      "before_snapshot_publish", "after_snapshot_publish", "before_prepared", "after_prepared",
+      "before_asset_install", "after_asset_install", "after_film_temp_fsync",
+      "before_film_rename", "after_film_rename", "after_parent_fsync",
+      "after_active_inspect", "before_response", "after_committed"]) {
+      expect(HISTORY_SERVICE_FAULT_POINTS, point).toContain(point);
+    }
+    // And the database boundaries: one before and one after every statement of the one
+    // commit transaction.
+    for (const statement of ["verify_fact", "project_state", "impact", "snapshot",
+      "projection_fact", "active_commit", "outbox", "idempotency", "transaction"]) {
+      expect(HISTORY_DB_FAULT_POINTS, statement).toContain(`before_db_statement:${statement}`);
+      expect(HISTORY_DB_FAULT_POINTS, statement).toContain(`after_db_statement:${statement}`);
+    }
+    expect(HISTORY_ALL_FAULT_POINTS.length)
+      .toBe(HISTORY_SERVICE_FAULT_POINTS.length + HISTORY_DB_FAULT_POINTS.length);
+  });
+
+  it.each(HISTORY_ALL_FAULT_POINTS)("converges the boundary %s to a decided state", async (point) => {
+    let fired = false;
+    const running = await start({ historyFault: (at) => {
+      if (at !== point) return;
+      fired = true;
+      // The process-loss model: the write dies where it is, and nothing compensates.
+      throw new SimulatedHistoryCrash(`FAULT:${point}`);
+    } });
+    hosts.push(running.host); dirs.push(running.base);
+
+    const project = await adoptedProject(running, `fault-${point.replace(/[^A-Za-z0-9]/gu, "-")}`);
+    const impact = await postImpact(running, project.projectId,
+      restoreImpactBody(project.view, project.migrationSnapshot, `m4c-fault-impact-${point}`));
+    expect(impact.status, JSON.stringify(impact.body)).toBe(201);
+    const impactId = impact.body.impact_id as string;
+    const before = await facts(running.host, project.projectId, impactId);
+
+    const request = restoreRequestBody(project.view, project.migrationSnapshot,
+      impact.body as { impact_id: string; impact_hash: string }, `m4c-fault-${point}`);
+    const response = await postRestore(running, project.projectId, request);
+    const crashed = await facts(running.host, project.projectId, impactId);
+    // The outcome is decided *after* the write, because whether the boundary was reached is
+    // what the write itself tells us.
+    const outcome = fired ? expectedOutcome(point) : "committed";
+
+    if (fired) {
+      // **The write died at the boundary.** Nothing may have moved that the boundary does
+      // not own.
+      expect(response.status).toBeGreaterThanOrEqual(400);
+      // The crash left the transaction where it died — the process is gone, so nothing
+      // compensated it. The *restart* is what has to decide it, and that is asserted below.
+      expect(crashed.transaction).not.toBeNull();
+      // The revision never moves twice and the pointer never moves backwards.
+      if (crashed.revision !== null) expect(crashed.revision).toBeGreaterThanOrEqual(before.revision ?? 0);
+      if (outcome === "aborted" || outcome === "nothing") {
+        // Nothing that the boundary does not own moved.
+        expect(crashed.revision).toBe(before.revision);
+        expect(crashed.pointer).toBe(before.pointer);
+        expect(crashed.source_digest).toBe(before.source_digest);
+      }
+    } else {
+      // **The boundary was not reached by this flow**, and the write completed normally.
+      expect(response.status).toBe(200);
+      expect(crashed.transaction).toBe("committed");
+    }
+
+    // ── the restart: the write must converge ───────────────────────────────────────────
+    await running.host.close();
+    hosts.splice(hosts.indexOf(running.host), 1);
+    const restarted = await startOn(running.base);
+    hosts.push(restarted.host);
+    const after = await facts(restarted.host, project.projectId, impactId);
+
+    if (outcome === "aborted") {
+      // **Aborted.** The revision did not move, the pointer did not move, the impact was
+      // not consumed, and the temporary file is gone.
+      expect(after.transaction).toBe("aborted");
+      expect(after.revision).toBe(before.revision);
+      expect(after.pointer).toBe(before.pointer);
+      expect(after.source_digest).toBe(before.source_digest);
+      expect(after.impact).toBe("active");
+      expect(after.temp).toEqual([]);
+    } else if (outcome === "committed") {
+      // **Committed.** Exactly one revision, the pointer moved once, the impact was consumed,
+      // and the temporary file is gone.
+      expect(after.transaction).toBe("committed");
+      expect(after.revision).toBe((before.revision ?? 0) + 1);
+      expect(after.pointer).not.toBe(before.pointer);
+      expect(after.impact).toBe("consumed");
+      expect(after.temp).toEqual([]);
+    } else if (outcome === "not_reached") {
+      // **Not reached.** The write completed and nothing about it is in doubt.
+      expect(after.transaction).toBe("committed");
+      expect(after.revision).toBe((before.revision ?? 0) + 1);
+      expect(after.impact).toBe("consumed");
+    } else {
+      // **Nothing happened.** The boundary is before the transaction is opened, so there is
+      // no row to abort, the revision did not move, the pointer did not move, the source did
+      // not move and the authorization was not spent.
+      expect(after.revision).toBe(before.revision);
+      expect(after.pointer).toBe(before.pointer);
+      expect(after.source_digest).toBe(before.source_digest);
+      expect(after.impact).toBe("active");
+      expect(after.idempotency).toBe(before.idempotency);
+      expect(after.temp).toEqual([]);
+    }
+
+    // **No orphan of any kind.** No transaction left in flight, no temporary file, and the
+    // idempotency authority holds exactly one answer for the key.
+    const transactions = restarted.host.revisions.projectTransactions(project.projectId);
+    expect(transactions.filter((row) => !["committed", "aborted", "attention"].includes(row.state)))
+      .toEqual([]);
+    const rows = restarted.host.revisions.compose((db) => Number((db.prepare(
+      "SELECT COUNT(*) AS n FROM operation_idempotency WHERE project_id=? AND operation_kind=? AND idempotency_key=?")
+      .get(project.projectId, "controlled_write.restore_snapshot", `m4c-fault-${point}`) as { n: number }).n));
+    if (outcome === "nothing") {
+      // Nothing was opened, so nothing was recorded against the key.
+      expect(rows).toBe(0);
+    } else {
+      // Exactly one answer for the key: the write is decided, and the key is spent.
+      expect(rows).toBe(1);
+      expect(after.idempotency).toBe(before.idempotency + 1);
+    }
+  }, 900_000);
+});

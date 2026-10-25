@@ -5,7 +5,8 @@ import { dirname, resolve, sep } from "node:path";
 import { HttpError } from "../api-error.js";
 import type { InstalledAdoptionAsset } from "./adoption-store.js";
 
-export type PublishBoundary = "asset_temp_fsynced" | "asset_installed" | "film_temp_fsynced" | "film_renamed" | "parent_fsynced";
+export type PublishBoundary = "asset_temp_fsynced" | "asset_installed" | "film_temp_fsynced"
+  | "before_film_rename" | "film_renamed" | "parent_fsynced";
 
 export interface AuthorSourcePublisherDeps {
   readonly fault?: (boundary: PublishBoundary) => void | Promise<void>;
@@ -64,7 +65,17 @@ export class AuthorSourcePublisher {
     this.#fault = deps.fault ?? (() => undefined);
   }
 
-  async publish(input: PublishAuthorSourceInput): Promise<PublishedAuthorSource> {
+  /**
+   * Publish the author source.
+   *
+   * `fault` overrides the constructor's seam for this call. M4C's fault matrix needs the
+   * publisher's boundaries in *its* vocabulary, and the publisher is M4B's module: a
+   * per-call override keeps the two vocabularies apart without either module knowing about
+   * the other.
+   */
+  async publish(input: PublishAuthorSourceInput,
+    fault?: (boundary: PublishBoundary) => void | Promise<void>): Promise<PublishedAuthorSource> {
+    const boundary = fault ?? this.#fault;
     if (!SHA256.test(input.expectedFilmBeforeSha256) || !SHA256.test(input.expectedFilmAfterSha256)
       || input.expectedFilmBeforeSha256 === input.expectedFilmAfterSha256) {
       throw new HttpError(422, "UNSUPPORTED_EDIT",
@@ -92,7 +103,7 @@ export class AuthorSourcePublisher {
     if (new Set(assets.map((asset) => asset.token)).size !== assets.length) {
       throw new HttpError(422, "UNSUPPORTED_EDIT", "Adoption contains duplicate installed asset tokens");
     }
-    for (const asset of assets) await this.#installAsset(activeRoot, stagedRoot, asset);
+    for (const asset of assets) await this.#installAsset(activeRoot, stagedRoot, asset, boundary);
 
     const expectedTempToken = `.narralens-${input.transactionId}.film.tmp`;
     if (input.filmTempToken !== expectedTempToken) {
@@ -102,15 +113,16 @@ export class AuthorSourcePublisher {
     try {
       await copyFile(stagedFilm, filmTemp, constants.COPYFILE_EXCL);
       await fsync(filmTemp);
-      await this.#fault("film_temp_fsynced");
+      await boundary("film_temp_fsynced");
       // Recheck immediately before the only author-source replacement point.
       if (await hashFile(activeFilm) !== input.expectedFilmBeforeSha256) {
         throw new HttpError(409, "SOURCE_CHANGED", "Active film changed at the publication boundary");
       }
+      await boundary("before_film_rename");
       await rename(filmTemp, activeFilm);
-      await this.#fault("film_renamed");
+      await boundary("film_renamed");
       await fsync(activeRoot);
-      await this.#fault("parent_fsynced");
+      await boundary("parent_fsynced");
     } catch (error) {
       await unlink(filmTemp).catch(() => undefined);
       throw error;
@@ -122,7 +134,8 @@ export class AuthorSourcePublisher {
       source_after_sha256: input.expectedFilmAfterSha256, installed_assets: assets };
   }
 
-  async #installAsset(activeRoot: string, stagedRoot: string, asset: InstalledAdoptionAsset): Promise<void> {
+  async #installAsset(activeRoot: string, stagedRoot: string, asset: InstalledAdoptionAsset,
+    boundary: (at: PublishBoundary) => void | Promise<void>): Promise<void> {
     if (!ASSET_TOKEN.test(asset.token) || !SHA256.test(asset.sha256)
       || asset.token.split("/")[1] !== asset.sha256) {
       throw new HttpError(422, "UNSUPPORTED_EDIT", "Installed asset token is not content addressed");
@@ -137,7 +150,7 @@ export class AuthorSourcePublisher {
     try {
       await copyFile(source, temp, constants.COPYFILE_EXCL);
       await fsync(temp);
-      await this.#fault("asset_temp_fsynced");
+      await boundary("asset_temp_fsynced");
       try {
         await link(temp, destination);
       } catch (error) {
@@ -148,7 +161,7 @@ export class AuthorSourcePublisher {
       }
       await unlink(temp).catch(() => undefined);
       await fsync(dirname(destination));
-      await this.#fault("asset_installed");
+      await boundary("asset_installed");
     } catch (error) {
       await unlink(temp).catch(() => undefined);
       throw error;

@@ -45,3 +45,17 @@
 | POST | `/api/migration/v1/projects/:id/history/restore` | 仍未注册，404 | M4C 才允许开放；M4B 不提供 restore/undo/redo |
 
 M4B 不改变 legacy `/api/projects/:id/edits` 的既有 typed-edit 所有权，也不开放任意 native op。当前唯一新增写入口由项目队列串行化，发布前重查 source/control/rights/impact/锁；恢复先于通用 journal recovery。
+
+## M4C 追加（当前实现，不改写上方历史观察）
+
+| Method | 路由 | 当前状态 | 写入所有者/副作用 |
+|---|---|---|---|
+| GET | `/api/migration/v1/projects/:id/history` | **M4C 已实现；只读** | `HistoryStore` 读模型：该项目已 committed 的 snapshot 引用，按 revision 排序；不写 source/revision/lock/pointer，不返回路径 |
+| POST | `/api/migration/v1/projects/:id/history/restore` | **M4C 已实现；只接受 `narralens.restore-request@1.0`** | `HistoryService` → `NativeWriteGateway`（`history.restore`）→ pinned `OpenFilmEngineAdapter` stage/validate → Host-only `AuthorSourcePublisher` → `RevisionStore.commitHistoryRestore`；revision 恰好 +1，result snapshot id 复用目标的内容地址，impact/idempotency/projection/outbox 同事务 |
+| POST | `/api/migration/v1/projects/:id/history/undo` | **M4C 已实现；只返回 typed intent** | `HistoryCommandTranslator` 解析当前 commit 的前一个 committed snapshot，返回 `narralens.history-intent@1.0`；**不写任何东西**，仍需新 impact 与显式 approval 才能落地 |
+| POST | `/api/migration/v1/projects/:id/history/redo` | **M4C 已实现；只返回 typed intent** | 同上，但仅当**当前 commit 本身是 committed history restore** 时才从其不可变 restore fact 解析 source-before snapshot；否则 422 fail closed |
+
+M4C 不改变 M4B 的 `/edits` 所有权，也不开放 `checkout/merge/discard/commit` 等裸 history 操作——它们在
+`NativeMutationRegistry` 中仍为 `blocked`。恢复发布到 active root 的变化被 ADR-W2.0-006 D-05 限死为两类：
+原子替换 `film.html`，以及安装目标引用而 active root 缺失的内容寻址资产；旧的未被引用的资产不删除。
+M4C 不开放生产 render route，headed/human 体验为 `NOT_RUN`。

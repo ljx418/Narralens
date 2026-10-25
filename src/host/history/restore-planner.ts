@@ -10,7 +10,8 @@ import type { AssetInventoryPort } from "../projects/asset-inventory-port.js";
 import type { MigratedAssetLedger } from "../projects/migrated-asset-ledger.js";
 import type { MigrationStore } from "../projects/migration-store.js";
 import type { ActivatedProjectView, ProjectResolver } from "../projects/project-resolver.js";
-import { buildHistoryRestorePlan, type HistoryRestorePlanV1 } from "./history-restore-plan.js";
+import { buildHistoryRestorePlan, restoreTargetIsEligible,
+  type HistoryRestorePlanV1 } from "./history-restore-plan.js";
 import type { HistoricalSnapshotResolver, ResolvedHistoricalSnapshot } from "./historical-snapshot-resolver.js";
 import { targetRights, type RestoreRights } from "./restore-rights.js";
 
@@ -53,11 +54,25 @@ export interface RestorePlanContext {
   readonly narration_target_path: string | null;
   /** The current source's declared roots. */
   readonly current_roots: readonly string[];
-  /** The ranges the change touches, named by the *current* clip. */
-  readonly affected_ranges: readonly { clip_id: string; start_frame: number; end_frame_exclusive: number }[];
+  /** The content-addressed assets the restore has to install into the active source. */
+  readonly missing_assets: readonly MissingAsset[];
 }
 
 const sha256 = (bytes: Uint8Array | string): string => createHash("sha256").update(bytes).digest("hex");
+
+/**
+ * A content-addressed asset: `assets/<sha256>/source.mp4`.
+ *
+ * The shape is the one M4B's publisher installs, and it is the only kind of root the
+ * restore may *add* to the active source (ADR D-05).
+ */
+const CONTENT_ADDRESSED_ASSET = /^assets\/[a-f0-9]{64}\/source\.mp4$/u;
+
+/** An asset the restore has to install into the active source. */
+export interface MissingAsset {
+  readonly token: string;
+  readonly sha256: string;
+}
 
 export class RestorePlanner {
   readonly #deps: RestorePlannerDeps;
@@ -128,39 +143,37 @@ export class RestorePlanner {
     const { target, target_projection: targetProjection, rights } = resolvedTarget;
     const narrationTargetPath = resolvedTarget.narration_target_path;
 
-    await this.#assertTargetFilesArePresent(view, target, correlationId);
+    const missingAssets = await this.#assertTargetFilesArePresent(view, target, correlationId);
 
     const plan = buildHistoryRestorePlan({
       project_id: projectId,
       current: currentProjection,
       target: targetProjection,
       current_snapshot_id: view.snapshot_id,
-      current_revision: view.revision,
-      current_source_digest: view.source_digest,
       target_snapshot_id: target.snapshot_id,
-      target_source_digest: target.source_digest,
-      target_film_sha256: target.film_sha256,
       target_roots: target.roots,
       target_subtitles: target.subtitles,
       narration_target_path: narrationTargetPath,
       rights_digest: rights.rights_digest,
     }, projectId);
 
-    const affectedRanges = plan.clips
-      .filter((clip) => clip.changed && clip.kind === "visual")
-      .map((clip) => {
-        const current = currentProjection.clips.find((candidate) => candidate.clip_id === clip.clip_id);
-        return {
-          clip_id: clip.clip_id,
-          start_frame: current?.frame_range.start_frame ?? clip.start_frame,
-          end_frame_exclusive: current?.frame_range.end_frame_exclusive ?? clip.end_frame_exclusive,
-        };
-      });
+    // **The eligibility rule is separate from the lock model.**
+    //
+    // ADR D-04 can classify a clip added or removed, and the plan says so — it asks for the
+    // project scope rather than pretending the change is local to one shot. But this stage
+    // only restores a target with the same clip identity and track topology, so a target
+    // that is not eligible is refused *after* the plan says what it would have taken. The
+    // lock model is a property of the difference; the eligibility rule is a property of M4C.
+    if (!restoreTargetIsEligible(currentProjection, targetProjection)) {
+      throw new HttpError(422, "UNSUPPORTED_EDIT",
+        "the restore target does not have the same clip identity and track topology as the current source",
+        { target_snapshot_id: target.snapshot_id }, correlationId);
+    }
 
     return {
       view, target, current_projection: currentProjection, target_projection: targetProjection,
       plan, rights, narration_target_path: narrationTargetPath,
-      current_roots: layout.layout.roots, affected_ranges: affectedRanges,
+      current_roots: layout.layout.roots, missing_assets: missingAssets,
     };
   }
 
@@ -176,20 +189,24 @@ export class RestorePlanner {
   }
 
   /**
-   * Every non-film root of the target must already be in the active source, byte for byte.
+   * Which of the target's roots the active source has to carry, and which it may install.
    *
-   * This is M4C's snapshot-eligibility rule ("the non-film mutable roots have the same
-   * bytes as the current ones"), and it is what makes the restore a *film* restore rather
-   * than a wholesale directory replacement. The staged tree is the current tree with the
-   * target's film written over it, so a target root that the current tree does not carry
-   * would simply be missing from the restored closure.
+   * ADR-W2.0-006 §D-05 splits the target's non-film roots in two:
    *
-   * The digest comparison at the end of the stage is the backstop; this is the early,
-   * specific refusal.
+   * - the **external mutable roots** — the subtitles, the settings — must be byte for byte
+   *   the same in the active source, because this stage does not replace them atomically
+   *   with the film. A difference there is a 422, and the gate says so;
+   * - the **content-addressed assets** the target references may be *missing* from the
+   *   active root, and the restore installs them. That is the one asset change D-05 allows,
+   *   and it is what makes the publisher's asset-install boundary reachable at all.
+   *
+   * The return value is the list of the assets that have to be installed, with the digest
+   * each one must have.
    */
   async #assertTargetFilesArePresent(view: ActivatedProjectView, target: ResolvedHistoricalSnapshot,
-    correlationId: string): Promise<void> {
+    correlationId: string): Promise<MissingAsset[]> {
     const activeRoot = resolve(view.source_root.value);
+    const missing: MissingAsset[] = [];
     for (const root of target.roots) {
       if (root === "film.html") continue;
       const activePath = resolve(activeRoot, root);
@@ -198,19 +215,28 @@ export class RestorePlanner {
           "The restore target declares a root that is not inside the project", { root },
           correlationId);
       }
-      let activeBytes: Buffer;
-      try { activeBytes = await readFile(activePath); }
-      catch {
-        throw new HttpError(422, "UNSUPPORTED_EDIT",
-          "The active source no longer carries a file the restore target needs", { root },
-          correlationId);
-      }
       const targetBytes = await readFile(join(target.source_root, root));
+      let activeBytes: Buffer | undefined;
+      try { activeBytes = await readFile(activePath); } catch { activeBytes = undefined; }
+      if (activeBytes === undefined) {
+        // A content-addressed asset may be installed by the restore. Anything else — a
+        // subtitle, a setting — is an external mutable root, and this stage refuses to
+        // replace it.
+        const digest = sha256(targetBytes);
+        if (!CONTENT_ADDRESSED_ASSET.test(root) || !root.endsWith("/source.mp4")) {
+          throw new HttpError(422, "UNSUPPORTED_EDIT",
+            "The active source no longer carries a file the restore target needs", { root },
+            correlationId);
+        }
+        missing.push({ token: root, sha256: digest });
+        continue;
+      }
       if (sha256(activeBytes) !== sha256(targetBytes)) {
         throw new HttpError(422, "UNSUPPORTED_EDIT",
           "The active source's copy of a file the restore target needs has different bytes",
           { root }, correlationId);
       }
     }
+    return missing;
   }
 }

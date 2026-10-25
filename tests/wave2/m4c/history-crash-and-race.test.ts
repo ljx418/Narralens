@@ -4,9 +4,10 @@ import { afterEach, describe, expect, it } from "vitest";
 import { NarralensHost } from "../../../src/host/server.js";
 import { SimulatedHistoryCrash } from "../../../src/host/history/history-service.js";
 import {
-  adoptedProject, getHistory, headers, postImpact, postRestore, restoreImpactBody,
-  restoreRequestBody, start, startOn, stopAll, type Started,
+  adoptedProject, getHistory, headers, postImpact, postIntent, postRestore, restoreImpactBody,
+  restoreRequestBody, stableThreeClipPlan, start, startOn, stopAll, type Started,
 } from "./harness.js";
+import { adoptBody, readyMaterialization } from "../m4a/harness.js";
 
 /**
  * M4C's crash matrix, its races and its idempotency.
@@ -242,6 +243,71 @@ describe("M4C TX-09: the history keeps every revision", () => {
     const row = running.host.revisions.snapshotRow(prepared.migrationSnapshot);
     expect(row?.source_digest).toBeTruthy();
     expect(running.host.revisions.snapshotRow(prepared.adoptedSnapshot)?.source_digest).toBeTruthy();
+  }, 900_000);
+});
+
+describe("M4C M-01: the redo exists only when the current commit is itself a restore", () => {
+  it("answers 422 after an adoption has been committed on top of the restore", async () => {
+    // ADR-W2.0-006 §D-08: the redo is derived from the current commit's immutable restore
+    // fact, and only when the current commit *is* a restore. The previous implementation
+    // scanned the project's transactions for the most recent committed restore, so this
+    // sequence still answered with the restore's source-before snapshot — a target two
+    // commits old.
+    const running = await start();
+    hosts.push(running.host); dirs.push(running.base);
+    const project = await adoptedProject(running, "redo-after-adopt");
+    const impact = await postImpact(running, project.projectId,
+      restoreImpactBody(project.view, project.migrationSnapshot, "m4c-redo-impact"));
+    expect(impact.status, JSON.stringify(impact.body)).toBe(201);
+    const restored = await postRestore(running, project.projectId, restoreRequestBody(
+      project.view, project.migrationSnapshot,
+      impact.body as { impact_id: string; impact_hash: string }, "m4c-redo-restore"));
+    expect(restored.status, JSON.stringify(restored.body)).toBe(200);
+
+    // Now commit an adoption on top of the restore, so the current commit is no longer a
+    // restore.
+    const afterRestore = await running.host.projectResolver.resolveActivated(project.projectId);
+    const materialization = await readyMaterialization(running.host, project.projectId,
+      "m4c-redo-materialize", stableThreeClipPlan(running, project.projectId));
+    const adoptImpact = await postImpact(running, project.projectId, adoptBody(
+      afterRestore, materialization.materialization_id, "m4c-redo-adopt-impact"));
+    expect(adoptImpact.status, JSON.stringify(adoptImpact.body)).toBe(201);
+    const adopted = await fetch(`${running.origin}/api/migration/v1/projects/${project.projectId}/edits`, {
+      method: "POST", headers: headers(running.origin, running.token),
+      body: JSON.stringify({
+        format: "narralens.adopt-request@1.0", base_revision: afterRestore.revision,
+        expected_source_digest: afterRestore.source_digest,
+        control_revision: afterRestore.control_revision,
+        materialization_id: materialization.materialization_id,
+        impact_id: adoptImpact.body.impact_id, impact_hash: adoptImpact.body.impact_hash,
+        approval: { confirmed: true }, idempotency_key: "m4c-redo-adopt",
+      }),
+    });
+    expect(adopted.status, await adopted.text()).toBe(200);
+
+    // **The redo is refused**, because the current commit is an adoption.
+    const redo = await postIntent(running, project.projectId, "redo");
+    expect(redo.status).toBe(422);
+    const after = await running.host.projectResolver.resolveActivated(project.projectId);
+    expect(after.revision).toBe(afterRestore.revision + 1);
+  }, 900_000);
+
+  it("still answers the restore's own source-before snapshot right after the restore", async () => {
+    const running = await start();
+    hosts.push(running.host); dirs.push(running.base);
+    const project = await adoptedProject(running, "redo-immediate");
+    const impact = await postImpact(running, project.projectId,
+      restoreImpactBody(project.view, project.migrationSnapshot, "m4c-redo2-impact"));
+    expect(impact.status, JSON.stringify(impact.body)).toBe(201);
+    const restored = await postRestore(running, project.projectId, restoreRequestBody(
+      project.view, project.migrationSnapshot,
+      impact.body as { impact_id: string; impact_hash: string }, "m4c-redo2-restore"));
+    expect(restored.status, JSON.stringify(restored.body)).toBe(200);
+    // The current commit is the restore, so the redo names the snapshot that was active
+    // before it — the adoption's.
+    const redo = await postIntent(running, project.projectId, "redo");
+    expect(redo.status, JSON.stringify(redo.body)).toBe(200);
+    expect(redo.body.target_snapshot_id).toBe(project.adoptedSnapshot);
   }, 900_000);
 });
 

@@ -33,6 +33,15 @@ export interface RestoreEnginePlanIntent {
   readonly target_entry_root: string;
   /** The digest the restored closure must reproduce. */
   readonly target_source_digest: Sha256;
+  /**
+   * The content-addressed assets the active root is missing and the restore has to
+   * install.
+   *
+   * ADR-W2.0-006 §D-05 allows exactly one asset change: installing a content-addressed
+   * asset the target references and the active root does not carry. The list is empty for
+   * every target whose files are already present, which is the normal case.
+   */
+  readonly missing_assets: readonly { readonly token: string; readonly sha256: string }[];
   /** The hash of the restore plan this write is authorized against. */
   readonly restore_plan_sha256: Sha256;
   readonly impact_hash: Sha256;
@@ -69,6 +78,7 @@ export function isRestoreEnginePlanIntent(value: EnginePlanIntent): value is Res
     && typeof candidate.target_film_text === "string"
     && typeof candidate.target_entry_root === "string" && candidate.target_entry_root !== ""
     && Array.isArray(candidate.target_roots) && candidate.target_roots.length > 0
+    && Array.isArray(candidate.missing_assets)
     && candidate.target_roots.every((root): boolean => typeof root === "string" && root !== "")
     && SHA256.test(candidate.target_film_sha256 ?? "")
     && SHA256.test(candidate.target_source_digest ?? "")

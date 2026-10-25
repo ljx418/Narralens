@@ -15,6 +15,10 @@ import type { EngineProjection } from "../../../src/contracts/engine-types.js";
  * therefore has to change this file deliberately, which is what makes the cross-check a
  * check.
  *
+ * The shape below is ADR-W2.0-006 §D-03's, field for field. When the ADR and the
+ * implementation disagreed, the implementation regressed to the ADR — so these vectors are
+ * the frozen contract's bytes, not the earlier, richer shape's.
+ *
  * Run with `pnpm test:wave2:m4c:vectors [output-path]`. The default writes the committed
  * file; the evidence capture passes a temporary path and *diffs* it against the committed
  * one, so the gate detects drift rather than causing it.
@@ -25,42 +29,15 @@ const sha = (character: string): string => character.repeat(64);
 const BASE: HistoryRestorePlanPreimage = {
   format: "narralens.history-restore-plan@1.0",
   project_id: "of_d1-30s_0123456789abcdef",
-  current_snapshot_id: sha("a"),
-  current_revision: 2,
-  current_source_digest: sha("b"),
   target_snapshot_id: sha("c"),
-  target_source_digest: sha("d"),
-  target_film_sha256: sha("e"),
-  entry_root: "film.html",
-  roots: [
-    "assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4",
-    "film.html",
-    "narration.wav",
+  current_snapshot_id: sha("a"),
+  current_projection_sha256: sha("1"),
+  target_projection_sha256: sha("2"),
+  affected_ranges: [
+    { clip_id: "shot-001", start_frame: 0, end_frame_exclusive: 300 },
+    { clip_id: "shot-002", start_frame: 300, end_frame_exclusive: 600 },
   ],
-  assets: ["assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4"],
-  subtitles: [{ subtitle_id: "narration", path: "assets/narration.vtt", changed: false }],
-  clips: [
-    {
-      clip_id: "shot-001", track_id: "track_0", kind: "visual",
-      start_frame: 0, end_frame_exclusive: 300,
-      current_source_ref: "assets/1111111111111111111111111111111111111111111111111111111111111111/source.mp4",
-      target_source_ref: "scenes/shot-001.html",
-      current_source_start_frame: 0, current_source_end_frame_exclusive: 300,
-      target_source_start_frame: 0, target_source_end_frame_exclusive: 300,
-      current_overrides_sha256: null, target_overrides_sha256: null,
-      changed: true,
-    },
-    {
-      clip_id: "narration", track_id: "track_1", kind: "sound",
-      start_frame: 0, end_frame_exclusive: 900,
-      current_source_ref: "narration.wav", target_source_ref: "narration.wav",
-      current_source_start_frame: 0, current_source_end_frame_exclusive: 900,
-      target_source_start_frame: 0, target_source_end_frame_exclusive: 900,
-      current_overrides_sha256: null, target_overrides_sha256: null,
-      changed: false,
-    },
-  ],
-  consumers: [
+  affected_consumers: [
     { kind: "visual", id: "shot-001", action: "replace" },
     { kind: "narration", id: "narration", action: "preserve" },
   ],
@@ -68,42 +45,40 @@ const BASE: HistoryRestorePlanPreimage = {
     { lock_type: "visual", scope: "shot", target_id: "shot-001",
       start_frame: 0, end_frame_exclusive: 300 },
   ],
+  target_roots: ["film.html", "narration.wav", "scenes/shot-001.html"],
+  target_subtitles: [{ subtitle_id: "narration", path: "assets/narration.vtt" }],
+  target_frame_count: 900,
   rights_digest: sha("f"),
 };
 
 /** One mutation per field. Every one of them has to move the hash. */
 const MUTATIONS: ReadonlyArray<{ name: string; mutate: (plan: HistoryRestorePlanPreimage) => HistoryRestorePlanPreimage }> = [
+  { name: "format", mutate: (plan) => ({ ...plan, format: "narralens.history-restore-plan@1.1" as typeof plan.format }) },
   { name: "project-id", mutate: (plan) => ({ ...plan, project_id: "of_other_0123456789abcdef" }) },
-  { name: "current-snapshot", mutate: (plan) => ({ ...plan, current_snapshot_id: sha("1") }) },
-  { name: "current-revision", mutate: (plan) => ({ ...plan, current_revision: 3 }) },
-  { name: "current-digest", mutate: (plan) => ({ ...plan, current_source_digest: sha("2") }) },
   { name: "target-snapshot", mutate: (plan) => ({ ...plan, target_snapshot_id: sha("3") }) },
-  { name: "target-digest", mutate: (plan) => ({ ...plan, target_source_digest: sha("4") }) },
-  { name: "target-film", mutate: (plan) => ({ ...plan, target_film_sha256: sha("5") }) },
-  { name: "entry-root", mutate: (plan) => ({ ...plan, entry_root: "narration.wav" }) },
+  { name: "current-snapshot", mutate: (plan) => ({ ...plan, current_snapshot_id: sha("4") }) },
+  { name: "current-projection", mutate: (plan) => ({ ...plan, current_projection_sha256: sha("5") }) },
+  { name: "target-projection", mutate: (plan) => ({ ...plan, target_projection_sha256: sha("6") }) },
   {
-    name: "roots",
-    mutate: (plan) => ({ ...plan, roots: [...plan.roots, "scenes/shot-001.html"] }),
-  },
-  { name: "assets", mutate: (plan) => ({ ...plan, assets: [] }) },
-  {
-    name: "subtitles",
-    mutate: (plan) => ({ ...plan, subtitles: [{ subtitle_id: "narration", path: "assets/other.vtt", changed: false }] }),
+    name: "affected-ranges",
+    mutate: (plan) => ({ ...plan, affected_ranges: [{ clip_id: "shot-001", start_frame: 0, end_frame_exclusive: 299 }] }),
   },
   {
-    name: "clips",
-    mutate: (plan) => ({ ...plan, clips: plan.clips.map((clip) => clip.clip_id === "shot-001"
-      ? { ...clip, changed: false } : clip) }),
-  },
-  {
-    name: "consumers",
-    mutate: (plan) => ({ ...plan, consumers: [{ kind: "visual", id: "shot-001", action: "preserve" }] }),
+    name: "affected-consumers",
+    mutate: (plan) => ({ ...plan, affected_consumers: [{ kind: "visual", id: "shot-001", action: "preserve" }] }),
   },
   {
     name: "required-locks",
-    mutate: (plan) => ({ ...plan, required_locks: [] }),
+    mutate: (plan) => ({ ...plan, required_locks: [{
+      lock_type: "visual", scope: "project", target_id: "", start_frame: 0, end_frame_exclusive: 900 }] }),
   },
-  { name: "rights-digest", mutate: (plan) => ({ ...plan, rights_digest: sha("6") }) },
+  { name: "target-roots", mutate: (plan) => ({ ...plan, target_roots: [...plan.target_roots, "settings.json"] }) },
+  {
+    name: "target-subtitles",
+    mutate: (plan) => ({ ...plan, target_subtitles: [{ subtitle_id: "narration", path: "assets/other.vtt" }] }),
+  },
+  { name: "target-frame-count", mutate: (plan) => ({ ...plan, target_frame_count: 901 }) },
+  { name: "rights-digest", mutate: (plan) => ({ ...plan, rights_digest: sha("7") }) },
 ];
 
 /**
@@ -138,11 +113,7 @@ const BUILDER_PLAN = buildHistoryRestorePlan({
       source_ref: "scenes/shot-001.html", overrides_digest: null },
   ], [], 300),
   current_snapshot_id: sha("a"),
-  current_revision: 2,
-  current_source_digest: sha("b"),
   target_snapshot_id: sha("c"),
-  target_source_digest: sha("d"),
-  target_film_sha256: sha("e"),
   target_roots: ["film.html", "scenes/shot-001.html"],
   target_subtitles: [],
   narration_target_path: null,
@@ -161,11 +132,11 @@ const CASES: ReadonlyArray<{ name: string; plan: HistoryRestorePlanPreimage }> =
     name: "reordered-arrays",
     plan: {
       ...BASE,
-      roots: [...BASE.roots].reverse(),
-      assets: [...BASE.assets].reverse(),
-      clips: [...BASE.clips].reverse(),
-      consumers: [...BASE.consumers].reverse(),
+      affected_ranges: [...BASE.affected_ranges].reverse(),
+      affected_consumers: [...BASE.affected_consumers].reverse(),
       required_locks: [...BASE.required_locks].reverse(),
+      target_roots: [...BASE.target_roots].reverse(),
+      target_subtitles: [...BASE.target_subtitles].reverse(),
     },
   },
   { name: "builder", plan: builderPlan },

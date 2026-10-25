@@ -1,6 +1,6 @@
 import { createHash, randomUUID } from "node:crypto";
-import { mkdir, mkdtemp, readFile, readdir, realpath, rm } from "node:fs/promises";
-import { join } from "node:path";
+import { mkdir, mkdtemp, readFile, readdir, realpath, rm, writeFile } from "node:fs/promises";
+import { dirname, join } from "node:path";
 import type { ControlledWriteFailureResponseV1, ControlledWriteResponseV1,
   RestoreRequestV1 } from "../../contracts/wave2-types.js";
 import { HttpError } from "../api-error.js";
@@ -67,6 +67,21 @@ export type HistoryFaultBoundary =
   | "after_stage" | "after_validate" | "after_snapshot_publish" | "after_prepared"
   | "after_published" | "after_active_inspect" | "after_committed";
 
+/**
+ * The publisher's own boundaries, in the registry's vocabulary.
+ *
+ * The publisher is shared with M4B and its boundary names are its own, so the mapping lives
+ * here rather than in the publisher: the publisher must not grow a vocabulary for one
+ * caller's test matrix.
+ */
+const PUBLISHER_FAULT_POINTS: Readonly<Record<string, string>> = Object.freeze({
+  asset_temp_fsynced: "before_asset_install",
+  asset_installed: "after_asset_install",
+  film_temp_fsynced: "after_film_temp_fsync",
+  film_renamed: "after_film_rename",
+  parent_fsynced: "after_parent_fsync",
+});
+
 export interface HistoryServiceDeps {
   readonly coordinator: ProjectCoordinator;
   readonly revisions: RevisionStore;
@@ -83,8 +98,14 @@ export interface HistoryServiceDeps {
   readonly translator: HistoryCommandTranslator;
   readonly publisher: AuthorSourcePublisher;
   readonly stagingRoot: string;
-  /** Test-only crash seams; production composition omits them. */
-  readonly fault?: (boundary: HistoryFaultBoundary) => void | Promise<void>;
+  /**
+   * Test-only crash seams; production composition omits them.
+   *
+   * The seam takes *any* boundary name, because the matrix walks two vocabularies: the
+   * service's own boundaries and the publisher's. The publisher's boundaries are mapped in
+   * `#publisherFault` so the registry can name them in one vocabulary.
+   */
+  readonly fault?: (boundary: string) => void;
 }
 
 /** Test-only marker that models process loss: online compensation must not run. */
@@ -210,6 +231,7 @@ export class HistoryService {
           restore_plan_sha256: context.plan.plan_sha256,
           impact_hash: request.impact_hash,
           rights_digest: context.rights.rights_digest,
+          missing_assets: context.missing_assets,
         };
         const ctx = {
           correlationId, projectId, idempotencyKey: request.idempotency_key,
@@ -222,6 +244,22 @@ export class HistoryService {
           signal: signal === undefined ? AbortSignal.timeout(120_000)
             : AbortSignal.any([AbortSignal.timeout(120_000), signal]),
         };
+        // The content-addressed assets the active root is missing are read out of the
+        // snapshot and staged into the isolated root's `inputs` area, with their digests
+        // proved there and then again in the adapter. The Host reads them; the adapter
+        // never learns a path.
+        for (const asset of context.missing_assets) {
+          const bytes = await readFile(join(context.target.source_root, asset.token));
+          if (sha256(bytes) !== asset.sha256) {
+            throw new HttpError(422, "UNSUPPORTED_EDIT",
+              "The restore target's asset does not match its content address",
+              { token: asset.token }, correlationId);
+          }
+          const input = join(isolated, "inputs", asset.sha256, "source.mp4");
+          await mkdir(dirname(input), { recursive: true });
+          await writeFile(input, bytes);
+        }
+
         const enginePlan = await resolved.port.plan({
           project_id: projectId, engine: "openfilm", source_digest: view.source_digest,
         }, intent, ctx);
@@ -248,6 +286,7 @@ export class HistoryService {
         }
 
         const stagedRoot = await realpath(join(isolated, staged.isolated_relative_root));
+        await this.#deps.fault?.("before_snapshot_publish");
         const digestRoots = [context.target.entry_root,
           ...context.target.roots.filter((root) => root !== context.target.entry_root)];
         const published = await this.#deps.snapshots.publish({
@@ -267,6 +306,7 @@ export class HistoryService {
         const beforeFilm = sha256(await readFile(join(view.source_root.value, "film.html")));
         const afterFilm = context.target.film_sha256;
         const filmTempToken = `.narralens-${transactionId}.film.tmp`;
+        await this.#deps.fault?.("before_prepared");
         this.#deps.history.prepare({
           transaction_id: transactionId, project_id: projectId,
           target_snapshot_id: context.target.snapshot_id,
@@ -278,9 +318,11 @@ export class HistoryService {
           impact_id: request.impact_id, impact_hash: request.impact_hash,
           rights_digest: context.rights.rights_digest,
           required_locks: context.plan.required_locks,
-          // A restore installs no asset: the target's files are already in the active tree
-          // with identical bytes, which the planner proved before the stage.
-          installed_assets: [],
+          // The content-addressed assets the restore installed, if any. ADR-W2.0-006 §D-05
+          // allows exactly this one asset change.
+          installed_assets: context.missing_assets.map((asset) => ({
+            token: asset.token, sha256: asset.sha256,
+          })),
           film_temp_token: filmTempToken,
           publish_intent_created_at: new Date().toISOString(),
         });
@@ -291,11 +333,13 @@ export class HistoryService {
 
         await this.#deps.publisher.publish({
           activeRoot: view.source_root.value, stagedRoot, transactionId,
-          filmTempToken, installedAssets: [],
+          filmTempToken, installedAssets: context.missing_assets.map((asset) => ({
+            token: asset.token, sha256: asset.sha256,
+          })),
           protectedTokens: context.current_roots,
           expectedFilmBeforeSha256: beforeFilm,
           expectedFilmAfterSha256: afterFilm,
-        });
+        }, this.#publisherFault);
         await this.#deps.fault?.("after_published");
 
         // The active source must now *be* the target, read by the pinned upstream over the
@@ -329,7 +373,8 @@ export class HistoryService {
             frame_count: context.target_projection.frame_count,
           },
           restorePlanSha256: context.plan.plan_sha256,
-        });
+        }, (point) => { this.#deps.fault?.(point); });
+        await this.#deps.fault?.("before_response");
         await this.#deps.fault?.("after_committed");
         return committed;
       } catch (error) {
@@ -482,6 +527,18 @@ export class HistoryService {
   }
 
   // ── internals ───────────────────────────────────────────────────────────────────────
+
+  /**
+   * The bridge from the publisher's boundary names to the registry's.
+   *
+   * The publisher is M4B's module and its vocabulary is its own; the fault matrix needs
+   * one vocabulary, and the mapping is the only place the two meet.
+   */
+  readonly #publisherFault = (boundary: string): void => {
+    const mapped = PUBLISHER_FAULT_POINTS[boundary];
+    if (mapped === undefined) return;
+    this.#deps.fault?.(mapped);
+  };
 
   async #capabilities(projectId: string, correlationId: string) {
     const resolved = this.#deps.engines.resolve(projectId, correlationId);

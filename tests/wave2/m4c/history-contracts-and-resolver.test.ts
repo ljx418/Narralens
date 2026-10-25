@@ -1,4 +1,5 @@
-import { cp, mkdir, rm } from "node:fs/promises";
+import { cp, mkdir, mkdtemp, rm, symlink } from "node:fs/promises";
+import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { NarralensHost } from "../../../src/host/server.js";
@@ -23,7 +24,11 @@ import {
 
 const hosts: NarralensHost[] = [];
 const dirs: string[] = [];
-afterEach(async () => { await stopAll(hosts.splice(0), dirs.splice(0)); });
+const outsideDirs: string[] = [];
+afterEach(async () => {
+  await stopAll(hosts.splice(0), dirs.splice(0));
+  await Promise.all(outsideDirs.splice(0).map((dir) => rm(dir, { recursive: true, force: true })));
+});
 
 describe("M4C-01: the restore contracts", () => {
   it("accepts a well-formed restore request and refuses anything else", () => {
@@ -180,6 +185,87 @@ describe("M4C-03: the negative matrix fails closed", () => {
     // **No restore impact was written.** The adoption's own impact is a different
     // operation and is still there; what must not exist is an authorization for a restore
     // that could not be proved.
+    expect(running.host.impacts.byProject(project.projectId)
+      .filter((row) => row.operation === "restore_snapshot")).toEqual([]);
+  }, 900_000);
+
+  it("refuses a snapshot whose source directory is a symlink to a directory outside the project", async () => {
+    // **B-01: the escape.** The snapshot's `source` is a symlink to a directory outside the
+    // project, and that directory's bytes are *exactly* the bytes the database records for
+    // this snapshot. So the digest check passes, the upstream reads a perfectly good film,
+    // and the only thing that can catch it is the containment check on `source` itself.
+    //
+    // The resolver used to `stat()` that path — which follows links — and then take the
+    // outside directory as the digest's own root, so the digest's containment check (which
+    // is relative to that root) passed on bytes that were never in the project's authority
+    // domain.
+    const running = await start();
+    hosts.push(running.host); dirs.push(running.base);
+    const project = await adoptedProject(running, "symlink-escape");
+    const migration = await running.host.historical.resolve(project.projectId,
+      project.migrationSnapshot, "m4c-symlink-roots");
+    const digest = running.host.revisions.snapshotRow(project.migrationSnapshot)?.source_digest ?? "";
+
+    // The bytes live *outside* the project, and they are the right bytes.
+    const outside = await mkdtemp(join(tmpdir(), "narralens-outside-"));
+    outsideDirs.push(outside);
+    await cp(join(running.host.snapshots.snapshotRoot(project.projectId, project.migrationSnapshot), "source"),
+      outside, { recursive: true });
+
+    // A snapshot that looks entirely legitimate: its row, its digest and its projection fact.
+    const escape = "2".repeat(64);
+    const escapeRoot = join(running.host.snapshots.snapshotRoot(project.projectId, escape));
+    await mkdir(escapeRoot, { recursive: true });
+    await symlink(outside, join(escapeRoot, "source"), "dir");
+    running.host.revisions.compose((db) => db.prepare(
+      "INSERT INTO snapshot(snapshot_id, project_id, source_digest, engine, created_at) VALUES(?,?,?,'openfilm',?)")
+      .run(escape, project.projectId, digest, new Date().toISOString()));
+    const transaction = running.host.revisions.projectTransactions(project.projectId)
+      .find((row) => row.state === "committed");
+    const frameCount = (await running.host.projectResolver.resolveActivated(project.projectId)).frame_count;
+    // **The escape snapshot is committed.** Otherwise the *committed* rule would refuse it
+    // and the symlink rule would never be reached — the test would pass without proving
+    // anything about the escape. So the project's own committed transaction is pointed at
+    // the escape, which makes every other proof the resolver makes succeed.
+    running.host.revisions.compose((db) => db.prepare(
+      "UPDATE project_transaction SET snapshot_id=? WHERE transaction_id=?")
+      .run(escape, transaction?.transaction_id ?? "txn_unknown"));
+    running.host.revisions.compose((db) => db.prepare(
+      `INSERT INTO openfilm_projection_fact(project_id, snapshot_id, migration_id, source_digest,
+        engine_upstream_sha, roots_json, subtitles_json, frame_count, transaction_id)
+       VALUES(?,?,?,?,?,?,?,?,?)`)
+      .run(project.projectId, escape, "mig_escape", digest,
+        "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+        JSON.stringify(migration.roots), JSON.stringify(migration.subtitles),
+        frameCount, transaction?.transaction_id ?? "txn_unknown"));
+
+    // **The refusal.** The bytes match the digest, and the answer is still no.
+    await expect(running.host.historical.resolve(project.projectId, escape, "m4c-symlink"))
+      .rejects.toMatchObject({ status: 422 });
+
+    // **And nothing was written.** The source, the revision, the pointer, the impact, the
+    // outbox and the idempotency rows are all exactly what they were.
+    const before = {
+      revision: running.host.revisions.activeCommit(project.projectId)?.revision,
+      snapshot: running.host.revisions.activeCommit(project.projectId)?.snapshot_id,
+      impacts: running.host.impacts.byProject(project.projectId).length,
+      outbox: running.host.revisions.pendingOutboxCount(),
+      transactions: running.host.revisions.projectTransactions(project.projectId).length,
+    };
+    const response = await fetch(
+      `${running.origin}/api/migration/v1/projects/${project.projectId}/impact`, {
+        method: "POST", headers: headers(running.origin, running.token),
+        body: JSON.stringify(restoreImpactBody(project.view, escape, "m4c-symlink-impact")),
+      });
+    expect(response.status).toBe(422);
+    const after = {
+      revision: running.host.revisions.activeCommit(project.projectId)?.revision,
+      snapshot: running.host.revisions.activeCommit(project.projectId)?.snapshot_id,
+      impacts: running.host.impacts.byProject(project.projectId).length,
+      outbox: running.host.revisions.pendingOutboxCount(),
+      transactions: running.host.revisions.projectTransactions(project.projectId).length,
+    };
+    expect(after).toEqual(before);
     expect(running.host.impacts.byProject(project.projectId)
       .filter((row) => row.operation === "restore_snapshot")).toEqual([]);
   }, 900_000);

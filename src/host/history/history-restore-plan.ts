@@ -2,90 +2,54 @@ import { createHash } from "node:crypto";
 import { HttpError } from "../api-error.js";
 import { canonicalJson, compareUtf8 } from "../engine/source-digest-v1.js";
 import type { EngineClip, EngineProjection } from "../../contracts/engine-types.js";
-import type { AffectedConsumer } from "../../contracts/wave2-types.js";
+import type { AffectedConsumer, HalfOpenRange } from "../../contracts/wave2-types.js";
 import type { AffectedLock } from "../projects/lock-service.js";
 
 /**
- * `HistoryRestorePlanV1` (M4C gate §3.3, ADR-W2.0-006).
+ * `HistoryRestorePlanV1` — the one authoritative contract (ADR-W2.0-006 §D-03).
  *
- * The plan is the *canonical difference* between the project's current source and the
- * historical snapshot it is about to restore. It is the one thing the impact authorizes and
- * the one thing the restore re-derives, and the two must agree on the *same bytes* — so the
- * plan carries a hash over its own canonical form, and the restore refuses to proceed unless
- * the hash it rebuilds is the hash the impact was computed from.
+ * The shape below is the frozen ADR's, field for field. An earlier implementation of M4C
+ * carried a different, richer shape; the independent external review of the frozen candidate
+ * recorded that as MAJOR M-03, and the ADR is the contract. So the implementation regressed
+ * to it rather than the other way round.
  *
- * Three properties this module has to have, and each of them was a defect somewhere else:
+ * What the ADR's shape gives up, and why that is not a loss:
  *
- * 1. **It is a function of content, not of order.** Every array is sorted by an explicit,
- *    total order before it is serialized, and `canonicalJson` sorts object keys. A plan
- *    whose hash moved because the Host enumerated two clips in a different order would be
- *    indistinguishable from a plan that genuinely changed, and the restore's "the facts
- *    moved" check would fire at random.
- * 2. **It classifies, it does not count.** The plan names *which* consumers change, *which*
- *    lock classes the change touches and *which* clips carry it. A blanket "everything is
- *    affected" answer would pass every lock check that matters and fail the one that does
- *    not: a restore that touches only the narration must not be blocked by a visual lock,
- *    and a restore that touches a shot must be blocked by one.
- * 3. **It refuses what it cannot describe.** A target with a different clip identity, a
- *    different track topology, an unmodelled field or a subtitle set that does not match is
- *    a 422, not a smaller plan. Under-counting a consumer is the one error no later check
- *    can catch, because the check that would have caught it is the one being computed.
+ * - The per-clip diff is no longer a field. It was never needed by a consumer: the affected
+ *   ranges name the clips, the consumers name the kinds, and the two projection digests bind
+ *   the inputs the diff was computed from. The per-clip diff is still *computed* — it is how
+ *   the ranges, the consumers and the locks are derived — but it is no longer part of the
+ *   hashed document, so there is nothing to keep in step with a second copy of it.
+ * - The entry root is no longer a field. `SourceDigestV1` fixes the entry to the first
+ *   *declared* root, so a sorted root set cannot say which root was first — but the target
+ *   snapshot id is in the plan, and the target's roots come from that snapshot's immutable
+ *   projection fact, so the entry is bound transitively and unambiguously.
+ * - The target's asset list is no longer a field: it is derived from the target's roots,
+ *   which are.
+ *
+ * What it gains is the thing the review said was missing: **`affected_ranges` is inside the
+ * hashed plan**. The ranges a restore touches are now part of the bytes the plan hash is
+ * taken over, so "the impact authorized this plan" and "this plan touches these ranges" are
+ * the same statement. The impact no longer computes ranges beside the plan and compares
+ * hashes that never covered them.
  */
 
 /** The domain separator. A plan hash can never collide with another domain's hash. */
 export const HISTORY_RESTORE_PLAN_DOMAIN = "narralens-history-restore-plan-v1\n";
 
-export interface HistoryRestoreClipV1 {
-  readonly clip_id: string;
-  readonly track_id: string;
-  readonly kind: "visual" | "sound";
-  readonly start_frame: number;
-  readonly end_frame_exclusive: number;
-  readonly current_source_ref: string;
-  readonly target_source_ref: string;
-  readonly current_source_start_frame: number | null;
-  readonly current_source_end_frame_exclusive: number | null;
-  readonly target_source_start_frame: number | null;
-  readonly target_source_end_frame_exclusive: number | null;
-  readonly current_overrides_sha256: string | null;
-  readonly target_overrides_sha256: string | null;
-  /** Whether this clip's bytes or its place on the timeline differ. */
-  readonly changed: boolean;
-}
-
-export interface HistoryRestoreSubtitleV1 {
-  readonly subtitle_id: string;
-  readonly path: string;
-  readonly changed: boolean;
-}
-
 export interface HistoryRestorePlanV1 {
   readonly format: "narralens.history-restore-plan@1.0";
   readonly project_id: string;
-  readonly current_snapshot_id: string;
-  readonly current_revision: number;
-  readonly current_source_digest: string;
   readonly target_snapshot_id: string;
-  readonly target_source_digest: string;
-  readonly target_film_sha256: string;
-  /**
-   * The root the digest treats as the entry.
-   *
-   * `SourceDigestV1` fixes the entry to the *first declared root*, and the declared order is
-   * part of the identity: a closure whose entry is `film.html` and one whose entry is an
-   * asset are different closures with different digests. The plan therefore records the
-   * entry separately from the sorted root set, because the sorted set alone cannot say which
-   * root was first.
-   */
-  readonly entry_root: string;
-  /** Every declared root of the target, in lexicographic order. */
-  readonly roots: readonly string[];
-  /** The target's media roots, in lexicographic order. */
-  readonly assets: readonly string[];
-  readonly subtitles: readonly HistoryRestoreSubtitleV1[];
-  readonly clips: readonly HistoryRestoreClipV1[];
-  readonly consumers: readonly AffectedConsumer[];
+  readonly current_snapshot_id: string;
+  readonly current_projection_sha256: string;
+  readonly target_projection_sha256: string;
+  readonly affected_ranges: readonly (HalfOpenRange & { clip_id: string })[];
+  readonly affected_consumers: readonly AffectedConsumer[];
   readonly required_locks: readonly AffectedLock[];
+  readonly target_roots: readonly string[];
+  readonly target_subtitles: readonly { subtitle_id: string; path: string }[];
+  readonly target_frame_count: number;
   readonly rights_digest: string;
   readonly plan_sha256: string;
 }
@@ -98,11 +62,7 @@ export interface HistoryRestorePlanInput {
   readonly current: EngineProjection;
   readonly target: EngineProjection;
   readonly current_snapshot_id: string;
-  readonly current_revision: number;
-  readonly current_source_digest: string;
   readonly target_snapshot_id: string;
-  readonly target_source_digest: string;
-  readonly target_film_sha256: string;
   /** The target's declared roots, in the order its digest was taken over them. */
   readonly target_roots: readonly string[];
   readonly target_subtitles: readonly { readonly subtitle_id: string; readonly path: string }[];
@@ -118,8 +78,51 @@ function fail(projectId: string, message: string, details?: Record<string, unkno
   return new HttpError(422, "INVALID_REQUEST", message, details, projectId);
 }
 
+/**
+ * The canonical digest of a projection.
+ *
+ * It covers the *content* of a projection — its clips, their places and their references,
+ * its subtitles and its length — and deliberately not the volatile fields around them
+ * (`snapshot_id`, `project_revision`, `control_revision`, the preview descriptor and the
+ * capability map). A projection's identity is what it contains, not which revision of it
+ * was read.
+ *
+ * The form is a plain canonical JSON document, so the independent Python implementation can
+ * reproduce it byte for byte from the same rules.
+ */
+export function projectionDigest(projection: EngineProjection): string {
+  const document = {
+    format: "narralens.history-restore-projection@1.0",
+    frame_count: projection.frame_count,
+    fps: { num: projection.fps.num, den: projection.fps.den },
+    clips: [...projection.clips]
+      .map((clip) => ({
+        clip_id: clip.clip_id,
+        track_id: clip.track_id,
+        kind: clip.kind,
+        start_frame: clip.frame_range.start_frame,
+        end_frame_exclusive: clip.frame_range.end_frame_exclusive,
+        source_ref: clip.source_ref,
+        source_start_frame: clip.source_frame_range?.start_frame ?? null,
+        source_end_frame_exclusive: clip.source_frame_range?.end_frame_exclusive ?? null,
+        overrides_sha256: clip.overrides_digest,
+      }))
+      .sort((left, right) => compareUtf8(left.clip_id, right.clip_id)),
+    subtitles: [...projection.subtitles]
+      .map((subtitle) => ({
+        subtitle_id: subtitle.subtitle_id,
+        path: subtitle.source_ref,
+        content_sha256: subtitle.content_sha256,
+      }))
+      .sort((left, right) => compareUtf8(left.subtitle_id, right.subtitle_id)),
+  };
+  return createHash("sha256").update("narralens-history-restore-projection-v1\n")
+    .update(canonicalJson(document)).digest("hex");
+}
+
 /** start, then clip id — total, so the result is a permutation-invariant list. */
-export function compareRestoreClips(left: HistoryRestoreClipV1, right: HistoryRestoreClipV1): number {
+export function compareRestoreRanges(left: HalfOpenRange & { clip_id: string },
+  right: HalfOpenRange & { clip_id: string }): number {
   return left.start_frame - right.start_frame || compareUtf8(left.clip_id, right.clip_id);
 }
 
@@ -137,11 +140,6 @@ export function compareRestoreLocks(left: AffectedLock, right: AffectedLock): nu
     || left.end_frame_exclusive - right.end_frame_exclusive;
 }
 
-/** subtitle id, then path. */
-export function compareRestoreSubtitles(left: HistoryRestoreSubtitleV1, right: HistoryRestoreSubtitleV1): number {
-  return compareUtf8(left.subtitle_id, right.subtitle_id) || compareUtf8(left.path, right.path);
-}
-
 /**
  * The canonical order of every array that enters the hash.
  *
@@ -151,24 +149,17 @@ export function compareRestoreSubtitles(left: HistoryRestoreSubtitleV1, right: H
 export function sortHistoryRestorePlan(plan: HistoryRestorePlanPreimage): HistoryRestorePlanPreimage {
   return {
     ...plan,
-    roots: [...plan.roots].sort(compareUtf8),
-    assets: [...plan.assets].sort(compareUtf8),
-    subtitles: [...plan.subtitles].sort(compareRestoreSubtitles),
-    clips: [...plan.clips].sort(compareRestoreClips),
-    consumers: [...plan.consumers].sort(compareRestoreConsumers),
+    affected_ranges: [...plan.affected_ranges].sort(compareRestoreRanges),
+    affected_consumers: [...plan.affected_consumers].sort(compareRestoreConsumers),
     required_locks: [...plan.required_locks].sort(compareRestoreLocks),
+    target_roots: [...plan.target_roots].sort(compareUtf8),
+    target_subtitles: [...plan.target_subtitles]
+      .sort((left, right) => compareUtf8(left.subtitle_id, right.subtitle_id)
+        || compareUtf8(left.path, right.path)),
   };
 }
 
-/**
- * The exact bytes the hash is taken over. Exposed so a second implementation can check it.
- *
- * The plan's own hash is removed from the preimage **here**, not only at the call sites.
- * A hash taken over bytes that contain the hash is a hash that cannot be computed, and a
- * caller who passed a finished plan would get a different answer from a caller who passed
- * the preimage — which is exactly the kind of "two functions, two answers" this module
- * exists to prevent.
- */
+/** The exact bytes the hash is taken over. Exposed so a second implementation can check it. */
 export function historyRestorePlanPreimage(plan: HistoryRestorePlanPreimage | HistoryRestorePlanV1): string {
   const { plan_sha256: _ignored, ...rest } = plan as HistoryRestorePlanV1;
   return `${HISTORY_RESTORE_PLAN_DOMAIN}${canonicalJson(sortHistoryRestorePlan(rest))}`;
@@ -184,14 +175,19 @@ export function verifyHistoryRestorePlanHash(plan: HistoryRestorePlanV1): boolea
   return computeHistoryRestorePlanHash(rest) === plan_sha256;
 }
 
-/** The roots a digest must be taken over, reconstructed from the plan. */
-export function restoreDigestRoots(plan: HistoryRestorePlanPreimage): string[] {
-  return [plan.entry_root, ...plan.roots.filter((root) => root !== plan.entry_root)];
+function visualShotLock(clip: EngineClip): AffectedLock {
+  return { lock_type: "visual", scope: "shot", target_id: clip.clip_id,
+    start_frame: clip.frame_range.start_frame, end_frame_exclusive: clip.frame_range.end_frame_exclusive };
 }
 
-function rangeChanged(left: EngineClip, right: EngineClip): boolean {
-  return left.frame_range.start_frame !== right.frame_range.start_frame
-    || left.frame_range.end_frame_exclusive !== right.frame_range.end_frame_exclusive;
+function projectLock(lockType: AffectedLock["lock_type"], endFrameExclusive: number): AffectedLock {
+  return { lock_type: lockType, scope: "project", target_id: "", start_frame: 0,
+    end_frame_exclusive: endFrameExclusive };
+}
+
+function visualExtent(clips: readonly EngineClip[]): number {
+  return clips.filter((clip) => clip.kind !== "sound")
+    .reduce((max, clip) => Math.max(max, clip.frame_range.end_frame_exclusive), 0);
 }
 
 function sourceRangeChanged(left: EngineClip, right: EngineClip): boolean {
@@ -202,17 +198,25 @@ function sourceRangeChanged(left: EngineClip, right: EngineClip): boolean {
   return leftStart !== rightStart || leftEnd !== rightEnd;
 }
 
-function visualExtent(clips: readonly EngineClip[]): number {
-  return clips.filter((clip) => clip.kind !== "sound")
-    .reduce((max, clip) => Math.max(max, clip.frame_range.end_frame_exclusive), 0);
+function frameRangeChanged(left: EngineClip, right: EngineClip): boolean {
+  return left.frame_range.start_frame !== right.frame_range.start_frame
+    || left.frame_range.end_frame_exclusive !== right.frame_range.end_frame_exclusive;
 }
 
 /**
  * Build the plan.
  *
- * The order of the checks is the order of the evidence: an incomplete projection cannot be
- * classified at all, a different clip identity is a different film, and only then is the
- * difference itself described.
+ * The classification is ADR D-04's, rule by rule:
+ *
+ * - a clip whose **content** changed — its source, its trim or its overrides — is a
+ *   *visual shot* lock on that clip;
+ * - a change to the clip **topology** — a clip added or removed, a clip's boundary moved,
+ *   the clips reordered, or the project's total frame count changed — is a *visual project*
+ *   and a *duration project* lock, because the change is no longer local to one shot;
+ * - a changed **narration or audio** clip is a *narration project* lock;
+ * - a changed **subtitle** is a *narration project* lock and a subtitle consumer;
+ * - a **shared asset** records every consumer of it and is locked by the clips that use it;
+ * - anything that cannot be classified, or that exceeds a ceiling, is a 422.
  */
 export function buildHistoryRestorePlan(input: HistoryRestorePlanInput,
   projectId: string): HistoryRestorePlanV1 {
@@ -225,74 +229,11 @@ export function buildHistoryRestorePlan(input: HistoryRestorePlanInput,
   if (input.target_roots.length === 0) {
     throw fail(projectId, "the target declares no roots", { target_snapshot_id: input.target_snapshot_id });
   }
-  const entryRoot = input.target_roots[0]!;
-  if (!input.target_roots.includes(entryRoot)) {
-    throw fail(projectId, "the target's entry root is not among its declared roots");
-  }
 
   const currentById = new Map(input.current.clips.map((clip) => [clip.clip_id, clip] as const));
   const targetById = new Map(input.target.clips.map((clip) => [clip.clip_id, clip] as const));
-  const missing = [...currentById.keys()].filter((id) => !targetById.has(id));
-  const added = [...targetById.keys()].filter((id) => !currentById.has(id));
-  if (missing.length > 0 || added.length > 0) {
-    throw fail(projectId,
-      "the target does not have the same clip identity as the current source, which M4C does not restore",
-      { missing, added });
-  }
-  for (const [clipId, current] of currentById) {
-    const target = targetById.get(clipId)!;
-    if (current.track_id !== target.track_id) {
-      throw fail(projectId, "the target moves a clip to another track, which M4C does not restore",
-        { clip_id: clipId, current_track: current.track_id, target_track: target.track_id });
-    }
-  }
+  const clipIds = [...new Set([...currentById.keys(), ...targetById.keys()])].sort(compareUtf8);
 
-  // ── the clips, and whether each one changes ────────────────────────────────────────
-  const clips: HistoryRestoreClipV1[] = [];
-  for (const [clipId, current] of currentById) {
-    const target = targetById.get(clipId)!;
-    const changed = current.source_ref !== target.source_ref
-      || sourceRangeChanged(current, target)
-      || rangeChanged(current, target)
-      || current.overrides_digest !== target.overrides_digest;
-    clips.push({
-      clip_id: clipId,
-      track_id: current.track_id,
-      kind: current.kind === "sound" ? "sound" : "visual",
-      start_frame: target.frame_range.start_frame,
-      end_frame_exclusive: target.frame_range.end_frame_exclusive,
-      current_source_ref: current.source_ref,
-      target_source_ref: target.source_ref,
-      current_source_start_frame: current.source_frame_range?.start_frame ?? null,
-      current_source_end_frame_exclusive: current.source_frame_range?.end_frame_exclusive ?? null,
-      target_source_start_frame: target.source_frame_range?.start_frame ?? null,
-      target_source_end_frame_exclusive: target.source_frame_range?.end_frame_exclusive ?? null,
-      current_overrides_sha256: current.overrides_digest,
-      target_overrides_sha256: target.overrides_digest,
-      changed,
-    });
-  }
-  clips.sort(compareRestoreClips);
-
-  // ── subtitles ───────────────────────────────────────────────────────────────────────
-  const currentSubtitles = new Map(input.current.subtitles.map((subtitle) => [subtitle.subtitle_id, subtitle] as const));
-  const targetSubtitles = new Map(input.target.subtitles.map((subtitle) => [subtitle.subtitle_id, subtitle] as const));
-  const subtitleMissing = [...currentSubtitles.keys()].filter((id) => !targetSubtitles.has(id));
-  const subtitleAdded = [...targetSubtitles.keys()].filter((id) => !currentSubtitles.has(id));
-  if (subtitleMissing.length > 0 || subtitleAdded.length > 0) {
-    throw fail(projectId, "the target does not carry the same subtitle set as the current source",
-      { missing: subtitleMissing, added: subtitleAdded });
-  }
-  const subtitles: HistoryRestoreSubtitleV1[] = [];
-  for (const [subtitleId, target] of targetSubtitles) {
-    const current = currentSubtitles.get(subtitleId)!;
-    const changed = current.content_sha256 !== target.content_sha256
-      || current.source_ref !== target.source_ref;
-    subtitles.push({ subtitle_id: subtitleId, path: target.source_ref, changed });
-  }
-  subtitles.sort(compareRestoreSubtitles);
-
-  // ── consumers and locks ─────────────────────────────────────────────────────────────
   const consumers = new Map<string, AffectedConsumer>();
   const addConsumer = (kind: AffectedConsumer["kind"], id: string, action: AffectedConsumer["action"]): void => {
     consumers.set(`${kind} ${id} ${action}`, { kind, id, action });
@@ -309,142 +250,213 @@ export function buildHistoryRestorePlan(input: HistoryRestorePlanInput,
 
   const currentVisualEnd = visualExtent(input.current.clips);
   const targetVisualEnd = visualExtent(input.target.clips);
-  const durationChanged = currentVisualEnd !== targetVisualEnd;
-  const projectEnd = Math.max(currentVisualEnd, targetVisualEnd);
+  // The project's own length: the larger of the two projections' frame counts and the two
+  // visual extents. A project-scope lock covers the whole project, so its range has to be
+  // the whole project — and a projection's frame count is its own statement of the length.
+  const projectEnd = Math.max(currentVisualEnd, targetVisualEnd,
+    input.current.frame_count, input.target.frame_count, 1);
 
-  const narrationClipIds = new Set<string>();
-  const changedVisualClipIds: string[] = [];
-  const usersByAsset = new Map<string, string[]>();
+  const ranges: Array<HalfOpenRange & { clip_id: string }> = [];
+  const addRange = (clipId: string, range: { start_frame: number; end_frame_exclusive: number }): void => {
+    ranges.push({ clip_id: clipId, start_frame: range.start_frame, end_frame_exclusive: range.end_frame_exclusive });
+  };
 
-  for (const clip of clips) {
-    const current = currentById.get(clip.clip_id)!;
-    const target = targetById.get(clip.clip_id)!;
-    if (clip.kind === "visual") {
-      addConsumer("visual", clip.clip_id, clip.changed ? "replace" : "preserve");
-      if (clip.changed) {
-        changedVisualClipIds.push(clip.clip_id);
-        // A shot-scoped visual lock on the *current* clip: the lock a client would hold is
-        // held against the clip that exists now, not against the one being restored.
-        addLock({ lock_type: "visual", scope: "shot", target_id: clip.clip_id,
-          start_frame: current.frame_range.start_frame,
-          end_frame_exclusive: current.frame_range.end_frame_exclusive });
-        if (rangeChanged(current, target)) {
-          addLock({ lock_type: "duration", scope: "shot", target_id: clip.clip_id,
-            start_frame: current.frame_range.start_frame,
-            end_frame_exclusive: current.frame_range.end_frame_exclusive });
-        }
-      }
-      for (const ref of [current.source_ref, target.source_ref]) {
-        if (!MEDIA_EXTENSIONS.test(ref)) continue;
-        usersByAsset.set(ref, [...(usersByAsset.get(ref) ?? []), clip.clip_id]);
-      }
+  // ── the topology bucket ────────────────────────────────────────────────────────────
+  // A clip added or removed, a clip's boundary moved, or the project's total frame count
+  // changed: none of these is local to one shot, so the plan asks for the project scope.
+  const added = clipIds.filter((id) => !currentById.has(id));
+  const removed = clipIds.filter((id) => !targetById.has(id));
+  const boundaryChanged = clipIds.filter((id) => {
+    const current = currentById.get(id);
+    const target = targetById.get(id);
+    if (current === undefined || target === undefined) return false;
+    return frameRangeChanged(current, target);
+  });
+  // The total frame count is the projection's own statement of the project's length. A
+  // change in it is not local to one shot, so it belongs to the project scope.
+  const totalFramesChanged = input.current.frame_count !== input.target.frame_count;
+  const topologyChanged = added.length > 0 || removed.length > 0
+    || boundaryChanged.length > 0 || totalFramesChanged;
+
+  if (topologyChanged) {
+    addLock(projectLock("visual", projectEnd));
+    addLock(projectLock("duration", projectEnd));
+  }
+
+  // ── the per-clip buckets ────────────────────────────────────────────────────────────
+  const assetUsers = new Map<string, string[]>();
+  const sharedAssetChanged = new Set<string>();
+
+  for (const clipId of clipIds) {
+    const current = currentById.get(clipId);
+    const target = targetById.get(clipId);
+    if (current === undefined || target === undefined) {
+      // Added or removed. The whole project's shape moved, so the project locks above cover
+      // it; the range names where the content appeared or disappeared.
+      const clip = current ?? target!;
+      addRange(clipId, clip.frame_range);
+      addConsumer("visual", clipId, "replace");
       continue;
     }
-    // A sound clip is the narration when the migration's recorded narration path names it.
-    // The narration is deliberately *not* in the asset ledger — it is a fact of the film's
-    // own audio — so the migration's plan is the only authority for what it is.
+    const mediaChanged = current.source_ref !== target.source_ref
+      || sourceRangeChanged(current, target)
+      || current.overrides_digest !== target.overrides_digest;
     const isNarration = input.narration_target_path !== null
       && (current.source_ref === input.narration_target_path
         || target.source_ref === input.narration_target_path);
     if (isNarration) {
-      narrationClipIds.add(clip.clip_id);
-      addConsumer("narration", clip.clip_id, clip.changed ? "replace" : "preserve");
-      if (clip.changed) {
-        // Both scopes. A project-scoped narration lock has to be matched by a project-scoped
-        // candidate, and a shot-scoped one by a shot-scoped candidate; emitting only one
-        // form would let the other through.
-        addLock({ lock_type: "narration", scope: "project", target_id: "",
-          start_frame: 0, end_frame_exclusive: projectEnd });
-        addLock({ lock_type: "narration", scope: "shot", target_id: clip.clip_id,
-          start_frame: current.frame_range.start_frame,
-          end_frame_exclusive: current.frame_range.end_frame_exclusive });
+      addConsumer("narration", clipId, mediaChanged ? "replace" : "preserve");
+      if (mediaChanged) {
+        addLock(projectLock("narration", projectEnd));
+        addRange(clipId, current.frame_range);
       }
       continue;
     }
-    addConsumer("audio", clip.clip_id, clip.changed ? "replace" : "preserve");
-    if (clip.changed) {
-      // An audio track that is not the narration is still an audio change, and M4A's own
-      // classifier puts the audio operations in the *narration* lock class: they share the
-      // narration consumers. A restore that changed one and required no lock would be a
-      // restore the lock model cannot see.
-      addLock({ lock_type: "narration", scope: "project", target_id: "",
-        start_frame: 0, end_frame_exclusive: projectEnd });
-      addLock({ lock_type: "narration", scope: "shot", target_id: clip.clip_id,
-        start_frame: current.frame_range.start_frame,
-        end_frame_exclusive: current.frame_range.end_frame_exclusive });
+    if (current.kind === "sound") {
+      addConsumer("audio", clipId, mediaChanged ? "replace" : "preserve");
+      if (mediaChanged) {
+        addLock(projectLock("narration", projectEnd));
+        addRange(clipId, current.frame_range);
+      }
+      for (const ref of [current.source_ref, target.source_ref]) {
+        if (!MEDIA_EXTENSIONS.test(ref)) continue;
+        assetUsers.set(ref, [...(assetUsers.get(ref) ?? []), clipId]);
+      }
+      continue;
     }
+    addConsumer("visual", clipId, mediaChanged ? "replace" : "preserve");
+    // Every user of every referenced asset is recorded, whether or not that user changed:
+    // an asset used by two clips is *shared* precisely because the other user also depends
+    // on it, and the consumer list has to name it.
     for (const ref of [current.source_ref, target.source_ref]) {
       if (!MEDIA_EXTENSIONS.test(ref)) continue;
-      usersByAsset.set(ref, [...(usersByAsset.get(ref) ?? []), clip.clip_id]);
+      assetUsers.set(ref, [...(assetUsers.get(ref) ?? []), clipId]);
+    }
+    if (!mediaChanged) continue;
+    // A content change is local to the shot: a visual *shot* lock on the current clip's
+    // range — unless the clip also moved, in which case the project locks above already
+    // cover the wider change.
+    if (!boundaryChanged.includes(clipId)) {
+      addLock(visualShotLock(current));
+      addRange(clipId, current.frame_range);
+    }
+    if (current.source_ref !== target.source_ref) {
+      sharedAssetChanged.add(current.source_ref);
+      sharedAssetChanged.add(target.source_ref);
     }
   }
 
-  let subtitleChanged = false;
-  for (const subtitle of subtitles) {
-    addConsumer("subtitle", subtitle.subtitle_id, subtitle.changed ? "replace" : "preserve");
-    if (!subtitle.changed) continue;
-    subtitleChanged = true;
-    addLock({ lock_type: "narration", scope: "project", target_id: "",
-      start_frame: 0, end_frame_exclusive: projectEnd });
+  // ── subtitles ───────────────────────────────────────────────────────────────────────
+  const currentSubtitles = new Map(input.current.subtitles.map((subtitle) => [subtitle.subtitle_id, subtitle] as const));
+  const targetSubtitles = new Map(input.target.subtitles.map((subtitle) => [subtitle.subtitle_id, subtitle] as const));
+  const subtitleMissing = [...currentSubtitles.keys()].filter((id) => !targetSubtitles.has(id));
+  const subtitleAdded = [...targetSubtitles.keys()].filter((id) => !currentSubtitles.has(id));
+  if (subtitleMissing.length > 0 || subtitleAdded.length > 0) {
+    // A subtitle set that does not correspond one to one cannot be classified into ranges,
+    // so it is refused rather than approximated.
+    throw fail(projectId, "the target does not carry the same subtitle set as the current source",
+      { missing: subtitleMissing, added: subtitleAdded });
+  }
+  for (const [subtitleId, target] of targetSubtitles) {
+    const current = currentSubtitles.get(subtitleId)!;
+    const changed = current.content_sha256 !== target.content_sha256
+      || current.source_ref !== target.source_ref;
+    addConsumer("subtitle", subtitleId, changed ? "replace" : "preserve");
+    if (!changed) continue;
+    addLock(projectLock("narration", projectEnd));
   }
 
-  for (const [ref, users] of usersByAsset) {
+  // ── shared assets ───────────────────────────────────────────────────────────────────
+  for (const [ref, users] of assetUsers) {
     if (users.length < 2) continue;
-    const changedUsers = users.filter((clipId) => clips.find((clip) => clip.clip_id === clipId)?.changed === true);
     // Shared means at least one user survives the restore, so the asset is *relinked* to the
     // surviving clips rather than replaced. With every user changing there is nothing left
-    // to relink — and the asset is not preserved either, because nobody references it any
-    // more. Calling that "preserve" would be a false statement about the asset, so it is
-    // called "replace": the restore drops it.
+    // to relink, and the asset is dropped: calling that "preserve" would be a false
+    // statement about it.
+    const changedUsers = users.filter((clipId) => {
+      const current = currentById.get(clipId);
+      const target = targetById.get(clipId);
+      if (current === undefined || target === undefined) return true;
+      return current.source_ref !== target.source_ref
+        || sourceRangeChanged(current, target)
+        || current.overrides_digest !== target.overrides_digest;
+    });
     const action = changedUsers.length === 0 ? "preserve"
       : changedUsers.length < users.length ? "relink" : "replace";
     addConsumer("shared_asset", ref, action);
+    // The shared asset's own impact is the impact of the clips that use it: those clips
+    // already carry their own visual shot locks, and when the asset is shared with a clip
+    // that did not change, that clip is affected too.
+    if (!sharedAssetChanged.has(ref)) continue;
+    for (const clipId of users) {
+      const current = currentById.get(clipId);
+      if (current === undefined) continue;
+      if (!locks.some((lock) => lock.lock_type === "visual" && lock.scope === "shot"
+        && lock.target_id === clipId)) {
+        addLock(visualShotLock(current));
+        addRange(clipId, current.frame_range);
+      }
+    }
   }
 
-  if (durationChanged) {
-    addLock({ lock_type: "duration", scope: "project", target_id: "",
-      start_frame: 0, end_frame_exclusive: projectEnd });
-  }
-
-  const requiredLocks = locks.sort(compareRestoreLocks);
   const affectedConsumers = [...consumers.values()].sort(compareRestoreConsumers);
+  const requiredLocks = locks.sort(compareRestoreLocks);
+  const affectedRanges = ranges.sort(compareRestoreRanges);
 
   if (requiredLocks.length === 0) {
     // A restore that changes nothing is not a restore. Saying so here rather than letting
     // the write proceed keeps the revision scale free of no-op revisions and keeps the
     // "the impact authorized *something*" claim honest.
-    const changed = clips.some((entry) => entry.changed) || subtitles.some((entry) => entry.changed);
-    throw fail(projectId, changed
-      ? "the difference requires no lock, which M4C's three lock classes cannot express"
-      : "the target is identical to the current source, so there is nothing to restore",
-    { target_snapshot_id: input.target_snapshot_id });
+    throw fail(projectId,
+      "the target is identical to the current source, so there is nothing to restore",
+      { target_snapshot_id: input.target_snapshot_id });
   }
   if (affectedConsumers.length === 0) {
     throw fail(projectId, "the difference produced no consumer at all, which means it could not be classified");
   }
-  if (requiredLocks.length > 64 || affectedConsumers.length > 256) {
+  if (requiredLocks.length > 64 || affectedConsumers.length > 256 || affectedRanges.length > 64) {
     throw fail(projectId, "the restore difference exceeds the contract's ceiling",
-      { required_lock_count: requiredLocks.length, affected_consumer_count: affectedConsumers.length });
+      { required_lock_count: requiredLocks.length, affected_consumer_count: affectedConsumers.length,
+        affected_range_count: affectedRanges.length });
   }
 
-  const assets = input.target_roots.filter((root) => MEDIA_EXTENSIONS.test(root)).sort(compareUtf8);
   const preimage: HistoryRestorePlanPreimage = {
     format: "narralens.history-restore-plan@1.0",
     project_id: input.project_id,
-    current_snapshot_id: input.current_snapshot_id,
-    current_revision: input.current_revision,
-    current_source_digest: input.current_source_digest,
     target_snapshot_id: input.target_snapshot_id,
-    target_source_digest: input.target_source_digest,
-    target_film_sha256: input.target_film_sha256,
-    entry_root: entryRoot,
-    roots: [...input.target_roots].sort(compareUtf8),
-    assets,
-    subtitles,
-    clips,
-    consumers: affectedConsumers,
+    current_snapshot_id: input.current_snapshot_id,
+    current_projection_sha256: projectionDigest(input.current),
+    target_projection_sha256: projectionDigest(input.target),
+    affected_ranges: affectedRanges,
+    affected_consumers: affectedConsumers,
     required_locks: requiredLocks,
+    target_roots: [...input.target_roots].sort(compareUtf8),
+    target_subtitles: [...input.target_subtitles]
+      .map((subtitle) => ({ subtitle_id: subtitle.subtitle_id, path: subtitle.path })),
+    target_frame_count: input.target.frame_count,
     rights_digest: input.rights_digest,
   };
   return { ...preimage, plan_sha256: computeHistoryRestorePlanHash(preimage) };
+}
+
+/**
+ * Whether a target is one this stage may restore.
+ *
+ * ADR D-04 can classify a clip added or removed, and the plan says so — but the ADR and the
+ * development gate both restrict M4C to a target with the *same* clip identity and track
+ * topology. So the plan may describe such a difference, and the restore must still refuse
+ * it. The two statements live in different places on purpose: the lock model is a property
+ * of the difference, and the eligibility rule is a property of this stage.
+ */
+export function restoreTargetIsEligible(current: EngineProjection, target: EngineProjection): boolean {
+  if (current.clips.length !== target.clips.length) return false;
+  const targetById = new Map(target.clips.map((clip) => [clip.clip_id, clip] as const));
+  for (const clip of current.clips) {
+    const other = targetById.get(clip.clip_id);
+    if (other === undefined) return false;
+    // The same track: a clip that moved to another track is a different topology, and this
+    // stage does not restore that.
+    if (other.track_id !== clip.track_id) return false;
+  }
+  return true;
 }

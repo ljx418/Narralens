@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
-import { readFile, realpath, stat } from "node:fs/promises";
+import { lstat, readFile, realpath } from "node:fs/promises";
+import type { Stats } from "node:fs";
 import { join, resolve, sep } from "node:path";
 import { HttpError } from "../api-error.js";
 import { OPENFILM_UPSTREAM_SHA } from "../engine/engine-binding-store.js";
@@ -178,8 +179,25 @@ export class HistoricalSnapshotResolver {
   /**
    * The snapshot's own source directory, proven to be inside this project's snapshot root.
    *
-   * The containment is proved by realpath, so a symlink planted in the snapshot root cannot
-   * make the resolver read a directory somewhere else entirely.
+   * Three separate things are proved, and each of them can fail on its own:
+   *
+   * 1. **The snapshot directory** is inside the project's snapshot root, checked on its
+   *    *canonical* path. A symlink planted in the snapshot root therefore cannot make the
+   *    resolver read a directory somewhere else entirely.
+   * 2. **`source` is not a link.** `lstat` does not follow links, so a `source` that is a
+   *    symlink — on Linux a symbolic link, on Windows a junction, which Node also reports
+   *    as a symbolic link — is refused outright. The policy is *fail closed*: a snapshot
+   *    whose own `source` is a link is not a snapshot this Host published, and the only
+   *    honest answer is to refuse it.
+   * 3. **The canonical `source` is inside the canonical snapshot directory.** This is the
+   *    check that was missing: `stat()` follows links, so a `source` that pointed outside
+   *    the project was accepted, and the source digest then took the *outside* directory as
+   *    its own root — so the digest's own containment check, which is relative to that root,
+   *    passed on bytes that were never in the project's authority domain.
+   *
+   * Every file the closure reads is then resolved by `SourceDigestV1` against this
+   * canonical root and checked for containment there, so the whole tree is inside the
+   * snapshot the commit named.
    */
   async #sourceDirectory(projectId: string, snapshotId: string, correlationId?: string): Promise<string> {
     let projectRoot: string;
@@ -196,14 +214,36 @@ export class HistoricalSnapshotResolver {
       throw new HttpError(422, "UNSUPPORTED_EDIT", "The snapshot's directory escapes the project's snapshot root",
         { snapshot_id: snapshotId }, correlationId ?? projectId);
     }
-    const source = join(canonical, "source");
-    try {
-      const info = await stat(source);
-      if (!info.isDirectory()) throw new Error("NOT_A_DIRECTORY");
-    } catch {
+    const sourcePath = join(canonical, "source");
+    let link: Stats;
+    try { link = await lstat(sourcePath); }
+    catch {
       throw new HttpError(422, "UNSUPPORTED_EDIT", "The snapshot has no source directory",
         { snapshot_id: snapshotId }, correlationId ?? projectId);
     }
-    return source;
+    if (link.isSymbolicLink()) {
+      // A link where the published tree has a directory. Refused before it is followed.
+      throw new HttpError(422, "UNSUPPORTED_EDIT",
+        "The snapshot's source directory is a symbolic link, so it is not a snapshot this Host published",
+        { snapshot_id: snapshotId }, correlationId ?? projectId);
+    }
+    if (!link.isDirectory()) {
+      throw new HttpError(422, "UNSUPPORTED_EDIT", "The snapshot's source is not a directory",
+        { snapshot_id: snapshotId }, correlationId ?? projectId);
+    }
+    let canonicalSource: string;
+    try { canonicalSource = await realpath(sourcePath); }
+    catch {
+      throw new HttpError(422, "UNSUPPORTED_EDIT", "The snapshot has no source directory",
+        { snapshot_id: snapshotId }, correlationId ?? projectId);
+    }
+    if (canonicalSource !== canonical && !canonicalSource.startsWith(`${canonical}${sep}`)) {
+      // The containment that was missing: the canonical source must be inside the canonical
+      // snapshot directory, so the closure can only ever read this project's bytes.
+      throw new HttpError(422, "UNSUPPORTED_EDIT",
+        "The snapshot's source directory escapes the snapshot's own directory",
+        { snapshot_id: snapshotId }, correlationId ?? projectId);
+    }
+    return canonicalSource;
   }
 }
