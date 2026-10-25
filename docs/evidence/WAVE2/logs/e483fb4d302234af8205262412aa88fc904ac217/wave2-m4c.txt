@@ -1,0 +1,67 @@
+
+> narralens@0.1.0 test:wave2:m4c /mnt/c/workspace/videoworkline/Narralens
+> vitest run --config vitest.config.ts tests/wave2/m4c
+
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens
+
+(node:3386466) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/m4c/history-crash-and-race.test.ts (16 tests) 335657ms
+   ✓ M4C TX-08C: the crash matrix converges to a decided state > converges the pre-publish crash boundary after_received to aborted with revision +0  21649ms
+   ✓ M4C TX-08C: the crash matrix converges to a decided state > converges the pre-publish crash boundary after_preconditions to aborted with revision +0  19965ms
+   ✓ M4C TX-08C: the crash matrix converges to a decided state > converges the pre-publish crash boundary after_plan to aborted with revision +0  19739ms
+   ✓ M4C TX-08C: the crash matrix converges to a decided state > converges the pre-publish crash boundary after_stage to aborted with revision +0  20445ms
+   ✓ M4C TX-08C: the crash matrix converges to a decided state > converges the pre-publish crash boundary after_validate to aborted with revision +0  21228ms
+   ✓ M4C TX-08C: the crash matrix converges to a decided state > converges the pre-publish crash boundary after_snapshot_publish to aborted with revision +0  21831ms
+   ✓ M4C TX-08C: the crash matrix converges to a decided state > converges a crash after the publication to one durable commit with revision +1  24676ms
+   ✓ M4C TX-08C: the crash matrix converges to a decided state > aborts with revision +0 when the crash came after the intent but before the publication  21709ms
+   ✓ M4C TX-05C: a race never reaches the commit > refuses a restore whose control revision moved, and the revision does not move  18342ms
+   ✓ M4C TX-05C: a race never reaches the commit > refuses a restore whose expected source digest is not the project's, and the revision does not move  18386ms
+   ✓ M4C TX-05C: a race never reaches the commit > refuses a restore when the source changes during the stage, and the revision does not move  20364ms
+   ✓ M4C TX-07C: one key, one answer > replays the same key with the same body and does not restore twice  22567ms
+   ✓ M4C TX-07C: one key, one answer > answers the same key with a different request with 409, and the revision does not move  22081ms
+   ✓ M4C TX-07C: one key, one answer > keeps the adoption and restore key spaces apart  21971ms
+   ✓ M4C TX-09: the history keeps every revision > lists the migration, the adoption and the restore, and deletes nothing  22712ms
+   ✓ M4C TX-10: the native history surface cannot bypass the two stages > translates undo and redo into an intent and writes nothing  17989ms
+(node:3869225) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/m4c/history-contracts-and-resolver.test.ts (12 tests) 187440ms
+   ✓ M4C-01: the restore contracts > answers a restore request that carries an unknown field with 400  16179ms
+   ✓ M4C-02 and M4C-04: the resolver proves the target from its own bytes > resolves the migration's snapshot and the adoption's snapshot, and reproduces the digest  17215ms
+   ✓ M4C-02 and M4C-04: the resolver proves the target from its own bytes > reads the target with the pinned upstream, and reports no problem  17247ms
+   ✓ M4C-03: the negative matrix fails closed > answers a snapshot of another project and a snapshot that does not exist with the same 404  16902ms
+   ✓ M4C-03: the negative matrix fails closed > refuses an orphan snapshot: bytes on disk that no committed write ever named  16816ms
+   ✓ M4C-03: the negative matrix fails closed > refuses a snapshot whose bytes are gone  18616ms
+   ✓ M4C-06: the restore impact is an authorization and writes nothing > creates the impact, replays it exactly, and writes no author fact  19503ms
+   ✓ M4C-06: the restore impact is an authorization and writes nothing > refuses the impact when a lock is held, and leaves no active row behind  19371ms
+   ✓ M4C-11: the history read model and the intent satisfy their contracts > answers the history model and the undo intent in their own shapes  17008ms
+   ✓ M4C: the response body says nothing about the server's filesystem > carries no path, no adapter name and no SQLite wording  28575ms
+(node:4079084) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/m4c/history-media-and-failure.test.ts (7 tests) 158162ms
+   ✓ M4C-14 and M4C-15: the restored film is still three native, decodable clips > restores three native clips, renders them with the pinned upstream and decodes 900 frames  36608ms
+   ✓ M4C-14 and M4C-15: the restored film is still three native, decodable clips > keeps the other two clips' identity when one clip is edited natively  21994ms
+   ✓ M4C TX-03C and TX-04C: the locks and the consumers are the right ones > asks for a visual lock on every changed clip and no narration lock while the narration is preserved  18063ms
+   ✓ M4C TX-03C and TX-04C: the locks and the consumers are the right ones > does not let a narration lock block a restore that preserves the narration  21195ms
+   ✓ M4C TX-12C: the restore changes nothing it did not name > leaves the old snapshot's bytes and the adopted snapshot's bytes exactly as they were  21176ms
+   ✓ M4C-16: a cancellation before the publication intent discards the staged result > aborts with revision +0 and publishes nothing  20543ms
+   ✓ M4C-17: a failed restore writes nothing but its own failure > leaves the source, the revision, the pointer, the impact, the outbox and the idempotency row as they were  18583ms
+(node:109896) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/m4c/history-route.test.ts (8 tests) 180385ms
+   ✓ M4C production history route > restores an earlier snapshot as a new revision, and the film is still three native clips  26015ms
+   ✓ M4C production history route > rebuilds the restored source after a restart, and the old snapshot's bytes are unchanged  33721ms
+   ✓ M4C production history route > replays the same key exactly and answers a different digest with 409  28748ms
+   ✓ M4C production history route > refuses a snapshot of another project and a snapshot that does not exist with the same 404  18375ms
+   ✓ M4C production history route > translates undo and redo into an intent and never writes  17131ms
+   ✓ M4C production history route > refuses a restore of the content that is already active  18101ms
+   ✓ M4C production history route > refuses a restore whose impact was computed while a visual lock was held  18698ms
+   ✓ M4C production history route > refuses a restore when a visual lock appears after the stage, and the revision does not move  19597ms
+ ✓ tests/wave2/m4c/restore-plan.test.ts (10 tests) 13ms
+
+ Test Files  5 passed (5)
+      Tests  53 passed (53)
+   Start at  12:27:36
+   Duration  889.54s (transform 1.59s, setup 0ms, collect 16.09s, tests 861.66s, environment 1ms, prepare 7.96s)
+

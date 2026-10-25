@@ -663,7 +663,11 @@ describe("M4A-R01: the route answers a client consistently and idempotently", ()
     expect(running.host.impacts.byProject(projectId)).toHaveLength(1);
   }, 600_000);
 
-  it("blocks a restore intent rather than passing the active source off as an old snapshot", async () => {
+  it("refuses a restore intent rather than passing the active source off as an old snapshot", async () => {
+    // M4A closed the restore arm entirely (422 CAPABILITY_NOT_ENABLED). **M4C opened it**,
+    // and the answer for a target that does not exist is now the resolver's: 404, the same
+    // answer a target that belongs to another project gets. What has not changed is the
+    // point of the test: the Host never stands the *current* source in for an old snapshot.
     const running = await started();
     const { projectId, view } = await migrate(running);
     await readyMaterialization(running.host, projectId);
@@ -673,9 +677,11 @@ describe("M4A-R01: the route answers a client consistently and idempotently", ()
       intent: { op: "restore_snapshot", target_snapshot_id: "snap_old" },
       idempotency_key: "r01-restore",
     });
-    expect(response.status).toBe(422);
-    expect(response.body.code).toBe("CAPABILITY_NOT_ENABLED");
-    expect(running.host.impacts.byProject(projectId)).toHaveLength(0);
+    expect(response.status).toBe(404);
+    expect(response.body.code).toBe("NOT_FOUND");
+    // And no authorization was written for a target that could not be proved.
+    expect(running.host.impacts.byProject(projectId)
+      .filter((row) => row.operation === "restore_snapshot")).toEqual([]);
   }, 600_000);
 
   it("refuses a materialization that does not exist, and one that belongs elsewhere, the same way", async () => {

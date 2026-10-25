@@ -1,0 +1,20 @@
+
+> narralens@0.1.0 evidence:wave2:m4b:integrity /mnt/c/workspace/videoworkline/Narralens
+> node tools/wave2-m4b-evidence-integrity.mjs
+
+PASS capture commit exists
+PASS capture began from a clean tree
+PASS 17 command logs and exits match
+PASS the manifest lists all 15 required commands
+PASS the manifest lists every command that finished in the capture (17 finished)
+PASS the manifest names a checked manifest for the same capture, with no command lost
+PASS TX-08B cites all 18 crash-boundary rows
+PASS every failed capture is indexed (17 listed)
+PASS the index names no capture that did not fail
+PASS the gate's own rule and the shared rule agree on every capture
+PASS all required M4B cases are directly mapped
+PASS capture tree mounts controlled adoption
+PASS history restore remains unmounted
+PASS declaration stays within M4B ceiling
+PASS external review is not self-signed
+checks_failed=0 capture_commit=25df0cb9ef33d3b48c11f6838adf6b8a6d2d1dee
