@@ -1,0 +1,58 @@
+
+> narralens@0.1.0 test:wave2:m4b /mnt/c/workspace/videoworkline/Narralens
+> vitest run --config vitest.config.ts tests/wave2/m4b
+
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens
+
+(node:1788202) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/m4b/adoption-route.test.ts (34 tests) 462639ms
+   ✓ M4B production adoption route > returns 428 before resource lookup when impact or approval is missing  2050ms
+   ✓ M4B production adoption route > adopts three native clips once, replays exactly, and rebuilds after restart  51485ms
+   ✓ M4B production adoption route > recovers a simulated crash at after_prepared to one durable outcome  13950ms
+   ✓ M4B production adoption route > recovers a simulated crash at after_published to one durable outcome  19416ms
+   ✓ M4B production adoption route > recovers a simulated crash at after_committed to one durable outcome  16217ms
+   ✓ M4B production adoption route > latches terminal attention when recovery can prove neither publication boundary  17360ms
+   ✓ M4B production adoption route > starts again after latching terminal attention, because one blocked project must not stop the Host  23584ms
+   ✓ M4B production adoption route > recovers the author-source publication boundary asset_temp_fsynced  16784ms
+   ✓ M4B production adoption route > recovers the author-source publication boundary asset_installed  17436ms
+   ✓ M4B production adoption route > recovers the author-source publication boundary film_temp_fsynced  16511ms
+   ✓ M4B production adoption route > recovers the author-source publication boundary film_renamed  18912ms
+   ✓ M4B production adoption route > recovers the author-source publication boundary parent_fsynced  18416ms
+   ✓ M4B production adoption route > rejects a visual lock acquired after staging with revision +0  12844ms
+   ✓ M4B production adoption route > re-reads the rights before publication, so a rights change after the impact stops it  13213ms
+   ✓ M4B production adoption route > does not over-block an adoption that preserves narration while a narration lock is held  14958ms
+   ✓ M4B production adoption route > converges the pre-publish crash boundary after_received to aborted with revision +0  13325ms
+   ✓ M4B production adoption route > converges the pre-publish crash boundary after_preconditions to aborted with revision +0  13658ms
+   ✓ M4B production adoption route > converges the pre-publish crash boundary after_plan to aborted with revision +0  13869ms
+   ✓ M4B production adoption route > converges the pre-publish crash boundary after_stage to aborted with revision +0  13201ms
+   ✓ M4B production adoption route > converges the pre-publish crash boundary after_validate to aborted with revision +0  13531ms
+   ✓ M4B production adoption route > converges the pre-publish crash boundary after_snapshot_publish to aborted with revision +0  13780ms
+   ✓ M4B production adoption route > converges the crash boundary after_active_inspect to a decided state with revision +1  18405ms
+   ✓ M4B production adoption route > answers the same key with the same body whether the recovery just ran or was replayed  12120ms
+   ✓ M4B production adoption route > records the source=after / DB-not-committed transition state field by field  17371ms
+   ✓ M4B production adoption route > answers a visual lock held during recovery with a controlled 423 and nothing committed  14537ms
+   ✓ M4B production adoption route > reclaims a crashed staging tree through the production composition, where the database path is the store's  3431ms
+   ✓ M4B production adoption route > latches a row whose request cannot be read, rather than leaving it to a recovery with no way out  3006ms
+   ✓ M4B production adoption route > records why a recovery was blocked, and closes the project visibly  3075ms
+   ✓ M4B production adoption route > does not let one of its own pending rows block the recovery of another  3061ms
+   ✓ M4B production adoption route > leaves another module's transaction alone: a legacy edit row is not M4B's to decide  3413ms
+   ✓ M4B production adoption route > answers a conflicting idempotency key with the request's correlation id  14601ms
+   ✓ M4B production adoption route > answers one idempotency key with one body, whatever the request body is  12137ms
+   ✓ M4B production adoption route > sweeps an adoption staging tree left behind by a hard crash  2977ms
+ ✓ tests/wave2/m4b/author-source-publisher.test.ts (8 tests) 155ms
+(node:2302124) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/m4b/commit-adoption.test.ts (5 tests) 13ms
+(node:2311338) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/m4b/adoption-store.test.ts (4 tests) 9ms
+ ✓ tests/wave2/m4b/contracts.test.ts (5 tests) 6ms
+ ✓ tests/wave2/m4b/governance.test.ts (4 tests) 3ms
+
+ Test Files  6 passed (6)
+      Tests  60 passed (60)
+   Start at  17:11:28
+   Duration  479.11s (transform 1.43s, setup 0ms, collect 5.57s, tests 462.82s, environment 1ms, prepare 7.12s)
+

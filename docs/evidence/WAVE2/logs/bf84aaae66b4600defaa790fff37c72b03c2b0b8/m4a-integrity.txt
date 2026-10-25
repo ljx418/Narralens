@@ -1,0 +1,21 @@
+
+> narralens@0.1.0 evidence:wave2:m4a:integrity /mnt/c/workspace/videoworkline/Narralens
+> node tools/wave2-m4a-evidence-integrity.mjs
+
+PASS the capture commit 6172751 exists and is reachable
+PASS the manifest records a clean working tree at capture
+PASS 15 command logs exist and match their digests
+PASS the case file covers M4A-C01, M4A-P01, M4A-DB01, M4A-H01, M4A-TTL01, TX-02A, TX-03A, TX-04A, TX-05A, M4A-NW01, M4A-R01
+PASS every case names at least one test file, and every one exists
+PASS every case claims only CLOSED or INTERNAL_EVIDENCED_SUBSET
+FAIL route claim for edits says false but the source says true
+FAIL route claim for history_restore says false but the source says true
+FAIL M4A opened a versioned-edit or history-restore route, which belongs to M4B/M4C
+PASS the frozen hash vectors match the digest the manifest records
+PASS the frozen vectors record order independence
+PASS the manifest and the case file describe the same case set
+PASS the declaration is "M4A_INTERNAL_EVIDENCED", which is within this session's ceiling
+PASS no forbidden declaration appears anywhere in the manifest
+PASS 14 claim limit(s) recorded
+checks_failed=3 capture_commit=617275139d41171997616e65c121fdb5fa389bbe
+ ELIFECYCLE  Command failed with exit code 1.
