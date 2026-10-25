@@ -132,7 +132,7 @@
    "tests/wave2/m4c/history-crash-and-race.test.ts::converges a crash after the publication to one durable commit with revision +1",
    "tests/wave2/m4c/history-crash-and-race.test.ts::aborts with revision +0 when the crash came after the intent but before the publication"
   ],
-  "evidence": "按冻结门 §6 建立**枚举式 fault registry**（`src/host/history/history-fault-registry.ts`）：21 个 service/publisher 边界+ 单事务 9 条语句各前后共 18 个数据库边界，合计 39 个。矩阵按 registry 行走，不是代表性子集；并且 registry 与生产代码**双向核对**：代码里出现而 registry 没有的边界、以及 registry 里有而代码走不到的边界，都会让检查失败——所以「边界没接线」不可能再伪装成绿灯。每个边界记录并断言 source、revision、pointer、impact、outbox、idempotency、temp、snapshot 的 before/after，并逐边界证明重启后收敛到 committed/aborted：发布前边界收敛为 aborted、revision +0、pointer 与 source 不动、impact 保持 active、无 outbox 行；发布之后（含 film rename 之后与事务内任一语句前后）收敛为唯一一次 commit、revision +1、impact consumed、恰好一条 outbox 行、无新增 snapshot；没有孤儿进行态、没有重复发布、没有重复 revision。两个 asset install 边界用专门的前置条件（先恢复旧快照、删掉已采用的内容寻址资产、再恢复已采用的快照）真正触达，而不是记成 not_reached。",
+  "evidence": "按冻结门 §6 建立**枚举式 fault registry**（`src/host/history/history-fault-registry.ts`）：22 个 service/publisher/adapter 边界+ 单事务 9 条语句各前后共 18 个数据库边界，合计 40 个。矩阵按 registry 行走，不是代表性子集；并且 registry 与生产代码**双向核对**：代码里出现而 registry 没有的边界、以及 registry 里有而代码走不到的边界，都会让检查失败——所以「边界没接线」不可能再伪装成绿灯。每个边界记录并断言 source、revision、pointer、impact、outbox、idempotency、temp、snapshot 的 before/after，并逐边界证明重启后收敛到 committed/aborted：发布前边界收敛为 aborted、revision +0、pointer 与 source 不动、impact 保持 active、无 outbox 行；发布之后（含 film rename 之后与事务内任一语句前后）收敛为唯一一次 commit、revision +1、impact consumed、恰好一条 outbox 行、无新增 snapshot；没有孤儿进行态、没有重复发布、没有重复 revision。两个 asset install 边界用专门的前置条件（先恢复旧快照、删掉已采用的内容寻址资产、再恢复已采用的快照）真正触达，而不是记成 not_reached；「stage copy 中/后」分别由 adapter 的 during_stage_copy 与 after_stage_copy 覆盖。",
   "notes": "registry 是契约且被双向核对：矩阵按它行走，服务里新增而 registry 没有的边界会让注册表检查失败；registry 里有而服务走不到的边界会让矩阵失败——除非该边界被显式声明为 not_reached 并写明理由。"
  },
  {
@@ -217,7 +217,7 @@
    "tests/wave2/m4c/history-fault-matrix.test.ts::converges the boundary %s to a decided state",
    "tests/wave2/m4c/history-crash-and-race.test.ts::answers the same key with a different request with 409, and the revision does not move"
   ],
-  "evidence": "失败路径的差异明确：source、revision、pointer、impact、outbox 全部不变，只有失败自身的 idempotency 行新增，而那一行的答案是 aborted 且 previous_revision == new_revision。此前的代表性失败发生在 transaction 创建之前，因此没有断言 idempotency 行；现在失败矩阵在**每一个**边界上断言同一组事实（source/revision/pointer/impact/outbox/idempotency/temp/snapshot），并断言幂等权威对该 key 恰好持有一条答案、不存在孤儿进行态。",
+  "evidence": "失败路径的差异明确：source、revision、pointer、impact、outbox 全部不变。发生在 transaction **之前**的拒绝连失败自身的 idempotency 行都不写（0 行）；发生在 transaction **之内**的失败恰好只留失败自身的那一行（1 行，且内容是 aborted、previous_revision == new_revision）——这两种都由同一条断言覆盖：故障矩阵在**每一个**边界上断言同一组事实（source/revision/pointer/impact/outbox/idempotency/temp/snapshot），并断言幂等权威对该 key 恰好持有一条答案、不存在孤儿进行态。",
   "notes": "每个边界的失败路径都由同一条断言覆盖，不再用一条代表性失败冒充全集。"
  },
  {

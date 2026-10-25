@@ -173,9 +173,11 @@ export interface OpenFilmAdapterOptions {
    * Test-only seam for M4C's fault matrix.
    *
    * `after_stage_copy` fires between the copy of the current source into the isolated root
-   * and the write of the target's film over it — the boundary the development gate calls
-   * "stage copy 中". It is a seam on the *adapter* because that is where the copy happens;
-   * the Host owns every decision, and this is only where a boundary can be observed.
+   * and the staging of the target's content; `during_stage_copy` fires between the staging
+   * of the target's assets and the write of the target's film over it. Together they are the
+   * development gate's "stage copy 中/后". They are seams on the *adapter* because that is
+   * where the copy happens; the Host owns every decision, and these are only where a
+   * boundary can be observed.
    */
   readonly fault?: (point: string) => void | Promise<void>;
 }
@@ -611,6 +613,10 @@ export class OpenFilmEngineAdapter implements EnginePort {
         await mkdir(dirname(destination), { recursive: true });
         await copyFile(input, destination);
       }
+      // The stage is in the middle of copying the target's content: the tree and the assets
+      // are in place and the target's film is not written yet. A crash here leaves an
+      // isolated tree that is *not* the target, which is what the boundary is for.
+      await this.#fault("during_stage_copy");
       const filmPath = join(stagedRoot, "film.html");
       await writeFile(filmPath, intent.target_film_text, "utf8");
       // The text went through a UTF-8 round trip on its way here. If the target's bytes were

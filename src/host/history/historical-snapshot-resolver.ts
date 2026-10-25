@@ -99,9 +99,19 @@ export class HistoricalSnapshotResolver {
 
     const sourceRoot = await this.#sourceDirectory(projectId, snapshotId, correlationId);
 
-    const observed = await computeSourceDigest({
-      root: sourceRoot, roots: facts.roots, engine: "openfilm", engineUpstreamSha: OPENFILM_UPSTREAM_SHA,
-    }, correlationId);
+    let observed: { source_digest: string };
+    try {
+      observed = await computeSourceDigest({
+        root: sourceRoot, roots: facts.roots, engine: "openfilm", engineUpstreamSha: OPENFILM_UPSTREAM_SHA,
+      }, correlationId);
+    } catch (error) {
+      // A closure whose bytes are gone cannot be re-derived. That is a refusal, not a crash:
+      // the snapshot is not the one the commit recorded, so it is not restorable.
+      throw new HttpError(422, "UNSUPPORTED_EDIT",
+        "The snapshot's closure cannot be read, so it is not the closure that was committed",
+        { snapshot_id: snapshotId, reason: error instanceof Error ? error.message : String(error) },
+        correlationId ?? projectId);
+    }
     if (observed.source_digest !== row.source_digest) {
       throw new HttpError(422, "UNSUPPORTED_EDIT",
         "The snapshot's bytes do not reproduce the digest it was committed with",

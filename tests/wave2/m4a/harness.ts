@@ -55,7 +55,6 @@ export async function start(options: {
   readonly adoptionFault?: (boundary: AdoptionFaultBoundary) => Promise<void> | void;
   readonly adoptionPublishFault?: (boundary: PublishBoundary) => Promise<void> | void;
   readonly historyFault?: (boundary: string) => void;
-  readonly historyPublishFault?: (boundary: PublishBoundary) => Promise<void> | void;
 } = {}): Promise<Started> {
   const base = await mkdtemp(join(tmpdir(), "narralens-m4a-"));
   process.env.NARRALENS_OPENFILM_VENDOR = REAL_UPSTREAM_PARENT;
@@ -83,7 +82,6 @@ export async function startOn(base: string, options: {
   readonly adoptionFault?: (boundary: AdoptionFaultBoundary) => Promise<void> | void;
   readonly adoptionPublishFault?: (boundary: PublishBoundary) => Promise<void> | void;
   readonly historyFault?: (boundary: string) => void;
-  readonly historyPublishFault?: (boundary: PublishBoundary) => Promise<void> | void;
 } = {}): Promise<Started> {
   process.env.NARRALENS_OPENFILM_VENDOR = REAL_UPSTREAM_PARENT;
   const host = new NarralensHost({

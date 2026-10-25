@@ -1,6 +1,6 @@
 # M4C 四视角内部审查
 
-状态：`BLOCKER=0 / MAJOR=0 / MINOR=6`。本结论只支持 `M4C_INTERNAL_EVIDENCED`；独立外审仍为 `REVIEW_PENDING`。
+状态：`BLOCKER=0 / MAJOR=0 / MINOR=11`。本结论只支持 `M4C_INTERNAL_EVIDENCED`；独立外审仍为 `REVIEW_PENDING`。
 
 审查对象：`src/host/history/`（`HistoricalSnapshotResolver`、`HistoryRestorePlanV1` 与 builder、`HistoryStore`、
 `HistoryCommandTranslator`、`RestorePlanner`、`HistoryService`、`history-fault-registry`）、OpenFilm adapter 的 restore 分支、
@@ -99,6 +99,41 @@ Wave 1/M3/M4A/M4B 历史证据。
 本轮改为从**捕获提交**读取引用文件核对（`git show <capture>:<file>`）：当前这份 manifest（指向返修前的捕获）
 因此如实变红，直到新捕获产生为止。
 
+### 4.1 第四个视角（实现、并发与恢复）在本轮之后提出的问题与处置
+
+| 事项 | 处置 |
+|---|---|
+| M4B 的 publisher 边界序列被本轮改长，M4B 冻结断言未同步 | **已关闭**：M4B 的断言随之变长（仍钉住完整顺序，未放宽），M4B 套件重新全绿 |
+| `before_film_rename` 在 publisher 抛出却没接进映射表，矩阵的「没触发」降级分支把它标成绿灯 | **已关闭**：映射表移进 registry（矩阵与服务读同一张表），未映射的边界直接抛 `UNMAPPED_PUBLISHER_FAULT_POINT`；矩阵遇到未声明却未触发的边界直接失败；registry 与生产代码双向核对成为一条测试 |
+| 两个 asset install 边界是本轮新增能力的零覆盖路径 | **已关闭**：两个边界用专门的前置条件真正触达（恢复旧快照 → 删掉已采用的内容寻址资产 → 恢复已采用的快照），能力本身另有端到端用例 |
+| `stage copy 中` 没有 seam | **已关闭**：adapter 在「树已复制、目标资产已就位、目标 film 未写入」处新增 `during_stage_copy`，与 `after_stage_copy` 一起覆盖门点名的「中/后」 |
+| outbox/snapshot 只采集不断言、「attention」收敛从未出现、边界计数写错 | **已关闭**：每个边界都断言 outbox 行数与 snapshot 行数；计数改为真实的 40（22 + 18） |
+| 恢复路径的 commit 没有 DB seam | **已关闭**：恢复路径的 `commitHistoryRestore` 同样收到逐语句 seam |
+| 恢复只清理 film 临时文件，不清理资产临时文件 | **已关闭**：恢复会按后缀清理 active root 里的资产临时文件 |
+| fact 的 `installed_assets` 记的是「意图」而不是「观测」 | **有界接受**：fact 是发布意图的不可变记录，M4B 的 fact 有同样性质；观测值由 publisher 的原子安装保证 |
+| 故障模型不是真正的进程丢失（publisher 的 catch 会执行清理） | **有界接受**：M4B 的崩溃矩阵用同一模型；「真实进程丢失」只会让清理更少发生，不会让结论更弱 |
+| ADR D-05 字面写 422 `CAPABILITY_NOT_ENABLED`，实现是 422 `UNSUPPORTED_EDIT` | **有界接受**：门 §3.2 只要求 422 fail closed，行为合规；ADR 字面与实现的差异待 supersession 记录 |
+| abort 的状态白名单会把范围外的状态静默改写成 500 | **有界接受**：当前几乎不可达（能力检查在开事务之前） |
+| 门 §4 的字面顺序与实现不同（目标在 plan 内部解析） | **有界接受**：可观察行为等价（impact 校验只比 id 与 hash） |
+
+### 4.2 本轮新增的用例（缺口的补齐）
+
+| 门点名的项 | 用例 |
+|---|---|
+| TX-05C 的 stale **base** | `refuses a restore whose base revision is stale, and the revision does not move` |
+| M4C-06 的 impact 期漂移 | `refuses the impact when the project's facts moved, and leaves no active row behind` |
+| M4C-03 的 Hypit snapshot | `refuses a Hypit snapshot: this stage restores OpenFilm content only` |
+| TX-03C 的 narration/subtitle/shared asset 锁 | `asks for a narration project lock when the narration changed, and not for a shot one` 等三条 |
+| M-01 的 redo current-commit 规则 | `answers 422 after an adoption has been committed on top of the restore` 等两条 |
+| M4C-16 的晚到 stage 结果 | `aborts with revision +0 and publishes nothing`（断言没有不可变 fact，也没有为它发布的 snapshot） |
+| D-05 的资产安装 | `installs the missing asset, and refuses one filed under a digest that is not its own bytes` |
+
+### 4.3 本轮审查自身发现的一处声明不实
+
+内部审查初稿在 case map 里写「每个边界都有直接注入与断言」，而当时矩阵对「没触发」走的是降级分支，
+这句话当时并不成立。修正的方式不是改措辞，而是改矩阵：未声明却未触发的边界现在让矩阵失败，
+并且 registry 与生产代码的双向核对成为一条测试。
+
 ## 5. 本轮之前的证据状态与本轮修复
 
 Codex 对 `62b804e` 的 `NOT PASS` 成立。本轮之后：`src/host/history/history-fault-registry.ts` 这个本轮核心新文件
@@ -116,6 +151,11 @@ Codex 对 `62b804e` 的 `NOT PASS` 成立。本轮之后：`src/host/history/his
 | MINOR-4 | narration rights 豁缺没有负向用例 | 有界接受（形状推理可靠）；可补一条用例 |
 | MINOR-5 | 请求体封闭但未显式列举"客户端不得提交" | 有界接受（`additionalProperties=false` 已覆盖） |
 | MINOR-6 | 完整性门原本不核对捕获提交 | **已关闭**：本轮改为按捕获提交核对引用 |
+| MINOR-7 | fact 的 `installed_assets` 记的是意图而非观测 | 有界接受：fact 是发布**意图**的不可变记录，M4B 的 fact 同样如此；观测由 publisher 的原子安装保证 |
+| MINOR-8 | 故障模型不是真正的进程丢失（publisher 的 catch 会执行清理） | 有界接受：M4B 的崩溃矩阵用同一模型；真实进程丢失只会让清理更少发生，不会让结论更弱 |
+| MINOR-9 | ADR D-05 字面是 422 `CAPABILITY_NOT_ENABLED`，实现是 422 `UNSUPPORTED_EDIT` | 有界接受：门 §3.2 只要求 422 fail closed，行为合规；字面差异待 supersession 记录 |
+| MINOR-10 | abort 的状态白名单会把范围外的状态静默改写成 500 | 有界接受：当前几乎不可达（能力检查在开事务之前） |
+| MINOR-11 | 门 §4 的字面顺序与实现不同（目标在 plan 内部解析） | 有界接受：可观察行为等价（impact 校验只比 id 与 hash） |
 
 Codex 外审提出的其余 MINOR（门自身诊断判定与共享规则的分歧、manifest 生成器的第三份硬编码预期失败集合、
 门不检查 manifest 是否覆盖当前树）在本轮一并处理：诊断判定两边都按「排序 + 只认文件」实现；manifest 生成器改用

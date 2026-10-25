@@ -510,6 +510,28 @@ export class HistoryService {
   // ── internals ───────────────────────────────────────────────────────────────────────
 
   /**
+   * Remove the publisher's asset temporaries from the active root.
+   *
+   * They are named `<asset>.<uuid>.tmp` next to the asset they replace, so they are found
+   * by their suffix rather than by a recorded name — the fact cannot record them, because a
+   * process that died before the install never got to write one.
+   */
+  async #sweepAssetTemporaries(activeRoot: string): Promise<void> {
+    const assets = join(activeRoot, "assets");
+    let entries: string[];
+    try { entries = await readdir(assets); } catch { return; }
+    for (const entry of entries) {
+      const directory = join(assets, entry);
+      let files: string[];
+      try { files = await readdir(directory); } catch { continue; }
+      for (const file of files) {
+        if (!file.endsWith(".tmp")) continue;
+        await rm(join(directory, file), { force: true }).catch(() => undefined);
+      }
+    }
+  }
+
+  /**
    * The bridge from the publisher's boundary names to the registry's.
    *
    * The publisher is M4B's module and its vocabulary is its own; the fault matrix needs
@@ -627,6 +649,9 @@ export class HistoryService {
     const activeFilmSha = sha256(await readFile(join(view.source_root.value, "film.html")));
     if (activeFilmSha === fact.source_before_sha256) {
       await rm(join(view.source_root.value, fact.film_temp_token), { force: true }).catch(() => undefined);
+      // The publisher's asset temporaries are named after the asset they replace, and a
+      // process that died between the temporary write and the install leaves them behind.
+      await this.#sweepAssetTemporaries(view.source_root.value);
       return this.#abort(transactionId, transaction.project_id, request, requestDigest,
         new HttpError(500, "INTERNAL_ERROR", "The prepared restore did not publish its author source"));
     }
@@ -690,7 +715,9 @@ export class HistoryService {
         frame_count: context.target_projection.frame_count,
       },
       restorePlanSha256: fact.restore_plan_sha256,
-    });
+      // The recovery's commit gets the same per-statement seam as the online one, so a
+      // crash *inside* the recovery's transaction is a boundary the matrix can inject too.
+    }, (point) => { this.#deps.fault?.(point); });
   }
 
   /**

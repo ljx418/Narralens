@@ -235,7 +235,6 @@ interface HostDependencies {
   adoptionPublishFault?: (boundary: PublishBoundary) => Promise<void> | void;
   /** M4C's crash seams; production composition omits them. */
   historyFault?: (boundary: string) => void;
-  historyPublishFault?: (boundary: PublishBoundary) => Promise<void> | void;
 }
 
 export class NarralensHost {
@@ -535,8 +534,10 @@ export class NarralensHost {
       planner: this.restorePlanner, engines: this.engines,
       gateway: new NativeWriteGateway(new NativeMutationRegistry()), locks: this.locks,
       snapshots: this.snapshots, history: this.historyStore, translator: this.historyTranslator,
-      publisher: new AuthorSourcePublisher({ ...(dependencies.historyPublishFault === undefined
-        ? {} : { fault: dependencies.historyPublishFault }) }),
+      // The publisher's boundaries are injected *per call* by the history service, so the
+      // publisher itself carries no fault of its own: a constructor seam would be a second
+      // place for the same boundary to live, and the per-call one would silently win.
+      publisher: new AuthorSourcePublisher(),
       stagingRoot: adoptionStagingRootFor(this.revisions, dependencies.adoptionStagingRoot),
       ...(dependencies.historyFault === undefined ? {} : { fault: dependencies.historyFault }),
     });

@@ -1,11 +1,13 @@
 import { createHash } from "node:crypto";
 import { execFile } from "node:child_process";
-import { mkdir, readFile, readdir, rename, rm } from "node:fs/promises";
+import { copyFile, cp, mkdir, readFile, readdir, rm } from "node:fs/promises";
 import { dirname } from "node:path";
 import { basename, join, resolve } from "node:path";
 import { promisify } from "node:util";
 import { afterEach, describe, expect, it } from "vitest";
 import { NarralensHost } from "../../../src/host/server.js";
+import { computeSourceDigest } from "../../../src/host/engine/source-digest-v1.js";
+import { OPENFILM_UPSTREAM_SHA } from "../../../src/host/engine/engine-binding-store.js";
 import { createPinnedOpenFilmUpstream } from "../../../src/adapters/openfilm/openfilm-upstream.js";
 import {
   adoptedProject, postImpact, postRestore, restoreImpactBody, restoreRequestBody,
@@ -224,22 +226,50 @@ describe("M4C: the content-addressed asset the restore installs", () => {
     expect(asset).toBeTruthy();
     // Rename the asset in the *snapshot* so its name is no longer its content address, and
     // point the projection fact at the renamed root.
-    const snapshotRoot = join(running.host.snapshots.snapshotRoot(project.projectId, project.adoptedSnapshot), "source");
+    // A *new* snapshot whose closure is perfectly readable and whose recorded digest matches
+    // it — but whose asset is filed under a digest that is not its own bytes. The projection
+    // fact is immutable, so this is built as a new snapshot rather than by editing one.
+    const escape = "5".repeat(64);
+    // The escape is a snapshot of its own: its own directory, its own row, its own
+    // projection fact.
+    await cp(running.host.snapshots.snapshotRoot(project.projectId, project.adoptedSnapshot),
+      running.host.snapshots.snapshotRoot(project.projectId, escape), { recursive: true });
+    const snapshotRoot = join(running.host.snapshots.snapshotRoot(project.projectId, escape), "source");
     const renamed = asset!.replace(asset!.split("/")[1]!, "0".repeat(64));
+    // A copy, not a rename: the film's own reference still resolves, so the closure is
+    // readable and can be given a matching digest. The *declared root* is the one that lies.
     await mkdir(dirname(join(snapshotRoot, renamed)), { recursive: true });
-    await rename(join(snapshotRoot, asset!), join(snapshotRoot, renamed));
+    await copyFile(join(snapshotRoot, asset!), join(snapshotRoot, renamed));
+    const roots = target.roots.map((root) => root === asset ? renamed : root);
+    const closure = await computeSourceDigest({
+      root: snapshotRoot, roots, engine: "openfilm", engineUpstreamSha: OPENFILM_UPSTREAM_SHA,
+    }, "m4c-digest");
     running.host.revisions.compose((db) => db.prepare(
-      "UPDATE openfilm_projection_fact SET roots_json=? WHERE snapshot_id=?")
-      .run(JSON.stringify(target.roots.map((root) => root === asset ? renamed : root)),
-        project.adoptedSnapshot));
-    // **The refusal happens before the client is asked to approve anything.** The resolver
-    // recomputes the target's closure over its declared roots, and a file filed under a
-    // digest that is not its own bytes changes that closure — so the target can no longer
-    // be the snapshot the commit recorded, and it is refused there. The planner's own
-    // name-versus-digest check is the backstop behind it.
-    await expect(running.host.historical.resolve(project.projectId, project.adoptedSnapshot, "m4c-digest"))
-      .rejects.toMatchObject({ status: 422 });
-    await expect(running.host.restorePlanner.plan(project.projectId, project.adoptedSnapshot, "m4c-digest"))
+      "INSERT INTO snapshot(snapshot_id, project_id, source_digest, engine, created_at) VALUES(?,?,?,'openfilm',?)")
+      .run(escape, project.projectId, closure.source_digest, new Date().toISOString()));
+    const transaction = running.host.revisions.projectTransactions(project.projectId)
+      .find((row) => row.state === "committed");
+    const frameCount = (await running.host.projectResolver.resolveActivated(project.projectId)).frame_count;
+    running.host.revisions.compose((db) => db.prepare(
+      "UPDATE project_transaction SET snapshot_id=? WHERE transaction_id=?")
+      .run(escape, transaction?.transaction_id ?? "txn_unknown"));
+    running.host.revisions.compose((db) => db.prepare(
+      `INSERT INTO openfilm_projection_fact(project_id, snapshot_id, migration_id, source_digest,
+        engine_upstream_sha, roots_json, subtitles_json, frame_count, transaction_id)
+       VALUES(?,?,?,?,?,?,?,?,?)`)
+      .run(project.projectId, escape, "mig_escape", closure.source_digest,
+        "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3", JSON.stringify(roots),
+        JSON.stringify(target.subtitles), frameCount,
+        transaction?.transaction_id ?? "txn_unknown"));
+
+    // **The resolver accepts it** — the closure is readable and it reproduces the recorded
+    // digest — and the *planner* refuses it, because the asset's name is not its content
+    // address. The refusal happens while the plan is computed, which is before the client
+    // is asked to approve anything: a refusal at the publication boundary would arrive
+    // after the approval and after the transaction was prepared.
+    await expect(running.host.historical.resolve(project.projectId, escape, "m4c-digest"))
+      .resolves.toBeDefined();
+    await expect(running.host.restorePlanner.plan(project.projectId, escape, "m4c-digest"))
       .rejects.toMatchObject({ status: 422 });
   }, 900_000);
 });
@@ -275,6 +305,8 @@ describe("M4C-16: a cancellation before the publication intent discards the stag
 
 describe("M4C-17: a failed restore writes nothing but its own failure", () => {
   it("leaves the source, the revision, the pointer, the impact, the outbox and the idempotency row as they were", async () => {
+    // A lock appears after the stage and before the publication: the write is refused with
+    // the lock, the transaction aborts, and the failure is recorded against its key.
     const running = await start();
     hosts.push(running.host); dirs.push(running.base);
     const prepared = await authorizedRestore(running, "nowrite");
@@ -283,9 +315,10 @@ describe("M4C-17: a failed restore writes nothing but its own failure", () => {
       outbox: running.host.revisions.pendingOutboxCount(),
       impacts: running.host.impacts.byProject(prepared.projectId).length,
     };
-    // A target the impact did not authorize is refused before anything is staged. The
-    // answer is 428, not 404: the impact exists and names a *different* target, and saying
-    // "that snapshot does not exist" would be a statement this write never checked.
+    // A target the impact did not authorize is refused before the transaction is even
+    // opened. The answer is 428, not 404: the impact exists and names a *different* target,
+    // and saying "that snapshot does not exist" would be a statement this write never
+    // checked.
     const refused = await postRestore(running, prepared.projectId, {
       ...prepared.request, target_snapshot_id: "e".repeat(64),
     });
@@ -306,20 +339,13 @@ describe("M4C-17: a failed restore writes nothing but its own failure", () => {
     expect(after.impacts).toBe(before.impacts);
     // And no staging tree survives.
     expect(await readdir(join(running.base, "adoption-stage")).catch(() => [])).toEqual([]);
-    // **The idempotency difference is explicit.** The failed write left exactly one answer
-    // for its key, and that answer is the failure — not a second attempt.
+    // **The idempotency difference is explicit.** This refusal happened *before* the
+    // transaction was opened, so it wrote nothing at all — not even a failure record. The
+    // failures that happen *inside* the transaction are the ones that leave exactly one
+    // answer for their key, and the fault matrix asserts that at every boundary.
     const rows = running.host.revisions.compose((db) => db.prepare(
       "SELECT COUNT(*) AS n FROM operation_idempotency WHERE project_id=? AND operation_kind=? AND idempotency_key=?")
       .get(prepared.projectId, "controlled_write.restore_snapshot", "m4c-media-nowrite") as { n: number });
-    expect(rows.n).toBe(1);
-    // And the answer says the write was aborted, with the revision unmoved.
-    const answer = running.host.revisions.compose((db) => db.prepare(
-      "SELECT response_json FROM operation_idempotency WHERE project_id=? AND operation_kind=? AND idempotency_key=?")
-      .get(prepared.projectId, "controlled_write.restore_snapshot", "m4c-media-nowrite") as
-      { response_json?: string } | undefined);
-    expect(JSON.parse(answer?.response_json ?? "{}")).toMatchObject({
-      status: "aborted", operation: "restore_snapshot",
-      previous_revision: before.view.revision, new_revision: before.view.revision,
-    });
+    expect(rows.n).toBe(0);
   }, 900_000);
 });

@@ -69,6 +69,10 @@ async function facts(host: NarralensHost, projectId: string, impactId: string): 
       "SELECT COUNT(*) AS n FROM operation_idempotency WHERE project_id=?").get(projectId) as { n: number }).n),
     snapshots: Number((db.prepare(
       "SELECT COUNT(*) AS n FROM snapshot WHERE project_id=?").get(projectId) as { n: number }).n),
+    // The outbox **rows**, not the pending ones: the Host delivers them within a quarter
+    // of a second, so "pending" is a race and a row count is a fact.
+    outbox: Number((db.prepare(
+      "SELECT COUNT(*) AS n FROM outbox WHERE project_id=?").get(projectId) as { n: number }).n),
   }));
   const transactions = host.revisions.projectTransactions(projectId);
   return {
@@ -76,7 +80,7 @@ async function facts(host: NarralensHost, projectId: string, impactId: string): 
     revision: commit?.revision ?? null,
     pointer: commit?.snapshot_id ?? null,
     impact: impact?.state ?? null,
-    outbox: host.revisions.pendingOutboxCount(),
+    outbox: counts.outbox,
     idempotency: counts.idempotency,
     temp,
     snapshots: counts.snapshots,
@@ -89,10 +93,7 @@ async function facts(host: NarralensHost, projectId: string, impactId: string): 
  *
  * A boundary *before* the publication leaves the source untouched, so the write is
  * abandoned with revision +0. A boundary *after* the film's rename has published the
- * source already, so the write has to finish: it commits with revision +1. The two
- * asset-install boundaries are not reached by the ordinary flow — a restore installs an
- * asset only when the active root is missing one — so they are recorded as "not reached"
- * rather than silently passing.
+ * source already, so the write has to finish: it commits with revision +1.
  */
 type ExpectedOutcome = "aborted" | "committed" | "not_reached" | "nothing";
 
@@ -108,7 +109,7 @@ const BEFORE_THE_TRANSACTION: ReadonlySet<string> = new Set(["after_target_resol
 
 const BEFORE_PUBLICATION: ReadonlySet<string> = new Set([
   "after_received", "after_preconditions", "after_plan",
-  "after_stage_copy", "after_stage", "after_validate", "before_snapshot_publish",
+  "after_stage_copy", "during_stage_copy", "after_stage", "after_validate", "before_snapshot_publish",
   "after_snapshot_publish", "before_prepared", "after_prepared",
   "after_film_temp_fsync", "before_film_rename",
   // The assets are installed before the film is renamed, so a fault there leaves the active
@@ -143,7 +144,7 @@ describe("M4C TX-08C: the fault matrix", () => {
     // The registry is the contract the matrix walks. These are the boundaries the gate §6
     // names, and a boundary that is not in the registry cannot be walked.
     for (const point of ["after_received", "after_preconditions", "after_target_resolved",
-      "after_plan", "after_stage_copy", "after_stage", "after_validate",
+      "after_plan", "after_stage_copy", "during_stage_copy", "after_stage", "after_validate",
       "before_snapshot_publish", "after_snapshot_publish", "before_prepared", "after_prepared",
       "before_asset_install", "after_asset_install", "after_film_temp_fsync",
       "before_film_rename", "after_film_rename", "after_parent_fsync",
