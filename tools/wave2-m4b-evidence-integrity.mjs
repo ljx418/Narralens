@@ -170,8 +170,31 @@ const required = new Set(["TX-01", "TX-02", "TX-03", "TX-04", "TX-05", "TX-06", 
   // audit was blind to exactly the class of defect the last two rounds' MAJORs lived in. Two
   // independent implementations that agree are a check; one implementation called twice is
   // a tautology.
-  const expectedFailures = new Set(["wave1-integrity", "m4a-integrity"]);
+  /**
+   * The failures a capture expected, from the capture's own record.
+   *
+   * "Which failures did this capture expect?" is a fact about the capture, and a later
+   * stage's capture may expect a failure that an earlier stage's capture must not have.
+   * M4C, for instance, runs M4B's current-tip integrity gate — which fails *by design*
+   * once M4C has mounted the history route. A global set could not say that without also
+   * declaring M4B's own integrity gate a failure, which it is not.
+   *
+   * This is the gate's own implementation of the rule. The shared module implements it
+   * too, and the two have to agree; that is what makes the agreement check below a check.
+   */
+  const expectedFailuresFor = (directory) => {
+    const fallback = ["wave1-integrity", "m4a-integrity"];
+    try {
+      const text = readFileSync(join(directory, "environment.txt"), "utf8");
+      const line = text.split("\n").find((entry) => entry.startsWith("expected_failure_commands="));
+      if (line === undefined) return new Set(fallback);
+      const names = line.slice("expected_failure_commands=".length)
+        .split(",").map((name) => name.trim()).filter((name) => name !== "");
+      return names.length === 0 ? new Set(fallback) : new Set(names);
+    } catch { return new Set(fallback); }
+  };
   const failuresOf = (directory) => {
+    const expectedFailures = expectedFailuresFor(directory);
     const names = readdirSync(directory);
     const exits = new Set(names.filter((name) => name.endsWith(".exit")));
     const failures = [];

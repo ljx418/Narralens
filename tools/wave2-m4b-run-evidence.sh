@@ -23,6 +23,10 @@ DIRTY="$(git status --porcelain | wc -l | tr -d ' ')"
   echo "openfilm_upstream=e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3"
   echo "declaration_ceiling=M4B_INTERNAL_EVIDENCED"
   echo "interaction=headless,muted,no-window,no-focus-steal,no-network,no-payment"
+  # The failures this capture expects, recorded so the shared failure rule can tell them
+  # from a real one. M4B runs Wave 1's and M4A's *current-tip* integrity gates, and both
+  # fail by design after M4B moved the code; their historical gates pass.
+  echo "expected_failure_commands=wave1-integrity,m4a-integrity"
 } > "$LOGS/environment.txt"
 
 overall=0

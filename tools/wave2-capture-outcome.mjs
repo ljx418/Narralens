@@ -33,8 +33,34 @@ import { join, resolve } from "node:path";
  * rule and the directories it reads stay in step.
  */
 
-/** The commands whose non-zero exit is expected, and therefore not a failure by themselves. */
-export const EXPECTED_FAILURE_COMMANDS = new Set(["wave1-integrity", "m4a-integrity"]);
+/**
+ * The commands whose non-zero exit is expected, and therefore not a failure by themselves.
+ *
+ * This is the *default*. A capture may narrow or widen it, and it records the set it used
+ * in its own `environment.txt` — because "which failures did this capture expect?" is a
+ * fact about that capture, not about the repository. M4C, for instance, runs M4B's
+ * current-tip integrity gate, and that gate fails *by design* once M4C has mounted the
+ * history route; the expectation belongs to the M4C capture, and a global set could not
+ * express it without also declaring M4B's own integrity gate a failure — which it is not.
+ */
+export const DEFAULT_EXPECTED_FAILURE_COMMANDS = new Set(["wave1-integrity", "m4a-integrity"]);
+
+/**
+ * The expected-failure set a capture recorded for itself.
+ *
+ * A capture that does not record one — every capture before this field existed — uses the
+ * default.
+ */
+export function expectedFailureCommands(directory) {
+  try {
+    const text = readFileSync(join(directory, "environment.txt"), "utf8");
+    const line = text.split("\n").find((entry) => entry.startsWith("expected_failure_commands="));
+    if (line === undefined) return DEFAULT_EXPECTED_FAILURE_COMMANDS;
+    const names = line.slice("expected_failure_commands=".length)
+      .split(",").map((name) => name.trim()).filter((name) => name !== "");
+    return names.length === 0 ? DEFAULT_EXPECTED_FAILURE_COMMANDS : new Set(names);
+  } catch { return DEFAULT_EXPECTED_FAILURE_COMMANDS; }
+}
 
 /**
  * The failing commands of a capture directory.
@@ -47,13 +73,14 @@ export function failedCommands(directory) {
   let entries;
   try { entries = readdirSync(directory); }
   catch { return failures; }
+  const expected = expectedFailureCommands(directory);
   const exits = new Set(entries.filter((name) => name.endsWith(".exit")));
   for (const entry of exits) {
     const name = entry.slice(0, -".exit".length);
     const raw = readFileSync(join(directory, entry), "utf8").trim();
     // A truncated or empty `.exit` is not a success. It is the absence of a result.
     const code = /^\d+$/u.test(raw) ? Number(raw) : null;
-    if (EXPECTED_FAILURE_COMMANDS.has(name)) {
+    if (expected.has(name)) {
       // These are expected to fail. One that *succeeded* is a failure of the expectation.
       if (code === 0) failures.push({ name, exit: 0 });
       continue;
