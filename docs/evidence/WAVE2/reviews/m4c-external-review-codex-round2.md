@@ -69,6 +69,8 @@ M4C 专项实际耗时约 2010 秒；其中 fault matrix 42/42、真实 900 帧�
 
 独立复现：当前 `[a,b]`，目标 `[b,a]` 并仅修改 `a.source_ref`，实际 plan 只有 `visual/shot/a`。用真实 `LockService` 在 `b` 上持有 visual-shot 锁后，`assertUnlocked(project, plan.required_locks)` 仍然通过。目标 film 会整体改变顺序语义，而 `b` 的保护没有参与授权。
 
+该项最终定为 MAJOR 而非 BLOCKER：当前 M4B/M4C 的正式写路径不会生成“只改变同轨顺序”的 committed snapshot，因此尚未证明 V1 用户可以直接触发这条绕过；但 builder、合同和 CLOSED case 已承诺支持/分类该差异，且后续 native edit 一旦开放就会使路径可达，所以必须在进入 M5 前关闭。
+
 现有“clips were reordered”测试实际交换的是两个 clip 的 frame ranges，并没有测试只改变 `tracks[].clip_ids` 顺序，所以无法咬住此缺陷。
 
 修复门：projection digest 必须绑定 track 顺序；eligibility 必须验证 kind 与精确 topology；纯顺序、顺序+内容、page/video↔sound 都须 fail closed 或按 ADR 生成完整 project locks/consumers。使用真实 LockService 证明任一受影响 clip 的锁都能阻断。
