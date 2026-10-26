@@ -1,6 +1,6 @@
 # Wave 3 / M5 开工入口
 
-状态：`REWORKED_CANDIDATE_FOR_INDEPENDENT_REVIEW`
+状态：`FROZEN_FOR_CLAUDE_IMPLEMENTATION`
 
 前置已满足：Wave 2 组合候选 `a038e4a6cc48a7d09c240318da3ec1068e0e8bcc` 独立外审 PASS，声明
 `WAVE2_EDITABLE_ADOPTION_READY`。M5 只负责把已证明的 Host 能力做成同页 Studio UX；不提前实现 M6 生产导出、

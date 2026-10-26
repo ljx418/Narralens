@@ -47,7 +47,7 @@
 | M2 | EnginePort、单引擎绑定、写入治理、三类锁、持久 Job/SSE/lease、snapshot/journal、迁移副本与回退 | **Wave 1 组合外审 PASS，`CONTROLLED_OPENFILM_READY`**：冻结代码 `e2dec5c...`，证据捕获 `fd64762...`，21 case 为 20 PASS + 1 `NOT_APPLICABLE_APPROVED` | migrate-copy/report/rollback 已实现；AC-005 legacy edit 仍为事后 snapshot，headed/human NOT_RUN |
 | W2.0–M3 | 目标工程解析、资产账本、素材化、真实 proxy/native plan/lineage | **M3 独立外审 PASS**：候选 `fa08fe4...`，捕获 `f2a41ff...`；ACT/ASSET、PR、MT 全部关闭 | materialize POST/GET 已开放；NOWRITE；impact/adopt/history 仍 404；M3 不等于 D4.2 完成 |
 | M4A–M4C | server impact、采用与历史事务 | **M4A、M4B、M4C 独立外审及 Wave 2 组合外审均 PASS；`WAVE2_EDITABLE_ADOPTION_READY`**。唯一 adopt/restore 路由、原子 source 发布、revision/impact/projection/ledger/outbox/idempotency 同事务、崩溃恢复、真实 900 帧双渲染与中镜原生编辑均有直接测试 | 组合候选 `a038e4a...`；允许进入 M5，Gate D4.2 仍未关闭 |
-| M5 | 同页原生 Studio UX | **文档返修候选 / 独立复审待执行** | Wave 2 前置已满足；M5 合同、Studio Gateway、comparison replay 与 UX/PF 门见 `docs/migration/WAVE3/`，复审 PASS 前不得实现 |
+| M5 | 同页原生 Studio UX | **文档冻结 / 允许实现** | 第三轮独立文档复审 PASS（BLOCKER=0 / MAJOR=0）；M5 合同、Studio Gateway、comparison replay 与 UX/PF 门见 `docs/migration/WAVE3/` |
 | M6 | `Gate V1-P0` | not-started | 不等于 V1-Full |
 | M7A–D | P1 与完整长片证据 | not-started | P0/P1 全绿后才可声明 V1-Full |
 

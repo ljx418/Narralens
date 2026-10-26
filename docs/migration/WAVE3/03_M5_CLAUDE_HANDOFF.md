@@ -1,6 +1,7 @@
 # Claude Code：M5 连续实现交接
 
-状态：`REVIEW_PENDING`。只有同目录文档在新冻结提交上通过独立复审后，本文件才可作为开工入口。
+状态：`READY_FOR_CLAUDE_IMPLEMENTATION`。第三轮独立复审 PASS（BLOCKER=0 / MAJOR=0）；最终完整 SHA 由 Codex
+在对话提示词中给出。
 
 下面提示词是下一阶段唯一开工入口；完整可复制版本也会打印在 Codex 对话中。
 

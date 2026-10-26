@@ -1,6 +1,6 @@
 # M5 同页 OpenFilm Studio：架构与合同锁
 
-状态：`REWORKED_CANDIDATE_FOR_INDEPENDENT_REVIEW`
+状态：`FROZEN_FOR_IMPLEMENTATION`
 声明上限：`M5_HEADLESS_EVIDENCED`；人工体验签署后才可 `M5_HUMAN_ACCEPTED`。
 
 强制补充合同：`04_M5_REVIEW_CLOSURE_AND_SUPERSESSIONS.md`。它冻结 Studio Gateway、comparison replay、身份映射、
@@ -96,7 +96,8 @@ interface WorkbenchProjectionV1 {
 保留 target clip id、唯一映射的 source shot id（无则 null）、kind、整数帧范围和 track 顺序。字幕来自 projection；
 旁白存在性来自 migration report（无法证明为 `unknown`）；资产公开 label 来自 ledger/inventory，绝不回传 path。
 禁止绝对路径、session token、adapter 类名、SQLite 文案或 author source bytes。
-响应必须通过 runtime JSON Schema、TS 类型和 validator；额外字段拒绝。
+响应必须通过 runtime JSON Schema、TS 类型和 validator；额外字段拒绝。preview 不能透传 adapter 当前 404 占位；
+按 04 §6 在 Workbench serializer 中由 Supervisor Gateway descriptor 整体替换。
 
 ### 4.2 用户锁合同
 

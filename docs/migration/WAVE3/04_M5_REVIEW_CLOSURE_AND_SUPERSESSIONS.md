@@ -13,7 +13,8 @@ openBrowser: noop, stays: true, editorDir: <M5 build>})`；扩展 `openfilm-upst
 闭包、Studio UI build 输入、package/lock/license SHA256。任一 HEAD、clean、文件摘要不符即 503
 `ENGINE_UNAVAILABLE`，不降级到系统 `latest`。
 
-Gateway 绑定独立的随机 loopback 端口，是浏览器唯一可见的 Studio origin；上游 raw origin、launch key、工程绝对路径
+Gateway 固定绑定 `127.0.0.1` 的随机端口（不得在 `localhost`/IPv6 主机名间切换），是浏览器唯一可见且顶层打开的
+Studio origin；M5 Narralens panel 与原生 Studio UI 同页同 origin，不使用跨源 iframe。上游 raw origin、launch key、工程绝对路径
 永不进入 WorkbenchProjection、DOM、日志或截图。Gateway 具备 DNS rebinding/Host 校验、随机 HttpOnly SameSite cookie、
 Referrer-Policy `no-referrer`、CSP。Studio 页面永不直接调用 Narralens Host，也不持有 Host bearer。浏览器只连接
 Gateway 同源 API/WebSocket；Gateway 在 NarralensHost composition 内通过受限服务接口调用 workbench/replay/lock 与既有
@@ -21,14 +22,16 @@ Wave 2 orchestration，不经浏览器转发凭据。Host 的 Origin allowlist �
 Gateway origin；从 Gateway origin 直调 Host 必须 401/403 且零副作用。`preview.url` 指向 Gateway target 页面，不再
 指向当前恒 404 的 Host 占位。
 
-M5 build 使用固定上游 `StudioHost` v1 接缝：`onSelection(StudioSelection)` 回传原生 clip/range/playhead，
+M5 build 实现固定上游 `openfilm/studio-ui/lib/host.ts` 导出的 `StudioHost` v1 接口，不修改 upstream：
+`onSelection(StudioSelection)` 回传原生 clip/range/playhead，
 `onCommand(StudioCommand)` 接收 seek/select/range；seconds 只在 bridge 边界用冻结 rational fps 转成整数半开帧。
 每条消息携带 `project_id/snapshot_id/revision`，旧 snapshot 消息丢弃。Narralens 的 DirectorPane 是
 `data-studio-host-panel`，原生 OpenFilm App/timeline/player 仍是唯一剪辑视图。
 
 Supervisor 启动前必须在配置的固定 checkout（允许显式 `OPENFILM_VENDOR_ROOT`，不得搜索 latest）探测
 `openfilm/studio.startStudio` 与 `StudioHost` v1 的 `onSelection/onCommand` 接缝，并把实际加载闭包纳入摘要；缺失、签名
-不符或 checkout 不可用均为 503 `ENGINE_UNAVAILABLE`，M5 合法终态为 `M5_BLOCKED_ENV`。不得修改 pinned upstream、
+不符或 checkout 不可用均为 503 `ENGINE_UNAVAILABLE`，M5 合法终态为 `M5_BLOCKED_ENV`。probe 结果、固定 SHA、导出签名与
+加载文件 SHA256 落到 `docs/evidence/WAVE3/M5/upstream/studio-seam-probe.json`。不得修改 pinned upstream、
 回退 CLI 或自建第二套 Studio。
 
 Gateway 对原生 API 使用“读 allowlist、写 deny-by-default”：
@@ -64,12 +67,15 @@ interface ComparisonReplayRequestV1 {
 ```
 
 Host 必须证明 target 的 terminal migration；源 comparison 的 `project_id` 必须等于
-`ActivatedProjectView.migrated_from`。映射权威固定为当前迁移器的不变量：`OpenFilmMigrator.clipIdFor(source_id)` 令
+`ActivatedProjectView.migrated_from`。映射权威固定为当前迁移器的不变量：
+`src/host/projects/openfilm-migrator.ts` 的模块私有 `clipIdFor` 令
 target `clip_id === source shot_id`。replay 必须同时读取 source `ProjectCatalog` 描述与当前 target
 `EngineProjection.clips`，证明 source shot 唯一存在、target 同 id clip 唯一存在，并以 projection 的真实
 `frame_range` 校验选区。不得引用 `MigrationReportV1.target_clips`（它是非持久 extras，GET 默认空且范围可能是合成值），
-也不得引用冻结为空壳的 plan `identity_map`。comparison 的 base revision 必须等于 migration plan 的 source revision；
-不等返回 409。服务端逐字段复制 proposal 内容与原始 `generation_audit`，创建新的
+也不得引用冻结为空壳的 plan `identity_map`。M5 实现时必须把 `clipIdFor` 导出为纯函数并由 migration/replay 共用，
+禁止复制字符串规则。comparison 的 base revision 必须等于 migration plan 的 source revision；不等返回 409，UI 文案为
+“该提案早于迁移基线，M5 不会重新调用模型；请选择与迁移基线匹配的已录制提案”，保留草稿并不得换 key 盲重试。
+服务端逐字段复制 proposal 内容与原始 `generation_audit`，创建新的
 target-owned comparison/id，并追加不可变 lineage `{source_comparison_id, source_project_id, migration_id,
 source_sha256}`。它不调用 Runner/provider、不改变 source/revision/active snapshot/ledger。相同 key+digest 重放同一响应，
 异体 409；映射缺失/重复为 422。UI 必须显示“已录制提案（原始生成审计）”，不得写成“本次 AI 新生成”。
@@ -157,6 +163,10 @@ Studio Gateway 使用独立 loopback origin，不占 `/api/migration/v1` route�
 “只挂载 engine 只读路由”为“只挂载阶段明确授权的精确白名单”。必须新增/更新 mutation gate，逐条删除或增加未授权
 route 都会红；不得删除、改为 `contains` 或放宽其他断言。“旧 1040 测试不删不弱化”仅允许上述受控前向扩展。
 
+Workbench 组装顺序固定：`EnginePort.inspect()` 仍可产出当前 Host-relative preview 占位，但 `NarralensHost` 在完成
+activated view 校验后必须调用 Supervisor `ensure(target)`，并在 WorkbenchProjection serializer 中把 preview 整体替换为
+Gateway `{kind,url,bridge_version}`；不得直接透传 adapter `preview.url`，不得修改 snapshot/source digest。
+
 ## 7. D-07：Headless、fixture、200% 与 BLOCKED_ENV
 
 M5C 新增一个仓内 browser harness：发现本机 Chrome（允许显式 `NARRALENS_CHROME_PATH`），用 `child_process.spawn`
@@ -172,7 +182,8 @@ M5C 新增一个仓内 browser harness：发现本机 Chrome（允许显式 `NAR
 3–5 分钟、20+ clip、至少三路可解码 proxy；允许重复已
 验真实片段来验证系统交互，但必须标注“不证明内容质量/长片体验”。120 clip/6+章是结构压力 fixture，同样不冒充
 长片质量证据。两者都记录生成命令、上游 SHA、媒体 SHA256、ffprobe 与完整 decode。缺固定 checkout、Chrome、
-ffmpeg、fixture 或上游 `startStudio/StudioHost v1` 接缝缺失/签名不符时合法终态是 `M5_BLOCKED_ENV`：不得启动人工体验门，
+ffmpeg、fixture 或上游 `startStudio/StudioHost v1` 接缝缺失/签名不符时合法终态是 `M5_BLOCKED_ENV`：UX-05、UX-10、
+PF-01..03 必须标为 `BLOCKED_ENV`，只允许交付 workbench/locks/replay 的有界部分；不得启动人工体验门，
 不得声明 `M5_HEADLESS_EVIDENCED`，也不得用 mock 替代后宣称 E2E。
 
 ## 8. D-08：外审遗留、安全和报告

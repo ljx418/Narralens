@@ -1,6 +1,6 @@
 # M5 开发与验收门
 
-状态：`REWORKED_CANDIDATE_FOR_INDEPENDENT_REVIEW`
+状态：`FROZEN_FOR_IMPLEMENTATION`
 
 强制裁决：`04_M5_REVIEW_CLOSURE_AND_SUPERSESSIONS.md`。所有 case 同时受其 Studio Gateway、comparison replay、
 身份/锁/CAS、fixture 与 BLOCKED_ENV 规则约束。
