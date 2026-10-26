@@ -1,6 +1,7 @@
 # Wave 2 组合冻结候选
 
 状态：`WAVE2_EDITABLE_ADOPTION_READY`（独立组合外审 PASS：BLOCKER=0 / MAJOR=0）
+外审路径：`docs/evidence/WAVE2/reviews/wave2-combined-external-review-claude.md`
 
 ## 1. 绑定
 

@@ -42,7 +42,7 @@ SnapshotStore → commit record/outbox`，adapter 无 commit 权。
 
 ## 3. 明确不在本波
 
-- M5 同页 Studio 完整 UI、章节/镜头地图、六类选择和 headed 人工体验；
+- M5 同页 Studio 完整 UI、章节/镜头地图、受 capability 约束的候选类别和 headed 人工体验；
 - M6 标题、封面、preflight、正式交付和 Gate V1-P0；
 - M7 风格、TTS/ASR、Provider/预算、长片和 V1-Full；
 - 插件市场、第二 timeline、Gemini 服务、Remotion 全片后端；
@@ -55,10 +55,10 @@ Claude Code 只能在以下条件同时成立后写代码：
 
 - 工作树用户改动已识别并保护，不 reset/stash/force push；
 - Wave 1 historical integrity PASS；current-tip 历史门按后续合法变化如实记录；
-- 本包状态为 `M4C_FROZEN_FOR_IMPLEMENTATION`；
+- 本包已完成并封存为 `WAVE2_EDITABLE_ADOPTION_READY`；本节保留为历史开工条件；
 - 不存在未关闭 BLOCKER/MAJOR 文档问题；
 - M4B 独立外审为 PASS，M4C 文档三轮审查为 PASS，且现场基线复验命令仍通过；
-- materialize/impact/adopt 已按 M3/M4A/M4B 开放；history restore 在 M4C 开工前仍为 404；
+- materialize/impact/adopt/history restore 已按 M3/M4A/M4B/M4C 开放并通过组合外审；
 - 本轮不需要费用、外传、headed 或人工内容判断。
 
 ## 5. 出门口径

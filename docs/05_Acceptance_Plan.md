@@ -52,7 +52,8 @@
 - [ ] 写入失败后主 Source 哈希恢复。
 - [ ] 历史恢复产生新 revision。
 
-D3 已通过其中：单镜 visual fit 事务总帧数不变、非目标逐字段不变、`preserve=narration` 资产哈希不变、visual 锁 423、旧 revision 409、失败补偿/attention 与真实 Source baseline 恢复。它只证明 visual 这一项主动锁；narration/duration 主动锁、历史恢复和整个 C 章节均未通过，不能由追踪矩阵中的 `partial` 推导为 P0-07 完成。
+D3 当时只通过单镜 visual 子集；该句保留阶段历史。当前 Wave 2 已追加 narration/duration 锁、采用与 history restore
+后端证据并通过组合外审，但整个 C 章节仍须由 M5 同页 Headless 与人工体验闭环，不能提前声明 Gate D4.2。
 
 ### C.1 D4.2 素材实体化与采用门限（D4.2.1 候选完成，D4.2.2–D4.2.3 未实现）
 

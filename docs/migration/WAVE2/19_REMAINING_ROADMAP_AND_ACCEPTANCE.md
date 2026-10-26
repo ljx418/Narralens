@@ -16,7 +16,8 @@
 
 ## 2. 最近人工体验门前仍需完成
 
-1. M5A：项目创建/打开、WorkbenchProjection、章/句/镜与 OpenFilm timeline/player 的共享 selection/clock/snapshot；
+1. M5A：打开/迁移已有事实项目、WorkbenchProjection、受控 Studio Gateway、章/句/镜与 OpenFilm
+   timeline/player 的共享 selection/clock/snapshot；空白项目创建延期到 M6/M7；
 2. M5B：3–6 提案比较、试听、impact 预览、采用/恢复、Inspector/History 状态在同页闭环；
 3. M5C：20+ 镜、3–5 分钟真实 fixture 的虚拟化/响应性、键盘、焦点、reduced motion、200% 文本与 Headless E2E；
 4. 生成中文可视化验收报告后，才进入第一次正式人工体验。

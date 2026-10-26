@@ -269,7 +269,8 @@ journal 目标状态为 `prepared → source_validated → metadata_committed`�
 - M2.1 起由 `tests/architecture/m2.1-fitness.test.ts` 机械执行：`app/**` 不 import host/adapters/vendor；
   `contracts/**` 不 import React/Node/adapters/host；生产代码不 import `spikes/**`；
   `EnginePort` 成员恰为 7 个且 adapter 无 commit/lock/process 方法；registry policy 四选一且 `unknown` 计数为 0；
-  `/api/migration/v1` 下只挂载 engine 只读路由；`ApiErrorCode` union / JSON Schema / alias 表三者一致；
+  `/api/migration/v1` 下只挂载各阶段合同明确授权的精确白名单路由；新增或删除均须同步阶段 fitness 与 mutation bite，
+  不允许通配放行；`ApiErrorCode` union / JSON Schema / alias 表三者一致；
   legacy `frame_rate` 仍为 number 且 `end_frame_exclusive` 未被改名。
 - 每条 fitness 规则都由 `tools/m2.1-gate-mutation-check.sh` 的变异用例证明会失败（MUT-A..MUT-F），
   避免出现「永远不会红的绿灯」。
