@@ -7,9 +7,11 @@ import { fileURLToPath } from "node:url";
 import { ControlledAgentRunner, type ComparisonRunnerInput } from "../adapters/openmontage/controlled-agent-runner.js";
 import { ProposalAdapter } from "../adapters/openmontage/proposal-adapter.js";
 import { ProposalComparisonAdapter } from "../adapters/openmontage/proposal-comparison-adapter.js";
-import { validateAdoptRequest, validateControlledWriteFailure, validateControlledWriteResponse, validateEditRequest,
+import { validateAdoptRequest, validateComparisonReplayRequest, validateComparisonReplayResponse,
+  validateControlledWriteFailure, validateControlledWriteResponse, validateEditRequest,
   validateEngineResponse, validateHistory, validateHistoryIntent, validateImpactRequest, validateImpactSpec,
-  validateProposalComparisonRequest, validateRestoreRequest } from "../contracts/validator.js";
+  validateLockCreateRequest, validateLockMutationResponse, validateProposalComparisonRequest,
+  validateRestoreRequest, validateWorkbenchProjection } from "../contracts/validator.js";
 import type { EngineResponse } from "../contracts/engine-types.js";
 import type { ApiError, JobEvent, ProjectResponse, ProposalComparisonRequest } from "../contracts/types.js";
 import { HttpError, normalizeError } from "./api-error.js";
@@ -62,6 +64,14 @@ import { HistoryCommandTranslator } from "./history/history-command-translator.j
 import { HistoryService } from "./history/history-service.js";
 import { RestorePlanner } from "./history/restore-planner.js";
 import type { PublishBoundary } from "./adoption/author-source-publisher.js";
+import { ComparisonReplayService } from "./m5/comparison-replay-service.js";
+import { LockMutationService } from "./m5/lock-mutation-service.js";
+import { OpenFilmStudioGateway, type StudioHostService, type StudioOperation } from "./m5/openfilm-studio-gateway.js";
+import { OpenFilmStudioSupervisor, type StartedStudio } from "./m5/openfilm-studio-supervisor.js";
+import { readPanelAssets } from "./m5/panel-assets.js";
+import { STUDIO_HOST_BRIDGE_SCRIPT } from "./m5/studio-host-bridge.js";
+import { WorkbenchService } from "./m5/workbench-service.js";
+import type { LockCreateRequestV1 } from "../contracts/wave3-types.js";
 
 const bodyLimit = 65_536;
 
@@ -235,6 +245,13 @@ interface HostDependencies {
   adoptionPublishFault?: (boundary: PublishBoundary) => Promise<void> | void;
   /** M4C's crash seams; production composition omits them. */
   historyFault?: (boundary: string) => void;
+  /**
+   * M5: where the pinned OpenFilm checkout lives.
+   *
+   * The Studio is started from the same checkout the film seam uses, and never from
+   * another revision. The default is the same resolution the OpenFilm composition uses.
+   */
+  openFilmVendorRoot?: string;
 }
 
 export class NarralensHost {
@@ -309,6 +326,23 @@ export class NarralensHost {
   readonly restorePlanner: RestorePlanner;
   readonly historyTranslator: HistoryCommandTranslator;
   readonly history: HistoryService;
+  /**
+   * M5's layer (Wave 3 `01` §4, `04`).
+   *
+   * `m5Supervisor` owns the pinned upstream Studio and the Gateway around it; `m5Workbench`
+   * is the read model the page draws from; `m5Locks` is the strict-CAS lock mutation path;
+   * `m5Replay` copies a recorded comparison onto the target without calling a provider.
+   *
+   * They are composed over the *same* resolver, projections, engine registry, revisions and
+   * idempotency authority the rest of the Host uses. A second resolver or a second
+   * idempotency table would be a second authority, which is what Wave 2 ruled out by name.
+   */
+  readonly m5Supervisor: OpenFilmStudioSupervisor;
+  readonly m5Workbench: WorkbenchService;
+  readonly m5Locks: LockMutationService;
+  readonly m5Replay: ComparisonReplayService;
+  /** The Gateway, once the Studio has been started. Null until then. */
+  #m5Gateway: OpenFilmStudioGateway | null = null;
   /** Injected so impact TTL is testable without waiting fifteen minutes. */
   readonly impactClock: () => Date;
   readonly sessionToken = randomBytes(32).toString("base64url");
@@ -551,6 +585,44 @@ export class NarralensHost {
       stagingRoot: adoptionStagingRootFor(this.revisions, dependencies.adoptionStagingRoot),
       ...(dependencies.adoptionFault === undefined ? {} : { fault: dependencies.adoptionFault }) });
     this.#historyFault = dependencies.historyFault;
+    // M5's composition. The Studio is started lazily — the first workbench read needs it —
+    // so a Host that is never asked for the workbench never starts an editor.
+    this.m5Supervisor = new OpenFilmStudioSupervisor({
+      vendorRoot: dependencies.openFilmVendorRoot ?? openfilmVendorRoot(),
+      targetRootOf: async (projectId: string) => {
+        const view = await this.projectResolver.resolveActivated(projectId);
+        return view.source_root.value;
+      },
+      onStudio: async (studio: StartedStudio) => {
+        const gateway = new OpenFilmStudioGateway({
+          studio,
+          services: this.#studioServices(),
+          bridgeScript: STUDIO_HOST_BRIDGE_SCRIPT,
+          panelAssets: await readPanelAssets(projectRoot),
+        });
+        const origin = await gateway.start();
+        this.#m5Gateway = gateway;
+        this.m5Supervisor.setGatewayBase(origin);
+      },
+    });
+    this.m5Workbench = new WorkbenchService({
+      resolver: this.projectResolver, projections: this.projections, engines: this.engines,
+      revisions: this.revisions, locks: this.locks, history: this.historyStore,
+      catalog: this.catalog, supervisor: this.m5Supervisor,
+    });
+    this.m5Locks = new LockMutationService({
+      revisions: this.revisions, idempotency: this.idempotency, queue: this.operations,
+      clipsOf: async (projectId: string) => await this.#targetClips(projectId),
+      frameCountOf: async (projectId: string) => {
+        const view = await this.projectResolver.resolveActivated(projectId);
+        return view.frame_count;
+      },
+    });
+    this.m5Replay = new ComparisonReplayService({
+      revisions: this.revisions, resolver: this.projectResolver, projections: this.projections,
+      engines: this.engines, catalog: this.catalog, comparisons: this.comparisons,
+      idempotency: this.idempotency, queue: this.operations,
+    });
     this.#leaseReapIntervalMs = dependencies.leaseReapIntervalMs ?? 1_000;
     this.#materializeDrainIntervalMs = dependencies.materializeDrainIntervalMs ?? 250;
     this.#outboxReplayIntervalMs = dependencies.outboxReplayIntervalMs ?? 250;
@@ -660,6 +732,15 @@ export class NarralensHost {
     // Stop accepting, tell running workers to finish, and wait for a durable ending —
     // before anything closes the database underneath them.
     await this.materialize.shutdown();
+    // M5's Gateway is a server of its own, on its own loopback port. It is closed with
+    // the Host: a Gateway left listening would keep the Studio and the browser's session
+    // alive after the Host that owned them is gone.
+    const gateway = this.#m5Gateway;
+    this.#m5Gateway = null;
+    if (gateway !== null) await gateway.close();
+    // The Studio is a server of its own; a Host that closed without stopping it would
+    // leave an editor listening on loopback.
+    await this.m5Supervisor.close();
     if (this.#leaseReaper !== undefined) clearInterval(this.#leaseReaper);
     this.#leaseReaper = undefined;
     if (!server) { this.revisions.close(); return; }
@@ -687,6 +768,8 @@ export class NarralensHost {
       this.#authenticate(request);
       let match = url.pathname.match(/^\/api\/migration\/v1\/projects\/([A-Za-z0-9_-]+)\/engine$/);
       if (request.method === "GET" && match?.[1]) return json(response, 200, await this.#engine(match[1]));
+      match = url.pathname.match(/^\/api\/migration\/v1\/projects\/([A-Za-z0-9_-]+)\/workbench$/);
+      if (request.method === "GET" && match?.[1]) return await this.#workbench(match[1], response);
       match = url.pathname.match(/^\/api\/migration\/v1\/projects\/([A-Za-z0-9_-]+)\/migrate-copy$/);
       if (request.method === "POST" && match?.[1]) return await this.#migrateCopy(match[1], request, response);
       match = url.pathname.match(
@@ -707,6 +790,14 @@ export class NarralensHost {
       if (request.method === "POST" && match?.[1]) return await this.#historyIntent(match[1], "undo", response);
       match = url.pathname.match(/^\/api\/migration\/v1\/projects\/([A-Za-z0-9_-]+)\/history\/redo$/);
       if (request.method === "POST" && match?.[1]) return await this.#historyIntent(match[1], "redo", response);
+      match = url.pathname.match(/^\/api\/migration\/v1\/projects\/([A-Za-z0-9_-]+)\/locks$/);
+      if (request.method === "POST" && match?.[1]) return await this.#createLock(match[1], request, response);
+      match = url.pathname.match(/^\/api\/migration\/v1\/projects\/([A-Za-z0-9_-]+)\/locks\/([A-Za-z0-9_-]+)$/);
+      if (request.method === "DELETE" && match?.[1] && match[2]) {
+        return await this.#releaseLock(match[1], match[2], url, response);
+      }
+      match = url.pathname.match(/^\/api\/migration\/v1\/projects\/([A-Za-z0-9_-]+)\/comparisons\/replay$/);
+      if (request.method === "POST" && match?.[1]) return await this.#replayComparison(match[1], request, response);
       match = url.pathname.match(/^\/api\/migration\/v1\/materializations\/([A-Za-z0-9_-]+)$/);
       if (request.method === "GET" && match?.[1]) return await this.#readMaterialization(match[1], response);
       match = url.pathname.match(/^\/api\/migration\/v1\/migrations\/([A-Za-z0-9_-]+)$/);
@@ -1046,6 +1137,382 @@ export class NarralensHost {
         { errors: validated.errors.slice(0, 8) }, projectId);
     }
     json(response, 200, validated.value);
+  }
+
+  // ── M5: the workbench, the locks and the comparison replay ─────────────────────────
+
+  /**
+   * M5's read model (Wave 3 `01` §4.1).
+   *
+   * The route is thin: the seam, the identity rules and the preview replacement all
+   * belong to `WorkbenchService`, and the contract check belongs here. What the route
+   * adds is the refusal to publish a projection that does not satisfy the contract — a
+   * read model with an unknown field is a read model nobody can trust.
+   */
+  async #workbench(projectId: string, response: ServerResponse): Promise<void> {
+    const projection = await this.m5Workbench.workbench(projectId, projectId);
+    const validated = validateWorkbenchProjection(projection);
+    if (!validated.ok) {
+      throw new HttpError(500, "INTERNAL_ERROR", "The workbench projection does not satisfy its contract",
+        { errors: validated.errors.slice(0, 8) }, projectId);
+    }
+    json(response, 200, validated.value);
+  }
+
+  /**
+   * M5's lock creation.
+   *
+   * The contract is enforced at the boundary — a client may not name the owner, may not
+   * widen the type or the reason, and may not carry an extra field — and everything else
+   * (the range proof, the strict CAS, the outbox row) belongs to `LockMutationService`.
+   */
+  async #createLock(projectId: string, request: IncomingMessage, response: ServerResponse): Promise<void> {
+    const parsed = validateLockCreateRequest(await readJson(request));
+    if (!parsed.ok) {
+      throw new HttpError(400, "INVALID_REQUEST", "The lock request does not satisfy its contract",
+        { errors: parsed.errors.slice(0, 8) }, projectId);
+    }
+    const result = await this.m5Locks.create(projectId, parsed.value, projectId);
+    const validated = validateLockMutationResponse(result);
+    if (!validated.ok) {
+      throw new HttpError(500, "INTERNAL_ERROR", "The lock response does not satisfy its contract",
+        { errors: validated.errors.slice(0, 8) }, projectId);
+    }
+    json(response, 200, validated.value);
+  }
+
+  /**
+   * M5's lock release.
+   *
+   * The base control revision and the idempotency key travel as query parameters: a
+   * `DELETE` with a body is not reliably delivered by every client, and a release that
+   * silently lost its CAS base would be a release nobody authorized.
+   */
+  async #releaseLock(projectId: string, lockId: string, url: URL, response: ServerResponse): Promise<void> {
+    const base = url.searchParams.get("base_control_revision");
+    const key = url.searchParams.get("idempotency_key");
+    if (base === null || key === null) {
+      throw new HttpError(400, "INVALID_REQUEST",
+        "Releasing a lock needs base_control_revision and idempotency_key", undefined, projectId);
+    }
+    const baseRevision = Number(base);
+    if (!Number.isSafeInteger(baseRevision) || baseRevision < 0) {
+      throw new HttpError(400, "INVALID_REQUEST", "base_control_revision must be a non-negative integer",
+        undefined, projectId);
+    }
+    if (key.length < 8 || key.length > 128) {
+      throw new HttpError(400, "INVALID_REQUEST", "idempotency_key must be 8 to 128 characters",
+        undefined, projectId);
+    }
+    const result = await this.m5Locks.release(projectId, lockId, baseRevision, key, projectId);
+    const validated = validateLockMutationResponse(result);
+    if (!validated.ok) {
+      throw new HttpError(500, "INTERNAL_ERROR", "The lock response does not satisfy its contract",
+        { errors: validated.errors.slice(0, 8) }, projectId);
+    }
+    json(response, 200, validated.value);
+  }
+
+  /**
+   * M5's comparison replay.
+   *
+   * A copy of a recorded comparison onto the target, with a lineage. It never calls a
+   * provider and never changes the source, the revision, the snapshot or the ledger.
+   */
+  async #replayComparison(projectId: string, request: IncomingMessage, response: ServerResponse): Promise<void> {
+    const parsed = validateComparisonReplayRequest(await readJson(request));
+    if (!parsed.ok) {
+      throw new HttpError(400, "INVALID_REQUEST", "The replay request does not satisfy its contract",
+        { errors: parsed.errors.slice(0, 8) }, projectId);
+    }
+    const result = await this.m5Replay.replay(projectId, parsed.value, projectId);
+    const validated = validateComparisonReplayResponse(result);
+    if (!validated.ok) {
+      throw new HttpError(500, "INTERNAL_ERROR", "The replay response does not satisfy its contract",
+        { errors: validated.errors.slice(0, 8) }, projectId);
+    }
+    json(response, 200, validated.value);
+  }
+
+  /**
+   * The restricted service interface the Gateway calls (`04` §1).
+   *
+   * The Gateway never reaches the Host's HTTP surface: it calls these two functions
+   * inside the Host's own composition, so the browser never holds a Host bearer and the
+   * Host's Origin allowlist never has to learn the Gateway's origin.
+   */
+  #studioServices(): StudioHostService {
+    return {
+      call: async (input) => await this.#studioOperation(input),
+      nativeWrite: async (input) => await this.#studioNativeWrite(input),
+    };
+  }
+
+  /**
+   * The Narralens operations the Gateway may ask for.
+   *
+   * Each one is the Host's own service, called in the Host's own process: the panel's
+   * request never carries a Host bearer, because it never leaves this process. The answers
+   * are the Host's own — the same status, the same code, the same contract-checked body
+   * the Host's HTTP route would have produced — so the page cannot tell the two apart and
+   * cannot be given a different, softer answer.
+   */
+  async #studioOperation(input: {
+    operation: StudioOperation; project_id: string; body?: unknown; correlation_id: string;
+  }): Promise<{ status: number; body: unknown }> {
+    const projectId = input.project_id;
+    const body = (input.body ?? {}) as Record<string, unknown>;
+    try {
+      switch (input.operation) {
+        case "workbench": {
+          if (projectId === "") throw new HttpError(400, "INVALID_REQUEST", "The request names no project");
+          const projection = await this.m5Workbench.workbench(projectId, input.correlation_id);
+          const validated = validateWorkbenchProjection(projection);
+          if (!validated.ok) {
+            throw new HttpError(500, "INTERNAL_ERROR", "The workbench projection does not satisfy its contract",
+              { errors: validated.errors.slice(0, 8) }, projectId);
+          }
+          return { status: 200, body: validated.value };
+        }
+        case "comparison.replay": {
+          const parsed = validateComparisonReplayRequest(body);
+          if (!parsed.ok) {
+            throw new HttpError(400, "INVALID_REQUEST", "The replay request does not satisfy its contract",
+              { errors: parsed.errors.slice(0, 8) }, projectId);
+          }
+          const result = await this.m5Replay.replay(projectId, parsed.value, input.correlation_id);
+          const validated = validateComparisonReplayResponse(result);
+          if (!validated.ok) {
+            throw new HttpError(500, "INTERNAL_ERROR", "The replay response does not satisfy its contract",
+              { errors: validated.errors.slice(0, 8) }, projectId);
+          }
+          return { status: 200, body: validated.value };
+        }
+        case "lock.create": {
+          const parsed = validateLockCreateRequest(body);
+          if (!parsed.ok) {
+            throw new HttpError(400, "INVALID_REQUEST", "The lock request does not satisfy its contract",
+              { errors: parsed.errors.slice(0, 8) }, projectId);
+          }
+          const result = await this.m5Locks.create(projectId, parsed.value, input.correlation_id);
+          const validated = validateLockMutationResponse(result);
+          if (!validated.ok) {
+            throw new HttpError(500, "INTERNAL_ERROR", "The lock response does not satisfy its contract",
+              { errors: validated.errors.slice(0, 8) }, projectId);
+          }
+          return { status: 200, body: validated.value };
+        }
+        case "lock.release": {
+          const lockId = String(body.lock_id ?? "");
+          const baseControlRevision = Number(body.base_control_revision);
+          const idempotencyKey = String(body.idempotency_key ?? "");
+          if (lockId === "" || !Number.isSafeInteger(baseControlRevision) || idempotencyKey.length < 8) {
+            throw new HttpError(400, "INVALID_REQUEST",
+              "Releasing a lock needs a lock id, a base control revision and an idempotency key",
+              undefined, projectId);
+          }
+          const result = await this.m5Locks.release(projectId, lockId, baseControlRevision, idempotencyKey,
+            input.correlation_id);
+          const validated = validateLockMutationResponse(result);
+          if (!validated.ok) {
+            throw new HttpError(500, "INTERNAL_ERROR", "The lock response does not satisfy its contract",
+              { errors: validated.errors.slice(0, 8) }, projectId);
+          }
+          return { status: 200, body: validated.value };
+        }
+        case "inventory": {
+          if (projectId === "") throw new HttpError(400, "INVALID_REQUEST", "The request names no project");
+          // The inventory's own contract: safe labels, never a path.
+          return { status: 200, body: await this.assetInventory.inventory(projectId) };
+        }
+        case "materialize": {
+          const proposalId = String(body.proposal_id ?? "");
+          const idempotencyKey = typeof body.idempotency_key === "string" ? body.idempotency_key : "";
+          if (idempotencyKey.length < 8 || idempotencyKey.length > 128) {
+            throw new HttpError(400, "INVALID_REQUEST", "idempotency_key must be 8 to 128 characters",
+              undefined, projectId);
+          }
+          const parsed = validateMaterializeRequest({
+            format: "narralens.materialize-request@1.0",
+            comparison_id: body.comparison_id, base_revision: body.base_revision,
+            expected_source_digest: body.expected_source_digest, control_revision: body.control_revision,
+            profile: { profile_id: "wave2-proxy-720p30-1v" },
+            segment_bindings: body.segment_bindings, idempotency_key: body.idempotency_key,
+          });
+          if (!parsed.ok) {
+            throw new HttpError(422, "INVALID_REQUEST", "The materialize request does not satisfy its contract",
+              { errors: parsed.errors.slice(0, 8) }, projectId);
+          }
+          const bindings = parsed.value.segment_bindings.map((entry) => ({ ...entry }));
+          const requestDigest = createHash("sha256").update(canonicalJson({
+            comparison_id: parsed.value.comparison_id, base_revision: parsed.value.base_revision,
+            expected_source_digest: parsed.value.expected_source_digest, bindings,
+          })).digest("hex");
+          const comparison = await this.comparisons.read(parsed.value.comparison_id);
+          const created = await this.materialize.request({
+            projectId, comparisonId: parsed.value.comparison_id, proposalId,
+            baseRevision: parsed.value.base_revision, sourceDigest: parsed.value.expected_source_digest,
+            controlRevision: parsed.value.control_revision, bindings, idempotencyKey, requestDigest,
+            comparison,
+          });
+          const job = this.jobs.get(created.job_id);
+          return { status: 202, body: { ...(job as unknown as Record<string, unknown>),
+            materialization_id: created.materialization_id } };
+        }
+        case "materialization.read": {
+          const materializationId = String(body.materialization_id ?? "");
+          if (materializationId === "") {
+            throw new HttpError(400, "INVALID_REQUEST", "The request names no materialization",
+              undefined, projectId);
+          }
+          return { status: 200, body: await this.materialize.read(materializationId) };
+        }
+        case "impact": {
+          const parsed = validateImpactRequest(body);
+          if (!parsed.ok) {
+            throw new HttpError(400, "INVALID_REQUEST", "The impact request does not satisfy its contract",
+              { errors: parsed.errors.slice(0, 8) }, projectId);
+          }
+          const created = await this.impact.create(projectId, parsed.value);
+          const validated = validateImpactSpec(created.spec);
+          if (!validated.ok) {
+            throw new HttpError(500, "INTERNAL_ERROR", "The computed impact does not satisfy its contract",
+              { errors: validated.errors.slice(0, 8) }, projectId);
+          }
+          return { status: created.status, body: validated.value };
+        }
+        case "history.read": {
+          await this.projectResolver.resolveActivated(projectId);
+          const model = { format: "narralens.history@1.0" as const, project_id: projectId,
+            entries: this.history.history(projectId) };
+          const validated = validateHistory(model);
+          if (!validated.ok) {
+            throw new HttpError(500, "INTERNAL_ERROR", "The history model does not satisfy its contract",
+              { errors: validated.errors.slice(0, 8) }, projectId);
+          }
+          return { status: 200, body: validated.value };
+        }
+        case "history.undo":
+        case "history.redo": {
+          const intent = await this.history.intent(projectId,
+            input.operation === "history.undo" ? "undo" : "redo", input.correlation_id);
+          const validated = validateHistoryIntent(intent);
+          if (!validated.ok) {
+            throw new HttpError(500, "INTERNAL_ERROR", "The history intent does not satisfy its contract",
+              { errors: validated.errors.slice(0, 8) }, projectId);
+          }
+          return { status: 200, body: validated.value };
+        }
+        case "history.restore": {
+          if ((body.approval as { confirmed?: unknown } | undefined)?.confirmed !== true) {
+            throw new HttpError(428, "IMPACT_REQUIRED",
+              "A current impact and explicit confirmation are required before a restore", undefined, projectId);
+          }
+          const parsed = validateRestoreRequest(body);
+          if (!parsed.ok) {
+            throw new HttpError(400, "INVALID_REQUEST", "The restore request does not satisfy its contract",
+              { errors: parsed.errors.slice(0, 8) }, projectId);
+          }
+          const committed = await this.history.restore(projectId, parsed.value, input.correlation_id);
+          if (committed.status === "aborted") {
+            const failed = validateControlledWriteFailure(committed);
+            return { status: failed.ok ? failed.value.error.http_status : 500,
+              body: failed.ok ? failed.value : committed };
+          }
+          const validated = validateControlledWriteResponse(committed);
+          if (!validated.ok) {
+            throw new HttpError(500, "INTERNAL_ERROR", "The controlled write response does not satisfy its contract",
+              { errors: validated.errors.slice(0, 8) }, projectId);
+          }
+          this.projections.forget(projectId);
+          return { status: 200, body: validated.value };
+        }
+      }
+    } catch (error) {
+      const normalized = normalizeError(error);
+      if (normalized.status >= 500) {
+        this.failures.record({ correlationId: input.correlation_id, stage: `studio:${input.operation}`, error });
+      }
+      return { status: normalized.status, body: normalized.body() };
+    }
+  }
+
+  /**
+   * The native writes the Gateway is allowed to make.
+   *
+   * The open set is exactly the OpenFilm capability map's supported entries, and each one
+   * is answered by the *Host's* own controlled path — the adoption goes through the
+   * impact and the explicit confirmation, and the undo and the redo produce a typed
+   * restore intent and nothing else. The upstream's own edit endpoint is never called, so
+   * a raw native operation can never reach the author's source.
+   */
+  async #studioNativeWrite(input: {
+    entry_id: string; project_id: string; body: unknown; correlation_id: string;
+  }): Promise<{ status: number; body: unknown }> {
+    const projectId = input.project_id;
+    if (projectId === "") {
+      return { status: 400, body: { code: "INVALID_REQUEST", message: "the request names no project" } };
+    }
+    if (input.entry_id === "timeline.adopt_materialization") {
+      const parsed = validateAdoptRequest(input.body);
+      if (!parsed.ok) {
+        return { status: 400, body: { code: "INVALID_REQUEST", message: "The adoption request is invalid",
+          errors: parsed.errors.slice(0, 8) } };
+      }
+      const committed = await this.adoption.adopt(projectId, parsed.value);
+      if (committed.status === "aborted") {
+        const failed = validateControlledWriteFailure(committed);
+        return { status: failed.ok ? failed.value.error.http_status : 500, body: failed.ok ? failed.value : committed };
+      }
+      const validated = validateControlledWriteResponse(committed);
+      if (!validated.ok) {
+        return { status: 500, body: { code: "INTERNAL_ERROR", message: "The controlled write response is invalid" } };
+      }
+      this.projections.forget(projectId);
+      return { status: 200, body: validated.value };
+    }
+    if (input.entry_id === "history.restore") {
+      const parsed = validateRestoreRequest(input.body);
+      if (!parsed.ok) {
+        return { status: 400, body: { code: "INVALID_REQUEST", message: "The restore request is invalid",
+          errors: parsed.errors.slice(0, 8) } };
+      }
+      const committed = await this.history.restore(projectId, parsed.value, input.correlation_id);
+      if (committed.status === "aborted") {
+        const failed = validateControlledWriteFailure(committed);
+        return { status: failed.ok ? failed.value.error.http_status : 500, body: failed.ok ? failed.value : committed };
+      }
+      const validated = validateControlledWriteResponse(committed);
+      if (!validated.ok) {
+        return { status: 500, body: { code: "INTERNAL_ERROR", message: "The controlled write response is invalid" } };
+      }
+      this.projections.forget(projectId);
+      return { status: 200, body: validated.value };
+    }
+    if (input.entry_id === "history.undo" || input.entry_id === "history.redo") {
+      // An intent and nothing else: no impact is created, no approval is assumed and
+      // nothing is written. The client still has to ask for an impact and confirm it.
+      const intent = await this.history.intent(projectId, input.entry_id === "history.undo" ? "undo" : "redo");
+      return { status: 200, body: intent };
+    }
+    return { status: 422, body: { code: "UNSUPPORTED_EDIT", message: `${input.entry_id} is not open on OpenFilm` } };
+  }
+
+  /** The current target's clips, for M5's lock range proof. */
+  async #targetClips(projectId: string): Promise<ReadonlyArray<{
+    clip_id: string; start_frame: number; end_frame_exclusive: number;
+  }>> {
+    const view = await this.projectResolver.resolveActivated(projectId);
+    await this.projections.layoutFor(view, `m5-clips-${projectId}`);
+    const resolved = this.engines.resolve(projectId);
+    const projection = await resolved.port.inspect({ project_id: projectId, engine: "openfilm",
+      source_digest: view.source_digest }, { correlationId: `m5-clips-${projectId}`, projectId,
+      signal: AbortSignal.timeout(20_000) });
+    return projection.clips.map((clip) => ({
+      clip_id: clip.clip_id,
+      start_frame: clip.frame_range.start_frame,
+      end_frame_exclusive: clip.frame_range.end_frame_exclusive,
+    }));
   }
 
   async #materializeProposal(projectId: string, proposalId: string,

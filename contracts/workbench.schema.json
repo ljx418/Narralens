@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://narralens.local/schemas/workbench.schema.json",
+  "description": "The read model of the migrated OpenFilm target: its clips, its history, its locks and what the native Studio may be asked to do. It carries no path, no token and no source bytes.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "format", "project_id", "source_project_id", "migration_id", "revision",
+    "control_revision", "source_digest", "active_snapshot_id", "fps", "frame_count",
+    "engine", "engine_upstream_sha", "tracks", "clips", "history", "active_locks",
+    "capabilities", "preview", "narration"
+  ],
+  "properties": {
+    "format": { "const": "narralens.workbench@1.0" },
+    "project_id": { "type": "string", "minLength": 1, "maxLength": 200 },
+    "source_project_id": { "type": "string", "minLength": 1, "maxLength": 200 },
+    "migration_id": { "type": "string", "minLength": 1, "maxLength": 200 },
+    "revision": { "type": "integer", "minimum": 0 },
+    "control_revision": { "type": "integer", "minimum": 0 },
+    "source_digest": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "active_snapshot_id": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "fps": {
+      "type": "object", "additionalProperties": false, "required": ["num", "den"],
+      "properties": { "num": { "type": "integer", "minimum": 1 }, "den": { "type": "integer", "minimum": 1 } }
+    },
+    "frame_count": { "type": "integer", "minimum": 1 },
+    "engine": { "const": "openfilm" },
+    "engine_upstream_sha": { "type": "string", "pattern": "^[a-f0-9]{40}$" },
+    "tracks": {
+      "type": "array", "maxItems": 256,
+      "items": {
+        "type": "object", "additionalProperties": false, "required": ["track_id", "index", "clip_ids"],
+        "properties": {
+          "track_id": { "type": "string", "minLength": 1 },
+          "index": { "type": "integer", "minimum": 0 },
+          "clip_ids": { "type": "array", "items": { "type": "string", "minLength": 1 } }
+        }
+      }
+    },
+    "clips": {
+      "type": "array", "maxItems": 4096,
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["clip_id", "track_id", "kind", "start_frame", "end_frame_exclusive", "source_shot_id", "source_label"],
+        "properties": {
+          "clip_id": { "type": "string", "minLength": 1, "maxLength": 200 },
+          "track_id": { "type": "string", "minLength": 1, "maxLength": 200 },
+          "kind": { "type": "string", "minLength": 1, "maxLength": 64 },
+          "start_frame": { "type": "integer", "minimum": 0 },
+          "end_frame_exclusive": { "type": "integer", "minimum": 1 },
+          "source_shot_id": { "type": ["string", "null"], "maxLength": 200 },
+          "source_label": { "type": ["string", "null"], "maxLength": 200 }
+        }
+      }
+    },
+    "history": {
+      "type": "array", "maxItems": 256,
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["revision", "snapshot_id", "kind", "transaction_id"],
+        "properties": {
+          "revision": { "type": "integer", "minimum": 0 },
+          "snapshot_id": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "kind": { "enum": ["migration", "adoption", "restore"] },
+          "transaction_id": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "active_locks": {
+      "type": "array", "maxItems": 256,
+      "items": { "$ref": "https://narralens.local/schemas/public-lock.schema.json" }
+    },
+    "capabilities": {
+      "type": "array", "maxItems": 256,
+      "items": {
+        "type": "object", "additionalProperties": false, "required": ["entry_id", "state", "reason"],
+        "properties": {
+          "entry_id": { "type": "string", "minLength": 1, "maxLength": 200 },
+          "state": { "enum": ["supported", "blocked"] },
+          "reason": { "type": "string", "minLength": 1, "maxLength": 500 }
+        }
+      }
+    },
+    "preview": {
+      "type": "object", "additionalProperties": false, "required": ["kind", "url", "bridge_version"],
+      "properties": {
+        "kind": { "const": "openfilm-studio" },
+        "url": { "type": "string", "minLength": 1 },
+        "bridge_version": { "const": 1 }
+      }
+    },
+    "narration": { "enum": ["present", "absent", "unknown"] }
+  }
+}

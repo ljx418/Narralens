@@ -33,12 +33,20 @@ import controlledWriteResponseSchema from "../../contracts/controlled-write-resp
 import controlledWriteFailureSchema from "../../contracts/controlled-write-failure.schema.json" with { type: "json" };
 import historySchema from "../../contracts/history.schema.json" with { type: "json" };
 import historyIntentSchema from "../../contracts/history-intent.schema.json" with { type: "json" };
+import workbenchSchema from "../../contracts/workbench.schema.json" with { type: "json" };
+import publicLockSchema from "../../contracts/public-lock.schema.json" with { type: "json" };
+import lockMutationResponseSchema from "../../contracts/lock-mutation-response.schema.json" with { type: "json" };
+import lockRequestSchema from "../../contracts/lock-request.schema.json" with { type: "json" };
+import comparisonReplayRequestSchema from "../../contracts/comparison-replay-request.schema.json" with { type: "json" };
+import comparisonReplayResponseSchema from "../../contracts/comparison-replay-response.schema.json" with { type: "json" };
 import type { EditRequest, ProposalBundle, ProposalComparison, ProposalComparisonDraft, ProposalComparisonRequest, ProposalRequest } from "./types.js";
 import type { EngineResponse, SourceDigestManifest } from "./engine-types.js";
 import type { MigrationPlanV1, MigrationReportV1, RollbackRecord } from "./migration-types.js";
 import type { AdoptRequestV1, ControlledWriteFailureResponseV1, ControlledWriteResponseV1, HistoryIntentResponseV1,
   HistoryReadModelV1, ImpactRequestV1, ImpactSpecV1,
   MaterializationV1, MaterializeRequestV1, NativePlanV1, RestoreRequestV1 } from "./wave2-types.js";
+import type { ComparisonReplayRequestV1, ComparisonReplayResponseV1, LockCreateRequestV1,
+  LockMutationResponseV1, PublicLockV1, WorkbenchProjectionV1 } from "./wave3-types.js";
 
 const ajv = new Ajv2020({ allErrors: true, strict: true });
 addFormats(ajv);
@@ -51,7 +59,9 @@ for (const schema of [apiErrorSchema, cancelResponseSchema, jobEventSchema, jobR
   migrationPlanSchema, rollbackRecordSchema, migrationReportSchema,
   materializeRequestSchema, materializationSchema, impactSpecSchema, impactRequestSchema, adoptRequestSchema,
   restoreRequestSchema, controlledWriteResponseSchema, controlledWriteFailureSchema,
-  historySchema, historyIntentSchema]) {
+  historySchema, historyIntentSchema,
+  workbenchSchema, publicLockSchema, lockMutationResponseSchema, lockRequestSchema,
+  comparisonReplayRequestSchema, comparisonReplayResponseSchema]) {
   ajv.addSchema(schema);
 }
 
@@ -89,6 +99,12 @@ export const contractIds = {
   controlledWriteFailure: controlledWriteFailureSchema.$id,
   history: historySchema.$id,
   historyIntent: historyIntentSchema.$id,
+  workbench: workbenchSchema.$id,
+  publicLock: publicLockSchema.$id,
+  lockMutationResponse: lockMutationResponseSchema.$id,
+  lockRequest: lockRequestSchema.$id,
+  comparisonReplayRequest: comparisonReplayRequestSchema.$id,
+  comparisonReplayResponse: comparisonReplayResponseSchema.$id,
 } as const;
 
 export function validatorFor(id: string): ValidateFunction {
@@ -403,4 +419,84 @@ export function validateHistoryIntent(value: unknown): { ok: true; value: Histor
   const validate = validatorFor(contractIds.historyIntent);
   if (!validate(value)) return { ok: false, errors: formatErrors(validate.errors) };
   return { ok: true, value: value as HistoryIntentResponseV1 };
+}
+
+/**
+ * The M5 validators.
+ *
+ * They are thin on purpose: the JSON Schema carries the shape, and these carry the two rules
+ * a schema cannot express — that a shot lock names a clip and a project lock does not, and
+ * that a frame range is a non-empty half-open interval.
+ */
+
+export function validateWorkbenchProjection(value: unknown): { ok: true; value: WorkbenchProjectionV1 } | { ok: false; errors: string[] } {
+  const validate = validatorFor(contractIds.workbench);
+  if (!validate(value)) return { ok: false, errors: formatErrors(validate.errors) };
+  const projection = value as WorkbenchProjectionV1;
+  const errors: string[] = [];
+  if (projection.source_project_id === projection.project_id) {
+    errors.push("the source and the target project must differ");
+  }
+  const clipIds = new Set(projection.clips.map((clip) => clip.clip_id));
+  if (clipIds.size !== projection.clips.length) errors.push("clip ids must be unique");
+  for (const clip of projection.clips) {
+    if (clip.end_frame_exclusive <= clip.start_frame) errors.push(`clip ${clip.clip_id} has an empty frame range`);
+  }
+  for (const track of projection.tracks) {
+    for (const clipId of track.clip_ids) {
+      if (!clipIds.has(clipId)) errors.push(`track ${track.track_id} names an unknown clip ${clipId}`);
+    }
+  }
+  if (errors.length > 0) return { ok: false, errors };
+  return { ok: true, value: projection };
+}
+
+export function validatePublicLock(value: unknown): { ok: true; value: PublicLockV1 } | { ok: false; errors: string[] } {
+  const validate = validatorFor(contractIds.publicLock);
+  if (!validate(value)) return { ok: false, errors: formatErrors(validate.errors) };
+  const lock = value as PublicLockV1;
+  const errors: string[] = [];
+  if (lock.end_frame_exclusive <= lock.start_frame) errors.push("a lock's frame range must not be empty");
+  if (lock.scope === "shot" && (lock.target_id === null || lock.target_id === "")) {
+    errors.push("a shot lock must name the clip it locks");
+  }
+  if (lock.scope === "project" && lock.target_id !== null) {
+    errors.push("a project lock must not name a clip");
+  }
+  if (errors.length > 0) return { ok: false, errors };
+  return { ok: true, value: lock };
+}
+
+export function validateLockMutationResponse(value: unknown): { ok: true; value: LockMutationResponseV1 } | { ok: false; errors: string[] } {
+  const validate = validatorFor(contractIds.lockMutationResponse);
+  if (!validate(value)) return { ok: false, errors: formatErrors(validate.errors) };
+  return { ok: true, value: value as LockMutationResponseV1 };
+}
+
+export function validateLockCreateRequest(value: unknown): { ok: true; value: LockCreateRequestV1 } | { ok: false; errors: string[] } {
+  const validate = validatorFor(contractIds.lockRequest);
+  if (!validate(value)) return { ok: false, errors: formatErrors(validate.errors) };
+  const request = value as LockCreateRequestV1;
+  const errors: string[] = [];
+  if (request.end_frame_exclusive <= request.start_frame) errors.push("a lock's frame range must not be empty");
+  if (request.scope === "shot" && (request.target_id === null || request.target_id === "")) {
+    errors.push("a shot lock must name the clip it locks");
+  }
+  if (request.scope === "project" && request.target_id !== null) {
+    errors.push("a project lock must not name a clip");
+  }
+  if (errors.length > 0) return { ok: false, errors };
+  return { ok: true, value: request };
+}
+
+export function validateComparisonReplayRequest(value: unknown): { ok: true; value: ComparisonReplayRequestV1 } | { ok: false; errors: string[] } {
+  const validate = validatorFor(contractIds.comparisonReplayRequest);
+  if (!validate(value)) return { ok: false, errors: formatErrors(validate.errors) };
+  return { ok: true, value: value as ComparisonReplayRequestV1 };
+}
+
+export function validateComparisonReplayResponse(value: unknown): { ok: true; value: ComparisonReplayResponseV1 } | { ok: false; errors: string[] } {
+  const validate = validatorFor(contractIds.comparisonReplayResponse);
+  if (!validate(value)) return { ok: false, errors: formatErrors(validate.errors) };
+  return { ok: true, value: value as ComparisonReplayResponseV1 };
 }

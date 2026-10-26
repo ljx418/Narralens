@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://narralens.local/schemas/comparison-replay-response.schema.json",
+  "description": "The target-owned comparison a replay produced, with the lineage that says where it came from. The comparison itself is a recorded proposal set, never a fresh generation.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["format", "project_id", "comparison_id", "lineage", "comparison", "replayed"],
+  "properties": {
+    "format": { "const": "narralens.comparison-replay-response@1.0" },
+    "project_id": { "type": "string", "minLength": 1, "maxLength": 200 },
+    "comparison_id": { "type": "string", "minLength": 1, "maxLength": 200 },
+    "lineage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source_comparison_id", "source_project_id", "migration_id", "source_sha256"],
+      "properties": {
+        "source_comparison_id": { "type": "string", "minLength": 1, "maxLength": 200 },
+        "source_project_id": { "type": "string", "minLength": 1, "maxLength": 200 },
+        "migration_id": { "type": "string", "minLength": 1, "maxLength": 200 },
+        "source_sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+      }
+    },
+    "comparison": { "$ref": "https://narralens.local/schemas/proposal-comparison.schema.json" },
+    "replayed": { "type": "boolean" }
+  }
+}

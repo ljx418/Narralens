@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://narralens.local/schemas/lock-mutation-response.schema.json",
+  "description": "The answer to creating or releasing a user lock. It carries the lock as the page sees it and the control revision the project is at afterwards.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["format", "project_id", "lock", "active", "control_revision"],
+  "properties": {
+    "format": { "const": "narralens.lock-mutation-response@1.0" },
+    "project_id": { "type": "string", "minLength": 1, "maxLength": 200 },
+    "lock": { "$ref": "https://narralens.local/schemas/public-lock.schema.json" },
+    "active": { "type": "boolean" },
+    "control_revision": { "type": "integer", "minimum": 0 }
+  }
+}

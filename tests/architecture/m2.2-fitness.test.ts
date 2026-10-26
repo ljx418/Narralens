@@ -1,6 +1,7 @@
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join, relative, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
+import { MIGRATION_ROUTE_WHITELIST, migrationRouteGate } from "./migration-route-gate.js";
 
 /**
  * M2.2 architecture fitness (M2.2 plan §3, §8, §11).
@@ -152,23 +153,14 @@ describe("M2.2 fitness: routes that must stay closed stay unmounted", () => {
   const server = sourceOf(resolve(REPO, "src/host/server.ts"));
 
   it("8. /api/migration/v1 holds exactly the frozen route set, opened stage by stage", () => {
-    const routes = [...server.matchAll(/\^\\\/api\\\/migration\\\/v1\\\/([^$]*)\$/gu)].map((match) => match[1]!);
-    expect(routes).toEqual([
-      "projects\\/([A-Za-z0-9_-]+)\\/engine",
-      "projects\\/([A-Za-z0-9_-]+)\\/migrate-copy",
-      // M3 opened two, M4A opened impact, M4B opened controlled edits, and M4C opened the
-      // history read model, the controlled restore and the two history translations.
-      "projects\\/([A-Za-z0-9_-]+)\\/proposals\\/([A-Za-z0-9_-]+)\\/materialize",
-      "projects\\/([A-Za-z0-9_-]+)\\/impact",
-      "projects\\/([A-Za-z0-9_-]+)\\/edits",
-      "projects\\/([A-Za-z0-9_-]+)\\/history",
-      "projects\\/([A-Za-z0-9_-]+)\\/history\\/restore",
-      "projects\\/([A-Za-z0-9_-]+)\\/history\\/undo",
-      "projects\\/([A-Za-z0-9_-]+)\\/history\\/redo",
-      "materializations\\/([A-Za-z0-9_-]+)",
-      "migrations\\/([A-Za-z0-9_-]+)",
-      "migrations\\/([A-Za-z0-9_-]+)\\/rollback",
-    ]);
+    // M3 opened two, M4A opened impact, M4B opened controlled edits, M4C opened the history
+    // read model, the controlled restore and the two history translations, and M5A opened
+    // the workbench read model, the two lock routes and the comparison replay. The list
+    // itself lives in `migration-route-gate.ts`, so the two fitness files cannot drift.
+    const gate = migrationRouteGate(server);
+    expect(gate.missing).toEqual([]);
+    expect(gate.unexpected).toEqual([]);
+    expect(gate.actual).toEqual([...MIGRATION_ROUTE_WHITELIST]);
   });
 
   it("9. the M4C history routes are mounted, and the ones M4C does not own stay closed", () => {

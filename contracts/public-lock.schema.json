@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://narralens.local/schemas/public-lock.schema.json",
+  "description": "A user lock as the page sees it. The actor's identity is never published: the owner is the fixed local-operator label, and the UUID that identifies this installation stays in the database.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "format", "lock_id", "project_id", "lock_type", "scope", "target_id",
+    "start_frame", "end_frame_exclusive", "owner_label", "reason_code",
+    "control_revision", "created_at"
+  ],
+  "properties": {
+    "format": { "const": "narralens.public-lock@1.0" },
+    "lock_id": { "type": "string", "minLength": 1, "maxLength": 200 },
+    "project_id": { "type": "string", "minLength": 1, "maxLength": 200 },
+    "lock_type": { "enum": ["visual", "narration", "duration"] },
+    "scope": { "enum": ["project", "shot"] },
+    "target_id": { "type": ["string", "null"], "maxLength": 200 },
+    "start_frame": { "type": "integer", "minimum": 0 },
+    "end_frame_exclusive": { "type": "integer", "minimum": 1 },
+    "owner_label": { "const": "本机操作者" },
+    "reason_code": {
+      "enum": ["preserve_visual", "preserve_narration", "preserve_duration", "user_review", "approved_content"]
+    },
+    "control_revision": { "type": "integer", "minimum": 0 },
+    "created_at": { "type": "string", "format": "date-time" }
+  }
+}

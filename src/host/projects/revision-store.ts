@@ -1,4 +1,5 @@
 import { DatabaseSync, type SQLInputValue } from "node:sqlite";
+import { randomUUID } from "node:crypto";
 import { MigrationStore } from "./migration-store.js";
 import { JOB_TABLE_DDL, migrateJobKind } from "./job-kind-migration.js";
 import type { ApiError, AssetImportResponse, EditResponse, JobEvent, JobState } from "../../contracts/types.js";
@@ -85,6 +86,8 @@ export interface EngineLockRecord {
   lock_id: string; project_id: string; lock_type: string; scope: string; target_id: string;
   start_frame: number; end_frame_exclusive: number; owner: string; reason: string;
   control_revision: number; active: boolean;
+  /** When the lock was taken. M5's public lock carries it; the Wave 2 read model did not. */
+  created_at: string;
 }
 
 function engineLock(row: Record<string, unknown>): EngineLockRecord {
@@ -94,6 +97,7 @@ function engineLock(row: Record<string, unknown>): EngineLockRecord {
     start_frame: Number(row.start_frame), end_frame_exclusive: Number(row.end_frame_exclusive),
     owner: String(row.owner ?? ""), reason: String(row.reason ?? ""),
     control_revision: Number(row.control_revision), active: Boolean(row.active),
+    created_at: String(row.created_at ?? ""),
   };
 }
 
@@ -225,6 +229,9 @@ export class RevisionStore {
         bytes_created INTEGER NOT NULL DEFAULT 0, response_status INTEGER, response_json TEXT,
         error_code TEXT, created_at TEXT NOT NULL, updated_at TEXT NOT NULL,
         UNIQUE(project_id, idempotency_key)
+      );
+      CREATE TABLE IF NOT EXISTS host_identity (
+        id INTEGER PRIMARY KEY CHECK (id = 1), actor_uuid TEXT NOT NULL, created_at TEXT NOT NULL
       );
     `);
     const columns = this.#db.prepare("PRAGMA table_info(edit_journal)").all() as Array<{ name: string }>;
@@ -840,6 +847,20 @@ export class RevisionStore {
     return Number((this.#db.prepare("SELECT COUNT(*) AS n FROM outbox WHERE delivered_at IS NULL").get() as { n: number }).n);
   }
 
+  /**
+   * Every outbox *row*, delivered or not.
+   *
+   * `pendingOutboxCount` counts the rows nobody has delivered yet, which is a different
+   * question: a test that wants to know whether a write produced an event has to count
+   * the rows, because the delivery interval may have marked them delivered in between.
+   */
+  outboxRowCount(topic?: string): number {
+    const row = topic === undefined
+      ? this.#db.prepare("SELECT COUNT(*) AS n FROM outbox").get() as { n: number }
+      : this.#db.prepare("SELECT COUNT(*) AS n FROM outbox WHERE topic=?").get(topic) as { n: number };
+    return Number(row.n);
+  }
+
   undeliveredOutbox(limit = 100): Array<{ event_id: number; topic: string; project_id: string;
     payload_json: string; attempts: number }> {
     return (this.#db.prepare(`SELECT event_id, topic, project_id, payload_json, attempts FROM outbox
@@ -1113,6 +1134,114 @@ export class RevisionStore {
       .run(row.lock_id, row.project_id, row.lock_type, row.scope, row.target_id, row.start_frame,
         row.end_frame_exclusive, row.owner, row.reason, row.control_revision, row.active ? 1 : 0,
         row.created_at, row.updated_at);
+  }
+
+  /**
+   * The installation's persistent actor identity (04 §4).
+   *
+   * A lock owner is an *installation*, not a process. M5's V1 is a single-operator model,
+   * and an owner that changed on every restart would make every lock a stranger's, so the
+   * row is created once and never rotated.
+   *
+   * The UUID is never published: the API exposes a fixed label instead, so the identity is
+   * durable without being a credential. The row lives in the project's own database — one
+   * database, one authority — and is created on first use, which for a desktop install is
+   * the install itself.
+   */
+  hostIdentity(now = new Date()): string {
+    const existing = this.#db.prepare("SELECT actor_uuid FROM host_identity WHERE id=1").get() as
+      { actor_uuid?: unknown } | undefined;
+    if (existing !== undefined && typeof existing.actor_uuid === "string" && existing.actor_uuid !== "") {
+      return existing.actor_uuid;
+    }
+    this.#db.prepare("INSERT OR IGNORE INTO host_identity(id, actor_uuid, created_at) VALUES(1,?,?)")
+      .run(randomUUID(), now.toISOString());
+    const row = this.#db.prepare("SELECT actor_uuid FROM host_identity WHERE id=1").get() as { actor_uuid: string };
+    return row.actor_uuid;
+  }
+
+  /**
+   * M5's strict control-revision CAS for a lock mutation (04 §4).
+   *
+   * `createLockWithControlRevision` above only ever moves the counter forward, which is
+   * right for an internal change and wrong for a client-driven mutation: two clients that
+   * read the same control revision must not both succeed. So the comparison, the lock
+   * row, the `+1` and the `lock.changed` outbox row are one `BEGIN IMMEDIATE`, and a
+   * stale base changes nothing at all.
+   *
+   * This method does not open a transaction of its own: the caller owns it, because the
+   * idempotency response has to land in the same commit (04 §4).
+   */
+  createLockWithControlRevisionCas(row: {
+    lock_id: string; project_id: string; lock_type: string; scope: string; target_id: string;
+    start_frame: number; end_frame_exclusive: number; owner: string; reason: string;
+    created_at: string; updated_at: string;
+  }, baseControlRevision: number): number {
+    this.#requireProjectRow(row.project_id);
+    const current = this.#currentControlRevision(row.project_id);
+    if (current !== baseControlRevision) {
+      throw new HttpError(409, "REVISION_CONFLICT",
+        "The control revision has moved since the request was prepared",
+        { expected_control_revision: baseControlRevision, current_control_revision: current });
+    }
+    this.#db.prepare(
+      "UPDATE project_state SET control_revision=CAST(control_revision AS INTEGER)+1, updated_at=? WHERE project_id=?",
+    ).run(row.updated_at, row.project_id);
+    const controlRevision = current + 1;
+    this.upsertLock({ ...row, control_revision: controlRevision, active: true });
+    this.#db.prepare("INSERT INTO outbox(topic, project_id, payload_json, created_at) VALUES('lock.changed',?,?,?)")
+      .run(row.project_id, JSON.stringify({ project_id: row.project_id, lock_id: row.lock_id,
+        active: true, control_revision: controlRevision }), row.updated_at);
+    return controlRevision;
+  }
+
+  /**
+   * The release half of the strict CAS. Same shape as the create half, and the same
+   * guarantee: a stale base revision leaves the lock, the counter and the outbox alone.
+   */
+  deactivateLockWithControlRevisionCas(lockId: string, baseControlRevision: number,
+    now = new Date()): number {
+    const lock = this.readLock(lockId);
+    if (lock === undefined) throw new HttpError(404, "NOT_FOUND", "Lock not found");
+    this.#requireProjectRow(lock.project_id);
+    const at = now.toISOString();
+    const current = this.#currentControlRevision(lock.project_id);
+    if (current !== baseControlRevision) {
+      throw new HttpError(409, "REVISION_CONFLICT",
+        "The control revision has moved since the request was prepared",
+        { expected_control_revision: baseControlRevision, current_control_revision: current });
+    }
+    this.#db.prepare(
+      "UPDATE project_state SET control_revision=CAST(control_revision AS INTEGER)+1, updated_at=? WHERE project_id=?",
+    ).run(at, lock.project_id);
+    this.deactivateLock(lockId, now);
+    const controlRevision = current + 1;
+    this.#db.prepare("INSERT INTO outbox(topic, project_id, payload_json, created_at) VALUES('lock.changed',?,?,?)")
+      .run(lock.project_id, JSON.stringify({ project_id: lock.project_id, lock_id: lockId,
+        active: false, control_revision: controlRevision }), at);
+    return controlRevision;
+  }
+
+  #currentControlRevision(projectId: string): number {
+    const row = this.#db.prepare("SELECT control_revision FROM project_state WHERE project_id=?").get(projectId) as
+      { control_revision?: unknown } | undefined;
+    return Number(row?.control_revision ?? 0);
+  }
+
+  /**
+   * The project must already exist.
+   *
+   * The old `ensureProject` call would *create* a project row as a side effect of a lock
+   * mutation, which would make a CAS failure leave a row behind — and a row for a project
+   * nobody activated is exactly the kind of orphan state M5 must not create. So the CAS
+   * refuses a project it cannot find.
+   */
+  #requireProjectRow(projectId: string): void {
+    const row = this.#db.prepare("SELECT 1 AS present FROM project_state WHERE project_id=?").get(projectId) as
+      { present?: unknown } | undefined;
+    if (row === undefined) {
+      throw new HttpError(404, "NOT_FOUND", "Project not found", undefined, projectId);
+    }
   }
 
   createLockWithControlRevision(row: {

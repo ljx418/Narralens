@@ -47,6 +47,8 @@ export interface EngineLock {
   readonly reason: string;
   readonly control_revision: number;
   readonly active: boolean;
+  /** When the lock was taken. */
+  readonly created_at: string;
 }
 
 export interface AcquireLockInput {

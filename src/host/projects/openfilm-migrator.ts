@@ -55,7 +55,16 @@ export interface MigratedProject {
   readonly contentDigest: string;
 }
 
-const clipIdFor = (sourceId: string): string => sourceId;
+/**
+ * The source-shot → target-clip identity invariant.
+ *
+ * M5's comparison replay has to prove that a source shot and a target clip are the same
+ * piece of work, and it may not re-derive the rule from a string (04 §2: "禁止复制字符串
+ * 规则"). So the rule lives here, once, and both the migrator and the replay import it.
+ *
+ * It is a pure function of the source id: the target clip keeps the source shot's id.
+ */
+export const clipIdFor = (sourceId: string): string => sourceId;
 
 function escapeAttribute(value: string): string {
   return value.replace(/&/gu, "&amp;").replace(/"/gu, "&quot;").replace(/</gu, "&lt;").replace(/>/gu, "&gt;");

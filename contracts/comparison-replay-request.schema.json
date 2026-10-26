@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://narralens.local/schemas/comparison-replay-request.schema.json",
+  "description": "Body of POST /api/migration/v1/projects/:id/comparisons/replay. It replays an existing D4.1 comparison from the source project onto the migrated target. It never calls a model.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["format", "source_comparison_id", "base_revision", "idempotency_key"],
+  "properties": {
+    "format": { "const": "narralens.comparison-replay-request@1.0" },
+    "source_comparison_id": { "type": "string", "minLength": 1, "maxLength": 200 },
+    "base_revision": { "type": "integer", "minimum": 0 },
+    "idempotency_key": { "type": "string", "minLength": 1, "maxLength": 200 }
+  }
+}

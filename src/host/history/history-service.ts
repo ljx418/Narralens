@@ -122,7 +122,7 @@ export class HistoryService {
    * interleave with an adoption, with a lock acquisition, or with another restore.
    */
   async restore(projectId: string, request: RestoreRequestV1,
-    correlationId = randomUUID(),
+    correlationId: string = randomUUID(),
     signal?: AbortSignal): Promise<ControlledWriteResponseV1 | ControlledWriteFailureResponseV1> {
     const unfinished = this.#unfinishedRestore(projectId);
     return await this.#deps.coordinator.controlledWrite(projectId, correlationId, async () => {
@@ -439,7 +439,7 @@ export class HistoryService {
    * point of translating rather than executing.
    */
   async intent(projectId: string, command: "undo" | "redo",
-    correlationId = randomUUID()): Promise<HistoryIntentV1> {
+    correlationId: string = randomUUID()): Promise<HistoryIntentV1> {
     const entryId = command === "undo" ? "history.undo" : "history.redo";
     const permitted = this.#deps.gateway.permits(entryId, await this.#capabilities(projectId, correlationId));
     if (!permitted.permitted) {

@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://narralens.local/schemas/lock-request.schema.json",
+  "description": "Body of POST /api/migration/v1/projects/:id/locks. The client may not name the owner: the owner is this installation's persisted identity, and the client may not carry a control revision other than the one it is acting against.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "format", "base_control_revision", "lock_type", "scope", "target_id",
+    "start_frame", "end_frame_exclusive", "reason_code", "idempotency_key"
+  ],
+  "properties": {
+    "format": { "const": "narralens.lock-request@1.0" },
+    "base_control_revision": { "type": "integer", "minimum": 0 },
+    "lock_type": { "enum": ["visual", "narration", "duration"] },
+    "scope": { "enum": ["project", "shot"] },
+    "target_id": { "type": ["string", "null"], "maxLength": 200 },
+    "start_frame": { "type": "integer", "minimum": 0 },
+    "end_frame_exclusive": { "type": "integer", "minimum": 1 },
+    "reason_code": {
+      "enum": ["preserve_visual", "preserve_narration", "preserve_duration", "user_review", "approved_content"]
+    },
+    "idempotency_key": { "type": "string", "minLength": 1, "maxLength": 200 }
+  }
+}

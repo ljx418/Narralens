@@ -1,0 +1,108 @@
+/*
+ * The M5 panel's own styles.
+ *
+ * The palette and the type scale come from the design tokens the rest of the app uses
+ * (`01` §7): 4px spacing steps, a 12/14/16/20/28px type scale, and a focus ring that
+ * does not depend on a colour change. The panel is a column on the right of the Studio's
+ * page, so it is positioned by the Studio's own layout seam (`panel.width`), not by a
+ * hard-coded grid of its own.
+ */
+
+#narralens-m5-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 380px;
+  max-width: 100vw;
+  overflow-y: auto;
+  box-sizing: border-box;
+  padding: 16px;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text, #f3ece2);
+  background: var(--surface, #17140f);
+  border-left: 1px solid var(--border, #3a332a);
+  z-index: 40;
+}
+
+#narralens-m5-panel h2 { font-size: 20px; margin: 0 0 4px; }
+#narralens-m5-panel h3 { font-size: 16px; margin: 0 0 8px; }
+#narralens-m5-panel p { margin: 4px 0; }
+#narralens-m5-panel small { font-size: 12px; color: var(--text-muted, #b6a894); }
+
+#narralens-m5-panel :is(button, input, select, textarea):focus-visible {
+  outline: 2px solid var(--accent, #f0a860);
+  outline-offset: 2px;
+}
+
+#narralens-m5-panel button {
+  font: inherit;
+  color: inherit;
+  background: var(--surface-2, #221d16);
+  border: 1px solid var(--border, #3a332a);
+  border-radius: 6px;
+  padding: 4px 10px;
+  cursor: pointer;
+}
+#narralens-m5-panel button:disabled { opacity: 0.55; cursor: not-allowed; }
+#narralens-m5-panel button.m5-primary { background: var(--accent, #f0a860); color: #1b1409; border-color: transparent; }
+
+#narralens-m5-panel input {
+  font: inherit;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 4px 8px;
+  margin-bottom: 8px;
+  color: inherit;
+  background: var(--surface-2, #221d16);
+  border: 1px solid var(--border, #3a332a);
+  border-radius: 6px;
+}
+
+#narralens-m5-panel .m5-head { border-bottom: 1px solid var(--border, #3a332a); padding-bottom: 8px; }
+#narralens-m5-panel .m5-facts { font-size: 12px; color: var(--text-muted, #b6a894); }
+#narralens-m5-panel .m5-facts span { margin-right: 8px; }
+#narralens-m5-panel .m5-phase { font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; }
+
+#narralens-m5-panel .m5-section { border-top: 1px solid var(--border, #3a332a); padding: 12px 0; }
+
+#narralens-m5-panel .m5-atlas { list-style: none; margin: 0; padding: 0; }
+#narralens-m5-panel .m5-atlas button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  margin-bottom: 4px;
+}
+#narralens-m5-panel .m5-atlas button[aria-pressed="true"] { border-color: var(--accent, #f0a860); }
+
+#narralens-m5-panel .m5-proposals { margin: 8px 0; }
+#narralens-m5-panel .m5-recorded { font-size: 12px; color: var(--text-muted, #b6a894); }
+#narralens-m5-panel .m5-proposal { border: 1px solid var(--border, #3a332a); border-radius: 6px; padding: 8px; margin-bottom: 6px; }
+
+#narralens-m5-panel .m5-impact { border: 1px solid var(--border, #3a332a); border-radius: 6px; padding: 8px; margin: 8px 0; }
+#narralens-m5-panel .m5-locks, #narralens-m5-panel .m5-history { list-style: none; margin: 0 0 8px; padding: 0; }
+#narralens-m5-panel .m5-locks li, #narralens-m5-panel .m5-history li {
+  border: 1px solid var(--border, #3a332a);
+  border-radius: 6px;
+  padding: 8px;
+  margin-bottom: 6px;
+}
+#narralens-m5-panel .m5-locks button { margin-top: 4px; }
+#narralens-m5-panel .m5-history-actions { display: flex; gap: 8px; }
+#narralens-m5-panel .m5-fineprint { font-size: 12px; color: var(--text-muted, #b6a894); }
+
+#narralens-m5-panel .m5-error {
+  border: 1px solid #b42318;
+  border-radius: 6px;
+  padding: 8px;
+  margin: 8px 0;
+  display: grid;
+  gap: 4px;
+}
+#narralens-m5-panel .m5-error small { color: var(--text-muted, #b6a894); }
+
+@media (prefers-reduced-motion: reduce) {
+  #narralens-m5-panel * { animation: none !important; transition: none !important; }
+}

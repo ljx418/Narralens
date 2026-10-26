@@ -8,8 +8,9 @@
     "node": ">=22.15.0"
   },
   "scripts": {
-    "check": "tsc --noEmit && vitest run --config vitest.config.ts && python3 -I tests/wave2/m4a/impact-hash.golden.py tests/wave2/m4a/impact-hash.vectors.json && vite build",
-    "build": "vite build",
+    "check": "tsc --noEmit && vitest run --config vitest.config.ts && python3 -I tests/wave2/m4a/impact-hash.golden.py tests/wave2/m4a/impact-hash.vectors.json && vite build && vite build --config vite.m5.config.ts",
+    "build": "vite build && vite build --config vite.m5.config.ts",
+    "build:m5": "vite build --config vite.m5.config.ts",
     "start": "tsx src/host/start.ts",
     "recover": "tsx src/host/recover.ts",
     "evidence:d421-large": "tsx tests/evidence/d421-large-upload-evidence.ts",
@@ -39,6 +40,8 @@
     "evidence:wave2:m4c:manifest": "node tools/wave2-m4c-evidence-manifest.mjs",
     "evidence:wave2:m4c:integrity": "node tools/wave2-m4c-evidence-integrity.mjs",
     "test:wave2:fitness": "vitest run --config vitest.config.ts tests/architecture tests/wave2/*fitness*",
+    "test:m5": "vitest run --config vitest.config.ts tests/m5",
+    "test:m5:headless": "tsx tests/m5/headless/run-headless.ts",
     "check:m2.1-docs": "node tools/m2.1-doc-consistency.mjs",
     "test:m2.1:golden-vectors": "tsx tests/m2.1-golden/generate-vectors.ts",
     "test:m2.1:golden-python": "python3 -I tests/m2.1-golden/source-digest-v1.golden.py tests/m2.1-golden/source-digest-v1.vectors.json",

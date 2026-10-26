@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { NarralensHost } from "../../src/host/server.js";
+import { MIGRATION_ROUTE_WHITELIST, migrationRouteGate } from "../architecture/migration-route-gate.js";
 
 /**
  * The Wave 2 route set, stage by stage.
@@ -112,22 +113,14 @@ describe("W2.0 fitness: the unopened Wave 2 routes stay closed", () => {
   });
 
   it("keeps the /api/migration/v1 route set at exactly the stage-approved routes", () => {
+    // M5A added four routes (the workbench read model, the two lock routes and the
+    // comparison replay) and changed nothing else. The list lives in one place, shared
+    // with the architecture fitness, so the two copies cannot drift.
     const server = readFileSync(resolve(REPO, "src/host/server.ts"), "utf8");
-    const routes = [...server.matchAll(/\^\\\/api\\\/migration\\\/v1\\\/([^$]*)\$/gu)].map((match) => match[1]!);
-    expect(routes).toEqual([
-      "projects\\/([A-Za-z0-9_-]+)\\/engine",
-      "projects\\/([A-Za-z0-9_-]+)\\/migrate-copy",
-      "projects\\/([A-Za-z0-9_-]+)\\/proposals\\/([A-Za-z0-9_-]+)\\/materialize",
-      "projects\\/([A-Za-z0-9_-]+)\\/impact",
-      "projects\\/([A-Za-z0-9_-]+)\\/edits",
-      "projects\\/([A-Za-z0-9_-]+)\\/history",
-      "projects\\/([A-Za-z0-9_-]+)\\/history\\/restore",
-      "projects\\/([A-Za-z0-9_-]+)\\/history\\/undo",
-      "projects\\/([A-Za-z0-9_-]+)\\/history\\/redo",
-      "materializations\\/([A-Za-z0-9_-]+)",
-      "migrations\\/([A-Za-z0-9_-]+)",
-      "migrations\\/([A-Za-z0-9_-]+)\\/rollback",
-    ]);
+    const gate = migrationRouteGate(server);
+    expect(gate.missing).toEqual([]);
+    expect(gate.unexpected).toEqual([]);
+    expect(gate.actual).toEqual([...MIGRATION_ROUTE_WHITELIST]);
   });
 
   it("mounts the M4B edits and the M4C history routes, and refuses their inputs on merit", async () => {
