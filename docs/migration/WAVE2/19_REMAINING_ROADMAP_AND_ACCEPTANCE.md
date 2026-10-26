@@ -2,7 +2,8 @@
 
 状态：`ACTIVE_PLAN`
 
-基线：M4B 内部冻结；M4B 外审、M4C、Wave 2 组合外审、M5/M6 尚未完成。
+基线：M4B 与 M4C 已分别通过独立外审；Wave 2 组合候选已完成当前 tip 的 84 files / 1040 tests 全量复验，
+组合独立外审、M5/M6 尚未完成。
 
 ## 1. 大步交付顺序
 
@@ -15,14 +16,12 @@
 
 ## 2. 最近人工体验门前仍需完成
 
-1. M4B 独立外审：验证已冻结 controlled adoption，预计只读审查与必要返修；
-2. M4C：历史 snapshot resolver、restore impact、history service/route、故障恢复、真实三镜链；
-3. Wave 2 组合冻结：主架构/追踪同步、全量门、一次独立外审，声明上限
+1. Wave 2 组合冻结：主架构/追踪已同步、当前 tip 全量门已绿，尚需一次独立组合外审，声明上限
    `WAVE2_EDITABLE_ADOPTION_READY`；
-4. M5A：项目创建/打开、StoryProjection、章/句/镜与 OpenFilm timeline/player 的共享 selection/clock/snapshot；
-5. M5B：3–6 提案比较、试听、impact 预览、采用/恢复、Inspector/History 状态在同页闭环；
-6. M5C：20+ 镜、3–5 分钟真实 fixture 的虚拟化/响应性、键盘、焦点、reduced motion、200% 文本与 Headless E2E；
-7. 生成中文可视化验收报告后，才进入第一次正式人工体验。
+2. M5A：项目创建/打开、StoryProjection、章/句/镜与 OpenFilm timeline/player 的共享 selection/clock/snapshot；
+3. M5B：3–6 提案比较、试听、impact 预览、采用/恢复、Inspector/History 状态在同页闭环；
+4. M5C：20+ 镜、3–5 分钟真实 fixture 的虚拟化/响应性、键盘、焦点、reduced motion、200% 文本与 Headless E2E；
+5. 生成中文可视化验收报告后，才进入第一次正式人工体验。
 
 M4C 完成不等于“可人工验收完整产品”；它关闭的是后端受控写与恢复闭环。最近人工体验门位于 M5C 后，主要剩余工作
 是一段完整后端阶段（M4C+Wave2 外审）和一段完整前端阶段（M5A/B/C）。不以百分比吞掉任何 `NOT_RUN`。
