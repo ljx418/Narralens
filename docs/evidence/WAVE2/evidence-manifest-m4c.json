@@ -2,15 +2,15 @@
   "format": "narralens.wave2-evidence-manifest@1",
   "stage": "M4C",
   "module": "HistoryRestore",
-  "capture_commit": "c7307f8e02c5294f083d94ddc1a0dda645dcba11",
-  "capture_logs": "docs/evidence/WAVE2/logs/c7307f8e02c5294f083d94ddc1a0dda645dcba11",
-  "captured_at_utc": "2026-10-25T17:54:57Z",
+  "capture_commit": "0f67594866582770b4ffb06e1af18d797344ceb0",
+  "capture_logs": "docs/evidence/WAVE2/logs/0f67594866582770b4ffb06e1af18d797344ceb0",
+  "captured_at_utc": "2026-10-26T02:00:45Z",
   "repo_dirty_at_capture": 0,
   "environment": {
-    "date_utc": "2026-10-25T17:54:57Z",
+    "date_utc": "2026-10-26T02:00:45Z",
     "node": "v22.22.1",
     "pnpm": "10.33.0",
-    "git_head": "c7307f8e02c5294f083d94ddc1a0dda645dcba11",
+    "git_head": "0f67594866582770b4ffb06e1af18d797344ceb0",
     "git_branch": "migration/m2.2-coordinator-persistence",
     "repo_dirty_at_capture": "0",
     "origin_main": "304c89134fdf9f834f7d69e3f4d5c89a68044c60",
@@ -26,49 +26,49 @@
       "name": "build",
       "command": "corepack pnpm build",
       "exit": 0,
-      "log": "docs/evidence/WAVE2/logs/c7307f8e02c5294f083d94ddc1a0dda645dcba11/build.txt",
-      "log_sha256": "43acfba9a232b83cabbf2db6c14f412343e06368d2ad1b3843d004e342b06aad"
+      "log": "docs/evidence/WAVE2/logs/0f67594866582770b4ffb06e1af18d797344ceb0/build.txt",
+      "log_sha256": "a7dbdd7df27235712a0ebe6882e48a1256f8c623210df85b9fa4994dd491514c"
     },
     {
       "name": "check",
       "command": "corepack pnpm check",
       "exit": 0,
-      "log": "docs/evidence/WAVE2/logs/c7307f8e02c5294f083d94ddc1a0dda645dcba11/check.txt",
-      "log_sha256": "1657cf5c4b849dfae8fd971bd4b774d7e0aed50a00070003e32fc573fb357433"
+      "log": "docs/evidence/WAVE2/logs/0f67594866582770b4ffb06e1af18d797344ceb0/check.txt",
+      "log_sha256": "aaf12975f3da646a14be73d7043a295adebb80fba3936092d0f65101771d548b"
     },
     {
       "name": "contracts",
       "command": "corepack pnpm test:contracts",
       "exit": 0,
-      "log": "docs/evidence/WAVE2/logs/c7307f8e02c5294f083d94ddc1a0dda645dcba11/contracts.txt",
-      "log_sha256": "e9683f007b3c561ab90451d4ca0bb09d3ba22e4b1dda1ce120b37df76b23c110"
+      "log": "docs/evidence/WAVE2/logs/0f67594866582770b4ffb06e1af18d797344ceb0/contracts.txt",
+      "log_sha256": "71c2a2e2ac5eb9e4b5c945245ae6a6f2ba7e18c08e0a0d211f88cdc5a385fd55"
     },
     {
       "name": "credential-scan",
-      "command": "NARRALENS_SECRET_SCAN_OUT=docs/evidence/WAVE2/logs/c7307f8e02c5294f083d94ddc1a0dda645dcba11/credential-scan.json corepack pnpm exec tsx tools/secret-scan.ts",
+      "command": "NARRALENS_SECRET_SCAN_OUT=docs/evidence/WAVE2/logs/0f67594866582770b4ffb06e1af18d797344ceb0/credential-scan.json corepack pnpm exec tsx tools/secret-scan.ts",
       "exit": 0,
-      "log": "docs/evidence/WAVE2/logs/c7307f8e02c5294f083d94ddc1a0dda645dcba11/credential-scan.txt",
-      "log_sha256": "6a6bc30b90850082371fa87001649d774d05410addee331e1b0ee8c540739fbd"
+      "log": "docs/evidence/WAVE2/logs/0f67594866582770b4ffb06e1af18d797344ceb0/credential-scan.txt",
+      "log_sha256": "be285761fb840736173feec6f60514fa06fc425e58622c566a5fc61a696bb791"
     },
     {
       "name": "m2.1",
       "command": "corepack pnpm test:m2.1",
       "exit": 0,
-      "log": "docs/evidence/WAVE2/logs/c7307f8e02c5294f083d94ddc1a0dda645dcba11/m2.1.txt",
-      "log_sha256": "21123d5910542e49303c0654183963ef750aad16805abfc8348c906d88d3518c"
+      "log": "docs/evidence/WAVE2/logs/0f67594866582770b4ffb06e1af18d797344ceb0/m2.1.txt",
+      "log_sha256": "0619de22d947adf80f99a371e37fa945a806ce55ca07580b27cc272143f6e9f6"
     },
     {
       "name": "m4a-historical",
       "command": "corepack pnpm evidence:wave2:m4a:historical",
       "exit": 0,
-      "log": "docs/evidence/WAVE2/logs/c7307f8e02c5294f083d94ddc1a0dda645dcba11/m4a-historical.txt",
+      "log": "docs/evidence/WAVE2/logs/0f67594866582770b4ffb06e1af18d797344ceb0/m4a-historical.txt",
       "log_sha256": "a2c821b374a558fae9c5e214ee8c62ef3db687c77d2d46bf97cbaa866749eaea"
     },
     {
       "name": "m4a-integrity",
       "command": "corepack pnpm evidence:wave2:m4a:integrity",
       "exit": 1,
-      "log": "docs/evidence/WAVE2/logs/c7307f8e02c5294f083d94ddc1a0dda645dcba11/m4a-integrity.txt",
+      "log": "docs/evidence/WAVE2/logs/0f67594866582770b4ffb06e1af18d797344ceb0/m4a-integrity.txt",
       "log_sha256": "f9b4ed270b3df624373d77c23c8557c1facab0329baea009a2b801e17e251d3e",
       "expected_failure": true
     },
@@ -76,107 +76,107 @@
       "name": "m4b-historical",
       "command": "corepack pnpm evidence:wave2:m4b:historical",
       "exit": 0,
-      "log": "docs/evidence/WAVE2/logs/c7307f8e02c5294f083d94ddc1a0dda645dcba11/m4b-historical.txt",
+      "log": "docs/evidence/WAVE2/logs/0f67594866582770b4ffb06e1af18d797344ceb0/m4b-historical.txt",
       "log_sha256": "00e256faf70eb81cfa1afd08e18fede1a9d2c3c810d12b257d94cd016d9fd075"
     },
     {
       "name": "m4b-integrity",
       "command": "corepack pnpm evidence:wave2:m4b:integrity",
       "exit": 0,
-      "log": "docs/evidence/WAVE2/logs/c7307f8e02c5294f083d94ddc1a0dda645dcba11/m4b-integrity.txt",
+      "log": "docs/evidence/WAVE2/logs/0f67594866582770b4ffb06e1af18d797344ceb0/m4b-integrity.txt",
       "log_sha256": "19f162d96e60591e039cb4b1c986b598d9acb97f67805d7fca2c5b1001ab2fb2"
     },
     {
       "name": "m4c-integrity",
-      "command": "node tools/wave2-m4c-evidence-integrity.mjs docs/evidence/WAVE2/logs/c7307f8e02c5294f083d94ddc1a0dda645dcba11/manifest.json",
+      "command": "node tools/wave2-m4c-evidence-integrity.mjs docs/evidence/WAVE2/logs/0f67594866582770b4ffb06e1af18d797344ceb0/manifest.json",
       "exit": 0,
-      "log": "docs/evidence/WAVE2/logs/c7307f8e02c5294f083d94ddc1a0dda645dcba11/m4c-integrity.txt",
-      "log_sha256": "e39b12794d743bbc7a77c79b356011764f142c7926d0ce5ebd8fc428bdff1771"
+      "log": "docs/evidence/WAVE2/logs/0f67594866582770b4ffb06e1af18d797344ceb0/m4c-integrity.txt",
+      "log_sha256": "64cd1865e7754f101e651df8927842e741c68517000ddfef3b37b891b7b855e9"
     },
     {
       "name": "manifest",
-      "command": "node tools/wave2-m4c-evidence-manifest.mjs c7307f8e02c5294f083d94ddc1a0dda645dcba11 docs/evidence/WAVE2/logs/c7307f8e02c5294f083d94ddc1a0dda645dcba11/manifest.json",
+      "command": "node tools/wave2-m4c-evidence-manifest.mjs 0f67594866582770b4ffb06e1af18d797344ceb0 docs/evidence/WAVE2/logs/0f67594866582770b4ffb06e1af18d797344ceb0/manifest.json",
       "exit": 0,
-      "log": "docs/evidence/WAVE2/logs/c7307f8e02c5294f083d94ddc1a0dda645dcba11/manifest.txt",
+      "log": "docs/evidence/WAVE2/logs/0f67594866582770b4ffb06e1af18d797344ceb0/manifest.txt",
       "log_sha256": "a93de7e6a69b6787390221a4d2431a9ba1b94464672c66b95e500e58bbf4f628"
     },
     {
       "name": "restore-plan-golden-python",
       "command": "corepack pnpm test:wave2:m4c:golden-python",
       "exit": 0,
-      "log": "docs/evidence/WAVE2/logs/c7307f8e02c5294f083d94ddc1a0dda645dcba11/restore-plan-golden-python.txt",
-      "log_sha256": "28962de6a0d09c79a9694db5826d1c0ace8cd06eeed2302beb6bf374da3495e8"
+      "log": "docs/evidence/WAVE2/logs/0f67594866582770b4ffb06e1af18d797344ceb0/restore-plan-golden-python.txt",
+      "log_sha256": "d7e8ff01402246f42811ded80fe02da6bf0e2dbc94034df7e87c74bae5c9f8df"
     },
     {
       "name": "restore-plan-vectors",
-      "command": "corepack pnpm test:wave2:m4c:vectors /tmp/tmp.3JL4n5UZWO/restore-plan.vectors.json",
+      "command": "corepack pnpm test:wave2:m4c:vectors /tmp/tmp.MSGTkLumnh/restore-plan.vectors.json",
       "exit": 0,
-      "log": "docs/evidence/WAVE2/logs/c7307f8e02c5294f083d94ddc1a0dda645dcba11/restore-plan-vectors.txt",
-      "log_sha256": "75ff6999055c0129b8b8f57775e9e7c3719d2e62b8ae855a4d54c55b3456ff11"
+      "log": "docs/evidence/WAVE2/logs/0f67594866582770b4ffb06e1af18d797344ceb0/restore-plan-vectors.txt",
+      "log_sha256": "f2e3ccab42d6b3420a34c7b8371fc535625b7919602b0418291d80aec2da565f"
     },
     {
       "name": "typecheck",
       "command": "corepack pnpm exec tsc --noEmit",
       "exit": 0,
-      "log": "docs/evidence/WAVE2/logs/c7307f8e02c5294f083d94ddc1a0dda645dcba11/typecheck.txt",
+      "log": "docs/evidence/WAVE2/logs/0f67594866582770b4ffb06e1af18d797344ceb0/typecheck.txt",
       "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     },
     {
       "name": "wave1-historical",
       "command": "corepack pnpm evidence:wave1:historical",
       "exit": 0,
-      "log": "docs/evidence/WAVE2/logs/c7307f8e02c5294f083d94ddc1a0dda645dcba11/wave1-historical.txt",
-      "log_sha256": "0b81fb585f05f08396028ffe96466ee45deda38b890baca1e271d425aebb4f1d"
+      "log": "docs/evidence/WAVE2/logs/0f67594866582770b4ffb06e1af18d797344ceb0/wave1-historical.txt",
+      "log_sha256": "6def73e046884fdf7cc63c1a199dced0f7e3d1720772cb2d7b18d47a21c2b309"
     },
     {
       "name": "wave1-integrity",
       "command": "corepack pnpm evidence:wave1:integrity",
       "exit": 1,
-      "log": "docs/evidence/WAVE2/logs/c7307f8e02c5294f083d94ddc1a0dda645dcba11/wave1-integrity.txt",
-      "log_sha256": "8cc1c9db5678eaf3b77bb594ded37434daf24933e2b35ecf9c3544e73ee1e16b",
+      "log": "docs/evidence/WAVE2/logs/0f67594866582770b4ffb06e1af18d797344ceb0/wave1-integrity.txt",
+      "log_sha256": "ac606c3315b8c31212d90e3fea50e497f6111ba0df5ef156a6fa1f58839f7620",
       "expected_failure": true
     },
     {
       "name": "wave2-fitness",
       "command": "corepack pnpm test:wave2:fitness",
       "exit": 0,
-      "log": "docs/evidence/WAVE2/logs/c7307f8e02c5294f083d94ddc1a0dda645dcba11/wave2-fitness.txt",
-      "log_sha256": "cb9a5d05ab4df5509ff5dacd1ea5033593989ad398d48e547b549f6564e37b2c"
+      "log": "docs/evidence/WAVE2/logs/0f67594866582770b4ffb06e1af18d797344ceb0/wave2-fitness.txt",
+      "log_sha256": "90465ad84ef939c78d867bc5935c9eec1caf31b1a9bfb501c7af5dbaa03f06f2"
     },
     {
       "name": "wave2-m3",
       "command": "corepack pnpm test:wave2:m3",
       "exit": 0,
-      "log": "docs/evidence/WAVE2/logs/c7307f8e02c5294f083d94ddc1a0dda645dcba11/wave2-m3.txt",
-      "log_sha256": "38ba6d978b256d08066fea261765b9dea88b681ead3de96344e8ed3d8df0410c"
+      "log": "docs/evidence/WAVE2/logs/0f67594866582770b4ffb06e1af18d797344ceb0/wave2-m3.txt",
+      "log_sha256": "a4d35419da1d8ca13b914ae11a095d8422a2a5b5db6754628484e99eee93b66d"
     },
     {
       "name": "wave2-m4a",
       "command": "corepack pnpm test:wave2:m4a",
       "exit": 0,
-      "log": "docs/evidence/WAVE2/logs/c7307f8e02c5294f083d94ddc1a0dda645dcba11/wave2-m4a.txt",
-      "log_sha256": "eb7af82973aff25fd93a0bd0960a46e351f7d864d7529040489ec5b8a76e6f95"
+      "log": "docs/evidence/WAVE2/logs/0f67594866582770b4ffb06e1af18d797344ceb0/wave2-m4a.txt",
+      "log_sha256": "1838415459861d1f8404a8e9c56918a66d87fa073411906605c6ad8ea996c8f3"
     },
     {
       "name": "wave2-m4b",
       "command": "corepack pnpm test:wave2:m4b",
       "exit": 0,
-      "log": "docs/evidence/WAVE2/logs/c7307f8e02c5294f083d94ddc1a0dda645dcba11/wave2-m4b.txt",
-      "log_sha256": "264f6c4af9d0a881f00cf1936a627ce7e682b4d024db488314b050a686cc1f3a"
+      "log": "docs/evidence/WAVE2/logs/0f67594866582770b4ffb06e1af18d797344ceb0/wave2-m4b.txt",
+      "log_sha256": "55710e6f028cd5262ea0991da347ba25687833a9b281d46ec2e531ef1c0340ab"
     },
     {
       "name": "wave2-m4c",
       "command": "corepack pnpm test:wave2:m4c",
       "exit": 0,
-      "log": "docs/evidence/WAVE2/logs/c7307f8e02c5294f083d94ddc1a0dda645dcba11/wave2-m4c.txt",
-      "log_sha256": "37c357dded1b7952629f31e002e0373753f5d48513e01936a1f228a2627e1057"
+      "log": "docs/evidence/WAVE2/logs/0f67594866582770b4ffb06e1af18d797344ceb0/wave2-m4c.txt",
+      "log_sha256": "92d14b092aaf0878c6b298336fb488694b694bee02873b01ab709f779bcde693"
     },
     {
       "name": "wave2-w2.0",
       "command": "corepack pnpm test:wave2:w2.0",
       "exit": 0,
-      "log": "docs/evidence/WAVE2/logs/c7307f8e02c5294f083d94ddc1a0dda645dcba11/wave2-w2.0.txt",
-      "log_sha256": "72ff4c336b73933f65553976791d4bcc37c64be499b9105208111f4ff41c8bda"
+      "log": "docs/evidence/WAVE2/logs/0f67594866582770b4ffb06e1af18d797344ceb0/wave2-w2.0.txt",
+      "log_sha256": "12840e9f311c86ea0c38301455d020ebfbd36a5999170312eda3899850c3cd72"
     }
   ],
   "cases": [
@@ -217,7 +217,7 @@
     },
     {
       "case_id": "TX-04C",
-      "status": "CLOSED",
+      "status": "CLOSED_WITH_TRANSITION_NOT_APPLICABLE_APPROVED",
       "production_seam": true
     },
     {
@@ -281,7 +281,7 @@
       "production_seam": true
     }
   ],
-  "checked_manifest": "docs/evidence/WAVE2/logs/c7307f8e02c5294f083d94ddc1a0dda645dcba11/manifest.json",
+  "checked_manifest": "docs/evidence/WAVE2/logs/0f67594866582770b4ffb06e1af18d797344ceb0/manifest.json",
   "route_status": {
     "materialize": true,
     "impact": true,

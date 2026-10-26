@@ -1,0 +1,1 @@
+node tools/wave2-m4c-evidence-manifest.mjs 0f67594866582770b4ffb06e1af18d797344ceb0 docs/evidence/WAVE2/logs/0f67594866582770b4ffb06e1af18d797344ceb0/manifest.json
