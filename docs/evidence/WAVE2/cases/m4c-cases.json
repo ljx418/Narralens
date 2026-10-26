@@ -137,7 +137,7 @@
    ,"tests/wave2/m4c/history-fault-matrix.test.ts::hard-exits a child at %s and sweeps nested asset temporaries"
    ,"tests/wave2/m4c/history-fault-matrix.test.ts::hard-exits a child at %s and recovers from durable state only"
   ],
-  "evidence": "按冻结门 §6 建立**枚举式 fault registry**（`src/host/history/history-fault-registry.ts`）：22 个 service/publisher/adapter 边界 + 单事务 9 条语句各前后共 18 个数据库边界，合计 40 个。异常矩阵按 registry 行走并与生产代码双向核对。另以独立子进程在 asset temp fsync、asset link、film temp fsync、film rename 与 DB transaction statement 五个边界直接 `process.exit(86)`，保证 catch/finally/Host close 均不运行；父进程递归枚举 active/staging 临时文件并用新 Host 从同一持久目录恢复。两类矩阵都断言 source、revision、pointer、impact、outbox、idempotency、temp、snapshot 与 transaction，发布前 abort + revision 0，发布后恰好 commit 一次。",
+  "evidence": "按冻结门 §6 建立**枚举式 fault registry**（`src/host/history/history-fault-registry.ts`）：22 个 service/publisher/adapter 边界 + 单事务 9 条语句各前后共 18 个数据库边界，合计 40 个。异常矩阵按 registry 行走并与生产代码双向核对，并逐边界断言 source、revision、pointer、impact、outbox、idempotency、temp、snapshot 与 transaction。另以独立子进程在 asset temp fsync、asset link、film temp fsync、film rename 与 DB transaction statement 五个边界直接 `process.exit(86)`，保证 catch/finally/Host close 均不运行；父进程递归枚举 active/staging 临时文件并用新 Host 从同一持久目录恢复，直接断言 transaction、revision、outbox、idempotency、snapshot 与临时文件清理。两类矩阵共同证明发布前 abort + revision 0、发布后恰好 commit 一次；不把硬退出子集未直接断言的字段冒充为该子集的证据。",
   "notes": "registry 是契约且被双向核对：矩阵按它行走，服务里新增而 registry 没有的边界会让注册表检查失败；registry 里有而服务走不到的边界会让矩阵失败——除非该边界被显式声明为 not_reached 并写明理由。"
  },
  {

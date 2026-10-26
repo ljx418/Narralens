@@ -96,7 +96,9 @@ Impact 计算时检查一次，source publish 前从当前 projection 与目标 
 ### D-05 可恢复 source 发布范围
 
 M4C 只恢复 Wave 2 可证明的 OpenFilm 快照。目标与当前的非 `film.html` 可变 roots（外置字幕、旁白资产、设置等）必须逐字节
-一致；否则 422 `CAPABILITY_NOT_ENABLED`，留待后续支持多文件原子包。本阶段允许的 active-root 变化仍为：
+一致；否则返回 422 `UNSUPPORTED_EDIT`，留待后续支持多文件原子包。该错误码由
+`ADR-W2.0-007-m4c-contract-reconciliation.md` D-03 取代本段早期草案中的
+`CAPABILITY_NOT_ENABLED` 字面；后者不得再作为 M4C restore 的规范错误码。本阶段允许的 active-root 变化仍为：
 
 1. 安装目标 snapshot 引用但 active root 缺失的内容寻址资产；
 2. 原子替换 `film.html`；

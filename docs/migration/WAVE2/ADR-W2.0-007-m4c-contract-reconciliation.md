@@ -29,8 +29,12 @@ state，`project_transaction.state` 仍是唯一状态机。表继续由 UPDATE/
 
 ### D-03 错误码
 
-D-05 所述“不支持的多文件/未建模恢复”统一返回 HTTP 422 `UNSUPPORTED_EDIT`。这与已冻结错误码 union、schema、
-M4B publisher 和客户端处理保持一致；旧文中的 `CAPABILITY_NOT_ENABLED` 不再是 M4C wire code。
+D-05 所述“不支持的多文件”以及已识别但不受 M4C 支持的恢复拓扑统一返回 HTTP 422
+`UNSUPPORTED_EDIT`。请求本身缺少可构造计划的必需事实（例如 projection `problems[]`、缺 roots、字幕集合
+不一致、无差异、超过上限或缺 consumer）属于请求不能形成有效计划，仍返回 HTTP 422 `INVALID_REQUEST`。
+两者均 fail closed：前者表达“能力不支持”，后者表达“输入不能形成冻结计划”，不得互相伪装。
+这与已冻结错误码 union、schema、M4B publisher 和客户端处理保持一致；旧文中的
+`CAPABILITY_NOT_ENABLED` 不再是 M4C wire code。
 
 ### D-04 transition 边界
 

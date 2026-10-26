@@ -81,8 +81,8 @@ Wave 1/M3/M4A/M4B 历史证据。
 
 ## 4. 测试与证据（M-04）
 
-- **枚举式 registry**：`src/host/history/history-fault-registry.ts` 是生产代码里的边界清单——21 个
-  service/publisher 边界 + 单事务 9 条语句各前后共 18 个数据库边界 = **39** 个。
+- **枚举式 registry**：`src/host/history/history-fault-registry.ts` 是生产代码里的边界清单——22 个
+  service/publisher/adapter 边界 + 单事务 9 条语句各前后共 18 个数据库边界 = **40** 个。
 - **矩阵按 registry 行走**，不是代表性子集：`tests/wave2/m4c/history-fault-matrix.test.ts` 逐个注入。
 - **双向核对**（本轮新增，且是本轮最重要的修补）：代码里出现而 registry 没有的边界、以及 registry 里有而代码
   走不到的边界，都会让检查失败。审查发现 `before_film_rename` 曾在 publisher 里抛出却没接进映射表，

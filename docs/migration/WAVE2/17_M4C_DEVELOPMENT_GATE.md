@@ -8,7 +8,8 @@
 范围：只完成历史 snapshot 的受控 restore，以及 native history restore/undo/redo 到 Host 的翻译。禁止 M5 UI、M6
 生产 render、provider/联网/付费/外传、插件市场、读取 `J:\`、重写 legacy Hypit actor 或删除旧工程/历史。
 
-配套：`ADR-W2.0-006-m4c-history-restore.md`、`16_M4C_HISTORY_RESTORE.html` 与 `.sequence.json`。
+配套：`ADR-W2.0-006-m4c-history-restore.md`、其合同勘误与增补
+`ADR-W2.0-007-m4c-contract-reconciliation.md`、`16_M4C_HISTORY_RESTORE.html` 与 `.sequence.json`。
 
 ## 1. 目标体验与出门声明
 

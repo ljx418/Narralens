@@ -3,6 +3,15 @@ import { describe, expect, it } from "vitest";
 
 const read = (path: string): string => readFileSync(path, "utf8");
 
+const routeRow = (document: string, route: string): string => {
+  const row = document
+    .split("\n")
+    .filter((line) => line.startsWith("|") && line.includes(`\`${route}\``))
+    .at(-1);
+  expect(row, `missing route inventory row for ${route}`).toBeDefined();
+  return row!;
+};
+
 /** Prevent a later evidence sync from putting a closed route back into the planned/404 state. */
 describe("M4C authority documents describe the mounted production routes", () => {
   it("keeps architecture, traceability and route inventory aligned with M4B/M4C", () => {
@@ -12,13 +21,24 @@ describe("M4C authority documents describe the mounted production routes", () =>
 
     expect(architecture).toContain("`POST /api/migration/v1/projects/:id/edits`：**M4B 已实现");
     expect(architecture).not.toContain("`POST /api/migration/v1/projects/:id/edits`：Wave 2 冻结、未实现");
-    for (const route of ["history`", "history/restore`", "history/undo`", "history/redo`"]) {
-      expect(routes).toContain(route);
+    for (const route of [
+      "/api/migration/v1/projects/:id/edits",
+      "/api/migration/v1/projects/:id/history",
+      "/api/migration/v1/projects/:id/history/restore",
+      "/api/migration/v1/projects/:id/history/undo",
+      "/api/migration/v1/projects/:id/history/redo",
+    ]) {
+      const row = routeRow(routes, route);
+      expect(row).toContain("**M4");
+      expect(row).toContain("已实现");
+      expect(row).not.toContain("404");
+      expect(row).not.toContain("未注册");
     }
     expect(architecture).toContain("history/restore`");
     expect(architecture).toContain("history/undo` 与 `.../redo`");
     expect(traceability).toContain("M4B 第十轮独立外审 PASS");
-    expect(traceability).toContain("M4C");
+    expect(traceability).toContain("M4C 第三轮独立外审 PASS");
+    expect(traceability).toContain("Wave 2 组合外审与 Gate D4.2 仍未关闭");
   });
 
   it("records the accepted D-05/D-06 reconciliation and transition boundary", () => {
@@ -27,7 +47,9 @@ describe("M4C authority documents describe the mounted production routes", () =>
     const gate = read("docs/migration/WAVE2/17_M4C_DEVELOPMENT_GATE.md");
     expect(adr6).toContain("ADR-W2.0-007-m4c-contract-reconciliation.md");
     expect(adr7).toContain("`required_locks` 是 `HistoryRestorePlanV1` canonical preimage 的字段");
-    expect(adr7).toContain("HTTP 422 `UNSUPPORTED_EDIT`");
+    expect(adr7).toMatch(/HTTP 422\s+`UNSUPPORTED_EDIT`/);
+    expect(adr7).toContain("HTTP 422 `INVALID_REQUEST`");
+    expect(gate).toContain("ADR-W2.0-007-m4c-contract-reconciliation.md");
     expect(gate).toContain("transition 为 `NOT_APPLICABLE_APPROVED`");
   });
 });
