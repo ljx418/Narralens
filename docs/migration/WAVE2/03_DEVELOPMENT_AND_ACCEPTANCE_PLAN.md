@@ -1,6 +1,6 @@
 # Wave 2 开发与验收计划
 
-状态：`M4C_EXTERNAL_REVIEW_PASS`（M3/M4A/M4B/M4C 单模块门已关闭；Wave 2 组合冻结与独立组合外审待执行）
+状态：`WAVE2_EDITABLE_ADOPTION_READY`（M3/M4A/M4B/M4C 单模块门及 Wave 2 组合独立外审均已关闭）
 执行模式：一个波次连续实现，模块检查点自动继续，波次末一次组合内审和一次独立外审。
 
 ## 1. 提交与依赖顺序

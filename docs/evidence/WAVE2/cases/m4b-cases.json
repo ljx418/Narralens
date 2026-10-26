@@ -127,8 +127,8 @@
    "tests/wave2/m4a/impact-races.test.ts::refuses and writes no row when a visual lock appears at before_insert",
    "tests/wave2/m4b/adoption-route.test.ts::re-reads the rights before publication, so a rights change after the impact stops it"
   ],
-  "evidence": "发布前重读 impact/materialization/view/rights，并重查锁；竞态不进入 commit；锁检查先于 currentness 检查，因此 visual 锁以 TARGET_LOCKED 报告而非被 control revision 抢先；rights 的重读由一条回归测试钉住——在 prepared 之后改掉 materialization 的 rights_digest，采用必须以 IMPACT_STALE 失败且 revision +0，没有这条测试时删掉这次重读仍然全绿。",
-  "notes": " rights 重读由「re-reads the rights before publication」钉住；锁与 currentness 的先后由 visual 锁的三条用例钉住。"
+  "evidence": "发布前重读 impact/materialization/view/rights，并重查锁；竞态不进入 commit；锁检查先于 currentness 检查，因此 visual 锁以 TARGET_LOCKED 报告而非被 control revision 抢先。rights 漂移用例能证明组合路径会拒绝，但单独删除任意一处重读仍可能由另一处防线拒绝，因此不得把它描述成逐调用点变异证明。",
+  "notes": "rights 漂移由「re-reads the rights before publication」证明端到端 fail closed；锁与 currentness 的先后由 visual 锁的三条用例钉住。"
  },
  {
   "case_id": "TX-14",

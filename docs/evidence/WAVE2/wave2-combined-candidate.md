@@ -1,6 +1,6 @@
 # Wave 2 组合冻结候选
 
-状态：`WAVE2_COMBINED_REVIEW_PENDING`
+状态：`WAVE2_EDITABLE_ADOPTION_READY`（独立组合外审 PASS：BLOCKER=0 / MAJOR=0）
 
 ## 1. 绑定
 
@@ -43,7 +43,13 @@ duration: 4377.53 s
 复验记录，而不是新的 append-only capture。可追溯的冻结原始日志仍是
 `docs/evidence/WAVE2/logs/0f67594866582770b4ffb06e1af18d797344ceb0/`：其中同样记录 84 files / 1040 tests、
 黄金向量和生产构建 exit 0。两次运行之间生产代码和合同无差异，只有外审文档、case 证据文字和收紧后的
-`document-status-fitness.test.ts` 发生变化；收紧后的定向 25 tests、TypeScript 与 21 个合同测试另行实跑全绿。
+`document-status-fitness.test.ts` 发生变化。M4C 外审曾复跑 25 个定向测试；组合外审另行复跑收紧后的 2 个
+document-status fitness、21 个合同测试以及当前 tip TypeScript，均 exit 0。
+
+媒体与上游复现边界：固定 OpenFilm checkout 位于仓库外
+`/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b`，固定 SHA 如 §1；900 帧媒体夹具由测试 harness 在隔离目录
+生成且被 `.gitignore` 排除，不把未跟踪媒体冒充仓库产物。若换机缺固定 checkout 或 ffmpeg/ffprobe，相关真实媒体
+case 必须记为 `BLOCKED_ENV`，不能降级为 mock 或跳过后仍宣称通过。
 
 ## 4. 组合不变量
 
@@ -61,8 +67,8 @@ duration: 4377.53 s
 
 ## 5. 允许与禁止
 
-独立组合外审仅在 `BLOCKER=0 / MAJOR=0` 时可把本候选提升为
-`WAVE2_EDITABLE_ADOPTION_READY`，随后才允许进入 M5 同页 Studio UX 开发。
+独立组合外审已在 `a038e4a...` 上以 `BLOCKER=0 / MAJOR=0` 通过，本候选已提升为
+`WAVE2_EDITABLE_ADOPTION_READY`；下一允许阶段为 M5 同页 Studio UX 开发。
 
 即使组合外审 PASS，仍不得声明 Gate D4.2、Gate V1-P0、V1-Full、完整同页 Studio、生产 render、长片性能或
 headed/human 已验。M5 的人工体验门和 M6 的交付视频门必须分别用自己的真实证据关闭。

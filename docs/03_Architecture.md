@@ -1,7 +1,7 @@
 # 叙镜架构设计 v1.0
 <!-- M2.1_REWORK_BASE_SHA=ee58ab5c6a9d4bbdf05e8ac8a394fd75218cae59 REVIEW_STATUS=PASS -->
 
-文档状态：Gate D1–D3、D4.0 与 D4.1 的历史结论保留。D4.2.1、Wave 1、M3 与 M4A 的历史外审结论保留。**M4B controlled adoption 的独立外审已 PASS**（第十轮，`M4B_EXTERNAL_REVIEW_PASS`，BLOCKER=0 / MAJOR=0；候选 `25df0cb`，捕获 `25df0cb` 的日志由 `docs/evidence/WAVE2/evidence-manifest-m4b.json` 记录，historical 门可复现）。**M4C history restore 已实现并通过第三轮独立外审**（候选 `c67b162...`，BLOCKER=0 / MAJOR=0；实现/捕获提交 `0f67594...`；外审亲自复跑完整性、合同/文档、真实进程硬退出与架构 fitness 门）。该结论只关闭 M4C；Gate D4.2、Wave 2 组合、`Gate V1-P0` 与 `V1-Full` 均未关闭，headed/human 为 `NOT_RUN`。
+文档状态：Gate D1–D3、D4.0 与 D4.1 的历史结论保留。D4.2.1、Wave 1、M3 与 M4A 的历史外审结论保留。**M4B controlled adoption 的独立外审已 PASS**（第十轮，`M4B_EXTERNAL_REVIEW_PASS`，BLOCKER=0 / MAJOR=0）。**M4C history restore 已实现并通过第三轮独立外审**（候选 `c67b162...`，BLOCKER=0 / MAJOR=0）。**Wave 2 组合外审已 PASS，状态为 `WAVE2_EDITABLE_ADOPTION_READY`**（候选 `a038e4a...`，BLOCKER=0 / MAJOR=0）；该声明只允许进入 M5。Gate D4.2、`Gate V1-P0` 与 `V1-Full` 仍未关闭，headed/human 为 `NOT_RUN`。
 
 ## 1. 零层架构
 

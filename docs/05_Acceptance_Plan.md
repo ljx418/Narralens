@@ -1,5 +1,10 @@
 # 叙镜验收计划 v1.0
 
+> 当前状态覆盖（2026-10-26）：下方 D4.2.1–D4.2.3 清单保留原始 Gate 历史与旧 Hypit 表述，不再作为当前实现状态来源。
+> Wave 2 已通过组合独立外审并达到 `WAVE2_EDITABLE_ADOPTION_READY`；OpenFilm 原生 materialize / impact / adopt /
+> history restore 的当前事实以 `11_V1_Traceability.md`、`docs/migration/WAVE2/` 与 `docs/evidence/WAVE2/` 为准。
+> Gate D4.2 仍未关闭：下一门是 `docs/migration/WAVE3/` 定义的 M5 Studio UX、Headless 验收和人工体验。
+
 ## 0. 三层出门门限
 
 | Gate | 用户操作 | 必需证据 | 出门门限 | 失败动作 |
@@ -8,7 +13,7 @@
 | Gate DOC（已通过） | 从任一 P0 追踪到实体、阶段、测试和证据 | MD、7 页 Draw.io、Archify 全系统图、内审与 Claude Code CLI 外审 | 内审和外审均无未关闭致命/重大问题；实际开发已于 2026-10-12 获批 | 继续修订文档；未批准不得开发 |
 | Gate D1（已通过，限制已声明） | 30 秒预览→导出→关闭→重开→改一镜→再导出 | 双 MP4、日志、命令、SHA、license、哈希/帧样本 | 声画正确、改动持久、接口来自事实；无字幕夹具不得声称字幕通过 | 停止业务 UI |
 | Gate D4.1（已通过，限制已声明） | 同一真实镜头→真实生成三案→键盘比较 | CLI audit、Comparison、结构签名、四类工程 SHA、写 Actor 计数、浏览器截图 | 3–6 全有或全无；只读、无采用、无工程写；内外审 0 未关闭问题 | 打回 D4.1 文档或实现 |
-| Gate D4.2（D4.2.1 内审通过，外审待完成） | 选方案→本地导入/绑定→核对许可/影响→采用→真实预览 | import/ffprobe、composite recipe/边界帧、journal、Source/Run/MP4、浏览器证据 | revision +1；旁白/时长/相邻镜头/stable shot 不变；失败可补偿 | 打回 D4.2 文档或对应子阶段 |
+| Gate D4.2（后端 Wave 2 已通过；M5 体验待完成） | 选方案→本地导入/绑定→核对许可/影响→采用→真实预览 | import/ffprobe、原生三 clip/边界帧、journal/snapshot、OpenFilm 工程/MP4、浏览器证据 | revision +1；旁白/相邻镜头/锁定事实不被越权修改；失败可补偿或进入 attention | 打回 Wave 2 或 M5 对应阶段 |
 | Gate V1 | 真实章节定位→比较→保留旁白采用→锁→恢复→重开→再导出 | 3–5 分钟、20+ 镜头、3 处采用链、失败/性能证据 | PRD、架构、实现、证据一致 | 打回对应开发阶段 |
 
 只有自动化 Gate 与零号用户人工体验 Gate 同时通过，才可声明阶段完成。

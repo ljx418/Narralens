@@ -1,8 +1,9 @@
 # Wave 2 开工包：先读本文
 
-状态：`M4C_FROZEN_FOR_IMPLEMENTATION`（M4B 内部冻结候选已形成、独立外审待签；M4C 文档门已冻结）
+状态：`WAVE2_EDITABLE_ADOPTION_READY`（M3/M4A/M4B/M4C 与 Wave 2 组合独立外审均 PASS）
 范围：M3 materialize + M4A impact + M4B adopt + M4C history/restore
-当前实现基线：`docs/evidence/WAVE2/evidence-manifest-m4b.json` 的 `capture_commit`（M4B 内部冻结候选；外审每轮修复后重新捕获，指针以 manifest 为准，避免再次过时）
+当前实现基线：生产实现与完整捕获 `0f67594866582770b4ffb06e1af18d797344ceb0`；组合候选
+`a038e4a6cc48a7d09c240318da3ec1068e0e8bcc` 仅追加外审/路线文档，生产与合同字节无变化。
 Wave 1 冻结代码：`e2dec5ca03ee881b55f92b920ee6df2c676aeb26`
 目标声明上限：`WAVE2_EDITABLE_ADOPTION_READY`
 

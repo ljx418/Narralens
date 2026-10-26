@@ -1,7 +1,7 @@
 # Narralens V1 规格—架构—开发—验收追踪矩阵
 
 版本：v1.0  
-状态：实际开发已批准；既有 Gate 与 Wave 1/M3/M4A 外审结论保留。M4B controlled adoption 的独立外审已 PASS（第十轮 `M4B_EXTERNAL_REVIEW_PASS`，BLOCKER=0 / MAJOR=0）。M4C history restore 已实现并在冻结候选 `c67b162...` 上通过第三轮独立外审（BLOCKER=0 / MAJOR=0）：`HistoricalSnapshotResolver`、`HistoryRestorePlanV1`（ADR-W2.0-006/007 的冻结合同）、不可变 `history_restore_fact`、`HistoryService` 的受控恢复与单事务提交、枚举式故障矩阵、五个真实进程硬退出恢复、真实三镜恢复与双渲染均有直接证据。该结论只关闭 M4C；Gate D4.2、Wave 2 组合、`Gate V1-P0` 与 `V1-Full` 均未关闭，headed/human 为 `NOT_RUN`。
+状态：实际开发已批准；既有 Gate 与 Wave 1/M3/M4A 外审结论保留。M4B controlled adoption 第十轮与 M4C history restore 第三轮独立外审均 PASS；Wave 2 组合候选 `a038e4a...` 的独立外审也以 BLOCKER=0 / MAJOR=0 PASS，当前状态为 `WAVE2_EDITABLE_ADOPTION_READY`。该状态只允许进入 M5 同页 Studio UX；Gate D4.2、`Gate V1-P0` 与 `V1-Full` 均未关闭，headed/human 为 `NOT_RUN`。
 事实日期：2026-10-23
 <!-- M2.1_REWORK_BASE_SHA=ee58ab5c6a9d4bbdf05e8ac8a394fd75218cae59 REVIEW_STATUS=PASS -->
 
@@ -46,7 +46,7 @@
 | M1B | 固定 OpenFilm SHA、可编辑 30 秒链路、native 写入口清单与 stale-base 实证 | passed-spike（OpenFilm `e70d9d9...`） | 不写生产 Hypit；可编辑三 clip；生产 translate/block 已由 M2.1 落地为 `NativeMutationRegistry`/`NativeWriteGateway`，M2.1 未提供任何 OpenFilm 写路径 |
 | M2 | EnginePort、单引擎绑定、写入治理、三类锁、持久 Job/SSE/lease、snapshot/journal、迁移副本与回退 | **Wave 1 组合外审 PASS，`CONTROLLED_OPENFILM_READY`**：冻结代码 `e2dec5c...`，证据捕获 `fd64762...`，21 case 为 20 PASS + 1 `NOT_APPLICABLE_APPROVED` | migrate-copy/report/rollback 已实现；AC-005 legacy edit 仍为事后 snapshot，headed/human NOT_RUN |
 | W2.0–M3 | 目标工程解析、资产账本、素材化、真实 proxy/native plan/lineage | **M3 独立外审 PASS**：候选 `fa08fe4...`，捕获 `f2a41ff...`；ACT/ASSET、PR、MT 全部关闭 | materialize POST/GET 已开放；NOWRITE；impact/adopt/history 仍 404；M3 不等于 D4.2 完成 |
-| M4A–M4C | server impact、采用与历史事务 | **M4A 独立外审 PASS；M4B 第十轮独立外审 PASS；M4C 第三轮独立外审 PASS（候选 `c67b162...`，BLOCKER=0 / MAJOR=0）**。M4B 唯一 adopt 路由、closed 9-op 三镜采用、原子 source 发布、revision/impact/projection/ledger/outbox/idempotency 同事务、八个崩溃边界恢复、真实 900 帧双渲染与中镜原生编辑均有直接测试；M4C 追加唯一 restore 路由、只读 history 模型、undo/redo 只翻译、计划合同、真实子进程丢失恢复与真实恢复渲染 | ADR-W2.0-004/005/006/007 + `12_M4B_DEVELOPMENT_GATE.md` + `17_M4C_DEVELOPMENT_GATE.md`；单模块外审已关闭，Wave 2 组合外审与 Gate D4.2 仍未关闭 |
+| M4A–M4C | server impact、采用与历史事务 | **M4A、M4B、M4C 独立外审及 Wave 2 组合外审均 PASS；`WAVE2_EDITABLE_ADOPTION_READY`**。唯一 adopt/restore 路由、原子 source 发布、revision/impact/projection/ledger/outbox/idempotency 同事务、崩溃恢复、真实 900 帧双渲染与中镜原生编辑均有直接测试 | 组合候选 `a038e4a...`；允许进入 M5，Gate D4.2 仍未关闭 |
 | M5 | 同页原生 Studio UX | not-started | 依赖 Wave 2 组合外审，不顺跳 |
 | M6 | `Gate V1-P0` | not-started | 不等于 V1-Full |
 | M7A–D | P1 与完整长片证据 | not-started | P0/P1 全绿后才可声明 V1-Full |

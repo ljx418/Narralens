@@ -36,9 +36,9 @@ describe("M4C authority documents describe the mounted production routes", () =>
     }
     expect(architecture).toContain("history/restore`");
     expect(architecture).toContain("history/undo` 与 `.../redo`");
-    expect(traceability).toContain("M4B 第十轮独立外审 PASS");
-    expect(traceability).toContain("M4C 第三轮独立外审 PASS");
-    expect(traceability).toContain("Wave 2 组合外审与 Gate D4.2 仍未关闭");
+    expect(traceability).toContain("M4B controlled adoption 第十轮与 M4C history restore 第三轮独立外审均 PASS");
+    expect(traceability).toContain("Wave 2 组合外审均 PASS");
+    expect(traceability).toContain("Gate D4.2 仍未关闭");
   });
 
   it("records the accepted D-05/D-06 reconciliation and transition boundary", () => {
