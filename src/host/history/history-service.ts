@@ -13,7 +13,7 @@ import type { EngineRegistry } from "../engine/engine-registry.js";
 import type { NativeWriteGateway } from "../engine/native-write-gateway.js";
 import type { RestoreEnginePlanIntent } from "../engine/engine-plan-intent.js";
 import type { ImpactService } from "../impact/impact-service.js";
-import type { LockService } from "../projects/lock-service.js";
+import type { AffectedLock, LockService } from "../projects/lock-service.js";
 import type { OperationIdempotencyStore } from "../projects/operation-idempotency-store.js";
 import type { ProjectCoordinator } from "../projects/project-coordinator.js";
 import type { ProjectResolver } from "../projects/project-resolver.js";
@@ -56,6 +56,19 @@ import { PUBLISHER_FAULT_POINTS } from "./history-fault-registry.js";
  */
 
 export const HISTORY_OPERATION_KIND = "controlled_write.restore_snapshot";
+
+/**
+ * The exact lock fact used by post-publication recovery.
+ *
+ * This deliberately performs no range-to-lock conversion. `affected_ranges` is a UI impact
+ * description, not lock authority; narration-only recovery may have ranges while requiring
+ * only narration/project. Keeping this pure also lets the real LockService test the same
+ * value the recovery path consumes.
+ */
+export function historyRecoveryLocks(fact: { readonly required_locks: readonly AffectedLock[] }):
+readonly AffectedLock[] {
+  return fact.required_locks;
+}
 
 /**
  * The boundaries the crash matrix has to cover independently.
@@ -661,11 +674,12 @@ export class HistoryService {
     }
     // The lock check comes before the recovery-current check, for the same reason it does
     // in the online path.
-    const scope = await this.#deps.impact.readScope(request.impact_id);
-    this.#deps.locks.assertUnlocked(transaction.project_id, scope.affected_ranges.map((range) => ({
-      lock_type: "visual" as const, scope: "shot" as const, target_id: range.clip_id,
-      start_frame: range.start_frame, end_frame_exclusive: range.end_frame_exclusive,
-    })));
+    // The immutable fact carries the exact lock classes the authorized plan named. Do not
+    // reinterpret `affected_ranges` as visual-shot locks here: narration/audio restores may
+    // carry ranges for presentation while their actual lock is narration/project. The old
+    // conversion made an unrelated visual lock block recovery after the author source had
+    // already been published.
+    this.#deps.locks.assertUnlocked(transaction.project_id, historyRecoveryLocks(fact));
     const impact = await this.#deps.impact.requirePreparedRecoveryCurrent(transactionId,
       request.impact_id, request.impact_hash, fact.publish_intent_created_at);
     // **The plan is not rebuilt here, and it must not be.**
@@ -698,7 +712,9 @@ export class HistoryService {
       throw new HttpError(423, "PROJECT_ATTENTION_REQUIRED",
         "The published restore closure cannot be proven");
     }
-    this.#deps.locks.assertUnlocked(transaction.project_id, fact.required_locks);
+    // Check again after the target/rights/digest reads so a lock acquired during recovery
+    // cannot race the commit.
+    this.#deps.locks.assertUnlocked(transaction.project_id, historyRecoveryLocks(fact));
     this.#deps.engines.resolveVerified(transaction.project_id, view.engine_upstream_sha, correlationId);
     return this.#deps.revisions.commitHistoryRestore({
       transactionId, projectId: transaction.project_id,

@@ -885,8 +885,8 @@
         "project_id": "of_d1-30s_0123456789abcdef",
         "target_snapshot_id": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
         "current_snapshot_id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-        "current_projection_sha256": "e60610f99e5a23ae0adc1262e3d0c4da120f563e03859e43851f98c0767cd0c5",
-        "target_projection_sha256": "e92c7df1a0b219c07b2445967150fcbbd0dcd5472f8ff3d62106b78362bb4e8c",
+        "current_projection_sha256": "095a02242c29b2a7e180a9ff7bda3ef3be44adef88bb7da7aec53fcf23da1235",
+        "target_projection_sha256": "48476822b5c19eab7b63170e00a199b362e7e9553dc661da554139ca1a38b85d",
         "affected_ranges": [
           {
             "clip_id": "shot-001",
@@ -903,6 +903,20 @@
         ],
         "required_locks": [
           {
+            "lock_type": "duration",
+            "scope": "project",
+            "target_id": "",
+            "start_frame": 0,
+            "end_frame_exclusive": 300
+          },
+          {
+            "lock_type": "visual",
+            "scope": "project",
+            "target_id": "",
+            "start_frame": 0,
+            "end_frame_exclusive": 300
+          },
+          {
             "lock_type": "visual",
             "scope": "shot",
             "target_id": "shot-001",
@@ -918,8 +932,8 @@
         "target_frame_count": 300,
         "rights_digest": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
       },
-      "plan_sha256": "c79a52e2a3dc420ace1e979af323f77f632b7b9c36a14be36294eb29b1a766b4",
-      "preimage": "narralens-history-restore-plan-v1\n{\"affected_consumers\":[{\"action\":\"replace\",\"id\":\"shot-001\",\"kind\":\"visual\"}],\"affected_ranges\":[{\"clip_id\":\"shot-001\",\"end_frame_exclusive\":300,\"start_frame\":0}],\"current_projection_sha256\":\"e60610f99e5a23ae0adc1262e3d0c4da120f563e03859e43851f98c0767cd0c5\",\"current_snapshot_id\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"format\":\"narralens.history-restore-plan@1.0\",\"project_id\":\"of_d1-30s_0123456789abcdef\",\"required_locks\":[{\"end_frame_exclusive\":300,\"lock_type\":\"visual\",\"scope\":\"shot\",\"start_frame\":0,\"target_id\":\"shot-001\"}],\"rights_digest\":\"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff\",\"target_frame_count\":300,\"target_projection_sha256\":\"e92c7df1a0b219c07b2445967150fcbbd0dcd5472f8ff3d62106b78362bb4e8c\",\"target_roots\":[\"film.html\",\"scenes/shot-001.html\"],\"target_snapshot_id\":\"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc\",\"target_subtitles\":[]}"
+      "plan_sha256": "a4c95e43147ca08a6ff2d1393227d327709200623e52bc5513f2abf46b574181",
+      "preimage": "narralens-history-restore-plan-v1\n{\"affected_consumers\":[{\"action\":\"replace\",\"id\":\"shot-001\",\"kind\":\"visual\"}],\"affected_ranges\":[{\"clip_id\":\"shot-001\",\"end_frame_exclusive\":300,\"start_frame\":0}],\"current_projection_sha256\":\"095a02242c29b2a7e180a9ff7bda3ef3be44adef88bb7da7aec53fcf23da1235\",\"current_snapshot_id\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"format\":\"narralens.history-restore-plan@1.0\",\"project_id\":\"of_d1-30s_0123456789abcdef\",\"required_locks\":[{\"end_frame_exclusive\":300,\"lock_type\":\"duration\",\"scope\":\"project\",\"start_frame\":0,\"target_id\":\"\"},{\"end_frame_exclusive\":300,\"lock_type\":\"visual\",\"scope\":\"project\",\"start_frame\":0,\"target_id\":\"\"},{\"end_frame_exclusive\":300,\"lock_type\":\"visual\",\"scope\":\"shot\",\"start_frame\":0,\"target_id\":\"shot-001\"}],\"rights_digest\":\"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff\",\"target_frame_count\":300,\"target_projection_sha256\":\"48476822b5c19eab7b63170e00a199b362e7e9553dc661da554139ca1a38b85d\",\"target_roots\":[\"film.html\",\"scenes/shot-001.html\"],\"target_snapshot_id\":\"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc\",\"target_subtitles\":[]}"
     }
   ]
 }

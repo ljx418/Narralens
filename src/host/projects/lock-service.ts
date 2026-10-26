@@ -155,7 +155,11 @@ export class LockService {
     for (const lock of locks) {
       const match = affected.find((candidate) =>
         candidate.lock_type === lock.lock_type
-        && (lock.scope === "project" || lock.target_id === candidate.target_id)
+        // A project-scoped change intersects every shot lock, just as a project-scoped
+        // held lock intersects every shot change.  The previous one-sided comparison let
+        // a reorder (project impact) pass while another actor held a shot lock.
+        && (lock.scope === "project" || candidate.scope === "project"
+          || lock.target_id === candidate.target_id)
         && overlaps(candidate, { start_frame: lock.start_frame, end_frame_exclusive: lock.end_frame_exclusive }));
       if (match !== undefined) {
         throw new HttpError(423, "TARGET_LOCKED",

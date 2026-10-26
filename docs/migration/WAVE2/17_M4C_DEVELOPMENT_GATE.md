@@ -226,7 +226,7 @@ restore→重开→改中镜→固定上游渲染/decode；证明三个原生 cl
 | M4C-05 | hash | restore plan 10+ golden vectors 双实现一致，字段变异全咬 | 占位 native hash |
 | M4C-06 | impact/NOWRITE | restore impact 201/replay；target/rights/locks/current drift 拒绝且零 active row | stale 授权 |
 | TX-03C | locks | 真实 narration/visual/duration 差异分别命中相应锁 | 少锁或全锁兜底 |
-| TX-04C | graph | subtitle/audio/transition/shared asset 完整分类；未知字段 422 | consumer 漏算 |
+| TX-04C | graph | subtitle/audio/shared asset 完整分类；未知字段 422。当前 `EngineProjection` 不表达 transition，故 transition 为 `NOT_APPLICABLE_APPROVED` 且上游一旦出现未建模字段必须 422 fail closed | consumer 漏算或把未建模 transition 冒充已支持 |
 | TX-05C | race | stale base/source/control/target bytes/rebased 均 revision 0 | TOCTOU commit |
 | TX-07C | idempotency | 同 kind/key/digest 完整重放；异 digest 409；与 adopt key 空间分离 | 二次 stage/revision |
 | TX-08C | crash | 每个边界收敛 committed/aborted/attention，无孤儿进行态 | 猜成功/重复发布 |

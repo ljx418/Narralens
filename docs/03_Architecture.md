@@ -1,7 +1,7 @@
 # 叙镜架构设计 v1.0
 <!-- M2.1_REWORK_BASE_SHA=ee58ab5c6a9d4bbdf05e8ac8a394fd75218cae59 REVIEW_STATUS=PASS -->
 
-文档状态：Gate D1–D3、D4.0 与 D4.1 的历史结论保留。D4.2.1、Wave 1、M3 与 M4A 的历史外审结论保留。**M4B controlled adoption 的独立外审已 PASS**（第十轮，`M4B_EXTERNAL_REVIEW_PASS`，BLOCKER=0 / MAJOR=0；候选 `25df0cb`，捕获 `25df0cb` 的日志由 `docs/evidence/WAVE2/evidence-manifest-m4b.json` 记录，historical 门可复现）。**M4C history restore 已实现**：唯一 versioned restore 路由、Host-only 原子 publisher、单事务 revision/impact/projection/outbox/idempotency、不可变 `history_restore_fact`、逐边界故障矩阵、真实三镜恢复/重开/改单镜/双渲染均已落地。Codex 独立外审对本轮冻结候选的结论是 `NOT PASS`（BLOCKER=1 / MAJOR=5），本轮关闭其 B-01 与 M-01…M-05 后重新形成候选，**独立外审仍待签**，最高声明仍仅为 `M4C_INTERNAL_EVIDENCED`。Gate D4.2、Wave 2 组合、`Gate V1-P0` 与 `V1-Full` 均未关闭；headed/human 为 `NOT_RUN`。
+文档状态：Gate D1–D3、D4.0 与 D4.1 的历史结论保留。D4.2.1、Wave 1、M3 与 M4A 的历史外审结论保留。**M4B controlled adoption 的独立外审已 PASS**（第十轮，`M4B_EXTERNAL_REVIEW_PASS`，BLOCKER=0 / MAJOR=0；候选 `25df0cb`，捕获 `25df0cb` 的日志由 `docs/evidence/WAVE2/evidence-manifest-m4b.json` 记录，historical 门可复现）。**M4C history restore 已实现**：唯一 versioned restore 路由、Host-only 原子 publisher、单事务 revision/impact/projection/outbox/idempotency、不可变 `history_restore_fact`、逐边界故障矩阵、真实三镜恢复/重开/改单镜/双渲染均已落地。Codex 第二轮独立外审结论为 `NOT PASS`（BLOCKER=0 / MAJOR=6）；本轮已逐项返修并通过内部专项复验，但**新候选的独立外审仍待签**，最高声明仍仅为 `M4C_INTERNAL_EVIDENCED`。Gate D4.2、Wave 2 组合、`Gate V1-P0` 与 `V1-Full` 均未关闭；headed/human 为 `NOT_RUN`。
 
 ## 1. 零层架构
 
@@ -185,7 +185,9 @@ Manifest@2，因此 W2.0 必须通过 terminal migration、source tree digest、
 - `POST /api/migration/v1/projects/:id/proposals/:proposalId/materialize`：M3 已实现；target-owned proposal + binding → 持久 Job，不调用远程 provider，成功只到 ready_for_adoption。
 - `GET /api/migration/v1/materializations/:materializationId`：M3 已实现；每次重验 base/source/control/inventory/rights/bytes，变化后只向 stale 收敛。
 - `POST /api/migration/v1/projects/:id/impact`：**M4A 已实现**；请求只带 base/source/control + typed intent + `idempotency_key`，`ImpactRequestV1` 对额外字段 `additionalProperties=false`，客户端自报 ranges/consumers/locks/rights/hash 一律 400。服务端从 committed snapshot、ready materialization、资产/许可、ConsumerGraph 与锁重算，返回 `ImpactSpecV1`（201）。`affected_ranges[].clip_id` 取当前 projection clip id；影响事实取 `ActivatedProjectView`而非 adapter 的 revision 0 占位。canonical/hash 为 `SHA256("narralens-impact-v1\n" + canonical)`，TTL 15 分钟（`now >= expires_at` 即过期，重放不续期）。仅允许同事务写 impact row 与既有 `operation_idempotency` response，无第二幂等权威。**M4C 已实现 `restore_snapshot` intent**：目标由 `HistoricalSnapshotResolver` 从 snapshot 自己的字节证明（同项目、已 committed、在盘、closure 可重算、`source` 不得是链接且其 canonical 路径必须在 snapshot 目录内），绝不用 active source 冒充历史快照；服务端按当前许可与锁重算差异并把 `HistoryRestorePlanV1.plan_sha256` 绑定进 `native_plan_sha256`。
-- `POST /api/migration/v1/projects/:id/edits`：Wave 2 冻结、未实现；仅接收带有效 impact 的 adopt typed edit。
+- `POST /api/migration/v1/projects/:id/edits`：**M4B 已实现并通过第十轮独立外审**；只接收
+  `narralens.adopt-request@1.0`，由 `AdoptionCoordinator` 独占写入，经有效 impact、显式确认、三类锁与
+  currentness 复核后原子发布，revision 恰好 `+1`。它不接受任意 native operation，也不替代 legacy typed-edit 路由。
 - `POST /api/migration/v1/projects/:id/history/restore`：**M4C 已实现**；恢复旧内容但生成新 revision，result snapshot id 复用目标的内容地址。
 - `GET /api/migration/v1/projects/:id/history`：**M4C 已实现**；只读 committed 历史模型。
 - `POST /api/migration/v1/projects/:id/history/undo` 与 `.../redo`：**M4C 已实现**；只返回 typed intent，不写任何东西，仍需新 impact 与显式 approval。

@@ -2,7 +2,8 @@
 新增表、schema arm、route 和 capability 均为 additive。部署回退关闭 restore impact、restore route 与三个 history
 translator 条目；保留 snapshot、fact、transaction、outbox 与历史 commit。内容回退只能再执行一次 HistoryService
 restore，禁止 git reset、数据库 pointer 手改或删除历史行。
-状态：`ACCEPTED_FOR_M4C_IMPLEMENTATION`
+状态：`ACCEPTED_FOR_M4C_IMPLEMENTATION`，其中 D-05/D-06 的实现细化由
+`ADR-W2.0-007-m4c-contract-reconciliation.md` **增补并取代冲突字面**。
 
 日期：2026-10-23
 

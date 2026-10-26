@@ -25,6 +25,7 @@ export type HistoryFaultPoint =
   | "after_target_resolved"
   | "after_plan"
   | "after_stage_copy"
+  | "during_stage_copy"
   | "after_stage"
   | "after_validate"
   | "before_snapshot_publish"
@@ -37,6 +38,7 @@ export type HistoryFaultPoint =
   | "before_film_rename"
   | "after_film_rename"
   | "after_parent_fsync"
+  | "after_published"
   | "after_active_inspect"
   | "before_response"
   | "after_committed";
@@ -69,7 +71,7 @@ export function historyDbFaultPoint(statement: HistoryCommitStatement, phase: "b
 export interface HistoryFaultDescriptor {
   readonly point: HistoryFaultPoint;
   /** Which part of the write the boundary sits in. */
-  readonly stage: "service" | "publisher" | "commit";
+  readonly stage: "service" | "adapter" | "publisher" | "commit";
   readonly description: string;
 }
 
@@ -117,8 +119,8 @@ const FAULT_DESCRIPTORS: readonly HistoryFaultDescriptor[] = Object.freeze([
   { point: "before_response", stage: "service",
     description: "The commit has happened and the response has not been written." },
   { point: "after_committed", stage: "service",
-    description: "The response has been produced." },
-] as HistoryFaultDescriptor[]);
+    description: "The database commit returned; the HTTP response has not yet been sent." },
+] satisfies readonly HistoryFaultDescriptor[]);
 
 export const HISTORY_FAULT_POINTS: readonly HistoryFaultDescriptor[] = FAULT_DESCRIPTORS;
 

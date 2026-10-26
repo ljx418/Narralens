@@ -171,3 +171,24 @@ Codex 外审提出的其余 MINOR（门自身诊断判定与共享规则的分�
 5. M4C 不打开生产 render route，也不冒充完整 TX-12 验收。
 
 禁止声明：Wave 2 组合 PASS、`WAVE2_EDITABLE_ADOPTION_READY`、Gate D4.2、Gate V1-P0、V1-Full、M5/M6、headed/human 已验。
+
+## 8. Codex 第二轮外审返修复验（2026-10-26）
+
+第二轮外审 `m4c-external-review-codex-round2.md` 的 6 项 MAJOR 已逐项进入实现与测试：
+
+1. projection digest 绑定有序 track topology；eligibility 比较顺序、track 与视觉/声音 kind 类；纯重排、
+   重排+内容和 page→sound 均有旧实现必红用例。`LockService` 同时修复“project change 绕过 shot lock”的
+   单向 scope 匹配漏洞。
+2. visual timing/topology 变化均产生非空 affected range；asset consumer 以 clip id 去重。当前 projection 无
+   transition，依 ADR-W2.0-007 与开发门正式记为 `NOT_APPLICABLE_APPROVED`，未知字段继续 422 fail closed。
+3. post-publication recovery 只消费 immutable fact 的 `required_locks`，不再把 affected range 猜成 visual-shot；
+   真实 LockService 证明 narration-only 锁语义。
+4. 保留 40 边界异常矩阵，并新增五个独立子进程 hard-exit：asset temp fsync、asset link、film temp fsync、
+   film rename、DB commit。子进程直接 exit，catch/finally/close 均不执行；父进程递归查 temp 并重启收敛。
+5. `docs/03_Architecture.md` 已把 M4B edits 路由同步为已实现；新增自动文档状态 fitness，覆盖架构、追踪、
+   route inventory 与 ADR/gate。
+6. ADR-W2.0-007 正式裁决 fact 五类增量字段、plan hash/lock 绑定、422 `UNSUPPORTED_EDIT` 与 transition 边界。
+
+外审 MINOR 同批关闭：fault registry union/stage 不再靠 cast 掩盖；`after_committed` 描述改为 response 前；计数统一
+为 22+18=40；旁白豁免增加“仅精确 migration-proven path 可豁免”的负向用例。历史 §0–§7 是上一候选的原始
+内审记录，本节为其 superseding addendum。新证据捕获与独立外审完成前，状态仍是 `REVIEW_PENDING`，不得自签。

@@ -87,10 +87,13 @@ const MUTATIONS: ReadonlyArray<{ name: string; mutate: (plan: HistoryRestorePlan
  */
 function projection(clips: EngineProjection["clips"], subtitles: EngineProjection["subtitles"],
   frameCount: number): EngineProjection {
+  const grouped = new Map<string, string[]>();
+  for (const clip of clips) grouped.set(clip.track_id, [...(grouped.get(clip.track_id) ?? []), clip.clip_id]);
   return {
     engine: "openfilm", engine_upstream_sha: "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
     snapshot_id: sha("9"), project_revision: 2, control_revision: 0, source_digest: sha("9"),
-    fps: { num: 30, den: 1 }, frame_count: frameCount, clips, tracks: [],
+    fps: { num: 30, den: 1 }, frame_count: frameCount, clips,
+    tracks: [...grouped.entries()].map(([track_id, clip_ids], index) => ({ track_id, index, clip_ids })),
     subtitles, asset_references: [], editable_capabilities: { entries: {}, fps: { num: 30, den: 1 }, fps_verified: true },
     preview: { kind: "openfilm-studio", url: "/api/migration/v1/projects/of/preview" },
     problems: [],

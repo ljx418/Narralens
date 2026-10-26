@@ -111,7 +111,10 @@ failures === 0 && pass(`${manifest.commands.length} command logs and exits match
   ]);
   for (const entry of cases) {
     required.delete(entry.case_id);
-    if (entry.status !== "CLOSED") fail(`${entry.case_id} is not CLOSED`);
+    if (entry.status !== "CLOSED"
+      && entry.status !== "CLOSED_WITH_TRANSITION_NOT_APPLICABLE_APPROVED") {
+      fail(`${entry.case_id} is not in an approved closed state`);
+    }
     for (const ref of entry.tests ?? []) {
       const [file, ...rest] = String(ref).split("::");
       if (!existsSync(resolve(root, file))) { fail(`missing test reference: ${ref}`); continue; }

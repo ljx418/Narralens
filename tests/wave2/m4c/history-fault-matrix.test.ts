@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
+import { spawn } from "node:child_process";
 import { readFileSync } from "node:fs";
-import { rm } from "node:fs/promises";
+import { rm, writeFile } from "node:fs/promises";
 import { readFile, readdir } from "node:fs/promises";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
@@ -51,6 +52,11 @@ interface WriteFacts {
   readonly transaction: string | null;
 }
 
+async function recursiveTemps(root: string): Promise<string[]> {
+  const entries = await readdir(root, { recursive: true }).catch(() => [] as string[]);
+  return entries.filter((name) => name.endsWith(".tmp") || name.includes(".film.tmp")).sort();
+}
+
 async function facts(host: NarralensHost, projectId: string, impactId: string): Promise<WriteFacts> {
   const commit = host.revisions.activeCommit(projectId);
   const view = await host.projectResolver.resolveActivated(projectId).catch(() => undefined);
@@ -60,7 +66,7 @@ async function facts(host: NarralensHost, projectId: string, impactId: string): 
     try {
       sourceDigest = createHash("sha256")
         .update(await readFile(join(view.source_root.value, "film.html"))).digest("hex");
-      temp = (await readdir(view.source_root.value)).filter((name) => name.includes(".film.tmp"));
+      temp = await recursiveTemps(view.source_root.value);
     } catch { sourceDigest = null; }
   }
   const impact = host.impacts.get(impactId);
@@ -86,6 +92,25 @@ async function facts(host: NarralensHost, projectId: string, impactId: string): 
     snapshots: counts.snapshots,
     transaction: transactions.at(-1)?.state ?? null,
   };
+}
+
+async function hardExit(base: string, projectId: string, request: unknown, point: string): Promise<void> {
+  const requestPath = join(base, `hard-exit-${point.replaceAll(":", "-")}.json`);
+  await writeFile(requestPath, JSON.stringify(request), "utf8");
+  const worker = join(process.cwd(), "tests/wave2/m4c/history-hard-exit-worker.ts");
+  const exit = await new Promise<number | null>((resolve, reject) => {
+    const child = spawn(process.execPath, ["--import", "tsx", worker, base, projectId, requestPath, point], {
+      cwd: process.cwd(), stdio: ["ignore", "pipe", "pipe"],
+    });
+    let stderr = "";
+    child.stderr.on("data", (chunk) => { stderr += String(chunk); });
+    child.once("error", reject);
+    child.once("exit", (code) => {
+      if (code !== 86 && stderr !== "") process.stderr.write(stderr);
+      resolve(code);
+    });
+  });
+  expect(exit, `child did not hard-exit at ${point}`).toBe(86);
 }
 
 /**
@@ -332,5 +357,82 @@ describe("M4C TX-08C: the fault matrix", () => {
       expect(rows).toBe(1);
       expect(after.idempotency).toBe(before.idempotency + 1);
     }
+  }, 900_000);
+});
+
+describe("M4C TX-08C: real process loss", () => {
+  it.each(["before_asset_install", "after_asset_install"])(
+    "hard-exits a child at %s and sweeps nested asset temporaries", async (point) => {
+      const running = await start();
+      hosts.push(running.host); dirs.push(running.base);
+      const project = await adoptedProject(running, `hard-${point}`);
+
+      // Put the migration snapshot back, then remove the adopted snapshot's immutable
+      // asset. Restoring the adopted snapshot now has to execute the asset publisher.
+      const toOld = await postImpact(running, project.projectId,
+        restoreImpactBody(project.view, project.migrationSnapshot, `hard-old-impact-${point}`));
+      expect(toOld.status, JSON.stringify(toOld.body)).toBe(201);
+      const restoredOld = await postRestore(running, project.projectId, restoreRequestBody(
+        project.view, project.migrationSnapshot,
+        toOld.body as { impact_id: string; impact_hash: string }, `hard-old-restore-${point}`));
+      expect(restoredOld.status, JSON.stringify(restoredOld.body)).toBe(200);
+      const asset = running.host.adoptionFacts.projectionFact(project.adoptedSnapshot)
+        ?.roots.find((root) => /^assets\/[a-f0-9]{64}\/source\.mp4$/u.test(root));
+      expect(asset).toBeTruthy();
+      const current = await running.host.projectResolver.resolveActivated(project.projectId);
+      await rm(join(current.source_root.value, asset!), { force: true });
+
+      const impact = await postImpact(running, project.projectId,
+        restoreImpactBody(current, project.adoptedSnapshot, `hard-impact-${point}`));
+      expect(impact.status, JSON.stringify(impact.body)).toBe(201);
+      const request = restoreRequestBody(current, project.adoptedSnapshot,
+        impact.body as { impact_id: string; impact_hash: string }, `hard-restore-${point}`);
+      const before = await facts(running.host, project.projectId, impact.body.impact_id as string);
+      await running.host.close();
+      hosts.splice(hosts.indexOf(running.host), 1);
+      await hardExit(running.base, project.projectId, request, point);
+
+      const restarted = await startOn(running.base);
+      hosts.push(restarted.host);
+      const after = await facts(restarted.host, project.projectId, impact.body.impact_id as string);
+      expect(after.transaction).toBe("aborted");
+      expect(after.revision).toBe(before.revision);
+      expect(after.pointer).toBe(before.pointer);
+      expect(after.temp).toEqual([]);
+      expect(await recursiveTemps(join(running.base, "adoption-stage"))).toEqual([]);
+      expect(after.outbox).toBe(before.outbox);
+      expect(after.idempotency).toBe(before.idempotency + 1);
+      expect(after.snapshots).toBe(before.snapshots);
+    }, 900_000);
+
+  it.each([
+    "after_film_temp_fsync",
+    "after_film_rename",
+    "after_db_statement:transaction",
+  ])("hard-exits a child at %s and recovers from durable state only", async (point) => {
+    const running = await start();
+    hosts.push(running.host); dirs.push(running.base);
+    const project = await adoptedProject(running, `hard-${point.replaceAll(":", "-")}`);
+    const impact = await postImpact(running, project.projectId,
+      restoreImpactBody(project.view, project.migrationSnapshot, `hard-impact-${point}`));
+    expect(impact.status, JSON.stringify(impact.body)).toBe(201);
+    const request = restoreRequestBody(project.view, project.migrationSnapshot,
+      impact.body as { impact_id: string; impact_hash: string }, `hard-restore-${point}`);
+    const before = await facts(running.host, project.projectId, impact.body.impact_id as string);
+
+    await running.host.close();
+    hosts.splice(hosts.indexOf(running.host), 1);
+    await hardExit(running.base, project.projectId, request, point);
+
+    const restarted = await startOn(running.base);
+    hosts.push(restarted.host);
+    const after = await facts(restarted.host, project.projectId, impact.body.impact_id as string);
+    expect(after.transaction).toBe(point === "after_film_temp_fsync" ? "aborted" : "committed");
+    expect(after.revision).toBe((before.revision ?? 0) + (point === "after_film_temp_fsync" ? 0 : 1));
+    expect(after.temp).toEqual([]);
+    expect(await recursiveTemps(join(running.base, "adoption-stage"))).toEqual([]);
+    expect(after.outbox).toBe(before.outbox + (point === "after_film_temp_fsync" ? 0 : 1));
+    expect(after.idempotency).toBe(before.idempotency + 1);
+    expect(after.snapshots).toBe(before.snapshots);
   }, 900_000);
 });

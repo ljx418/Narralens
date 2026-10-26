@@ -91,6 +91,7 @@ function fail(projectId: string, message: string, details?: Record<string, unkno
  * reproduce it byte for byte from the same rules.
  */
 export function projectionDigest(projection: EngineProjection): string {
+  const tracks = normalizedTrackTopology(projection);
   const document = {
     format: "narralens.history-restore-projection@1.0",
     frame_count: projection.frame_count,
@@ -108,6 +109,10 @@ export function projectionDigest(projection: EngineProjection): string {
         overrides_sha256: clip.overrides_digest,
       }))
       .sort((left, right) => compareUtf8(left.clip_id, right.clip_id)),
+    // Track membership and clip order are rendering facts. Sorting clips by id is useful
+    // for canonical content, but without this ordered topology `[a,b]` and `[b,a]` would
+    // hash alike even though overlapping OpenFilm clips have different stacking semantics.
+    tracks,
     subtitles: [...projection.subtitles]
       .map((subtitle) => ({
         subtitle_id: subtitle.subtitle_id,
@@ -118,6 +123,84 @@ export function projectionDigest(projection: EngineProjection): string {
   };
   return createHash("sha256").update("narralens-history-restore-projection-v1\n")
     .update(canonicalJson(document)).digest("hex");
+}
+
+interface CanonicalTrackTopology {
+  readonly track_id: string;
+  readonly index: number;
+  readonly clip_ids: readonly string[];
+}
+
+/**
+ * The ordered track topology used by both the hash and restore eligibility.
+ *
+ * Production projections carry `tracks`. Synthetic component tests historically omitted
+ * them, so the fallback derives the same structure from clip order rather than treating an
+ * empty test fixture as evidence that order does not exist.
+ */
+function normalizedTrackTopology(projection: EngineProjection): readonly CanonicalTrackTopology[] {
+  if (projection.tracks.length > 0) {
+    return [...projection.tracks]
+      .sort((left, right) => left.index - right.index || compareUtf8(left.track_id, right.track_id))
+      .map((track) => ({ track_id: track.track_id, index: track.index, clip_ids: [...track.clip_ids] }));
+  }
+  const groups = new Map<string, string[]>();
+  for (const clip of projection.clips) {
+    groups.set(clip.track_id, [...(groups.get(clip.track_id) ?? []), clip.clip_id]);
+  }
+  return [...groups.entries()].map(([trackId, clipIds], index) => ({
+    track_id: trackId, index, clip_ids: clipIds,
+  }));
+}
+
+function topologyLocation(projection: EngineProjection): ReadonlyMap<string, string> {
+  const locations = new Map<string, string>();
+  for (const track of normalizedTrackTopology(projection)) {
+    track.clip_ids.forEach((clipId, position) => locations.set(clipId, `${track.index}:${track.track_id}:${position}`));
+  }
+  return locations;
+}
+
+function topologyIsComplete(projection: EngineProjection): boolean {
+  // Empty tracks are supported only as a compatibility shape for old synthetic fixtures;
+  // normalizedTrackTopology derives a complete topology from clip order in that case.
+  const clips = new Map<string, EngineProjection["clips"][number]>();
+  for (const clip of projection.clips) {
+    if (clips.has(clip.clip_id)) return false;
+    clips.set(clip.clip_id, clip);
+  }
+  const seen = new Set<string>();
+  for (const track of normalizedTrackTopology(projection)) {
+    for (const clipId of track.clip_ids) {
+      const clip = clips.get(clipId);
+      if (clip === undefined || clip.track_id !== track.track_id || seen.has(clipId)) return false;
+      seen.add(clipId);
+    }
+  }
+  return seen.size === clips.size;
+}
+
+function sameTrackTopology(current: EngineProjection, target: EngineProjection): boolean {
+  if (!topologyIsComplete(current) || !topologyIsComplete(target)) return false;
+  const left = normalizedTrackTopology(current);
+  const right = normalizedTrackTopology(target);
+  if (left.length !== right.length || current.clips.length !== target.clips.length) return false;
+  for (let index = 0; index < left.length; index += 1) {
+    const a = left[index]!;
+    const b = right[index]!;
+    if (a.index !== b.index || a.track_id !== b.track_id || a.clip_ids.length !== b.clip_ids.length) return false;
+    if (a.clip_ids.some((clipId, position) => clipId !== b.clip_ids[position])) return false;
+  }
+  const targetById = new Map(target.clips.map((clip) => [clip.clip_id, clip] as const));
+  for (const clip of current.clips) {
+    const other = targetById.get(clip.clip_id);
+    // `page` and `video` are both visual clips in the lock/consumer model and M4B
+    // legitimately adopts one into the other. Crossing the visual/sound boundary changes
+    // the authority class and is therefore ineligible.
+    if (other === undefined || other.track_id !== clip.track_id
+      || (other.kind === "sound") !== (clip.kind === "sound")) return false;
+  }
+  return true;
 }
 
 /** start, then clip id — total, so the result is a permutation-invariant list. */
@@ -257,7 +340,11 @@ export function buildHistoryRestorePlan(input: HistoryRestorePlanInput,
     input.current.frame_count, input.target.frame_count, 1);
 
   const ranges: Array<HalfOpenRange & { clip_id: string }> = [];
+  const rangeKeys = new Set<string>();
   const addRange = (clipId: string, range: { start_frame: number; end_frame_exclusive: number }): void => {
+    const key = `${clipId}:${range.start_frame}:${range.end_frame_exclusive}`;
+    if (rangeKeys.has(key)) return;
+    rangeKeys.add(key);
     ranges.push({ clip_id: clipId, start_frame: range.start_frame, end_frame_exclusive: range.end_frame_exclusive });
   };
 
@@ -275,16 +362,42 @@ export function buildHistoryRestorePlan(input: HistoryRestorePlanInput,
   // The total frame count is the projection's own statement of the project's length. A
   // change in it is not local to one shot, so it belongs to the project scope.
   const totalFramesChanged = input.current.frame_count !== input.target.frame_count;
+  const currentLocations = topologyLocation(input.current);
+  const targetLocations = topologyLocation(input.target);
+  const reorderedOrRetyped = clipIds.filter((id) => {
+    const current = currentById.get(id);
+    const target = targetById.get(id);
+    if (current === undefined || target === undefined) return false;
+    return current.kind !== target.kind || current.track_id !== target.track_id
+      || currentLocations.get(id) !== targetLocations.get(id);
+  });
   const topologyChanged = added.length > 0 || removed.length > 0
-    || boundaryChanged.length > 0 || totalFramesChanged;
+    || boundaryChanged.length > 0 || reorderedOrRetyped.length > 0 || totalFramesChanged;
 
   if (topologyChanged) {
     addLock(projectLock("visual", projectEnd));
     addLock(projectLock("duration", projectEnd));
+    const rangeIds = new Set([...added, ...removed, ...boundaryChanged, ...reorderedOrRetyped]);
+    // A frame-count-only change is still a visual project change. Name every current visual
+    // clip so the impact cannot display an empty visual range (empty ranges are reserved
+    // for narration/audio-only changes).
+    if (rangeIds.size === 0 && totalFramesChanged) {
+      for (const clip of input.current.clips) if (clip.kind !== "sound") rangeIds.add(clip.clip_id);
+    }
+    for (const clipId of rangeIds) {
+      const clip = currentById.get(clipId) ?? targetById.get(clipId);
+      if (clip !== undefined) addRange(clipId, clip.frame_range);
+    }
   }
 
   // ── the per-clip buckets ────────────────────────────────────────────────────────────
-  const assetUsers = new Map<string, string[]>();
+  const assetUsers = new Map<string, Set<string>>();
+  const addAssetUser = (ref: string, clipId: string): void => {
+    if (!MEDIA_EXTENSIONS.test(ref)) return;
+    const users = assetUsers.get(ref) ?? new Set<string>();
+    users.add(clipId);
+    assetUsers.set(ref, users);
+  };
   const sharedAssetChanged = new Set<string>();
 
   for (const clipId of clipIds) {
@@ -319,8 +432,7 @@ export function buildHistoryRestorePlan(input: HistoryRestorePlanInput,
         addRange(clipId, current.frame_range);
       }
       for (const ref of [current.source_ref, target.source_ref]) {
-        if (!MEDIA_EXTENSIONS.test(ref)) continue;
-        assetUsers.set(ref, [...(assetUsers.get(ref) ?? []), clipId]);
+        addAssetUser(ref, clipId);
       }
       continue;
     }
@@ -329,8 +441,7 @@ export function buildHistoryRestorePlan(input: HistoryRestorePlanInput,
     // an asset used by two clips is *shared* precisely because the other user also depends
     // on it, and the consumer list has to name it.
     for (const ref of [current.source_ref, target.source_ref]) {
-      if (!MEDIA_EXTENSIONS.test(ref)) continue;
-      assetUsers.set(ref, [...(assetUsers.get(ref) ?? []), clipId]);
+      addAssetUser(ref, clipId);
     }
     if (!mediaChanged) continue;
     // A content change is local to the shot: a visual *shot* lock on the current clip's
@@ -367,7 +478,8 @@ export function buildHistoryRestorePlan(input: HistoryRestorePlanInput,
   }
 
   // ── shared assets ───────────────────────────────────────────────────────────────────
-  for (const [ref, users] of assetUsers) {
+  for (const [ref, userSet] of assetUsers) {
+    const users = [...userSet];
     if (users.length < 2) continue;
     // Shared means at least one user survives the restore, so the asset is *relinked* to the
     // surviving clips rather than replaced. With every user changing there is nothing left
@@ -449,14 +561,5 @@ export function buildHistoryRestorePlan(input: HistoryRestorePlanInput,
  * of the difference, and the eligibility rule is a property of this stage.
  */
 export function restoreTargetIsEligible(current: EngineProjection, target: EngineProjection): boolean {
-  if (current.clips.length !== target.clips.length) return false;
-  const targetById = new Map(target.clips.map((clip) => [clip.clip_id, clip] as const));
-  for (const clip of current.clips) {
-    const other = targetById.get(clip.clip_id);
-    if (other === undefined) return false;
-    // The same track: a clip that moved to another track is a different topology, and this
-    // stage does not restore that.
-    if (other.track_id !== clip.track_id) return false;
-  }
-  return true;
+  return sameTrackTopology(current, target);
 }
