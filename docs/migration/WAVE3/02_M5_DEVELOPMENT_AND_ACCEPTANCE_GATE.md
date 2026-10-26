@@ -26,7 +26,7 @@
 3. 采用后刷新 workbench projection/history/revision；同页 NativeTimelineBridge 与 selection 不丢失。
 4. lock 创建/释放真实阻断 impact/adopt/restore；显示本机 owner/reason；History drawer 的 undo/redo 只生成意图，再走 impact/确认。
 5. 409/422/423/428/500/503、cancel/late/stale/attention 均保留草稿并给出准确下一步。
-6. 出门：UX-06..10；至少一条真实 900 帧链完成采用、关闭重开、中镜原生修改、恢复旧 snapshot。
+6. 出门：UX-06..10；至少一条真实 900 帧链完成采用、关闭重开、在原生 timeline 重新选择中镜并受控采用、恢复旧 snapshot。
 
 ### M5C：可访问性、性能与 Headless 体验
 
@@ -50,7 +50,7 @@
 | UX-07 | 录制 D4.1 comparison 有原始 audit/lineage；3 路 proxy 是真实 media events，只有一个音频焦点，离屏暂停 | 把 replay 写成新生成，或图片/mock 冒充视频 |
 | UX-08 | 能力类别来自 server capabilities；Gateway 对未支持 native write 同步 disabled + 服务端 422 | 假按钮、裸 native op 或只禁 UI 不禁绕过 |
 | UX-09 | materialize→impact→confirm→adopt；成功 +1，失败 0，跳过 NOWRITE | UI 直接写 source |
-| UX-10 | 同页原生精修；undo/redo 只生成 restore intent；恢复 +1 | 指针回拨或“200=已撤回” |
+| UX-10 | 同页原生选择/预览 + capability 已支持的受控 adopt/history；undo/redo 只生成 restore intent；恢复 +1 | 裸原生 edit、指针回拨或“200=已撤回” |
 | UX-11 | 键盘、焦点、文本状态、axe、reduced motion、主题、隔离 profile 原生 200% 读回 | headed 自动化、手工 CDP 或 CSS/viewport 缩放冒充 |
 | UX-12 | 人类一分钟定位/比较、十秒找到撤回、理解 impact/错误 | 自动化代签人类判断 |
 | PF-01 | 120 clip 四类操作各 100 样本 p95≤100ms | 丢慢样本/混入 AI 延迟 |
@@ -62,7 +62,8 @@
 - workbench：未知项目、非 terminal migration、binding/commit/ledger 缺失、source/asset drift、路径泄漏；
 - identity/replay：MigrationRow 与 view 不一致、source comparison 属错项目、source shot 无/重复映射、lineage 篡改；
 - locks：extra field、跨项目 id、非法 type/scope/reason/range/target、stale control revision、同 key 异体、重复 release；
-- Studio Gateway：错误 HEAD/dirty/hash、raw key/path 泄漏、伪 Origin、未知写入口、stale native base、rebased bypass；
+- Studio Gateway：错误 HEAD/dirty/hash/接缝签名、raw key/path 泄漏、伪 Origin、未知写入口、stale native base、
+  rebased bypass；Gateway origin 直调 Host 必须 401/403 且 lock/revision/outbox 均不变；
 - proposal/materialize：旧 comparison、缺 binding、取消、晚到、Host 重启、proxy 失败；
 - impact/adopt/restore：过期、hash 篡改、base/source/control/rights 变化、三类锁、并发双击、网络断开后重放；
 - UI：SSE/poll 乱序、组件卸载后晚到、路由切换、浏览器重载、主题与草稿恢复、attention/503。
@@ -83,12 +84,13 @@ impact/idempotency/outbox/locks 前后；只读路径断言全部不变。
 自己创建的浏览器/Host/Gateway；200% 复用 04 §7 的已验证机制；
 禁止读取 `J:\`，禁止网络/provider/付费。缺真实 fixture 或固定上游记 `BLOCKED_ENV`，不得 fallback mock 后宣称 E2E。
 
-若缺固定 checkout、Chrome、ffmpeg 或 fixture，合法终态为 `M5_BLOCKED_ENV`：不得启动人工体验门，不得声明
+若缺固定 checkout、Chrome、ffmpeg、fixture 或固定上游 Studio 接缝/签名，合法终态为 `M5_BLOCKED_ENV`：不得启动人工体验门，不得声明
 `M5_HEADLESS_EVIDENCED`。该状态不是测试 PASS，也不得靠延长超时或选择性摘绿消除。
 
 ## 5. 最低命令与证据
 
-实现时新增实际脚本名，不预言不存在的脚本。最低执行：
+M5A 必须新增 `test:m5` 与 `test:m5:headless` 两个 package scripts；它们在本文冻结时尚不存在，不得在实现前冒充
+已执行。完成实现后的最低执行：
 
 ```bash
 corepack pnpm check

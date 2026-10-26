@@ -9,7 +9,8 @@
 ## 1. 用户结果与范围
 
 用户在一个页面完成：打开已迁移 OpenFilm 项目 → 章节/镜头/语义/时间码定位 → 真实预览与原生 timeline 同步 →
-比较 3–6 个已有 D4.1 提案 → 绑定/素材化 → 查看 server impact → 显式确认采用 → 关闭重开 → 精修中镜 →
+比较 3–6 个已有 D4.1 提案 → 绑定/素材化 → 查看 server impact → 显式确认采用 → 关闭重开 → 在原生 Studio
+选择/检查中镜并执行 capability 已支持的受控采用 →
 从 history 生成恢复意图并再次 impact/确认恢复。
 
 M5 不承诺：从空白想法自动下载全部素材、生产 render route、标题 8 个/封面 4 个、preflight、发布包、真实 provider
@@ -33,7 +34,7 @@ NarralensHost ─ WorkbenchProjection / Lock routes（M5A 新增）
               ├─ LockService（三类真实持久锁）
               ├─ Proposal/Materialize/Impact/Adoption
               └─ History intent/Impact/Restore
-              └─ OpenFilmStudioSupervisor / Gateway
+              └─ OpenFilmStudioSupervisor / Gateway（服务端中继；浏览器无 Host bearer）
                   ├─ fixed upstream Studio + StudioHost v1 selection/command bridge
                   ├─ read allowlist / native writes translate-or-block
                   └─ exact-origin session, raw upstream key/path never exposed
@@ -55,7 +56,8 @@ Pinned OpenFilm Studio / preview（唯一原生 timeline 与播放器）
 - 页面 URL 永远使用 target `project_id`；API 请求不得靠 UI 猜 source id。
 
 字段必须按 04 §3 的表绑定：target `project_id` 来自 `ActivatedProjectView.project_id`；source 来自
-`migrated_from` 并与 `MigrationRow.project_id` 互证；clip 与 source shot 只能经 report target_clips 唯一映射。
+`migrated_from` 并与 `MigrationRow.project_id` 互证；clip 与 source shot 按 04 §2/§3 由 source descriptor 和当前 target
+projection 的同 id 不变量互证，禁止读取非持久 report extras 或空 plan identity_map。
 
 M5A 的 workbench read model 必须由 MigrationStore/ProjectResolver 证明映射，不能由 query string 自报。若项目没有
 terminal migration、binding、active commit 或 ledger，页面显示明确 blocked 状态，不降级到 legacy 编辑器冒充成功。
@@ -174,7 +176,7 @@ revision 改变后，旧 selection 只在 clip identity 仍存在且范围合法
 
 - 409：显示 base/current，保留草稿，动作是重新加载并重新计算；
 - 422：展示缺素材/不支持能力/无差异，绝不展示可采用；
-- 423：展示 visual/narration/duration、owner/reason，允许有权限者显式释放；
+- 423：展示 visual/narration/duration、owner/reason，允许当前本地操作者显式释放；
 - 428：展示 impact 过期或缺批准，重新计算，不静默复用；
 - 500 粘滞失败：同 idempotency key 重放同一失败；UI 明示失败已绑定本次请求，只有用户明确“新建一次请求”才生成新 key；
 - 503：草稿保留、手动重试；瞬时错误不显示 permanent drift；
@@ -185,7 +187,8 @@ revision 改变后，旧 selection 只在 clip identity 仍存在且范围合法
 - 现有深色暖黑/琥珀主色作为默认，补齐浅色与 system；主题切换必须保存偏好。
 - 4px 基础 spacing；文本至少 12/14/16/20/28px 层级；焦点环不依赖颜色变化。
 - 本节的尺寸与断点明确取代批准原型 HTML 中的 230px/1100px/720px 实现数值，但不取代其信息架构与视觉语言。
-- 桌面 1440×900：左导航 240–300px，中预览自适应，右面板 340–420px，底部 timeline 180–260px；无页面级横溢出。
+- 桌面 1440×900：左导航 240–300px，中预览自适应，右面板 340–420px，底部原生 Studio 面板（含唯一原生
+  timeline）180–260px；无页面级横溢出。原型 HTML 的自绘 `.timeline/.tracks/.clip/.playhead` 网格被本合同取代。
 - 1024–1439：右面板可折叠为 drawer；768–1023：左导航和 inspector 互斥 drawer；小于 768 只提供审阅/轻操作，
   原生精剪明确要求更宽视口，不把控件压成不可用。
 - 动效 180–240ms，Story Atlas 展开不超过 420ms；播放头不缓动；`prefers-reduced-motion` 关闭装饰动画。
