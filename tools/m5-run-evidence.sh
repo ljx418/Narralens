@@ -47,9 +47,13 @@ run() {
   [ "$code" -eq 0 ] || overall=1
 }
 
-# The pinned OpenFilm checkout, for the probe and for anything that reads it. It is the
-# same path the Host's own composition reads.
-export NARRALENS_OPENFILM_VENDOR="${NARRALENS_OPENFILM_VENDOR:-/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b}"
+# The pinned OpenFilm checkout is *not* exported for the whole capture.
+#
+# The suites that need it set it themselves (the Wave 2 harness does), and the ones that
+# do not — the legacy Host HTTP suite, the composition suite — must not pay for verifying
+# a checkout they never read: the verification runs `git status` in the upstream tree on
+# the Windows drive, and a second of it per Host start is enough to push a test with the
+# default five-second timeout over the line. The probe resolves the checkout itself.
 
 echo "== M5 capture at ${CAPTURE_SHA:0:7} (dirty=$DIRTY) =="
 run check             corepack pnpm check
