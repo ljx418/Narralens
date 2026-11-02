@@ -6,6 +6,7 @@ import {
 } from "./cases.js";
 import { startBrowser, startEnvironment, writeEvidence, REPO, type HeadlessBrowser, type HeadlessEnvironment } from "./environment.js";
 import { ux07, ux09, ux10 } from "./closed-loop.js";
+import { recordWritePaths } from "./write-paths.js";
 import { CdpSession } from "./cdp.js";
 import { findChrome, makeProfile } from "./chrome.js";
 
@@ -135,6 +136,36 @@ try {
   // repository's existing D4.2.1 script, and read back from the page: the device pixel
   // ratio and the layout viewport. Nothing is faked with a device scale factor, a
   // shrunken viewport or a CSS transform.
+  // The human gate is a case too: it is recorded as NOT_RUN, with the reason, so that a
+  // reader sees it was *considered* and not simply forgotten.
+  results.push({
+    case_id: "UX-12", title: "人类一分钟定位/比较、十秒找到恢复、理解 impact 与错误",
+    status: "NOT_RUN",
+    assertions: [{
+      claim: "项目负责人亲自走一遍并签署",
+      ok: false,
+      detail: "人工体验门：自动化不得代签。项目负责人尚未执行，UX-12 保持 HUMAN_NOT_RUN。",
+    }],
+    facts: { human_gate: "HUMAN_NOT_RUN" }, evidence: [],
+  });
+
+  // The write paths, before and after.
+  try {
+    const writeEnv = await startEnvironment();
+    try { await recordWritePaths(writeEnv, CAPTURE_ROOT); }
+    finally { await writeEnv.close(); }
+  } catch (error) {
+    results.push({
+      case_id: "WP-01", title: "写路径前后差异记录", status: "FAIL",
+      assertions: [{
+        claim: "写路径的前后差异能够被记录",
+        ok: false,
+        detail: error instanceof Error ? error.message : String(error),
+      }],
+      facts: {}, evidence: [],
+    });
+  }
+
   try {
     await recordZoom(browser, results);
   } catch (error) {
@@ -188,8 +219,13 @@ async function recordZoom(instrument: HeadlessBrowser, results: CaseResult[]): P
   const zoomBrowser = await startBrowser({ profileRoot });
   const chrome = zoomBrowser.chrome;
   const session = zoomBrowser.session;
+  // The 100% baseline, measured in a *plain* profile on the same page: the claim is that
+  // the zoomed layout viewport is about half of the 100% one, and both numbers have to
+  // come from the same page.
+  const plainBrowser = await startBrowser();
   try {
     await session.navigate(`${env.pageUrl}#/refine/${env.projectId}`);
+    await plainBrowser.session.navigate(`${env.pageUrl}#/refine/${env.projectId}`);
     await new Promise((done) => setTimeout(done, 3_000));
     const layout = await session.evaluateWithRetry<Record<string, unknown>>(`({
       device_pixel_ratio: window.devicePixelRatio,
@@ -200,16 +236,23 @@ async function recordZoom(instrument: HeadlessBrowser, results: CaseResult[]): P
       overflow_x: document.documentElement.scrollWidth > window.innerWidth + 1,
       zoom_level: Math.log(window.devicePixelRatio) / Math.log(1.2),
     })`);
-    const baseline = await session.evaluateWithRetry<Record<string, unknown>>(`({
+    const baseline = await plainBrowser.session.evaluateWithRetry<Record<string, unknown>>(`({
       inner_width: window.innerWidth,
+      inner_height: window.innerHeight,
+      device_pixel_ratio: window.devicePixelRatio,
     })`);
+    const zoomedWidth = Number(layout.inner_width);
+    const baselineWidth = Number(baseline.inner_width);
+    const ratio = baselineWidth > 0 ? zoomedWidth / baselineWidth : Number.NaN;
     await writeEvidence(CAPTURE_ROOT, "zoom/native-200.json", `${JSON.stringify({
       mechanism: "isolated Chrome profile native default zoom preference",
       preference: "partition.default_zoom_level.x",
       expected_factor: 2,
       layout,
       baseline,
-      note: "读回自页面本身：devicePixelRatio 与布局视口；没有使用 deviceScaleFactor、缩小 viewport 或 CSS transform。",
+      layout_to_baseline_ratio: ratio,
+      note: "读回自页面本身：devicePixelRatio 与布局视口；没有使用 deviceScaleFactor、缩小 viewport 或 CSS transform。"
+        + " 100% 基线由同一页面的另一个无缩放 profile 测得。",
     }, null, 2)}\n`);
     results.push({
       case_id: "UX-200", title: "原生 200% 页面缩放读回（隔离 profile）",
@@ -218,11 +261,16 @@ async function recordZoom(instrument: HeadlessBrowser, results: CaseResult[]): P
         claim: "DPR=2 且无页面级横向溢出",
         ok: Number(layout.device_pixel_ratio) === 2 && layout.overflow_x === false,
         detail: JSON.stringify(layout),
+      }, {
+        claim: "布局视口约为 100% 的一半（原生缩放，不是缩小的 viewport）",
+        ok: Math.abs(ratio - 0.5) < 0.12,
+        detail: `zoomed=${zoomedWidth} baseline=${baselineWidth} ratio=${ratio}`,
       }],
       facts: { layout }, evidence: [],
     });
   } finally {
     await zoomBrowser.close();
+    await plainBrowser.close();
     await env.close();
   }
 }

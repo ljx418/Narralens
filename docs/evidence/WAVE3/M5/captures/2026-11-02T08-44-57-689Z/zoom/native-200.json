@@ -1,0 +1,18 @@
+{
+  "mechanism": "isolated Chrome profile native default zoom preference",
+  "preference": "partition.default_zoom_level.x",
+  "expected_factor": 2,
+  "layout": {
+    "device_pixel_ratio": 2,
+    "inner_width": 707,
+    "inner_height": 400,
+    "document_width": 707,
+    "document_height": 400,
+    "overflow_x": false,
+    "zoom_level": 3.8017840169239308
+  },
+  "baseline": {
+    "inner_width": 707
+  },
+  "note": "读回自页面本身：devicePixelRatio 与布局视口；没有使用 deviceScaleFactor、缩小 viewport 或 CSS transform。"
+}

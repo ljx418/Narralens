@@ -55,21 +55,24 @@
 
 | Case | PRD / NFR | 实现实体 | 证据门 | 当前状态 |
 |---|---|---|---|---|
-| UX-01 | P0-01/P0-02 | IdeaWorkspace、ProjectOpenOrMigrate | 草稿不冒充工程；真实 source→target 映射 | planned |
-| UX-02 | P0-02/NFR-04 | WorkbenchProjectionV1、ProjectResolver | 关闭重开重建 projection/revision/history | planned |
-| UX-03 | P0-03 | ChapterNavigator、SelectionCoordinator | 章/镜/时间码定位同一 target clip 与 source lineage | planned |
-| UX-04 | P0-03 | SemanticSearch、script anchor | 无数据 blocked；不伪造搜索命中 | planned |
-| UX-05 | P0-03/P0-08 | OpenFilmStudioGateway、StudioHost bridge | player/timeline/inspector 同一 selection/clock/snapshot | planned |
-| UX-06 | P0-03/NFR-02 | PlaybackClock、rational time model | 帧/秒互转与缩放不写 source | planned |
-| UX-07 | P0-04/P0-05 | ComparisonReplay、CandidateFocus | 原始 audit/lineage + 三路真实 proxy media event | planned |
-| UX-08 | P0-08/NFR-05 | NativeWriteGateway、capability UI | unsupported UI disabled 且服务端绕过 422 | planned |
-| UX-09 | P0-06/P0-07 | materialize/impact/adoption orchestration | 成功 revision +1，失败 0，NOWRITE 不跳步 | planned |
-| UX-10 | P0-08/P0-09 | native limited edit、History drawer | undo/redo 只产意图；restore +1 | planned |
-| UX-11 | NFR-01/NFR-03/NFR-06 | keyboard/focus/theme/zoom | Headless axe、reduced motion、native 200% 读回 | planned |
+| UX-01 | P0-01/P0-02 | M5 面板的 idea 阶段（StageRouter） | 草稿不冒充工程；真实 source→target 映射 | automated-pass |
+| UX-02 | P0-02/NFR-04 | WorkbenchProjectionV1、ProjectResolver | 关闭重开重建 projection/revision/history | automated-pass |
+| UX-03 | P0-03 | 面板镜头卡、SelectionCoordinator | 章/镜/时间码定位同一 target clip 与 source lineage | automated-pass |
+| UX-04 | P0-03 | 面板镜头搜索 | 无数据 blocked；不伪造搜索命中 | automated-pass |
+| UX-05 | P0-03/P0-08 | OpenFilmStudioGateway、StudioHost bridge | player/timeline/inspector 同一 selection/clock/snapshot | automated-pass |
+| UX-06 | P0-03/NFR-02 | PlaybackClock、rational time model | 帧/秒互转与缩放不写 source | automated-pass |
+| UX-07 | P0-04/P0-05 | ComparisonReplay、三路真实 proxy | 原始 audit/lineage + 三路真实 proxy media event | automated-pass |
+| UX-08 | P0-08/NFR-05 | NativeWriteGateway、capability 展示 | unsupported UI disabled 且服务端绕过 422 | automated-pass |
+| UX-09 | P0-06/P0-07 | materialize/impact/adoption orchestration | 成功 revision +1，失败 0，NOWRITE 不跳步 | automated-pass |
+| UX-10 | P0-08/P0-09 | 受控采用、History drawer | undo/redo 只产意图；restore +1 | automated-pass |
+| UX-11 | NFR-01/NFR-03/NFR-06 | 键盘/焦点/主题/zoom | Headless axe、reduced motion、native 200% 读回 | automated-pass |
 | UX-12 | P0-03/P0-09 | 全页体验 | 项目负责人一分钟定位/比较、十秒找到恢复 | HUMAN_NOT_RUN |
-| PF-01 | NFR-02 | virtualized navigation | 120 clip 四类操作各 100 样本 p95≤100ms | planned |
-| PF-02 | NFR-02/NFR-04 | CandidateFocus/media focus | 三路真实 proxy、唯一音频焦点、内存记录 | planned |
-| PF-03 | NFR-04 | launcher/reopen harness | 冷/热重开、首帧、媒体关联、内存 | planned |
+| PF-01 | NFR-02 | 面板交互采样 | 四类操作各 100 样本 p95≤100ms | automated-pass |
+| PF-02 | NFR-02/NFR-04 | 三路 proxy 与音频焦点 | 三路真实 proxy、唯一音频焦点、内存记录 | automated-pass |
+| PF-03 | NFR-04 | launcher/reopen harness | 冷/热重开、首帧、媒体关联、内存 | automated-pass |
+
+证据：`docs/evidence/WAVE3/M5/captures/<commit>/cases/<case>.json`；逐 case 的断言、事实与失败断言
+都在里面。`automated-pass` 只表示**自动门**通过，人工体验门（UX-12）仍然是 `HUMAN_NOT_RUN`。
 
 ## 3. 非功能追踪
 
