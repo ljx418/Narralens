@@ -1,0 +1,112 @@
+{
+  "captured_at": "2026-10-26T15:24:16.782Z",
+  "cases": [
+    {
+      "case_id": "UX-01",
+      "status": "PASS",
+      "title": "想法草稿可编辑，打开真实 source→target 映射",
+      "failed_assertions": []
+    },
+    {
+      "case_id": "UX-02",
+      "status": "PASS",
+      "title": "关闭重开后 projection/revision/history 可重建",
+      "failed_assertions": []
+    },
+    {
+      "case_id": "UX-03",
+      "status": "PASS",
+      "title": "章节/镜头/时间码定位同一 target clip 与范围，并显示唯一 source shot lineage",
+      "failed_assertions": []
+    },
+    {
+      "case_id": "UX-04",
+      "status": "PASS",
+      "title": "语义结果同时带 clip 与半开范围；无数据时诚实 blocked",
+      "failed_assertions": []
+    },
+    {
+      "case_id": "UX-05",
+      "status": "PASS",
+      "title": "原生 StudioHost bridge 让 navigator/player/timeline 共享 selection/clock/snapshot",
+      "failed_assertions": []
+    },
+    {
+      "case_id": "UX-06",
+      "status": "FAIL",
+      "title": "帧↔seconds 使用冻结 rational time model；定位不改变 source",
+      "failed_assertions": [
+        "Shift+方向是 1 秒 = 30 帧（冻结 rational fps）"
+      ]
+    },
+    {
+      "case_id": "UX-07",
+      "status": "PASS",
+      "title": "录制 D4.1 comparison 有原始 audit/lineage；三路 proxy 是真实 media events",
+      "failed_assertions": []
+    },
+    {
+      "case_id": "UX-09",
+      "status": "FAIL",
+      "title": "materialize→impact→confirm→adopt；成功 +1，失败 0",
+      "failed_assertions": [
+        "素材化产出真实的 materialization",
+        "影响由服务端计算并显示 impact_id",
+        "确认后受控采用成功，revision 恰好 +1",
+        "历史随之增长"
+      ]
+    },
+    {
+      "case_id": "UX-10",
+      "status": "FAIL",
+      "title": "UX-10",
+      "failed_assertions": [
+        "该 case 可以被运行"
+      ]
+    },
+    {
+      "case_id": "UX-08",
+      "status": "FAIL",
+      "title": "UX-08",
+      "failed_assertions": [
+        "该 case 可以被运行"
+      ]
+    },
+    {
+      "case_id": "UX-11",
+      "status": "FAIL",
+      "title": "UX-11",
+      "failed_assertions": [
+        "该 case 可以被运行"
+      ]
+    },
+    {
+      "case_id": "PF-01",
+      "status": "FAIL",
+      "title": "PF-01",
+      "failed_assertions": [
+        "该 case 可以被运行"
+      ]
+    },
+    {
+      "case_id": "PF-02",
+      "status": "FAIL",
+      "title": "PF-02",
+      "failed_assertions": [
+        "该 case 可以被运行"
+      ]
+    },
+    {
+      "case_id": "PF-03",
+      "status": "FAIL",
+      "title": "PF-03",
+      "failed_assertions": [
+        "该 case 可以被运行"
+      ]
+    }
+  ],
+  "passed": 6,
+  "failed": 8,
+  "blocked": 0,
+  "not_run": 0
+}

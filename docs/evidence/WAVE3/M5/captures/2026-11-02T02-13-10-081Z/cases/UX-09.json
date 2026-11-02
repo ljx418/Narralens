@@ -1,0 +1,128 @@
+{
+  "run_id": "2026-11-02T02-13-10-081Z",
+  "captured_at": "2026-11-02T02:22:23.562Z",
+  "case_id": "UX-09",
+  "title": "materialize→impact→confirm→adopt；成功 +1，失败 0",
+  "status": "FAIL",
+  "assertions": [
+    {
+      "claim": "素材化产出真实的 materialization",
+      "ok": true,
+      "detail": "materialization=mat_30a42dbcc736424e918d13100f9bdd72"
+    },
+    {
+      "claim": "影响由服务端计算并显示 impact_id",
+      "ok": false,
+      "detail": "impact=null"
+    },
+    {
+      "claim": "确认后受控采用成功，revision 恰好 +1",
+      "ok": false,
+      "detail": "r1 → r1 phase=failed"
+    },
+    {
+      "claim": "历史随之增长",
+      "ok": false,
+      "detail": "1 → 1"
+    }
+  ],
+  "facts": {
+    "chain": {
+      "before": {
+        "phase": "proposal_only",
+        "revision": "1",
+        "history": "1",
+        "locks": "0",
+        "selection": "",
+        "studio": "",
+        "proposals": 3,
+        "recorded": "已录制提案（原始生成审计）· 来源 comparison_m5_recorded_1",
+        "materialization": null,
+        "impact": null,
+        "restoreIntent": null,
+        "error": null,
+        "text": "Narralens 导演面板\n\ntarget of_d1-30s_9bca26e6source d1-30sr1 · c0900 帧 · 旁白 有\n\n仅有已录制提案\n\n镜头与章节\nshot-001源 shot-0010—300 帧\nshot-002源 shot-002300—600 帧\nshot-003源 shot-003600—900 帧\n\n当前选区：— · 播放头 0 帧\n\n三路真实 proxy\n\n三路同时播放，只有一路持有音频焦点；离开视口的一路会暂停。\n\nproxy-a.mp4\nproxy-b.mp4\nproxy-c.mp4\n比较与采用\n已录制的 D4.1 提案复制已录制提案到本工程\n\n已录制提案（原始生成审计）· 来源 comparison_m5_recorded_1\n\n方案 1\n\nrecorded summary\n\n1 段 · anchor\n方案 2\n\nrecorded summary\n\n2 段 · anchor → context\n方案 3\n\nrecorded summary\n\n3 段 · anchor → context → evidence\n素材化计算影响确认采用\n锁\n加项目级画面锁\n历史\nr1 · migration5f069fcb9096…\n准备撤回\n准备重做\n\n撤回与重做只生成恢复意图，仍需计算影响并再次确认。"
+      },
+      "materialized": {
+        "phase": "materializing",
+        "revision": "1",
+        "history": "1",
+        "locks": "0",
+        "selection": "",
+        "studio": "",
+        "proposals": 3,
+        "recorded": "已录制提案（原始生成审计）· 来源 comparison_m5_recorded_1",
+        "materialization": "mat_30a42dbcc736424e918d13100f9bdd72",
+        "impact": null,
+        "restoreIntent": null,
+        "error": null,
+        "text": "Narralens 导演面板\n\ntarget of_d1-30s_9bca26e6source d1-30sr1 · c0900 帧 · 旁白 有\n\n正在素材化\n\n镜头与章节\nshot-001源 shot-0010—300 帧\nshot-002源 shot-002300—600 帧\nshot-003源 shot-003600—900 帧\n\n当前选区：— · 播放头 0 帧\n\n三路真实 proxy\n\n三路同时播放，只有一路持有音频焦点；离开视口的一路会暂停。\n\nproxy-a.mp4\nproxy-b.mp4\nproxy-c.mp4\n比较与采用\n已录制的 D4.1 提案复制已录制提案到本工程\n\n已录制提案（原始生成审计）· 来源 comparison_m5_recorded_1\n\n方案 1\n\nrecorded summary\n\n1 段 · anchor\n方案 2\n\nrecorded summary\n\n2 段 · anchor → context\n方案 3\n\nrecorded summary\n\n3 段 · anchor → context → evidence\n素材化\n\n素材化 mat_30a42dbcc736424e918d13100f9bdd72 · queued\n\n计算影响确认采用\n锁\n加项目级画面锁\n历史\nr1 · migration5f069fcb9096…\n准备撤回\n准备重做\n\n撤回与重做只生成恢复意图，仍需计算影响并再次确认。"
+      },
+      "impacted": {
+        "phase": "failed",
+        "revision": "1",
+        "history": "1",
+        "locks": "0",
+        "selection": "",
+        "studio": "",
+        "proposals": 3,
+        "recorded": "已录制提案（原始生成审计）· 来源 comparison_m5_recorded_1",
+        "materialization": "mat_30a42dbcc736424e918d13100f9bdd72",
+        "impact": null,
+        "restoreIntent": null,
+        "error": "IMPACT_STALE",
+        "text": "Narralens 导演面板\n\ntarget of_d1-30s_9bca26e6source d1-30sr1 · c0900 帧 · 旁白 有\n\n失败\n\nIMPACT_STALE\nThe materialization is stale and can no longer back an authorization\n影响已过期或缺失：请重新计算影响并再次确认。\n镜头与章节\nshot-001源 shot-0010—300 帧\nshot-002源 shot-002300—600 帧\nshot-003源 shot-003600—900 帧\n\n当前选区：— · 播放头 0 帧\n\n三路真实 proxy\n\n三路同时播放，只有一路持有音频焦点；离开视口的一路会暂停。\n\nproxy-a.mp4\nproxy-b.mp4\nproxy-c.mp4\n比较与采用\n已录制的 D4.1 提案复制已录制提案到本工程\n\n已录制提案（原始生成审计）· 来源 comparison_m5_recorded_1\n\n方案 1\n\nrecorded summary\n\n1 段 · anchor\n方案 2\n\nrecorded summary\n\n2 段 · anchor → context\n方案 3\n\nrecorded summary\n\n3 段 · anchor → context → evidence\n素材化\n\n素材化 mat_30a42dbcc736424e918d13100f9bdd72 · queued\n\n计算影响确认采用\n锁\n加项目级画面锁\n历史\nr1 · migration5f069fcb9096…\n准备撤回\n准备重做\n\n撤回与重做只生成恢复意图，仍需计算影响并再次确认。"
+      },
+      "adopted": {
+        "phase": "failed",
+        "revision": "1",
+        "history": "1",
+        "locks": "0",
+        "selection": "",
+        "studio": "",
+        "proposals": 3,
+        "recorded": "已录制提案（原始生成审计）· 来源 comparison_m5_recorded_1",
+        "materialization": "mat_30a42dbcc736424e918d13100f9bdd72",
+        "impact": null,
+        "restoreIntent": null,
+        "error": "IMPACT_STALE",
+        "text": "Narralens 导演面板\n\ntarget of_d1-30s_9bca26e6source d1-30sr1 · c0900 帧 · 旁白 有\n\n失败\n\nIMPACT_STALE\nThe materialization is stale and can no longer back an authorization\n影响已过期或缺失：请重新计算影响并再次确认。\n镜头与章节\nshot-001源 shot-0010—300 帧\nshot-002源 shot-002300—600 帧\nshot-003源 shot-003600—900 帧\n\n当前选区：— · 播放头 0 帧\n\n三路真实 proxy\n\n三路同时播放，只有一路持有音频焦点；离开视口的一路会暂停。\n\nproxy-a.mp4\nproxy-b.mp4\nproxy-c.mp4\n比较与采用\n已录制的 D4.1 提案复制已录制提案到本工程\n\n已录制提案（原始生成审计）· 来源 comparison_m5_recorded_1\n\n方案 1\n\nrecorded summary\n\n1 段 · anchor\n方案 2\n\nrecorded summary\n\n2 段 · anchor → context\n方案 3\n\nrecorded summary\n\n3 段 · anchor → context → evidence\n素材化\n\n素材化 mat_30a42dbcc736424e918d13100f9bdd72 · queued\n\n计算影响确认采用\n锁\n加项目级画面锁\n历史\nr1 · migration5f069fcb9096…\n准备撤回\n准备重做\n\n撤回与重做只生成恢复意图，仍需计算影响并再次确认。"
+      }
+    },
+    "after": {
+      "phase": "failed",
+      "revision": "1",
+      "history": "1",
+      "locks": "0",
+      "selection": "",
+      "studio": "",
+      "proposals": 3,
+      "recorded": "已录制提案（原始生成审计）· 来源 comparison_m5_recorded_1",
+      "materialization": "mat_30a42dbcc736424e918d13100f9bdd72",
+      "impact": null,
+      "restoreIntent": null,
+      "error": "IMPACT_STALE",
+      "text": "Narralens 导演面板\n\ntarget of_d1-30s_9bca26e6source d1-30sr1 · c0900 帧 · 旁白 有\n\n失败\n\nIMPACT_STALE\nThe materialization is stale and can no longer back an authorization\n影响已过期或缺失：请重新计算影响并再次确认。\n镜头与章节\nshot-001源 shot-0010—300 帧\nshot-002源 shot-002300—600 帧\nshot-003源 shot-003600—900 帧\n\n当前选区：— · 播放头 0 帧\n\n三路真实 proxy\n\n三路同时播放，只有一路持有音频焦点；离开视口的一路会暂停。\n\nproxy-a.mp4\nproxy-b.mp4\nproxy-c.mp4\n比较与采用\n已录制的 D4.1 提案复制已录制提案到本工程\n\n已录制提案（原始生成审计）· 来源 comparison_m5_recorded_1\n\n方案 1\n\nrecorded summary\n\n1 段 · anchor\n方案 2\n\nrecorded summary\n\n2 段 · anchor → context\n方案 3\n\nrecorded summary\n\n3 段 · anchor → context → evidence\n素材化\n\n素材化 mat_30a42dbcc736424e918d13100f9bdd72 · queued\n\n计算影响确认采用\n锁\n加项目级画面锁\n历史\nr1 · migration5f069fcb9096…\n准备撤回\n准备重做\n\n撤回与重做只生成恢复意图，仍需计算影响并再次确认。"
+    },
+    "diagnostics": [
+      {
+        "correlation_id": "mat_30a42dbcc736424e918d13100f9bdd72",
+        "stage": "materialize.stale",
+        "kind": "MaterializationOutcome",
+        "message_sha256": "b56edeebd020e4f30c4bfd6d85051fad0db12a3a8b631ca36b89833b7e7eafbb",
+        "message_redacted": "materialize.stale: INTERNAL_ERROR",
+        "context": {
+          "materialization_id": "mat_30a42dbcc736424e918d13100f9bdd72",
+          "job_id": "job_1dcae62f20064b1b95db156c1794df3f",
+          "attempt": "1",
+          "lease_owner": "worker-2870388",
+          "reason": "INTERNAL_ERROR",
+          "boundary": "render",
+          "cause": ""
+        },
+        "at": "2026-11-02T02:14:25.246Z"
+      }
+    ]
+  },
+  "evidence": []
+}

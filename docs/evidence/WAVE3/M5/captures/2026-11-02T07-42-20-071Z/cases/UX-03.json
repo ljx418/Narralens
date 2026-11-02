@@ -1,0 +1,90 @@
+{
+  "run_id": "2026-11-02T07-42-20-071Z",
+  "captured_at": "2026-11-02T07:44:00.826Z",
+  "case_id": "UX-03",
+  "title": "章节/镜头/时间码定位同一 target clip 与范围，并显示唯一 source shot lineage",
+  "status": "PASS",
+  "assertions": [
+    {
+      "claim": "选中第二个镜头",
+      "ok": true,
+      "detail": "clicked=true selection=shot-002"
+    },
+    {
+      "claim": "显示唯一的 source shot lineage（不是互换）",
+      "ok": true,
+      "detail": "panel=shot-002 projection=shot-002"
+    },
+    {
+      "claim": "半开帧范围与目标 clip 一致",
+      "ok": true,
+      "detail": "panel=300-600 projection=300-600"
+    }
+  ],
+  "facts": {
+    "state": {
+      "panel": "ready",
+      "stage": "refine",
+      "phase": "proposal_only",
+      "target": "of_d1-30s_9bca26e6",
+      "revision": "1",
+      "controlRevision": "0",
+      "selectionClip": "shot-002",
+      "selectionSourceShot": "shot-002",
+      "selectionRange": "300-600",
+      "playhead": "300",
+      "locks": "0",
+      "history": "1",
+      "studioSelection": "",
+      "studioSeconds": "0",
+      "errorCode": null,
+      "text": "Narralens 导演面板\n\ntarget of_d1-30s_9bca26e6source d1-30sr1 · c0900 帧 · 旁白 有\n\n仅有已录制提案\n\n镜头与章节\nshot-001源 shot-0010—300 帧\nshot-002源 shot-002300—600 帧\nshot-003源 shot-003600—900 帧\n\n当前选区：shot-002 [300, 600) · 播放头 300 帧 · page\n\n三路真实 proxy\n\n三路同时播放，只有一路持有音频焦点；离开视口的一路会暂停。\n\nproxy-a.mp4\nproxy-b.mp4\nproxy-c.mp4\n比较与采用\n已录制的 D4.1 提案复制已录制提案到本工程素材化计算影响确认采用\n锁\n加项目级画面锁\n历史\nr1 · migration5f069fcb9096…\n准备撤回\n准备重做\n\n撤回与重做只生成恢复意图，仍需计算影响并再次确认。",
+      "proxies": [
+        {
+          "name": "proxy-a.mp4",
+          "focus": "true",
+          "muted": false,
+          "paused": false,
+          "readyState": 4,
+          "currentTime": 0.1426,
+          "duration": 10,
+          "unavailable": null
+        },
+        {
+          "name": "proxy-b.mp4",
+          "focus": "false",
+          "muted": true,
+          "paused": false,
+          "readyState": 4,
+          "currentTime": 0.2147,
+          "duration": 10,
+          "unavailable": null
+        },
+        {
+          "name": "proxy-c.mp4",
+          "focus": "false",
+          "muted": true,
+          "paused": true,
+          "readyState": 4,
+          "currentTime": 0,
+          "duration": 10,
+          "unavailable": null
+        }
+      ],
+      "documentWidth": 1414,
+      "innerWidth": 1414,
+      "devicePixelRatio": 1,
+      "activeElement": "BODY"
+    },
+    "clip": {
+      "clip_id": "shot-002",
+      "track_id": "track_0",
+      "kind": "page",
+      "start_frame": 300,
+      "end_frame_exclusive": 600,
+      "source_shot_id": "shot-002",
+      "source_label": "shot-002"
+    }
+  },
+  "evidence": []
+}

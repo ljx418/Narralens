@@ -11,6 +11,6 @@ import "./m5.css";
  */
 const mount = document.getElementById("narralens-m5-panel");
 if (mount !== null) {
-  mount.setAttribute("data-narralens-panel", "mounted");
+  mount.setAttribute("data-narralens-mount", "mounted");
   createRoot(mount).render(<M5Panel />);
 }

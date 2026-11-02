@@ -7,6 +7,7 @@ import {
 } from "../../src/host/engine/engine-capabilities.js";
 import { ERROR_ALIAS_TABLE, ERROR_ALIAS_VERSION } from "../../src/host/engine/error-alias.js";
 import { validatorFor } from "../../src/contracts/validator.js";
+import { MIGRATION_ROUTE_WHITELIST, migrationRouteGate } from "./migration-route-gate.js";
 import apiErrorSchema from "../../contracts/api-error.schema.json" with { type: "json" };
 import projectResponseSchema from "../../contracts/project-response.schema.json" with { type: "json" };
 
@@ -109,28 +110,18 @@ describe("fitness 6: route activation matches the stage gate", () => {
   const serverSource = readFileSync(resolve(REPO, "src/host/server.ts"), "utf8");
 
   it("6. /api/migration/v1 exposes exactly the routes the current stage froze", () => {
-    const migrationRoutes = [...serverSource.matchAll(/\^\\\/api\\\/migration\\\/v1\\\/([^$]*)\$/gu)].map((match) => match[1]!);
     // M2.1 opened one read route; M2.3 adds migration copy, report and rollback; M3 opens
     // materialize and its read; M4A opens impact; M4B opens the single controlled-adoption
     // edit route; M4C opens the history read model, the controlled restore and the two
-    // history translations. Any other addition has to be justified by its own stage.
-    expect(migrationRoutes).toEqual([
-      "projects\\/([A-Za-z0-9_-]+)\\/engine",
-      "projects\\/([A-Za-z0-9_-]+)\\/migrate-copy",
-      "projects\\/([A-Za-z0-9_-]+)\\/proposals\\/([A-Za-z0-9_-]+)\\/materialize",
-      // M4A opens impact; M4B opens controlled adoption.
-      "projects\\/([A-Za-z0-9_-]+)\\/impact",
-      "projects\\/([A-Za-z0-9_-]+)\\/edits",
-      // M4C opens the history read model, the controlled restore, and the undo and redo
-      // *translations*. The translations return a typed intent and commit nothing.
-      "projects\\/([A-Za-z0-9_-]+)\\/history",
-      "projects\\/([A-Za-z0-9_-]+)\\/history\\/restore",
-      "projects\\/([A-Za-z0-9_-]+)\\/history\\/undo",
-      "projects\\/([A-Za-z0-9_-]+)\\/history\\/redo",
-      "materializations\\/([A-Za-z0-9_-]+)",
-      "migrations\\/([A-Za-z0-9_-]+)",
-      "migrations\\/([A-Za-z0-9_-]+)\\/rollback",
-    ]);
+    // history translations; M5A opens the workbench read model, the two lock routes and
+    // the comparison replay. Any other addition has to be justified by its own stage.
+    //
+    // The list itself lives in `migration-route-gate.ts`, so the three fitness files
+    // cannot drift apart, and the gate is exact in both directions.
+    const gate = migrationRouteGate(serverSource);
+    expect(gate.missing).toEqual([]);
+    expect(gate.unexpected).toEqual([]);
+    expect(gate.actual).toEqual([...MIGRATION_ROUTE_WHITELIST]);
   });
 
   it("6. the write routes this stage does not own are never mounted", () => {

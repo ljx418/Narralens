@@ -1,0 +1,136 @@
+{
+  "run_id": "2026-11-02T07-42-20-071Z",
+  "captured_at": "2026-11-02T08:03:17.518Z",
+  "case_id": "PF-03",
+  "title": "冷/热重开数据一致，首帧/内存/媒体关联记录",
+  "status": "PASS",
+  "assertions": [
+    {
+      "claim": "冷/热重开后数据一致",
+      "ok": true,
+      "detail": "hot r1/h1 cold r1/h1"
+    },
+    {
+      "claim": "重开后的 revision 与 Host 一致",
+      "ok": true,
+      "detail": "panel=1 host=1"
+    },
+    {
+      "claim": "冷启动首帧时间已记录",
+      "ok": true,
+      "detail": "cold=1993ms"
+    }
+  ],
+  "facts": {
+    "hot": {
+      "panel": "ready",
+      "stage": "refine",
+      "phase": "proposal_only",
+      "target": "of_d1-30s_9bca26e6",
+      "revision": "1",
+      "controlRevision": "0",
+      "selectionClip": "",
+      "selectionSourceShot": "",
+      "selectionRange": "",
+      "playhead": "0",
+      "locks": "0",
+      "history": "1",
+      "studioSelection": "",
+      "studioSeconds": "",
+      "errorCode": null,
+      "text": "Narralens 导演面板\n\ntarget of_d1-30s_9bca26e6source d1-30sr1 · c0900 帧 · 旁白 有\n\n仅有已录制提案\n\n镜头与章节\nshot-001源 shot-0010—300 帧\nshot-002源 shot-002300—600 帧\nshot-003源 shot-003600—900 帧\n\n当前选区：— · 播放头 0 帧\n\n三路真实 proxy\n\n三路同时播放，只有一路持有音频焦点；离开视口的一路会暂停。\n\nproxy-a.mp4\nproxy-b.mp4\nproxy-c.mp4\n比较与采用\n已录制的 D4.1 提案复制已录制提案到本工程素材化计算影响确认采用\n锁\n加项目级画面锁\n历史\nr1 · migration5f069fcb9096…\n准备撤回\n准备重做\n\n撤回与重做只生成恢复意图，仍需计算影响并再次确认。",
+      "proxies": [
+        {
+          "name": "proxy-a.mp4",
+          "focus": "true",
+          "muted": false,
+          "paused": false,
+          "readyState": 1,
+          "currentTime": 0,
+          "duration": 10,
+          "unavailable": null
+        },
+        {
+          "name": "proxy-b.mp4",
+          "focus": "false",
+          "muted": true,
+          "paused": false,
+          "readyState": 4,
+          "currentTime": 0.0154,
+          "duration": 10,
+          "unavailable": null
+        },
+        {
+          "name": "proxy-c.mp4",
+          "focus": "false",
+          "muted": true,
+          "paused": true,
+          "readyState": 4,
+          "currentTime": 0.0058,
+          "duration": 10,
+          "unavailable": null
+        }
+      ],
+      "documentWidth": 1414,
+      "innerWidth": 1414,
+      "devicePixelRatio": 1,
+      "activeElement": "BODY"
+    },
+    "cold": {
+      "panel": "ready",
+      "stage": "refine",
+      "phase": "proposal_only",
+      "target": "of_d1-30s_9bca26e6",
+      "revision": "1",
+      "controlRevision": "0",
+      "selectionClip": "",
+      "selectionSourceShot": "",
+      "selectionRange": "",
+      "playhead": "0",
+      "locks": "0",
+      "history": "1",
+      "studioSelection": "",
+      "studioSeconds": "0",
+      "errorCode": null,
+      "text": "Narralens 导演面板\n\ntarget of_d1-30s_9bca26e6source d1-30sr1 · c0900 帧 · 旁白 有\n\n仅有已录制提案\n\n镜头与章节\nshot-001源 shot-0010—300 帧\nshot-002源 shot-002300—600 帧\nshot-003源 shot-003600—900 帧\n\n当前选区：— · 播放头 0 帧\n\n三路真实 proxy\n\n三路同时播放，只有一路持有音频焦点；离开视口的一路会暂停。\n\nproxy-a.mp4\nproxy-b.mp4\nproxy-c.mp4\n比较与采用\n已录制的 D4.1 提案复制已录制提案到本工程素材化计算影响确认采用\n锁\n加项目级画面锁\n历史\nr1 · migration5f069fcb9096…\n准备撤回\n准备重做\n\n撤回与重做只生成恢复意图，仍需计算影响并再次确认。",
+      "proxies": [
+        {
+          "name": "proxy-a.mp4",
+          "focus": "true",
+          "muted": false,
+          "paused": false,
+          "readyState": 4,
+          "currentTime": 1.6769,
+          "duration": 10,
+          "unavailable": null
+        },
+        {
+          "name": "proxy-b.mp4",
+          "focus": "false",
+          "muted": true,
+          "paused": false,
+          "readyState": 4,
+          "currentTime": 1.7123,
+          "duration": 10,
+          "unavailable": null
+        },
+        {
+          "name": "proxy-c.mp4",
+          "focus": "false",
+          "muted": true,
+          "paused": true,
+          "readyState": 4,
+          "currentTime": 0.0854,
+          "duration": 10,
+          "unavailable": null
+        }
+      ],
+      "documentWidth": 1414,
+      "innerWidth": 1414,
+      "devicePixelRatio": 1,
+      "activeElement": "BODY"
+    },
+    "coldMs": 1993
+  },
+  "evidence": []
+}

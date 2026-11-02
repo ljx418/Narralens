@@ -68,7 +68,7 @@ import { ComparisonReplayService } from "./m5/comparison-replay-service.js";
 import { LockMutationService } from "./m5/lock-mutation-service.js";
 import { OpenFilmStudioGateway, type StudioHostService, type StudioOperation } from "./m5/openfilm-studio-gateway.js";
 import { OpenFilmStudioSupervisor, type StartedStudio } from "./m5/openfilm-studio-supervisor.js";
-import { readPanelAssets } from "./m5/panel-assets.js";
+import { mediaFilesFor, readPanelAssets } from "./m5/panel-assets.js";
 import { STUDIO_HOST_BRIDGE_SCRIPT } from "./m5/studio-host-bridge.js";
 import { WorkbenchService } from "./m5/workbench-service.js";
 import type { LockCreateRequestV1 } from "../contracts/wave3-types.js";
@@ -252,6 +252,13 @@ interface HostDependencies {
    * another revision. The default is the same resolution the OpenFilm composition uses.
    */
   openFilmVendorRoot?: string;
+  /**
+   * M5C: the directory the fixture media lives in.
+   *
+   * The Gateway serves exactly the fixture names from here and nothing else, so the
+   * panel can play real media without the Gateway becoming a way to read a directory.
+   */
+  mediaRoot?: string;
 }
 
 export class NarralensHost {
@@ -599,6 +606,7 @@ export class NarralensHost {
           services: this.#studioServices(),
           bridgeScript: STUDIO_HOST_BRIDGE_SCRIPT,
           panelAssets: await readPanelAssets(projectRoot),
+          mediaFiles: mediaFilesFor(dependencies.mediaRoot),
         });
         const origin = await gateway.start();
         this.#m5Gateway = gateway;
@@ -1336,7 +1344,7 @@ export class NarralensHost {
             format: "narralens.materialize-request@1.0",
             comparison_id: body.comparison_id, base_revision: body.base_revision,
             expected_source_digest: body.expected_source_digest, control_revision: body.control_revision,
-            profile: { profile_id: "wave2-proxy-720p30-1v" },
+            profile: { profile_id: "wave2-proxy-720p30-v1" },
             segment_bindings: body.segment_bindings, idempotency_key: body.idempotency_key,
           });
           if (!parsed.ok) {

@@ -1,0 +1,27 @@
+{
+  "run_id": "2026-10-26T14-06-23-156Z",
+  "captured_at": "2026-10-26T14:08:15.088Z",
+  "case_id": "UX-04",
+  "title": "语义结果同时带 clip 与半开范围；无数据时诚实 blocked",
+  "status": "PASS",
+  "assertions": [
+    {
+      "claim": "有数据时命中真实镜头",
+      "ok": true,
+      "detail": "results=1"
+    },
+    {
+      "claim": "无数据时诚实 blocked，不给假命中",
+      "ok": true,
+      "detail": "results=0 blocked=true"
+    }
+  ],
+  "facts": {
+    "found": 1,
+    "empty": {
+      "count": 0,
+      "blocked": true
+    }
+  },
+  "evidence": []
+}

@@ -21,8 +21,10 @@ describe("API contracts", () => {
     // schemas and types so the three cannot drift apart. Exact equality, never `contains`:
     // a registry that quietly gained a contract is exactly the drift this gate is for.
     // 31 through M4B-0, which adds the terminal controlled-write failure response; 33
-    // through M4C, which adds the history read model and the history intent.
-    expect(Object.keys(contractIds)).toHaveLength(33);
+    // through M4C, which adds the history read model and the history intent; 39 through
+    // M5A, which adds the workbench projection, the public lock, the lock mutation
+    // response, the lock request and the two comparison replay contracts.
+    expect(Object.keys(contractIds)).toHaveLength(39);
     // The full registry, named. Together with the count above this is exact equality, so
     // neither a missing nor an extra contract can pass.
     expect([...Object.keys(contractIds)].sort()).toEqual([
@@ -33,6 +35,8 @@ describe("API contracts", () => {
       "impactRequest",
       "adoptRequest", "restoreRequest", "controlledWriteResponse", "controlledWriteFailure",
       "history", "historyIntent",
+      "workbench", "publicLock", "lockMutationResponse", "lockRequest",
+      "comparisonReplayRequest", "comparisonReplayResponse",
     ].sort());
     for (const key of D2_D421_SCHEMA_IDS) expect(contractIds[key]).toBeTypeOf("string");
     expect(contractIds.migrationPlan).toBe("https://narralens.local/schemas/migration-plan.schema.json");

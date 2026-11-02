@@ -23,3 +23,20 @@ export async function readPanelAssets(root: string): Promise<PanelAssets | undef
   const styles = await readFile(resolve(root, "dist/m5/narralens-panel.css"), "utf8").catch(() => "");
   return { script, styles };
 }
+
+/**
+ * The media the panel may play, by name.
+ *
+ * The allowlist is exact and the names are the fixture set's own, so the Gateway serves
+ * exactly the files the M5C evidence recorded and nothing else.
+ */
+export const M5_MEDIA_FILES = [
+  "proxy-a.mp4", "proxy-b.mp4", "proxy-c.mp4", "system-3min.mp4", "stress-120clips.mp4",
+] as const;
+
+export function mediaFilesFor(root: string | undefined): Record<string, string> {
+  if (root === undefined) return {};
+  const files: Record<string, string> = {};
+  for (const name of M5_MEDIA_FILES) files[name] = resolve(root, name);
+  return files;
+}

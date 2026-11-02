@@ -191,6 +191,24 @@ Manifest@2，因此 W2.0 必须通过 terminal migration、source tree digest、
 - `POST /api/migration/v1/projects/:id/history/restore`：**M4C 已实现**；恢复旧内容但生成新 revision，result snapshot id 复用目标的内容地址。
 - `GET /api/migration/v1/projects/:id/history`：**M4C 已实现**；只读 committed 历史模型。
 - `POST /api/migration/v1/projects/:id/history/undo` 与 `.../redo`：**M4C 已实现**；只返回 typed intent，不写任何东西，仍需新 impact 与显式 approval。
+- `GET /api/migration/v1/projects/:id/workbench`：**M5A 已实现**；只读投影，接缝固定为
+  `ProjectResolver.resolveActivated(target)` → `ActivatedProjectionService.layoutFor(view)` → `EnginePort.inspect()`；
+  不用 legacy catalog 解析 target，不读 report 的 `target_clips` 或 plan 的空 `identity_map`；
+  `project_id` 是 target、`source_project_id` 是 `migrated_from`（与 `MigrationRow.project_id` 互证）；
+  `preview` 由 Workbench serializer 整体替换为 Gateway descriptor，不透传 adapter 的 404 占位。
+- `POST /api/migration/v1/projects/:id/locks` 与 `DELETE .../locks/:lock_id`：**M5A 已实现**；
+  锁类型闭合为 visual/narration/duration，scope 为 project/shot，`reason_code` 闭合枚举；
+  owner 由安装期持久化的 `host_identity` 派生，API 只公开固定 label，不公开 UUID；
+  `base_control_revision` 严格 CAS，比较、lock 行、`control_revision +1` 与 `lock.changed` outbox 在同一
+  `BEGIN IMMEDIATE` 内，CAS 失败零 lock/outbox 变化；跨项目 lock id 一律 404；同 key 同体重放相同响应、异体 409。
+- `POST /api/migration/v1/projects/:id/comparisons/replay`：**M5A 已实现**；只把既有 D4.1 已录制 comparison
+  复制成带 lineage 的 target-owned immutable comparison，不调用 Runner/provider、不改 source/revision/
+  active snapshot/ledger；映射由 migrator 的 `clipIdFor` 不变量与当前 target projection 的真实 clip 互证；
+  base revision 必须等于 migration plan 的 source revision，否则 409。
+- `OpenFilm Studio Gateway`：**M5A 已实现**；独立的 127.0.0.1 随机端口 loopback origin，不占用
+  `/api/migration/v1` 路由。浏览器只连 Gateway 同源 API/WS，Gateway 在 NarralensHost composition 内调用
+  受限服务接口；Host 的 Origin allowlist 不加入 Gateway origin，从 Gateway origin 直调 Host 为 401/403 且零副作用；
+  读 allowlist 逐路登记，写 deny-by-default，开放集恰为 OpenFilm capability map 的四条 supported entry。
 - `POST /api/projects/:id/edits`：typed operations + baseRevision → newRevision。
 - `POST /api/projects/:id/renders`：revision + profile → jobId。
 - `POST /api/jobs/:id/cancel`：尽力取消，已产生外部费用如实记录。

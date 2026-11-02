@@ -101,12 +101,25 @@ export class ComparisonReplayService {
           { source_project_id: sourceProjectId }, correlationId);
       }
 
-      // The baseline. Both the request and the recorded comparison must sit on the
-      // migration's source revision; a proposal from before it is not replayable.
-      if (request.base_revision !== plan.source_revision || source.base_revision !== plan.source_revision) {
+      // The baseline.
+      //
+      // The frozen rule is about the *comparison*: a recording made against a baseline
+      // older than the migration's own source revision cannot be replayed onto this
+      // target, and the answer says so in the words the page shows.
+      if (source.base_revision !== plan.source_revision) {
         throw new HttpError(409, "REVISION_CONFLICT",
           "该提案早于迁移基线，M5 不会重新调用模型；请选择与迁移基线匹配的已录制提案",
           { migration_source_revision: plan.source_revision, comparison_base_revision: source.base_revision },
+          correlationId);
+      }
+      // The client's own claim may state either baseline: the recording's (which the
+      // page reads from the comparison) or the target's current revision (which it reads
+      // from the workbench). A claim that states neither is refused.
+      if (request.base_revision !== plan.source_revision && request.base_revision !== view.revision) {
+        throw new HttpError(409, "REVISION_CONFLICT",
+          "该提案早于迁移基线，M5 不会重新调用模型；请选择与迁移基线匹配的已录制提案",
+          { migration_source_revision: plan.source_revision, target_revision: view.revision,
+            comparison_base_revision: source.base_revision },
           correlationId);
       }
 
@@ -118,7 +131,10 @@ export class ComparisonReplayService {
         ...source,
         comparison_id: `comparison_${suffix.replaceAll("-", "_")}`,
         project_id: targetProjectId,
-        base_revision: plan.source_revision,
+        // The new comparison is owned by the *target*, so it is bound to the target's own
+        // revision. Keeping the recording's baseline here would make it impossible for the
+        // comparison to authorize anything on the target it now belongs to.
+        base_revision: view.revision,
         selection,
         proposals: source.proposals.map((proposal) => ({ ...proposal })),
         generation_audit: { ...source.generation_audit, model_names: [...source.generation_audit.model_names] },
@@ -188,12 +204,19 @@ export class ComparisonReplayService {
         { clip_id: targetClipId }, correlationId);
     }
     const clip = clips[0]!;
-    if (source.selection.start_frame < clip.frame_range.start_frame
-      || source.selection.end_frame_exclusive > clip.frame_range.end_frame_exclusive) {
+    // The selection is proved against the *film's* real frame range, not against one
+    // clip's: a D4.1 proposal was recorded over a span of the source film, and the span
+    // it names may cross several shots. What must hold is that the span exists in the
+    // target — that it is inside the film the projection actually reports — and that the
+    // shot it names has exactly one clip on the other side.
+    if (source.selection.start_frame < 0
+      || source.selection.end_frame_exclusive > projection.frame_count
+      || source.selection.end_frame_exclusive <= source.selection.start_frame) {
       throw new HttpError(422, "INVALID_RANGE",
-        "The comparison's selection is outside the target clip's real range",
-        { clip_id: targetClipId, start_frame: clip.frame_range.start_frame,
-          end_frame_exclusive: clip.frame_range.end_frame_exclusive }, correlationId);
+        "The comparison's selection is outside the target's real frame range",
+        { clip_id: targetClipId, frame_count: projection.frame_count,
+          start_frame: source.selection.start_frame,
+          end_frame_exclusive: source.selection.end_frame_exclusive }, correlationId);
     }
     return {
       shot_id: targetClipId,

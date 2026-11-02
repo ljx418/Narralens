@@ -56,6 +56,8 @@ export class SelectionStore extends Store<SelectionContext | null> {
 export interface WorkbenchUiState {
   /** The operator's own words. A draft, and nothing more. */
   readonly intent: string;
+  /** The atlas search box. A query, not a filter over an author timeline. */
+  readonly atlasQuery: string;
   /** Which proposal the operator is looking at. */
   readonly selectedProposalId: string;
   /** Which panel section is open. */
@@ -72,6 +74,7 @@ export interface WorkbenchUiState {
 
 export const INITIAL_WORKBENCH_UI: WorkbenchUiState = {
   intent: "",
+  atlasQuery: "",
   selectedProposalId: "",
   expanded: "atlas",
   focusedId: null,

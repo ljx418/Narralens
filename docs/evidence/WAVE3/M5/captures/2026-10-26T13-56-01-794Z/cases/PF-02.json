@@ -1,0 +1,62 @@
+{
+  "run_id": "2026-10-26T13-56-01-794Z",
+  "captured_at": "2026-10-26T14:01:21.949Z",
+  "case_id": "PF-02",
+  "title": "三路真实 proxy 播放/切焦，无三路同时出声",
+  "status": "PASS",
+  "assertions": [
+    {
+      "claim": "三路 proxy 都是真实可解码的媒体事件",
+      "ok": true,
+      "detail": "{\"count\":3,\"ready\":3,\"playing\":3,\"muted\":2,\"durations\":[10,10,10],\"names\":[\"proxy-a.mp4\",\"proxy-b.mp4\",\"proxy-c.mp4\"]}"
+    },
+    {
+      "claim": "三路同时在播放",
+      "ok": true,
+      "detail": "playing=3"
+    },
+    {
+      "claim": "只有一路持有音频焦点",
+      "ok": true,
+      "detail": "muted=2 afterFocus={\"unmuted\":1,\"focus\":[\"false\",\"true\",\"false\"]}"
+    },
+    {
+      "claim": "内存有记录（无不可控增长）",
+      "ok": true,
+      "detail": "{\"used\":66694024,\"limit\":4395630592}"
+    }
+  ],
+  "facts": {
+    "first": {
+      "count": 3,
+      "ready": 3,
+      "playing": 3,
+      "muted": 2,
+      "durations": [
+        10,
+        10,
+        10
+      ],
+      "names": [
+        "proxy-a.mp4",
+        "proxy-b.mp4",
+        "proxy-c.mp4"
+      ]
+    },
+    "afterFocus": {
+      "unmuted": 1,
+      "focus": [
+        "false",
+        "true",
+        "false"
+      ]
+    },
+    "memory": {
+      "used": 66694024,
+      "limit": 4395630592
+    }
+  },
+  "evidence": [
+    "/mnt/c/workspace/videoworkline/Narralens/docs/evidence/WAVE3/M5/captures/2026-10-26T13-56-01-794Z/performance/pf-02-proxies.json"
+  ]
+}

@@ -14,6 +14,10 @@ import react from "@vitejs/plugin-react";
  */
 export default defineConfig({
   plugins: [react()],
+  // A library build does not define `process.env.NODE_ENV`, and React's bundle reads it
+  // at module scope — so without this the panel throws `process is not defined` before it
+  // ever mounts, and the page silently loses the panel.
+  define: { "process.env.NODE_ENV": JSON.stringify("production") },
   build: {
     outDir: "dist/m5",
     emptyOutDir: true,

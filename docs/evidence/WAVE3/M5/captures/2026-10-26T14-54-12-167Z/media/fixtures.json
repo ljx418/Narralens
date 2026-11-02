@@ -1,0 +1,193 @@
+{
+  "root": "/mnt/c/workspace/videoworkline/Narralens/var/m5-fixtures",
+  "files": [
+    {
+      "kind": "proxy",
+      "name": "proxy-a.mp4",
+      "path": "/mnt/c/workspace/videoworkline/Narralens/var/m5-fixtures/proxy-a.mp4",
+      "command": "ffmpeg -y -v error -i /mnt/c/workspace/videoworkline/Narralens/fixtures/d1-30s/assets/generated/visual-10s.mp4 -t 10 -vf scale=1280:720,fps=30 -c:v libx264 -preset veryfast -pix_fmt yuv420p -an -metadata title=narralens-m5-proxy-1 /mnt/c/workspace/videoworkline/Narralens/var/m5-fixtures/proxy-a.mp4",
+      "sha256": "168a7f899d34cbf5f60be60e36bf6e007ed3da3d8f549a918754f123c9430b98",
+      "bytes": 2946391,
+      "ffprobe": {
+        "programs": [],
+        "streams": [
+          {
+            "index": 0,
+            "codec_name": "h264",
+            "codec_type": "video",
+            "width": 1280,
+            "height": 720,
+            "r_frame_rate": "30/1",
+            "nb_frames": "300"
+          }
+        ],
+        "format": {
+          "duration": "10.000000",
+          "size": "2946391",
+          "bit_rate": "2357112"
+        }
+      },
+      "decoded_frames": 0,
+      "decode_command": "ffmpeg -v error -i /mnt/c/workspace/videoworkline/Narralens/var/m5-fixtures/proxy-a.mp4 -f null -"
+    },
+    {
+      "kind": "proxy",
+      "name": "proxy-b.mp4",
+      "path": "/mnt/c/workspace/videoworkline/Narralens/var/m5-fixtures/proxy-b.mp4",
+      "command": "ffmpeg -y -v error -i /mnt/c/workspace/videoworkline/Narralens/fixtures/d1-30s/assets/generated/visual-10s.mp4 -t 10 -vf scale=854:480,fps=30 -c:v libx264 -preset veryfast -pix_fmt yuv420p -an -metadata title=narralens-m5-proxy-2 /mnt/c/workspace/videoworkline/Narralens/var/m5-fixtures/proxy-b.mp4",
+      "sha256": "55e65de352c810524d98c200f8878e8c78d6ad43fba514c6a24cb0cda4bc0d8c",
+      "bytes": 760094,
+      "ffprobe": {
+        "programs": [],
+        "streams": [
+          {
+            "index": 0,
+            "codec_name": "h264",
+            "codec_type": "video",
+            "width": 854,
+            "height": 480,
+            "r_frame_rate": "30/1",
+            "nb_frames": "300"
+          }
+        ],
+        "format": {
+          "duration": "10.000000",
+          "size": "760094",
+          "bit_rate": "608075"
+        }
+      },
+      "decoded_frames": 0,
+      "decode_command": "ffmpeg -v error -i /mnt/c/workspace/videoworkline/Narralens/var/m5-fixtures/proxy-b.mp4 -f null -"
+    },
+    {
+      "kind": "proxy",
+      "name": "proxy-c.mp4",
+      "path": "/mnt/c/workspace/videoworkline/Narralens/var/m5-fixtures/proxy-c.mp4",
+      "command": "ffmpeg -y -v error -i /mnt/c/workspace/videoworkline/Narralens/fixtures/d1-30s/assets/generated/visual-alt-10s.mp4 -t 10 -vf scale=640:360,fps=30 -c:v libx264 -preset veryfast -pix_fmt yuv420p -an -metadata title=narralens-m5-proxy-3 /mnt/c/workspace/videoworkline/Narralens/var/m5-fixtures/proxy-c.mp4",
+      "sha256": "e39e84d77e39c30c9953d320c36894f6e32db8d00a40602e52d6dd8b2f7fce78",
+      "bytes": 11893,
+      "ffprobe": {
+        "programs": [],
+        "streams": [
+          {
+            "index": 0,
+            "codec_name": "h264",
+            "codec_type": "video",
+            "width": 640,
+            "height": 360,
+            "r_frame_rate": "30/1",
+            "nb_frames": "300"
+          }
+        ],
+        "format": {
+          "duration": "10.000000",
+          "size": "11893",
+          "bit_rate": "9514"
+        }
+      },
+      "decoded_frames": 0,
+      "decode_command": "ffmpeg -v error -i /mnt/c/workspace/videoworkline/Narralens/var/m5-fixtures/proxy-c.mp4 -f null -"
+    },
+    {
+      "kind": "system-film",
+      "name": "system-3min.mp4",
+      "path": "/mnt/c/workspace/videoworkline/Narralens/var/m5-fixtures/system-3min.mp4",
+      "command": "ffmpeg -y -v error -i /mnt/c/workspace/videoworkline/Narralens/var/m5-fixtures/proxy-a.mp4 -filter_complex [0:v]trim=start=0.00:duration=7.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v0];[0:v]trim=start=0.25:duration=7.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v1];[0:v]trim=start=0.50:duration=7.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v2];[0:v]trim=start=0.00:duration=7.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v3];[0:v]trim=start=0.25:duration=7.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v4];[0:v]trim=start=0.50:duration=7.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v5];[0:v]trim=start=0.00:duration=7.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v6];[0:v]trim=start=0.25:duration=7.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v7];[0:v]trim=start=0.50:duration=7.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v8];[0:v]trim=start=0.00:duration=7.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v9];[0:v]trim=start=0.25:duration=7.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v10];[0:v]trim=start=0.50:duration=7.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v11];[0:v]trim=start=0.00:duration=7.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v12];[0:v]trim=start=0.25:duration=7.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v13];[0:v]trim=start=0.50:duration=7.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v14];[0:v]trim=start=0.00:duration=7.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v15];[0:v]trim=start=0.25:duration=7.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v16];[0:v]trim=start=0.50:duration=7.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v17];[0:v]trim=start=0.00:duration=7.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v18];[0:v]trim=start=0.25:duration=7.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v19];[0:v]trim=start=0.50:duration=7.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v20];[0:v]trim=start=0.00:duration=7.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v21];[0:v]trim=start=0.25:duration=7.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v22];[0:v]trim=start=0.50:duration=7.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v23];[v0][v1][v2][v3][v4][v5][v6][v7][v8][v9][v10][v11][v12][v13][v14][v15][v16][v17][v18][v19][v20][v21][v22][v23]concat=n=24:v=1:a=0[out] -map [out] -c:v libx264 -preset veryfast -pix_fmt yuv420p -r 30 -an /mnt/c/workspace/videoworkline/Narralens/var/m5-fixtures/system-3min.mp4",
+      "sha256": "d8f6ee8114ea62e67d203a252c59975ed2da29018208cc0159a8af007e0935e4",
+      "bytes": 6491119,
+      "ffprobe": {
+        "programs": [],
+        "streams": [
+          {
+            "index": 0,
+            "codec_name": "h264",
+            "codec_type": "video",
+            "width": 640,
+            "height": 360,
+            "r_frame_rate": "30/1",
+            "nb_frames": "5400"
+          }
+        ],
+        "format": {
+          "duration": "180.000000",
+          "size": "6491119",
+          "bit_rate": "288494"
+        }
+      },
+      "decoded_frames": 0,
+      "decode_command": "ffmpeg -v error -i /mnt/c/workspace/videoworkline/Narralens/var/m5-fixtures/system-3min.mp4 -f null -"
+    },
+    {
+      "kind": "stress-film",
+      "name": "stress-120clips.mp4",
+      "path": "/mnt/c/workspace/videoworkline/Narralens/var/m5-fixtures/stress-120clips.mp4",
+      "command": "ffmpeg -y -v error -i /mnt/c/workspace/videoworkline/Narralens/var/m5-fixtures/proxy-b.mp4 -filter_complex [0:v]trim=start=0.00:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v0];[0:v]trim=start=0.25:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v1];[0:v]trim=start=0.50:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v2];[0:v]trim=start=0.00:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v3];[0:v]trim=start=0.25:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v4];[0:v]trim=start=0.50:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v5];[0:v]trim=start=0.00:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v6];[0:v]trim=start=0.25:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v7];[0:v]trim=start=0.50:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v8];[0:v]trim=start=0.00:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v9];[0:v]trim=start=0.25:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v10];[0:v]trim=start=0.50:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v11];[0:v]trim=start=0.00:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v12];[0:v]trim=start=0.25:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v13];[0:v]trim=start=0.50:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v14];[0:v]trim=start=0.00:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v15];[0:v]trim=start=0.25:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v16];[0:v]trim=start=0.50:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v17];[0:v]trim=start=0.00:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v18];[0:v]trim=start=0.25:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v19];[0:v]trim=start=0.50:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v20];[0:v]trim=start=0.00:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v21];[0:v]trim=start=0.25:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v22];[0:v]trim=start=0.50:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v23];[0:v]trim=start=0.00:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v24];[0:v]trim=start=0.25:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v25];[0:v]trim=start=0.50:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v26];[0:v]trim=start=0.00:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v27];[0:v]trim=start=0.25:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v28];[0:v]trim=start=0.50:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v29];[0:v]trim=start=0.00:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v30];[0:v]trim=start=0.25:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v31];[0:v]trim=start=0.50:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v32];[0:v]trim=start=0.00:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v33];[0:v]trim=start=0.25:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v34];[0:v]trim=start=0.50:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v35];[0:v]trim=start=0.00:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v36];[0:v]trim=start=0.25:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v37];[0:v]trim=start=0.50:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v38];[0:v]trim=start=0.00:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v39];[0:v]trim=start=0.25:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v40];[0:v]trim=start=0.50:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v41];[0:v]trim=start=0.00:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v42];[0:v]trim=start=0.25:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v43];[0:v]trim=start=0.50:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v44];[0:v]trim=start=0.00:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v45];[0:v]trim=start=0.25:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v46];[0:v]trim=start=0.50:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v47];[0:v]trim=start=0.00:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v48];[0:v]trim=start=0.25:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v49];[0:v]trim=start=0.50:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v50];[0:v]trim=start=0.00:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v51];[0:v]trim=start=0.25:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v52];[0:v]trim=start=0.50:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v53];[0:v]trim=start=0.00:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v54];[0:v]trim=start=0.25:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v55];[0:v]trim=start=0.50:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v56];[0:v]trim=start=0.00:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v57];[0:v]trim=start=0.25:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v58];[0:v]trim=start=0.50:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v59];[0:v]trim=start=0.00:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v60];[0:v]trim=start=0.25:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v61];[0:v]trim=start=0.50:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v62];[0:v]trim=start=0.00:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v63];[0:v]trim=start=0.25:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v64];[0:v]trim=start=0.50:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v65];[0:v]trim=start=0.00:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v66];[0:v]trim=start=0.25:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v67];[0:v]trim=start=0.50:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v68];[0:v]trim=start=0.00:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v69];[0:v]trim=start=0.25:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v70];[0:v]trim=start=0.50:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v71];[0:v]trim=start=0.00:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v72];[0:v]trim=start=0.25:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v73];[0:v]trim=start=0.50:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v74];[0:v]trim=start=0.00:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v75];[0:v]trim=start=0.25:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v76];[0:v]trim=start=0.50:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v77];[0:v]trim=start=0.00:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v78];[0:v]trim=start=0.25:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v79];[0:v]trim=start=0.50:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v80];[0:v]trim=start=0.00:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v81];[0:v]trim=start=0.25:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v82];[0:v]trim=start=0.50:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v83];[0:v]trim=start=0.00:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v84];[0:v]trim=start=0.25:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v85];[0:v]trim=start=0.50:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v86];[0:v]trim=start=0.00:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v87];[0:v]trim=start=0.25:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v88];[0:v]trim=start=0.50:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v89];[0:v]trim=start=0.00:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v90];[0:v]trim=start=0.25:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v91];[0:v]trim=start=0.50:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v92];[0:v]trim=start=0.00:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v93];[0:v]trim=start=0.25:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v94];[0:v]trim=start=0.50:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v95];[0:v]trim=start=0.00:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v96];[0:v]trim=start=0.25:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v97];[0:v]trim=start=0.50:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v98];[0:v]trim=start=0.00:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v99];[0:v]trim=start=0.25:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v100];[0:v]trim=start=0.50:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v101];[0:v]trim=start=0.00:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v102];[0:v]trim=start=0.25:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v103];[0:v]trim=start=0.50:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v104];[0:v]trim=start=0.00:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v105];[0:v]trim=start=0.25:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v106];[0:v]trim=start=0.50:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v107];[0:v]trim=start=0.00:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v108];[0:v]trim=start=0.25:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v109];[0:v]trim=start=0.50:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v110];[0:v]trim=start=0.00:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v111];[0:v]trim=start=0.25:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v112];[0:v]trim=start=0.50:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v113];[0:v]trim=start=0.00:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v114];[0:v]trim=start=0.25:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v115];[0:v]trim=start=0.50:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v116];[0:v]trim=start=0.00:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v117];[0:v]trim=start=0.25:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v118];[0:v]trim=start=0.50:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v119];[v0][v1][v2][v3][v4][v5][v6][v7][v8][v9][v10][v11][v12][v13][v14][v15][v16][v17][v18][v19][v20][v21][v22][v23][v24][v25][v26][v27][v28][v29][v30][v31][v32][v33][v34][v35][v36][v37][v38][v39][v40][v41][v42][v43][v44][v45][v46][v47][v48][v49][v50][v51][v52][v53][v54][v55][v56][v57][v58][v59][v60][v61][v62][v63][v64][v65][v66][v67][v68][v69][v70][v71][v72][v73][v74][v75][v76][v77][v78][v79][v80][v81][v82][v83][v84][v85][v86][v87][v88][v89][v90][v91][v92][v93][v94][v95][v96][v97][v98][v99][v100][v101][v102][v103][v104][v105][v106][v107][v108][v109][v110][v111][v112][v113][v114][v115][v116][v117][v118][v119]concat=n=120:v=1:a=0[out] -map [out] -c:v libx264 -preset veryfast -pix_fmt yuv420p -r 30 -an /mnt/c/workspace/videoworkline/Narralens/var/m5-fixtures/stress-120clips.mp4",
+      "sha256": "9b7734d628297f163b995958c3bf97919d1fe93d05911f3ebec71f80ed71e130",
+      "bytes": 1819226,
+      "ffprobe": {
+        "programs": [],
+        "streams": [
+          {
+            "index": 0,
+            "codec_name": "h264",
+            "codec_type": "video",
+            "width": 640,
+            "height": 360,
+            "r_frame_rate": "30/1",
+            "nb_frames": "1800"
+          }
+        ],
+        "format": {
+          "duration": "60.000000",
+          "size": "1819226",
+          "bit_rate": "242563"
+        }
+      },
+      "decoded_frames": 0,
+      "decode_command": "ffmpeg -v error -i /mnt/c/workspace/videoworkline/Narralens/var/m5-fixtures/stress-120clips.mp4 -f null -"
+    }
+  ],
+  "chapters": [
+    {
+      "chapter_id": "chapter_1",
+      "title": "第 1 章",
+      "start_clip": 0,
+      "clip_count": 20
+    },
+    {
+      "chapter_id": "chapter_2",
+      "title": "第 2 章",
+      "start_clip": 20,
+      "clip_count": 20
+    },
+    {
+      "chapter_id": "chapter_3",
+      "title": "第 3 章",
+      "start_clip": 40,
+      "clip_count": 20
+    },
+    {
+      "chapter_id": "chapter_4",
+      "title": "第 4 章",
+      "start_clip": 60,
+      "clip_count": 20
+    },
+    {
+      "chapter_id": "chapter_5",
+      "title": "第 5 章",
+      "start_clip": 80,
+      "clip_count": 20
+    },
+    {
+      "chapter_id": "chapter_6",
+      "title": "第 6 章",
+      "start_clip": 100,
+      "clip_count": 20
+    }
+  ],
+  "claim_limits": [
+    "这些 fixture 只证明系统交互（真实媒体、真实解码、真实帧率），不证明长片内容质量。",
+    "120 clip / 6 章是结构压力用例，不是长片质量证据。",
+    "素材来自仓库内已验证的 fixtures/d1-30s 媒体，由本地 ffmpeg 确定性合成。"
+  ]
+}

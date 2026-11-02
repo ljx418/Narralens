@@ -1,0 +1,98 @@
+{
+  "run_id": "2026-10-26T13-31-50-175Z",
+  "captured_at": "2026-10-26T13:42:57.888Z",
+  "cases": [
+    {
+      "case_id": "UX-01",
+      "status": "FAIL",
+      "title": "UX-01",
+      "failed_assertions": [
+        "该 case 可以被运行"
+      ]
+    },
+    {
+      "case_id": "UX-02",
+      "status": "FAIL",
+      "title": "关闭重开后 projection/revision/history 可重建",
+      "failed_assertions": [
+        "关闭重开后 projection/revision/history 可重建",
+        "重建后的 revision 与 Host 的提交事实一致"
+      ]
+    },
+    {
+      "case_id": "UX-03",
+      "status": "FAIL",
+      "title": "章节/镜头/时间码定位同一 target clip 与范围，并显示唯一 source shot lineage",
+      "failed_assertions": [
+        "选中第二个镜头",
+        "显示唯一的 source shot lineage（不是互换）",
+        "半开帧范围与目标 clip 一致"
+      ]
+    },
+    {
+      "case_id": "UX-04",
+      "status": "PASS",
+      "title": "语义结果同时带 clip 与半开范围；无数据时诚实 blocked",
+      "failed_assertions": []
+    },
+    {
+      "case_id": "UX-05",
+      "status": "FAIL",
+      "title": "原生 StudioHost bridge 让 navigator/player/timeline 共享 selection/clock/snapshot",
+      "failed_assertions": [
+        "原生 Studio 真的回报了选区（onSelection 被调用）"
+      ]
+    },
+    {
+      "case_id": "UX-06",
+      "status": "FAIL",
+      "title": "帧↔seconds 使用冻结 rational time model；定位不改变 source",
+      "failed_assertions": [
+        "逐帧步进是 1 帧（整数帧权威）",
+        "Shift+方向是 1 秒 = 30 帧（冻结 rational fps）"
+      ]
+    },
+    {
+      "case_id": "UX-08",
+      "status": "FAIL",
+      "title": "能力类别来自 server capabilities；Gateway 对未支持 native write 同步 disabled + 422",
+      "failed_assertions": [
+        "未开放的原生写在服务端同步 422（不只是 UI disabled）"
+      ]
+    },
+    {
+      "case_id": "UX-11",
+      "status": "FAIL",
+      "title": "键盘、焦点、文本状态、axe、reduced motion、主题",
+      "failed_assertions": [
+        "axe 无 critical/serious 违规"
+      ]
+    },
+    {
+      "case_id": "PF-01",
+      "status": "FAIL",
+      "title": "PF-01",
+      "failed_assertions": [
+        "该 case 可以被运行"
+      ]
+    },
+    {
+      "case_id": "PF-02",
+      "status": "PASS",
+      "title": "三路真实 proxy 播放/切焦，无三路同时出声",
+      "failed_assertions": []
+    },
+    {
+      "case_id": "PF-03",
+      "status": "FAIL",
+      "title": "冷/热重开数据一致，首帧/内存/媒体关联记录",
+      "failed_assertions": [
+        "重开后的 revision 与 Host 一致"
+      ]
+    }
+  ],
+  "passed": 2,
+  "failed": 9,
+  "blocked": 0,
+  "not_run": 0
+}

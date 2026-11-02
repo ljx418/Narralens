@@ -1,0 +1,16 @@
+{
+  "run_id": "2026-10-26T14-06-23-156Z",
+  "captured_at": "2026-10-26T14:11:43.132Z",
+  "case_id": "PF-01",
+  "title": "PF-01",
+  "status": "FAIL",
+  "assertions": [
+    {
+      "claim": "该 case 可以被运行",
+      "ok": false,
+      "detail": "CDP_EVALUATION_FAILED:TypeError: Cannot read properties of undefined (reading 'click')\n    at <anonymous>:17:72\n    at measure (<anonymous>:12:7)\n    at <anonymous>:17:13\n    at <anonymous>:29:5"
+    }
+  ],
+  "facts": {},
+  "evidence": []
+}

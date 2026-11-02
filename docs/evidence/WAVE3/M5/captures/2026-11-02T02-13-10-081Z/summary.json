@@ -1,0 +1,19 @@
+{
+  "captured_at": "2026-11-02T02:23:04.311Z",
+  "cases": [
+    {
+      "case_id": "UX-09",
+      "status": "FAIL",
+      "title": "materialize→impact→confirm→adopt；成功 +1，失败 0",
+      "failed_assertions": [
+        "影响由服务端计算并显示 impact_id",
+        "确认后受控采用成功，revision 恰好 +1",
+        "历史随之增长"
+      ]
+    }
+  ],
+  "passed": 0,
+  "failed": 1,
+  "blocked": 0,
+  "not_run": 0
+}

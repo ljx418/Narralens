@@ -1,4 +1,5 @@
 import { randomBytes, randomUUID } from "node:crypto";
+import { readFile } from "node:fs/promises";
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from "node:http";
 import type { Duplex } from "node:stream";
 import { openFilmCapabilityMap } from "../engine/engine-capabilities.js";
@@ -78,6 +79,13 @@ export interface OpenFilmStudioGatewayDeps {
   readonly bridgeScript?: string | undefined;
   /** The built M5 panel, when the build has produced one. */
   readonly panelAssets?: { readonly script: string; readonly styles: string } | undefined;
+  /**
+   * The media the panel may play, by name.
+   *
+   * The allowlist is exact: a name that is not in this map is not served, so the Gateway
+   * can never become a way to read a directory.
+   */
+  readonly mediaFiles?: Readonly<Record<string, string>> | undefined;
 }
 
 interface AllowedRead {
@@ -232,6 +240,13 @@ export class OpenFilmStudioGateway {
       return;
     }
 
+    // The media the panel may play. The allowlist is exact: a name that is not in it is
+    // not served, and the Gateway never becomes a way to read a directory.
+    if (path.startsWith("/narralens/media/")) {
+      await this.#media(response, path.slice("/narralens/media/".length));
+      return;
+    }
+
     // The bridge and the panel are the only things the Gateway serves itself.
     if (path.startsWith("/narralens/")) {
       response.writeHead(404, { "content-type": "application/json" });
@@ -358,8 +373,12 @@ export class OpenFilmStudioGateway {
     const projectId = typeof (body as { project_id?: unknown }).project_id === "string"
       ? (body as { project_id: string }).project_id : "";
     const correlationId = randomUUID();
+    // The project id is the Gateway's own addressing, not part of the request the Host
+    // validates: the frozen request contracts forbid an extra field, and `project_id` is
+    // not one of them.
+    const { project_id: _addressing, ...payload } = body as Record<string, unknown>;
     const result = await this.#deps.services.nativeWrite({
-      entry_id: entryId, project_id: projectId, body, correlation_id: correlationId,
+      entry_id: entryId, project_id: projectId, body: payload, correlation_id: correlationId,
     });
     response.writeHead(result.status, { "content-type": "application/json" });
     response.end(JSON.stringify(result.body));
@@ -368,6 +387,27 @@ export class OpenFilmStudioGateway {
   #refuse(response: ServerResponse, status: number, message: string): void {
     response.writeHead(status, { "content-type": "application/json" });
     response.end(JSON.stringify({ error: message }));
+  }
+
+  /** Serve one allowlisted media file. */
+  async #media(response: ServerResponse, name: string): Promise<void> {
+    const files = this.#deps.mediaFiles;
+    const file = files?.[name];
+    if (file === undefined) {
+      this.#refuse(response, 404, "no such media file");
+      return;
+    }
+    const bytes = await readFile(file).catch(() => undefined);
+    if (bytes === undefined) {
+      this.#refuse(response, 404, "no such media file");
+      return;
+    }
+    response.writeHead(200, {
+      "content-type": name.endsWith(".mp4") ? "video/mp4" : "application/octet-stream",
+      "content-length": String(bytes.length),
+      "accept-ranges": "none",
+    });
+    response.end(bytes);
   }
 
   /**

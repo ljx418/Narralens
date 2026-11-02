@@ -1,0 +1,6 @@
+{
+  "run_id": "2026-10-26T12-18-48-752Z",
+  "captured_at": "2026-10-26T12:18:48.801Z",
+  "reason": "Command failed: ffmpeg -y -v error -i /mnt/c/workspace/videoworkline/Narralens/fixtures/d1-30s/assets/generated/visual-10s.mp4 -t 10 -vf scale=1280:720:fps=30 -c:v libx264 -preset veryfast -pix_fmt yuv420p -an -metadata title=narralens-m5-proxy-1 /tmp/narralens-m5-headless-qvwEl4/fixtures/proxy-a.mp4\nError applying option 'fps' to filter 'scale': Option not found\n[vost#0:0/libx264 @ 0x56a014551400] Error initializing a simple filtergraph\nError opening output file /tmp/narralens-m5-headless-qvwEl4/fixtures/proxy-a.mp4.\nError opening output files: Option not found\n",
+  "stage": "M5_BLOCKED_ENV"
+}

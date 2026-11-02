@@ -117,7 +117,10 @@ describe("M5 comparison replay: a recorded comparison, copied onto the target", 
     expect(body.comparison_id).not.toBe(source.comparison_id);
     expect(body.comparison.comparison_id).toBe(body.comparison_id);
     expect(body.comparison.project_id).toBe(projectId);
-    expect(body.comparison.base_revision).toBe(plan.source_revision);
+    // The new comparison is owned by the *target*, so it is bound to the target's own
+    // revision — the recording's baseline is what the lineage carries, not what the new
+    // comparison authorizes against.
+    expect(body.comparison.base_revision).toBe(view.revision);
     // The lineage says exactly where it came from.
     expect(body.lineage.source_comparison_id).toBe(source.comparison_id);
     expect(body.lineage.source_project_id).toBe("d1-30s");

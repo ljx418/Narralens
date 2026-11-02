@@ -1,0 +1,276 @@
+{
+  "run_id": "2026-11-02T01-52-16-589Z",
+  "captured_at": "2026-11-02T02:17:25.953Z",
+  "case_id": "UX-08",
+  "title": "能力类别来自 server capabilities；Gateway 对未支持 native write 同步 disabled + 422",
+  "status": "PASS",
+  "assertions": [
+    {
+      "claim": "能力类别来自服务端 capability map，开放集恰为四条",
+      "ok": true,
+      "detail": "[\"history.redo\",\"history.restore\",\"history.undo\",\"timeline.adopt_materialization\"]"
+    },
+    {
+      "claim": "未开放的原生写在服务端同步 422（不只是 UI disabled）",
+      "ok": true,
+      "detail": "{\"timeline.set_visual_fit\":422,\"timeline.replace_visual_asset\":422,\"timeline.trim\":422,\"history.commit\":422,\"asset.relink\":422}"
+    }
+  ],
+  "facts": {
+    "capabilities": [
+      {
+        "entry_id": "asset.collect",
+        "state": "blocked",
+        "reason": "OpenFilm permits only the controlled adoption and history-restore write paths"
+      },
+      {
+        "entry_id": "asset.delete",
+        "state": "blocked",
+        "reason": "OpenFilm permits only the controlled adoption and history-restore write paths"
+      },
+      {
+        "entry_id": "asset.relink",
+        "state": "blocked",
+        "reason": "OpenFilm permits only the controlled adoption and history-restore write paths"
+      },
+      {
+        "entry_id": "audio.mix.set",
+        "state": "blocked",
+        "reason": "OpenFilm permits only the controlled adoption and history-restore write paths"
+      },
+      {
+        "entry_id": "audio.track.replace",
+        "state": "blocked",
+        "reason": "OpenFilm permits only the controlled adoption and history-restore write paths"
+      },
+      {
+        "entry_id": "autosave.trigger",
+        "state": "blocked",
+        "reason": "OpenFilm permits only the controlled adoption and history-restore write paths"
+      },
+      {
+        "entry_id": "cli.get",
+        "state": "blocked",
+        "reason": "OpenFilm permits only the controlled adoption and history-restore write paths"
+      },
+      {
+        "entry_id": "cli.look",
+        "state": "blocked",
+        "reason": "Observation only; no side effect on author source"
+      },
+      {
+        "entry_id": "cli.open",
+        "state": "blocked",
+        "reason": "OpenFilm permits only the controlled adoption and history-restore write paths"
+      },
+      {
+        "entry_id": "cli.render",
+        "state": "blocked",
+        "reason": "Snapshot-bound export is an M6 capability; M2.1 exposes no render entry"
+      },
+      {
+        "entry_id": "export.create",
+        "state": "blocked",
+        "reason": "OpenFilm permits only the controlled adoption and history-restore write paths"
+      },
+      {
+        "entry_id": "export.delete",
+        "state": "blocked",
+        "reason": "OpenFilm permits only the controlled adoption and history-restore write paths"
+      },
+      {
+        "entry_id": "export.reveal",
+        "state": "blocked",
+        "reason": "A human explicit action that never enters headless automation"
+      },
+      {
+        "entry_id": "filewatch.external_change",
+        "state": "blocked",
+        "reason": "Detects an external change and raises attention; never accepts it automatically"
+      },
+      {
+        "entry_id": "history.branch.delete",
+        "state": "blocked",
+        "reason": "OpenFilm permits only the controlled adoption and history-restore write paths"
+      },
+      {
+        "entry_id": "history.checkout",
+        "state": "blocked",
+        "reason": "OpenFilm permits only the controlled adoption and history-restore write paths"
+      },
+      {
+        "entry_id": "history.commit",
+        "state": "blocked",
+        "reason": "OpenFilm permits only the controlled adoption and history-restore write paths"
+      },
+      {
+        "entry_id": "history.discard",
+        "state": "blocked",
+        "reason": "OpenFilm permits only the controlled adoption and history-restore write paths"
+      },
+      {
+        "entry_id": "history.merge",
+        "state": "blocked",
+        "reason": "OpenFilm permits only the controlled adoption and history-restore write paths"
+      },
+      {
+        "entry_id": "history.redo",
+        "state": "supported",
+        "reason": "M4C resolves a redo to a snapshot and still requires an impact and an explicit approval"
+      },
+      {
+        "entry_id": "history.restore",
+        "state": "supported",
+        "reason": "M4C translates an authorised restore into a new Narralens revision; it never moves the pointer"
+      },
+      {
+        "entry_id": "history.undo",
+        "state": "supported",
+        "reason": "M4C resolves an undo to a snapshot and still requires an impact and an explicit approval"
+      },
+      {
+        "entry_id": "inspector.field.set",
+        "state": "blocked",
+        "reason": "OpenFilm permits only the controlled adoption and history-restore write paths"
+      },
+      {
+        "entry_id": "inspector.style.set",
+        "state": "blocked",
+        "reason": "OpenFilm permits only the controlled adoption and history-restore write paths"
+      },
+      {
+        "entry_id": "markers.put",
+        "state": "blocked",
+        "reason": "Markers are a derived view and never change film content"
+      },
+      {
+        "entry_id": "project.delete",
+        "state": "blocked",
+        "reason": "OpenFilm permits only the controlled adoption and history-restore write paths"
+      },
+      {
+        "entry_id": "project.fetch_remote",
+        "state": "blocked",
+        "reason": "OpenFilm permits only the controlled adoption and history-restore write paths"
+      },
+      {
+        "entry_id": "project.import_template",
+        "state": "blocked",
+        "reason": "OpenFilm permits only the controlled adoption and history-restore write paths"
+      },
+      {
+        "entry_id": "project.move",
+        "state": "blocked",
+        "reason": "OpenFilm permits only the controlled adoption and history-restore write paths"
+      },
+      {
+        "entry_id": "project.open_picker",
+        "state": "blocked",
+        "reason": "OpenFilm permits only the controlled adoption and history-restore write paths"
+      },
+      {
+        "entry_id": "project.rename",
+        "state": "blocked",
+        "reason": "OpenFilm permits only the controlled adoption and history-restore write paths"
+      },
+      {
+        "entry_id": "project.template_apply",
+        "state": "blocked",
+        "reason": "OpenFilm permits only the controlled adoption and history-restore write paths"
+      },
+      {
+        "entry_id": "provider.ask",
+        "state": "blocked",
+        "reason": "OpenFilm permits only the controlled adoption and history-restore write paths"
+      },
+      {
+        "entry_id": "provider.generate",
+        "state": "blocked",
+        "reason": "OpenFilm permits only the controlled adoption and history-restore write paths"
+      },
+      {
+        "entry_id": "provider.get",
+        "state": "blocked",
+        "reason": "OpenFilm permits only the controlled adoption and history-restore write paths"
+      },
+      {
+        "entry_id": "provider.key.delete",
+        "state": "blocked",
+        "reason": "OpenFilm permits only the controlled adoption and history-restore write paths"
+      },
+      {
+        "entry_id": "provider.key.set",
+        "state": "blocked",
+        "reason": "OpenFilm permits only the controlled adoption and history-restore write paths"
+      },
+      {
+        "entry_id": "settings.patch",
+        "state": "blocked",
+        "reason": "OpenFilm permits only the controlled adoption and history-restore write paths"
+      },
+      {
+        "entry_id": "subtitle.line.set",
+        "state": "blocked",
+        "reason": "OpenFilm permits only the controlled adoption and history-restore write paths"
+      },
+      {
+        "entry_id": "subtitle.style.set",
+        "state": "blocked",
+        "reason": "OpenFilm permits only the controlled adoption and history-restore write paths"
+      },
+      {
+        "entry_id": "subtitle.transcribe",
+        "state": "blocked",
+        "reason": "OpenFilm permits only the controlled adoption and history-restore write paths"
+      },
+      {
+        "entry_id": "subtitle.translate",
+        "state": "blocked",
+        "reason": "OpenFilm permits only the controlled adoption and history-restore write paths"
+      },
+      {
+        "entry_id": "timeline.adopt_materialization",
+        "state": "supported",
+        "reason": "M4B translates an authorised materialization into nine closed OpenFilm set operations"
+      },
+      {
+        "entry_id": "timeline.move",
+        "state": "blocked",
+        "reason": "OpenFilm permits only the controlled adoption and history-restore write paths"
+      },
+      {
+        "entry_id": "timeline.replace_visual_asset",
+        "state": "blocked",
+        "reason": "OpenFilm permits only the controlled adoption and history-restore write paths"
+      },
+      {
+        "entry_id": "timeline.set_visual_fit",
+        "state": "blocked",
+        "reason": "OpenFilm permits only the controlled adoption and history-restore write paths"
+      },
+      {
+        "entry_id": "timeline.speed",
+        "state": "blocked",
+        "reason": "OpenFilm permits only the controlled adoption and history-restore write paths"
+      },
+      {
+        "entry_id": "timeline.split",
+        "state": "blocked",
+        "reason": "OpenFilm permits only the controlled adoption and history-restore write paths"
+      },
+      {
+        "entry_id": "timeline.trim",
+        "state": "blocked",
+        "reason": "OpenFilm permits only the controlled adoption and history-restore write paths"
+      }
+    ],
+    "refusals": {
+      "timeline.set_visual_fit": 422,
+      "timeline.replace_visual_asset": 422,
+      "timeline.trim": 422,
+      "history.commit": 422,
+      "asset.relink": 422
+    }
+  },
+  "evidence": []
+}
