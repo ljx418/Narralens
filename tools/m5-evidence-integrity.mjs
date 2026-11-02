@@ -47,6 +47,9 @@ for (const capture of captures) {
 
   // 3. Every file the manifest names is there, with the recorded digest.
   for (const file of manifest.files ?? []) {
+    // The manifest cannot contain its own digest: it is written after its file list is
+    // built. A capture whose manifest was written by an older tool may still name them.
+    if (file.path === "manifest.json" || file.path === "manifest.txt") continue;
     const path = join(directory, file.path);
     if (!existsSync(path)) { note(`${capture}: the manifest names a missing file: ${file.path}`); continue; }
     const digest = createHash("sha256").update(readFileSync(path)).digest("hex");

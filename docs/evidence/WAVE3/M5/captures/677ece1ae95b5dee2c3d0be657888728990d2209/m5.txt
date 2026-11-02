@@ -1,0 +1,55 @@
+
+> narralens@0.1.0 test:m5 /mnt/c/workspace/videoworkline/Narralens
+> vitest run --config vitest.config.ts tests/m5
+
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens
+
+(node:1798661) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m5/studio-gateway.test.ts (8 tests) 148097ms
+   ✓ M5 Studio Gateway: the only origin the browser sees > binds 127.0.0.1 on a random port and answers a rebound Host header with nothing  23961ms
+   ✓ M5 Studio Gateway: the only origin the browser sees > requires its session cookie for the API, and issues it HttpOnly and SameSite  25735ms
+   ✓ M5 Studio Gateway: the only origin the browser sees > answers every page with a no-referrer policy, a self-only CSP and no framing  15645ms
+   ✓ M5 Studio Gateway: the only origin the browser sees > never publishes the project's absolute path  19879ms
+   ✓ M5 Studio Gateway: the only origin the browser sees > refuses every write that the OpenFilm capability map does not open  15176ms
+   ✓ M5 Studio Gateway: the only origin the browser sees > never proxies the upstream's own edit endpoint  16636ms
+   ✓ M5 Studio Gateway: the only origin the browser sees > refuses a write that does not come from the Gateway's own origin  15278ms
+   ✓ M5 Studio Gateway: the only origin the browser sees > refuses a direct call from the Gateway's origin to the Host, and changes nothing  15785ms
+(node:1860901) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m5/locks.test.ts (8 tests) 108896ms
+   ✓ M5 locks: the strict control-revision CAS > creates a lock, moves the control revision and writes exactly one lock.changed row  12523ms
+   ✓ M5 locks: the strict control-revision CAS > refuses a stale base control revision and changes nothing at all  12046ms
+   ✓ M5 locks: the strict control-revision CAS > replays the same response for the same key and refuses a different body under it  12428ms
+   ✓ M5 locks: the strict control-revision CAS > refuses a request that names an owner, a type outside the set, or an extra field  12398ms
+   ✓ M5 locks: the strict control-revision CAS > refuses a shot lock that names no clip, a clip that does not exist, or a range outside it  12769ms
+   ✓ M5 locks: the strict control-revision CAS > refuses a project lock that does not cover the whole film  12717ms
+   ✓ M5 locks: the strict control-revision CAS > answers 404 for a lock id that belongs to another project, and releases its own  16686ms
+   ✓ M5 locks: the strict control-revision CAS > keeps the installation's actor identity across a restart, and never publishes it  17325ms
+(node:1898687) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m5/comparison-replay.test.ts (6 tests) 71105ms
+   ✓ M5 comparison replay: a recorded comparison, copied onto the target > copies the recorded comparison, adds the lineage, and writes nothing else  12746ms
+   ✓ M5 comparison replay: a recorded comparison, copied onto the target > replays the same response for the same key and refuses a different body under it  11717ms
+   ✓ M5 comparison replay: a recorded comparison, copied onto the target > refuses a comparison that belongs to another project  11654ms
+   ✓ M5 comparison replay: a recorded comparison, copied onto the target > refuses a comparison recorded against a baseline before the migration, with the message the page shows  12471ms
+   ✓ M5 comparison replay: a recorded comparison, copied onto the target > refuses a selection that the target's own projection does not carry  11475ms
+   ✓ M5 comparison replay: a recorded comparison, copied onto the target > refuses a request that carries a prompt, and a request that names no key  11039ms
+(node:1922863) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m5/workbench.test.ts (3 tests) 34026ms
+   ✓ M5 workbench: the read model over a real migrated target > publishes the target's own projection, its source lineage and the Gateway's preview  15337ms
+   ✓ M5 workbench: the read model over a real migrated target > publishes no path, no token and no adapter class name  14132ms
+   ✓ M5 workbench: the read model over a real migrated target > refuses a project that was never migrated, and one that does not exist  4554ms
+(node:1944523) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m5/route-fitness.test.ts (4 tests) 4042ms
+   ✓ M5 route fitness: the whitelist grew by four and did not soften > mounts the four M5 routes and refuses their inputs on merit, not with 404  4002ms
+ ✓ tests/m5/contracts.test.ts (9 tests) 74ms
+
+ Test Files  6 passed (6)
+      Tests  38 passed (38)
+   Start at  01:57:50
+   Duration  436.31s (transform 11.68s, setup 0ms, collect 40.08s, tests 366.24s, environment 2ms, prepare 19.95s)
+

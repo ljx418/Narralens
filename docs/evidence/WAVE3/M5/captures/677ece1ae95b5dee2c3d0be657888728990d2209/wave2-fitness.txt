@@ -1,0 +1,83 @@
+
+> narralens@0.1.0 test:wave2:fitness /mnt/c/workspace/videoworkline/Narralens
+> vitest run --config vitest.config.ts tests/architecture tests/wave2/*fitness*
+
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens
+
+(node:1772319) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/wave2/w2-route-fitness.test.ts (8 tests | 3 failed) 32536ms
+   × W2.0 fitness: the unopened Wave 2 routes stay closed > answers 404 for every still-closed Wave 2 path, with no body that looks like a contract 5036ms
+     → Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+   × W2.0 fitness: the unopened Wave 2 routes stay closed > keeps the Wave 1 migration routes answering, so 404 means unmounted and not broken 9047ms
+     → Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+   ✓ W2.0 fitness: the unopened Wave 2 routes stay closed > keeps the EnginePort at exactly seven methods while Wave 2 work is in progress 7ms
+   ✓ W2.0 fitness: the unopened Wave 2 routes stay closed > keeps the /api/migration/v1 route set at exactly the stage-approved routes 9ms
+   × W2.0 fitness: the unopened Wave 2 routes stay closed > mounts the M4B edits and the M4C history routes, and refuses their inputs on merit 5003ms
+     → Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+   ✓ W2.0 fitness: the unopened Wave 2 routes stay closed > answers what OPENED_BY_M3 and OPENED_BY_M4A record, so those lists are assertions  4624ms
+   ✓ W2.0 fitness: the unopened Wave 2 routes stay closed > mounts the impact route and refuses its inputs on merit, not with 404  4513ms
+   ✓ W2.0 fitness: the unopened Wave 2 routes stay closed > mounts the two M3 routes and refuses their inputs on merit, not with 404  4295ms
+ ✓ tests/architecture/m2.2-fitness.test.ts (15 tests) 1970ms
+   ✓ M2.2 fitness: one state machine, no arbitrary state writes > 1. every production `UPDATE ... SET state` lives in transition, advanceJournal or markRecovering  343ms
+   ✓ M2.2 fitness: one state machine, no arbitrary state writes > 13. every job state write goes through the store that owns the transition table  324ms
+   ✓ M2.2 fitness: one state machine, no arbitrary state writes > 2. no production DELETE on a journal row; rows are evidence, not scratch  310ms
+   ✓ M2.2 fitness: one state machine, no arbitrary state writes > 3. only project_state ever changes the current revision  318ms
+   ✓ M2.2 fitness: no second actor, queue, store or timeline > 5. no production class extends or duplicates ProjectWriteActor  316ms
+   ✓ M2.2 fitness: no second actor, queue, store or timeline > 6. the revision store owns one database handle; no second DatabaseSync for project state  313ms
+ ✓ tests/architecture/m2.1-fitness.test.ts (22 tests) 1324ms
+   ✓ fitness 1-3: dependency direction > 3. production code never imports a spike, statically or dynamically  720ms
+   ✓ fitness 10-14: stage-specific invariants > 11. no production path reaches editProjectFilm from a translated write  362ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/wave2/w2-route-fitness.test.ts > W2.0 fitness: the unopened Wave 2 routes stay closed > answers 404 for every still-closed Wave 2 path, with no body that looks like a contract
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ tests/wave2/w2-route-fitness.test.ts:68:3
+     66| 
+     67| describe("W2.0 fitness: the unopened Wave 2 routes stay closed", () =>…
+     68|   it("answers 404 for every still-closed Wave 2 path, with no body tha…
+       |   ^
+     69|     const host = new NarralensHost();
+     70|     hosts.push(host);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  tests/wave2/w2-route-fitness.test.ts > W2.0 fitness: the unopened Wave 2 routes stay closed > keeps the Wave 1 migration routes answering, so 404 means unmounted and not broken
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ tests/wave2/w2-route-fitness.test.ts:91:3
+     89|   });
+     90| 
+     91|   it("keeps the Wave 1 migration routes answering, so 404 means unmoun…
+       |   ^
+     92|     const host = new NarralensHost();
+     93|     hosts.push(host);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  tests/wave2/w2-route-fitness.test.ts > W2.0 fitness: the unopened Wave 2 routes stay closed > mounts the M4B edits and the M4C history routes, and refuses their inputs on merit
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ tests/wave2/w2-route-fitness.test.ts:126:3
+    124|   });
+    125| 
+    126|   it("mounts the M4B edits and the M4C history routes, and refuses the…
+       |   ^
+    127|     const { origin, token } = await started();
+    128|     const edits = await fetch(`${origin}/api/migration/v1/projects/d1-…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  3 failed | 42 passed (45)
+   Start at  01:56:32
+   Duration  70.28s (transform 4.77s, setup 0ms, collect 17.84s, tests 35.83s, environment 1ms, prepare 10.93s)
+
+ ELIFECYCLE  Command failed with exit code 1.

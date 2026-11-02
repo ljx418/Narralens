@@ -1,0 +1,465 @@
+{
+  "run_id": "2026-11-02T18-05-27-130Z",
+  "captured_at": "2026-11-02T18:06:21.613Z",
+  "case_id": "UX-02",
+  "title": "关闭重开后 projection/revision/history 可重建",
+  "status": "PASS",
+  "assertions": [
+    {
+      "claim": "关闭重开后 projection/revision/history 可重建",
+      "ok": true,
+      "detail": "first r1/h1 second r1/h1"
+    },
+    {
+      "claim": "重建后的 revision 与 Host 的提交事实一致",
+      "ok": true,
+      "detail": "panel=1 host=1"
+    }
+  ],
+  "facts": {
+    "first": {
+      "panel": "ready",
+      "stage": "refine",
+      "phase": "proposal_only",
+      "target": "of_d1-30s_9bca26e6",
+      "revision": "1",
+      "controlRevision": "0",
+      "selectionClip": "",
+      "selectionSourceShot": "",
+      "selectionRange": "",
+      "playhead": "0",
+      "locks": "0",
+      "history": "1",
+      "studioSelection": "",
+      "studioSeconds": "",
+      "errorCode": null,
+      "text": "Narralens 导演面板\n\ntarget of_d1-30s_9bca26e6source d1-30sr1 · c0900 帧 · 旁白 有\n\n仅有已录制提案\n\n镜头与章节\nshot-001源 shot-0010—300 帧\nshot-002源 shot-002300—600 帧\nshot-003源 shot-003600—900 帧\n\n当前选区：— · 播放头 0 帧\n\n三路真实 proxy\n\n三路同时播放，只有一路持有音频焦点；离开视口的一路会暂停。\n\nproxy-a.mp4\nproxy-b.mp4\nproxy-c.mp4\n比较与采用\n已录制的 D4.1 提案复制已录制提案到本工程素材化计算影响确认采用\n锁\n加项目级画面锁\n历史\nr1 · migration5f069fcb9096…\n准备撤回\n准备重做\n\n撤回与重做只生成恢复意图，仍需计算影响并再次确认。",
+      "proxies": [
+        {
+          "name": "proxy-a.mp4",
+          "focus": "true",
+          "muted": false,
+          "paused": false,
+          "readyState": 0,
+          "currentTime": 0,
+          "duration": null,
+          "unavailable": null
+        },
+        {
+          "name": "proxy-b.mp4",
+          "focus": "false",
+          "muted": true,
+          "paused": false,
+          "readyState": 0,
+          "currentTime": 0,
+          "duration": null,
+          "unavailable": null
+        },
+        {
+          "name": "proxy-c.mp4",
+          "focus": "false",
+          "muted": true,
+          "paused": false,
+          "readyState": 0,
+          "currentTime": 0,
+          "duration": null,
+          "unavailable": null
+        }
+      ],
+      "documentWidth": 1414,
+      "innerWidth": 1414,
+      "devicePixelRatio": 1,
+      "activeElement": "BODY"
+    },
+    "second": {
+      "panel": "ready",
+      "stage": "refine",
+      "phase": "proposal_only",
+      "target": "of_d1-30s_9bca26e6",
+      "revision": "1",
+      "controlRevision": "0",
+      "selectionClip": "",
+      "selectionSourceShot": "",
+      "selectionRange": "",
+      "playhead": "0",
+      "locks": "0",
+      "history": "1",
+      "studioSelection": "",
+      "studioSeconds": "",
+      "errorCode": null,
+      "text": "Narralens 导演面板\n\ntarget of_d1-30s_9bca26e6source d1-30sr1 · c0900 帧 · 旁白 有\n\n仅有已录制提案\n\n镜头与章节\nshot-001源 shot-0010—300 帧\nshot-002源 shot-002300—600 帧\nshot-003源 shot-003600—900 帧\n\n当前选区：— · 播放头 0 帧\n\n三路真实 proxy\n\n三路同时播放，只有一路持有音频焦点；离开视口的一路会暂停。\n\nproxy-a.mp4\nproxy-b.mp4\nproxy-c.mp4\n比较与采用\n已录制的 D4.1 提案复制已录制提案到本工程素材化计算影响确认采用\n锁\n加项目级画面锁\n历史\nr1 · migration5f069fcb9096…\n准备撤回\n准备重做\n\n撤回与重做只生成恢复意图，仍需计算影响并再次确认。",
+      "proxies": [
+        {
+          "name": "proxy-a.mp4",
+          "focus": "true",
+          "muted": false,
+          "paused": false,
+          "readyState": 0,
+          "currentTime": 0,
+          "duration": null,
+          "unavailable": null
+        },
+        {
+          "name": "proxy-b.mp4",
+          "focus": "false",
+          "muted": true,
+          "paused": false,
+          "readyState": 0,
+          "currentTime": 0,
+          "duration": null,
+          "unavailable": null
+        },
+        {
+          "name": "proxy-c.mp4",
+          "focus": "false",
+          "muted": true,
+          "paused": false,
+          "readyState": 0,
+          "currentTime": 0,
+          "duration": null,
+          "unavailable": null
+        }
+      ],
+      "documentWidth": 1414,
+      "innerWidth": 1414,
+      "devicePixelRatio": 1,
+      "activeElement": "BODY"
+    },
+    "projection": {
+      "format": "narralens.workbench@1.0",
+      "project_id": "of_d1-30s_9bca26e6",
+      "source_project_id": "d1-30s",
+      "migration_id": "mig_d16192fcafaf41a286b48f737e9dff50",
+      "revision": 1,
+      "control_revision": 0,
+      "source_digest": "fd42d3608f47df9781aa7690151fb314cdb6b398c5ea4f19a6c438fe539be24f",
+      "active_snapshot_id": "5f069fcb9096619936f92e82ffb810b4595048903740e3a6dd68d1c77f5420b0",
+      "fps": {
+        "num": 30,
+        "den": 1
+      },
+      "frame_count": 900,
+      "engine": "openfilm",
+      "engine_upstream_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+      "tracks": [
+        {
+          "track_id": "track_0",
+          "index": 0,
+          "clip_ids": [
+            "shot-001",
+            "shot-002",
+            "shot-003"
+          ]
+        },
+        {
+          "track_id": "track_1",
+          "index": 1,
+          "clip_ids": [
+            "narration"
+          ]
+        }
+      ],
+      "clips": [
+        {
+          "clip_id": "shot-001",
+          "track_id": "track_0",
+          "kind": "page",
+          "start_frame": 0,
+          "end_frame_exclusive": 300,
+          "source_shot_id": "shot-001",
+          "source_label": "shot-001"
+        },
+        {
+          "clip_id": "shot-002",
+          "track_id": "track_0",
+          "kind": "page",
+          "start_frame": 300,
+          "end_frame_exclusive": 600,
+          "source_shot_id": "shot-002",
+          "source_label": "shot-002"
+        },
+        {
+          "clip_id": "shot-003",
+          "track_id": "track_0",
+          "kind": "page",
+          "start_frame": 600,
+          "end_frame_exclusive": 900,
+          "source_shot_id": "shot-003",
+          "source_label": "shot-003"
+        },
+        {
+          "clip_id": "narration",
+          "track_id": "track_1",
+          "kind": "sound",
+          "start_frame": 0,
+          "end_frame_exclusive": 900,
+          "source_shot_id": null,
+          "source_label": null
+        }
+      ],
+      "history": [
+        {
+          "revision": 1,
+          "snapshot_id": "5f069fcb9096619936f92e82ffb810b4595048903740e3a6dd68d1c77f5420b0",
+          "kind": "migration",
+          "transaction_id": "mig_d16192fcafaf41a286b48f737e9dff50"
+        }
+      ],
+      "active_locks": [],
+      "capabilities": [
+        {
+          "entry_id": "asset.collect",
+          "state": "blocked",
+          "reason": "OpenFilm permits only the controlled adoption and history-restore write paths"
+        },
+        {
+          "entry_id": "asset.delete",
+          "state": "blocked",
+          "reason": "OpenFilm permits only the controlled adoption and history-restore write paths"
+        },
+        {
+          "entry_id": "asset.relink",
+          "state": "blocked",
+          "reason": "OpenFilm permits only the controlled adoption and history-restore write paths"
+        },
+        {
+          "entry_id": "audio.mix.set",
+          "state": "blocked",
+          "reason": "OpenFilm permits only the controlled adoption and history-restore write paths"
+        },
+        {
+          "entry_id": "audio.track.replace",
+          "state": "blocked",
+          "reason": "OpenFilm permits only the controlled adoption and history-restore write paths"
+        },
+        {
+          "entry_id": "autosave.trigger",
+          "state": "blocked",
+          "reason": "OpenFilm permits only the controlled adoption and history-restore write paths"
+        },
+        {
+          "entry_id": "cli.get",
+          "state": "blocked",
+          "reason": "OpenFilm permits only the controlled adoption and history-restore write paths"
+        },
+        {
+          "entry_id": "cli.look",
+          "state": "blocked",
+          "reason": "Observation only; no side effect on author source"
+        },
+        {
+          "entry_id": "cli.open",
+          "state": "blocked",
+          "reason": "OpenFilm permits only the controlled adoption and history-restore write paths"
+        },
+        {
+          "entry_id": "cli.render",
+          "state": "blocked",
+          "reason": "Snapshot-bound export is an M6 capability; M2.1 exposes no render entry"
+        },
+        {
+          "entry_id": "export.create",
+          "state": "blocked",
+          "reason": "OpenFilm permits only the controlled adoption and history-restore write paths"
+        },
+        {
+          "entry_id": "export.delete",
+          "state": "blocked",
+          "reason": "OpenFilm permits only the controlled adoption and history-restore write paths"
+        },
+        {
+          "entry_id": "export.reveal",
+          "state": "blocked",
+          "reason": "A human explicit action that never enters headless automation"
+        },
+        {
+          "entry_id": "filewatch.external_change",
+          "state": "blocked",
+          "reason": "Detects an external change and raises attention; never accepts it automatically"
+        },
+        {
+          "entry_id": "history.branch.delete",
+          "state": "blocked",
+          "reason": "OpenFilm permits only the controlled adoption and history-restore write paths"
+        },
+        {
+          "entry_id": "history.checkout",
+          "state": "blocked",
+          "reason": "OpenFilm permits only the controlled adoption and history-restore write paths"
+        },
+        {
+          "entry_id": "history.commit",
+          "state": "blocked",
+          "reason": "OpenFilm permits only the controlled adoption and history-restore write paths"
+        },
+        {
+          "entry_id": "history.discard",
+          "state": "blocked",
+          "reason": "OpenFilm permits only the controlled adoption and history-restore write paths"
+        },
+        {
+          "entry_id": "history.merge",
+          "state": "blocked",
+          "reason": "OpenFilm permits only the controlled adoption and history-restore write paths"
+        },
+        {
+          "entry_id": "history.redo",
+          "state": "supported",
+          "reason": "M4C resolves a redo to a snapshot and still requires an impact and an explicit approval"
+        },
+        {
+          "entry_id": "history.restore",
+          "state": "supported",
+          "reason": "M4C translates an authorised restore into a new Narralens revision; it never moves the pointer"
+        },
+        {
+          "entry_id": "history.undo",
+          "state": "supported",
+          "reason": "M4C resolves an undo to a snapshot and still requires an impact and an explicit approval"
+        },
+        {
+          "entry_id": "inspector.field.set",
+          "state": "blocked",
+          "reason": "OpenFilm permits only the controlled adoption and history-restore write paths"
+        },
+        {
+          "entry_id": "inspector.style.set",
+          "state": "blocked",
+          "reason": "OpenFilm permits only the controlled adoption and history-restore write paths"
+        },
+        {
+          "entry_id": "markers.put",
+          "state": "blocked",
+          "reason": "Markers are a derived view and never change film content"
+        },
+        {
+          "entry_id": "project.delete",
+          "state": "blocked",
+          "reason": "OpenFilm permits only the controlled adoption and history-restore write paths"
+        },
+        {
+          "entry_id": "project.fetch_remote",
+          "state": "blocked",
+          "reason": "OpenFilm permits only the controlled adoption and history-restore write paths"
+        },
+        {
+          "entry_id": "project.import_template",
+          "state": "blocked",
+          "reason": "OpenFilm permits only the controlled adoption and history-restore write paths"
+        },
+        {
+          "entry_id": "project.move",
+          "state": "blocked",
+          "reason": "OpenFilm permits only the controlled adoption and history-restore write paths"
+        },
+        {
+          "entry_id": "project.open_picker",
+          "state": "blocked",
+          "reason": "OpenFilm permits only the controlled adoption and history-restore write paths"
+        },
+        {
+          "entry_id": "project.rename",
+          "state": "blocked",
+          "reason": "OpenFilm permits only the controlled adoption and history-restore write paths"
+        },
+        {
+          "entry_id": "project.template_apply",
+          "state": "blocked",
+          "reason": "OpenFilm permits only the controlled adoption and history-restore write paths"
+        },
+        {
+          "entry_id": "provider.ask",
+          "state": "blocked",
+          "reason": "OpenFilm permits only the controlled adoption and history-restore write paths"
+        },
+        {
+          "entry_id": "provider.generate",
+          "state": "blocked",
+          "reason": "OpenFilm permits only the controlled adoption and history-restore write paths"
+        },
+        {
+          "entry_id": "provider.get",
+          "state": "blocked",
+          "reason": "OpenFilm permits only the controlled adoption and history-restore write paths"
+        },
+        {
+          "entry_id": "provider.key.delete",
+          "state": "blocked",
+          "reason": "OpenFilm permits only the controlled adoption and history-restore write paths"
+        },
+        {
+          "entry_id": "provider.key.set",
+          "state": "blocked",
+          "reason": "OpenFilm permits only the controlled adoption and history-restore write paths"
+        },
+        {
+          "entry_id": "settings.patch",
+          "state": "blocked",
+          "reason": "OpenFilm permits only the controlled adoption and history-restore write paths"
+        },
+        {
+          "entry_id": "subtitle.line.set",
+          "state": "blocked",
+          "reason": "OpenFilm permits only the controlled adoption and history-restore write paths"
+        },
+        {
+          "entry_id": "subtitle.style.set",
+          "state": "blocked",
+          "reason": "OpenFilm permits only the controlled adoption and history-restore write paths"
+        },
+        {
+          "entry_id": "subtitle.transcribe",
+          "state": "blocked",
+          "reason": "OpenFilm permits only the controlled adoption and history-restore write paths"
+        },
+        {
+          "entry_id": "subtitle.translate",
+          "state": "blocked",
+          "reason": "OpenFilm permits only the controlled adoption and history-restore write paths"
+        },
+        {
+          "entry_id": "timeline.adopt_materialization",
+          "state": "supported",
+          "reason": "M4B translates an authorised materialization into nine closed OpenFilm set operations"
+        },
+        {
+          "entry_id": "timeline.move",
+          "state": "blocked",
+          "reason": "OpenFilm permits only the controlled adoption and history-restore write paths"
+        },
+        {
+          "entry_id": "timeline.replace_visual_asset",
+          "state": "blocked",
+          "reason": "OpenFilm permits only the controlled adoption and history-restore write paths"
+        },
+        {
+          "entry_id": "timeline.set_visual_fit",
+          "state": "blocked",
+          "reason": "OpenFilm permits only the controlled adoption and history-restore write paths"
+        },
+        {
+          "entry_id": "timeline.speed",
+          "state": "blocked",
+          "reason": "OpenFilm permits only the controlled adoption and history-restore write paths"
+        },
+        {
+          "entry_id": "timeline.split",
+          "state": "blocked",
+          "reason": "OpenFilm permits only the controlled adoption and history-restore write paths"
+        },
+        {
+          "entry_id": "timeline.trim",
+          "state": "blocked",
+          "reason": "OpenFilm permits only the controlled adoption and history-restore write paths"
+        }
+      ],
+      "preview": {
+        "kind": "openfilm-studio",
+        "url": "http://127.0.0.1:54392/projects/r1hFhki8wAll?target=of_d1-30s_9bca26e6",
+        "bridge_version": 1
+      },
+      "narration": "present"
+    }
+  },
+  "evidence": []
+}
