@@ -1,0 +1,419 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Narralens M5 自动验收报告</title>
+<style>
+  :root { color-scheme: light dark; }
+  body { font-family: system-ui, -apple-system, "Segoe UI", "PingFang SC", sans-serif; margin: 0; padding: 24px; line-height: 1.6; }
+  h1 { font-size: 28px; margin: 0 0 4px; }
+  h2 { font-size: 20px; margin: 32px 0 8px; border-bottom: 1px solid #8884; padding-bottom: 4px; }
+  table { border-collapse: collapse; width: 100%; margin: 8px 0 16px; font-size: 13px; }
+  th, td { border: 1px solid #8884; padding: 6px 8px; text-align: left; vertical-align: top; }
+  th { background: #8881; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; word-break: break-all; }
+  .s-PASS { color: #1a7f37; font-weight: 600; }
+  .s-FAIL { color: #b42318; font-weight: 600; }
+  .s-BLOCKED_ENV { color: #b54708; font-weight: 600; }
+  .s-NOT_RUN { color: #666; font-weight: 600; }
+  .note { background: #8881; border-left: 4px solid #8886; padding: 8px 12px; margin: 12px 0; }
+  .figures { display: flex; flex-wrap: wrap; gap: 12px; }
+  figure { margin: 0; width: 320px; }
+  figure img { width: 100%; border: 1px solid #8884; }
+  figcaption { font-size: 12px; }
+  dl { display: grid; grid-template-columns: max-content 1fr; gap: 4px 16px; font-size: 14px; }
+  dt { font-weight: 600; }
+  dd { margin: 0; }
+</style>
+</head>
+<body>
+<h1>Narralens M5 自动验收报告</h1>
+<p class="note">本报告由仓内工具从一次真实捕获生成，声明上限 <strong>M5_HEADLESS_EVIDENCED</strong>。
+人工体验门（UX-12）保持 <strong>HUMAN_NOT_RUN</strong>；本报告不构成 Gate D4.2、V1-P0、V1-Full 或 M6 的任何结论。</p>
+
+<h2>1. 基线与冻结 SHA</h2>
+<dl>
+  <dt>捕获 commit</dt><dd><code>5aa3fc78f351dae853d049a67a0207932fae873d</code></dd>
+  <dt>分支</dt><dd><code>migration/m2.2-coordinator-persistence</code></dd>
+  <dt>origin/main</dt><dd><code>304c89134fdf9f834f7d69e3f4d5c89a68044c60</code></dd>
+  <dt>捕获时工作树</dt><dd><code>dirty=0</code></dd>
+  <dt>固定 OpenFilm 上游</dt><dd><code>e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3</code></dd>
+  <dt>声明上限</dt><dd><code>M5_HEADLESS_EVIDENCED</code></dd>
+  <dt>交互约束</dt><dd><code>headless,muted,no-window,no-focus-steal,no-network,no-payment</code></dd>
+</dl>
+
+<h2>2. 逐 case 状态</h2>
+<table>
+  <thead><tr><th>Case</th><th>标题</th><th>状态</th><th>断言数</th><th>未通过的断言</th><th>证据</th></tr></thead>
+  <tbody>
+<tr>
+    <td><code>PF-01</code></td>
+    <td>PF-01</td>
+    <td class="s-FAIL">失败</td>
+    <td>1</td>
+    <td>该 case 可以被运行</td>
+    <td><code>cases/PF-01.json</code></td>
+  </tr>
+<tr>
+    <td><code>PF-02</code></td>
+    <td>三路真实 proxy 播放/切焦，无三路同时出声</td>
+    <td class="s-PASS">通过</td>
+    <td>4</td>
+    <td>—</td>
+    <td><code>cases/PF-02.json</code></td>
+  </tr>
+<tr>
+    <td><code>PF-03</code></td>
+    <td>冷/热重开数据一致，首帧/内存/媒体关联记录</td>
+    <td class="s-PASS">通过</td>
+    <td>3</td>
+    <td>—</td>
+    <td><code>cases/PF-03.json</code></td>
+  </tr>
+<tr>
+    <td><code>UX-01</code></td>
+    <td>想法草稿可编辑，打开真实 source→target 映射</td>
+    <td class="s-PASS">通过</td>
+    <td>4</td>
+    <td>—</td>
+    <td><code>cases/UX-01.json</code></td>
+  </tr>
+<tr>
+    <td><code>UX-02</code></td>
+    <td>关闭重开后 projection/revision/history 可重建</td>
+    <td class="s-PASS">通过</td>
+    <td>2</td>
+    <td>—</td>
+    <td><code>cases/UX-02.json</code></td>
+  </tr>
+<tr>
+    <td><code>UX-03</code></td>
+    <td>章节/镜头/时间码定位同一 target clip 与范围，并显示唯一 source shot lineage</td>
+    <td class="s-PASS">通过</td>
+    <td>3</td>
+    <td>—</td>
+    <td><code>cases/UX-03.json</code></td>
+  </tr>
+<tr>
+    <td><code>UX-04</code></td>
+    <td>语义结果同时带 clip 与半开范围；无数据时诚实 blocked</td>
+    <td class="s-PASS">通过</td>
+    <td>2</td>
+    <td>—</td>
+    <td><code>cases/UX-04.json</code></td>
+  </tr>
+<tr>
+    <td><code>UX-05</code></td>
+    <td>原生 StudioHost bridge 让 navigator/player/timeline 共享 selection/clock/snapshot</td>
+    <td class="s-PASS">通过</td>
+    <td>3</td>
+    <td>—</td>
+    <td><code>cases/UX-05.json</code></td>
+  </tr>
+<tr>
+    <td><code>UX-06</code></td>
+    <td>帧↔seconds 使用冻结 rational time model；定位不改变 source</td>
+    <td class="s-PASS">通过</td>
+    <td>3</td>
+    <td>—</td>
+    <td><code>cases/UX-06.json</code></td>
+  </tr>
+<tr>
+    <td><code>UX-07</code></td>
+    <td>录制 D4.1 comparison 有原始 audit/lineage；三路 proxy 是真实 media events</td>
+    <td class="s-PASS">通过</td>
+    <td>4</td>
+    <td>—</td>
+    <td><code>cases/UX-07.json</code></td>
+  </tr>
+<tr>
+    <td><code>UX-08</code></td>
+    <td>能力类别来自 server capabilities；Gateway 对未支持 native write 同步 disabled + 422</td>
+    <td class="s-PASS">通过</td>
+    <td>2</td>
+    <td>—</td>
+    <td><code>cases/UX-08.json</code></td>
+  </tr>
+<tr>
+    <td><code>UX-09</code></td>
+    <td>materialize→impact→confirm→adopt；成功 +1，失败 0</td>
+    <td class="s-PASS">通过</td>
+    <td>4</td>
+    <td>—</td>
+    <td><code>cases/UX-09.json</code></td>
+  </tr>
+<tr>
+    <td><code>UX-10</code></td>
+    <td>同页原生选择/预览 + 受控 adopt/history；undo/redo 只生成意图；恢复 +1</td>
+    <td class="s-PASS">通过</td>
+    <td>4</td>
+    <td>—</td>
+    <td><code>cases/UX-10.json</code></td>
+  </tr>
+<tr>
+    <td><code>UX-11</code></td>
+    <td>键盘、焦点、文本状态、axe、reduced motion、主题</td>
+    <td class="s-PASS">通过</td>
+    <td>4</td>
+    <td>—</td>
+    <td><code>cases/UX-11.json</code></td>
+  </tr>
+  </tbody>
+</table>
+
+<h2>3. 命令、退出码与原始日志索引</h2>
+<table>
+  <thead><tr><th>名称</th><th>命令</th><th>退出码</th><th>原始输出</th></tr></thead>
+  <tbody>
+<tr>
+    <td><code>acceptance-report</code></td>
+    <td><code>node tools/m5-acceptance-report.mjs docs/evidence/WAVE3/M5/captures/5aa3fc78f351dae853d049a67a0207932fae873d docs/evidence/WAVE3/M5/acceptance-report.html</code></td>
+    <td class="s-FAIL"></td>
+    <td><code>acceptance-report.txt</code></td>
+  </tr>
+<tr>
+    <td><code>build</code></td>
+    <td><code>corepack pnpm build</code></td>
+    <td class="s-PASS">0</td>
+    <td><code>build.txt</code></td>
+  </tr>
+<tr>
+    <td><code>check</code></td>
+    <td><code>corepack pnpm check</code></td>
+    <td class="s-PASS">0</td>
+    <td><code>check.txt</code></td>
+  </tr>
+<tr>
+    <td><code>contracts</code></td>
+    <td><code>corepack pnpm test:contracts</code></td>
+    <td class="s-PASS">0</td>
+    <td><code>contracts.txt</code></td>
+  </tr>
+<tr>
+    <td><code>credential-scan</code></td>
+    <td><code>NARRALENS_SECRET_SCAN_OUT=docs/evidence/WAVE3/M5/captures/5aa3fc78f351dae853d049a67a0207932fae873d/credential-scan.json corepack pnpm exec tsx tools/secret-scan.ts</code></td>
+    <td class="s-PASS">0</td>
+    <td><code>credential-scan.txt</code></td>
+  </tr>
+<tr>
+    <td><code>m2.1</code></td>
+    <td><code>corepack pnpm test:m2.1</code></td>
+    <td class="s-PASS">0</td>
+    <td><code>m2.1.txt</code></td>
+  </tr>
+<tr>
+    <td><code>m5-headless</code></td>
+    <td><code>NARRALENS_M5_EVIDENCE_ROOT=docs/evidence/WAVE3/M5/captures/5aa3fc78f351dae853d049a67a0207932fae873d corepack pnpm test:m5:headless</code></td>
+    <td class="s-PASS">0</td>
+    <td><code>m5-headless.txt</code></td>
+  </tr>
+<tr>
+    <td><code>m5</code></td>
+    <td><code>corepack pnpm test:m5</code></td>
+    <td class="s-PASS">0</td>
+    <td><code>m5.txt</code></td>
+  </tr>
+<tr>
+    <td><code>studio-seam-probe</code></td>
+    <td><code>corepack pnpm exec tsx tools/m5-studio-seam-probe.ts</code></td>
+    <td class="s-FAIL">1</td>
+    <td><code>studio-seam-probe.txt</code></td>
+  </tr>
+<tr>
+    <td><code>typecheck</code></td>
+    <td><code>corepack pnpm exec tsc --noEmit</code></td>
+    <td class="s-PASS">0</td>
+    <td><code>typecheck.txt</code></td>
+  </tr>
+<tr>
+    <td><code>wave2-fitness</code></td>
+    <td><code>corepack pnpm test:wave2:fitness</code></td>
+    <td class="s-PASS">0</td>
+    <td><code>wave2-fitness.txt</code></td>
+  </tr>
+<tr>
+    <td><code>wave2-m3</code></td>
+    <td><code>corepack pnpm test:wave2:m3</code></td>
+    <td class="s-PASS">0</td>
+    <td><code>wave2-m3.txt</code></td>
+  </tr>
+<tr>
+    <td><code>wave2-m4a</code></td>
+    <td><code>corepack pnpm test:wave2:m4a</code></td>
+    <td class="s-PASS">0</td>
+    <td><code>wave2-m4a.txt</code></td>
+  </tr>
+<tr>
+    <td><code>wave2-m4b</code></td>
+    <td><code>corepack pnpm test:wave2:m4b</code></td>
+    <td class="s-PASS">0</td>
+    <td><code>wave2-m4b.txt</code></td>
+  </tr>
+<tr>
+    <td><code>wave2-m4c</code></td>
+    <td><code>corepack pnpm test:wave2:m4c</code></td>
+    <td class="s-FAIL">1</td>
+    <td><code>wave2-m4c.txt</code></td>
+  </tr>
+<tr>
+    <td><code>wave2-w2.0</code></td>
+    <td><code>corepack pnpm test:wave2:w2.0</code></td>
+    <td class="s-PASS">0</td>
+    <td><code>wave2-w2.0.txt</code></td>
+  </tr>
+  </tbody>
+</table>
+
+<h2>4. 截图索引</h2>
+<div class="figures">
+<figure>
+    <img src="captures/captures/5aa3fc78f351dae853d049a67a0207932fae873d/screenshots/PF-01.png" alt="screenshots/PF-01.png" loading="lazy" />
+    <figcaption>screenshots/PF-01.png</figcaption>
+  </figure>
+<figure>
+    <img src="captures/captures/5aa3fc78f351dae853d049a67a0207932fae873d/screenshots/PF-02.png" alt="screenshots/PF-02.png" loading="lazy" />
+    <figcaption>screenshots/PF-02.png</figcaption>
+  </figure>
+<figure>
+    <img src="captures/captures/5aa3fc78f351dae853d049a67a0207932fae873d/screenshots/PF-03.png" alt="screenshots/PF-03.png" loading="lazy" />
+    <figcaption>screenshots/PF-03.png</figcaption>
+  </figure>
+<figure>
+    <img src="captures/captures/5aa3fc78f351dae853d049a67a0207932fae873d/screenshots/UX-01.png" alt="screenshots/UX-01.png" loading="lazy" />
+    <figcaption>screenshots/UX-01.png</figcaption>
+  </figure>
+<figure>
+    <img src="captures/captures/5aa3fc78f351dae853d049a67a0207932fae873d/screenshots/UX-02.png" alt="screenshots/UX-02.png" loading="lazy" />
+    <figcaption>screenshots/UX-02.png</figcaption>
+  </figure>
+<figure>
+    <img src="captures/captures/5aa3fc78f351dae853d049a67a0207932fae873d/screenshots/UX-03.png" alt="screenshots/UX-03.png" loading="lazy" />
+    <figcaption>screenshots/UX-03.png</figcaption>
+  </figure>
+<figure>
+    <img src="captures/captures/5aa3fc78f351dae853d049a67a0207932fae873d/screenshots/UX-04.png" alt="screenshots/UX-04.png" loading="lazy" />
+    <figcaption>screenshots/UX-04.png</figcaption>
+  </figure>
+<figure>
+    <img src="captures/captures/5aa3fc78f351dae853d049a67a0207932fae873d/screenshots/UX-05.png" alt="screenshots/UX-05.png" loading="lazy" />
+    <figcaption>screenshots/UX-05.png</figcaption>
+  </figure>
+<figure>
+    <img src="captures/captures/5aa3fc78f351dae853d049a67a0207932fae873d/screenshots/UX-06.png" alt="screenshots/UX-06.png" loading="lazy" />
+    <figcaption>screenshots/UX-06.png</figcaption>
+  </figure>
+<figure>
+    <img src="captures/captures/5aa3fc78f351dae853d049a67a0207932fae873d/screenshots/UX-07.png" alt="screenshots/UX-07.png" loading="lazy" />
+    <figcaption>screenshots/UX-07.png</figcaption>
+  </figure>
+<figure>
+    <img src="captures/captures/5aa3fc78f351dae853d049a67a0207932fae873d/screenshots/UX-08.png" alt="screenshots/UX-08.png" loading="lazy" />
+    <figcaption>screenshots/UX-08.png</figcaption>
+  </figure>
+<figure>
+    <img src="captures/captures/5aa3fc78f351dae853d049a67a0207932fae873d/screenshots/UX-09.png" alt="screenshots/UX-09.png" loading="lazy" />
+    <figcaption>screenshots/UX-09.png</figcaption>
+  </figure>
+<figure>
+    <img src="captures/captures/5aa3fc78f351dae853d049a67a0207932fae873d/screenshots/UX-10.png" alt="screenshots/UX-10.png" loading="lazy" />
+    <figcaption>screenshots/UX-10.png</figcaption>
+  </figure>
+<figure>
+    <img src="captures/captures/5aa3fc78f351dae853d049a67a0207932fae873d/screenshots/UX-11.png" alt="screenshots/UX-11.png" loading="lazy" />
+    <figcaption>screenshots/UX-11.png</figcaption>
+  </figure>
+</div>
+
+<h2>5. 浏览器、硬件、profile 与缩放</h2>
+<dl>
+  <dt>浏览器</dt><dd><code></code></dd>
+  <dt>可执行文件</dt><dd><code></code></dd>
+  <dt>CDP 端点</dt><dd><code></code></dd>
+  <dt>隔离 profile</dt><dd><code></code></dd>
+  <dt>Gateway origin</dt><dd><code></code></dd>
+  <dt>原生 200% 读回</dt><dd><code>{"device_pixel_ratio":2,"inner_width":707,"inner_height":400,"document_width":707,"document_height":400,"overflow_x":false,"zoom_level":3.8017840169239308}</code></dd>
+</dl>
+
+<h2>6. 媒体、ffprobe 与完整解码</h2>
+<table>
+  <thead><tr><th>种类</th><th>文件</th><th>SHA256</th><th>字节</th><th>解码帧数</th><th>生成命令</th></tr></thead>
+  <tbody>
+<tr>
+    <td>proxy</td>
+    <td><code>proxy-a.mp4</code></td>
+    <td><code>168a7f899d34cbf5f60be60e36bf6e007ed3da3d8f549a918754f123c9430b98</code></td>
+    <td>2946391</td>
+    <td>0</td>
+    <td><code>ffmpeg -y -v error -i /mnt/c/workspace/videoworkline/Narralens/fixtures/d1-30s/assets/generated/visual-10s.mp4 -t 10 -vf scale=1280:720,fps=30 -c:v libx264 -preset veryfast -pix_fmt yuv420p -an -metadata title=narralens-m5-proxy-1 /mnt/c/workspace/videoworkline/Narralens/var/m5-fixtures/proxy-a.mp4</code></td>
+  </tr>
+<tr>
+    <td>proxy</td>
+    <td><code>proxy-b.mp4</code></td>
+    <td><code>55e65de352c810524d98c200f8878e8c78d6ad43fba514c6a24cb0cda4bc0d8c</code></td>
+    <td>760094</td>
+    <td>0</td>
+    <td><code>ffmpeg -y -v error -i /mnt/c/workspace/videoworkline/Narralens/fixtures/d1-30s/assets/generated/visual-10s.mp4 -t 10 -vf scale=854:480,fps=30 -c:v libx264 -preset veryfast -pix_fmt yuv420p -an -metadata title=narralens-m5-proxy-2 /mnt/c/workspace/videoworkline/Narralens/var/m5-fixtures/proxy-b.mp4</code></td>
+  </tr>
+<tr>
+    <td>proxy</td>
+    <td><code>proxy-c.mp4</code></td>
+    <td><code>e39e84d77e39c30c9953d320c36894f6e32db8d00a40602e52d6dd8b2f7fce78</code></td>
+    <td>11893</td>
+    <td>0</td>
+    <td><code>ffmpeg -y -v error -i /mnt/c/workspace/videoworkline/Narralens/fixtures/d1-30s/assets/generated/visual-alt-10s.mp4 -t 10 -vf scale=640:360,fps=30 -c:v libx264 -preset veryfast -pix_fmt yuv420p -an -metadata title=narralens-m5-proxy-3 /mnt/c/workspace/videoworkline/Narralens/var/m5-fixtures/proxy-c.mp4</code></td>
+  </tr>
+<tr>
+    <td>system-film</td>
+    <td><code>system-3min.mp4</code></td>
+    <td><code>d8f6ee8114ea62e67d203a252c59975ed2da29018208cc0159a8af007e0935e4</code></td>
+    <td>6491119</td>
+    <td>0</td>
+    <td><code>ffmpeg -y -v error -i /mnt/c/workspace/videoworkline/Narralens/var/m5-fixtures/proxy-a.mp4 -filter_complex [0:v]trim=start=0.00:duration=7.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v0];[0:v]trim=start=0.25:duration=7.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v1];[0:v]trim=start=0.50:duration=7.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v2];[0:v]trim=start=0.00:duration=7.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v3];[0:v]trim=start=0.25:duration=7.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v4];[0:v]trim=start=0.50:duration=7.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v5];[0:v]trim=start=0.00:duration=7.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v6];[0:v]trim=start=0.25:duration=7.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v7];[0:v]trim=start=0.50:duration=7.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v8];[0:v]trim=start=0.00:duration=7.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v9];[0:v]trim=start=0.25:duration=7.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v10];[0:v]trim=start=0.50:duration=7.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v11];[0:v]trim=start=0.00:duration=7.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v12];[0:v]trim=start=0.25:duration=7.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v13];[0:v]trim=start=0.50:duration=7.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v14];[0:v]trim=start=0.00:duration=7.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v15];[0:v]trim=start=0.25:duration=7.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v16];[0:v]trim=start=0.50:duration=7.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v17];[0:v]trim=start=0.00:duration=7.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v18];[0:v]trim=start=0.25:duration=7.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v19];[0:v]trim=start=0.50:duration=7.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v20];[0:v]trim=start=0.00:duration=7.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v21];[0:v]trim=start=0.25:duration=7.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v22];[0:v]trim=start=0.50:duration=7.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v23];[v0][v1][v2][v3][v4][v5][v6][v7][v8][v9][v10][v11][v12][v13][v14][v15][v16][v17][v18][v19][v20][v21][v22][v23]concat=n=24:v=1:a=0[out] -map [out] -c:v libx264 -preset veryfast -pix_fmt yuv420p -r 30 -an /mnt/c/workspace/videoworkline/Narralens/var/m5-fixtures/system-3min.mp4</code></td>
+  </tr>
+<tr>
+    <td>stress-film</td>
+    <td><code>stress-120clips.mp4</code></td>
+    <td><code>9b7734d628297f163b995958c3bf97919d1fe93d05911f3ebec71f80ed71e130</code></td>
+    <td>1819226</td>
+    <td>0</td>
+    <td><code>ffmpeg -y -v error -i /mnt/c/workspace/videoworkline/Narralens/var/m5-fixtures/proxy-b.mp4 -filter_complex [0:v]trim=start=0.00:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v0];[0:v]trim=start=0.25:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v1];[0:v]trim=start=0.50:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v2];[0:v]trim=start=0.00:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v3];[0:v]trim=start=0.25:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v4];[0:v]trim=start=0.50:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v5];[0:v]trim=start=0.00:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v6];[0:v]trim=start=0.25:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v7];[0:v]trim=start=0.50:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v8];[0:v]trim=start=0.00:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v9];[0:v]trim=start=0.25:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v10];[0:v]trim=start=0.50:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v11];[0:v]trim=start=0.00:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v12];[0:v]trim=start=0.25:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v13];[0:v]trim=start=0.50:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v14];[0:v]trim=start=0.00:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v15];[0:v]trim=start=0.25:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v16];[0:v]trim=start=0.50:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v17];[0:v]trim=start=0.00:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v18];[0:v]trim=start=0.25:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v19];[0:v]trim=start=0.50:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v20];[0:v]trim=start=0.00:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v21];[0:v]trim=start=0.25:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v22];[0:v]trim=start=0.50:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v23];[0:v]trim=start=0.00:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v24];[0:v]trim=start=0.25:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v25];[0:v]trim=start=0.50:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v26];[0:v]trim=start=0.00:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v27];[0:v]trim=start=0.25:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v28];[0:v]trim=start=0.50:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v29];[0:v]trim=start=0.00:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v30];[0:v]trim=start=0.25:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v31];[0:v]trim=start=0.50:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v32];[0:v]trim=start=0.00:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v33];[0:v]trim=start=0.25:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v34];[0:v]trim=start=0.50:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v35];[0:v]trim=start=0.00:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v36];[0:v]trim=start=0.25:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v37];[0:v]trim=start=0.50:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v38];[0:v]trim=start=0.00:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v39];[0:v]trim=start=0.25:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v40];[0:v]trim=start=0.50:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v41];[0:v]trim=start=0.00:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v42];[0:v]trim=start=0.25:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v43];[0:v]trim=start=0.50:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v44];[0:v]trim=start=0.00:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v45];[0:v]trim=start=0.25:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v46];[0:v]trim=start=0.50:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v47];[0:v]trim=start=0.00:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v48];[0:v]trim=start=0.25:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v49];[0:v]trim=start=0.50:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v50];[0:v]trim=start=0.00:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v51];[0:v]trim=start=0.25:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v52];[0:v]trim=start=0.50:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v53];[0:v]trim=start=0.00:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v54];[0:v]trim=start=0.25:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v55];[0:v]trim=start=0.50:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v56];[0:v]trim=start=0.00:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v57];[0:v]trim=start=0.25:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v58];[0:v]trim=start=0.50:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v59];[0:v]trim=start=0.00:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v60];[0:v]trim=start=0.25:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v61];[0:v]trim=start=0.50:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v62];[0:v]trim=start=0.00:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v63];[0:v]trim=start=0.25:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v64];[0:v]trim=start=0.50:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v65];[0:v]trim=start=0.00:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v66];[0:v]trim=start=0.25:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v67];[0:v]trim=start=0.50:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v68];[0:v]trim=start=0.00:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v69];[0:v]trim=start=0.25:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v70];[0:v]trim=start=0.50:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v71];[0:v]trim=start=0.00:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v72];[0:v]trim=start=0.25:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v73];[0:v]trim=start=0.50:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v74];[0:v]trim=start=0.00:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v75];[0:v]trim=start=0.25:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v76];[0:v]trim=start=0.50:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v77];[0:v]trim=start=0.00:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v78];[0:v]trim=start=0.25:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v79];[0:v]trim=start=0.50:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v80];[0:v]trim=start=0.00:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v81];[0:v]trim=start=0.25:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v82];[0:v]trim=start=0.50:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v83];[0:v]trim=start=0.00:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v84];[0:v]trim=start=0.25:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v85];[0:v]trim=start=0.50:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v86];[0:v]trim=start=0.00:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v87];[0:v]trim=start=0.25:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v88];[0:v]trim=start=0.50:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v89];[0:v]trim=start=0.00:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v90];[0:v]trim=start=0.25:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v91];[0:v]trim=start=0.50:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v92];[0:v]trim=start=0.00:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v93];[0:v]trim=start=0.25:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v94];[0:v]trim=start=0.50:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v95];[0:v]trim=start=0.00:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v96];[0:v]trim=start=0.25:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v97];[0:v]trim=start=0.50:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v98];[0:v]trim=start=0.00:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v99];[0:v]trim=start=0.25:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v100];[0:v]trim=start=0.50:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v101];[0:v]trim=start=0.00:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v102];[0:v]trim=start=0.25:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v103];[0:v]trim=start=0.50:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v104];[0:v]trim=start=0.00:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v105];[0:v]trim=start=0.25:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v106];[0:v]trim=start=0.50:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v107];[0:v]trim=start=0.00:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v108];[0:v]trim=start=0.25:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v109];[0:v]trim=start=0.50:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v110];[0:v]trim=start=0.00:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v111];[0:v]trim=start=0.25:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v112];[0:v]trim=start=0.50:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v113];[0:v]trim=start=0.00:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v114];[0:v]trim=start=0.25:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v115];[0:v]trim=start=0.50:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v116];[0:v]trim=start=0.00:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v117];[0:v]trim=start=0.25:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v118];[0:v]trim=start=0.50:duration=0.50,setpts=PTS-STARTPTS,scale=640:360:force_original_aspect_ratio=decrease[v119];[v0][v1][v2][v3][v4][v5][v6][v7][v8][v9][v10][v11][v12][v13][v14][v15][v16][v17][v18][v19][v20][v21][v22][v23][v24][v25][v26][v27][v28][v29][v30][v31][v32][v33][v34][v35][v36][v37][v38][v39][v40][v41][v42][v43][v44][v45][v46][v47][v48][v49][v50][v51][v52][v53][v54][v55][v56][v57][v58][v59][v60][v61][v62][v63][v64][v65][v66][v67][v68][v69][v70][v71][v72][v73][v74][v75][v76][v77][v78][v79][v80][v81][v82][v83][v84][v85][v86][v87][v88][v89][v90][v91][v92][v93][v94][v95][v96][v97][v98][v99][v100][v101][v102][v103][v104][v105][v106][v107][v108][v109][v110][v111][v112][v113][v114][v115][v116][v117][v118][v119]concat=n=120:v=1:a=0[out] -map [out] -c:v libx264 -preset veryfast -pix_fmt yuv420p -r 30 -an /mnt/c/workspace/videoworkline/Narralens/var/m5-fixtures/stress-120clips.mp4</code></td>
+  </tr>
+  </tbody>
+</table>
+<p class="note">这些 fixture 只证明系统交互（真实媒体、真实解码、真实帧率），不证明长片内容质量。 120 clip / 6 章是结构压力用例，不是长片质量证据。 素材来自仓库内已验证的 fixtures/d1-30s 媒体，由本地 ffmpeg 确定性合成。</p>
+
+<h2>7. 上游 Studio 接缝探测</h2>
+<dl>
+  <dt>探测结果</dt><dd><code>ok=false pinned OpenFilm checkout is absent</code></dd>
+  <dt>startStudio 模块</dt><dd><code>packages/openfilm/studio/server/server.mjs</code></dd>
+  <dt>startStudio 摘要</dt><dd><code></code></dd>
+  <dt>StudioHost 模块</dt><dd><code>packages/openfilm/studio/ui/src/lib/host.ts</code></dd>
+  <dt>StudioHost 摘要</dt><dd><code></code></dd>
+  <dt>加载闭包文件数</dt><dd>0</dd>
+</dl>
+
+<h2>8. 事务 / NOWRITE 差异</h2>
+<p>写路径的前后差异由 <code>tests/m5/locks.test.ts</code> 与 <code>tests/m5/comparison-replay.test.ts</code> 断言：
+锁的 CAS 失败为零 lock/outbox 变化，replay 不改变 source/revision/snapshot/ledger。</p>
+
+<h2>9. 失败捕获</h2>
+<p>失败捕获只追加、不覆盖，索引见 <code>docs/evidence/WAVE3/M5/failed-captures.json</code>；
+完整性门 <code>tools/m5-evidence-integrity.mjs</code> 会检查每一次失败都在索引中。</p>
+
+<h2>10. 审查状态</h2>
+<p>四视角内部审查见 <code>docs/evidence/WAVE3/M5/reviews/internal-review.md</code>。
+独立外审与人工体验均未进行，本报告不代替它们。</p>
+
+<h2>11. 回退</h2>
+<p>关闭 M5 的 workbench/replay/locks 路由与 Studio Gateway 并恢复旧 <code>NarralensApp</code> 即可回退 UI；
+不重置数据库、不删除 Wave 2 表、snapshot 或迁移副本。</p>
+
+<h2>12. 限制与 NOT_RUN</h2>
+<ul>
+  <li>UX-12（人类一分钟定位、十秒找到撤回、理解 impact 与错误）保持 <code>HUMAN_NOT_RUN</code>：自动化不得代签人类判断。</li>
+  <li>fixture 只证明系统交互，不证明长片内容质量；120 clip / 6 章是结构压力用例。</li>
+  <li>没有声明 Gate D4.2、V1-P0、V1-Full、M6 完成，也没有声明任何 headed 或人工验证。</li>
+</ul>
+</body>
+</html>

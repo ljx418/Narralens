@@ -37,6 +37,11 @@ const walk = (directory) => {
   }
 };
 walk(captureRoot);
+// The manifest cannot contain its own digest: it is written after this list is built.
+for (const own of ["manifest.json", "manifest.txt"]) {
+  const index = files.findIndex((file) => file.path === own);
+  if (index >= 0) files.splice(index, 1);
+}
 
 const cases = [];
 for (const file of files.filter((entry) => entry.path.startsWith("cases/") && entry.path.endsWith(".json"))) {

@@ -47,6 +47,10 @@ run() {
   [ "$code" -eq 0 ] || overall=1
 }
 
+# The pinned OpenFilm checkout, for the probe and for anything that reads it. It is the
+# same path the Host's own composition reads.
+export NARRALENS_OPENFILM_VENDOR="${NARRALENS_OPENFILM_VENDOR:-/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b}"
+
 echo "== M5 capture at ${CAPTURE_SHA:0:7} (dirty=$DIRTY) =="
 run check             corepack pnpm check
 run typecheck         corepack pnpm exec tsc --noEmit
@@ -114,6 +118,11 @@ printf '%s\n' "$code" > "$LOGS/manifest.exit"
 printf '%-24s exit=%s\n' manifest "$code"
 [ "$code" -eq 0 ] || overall=1
 
+# The end marker: every command of this capture has finished. It is written *before* the
+# integrity gate, because the gate reads the capture's own files and a file that is still
+# being written is by definition incomplete.
+git status --porcelain > "$LOGS/git-status-after.txt"
+
 # The integrity gate, over the whole M5 evidence tree.
 printf '%s\n' "node tools/m5-evidence-integrity.mjs" > "$LOGS/integrity.cmd"
 node tools/m5-evidence-integrity.mjs > "$LOGS/integrity.txt" 2>&1
@@ -123,6 +132,5 @@ printf '%-24s exit=%s\n' integrity "$code"
 [ "$code" -eq 0 ] || overall=1
 
 printf '%s\n' "$overall" > "$LOGS/overall.txt"
-git status --porcelain > "$LOGS/git-status-after.txt"
 printf 'capture %s overall=%s\n' "$CAPTURE_SHA" "$overall"
 exit "$overall"

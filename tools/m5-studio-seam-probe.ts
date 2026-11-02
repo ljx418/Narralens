@@ -22,7 +22,21 @@ import { OpenFilmStudioSupervisor } from "../src/host/m5/openfilm-studio-supervi
  */
 const REPO = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
-const vendorRoot = resolve(process.env.NARRALENS_OPENFILM_VENDOR ?? REPO, "vendor/openfilm");
+/**
+ * Where the pinned checkout is.
+ *
+ * The probe reads the *same* checkout the Host's composition reads, and it never searches
+ * for another one: an explicit root wins, then the sibling checkout the M1B spike made,
+ * then the repository's own `vendor/`.
+ */
+function resolveVendorRoot(): string {
+  const explicit = process.env.OPENFILM_VENDOR_ROOT ?? process.env.NARRALENS_OPENFILM_VENDOR;
+  if (explicit !== undefined && explicit !== "") return resolve(explicit, "vendor/openfilm");
+  const sibling = resolve(REPO, "../Narralens-openfilm-m1b/vendor/openfilm");
+  return sibling;
+}
+
+const vendorRoot = resolveVendorRoot();
 const probePath = resolve(REPO, "docs/evidence/WAVE3/M5/upstream/studio-seam-probe.json");
 const lockPath = resolve(REPO, "contracts/openfilm-upstream-lock.json");
 

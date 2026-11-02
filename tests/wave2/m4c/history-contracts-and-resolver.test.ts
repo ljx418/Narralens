@@ -249,7 +249,7 @@ describe("M4C-03: the negative matrix fails closed", () => {
       revision: running.host.revisions.activeCommit(project.projectId)?.revision,
       snapshot: running.host.revisions.activeCommit(project.projectId)?.snapshot_id,
       impacts: running.host.impacts.byProject(project.projectId).length,
-      outbox: running.host.revisions.pendingOutboxCount(),
+      outbox: running.host.revisions.outboxRowCount(),
       transactions: running.host.revisions.projectTransactions(project.projectId).length,
     };
     const response = await fetch(
@@ -262,7 +262,7 @@ describe("M4C-03: the negative matrix fails closed", () => {
       revision: running.host.revisions.activeCommit(project.projectId)?.revision,
       snapshot: running.host.revisions.activeCommit(project.projectId)?.snapshot_id,
       impacts: running.host.impacts.byProject(project.projectId).length,
-      outbox: running.host.revisions.pendingOutboxCount(),
+      outbox: running.host.revisions.outboxRowCount(),
       transactions: running.host.revisions.projectTransactions(project.projectId).length,
     };
     expect(after).toEqual(before);

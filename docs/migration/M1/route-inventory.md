@@ -59,3 +59,21 @@ M4C 不改变 M4B 的 `/edits` 所有权，也不开放 `checkout/merge/discard/
 `NativeMutationRegistry` 中仍为 `blocked`。恢复发布到 active root 的变化被 ADR-W2.0-006 D-05 限死为两类：
 原子替换 `film.html`，以及安装目标引用而 active root 缺失的内容寻址资产；旧的未被引用的资产不删除。
 M4C 不开放生产 render route，headed/human 体验为 `NOT_RUN`。
+
+## M5 追加（当前实现，不改写上方历史观察）
+
+| Method | 路由 | 当前状态 | 写入所有者/副作用 |
+|---|---|---|---|
+| GET | `/api/migration/v1/projects/:id/workbench` | **M5A 已实现；只读** | `WorkbenchService`：`ProjectResolver.resolveActivated(target)` → `ActivatedProjectionService.layoutFor(view)` → `EnginePort.inspect()`；只用 durable facts 证明 target 与 source 的映射；不读 report 的 `target_clips`、不读 plan 的空 `identity_map`；`preview` 由 serializer 整体替换为 Gateway descriptor；不写 source/revision/lock/outbox/ledger，不返回路径 |
+| POST | `/api/migration/v1/projects/:id/locks` | **M5A 已实现** | `LockMutationService` → `RevisionStore.createLockWithControlRevisionCas`：`base_control_revision` 严格 CAS，比较、lock 行、`control_revision +1` 与 `lock.changed` outbox 在同一 `BEGIN IMMEDIATE`；CAS 失败零 lock/outbox 变化；owner 是安装期持久化的 `host_identity` actor，API 只公开固定 label；同 key 同体重放同响应、异体 409 |
+| DELETE | `/api/migration/v1/projects/:id/locks/:lock_id` | **M5A 已实现** | 同上的 CAS 变体：`RevisionStore.deactivateLockWithControlRevisionCas`；跨项目 lock id 一律 404；重复释放 409 |
+| POST | `/api/migration/v1/projects/:id/comparisons/replay` | **M5A 已实现** | `ComparisonReplayService`：把既有 D4.1 已录制 comparison 复制成 target-owned 的不可变 comparison + 不可变 lineage；映射用 migrator 导出的 `clipIdFor` 纯函数与当前 target projection 互证；不调用 Runner/provider，不改 source/revision/active snapshot/ledger；base revision 与 migration plan 的 source revision 不符时 409 |
+
+M5 另外开放一个**不在本表**的 origin：OpenFilm Studio Gateway。它固定绑定 `127.0.0.1` 的随机端口，
+是浏览器唯一可见且顶层打开的 Studio origin，不占用 `/api/migration/v1` 路由。它的读 allowlist 逐路登记，
+写 deny-by-default，开放集恰为 OpenFilm capability map 报告 supported 的四条 entry
+（`timeline.adopt_materialization`、`history.restore`、`history.undo`、`history.redo`）；
+上游自己的 `/edit`、`files.bring/relink/delete`、`history.commit/discard/checkout/merge` 一律 422，
+raw upstream origin/key/工程绝对路径不进入 API、DOM、日志或截图。Host 的 Origin allowlist 不加入
+Gateway origin，从 Gateway origin 直调 Host 为 401/403 且零副作用。M5 不开放生产 render route，
+不建立第二 timeline，headed/human 体验为 `NOT_RUN`。

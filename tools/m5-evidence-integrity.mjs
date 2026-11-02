@@ -56,6 +56,9 @@ for (const capture of captures) {
   // 4. Every command has its raw triple.
   const commands = [...files].filter((name) => name.endsWith(".cmd")).map((name) => name.slice(0, -4));
   for (const command of commands) {
+    // The gate's own command is still being written while the gate runs: its exit code
+    // cannot exist yet, and requiring it would make the gate fail on itself.
+    if (command === "integrity") continue;
     if (!files.has(`${command}.txt`)) note(`${capture}: ${command} has no raw output`);
     if (!files.has(`${command}.exit`)) note(`${capture}: ${command} has no exit code`);
   }

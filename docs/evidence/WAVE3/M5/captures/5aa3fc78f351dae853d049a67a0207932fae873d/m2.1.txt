@@ -1,0 +1,34 @@
+
+> narralens@0.1.0 test:m2.1 /mnt/c/workspace/videoworkline/Narralens
+> vitest run --config vitest.config.ts tests/m2.1 tests/architecture
+
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens
+
+ ✓ tests/m2.1/source-digest-v1.test.ts (18 tests) 1961ms
+   ✓ SourceDigestV1 closure > EN-04 gives the same digest whatever order the Host declares the roots in  349ms
+   ✓ SourceDigestV1 closure > EN-04 changes the digest when a scene, subtitle, setting, font or referenced asset changes  416ms
+(node:1231559) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.1/engine-route.test.ts (8 tests) 2044ms
+   ✓ M2.1 route activation > AC-019 leaves every legacy route in place  1438ms
+(node:1233343) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.1/native-bypass.test.ts (13 tests) 1988ms
+   ✓ B-01 external source change reaches attention through the production path > 409, then attention=true, then the next typed edit is 423, without touching the edited bytes  329ms
+ ✓ tests/architecture/m2.2-fitness.test.ts (15 tests) 1420ms
+ ✓ tests/architecture/m2.1-fitness.test.ts (22 tests) 802ms
+   ✓ fitness 1-3: dependency direction > 3. production code never imports a spike, statically or dynamically  445ms
+ ✓ tests/m2.1/engine-port.test.ts (10 tests) 545ms
+ ✓ tests/m2.1/openfilm-upstream-lock.test.ts (13 tests) 175ms
+ ✓ tests/m2.1/time-model.test.ts (11 tests) 36ms
+ ✓ tests/m2.1/native-write-gateway.test.ts (20 tests) 29ms
+(node:1265144) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.1/engine-binding-store.test.ts (10 tests) 23ms
+
+ Test Files  10 passed (10)
+      Tests  140 passed (140)
+   Start at  18:50:11
+   Duration  65.83s (transform 2.82s, setup 0ms, collect 22.30s, tests 9.02s, environment 3ms, prepare 23.06s)
+

@@ -1,0 +1,59 @@
+{
+  "run_id": "2026-11-02T12-41-07-835Z",
+  "captured_at": "2026-11-02T12:46:08.669Z",
+  "case_id": "UX-07",
+  "title": "录制 D4.1 comparison 有原始 audit/lineage；三路 proxy 是真实 media events",
+  "status": "PASS",
+  "assertions": [
+    {
+      "claim": "页面把复制的提案标为「已录制提案」并给出 lineage",
+      "ok": true,
+      "detail": "recorded=已录制提案（原始生成审计）· 来源 comparison_m5_recorded_1"
+    },
+    {
+      "claim": "复制动作真的发生了，且拿到了 3 个方案",
+      "ok": true,
+      "detail": "clicked=true proposals=3"
+    },
+    {
+      "claim": "三路 proxy 是真实媒体事件（可解码、有真实时长、在视口内的在播放）",
+      "ok": true,
+      "detail": "{\"count\":3,\"ready\":3,\"playing\":2,\"unmuted\":1,\"durations\":[10,10,10],\"offScreenPlaying\":0}"
+    },
+    {
+      "claim": "只有一路持有音频焦点",
+      "ok": true,
+      "detail": "unmuted=1"
+    }
+  ],
+  "facts": {
+    "state": {
+      "phase": "proposal_only",
+      "revision": "1",
+      "history": "1",
+      "locks": "0",
+      "selection": "",
+      "studio": "",
+      "proposals": 3,
+      "recorded": "已录制提案（原始生成审计）· 来源 comparison_m5_recorded_1",
+      "materialization": null,
+      "impact": null,
+      "restoreIntent": null,
+      "error": null,
+      "text": "Narralens 导演面板\n\ntarget of_d1-30s_9bca26e6source d1-30sr1 · c0900 帧 · 旁白 有\n\n仅有已录制提案\n\n镜头与章节\nshot-001源 shot-0010—300 帧\nshot-002源 shot-002300—600 帧\nshot-003源 shot-003600—900 帧\n\n当前选区：— · 播放头 0 帧\n\n三路真实 proxy\n\n三路同时播放，只有一路持有音频焦点；离开视口的一路会暂停。\n\nproxy-a.mp4\nproxy-b.mp4\nproxy-c.mp4\n比较与采用\n已录制的 D4.1 提案复制已录制提案到本工程\n\n已录制提案（原始生成审计）· 来源 comparison_m5_recorded_1\n\n方案 1\n\nrecorded summary\n\n3 段 · anchor → context → evidence\n方案 2\n\nrecorded summary\n\n3 段 · anchor → contrast → conclusion\n方案 3\n\nrecorded summary\n\n3 段 · anchor → transition → evidence\n素材化计算影响确认采用\n锁\n加项目级画面锁\n历史\nr1 · migration5f069fcb9096…\n准备撤回\n准备重做\n\n撤回与重做只生成恢复意图，仍需计算影响并再次确认。"
+    },
+    "proxies": {
+      "count": 3,
+      "ready": 3,
+      "playing": 2,
+      "unmuted": 1,
+      "durations": [
+        10,
+        10,
+        10
+      ],
+      "offScreenPlaying": 0
+    }
+  },
+  "evidence": []
+}
