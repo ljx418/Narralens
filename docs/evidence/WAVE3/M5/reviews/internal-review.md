@@ -109,6 +109,28 @@
 
 BLOCKER=0、MAJOR=0。八个 MINOR 都是有边界的已知限制，写在这里而不是藏起来。
 
+---
+
+## 接管修复补充审查（2026-11-03）
+
+候选：`e3a1457c018316b8499d513cf7fbb004234c00f2`。本节仍是实现会话自审，不冒充独立外审；
+完整 M5 捕获尚须绑定此候选重新执行，捕获完成前不得声明 `M5_HEADLESS_EVIDENCED`。
+
+前一候选的全量门真实执行到 `91/92` files、`1085/1086` tests 时，冻结锁测试抓到新增的可选
+verification verdict 参数与旧安全断言不一致。复核没有把它当作单纯测试漂移：结构类型允许内部调用者
+伪造 `available: true` verdict，会削弱「只有真实固定上游字节才能被加载」的合同。
+
+| 视角 | 发现 | 闭环与直接证据 |
+|---|---|---|
+| 架构 / 单权威 | Host 启动的首次 clean-tree 检查可瞬时失败，随后迁移却能成功，造成项目已绑定 OpenFilm 而 registry 未安装 | composition 只对精确的 inconclusive clean-check 做有界重试；缺失、SHA、dirty、digest 漂移仍立即失败；专项 9 tests 及真实 composition 通过 |
+| 实现 / 并发 | 同一 migration 的重试会从头执行，已到 `staged` 时触发非法状态迁移；并发首次请求可重复 plan | `MigrationService.execute()` 按持久状态边界恢复并 single-flight；Host plan+execute 进入 source project queue；migration/locks/harness 专项 37 tests 通过 |
+| 安全 | 可复用 verdict 的公开字段可被结构性伪造 | verdict 由模块私有 `WeakSet` 运行时铸造并单次消费；canonical root、固定 SHA、`git_clean` 仍逐项校验；新增伪造 verdict 503 负向用例，M2.1 141 tests 通过 |
+| 证据 | 候选 `a65d259...` 的全量门有一条真实失败 | 失败捕获逐字保留并明确无 overall/manifest/integrity；没有摘绿、覆盖或宣称环境失败 |
+
+补充审查结论：上述修复未引入第二 timeline、第二 migration 状态机或浏览器可控 vendor path；重试范围
+精确且有界，脏 checkout 永不重试；验证凭据不可伪造且不可重放。当前补充审查
+`BLOCKER=0 / MAJOR=0`，但最终状态仍取决于新冻结提交的完整 M5 捕获。
+
 **未做的事（不得被读成已完成）**
 
 - 独立外审（Codex）与人工体验门均未进行；本文件不代替它们。
