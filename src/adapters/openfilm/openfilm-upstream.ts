@@ -214,11 +214,28 @@ async function trackedModifications(root: string, timeout: number): Promise<stri
  * Load the pinned upstream seam. Throws `ENGINE_UNAVAILABLE` when the checkout is absent
  * or not at the pinned SHA; never falls back to another revision or to a bundled copy.
  */
-export async function createPinnedOpenFilmUpstream(vendorRoot: string): Promise<OpenFilmUpstream> {
-  const availability = await openFilmAvailability(vendorRoot);
+export async function createPinnedOpenFilmUpstream(vendorRoot: string,
+  verified?: OpenFilmAvailability): Promise<OpenFilmUpstream> {
+  const availability = verified ?? await openFilmAvailability(vendorRoot);
   if (!availability.available) {
     throw new HttpError(503, "ENGINE_UNAVAILABLE", `OpenFilm upstream unavailable: ${availability.reason}`,
       { expected_sha: OPENFILM_PIN.full_sha, observed_sha: availability.observed_sha });
+  }
+  // Composition may pass the verdict it obtained immediately before this call. Re-running
+  // `git status` here created a second, independent transient failure window: verification
+  // could succeed, then the loader could fail to repeat the same check and leave a migrated
+  // project bound to an uninstalled engine. A supplied verdict is accepted only for the
+  // exact canonical root and exact pin that this loader is about to execute.
+  if (verified !== undefined) {
+    let canonicalRoot: string;
+    try { canonicalRoot = await realpath(vendorRoot); }
+    catch { throw new HttpError(503, "ENGINE_UNAVAILABLE", "OpenFilm upstream disappeared after verification"); }
+    if (canonicalRoot !== availability.vendor_root
+      || availability.observed_sha !== OPENFILM_PIN.full_sha
+      || availability.expected_sha !== OPENFILM_PIN.full_sha
+      || !availability.checked.includes("git_clean")) {
+      throw new HttpError(503, "ENGINE_UNAVAILABLE", "OpenFilm upstream verification verdict is not reusable");
+    }
   }
   const moduleUrl = pathToFileURL(resolve(availability.vendor_root, OPENFILM_PIN.module_path)).href;
   let loaded: Record<string, unknown>;

@@ -13,6 +13,7 @@ import { EngineBindingStore } from "../../src/host/engine/engine-binding-store.j
 import { treeDigest } from "../../src/host/projects/openfilm-migrator.js";
 import { validateMigrationPlan, validateMigrationReport, validateRollbackRecord } from "../../src/contracts/validator.js";
 import type { EngineKind } from "../../src/contracts/engine-types.js";
+import { HttpError } from "../../src/host/api-error.js";
 
 /**
  * EN-03, MIG-01, MIG-05, MIG-06, MIG-07 (M2.3 plan §6).
@@ -248,6 +249,65 @@ describe("MIG-07 the same key replays, a different request conflicts", () => {
     expect(existing?.migration_id).toBe(first.migration_id);
     expect(revisions.migrations.all()).toHaveLength(1);
     expect(revisions.migrations.all().filter((row) => row.target_project_id === first.target_project_id)).toHaveLength(1);
+  });
+
+  it("resumes after a transient validation failure without replaying the staged boundary", async () => {
+    const { deps, revisions } = await harness();
+    const verify = deps.verifyStagedProject;
+    let attempts = 0;
+    const service = new MigrationService({
+      ...deps,
+      verifyStagedProject: async (root) => {
+        attempts += 1;
+        if (attempts === 1) throw new HttpError(503, "ENGINE_UNAVAILABLE", "transient validation failure");
+        return await verify(root);
+      },
+    });
+    const plan = await service.plan({ projectId: PROJECT, idempotencyKey: "mig-key-resume-staged" });
+
+    await expect(service.execute(plan.migration_id)).rejects.toMatchObject({ code: "ENGINE_UNAVAILABLE" });
+    expect(revisions.migrations.get(plan.migration_id)?.state).toBe("staged");
+    const stagedStep = revisions.migrations.steps(plan.migration_id).find((step) => step.id === "stage");
+
+    const report = await service.execute(plan.migration_id);
+    expect(report.state).toBe("reported");
+    expect(report.complete).toBe(true);
+    expect(attempts).toBe(2);
+    expect(revisions.migrations.steps(plan.migration_id).find((step) => step.id === "stage"))
+      .toEqual(stagedStep);
+  });
+
+  it("coalesces concurrent execution of the same durable migration", async () => {
+    const { deps, revisions } = await harness();
+    const verify = deps.verifyStagedProject;
+    let verifyCalls = 0;
+    let release!: () => void;
+    let signalEntered!: () => void;
+    const gate = new Promise<void>((resolveGate) => { release = resolveGate; });
+    const entered = new Promise<void>((resolveEntered) => { signalEntered = resolveEntered; });
+    const service = new MigrationService({
+      ...deps,
+      verifyStagedProject: async (root) => {
+        verifyCalls += 1;
+        signalEntered();
+        await gate;
+        return await verify(root);
+      },
+    });
+    const plan = await service.plan({ projectId: PROJECT, idempotencyKey: "mig-key-concurrent-run" });
+    const first = service.execute(plan.migration_id);
+    const second = service.execute(plan.migration_id);
+    // Wait for the production boundary itself. A timer/tick here races the real fixture's
+    // file copy and can make test cleanup delete its source while execution is still live.
+    await entered;
+    expect(verifyCalls).toBe(1);
+    release();
+
+    const [left, right] = await Promise.all([first, second]);
+    expect(left.state).toBe("reported");
+    expect(right.state).toBe("reported");
+    expect(verifyCalls).toBe(1);
+    expect(revisions.migrations.all()).toHaveLength(1);
   });
 });
 

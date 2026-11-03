@@ -1585,19 +1585,24 @@ export class NarralensHost {
     if (idempotencyKey.length < 8 || idempotencyKey.length > 128) {
       throw new HttpError(400, "INVALID_REQUEST", "idempotency_key must be 8 to 128 characters");
     }
-    const plan = await this.migrations.plan({ projectId, idempotencyKey });
-    let report;
-    try { report = await this.migrations.execute(plan.migration_id); }
-    catch (error) {
-      // A blocked or crashed migration still has a report worth reading.
-      const failed = this.#migrationReport(plan.migration_id);
-      if (failed.state === "aborted" || failed.state === "attention" || failed.state === "recovering") {
-        json(response, 409, failed);
-        return;
+    await this.operations.run(projectId, async () => {
+      // Planning and execution share the source project's serial boundary. Without this,
+      // two simultaneous first requests can both observe "no plan", create different
+      // migration ids for the same target, and only collide after filesystem work begins.
+      const plan = await this.migrations.plan({ projectId, idempotencyKey });
+      let report;
+      try { report = await this.migrations.execute(plan.migration_id); }
+      catch (error) {
+        // A blocked or crashed migration still has a report worth reading.
+        const failed = this.#migrationReport(plan.migration_id);
+        if (failed.state === "aborted" || failed.state === "attention" || failed.state === "recovering") {
+          json(response, 409, failed);
+          return;
+        }
+        throw error;
       }
-      throw error;
-    }
-    json(response, report.complete ? 200 : 409, report);
+      json(response, report.complete ? 200 : 409, report);
+    });
   }
 
   #migrationReport(migrationId: string): MigrationReportV1 {

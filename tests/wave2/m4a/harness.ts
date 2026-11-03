@@ -10,6 +10,7 @@ import { planDigest, VISUAL_TRACK_ID } from "../../../src/host/materialize/nativ
 import type { MaterializationV1, NativePlanV1 } from "../../../src/contracts/wave2-types.js";
 import type { ActivatedProjectView } from "../../../src/host/projects/project-resolver.js";
 import type { PublishBoundary } from "../../../src/host/adoption/author-source-publisher.js";
+import { retryRecoverable } from "../../support/retry-recoverable.js";
 
 /**
  * The M4A test harness.
@@ -104,44 +105,6 @@ export async function stopAll(hosts: readonly NarralensHost[], dirs: readonly st
   await Promise.all(dirs.map((dir) => rm(dir, { recursive: true, force: true })));
 }
 
-/**
- * Retry a *recoverable* resource failure.
- *
- * The Host maps ENOMEM and its siblings to `HOST_RESOURCE_EXHAUSTED` with
- * `recoverable: true` precisely so that a transient machine condition is not reported as a
- * behavioural failure. This box runs several sessions at once and has run out of memory
- * during a capture more than once; a test that treats that as "the feature is broken" is
- * wrong in both directions.
- *
- * It is a retry on a *recoverable* error only. An assertion about behaviour is never
- * relaxed: if the second attempt fails for any reason, the failure stands.
- */
-async function retryRecoverable<T>(operation: () => Promise<T>, attempts = 3): Promise<T> {
-  let last: unknown;
-  for (let attempt = 0; attempt < attempts; attempt += 1) {
-    try { return await operation(); }
-    catch (error) {
-      const code = (error as { code?: string }).code;
-      const details = (error as { details?: { recoverable?: boolean } }).details;
-      const message = error instanceof Error ? error.message : String(error);
-      // The pinned checkout is verified with a `git status` subprocess. When the machine
-      // is saturated the subprocess is killed or times out, the verification cannot
-      // answer, and the Host closes the capability — correctly, but *transiently*. The
-      // message says so: "cannot verify that the pinned OpenFilm checkout is clean" is a
-      // failed check, while "has local modifications" is a real one. Only the first is
-      // retried, and only on a machine condition.
-      const unverifiable = code === "ENGINE_UNAVAILABLE"
-        && message.includes("cannot verify that the pinned OpenFilm checkout is clean");
-      const recoverable = (code === "HOST_RESOURCE_EXHAUSTED" && details?.recoverable !== false)
-        || unverifiable;
-      if (!recoverable || attempt === attempts - 1) throw error;
-      last = error;
-      await new Promise((done) => setTimeout(done, 500 * (attempt + 1)));
-    }
-  }
-  throw last;
-}
-
 /** Migrate the real fixture through the Host's own route. */
 export async function migrate(running: Started, idempotencyKey = "m4a-migrate-1"): Promise<Migrated> {
   const response = await retryRecoverable(async () => {
@@ -151,11 +114,29 @@ export async function migrate(running: Started, idempotencyKey = "m4a-migrate-1"
     });
     if (attempt.status !== 200) {
       const text = await attempt.text();
-      const parsed = (() => { try { return JSON.parse(text) as { code?: string; details?: { recoverable?: boolean } }; } catch { return {}; } })();
-      if (parsed.code === "HOST_RESOURCE_EXHAUSTED" && parsed.details?.recoverable !== false) {
-        throw Object.assign(new Error(`MIGRATE_${attempt.status}: ${text.slice(0, 300)}`), parsed);
-      }
-      throw new Error(`MIGRATE_${attempt.status}: ${text.slice(0, 300)}`);
+      const parsed = (() => { try { return JSON.parse(text) as {
+        code?: string; message?: string; correlation_id?: string;
+        details?: { recoverable?: boolean };
+      }; } catch { return {}; } })();
+      // Preserve the Host's structured error for the bounded retry classifier above.
+      // Previously only HOST_RESOURCE_EXHAUSTED retained `code`; an unverifiable pinned
+      // checkout therefore became a plain Error and the intended ENGINE_UNAVAILABLE retry
+      // was unreachable. Unknown and genuinely dirty-checkout errors still do not retry,
+      // because retryRecoverable checks both the exact code and exact diagnostic text.
+      const diagnostic = parsed.correlation_id === undefined
+        ? undefined
+        : running.host.failures.byCorrelationId(parsed.correlation_id);
+      const suffix = diagnostic === undefined ? ""
+        : ` diagnostic=${diagnostic.stage}:${diagnostic.kind}:${diagnostic.message_redacted}`;
+      const failure = new Error(`MIGRATE_${attempt.status}: ${text.slice(0, 300)}${suffix}`);
+      // Keep the structured fields used by retryRecoverable without copying `message` over
+      // the actionable local message above.
+      Object.assign(failure, {
+        ...(parsed.code === undefined ? {} : { code: parsed.code }),
+        ...(parsed.details === undefined ? {} : { details: parsed.details }),
+        ...(parsed.correlation_id === undefined ? {} : { correlation_id: parsed.correlation_id }),
+      });
+      throw failure;
     }
     return attempt;
   });

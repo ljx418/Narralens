@@ -45,22 +45,62 @@ export interface OpenFilmLayoutRegistrar {
   registerLayout(projectId: string, layout: OpenFilmProjectLayout): void;
 }
 
+export interface OpenFilmAvailabilityRetryOptions {
+  readonly attempts?: number;
+  readonly delayMs?: number;
+  readonly check?: (vendorRoot: string, gitStatusTimeoutMs: number) => Promise<OpenFilmAvailability>;
+}
+
+/**
+ * Verify the pinned checkout with a bounded retry for an *inconclusive* clean-tree check.
+ *
+ * Missing bytes, a different SHA, tracked modifications and digest drift are conclusive
+ * failures and return immediately. Only a `git status` check that could not complete may
+ * be repeated. Without this distinction a transiently saturated machine can start a Host
+ * without its OpenFilm port, then successfully migrate and persist an OpenFilm binding;
+ * every later operation would fail with "bound but not installed" until restart.
+ */
+export async function verifyOpenFilmForComposition(vendorRoot: string, gitStatusTimeoutMs: number,
+  options: OpenFilmAvailabilityRetryOptions = {}): Promise<OpenFilmAvailability> {
+  const attempts = options.attempts ?? 3;
+  if (!Number.isSafeInteger(attempts) || attempts < 1) throw new Error("INVALID_OPENFILM_VERIFICATION_ATTEMPTS");
+  const delayMs = options.delayMs ?? 500;
+  if (!Number.isFinite(delayMs) || delayMs < 0) throw new Error("INVALID_OPENFILM_VERIFICATION_DELAY");
+  const check = options.check ?? openFilmAvailability;
+  let last: OpenFilmAvailability | undefined;
+  for (let attempt = 0; attempt < attempts; attempt += 1) {
+    last = await check(vendorRoot, gitStatusTimeoutMs);
+    if (last.available || last.reason !== "cannot verify that the pinned OpenFilm checkout is clean") return last;
+    if (attempt < attempts - 1 && delayMs > 0) {
+      await new Promise((done) => setTimeout(done, delayMs * (attempt + 1)));
+    }
+  }
+  return last!;
+}
+
 export async function composeOpenFilmPort(input: {
   readonly registry: EngineRegistry;
   readonly vendorRoot: string;
   /** Bounded so a hung `git status` cannot hold startup open. */
   readonly gitStatusTimeoutMs?: number;
+  /** Bounded retries apply only when the clean-tree check could not complete. */
+  readonly verificationAttempts?: number;
+  readonly verificationRetryDelayMs?: number;
   /** Test-only seam for M4C's fault matrix; production composition omits it. */
   readonly fault?: (point: string) => void | Promise<void>;
 }): Promise<OpenFilmComposition> {
-  const availability = await openFilmAvailability(input.vendorRoot, input.gitStatusTimeoutMs ?? 30_000);
+  const availability = await verifyOpenFilmForComposition(input.vendorRoot,
+    input.gitStatusTimeoutMs ?? 30_000, {
+      ...(input.verificationAttempts === undefined ? {} : { attempts: input.verificationAttempts }),
+      ...(input.verificationRetryDelayMs === undefined ? {} : { delayMs: input.verificationRetryDelayMs }),
+    });
   if (!availability.available) {
     return { installed: false, availability, vendor_root: availability.vendor_root,
       reason: availability.reason };
   }
   // Loading is the last step and the only one that can execute anything, so it happens
   // only once the checkout has already been proven.
-  const upstream = await createPinnedOpenFilmUpstream(input.vendorRoot);
+  const upstream = await createPinnedOpenFilmUpstream(input.vendorRoot, availability);
   const adapter = new OpenFilmEngineAdapter(upstream,
     input.fault === undefined ? {} : { fault: input.fault });
   input.registry.register("openfilm", adapter);

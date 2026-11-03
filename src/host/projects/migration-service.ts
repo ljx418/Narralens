@@ -90,6 +90,14 @@ const VALIDATION_STEPS: readonly MigrationValidationStep[] = [
 
 export class MigrationService {
   /**
+   * One process may receive the same idempotent HTTP request more than once before the
+   * first response is observed. The database state machine is the durable authority, while
+   * this map only prevents two callers in this process from trying to advance the same row
+   * at once. It is deliberately deleted in `finally`: a transient failure must remain
+   * retryable from the last committed boundary.
+   */
+  readonly #executions = new Map<string, Promise<MigrationReportV1>>();
+  /**
    * Target roots, derived rather than remembered.
    *
    * A copy lives at `migrationRoot/<migration_id>`, which is the same rule
@@ -182,97 +190,142 @@ export class MigrationService {
    * rather than in a state only memory knew about.
    */
   async execute(migrationId: string, now = new Date()): Promise<MigrationReportV1> {
+    const active = this.#executions.get(migrationId);
+    if (active !== undefined) return await active;
+    const execution = this.#executeFromDurableState(migrationId, now);
+    this.#executions.set(migrationId, execution);
+    try { return await execution; }
+    finally {
+      if (this.#executions.get(migrationId) === execution) this.#executions.delete(migrationId);
+    }
+  }
+
+  /** Resume at the first boundary that is not already durable; never replay an earlier one. */
+  async #executeFromDurableState(migrationId: string, now: Date): Promise<MigrationReportV1> {
     const store = this.deps.revisions.migrations;
     const plan = store.plan(migrationId);
     if (plan === undefined) throw new HttpError(404, "NOT_FOUND", "Migration not found");
+    let state = store.require(migrationId)!.state;
+    if (state === "reported") return this.report(migrationId);
+    if (state === "aborted" || state === "attention" || state === "recovering") {
+      throw new HttpError(409, "PROJECT_ATTENTION_REQUIRED",
+        `Migration cannot execute while it is ${state}`);
+    }
     if (plan.blocking.length > 0) {
-      store.transition(migrationId, "plan_written", "aborted", now);
+      if (state === "plan_written") store.transition(migrationId, "plan_written", "aborted", now);
       store.recordStep(migrationId, { id: "stage", status: "blocked",
         detail: plan.blocking.join("; "), artifact_sha256: null, at: now.toISOString() });
       throw new HttpError(422, "UNSUPPORTED_EDIT", `MIGRATION_BLOCKED: ${plan.blocking.join("; ")}`);
     }
-    await this.#crash("after_plan");
 
     const sourceRoot = resolve(this.deps.catalog.descriptorRoot(plan.source_project_id));
     const descriptor = await this.deps.catalog.readDescriptor(plan.source_project_id);
     const targetRoot = resolve(this.deps.migrationRoot, plan.migration_id);
-    await rm(targetRoot, { recursive: true, force: true });
-
     const input = await this.#stageInput(descriptor, sourceRoot, targetRoot);
-    const migrated = await migrateToOpenFilm(input);
-    store.transition(migrationId, "plan_written", "staged", now);
-    store.recordStep(migrationId, { id: "stage", status: "done",
-      detail: `staged ${migrated.identity_map.length} native clips`, artifact_sha256: migrated.contentDigest,
-      at: now.toISOString() });
-    await this.#crash("after_stage");
+    let contentDigest: string | null = null;
+    let totalFrames = clipsOf(descriptor).reduce((max, clip) => Math.max(max, clip.end_frame_exclusive), 0);
 
-    // The engine decides whether this is acceptable; the service does not second-guess it.
-    const clips = await this.deps.verifyStagedProject(targetRoot);
-    const expected = clipsOf(descriptor).map((clip) => clip.source_id);
-    const actual = clips.map((clip) => clip.target_id);
-    if (clips.length !== expected.length || actual.join(",") !== expected.join(",")) {
-      store.transition(migrationId, "staged", "aborted", now);
-      store.recordStep(migrationId, { id: "validate", status: "failed",
-        detail: `engine reported clips ${actual.join(",")}, expected ${expected.join(",")}`,
-        artifact_sha256: null, at: now.toISOString() });
-      throw new HttpError(422, "UNSUPPORTED_EDIT", "MIGRATION_VALIDATION_FAILED: clip identities differ from the source");
+    if (state === "plan_written") {
+      await this.#crash("after_plan");
+      await rm(targetRoot, { recursive: true, force: true });
+      const migrated = await migrateToOpenFilm(input);
+      contentDigest = migrated.contentDigest;
+      totalFrames = migrated.totalFrames;
+      store.transition(migrationId, "plan_written", "staged", now);
+      store.recordStep(migrationId, { id: "stage", status: "done",
+        detail: `staged ${migrated.identity_map.length} native clips`, artifact_sha256: migrated.contentDigest,
+        at: now.toISOString() });
+      state = "staged";
+      await this.#crash("after_stage");
     }
-    store.transition(migrationId, "staged", "validated", now);
-    store.recordStep(migrationId, { id: "validate", status: "done",
-      detail: `engine confirmed ${clips.length} native editable clips`,
-      artifact_sha256: migrated.contentDigest, at: now.toISOString() });
-    await this.#crash("after_validate");
 
-    const published = await this.deps.snapshots.publish({
-      projectId: plan.target_project_id, engine: MIGRATION_TARGET_ENGINE,
-      engineUpstreamSha: plan.target_engine_upstream_sha,
-      descriptor: { ...descriptor, project_id: plan.target_project_id },
-      sourceRoot: targetRoot,
-      // The migrated project's closure is OpenFilm's, not the source's: film.html plus the
-      // subtitle and the assets it references. Deriving it from the engine kind would look
-      // for the Hypit Run file, which the copy does not have.
-      roots: openFilmRoots(input),
-    });
-    store.setTargetSnapshot(migrationId, published.snapshot_id, published.source_digest, now, migrated.totalFrames);
-    store.transition(migrationId, "validated", "snapshot_published", now);
-    store.recordStep(migrationId, { id: "snapshot", status: "done",
-      detail: `published snapshot ${published.snapshot_id}`, artifact_sha256: published.source_digest,
-      at: now.toISOString() });
-    await this.#crash("after_snapshot");
+    let clips: MigrationIdentityEntry[] = [];
+    if (state === "staged") {
+      // The engine decides whether this is acceptable; the service does not second-guess it.
+      clips = await this.deps.verifyStagedProject(targetRoot);
+      const expected = clipsOf(descriptor).map((clip) => clip.source_id);
+      const actual = clips.map((clip) => clip.target_id);
+      if (clips.length !== expected.length || actual.join(",") !== expected.join(",")) {
+        store.transition(migrationId, "staged", "aborted", now);
+        store.recordStep(migrationId, { id: "validate", status: "failed",
+          detail: `engine reported clips ${actual.join(",")}, expected ${expected.join(",")}`,
+          artifact_sha256: null, at: now.toISOString() });
+        throw new HttpError(422, "UNSUPPORTED_EDIT", "MIGRATION_VALIDATION_FAILED: clip identities differ from the source");
+      }
+      contentDigest ??= await treeDigest(targetRoot);
+      store.transition(migrationId, "staged", "validated", now);
+      store.recordStep(migrationId, { id: "validate", status: "done",
+        detail: `engine confirmed ${clips.length} native editable clips`,
+        artifact_sha256: contentDigest, at: now.toISOString() });
+      state = "validated";
+      await this.#crash("after_validate");
+    }
 
-    await this.#crash("before_commit");
-    const commitRecord = this.#commitTarget(plan, published, now);
-    store.transition(migrationId, "snapshot_published", "committed", now);
-    store.recordStep(migrationId, { id: "commit", status: "done",
-      detail: `active commit ${published.snapshot_id}`, artifact_sha256: published.source_digest,
-      at: now.toISOString() });
-    await this.#crash("after_commit");
+    if (state === "validated") {
+      const published = await this.deps.snapshots.publish({
+        projectId: plan.target_project_id, engine: MIGRATION_TARGET_ENGINE,
+        engineUpstreamSha: plan.target_engine_upstream_sha,
+        descriptor: { ...descriptor, project_id: plan.target_project_id },
+        sourceRoot: targetRoot,
+        // The migrated project's closure is OpenFilm's, not the source's: film.html plus the
+        // subtitle and the assets it references. Deriving it from the engine kind would look
+        // for the Hypit Run file, which the copy does not have.
+        roots: openFilmRoots(input),
+      });
+      store.setTargetSnapshot(migrationId, published.snapshot_id, published.source_digest, now, totalFrames);
+      store.transition(migrationId, "validated", "snapshot_published", now);
+      store.recordStep(migrationId, { id: "snapshot", status: "done",
+        detail: `published snapshot ${published.snapshot_id}`, artifact_sha256: published.source_digest,
+        at: now.toISOString() });
+      state = "snapshot_published";
+      await this.#crash("after_snapshot");
+    }
 
-    await this.#crash("before_bind");
-    this.#bindTarget(plan, now);
-    await this.#crash("after_bind_before_ledger");
+    const snapshot = store.targetSnapshot(migrationId);
+    if (state === "snapshot_published") {
+      if (snapshot.snapshotId === null || snapshot.sourceDigest === null) {
+        throw new HttpError(409, "PROJECT_ATTENTION_REQUIRED", "Published migration snapshot facts are missing");
+      }
+      await this.#crash("before_commit");
+      this.#commitTarget(plan, { snapshot_id: snapshot.snapshotId, source_digest: snapshot.sourceDigest }, now);
+      store.transition(migrationId, "snapshot_published", "committed", now);
+      store.recordStep(migrationId, { id: "commit", status: "done",
+        detail: `active commit ${snapshot.snapshotId}`, artifact_sha256: snapshot.sourceDigest,
+        at: now.toISOString() });
+      state = "committed";
+      await this.#crash("after_commit");
+    }
 
-    // ASSET-03. The target's asset facts are established *before* the migration becomes
-    // terminal. `ProjectResolver` requires a terminal migration, so until this point the
-    // target is not resolvable at all — which is the safe direction. Doing it the other way
-    // round would open a window where the project resolves and its ledger does not exist.
-    await this.#seedLedger(plan, now);
-    await this.#crash("after_ledger");
+    if (state === "committed") {
+      await this.#crash("before_bind");
+      this.#bindTarget(plan, now);
+      await this.#crash("after_bind_before_ledger");
 
-    store.transition(migrationId, "committed", "activated", now);
-    store.recordStep(migrationId, { id: "bind", status: "done",
-      detail: `bound ${plan.target_project_id} to ${plan.target_engine}@${plan.target_engine_upstream_sha}`,
-      artifact_sha256: published.source_digest, at: now.toISOString() });
-    await this.#crash("after_bind");
+      // ASSET-03. The target's asset facts are established *before* the migration becomes
+      // terminal. `ProjectResolver` requires a terminal migration, so until this point the
+      // target is not resolvable at all — which is the safe direction. Doing it the other way
+      // round would open a window where the project resolves and its ledger does not exist.
+      await this.#seedLedger(plan, now);
+      await this.#crash("after_ledger");
 
-    await this.#crash("before_report");
-    const exports = await this.#export(migrationId, [plan.target_project_id], now);
-    store.transition(migrationId, "activated", "reported", now);
-    store.recordStep(migrationId, { id: "report", status: "done",
-      detail: `migration reported with ${exports.length} export artifact(s)`,
-      artifact_sha256: exports[0]?.sha256 ?? null, at: now.toISOString() });
-    void commitRecord;
-    return this.report(migrationId, { targetClips: clips, exportArtifacts: exports, now });
+      store.transition(migrationId, "committed", "activated", now);
+      store.recordStep(migrationId, { id: "bind", status: "done",
+        detail: `bound ${plan.target_project_id} to ${plan.target_engine}@${plan.target_engine_upstream_sha}`,
+        artifact_sha256: snapshot.sourceDigest, at: now.toISOString() });
+      state = "activated";
+      await this.#crash("after_bind");
+    }
+
+    if (state === "activated") {
+      await this.#crash("before_report");
+      const exports = await this.#export(migrationId, [plan.target_project_id], now);
+      store.transition(migrationId, "activated", "reported", now);
+      store.recordStep(migrationId, { id: "report", status: "done",
+        detail: `migration reported with ${exports.length} export artifact(s)`,
+        artifact_sha256: exports[0]?.sha256 ?? null, at: now.toISOString() });
+      return this.report(migrationId, { targetClips: clips, exportArtifacts: exports, now });
+    }
+    throw new HttpError(409, "PROJECT_ATTENTION_REQUIRED", `Unsupported migration state ${state}`);
   }
 
   report(migrationId: string, extras: {
@@ -379,12 +432,6 @@ export class MigrationService {
   // ── recovery ───────────────────────────────────────────────────────────────────────
 
   /**
-   * Decide every unfinished migration. A crash can leave exactly three situations: the new
-   * copy is not active and can be finished or discarded, the copy is fully active and the
-   * report can be rebuilt, or something is uncertain and everything stops in attention.
-   * Guessing success is never an option.
-   */
-  /**
    * Startup recovery.
    *
    * A migration that reached `activated` is finished as far as the *project* is concerned:
@@ -404,75 +451,20 @@ export class MigrationService {
     for (const row of store.incomplete()) {
       if (row.state === "recovering") { recovering.push(row.migration_id); continue; }
       if (row.state === "attention") { attention.push(row.migration_id); continue; }
-      const bound = this.deps.bindings.read(row.target_project_id);
-      const snapshot = store.targetSnapshot(row.migration_id);
-      if (row.state === "activated" || row.state === "reported"
-        || (bound !== undefined && snapshot.snapshotId !== null)) {
-        const finished = await this.#finishActivated(row.migration_id, now);
-        (finished ? completed : recovering).push(row.migration_id);
-        continue;
+      try {
+        // `execute` is boundary-aware: it reads the durable row and starts after the last
+        // successful transition. Recovery therefore uses the same implementation as an
+        // idempotent HTTP retry instead of moving an otherwise resumable row into the
+        // one-way `recovering` parking state.
+        await this.execute(row.migration_id, now);
+        completed.push(row.migration_id);
+      } catch {
+        const observed = store.require(row.migration_id)?.state;
+        if (observed === "attention") attention.push(row.migration_id);
+        else recovering.push(row.migration_id);
       }
-      store.markRecovering(row.migration_id, "unfinished before activation; safe to retry", now);
-      recovering.push(row.migration_id);
     }
     return { recovering, attention, completed };
-  }
-
-  /**
-   * Finishes a migration that got as far as `activated`. Both steps are idempotent: the
-   * ledger is keyed by evidence digest, and the export already on disk is reused.
-   *
-   * Returns false when the tail could not be completed, which is a real failure and is
-   * reported as `recovering` rather than being papered over with a synthetic report step.
-   */
-  async #finishActivated(migrationId: string, now: Date): Promise<boolean> {
-    const store = this.deps.revisions.migrations;
-    const row = store.require(migrationId);
-    if (row === undefined) return false;
-    const plan = store.plan(migrationId);
-    if (plan === undefined) return false;
-    const snapshot = store.targetSnapshot(migrationId);
-
-    // `committed` is included because a crash between binding and seeding leaves the
-    // migration exactly there, with its snapshot published and its binding written. The
-    // remaining work is the same tail, so it is the same recovery.
-    if (row.state === "committed" || row.state === "activated") {
-      const resumeTo = row.state;
-      try {
-        // Seed *before* `markRecovering`. The ledger deliberately refuses to seed against a
-        // migration in `recovering`, because that state means "a human or a restart owns
-        // this". Marking first and seeding second therefore always fails, and the failure
-        // looked like the tail being unprovable rather than like an ordering mistake.
-        await this.#seedLedger(plan, now);
-        store.markRecovering(migrationId, "resume activation tail after restart", now);
-        // From `recovering` the only forward exit is `activated`, which is also the honest
-        // one: by the time recovery runs, the snapshot is published, the commit is recorded
-        // and the binding is written. Activation is complete the moment the ledger exists.
-        store.transition(migrationId, "recovering", "activated", now);
-        void resumeTo;
-        const exports = await this.#export(migrationId, [plan.target_project_id], now);
-        store.transition(migrationId, "activated", "reported", now);
-        store.recordStep(migrationId, { id: "report", status: "done",
-          detail: `report rebuilt after restart with ${exports.length} export artifact(s)`,
-          artifact_sha256: exports[0]?.sha256 ?? snapshot.sourceDigest, at: now.toISOString() });
-        return true;
-      } catch {
-        // Cannot prove the tail. Park it where a human will see it rather than reporting a
-        // migration as finished whose asset facts were never established.
-        if (store.require(migrationId)?.state === "recovering") {
-          store.transition(migrationId, "recovering", "attention", now);
-        }
-        return false;
-      }
-    }
-    if (row.state === "reported") {
-      // Terminal already; recovery must not move it, and must not claim a rebuild.
-      store.recordStep(migrationId, { id: "report", status: "done",
-        detail: "already reported before the restart; nothing to rebuild",
-        artifact_sha256: snapshot.sourceDigest, at: now.toISOString() });
-      return true;
-    }
-    return false;
   }
 
   // ── internals ──────────────────────────────────────────────────────────────────────
