@@ -1,0 +1,37 @@
+
+> narralens@0.1.0 check /mnt/c/workspace/videoworkline/Narralens
+> tsc --noEmit && vitest run --config vitest.config.ts && python3 -I tests/wave2/m4a/impact-hash.golden.py tests/wave2/m4a/impact-hash.vectors.json && vite build && vite build --config vite.m5.config.ts
+
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens
+
+(node:3842784) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m5/comparison-replay.test.ts (6 tests) 241558ms
+   ✓ M5 comparison replay: a recorded comparison, copied onto the target > copies the recorded comparison, adds the lineage, and writes nothing else  31883ms
+   ✓ M5 comparison replay: a recorded comparison, copied onto the target > replays the same response for the same key and refuses a different body under it  34641ms
+   ✓ M5 comparison replay: a recorded comparison, copied onto the target > refuses a comparison that belongs to another project  39275ms
+   ✓ M5 comparison replay: a recorded comparison, copied onto the target > refuses a comparison recorded against a baseline before the migration, with the message the page shows  43283ms
+   ✓ M5 comparison replay: a recorded comparison, copied onto the target > refuses a selection that the target's own projection does not carry  41776ms
+   ✓ M5 comparison replay: a recorded comparison, copied onto the target > refuses a request that carries a prompt, and a request that names no key  50697ms
+(node:3921219) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/m5/locks.test.ts (8 tests | 1 failed) 432194ms
+   ✓ M5 locks: the strict control-revision CAS > creates a lock, moves the control revision and writes exactly one lock.changed row  32452ms
+   ✓ M5 locks: the strict control-revision CAS > refuses a stale base control revision and changes nothing at all  35103ms
+   ✓ M5 locks: the strict control-revision CAS > replays the same response for the same key and refuses a different body under it  52135ms
+   ✓ M5 locks: the strict control-revision CAS > refuses a request that names an owner, a type outside the set, or an extra field  34316ms
+   ✓ M5 locks: the strict control-revision CAS > refuses a shot lock that names no clip, a clip that does not exist, or a range outside it  26672ms
+   ✓ M5 locks: the strict control-revision CAS > refuses a project lock that does not cover the whole film  30981ms
+   × M5 locks: the strict control-revision CAS > answers 404 for a lock id that belongs to another project, and releases its own 65604ms
+     → MIGRATE_503: {"code":"ENGINE_UNAVAILABLE","message":"OpenFilm upstream unavailable: cannot verify that the pinned OpenFilm checkout is clean","correlation_id":"d8f09078-40b1-42f5-adb6-cd3363191667","details":{"expected_sha":"e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3","observed_sha":"e70d9d93c7bebe3d634ff2caa6f7a7
+   ✓ M5 locks: the strict control-revision CAS > keeps the installation's actor identity across a restart, and never publishes it  154927ms
+(node:3991282) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m5/workbench.test.ts (3 tests) 231086ms
+   ✓ M5 workbench: the read model over a real migrated target > publishes the target's own projection, its source lineage and the Gateway's preview  121495ms
+   ✓ M5 workbench: the read model over a real migrated target > publishes no path, no token and no adapter class name  86398ms
+   ✓ M5 workbench: the read model over a real migrated target > refuses a project that was never migrated, and one that does not exist  23190ms
+(node:4016161) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ELIFECYCLE  Command failed.
