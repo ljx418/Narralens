@@ -2,6 +2,15 @@
   "kind": "narralens.m5_failed_captures@1.0",
   "captures": [
     {
+      "capture": "0bc91e0580ec907dee051a49beef354347188101",
+      "recorded_at": "2026-11-03T03:34:01.668Z",
+      "incomplete": true,
+      "overall_exit": null,
+      "blocked_env": "M5_BLOCKED_ENV:MIGRATION_FAILED:503:{\"code\":\"ENGINE_UNAVAILABLE\",\"message\":\"OpenFilm upstream unavailable: cannot verify that the pinned OpenFilm checkout is clean\",\"correlation_id\":\"9bd68ecc-e1e8-4100-8cbd-75f2a6d25c6c\",\"details\":{\"expected_sha\":\"e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3\",\"observed_sha\":\"e70d9d93c7bebe3d634ff2caa6f7a7",
+      "cases": [],
+      "note": "这一次捕获没有通过；它被保留在这里，而不是被删除或重跑成一个绿色。"
+    },
+    {
       "capture": "2026-10-26T12-18-48-752Z",
       "recorded_at": "2026-11-02T07:23:51.853Z",
       "incomplete": true,
@@ -254,6 +263,15 @@
       "note": "这一次捕获没有通过；它被保留在这里，而不是被删除或重跑成一个绿色。"
     },
     {
+      "capture": "85b8de2f160c1b72663a7dd8fa9421e0ac967e67",
+      "recorded_at": "2026-11-03T03:34:05.352Z",
+      "incomplete": true,
+      "overall_exit": null,
+      "blocked_env": null,
+      "cases": [],
+      "note": "这一次捕获没有通过；它被保留在这里，而不是被删除或重跑成一个绿色。"
+    },
+    {
       "capture": "a9718aedf9b19d5ddba291a704f05880d69ecfeb",
       "recorded_at": "2026-11-02T13:05:12.252Z",
       "incomplete": true,
@@ -263,5 +281,5 @@
       "note": "这一次捕获没有通过；它被保留在这里，而不是被删除或重跑成一个绿色。"
     }
   ],
-  "updated_at": "2026-11-02T18:30:06.978Z"
+  "updated_at": "2026-11-03T03:34:05.418Z"
 }

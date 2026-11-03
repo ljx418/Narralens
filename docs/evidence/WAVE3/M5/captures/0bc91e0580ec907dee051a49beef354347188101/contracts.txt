@@ -1,0 +1,17 @@
+
+> narralens@0.1.0 test:contracts /mnt/c/workspace/videoworkline/Narralens
+> vitest run --config vitest.config.ts tests/contracts
+
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens
+
+ ✓ tests/contracts/contracts.test.ts (7 tests) 351ms
+   ✓ API contracts > registers the D2-D4.0 frozen schemas  338ms
+ ✓ tests/contracts/d4.2.1-contracts.test.ts (6 tests) 141ms
+ ✓ tests/contracts/d4.1-contracts.test.ts (8 tests) 56ms
+
+ Test Files  3 passed (3)
+      Tests  21 passed (21)
+   Start at  08:28:20
+   Duration  33.56s (transform 729ms, setup 0ms, collect 16.59s, tests 549ms, environment 1ms, prepare 10.44s)
+

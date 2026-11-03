@@ -162,6 +162,19 @@ export class OpenFilmStudioSupervisor {
   }
 
   /**
+   * Probe again, discarding the memoised answer.
+   *
+   * The memo is right for a checkout that does not change, and wrong for a *failed*
+   * check: a verification that could not complete (a saturated machine, a killed
+   * subprocess) says nothing about the checkout, and the only way to learn is to ask
+   * again.
+   */
+  async refresh(): Promise<StudioSeamProbe> {
+    this.#probe = undefined;
+    return await this.probe();
+  }
+
+  /**
    * Make sure the Studio is running and the target is open in it.
    *
    * The returned descriptor is what the workbench projection publishes as its `preview`:

@@ -224,6 +224,9 @@ describe("M5 locks: the strict control-revision CAS", () => {
       start_frame: 0, end_frame_exclusive: before.frame_count,
       reason_code: "preserve_visual", idempotency_key: "m5-lock-release-1",
     });
+    // The body is the diagnosis when it is not what was expected: a lock that was not
+    // created says why in the Host's own answer.
+    expect(created.status, JSON.stringify(created.body)).toBe(200);
     const lockId = (created.body as { lock: { lock_id: string } }).lock.lock_id;
 
     // Another project: the id is not found there, and nothing is released. The other

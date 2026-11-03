@@ -1,0 +1,105 @@
+
+> narralens@0.1.0 test:m5 /mnt/c/workspace/videoworkline/Narralens
+> vitest run --config vitest.config.ts tests/m5
+
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens
+
+(node:2777454) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m5/studio-gateway.test.ts (8 tests) 183367ms
+   ✓ M5 Studio Gateway: the only origin the browser sees > binds 127.0.0.1 on a random port and answers a rebound Host header with nothing  37678ms
+   ✓ M5 Studio Gateway: the only origin the browser sees > requires its session cookie for the API, and issues it HttpOnly and SameSite  29996ms
+   ✓ M5 Studio Gateway: the only origin the browser sees > answers every page with a no-referrer policy, a self-only CSP and no framing  19562ms
+   ✓ M5 Studio Gateway: the only origin the browser sees > never publishes the project's absolute path  20403ms
+   ✓ M5 Studio Gateway: the only origin the browser sees > refuses every write that the OpenFilm capability map does not open  19225ms
+   ✓ M5 Studio Gateway: the only origin the browser sees > never proxies the upstream's own edit endpoint  18620ms
+   ✓ M5 Studio Gateway: the only origin the browser sees > refuses a write that does not come from the Gateway's own origin  19868ms
+   ✓ M5 Studio Gateway: the only origin the browser sees > refuses a direct call from the Gateway's origin to the Host, and changes nothing  18011ms
+(node:2814370) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/m5/locks.test.ts (8 tests | 1 failed) 265813ms
+   ✓ M5 locks: the strict control-revision CAS > creates a lock, moves the control revision and writes exactly one lock.changed row  15008ms
+   ✓ M5 locks: the strict control-revision CAS > refuses a stale base control revision and changes nothing at all  15247ms
+   ✓ M5 locks: the strict control-revision CAS > replays the same response for the same key and refuses a different body under it  15381ms
+   ✓ M5 locks: the strict control-revision CAS > refuses a request that names an owner, a type outside the set, or an extra field  16034ms
+   ✓ M5 locks: the strict control-revision CAS > refuses a shot lock that names no clip, a clip that does not exist, or a range outside it  48848ms
+   ✓ M5 locks: the strict control-revision CAS > refuses a project lock that does not cover the whole film  19302ms
+   × M5 locks: the strict control-revision CAS > answers 404 for a lock id that belongs to another project, and releases its own 82981ms
+     → Cannot read properties of undefined (reading 'lock_id')
+   ✓ M5 locks: the strict control-revision CAS > keeps the installation's actor identity across a restart, and never publishes it  53008ms
+(node:2878715) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/m5/comparison-replay.test.ts (6 tests | 1 failed) 340707ms
+   ✓ M5 comparison replay: a recorded comparison, copied onto the target > copies the recorded comparison, adds the lineage, and writes nothing else  27909ms
+   ✓ M5 comparison replay: a recorded comparison, copied onto the target > replays the same response for the same key and refuses a different body under it  25552ms
+   ✓ M5 comparison replay: a recorded comparison, copied onto the target > refuses a comparison that belongs to another project  95302ms
+   × M5 comparison replay: a recorded comparison, copied onto the target > refuses a comparison recorded against a baseline before the migration, with the message the page shows 90196ms
+     → MIGRATE_503: {"code":"ENGINE_UNAVAILABLE","message":"OpenFilm upstream unavailable: cannot verify that the pinned OpenFilm checkout is clean","correlation_id":"e15387fb-7b69-40a7-9a70-4963bc8728d8","details":{"expected_sha":"e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3","observed_sha":"e70d9d93c7bebe3d634ff2caa6f7a7
+   ✓ M5 comparison replay: a recorded comparison, copied onto the target > refuses a selection that the target's own projection does not carry  63256ms
+   ✓ M5 comparison replay: a recorded comparison, copied onto the target > refuses a request that carries a prompt, and a request that names no key  38487ms
+(node:2997152) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/m5/workbench.test.ts (3 tests | 1 failed) 206507ms
+   ✓ M5 workbench: the read model over a real migrated target > publishes the target's own projection, its source lineage and the Gateway's preview  47175ms
+   × M5 workbench: the read model over a real migrated target > publishes no path, no token and no adapter class name 99216ms
+     → MIGRATE_503: {"code":"ENGINE_UNAVAILABLE","message":"OpenFilm upstream unavailable: cannot verify that the pinned OpenFilm checkout is clean","correlation_id":"1c1029b5-c6f3-40ac-a777-e91f98d11700","details":{"expected_sha":"e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3","observed_sha":"e70d9d93c7bebe3d634ff2caa6f7a7
+   ✓ M5 workbench: the read model over a real migrated target > refuses a project that was never migrated, and one that does not exist  60109ms
+(node:3059814) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m5/route-fitness.test.ts (4 tests) 460ms
+ ✓ tests/m5/contracts.test.ts (9 tests) 181ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/m5/comparison-replay.test.ts > M5 comparison replay: a recorded comparison, copied onto the target > refuses a comparison recorded against a baseline before the migration, with the message the page shows
+Error: MIGRATE_503: {"code":"ENGINE_UNAVAILABLE","message":"OpenFilm upstream unavailable: cannot verify that the pinned OpenFilm checkout is clean","correlation_id":"e15387fb-7b69-40a7-9a70-4963bc8728d8","details":{"expected_sha":"e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3","observed_sha":"e70d9d93c7bebe3d634ff2caa6f7a7
+ ❯ tests/wave2/m4a/harness.ts:148:13
+    146|         throw Object.assign(new Error(`MIGRATE_${attempt.status}: ${te…
+    147|       }
+    148|       throw new Error(`MIGRATE_${attempt.status}: ${text.slice(0, 300)…
+       |             ^
+    149|     }
+    150|     return attempt;
+ ❯ retryRecoverable tests/wave2/m4a/harness.ts:122:18
+ ❯ migrate tests/wave2/m4a/harness.ts:137:20
+ ❯ migrated tests/m5/comparison-replay.test.ts:68:18
+ ❯ tests/m5/comparison-replay.test.ts:193:36
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  tests/m5/locks.test.ts > M5 locks: the strict control-revision CAS > answers 404 for a lock id that belongs to another project, and releases its own
+TypeError: Cannot read properties of undefined (reading 'lock_id')
+ ❯ tests/m5/locks.test.ts:227:73
+    225|       reason_code: "preserve_visual", idempotency_key: "m5-lock-releas…
+    226|     });
+    227|     const lockId = (created.body as { lock: { lock_id: string } }).loc…
+       |                                                                         ^
+    228| 
+    229|     // Another project: the id is not found there, and nothing is rele…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  tests/m5/workbench.test.ts > M5 workbench: the read model over a real migrated target > publishes no path, no token and no adapter class name
+Error: MIGRATE_503: {"code":"ENGINE_UNAVAILABLE","message":"OpenFilm upstream unavailable: cannot verify that the pinned OpenFilm checkout is clean","correlation_id":"1c1029b5-c6f3-40ac-a777-e91f98d11700","details":{"expected_sha":"e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3","observed_sha":"e70d9d93c7bebe3d634ff2caa6f7a7
+ ❯ tests/wave2/m4a/harness.ts:148:13
+    146|         throw Object.assign(new Error(`MIGRATE_${attempt.status}: ${te…
+    147|       }
+    148|       throw new Error(`MIGRATE_${attempt.status}: ${text.slice(0, 300)…
+       |             ^
+    149|     }
+    150|     return attempt;
+ ❯ retryRecoverable tests/wave2/m4a/harness.ts:122:18
+ ❯ migrate tests/wave2/m4a/harness.ts:137:20
+ ❯ migrated tests/m5/workbench.test.ts:26:18
+ ❯ tests/m5/workbench.test.ts:99:36
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  3 failed | 3 passed (6)
+      Tests  3 failed | 35 passed (38)
+   Start at  10:53:26
+   Duration  1310.90s (transform 20.32s, setup 0ms, collect 193.17s, tests 997.04s, environment 2ms, prepare 88.53s)
+
+ ELIFECYCLE  Command failed with exit code 1.

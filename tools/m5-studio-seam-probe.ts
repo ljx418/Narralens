@@ -46,7 +46,20 @@ const supervisor = new OpenFilmStudioSupervisor({
   onStudio: () => undefined,
 });
 
-const probe = await supervisor.probe();
+/**
+ * The probe, retried on a *failed* verification.
+ *
+ * The checkout is verified with a `git status` subprocess; a saturated machine can make
+ * that subprocess fail, and the Host then says "cannot verify that the pinned OpenFilm
+ * checkout is clean". That is a failed check, not a dirty checkout, and a probe that
+ * reported it as the latter would be lying about the upstream.
+ */
+let probe = await supervisor.probe();
+for (let attempt = 0; attempt < 3 && !probe.ok
+  && probe.reason.includes("cannot verify that the pinned OpenFilm checkout is clean"); attempt += 1) {
+  await new Promise((done) => setTimeout(done, 1000 * (attempt + 1)));
+  probe = await supervisor.refresh();
+}
 
 await mkdir(dirname(probePath), { recursive: true });
 await writeFile(probePath, `${JSON.stringify(probe, null, 2)}\n`, "utf8");

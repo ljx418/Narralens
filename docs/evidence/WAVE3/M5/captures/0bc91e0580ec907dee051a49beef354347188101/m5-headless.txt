@@ -1,0 +1,17 @@
+
+> narralens@0.1.0 test:m5:headless /mnt/c/workspace/videoworkline/Narralens
+> tsx tests/m5/headless/run-headless.ts
+
+(node:3123219) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+M5 headless: UX-01 …
+M5 headless: BLOCKED_ENV M5_BLOCKED_ENV:MIGRATION_FAILED:503:{"code":"ENGINE_UNAVAILABLE","message":"OpenFilm upstream unavailable: cannot verify that the pinned OpenFilm checkout is clean","correlation_id":"9bd68ecc-e1e8-4100-8cbd-75f2a6d25c6c","details":{"expected_sha":"e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3","observed_sha":"e70d9d93c7bebe3d634ff2caa6f7a7
+{
+  "captured_at": "2026-11-03T03:29:37.665Z",
+  "cases": [],
+  "passed": 0,
+  "failed": 0,
+  "blocked": 0,
+  "not_run": 0
+}
+ ELIFECYCLE  Command failed with exit code 1.

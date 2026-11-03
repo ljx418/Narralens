@@ -110,15 +110,27 @@ export async function startEnvironment(options: StartOptions = {}): Promise<Head
     { token: string }).token;
 
   // The migration: the real route, over the real fixture, against the pinned upstream.
-  const migrated = await fetch(`${origin}/api/migration/v1/projects/d1-30s/migrate-copy`, {
-    method: "POST", headers: { origin, authorization: `Bearer ${token}`, "content-type": "application/json" },
-    body: JSON.stringify({ idempotency_key: "m5-headless-migrate-1" }),
-  });
-  if (migrated.status !== 200) {
+  //
+  // A saturated machine can make the upstream's checkout verification fail *transiently*
+  // (the `git status` subprocess is killed or times out), which the Host reports as
+  // "cannot verify that the pinned OpenFilm checkout is clean". That is a failed check,
+  // not a dirty checkout, so it is retried — three times, and only for that message.
+  let migrated: Response | undefined;
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    migrated = await fetch(`${origin}/api/migration/v1/projects/d1-30s/migrate-copy`, {
+      method: "POST", headers: { origin, authorization: `Bearer ${token}`, "content-type": "application/json" },
+      body: JSON.stringify({ idempotency_key: "m5-headless-migrate-1" }),
+    });
+    if (migrated.status === 200) break;
     const text = await migrated.text();
+    if (!text.includes("cannot verify that the pinned OpenFilm checkout is clean")) break;
+    await new Promise((done) => setTimeout(done, 1000 * (attempt + 1)));
+  }
+  if (migrated === undefined || migrated.status !== 200) {
+    const text = migrated === undefined ? "" : await migrated.text();
     await host.close();
     await rm(base, { recursive: true, force: true });
-    throw new Error(`M5_BLOCKED_ENV:MIGRATION_FAILED:${migrated.status}:${text.slice(0, 300)}`);
+    throw new Error(`M5_BLOCKED_ENV:MIGRATION_FAILED:${migrated?.status ?? 0}:${text.slice(0, 300)}`);
   }
   const report = await migrated.json() as { plan: { target_project_id: string } };
   const projectId = report.plan.target_project_id;
