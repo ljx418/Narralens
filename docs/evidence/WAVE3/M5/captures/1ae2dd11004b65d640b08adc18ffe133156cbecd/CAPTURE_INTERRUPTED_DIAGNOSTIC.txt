@@ -1,0 +1,9 @@
+status=INCOMPLETE_CAPTURE
+capture_sha=1ae2dd11004b65d640b08adc18ffe133156cbecd
+observed_process_state=no_capture_process_remaining
+check_exit_file=missing
+overall_file=missing
+last_completed_suite=m5/workbench.test.ts (3/3 passed)
+in_progress_suite=m5/locks.test.ts
+reason=The supervising execution session ended while the lock suite was running. No test failure or exit code was emitted, so this capture proves neither PASS nor FAIL for the unfinished command.
+disposition=Preserved verbatim and excluded from any passing declaration. A new append-only capture must use a later commit SHA.
