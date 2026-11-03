@@ -1,0 +1,36 @@
+
+> narralens@0.1.0 test:m2.1 /mnt/c/workspace/videoworkline/Narralens
+> vitest run --config vitest.config.ts tests/m2.1 tests/architecture
+
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens
+
+(node:1961292) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.1/engine-route.test.ts (8 tests) 2036ms
+   ✓ M2.1 route activation > EN-01 opens GET /api/migration/v1/projects/:id/engine as a read-only projection  432ms
+   ✓ M2.1 route activation > AC-019 leaves every legacy route in place  1301ms
+ ✓ tests/m2.1/source-digest-v1.test.ts (18 tests) 1392ms
+(node:1974054) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.1/native-bypass.test.ts (13 tests) 1208ms
+ ✓ tests/architecture/m2.2-fitness.test.ts (15 tests) 2662ms
+   ✓ M2.2 fitness: one state machine, no arbitrary state writes > 1. every production `UPDATE ... SET state` lives in transition, advanceJournal or markRecovering  583ms
+   ✓ M2.2 fitness: one state machine, no arbitrary state writes > 13. every job state write goes through the store that owns the transition table  583ms
+   ✓ M2.2 fitness: one state machine, no arbitrary state writes > 2. no production DELETE on a journal row; rows are evidence, not scratch  549ms
+   ✓ M2.2 fitness: one state machine, no arbitrary state writes > 3. only project_state ever changes the current revision  421ms
+ ✓ tests/architecture/m2.1-fitness.test.ts (22 tests) 932ms
+   ✓ fitness 1-3: dependency direction > 3. production code never imports a spike, statically or dynamically  528ms
+ ✓ tests/m2.1/engine-port.test.ts (10 tests) 457ms
+ ✓ tests/m2.1/openfilm-upstream-lock.test.ts (14 tests) 148ms
+ ✓ tests/m2.1/time-model.test.ts (11 tests) 30ms
+ ✓ tests/m2.1/native-write-gateway.test.ts (20 tests) 18ms
+(node:1999278) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.1/engine-binding-store.test.ts (10 tests) 15ms
+
+ Test Files  10 passed (10)
+      Tests  141 passed (141)
+   Start at  00:48:34
+   Duration  55.97s (transform 1.90s, setup 0ms, collect 17.12s, tests 8.90s, environment 1ms, prepare 21.39s)
+

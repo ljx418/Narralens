@@ -1,6 +1,6 @@
 {
   "kind": "narralens.studio_seam_probe@1.0",
-  "probed_at": "2026-11-03T03:31:20.632Z",
+  "probed_at": "2026-11-03T18:30:10.614Z",
   "upstream": {
     "repository": "https://github.com/openfilm/openfilm.git",
     "full_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
@@ -11,16 +11,23 @@
     "head_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
     "clean": true,
     "checked": [
-      "git_head"
+      "git_head",
+      "git_clean",
+      "package.json",
+      "pnpm-lock.yaml",
+      "LICENSE",
+      "packages/openfilm/studio/server/film.mjs",
+      "packages/openfilm/studio/server/ops.mjs",
+      "packages/openfilm/studio/server/atomic.mjs",
+      "packages/openfilm/src/film-doc.mjs"
     ]
   },
   "seams": {
     "start_studio": {
       "module": "packages/openfilm/studio/server/server.mjs",
-      "sha256": null,
-      "export_present": false,
-      "option_names": [],
-      "missing_options": [
+      "sha256": "c2da2fcf3b8cab3c6758a8d50a660b9d8d0543b917d9927e52b4cda4f2344a0f",
+      "export_present": true,
+      "option_names": [
         "port",
         "key",
         "openBrowser",
@@ -30,27 +37,103 @@
         "editorDir",
         "working"
       ],
-      "ok": false
+      "missing_options": [],
+      "ok": true
     },
     "studio_host": {
       "module": "packages/openfilm/studio/ui/src/lib/host.ts",
-      "sha256": null,
-      "declares_version_1": false,
-      "members": [],
-      "missing_members": [
+      "sha256": "84b6b549a80a695d68a0915681b865f0a22c7e49b8533fc5d8d889ef8a966053",
+      "declares_version_1": true,
+      "members": [
         "version",
         "onSelection",
         "onCommand",
         "panel"
       ],
-      "ok": false
+      "missing_members": [],
+      "ok": true
     }
   },
-  "loaded_closure": {},
+  "loaded_closure": {
+    "packages/openfilm/src/film-doc.mjs": "feef7be8181e7ec63cf2b8760f3a32b7b7e22cd851d4e5a233c04f1768cf719d",
+    "packages/openfilm/src/host.mjs": "dfed0fd5b068823d06b5091fbc01821791f0f470bbf061741bf21a25dc0bb170",
+    "packages/openfilm/src/media-links.mjs": "ff65c045f37edfdc1e3f39454dd6d93f2fb5a112991dd595a46a5e049ab9438f",
+    "packages/openfilm/src/shared.mjs": "80aae1cac71dbdc71a8a782a457202a28e9d0becf97da05d63ad0655a264543a",
+    "packages/openfilm/studio/client.mjs": "1bba7cb01f1ccbbfed576b0a30bddd1b6ec9836ca3140305c60aa1f4ff931cc3",
+    "packages/openfilm/studio/server/atomic.mjs": "61374e50c67d76e03d70d73e05ed307378d866d579847c316c4203fbc9cde94f",
+    "packages/openfilm/studio/server/browse.mjs": "289590ebe95e19a0b854061f0492114e477af6d43e18162bf2c2fdc35cc6078a",
+    "packages/openfilm/studio/server/captions.mjs": "7a9bd076c307b6296be6e3d05153bf3f386aa01e97503d23f5d5deac1f0d2df0",
+    "packages/openfilm/studio/server/closure.mjs": "a46a9514f0ff0c19a109c2370f9c08af6468d927273c519df311010e2e7ede8f",
+    "packages/openfilm/studio/server/custom-services.mjs": "b8dd982b1525e85c2f79689b536dbd39f57f108a3e033f3d7c76fa558efc217b",
+    "packages/openfilm/studio/server/derived.mjs": "fdc4ae961d25735a87fe1d6e1012cb55278c4c04073a2a5f804548ab06384a99",
+    "packages/openfilm/studio/server/examples.mjs": "a5ca1c20f9715aef9921318acdcac0c3586a90e6ff1f3139f71e2928cb2e6945",
+    "packages/openfilm/studio/server/exports.mjs": "868c4de9598fbb3911ac52cb87637d296f99803005a68d91a6e41da79f9a1fea",
+    "packages/openfilm/studio/server/fetch-error.mjs": "5a75f9c88340c9d2c2ea9bf23a0f7cd2569278ac4472bfd55b817a83098442be",
+    "packages/openfilm/studio/server/fetch-github.mjs": "163ff031c68ddf83e64b548e1631a13952911cce437d90901a07a12709cf588c",
+    "packages/openfilm/studio/server/fetch-repo.mjs": "1e06ddf546085520d056492d3e1792a191bd735ceae4e093345b41fa357d94ca",
+    "packages/openfilm/studio/server/files.mjs": "93d65bb02d76ab09e112588d7a852b3d4ada3083ebcd1d9ea2e7d216e82dcf99",
+    "packages/openfilm/studio/server/film-subtitle.mjs": "be4b1852bc254ff597e43694a732044ef51dd43a78df13735c2ff023957687dd",
+    "packages/openfilm/studio/server/film.mjs": "eb0aab3a4770082a0b273f448b6bda3b0ca043aee791d5444148c459af855d85",
+    "packages/openfilm/studio/server/folder-picker.mjs": "6f480e8143831a1a769c62f5645aefab2b7e3bdb03c343193dd854b0c4ba178e",
+    "packages/openfilm/studio/server/fonts.mjs": "4a15ddc2432f7a1268d36cd75bbcad08076b1334483d2ffb9db28fbc24024615",
+    "packages/openfilm/studio/server/get.mjs": "d6b19cae59cbcb8578fcd4ddab3c1326943a7c9a597df9b4b1dfea9d0d582e04",
+    "packages/openfilm/studio/server/history-migrate.mjs": "ecc3911070892f6caa7a17f5cbc5391133cc1e72ea4cd58b7e1fd7a82a4172ea",
+    "packages/openfilm/studio/server/history-store.mjs": "67f88ffe3873e1eeb76195fbebf0a9d71c4f4d52ebd14c6760dc7f793dff36ac",
+    "packages/openfilm/studio/server/history.mjs": "409eeb89b245b6a157dc71d1e2cff2a8c63a94050bb3dd39ec6abe8f80d951a1",
+    "packages/openfilm/studio/server/http.mjs": "357da4dad30c36ca14d7bde8fd02587b58653e915bddb36c220ba02d10c70524",
+    "packages/openfilm/studio/server/jianying.mjs": "d1daf8c708e8d114d639344c73fdf59da2e6bfc2548faa9944255df0f45108fd",
+    "packages/openfilm/studio/server/keys.mjs": "488854aa195fae13e5200ac99651472ece06ec091793d0d36881cbf77156b5db",
+    "packages/openfilm/studio/server/markers.mjs": "a16e25078d185b0ca49a9be40336a69c4f0627cff610ec97c4a5951b9bff7b52",
+    "packages/openfilm/studio/server/nle.mjs": "e25db69fba970954a6408bf4cf35291e6f748ce9a8ca642fb70628b55d80e88e",
+    "packages/openfilm/studio/server/ops.mjs": "e44a93286d500391cd61b6f27cc426ecb6fd49f777f816593c17133f0bd15957",
+    "packages/openfilm/studio/server/page-links.mjs": "5489ce9616f2eea8309e7776dcf20f358fd97886e7cd250d6ab813b80fbf8c8e",
+    "packages/openfilm/studio/server/pageframes.mjs": "87d82f73add17d699aab963a99e45b4406cf68ecf547389b61a24083658f2828",
+    "packages/openfilm/studio/server/pages.mjs": "5b56f4d34606acae83d3b249686078439a0a833323c42e35cd8facfb30abc989",
+    "packages/openfilm/studio/server/prefs.mjs": "ad46dd3f472f5cc478865fda99376f892fd74563a631389abb3882fcdb7641d2",
+    "packages/openfilm/studio/server/project-fonts.mjs": "edf1113adcd29150c56803c0de50842f4c4b1e420039bc0b3ff9a76ceb9a6f25",
+    "packages/openfilm/studio/server/project-settings.mjs": "c1e794bd481022ad61e8306bb16e5e3d8304c6787b4285641bb36a3605432e39",
+    "packages/openfilm/studio/server/projects.mjs": "f2905720ecc890c4f27a36eb579bfdd4a754774720a03d53b965d3ea0a3c7c3f",
+    "packages/openfilm/studio/server/providers/azure.mjs": "bcf1892359426d35890e9e72f199b36973a8178dc06d520d578edfdd0d380ff2",
+    "packages/openfilm/studio/server/providers/brave.mjs": "bde1599b372ee7f5ff7eb23ddd37aa7ea1962701e9b69a96eabf4371f5063b52",
+    "packages/openfilm/studio/server/providers/common.mjs": "caf8dd1decebb6862c6f492541f7954a4cac42368bdc9f379fa1d0eb6d722343",
+    "packages/openfilm/studio/server/providers/doubao.mjs": "0c6da3d35f35754e2bc05f027878ae5e0356ddbbffb5a8d9f03719c0fa558f2d",
+    "packages/openfilm/studio/server/providers/elevenlabs.mjs": "b7a5c240e6fcc34e261aa5b405529a760b62b7f16d5e1b7546166d5cd2329457",
+    "packages/openfilm/studio/server/providers/fal.mjs": "3ca9ec0b4c6df9238710ed88f87ab4871df2663c6ff6e2d07db5a8f8570734da",
+    "packages/openfilm/studio/server/providers/google.mjs": "38e6fe36f48f5830688de8d9d300cf9da55dbd9733493909a4b33ed06356d37f",
+    "packages/openfilm/studio/server/providers/groq.mjs": "5e043d5d81c26dfa82de4ac888766a457d099a0ef706ab82611966da0d28c291",
+    "packages/openfilm/studio/server/providers/index.mjs": "949c9033d0c2dfe2db9f125209bdd32bd08e361cd89dacb3ece9506cb1625112",
+    "packages/openfilm/studio/server/providers/openai.mjs": "c0662d8de42de7be149d3a2c7e19eb662ace215e9cbbfd8335860651a21dd5ed",
+    "packages/openfilm/studio/server/providers/pexels.mjs": "7b8790c30424375e256c5b1ba4995a27b8e9f7b76934c3725209253f93c5c041",
+    "packages/openfilm/studio/server/providers/pixabay.mjs": "9efa5ec35fdff2e8388e45906b8160b5c223746ed465934514cea3e2064130d7",
+    "packages/openfilm/studio/server/providers/tavily.mjs": "fd8504c54f1b6162929e776af8161acbd3738e1767b4ff566c49c642093510c9",
+    "packages/openfilm/studio/server/providers/web.mjs": "ee5bc76105847ce637a704224d70ff2dee450e6499e5b1a15ca102f8d76922b1",
+    "packages/openfilm/studio/server/proxies.mjs": "e384d8d590351cf9a3993d36f30631a1c739e63550cc36e37d9045a79f539047",
+    "packages/openfilm/studio/server/server.mjs": "c2da2fcf3b8cab3c6758a8d50a660b9d8d0543b917d9927e52b4cda4f2344a0f",
+    "packages/openfilm/studio/server/slides.mjs": "a47f3f2e4825171eb643439c11df5a33abd04242465bbceff3f2893a8fce2ea1",
+    "packages/openfilm/studio/server/subtitle-edits.mjs": "59e13625179f2c843667722989149e6ec1c01afd459b1c5b5328a91b6c866e8f",
+    "packages/openfilm/studio/server/subtitle-segments.mjs": "b4791b6ec527379aeedaa5329ee7efc3855b8b5dc99cf36db25c2d4652e5784f",
+    "packages/openfilm/studio/server/transcripts.mjs": "ff2c765bec47e7238a56f787c88da7cd1eea3ce893c8fe2959f0a1bdc6da50d3",
+    "packages/openfilm/studio/server/transition-pages.mjs": "2e9a218091e8d60ac6e8b2621687911bb2871154e2c84d8e41136fc0f5bc5fd8",
+    "packages/openfilm/studio/server/trash.mjs": "26ec5e0a12ca1b836658744db2482643af985325093a63f08d093130e17e046f",
+    "packages/openfilm/studio/server/watch.mjs": "c4c85f7bd725f518f200a1cb4081c495daf1b2d1e7ba4a9b65e3b5dc2c641b7f",
+    "packages/openfilm/studio/server/websocket.mjs": "3cc11b2f52d8505a00406b069f8e8a11a6b4db0abaac8973ae52966b64a5d3d5",
+    "packages/openfilm/studio/server/zip.mjs": "ec32b1f18203c19a9f1d011116b28099778039585f6bffe2814850350bf06c43"
+  },
   "studio_build": {
     "editor_dir": "packages/openfilm/studio/ui/dist",
-    "files": {}
+    "files": {
+      "packages/openfilm/studio/ui/dist/index-CCk1fSID.js": "5ae9aa843ec030df256a63e16adbdadb38a2505cf0b0e8aed0e9dd783b65303a",
+      "packages/openfilm/studio/ui/dist/index-DwjabaiN.css": "f4e98fb54a11a553e4aa3668c1a2314e1d165322da014a53a900c6bc8a292f4e",
+      "packages/openfilm/studio/ui/dist/inter-cyrillic-ext-wght-normal-BOeWTOD4.woff2": "ca157063339ac4ad418f214f3abfed119b0798ab4d377386ce5c9e5a7a435ebd",
+      "packages/openfilm/studio/ui/dist/inter-cyrillic-wght-normal-DqGufNeO.woff2": "71d5ee93cc1e9f1d520a3a8b66456de18c7879d8df09d57fcd2eaff75fef0075",
+      "packages/openfilm/studio/ui/dist/inter-greek-ext-wght-normal-DlzME5K_.woff2": "6e9e020a25f9b56d418f2c085b1d3c09725a4da23fe693a5b463064606732190",
+      "packages/openfilm/studio/ui/dist/inter-greek-wght-normal-CkhJZR-_.woff2": "1be3448e292fbf05ffe176fe1e43f135013d50b1e7d324ad1a558f623d3bb6f6",
+      "packages/openfilm/studio/ui/dist/inter-latin-ext-wght-normal-DO1Apj_S.woff2": "34b9c504cab7a73e37b746343a449132e56cf7b5481af2cb81dc74dcff25c956",
+      "packages/openfilm/studio/ui/dist/inter-latin-wght-normal-Dx4kXJAl.woff2": "3100e775e8616cd2611beecfa23a4263d7037586789b43f035236a2e6fbd4c62",
+      "packages/openfilm/studio/ui/dist/inter-vietnamese-wght-normal-CBcvBZtf.woff2": "5c66f9e07e90c6d4ac4922cc68d60de26c17b1858e677fb5e603fce3952b3ff2",
+      "packages/openfilm/studio/ui/dist/index.html": "93ed45846158e6991dc2fc23fceb0238f65182c9135f274d012f09b291148d4b"
+    }
   },
-  "ok": false,
-  "reason": "cannot verify that the pinned OpenFilm checkout is clean"
+  "ok": true,
+  "reason": "the Studio seam is present at the pinned upstream"
 }
