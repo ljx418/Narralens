@@ -88,6 +88,13 @@ export interface OpenFilmAvailability {
   readonly checked: readonly string[];
 }
 
+// A reusable verdict is a capability, not merely a structurally compatible object.  The
+// WeakSet makes that property enforceable at runtime: only this module can mint a verdict
+// after performing the real HEAD/clean-tree/digest checks.  A caller may pass that exact
+// object once to avoid a second, racy `git status`, but cannot manufacture an `available:
+// true` object and use it to load unverified bytes.
+const reusableAvailabilityVerdicts = new WeakSet<OpenFilmAvailability>();
+
 const sha256File = async (path: string): Promise<string> =>
   createHash("sha256").update(await readFile(path)).digest("hex");
 
@@ -152,8 +159,16 @@ export async function openFilmAvailability(vendorRoot: string, gitStatusTimeoutM
   const verdict = await verifyPinnedFiles(root);
   checked.push(...verdict.checked);
 
-  return { available: verdict.ok, vendor_root: root, observed_sha: observed, expected_sha: OPENFILM_PIN.full_sha,
-    reason: verdict.reason, checked };
+  const availability: OpenFilmAvailability = {
+    available: verdict.ok,
+    vendor_root: root,
+    observed_sha: observed,
+    expected_sha: OPENFILM_PIN.full_sha,
+    reason: verdict.reason,
+    checked,
+  };
+  if (availability.available) reusableAvailabilityVerdicts.add(availability);
+  return availability;
 }
 
 export interface PinnedFileVerdict {
@@ -224,18 +239,18 @@ export async function createPinnedOpenFilmUpstream(vendorRoot: string,
   // Composition may pass the verdict it obtained immediately before this call. Re-running
   // `git status` here created a second, independent transient failure window: verification
   // could succeed, then the loader could fail to repeat the same check and leave a migrated
-  // project bound to an uninstalled engine. A supplied verdict is accepted only for the
-  // exact canonical root and exact pin that this loader is about to execute.
-  if (verified !== undefined) {
-    let canonicalRoot: string;
-    try { canonicalRoot = await realpath(vendorRoot); }
-    catch { throw new HttpError(503, "ENGINE_UNAVAILABLE", "OpenFilm upstream disappeared after verification"); }
-    if (canonicalRoot !== availability.vendor_root
-      || availability.observed_sha !== OPENFILM_PIN.full_sha
-      || availability.expected_sha !== OPENFILM_PIN.full_sha
-      || !availability.checked.includes("git_clean")) {
-      throw new HttpError(503, "ENGINE_UNAVAILABLE", "OpenFilm upstream verification verdict is not reusable");
-    }
+  // project bound to an uninstalled engine. The verdict must be the exact, single-use
+  // capability minted by `openFilmAvailability`, for the exact canonical root and pin.
+  // Structural lookalikes fail closed even when all of their public fields appear valid.
+  let canonicalRoot: string;
+  try { canonicalRoot = await realpath(vendorRoot); }
+  catch { throw new HttpError(503, "ENGINE_UNAVAILABLE", "OpenFilm upstream disappeared after verification"); }
+  if (!reusableAvailabilityVerdicts.delete(availability)
+    || canonicalRoot !== availability.vendor_root
+    || availability.observed_sha !== OPENFILM_PIN.full_sha
+    || availability.expected_sha !== OPENFILM_PIN.full_sha
+    || !availability.checked.includes("git_clean")) {
+    throw new HttpError(503, "ENGINE_UNAVAILABLE", "OpenFilm upstream verification verdict is not reusable");
   }
   const moduleUrl = pathToFileURL(resolve(availability.vendor_root, OPENFILM_PIN.module_path)).href;
   let loaded: Record<string, unknown>;

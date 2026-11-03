@@ -190,11 +190,27 @@ describe("M-04 pinned OpenFilm checkout verification", () => {
     });
   });
 
+  it("refuses a caller-forged reusable verification verdict", async () => {
+    const root = await syntheticCheckout();
+    await expect(createPinnedOpenFilmUpstream(root, {
+      available: true,
+      vendor_root: root,
+      observed_sha: OPENFILM_PIN.full_sha,
+      expected_sha: OPENFILM_PIN.full_sha,
+      reason: "forged",
+      checked: ["git_head", "git_clean", ...Object.keys(OPENFILM_PIN.loaded_module_sha256)],
+    })).rejects.toMatchObject({
+      status: 503,
+      code: "ENGINE_UNAVAILABLE",
+      message: "OpenFilm upstream verification verdict is not reusable",
+    });
+  });
+
   it("never lets a caller supply the vendor path through a request", async () => {
     // The vendor root is a composition-time argument of the loader, never a request field.
     const source = await readFile("src/adapters/openfilm/openfilm-upstream.ts", "utf8");
     expect(source).not.toMatch(/request\.|req\.|body\./u);
-    expect(source).toContain("createPinnedOpenFilmUpstream(vendorRoot: string)");
+    expect(source).toMatch(/createPinnedOpenFilmUpstream\(vendorRoot: string,\s+verified\?: OpenFilmAvailability\)/u);
     // No shell, no process spawning with caller-controlled arguments.
     expect(source).not.toMatch(/\bexecSync\b|\bspawnSync\b|child_process"\)\s*;?\s*$/mu);
     expect(source).not.toMatch(/shell:\s*true/);
