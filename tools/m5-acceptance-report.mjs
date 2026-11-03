@@ -1,5 +1,5 @@
 import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
-import { join, relative, resolve } from "node:path";
+import { dirname, join, relative, resolve } from "node:path";
 
 /**
  * The M5 Chinese acceptance report (Wave 3 `04` §8, `02` §5).
@@ -82,7 +82,7 @@ const commandRows = commands.map((entry) => `<tr>
   </tr>`).join("\n");
 
 const screenshotRows = screenshots.map((name) => `<figure>
-    <img src="captures/${escape(relative(resolve("docs/evidence/WAVE3/M5"), join(captureRoot, name)).replaceAll("\\", "/"))}" alt="${escape(name)}" loading="lazy" />
+    <img src="${escape(relative(dirname(outputPath), join(captureRoot, name)).replaceAll("\\", "/"))}" alt="${escape(name)}" loading="lazy" />
     <figcaption>${escape(name)}</figcaption>
   </figure>`).join("\n");
 

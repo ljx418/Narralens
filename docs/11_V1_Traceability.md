@@ -1,8 +1,11 @@
 # Narralens V1 规格—架构—开发—验收追踪矩阵
 
 版本：v1.0  
-状态：实际开发已批准；既有 Gate 与 Wave 1/M3/M4A 外审结论保留。M4B controlled adoption 第十轮与 M4C history restore 第三轮独立外审均 PASS；Wave 2 组合候选 `a038e4a...` 的独立外审也以 BLOCKER=0 / MAJOR=0 PASS，当前状态为 `WAVE2_EDITABLE_ADOPTION_READY`。该状态只允许进入 M5 同页 Studio UX；Gate D4.2、`Gate V1-P0` 与 `V1-Full` 均未关闭，headed/human 为 `NOT_RUN`。
-事实日期：2026-10-26
+状态：实际开发已批准；Wave 2 组合外审结论保留。M5 同页 Studio UX 已在冻结代码
+`6e9b8ed199dcdeb8c61f9a68022a748bd08944ca` 完成全量回归、独立阶段门、生产构建与 Headless 体验捕获，
+但自动验收报告的截图相对路径重复了 `captures/`，当前为 `M5_REPORT_REPAIR_PENDING`，不得据此声明最终
+`M5_HEADLESS_EVIDENCED`。UX-12 仍为 `HUMAN_NOT_RUN`；Gate D4.2、`Gate V1-P0`、`V1-Full`、M6 与 M7 均未关闭。
+事实日期：2026-11-04
 <!-- M2.1_REWORK_BASE_SHA=ee58ab5c6a9d4bbdf05e8ac8a394fd75218cae59 REVIEW_STATUS=PASS -->
 
 ## 1. 使用规则
@@ -13,16 +16,16 @@
 
 | PRD | 责任实体 | 阶段 | 验收测试 | 必需证据 | 当前状态 |
 |---|---|---|---|---|---|
-| P0-01 项目创建/任务包 | `IdeaWorkspace`、`CreativeTaskSchema`、`ProjectActor` | D2 | `AT-IDEA-01` 导入合法/非法包并重开 | 工程目录、校验日志、重开截图 | not-started |
+| P0-01 项目创建/任务包 | `IdeaWorkspace`、`CreativeTaskSchema`、`ProjectActor` | D2 | `AT-IDEA-01` 导入合法/非法包并重开 | 工程目录、校验日志、重开截图 | partial：M5 Idea 草稿可编辑、不会冒充工程，并可打开/迁移既有事实项目；从空白想法创建生产项目仍属 M6/M7 |
 | P0-02 章节/脚本/镜头 | `ChapterNavigator`、`SelectionCoordinator` | D2–D3 | `AT-NAV-01` 三种入口定位同一对象 | stable ID/时间范围对照 | partial：D2/D3 三个稳定 shot 与单镜选区可用；章节与三入口仍待后续阶段 |
-| P0-03 真实播放器/时间码 | `RealPreviewSurface`、`HypitAdapter` | D1–D2（时间模型 M2.1） | `AT-PREVIEW-01` 帧时间往返 | 真实 Run、时间码/抽样帧 | partial：D2 真实 descriptor/900 帧/30fps/预览入口；M2.1 已以 `TM-01` 关闭 rational fps 与整数半开帧往返（901 帧 floor/half_up/ceil 全等）；完整播放器待后续 |
-| P0-04 全片/局部时间轴 | `TimelineSurface` | D2–D3 | `AT-TIMELINE-01` 缩放不改变选区 | 120 镜头 trace、选区日志 | not-started；D1 前置已清除 |
-| P0-05 镜头/区间/逐帧 | `SelectionCoordinator` | D3（区间语义 M2.1） | `AT-SELECTION-01` `[start,end)` 边界 | 首尾帧样本、契约测试 | partial：D3 单镜稳定选区/边界已通过；M2.1 已以 `TM-02` 关闭零长/倒序/越界/跨镜拒绝（422 `INVALID_RANGE`）与 `TM-03` 短素材拒绝；区间与逐帧 UI 待后续 |
+| P0-03 真实播放器/时间码 | `RealPreviewSurface`、`HypitAdapter` | D1–D2（时间模型 M2.1） | `AT-PREVIEW-01` 帧时间往返 | 真实 Run、时间码/抽样帧 | partial：M5 已用原生 OpenFilm player/timeline/inspector 证明同一 selection/clock/snapshot，并通过帧↔秒冻结时间模型；完整“空白想法→成片”播放器体验仍待 M6/M7 |
+| P0-04 全片/局部时间轴 | `TimelineSurface` | D2–D3 | `AT-TIMELINE-01` 缩放不改变选区 | 120 镜头 trace、选区日志 | partial：M5 原生 timeline 与 120 clip 结构压力、四类操作各 100 样本已通过；生产长片与完整编辑操作仍待 M6/M7 |
+| P0-05 镜头/区间/逐帧 | `SelectionCoordinator` | D3（区间语义 M2.1） | `AT-SELECTION-01` `[start,end)` 边界 | 首尾帧样本、契约测试 | partial：M5 已证明镜头卡/时间码/原生 timeline 定位同一 target clip、半开范围与 source lineage，并通过键盘逐帧；完整生产长片仍待 M6/M7 |
 | P0-06 3–6 提案 | `DirectorPane`、`ProposalCompare`、`ProposalComparisonAdapter` | D2–D4 | `D41-CONTRACT/COUNT/DIVERSITY/DURATION/REF/TRUST/STAGING/REV/NOWRITE/CANCEL/PROVIDER/RUNNER/UI/A11Y/SEC/REGRESSION` 全族 | Runner 审计、ProposalComparison、结构签名、工程 SHA、Host 写调用计数、浏览器证据 | done：D4.1 生产实现、80/80、真实 CLI 三案、浏览器/NOWRITE 与内外实现审查通过；不包含 P0-07 采用 |
-| P0-07 分项锁 | `ProjectWriteActor`、`LockPolicy` | D3–D4 | `AT-LOCK-01` UI/Agent 同时被阻止 | 423 响应、资产哈希不变 | partial：仅 D3 visual 服务端主动锁这一项通过；D4.2 计划复验 visual lock，但 narration/duration 主动锁与完整 P0-07 仍待后续 |
-| P0-08 素材/来源/许可 | `AssetRegistry`、`AssetImportService`、`MaterializeService` | D4 | `D42-IMPORT/LICENSE/MAT/SEC` | import/ffprobe、manifest v2、lineage、422/428、许可清单 | partial：D4.2.1 本地导入、媒体验证、库存、许可展示、@2 transaction、journal、Hypit lease/TOCTOU、routes/UI 已完成 M1A 独立外审；derived composite 与审批仍属于后续 M3/M4；外传/provider 不在本阶段 |
-| P0-09 局部差异确认 | `ImpactPreview`、`EditTransaction` | D3–D4 | `AT-DIFF-01`、`D42-APPROVAL/ADOPT` | before/after diff、impact SHA、帧数/边界帧 | partial：D3 fit before→after、精确 Source 与全 item 不变量通过；D4.2 当前只有采用影响确认计划 |
-| P0-10 版本/撤回/恢复/冲突 | `RevisionService`、journal | D3–D5 | `AT-REV-01` 409、恢复产生新 revision | event log、重开记录 | partial：D3 monotonic revision/409/journal/启动恢复通过；用户历史恢复待 D5 |
+| P0-07 分项锁 | `ProjectWriteActor`、`LockPolicy` | D3–D4 | `AT-LOCK-01` UI/Agent 同时被阻止 | 423 响应、资产哈希不变 | partial：M4/M5 已以真实 LockService、control-revision CAS 与 Gateway 绕过测试证明受支持范围的 project/shot 锁；完整 V1 内容类型仍待 M6/M7 |
+| P0-08 素材/来源/许可 | `AssetRegistry`、`AssetImportService`、`MaterializeService` | D4 | `D42-IMPORT/LICENSE/MAT/SEC` | import/ffprobe、manifest v2、lineage、422/428、许可清单 | partial：本地导入、账本、真实 proxy/native plan/lineage、impact/adopt 与 M5 同页能力展示均有证据；在线下载/provider 与完整交付素材链仍待 M6/M7 |
+| P0-09 局部差异确认 | `ImpactPreview`、`EditTransaction` | D3–D4 | `AT-DIFF-01`、`D42-APPROVAL/ADOPT` | before/after diff、impact SHA、帧数/边界帧 | partial：M4/M5 已证明 server impact/hash、锁、许可、幂等、成功 revision +1/失败 +0 及同页确认；完整生产项目链仍待 M6 |
+| P0-10 版本/撤回/恢复/冲突 | `RevisionService`、journal | D3–D5 | `AT-REV-01` 409、恢复产生新 revision | event log、重开记录 | partial：M4C/M5 已证明 history、undo/redo typed intent、受控 restore +1、重开与冲突；完整长片交付后的历史体验仍待 M6 人工验收 |
 | P0-11 重开与 MP4 | `HypitAdapter`、`RenderService` | D1、D6–D7 | `AT-EXPORT-01` 双导出、重开、改一镜 | MP4、ffprobe、工程哈希 | D1 30 秒夹具通过；真实母项目待 D6–D7 |
 | P0-12 标题/封面 | `DeliveryWorkspace` | 第 2 周 | `AT-DELIVERY-01` 8 标题/4 封面、正文一致性 | 候选记录、人工选择 | not-started |
 | P0-13 发布前检查 | `PreflightChecklist` | D6–D7 | `AT-PREFLIGHT-01` 黑帧/字幕/音量/来源 | 报告、抽样帧、许可清单 | not-started |
@@ -47,11 +50,11 @@
 | M2 | EnginePort、单引擎绑定、写入治理、三类锁、持久 Job/SSE/lease、snapshot/journal、迁移副本与回退 | **Wave 1 组合外审 PASS，`CONTROLLED_OPENFILM_READY`**：冻结代码 `e2dec5c...`，证据捕获 `fd64762...`，21 case 为 20 PASS + 1 `NOT_APPLICABLE_APPROVED` | migrate-copy/report/rollback 已实现；AC-005 legacy edit 仍为事后 snapshot，headed/human NOT_RUN |
 | W2.0–M3 | 目标工程解析、资产账本、素材化、真实 proxy/native plan/lineage | **M3 独立外审 PASS**：候选 `fa08fe4...`，捕获 `f2a41ff...`；ACT/ASSET、PR、MT 全部关闭 | materialize POST/GET 已开放；NOWRITE；impact/adopt/history 仍 404；M3 不等于 D4.2 完成 |
 | M4A–M4C | server impact、采用与历史事务 | **M4A、M4B、M4C 独立外审及 Wave 2 组合外审均 PASS；`WAVE2_EDITABLE_ADOPTION_READY`**。唯一 adopt/restore 路由、原子 source 发布、revision/impact/projection/ledger/outbox/idempotency 同事务、崩溃恢复、真实 900 帧双渲染与中镜原生编辑均有直接测试 | 组合候选 `a038e4a...`；允许进入 M5，Gate D4.2 仍未关闭 |
-| M5 | 同页原生 Studio UX | **文档冻结 / 允许实现** | 第三轮独立文档复审 PASS（BLOCKER=0 / MAJOR=0）；M5 合同、Studio Gateway、comparison replay 与 UX/PF 门见 `docs/migration/WAVE3/` |
+| M5 | 同页原生 Studio UX | **`M5_REPORT_REPAIR_PENDING`** | 冻结候选 `6e9b8ed...` 的自动门全绿，但 HTML 截图路径缺陷已诚实记录，须修复、增加回归门并重新捕获；UX-12 `HUMAN_NOT_RUN` |
 | M6 | `Gate V1-P0` | not-started | 不等于 V1-Full |
 | M7A–D | P1 与完整长片证据 | not-started | P0/P1 全绿后才可声明 V1-Full |
 
-### M5 / Wave 3 逐 case 追踪（开发前冻结）
+### M5 / Wave 3 逐 case 追踪（实现后证据）
 
 | Case | PRD / NFR | 实现实体 | 证据门 | 当前状态 |
 |---|---|---|---|---|
@@ -71,7 +74,8 @@
 | PF-02 | NFR-02/NFR-04 | 三路 proxy 与音频焦点 | 三路真实 proxy、唯一音频焦点、内存记录 | automated-pass |
 | PF-03 | NFR-04 | launcher/reopen harness | 冷/热重开、首帧、媒体关联、内存 | automated-pass |
 
-证据：`docs/evidence/WAVE3/M5/captures/<commit>/cases/<case>.json`；逐 case 的断言、事实与失败断言
+证据：`docs/evidence/WAVE3/M5/captures/6e9b8ed199dcdeb8c61f9a68022a748bd08944ca/`；逐 case 的断言、事实、
+截图、性能样本与失败断言
 都在里面。`automated-pass` 只表示**自动门**通过，人工体验门（UX-12）仍然是 `HUMAN_NOT_RUN`。
 
 ## 3. 非功能追踪
@@ -82,8 +86,8 @@
 | NFR-02 可恢复 | ProjectWriteActor + journal + append-only event log | `AT-RECOVERY-01` 在 journal/迁移边界注入崩溃 | 重启恢复到最后提交 revision，主 Source 不损坏 | partial：D3 四状态恢复保持通过；M2.2 持久任务/lease/outbox 恢复已接线，M2.3 迁移 9 个崩溃边界可收敛；用户历史恢复仍待 D5 |
 | NFR-03 可观察 | Job state + SSE + correlation ID | `AT-OBS-01` 断线重连/晚到/取消 | 无重复事件；费用与“已请求取消”如实显示；无假百分比 | partial：D2 既有链保持；M2.2 已实现持久 Job/event/SSE/outbox、owner+attempt lease、晚到隔离与 replay；render/snapshot_publish 业务 runner 尚未实现 |
 | NFR-04 可测试 | schema/contract/fixture/ffprobe/frame sampling | `AT-CONTRACT-01`、`AT-E2E-01` | 每个 phase 的 evidence manifest 完整 | partial：D4.1 达到 80/80、真实 CLI/浏览器/NOWRITE/evidence manifest；V1 全阶段未完成 |
-| NFR-05 性能 | Timeline virtualization + async jobs | `AT-PERF-01` 120 镜头 reference fixture | 选择反馈 p95 ≤100ms；无 >100ms UI 长任务；机器与 trace 已记录 | not-started |
-| NFR-06 可访问 | focus management、键盘映射、reduced motion、文本状态 | `AT-A11Y-01` axe + keyboard + 200% text + 人工审查 | 无阻塞级问题；全部核心路径可用键盘完成 | partial：D4.1 axe-core 4.10.3、键盘提交/切换、四视口、200% 重排与人工对比度通过；V1 其余路径待验 |
+| NFR-05 性能 | Timeline virtualization + async jobs | `AT-PERF-01` 120 镜头 reference fixture | 选择反馈 p95 ≤100ms；无 >100ms UI 长任务；机器与 trace 已记录 | partial：M5 PF-01 已以 120 clip、四类操作各 100 样本通过 p95≤100ms；10–15 分钟生产长片性能仍待 M6/M7 |
+| NFR-06 可访问 | focus management、键盘映射、reduced motion、文本状态 | `AT-A11Y-01` axe + keyboard + 200% text + 人工审查 | 无阻塞级问题；全部核心路径可用键盘完成 | partial：M5 UX-11/UX-200 已通过 Headless axe、键盘、焦点、reduced motion、主题与原生 200% 缩放；UX-12 人工判断未运行 |
 
 ## 4. 阶段证据清单
 
