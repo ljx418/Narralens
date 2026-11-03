@@ -9,7 +9,8 @@ import { join, resolve } from "node:path";
  * append-only: a capture that has been fixed keeps its entry, because the history of what
  * went wrong is part of the evidence.
  */
-const root = resolve("docs/evidence/WAVE3/M5");
+const inProgressCapture = process.argv[2] ?? "";
+const root = resolve(process.argv[3] ?? "docs/evidence/WAVE3/M5");
 const capturesRoot = join(root, "captures");
 const indexPath = join(root, "failed-captures.json");
 
@@ -25,6 +26,11 @@ for (const capture of readdirSync(capturesRoot, { withFileTypes: true })
   const manifestPath = join(directory, "manifest.json");
   const overallPath = join(directory, "overall.txt");
   const blockedPath = join(directory, "blocked-env.json");
+  // The evidence runner invokes this tool before it writes the manifest and overall
+  // marker for its own capture. That live directory is neither a success nor a failed
+  // historical capture yet, so indexing it as "incomplete" would create a false failure.
+  // A later run will index it if the runner really stops before producing an overall.
+  if (capture === inProgressCapture && !existsSync(overallPath)) continue;
   const incomplete = !existsSync(manifestPath);
   const cases = [];
   if (existsSync(manifestPath)) {

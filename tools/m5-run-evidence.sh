@@ -112,8 +112,8 @@ printf '%-24s exit=%s\n' acceptance-report "$code"
 # The failed-capture index: every capture that did not pass is listed, so a failure is
 # never invisible. It runs before the manifest, because the manifest is what the index
 # is checked against.
-printf '%s\n' "node tools/m5-failed-captures.mjs" > "$LOGS/failed-captures.cmd"
-node tools/m5-failed-captures.mjs > "$LOGS/failed-captures.txt" 2>&1
+printf '%s\n' "node tools/m5-failed-captures.mjs $CAPTURE_SHA" > "$LOGS/failed-captures.cmd"
+node tools/m5-failed-captures.mjs "$CAPTURE_SHA" > "$LOGS/failed-captures.txt" 2>&1
 code=$?
 printf '%s\n' "$code" > "$LOGS/failed-captures.exit"
 printf '%-24s exit=%s\n' failed-captures "$code"
