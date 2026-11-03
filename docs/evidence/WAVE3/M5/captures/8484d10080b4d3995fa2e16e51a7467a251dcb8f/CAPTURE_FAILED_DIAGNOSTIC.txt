@@ -1,0 +1,7 @@
+CAPTURE_STATUS=FAILED_AND_TERMINATED
+candidate=8484d10080b4d3995fa2e16e51a7467a251dcb8f
+failed_gate=check
+failed_test=tests/wave2/m4c/document-status-fitness.test.ts
+reason=The fitness test required an obsolete whole-sentence status summary after the authority document advanced to M5_REPORT_REPAIR_PENDING. The authoritative M4A-M4C stage row still records the passed Wave 2 decision.
+action=The capture was terminated after the definitive failure instead of spending approximately two more hours on gates that could not change overall=1. No check.exit or overall.txt exists because the process group was terminated during the failed check command.
+claim=This directory is failed evidence and must never be used for M5_HEADLESS_EVIDENCED.

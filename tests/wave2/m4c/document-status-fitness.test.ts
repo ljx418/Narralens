@@ -12,6 +12,14 @@ const routeRow = (document: string, route: string): string => {
   return row!;
 };
 
+const stageRow = (document: string, stage: string): string => {
+  const row = document
+    .split("\n")
+    .find((line) => line.startsWith(`| ${stage} |`));
+  expect(row, `missing stage row for ${stage}`).toBeDefined();
+  return row!;
+};
+
 /** Prevent a later evidence sync from putting a closed route back into the planned/404 state. */
 describe("M4C authority documents describe the mounted production routes", () => {
   it("keeps architecture, traceability and route inventory aligned with M4B/M4C", () => {
@@ -36,8 +44,9 @@ describe("M4C authority documents describe the mounted production routes", () =>
     }
     expect(architecture).toContain("history/restore`");
     expect(architecture).toContain("history/undo` 与 `.../redo`");
-    expect(traceability).toContain("M4B controlled adoption 第十轮与 M4C history restore 第三轮独立外审均 PASS");
-    expect(traceability).toContain("Wave 2 组合外审均 PASS");
+    const wave2Row = stageRow(traceability, "M4A–M4C");
+    expect(wave2Row).toContain("M4A、M4B、M4C 独立外审及 Wave 2 组合外审均 PASS");
+    expect(wave2Row).toContain("WAVE2_EDITABLE_ADOPTION_READY");
     expect(traceability).toContain("Gate D4.2 仍未关闭");
   });
 
