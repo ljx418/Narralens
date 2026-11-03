@@ -1,0 +1,128 @@
+
+> narralens@0.1.0 test:wave2:m4c /mnt/c/workspace/videoworkline/Narralens
+> vitest run --config vitest.config.ts tests/wave2/m4c
+
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens
+
+(node:3182183) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/m4c/history-fault-matrix.test.ts (47 tests) 1255785ms
+   ✓ M4C TX-08C: the fault matrix > converges the boundary after_received to a decided state  21428ms
+   ✓ M4C TX-08C: the fault matrix > converges the boundary after_preconditions to a decided state  25948ms
+   ✓ M4C TX-08C: the fault matrix > converges the boundary after_target_resolved to a decided state  23092ms
+   ✓ M4C TX-08C: the fault matrix > converges the boundary after_plan to a decided state  22505ms
+   ✓ M4C TX-08C: the fault matrix > converges the boundary after_stage_copy to a decided state  23334ms
+   ✓ M4C TX-08C: the fault matrix > converges the boundary during_stage_copy to a decided state  23269ms
+   ✓ M4C TX-08C: the fault matrix > converges the boundary after_stage to a decided state  22421ms
+   ✓ M4C TX-08C: the fault matrix > converges the boundary after_validate to a decided state  21578ms
+   ✓ M4C TX-08C: the fault matrix > converges the boundary before_snapshot_publish to a decided state  22677ms
+   ✓ M4C TX-08C: the fault matrix > converges the boundary after_snapshot_publish to a decided state  20938ms
+   ✓ M4C TX-08C: the fault matrix > converges the boundary before_prepared to a decided state  21223ms
+   ✓ M4C TX-08C: the fault matrix > converges the boundary after_prepared to a decided state  20647ms
+   ✓ M4C TX-08C: the fault matrix > converges the boundary before_asset_install to a decided state  32673ms
+   ✓ M4C TX-08C: the fault matrix > converges the boundary after_asset_install to a decided state  29404ms
+   ✓ M4C TX-08C: the fault matrix > converges the boundary after_film_temp_fsync to a decided state  24936ms
+   ✓ M4C TX-08C: the fault matrix > converges the boundary before_film_rename to a decided state  26376ms
+   ✓ M4C TX-08C: the fault matrix > converges the boundary after_film_rename to a decided state  29746ms
+   ✓ M4C TX-08C: the fault matrix > converges the boundary after_parent_fsync to a decided state  28243ms
+   ✓ M4C TX-08C: the fault matrix > converges the boundary after_published to a decided state  28445ms
+   ✓ M4C TX-08C: the fault matrix > converges the boundary after_active_inspect to a decided state  25552ms
+   ✓ M4C TX-08C: the fault matrix > converges the boundary before_response to a decided state  24514ms
+   ✓ M4C TX-08C: the fault matrix > converges the boundary after_committed to a decided state  30500ms
+   ✓ M4C TX-08C: the fault matrix > converges the boundary before_db_statement:verify_fact to a decided state  29003ms
+   ✓ M4C TX-08C: the fault matrix > converges the boundary after_db_statement:verify_fact to a decided state  28139ms
+   ✓ M4C TX-08C: the fault matrix > converges the boundary before_db_statement:project_state to a decided state  28934ms
+   ✓ M4C TX-08C: the fault matrix > converges the boundary after_db_statement:project_state to a decided state  29850ms
+   ✓ M4C TX-08C: the fault matrix > converges the boundary before_db_statement:impact to a decided state  25683ms
+   ✓ M4C TX-08C: the fault matrix > converges the boundary after_db_statement:impact to a decided state  26527ms
+   ✓ M4C TX-08C: the fault matrix > converges the boundary before_db_statement:snapshot to a decided state  27151ms
+   ✓ M4C TX-08C: the fault matrix > converges the boundary after_db_statement:snapshot to a decided state  25687ms
+   ✓ M4C TX-08C: the fault matrix > converges the boundary before_db_statement:projection_fact to a decided state  33575ms
+   ✓ M4C TX-08C: the fault matrix > converges the boundary after_db_statement:projection_fact to a decided state  28089ms
+   ✓ M4C TX-08C: the fault matrix > converges the boundary before_db_statement:active_commit to a decided state  30900ms
+   ✓ M4C TX-08C: the fault matrix > converges the boundary after_db_statement:active_commit to a decided state  30242ms
+   ✓ M4C TX-08C: the fault matrix > converges the boundary before_db_statement:outbox to a decided state  27946ms
+   ✓ M4C TX-08C: the fault matrix > converges the boundary after_db_statement:outbox to a decided state  26757ms
+   ✓ M4C TX-08C: the fault matrix > converges the boundary before_db_statement:idempotency to a decided state  27734ms
+   ✓ M4C TX-08C: the fault matrix > converges the boundary after_db_statement:idempotency to a decided state  27382ms
+   ✓ M4C TX-08C: the fault matrix > converges the boundary before_db_statement:transaction to a decided state  26314ms
+   ✓ M4C TX-08C: the fault matrix > converges the boundary after_db_statement:transaction to a decided state  36888ms
+   ✓ M4C TX-08C: real process loss > hard-exits a child at before_asset_install and sweeps nested asset temporaries  43883ms
+   ✓ M4C TX-08C: real process loss > hard-exits a child at after_asset_install and sweeps nested asset temporaries  43678ms
+   ✓ M4C TX-08C: real process loss > hard-exits a child at after_film_temp_fsync and recovers from durable state only  33632ms
+   ✓ M4C TX-08C: real process loss > hard-exits a child at after_film_rename and recovers from durable state only  33894ms
+   ✓ M4C TX-08C: real process loss > hard-exits a child at after_db_statement:transaction and recovers from durable state only  34430ms
+(node:3640705) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/m4c/history-crash-and-race.test.ts (19 tests) 490532ms
+   ✓ M4C TX-08C: the crash matrix converges to a decided state > converges the pre-publish crash boundary after_received to aborted with revision +0  30991ms
+   ✓ M4C TX-08C: the crash matrix converges to a decided state > converges the pre-publish crash boundary after_preconditions to aborted with revision +0  26120ms
+   ✓ M4C TX-08C: the crash matrix converges to a decided state > converges the pre-publish crash boundary after_plan to aborted with revision +0  25235ms
+   ✓ M4C TX-08C: the crash matrix converges to a decided state > converges the pre-publish crash boundary after_stage to aborted with revision +0  26845ms
+   ✓ M4C TX-08C: the crash matrix converges to a decided state > converges the pre-publish crash boundary after_validate to aborted with revision +0  26442ms
+   ✓ M4C TX-08C: the crash matrix converges to a decided state > converges the pre-publish crash boundary after_snapshot_publish to aborted with revision +0  22839ms
+   ✓ M4C TX-08C: the crash matrix converges to a decided state > converges a crash after the publication to one durable commit with revision +1  27455ms
+   ✓ M4C TX-08C: the crash matrix converges to a decided state > aborts with revision +0 when the crash came after the intent but before the publication  24439ms
+   ✓ M4C TX-05C: a race never reaches the commit > refuses a restore whose control revision moved, and the revision does not move  20065ms
+   ✓ M4C TX-05C: a race never reaches the commit > refuses a restore whose base revision is stale, and the revision does not move  20658ms
+   ✓ M4C TX-05C: a race never reaches the commit > refuses a restore whose expected source digest is not the project's, and the revision does not move  26642ms
+   ✓ M4C TX-05C: a race never reaches the commit > refuses a restore when the source changes during the stage, and the revision does not move  25722ms
+   ✓ M4C TX-07C: one key, one answer > replays the same key with the same body and does not restore twice  27226ms
+   ✓ M4C TX-07C: one key, one answer > answers the same key with a different request with 409, and the revision does not move  25918ms
+   ✓ M4C TX-07C: one key, one answer > keeps the adoption and restore key spaces apart  26612ms
+   ✓ M4C TX-09: the history keeps every revision > lists the migration, the adoption and the restore, and deletes nothing  25404ms
+   ✓ M4C M-01: the redo exists only when the current commit is itself a restore > answers 422 after an adoption has been committed on top of the restore  38131ms
+   ✓ M4C M-01: the redo exists only when the current commit is itself a restore > still answers the restore's own source-before snapshot right after the restore  23702ms
+   ✓ M4C TX-10: the native history surface cannot bypass the two stages > translates undo and redo into an intent and writes nothing  20083ms
+(node:3837840) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/m4c/history-contracts-and-resolver.test.ts (15 tests) 279185ms
+   ✓ M4C-01: the restore contracts > answers a restore request that carries an unknown field with 400  25762ms
+   ✓ M4C-02 and M4C-04: the resolver proves the target from its own bytes > resolves the migration's snapshot and the adoption's snapshot, and reproduces the digest  20744ms
+   ✓ M4C-02 and M4C-04: the resolver proves the target from its own bytes > reads the target with the pinned upstream, and reports no problem  20737ms
+   ✓ M4C-03: the negative matrix fails closed > answers a snapshot of another project and a snapshot that does not exist with the same 404  21127ms
+   ✓ M4C-03: the negative matrix fails closed > refuses an orphan snapshot: bytes on disk that no committed write ever named  20266ms
+   ✓ M4C-03: the negative matrix fails closed > refuses a snapshot whose source directory is a symlink to a directory outside the project  21844ms
+   ✓ M4C-03: the negative matrix fails closed > refuses a Hypit snapshot: this stage restores OpenFilm content only  19755ms
+   ✓ M4C-03: the negative matrix fails closed > refuses a snapshot whose bytes are gone  20340ms
+   ✓ M4C-06: the restore impact is an authorization and writes nothing > creates the impact, replays it exactly, and writes no author fact  19724ms
+   ✓ M4C-06: the restore impact is an authorization and writes nothing > refuses the impact when the project's facts moved, and leaves no active row behind  19219ms
+   ✓ M4C-06: the restore impact is an authorization and writes nothing > refuses the impact when a lock is held, and leaves no active row behind  19165ms
+   ✓ M4C-11: the history read model and the intent satisfy their contracts > answers the history model and the undo intent in their own shapes  19583ms
+   ✓ M4C: the response body says nothing about the server's filesystem > carries no path, no adapter name and no SQLite wording  30906ms
+(node:3959693) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/m4c/history-media-and-failure.test.ts (9 tests) 226829ms
+   ✓ M4C-14 and M4C-15: the restored film is still three native, decodable clips > restores three native clips, renders them with the pinned upstream and decodes 900 frames  41804ms
+   ✓ M4C-14 and M4C-15: the restored film is still three native, decodable clips > keeps the other two clips' identity when one clip is edited natively  29862ms
+   ✓ M4C TX-03C and TX-04C: the locks and the consumers are the right ones > asks for a visual lock on every changed clip and no narration lock while the narration is preserved  21978ms
+   ✓ M4C TX-03C and TX-04C: the locks and the consumers are the right ones > does not let a narration lock block a restore that preserves the narration  24128ms
+   ✓ M4C TX-12C: the restore changes nothing it did not name > leaves the old snapshot's bytes and the adopted snapshot's bytes exactly as they were  22458ms
+   ✓ M4C: the content-addressed asset the restore installs > installs the missing asset, and refuses one filed under a digest that is not its own bytes  27541ms
+   ✓ M4C: the content-addressed asset the restore installs > refuses a target whose asset is filed under a digest that is not its own content address  18666ms
+   ✓ M4C-16: a cancellation before the publication intent discards the staged result > aborts with revision +0 and publishes nothing  20185ms
+   ✓ M4C-17: a failed restore writes nothing but its own failure > leaves the source, the revision, the pointer, the impact, the outbox and the idempotency row as they were  20204ms
+(node:4051895) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/m4c/history-route.test.ts (9 tests) 208846ms
+   ✓ M4C production history route > restores an earlier snapshot as a new revision, and the film is still three native clips  24668ms
+   ✓ M4C production history route > rebuilds the restored source after a restart, and the old snapshot's bytes are unchanged  26105ms
+   ✓ M4C production history route > replays the same key exactly and answers a different digest with 409  24967ms
+   ✓ M4C production history route > restores, and then adopts the same content again, without the projection fact refusing it  37912ms
+   ✓ M4C production history route > refuses a snapshot of another project and a snapshot that does not exist with the same 404  17093ms
+   ✓ M4C production history route > translates undo and redo into an intent and never writes  17945ms
+   ✓ M4C production history route > refuses a restore of the content that is already active  20100ms
+   ✓ M4C production history route > refuses a restore whose impact was computed while a visual lock was held  20034ms
+   ✓ M4C production history route > refuses a restore when a visual lock appears after the stage, and the revision does not move  20020ms
+(node:4144733) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/m4c/restore-plan.test.ts (22 tests) 22ms
+ ✓ tests/wave2/m4c/document-status-fitness.test.ts (2 tests) 15ms
+ ✓ tests/wave2/m4c/restore-rights.test.ts (1 test) 3ms
+
+ Test Files  8 passed (8)
+      Tests  124 passed (124)
+   Start at  05:43:20
+   Duration  2505.25s (transform 2.13s, setup 0ms, collect 18.56s, tests 2461.22s, environment 2ms, prepare 15.84s)
+

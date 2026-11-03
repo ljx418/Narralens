@@ -1,0 +1,7 @@
+CAPTURE_STATUS=AUTOMATED_GATES_PASSED_REPORT_INDEX_DEFECT
+candidate=fc4576ea011f903eb4697f4c89b9f9510c9d2012
+overall=0
+defect=failed-captures.json incorrectly indexed this still-running capture as incomplete because the index was generated before overall.txt and manifest.json existed.
+impact=The automated gates passed and the acceptance-report image links resolve, but the human-facing failed-capture index makes a false claim about this successful capture.
+claim=This capture is preserved but must not be the final basis for M5_HEADLESS_EVIDENCED.
+repair=Teach the indexer to exclude the explicitly named in-progress capture, add a regression test, then capture a new frozen commit.
