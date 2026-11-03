@@ -1,0 +1,865 @@
+
+> narralens@0.1.0 check /mnt/c/workspace/videoworkline/Narralens
+> tsc --noEmit && vitest run --config vitest.config.ts && python3 -I tests/wave2/m4a/impact-hash.golden.py tests/wave2/m4a/impact-hash.vectors.json && vite build && vite build --config vite.m5.config.ts
+
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens
+
+(node:180933) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m5/comparison-replay.test.ts (6 tests) 33692ms
+   ✓ M5 comparison replay: a recorded comparison, copied onto the target > copies the recorded comparison, adds the lineage, and writes nothing else  6135ms
+   ✓ M5 comparison replay: a recorded comparison, copied onto the target > replays the same response for the same key and refuses a different body under it  5007ms
+   ✓ M5 comparison replay: a recorded comparison, copied onto the target > refuses a comparison that belongs to another project  5345ms
+   ✓ M5 comparison replay: a recorded comparison, copied onto the target > refuses a comparison recorded against a baseline before the migration, with the message the page shows  5892ms
+   ✓ M5 comparison replay: a recorded comparison, copied onto the target > refuses a selection that the target's own projection does not carry  5555ms
+   ✓ M5 comparison replay: a recorded comparison, copied onto the target > refuses a request that carries a prompt, and a request that names no key  5757ms
+(node:206850) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m5/workbench.test.ts (3 tests) 20539ms
+   ✓ M5 workbench: the read model over a real migrated target > publishes the target's own projection, its source lineage and the Gateway's preview  12203ms
+   ✓ M5 workbench: the read model over a real migrated target > publishes no path, no token and no adapter class name  7082ms
+   ✓ M5 workbench: the read model over a real migrated target > refuses a project that was never migrated, and one that does not exist  1251ms
+(node:225356) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/m4c/history-fault-matrix.test.ts (47 tests) 1277606ms
+   ✓ M4C TX-08C: the fault matrix > converges the boundary after_received to a decided state  24384ms
+   ✓ M4C TX-08C: the fault matrix > converges the boundary after_preconditions to a decided state  21660ms
+   ✓ M4C TX-08C: the fault matrix > converges the boundary after_target_resolved to a decided state  22746ms
+   ✓ M4C TX-08C: the fault matrix > converges the boundary after_plan to a decided state  41775ms
+   ✓ M4C TX-08C: the fault matrix > converges the boundary after_stage_copy to a decided state  25584ms
+   ✓ M4C TX-08C: the fault matrix > converges the boundary during_stage_copy to a decided state  24291ms
+   ✓ M4C TX-08C: the fault matrix > converges the boundary after_stage to a decided state  26242ms
+   ✓ M4C TX-08C: the fault matrix > converges the boundary after_validate to a decided state  27923ms
+   ✓ M4C TX-08C: the fault matrix > converges the boundary before_snapshot_publish to a decided state  27805ms
+   ✓ M4C TX-08C: the fault matrix > converges the boundary after_snapshot_publish to a decided state  27935ms
+   ✓ M4C TX-08C: the fault matrix > converges the boundary before_prepared to a decided state  27033ms
+   ✓ M4C TX-08C: the fault matrix > converges the boundary after_prepared to a decided state  28513ms
+   ✓ M4C TX-08C: the fault matrix > converges the boundary before_asset_install to a decided state  35896ms
+   ✓ M4C TX-08C: the fault matrix > converges the boundary after_asset_install to a decided state  34695ms
+   ✓ M4C TX-08C: the fault matrix > converges the boundary after_film_temp_fsync to a decided state  28479ms
+   ✓ M4C TX-08C: the fault matrix > converges the boundary before_film_rename to a decided state  26334ms
+   ✓ M4C TX-08C: the fault matrix > converges the boundary after_film_rename to a decided state  28091ms
+   ✓ M4C TX-08C: the fault matrix > converges the boundary after_parent_fsync to a decided state  27788ms
+   ✓ M4C TX-08C: the fault matrix > converges the boundary after_published to a decided state  28211ms
+   ✓ M4C TX-08C: the fault matrix > converges the boundary after_active_inspect to a decided state  27313ms
+   ✓ M4C TX-08C: the fault matrix > converges the boundary before_response to a decided state  26658ms
+   ✓ M4C TX-08C: the fault matrix > converges the boundary after_committed to a decided state  24581ms
+   ✓ M4C TX-08C: the fault matrix > converges the boundary before_db_statement:verify_fact to a decided state  33131ms
+   ✓ M4C TX-08C: the fault matrix > converges the boundary after_db_statement:verify_fact to a decided state  28751ms
+   ✓ M4C TX-08C: the fault matrix > converges the boundary before_db_statement:project_state to a decided state  27759ms
+   ✓ M4C TX-08C: the fault matrix > converges the boundary after_db_statement:project_state to a decided state  25108ms
+   ✓ M4C TX-08C: the fault matrix > converges the boundary before_db_statement:impact to a decided state  24841ms
+   ✓ M4C TX-08C: the fault matrix > converges the boundary after_db_statement:impact to a decided state  22784ms
+   ✓ M4C TX-08C: the fault matrix > converges the boundary before_db_statement:snapshot to a decided state  25433ms
+   ✓ M4C TX-08C: the fault matrix > converges the boundary after_db_statement:snapshot to a decided state  25463ms
+   ✓ M4C TX-08C: the fault matrix > converges the boundary before_db_statement:projection_fact to a decided state  25938ms
+   ✓ M4C TX-08C: the fault matrix > converges the boundary after_db_statement:projection_fact to a decided state  26036ms
+   ✓ M4C TX-08C: the fault matrix > converges the boundary before_db_statement:active_commit to a decided state  26183ms
+   ✓ M4C TX-08C: the fault matrix > converges the boundary after_db_statement:active_commit to a decided state  28659ms
+   ✓ M4C TX-08C: the fault matrix > converges the boundary before_db_statement:outbox to a decided state  29327ms
+   ✓ M4C TX-08C: the fault matrix > converges the boundary after_db_statement:outbox to a decided state  29270ms
+   ✓ M4C TX-08C: the fault matrix > converges the boundary before_db_statement:idempotency to a decided state  28708ms
+   ✓ M4C TX-08C: the fault matrix > converges the boundary after_db_statement:idempotency to a decided state  26640ms
+   ✓ M4C TX-08C: the fault matrix > converges the boundary before_db_statement:transaction to a decided state  29560ms
+   ✓ M4C TX-08C: the fault matrix > converges the boundary after_db_statement:transaction to a decided state  24715ms
+   ✓ M4C TX-08C: real process loss > hard-exits a child at before_asset_install and sweeps nested asset temporaries  34710ms
+   ✓ M4C TX-08C: real process loss > hard-exits a child at after_asset_install and sweeps nested asset temporaries  35152ms
+   ✓ M4C TX-08C: real process loss > hard-exits a child at after_film_temp_fsync and recovers from durable state only  33743ms
+   ✓ M4C TX-08C: real process loss > hard-exits a child at after_film_rename and recovers from durable state only  36210ms
+   ✓ M4C TX-08C: real process loss > hard-exits a child at after_db_statement:transaction and recovers from durable state only  35532ms
+(node:1000307) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/m4b/adoption-route.test.ts (34 tests) 629220ms
+   ✓ M4B production adoption route > returns 428 before resource lookup when impact or approval is missing  1965ms
+   ✓ M4B production adoption route > adopts three native clips once, replays exactly, and rebuilds after restart  65015ms
+   ✓ M4B production adoption route > recovers a simulated crash at after_prepared to one durable outcome  18030ms
+   ✓ M4B production adoption route > recovers a simulated crash at after_published to one durable outcome  23989ms
+   ✓ M4B production adoption route > recovers a simulated crash at after_committed to one durable outcome  25345ms
+   ✓ M4B production adoption route > latches terminal attention when recovery can prove neither publication boundary  21554ms
+   ✓ M4B production adoption route > starts again after latching terminal attention, because one blocked project must not stop the Host  23440ms
+   ✓ M4B production adoption route > recovers the author-source publication boundary asset_temp_fsynced  26403ms
+   ✓ M4B production adoption route > recovers the author-source publication boundary asset_installed  24718ms
+   ✓ M4B production adoption route > recovers the author-source publication boundary film_temp_fsynced  27092ms
+   ✓ M4B production adoption route > recovers the author-source publication boundary film_renamed  25868ms
+   ✓ M4B production adoption route > recovers the author-source publication boundary parent_fsynced  24806ms
+   ✓ M4B production adoption route > rejects a visual lock acquired after staging with revision +0  17873ms
+   ✓ M4B production adoption route > re-reads the rights before publication, so a rights change after the impact stops it  20332ms
+   ✓ M4B production adoption route > does not over-block an adoption that preserves narration while a narration lock is held  21247ms
+   ✓ M4B production adoption route > converges the pre-publish crash boundary after_received to aborted with revision +0  18778ms
+   ✓ M4B production adoption route > converges the pre-publish crash boundary after_preconditions to aborted with revision +0  20630ms
+   ✓ M4B production adoption route > converges the pre-publish crash boundary after_plan to aborted with revision +0  16406ms
+   ✓ M4B production adoption route > converges the pre-publish crash boundary after_stage to aborted with revision +0  17155ms
+   ✓ M4B production adoption route > converges the pre-publish crash boundary after_validate to aborted with revision +0  17948ms
+   ✓ M4B production adoption route > converges the pre-publish crash boundary after_snapshot_publish to aborted with revision +0  19555ms
+   ✓ M4B production adoption route > converges the crash boundary after_active_inspect to a decided state with revision +1  27869ms
+   ✓ M4B production adoption route > answers the same key with the same body whether the recovery just ran or was replayed  17663ms
+   ✓ M4B production adoption route > records the source=after / DB-not-committed transition state field by field  27829ms
+   ✓ M4B production adoption route > answers a visual lock held during recovery with a controlled 423 and nothing committed  21938ms
+   ✓ M4B production adoption route > reclaims a crashed staging tree through the production composition, where the database path is the store's  2737ms
+   ✓ M4B production adoption route > latches a row whose request cannot be read, rather than leaving it to a recovery with no way out  3109ms
+   ✓ M4B production adoption route > records why a recovery was blocked, and closes the project visibly  2877ms
+   ✓ M4B production adoption route > does not let one of its own pending rows block the recovery of another  2773ms
+   ✓ M4B production adoption route > leaves another module's transaction alone: a legacy edit row is not M4B's to decide  2815ms
+   ✓ M4B production adoption route > answers a conflicting idempotency key with the request's correlation id  22283ms
+   ✓ M4B production adoption route > answers one idempotency key with one body, whatever the request body is  16279ms
+   ✓ M4B production adoption route > sweeps an adoption staging tree left behind by a hard crash  2893ms
+(node:1348965) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/m4a/impact-races.test.ts (42 tests) 551416ms
+   ✓ TX-02A / M4A-TTL01: an impact outlives nothing it was computed from > expires at exactly fifteen minutes and is not revived by a replay with the same key  19920ms
+   ✓ TX-02A / M4A-TTL01: an impact outlives nothing it was computed from > marks a direct consumer at the TTL boundary expired rather than stale  15374ms
+   ✓ TX-02A / M4A-TTL01: an impact outlives nothing it was computed from > refuses a materialization whose base_revision no longer matches the project  12519ms
+   ✓ TX-02A / M4A-TTL01: an impact outlives nothing it was computed from > refuses a materialization whose source_digest no longer matches the project  9526ms
+   ✓ TX-02A / M4A-TTL01: an impact outlives nothing it was computed from > refuses a materialization whose control_revision no longer matches the project  9649ms
+   ✓ TX-02A / M4A-TTL01: an impact outlives nothing it was computed from > refuses a materialization whose asset_inventory_sha256 no longer matches the project  11204ms
+   ✓ TX-02A / M4A-TTL01: an impact outlives nothing it was computed from > rejects a stale base, source or control before it computes anything  8193ms
+   ✓ TX-02A / M4A-TTL01: an impact outlives nothing it was computed from > returns 428 and marks the row stale when base revision has moved  14111ms
+   ✓ TX-02A / M4A-TTL01: an impact outlives nothing it was computed from > returns 428 and marks the row stale when source digest has moved  16246ms
+   ✓ TX-02A / M4A-TTL01: an impact outlives nothing it was computed from > returns 428 and marks the row stale when control revision has moved  11960ms
+   ✓ TX-02A / M4A-TTL01: an impact outlives nothing it was computed from > returns 428 and marks the row stale when rights digest has moved  13673ms
+   ✓ TX-02A / M4A-TTL01: an impact outlives nothing it was computed from > returns 428 and marks the row stale when native plan has moved  13562ms
+   ✓ TX-02A / M4A-TTL01: an impact outlives nothing it was computed from > returns 428 and marks the row stale when materialization state has moved  12496ms
+   ✓ TX-02A / M4A-TTL01: an impact outlives nothing it was computed from > returns 428 and marks the row stale when materialization removed has moved  16038ms
+   ✓ TX-02A / M4A-TTL01: an impact outlives nothing it was computed from > returns 428 and marks the row stale when the stored bytes has moved  15120ms
+   ✓ TX-02A / M4A-TTL01: an impact outlives nothing it was computed from > still answers an unchanged impact, so the arms above are not vacuously failing  16370ms
+   ✓ TX-02A / M4A-TTL01: an impact outlives nothing it was computed from > rejects real source bytes changed after insertion  14790ms
+   ✓ TX-02A / M4A-TTL01: an impact outlives nothing it was computed from > rejects replay after real source bytes changed after insertion  15980ms
+   ✓ TX-02A / M4A-TTL01: an impact outlives nothing it was computed from > rejects real asset bytes changed after insertion  14218ms
+   ✓ TX-02A / M4A-TTL01: an impact outlives nothing it was computed from > rejects rights changed after insertion through materialization re-verification  14555ms
+   ✓ TX-02A / M4A-TTL01: an impact outlives nothing it was computed from > keeps the impact active when currentness cannot be checked transiently  13513ms
+   ✓ TX-05A: a change between the first check and the insert leaves no active impact > refuses and writes no row when a visual lock appears at after_inspect  10029ms
+   ✓ TX-05A: a change between the first check and the insert leaves no active impact > refuses and writes no row when a visual lock appears at after_graph  12699ms
+   ✓ TX-05A: a change between the first check and the insert leaves no active impact > refuses and writes no row when a visual lock appears at after_locks  12457ms
+   ✓ TX-05A: a change between the first check and the insert leaves no active impact > refuses and writes no row when a visual lock appears at before_insert  11386ms
+   ✓ TX-05A: a change between the first check and the insert leaves no active impact > refuses, stales the materialization, and writes no impact when ledger rights move at after_graph  13219ms
+   ✓ TX-05A: a change between the first check and the insert leaves no active impact > refuses, stales the materialization, and writes no impact when ledger rights move at after_locks  14096ms
+   ✓ TX-05A: a change between the first check and the insert leaves no active impact > refuses, stales the materialization, and writes no impact when ledger rights move at before_insert  14619ms
+   ✓ TX-05A: a change between the first check and the insert leaves no active impact > refuses and writes no row when the control revision moves at before_insert  14894ms
+   ✓ TX-05A: a change between the first check and the insert leaves no active impact > answers 423 TARGET_LOCKED for a lock that is already held, and creates nothing  15888ms
+   ✓ TX-05A: a change between the first check and the insert leaves no active impact > records every active lock it checked, and refuses a project with more than 64  27989ms
+   ✓ TX-05A: a change between the first check and the insert leaves no active impact > refuses and writes no row when the source bytes move mid-computation  13795ms
+   ✓ TX-05A: a change between the first check and the insert leaves no active impact > refuses and writes no row when the materialization's proven facts move mid-computation  14527ms
+   ✓ TX-05A: a change between the first check and the insert leaves no active impact > refuses and writes no row when the materialization goes stale mid-computation  8157ms
+   ✓ M4A-R01: the route answers a client consistently and idempotently > replays the whole spec for the same key and digest, and 409s a different digest  15434ms
+   ✓ M4A-R01: the route answers a client consistently and idempotently > refuses to replay an impact the row says is no longer active  13662ms
+   ✓ M4A-R01: the route answers a client consistently and idempotently > refuses a restore intent rather than passing the active source off as an old snapshot  7219ms
+   ✓ M4A-R01: the route answers a client consistently and idempotently > refuses a materialization that does not exist, and one that belongs elsewhere, the same way  8608ms
+   ✓ M4A-R01: the route answers a client consistently and idempotently > keeps the legacy routes working, and the M4C restore route refusing on its merits  4191ms
+   ✓ M4A-NW01: an impact changes nothing but its own two rows > leaves source, revision, commit, pointer, binding, ledger, materialization, job and outbox identical  16268ms
+   ✓ M4A-NW01: an impact changes nothing but its own two rows > leaves the migrated copy's bytes byte-for-byte identical  13258ms
+(node:1640749) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/m4c/history-crash-and-race.test.ts (19 tests) 514840ms
+   ✓ M4C TX-08C: the crash matrix converges to a decided state > converges the pre-publish crash boundary after_received to aborted with revision +0  25524ms
+   ✓ M4C TX-08C: the crash matrix converges to a decided state > converges the pre-publish crash boundary after_preconditions to aborted with revision +0  26842ms
+   ✓ M4C TX-08C: the crash matrix converges to a decided state > converges the pre-publish crash boundary after_plan to aborted with revision +0  24452ms
+   ✓ M4C TX-08C: the crash matrix converges to a decided state > converges the pre-publish crash boundary after_stage to aborted with revision +0  24710ms
+   ✓ M4C TX-08C: the crash matrix converges to a decided state > converges the pre-publish crash boundary after_validate to aborted with revision +0  23151ms
+   ✓ M4C TX-08C: the crash matrix converges to a decided state > converges the pre-publish crash boundary after_snapshot_publish to aborted with revision +0  24119ms
+   ✓ M4C TX-08C: the crash matrix converges to a decided state > converges a crash after the publication to one durable commit with revision +1  30214ms
+   ✓ M4C TX-08C: the crash matrix converges to a decided state > aborts with revision +0 when the crash came after the intent but before the publication  25553ms
+   ✓ M4C TX-05C: a race never reaches the commit > refuses a restore whose control revision moved, and the revision does not move  20475ms
+   ✓ M4C TX-05C: a race never reaches the commit > refuses a restore whose base revision is stale, and the revision does not move  22670ms
+   ✓ M4C TX-05C: a race never reaches the commit > refuses a restore whose expected source digest is not the project's, and the revision does not move  23269ms
+   ✓ M4C TX-05C: a race never reaches the commit > refuses a restore when the source changes during the stage, and the revision does not move  25953ms
+   ✓ M4C TX-07C: one key, one answer > replays the same key with the same body and does not restore twice  30358ms
+   ✓ M4C TX-07C: one key, one answer > answers the same key with a different request with 409, and the revision does not move  27770ms
+   ✓ M4C TX-07C: one key, one answer > keeps the adoption and restore key spaces apart  30071ms
+   ✓ M4C TX-09: the history keeps every revision > lists the migration, the adoption and the restore, and deletes nothing  29854ms
+   ✓ M4C M-01: the redo exists only when the current commit is itself a restore > answers 422 after an adoption has been committed on top of the restore  48194ms
+   ✓ M4C M-01: the redo exists only when the current commit is itself a restore > still answers the restore's own source-before snapshot right after the restore  29126ms
+   ✓ M4C TX-10: the native history surface cannot bypass the two stages > translates undo and redo into an intent and writes nothing  22531ms
+(node:1677329) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/m4c/history-route.test.ts (9 tests) 226086ms
+   ✓ M4C production history route > restores an earlier snapshot as a new revision, and the film is still three native clips  27792ms
+   ✓ M4C production history route > rebuilds the restored source after a restart, and the old snapshot's bytes are unchanged  26226ms
+   ✓ M4C production history route > replays the same key exactly and answers a different digest with 409  29431ms
+   ✓ M4C production history route > restores, and then adopts the same content again, without the projection fact refusing it  36335ms
+   ✓ M4C production history route > refuses a snapshot of another project and a snapshot that does not exist with the same 404  19911ms
+   ✓ M4C production history route > translates undo and redo into an intent and never writes  17781ms
+   ✓ M4C production history route > refuses a restore of the content that is already active  20455ms
+   ✓ M4C production history route > refuses a restore whose impact was computed while a visual lock was held  23069ms
+   ✓ M4C production history route > refuses a restore when a visual lock appears after the stage, and the revision does not move  25086ms
+(node:1680265) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/m4c/history-media-and-failure.test.ts (9 tests) 255120ms
+   ✓ M4C-14 and M4C-15: the restored film is still three native, decodable clips > restores three native clips, renders them with the pinned upstream and decodes 900 frames  40295ms
+   ✓ M4C-14 and M4C-15: the restored film is still three native, decodable clips > keeps the other two clips' identity when one clip is edited natively  26047ms
+   ✓ M4C TX-03C and TX-04C: the locks and the consumers are the right ones > asks for a visual lock on every changed clip and no narration lock while the narration is preserved  21237ms
+   ✓ M4C TX-03C and TX-04C: the locks and the consumers are the right ones > does not let a narration lock block a restore that preserves the narration  29838ms
+   ✓ M4C TX-12C: the restore changes nothing it did not name > leaves the old snapshot's bytes and the adopted snapshot's bytes exactly as they were  31239ms
+   ✓ M4C: the content-addressed asset the restore installs > installs the missing asset, and refuses one filed under a digest that is not its own bytes  36080ms
+   ✓ M4C: the content-addressed asset the restore installs > refuses a target whose asset is filed under a digest that is not its own content address  23983ms
+   ✓ M4C-16: a cancellation before the publication intent discards the staged result > aborts with revision +0 and publishes nothing  21828ms
+   ✓ M4C-17: a failed restore writes nothing but its own failure > leaves the source, the revision, the pointer, the impact, the outbox and the idempotency row as they were  24572ms
+(node:1703177) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/m4c/history-contracts-and-resolver.test.ts (15 tests) 301917ms
+   ✓ M4C-01: the restore contracts > answers a restore request that carries an unknown field with 400  18474ms
+   ✓ M4C-02 and M4C-04: the resolver proves the target from its own bytes > resolves the migration's snapshot and the adoption's snapshot, and reproduces the digest  19353ms
+   ✓ M4C-02 and M4C-04: the resolver proves the target from its own bytes > reads the target with the pinned upstream, and reports no problem  19035ms
+   ✓ M4C-03: the negative matrix fails closed > answers a snapshot of another project and a snapshot that does not exist with the same 404  26426ms
+   ✓ M4C-03: the negative matrix fails closed > refuses an orphan snapshot: bytes on disk that no committed write ever named  24202ms
+   ✓ M4C-03: the negative matrix fails closed > refuses a snapshot whose source directory is a symlink to a directory outside the project  21889ms
+   ✓ M4C-03: the negative matrix fails closed > refuses a Hypit snapshot: this stage restores OpenFilm content only  29118ms
+   ✓ M4C-03: the negative matrix fails closed > refuses a snapshot whose bytes are gone  23783ms
+   ✓ M4C-06: the restore impact is an authorization and writes nothing > creates the impact, replays it exactly, and writes no author fact  26344ms
+   ✓ M4C-06: the restore impact is an authorization and writes nothing > refuses the impact when the project's facts moved, and leaves no active row behind  20182ms
+   ✓ M4C-06: the restore impact is an authorization and writes nothing > refuses the impact when a lock is held, and leaves no active row behind  21386ms
+   ✓ M4C-11: the history read model and the intent satisfy their contracts > answers the history model and the undo intent in their own shapes  21941ms
+   ✓ M4C: the response body says nothing about the server's filesystem > carries no path, no adapter name and no SQLite wording  29772ms
+(node:1882134) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/m3/materialize-routes.test.ts (13 tests) 146696ms
+   ✓ M3.3 the two routes, over HTTP, against a real migrated target > POST returns 202 with a job and a materialization id, and GET reads it back  15109ms
+   ✓ M3.3 the two routes, over HTTP, against a real migrated target > GET answers 404 for a materialization that does not exist  1438ms
+   ✓ M3.3 the two routes, over HTTP, against a real migrated target > POST refuses a malformed body on merit, with no materialization created  6048ms
+   ✓ M3.3 the two routes, over HTTP, against a real migrated target > POST refuses a stale base revision rather than preparing against a moved project  5601ms
+   ✓ M3.3 the two routes, over HTTP, against a real migrated target > GET moves a drifted materialization to stale over HTTP  16781ms
+   ✓ M3.3 a client never has to call the worker itself > renders on its own after a POST, with no manual worker call  13471ms
+   ✓ M3.3 a client never has to call the worker itself > classifies rows left behind when the Host restarts  16651ms
+   ✓ PR-01 a replayed comparison is labelled and both digests are kept > stamps RECORDED_PROVIDER_OUTPUT_REPLAY with both digests  6701ms
+   ✓ PR-01 a replayed comparison is labelled and both digests are kept > refuses a replay that cannot be substantiated  6509ms
+   ✓ MT-04 and MT-05 through the Host, not around it > changes no author fact while a real materialize runs end to end  17467ms
+   ✓ MT-04 and MT-05 through the Host, not around it > goes stale when the control revision moves under a ready materialization  15803ms
+   ✓ PR-03 a real lock, not a hand-written control revision > refuses a POST prepared before the range was locked  7275ms
+   ✓ PR-03 a real lock, not a hand-written control revision > moves a ready materialization stale when the range is locked afterwards  17839ms
+(node:1960565) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m5/studio-gateway.test.ts (8 tests) 64043ms
+   ✓ M5 Studio Gateway: the only origin the browser sees > binds 127.0.0.1 on a random port and answers a rebound Host header with nothing  10085ms
+   ✓ M5 Studio Gateway: the only origin the browser sees > requires its session cookie for the API, and issues it HttpOnly and SameSite  11137ms
+   ✓ M5 Studio Gateway: the only origin the browser sees > answers every page with a no-referrer policy, a self-only CSP and no framing  7972ms
+   ✓ M5 Studio Gateway: the only origin the browser sees > never publishes the project's absolute path  6093ms
+   ✓ M5 Studio Gateway: the only origin the browser sees > refuses every write that the OpenFilm capability map does not open  8474ms
+   ✓ M5 Studio Gateway: the only origin the browser sees > never proxies the upstream's own edit endpoint  6711ms
+   ✓ M5 Studio Gateway: the only origin the browser sees > refuses a write that does not come from the Gateway's own origin  6748ms
+   ✓ M5 Studio Gateway: the only origin the browser sees > refuses a direct call from the Gateway's origin to the Host, and changes nothing  6820ms
+(node:1991879) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/m3/materialize-service.test.ts (29 tests) 66566ms
+   ✓ M3.3 a materialization runs end to end to a real proxy > reaches ready with a real plan, a real proxy and lineage covering both outputs  5245ms
+   ✓ M3.3 a materialization runs end to end to a real proxy > records every fault point it passed, in order  4878ms
+   ✓ M3.3 a materialization runs end to end to a real proxy > changes no author fact (MT-04 persistence subset)  4695ms
+   ✓ M3.3 the worker holds a lease before it does anything > refuses to run while another owner holds the lease  327ms
+   ✓ M3.3 the worker holds a lease before it does anything > releases the lease when it finishes, so another run can take it  4661ms
+   ✓ M3.3 the worker holds a lease before it does anything > does not let a second worker advance a materialization that already moved on  4757ms
+   ✓ M3.3 a late or cancelled result is quarantined, never adopted > does not reach ready when the job was cancelled mid-run  380ms
+   ✓ M3.3 a late or cancelled result is quarantined, never adopted > records the orphan rather than deleting it  563ms
+   ✓ M3.3 a late or cancelled result is quarantined, never adopted > quarantines a materialization whose worker died holding the lease  316ms
+   ✓ M3.3 a late or cancelled result is quarantined, never adopted > queues a cancelled materialization for quarantine on recovery, not a retry  326ms
+   ✓ M3.3 a crash before ready never leaves something adoptable > leaves no adoptable materialization after a crash at after_lease  311ms
+   ✓ M3.3 a crash before ready never leaves something adoptable > leaves no adoptable materialization after a crash at after_plan  344ms
+   ✓ M3.3 a crash before ready never leaves something adoptable > leaves no adoptable materialization after a crash at after_proxy  3987ms
+   ✓ M3.3 a crash before ready never leaves something adoptable > leaves no adoptable materialization after a crash at after_lineage  4670ms
+   ✓ M3.3 a crash before ready never leaves something adoptable > leaves no adoptable materialization after a crash at before_ready  4900ms
+   ✓ M3.3 a crash before ready never leaves something adoptable > leaves no staging file behind after a crash  378ms
+   ✓ M3.3 every read re-verifies and only ever moves to stale > reports ready while nothing has moved  4844ms
+   ✓ M3.3 every read re-verifies and only ever moves to stale > becomes stale when the target's asset bytes drift  4739ms
+   ✓ M3.3 every read re-verifies and only ever moves to stale > stays stale on every later read, and never returns to ready  4611ms
+   ✓ M3.3 every read re-verifies and only ever moves to stale > becomes stale when the base revision moves under it  4917ms
+   ✓ M3.3 the intent is recorded idempotently > replays the same key and digest without queueing a second render  329ms
+   ✓ M3.3 the intent is recorded idempotently > refuses a legacy project, which has no comparable target  312ms
+   ✓ every defect the internal review raised has a test that fails without its fix > concurrent identical requests create one row and one job, not a 500  306ms
+   ✓ every defect the internal review raised has a test that fails without its fix > keeps a completed materialization when only the promotion is interrupted  4170ms
+   ✓ every defect the internal review raised has a test that fails without its fix > cannot reach ready without the facts the worker proved  319ms
+   ✓ every defect the internal review raised has a test that fails without its fix > refuses a comparison rebuilt after the intent was prepared  303ms
+   ✓ every defect the internal review raised has a test that fails without its fix > recovery parks a row whose job is terminal instead of promising a retry  343ms
+   ✓ every defect the internal review raised has a test that fails without its fix > refuses media that is not an MP4 container even when its bytes match  342ms
+(node:2049678) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.3/migration-real-export.test.ts (2 tests) 75540ms
+   ✓ MIG-03 the real chain: migrate, reopen, export, edit the middle clip, export again > produces two real, different exports of the same 900-frame three-clip film  47308ms
+   ✓ EN-05 the source project is still intact and openable after rollback > keeps the source bytes, binding and recorded output, and retains the copy  28231ms
+(node:2138669) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/m4a/activated-projection.test.ts (8 tests) 45326ms
+   ✓ M4A-P01: a fresh Host rebuilds the active layout from durable facts > cannot inspect an activated target at all without a layout — the gap M4A closes  9540ms
+   ✓ M4A-P01: a fresh Host rebuilds the active layout from durable facts > inspects a restarted Host's own migrated target, with no test hook anywhere  10316ms
+   ✓ M4A-P01: a fresh Host rebuilds the active layout from durable facts > keys its cache by project, snapshot and source digest  6021ms
+   ✓ M4A-P01: a fresh Host rebuilds the active layout from durable facts > fails closed when the migrated copy's bytes move under it  6400ms
+   ✓ M4A-P01: a fresh Host rebuilds the active layout from durable facts > refuses a layout whose declared root escapes the target  6917ms
+   ✓ M4A-P01: a fresh Host rebuilds the active layout from durable facts > refuses when the ledger names a target the plan does not cover  6129ms
+ ✓ tests/wave2/m3/proxy-renderer.test.ts (21 tests) 30837ms
+   ✓ M3.2 the proxy is real media with the frames the plan promised > produces a decodable proxy whose total frame count matches the plan  5130ms
+   ✓ M3.2 the proxy is real media with the frames the plan promised > keeps each segment's own first and last frames, so the proxy is really the segments  5574ms
+   ✓ M3.2 the proxy is real media with the frames the plan promised > decodes the whole proxy without error, not just its head  3510ms
+   ✓ M3.2 lineage accounts for every output and cannot be quietly rewritten > names the input bytes, span and rights behind every clip  5068ms
+   ✓ M3.2 lineage accounts for every output and cannot be quietly rewritten > records the tool and its version, so a proxy can be traced to what made it  3783ms
+   ✓ M3.2 the renderer cannot be steered by its arguments > builds argv from a fixed template, so no input can reach a shell  3864ms
+   ✓ M3.2 the renderer cannot be steered by its arguments > writes only under the derived root, never next to the source  3570ms
+(node:2189479) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/m4a/impact-real-chain.test.ts (1 test) 31833ms
+   ✓ M4A-R01: the chain a client actually walks > migrates, materializes for real, and then gets a valid impact — twice, idempotently  31831ms
+(node:2208223) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m5/locks.test.ts (8 tests) 58916ms
+   ✓ M5 locks: the strict control-revision CAS > creates a lock, moves the control revision and writes exactly one lock.changed row  6840ms
+   ✓ M5 locks: the strict control-revision CAS > refuses a stale base control revision and changes nothing at all  8048ms
+   ✓ M5 locks: the strict control-revision CAS > replays the same response for the same key and refuses a different body under it  9560ms
+   ✓ M5 locks: the strict control-revision CAS > refuses a request that names an owner, a type outside the set, or an extra field  6598ms
+   ✓ M5 locks: the strict control-revision CAS > refuses a shot lock that names no clip, a clip that does not exist, or a range outside it  6864ms
+   ✓ M5 locks: the strict control-revision CAS > refuses a project lock that does not cover the whole film  6855ms
+   ✓ M5 locks: the strict control-revision CAS > answers 404 for a lock id that belongs to another project, and releases its own  5359ms
+   ✓ M5 locks: the strict control-revision CAS > keeps the installation's actor identity across a restart, and never publishes it  8790ms
+(node:2242066) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/host/d4.2.1-import-service.test.ts (8 tests) 30862ms
+   ✓ D4.2.1 AssetImportService HTTP transaction > streams a real MP4, migrates @1 to @2, replays exactly and changes no authored project facts  3663ms
+   ✓ D4.2.1 AssetImportService HTTP transaction > returns a truthful @1 no-op for an exact duplicate without changing manifest bytes  2254ms
+   ✓ D4.2.1 AssetImportService HTTP transaction > rejects invalid media before journal or manifest mutation and removes private staging  1686ms
+   ✓ D4.2.1 AssetImportService HTTP transaction > commits a manifest-published journal deterministically before opening the HTTP port after restart  1950ms
+   ✓ D4.2.1 AssetImportService HTTP transaction > restores the exact manifest preimage and removes unreferenced new bytes after a publish-before-journal crash  1891ms
+   ✓ D4.2.1 AssetImportService HTTP transaction > serializes concurrent imports and replays the same key without losing either manifest entry  2468ms
+   ✓ D4.2.1 AssetImportService HTTP transaction > compensates content-install, manifest-temp and rename faults without changing authored or manifest facts  8200ms
+   ✓ D4.2.1 AssetImportService HTTP transaction > restores the exact manifest after one-shot post-publish faults and enters attention when durability stays unprovable  8751ms
+(node:2264009) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/m4a/impact-end-to-end.test.ts (6 tests) 26125ms
+   ✓ M4A-C01 over HTTP: the route refuses a self-authored impact and creates nothing > returns 400 for a client that names its own scope, consumers, locks, rights or hash  10337ms
+   ✓ M4A-C01 over HTTP: the route refuses a self-authored impact and creates nothing > computes a spec that satisfies its own contract, and 201s it  15776ms
+ ✓ tests/wave2/m3/lineage-and-limits.test.ts (12 tests) 18741ms
+   ✓ MT-03 lineage is tamper-evident > matches what a real render produced, so the digest covers the actual outputs  3618ms
+   ✓ M3.2 the renderer is bounded > never runs more than the global ceiling inside itself  3379ms
+   ✓ M3.2 the renderer is bounded > never runs more than one render for a single project at a time  4184ms
+   ✓ M3.2 the renderer is bounded > does let two different projects run at once  2149ms
+   ✓ M3.2 the renderer is bounded > still completes every render it accepted  2098ms
+   ✓ M3.2 the renderer is bounded > releases its slot when a render fails, so one bad input cannot wedge the queue  3302ms
+(node:2287716) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/w2-host-composition.test.ts (12 tests) 14746ms
+   ✓ blocker 4a: the Host owns one resolver, one ledger and one inventory > exposes the three W2.0 components from composition  307ms
+   ✓ blocker 4a: the Host owns one resolver, one ledger and one inventory > keeps the legacy route answering exactly as before  988ms
+   ✓ blocker 4a: the Host owns one resolver, one ledger and one inventory > mounts the M4C history routes while the M4B edits are mounted  323ms
+   ✓ blocker 4a: the Host owns one resolver, one ledger and one inventory > still exposes the Wave 1 migration routes  489ms
+   ✓ blocker 4b: a migrated target resolves through the production seam after a restart > resolves after the Host that created the target is closed and reopened  366ms
+   ✓ blocker 4b: a migrated target resolves through the production seam after a restart > fails closed through the same seam when the binding is missing  340ms
+   ✓ blocker 4b: a migrated target resolves through the production seam after a restart > fails closed when the active commit is missing  556ms
+   ✓ blocker 4b: a migrated target resolves through the production seam after a restart > fails closed when the migration is still moving  323ms
+   ✓ ASSET-02 and ASSET-03 through the Host's own instances > seeds through the real migration, then fails closed on drift, permanently  10423ms
+(node:2302887) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/host/d4.2.1-migration-evidence.test.ts (8 tests) 9238ms
+   ✓ M1A direct multipart and closed-route evidence > IM-02 accepts file before metadata through the real import route  1720ms
+   ✓ M1A direct multipart and closed-route evidence > IM-03..IM-09 rejects duplicate/missing/oversize/malformed multipart variants and cleans staging  338ms
+   ✓ M1A direct multipart and closed-route evidence > IM-24/IM-25 keeps materialize/adopt unavailable and rejects a fabricated edit operation without state change  2467ms
+   ✓ M1A direct media-tool evidence > IM-14..IM-17 distinguishes missing ffmpeg/ffprobe, timeout, stderr overflow and ordinary tool failure  723ms
+   ✓ M1A inventory and shared-write-boundary evidence > IM-18..IM-21 serves 256 ordered items over HTTP, caps probes at 2, isolates one timeout, revalidates changed bytes and rejects the 257th  630ms
+   ✓ M1A inventory and shared-write-boundary evidence > IM-22 serializes real HTTP import commit with a real D4.0 edit and only the edit advances revision  3128ms
+(node:2308987) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/host/host-http.test.ts (10 tests) 7767ms
+   ✓ D2 Host HTTP > enforces same-origin session and auth without leaking a token  744ms
+   ✓ D2 Host HTTP > rejects an oversized JSON body before contract parsing  690ms
+   ✓ D2 Host HTTP > reads the real D1 descriptor and leaves Source unchanged  710ms
+   ✓ D2 Host HTTP > returns the complete current asset inventory without leaking project paths  648ms
+   ✓ D2 Host HTTP > runs an asynchronous proposal job and replays monotonic SSE events  817ms
+   ✓ D2 Host HTTP > accepts a registered selection independent of JSON property order  704ms
+   ✓ D2 Host HTTP > rejects invalid D4.1 counts, reverse ranges and extra fields before Runner  2649ms
+   ✓ D2 Host HTTP > maps a comparison provider 529 after exactly one invocation  734ms
+(node:2321220) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+stderr | tests/wave2/m3/drain-liveness.test.ts > a hung render must not starve the queue > still runs other runnable rows while one render is parked
+DRAIN_STATE ["mat_a","mat_b","mat_c"] [] [["mat_a","running"],["mat_b","running"],["mat_c","running"]]
+
+ ✓ tests/wave2/m3/drain-liveness.test.ts (18 tests) 6478ms
+   ✓ a hung render must not starve the queue > still runs other runnable rows while one render is parked  846ms
+   ✓ a hung render must not starve the queue > resumes on its own after the held work is released, with no new request  370ms
+   ✓ a hung render must not starve the queue > never runs the same row twice, whichever way overlapping ticks are joined  374ms
+   ✓ a drain failure is a record, not a shrug > does not sweep a staging file owned by another active worker  363ms
+   ✓ a drain failure is a record, not a shrug > records a row failure with enough to act on it  595ms
+   ✓ a drain failure is a record, not a shrug > keeps draining after a failure, rather than stopping for the rest of the process  384ms
+   ✓ close stops the scheduler and in-flight work > starts no drain after close and clears its timer  307ms
+   ✓ close stops the scheduler and in-flight work > a drain that throws during shutdown does not reject  365ms
+   ✓ close during a drain leaves nothing running > stops the timer, aborts the work it owns, and lets nothing write afterwards  330ms
+   ✓ a retryable failure must not strand the materialization either > leaves the row retryable when the layer below says the facts were not verified  345ms
+   ✓ a retryable failure must not strand the materialization either > preserves the host-resource code when a ready row cannot be reverified  370ms
+   ✓ a retryable failure must not strand the materialization either > still strands a row when the facts were genuinely disproven  342ms
+(node:2325241) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.3/migration-service.test.ts (26 tests) 2120ms
+(node:2327818) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/w2-openfilm-composition.test.ts (6 tests) 2583ms
+   ✓ R2-07 the OpenFilm port is composed only from a verified pinned checkout > registers a port against the real pinned upstream when one is present  1047ms
+   ✓ R2-07 the OpenFilm port is composed only from a verified pinned checkout > leaves the capability closed when the checkout does not verify  1525ms
+(node:2327930) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/w2-job-kind-migration.test.ts (17 tests) 4211ms
+   ✓ W2-G02 the job table gains `materialize` without losing a row > reopens a Wave 1 database and keeps every job field value exactly  335ms
+   ✓ W2-G02 the job table gains `materialize` without losing a row > leaves events and the outbox untouched  580ms
+   ✓ W2-G02 the job table gains `materialize` without losing a row > accepts a materialize job after the migration and still rejects an unknown kind  335ms
+   ✓ W2-G02 the job table gains `materialize` without losing a row > is idempotent: reopening again performs no further migration and keeps the data  340ms
+   ✓ W2-G02 the job table gains `materialize` without losing a row > leaves the old table in place until the swap is proven, and records why  309ms
+   ✓ the copy is by explicit column list, not by position > drops an unknown column rather than shifting every value after it  312ms
+   ✓ the verification actually fires > leaves a backup alone once its migration is recorded  328ms
+(node:2340143) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/m3/materialization-store.test.ts (18 tests) 4611ms
+   ✓ M3.1 the materialization row > refuses ready when the proxy is not the one the lineage accounts for  760ms
+(node:2344058) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/w2-project-resolver.test.ts (16 tests) 4286ms
+   ✓ ACT-01 a terminal migrated target resolves from durable facts alone > resolves after the process that migrated it is gone  398ms
+   ✓ ACT-02 every way a migrated target must not resolve is closed > refuses a migration in attention, and a recovery-parked one, with 423  396ms
+   ✓ ACT-02 every way a migrated target must not resolve is closed > refuses a target with no engine binding and one with no active commit  417ms
+(node:2351041) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/m3/lease-and-recovery.test.ts (15 tests) 4106ms
+   ✓ B1: a lease is renewed only by its own attempt > refuses renewal of a cancelled or terminal job  436ms
+   ✓ B3: close stops work, waits for it, and leaves a restartable state > stops the drain timer and leaves nothing running after close  306ms
+   ✓ B3: close stops work, waits for it, and leaves a restartable state > a second Host on the same directory closes cleanly with nothing left behind  333ms
+   ✓ B1: a worker that outlives its lease cannot publish > keeps the lease across the same elapsed time when the heartbeat runs  303ms
+   ✓ D5: a running worker's heartbeat is what keeps the lease > renews while the run is in flight, so the reaper never sees it expire  316ms
+(node:2373955) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/host/d4.2.1-registry-journal.test.ts (10 tests) 1996ms
+   ✓ D4.2.1 AssetRegistry v2 transaction foundation > re-reads media facts when bytes change without size or mtime signals  991ms
+   ✓ D4.2.1 AssetRegistry v2 transaction foundation > returns a path-free ordered inventory and degrades tampered, missing and restricted entries independently  503ms
+ ✓ tests/m2.1/source-digest-v1.test.ts (18 tests) 1940ms
+   ✓ SourceDigestV1 closure > EN-04 gives the same digest whatever order the Host declares the roots in  381ms
+   ✓ SourceDigestV1 closure > EN-04 changes the digest when a scene, subtitle, setting, font or referenced asset changes  405ms
+(node:2390854) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.2/project-coordinator.test.ts (12 tests) 1932ms
+   ✓ BYP the gateway is in front of every write > an accepted edit reaches the actor exactly once and returns its response unchanged  321ms
+(node:2391005) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.1/engine-route.test.ts (8 tests) 1925ms
+   ✓ M2.1 route activation > AC-019 leaves every legacy route in place  1308ms
+ ✓ tests/architecture/m2.2-fitness.test.ts (15 tests) 1410ms
+ ✓ tests/host/d4.2.1-upload-media.test.ts (12 tests) 2059ms
+   ✓ D4.2.1 imported media validation > proves a real MP4 has one CFR stream at the project rate and survives a second hash  844ms
+   ✓ D4.2.1 imported media validation > maps wrong frame rate and corrupt bytes to INVALID_MEDIA  614ms
+(node:2406217) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/m4a/impact-store.test.ts (12 tests) 2001ms
+(node:2406582) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/w2-job-kind-fresh.test.ts (8 tests) 1823ms
+   ✓ blocker 1a: a fresh database accepts materialize on its first open > keeps the fresh and migrated schemas semantically identical  400ms
+(node:2409548) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.1/native-bypass.test.ts (13 tests) 3603ms
+   ✓ EN-04 external change detection > refuses a stale digest after an out-of-band source edit and leaves the bytes untouched  441ms
+   ✓ EN-04 external change detection > changes the digest when a declared asset, not only a source file, changes  363ms
+   ✓ B-01 external source change reaches attention through the production path > 409, then attention=true, then the next typed edit is 423, without touching the edited bytes  458ms
+   ✓ B-01 external source change reaches attention through the production path > never re-samples the committed baseline: reading again stays 409 and attention stays set  487ms
+   ✓ B-02 referenced Hypit asset bytes are inside the source digest > covers both referenced visual assets in the closure  338ms
+   ✓ B-02 referenced Hypit asset bytes are inside the source digest > changes the digest when a referenced asset is legitimately re-imported (bytes and manifest together)  332ms
+   ✓ B-02 referenced Hypit asset bytes are inside the source digest > fails closed when a referenced asset is missing or its path escapes the project  570ms
+(node:2426413) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/w2-route-fitness.test.ts (8 tests) 1626ms
+   ✓ W2.0 fitness: the unopened Wave 2 routes stay closed > keeps the Wave 1 migration routes answering, so 404 means unmounted and not broken  1346ms
+ ✓ tests/m2.3/openfilm-migrator.test.ts (7 tests) 5238ms
+   ✓ MIG-02 the migrated project is a native three-clip film > writes a film the pinned upstream reads back as three editable clips  4970ms
+ ✓ tests/architecture/m2.1-fitness.test.ts (22 tests) 2554ms
+   ✓ fitness 1-3: dependency direction > 3. production code never imports a spike, statically or dynamically  1464ms
+   ✓ fitness 10-14: stage-specific invariants > 11. no production path reaches editProjectFilm from a translated write  670ms
+ ✓ tests/m2.2/snapshot-store.test.ts (9 tests) 995ms
+   ✓ SNAP content-addressed publication > refuses a snapshot read that escapes the snapshot directory  325ms
+ ✓ tests/wave2/m4a/harness-retry.test.ts (3 tests) 1007ms
+   ✓ M4A harness recoverable upstream verification > retries an unverifiable pinned checkout and then returns the successful result  503ms
+   ✓ M4A harness recoverable upstream verification > bounds repeated unverifiable-checkout retries  502ms
+ ✓ tests/m2.1/engine-port.test.ts (10 tests) 388ms
+(node:2477543) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/m3/binding-service.test.ts (22 tests) 368ms
+(node:2481826) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/w2-asset-ledger.test.ts (30 tests) 325ms
+(node:2485027) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/w2-asset-inventory-port.test.ts (14 tests) 238ms
+(node:2485167) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/m3/derived-artifact-store.test.ts (13 tests) 757ms
+   ✓ a write needs the row to still be live > refuses to write into a row that has moved to attention  587ms
+(node:2485556) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/w2-asset-02-production.test.ts (13 tests) 248ms
+ ✓ tests/adapters/runner.test.ts (6 tests) 248ms
+(node:2497460) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m5/route-fitness.test.ts (4 tests) 100ms
+(node:2497871) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/w2-asset-03-atomic.test.ts (13 tests) 219ms
+(node:2500630) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/host/d3-write-actor.test.ts (12 tests) 244ms
+(node:2503980) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.2/host-coordinator-integration.test.ts (2 tests) 181ms
+(node:2504219) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/w2-ledger-attention.test.ts (9 tests) 171ms
+(node:2505841) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.2/persistent-job-store.test.ts (19 tests) 221ms
+ ✓ tests/contracts/contracts.test.ts (7 tests) 146ms
+ ❯ tests/m2.1/openfilm-upstream-lock.test.ts (13 tests | 1 failed) 154ms
+   ✓ M-04 pinned OpenFilm checkout verification > pins every file the loader is about to execute, plus package, lock and licence 1ms
+   ✓ M-04 pinned OpenFilm checkout verification > keeps the production lock consistent with the M1B recorded upstream lock 0ms
+   ✓ M-04 pinned OpenFilm checkout verification > refuses a checkout with no git HEAD 11ms
+   ✓ M-04 pinned OpenFilm checkout verification > fails closed when git status cannot be executed 13ms
+   ✓ M-04 pinned OpenFilm checkout verification > fails closed when git status exits non-zero 11ms
+   ✓ M-04 pinned OpenFilm checkout verification > fails closed when git status times out 19ms
+   ✓ M-04 pinned OpenFilm checkout verification > uses a 30 second production default without weakening an explicit fail-closed budget 4ms
+   ✓ M-04 pinned OpenFilm checkout verification > rejects a tracked dirty checkout and records git_clean only after a successful check 17ms
+   ✓ M-04 pinned OpenFilm checkout verification > refuses when the seam module was tampered with 7ms
+   ✓ M-04 pinned OpenFilm checkout verification > refuses when any other loaded module, package, lock or licence changes 43ms
+   ✓ M-04 pinned OpenFilm checkout verification > reports a missing pinned file as missing rather than as a digest mismatch 6ms
+   ✓ M-04 pinned OpenFilm checkout verification > refuses to load rather than loading a module whose digest does not match 5ms
+   × M-04 pinned OpenFilm checkout verification > never lets a caller supply the vendor path through a request 16ms
+     → expected 'import { createHash } from "node:cryp…' to contain 'createPinnedOpenFilmUpstream(vendorRo…'
+(node:2516777) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.2/transaction-state-machine.test.ts (8 tests) 223ms
+ ✓ tests/adapters/d4.1-runner.test.ts (8 tests) 164ms
+ ✓ tests/wave2/m4b/author-source-publisher.test.ts (8 tests) 144ms
+ ✓ tests/m5/contracts.test.ts (9 tests) 38ms
+ ✓ tests/contracts/d4.2.1-contracts.test.ts (6 tests) 49ms
+ ✓ tests/adapters/proposal-comparison-adapter.test.ts (12 tests) 50ms
+ ✓ tests/wave2/w2-contracts.test.ts (28 tests) 44ms
+ ✓ tests/wave2/m4a/openfilm-projection-completeness.test.ts (11 tests) 32ms
+(node:2535897) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/m4c/restore-plan.test.ts (22 tests) 22ms
+ ✓ tests/m2.1/time-model.test.ts (11 tests) 29ms
+(node:2536078) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/host/d4-media-write-actor.test.ts (9 tests) 31ms
+ ✓ tests/contracts/d4.1-contracts.test.ts (8 tests) 30ms
+ ✓ tests/wave2/m3/native-plan.test.ts (18 tests) 25ms
+ ✓ tests/m2.1/native-write-gateway.test.ts (20 tests) 20ms
+(node:2544096) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.1/engine-binding-store.test.ts (10 tests) 15ms
+(node:2552716) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.2/outbox.test.ts (9 tests) 18ms
+(node:2556462) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.2/lock-service.test.ts (12 tests) 15ms
+ ✓ tests/wave2/m4c/document-status-fitness.test.ts (2 tests) 15ms
+(node:2556725) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/m4b/commit-adoption.test.ts (5 tests) 15ms
+ ✓ tests/wave2/w2-typed-edit.test.ts (5 tests) 14ms
+(node:2562098) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.2/journal-predecessor.test.ts (9 tests) 14ms
+(node:2564539) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/m4a/consumer-graph.test.ts (18 tests) 9ms
+ ✓ tests/wave2/w2-host-diagnostics.test.ts (10 tests) 6ms
+(node:2564612) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/m4b/adoption-store.test.ts (4 tests) 11ms
+ ✓ tests/wave2/w2-openfilm-composition-retry.test.ts (3 tests) 3ms
+ ✓ tests/host/project-operation-queue.test.ts (3 tests) 3ms
+ ✓ tests/host/host-core.test.ts (5 tests) 4ms
+ ✓ tests/wave2/m4b/contracts.test.ts (5 tests) 6ms
+ ✓ tests/wave2/m4c/restore-rights.test.ts (1 test) 4ms
+ ✓ tests/wave2/m4a/impact-hash-vectors.test.ts (3 tests) 4ms
+ ✓ tests/wave2/m4b/governance.test.ts (4 tests) 4ms
+ ✓ tests/app/NarralensApp.test.tsx (9 tests) 618ms
+ ✓ tests/app/HostApiClient.test.ts (1 test) 4ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/m2.1/openfilm-upstream-lock.test.ts > M-04 pinned OpenFilm checkout verification > never lets a caller supply the vendor path through a request
+AssertionError: expected 'import { createHash } from "node:cryp…' to contain 'createPinnedOpenFilmUpstream(vendorRo…'
+
+- Expected
++ Received
+
+- createPinnedOpenFilmUpstream(vendorRoot: string)
++ import { createHash } from "node:crypto";
++ import { execFile } from "node:child_process";
++ import { readFile, realpath } from "node:fs/promises";
++ import { resolve } from "node:path";
++ import { promisify } from "node:util";
++ import { pathToFileURL } from "node:url";
++ import lock from "../../../contracts/openfilm-upstream-lock.json" with { type: "json" };
++ import { HttpError } from "../../host/api-error.js";
++
++ const run = promisify(execFile);
++
++ /**
++  * The OpenFilm upstream seam.
++  *
++  * `readProjectFilm`, `editProjectFilm` and `revOf` are the only functions M2.1 uses, and
++  * they are exactly the ones M1B already exercised against the pinned upstream
++  * `e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3`. Nothing here forwards an arbitrary command,
++  * path or URL to the upstream.
++  *
++  * The module is loaded with a guarded dynamic `import()` after the checkout's HEAD is
++  * verified to equal the pinned full SHA, so a drifted or absent checkout fails closed
++  * instead of silently binding a different engine. No production file statically imports
++  * `vendor/` or `spikes/`.
++  */
++
++ export const OPENFILM_PIN = Object.freeze({
++   repository: lock.repository,
++   full_sha: lock.full_sha,
++   package: lock.package,
++   license: lock.license,
++   module_path: "packages/openfilm/studio/server/film.mjs",
++   /** Every file whose bytes are about to be executed, pinned before any dynamic import. */
++   loaded_module_sha256: lock.loaded_module_sha256,
++   package_json_sha256: lock.package_json_sha256,
++   lockfile_sha256: lock.lockfile_sha256,
++   license_sha256: lock.license_sha256,
++   package_file: lock.package_file,
++   lockfile_file: lock.lockfile_file,
++   license_file: lock.license_file,
++   seam_exports: lock.seam_exports,
++ });
++
++ export interface OpenFilmFilmRead {
++   readonly text: string;
++   readonly rev: string;
++   readonly value: unknown;
++   readonly doc: unknown;
++   readonly problems: string[];
++ }
++
++ export interface OpenFilmFilmEdit {
++   readonly text: string;
++   readonly rev: string;
++   readonly value: unknown;
++   readonly doc: unknown;
++   readonly rebased: boolean;
++ }
++
++ export type OpenFilmPropValue = number | string | boolean | readonly number[] | Record<string, unknown> | null;
++
++ export type OpenFilmOp =
++   | { op: "set"; clip: string; field: string; value?: unknown }
++   | { op: "move"; clip: string; at: number; track?: number; newTrack?: number }
++   | { op: "remove"; clip: string }
++   | { op: "split"; clip: string; at: number; time: [number, number]; restTime: [number, number]; restId?: string }
++   | { op: "split"; clip: string; left: Record<string, OpenFilmPropValue>; right: Record<string, OpenFilmPropValue>; rightId?: string }
++   | { op: "props"; edits: ReadonlyArray<{ clip: string; prop: string; value: OpenFilmPropValue }> }
++   | { op: "stage"; w: number; h: number }
++   | { op: "fields"; clip: string; fields: Record<string, unknown> }
++   | { op: "track"; track: number; field: "locked" | "hidden" | "muted"; value: boolean }
++   | { op: "reorder"; from: number; to: number }
++   | { op: "insert"; clip?: Partial<{ src: string; id: string; [field: string]: unknown }> & { src: string };
++       from?: string; at?: number; after?: string; track?: number | { insert: number };
++       newTrack?: number; link?: string | null };
++
++ export interface OpenFilmUpstream {
++   revOf(text: string): string;
++   readProjectFilm(root: string): Promise<OpenFilmFilmRead>;
++   editProjectFilm(root: string, base: string | null, ops: readonly OpenFilmOp[]): Promise<OpenFilmFilmEdit>;
++ }
++
++ export interface OpenFilmAvailability {
++   readonly available: boolean;
++   readonly vendor_root: string;
++   readonly observed_sha: string | null;
++   readonly expected_sha: string;
++   readonly reason: string;
++   readonly checked: readonly string[];
++ }
++
++ const sha256File = async (path: string): Promise<string> =>
++   createHash("sha256").update(await readFile(path)).digest("hex");
++
++ const SHA_PATTERN = /^[a-f0-9]{40}$/u;
++
++ /** Read the checkout's HEAD without executing anything from it. */
++ async function readCheckoutSha(vendorRoot: string): Promise<string | null> {
++   const { readFile } = await import("node:fs/promises");
++   const head = resolve(vendorRoot, ".git/HEAD");
++   try {
++     const text = (await readFile(head, "utf8")).trim();
++     const direct = /^([a-f0-9]{40})$/u.exec(text);
++     if (direct) return direct[1]!;
++     const ref = /^ref:\s*(.+)$/u.exec(text);
++     if (!ref) return null;
++     const refFile = resolve(vendorRoot, ".git", ref[1]!.trim());
++     const sha = (await readFile(refFile, "utf8")).trim();
++     return SHA_PATTERN.test(sha) ? sha : null;
++   } catch {
++     return null;
++   }
++ }
++
++ /**
++  * M-04: a pinned commit is a claim about a tree, not about the bytes that will run.
++  *
++  * A checkout can sit at the right HEAD with locally modified files, and a dynamic import
++  * would then execute bytes that no commit ever contained. So availability requires three
++  * independent facts: the HEAD is the pinned SHA, the checkout has no tracked modifications,
++  * and every file this loader is about to execute hashes to its pinned digest.
++  */
++ export async function openFilmAvailability(vendorRoot: string, gitStatusTimeoutMs = 30_000): Promise<OpenFilmAvailability> {
++   const checked: string[] = [];
++   let root: string;
++   try { root = await realpath(vendorRoot); }
++   catch {
++     return { available: false, vendor_root: vendorRoot, observed_sha: null, expected_sha: OPENFILM_PIN.full_sha,
++       reason: "pinned OpenFilm checkout is absent", checked };
++   }
++   const observed = await readCheckoutSha(root);
++   if (observed === null) {
++     return { available: false, vendor_root: root, observed_sha: null, expected_sha: OPENFILM_PIN.full_sha,
++       reason: "pinned OpenFilm checkout has no readable git HEAD", checked };
++   }
++   checked.push("git_head");
++   if (observed !== OPENFILM_PIN.full_sha) {
++     return { available: false, vendor_root: root, observed_sha: observed, expected_sha: OPENFILM_PIN.full_sha,
++       reason: "pinned OpenFilm checkout is not at the pinned full SHA", checked };
++   }
++
++   const dirty = await trackedModifications(root, gitStatusTimeoutMs);
++   if (dirty === null) {
++     return { available: false, vendor_root: root, observed_sha: observed, expected_sha: OPENFILM_PIN.full_sha,
++       reason: "cannot verify that the pinned OpenFilm checkout is clean", checked };
++   }
++   checked.push("git_clean");
++   if (dirty.length > 0) {
++     return { available: false, vendor_root: root, observed_sha: observed, expected_sha: OPENFILM_PIN.full_sha,
++       reason: `pinned OpenFilm checkout has local modifications: ${dirty.slice(0, 5).join(", ")}`, checked };
++   }
++
++   const verdict = await verifyPinnedFiles(root);
++   checked.push(...verdict.checked);
++
++   return { available: verdict.ok, vendor_root: root, observed_sha: observed, expected_sha: OPENFILM_PIN.full_sha,
++     reason: verdict.reason, checked };
++ }
++
++ export interface PinnedFileVerdict {
++   readonly ok: boolean;
++   readonly reason: string;
++   readonly checked: readonly string[];
++   readonly missing: readonly string[];
++   readonly mismatched: readonly string[];
++ }
++
++ /**
++  * Hash every file this loader will execute or read, plus package, lock and licence.
++  *
++  * Split out from the git checks so the digest gate itself is directly testable: a synthetic
++  * tree can never satisfy the real pins, which is exactly what proves the gate refuses.
++  */
++ export async function verifyPinnedFiles(root: string): Promise<PinnedFileVerdict> {
++   const digests: Array<[string, string]> = [
++     [OPENFILM_PIN.package_file, OPENFILM_PIN.package_json_sha256],
++     [OPENFILM_PIN.lockfile_file, OPENFILM_PIN.lockfile_sha256],
++     [OPENFILM_PIN.license_file, OPENFILM_PIN.license_sha256],
++     ...Object.entries(OPENFILM_PIN.loaded_module_sha256),
++   ];
++   const checked: string[] = [];
++   const missing: string[] = [];
++   const mismatched: string[] = [];
++   // Every pinned file is checked, not just the first failure, so an operator sees the whole
++   // picture of what a tampered checkout contains.
++   for (const [relative, expected] of digests) {
++     checked.push(relative);
++     const actual = await sha256File(resolve(root, relative)).catch(() => null);
++     if (actual === null) missing.push(relative);
++     else if (actual !== expected) mismatched.push(relative);
++   }
++   if (missing.length > 0 || mismatched.length > 0) {
++     const parts = [
++       ...missing.map((relative) => `missing ${relative}`),
++       ...mismatched.map((relative) => `digest mismatch ${relative}`),
++     ];
++     return { ok: false, reason: `pinned OpenFilm checkout is not intact: ${parts.join("; ")}`,
++       checked, missing, mismatched };
++   }
++   return { ok: true, reason: "all pinned files match their digests", checked, missing, mismatched };
++ }
++
++ /**
++  * Tracked modifications, or `null` when git cannot answer. Fixed argv, never a shell: the
++  * caller supplies no command, no flags and no paths of its own.
++  */
++ async function trackedModifications(root: string, timeout: number): Promise<string[] | null> {
++   try {
++     const { stdout } = await run("git", ["-C", root, "status", "--porcelain", "--untracked-files=no"], { timeout });
++     return stdout.split("\n").map((line) => line.trim()).filter((line) => line !== "");
++   } catch { return null; }
++ }
++
++ /**
++  * Load the pinned upstream seam. Throws `ENGINE_UNAVAILABLE` when the checkout is absent
++  * or not at the pinned SHA; never falls back to another revision or to a bundled copy.
++  */
++ export async function createPinnedOpenFilmUpstream(vendorRoot: string,
++   verified?: OpenFilmAvailability): Promise<OpenFilmUpstream> {
++   const availability = verified ?? await openFilmAvailability(vendorRoot);
++   if (!availability.available) {
++     throw new HttpError(503, "ENGINE_UNAVAILABLE", `OpenFilm upstream unavailable: ${availability.reason}`,
++       { expected_sha: OPENFILM_PIN.full_sha, observed_sha: availability.observed_sha });
++   }
++   // Composition may pass the verdict it obtained immediately before this call. Re-running
++   // `git status` here created a second, independent transient failure window: verification
++   // could succeed, then the loader could fail to repeat the same check and leave a migrated
++   // project bound to an uninstalled engine. A supplied verdict is accepted only for the
++   // exact canonical root and exact pin that this loader is about to execute.
++   if (verified !== undefined) {
++     let canonicalRoot: string;
++     try { canonicalRoot = await realpath(vendorRoot); }
++     catch { throw new HttpError(503, "ENGINE_UNAVAILABLE", "OpenFilm upstream disappeared after verification"); }
++     if (canonicalRoot !== availability.vendor_root
++       || availability.observed_sha !== OPENFILM_PIN.full_sha
++       || availability.expected_sha !== OPENFILM_PIN.full_sha
++       || !availability.checked.includes("git_clean")) {
++       throw new HttpError(503, "ENGINE_UNAVAILABLE", "OpenFilm upstream verification verdict is not reusable");
++     }
++   }
++   const moduleUrl = pathToFileURL(resolve(availability.vendor_root, OPENFILM_PIN.module_path)).href;
++   let loaded: Record<string, unknown>;
++   try { loaded = await import(/* @vite-ignore */ moduleUrl) as Record<string, unknown>; }
++   catch { throw new HttpError(503, "ENGINE_UNAVAILABLE", "OpenFilm upstream seam could not be loaded"); }
++   for (const name of OPENFILM_PIN.seam_exports) {
++     if (typeof loaded[name] !== "function") {
++       throw new HttpError(503, "ENGINE_UNAVAILABLE", `OpenFilm upstream seam is missing export ${name}`);
++     }
++   }
++   return {
++     revOf: (text: string) => String((loaded.revOf as (value: string) => string)(text)),
++     readProjectFilm: async (root: string) => await (loaded.readProjectFilm as (value: string) => Promise<OpenFilmFilmRead>)(root),
++     editProjectFilm: async (root: string, base: string | null, ops: readonly OpenFilmOp[]) =>
++       await (loaded.editProjectFilm as (value: string, base: string | null, ops: readonly OpenFilmOp[]) => Promise<OpenFilmFilmEdit>)(root, base, ops),
++   };
++ }
++
++ /**
++  * The revision the upstream derives from a film.html text: the first 16 hex of its SHA-256.
++  * Reimplemented here (one line, documented) so a strict base check does not require loading
++  * the upstream at all.
++  */
++ export function upstreamRevOf(text: string): string {
++   return createHash("sha256").update(text).digest("hex").slice(0, 16);
++ }
++
+
+ ❯ tests/m2.1/openfilm-upstream-lock.test.ts:197:20
+    195|     const source = await readFile("src/adapters/openfilm/openfilm-upst…
+    196|     expect(source).not.toMatch(/request\.|req\.|body\./u);
+    197|     expect(source).toContain("createPinnedOpenFilmUpstream(vendorRoot:…
+       |                    ^
+    198|     // No shell, no process spawning with caller-controlled arguments.
+    199|     expect(source).not.toMatch(/\bexecSync\b|\bspawnSync\b|child_proce…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 91 passed (92)
+      Tests  1 failed | 1085 passed (1086)
+   Start at  22:13:48
+   Duration  5082.81s (transform 11.18s, setup 0ms, collect 248.83s, tests 4501.87s, environment 17.26s, prepare 210.86s)
+
+ ELIFECYCLE  Command failed with exit code 1.

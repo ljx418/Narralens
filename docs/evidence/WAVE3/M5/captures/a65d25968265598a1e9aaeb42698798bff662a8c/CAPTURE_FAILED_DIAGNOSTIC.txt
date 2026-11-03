@@ -1,0 +1,17 @@
+CAPTURE STATUS: FAILED AND THEN STOPPED
+
+The authoritative `check` command completed at this frozen commit and returned exit 1:
+
+  Test Files  1 failed | 91 passed (92)
+  Tests       1 failed | 1085 passed (1086)
+
+The failing case was `tests/m2.1/openfilm-upstream-lock.test.ts`, which still required the
+old one-argument source signature of `createPinnedOpenFilmUpstream`. The implementation at
+this commit added an optional reusable verification verdict. This is a real frozen-gate
+failure; it is not classified as an environmental failure and it is not a PASS.
+
+After `check.exit=1` had been written, the remainder of the evidence runner was stopped so
+the defect could be repaired instead of spending several more hours repeating suites for a
+candidate that was already ineligible. Consequently this capture has no `overall.txt`, no
+manifest and no integrity result. Its partial files are append-only failure evidence and
+must never be used to declare `M5_HEADLESS_EVIDENCED`.
