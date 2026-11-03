@@ -32,6 +32,11 @@ mkdir -p "$LOGS"
   echo "openfilm_upstream=e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3"
   echo "declaration_ceiling=M5_HEADLESS_EVIDENCED"
   echo "interaction=headless,muted,no-window,no-focus-steal,no-network,no-payment"
+  # The machine's load when the capture started. Several of the repository's older tests
+  # carry the default five-second per-test timeout, and a saturated machine can push a
+  # test that takes a fifth of that over the line; the load is recorded so a reader can
+  # tell a slow machine from a slow feature.
+  echo "machine_load_at_capture=$(cut -d' ' -f1-3 /proc/loadavg)"
   echo "human_experience=NOT_RUN"
   echo "ux12=HUMAN_NOT_RUN"
 } > "$LOGS/environment.txt"
