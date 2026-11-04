@@ -1,0 +1,48 @@
+
+> narralens@0.1.0 test:m2.1 /mnt/c/workspace/videoworkline/Narralens
+> vitest run --config vitest.config.ts tests/m2.1 tests/architecture
+
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens
+
+(node:1534169) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.1/engine-route.test.ts (8 tests) 3209ms
+   ✓ M2.1 route activation > EN-01 opens GET /api/migration/v1/projects/:id/engine as a read-only projection  405ms
+   ✓ M2.1 route activation > AC-019 leaves every legacy route in place  2259ms
+ ✓ tests/m2.1/source-digest-v1.test.ts (18 tests) 3399ms
+   ✓ SourceDigestV1 closure > EN-04 gives the same digest whatever order the Host declares the roots in  595ms
+   ✓ SourceDigestV1 closure > EN-04 changes the digest when a scene, subtitle, setting, font or referenced asset changes  707ms
+   ✓ SourceDigestV1 closure > AC-006 refuses absolute paths, traversal, symlink escape, query strings and unknown roles  411ms
+   ✓ M-03 canonical identity is the realpath > refuses Windows and WSL path shapes instead of normalising them silently  335ms
+(node:1558422) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.1/native-bypass.test.ts (13 tests) 2888ms
+   ✓ EN-04 external change detection > refuses a stale digest after an out-of-band source edit and leaves the bytes untouched  394ms
+   ✓ B-01 external source change reaches attention through the production path > 409, then attention=true, then the next typed edit is 423, without touching the edited bytes  410ms
+   ✓ B-01 external source change reaches attention through the production path > never re-samples the committed baseline: reading again stays 409 and attention stays set  410ms
+   ✓ B-02 referenced Hypit asset bytes are inside the source digest > fails closed when a referenced asset is missing or its path escapes the project  439ms
+ ✓ tests/architecture/m2.2-fitness.test.ts (15 tests) 2196ms
+   ✓ M2.2 fitness: one state machine, no arbitrary state writes > 1. every production `UPDATE ... SET state` lives in transition, advanceJournal or markRecovering  379ms
+   ✓ M2.2 fitness: one state machine, no arbitrary state writes > 13. every job state write goes through the store that owns the transition table  359ms
+   ✓ M2.2 fitness: one state machine, no arbitrary state writes > 2. no production DELETE on a journal row; rows are evidence, not scratch  355ms
+   ✓ M2.2 fitness: one state machine, no arbitrary state writes > 3. only project_state ever changes the current revision  358ms
+   ✓ M2.2 fitness: no second actor, queue, store or timeline > 5. no production class extends or duplicates ProjectWriteActor  347ms
+   ✓ M2.2 fitness: no second actor, queue, store or timeline > 6. the revision store owns one database handle; no second DatabaseSync for project state  343ms
+ ✓ tests/architecture/m2.1-fitness.test.ts (22 tests) 1341ms
+   ✓ fitness 1-3: dependency direction > 3. production code never imports a spike, statically or dynamically  722ms
+   ✓ fitness 10-14: stage-specific invariants > 11. no production path reaches editProjectFilm from a translated write  354ms
+ ✓ tests/m2.1/engine-port.test.ts (10 tests) 887ms
+   ✓ OpenFilmEngineAdapter staging > AC-004 never accepts an upstream rebased result as success  480ms
+ ✓ tests/m2.1/openfilm-upstream-lock.test.ts (14 tests) 299ms
+ ✓ tests/m2.1/time-model.test.ts (11 tests) 57ms
+ ✓ tests/m2.1/native-write-gateway.test.ts (20 tests) 41ms
+(node:1598076) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.1/engine-binding-store.test.ts (10 tests) 28ms
+
+ Test Files  10 passed (10)
+      Tests  141 passed (141)
+   Start at  13:39:04
+   Duration  102.14s (transform 4.56s, setup 0ms, collect 36.10s, tests 14.34s, environment 3ms, prepare 34.71s)
+

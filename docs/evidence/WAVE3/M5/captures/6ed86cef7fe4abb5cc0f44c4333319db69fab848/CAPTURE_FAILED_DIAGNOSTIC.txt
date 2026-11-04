@@ -1,0 +1,7 @@
+CAPTURE_STATUS=FAILED_AND_TERMINATED
+candidate=6ed86cef7fe4abb5cc0f44c4333319db69fab848
+failed_gate=check
+failed_test=tests/wave2/m4c/history-fault-matrix.test.ts after_db_statement:outbox
+observed=The adoption prerequisite returned HTTP 500 after approximately 38 seconds under a full-suite run whose total duration exceeded 150 minutes. The other 1089 tests passed.
+action=The remaining duplicate gates were terminated after the definitive check failure. This capture is preserved and cannot support M5_HEADLESS_EVIDENCED.
+next=Reproduce the exact case in isolation and classify the complete controlled-write failure before changing production or test code.
