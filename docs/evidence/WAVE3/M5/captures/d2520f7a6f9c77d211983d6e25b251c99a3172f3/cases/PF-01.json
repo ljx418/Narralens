@@ -1,0 +1,51 @@
+{
+  "run_id": "2026-11-04T02-24-20-879Z",
+  "captured_at": "2026-11-04T02:44:17.192Z",
+  "case_id": "PF-01",
+  "title": "120 clip 四类操作各 100 样本 p95≤100ms",
+  "status": "PASS",
+  "assertions": [
+    {
+      "claim": "四类操作各 100 个原始样本",
+      "ok": true,
+      "detail": "{\"selection\":100,\"pan\":100,\"zoom\":100,\"chapter\":100}"
+    },
+    {
+      "claim": "每类 event→paint p95 ≤ 100ms",
+      "ok": true,
+      "detail": "{\"selection\":70.60000000149012,\"pan\":72.70000000298023,\"zoom\":69.79999999701977,\"chapter\":70.20000000298023}"
+    },
+    {
+      "claim": "慢样本没有被删除",
+      "ok": true,
+      "detail": "样本数与采集数一致"
+    }
+  ],
+  "facts": {
+    "summary": {
+      "selection": {
+        "count": 100,
+        "p95": 70.60000000149012,
+        "max": 83.5
+      },
+      "pan": {
+        "count": 100,
+        "p95": 72.70000000298023,
+        "max": 81.90000000596046
+      },
+      "zoom": {
+        "count": 100,
+        "p95": 69.79999999701977,
+        "max": 75.20000000298023
+      },
+      "chapter": {
+        "count": 100,
+        "p95": 70.20000000298023,
+        "max": 74.40000000596046
+      }
+    }
+  },
+  "evidence": [
+    "/mnt/c/workspace/videoworkline/Narralens/docs/evidence/WAVE3/M5/captures/d2520f7a6f9c77d211983d6e25b251c99a3172f3/performance/pf-01-samples.json"
+  ]
+}

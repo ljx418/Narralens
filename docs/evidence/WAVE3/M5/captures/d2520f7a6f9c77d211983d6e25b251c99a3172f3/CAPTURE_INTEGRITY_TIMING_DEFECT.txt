@@ -1,0 +1,7 @@
+CAPTURE_STATUS=FAILED_INTEGRITY_TIMING_CONTRACT
+candidate=d2520f7a6f9c77d211983d6e25b251c99a3172f3
+business_and_headless_gates=PASS
+integrity=FAIL
+defect=The integrity gate ran before overall.txt was written and classified its own explicitly in-progress capture as a failed capture missing from the failure index.
+impact=overall=1 is correct for this run. The capture must not support M5_HEADLESS_EVIDENCED even though every preceding gate passed.
+repair=Pass the in-progress capture SHA explicitly to the integrity gate; waive only that capture's not-yet-written overall marker while retaining strict historical failure-index checks.
