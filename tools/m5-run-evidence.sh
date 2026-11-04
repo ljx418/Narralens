@@ -133,8 +133,8 @@ printf '%-24s exit=%s\n' manifest "$code"
 git status --porcelain > "$LOGS/git-status-after.txt"
 
 # The integrity gate, over the whole M5 evidence tree.
-printf '%s\n' "node tools/m5-evidence-integrity.mjs" > "$LOGS/integrity.cmd"
-node tools/m5-evidence-integrity.mjs > "$LOGS/integrity.txt" 2>&1
+printf '%s\n' "node tools/m5-evidence-integrity.mjs $CAPTURE_SHA" > "$LOGS/integrity.cmd"
+node tools/m5-evidence-integrity.mjs "$CAPTURE_SHA" > "$LOGS/integrity.txt" 2>&1
 code=$?
 printf '%s\n' "$code" > "$LOGS/integrity.exit"
 printf '%-24s exit=%s\n' integrity "$code"

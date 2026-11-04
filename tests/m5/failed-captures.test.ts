@@ -24,4 +24,30 @@ describe("M5 failed-capture index", () => {
     const index = JSON.parse(await readFile(resolve(root, "failed-captures.json"), "utf8"));
     expect(index.captures.map((entry: { capture: string }) => entry.capture)).toEqual(["historical-incomplete"]);
   });
+
+  it("lets integrity inspect only its explicitly named live capture before overall is written", async () => {
+    const root = await mkdtemp(resolve(tmpdir(), "narralens-m5-live-integrity-"));
+    const capture = resolve(root, "captures", "current");
+    await mkdir(capture, { recursive: true });
+    await writeFile(resolve(capture, "git-status-after.txt"), "", "utf8");
+    await writeFile(resolve(capture, "manifest.json"), JSON.stringify({
+      files: [],
+      cases: [],
+      declaration_ceiling: "M5_HEADLESS_EVIDENCED",
+      human_experience: "NOT_RUN",
+      environment: "human_experience=NOT_RUN\n",
+    }), "utf8");
+    await writeFile(resolve(root, "failed-captures.json"), JSON.stringify({ captures: [] }), "utf8");
+
+    const live = await exec(process.execPath, ["tools/m5-evidence-integrity.mjs", "current", root], {
+      cwd: resolve("."),
+    });
+    expect(live.stdout).toContain("0 failures");
+
+    await expect(exec(process.execPath, ["tools/m5-evidence-integrity.mjs", "", root], {
+      cwd: resolve("."),
+    })).rejects.toMatchObject({
+      stdout: expect.stringContaining("a failed capture is not in the failed-capture index"),
+    });
+  });
 });

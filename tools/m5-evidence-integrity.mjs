@@ -18,7 +18,8 @@ import { join, resolve } from "node:path";
  *
  * It exits non-zero on any failure, and it prints what failed.
  */
-const root = resolve("docs/evidence/WAVE3/M5");
+const inProgressCapture = process.argv[2] ?? "";
+const root = resolve(process.argv[3] ?? "docs/evidence/WAVE3/M5");
 const failures = [];
 const note = (message) => failures.push(message);
 
@@ -110,6 +111,10 @@ if (existsSync(indexPath)) {
     const failed = (manifest.cases ?? []).some((entry) => entry.status === "FAIL");
     const overall = join(capturesRoot, capture, "overall.txt");
     const overallText = existsSync(overall) ? readFileSync(overall, "utf8").trim() : "";
+    // The runner executes integrity immediately before it writes its own overall marker.
+    // Only the explicitly named live capture may be in that state. Historical captures
+    // with no overall marker are still failures and must remain indexed.
+    if (capture === inProgressCapture && overallText === "") continue;
     if (failed || overallText !== "0") {
       if (!indexed.has(capture)) note(`${capture}: a failed capture is not in the failed-capture index`);
     }
