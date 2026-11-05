@@ -1,0 +1,8 @@
+CAPTURE_STATUS=INCOMPLETE_PROCESS_TERMINATED
+candidate=f8cfa4c7a1439634f45ce1591f6e5af1e01da69d
+completed_gates=check,typecheck,contracts,m2.1,wave2-w2.0,wave2-m3,wave2-m4a,wave2-m4b,wave2-m4c,wave2-fitness,m5,build
+completed_gate_result=all exit 0
+headless_progress=UX-01,UX-02,UX-03,UX-04,UX-05,UX-06,UX-07,UX-09 PASS; process terminated during UX-10
+missing=m5-headless.exit,manifest.json,git-status-after.txt,integrity.exit,overall.txt
+claim=This is an incomplete failed capture and must not support M5_HEADLESS_EVIDENCED.
+action=Preserve and index this directory without overwriting it; run a new capture at a new frozen commit.
