@@ -1,0 +1,79 @@
+{
+  "run_id": "2026-11-05T08-50-37-244Z",
+  "captured_at": "2026-11-05T09:09:36.819Z",
+  "case_id": "PF-02",
+  "title": "三路真实 proxy 播放/切焦，无三路同时出声",
+  "status": "PASS",
+  "assertions": [
+    {
+      "claim": "三路 proxy 都是真实可解码的媒体事件",
+      "ok": true,
+      "detail": "{\"count\":3,\"ready\":3,\"playing\":2,\"muted\":2,\"durations\":[10,10,10],\"names\":[\"proxy-a.mp4\",\"proxy-b.mp4\",\"proxy-c.mp4\"],\"offScreenPaused\":1,\"offScreenPlaying\":0}"
+    },
+    {
+      "claim": "在视口内的 proxy 在播放，离屏的已暂停",
+      "ok": true,
+      "detail": "playing=2 offScreenPaused=1"
+    },
+    {
+      "claim": "只有一路持有音频焦点",
+      "ok": true,
+      "detail": "muted=2 afterFocus={\"unmuted\":1,\"focus\":[\"false\",\"true\",\"false\"]}"
+    },
+    {
+      "claim": "12 轮真实切焦/滚动的 heap 样本完整且增长有界",
+      "ok": true,
+      "detail": "{\"samples\":[92956490,89547914,89571994,91101459,90083496,90963288,90985212,92488678,90982871,91884583,91908035,93656161],\"start\":92956490,\"end\":93656161,\"peak\":93656161} growth=699671 limit=32534771.499999996"
+    }
+  ],
+  "facts": {
+    "first": {
+      "count": 3,
+      "ready": 3,
+      "playing": 2,
+      "muted": 2,
+      "durations": [
+        10,
+        10,
+        10
+      ],
+      "names": [
+        "proxy-a.mp4",
+        "proxy-b.mp4",
+        "proxy-c.mp4"
+      ],
+      "offScreenPaused": 1,
+      "offScreenPlaying": 0
+    },
+    "afterFocus": {
+      "unmuted": 1,
+      "focus": [
+        "false",
+        "true",
+        "false"
+      ]
+    },
+    "memory": {
+      "samples": [
+        92956490,
+        89547914,
+        89571994,
+        91101459,
+        90083496,
+        90963288,
+        90985212,
+        92488678,
+        90982871,
+        91884583,
+        91908035,
+        93656161
+      ],
+      "start": 92956490,
+      "end": 93656161,
+      "peak": 93656161
+    }
+  },
+  "evidence": [
+    "/mnt/c/workspace/videoworkline/Narralens/docs/evidence/WAVE3/M5/captures/74dd5689829109da9e474833c745d05974542c02/performance/pf-02-proxies.json"
+  ]
+}

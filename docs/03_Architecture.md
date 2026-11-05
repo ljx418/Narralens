@@ -1,40 +1,40 @@
 # 叙镜架构设计 v1.0
 <!-- M2.1_REWORK_BASE_SHA=ee58ab5c6a9d4bbdf05e8ac8a394fd75218cae59 REVIEW_STATUS=PASS -->
 
-文档状态：Gate D1–D3、D4.0/D4.1 与 Wave 1/Wave 2 历史结论保留。UX-12 前置独立审计判定旧 M5
-捕获仅具文件完整性、不具语义验收效力，当前为 `M5_ACCEPTANCE_REWORK`。真实 120 clip、完整键盘、四视口、
-性能序列、整页可访问性、成功态截图和浏览器清理正在重新冻结；UX-12 保持 `HUMAN_NOT_RUN`。
+文档状态：Gate D1–D3、D4.0/D4.1 与 Wave 1/Wave 2 历史结论保留。旧 M5 捕获已被语义审计否决并保留为
+历史；冻结提交 `74dd5689829109da9e474833c745d05974542c02` 的捕获随后被发现存在原生 WebSocket 认证失败
+导致的预览重载风暴，因此同样只作失败历史。当前声明上限为 `M5_ACCEPTANCE_REWORK`；UX-11 与 PF-01
+修复后本地聚焦复验已通过，但必须绑定新的干净冻结提交完成全量捕获和独立复审，才可恢复
+`M5_HEADLESS_EVIDENCED`。UX-12 保持 `HUMAN_NOT_RUN`。
 Gate D4.2、`Gate V1-P0`、`V1-Full`、M6 与 M7 仍未关闭。
+
+当前阶段的可视化权威架构为 `docs/architecture/m5-stage-current.architecture.html`；其 Archify 源为同目录
+`.architecture.json`，PNG 是人工快速复核用快照。图中代码实体、状态和边界绑定上述冻结提交。
 
 ## 1. 零层架构
 
 ```text
-用户：聊天 / 观点 / 资料 / 实拍 / 录音
-                  │
-                  ▼
-Narralens Unified Workbench
-导演面板 + Hypit 编辑区域 + 时间轴 + 交付区
-                  │
-                  ▼
-Narralens Local Host (TS/Node)
-项目 / 任务 / 版本 / 锁 / 预算 / 权限 / 事件 / 事务
-          │                         │
-          │                         ▼
-          │                 Hypit Adapter
-          │                 Author Source + Run
-          │                         │
-          │                         ▼
-          │                 Hypit compile/build
-          │                         │
-          ▼                         ▼
-OpenMontage Adapter          预览 / MP4 / 字幕
-受控 Agent Runner
-pipeline + skills + tools
+用户：想法 / 资料 / 本地媒体 / 已录制多提案
+                    │
+                    ▼
+Narralens M5 同页工作台
+导演面板 ↔ StudioHost Bridge ↔ 固定 OpenFilm Studio
+                    │ 同一 selection / clock / snapshot
+                    ▼
+Narralens Local Host（TS / Node，仅 loopback）
+ProjectResolver / WorkbenchProjection / LockService
+ProjectCoordinator / Impact / Adoption / History
+Materialize / Job / Lease / SSE / Snapshot / Journal
+          │                            │
+          ▼                            ▼
+EnginePort（恰 7 方法）          SQLite 审计与事务事实
           │
-          ▼
-ProposalBundle / Evidence / AssetManifest
-          │
-          └──> 暂存区 → 审批/校验 → Source Adapter → 唯一主工程
+  ┌───────┴────────┐
+  ▼                ▼
+OpenFilmAdapter   HypitAdapter（legacy / 回退）
+目标原生工程       旧项目 Author Source
+  │
+  └─ 原生可编辑 clips + 引用资产 + 内容寻址 snapshot
 ```
 
 **每个项目只绑定一个可写引擎事实源。** legacy 项目保持 Hypit Author Source + Run；通过受控迁移验证并
@@ -42,46 +42,48 @@ ProposalBundle / Evidence / AssetManifest
 审计事实，不是第二条时间轴；两个引擎之间不双写，OpenMontage 不直接写任何主工程。
 
 ## 2. 为什么这样集成
-OpenMontage 的公开架构是 agent-first：编码智能体读取 YAML pipeline、Markdown skills，调用 Python tools，并通过 checkpoint 推进；它不是一个现成的单一 HTTP 视频生成 API。Backlot 是只读制作看板。因此我们复用它的制作方法、工具和产物，不把 Backlot 当编辑器。
+OpenFilm Studio 是迁移后项目的目标原生 UI 与默认编辑表面；Narralens 不维护第二份 timeline。所有受支持
+写入先由 Host 计算 impact、检查 base/锁/许可与幂等，再由受控服务发布；未支持的原生写入口由 Gateway
+禁用并由服务端 422 拒绝。Hypit 只保留为 legacy 引擎与可验证回退，不与 OpenFilm 双写。
 
-Hypit 已有 Studio、时间模型、工程和本地渲染链路。Narralens 应在固定版本 Studio 应用层做薄改造，复用真实播放器/时间模型/工程写入，而不是重新发明渲染器。
+OpenMontage 仍只提供 agent-first 的提案/素材方法，不能直接覆盖主工程；VibeMovie 只借鉴结构化提案，
+不引入第二套完整 timeline、Gemini 服务或 Remotion 全片后端。
 
 ## 3. 组件职责
 | 组件 | 负责 | 禁止 |
 |---|---|---|
-| Narralens UI | 单页创作、选区、方案、精修、标题封面、交付 | 维护独立最终时间轴 |
-| Local Host | 项目状态、任务、锁、版本、审批、预算、事务、SSE | 隐藏创作决策 |
-| OpenMontage Adapter | 调用固定 pipeline/skills/tools，归一化提案和素材 | 直接覆盖主工程 |
-| Agent Runner | 受控目录和白名单网络下运行 OpenMontage | 任意 shell/任意路径 |
-| Hypit Adapter | Author Source 定位、typed patch、Run 产物选择、build | 正则猜写源码 |
-| Hypit Runtime | 真实编译、预览、媒体装配、编码 | 自动理解用户聊天 |
-| SQLite/Event Log | 任务、事件、修订、审批、映射 | 保存第二份影片结构 |
+| M5 同页工作台 | 想法草稿、章节/镜头定位、提案比较、impact 确认、采用与历史入口 | 维护独立最终时间轴或绕过 Host 写入 |
+| 固定 OpenFilm Studio | 原生素材库、播放器、Inspector、timeline 和原生可编辑 clips | 裸转发未治理写操作 |
+| StudioHost Bridge / Gateway | 同步 selection/clock/snapshot；提供同源只读与受控写白名单 | 成为业务权威或放开任意上游路由 |
+| Local Host | 项目解析、任务、三类锁、版本、许可、事务、SSE、恢复 | 隐藏创作决策或信任客户端自报 impact |
+| ProjectCoordinator + 写服务 | 每项目串行；impact/adoption/history 的唯一事务边界 | 双写引擎、回拨 revision、跳过显式确认 |
+| MaterializeService | native plan、真实 proxy、lineage、持久 job/lease | 修改 author source 或 project revision |
+| EnginePort / Adapter | 隔离 OpenFilm 与 legacy Hypit；单项目单引擎 | 暴露 commit/lock/process 或动态 `latest` 上游 |
+| SQLite + 文件系统 | 前者保存审计/事务事实；后者保存 author source、snapshot、staging 与资产 | 在数据库保存可独立重建影片的第二时间轴 |
 
 ## 4. 技术栈基线
-- UI：沿用固定 Hypit Studio 的 TypeScript/Vite 技术栈；新增 `DirectorPane`、`SpatialAlternatives`、`DeliveryPanel`。
-- Host：Node.js + TypeScript；loopback 同源 API；每项目串行写 actor。
+- UI：React + TypeScript + Vite；固定 OpenFilm Studio 与 `src/app/m5/M5Panel.tsx` 同页组合。
+- Host：Node.js + TypeScript；loopback Host + 随机端口 Main Studio Gateway + 隔离只读 Film Gateway；
+  每项目串行 Coordinator。
 - Persistence：SQLite + append-only event log + project journal。
 - OpenMontage：独立 Python venv，固定 commit SHA，受控 Agent Runner。
-- Hypit：当前 distribution `@hypit/hypit` 0.3.1、Studio 0.2.0；Author Source Header 使用 `@hypit/markup@1`，媒体/时间等 module request 版本按 fixture import（如 `@hypit/media@1`）由该固定 distribution 解析。commit/version、Source/Run adapter 与实际 CLI/API 以 D1 探测结果为准。
-- Testing：Vitest/现有 TS 测试 + Playwright + pytest（adapter）+ ffprobe + 帧采样。
+- OpenFilm：固定上游 `e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3`，加载闭包逐文件 SHA256 校验。
+- Hypit：固定 legacy 上游 `6fdd8c0f02c17b9970aee6deb4550a70e9d57acf`，只服务旧项目/回退。
+- Testing：Vitest + 自建 CDP Headless Chrome harness + Python 黄金向量 + ffprobe/ffmpeg 完整解码。
 - Media store：内容哈希目录；媒体不嵌入 JSON。
 
 ## 5. 文件布局
 ```text
-narralens/
-  vendor/hypit/                 # 固定 SHA 的薄 fork
-  vendor/openmontage/           # 固定 SHA，独立 venv
-  app/director/                 # 导演面板、空间备选、标题封面
-  host/                         # API、actor、事务、事件、SQLite
-  adapters/openmontage/         # pipeline 交接、产物归一化
-  adapters/hypit/               # author identity、patch、run/build
-  contracts/                    # JSON Schema + examples
-  projects/<project-id>/
-    film/
-    media/<sha256>/
-    proposals/
-    runs/
-    .narralens/
+Narralens/
+  src/app/m5/                   # 当前导演面板、stores、selection 协调与样式
+  src/host/m5/                  # Studio supervisor / gateway / bridge
+  src/host/{projects,engine}/    # Coordinator、snapshot、locks、binding、EnginePort
+  src/host/{materialize,impact,adoption,history}/
+  src/adapters/{openfilm,hypit,openmontage}/
+  src/contracts/ + contracts/   # TS 类型、validator 与 runtime JSON Schema
+  tests/m5/headless/            # 无声 CDP 端到端验收
+  docs/evidence/WAVE3/M5/       # 捕获、截图、性能、报告和审查
+  docs/architecture/            # Archify 源、HTML、PNG 与视觉核查记录
 ```
 
 ### 5.1 代码实体与实现状态
@@ -208,10 +210,13 @@ Manifest@2，因此 W2.0 必须通过 terminal migration、source tree digest、
   复制成带 lineage 的 target-owned immutable comparison，不调用 Runner/provider、不改 source/revision/
   active snapshot/ledger；映射由 migrator 的 `clipIdFor` 不变量与当前 target projection 的真实 clip 互证；
   base revision 必须等于 migration plan 的 source revision，否则 409。
-- `OpenFilm Studio Gateway`：**M5A 已实现**；独立的 127.0.0.1 随机端口 loopback origin，不占用
-  `/api/migration/v1` 路由。浏览器只连 Gateway 同源 API/WS，Gateway 在 NarralensHost composition 内调用
-  受限服务接口；Host 的 Origin allowlist 不加入 Gateway origin，从 Gateway origin 直调 Host 为 401/403 且零副作用；
-  读 allowlist 逐路登记，写 deny-by-default，开放集恰为 OpenFilm capability map 的四条 supported entry。
+- `OpenFilm Studio Gateway`：**M5A 已实现并在 UX-12 前置审计返修**；Main Gateway 与只读 Film Gateway
+  分别绑定 127.0.0.1 随机端口。原生 film/page code 保持跨源隔离，Main origin 不能被 film code 读取；
+  Film Gateway 只接受 Host 精确匹配的 GET/HEAD `/film/*`，仅向 Main origin 单向开放媒体读取。
+  Main Gateway 代理固定读面和 WebSocket，WebSocket 以不进入 URL/浏览器的 `x-studio-key` 对上游握手，
+  浏览器侧 cookie、Host 校验、CSP 与帧策略保持不变。Gateway 在 NarralensHost composition 内调用受限
+  服务接口；Host 的 Origin allowlist 不加入 Gateway origin，从 Gateway origin 直调 Host 为 401/403 且
+  零副作用；写 deny-by-default，开放集恰为 OpenFilm capability map 的四条 supported entry。
 - `POST /api/projects/:id/edits`：typed operations + baseRevision → newRevision。
 - `POST /api/projects/:id/renders`：revision + profile → jobId。
 - `POST /api/jobs/:id/cancel`：尽力取消，已产生外部费用如实记录。

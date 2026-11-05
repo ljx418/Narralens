@@ -95,6 +95,8 @@ export interface OpenFilmStudioSupervisorDeps {
 
 export interface StartedStudio {
   readonly origin: string;
+  /** The read-only project pages server selected by the pinned Studio itself. */
+  readonly filmOrigin: string;
   readonly port: number;
   readonly key: string;
   readonly close: () => Promise<void>;

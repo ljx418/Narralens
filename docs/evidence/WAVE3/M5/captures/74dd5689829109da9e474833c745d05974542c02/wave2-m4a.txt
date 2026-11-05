@@ -1,0 +1,87 @@
+
+> narralens@0.1.0 test:wave2:m4a /mnt/c/workspace/videoworkline/Narralens
+> vitest run --config vitest.config.ts tests/wave2/m4a
+
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens
+
+(node:3842951) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/m4a/impact-races.test.ts (42 tests) 396392ms
+   ✓ TX-02A / M4A-TTL01: an impact outlives nothing it was computed from > expires at exactly fifteen minutes and is not revived by a replay with the same key  15228ms
+   ✓ TX-02A / M4A-TTL01: an impact outlives nothing it was computed from > marks a direct consumer at the TTL boundary expired rather than stale  9224ms
+   ✓ TX-02A / M4A-TTL01: an impact outlives nothing it was computed from > refuses a materialization whose base_revision no longer matches the project  6656ms
+   ✓ TX-02A / M4A-TTL01: an impact outlives nothing it was computed from > refuses a materialization whose source_digest no longer matches the project  6706ms
+   ✓ TX-02A / M4A-TTL01: an impact outlives nothing it was computed from > refuses a materialization whose control_revision no longer matches the project  6773ms
+   ✓ TX-02A / M4A-TTL01: an impact outlives nothing it was computed from > refuses a materialization whose asset_inventory_sha256 no longer matches the project  6540ms
+   ✓ TX-02A / M4A-TTL01: an impact outlives nothing it was computed from > rejects a stale base, source or control before it computes anything  5309ms
+   ✓ TX-02A / M4A-TTL01: an impact outlives nothing it was computed from > returns 428 and marks the row stale when base revision has moved  9312ms
+   ✓ TX-02A / M4A-TTL01: an impact outlives nothing it was computed from > returns 428 and marks the row stale when source digest has moved  9290ms
+   ✓ TX-02A / M4A-TTL01: an impact outlives nothing it was computed from > returns 428 and marks the row stale when control revision has moved  9103ms
+   ✓ TX-02A / M4A-TTL01: an impact outlives nothing it was computed from > returns 428 and marks the row stale when rights digest has moved  10739ms
+   ✓ TX-02A / M4A-TTL01: an impact outlives nothing it was computed from > returns 428 and marks the row stale when native plan has moved  15182ms
+   ✓ TX-02A / M4A-TTL01: an impact outlives nothing it was computed from > returns 428 and marks the row stale when materialization state has moved  13485ms
+   ✓ TX-02A / M4A-TTL01: an impact outlives nothing it was computed from > returns 428 and marks the row stale when materialization removed has moved  10399ms
+   ✓ TX-02A / M4A-TTL01: an impact outlives nothing it was computed from > returns 428 and marks the row stale when the stored bytes has moved  9660ms
+   ✓ TX-02A / M4A-TTL01: an impact outlives nothing it was computed from > still answers an unchanged impact, so the arms above are not vacuously failing  16736ms
+   ✓ TX-02A / M4A-TTL01: an impact outlives nothing it was computed from > rejects real source bytes changed after insertion  10598ms
+   ✓ TX-02A / M4A-TTL01: an impact outlives nothing it was computed from > rejects replay after real source bytes changed after insertion  9532ms
+   ✓ TX-02A / M4A-TTL01: an impact outlives nothing it was computed from > rejects real asset bytes changed after insertion  9882ms
+   ✓ TX-02A / M4A-TTL01: an impact outlives nothing it was computed from > rejects rights changed after insertion through materialization re-verification  15904ms
+   ✓ TX-02A / M4A-TTL01: an impact outlives nothing it was computed from > keeps the impact active when currentness cannot be checked transiently  10904ms
+   ✓ TX-05A: a change between the first check and the insert leaves no active impact > refuses and writes no row when a visual lock appears at after_inspect  7104ms
+   ✓ TX-05A: a change between the first check and the insert leaves no active impact > refuses and writes no row when a visual lock appears at after_graph  8687ms
+   ✓ TX-05A: a change between the first check and the insert leaves no active impact > refuses and writes no row when a visual lock appears at after_locks  8536ms
+   ✓ TX-05A: a change between the first check and the insert leaves no active impact > refuses and writes no row when a visual lock appears at before_insert  8784ms
+   ✓ TX-05A: a change between the first check and the insert leaves no active impact > refuses, stales the materialization, and writes no impact when ledger rights move at after_graph  10698ms
+   ✓ TX-05A: a change between the first check and the insert leaves no active impact > refuses, stales the materialization, and writes no impact when ledger rights move at after_locks  10185ms
+   ✓ TX-05A: a change between the first check and the insert leaves no active impact > refuses, stales the materialization, and writes no impact when ledger rights move at before_insert  9719ms
+   ✓ TX-05A: a change between the first check and the insert leaves no active impact > refuses and writes no row when the control revision moves at before_insert  8934ms
+   ✓ TX-05A: a change between the first check and the insert leaves no active impact > answers 423 TARGET_LOCKED for a lock that is already held, and creates nothing  8665ms
+   ✓ TX-05A: a change between the first check and the insert leaves no active impact > records every active lock it checked, and refuses a project with more than 64  18953ms
+   ✓ TX-05A: a change between the first check and the insert leaves no active impact > refuses and writes no row when the source bytes move mid-computation  8595ms
+   ✓ TX-05A: a change between the first check and the insert leaves no active impact > refuses and writes no row when the materialization's proven facts move mid-computation  9598ms
+   ✓ TX-05A: a change between the first check and the insert leaves no active impact > refuses and writes no row when the materialization goes stale mid-computation  5405ms
+   ✓ M4A-R01: the route answers a client consistently and idempotently > replays the whole spec for the same key and digest, and 409s a different digest  10772ms
+   ✓ M4A-R01: the route answers a client consistently and idempotently > refuses to replay an impact the row says is no longer active  9328ms
+   ✓ M4A-R01: the route answers a client consistently and idempotently > refuses a restore intent rather than passing the active source off as an old snapshot  5390ms
+   ✓ M4A-R01: the route answers a client consistently and idempotently > refuses a materialization that does not exist, and one that belongs elsewhere, the same way  5979ms
+   ✓ M4A-R01: the route answers a client consistently and idempotently > keeps the legacy routes working, and the M4C restore route refusing on its merits  1754ms
+   ✓ M4A-NW01: an impact changes nothing but its own two rows > leaves source, revision, commit, pointer, binding, ledger, materialization, job and outbox identical  11666ms
+   ✓ M4A-NW01: an impact changes nothing but its own two rows > leaves the migrated copy's bytes byte-for-byte identical  10476ms
+(node:4158866) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/m4a/activated-projection.test.ts (8 tests) 29409ms
+   ✓ M4A-P01: a fresh Host rebuilds the active layout from durable facts > cannot inspect an activated target at all without a layout — the gap M4A closes  4105ms
+   ✓ M4A-P01: a fresh Host rebuilds the active layout from durable facts > inspects a restarted Host's own migrated target, with no test hook anywhere  7936ms
+   ✓ M4A-P01: a fresh Host rebuilds the active layout from durable facts > keys its cache by project, snapshot and source digest  4237ms
+   ✓ M4A-P01: a fresh Host rebuilds the active layout from durable facts > fails closed when the migrated copy's bytes move under it  4220ms
+   ✓ M4A-P01: a fresh Host rebuilds the active layout from durable facts > refuses a layout whose declared root escapes the target  4318ms
+   ✓ M4A-P01: a fresh Host rebuilds the active layout from durable facts > refuses when the ledger names a target the plan does not cover  4591ms
+(node:4181426) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/m4a/impact-real-chain.test.ts (1 test) 22655ms
+   ✓ M4A-R01: the chain a client actually walks > migrates, materializes for real, and then gets a valid impact — twice, idempotently  22654ms
+(node:5802) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/m4a/impact-end-to-end.test.ts (6 tests) 16320ms
+   ✓ M4A-C01 over HTTP: the route refuses a self-authored impact and creates nothing > returns 400 for a client that names its own scope, consumers, locks, rights or hash  5948ms
+   ✓ M4A-C01 over HTTP: the route refuses a self-authored impact and creates nothing > computes a spec that satisfies its own contract, and 201s it  10366ms
+(node:20543) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/m4a/impact-store.test.ts (12 tests) 1879ms
+   ✓ M4A-DB01: the impact table is additive, CAS-only, and shares one idempotency authority > keeps one authority: no second key column or constraint on the impact table  337ms
+ ✓ tests/wave2/m4a/harness-retry.test.ts (3 tests) 1005ms
+   ✓ M4A harness recoverable upstream verification > retries an unverifiable pinned checkout and then returns the successful result  503ms
+   ✓ M4A harness recoverable upstream verification > bounds repeated unverifiable-checkout retries  501ms
+ ✓ tests/wave2/m4a/openfilm-projection-completeness.test.ts (11 tests) 32ms
+(node:32798) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/m4a/consumer-graph.test.ts (18 tests) 7ms
+ ✓ tests/wave2/m4a/impact-hash-vectors.test.ts (3 tests) 4ms
+
+ Test Files  9 passed (9)
+      Tests  104 passed (104)
+   Start at  15:54:51
+   Duration  502.54s (transform 1.74s, setup 0ms, collect 16.26s, tests 467.70s, environment 1ms, prepare 12.30s)
+

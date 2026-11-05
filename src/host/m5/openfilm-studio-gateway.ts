@@ -1,11 +1,11 @@
 import { randomBytes, randomUUID } from "node:crypto";
 import { readFile } from "node:fs/promises";
-import { createServer, type IncomingMessage, type Server, type ServerResponse } from "node:http";
+import { createServer, request as httpRequest, type IncomingMessage, type Server, type ServerResponse } from "node:http";
 import type { Duplex } from "node:stream";
 import { openFilmCapabilityMap } from "../engine/engine-capabilities.js";
 import { NATIVE_MUTATION_REGISTRY } from "../engine/native-mutation-registry.js";
 import type { StartedStudio } from "./openfilm-studio-supervisor.js";
-import { OPCODE, decodeFrames, encodeFrame, relayFrames, writeHandshake } from "./websocket-relay.js";
+import { OPCODE, decodeFrames, encodeClientFrame, encodeFrame, writeHandshake } from "./websocket-relay.js";
 
 /**
  * `OpenFilmStudioGateway` (Wave 3 `04` §1).
@@ -129,11 +129,44 @@ export function openNativeWriteEntries(): readonly string[] {
 
 const SESSION_COOKIE = "narralens_studio_session";
 
+/** The composed editor is top-level; only its own proxied film may be framed by it. */
+export function gatewayFramePolicy(path: string): {
+  readonly frameAncestors: "self" | "none"; readonly xFrameOptions: "SAMEORIGIN" | "DENY";
+} {
+  void path;
+  return { frameAncestors: "none", xFrameOptions: "DENY" };
+}
+
+/**
+ * The pinned Studio reports its media server as `localhost` even though its listening
+ * origin is normalised to `127.0.0.1`. They are different browser origins. Accept only
+ * those two exact loopback spellings on the already-known media port and project the URL
+ * back through the Gateway; never rewrite another hostname or port.
+ */
+export function gatewayFilmUrl(value: string, filmOrigin: string, gatewayOrigin: string): string | null {
+  let candidate: URL;
+  let expected: URL;
+  try { candidate = new URL(value); expected = new URL(filmOrigin); }
+  catch { return null; }
+  const loopback = (host: string): boolean => host === "localhost" || host === "127.0.0.1";
+  if (candidate.protocol !== "http:" || expected.protocol !== "http:"
+    || !loopback(candidate.hostname) || !loopback(expected.hostname)
+    || candidate.port !== expected.port) return null;
+  return `${gatewayOrigin}/film${candidate.pathname}${candidate.search}${candidate.hash}`;
+}
+
+/** Point the film host bridge at the composed parent document, never the hidden upstream. */
+export function rewriteFilmDocument(source: string, studioOrigin: string, gatewayOrigin: string): string {
+  return source.replaceAll(studioOrigin, gatewayOrigin);
+}
+
 export class OpenFilmStudioGateway {
   readonly #deps: OpenFilmStudioGatewayDeps;
   readonly #sessions = new Set<string>();
   #server: Server | undefined;
+  #filmServer: Server | undefined;
   #origin = "";
+  #filmGatewayOrigin = "";
   #filmOrigin = "";
   readonly #sockets = new Set<Duplex>();
 
@@ -145,7 +178,11 @@ export class OpenFilmStudioGateway {
 
   async start(): Promise<string> {
     if (this.#server !== undefined) return this.#origin;
-    this.#filmOrigin = this.#filmOriginOf(this.#deps.studio.origin);
+    // With `port: 0` the pinned Studio selects two free ports and reports both. The film
+    // server is not required to be editor-port+1 in that mode, so deriving it points the
+    // proxy at a listener that may not exist and fails to rewrite the real `localhost`
+    // URL returned by the API/event stream.
+    this.#filmOrigin = this.#deps.studio.filmOrigin;
     const server = createServer((request, response) => { void this.#handle(request, response); });
     server.on("upgrade", (request, socket, head) => { this.#upgrade(request, socket, head); });
     await new Promise<void>((done, fail) => {
@@ -164,6 +201,24 @@ export class OpenFilmStudioGateway {
     }
     this.#origin = `http://127.0.0.1:${address.port}`;
     this.#server = server;
+
+    // Film code is intentionally a different browser origin from the editor. It can
+    // render and postMessage to the editor, but it cannot read the panel DOM, its cookie
+    // or its API. This second server is still a read-only, Host-checked Gateway — never
+    // the upstream origin and never a filesystem server.
+    const filmServer = createServer((request, response) => { void this.#handleFilm(request, response); });
+    await new Promise<void>((done, fail) => {
+      filmServer.once("error", fail);
+      filmServer.listen(0, "127.0.0.1", () => { filmServer.removeListener("error", fail); done(); });
+    });
+    const filmAddress = filmServer.address();
+    if (filmAddress === null || typeof filmAddress === "string") {
+      await new Promise<void>((done) => server.close(() => done()));
+      this.#server = undefined;
+      throw new Error("THE_FILM_GATEWAY_HAS_NO_ADDRESS");
+    }
+    this.#filmGatewayOrigin = `http://127.0.0.1:${filmAddress.port}`;
+    this.#filmServer = filmServer;
     return this.#origin;
   }
 
@@ -171,15 +226,37 @@ export class OpenFilmStudioGateway {
     for (const socket of this.#sockets) socket.destroy();
     this.#sockets.clear();
     const server = this.#server;
+    const filmServer = this.#filmServer;
     this.#server = undefined;
-    if (server === undefined) return;
-    await new Promise<void>((done) => { server.close(() => done()); });
+    this.#filmServer = undefined;
+    await Promise.all([
+      server === undefined ? Promise.resolve() : new Promise<void>((done) => { server.close(() => done()); }),
+      filmServer === undefined ? Promise.resolve() : new Promise<void>((done) => { filmServer.close(() => done()); }),
+    ]);
   }
 
-  /** The film's own origin: the Studio serves the project's media from the next port. */
-  #filmOriginOf(studioOrigin: string): string {
-    const port = Number(new URL(studioOrigin).port);
-    return `http://127.0.0.1:${port + 1}`;
+  async #handleFilm(request: IncomingMessage, response: ServerResponse): Promise<void> {
+    const url = new URL(request.url ?? "/", this.#filmGatewayOrigin);
+    if (!this.#hostHeaderAllowed(request, this.#filmGatewayOrigin)) {
+      response.writeHead(421, { "content-type": "text/plain" });
+      response.end("misdirected request\n");
+      return;
+    }
+    response.setHeader("Referrer-Policy", "no-referrer");
+    response.setHeader("Content-Security-Policy",
+      `default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; `
+      + `img-src 'self' data: blob:; media-src 'self' blob:; connect-src 'self'; `
+      + `frame-ancestors 'self' ${this.#origin}; base-uri 'none'; form-action 'none'`);
+    // The editor, and only the editor, may read film assets. This one-way CORS grant is
+    // required by the pinned player: it fetches narration bytes before handing them to
+    // WebAudio. It does not give film code access to the editor origin, its cookie or API.
+    response.setHeader("Access-Control-Allow-Origin", this.#origin);
+    response.setHeader("X-Content-Type-Options", "nosniff");
+    response.setHeader("Cache-Control", "no-store");
+    if (!url.pathname.startsWith("/film/")) {
+      response.writeHead(404, { "content-type": "text/plain" }); response.end("not found\n"); return;
+    }
+    await this.#proxyFilm(url.pathname.slice("/film".length), url, request, response);
   }
 
   // ── request handling ────────────────────────────────────────────────────────────────
@@ -190,12 +267,12 @@ export class OpenFilmStudioGateway {
 
     // The Host header check comes first: a name pointed at this machine (DNS rebinding)
     // gets nothing at all, not even a 404 that describes the Gateway.
-    if (!this.#hostHeaderAllowed(request)) {
+    if (!this.#hostHeaderAllowed(request, this.#origin)) {
       response.writeHead(421, { "content-type": "text/plain" });
       response.end("misdirected request\n");
       return;
     }
-    this.#securityHeaders(response);
+    this.#securityHeaders(response, path);
 
     if (path === "/narralens/studio-host.js") {
       const script = this.#deps.bridgeScript ?? "";
@@ -254,11 +331,6 @@ export class OpenFilmStudioGateway {
       return;
     }
 
-    if (path.startsWith("/film/")) {
-      await this.#proxyFilm(path.slice("/film".length), request, response);
-      return;
-    }
-
     if (path.startsWith("/api/")) {
       await this.#proxyApi(request, response, path, url);
       return;
@@ -268,24 +340,28 @@ export class OpenFilmStudioGateway {
     await this.#proxyEditor(request, response, path, url);
   }
 
-  #hostHeaderAllowed(request: IncomingMessage): boolean {
+  #hostHeaderAllowed(request: IncomingMessage, origin: string): boolean {
     const host = request.headers.host;
     if (typeof host !== "string" || host === "") return false;
-    const expected = new URL(this.#origin).host;
+    const expected = new URL(origin).host;
     if (host === expected) return true;
     // `127.0.0.1` without the port is not this Gateway: a rebound name usually arrives
     // with a port of its own, and the port is part of the origin.
     return false;
   }
 
-  #securityHeaders(response: ServerResponse): void {
+  #securityHeaders(response: ServerResponse, path: string): void {
+    // The editor page itself must never be framed. Film pages are not served here: the
+    // dedicated read-only Film Gateway gives them a separate browser origin.
+    const framePolicy = gatewayFramePolicy(path);
     response.setHeader("Referrer-Policy", "no-referrer");
     response.setHeader("Content-Security-Policy",
       "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; "
-      + "img-src 'self' data: blob:; media-src 'self' blob:; connect-src 'self' ws: wss:; "
-      + "frame-ancestors 'none'; base-uri 'none'; form-action 'none'");
+      + `img-src 'self' data: blob: ${this.#filmGatewayOrigin}; media-src 'self' blob: ${this.#filmGatewayOrigin}; `
+      + `connect-src 'self' ${this.#filmGatewayOrigin} ws: wss:; `
+      + `frame-src ${this.#filmGatewayOrigin}; frame-ancestors '${framePolicy.frameAncestors}'; base-uri 'none'; form-action 'none'`);
     response.setHeader("X-Content-Type-Options", "nosniff");
-    response.setHeader("X-Frame-Options", "DENY");
+    response.setHeader("X-Frame-Options", framePolicy.xFrameOptions);
     response.setHeader("Cache-Control", "no-store");
   }
 
@@ -497,13 +573,34 @@ export class OpenFilmStudioGateway {
 
   // ── the film's own origin ──────────────────────────────────────────────────────────
 
-  async #proxyFilm(path: string, request: IncomingMessage, response: ServerResponse): Promise<void> {
+  async #proxyFilm(path: string, url: URL, request: IncomingMessage, response: ServerResponse): Promise<void> {
     const method = (request.method ?? "GET").toUpperCase();
     if (method !== "GET" && method !== "HEAD") {
       this.#refuse(response, 422, "the film's files are read-only through the Gateway");
       return;
     }
-    await this.#relay(request, response, `${this.#filmOrigin}${path}`, false);
+    // `timeline.mjs` re-reads film.html with `?film-host=0` to obtain the author's source
+    // without OpenFilm's injected host scripts and with the original iframe `src`
+    // attributes. Dropping this query makes the parser read its own injected runtime and
+    // turns every page clip into a false "missing src" error.
+    const requestHeaders: Record<string, string> = { accept: request.headers.accept ?? "*/*" };
+    if (typeof request.headers.range === "string") requestHeaders.range = request.headers.range;
+    const upstream = await fetch(`${this.#filmOrigin}${path}${url.search}`, {
+      method, headers: requestHeaders,
+    });
+    const contentType = upstream.headers.get("content-type") ?? "";
+    const headers: Record<string, string> = { "content-type": contentType };
+    for (const name of ["content-range", "accept-ranges"] as const) {
+      const value = upstream.headers.get(name);
+      if (value !== null) headers[name] = value;
+    }
+    response.writeHead(upstream.status, headers);
+    if (method === "HEAD") { response.end(); return; }
+    if (contentType.includes("text/html") || contentType.includes("javascript")) {
+      response.end(rewriteFilmDocument(await upstream.text(), this.#deps.studio.origin, this.#origin));
+      return;
+    }
+    response.end(Buffer.from(await upstream.arrayBuffer()));
   }
 
   // ── relaying ────────────────────────────────────────────────────────────────────────
@@ -537,7 +634,7 @@ export class OpenFilmStudioGateway {
   #sanitize(text: string): string {
     let value: unknown;
     try { value = JSON.parse(text); } catch { return text; }
-    const rewritten = rewriteValue(value, this.#filmOrigin, this.#origin);
+    const rewritten = rewriteValue(value, this.#filmOrigin, this.#filmGatewayOrigin);
     return JSON.stringify(rewritten);
   }
 
@@ -548,59 +645,70 @@ export class OpenFilmStudioGateway {
     const path = url.pathname;
     const key = request.headers["sec-websocket-key"];
     if (typeof key !== "string" || key === ""
-      || !this.#hostHeaderAllowed(request)
+      || !this.#hostHeaderAllowed(request, this.#origin)
       || !this.#sessionValid(request)
       || !ALLOWED_SOCKETS.some((pattern) => pattern.test(path))) {
       socket.write("HTTP/1.1 401 Unauthorized\r\nConnection: close\r\n\r\n");
       socket.destroy();
       return;
     }
-    const upstream = new WebSocket(`${this.#deps.studio.origin}${path}?key=${encodeURIComponent(this.#deps.studio.key)}`);
     this.#sockets.add(socket);
-    writeHandshake(socket, key);
-    if (head.length > 0) socket.unshift(head);
+    void this.#relaySocket(url, socket, head, key).catch(() => {
+      if (!socket.destroyed) socket.end("HTTP/1.1 502 Bad Gateway\r\nConnection: close\r\n\r\n");
+    });
+  }
 
-    let pending: Buffer = Buffer.alloc(0);
-    socket.on("data", (chunk: Buffer) => {
-      pending = Buffer.concat([pending, chunk]);
-      const { frames, rest } = decodeFrames(pending);
-      pending = rest;
-      for (const frame of frames) {
-        if (frame.opcode === OPCODE.close) { socket.end(); return; }
-        if (frame.opcode === OPCODE.ping) { socket.write(encodeFrame(OPCODE.pong, frame.payload)); continue; }
+  async #relaySocket(url: URL, browser: Duplex, head: Buffer, browserKey: string): Promise<void> {
+    const upstream = await openUpstreamSocket(
+      `${this.#deps.studio.origin}${url.pathname}${url.search}`, this.#deps.studio.key);
+    if (browser.destroyed) { upstream.destroy(); return; }
+    writeHandshake(browser, browserKey);
+    if (head.length > 0) browser.unshift(head);
+    let browserPending = Buffer.alloc(0);
+    let upstreamPending = Buffer.alloc(0);
+    browser.on("data", (chunk: Buffer) => {
+      browserPending = Buffer.concat([browserPending, chunk]);
+      const decoded = decodeFrames(browserPending); browserPending = Buffer.from(decoded.rest);
+      for (const frame of decoded.frames) {
+        if (frame.opcode === OPCODE.close) {
+          upstream.write(encodeClientFrame(OPCODE.close, frame.payload.subarray(0, 2))); browser.end(); return;
+        }
+        if (frame.opcode === OPCODE.ping) { browser.write(encodeFrame(OPCODE.pong, frame.payload)); continue; }
         if (frame.opcode === OPCODE.pong) continue;
-        if (upstream.readyState === WebSocket.OPEN) upstream.send(frame.payload.toString("utf8"));
+        upstream.write(encodeClientFrame(frame.opcode, frame.payload));
       }
     });
-    socket.on("error", () => { socket.destroy(); });
-    socket.on("close", () => { this.#sockets.delete(socket); try { upstream.close(); } catch { /* already closed */ } });
-
-    relayFrames(upstreamMessages(upstream), (frame) => {
-      if (socket.destroyed) return;
-      socket.write(encodeFrame(frame.opcode, frame.payload));
-    }, () => { if (!socket.destroyed) socket.end(); });
+    upstream.on("data", (chunk: Buffer) => {
+      upstreamPending = Buffer.concat([upstreamPending, chunk]);
+      const decoded = decodeFrames(upstreamPending); upstreamPending = Buffer.from(decoded.rest);
+      for (const frame of decoded.frames) {
+        if (frame.opcode === OPCODE.close) { browser.end(encodeFrame(OPCODE.close, frame.payload.subarray(0, 2))); return; }
+        if (frame.opcode === OPCODE.ping) { upstream.write(encodeClientFrame(OPCODE.pong, frame.payload)); continue; }
+        if (frame.opcode === OPCODE.pong) continue;
+        const payload = frame.opcode === OPCODE.text
+          ? Buffer.from(this.#sanitize(frame.payload.toString("utf8")), "utf8") : frame.payload;
+        browser.write(encodeFrame(frame.opcode, payload));
+      }
+    });
+    const close = (): void => { this.#sockets.delete(browser); browser.destroy(); upstream.destroy(); };
+    browser.on("error", close); browser.on("close", close);
+    upstream.on("error", close); upstream.on("close", close);
   }
 }
 
-/** The upstream's messages, as an async iterable. */
-async function* upstreamMessages(socket: WebSocket): AsyncGenerator<string> {
-  await new Promise<void>((done, fail) => {
-    socket.addEventListener("open", () => done(), { once: true });
-    socket.addEventListener("error", () => fail(new Error("UPSTREAM_SOCKET_FAILED")), { once: true });
-  });
-  const queue: string[] = [];
-  let notify: (() => void) | undefined;
-  socket.addEventListener("message", (event: MessageEvent) => {
-    queue.push(typeof event.data === "string" ? event.data : "");
-    notify?.();
-  });
-  for (;;) {
-    while (queue.length > 0) yield queue.shift()!;
-    await new Promise<void>((done) => {
-      notify = () => { notify = undefined; done(); };
-      if (queue.length > 0) { notify = undefined; done(); }
+/** Open an authenticated upstream WebSocket without exposing the Studio key in a URL. */
+function openUpstreamSocket(target: string, studioKey: string): Promise<Duplex> {
+  return new Promise((done, fail) => {
+    const request = httpRequest(target, { headers: {
+      connection: "Upgrade", upgrade: "websocket", "sec-websocket-version": "13",
+      "sec-websocket-key": randomBytes(16).toString("base64"), "x-studio-key": studioKey,
+    } });
+    request.once("upgrade", (_response, socket, head) => {
+      if (head.length > 0) socket.unshift(head); done(socket);
     });
-  }
+    request.once("response", (response) => fail(new Error(`UPSTREAM_SOCKET_REFUSED:${response.statusCode ?? 0}`)));
+    request.once("error", fail); request.end();
+  });
 }
 
 /**
@@ -609,7 +717,8 @@ async function* upstreamMessages(socket: WebSocket): AsyncGenerator<string> {
  */
 function rewriteValue(value: unknown, filmOrigin: string, gatewayOrigin: string): unknown {
   if (typeof value === "string") {
-    if (value.startsWith(filmOrigin)) return `${gatewayOrigin}/film${value.slice(filmOrigin.length)}`;
+    const filmUrl = gatewayFilmUrl(value, filmOrigin, gatewayOrigin);
+    if (filmUrl !== null) return filmUrl;
     // An absolute path on this machine is a directory listing, and the browser has no
     // business having one.
     if (value.startsWith("/") && value.length > 1 && !value.startsWith("//")) return "";

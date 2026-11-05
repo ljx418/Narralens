@@ -1,4 +1,4 @@
-import { createHash } from "node:crypto";
+import { createHash, randomBytes } from "node:crypto";
 import type { Duplex } from "node:stream";
 
 /**
@@ -95,6 +95,27 @@ export function encodeFrame(opcode: number, payload: Buffer): Buffer {
     header.writeBigUInt64BE(BigInt(length), 2);
   }
   return Buffer.concat([header, payload]);
+}
+
+/** Encode one client-to-server frame. RFC 6455 requires every client frame to be masked. */
+export function encodeClientFrame(opcode: number, payload: Buffer, mask = cryptoMask()): Buffer {
+  const length = payload.length;
+  let header: Buffer;
+  if (length < 126) header = Buffer.from([0x80 | opcode, 0x80 | length]);
+  else if (length < 65_536) {
+    header = Buffer.alloc(4); header[0] = 0x80 | opcode; header[1] = 0x80 | 126;
+    header.writeUInt16BE(length, 2);
+  } else {
+    header = Buffer.alloc(10); header[0] = 0x80 | opcode; header[1] = 0x80 | 127;
+    header.writeBigUInt64BE(BigInt(length), 2);
+  }
+  const masked = Buffer.from(payload);
+  for (let index = 0; index < masked.length; index += 1) masked[index] = masked[index]! ^ mask[index % 4]!;
+  return Buffer.concat([header, mask, masked]);
+}
+
+function cryptoMask(): Buffer {
+  return randomBytes(4);
 }
 
 /**

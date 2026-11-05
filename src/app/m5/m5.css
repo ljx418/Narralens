@@ -59,6 +59,10 @@ html[data-theme="light"] #narralens-m5-panel {
   --border: #9b8872; --accent: #9b4f00;
 }
 
+/* OpenFilm's light timeline accent carries 10.5px white range text. Its pinned default
+   measures 4.16:1; this composed-page token keeps the same teal role at WCAG AA contrast. */
+html[data-theme="light"] { --tl-accent: #0f6b67; --tl-playhead: #0f6b67; }
+
 /* The stylesheet is loaded into the composed Studio page, not an iframe. These tokens
    close the pinned upstream's faint-text contrast gap for the approved light theme. */
 html[data-theme="light"] { --text-faint: #595959; --text-muted: #595959; }

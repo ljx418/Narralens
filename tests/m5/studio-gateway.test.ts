@@ -2,7 +2,8 @@ import { request as httpRequest } from "node:http";
 import { afterEach, describe, expect, it } from "vitest";
 import { authHeaders, migrate, start, stopAll, type Started } from "./harness.js";
 import { NarralensHost } from "../../src/host/server.js";
-import { openNativeWriteEntries } from "../../src/host/m5/openfilm-studio-gateway.js";
+import { gatewayFilmUrl, gatewayFramePolicy, openNativeWriteEntries,
+  rewriteFilmDocument } from "../../src/host/m5/openfilm-studio-gateway.js";
 
 /**
  * A raw HTTP request.
@@ -123,6 +124,34 @@ describe("M5 Studio Gateway: the only origin the browser sees", () => {
     // No CORS: another origin's page cannot read any of this.
     expect(response.headers.get("access-control-allow-origin")).toBeNull();
   }, 300_000);
+
+  it("allows only the same Gateway origin to frame the film preview", () => {
+    // The headless UX test proves these headers are delivered on a real film response;
+    // this fast contract test protects the path classification itself.
+    expect(gatewayFramePolicy("/film/project/film.html")).toEqual({
+      frameAncestors: "none", xFrameOptions: "DENY",
+    });
+    expect(gatewayFramePolicy("/projects/project")).toEqual({
+      frameAncestors: "none", xFrameOptions: "DENY",
+    });
+    expect(gatewayFramePolicy("/narralens/panel.js")).toEqual({
+      frameAncestors: "none", xFrameOptions: "DENY",
+    });
+    expect(gatewayFilmUrl("http://localhost:4568/p/id/film.html?load=1#frame",
+      "http://127.0.0.1:4568", "http://127.0.0.1:9000"))
+      .toBe("http://127.0.0.1:9000/film/p/id/film.html?load=1#frame");
+    expect(gatewayFilmUrl("http://127.0.0.1:4568/p/id/film.html",
+      "http://127.0.0.1:4568", "http://127.0.0.1:9000"))
+      .toBe("http://127.0.0.1:9000/film/p/id/film.html");
+    expect(gatewayFilmUrl("http://localhost.evil:4568/p/id/film.html",
+      "http://127.0.0.1:4568", "http://127.0.0.1:9000")).toBeNull();
+    expect(gatewayFilmUrl("http://localhost:9999/p/id/film.html",
+      "http://127.0.0.1:4568", "http://127.0.0.1:9000")).toBeNull();
+    expect(rewriteFilmDocument(
+      "postMessage({type:'ready'}, 'http://127.0.0.1:4567')",
+      "http://127.0.0.1:4567", "http://127.0.0.1:9000"))
+      .toBe("postMessage({type:'ready'}, 'http://127.0.0.1:9000')");
+  });
 
   it("never publishes the project's absolute path", async () => {
     const gateway = await withGateway();

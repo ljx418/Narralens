@@ -9,7 +9,7 @@
       "url": "https://github.com/ljx418/Narralens",
       "provider": "github",
       "link_mode": "web",
-      "revision": "2b0facc1444cdf601d10b9ae9857363e57a9df5b"
+      "revision": "CODE_FREEZE_PENDING"
     },
     "viewBox": [1160, 820],
     "views": [
@@ -59,8 +59,8 @@
     {
       "id": "gateway",
       "type": "security",
-      "label": "Studio Gateway",
-      "sublabel": "127.0.0.1 · cookie · CSP · allowlist",
+      "label": "Dual-origin Studio Gateway",
+      "sublabel": "主 API/WS + 隔离只读 Film",
       "pos": [900, 260],
       "size": [185, 72],
       "tag": "deny-by-default"
@@ -229,7 +229,7 @@
       "id": "gateway-studio",
       "from": "gateway",
       "to": "studio",
-      "label": "资源代理 / 启动 / CSP",
+      "label": "editor/API + 认证 WS",
       "labelAt": [875, 350],
       "variant": "security"
     },
@@ -257,14 +257,17 @@
       "from": "media",
       "to": "coordinator",
       "label": "串行 / 锁 / commit gate",
-      "labelAt": [640, 540]
+      "labelAt": [535, 540]
     },
     {
-      "id": "coordinator-engine",
-      "from": "coordinator",
+      "id": "services-engine",
+      "from": "media",
       "to": "engine",
-      "label": "stage / validate / publish",
-      "labelAt": [405, 540]
+      "label": "stage / validate",
+      "fromSide": "bottom",
+      "toSide": "bottom",
+      "via": [[755, 570], [290, 570]],
+      "labelAt": [520, 560]
     },
     {
       "id": "services-db",
@@ -274,18 +277,20 @@
       "labelAt": [755, 590]
     },
     {
-      "id": "coordinator-store",
-      "from": "coordinator",
+      "id": "services-store",
+      "from": "media",
       "to": "projectstore",
-      "label": "snapshot / source commit",
+      "label": "snapshot / 原子 source 发布",
       "labelAt": [620, 590]
     },
     {
-      "id": "services-jobs",
-      "from": "media",
+      "id": "host-jobs",
+      "from": "host",
       "to": "jobs",
-      "label": "prepare proxy / segment plan",
-      "labelAt": [985, 590]
+      "label": "materialize API / schedule / drain",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelAt": [1060, 590]
     },
     {
       "id": "jobs-db",
@@ -302,14 +307,14 @@
       "title": "本阶段已实现",
       "items": [
         "M5 同页 Studio、受控采用与历史恢复的核心实现已存在",
-        "旧 Headless 证据已因语义审计降级，正在重新捕获"
+        "WebSocket 认证与双 loopback origin 已返修，等待新冻结捕获"
       ]
     },
     {
       "dot": "amber",
       "title": "当前出门门限",
       "items": [
-        "先关闭 UX-11、PF-01..03、四视口与浏览器清理缺口",
+        "UX-11/PF-01 聚焦复验已通过；仍须全量重捕获与独立复审",
         "自动门全绿后才启动 UX-12；人工不得替代自动门"
       ]
     },

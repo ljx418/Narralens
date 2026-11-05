@@ -80,6 +80,35 @@ for (const capture of captures) {
     if (value.status !== entry.status) note(`${capture}: ${entry.case_id} disagrees with the manifest status`);
   }
 
+  // 5b. summary.json is the user-facing aggregate, but it must not be allowed to invent
+  // cases that the manifest does not protect (or omit a failed/human case). The exact id
+  // and status set is therefore identical across summary, cases/*.json and manifest.
+  const summaryPath = join(directory, "summary.json");
+  if (manifest.kind === "narralens.m5_evidence_manifest@1.1" && !existsSync(summaryPath)) {
+    note(`${capture}: there is no summary.json`);
+  } else if (manifest.kind === "narralens.m5_evidence_manifest@1.1") {
+    const summary = JSON.parse(readFileSync(summaryPath, "utf8"));
+    const summaryCases = [...(summary.cases ?? [])]
+      .map((entry) => `${entry.case_id}:${entry.status}`).sort();
+    const manifestCases = [...(manifest.cases ?? [])]
+      .map((entry) => `${entry.case_id}:${entry.status}`).sort();
+    if (JSON.stringify(summaryCases) !== JSON.stringify(manifestCases)) {
+      note(`${capture}: summary case/status set disagrees with the manifest`);
+    }
+    const expectedCounts = {
+      passed: (manifest.cases ?? []).filter((entry) => entry.status === "PASS").length,
+      failed: (manifest.cases ?? []).filter((entry) => entry.status === "FAIL").length,
+      blocked: (manifest.cases ?? []).filter((entry) => entry.status === "BLOCKED_ENV").length,
+      not_run: (manifest.cases ?? []).filter((entry) => entry.status === "NOT_RUN").length,
+    };
+    for (const [key, expected] of Object.entries(expectedCounts)) {
+      if (summary[key] !== expected) note(`${capture}: summary ${key}=${summary[key]} expected ${expected}`);
+    }
+    for (const required of ["UX-RESP:PASS", "UX-200:PASS", "UX-12:NOT_RUN"]) {
+      if (!summaryCases.includes(required)) note(`${capture}: required case/status is missing: ${required}`);
+    }
+  }
+
   // 6. The declaration ceiling and the human gate.
   if (manifest.declaration_ceiling !== "M5_HEADLESS_EVIDENCED") {
     note(`${capture}: the declaration ceiling is ${manifest.declaration_ceiling}`);

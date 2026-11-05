@@ -76,12 +76,17 @@ const caseRows = cases.map((entry) => {
   </tr>`;
 }).join("\n");
 
-const commandRows = commands.map((entry) => `<tr>
+const commandRows = commands.map((entry) => {
+  const selfGenerating = entry.name === "acceptance-report" && entry.exit === "";
+  const ok = entry.exit === "0";
+  return `<tr>
     <td><code>${escape(entry.name)}</code></td>
     <td><code>${escape(entry.command)}</code></td>
-    <td class="s-${entry.exit === "0" ? "PASS" : "FAIL"}">${escape(entry.exit)}</td>
+    <td class="s-${selfGenerating ? "NOT_RUN" : ok ? "PASS" : "FAIL"}">${selfGenerating
+      ? "生成本页中；最终退出码见 acceptance-report.exit" : escape(entry.exit)}</td>
     <td><code>${escape(entry.name)}.txt</code></td>
-  </tr>`).join("\n");
+  </tr>`;
+}).join("\n");
 
 const screenshotRows = screenshots.map((name) => `<figure>
     <img src="${escape(relative(dirname(outputPath), join(captureRoot, name)).replaceAll("\\", "/"))}" alt="${escape(name)}" loading="lazy" />
@@ -193,7 +198,7 @@ ${mediaRows}
 </table>
 <p class="note">${escape((media?.claim_limits ?? []).join(" "))}</p>
 
-<h2>7. 上游 Studio 接缝探测</h2>
+<h2>8. 上游 Studio 接缝探测</h2>
 <dl>
   <dt>探测结果</dt><dd><code>ok=${escape(probe?.ok)} ${escape(probe?.reason ?? "")}</code></dd>
   <dt>startStudio 模块</dt><dd><code>${escape(probe?.seams?.start_studio?.module ?? "")}</code></dd>
@@ -203,23 +208,23 @@ ${mediaRows}
   <dt>加载闭包文件数</dt><dd>${escape(Object.keys(probe?.loaded_closure ?? {}).length)}</dd>
 </dl>
 
-<h2>8. 事务 / NOWRITE 差异</h2>
+<h2>9. 事务 / NOWRITE 差异</h2>
 <p>写路径的前后差异由 <code>tests/m5/locks.test.ts</code> 与 <code>tests/m5/comparison-replay.test.ts</code> 断言：
 锁的 CAS 失败为零 lock/outbox 变化，replay 不改变 source/revision/snapshot/ledger。</p>
 
-<h2>9. 失败捕获</h2>
+<h2>10. 失败捕获</h2>
 <p>失败捕获只追加、不覆盖，索引见 <code>docs/evidence/WAVE3/M5/failed-captures.json</code>；
 完整性门 <code>tools/m5-evidence-integrity.mjs</code> 会检查每一次失败都在索引中。</p>
 
-<h2>10. 审查状态</h2>
+<h2>11. 审查状态</h2>
 <p>四视角内部审查见 <code>docs/evidence/WAVE3/M5/reviews/internal-review.md</code>。
 独立外审与人工体验均未进行，本报告不代替它们。</p>
 
-<h2>11. 回退</h2>
+<h2>12. 回退</h2>
 <p>关闭 M5 的 workbench/replay/locks 路由与 Studio Gateway 并恢复旧 <code>NarralensApp</code> 即可回退 UI；
 不重置数据库、不删除 Wave 2 表、snapshot 或迁移副本。</p>
 
-<h2>12. 限制与 NOT_RUN</h2>
+<h2>13. 限制与 NOT_RUN</h2>
 <ul>
   <li>UX-12（人类一分钟定位、十秒找到撤回、理解 impact 与错误）保持 <code>HUMAN_NOT_RUN</code>：自动化不得代签人类判断。</li>
   <li>fixture 只证明系统交互，不证明长片内容质量；120 clip / 6 章是结构压力用例。</li>

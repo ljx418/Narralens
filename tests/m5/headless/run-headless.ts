@@ -385,5 +385,14 @@ const summary = {
   blocked: results.filter((result) => result.status === "BLOCKED_ENV").length,
   not_run: results.filter((result) => result.status === "NOT_RUN").length,
 };
+// Every status in the summary must have one canonical case file. Responsive, native
+// zoom and the human gate are produced outside the ordinary per-environment loop, so
+// writing all results here prevents the manifest/report from silently seeing a smaller
+// case set than the summary.
+for (const result of results) {
+  await writeEvidence(CAPTURE_ROOT, `cases/${result.case_id}.json`,
+    `${JSON.stringify({ run_id: RUN_ID, captured_at: new Date().toISOString(), ...result }, null, 2)}\n`);
+}
 await writeEvidence(CAPTURE_ROOT, "summary.json", `${JSON.stringify(summary, null, 2)}\n`);
 process.stdout.write(`${JSON.stringify(summary, null, 2)}\n`);
+if (summary.failed > 0 || summary.blocked > 0) process.exitCode = 1;

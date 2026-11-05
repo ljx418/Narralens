@@ -1,0 +1,194 @@
+{
+  "captured_at": "2026-11-05T09:10:13.722Z",
+  "target_project_id": "of_d1-30s_9bca26e6",
+  "note": "每一行都是同一组事实的前后差；changed 是动了的，unchanged 是不该动的。",
+  "diffs": [
+    {
+      "name": "read:workbench",
+      "before": {
+        "source_digest": "fd42d3608f47df9781aa7690151fb314cdb6b398c5ea4f19a6c438fe539be24f",
+        "revision": 1,
+        "control_revision": 0,
+        "snapshot_id": "5f069fcb9096619936f92e82ffb810b4595048903740e3a6dd68d1c77f5420b0",
+        "commit_transaction": "mig_e1222411a53f4b07b867994e2806741f",
+        "impact_rows": 0,
+        "outbox_rows": 0,
+        "lock_rows": 0,
+        "ledger_assets": 2
+      },
+      "after": {
+        "source_digest": "fd42d3608f47df9781aa7690151fb314cdb6b398c5ea4f19a6c438fe539be24f",
+        "revision": 1,
+        "control_revision": 0,
+        "snapshot_id": "5f069fcb9096619936f92e82ffb810b4595048903740e3a6dd68d1c77f5420b0",
+        "commit_transaction": "mig_e1222411a53f4b07b867994e2806741f",
+        "impact_rows": 0,
+        "outbox_rows": 0,
+        "lock_rows": 0,
+        "ledger_assets": 2
+      },
+      "changed": [],
+      "unchanged": [
+        "source_digest",
+        "revision",
+        "control_revision",
+        "snapshot_id",
+        "commit_transaction",
+        "impact_rows",
+        "outbox_rows",
+        "lock_rows",
+        "ledger_assets"
+      ]
+    },
+    {
+      "name": "write:comparison-replay",
+      "before": {
+        "source_digest": "fd42d3608f47df9781aa7690151fb314cdb6b398c5ea4f19a6c438fe539be24f",
+        "revision": 1,
+        "control_revision": 0,
+        "snapshot_id": "5f069fcb9096619936f92e82ffb810b4595048903740e3a6dd68d1c77f5420b0",
+        "commit_transaction": "mig_e1222411a53f4b07b867994e2806741f",
+        "impact_rows": 0,
+        "outbox_rows": 0,
+        "lock_rows": 0,
+        "ledger_assets": 2
+      },
+      "after": {
+        "source_digest": "fd42d3608f47df9781aa7690151fb314cdb6b398c5ea4f19a6c438fe539be24f",
+        "revision": 1,
+        "control_revision": 0,
+        "snapshot_id": "5f069fcb9096619936f92e82ffb810b4595048903740e3a6dd68d1c77f5420b0",
+        "commit_transaction": "mig_e1222411a53f4b07b867994e2806741f",
+        "impact_rows": 0,
+        "outbox_rows": 0,
+        "lock_rows": 0,
+        "ledger_assets": 2
+      },
+      "changed": [],
+      "unchanged": [
+        "source_digest",
+        "revision",
+        "control_revision",
+        "snapshot_id",
+        "commit_transaction",
+        "impact_rows",
+        "outbox_rows",
+        "lock_rows",
+        "ledger_assets"
+      ]
+    },
+    {
+      "name": "write:lock.create",
+      "before": {
+        "source_digest": "fd42d3608f47df9781aa7690151fb314cdb6b398c5ea4f19a6c438fe539be24f",
+        "revision": 1,
+        "control_revision": 0,
+        "snapshot_id": "5f069fcb9096619936f92e82ffb810b4595048903740e3a6dd68d1c77f5420b0",
+        "commit_transaction": "mig_e1222411a53f4b07b867994e2806741f",
+        "impact_rows": 0,
+        "outbox_rows": 0,
+        "lock_rows": 0,
+        "ledger_assets": 2
+      },
+      "after": {
+        "source_digest": "fd42d3608f47df9781aa7690151fb314cdb6b398c5ea4f19a6c438fe539be24f",
+        "revision": 1,
+        "control_revision": 1,
+        "snapshot_id": "5f069fcb9096619936f92e82ffb810b4595048903740e3a6dd68d1c77f5420b0",
+        "commit_transaction": "mig_e1222411a53f4b07b867994e2806741f",
+        "impact_rows": 0,
+        "outbox_rows": 1,
+        "lock_rows": 1,
+        "ledger_assets": 2
+      },
+      "changed": [
+        "control_revision",
+        "outbox_rows",
+        "lock_rows"
+      ],
+      "unchanged": [
+        "source_digest",
+        "revision",
+        "snapshot_id",
+        "commit_transaction",
+        "impact_rows",
+        "ledger_assets"
+      ]
+    },
+    {
+      "name": "write:lock.create(stale-cas)",
+      "before": {
+        "source_digest": "fd42d3608f47df9781aa7690151fb314cdb6b398c5ea4f19a6c438fe539be24f",
+        "revision": 1,
+        "control_revision": 1,
+        "snapshot_id": "5f069fcb9096619936f92e82ffb810b4595048903740e3a6dd68d1c77f5420b0",
+        "commit_transaction": "mig_e1222411a53f4b07b867994e2806741f",
+        "impact_rows": 0,
+        "outbox_rows": 1,
+        "lock_rows": 1,
+        "ledger_assets": 2
+      },
+      "after": {
+        "source_digest": "fd42d3608f47df9781aa7690151fb314cdb6b398c5ea4f19a6c438fe539be24f",
+        "revision": 1,
+        "control_revision": 1,
+        "snapshot_id": "5f069fcb9096619936f92e82ffb810b4595048903740e3a6dd68d1c77f5420b0",
+        "commit_transaction": "mig_e1222411a53f4b07b867994e2806741f",
+        "impact_rows": 0,
+        "outbox_rows": 1,
+        "lock_rows": 1,
+        "ledger_assets": 2
+      },
+      "changed": [],
+      "unchanged": [
+        "source_digest",
+        "revision",
+        "control_revision",
+        "snapshot_id",
+        "commit_transaction",
+        "impact_rows",
+        "outbox_rows",
+        "lock_rows",
+        "ledger_assets"
+      ]
+    },
+    {
+      "name": "write:lock.release",
+      "before": {
+        "source_digest": "fd42d3608f47df9781aa7690151fb314cdb6b398c5ea4f19a6c438fe539be24f",
+        "revision": 1,
+        "control_revision": 1,
+        "snapshot_id": "5f069fcb9096619936f92e82ffb810b4595048903740e3a6dd68d1c77f5420b0",
+        "commit_transaction": "mig_e1222411a53f4b07b867994e2806741f",
+        "impact_rows": 0,
+        "outbox_rows": 1,
+        "lock_rows": 1,
+        "ledger_assets": 2
+      },
+      "after": {
+        "source_digest": "fd42d3608f47df9781aa7690151fb314cdb6b398c5ea4f19a6c438fe539be24f",
+        "revision": 1,
+        "control_revision": 2,
+        "snapshot_id": "5f069fcb9096619936f92e82ffb810b4595048903740e3a6dd68d1c77f5420b0",
+        "commit_transaction": "mig_e1222411a53f4b07b867994e2806741f",
+        "impact_rows": 0,
+        "outbox_rows": 2,
+        "lock_rows": 0,
+        "ledger_assets": 2
+      },
+      "changed": [
+        "control_revision",
+        "outbox_rows",
+        "lock_rows"
+      ],
+      "unchanged": [
+        "source_digest",
+        "revision",
+        "snapshot_id",
+        "commit_transaction",
+        "impact_rows",
+        "ledger_assets"
+      ]
+    }
+  ]
+}

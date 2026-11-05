@@ -126,6 +126,27 @@ async function waitForStudio(session: CdpSession, timeoutMs = 30_000): Promise<P
   return await waitForPanel(session, (state) => (state?.studioSelection ?? "") !== "", timeoutMs);
 }
 
+/** The native preview has finished loading every clip and has published a non-zero film. */
+async function waitForNativePlayable(session: CdpSession, timeoutMs = 90_000): Promise<boolean> {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    const ready = await session.evaluateWithRetry<boolean>(`(() => {
+      const button = [...document.querySelectorAll('button')].find((entry) =>
+        ['播放', '暂停', 'Play', 'Pause'].includes(entry.getAttribute('aria-label') || ''));
+      const timeline = document.querySelector('.tl-zoom');
+      const durationText = [...document.querySelectorAll('span,div')].some((entry) => {
+        const value = (entry.textContent || '').trim();
+        return value.startsWith('00:') && value.includes(' / 00:')
+          && !value.includes('00:00 / 00:00');
+      });
+      return Boolean(button && !button.disabled && timeline && durationText);
+    })()`);
+    if (ready) return true;
+    await sleep(100);
+  }
+  return false;
+}
+
 /** Wait until the panel satisfies a predicate, or give up. */
 async function waitForPanel(session: CdpSession,
   predicate: (state: PanelState | null) => boolean, timeoutMs = 20_000): Promise<PanelState | null> {
@@ -453,9 +474,31 @@ export async function ux08(context: CaseContext): Promise<CaseResult> {
 /** UX-11: keyboard, focus, text state, axe, reduced motion and the theme. */
 export async function ux11(context: CaseContext): Promise<CaseResult> {
   const { env, session } = context;
+  const browserDiagnostics: unknown[] = [];
+  const diagnosticKeys = new Set<string>();
+  const recordDiagnostic = (kind: string, event: unknown): void => {
+    const value = event as { entry?: { text?: unknown; url?: unknown }; errorText?: unknown;
+      exceptionDetails?: { exception?: { description?: unknown } } };
+    const key = `${kind}:${String(value.entry?.text ?? value.errorText
+      ?? value.exceptionDetails?.exception?.description ?? "")}:${String(value.entry?.url ?? "")}`;
+    if (diagnosticKeys.has(key) || browserDiagnostics.length >= 100) return;
+    diagnosticKeys.add(key); browserDiagnostics.push({ kind, event });
+  };
+  await session.call("Log.enable");
+  await session.call("Network.enable");
+  const stopLog = session.on("Log.entryAdded", (event) => recordDiagnostic("log", event));
+  const stopException = session.on("Runtime.exceptionThrown", (event) => recordDiagnostic("exception", event));
+  const stopNetwork = session.on("Network.loadingFailed", (event) => recordDiagnostic("network", event));
+  const stopSocket = session.on("Network.webSocketFrameReceived", (event) => recordDiagnostic("websocket", event));
   await session.navigate("about:blank");
   await session.navigate(`${env.pageUrl}#/refine/${env.projectId}`);
   await waitForPanel(session, (state) => state?.panel === "ready");
+  await waitForStudio(session);
+  // Selection arrives before the pinned Studio preview has necessarily established a
+  // non-zero native film duration. J/K/L and I/O intentionally ignore keys before that
+  // boundary, so wait for the actual native transport/timeline instead of accepting the
+  // Narralens key-capture attribute as proof.
+  const nativeReady = await waitForNativePlayable(session);
 
   // The search shortcut focuses the atlas search box.
   await session.pressKey("/", "Slash", 191);
@@ -463,13 +506,76 @@ export async function ux11(context: CaseContext): Promise<CaseResult> {
   const focused = await session.evaluateWithRetry<string>(`document.activeElement ? document.activeElement.id : ""`);
 
   await session.evaluateWithRetry(`document.activeElement?.blur()`);
+  const readNative = async (): Promise<Record<string, unknown>> => await session.evaluateWithRetry(`(() => {
+    const zoom = document.querySelector('.tl-zoom');
+    const range = document.querySelector('[data-timeline-range]');
+    const panel = document.querySelector('[data-narralens-panel="ready"]');
+    const transport = [...document.querySelectorAll('button')].find((entry) =>
+      ['播放', '暂停', 'Play', 'Pause'].includes(entry.getAttribute('aria-label') || ''));
+    const frames = [...document.querySelectorAll('iframe')].map((frame) => {
+      let href = null, ready = null, body = null, nested = null, filmHost = null, film = null, scripts = null;
+      try { href = frame.contentWindow?.location.href ?? null;
+        ready = frame.contentDocument?.readyState ?? null;
+        body = frame.contentDocument?.body?.innerText?.slice(0, 300) ?? null;
+        nested = [...(frame.contentDocument?.querySelectorAll('iframe') || [])].map((entry) => ({
+          src: entry.getAttribute('src'), filmSrc: entry.getAttribute('data-film-src'),
+          ready: entry.contentDocument?.readyState ?? null,
+          film: entry.contentWindow?.film ? {
+            duration: entry.contentWindow.film.duration, frame: typeof entry.contentWindow.film.frame,
+            ready: typeof entry.contentWindow.film.ready,
+          } : null,
+        }));
+        filmHost = frame.contentWindow?.filmHost
+          ? { version: frame.contentWindow.filmHost.version, time: typeof frame.contentWindow.filmHost.time }
+          : null;
+        film = frame.contentWindow?.film ? { duration: frame.contentWindow.film.duration,
+          frame: typeof frame.contentWindow.film.frame, ready: typeof frame.contentWindow.film.ready } : null;
+        scripts = [...(frame.contentDocument?.scripts || [])].map((entry) => ({ src: entry.src,
+          text: entry.textContent?.slice(0, 200) ?? '' })); } catch {}
+      return { src: frame.src, title: frame.title, href, ready, body, nested, filmHost, film, scripts };
+    });
+    return { studio_seconds: Number(panel?.getAttribute('data-studio-seconds') || 0),
+      transport: transport?.getAttribute('aria-label') ?? null, zoom: zoom?.value ?? null,
+      marked: Boolean(range), marked_width: range?.getBoundingClientRect().width ?? 0, frames };
+  })()`);
   const keyReads: Record<string, string> = {};
-  for (const [key, code, keyCode] of [["j", "KeyJ", 74], ["k", "KeyK", 75], ["l", "KeyL", 76],
-    ["i", "KeyI", 73], ["o", "KeyO", 79], ["f", "KeyF", 70]] as const) {
-    await session.pressKey(key, code, keyCode);
+  const readKey = async (key: string): Promise<void> => {
     keyReads[key] = await session.evaluateWithRetry<string>(
       `document.querySelector('[data-narralens-panel="ready"]')?.getAttribute('data-last-key') || ''`);
-  }
+  };
+
+  // Prove the pinned Studio changed state, not merely that our capture listener saw a key.
+  const playbackBefore = await readNative();
+  await session.pressKey("l", "KeyL", 76); await sleep(350); await readKey("l");
+  const afterForward = await readNative();
+  await session.pressKey("k", "KeyK", 75); await sleep(160); await readKey("k");
+  const afterStop = await readNative();
+  await session.pressKey("i", "KeyI", 73); await readKey("i");
+  await session.pressKey("l", "KeyL", 76); await sleep(350);
+  await session.pressKey("k", "KeyK", 75); await sleep(120);
+  await session.pressKey("o", "KeyO", 79); await sleep(120); await readKey("o");
+  const afterMarks = await readNative();
+
+  // Put the native timeline at a non-default zoom, then F must translate to upstream
+  // Shift+Z and change the native range input back to its fit value.
+  await session.evaluateWithRetry(`(() => {
+    const input = document.querySelector('.tl-zoom');
+    if (!input) throw new Error('NATIVE_TIMELINE_ZOOM_MISSING');
+    const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set;
+    set.call(input, input.value === '0.82' ? '0.18' : '0.82');
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    input.dispatchEvent(new Event('change', { bubbles: true }));
+  })()`);
+  await sleep(120);
+  const beforeFit = await readNative();
+  await session.pressKey("f", "KeyF", 70); await sleep(180); await readKey("f");
+  const afterFit = await readNative();
+
+  // J must reverse from a non-zero moment. It is tested last so it cannot invalidate the
+  // marked-range evidence above.
+  await session.pressKey("j", "KeyJ", 74); await sleep(350); await readKey("j");
+  await session.pressKey("k", "KeyK", 75); await sleep(120);
+  const afterReverse = await readNative();
 
   // Real theme control + persistence across a reload.
   await session.evaluateWithRetry(`(() => {
@@ -501,12 +607,31 @@ export async function ux11(context: CaseContext): Promise<CaseResult> {
   const axe = await session.evaluateWithRetry<Record<string, unknown>>(await axeExpression(env));
   const wholePage = await session.evaluateWithRetry<Record<string, unknown>>(await axeExpression(env, true));
   const violations = (axe.violations ?? []) as Array<{ id: string; impact: string | null }>;
+  const previewLoads = [playbackBefore, afterForward, afterStop, afterMarks, afterReverse]
+    .flatMap((state) => (state.frames as Array<{src?: unknown}> ?? []).map((frame) => String(frame.src ?? "")));
 
   const assertions: Assertion[] = [
     { claim: "键盘可达：/ 聚焦搜索框", ok: focused === "narralens-atlas-search", detail: `focus=${focused}` },
+    { claim: "快捷键验收发生在原生播放器建立非零时长之后", ok: nativeReady,
+      detail: `nativeReady=${nativeReady}` },
     { claim: "J/K/L、I/O、F 默认键均进入真实 Studio 页面的键盘路径",
       ok: Object.entries(keyReads).every(([key, value]) => value.toLowerCase().startsWith(key === "f" ? "z:" : `${key}:`)),
       detail: JSON.stringify(keyReads) },
+    { claim: "L 前进、K 停止、J 后退均改变原生播放器状态",
+      ok: ["暂停", "Pause"].includes(String(afterForward.transport))
+        && ["播放", "Play"].includes(String(afterStop.transport))
+        && Number(afterReverse.studio_seconds) < Number(afterMarks.studio_seconds),
+      detail: JSON.stringify({ playbackBefore, afterForward, afterStop, afterMarks, afterReverse }) },
+    { claim: "I/O 在原生时间线产生非空标记范围",
+      ok: afterMarks.marked === true && Number(afterMarks.marked_width) > 1,
+      detail: JSON.stringify(afterMarks) },
+    { claim: "F 通过 Shift+Z 接缝把原生时间线从非默认缩放恢复为 fit",
+      ok: typeof beforeFit.zoom === "string" && typeof afterFit.zoom === "string"
+        && beforeFit.zoom !== afterFit.zoom,
+      detail: JSON.stringify({ beforeFit: beforeFit.zoom, afterFit: afterFit.zoom }) },
+    { claim: "原生预览在快捷键操作期间保持同一加载实例（没有 WebSocket 重连风暴）",
+      ok: new Set(previewLoads).size === 1,
+      detail: JSON.stringify(previewLoads) },
     { claim: "浅色主题切换并在重载后持久化", ok: lightTheme === "light" && persistedTheme === "light",
       detail: `before=${lightTheme} reload=${persistedTheme}` },
     { claim: "面板有可读文本状态（不是空白画布）", ok: String(theme.text).length > 40,
@@ -523,29 +648,60 @@ export async function ux11(context: CaseContext): Promise<CaseResult> {
         (violation) => `${violation.id}:${String(violation.impact)}`)) },
   ];
   const evidence = await context.json("a11y/ux-11-axe.json", { panel: axe, whole_page: wholePage });
+  stopLog(); stopException(); stopNetwork(); stopSocket();
+  const diagnosticsEvidence = await context.json("browser/ux-11-diagnostics.json", browserDiagnostics);
   return {
     case_id: "UX-11", title: "键盘、焦点、文本状态、axe、reduced motion、主题",
-    status: verdict(assertions), assertions, facts: { focused, keyReads, lightTheme, persistedTheme, reduced, theme, axe, whole_page: wholePage },
-    evidence: [evidence],
+    status: verdict(assertions), assertions, facts: { focused, keyReads, playbackBefore, afterForward, afterStop,
+      afterMarks, beforeFit, afterFit, afterReverse, lightTheme, persistedTheme, reduced, theme, axe,
+      whole_page: wholePage, browserDiagnostics },
+    evidence: [evidence, diagnosticsEvidence],
   };
 }
 
 /** PF-01: a hundred samples of each interaction, with the p95 reported. */
 export async function pf01(context: CaseContext): Promise<CaseResult> {
   const { env, session } = context;
+  const network = { responses: 0, scene_responses: 0, failed_count: 0,
+    failed_by_reason: {} as Record<string, number>, errors: [] as Array<{ url: string; status: number }> };
+  await session.call("Network.enable");
+  const stopResponse = session.on("Network.responseReceived", (event) => {
+    const response = (event as { response?: { url?: unknown; status?: unknown } }).response;
+    network.responses += 1;
+    if (String(response?.url ?? "").includes("/scenes/")) network.scene_responses += 1;
+    if (Number(response?.status ?? 0) >= 400 && network.errors.length < 20) network.errors.push({
+      url: String(response?.url ?? ""), status: Number(response?.status ?? 0),
+    });
+  });
+  const stopFailed = session.on("Network.loadingFailed", (event) => {
+    network.failed_count += 1;
+    const failed = event as { errorText?: unknown; canceled?: unknown };
+    const reason = `${String(failed.errorText ?? "unknown")}:${failed.canceled === true ? "cancelled" : "failed"}`;
+    network.failed_by_reason[reason] = (network.failed_by_reason[reason] ?? 0) + 1;
+  });
   await session.navigate("about:blank");
   await session.navigate(`${env.pageUrl}#/refine/${env.projectId}`);
   await waitForPanel(session, (state) => state?.panel === "ready");
   await waitForStudio(session);
+  const diagnosticTimeout = Number(process.env.NARRALENS_M5_NATIVE_READY_TIMEOUT_MS ?? 240_000);
+  const nativeReady = await waitForNativePlayable(session, diagnosticTimeout);
+  const nativeState = await session.evaluateWithRetry<Record<string, unknown>>(`(() => ({
+    studio_seconds: Number(document.querySelector('[data-narralens-panel="ready"]')?.getAttribute('data-studio-seconds') || 0),
+    transport: [...document.querySelectorAll('button')].find((entry) => ['播放','暂停','Play','Pause'].includes(entry.getAttribute('aria-label') || ''))?.getAttribute('aria-label') ?? null,
+    frames: [...document.querySelectorAll('iframe')].map((frame) => frame.src),
+  }))()`);
 
-  const samples = await session.evaluateWithRetry<Record<string, number[] | undefined>>(`(async () => {
+  const samples = await session.evaluateWithRetry<Record<string, number[] | number | undefined>>(`(async () => {
     const panel = document.querySelector("[data-narralens-panel]");
     const buttons = [...document.querySelectorAll(".m5-atlas button")];
     const chapters = [...document.querySelectorAll(".m5-chapters button")];
     if (buttons.length !== 120) throw new Error("STRESS_ATLAS_IS_NOT_120_CLIPS:" + buttons.length);
     if (chapters.length < 6) throw new Error("STRESS_ATLAS_HAS_TOO_FEW_CHAPTERS:" + chapters.length);
     const search = document.querySelector("#narralens-atlas-search");
-    const results = { selection: [], pan: [], zoom: [], chapter: [] };
+    const zoom = document.querySelector('.tl-zoom');
+    if (!zoom) throw new Error('NATIVE_TIMELINE_ZOOM_MISSING');
+    const setInputValue = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set;
+    const results = { selection: [], pan: [], zoom: [], chapter: [], zoom_state_changes: 0 };
     const frame = () => new Promise((done) => {
       const timer = setTimeout(done, 50);
       requestAnimationFrame(() => { clearTimeout(timer); requestAnimationFrame(() => done()); });
@@ -559,12 +715,18 @@ export async function pf01(context: CaseContext): Promise<CaseResult> {
     for (let index = 0; index < 100; index += 1) {
       await measure("selection", () => buttons[index % buttons.length].click());
       await measure("pan", () => panel.scrollBy(0, index % 2 === 0 ? 40 : -40));
-      await measure("zoom", () => { document.body.style.zoom = "1.0"; });
+      const beforeZoom = zoom.value;
+      await measure("zoom", () => {
+        const next = index % 2 === 0 ? 0.22 : 0.78;
+        setInputValue.call(zoom, String(next));
+        zoom.dispatchEvent(new Event('input', { bubbles: true }));
+        zoom.dispatchEvent(new Event('change', { bubbles: true }));
+      });
+      if (zoom.value !== beforeZoom) results.zoom_state_changes += 1;
       await measure("chapter", () => chapters[index % chapters.length].click());
     }
     search.value = "";
     search.dispatchEvent(new Event("input", { bubbles: true }));
-    document.body.style.zoom = "";
     return { ...results, clip_count: buttons.length, chapter_count: chapters.length };
   })()`);
 
@@ -574,7 +736,7 @@ export async function pf01(context: CaseContext): Promise<CaseResult> {
     const index = Math.min(sorted.length - 1, Math.ceil(sorted.length * 0.95) - 1);
     return sorted[index]!;
   };
-  const of = (name: string): number[] => samples[name] ?? [];
+  const of = (name: string): number[] => Array.isArray(samples[name]) ? samples[name] as number[] : [];
   const summary = {
     selection: { count: of("selection").length, p95: p95(of("selection")), max: Math.max(0, ...of("selection")) },
     pan: { count: of("pan").length, p95: p95(of("pan")), max: Math.max(0, ...of("pan")) },
@@ -583,20 +745,30 @@ export async function pf01(context: CaseContext): Promise<CaseResult> {
   };
   const over = Object.entries(summary).filter(([, value]) => value.p95 > 100);
   const evidence = await context.json("performance/pf-01-samples.json", { samples, summary });
+  const diagnosticEvidence = await context.json("browser/pf-01-native-diagnostics.json", {
+    timeout_ms: diagnosticTimeout, nativeReady, nativeState, network,
+  });
   const assertions: Assertion[] = [
+    { claim: "性能采样发生在原生 120-clip 影片加载完成后", ok: nativeReady,
+      detail: `nativeReady=${nativeReady}` },
     { claim: "真实工作台投影包含 120 个原生可寻址 clip 与至少 6 章",
       ok: Number(samples.clip_count) === 120 && Number(samples.chapter_count) >= 6,
       detail: `clips=${String(samples.clip_count)} chapters=${String(samples.chapter_count)}` },
     { claim: "四类操作各 100 个原始样本", ok: Object.values(summary).every((value) => value.count === 100),
       detail: JSON.stringify(Object.fromEntries(Object.entries(summary).map(([key, value]) => [key, value.count]))) },
+    { claim: "100 次 zoom 都改变固定 OpenFilm 原生时间线的缩放状态",
+      ok: Number(samples.zoom_state_changes) === 100,
+      detail: `native zoom state changes=${String(samples.zoom_state_changes)}` },
     { claim: "每类 event→paint p95 ≤ 100ms", ok: over.length === 0,
       detail: JSON.stringify(Object.fromEntries(Object.entries(summary).map(([key, value]) => [key, value.p95]))) },
     { claim: "慢样本没有被删除", ok: Object.values(summary).every((value) => value.count === 100),
       detail: "样本数与采集数一致" },
   ];
+  stopResponse(); stopFailed();
   return {
     case_id: "PF-01", title: "120 clip 四类操作各 100 样本 p95≤100ms",
-    status: verdict(assertions), assertions, facts: { summary }, evidence: [evidence],
+    status: verdict(assertions), assertions, facts: { summary, nativeState, network },
+    evidence: [evidence, diagnosticEvidence],
   };
 }
 
@@ -721,7 +893,7 @@ export async function pf03(context: CaseContext): Promise<CaseResult> {
     { claim: "重开后的 revision 与 Host 一致", ok: Number(cold?.revision) === Number(projection.revision),
       detail: `panel=${String(cold?.revision)} host=${String(projection.revision)}` },
     { claim: "冷启动首帧时间已记录", ok: coldMs > 0, detail: `cold=${coldMs}ms` },
-    { claim: "重开后的内存峰值与媒体掉帧数据已记录", ok: typeof runtime.memory_used === "number"
+    { claim: "重开后的单点内存事实与媒体掉帧数据已记录", ok: typeof runtime.memory_used === "number"
       && Array.isArray(runtime.qualities) && runtime.qualities.length === 3
       && runtime.qualities.every((entry: { total_frames?: unknown; dropped_frames?: unknown }) =>
         typeof entry.total_frames === "number" && typeof entry.dropped_frames === "number"),

@@ -100,7 +100,9 @@ printf '%s\n' "$code" > "$LOGS/credential-scan.exit"
 printf '%-24s exit=%s\n' credential-scan "$code"
 [ "$code" -eq 0 ] || overall=1
 
-# The Chinese acceptance report, generated from this capture.
+# Generate once so the command/output/exit triple is covered by the manifest. The HTML
+# is regenerated after the integrity command below so its table also sees the commands
+# that necessarily run after this first pass.
 printf '%s\n' "node tools/m5-acceptance-report.mjs $LOGS docs/evidence/WAVE3/M5/acceptance-report.html" > "$LOGS/acceptance-report.cmd"
 node tools/m5-acceptance-report.mjs "$LOGS" docs/evidence/WAVE3/M5/acceptance-report.html \
   > "$LOGS/acceptance-report.txt" 2>&1
@@ -138,6 +140,13 @@ node tools/m5-evidence-integrity.mjs "$CAPTURE_SHA" > "$LOGS/integrity.txt" 2>&1
 code=$?
 printf '%s\n' "$code" > "$LOGS/integrity.exit"
 printf '%-24s exit=%s\n' integrity "$code"
+[ "$code" -eq 0 ] || overall=1
+
+# Final presentation pass: every command exit now exists. It only rewrites the external
+# HTML; the already-manifested acceptance-report cmd/txt/exit triple remains immutable.
+node tools/m5-acceptance-report.mjs "$LOGS" docs/evidence/WAVE3/M5/acceptance-report.html >/dev/null 2>&1
+code=$?
+printf '%-24s exit=%s\n' acceptance-report-final "$code"
 [ "$code" -eq 0 ] || overall=1
 
 printf '%s\n' "$overall" > "$LOGS/overall.txt"

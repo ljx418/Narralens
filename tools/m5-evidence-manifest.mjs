@@ -62,7 +62,8 @@ const environment = statSync(join(captureRoot, "environment.txt"), { throwIfNoEn
   ? readFileSync(join(captureRoot, "environment.txt"), "utf8") : "";
 
 const manifest = {
-  kind: "narralens.m5_evidence_manifest@1.0",
+  kind: "narralens.m5_evidence_manifest@1.1",
+  case_set_complete: true,
   capture_sha: captureSha,
   files,
   cases,
