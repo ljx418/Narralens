@@ -1,8 +1,9 @@
 # M5 交付报告（M5A → M5B → M5C）
 
-声明上限：**`M5_ACCEPTANCE_REWORK`**。旧自动证据经 UX-12 前置阶段审计被语义降级；人工体验门
-（UX-12）保持 `HUMAN_NOT_RUN`，等待新冻结提交的完整捕获与独立复审。
-本报告不构成 Gate D4.2、Gate V1-P0、V1-Full 或 M6 的任何结论，也没有做过独立外审。
+声明上限：**`M5_HEADLESS_REVIEW_REPAIR_PENDING`**。旧自动证据经 UX-12 前置阶段审计被语义降级；
+返修代码冻结 `63492d1...`、正式捕获 `ff807c3...` 已完成 16 PASS / 0 FAIL / UX-12 NOT_RUN，三路独立
+复审中架构与 PRD 两路 PASS，测试证据路要求补充 preview Document/WebSocket 生命周期直接证据。
+人工体验门（UX-12）保持 `HUMAN_NOT_RUN`。本报告不构成 Gate D4.2、Gate V1-P0、V1-Full 或 M6 结论。
 
 ---
 
@@ -14,8 +15,9 @@
 | 分支 | `migration/m2.2-coordinator-persistence` |
 | 起点（交接基线） | `68a558a326fbbfbf78509ca548b1b075150fd5a4` |
 | M5A 冻结候选 | `205faad`（workbench / locks / replay / Studio Gateway） |
-| M5B+M5C 候选 | `a9718ae`（同页闭环、Headless harness、证据工具） |
-| 捕获 commit | 见 `docs/evidence/WAVE3/M5/captures/<commit>/environment.txt` |
+| M5B+M5C 原候选 | `a9718ae`（同页闭环、Headless harness、证据工具） |
+| preview/Gateway 返修代码冻结 | `63492d1e02548cfec9cb3b83fc020b0a22bcc10e` |
+| 当前捕获 commit | `ff807c332eab04f0a28c03f78734da7b73bc802d`（将由生命周期断言返修后的新捕获取代） |
 | 固定 OpenFilm 上游 | `e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3` |
 
 `origin/main` 未被改动；没有 push、没有 force push、没有 reset、没有删除任何 Wave 1/Wave 2 证据。
@@ -67,12 +69,14 @@ fixture：3 路真实 proxy、3 分钟 24 clip 系统片、120 clip / 6 章结�
 
 ## 3. 逐 case 状态
 
-见 `docs/evidence/WAVE3/M5/captures/<commit>/summary.json` 与 `cases/*.json`。
-自动门：UX-01…UX-11 与 PF-01…PF-03 全部通过；UX-12 保持 `HUMAN_NOT_RUN`。
+见当前 `docs/evidence/WAVE3/M5/captures/ff807c332eab04f0a28c03f78734da7b73bc802d/summary.json` 与
+`cases/*.json`。该捕获为 16 个自动 case PASS；UX-12 保持 `HUMAN_NOT_RUN`。preview 生命周期直接断言
+返修后必须产生新 capture，旧 ff807c 继续保留但不作为最终放行依据。
 
 ## 4. 命令、退出码与测试数量
 
-见 `docs/evidence/WAVE3/M5/captures/<commit>/*.cmd|.txt|.exit`（每条命令的原始 stdout/stderr 与退出码）。
+见 `docs/evidence/WAVE3/M5/captures/ff807c332eab04f0a28c03f78734da7b73bc802d/*.cmd|.txt|.exit`
+（19 条命令原始 stdout/stderr 与退出码；最终以返修后的新 capture 为准）。
 
 ## 5. 内部审查
 
@@ -92,4 +96,5 @@ M5 的写路径全部走既有 Host 服务（adoption / history restore），它
 - 没有做 headed 自动化，没有打开窗口，没有抢焦点，没有联网，没有调用 provider，没有产生费用。
 - 没有读取 `J:\`，没有读取或使用仓库根未跟踪的 `narralens-d1`。
 - fixture 只证明系统交互，不证明长片内容质量；120 clip / 6 章是结构压力用例。
-- 独立外审（Codex）与人工体验均未进行，本报告不代替它们。
+- 架构/代码与 PRD/阶段两路独立复审 PASS；测试证据复审因 preview 生命周期证据不足为 NOT PASS，
+  返修后必须重新复审。人工体验未进行，本报告不代替它。

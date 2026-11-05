@@ -486,10 +486,31 @@ export async function ux11(context: CaseContext): Promise<CaseResult> {
   };
   await session.call("Log.enable");
   await session.call("Network.enable");
+  const nativeLifecycle = {
+    documents: [] as Array<{ url: string; loader_id: string; frame_id: string }>,
+    websockets_created: [] as Array<{ url: string; request_id: string }>,
+    websockets_closed: [] as Array<{ request_id: string }>,
+  };
   const stopLog = session.on("Log.entryAdded", (event) => recordDiagnostic("log", event));
   const stopException = session.on("Runtime.exceptionThrown", (event) => recordDiagnostic("exception", event));
   const stopNetwork = session.on("Network.loadingFailed", (event) => recordDiagnostic("network", event));
   const stopSocket = session.on("Network.webSocketFrameReceived", (event) => recordDiagnostic("websocket", event));
+  const stopDocument = session.on("Network.requestWillBeSent", (event) => {
+    const value = event as { type?: unknown; loaderId?: unknown; frameId?: unknown;
+      request?: { url?: unknown } };
+    if (value.type !== "Document") return;
+    nativeLifecycle.documents.push({ url: String(value.request?.url ?? ""),
+      loader_id: String(value.loaderId ?? ""), frame_id: String(value.frameId ?? "") });
+  });
+  const stopSocketCreated = session.on("Network.webSocketCreated", (event) => {
+    const value = event as { url?: unknown; requestId?: unknown };
+    nativeLifecycle.websockets_created.push({ url: String(value.url ?? ""),
+      request_id: String(value.requestId ?? "") });
+  });
+  const stopSocketClosed = session.on("Network.webSocketClosed", (event) => {
+    const value = event as { requestId?: unknown };
+    nativeLifecycle.websockets_closed.push({ request_id: String(value.requestId ?? "") });
+  });
   await session.navigate("about:blank");
   await session.navigate(`${env.pageUrl}#/refine/${env.projectId}`);
   await waitForPanel(session, (state) => state?.panel === "ready");
@@ -499,6 +520,11 @@ export async function ux11(context: CaseContext): Promise<CaseResult> {
   // boundary, so wait for the actual native transport/timeline instead of accepting the
   // Narralens key-capture attribute as proof.
   const nativeReady = await waitForNativePlayable(session);
+  const lifecycleBeforeKeys = {
+    documents: nativeLifecycle.documents.length,
+    websockets_created: nativeLifecycle.websockets_created.length,
+    websockets_closed: nativeLifecycle.websockets_closed.length,
+  };
 
   // The search shortcut focuses the atlas search box.
   await session.pressKey("/", "Slash", 191);
@@ -576,6 +602,16 @@ export async function ux11(context: CaseContext): Promise<CaseResult> {
   await session.pressKey("j", "KeyJ", 74); await sleep(350); await readKey("j");
   await session.pressKey("k", "KeyK", 75); await sleep(120);
   const afterReverse = await readNative();
+  // Let any reconnect/reload triggered by the last shortcut become observable before the
+  // deliberate top-level theme reload below. A same-URL iframe reload receives a new
+  // Document loaderId, so this proves browsing-context stability rather than comparing
+  // five identical src strings.
+  await sleep(250);
+  const lifecycleAfterKeys = {
+    documents: nativeLifecycle.documents.length,
+    websockets_created: nativeLifecycle.websockets_created.length,
+    websockets_closed: nativeLifecycle.websockets_closed.length,
+  };
 
   // Real theme control + persistence across a reload.
   await session.evaluateWithRetry(`(() => {
@@ -607,9 +643,6 @@ export async function ux11(context: CaseContext): Promise<CaseResult> {
   const axe = await session.evaluateWithRetry<Record<string, unknown>>(await axeExpression(env));
   const wholePage = await session.evaluateWithRetry<Record<string, unknown>>(await axeExpression(env, true));
   const violations = (axe.violations ?? []) as Array<{ id: string; impact: string | null }>;
-  const previewLoads = [playbackBefore, afterForward, afterStop, afterMarks, afterReverse]
-    .flatMap((state) => (state.frames as Array<{src?: unknown}> ?? []).map((frame) => String(frame.src ?? "")));
-
   const assertions: Assertion[] = [
     { claim: "键盘可达：/ 聚焦搜索框", ok: focused === "narralens-atlas-search", detail: `focus=${focused}` },
     { claim: "快捷键验收发生在原生播放器建立非零时长之后", ok: nativeReady,
@@ -629,9 +662,12 @@ export async function ux11(context: CaseContext): Promise<CaseResult> {
       ok: typeof beforeFit.zoom === "string" && typeof afterFit.zoom === "string"
         && beforeFit.zoom !== afterFit.zoom,
       detail: JSON.stringify({ beforeFit: beforeFit.zoom, afterFit: afterFit.zoom }) },
-    { claim: "原生预览在快捷键操作期间保持同一加载实例（没有 WebSocket 重连风暴）",
-      ok: new Set(previewLoads).size === 1,
-      detail: JSON.stringify(previewLoads) },
+    { claim: "原生预览在快捷键窗口没有新增 Document loader、WebSocket 重建或关闭",
+      ok: lifecycleBeforeKeys.websockets_created > 0
+        && lifecycleAfterKeys.documents === lifecycleBeforeKeys.documents
+        && lifecycleAfterKeys.websockets_created === lifecycleBeforeKeys.websockets_created
+        && lifecycleAfterKeys.websockets_closed === lifecycleBeforeKeys.websockets_closed,
+      detail: JSON.stringify({ lifecycleBeforeKeys, lifecycleAfterKeys, nativeLifecycle }) },
     { claim: "浅色主题切换并在重载后持久化", ok: lightTheme === "light" && persistedTheme === "light",
       detail: `before=${lightTheme} reload=${persistedTheme}` },
     { claim: "面板有可读文本状态（不是空白画布）", ok: String(theme.text).length > 40,
@@ -648,13 +684,17 @@ export async function ux11(context: CaseContext): Promise<CaseResult> {
         (violation) => `${violation.id}:${String(violation.impact)}`)) },
   ];
   const evidence = await context.json("a11y/ux-11-axe.json", { panel: axe, whole_page: wholePage });
-  stopLog(); stopException(); stopNetwork(); stopSocket();
-  const diagnosticsEvidence = await context.json("browser/ux-11-diagnostics.json", browserDiagnostics);
+  stopLog(); stopException(); stopNetwork(); stopSocket(); stopDocument(); stopSocketCreated(); stopSocketClosed();
+  const diagnosticsEvidence = await context.json("browser/ux-11-diagnostics.json", {
+    lifecycle: nativeLifecycle,
+    known_compatibility_noise: "Pinned upstream may log optional endpoint 422 and one cross-origin postMessage warning; no critical path failure was observed.",
+    diagnostics: browserDiagnostics,
+  });
   return {
     case_id: "UX-11", title: "键盘、焦点、文本状态、axe、reduced motion、主题",
     status: verdict(assertions), assertions, facts: { focused, keyReads, playbackBefore, afterForward, afterStop,
       afterMarks, beforeFit, afterFit, afterReverse, lightTheme, persistedTheme, reduced, theme, axe,
-      whole_page: wholePage, browserDiagnostics },
+      whole_page: wholePage, lifecycleBeforeKeys, lifecycleAfterKeys, nativeLifecycle, browserDiagnostics },
     evidence: [evidence, diagnosticsEvidence],
   };
 }

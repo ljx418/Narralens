@@ -1,12 +1,14 @@
 # M5 UX-12 人工体验与签署清单
 
-状态：`READY_FOR_HUMAN`。本文件不能由自动化签署；未取得项目负责人明确结论前，UX-12 保持
-`HUMAN_NOT_RUN`，不得进入 M6。
+状态：`HEADLESS_REVIEW_REPAIR_PENDING`。本文件不能由自动化签署；新的 preview 生命周期证据完成捕获并
+取得独立复审 PASS 前不得启动。未取得项目负责人明确结论前，UX-12 保持 `HUMAN_NOT_RUN`，不得进入 M6。
 
 ## 1. 启动边界
 
-- 前置证据：捕获 `2a8337d316a6ed503c2e85e065a0385b0dcc87e6`，19 个命令全部 exit 0；
-  15 个自动体验 case PASS、0 FAIL、0 BLOCKED；验收报告 14 张截图均存在。
+- 旧捕获 `2a8337d...` 与 `74dd568...` 已被语义审计否决，只能作为失败历史，禁止用于人工验收前置。
+- 当前自动捕获 `ff807c332eab04f0a28c03f78734da7b73bc802d` 为 16 PASS、0 FAIL、UX-12 NOT_RUN，
+  但独立证据审查要求补充 Document loader/WebSocket 生命周期断言；修复后的新冻结捕获与复审结论将
+  在本清单状态提升为 `READY_FOR_HUMAN` 时写入，未提升前不得运行可见 launcher。
 - 可见 Chrome 可能抢占焦点，只有项目负责人已经在电脑前并明确要求启动时才运行。
 - launcher 仅访问 `127.0.0.1`，使用临时数据库、迁移副本和隔离浏览器 profile；不读取 `J:\`，不联网，
   不调用 provider，不产生费用，不写生产工程。
