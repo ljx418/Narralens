@@ -1,0 +1,147 @@
+
+> narralens@0.1.0 test:m5:headless /mnt/c/workspace/videoworkline/Narralens
+> tsx tests/m5/headless/run-headless.ts
+
+(node:1799857) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+M5 headless: UX-01 …
+M5 headless: UX-01 → PASS
+M5 headless: UX-02 …
+M5 headless: UX-02 → PASS
+M5 headless: UX-03 …
+M5 headless: UX-03 → PASS
+M5 headless: UX-04 …
+M5 headless: UX-04 → PASS
+M5 headless: UX-05 …
+M5 headless: UX-05 → PASS
+M5 headless: UX-06 …
+M5 headless: UX-06 → PASS
+M5 headless: UX-07 …
+M5 headless: UX-07 → PASS
+M5 headless: UX-09 …
+M5 headless: UX-09 → PASS
+M5 headless: UX-10 …
+M5 headless: UX-10 → PASS
+M5 headless: UX-08 …
+M5 headless: UX-08 → PASS
+M5 headless: UX-11 …
+M5 headless: UX-11 → PASS
+M5 headless: PF-01 …
+M5 headless: PF-01 → PASS
+M5 headless: PF-02 …
+M5 headless: PF-02 → PASS
+M5 headless: PF-03 …
+M5 headless: PF-03 → PASS
+{
+  "captured_at": "2026-11-05T16:14:29.714Z",
+  "cases": [
+    {
+      "case_id": "UX-01",
+      "status": "PASS",
+      "title": "想法草稿可编辑，打开真实 source→target 映射",
+      "failed_assertions": []
+    },
+    {
+      "case_id": "UX-02",
+      "status": "PASS",
+      "title": "关闭重开后 projection/revision/history 可重建",
+      "failed_assertions": []
+    },
+    {
+      "case_id": "UX-03",
+      "status": "PASS",
+      "title": "章节/镜头/时间码定位同一 target clip 与范围，并显示唯一 source shot lineage",
+      "failed_assertions": []
+    },
+    {
+      "case_id": "UX-04",
+      "status": "PASS",
+      "title": "语义结果同时带 clip 与半开范围；无数据时诚实 blocked",
+      "failed_assertions": []
+    },
+    {
+      "case_id": "UX-05",
+      "status": "PASS",
+      "title": "原生 StudioHost bridge 让 navigator/player/timeline 共享 selection/clock/snapshot",
+      "failed_assertions": []
+    },
+    {
+      "case_id": "UX-06",
+      "status": "PASS",
+      "title": "帧↔seconds 使用冻结 rational time model；定位不改变 source",
+      "failed_assertions": []
+    },
+    {
+      "case_id": "UX-07",
+      "status": "PASS",
+      "title": "录制 D4.1 comparison 有原始 audit/lineage；三路 proxy 是真实 media events",
+      "failed_assertions": []
+    },
+    {
+      "case_id": "UX-09",
+      "status": "PASS",
+      "title": "materialize→impact→confirm→adopt；成功 +1，失败 0",
+      "failed_assertions": []
+    },
+    {
+      "case_id": "UX-10",
+      "status": "PASS",
+      "title": "同页原生选择/预览 + 受控 adopt/history；undo/redo 只生成意图；恢复 +1",
+      "failed_assertions": []
+    },
+    {
+      "case_id": "UX-08",
+      "status": "PASS",
+      "title": "能力类别来自 server capabilities；Gateway 对未支持 native write 同步 disabled + 422",
+      "failed_assertions": []
+    },
+    {
+      "case_id": "UX-11",
+      "status": "PASS",
+      "title": "键盘、焦点、文本状态、axe、reduced motion、主题",
+      "failed_assertions": []
+    },
+    {
+      "case_id": "PF-01",
+      "status": "PASS",
+      "title": "120 clip 四类操作各 100 样本 p95≤100ms",
+      "failed_assertions": []
+    },
+    {
+      "case_id": "PF-02",
+      "status": "PASS",
+      "title": "三路真实 proxy 播放/切焦，无三路同时出声",
+      "failed_assertions": []
+    },
+    {
+      "case_id": "PF-03",
+      "status": "PASS",
+      "title": "冷/热重开数据一致，首帧/内存/媒体关联记录",
+      "failed_assertions": []
+    },
+    {
+      "case_id": "UX-RESP",
+      "status": "PASS",
+      "title": "四视口响应式与窄屏能力边界",
+      "failed_assertions": []
+    },
+    {
+      "case_id": "UX-12",
+      "status": "NOT_RUN",
+      "title": "人类一分钟定位/比较、十秒找到恢复、理解 impact 与错误",
+      "failed_assertions": [
+        "项目负责人亲自走一遍并签署"
+      ]
+    },
+    {
+      "case_id": "UX-200",
+      "status": "PASS",
+      "title": "原生 200% 页面缩放读回（隔离 profile）",
+      "failed_assertions": []
+    }
+  ],
+  "passed": 16,
+  "failed": 0,
+  "blocked": 0,
+  "not_run": 1
+}

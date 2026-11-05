@@ -1,0 +1,31 @@
+{
+  "run_id": "2026-11-05T15-54-25-085Z",
+  "captured_at": "2026-11-05T16:14:29.746Z",
+  "case_id": "UX-200",
+  "title": "原生 200% 页面缩放读回（隔离 profile）",
+  "status": "PASS",
+  "assertions": [
+    {
+      "claim": "DPR=2 且无页面级横向溢出",
+      "ok": true,
+      "detail": "{\"device_pixel_ratio\":2,\"inner_width\":707,\"inner_height\":400,\"document_width\":707,\"document_height\":400,\"overflow_x\":false,\"zoom_level\":3.8017840169239308}"
+    },
+    {
+      "claim": "布局视口约为 100% 的一半（原生缩放，不是缩小的 viewport）",
+      "ok": true,
+      "detail": "zoomed=707 baseline=1414 ratio=0.5"
+    }
+  ],
+  "facts": {
+    "layout": {
+      "device_pixel_ratio": 2,
+      "inner_width": 707,
+      "inner_height": 400,
+      "document_width": 707,
+      "document_height": 400,
+      "overflow_x": false,
+      "zoom_level": 3.8017840169239308
+    }
+  },
+  "evidence": []
+}

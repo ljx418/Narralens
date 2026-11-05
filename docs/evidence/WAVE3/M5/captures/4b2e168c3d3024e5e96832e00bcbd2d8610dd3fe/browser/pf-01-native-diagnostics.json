@@ -1,0 +1,57 @@
+{
+  "timeout_ms": 240000,
+  "nativeReady": true,
+  "nativeState": {
+    "studio_seconds": 0,
+    "transport": "播放",
+    "frames": [
+      "http://127.0.0.1:55613/film/p/RIjobO4RFUnGcwn1IPTsyYju/film.html?load=1&film-missing=skip"
+    ]
+  },
+  "network": {
+    "responses": 838,
+    "scene_responses": 514,
+    "failed_count": 121,
+    "failed_by_reason": {
+      "net::ERR_ABORTED:cancelled": 121
+    },
+    "errors": [
+      {
+        "url": "http://127.0.0.1:56769/api/projects/J4rBm65z0Zr-/opened",
+        "status": 422
+      },
+      {
+        "url": "http://127.0.0.1:56769/api/projects/J4rBm65z0Zr-/settings",
+        "status": 422
+      },
+      {
+        "url": "http://127.0.0.1:56769/api/projects/J4rBm65z0Zr-/subtitles",
+        "status": 422
+      },
+      {
+        "url": "http://127.0.0.1:56769/api/projects/J4rBm65z0Zr-/captions",
+        "status": 422
+      },
+      {
+        "url": "http://127.0.0.1:56769/api/projects/J4rBm65z0Zr-/markers",
+        "status": 422
+      },
+      {
+        "url": "http://127.0.0.1:56769/api/prefs",
+        "status": 422
+      },
+      {
+        "url": "http://127.0.0.1:56769/api/health",
+        "status": 422
+      },
+      {
+        "url": "http://127.0.0.1:56769/api/projects/J4rBm65z0Zr-/exports",
+        "status": 422
+      },
+      {
+        "url": "http://127.0.0.1:56769/api/projects/J4rBm65z0Zr-/proxies",
+        "status": 422
+      }
+    ]
+  }
+}
