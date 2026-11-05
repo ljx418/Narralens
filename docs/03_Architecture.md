@@ -8,7 +8,8 @@
 UX-12 为 `HUMAN_NOT_RUN`，全部代码门、Headless、真实 Studio seam、凭据扫描和证据完整性门 exit 0。
 UX-11 直接记录快捷键窗口前后 Document loader `5→5`、WebSocket created `2→2`、closed `0→0`，
 不再以相同 iframe URL 冒充稳定加载实例。
-当前声明上限为 `M5_HEADLESS_REVIEW_PENDING`；三路独立复审通过前不提升为 `M5_HEADLESS_EVIDENCED`。
+三路独立复审均为 PASS（BLOCKER=0、MAJOR=0），当前声明上限为 `M5_HEADLESS_EVIDENCED`，允许启动
+UX-12 人工体验；UX-12 仍为 `HUMAN_NOT_RUN`，不得由自动化代签。
 Gate D4.2、`Gate V1-P0`、`V1-Full`、M6 与 M7 仍未关闭。
 
 当前阶段的可视化权威架构为 `docs/architecture/m5-stage-current.architecture.html`；其 Archify 源为同目录

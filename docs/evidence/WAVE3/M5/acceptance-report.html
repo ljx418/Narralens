@@ -472,7 +472,8 @@ ProjectCoordinator、EnginePort、素材化 worker、SQLite 与工程文件系�
 
 <h2>11. 审查状态</h2>
 <p>四视角内部审查见 <code>docs/evidence/WAVE3/M5/reviews/internal-review.md</code>。
-独立外审与人工体验均未进行，本报告不代替它们。</p>
+捕获完成后，架构/代码、PRD/阶段与测试证据三路独立复审均为 PASS（0 BLOCKER / 0 MAJOR），见
+<code>reviews/ux12-preflight-independent-review.md</code>。人工体验仍未进行，本报告不代替 UX-12。</p>
 
 <h2>12. 回退</h2>
 <p>关闭 M5 的 workbench/replay/locks 路由与 Studio Gateway 并恢复旧 <code>NarralensApp</code> 即可回退 UI；
@@ -483,6 +484,7 @@ ProjectCoordinator、EnginePort、素材化 worker、SQLite 与工程文件系�
   <li>UX-12（人类一分钟定位、十秒找到撤回、理解 impact 与错误）保持 <code>HUMAN_NOT_RUN</code>：自动化不得代签人类判断。</li>
   <li>fixture 只证明系统交互，不证明长片内容质量；120 clip / 6 章是结构压力用例。</li>
   <li>没有声明 Gate D4.2、V1-P0、V1-Full、M6 完成，也没有声明任何 headed 或人工验证。</li>
+  <li>已知非阻塞诊断噪声：9 条可选接口 422、一次 aborted fetch、一次跨 origin postMessage warning；UX-12 需观察其是否造成可感知中断。</li>
 </ul>
 </body>
 </html>

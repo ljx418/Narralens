@@ -53,3 +53,5 @@
 - 2026-11-06：测试证据独立复审指出相同 iframe src 不能证明无重载。UX-11 已改为 CDP 直接统计
   Document loader 与 WebSocket created/closed；`4b2e168...` 捕获证明快捷键窗口为 5→5、2→2、0→0。
   人工 runbook 不得再引用已否决的 `2a8337...` 或 `74dd568...`。
+- 2026-11-06：候选 `2e8bbad...` 的架构、PRD/阶段、测试证据三路独立复审均 PASS，0 BLOCKER / 0 MAJOR；
+  状态提升为 `M5_HEADLESS_EVIDENCED`，允许启动 UX-12。UX-12 仍必须由项目负责人亲自签署。

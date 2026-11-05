@@ -1,9 +1,8 @@
 # M5 交付报告（M5A → M5B → M5C）
 
-声明上限：**`M5_HEADLESS_REVIEW_PENDING`**。旧自动证据经 UX-12 前置阶段审计被语义降级；
+声明上限：**`M5_HEADLESS_EVIDENCED`**。旧自动证据经 UX-12 前置阶段审计被语义降级；
 返修代码冻结 `63492d1...`、生命周期证据返修 `4b2e168...`、正式捕获 `4b2e168...` 已完成
-16 PASS / 0 FAIL / UX-12 NOT_RUN。架构与 PRD 两路独立复审已 PASS；测试证据路正在复审新增的
-preview Document loader/WebSocket 生命周期直接证据。
+16 PASS / 0 FAIL / UX-12 NOT_RUN。架构、PRD 与测试证据三路独立复审均 PASS（0 BLOCKER / 0 MAJOR）。
 人工体验门（UX-12）保持 `HUMAN_NOT_RUN`。本报告不构成 Gate D4.2、Gate V1-P0、V1-Full 或 M6 结论。
 
 ---
@@ -97,5 +96,5 @@ M5 的写路径全部走既有 Host 服务（adoption / history restore），它
 - 没有做 headed 自动化，没有打开窗口，没有抢焦点，没有联网，没有调用 provider，没有产生费用。
 - 没有读取 `J:\`，没有读取或使用仓库根未跟踪的 `narralens-d1`。
 - fixture 只证明系统交互，不证明长片内容质量；120 clip / 6 章是结构压力用例。
-- 架构/代码与 PRD/阶段两路独立复审 PASS；测试证据复审上一轮因 preview 生命周期证据不足为 NOT PASS，
-  已增加 loader/WebSocket 直接断言并完成全量重捕获，等待该路重新复审。人工体验未进行，本报告不代替它。
+- 架构/代码、PRD/阶段与测试证据三路独立复审均 PASS；汇总结论见
+  `reviews/ux12-preflight-independent-review.md`。人工体验未进行，本报告不代替它。

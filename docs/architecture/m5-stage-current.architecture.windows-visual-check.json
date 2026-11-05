@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "artifact_sha256": "4488942fad30c80a8a6985f06ab1cc583674445a50cd380e0a5269e1a7482bed",
+  "artifact_sha256": "ee39d05550f7e94129c37b95d210e68112888811d4cf04f4a9bacc3368230b68",
   "archify_native_visual_check": {
     "status": "FAIL_ENVIRONMENT",
     "reason": "Windows Chrome does not expose the Linux remote-debugging-pipe file descriptors under WSL; Archify preserved ECONNRESET in the native receipt"
@@ -10,7 +10,7 @@
     "mode": "headless_new_muted",
     "viewport": [1440, 1800],
     "screenshot": "m5-stage-current.architecture.png",
-    "screenshot_sha256": "74584e1cdaadae8d5e90a791be513c7ef06531c50438b453a28a58d7ce8bdacd",
+    "screenshot_sha256": "21599462727af4e69ab01f28b72b8bbc02d108cbdda3ad398355f85c13ffef50",
     "observations": [
       "diagram, legend and three stage cards are contained in the viewport",
       "component and relationship labels are readable without overlap",

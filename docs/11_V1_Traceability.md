@@ -3,8 +3,7 @@
 版本：v1.0  
 状态：实际开发已批准；Wave 2 组合外审结论保留。旧 M5 自动证据已降级并保留为失败历史；返修后的
 返修后正式捕获 `4b2e168c3d3024e5e96832e00bcbd2d8610dd3fe` 为 16 个自动 case PASS、0 FAIL、UX-12 NOT_RUN，
-当前为 `M5_HEADLESS_REVIEW_PENDING`。三路独立复审通过前不声明 `M5_HEADLESS_EVIDENCED`；UX-12 仍为
-`HUMAN_NOT_RUN`；
+三路独立复审均 PASS，当前为 `M5_HEADLESS_EVIDENCED`；UX-12 仍为 `HUMAN_NOT_RUN`；
 Gate D4.2、`Gate V1-P0`、`V1-Full`、M6 与 M7 均未关闭。
 事实日期：2026-11-05
 <!-- M2.1_REWORK_BASE_SHA=ee58ab5c6a9d4bbdf05e8ac8a394fd75218cae59 REVIEW_STATUS=PASS -->
@@ -51,7 +50,7 @@ Gate D4.2、`Gate V1-P0`、`V1-Full`、M6 与 M7 均未关闭。
 | M2 | EnginePort、单引擎绑定、写入治理、三类锁、持久 Job/SSE/lease、snapshot/journal、迁移副本与回退 | **Wave 1 组合外审 PASS，`CONTROLLED_OPENFILM_READY`**：冻结代码 `e2dec5c...`，证据捕获 `fd64762...`，21 case 为 20 PASS + 1 `NOT_APPLICABLE_APPROVED` | migrate-copy/report/rollback 已实现；AC-005 legacy edit 仍为事后 snapshot，headed/human NOT_RUN |
 | W2.0–M3 | 目标工程解析、资产账本、素材化、真实 proxy/native plan/lineage | **M3 独立外审 PASS**：候选 `fa08fe4...`，捕获 `f2a41ff...`；ACT/ASSET、PR、MT 全部关闭 | materialize POST/GET 已开放；NOWRITE；impact/adopt/history 仍 404；M3 不等于 D4.2 完成 |
 | M4A–M4C | server impact、采用与历史事务 | **M4A、M4B、M4C 独立外审及 Wave 2 组合外审均 PASS；`WAVE2_EDITABLE_ADOPTION_READY`**。唯一 adopt/restore 路由、原子 source 发布、revision/impact/projection/ledger/outbox/idempotency 同事务、崩溃恢复、真实 900 帧双渲染与中镜原生编辑均有直接测试 | 组合候选 `a038e4a...`；允许进入 M5，Gate D4.2 仍未关闭 |
-| M5 | 同页原生 Studio UX | **`M5_HEADLESS_REVIEW_PENDING`** | Gateway 返修代码 `63492d1...`、生命周期证据返修 `4b2e168...`；正式捕获 `4b2e168...` 为 16 PASS / 0 FAIL / 1 HUMAN_NOT_RUN，完整性门 exit 0；等待证据独立复审，UX-12 尚未签署 |
+| M5 | 同页原生 Studio UX | **`M5_HEADLESS_EVIDENCED`** | Gateway 返修代码 `63492d1...`、生命周期证据返修 `4b2e168...`；正式捕获 `4b2e168...` 为 16 PASS / 0 FAIL / 1 HUMAN_NOT_RUN，完整性门 exit 0；三路独立复审 0 BLOCKER/0 MAJOR，允许进入 UX-12，尚未人工签署 |
 | M6 | `Gate V1-P0` | not-started | 不等于 V1-Full |
 | M7A–D | P1 与完整长片证据 | not-started | P0/P1 全绿后才可声明 V1-Full |
 
