@@ -1,0 +1,326 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Narralens M5 当前实现与受控写入架构",
+    "locale": "zh-CN",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "https://github.com/ljx418/Narralens",
+      "provider": "github",
+      "link_mode": "web",
+      "revision": "d792e43fc626c046a798bc832d70a2dd14a71e6a"
+    },
+    "viewBox": [1160, 820],
+    "views": [
+      {
+        "id": "experience",
+        "label": "同页体验",
+        "focus": ["owner", "panel", "bridge", "studio", "gateway"],
+        "note": "项目负责人在 Narralens 面板与原生 OpenFilm Studio 的同一页面完成定位、比较和恢复。"
+      },
+      {
+        "id": "controlled-write",
+        "label": "受控写入",
+        "focus": ["panel", "gateway", "host", "media", "coordinator", "engine"],
+        "note": "所有采用与恢复都经 Host、锁、impact、revision 和单引擎适配器；原生裸写被拒绝。"
+      },
+      {
+        "id": "durability",
+        "label": "持久与恢复",
+        "focus": ["host", "media", "coordinator", "database", "projectstore", "jobs"],
+        "note": "SQLite 状态、snapshot、journal、outbox、lease 与工程字节共同支持重开和崩溃收敛。"
+      }
+    ]
+  },
+  "components": [
+    {
+      "id": "owner",
+      "type": "external",
+      "label": "项目负责人",
+      "sublabel": "UX-12 人工体验与签署",
+      "pos": [35, 262],
+      "size": [150, 68],
+      "tag": "HUMAN_NOT_RUN"
+    },
+    {
+      "id": "panel",
+      "type": "frontend",
+      "label": "Narralens M5 Panel",
+      "sublabel": "Idea / Refine / History / Impact",
+      "pos": [235, 260],
+      "size": [185, 72],
+      "tag": "M5_ACCEPTANCE_REWORK"
+      ,"sources": [
+        { "path": "src/app/m5/M5Panel.tsx", "line": 129, "label": "同页面板" },
+        { "path": "src/app/m5/SelectionCoordinator.ts", "line": 22, "label": "选区协调" }
+      ]
+    },
+    {
+      "id": "gateway",
+      "type": "security",
+      "label": "Studio Gateway",
+      "sublabel": "127.0.0.1 · cookie · CSP · allowlist",
+      "pos": [900, 260],
+      "size": [185, 72],
+      "tag": "deny-by-default"
+      ,"sources": [
+        { "path": "src/host/m5/openfilm-studio-gateway.ts", "line": 132, "label": "Gateway" },
+        { "path": "src/host/m5/openfilm-studio-supervisor.ts", "line": 149, "label": "Supervisor" }
+      ]
+    },
+    {
+      "id": "studio",
+      "type": "frontend",
+      "label": "OpenFilm Studio",
+      "sublabel": "原生 Player / Timeline / Inspector",
+      "pos": [660, 260],
+      "size": [190, 72],
+      "tag": "pinned e70d9d9"
+      ,"sources": [
+        { "path": "src/host/m5/openfilm-studio-supervisor.ts", "line": 38, "label": "StudioHost v1 seam" },
+        { "path": "src/host/m5/workbench-service.ts", "line": 49, "label": "Workbench projection" }
+      ]
+    },
+    {
+      "id": "host",
+      "type": "backend",
+      "label": "NarralensHost API",
+      "sublabel": "workbench · locks · comparison · history",
+      "pos": [900, 450],
+      "size": [190, 74],
+      "tag": "loopback + bearer/origin"
+      ,"sources": [
+        { "path": "src/host/server.ts", "line": 264, "label": "Host composition" },
+        { "path": "src/host/server.ts", "line": 779, "label": "M5 routes" }
+      ]
+    },
+    {
+      "id": "coordinator",
+      "type": "backend",
+      "label": "ProjectCoordinator Core",
+      "sublabel": "串行化 · 三类锁 · transaction · recovery",
+      "pos": [430, 450],
+      "size": [190, 74],
+      "tag": "single authority"
+      ,"sources": [
+        { "path": "src/host/projects/project-coordinator.ts", "line": 78, "label": "共享事务与恢复门" }
+      ]
+    },
+    {
+      "id": "engine",
+      "type": "backend",
+      "label": "EnginePort + Adapters",
+      "sublabel": "OpenFilm 默认 · Hypit 回退",
+      "pos": [200, 450],
+      "size": [180, 74],
+      "tag": "每项目单引擎"
+      ,"sources": [
+        { "path": "src/host/engine/engine-port.ts", "line": 91, "label": "七方法端口" },
+        { "path": "src/adapters/openfilm/openfilm-engine-adapter.ts", "line": 185, "label": "OpenFilm adapter" },
+        { "path": "src/adapters/hypit/hypit-engine-adapter.ts", "line": 39, "label": "Hypit adapter" }
+      ]
+    },
+    {
+      "id": "database",
+      "type": "database",
+      "label": "RevisionStore / SQLite",
+      "sublabel": "revision · locks · jobs · outbox · facts",
+      "pos": [660, 650],
+      "size": [190, 74],
+      "tag": "BEGIN IMMEDIATE"
+      ,"sources": [
+        { "path": "src/host/projects/revision-store.ts", "line": 180, "label": "SQLite authority" }
+      ]
+    },
+    {
+      "id": "projectstore",
+      "type": "database",
+      "label": "工程与 Snapshot 存储",
+      "sublabel": "author source · snapshots · staging",
+      "pos": [430, 650],
+      "size": [190, 74],
+      "tag": "content-addressed"
+      ,"sources": [
+        { "path": "src/host/projects/snapshot-store.ts", "line": 95, "label": "SnapshotStore" },
+        { "path": "src/host/adoption/author-source-publisher.ts", "line": 61, "label": "原子发布" }
+      ]
+    },
+    {
+      "id": "jobs",
+      "type": "messagebus",
+      "label": "MaterializeService",
+      "sublabel": "NativePlan · Proxy · Job/Lease/SSE",
+      "pos": [900, 650],
+      "size": [180, 74],
+      "tag": "bounded concurrency"
+      ,"sources": [
+        { "path": "src/host/persistent-job-store.ts", "line": 62, "label": "持久 Job" },
+        { "path": "src/host/materialize/materialize-service.ts", "line": 124, "label": "素材化 worker" }
+      ]
+    },
+    {
+      "id": "media",
+      "type": "external",
+      "label": "Controlled Write Services",
+      "sublabel": "Impact · Adoption · History restore",
+      "pos": [660, 450],
+      "size": [190, 74],
+      "tag": "revision exactly +1"
+      ,"sources": [
+        { "path": "src/host/impact/impact-service.ts", "line": 89, "label": "影响授权" },
+        { "path": "src/host/adoption/adoption-coordinator.ts", "line": 71, "label": "受控采用" },
+        { "path": "src/host/history/history-service.ts", "line": 110, "label": "历史恢复" }
+      ]
+    },
+    {
+      "id": "bridge",
+      "type": "frontend",
+      "label": "StudioHost Bridge",
+      "sublabel": "selection · clock · panel command",
+      "pos": [450, 260],
+      "size": [165, 72],
+      "tag": "one native timeline",
+      "sources": [
+        { "path": "src/host/m5/studio-host-bridge.ts", "line": 19, "label": "Panel ↔ Studio seam" }
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "security-group",
+      "label": "同机 loopback 体验边界",
+      "wraps": ["panel", "bridge", "gateway", "studio", "host"]
+    },
+    {
+      "kind": "region",
+      "label": "Host 受控写入与持久恢复边界",
+      "wraps": ["host", "media", "coordinator", "engine", "database", "projectstore", "jobs"]
+    }
+  ],
+  "connections": [
+    {
+      "id": "owner-panel",
+      "from": "owner",
+      "to": "panel",
+      "label": "定位 / 比较 / 确认",
+      "fromSide": "right",
+      "toSide": "left",
+      "route": "straight",
+      "labelAt": [210, 350],
+      "variant": "emphasis"
+    },
+    {
+      "id": "panel-bridge",
+      "from": "panel",
+      "to": "bridge",
+      "label": "选择 / 时钟 / 命令",
+      "labelAt": [435, 350]
+    },
+    {
+      "id": "bridge-studio",
+      "from": "bridge",
+      "to": "studio",
+      "label": "StudioHost v1 seam",
+      "labelAt": [638, 350],
+      "variant": "emphasis"
+    },
+    {
+      "id": "gateway-studio",
+      "from": "gateway",
+      "to": "studio",
+      "label": "资源代理 / 启动 / CSP",
+      "labelAt": [875, 350],
+      "variant": "security"
+    },
+    {
+      "id": "gateway-host",
+      "from": "gateway",
+      "to": "host",
+      "label": "allowlisted API",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelAt": [1135, 390],
+      "variant": "security"
+    },
+    {
+      "id": "host-services",
+      "from": "host",
+      "to": "media",
+      "label": "typed intent + base/rights",
+      "fromSide": "left",
+      "toSide": "right",
+      "labelAt": [875, 430]
+    },
+    {
+      "id": "services-coordinator",
+      "from": "media",
+      "to": "coordinator",
+      "label": "串行 / 锁 / commit gate",
+      "labelAt": [640, 540]
+    },
+    {
+      "id": "coordinator-engine",
+      "from": "coordinator",
+      "to": "engine",
+      "label": "stage / validate / publish",
+      "labelAt": [405, 540]
+    },
+    {
+      "id": "services-db",
+      "from": "media",
+      "to": "database",
+      "label": "原子状态与幂等",
+      "labelAt": [755, 590]
+    },
+    {
+      "id": "coordinator-store",
+      "from": "coordinator",
+      "to": "projectstore",
+      "label": "snapshot / source commit",
+      "labelAt": [620, 590]
+    },
+    {
+      "id": "services-jobs",
+      "from": "media",
+      "to": "jobs",
+      "label": "prepare proxy / segment plan",
+      "labelAt": [985, 590]
+    },
+    {
+      "id": "jobs-db",
+      "from": "jobs",
+      "to": "database",
+      "label": "lease / state / events",
+      "labelAt": [875, 745],
+      "variant": "dashed"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "本阶段已实现",
+      "items": [
+        "M5 同页 Studio、受控采用与历史恢复的核心实现已存在",
+        "旧 Headless 证据已因语义审计降级，正在重新捕获"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "当前出门门限",
+      "items": [
+        "先关闭 UX-11、PF-01..03、四视口与浏览器清理缺口",
+        "自动门全绿后才启动 UX-12；人工不得替代自动门"
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "后续范围",
+      "items": [
+        "M5 fixture/proxy 不是 M6 生产 render；二者严格分离",
+        "M6 才实现生产 render、标题/封面、preflight 与 P0 发布包",
+        "M7A–D 与全部 P1 通过后才允许 V1-Full"
+      ]
+    }
+  ]
+}

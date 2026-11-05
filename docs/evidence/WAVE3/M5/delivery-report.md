@@ -1,6 +1,7 @@
 # M5 交付报告（M5A → M5B → M5C）
 
-声明上限：**`M5_HEADLESS_EVIDENCED`**。人工体验门（UX-12）保持 `HUMAN_NOT_RUN`。
+声明上限：**`M5_ACCEPTANCE_REWORK`**。旧自动证据经 UX-12 前置阶段审计被语义降级；人工体验门
+（UX-12）保持 `HUMAN_NOT_RUN`，等待新冻结提交的完整捕获与独立复审。
 本报告不构成 Gate D4.2、Gate V1-P0、V1-Full 或 M6 的任何结论，也没有做过独立外审。
 
 ---

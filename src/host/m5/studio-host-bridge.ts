@@ -34,6 +34,19 @@ export const STUDIO_HOST_BRIDGE_SCRIPT = `/* The Narralens panel's bridge into t
   attach();
   document.addEventListener("DOMContentLoaded", attach);
 
+  /* The pinned Studio's timeline scroller is programmatically scrollable but carries no
+     focus target. The integration owns the composed page, so it closes that keyboard
+     accessibility seam without forking the pinned upstream. */
+  var repairScrollableRegions = function () {
+    var timeline = document.querySelector(".tl-scroll");
+    if (timeline && !timeline.hasAttribute("tabindex")) {
+      timeline.setAttribute("tabindex", "0");
+      timeline.setAttribute("aria-label", "原生时间线滚动区域");
+    }
+  };
+  document.addEventListener("DOMContentLoaded", repairScrollableRegions);
+  new MutationObserver(repairScrollableRegions).observe(document.documentElement, { childList: true, subtree: true });
+
   var listeners = [];
   var panelListeners = [];
   var panelState = { open: true, width: 380, assetsOpen: false, assetsBottom: 0 };

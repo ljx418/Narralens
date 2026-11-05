@@ -1,10 +1,10 @@
 # 叙镜架构设计 v1.0
 <!-- M2.1_REWORK_BASE_SHA=ee58ab5c6a9d4bbdf05e8ac8a394fd75218cae59 REVIEW_STATUS=PASS -->
 
-文档状态：Gate D1–D3、D4.0/D4.1 与 Wave 1/Wave 2 历史结论保留。M5 最终自动验收捕获绑定
-`2a8337d316a6ed503c2e85e065a0385b0dcc87e6`：全量回归、独立阶段门、生产构建、Headless UX/PF、固定上游
-seam、14 张报告截图、凭据扫描与证据完整性均通过，状态为 `M5_HEADLESS_EVIDENCED`。UX-12 仍为
-`HUMAN_NOT_RUN`；Gate D4.2、`Gate V1-P0`、`V1-Full`、M6 与 M7 仍未关闭，人工签署前不得进入 M6。
+文档状态：Gate D1–D3、D4.0/D4.1 与 Wave 1/Wave 2 历史结论保留。UX-12 前置独立审计判定旧 M5
+捕获仅具文件完整性、不具语义验收效力，当前为 `M5_ACCEPTANCE_REWORK`。真实 120 clip、完整键盘、四视口、
+性能序列、整页可访问性、成功态截图和浏览器清理正在重新冻结；UX-12 保持 `HUMAN_NOT_RUN`。
+Gate D4.2、`Gate V1-P0`、`V1-Full`、M6 与 M7 仍未关闭。
 
 ## 1. 零层架构
 

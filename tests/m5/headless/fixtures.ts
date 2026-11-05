@@ -76,10 +76,14 @@ async function ffprobeFacts(path: string): Promise<Record<string, unknown>> {
  * cannot be counted as playable. The frame count comes from the decoder's own report.
  */
 async function fullDecode(path: string): Promise<{ frames: number; command: string }> {
-  const command = `${FFMPEG} -v error -i ${path} -f null -`;
-  const { stderr } = await run(FFMPEG, ["-v", "error", "-i", path, "-f", "null", "-"]);
-  const match = /frame=\s*(\d+)/u.exec(stderr);
-  return { frames: match === null ? 0 : Number(match[1]), command };
+  const args = ["-v", "error", "-i", path, "-map", "0:v:0", "-f", "null", "-",
+    "-progress", "pipe:2", "-nostats"];
+  const command = `${FFMPEG} ${args.join(" ")}`;
+  const { stderr } = await run(FFMPEG, args);
+  const frames = [...stderr.matchAll(/^frame=(\d+)$/gmu)].map((match) => Number(match[1]));
+  const last = frames.at(-1) ?? 0;
+  if (last <= 0) throw new Error(`FULL_DECODE_REPORTED_NO_FRAMES:${path}`);
+  return { frames: last, command };
 }
 
 /** Encode one proxy stream from the verified source media. */
@@ -207,7 +211,7 @@ async function loadFixtureManifest(root: string): Promise<FixtureSet | undefined
   catch { return undefined; }
   for (const file of parsed.files) {
     const present = await readFile(file.path).catch(() => undefined);
-    if (present === undefined || sha256(present) !== file.sha256) return undefined;
+    if (present === undefined || sha256(present) !== file.sha256 || file.decoded_frames <= 0) return undefined;
   }
   return parsed;
 }

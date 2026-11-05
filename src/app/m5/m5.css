@@ -27,7 +27,43 @@
   z-index: 40;
 }
 
+@media (max-width: 1439px) {
+  #narralens-m5-panel { width: min(380px, 42vw); }
+}
+
+@media (max-width: 1023px) {
+  #narralens-m5-panel { width: min(420px, 52vw); }
+}
+
+@media (max-width: 767px) {
+  #narralens-m5-panel {
+    width: 100vw;
+    top: 55%;
+    border-left: 0;
+    border-top: 1px solid var(--border, #3a332a);
+  }
+  #narralens-m5-panel::before {
+    content: "窄屏审阅模式 · 原生精剪需要 ≥768px";
+    display: block;
+    padding-bottom: 8px;
+    color: var(--text-muted, #b6a894);
+    font-size: 12px;
+  }
+}
+
 #narralens-m5-panel h2 { font-size: 20px; margin: 0 0 4px; }
+#narralens-m5-panel .m5-theme { display: flex; align-items: center; gap: 6px; margin: 4px 0; }
+#narralens-m5-panel .m5-theme select { color: inherit; background: var(--surface-2, #221d16); border: 1px solid var(--border, #3a332a); }
+html[data-theme="light"] #narralens-m5-panel {
+  --text: #241b12; --text-muted: #66584a; --surface: #fffaf3; --surface-2: #f4e8d8;
+  --border: #9b8872; --accent: #9b4f00;
+}
+
+/* The stylesheet is loaded into the composed Studio page, not an iframe. These tokens
+   close the pinned upstream's faint-text contrast gap for the approved light theme. */
+html[data-theme="light"] { --text-faint: #595959; --text-muted: #595959; }
+html[data-theme="light"] .font-mono { color: #595959 !important; }
+html[data-theme="light"] [data-lane-type="visual"] .justify-center { background-color: #596273 !important; }
 #narralens-m5-panel h3 { font-size: 16px; margin: 0 0 8px; }
 #narralens-m5-panel p { margin: 4px 0; }
 #narralens-m5-panel small { font-size: 12px; color: var(--text-muted, #b6a894); }
@@ -69,6 +105,7 @@
 #narralens-m5-panel .m5-section { border-top: 1px solid var(--border, #3a332a); padding: 12px 0; }
 
 #narralens-m5-panel .m5-atlas { list-style: none; margin: 0; padding: 0; }
+#narralens-m5-panel .m5-chapters { display: flex; flex-wrap: wrap; gap: 4px; margin: 0 0 8px; }
 #narralens-m5-panel .m5-atlas button {
   display: block;
   width: 100%;

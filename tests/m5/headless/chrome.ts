@@ -93,6 +93,24 @@ export function toWindowsPath(path: string): string {
 
 const sleep = (ms: number): Promise<void> => new Promise((done) => setTimeout(done, ms));
 
+/** Stop only the Windows Chrome process tree that owns this exact isolated profile. */
+export async function stopWindowsChromeProfile(profileArgument: string): Promise<void> {
+  const script = [
+    "$needle = '--user-data-dir=' + $env:NARRALENS_PROFILE_TO_STOP",
+    "$targets = @(Get-CimInstance Win32_Process -Filter \"Name = 'chrome.exe'\" | Where-Object { $_.CommandLine -and $_.CommandLine.Contains($needle) })",
+    "foreach ($target in $targets) { & taskkill.exe /PID $target.ProcessId /T /F | Out-Null }",
+    "$remaining = @(Get-CimInstance Win32_Process -Filter \"Name = 'chrome.exe'\" | Where-Object { $_.CommandLine -and $_.CommandLine.Contains($needle) })",
+    "if ($remaining.Count -ne 0) { exit 17 }",
+  ].join("; ");
+  await new Promise<void>((done, fail) => {
+    const child = spawn("powershell.exe", ["-NoProfile", "-NonInteractive", "-Command", script], {
+      stdio: "ignore", env: { ...process.env, NARRALENS_PROFILE_TO_STOP: profileArgument },
+    });
+    child.on("exit", (code) => code === 0 ? done() : fail(new Error(`CHROME_PROFILE_CLEANUP_FAILED:${code ?? -1}`)));
+    child.on("error", fail);
+  });
+}
+
 export async function launchChrome(options: ChromeLaunchOptions): Promise<ChromeHandle> {
   const executable = await findChrome();
   if (executable === undefined) {
@@ -157,11 +175,9 @@ export async function launchChrome(options: ChromeLaunchOptions): Promise<Chrome
       await fetch(`${endpoint}/json/close`).catch(() => undefined);
       await sleep(300);
       if (windows) {
-        await new Promise<void>((done) => {
-          const killer = spawn("taskkill.exe", ["//F", "//T", "//PID", String(child.pid)], { stdio: "ignore" });
-          killer.on("exit", () => done());
-          killer.on("error", () => done());
-        });
+        // A WSL interop PID is not the Windows chrome.exe PID. Resolve the exact process
+        // from its unique profile argument; never kill unrelated Chrome sessions.
+        await stopWindowsChromeProfile(profileArgument);
       } else {
         child.kill("SIGTERM");
       }

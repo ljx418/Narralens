@@ -3,7 +3,7 @@ import { rm } from "node:fs/promises";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { resolve } from "node:path";
 import { startEnvironment, type HeadlessEnvironment } from "../tests/m5/headless/environment.js";
-import { findChrome, makeProfile, toWindowsPath } from "../tests/m5/headless/chrome.js";
+import { findChrome, makeProfile, stopWindowsChromeProfile, toWindowsPath } from "../tests/m5/headless/chrome.js";
 
 /**
  * Visible UX-12 launcher.
@@ -34,14 +34,10 @@ export function headedChromeArgs(profileRoot: string, pageUrl: string, windows: 
   ];
 }
 
-async function stopBrowser(child: ChildProcess, windows: boolean): Promise<void> {
+async function stopBrowser(child: ChildProcess, windows: boolean, profileRoot: string): Promise<void> {
   if (child.exitCode !== null) return;
-  if (windows && child.pid !== undefined) {
-    await new Promise<void>((done) => {
-      const killer = spawn("taskkill.exe", ["//F", "//T", "//PID", String(child.pid)], { stdio: "ignore" });
-      killer.once("exit", () => done());
-      killer.once("error", () => done());
-    });
+  if (windows) {
+    await stopWindowsChromeProfile(toWindowsPath(profileRoot));
     return;
   }
   const exited = new Promise<void>((done) => child.once("exit", () => done()));
@@ -72,7 +68,7 @@ export async function main(): Promise<void> {
   const requestStop = (): void => {
     if (stopping) return;
     stopping = true;
-    if (child !== undefined) browserStop = stopBrowser(child, windows);
+    if (child !== undefined) browserStop = stopBrowser(child, windows, profileRoot);
   };
   process.once("SIGINT", requestStop);
   process.once("SIGTERM", requestStop);
@@ -106,7 +102,7 @@ export async function main(): Promise<void> {
   } finally {
     process.removeListener("SIGINT", requestStop);
     process.removeListener("SIGTERM", requestStop);
-    if (child !== undefined) await (browserStop ?? stopBrowser(child, windows));
+    if (child !== undefined) await (browserStop ?? stopBrowser(child, windows, profileRoot));
     await environment?.close();
     await rm(profileRoot, { recursive: true, force: true }).catch(() => undefined);
   }

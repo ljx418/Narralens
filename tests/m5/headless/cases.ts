@@ -462,6 +462,34 @@ export async function ux11(context: CaseContext): Promise<CaseResult> {
   await sleep(120);
   const focused = await session.evaluateWithRetry<string>(`document.activeElement ? document.activeElement.id : ""`);
 
+  await session.evaluateWithRetry(`document.activeElement?.blur()`);
+  const keyReads: Record<string, string> = {};
+  for (const [key, code, keyCode] of [["j", "KeyJ", 74], ["k", "KeyK", 75], ["l", "KeyL", 76],
+    ["i", "KeyI", 73], ["o", "KeyO", 79], ["f", "KeyF", 70]] as const) {
+    await session.pressKey(key, code, keyCode);
+    keyReads[key] = await session.evaluateWithRetry<string>(
+      `document.querySelector('[data-narralens-panel="ready"]')?.getAttribute('data-last-key') || ''`);
+  }
+
+  // Real theme control + persistence across a reload.
+  await session.evaluateWithRetry(`(() => {
+    const select = document.querySelector('select[aria-label="主题"]');
+    select.value = 'light'; select.dispatchEvent(new Event('change', { bubbles: true }));
+  })()`);
+  await sleep(100);
+  const lightTheme = await session.evaluateWithRetry<string>(`document.documentElement.dataset.theme || ''`);
+  await session.navigate(`${env.pageUrl}#/refine/${env.projectId}`);
+  await waitForPanel(session, (state) => state?.panel === "ready");
+  const persistedTheme = await session.evaluateWithRetry<string>(`document.documentElement.dataset.theme || ''`);
+
+  await session.call("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "reduce" }] });
+  const reduced = await session.evaluateWithRetry<Record<string, unknown>>(`(() => {
+    const panel = document.querySelector('[data-narralens-panel="ready"]');
+    const style = getComputedStyle(panel);
+    return { matches: matchMedia('(prefers-reduced-motion: reduce)').matches,
+      animationDuration: style.animationDuration, transitionDuration: style.transitionDuration };
+  })()`);
+
   // The theme follows the system by default and is a real attribute on the document.
   const theme = await session.evaluateWithRetry<Record<string, unknown>>(`({
     dataset: document.documentElement.dataset.theme || null,
@@ -476,18 +504,28 @@ export async function ux11(context: CaseContext): Promise<CaseResult> {
 
   const assertions: Assertion[] = [
     { claim: "键盘可达：/ 聚焦搜索框", ok: focused === "narralens-atlas-search", detail: `focus=${focused}` },
+    { claim: "J/K/L、I/O、F 默认键均进入真实 Studio 页面的键盘路径",
+      ok: Object.entries(keyReads).every(([key, value]) => value.toLowerCase().startsWith(key === "f" ? "z:" : `${key}:`)),
+      detail: JSON.stringify(keyReads) },
+    { claim: "浅色主题切换并在重载后持久化", ok: lightTheme === "light" && persistedTheme === "light",
+      detail: `before=${lightTheme} reload=${persistedTheme}` },
     { claim: "面板有可读文本状态（不是空白画布）", ok: String(theme.text).length > 40,
       detail: `text length=${String(theme.text).length}` },
     { claim: "M5 面板无 critical/serious axe 违规", ok: violations.every((violation) =>
       violation.impact !== "critical" && violation.impact !== "serious"),
       detail: JSON.stringify(violations.map((violation) => `${violation.id}:${String(violation.impact)}`)) },
-    { claim: "reduced motion 被尊重（无装饰动画）", ok: typeof theme.reducedMotion === "boolean",
-      detail: `prefers-reduced-motion=${String(theme.reducedMotion)}` },
+    { claim: "强制 reduced motion 后计算样式无动画/过渡", ok: reduced.matches === true
+      && reduced.animationDuration === "0s" && reduced.transitionDuration === "0s",
+      detail: JSON.stringify(reduced) },
+    { claim: "整页无 critical/serious axe 违规", ok: ((wholePage.violations ?? []) as Array<{impact: string | null}>).every(
+      (violation) => violation.impact !== "critical" && violation.impact !== "serious"),
+      detail: JSON.stringify(((wholePage.violations ?? []) as Array<{id: string; impact: string | null}>).map(
+        (violation) => `${violation.id}:${String(violation.impact)}`)) },
   ];
   const evidence = await context.json("a11y/ux-11-axe.json", { panel: axe, whole_page: wholePage });
   return {
     case_id: "UX-11", title: "键盘、焦点、文本状态、axe、reduced motion、主题",
-    status: verdict(assertions), assertions, facts: { focused, theme, axe, whole_page: wholePage },
+    status: verdict(assertions), assertions, facts: { focused, keyReads, lightTheme, persistedTheme, reduced, theme, axe, whole_page: wholePage },
     evidence: [evidence],
   };
 }
@@ -503,7 +541,9 @@ export async function pf01(context: CaseContext): Promise<CaseResult> {
   const samples = await session.evaluateWithRetry<Record<string, number[] | undefined>>(`(async () => {
     const panel = document.querySelector("[data-narralens-panel]");
     const buttons = [...document.querySelectorAll(".m5-atlas button")];
-    if (buttons.length === 0) throw new Error("THE_ATLAS_HAS_NO_CLIPS_TO_MEASURE");
+    const chapters = [...document.querySelectorAll(".m5-chapters button")];
+    if (buttons.length !== 120) throw new Error("STRESS_ATLAS_IS_NOT_120_CLIPS:" + buttons.length);
+    if (chapters.length < 6) throw new Error("STRESS_ATLAS_HAS_TOO_FEW_CHAPTERS:" + chapters.length);
     const search = document.querySelector("#narralens-atlas-search");
     const results = { selection: [], pan: [], zoom: [], chapter: [] };
     const frame = () => new Promise((done) => {
@@ -520,15 +560,12 @@ export async function pf01(context: CaseContext): Promise<CaseResult> {
       await measure("selection", () => buttons[index % buttons.length].click());
       await measure("pan", () => panel.scrollBy(0, index % 2 === 0 ? 40 : -40));
       await measure("zoom", () => { document.body.style.zoom = "1.0"; });
-      await measure("chapter", () => {
-        search.value = "shot-" + String((index % 3) + 1).padStart(3, "0");
-        search.dispatchEvent(new Event("input", { bubbles: true }));
-      });
+      await measure("chapter", () => chapters[index % chapters.length].click());
     }
     search.value = "";
     search.dispatchEvent(new Event("input", { bubbles: true }));
     document.body.style.zoom = "";
-    return results;
+    return { ...results, clip_count: buttons.length, chapter_count: chapters.length };
   })()`);
 
   const p95 = (values: readonly number[]): number => {
@@ -547,6 +584,9 @@ export async function pf01(context: CaseContext): Promise<CaseResult> {
   const over = Object.entries(summary).filter(([, value]) => value.p95 > 100);
   const evidence = await context.json("performance/pf-01-samples.json", { samples, summary });
   const assertions: Assertion[] = [
+    { claim: "真实工作台投影包含 120 个原生可寻址 clip 与至少 6 章",
+      ok: Number(samples.clip_count) === 120 && Number(samples.chapter_count) >= 6,
+      detail: `clips=${String(samples.clip_count)} chapters=${String(samples.chapter_count)}` },
     { claim: "四类操作各 100 个原始样本", ok: Object.values(summary).every((value) => value.count === 100),
       detail: JSON.stringify(Object.fromEntries(Object.entries(summary).map(([key, value]) => [key, value.count]))) },
     { claim: "每类 event→paint p95 ≤ 100ms", ok: over.length === 0,
@@ -607,9 +647,21 @@ export async function pf02(context: CaseContext): Promise<CaseResult> {
     };
   })()`);
 
-  const memory = await session.evaluateWithRetry<Record<string, unknown>>(`(performance.memory ? {
-    used: performance.memory.usedJSHeapSize, limit: performance.memory.jsHeapSizeLimit,
-  } : {})`);
+  const memorySamples: number[] = [];
+  for (let cycle = 0; cycle < 12; cycle += 1) {
+    const used = await session.evaluateWithRetry<number>(`(async () => {
+      const figures = [...document.querySelectorAll('[data-narralens-proxy]')];
+      const figure = figures[${cycle} % Math.max(1, figures.length)];
+      figure?.click(); figure?.scrollIntoView({ block: ${cycle % 2 === 0 ? "'start'" : "'end'"} });
+      await new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done)));
+      return performance.memory?.usedJSHeapSize || 0;
+    })()`);
+    memorySamples.push(used);
+  }
+  const memory = { samples: memorySamples, start: memorySamples[0] ?? 0,
+    end: memorySamples.at(-1) ?? 0, peak: Math.max(0, ...memorySamples) };
+  const growth = memory.end - memory.start;
+  const growthLimit = Math.max(16 * 1024 * 1024, memory.start * 0.35);
 
   const assertions: Assertion[] = [
     { claim: "三路 proxy 都是真实可解码的媒体事件", ok: first.count === 3 && first.ready === 3,
@@ -621,8 +673,9 @@ export async function pf02(context: CaseContext): Promise<CaseResult> {
     },
     { claim: "只有一路持有音频焦点", ok: first.muted === 2 && afterFocus.unmuted === 1,
       detail: `muted=${String(first.muted)} afterFocus=${JSON.stringify(afterFocus)}` },
-    { claim: "内存有记录（无不可控增长）", ok: typeof memory.used === "number",
-      detail: JSON.stringify(memory) },
+    { claim: "12 轮真实切焦/滚动的 heap 样本完整且增长有界", ok: memorySamples.length === 12
+      && memory.start > 0 && growth <= growthLimit,
+      detail: `${JSON.stringify(memory)} growth=${growth} limit=${growthLimit}` },
   ];
   const evidence = await context.json("performance/pf-02-proxies.json", { first, afterFocus, memory });
   return {
@@ -647,6 +700,19 @@ export async function pf03(context: CaseContext): Promise<CaseResult> {
   const cold = await waitForPanel(session, (state) => state?.panel === "ready");
   const coldMs = Date.now() - coldStart;
 
+  await sleep(1_000);
+  const runtime = await session.evaluateWithRetry<Record<string, unknown>>(`(() => {
+    const videos = [...document.querySelectorAll('[data-narralens-proxy] video')];
+    const qualities = videos.map((video) => {
+      const quality = video.getVideoPlaybackQuality?.();
+      return { ready_state: video.readyState, current_time: video.currentTime,
+        total_frames: quality?.totalVideoFrames ?? null,
+        dropped_frames: quality?.droppedVideoFrames ?? null };
+    });
+    return { memory_used: performance.memory?.usedJSHeapSize ?? null, qualities,
+      paint_entries: performance.getEntriesByType('paint').map((entry) => ({ name: entry.name, start: entry.startTime })) };
+  })()`);
+
   const projection = await workbench(env);
   const assertions: Assertion[] = [
     { claim: "冷/热重开后数据一致", ok: hot?.target === cold?.target && hot?.revision === cold?.revision
@@ -655,10 +721,15 @@ export async function pf03(context: CaseContext): Promise<CaseResult> {
     { claim: "重开后的 revision 与 Host 一致", ok: Number(cold?.revision) === Number(projection.revision),
       detail: `panel=${String(cold?.revision)} host=${String(projection.revision)}` },
     { claim: "冷启动首帧时间已记录", ok: coldMs > 0, detail: `cold=${coldMs}ms` },
+    { claim: "重开后的内存峰值与媒体掉帧数据已记录", ok: typeof runtime.memory_used === "number"
+      && Array.isArray(runtime.qualities) && runtime.qualities.length === 3
+      && runtime.qualities.every((entry: { total_frames?: unknown; dropped_frames?: unknown }) =>
+        typeof entry.total_frames === "number" && typeof entry.dropped_frames === "number"),
+      detail: JSON.stringify(runtime) },
   ];
   return {
     case_id: "PF-03", title: "冷/热重开数据一致，首帧/内存/媒体关联记录",
-    status: verdict(assertions), assertions, facts: { hot, cold, coldMs }, evidence: [],
+    status: verdict(assertions), assertions, facts: { hot, cold, coldMs, runtime }, evidence: [],
   };
 }
 

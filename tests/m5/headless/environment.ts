@@ -1,4 +1,4 @@
-import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
+import { copyFile, mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -9,6 +9,7 @@ import { ProposalComparisonAdapter } from "../../../src/adapters/openmontage/pro
 import { CdpSession } from "./cdp.js";
 import { findChrome, launchChrome, makeProfile, type ChromeHandle } from "./chrome.js";
 import { buildFixtures, type FixtureSet } from "./fixtures.js";
+import { ProjectCatalog } from "../../../src/host/projects/project-catalog.js";
 
 /**
  * M5C's headless environment (Wave 3 `04` §7).
@@ -62,6 +63,9 @@ export async function startBrowser(options: {
   return {
     chrome, session, profileRoot,
     close: async (): Promise<void> => {
+      // Browser.close is the protocol's graceful shutdown. The profile-targeted process
+      // cleanup in chrome.ts is still the verified fallback.
+      await session.call("Browser.close", {}, 5_000).catch(() => undefined);
       session.close();
       await chrome.close();
       await rm(profileRoot, { recursive: true, force: true }).catch(() => undefined);
@@ -72,6 +76,8 @@ export async function startBrowser(options: {
 export interface StartOptions {
   readonly width?: number;
   readonly height?: number;
+  /** Use the genuine 120-clip/6-chapter source fixture for PF-01. */
+  readonly stress120?: boolean;
 }
 
 /**
@@ -96,7 +102,16 @@ export async function startEnvironment(options: StartOptions = {}): Promise<Head
     resolve(REPO, "fixtures/d1-30s/assets/generated/visual-10s.mp4"),
     resolve(REPO, "fixtures/d1-30s/assets/generated/visual-alt-10s.mp4"));
 
+  const sourceProjectId = options.stress120 === true ? "m5-stress-120" : "d1-30s";
+  const stressDescriptor = options.stress120 === true
+    ? await createStressSource(base, sourceProjectId)
+    : undefined;
+  const catalog = stressDescriptor === undefined
+    ? undefined
+    : new ProjectCatalog(new Map([[sourceProjectId, stressDescriptor]]));
+
   const host = new NarralensHost({
+    ...(catalog === undefined ? {} : { catalog }),
     migrationsRoot: join(base, "migrations"), dbPath: join(base, "narralens.sqlite"),
     derivedRoot: join(base, "derived"), snapshotsRoot: join(base, "snapshots"),
     adoptionStagingRoot: join(base, "adoption-stage"),
@@ -104,6 +119,9 @@ export async function startEnvironment(options: StartOptions = {}): Promise<Head
     proposals: new ProposalAdapter(join(base, "proposals")),
     comparisons: new ProposalComparisonAdapter(join(base, "proposal-comparisons")),
   });
+  if (options.stress120 === true) {
+    host.engines.bindings.bind(sourceProjectId, "hypit", { createdAt: "1970-01-01T00:00:00.000Z" });
+  }
   const port = await host.listen(0);
   const origin = `http://127.0.0.1:${port}`;
   const token = (await (await fetch(`${origin}/api/session`, { headers: { origin } })).json() as
@@ -117,9 +135,10 @@ export async function startEnvironment(options: StartOptions = {}): Promise<Head
   // not a dirty checkout, so it is retried — three times, and only for that message.
   let migrated: Response | undefined;
   for (let attempt = 0; attempt < 3; attempt += 1) {
-    migrated = await fetch(`${origin}/api/migration/v1/projects/d1-30s/migrate-copy`, {
+    migrated = await fetch(`${origin}/api/migration/v1/projects/${sourceProjectId}/migrate-copy`, {
       method: "POST", headers: { origin, authorization: `Bearer ${token}`, "content-type": "application/json" },
-      body: JSON.stringify({ idempotency_key: "m5-headless-migrate-1" }),
+      body: JSON.stringify({ idempotency_key: options.stress120 === true
+        ? "m5-headless-migrate-stress-120" : "m5-headless-migrate-1" }),
     });
     if (migrated.status === 200) break;
     const text = await migrated.text();
@@ -142,11 +161,11 @@ export async function startEnvironment(options: StartOptions = {}): Promise<Head
     ?? "";
   const plan = host.revisions.migrations.plan(migrationId);
   const sourceComparisonId = "comparison_m5_recorded_1";
-  if (plan !== undefined) {
+  if (plan !== undefined && options.stress120 !== true) {
     // The recording covers the whole film, because a plan that adopts must replace the
     // target's visual track: the plan builder refuses a plan whose clip count differs from
     // the target's, and the fixture's target has three clips.
-    await host.comparisons.save(recordedComparison(sourceComparisonId, "d1-30s", plan.source_revision,
+    await host.comparisons.save(recordedComparison(sourceComparisonId, sourceProjectId, plan.source_revision,
       { shot_id: "shot-001", start_frame: 0, end_frame_exclusive: 900 }));
   }
 
@@ -175,6 +194,38 @@ export async function startEnvironment(options: StartOptions = {}): Promise<Head
     fixtures, base,
     close,
   };
+}
+
+/** Build a real registered Hypit source whose migration yields 120 native OpenFilm clips. */
+async function createStressSource(base: string, projectId: string): Promise<string> {
+  const root = join(base, "stress-source");
+  await mkdir(join(root, "assets/generated"), { recursive: true });
+  await mkdir(join(root, "runs"), { recursive: true });
+  await copyFile(resolve(REPO, "fixtures/d1-30s/assets/generated/visual-10s.mp4"),
+    join(root, "assets/generated/visual-10s.mp4"));
+  await copyFile(resolve(REPO, "fixtures/d1-30s/assets/generated/narration-30s.wav"),
+    join(root, "assets/generated/narration-30s.wav"));
+  const sourceManifest = JSON.parse(await (await import("node:fs/promises")).readFile(
+    resolve(REPO, "fixtures/d1-30s/narralens.assets.json"), "utf8")) as { assets: unknown[] };
+  await writeFile(join(root, "narralens.assets.json"), `${JSON.stringify({
+    ...sourceManifest, assets: sourceManifest.assets.slice(0, 1),
+  }, null, 2)}\n`, "utf8");
+  await writeFile(join(root, "runs/build.svrun"), "{\"fixture\":\"m5-stress-120\"}\n", "utf8");
+  const shots = Array.from({ length: 120 }, (_, index) => ({
+    shot_id: `shot-${String(index + 1).padStart(3, "0")}`,
+    authoring_id: `shot-${index + 1}`,
+    start_frame: Math.floor(index * 900 / 120),
+    end_frame_exclusive: Math.floor((index + 1) * 900 / 120),
+  }));
+  const descriptor = {
+    project_id: projectId, revision: 1, frame_rate: 30, frame_count: 900, shots,
+    preview: { kind: "hypit-studio", url: "http://127.0.0.1:4174/" },
+    run_file: "runs/build.svrun", studio_origin: "http://127.0.0.1:4174",
+    narration_asset: "assets/generated/narration-30s.wav", asset_manifest: "narralens.assets.json",
+  };
+  const path = join(root, "narralens.project.json");
+  await writeFile(path, `${JSON.stringify(descriptor, null, 2)}\n`, "utf8");
+  return path;
 }
 
 /**

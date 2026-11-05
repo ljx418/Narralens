@@ -54,6 +54,8 @@ const screenshots = allFiles.filter((name) => name.startsWith("screenshots/") &&
 const media = readJson("media/fixtures.json");
 const browser = readJson("browser/environment.json");
 const zoom = readJson("zoom/native-200.json");
+const architectureHref = relative(dirname(outputPath), resolve("docs/architecture/m5-stage-current.architecture.html"))
+  .replaceAll("\\", "/");
 const probe = existsSync(resolve("docs/evidence/WAVE3/M5/upstream/studio-seam-probe.json"))
   ? JSON.parse(readFileSync(resolve("docs/evidence/WAVE3/M5/upstream/studio-seam-probe.json"), "utf8"))
   : undefined;
@@ -120,6 +122,7 @@ const html = `<!doctype html>
   figure img { width: 100%; border: 1px solid #8884; }
   figcaption { font-size: 12px; }
   dl { display: grid; grid-template-columns: max-content 1fr; gap: 4px 16px; font-size: 14px; }
+  iframe.architecture { width: 100%; min-height: 620px; border: 1px solid #8884; background: white; }
   dt { font-weight: 600; }
   dd { margin: 0; }
 </style>
@@ -148,7 +151,14 @@ ${caseRows}
   </tbody>
 </table>
 
-<h2>3. 命令、退出码与原始日志索引</h2>
+<h2>3. 目标架构与当前实现</h2>
+<p>本阶段架构由 Archify showcase 模式生成并通过 9/9 结构与组合检查。图中把 M5 的
+fixture/proxy 与 M6 正式生产渲染明确分离，并展示 Panel/StudioHost/Gateway、受控写服务、
+ProjectCoordinator、EnginePort、素材化 worker、SQLite 与工程文件系统的真实边界。</p>
+<p><a href="${escape(architectureHref)}">在独立页面打开本阶段架构设计</a></p>
+<iframe class="architecture" src="${escape(architectureHref)}" title="Narralens M5 当前实现架构"></iframe>
+
+<h2>4. 命令、退出码与原始日志索引</h2>
 <table>
   <thead><tr><th>名称</th><th>命令</th><th>退出码</th><th>原始输出</th></tr></thead>
   <tbody>
@@ -156,12 +166,15 @@ ${commandRows}
   </tbody>
 </table>
 
-<h2>4. 截图索引</h2>
+<h2>5. 用户体验路径与截图索引</h2>
+<p>截图只在每个 case 的 Studio 与 Narralens 面板仍处于成功态时捕获；环境关闭后的
+“Studio connection lost”页面不会被当作成功证据。路径覆盖：打开已迁移工程 → 定位镜头/章节 →
+读取原生时间线 → 回放已录制提案 → 素材化 → impact/锁确认 → 采用 → history 恢复。</p>
 <div class="figures">
 ${screenshotRows}
 </div>
 
-<h2>5. 浏览器、硬件、profile 与缩放</h2>
+<h2>6. 浏览器、硬件、profile 与缩放</h2>
 <dl>
   <dt>浏览器</dt><dd><code>${escape(browser?.browser ?? "")}</code></dd>
   <dt>可执行文件</dt><dd><code>${escape(browser?.executable ?? "")}</code></dd>
@@ -171,7 +184,7 @@ ${screenshotRows}
   <dt>原生 200% 读回</dt><dd><code>${escape(JSON.stringify(zoom?.layout ?? {}))}</code></dd>
 </dl>
 
-<h2>6. 媒体、ffprobe 与完整解码</h2>
+<h2>7. 媒体、ffprobe 与完整解码</h2>
 <table>
   <thead><tr><th>种类</th><th>文件</th><th>SHA256</th><th>字节</th><th>解码帧数</th><th>生成命令</th></tr></thead>
   <tbody>

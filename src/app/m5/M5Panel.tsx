@@ -166,6 +166,10 @@ export function M5Panel({ client, targetProjectId }: M5PanelProps): React.JSX.El
   const [restoreIntent, setRestoreIntent] = useState<{ target_snapshot_id: string } | null>(null);
   /** The last key the panel handled. It is published so the page's state can be read. */
   const [lastKey, setLastKey] = useState("");
+  const [theme, setTheme] = useState<"system" | "dark" | "light">(() => {
+    const saved = window.localStorage.getItem("narralens.m5.theme");
+    return saved === "dark" || saved === "light" ? saved : "system";
+  });
   const proxyRefs = useRef<(HTMLVideoElement | null)[]>([]);
   /**
    * The clip the panel has asked the native editor to select.
@@ -181,6 +185,11 @@ export function M5Panel({ client, targetProjectId }: M5PanelProps): React.JSX.El
   useEffect(() => selectionStore.subscribe((value) => setSelection(value)), [selectionStore]);
   useEffect(() => uiStore.subscribe((value) => setUi(value)), [uiStore]);
   useEffect(() => clock.onFrame((value) => setFrame(value)), [clock]);
+  useEffect(() => {
+    window.localStorage.setItem("narralens.m5.theme", theme);
+    if (theme === "system") delete document.documentElement.dataset.theme;
+    else document.documentElement.dataset.theme = theme;
+  }, [theme]);
 
   const fail = useCallback((reason: unknown): void => {
     const error = reason instanceof GatewayApiError ? reason : undefined;
@@ -349,6 +358,15 @@ export function M5Panel({ client, targetProjectId }: M5PanelProps): React.JSX.El
         // The browser's undo is for the *draft*; a committed change goes through the
         // history intent, impact and confirmation.
         event.preventDefault();
+        return;
+      }
+      if (event.key.toLowerCase() === "f" && !event.ctrlKey && !event.metaKey && !event.altKey) {
+        // Pinned OpenFilm names timeline fit as Shift+Z. M5's approved shortcut is F,
+        // so the bridge translates it without creating a second timeline command.
+        event.preventDefault();
+        window.dispatchEvent(new KeyboardEvent("keydown", {
+          key: "Z", code: "KeyZ", shiftKey: true, bubbles: true, cancelable: true,
+        }));
       }
     };
     // The capture phase, on purpose: the Studio binds the arrow keys for its own
@@ -563,8 +581,12 @@ export function M5Panel({ client, targetProjectId }: M5PanelProps): React.JSX.El
 
   const selectedClip = projection === undefined ? undefined : clipOf(projection, selection);
   const proposals = replay === undefined ? [] : (replay.comparison as RecordedComparison).proposals;
-  const atlasClips = projection === undefined ? [] : projection.clips.filter((clip) => {
-    if (clip.kind !== "page") return false;
+  const pageClips = projection === undefined ? [] : projection.clips.filter((clip) => clip.kind === "page");
+  const chapters = pageClips.length < 20 ? [] : Array.from(
+    { length: Math.ceil(pageClips.length / 20) }, (_, index) => ({
+      id: `chapter-${index + 1}`, title: `第 ${index + 1} 章`, first: pageClips[index * 20],
+    }));
+  const atlasClips = pageClips.filter((clip) => {
     const query = ui.atlasQuery.trim().toLowerCase();
     if (query === "") return true;
     return clip.clip_id.toLowerCase().includes(query)
@@ -627,6 +649,12 @@ export function M5Panel({ client, targetProjectId }: M5PanelProps): React.JSX.El
     data-studio-seconds={studioSelection === null ? "" : String(studioSelection.seconds)}>
     <header className="m5-head">
       <h2>Narralens 导演面板</h2>
+      <label className="m5-theme">主题
+        <select aria-label="主题" value={theme}
+          onChange={(event) => setTheme(event.target.value as "system" | "dark" | "light")}>
+          <option value="system">跟随系统</option><option value="dark">深色</option><option value="light">浅色</option>
+        </select>
+      </label>
       <p className="m5-facts">
         <span>target {projection.project_id}</span>
         <span>source {projection.source_project_id}</span>
@@ -653,6 +681,13 @@ export function M5Panel({ client, targetProjectId }: M5PanelProps): React.JSX.El
         aria-label="搜索镜头"
         value={ui.atlasQuery}
         onChange={(event) => uiStore.patch({ atlasQuery: event.target.value })} />
+      {chapters.length > 0 ? <nav className="m5-chapters" aria-label="章节导航">
+        {chapters.map((chapter) => <button type="button" key={chapter.id}
+          data-chapter-id={chapter.id}
+          onClick={() => { if (chapter.first !== undefined) selectClip(chapter.first.clip_id); }}>
+          {chapter.title}
+        </button>)}
+      </nav> : null}
       <ul className="m5-atlas">
         {atlasClips.map((clip) => (
           <li key={clip.clip_id}>

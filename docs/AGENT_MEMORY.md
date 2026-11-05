@@ -41,7 +41,6 @@
 - M4C 必须先完成 M4B 独立外审，再按 `docs/migration/WAVE2/17_M4C_DEVELOPMENT_GATE.md` 连续实现；
 - M4C 内容相同的历史恢复复用 content-addressed snapshot id，但必须创建新 transaction/commit/revision+1；
 - M4C 完成后先做 Wave 2 组合外审，不顺跳 M5；最近正式人工体验门在 M5C 后。
-- 2026-11-05：M5 最终自动验收捕获 `2a8337d316a6ed503c2e85e065a0385b0dcc87e6` 已通过全量门、
-  Headless UX、真实 Studio 接缝、14 张报告截图与证据完整性，状态为 `M5_HEADLESS_EVIDENCED`。UX-12
-  必须由项目负责人亲自体验并签署，自动化不得代签；人工签署前不得进入 M6，也不得声明 Gate D4.2、
-  Gate V1-P0 或 V1-Full。
+- 2026-11-05：UX-12 前置独立阶段审计发现旧 M5 捕获存在语义假绿（3 clip 冒充 120 clip、关闭后截图、
+  键盘/四视口/内存与掉帧覆盖不足、Chrome 清理错误），状态降为 `M5_ACCEPTANCE_REWORK`。旧证据只可作为
+  历史记录，不可作为出门结论；必须在新冻结提交上全量重捕获并独立复审后，才允许启动 UX-12。

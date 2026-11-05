@@ -57,6 +57,12 @@ try {
   await mkdir(CAPTURE_ROOT, { recursive: true });
   browser = await startBrowser();
   const instrument = browser;
+  await writeEvidence(CAPTURE_ROOT, "browser/environment.json", `${JSON.stringify({
+    run_id: RUN_ID, captured_at: new Date().toISOString(), browser: instrument.chrome.browser,
+    executable: instrument.chrome.executable, windows_executable: instrument.chrome.windows,
+    cdp_endpoint: instrument.chrome.endpoint, profile_root: instrument.profileRoot,
+    headless: true, muted: true,
+  }, null, 2)}\n`);
 
   // A run may be limited to some cases, so a single case can be re-run while it is being
   // fixed. The default is every case.
@@ -72,7 +78,7 @@ try {
     // case would then be measuring a different film. Sharing one Host between the cases
     // made the order of the run part of the measurement, which is exactly what an
     // experience gate must not be.
-    const env = await startEnvironment();
+    const env = await startEnvironment({ stress120: entry.id === "PF-01" });
     const context: CaseContext = {
       env,
       session: instrument.session,
@@ -104,6 +110,13 @@ try {
       page_url: env.pageUrl,
     }, null, 2)}\n`);
     if (entry.id === selected[0]?.id) {
+      await writeEvidence(CAPTURE_ROOT, "browser/environment.json", `${JSON.stringify({
+        run_id: RUN_ID, captured_at: new Date().toISOString(), browser: instrument.chrome.browser,
+        executable: instrument.chrome.executable, windows_executable: instrument.chrome.windows,
+        cdp_endpoint: instrument.chrome.endpoint, profile_root: instrument.profileRoot,
+        gateway_origin: env.gatewayOrigin, host_origin: env.origin,
+        target_project_id: env.projectId, page_url: env.pageUrl, headless: true, muted: true,
+      }, null, 2)}\n`);
       await writeEvidence(CAPTURE_ROOT, "media/fixtures.json", `${JSON.stringify(env.fixtures, null, 2)}\n`);
     }
 
@@ -120,14 +133,33 @@ try {
         }],
         facts: {}, evidence: [],
       };
-    } finally {
-      await env.close();
     }
     results.push(result);
     await writeEvidence(CAPTURE_ROOT, `cases/${result.case_id}.json`,
       `${JSON.stringify({ run_id: RUN_ID, captured_at: new Date().toISOString(), ...result }, null, 2)}\n`);
-    try { await context.screenshot(`${result.case_id}.png`); } catch { /* a screenshot is not a claim */ }
+    // Capture while the successful environment is still live. A screenshot of the
+    // post-close "Studio connection lost" state is evidence of teardown, not the case.
+    try {
+      const state = await instrument.session.evaluateWithRetry<string>(
+        `document.querySelector('[data-narralens-panel]')?.getAttribute('data-narralens-panel') || ''`);
+      if (state !== "ready") throw new Error(`SCREENSHOT_PANEL_NOT_READY:${state}`);
+      await context.screenshot(`${result.case_id}.png`);
+    } catch (error) {
+      result = { ...result, status: "FAIL", assertions: [...result.assertions, {
+        claim: "成功态截图在环境关闭前捕获", ok: false,
+        detail: error instanceof Error ? error.message : String(error),
+      }] };
+      results[results.length - 1] = result;
+      await writeEvidence(CAPTURE_ROOT, `cases/${result.case_id}.json`,
+        `${JSON.stringify({ run_id: RUN_ID, captured_at: new Date().toISOString(), ...result }, null, 2)}\n`);
+    } finally {
+      await env.close();
+    }
     process.stdout.write(`M5 headless: ${result.case_id} → ${result.status}\n`);
+  }
+
+  if (only.length === 0 || only.includes("UX-RESP")) {
+    results.push(await recordResponsiveMatrix());
   }
 
   // The native 200% run.
@@ -273,6 +305,73 @@ async function recordZoom(instrument: HeadlessBrowser, results: CaseResult[]): P
     await plainBrowser.close();
     await env.close();
   }
+}
+
+/** Exercise the four contract viewports with four real headless browser processes. */
+async function recordResponsiveMatrix(): Promise<CaseResult> {
+  const env = await startEnvironment();
+  const matrix = [
+    { name: "desktop", width: 1440, height: 900 },
+    { name: "compact", width: 1024, height: 768 },
+    { name: "tablet", width: 768, height: 1024 },
+    { name: "narrow", width: 360, height: 800 },
+  ];
+  const facts: Array<Record<string, unknown>> = [];
+  try {
+    for (const viewport of matrix) {
+      const candidate = await startBrowser(viewport);
+      try {
+        // Windows Chrome enforces a minimum outer window width. The responsive gate is
+        // about CSS layout viewports (unlike UX-200's native browser zoom), so CDP sets
+        // and then reads back the exact contract viewport.
+        await candidate.session.call("Emulation.setDeviceMetricsOverride", {
+          width: viewport.width, height: viewport.height, deviceScaleFactor: 1, mobile: false,
+        });
+        await candidate.session.navigate(`${env.pageUrl}#/refine/${env.projectId}`);
+        for (let attempt = 0; attempt < 120; attempt += 1) {
+          const ready = await candidate.session.evaluateWithRetry<boolean>(
+            `document.querySelector('[data-narralens-panel]')?.getAttribute('data-narralens-panel') === 'ready'`);
+          if (ready) break;
+          await new Promise((done) => setTimeout(done, 100));
+        }
+        const observed = await candidate.session.evaluateWithRetry<Record<string, unknown>>(`(() => {
+          const panel = document.querySelector('[data-narralens-panel="ready"]');
+          const panelHost = document.querySelector('#narralens-m5-panel');
+          const search = document.querySelector('#narralens-atlas-search');
+          const rect = panel?.getBoundingClientRect();
+          return { inner_width: innerWidth, inner_height: innerHeight,
+            document_width: document.documentElement.scrollWidth,
+            overflow_x: document.documentElement.scrollWidth > innerWidth + 1,
+            panel_ready: Boolean(panel), panel_width: rect?.width || 0, panel_height: rect?.height || 0,
+            search_visible: Boolean(search && search.getBoundingClientRect().width > 0),
+            narrow_notice: panelHost ? getComputedStyle(panelHost, '::before').content : 'none' };
+        })()`);
+        const png = await candidate.session.screenshot();
+        const screenshot = resolve(CAPTURE_ROOT, "screenshots", `UX-RESP-${viewport.width}x${viewport.height}.png`);
+        await mkdir(dirname(screenshot), { recursive: true });
+        await writeFile(screenshot, Buffer.from(png, "base64"));
+        facts.push({ ...viewport, ...observed, screenshot });
+      } finally { await candidate.close(); }
+    }
+  } finally { await env.close(); }
+  await writeEvidence(CAPTURE_ROOT, "responsive/viewports.json", `${JSON.stringify(facts, null, 2)}\n`);
+  const assertions = [{
+    claim: "1440/1024/768/360 四个真实视口均可用且无页面级横向溢出",
+    ok: facts.length === 4 && facts.every((fact) => fact.panel_ready === true
+      && fact.search_visible === true && fact.overflow_x === false),
+    detail: JSON.stringify(facts.map((fact) => ({ width: fact.width, ready: fact.panel_ready,
+      overflow_x: fact.overflow_x, panel_width: fact.panel_width }))),
+  }, {
+    claim: "360px 明示窄屏仅审阅/轻操作，不冒充原生精剪",
+    ok: String(facts.find((fact) => fact.width === 360)?.narrow_notice ?? "").includes("窄屏审阅模式"),
+    detail: String(facts.find((fact) => fact.width === 360)?.narrow_notice ?? ""),
+  }];
+  return { case_id: "UX-RESP", title: "四视口响应式与窄屏能力边界", status: verdict(assertions),
+    assertions, facts: { matrix: facts }, evidence: ["responsive/viewports.json"] };
+}
+
+function verdict(assertions: readonly { ok: boolean }[]): "PASS" | "FAIL" {
+  return assertions.every((assertion) => assertion.ok) ? "PASS" : "FAIL";
 }
 
 const summary = {
