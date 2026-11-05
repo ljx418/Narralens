@@ -1,9 +1,10 @@
 # Narralens V1 规格—架构—开发—验收追踪矩阵
 
 版本：v1.0  
-状态：实际开发已批准；Wave 2 组合外审结论保留。UX-12 前置独立审计已把旧 M5 自动证据降级为
-`M5_ACCEPTANCE_REWORK`：旧捕获保留为历史，但 120 clip、键盘、四视口、性能序列、截图与清理语义须重验。
-UX-12 仍为 `HUMAN_NOT_RUN`；
+状态：实际开发已批准；Wave 2 组合外审结论保留。旧 M5 自动证据已降级并保留为失败历史；返修后的
+正式捕获 `ff807c332eab04f0a28c03f78734da7b73bc802d` 为 16 个自动 case PASS、0 FAIL、UX-12 NOT_RUN，
+当前为 `M5_HEADLESS_REVIEW_PENDING`。三路独立复审通过前不声明 `M5_HEADLESS_EVIDENCED`；UX-12 仍为
+`HUMAN_NOT_RUN`；
 Gate D4.2、`Gate V1-P0`、`V1-Full`、M6 与 M7 均未关闭。
 事实日期：2026-11-05
 <!-- M2.1_REWORK_BASE_SHA=ee58ab5c6a9d4bbdf05e8ac8a394fd75218cae59 REVIEW_STATUS=PASS -->
@@ -50,7 +51,7 @@ Gate D4.2、`Gate V1-P0`、`V1-Full`、M6 与 M7 均未关闭。
 | M2 | EnginePort、单引擎绑定、写入治理、三类锁、持久 Job/SSE/lease、snapshot/journal、迁移副本与回退 | **Wave 1 组合外审 PASS，`CONTROLLED_OPENFILM_READY`**：冻结代码 `e2dec5c...`，证据捕获 `fd64762...`，21 case 为 20 PASS + 1 `NOT_APPLICABLE_APPROVED` | migrate-copy/report/rollback 已实现；AC-005 legacy edit 仍为事后 snapshot，headed/human NOT_RUN |
 | W2.0–M3 | 目标工程解析、资产账本、素材化、真实 proxy/native plan/lineage | **M3 独立外审 PASS**：候选 `fa08fe4...`，捕获 `f2a41ff...`；ACT/ASSET、PR、MT 全部关闭 | materialize POST/GET 已开放；NOWRITE；impact/adopt/history 仍 404；M3 不等于 D4.2 完成 |
 | M4A–M4C | server impact、采用与历史事务 | **M4A、M4B、M4C 独立外审及 Wave 2 组合外审均 PASS；`WAVE2_EDITABLE_ADOPTION_READY`**。唯一 adopt/restore 路由、原子 source 发布、revision/impact/projection/ledger/outbox/idempotency 同事务、崩溃恢复、真实 900 帧双渲染与中镜原生编辑均有直接测试 | 组合候选 `a038e4a...`；允许进入 M5，Gate D4.2 仍未关闭 |
-| M5 | 同页原生 Studio UX | **`M5_ACCEPTANCE_REWORK`** | 旧捕获 `2a8337d...` 文件完整但被独立语义审计否决；返修完成后须绑定新冻结提交重新捕获；UX-12 `HUMAN_NOT_RUN` |
+| M5 | 同页原生 Studio UX | **`M5_HEADLESS_REVIEW_PENDING`** | 返修代码 `63492d1...`；正式捕获 `ff807c3...` 为 16 PASS / 0 FAIL / 1 HUMAN_NOT_RUN，完整性门 exit 0；等待三路独立复审，UX-12 尚未签署 |
 | M6 | `Gate V1-P0` | not-started | 不等于 V1-Full |
 | M7A–D | P1 与完整长片证据 | not-started | P0/P1 全绿后才可声明 V1-Full |
 
@@ -68,14 +69,14 @@ Gate D4.2、`Gate V1-P0`、`V1-Full`、M6 与 M7 均未关闭。
 | UX-08 | P0-08/NFR-05 | NativeWriteGateway、capability 展示 | unsupported UI disabled 且服务端绕过 422 | automated-pass |
 | UX-09 | P0-06/P0-07 | materialize/impact/adoption orchestration | 成功 revision +1，失败 0，NOWRITE 不跳步 | automated-pass |
 | UX-10 | P0-08/P0-09 | 受控采用、History drawer | undo/redo 只产意图；restore +1 | automated-pass |
-| UX-11 | NFR-01/NFR-03/NFR-06 | 键盘/焦点/主题/zoom | Headless axe、reduced motion、native 200% 读回 | rework-local-pass；冻结捕获待执行 |
-| UX-RESP | NFR-05/NFR-06 | M5 responsive panel | 1440/1024/768/360 实际 viewport 与窄屏边界 | rework-local-pass；冻结捕获待执行 |
+| UX-11 | NFR-01/NFR-03/NFR-06 | 键盘/焦点/主题/zoom | Headless axe、reduced motion、native 200% 读回，并证明 preview 实例无重载风暴 | automated-pass；独立复审待完成 |
+| UX-RESP | NFR-05/NFR-06 | M5 responsive panel | 1440/1024/768/360 实际 viewport 与窄屏边界 | automated-pass；独立复审待完成 |
 | UX-12 | P0-03/P0-09 | 全页体验 | 项目负责人一分钟定位/比较、十秒找到恢复 | HUMAN_NOT_RUN |
-| PF-01 | NFR-02 | 面板交互采样 | 真实 120 原生 clip/6 章，四类操作各 100 样本 p95≤100ms | rework-local-pass；冻结捕获待执行 |
-| PF-02 | NFR-02/NFR-04 | 三路 proxy 与音频焦点 | 三路真实 proxy、唯一音频焦点、12 轮 heap 序列 | rework-local-pass；冻结捕获待执行 |
-| PF-03 | NFR-04 | launcher/reopen harness | 冷/热重开、首帧、掉帧、媒体关联、内存 | rework-local-pass；冻结捕获待执行 |
+| PF-01 | NFR-02 | 面板交互采样 | 真实 120 原生 clip/6 章，四类操作各 100 样本 p95≤100ms | automated-pass；独立复审待完成 |
+| PF-02 | NFR-02/NFR-04 | 三路 proxy 与音频焦点 | 三路真实 proxy、唯一音频焦点、12 轮 heap 序列 | automated-pass；独立复审待完成 |
+| PF-03 | NFR-04 | launcher/reopen harness | 冷/热重开、首帧、掉帧、媒体关联、内存 | automated-pass；独立复审待完成 |
 
-证据：`docs/evidence/WAVE3/M5/captures/2a8337d316a6ed503c2e85e065a0385b0dcc87e6/`；逐 case 的断言、事实、
+证据：`docs/evidence/WAVE3/M5/captures/ff807c332eab04f0a28c03f78734da7b73bc802d/`；逐 case 的断言、事实、
 截图、性能样本与失败断言
 都在里面。`automated-pass` 只表示**自动门**通过，人工体验门（UX-12）仍然是 `HUMAN_NOT_RUN`。
 

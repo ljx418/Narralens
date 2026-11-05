@@ -35,7 +35,7 @@
 
 <h2>1. 基线与冻结 SHA</h2>
 <dl>
-  <dt>捕获 commit</dt><dd><code>74dd5689829109da9e474833c745d05974542c02</code></dd>
+  <dt>捕获 commit</dt><dd><code>ff807c332eab04f0a28c03f78734da7b73bc802d</code></dd>
   <dt>分支</dt><dd><code>migration/m2.2-coordinator-persistence</code></dd>
   <dt>origin/main</dt><dd><code>304c89134fdf9f834f7d69e3f4d5c89a68044c60</code></dd>
   <dt>捕获时工作树</dt><dd><code>dirty=0</code></dd>
@@ -52,7 +52,7 @@
     <td><code>PF-01</code></td>
     <td>120 clip 四类操作各 100 样本 p95≤100ms</td>
     <td class="s-PASS">通过</td>
-    <td>4</td>
+    <td>6</td>
     <td>—</td>
     <td><code>cases/PF-01.json</code></td>
   </tr>
@@ -156,9 +156,33 @@
     <td><code>UX-11</code></td>
     <td>键盘、焦点、文本状态、axe、reduced motion、主题</td>
     <td class="s-PASS">通过</td>
-    <td>7</td>
+    <td>12</td>
     <td>—</td>
     <td><code>cases/UX-11.json</code></td>
+  </tr>
+<tr>
+    <td><code>UX-12</code></td>
+    <td>人类一分钟定位/比较、十秒找到恢复、理解 impact 与错误</td>
+    <td class="s-NOT_RUN">未运行</td>
+    <td>1</td>
+    <td>项目负责人亲自走一遍并签署</td>
+    <td><code>cases/UX-12.json</code></td>
+  </tr>
+<tr>
+    <td><code>UX-200</code></td>
+    <td>原生 200% 页面缩放读回（隔离 profile）</td>
+    <td class="s-PASS">通过</td>
+    <td>2</td>
+    <td>—</td>
+    <td><code>cases/UX-200.json</code></td>
+  </tr>
+<tr>
+    <td><code>UX-RESP</code></td>
+    <td>四视口响应式与窄屏能力边界</td>
+    <td class="s-PASS">通过</td>
+    <td>2</td>
+    <td>—</td>
+    <td><code>cases/UX-RESP.json</code></td>
   </tr>
   </tbody>
 </table>
@@ -176,8 +200,8 @@ ProjectCoordinator、EnginePort、素材化 worker、SQLite 与工程文件系�
   <tbody>
 <tr>
     <td><code>acceptance-report</code></td>
-    <td><code>node tools/m5-acceptance-report.mjs docs/evidence/WAVE3/M5/captures/74dd5689829109da9e474833c745d05974542c02 docs/evidence/WAVE3/M5/acceptance-report.html</code></td>
-    <td class="s-FAIL"></td>
+    <td><code>node tools/m5-acceptance-report.mjs docs/evidence/WAVE3/M5/captures/ff807c332eab04f0a28c03f78734da7b73bc802d docs/evidence/WAVE3/M5/acceptance-report.html</code></td>
+    <td class="s-PASS">0</td>
     <td><code>acceptance-report.txt</code></td>
   </tr>
 <tr>
@@ -200,9 +224,21 @@ ProjectCoordinator、EnginePort、素材化 worker、SQLite 与工程文件系�
   </tr>
 <tr>
     <td><code>credential-scan</code></td>
-    <td><code>NARRALENS_SECRET_SCAN_OUT=docs/evidence/WAVE3/M5/captures/74dd5689829109da9e474833c745d05974542c02/credential-scan.json corepack pnpm exec tsx tools/secret-scan.ts</code></td>
+    <td><code>NARRALENS_SECRET_SCAN_OUT=docs/evidence/WAVE3/M5/captures/ff807c332eab04f0a28c03f78734da7b73bc802d/credential-scan.json corepack pnpm exec tsx tools/secret-scan.ts</code></td>
     <td class="s-PASS">0</td>
     <td><code>credential-scan.txt</code></td>
+  </tr>
+<tr>
+    <td><code>failed-captures</code></td>
+    <td><code>node tools/m5-failed-captures.mjs ff807c332eab04f0a28c03f78734da7b73bc802d</code></td>
+    <td class="s-PASS">0</td>
+    <td><code>failed-captures.txt</code></td>
+  </tr>
+<tr>
+    <td><code>integrity</code></td>
+    <td><code>node tools/m5-evidence-integrity.mjs ff807c332eab04f0a28c03f78734da7b73bc802d</code></td>
+    <td class="s-PASS">0</td>
+    <td><code>integrity.txt</code></td>
   </tr>
 <tr>
     <td><code>m2.1</code></td>
@@ -212,7 +248,7 @@ ProjectCoordinator、EnginePort、素材化 worker、SQLite 与工程文件系�
   </tr>
 <tr>
     <td><code>m5-headless</code></td>
-    <td><code>NARRALENS_M5_EVIDENCE_ROOT=docs/evidence/WAVE3/M5/captures/74dd5689829109da9e474833c745d05974542c02 corepack pnpm test:m5:headless</code></td>
+    <td><code>NARRALENS_M5_EVIDENCE_ROOT=docs/evidence/WAVE3/M5/captures/ff807c332eab04f0a28c03f78734da7b73bc802d corepack pnpm test:m5:headless</code></td>
     <td class="s-PASS">0</td>
     <td><code>m5-headless.txt</code></td>
   </tr>
@@ -221,6 +257,12 @@ ProjectCoordinator、EnginePort、素材化 worker、SQLite 与工程文件系�
     <td><code>corepack pnpm test:m5</code></td>
     <td class="s-PASS">0</td>
     <td><code>m5.txt</code></td>
+  </tr>
+<tr>
+    <td><code>manifest</code></td>
+    <td><code>node tools/m5-evidence-manifest.mjs ff807c332eab04f0a28c03f78734da7b73bc802d docs/evidence/WAVE3/M5/captures/ff807c332eab04f0a28c03f78734da7b73bc802d/manifest.json</code></td>
+    <td class="s-PASS">0</td>
+    <td><code>manifest.txt</code></td>
   </tr>
 <tr>
     <td><code>studio-seam-probe</code></td>
@@ -279,75 +321,75 @@ ProjectCoordinator、EnginePort、素材化 worker、SQLite 与工程文件系�
 读取原生时间线 → 回放已录制提案 → 素材化 → impact/锁确认 → 采用 → history 恢复。</p>
 <div class="figures">
 <figure>
-    <img src="captures/74dd5689829109da9e474833c745d05974542c02/screenshots/PF-01.png" alt="screenshots/PF-01.png" loading="lazy" />
+    <img src="captures/ff807c332eab04f0a28c03f78734da7b73bc802d/screenshots/PF-01.png" alt="screenshots/PF-01.png" loading="lazy" />
     <figcaption>screenshots/PF-01.png</figcaption>
   </figure>
 <figure>
-    <img src="captures/74dd5689829109da9e474833c745d05974542c02/screenshots/PF-02.png" alt="screenshots/PF-02.png" loading="lazy" />
+    <img src="captures/ff807c332eab04f0a28c03f78734da7b73bc802d/screenshots/PF-02.png" alt="screenshots/PF-02.png" loading="lazy" />
     <figcaption>screenshots/PF-02.png</figcaption>
   </figure>
 <figure>
-    <img src="captures/74dd5689829109da9e474833c745d05974542c02/screenshots/PF-03.png" alt="screenshots/PF-03.png" loading="lazy" />
+    <img src="captures/ff807c332eab04f0a28c03f78734da7b73bc802d/screenshots/PF-03.png" alt="screenshots/PF-03.png" loading="lazy" />
     <figcaption>screenshots/PF-03.png</figcaption>
   </figure>
 <figure>
-    <img src="captures/74dd5689829109da9e474833c745d05974542c02/screenshots/UX-01.png" alt="screenshots/UX-01.png" loading="lazy" />
+    <img src="captures/ff807c332eab04f0a28c03f78734da7b73bc802d/screenshots/UX-01.png" alt="screenshots/UX-01.png" loading="lazy" />
     <figcaption>screenshots/UX-01.png</figcaption>
   </figure>
 <figure>
-    <img src="captures/74dd5689829109da9e474833c745d05974542c02/screenshots/UX-02.png" alt="screenshots/UX-02.png" loading="lazy" />
+    <img src="captures/ff807c332eab04f0a28c03f78734da7b73bc802d/screenshots/UX-02.png" alt="screenshots/UX-02.png" loading="lazy" />
     <figcaption>screenshots/UX-02.png</figcaption>
   </figure>
 <figure>
-    <img src="captures/74dd5689829109da9e474833c745d05974542c02/screenshots/UX-03.png" alt="screenshots/UX-03.png" loading="lazy" />
+    <img src="captures/ff807c332eab04f0a28c03f78734da7b73bc802d/screenshots/UX-03.png" alt="screenshots/UX-03.png" loading="lazy" />
     <figcaption>screenshots/UX-03.png</figcaption>
   </figure>
 <figure>
-    <img src="captures/74dd5689829109da9e474833c745d05974542c02/screenshots/UX-04.png" alt="screenshots/UX-04.png" loading="lazy" />
+    <img src="captures/ff807c332eab04f0a28c03f78734da7b73bc802d/screenshots/UX-04.png" alt="screenshots/UX-04.png" loading="lazy" />
     <figcaption>screenshots/UX-04.png</figcaption>
   </figure>
 <figure>
-    <img src="captures/74dd5689829109da9e474833c745d05974542c02/screenshots/UX-05.png" alt="screenshots/UX-05.png" loading="lazy" />
+    <img src="captures/ff807c332eab04f0a28c03f78734da7b73bc802d/screenshots/UX-05.png" alt="screenshots/UX-05.png" loading="lazy" />
     <figcaption>screenshots/UX-05.png</figcaption>
   </figure>
 <figure>
-    <img src="captures/74dd5689829109da9e474833c745d05974542c02/screenshots/UX-06.png" alt="screenshots/UX-06.png" loading="lazy" />
+    <img src="captures/ff807c332eab04f0a28c03f78734da7b73bc802d/screenshots/UX-06.png" alt="screenshots/UX-06.png" loading="lazy" />
     <figcaption>screenshots/UX-06.png</figcaption>
   </figure>
 <figure>
-    <img src="captures/74dd5689829109da9e474833c745d05974542c02/screenshots/UX-07.png" alt="screenshots/UX-07.png" loading="lazy" />
+    <img src="captures/ff807c332eab04f0a28c03f78734da7b73bc802d/screenshots/UX-07.png" alt="screenshots/UX-07.png" loading="lazy" />
     <figcaption>screenshots/UX-07.png</figcaption>
   </figure>
 <figure>
-    <img src="captures/74dd5689829109da9e474833c745d05974542c02/screenshots/UX-08.png" alt="screenshots/UX-08.png" loading="lazy" />
+    <img src="captures/ff807c332eab04f0a28c03f78734da7b73bc802d/screenshots/UX-08.png" alt="screenshots/UX-08.png" loading="lazy" />
     <figcaption>screenshots/UX-08.png</figcaption>
   </figure>
 <figure>
-    <img src="captures/74dd5689829109da9e474833c745d05974542c02/screenshots/UX-09.png" alt="screenshots/UX-09.png" loading="lazy" />
+    <img src="captures/ff807c332eab04f0a28c03f78734da7b73bc802d/screenshots/UX-09.png" alt="screenshots/UX-09.png" loading="lazy" />
     <figcaption>screenshots/UX-09.png</figcaption>
   </figure>
 <figure>
-    <img src="captures/74dd5689829109da9e474833c745d05974542c02/screenshots/UX-10.png" alt="screenshots/UX-10.png" loading="lazy" />
+    <img src="captures/ff807c332eab04f0a28c03f78734da7b73bc802d/screenshots/UX-10.png" alt="screenshots/UX-10.png" loading="lazy" />
     <figcaption>screenshots/UX-10.png</figcaption>
   </figure>
 <figure>
-    <img src="captures/74dd5689829109da9e474833c745d05974542c02/screenshots/UX-11.png" alt="screenshots/UX-11.png" loading="lazy" />
+    <img src="captures/ff807c332eab04f0a28c03f78734da7b73bc802d/screenshots/UX-11.png" alt="screenshots/UX-11.png" loading="lazy" />
     <figcaption>screenshots/UX-11.png</figcaption>
   </figure>
 <figure>
-    <img src="captures/74dd5689829109da9e474833c745d05974542c02/screenshots/UX-RESP-1024x768.png" alt="screenshots/UX-RESP-1024x768.png" loading="lazy" />
+    <img src="captures/ff807c332eab04f0a28c03f78734da7b73bc802d/screenshots/UX-RESP-1024x768.png" alt="screenshots/UX-RESP-1024x768.png" loading="lazy" />
     <figcaption>screenshots/UX-RESP-1024x768.png</figcaption>
   </figure>
 <figure>
-    <img src="captures/74dd5689829109da9e474833c745d05974542c02/screenshots/UX-RESP-1440x900.png" alt="screenshots/UX-RESP-1440x900.png" loading="lazy" />
+    <img src="captures/ff807c332eab04f0a28c03f78734da7b73bc802d/screenshots/UX-RESP-1440x900.png" alt="screenshots/UX-RESP-1440x900.png" loading="lazy" />
     <figcaption>screenshots/UX-RESP-1440x900.png</figcaption>
   </figure>
 <figure>
-    <img src="captures/74dd5689829109da9e474833c745d05974542c02/screenshots/UX-RESP-360x800.png" alt="screenshots/UX-RESP-360x800.png" loading="lazy" />
+    <img src="captures/ff807c332eab04f0a28c03f78734da7b73bc802d/screenshots/UX-RESP-360x800.png" alt="screenshots/UX-RESP-360x800.png" loading="lazy" />
     <figcaption>screenshots/UX-RESP-360x800.png</figcaption>
   </figure>
 <figure>
-    <img src="captures/74dd5689829109da9e474833c745d05974542c02/screenshots/UX-RESP-768x1024.png" alt="screenshots/UX-RESP-768x1024.png" loading="lazy" />
+    <img src="captures/ff807c332eab04f0a28c03f78734da7b73bc802d/screenshots/UX-RESP-768x1024.png" alt="screenshots/UX-RESP-768x1024.png" loading="lazy" />
     <figcaption>screenshots/UX-RESP-768x1024.png</figcaption>
   </figure>
 </div>
@@ -356,9 +398,9 @@ ProjectCoordinator、EnginePort、素材化 worker、SQLite 与工程文件系�
 <dl>
   <dt>浏览器</dt><dd><code>Chrome/156.0.8078.80</code></dd>
   <dt>可执行文件</dt><dd><code>/mnt/c/Program Files/Google/Chrome/Application/chrome.exe</code></dd>
-  <dt>CDP 端点</dt><dd><code>http://127.0.0.1:13835</code></dd>
-  <dt>隔离 profile</dt><dd><code>/mnt/c/Users/Public/narralens-m5-chrome-hsd22Q</code></dd>
-  <dt>Gateway origin</dt><dd><code>http://127.0.0.1:57133</code></dd>
+  <dt>CDP 端点</dt><dd><code>http://127.0.0.1:12386</code></dd>
+  <dt>隔离 profile</dt><dd><code>/mnt/c/Users/Public/narralens-m5-chrome-2a22y0</code></dd>
+  <dt>Gateway origin</dt><dd><code>http://127.0.0.1:55705</code></dd>
   <dt>原生 200% 读回</dt><dd><code>{"device_pixel_ratio":2,"inner_width":707,"inner_height":400,"document_width":707,"document_height":400,"overflow_x":false,"zoom_level":3.8017840169239308}</code></dd>
 </dl>
 
@@ -410,7 +452,7 @@ ProjectCoordinator、EnginePort、素材化 worker、SQLite 与工程文件系�
 </table>
 <p class="note">这些 fixture 只证明系统交互（真实媒体、真实解码、真实帧率），不证明长片内容质量。 120 clip / 6 章是结构压力用例，不是长片质量证据。 素材来自仓库内已验证的 fixtures/d1-30s 媒体，由本地 ffmpeg 确定性合成。</p>
 
-<h2>7. 上游 Studio 接缝探测</h2>
+<h2>8. 上游 Studio 接缝探测</h2>
 <dl>
   <dt>探测结果</dt><dd><code>ok=true the Studio seam is present at the pinned upstream</code></dd>
   <dt>startStudio 模块</dt><dd><code>packages/openfilm/studio/server/server.mjs</code></dd>
@@ -420,23 +462,23 @@ ProjectCoordinator、EnginePort、素材化 worker、SQLite 与工程文件系�
   <dt>加载闭包文件数</dt><dd>63</dd>
 </dl>
 
-<h2>8. 事务 / NOWRITE 差异</h2>
+<h2>9. 事务 / NOWRITE 差异</h2>
 <p>写路径的前后差异由 <code>tests/m5/locks.test.ts</code> 与 <code>tests/m5/comparison-replay.test.ts</code> 断言：
 锁的 CAS 失败为零 lock/outbox 变化，replay 不改变 source/revision/snapshot/ledger。</p>
 
-<h2>9. 失败捕获</h2>
+<h2>10. 失败捕获</h2>
 <p>失败捕获只追加、不覆盖，索引见 <code>docs/evidence/WAVE3/M5/failed-captures.json</code>；
 完整性门 <code>tools/m5-evidence-integrity.mjs</code> 会检查每一次失败都在索引中。</p>
 
-<h2>10. 审查状态</h2>
+<h2>11. 审查状态</h2>
 <p>四视角内部审查见 <code>docs/evidence/WAVE3/M5/reviews/internal-review.md</code>。
 独立外审与人工体验均未进行，本报告不代替它们。</p>
 
-<h2>11. 回退</h2>
+<h2>12. 回退</h2>
 <p>关闭 M5 的 workbench/replay/locks 路由与 Studio Gateway 并恢复旧 <code>NarralensApp</code> 即可回退 UI；
 不重置数据库、不删除 Wave 2 表、snapshot 或迁移副本。</p>
 
-<h2>12. 限制与 NOT_RUN</h2>
+<h2>13. 限制与 NOT_RUN</h2>
 <ul>
   <li>UX-12（人类一分钟定位、十秒找到撤回、理解 impact 与错误）保持 <code>HUMAN_NOT_RUN</code>：自动化不得代签人类判断。</li>
   <li>fixture 只证明系统交互，不证明长片内容质量；120 clip / 6 章是结构压力用例。</li>

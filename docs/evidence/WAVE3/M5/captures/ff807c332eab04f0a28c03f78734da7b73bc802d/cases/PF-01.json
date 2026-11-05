@@ -1,0 +1,120 @@
+{
+  "run_id": "2026-11-05T13-16-29-981Z",
+  "captured_at": "2026-11-05T13:37:12.279Z",
+  "case_id": "PF-01",
+  "title": "120 clip 四类操作各 100 样本 p95≤100ms",
+  "status": "PASS",
+  "assertions": [
+    {
+      "claim": "性能采样发生在原生 120-clip 影片加载完成后",
+      "ok": true,
+      "detail": "nativeReady=true"
+    },
+    {
+      "claim": "真实工作台投影包含 120 个原生可寻址 clip 与至少 6 章",
+      "ok": true,
+      "detail": "clips=120 chapters=6"
+    },
+    {
+      "claim": "四类操作各 100 个原始样本",
+      "ok": true,
+      "detail": "{\"selection\":100,\"pan\":100,\"zoom\":100,\"chapter\":100}"
+    },
+    {
+      "claim": "100 次 zoom 都改变固定 OpenFilm 原生时间线的缩放状态",
+      "ok": true,
+      "detail": "native zoom state changes=100"
+    },
+    {
+      "claim": "每类 event→paint p95 ≤ 100ms",
+      "ok": true,
+      "detail": "{\"selection\":67.29999999701977,\"pan\":34.100000001490116,\"zoom\":67.79999999701977,\"chapter\":59.899999998509884}"
+    },
+    {
+      "claim": "慢样本没有被删除",
+      "ok": true,
+      "detail": "样本数与采集数一致"
+    }
+  ],
+  "facts": {
+    "summary": {
+      "selection": {
+        "count": 100,
+        "p95": 67.29999999701977,
+        "max": 80.20000000298023
+      },
+      "pan": {
+        "count": 100,
+        "p95": 34.100000001490116,
+        "max": 40.600000001490116
+      },
+      "zoom": {
+        "count": 100,
+        "p95": 67.79999999701977,
+        "max": 81.5
+      },
+      "chapter": {
+        "count": 100,
+        "p95": 59.899999998509884,
+        "max": 65.5
+      }
+    },
+    "nativeState": {
+      "studio_seconds": 0,
+      "transport": "播放",
+      "frames": [
+        "http://127.0.0.1:57123/film/p/5yZaWLkzbfSFB-fAp51oQ5lW/film.html?load=1&film-missing=skip"
+      ]
+    },
+    "network": {
+      "responses": 602,
+      "scene_responses": 271,
+      "failed_count": 121,
+      "failed_by_reason": {
+        "net::ERR_ABORTED:cancelled": 121
+      },
+      "errors": [
+        {
+          "url": "http://127.0.0.1:55557/api/projects/5_yUOmV1hSlk/opened",
+          "status": 422
+        },
+        {
+          "url": "http://127.0.0.1:55557/api/projects/5_yUOmV1hSlk/settings",
+          "status": 422
+        },
+        {
+          "url": "http://127.0.0.1:55557/api/projects/5_yUOmV1hSlk/subtitles",
+          "status": 422
+        },
+        {
+          "url": "http://127.0.0.1:55557/api/projects/5_yUOmV1hSlk/captions",
+          "status": 422
+        },
+        {
+          "url": "http://127.0.0.1:55557/api/projects/5_yUOmV1hSlk/markers",
+          "status": 422
+        },
+        {
+          "url": "http://127.0.0.1:55557/api/health",
+          "status": 422
+        },
+        {
+          "url": "http://127.0.0.1:55557/api/prefs",
+          "status": 422
+        },
+        {
+          "url": "http://127.0.0.1:55557/api/projects/5_yUOmV1hSlk/exports",
+          "status": 422
+        },
+        {
+          "url": "http://127.0.0.1:55557/api/projects/5_yUOmV1hSlk/proxies",
+          "status": 422
+        }
+      ]
+    }
+  },
+  "evidence": [
+    "/mnt/c/workspace/videoworkline/Narralens/docs/evidence/WAVE3/M5/captures/ff807c332eab04f0a28c03f78734da7b73bc802d/performance/pf-01-samples.json",
+    "/mnt/c/workspace/videoworkline/Narralens/docs/evidence/WAVE3/M5/captures/ff807c332eab04f0a28c03f78734da7b73bc802d/browser/pf-01-native-diagnostics.json"
+  ]
+}

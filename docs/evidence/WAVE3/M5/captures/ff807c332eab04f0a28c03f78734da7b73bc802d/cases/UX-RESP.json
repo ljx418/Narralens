@@ -1,0 +1,86 @@
+{
+  "run_id": "2026-11-05T13-16-29-981Z",
+  "captured_at": "2026-11-05T13:37:12.286Z",
+  "case_id": "UX-RESP",
+  "title": "四视口响应式与窄屏能力边界",
+  "status": "PASS",
+  "assertions": [
+    {
+      "claim": "1440/1024/768/360 四个真实视口均可用且无页面级横向溢出",
+      "ok": true,
+      "detail": "[{\"width\":1440,\"ready\":true,\"overflow_x\":false,\"panel_width\":338},{\"width\":1024,\"ready\":true,\"overflow_x\":false,\"panel_width\":338},{\"width\":768,\"ready\":true,\"overflow_x\":false,\"panel_width\":357.359375},{\"width\":360,\"ready\":true,\"overflow_x\":false,\"panel_width\":319}]"
+    },
+    {
+      "claim": "360px 明示窄屏仅审阅/轻操作，不冒充原生精剪",
+      "ok": true,
+      "detail": "\"窄屏审阅模式 · 原生精剪需要 ≥768px\""
+    }
+  ],
+  "facts": {
+    "matrix": [
+      {
+        "name": "desktop",
+        "width": 1440,
+        "height": 900,
+        "inner_width": 1440,
+        "inner_height": 900,
+        "document_width": 1440,
+        "overflow_x": false,
+        "panel_ready": true,
+        "panel_width": 338,
+        "panel_height": 1395,
+        "search_visible": true,
+        "narrow_notice": "none",
+        "screenshot": "/mnt/c/workspace/videoworkline/Narralens/docs/evidence/WAVE3/M5/captures/ff807c332eab04f0a28c03f78734da7b73bc802d/screenshots/UX-RESP-1440x900.png"
+      },
+      {
+        "name": "compact",
+        "width": 1024,
+        "height": 768,
+        "inner_width": 1024,
+        "inner_height": 768,
+        "document_width": 1024,
+        "overflow_x": false,
+        "panel_ready": true,
+        "panel_width": 338,
+        "panel_height": 1395,
+        "search_visible": true,
+        "narrow_notice": "none",
+        "screenshot": "/mnt/c/workspace/videoworkline/Narralens/docs/evidence/WAVE3/M5/captures/ff807c332eab04f0a28c03f78734da7b73bc802d/screenshots/UX-RESP-1024x768.png"
+      },
+      {
+        "name": "tablet",
+        "width": 768,
+        "height": 1024,
+        "inner_width": 768,
+        "inner_height": 1024,
+        "document_width": 768,
+        "overflow_x": false,
+        "panel_ready": true,
+        "panel_width": 357.359375,
+        "panel_height": 1377,
+        "search_visible": true,
+        "narrow_notice": "none",
+        "screenshot": "/mnt/c/workspace/videoworkline/Narralens/docs/evidence/WAVE3/M5/captures/ff807c332eab04f0a28c03f78734da7b73bc802d/screenshots/UX-RESP-768x1024.png"
+      },
+      {
+        "name": "narrow",
+        "width": 360,
+        "height": 800,
+        "inner_width": 360,
+        "inner_height": 800,
+        "document_width": 360,
+        "overflow_x": false,
+        "panel_ready": true,
+        "panel_width": 319,
+        "panel_height": 1395,
+        "search_visible": true,
+        "narrow_notice": "\"窄屏审阅模式 · 原生精剪需要 ≥768px\"",
+        "screenshot": "/mnt/c/workspace/videoworkline/Narralens/docs/evidence/WAVE3/M5/captures/ff807c332eab04f0a28c03f78734da7b73bc802d/screenshots/UX-RESP-360x800.png"
+      }
+    ]
+  },
+  "evidence": [
+    "responsive/viewports.json"
+  ]
+}

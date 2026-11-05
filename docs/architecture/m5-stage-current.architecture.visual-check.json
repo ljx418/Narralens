@@ -7,8 +7,8 @@
   "visualReview": "pending",
   "artifact": {
     "path": "/mnt/c/workspace/videoworkline/Narralens/docs/architecture/m5-stage-current.architecture.html",
-    "sha256": "a3e4209e24fb67de0eb262092d03a3b457d26c21747a701b01aab4619acca641",
-    "bytes": 827119
+    "sha256": "4488942fad30c80a8a6985f06ab1cc583674445a50cd380e0a5269e1a7482bed",
+    "bytes": 827311
   },
   "state": {
     "detail": "read",
@@ -27,7 +27,7 @@
         "artifact": "/mnt/c/workspace/videoworkline/Narralens/docs/architecture/m5-stage-current.architecture.html"
       },
       "evidence": {
-        "reason": "Chrome DevTools write pipe failed: read ECONNRESET [ECONNRESET]\nChrome process: still running.\nChrome stderr:\n[1105/143554.288:ERROR:chrome\\app\\chrome_main_delegate.cc:1226] Remote debugging pipe file descriptors are not open."
+        "reason": "Chrome DevTools write pipe failed: read ECONNRESET [ECONNRESET]\nChrome process: still running.\nChrome stderr:\n[1105/213907.805:ERROR:chrome\\app\\chrome_main_delegate.cc:1226] Remote debugging pipe file descriptors are not open."
       },
       "supportedFixes": [
         "resolve the reported Chrome inspection error, then rerun visual-check"
@@ -56,5 +56,5 @@
     "receipt": "m5-stage-current.architecture.visual-check.json",
     "contactSheet": "m5-stage-current.architecture.visual-check.html"
   },
-  "error": "Chrome DevTools write pipe failed: read ECONNRESET [ECONNRESET]\nChrome process: still running.\nChrome stderr:\n[1105/143554.288:ERROR:chrome\\app\\chrome_main_delegate.cc:1226] Remote debugging pipe file descriptors are not open."
+  "error": "Chrome DevTools write pipe failed: read ECONNRESET [ECONNRESET]\nChrome process: still running.\nChrome stderr:\n[1105/213907.805:ERROR:chrome\\app\\chrome_main_delegate.cc:1226] Remote debugging pipe file descriptors are not open."
 }

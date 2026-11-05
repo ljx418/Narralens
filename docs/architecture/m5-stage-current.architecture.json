@@ -50,7 +50,7 @@
       "sublabel": "Idea / Refine / History / Impact",
       "pos": [235, 260],
       "size": [185, 72],
-      "tag": "M5_ACCEPTANCE_REWORK"
+      "tag": "HEADLESS_REVIEW_PENDING"
       ,"sources": [
         { "path": "src/app/m5/M5Panel.tsx", "line": 129, "label": "同页面板" },
         { "path": "src/app/m5/SelectionCoordinator.ts", "line": 22, "label": "选区协调" }
@@ -307,15 +307,15 @@
       "title": "本阶段已实现",
       "items": [
         "M5 同页 Studio、受控采用与历史恢复的核心实现已存在",
-        "WebSocket 认证与双 loopback origin 已返修，等待新冻结捕获"
+        "WebSocket 认证与双 loopback origin 已返修并完成正式捕获"
       ]
     },
     {
       "dot": "amber",
       "title": "当前出门门限",
       "items": [
-        "UX-11/PF-01 聚焦复验已通过；仍须全量重捕获与独立复审",
-        "自动门全绿后才启动 UX-12；人工不得替代自动门"
+        "正式捕获 16 PASS / 0 FAIL / UX-12 NOT_RUN；等待三路独立复审",
+        "独立复审全绿后才启动 UX-12；人工不得替代自动门"
       ]
     },
     {

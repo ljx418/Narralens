@@ -3,9 +3,10 @@
 
 文档状态：Gate D1–D3、D4.0/D4.1 与 Wave 1/Wave 2 历史结论保留。旧 M5 捕获已被语义审计否决并保留为
 历史；冻结提交 `74dd5689829109da9e474833c745d05974542c02` 的捕获随后被发现存在原生 WebSocket 认证失败
-导致的预览重载风暴，因此同样只作失败历史。当前声明上限为 `M5_ACCEPTANCE_REWORK`；UX-11 与 PF-01
-修复后本地聚焦复验已通过，但必须绑定新的干净冻结提交完成全量捕获和独立复审，才可恢复
-`M5_HEADLESS_EVIDENCED`。UX-12 保持 `HUMAN_NOT_RUN`。
+导致的预览重载风暴，因此同样只作失败历史。返修代码冻结于 `63492d1e02548cfec9cb3b83fc020b0a22bcc10e`；
+干净提交 `ff807c332eab04f0a28c03f78734da7b73bc802d` 的正式捕获已完成：16 个自动 case PASS、0 FAIL、
+UX-12 为 `HUMAN_NOT_RUN`，全部代码门、Headless、真实 Studio seam、凭据扫描和证据完整性门 exit 0。
+当前声明上限为 `M5_HEADLESS_REVIEW_PENDING`；三路独立复审通过前不提升为 `M5_HEADLESS_EVIDENCED`。
 Gate D4.2、`Gate V1-P0`、`V1-Full`、M6 与 M7 仍未关闭。
 
 当前阶段的可视化权威架构为 `docs/architecture/m5-stage-current.architecture.html`；其 Archify 源为同目录

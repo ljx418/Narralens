@@ -1,0 +1,105 @@
+
+> narralens@0.1.0 test:wave2:m3 /mnt/c/workspace/videoworkline/Narralens
+> vitest run --config vitest.config.ts tests/wave2/m3
+
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens
+
+(node:2733236) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/m3/materialize-routes.test.ts (13 tests) 122221ms
+   ✓ M3.3 the two routes, over HTTP, against a real migrated target > POST returns 202 with a job and a materialization id, and GET reads it back  13179ms
+   ✓ M3.3 the two routes, over HTTP, against a real migrated target > GET answers 404 for a materialization that does not exist  1285ms
+   ✓ M3.3 the two routes, over HTTP, against a real migrated target > POST refuses a malformed body on merit, with no materialization created  5207ms
+   ✓ M3.3 the two routes, over HTTP, against a real migrated target > POST refuses a stale base revision rather than preparing against a moved project  5198ms
+   ✓ M3.3 the two routes, over HTTP, against a real migrated target > GET moves a drifted materialization to stale over HTTP  11529ms
+   ✓ M3.3 a client never has to call the worker itself > renders on its own after a POST, with no manual worker call  12125ms
+   ✓ M3.3 a client never has to call the worker itself > classifies rows left behind when the Host restarts  13756ms
+   ✓ PR-01 a replayed comparison is labelled and both digests are kept > stamps RECORDED_PROVIDER_OUTPUT_REPLAY with both digests  5050ms
+   ✓ PR-01 a replayed comparison is labelled and both digests are kept > refuses a replay that cannot be substantiated  4940ms
+   ✓ MT-04 and MT-05 through the Host, not around it > changes no author fact while a real materialize runs end to end  12667ms
+   ✓ MT-04 and MT-05 through the Host, not around it > goes stale when the control revision moves under a ready materialization  12272ms
+   ✓ PR-03 a real lock, not a hand-written control revision > refuses a POST prepared before the range was locked  10733ms
+   ✓ PR-03 a real lock, not a hand-written control revision > moves a ready materialization stale when the range is locked afterwards  14277ms
+(node:2842612) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/m3/materialize-service.test.ts (29 tests) 58203ms
+   ✓ M3.3 a materialization runs end to end to a real proxy > reaches ready with a real plan, a real proxy and lineage covering both outputs  4395ms
+   ✓ M3.3 a materialization runs end to end to a real proxy > records every fault point it passed, in order  4497ms
+   ✓ M3.3 a materialization runs end to end to a real proxy > changes no author fact (MT-04 persistence subset)  4322ms
+   ✓ M3.3 the worker holds a lease before it does anything > refuses to run while another owner holds the lease  459ms
+   ✓ M3.3 the worker holds a lease before it does anything > releases the lease when it finishes, so another run can take it  3938ms
+   ✓ M3.3 the worker holds a lease before it does anything > does not let a second worker advance a materialization that already moved on  4167ms
+   ✓ M3.3 a late or cancelled result is quarantined, never adopted > does not reach ready when the job was cancelled mid-run  480ms
+   ✓ M3.3 a late or cancelled result is quarantined, never adopted > records the orphan rather than deleting it  485ms
+   ✓ M3.3 a late or cancelled result is quarantined, never adopted > quarantines a materialization whose worker died holding the lease  460ms
+   ✓ M3.3 a late or cancelled result is quarantined, never adopted > queues a cancelled materialization for quarantine on recovery, not a retry  443ms
+   ✓ M3.3 a crash before ready never leaves something adoptable > leaves no adoptable materialization after a crash at after_lease  427ms
+   ✓ M3.3 a crash before ready never leaves something adoptable > leaves no adoptable materialization after a crash at after_plan  470ms
+   ✓ M3.3 a crash before ready never leaves something adoptable > leaves no adoptable materialization after a crash at after_proxy  3859ms
+   ✓ M3.3 a crash before ready never leaves something adoptable > leaves no adoptable materialization after a crash at after_lineage  4124ms
+   ✓ M3.3 a crash before ready never leaves something adoptable > leaves no adoptable materialization after a crash at before_ready  3797ms
+   ✓ M3.3 a crash before ready never leaves something adoptable > leaves no staging file behind after a crash  315ms
+   ✓ M3.3 every read re-verifies and only ever moves to stale > reports ready while nothing has moved  3844ms
+   ✓ M3.3 every read re-verifies and only ever moves to stale > becomes stale when the target's asset bytes drift  3927ms
+   ✓ M3.3 every read re-verifies and only ever moves to stale > stays stale on every later read, and never returns to ready  3797ms
+   ✓ M3.3 every read re-verifies and only ever moves to stale > becomes stale when the base revision moves under it  3719ms
+   ✓ M3.3 the intent is recorded idempotently > refuses a legacy project, which has no comparable target  304ms
+   ✓ every defect the internal review raised has a test that fails without its fix > keeps a completed materialization when only the promotion is interrupted  3963ms
+   ✓ every defect the internal review raised has a test that fails without its fix > cannot reach ready without the facts the worker proved  304ms
+   ✓ every defect the internal review raised has a test that fails without its fix > refuses a comparison rebuilt after the intent was prepared  304ms
+ ✓ tests/wave2/m3/proxy-renderer.test.ts (21 tests) 23078ms
+   ✓ M3.2 the proxy is real media with the frames the plan promised > produces a decodable proxy whose total frame count matches the plan  4030ms
+   ✓ M3.2 the proxy is real media with the frames the plan promised > keeps each segment's own first and last frames, so the proxy is really the segments  4551ms
+   ✓ M3.2 the proxy is real media with the frames the plan promised > decodes the whole proxy without error, not just its head  2887ms
+   ✓ M3.2 lineage accounts for every output and cannot be quietly rewritten > names the input bytes, span and rights behind every clip  3560ms
+   ✓ M3.2 lineage accounts for every output and cannot be quietly rewritten > records the tool and its version, so a proxy can be traced to what made it  2566ms
+   ✓ M3.2 the renderer cannot be steered by its arguments > builds argv from a fixed template, so no input can reach a shell  2573ms
+   ✓ M3.2 the renderer cannot be steered by its arguments > writes only under the derived root, never next to the source  2681ms
+ ✓ tests/wave2/m3/lineage-and-limits.test.ts (12 tests) 14673ms
+   ✓ MT-03 lineage is tamper-evident > matches what a real render produced, so the digest covers the actual outputs  2757ms
+   ✓ M3.2 the renderer is bounded > never runs more than the global ceiling inside itself  2500ms
+   ✓ M3.2 the renderer is bounded > never runs more than one render for a single project at a time  3083ms
+   ✓ M3.2 the renderer is bounded > does let two different projects run at once  1574ms
+   ✓ M3.2 the renderer is bounded > still completes every render it accepted  1624ms
+   ✓ M3.2 the renderer is bounded > releases its slot when a render fails, so one bad input cannot wedge the queue  3124ms
+(node:2941995) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+stderr | tests/wave2/m3/drain-liveness.test.ts > a hung render must not starve the queue > still runs other runnable rows while one render is parked
+DRAIN_STATE ["mat_a","mat_b","mat_c"] [] [["mat_a","running"],["mat_b","running"],["mat_c","running"]]
+
+ ✓ tests/wave2/m3/drain-liveness.test.ts (18 tests) 7001ms
+   ✓ a hung render must not starve the queue > still runs other runnable rows while one render is parked  810ms
+   ✓ a hung render must not starve the queue > resumes on its own after the held work is released, with no new request  367ms
+   ✓ a hung render must not starve the queue > never runs the same row twice, whichever way overlapping ticks are joined  318ms
+   ✓ a drain failure is a record, not a shrug > does not sweep a staging file owned by another active worker  403ms
+   ✓ a drain failure is a record, not a shrug > records an unexpected failure outside the owned-run catch  360ms
+   ✓ a drain failure is a record, not a shrug > records a row failure with enough to act on it  354ms
+   ✓ a drain failure is a record, not a shrug > keeps draining after a failure, rather than stopping for the rest of the process  327ms
+   ✓ close stops the scheduler and in-flight work > a drain that throws during shutdown does not reject  310ms
+   ✓ a retryable failure must not strand the materialization either > leaves the row retryable when the layer below says the facts were not verified  1138ms
+   ✓ a retryable failure must not strand the materialization either > preserves the host-resource code when a ready row cannot be reverified  576ms
+   ✓ a retryable failure must not strand the materialization either > still strands a row when the facts were genuinely disproven  335ms
+(node:2949578) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/m3/materialization-store.test.ts (18 tests) 3925ms
+   ✓ M3.1 the materialization row > starts queued and keeps every fact it was seeded with  319ms
+(node:2949860) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/m3/lease-and-recovery.test.ts (15 tests) 3827ms
+   ✓ B1: a lease is renewed only by its own attempt > refuses renewal of a cancelled or terminal job  409ms
+   ✓ B2: recovery is one decision about both rows, not a report > resumes a complete row at validating so it can be promoted without re-encoding  383ms
+   ✓ B2: recovery is one decision about both rows, not a report > refuses to resume a cancelled row  318ms
+(node:2963753) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/m3/binding-service.test.ts (22 tests) 419ms
+(node:2963974) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/m3/derived-artifact-store.test.ts (13 tests) 304ms
+ ✓ tests/wave2/m3/native-plan.test.ts (18 tests) 22ms
+
+ Test Files  10 passed (10)
+      Tests  179 passed (179)
+   Start at  20:13:11
+   Duration  285.48s (transform 2.50s, setup 0ms, collect 25.98s, tests 233.67s, environment 1ms, prepare 17.94s)
+

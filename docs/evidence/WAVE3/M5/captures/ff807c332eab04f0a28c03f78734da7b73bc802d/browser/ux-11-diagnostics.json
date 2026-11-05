@@ -1,0 +1,264 @@
+[
+  {
+    "kind": "log",
+    "event": {
+      "entry": {
+        "source": "network",
+        "level": "error",
+        "text": "Failed to load resource: the server responded with a status of 422 (Unprocessable Entity)",
+        "timestamp": 1793885620816.128,
+        "url": "http://127.0.0.1:57461/api/projects/7Fca3iP-2Es1/opened",
+        "networkRequestId": "24968.1661"
+      }
+    }
+  },
+  {
+    "kind": "log",
+    "event": {
+      "entry": {
+        "source": "network",
+        "level": "error",
+        "text": "Failed to load resource: the server responded with a status of 422 (Unprocessable Entity)",
+        "timestamp": 1793885620818.802,
+        "url": "http://127.0.0.1:57461/api/projects/7Fca3iP-2Es1/subtitles",
+        "networkRequestId": "24968.1665"
+      }
+    }
+  },
+  {
+    "kind": "log",
+    "event": {
+      "entry": {
+        "source": "network",
+        "level": "error",
+        "text": "Failed to load resource: the server responded with a status of 422 (Unprocessable Entity)",
+        "timestamp": 1793885620819.052,
+        "url": "http://127.0.0.1:57461/api/projects/7Fca3iP-2Es1/captions",
+        "networkRequestId": "24968.1666"
+      }
+    }
+  },
+  {
+    "kind": "log",
+    "event": {
+      "entry": {
+        "source": "network",
+        "level": "error",
+        "text": "Failed to load resource: the server responded with a status of 422 (Unprocessable Entity)",
+        "timestamp": 1793885620819.186,
+        "url": "http://127.0.0.1:57461/api/projects/7Fca3iP-2Es1/settings",
+        "networkRequestId": "24968.1664"
+      }
+    }
+  },
+  {
+    "kind": "log",
+    "event": {
+      "entry": {
+        "source": "network",
+        "level": "error",
+        "text": "Failed to load resource: the server responded with a status of 422 (Unprocessable Entity)",
+        "timestamp": 1793885620819.357,
+        "url": "http://127.0.0.1:57461/api/projects/7Fca3iP-2Es1/markers",
+        "networkRequestId": "24968.1667"
+      }
+    }
+  },
+  {
+    "kind": "log",
+    "event": {
+      "entry": {
+        "source": "network",
+        "level": "error",
+        "text": "Failed to load resource: the server responded with a status of 422 (Unprocessable Entity)",
+        "timestamp": 1793885620825.348,
+        "url": "http://127.0.0.1:57461/api/health",
+        "networkRequestId": "24968.1671"
+      }
+    }
+  },
+  {
+    "kind": "log",
+    "event": {
+      "entry": {
+        "source": "network",
+        "level": "error",
+        "text": "Failed to load resource: the server responded with a status of 422 (Unprocessable Entity)",
+        "timestamp": 1793885620826.924,
+        "url": "http://127.0.0.1:57461/api/prefs",
+        "networkRequestId": "24968.1670"
+      }
+    }
+  },
+  {
+    "kind": "log",
+    "event": {
+      "entry": {
+        "source": "network",
+        "level": "error",
+        "text": "Failed to load resource: the server responded with a status of 422 (Unprocessable Entity)",
+        "timestamp": 1793885620918.352,
+        "url": "http://127.0.0.1:57461/api/projects/7Fca3iP-2Es1/exports",
+        "networkRequestId": "24968.1676"
+      }
+    }
+  },
+  {
+    "kind": "log",
+    "event": {
+      "entry": {
+        "source": "network",
+        "level": "error",
+        "text": "Failed to load resource: the server responded with a status of 422 (Unprocessable Entity)",
+        "timestamp": 1793885620978.845,
+        "url": "http://127.0.0.1:57461/api/projects/7Fca3iP-2Es1/proxies",
+        "networkRequestId": "24968.1685"
+      }
+    }
+  },
+  {
+    "kind": "network",
+    "event": {
+      "requestId": "24968.1689",
+      "timestamp": 40507.642958,
+      "type": "Fetch",
+      "errorText": "net::ERR_ABORTED",
+      "canceled": true
+    }
+  },
+  {
+    "kind": "log",
+    "event": {
+      "entry": {
+        "source": "security",
+        "level": "warning",
+        "text": "Failed to execute 'postMessage' on 'DOMWindow': The target origin provided ('http://127.0.0.1:57461') does not match the recipient window's origin ('http://127.0.0.1:56271').",
+        "timestamp": 1793885683713.92,
+        "lineNumber": 12,
+        "stackTrace": {
+          "callFrames": [
+            {
+              "functionName": "",
+              "scriptId": "278",
+              "url": "",
+              "lineNumber": 12,
+              "columnNumber": 107376
+            },
+            {
+              "functionName": "ii",
+              "scriptId": "278",
+              "url": "",
+              "lineNumber": 12,
+              "columnNumber": 107350
+            },
+            {
+              "functionName": "post",
+              "scriptId": "278",
+              "url": "",
+              "lineNumber": 12,
+              "columnNumber": 108675
+            },
+            {
+              "functionName": "mi",
+              "scriptId": "278",
+              "url": "",
+              "lineNumber": 12,
+              "columnNumber": 108844
+            },
+            {
+              "functionName": "gi",
+              "scriptId": "278",
+              "url": "",
+              "lineNumber": 12,
+              "columnNumber": 109197
+            },
+            {
+              "functionName": "",
+              "scriptId": "278",
+              "url": "",
+              "lineNumber": 12,
+              "columnNumber": 112822
+            },
+            {
+              "functionName": "c",
+              "scriptId": "278",
+              "url": "",
+              "lineNumber": 12,
+              "columnNumber": 103328
+            },
+            {
+              "functionName": "defer",
+              "scriptId": "278",
+              "url": "",
+              "lineNumber": 12,
+              "columnNumber": 103608
+            },
+            {
+              "functionName": "",
+              "scriptId": "278",
+              "url": "",
+              "lineNumber": 12,
+              "columnNumber": 112802
+            },
+            {
+              "functionName": "Ci",
+              "scriptId": "278",
+              "url": "",
+              "lineNumber": 12,
+              "columnNumber": 112758
+            },
+            {
+              "functionName": "",
+              "scriptId": "278",
+              "url": "",
+              "lineNumber": 12,
+              "columnNumber": 452242
+            },
+            {
+              "functionName": "c",
+              "scriptId": "278",
+              "url": "",
+              "lineNumber": 12,
+              "columnNumber": 103328
+            },
+            {
+              "functionName": "defer",
+              "scriptId": "278",
+              "url": "",
+              "lineNumber": 12,
+              "columnNumber": 103608
+            },
+            {
+              "functionName": "H0",
+              "scriptId": "278",
+              "url": "",
+              "lineNumber": 12,
+              "columnNumber": 452222
+            },
+            {
+              "functionName": "axe.run",
+              "scriptId": "278",
+              "url": "",
+              "lineNumber": 12,
+              "columnNumber": 458082
+            },
+            {
+              "functionName": "",
+              "scriptId": "278",
+              "url": "",
+              "lineNumber": 13,
+              "columnNumber": 21
+            },
+            {
+              "functionName": "",
+              "scriptId": "278",
+              "url": "",
+              "lineNumber": 14,
+              "columnNumber": 4
+            }
+          ]
+        }
+      }
+    }
+  }
+]
