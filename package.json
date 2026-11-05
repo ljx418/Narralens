@@ -42,6 +42,7 @@
     "test:wave2:fitness": "vitest run --config vitest.config.ts tests/architecture tests/wave2/*fitness*",
     "test:m5": "vitest run --config vitest.config.ts tests/m5",
     "test:m5:headless": "tsx tests/m5/headless/run-headless.ts",
+    "experience:m5": "tsx tools/m5-human-experience.ts",
     "evidence:m5": "bash tools/m5-run-evidence.sh",
     "evidence:m5:manifest": "node tools/m5-evidence-manifest.mjs",
     "evidence:m5:integrity": "node tools/m5-evidence-integrity.mjs",
