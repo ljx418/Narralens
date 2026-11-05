@@ -1,0 +1,67 @@
+
+> narralens@0.1.0 test:wave2:w2.0 /mnt/c/workspace/videoworkline/Narralens
+> vitest run --config vitest.config.ts tests/wave2/w2-asset-02-production.test.ts tests/wave2/w2-asset-03-atomic.test.ts tests/wave2/w2-asset-inventory-port.test.ts tests/wave2/w2-asset-ledger.test.ts tests/wave2/w2-contracts.test.ts tests/wave2/w2-host-composition.test.ts tests/wave2/w2-host-diagnostics.test.ts tests/wave2/w2-job-kind-fresh.test.ts tests/wave2/w2-job-kind-migration.test.ts tests/wave2/w2-ledger-attention.test.ts tests/wave2/w2-openfilm-composition.test.ts tests/wave2/w2-project-resolver.test.ts tests/wave2/w2-route-fitness.test.ts tests/wave2/w2-typed-edit.test.ts
+
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens
+
+(node:2997040) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/w2-host-composition.test.ts (12 tests) 13032ms
+   ✓ blocker 4a: the Host owns one resolver, one ledger and one inventory > keeps the legacy route answering exactly as before  849ms
+   ✓ blocker 4a: the Host owns one resolver, one ledger and one inventory > still exposes the Wave 1 migration routes  406ms
+   ✓ blocker 4b: a migrated target resolves through the production seam after a restart > resolves after the Host that created the target is closed and reopened  355ms
+   ✓ blocker 4b: a migrated target resolves through the production seam after a restart > fails closed through the same seam when the binding is missing  313ms
+   ✓ blocker 4b: a migrated target resolves through the production seam after a restart > fails closed when the active commit is missing  312ms
+   ✓ ASSET-02 and ASSET-03 through the Host's own instances > seeds through the real migration, then fails closed on drift, permanently  9351ms
+(node:3009597) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/w2-project-resolver.test.ts (16 tests) 4286ms
+   ✓ ACT-02 every way a migrated target must not resolve is closed > refuses a migration in attention, and a recovery-parked one, with 423  399ms
+   ✓ ACT-02 every way a migrated target must not resolve is closed > refuses when the target root does not exist on disk  525ms
+   ✓ ACT-02 every way a migrated target must not resolve is closed > refuses a target with no engine binding and one with no active commit  426ms
+(node:3012474) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/w2-job-kind-migration.test.ts (17 tests) 3900ms
+   ✓ W2-G02 the job table gains `materialize` without losing a row > accepts a materialize job after the migration and still rejects an unknown kind  302ms
+   ✓ W2-G02 the job table gains `materialize` without losing a row > is idempotent: reopening again performs no further migration and keeps the data  472ms
+   ✓ W2-G02 the job table gains `materialize` without losing a row > leaves the old table in place until the swap is proven, and records why  324ms
+   ✓ W2-G02 the job table gains `materialize` without losing a row > fails startup loudly rather than silently skipping a half-migrated table  304ms
+   ✓ the copy is by explicit column list, not by position > drops an unknown column rather than shifting every value after it  322ms
+(node:3013879) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/w2-openfilm-composition.test.ts (6 tests) 2520ms
+   ✓ R2-07 the OpenFilm port is composed only from a verified pinned checkout > registers a port against the real pinned upstream when one is present  987ms
+   ✓ R2-07 the OpenFilm port is composed only from a verified pinned checkout > leaves the capability closed when the checkout does not verify  1527ms
+(node:3014024) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/w2-job-kind-fresh.test.ts (8 tests) 1660ms
+   ✓ blocker 1a: a fresh database accepts materialize on its first open > keeps the fresh and migrated schemas semantically identical  366ms
+(node:3014061) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/w2-route-fitness.test.ts (8 tests) 943ms
+   ✓ W2.0 fitness: the unopened Wave 2 routes stay closed > keeps the Wave 1 migration routes answering, so 404 means unmounted and not broken  771ms
+(node:3014162) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/w2-asset-ledger.test.ts (30 tests) 495ms
+(node:3025016) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/w2-asset-inventory-port.test.ts (14 tests) 299ms
+(node:3026478) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/w2-asset-02-production.test.ts (13 tests) 313ms
+(node:3030170) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/w2-asset-03-atomic.test.ts (13 tests) 222ms
+(node:3031235) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/w2-ledger-attention.test.ts (9 tests) 156ms
+ ✓ tests/wave2/w2-contracts.test.ts (28 tests) 57ms
+ ✓ tests/wave2/w2-typed-edit.test.ts (5 tests) 13ms
+ ✓ tests/wave2/w2-host-diagnostics.test.ts (10 tests) 7ms
+
+ Test Files  14 passed (14)
+      Tests  189 passed (189)
+   Start at  11:43:20
+   Duration  106.28s (transform 2.78s, setup 0ms, collect 38.74s, tests 27.90s, environment 2ms, prepare 27.44s)
+

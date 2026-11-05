@@ -1,11 +1,11 @@
 # Narralens V1 规格—架构—开发—验收追踪矩阵
 
 版本：v1.0  
-状态：实际开发已批准；Wave 2 组合外审结论保留。M5 同页 Studio UX 已在冻结代码
-`6e9b8ed199dcdeb8c61f9a68022a748bd08944ca` 完成全量回归、独立阶段门、生产构建与 Headless 体验捕获，
-但自动验收报告的截图相对路径重复了 `captures/`，当前为 `M5_REPORT_REPAIR_PENDING`，不得据此声明最终
-`M5_HEADLESS_EVIDENCED`。UX-12 仍为 `HUMAN_NOT_RUN`；Gate D4.2、`Gate V1-P0`、`V1-Full`、M6 与 M7 均未关闭。
-事实日期：2026-11-04
+状态：实际开发已批准；Wave 2 组合外审结论保留。M5 同页 Studio UX 最终自动验收绑定
+`2a8337d316a6ed503c2e85e065a0385b0dcc87e6`，全量回归、独立阶段门、生产构建、Headless 体验、
+14 张报告截图与证据完整性均通过，当前为 `M5_HEADLESS_EVIDENCED`。UX-12 仍为 `HUMAN_NOT_RUN`；
+Gate D4.2、`Gate V1-P0`、`V1-Full`、M6 与 M7 均未关闭。
+事实日期：2026-11-05
 <!-- M2.1_REWORK_BASE_SHA=ee58ab5c6a9d4bbdf05e8ac8a394fd75218cae59 REVIEW_STATUS=PASS -->
 
 ## 1. 使用规则
@@ -50,7 +50,7 @@
 | M2 | EnginePort、单引擎绑定、写入治理、三类锁、持久 Job/SSE/lease、snapshot/journal、迁移副本与回退 | **Wave 1 组合外审 PASS，`CONTROLLED_OPENFILM_READY`**：冻结代码 `e2dec5c...`，证据捕获 `fd64762...`，21 case 为 20 PASS + 1 `NOT_APPLICABLE_APPROVED` | migrate-copy/report/rollback 已实现；AC-005 legacy edit 仍为事后 snapshot，headed/human NOT_RUN |
 | W2.0–M3 | 目标工程解析、资产账本、素材化、真实 proxy/native plan/lineage | **M3 独立外审 PASS**：候选 `fa08fe4...`，捕获 `f2a41ff...`；ACT/ASSET、PR、MT 全部关闭 | materialize POST/GET 已开放；NOWRITE；impact/adopt/history 仍 404；M3 不等于 D4.2 完成 |
 | M4A–M4C | server impact、采用与历史事务 | **M4A、M4B、M4C 独立外审及 Wave 2 组合外审均 PASS；`WAVE2_EDITABLE_ADOPTION_READY`**。唯一 adopt/restore 路由、原子 source 发布、revision/impact/projection/ledger/outbox/idempotency 同事务、崩溃恢复、真实 900 帧双渲染与中镜原生编辑均有直接测试 | 组合候选 `a038e4a...`；允许进入 M5，Gate D4.2 仍未关闭 |
-| M5 | 同页原生 Studio UX | **`M5_REPORT_REPAIR_PENDING`** | 冻结候选 `6e9b8ed...` 的自动门全绿，但 HTML 截图路径缺陷已诚实记录，须修复、增加回归门并重新捕获；UX-12 `HUMAN_NOT_RUN` |
+| M5 | 同页原生 Studio UX | **`M5_HEADLESS_EVIDENCED`** | 最终捕获 `2a8337d...`：全量门与 15 个自动体验 case 通过，14 张截图路径完整，证据完整性覆盖 42 次捕获且 0 failure；UX-12 `HUMAN_NOT_RUN` |
 | M6 | `Gate V1-P0` | not-started | 不等于 V1-Full |
 | M7A–D | P1 与完整长片证据 | not-started | P0/P1 全绿后才可声明 V1-Full |
 
@@ -74,7 +74,7 @@
 | PF-02 | NFR-02/NFR-04 | 三路 proxy 与音频焦点 | 三路真实 proxy、唯一音频焦点、内存记录 | automated-pass |
 | PF-03 | NFR-04 | launcher/reopen harness | 冷/热重开、首帧、媒体关联、内存 | automated-pass |
 
-证据：`docs/evidence/WAVE3/M5/captures/6e9b8ed199dcdeb8c61f9a68022a748bd08944ca/`；逐 case 的断言、事实、
+证据：`docs/evidence/WAVE3/M5/captures/2a8337d316a6ed503c2e85e065a0385b0dcc87e6/`；逐 case 的断言、事实、
 截图、性能样本与失败断言
 都在里面。`automated-pass` 只表示**自动门**通过，人工体验门（UX-12）仍然是 `HUMAN_NOT_RUN`。
 

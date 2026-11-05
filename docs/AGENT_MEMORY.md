@@ -41,7 +41,7 @@
 - M4C 必须先完成 M4B 独立外审，再按 `docs/migration/WAVE2/17_M4C_DEVELOPMENT_GATE.md` 连续实现；
 - M4C 内容相同的历史恢复复用 content-addressed snapshot id，但必须创建新 transaction/commit/revision+1；
 - M4C 完成后先做 Wave 2 组合外审，不顺跳 M5；最近正式人工体验门在 M5C 后。
-- 2026-11-04：M5 冻结代码 `6e9b8ed199dcdeb8c61f9a68022a748bd08944ca` 的自动门全部通过，但验收
-  HTML 截图路径缺陷使状态保持 `M5_REPORT_REPAIR_PENDING`；修复、回归并重新捕获前不得声明最终
-  `M5_HEADLESS_EVIDENCED`。UX-12 必须由项目负责人亲自体验并签署，自动化不得代签；人工签署前不得进入
-  M6，也不得声明 Gate D4.2、Gate V1-P0 或 V1-Full。
+- 2026-11-05：M5 最终自动验收捕获 `2a8337d316a6ed503c2e85e065a0385b0dcc87e6` 已通过全量门、
+  Headless UX、真实 Studio 接缝、14 张报告截图与证据完整性，状态为 `M5_HEADLESS_EVIDENCED`。UX-12
+  必须由项目负责人亲自体验并签署，自动化不得代签；人工签署前不得进入 M6，也不得声明 Gate D4.2、
+  Gate V1-P0 或 V1-Full。
