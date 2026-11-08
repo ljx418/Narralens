@@ -1,5 +1,8 @@
 # 叙镜验收计划 v1.0
 
+> 2026-11-08：PRD v1.1 新路线的验收目标见 `agent-driven-v1/02_DEVELOPMENT_AND_ACCEPTANCE.md`，
+> AD-T01..25 映射 AD-E01..16；新路线尚待核对，未执行、未签署。下方历史结果不替代新链路验证。
+
 > 当前状态覆盖（2026-10-26）：下方 D4.2.1–D4.2.3 清单保留原始 Gate 历史与旧 Hypit 表述，不再作为当前实现状态来源。
 > Wave 2 已通过组合独立外审并达到 `WAVE2_EDITABLE_ADOPTION_READY`；OpenFilm 原生 materialize / impact / adopt /
 > history restore 的当前事实以 `11_V1_Traceability.md`、`docs/migration/WAVE2/` 与 `docs/evidence/WAVE2/` 为准。

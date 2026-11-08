@@ -1,0 +1,157 @@
+{
+  "kind": "supplementary-windows-headless-CDP",
+  "status": "pass",
+  "businessAcceptance": "NOT_RUN",
+  "viewports": [
+    {
+      "artifact": "architecture",
+      "width": 1440,
+      "height": 900,
+      "scrollWidth": 1440,
+      "scrollHeight": 900
+    },
+    {
+      "artifact": "architecture",
+      "width": 1600,
+      "height": 1000,
+      "scrollWidth": 1600,
+      "scrollHeight": 1000
+    },
+    {
+      "artifact": "architecture",
+      "width": 1920,
+      "height": 1080,
+      "scrollWidth": 1920,
+      "scrollHeight": 1080
+    },
+    {
+      "artifact": "architecture",
+      "width": 2048,
+      "height": 1320,
+      "scrollWidth": 2048,
+      "scrollHeight": 1320
+    },
+    {
+      "artifact": "review",
+      "width": 1440,
+      "scrollWidth": 1425,
+      "items": 32,
+      "embeddedDiagram": 2
+    },
+    {
+      "artifact": "review",
+      "width": 390,
+      "scrollWidth": 375,
+      "items": 32,
+      "embeddedDiagram": 2
+    }
+  ],
+  "screenshots": [
+    "architecture-1440-light.png",
+    "architecture-1440-dark.png",
+    "architecture-2048-light.png",
+    "architecture-2048-dark.png",
+    "review-1440.png",
+    "review-390.png"
+  ],
+  "architecture": {
+    "sha256": "1fbd988fb7ef9177adc1dcf34aef3aa3c0bf687c9dc30e008e262d3381e7452c",
+    "bytes": 813840
+  },
+  "review": {
+    "sha256": "26cb9727f63b5c4c25b4c80d94c0159fbab83a0184991d70efb62594759833a4",
+    "bytes": 950575
+  },
+  "interactions": {
+    "choice": "change",
+    "note": "需要明确启动状态",
+    "total": 32,
+    "approvalStatus": "USER_REVIEW_INPUT_NOT_IMPLEMENTATION_APPROVAL",
+    "documentCount": 5,
+    "stored": true
+  },
+  "reload": {
+    "selected": true,
+    "note": "需要明确启动状态"
+  },
+  "downloadAttempt": {
+    "result": {
+      "type": "string",
+      "value": "已生成核对 JSON。"
+    }
+  },
+  "downloadEvents": [
+    {
+      "method": "Browser.downloadWillBegin",
+      "params": {
+        "frameId": "FCDDF9983C5F1B54E93E9F0CF6241750",
+        "guid": "3b9556f1-9903-4120-837b-099d5cb92af3",
+        "url": "blob:null/aebe82ee-69fd-4dbb-809b-2fb45c6dea71",
+        "suggestedFilename": "Narralens-路线核对.json"
+      }
+    },
+    {
+      "method": "Browser.downloadProgress",
+      "params": {
+        "guid": "3b9556f1-9903-4120-837b-099d5cb92af3",
+        "totalBytes": 5985,
+        "receivedBytes": 0,
+        "state": "inProgress"
+      }
+    },
+    {
+      "method": "Browser.downloadProgress",
+      "params": {
+        "guid": "3b9556f1-9903-4120-837b-099d5cb92af3",
+        "totalBytes": 5985,
+        "receivedBytes": 5985,
+        "state": "inProgress"
+      }
+    },
+    {
+      "method": "Browser.downloadProgress",
+      "params": {
+        "guid": "3b9556f1-9903-4120-837b-099d5cb92af3",
+        "totalBytes": 5985,
+        "receivedBytes": 5985,
+        "state": "inProgress"
+      }
+    },
+    {
+      "method": "Browser.downloadProgress",
+      "params": {
+        "guid": "3b9556f1-9903-4120-837b-099d5cb92af3",
+        "totalBytes": 5985,
+        "receivedBytes": 5985,
+        "state": "inProgress"
+      }
+    },
+    {
+      "method": "Browser.downloadProgress",
+      "params": {
+        "guid": "3b9556f1-9903-4120-837b-099d5cb92af3",
+        "totalBytes": 5985,
+        "receivedBytes": 5985,
+        "state": "inProgress"
+      }
+    },
+    {
+      "method": "Browser.downloadProgress",
+      "params": {
+        "guid": "3b9556f1-9903-4120-837b-099d5cb92af3",
+        "totalBytes": 5985,
+        "receivedBytes": 5985,
+        "state": "completed",
+        "filePath": "C:\\workspace\\videoworkline\\.narralens-design-review-aTI5dm\\downloads\\Narralens-路线核对.json"
+      }
+    }
+  ],
+  "downloadFiles": [
+    "Narralens-路线核对.json"
+  ],
+  "download": {
+    "status": "pass",
+    "items": 32,
+    "versionBound": true
+  }
+}

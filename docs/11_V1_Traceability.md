@@ -1,5 +1,13 @@
 # Narralens V1 规格—架构—开发—验收追踪矩阵
 
+## 2026-11-08 新路线追踪入口（目标，未实现）
+
+PRD v1.1 新增 `AD-E01..16`，架构变化 `AD-A01..10`，新阶段 `AD-S0..S5`。
+完整覆盖表见 `agent-driven-v1/02_DEVELOPMENT_AND_ACCEPTANCE.md` §8，直接验收编号为 `AD-T01..25`。
+新目标统一为 `PROPOSED_FOR_REVIEW`，不得沿用旧 automated-pass 作为新路线验收。
+用户反馈只确认面板基础操作，整体产品功能/体验未认可；不自动签署完整 UX-12。
+下文全部旧 Gate/测试/证据保留；原 M6/M7 未关闭，新阶段不自动关闭它们。
+
 版本：v1.0  
 状态：实际开发已批准；Wave 2 组合外审结论保留。旧 M5 自动证据已降级并保留为失败历史；返修后的
 返修后正式捕获 `4b2e168c3d3024e5e96832e00bcbd2d8610dd3fe` 为 16 个自动 case PASS、0 FAIL、UX-12 NOT_RUN，

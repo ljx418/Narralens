@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {"title": "Narralens：Agent 驱动目标架构（待批准）", "locale": "zh-CN", "quality_profile": "showcase"},
+  "components": [
+    {"id":"driver","type":"external","label":"外部驱动 Agent","sublabel":"三类 CLI 驱动","tag":"客户端逐项验证","pos":[60,220],"size":[245,86]},
+    {"id":"skills","type":"external","label":"入口 Skill 与技能库","sublabel":"规划 / 方法 / 恢复指导","tag":"待新增","pos":[400,220],"size":[245,86]},
+    {"id":"mcp","type":"backend","label":"Narralens MCP","sublabel":"发现 / 工具 / 项目资源","tag":"待新增","pos":[740,220],"size":[245,86]},
+    {"id":"application","type":"backend","label":"应用服务与任务上下文","sublabel":"项目 / 审批 / 驱动租约","tag":"已有底座需扩展","pos":[1080,220],"size":[245,86]},
+    {"id":"workbench","type":"frontend","label":"可见视频工作台","sublabel":"选区 / 预览 / 方案与审批","tag":"M5 需重构","pos":[1080,40],"size":[245,86]},
+    {"id":"jobs","type":"messagebus","label":"持久任务与执行器","sublabel":"Job / lease / 检查点","tag":"复用并扩展","pos":[740,400],"size":[245,86]},
+    {"id":"coordinator","type":"security","label":"唯一工程提交边界","sublabel":"Coordinator / impact / 锁","tag":"已有并保留","pos":[1080,400],"size":[245,86]},
+    {"id":"provider","type":"external","label":"媒体与外部服务适配","sublabel":"检索 / 下载 / 配音 / QC","tag":"分能力接入","pos":[400,400],"size":[245,86]},
+    {"id":"engine","type":"backend","label":"EnginePort 与引擎","sublabel":"OpenFilm / Hypit 回退","tag":"原生可编辑工程","pos":[1080,580],"size":[245,86]},
+    {"id":"facts","type":"database","label":"持久项目与事实存储","sublabel":"SQLite / 资产 / snapshot","tag":"复用并扩展","pos":[740,580],"size":[245,86]}
+  ],
+  "connections": [
+    {"id":"driver-method","from":"driver","to":"skills","label":"加载方法"},
+    {"id":"skill-tools","from":"skills","to":"mcp","label":"按契约调用"},
+    {"id":"mcp-app","from":"mcp","to":"application","label":"受控业务请求"},
+    {"id":"app-submit","from":"application","to":"coordinator","label":"审批后提交","variant":"security","labelDy":55},
+    {"id":"app-jobs","from":"application","to":"jobs","label":"准备与查询任务"},
+    {"id":"ui-app","from":"workbench","to":"application","label":"读取与人工决定","labelDy":55},
+    {"id":"jobs-media","from":"jobs","to":"provider","label":"授权范围内执行"},
+    {"id":"coord-engine","from":"coordinator","to":"engine","label":"stage / 验证 / 发布","labelDy":55},
+    {"id":"jobs-facts","from":"jobs","to":"facts","label":"持久检查点","labelDy":55},
+    {"id":"coord-facts","from":"coordinator","to":"facts","label":"原子提交事实","fromSide":"left","toSide":"right","via":[[1030,443],[1030,623]]}
+  ],
+  "cards": [
+    {"dot":"cyan","title":"Agent 组织创作","items":["Skill 是方法，MCP 是协议入口","动态规划不替代持久执行事实"]},
+    {"dot":"emerald","title":"工作台与服务共享事实","items":["用户选择可被 Agent 读取","所有写通道复用 Coordinator"]},
+    {"dot":"amber","title":"规划不是实现","items":["新建 MCP、持久创作上下文与生产入口","旧 Gate 保留；新目标需逐项验收"]}
+  ]
+}

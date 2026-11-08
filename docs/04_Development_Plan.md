@@ -1,5 +1,9 @@
 # 叙镜开发计划 v1.0
 
+> 2026-11-08：新目标开发计划见 [Agent 驱动六阶段计划](agent-driven-v1/02_DEVELOPMENT_AND_ACCEPTANCE.md)。
+> 状态 `PROPOSED_FOR_REVIEW`，仅授权本轮文档开发。新编号 AD-S0..S5 不覆盖旧 M/D/Wave；下文保留历史，
+> 旧 M6/M7 指令不构成新路线自动开工许可。下一步为用户核对、原型和详细合同闭环。
+
 状态：实际开发已批准；Gate D1、D2、D3、D4.0、D4.1 已通过。D4.2.1 的 M1A 逐编号证据和独立 R4 外审已关闭；M2.1–M2.3 已组成 Wave 1 并通过组合独立外审，达到 `CONTROLLED_OPENFILM_READY`。Wave 2 的 W2.0–M4C 已实现并通过组合独立外审，达到 `WAVE2_EDITABLE_ADOPTION_READY`。下一开发阶段为 Wave 3 / M5 Studio UX；Gate D4.2、Gate V1-P0 与 V1-Full 均未关闭。总览见 `Narralens-V1-Development-GAP.drawio` 第 5 页，最新需求追踪见 `11_V1_Traceability.md`。
 
 ## 当前前置阶段 — V1 前端体验冻结（文档中）

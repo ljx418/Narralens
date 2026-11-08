@@ -1,4 +1,9 @@
 # 叙镜架构设计 v1.0
+
+> 2026-11-08 新路线入口：PRD v1.1 将目标调整为“外部 Agent + Skill/技能库 + MCP + Narralens 服务/工作台”。
+> 待批准 L0/L1 见 [目标架构分析](agent-driven-v1/01_TARGET_ARCHITECTURE.md)，
+> 新 Archify 图见 [Agent 驱动目标架构](architecture/agent-driven-v1.architecture.html)。
+> 下文继续保留原实现与历史 Gate，不能解释为新目标已实现；新路线尚处文档核对阶段。
 <!-- M2.1_REWORK_BASE_SHA=ee58ab5c6a9d4bbdf05e8ac8a394fd75218cae59 REVIEW_STATUS=PASS -->
 
 文档状态：Gate D1–D3、D4.0/D4.1 与 Wave 1/Wave 2 历史结论保留。旧 M5 捕获已被语义审计否决并保留为
