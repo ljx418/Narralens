@@ -2,6 +2,8 @@
 
 ## 2026-11-08 当前指令优先入口
 
+- 最新批准：三个lane由目录内Codex负责设计/文档/验收，Claude Code CLI具体实现；429后Codex核对原writer停止并保留工作后自动接手。分时单writer，接手实现需未参与者复核；MAIN统一集成验收。此条覆盖旧文中对CLI角色的泛称，不改变生产release门。
+
 - 最新用户认可截至867b3b3的目标与规划文档，要求主Agent设计多Agent并行架构和目录。采用主Agent+BRIDGE/PRODUCT/MEDIA独立worktree，不在同一checkout并发Git操作；公共合同/DDL/装配/原核心与最终验收由MAIN负责。后续以07/08/09文档、parallel-plan.json和根AGENTS.md为协作入口，未发布CP-A0与IMPLEMENTATION_RELEASE前不启动生产代码。
 
 - 最新批准为“继续做开发计划落盘，重新规划后续迭代”；不推断为生产实现批准。执行主线 `docs/agent-driven-v1/06_ITERATION_EXECUTION_PLAN.md`：准备轮+三轮A/B/C、17个IT包；AD-A仍仅架构编号，避免任务ID冲突。首个人工产品门是持久短片、改单镜、重开与双导出，不能回退成面板演示。
@@ -72,3 +74,7 @@
   人工 runbook 不得再引用已否决的 `2a8337...` 或 `74dd568...`。
 - 2026-11-06：候选 `2e8bbad...` 的架构、PRD/阶段、测试证据三路独立复审均 PASS，0 BLOCKER / 0 MAJOR；
   状态提升为 `M5_HEADLESS_EVIDENCED`，允许启动 UX-12。UX-12 仍必须由项目负责人亲自签署。
+
+## 用户批准的双CLI分工
+
+三个lane内Codex负责设计/文档/验收，同目录Claude Code CLI负责具体开发；Claude报429时由该lane Codex自动接手，交接前核对进程停止并保留dirty工作。同目录单writer，恢复后不得自动抢回。接手实现的Codex不能自签独立外审；MAIN统一集成验收。详见AGENTS.md与07_PARALLEL_DEVELOPMENT.md。

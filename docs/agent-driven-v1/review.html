@@ -31041,6 +31041,18 @@ manifest至少包含repo/upstream/合同版本、命令exit与日志、逐case�
 
 `tools/parallel-workspace.mjs`默认只输出计划，`--prepare`才创建；已存在不同内容/分支的目标拒绝覆盖。命令不做reset、checkout旧SHA、删除目录或覆盖现有用户工作。实际目录状态以生成回执与`git worktree list`为准，文档路径不能冒充已创建。
 
+## Codex与Claude Code执行分工（用户批准）
+
+三个lane均采用“目录内Codex负责设计、文档、验收；同目录Claude Code CLI负责具体实现”。MAIN仍负责公共合同/核心实现、跨lane接线、统一验收和发布，现有白名单、阶段依赖与资源预约不变。两种CLI由本机不同模型供应商提供；不得推定同一额度、共享凭据或擅自切换供应商。此批准落实团队分工，不替代IT-P01/IT-P02、CP-A0或具体生产release。
+
+每个lane的Codex先落盘任务单（完整base/contract SHA、路径范围、输入输出、验收case、命令、资源预约与停止条件），再交同目录Claude实现。Claude交代码、测试、复现与产物摘要；Codex冻结实现SHA后独立读取代码并重跑对应验收，MAIN集成后重跑真实组合链。CLI名称或供应商不同本身不是外审通过证据。
+
+**同一lane只有一个写入者。** Codex设计/文档与Claude实现分时执行；Claude写入时Codex仅只读观察，不并发改文件、Git索引、分支或运行根。每个lane在自身`docs/parallel/lane-*/`维护`TASK.md`与`HANDOFF.md`，记录任务状态、当前writer、base/contract/HEAD、dirty文件、命令/进程、日志与接手理由。默认Codex是lane负责人，Claude仅接已释放的实现任务。
+
+遇到Claude **429**，无需再问用户，Codex自动接手已授权剩余实现。先确认原Claude调用/子进程已结束或停止并记录，不能只凭一个429日志判断全部进程停止；记录错误与未完成工作，复核HEAD/差异、保留全部未提交内容，移交唯一writer后继续。不得reset/stash覆盖，不把失败或未完成测试写PASS；不得新增付费请求、外传或更换凭据。Claude恢复后默认仍停，直到Codex显式移交，禁止双写/自动抢回。
+
+Codex接手实现后，其自测只能称内部验证，不能自签独立外审。该候选由未参与实现的MAIN/其他干净只读审查上下文复核；若MAIN也参与实现，则另取未参与的审查上下文。独立复核暂不可得时标`REVIEW_PENDING`，可继续无依赖的已授权工作，不能越过相关验收门。
+
 ## 3. 责任划分
 
 | 角色 | 实现职责 | 目录所有权（新增模块） | 主Agent接线 |
@@ -31123,7 +31135,7 @@ worker可用真实本地数据做已授权模块验证，但不得自行启动�
 已获认可：现有21体验/13架构/六阶段/三轮目标文档；本轮提出的并行责任/目录属于新的执行设计并已落盘。
 可启动：隔离worktree准备、按lane参与IT-P01/IT-P02文档/原型任务、基线复核。
 不可启动：在CP-A0和生产实现准入未明确前启动三条生产代码开发；不得声称合同已冻结或V1开发已完成。
-</pre><p class="print-note">SHA256 9f45ebec92024723b723eb4cb27d871a4b062a818f3adc3b715c97ef1a5e6984</p></details><details><summary>docs/agent-driven-v1/08_PARALLEL_PORTS_AND_OWNERSHIP.md</summary><pre># 并行架构：公共端口、代码所有权和集成接缝
+</pre><p class="print-note">SHA256 8c0a9d952ec476cbb9739147994c3b9f140c4d9bbf85f80b5a5147f2c2de7030</p></details><details><summary>docs/agent-driven-v1/08_PARALLEL_PORTS_AND_OWNERSHIP.md</summary><pre># 并行架构：公共端口、代码所有权和集成接缝
 
 状态：执行设计，精确运行时合同待CP-A0冻结；本文定义责任与必需字段，不冒充已经新增API或schema。
 
@@ -31185,6 +31197,18 @@ PRODUCT拥有新`agent-workbench`组件、API client抽象、状态呈现与监�
 
 目前所有泳道只允许基线复核、IT-P01/IT-P02文档/原型协作。生产实现须等待MAIN发布CP-A0合同SHA与明确的release。工作目录已准备不代表任务已启动或准入已通过。
 
+## Codex与Claude Code执行分工（用户批准）
+
+三个lane均采用“目录内Codex负责设计、文档、验收；同目录Claude Code CLI负责具体实现”。MAIN仍负责公共合同/核心实现、跨lane接线、统一验收和发布，现有白名单、阶段依赖与资源预约不变。两种CLI由本机不同模型供应商提供；不得推定同一额度、共享凭据或擅自切换供应商。此批准落实团队分工，不替代IT-P01/IT-P02、CP-A0或具体生产release。
+
+每个lane的Codex先落盘任务单（完整base/contract SHA、路径范围、输入输出、验收case、命令、资源预约与停止条件），再交同目录Claude实现。Claude交代码、测试、复现与产物摘要；Codex冻结实现SHA后独立读取代码并重跑对应验收，MAIN集成后重跑真实组合链。CLI名称或供应商不同本身不是外审通过证据。
+
+**同一lane只有一个写入者。** Codex设计/文档与Claude实现分时执行；Claude写入时Codex仅只读观察，不并发改文件、Git索引、分支或运行根。每个lane在自身`docs/parallel/lane-*/`维护`TASK.md`与`HANDOFF.md`，记录任务状态、当前writer、base/contract/HEAD、dirty文件、命令/进程、日志与接手理由。默认Codex是lane负责人，Claude仅接已释放的实现任务。
+
+遇到Claude **429**，无需再问用户，Codex自动接手已授权剩余实现。先确认原Claude调用/子进程已结束或停止并记录，不能只凭一个429日志判断全部进程停止；记录错误与未完成工作，复核HEAD/差异、保留全部未提交内容，移交唯一writer后继续。不得reset/stash覆盖，不把失败或未完成测试写PASS；不得新增付费请求、外传或更换凭据。Claude恢复后默认仍停，直到Codex显式移交，禁止双写/自动抢回。
+
+Codex接手实现后，其自测只能称内部验证，不能自签独立外审。该候选由未参与实现的MAIN/其他干净只读审查上下文复核；若MAIN也参与实现，则另取未参与的审查上下文。独立复核暂不可得时标`REVIEW_PENDING`，可继续无依赖的已授权工作，不能越过相关验收门。
+
 ## MAIN主Agent职责
 
 1. 核对用户认可的21体验/13架构/六阶段，保留旧Gate；更新并行架构和17包DAG，不改验收数量。
@@ -31196,9 +31220,10 @@ PRODUCT拥有新`agent-workbench`组件、API client抽象、状态呈现与监�
 ## BRIDGE窗口可复制提示词
 
 ```text
-你是Narralens BRIDGE（接入与观测）工作Agent。
+你是Narralens BRIDGE（接入与观测）目录的Codex负责人。
 工作目录：/mnt/c/workspace/videoworkline/Narralens-agents/bridge-observability
 预期分支：agent-driven/lane-bridge
+你负责设计、文档和验收，将已释放实现任务交本目录Claude Code CLI；遇429核对原writer停止并保留工作后由你接手。必须分时单writer；接手实现后另取未参与者复核。
 先读AGENTS.md、docs/agent-driven-v1/00_READ_FIRST.md、07_PARALLEL_DEVELOPMENT.md、08_PARALLEL_PORTS_AND_OWNERSHIP.md、parallel-plan.json。
 先核对完整SHA、分支、git status、worktree与MAIN发出的ReleaseAssignment。不得reset/stash/覆盖用户工作。
 没有CP-A0冻结SHA与明确IMPLEMENTATION_RELEASE时，只做只读复核/指定文档，不启动生产实现。
@@ -31212,9 +31237,10 @@ Host、DB、引擎与服务控制通过冻结ApplicationPort调用；不能改se
 ## PRODUCT窗口可复制提示词
 
 ```text
-你是Narralens PRODUCT（创作与工作台）工作Agent。
+你是Narralens PRODUCT（创作与工作台）目录的Codex负责人。
 工作目录：/mnt/c/workspace/videoworkline/Narralens-agents/product-workbench
 预期分支：agent-driven/lane-product
+你负责设计、文档和验收，将已释放实现任务交本目录Claude Code CLI；遇429核对原writer停止并保留工作后由你接手。必须分时单writer；接手实现后另取未参与者复核。
 先读AGENTS.md、docs/agent-driven-v1/00_READ_FIRST.md、07_PARALLEL_DEVELOPMENT.md、08_PARALLEL_PORTS_AND_OWNERSHIP.md、parallel-plan.json。
 先核对SHA/分支/干净度与MAIN的ReleaseAssignment；不reset/stash。
 没有CP-A0与明确IMPLEMENTATION_RELEASE时，只做IT-P01/IT-P02指定原型/文档，不实现生产功能。
@@ -31228,9 +31254,10 @@ Host、DB、引擎与服务控制通过冻结ApplicationPort调用；不能改se
 ## MEDIA窗口可复制提示词
 
 ```text
-你是Narralens MEDIA（媒体执行与交付）工作Agent。
+你是Narralens MEDIA（媒体执行与交付）目录的Codex负责人。
 工作目录：/mnt/c/workspace/videoworkline/Narralens-agents/media-delivery
 预期分支：agent-driven/lane-media
+你负责设计、文档和验收，将已释放实现任务交本目录Claude Code CLI；遇429核对原writer停止并保留工作后由你接手。必须分时单writer；接手实现后另取未参与者复核。
 先读AGENTS.md、docs/agent-driven-v1/00_READ_FIRST.md、04_R2_FEEDBACK_AND_COMFY.md、07_PARALLEL_DEVELOPMENT.md、08_PARALLEL_PORTS_AND_OWNERSHIP.md、parallel-plan.json。
 核对完整SHA/分支/status与MAIN ReleaseAssignment；无CP-A0/明确IMPLEMENTATION_RELEASE不开始生产代码。
 获释放后仅在render/preflight/delivery/providers与指定adapter目录实现冻结Snapshot/Job/Asset/Resource/Approval端口的消费者和worker。
@@ -31255,7 +31282,15 @@ declaration_ceiling / next_allowed_action
 ```
 
 本文件是角色提示词模板，不是实际生产任务release。MAIN必须补入当前完整基线与已冻结合同/授权/范围后，才能发给工作Agent执行。
-</pre><p class="print-note">SHA256 6e4dd0e00ee32d0aa53aa2452c22dcf7bfc74e32e807c001f3bc092dba802bcc</p></details><details><summary>docs/agent-driven-v1/10_PARALLEL_REVIEW_RECORD.md</summary><pre># 并行设计复核与准备工具验证
+
+## 发给各目录Claude Code CLI的通用提示词
+
+```text
+你是当前Narralens lane的实现者。先读AGENTS.md、CLAUDE.md、parallel-plan.json及本lane Codex发布的TASK.md/ReleaseAssignment。核对目录、branch、完整SHA、dirty状态、contract_sha和当前writer；缺实现release只做已指定文档协作。
+只在本lane白名单实现任务，不改公共合同/DDL/Host/配置。按任务单逐case验证，保留真实失败、NOT_RUN、日志和产物SHA256，交候选commit给目录Codex复验。
+若收到429，停止派发，尽可能记录HANDOFF.md与进程状态，交Codex接手；恢复后未经Codex明确交回不得写入。不能reset/stash用户工作、并发写索引、自动push或自签外审。
+```
+</pre><p class="print-note">SHA256 85f86b0d38a7f40e32401216d1cf124e061c3b9ba505b49ce03f98e86bb03e05</p></details><details><summary>docs/agent-driven-v1/10_PARALLEL_REVIEW_RECORD.md</summary><pre># 并行设计复核与准备工具验证
 
 范围：多Agent工作目录/任务/所有权/公共端口/统一验收设计与元数据工具。产品运行时未实现，未运行新业务验收。
 用户认可基线：`867b3b33b9dd88c88e7bcca6c997d1ceba9c3051`。本轮并行方案构建在此之上。
@@ -31304,17 +31339,17 @@ MAIN将统一安排实际实现、持续接线与组合冻结；独立审查和�
   &quot;docs/agent-driven-v1/04_R2_FEEDBACK_AND_COMFY.md&quot;: &quot;204c0dc111d7f68da9b7753e3e3013c27bb192e49be6d7f394f4bb09ea73d878&quot;,
   &quot;docs/agent-driven-v1/05_REALTIME_AND_MONITORING.md&quot;: &quot;b162b03b86ab08c7e361f432c24ed1e49d8425789c05b59c0af372f6c4ba130f&quot;,
   &quot;docs/agent-driven-v1/06_ITERATION_EXECUTION_PLAN.md&quot;: &quot;605300a9bd4d6904e7efe6d4743f6ac18c124cb07332b155fe82891b92f3f14d&quot;,
-  &quot;docs/agent-driven-v1/07_PARALLEL_DEVELOPMENT.md&quot;: &quot;9f45ebec92024723b723eb4cb27d871a4b062a818f3adc3b715c97ef1a5e6984&quot;,
+  &quot;docs/agent-driven-v1/07_PARALLEL_DEVELOPMENT.md&quot;: &quot;8c0a9d952ec476cbb9739147994c3b9f140c4d9bbf85f80b5a5147f2c2de7030&quot;,
   &quot;docs/agent-driven-v1/08_PARALLEL_PORTS_AND_OWNERSHIP.md&quot;: &quot;8d527d08880b379bec5efe4c5445423580a6081b34f826fed05b1d6c85b0e698&quot;,
-  &quot;docs/agent-driven-v1/09_PARALLEL_AGENT_HANDOFFS.md&quot;: &quot;6e4dd0e00ee32d0aa53aa2452c22dcf7bfc74e32e807c001f3bc092dba802bcc&quot;,
+  &quot;docs/agent-driven-v1/09_PARALLEL_AGENT_HANDOFFS.md&quot;: &quot;85f86b0d38a7f40e32401216d1cf124e061c3b9ba505b49ce03f98e86bb03e05&quot;,
   &quot;docs/agent-driven-v1/10_PARALLEL_REVIEW_RECORD.md&quot;: &quot;1319e2def4d2fed591193e87645b3049b16f050dc03e102ec484cc9ee5816cb5&quot;,
   &quot;docs/architecture/agent-driven-v1-r2.architecture.html&quot;: &quot;5da3fcb4ae32db438a0ddd7730955872c3ab805192e421bd8f7fc1870c1d504c&quot;,
   &quot;docs/agent-driven-v1/reviews/user-review-r1.json&quot;: &quot;d08c8105dcc482687c17fc82c40211cfd65bf8cd1953711a9e095b3915da6196&quot;,
   &quot;docs/architecture/parallel-development.architecture.html&quot;: &quot;61eeb264775994e4b278a1f5fb585dd41489d7c08286e2bf0a6cb01336566c58&quot;,
-  &quot;docs/agent-driven-v1/parallel-plan.json&quot;: &quot;9c0e337a0b4a235e543998294ccbf2c657725041db46c2f37c344c7229254ac8&quot;
+  &quot;docs/agent-driven-v1/parallel-plan.json&quot;: &quot;4e1dd90574e58d70608a31ebedc87e368a2b69113133d3dffedd3d802e1335ae&quot;
 }</pre></details></section></main></div><script>
-const binding={"docs/01_PRD.md":"ea325e00159f9f5edd36f9c2827e90884807ce840245c6978640ff39c63ca804","docs/agent-driven-v1/01_TARGET_ARCHITECTURE.md":"01a471c60f697f22084a0784cd398fb22ee925d00b2744b542dee627890d6a94","docs/agent-driven-v1/02_DEVELOPMENT_AND_ACCEPTANCE.md":"c87adb4d928738555c5827d50d2d6e2997200466d2b5a1af0ab4bda28891d645","docs/agent-driven-v1/03_REVIEW_RECORD.md":"6be7077fc3c0ce092b2b83634a0dfa82aecb7bb1768137d76831909f8ea7e9be","docs/agent-driven-v1/04_R2_FEEDBACK_AND_COMFY.md":"204c0dc111d7f68da9b7753e3e3013c27bb192e49be6d7f394f4bb09ea73d878","docs/agent-driven-v1/05_REALTIME_AND_MONITORING.md":"b162b03b86ab08c7e361f432c24ed1e49d8425789c05b59c0af372f6c4ba130f","docs/agent-driven-v1/06_ITERATION_EXECUTION_PLAN.md":"605300a9bd4d6904e7efe6d4743f6ac18c124cb07332b155fe82891b92f3f14d","docs/agent-driven-v1/07_PARALLEL_DEVELOPMENT.md":"9f45ebec92024723b723eb4cb27d871a4b062a818f3adc3b715c97ef1a5e6984","docs/agent-driven-v1/08_PARALLEL_PORTS_AND_OWNERSHIP.md":"8d527d08880b379bec5efe4c5445423580a6081b34f826fed05b1d6c85b0e698","docs/agent-driven-v1/09_PARALLEL_AGENT_HANDOFFS.md":"6e4dd0e00ee32d0aa53aa2452c22dcf7bfc74e32e807c001f3bc092dba802bcc","docs/agent-driven-v1/10_PARALLEL_REVIEW_RECORD.md":"1319e2def4d2fed591193e87645b3049b16f050dc03e102ec484cc9ee5816cb5","docs/architecture/agent-driven-v1-r2.architecture.html":"5da3fcb4ae32db438a0ddd7730955872c3ab805192e421bd8f7fc1870c1d504c","docs/agent-driven-v1/reviews/user-review-r1.json":"d08c8105dcc482687c17fc82c40211cfd65bf8cd1953711a9e095b3915da6196","docs/architecture/parallel-development.architecture.html":"61eeb264775994e4b278a1f5fb585dd41489d7c08286e2bf0a6cb01336566c58","docs/agent-driven-v1/parallel-plan.json":"9c0e337a0b4a235e543998294ccbf2c657725041db46c2f37c344c7229254ac8"};
-const revision="a495dbe5d454828f44dd5cf8927a26787f5fbf4895b0d9dc1a16e4f014446820";
+const binding={"docs/01_PRD.md":"ea325e00159f9f5edd36f9c2827e90884807ce840245c6978640ff39c63ca804","docs/agent-driven-v1/01_TARGET_ARCHITECTURE.md":"01a471c60f697f22084a0784cd398fb22ee925d00b2744b542dee627890d6a94","docs/agent-driven-v1/02_DEVELOPMENT_AND_ACCEPTANCE.md":"c87adb4d928738555c5827d50d2d6e2997200466d2b5a1af0ab4bda28891d645","docs/agent-driven-v1/03_REVIEW_RECORD.md":"6be7077fc3c0ce092b2b83634a0dfa82aecb7bb1768137d76831909f8ea7e9be","docs/agent-driven-v1/04_R2_FEEDBACK_AND_COMFY.md":"204c0dc111d7f68da9b7753e3e3013c27bb192e49be6d7f394f4bb09ea73d878","docs/agent-driven-v1/05_REALTIME_AND_MONITORING.md":"b162b03b86ab08c7e361f432c24ed1e49d8425789c05b59c0af372f6c4ba130f","docs/agent-driven-v1/06_ITERATION_EXECUTION_PLAN.md":"605300a9bd4d6904e7efe6d4743f6ac18c124cb07332b155fe82891b92f3f14d","docs/agent-driven-v1/07_PARALLEL_DEVELOPMENT.md":"8c0a9d952ec476cbb9739147994c3b9f140c4d9bbf85f80b5a5147f2c2de7030","docs/agent-driven-v1/08_PARALLEL_PORTS_AND_OWNERSHIP.md":"8d527d08880b379bec5efe4c5445423580a6081b34f826fed05b1d6c85b0e698","docs/agent-driven-v1/09_PARALLEL_AGENT_HANDOFFS.md":"85f86b0d38a7f40e32401216d1cf124e061c3b9ba505b49ce03f98e86bb03e05","docs/agent-driven-v1/10_PARALLEL_REVIEW_RECORD.md":"1319e2def4d2fed591193e87645b3049b16f050dc03e102ec484cc9ee5816cb5","docs/architecture/agent-driven-v1-r2.architecture.html":"5da3fcb4ae32db438a0ddd7730955872c3ab805192e421bd8f7fc1870c1d504c","docs/agent-driven-v1/reviews/user-review-r1.json":"d08c8105dcc482687c17fc82c40211cfd65bf8cd1953711a9e095b3915da6196","docs/architecture/parallel-development.architecture.html":"61eeb264775994e4b278a1f5fb585dd41489d7c08286e2bf0a6cb01336566c58","docs/agent-driven-v1/parallel-plan.json":"4e1dd90574e58d70608a31ebedc87e368a2b69113133d3dffedd3d802e1335ae"};
+const revision="b804dd8b23b2348e7f6a961e2a04dce1156e09933fe4a7697aebc6374148a91e";
 const key='narralens-agent-driven-review-'+revision;
 const items=[...document.querySelectorAll('.review-item')];
 let decisions={};try{decisions=JSON.parse(localStorage.getItem(key)||'{}')}catch{}

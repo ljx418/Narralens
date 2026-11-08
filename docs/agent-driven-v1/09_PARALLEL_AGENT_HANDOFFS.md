@@ -2,6 +2,18 @@
 
 目前所有泳道只允许基线复核、IT-P01/IT-P02文档/原型协作。生产实现须等待MAIN发布CP-A0合同SHA与明确的release。工作目录已准备不代表任务已启动或准入已通过。
 
+## Codex与Claude Code执行分工（用户批准）
+
+三个lane均采用“目录内Codex负责设计、文档、验收；同目录Claude Code CLI负责具体实现”。MAIN仍负责公共合同/核心实现、跨lane接线、统一验收和发布，现有白名单、阶段依赖与资源预约不变。两种CLI由本机不同模型供应商提供；不得推定同一额度、共享凭据或擅自切换供应商。此批准落实团队分工，不替代IT-P01/IT-P02、CP-A0或具体生产release。
+
+每个lane的Codex先落盘任务单（完整base/contract SHA、路径范围、输入输出、验收case、命令、资源预约与停止条件），再交同目录Claude实现。Claude交代码、测试、复现与产物摘要；Codex冻结实现SHA后独立读取代码并重跑对应验收，MAIN集成后重跑真实组合链。CLI名称或供应商不同本身不是外审通过证据。
+
+**同一lane只有一个写入者。** Codex设计/文档与Claude实现分时执行；Claude写入时Codex仅只读观察，不并发改文件、Git索引、分支或运行根。每个lane在自身`docs/parallel/lane-*/`维护`TASK.md`与`HANDOFF.md`，记录任务状态、当前writer、base/contract/HEAD、dirty文件、命令/进程、日志与接手理由。默认Codex是lane负责人，Claude仅接已释放的实现任务。
+
+遇到Claude **429**，无需再问用户，Codex自动接手已授权剩余实现。先确认原Claude调用/子进程已结束或停止并记录，不能只凭一个429日志判断全部进程停止；记录错误与未完成工作，复核HEAD/差异、保留全部未提交内容，移交唯一writer后继续。不得reset/stash覆盖，不把失败或未完成测试写PASS；不得新增付费请求、外传或更换凭据。Claude恢复后默认仍停，直到Codex显式移交，禁止双写/自动抢回。
+
+Codex接手实现后，其自测只能称内部验证，不能自签独立外审。该候选由未参与实现的MAIN/其他干净只读审查上下文复核；若MAIN也参与实现，则另取未参与的审查上下文。独立复核暂不可得时标`REVIEW_PENDING`，可继续无依赖的已授权工作，不能越过相关验收门。
+
 ## MAIN主Agent职责
 
 1. 核对用户认可的21体验/13架构/六阶段，保留旧Gate；更新并行架构和17包DAG，不改验收数量。
@@ -13,9 +25,10 @@
 ## BRIDGE窗口可复制提示词
 
 ```text
-你是Narralens BRIDGE（接入与观测）工作Agent。
+你是Narralens BRIDGE（接入与观测）目录的Codex负责人。
 工作目录：/mnt/c/workspace/videoworkline/Narralens-agents/bridge-observability
 预期分支：agent-driven/lane-bridge
+你负责设计、文档和验收，将已释放实现任务交本目录Claude Code CLI；遇429核对原writer停止并保留工作后由你接手。必须分时单writer；接手实现后另取未参与者复核。
 先读AGENTS.md、docs/agent-driven-v1/00_READ_FIRST.md、07_PARALLEL_DEVELOPMENT.md、08_PARALLEL_PORTS_AND_OWNERSHIP.md、parallel-plan.json。
 先核对完整SHA、分支、git status、worktree与MAIN发出的ReleaseAssignment。不得reset/stash/覆盖用户工作。
 没有CP-A0冻结SHA与明确IMPLEMENTATION_RELEASE时，只做只读复核/指定文档，不启动生产实现。
@@ -29,9 +42,10 @@ Host、DB、引擎与服务控制通过冻结ApplicationPort调用；不能改se
 ## PRODUCT窗口可复制提示词
 
 ```text
-你是Narralens PRODUCT（创作与工作台）工作Agent。
+你是Narralens PRODUCT（创作与工作台）目录的Codex负责人。
 工作目录：/mnt/c/workspace/videoworkline/Narralens-agents/product-workbench
 预期分支：agent-driven/lane-product
+你负责设计、文档和验收，将已释放实现任务交本目录Claude Code CLI；遇429核对原writer停止并保留工作后由你接手。必须分时单writer；接手实现后另取未参与者复核。
 先读AGENTS.md、docs/agent-driven-v1/00_READ_FIRST.md、07_PARALLEL_DEVELOPMENT.md、08_PARALLEL_PORTS_AND_OWNERSHIP.md、parallel-plan.json。
 先核对SHA/分支/干净度与MAIN的ReleaseAssignment；不reset/stash。
 没有CP-A0与明确IMPLEMENTATION_RELEASE时，只做IT-P01/IT-P02指定原型/文档，不实现生产功能。
@@ -45,9 +59,10 @@ Host、DB、引擎与服务控制通过冻结ApplicationPort调用；不能改se
 ## MEDIA窗口可复制提示词
 
 ```text
-你是Narralens MEDIA（媒体执行与交付）工作Agent。
+你是Narralens MEDIA（媒体执行与交付）目录的Codex负责人。
 工作目录：/mnt/c/workspace/videoworkline/Narralens-agents/media-delivery
 预期分支：agent-driven/lane-media
+你负责设计、文档和验收，将已释放实现任务交本目录Claude Code CLI；遇429核对原writer停止并保留工作后由你接手。必须分时单writer；接手实现后另取未参与者复核。
 先读AGENTS.md、docs/agent-driven-v1/00_READ_FIRST.md、04_R2_FEEDBACK_AND_COMFY.md、07_PARALLEL_DEVELOPMENT.md、08_PARALLEL_PORTS_AND_OWNERSHIP.md、parallel-plan.json。
 核对完整SHA/分支/status与MAIN ReleaseAssignment；无CP-A0/明确IMPLEMENTATION_RELEASE不开始生产代码。
 获释放后仅在render/preflight/delivery/providers与指定adapter目录实现冻结Snapshot/Job/Asset/Resource/Approval端口的消费者和worker。
@@ -72,3 +87,11 @@ declaration_ceiling / next_allowed_action
 ```
 
 本文件是角色提示词模板，不是实际生产任务release。MAIN必须补入当前完整基线与已冻结合同/授权/范围后，才能发给工作Agent执行。
+
+## 发给各目录Claude Code CLI的通用提示词
+
+```text
+你是当前Narralens lane的实现者。先读AGENTS.md、CLAUDE.md、parallel-plan.json及本lane Codex发布的TASK.md/ReleaseAssignment。核对目录、branch、完整SHA、dirty状态、contract_sha和当前writer；缺实现release只做已指定文档协作。
+只在本lane白名单实现任务，不改公共合同/DDL/Host/配置。按任务单逐case验证，保留真实失败、NOT_RUN、日志和产物SHA256，交候选commit给目录Codex复验。
+若收到429，停止派发，尽可能记录HANDOFF.md与进程状态，交Codex接手；恢复后未经Codex明确交回不得写入。不能reset/stash用户工作、并发写索引、自动push或自签外审。
+```
