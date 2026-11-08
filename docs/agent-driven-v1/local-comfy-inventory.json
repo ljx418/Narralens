@@ -1,0 +1,201 @@
+{
+  "format": "narralens.local-comfy-design-inventory@1",
+  "observed_at": "2026-11-08T11:34:23.158Z",
+  "scope": "file/schema/source inspection only; no GPU execution or prompt submission",
+  "candidates": [
+    {
+      "id": "h3-ref",
+      "path": "/mnt/c/workspace/videoworkline/comfyui-ai-comic-workflows/workflows/api/01_H3_R2V_Character_Cinematic_5s.api.json",
+      "sha256": "7471dadc4001b8260edb7c9fc27fa95474d470f304c97b186b45df0a86cc3d7f",
+      "format": "prompt-envelope",
+      "purpose": "参考图生成概念片段",
+      "nodes": 17,
+      "nodeClasses": [
+        "UNETLoader",
+        "MiniMaxH3TurboLoRA",
+        "CLIPLoader",
+        "VAELoader",
+        "LoadImage",
+        "MiniMaxH3ReferenceToVideo",
+        "BasicGuider",
+        "RandomNoise",
+        "MiniMaxH3TurboSampler",
+        "BasicScheduler",
+        "SamplerCustomAdvanced",
+        "VAEDecode",
+        "VAEDecodeAudio",
+        "CreateVideo",
+        "SaveVideo"
+      ],
+      "narralensStatus": "CANDIDATE_NOT_INTEGRATED",
+      "runtimeTest": "NOT_RUN"
+    },
+    {
+      "id": "h3-first-last",
+      "path": "/mnt/c/workspace/videoworkline/comfyui-ai-comic-workflows/workflows/api/02_H3_FL2V_Storyboard_5s.api.json",
+      "sha256": "757f6ccbae3364f300974b3e8471ab19be4e30127660376ac67625336b74831c",
+      "format": "prompt-envelope",
+      "purpose": "首尾帧概念镜头/转场候选",
+      "nodes": 17,
+      "nodeClasses": [
+        "UNETLoader",
+        "MiniMaxH3TurboLoRA",
+        "CLIPLoader",
+        "VAELoader",
+        "LoadImage",
+        "MiniMaxH3ImageToVideo",
+        "BasicGuider",
+        "RandomNoise",
+        "MiniMaxH3TurboSampler",
+        "BasicScheduler",
+        "SamplerCustomAdvanced",
+        "VAEDecode",
+        "VAEDecodeAudio",
+        "CreateVideo",
+        "SaveVideo"
+      ],
+      "narralensStatus": "CANDIDATE_NOT_INTEGRATED",
+      "runtimeTest": "NOT_RUN"
+    },
+    {
+      "id": "wan-i2v",
+      "path": "/mnt/c/workspace/videoworkline/comfyui-ai-comic-workflows/workflows/api/03B_Wan22_I2V_Wrapper_LowMem_Smoke.api.json",
+      "sha256": "d90f7789506350ee01595c32dc25af1f3e34a1b681a588d95de1d2a440f74cbe",
+      "format": "prompt-envelope",
+      "purpose": "静态概念图短动态",
+      "nodes": 14,
+      "nodeClasses": [
+        "LoadImage",
+        "WanVideoVAELoader",
+        "WanVideoTextEncodeCached",
+        "WanVideoImageToVideoEncode",
+        "WanVideoBlockSwap",
+        "WanVideoLoraSelectMulti",
+        "WanVideoModelLoader",
+        "WanVideoSampler",
+        "WanVideoDecode",
+        "CreateVideo",
+        "SaveVideo"
+      ],
+      "narralensStatus": "CANDIDATE_NOT_INTEGRATED",
+      "runtimeTest": "NOT_RUN"
+    },
+    {
+      "id": "rife",
+      "path": "/mnt/c/workspace/videoworkline/comfyui-ai-comic-workflows/workflows/api/05A_Finish_RIFE_Prepare_30fps.api.json",
+      "sha256": "f6e7dea30142d9c6ed9428cad31b7b177435c554c365549b71b4fa8e51113660",
+      "format": "prompt-envelope",
+      "purpose": "插帧准备，需执行器组合",
+      "nodes": 6,
+      "nodeClasses": [
+        "LoadVideo",
+        "GetVideoComponents",
+        "FrameInterpolationModelLoader",
+        "FrameInterpolate",
+        "GetImagesFromBatchIndexed",
+        "SaveImageKJ"
+      ],
+      "narralensStatus": "CANDIDATE_NOT_INTEGRATED",
+      "runtimeTest": "NOT_RUN"
+    },
+    {
+      "id": "upscale",
+      "path": "/mnt/c/workspace/videoworkline/comfyui-ai-comic-workflows/workflows/api/05B_Finish_Fast_AnimeSharp_1080p.api.json",
+      "sha256": "121f834991b81b8f158726f48ccf22a095fbdf0805e6507651e07a0b3d054de3",
+      "format": "prompt-envelope",
+      "purpose": "分批超分，非整片执行器",
+      "nodes": 5,
+      "nodeClasses": [
+        "LoadImagesFromFolderKJ",
+        "UpscaleModelLoader",
+        "ImageUpscaleWithModelBatched",
+        "ImageScale",
+        "SaveImageKJ"
+      ],
+      "narralensStatus": "CANDIDATE_NOT_INTEGRATED",
+      "runtimeTest": "NOT_RUN"
+    },
+    {
+      "id": "seedvr2",
+      "path": "/mnt/c/workspace/videoworkline/comfyui-ai-comic-workflows/workflows/api/06_Finish_HQ_SeedVR2_1080p.api.json",
+      "sha256": "c868a1e01d31771f4c52b1a4776068352be6e54f94b84dce50e294c94234f385",
+      "format": "prompt-envelope",
+      "purpose": "自定义后台长任务包装节点",
+      "nodes": 2,
+      "nodeClasses": [
+        "LocalSeedVR2LongJob",
+        "LocalLongJobStatus"
+      ],
+      "narralensStatus": "CANDIDATE_NOT_INTEGRATED",
+      "runtimeTest": "NOT_RUN"
+    },
+    {
+      "id": "image-6",
+      "path": "/mnt/c/ComfyUI-aki-v2/ComfyUI/user/default/workflows/项目工作流总库/05_图像生成与编辑/image_z_image_turbo.json",
+      "sha256": "307904f13211cfa5405b308e748ef8035c68991b5bb4cfd4733daed9bc511b77",
+      "format": "canvas-requires-conversion",
+      "purpose": "概念图/封面候选",
+      "nodes": 3,
+      "nodeClasses": [
+        "MarkdownNote",
+        "SaveImage",
+        "f2fdebf6-dfaf-43b6-9eb2-7f70613cfdc1"
+      ],
+      "narralensStatus": "CANDIDATE_NOT_INTEGRATED",
+      "runtimeTest": "NOT_RUN"
+    },
+    {
+      "id": "image-7",
+      "path": "/mnt/c/ComfyUI-aki-v2/ComfyUI/user/default/workflows/项目工作流总库/05_图像生成与编辑/（工作流）image_z_image_turbo.json",
+      "sha256": "0f3dd734887e6c0bfcc2f09399c264ca1c86b0d2ab5b1866834900ceb2ff7361",
+      "format": "canvas-requires-conversion",
+      "purpose": "概念图/封面候选",
+      "nodes": 13,
+      "nodeClasses": [
+        "CLIPLoader",
+        "VAELoader",
+        "ConditioningZeroOut",
+        "UNETLoader",
+        "EmptySD3LatentImage",
+        "SaveImage",
+        "KSampler",
+        "ModelSamplingAuraFlow",
+        "VAEDecode",
+        "MarkdownNote",
+        "LoraLoaderModelOnly",
+        "Note",
+        "CLIPTextEncode"
+      ],
+      "narralensStatus": "CANDIDATE_NOT_INTEGRATED",
+      "runtimeTest": "NOT_RUN"
+    }
+  ],
+  "historicalPreflight": {
+    "path": "/mnt/c/workspace/videoworkline/comfyui-ai-comic-workflows/preflight-status.json",
+    "sha256": "ce3dad041cd7d1676d400a7b5673f210af17243449294e29c5104362f946e6fd",
+    "ready": false,
+    "blockers": 4,
+    "failedChecks": [
+      "Wan Animate 2 distilled INT8",
+      "Wan Animate 2 CLIP Vision",
+      "Wan Animate 2 UNET registered",
+      "Wan Animate 2 CLIP Vision registered"
+    ]
+  },
+  "currentExistenceForHistoricalMissingFiles": [
+    {
+      "name": "Wan Animate 2 distilled INT8",
+      "exists": false,
+      "bytes": null
+    },
+    {
+      "name": "Wan Animate 2 CLIP Vision",
+      "exists": true,
+      "bytes": 1264219396
+    }
+  ],
+  "warnings": [
+    "Registry and per-workflow docs disagree about historical readiness. No current runtime capability approval.",
+    "Canvas and prompt-envelope formats must be distinguished. Custom async output nodes may return job handles rather than final media."
+  ]
+}

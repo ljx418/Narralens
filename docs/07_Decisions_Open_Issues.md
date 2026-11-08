@@ -6,6 +6,8 @@
 用户提出外部 Codex/Claude Code CLI/DSH 驱动、Skill/Skill-Lib/MCP 桥接、Narralens 提供视频服务与工作台，
 并授权依次修订 PRD、Archify 架构与开发计划。本轮不授权生产实现。
 待核对：AD-E01..16、AD-A01..10、AD-S0..S5，见 `agent-driven-v1/review.html`。
+R2：已归档用户初审27认可/3需修改/2待讨论；按意见扩为AD-E01..19、AD-A01..12，六阶段不变。
+需求启发、分阶段素材、工作流图/节点编辑、资源并行与Comfy生成修订见 `agent-driven-v1/04_R2_FEEDBACK_AND_COMFY.md`；E03审阅方式与“专场/转场”具体含义仍待澄清，不自定为已认可。
 建议默认：单 Narralens MCP 外观、常驻单 Host、stdio 首端、单活动驱动租约、工作台通过 HTTP/SSE 使用同一应用服务。
 未锁定：DSH 兼容路线、真实 provider、审批可信渠道、精确 tool schema/DDL、生产启动凭据与完整原型。
 PRD v1.1 处于 proposed；不削减旧 P0/P1，完整 V1 仍须全部证据和人工签署。

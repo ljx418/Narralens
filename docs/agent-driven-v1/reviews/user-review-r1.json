@@ -1,0 +1,207 @@
+{
+  "format": "narralens.design-review@1",
+  "status": "USER_REVIEW_INPUT_NOT_IMPLEMENTATION_APPROVAL",
+  "document_revision": "a034cfd2de6d8686a34b55c7c623259463cb58150ba682f2ac219cef8b3f6246",
+  "documents": {
+    "docs/01_PRD.md": "bf1ec945a818c096b0326e78146789f66215f747d81def5f71e2ae6436e3a14d",
+    "docs/agent-driven-v1/01_TARGET_ARCHITECTURE.md": "cfb303e267c9cda4f1c1b967af483982f81733700915696e5e8ed9eee7c24fc6",
+    "docs/agent-driven-v1/02_DEVELOPMENT_AND_ACCEPTANCE.md": "9f91bd4c5b7103e56193e5ff4e8ddd7f11346d8ecd8172760042d212f8b72365",
+    "docs/agent-driven-v1/03_REVIEW_RECORD.md": "e26282093ef1108c18f79c0ba517e4e1e63584bd8cfd7a883be73aaa803b00ed",
+    "docs/architecture/agent-driven-v1.architecture.html": "1fbd988fb7ef9177adc1dcf34aef3aa3c0bf687c9dc30e008e262d3381e7452c"
+  },
+  "generated_at": "2026-11-08T11:30:01.629Z",
+  "items": [
+    {
+      "id": "AD-E01",
+      "title": "双击图标启动服务与工作台，Agent 可发现同一实例",
+      "choice": "agree",
+      "note": ""
+    },
+    {
+      "id": "AD-E02",
+      "title": "在终端说出想法、时长、资料和保留项",
+      "choice": "discuss",
+      "note": "期望Agent主动启发式提问，让用户在界面能尽可能多的覆盖主题、内容、时长、风格等"
+    },
+    {
+      "id": "AD-E03",
+      "title": "审阅资料、论点、脚本和章节",
+      "choice": "discuss",
+      "note": ""
+    },
+    {
+      "id": "AD-E04",
+      "title": "比较 3–6 个结构不同的方案并选择",
+      "choice": "agree",
+      "note": ""
+    },
+    {
+      "id": "AD-E05",
+      "title": "提供本地素材或要求搜索、下载",
+      "choice": "change",
+      "note": "期望后续按照用户诉求，根据主题相关性、脚本、台词等来分阶段执行素材下载"
+    },
+    {
+      "id": "AD-E06",
+      "title": "提交本人录音或选择授权配音",
+      "choice": "agree",
+      "note": ""
+    },
+    {
+      "id": "AD-E07",
+      "title": "Agent 组装出可播放初稿",
+      "choice": "agree",
+      "note": ""
+    },
+    {
+      "id": "AD-E08",
+      "title": "在片中选一镜说“换画面、保留旁白和时长”",
+      "choice": "agree",
+      "note": ""
+    },
+    {
+      "id": "AD-E09",
+      "title": "确认修改，或拒绝/撤回",
+      "choice": "agree",
+      "note": ""
+    },
+    {
+      "id": "AD-E10",
+      "title": "Agent 中断、换窗口或换驱动继续",
+      "choice": "agree",
+      "note": ""
+    },
+    {
+      "id": "AD-E11",
+      "title": "关工作台后继续后台任务，重新打开",
+      "choice": "agree",
+      "note": ""
+    },
+    {
+      "id": "AD-E12",
+      "title": "同时手工编辑或启动第二个 Agent",
+      "choice": "agree",
+      "note": ""
+    },
+    {
+      "id": "AD-E13",
+      "title": "审阅 8 标题、4 封面候选",
+      "choice": "agree",
+      "note": ""
+    },
+    {
+      "id": "AD-E14",
+      "title": "检查并导出影片与附属文件",
+      "choice": "agree",
+      "note": ""
+    },
+    {
+      "id": "AD-E15",
+      "title": "一眼知道当前在做什么、接下来做什么",
+      "choice": "change",
+      "note": "要求在工作台内显示一个工作流流程图，工作流内的各个节点可以展示当前状态及各个节点的输入输出产物进行复查、单独编辑"
+    },
+    {
+      "id": "AD-E16",
+      "title": "完成完整 10–15 分钟项目并记录反馈",
+      "choice": "agree",
+      "note": ""
+    },
+    {
+      "id": "AD-A01",
+      "title": "生产 ServiceSupervisor 独立生命周期；图标启动/状态/停止与重开项目",
+      "choice": "agree",
+      "note": ""
+    },
+    {
+      "id": "AD-A02",
+      "title": "一个 MCP 外观，发现/工具/资源映射应用服务；本地多服务通过受控适配接入",
+      "choice": "agree",
+      "note": ""
+    },
+    {
+      "id": "AD-A03",
+      "title": "入口 Skill + Skill-Lib；外部驱动可提交结构化结果，旧 Runner 作为显式可选兼容路径",
+      "choice": "agree",
+      "note": ""
+    },
+    {
+      "id": "AD-A04",
+      "title": "ProjectCreationService 建立原生工程、binding、初始 snapshot 与资产上下文；Resolver 支持新建与迁移两种来源",
+      "choice": "agree",
+      "note": ""
+    },
+    {
+      "id": "AD-A05",
+      "title": "CreativeTaskStore/WorkflowCheckpointStore 保存 DAG、输入输出引用、等待原因与版本；Agent 任意合理编排",
+      "choice": "agree",
+      "note": ""
+    },
+    {
+      "id": "AD-A06",
+      "title": "DriverSessionService 与意图审批，单活动驱动租约、接管记录、selection_version",
+      "choice": "change",
+      "note": "此处需要考虑并行任务队列，例如同时执行多个镜头的分装下载，同时执行多个章节内的视频拼接、音频合成等功能"
+    },
+    {
+      "id": "AD-A07",
+      "title": "两入口复用 application commands；新增意图绑定的审批，与 impact/base/锁/许可共同校验",
+      "choice": "agree",
+      "note": ""
+    },
+    {
+      "id": "AD-A08",
+      "title": "ProviderGateway+DownloadService+Voice/Subtitle/Cover adapters，落地资产后才可绑定",
+      "choice": "agree",
+      "note": ""
+    },
+    {
+      "id": "AD-A09",
+      "title": "TaskSummary/CandidateReview/ChangeReview/ApprovalInbox/Delivery；候选有 proposal→proxy→绑定关系",
+      "choice": "agree",
+      "note": ""
+    },
+    {
+      "id": "AD-A10",
+      "title": "SnapshotRenderService、PreflightService、DeliveryPackage；任务查询、取消、审计",
+      "choice": "agree",
+      "note": ""
+    },
+    {
+      "id": "AD-S0",
+      "title": "方向、原型与合同设计闭环",
+      "choice": "agree",
+      "note": ""
+    },
+    {
+      "id": "AD-S1",
+      "title": "服务入口、Skill 与客户端接入",
+      "choice": "agree",
+      "note": ""
+    },
+    {
+      "id": "AD-S2",
+      "title": "第一个真实短片闭环",
+      "choice": "agree",
+      "note": ""
+    },
+    {
+      "id": "AD-S3",
+      "title": "工作台与 Agent 协作、精修与接管",
+      "choice": "agree",
+      "note": ""
+    },
+    {
+      "id": "AD-S4",
+      "title": "检索下载、声音字幕与完整交付能力",
+      "choice": "agree",
+      "note": ""
+    },
+    {
+      "id": "AD-S5",
+      "title": "全 V1 验收与多驱动接力",
+      "choice": "agree",
+      "note": ""
+    }
+  ]
+}

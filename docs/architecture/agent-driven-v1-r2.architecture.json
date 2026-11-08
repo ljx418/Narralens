@@ -1,0 +1,33 @@
+{
+  "schema_version":1,"diagram_type":"architecture",
+  "meta":{"title":"Narralens：可见工作流与本地生成（R2）","locale":"zh-CN","quality_profile":"showcase"},
+  "components":[
+    {"id":"driver","type":"external","label":"外部驱动 Agent","sublabel":"启发提问 / 动态编排","tag":"单活动编排者","pos":[60,220],"size":[245,86]},
+    {"id":"skills","type":"external","label":"入口 Skill 与技能库","sublabel":"语义方法 / 能力选择","tag":"待新增","pos":[400,220],"size":[245,86]},
+    {"id":"mcp","type":"backend","label":"Narralens MCP","sublabel":"发现 / 工具 / 项目资源","tag":"待新增","pos":[740,220],"size":[245,86]},
+    {"id":"application","type":"backend","label":"应用服务与工作流","sublabel":"依赖 / 决定 / 版本影响","tag":"已有底座需扩展","pos":[1080,220],"size":[245,86]},
+    {"id":"workbench","type":"frontend","label":"可见工作流工作台","sublabel":"节点状态 / 产物复查编辑","tag":"需重构","pos":[1080,40],"size":[245,86]},
+    {"id":"jobs","type":"messagebus","label":"任务与资源调度","sublabel":"IO / CPU / RAM / GPU槽","tag":"多分支并发准备","pos":[740,400],"size":[245,86]},
+    {"id":"coordinator","type":"security","label":"唯一工程提交边界","sublabel":"Coordinator / impact / 锁","tag":"正式写入仍串行","pos":[1080,400],"size":[245,86]},
+    {"id":"provider","type":"external","label":"ComfyUI 与媒体适配","sublabel":"模板固定 / 生成 / 下载","tag":"本地候选未接入","pos":[400,400],"size":[245,86]},
+    {"id":"engine","type":"backend","label":"原生剪辑与图形层","sublabel":"OpenFilm / 精确文字图形","tag":"AI素材先验证再采用","pos":[1080,580],"size":[245,86]},
+    {"id":"facts","type":"database","label":"持久项目与资产谱系","sublabel":"输入输出 / seed / snapshot","tag":"旧结果保留可追溯","pos":[740,580],"size":[245,86]}
+  ],
+  "connections":[
+    {"id":"driver-method","from":"driver","to":"skills","label":"加载方法"},
+    {"id":"skill-tools","from":"skills","to":"mcp","label":"按契约调用"},
+    {"id":"mcp-app","from":"mcp","to":"application","label":"受控业务请求"},
+    {"id":"app-submit","from":"application","to":"coordinator","label":"审批后提交","variant":"security","labelDy":55},
+    {"id":"app-jobs","from":"application","to":"jobs","label":"分支准备任务"},
+    {"id":"ui-app","from":"workbench","to":"application","label":"复查编辑与决定","labelDy":55},
+    {"id":"jobs-media","from":"jobs","to":"provider","label":"资源可用时执行"},
+    {"id":"coord-engine","from":"coordinator","to":"engine","label":"stage / 验证 / 发布","labelDy":55},
+    {"id":"jobs-facts","from":"jobs","to":"facts","label":"版本化输入输出","labelDy":55},
+    {"id":"coord-facts","from":"coordinator","to":"facts","label":"原子提交事实","fromSide":"left","toSide":"right","via":[[1030,443],[1030,623]]}
+  ],
+  "cards":[
+    {"dot":"cyan","title":"需求与工作流可见","items":["Agent提问，工作台逐项补全简报","业务节点可查输入输出并独立修订"]},
+    {"dot":"emerald","title":"并行准备、受控提交","items":["下载/章节/音频按资源池运行","单驱动不等于单任务；GPU不盲目并发"]},
+    {"dot":"amber","title":"本地生成有界接入","items":["工作流文件存在不代表当前可运行","概念关系与文字保留确定性可编辑层"]}
+  ]
+}

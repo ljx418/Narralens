@@ -1,5 +1,24 @@
 # 本轮文档核查记录
 
+## R2：用户初审与本地工作流设计复核
+
+R2前置文档提交`07ed798`，用户导出的5项文档摘要在修改前逐个匹配，原件保留于`reviews/user-review-r1.json`。
+修订覆盖E02/E05/E15/A06以及新增E17..19/A11..12，E03无附注仍待讨论。下面R1自审与截图为历史，不作为R2结果冒用。
+
+R2产品自审：需求启发与界面答复、分阶段AssetPlan、默认业务图/高级Comfy图两层；“专场”与“转场”分别描述，未默默合并。
+R2实现自审：驱动租约≠任务串行；ResourceScheduler与Job/Coordinator边界；canvas/API/envelope区分；异步自定义节点结果不等于媒体；取消共享Comfy不能全局interrupt；概念精确层与生成背景分离。
+R2验收自审：E01..19/A01..12/S0..5计37项，T01..31覆盖；历史smoke/文件存在/依赖就绪/新集成验收分级。新业务测试、GPU运行与独立外审均NOT_RUN。
+
+R2 Archify deliver：9/9 showcase、0错误/0警告。
+specification SHA256 `fb5dfab224bbb7327a0057440a800bb9c5c4d7118c986c12dda42eaebc9369b4`；
+artifact SHA256 `5da3fcb4ae32db438a0ddd7730955872c3ab805192e421bd8f7fc1870c1d504c`。
+浏览器、37项意见保存/导出与工作流交互示意的实际结果见最新`review-check.json`；R2截图以`r2-`开头。
+这些是文档与演示检查，不是真实工作流执行。用户未认可R2设计前，不进入生产实现。
+
+R2补充Headless验证已通过：四个架构桌面尺寸、桌面/390窄屏、37项核对、R1历史意见呈现、意见保存/刷新恢复/JSON实际下载，以及8节点示意的“编辑画面只影响下游、不重算独立旁白”。已查看大屏架构与节点编辑示意截图，无内容遮挡。原生Archify visual-check仍因Windows调试pipe错误失败，单独保留`../architecture/agent-driven-v1-r2.architecture.visual-check.json`，不将补充结果冒充原生命令通过。
+
+## R1历史记录
+
 基线 `8633786dfc15490761f5d6a46f20bca0bcdc7d80`。范围仅文档/图表/核对页面生成与验证工具，不修改产品运行时。
 
 ## 第一轮：产品与职责自审

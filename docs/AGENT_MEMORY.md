@@ -2,6 +2,9 @@
 
 ## 2026-11-08 当前指令优先入口
 
+- R2用户初审原件存 `docs/agent-driven-v1/reviews/user-review-r1.json`，27认可/3需修改/2待讨论；修改/新增意见不自动签署。用户要求启发提问、按主题/脚本/台词分阶段下载、工作台业务流程图及节点输入输出复查/单独编辑、多个镜头/章节/音频并行。
+- 本地ComfyUI工作流纳入设计：先只读盘点/固定模板和语义参数，再生成任务→资产验证→受控采用；不因存在JSON或历史smoke就标当前可用，不自动启动GPU/安装模型。单活动驱动与资源并行分离，正式提交仍串行。
+
 - 用户要求先停下实施，讨论并设计外部 Agent 驱动路线；最新授权仅 PRD→架构→计划文档依次开发和 HTML 核对。
 - 目标：Codex/Claude Code CLI/DSH 组织工作流；入口 Skill+Skill-Lib+MCP 发现并调用 Narralens 的媒体处理/工程/工作台服务。
 - Agent 编排决策与 Host 持久事实分开；新目标 AD-E/AD-A/AD-S 见 `docs/agent-driven-v1/00_READ_FIRST.md`。

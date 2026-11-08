@@ -2,7 +2,7 @@
 
 > 2026-11-08 新路线入口：PRD v1.1 将目标调整为“外部 Agent + Skill/技能库 + MCP + Narralens 服务/工作台”。
 > 待批准 L0/L1 见 [目标架构分析](agent-driven-v1/01_TARGET_ARCHITECTURE.md)，
-> 新 Archify 图见 [Agent 驱动目标架构](architecture/agent-driven-v1.architecture.html)。
+> 新 Archify 图见 [R2 Agent 驱动目标架构](architecture/agent-driven-v1-r2.architecture.html)。R2增加可见工作流、资源并行和本地Comfy适配，PRD已修订为v1.2；R1图保留。
 > 下文继续保留原实现与历史 Gate，不能解释为新目标已实现；新路线尚处文档核对阶段。
 <!-- M2.1_REWORK_BASE_SHA=ee58ab5c6a9d4bbdf05e8ac8a394fd75218cae59 REVIEW_STATUS=PASS -->
 

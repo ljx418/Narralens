@@ -1,7 +1,7 @@
 # Agent 驱动目标架构 L0 / L1
 
-状态：待核对设计；本文所有“拟新增路径/接口”都不是现有 API。源码基线见 `00_READ_FIRST.md`。
-约束源：PRD v1.1 §11–15。图为 `docs/architecture/agent-driven-v1.architecture.html`，JSON 为可再生成源。
+状态：R2待核对设计；本文所有“拟新增路径/接口”都不是现有 API。源码基线见 `00_READ_FIRST.md`。
+约束源：PRD v1.2 §11–16。当前图为 `docs/architecture/agent-driven-v1-r2.architecture.html`；R1图与用户核验原件保留。
 
 ## 1. 架构决策摘要
 
@@ -19,12 +19,14 @@ L0 主路径：用户意图 → 外部 Agent → Skill/技能库 → MCP → 应
 | AD-A02 | HTTP API 与产品内 Runner，尚无统一 MCP | 一个 MCP 外观，发现/工具/资源映射应用服务；本地多服务通过受控适配接入 | 新 `src/mcp/{server,tool-registry,resource-registry}.ts` | 先 stdio→常驻 Host；不为每个工具创建新 Host |
 | AD-A03 | 固定 pipeline/内部提案 Runner 为主要生成入口 | 入口 Skill + Skill-Lib；外部驱动可提交结构化结果，旧 Runner 作为显式可选兼容路径 | 新 `skills/narralens/SKILL.md`、`skills/narralens-lib/*`、`src/host/creative/creative-artifact-service.ts` | 新增方法包；固定版本，避免驱动递归调用自身 |
 | AD-A04 | 项目读取依赖 migration terminal record，不能创建一般空白工程 | ProjectCreationService 建立原生工程、binding、初始 snapshot 与资产上下文；Resolver 支持新建与迁移两种来源 | 新 `src/host/creative/project-creation-service.ts`；改 `projects/project-resolver.ts`、`m5/workbench-service.ts` | 关键适配风险；不能伪造 migration 记录或复制三镜 fixture |
-| AD-A05 | 已有 Job/lease/event，但缺整次创作的持久步骤关系 | CreativeTaskStore/WorkflowCheckpointStore 保存 DAG、输入输出引用、等待原因与版本；Agent 任意合理编排 | 新 `src/host/creative/{task-store,checkpoint-store}.ts`，扩展共享 RevisionStore DDL | 不是第二个媒体提交状态机；阶段输入变化使下游 stale |
-| AD-A06 | 单项目写串行已有，缺驱动接管语义 | DriverSessionService 与意图审批，单活动驱动租约、接管记录、selection_version | 新 `src/host/agents/{driver-session,approval-service}.ts`、扩展 UI selection read model | Driver lease、job lease、三类内容锁互不替代 |
+| AD-A05 | 已有 Job/lease/event，但缺整次创作的持久步骤关系 | CreativeTaskStore/WorkflowCheckpointStore 保存业务DAG、输入输出版本、等待原因；编辑后生成新版本与下游重算计划 | 新 `src/host/creative/{task-store,checkpoint-store,artifact-revision-service}.ts`，扩展共享 RevisionStore DDL | Agent可规划分支；图编辑不绕过提交边界 |
+| AD-A06 | 单项目写串行已有，缺驱动接管语义 | 单活动驱动负责编排；ResourceScheduler 按IO/CPU/RAM/GPU池调度多个镜头下载、章节合成与音频child jobs | 新 `src/host/agents/driver-session.ts`、`src/host/jobs/resource-scheduler.ts`、现有JobStore | 编排租约不串行化准备任务；正式工程提交仍串行 |
 | AD-A07 | materialize/impact/adopt/history 已有受控提交 | 两入口复用 application commands；新增意图绑定的审批，与 impact/base/锁/许可共同校验 | 保留 `projects/project-coordinator.ts`、`impact/`、`adoption/`、`history/` | 不改 EnginePort 七方法，不双写，不绕 gateway |
-| AD-A08 | 资产导入/账本与部分适配已有 | ProviderGateway+DownloadService+Voice/Subtitle/Cover adapters，落地资产后才可绑定 | 新 `src/host/providers/`、`src/adapters/{retrieval,voice,subtitles,cover}/` | 首期最少能力；真实 provider/许可/费用可用性须探针 |
-| AD-A09 | 面板暴露内部 ID、固定第一案、三路预览关联不清 | TaskSummary/CandidateReview/ChangeReview/ApprovalInbox/Delivery；候选有 proposal→proxy→绑定关系 | 改 `src/app/m5/`；新 `src/host/workspace/{selection,decision,review}-service.ts` | 保留原生 Studio；三阶段导航不变，不开发第二条 timeline |
+| AD-A08 | 资产导入/账本与部分适配已有 | AssetPlanService 先按主题/章节/台词缺口检索，再对选中方案分批下载/生成，缓存与来源/许可关联 | 新 `src/host/assets/asset-plan-service.ts`、ProviderGateway、retrieval/voice/subtitles/cover adapters | 资源准备不一次性批量获取所有素材 |
+| AD-A09 | 面板暴露内部 ID、固定第一案、三路预览关联不清 | BriefInterview、WorkflowGraph、NodeInspector 与候选/差异/审批；用户在界面补需求、查输入输出、单独编辑产物 | 改 `src/app/m5/`；新 `src/host/workspace/{question,workflow-view,artifact-edit}-service.ts` | 业务图为Host只读投影，编辑命令先生成新版本与影响 |
 | AD-A10 | 正式 Render/QC/Delivery 未闭环 | SnapshotRenderService、PreflightService、DeliveryPackage；任务查询、取消、审计 | 新 `src/host/{render,preflight,delivery}/` | 所有导出绑定 committed snapshot，工作区改动不污染在途导出 |
+| AD-A11 | 本地已有多套ComfyUI JSON与执行器，Narralens尚未接通 | ComfyWorkflowRegistry/ComfyAdapter固定模板与参数映射；能力预检→作业关联→结果资产验证→受控采用 | 新 `src/adapters/comfyui/`、`src/host/providers/comfy-workflow-registry.ts`，复用已有固定执行器 | 不复制模型、不自动安装节点、不导入任意有副作用图 |
+| AD-A12 | 概念说明/AI转场没有明确语义合同 | ConceptSceneSpec/TransitionSpec 分离可编辑图形与生成背景；检验术语/首尾/时长/音轨再组装 | 新 `src/host/creative/{concept-scene,transition-plan}.ts`，复用原生图形和EnginePort | 生成素材不等于概念事实正确；原生clip与文字可编辑 |
 
 以上路径是实施设计，不宣称当前存在。已有实体精确路径以源码为准；同名拆分在各阶段接口冻结时确定，禁止建立重复权威模块。
 
@@ -106,3 +108,17 @@ Agent 退出→服务继续已授权任务→lease 过期→新客户端读取 c
 ## 8. 合同冻结门
 
 当前为设计草案，不称“架构契约已锁定”。AD-S0 核对产品方向；AD-S1 实现前把 runtime schema/TS/validator/SQL migration、tool/resource registry、权限与错误码、版本兼容、取消/重试/接管/授权、真实 case 对齐并独立文档审查。不得同时扩张 EnginePort 或重写已验模块；确需变更先 ADR，明确旧回归与回退。
+
+## 9. R2新增执行合同与事实边界
+
+详细Comfy清单、输入输出合同、队列取消和概念/转场说明见 `04_R2_FEEDBACK_AND_COMFY.md` §3–7。
+
+- `WorkflowProjection`：workflow_revision、节点/依赖、step与attempt分列、artifact refs+versions、status/reason、resource_wait、允许动作。它是Host事实投影，不是一份能独立恢复影片的clip数组。
+- `BriefQuestion/Answer`：字段、已知值与来源、假设、候选、required_for_next_step、回答Decision；Agent提出，界面回答，双端读同一版本。
+- `AssetIntent`：主题/章节/shot/utterance refs、用途、素材来源类型、相关性依据、许可要求、阶段、selected_proposal、fulfilled_by refs；`AssetPlan`按版本产出可并行需求，不提前全量下载。
+- `ArtifactRevisionCommand`：artifact/base_version/new_content；产物独立版本与project revision分离；修改脚本不直接增加影片revision，应用到工程时才经Coordinator。
+- `DependencyImpact`：旧/新artifact摘要、需要重算的子图、保留的独立结果、已提交范围风险；输入变化后旧结果不得自动采用。
+- `ResourceClaim`：IO/CPU/RAM/GPU/磁盘容量及lease，worker和外部prompt_id关联；不同实例的GPU任务共享宿主资源约束，不因多个Comfy端口误以为多块显卡。
+- `ComfyExecutionRef`：workflow/version/hash、input/model指纹、seed/参数、server_instance_id、prompt_id、可选external_job_id、attempt、output refs；WS事件不当作最终成功证据。
+
+MCP增量工具族草案：`narralens_questions_read/answer`、`narralens_workflow_read`、`narralens_artifact_revise`、`narralens_recompute_prepare`、`narralens_workflows_list/inspect`。图像/视频执行优先复用通用task_prepare，参数只允许注册workflow_id与语义值，禁止直接给客户端任意workflow JSON与绝对路径执行能力。

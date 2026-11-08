@@ -35,39 +35,45 @@
       "artifact": "review",
       "width": 1440,
       "scrollWidth": 1425,
-      "items": 32,
+      "items": 37,
       "embeddedDiagram": 2
     },
     {
       "artifact": "review",
       "width": 390,
       "scrollWidth": 375,
-      "items": 32,
+      "items": 37,
       "embeddedDiagram": 2
     }
   ],
   "screenshots": [
-    "architecture-1440-light.png",
-    "architecture-1440-dark.png",
-    "architecture-2048-light.png",
-    "architecture-2048-dark.png",
-    "review-1440.png",
-    "review-390.png"
+    "r2-architecture-1440-light.png",
+    "r2-architecture-1440-dark.png",
+    "r2-architecture-2048-light.png",
+    "r2-architecture-2048-dark.png",
+    "r2-review-1440.png",
+    "r2-review-390.png",
+    "r2-workflow-demo.png"
   ],
   "architecture": {
-    "sha256": "1fbd988fb7ef9177adc1dcf34aef3aa3c0bf687c9dc30e008e262d3381e7452c",
-    "bytes": 813840
+    "sha256": "5da3fcb4ae32db438a0ddd7730955872c3ab805192e421bd8f7fc1870c1d504c",
+    "bytes": 814017
   },
   "review": {
-    "sha256": "26cb9727f63b5c4c25b4c80d94c0159fbab83a0184991d70efb62594759833a4",
-    "bytes": 950575
+    "sha256": "e938b02130223bc0fca7326b7cf7234a6fb54fb2d8fb429f4ad4e7a79edc02dc",
+    "bytes": 990377
+  },
+  "workflowDemo": {
+    "nodes": 8,
+    "retainsVoice": true,
+    "noExecution": true
   },
   "interactions": {
     "choice": "change",
     "note": "需要明确启动状态",
-    "total": 32,
+    "total": 37,
     "approvalStatus": "USER_REVIEW_INPUT_NOT_IMPLEMENTATION_APPROVAL",
-    "documentCount": 5,
+    "documentCount": 7,
     "stored": true
   },
   "reload": {
@@ -84,17 +90,17 @@
     {
       "method": "Browser.downloadWillBegin",
       "params": {
-        "frameId": "FCDDF9983C5F1B54E93E9F0CF6241750",
-        "guid": "3b9556f1-9903-4120-837b-099d5cb92af3",
-        "url": "blob:null/aebe82ee-69fd-4dbb-809b-2fb45c6dea71",
+        "frameId": "6DE8F5793043D51B8E3AEF2A5E318215",
+        "guid": "f93a34af-5b38-48b2-a178-9ada7d2baa9c",
+        "url": "blob:null/49655c58-1af0-451a-a7e7-be85330f8778",
         "suggestedFilename": "Narralens-路线核对.json"
       }
     },
     {
       "method": "Browser.downloadProgress",
       "params": {
-        "guid": "3b9556f1-9903-4120-837b-099d5cb92af3",
-        "totalBytes": 5985,
+        "guid": "f93a34af-5b38-48b2-a178-9ada7d2baa9c",
+        "totalBytes": 7376,
         "receivedBytes": 0,
         "state": "inProgress"
       }
@@ -102,47 +108,47 @@
     {
       "method": "Browser.downloadProgress",
       "params": {
-        "guid": "3b9556f1-9903-4120-837b-099d5cb92af3",
-        "totalBytes": 5985,
-        "receivedBytes": 5985,
+        "guid": "f93a34af-5b38-48b2-a178-9ada7d2baa9c",
+        "totalBytes": 7376,
+        "receivedBytes": 7376,
         "state": "inProgress"
       }
     },
     {
       "method": "Browser.downloadProgress",
       "params": {
-        "guid": "3b9556f1-9903-4120-837b-099d5cb92af3",
-        "totalBytes": 5985,
-        "receivedBytes": 5985,
+        "guid": "f93a34af-5b38-48b2-a178-9ada7d2baa9c",
+        "totalBytes": 7376,
+        "receivedBytes": 7376,
         "state": "inProgress"
       }
     },
     {
       "method": "Browser.downloadProgress",
       "params": {
-        "guid": "3b9556f1-9903-4120-837b-099d5cb92af3",
-        "totalBytes": 5985,
-        "receivedBytes": 5985,
+        "guid": "f93a34af-5b38-48b2-a178-9ada7d2baa9c",
+        "totalBytes": 7376,
+        "receivedBytes": 7376,
         "state": "inProgress"
       }
     },
     {
       "method": "Browser.downloadProgress",
       "params": {
-        "guid": "3b9556f1-9903-4120-837b-099d5cb92af3",
-        "totalBytes": 5985,
-        "receivedBytes": 5985,
+        "guid": "f93a34af-5b38-48b2-a178-9ada7d2baa9c",
+        "totalBytes": 7376,
+        "receivedBytes": 7376,
         "state": "inProgress"
       }
     },
     {
       "method": "Browser.downloadProgress",
       "params": {
-        "guid": "3b9556f1-9903-4120-837b-099d5cb92af3",
-        "totalBytes": 5985,
-        "receivedBytes": 5985,
+        "guid": "f93a34af-5b38-48b2-a178-9ada7d2baa9c",
+        "totalBytes": 7376,
+        "receivedBytes": 7376,
         "state": "completed",
-        "filePath": "C:\\workspace\\videoworkline\\.narralens-design-review-aTI5dm\\downloads\\Narralens-路线核对.json"
+        "filePath": "C:\\workspace\\videoworkline\\.narralens-design-review-TacU3J\\downloads\\Narralens-路线核对.json"
       }
     }
   ],
@@ -151,7 +157,7 @@
   ],
   "download": {
     "status": "pass",
-    "items": 32,
+    "items": 37,
     "versionBound": true
   }
 }
