@@ -5,6 +5,7 @@
 PRD v1.1 新增 `AD-E01..16`，架构变化 `AD-A01..10`，新阶段 `AD-S0..S5`。
 R2（PRD v1.2）扩为AD-E01..19、AD-A01..12，新增AD-T26..31覆盖启发简报、并行、Comfy、概念/转场与节点编辑；所有新增业务验证仍NOT_RUN。
 最新增量：AD-E20实时状态、AD-E21服务监控、AD-A13观测模块、AD-T32..35直接验收；当前合计21体验/13架构/6阶段，仍为文档设计。
+R3实施组织：准备轮IT-P01..P02、A轮IT-A01..A06、B轮IT-B01..B06、C轮IT-C01..C03。35验收族在最终总审计前均有具体责任包；见`agent-driven-v1/iteration-plan.json`。包映射不是功能通过声明。
 完整覆盖表见 `agent-driven-v1/02_DEVELOPMENT_AND_ACCEPTANCE.md` §8，直接验收编号为 `AD-T01..25`。
 新目标统一为 `PROPOSED_FOR_REVIEW`，不得沿用旧 automated-pass 作为新路线验收。
 用户反馈只确认面板基础操作，整体产品功能/体验未认可；不自动签署完整 UX-12。

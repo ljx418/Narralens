@@ -4,6 +4,14 @@
 > 状态 `PROPOSED_FOR_REVIEW`，仅授权本轮文档开发。新编号 AD-S0..S5 不覆盖旧 M/D/Wave；下文保留历史，
 > 旧 M6/M7 指令不构成新路线自动开工许可。下一步为用户核对、原型和详细合同闭环。
 
+## 当前后续迭代主线（R3）
+
+用户已批准继续做迭代计划落盘；主计划为 [准备轮与三轮交付](agent-driven-v1/06_ITERATION_EXECUTION_PLAN.md)。
+保留六阶段AD-S0..S5：准备轮2包、迭代A真实短片6包、迭代B协作/完整制作6包、迭代C长片V1终审3包，共17包。
+每轮集中组合审查，轮内增量测试后连续推进；最近产品人工门为A轮真实60–180秒短片、改单镜、持久重开与双导出。
+当前只获文档规划授权，生产实现前仍需完成IT-P01/IT-P02的原型、精确合同与独立文档审查及明确实现准入。
+下文旧D/M计划保持历史内容，不与新主线并行重复执行。
+
 状态：实际开发已批准；Gate D1、D2、D3、D4.0、D4.1 已通过。D4.2.1 的 M1A 逐编号证据和独立 R4 外审已关闭；M2.1–M2.3 已组成 Wave 1 并通过组合独立外审，达到 `CONTROLLED_OPENFILM_READY`。Wave 2 的 W2.0–M4C 已实现并通过组合独立外审，达到 `WAVE2_EDITABLE_ADOPTION_READY`。下一开发阶段为 Wave 3 / M5 Studio UX；Gate D4.2、Gate V1-P0 与 V1-Full 均未关闭。总览见 `Narralens-V1-Development-GAP.drawio` 第 5 页，最新需求追踪见 `11_V1_Traceability.md`。
 
 ## 当前前置阶段 — V1 前端体验冻结（文档中）

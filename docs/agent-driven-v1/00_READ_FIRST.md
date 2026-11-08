@@ -12,6 +12,7 @@
 6. `03_REVIEW_RECORD.md`：文档自审、自动图表检查和剩余条件。
 7. `04_R2_FEEDBACK_AND_COMFY.md`：用户初审逐条处置、本地Comfy候选、并行/概念/转场合同与待核对项；只读清单 `local-comfy-inventory.json`。
 8. `05_REALTIME_AND_MONITORING.md`：实时工作流、服务健康、资源/队列、断线与服务恢复合同。动态示意为模拟，不是真实监控。
+9. `06_ITERATION_EXECUTION_PLAN.md`：最新准备轮+A/B/C三轮、17个IT任务包、依赖/合同/证据/停点；`iteration-plan.json`为同源机器清单，`tools/check-iteration-plan.mjs`检查文档依赖与覆盖，不是业务验收。
 
 ## 权威与历史
 
