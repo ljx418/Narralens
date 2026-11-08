@@ -221,6 +221,38 @@
       </aside>
 
       <main>
+        <section class="section" aria-labelledby="usage-title">
+          <div class="section-title"><h2 id="usage-title">第一次使用：跟着按钮走一遍</h2></div>
+          <p><strong>本轮可以体验：</strong>打开已有的迁移工程、定位镜头、查看原生时间轴与 Inspector、播放三路预览、复制已录制提案、素材化、查看影响、确认采用和受控恢复。当前还不能从一句想法自动生成并导出完整影片。</p>
+          <p><strong>建议分两次：</strong>先照下面的教程熟悉产品，再进行六步验收。熟悉过界面后记录的计时应注明“已学习后操作”，不能作为首次发现入口的耗时。</p>
+          <div class="reference">
+            <h3>启动后，我应该看哪里？</h3>
+            <p>在 WSL 项目终端运行左侧命令，等待出现 <code>M5 UX-12 visible session started</code>。它会打开带示例工程的精修页，地址结尾为 <code>#/refine/工程编号</code>。不要自行猜端口或工程编号；如果窗口没有打开，使用终端打印的 <code>url=</code> 地址。</p>
+            <p>找到标题为<strong>“Narralens 导演面板”</strong>的区域。它从上到下依次是：<strong>镜头与章节 → 三路真实 proxy → 比较与采用 → 锁 → 历史</strong>。看不到后面的区域就向下滚动该面板。OpenFilm 的播放器、时间轴与 Inspector 用来观察当前工程；采用和恢复从导演面板发起。</p>
+            <ol>
+              <li><strong>定位镜头：</strong>在“镜头与章节”点击一个镜头按钮，看“当前选区”和播放头变化，再核对原生时间轴选中项与 Inspector。输入镜头编号可搜索；少于 20 镜时不显示章节按钮。</li>
+              <li><strong>看预览：</strong>滚到“三路真实 proxy”，查看三段循环视频。点击某一路让它获得音频焦点；其他路保持静音，离开视口的视频会暂停。这是独立预览比较区，点击它不会选择待采用的提案。</li>
+              <li><strong>载入示例提案：</strong>在“比较与采用”的“已录制的 D4.1 提案”输入框填入 <code>comparison_m5_recorded_1</code>，然后点击<strong>“复制已录制提案到本工程”</strong>。这是当前隔离体验环境预置的编号。成功后出现三份提案的标题、摘要、段数与原始生成审计；不会重新调用 AI。</li>
+              <li><strong>准备可采用素材：</strong>点击<strong>“素材化”</strong>。当前实现固定处理复制结果中的<strong>第一份提案</strong>，并自动绑定体验环境素材；本页没有任意方案选择或手动素材绑定入口。等待状态离开 queued/running，完成后再继续；此时工程 revision 应保持不变。</li>
+              <li><strong>查看改动再提交：</strong>点击<strong>“计算影响”</strong>，检查“影响”区域。当前摘要显示锁检查数量与受影响片段数量，若这些信息不足以让你解释具体改动，请在验收中记录为指引缺口。确认理解后点<strong>“确认采用”</strong>；成功后顶部 r 编号应增加 1，时间轴与历史同步更新。</li>
+              <li><strong>撤回刚才的采用：</strong>滚到“历史”，点击<strong>“准备撤回” → “计算恢复影响” → “确认恢复”</strong>。第一步仅生成意图，不立即改片；最终确认后 r 再增加 1，内容恢复。需要重做时依次点<strong>“准备重做” → “计算恢复影响” → “确认恢复”</strong>。</li>
+              <li><strong>验证保留状态：</strong>刷新当前页，核对 r 与历史仍存在，再选择镜头。体验期间保持 Chrome 窗口打开；关闭它会结束此次临时工程会话。</li>
+            </ol>
+            <p><strong>键盘：</strong>输入框外按 <kbd>/</kbd> 聚焦镜头搜索；<kbd>←</kbd>/<kbd>→</kbd> 移动一帧，按住 Shift 按方向键移动更大步长；<kbd>F</kbd> 适配时间轴。用 Tab 移动焦点，用 Enter/空格操作按钮。工程撤回走“历史”流程，不能用 Ctrl+Z 代替。</p>
+          </div>
+          <details class="reference" style="margin-top:14px">
+            <summary><strong>卡住时怎么处理？</strong></summary>
+            <ul>
+              <li>“复制”按钮灰色：先填写上述预置 comparison 编号。</li>
+              <li>“素材化”按钮灰色：先成功复制提案；“确认采用”灰色：先素材化并成功计算影响。</li>
+              <li>锁阻止采用：检查“锁”区域；若是你为验证创建的画面锁，点击对应“显式释放”，再重新计算影响。不要反复点击确认。</li>
+              <li>影响过期或基线变化：按页面提示重新加载、重新计算影响；项目要求 attention 时，记录错误与操作步骤并停止写入。</li>
+              <li>想法页：只保存草稿，点击“打开已迁移的 OpenFilm 工程”进入精修。交付预览页目前只展示阶段限制，没有可用的正式导出动作。</li>
+              <li>没有预期结果：记下按钮名、页面提示、顶部 r 编号和复现步骤，判定该路径未通过；不要把教程描述当作已经成功的结果。</li>
+            </ul>
+          </details>
+        </section>
+
         <section class="section" aria-labelledby="baseline-title">
           <div class="section-title"><b>00 / BASELINE</b><h2 id="baseline-title">开始前先看清验收边界</h2></div>
           <div class="facts">
@@ -235,7 +267,7 @@
           <div class="section-title"><b>01 / RUN SHEET</b><h2 id="route-title">六步人工体验路线</h2></div>
           <div class="timeline">
             <article class="step" data-step="locate" data-no="1" data-state="pending">
-              <div class="step__head"><div><h3>一分钟定位中间镜头并比较三份提案</h3><p>从章节/镜头区找到中间镜头，确认播放器、原生 timeline、Inspector 指向同一镜头与时间范围；再打开“已录制提案（原始生成审计）”切换三个真实 proxy。</p></div></div>
+              <div class="step__head"><div><h3>一分钟定位中间镜头并比较三路预览</h3><p>从“镜头与章节”找到中间镜头，确认播放器、原生 timeline、Inspector 指向同一镜头与时间范围；再到“三路真实 proxy”查看三路预览。提案复制的具体步骤见上方教程。</p></div></div>
               <div class="threshold"><strong>门槛</strong>首次可操作起 ≤ 60 秒；三处选区一致；三份 proxy 可区分、可比较。</div>
               <ul class="checks"><li>不要预先通过截图记住按钮位置</li><li>记录实际耗时及任何迷路、误触或等待</li></ul>
               <div class="step-controls"><button class="btn btn--primary mark" data-value="pass">通过</button><button class="btn btn--danger mark" data-value="fail">未通过</button><textarea aria-label="步骤1记录" placeholder="实际耗时、卡点、视觉或交互问题…"></textarea></div>
@@ -248,7 +280,7 @@
             </article>
 
             <article class="step" data-step="impact" data-no="3" data-state="pending">
-              <div class="step__head"><div><h3>理解素材化、Impact 与采用</h3><p>选择一个候选，依次观察素材化 → impact → 确认。用自己的话解释改变范围、锁、许可和 revision 规则。</p></div></div>
+              <div class="step__head"><div><h3>理解素材化、Impact 与采用</h3><p>复制已录制提案，点击“素材化”（当前固定第一份）→“计算影响”→“确认采用”。用自己的话解释改变范围、锁、许可和 revision 规则；信息不足也要如实记录。</p></div></div>
               <div class="threshold"><strong>门槛</strong>能解释：哪些镜头/范围变化；哪些锁或许可会阻止采用；成功 revision +1，失败 revision +0。</div>
               <div class="step-controls"><button class="btn btn--primary mark" data-value="pass">能解释</button><button class="btn btn--danger mark" data-value="fail">不能解释</button><textarea aria-label="步骤3记录" placeholder="请用自己的话写下 impact / 锁 / 许可 / revision 规则…"></textarea></div>
             </article>
