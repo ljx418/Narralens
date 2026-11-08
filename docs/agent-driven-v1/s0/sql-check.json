@@ -1,0 +1,105 @@
+{
+  "kind": "S0_ISOLATED_SQL_AND_PYTHON_CHECK",
+  "status": "PASS",
+  "productionAcceptance": "NOT_RUN",
+  "scope": "temporary database with exact legacy DDL extracts; not real RevisionStore migration or business recovery",
+  "checks": [
+    {
+      "id": "legacy-ddl-byte-unchanged",
+      "status": "PASS"
+    },
+    {
+      "id": "twelve-additive-tables",
+      "status": "PASS"
+    },
+    {
+      "id": "trusted-channel-only",
+      "status": "PASS"
+    },
+    {
+      "id": "global-command-key-unique",
+      "status": "PASS"
+    },
+    {
+      "id": "origin-must-reference-real-project",
+      "status": "PASS"
+    },
+    {
+      "id": "intake-version-immutable",
+      "status": "PASS"
+    },
+    {
+      "id": "approval-facts-cannot-change",
+      "status": "PASS"
+    },
+    {
+      "id": "consumed-requires-transaction",
+      "status": "PASS"
+    },
+    {
+      "id": "approval-no-delete",
+      "status": "PASS"
+    },
+    {
+      "id": "terminal-approval-no-reopen",
+      "status": "PASS"
+    },
+    {
+      "id": "artifact-no-rewrite",
+      "status": "PASS"
+    },
+    {
+      "id": "artifact-no-delete",
+      "status": "PASS"
+    },
+    {
+      "id": "transaction-rollback",
+      "status": "PASS"
+    },
+    {
+      "id": "temp-old-schema-reopen",
+      "status": "PASS"
+    },
+    {
+      "id": "CAN-01-python",
+      "status": "PASS"
+    },
+    {
+      "id": "CAN-02-python",
+      "status": "PASS"
+    },
+    {
+      "id": "CAN-03-python",
+      "status": "PASS"
+    },
+    {
+      "id": "CAN-04-python",
+      "status": "PASS"
+    },
+    {
+      "id": "CAN-05-python",
+      "status": "PASS"
+    },
+    {
+      "id": "CAN-06-python",
+      "status": "PASS"
+    },
+    {
+      "id": "CAN-07-python",
+      "status": "PASS"
+    },
+    {
+      "id": "CAN-08-python",
+      "status": "PASS"
+    },
+    {
+      "id": "CAN-09-python",
+      "status": "PASS"
+    },
+    {
+      "id": "CAN-10-python",
+      "status": "PASS"
+    }
+  ],
+  "migration_sha256": "54e711aa1fe130787880dacd45c6afd56e7f95080656a997731cfee92dad3c91"
+}

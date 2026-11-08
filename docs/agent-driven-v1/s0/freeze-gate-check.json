@@ -1,0 +1,43 @@
+{
+  "kind": "S0_FREEZE_MUTATION_CHECK",
+  "status": "PASS",
+  "manifestSha256": "314f92d39e0b82c852febc9c3ca72c852ea51c8acc44ef1a7e7409a928b016fb",
+  "checks": [
+    {
+      "case": "prototype.html tamper",
+      "exit": 1,
+      "detected": true,
+      "diagnostic": [
+        "file:///mnt/c/workspace/videoworkline/Narralens/tools/s0-freeze.mjs:11",
+        "const browser=JSON.parse(readFileSync(resolve(dir,'browser-check.json')));for(const [n,h]of Object.entries(browser.hashes))if(sha(readFileSync(resolve(dir,n)))!==h)throw Error('STALE_BROWSER:'+n);",
+        "                                                                                                                                                                          ^"
+      ]
+    },
+    {
+      "case": "registry.json tamper",
+      "exit": 1,
+      "detected": true,
+      "diagnostic": [
+        "file:///mnt/c/workspace/videoworkline/Narralens/tools/s0-freeze.mjs:12",
+        "const contracts=JSON.parse(readFileSync(resolve(dir,'contract-check.json')));for(const [n,h]of Object.entries(contracts.hashes))if(sha(readFileSync(resolve(dir,n)))!==h)throw Error('STALE_CONTRACT:'+n);",
+        "                                                                                                                                                                               ^"
+      ]
+    },
+    {
+      "case": "FREEZE.json tamper",
+      "exit": 1,
+      "detected": true,
+      "diagnostic": [
+        "file:///mnt/c/workspace/videoworkline/Narralens/tools/s0-freeze.mjs:16",
+        "const target=resolve(dir,'FREEZE.json');if(process.argv.includes('--write'))writeFileSync(target,JSON.stringify(manifest,null,2)+'\\n');else{const saved=JSON.parse(readFileSync(target));if(JSON.stringify(saved)!==JSON.stringify(manifest))throw Error('FREEZE_DRIFT')}",
+        "                                                                                                                                                                                                                                                   ^"
+      ]
+    },
+    {
+      "case": "original restored",
+      "exit": 0,
+      "passed": true
+    }
+  ],
+  "productionAcceptance": "NOT_RUN"
+}

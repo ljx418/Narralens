@@ -1,0 +1,253 @@
+{
+  "kind": "supplementary-windows-headless-CDP",
+  "status": "pass",
+  "businessAcceptance": "NOT_RUN",
+  "viewports": [
+    {
+      "artifact": "architecture",
+      "width": 1440,
+      "height": 900,
+      "scrollWidth": 1440,
+      "scrollHeight": 900
+    },
+    {
+      "artifact": "architecture",
+      "width": 1600,
+      "height": 1000,
+      "scrollWidth": 1600,
+      "scrollHeight": 1000
+    },
+    {
+      "artifact": "architecture",
+      "width": 1920,
+      "height": 1080,
+      "scrollWidth": 1920,
+      "scrollHeight": 1080
+    },
+    {
+      "artifact": "architecture",
+      "width": 2048,
+      "height": 1320,
+      "scrollWidth": 2048,
+      "scrollHeight": 1320
+    },
+    {
+      "artifact": "prototype",
+      "width": 1440,
+      "scrollWidth": 1425
+    },
+    {
+      "artifact": "prototype",
+      "width": 390,
+      "scrollWidth": 375
+    },
+    {
+      "artifact": "review",
+      "width": 1440,
+      "scrollWidth": 1425,
+      "count": 17
+    },
+    {
+      "artifact": "review",
+      "width": 390,
+      "scrollWidth": 385,
+      "count": 17
+    }
+  ],
+  "screenshots": [
+    "architecture-1440-light.png",
+    "architecture-1440-dark.png",
+    "architecture-2048-light.png",
+    "architecture-2048-dark.png",
+    "approval-1440.png",
+    "prototype-1440.png",
+    "prototype-390.png",
+    "review-1440.png",
+    "review-390.png"
+  ],
+  "hashes": {
+    "prototype.html": "3da7630f040344cf75d2fcdaf7f8c8d269f081645257436d4851e7a66c382375",
+    "architecture.html": "2a75e9970d4b8aa5a404d542e6d12a92ebd727de8eb1d0173c1e549933bada03",
+    "review.html": "6da68249a9311cce8f3af59712faadde4c98343f1a5c4329097b2746ab9f123c"
+  },
+  "checks": [
+    {
+      "id": "diagram-fit-1440",
+      "status": "PASS"
+    },
+    {
+      "id": "diagram-fit-1600",
+      "status": "PASS"
+    },
+    {
+      "id": "diagram-fit-1920",
+      "status": "PASS"
+    },
+    {
+      "id": "diagram-fit-2048",
+      "status": "PASS"
+    },
+    {
+      "id": "invalid-empty-brief-refused",
+      "status": "PASS"
+    },
+    {
+      "id": "create-intake-and-origin-demo",
+      "status": "PASS"
+    },
+    {
+      "id": "research-source-not-certified",
+      "status": "PASS"
+    },
+    {
+      "id": "draft-buffer-retained-on-node-switch",
+      "status": "PASS"
+    },
+    {
+      "id": "only-visual-version-increments",
+      "status": "PASS"
+    },
+    {
+      "id": "approval-before-after-scope-rights",
+      "status": "PASS"
+    },
+    {
+      "id": "apply-once",
+      "status": "PASS"
+    },
+    {
+      "id": "stale-base-refuses-keeps-human",
+      "status": "PASS"
+    },
+    {
+      "id": "cancel-late-quarantine",
+      "status": "PASS"
+    },
+    {
+      "id": "reopen-requires-new-prepare",
+      "status": "PASS"
+    },
+    {
+      "id": "offline-unknown-and-submit-disabled",
+      "status": "PASS"
+    },
+    {
+      "id": "transient-not-attention",
+      "status": "PASS"
+    },
+    {
+      "id": "candidate-selection-does-not-commit",
+      "status": "PASS"
+    },
+    {
+      "id": "longform-unverified-not-fake-compatible",
+      "status": "PASS"
+    },
+    {
+      "id": "storage-write-failure-degrades",
+      "status": "PASS"
+    },
+    {
+      "id": "prototype-no-horizontal-overflow-1440",
+      "status": "PASS"
+    },
+    {
+      "id": "prototype-no-horizontal-overflow-390",
+      "status": "PASS"
+    },
+    {
+      "id": "nonvisual-stale-not-falsely-adopted",
+      "status": "PASS"
+    },
+    {
+      "id": "synthetic-storage-conflict-stops-writer",
+      "status": "PASS"
+    },
+    {
+      "id": "review-layout-1440",
+      "status": "PASS"
+    },
+    {
+      "id": "review-layout-390",
+      "status": "PASS"
+    },
+    {
+      "id": "review-opinion-persistence",
+      "status": "PASS"
+    },
+    {
+      "id": "review-opinions-download-bound-version",
+      "status": "PASS"
+    }
+  ],
+  "downloadEvents": [
+    {
+      "method": "Browser.downloadWillBegin",
+      "params": {
+        "frameId": "8FF7C94FCF1C52990D4F7A6C8578D3E5",
+        "guid": "59a57cf8-9027-49c2-9a08-0483f74d8c0d",
+        "url": "blob:null/aab43a83-3375-4ae5-bc9e-8a49cf0b6133",
+        "suggestedFilename": "Narralens-S0-核对意见.json"
+      }
+    },
+    {
+      "method": "Browser.downloadProgress",
+      "params": {
+        "guid": "59a57cf8-9027-49c2-9a08-0483f74d8c0d",
+        "totalBytes": 2769,
+        "receivedBytes": 0,
+        "state": "inProgress"
+      }
+    },
+    {
+      "method": "Browser.downloadProgress",
+      "params": {
+        "guid": "59a57cf8-9027-49c2-9a08-0483f74d8c0d",
+        "totalBytes": 2769,
+        "receivedBytes": 2769,
+        "state": "inProgress"
+      }
+    },
+    {
+      "method": "Browser.downloadProgress",
+      "params": {
+        "guid": "59a57cf8-9027-49c2-9a08-0483f74d8c0d",
+        "totalBytes": 2769,
+        "receivedBytes": 2769,
+        "state": "inProgress"
+      }
+    },
+    {
+      "method": "Browser.downloadProgress",
+      "params": {
+        "guid": "59a57cf8-9027-49c2-9a08-0483f74d8c0d",
+        "totalBytes": 2769,
+        "receivedBytes": 2769,
+        "state": "inProgress"
+      }
+    },
+    {
+      "method": "Browser.downloadProgress",
+      "params": {
+        "guid": "59a57cf8-9027-49c2-9a08-0483f74d8c0d",
+        "totalBytes": 2769,
+        "receivedBytes": 2769,
+        "state": "inProgress"
+      }
+    },
+    {
+      "method": "Browser.downloadProgress",
+      "params": {
+        "guid": "59a57cf8-9027-49c2-9a08-0483f74d8c0d",
+        "totalBytes": 2769,
+        "receivedBytes": 2769,
+        "state": "completed",
+        "filePath": "C:\\workspace\\videoworkline\\.narralens-s0-review-1Th0Ve\\downloads\\Narralens-S0-核对意见.json"
+      }
+    }
+  ],
+  "download": {
+    "items": 17,
+    "status": "pass"
+  }
+}

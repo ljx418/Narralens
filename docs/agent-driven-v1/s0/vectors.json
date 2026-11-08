@@ -1,0 +1,139 @@
+[
+  {
+    "id": "CAN-01",
+    "input": {
+      "principal": "local_user",
+      "operation": "artifact.put",
+      "body": {
+        "project_id": "demo",
+        "base_version": 0,
+        "content": {
+          "kind": "script",
+          "paragraphs": [
+            {
+              "paragraph_id": "p1",
+              "text": "雨后为什么有彩虹？🌈"
+            }
+          ]
+        }
+      }
+    },
+    "canonical": "{\"body\":{\"base_version\":0,\"content\":{\"kind\":\"script\",\"paragraphs\":[{\"paragraph_id\":\"p1\",\"text\":\"雨后为什么有彩虹？🌈\"}]},\"project_id\":\"demo\"},\"operation\":\"artifact.put\",\"principal\":\"local_user\"}",
+    "sha256": "946caee67e033e36bd9d3e0c7a7a1dd961a14b638d8505fd9681816cb2772517",
+    "purpose": "encoding_only_not_a_legal_ArtifactPut"
+  },
+  {
+    "id": "CAN-02",
+    "input": {
+      "z": 0,
+      "a": "中文"
+    },
+    "canonical": "{\"a\":\"中文\",\"z\":0}",
+    "sha256": "1315b7cfb8e59c093cce00f9cadbd501cf6cdd603e95ce7ccbcda58d53627925"
+  },
+  {
+    "id": "CAN-03",
+    "input": {
+      "é": 1,
+      "é": 2
+    },
+    "canonical": "{\"é\":2,\"é\":1}",
+    "sha256": "a7962fb10dc1255be368ece9c22b2256605921dc6d0a8c9409d3ee406bcb86e5"
+  },
+  {
+    "id": "CAN-04",
+    "input": {
+      "😀": 1,
+      "￿": 2
+    },
+    "canonical": "{\"￿\":2,\"😀\":1}",
+    "sha256": "92db27167c6f89fc43ff6c1997a7954a2e5bec81936fbe5ee12b4b6615b09596"
+  },
+  {
+    "id": "CAN-05",
+    "input": {
+      "items": [
+        2,
+        1
+      ]
+    },
+    "canonical": "{\"items\":[2,1]}",
+    "sha256": "999e7876bd6caa905b1c5fd6e9a875224c9523c3f71d792d62de83fb5201ade1"
+  },
+  {
+    "id": "CAN-06",
+    "input": {
+      "items": [
+        1,
+        2
+      ]
+    },
+    "canonical": "{\"items\":[1,2]}",
+    "sha256": "02d21651bf4a0c676159456cd47d09d4ac585db5ed1324ac191f3e98640846a3"
+  },
+  {
+    "id": "CAN-07",
+    "input": {
+      "topic": "abc\n中文"
+    },
+    "canonical": "{\"topic\":\"abc\\n中文\"}",
+    "sha256": "e8d52ab2e4ab4fab06103bb9aa992a1e33fb9fcce8356f5e335a4eb80606fc87"
+  },
+  {
+    "id": "CAN-08",
+    "input": {
+      "a": null,
+      "b": false
+    },
+    "canonical": "{\"a\":null,\"b\":false}",
+    "sha256": "f87d1ab64a7bbf059ab4894bea74cbf084704e08a890ba389ea41d8f2c57e582"
+  },
+  {
+    "id": "CAN-09",
+    "request_schema": "CreateProject",
+    "request": {
+      "meta": {
+        "idempotency_key": "key1",
+        "correlation_id": "corr1"
+      },
+      "intake_id": "intake1",
+      "intake_version": 1,
+      "decision_id": "decision1"
+    },
+    "input": {
+      "principal": "user1",
+      "operation": "project.create",
+      "body": {
+        "intake_id": "intake1",
+        "intake_version": 1,
+        "decision_id": "decision1"
+      }
+    },
+    "canonical": "{\"body\":{\"decision_id\":\"decision1\",\"intake_id\":\"intake1\",\"intake_version\":1},\"operation\":\"project.create\",\"principal\":\"user1\"}",
+    "sha256": "eb07b1a0e88630c974c8bc00c1b02446ee38bdd834696b074ab439fb6e14b97e"
+  },
+  {
+    "id": "CAN-10",
+    "request_schema": "CreateProject",
+    "request": {
+      "meta": {
+        "idempotency_key": "key1",
+        "correlation_id": "corr1"
+      },
+      "intake_id": "intake1",
+      "intake_version": 1,
+      "decision_id": "decision2"
+    },
+    "input": {
+      "principal": "user1",
+      "operation": "project.create",
+      "body": {
+        "intake_id": "intake1",
+        "intake_version": 1,
+        "decision_id": "decision2"
+      }
+    },
+    "canonical": "{\"body\":{\"decision_id\":\"decision2\",\"intake_id\":\"intake1\",\"intake_version\":1},\"operation\":\"project.create\",\"principal\":\"user1\"}",
+    "sha256": "217c7251a9b0be7d648b100bc6fcac5fdcd15b71e110857748b8b77c893220be"
+  }
+]

@@ -1,0 +1,732 @@
+{
+  "kind": "S0_DESIGN_CONTRACT_CHECK",
+  "status": "PASS",
+  "productionAcceptance": "NOT_RUN",
+  "schemaDefinitions": 39,
+  "routes": 16,
+  "tools": 13,
+  "checks": [
+    {
+      "id": "schema-valid-Meta",
+      "status": "PASS"
+    },
+    {
+      "id": "reject-unknown-Meta",
+      "status": "PASS"
+    },
+    {
+      "id": "reject-missing-Meta",
+      "status": "PASS"
+    },
+    {
+      "id": "schema-valid-Ref",
+      "status": "PASS"
+    },
+    {
+      "id": "reject-unknown-Ref",
+      "status": "PASS"
+    },
+    {
+      "id": "reject-missing-Ref",
+      "status": "PASS"
+    },
+    {
+      "id": "schema-valid-Brief",
+      "status": "PASS"
+    },
+    {
+      "id": "reject-unknown-Brief",
+      "status": "PASS"
+    },
+    {
+      "id": "reject-missing-Brief",
+      "status": "PASS"
+    },
+    {
+      "id": "schema-valid-IntakePut",
+      "status": "PASS"
+    },
+    {
+      "id": "reject-unknown-IntakePut",
+      "status": "PASS"
+    },
+    {
+      "id": "reject-missing-IntakePut",
+      "status": "PASS"
+    },
+    {
+      "id": "schema-valid-Intake",
+      "status": "PASS"
+    },
+    {
+      "id": "reject-unknown-Intake",
+      "status": "PASS"
+    },
+    {
+      "id": "reject-missing-Intake",
+      "status": "PASS"
+    },
+    {
+      "id": "schema-valid-DecisionInput",
+      "status": "PASS"
+    },
+    {
+      "id": "reject-unknown-DecisionInput",
+      "status": "PASS"
+    },
+    {
+      "id": "reject-missing-DecisionInput",
+      "status": "PASS"
+    },
+    {
+      "id": "schema-valid-Decision",
+      "status": "PASS"
+    },
+    {
+      "id": "reject-unknown-Decision",
+      "status": "PASS"
+    },
+    {
+      "id": "reject-missing-Decision",
+      "status": "PASS"
+    },
+    {
+      "id": "schema-valid-CreateProject",
+      "status": "PASS"
+    },
+    {
+      "id": "reject-unknown-CreateProject",
+      "status": "PASS"
+    },
+    {
+      "id": "reject-missing-CreateProject",
+      "status": "PASS"
+    },
+    {
+      "id": "schema-valid-ProjectRead",
+      "status": "PASS"
+    },
+    {
+      "id": "reject-unknown-ProjectRead",
+      "status": "PASS"
+    },
+    {
+      "id": "reject-missing-ProjectRead",
+      "status": "PASS"
+    },
+    {
+      "id": "schema-valid-JobRead",
+      "status": "PASS"
+    },
+    {
+      "id": "reject-unknown-JobRead",
+      "status": "PASS"
+    },
+    {
+      "id": "reject-missing-JobRead",
+      "status": "PASS"
+    },
+    {
+      "id": "schema-valid-JobCancel",
+      "status": "PASS"
+    },
+    {
+      "id": "reject-unknown-JobCancel",
+      "status": "PASS"
+    },
+    {
+      "id": "reject-missing-JobCancel",
+      "status": "PASS"
+    },
+    {
+      "id": "schema-valid-JobReceipt",
+      "status": "PASS"
+    },
+    {
+      "id": "reject-unknown-JobReceipt",
+      "status": "PASS"
+    },
+    {
+      "id": "reject-missing-JobReceipt",
+      "status": "PASS"
+    },
+    {
+      "id": "schema-valid-ScriptParagraph",
+      "status": "PASS"
+    },
+    {
+      "id": "reject-unknown-ScriptParagraph",
+      "status": "PASS"
+    },
+    {
+      "id": "reject-missing-ScriptParagraph",
+      "status": "PASS"
+    },
+    {
+      "id": "schema-valid-StoryboardShot",
+      "status": "PASS"
+    },
+    {
+      "id": "reject-unknown-StoryboardShot",
+      "status": "PASS"
+    },
+    {
+      "id": "reject-missing-StoryboardShot",
+      "status": "PASS"
+    },
+    {
+      "id": "schema-valid-Script",
+      "status": "PASS"
+    },
+    {
+      "id": "reject-unknown-Script",
+      "status": "PASS"
+    },
+    {
+      "id": "reject-missing-Script",
+      "status": "PASS"
+    },
+    {
+      "id": "schema-valid-Storyboard",
+      "status": "PASS"
+    },
+    {
+      "id": "reject-unknown-Storyboard",
+      "status": "PASS"
+    },
+    {
+      "id": "reject-missing-Storyboard",
+      "status": "PASS"
+    },
+    {
+      "id": "schema-valid-ArtifactContent",
+      "status": "PASS"
+    },
+    {
+      "id": "schema-valid-ArtifactPut",
+      "status": "PASS"
+    },
+    {
+      "id": "reject-unknown-ArtifactPut",
+      "status": "PASS"
+    },
+    {
+      "id": "reject-missing-ArtifactPut",
+      "status": "PASS"
+    },
+    {
+      "id": "schema-valid-Artifact",
+      "status": "PASS"
+    },
+    {
+      "id": "reject-unknown-Artifact",
+      "status": "PASS"
+    },
+    {
+      "id": "reject-missing-Artifact",
+      "status": "PASS"
+    },
+    {
+      "id": "schema-valid-TaskPrepare",
+      "status": "PASS"
+    },
+    {
+      "id": "reject-unknown-TaskPrepare",
+      "status": "PASS"
+    },
+    {
+      "id": "reject-missing-TaskPrepare",
+      "status": "PASS"
+    },
+    {
+      "id": "schema-valid-Context",
+      "status": "PASS"
+    },
+    {
+      "id": "reject-unknown-Context",
+      "status": "PASS"
+    },
+    {
+      "id": "reject-missing-Context",
+      "status": "PASS"
+    },
+    {
+      "id": "schema-valid-Event",
+      "status": "PASS"
+    },
+    {
+      "id": "reject-unknown-Event",
+      "status": "PASS"
+    },
+    {
+      "id": "reject-missing-Event",
+      "status": "PASS"
+    },
+    {
+      "id": "schema-valid-EventSnapshot",
+      "status": "PASS"
+    },
+    {
+      "id": "reject-unknown-EventSnapshot",
+      "status": "PASS"
+    },
+    {
+      "id": "reject-missing-EventSnapshot",
+      "status": "PASS"
+    },
+    {
+      "id": "schema-valid-HealthMetric",
+      "status": "PASS"
+    },
+    {
+      "id": "reject-unknown-HealthMetric",
+      "status": "PASS"
+    },
+    {
+      "id": "reject-missing-HealthMetric",
+      "status": "PASS"
+    },
+    {
+      "id": "schema-valid-ServiceHealth",
+      "status": "PASS"
+    },
+    {
+      "id": "reject-unknown-ServiceHealth",
+      "status": "PASS"
+    },
+    {
+      "id": "reject-missing-ServiceHealth",
+      "status": "PASS"
+    },
+    {
+      "id": "schema-valid-HealthRead",
+      "status": "PASS"
+    },
+    {
+      "id": "reject-unknown-HealthRead",
+      "status": "PASS"
+    },
+    {
+      "id": "reject-missing-HealthRead",
+      "status": "PASS"
+    },
+    {
+      "id": "schema-valid-Capability",
+      "status": "PASS"
+    },
+    {
+      "id": "reject-unknown-Capability",
+      "status": "PASS"
+    },
+    {
+      "id": "reject-missing-Capability",
+      "status": "PASS"
+    },
+    {
+      "id": "schema-valid-Instance",
+      "status": "PASS"
+    },
+    {
+      "id": "reject-unknown-Instance",
+      "status": "PASS"
+    },
+    {
+      "id": "reject-missing-Instance",
+      "status": "PASS"
+    },
+    {
+      "id": "schema-valid-PrepareChange",
+      "status": "PASS"
+    },
+    {
+      "id": "reject-unknown-PrepareChange",
+      "status": "PASS"
+    },
+    {
+      "id": "reject-missing-PrepareChange",
+      "status": "PASS"
+    },
+    {
+      "id": "schema-valid-Change",
+      "status": "PASS"
+    },
+    {
+      "id": "reject-unknown-Change",
+      "status": "PASS"
+    },
+    {
+      "id": "reject-missing-Change",
+      "status": "PASS"
+    },
+    {
+      "id": "schema-valid-ApproveChange",
+      "status": "PASS"
+    },
+    {
+      "id": "reject-unknown-ApproveChange",
+      "status": "PASS"
+    },
+    {
+      "id": "reject-missing-ApproveChange",
+      "status": "PASS"
+    },
+    {
+      "id": "schema-valid-Approval",
+      "status": "PASS"
+    },
+    {
+      "id": "reject-unknown-Approval",
+      "status": "PASS"
+    },
+    {
+      "id": "reject-missing-Approval",
+      "status": "PASS"
+    },
+    {
+      "id": "schema-valid-ApplyChange",
+      "status": "PASS"
+    },
+    {
+      "id": "reject-unknown-ApplyChange",
+      "status": "PASS"
+    },
+    {
+      "id": "reject-missing-ApplyChange",
+      "status": "PASS"
+    },
+    {
+      "id": "schema-valid-Applied",
+      "status": "PASS"
+    },
+    {
+      "id": "reject-unknown-Applied",
+      "status": "PASS"
+    },
+    {
+      "id": "reject-missing-Applied",
+      "status": "PASS"
+    },
+    {
+      "id": "schema-valid-Delivery",
+      "status": "PASS"
+    },
+    {
+      "id": "reject-unknown-Delivery",
+      "status": "PASS"
+    },
+    {
+      "id": "reject-missing-Delivery",
+      "status": "PASS"
+    },
+    {
+      "id": "schema-valid-Error",
+      "status": "PASS"
+    },
+    {
+      "id": "reject-unknown-Error",
+      "status": "PASS"
+    },
+    {
+      "id": "reject-missing-Error",
+      "status": "PASS"
+    },
+    {
+      "id": "schema-valid-Selection",
+      "status": "PASS"
+    },
+    {
+      "id": "reject-unknown-Selection",
+      "status": "PASS"
+    },
+    {
+      "id": "reject-missing-Selection",
+      "status": "PASS"
+    },
+    {
+      "id": "schema-valid-WorkflowNode",
+      "status": "PASS"
+    },
+    {
+      "id": "reject-unknown-WorkflowNode",
+      "status": "PASS"
+    },
+    {
+      "id": "reject-missing-WorkflowNode",
+      "status": "PASS"
+    },
+    {
+      "id": "schema-valid-Workflow",
+      "status": "PASS"
+    },
+    {
+      "id": "reject-unknown-Workflow",
+      "status": "PASS"
+    },
+    {
+      "id": "reject-missing-Workflow",
+      "status": "PASS"
+    },
+    {
+      "id": "registry-instance",
+      "status": "PASS"
+    },
+    {
+      "id": "tool-unique-instance",
+      "status": "PASS"
+    },
+    {
+      "id": "registry-intake.put",
+      "status": "PASS"
+    },
+    {
+      "id": "tool-unique-intake.put",
+      "status": "PASS"
+    },
+    {
+      "id": "registry-intake.confirm",
+      "status": "PASS"
+    },
+    {
+      "id": "registry-project.create",
+      "status": "PASS"
+    },
+    {
+      "id": "tool-unique-project.create",
+      "status": "PASS"
+    },
+    {
+      "id": "registry-context.read",
+      "status": "PASS"
+    },
+    {
+      "id": "tool-unique-context.read",
+      "status": "PASS"
+    },
+    {
+      "id": "registry-artifact.put",
+      "status": "PASS"
+    },
+    {
+      "id": "tool-unique-artifact.put",
+      "status": "PASS"
+    },
+    {
+      "id": "registry-task.prepare",
+      "status": "PASS"
+    },
+    {
+      "id": "tool-unique-task.prepare",
+      "status": "PASS"
+    },
+    {
+      "id": "registry-job.read",
+      "status": "PASS"
+    },
+    {
+      "id": "tool-unique-job.read",
+      "status": "PASS"
+    },
+    {
+      "id": "registry-job.cancel",
+      "status": "PASS"
+    },
+    {
+      "id": "tool-unique-job.cancel",
+      "status": "PASS"
+    },
+    {
+      "id": "registry-change.prepare",
+      "status": "PASS"
+    },
+    {
+      "id": "tool-unique-change.prepare",
+      "status": "PASS"
+    },
+    {
+      "id": "registry-change.approve",
+      "status": "PASS"
+    },
+    {
+      "id": "registry-change.apply",
+      "status": "PASS"
+    },
+    {
+      "id": "tool-unique-change.apply",
+      "status": "PASS"
+    },
+    {
+      "id": "registry-events.snapshot",
+      "status": "PASS"
+    },
+    {
+      "id": "registry-health.read",
+      "status": "PASS"
+    },
+    {
+      "id": "tool-unique-health.read",
+      "status": "PASS"
+    },
+    {
+      "id": "registry-delivery.read",
+      "status": "PASS"
+    },
+    {
+      "id": "tool-unique-delivery.read",
+      "status": "PASS"
+    },
+    {
+      "id": "registry-workflow.read",
+      "status": "PASS"
+    },
+    {
+      "id": "tool-unique-workflow.read",
+      "status": "PASS"
+    },
+    {
+      "id": "resource-narralens://projects/{id}/context",
+      "status": "PASS"
+    },
+    {
+      "id": "resource-narralens://projects/{id}/workflow",
+      "status": "PASS"
+    },
+    {
+      "id": "resource-narralens://projects/{id}/jobs",
+      "status": "PASS"
+    },
+    {
+      "id": "resource-narralens://services/health",
+      "status": "PASS"
+    },
+    {
+      "id": "resource-narralens://projects/{id}/events-snapshot",
+      "status": "PASS"
+    },
+    {
+      "id": "CAN-01-canonical",
+      "status": "PASS"
+    },
+    {
+      "id": "CAN-01-digest",
+      "status": "PASS"
+    },
+    {
+      "id": "CAN-02-canonical",
+      "status": "PASS"
+    },
+    {
+      "id": "CAN-02-digest",
+      "status": "PASS"
+    },
+    {
+      "id": "CAN-03-canonical",
+      "status": "PASS"
+    },
+    {
+      "id": "CAN-03-digest",
+      "status": "PASS"
+    },
+    {
+      "id": "CAN-04-canonical",
+      "status": "PASS"
+    },
+    {
+      "id": "CAN-04-digest",
+      "status": "PASS"
+    },
+    {
+      "id": "CAN-05-canonical",
+      "status": "PASS"
+    },
+    {
+      "id": "CAN-05-digest",
+      "status": "PASS"
+    },
+    {
+      "id": "CAN-06-canonical",
+      "status": "PASS"
+    },
+    {
+      "id": "CAN-06-digest",
+      "status": "PASS"
+    },
+    {
+      "id": "CAN-07-canonical",
+      "status": "PASS"
+    },
+    {
+      "id": "CAN-07-digest",
+      "status": "PASS"
+    },
+    {
+      "id": "CAN-08-canonical",
+      "status": "PASS"
+    },
+    {
+      "id": "CAN-08-digest",
+      "status": "PASS"
+    },
+    {
+      "id": "CAN-09-legal-request",
+      "status": "PASS"
+    },
+    {
+      "id": "CAN-09-canonical",
+      "status": "PASS"
+    },
+    {
+      "id": "CAN-09-digest",
+      "status": "PASS"
+    },
+    {
+      "id": "CAN-10-legal-request",
+      "status": "PASS"
+    },
+    {
+      "id": "CAN-10-canonical",
+      "status": "PASS"
+    },
+    {
+      "id": "CAN-10-digest",
+      "status": "PASS"
+    },
+    {
+      "id": "unsafe-number-NaN",
+      "status": "PASS"
+    },
+    {
+      "id": "unsafe-number-Infinity",
+      "status": "PASS"
+    },
+    {
+      "id": "unsafe-number-1.5",
+      "status": "PASS"
+    },
+    {
+      "id": "unsafe-number-9007199254740992",
+      "status": "PASS"
+    },
+    {
+      "id": "legal-create-command",
+      "status": "PASS"
+    },
+    {
+      "id": "meta-excluded",
+      "status": "PASS"
+    },
+    {
+      "id": "approval-id-bound",
+      "status": "PASS"
+    },
+    {
+      "id": "unsafe-frame-rejected",
+      "status": "PASS"
+    }
+  ],
+  "hashes": {
+    "contracts.schema.json": "6ad9c956edafdd09eac447a785d9ef9bfe60a52b3802fb5d7bbcf7e93fe182b6",
+    "contracts.ts": "5c0a25c5fd4af564dc224bc9a751bdc67ec629581ae0ce7a398c728ddc7e8fcc",
+    "registry.json": "e7b064adc6aaf211ee55e736e304e0acb1bf1a6915b70c08531174fdcbec53d1",
+    "vectors.json": "edd4f481a69baf6d783268a452fef2ef168768f4c623577cd6f04873018717ed"
+  }
+}

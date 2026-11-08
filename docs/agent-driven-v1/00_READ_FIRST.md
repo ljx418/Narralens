@@ -1,5 +1,7 @@
 # Agent 驱动路线审查入口
 
+最新S0候选入口：`s0/review.html`（可操作模拟原型、首轮schema/TS/SQL与冻结方案），详见`s0/README.md`。用户已批准完成并汇报S0；仍未释放A生产实现。S0原型需用户核验，本包工具检查不替代业务验收。
+
 状态：`PROPOSED_FOR_REVIEW`；本轮仅文档开发，未授权进入新路线代码实现。
 最新覆盖：用户已认可截至`867b3b3`的目标/规划文档；当前任务为并行架构/目录/任务划分。目标文档认可与原型/精确合同/实现release分开。新增入口07/08/09与parallel-plan.json优先解释并行边界。
 基线：`8633786dfc15490761f5d6a46f20bca0bcdc7d80`，分支 `migration/m2.2-coordinator-persistence`，编写前工作树清洁。

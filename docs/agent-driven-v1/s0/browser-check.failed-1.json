@@ -1,0 +1,111 @@
+{
+  "kind": "supplementary-windows-headless-CDP",
+  "status": "fail",
+  "businessAcceptance": "NOT_RUN",
+  "viewports": [
+    {
+      "artifact": "architecture",
+      "width": 1440,
+      "height": 900,
+      "scrollWidth": 1440,
+      "scrollHeight": 900
+    },
+    {
+      "artifact": "architecture",
+      "width": 1600,
+      "height": 1000,
+      "scrollWidth": 1600,
+      "scrollHeight": 1000
+    },
+    {
+      "artifact": "architecture",
+      "width": 1920,
+      "height": 1080,
+      "scrollWidth": 1920,
+      "scrollHeight": 1080
+    },
+    {
+      "artifact": "architecture",
+      "width": 2048,
+      "height": 1320,
+      "scrollWidth": 2048,
+      "scrollHeight": 1320
+    }
+  ],
+  "screenshots": [
+    "architecture-2048.png",
+    "approval-1440.png"
+  ],
+  "hashes": {
+    "prototype.html": "50e03a67eee54bdab773ea842d314846003c57b85503600a97db36c589ab399b",
+    "architecture.html": "2a75e9970d4b8aa5a404d542e6d12a92ebd727de8eb1d0173c1e549933bada03",
+    "review.html": "bef3534b7af1921ebf12573b3d9c6605cab4e9458d30584b5a356fdb93b9a502"
+  },
+  "checks": [
+    {
+      "id": "diagram-fit-1440",
+      "status": "PASS"
+    },
+    {
+      "id": "diagram-fit-1600",
+      "status": "PASS"
+    },
+    {
+      "id": "diagram-fit-1920",
+      "status": "PASS"
+    },
+    {
+      "id": "diagram-fit-2048",
+      "status": "PASS"
+    },
+    {
+      "id": "invalid-empty-brief-refused",
+      "status": "PASS"
+    },
+    {
+      "id": "create-intake-and-origin-demo",
+      "status": "PASS"
+    },
+    {
+      "id": "research-source-not-certified",
+      "status": "PASS"
+    },
+    {
+      "id": "draft-buffer-retained-on-node-switch",
+      "status": "PASS"
+    },
+    {
+      "id": "only-visual-version-increments",
+      "status": "PASS"
+    },
+    {
+      "id": "approval-before-after-scope-rights",
+      "status": "PASS"
+    },
+    {
+      "id": "apply-once",
+      "status": "PASS"
+    },
+    {
+      "id": "stale-base-refuses-keeps-human",
+      "status": "PASS"
+    },
+    {
+      "id": "cancel-late-quarantine",
+      "status": "PASS"
+    },
+    {
+      "id": "reopen-requires-new-prepare",
+      "status": "PASS"
+    },
+    {
+      "id": "offline-unknown-and-submit-disabled",
+      "status": "PASS"
+    },
+    {
+      "id": "transient-not-attention",
+      "status": "PASS"
+    }
+  ],
+  "error": "Error: {\"exceptionId\":1,\"text\":\"Uncaught\",\"lineNumber\":0,\"columnNumber\":58,\"scriptId\":\"30\",\"exception\":{\"type\":\"object\",\"subtype\":\"error\",\"className\":\"DOMException\",\"description\":\"SyntaxError: Failed to execute 'querySelector' on 'Document': '[data-candidate=2]' is not a valid selector.\\n    at <anonymous>:1:59\",\"objectId\":\"-1299866514954303976.4.2\",\"preview\":{\"type\":\"object\",\"subtype\":\"error\",\"description\":\"SyntaxError: Failed to execute 'querySelector' on 'Document': '[data-candidate=2]' is not a valid selector.\\n    at <anonymous>:1:59\",\"overflow\":false,\"properties\":[{\"name\":\"stack\",\"type\":\"string\",\"value\":\"SyntaxError: Failed to execute 'querySelector' on … is not a valid selector.\\n    at <anonymous>:1:59\"},{\"name\":\"code\",\"type\":\"number\",\"value\":\"12\"},{\"name\":\"name\",\"type\":\"string\",\"value\":\"SyntaxError\"},{\"name\":\"message\",\"type\":\"string\",\"value\":\"Failed to execute 'querySelector' on 'Document': '[data-candidate=2]' is not a valid selector.\"}]}}}"
+}

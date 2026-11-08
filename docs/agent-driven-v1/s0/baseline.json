@@ -1,0 +1,72 @@
+{
+  "observed_commit": "95087de9bfafdf2f2e339f3d2f2e8991ca11c8a7",
+  "note": "Source existence/hash observations only; earlier reports are not re-executed business verification. Working tree contains authorized S0/process edits.",
+  "files": [
+    {
+      "path": "src/host/server.ts",
+      "exists": true,
+      "sha256": "c050927b8b41a0a0e506985a52f9c26d394fa599da89d0128c9d4bb95904c819"
+    },
+    {
+      "path": "src/host/projects/revision-store.ts",
+      "exists": true,
+      "sha256": "fea46b6310be044d2c90b6c846b07e04600da286643411a53313680230978dae"
+    },
+    {
+      "path": "src/host/projects/project-catalog.ts",
+      "exists": true,
+      "sha256": "191bfbf8454f0b772f3a2af200b35b2fa031e78cd7c5d9cf746a8fa278dc9eb7"
+    },
+    {
+      "path": "src/host/projects/project-coordinator.ts",
+      "exists": true,
+      "sha256": "36a996d700f7009bc08f9aaafe489081058033fe8adbf2ae20019c8568143e02"
+    },
+    {
+      "path": "src/host/job-defaults.ts",
+      "exists": true,
+      "sha256": "a97f1f4fb31b3743aa1016c2c2ac6b1200ff0e8d84e98451b9d63041d94b8582"
+    },
+    {
+      "path": "src/host/outbox.ts",
+      "exists": true,
+      "sha256": "6419f96754adbab68f974eb3b16e1855356bba71aef60754412361def6b49e97"
+    },
+    {
+      "path": "src/contracts/validator.ts",
+      "exists": true,
+      "sha256": "67f75396541dccde5beefaa3c9853a35137af1c493da8a63a3c819c048a10237"
+    },
+    {
+      "path": "package.json",
+      "exists": true,
+      "sha256": "7e69c0a933833d1df3cfb9e77dde8104add573b0bd9d6ebb78da1dc01844737a"
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "exists": true,
+      "sha256": "71eb044aefcdf9a07be7f47465afa1029029e6bd616001790cdd5eedddbe04a2"
+    },
+    {
+      "path": "src/host/creative/project-creation-service.ts",
+      "exists": false,
+      "sha256": null
+    },
+    {
+      "path": "src/mcp/server.ts",
+      "exists": false,
+      "sha256": null
+    },
+    {
+      "path": "src/app/agent-workbench/index.tsx",
+      "exists": false,
+      "sha256": null
+    }
+  ],
+  "client_probes": {
+    "codex": "NOT_RUN",
+    "claude": "NOT_RUN",
+    "dsh": "NOT_RUN"
+  },
+  "production_acceptance": "NOT_RUN"
+}

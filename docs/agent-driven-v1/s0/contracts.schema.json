@@ -1,0 +1,1660 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:narralens:s0-a1:contracts",
+  "description": "Target candidate only. Not registered in production.",
+  "type": "object",
+  "$defs": {
+    "Meta": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "idempotency_key": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$"
+        },
+        "correlation_id": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$"
+        }
+      },
+      "required": [
+        "idempotency_key",
+        "correlation_id"
+      ]
+    },
+    "Ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$"
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      },
+      "required": [
+        "id",
+        "version",
+        "sha256"
+      ]
+    },
+    "Brief": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "topic": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "audience": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "duration_seconds": {
+          "type": "integer",
+          "minimum": 60,
+          "maximum": 180
+        },
+        "tone": {
+          "type": "string",
+          "enum": [
+            "explanatory",
+            "documentary",
+            "tutorial"
+          ]
+        },
+        "local_asset_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$"
+          },
+          "maxItems": 64
+        },
+        "narration_asset_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "concept_summary": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 1000
+        }
+      },
+      "required": [
+        "topic",
+        "audience",
+        "duration_seconds",
+        "tone",
+        "local_asset_ids",
+        "narration_asset_id",
+        "concept_summary"
+      ]
+    },
+    "IntakePut": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "meta": {
+          "$ref": "#/$defs/Meta"
+        },
+        "intake_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "base_version": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "brief": {
+          "$ref": "#/$defs/Brief"
+        }
+      },
+      "required": [
+        "meta",
+        "intake_id",
+        "base_version",
+        "brief"
+      ]
+    },
+    "Intake": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "intake_id": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$"
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "brief": {
+          "$ref": "#/$defs/Brief"
+        },
+        "brief_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "confirmed": {
+          "type": "boolean"
+        },
+        "next_actions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$"
+          },
+          "maxItems": 8
+        }
+      },
+      "required": [
+        "intake_id",
+        "version",
+        "brief",
+        "brief_sha256",
+        "confirmed",
+        "next_actions"
+      ]
+    },
+    "DecisionInput": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "meta": {
+          "$ref": "#/$defs/Meta"
+        },
+        "intake_id": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$"
+        },
+        "intake_version": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "brief_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "choice": {
+          "type": "string",
+          "enum": [
+            "confirm_brief",
+            "reject_brief"
+          ]
+        }
+      },
+      "required": [
+        "meta",
+        "intake_id",
+        "intake_version",
+        "brief_sha256",
+        "choice"
+      ]
+    },
+    "Decision": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "decision_id": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$"
+        },
+        "intake_id": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$"
+        },
+        "intake_version": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "brief_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "choice": {
+          "type": "string",
+          "enum": [
+            "confirm_brief",
+            "reject_brief"
+          ]
+        },
+        "issued_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "decision_id",
+        "intake_id",
+        "intake_version",
+        "brief_sha256",
+        "choice",
+        "issued_at",
+        "expires_at"
+      ]
+    },
+    "CreateProject": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "meta": {
+          "$ref": "#/$defs/Meta"
+        },
+        "intake_id": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$"
+        },
+        "intake_version": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "decision_id": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$"
+        }
+      },
+      "required": [
+        "meta",
+        "intake_id",
+        "intake_version",
+        "decision_id"
+      ]
+    },
+    "ProjectRead": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "project_id": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$"
+        }
+      },
+      "required": [
+        "project_id"
+      ]
+    },
+    "JobRead": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "project_id": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$"
+        },
+        "job_id": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$"
+        }
+      },
+      "required": [
+        "project_id",
+        "job_id"
+      ]
+    },
+    "JobCancel": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "meta": {
+          "$ref": "#/$defs/Meta"
+        },
+        "project_id": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$"
+        },
+        "job_id": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$"
+        }
+      },
+      "required": [
+        "meta",
+        "project_id",
+        "job_id"
+      ]
+    },
+    "JobReceipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "job_id": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$"
+        },
+        "project_id": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$"
+        },
+        "state": {
+          "type": "string",
+          "enum": [
+            "queued",
+            "running",
+            "cancel_requested",
+            "succeeded",
+            "failed",
+            "cancelled",
+            "attention",
+            "completed_after_cancel"
+          ]
+        },
+        "attempt": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "snapshot_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "result_ref": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Ref"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "next_actions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$"
+          },
+          "maxItems": 8
+        }
+      },
+      "required": [
+        "job_id",
+        "project_id",
+        "state",
+        "attempt",
+        "snapshot_id",
+        "result_ref",
+        "next_actions"
+      ]
+    },
+    "ScriptParagraph": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "paragraph_id": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$"
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 6000
+        }
+      },
+      "required": [
+        "paragraph_id",
+        "text"
+      ]
+    },
+    "StoryboardShot": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "shot_id": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$"
+        },
+        "paragraph_id": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$"
+        },
+        "asset_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "duration_frames": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 18000
+        },
+        "caption": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 2000
+        },
+        "concept_text": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 2000
+        }
+      },
+      "required": [
+        "shot_id",
+        "paragraph_id",
+        "asset_id",
+        "duration_frames",
+        "caption",
+        "concept_text"
+      ]
+    },
+    "Script": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "script"
+        },
+        "paragraphs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ScriptParagraph"
+          },
+          "maxItems": 128,
+          "minItems": 1
+        }
+      },
+      "required": [
+        "kind",
+        "paragraphs"
+      ]
+    },
+    "Storyboard": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "storyboard"
+        },
+        "fps": {
+          "const": 30
+        },
+        "shots": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/StoryboardShot"
+          },
+          "maxItems": 128,
+          "minItems": 1
+        }
+      },
+      "required": [
+        "kind",
+        "fps",
+        "shots"
+      ]
+    },
+    "ArtifactContent": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/Script"
+        },
+        {
+          "$ref": "#/$defs/Storyboard"
+        }
+      ]
+    },
+    "ArtifactPut": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "meta": {
+          "$ref": "#/$defs/Meta"
+        },
+        "project_id": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$"
+        },
+        "artifact_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "base_version": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "input_digest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "content": {
+          "$ref": "#/$defs/ArtifactContent"
+        },
+        "input_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Ref"
+          },
+          "maxItems": 16
+        }
+      },
+      "required": [
+        "meta",
+        "project_id",
+        "artifact_id",
+        "base_version",
+        "input_digest",
+        "content",
+        "input_refs"
+      ]
+    },
+    "Artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "project_id": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$"
+        },
+        "ref": {
+          "$ref": "#/$defs/Ref"
+        },
+        "input_digest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "content": {
+          "$ref": "#/$defs/ArtifactContent"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "input_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Ref"
+          },
+          "maxItems": 16
+        }
+      },
+      "required": [
+        "project_id",
+        "ref",
+        "input_digest",
+        "content",
+        "created_at",
+        "input_refs"
+      ]
+    },
+    "TaskPrepare": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "meta": {
+          "$ref": "#/$defs/Meta"
+        },
+        "project_id": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "assemble_draft",
+            "render_snapshot"
+          ]
+        },
+        "input_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Ref"
+          },
+          "maxItems": 16
+        },
+        "snapshot_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "base_revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "source_digest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      },
+      "required": [
+        "meta",
+        "project_id",
+        "kind",
+        "input_refs",
+        "snapshot_id",
+        "base_revision",
+        "source_digest"
+      ]
+    },
+    "Context": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "project_id": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$"
+        },
+        "origin": {
+          "type": "string",
+          "enum": [
+            "created",
+            "migrated"
+          ]
+        },
+        "project_revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "control_revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "snapshot_id": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$"
+        },
+        "source_digest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "workflow_revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "selection_version": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "current_selection": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Selection"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "active_jobs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/JobReceipt"
+          },
+          "maxItems": 128
+        },
+        "artifacts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Ref"
+          },
+          "maxItems": 128
+        },
+        "capabilities": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$"
+          },
+          "maxItems": 64
+        },
+        "next_actions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$"
+          },
+          "maxItems": 16
+        }
+      },
+      "required": [
+        "project_id",
+        "origin",
+        "project_revision",
+        "control_revision",
+        "snapshot_id",
+        "source_digest",
+        "workflow_revision",
+        "selection_version",
+        "current_selection",
+        "active_jobs",
+        "artifacts",
+        "capabilities",
+        "next_actions"
+      ]
+    },
+    "Event": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "event_id": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "project_id": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$"
+        },
+        "workflow_revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "entity_type": {
+          "type": "string",
+          "enum": [
+            "task",
+            "artifact",
+            "decision",
+            "job",
+            "project",
+            "health"
+          ]
+        },
+        "entity_id": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$"
+        },
+        "entity_version": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "attempt": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "state": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "observed_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "event_id",
+        "project_id",
+        "workflow_revision",
+        "entity_type",
+        "entity_id",
+        "entity_version",
+        "attempt",
+        "state",
+        "observed_at"
+      ]
+    },
+    "EventSnapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "context": {
+          "$ref": "#/$defs/Context"
+        },
+        "cursor": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$"
+        },
+        "oldest_retained_event_id": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "snapshot_event_id": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "context",
+        "cursor",
+        "oldest_retained_event_id",
+        "snapshot_event_id"
+      ]
+    },
+    "HealthMetric": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "value": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "unit": {
+          "type": "string",
+          "enum": [
+            "percent",
+            "bytes",
+            "count"
+          ]
+        },
+        "source": {
+          "type": "string",
+          "enum": [
+            "os",
+            "worker",
+            "unavailable"
+          ]
+        },
+        "observed_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "value",
+        "unit",
+        "source",
+        "observed_at"
+      ]
+    },
+    "ServiceHealth": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "service_id": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$"
+        },
+        "state": {
+          "type": "string",
+          "enum": [
+            "starting",
+            "ready",
+            "degraded",
+            "stopped",
+            "unknown"
+          ]
+        },
+        "ownership": {
+          "type": "string",
+          "enum": [
+            "owned",
+            "shared"
+          ]
+        },
+        "sampled_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 400
+        },
+        "metrics": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/HealthMetric"
+          },
+          "maxItems": 16
+        }
+      },
+      "required": [
+        "service_id",
+        "state",
+        "ownership",
+        "sampled_at",
+        "expires_at",
+        "reason",
+        "metrics"
+      ]
+    },
+    "HealthRead": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "services": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ServiceHealth"
+          },
+          "maxItems": 32
+        },
+        "sample_interval_ms": {
+          "const": 5000
+        },
+        "stale_after_ms": {
+          "const": 15000
+        }
+      },
+      "required": [
+        "services",
+        "sample_interval_ms",
+        "stale_after_ms"
+      ]
+    },
+    "Capability": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$"
+        },
+        "version": {
+          "const": 1
+        },
+        "state": {
+          "type": "string",
+          "enum": [
+            "available",
+            "blocked",
+            "unverified"
+          ]
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 400
+        }
+      },
+      "required": [
+        "id",
+        "version",
+        "state",
+        "reason"
+      ]
+    },
+    "Instance": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "instance_id": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$"
+        },
+        "generation": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "api_version": {
+          "const": "agent.v1"
+        },
+        "contract_version": {
+          "const": "s0-a1"
+        },
+        "capabilities": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Capability"
+          },
+          "maxItems": 64
+        },
+        "health": {
+          "type": "string",
+          "enum": [
+            "ready",
+            "degraded",
+            "starting"
+          ]
+        }
+      },
+      "required": [
+        "instance_id",
+        "generation",
+        "api_version",
+        "contract_version",
+        "capabilities",
+        "health"
+      ]
+    },
+    "PrepareChange": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "meta": {
+          "$ref": "#/$defs/Meta"
+        },
+        "project_id": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$"
+        },
+        "materialization_id": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$"
+        },
+        "base_revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "source_digest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "selection_version": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "meta",
+        "project_id",
+        "materialization_id",
+        "base_revision",
+        "source_digest",
+        "selection_version"
+      ]
+    },
+    "Change": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "impact_id": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$"
+        },
+        "project_id": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$"
+        },
+        "materialization_id": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$"
+        },
+        "base_revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "control_revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "source_digest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "selection_version": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "plan_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "target_snapshot_id": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$"
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "state": {
+          "type": "string",
+          "enum": [
+            "active",
+            "consumed",
+            "expired",
+            "revoked"
+          ]
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        }
+      },
+      "required": [
+        "impact_id",
+        "project_id",
+        "materialization_id",
+        "base_revision",
+        "control_revision",
+        "source_digest",
+        "selection_version",
+        "plan_sha256",
+        "target_snapshot_id",
+        "expires_at",
+        "state",
+        "summary"
+      ]
+    },
+    "ApproveChange": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "meta": {
+          "$ref": "#/$defs/Meta"
+        },
+        "project_id": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$"
+        },
+        "impact_id": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$"
+        },
+        "plan_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "choice": {
+          "type": "string",
+          "enum": [
+            "approve",
+            "reject"
+          ]
+        }
+      },
+      "required": [
+        "meta",
+        "project_id",
+        "impact_id",
+        "plan_sha256",
+        "choice"
+      ]
+    },
+    "Approval": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "approval_id": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$"
+        },
+        "project_id": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$"
+        },
+        "impact_id": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$"
+        },
+        "plan_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "state": {
+          "type": "string",
+          "enum": [
+            "active",
+            "consumed",
+            "rejected",
+            "revoked"
+          ]
+        }
+      },
+      "required": [
+        "approval_id",
+        "project_id",
+        "impact_id",
+        "plan_sha256",
+        "expires_at",
+        "state"
+      ]
+    },
+    "ApplyChange": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "meta": {
+          "$ref": "#/$defs/Meta"
+        },
+        "project_id": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$"
+        },
+        "impact_id": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$"
+        },
+        "approval_id": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$"
+        },
+        "base_revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "source_digest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      },
+      "required": [
+        "meta",
+        "project_id",
+        "impact_id",
+        "approval_id",
+        "base_revision",
+        "source_digest"
+      ]
+    },
+    "Applied": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "project_id": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$"
+        },
+        "transaction_id": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$"
+        },
+        "project_revision": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "snapshot_id": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$"
+        },
+        "source_digest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "replayed": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "project_id",
+        "transaction_id",
+        "project_revision",
+        "snapshot_id",
+        "source_digest",
+        "replayed"
+      ]
+    },
+    "Delivery": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "project_id": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$"
+        },
+        "snapshot_id": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$"
+        },
+        "job_id": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$"
+        },
+        "state": {
+          "type": "string",
+          "enum": [
+            "preparing",
+            "blocked",
+            "ready",
+            "failed"
+          ]
+        },
+        "artifact_ref": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Ref"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "qc": {
+          "type": "string",
+          "enum": [
+            "pending",
+            "passed",
+            "blocked"
+          ]
+        },
+        "download_ref": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "project_id",
+        "snapshot_id",
+        "job_id",
+        "state",
+        "artifact_ref",
+        "qc",
+        "download_ref"
+      ]
+    },
+    "Error": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "agent.v1"
+        },
+        "correlation_id": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$"
+        },
+        "code": {
+          "type": "string",
+          "enum": [
+            "INVALID_REQUEST",
+            "UNAUTHORIZED",
+            "ORIGIN_REJECTED",
+            "NOT_FOUND",
+            "REVISION_CONFLICT",
+            "IDEMPOTENCY_CONFLICT",
+            "TARGET_LOCKED",
+            "IMPACT_REQUIRED",
+            "IMPACT_STALE",
+            "APPROVAL_REQUIRED",
+            "CAPABILITY_UNAVAILABLE",
+            "HOST_RESOURCE_EXHAUSTED",
+            "CURSOR_EXPIRED",
+            "INTERNAL_ERROR",
+            "PAYLOAD_TOO_LARGE"
+          ]
+        },
+        "http_status": {
+          "type": "integer",
+          "enum": [
+            400,
+            401,
+            403,
+            404,
+            409,
+            410,
+            422,
+            423,
+            428,
+            503,
+            500,
+            413
+          ]
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 400
+        },
+        "retryable": {
+          "type": "boolean"
+        },
+        "next_actions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$"
+          },
+          "maxItems": 8
+        }
+      },
+      "required": [
+        "schema_version",
+        "correlation_id",
+        "code",
+        "http_status",
+        "message",
+        "retryable",
+        "next_actions"
+      ]
+    },
+    "Selection": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "selection_id": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$"
+        },
+        "selection_version": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "project_revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "shot_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$"
+          },
+          "maxItems": 128
+        },
+        "start_frame": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "end_frame_exclusive": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "selection_id",
+        "selection_version",
+        "project_revision",
+        "shot_ids",
+        "start_frame",
+        "end_frame_exclusive"
+      ]
+    },
+    "WorkflowNode": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "node_id": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$"
+        },
+        "state": {
+          "type": "string",
+          "enum": [
+            "pending",
+            "running",
+            "waiting_user",
+            "succeeded",
+            "failed",
+            "cancelled",
+            "stale",
+            "unknown"
+          ]
+        },
+        "reason": {
+          "type": "string",
+          "maxLength": 400
+        },
+        "input_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Ref"
+          },
+          "maxItems": 128
+        },
+        "output_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Ref"
+          },
+          "maxItems": 128
+        },
+        "job_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "attempt": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "dependencies": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$"
+          },
+          "maxItems": 128
+        },
+        "allowed_actions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$"
+          },
+          "maxItems": 128
+        }
+      },
+      "required": [
+        "node_id",
+        "state",
+        "reason",
+        "input_refs",
+        "output_refs",
+        "job_id",
+        "attempt",
+        "dependencies",
+        "allowed_actions"
+      ]
+    },
+    "Workflow": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "project_id": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$"
+        },
+        "workflow_revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "nodes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/WorkflowNode"
+          },
+          "maxItems": 128
+        },
+        "next_actions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$"
+          },
+          "maxItems": 128
+        }
+      },
+      "required": [
+        "project_id",
+        "workflow_revision",
+        "nodes",
+        "next_actions"
+      ]
+    }
+  }
+}

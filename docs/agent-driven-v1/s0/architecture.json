@@ -1,0 +1,223 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Narralens 首轮合同与现有内核接线",
+    "locale": "zh-CN",
+    "quality_profile": "showcase"
+  },
+  "components": [
+    {
+      "id": "driver",
+      "type": "external",
+      "label": "外部驱动 Agent",
+      "sublabel": "Skill / MCP 客户端",
+      "tag": "拟接入",
+      "pos": [
+        70,
+        70
+      ],
+      "size": [
+        270,
+        85
+      ]
+    },
+    {
+      "id": "transport",
+      "type": "backend",
+      "label": "MCP 外观与 HostClient",
+      "sublabel": "src/mcp/",
+      "tag": "BRIDGE 新增",
+      "pos": [
+        430,
+        70
+      ],
+      "size": [
+        270,
+        85
+      ]
+    },
+    {
+      "id": "app",
+      "type": "backend",
+      "label": "创作应用端口",
+      "sublabel": "agent-driven/composition.ts",
+      "tag": "MAIN 新增",
+      "pos": [
+        790,
+        70
+      ],
+      "size": [
+        270,
+        85
+      ]
+    },
+    {
+      "id": "ui",
+      "type": "frontend",
+      "label": "创作与监控工作台",
+      "sublabel": "app/agent-workbench/",
+      "tag": "PRODUCT 新增",
+      "pos": [
+        790,
+        260
+      ],
+      "size": [
+        270,
+        85
+      ]
+    },
+    {
+      "id": "store",
+      "type": "database",
+      "label": "创作对象与事件",
+      "sublabel": "既有 RevisionStore 扩展",
+      "tag": "MAIN 新增表",
+      "pos": [
+        430,
+        260
+      ],
+      "size": [
+        270,
+        85
+      ]
+    },
+    {
+      "id": "create",
+      "type": "backend",
+      "label": "一般工程初始化",
+      "sublabel": "creative/project-creation-service.ts",
+      "tag": "MAIN 尚未实现",
+      "pos": [
+        70,
+        260
+      ],
+      "size": [
+        270,
+        85
+      ]
+    },
+    {
+      "id": "core",
+      "type": "security",
+      "label": "唯一受控提交内核",
+      "sublabel": "Coordinator / snapshot / locks",
+      "tag": "保留既有",
+      "pos": [
+        70,
+        450
+      ],
+      "size": [
+        270,
+        85
+      ]
+    },
+    {
+      "id": "engine",
+      "type": "backend",
+      "label": "EnginePort 与单引擎",
+      "sublabel": "受控 OpenFilmAdapter",
+      "tag": "保留七方法",
+      "pos": [
+        430,
+        450
+      ],
+      "size": [
+        270,
+        85
+      ]
+    },
+    {
+      "id": "render",
+      "type": "backend",
+      "label": "快照渲染与质检交付",
+      "sublabel": "render / preflight / delivery",
+      "tag": "MEDIA 新增",
+      "pos": [
+        790,
+        450
+      ],
+      "size": [
+        270,
+        85
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "driver-transport",
+      "from": "driver",
+      "to": "transport",
+      "label": "工具与资源"
+    },
+    {
+      "id": "transport-app",
+      "from": "transport",
+      "to": "app",
+      "label": "应用命令"
+    },
+    {
+      "id": "ui-app",
+      "from": "ui",
+      "to": "app",
+      "label": "同源 HTTP"
+    },
+    {
+      "id": "app-store",
+      "from": "app",
+      "to": "store",
+      "label": "创作事实"
+    },
+    {
+      "id": "store-create",
+      "from": "store",
+      "to": "create",
+      "label": "已确认草稿"
+    },
+    {
+      "id": "create-core",
+      "from": "create",
+      "to": "core",
+      "label": "初始化与采用",
+      "labelDy": 24
+    },
+    {
+      "id": "core-engine",
+      "from": "core",
+      "to": "engine",
+      "label": "受控发布"
+    },
+    {
+      "id": "engine-render",
+      "from": "engine",
+      "to": "render",
+      "label": "已提交快照"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "首轮范围",
+      "items": [
+        "本地授权素材与确定性概念画面",
+        "60–180秒影片、改单镜与双导出"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "合同与权限",
+      "items": [
+        "审批来自可信工作台，Agent不能自证",
+        "图稿非第二时间轴；未知状态明确展示"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "开发与证据",
+      "items": [
+        "Codex设计验收，Claude实现；429接管",
+        "图中新增实体尚无生产通过声明"
+      ]
+    }
+  ]
+}

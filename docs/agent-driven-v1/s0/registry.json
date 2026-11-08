@@ -1,0 +1,255 @@
+{
+  "version": "s0-a1",
+  "state": "FREEZE_CANDIDATE_NOT_PRODUCTION",
+  "apiPrefix": "/api/agent/v1",
+  "routes": [
+    {
+      "id": "instance",
+      "method": "GET",
+      "path": "/api/agent/v1/instance",
+      "tool": "narralens_capabilities",
+      "input": null,
+      "output": "Instance",
+      "scope": "read",
+      "owner": "bridge",
+      "production": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "intake.put",
+      "method": "POST",
+      "path": "/api/agent/v1/intakes",
+      "tool": "narralens_intake_put",
+      "input": "IntakePut",
+      "output": "Intake",
+      "scope": "draft",
+      "owner": "product",
+      "production": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "intake.confirm",
+      "method": "POST",
+      "path": "/api/agent/v1/intakes/:id/decision",
+      "tool": null,
+      "input": "DecisionInput",
+      "output": "Decision",
+      "scope": "trusted_ui",
+      "owner": "main",
+      "production": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "project.create",
+      "method": "POST",
+      "path": "/api/agent/v1/projects",
+      "tool": "narralens_project_create",
+      "input": "CreateProject",
+      "output": "JobReceipt",
+      "scope": "create",
+      "owner": "main",
+      "production": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "context.read",
+      "method": "GET",
+      "path": "/api/agent/v1/projects/:id/context",
+      "tool": "narralens_context_read",
+      "input": "ProjectRead",
+      "output": "Context",
+      "scope": "read",
+      "owner": "product",
+      "production": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "artifact.put",
+      "method": "POST",
+      "path": "/api/agent/v1/projects/:id/artifacts",
+      "tool": "narralens_artifact_put",
+      "input": "ArtifactPut",
+      "output": "Artifact",
+      "scope": "draft",
+      "owner": "product",
+      "production": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "task.prepare",
+      "method": "POST",
+      "path": "/api/agent/v1/projects/:id/tasks",
+      "tool": "narralens_task_prepare",
+      "input": "TaskPrepare",
+      "output": "JobReceipt",
+      "scope": "prepare",
+      "owner": "main",
+      "production": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "job.read",
+      "method": "GET",
+      "path": "/api/agent/v1/projects/:id/jobs/:job",
+      "tool": "narralens_job_read",
+      "input": "JobRead",
+      "output": "JobReceipt",
+      "scope": "read",
+      "owner": "main",
+      "production": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "job.cancel",
+      "method": "POST",
+      "path": "/api/agent/v1/projects/:id/jobs/:job/cancel",
+      "tool": "narralens_job_cancel",
+      "input": "JobCancel",
+      "output": "JobReceipt",
+      "scope": "cancel",
+      "owner": "main",
+      "production": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "change.prepare",
+      "method": "POST",
+      "path": "/api/agent/v1/projects/:id/changes",
+      "tool": "narralens_change_prepare",
+      "input": "PrepareChange",
+      "output": "Change",
+      "scope": "prepare",
+      "owner": "main",
+      "production": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "change.approve",
+      "method": "POST",
+      "path": "/api/agent/v1/projects/:id/changes/:impact/approval",
+      "tool": null,
+      "input": "ApproveChange",
+      "output": "Approval",
+      "scope": "trusted_ui",
+      "owner": "main",
+      "production": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "change.apply",
+      "method": "POST",
+      "path": "/api/agent/v1/projects/:id/apply",
+      "tool": "narralens_change_apply",
+      "input": "ApplyChange",
+      "output": "Applied",
+      "scope": "apply",
+      "owner": "main",
+      "production": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "events.snapshot",
+      "method": "GET",
+      "path": "/api/agent/v1/projects/:id/events-snapshot",
+      "tool": null,
+      "input": "ProjectRead",
+      "output": "EventSnapshot",
+      "scope": "read",
+      "owner": "bridge",
+      "production": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "health.read",
+      "method": "GET",
+      "path": "/api/agent/v1/health",
+      "tool": "narralens_health_read",
+      "input": null,
+      "output": "HealthRead",
+      "scope": "read",
+      "owner": "bridge",
+      "production": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "delivery.read",
+      "method": "GET",
+      "path": "/api/agent/v1/projects/:id/delivery/:job",
+      "tool": "narralens_delivery_read",
+      "input": "JobRead",
+      "output": "Delivery",
+      "scope": "read",
+      "owner": "media",
+      "production": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "workflow.read",
+      "method": "GET",
+      "path": "/api/agent/v1/projects/:id/workflow",
+      "tool": "narralens_workflow_read",
+      "input": "ProjectRead",
+      "output": "Workflow",
+      "scope": "read",
+      "owner": "product",
+      "production": "NOT_IMPLEMENTED"
+    }
+  ],
+  "eventStream": {
+    "path": "/api/agent/v1/projects/:id/events",
+    "transport": "SSE",
+    "input": "opaque authenticated cursor in initial query or Last-Event-ID; SSE id is newly signed cursor containing global outbox high-watermark, not a raw number",
+    "output": "Event",
+    "production": "NOT_IMPLEMENTED",
+    "resumeRules": {
+      "priority": "valid Last-Event-ID overrides initial query cursor",
+      "bothMustMatchScope": [
+        "principal",
+        "project",
+        "filter",
+        "generation"
+      ],
+      "rawNumericId": "reject",
+      "expired": "410 CURSOR_EXPIRED",
+      "scopeMismatch": "403 ORIGIN_REJECTED"
+    }
+  },
+  "resources": [
+    {
+      "uri": "narralens://projects/{id}/context",
+      "output": "Context",
+      "source": "context.read"
+    },
+    {
+      "uri": "narralens://projects/{id}/workflow",
+      "output": "Workflow",
+      "source": "workflow.read"
+    },
+    {
+      "uri": "narralens://projects/{id}/jobs",
+      "output": "Context",
+      "source": "context.read",
+      "projection": "active_jobs plus context identity; not a bare array"
+    },
+    {
+      "uri": "narralens://services/health",
+      "output": "HealthRead",
+      "source": "health.read"
+    },
+    {
+      "uri": "narralens://projects/{id}/events-snapshot",
+      "output": "EventSnapshot",
+      "source": "events.snapshot"
+    }
+  ],
+  "protocol": {
+    "baseline": "2025-11-25",
+    "transport": "stdio",
+    "sdk": "@modelcontextprotocol/sdk@1.26.0",
+    "sdkIntegrity": "sha512-Y5RmPncpiDtTXDbLKswIJzTqu2hyBKxTNsgKqKclDbhIgg1wgtf1fRuvxgTnRfcnxtvvgbIEcqUOzZrJ6iSReg==",
+    "license": "MIT",
+    "status": "METADATA_VERIFIED_NOT_INSTALLED_NOT_CLIENT_TESTED"
+  },
+  "deferred": [
+    "DriverSession/takeover (B)",
+    "resource/GPU lease (B)",
+    "online download/provider (B)",
+    "Comfy execution (B)",
+    "full post-edit/long-form (C)"
+  ],
+  "download": {
+    "method": "GET",
+    "path": "/api/agent/v1/projects/:id/downloads/:ref",
+    "auth": "read+project/artifact ownership",
+    "response": "binary stream, application/octet-stream or verified media MIME",
+    "range": "single byte range only; 200 full / 206 valid range / 416 invalid or multiple range; Accept-Ranges: bytes; Content-Range on 206/416",
+    "headers": "Content-Disposition attachment with sanitized filename; immutable ETag=artifact SHA256; If-Range mismatch -> 200 full",
+    "noRedirect": true,
+    "production": "NOT_IMPLEMENTED"
+  }
+}
