@@ -27,6 +27,7 @@ L0 主路径：用户意图 → 外部 Agent → Skill/技能库 → MCP → 应
 | AD-A10 | 正式 Render/QC/Delivery 未闭环 | SnapshotRenderService、PreflightService、DeliveryPackage；任务查询、取消、审计 | 新 `src/host/{render,preflight,delivery}/` | 所有导出绑定 committed snapshot，工作区改动不污染在途导出 |
 | AD-A11 | 本地已有多套ComfyUI JSON与执行器，Narralens尚未接通 | ComfyWorkflowRegistry/ComfyAdapter固定模板与参数映射；能力预检→作业关联→结果资产验证→受控采用 | 新 `src/adapters/comfyui/`、`src/host/providers/comfy-workflow-registry.ts`，复用已有固定执行器 | 不复制模型、不自动安装节点、不导入任意有副作用图 |
 | AD-A12 | 概念说明/AI转场没有明确语义合同 | ConceptSceneSpec/TransitionSpec 分离可编辑图形与生成背景；检验术语/首尾/时长/音轨再组装 | 新 `src/host/creative/{concept-scene,transition-plan}.ts`，复用原生图形和EnginePort | 生成素材不等于概念事实正确；原生clip与文字可编辑 |
+| AD-A13 | 原有Job/SSE与服务启动职责尚未形成统一监控 | WorkflowEventProjector/ServiceHealthRegistry/ResourceSampler/MonitoringQuery提供实时业务图与服务/队列/资源面板 | 新 `src/host/observability/`、`src/app/m5/monitoring/`，复用supervisor与Job/outbox/SSE | 快照+游标恢复；状态/健康/资源分离，监控不新增提交权威 |
 
 以上路径是实施设计，不宣称当前存在。已有实体精确路径以源码为准；同名拆分在各阶段接口冻结时确定，禁止建立重复权威模块。
 
@@ -122,3 +123,8 @@ Agent 退出→服务继续已授权任务→lease 过期→新客户端读取 c
 - `ComfyExecutionRef`：workflow/version/hash、input/model指纹、seed/参数、server_instance_id、prompt_id、可选external_job_id、attempt、output refs；WS事件不当作最终成功证据。
 
 MCP增量工具族草案：`narralens_questions_read/answer`、`narralens_workflow_read`、`narralens_artifact_revise`、`narralens_recompute_prepare`、`narralens_workflows_list/inspect`。图像/视频执行优先复用通用task_prepare，参数只允许注册workflow_id与语义值，禁止直接给客户端任意workflow JSON与绝对路径执行能力。
+
+## 10. 实时与监控增量
+
+详细合同见 `05_REALTIME_AND_MONITORING.md`。R2概览图的“可见工作流工作台/应用服务与工作流/任务与资源调度”仍承担相同层级职责；A13补齐其内部观测模块，不改变唯一提交路径，不把read model误画为新的业务写入服务。
+事件投影读取既有outbox/Job/decision/artifact事实；监控查询同时给MCP和UI；独立supervisor可在Host失联时提供有限健康信息。采样指标带来源/时间/TTL，unknown不能归零，业务成功不由心跳推断。

@@ -35,14 +35,14 @@
       "artifact": "review",
       "width": 1440,
       "scrollWidth": 1425,
-      "items": 37,
+      "items": 40,
       "embeddedDiagram": 2
     },
     {
       "artifact": "review",
       "width": 390,
       "scrollWidth": 375,
-      "items": 37,
+      "items": 40,
       "embeddedDiagram": 2
     }
   ],
@@ -53,6 +53,7 @@
     "r2-architecture-2048-dark.png",
     "r2-review-1440.png",
     "r2-review-390.png",
+    "monitoring-demo.png",
     "r2-workflow-demo.png"
   ],
   "architecture": {
@@ -60,20 +61,26 @@
     "bytes": 814017
   },
   "review": {
-    "sha256": "e938b02130223bc0fca7326b7cf7234a6fb54fb2d8fb429f4ad4e7a79edc02dc",
-    "bytes": 990377
+    "sha256": "3a15443c57a10f469338e412b74c259f713d81ecba5e3b6448660a150a172219",
+    "bytes": 1009995
   },
   "workflowDemo": {
     "nodes": 8,
     "retainsVoice": true,
     "noExecution": true
   },
+  "monitorDemo": {
+    "frozenOnDisconnect": true,
+    "showsUnknown": true,
+    "recovered": true,
+    "clearlySimulated": true
+  },
   "interactions": {
     "choice": "change",
     "note": "需要明确启动状态",
-    "total": 37,
+    "total": 40,
     "approvalStatus": "USER_REVIEW_INPUT_NOT_IMPLEMENTATION_APPROVAL",
-    "documentCount": 7,
+    "documentCount": 8,
     "stored": true
   },
   "reload": {
@@ -90,17 +97,17 @@
     {
       "method": "Browser.downloadWillBegin",
       "params": {
-        "frameId": "6DE8F5793043D51B8E3AEF2A5E318215",
-        "guid": "f93a34af-5b38-48b2-a178-9ada7d2baa9c",
-        "url": "blob:null/49655c58-1af0-451a-a7e7-be85330f8778",
+        "frameId": "209AC8E3E6DF70F6F25B1E99118B048B",
+        "guid": "6e010fb0-3da8-4654-97af-9ab43f593435",
+        "url": "blob:null/d6d275bb-9194-49a0-bd10-3c1211eba99a",
         "suggestedFilename": "Narralens-路线核对.json"
       }
     },
     {
       "method": "Browser.downloadProgress",
       "params": {
-        "guid": "f93a34af-5b38-48b2-a178-9ada7d2baa9c",
-        "totalBytes": 7376,
+        "guid": "6e010fb0-3da8-4654-97af-9ab43f593435",
+        "totalBytes": 8036,
         "receivedBytes": 0,
         "state": "inProgress"
       }
@@ -108,47 +115,47 @@
     {
       "method": "Browser.downloadProgress",
       "params": {
-        "guid": "f93a34af-5b38-48b2-a178-9ada7d2baa9c",
-        "totalBytes": 7376,
-        "receivedBytes": 7376,
+        "guid": "6e010fb0-3da8-4654-97af-9ab43f593435",
+        "totalBytes": 8036,
+        "receivedBytes": 8036,
         "state": "inProgress"
       }
     },
     {
       "method": "Browser.downloadProgress",
       "params": {
-        "guid": "f93a34af-5b38-48b2-a178-9ada7d2baa9c",
-        "totalBytes": 7376,
-        "receivedBytes": 7376,
+        "guid": "6e010fb0-3da8-4654-97af-9ab43f593435",
+        "totalBytes": 8036,
+        "receivedBytes": 8036,
         "state": "inProgress"
       }
     },
     {
       "method": "Browser.downloadProgress",
       "params": {
-        "guid": "f93a34af-5b38-48b2-a178-9ada7d2baa9c",
-        "totalBytes": 7376,
-        "receivedBytes": 7376,
+        "guid": "6e010fb0-3da8-4654-97af-9ab43f593435",
+        "totalBytes": 8036,
+        "receivedBytes": 8036,
         "state": "inProgress"
       }
     },
     {
       "method": "Browser.downloadProgress",
       "params": {
-        "guid": "f93a34af-5b38-48b2-a178-9ada7d2baa9c",
-        "totalBytes": 7376,
-        "receivedBytes": 7376,
+        "guid": "6e010fb0-3da8-4654-97af-9ab43f593435",
+        "totalBytes": 8036,
+        "receivedBytes": 8036,
         "state": "inProgress"
       }
     },
     {
       "method": "Browser.downloadProgress",
       "params": {
-        "guid": "f93a34af-5b38-48b2-a178-9ada7d2baa9c",
-        "totalBytes": 7376,
-        "receivedBytes": 7376,
+        "guid": "6e010fb0-3da8-4654-97af-9ab43f593435",
+        "totalBytes": 8036,
+        "receivedBytes": 8036,
         "state": "completed",
-        "filePath": "C:\\workspace\\videoworkline\\.narralens-design-review-TacU3J\\downloads\\Narralens-路线核对.json"
+        "filePath": "C:\\workspace\\videoworkline\\.narralens-design-review-pmlMRU\\downloads\\Narralens-路线核对.json"
       }
     }
   ],
@@ -157,7 +164,7 @@
   ],
   "download": {
     "status": "pass",
-    "items": 37,
+    "items": 40,
     "versionBound": true
   }
 }

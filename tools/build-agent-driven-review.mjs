@@ -7,7 +7,7 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const read = path => readFileSync(resolve(root,path),'utf8');
 const esc = value => String(value).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;');
 const sha = value => createHash('sha256').update(value).digest('hex');
-const docs = ['docs/01_PRD.md','docs/agent-driven-v1/01_TARGET_ARCHITECTURE.md','docs/agent-driven-v1/02_DEVELOPMENT_AND_ACCEPTANCE.md','docs/agent-driven-v1/03_REVIEW_RECORD.md','docs/agent-driven-v1/04_R2_FEEDBACK_AND_COMFY.md'];
+const docs = ['docs/01_PRD.md','docs/agent-driven-v1/01_TARGET_ARCHITECTURE.md','docs/agent-driven-v1/02_DEVELOPMENT_AND_ACCEPTANCE.md','docs/agent-driven-v1/03_REVIEW_RECORD.md','docs/agent-driven-v1/04_R2_FEEDBACK_AND_COMFY.md','docs/agent-driven-v1/05_REALTIME_AND_MONITORING.md'];
 const contents = docs.map(path => ({path, text:read(path)}));
 const diagramPath='docs/architecture/agent-driven-v1-r2.architecture.html';
 const diagram = read(diagramPath);
@@ -19,8 +19,8 @@ const rows = (text,prefix) => text.split('\n').filter(line=>line.startsWith(`| $
 const experiences = rows(contents[0].text,'AD-E').map(([id,title,gate,mapping])=>({id,title,description:gate,extra:mapping}));
 const architecture = rows(contents[1].text,'AD-A').map(([id,before,after,entities,status])=>({id,title:after,description:`现状：${before}`,extra:`实现落点：${entities}；${status}`}));
 const stages = [...contents[2].text.matchAll(/^## \d+\. (AD-S\d)：(.+)\n([\s\S]*?)(?=^## |$(?![\s\S]))/gm)].map(([,id,title,description])=>({id,title,description,extra:''}));
-if(experiences.length!==19||architecture.length!==12||stages.length!==6)throw Error(`Unexpected coverage: ${experiences.length}/${architecture.length}/${stages.length}`);
-for(let i=1;i<=31;i++) if(!contents[2].text.includes(`AD-T${String(i).padStart(2,'0')}`))throw Error(`Missing test ${i}`);
+if(experiences.length!==21||architecture.length!==13||stages.length!==6)throw Error(`Unexpected coverage: ${experiences.length}/${architecture.length}/${stages.length}`);
+for(let i=1;i<=35;i++) if(!contents[2].text.includes(`AD-T${String(i).padStart(2,'0')}`))throw Error(`Missing test ${i}`);
 const groups=[['experience','体验目标',experiences],['architecture','架构变动',architecture],['plan','开发阶段',stages]];
 const render = (item) => `<article class="review-item" id="${item.id}" data-id="${item.id}"><header><code>${item.id}</code><h3>${esc(item.title)}</h3></header><div class="description">${esc(item.description)}</div>${item.extra?`<p class="extra">${esc(item.extra)}</p>`:''}<fieldset><legend>核对意见</legend>${[['agree','认可'],['change','需修改'],['discuss','待讨论']].map(([value,label])=>`<label><input type="radio" name="${item.id}" value="${value}">${label}</label>`).join('')}</fieldset><label class="note-label">补充意见<textarea placeholder="写下希望保留、修改或澄清的内容…" aria-label="${item.id} 补充意见"></textarea></label></article>`;
 let html=`<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Narralens 新路线逐项核对</title><style>
@@ -49,7 +49,7 @@ for(const item of [...experiences,...architecture,...stages]){
 }
 const demo=`<section id="r2-summary"><h2>本轮优化：让过程与产物可见</h2><p class="status">已读取并核对R1原件：27认可、3需修改、2待讨论。E03审阅方式仍待澄清；新增本地生成、概念/转场与并行目标需复核。</p><p>Agent先启发提问，界面补全简报；素材按主题、章节、镜头台词逐步准备。一个Agent可以组织多个下载/合成任务，GPU生成则按真实资源排队。</p><p><strong>本地盘点：</strong>8个候选文件已只读检查，含canvas与prompt封套两种形态；未执行生成，尚未接通Narralens。具体节点、摘要及历史状态矛盾见下方完整R2文档。</p><details open><summary>工作流节点交互示意（文档演示，不调用服务）</summary><p>点击节点查看输入/输出，修改示例产物后预览受影响下游；独立分支保留。这里不是运行中的产品。</p><div id="workflow-demo" style="display:flex;gap:8px;flex-wrap:wrap;margin:14px 0"></div><div id="node-detail" class="sequence"></div><label>示例产物编辑<textarea id="demo-output" aria-label="示例节点产物"></textarea></label><button id="demo-edit" type="button">预览编辑后的重算范围</button><p id="demo-impact" role="status"></p></details></section>`;
 html=html.replace('<section id="experience">',demo+'<section id="experience">');
-html=html.replaceAll('16 条体验目标','19 条体验目标').replaceAll('10 项架构变化','12 项架构变化').replaceAll('0 / 32 已核对','0 / 37 已核对').replaceAll('../architecture/agent-driven-v1.architecture.html','../architecture/agent-driven-v1-r2.architecture.html');
+html=html.replaceAll('16 条体验目标','21 条体验目标').replaceAll('10 项架构变化','13 项架构变化').replaceAll('0 / 32 已核对','0 / 40 已核对').replaceAll('../architecture/agent-driven-v1.architecture.html','../architecture/agent-driven-v1-r2.architecture.html');
 html=html.replace('</body>',`<script>
 (()=>{
  const nodes=[
@@ -66,6 +66,18 @@ html=html.replace('</body>',`<script>
  for(const node of nodes){const button=document.createElement('button');button.type='button';button.textContent=node.label+' · '+node.state;button.dataset.demoNode=node.id;button.onclick=()=>{selected=node.id;draw()};document.querySelector('#workflow-demo').append(button)}
  document.querySelector('#demo-edit').onclick=()=>{const affected=new Set([selected]);let expanded=true;while(expanded){expanded=false;for(const node of nodes)if(!affected.has(node.id)&&node.deps.some(dep=>affected.has(dep))){affected.add(node.id);expanded=true}}const retained=nodes.filter(n=>!affected.has(n.id)).map(n=>n.label);document.querySelector('#demo-impact').textContent='拟创建新产物版本；重算消费者：'+nodes.filter(n=>affected.has(n.id)&&n.id!==selected).map(n=>n.label).join('、')+'。保留：'+retained.join('、')+'。已锁定内容若在影响范围内需重新授权；旧结果保留。此处未执行重算。';nodes.find(n=>n.id===selected).output=document.querySelector('#demo-output').value;};draw();
 })();
+</script></body>`);
+const monitorMarkup=`<section id="monitor-design"><h2>实时工作流与服务监控</h2><p class="status"><strong>交互示意：以下全部为模拟数据。</strong>未连接本机Host/Comfy，不能用于判断真实服务是否在线。生产目标是同页实时同步、断线可见、任务与服务互相定位。</p><div class="reference" style="background:white;padding:20px;border:1px solid #d8e2e9;border-radius:10px"><div style="display:flex;gap:10px;flex-wrap:wrap"><button id="mon-start" type="button">开始动态示意</button><button id="mon-step" type="button">模拟推进一步</button><button id="mon-disconnect" type="button">模拟连接中断</button><button id="mon-recover" type="button">恢复示例连接</button></div><p id="mon-connection" role="status">示例连接：已连接；尚未开始模拟。</p><p id="mon-sampled">尚无示例采样</p><div class="sequence"><strong>工作流当前节点</strong><div id="mon-workflow" role="status">AI画面：排队；旁白：已完成；章节拼接：等待画面。</div></div><h3 style="margin-top:18px">服务总览（模拟）</h3><ul id="mon-services"><li>Host：就绪；MCP：就绪；Studio/Gateway：就绪</li><li>Worker：等待资源；Comfy：服务在线、GPU槽忙</li></ul><p id="mon-resources">示例资源池：IO 2项运行；CPU 1项运行；GPU 1项运行/2项等待。真实CPU/RAM/显存指标将在实施时按可用遥测展示。</p><p>生产面板支持查看采样来源与更新时间、受影响节点、脱敏日志和恢复建议。启动/停止/重启受实例归属和在途任务限制；共享Comfy不提供任意kill或全局清队列。</p></div></section>`;
+html=html.replace('<section id="experience">',monitorMarkup+'<section id="experience">');
+html=html.replace('<a href="#sources">','<a href="#monitor-design">实时与服务监控</a><a href="#sources">');
+html=html.replace('</body>',`<script>
+(()=>{let timer=null,index=0,connected=true;const phases=['AI画面：排队；旁白：已完成；章节拼接：等待画面。','AI画面：运行中（采样阶段）；旁白：已完成；章节拼接：等待画面。','AI画面：已生成，待验证；旁白：已完成；章节拼接：准备中。','AI画面：验证完成；章节拼接：运行中；工程提交：等待用户。'];
+function sample(){if(!connected)return;index++;document.querySelector('#mon-workflow').textContent=phases[Math.min(index,phases.length-1)];document.querySelector('#mon-sampled').textContent='示例采样时间：'+new Date().toLocaleTimeString('zh-CN')+'；示例事件序号 '+index;document.querySelector('#mon-connection').textContent='示例连接：已连接（模拟）；业务状态随事件更新。';if(index>=phases.length-1){clearInterval(timer);timer=null}}
+document.querySelector('#mon-step').onclick=sample;
+document.querySelector('#mon-start').onclick=()=>{if(!connected)return;clearInterval(timer);index=0;sample();timer=setInterval(sample,1500)};
+document.querySelector('#mon-disconnect').onclick=()=>{connected=false;clearInterval(timer);timer=null;document.querySelector('#mon-connection').textContent='示例连接：已断开；下列均为最后已知状态，不再更新。';document.querySelector('#mon-services').textContent='Host/MCP/Studio/Worker/Comfy：观测未知；无法由旧样本推定当前就绪。';document.querySelector('#mon-resources').textContent='资源数据已失联；保留最后已知信息，不按0或正常处理。'};
+document.querySelector('#mon-recover').onclick=()=>{connected=true;document.querySelector('#mon-services').textContent='示例：Host/MCP/Studio就绪；Comfy在线但模型能力需独立验证；Worker状态可查询。';document.querySelector('#mon-resources').textContent='示例：已重新获取资源与队列快照；不重复执行业务任务。';sample()};
+window.addEventListener('pagehide',()=>clearInterval(timer));})();
 </script></body>`);
 writeFileSync(resolve(root,'docs/agent-driven-v1/review.html'),html);
 console.log(JSON.stringify({experiences:experiences.length,architecture:architecture.length,stages:stages.length,revision,html_sha256:sha(html),output:'docs/agent-driven-v1/review.html'},null,2));

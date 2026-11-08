@@ -50,15 +50,18 @@ try{
     await viewport(width,height);
     const result=await evaluate(`({width:innerWidth,scrollWidth:document.documentElement.scrollWidth,items:document.querySelectorAll('.review-item').length,embeddedDiagram:document.querySelector('iframe').contentDocument.querySelectorAll('svg').length})`);
     receipt.viewports.push({artifact:'review',...result});
-    if(result.scrollWidth>width||result.items!==37||result.embeddedDiagram<1)throw Error('REVIEW_LAYOUT:'+JSON.stringify(result));
+    if(result.scrollWidth>width||result.items!==40||result.embeddedDiagram<1)throw Error('REVIEW_LAYOUT:'+JSON.stringify(result));
     await capture(`r2-review-${width}.png`);
   }
   await viewport(1440,1000);
   receipt.workflowDemo=await evaluate(`(()=>{document.querySelector('[data-demo-node="visual"]').click();document.querySelector('#demo-output').value='新的概念图示例';document.querySelector('#demo-edit').click();const text=document.querySelector('#demo-impact').textContent;return {nodes:document.querySelectorAll('[data-demo-node]').length,retainsVoice:text.includes('保留：创作简报、脚本章节、分镜方案、旁白与字幕'),noExecution:text.includes('未执行重算')}})()`);
   if(receipt.workflowDemo.nodes!==8||!receipt.workflowDemo.retainsVoice||!receipt.workflowDemo.noExecution)throw Error('WORKFLOW_DEMO');
+  receipt.monitorDemo=await evaluate(`(()=>{document.querySelector('#mon-step').click();const before=document.querySelector('#mon-workflow').textContent;document.querySelector('#mon-disconnect').click();document.querySelector('#mon-step').click();const frozen=before===document.querySelector('#mon-workflow').textContent;const unknown=document.querySelector('#mon-services').textContent.includes('未知');document.querySelector('#mon-recover').click();return {frozenOnDisconnect:frozen,showsUnknown:unknown,recovered:document.querySelector('#mon-connection').textContent.includes('已连接'),clearlySimulated:document.querySelector('#monitor-design').textContent.includes('全部为模拟数据')}})()`);
+  if(Object.values(receipt.monitorDemo).some(value=>!value))throw Error('MONITOR_DEMO');
+  await evaluate("document.querySelector('#monitor-design').scrollIntoView()");await capture('monitoring-demo.png');
   await evaluate("document.querySelector('#r2-summary').scrollIntoView()");await capture('r2-workflow-demo.png');await evaluate('scrollTo(0,0)');
   receipt.interactions=await evaluate(`(()=>{const item=document.querySelector('[data-id="AD-E01"]');item.querySelector('[value="change"]').click();const note=item.querySelector('textarea');note.value='需要明确启动状态';note.dispatchEvent(new Event('input',{bubbles:true}));const result=report();return {choice:result.items[0].choice,note:result.items[0].note,total:result.items.length,approvalStatus:result.status,documentCount:Object.keys(result.documents).length,stored:localStorage.getItem(key)!==null}})()`);
-  if(receipt.interactions.choice!=='change'||receipt.interactions.total!==37||!receipt.interactions.stored)throw Error('REVIEW_INTERACTION');
+  if(receipt.interactions.choice!=='change'||receipt.interactions.total!==40||!receipt.interactions.stored)throw Error('REVIEW_INTERACTION');
   await call('Page.reload');await wait(500);
   receipt.reload=await evaluate(`({selected:document.querySelector('[data-id="AD-E01"] [value="change"]').checked,note:document.querySelector('[data-id="AD-E01"] textarea').value})`);
   if(!receipt.reload.selected||receipt.reload.note!=='需要明确启动状态')throw Error('REVIEW_PERSISTENCE');
@@ -67,7 +70,7 @@ try{
   receipt.downloadAttempt=await call('Runtime.evaluate',{expression:"document.querySelector('#download').click();document.querySelector('#message').textContent",userGesture:true,returnByValue:true});
   let downloaded;
   for(let i=0;i<100;i++){try{const names=await readdir(downloadRoot);receipt.downloadFiles=names;const name=names.find(name=>name.endsWith('.json'));if(name){downloaded=JSON.parse(await readFile(join(downloadRoot,name),'utf8'));break}}catch{}await wait(100)}
-  if(!downloaded||downloaded.items.length!==37||downloaded.items[0].choice!=='change'||downloaded.document_revision!==await evaluate('revision'))throw Error('REVIEW_DOWNLOAD:'+JSON.stringify({files:receipt.downloadFiles,downloaded}));
+  if(!downloaded||downloaded.items.length!==40||downloaded.items[0].choice!=='change'||downloaded.document_revision!==await evaluate('revision'))throw Error('REVIEW_DOWNLOAD:'+JSON.stringify({files:receipt.downloadFiles,downloaded}));
   receipt.download={status:'pass',items:downloaded.items.length,versionBound:true};
   await evaluate('localStorage.removeItem(key)');
   receipt.status='pass';
