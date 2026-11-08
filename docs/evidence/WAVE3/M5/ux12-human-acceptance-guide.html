@@ -201,10 +201,13 @@
           </div>
 
           <div class="launch">
-            <h3>1. 在项目终端启动</h3>
+            <h3>1. 双击桌面 Narralens 图标</h3>
+            <p>也可双击仓库根目录 <code>Narralens.cmd</code>。启动器会自动检查依赖、构建面板、预热素材并启动服务，随后打开示例工程。请保留启动状态窗口。</p>
+            <details><summary>维护者命令行入口</summary>
             <code class="command" id="launchCommand">NARRALENS_ALLOW_VISIBLE_UI=1 corepack pnpm experience:m5</code>
             <button class="btn" id="copyCommand" type="button">复制启动命令</button>
             <p><small>在 <code>/mnt/c/workspace/videoworkline/Narralens</code> 执行。关闭方式：关闭 Chrome，或终端按 Ctrl+C。</small></p>
+            </details>
           </div>
 
           <div class="decision">
@@ -227,7 +230,7 @@
           <p><strong>建议分两次：</strong>先照下面的教程熟悉产品，再进行六步验收。熟悉过界面后记录的计时应注明“已学习后操作”，不能作为首次发现入口的耗时。</p>
           <div class="reference">
             <h3>启动后，我应该看哪里？</h3>
-            <p>在 WSL 项目终端运行左侧命令，等待出现 <code>M5 UX-12 visible session started</code>。它会打开带示例工程的精修页，地址结尾为 <code>#/refine/工程编号</code>。不要自行猜端口或工程编号；如果窗口没有打开，使用终端打印的 <code>url=</code> 地址。</p>
+            <p>双击桌面 <strong>Narralens</strong> 图标（或仓库中的 <code>Narralens.cmd</code>），等待状态窗口完成检查、构建与预热。它会打开带示例工程的精修页，地址结尾为 <code>#/refine/工程编号</code>。不要自行猜端口或工程编号；如果启动失败，状态窗口会保留错误信息。每次启动使用临时体验工程，关闭体验窗口后清理，本轮改动不会保留到下次启动。</p>
             <p>找到标题为<strong>“Narralens 导演面板”</strong>的区域。它从上到下依次是：<strong>镜头与章节 → 三路真实 proxy → 比较与采用 → 锁 → 历史</strong>。看不到后面的区域就向下滚动该面板。OpenFilm 的播放器、时间轴与 Inspector 用来观察当前工程；采用和恢复从导演面板发起。</p>
             <ol>
               <li><strong>定位镜头：</strong>在“镜头与章节”点击一个镜头按钮，看“当前选区”和播放头变化，再核对原生时间轴选中项与 Inspector。输入镜头编号可搜索；少于 20 镜时不显示章节按钮。</li>
