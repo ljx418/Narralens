@@ -1,9 +1,29 @@
 {
-  "format": "narralens.iteration-plan@1",
+  "format": "narralens.iteration-plan@2",
   "source": "docs/agent-driven-v1/06_ITERATION_EXECUTION_PLAN.md",
-  "source_sha256": "f21ce617adde16cb263eb648410718f229f6532b1fc45fb508b9b0e85c7ddc9b",
+  "source_sha256": "605300a9bd4d6904e7efe6d4743f6ac18c124cb07332b155fe82891b92f3f14d",
   "validation": "DOC_CONSISTENT_NOT_BUSINESS_ACCEPTANCE",
   "implementationAuthorization": "NOT_GRANTED_BY_CURRENT_PLANNING_REQUEST",
+  "dependenciesMeaning": "PACKAGE_ACCEPTANCE; coding may start earlier on frozen ports with MAIN release",
+  "topologicalOrder": [
+    "IT-P01",
+    "IT-P02",
+    "IT-A01",
+    "IT-A02",
+    "IT-A03",
+    "IT-A04",
+    "IT-A05",
+    "IT-A06",
+    "IT-B01",
+    "IT-B02",
+    "IT-B03",
+    "IT-B04",
+    "IT-B05",
+    "IT-B06",
+    "IT-C01",
+    "IT-C02",
+    "IT-C03"
+  ],
   "stages": 6,
   "workPackages": 17,
   "acceptanceFamilies": 35,
@@ -52,7 +72,7 @@
       "wave": "A",
       "deliverable": "MCP façade/能力目录、入口Skill、首端真实连接与三端探针",
       "dependencies": [
-        "IT-A01"
+        "IT-P02"
       ],
       "acceptanceFamilies": [
         "AD-T02",
@@ -69,7 +89,7 @@
       "wave": "A",
       "deliverable": "公共创作合同/事件快照游标、提问回答、任务幂等/恢复接缝、Comfy只读目录",
       "dependencies": [
-        "IT-A02"
+        "IT-P02"
       ],
       "acceptanceFamilies": [
         "AD-T09",
@@ -86,6 +106,7 @@
       "wave": "A",
       "deliverable": "一般项目创建/Resolver、初始snapshot、启发简报、结构化脚本/分镜入库",
       "dependencies": [
+        "IT-A01",
         "IT-A03"
       ],
       "acceptanceFamilies": [
@@ -102,6 +123,8 @@
       "wave": "A",
       "deliverable": "本地资产/录音→所选分镜→原生可编辑工程、只读实时业务图/审批、最小局部修改",
       "dependencies": [
+        "IT-A02",
+        "IT-A03",
         "IT-A04"
       ],
       "acceptanceFamilies": [
@@ -119,6 +142,9 @@
       "wave": "A",
       "deliverable": "committed snapshot渲染/QC/持久交付、关服重开/中断/改单镜双导出，首轮冻结",
       "dependencies": [
+        "IT-A01",
+        "IT-A02",
+        "IT-A04",
         "IT-A05"
       ],
       "acceptanceFamilies": [
@@ -156,7 +182,7 @@
       "wave": "B",
       "deliverable": "DriverSession/fencing、三类锁与审批、IO/CPU子任务并行、冲突/取消/恢复",
       "dependencies": [
-        "IT-B01"
+        "IT-A06"
       ],
       "acceptanceFamilies": [
         "AD-T12",
@@ -174,7 +200,7 @@
       "wave": "B",
       "deliverable": "完整监控面板、队列/资源/告警与节点关联、实时事件重连与故障恢复",
       "dependencies": [
-        "IT-B02"
+        "IT-A06"
       ],
       "acceptanceFamilies": [
         "AD-T01",
@@ -195,6 +221,8 @@
       "wave": "B",
       "deliverable": "分阶段AssetPlan/下载、Comfy固定一图一视频与后期、GPU资源池/异步子job、概念与转场",
       "dependencies": [
+        "IT-B01",
+        "IT-B02",
         "IT-B03"
       ],
       "acceptanceFamilies": [
@@ -214,7 +242,8 @@
       "wave": "B",
       "deliverable": "本人录音/授权TTS/ASR/字幕对齐与音频锁、真实时长/采样/费用与未知结果",
       "dependencies": [
-        "IT-B04"
+        "IT-B02",
+        "IT-B03"
       ],
       "acceptanceFamilies": [
         "AD-T17",
@@ -231,6 +260,9 @@
       "wave": "B",
       "deliverable": "8标题/4封面、全QC/来源许可/交付包、候选独立审查与人工闭环",
       "dependencies": [
+        "IT-B01",
+        "IT-B03",
+        "IT-B04",
         "IT-B05"
       ],
       "acceptanceFamilies": [
@@ -266,7 +298,7 @@
       "wave": "C",
       "deliverable": "三驱动真实接力、10–15分钟母片/3–5分钟章节/跨章重算与性能故障矩阵",
       "dependencies": [
-        "IT-C01"
+        "IT-B06"
       ],
       "acceptanceFamilies": [
         "AD-T09",
@@ -287,6 +319,7 @@
       "wave": "C",
       "deliverable": "P0/P1/NFR/21体验逐项总审计、全量实证/独立外审/人工签署与Git同步",
       "dependencies": [
+        "IT-C01",
         "IT-C02"
       ],
       "acceptanceFamilies": [

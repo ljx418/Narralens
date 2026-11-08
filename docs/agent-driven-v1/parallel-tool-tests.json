@@ -1,0 +1,49 @@
+{
+  "kind": "isolated-planning-tool-regression",
+  "status": "PASS",
+  "checks": [
+    {
+      "name": "fresh parallel-plan source binding",
+      "status": "PASS"
+    },
+    {
+      "name": "fresh worktrees all share clean baseline",
+      "status": "PASS"
+    },
+    {
+      "name": "aligned preparation is idempotent",
+      "status": "PASS"
+    },
+    {
+      "name": "allowed untracked module can be inspected",
+      "status": "PASS"
+    },
+    {
+      "name": "dirty/untracked lane refuses preparation without deletion",
+      "status": "PASS"
+    },
+    {
+      "name": "out-of-scope untracked file is rejected",
+      "status": "PASS"
+    },
+    {
+      "name": "clean but divergent lane refuses preparation",
+      "status": "PASS"
+    },
+    {
+      "name": "stale derived iteration plan cannot pass",
+      "status": "PASS"
+    },
+    {
+      "name": "multi-predecessor dependency cycle is rejected",
+      "status": "PASS"
+    }
+  ],
+  "productionAcceptance": "NOT_RUN",
+  "userWorktreesTouched": false,
+  "toolHashes": {
+    "check-iteration-plan.mjs": "470b58c2006524765c109702a017e25b9031cac191fb6930eb44d13f0daa73ce",
+    "check-parallel-plan.mjs": "1bf441a28f2b4cbcd30a2375c9f9fcdfb2bcd8cf0e10ea538d80f4415f415c0b",
+    "parallel-workspace.mjs": "e688b24eaccf689f3a8c766eacf59904e380984978a7263e901220c94885b98c"
+  }
+}

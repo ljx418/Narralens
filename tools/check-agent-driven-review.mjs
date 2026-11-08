@@ -33,27 +33,31 @@ try{
   await new Promise((resolve,reject)=>{socket.addEventListener('open',resolve,{once:true});socket.addEventListener('error',reject,{once:true})});
   socket.addEventListener('message',event=>{const msg=JSON.parse(event.data);if(msg.method?.startsWith('Browser.download')){(receipt.downloadEvents??=[]).push(msg)}if(msg.id&&pending.has(msg.id)){pending.get(msg.id)(msg);pending.delete(msg.id)}});
   await call('Page.enable');
-  const architecturePath=join(root,'docs/architecture/agent-driven-v1-r2.architecture.html');
-  const bytes=await readFile(architecturePath);receipt.architecture={sha256:createHash('sha256').update(bytes).digest('hex'),bytes:bytes.length};
+  for(const architectureFile of ['agent-driven-v1-r2.architecture.html','parallel-development.architecture.html']){
+  const architecturePath=join(root,'docs/architecture',architectureFile);
+  const parallel=architectureFile.startsWith('parallel');
+  const bytes=await readFile(architecturePath);receipt[parallel?'parallelArchitecture':'architecture']={sha256:createHash('sha256').update(bytes).digest('hex'),bytes:bytes.length};
   await navigate(architecturePath);
   for(const [width,height] of [[1440,900],[1600,1000],[1920,1080],[2048,1320]]){
     await viewport(width,height);
     const result=await evaluate(`({width:innerWidth,height:innerHeight,scrollWidth:document.documentElement.scrollWidth,scrollHeight:document.documentElement.scrollHeight})`);
-    receipt.viewports.push({artifact:'architecture',...result});
+    receipt.viewports.push({artifact:architectureFile,...result});
     if(result.scrollWidth>width||result.scrollHeight>height)throw Error('ARCHITECTURE_OVERFLOW:'+JSON.stringify(result));
-    if(width===1440||width===2048)for(const theme of ['light','dark']){await evaluate(`document.documentElement.setAttribute('data-theme',${JSON.stringify(theme)})`);await capture(`r2-architecture-${width}-${theme}.png`)}
+    if(width===1440||width===2048)for(const theme of ['light','dark']){await evaluate(`document.documentElement.setAttribute('data-theme',${JSON.stringify(theme)})`);await capture(`${parallel?'parallel':'r2'}-architecture-${width}-${theme}.png`)}
+  }
   }
   const reviewPath=join(output,'review.html');
   const reviewBytes=await readFile(reviewPath);receipt.review={sha256:createHash('sha256').update(reviewBytes).digest('hex'),bytes:reviewBytes.length};
   await navigate(reviewPath);
   for(const [width,height] of [[1440,1000],[390,844]]){
     await viewport(width,height);
-    const result=await evaluate(`({width:innerWidth,scrollWidth:document.documentElement.scrollWidth,items:document.querySelectorAll('.review-item').length,embeddedDiagram:document.querySelector('iframe').contentDocument.querySelectorAll('svg').length})`);
+    const result=await evaluate(`({width:innerWidth,scrollWidth:document.documentElement.scrollWidth,items:document.querySelectorAll('.review-item').length,embeddedDiagram:document.querySelector('iframe').contentDocument.querySelectorAll('svg').length,parallelLanes:document.querySelectorAll('[data-lane-id]').length,diagramFrames:document.querySelectorAll('iframe').length})`);
     receipt.viewports.push({artifact:'review',...result});
-    if(result.scrollWidth>width||result.items!==40||result.embeddedDiagram<1)throw Error('REVIEW_LAYOUT:'+JSON.stringify(result));
+    if(result.scrollWidth>width||result.items!==40||result.embeddedDiagram<1||result.parallelLanes!==3||result.diagramFrames!==2)throw Error('REVIEW_LAYOUT:'+JSON.stringify(result));
     await capture(`r2-review-${width}.png`);
   }
   await viewport(1440,1000);
+  await evaluate("document.querySelector('#parallel-plan').scrollIntoView()");await capture('parallel-workspace-review.png');
   receipt.workflowDemo=await evaluate(`(()=>{document.querySelector('[data-demo-node="visual"]').click();document.querySelector('#demo-output').value='新的概念图示例';document.querySelector('#demo-edit').click();const text=document.querySelector('#demo-impact').textContent;return {nodes:document.querySelectorAll('[data-demo-node]').length,retainsVoice:text.includes('保留：创作简报、脚本章节、分镜方案、旁白与字幕'),noExecution:text.includes('未执行重算')}})()`);
   if(receipt.workflowDemo.nodes!==8||!receipt.workflowDemo.retainsVoice||!receipt.workflowDemo.noExecution)throw Error('WORKFLOW_DEMO');
   receipt.monitorDemo=await evaluate(`(()=>{document.querySelector('#mon-step').click();const before=document.querySelector('#mon-workflow').textContent;document.querySelector('#mon-disconnect').click();document.querySelector('#mon-step').click();const frozen=before===document.querySelector('#mon-workflow').textContent;const unknown=document.querySelector('#mon-services').textContent.includes('未知');document.querySelector('#mon-recover').click();return {frozenOnDisconnect:frozen,showsUnknown:unknown,recovered:document.querySelector('#mon-connection').textContent.includes('已连接'),clearlySimulated:document.querySelector('#monitor-design').textContent.includes('全部为模拟数据')}})()`);

@@ -1,0 +1,48 @@
+{
+  "format": "narralens.parallel-plan-check@1",
+  "status": "PASS",
+  "stages": 6,
+  "tickets": 17,
+  "lanes": 3,
+  "uniqueOwnership": true,
+  "denyRuleProbes": [
+    {
+      "name": "bridge module",
+      "passed": true
+    },
+    {
+      "name": "product module",
+      "passed": true
+    },
+    {
+      "name": "media module",
+      "passed": true
+    },
+    {
+      "name": "protected overrides broad prefix",
+      "passed": true
+    },
+    {
+      "name": "server denied",
+      "passed": true
+    },
+    {
+      "name": "DDL denied",
+      "passed": true
+    },
+    {
+      "name": "shared schema denied",
+      "passed": true
+    },
+    {
+      "name": "cross lane denied",
+      "passed": true
+    },
+    {
+      "name": "lockfile denied",
+      "passed": true
+    }
+  ],
+  "implementationRelease": "NOT_RELEASED",
+  "businessAcceptance": "NOT_RUN"
+}

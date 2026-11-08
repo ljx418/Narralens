@@ -2,6 +2,8 @@
 
 ## 2026-11-08 当前指令优先入口
 
+- 最新用户认可截至867b3b3的目标与规划文档，要求主Agent设计多Agent并行架构和目录。采用主Agent+BRIDGE/PRODUCT/MEDIA独立worktree，不在同一checkout并发Git操作；公共合同/DDL/装配/原核心与最终验收由MAIN负责。后续以07/08/09文档、parallel-plan.json和根AGENTS.md为协作入口，未发布CP-A0与IMPLEMENTATION_RELEASE前不启动生产代码。
+
 - 最新批准为“继续做开发计划落盘，重新规划后续迭代”；不推断为生产实现批准。执行主线 `docs/agent-driven-v1/06_ITERATION_EXECUTION_PLAN.md`：准备轮+三轮A/B/C、17个IT包；AD-A仍仅架构编号，避免任务ID冲突。首个人工产品门是持久短片、改单镜、重开与双导出，不能回退成面板演示。
 
 - 用户要求工作台实时展示工作流状态，并提供服务监控面板。监控区分业务状态/服务就绪/资源等待，显示采样时间和失联，禁止缓存绿灯、假进度、unknown按0；服务控制仅限自有实例并检查在途任务。规格见 `docs/agent-driven-v1/05_REALTIME_AND_MONITORING.md`。

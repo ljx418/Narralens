@@ -1,0 +1,28 @@
+{
+  "schema_version":1,"diagram_type":"architecture",
+  "meta":{"title":"Narralens：并行开发与统一集成","locale":"zh-CN","quality_profile":"showcase"},
+  "components":[
+    {"id":"lead","type":"security","label":"主 Agent 与集成仓","sublabel":"计划 / 合同 / 迁移 / 装配","tag":"唯一集成责任","pos":[540,40],"size":[240,80]},
+    {"id":"contracts","type":"backend","label":"版本化公共端口","sublabel":"schema / DTO / 错误 / fixture","tag":"先冻结再并行","pos":[540,150],"size":[240,80]},
+    {"id":"bridge","type":"backend","label":"接入与观测泳道","sublabel":"MCP / launcher / 健康事件","tag":"独立 worktree","pos":[100,270],"size":[240,80]},
+    {"id":"product","type":"frontend","label":"创作与工作台泳道","sublabel":"简报 / workflow / 编辑 UI","tag":"独立 worktree","pos":[540,270],"size":[240,80]},
+    {"id":"media","type":"backend","label":"媒体与交付泳道","sublabel":"render / Comfy / 资源调度","tag":"独立 worktree","pos":[980,270],"size":[240,80]},
+    {"id":"integration","type":"backend","label":"主 Agent 集成检查点","sublabel":"审核 commit / 接线 / 真实链","tag":"持续集成非最后拼装","pos":[540,390],"size":[240,80]},
+    {"id":"gate","type":"database","label":"统一冻结与独立验收","sublabel":"组合 SHA / 实证 / 外审 / 人验","tag":"不能各自自签完成","pos":[540,510],"size":[240,80]}
+  ],
+  "connections":[
+    {"id":"lead-contract","from":"lead","to":"contracts","label":"冻结与分发","labelDy":30},
+    {"id":"contract-bridge","from":"contracts","to":"bridge","label":"接入端口"},
+    {"id":"contract-product","from":"contracts","to":"product","label":"创作端口","labelDy":40},
+    {"id":"contract-media","from":"contracts","to":"media","label":"媒体端口"},
+    {"id":"bridge-integrate","from":"bridge","to":"integration","label":"提交证据"},
+    {"id":"product-integrate","from":"product","to":"integration","label":"提交证据","labelDy":40},
+    {"id":"media-integrate","from":"media","to":"integration","label":"提交证据"},
+    {"id":"integration-gate","from":"integration","to":"gate","label":"冻结真实组合","labelDy":40}
+  ],
+  "cards":[
+    {"dot":"cyan","title":"目录与状态隔离","items":["同父目录、独立分支与Git索引","DB/profile/端口/产物各自隔离"]},
+    {"dot":"emerald","title":"开发并行、工程不分叉","items":["功能按端口实现，不复制业务权威","合同/DDL/旧核心文件由主 Agent修改"]},
+    {"dot":"amber","title":"验收与资源统一","items":["全量门和GPU测试协调排队","三轮正式验收，包内持续集成"]}
+  ]
+}

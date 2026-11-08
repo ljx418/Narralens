@@ -1,6 +1,7 @@
 # Agent 驱动路线审查入口
 
 状态：`PROPOSED_FOR_REVIEW`；本轮仅文档开发，未授权进入新路线代码实现。
+最新覆盖：用户已认可截至`867b3b3`的目标/规划文档；当前任务为并行架构/目录/任务划分。目标文档认可与原型/精确合同/实现release分开。新增入口07/08/09与parallel-plan.json优先解释并行边界。
 基线：`8633786dfc15490761f5d6a46f20bca0bcdc7d80`，分支 `migration/m2.2-coordinator-persistence`，编写前工作树清洁。
 
 顺序：
@@ -13,6 +14,10 @@
 7. `04_R2_FEEDBACK_AND_COMFY.md`：用户初审逐条处置、本地Comfy候选、并行/概念/转场合同与待核对项；只读清单 `local-comfy-inventory.json`。
 8. `05_REALTIME_AND_MONITORING.md`：实时工作流、服务健康、资源/队列、断线与服务恢复合同。动态示意为模拟，不是真实监控。
 9. `06_ITERATION_EXECUTION_PLAN.md`：最新准备轮+A/B/C三轮、17个IT任务包、依赖/合同/证据/停点；`iteration-plan.json`为同源机器清单，`tools/check-iteration-plan.mjs`检查文档依赖与覆盖，不是业务验收。
+10. `07_PARALLEL_DEVELOPMENT.md`：主Agent+三泳道、独立worktree、并行批次、资源预约与统一冻结验收。
+11. `08_PARALLEL_PORTS_AND_OWNERSHIP.md`：跨泳道接口/存储/注册/代码责任；`parallel-plan.json`为路径所有权与17包责任清单。
+12. `09_PARALLEL_AGENT_HANDOFFS.md`：三个工作窗口提示词模板与MAIN release/交付协议。当前不是生产release。
+13. `10_PARALLEL_REVIEW_RECORD.md`：两路只读设计复核、真实问题闭环、9项一次性仓库工具验证；不替代产品验收。
 
 ## 权威与历史
 

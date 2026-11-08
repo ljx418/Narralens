@@ -128,3 +128,8 @@ MCP增量工具族草案：`narralens_questions_read/answer`、`narralens_workfl
 
 详细合同见 `05_REALTIME_AND_MONITORING.md`。R2概览图的“可见工作流工作台/应用服务与工作流/任务与资源调度”仍承担相同层级职责；A13补齐其内部观测模块，不改变唯一提交路径，不把read model误画为新的业务写入服务。
 事件投影读取既有outbox/Job/decision/artifact事实；监控查询同时给MCP和UI；独立supervisor可在Host失联时提供有限健康信息。采样指标带来源/时间/TTL，unknown不能归零，业务成功不由心跳推断。
+
+## 11. 并行开发的模块化与装配
+
+用户已认可目标文档并要求多Agent实施规划。新的模块责任见`08_PARALLEL_PORTS_AND_OWNERSHIP.md`，图见`../architecture/parallel-development.architecture.html`；这是开发/集成架构，不替换R2产品运行架构。
+新增子系统通过typed port与`src/host/agent-driven/composition.ts`（拟新增）装配；主Agent独占公共合同/DDL/原核心，BRIDGE负责协议与观测、PRODUCT负责创作/工作台、MEDIA负责媒体消费者。三条开发分支不能成为三份工程事实或独立提交权威。全部写入仍遵守原架构约束。

@@ -3,6 +3,8 @@
 版本：R3 / 2026-11-08。文档现场基线 `46ac74138fd668569112969f644e338b891be1b8`，分支 `migration/m2.2-coordinator-persistence`，工作树编写前清洁。
 授权：用户批准继续落盘并重新规划迭代开发计划；**未据此推断批准生产代码实现**。本文件是后续实施主线，六阶段编号与原PRD承诺不变。
 
+R4并行覆盖：用户已认可本计划目标文档，现要求主Agent重划并行工作；责任/目录/端口见`07_PARALLEL_DEVELOPMENT.md`与`08_PARALLEL_PORTS_AND_OWNERSHIP.md`。下表依赖升级为多前置**正式包验收DAG**；代码可在公共port冻结后按release并行，但包验收必须等前置真接线完成。现阶段原型/精确合同未冻结，不误解为生产代码准入。
+
 ## 1. 目标与推进顺序
 
 整体目标：外部Agent经Skill/MCP驱动持久项目，工作台能启发式补全需求、实时呈现业务工作流、查看/单独修改产物、监控服务和资源；通过真实素材和本地Comfy生产视频，完成精修、质量检查和成套交付。
@@ -40,20 +42,20 @@ AD-S0完成以下可审核交付，不能把当前文档示意直接当产品原
 | IT-P01 | AD-S0 | 交互原型、需求与实现差距、用户核对闭环 | 无 | DOC-PROTOTYPE | PLANNED |
 | IT-P02 | AD-S0 | 首轮合同/DDL/测试/回退、内部及独立文档审查、明确实现授权 | IT-P01 | DOC-CONTRACT | PLANNED |
 | IT-A01 | AD-S1 | 生产实例supervisor、持久目录/启动停止、基础服务就绪与健康TTL | IT-P02 | AD-T01,AD-T32,AD-T34 | PLANNED |
-| IT-A02 | AD-S1 | MCP façade/能力目录、入口Skill、首端真实连接与三端探针 | IT-A01 | AD-T02,AD-T03,AD-T04,AD-T22 | PLANNED |
-| IT-A03 | AD-S1 | 公共创作合同/事件快照游标、提问回答、任务幂等/恢复接缝、Comfy只读目录 | IT-A02 | AD-T09,AD-T26,AD-T27,AD-T33 | PLANNED |
-| IT-A04 | AD-S2 | 一般项目创建/Resolver、初始snapshot、启发简报、结构化脚本/分镜入库 | IT-A03 | AD-T05,AD-T07,AD-T27 | PLANNED |
-| IT-A05 | AD-S2 | 本地资产/录音→所选分镜→原生可编辑工程、只读实时业务图/审批、最小局部修改 | IT-A04 | AD-T06,AD-T10,AD-T11,AD-T33 | PLANNED |
-| IT-A06 | AD-S2 | committed snapshot渲染/QC/持久交付、关服重开/中断/改单镜双导出，首轮冻结 | IT-A05 | AD-T06,AD-T07,AD-T08,AD-T09,AD-T20,AD-T35 | PLANNED |
+| IT-A02 | AD-S1 | MCP façade/能力目录、入口Skill、首端真实连接与三端探针 | IT-P02 | AD-T02,AD-T03,AD-T04,AD-T22 | PLANNED |
+| IT-A03 | AD-S1 | 公共创作合同/事件快照游标、提问回答、任务幂等/恢复接缝、Comfy只读目录 | IT-P02 | AD-T09,AD-T26,AD-T27,AD-T33 | PLANNED |
+| IT-A04 | AD-S2 | 一般项目创建/Resolver、初始snapshot、启发简报、结构化脚本/分镜入库 | IT-A01,IT-A03 | AD-T05,AD-T07,AD-T27 | PLANNED |
+| IT-A05 | AD-S2 | 本地资产/录音→所选分镜→原生可编辑工程、只读实时业务图/审批、最小局部修改 | IT-A02,IT-A03,IT-A04 | AD-T06,AD-T10,AD-T11,AD-T33 | PLANNED |
+| IT-A06 | AD-S2 | committed snapshot渲染/QC/持久交付、关服重开/中断/改单镜双导出，首轮冻结 | IT-A01,IT-A02,IT-A04,IT-A05 | AD-T06,AD-T07,AD-T08,AD-T09,AD-T20,AD-T35 | PLANNED |
 | IT-B01 | AD-S3 | 3–6任意选案与真实前后对比、NodeInspector/产物编辑、依赖影响与局部重算 | IT-A06 | AD-T10,AD-T11,AD-T15,AD-T27,AD-T31 | PLANNED |
-| IT-B02 | AD-S3 | DriverSession/fencing、三类锁与审批、IO/CPU子任务并行、冲突/取消/恢复 | IT-B01 | AD-T12,AD-T13,AD-T14,AD-T28,AD-T31 | PLANNED |
-| IT-B03 | AD-S3 | 完整监控面板、队列/资源/告警与节点关联、实时事件重连与故障恢复 | IT-B02 | AD-T01,AD-T03,AD-T04,AD-T15,AD-T32,AD-T33,AD-T34,AD-T35 | PLANNED |
-| IT-B04 | AD-S4 | 分阶段AssetPlan/下载、Comfy固定一图一视频与后期、GPU资源池/异步子job、概念与转场 | IT-B03 | AD-T16,AD-T18,AD-T26,AD-T28,AD-T29,AD-T30 | PLANNED |
-| IT-B05 | AD-S4 | 本人录音/授权TTS/ASR/字幕对齐与音频锁、真实时长/采样/费用与未知结果 | IT-B04 | AD-T17,AD-T18,AD-T29,AD-T32 | PLANNED |
-| IT-B06 | AD-S4 | 8标题/4封面、全QC/来源许可/交付包、候选独立审查与人工闭环 | IT-B05 | AD-T19,AD-T20,AD-T25,AD-T30,AD-T35 | PLANNED |
+| IT-B02 | AD-S3 | DriverSession/fencing、三类锁与审批、IO/CPU子任务并行、冲突/取消/恢复 | IT-A06 | AD-T12,AD-T13,AD-T14,AD-T28,AD-T31 | PLANNED |
+| IT-B03 | AD-S3 | 完整监控面板、队列/资源/告警与节点关联、实时事件重连与故障恢复 | IT-A06 | AD-T01,AD-T03,AD-T04,AD-T15,AD-T32,AD-T33,AD-T34,AD-T35 | PLANNED |
+| IT-B04 | AD-S4 | 分阶段AssetPlan/下载、Comfy固定一图一视频与后期、GPU资源池/异步子job、概念与转场 | IT-B01,IT-B02,IT-B03 | AD-T16,AD-T18,AD-T26,AD-T28,AD-T29,AD-T30 | PLANNED |
+| IT-B05 | AD-S4 | 本人录音/授权TTS/ASR/字幕对齐与音频锁、真实时长/采样/费用与未知结果 | IT-B02,IT-B03 | AD-T17,AD-T18,AD-T29,AD-T32 | PLANNED |
+| IT-B06 | AD-S4 | 8标题/4封面、全QC/来源许可/交付包、候选独立审查与人工闭环 | IT-B01,IT-B03,IT-B04,IT-B05 | AD-T19,AD-T20,AD-T25,AD-T30,AD-T35 | PLANNED |
 | IT-C01 | AD-S5 | StyleProfile/局部override/回滚、评论锚点、原PRD后期操作逐项补齐 | IT-B06 | AD-T11,AD-T12,AD-T14,AD-T23 | PLANNED |
-| IT-C02 | AD-S5 | 三驱动真实接力、10–15分钟母片/3–5分钟章节/跨章重算与性能故障矩阵 | IT-C01 | AD-T09,AD-T13,AD-T21,AD-T22,AD-T24,AD-T28,AD-T31,AD-T35 | PLANNED |
-| IT-C03 | AD-S5 | P0/P1/NFR/21体验逐项总审计、全量实证/独立外审/人工签署与Git同步 | IT-C02 | AD-T01,AD-T02,AD-T03,AD-T04,AD-T05,AD-T06,AD-T07,AD-T08,AD-T09,AD-T10,AD-T11,AD-T12,AD-T13,AD-T14,AD-T15,AD-T16,AD-T17,AD-T18,AD-T19,AD-T20,AD-T21,AD-T22,AD-T23,AD-T24,AD-T25,AD-T26,AD-T27,AD-T28,AD-T29,AD-T30,AD-T31,AD-T32,AD-T33,AD-T34,AD-T35 | PLANNED |
+| IT-C02 | AD-S5 | 三驱动真实接力、10–15分钟母片/3–5分钟章节/跨章重算与性能故障矩阵 | IT-B06 | AD-T09,AD-T13,AD-T21,AD-T22,AD-T24,AD-T28,AD-T31,AD-T35 | PLANNED |
+| IT-C03 | AD-S5 | P0/P1/NFR/21体验逐项总审计、全量实证/独立外审/人工签署与Git同步 | IT-C01,IT-C02 | AD-T01,AD-T02,AD-T03,AD-T04,AD-T05,AD-T06,AD-T07,AD-T08,AD-T09,AD-T10,AD-T11,AD-T12,AD-T13,AD-T14,AD-T15,AD-T16,AD-T17,AD-T18,AD-T19,AD-T20,AD-T21,AD-T22,AD-T23,AD-T24,AD-T25,AD-T26,AD-T27,AD-T28,AD-T29,AD-T30,AD-T31,AD-T32,AD-T33,AD-T34,AD-T35 | PLANNED |
 
 `IT-*`是唯一任务包ID，`AD-A*`继续只表示架构变动，`AD-S*`表示阶段，`AD-T*`表示验收族；避免旧新编号混用。
 

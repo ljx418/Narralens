@@ -1,0 +1,43 @@
+{
+  "format":"narralens.parallel-development-plan@1",
+  "observedBase":"867b3b33b9dd88c88e7bcca6c997d1ceba9c3051",
+  "implementationRelease":"NOT_RELEASED",
+  "documentsAccepted":true,
+  "sourcePlan":"docs/agent-driven-v1/06_ITERATION_EXECUTION_PLAN.md",
+  "integrationRole":"main",
+  "workspaceParent":"../Narralens-agents",
+  "protectedPrefixes":["src/contracts/","contracts/","src/host/projects/","src/host/engine/","src/host/m5/","src/host/agents/","src/host/jobs/","src/host/agent-driven/","src/app/m5/","vendor/","docs/evidence/AGENT_DRIVEN/","tests/agent-driven/integration/"],
+  "protectedFiles":["AGENTS.md","package.json","pnpm-lock.yaml","tsconfig.json","vitest.config.ts","vite.config.ts","vite.m5.config.ts","src/host/server.ts","src/host/api-error.ts","src/host/security.ts","src/host/persistent-job-store.ts","src/host/job-defaults.ts","src/host/job-store.ts","src/host/outbox.ts","src/host/start.ts","src/host/recover.ts","src/host/creative/project-creation-service.ts"],
+  "lanes":[
+    {"id":"bridge","directory":"bridge-observability","branch":"agent-driven/lane-bridge","allowPrefixes":["src/mcp/","skills/narralens/","skills/narralens-lib/","src/launcher/","src/host/observability/","tests/agent-driven/bridge/","tools/agent-driven/bridge/","docs/parallel/lane-bridge/"],"lightTests":"tests/agent-driven/bridge","heavyResources":"MAIN_RESERVATION_REQUIRED"},
+    {"id":"product","directory":"product-workbench","branch":"agent-driven/lane-product","allowPrefixes":["src/app/agent-workbench/","src/host/creative/","src/host/workspace/","tests/agent-driven/product/","tools/agent-driven/product/","docs/parallel/lane-product/"],"lightTests":"tests/agent-driven/product","heavyResources":"MAIN_RESERVATION_REQUIRED"},
+    {"id":"media","directory":"media-delivery","branch":"agent-driven/lane-media","allowPrefixes":["src/host/render/","src/host/preflight/","src/host/delivery/","src/host/providers/","src/adapters/comfyui/","src/adapters/retrieval/","src/adapters/voice/","src/adapters/subtitles/","src/adapters/cover/","tests/agent-driven/media/","tools/agent-driven/media/","docs/parallel/lane-media/"],"lightTests":"tests/agent-driven/media","heavyResources":"MAIN_RESERVATION_REQUIRED"}
+  ],
+  "releases":[
+    {"id":"P","contractGate":"DOCUMENT_ONLY","lanes":["bridge","product","media"],"allowedWork":"IT-P01/IT-P02 assigned documents/prototype/review only"},
+    {"id":"A1","contractGate":"CP-A0","lanes":["bridge","product","media"],"allowedWork":"independent modules after frozen ports; no production acceptance before required package dependencies"},
+    {"id":"A2","contractGate":"CP-A0+GENERAL_PROJECT_READY","lanes":["bridge","product","media"],"allowedWork":"real Host/MCP/new-project/preview/export integration"},
+    {"id":"B1","contractGate":"A_ACCEPTED+CP-B0","lanes":["bridge","product","media"],"allowedWork":"workflow editing, monitoring and execution consumers; MAIN owns fencing and resource leases"},
+    {"id":"B2","contractGate":"RESOURCE_JOB_ASSET_READY","lanes":["bridge","product","media"],"allowedWork":"Comfy/download then voice/QC production integration"},
+    {"id":"C","contractGate":"B_ACCEPTED+CP-C0","lanes":["bridge","product","media"],"allowedWork":"style/feedback, compatibility, post-edit/long-form; unified final gate"}
+  ],
+  "tickets":[
+    {"id":"IT-P01","lead":"main","contributors":["product","bridge","media"]},
+    {"id":"IT-P02","lead":"main","contributors":["bridge","product","media"]},
+    {"id":"IT-A01","lead":"bridge","contributors":["main"]},
+    {"id":"IT-A02","lead":"bridge","contributors":["main"]},
+    {"id":"IT-A03","lead":"main","contributors":["product","bridge"]},
+    {"id":"IT-A04","lead":"main","contributors":["product"]},
+    {"id":"IT-A05","lead":"product","contributors":["main","media","bridge"]},
+    {"id":"IT-A06","lead":"media","contributors":["main","product","bridge"]},
+    {"id":"IT-B01","lead":"product","contributors":["main"]},
+    {"id":"IT-B02","lead":"main","contributors":["media","product"]},
+    {"id":"IT-B03","lead":"bridge","contributors":["product","main"]},
+    {"id":"IT-B04","lead":"media","contributors":["main","product","bridge"]},
+    {"id":"IT-B05","lead":"media","contributors":["main","product"]},
+    {"id":"IT-B06","lead":"main","contributors":["product","media","bridge"]},
+    {"id":"IT-C01","lead":"product","contributors":["main","media"]},
+    {"id":"IT-C02","lead":"main","contributors":["bridge","media","product"]},
+    {"id":"IT-C03","lead":"main","contributors":["bridge","product","media"]}
+  ]
+}
