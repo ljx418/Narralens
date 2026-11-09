@@ -1,3 +1,5 @@
+import {CreatedWorkbenchService} from './created-workbench-service.js';
+import {CreatedWorkbenchHttp} from './created-workbench-http.js';
 import {CreatedNativeWorkspaceService} from './created-native-workspace.js';
 import {createHash} from 'node:crypto';
 import type {IncomingMessage,ServerResponse} from 'node:http';
@@ -31,6 +33,8 @@ export class CreationApplication implements AgentHostApplication {
  readonly committedSnapshots:CommittedSnapshotAuthority;
  readonly localAssets:LocalAssetRegistry|null;
  readonly nativeWorkspaces:CreatedNativeWorkspaceService;
+ readonly createdWorkbench:CreatedWorkbenchService;
+ readonly #workbenchRead:CreatedWorkbenchHttp;
  #closing:Promise<void>|undefined;
  readonly worker:ProjectCreationService;
  constructor(host:NarralensHost,options:{createdRoot:string;vendorRoot:string;nativeWorkspaceRoot?:string;worker?:Pick<CreationServiceDeps,'leaseMs'|'pollMs'|'boundary'>;instance?:()=>Instance;health?:()=>HealthRead;workbench?:{principalId:string;operatorSecret:string};localAssets?:Omit<LocalAssetRegistryOptions,'projectsRoot'|'snapshotsRoot'>}){
@@ -42,6 +46,8 @@ export class CreationApplication implements AgentHostApplication {
   host.projectResolver.attachCreatedProjects(this.creation,options.createdRoot);
   this.committedSnapshots=new CommittedSnapshotAuthority(host.revisions,host.snapshots,this.creation,options.vendorRoot);
   this.nativeWorkspaces=new CreatedNativeWorkspaceService(host.revisions,this.creation,this.committedSnapshots,{root:options.nativeWorkspaceRoot??options.createdRoot+'-native-workspaces',protectedRoots:[options.createdRoot,host.snapshots.projectRoot(''),options.vendorRoot,...(host.nativeStudioRuntimeRoot?[host.nativeStudioRuntimeRoot]:[])]});
+  this.createdWorkbench=new CreatedWorkbenchService(host,this.creation);
+  this.#workbenchRead=new CreatedWorkbenchHttp(this.auth,()=>host.origin,this.createdWorkbench);
   this.localAssets=options.localAssets?new LocalAssetRegistry(host.revisions,this.creation,{...options.localAssets,projectsRoot:options.createdRoot,snapshotsRoot:host.snapshots.projectRoot('')}):null;
   this.worker=new ProjectCreationService({store:this.creation,coordinator:host.coordinator,snapshots:host.snapshots,verifier,createdRoot:options.createdRoot,...options.worker});
   const authority=new CreativeProjectAuthority(this.creation);
@@ -76,11 +82,11 @@ export class CreationApplication implements AgentHostApplication {
    },
   });
  }
- handleWorkbenchSession(request:IncomingMessage,response:ServerResponse){return this.workbenchSessions?.handle(request,response)??Promise.resolve(false);}
+ async handleWorkbenchSession(request:IncomingMessage,response:ServerResponse){if(await this.workbenchSessions?.handle(request,response))return true;return this.#workbenchRead.handle(request,response);}
  nativeSourceRootFor(projectId:string){return this.nativeWorkspaces.rootFor(projectId).then(root=>root.value);}
  closeAfterNative(){return this.nativeWorkspaces.disposeAfterNative();}
  leaseReaperExclusions(){return this.creation.pending().map(row=>row.job_id);}
  recoverBeforeGeneric(){return this.worker.recoverBeforeGeneric();}
  start(){this.worker.start();}
- close(){this.workbenchSessions?.close();return this.#closing??=Promise.all([this.worker.close(),this.localAssets?.close(),this.nativeWorkspaces.close()]).then(()=>undefined);}
+ close(){this.createdWorkbench.close();this.workbenchSessions?.close();return this.#closing??=Promise.all([this.worker.close(),this.localAssets?.close(),this.nativeWorkspaces.close()]).then(()=>undefined);}
 }

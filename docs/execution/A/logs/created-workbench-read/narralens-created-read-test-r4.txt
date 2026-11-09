@@ -1,0 +1,26 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:4123421) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/created-workbench-read.test.ts (5 tests) 14880ms
+   ✓ reads the actual HTTP-created zero-frame native project without starting native or creating a workspace or revision  2971ms
+   ✓ rejects anonymous, driver, cross-origin, and cookie-only reads before resolving an unavailable project  2903ms
+   ✓ refuses genuine source drift and closed service reads without publishing stale committed facts  3116ms
+   ✓ validates explicit created lineage, zero frames and unknown native state rather than permitting old migration claims  2942ms
+   ✓ rechecks the genuine UI credential after the actual project read before returning any private projection  2947ms
+(node:4124443) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/workbench-session-host.test.ts (11 tests) 2904ms
+   ✓ refuses a stolen cookie on both session discovery and Agent UI reads without the port-scoped proof  429ms
+   ✓ does not exhaust session capacity after 80 real renewals and still permits an operator reopen  492ms
+   ✓ allows an explicit operator ticket to reopen after the prior cookie was revoked  441ms
+(node:4124657) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/host-close-lifecycle.test.ts (1 test) 261ms
+
+ Test Files  3 passed (3)
+      Tests  17 passed (17)
+   Start at  06:25:32
+   Duration  35.00s (transform 2.51s, setup 0ms, collect 11.16s, tests 18.05s, environment 0ms, prepare 4.01s)
+

@@ -1,0 +1,29 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:4116566) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/created-workbench-read.test.ts (5 tests) 13900ms
+   ✓ reads the actual HTTP-created zero-frame native project without starting native or creating a workspace or revision  2872ms
+   ✓ rejects anonymous, driver, cross-origin, and cookie-only reads before resolving an unavailable project  2755ms
+   ✓ refuses genuine source drift and closed service reads without publishing stale committed facts  2838ms
+   ✓ validates explicit created lineage, zero frames and unknown native state rather than permitting old migration claims  2644ms
+   ✓ rechecks the genuine UI credential after the actual project read before returning any private projection  2790ms
+(node:4117238) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/workbench-session-host.test.ts (11 tests) 2889ms
+   ✓ exchanges a genuine Host-only ticket once; browser cookie reads a session without creating any approval or project  321ms
+   ✓ requires CSRF for renewal, preserves a predecessor after lost responses, and permits reopening with an existing cookie  328ms
+   ✓ rejects cross-origin, malformed ticket, unknown fields, oversized body, and unavailable paths without leaking credentials  331ms
+   ✓ expires tickets exactly at their deadline and never accepts tickets in a different Host instance  326ms
+   ✓ refuses a stolen cookie on both session discovery and Agent UI reads without the port-scoped proof  307ms
+   ✓ does not exhaust session capacity after 80 real renewals and still permits an operator reopen  445ms
+(node:4117573) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/host-close-lifecycle.test.ts (1 test) 267ms
+
+ Test Files  3 passed (3)
+      Tests  17 passed (17)
+   Start at  06:21:54
+   Duration  32.24s (transform 2.25s, setup 0ms, collect 9.83s, tests 17.06s, environment 0ms, prepare 3.64s)
+

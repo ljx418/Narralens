@@ -1,0 +1,2 @@
+src/contracts/created-workbench.ts(21,9): error TS2352: Conversion of type '{ [x: string]: {}; }' to type 'CreatedWorkbenchProjection' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Type '{ [x: string]: {}; }' is missing the following properties from type 'CreatedWorkbenchProjection': format, origin, migration_id, source_project_id, and 17 more.

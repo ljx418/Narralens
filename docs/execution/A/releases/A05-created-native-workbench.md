@@ -17,3 +17,5 @@
 下一实体明确允许src/host/agent-driven/created-native-workspace.ts、实际Host/SQLite/pinned Studio集成测试和CreationApplication/server的before/after native close装配。它只消费CommittedSnapshotAuthority读权威复制闭包到私有FD锚定目录，缓存不成为第二事实库、不给公开接口返回绝对路径。prepare按真实caller归属/active committed tuple，完成与resolve时重验；关服先停copy，native关完后才删除副本/关目录FD。Snapshot/author/J盘均不得作为Studio可写root。现阶段未实现Run/assembly等仍不注册capability。
 
 第四切面：独立created-workbench@1.0纯读合同及GET /api/ui/v1/projects/:id/created-workbench，MAIN独占src/contracts/created-workbench.ts、contracts/created-workbench.schema.json、src/host/agent-driven/created-workbench-{service,http}.ts与实际Host测试。旧workbench@1/旧migration GET及31个CP-A0 Agent合同不变；明确origin=created、迁移来源null、frame_count>=0。真实projection来自当前committed resolver与pinned EnginePort，完成后复验active transaction/control/recovery；权限在资源查找前及所有await后验证。只读GET不启动Studio、不准备workspace、不产生approval/revision，preview暂为null，native_sync取真实Context unknown/pending（没有producer时不得声称loaded）。新read并不开放匿名Gateway，受限delegate仍是Gateway接线前置。
+
+纯读预审补充：音轨存在不能证明旁白存在，当前有sound仅返回narration unknown；无sound且完整projection返回absent。真实旁白绑定接线后才允许present。该读接口不宣称影片/真实录音/原生loaded/A05已验收。

@@ -1,0 +1,267 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://narralens.local/schemas/created-workbench.schema.json",
+  "description": "Pure read projection of a real owned created project. Never starts Studio or authorizes a mutation; legacy migration contract unchanged.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "format",
+    "project_id",
+    "source_project_id",
+    "migration_id",
+    "revision",
+    "control_revision",
+    "source_digest",
+    "active_snapshot_id",
+    "fps",
+    "frame_count",
+    "engine",
+    "engine_upstream_sha",
+    "tracks",
+    "clips",
+    "history",
+    "active_locks",
+    "capabilities",
+    "preview",
+    "narration",
+    "origin",
+    "native_sync"
+  ],
+  "properties": {
+    "format": {
+      "const": "narralens.created-workbench@1.0"
+    },
+    "project_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$"
+    },
+    "source_project_id": {
+      "type": "null"
+    },
+    "migration_id": {
+      "type": "null"
+    },
+    "revision": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "control_revision": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "source_digest": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "active_snapshot_id": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "fps": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "num",
+        "den"
+      ],
+      "properties": {
+        "num": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "den": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "frame_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "engine": {
+      "const": "openfilm"
+    },
+    "engine_upstream_sha": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{40}$"
+    },
+    "tracks": {
+      "type": "array",
+      "maxItems": 256,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "track_id",
+          "index",
+          "clip_ids"
+        ],
+        "properties": {
+          "track_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "index": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "clip_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      }
+    },
+    "clips": {
+      "type": "array",
+      "maxItems": 4096,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "clip_id",
+          "track_id",
+          "kind",
+          "start_frame",
+          "end_frame_exclusive",
+          "source_shot_id",
+          "source_label"
+        ],
+        "properties": {
+          "clip_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "track_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "kind": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64
+          },
+          "start_frame": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "end_frame_exclusive": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "source_shot_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 200
+          },
+          "source_label": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 200
+          }
+        }
+      }
+    },
+    "history": {
+      "type": "array",
+      "maxItems": 256,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "revision",
+          "snapshot_id",
+          "kind",
+          "transaction_id"
+        ],
+        "properties": {
+          "revision": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "snapshot_id": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "kind": {
+            "enum": [
+              "edit",
+              "asset_import",
+              "lock",
+              "history",
+              "snapshot_publish"
+            ]
+          },
+          "transaction_id": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "active_locks": {
+      "type": "array",
+      "maxItems": 256,
+      "items": {
+        "$ref": "https://narralens.local/schemas/public-lock.schema.json"
+      }
+    },
+    "capabilities": {
+      "type": "array",
+      "maxItems": 256,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "entry_id",
+          "state",
+          "reason"
+        ],
+        "properties": {
+          "entry_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "state": {
+            "enum": [
+              "supported",
+              "blocked"
+            ]
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          }
+        }
+      }
+    },
+    "preview": {
+      "type": "null"
+    },
+    "narration": {
+      "enum": [
+        "present",
+        "absent",
+        "unknown"
+      ]
+    },
+    "origin": {
+      "const": "created"
+    },
+    "native_sync": {
+      "const": "unknown"
+    }
+  }
+}

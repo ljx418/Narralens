@@ -1,0 +1,49 @@
+{
+  "format": "narralens.created-workbench-read-evidence@1",
+  "base_commit": "8638ee182fd53251b6461904016ddce62b9bc4eb",
+  "capture_worktree_dirty": true,
+  "scope": "owned Host UI pure read for actual created projects; no native open or loaded ack",
+  "internal": {
+    "typecheck_exit": 0,
+    "test_files": 3,
+    "tests": 17,
+    "tests_exit": 0,
+    "build_exit": 0,
+    "secret_scan_findings": 0
+  },
+  "external": "REVIEW_PENDING",
+  "human": "NOT_RUN",
+  "overall_A": "IN_PROGRESS",
+  "source_hashes": {
+    "contracts/created-workbench.schema.json": "6807485c37da76bdfa4f56eff052f53fe21452054bfb71f4e79cfa82626d6221",
+    "src/contracts/created-workbench.ts": "7343ae1aeeb41f2b4dbe6541ac2424244740855cd008c785895966b66171d50c",
+    "src/host/agent-driven/created-workbench-service.ts": "47d88404022ec0b16e8b2835d38bd38f2de88ff93e24192a45fcc564da82556d",
+    "src/host/agent-driven/created-workbench-http.ts": "0ef7430d2e6b14d3851b2847a6e15bd67cde5cfe3df667cc8706f1945eca0880",
+    "src/host/agent-driven/creation-application.ts": "2e17ed2cf2c28f232b0a59801bd6969f72e90f3042d72c4f135b6d3235746d1e",
+    "tests/agent-driven/integration/created-workbench-read.test.ts": "b7f5c5d6d5467ef0d1fdbdfea3314b647046668f0bb9a0a20acbd28ff893244b",
+    "tests/agent-driven/integration/helpers/created-project-fixture.ts": "45c6957adb34337e29810faa5ce0d3a3e9370fd0014b7c6f7ea1c4ae47b5704a"
+  },
+  "artifact_hashes": {
+    "docs/execution/A/logs/created-workbench-read/credential-scan.json": "41a7a5dc90804a18bd1a6f44f6996b76d3cdd99c5e262a672b5b4279fbb629d0",
+    "docs/execution/A/logs/created-workbench-read/narralens-created-read-build-r4.txt": "d07fcb4633afede8f30d9881de2c6fee9179ec927d18b15384ae2b1da4edbd44",
+    "docs/execution/A/logs/created-workbench-read/narralens-created-read-scan-r4.txt": "3159ad17286a0aeca01af0c696f6575f432c79bfbe6806238ebaeeb7d73c8d1a",
+    "docs/execution/A/logs/created-workbench-read/narralens-created-read-test-r2.txt": "bba39f90054a2b0e16b23783ae6c3e1e42d30f2d964e3f381db6bce46a03bf4b",
+    "docs/execution/A/logs/created-workbench-read/narralens-created-read-test-r3.txt": "70264e60033b10ea3aab995b2e83a78e9e64af6077a5b03a8a6cc37d4ae4cc6c",
+    "docs/execution/A/logs/created-workbench-read/narralens-created-read-test-r4.txt": "e487f491f1955f6e77c6a0c3f70bd74e15515e8c2d950e3f92f03a0226155bc0",
+    "docs/execution/A/logs/created-workbench-read/narralens-created-read-tsc-r1.txt": "dd51df13ffe6844852d718bbda709c6347a298f9293153e766dbb3b1fda5c1fd",
+    "docs/execution/A/logs/created-workbench-read/narralens-created-read-tsc-r2.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "docs/execution/A/logs/created-workbench-read/narralens-created-read-tsc-r3.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "docs/execution/A/logs/created-workbench-read/narralens-created-read-tsc-r4.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "retained_failures": [
+    "r1 tsc: Ajv type inference; corrected compile generic",
+    "r2 tests: incorrect no-track expectation, actual empty project retains two native tracks"
+  ],
+  "not_proven": [
+    "Gateway scoped delegation",
+    "real native loaded observation",
+    "Run/Task/assembly/adoption",
+    "real human media film and double export",
+    "A acceptance and human PASS"
+  ]
+}

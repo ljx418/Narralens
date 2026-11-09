@@ -1,0 +1,54 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:4114510) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/agent-driven/integration/created-workbench-read.test.ts (4 tests | 1 failed) 12068ms
+   × reads the actual HTTP-created zero-frame native project without starting native or creating a workspace or revision 3045ms
+     → expected { …(21) } to match object { …(13) }
+(10 matching properties omitted from actual)
+   ✓ rejects anonymous, driver, cross-origin, and cookie-only reads before resolving an unavailable project  2751ms
+   ✓ refuses genuine source drift and closed service reads without publishing stale committed facts  3376ms
+   ✓ validates explicit created lineage, zero frames and unknown native state rather than permitting old migration claims  2896ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/created-workbench-read.test.ts > reads the actual HTTP-created zero-frame native project without starting native or creating a workspace or revision
+AssertionError: expected { …(21) } to match object { …(13) }
+(10 matching properties omitted from actual)
+
+- Expected
++ Received
+
+@@ -9,7 +9,18 @@
+    "origin": "created",
+    "preview": null,
+    "revision": 1,
+    "source_digest": "deb8d69a668e8b5b252a0213742bb427c440d307946783e97ec41f788342eb78",
+    "source_project_id": null,
+-   "tracks": [],
++   "tracks": [
++     {
++       "clip_ids": [],
++       "index": 0,
++       "track_id": "track_0",
++     },
++     {
++       "clip_ids": [],
++       "index": 1,
++       "track_id": "track_1",
++     },
++   ],
+  }
+
+ ❯ tests/agent-driven/integration/created-workbench-read.test.ts:13:77
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 3 passed (4)
+   Start at  06:20:40
+   Duration  19.31s (transform 2.25s, setup 0ms, collect 5.00s, tests 12.07s, environment 0ms, prepare 1.48s)
+

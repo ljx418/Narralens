@@ -36,6 +36,6 @@ export async function createdProjectFixture(options:{studioBeforeGatewayPublish?
   const closure=await app.committedSnapshots.readerForTransaction(projectId,commit.transaction_id,'owner').readSnapshot({project_id:projectId,snapshot_id:commit.snapshot_id,source_digest:commit.source_digest});
   const owner=createTrustedCallerContext({principal_id:'owner',channel:'authenticated',source:'driver_relay',session_ref:'fixture-owner'}),foreign=createTrustedCallerContext({principal_id:'other',channel:'authenticated',source:'driver_relay',session_ref:'fixture-other'});
   const authorRoot=join(root,'projects',projectId,'source'),authorBytes=await readFile(join(authorRoot,'film.html'));
-  return {root,host,app,projectId,commit,closure,owner,foreign,authorRoot,authorBytes,close:async()=>{await host.close();await rm(root,{recursive:true,force:true});}};
+  return {root,host,app,projectId,commit,closure,owner,foreign,authorRoot,authorBytes,request,ui,driver,close:async()=>{await host.close();await rm(root,{recursive:true,force:true});}};
  }catch(error){await host.close();await rm(root,{recursive:true,force:true});throw error;}
 }

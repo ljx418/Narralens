@@ -1,0 +1,106 @@
+{
+  "commit": "8638ee182fd53251b6461904016ddce62b9bc4eb",
+  "source_directory": "/mnt/c/workspace/videoworkline/Narralens-agents/bridge-observability/var/independent-native-8638ee1/source",
+  "completed_at": "2026-11-09T22:24:47.296865+00:00",
+  "exec_session": 55515,
+  "results": {
+    "typecheck_exit": 0,
+    "build_exit": 0,
+    "test_exit": 0,
+    "test_files": 2,
+    "tests": 12,
+    "test_duration_seconds": 54.54
+  },
+  "source_checks": [
+    {
+      "path": "src/host/agent-driven/created-native-workspace.ts",
+      "sha256": "422c29dcc48d3c5f1989c5cd85d89a0bce9ea6ced6f0f35600a343129f0ea8e2",
+      "matches_before_and_git": true
+    },
+    {
+      "path": "src/host/agent-driven/creation-application.ts",
+      "sha256": "74893e049ff951ea5ce435a6aa6f01126e322a879d2a592276f40898ea1ce81e",
+      "matches_before_and_git": true
+    },
+    {
+      "path": "src/host/agent-driven/start-runtime.ts",
+      "sha256": "d5bd8fb2507f61e1dc1c01c83def8a9d81406dc48a7e7120746c090dca9227a4",
+      "matches_before_and_git": true
+    },
+    {
+      "path": "src/host/m5/openfilm-studio-supervisor.ts",
+      "sha256": "6fb93710a1cfc96ea80f4427f55f9d30742a639b371f490fa5073b80dd9cfec0",
+      "matches_before_and_git": true
+    },
+    {
+      "path": "src/host/server.ts",
+      "sha256": "11edc2c5015e5250fcc2dec8780a527d356e7eb51c5e6278275fa743fcba64c2",
+      "matches_before_and_git": true
+    },
+    {
+      "path": "tests/agent-driven/integration/created-native-workspace.test.ts",
+      "sha256": "439d469032c9af2b83ceb826e0aead7cf5c2fe5c5693be7cbf18c8e67f0f615f",
+      "matches_before_and_git": true
+    },
+    {
+      "path": "tests/agent-driven/integration/helpers/created-project-fixture.ts",
+      "sha256": "6462cadc62224b678861ffeb028767d54247cf3fe99fac2b7f2aab7e5f223adc",
+      "matches_before_and_git": true
+    },
+    {
+      "path": "src/host/agent-driven/owned-runtime.ts",
+      "sha256": "9ff6bca28da8f9d9537eda9a013149ef5789616ce98d43066eb91d8872fda8e4",
+      "matches_before_and_git": true
+    },
+    {
+      "path": "src/host/agent-driven/committed-snapshot-authority.ts",
+      "sha256": "91fd1e8b517bfbcf4dcc385d3b243df3e945b48f8fec27ea7bee71e80fb1d0aa",
+      "matches_before_and_git": true
+    },
+    {
+      "path": "package.json",
+      "sha256": "1d6281dc15a2c20ae4533730477d9611818701962126c6e45c306b2d0c9a1f4b",
+      "matches_before_and_git": true
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "sha256": "66d38478d0b035777472a8cdb53954559a6c1a5f8803f7247caaffce1ac3584d",
+      "matches_before_and_git": true
+    }
+  ],
+  "build_artifacts": [
+    {
+      "path": "dist/assets/index-BMbIPAAc.js",
+      "bytes": 213602,
+      "sha256": "a6de845f0465b344b05f7605cbc1310984be8b4e443c05344070eeffcb57d514"
+    },
+    {
+      "path": "dist/assets/index-BMbIPAAc.js.map",
+      "bytes": 945158,
+      "sha256": "6b0c9dd6ae7a71521eedbeccb3fa73ce64142409a268795b464cb40e0d5a00bd"
+    },
+    {
+      "path": "dist/assets/index-CuKclEQt.css",
+      "bytes": 12548,
+      "sha256": "26cadeed11e56c77a59d7274530cb38241f8c8975e85ccaa6d940c9f7dfb8cf2"
+    },
+    {
+      "path": "dist/index.html",
+      "bytes": 458,
+      "sha256": "2c19adb230413b3c49564b4377f7681569a9b8727482e701446d5606a5378b66"
+    },
+    {
+      "path": "dist/m5/narralens-panel.css",
+      "bytes": 4206,
+      "sha256": "a5c3958d88bc5911c924b592d276822e8380e4036c3007439ac982c8cd2dcbb4"
+    },
+    {
+      "path": "dist/m5/narralens-panel.js",
+      "bytes": 347749,
+      "sha256": "6ec3c65f14faea0650d3136d4fbe5c2b294e4a2b968f425b74898dad988f9d3b"
+    }
+  ],
+  "main_worktree_used_as_input": false,
+  "main_written_by_reviewer": false,
+  "slot": "RELEASED"
+}

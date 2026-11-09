@@ -105,6 +105,36 @@
         "report_sha256": "cd80c0f037cfc64f2129a0881cad10ffd88943eb7014cdb36e9c9f85ea4c76e1",
         "controlled_test_output": "one unique untracked headless result moved unchanged to reviewer archive; final frozen tree clean"
       }
+    },
+    {
+      "scope": "committed created native working copy and actual Host Studio/Gateway startup/close/version-window chain",
+      "frozen_commit": "8638ee182fd53251b6461904016ddce62b9bc4eb",
+      "review": "PASS_LIMITED_SCOPE",
+      "internal": {
+        "files": 8,
+        "tests": 85,
+        "exit": 0
+      },
+      "independent": {
+        "files": 2,
+        "tests": 12,
+        "typecheck_exit": 0,
+        "build_exit": 0,
+        "exit": 0,
+        "report": "docs/execution/A/reviews/created-native-workspace-8638ee1/REVIEW.md"
+      }
+    },
+    {
+      "scope": "created Host UI pure read; zero-frame actual projection and current owner/session checks",
+      "review": "INTERNAL_EVIDENCED_EXTERNAL_PENDING",
+      "internal": {
+        "files": 3,
+        "tests": 17,
+        "exit": 0,
+        "typecheck_exit": 0,
+        "build_exit": 0
+      },
+      "evidence": "docs/execution/A/created-workbench-read-evidence.json"
     }
   ],
   "not_closed": [
@@ -112,7 +142,7 @@
     "IT-A01 and IT-A02 overall",
     "IT-A03..A06 overall",
     "real human footage/voice film",
-    "created native workbench/ack and trusted UI entry",
+    "created native public workbench/Gateway owner delegation and loaded ack",
     "full Run execution and formal Delivery",
     "whole A regressions/build/T20",
     "HTML acceptance report/services ready for human",

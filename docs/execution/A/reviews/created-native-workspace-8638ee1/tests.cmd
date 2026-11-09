@@ -1,0 +1,1 @@
+COREPACK_ENABLE_NETWORK=0 corepack pnpm exec vitest run --config vitest.config.ts tests/agent-driven/integration/created-native-workspace.test.ts tests/agent-driven/integration/host-close-lifecycle.test.ts --maxWorkers=1 --minWorkers=1
