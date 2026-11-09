@@ -31,6 +31,8 @@ export interface StagedNativeDraft {
   recording_origin:NativeDraftAsset['recording_origin'];
  }[];
  readonly plan_digest:string;
+ /** Approved storyboard intervals, never an ASR/word-alignment claim. */
+ readonly subtitle_timing_basis:'storyboard_plan';
 }
 /** Preparation only. MAIN owns real Run/Job fencing, current facts, review and commit. */
 export interface NativeDraftAssembler {prepare(request:NativeDraftRequest):Promise<StagedNativeDraft>;}
