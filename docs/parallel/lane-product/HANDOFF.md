@@ -145,3 +145,11 @@ that they pass, and it does not claim an independent review.
 
 The lane stays stopped until MAIN explicitly hands it back. It does not push, it does not
 touch `main`, and it does not re-open a write window on its own.
+
+
+## Codex acceptance intake (2026-11-09)
+Claude session 4548ddcb-e870-405b-863f-a17a4a7ed683 completed; latest PID3531672 and exec59591 exit0; no remaining child. Implementation candidate HEAD7e4f8b0a4ea318f0c607ed72bcfc4f4e521306f6, source correction d4383629babd5979bf313c84eaa211fa9093ed9a. Writer is now Codex for documentation/acceptance only; Claude remains stopped until explicit next handoff.
+
+MAIN decisions accepted: preproject idempotency maps existing operation_idempotency project_id=principal:<authenticated principal>, project uses actual project ID; operation_kind=agent.v1:<operation>. No new ledger. Sensitive seven registry businessProducer remains MAIN; helpers supplied by PRODUCT, MAIN verifies channel/principal/currentness and registers trusted evidence/finite approval in same transaction. Coordinator consumes adoption approval in final commit. Intake.confirm remains MAIN trusted UI entry. Gates checkpoint_json, ReviewPackage artifact_version, plan_sha→action_digest and nonrun outbox-only mapping accepted. Bootstrap command lifecycle state mutable only by MAIN dedicated service; PRODUCT initial reservation/read surface remains append-only.
+
+Resource: BRIDGE occupies only light slot; PRODUCT source-only pending MAIN admission. tsc/vitest/UI browser NOT_RUN. Static standalone canonical/exports script checks were performed by Claude despite source-only intention; these are not module test PASS. Scope deviation: /tmp/check-exports.mjs was written by Claude rather than under allowed lane; cleanup limited to that self-owned file. Future scratch must remain inside docs/parallel/lane-product. No other project/public/protected paths changed.
