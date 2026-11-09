@@ -52,6 +52,7 @@ import {
   FIXED_PLAN,
   FIXED_PLAN_EXECUTION_DIGEST,
 } from "./digest.js";
+import {trustedGrantConfirmation} from './trusted-grant.js';
 import { assertAbleScope } from "./execution-guard.js";
 import { assertProjectFacts, requireFactPort, type ProductFactPort } from "./product-facts.js";
 import type {
@@ -1331,6 +1332,19 @@ export class FixedWorkflowService {
    * The nodes come from the durable checkpoint, not from a guess about what should have
    * happened. A stage that never ran is `pending` with attempt 0, and the node says so.
    */
+  /** Same current-run selection as the workflow observer; no second run pointer. */
+  async readCurrentRun(projectId: string, caller: TrustedCallerContext): Promise<WorkflowRun | null> {
+    this.#requireContext(caller);
+    return this.#repository.transaction(tx => this.readCurrentRunInTransaction(tx, projectId, caller));
+  }
+
+  /** Used by MAIN's context read in the SAME transaction as grants and native/commit facts. */
+  readCurrentRunInTransaction(tx: ProductTransaction, projectId: string, caller: TrustedCallerContext): WorkflowRun | null {
+    this.#requireContext(caller);
+    if (tx.list("run", {project_id: projectId}).length === 0) return null;
+    return this.#projectRun(tx, this.#selectActiveRun(tx, projectId));
+  }
+
   async readWorkflow(projectId: string, caller: TrustedCallerContext): Promise<Workflow> {
     this.#requireContext(caller);
     return this.#repository.transaction((tx) => {
@@ -1429,6 +1443,9 @@ export class FixedWorkflowService {
       throw new ProductError("RUN_SCOPE_REQUIRED", "The authorization is not active", {
         details: { state: grant.state },
       });
+    }
+    if (!trustedGrantConfirmation(tx, run, grant, this.#now())) {
+      throw new ProductError("RUN_SCOPE_REQUIRED", "The authorization has no current exact trusted confirmation");
     }
     if (this.#now() >= grant.expires_at) {
       throw new ProductError("RUN_SCOPE_REQUIRED", "The authorization has expired");
@@ -1748,15 +1765,20 @@ export class FixedWorkflowService {
 
   /** The wire projection of a run. */
   #projectRun(tx: ProductTransaction, run: RunRecord): WorkflowRun {
-    const grant = tx.list("execution_grant", { project_id: run.project_id, run_id: run.run_id })
-      .find((candidate) => candidate.state === "active");
-    const confirmation = grant === undefined
-      ? null
-      : tx.get("trusted_confirmation", {
-          project_id: run.project_id,
-          run_id: run.run_id,
-          confirmation_id: grant.confirmation_id,
-        });
+    const now = this.#now();
+    const candidates = tx.list("execution_grant", {project_id: run.project_id, run_id: run.run_id})
+      .filter(grant => grant.state === "active")
+      .flatMap(grant => {
+        const confirmation = trustedGrantConfirmation(tx, run, grant, now);
+        // An unusable grant is not authority. Projection must remain readable so
+        // a clock rollback or damaged confirmation cannot roll back pause/cancel.
+        // Execution paths still require an exact current trusted confirmation.
+        return confirmation ? [{grant, confirmation}] : [];
+      })
+      .sort((a,b) => Number(b.grant.expires_at > now) - Number(a.grant.expires_at > now) ||
+        b.confirmation.issued_at - a.confirmation.issued_at || a.grant.grant_id.localeCompare(b.grant.grant_id));
+    const grant = candidates[0]?.grant;
+    const confirmation = candidates[0]?.confirmation;
     const authorization = grant === undefined
       ? null
       : {
@@ -1765,8 +1787,8 @@ export class FixedWorkflowService {
           scope_digest: run.run_scope_digest,
           principal_id: grant.principal_id,
           decision_id: grant.confirmation_id,
-          state: grant.state,
-          issued_at: new Date((confirmation?.issued_at ?? grant.expires_at) * 1000).toISOString(),
+          state: grant.expires_at <= now ? "expired" : grant.state,
+          issued_at: new Date(confirmation!.issued_at * 1000).toISOString(),
           expires_at: new Date(grant.expires_at * 1000).toISOString(),
           channel: "trusted_ui" as const,
         };

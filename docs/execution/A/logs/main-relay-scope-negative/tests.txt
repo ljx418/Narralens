@@ -1,0 +1,43 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:3897242) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/agent-driven/integration/creative-context-host.test.ts (13 tests | 1 failed | 12 skipped) 2128ms
+   ↓ writes Script and bound Storyboard through real HTTP and observes them beside the actual committed native project
+   ↓ rejects foreign owner access and unresolved or altered lineage without inserting content/outbox/command facts
+   ↓ keeps original artifact replay after input changes but refuses new stale writes and rejects dangling storyboard paragraphs
+   ↓ reports an actual non-creator active Job as missing its producer, never hides it or misreports a revision conflict
+   ↓ does not resolve another real project artifact even for the same owner and matching hash
+   ↓ binds new draft writes to the question closure, while replay keeps the original artifact after a new question
+   ↓ maps a real native source drift to conflict and checks ownership before unavailable source lookup
+   ↓ component observer uses the authorization written during native observation in its one final SQLite projection
+   ↓ component observer reports expired grants honestly and prefers a new valid authorization over expired predecessors
+   ↓ rejects a committed author source replaced by a FIFO without hanging the HTTP request or Host close
+   ↓ component safe-control pause still commits with a future-issued grant and does not authorize a new action
+   ↓ component safe-control cancel still commits with a future-issued grant and does not authorize a new action
+   × binds content relay project scope to its owned project and originating intake while preserving pre-project decisions 2127ms
+     → {"decision_id":"content-decision-31e91a0be582d796ab2fe46e4b488898","project_id":"unknown-project","intake_id":"intake-1084db76-7620-48cb-b840-7e7fc849b40a","intake_version":1,"input_digest":"00d336a62b1ac2da7d96639a58b4fd98d71ae60bdd6ecb4a690d0bd5678899a0","request_id":"scoped-relay","choice":"accept_content","source":"driver_relay","source_message_ref":"conversation-content","recorded_at":"2026-11-09T18:36:13.000Z","authority":"content_only"}: expected 200 to be 404 // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/creative-context-host.test.ts > binds content relay project scope to its owned project and originating intake while preserving pre-project decisions
+AssertionError: {"decision_id":"content-decision-31e91a0be582d796ab2fe46e4b488898","project_id":"unknown-project","intake_id":"intake-1084db76-7620-48cb-b840-7e7fc849b40a","intake_version":1,"input_digest":"00d336a62b1ac2da7d96639a58b4fd98d71ae60bdd6ecb4a690d0bd5678899a0","request_id":"scoped-relay","choice":"accept_content","source":"driver_relay","source_message_ref":"conversation-content","recorded_at":"2026-11-09T18:36:13.000Z","authority":"content_only"}: expected 200 to be 404 // Object.is equality
+
+- Expected
++ Received
+
+- 404
++ 200
+
+ ❯ tests/agent-driven/integration/creative-context-host.test.ts:191:159
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 12 skipped (13)
+   Start at  02:36:05
+   Duration  8.15s (transform 1.94s, setup 0ms, collect 4.26s, tests 2.13s, environment 0ms, prepare 1.16s)
+

@@ -71,15 +71,22 @@ export interface CreativeServiceOptions {
   readonly repository: ProductRepository;
   /** The clock, in epoch seconds. Overridable so tests are deterministic. */
   readonly now?: () => number;
+  /** MAIN supplies same-transaction ownership/lineage authority before production registration. */
+  readonly contentAuthority?: (tx: ProductTransaction, input: ContentDecisionRelay, caller: TrustedCallerContext) => void;
+  readonly artifactAuthority?: (tx: ProductTransaction, input: ArtifactPut, caller: TrustedCallerContext, phase: "access" | "write") => void;
 }
 
 export class CreativeService {
   readonly #repository: ProductRepository;
   readonly #now: () => number;
+  readonly #contentAuthority: CreativeServiceOptions["contentAuthority"];
+  readonly #artifactAuthority: CreativeServiceOptions["artifactAuthority"];
 
   constructor(options: CreativeServiceOptions) {
     this.#repository = options.repository;
     this.#now = options.now ?? nowEpochSeconds;
+    this.#artifactAuthority = options.artifactAuthority;
+    this.#contentAuthority = options.contentAuthority;
   }
 
   /* ------------------------------------------------------------------------------------ */
@@ -738,6 +745,7 @@ export class CreativeService {
 
     return this.#repository.transaction((tx) => {
       assertIntakeOwner(tx, request.intake_id, caller.principal_id);
+      this.#contentAuthority?.(tx, request, caller);
       const stored = tx.recallIdempotency(
         { kind: "principal", principal_id: caller.principal_id },
         CREATIVE_OPERATIONS.contentRelay,
@@ -843,6 +851,7 @@ export class CreativeService {
     const digest = contentDigest(request);
 
     return this.#repository.transaction((tx) => {
+      this.#artifactAuthority?.(tx, request, caller, "access");
       const stored = tx.recallIdempotency(
         { kind: "project", project_id: request.project_id },
         CREATIVE_OPERATIONS.artifactPut,
@@ -852,6 +861,8 @@ export class CreativeService {
         this.#assertSameRequest(stored.receipt, digest);
         return validateAgentRouteOutput("artifact.put", stored.response) as Artifact;
       }
+
+      this.#artifactAuthority?.(tx, request, caller, "write");
 
       let artifactId: string;
       let expectedVersion: number;
@@ -930,7 +941,7 @@ export class CreativeService {
         input_refs: request.input_refs,
       }) as Artifact;
 
-      const receipt = this.#receipt(CREATIVE_OPERATIONS.artifactPut, caller, request.meta, digest);
+      const receipt = { ...this.#receipt(CREATIVE_OPERATIONS.artifactPut, caller, request.meta, digest), project_id: request.project_id };
       tx.recordIdempotency(
         { kind: "project", project_id: request.project_id },
         CREATIVE_OPERATIONS.artifactPut,

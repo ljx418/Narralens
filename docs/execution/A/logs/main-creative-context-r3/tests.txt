@@ -1,0 +1,18 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:3873066) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/creative-context-host.test.ts (4 tests) 7218ms
+   ✓ writes Script and bound Storyboard through real HTTP and observes them beside the actual committed native project  1910ms
+   ✓ rejects foreign owner access and unresolved or altered lineage without inserting content/outbox/command facts  1695ms
+   ✓ keeps original artifact replay after input changes but refuses new stale writes and rejects dangling storyboard paragraphs  1749ms
+   ✓ reports an actual non-creator active Job as missing its producer, never hides it or misreports a revision conflict  1863ms
+ ✓ tests/agent-driven/product/fixed-workflow-service.test.ts (31 tests) 133ms
+ ✓ tests/agent-driven/product/creative-service.test.ts (20 tests) 71ms
+
+ Test Files  3 passed (3)
+      Tests  55 passed (55)
+   Start at  02:05:13
+   Duration  20.19s (transform 1.85s, setup 0ms, collect 7.60s, tests 7.42s, environment 0ms, prepare 3.48s)
+

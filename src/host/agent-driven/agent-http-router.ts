@@ -4,6 +4,7 @@ import type { ApplicationPorts,Error as WireError } from '../../contracts/agent-
 import { agentRoutes,validateAgentRouteInput,validateAgentRouteOutput,validateAgentDefinition,type AgentRouteId } from '../../contracts/agent-driven-validator.js';
 import registry from '../../../contracts/agent-driven-a.registry.json' with {type:'json'};
 import { ScopedAgentAuth,type AgentPrincipal,type AgentChannel } from './scoped-auth.js';
+import {agentErrorCode} from './agent-error-alias.js';
 import { CursorRejection,rejectionToCode } from '../observability/cursor.js';
 
 export interface AgentDispatcher {
@@ -50,7 +51,7 @@ function send(response:ServerResponse,status:number,body:unknown){
  response.statusCode=status;response.setHeader('Content-Type','application/json; charset=utf-8');response.setHeader('Cache-Control','no-store');response.end(JSON.stringify(body));
 }
 function failure(error:unknown,correlation:string):WireError {
- let code:string=error instanceof CursorRejection?rejectionToCode(error.kind):error&&typeof error==='object'&&'code' in error?typeof error.code==='string'?error.code:'INTERNAL_ERROR':'INTERNAL_ERROR';
+ let code:string=error instanceof CursorRejection?rejectionToCode(error.kind):agentErrorCode(error);
  if(!statusMap.has(code))code='INTERNAL_ERROR';
  const next=code==='UNAUTHORIZED'?['reconnect_authorized_instance']:code==='ORIGIN_REJECTED'?['open_trusted_workbench']:code==='CURSOR_EXPIRED'?['resync_snapshot']:code==='PROVIDER_RESULT_UNKNOWN'?['reconcile_same_idempotency_key']:code==='INVALID_REQUEST'?['correct_request']:['read_current_context'];
  return validateAgentDefinition<WireError>('Error',{schema_version:'agent.v1',correlation_id:correlation,code,http_status:statusMap.get(code),message:'请求未完成，请按当前权限和状态处理',retryable:code==='HOST_RESOURCE_EXHAUSTED',next_actions:next});

@@ -1,0 +1,45 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:3894303) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/creative-context-host.test.ts (12 tests) 26311ms
+   ✓ writes Script and bound Storyboard through real HTTP and observes them beside the actual committed native project  2309ms
+   ✓ rejects foreign owner access and unresolved or altered lineage without inserting content/outbox/command facts  2208ms
+   ✓ keeps original artifact replay after input changes but refuses new stale writes and rejects dangling storyboard paragraphs  1859ms
+   ✓ reports an actual non-creator active Job as missing its producer, never hides it or misreports a revision conflict  2278ms
+   ✓ does not resolve another real project artifact even for the same owner and matching hash  3056ms
+   ✓ binds new draft writes to the question closure, while replay keeps the original artifact after a new question  2404ms
+   ✓ maps a real native source drift to conflict and checks ownership before unavailable source lookup  2068ms
+   ✓ component observer uses the authorization written during native observation in its one final SQLite projection  2101ms
+   ✓ component observer reports expired grants honestly and prefers a new valid authorization over expired predecessors  2245ms
+   ✓ rejects a committed author source replaced by a FIFO without hanging the HTTP request or Host close  1923ms
+   ✓ component safe-control pause still commits with a future-issued grant and does not authorize a new action  1810ms
+   ✓ component safe-control cancel still commits with a future-issued grant and does not authorize a new action  2047ms
+(node:3895216) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.1/engine-route.test.ts (8 tests) 1257ms
+   ✓ M2.1 route activation > AC-019 leaves every legacy route in place  888ms
+(node:3895355) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.1/native-bypass.test.ts (13 tests) 1126ms
+ ✓ tests/m2.1/source-digest-v1.test.ts (18 tests) 1409ms
+   ✓ SourceDigestV1 closure > EN-04 changes the digest when a scene, subtitle, setting, font or referenced asset changes  356ms
+ ✓ tests/m2.1/engine-port.test.ts (10 tests) 324ms
+ ✓ tests/agent-driven/product/fixed-workflow-service.test.ts (31 tests) 141ms
+ ✓ tests/m2.1/openfilm-upstream-lock.test.ts (14 tests) 121ms
+ ✓ tests/agent-driven/product/creative-service.test.ts (20 tests) 64ms
+ ✓ tests/m2.1/time-model.test.ts (11 tests) 25ms
+ ✓ tests/m2.1/native-write-gateway.test.ts (20 tests) 17ms
+(node:3896374) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.1/engine-binding-store.test.ts (10 tests) 13ms
+ ✓ tests/agent-driven/product/execution-guard.test.ts (22 tests) 13ms
+ ✓ tests/agent-driven/product/digest.test.ts (6 tests) 4ms
+ ✓ tests/agent-driven/product/observation-ui.test.tsx (22 tests) 83ms
+
+ Test Files  14 passed (14)
+      Tests  217 passed (217)
+   Start at  02:33:38
+   Duration  90.13s (transform 2.55s, setup 0ms, collect 25.25s, tests 30.91s, environment 6.86s, prepare 18.54s)
+

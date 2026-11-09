@@ -1,0 +1,40 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:3885797) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/agent-driven/integration/creative-context-host.test.ts (10 tests | 1 failed | 9 skipped) 5313ms
+   ↓ writes Script and bound Storyboard through real HTTP and observes them beside the actual committed native project
+   ↓ rejects foreign owner access and unresolved or altered lineage without inserting content/outbox/command facts
+   ↓ keeps original artifact replay after input changes but refuses new stale writes and rejects dangling storyboard paragraphs
+   ↓ reports an actual non-creator active Job as missing its producer, never hides it or misreports a revision conflict
+   ↓ does not resolve another real project artifact even for the same owner and matching hash
+   ↓ binds new draft writes to the question closure, while replay keeps the original artifact after a new question
+   ↓ maps a real native source drift to conflict and checks ownership before unavailable source lookup
+   ↓ component observer uses the authorization written during native observation in its one final SQLite projection
+   ↓ component observer reports expired grants honestly and prefers a new valid authorization over expired predecessors
+   × rejects a committed author source replaced by a FIFO without hanging the HTTP request or Host close 5312ms
+     → a FIFO occupied the live request instead of being rejected: expected true to be false // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/creative-context-host.test.ts > rejects a committed author source replaced by a FIFO without hanging the HTTP request or Host close
+AssertionError: a FIFO occupied the live request instead of being rejected: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ tests/agent-driven/integration/creative-context-host.test.ts:164:81
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 9 skipped (10)
+   Start at  02:24:17
+   Duration  11.90s (transform 2.01s, setup 0ms, collect 4.55s, tests 5.31s, environment 0ms, prepare 1.40s)
+

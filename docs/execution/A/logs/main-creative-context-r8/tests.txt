@@ -1,0 +1,62 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:3897738) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/creative-context-host.test.ts (13 tests) 25671ms
+   ✓ writes Script and bound Storyboard through real HTTP and observes them beside the actual committed native project  2018ms
+   ✓ rejects foreign owner access and unresolved or altered lineage without inserting content/outbox/command facts  1849ms
+   ✓ keeps original artifact replay after input changes but refuses new stale writes and rejects dangling storyboard paragraphs  1814ms
+   ✓ reports an actual non-creator active Job as missing its producer, never hides it or misreports a revision conflict  2540ms
+   ✓ does not resolve another real project artifact even for the same owner and matching hash  2771ms
+   ✓ binds new draft writes to the question closure, while replay keeps the original artifact after a new question  1810ms
+   ✓ maps a real native source drift to conflict and checks ownership before unavailable source lookup  1788ms
+   ✓ component observer uses the authorization written during native observation in its one final SQLite projection  1876ms
+   ✓ component observer reports expired grants honestly and prefers a new valid authorization over expired predecessors  1911ms
+   ✓ rejects a committed author source replaced by a FIFO without hanging the HTTP request or Host close  1810ms
+   ✓ component safe-control pause still commits with a future-issued grant and does not authorize a new action  1819ms
+   ✓ component safe-control cancel still commits with a future-issued grant and does not authorize a new action  1844ms
+   ✓ binds content relay project scope to its owned project and originating intake while preserving pre-project decisions  1818ms
+(node:3898012) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/project-creation-host.test.ts (14 tests) 70122ms
+   ✓ creates through HTTP and Host scheduling only; reopens native source without migration or manual registration  2557ms
+   ✓ refuses unknown fields and driver-minted confirmation before creating any Job  1081ms
+   ✓ rejects modified initial source before committing a pointer or origin  3789ms
+   ✓ quiesces an interrupted creation before closing SQLite, then resumes the same durable Job on reopen  2558ms
+   ✓ settles owner cancellation without publishing or wedging a subsequent Host start  1758ms
+   ✓ survives actual SIGKILL at after_lease and decides its own journal before generic recovery  7050ms
+   ✓ survives actual SIGKILL at after_project_directory and decides its own journal before generic recovery  6273ms
+   ✓ survives actual SIGKILL at after_owner_claim and decides its own journal before generic recovery  7235ms
+   ✓ survives actual SIGKILL at after_source and decides its own journal before generic recovery  7009ms
+   ✓ survives actual SIGKILL at after_snapshot and decides its own journal before generic recovery  6982ms
+   ✓ survives actual SIGKILL at before_commit and decides its own journal before generic recovery  7806ms
+   ✓ survives actual SIGKILL at after_commit and decides its own journal before generic recovery  7134ms
+   ✓ survives actual SIGKILL at cancel_after_source and decides its own journal before generic recovery  6566ms
+   ✓ lets the dedicated owner settle expired cancellation while the real global reaper is ticking  2321ms
+ ✓ tests/m2.1/source-digest-v1.test.ts (18 tests) 1136ms
+(node:3898847) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.1/engine-route.test.ts (8 tests) 1316ms
+   ✓ M2.1 route activation > AC-019 leaves every legacy route in place  947ms
+(node:3898904) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.1/native-bypass.test.ts (13 tests) 1019ms
+ ✓ tests/m2.1/engine-port.test.ts (10 tests) 343ms
+ ✓ tests/agent-driven/product/fixed-workflow-service.test.ts (31 tests) 133ms
+ ✓ tests/m2.1/openfilm-upstream-lock.test.ts (14 tests) 110ms
+ ✓ tests/agent-driven/product/creative-service.test.ts (20 tests) 65ms
+ ✓ tests/m2.1/time-model.test.ts (11 tests) 25ms
+ ✓ tests/m2.1/native-write-gateway.test.ts (20 tests) 14ms
+ ✓ tests/agent-driven/product/execution-guard.test.ts (22 tests) 12ms
+(node:3899324) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.1/engine-binding-store.test.ts (10 tests) 13ms
+ ✓ tests/agent-driven/product/digest.test.ts (6 tests) 4ms
+ ✓ tests/agent-driven/product/observation-ui.test.tsx (22 tests) 79ms
+
+ Test Files  15 passed (15)
+      Tests  232 passed (232)
+   Start at  02:37:00
+   Duration  159.72s (transform 2.49s, setup 0ms, collect 26.60s, tests 100.06s, environment 6.83s, prepare 17.61s)
+

@@ -1,0 +1,1 @@
+corepack pnpm exec vitest run --config vitest.config.ts --maxWorkers=1 tests/agent-driven/integration/creative-context-host.test.ts tests/agent-driven/product tests/agent-driven/integration/project-creation-host.test.ts tests/m2.1

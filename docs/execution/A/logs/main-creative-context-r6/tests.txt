@@ -1,0 +1,46 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:3887700) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/creative-context-host.test.ts (10 tests) 18814ms
+   ✓ writes Script and bound Storyboard through real HTTP and observes them beside the actual committed native project  2113ms
+   ✓ rejects foreign owner access and unresolved or altered lineage without inserting content/outbox/command facts  1780ms
+   ✓ keeps original artifact replay after input changes but refuses new stale writes and rejects dangling storyboard paragraphs  1748ms
+   ✓ reports an actual non-creator active Job as missing its producer, never hides it or misreports a revision conflict  1731ms
+   ✓ does not resolve another real project artifact even for the same owner and matching hash  2499ms
+   ✓ binds new draft writes to the question closure, while replay keeps the original artifact after a new question  1847ms
+   ✓ maps a real native source drift to conflict and checks ownership before unavailable source lookup  1750ms
+   ✓ component observer uses the authorization written during native observation in its one final SQLite projection  1784ms
+   ✓ component observer reports expired grants honestly and prefers a new valid authorization over expired predecessors  1780ms
+   ✓ rejects a committed author source replaced by a FIFO without hanging the HTTP request or Host close  1781ms
+ ✓ tests/agent-driven/product/fixed-workflow-service.test.ts (31 tests) 130ms
+ ✓ tests/agent-driven/product/creative-service.test.ts (20 tests) 66ms
+ ✓ tests/m2.1/source-digest-v1.test.ts (18 tests) 1083ms
+(node:3887899) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.1/native-bypass.test.ts (13 tests) 1273ms
+   ✓ B-02 referenced Hypit asset bytes are inside the source digest > fails closed when a referenced asset is missing or its path escapes the project  306ms
+ ✓ tests/m2.1/native-write-gateway.test.ts (20 tests) 17ms
+ ✓ tests/m2.1/engine-port.test.ts (10 tests) 289ms
+ ✓ tests/m2.1/openfilm-upstream-lock.test.ts (14 tests) 105ms
+(node:3888149) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/agent-http-router.test.ts (5 tests) 212ms
+ ✓ tests/agent-driven/product/execution-guard.test.ts (22 tests) 11ms
+(node:3888220) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.1/engine-route.test.ts (8 tests) 1297ms
+   ✓ M2.1 route activation > AC-019 leaves every legacy route in place  940ms
+ ✓ tests/m2.1/time-model.test.ts (11 tests) 24ms
+(node:3888305) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.1/engine-binding-store.test.ts (10 tests) 14ms
+ ✓ tests/agent-driven/product/digest.test.ts (6 tests) 4ms
+ ✓ tests/agent-driven/product/observation-ui.test.tsx (22 tests) 76ms
+
+ Test Files  15 passed (15)
+      Tests  220 passed (220)
+   Start at  02:25:46
+   Duration  80.33s (transform 2.33s, setup 0ms, collect 24.51s, tests 23.41s, environment 6.72s, prepare 17.02s)
+

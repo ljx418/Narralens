@@ -1,0 +1,29 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:3880158) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/creative-context-host.test.ts (9 tests) 18586ms
+   ✓ writes Script and bound Storyboard through real HTTP and observes them beside the actual committed native project  2125ms
+   ✓ rejects foreign owner access and unresolved or altered lineage without inserting content/outbox/command facts  1761ms
+   ✓ keeps original artifact replay after input changes but refuses new stale writes and rejects dangling storyboard paragraphs  1793ms
+   ✓ reports an actual non-creator active Job as missing its producer, never hides it or misreports a revision conflict  1752ms
+   ✓ does not resolve another real project artifact even for the same owner and matching hash  2734ms
+   ✓ binds new draft writes to the question closure, while replay keeps the original artifact after a new question  2217ms
+   ✓ maps a real native source drift to conflict and checks ownership before unavailable source lookup  1984ms
+   ✓ component observer uses the authorization written during native observation in its one final SQLite projection  2160ms
+   ✓ component observer reports expired grants honestly and prefers a new valid authorization over expired predecessors  2057ms
+(node:3880569) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/agent-http-router.test.ts (5 tests) 219ms
+ ✓ tests/agent-driven/product/fixed-workflow-service.test.ts (31 tests) 162ms
+ ✓ tests/agent-driven/product/creative-service.test.ts (20 tests) 63ms
+ ✓ tests/agent-driven/product/execution-guard.test.ts (22 tests) 11ms
+ ✓ tests/agent-driven/product/digest.test.ts (6 tests) 4ms
+ ✓ tests/agent-driven/product/observation-ui.test.tsx (22 tests) 75ms
+
+ Test Files  7 passed (7)
+      Tests  115 passed (115)
+   Start at  02:20:29
+   Duration  57.24s (transform 2.25s, setup 0ms, collect 17.04s, tests 19.12s, environment 7.82s, prepare 9.14s)
+

@@ -1,0 +1,43 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:3897018) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/agent-driven/integration/creative-context-host.test.ts (13 tests | 1 failed | 12 skipped) 2025ms
+   ↓ writes Script and bound Storyboard through real HTTP and observes them beside the actual committed native project
+   ↓ rejects foreign owner access and unresolved or altered lineage without inserting content/outbox/command facts
+   ↓ keeps original artifact replay after input changes but refuses new stale writes and rejects dangling storyboard paragraphs
+   ↓ reports an actual non-creator active Job as missing its producer, never hides it or misreports a revision conflict
+   ↓ does not resolve another real project artifact even for the same owner and matching hash
+   ↓ binds new draft writes to the question closure, while replay keeps the original artifact after a new question
+   ↓ maps a real native source drift to conflict and checks ownership before unavailable source lookup
+   ↓ component observer uses the authorization written during native observation in its one final SQLite projection
+   ↓ component observer reports expired grants honestly and prefers a new valid authorization over expired predecessors
+   ↓ rejects a committed author source replaced by a FIFO without hanging the HTTP request or Host close
+   ↓ component safe-control pause still commits with a future-issued grant and does not authorize a new action
+   ↓ component safe-control cancel still commits with a future-issued grant and does not authorize a new action
+   × binds content relay project scope to its owned project and originating intake while preserving pre-project decisions 2024ms
+     → expected 400 to be 404 // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/creative-context-host.test.ts > binds content relay project scope to its owned project and originating intake while preserving pre-project decisions
+AssertionError: expected 400 to be 404 // Object.is equality
+
+- Expected
++ Received
+
+- 404
++ 400
+
+ ❯ tests/agent-driven/integration/creative-context-host.test.ts:191:130
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 12 skipped (13)
+   Start at  02:35:42
+   Duration  7.95s (transform 1.92s, setup 0ms, collect 4.19s, tests 2.02s, environment 0ms, prepare 1.15s)
+

@@ -68,6 +68,7 @@ function facts(overrides: Partial<ExecutionGuardFacts> = {}): ExecutionGuardFact
       run_scope_digest: SCOPE_DIGEST,
       principal_id: "human-1",
       state: "active",
+      issued_at: NOW - 60,
       expires_at: NOW + 3600,
     },
     attempt: {
@@ -87,6 +88,14 @@ function facts(overrides: Partial<ExecutionGuardFacts> = {}): ExecutionGuardFact
 const EFFECT = { kind: "action", action: "clip.prepare", stage_id: "first_chapter" } as const;
 
 describe("the execution guard", () => {
+  it("refuses future-issued or missing issuance facts, while cancellation stays available", () => {
+    for (const issued of [NOW + 1, undefined]) {
+      const current = facts({grant:{...facts().grant!,issued_at:issued as number}});
+      expect(() => guardExecution(BINDING,EFFECT,current)).toThrowError(expect.objectContaining({code:"RUN_SCOPE_REQUIRED"}));
+      expect(() => guardExecution(BINDING,{kind:"safe_control",control:"cancel"},current)).not.toThrow();
+    }
+  });
+
   it("refuses to authorize anything without the durable facts", () => {
     expect(() => guardExecution(BINDING, EFFECT, undefined)).toThrowError(
       expect.objectContaining({ code: "RUN_SCOPE_REQUIRED" }),

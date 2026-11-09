@@ -1,0 +1,19 @@
+# A03创作产物及上下文接线
+
+base=4b683a12d4c7dff570c7e240a3fc236c694e6896；冻结cp-a0公开合同不变。MAIN唯一writer，BRIDGE/MEDIA只读复核，Claude未启动。
+
+范围：新增MAIN CreativeProjectAuthority/ProjectContextService；对已通过CreativeService只增加可选同步artifact authority hook（生产装配必须提供），FixedWorkflowService增加复用其既有选择规则的current-run只读方法；CreationApplication按真实工程归属注册artifact/context和workflow只读端口。允许这些具体文件、对应integration测试和本轮证据。不开缺事实的run dispatch/render/Delivery，不伪造capability fingerprint、许可、native ack、migration。
+
+Artifact写为内容草稿，不写author source、不递增project revision、不接受review/执行批准。生产写须验证同owner已提交created工程、声明input绑定其Intake当前创作闭包、input_refs在同工程有不可变版本/hash，分镜paragraph来自声明Script且ID不重复。素材ID仅检查与当前Brief策略的绑定，不把它当真实许可；Run/Task派发前仍必须实际许可与四能力校验。旧域单测无hook为兼容内部纯内容模块，不代表生产路由可跳过MAIN权威。
+
+Context从真实commit/engine inspect、artifact head和现有run投影读取；无producer不能冒充空集合。有原生ack/selection时只能由正式trusted bridge状态端口提供，当前无桥则unknown/null而非loaded。版本在异步解析后变化拒绝本次读取。所有权限先于对象内容，幂等重放也不可跨owner。只读不派发任务。
+
+验证单worker真实Host/SQLite/固定上游，POST/GET端到端；无窗口/模型/下载/J盘/费用。A整体目标保持，完成本批继续接运行与原工作台。
+
+本批发现的实际接线缺口一并允许定向修复：artifact idempotency receipt项目字段原来为null；Context最终事务统一读run/grant/confirmation；读取过期授权不得伪active，未来签发确认不得有效。新增trusted-grant.ts作为观察与execution-guard同一来源规则，readGuardFacts从真实trusted confirmation取issued_at；无可用grant时返回null，使safe-control取消仍可用，实际action仍严格拒绝。内部ExecutionGuardFacts补issued_at，公开CP/schema/DDL不变。AgentHTTP边界闭合映射既有SOURCE_CHANGED/ENGINE_UNAVAILABLE等读错误到冻结码，不用项目attention冒充用户锁。所有修复与组件级fixture清楚分开，不算真实媒体/生产Run已通过。
+
+额外实测负向：外部把已提交source的film.html改为FIFO，会让SourceDigestV1的readFile占住HTTP请求，原失败已捕获。允许MAIN在source-digest-v1.ts做最小regular-file/nonblock读取修复（不改摘要域、canonical字节、roots和资产语义），以同一打开句柄stat/read并确保finally close；必须回归原source digest及跨语言黄金向量。不将这些构造故障算真实媒体验收。
+
+独立预审C-R4用真实SQLite证明：未来签发的grant使pause/cancel在响应投影throw并整事务回滚。修复为投影排除不可用确认、authorization:null；动作入口仍严格校验。旧负向main-safe-control-before保留，两项实际负向均红；R7含两项修后均绿。
+
+C-R5允许最小contentAuthority同步hook：非null project必须owned+committed且其origin intake等于request.intake_id，在回放之前执行；null仍为合法建项前内容决定，不升级执行权。真实旧响应unknown-project=200已捕获main-relay-scope-negative，首次错误source_message_ref含冒号被schema400拦截的fixture也保留、不算行为证据。新增真实HTTP同owner错误intake/foreign owner/unknown project/合法与重放/null分别验证。job.read同时先验证owned project和真实job.project_id：非创建worker job无receipt producer返回503，不再误报409，创建中无origin仍允许合法轮询。

@@ -1,0 +1,55 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+ ✓ tests/agent-driven/product/fixed-workflow-service.test.ts (31 tests) 179ms
+ ✓ tests/agent-driven/product/creative-service.test.ts (20 tests) 72ms
+(node:3867595) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/agent-driven/integration/creative-context-host.test.ts (3 tests | 2 failed) 7059ms
+   × writes Script and bound Storyboard through real HTTP and observes them beside the actual committed native project 2159ms
+     → {"schema_version":"agent.v1","correlation_id":"script","code":"INVALID_REQUEST","http_status":400,"message":"请求未完成，请按当前权限和状态处理","retryable":false,"next_actions":["correct_request"]}: expected 400 to be 200 // Object.is equality
+   ✓ rejects foreign owner access and unresolved or altered lineage without inserting content/outbox/command facts  2779ms
+   × keeps original artifact replay after input changes but refuses new stale writes and rejects dangling storyboard paragraphs 2121ms
+     → expected 400 to be 200 // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/creative-context-host.test.ts > writes Script and bound Storyboard through real HTTP and observes them beside the actual committed native project
+AssertionError: {"schema_version":"agent.v1","correlation_id":"script","code":"INVALID_REQUEST","http_status":400,"message":"请求未完成，请按当前权限和状态处理","retryable":false,"next_actions":["correct_request"]}: expected 400 to be 200 // Object.is equality
+
+- Expected
++ Received
+
+- 200
++ 400
+
+ ❯ tests/agent-driven/integration/creative-context-host.test.ts:36:96
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/agent-driven/integration/creative-context-host.test.ts > keeps original artifact replay after input changes but refuses new stale writes and rejects dangling storyboard paragraphs
+AssertionError: expected 400 to be 200 // Object.is equality
+
+- Expected
++ Received
+
+- 200
++ 400
+
+ ❯ tests/agent-driven/integration/creative-context-host.test.ts:60:66
+     58|  const f=await fixture();
+     59|  try{
+     60|   const response=await f.put(f.script());expect(response.status).toBe(…
+       |                                                                  ^
+     61|   const changed={...f.input,intake_id:f.intake.intake_id,base_version:…
+     62|   expect((await f.request('/api/agent/v1/intakes',changed)).status).to…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  2 failed | 52 passed (54)
+   Start at  02:00:18
+   Duration  22.09s (transform 2.23s, setup 0ms, collect 8.82s, tests 7.31s, environment 0ms, prepare 3.88s)
+

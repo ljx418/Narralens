@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
-import { readFile, realpath } from "node:fs/promises";
+import { open, realpath } from "node:fs/promises";
+import { constants } from "node:fs";
 import { resolve, sep } from "node:path";
 import { HttpError } from "../api-error.js";
 
@@ -198,7 +199,14 @@ async function loadFile(rootAbsolute: string, resolved: string, label: string, c
   if (canonical !== rootAbsolute && !canonical.startsWith(`${rootAbsolute}${sep}`)) {
     throw fail("SOURCE_PATH_ESCAPE", label, correlationId);
   }
-  const bytes = await readFile(canonical);
+  // The source may have been replaced outside the controlled writer. Open nonblocking
+  // so a FIFO cannot occupy a worker forever before its type can be rejected.
+  const handle = await open(canonical, constants.O_RDONLY | constants.O_NONBLOCK | constants.O_NOFOLLOW);
+  let bytes: Buffer;
+  try {
+    if (!(await handle.stat()).isFile()) throw fail("SOURCE_REFERENCE_UNSUPPORTED", label, correlationId);
+    bytes = await handle.readFile();
+  } finally { await handle.close(); }
   return {
     relative: canonical.slice(rootAbsolute.length + 1).split(sep).join("/"),
     bytes,

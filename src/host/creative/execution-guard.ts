@@ -37,6 +37,7 @@ import type {
   RunState,
   StepAttemptRecord,
 } from "./product-repository.js";
+import {trustedGrantConfirmation} from './trusted-grant.js';
 import { ProductError } from "./trusted-context.js";
 
 /** The actions an A run may perform. Nothing outside this set is dispatchable. */
@@ -142,7 +143,8 @@ export interface ExecutionGuardFacts {
     readonly run_scope_digest: string;
     readonly principal_id: string;
     readonly state: "active" | "revoked" | "expired";
-    /** Epoch seconds. */
+    /** Epoch seconds from the exact trusted confirmation, never guessed from expiry. */
+    readonly issued_at: number;
     readonly expires_at: number;
   } | null;
   /** The durable attempt row of the step the binding names, or `null`. */
@@ -314,6 +316,9 @@ function assertGrant(facts: ExecutionGuardFacts, binding: ExecutionBinding): voi
       details: { state: grant.state },
     });
   }
+  if (!Number.isSafeInteger(grant.issued_at) || grant.issued_at > facts.now_epoch_seconds || grant.issued_at >= grant.expires_at) {
+    throw new ProductError("RUN_SCOPE_REQUIRED", "The authorization is not yet valid or lacks its issuance facts");
+  }
   if (facts.now_epoch_seconds >= grant.expires_at) {
     throw new ProductError("RUN_SCOPE_REQUIRED", "The authorization has expired", {
       details: { expires_at: grant.expires_at, now: facts.now_epoch_seconds },
@@ -473,6 +478,7 @@ export function readGuardFacts(
     run_id: run.run_id,
     grant_id: binding.authorization_id,
   });
+  const confirmation = grant === null ? null : trustedGrantConfirmation(tx, run, grant, nowEpochSeconds);
   const attempts = tx.list("step_attempt", {
     project_id: run.project_id,
     run_id: run.run_id,
@@ -490,13 +496,14 @@ export function readGuardFacts(
       scope: run.scope_json,
       run_scope_digest: run.run_scope_digest,
     },
-    grant: grant === null
+    grant: grant === null || confirmation === null
       ? null
       : {
           grant_id: grant.grant_id,
           run_scope_digest: grant.run_scope_digest,
           principal_id: grant.principal_id,
           state: grant.state,
+          issued_at: confirmation.issued_at,
           expires_at: grant.expires_at,
         },
     attempt: current === null
