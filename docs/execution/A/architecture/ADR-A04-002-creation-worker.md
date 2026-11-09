@@ -30,3 +30,7 @@
 ## 本批组合复验
 
 main-creation-recovery-r3：类型检查0，5文件71项全部通过。含14项Host/进程恢复、36项创建存储、19项旧持久Job、原Host/MCP一项及并发关闭一项。Host关闭已合并共享Promise；旧实现真实复现database is not open，原失败日志main-host-double-close-before保留。真实kill共八点：after_project_directory明确失败不接管目录，其余正常边界恢复同Job；cancel_after_source收敛cancelled。仍不关闭A04整模块或A轮。
+
+## 冻结后独立复核追加
+
+冻结76607c191db5505bcedc88113330fc4ce7e14537创建链限定独立PASS：15/15真实重跑，source/artifact15项摘要一致；报告reviews/creation-worker-76607。不是A04或A整体通过。

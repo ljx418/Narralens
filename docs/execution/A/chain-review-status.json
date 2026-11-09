@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "overall_A": "IN_PROGRESS_NOT_ACCEPTED",
+  "chains": [
+    {
+      "scope": "general created-project Host/SQL/snapshot/recovery chain",
+      "frozen_commit": "76607c191db5505bcedc88113330fc4ce7e14537",
+      "review": "PASS_LIMITED_SCOPE",
+      "internal": {
+        "files": 5,
+        "tests": 71,
+        "exit": 0
+      },
+      "independent": {
+        "files": 2,
+        "tests": 15,
+        "exit": 0,
+        "report": "docs/execution/A/reviews/creation-worker-76607/REVIEW.md"
+      }
+    },
+    {
+      "scope": "owned local runtime and real MCP discovery foundation",
+      "frozen_commit": "4eaa169d235e5f607feec8dd1e93701bc67815e3",
+      "review": "PASS_LIMITED_SCOPE",
+      "internal": {
+        "files": 3,
+        "tests": 29,
+        "exit": 0
+      },
+      "independent": {
+        "files": 1,
+        "tests": 7,
+        "exit": 0,
+        "report": "docs/execution/A/reviews/runtime-4eaa169/REVIEW.md"
+      }
+    }
+  ],
+  "not_closed": [
+    "A-COLD overall",
+    "IT-A01 and IT-A02 overall",
+    "IT-A03..A06 overall",
+    "real human footage/voice film",
+    "created native workbench/ack and trusted UI entry",
+    "full Run execution and formal Delivery",
+    "whole A regressions/build/T20",
+    "HTML acceptance report/services ready for human",
+    "human acceptance/B"
+  ],
+  "actual_team": {
+    "MAIN": "sole implementation writer and integration",
+    "BRIDGE": "read-only creation review + runtime interface/pre-review; not runtime implementer",
+    "MEDIA-independent": "frozen runtime independent review and real tests",
+    "Claude": "not started"
+  },
+  "next": "Production artifact/context/Run fact and execution wiring with owned project scope, actual existing M5/native seam, snapshot/fence/Delivery; keep missing producer unavailable"
+}
