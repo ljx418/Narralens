@@ -69,7 +69,7 @@ async function baseRequest(): Promise<Record<string, unknown>> {
   await writeFile(join(project, "film.html"), "<html></html>", "utf8");
   return {
     kind: "narralens.native_render_request@1.0",
-    upstream_root: join(staging, "upstream"),
+    upstream_root: await directory("worker-upstream"),
     project_root: project,
     native_entry: "film.html",
     out_path: join(staging, "media.mp4"),

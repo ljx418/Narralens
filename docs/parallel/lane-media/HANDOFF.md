@@ -133,3 +133,7 @@ R1冻结于 `9e1de1879c214f4a1e00e195ced4bd8e8c6085e0`；Codex静态审查 `REVI
 - 未自签外审、未代签人验、未合main、未push；本泳道实现由Claude完成，Codex冻结SHA后需未参与者独立复核。
 
 R2 Claude exec20750 exit0，PID3628459已终止，writer现为Codex文档/验收。仍未安装或运行测试。等MAIN MEDIA-light后独立执行冻结候选检查。
+
+MAIN正式准入MEDIA-light；Codex唯一writer执行独立offline frozen --ignore-scripts install→tsc→1worker纯模块。禁止ffmpeg/Chrome/Host/全量；源码冻结4a369d601793cd39dfb81117594c20f3c943aca5。
+
+第三次返工由MAIN按用户后续明确指令授权Codex接管共同根因；不再以仅429为限。旧Claude exec20750 exit0/PID3628459及全部子进程已终止；当前唯一writer=Codex，范围仍lane白名单。保留首tsc2/125测116PASS9FAIL原始日志。PRODUCT使用轻槽期间仅源码/文档修复；复验需重新排槽。后续只能称内部验证，独立审查由未参与者承担。

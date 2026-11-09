@@ -1,5 +1,5 @@
 {
-  "$comment": "The render pin for IT-A06. The upstream commit and the studio modules come from contracts/openfilm-upstream-lock.json, which MAIN owns; this file adds the four modules that lock does not cover (render.mjs, timeline.mjs, seekable.mjs, overrides.mjs), the offline guard that stands in front of the pinned renderer (its wrapper, its loader hooks and the rules they apply), and the digest of the worker that loads them, because a render is only reproducible and only safe when every byte that can change the produced frames — or the network the renderer may reach — is named. MAIN is asked to fold the upstream digests into the canonical lock (see docs/parallel/lane-media/requests/A06-MAIN-INTEGRATION.md).",
+  "$comment": "The render pin for IT-A06. The upstream commit and the studio modules come from contracts/openfilm-upstream-lock.json, which MAIN owns; this file adds the four modules that lock does not cover (render.mjs, timeline.mjs, seekable.mjs, overrides.mjs), the offline guard that stands in front of the pinned renderer (its wrapper, its loader hooks and the rules they apply), and the digest of the worker that loads them, because a render is only reproducible and only safe when every byte that can change the produced frames \u2014 or the network the renderer may reach \u2014 is named. MAIN is asked to fold the upstream digests into the canonical lock (see docs/parallel/lane-media/requests/A06-MAIN-INTEGRATION.md).",
   "kind": "narralens.openfilm_render_pin@1.0",
   "upstream_repository": "https://github.com/openfilm/openfilm.git",
   "upstream_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
@@ -12,7 +12,7 @@
   "guard_module_sha256": {
     "src/host/render/openfilm-offline-wrapper.mjs": "3da8a0b3a817d80bc9fad8be3d92f022b638c6919e4c959b9a5d895b62a08d30",
     "src/host/render/openfilm-offline-hooks.mjs": "1f73d6b61741062d8b2419323174743ea42ffc93ae282a08cab6f97fe1a7f1ee",
-    "src/host/render/openfilm-guard-rules.mjs": "001f30e71e68a2d4e849e3d8851a870135d2af2df44ae16cc3119196dc8b221c"
+    "src/host/render/openfilm-guard-rules.mjs": "8ff1f73170dc0fd8414fb8fc8015416ac9e8522d0d7d092b903782f657c90c0a"
   },
   "loaded_module_sha256": {
     "packages/openfilm/src/render.mjs": "d308b672e7e2d60b6e06ea432bbf009ae96b5e197b3f4d1d50bab7c40fcae84f",

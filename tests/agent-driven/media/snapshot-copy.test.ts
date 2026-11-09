@@ -50,7 +50,7 @@ describe("copying a snapshot's closure", () => {
     const copy = await copySnapshotClosure({ closure, staging_root: staging });
 
     expect(copy.native_entry).toBe("film.html");
-    expect(copy.files).toHaveLength(3);
+    expect(copy.files).toHaveLength(closure.entries.length);
     await expect(verifySnapshotCopy(copy)).resolves.toBeUndefined();
   });
 
@@ -81,6 +81,7 @@ describe("copying a snapshot's closure", () => {
         bytes: 13,
         kind: "native_source" as const,
         rights_ref: null,
+        role: null,
       }],
     };
 

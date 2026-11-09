@@ -164,7 +164,8 @@ describe("the preflight", () => {
   it("blocks a snapshot that does not carry what was promised", async () => {
     const source = await directory("preflight-supplement-source");
     const staging = await directory("preflight-supplement-staging");
-    const closure = await makeClosure({ directory: source, with_supplement: true });
+    const complete = await makeClosure({ directory: source, with_supplement: true });
+    const closure = { ...complete, entries: complete.entries.filter((entry) => entry.role !== "subtitles") };
 
     const report = await runPreflight({
       closure,

@@ -63,10 +63,11 @@ export function runnerOf(results: {
     async run(tool) {
       const canned = tool === "ffprobe" ? results.probe : results.decode;
       return {
-        code: canned?.code ?? 0,
+        code: canned?.code === undefined ? 0 : canned.code,
         signal: canned?.signal ?? null,
         stdout: canned?.stdout ?? (tool === "ffprobe" ? GOOD_PROBE : ""),
         stderr: canned?.stderr ?? "",
+        group_settled: canned?.group_settled ?? true,
       };
     },
   };
