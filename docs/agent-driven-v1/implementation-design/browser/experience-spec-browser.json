@@ -1,0 +1,39 @@
+{
+  "console": [],
+  "states": [
+    {
+      "width": 1440,
+      "scrollWidth": 1425
+    },
+    {
+      "width": 390,
+      "scrollWidth": 375
+    }
+  ],
+  "screenshots": [
+    "experience-spec-1440.png",
+    "experience-spec-390.png"
+  ],
+  "scope": "DOCUMENT_AMENDMENT_ONLY",
+  "checks": [
+    {
+      "id": "eight-architecture-pages-preserved",
+      "status": "PASS"
+    },
+    {
+      "id": "experience-documents-mirrored",
+      "status": "PASS"
+    },
+    {
+      "id": "no-horizontal-page-overflow-1440",
+      "status": "PASS"
+    },
+    {
+      "id": "no-horizontal-page-overflow-390",
+      "status": "PASS"
+    }
+  ],
+  "sourceSha256": "c91b8fe56f8bd8662fede85dda1d23521a77a15e57e3c1c74c6fda39da858c6f",
+  "status": "complete",
+  "cleanup": "browser closed; own profile removed"
+}

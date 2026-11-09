@@ -1,5 +1,7 @@
 # 叙镜架构设计 v1.0
 
+> 当前实施设计：`agent-driven-v1/implementation-design/01_ARCHITECTURE_AND_GAP.md`及8页GAP。已有migration/materialize/impact/adoption/history为源码生产接缝；render在两个adapter仍CAPABILITY_NOT_ENABLED；一般创建/MCP/R4/媒体交付待实现。下面旧Gate状态仅描述其历史范围，不能据旧“待开发D4.2”语句否定当前接线，也不代表新路线通过。
+
 > 2026-11-08 新路线入口：PRD v1.1 将目标调整为“外部 Agent + Skill/技能库 + MCP + Narralens 服务/工作台”。
 > 待批准 L0/L1 见 [目标架构分析](agent-driven-v1/01_TARGET_ARCHITECTURE.md)，
 > 新 Archify 图见 [R2 Agent 驱动目标架构](architecture/agent-driven-v1-r2.architecture.html)。R2增加可见工作流、资源并行和本地Comfy适配，PRD已修订为v1.2；R1图保留。
@@ -314,3 +316,7 @@ journal 目标状态为 `prepared → source_validated → metadata_committed`�
 
 允许：依据固定上游版本修正真实命令、入口、文件路径、时间单位、Adapter 接口和测试夹具。  
 不允许：改变三阶段体验、绕开统一事务、建立第二时间轴、允许 OpenMontage 直写主工程、用 mock 取代真实出门证据。若确需改变不允许项，退回 PRD/原型审批。
+
+### 当前统一设计交付
+
+目标0/1层、22实体状态与8页GAP汇总在`agent-driven-v1/final-review/index.html`。精确A准备合同/DDL/恢复/验收/分工见`agent-driven-v1/cp-a0/00_READ_FIRST.md`，仍文档候选；不改变当前代码实体实现状态，不把拟新增组件写成已实现。

@@ -1,0 +1,57 @@
+{
+  "status": "PROTOTYPE_READY_FOR_HUMAN_REVIEW",
+  "productionRelease": "NOT_RELEASED",
+  "humanAcceptance": "NOT_RUN",
+  "userDirection": {
+    "journey": "existing-project-one-shot",
+    "systemControl": "nonmodal-side-panel"
+  },
+  "baselineCommit": "fd3021c336387b4c6405b3db08abaafa81c842ff",
+  "headlessChecks": {
+    "passed": 49,
+    "failed": 0,
+    "screenshots": 11,
+    "runtimeErrors": [],
+    "httpRequests": [],
+    "cleanup": "browser closed; own profile removed"
+  },
+  "review": "review.md",
+  "historicalCaptures": [
+    {
+      "path": "attempt-1",
+      "status": "FAILED_PRESERVED"
+    },
+    {
+      "path": "attempt-2",
+      "status": "PASSED_SUPERSEDED"
+    }
+  ],
+  "limits": [
+    "historical editor screenshot",
+    "schematic frames only",
+    "simulated callbacks",
+    "no production video acceptance"
+  ],
+  "files": {
+    "01-intent.png": "a55ec7ccdae4e9911d5d021654ea01339f2c13494c1c14d9be4a2cf9542c7113",
+    "02-compare.png": "825aaf420af32a3420090aa2a039e703603b9005ae25f551354a6b12943d653c",
+    "03-sync-pending.png": "2f9c70c9cf5301e09da5ecee2557d76654a81ec721703944e09c1100cb8776db",
+    "04-complete.png": "b5d6f76c32706bd9c6d2cac2502562666726ec364fe66639050882d1ea9e64d1",
+    "05-system-nonmodal.png": "a64ee19fe65a92cb55220dbc474bce9d2c1d93a24d50589a29f61b129c363ba0",
+    "README.md": "d5f98e558c74ea71babcb2b04ea63c36b9e62803763e00e84281650bde08121a",
+    "browser-check.json": "5c925888085bf38d8bc59101151e0ed17ce8dd56772c59790fc02a3a04eb14b0",
+    "browser-check.mjs": "ac24ed90d05fa6adf7b1e4b642f3f11771f97ecac25b95b009639cb2b113717a",
+    "detector.exit": "53c234e5e8472b6ac51c1ae1cab3fe06fad053beb8ebfd8977b010655bfdd3c3",
+    "detector.json": "b748f018676efc0a68ce19c515d436ff47e37cba2352cdf8e6c972dd050f2def",
+    "layout-1366-collapsed.png": "b4078069233bc5483e870d3d84eca3f658da7f12fb4f403dd132f79a019dd6fb",
+    "layout-1366-expanded.png": "2aa48227737bb6cc883e0cdff9f50b9cbfabb8a35074ceebb9986fdb91881334",
+    "layout-1440-collapsed.png": "a64ee19fe65a92cb55220dbc474bce9d2c1d93a24d50589a29f61b129c363ba0",
+    "layout-1440-expanded.png": "38db4c908f587044cf22d19948244a3847dd9831da15babb02ebfd1068a0abf8",
+    "layout-390-collapsed.png": "1770e8f26e45563bf3bb389d9b839d0bfc1e76ac5ada4289b12c2e43e2e217f6",
+    "layout-390-expanded.png": "ba52d9775de54041cba65a7f0e4c8ec6faafb9e4e786dc7e63a7276cd12b59d0",
+    "prototype.css": "73ac71033a66c4bc4f96842d29f1dc61cfaa85c12c9664c8f32a2dad9df81ae3",
+    "prototype.html": "00f0fa6c27439c0c6e21b63692629ef8cd7627812950c2bac4736cc6560cedf3",
+    "prototype.js": "5e06667c5474ce1fc328b0ee9c45a96b86cb4846d8c86e4c45ddc4714fd5affd",
+    "review.md": "b41347b321b6c4ff9b82426abcb8359e47d06159a588eb0b2a4616bea1b017d5"
+  }
+}

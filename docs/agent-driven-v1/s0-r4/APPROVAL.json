@@ -1,0 +1,27 @@
+{
+  "format": "narralens.frontend-experience-approval@1",
+  "date": "2026-11-09",
+  "authority": "user-message-in-current-conversation",
+  "verbatim": "批准当前原型通过，按此前端目标作为V1的体验出门门限",
+  "prototypeHumanReview": "PASS",
+  "scope": "V1 frontend target experience; not production feature acceptance",
+  "freezeSha256": "6a781c6608645b1e6f9cc8a2fc4d3989b9fd9fecd2781098b5ef2ccef82b0955",
+  "gate": "docs/agent-driven-v1/V1_FRONTEND_EXIT_GATE.md",
+  "gateSha256": "c36f4522485f4e8438399f55871431295be4f4439db07ec5fee197f3a883cf96",
+  "requiredCases": [
+    "R4-UX-01",
+    "R4-UX-02",
+    "R4-UX-03",
+    "R4-UX-04",
+    "R4-UX-05",
+    "R4-UX-06",
+    "R4-UX-07",
+    "R4-UX-08",
+    "R4-UX-09",
+    "R4-UX-10",
+    "R4-UX-11",
+    "R4-UX-12"
+  ],
+  "productCasesStatus": "NOT_RUN",
+  "productionRelease": "NOT_RELEASED"
+}

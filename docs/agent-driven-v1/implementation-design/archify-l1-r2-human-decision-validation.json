@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "ok": false,
+  "command": "validate",
+  "stage": "render",
+  "type": "architecture",
+  "input": "/mnt/c/workspace/videoworkline/Narralens/docs/agent-driven-v1/implementation-design/target-l1-r2.architecture.json",
+  "error": "Architecture layout validation failed:\n- Label \"原子事务\" overlaps component \"coordinator\" — adjust labelDx/labelDy/labelSegment or set labelAt.\n  label rect: [731, 316, 48, 14]\n  component \"coordinator\" rect: [645, 250, 220, 86]\n  Suggested fix: labelAt [755, 350] or labelDy +24 (below); or labelAt [755, 246] or labelDy -80 (above)",
+  "diagnostics": [
+    {
+      "code": "layout/constraint",
+      "severity": "error",
+      "message": "Label \"原子事务\" overlaps component \"coordinator\" — adjust labelDx/labelDy/labelSegment or set labelAt.\n  label rect: [731, 316, 48, 14]\n  component \"coordinator\" rect: [645, 250, 220, 86]\n  Suggested fix: labelAt [755, 350] or labelDy +24 (below); or labelAt [755, 246] or labelDy -80 (above)",
+      "subject": {
+        "diagramType": "architecture"
+      },
+      "evidence": {},
+      "supportedFixes": []
+    }
+  ]
+}

@@ -1,0 +1,178 @@
+{
+  "status": "PASS",
+  "scope": "isolated Python SQLite fixtures only; no Host/provider/services/production DB",
+  "sqlite_version": "3.45.1",
+  "migration_sha256": "5572530b5036728e414a0653fc36fd43958874a3a89cc8223e3984194c4a1fa4",
+  "legacy_source_sha256": "fea46b6310be044d2c90b6c846b07e04600da286643411a53313680230978dae",
+  "cases": [
+    {
+      "case": "fresh_base_plus_candidate",
+      "result": "PASS"
+    },
+    {
+      "case": "repeat_exact_migration",
+      "result": "PASS"
+    },
+    {
+      "case": "minimal_real_legacy_ddl_preserves_rows_no_constructor",
+      "result": "PASS"
+    },
+    {
+      "case": "halfway_migration_rollback_then_retry",
+      "result": "PASS"
+    },
+    {
+      "case": "relay_not_trusted_confirmation",
+      "result": "PASS"
+    },
+    {
+      "case": "trusted_channel_check",
+      "result": "PASS"
+    },
+    {
+      "case": "review_confirmation_cannot_authorize_run",
+      "result": "PASS"
+    },
+    {
+      "case": "adoption_confirmation_cannot_authorize_run",
+      "result": "PASS"
+    },
+    {
+      "case": "run_confirmation_actor_mismatch",
+      "result": "PASS"
+    },
+    {
+      "case": "run_confirmation_scope_mismatch",
+      "result": "PASS"
+    },
+    {
+      "case": "run_confirmation_cannot_authorize_adoption",
+      "result": "PASS"
+    },
+    {
+      "case": "review_confirmation_cannot_authorize_adoption",
+      "result": "PASS"
+    },
+    {
+      "case": "approval_expired_state_not_canonical",
+      "result": "PASS"
+    },
+    {
+      "case": "approval_rejected_canonical_terminal",
+      "result": "PASS"
+    },
+    {
+      "case": "cross_scope_grant",
+      "result": "PASS"
+    },
+    {
+      "case": "scope_digest_mismatch",
+      "result": "PASS"
+    },
+    {
+      "case": "rich_patch_deferred",
+      "result": "PASS"
+    },
+    {
+      "case": "immutable_artifact",
+      "result": "PASS"
+    },
+    {
+      "case": "immutable_published_template",
+      "result": "PASS"
+    },
+    {
+      "case": "approval_no_unprepared_consume",
+      "result": "PASS"
+    },
+    {
+      "case": "approval_cross_project_transaction",
+      "result": "PASS"
+    },
+    {
+      "case": "transaction_requires_consumption",
+      "result": "PASS"
+    },
+    {
+      "case": "fixture_atomic_consumption_pointer_outbox_rollback_and_commit",
+      "result": "PASS"
+    },
+    {
+      "case": "approval_terminal_immutable",
+      "result": "PASS"
+    },
+    {
+      "case": "bootstrap_unique_idempotency",
+      "result": "PASS"
+    },
+    {
+      "case": "origin_cross_snapshot",
+      "result": "PASS"
+    },
+    {
+      "case": "native_cross_scope",
+      "result": "PASS"
+    },
+    {
+      "case": "one_current_attempt",
+      "result": "PASS"
+    },
+    {
+      "case": "attempt_cross_job",
+      "result": "PASS"
+    },
+    {
+      "case": "ready_requires_qc",
+      "result": "PASS"
+    },
+    {
+      "case": "delivery_before_ready_rejected",
+      "result": "PASS"
+    },
+    {
+      "case": "delivery_duplicate_rejected",
+      "result": "PASS"
+    },
+    {
+      "case": "actual_wire_RunScope_fixedPlan_to_SQL_and_scope_plan_rejections",
+      "result": "PASS"
+    },
+    {
+      "case": "grant_binding_immutable",
+      "result": "PASS"
+    },
+    {
+      "case": "step_input_immutable",
+      "result": "PASS"
+    },
+    {
+      "case": "ready_render_terminal",
+      "result": "PASS"
+    },
+    {
+      "case": "run_scope_immutable",
+      "result": "PASS"
+    },
+    {
+      "case": "question_answer_exact_versions_skip_content_authority_CAS_stale_intake",
+      "result": "PASS"
+    },
+    {
+      "case": "actual_wire_question_answer_to_SQL_roundtrip_wrong_input_rejected",
+      "result": "PASS"
+    },
+    {
+      "case": "answer_change_same_intake_closure_invalidation_outbox_atomic_fixture",
+      "result": "PASS"
+    },
+    {
+      "case": "actual_golden_brief_question_answer_SQL_heads_exact_closure_hashes",
+      "result": "PASS"
+    },
+    {
+      "case": "foreign_key_check",
+      "result": "PASS"
+    }
+  ],
+  "production_integration": "NOT_RUN"
+}

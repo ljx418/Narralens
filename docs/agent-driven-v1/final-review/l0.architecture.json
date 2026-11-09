@@ -1,0 +1,167 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "叙镜L0：Agent驱动与可见视频制作",
+    "locale": "zh-CN",
+    "quality_profile": "showcase",
+    "viewBox": [
+      1220,
+      640
+    ]
+  },
+  "components": [
+    {
+      "id": "driver",
+      "type": "external",
+      "label": "驱动Agent与入口Skill",
+      "sublabel": "Codex / Claude CLI / DSH",
+      "tag": "接入待实现",
+      "pos": [
+        35,
+        250
+      ],
+      "size": [
+        220,
+        86
+      ]
+    },
+    {
+      "id": "mcp",
+      "type": "backend",
+      "label": "MCP服务外观",
+      "sublabel": "McpServer / ToolRegistry",
+      "tag": "待新增",
+      "pos": [
+        335,
+        250
+      ],
+      "size": [
+        220,
+        86
+      ]
+    },
+    {
+      "id": "app",
+      "type": "backend",
+      "label": "统一创作应用",
+      "sublabel": "AgentDrivenComposition",
+      "tag": "待新增",
+      "pos": [
+        635,
+        250
+      ],
+      "size": [
+        220,
+        86
+      ]
+    },
+    {
+      "id": "core",
+      "type": "security",
+      "label": "提交内核与共享事实",
+      "sublabel": "ProjectCoordinator / RevisionStore",
+      "tag": "已有·增量接线",
+      "pos": [
+        935,
+        250
+      ],
+      "size": [
+        220,
+        86
+      ]
+    },
+    {
+      "id": "ui",
+      "type": "frontend",
+      "label": "原剪辑工作台增量",
+      "sublabel": "M5Panel / WorkflowTopBar",
+      "tag": "R4目标已批准",
+      "pos": [
+        635,
+        40
+      ],
+      "size": [
+        220,
+        86
+      ]
+    },
+    {
+      "id": "job",
+      "type": "messagebus",
+      "label": "持久任务与媒体执行",
+      "sublabel": "PersistentJobStore / MediaWorker",
+      "tag": "底座已有·需扩展",
+      "pos": [
+        635,
+        480
+      ],
+      "size": [
+        220,
+        86
+      ]
+    },
+    {
+      "id": "engine",
+      "type": "backend",
+      "label": "单引擎可编辑工程",
+      "sublabel": "EnginePort / OpenFilmAdapter",
+      "tag": "已有·render待接线",
+      "pos": [
+        935,
+        480
+      ],
+      "size": [
+        220,
+        86
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "skill-mcp",
+      "from": "driver",
+      "to": "mcp",
+      "label": "按Skill调用"
+    },
+    {
+      "id": "mcp-app",
+      "from": "mcp",
+      "to": "app",
+      "label": "统一应用调用"
+    },
+    {
+      "id": "app-core",
+      "from": "app",
+      "to": "core",
+      "label": "有限授权提交"
+    },
+    {
+      "id": "ui-app",
+      "from": "ui",
+      "to": "app",
+      "label": "同源HTTP / SSE",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelDy": 70
+    },
+    {
+      "id": "app-jobs",
+      "from": "app",
+      "to": "job",
+      "label": "持久准备任务",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelDy": 70
+    },
+    {
+      "id": "core-engine",
+      "from": "core",
+      "to": "engine",
+      "label": "暂存校验发布",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelDy": 70
+    }
+  ]
+}

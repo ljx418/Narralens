@@ -1,0 +1,210 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "叙镜V1目标架构：原工作台与唯一提交边界",
+    "locale": "zh-CN",
+    "quality_profile": "showcase",
+    "viewBox": [
+      1250,
+      870
+    ]
+  },
+  "components": [
+    {
+      "id": "creator",
+      "type": "external",
+      "label": "驱动Agent",
+      "sublabel": "Codex / Claude CLI / DSH",
+      "tag": "外部驱动",
+      "pos": [
+        30,
+        100
+      ],
+      "size": [
+        230,
+        90
+      ]
+    },
+    {
+      "id": "bridge",
+      "type": "backend",
+      "label": "MCP外观与Skill",
+      "sublabel": "McpServer / ToolRegistry",
+      "tag": "待新增",
+      "pos": [
+        340,
+        100
+      ],
+      "size": [
+        230,
+        90
+      ]
+    },
+    {
+      "id": "application",
+      "type": "backend",
+      "label": "统一应用装配",
+      "sublabel": "AgentDrivenComposition",
+      "tag": "待新增",
+      "pos": [
+        650,
+        100
+      ],
+      "size": [
+        230,
+        90
+      ]
+    },
+    {
+      "id": "coordinator",
+      "type": "security",
+      "label": "唯一工程提交边界",
+      "sublabel": "ProjectCoordinator / Adoption",
+      "tag": "已有·需接审批",
+      "pos": [
+        650,
+        410
+      ],
+      "size": [
+        230,
+        90
+      ]
+    },
+    {
+      "id": "engine",
+      "type": "backend",
+      "label": "单引擎原生工程",
+      "sublabel": "EnginePort / OpenFilmAdapter",
+      "tag": "已有·复用",
+      "pos": [
+        650,
+        710
+      ],
+      "size": [
+        230,
+        90
+      ]
+    },
+    {
+      "id": "workbench",
+      "type": "frontend",
+      "label": "原工作台增量界面",
+      "sublabel": "M5Panel / WorkflowTopBar",
+      "tag": "需修改·R4已批",
+      "pos": [
+        960,
+        100
+      ],
+      "size": [
+        230,
+        90
+      ]
+    },
+    {
+      "id": "jobs",
+      "type": "messagebus",
+      "label": "持久准备与媒体作业",
+      "sublabel": "PersistentJobStore / Materialize",
+      "tag": "已有·扩展",
+      "pos": [
+        340,
+        410
+      ],
+      "size": [
+        230,
+        90
+      ]
+    },
+    {
+      "id": "storage",
+      "type": "database",
+      "label": "共享事务与恢复事实",
+      "sublabel": "RevisionStore / SnapshotStore",
+      "tag": "已有·复用",
+      "pos": [
+        960,
+        410
+      ],
+      "size": [
+        230,
+        90
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "driver-tools",
+      "from": "creator",
+      "to": "bridge",
+      "label": "Skill指导调用"
+    },
+    {
+      "id": "tools-app",
+      "from": "bridge",
+      "to": "application",
+      "label": "受控工具命令"
+    },
+    {
+      "id": "app-write",
+      "from": "application",
+      "to": "coordinator",
+      "label": "审批与版本检查",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelDy": 70
+    },
+    {
+      "id": "write-engine",
+      "from": "coordinator",
+      "to": "engine",
+      "label": "校验并原子发布",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelDy": 70
+    },
+    {
+      "id": "ui-app",
+      "from": "workbench",
+      "to": "application",
+      "label": "同源HTTP / SSE",
+      "fromSide": "left",
+      "toSide": "right"
+    },
+    {
+      "id": "app-jobs",
+      "from": "application",
+      "to": "jobs",
+      "label": "准备·不写工程",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelDy": 70
+    },
+    {
+      "id": "coord-store",
+      "from": "coordinator",
+      "to": "storage",
+      "label": "日志·快照·恢复",
+      "fromSide": "right",
+      "toSide": "left"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "保留的工程底座",
+      "items": [
+        "既有受控采用、历史恢复与单引擎",
+        "原型通过不代表真实产品通过"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "本轮设计的新增接线",
+      "items": [
+        "Agent驱动与持久创作流程",
+        "R4改单镜主线与非模态系统面板"
+      ]
+    }
+  ]
+}

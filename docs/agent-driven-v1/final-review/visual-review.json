@@ -1,0 +1,19 @@
+{
+  "scope": "DOCUMENT_VISUAL_REVIEW_NOT_PRODUCT_ACCEPTANCE",
+  "l0ArtifactSHA256": "b48dfed3c0d1ecab1c94baf740d36164600072d74bc884ad19640d5956ce2546",
+  "archifyNativeVisualCheck": "SKIPPED_NO_WSL_CHROME",
+  "supplement": "Windows headless 4 desktop viewports x 2 themes, all no overflow",
+  "perceptualReview": "inspected minimum and maximum desktop screenshots in both themes, main page desktop/mobile and architecture section; no clipped nodes, obscured relationship labels or page horizontal overflow observed",
+  "conceptImage": {
+    "sha256": "2229d0abc766273d71d74685476aef79574757a8b2afeb3efe9d45af3c7c6e2f",
+    "status": "ACCEPTED_AS_ILLUSTRATION_ONLY",
+    "limitations": [
+      "30s/10s are inherited prototype samples, not acceptance thresholds",
+      "illustrated labels/controls are not production UI or telemetry",
+      "sample and first chapter have distinct gates in authoritative text",
+      "native editor remains baseline; no workflow editing platform introduced"
+    ]
+  },
+  "frozenR4": "UNCHANGED",
+  "businessAcceptance": "NOT_RUN"
+}

@@ -1,0 +1,165 @@
+{
+  "format": "narralens.experience-decisions@1",
+  "state": "USER_CONFIRMED_DIRECTIONS_WITH_DERIVED_SPEC_DRAFT",
+  "productionRelease": "NOT_RELEASED",
+  "runtimeAcceptance": "NOT_RUN",
+  "confirmedSelections": [
+    {
+      "topic": "workflow-display",
+      "choice": "A",
+      "meaning": "默认创作阶段；点击具体节点以弹窗查看实际任务细节"
+    },
+    {
+      "topic": "human-involvement",
+      "choice": "A+B",
+      "meaning": "关键创作、异常及较高失败/时间风险介入；普通低价值执行自动"
+    },
+    {
+      "topic": "decision-channel",
+      "choice": "phase-based",
+      "meaning": "定义/脚本/素材策略/风格在Agent；制作后章节/声音/封面/选镜在工作台，Agent引导"
+    },
+    {
+      "topic": "workflow-persistence",
+      "choice": "B+C",
+      "meaning": "可复用模板，Host独立执行已授权步骤；Agent经MCP审核修改"
+    },
+    {
+      "topic": "batch-before-review",
+      "choice": "A+first-chapter-validation",
+      "meaning": "先代表性片段；稳定前增加完整首章检查，稳定后回到A"
+    },
+    {
+      "topic": "review-unit",
+      "choice": "A",
+      "meaning": "章节音画字幕合包，问题定位局部；封面独立"
+    },
+    {
+      "topic": "workflow-composition",
+      "choice": "B",
+      "meaning": "Agent可组合已登记能力建新流程，经Host验证"
+    },
+    {
+      "topic": "stability-transition",
+      "choice": "B",
+      "meaning": "Agent据记录建议，人类确认指定流程/风格/内容类型scope后生效；不固定通过次数"
+    },
+    {
+      "topic": "active-run-edit",
+      "choice": "B",
+      "meaning": "允许影响审阅后调整本次未执行部分；保留已完成独立结果"
+    },
+    {
+      "topic": "runtime-preparation",
+      "choice": "A",
+      "meaning": "已登记授权的自有/接管服务与模型按需自动启动/加载/预热"
+    },
+    {
+      "topic": "visual-workflow-editor",
+      "choice": "V2",
+      "meaning": "V1暂无必要开放工作台编排编辑器，后续V2评估"
+    }
+  ],
+  "derivedSpecStatus": "PROPOSED_FOR_CP_REVIEW_NOT_ALL_FIELDS_HUMAN_FROZEN",
+  "specifications": [
+    "07_EXPERIENCE_SPEC.md",
+    "08_WORKFLOW_MCP_CONTRACT.md"
+  ],
+  "acceptanceSubcases": [
+    {
+      "id": "EX-01",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "EX-02",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "EX-03",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "EX-04",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "EX-05",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "EX-06",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "EX-07",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "EX-08",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "EX-09",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "EX-10",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "EX-11",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "EX-12",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "EX-13",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "EX-14",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "EX-15",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "EX-16",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "EX-17",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "EX-18",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "EX-19",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "EX-20",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "EX-21",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "EX-22",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "EX-23",
+      "status": "NOT_RUN"
+    }
+  ],
+  "independentReview": "reviews/experience-spec-review.md",
+  "coreArchitecture": "retain single Host/shared DB/engine/Coordinator and original Studio selection-clock",
+  "frozenPrototype": "../s0-r4/FREEZE.json"
+}

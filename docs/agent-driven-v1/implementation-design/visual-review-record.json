@@ -1,0 +1,93 @@
+{
+  "artifact": {
+    "sha256": "53e48a13ed0b2789dfcdc0a3504701abcd0024e8ac40c23688a4f28db6ae974a",
+    "bytes": 804448
+  },
+  "specification": {
+    "sha256": "56c9932e4e314fcf4b32102dca2baf049700461b98bc76c5e007fdddd6193928",
+    "bytes": 3142
+  },
+  "browser_evidence": "skipped (canonical WSL Chrome unavailable)",
+  "supplementary_browser": {
+    "kind": "Windows Headless CDP",
+    "status": "complete",
+    "measurements": [
+      {
+        "artifact": "target-l1.architecture.html",
+        "width": 1440,
+        "height": 900,
+        "scrollWidth": 1440,
+        "scrollHeight": 900,
+        "theme": "light"
+      },
+      {
+        "artifact": "target-l1.architecture.html",
+        "width": 1600,
+        "height": 1000,
+        "scrollWidth": 1600,
+        "scrollHeight": 1000,
+        "theme": "light"
+      },
+      {
+        "artifact": "target-l1.architecture.html",
+        "width": 1920,
+        "height": 1080,
+        "scrollWidth": 1920,
+        "scrollHeight": 1080,
+        "theme": "light"
+      },
+      {
+        "artifact": "target-l1.architecture.html",
+        "width": 2048,
+        "height": 1320,
+        "scrollWidth": 2048,
+        "scrollHeight": 1320,
+        "theme": "light"
+      },
+      {
+        "artifact": "target-l1.architecture.html",
+        "width": 1440,
+        "height": 900,
+        "scrollWidth": 1440,
+        "scrollHeight": 900,
+        "theme": "dark"
+      },
+      {
+        "artifact": "target-l1.architecture.html",
+        "width": 1600,
+        "height": 1000,
+        "scrollWidth": 1600,
+        "scrollHeight": 1000,
+        "theme": "dark"
+      },
+      {
+        "artifact": "target-l1.architecture.html",
+        "width": 1920,
+        "height": 1080,
+        "scrollWidth": 1920,
+        "scrollHeight": 1080,
+        "theme": "dark"
+      },
+      {
+        "artifact": "target-l1.architecture.html",
+        "width": 2048,
+        "height": 1320,
+        "scrollWidth": 2048,
+        "scrollHeight": 1320,
+        "theme": "dark"
+      }
+    ],
+    "source": "browser/browser-evidence.json"
+  },
+  "visual_review": "passed",
+  "reviewer": "main agent with image reader; not human approval",
+  "reviewedScreenshots": [
+    "browser/archify-2048.png",
+    "browser/archify-alternate-1440.png"
+  ],
+  "correction_rounds": 1,
+  "limitations": [
+    "L0 failed candidate is not a delivered diagram",
+    "product validation and human design approval NOT_RUN"
+  ]
+}

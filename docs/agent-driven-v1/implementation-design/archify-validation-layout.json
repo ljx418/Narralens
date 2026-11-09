@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "ok": false,
+  "command": "validate",
+  "stage": "render",
+  "type": "architecture",
+  "input": "/mnt/c/workspace/videoworkline/Narralens/docs/agent-driven-v1/implementation-design/target-l0.architecture.json",
+  "error": "Architecture layout validation failed:\n- [composition/label-route-clearance] showcase architecture label \"审批与版本检查\" on connections[2] id \"app-write\" \"application\" -> \"coordinator\" label \"审批与版本检查\" is 0px from connections[5] id \"app-jobs\" \"application\" -> \"jobs\" label \"准备·不写工程\" segment 0 [758, 190] -> [758, 300] (label rect [733, 240, 77, 14]; minimum 4px) — adjust labelAt, labelDx, labelDy, or labelSegment; otherwise adjust the other relationship route/via/channel.",
+  "diagnostics": [
+    {
+      "code": "composition/label-route-clearance",
+      "severity": "error",
+      "message": "[composition/label-route-clearance] showcase architecture label \"审批与版本检查\" on connections[2] id \"app-write\" \"application\" -> \"coordinator\" label \"审批与版本检查\" is 0px from connections[5] id \"app-jobs\" \"application\" -> \"jobs\" label \"准备·不写工程\" segment 0 [758, 190] -> [758, 300] (label rect [733, 240, 77, 14]; minimum 4px) — adjust labelAt, labelDx, labelDy, or labelSegment; otherwise adjust the other relationship route/via/channel.",
+      "subject": {
+        "diagramType": "architecture",
+        "collection": "connections",
+        "index": 2,
+        "id": "app-write",
+        "from": "application",
+        "to": "coordinator"
+      },
+      "evidence": {
+        "label": "审批与版本检查",
+        "otherRelationship": {
+          "diagramType": "architecture",
+          "collection": "connections",
+          "index": 5,
+          "id": "app-jobs",
+          "from": "application",
+          "to": "jobs"
+        },
+        "segmentIndex": 0,
+        "clearancePx": 0,
+        "minimumPx": 4,
+        "labelRect": {
+          "relation": {
+            "id": "app-write",
+            "from": "application",
+            "to": "coordinator",
+            "label": "审批与版本检查",
+            "fromSide": "bottom",
+            "toSide": "top",
+            "labelDy": 70
+          },
+          "relationIndex": 2,
+          "label": "审批与版本检查",
+          "x": 733.4,
+          "y": 240,
+          "width": 77.2,
+          "height": 14,
+          "lx": 772,
+          "ly": 250
+        },
+        "from": [
+          758,
+          190
+        ],
+        "to": [
+          758,
+          300
+        ]
+      },
+      "supportedFixes": [
+        "adjust labelAt, labelDx, labelDy, or labelSegment; otherwise adjust the other relationship route/via/channel"
+      ]
+    }
+  ]
+}

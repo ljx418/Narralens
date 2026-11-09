@@ -1,0 +1,24 @@
+// Documentation/approval integrity only; this does not run product acceptance.
+import { readFileSync, writeFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import { resolve, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+const root=resolve(dirname(fileURLToPath(import.meta.url)),'..');
+const bytes=path=>readFileSync(resolve(root,path));
+const sha=value=>createHash('sha256').update(value).digest('hex');
+const read=path=>JSON.parse(bytes(path));
+const base='docs/agent-driven-v1/s0-r4/';
+const frozen=read(base+'FREEZE.json'),approval=read(base+'APPROVAL.json');
+if(sha(bytes(base+'FREEZE.json'))!==approval.freezeSha256)throw Error('FREEZE_MANIFEST_CHANGED');
+for(const [path,digest] of Object.entries(frozen.files))if(sha(bytes(path))!==digest)throw Error('FROZEN_FILE_CHANGED:'+path);
+if(sha(bytes(approval.gate))!==approval.gateSha256)throw Error('GATE_CHANGED_REQUIRES_EXPLICIT_RECONCILIATION');
+const gate=bytes(approval.gate).toString();
+const ids=[...gate.matchAll(/^\| (R4-UX-\d{2}) \|/gm)].map(m=>m[1]);
+if(JSON.stringify(ids)!==JSON.stringify(approval.requiredCases))throw Error('CASE_COVERAGE_DRIFT');
+const browser=read(base+'browser-check.json');
+if(browser.status!=='complete'||browser.checks.length!==49||browser.checks.some(c=>c.status!=='PASS'))throw Error('PROTOTYPE_CHECK_FAILED');
+for(const [name,digest] of Object.entries(browser.sourceHashes))if(sha(bytes(base+name))!==digest)throw Error('BROWSER_CAPTURE_SOURCE_DRIFT:'+name);
+if(approval.prototypeHumanReview!=='PASS'||approval.productCasesStatus!=='NOT_RUN'||approval.productionRelease!=='NOT_RELEASED'||frozen.productionRelease!=='NOT_RELEASED')throw Error('APPROVAL_SCOPE_OVERCLAIM');
+const result={status:'PASS',scope:'APPROVAL_AND_DOCUMENT_INTEGRITY_ONLY',prototypeHumanReview:'PASS',cases:ids.length,frozenFiles:Object.keys(frozen.files).length,prototypeChecks:49,productionAcceptance:'NOT_RUN',productionRelease:'NOT_RELEASED',freezeSha256:approval.freezeSha256};
+writeFileSync(resolve(root,'docs/agent-driven-v1/s0-r4-approval-check.json'),JSON.stringify(result,null,2)+'\n');
+console.log(JSON.stringify(result,null,2));

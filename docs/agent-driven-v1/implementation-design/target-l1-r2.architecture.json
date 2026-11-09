@@ -1,0 +1,166 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "叙镜L1：可信决定到原生提交",
+    "locale": "zh-CN",
+    "quality_profile": "showcase",
+    "viewBox": [
+      1220,
+      640
+    ]
+  },
+  "components": [
+    {
+      "id": "commands",
+      "type": "backend",
+      "label": "变更应用服务",
+      "sublabel": "ChangeApplicationService",
+      "tag": "待新增",
+      "pos": [
+        35,
+        250
+      ],
+      "size": [
+        220,
+        86
+      ]
+    },
+    {
+      "id": "approval",
+      "type": "security",
+      "label": "可信批准与消费",
+      "sublabel": "ApprovalService",
+      "tag": "待新增",
+      "pos": [
+        340,
+        250
+      ],
+      "size": [
+        220,
+        86
+      ]
+    },
+    {
+      "id": "coordinator",
+      "type": "backend",
+      "label": "唯一正式写入",
+      "sublabel": "ProjectCoordinator",
+      "tag": "已有·需接线",
+      "pos": [
+        645,
+        250
+      ],
+      "size": [
+        220,
+        86
+      ]
+    },
+    {
+      "id": "engine",
+      "type": "backend",
+      "label": "隔离生成与校验",
+      "sublabel": "EnginePort / OpenFilmAdapter",
+      "tag": "已有·复用",
+      "pos": [
+        950,
+        250
+      ],
+      "size": [
+        220,
+        86
+      ]
+    },
+    {
+      "id": "decision",
+      "type": "frontend",
+      "label": "原导演栏的决定",
+      "sublabel": "M5Panel / DecisionService",
+      "tag": "需修改",
+      "pos": [
+        340,
+        40
+      ],
+      "size": [
+        220,
+        86
+      ]
+    },
+    {
+      "id": "impact",
+      "type": "backend",
+      "label": "服务器影响复核",
+      "sublabel": "ImpactService / LockService",
+      "tag": "已有·复用",
+      "pos": [
+        340,
+        500
+      ],
+      "size": [
+        220,
+        86
+      ]
+    },
+    {
+      "id": "revision",
+      "type": "database",
+      "label": "单库提交事实",
+      "sublabel": "RevisionStore / SnapshotStore",
+      "tag": "已有·复用",
+      "pos": [
+        645,
+        500
+      ],
+      "size": [
+        220,
+        86
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "prepare-approval",
+      "from": "commands",
+      "to": "approval",
+      "label": "申请有限授权"
+    },
+    {
+      "id": "approve-write",
+      "from": "approval",
+      "to": "coordinator",
+      "label": "核对并消费"
+    },
+    {
+      "id": "controlled-engine",
+      "from": "coordinator",
+      "to": "engine",
+      "label": "暂存校验发布"
+    },
+    {
+      "id": "human-decision",
+      "from": "decision",
+      "to": "approval",
+      "label": "可信决定",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelDy": 70
+    },
+    {
+      "id": "impact-check",
+      "from": "impact",
+      "to": "approval",
+      "label": "影响与锁",
+      "fromSide": "top",
+      "toSide": "bottom"
+    },
+    {
+      "id": "atomic-facts",
+      "from": "coordinator",
+      "to": "revision",
+      "label": "原子事务",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelDy": 70
+    }
+  ]
+}

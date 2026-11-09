@@ -1,8 +1,8 @@
 # 并行Agent任务入口与交付协议
 
-> 2026-11-09 S0 R3最新页面划分：工作流位于全局顶部Bar，横向展开/折叠；另一入口是独立系统控制面板，负责服务、模型加载/预热/卸载、重试与诊断，不是Agent控制台。原剪辑区与M5业务控件保留。当前效果图与交互稿见`s0-r3/review.html`；R2右侧两section布局退为历史，生产实现仍未释放。
+> 当前权威：R4体验已批准，见V1_FRONTEND_EXIT_GATE.md；详细实施设计/22实体/35族场景/里程碑与回退见implementation-design/00_READ_FIRST.md。原工作台增量，顶部横向WorkflowTopBar、独立非模态SystemControlPanel；新项目bootstrap/初始commit属MAIN，生产注册属MAIN。旧正文与批准状态见history归档；当前仅文档，CP/生产NOT_RELEASED。
 
-> 2026-11-09用户纠偏（前端实施优先）：保留现有OpenFilm剪辑区和M5导演面板，仅在原导演面板中新增工作流展示、Agent控制台两个可折叠section；服务监控归控制台。工作台呈现同一项目的真实剪辑状态，禁止另建agent-workbench独立前端/聊天入口/时间轴。详情与当前原型见`s0-r2/README.md`（本段路径按当前文档目录解析）。原始PRD功能目标和后台制作计划继续保留，既有审阅/批准/编辑尽量复用原入口。新S0 R2仍待用户核验，不是生产实现release。
+
 
 目前所有泳道只允许基线复核、IT-P01/IT-P02文档/原型协作。生产实现须等待MAIN发布CP-A0合同SHA与明确的release。工作目录已准备不代表任务已启动或准入已通过。
 
@@ -53,7 +53,7 @@ Host、DB、引擎与服务控制通过冻结ApplicationPort调用；不能改se
 先读AGENTS.md、docs/agent-driven-v1/00_READ_FIRST.md、07_PARALLEL_DEVELOPMENT.md、08_PARALLEL_PORTS_AND_OWNERSHIP.md、parallel-plan.json。
 先核对SHA/分支/干净度与MAIN的ReleaseAssignment；不reset/stash。
 没有CP-A0与明确IMPLEMENTATION_RELEASE时，只做IT-P01/IT-P02指定原型/文档，不实现生产功能。
-获释放后实现原工作台内的两块observation展示组件与允许的creative/workspace服务。只新增工作流、Agent控制台；复查/批准/编辑接既有入口，不另建前端或聊天页。
+获释放后在原工作台新增observation/WorkflowTopBar与system/SystemControlPanel，以及允许的creative/workspace服务。系统面板为独立非模态分栏，不是Agent控制台；复查/批准/编辑接原导演入口，不另建应用或聊天页。
 使用冻结Repository/Project/Job/Decision/Application/Selection端口；新工程bootstrap与正式commit由MAIN接线。
 不要改project-creation-service、公共DDL/合同、server、旧M5/唯一clock-selection或第二timeline。旧M5挂载需要提出补丁请求。
 合同fixture可用于显式组件开发，必须标组件级；不能据此声明生产接线。真实状态/unknown/断线不能用假计时器代替。

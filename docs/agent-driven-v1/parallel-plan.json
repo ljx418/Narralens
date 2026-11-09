@@ -318,12 +318,19 @@
     ],
     "placement": {
       "WorkflowTopBar": "global top horizontal collapsible bar",
-      "SystemControlPanel": "separate drawer opened by explicit system control entry"
+      "SystemControlPanel": "separate nonmodal side panel; shares layout, no backdrop or focus trap; editing remains usable"
     },
     "newStandaloneApp": false,
     "newTimeline": false,
     "legacyMountOwner": "main",
     "systemCommandsOwner": "main",
-    "candidate": "docs/agent-driven-v1/s0-r3/README.md"
-  }
+    "candidate": "docs/agent-driven-v1/s0-r4/prototype.html",
+    "approval": "HUMAN_APPROVED_TARGET_NOT_PRODUCT_ACCEPTANCE",
+    "experienceGate": "docs/agent-driven-v1/V1_FRONTEND_EXIT_GATE.md",
+    "freeze": "docs/agent-driven-v1/s0-r4/FREEZE.json",
+    "workflowDefault": "creative stages; node opens task details popup",
+    "visualWorkflowEditorV1": false,
+    "experienceSpecification": "docs/agent-driven-v1/implementation-design/07_EXPERIENCE_SPEC.md"
+  },
+  "detailedDesign": "docs/agent-driven-v1/implementation-design/00_READ_FIRST.md"
 }

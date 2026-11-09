@@ -1,0 +1,196 @@
+{
+  "format": "narralens.cp-a0.readiness-check@1",
+  "documentStatus": "REVIEWED_CANDIDATE_FOR_USER_REVIEW",
+  "observedSourceSHA": "fd3021c336387b4c6405b3db08abaafa81c842ff",
+  "productionImplementationAuthorized": false,
+  "implementationRelease": "NOT_RELEASED",
+  "cpA0": "NOT_FROZEN",
+  "productAcceptance": "NOT_RUN",
+  "humanAExit": "NOT_RUN",
+  "independentCodeReview": "NOT_RUN",
+  "documentValidation": "PASS_DOCUMENTS_ONLY",
+  "implementationSessions": [
+    {
+      "role": "main",
+      "directory": "/mnt/c/workspace/videoworkline/Narralens",
+      "status": "NOT_STARTED",
+      "currentWriter": null,
+      "releaseAssignment": null
+    },
+    {
+      "role": "bridge",
+      "directory": "/mnt/c/workspace/videoworkline/Narralens-agents/bridge-observability",
+      "status": "NOT_STARTED",
+      "currentWriter": null,
+      "releaseAssignment": null
+    },
+    {
+      "role": "product",
+      "directory": "/mnt/c/workspace/videoworkline/Narralens-agents/product-workbench",
+      "status": "NOT_STARTED",
+      "currentWriter": null,
+      "releaseAssignment": null
+    },
+    {
+      "role": "media",
+      "directory": "/mnt/c/workspace/videoworkline/Narralens-agents/media-delivery",
+      "status": "NOT_STARTED",
+      "currentWriter": null,
+      "releaseAssignment": null
+    }
+  ],
+  "baseline": {
+    "existingWorkspaceReceipt": "Narralens-agents/workspace-receipt.json",
+    "receiptPreparedFromSHA": "95087de9bfafdf2f2e339f3d2f2e8991ca11c8a7",
+    "receiptIsLiveProbe": false,
+    "alignment": "RECHECK_REQUIRED_BEFORE_RELEASE",
+    "contractSHA": null
+  },
+  "checks": [
+    {
+      "id": "DOC-TRACE",
+      "owner": "MAIN",
+      "status": "DOCUMENTED",
+      "evidence": "03_EXECUTABLE_ACCEPTANCE.md and acceptance-plan.json retain AD-T families, 23 EX split and T20-A..H"
+    },
+    {
+      "id": "DOC-ASSIGNMENTS",
+      "owner": "MAIN",
+      "status": "DOCUMENTED",
+      "evidence": "04_RELEASE_ASSIGNMENTS.md gives concrete dirs, exact protection, dependencies and required ReleaseAssignment fields"
+    },
+    {
+      "id": "SCHEMA-REGISTRY-FREEZE",
+      "owner": "MAIN",
+      "status": "REVIEWED_CANDIDATE_NOT_PRODUCTION_FROZEN",
+      "evidence": "80 definitions / 31 candidate routes / 1335 schema vectors / 161 policy cases / strict TS / 42 isolated SQLite cases; current files cross-reviewed; candidate byte-lock does not publish API"
+    },
+    {
+      "id": "FIXTURE-MEDIA",
+      "owner": "MEDIA+MAIN",
+      "status": "SELECTION_PENDING",
+      "evidence": "No selected authorized 60–180s media/real Chinese recording manifest; reference file hashes are not license or A-film proof"
+    },
+    {
+      "id": "CLIENTS",
+      "owner": "BRIDGE",
+      "status": "NOT_RUN",
+      "evidence": "Codex real client chain required A; ClaudeCode and DSH separately probed, A may blocked but C cannot omit"
+    },
+    {
+      "id": "NEW-OLD-DB-RECOVERY",
+      "owner": "MAIN",
+      "status": "NOT_RUN",
+      "evidence": "Fresh raw DDL and old-db copy upgrade/reopen/crash cases, not only upgraded test DB"
+    },
+    {
+      "id": "REAL-RENDER",
+      "owner": "MEDIA+MAIN",
+      "status": "NOT_RUN",
+      "evidence": "Existing EnginePort render signature is disabled in baseline adapters; real encode/decode/T20 required"
+    },
+    {
+      "id": "TASK-GATES-CURSOR-NATIVE",
+      "owner": "MAIN+BRIDGE+PRODUCT",
+      "status": "NOT_RUN",
+      "evidence": "All production side-effect entrances, signedcursor runtime, snapshot gap and actual nativeack proofs absent until implemented"
+    },
+    {
+      "id": "RESOURCE-BASELINE",
+      "owner": "MAIN",
+      "status": "NOT_RUN",
+      "evidence": "Live directories/HEAD/dirty/dependencies/ports and reference-machine reservation must be checked before release; no installs/launch performed"
+    },
+    {
+      "id": "USER-IMPLEMENTATION-AUTHORIZATION",
+      "owner": "MAIN+USER",
+      "status": "NOT_GRANTED",
+      "evidence": "Planning/document approval is not implementation authorization; MAIN must record exact user instruction and bounded ReleaseAssignment"
+    },
+    {
+      "id": "A-EXIT",
+      "owner": "MAIN+INDEPENDENT+USER",
+      "status": "NOT_RUN",
+      "evidence": "Same frozen SHA automated+build+media+negative+recovery, independent reviewer and human signature"
+    }
+  ],
+  "unresolvedProbes": [
+    {
+      "id": "P-MEDIA",
+      "phase": "BEFORE_A_EVIDENCE",
+      "owner": "MEDIA+MAIN",
+      "reason": "Choose authorized media/real recording and hash/probe full closure; docs cannot prove audio reality or rights"
+    },
+    {
+      "id": "P-CLIENT",
+      "phase": "A_THEN_C",
+      "owner": "BRIDGE",
+      "reason": "Actual CLI versions, stdio discovery/read/reconnect and three-client matrix require real clients"
+    },
+    {
+      "id": "P-DB",
+      "phase": "A",
+      "owner": "MAIN",
+      "reason": "Fresh/old SQLite upgrade, CHECK/index/CAS and real process restart must run on isolated copies"
+    },
+    {
+      "id": "P-SECURITY",
+      "phase": "A",
+      "owner": "MAIN+BRIDGE+PRODUCT",
+      "reason": "Production authorization consumption/commit atomicity, signed cursor and native ack cannot be proven by schema"
+    },
+    {
+      "id": "P-RENDER",
+      "phase": "A",
+      "owner": "MEDIA+MAIN",
+      "reason": "Real adapter render/encode/decode/atomic publication and crash convergence"
+    },
+    {
+      "id": "P-RUNTIME",
+      "phase": "B",
+      "owner": "MEDIA+MAIN",
+      "reason": "Authorized template/model fingerprints, license, runtime ownership, GPU lease, receipt/cancel/unknown fees and actual smoke"
+    },
+    {
+      "id": "P-QUALITY",
+      "phase": "BEFORE_B_EVIDENCE",
+      "owner": "MEDIA+MAIN+USER",
+      "reason": "Freeze audio/subtitle/media tolerances and risk policy before measuring; no invented threshold"
+    },
+    {
+      "id": "P-HUMAN",
+      "phase": "A_B_C_EXIT",
+      "owner": "USER",
+      "reason": "Actual content/experience and independent evidence remain unsignable by implementation agents"
+    }
+  ],
+  "documentationExit": {
+    "required": [
+      "all four prep workpackages reviewable",
+      "cross-file refs and plan JSON parse",
+      "contract candidate inconsistencies explicitly resolved or tracked",
+      "independent documentation review records findings and disposition",
+      "user receives concrete tasks/actual session state and unresolved probes"
+    ],
+    "doesNotAuthorize": [
+      "production code",
+      "new provider/model/paid/network work",
+      "release assignment",
+      "A/B/C human pass",
+      "old freeze changes"
+    ]
+  },
+  "documentReview": {
+    "contracts": "independent-cross-review.md: CR01..05 CLOSED_DOCUMENT_ONLY",
+    "dataAndAcceptance": "independent-data-acceptance-review.md, parent closes formatting nit",
+    "targetDesign": "../final-review/independent-design-review.md, final artifact bindings separately checked",
+    "scope": "independent by un-authored file sets; not production external review"
+  },
+  "preparationPackageChecks": {
+    "contractSchemaVectors": 1335,
+    "contractPolicies": 161,
+    "sqliteCases": 42,
+    "questionAnswerClosureGolden": "PASS_DOCUMENT_FIXTURE_ONLY",
+    "realHostIntegration": "NOT_RUN"
+  }
+}

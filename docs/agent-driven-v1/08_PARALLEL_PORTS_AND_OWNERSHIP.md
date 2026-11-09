@@ -1,8 +1,8 @@
 # 并行架构：公共端口、代码所有权和集成接缝
 
-> 2026-11-09 S0 R3最新页面划分：工作流位于全局顶部Bar，横向展开/折叠；另一入口是独立系统控制面板，负责服务、模型加载/预热/卸载、重试与诊断，不是Agent控制台。原剪辑区与M5业务控件保留。当前效果图与交互稿见`s0-r3/review.html`；R2右侧两section布局退为历史，生产实现仍未释放。
+> 当前权威：R4体验已批准，见V1_FRONTEND_EXIT_GATE.md；详细实施设计/22实体/35族场景/里程碑与回退见implementation-design/00_READ_FIRST.md。原工作台增量，顶部横向WorkflowTopBar、独立非模态SystemControlPanel；新项目bootstrap/初始commit属MAIN，生产注册属MAIN。旧正文与批准状态见history归档；当前仅文档，CP/生产NOT_RELEASED。
 
-> 2026-11-09用户纠偏（前端实施优先）：保留现有OpenFilm剪辑区和M5导演面板，仅在原导演面板中新增工作流展示、Agent控制台两个可折叠section；服务监控归控制台。工作台呈现同一项目的真实剪辑状态，禁止另建agent-workbench独立前端/聊天入口/时间轴。详情与当前原型见`s0-r2/README.md`（本段路径按当前文档目录解析）。原始PRD功能目标和后台制作计划继续保留，既有审阅/批准/编辑尽量复用原入口。新S0 R2仍待用户核验，不是生产实现release。
+
 
 状态：执行设计，精确运行时合同待CP-A0冻结；本文定义责任与必需字段，不冒充已经新增API或schema。
 
@@ -49,7 +49,7 @@ MAIN持有RevisionStore一个连接与DDL/迁移、项目写队列、commit/snap
 
 ## 5. UI与原生Studio分工
 
-PRODUCT仅拥有新增`observation`内WorkflowPanel、AgentConsolePanel及只读投影hook，复用旧GatewayApiClient传入的typed port；使用唯一selection/clock的桥接，不维护可独立重建全片的clip数组。旧M5挂载点和原生Gateway由MAIN接线/审核，避免与BRIDGE同时修改M5Panel。
+PRODUCT拥有新增`observation`内WorkflowTopBar、`system`内SystemControlPanel及只读投影hook，复用旧GatewayApiClient传入的typed port；使用唯一selection/clock的桥接，不维护可独立重建全片的clip数组。旧M5挂载点和原生Gateway由MAIN接线/审核，避免与BRIDGE同时修改M5Panel。
 
 任务状态来自Host/事件，不用浏览器计时器模拟生产进度；服务指标带来源、采样时间/TTL，不支持就unknown。原型的模拟仅在明确demo模式，不进入业务验收或混入真实监控。
 
@@ -67,8 +67,12 @@ ProjectObservationReadPort读Host commit/Job/workflow/脱敏日志；EditorViewR
 
 ## R3布局与系统控制端口
 
-PRODUCT的WorkflowTopBar放src/app/observation，SystemControlPanel放src/app/system；MAIN通过原有React根和布局插槽/portal挂载，不再在导演列插入竖向工作流/AgentConsole。旧M5控件顺序与单一selection/clock保持。
+PRODUCT的WorkflowTopBar放src/app/observation，SystemControlPanel放src/app/system；MAIN通过原有React根和布局插槽/portal挂载，不再在导演列插入竖向工作流/SystemControlPanel。旧M5控件顺序与单一selection/clock保持。
 
 SystemStateReadPort提供已登记实例/模型配置、归属、就绪/加载状态、采样时间与allowed_actions；SystemLifecycleCommandPort由MAIN负责授权/幂等/实例归属/活动任务影响，异步结果经Job/事件回报；MEDIA的ModelRuntimePort只接受固定runtime+model配置ID和受限load/warm/unload动作，不接任意模型路径/脚本。BRIDGE提供受控服务发现、健康与就绪检查。其精确写合同在开工前另冻，不能把R2只读Observation DTO当系统管理权限。
 
 系统控制不直接写工程source/revision；重试检查和重试媒体任务分开，后者仍校验输入/许可/授权/费用和幂等。共享服务无接管能力时按钮不可用且说明原因，不绕过资源租约全局卸载/清队列。
+
+## 体验讨论后的端口补充
+
+TemplateVersion/RunPlan/ReviewRequest由PRODUCT定义业务并通过MAIN仓储port持久化；StabilityAuthorization、ExecutionGrant、RunPlanChange CAS/决定消费与调度门由MAIN。BRIDGE仅映射MCP与事件，MEDIA供应固定能力/runtime。所有副作用入口共用review/grant/版本/资源检查，不能另开任务绕门。详见implementation-design/07/08；当前不扩大lane的共享文件写权，不增加实施release。

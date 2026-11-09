@@ -1,10 +1,12 @@
 # Narralens 多Agent工作约定
 
-最新前端候选：docs/agent-driven-v1/s0-r3/review.html。顶部横向工作流Bar＋独立系统控制；R2右侧两section布局已退为历史。当前仅设计/生图，生产实现未释放。
+最新已批准体验基线：docs/agent-driven-v1/s0-r4/prototype.html。用户批准R4原型通过，作为V1前端体验出门门限；冻结见同目录FREEZE.json/APPROVAL.json，验收见docs/agent-driven-v1/V1_FRONTEND_EXIT_GATE.md（R4-UX-01..12）。已有工程改单镜、顶部可折叠横向工作流、可继续剪辑的非模态系统侧面板必须保持。原型人工PASS；真实产品验收NOT_RUN，IT-P02/生产release未据此释放，历史Gate不变。
 
 ## 当前授权与权威入口
 
-用户已认可截至`867b3b3`的Agent驱动路线文档，并授权并行架构/目录/任务规划。尚未把精确合同或产品原型冻结，也没有本轮生产实现release。先读 `docs/agent-driven-v1/00_READ_FIRST.md`、`07_PARALLEL_DEVELOPMENT.md`、`08_PARALLEL_PORTS_AND_OWNERSHIP.md`、`parallel-plan.json`。
+体验交流最新确认：默认创作阶段Bar，点节点弹窗查任务；系统控制仍非模态。内容/脚本/素材策略/风格在Agent，制作后预览/章节/音频/封面/选镜在工作台，由Agent引导并读同一决定；普通低价值步骤自动，关键创作/异常/高风险聚合介入。样片之后，稳定前另审首章；Agent建议稳定、人类确认特定scope后省首章，不省样片/其他门。MCP可组合已登记能力、版本化模板/运行；Host继续已授权确定步骤；运行中只可经影响确认调整未执行部分。自有授权runtime按需自动启动/加载/预热，共享/未知/活动任务保护。V1无工作台流程编辑器（V2评估）。详见implementation-design/07与08；当前仍仅文档。
+
+用户已认可截至`867b3b3`的Agent驱动路线文档，并授权并行架构/目录/任务规划。R4体验原型已冻结批准，精确生产合同尚未冻结，也没有本轮生产实现release。先读 `docs/agent-driven-v1/00_READ_FIRST.md`、`07_PARALLEL_DEVELOPMENT.md`、`08_PARALLEL_PORTS_AND_OWNERSHIP.md`、`parallel-plan.json`。
 
 有用户后续明确授权时以最新指令为准；MAIN将其记录为ReleaseAssignment（合同/基线/范围/owner/验收）。文档认可、创建worktree、模块测试通过均不能冒充生产准入或整体验收。
 
@@ -46,12 +48,20 @@ Codex接手实现后，其自测只能称内部验证，不能自签独立外审
 
 ## S0工作入口
 
-用户已批准完成并汇报S0原型与首轮合同冻结方案。旧候选见docs/agent-driven-v1/s0/并保留冻结；当前前端候选见docs/agent-driven-v1/s0-r2/review.html。所有schema/TS/SQL位于文档包，尚未注册生产；S0-HUMAN=REVIEW_PENDING，CP-A0=NOT_RELEASED。下一步等待具体原型核验，开A前先汇报任务与实际分配，不能把本次文档批准当实现release。
+用户已批准完成并汇报S0原型与首轮合同冻结方案。旧候选见docs/agent-driven-v1/s0/并保留冻结；当前已批准体验见docs/agent-driven-v1/s0-r4/prototype.html。所有schema/TS/SQL位于文档包，尚未注册生产；R4-PROTOTYPE-HUMAN=PASS；S0-CONTRACT-REVIEW=REVIEW_PENDING，CP-A0=NOT_RELEASED。下一步完成实施文档审查与精确合同核对，开A前先汇报任务与实际分配，不能把本次文档批准当实现release。
 
 ## 2026-11-09 前端纠偏（最新约束）
 
-用户要求只在现有剪辑工作台增加工作流展示和Agent控制台，其他前端保留；目标是在Agent操作时可见目标/动作/准备/待批/commit/编辑区同步状态，及早介入减少返工。上一版独立创作工作台原型不再指导前端。当前S0 R2见docs/agent-driven-v1/s0-r2/README.md；旧s0冻结包保留历史。PRODUCT新增组件放src/app/observation，MAIN最小挂载M5Panel；不加第二应用根、聊天页、时间轴或播放头。Job完成≠commit，commit≠原生编辑区已加载，无法核对native版本时显示未确认。生产实现未释放。
+历史R2要求在现有工作台增加观测区域（已由R4顶部工作流+非模态系统控制取代），其他前端保留；目标是在Agent操作时可见目标/动作/准备/待批/commit/编辑区同步状态，及早介入减少返工。上一版独立创作工作台原型不再指导前端。当前S0 R2见docs/agent-driven-v1/s0-r2/README.md；旧s0冻结包保留历史。PRODUCT新增组件放src/app/observation，MAIN最小挂载M5Panel；不加第二应用根、聊天页、时间轴或播放头。Job完成≠commit，commit≠原生编辑区已加载，无法核对native版本时显示未确认。生产实现未释放。
 
 ## S0 R3最新前端语义
 
-用户要求顶部可折叠横向工作流Bar，及独立系统控制（服务启动/就绪、模型按需加载/预热/卸载、重试与诊断），不是Agent控制台。原剪辑区与导演控件保留。当前候选docs/agent-driven-v1/s0-r3/review.html；旧s0/s0-r2冻结保留历史。PRODUCT实现src/app/observation/WorkflowTopBar及src/app/system/SystemControlPanel；MAIN最小布局接线并独占系统生命周期命令，BRIDGE健康/服务发现，MEDIA受控模型runtime。当前只文档与图像，未运行模型/服务，生产实现NOT_RELEASED。
+用户要求顶部可折叠横向工作流Bar，及独立系统控制（服务启动/就绪、模型按需加载/预热/卸载、重试与诊断），不是Agent控制台。原剪辑区与导演控件保留。历史R3候选docs/agent-driven-v1/s0-r3/review.html，当前已批准R4见s0-r4/prototype.html；旧s0/s0-r2冻结保留历史。PRODUCT实现src/app/observation/WorkflowTopBar及src/app/system/SystemControlPanel；MAIN最小布局接线并独占系统生命周期命令，BRIDGE健康/服务发现，MEDIA受控模型runtime。当前只文档与图像，未运行模型/服务，生产实现NOT_RELEASED。
+
+## R4实施文档阶段（当前用户指令）
+
+当前仅做文档，不进入产品代码。权威实施设计为docs/agent-driven-v1/implementation-design/00_READ_FIRST.md与8页GAP；旧根文档已归档纠偏。R4体验已批准，CP-A0/生产release仍未释放。一般项目初始化路径拟src/host/projects/project-creation-service.ts，MAIN独占；PRODUCT只消费BootstrapPort。原M5独立注入bundle保留，不另建前端/时间轴。A05必须覆盖T12安全和T15/R4体验，正式导出必须有T20-A..H恢复与原子发布门。
+
+## 最新授权：A轮实际开发（2026-11-09）
+
+用户已设置active goal，明确授权实际开发并验收IT-A01..A06；此前仅文档/未释放描述为历史快照，由本节及docs/execution/A实际ReleaseAssignment覆盖。以已批准final-review、cp-a0和execution-planning为目标，不重写或调绿其历史状态。MAIN复核基线、冻结合同并发放具体范围后连续实现。A末真实短片/原生编辑/关服重开/改单镜双导出、全量/恢复/独立审查通过，报告及服务就绪后停在人工验收入口，不代签人验、不进入B。保留用户工作，静音Headless，不擅自付费/外传/J盘。

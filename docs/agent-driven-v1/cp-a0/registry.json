@@ -1,0 +1,668 @@
+{
+  "fixedWorkflow": {
+    "template_id": "local-short-film",
+    "template_version": 1,
+    "execution_digest": "b70615d5ad4246caac7d0e770022429de5826831b222447e4be7637e4a07ca32",
+    "stage_ids": [
+      "definition",
+      "sample",
+      "first_chapter",
+      "chapters",
+      "cover",
+      "delivery"
+    ],
+    "capability_ids": [
+      "clip.prepare",
+      "snapshot.render",
+      "qc.inspect",
+      "delivery.package"
+    ],
+    "status": "published",
+    "composition": "fixed_a"
+  },
+  "version": "cp-a0-r4",
+  "state": "REVIEW_CANDIDATE_NOT_FROZEN_NOT_RELEASED",
+  "apiPrefix": "/api/agent/v1",
+  "routes": [
+    {
+      "id": "instance",
+      "method": "GET",
+      "path": "/api/agent/v1/instance",
+      "tool": "narralens_capabilities",
+      "input": null,
+      "output": "Instance",
+      "scope": "read",
+      "owner": "bridge",
+      "production": "NOT_IMPLEMENTED",
+      "businessProducer": "BRIDGE",
+      "protocolOwner": "BRIDGE",
+      "registrationOwner": "MAIN",
+      "authChannel": "authenticated",
+      "gatePolicy": "none"
+    },
+    {
+      "id": "intake.put",
+      "method": "POST",
+      "path": "/api/agent/v1/intakes",
+      "tool": "narralens_intake_put",
+      "input": "IntakePut",
+      "output": "Intake",
+      "scope": "draft",
+      "owner": "product",
+      "production": "NOT_IMPLEMENTED",
+      "businessProducer": "PRODUCT",
+      "protocolOwner": "BRIDGE",
+      "registrationOwner": "MAIN",
+      "authChannel": "authenticated",
+      "gatePolicy": "none"
+    },
+    {
+      "id": "intake.confirm",
+      "method": "POST",
+      "path": "/api/agent/v1/intakes/:id/decision",
+      "tool": null,
+      "input": "DecisionInput",
+      "output": "Decision",
+      "scope": "trusted_ui",
+      "owner": "main",
+      "production": "NOT_IMPLEMENTED",
+      "businessProducer": "MAIN",
+      "protocolOwner": "BRIDGE",
+      "registrationOwner": "MAIN",
+      "authChannel": "trusted_ui",
+      "gatePolicy": "none"
+    },
+    {
+      "id": "project.create",
+      "method": "POST",
+      "path": "/api/agent/v1/projects",
+      "tool": "narralens_project_create",
+      "input": "CreateProject",
+      "output": "JobReceipt",
+      "scope": "create",
+      "owner": "main",
+      "production": "NOT_IMPLEMENTED",
+      "businessProducer": "MAIN",
+      "protocolOwner": "BRIDGE",
+      "registrationOwner": "MAIN",
+      "authChannel": "authenticated",
+      "gatePolicy": "none"
+    },
+    {
+      "id": "context.read",
+      "method": "GET",
+      "path": "/api/agent/v1/projects/:id/context",
+      "tool": "narralens_context_read",
+      "input": "ProjectRead",
+      "output": "Context",
+      "scope": "read",
+      "owner": "product",
+      "production": "NOT_IMPLEMENTED",
+      "businessProducer": "PRODUCT",
+      "protocolOwner": "BRIDGE",
+      "registrationOwner": "MAIN",
+      "authChannel": "authenticated",
+      "gatePolicy": "none"
+    },
+    {
+      "id": "artifact.put",
+      "method": "POST",
+      "path": "/api/agent/v1/projects/:id/artifacts",
+      "tool": "narralens_artifact_put",
+      "input": "ArtifactPut",
+      "output": "Artifact",
+      "scope": "draft",
+      "owner": "product",
+      "production": "NOT_IMPLEMENTED",
+      "businessProducer": "PRODUCT",
+      "protocolOwner": "BRIDGE",
+      "registrationOwner": "MAIN",
+      "authChannel": "authenticated",
+      "gatePolicy": "none"
+    },
+    {
+      "id": "task.prepare",
+      "method": "POST",
+      "path": "/api/agent/v1/projects/:id/tasks",
+      "tool": "narralens_task_prepare",
+      "input": "TaskPrepare",
+      "output": "JobReceipt",
+      "scope": "prepare",
+      "owner": "main",
+      "production": "NOT_IMPLEMENTED",
+      "businessProducer": "MAIN",
+      "protocolOwner": "BRIDGE",
+      "registrationOwner": "MAIN",
+      "authChannel": "authenticated",
+      "gatePolicy": "run_scope"
+    },
+    {
+      "id": "job.read",
+      "method": "GET",
+      "path": "/api/agent/v1/projects/:id/jobs/:job",
+      "tool": "narralens_job_read",
+      "input": "JobRead",
+      "output": "JobReceipt",
+      "scope": "read",
+      "owner": "main",
+      "production": "NOT_IMPLEMENTED",
+      "businessProducer": "MAIN",
+      "protocolOwner": "BRIDGE",
+      "registrationOwner": "MAIN",
+      "authChannel": "authenticated",
+      "gatePolicy": "none"
+    },
+    {
+      "id": "job.cancel",
+      "method": "POST",
+      "path": "/api/agent/v1/projects/:id/jobs/:job/cancel",
+      "tool": "narralens_job_cancel",
+      "input": "JobCancel",
+      "output": "JobReceipt",
+      "scope": "cancel",
+      "owner": "main",
+      "production": "NOT_IMPLEMENTED",
+      "businessProducer": "MAIN",
+      "protocolOwner": "BRIDGE",
+      "registrationOwner": "MAIN",
+      "authChannel": "authenticated",
+      "gatePolicy": "safe_control"
+    },
+    {
+      "id": "change.prepare",
+      "method": "POST",
+      "path": "/api/agent/v1/projects/:id/changes",
+      "tool": "narralens_change_prepare",
+      "input": "PrepareChange",
+      "output": "Change",
+      "scope": "prepare",
+      "owner": "main",
+      "production": "NOT_IMPLEMENTED",
+      "businessProducer": "MAIN",
+      "protocolOwner": "BRIDGE",
+      "registrationOwner": "MAIN",
+      "authChannel": "authenticated",
+      "gatePolicy": "run_scope"
+    },
+    {
+      "id": "change.approve",
+      "method": "POST",
+      "path": "/api/agent/v1/projects/:id/changes/:impact/approval",
+      "tool": null,
+      "input": "ApproveChange",
+      "output": "Approval",
+      "scope": "trusted_ui",
+      "owner": "main",
+      "production": "NOT_IMPLEMENTED",
+      "businessProducer": "MAIN",
+      "protocolOwner": "BRIDGE",
+      "registrationOwner": "MAIN",
+      "authChannel": "trusted_ui",
+      "gatePolicy": "none"
+    },
+    {
+      "id": "change.apply",
+      "method": "POST",
+      "path": "/api/agent/v1/projects/:id/apply",
+      "tool": "narralens_change_apply",
+      "input": "ApplyChange",
+      "output": "Applied",
+      "scope": "apply",
+      "owner": "main",
+      "production": "NOT_IMPLEMENTED",
+      "businessProducer": "MAIN",
+      "protocolOwner": "BRIDGE",
+      "registrationOwner": "MAIN",
+      "authChannel": "authenticated",
+      "gatePolicy": "run_scope"
+    },
+    {
+      "id": "events.snapshot",
+      "method": "GET",
+      "path": "/api/agent/v1/projects/:id/events-snapshot",
+      "tool": null,
+      "input": "CursorRead",
+      "output": "EventSnapshot",
+      "scope": "read",
+      "owner": "bridge",
+      "production": "NOT_IMPLEMENTED",
+      "businessProducer": "BRIDGE",
+      "protocolOwner": "BRIDGE",
+      "registrationOwner": "MAIN",
+      "authChannel": "authenticated",
+      "gatePolicy": "none"
+    },
+    {
+      "id": "health.read",
+      "method": "GET",
+      "path": "/api/agent/v1/health",
+      "tool": "narralens_health_read",
+      "input": null,
+      "output": "HealthRead",
+      "scope": "read",
+      "owner": "bridge",
+      "production": "NOT_IMPLEMENTED",
+      "businessProducer": "BRIDGE",
+      "protocolOwner": "BRIDGE",
+      "registrationOwner": "MAIN",
+      "authChannel": "authenticated",
+      "gatePolicy": "none"
+    },
+    {
+      "id": "delivery.read",
+      "method": "GET",
+      "path": "/api/agent/v1/projects/:id/delivery/:job",
+      "tool": "narralens_delivery_read",
+      "input": "JobRead",
+      "output": "Delivery",
+      "scope": "read",
+      "owner": "media",
+      "production": "NOT_IMPLEMENTED",
+      "businessProducer": "MEDIA",
+      "protocolOwner": "BRIDGE",
+      "registrationOwner": "MAIN",
+      "authChannel": "authenticated",
+      "gatePolicy": "none"
+    },
+    {
+      "id": "workflow.read",
+      "method": "GET",
+      "path": "/api/agent/v1/projects/:id/workflow",
+      "tool": "narralens_workflow_read",
+      "input": "ProjectRead",
+      "output": "Workflow",
+      "scope": "read",
+      "owner": "product",
+      "production": "NOT_IMPLEMENTED",
+      "businessProducer": "PRODUCT",
+      "protocolOwner": "BRIDGE",
+      "registrationOwner": "MAIN",
+      "authChannel": "authenticated",
+      "gatePolicy": "none"
+    },
+    {
+      "id": "intake.read",
+      "method": "GET",
+      "path": "/api/agent/v1/intakes/:id",
+      "tool": "narralens_intake_read",
+      "input": "IntakeRead",
+      "output": "Intake",
+      "scope": "read",
+      "owner": "product",
+      "businessProducer": "PRODUCT",
+      "protocolOwner": "BRIDGE",
+      "registrationOwner": "MAIN",
+      "production": "NOT_IMPLEMENTED",
+      "authChannel": "authenticated",
+      "gatePolicy": "none"
+    },
+    {
+      "id": "question.put",
+      "method": "POST",
+      "path": "/api/agent/v1/intakes/:id/questions",
+      "tool": "narralens_question_put",
+      "input": "QuestionPut",
+      "output": "Question",
+      "scope": "draft",
+      "owner": "product",
+      "businessProducer": "PRODUCT",
+      "protocolOwner": "BRIDGE",
+      "registrationOwner": "MAIN",
+      "production": "NOT_IMPLEMENTED",
+      "authChannel": "authenticated",
+      "gatePolicy": "none"
+    },
+    {
+      "id": "question.answer",
+      "method": "POST",
+      "path": "/api/agent/v1/intakes/:id/questions/:question/answers",
+      "tool": "narralens_question_answer",
+      "input": "QuestionAnswerPut",
+      "output": "QuestionAnswer",
+      "scope": "draft",
+      "owner": "product",
+      "businessProducer": "PRODUCT",
+      "protocolOwner": "BRIDGE",
+      "registrationOwner": "MAIN",
+      "production": "NOT_IMPLEMENTED",
+      "authChannel": "authenticated",
+      "gatePolicy": "none"
+    },
+    {
+      "id": "question.answer.ui",
+      "method": "POST",
+      "path": "/api/agent/v1/intakes/:id/questions/:question/ui-answers",
+      "tool": null,
+      "input": "QuestionAnswerPut",
+      "output": "QuestionAnswer",
+      "scope": "trusted_ui",
+      "owner": "product",
+      "businessProducer": "PRODUCT",
+      "protocolOwner": "BRIDGE",
+      "registrationOwner": "MAIN",
+      "production": "NOT_IMPLEMENTED",
+      "authChannel": "trusted_ui",
+      "gatePolicy": "none"
+    },
+    {
+      "id": "content.relay",
+      "method": "POST",
+      "path": "/api/agent/v1/content-decisions",
+      "tool": "narralens_content_decision_relay",
+      "input": "ContentDecisionRelay",
+      "output": "ContentDecision",
+      "scope": "draft",
+      "owner": "product",
+      "businessProducer": "PRODUCT",
+      "protocolOwner": "BRIDGE",
+      "registrationOwner": "MAIN",
+      "production": "NOT_IMPLEMENTED",
+      "authChannel": "authenticated",
+      "gatePolicy": "none"
+    },
+    {
+      "id": "workflow.run.prepare",
+      "method": "POST",
+      "path": "/api/agent/v1/projects/:id/runs",
+      "tool": "narralens_workflow_run_prepare",
+      "input": "RunPrepare",
+      "output": "WorkflowRun",
+      "scope": "prepare",
+      "owner": "product",
+      "businessProducer": "PRODUCT",
+      "protocolOwner": "BRIDGE",
+      "registrationOwner": "MAIN",
+      "production": "NOT_IMPLEMENTED",
+      "authChannel": "authenticated",
+      "gatePolicy": "prepare_only"
+    },
+    {
+      "id": "workflow.run.authorize",
+      "method": "POST",
+      "path": "/api/agent/v1/projects/:id/runs/:run/authorization",
+      "tool": null,
+      "input": "RunAuthorize",
+      "output": "RunAuthorization",
+      "scope": "trusted_ui",
+      "owner": "main",
+      "businessProducer": "MAIN",
+      "protocolOwner": "BRIDGE",
+      "registrationOwner": "MAIN",
+      "production": "NOT_IMPLEMENTED",
+      "authChannel": "trusted_ui",
+      "gatePolicy": "none"
+    },
+    {
+      "id": "workflow.run.read",
+      "method": "GET",
+      "path": "/api/agent/v1/projects/:id/runs/:run",
+      "tool": "narralens_workflow_run_read",
+      "input": "RunRead",
+      "output": "WorkflowRun",
+      "scope": "read",
+      "owner": "product",
+      "businessProducer": "PRODUCT",
+      "protocolOwner": "BRIDGE",
+      "registrationOwner": "MAIN",
+      "production": "NOT_IMPLEMENTED",
+      "authChannel": "authenticated",
+      "gatePolicy": "none"
+    },
+    {
+      "id": "workflow.run.start",
+      "method": "POST",
+      "path": "/api/agent/v1/projects/:id/runs/:run/start",
+      "tool": "narralens_workflow_run_start",
+      "input": "RunCommand",
+      "output": "WorkflowRun",
+      "scope": "control",
+      "owner": "main",
+      "businessProducer": "MAIN",
+      "protocolOwner": "BRIDGE",
+      "registrationOwner": "MAIN",
+      "production": "NOT_IMPLEMENTED",
+      "authChannel": "authenticated",
+      "gatePolicy": "run_scope"
+    },
+    {
+      "id": "workflow.run.pause",
+      "method": "POST",
+      "path": "/api/agent/v1/projects/:id/runs/:run/pause",
+      "tool": "narralens_workflow_run_pause",
+      "input": "RunCommand",
+      "output": "WorkflowRun",
+      "scope": "control",
+      "owner": "main",
+      "businessProducer": "MAIN",
+      "protocolOwner": "BRIDGE",
+      "registrationOwner": "MAIN",
+      "production": "NOT_IMPLEMENTED",
+      "authChannel": "authenticated",
+      "gatePolicy": "safe_control"
+    },
+    {
+      "id": "workflow.run.resume",
+      "method": "POST",
+      "path": "/api/agent/v1/projects/:id/runs/:run/resume",
+      "tool": "narralens_workflow_run_resume",
+      "input": "RunCommand",
+      "output": "WorkflowRun",
+      "scope": "control",
+      "owner": "main",
+      "businessProducer": "MAIN",
+      "protocolOwner": "BRIDGE",
+      "registrationOwner": "MAIN",
+      "production": "NOT_IMPLEMENTED",
+      "authChannel": "authenticated",
+      "gatePolicy": "run_scope"
+    },
+    {
+      "id": "workflow.run.cancel",
+      "method": "POST",
+      "path": "/api/agent/v1/projects/:id/runs/:run/cancel",
+      "tool": "narralens_workflow_run_cancel",
+      "input": "RunCommand",
+      "output": "WorkflowRun",
+      "scope": "control",
+      "owner": "main",
+      "businessProducer": "MAIN",
+      "protocolOwner": "BRIDGE",
+      "registrationOwner": "MAIN",
+      "production": "NOT_IMPLEMENTED",
+      "authChannel": "authenticated",
+      "gatePolicy": "safe_control"
+    },
+    {
+      "id": "review.read",
+      "method": "GET",
+      "path": "/api/agent/v1/projects/:id/runs/:run/reviews/:package",
+      "tool": "narralens_review_read",
+      "input": "ReviewRead",
+      "output": "ReviewPackage",
+      "scope": "read",
+      "owner": "product",
+      "businessProducer": "PRODUCT",
+      "protocolOwner": "BRIDGE",
+      "registrationOwner": "MAIN",
+      "production": "NOT_IMPLEMENTED",
+      "authChannel": "authenticated",
+      "gatePolicy": "none"
+    },
+    {
+      "id": "review.decide",
+      "method": "POST",
+      "path": "/api/agent/v1/projects/:id/runs/:run/reviews/:package/decision",
+      "tool": null,
+      "input": "ReviewDecisionInput",
+      "output": "ReviewDecision",
+      "scope": "trusted_ui",
+      "owner": "main",
+      "businessProducer": "MAIN",
+      "protocolOwner": "BRIDGE",
+      "registrationOwner": "MAIN",
+      "production": "NOT_IMPLEMENTED",
+      "authChannel": "trusted_ui",
+      "gatePolicy": "none"
+    },
+    {
+      "id": "editor.native.ack",
+      "method": "POST",
+      "path": "/api/agent/v1/projects/:id/native-ack",
+      "tool": null,
+      "input": "NativeAckInput",
+      "output": "NativeAck",
+      "scope": "native_bridge",
+      "owner": "product",
+      "businessProducer": "PRODUCT",
+      "protocolOwner": "BRIDGE",
+      "registrationOwner": "MAIN",
+      "production": "NOT_IMPLEMENTED",
+      "authChannel": "native_bridge",
+      "gatePolicy": "none"
+    }
+  ],
+  "protocol": {
+    "baseline": "2025-11-25",
+    "transport": "stdio",
+    "sdk": "@modelcontextprotocol/sdk@1.26.0",
+    "sdkIntegrity": "sha512-Y5RmPncpiDtTXDbLKswIJzTqu2hyBKxTNsgKqKclDbhIgg1wgtf1fRuvxgTnRfcnxtvvgbIEcqUOzZrJ6iSReg==",
+    "license": "MIT",
+    "status": "METADATA_VERIFIED_NOT_INSTALLED_NOT_CLIENT_TESTED"
+  },
+  "resources": [
+    {
+      "uri": "narralens://projects/{id}/context",
+      "output": "Context",
+      "source": "context.read",
+      "projection": null
+    },
+    {
+      "uri": "narralens://projects/{id}/workflow",
+      "output": "Workflow",
+      "source": "workflow.read",
+      "projection": null
+    },
+    {
+      "uri": "narralens://projects/{id}/jobs",
+      "output": "Context",
+      "source": "context.read",
+      "projection": "active_jobs plus context identity; not a bare array"
+    },
+    {
+      "uri": "narralens://services/health",
+      "output": "HealthRead",
+      "source": "health.read",
+      "projection": null
+    },
+    {
+      "uri": "narralens://projects/{id}/events-snapshot",
+      "output": "EventSnapshot",
+      "source": "events.snapshot",
+      "projection": null
+    }
+  ],
+  "eventStream": {
+    "path": "/api/agent/v1/projects/:id/events",
+    "input": "CursorRead",
+    "output": "Event",
+    "authChannel": "authenticated",
+    "production": "NOT_IMPLEMENTED"
+  },
+  "deferred": [
+    "DriverSession/takeover (B)",
+    "resource/GPU lease (B)",
+    "online download/provider (B)",
+    "Comfy execution (B)",
+    "full post-edit/long-form (C)",
+    "workflow_template_draft/revise/validate/publish/deprecate: B blocked",
+    "stability_recommend/read/authorization: B blocked; A never skips first chapter",
+    "workflow_run_change_prepare/apply and dispatch barrier: B blocked",
+    "runtime load/warm/unload/restart and external model writes: B blocked"
+  ],
+  "errorMapping": [
+    {
+      "code": "INVALID_REQUEST",
+      "http_status": 400
+    },
+    {
+      "code": "UNAUTHORIZED",
+      "http_status": 401
+    },
+    {
+      "code": "ORIGIN_REJECTED",
+      "http_status": 403
+    },
+    {
+      "code": "NOT_FOUND",
+      "http_status": 404
+    },
+    {
+      "code": "REVISION_CONFLICT",
+      "http_status": 409
+    },
+    {
+      "code": "IDEMPOTENCY_CONFLICT",
+      "http_status": 409
+    },
+    {
+      "code": "TARGET_LOCKED",
+      "http_status": 423
+    },
+    {
+      "code": "IMPACT_REQUIRED",
+      "http_status": 428
+    },
+    {
+      "code": "IMPACT_STALE",
+      "http_status": 428
+    },
+    {
+      "code": "APPROVAL_REQUIRED",
+      "http_status": 428
+    },
+    {
+      "code": "CAPABILITY_UNAVAILABLE",
+      "http_status": 503
+    },
+    {
+      "code": "HOST_RESOURCE_EXHAUSTED",
+      "http_status": 503
+    },
+    {
+      "code": "CURSOR_EXPIRED",
+      "http_status": 410
+    },
+    {
+      "code": "INTERNAL_ERROR",
+      "http_status": 500
+    },
+    {
+      "code": "PAYLOAD_TOO_LARGE",
+      "http_status": 413
+    },
+    {
+      "code": "RUN_SCOPE_REQUIRED",
+      "http_status": 428
+    },
+    {
+      "code": "RUN_GATE_BLOCKED",
+      "http_status": 428
+    },
+    {
+      "code": "RUN_PLAN_STALE",
+      "http_status": 409
+    },
+    {
+      "code": "REVIEW_STALE",
+      "http_status": 409
+    },
+    {
+      "code": "NATIVE_ACK_STALE",
+      "http_status": 409
+    },
+    {
+      "code": "PROVIDER_RESULT_UNKNOWN",
+      "http_status": 428
+    }
+  ]
+}

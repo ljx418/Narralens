@@ -1,0 +1,105 @@
+{
+  "console": [],
+  "states": [
+    {
+      "artifact": "review.html",
+      "width": 1440,
+      "scrollWidth": 1425
+    },
+    {
+      "artifact": "review.html",
+      "width": 1366,
+      "scrollWidth": 1351
+    },
+    {
+      "artifact": "review.html",
+      "width": 390,
+      "scrollWidth": 375
+    },
+    {
+      "artifact": "target-l1.architecture.html",
+      "width": 1440,
+      "height": 900,
+      "scrollWidth": 1425,
+      "scrollHeight": 1464,
+      "theme": "light"
+    }
+  ],
+  "screenshots": [
+    "review-1440.png",
+    "review-1366.png",
+    "review-390.png",
+    "gap-page-1.png",
+    "gap-page-2.png",
+    "gap-page-3.png",
+    "gap-page-4.png",
+    "gap-page-5.png",
+    "gap-page-6.png",
+    "gap-page-7.png",
+    "gap-page-8.png"
+  ],
+  "scope": "DOCUMENT_VISUAL_INSPECTION_NOT_BUSINESS_ACCEPTANCE",
+  "checks": [
+    {
+      "id": "review-no-horizontal-overflow-1440",
+      "status": "PASS"
+    },
+    {
+      "id": "review-no-horizontal-overflow-1366",
+      "status": "PASS"
+    },
+    {
+      "id": "review-no-horizontal-overflow-390",
+      "status": "PASS"
+    },
+    {
+      "id": "page-svg-visible-1",
+      "status": "PASS"
+    },
+    {
+      "id": "page-svg-visible-2",
+      "status": "PASS"
+    },
+    {
+      "id": "page-svg-visible-3",
+      "status": "PASS"
+    },
+    {
+      "id": "page-svg-visible-4",
+      "status": "PASS"
+    },
+    {
+      "id": "page-svg-visible-5",
+      "status": "PASS"
+    },
+    {
+      "id": "page-svg-visible-6",
+      "status": "PASS"
+    },
+    {
+      "id": "page-svg-visible-7",
+      "status": "PASS"
+    },
+    {
+      "id": "page-svg-visible-8",
+      "status": "PASS"
+    },
+    {
+      "id": "review-note-version-local-not-release",
+      "status": "PASS"
+    },
+    {
+      "id": "archify-desktop-containment-1440",
+      "status": "FAIL"
+    }
+  ],
+  "archifyArtifact": {
+    "sha256": "0faf212d91745d08cbe2d2426ae4d36df403ec13a0562928a2eac14013452fed",
+    "bytes": 804436,
+    "canonicalAutomatedBrowser": "skipped:WSL Chrome unavailable",
+    "supplementaryBrowser": "Windows Headless CDP"
+  },
+  "error": "Error: archify-desktop-containment-1440",
+  "status": "failed",
+  "cleanup": "browser closed; own profile removed"
+}

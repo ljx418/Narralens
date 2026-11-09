@@ -1,8 +1,8 @@
 # 多Agent并行实施与主Agent集成方案
 
-> 2026-11-09 S0 R3最新页面划分：工作流位于全局顶部Bar，横向展开/折叠；另一入口是独立系统控制面板，负责服务、模型加载/预热/卸载、重试与诊断，不是Agent控制台。原剪辑区与M5业务控件保留。当前效果图与交互稿见`s0-r3/review.html`；R2右侧两section布局退为历史，生产实现仍未释放。
+> 当前权威：R4体验已批准，见V1_FRONTEND_EXIT_GATE.md；详细实施设计/22实体/35族场景/里程碑与回退见implementation-design/00_READ_FIRST.md。原工作台增量，顶部横向WorkflowTopBar、独立非模态SystemControlPanel；新项目bootstrap/初始commit属MAIN，生产注册属MAIN。旧正文与批准状态见history归档；当前仅文档，CP/生产NOT_RELEASED。
 
-> 2026-11-09用户纠偏（前端实施优先）：保留现有OpenFilm剪辑区和M5导演面板，仅在原导演面板中新增工作流展示、Agent控制台两个可折叠section；服务监控归控制台。工作台呈现同一项目的真实剪辑状态，禁止另建agent-workbench独立前端/聊天入口/时间轴。详情与当前原型见`s0-r2/README.md`（本段路径按当前文档目录解析）。原始PRD功能目标和后台制作计划继续保留，既有审阅/批准/编辑尽量复用原入口。新S0 R2仍待用户核验，不是生产实现release。
+
 
 状态：`DOCUMENTS_ACCEPTED_PARALLEL_PLAN_PREPARED`；用户认可截至`867b3b33b9dd88c88e7bcca6c997d1ceba9c3051`的规划文档，并授权重新划分多Agent工作目录/任务/架构。此状态不等于IT-P01原型、IT-P02精确合同或生产实现准入已通过。当前可准备隔离工作目录与执行文档工作，生产代码等主Agent明确释放。
 
@@ -48,7 +48,7 @@ Codex接手实现后，其自测只能称内部验证，不能自签独立外审
 |---|---|---|---|
 | MAIN 主Agent | PRD/架构/合同、数据与事务内核、一般项目创建接缝、审批/DriverSession/资源租约、公共装配、集成及验收 | 所有公共合同、旧核心文件、共享配置、跨泳道测试/证据 | 唯一能改server/DDL/registry/核心write路径并合入候选 |
 | BRIDGE 接入观测 | stdio MCP外观、入口Skill/技能库、客户端探针、事件/健康/资源read model、launcher纯模块 | `src/mcp/`、`skills/narralens/`、`skills/narralens-lib/`、`src/launcher/`、`src/host/observability/`、`tests/agent-driven/bridge/` | Host应用端口、服务启动命令、可信service control由MAIN注册 |
-| PRODUCT 创作工作台 | 后台任务/产物服务；前端只新增工作流与控制台展示，链接原操作入口 | `src/app/observation/`、`src/host/creative/`、`src/host/workspace/`、`tests/agent-driven/product/` | 生产入口与旧M5挂载、公共仓储/项目创建/bootstrap与提交由MAIN |
+| PRODUCT 创作工作台 | 后台任务/产物服务；前端只新增顶部工作流与非模态系统展示，链接原操作入口 | `src/app/observation/`、`src/app/system/`、`src/host/creative/`、`src/host/workspace/`、`tests/agent-driven/product/` | 生产入口与旧M5挂载、公共仓储/项目创建/bootstrap与提交由MAIN |
 | MEDIA 媒体交付 | snapshot render/QC/包、Comfy固定模板/媒体验证、下载/声音/字幕/封面workers | `src/host/render/`、`src/host/preflight/`、`src/host/delivery/`、`src/host/providers/`、批准的`src/adapters/`子目录、`tests/agent-driven/media/` | ResourceClaim/Job/Asset/Approval端口与最终采用由MAIN |
 
 拟新增目录是所有权规划，不宣称已经存在。详见机器规则`parallel-plan.json`；任何与旧源码同路径实体只允许MAIN发起单独文件授权，不靠宽泛目录白名单覆盖旧实现。

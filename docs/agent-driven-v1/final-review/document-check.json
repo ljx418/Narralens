@@ -1,0 +1,92 @@
+{
+  "format": "narralens.final-review.document-check@1",
+  "status": "PASS",
+  "scope": "DOCUMENT_CONSISTENCY_ONLY",
+  "checks": [
+    {
+      "id": "SOURCE_BINDINGS",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "id": "ALL_EMBEDDED_INPUT_BINDINGS",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "id": "HTML_BINDING",
+      "passed": true,
+      "detail": "fec68c819f63327424b717fb86b8a9fc32fa3cfeff6ad1a6b75854632454a934"
+    },
+    {
+      "id": "CANDIDATE_BYTE_LOCK",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "id": "SELF_CONTAINED",
+      "passed": true,
+      "detail": {
+        "externalRequiredAssets": [],
+        "frames": 3,
+        "images": 1
+      }
+    },
+    {
+      "id": "NO_TEMPLATE_MARKERS",
+      "passed": true,
+      "detail": "all replacement tokens resolved"
+    },
+    {
+      "id": "SOURCE_SHA_UNCHANGED",
+      "passed": true,
+      "detail": "fd3021c336387b4c6405b3db08abaafa81c842ff"
+    },
+    {
+      "id": "NO_PRODUCT_DIFF",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "id": "NO_RELEASE_OR_PRODUCT_PASS",
+      "passed": true,
+      "detail": {
+        "release": "NOT_RELEASED",
+        "business": "NOT_RUN"
+      }
+    },
+    {
+      "id": "GAP_EIGHT_PAGES",
+      "passed": true,
+      "detail": "eight editable Chinese GAP pages"
+    },
+    {
+      "id": "PLAN_COVERAGE",
+      "passed": true,
+      "detail": {
+        "tickets": 17,
+        "families": 35,
+        "EX": 23
+      }
+    },
+    {
+      "id": "DIAGRAMS_DELIVERED",
+      "passed": true,
+      "detail": "two Archify showcase receipts 9/9"
+    },
+    {
+      "id": "BROWSER_DOCUMENT_CHECK",
+      "passed": true,
+      "detail": "headless document UI only, exact artifact bound"
+    },
+    {
+      "id": "CONCEPT_SEPARATE_FROM_EVIDENCE",
+      "passed": true,
+      "detail": "concept and real acceptance separately labelled"
+    }
+  ],
+  "productAcceptance": "NOT_RUN",
+  "implementationRelease": "NOT_RELEASED",
+  "htmlSHA256": "fec68c819f63327424b717fb86b8a9fc32fa3cfeff6ad1a6b75854632454a934",
+  "documentRevision": "d5aad5cb3fe1ab55974710cd6adaf4da388fc4a3bdc113563baae22a62aad0c6"
+}

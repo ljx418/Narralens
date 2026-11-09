@@ -1,0 +1,271 @@
+{
+  "status": "CANDIDATE_NOT_FROZEN",
+  "algorithm": "restricted JCS: recursively sorted ASCII keys, preserve array order, UTF-8 without BOM, no whitespace, safe integer/boolean/null/string only; reject duplicate keys, floats, -0 and non-finite; no Unicode normalization",
+  "referenceVectors": {
+    "fixedPlan": {
+      "value": {
+        "template_id": "local-short-film",
+        "template_version": 1,
+        "stages": [
+          {
+            "id": "definition",
+            "after": []
+          },
+          {
+            "id": "sample",
+            "after": [
+              "definition"
+            ],
+            "review": "sample"
+          },
+          {
+            "id": "first_chapter",
+            "after": [
+              "sample"
+            ],
+            "review": "first_chapter"
+          },
+          {
+            "id": "chapters",
+            "after": [
+              "first_chapter"
+            ],
+            "review": "chapter_pack"
+          },
+          {
+            "id": "cover",
+            "after": [
+              "chapters"
+            ],
+            "review": "cover"
+          },
+          {
+            "id": "delivery",
+            "after": [
+              "chapters",
+              "cover"
+            ],
+            "review": "qc"
+          }
+        ],
+        "capabilities": [
+          "clip.prepare",
+          "snapshot.render",
+          "qc.inspect",
+          "delivery.package"
+        ],
+        "stability_skip": false,
+        "dynamic_patch": false,
+        "paid": false,
+        "external_write": false,
+        "runtime_mutation": false
+      },
+      "canonical": "{\"capabilities\":[\"clip.prepare\",\"snapshot.render\",\"qc.inspect\",\"delivery.package\"],\"dynamic_patch\":false,\"external_write\":false,\"paid\":false,\"runtime_mutation\":false,\"stability_skip\":false,\"stages\":[{\"after\":[],\"id\":\"definition\"},{\"after\":[\"definition\"],\"id\":\"sample\",\"review\":\"sample\"},{\"after\":[\"sample\"],\"id\":\"first_chapter\",\"review\":\"first_chapter\"},{\"after\":[\"first_chapter\"],\"id\":\"chapters\",\"review\":\"chapter_pack\"},{\"after\":[\"chapters\"],\"id\":\"cover\",\"review\":\"cover\"},{\"after\":[\"chapters\",\"cover\"],\"id\":\"delivery\",\"review\":\"qc\"}],\"template_id\":\"local-short-film\",\"template_version\":1}",
+      "sha256": "b70615d5ad4246caac7d0e770022429de5826831b222447e4be7637e4a07ca32"
+    },
+    "runScope": {
+      "value": {
+        "project_id": "id1",
+        "run_id": "id1",
+        "plan_version": 1,
+        "template_id": "local-short-film",
+        "template_version": 1,
+        "execution_digest": "b70615d5ad4246caac7d0e770022429de5826831b222447e4be7637e4a07ca32",
+        "input_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "content_type": "short_film",
+        "style_ref": {
+          "id": "id1",
+          "version": 1,
+          "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        "capability_fingerprint": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "allowed_actions": [],
+        "allow_paid": false,
+        "allow_external_write": false,
+        "allow_runtime_mutation": false
+      },
+      "canonical": "{\"allow_external_write\":false,\"allow_paid\":false,\"allow_runtime_mutation\":false,\"allowed_actions\":[],\"capability_fingerprint\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"content_type\":\"short_film\",\"execution_digest\":\"b70615d5ad4246caac7d0e770022429de5826831b222447e4be7637e4a07ca32\",\"input_digest\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"plan_version\":1,\"project_id\":\"id1\",\"run_id\":\"id1\",\"style_ref\":{\"id\":\"id1\",\"sha256\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"version\":1},\"template_id\":\"local-short-film\",\"template_version\":1}",
+      "sha256": "d4ac46dafa5ca1a48089efe2ef20374bce7f639988530ee77ebb14be7478e57e"
+    },
+    "creativeInput": {
+      "brief": {
+        "value": {
+          "topic": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+          "audience": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+          "duration_seconds": 60,
+          "tone": "explanatory",
+          "local_asset_ids": [],
+          "narration_asset_id": "id1",
+          "concept_summary": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+          "content_brief": {
+            "script_ref": {
+              "id": "id1",
+              "version": 1,
+              "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+            },
+            "material_strategy": {
+              "mode": "authorized_local_only",
+              "asset_ids": [],
+              "rights_refs": [],
+              "narration_asset_id": "id1",
+              "selection_notes": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+            },
+            "style": {
+              "style_id": "id1",
+              "version": 1,
+              "visual_direction": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+              "voice_direction": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+              "subtitle_direction": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+              "style_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+            }
+          }
+        },
+        "canonical": "{\"audience\":\"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\",\"concept_summary\":\"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\",\"content_brief\":{\"material_strategy\":{\"asset_ids\":[],\"mode\":\"authorized_local_only\",\"narration_asset_id\":\"id1\",\"rights_refs\":[],\"selection_notes\":\"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\"},\"script_ref\":{\"id\":\"id1\",\"sha256\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"version\":1},\"style\":{\"style_digest\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"style_id\":\"id1\",\"subtitle_direction\":\"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\",\"version\":1,\"visual_direction\":\"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\",\"voice_direction\":\"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\"}},\"duration_seconds\":60,\"local_asset_ids\":[],\"narration_asset_id\":\"id1\",\"tone\":\"explanatory\",\"topic\":\"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\"}",
+        "sha256": "e7723bb464fc795ec8dbc297baa0a4e839e5d7e486b701319533140c29c34ddc"
+      },
+      "question": {
+        "question_id": "audience",
+        "version": 1,
+        "intake_id": "intake-creative",
+        "intake_version": 1,
+        "input_digest": "e7723bb464fc795ec8dbc297baa0a4e839e5d7e486b701319533140c29c34ddc",
+        "prompt": "主要面向哪些观众？",
+        "kind": "text",
+        "choices": [],
+        "skip_allowed": false,
+        "state": "answered"
+      },
+      "unansweredQuestion": {
+        "question_id": "purpose",
+        "version": 1,
+        "intake_id": "intake-creative",
+        "intake_version": 1,
+        "input_digest": "e7723bb464fc795ec8dbc297baa0a4e839e5d7e486b701319533140c29c34ddc",
+        "prompt": "本片希望观众理解什么？",
+        "kind": "text",
+        "choices": [],
+        "skip_allowed": false,
+        "state": "open"
+      },
+      "firstAnswer": {
+        "answer_id": "audience-answer",
+        "version": 1,
+        "intake_id": "intake-creative",
+        "intake_version": 1,
+        "question_id": "audience",
+        "question_version": 1,
+        "input_digest": "e7723bb464fc795ec8dbc297baa0a4e839e5d7e486b701319533140c29c34ddc",
+        "action": "answer_text",
+        "text": "普通观众",
+        "choice_id": null,
+        "source": "driver_relay",
+        "source_message_ref": "message-first",
+        "authority": "content_only",
+        "state": "current",
+        "supersedes_answer_id": null,
+        "recorded_at": "2026-11-09T00:00:00Z"
+      },
+      "secondAnswer": {
+        "answer_id": "audience-answer",
+        "version": 2,
+        "intake_id": "intake-creative",
+        "intake_version": 1,
+        "question_id": "audience",
+        "question_version": 1,
+        "input_digest": "e7723bb464fc795ec8dbc297baa0a4e839e5d7e486b701319533140c29c34ddc",
+        "action": "answer_text",
+        "text": "有基础知识的专业观众",
+        "choice_id": null,
+        "source": "driver_relay",
+        "source_message_ref": "message-changed",
+        "authority": "content_only",
+        "state": "current",
+        "supersedes_answer_id": "audience-answer",
+        "recorded_at": "2026-11-09T00:00:00Z"
+      },
+      "initialAnswer": {
+        "value": {
+          "intake_id": "intake-creative",
+          "intake_version": 1,
+          "brief_sha256": "e7723bb464fc795ec8dbc297baa0a4e839e5d7e486b701319533140c29c34ddc",
+          "questions": [
+            {
+              "question_id": "audience",
+              "question_version": 1,
+              "answer": {
+                "answer_id": "audience-answer",
+                "answer_version": 1
+              }
+            },
+            {
+              "question_id": "purpose",
+              "question_version": 1,
+              "answer": null
+            }
+          ]
+        },
+        "canonical": "{\"brief_sha256\":\"e7723bb464fc795ec8dbc297baa0a4e839e5d7e486b701319533140c29c34ddc\",\"intake_id\":\"intake-creative\",\"intake_version\":1,\"questions\":[{\"answer\":{\"answer_id\":\"audience-answer\",\"answer_version\":1},\"question_id\":\"audience\",\"question_version\":1},{\"answer\":null,\"question_id\":\"purpose\",\"question_version\":1}]}",
+        "sha256": "b6b615c776ddb6a815758d9cc8fd506c2aaf8a4d5df072b6263449a7f15678e0"
+      },
+      "changedAnswer": {
+        "value": {
+          "intake_id": "intake-creative",
+          "intake_version": 1,
+          "brief_sha256": "e7723bb464fc795ec8dbc297baa0a4e839e5d7e486b701319533140c29c34ddc",
+          "questions": [
+            {
+              "question_id": "audience",
+              "question_version": 1,
+              "answer": {
+                "answer_id": "audience-answer",
+                "answer_version": 2
+              }
+            },
+            {
+              "question_id": "purpose",
+              "question_version": 1,
+              "answer": null
+            }
+          ]
+        },
+        "canonical": "{\"brief_sha256\":\"e7723bb464fc795ec8dbc297baa0a4e839e5d7e486b701319533140c29c34ddc\",\"intake_id\":\"intake-creative\",\"intake_version\":1,\"questions\":[{\"answer\":{\"answer_id\":\"audience-answer\",\"answer_version\":2},\"question_id\":\"audience\",\"question_version\":1},{\"answer\":null,\"question_id\":\"purpose\",\"question_version\":1}]}",
+        "sha256": "9f168593f70c857cf0b8bc5aa51c354eb79e483f72f16e1fd7004348b6d5639f"
+      }
+    }
+  },
+  "negativeVectors": [
+    {
+      "id": "scope_project_input_or_style_change",
+      "expected": "digest changes; reject old authorization"
+    },
+    {
+      "id": "relay_as_approval",
+      "expected": "channel/FK rejection"
+    },
+    {
+      "id": "skip_first_chapter",
+      "expected": "fixed plan digest mismatch; A reject"
+    },
+    {
+      "id": "duplicate_key",
+      "json": "{\"project_id\":\"p\",\"project_id\":\"q\"}",
+      "expected": "reject before canonicalization"
+    },
+    {
+      "id": "trusted_review_as_run_grant",
+      "expected": "SQL GRANT_CONFIRMATION_PURPOSE_ACTOR_SCOPE rejection"
+    },
+    {
+      "id": "wrong_actor_or_scope_grant",
+      "expected": "SQL GRANT_CONFIRMATION_PURPOSE_ACTOR_SCOPE rejection"
+    },
+    {
+      "id": "run_authorize_as_adoption_approval",
+      "expected": "SQL APPROVAL_CONFIRMATION_PURPOSE_INPUT_ACTION rejection"
+    },
+    {
+      "id": "same_brief_changed_answer_old_decision",
+      "expected": "current closure changes despite same intake_version/Brief SHA; old Decision cannot start new run"
+    }
+  ]
+}

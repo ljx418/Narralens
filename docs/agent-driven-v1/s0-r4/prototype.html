@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Narralens · 单镜精修交互演练</title><link rel="stylesheet" href="prototype.css"></head>
+<body>
+<div class="app">
+  <div class="notice">交互原型 · 状态、画面与回报均为模拟，不连接生产服务。<a href="README.md">范围与验收记录</a></div>
+  <header class="topbar">
+    <div class="brand">Narralens <span>城市的一天</span></div>
+    <div class="task-summary"><strong id="top-title">镜头2 · 让城市远景更有故事感</strong><span id="top-status" aria-live="polite">先确认修改目标，其他镜头保持</span></div>
+    <button id="locate">定位当前事项</button><button id="flow-toggle" aria-expanded="false" aria-controls="workflow">工作流</button><button id="system-open" aria-expanded="false" aria-controls="system-panel">系统</button>
+  </header>
+  <section id="workflow" hidden aria-label="当前镜头的创作路径">
+    <ol id="flow-rail"><li>明确目标</li><li>准备候选</li><li>比较与确认</li><li>写入与同步</li><li>继续精修</li></ol>
+    <p id="flow-explanation">只调整镜头2的画面；旁白、10秒镜头时长与其他镜头保持。</p>
+  </section>
+  <main class="workspace" id="workspace">
+    <section class="editor" aria-label="保留的原剪辑工作区布局">
+      <div class="historical"><img src="../s0-r3/baseline.png" alt="历史OpenFilm素材、检查器与时间轴截图；背景控件不可操作"></div>
+      <div class="editor-note">原编辑器布局基线 · 背景为历史截图</div>
+      <div class="preview-slot" aria-label="原播放器位置的示意帧比较">
+        <div class="preview-tabs" role="group" aria-label="比较画面"><button id="view-original" aria-pressed="true">当前画面</button><button id="view-candidate" aria-pressed="false" disabled>候选画面</button></div>
+        <svg id="scene" viewBox="0 0 640 300" role="img" aria-labelledby="scene-title"><title id="scene-title">当前城市远景示意帧，不是真实视频</title><rect width="640" height="300" class="sky"/><circle cx="475" cy="72" r="32" class="sun"/><path d="M0 240H55V168H106V224H136V104H180V218H207V146H252V198H292V80H335V212H369V127H417V208H453V94H501V205H533V144H585V226H640V300H0Z" class="city-back"/><path d="M0 270H82V210H135V252H188V175H231V239H277V192H313V267H374V188H430V246H480V164H522V246H570V202H610V266H640V300H0Z" class="city-front"/><path d="M0 285Q260 220 640 286" fill="none" stroke="#f2c589" stroke-width="4"/></svg>
+        <div class="preview-caption"><strong id="preview-title">当前 · 城市远景</strong><span>演练示意帧 · 非生成素材 / 不提供真实播放</span></div>
+      </div>
+      <div class="editor-sync" id="editor-sync">工程 r1 · 编辑区 r1（演练）</div>
+    </section>
+    <aside class="director" aria-labelledby="director-title">
+      <header><span class="context">精修 / 镜头2 · 00:10–00:20</span><h1 id="director-title">这次只改画面</h1><p class="preserve">保留旁白 · 保留10秒时长 · 其他镜头不变</p></header>
+      <div class="director-body">
+        <section data-phase="intent"><label for="intent">希望这个镜头有什么变化？</label><textarea id="intent" rows="3">让城市远景更有故事感，突出傍晚的灯光。</textarea><p class="muted">驱动Agent提交的目标也在此复查；不需要手填任务或提案ID。</p><details><summary>本次保留项与范围</summary><p>镜头2：300–600帧。旁白与总时长保持；其他镜头不重做。</p></details></section>
+        <section data-phase="preparing"><h2>正在准备镜头2候选</h2><p>将目标、素材与保留项交给准备流程。你可以留在原工作台检查其他内容。</p><p class="muted">暂无百分比 · 等待候选回报（演练）</p><button id="cancel-prepare">取消这次准备</button></section>
+        <section data-phase="review confirm"><div class="result-label">候选A · 暖色城市暮景</div><h2 id="review-heading">先看变化，再决定</h2><p>突出傍晚灯光与城市轮廓，让这一镜与叙事气氛一致。</p><dl><dt>将改变</dt><dd>仅镜头2画面与色彩</dd><dt>将保留</dt><dd>旁白、10秒时长、其他镜头</dd></dl><p id="compare-hint" class="muted">使用原播放区上方的当前 / 候选切换比较。</p><button id="rework">调整要求，只重做这一镜</button><details><summary>来源与影响明细</summary><p>原型占位素材，无真实许可结论。生产必须验证来源、许可、base、锁及impact，才能开放采用。</p><p>比较不写工程；确认后才发起受控采用。</p></details><p id="confirmation" class="confirmation" hidden>请确认：仅替换镜头2画面，其他内容保持。关闭系统面板或查看工作流不会提交。</p></section>
+        <section data-phase="committing"><h2>正在写入修改</h2><p>确认已受理，尚不能宣称写入成功。暂不重复提交。</p></section>
+        <section data-phase="syncing"><h2>工程已提交，正在同步画面</h2><p id="sync-info">Host已记录新版本，等待编辑区确认。此时还不能说画面已经更新。</p></section>
+        <section data-phase="done"><div class="result-label">本次修改已完成（演练）</div><h2>镜头2已更新</h2><p>工程与编辑区已确认同一版本。现在可以回看结果，或继续调整这一镜。</p><p>旁白、时长与其他镜头保持。</p><details><summary>版本记录与回退说明</summary><p id="history">工程 r2：采用镜头2候选。</p><p>生产恢复旧内容仍需重新核对影响并产生新revision；此原型不模拟完整历史恢复。</p></details></section>
+        <section data-phase="blocked"><h2>候选准备在等待媒体服务</h2><p>影响：镜头2的候选暂时不能生成。目标和草稿已保留，工程未改动。</p><button id="open-blocker">查看系统中的阻塞项</button></section>
+        <section data-phase="offline"><h2>连接中断，结果暂未确认</h2><p>保留最后已知状态与修改目标。恢复连接后先核对原任务，不另建请求。</p></section>
+        <section data-phase="unknown"><h2>采用结果未知，先核对</h2><p>可能已受理，不能重提或显示成功。查询不会重新执行，也不会更改工程。</p></section>
+        <section data-phase="expired"><h2>确认依据已过期</h2><p>候选和草稿保留。重新核对当前版本、锁及许可后，再请你确认采用。</p></section>
+        <p id="feedback" class="feedback" role="status" aria-live="polite">请先复查目标，再准备候选。</p>
+      </div>
+      <footer class="decision"><button id="primary" class="primary">准备这个镜头的候选</button><span id="decision-help">只准备预览，不写工程。</span></footer>
+    </aside>
+    <aside id="system-panel" class="system-panel" aria-labelledby="system-title" hidden>
+      <header><div><h2 id="system-title">系统控制</h2><p>独立管理面板 · 可继续编辑</p></div><button id="system-close" aria-label="关闭系统面板">关闭</button></header>
+      <p id="system-impact">当前无已知阻塞（演练）。</p>
+      <div class="tabs" role="tablist" aria-label="系统分类"><button role="tab" id="tab-services" aria-selected="true" aria-controls="panel-services" tabindex="0">服务</button><button role="tab" id="tab-models" aria-selected="false" aria-controls="panel-models" tabindex="-1">模型</button><button role="tab" id="tab-recovery" aria-selected="false" aria-controls="panel-recovery" tabindex="-1">恢复</button></div>
+      <section id="panel-services" role="tabpanel" aria-labelledby="tab-services"><h3>本项目服务</h3><div class="service-row"><strong>Host</strong><span>就绪（模拟）</span></div><div class="service-row"><strong>媒体 Worker</strong><span id="worker-state">就绪（模拟）</span></div><button id="worker-check">检查就绪状态</button><div class="service-row"><strong>共享 ComfyUI</strong><span>未接管 · 只读</span></div><button id="shared-check">检查连接</button><p class="muted">不管理共享实例，不擅自重启、卸载或清队列。</p></section>
+      <section id="panel-models" role="tabpanel" aria-labelledby="tab-models" hidden><h3>登记的生图运行配置</h3><p id="model-state">未加载（模拟）</p><div class="model-actions"><button id="model-load">按需加载</button><button id="model-warm" disabled>预热</button><button id="model-unload" disabled>卸载</button></div><p class="muted">显存：未知，未采样。请求受理不等于就绪；活动任务期间不允许卸载。</p></section>
+      <section id="panel-recovery" role="tabpanel" aria-labelledby="tab-recovery" hidden><h3>受影响的创作事项</h3><p id="recovery-impact">当前无待恢复事项。</p><button id="diagnostic">检查依赖</button><p class="muted">只检查依赖，不重新执行视频任务。结果未知先对账。</p></section>
+      <p id="system-feedback" role="status" aria-live="polite">所有服务与模型操作仅改变演练状态。</p>
+    </aside>
+  </main>
+  <footer class="demo-tools"><label for="scenario">演练情境</label><select id="scenario"><option value="normal">正常改单镜</option><option value="blocked">媒体服务阻塞</option><option value="offline">准备时断线</option><option value="expired">确认依据过期一次</option><option value="unknown">采用结果未知</option></select><button id="restart-demo">重新演练</button><span>背景控件不可操作；新增交互在导演栏与系统面板中。</span></footer>
+</div><script src="prototype.js"></script>
+</body></html>

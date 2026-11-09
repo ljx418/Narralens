@@ -1,0 +1,2045 @@
+{
+  "version": "r4-implementation-design@1",
+  "observedHead": "fd3021c336387b4c6405b3db08abaafa81c842ff",
+  "scope": "DOCUMENTS_ONLY",
+  "productionRelease": "NOT_RELEASED",
+  "statusMeaning": {
+    "existing": "源码有实体/生产接缝，本轮未复验",
+    "modify": "已有实体需改",
+    "new": "目标待新增",
+    "verify": "能力未开放/待验证",
+    "developing": "0个产品模块"
+  },
+  "tickets": [
+    {
+      "id": "IT-P01",
+      "stage": "AD-S0",
+      "wave": "PREPARE",
+      "deliverable": "交互原型、需求与实现差距、用户核对闭环",
+      "dependencies": [],
+      "acceptanceFamilies": [],
+      "documentGate": "DOC-PROTOTYPE",
+      "status": "PLANNED",
+      "owner": "main"
+    },
+    {
+      "id": "IT-P02",
+      "stage": "AD-S0",
+      "wave": "PREPARE",
+      "deliverable": "首轮合同/DDL/测试/回退、内部及独立文档审查、明确实现授权",
+      "dependencies": [
+        "IT-P01"
+      ],
+      "acceptanceFamilies": [],
+      "documentGate": "DOC-CONTRACT",
+      "status": "PLANNED",
+      "owner": "main"
+    },
+    {
+      "id": "IT-A01",
+      "stage": "AD-S1",
+      "wave": "A",
+      "deliverable": "生产实例supervisor、持久目录/启动停止、基础服务就绪与健康TTL",
+      "dependencies": [
+        "IT-P02"
+      ],
+      "acceptanceFamilies": [
+        "AD-T01",
+        "AD-T32",
+        "AD-T34"
+      ],
+      "documentGate": null,
+      "status": "PLANNED",
+      "owner": "bridge"
+    },
+    {
+      "id": "IT-A02",
+      "stage": "AD-S1",
+      "wave": "A",
+      "deliverable": "MCP façade/能力目录、入口Skill、首端真实连接与三端探针",
+      "dependencies": [
+        "IT-P02"
+      ],
+      "acceptanceFamilies": [
+        "AD-T02",
+        "AD-T03",
+        "AD-T04",
+        "AD-T22"
+      ],
+      "documentGate": null,
+      "status": "PLANNED",
+      "owner": "bridge"
+    },
+    {
+      "id": "IT-A03",
+      "stage": "AD-S1",
+      "wave": "A",
+      "deliverable": "公共创作合同/事件快照游标、提问回答、任务幂等/恢复接缝、Comfy只读目录",
+      "dependencies": [
+        "IT-P02"
+      ],
+      "acceptanceFamilies": [
+        "AD-T09",
+        "AD-T26",
+        "AD-T27",
+        "AD-T33"
+      ],
+      "documentGate": null,
+      "status": "PLANNED",
+      "owner": "main"
+    },
+    {
+      "id": "IT-A04",
+      "stage": "AD-S2",
+      "wave": "A",
+      "deliverable": "一般项目创建/Resolver、初始snapshot、Agent简报与结构化脚本/分镜入库（不新建前端）",
+      "dependencies": [
+        "IT-A01",
+        "IT-A03"
+      ],
+      "acceptanceFamilies": [
+        "AD-T05",
+        "AD-T07",
+        "AD-T27"
+      ],
+      "documentGate": null,
+      "status": "PLANNED",
+      "owner": "main"
+    },
+    {
+      "id": "IT-A05",
+      "stage": "AD-S2",
+      "wave": "A",
+      "deliverable": "本地资产/录音→所选分镜→原生可编辑工程、只读实时业务图/审批、最小局部修改",
+      "dependencies": [
+        "IT-A02",
+        "IT-A03",
+        "IT-A04"
+      ],
+      "acceptanceFamilies": [
+        "AD-T06",
+        "AD-T10",
+        "AD-T11",
+        "AD-T33",
+        "AD-T12",
+        "AD-T15"
+      ],
+      "documentGate": null,
+      "status": "PLANNED",
+      "owner": "product"
+    },
+    {
+      "id": "IT-A06",
+      "stage": "AD-S2",
+      "wave": "A",
+      "deliverable": "committed snapshot渲染/QC/持久交付、关服重开/中断/改单镜双导出，首轮冻结",
+      "dependencies": [
+        "IT-A01",
+        "IT-A02",
+        "IT-A04",
+        "IT-A05"
+      ],
+      "acceptanceFamilies": [
+        "AD-T06",
+        "AD-T07",
+        "AD-T08",
+        "AD-T09",
+        "AD-T20",
+        "AD-T35"
+      ],
+      "documentGate": null,
+      "status": "PLANNED",
+      "owner": "media"
+    },
+    {
+      "id": "IT-B01",
+      "stage": "AD-S3",
+      "wave": "B",
+      "deliverable": "3–6任意选案与真实前后对比、NodeInspector/产物编辑、依赖影响与局部重算",
+      "dependencies": [
+        "IT-A06"
+      ],
+      "acceptanceFamilies": [
+        "AD-T10",
+        "AD-T11",
+        "AD-T15",
+        "AD-T27",
+        "AD-T31"
+      ],
+      "documentGate": null,
+      "status": "PLANNED",
+      "owner": "product"
+    },
+    {
+      "id": "IT-B02",
+      "stage": "AD-S3",
+      "wave": "B",
+      "deliverable": "DriverSession/fencing、三类锁与审批、IO/CPU子任务并行、冲突/取消/恢复",
+      "dependencies": [
+        "IT-A06"
+      ],
+      "acceptanceFamilies": [
+        "AD-T12",
+        "AD-T13",
+        "AD-T14",
+        "AD-T28",
+        "AD-T31"
+      ],
+      "documentGate": null,
+      "status": "PLANNED",
+      "owner": "main"
+    },
+    {
+      "id": "IT-B03",
+      "stage": "AD-S3",
+      "wave": "B",
+      "deliverable": "完整监控面板、队列/资源/告警与节点关联、实时事件重连与故障恢复",
+      "dependencies": [
+        "IT-A06"
+      ],
+      "acceptanceFamilies": [
+        "AD-T01",
+        "AD-T03",
+        "AD-T04",
+        "AD-T15",
+        "AD-T32",
+        "AD-T33",
+        "AD-T34",
+        "AD-T35"
+      ],
+      "documentGate": null,
+      "status": "PLANNED",
+      "owner": "bridge"
+    },
+    {
+      "id": "IT-B04",
+      "stage": "AD-S4",
+      "wave": "B",
+      "deliverable": "分阶段AssetPlan/下载、Comfy固定一图一视频与后期、GPU资源池/异步子job、概念与转场",
+      "dependencies": [
+        "IT-B01",
+        "IT-B02",
+        "IT-B03"
+      ],
+      "acceptanceFamilies": [
+        "AD-T16",
+        "AD-T18",
+        "AD-T26",
+        "AD-T28",
+        "AD-T29",
+        "AD-T30"
+      ],
+      "documentGate": null,
+      "status": "PLANNED",
+      "owner": "media"
+    },
+    {
+      "id": "IT-B05",
+      "stage": "AD-S4",
+      "wave": "B",
+      "deliverable": "本人录音/授权TTS/ASR/字幕对齐与音频锁、真实时长/采样/费用与未知结果",
+      "dependencies": [
+        "IT-B02",
+        "IT-B03"
+      ],
+      "acceptanceFamilies": [
+        "AD-T17",
+        "AD-T18",
+        "AD-T29",
+        "AD-T32"
+      ],
+      "documentGate": null,
+      "status": "PLANNED",
+      "owner": "media"
+    },
+    {
+      "id": "IT-B06",
+      "stage": "AD-S4",
+      "wave": "B",
+      "deliverable": "8标题/4封面、全QC/来源许可/交付包、候选独立审查与人工闭环",
+      "dependencies": [
+        "IT-B01",
+        "IT-B03",
+        "IT-B04",
+        "IT-B05"
+      ],
+      "acceptanceFamilies": [
+        "AD-T19",
+        "AD-T20",
+        "AD-T25",
+        "AD-T30",
+        "AD-T35"
+      ],
+      "documentGate": null,
+      "status": "PLANNED",
+      "owner": "main"
+    },
+    {
+      "id": "IT-C01",
+      "stage": "AD-S5",
+      "wave": "C",
+      "deliverable": "StyleProfile/局部override/回滚、评论锚点、原PRD后期操作逐项补齐",
+      "dependencies": [
+        "IT-B06"
+      ],
+      "acceptanceFamilies": [
+        "AD-T11",
+        "AD-T12",
+        "AD-T14",
+        "AD-T23"
+      ],
+      "documentGate": null,
+      "status": "PLANNED",
+      "owner": "product"
+    },
+    {
+      "id": "IT-C02",
+      "stage": "AD-S5",
+      "wave": "C",
+      "deliverable": "三驱动真实接力、10–15分钟母片/3–5分钟章节/跨章重算与性能故障矩阵",
+      "dependencies": [
+        "IT-B06"
+      ],
+      "acceptanceFamilies": [
+        "AD-T09",
+        "AD-T13",
+        "AD-T21",
+        "AD-T22",
+        "AD-T24",
+        "AD-T28",
+        "AD-T31",
+        "AD-T35"
+      ],
+      "documentGate": null,
+      "status": "PLANNED",
+      "owner": "main"
+    },
+    {
+      "id": "IT-C03",
+      "stage": "AD-S5",
+      "wave": "C",
+      "deliverable": "P0/P1/NFR/21体验逐项总审计、全量实证/独立外审/人工签署与Git同步",
+      "dependencies": [
+        "IT-C01",
+        "IT-C02"
+      ],
+      "acceptanceFamilies": [
+        "AD-T01",
+        "AD-T02",
+        "AD-T03",
+        "AD-T04",
+        "AD-T05",
+        "AD-T06",
+        "AD-T07",
+        "AD-T08",
+        "AD-T09",
+        "AD-T10",
+        "AD-T11",
+        "AD-T12",
+        "AD-T13",
+        "AD-T14",
+        "AD-T15",
+        "AD-T16",
+        "AD-T17",
+        "AD-T18",
+        "AD-T19",
+        "AD-T20",
+        "AD-T21",
+        "AD-T22",
+        "AD-T23",
+        "AD-T24",
+        "AD-T25",
+        "AD-T26",
+        "AD-T27",
+        "AD-T28",
+        "AD-T29",
+        "AD-T30",
+        "AD-T31",
+        "AD-T32",
+        "AD-T33",
+        "AD-T34",
+        "AD-T35"
+      ],
+      "documentGate": null,
+      "status": "PLANNED",
+      "owner": "main"
+    }
+  ],
+  "acceptance": [
+    {
+      "id": "AD-T01",
+      "wave": "A/B",
+      "scene": "双击启动、重复启动、停止并重开",
+      "steps": "新旧实例分别冷/热启动，关闭UI后检查Host再停止重启",
+      "threshold": "同一实例/持久项目不丢失，进程存在与API就绪分开；不擅自终止共享实例",
+      "owner": "BRIDGE+MAIN",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "AD-T02",
+      "wave": "A",
+      "scene": "能力发现与合同拒绝",
+      "steps": "真实首端列tools/resources，提交非法字段、未知版本、无权请求",
+      "threshold": "schema逐字段拒绝且无业务副作用；blocked能力不宣传可执行",
+      "owner": "BRIDGE+MAIN",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "AD-T03",
+      "wave": "A/B",
+      "scene": "双客户端共享事实",
+      "steps": "两客户端读取同project/job/snapshot，再同时打开工作台",
+      "threshold": "ID/版本一致；只一个Host/DB事实源，关闭任一客户端不删项目",
+      "owner": "BRIDGE+MAIN",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "AD-T04",
+      "wave": "A",
+      "scene": "服务不可用与Skill恢复",
+      "steps": "断Host后调用能力，再按Skill重新连接同实例",
+      "threshold": "明确不可用与下一步，不新建影子Host/库，不猜成功",
+      "owner": "BRIDGE",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "AD-T05",
+      "wave": "A",
+      "scene": "一般新工程创建",
+      "steps": "两个不同主题确认简报并创建；同key重放/异内容冲突；创建中崩溃",
+      "threshold": "不同工程与内容；重放同结果，异内容409；重开可读，无假migration",
+      "owner": "MAIN+PRODUCT",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "AD-T06",
+      "wave": "A/B",
+      "scene": "真实可编辑短片",
+      "steps": "授权本地媒体和真实中文录音→Agent提交分镜→原生clip→snapshot渲染",
+      "threshold": "60–180秒真实短片；逐镜可编辑，MP4完整decode，无空音轨冒充录音",
+      "owner": "MAIN+MEDIA+PRODUCT",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "AD-T07",
+      "wave": "A/C",
+      "scene": "关服重开",
+      "steps": "生成并提交后关闭Agent/UI、受控停服、重启、重开同工程",
+      "threshold": "source/revision/snapshot/history一致，草稿与正式版本可区分",
+      "owner": "MAIN",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "AD-T08",
+      "wave": "A/C",
+      "scene": "改单镜双导出",
+      "steps": "保存前一snapshot并导出，选镜只换画面保留旁白/时长，再导出",
+      "threshold": "比较/拒绝+0，确认+1；不变范围与音轨保持；两产物绑定各自snapshot",
+      "owner": "MAIN+MEDIA+PRODUCT",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "AD-T09",
+      "wave": "A/C",
+      "scene": "驱动中断与续作",
+      "steps": "准备前/受理后/回报前中断CLI，重连读checkpoint",
+      "threshold": "不重复准备/提交/扣费；旧结果与新输入版本隔离，未核实结果unknown",
+      "owner": "MAIN+BRIDGE",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "AD-T10",
+      "wave": "A/B",
+      "scene": "任意候选选择",
+      "steps": "生成3–6案，选择非首案，改选并读Agent上下文",
+      "threshold": "每案映射真实preview与版本；所选案用于准备；改选旧结果stale；选择不提交",
+      "owner": "PRODUCT+MAIN",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "AD-T11",
+      "wave": "A/B/C",
+      "scene": "UI选区与Agent精修",
+      "steps": "原播放器选区→Agent读selection_version→局部准备→审差异→确认",
+      "threshold": "唯一选区/播放时钟，限定范围改变；人工改选后旧请求拒绝",
+      "owner": "PRODUCT+MAIN",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "AD-T12",
+      "wave": "A/B/C",
+      "scene": "真实写路径安全",
+      "steps": "分别改变base/source/锁/许可/impact/approval/project后apply，保留对照成功",
+      "threshold": "失败影片revision+0、source/active_commit/批准消费/成功commit不推进；允许合法拒绝审计；成功恰好+1，禁止裸写绕过",
+      "owner": "MAIN",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "AD-T13",
+      "wave": "B/C",
+      "scene": "驱动争抢与接管",
+      "steps": "两个Agent争抢，失lease后显式接管，旧epoch迟到apply",
+      "threshold": "唯一活动编排者，旧epoch拒绝；有效worker不被误取消",
+      "owner": "MAIN+BRIDGE",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "AD-T14",
+      "wave": "B/C",
+      "scene": "人工编辑冲突与恢复",
+      "steps": "Agent准备后人工提交，再发送旧base；受控restore一次",
+      "threshold": "旧操作409不覆盖；恢复旧内容产生新revision，undo/redo不裸转发",
+      "owner": "MAIN+PRODUCT",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "AD-T15",
+      "wave": "A/B/C",
+      "scene": "R4与可访问性",
+      "steps": "键盘完成比较/确认/系统面板，三个目标视口，原生预览稳定检查",
+      "threshold": "R4-UX适用项通过；首次定位/比较≤60秒，恢复入口≤10秒，学习后单列",
+      "owner": "PRODUCT",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "AD-T16",
+      "wave": "B",
+      "scene": "检索下载与来源",
+      "steps": "依据AssetPlan检索→用户授权选源→有界下载→校验注册",
+      "threshold": "至少一条真实许可来源；bytes/hash/probe/许可可证；SSRF/重定向/大小/超时拒绝",
+      "owner": "MEDIA+MAIN",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "AD-T17",
+      "wave": "B",
+      "scene": "声音与字幕",
+      "steps": "真实录音/授权TTS、ASR/对齐→native字幕音轨→试听导出",
+      "threshold": "采样/真实时长与字幕对应；音频锁阻止越权；偏差报告按CP冻结阈值判定",
+      "owner": "MEDIA",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "AD-T18",
+      "wave": "B",
+      "scene": "费用与外部未知结果",
+      "steps": "provider受理后断线，查receipt/费用；取消后送迟到结果",
+      "threshold": "未知不记0/不盲重提；费用与输入/模型/attempt可追溯，晚到不采用",
+      "owner": "MEDIA+MAIN",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "AD-T19",
+      "wave": "B",
+      "scene": "标题封面",
+      "steps": "基于同一事实摘要给8标题/4封面，选非首项，制造正文冲突",
+      "threshold": "真实候选全部可选择；风险提示并保存选项/版本，不伪造现场画面",
+      "owner": "PRODUCT+MEDIA",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "AD-T20",
+      "wave": "A/B/C",
+      "scene": "QC与交付包",
+      "steps": "用已提交snapshot渲染，触发QC block再修复，导出附属文件；执行T20-A..H：磁盘满/坏帧/并发重名/取消晚到/真实崩溃/QC阻断/版本固定/重启重复读取",
+      "threshold": "block不能正式交付；MP4+字幕+来源许可+标题封面+版本费用按阶段齐备；只在完整decode+QC+附属包校验后原子发布ready/下载引用，半成品不可达",
+      "owner": "MEDIA+MAIN",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "AD-T21",
+      "wave": "C",
+      "scene": "长片母工程",
+      "steps": "真实10–15分钟、100+镜工程导航/精修/提交/双导出",
+      "threshold": "原生可编辑，非扁平MP4迁移；完整P0/P1/NFR回归无未解释失败",
+      "owner": "MAIN+MEDIA+PRODUCT",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "AD-T22",
+      "wave": "A/C",
+      "scene": "三端真实兼容",
+      "steps": "Codex首端真实标准链；ClaudeCode/DSH分别连接、读取、续作",
+      "threshold": "每端独立实际证据；A可明确blocked，C缺任一承诺端不得宣称Full",
+      "owner": "BRIDGE",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "AD-T23",
+      "wave": "C",
+      "scene": "风格与反馈",
+      "steps": "版本化StyleProfile，局部override，回滚；评论定位章节镜头",
+      "threshold": "锁定内容不被覆盖，反馈锚点稳定；应用仍经受控提交",
+      "owner": "PRODUCT+MAIN",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "AD-T24",
+      "wave": "C",
+      "scene": "长片性能",
+      "steps": "参考机100+镜项目，四类导航操作各采100样本；章节/导出预算跑前冻结",
+      "threshold": "交互p95≤100ms；原始样本/分母/资源与预算留证，不能跑后放宽",
+      "owner": "PRODUCT+MEDIA",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "AD-T25",
+      "wave": "B/C",
+      "scene": "事实与规格总审",
+      "steps": "逐项核主张/引用、素材许可、字幕/标题封面与PRD全量",
+      "threshold": "事实/判断/争议分明；13P0/6P1/6NFR/21体验全覆盖；未通过保持未实现",
+      "owner": "MAIN+PRODUCT",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "AD-T26",
+      "wave": "A/B",
+      "scene": "Comfy模板登记探针",
+      "steps": "只读识别模板格式/固定SHA/模型节点/许可，隔离一图一视频smoke",
+      "threshold": "依赖不足blocked；无prompt外呼或安装默许；真实smoke与生产接入分开",
+      "owner": "MEDIA",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "AD-T27",
+      "wave": "A/B",
+      "scene": "结构化提问回答",
+      "steps": "已有简报不重问，在UI答复/跳过/改答案后Agent读版本",
+      "threshold": "已知/推断/待答分明，Decision版本一致，E03缺省审阅不得删事实核验",
+      "owner": "PRODUCT+BRIDGE",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "AD-T28",
+      "wave": "B/C",
+      "scene": "有界并行",
+      "steps": "两镜下载/两章节声音画面准备，争GPU槽、取消一任务",
+      "threshold": "容量真实受限且产物不覆盖；驱动单会话不串行全部准备；发布仍串行",
+      "owner": "MAIN+MEDIA",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "AD-T29",
+      "wave": "B",
+      "scene": "Comfy生产闭环",
+      "steps": "真实固定一图一短视频→外部job→probe/资产→native clip→采用→渲染",
+      "threshold": "模型/seed/输入/receipt可追溯；不盲重提、不误伤共享任务，结果可播放",
+      "owner": "MEDIA+MAIN",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "AD-T30",
+      "wave": "B",
+      "scene": "概念与转场",
+      "steps": "中文术语/数值图形可编辑，AI背景/首尾帧转场实际进入工程",
+      "threshold": "文字关系人工核对；时长/音轨/锁/handles正确；fallback不冒充AI通过",
+      "owner": "MEDIA+PRODUCT",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "AD-T31",
+      "wave": "B/C",
+      "scene": "依赖局部重算",
+      "steps": "改脚本节点版本→查看影响→批准子图重算，运行中再改输入",
+      "threshold": "独立旁白/其他章节hash不变，旧产物保留；环/非法参数/旧attempt拒绝",
+      "owner": "PRODUCT+MAIN",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "AD-T32",
+      "wave": "A/B",
+      "scene": "真实健康与资源",
+      "steps": "启动/停依赖、模拟能力缺失、停止采样、读取resource",
+      "threshold": "进程/API/模型分别就绪；5秒采样、15秒过期unknown/stale；无采样不填0",
+      "owner": "BRIDGE+MEDIA",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "AD-T33",
+      "wave": "A/B",
+      "scene": "事件游标与原生确认",
+      "steps": "初连snapshot后并发事件；重复/乱序/断线/过期cursor；延迟nativeack",
+      "threshold": "无漏窗口和重复业务效果；重连校准快照，Host新值不能填nativeack",
+      "owner": "BRIDGE+MAIN+PRODUCT",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "AD-T34",
+      "wave": "A/B",
+      "scene": "系统受控恢复",
+      "steps": "非模态侧栏继续精修；owned/shared检查；活动/未知任务尝试卸载重启",
+      "threshold": "仅自有授权动作；资源互斥在服务端生效；检查不重提媒体，错误脱敏",
+      "owner": "MAIN+BRIDGE+MEDIA+PRODUCT",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "AD-T35",
+      "wave": "A/B/C",
+      "scene": "可观察性时延与压力",
+      "steps": "持续Host事件与媒体负载，记录事件到DOM/健康采样时间及定位恢复",
+      "threshold": "正常连接呈现p95≤2秒，测量样本/参考机固定；故障明确，无假百分比",
+      "owner": "BRIDGE+PRODUCT",
+      "status": "NOT_RUN"
+    }
+  ],
+  "pages": [
+    {
+      "name": "01 已批准体验与责任边界",
+      "width": 1800,
+      "height": 1120,
+      "nodes": [
+        {
+          "id": "human",
+          "title": "创作者 / 用户",
+          "body": "表达目标、核对事实与审美；选择不等于批准",
+          "x": 70,
+          "y": 150,
+          "w": 280,
+          "h": 190,
+          "status": "note",
+          "renderedLines": 3
+        },
+        {
+          "id": "agent",
+          "title": "驱动Agent + 入口Skill",
+          "body": "Codex/Claude Code/DSH；发现能力、组织流程；不直写工程",
+          "x": 415,
+          "y": 150,
+          "w": 280,
+          "h": 190,
+          "status": "new",
+          "renderedLines": 3
+        },
+        {
+          "id": "host",
+          "title": "常驻Host应用服务",
+          "body": "ProjectCoordinator、Job、批准/产物/事件；持久事实不随窗口消失",
+          "x": 760,
+          "y": 150,
+          "w": 280,
+          "h": 190,
+          "status": "modify",
+          "renderedLines": 4
+        },
+        {
+          "id": "view",
+          "title": "原OpenFilm + M5工作台",
+          "body": "原播放器/检查器/时间轴保留；当前事项和真实剪辑进展可见",
+          "x": 1105,
+          "y": 150,
+          "w": 280,
+          "h": 190,
+          "status": "modify",
+          "renderedLines": 4
+        },
+        {
+          "id": "system",
+          "title": "SystemControlPanel",
+          "body": "独立非模态侧面板；服务/模型/恢复，打开后仍可编辑",
+          "x": 1450,
+          "y": 150,
+          "w": 280,
+          "h": 190,
+          "status": "new",
+          "renderedLines": 3
+        },
+        {
+          "id": "one-shot",
+          "title": "R4：当前先完整实现已有工程改单镜",
+          "body": "目标→准备候选→比较差异→核对影响→显式确认→提交→原生确认→继续精修。Agent/Host串联准备，不要求日常用户手填comparison ID。",
+          "x": 70,
+          "y": 420,
+          "w": 1000,
+          "h": 180,
+          "status": "modify",
+          "renderedLines": 3
+        },
+        {
+          "id": "workflow",
+          "title": "WorkflowTopBar",
+          "body": "顶部横向、默认折叠；当前目标/等待原因/失联时间可见；展开定位当前阶段，定位回原导演入口。",
+          "x": 1120,
+          "y": 420,
+          "w": 580,
+          "h": 180,
+          "status": "new",
+          "renderedLines": 3
+        },
+        {
+          "id": "scope",
+          "title": "完整V1目标不缩减",
+          "body": "从想法→研究/脚本→分镜→素材/声音→可编辑初稿→精修→QC与交付。A真实短片；B完整制作；C长片/三端/全规格。",
+          "x": 70,
+          "y": 690,
+          "w": 1000,
+          "h": 180,
+          "status": "note",
+          "renderedLines": 2
+        },
+        {
+          "id": "truth",
+          "title": "当前状态与批准边界",
+          "body": "R4原型人工PASS；产品case NOT_RUN；CP-A0未冻结；生产NOT_RELEASED。开发中产品实体0。历史截图/SVG/定时回报不是生产实现。",
+          "x": 1120,
+          "y": 690,
+          "w": 580,
+          "h": 180,
+          "status": "risk",
+          "renderedLines": 3
+        }
+      ],
+      "edges": [
+        {
+          "source": "human",
+          "target": "agent",
+          "label": "",
+          "sides": null
+        },
+        {
+          "source": "agent",
+          "target": "host",
+          "label": "",
+          "sides": null
+        },
+        {
+          "source": "host",
+          "target": "view",
+          "label": "",
+          "sides": null
+        },
+        {
+          "source": "view",
+          "target": "system",
+          "label": "",
+          "sides": null
+        }
+      ]
+    },
+    {
+      "name": "02 当前源码与生产接缝",
+      "width": 1800,
+      "height": 1160,
+      "nodes": [
+        {
+          "id": "start",
+          "title": "start.ts / NarralensHost",
+          "body": "src/host/start.ts\n创建单RevisionStore与Host",
+          "x": 55,
+          "y": 145,
+          "w": 285,
+          "h": 190,
+          "status": "existing",
+          "renderedLines": 4
+        },
+        {
+          "id": "server",
+          "title": "server.ts / 应用装配",
+          "body": "src/host/server.ts\n同库、同项目写队列、旧路由",
+          "x": 402,
+          "y": 145,
+          "w": 285,
+          "h": 190,
+          "status": "existing",
+          "renderedLines": 4
+        },
+        {
+          "id": "workbench",
+          "title": "WorkbenchService",
+          "body": "src/host/m5/workbench-service.ts\n真实迁移目标工作台",
+          "x": 749,
+          "y": 145,
+          "w": 285,
+          "h": 190,
+          "status": "existing",
+          "renderedLines": 4
+        },
+        {
+          "id": "gateway",
+          "title": "StudioSupervisor / Gateway",
+          "body": "src/host/m5/\n注入panel bundle与原生桥",
+          "x": 1096,
+          "y": 145,
+          "w": 285,
+          "h": 190,
+          "status": "existing",
+          "renderedLines": 4
+        },
+        {
+          "id": "m5",
+          "title": "M5Panel / SelectionCoordinator",
+          "body": "src/app/m5/\n现仍手填ID、首案与分步操作",
+          "x": 1443,
+          "y": 145,
+          "w": 285,
+          "h": 190,
+          "status": "modify",
+          "renderedLines": 3
+        },
+        {
+          "id": "db",
+          "title": "RevisionStore / SnapshotStore",
+          "body": "src/host/projects/\nproject_state、active_commit、project_transaction、snapshot；共享DB事实",
+          "x": 55,
+          "y": 440,
+          "w": 285,
+          "h": 210,
+          "status": "existing",
+          "renderedLines": 6
+        },
+        {
+          "id": "coord",
+          "title": "ProjectCoordinator / Actor",
+          "body": "src/host/projects/\n队列+base/source/锁复核；原子commit；legacy限制单列",
+          "x": 402,
+          "y": 440,
+          "w": 285,
+          "h": 210,
+          "status": "existing",
+          "renderedLines": 5
+        },
+        {
+          "id": "port",
+          "title": "EnginePort / OpenFilmAdapter",
+          "body": "src/host/engine/ 与 adapters/openfilm\n七方法；每项目单引擎；render尚未开放",
+          "x": 749,
+          "y": 440,
+          "w": 285,
+          "h": 210,
+          "status": "verify",
+          "renderedLines": 5
+        },
+        {
+          "id": "mat",
+          "title": "MaterializeService",
+          "body": "src/host/materialize/\nlease/CAS、并发drain、proxy/plan/lineage；不写工程",
+          "x": 1096,
+          "y": 440,
+          "w": 285,
+          "h": 210,
+          "status": "existing",
+          "renderedLines": 5
+        },
+        {
+          "id": "writes",
+          "title": "Impact / Adoption / History",
+          "body": "src/host/{impact,adoption,history}/\nserver已真实装配；采用/恢复回Coordinator",
+          "x": 1443,
+          "y": 440,
+          "w": 285,
+          "h": 210,
+          "status": "existing",
+          "renderedLines": 5
+        },
+        {
+          "id": "old-entry",
+          "title": "旧默认入口不可误作生产工作台",
+          "body": "src/app/main.tsx → director/NarralensApp.tsx，固定d1-30s；与Gateway注入M5是不同入口。生产必须返回同一真实持久工程的Gateway地址，保留legacy演示。",
+          "x": 55,
+          "y": 765,
+          "w": 710,
+          "h": 185,
+          "status": "modify",
+          "renderedLines": 3
+        },
+        {
+          "id": "remaining",
+          "title": "主要缺口：新增驱动、创作与完整交付",
+          "body": "src中未有生产MCP/Skill注册、一般项目创建、创作artifact/DAG、R4新面板、通用资源池、下载/Comfy/声音/完整QC。render签名和探针不等于产品导出。",
+          "x": 815,
+          "y": 765,
+          "w": 913,
+          "h": 185,
+          "status": "new",
+          "renderedLines": 3
+        }
+      ],
+      "edges": [
+        {
+          "source": "start",
+          "target": "server",
+          "label": "",
+          "sides": null
+        },
+        {
+          "source": "server",
+          "target": "workbench",
+          "label": "",
+          "sides": null
+        },
+        {
+          "source": "workbench",
+          "target": "gateway",
+          "label": "",
+          "sides": null
+        },
+        {
+          "source": "gateway",
+          "target": "m5",
+          "label": "",
+          "sides": null
+        },
+        {
+          "source": "server",
+          "target": "coord",
+          "label": "共享项目队列",
+          "sides": null
+        },
+        {
+          "source": "coord",
+          "target": "db",
+          "label": "同库提交",
+          "sides": null
+        },
+        {
+          "source": "coord",
+          "target": "port",
+          "label": "stage/validate",
+          "sides": [
+            "top",
+            "top"
+          ],
+          "sourceOffset": 0.8
+        },
+        {
+          "source": "gateway",
+          "target": "mat",
+          "label": "经Host应用调用",
+          "sides": null
+        },
+        {
+          "source": "m5",
+          "target": "writes",
+          "label": "经Gateway/Host命令",
+          "sides": null
+        }
+      ]
+    },
+    {
+      "name": "03 目标L0分层与唯一提交",
+      "width": 1800,
+      "height": 1120,
+      "nodes": [
+        {
+          "id": "driver",
+          "title": "外部驱动 + Skill",
+          "body": "表达/研究/脚本/调用与恢复",
+          "x": 50,
+          "y": 400,
+          "w": 285,
+          "h": 175,
+          "status": "new",
+          "renderedLines": 3
+        },
+        {
+          "id": "mcp",
+          "title": "McpServer / Registry",
+          "body": "src/mcp/\nstdio外观连常驻Host",
+          "x": 397,
+          "y": 400,
+          "w": 285,
+          "h": 175,
+          "status": "new",
+          "renderedLines": 3
+        },
+        {
+          "id": "app",
+          "title": "AgentDrivenComposition",
+          "body": "src/host/agent-driven/\n同一ApplicationPort给UI/MCP",
+          "x": 744,
+          "y": 400,
+          "w": 285,
+          "h": 175,
+          "status": "new",
+          "renderedLines": 3
+        },
+        {
+          "id": "commit",
+          "title": "ProjectCoordinator",
+          "body": "base/锁/许可/可信approval\n唯一正式写入边界",
+          "x": 1091,
+          "y": 400,
+          "w": 285,
+          "h": 175,
+          "status": "modify",
+          "renderedLines": 4
+        },
+        {
+          "id": "engine",
+          "title": "EnginePort / OpenFilm",
+          "body": "隔离stage/validate/发布\n保留七方法、单引擎",
+          "x": 1438,
+          "y": 400,
+          "w": 285,
+          "h": 175,
+          "status": "existing",
+          "renderedLines": 4
+        },
+        {
+          "id": "ui",
+          "title": "M5 / WorkflowTopBar / SystemControlPanel",
+          "body": "原UI + 新observation/system组件；同源HTTP/SSE；非模态；唯一selection/clock；native回报独立。",
+          "x": 744,
+          "y": 100,
+          "w": 430,
+          "h": 180,
+          "status": "modify",
+          "renderedLines": 3
+        },
+        {
+          "id": "jobs",
+          "title": "PersistentJobStore + 准备Worker",
+          "body": "已有Materialize + 拟Render/QC/Provider worker；准备结果进入Asset/Artifact；无source/revision写权。",
+          "x": 744,
+          "y": 745,
+          "w": 430,
+          "h": 180,
+          "status": "modify",
+          "renderedLines": 4
+        },
+        {
+          "id": "facts",
+          "title": "RevisionStore / SnapshotStore / Outbox",
+          "body": "同连接事务；commit/幂等/批准消费/outbox关联。原生已加载事实不能由Host值代填。",
+          "x": 1230,
+          "y": 745,
+          "w": 490,
+          "h": 180,
+          "status": "modify",
+          "renderedLines": 3
+        }
+      ],
+      "edges": [
+        {
+          "source": "driver",
+          "target": "mcp",
+          "label": "",
+          "sides": null
+        },
+        {
+          "source": "mcp",
+          "target": "app",
+          "label": "",
+          "sides": null
+        },
+        {
+          "source": "app",
+          "target": "commit",
+          "label": "",
+          "sides": null
+        },
+        {
+          "source": "commit",
+          "target": "engine",
+          "label": "",
+          "sides": null
+        },
+        {
+          "source": "ui",
+          "target": "app",
+          "label": "同源HTTP / SSE",
+          "sides": null
+        },
+        {
+          "source": "app",
+          "target": "jobs",
+          "label": "持久准备任务",
+          "sides": null
+        },
+        {
+          "source": "commit",
+          "target": "facts",
+          "label": "事务与恢复",
+          "sides": null
+        }
+      ]
+    },
+    {
+      "name": "04 目标L1代码实体与端口",
+      "width": 1800,
+      "height": 1160,
+      "nodes": [
+        {
+          "id": "ui",
+          "title": "PRODUCT：现有M5 + 新UI",
+          "body": "M5Panel（MAIN挂载）\nWorkflowTopBar / SystemControlPanel\nProjectObservationAdapter",
+          "x": 55,
+          "y": 150,
+          "w": 500,
+          "h": 180,
+          "status": "modify",
+          "renderedLines": 4
+        },
+        {
+          "id": "bridge",
+          "title": "BRIDGE：MCP与Skill",
+          "body": "src/mcp/{server,tool-registry,resource-registry}.ts\nskills/narralens/、narralens-lib/",
+          "x": 650,
+          "y": 150,
+          "w": 500,
+          "h": 180,
+          "status": "new",
+          "renderedLines": 3
+        },
+        {
+          "id": "provider",
+          "title": "MEDIA：受控Provider",
+          "body": "ProviderGateway / ComfyWorkflowRegistry\nModelRuntime / 下载、声音、字幕worker",
+          "x": 1245,
+          "y": 150,
+          "w": 500,
+          "h": 180,
+          "status": "new",
+          "renderedLines": 3
+        },
+        {
+          "id": "app",
+          "title": "MAIN：统一命令与授权",
+          "body": "agent-driven/composition.ts\nApprovalService / SystemLifecycleCommand\nProjectBootstrapPort / JobExecutionPort",
+          "x": 55,
+          "y": 470,
+          "w": 500,
+          "h": 180,
+          "status": "new",
+          "renderedLines": 4
+        },
+        {
+          "id": "obs",
+          "title": "BRIDGE：只读观测",
+          "body": "WorkflowEventProjector / HealthRegistry\nResourceSampler / MonitoringQuery\nEventSnapshot/Cursor / EditorViewReadPort",
+          "x": 650,
+          "y": 470,
+          "w": 500,
+          "h": 180,
+          "status": "new",
+          "renderedLines": 4
+        },
+        {
+          "id": "media",
+          "title": "MEDIA：媒体执行",
+          "body": "SnapshotRenderService / Preflight / Delivery\nResourceClaim / ProviderReceipt\n只读snapshot，产物校验后注册",
+          "x": 1245,
+          "y": 470,
+          "w": 500,
+          "h": 180,
+          "status": "new",
+          "renderedLines": 4
+        },
+        {
+          "id": "write",
+          "title": "MAIN：既有写核心与一般创建",
+          "body": "ProjectCreationService（拟projects路径）\nCoordinator / Impact / Lock / Adoption / History\nAssetRegister / EnginePort",
+          "x": 55,
+          "y": 790,
+          "w": 500,
+          "h": 180,
+          "status": "modify",
+          "renderedLines": 4
+        },
+        {
+          "id": "store",
+          "title": "MAIN：共享存储接缝",
+          "body": "RevisionStore / Job / Outbox / SnapshotStore\nCreativeRepositoryPort；新表同库迁移\nproducer所有权不等于DDL/注册权",
+          "x": 650,
+          "y": 790,
+          "w": 500,
+          "h": 180,
+          "status": "modify",
+          "renderedLines": 4
+        },
+        {
+          "id": "creative",
+          "title": "PRODUCT：创作对象",
+          "body": "Task / ArtifactRevision / Question / Decision\nWorkflowService / SelectionContext读模型\n版本DAG不是第二条timeline",
+          "x": 1245,
+          "y": 790,
+          "w": 500,
+          "h": 180,
+          "status": "new",
+          "renderedLines": 4
+        }
+      ],
+      "edges": [
+        {
+          "source": "ui",
+          "target": "app",
+          "label": "同一应用命令",
+          "sides": null
+        },
+        {
+          "source": "app",
+          "target": "write",
+          "label": "授权后受控写",
+          "sides": null
+        },
+        {
+          "source": "bridge",
+          "target": "app",
+          "label": "HostClient映射",
+          "sides": [
+            "bottom",
+            "top"
+          ],
+          "labelAt": [
+            820,
+            390
+          ]
+        },
+        {
+          "source": "provider",
+          "target": "media",
+          "label": "受控结果与receipt",
+          "sides": null
+        },
+        {
+          "source": "media",
+          "target": "creative",
+          "label": "Asset/Artifact引用",
+          "sides": null
+        },
+        {
+          "source": "write",
+          "target": "store",
+          "label": "同库事务",
+          "sides": null
+        },
+        {
+          "source": "store",
+          "target": "obs",
+          "label": "只读事实投影",
+          "sides": null
+        },
+        {
+          "source": "obs",
+          "target": "ui",
+          "label": "事件与健康",
+          "sides": [
+            "left",
+            "right"
+          ],
+          "labelAt": [
+            603,
+            520
+          ]
+        }
+      ]
+    },
+    {
+      "name": "05 事务 数据权威 并发与恢复",
+      "width": 1800,
+      "height": 1170,
+      "nodes": [
+        {
+          "id": "context",
+          "title": "读取上下文",
+          "body": "project/base/selection\n所选产物版本",
+          "x": 40,
+          "y": 145,
+          "w": 220,
+          "h": 210,
+          "status": "new",
+          "renderedLines": 4
+        },
+        {
+          "id": "prepare",
+          "title": "准备候选",
+          "body": "Job→proxy/native plan\nsource/revision不变",
+          "x": 290,
+          "y": 145,
+          "w": 220,
+          "h": 210,
+          "status": "existing",
+          "renderedLines": 4
+        },
+        {
+          "id": "impact",
+          "title": "服务器影响",
+          "body": "重查source/rights/锁\n生成server hash",
+          "x": 540,
+          "y": 145,
+          "w": 220,
+          "h": 210,
+          "status": "existing",
+          "renderedLines": 4
+        },
+        {
+          "id": "approval",
+          "title": "可信批准",
+          "body": "project/action/base/hash\n期限与授权范围",
+          "x": 790,
+          "y": 145,
+          "w": 220,
+          "h": 210,
+          "status": "new",
+          "renderedLines": 4
+        },
+        {
+          "id": "publish",
+          "title": "受控提交",
+          "body": "最终重验→stage/publish\njournal收敛",
+          "x": 1040,
+          "y": 145,
+          "w": 220,
+          "h": 210,
+          "status": "modify",
+          "renderedLines": 4
+        },
+        {
+          "id": "commit",
+          "title": "原子事实",
+          "body": "revision+1 / active_commit\n幂等/approval/outbox",
+          "x": 1290,
+          "y": 145,
+          "w": 220,
+          "h": 210,
+          "status": "modify",
+          "renderedLines": 4
+        },
+        {
+          "id": "ack",
+          "title": "编辑区确认",
+          "body": "真实native loaded回报\n未确认仍待同步",
+          "x": 1540,
+          "y": 145,
+          "w": 220,
+          "h": 210,
+          "status": "modify",
+          "renderedLines": 4
+        },
+        {
+          "id": "dag",
+          "title": "创作与任务版本分离",
+          "body": "creative_artifact/workflow/decision是拟新增创作事实；Job/attempt/lease已存在底座。它们不自行增加影片revision，也不能恢复另一份timeline。",
+          "x": 55,
+          "y": 440,
+          "w": 520,
+          "h": 195,
+          "status": "new",
+          "renderedLines": 4
+        },
+        {
+          "id": "db",
+          "title": "既有工程事实保持",
+          "body": "project_state、project_transaction、active_commit、snapshot、journal、outbox。pointer实际在active_commit；每项目单引擎。新表由MAIN在同连接迁移。",
+          "x": 635,
+          "y": 440,
+          "w": 520,
+          "h": 195,
+          "status": "existing",
+          "renderedLines": 4
+        },
+        {
+          "id": "resource",
+          "title": "driver / resource / provider三类边界",
+          "body": "DriverSession限制编排权；worker lease限制执行；ResourceClaim分IO/CPU/RAM/GPU；provider未知结果先对账。失联不贸然卸载/重提。",
+          "x": 1215,
+          "y": 440,
+          "w": 520,
+          "h": 195,
+          "status": "new",
+          "renderedLines": 4
+        },
+        {
+          "id": "recovery",
+          "title": "恢复序列与故障矩阵",
+          "body": "保留现有：import/legacy→OpenFilm装配→history/adoption/history→通用Coordinator→migration→materialize→outbox。新建/外部受理/prepare/发布/DB前后/native未确认/进程退出逐边界测试；0或+1，无分叉。",
+          "x": 55,
+          "y": 740,
+          "w": 1055,
+          "h": 210,
+          "status": "modify",
+          "renderedLines": 3
+        },
+        {
+          "id": "cancel",
+          "title": "取消与回退",
+          "body": "准备取消后晚到不采用；prepared后按journal收敛。内容回退仅restore新revision；关UI不删工程。未知费用/结果保留，不凭猜测记0。",
+          "x": 1170,
+          "y": 740,
+          "w": 565,
+          "h": 210,
+          "status": "risk",
+          "renderedLines": 3
+        }
+      ],
+      "edges": [
+        {
+          "source": "context",
+          "target": "prepare",
+          "label": "",
+          "sides": null
+        },
+        {
+          "source": "prepare",
+          "target": "impact",
+          "label": "",
+          "sides": null
+        },
+        {
+          "source": "impact",
+          "target": "approval",
+          "label": "",
+          "sides": null
+        },
+        {
+          "source": "approval",
+          "target": "publish",
+          "label": "",
+          "sides": null
+        },
+        {
+          "source": "publish",
+          "target": "commit",
+          "label": "",
+          "sides": null
+        },
+        {
+          "source": "commit",
+          "target": "ack",
+          "label": "",
+          "sides": null
+        }
+      ]
+    },
+    {
+      "name": "06 开发计划 依赖与里程碑",
+      "width": 1900,
+      "height": 1874,
+      "nodes": [
+        {
+          "id": "milestones",
+          "title": "DOC-G0 → CP-A0 → A-EXIT → B-EXIT → C-EXIT",
+          "body": "文档审查与用户批准后才发实施release；A真实短片，B协作完整制作，C三端/长片/全规格。模块级自动接线检查，阶段末统一外审与人验，不反复逐模块求批准。",
+          "x": 50,
+          "y": 135,
+          "w": 1800,
+          "h": 150,
+          "status": "note",
+          "renderedLines": 2
+        },
+        {
+          "id": "IT-P01",
+          "title": "IT-P01 / AD-S0 / PLANNED",
+          "body": "交互原型、需求与实现差距、用户核对闭环\n前置：无；owner：main；验收：DOC-PROTOTYPE",
+          "x": 50,
+          "y": 330,
+          "w": 1800,
+          "h": 80,
+          "status": "modify",
+          "renderedLines": 3
+        },
+        {
+          "id": "IT-P02",
+          "title": "IT-P02 / AD-S0 / PLANNED",
+          "body": "首轮合同/DDL/测试/回退、内部及独立文档审查、明确实现授权\n前置：IT-P01；owner：main；验收：DOC-CONTRACT",
+          "x": 50,
+          "y": 414,
+          "w": 1800,
+          "h": 80,
+          "status": "new",
+          "renderedLines": 3
+        },
+        {
+          "id": "IT-A01",
+          "title": "IT-A01 / AD-S1 / PLANNED",
+          "body": "生产实例supervisor、持久目录/启动停止、基础服务就绪与健康TTL\n前置：IT-P02；owner：bridge；验收：AD-T01,AD-T32,AD-T34",
+          "x": 50,
+          "y": 498,
+          "w": 1800,
+          "h": 80,
+          "status": "new",
+          "renderedLines": 3
+        },
+        {
+          "id": "IT-A02",
+          "title": "IT-A02 / AD-S1 / PLANNED",
+          "body": "MCP façade/能力目录、入口Skill、首端真实连接与三端探针\n前置：IT-P02；owner：bridge；验收：AD-T02,AD-T03,AD-T04,AD-T22",
+          "x": 50,
+          "y": 582,
+          "w": 1800,
+          "h": 80,
+          "status": "new",
+          "renderedLines": 3
+        },
+        {
+          "id": "IT-A03",
+          "title": "IT-A03 / AD-S1 / PLANNED",
+          "body": "公共创作合同/事件快照游标、提问回答、任务幂等/恢复接缝、Comfy只读目录\n前置：IT-P02；owner：main；验收：AD-T09,AD-T26,AD-T27,AD-T33",
+          "x": 50,
+          "y": 666,
+          "w": 1800,
+          "h": 80,
+          "status": "new",
+          "renderedLines": 3
+        },
+        {
+          "id": "IT-A04",
+          "title": "IT-A04 / AD-S2 / PLANNED",
+          "body": "一般项目创建/Resolver、初始snapshot、Agent简报与结构化脚本/分镜入库（不新建前端）\n前置：IT-A01,IT-A03；owner：main；验收：AD-T05,AD-T07,AD-T27",
+          "x": 50,
+          "y": 750,
+          "w": 1800,
+          "h": 80,
+          "status": "new",
+          "renderedLines": 3
+        },
+        {
+          "id": "IT-A05",
+          "title": "IT-A05 / AD-S2 / PLANNED",
+          "body": "本地资产/录音→所选分镜→原生可编辑工程、只读实时业务图/审批、最小局部修改\n前置：IT-A02,IT-A03,IT-A04；owner：product；验收：AD-T06,AD-T10,AD-T11,AD-T33,AD-T12,AD-T15",
+          "x": 50,
+          "y": 834,
+          "w": 1800,
+          "h": 80,
+          "status": "new",
+          "renderedLines": 3
+        },
+        {
+          "id": "IT-A06",
+          "title": "IT-A06 / AD-S2 / PLANNED",
+          "body": "committed snapshot渲染/QC/持久交付、关服重开/中断/改单镜双导出，首轮冻结\n前置：IT-A01,IT-A02,IT-A04,IT-A05；owner：media；验收：AD-T06,AD-T07,AD-T08,AD-T09,AD-T20,AD-T35",
+          "x": 50,
+          "y": 918,
+          "w": 1800,
+          "h": 80,
+          "status": "new",
+          "renderedLines": 3
+        },
+        {
+          "id": "IT-B01",
+          "title": "IT-B01 / AD-S3 / PLANNED",
+          "body": "3–6任意选案与真实前后对比、NodeInspector/产物编辑、依赖影响与局部重算\n前置：IT-A06；owner：product；验收：AD-T10,AD-T11,AD-T15,AD-T27,AD-T31",
+          "x": 50,
+          "y": 1002,
+          "w": 1800,
+          "h": 80,
+          "status": "new",
+          "renderedLines": 3
+        },
+        {
+          "id": "IT-B02",
+          "title": "IT-B02 / AD-S3 / PLANNED",
+          "body": "DriverSession/fencing、三类锁与审批、IO/CPU子任务并行、冲突/取消/恢复\n前置：IT-A06；owner：main；验收：AD-T12,AD-T13,AD-T14,AD-T28,AD-T31",
+          "x": 50,
+          "y": 1086,
+          "w": 1800,
+          "h": 80,
+          "status": "new",
+          "renderedLines": 3
+        },
+        {
+          "id": "IT-B03",
+          "title": "IT-B03 / AD-S3 / PLANNED",
+          "body": "完整监控面板、队列/资源/告警与节点关联、实时事件重连与故障恢复\n前置：IT-A06；owner：bridge；验收：AD-T01,AD-T03,AD-T04,AD-T15,AD-T32,AD-T33,AD-T34,AD-T35",
+          "x": 50,
+          "y": 1170,
+          "w": 1800,
+          "h": 80,
+          "status": "new",
+          "renderedLines": 3
+        },
+        {
+          "id": "IT-B04",
+          "title": "IT-B04 / AD-S4 / PLANNED",
+          "body": "分阶段AssetPlan/下载、Comfy固定一图一视频与后期、GPU资源池/异步子job、概念与转场\n前置：IT-B01,IT-B02,IT-B03；owner：media；验收：AD-T16,AD-T18,AD-T26,AD-T28,AD-T29,AD-T30",
+          "x": 50,
+          "y": 1254,
+          "w": 1800,
+          "h": 80,
+          "status": "new",
+          "renderedLines": 3
+        },
+        {
+          "id": "IT-B05",
+          "title": "IT-B05 / AD-S4 / PLANNED",
+          "body": "本人录音/授权TTS/ASR/字幕对齐与音频锁、真实时长/采样/费用与未知结果\n前置：IT-B02,IT-B03；owner：media；验收：AD-T17,AD-T18,AD-T29,AD-T32",
+          "x": 50,
+          "y": 1338,
+          "w": 1800,
+          "h": 80,
+          "status": "new",
+          "renderedLines": 3
+        },
+        {
+          "id": "IT-B06",
+          "title": "IT-B06 / AD-S4 / PLANNED",
+          "body": "8标题/4封面、全QC/来源许可/交付包、候选独立审查与人工闭环\n前置：IT-B01,IT-B03,IT-B04,IT-B05；owner：main；验收：AD-T19,AD-T20,AD-T25,AD-T30,AD-T35",
+          "x": 50,
+          "y": 1422,
+          "w": 1800,
+          "h": 80,
+          "status": "new",
+          "renderedLines": 3
+        },
+        {
+          "id": "IT-C01",
+          "title": "IT-C01 / AD-S5 / PLANNED",
+          "body": "StyleProfile/局部override/回滚、评论锚点、原PRD后期操作逐项补齐\n前置：IT-B06；owner：product；验收：AD-T11,AD-T12,AD-T14,AD-T23",
+          "x": 50,
+          "y": 1506,
+          "w": 1800,
+          "h": 80,
+          "status": "new",
+          "renderedLines": 3
+        },
+        {
+          "id": "IT-C02",
+          "title": "IT-C02 / AD-S5 / PLANNED",
+          "body": "三驱动真实接力、10–15分钟母片/3–5分钟章节/跨章重算与性能故障矩阵\n前置：IT-B06；owner：main；验收：AD-T09,AD-T13,AD-T21,AD-T22,AD-T24,AD-T28,AD-T31,AD-T35",
+          "x": 50,
+          "y": 1590,
+          "w": 1800,
+          "h": 80,
+          "status": "new",
+          "renderedLines": 3
+        },
+        {
+          "id": "IT-C03",
+          "title": "IT-C03 / AD-S5 / PLANNED",
+          "body": "P0/P1/NFR/21体验逐项总审计、全量实证/独立外审/人工签署与Git同步\n前置：IT-C01,IT-C02；owner：main；验收：AD-T01..35（逐项全覆盖）",
+          "x": 50,
+          "y": 1674,
+          "w": 1800,
+          "h": 96,
+          "status": "new",
+          "renderedLines": 3
+        }
+      ],
+      "edges": []
+    },
+    {
+      "name": "07 用户场景 验收门限与出门",
+      "width": 1800,
+      "height": 1290,
+      "nodes": [
+        {
+          "id": "ux01",
+          "title": "R4-UX-01 原工作台与唯一选择/时钟",
+          "body": "新面板开关前后可播放/精剪；selection、草稿、版本不重置",
+          "x": 50,
+          "y": 145,
+          "w": 1060,
+          "h": 70,
+          "status": "verify",
+          "renderedLines": 2
+        },
+        {
+          "id": "ux02",
+          "title": "R4-UX-02 完整改单镜决策链",
+          "body": "目标→候选→差异→核对→确认→同步→继续；不手填内部ID",
+          "x": 50,
+          "y": 221,
+          "w": 1060,
+          "h": 70,
+          "status": "verify",
+          "renderedLines": 2
+        },
+        {
+          "id": "ux03",
+          "title": "R4-UX-03 真实当前与候选比较",
+          "body": "所选proposal/preview/版本匹配；比较revision+0；最终3–6案均可选",
+          "x": 50,
+          "y": 297,
+          "w": 1060,
+          "h": 70,
+          "status": "verify",
+          "renderedLines": 2
+        },
+        {
+          "id": "ux04",
+          "title": "R4-UX-04 可信确认与最终重验",
+          "body": "base/锁/许可/impact/approval负向+0；成功恰好+1",
+          "x": 50,
+          "y": 373,
+          "w": 1060,
+          "h": 70,
+          "status": "verify",
+          "renderedLines": 2
+        },
+        {
+          "id": "ux05",
+          "title": "R4-UX-05 提交与native确认分开",
+          "body": "延迟native ack时显示待同步，不能填Host值作成功",
+          "x": 50,
+          "y": 449,
+          "w": 1060,
+          "h": 70,
+          "status": "verify",
+          "renderedLines": 2
+        },
+        {
+          "id": "ux06",
+          "title": "R4-UX-06 局部返工与取消晚到",
+          "body": "仅相关范围重算；保留旁白/时长；晚到不自动采用",
+          "x": 50,
+          "y": 525,
+          "w": 1060,
+          "h": 70,
+          "status": "verify",
+          "renderedLines": 2
+        },
+        {
+          "id": "ux07",
+          "title": "R4-UX-07 顶部横向工作流",
+          "body": "折叠仍有当前事项；展开定位当前步；真实事件p95≤2秒",
+          "x": 50,
+          "y": 601,
+          "w": 1060,
+          "h": 70,
+          "status": "verify",
+          "renderedLines": 2
+        },
+        {
+          "id": "ux08",
+          "title": "R4-UX-08 非模态系统控制",
+          "body": "无遮罩/焦点锁、不遮导演栏；打开仍可编辑，关闭仅收起",
+          "x": 50,
+          "y": 677,
+          "w": 1060,
+          "h": 70,
+          "status": "verify",
+          "renderedLines": 2
+        },
+        {
+          "id": "ux09",
+          "title": "R4-UX-09 真实模型与资源状态",
+          "body": "请求/加载/预热/就绪分开；活动/未知任务不越权卸载",
+          "x": 50,
+          "y": 753,
+          "w": 1060,
+          "h": 70,
+          "status": "verify",
+          "renderedLines": 2
+        },
+        {
+          "id": "ux10",
+          "title": "R4-UX-10 阻塞/断线/过期/未知",
+          "body": "保存草稿、重核原任务；检查不变成重提/重复扣费",
+          "x": 50,
+          "y": 829,
+          "w": 1060,
+          "h": 70,
+          "status": "verify",
+          "renderedLines": 2
+        },
+        {
+          "id": "ux11",
+          "title": "R4-UX-11 布局与可访问",
+          "body": "1440×900/1366×768；390审阅模式；方向键/焦点/播报",
+          "x": 50,
+          "y": 905,
+          "w": 1060,
+          "h": 70,
+          "status": "verify",
+          "renderedLines": 2
+        },
+        {
+          "id": "ux12",
+          "title": "R4-UX-12 真实人验与交付",
+          "body": "实际改单镜、重开、snapshot绑定双导出与完整decode；用户签署",
+          "x": 50,
+          "y": 981,
+          "w": 1060,
+          "h": 70,
+          "status": "verify",
+          "renderedLines": 2
+        },
+        {
+          "id": "A",
+          "title": "A人验：能带走真实短片",
+          "body": "启动→新主题/授权素材与录音→60–180秒可编辑初稿→拒绝/采用改单镜→关服重开→双导出。仅签短片范围；未完成AI/多案明确列出。",
+          "x": 1170,
+          "y": 145,
+          "w": 565,
+          "h": 240,
+          "status": "verify",
+          "renderedLines": 3
+        },
+        {
+          "id": "B",
+          "title": "B人验：完整制作与协作",
+          "body": "任意选案/产物改版/局部重算→并行与接管→固定一图一短视频/声音字幕→8标题4封面→QC阻断/修复→完整交付。",
+          "x": 1170,
+          "y": 455,
+          "w": 565,
+          "h": 240,
+          "status": "verify",
+          "renderedLines": 3
+        },
+        {
+          "id": "C",
+          "title": "C人验：完整V1",
+          "body": "10–15分钟100+镜母片、3–5分钟20+镜章节、3处局部修改；三端标准链接力。全P0/P1/NFR/21体验/35族+独立外审和人验才Full。",
+          "x": 1170,
+          "y": 765,
+          "w": 565,
+          "h": 265,
+          "status": "verify",
+          "renderedLines": 3
+        },
+        {
+          "id": "evidence",
+          "title": "逐项证据与当前状态",
+          "body": "35个AD-T族详见04_ACCEPTANCE_SCENARIOS.md：每族有场景、步骤、阈值、owner与证据。当前产品全部NOT_RUN；原型PASS不能涂绿产品。Headless与人工记录分列。",
+          "x": 50,
+          "y": 1100,
+          "w": 1685,
+          "h": 115,
+          "status": "note",
+          "renderedLines": 2
+        }
+      ],
+      "edges": []
+    },
+    {
+      "name": "08 架构风险 回退 与实现准入",
+      "width": 1800,
+      "height": 1430,
+      "nodes": [
+        {
+          "id": "R01",
+          "title": "R01 一般新建/旧演示入口",
+          "body": "ProjectCreationService+origin，失败隔离补偿；关闭新建，不伪造migration；责任：MAIN",
+          "x": 50,
+          "y": 145,
+          "w": 1685,
+          "h": 70,
+          "status": "risk",
+          "renderedLines": 2
+        },
+        {
+          "id": "R02",
+          "title": "R02 正式render仍未开放",
+          "body": "真实snapshot render+decode+双导出；无真证据不签导出完成；责任：MAIN+MEDIA",
+          "x": 50,
+          "y": 221,
+          "w": 1685,
+          "h": 70,
+          "status": "risk",
+          "renderedLines": 2
+        },
+        {
+          "id": "R03",
+          "title": "R03 双事实/裸写绕过",
+          "body": "单Host/库/引擎/Coordinator，原生allowlist；停新入口保留旧工程；责任：MAIN",
+          "x": 50,
+          "y": 297,
+          "w": 1685,
+          "h": 70,
+          "status": "risk",
+          "renderedLines": 2
+        },
+        {
+          "id": "R04",
+          "title": "R04 批准伪造/过期复用",
+          "body": "可信身份、project/action/base/hash/expiry、原子consume；撤未消费授权；责任：MAIN",
+          "x": 50,
+          "y": 373,
+          "w": 1685,
+          "h": 70,
+          "status": "risk",
+          "renderedLines": 2
+        },
+        {
+          "id": "R05",
+          "title": "R05 Host提交冒充画面同步",
+          "body": "原生版本回报独立，缺ack显示待同步/unknown；不能代填；责任：MAIN+PRODUCT",
+          "x": 50,
+          "y": 449,
+          "w": 1685,
+          "h": 70,
+          "status": "risk",
+          "renderedLines": 2
+        },
+        {
+          "id": "R06",
+          "title": "R06 卸载/新任务/失联竞争",
+          "body": "资源与归属原子检查，未知先核实；停危险动作，不清共享队列；责任：MAIN+MEDIA",
+          "x": 50,
+          "y": 525,
+          "w": 1685,
+          "h": 70,
+          "status": "risk",
+          "renderedLines": 2
+        },
+        {
+          "id": "R07",
+          "title": "R07 外部受理未知与重复扣费",
+          "body": "provider receipt/ID对账；unknown不重提，晚到隔离；责任：MEDIA",
+          "x": 50,
+          "y": 601,
+          "w": 1685,
+          "h": 70,
+          "status": "risk",
+          "renderedLines": 2
+        },
+        {
+          "id": "R08",
+          "title": "R08 DDL升级/专项恢复顺序",
+          "body": "旧库副本+新库+中断重开；不删库回退，必要时只读/导出恢复；责任：MAIN",
+          "x": 50,
+          "y": 677,
+          "w": 1685,
+          "h": 70,
+          "status": "risk",
+          "renderedLines": 2
+        },
+        {
+          "id": "R09",
+          "title": "R09 下载/任意图/模型路径越权",
+          "body": "固定模板/配置、SSRF/大小/许可/授权；停能力保留已验资产；责任：MEDIA",
+          "x": 50,
+          "y": 753,
+          "w": 1685,
+          "h": 70,
+          "status": "risk",
+          "renderedLines": 2
+        },
+        {
+          "id": "R10",
+          "title": "R10 合同/所有权漂移",
+          "body": "CP hash、producer/consumer/注册owner分离；先CCR，不放宽schema；责任：MAIN",
+          "x": 50,
+          "y": 829,
+          "w": 1685,
+          "h": 70,
+          "status": "risk",
+          "renderedLines": 2
+        },
+        {
+          "id": "R11",
+          "title": "R11 资源耗尽/关库晚回调",
+          "body": "有限并行、全机预约、停止心跳/排空后关DB；保留原失败原因；责任：MAIN+MEDIA",
+          "x": 50,
+          "y": 905,
+          "w": 1685,
+          "h": 70,
+          "status": "risk",
+          "renderedLines": 2
+        },
+        {
+          "id": "R12",
+          "title": "R12 短片/禁用项冒充完整V1",
+          "body": "13P0/6P1/6NFR/AD-E/AD-T/R4逐项真证；阶段范围不替代Full；责任：MAIN",
+          "x": 50,
+          "y": 981,
+          "w": 1685,
+          "h": 70,
+          "status": "risk",
+          "renderedLines": 2
+        },
+        {
+          "id": "release",
+          "title": "当前唯一允许：继续文档闭环与人类审图",
+          "body": "已批准R4体验；精确CP-A0仍待冻结，真实provider/三端/性能预算待阶段探针；没有用户实施批准与MAIN ReleaseAssignment，不启动产品代码。Git不reset、不force push，不覆盖用户dirty工作。",
+          "x": 50,
+          "y": 1100,
+          "w": 1685,
+          "h": 180,
+          "status": "note",
+          "renderedLines": 2
+        }
+      ],
+      "edges": []
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "ok": false,
+  "command": "validate",
+  "stage": "render",
+  "type": "architecture",
+  "input": "/mnt/c/workspace/videoworkline/Narralens/docs/agent-driven-v1/implementation-design/target-l0.architecture.json",
+  "error": "Architecture layout validation failed:\n- Label \"准备·不写工程\" overlaps component \"application\" — adjust labelDx/labelDy/labelSegment or set labelAt.\n  label rect: [826, 370, 72, 14]\n  component \"application\" rect: [740, 300, 245, 90]\n  Suggested fix: labelAt [863, 404] or labelDy +24 (below); or labelAt [863, 296] or labelDy -84 (above)\n- Label \"日志·快照·恢复\" overlaps component \"coordinator\" — adjust labelDx/labelDy/labelSegment or set labelAt.\n  label rect: [1174, 370, 77, 14]\n  component \"coordinator\" rect: [1090, 300, 245, 90]\n  Suggested fix: labelAt [1213, 404] or labelDy +24 (below); or labelAt [1213, 296] or labelDy -84 (above)",
+  "diagnostics": [
+    {
+      "code": "layout/constraint",
+      "severity": "error",
+      "message": "Label \"准备·不写工程\" overlaps component \"application\" — adjust labelDx/labelDy/labelSegment or set labelAt.\n  label rect: [826, 370, 72, 14]\n  component \"application\" rect: [740, 300, 245, 90]\n  Suggested fix: labelAt [863, 404] or labelDy +24 (below); or labelAt [863, 296] or labelDy -84 (above)",
+      "subject": {
+        "diagramType": "architecture"
+      },
+      "evidence": {},
+      "supportedFixes": []
+    },
+    {
+      "code": "layout/constraint",
+      "severity": "error",
+      "message": "Label \"日志·快照·恢复\" overlaps component \"coordinator\" — adjust labelDx/labelDy/labelSegment or set labelAt.\n  label rect: [1174, 370, 77, 14]\n  component \"coordinator\" rect: [1090, 300, 245, 90]\n  Suggested fix: labelAt [1213, 404] or labelDy +24 (below); or labelAt [1213, 296] or labelDy -84 (above)",
+      "subject": {
+        "diagramType": "architecture"
+      },
+      "evidence": {},
+      "supportedFixes": []
+    }
+  ]
+}

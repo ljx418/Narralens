@@ -1,0 +1,840 @@
+{
+  "status": "PASS_DOCUMENT_CONTRACT_ONLY",
+  "executed_at": "2026-11-09T10:36:45.680Z",
+  "command": "node docs/agent-driven-v1/cp-a0/contract-check.mjs",
+  "ajv": "8.18.0 (existing repo dependency)",
+  "schema_definitions": 80,
+  "route_count": 31,
+  "vector_count": 1335,
+  "policy_count": 161,
+  "policyCases": [
+    {
+      "id": "cursor:signed_valid",
+      "expected": "ALLOW",
+      "actual": "ALLOW"
+    },
+    {
+      "id": "cursor:raw_number",
+      "expected": "INVALID_REQUEST",
+      "actual": "INVALID_REQUEST"
+    },
+    {
+      "id": "cursor:tampered",
+      "expected": "ORIGIN_REJECTED",
+      "actual": "ORIGIN_REJECTED"
+    },
+    {
+      "id": "cursor:wrong_principal_id",
+      "expected": "ORIGIN_REJECTED",
+      "actual": "ORIGIN_REJECTED"
+    },
+    {
+      "id": "cursor:wrong_project_id",
+      "expected": "ORIGIN_REJECTED",
+      "actual": "ORIGIN_REJECTED"
+    },
+    {
+      "id": "cursor:wrong_filter_digest",
+      "expected": "ORIGIN_REJECTED",
+      "actual": "ORIGIN_REJECTED"
+    },
+    {
+      "id": "cursor:wrong_instance_generation",
+      "expected": "ORIGIN_REJECTED",
+      "actual": "ORIGIN_REJECTED"
+    },
+    {
+      "id": "cursor:expired",
+      "expected": "CURSOR_EXPIRED",
+      "actual": "CURSOR_EXPIRED"
+    },
+    {
+      "id": "native:exact",
+      "expected": "ALLOW",
+      "actual": "ALLOW"
+    },
+    {
+      "id": "native:agent_spoof",
+      "expected": "ORIGIN_REJECTED",
+      "actual": "ORIGIN_REJECTED"
+    },
+    {
+      "id": "native:mismatch_project_id",
+      "expected": "NATIVE_ACK_STALE",
+      "actual": "NATIVE_ACK_STALE"
+    },
+    {
+      "id": "native:mismatch_bridge_session_id",
+      "expected": "NATIVE_ACK_STALE",
+      "actual": "NATIVE_ACK_STALE"
+    },
+    {
+      "id": "native:mismatch_instance_generation",
+      "expected": "NATIVE_ACK_STALE",
+      "actual": "NATIVE_ACK_STALE"
+    },
+    {
+      "id": "native:mismatch_loaded_project_revision",
+      "expected": "NATIVE_ACK_STALE",
+      "actual": "NATIVE_ACK_STALE"
+    },
+    {
+      "id": "native:mismatch_loaded_snapshot_id",
+      "expected": "NATIVE_ACK_STALE",
+      "actual": "NATIVE_ACK_STALE"
+    },
+    {
+      "id": "native:mismatch_source_digest",
+      "expected": "NATIVE_ACK_STALE",
+      "actual": "NATIVE_ACK_STALE"
+    },
+    {
+      "id": "review:valid",
+      "expected": "ALLOW",
+      "actual": "ALLOW"
+    },
+    {
+      "id": "review:relay",
+      "expected": "ORIGIN_REJECTED",
+      "actual": "ORIGIN_REJECTED"
+    },
+    {
+      "id": "review:changed_project_id",
+      "expected": "REVIEW_STALE",
+      "actual": "REVIEW_STALE"
+    },
+    {
+      "id": "review:changed_run_id",
+      "expected": "REVIEW_STALE",
+      "actual": "REVIEW_STALE"
+    },
+    {
+      "id": "review:changed_input_digest",
+      "expected": "REVIEW_STALE",
+      "actual": "REVIEW_STALE"
+    },
+    {
+      "id": "review:changed_output_digest",
+      "expected": "REVIEW_STALE",
+      "actual": "REVIEW_STALE"
+    },
+    {
+      "id": "review:changed_quality_digest",
+      "expected": "REVIEW_STALE",
+      "actual": "REVIEW_STALE"
+    },
+    {
+      "id": "review:adopt_without_impact",
+      "expected": "IMPACT_REQUIRED",
+      "actual": "IMPACT_REQUIRED"
+    },
+    {
+      "id": "review:adopt_bound_impact",
+      "expected": "ALLOW",
+      "actual": "ALLOW"
+    },
+    {
+      "id": "review:identical_reuse",
+      "expected": true,
+      "actual": true
+    },
+    {
+      "id": "review:changed_quality_no_reuse",
+      "expected": false,
+      "actual": false
+    },
+    {
+      "id": "workflow.start:valid",
+      "expected": "ALLOW",
+      "actual": "ALLOW"
+    },
+    {
+      "id": "workflow.start:sample_pending",
+      "expected": "RUN_GATE_BLOCKED",
+      "actual": "RUN_GATE_BLOCKED"
+    },
+    {
+      "id": "workflow.start:first_chapter_pending",
+      "expected": "RUN_GATE_BLOCKED",
+      "actual": "RUN_GATE_BLOCKED"
+    },
+    {
+      "id": "workflow.start:risk_pending",
+      "expected": "RUN_GATE_BLOCKED",
+      "actual": "RUN_GATE_BLOCKED"
+    },
+    {
+      "id": "workflow.start:revoked",
+      "expected": "APPROVAL_REQUIRED",
+      "actual": "APPROVAL_REQUIRED"
+    },
+    {
+      "id": "workflow.start:old_plan",
+      "expected": "RUN_SCOPE_REQUIRED",
+      "actual": "RUN_SCOPE_REQUIRED"
+    },
+    {
+      "id": "workflow.start:other_run",
+      "expected": "RUN_SCOPE_REQUIRED",
+      "actual": "RUN_SCOPE_REQUIRED"
+    },
+    {
+      "id": "workflow.start:unknown_receipt",
+      "expected": "PROVIDER_RESULT_UNKNOWN",
+      "actual": "PROVIDER_RESULT_UNKNOWN"
+    },
+    {
+      "id": "workflow.start:barrier",
+      "expected": "RUN_GATE_BLOCKED",
+      "actual": "RUN_GATE_BLOCKED"
+    },
+    {
+      "id": "task.prepare:valid",
+      "expected": "ALLOW",
+      "actual": "ALLOW"
+    },
+    {
+      "id": "task.prepare:sample_pending",
+      "expected": "RUN_GATE_BLOCKED",
+      "actual": "RUN_GATE_BLOCKED"
+    },
+    {
+      "id": "task.prepare:first_chapter_pending",
+      "expected": "RUN_GATE_BLOCKED",
+      "actual": "RUN_GATE_BLOCKED"
+    },
+    {
+      "id": "task.prepare:risk_pending",
+      "expected": "RUN_GATE_BLOCKED",
+      "actual": "RUN_GATE_BLOCKED"
+    },
+    {
+      "id": "task.prepare:revoked",
+      "expected": "APPROVAL_REQUIRED",
+      "actual": "APPROVAL_REQUIRED"
+    },
+    {
+      "id": "task.prepare:old_plan",
+      "expected": "RUN_SCOPE_REQUIRED",
+      "actual": "RUN_SCOPE_REQUIRED"
+    },
+    {
+      "id": "task.prepare:other_run",
+      "expected": "RUN_SCOPE_REQUIRED",
+      "actual": "RUN_SCOPE_REQUIRED"
+    },
+    {
+      "id": "task.prepare:unknown_receipt",
+      "expected": "PROVIDER_RESULT_UNKNOWN",
+      "actual": "PROVIDER_RESULT_UNKNOWN"
+    },
+    {
+      "id": "task.prepare:barrier",
+      "expected": "RUN_GATE_BLOCKED",
+      "actual": "RUN_GATE_BLOCKED"
+    },
+    {
+      "id": "ui.prepare:valid",
+      "expected": "ALLOW",
+      "actual": "ALLOW"
+    },
+    {
+      "id": "ui.prepare:sample_pending",
+      "expected": "RUN_GATE_BLOCKED",
+      "actual": "RUN_GATE_BLOCKED"
+    },
+    {
+      "id": "ui.prepare:first_chapter_pending",
+      "expected": "RUN_GATE_BLOCKED",
+      "actual": "RUN_GATE_BLOCKED"
+    },
+    {
+      "id": "ui.prepare:risk_pending",
+      "expected": "RUN_GATE_BLOCKED",
+      "actual": "RUN_GATE_BLOCKED"
+    },
+    {
+      "id": "ui.prepare:revoked",
+      "expected": "APPROVAL_REQUIRED",
+      "actual": "APPROVAL_REQUIRED"
+    },
+    {
+      "id": "ui.prepare:old_plan",
+      "expected": "RUN_SCOPE_REQUIRED",
+      "actual": "RUN_SCOPE_REQUIRED"
+    },
+    {
+      "id": "ui.prepare:other_run",
+      "expected": "RUN_SCOPE_REQUIRED",
+      "actual": "RUN_SCOPE_REQUIRED"
+    },
+    {
+      "id": "ui.prepare:unknown_receipt",
+      "expected": "PROVIDER_RESULT_UNKNOWN",
+      "actual": "PROVIDER_RESULT_UNKNOWN"
+    },
+    {
+      "id": "ui.prepare:barrier",
+      "expected": "RUN_GATE_BLOCKED",
+      "actual": "RUN_GATE_BLOCKED"
+    },
+    {
+      "id": "child.dispatch:valid",
+      "expected": "ALLOW",
+      "actual": "ALLOW"
+    },
+    {
+      "id": "child.dispatch:sample_pending",
+      "expected": "RUN_GATE_BLOCKED",
+      "actual": "RUN_GATE_BLOCKED"
+    },
+    {
+      "id": "child.dispatch:first_chapter_pending",
+      "expected": "RUN_GATE_BLOCKED",
+      "actual": "RUN_GATE_BLOCKED"
+    },
+    {
+      "id": "child.dispatch:risk_pending",
+      "expected": "RUN_GATE_BLOCKED",
+      "actual": "RUN_GATE_BLOCKED"
+    },
+    {
+      "id": "child.dispatch:revoked",
+      "expected": "APPROVAL_REQUIRED",
+      "actual": "APPROVAL_REQUIRED"
+    },
+    {
+      "id": "child.dispatch:old_plan",
+      "expected": "RUN_SCOPE_REQUIRED",
+      "actual": "RUN_SCOPE_REQUIRED"
+    },
+    {
+      "id": "child.dispatch:other_run",
+      "expected": "RUN_SCOPE_REQUIRED",
+      "actual": "RUN_SCOPE_REQUIRED"
+    },
+    {
+      "id": "child.dispatch:unknown_receipt",
+      "expected": "PROVIDER_RESULT_UNKNOWN",
+      "actual": "PROVIDER_RESULT_UNKNOWN"
+    },
+    {
+      "id": "child.dispatch:barrier",
+      "expected": "RUN_GATE_BLOCKED",
+      "actual": "RUN_GATE_BLOCKED"
+    },
+    {
+      "id": "resume:valid",
+      "expected": "ALLOW",
+      "actual": "ALLOW"
+    },
+    {
+      "id": "resume:sample_pending",
+      "expected": "RUN_GATE_BLOCKED",
+      "actual": "RUN_GATE_BLOCKED"
+    },
+    {
+      "id": "resume:first_chapter_pending",
+      "expected": "RUN_GATE_BLOCKED",
+      "actual": "RUN_GATE_BLOCKED"
+    },
+    {
+      "id": "resume:risk_pending",
+      "expected": "RUN_GATE_BLOCKED",
+      "actual": "RUN_GATE_BLOCKED"
+    },
+    {
+      "id": "resume:revoked",
+      "expected": "APPROVAL_REQUIRED",
+      "actual": "APPROVAL_REQUIRED"
+    },
+    {
+      "id": "resume:old_plan",
+      "expected": "RUN_SCOPE_REQUIRED",
+      "actual": "RUN_SCOPE_REQUIRED"
+    },
+    {
+      "id": "resume:other_run",
+      "expected": "RUN_SCOPE_REQUIRED",
+      "actual": "RUN_SCOPE_REQUIRED"
+    },
+    {
+      "id": "resume:unknown_receipt",
+      "expected": "PROVIDER_RESULT_UNKNOWN",
+      "actual": "PROVIDER_RESULT_UNKNOWN"
+    },
+    {
+      "id": "resume:barrier",
+      "expected": "RUN_GATE_BLOCKED",
+      "actual": "RUN_GATE_BLOCKED"
+    },
+    {
+      "id": "retry:valid",
+      "expected": "ALLOW",
+      "actual": "ALLOW"
+    },
+    {
+      "id": "retry:sample_pending",
+      "expected": "RUN_GATE_BLOCKED",
+      "actual": "RUN_GATE_BLOCKED"
+    },
+    {
+      "id": "retry:first_chapter_pending",
+      "expected": "RUN_GATE_BLOCKED",
+      "actual": "RUN_GATE_BLOCKED"
+    },
+    {
+      "id": "retry:risk_pending",
+      "expected": "RUN_GATE_BLOCKED",
+      "actual": "RUN_GATE_BLOCKED"
+    },
+    {
+      "id": "retry:revoked",
+      "expected": "APPROVAL_REQUIRED",
+      "actual": "APPROVAL_REQUIRED"
+    },
+    {
+      "id": "retry:old_plan",
+      "expected": "RUN_SCOPE_REQUIRED",
+      "actual": "RUN_SCOPE_REQUIRED"
+    },
+    {
+      "id": "retry:other_run",
+      "expected": "RUN_SCOPE_REQUIRED",
+      "actual": "RUN_SCOPE_REQUIRED"
+    },
+    {
+      "id": "retry:unknown_receipt",
+      "expected": "PROVIDER_RESULT_UNKNOWN",
+      "actual": "PROVIDER_RESULT_UNKNOWN"
+    },
+    {
+      "id": "retry:barrier",
+      "expected": "RUN_GATE_BLOCKED",
+      "actual": "RUN_GATE_BLOCKED"
+    },
+    {
+      "id": "runtime.load:valid",
+      "expected": "CAPABILITY_UNAVAILABLE",
+      "actual": "CAPABILITY_UNAVAILABLE"
+    },
+    {
+      "id": "runtime.load:sample_pending",
+      "expected": "RUN_GATE_BLOCKED",
+      "actual": "RUN_GATE_BLOCKED"
+    },
+    {
+      "id": "runtime.load:first_chapter_pending",
+      "expected": "RUN_GATE_BLOCKED",
+      "actual": "RUN_GATE_BLOCKED"
+    },
+    {
+      "id": "runtime.load:risk_pending",
+      "expected": "RUN_GATE_BLOCKED",
+      "actual": "RUN_GATE_BLOCKED"
+    },
+    {
+      "id": "runtime.load:revoked",
+      "expected": "APPROVAL_REQUIRED",
+      "actual": "APPROVAL_REQUIRED"
+    },
+    {
+      "id": "runtime.load:old_plan",
+      "expected": "RUN_SCOPE_REQUIRED",
+      "actual": "RUN_SCOPE_REQUIRED"
+    },
+    {
+      "id": "runtime.load:other_run",
+      "expected": "RUN_SCOPE_REQUIRED",
+      "actual": "RUN_SCOPE_REQUIRED"
+    },
+    {
+      "id": "runtime.load:unknown_receipt",
+      "expected": "PROVIDER_RESULT_UNKNOWN",
+      "actual": "PROVIDER_RESULT_UNKNOWN"
+    },
+    {
+      "id": "runtime.load:barrier",
+      "expected": "RUN_GATE_BLOCKED",
+      "actual": "RUN_GATE_BLOCKED"
+    },
+    {
+      "id": "runtime.warm:valid",
+      "expected": "CAPABILITY_UNAVAILABLE",
+      "actual": "CAPABILITY_UNAVAILABLE"
+    },
+    {
+      "id": "runtime.warm:sample_pending",
+      "expected": "RUN_GATE_BLOCKED",
+      "actual": "RUN_GATE_BLOCKED"
+    },
+    {
+      "id": "runtime.warm:first_chapter_pending",
+      "expected": "RUN_GATE_BLOCKED",
+      "actual": "RUN_GATE_BLOCKED"
+    },
+    {
+      "id": "runtime.warm:risk_pending",
+      "expected": "RUN_GATE_BLOCKED",
+      "actual": "RUN_GATE_BLOCKED"
+    },
+    {
+      "id": "runtime.warm:revoked",
+      "expected": "APPROVAL_REQUIRED",
+      "actual": "APPROVAL_REQUIRED"
+    },
+    {
+      "id": "runtime.warm:old_plan",
+      "expected": "RUN_SCOPE_REQUIRED",
+      "actual": "RUN_SCOPE_REQUIRED"
+    },
+    {
+      "id": "runtime.warm:other_run",
+      "expected": "RUN_SCOPE_REQUIRED",
+      "actual": "RUN_SCOPE_REQUIRED"
+    },
+    {
+      "id": "runtime.warm:unknown_receipt",
+      "expected": "PROVIDER_RESULT_UNKNOWN",
+      "actual": "PROVIDER_RESULT_UNKNOWN"
+    },
+    {
+      "id": "runtime.warm:barrier",
+      "expected": "RUN_GATE_BLOCKED",
+      "actual": "RUN_GATE_BLOCKED"
+    },
+    {
+      "id": "new_run:valid",
+      "expected": "ALLOW",
+      "actual": "ALLOW"
+    },
+    {
+      "id": "new_run:sample_pending",
+      "expected": "RUN_GATE_BLOCKED",
+      "actual": "RUN_GATE_BLOCKED"
+    },
+    {
+      "id": "new_run:first_chapter_pending",
+      "expected": "RUN_GATE_BLOCKED",
+      "actual": "RUN_GATE_BLOCKED"
+    },
+    {
+      "id": "new_run:risk_pending",
+      "expected": "RUN_GATE_BLOCKED",
+      "actual": "RUN_GATE_BLOCKED"
+    },
+    {
+      "id": "new_run:revoked",
+      "expected": "APPROVAL_REQUIRED",
+      "actual": "APPROVAL_REQUIRED"
+    },
+    {
+      "id": "new_run:old_plan",
+      "expected": "RUN_SCOPE_REQUIRED",
+      "actual": "RUN_SCOPE_REQUIRED"
+    },
+    {
+      "id": "new_run:other_run",
+      "expected": "RUN_SCOPE_REQUIRED",
+      "actual": "RUN_SCOPE_REQUIRED"
+    },
+    {
+      "id": "new_run:unknown_receipt",
+      "expected": "PROVIDER_RESULT_UNKNOWN",
+      "actual": "PROVIDER_RESULT_UNKNOWN"
+    },
+    {
+      "id": "new_run:barrier",
+      "expected": "RUN_GATE_BLOCKED",
+      "actual": "RUN_GATE_BLOCKED"
+    },
+    {
+      "id": "change.apply:valid",
+      "expected": "ALLOW",
+      "actual": "ALLOW"
+    },
+    {
+      "id": "change.apply:sample_pending",
+      "expected": "RUN_GATE_BLOCKED",
+      "actual": "RUN_GATE_BLOCKED"
+    },
+    {
+      "id": "change.apply:first_chapter_pending",
+      "expected": "RUN_GATE_BLOCKED",
+      "actual": "RUN_GATE_BLOCKED"
+    },
+    {
+      "id": "change.apply:risk_pending",
+      "expected": "RUN_GATE_BLOCKED",
+      "actual": "RUN_GATE_BLOCKED"
+    },
+    {
+      "id": "change.apply:revoked",
+      "expected": "APPROVAL_REQUIRED",
+      "actual": "APPROVAL_REQUIRED"
+    },
+    {
+      "id": "change.apply:old_plan",
+      "expected": "RUN_SCOPE_REQUIRED",
+      "actual": "RUN_SCOPE_REQUIRED"
+    },
+    {
+      "id": "change.apply:other_run",
+      "expected": "RUN_SCOPE_REQUIRED",
+      "actual": "RUN_SCOPE_REQUIRED"
+    },
+    {
+      "id": "change.apply:unknown_receipt",
+      "expected": "PROVIDER_RESULT_UNKNOWN",
+      "actual": "PROVIDER_RESULT_UNKNOWN"
+    },
+    {
+      "id": "change.apply:barrier",
+      "expected": "RUN_GATE_BLOCKED",
+      "actual": "RUN_GATE_BLOCKED"
+    },
+    {
+      "id": "plan_change.dispatch:valid",
+      "expected": "CAPABILITY_UNAVAILABLE",
+      "actual": "CAPABILITY_UNAVAILABLE"
+    },
+    {
+      "id": "plan_change.dispatch:sample_pending",
+      "expected": "RUN_GATE_BLOCKED",
+      "actual": "RUN_GATE_BLOCKED"
+    },
+    {
+      "id": "plan_change.dispatch:first_chapter_pending",
+      "expected": "RUN_GATE_BLOCKED",
+      "actual": "RUN_GATE_BLOCKED"
+    },
+    {
+      "id": "plan_change.dispatch:risk_pending",
+      "expected": "RUN_GATE_BLOCKED",
+      "actual": "RUN_GATE_BLOCKED"
+    },
+    {
+      "id": "plan_change.dispatch:revoked",
+      "expected": "APPROVAL_REQUIRED",
+      "actual": "APPROVAL_REQUIRED"
+    },
+    {
+      "id": "plan_change.dispatch:old_plan",
+      "expected": "RUN_SCOPE_REQUIRED",
+      "actual": "RUN_SCOPE_REQUIRED"
+    },
+    {
+      "id": "plan_change.dispatch:other_run",
+      "expected": "RUN_SCOPE_REQUIRED",
+      "actual": "RUN_SCOPE_REQUIRED"
+    },
+    {
+      "id": "plan_change.dispatch:unknown_receipt",
+      "expected": "PROVIDER_RESULT_UNKNOWN",
+      "actual": "PROVIDER_RESULT_UNKNOWN"
+    },
+    {
+      "id": "plan_change.dispatch:barrier",
+      "expected": "RUN_GATE_BLOCKED",
+      "actual": "RUN_GATE_BLOCKED"
+    },
+    {
+      "id": "intake.confirm:relay_spoof",
+      "expected": "DENY",
+      "actual": "DENY"
+    },
+    {
+      "id": "intake.confirm:trusted_server_channel",
+      "expected": "ALLOW",
+      "actual": "ALLOW"
+    },
+    {
+      "id": "change.approve:relay_spoof",
+      "expected": "DENY",
+      "actual": "DENY"
+    },
+    {
+      "id": "change.approve:trusted_server_channel",
+      "expected": "ALLOW",
+      "actual": "ALLOW"
+    },
+    {
+      "id": "question.answer.ui:relay_spoof",
+      "expected": "DENY",
+      "actual": "DENY"
+    },
+    {
+      "id": "question.answer.ui:trusted_server_channel",
+      "expected": "ALLOW",
+      "actual": "ALLOW"
+    },
+    {
+      "id": "workflow.run.authorize:relay_spoof",
+      "expected": "DENY",
+      "actual": "DENY"
+    },
+    {
+      "id": "workflow.run.authorize:trusted_server_channel",
+      "expected": "ALLOW",
+      "actual": "ALLOW"
+    },
+    {
+      "id": "review.decide:relay_spoof",
+      "expected": "DENY",
+      "actual": "DENY"
+    },
+    {
+      "id": "review.decide:trusted_server_channel",
+      "expected": "ALLOW",
+      "actual": "ALLOW"
+    },
+    {
+      "id": "editor.native.ack:relay_spoof",
+      "expected": "DENY",
+      "actual": "DENY"
+    },
+    {
+      "id": "editor.native.ack:trusted_server_channel",
+      "expected": "ALLOW",
+      "actual": "ALLOW"
+    },
+    {
+      "id": "job.cancel:revoked_pending_safe_control",
+      "expected": "ALLOW",
+      "actual": "ALLOW"
+    },
+    {
+      "id": "job.cancel:no_identity",
+      "expected": "UNAUTHORIZED",
+      "actual": "UNAUTHORIZED"
+    },
+    {
+      "id": "job.cancel:other_run",
+      "expected": "RUN_SCOPE_REQUIRED",
+      "actual": "RUN_SCOPE_REQUIRED"
+    },
+    {
+      "id": "workflow.run.pause:revoked_pending_safe_control",
+      "expected": "ALLOW",
+      "actual": "ALLOW"
+    },
+    {
+      "id": "workflow.run.pause:no_identity",
+      "expected": "UNAUTHORIZED",
+      "actual": "UNAUTHORIZED"
+    },
+    {
+      "id": "workflow.run.pause:other_run",
+      "expected": "RUN_SCOPE_REQUIRED",
+      "actual": "RUN_SCOPE_REQUIRED"
+    },
+    {
+      "id": "workflow.run.cancel:revoked_pending_safe_control",
+      "expected": "ALLOW",
+      "actual": "ALLOW"
+    },
+    {
+      "id": "workflow.run.cancel:no_identity",
+      "expected": "UNAUTHORIZED",
+      "actual": "UNAUTHORIZED"
+    },
+    {
+      "id": "workflow.run.cancel:other_run",
+      "expected": "RUN_SCOPE_REQUIRED",
+      "actual": "RUN_SCOPE_REQUIRED"
+    },
+    {
+      "id": "question:text_answer",
+      "expected": "ALLOW",
+      "actual": "ALLOW"
+    },
+    {
+      "id": "question:skip_forbidden",
+      "expected": "INVALID_REQUEST",
+      "actual": "INVALID_REQUEST"
+    },
+    {
+      "id": "question:skip_allowed",
+      "expected": "ALLOW",
+      "actual": "ALLOW"
+    },
+    {
+      "id": "question:answer_cas",
+      "expected": "REVIEW_STALE",
+      "actual": "REVIEW_STALE"
+    },
+    {
+      "id": "question:old_question",
+      "expected": "REVIEW_STALE",
+      "actual": "REVIEW_STALE"
+    },
+    {
+      "id": "question:unknown_choice",
+      "expected": "INVALID_REQUEST",
+      "actual": "INVALID_REQUEST"
+    },
+    {
+      "id": "creative:initial_answer_same_intake",
+      "expected": "ALLOW",
+      "actual": "ALLOW"
+    },
+    {
+      "id": "creative:changed_answer_fresh_decision",
+      "expected": "ALLOW",
+      "actual": "ALLOW"
+    },
+    {
+      "id": "content.relay:changed_answer_old_decision",
+      "expected": "REVIEW_STALE",
+      "actual": "REVIEW_STALE"
+    },
+    {
+      "id": "workflow.run.prepare:changed_answer_old_decision",
+      "expected": "REVIEW_STALE",
+      "actual": "REVIEW_STALE"
+    },
+    {
+      "id": "workflow.run.start:changed_answer_old_decision",
+      "expected": "REVIEW_STALE",
+      "actual": "REVIEW_STALE"
+    },
+    {
+      "id": "creative:new_question_invalidates_decision",
+      "expected": "REVIEW_STALE",
+      "actual": "REVIEW_STALE"
+    },
+    {
+      "id": "creative:revised_question_invalidates_decision",
+      "expected": "REVIEW_STALE",
+      "actual": "REVIEW_STALE"
+    },
+    {
+      "id": "creative:unsorted_heads",
+      "expected": "INVALID_REQUEST",
+      "actual": "INVALID_REQUEST"
+    }
+  ],
+  "typescript": {
+    "status": "PASS",
+    "version": "5.9.2",
+    "command": "node node_modules/typescript/bin/tsc --strict --noEmit --skipLibCheck --target ES2022 --module NodeNext --moduleResolution NodeNext docs/agent-driven-v1/cp-a0/contracts.ts"
+  },
+  "sha256": {
+    "contracts.schema.json": "088a451e9646199618261a6cc95a84e3767dbf4cc87004f3e5995dda86b60964",
+    "contracts.ts": "64a509bed408eee25b89168fecc7f545553abffd2de8d12a47017cbdd5e2fccd",
+    "registry.json": "05f29d947ec65398fee37851a583afc781adc87d6b7d382b1da45eb46f80dc4f",
+    "contract-vectors.json": "93dcc5b9803835a53765a1a9216999f4e5e42d34ec6162039d438b2f560c35d3"
+  },
+  "production_probes": {
+    "host": "NOT_RUN",
+    "native_bridge": "NOT_RUN",
+    "cursor_signature": "NOT_RUN",
+    "database": "NOT_RUN",
+    "render_decode": "NOT_RUN",
+    "codex": "NOT_RUN",
+    "claude": "NOT_RUN",
+    "dsh": "NOT_RUN"
+  },
+  "cp_status": "REVIEW_CANDIDATE_NOT_FROZEN",
+  "production_release": "NOT_RELEASED"
+}

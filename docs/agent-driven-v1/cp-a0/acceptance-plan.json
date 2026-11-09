@@ -1,0 +1,563 @@
+{
+  "format": "narralens.cp-a0.acceptance-plan@1",
+  "state": "DOCUMENT_CANDIDATE",
+  "observedSourceSHA": "fd3021c336387b4c6405b3db08abaafa81c842ff",
+  "contractSHA": null,
+  "implementationRelease": "NOT_RELEASED",
+  "productStatus": "NOT_RUN",
+  "evidenceRoot": "docs/evidence/AGENT_DRIVEN/A/<frozen-code-sha>/<run-id> (future MAIN-owned path)",
+  "commands": [
+    {
+      "id": "existing-test:contracts",
+      "command": "corepack pnpm test:contracts",
+      "availability": "EXISTS_IN_PACKAGE_JSON",
+      "status": "NOT_RUN",
+      "purpose": "旧适用回归/构建，不证明新A业务",
+      "resource": "ISOLATED_LIGHT_AFTER_RELEASE"
+    },
+    {
+      "id": "existing-test:m5",
+      "command": "corepack pnpm test:m5",
+      "availability": "EXISTS_IN_PACKAGE_JSON",
+      "status": "NOT_RUN",
+      "purpose": "旧适用回归/构建，不证明新A业务",
+      "resource": "ISOLATED_LIGHT_AFTER_RELEASE"
+    },
+    {
+      "id": "existing-test:m5:headless",
+      "command": "corepack pnpm test:m5:headless",
+      "availability": "EXISTS_IN_PACKAGE_JSON",
+      "status": "NOT_RUN",
+      "purpose": "旧适用回归/构建，不证明新A业务",
+      "resource": "MAIN_RESERVATION_REQUIRED"
+    },
+    {
+      "id": "existing-test:wave2:m4c",
+      "command": "corepack pnpm test:wave2:m4c",
+      "availability": "EXISTS_IN_PACKAGE_JSON",
+      "status": "NOT_RUN",
+      "purpose": "旧适用回归/构建，不证明新A业务",
+      "resource": "ISOLATED_LIGHT_AFTER_RELEASE"
+    },
+    {
+      "id": "existing-build",
+      "command": "corepack pnpm build",
+      "availability": "EXISTS_IN_PACKAGE_JSON",
+      "status": "NOT_RUN",
+      "purpose": "旧适用回归/构建，不证明新A业务",
+      "resource": "MAIN_RESERVATION_REQUIRED"
+    },
+    {
+      "id": "existing-check",
+      "command": "corepack pnpm check",
+      "availability": "EXISTS_IN_PACKAGE_JSON",
+      "status": "NOT_RUN",
+      "purpose": "旧适用回归/构建，不证明新A业务",
+      "resource": "MAIN_RESERVATION_REQUIRED"
+    },
+    {
+      "id": "a-integration",
+      "command": "node tools/agent-driven/a-run-evidence.mjs --plan docs/agent-driven-v1/cp-a0/acceptance-plan.json --fixture-manifest <frozen-manifest> --evidence-root <isolated-root>",
+      "availability": "PROPOSED_PATH_TO_CREATE_NOT_EXECUTABLE",
+      "path": "tools/agent-driven/a-run-evidence.mjs",
+      "implementationOwner": "MAIN",
+      "status": "NOT_RUN",
+      "resource": "MAIN_RESERVATION_REQUIRED",
+      "failureRule": "缺runner/fixture/生产接线即BLOCKED，不能把模板命令记成功"
+    },
+    {
+      "id": "a-integrity",
+      "command": "node tools/agent-driven/a-evidence-integrity.mjs --evidence-root <isolated-root> --code-sha <frozen-sha>",
+      "availability": "PROPOSED_PATH_TO_CREATE_NOT_EXECUTABLE",
+      "path": "tools/agent-driven/a-evidence-integrity.mjs",
+      "implementationOwner": "MAIN",
+      "status": "NOT_RUN",
+      "resource": "MAIN_RESERVATION_REQUIRED",
+      "failureRule": "缺runner/fixture/生产接线即BLOCKED，不能把模板命令记成功"
+    },
+    {
+      "id": "a-mutation",
+      "command": "node tools/agent-driven/a-mutation-check.mjs --evidence-root <isolated-root> --case <case-id>",
+      "availability": "PROPOSED_PATH_TO_CREATE_NOT_EXECUTABLE",
+      "path": "tools/agent-driven/a-mutation-check.mjs",
+      "implementationOwner": "MAIN",
+      "status": "NOT_RUN",
+      "resource": "MAIN_RESERVATION_REQUIRED",
+      "failureRule": "缺runner/fixture/生产接线即BLOCKED，不能把模板命令记成功"
+    }
+  ],
+  "fixtures": {
+    "references": [
+      {
+        "path": "fixtures/d1-30s/narration.txt",
+        "exists": true,
+        "sha256": "89c05ea25482ded68ba25801ad4632b229e93e4f13571b0067377b42191c140e",
+        "role": "EXISTING_REFERENCE_ONLY_NOT_A_FILM_OR_LICENSE_PROOF"
+      },
+      {
+        "path": "fixtures/d1-30s/narralens.project.json",
+        "exists": true,
+        "sha256": "9e9c4ecff456c72c08cd2154e6a4994004bed7f0ff735ad947ec573fbb76213c",
+        "role": "EXISTING_REFERENCE_ONLY_NOT_A_FILM_OR_LICENSE_PROOF"
+      },
+      {
+        "path": "fixtures/d1-30s/narralens.assets.json",
+        "exists": true,
+        "sha256": "bbf00c5ef213b4000bd1c01fca8f3cf6e140f99930d39225abab699c6cf1b210",
+        "role": "EXISTING_REFERENCE_ONLY_NOT_A_FILM_OR_LICENSE_PROOF"
+      },
+      {
+        "path": "tests/fixtures/m2.1/openfilm-project/assets/poster.png",
+        "exists": true,
+        "sha256": "61e26367a652a3db0896d25e5305fa7f9edd0c36e3993d06e3782593e95636cd",
+        "role": "EXISTING_REFERENCE_ONLY_NOT_A_FILM_OR_LICENSE_PROOF"
+      }
+    ],
+    "selectedMedia": null,
+    "status": "SELECTION_PENDING",
+    "required": [
+      "授权本地真实媒体支持60–180秒且可原生逐镜编辑",
+      "真实中文本人/已授权录音，非空音轨",
+      "两个不同主题brief；golden+非法/旧版本/取消/无权向量",
+      "全新库原始DDL与旧库脱敏副本，new/migrated origin",
+      "每个输入bytes/sha256/rights/probe与全部引用闭包；机器/配置/上游版本",
+      "媒体选择后MAIN冻结manifest SHA，现有30秒fixture不得冒充A短片"
+    ]
+  },
+  "cases": [
+    {
+      "id": "A-COLD",
+      "owner": "bridge+main",
+      "package": "IT-A01",
+      "families": "AD-T01/32/34",
+      "steps": "隔离空运行根冷启动→重复启动→API未ready→ready→关闭UI→受控停止→重开同实例",
+      "oracle": "PID/instance/ownership/observed_at；只一实例，关闭UI不删工程；shared不kill",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "A-MCP",
+      "owner": "bridge+main",
+      "package": "IT-A02",
+      "families": "AD-T02/03/04/22",
+      "steps": "真实Codex发现工具/资源→读同工程→非法字段/版本/无权→断Host→按Skill重连",
+      "oracle": "真实stdio记录与Host日志对应；严格拒绝无业务写；Claude/DSH分别NOT_RUN或BLOCKED不签兼容",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "A-CREATE",
+      "owner": "main+product",
+      "package": "IT-A04",
+      "families": "AD-T05/07/27",
+      "steps": "两个不同主题确认简报→创建→同key重放/异内容冲突→初始化关键点真实进程终止→恢复；new与migrated分别重开",
+      "oracle": "不同项目和内容，重放同结果/异内容409，初始commit唯一，origin真实；无假迁移或删库恢复",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "A-FILM",
+      "owner": "main+media+product",
+      "package": "IT-A05",
+      "families": "AD-T06/10/11/15",
+      "steps": "授权本地媒体+真实中文录音→固定工作流→样片/首章→原生可编辑60–180秒→选镜准备真实候选",
+      "oracle": "每镜asset/proxy/native refs可核；首链所选候选真实映射；比较/拒绝+0；A未交3–6案不得关闭T10",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "A-WRITE",
+      "owner": "main",
+      "package": "IT-A05",
+      "families": "AD-T12",
+      "steps": "每个现有与新增公开写入口逐一成功对照；分别篡base/source/project/选区/锁/rights/impact/approval/期限/输入及agent human伪字段；并发重放",
+      "oracle": "失败source/revision/active_commit/批准消费/成功commit业务outbox不推进；合法拒绝审计可写；确认成功恰+1且重复不再+1",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "A-ENTRANCES",
+      "owner": "main+all",
+      "package": "IT-A03/05",
+      "families": "AD-T02/12/34",
+      "steps": "枚举实际生产registry/HTTP/Gateway/native/worker dispatch/child/retry/resume/runtime入口，对每项在样片/首章/风险待审时调用；再成功对照",
+      "oracle": "入口清单与生产注册diff闭合；即使direct task_prepare/另建run/伪独立声明仍服务端拒绝或等待；未实现入口明确unregistered非测试通过",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "A-EVENTS",
+      "owner": "main+bridge+product",
+      "package": "IT-A03/05",
+      "families": "AD-T33",
+      "steps": "snapshot与订阅间插入提交，重复/乱序/断线重连；cursor篡改/跨项目/过滤器不符/过期/保留窗外；Host提交后延迟或丢nativeack，再发旧ack和正确ack",
+      "oracle": "snapshot watermark无漏窗口、业务去重；签名cursor失败不降级重放，过期resync；Host新值不填ack；仅实际匹配project/revision/snapshot确认同步",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "A-CANCEL",
+      "owner": "main+bridge+media",
+      "package": "IT-A03/06",
+      "families": "AD-T09/33",
+      "steps": "准备前/受理后/回报前中断真实CLI；任务取消/重连；旧attempt/输入/审阅回报晚到",
+      "oracle": "checkpoint/幂等/attempt/lease留证；已知/unknown区分；无重复执行/扣费/提交，无晚到采用",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "A-UI",
+      "owner": "product+main",
+      "package": "IT-A05",
+      "families": "AD-T15/32/34/35",
+      "steps": "三视口键盘改单镜；展开顶部Bar/节点弹窗/非模态系统；原区继续编辑；停止健康采样/断线；错误恢复定位",
+      "oracle": "1440x900/1366x768主操作可达，390x844仅审阅；5秒采样15秒unknown；Host到DOM p95≤2秒；首次比较≤60秒恢复≤10秒，人验单列",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "A-REOPEN",
+      "owner": "main+media",
+      "package": "IT-A06",
+      "families": "AD-T07/08/20",
+      "steps": "导出旧snapshot→只换一镜保留旁白/时长→导出新snapshot→关闭CLI/UI/真实停服→重开同工程再下载",
+      "oracle": "两snapshot/manifest/bytes/hash/decode；未改范围及音轨不变；source/revision/history同事实；GET不重渲染",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "A-COMFY-CATALOG",
+      "owner": "media+main",
+      "package": "IT-A03",
+      "families": "AD-T26",
+      "steps": "只读识别已授权模板/版本/模型/许可并记录缺依赖；不调用模型",
+      "oracle": "目录检查非smoke，未授权模型/模板blocked；B真实smoke/生产闭环仍NOT_RUN",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "T20-A",
+      "owner": "media+main",
+      "package": "IT-A06",
+      "families": "AD-T20",
+      "steps": "encode时ENOSPC/写失败",
+      "oracle": "明确失败，无ready/download/半成品，原snapshot/source/revision不变",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "T20-B",
+      "owner": "media+main",
+      "package": "IT-A06",
+      "families": "AD-T20",
+      "steps": "编码非零/截断/坏帧",
+      "oracle": "ffprobe或完整decode拒绝，QC未完不能ready",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "T20-C",
+      "owner": "media+main",
+      "package": "IT-A06",
+      "families": "AD-T20",
+      "steps": "同snapshot/config并发同key及预置同名输出",
+      "oracle": "只发布一个完整包，异输入不覆盖，loser只删自有staging",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "T20-D",
+      "owner": "media+main",
+      "package": "IT-A06",
+      "families": "AD-T20",
+      "steps": "渲染取消后晚到成功",
+      "oracle": "子进程/lease停止或持久待收敛，不重发，不ready/下载",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "T20-E",
+      "owner": "media+main",
+      "package": "IT-A06",
+      "families": "AD-T20",
+      "steps": "encode后QC前、publish前、rename后DB前、DB后events前逐点真实终止",
+      "oracle": "重启可恢复/明确失败/完整已发布，无DB ready却缺包，无重复发布",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "T20-F",
+      "owner": "media+main",
+      "package": "IT-A06",
+      "families": "AD-T20",
+      "steps": "QC block、附属文件缺失/摘要不符，再修复",
+      "oracle": "block无交付，正确同snapshot包或明确新attempt，不跳QC",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "T20-G",
+      "owner": "media+main",
+      "package": "IT-A06",
+      "families": "AD-T20",
+      "steps": "渲染同时新revision提交",
+      "oracle": "旧job输出仍旧snapshot并显式版本，不能冒充最新",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "T20-H",
+      "owner": "media+main",
+      "package": "IT-A06",
+      "families": "AD-T20",
+      "steps": "完成后重复GET/同key，重启再下载",
+      "oracle": "读取不渲染；digest/bytes/manifest相同，旧包不被重试清理，完整decode",
+      "status": "NOT_RUN"
+    }
+  ],
+  "experienceCases": [
+    {
+      "id": "EX-01",
+      "aScope": "Agent确认主题、脚本、素材策略、风格；同版本内容Decision持久，relay不授安全权限",
+      "steps": "Agent确认主题、脚本、素材策略、风格；同版本内容Decision持久，relay不授安全权限",
+      "families": "T05/27",
+      "nextScope": "B扩展完整创作对象，C长片复验",
+      "status": "NOT_RUN",
+      "cFullRegressionRequired": true,
+      "firstRequiredPhase": "A",
+      "completeExPassRequires": "本行A子集与B完整能力均有真实证据，C最终范围复验；不由A子集关闭整项"
+    },
+    {
+      "id": "EX-02",
+      "aScope": "真实项目/审阅链接直达样片；UI决定与Agent读回同ID，无第二次批准",
+      "steps": "真实项目/审阅链接直达样片；UI决定与Agent读回同ID，无第二次批准",
+      "families": "T03/10/33",
+      "nextScope": "B多候选/多章，C完整制作",
+      "status": "NOT_RUN",
+      "cFullRegressionRequired": true,
+      "firstRequiredPhase": "A",
+      "completeExPassRequires": "本行A子集与B完整能力均有真实证据，C最终范围复验；不由A子集关闭整项"
+    },
+    {
+      "id": "EX-03",
+      "aScope": "默认阶段Bar，节点弹窗读真实attempt/输入/输出；关闭不暂停且焦点返回",
+      "steps": "默认阶段Bar，节点弹窗读真实attempt/输入/输出；关闭不暂停且焦点返回",
+      "families": "T15/32/33",
+      "nextScope": "B完整子图，C长片与全视口",
+      "status": "NOT_RUN",
+      "cFullRegressionRequired": true,
+      "firstRequiredPhase": "A",
+      "completeExPassRequires": "本行A子集与B完整能力均有真实证据，C最终范围复验；不由A子集关闭整项"
+    },
+    {
+      "id": "EX-04",
+      "aScope": "固定版本首链样片接受后才过首章门；未接受不派发依赖它的高成本任务",
+      "steps": "固定版本首链样片接受后才过首章门；未接受不派发依赖它的高成本任务",
+      "families": "T06/27/31",
+      "nextScope": "B多章/可复用模板，C长片",
+      "status": "NOT_RUN",
+      "cFullRegressionRequired": true,
+      "firstRequiredPhase": "A",
+      "completeExPassRequires": "本行A子集与B完整能力均有真实证据，C最终范围复验；不由A子集关闭整项"
+    },
+    {
+      "id": "EX-05",
+      "aScope": "单章同摘要同规格明确复用审阅；输入/质量改变必须重新审阅",
+      "steps": "单章同摘要同规格明确复用审阅；输入/质量改变必须重新审阅",
+      "families": "T06/15/27",
+      "nextScope": "B多章交叉验证，C全规格",
+      "status": "NOT_RUN",
+      "cFullRegressionRequired": true,
+      "firstRequiredPhase": "A",
+      "completeExPassRequires": "本行A子集与B完整能力均有真实证据，C最终范围复验；不由A子集关闭整项"
+    },
+    {
+      "id": "EX-06",
+      "aScope": "仅安全拒绝/保留门子集，见nextScope；不签整项",
+      "steps": "稳定建议提供真实记录；无可信人确认保留首章门，不按次数自动放行",
+      "families": "T27/31/34",
+      "nextScope": "A安全子case：不存在稳定授权仍保留首章门；C复验",
+      "status": "NOT_RUN",
+      "cFullRegressionRequired": true,
+      "firstRequiredPhase": "B",
+      "completeExPassRequires": "本行A子集与B完整能力均有真实证据，C最终范围复验；不由A子集关闭整项"
+    },
+    {
+      "id": "EX-07",
+      "aScope": "仅安全拒绝/保留门子集，见nextScope；不签整项",
+      "steps": "稳定授权只省匹配范围首章门，样片/章节/QC/采用仍检查",
+      "families": "T12/27/31",
+      "nextScope": "A无授权不得省门；C完整范围",
+      "status": "NOT_RUN",
+      "cFullRegressionRequired": true,
+      "firstRequiredPhase": "B",
+      "completeExPassRequires": "本行A子集与B完整能力均有真实证据，C最终范围复验；不由A子集关闭整项"
+    },
+    {
+      "id": "EX-08",
+      "aScope": "仅安全拒绝/保留门子集，见nextScope；不签整项",
+      "steps": "变更模板/风格/模型或撤销后stale/revoked并恢复待过首章门，不误杀在途",
+      "families": "T12/14/31",
+      "nextScope": "A未实现稳定授权不得宣传；C复验",
+      "status": "NOT_RUN",
+      "cFullRegressionRequired": true,
+      "firstRequiredPhase": "B",
+      "completeExPassRequires": "本行A子集与B完整能力均有真实证据，C最终范围复验；不由A子集关闭整项"
+    },
+    {
+      "id": "EX-09",
+      "aScope": "单章音画字幕同包同版本，局部定位；接受/修改/关闭分开，封面独立",
+      "steps": "单章音画字幕同包同版本，局部定位；接受/修改/关闭分开，封面独立",
+      "families": "T10/11/17/19",
+      "nextScope": "B真实ASR/TTS/多章/封面，C完整后期；A不签T17/T19整体",
+      "status": "NOT_RUN",
+      "cFullRegressionRequired": true,
+      "firstRequiredPhase": "A",
+      "completeExPassRequires": "本行A子集与B完整能力均有真实证据，C最终范围复验；不由A子集关闭整项"
+    },
+    {
+      "id": "EX-10",
+      "aScope": "普通本地准备自动，相同未变待办合并，风险无依据标unknown",
+      "steps": "普通本地准备自动，相同未变待办合并，风险无依据标unknown",
+      "families": "T15/18/35",
+      "nextScope": "B费用/provider风险，C负载复验",
+      "status": "NOT_RUN",
+      "cFullRegressionRequired": true,
+      "firstRequiredPhase": "A",
+      "completeExPassRequires": "本行A子集与B完整能力均有真实证据，C最终范围复验；不由A子集关闭整项"
+    },
+    {
+      "id": "EX-11",
+      "aScope": "仅安全拒绝/保留门子集，见nextScope；不签整项",
+      "steps": "能力组合草稿/校验/发布分开，未知能力/环/缺依赖拒绝且零执行；发布不授执行权",
+      "families": "T02/26/31",
+      "nextScope": "A固定版本模板输入/未知能力/权限拒绝；不签自由组合",
+      "status": "NOT_RUN",
+      "cFullRegressionRequired": true,
+      "firstRequiredPhase": "B",
+      "completeExPassRequires": "本行A子集与B完整能力均有真实证据，C最终范围复验；不由A子集关闭整项"
+    },
+    {
+      "id": "EX-12",
+      "aScope": "驱动退出/UI关闭后已授权确定步骤继续；推理点waiting_agent，UI可满足既定门，不启动额外Agent",
+      "steps": "驱动退出/UI关闭后已授权确定步骤继续；推理点waiting_agent，UI可满足既定门，不启动额外Agent",
+      "families": "T07/09/13",
+      "nextScope": "B多分支/多驱动，C三端与长片",
+      "status": "NOT_RUN",
+      "cFullRegressionRequired": true,
+      "firstRequiredPhase": "A",
+      "completeExPassRequires": "本行A子集与B完整能力均有真实证据，C最终范围复验；不由A子集关闭整项"
+    },
+    {
+      "id": "EX-13",
+      "aScope": "仅安全拒绝/保留门子集，见nextScope；不签整项",
+      "steps": "未执行计划patch列影响；拒绝不变、可信确认后CAS且影片revision不变",
+      "families": "T12/28/31",
+      "nextScope": "A无运行调整入口并验证不能绕门；C复验",
+      "status": "NOT_RUN",
+      "cFullRegressionRequired": true,
+      "firstRequiredPhase": "B",
+      "completeExPassRequires": "本行A子集与B完整能力均有真实证据，C最终范围复验；不由A子集关闭整项"
+    },
+    {
+      "id": "EX-14",
+      "aScope": "仅安全拒绝/保留门子集，见nextScope；不签整项",
+      "steps": "审阅期间节点开跑则旧patch拒绝重算；无热换/重复dispatch/旧attempt污染",
+      "families": "T09/12/28/31",
+      "nextScope": "A旧attempt/输入隔离，C复验",
+      "status": "NOT_RUN",
+      "cFullRegressionRequired": true,
+      "firstRequiredPhase": "B",
+      "completeExPassRequires": "本行A子集与B完整能力均有真实证据，C最终范围复验；不由A子集关闭整项"
+    },
+    {
+      "id": "EX-15",
+      "aScope": "仅安全拒绝/保留门子集，见nextScope；不签整项",
+      "steps": "登记模型按需资源申请/加载/预热，accepted/loaded/warm/ready有独立真实证据",
+      "families": "T29/32/34",
+      "nextScope": "A owned本地Host按需启动/健康，不签模型加载；C复验",
+      "status": "NOT_RUN",
+      "cFullRegressionRequired": true,
+      "firstRequiredPhase": "B",
+      "completeExPassRequires": "本行A子集与B完整能力均有真实证据，C最终范围复验；不由A子集关闭整项"
+    },
+    {
+      "id": "EX-16",
+      "aScope": "本地owned/shared/unknown任务边界拒绝破坏；未知先核对，不重复求确认",
+      "steps": "本地owned/shared/unknown任务边界拒绝破坏；未知先核对，不重复求确认",
+      "families": "T18/28/34",
+      "nextScope": "B真实模型与GPU准备/卸载原子互斥，C复验",
+      "status": "NOT_RUN",
+      "cFullRegressionRequired": true,
+      "firstRequiredPhase": "A",
+      "completeExPassRequires": "本行A子集与B完整能力均有真实证据，C最终范围复验；不由A子集关闭整项"
+    },
+    {
+      "id": "EX-17",
+      "aScope": "未授权下载/安装/费用/外传blocked；无能力/许可硬失败不可继续",
+      "steps": "未授权下载/安装/费用/外传blocked；无能力/许可硬失败不可继续",
+      "families": "T12/16/18/26",
+      "nextScope": "B真实网络/provider成功与失败；C复验",
+      "status": "NOT_RUN",
+      "cFullRegressionRequired": true,
+      "firstRequiredPhase": "A",
+      "completeExPassRequires": "本行A子集与B完整能力均有真实证据，C最终范围复验；不由A子集关闭整项"
+    },
+    {
+      "id": "EX-18",
+      "aScope": "恢复/取消/重连匹配run/plan/attempt/input；旧决定不消费、晚到不采用、查询不重提",
+      "steps": "恢复/取消/重连匹配run/plan/attempt/input；旧决定不消费、晚到不采用、查询不重提",
+      "families": "T09/18/31/33",
+      "nextScope": "B外部receipt/费用未知，C跨端",
+      "status": "NOT_RUN",
+      "cFullRegressionRequired": true,
+      "firstRequiredPhase": "A",
+      "completeExPassRequires": "本行A子集与B完整能力均有真实证据，C最终范围复验；不由A子集关闭整项"
+    },
+    {
+      "id": "EX-19",
+      "aScope": "首章/风险门对全部实际副作用入口检查scope/依赖，等待子图无生成；未知入口拒绝",
+      "steps": "首章/风险门对全部实际副作用入口检查scope/依赖，等待子图无生成；未知入口拒绝",
+      "families": "T02/12/28/31/34",
+      "nextScope": "B新增子job/预热/重试/另建run全部重跑，C全入口",
+      "status": "NOT_RUN",
+      "cFullRegressionRequired": true,
+      "firstRequiredPhase": "A",
+      "completeExPassRequires": "本行A子集与B完整能力均有真实证据，C最终范围复验；不由A子集关闭整项"
+    },
+    {
+      "id": "EX-20",
+      "aScope": "仅安全拒绝/保留门子集，见nextScope；不签整项",
+      "steps": "Agent relay/confirmed=true不能批准活跃RunPlanChange，返回可信确认链接",
+      "families": "T02/12/27",
+      "nextScope": "A同类伪批准不能获得采用/越首章门；C复验",
+      "status": "NOT_RUN",
+      "cFullRegressionRequired": true,
+      "firstRequiredPhase": "B",
+      "completeExPassRequires": "本行A子集与B完整能力均有真实证据，C最终范围复验；不由A子集关闭整项"
+    },
+    {
+      "id": "EX-21",
+      "aScope": "仅安全拒绝/保留门子集，见nextScope；不签整项",
+      "steps": "计划审阅barrier仅挡受影响未执行子图，不占长期槽；独立分支继续、旧apply拒绝",
+      "families": "T09/12/28/31",
+      "nextScope": "A首章门阻塞下游，C并发/长片",
+      "status": "NOT_RUN",
+      "cFullRegressionRequired": true,
+      "firstRequiredPhase": "B",
+      "completeExPassRequires": "本行A子集与B完整能力均有真实证据，C最终范围复验；不由A子集关闭整项"
+    },
+    {
+      "id": "EX-22",
+      "aScope": "仅安全拒绝/保留门子集，见nextScope；不签整项",
+      "steps": "比较真实scope摘要，ID相同也核override/指纹/内容类型；未知不相等、不跨项目继承权限",
+      "families": "T12/18/26/31/34",
+      "nextScope": "A批准scope/input/project绑定负向；C全规格",
+      "status": "NOT_RUN",
+      "cFullRegressionRequired": true,
+      "firstRequiredPhase": "B",
+      "completeExPassRequires": "本行A子集与B完整能力均有真实证据，C最终范围复验；不由A子集关闭整项"
+    },
+    {
+      "id": "EX-23",
+      "aScope": "一次单章确认并采用，后端决定/批准分离且+1恰一次；纯审阅无写权、过期重审",
+      "steps": "一次单章确认并采用，后端决定/批准分离且+1恰一次；纯审阅无写权、过期重审",
+      "families": "T10/11/12/15",
+      "nextScope": "B批量多章，C长片",
+      "status": "NOT_RUN",
+      "cFullRegressionRequired": true,
+      "firstRequiredPhase": "A",
+      "completeExPassRequires": "本行A子集与B完整能力均有真实证据，C最终范围复验；不由A子集关闭整项"
+    }
+  ],
+  "gate": {
+    "automated": "同一冻结代码/合同/配置/fixture/上游与机器；所有A case及适用旧回归全过",
+    "independentReview": "未参与实现者复核同一冻结候选；缺失REVIEW_PENDING",
+    "human": "真实步骤逐项人签，自动化不得代签",
+    "aClaimOnly": "AD_SHORT_FILM_READY",
+    "fullV1": "B/C及所有PRD/P0/P1/NFR/AD-E/AD-T/R4门齐备前禁止",
+    "production": "所有业务NOT_RUN；文档校验不推进CP-A0或ReleaseAssignment"
+  }
+}
