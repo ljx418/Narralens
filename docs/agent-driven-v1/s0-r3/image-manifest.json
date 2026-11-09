@@ -1,0 +1,58 @@
+{
+  "kind": "HOST_NATIVE_IMAGE_GENERATION",
+  "state": "DESIGN_EXAMPLES_NOT_RUNTIME",
+  "tool": "image_gen.imagegen",
+  "reference_sha256": "9dce2cf5ec20099abadffe7a75dbc13dbb4217553948641d2b41ff43a7a6f4b6",
+  "images": [
+    {
+      "name": "01-workflow-collapsed",
+      "source": "/home/administrator/.codex/generated_images/01a129f8-b21a-7523-a6c0-620fbec2da27/exec-f944c5aa-998e-4b35-b269-1c6672a26ba9.png",
+      "tool": "image_gen.imagegen",
+      "prompt": "prompts/01-workflow-collapsed.md",
+      "kind": "AI_CONCEPT_NOT_RUNTIME_EVIDENCE",
+      "sha256": "7785c066cd6261f77d07450dfb2812e6b6c093bd36eaa962d0f47c05ba78bc49",
+      "dimensions": [
+        1672,
+        941
+      ]
+    },
+    {
+      "name": "02-workflow-expanded",
+      "source": "/home/administrator/.codex/generated_images/01a129f8-b21a-7523-a6c0-620fbec2da27/exec-09b27304-51ca-415a-8255-f8af2d71cb54.png",
+      "tool": "image_gen.imagegen",
+      "prompt": "prompts/02-correction.md",
+      "kind": "AI_CONCEPT_NOT_RUNTIME_EVIDENCE",
+      "sha256": "2c87ee771d0c646a6dc5b06a737d420573524bf5c3fe77db0db82e2d0c66d8d1",
+      "dimensions": [
+        1585,
+        992
+      ]
+    },
+    {
+      "name": "03-system-control",
+      "source": "/home/administrator/.codex/generated_images/01a129f8-b21a-7523-a6c0-620fbec2da27/exec-a3229bff-23b1-42ba-b637-287a00be2500.png",
+      "tool": "image_gen.imagegen",
+      "prompt": "prompts/03-correction.md",
+      "kind": "AI_CONCEPT_NOT_RUNTIME_EVIDENCE",
+      "sha256": "d63ea1f21c465ea6cfd61a0d428bdaf3a6925f61b9bfc318eacd16792af818e0",
+      "dimensions": [
+        1672,
+        941
+      ]
+    }
+  ],
+  "review": {
+    "layout": "top horizontal collapsible workflow, existing editor, separate system management",
+    "corrected": [
+      "removed speculative ETA in expanded flow",
+      "matched system view top workflow bar to collapsed view"
+    ],
+    "notEvidenceOf": [
+      "installed models",
+      "loaded models",
+      "running services",
+      "resource measurements",
+      "working production controls"
+    ]
+  }
+}

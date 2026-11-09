@@ -1,0 +1,26 @@
+{
+  "kind": "S0_R3_DESIGN_REVIEW",
+  "state": "READY_FOR_USER_LAYOUT_REVIEW",
+  "productionRelease": "NOT_RELEASED",
+  "independentReview": {
+    "reviewer": "s0_ux_acceptance_review",
+    "mode": "read-only static UI/document/image manifest review",
+    "blocker": 0,
+    "major": 0,
+    "businessAcceptance": "NOT_RUN"
+  },
+  "imageGeneration": {
+    "tool": "image_gen.imagegen",
+    "mode": "HOST_NATIVE",
+    "initialImages": 3,
+    "targetedCorrections": 2,
+    "promptsSaved": true,
+    "nativeOriginalsRetained": true
+  },
+  "scope": "top horizontal collapsible workflow; independent services/models/retry panel; original editor preserved",
+  "limits": [
+    "all example statuses simulated",
+    "no model loaded or service started",
+    "precise system lifecycle command contracts still required before implementation"
+  ]
+}

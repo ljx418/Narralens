@@ -1,5 +1,7 @@
 # Narralens 多Agent工作约定
 
+最新前端候选：docs/agent-driven-v1/s0-r3/review.html。顶部横向工作流Bar＋独立系统控制；R2右侧两section布局已退为历史。当前仅设计/生图，生产实现未释放。
+
 ## 当前授权与权威入口
 
 用户已认可截至`867b3b3`的Agent驱动路线文档，并授权并行架构/目录/任务规划。尚未把精确合同或产品原型冻结，也没有本轮生产实现release。先读 `docs/agent-driven-v1/00_READ_FIRST.md`、`07_PARALLEL_DEVELOPMENT.md`、`08_PARALLEL_PORTS_AND_OWNERSHIP.md`、`parallel-plan.json`。
@@ -49,3 +51,7 @@ Codex接手实现后，其自测只能称内部验证，不能自签独立外审
 ## 2026-11-09 前端纠偏（最新约束）
 
 用户要求只在现有剪辑工作台增加工作流展示和Agent控制台，其他前端保留；目标是在Agent操作时可见目标/动作/准备/待批/commit/编辑区同步状态，及早介入减少返工。上一版独立创作工作台原型不再指导前端。当前S0 R2见docs/agent-driven-v1/s0-r2/README.md；旧s0冻结包保留历史。PRODUCT新增组件放src/app/observation，MAIN最小挂载M5Panel；不加第二应用根、聊天页、时间轴或播放头。Job完成≠commit，commit≠原生编辑区已加载，无法核对native版本时显示未确认。生产实现未释放。
+
+## S0 R3最新前端语义
+
+用户要求顶部可折叠横向工作流Bar，及独立系统控制（服务启动/就绪、模型按需加载/预热/卸载、重试与诊断），不是Agent控制台。原剪辑区与导演控件保留。当前候选docs/agent-driven-v1/s0-r3/review.html；旧s0/s0-r2冻结保留历史。PRODUCT实现src/app/observation/WorkflowTopBar及src/app/system/SystemControlPanel；MAIN最小布局接线并独占系统生命周期命令，BRIDGE健康/服务发现，MEDIA受控模型runtime。当前只文档与图像，未运行模型/服务，生产实现NOT_RELEASED。

@@ -1,0 +1,151 @@
+{
+  "kind": "supplementary-windows-headless-CDP",
+  "status": "pass",
+  "businessAcceptance": "NOT_RUN",
+  "viewports": [
+    {
+      "artifact": "prototype",
+      "width": 1440,
+      "scrollWidth": 1440
+    },
+    {
+      "artifact": "prototype",
+      "width": 390,
+      "scrollWidth": 390
+    },
+    {
+      "artifact": "review",
+      "width": 1440,
+      "scrollWidth": 1425
+    },
+    {
+      "artifact": "review",
+      "width": 390,
+      "scrollWidth": 375
+    }
+  ],
+  "screenshots": [
+    "prototype-flow-expanded.png",
+    "prototype-system-models.png",
+    "prototype-1440.png",
+    "prototype-390.png",
+    "review-1440.png",
+    "review-390.png"
+  ],
+  "hashes": {
+    "prototype.html": "f93440148dbaa8285fe6a7fdff1d649af39872fd4119555342be0a750b99b1f6",
+    "review.html": "1baddaa5a0b5834a48a4198d72d1c76d48610001d816d4f024ca22183ba363c1",
+    "README.md": "b1eb541931403af232b48cf50ddf6724c4b1206460d16a9211265f16b42da906",
+    "image-manifest.json": "131fa8f082e099dd70e8673a37b598d054b93f8418c6f9ac65b8331d2d4b11d0"
+  },
+  "checks": [
+    {
+      "id": "workflow-collapsed-by-default",
+      "status": "PASS"
+    },
+    {
+      "id": "top-flow-horizontal-and-reserves-space",
+      "status": "PASS"
+    },
+    {
+      "id": "collapse-retains-original-editor",
+      "status": "PASS"
+    },
+    {
+      "id": "separate-system-dialog",
+      "status": "PASS"
+    },
+    {
+      "id": "shared-service-control-disabled",
+      "status": "PASS"
+    },
+    {
+      "id": "start-request-is-not-readiness",
+      "status": "PASS"
+    },
+    {
+      "id": "worker-ready-only-after-reply",
+      "status": "PASS"
+    },
+    {
+      "id": "model-loading-is-not-loaded",
+      "status": "PASS"
+    },
+    {
+      "id": "loaded-not-prewarmed",
+      "status": "PASS"
+    },
+    {
+      "id": "warm-request-not-ready",
+      "status": "PASS"
+    },
+    {
+      "id": "model-ready-after-warm-reply",
+      "status": "PASS"
+    },
+    {
+      "id": "active-video-model-unload-disabled",
+      "status": "PASS"
+    },
+    {
+      "id": "unload-request-not-completed",
+      "status": "PASS"
+    },
+    {
+      "id": "unloaded-after-runtime-reply",
+      "status": "PASS"
+    },
+    {
+      "id": "retry-check-not-media-reexecution",
+      "status": "PASS"
+    },
+    {
+      "id": "unknown-result-not-resubmitted",
+      "status": "PASS"
+    },
+    {
+      "id": "close-does-not-stop-services-or-reset-workflow",
+      "status": "PASS"
+    },
+    {
+      "id": "prototype-layout-1440",
+      "status": "PASS"
+    },
+    {
+      "id": "system-dialog-fits-1440",
+      "status": "PASS"
+    },
+    {
+      "id": "prototype-layout-390",
+      "status": "PASS"
+    },
+    {
+      "id": "system-dialog-fits-390",
+      "status": "PASS"
+    },
+    {
+      "id": "three-host-generated-images",
+      "status": "PASS"
+    },
+    {
+      "id": "generated-image-visible-0",
+      "status": "PASS"
+    },
+    {
+      "id": "generated-image-visible-1",
+      "status": "PASS"
+    },
+    {
+      "id": "generated-image-visible-2",
+      "status": "PASS"
+    },
+    {
+      "id": "gallery-layout-1440",
+      "status": "PASS"
+    },
+    {
+      "id": "gallery-layout-390",
+      "status": "PASS"
+    }
+  ]
+}

@@ -1,5 +1,7 @@
 # 并行架构：公共端口、代码所有权和集成接缝
 
+> 2026-11-09 S0 R3最新页面划分：工作流位于全局顶部Bar，横向展开/折叠；另一入口是独立系统控制面板，负责服务、模型加载/预热/卸载、重试与诊断，不是Agent控制台。原剪辑区与M5业务控件保留。当前效果图与交互稿见`s0-r3/review.html`；R2右侧两section布局退为历史，生产实现仍未释放。
+
 > 2026-11-09用户纠偏（前端实施优先）：保留现有OpenFilm剪辑区和M5导演面板，仅在原导演面板中新增工作流展示、Agent控制台两个可折叠section；服务监控归控制台。工作台呈现同一项目的真实剪辑状态，禁止另建agent-workbench独立前端/聊天入口/时间轴。详情与当前原型见`s0-r2/README.md`（本段路径按当前文档目录解析）。原始PRD功能目标和后台制作计划继续保留，既有审阅/批准/编辑尽量复用原入口。新S0 R2仍待用户核验，不是生产实现release。
 
 状态：执行设计，精确运行时合同待CP-A0冻结；本文定义责任与必需字段，不冒充已经新增API或schema。
@@ -62,3 +64,11 @@ PRODUCT仅拥有新增`observation`内WorkflowPanel、AgentConsolePanel及只读
 ## 当前前端接口约束
 
 ProjectObservationReadPort读Host commit/Job/workflow/脱敏日志；EditorViewReadPort从既有UI桥接读实际加载project/revision/snapshot，不是把Host新值当编辑器ack。点击定位走SelectionCoordinator；共享SelectionStore/PlaybackClock不复制。两面板没有独立createRoot/路由/数据库/工程写方法。MAIN挂载旧M5，PRODUCT不得直接改旧M5文件。显示Job成功、commit成功、编辑区同步确认三个不同事实；public Agent说明不能推进Host状态。
+
+## R3布局与系统控制端口
+
+PRODUCT的WorkflowTopBar放src/app/observation，SystemControlPanel放src/app/system；MAIN通过原有React根和布局插槽/portal挂载，不再在导演列插入竖向工作流/AgentConsole。旧M5控件顺序与单一selection/clock保持。
+
+SystemStateReadPort提供已登记实例/模型配置、归属、就绪/加载状态、采样时间与allowed_actions；SystemLifecycleCommandPort由MAIN负责授权/幂等/实例归属/活动任务影响，异步结果经Job/事件回报；MEDIA的ModelRuntimePort只接受固定runtime+model配置ID和受限load/warm/unload动作，不接任意模型路径/脚本。BRIDGE提供受控服务发现、健康与就绪检查。其精确写合同在开工前另冻，不能把R2只读Observation DTO当系统管理权限。
+
+系统控制不直接写工程source/revision；重试检查和重试媒体任务分开，后者仍校验输入/许可/授权/费用和幂等。共享服务无接管能力时按钮不可用且说明原因，不绕过资源租约全局卸载/清队列。

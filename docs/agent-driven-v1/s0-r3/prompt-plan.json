@@ -1,0 +1,17 @@
+{
+  "mode": "HOST_NATIVE",
+  "skill": "gpt-image-2",
+  "tool": "image_gen.imagegen",
+  "reference": "docs/agent-driven-v1/s0-r2/baseline.png",
+  "requests": [
+    "01-workflow-collapsed",
+    "02-workflow-expanded",
+    "03-system-control"
+  ],
+  "authorization": "user requested generated example visuals; no runtime model/service operations",
+  "state": "HOST_IMAGES_GENERATED_AND_VISUALLY_REVIEWED",
+  "corrections": [
+    "prompts/02-correction.md",
+    "prompts/03-correction.md"
+  ]
+}

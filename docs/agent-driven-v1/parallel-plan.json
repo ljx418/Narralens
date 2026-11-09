@@ -27,7 +27,8 @@
     "src/app/m5/",
     "vendor/",
     "docs/evidence/AGENT_DRIVEN/",
-    "tests/agent-driven/integration/"
+    "tests/agent-driven/integration/",
+    "src/host/system/"
   ],
   "protectedFiles": [
     "AGENTS.md",
@@ -73,6 +74,7 @@
       "branch": "agent-driven/lane-product",
       "allowPrefixes": [
         "src/app/observation/",
+        "src/app/system/",
         "src/host/creative/",
         "src/host/workspace/",
         "tests/agent-driven/product/",
@@ -311,12 +313,17 @@
   "presentationPolicy": {
     "shell": "retain existing OpenFilm Studio + M5Panel",
     "newFrontendScope": [
-      "WorkflowPanel",
-      "AgentConsolePanel"
+      "WorkflowTopBar",
+      "SystemControlPanel"
     ],
+    "placement": {
+      "WorkflowTopBar": "global top horizontal collapsible bar",
+      "SystemControlPanel": "separate drawer opened by explicit system control entry"
+    },
     "newStandaloneApp": false,
     "newTimeline": false,
     "legacyMountOwner": "main",
-    "candidate": "docs/agent-driven-v1/s0-r2/README.md"
+    "systemCommandsOwner": "main",
+    "candidate": "docs/agent-driven-v1/s0-r3/README.md"
   }
 }
