@@ -1,0 +1,40 @@
+{
+  "scope": "managed native UI only, no browser or Host",
+  "network": "NONE",
+  "started_at": "2026-11-09T22:38:30.709917+00:00",
+  "node": "v22.22.1",
+  "upstream_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+  "patch_sha256": "71135c54f97672d698e9d24741b67f7e98fca4900757b7484ec9d324a06c867a",
+  "lock_sha256": "d9faf24e9480b847be99b61ec2b220ef5290530a54b1f6f667845fb8ac2905f9",
+  "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/product-workbench/var/managed-native-observation/source/packages/openfilm",
+  "commands": [
+    {
+      "name": "typecheck",
+      "argv": [
+        "node",
+        "node_modules/typescript/bin/tsc",
+        "-p",
+        "studio/ui"
+      ],
+      "started_at": "2026-11-09T22:38:30.717835+00:00",
+      "ended_at": "2026-11-09T22:38:42.181338+00:00",
+      "exit": 0,
+      "log": "checks/typecheck-first.log"
+    },
+    {
+      "name": "build",
+      "argv": [
+        "node",
+        "node_modules/vite/bin/vite.js",
+        "build",
+        "--config",
+        "studio/ui/vite.config.ts"
+      ],
+      "started_at": "2026-11-09T22:38:42.184156+00:00",
+      "ended_at": "2026-11-09T22:39:05.248750+00:00",
+      "exit": 0,
+      "log": "checks/build-first.log"
+    }
+  ],
+  "ended_at": "2026-11-09T22:39:05.336728+00:00"
+}

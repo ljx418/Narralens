@@ -82,3 +82,7 @@ MAIN explicitly directed takeover after repeated roots across two actual checks.
 Internal tsc exit0 and five files/98 tests PASS (26.10s); verification-codex.json records raw logs/handles/hashes and earlier failures. Codex implemented fixes, so independent review stays REVIEW_PENDING; no A/Host/browser/media/human PASS. MAIN has the next integration and final effect boundary.
 
 Final fingerprint increment retested at frozen source9eb701d901cf39aa03a7ea3d04cc5a938fa3386f: tsc0 and100/100 internal tests. No source edits afterwards. Independent review and MAIN composition remain pending.
+
+## 2026-11-10 managed native observation candidate
+
+MAIN explicitly authorized controlled candidate source/patch artifacts under requests/010 and private var/managed-native-observation. Sole writer Codex; no Claude/provider. Exact upstream e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3 read-only; only exported host/use-film/ProjectView observer metadata changes. Shared Host and vendor/legacy dist untouched. Build/browser/Host require separate MAIN resource notification. Evidence and rollback in requests/010/README.md; this candidate does not self-sign independent PASS.
