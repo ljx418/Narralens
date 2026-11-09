@@ -345,6 +345,64 @@ describe("A-MCP contract handshake", () => {
     expect(calls).toEqual(["context.read"]);
     await client.close();
   });
+
+  it("rechecks the handshake before every dispatch and fails closed when the host is replaced", async () => {
+    // The Host can be replaced under a façade that is still connected. A handshake
+    // that was remembered from earlier would keep dispatching to a Host the façade
+    // has never spoken to.
+    let instance: unknown = INSTANCE;
+    const { ports, calls } = fakePorts({
+      "context.read": CONTEXT,
+      "artifact.put": {
+        project_id: "p1",
+        ref: { id: "a1", version: 1, sha256: "a".repeat(64) },
+        input_digest: "b".repeat(64),
+        content: { kind: "script", paragraphs: [] },
+        created_at: "2026-11-09T00:00:00.000Z",
+        input_refs: [],
+      },
+    });
+    // The fake answers the instance route with whatever the current Host says.
+    const responding = new Proxy(ports, {
+      get(target: ApplicationPorts, property: string | symbol) {
+        const routeId = String(property);
+        if (routeId === "instance") {
+          return async () => instance;
+        }
+        const route = (target as unknown as Record<string, unknown>)[routeId];
+        return typeof route === "function" ? (route as (input: unknown) => Promise<unknown>) : undefined;
+      },
+    }) as unknown as ApplicationPorts;
+
+    const client = await connect(responding);
+    const first = await client.callTool({
+      name: "narralens_context_read",
+      arguments: { project_id: "p1" },
+    });
+    expect(first.isError).toBeFalsy();
+
+    // The Host is replaced by one that speaks another contract.
+    instance = FOREIGN_INSTANCE;
+
+    const second = await client.callTool({
+      name: "narralens_artifact_put",
+      arguments: {
+        meta: { idempotency_key: "k1", correlation_id: "c1" },
+        project_id: "p1",
+        artifact_id: null,
+        base_version: 0,
+        input_digest: "b".repeat(64),
+        content: { kind: "script", paragraphs: [] },
+        input_refs: [],
+      },
+    });
+    expect(second.isError).toBe(true);
+    const envelope = second.structuredContent as { code: string };
+    expect(envelope.code).toBe("CAPABILITY_UNAVAILABLE");
+    // The write was never dispatched.
+    expect(calls).not.toContain("artifact.put");
+    await client.close();
+  });
 });
 
 describe("A-MCP façade behaviour", () => {
@@ -492,6 +550,48 @@ describe("A-MCP resource reads", () => {
     const { ports, calls } = fakePorts({ instance: INSTANCE, "context.read": CONTEXT });
     const client = await connect(ports);
     const result = await client.readResource({ uri: "narralens://projects/bad%ZZ/context" });
+    const payload = JSON.parse(resourceText(result));
+    expect(payload.code).toBe("INVALID_REQUEST");
+    expect(calls).not.toContain("context.read");
+    await client.close();
+  });
+
+  it("decodes a percent-encoded project exactly once", async () => {
+    const { ports } = fakePorts({ instance: INSTANCE, "context.read": CONTEXT });
+    const client = await connect(ports);
+    const result = await client.readResource({ uri: "narralens://projects/p%2D1/context" });
+    const payload = JSON.parse(resourceText(result));
+    expect(payload.code).toBeUndefined();
+    expect(payload.project_id).toBe("p-1");
+    await client.close();
+  });
+
+  it("refuses a URI that carries a fragment", async () => {
+    const { ports, calls } = fakePorts({ instance: INSTANCE, "context.read": CONTEXT });
+    const client = await connect(ports);
+    const result = await client.readResource({ uri: "narralens://projects/p1/context#section" });
+    const payload = JSON.parse(resourceText(result));
+    expect(payload.code).toBe("INVALID_REQUEST");
+    expect(calls).not.toContain("context.read");
+    await client.close();
+  });
+
+  it("refuses a query parameter that is given more than once", async () => {
+    const { ports, calls } = fakePorts({ instance: INSTANCE, "events.snapshot": SNAPSHOT });
+    const client = await connect(ports);
+    const result = await client.readResource({
+      uri: `narralens://projects/p1/events-snapshot?filter_digest=${"b".repeat(64)}&filter_digest=${"c".repeat(64)}`,
+    });
+    const payload = JSON.parse(resourceText(result));
+    expect(payload.code).toBe("INVALID_REQUEST");
+    expect(calls).not.toContain("events.snapshot");
+    await client.close();
+  });
+
+  it("does not silently drop the tail of a URI that carries two question marks", async () => {
+    const { ports, calls } = fakePorts({ instance: INSTANCE, "context.read": CONTEXT });
+    const client = await connect(ports);
+    const result = await client.readResource({ uri: "narralens://projects/p1/context?a=1?b=2" });
     const payload = JSON.parse(resourceText(result));
     expect(payload.code).toBe("INVALID_REQUEST");
     expect(calls).not.toContain("context.read");

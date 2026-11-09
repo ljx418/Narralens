@@ -3,10 +3,15 @@
  *
  * The client holds credentials for one local Host. These cases pin the refusals
  * that keep it that way: a payload the contract does not describe never reaches
- * the network, a base URL that points anywhere but a loopback is refused when the
- * client is built, a redirect is refused rather than followed (so the credentials
- * are never handed to whoever the redirect names), and a response body cannot be
- * unbounded.
+ * the network, a base URL that points anywhere but a loopback **address literal** is
+ * refused when the client is built, a redirect is refused rather than followed (so
+ * the credentials are never handed to whoever the redirect names), and a response
+ * body cannot be unbounded.
+ *
+ * The address that is checked has to be the address that is fetched. A host *name*
+ * is refused outright for exactly that reason: the network stack resolves it again
+ * on every connection, so a name that was checked once can point somewhere else by
+ * the time the request is made.
  *
  * The two failure shapes that are easy to confuse are pinned as well: a *read*
  * that could not be delivered is a retryable capability failure, while a *write*
@@ -18,6 +23,7 @@ import { describe, expect, it } from "vitest";
 import {
   createHostApplicationPorts,
   HostCallError,
+  HostConfigurationError,
   HostEndpointPolicyError,
 } from "../../../src/mcp/index.js";
 
@@ -49,12 +55,12 @@ const CREATE_PROJECT = {
 
 function clientWith(
   fetchImpl: typeof fetch,
-  overrides: Partial<{ baseUrl: string; resolveHost: (host: string) => readonly string[]; maxResponseBytes: number }> = {},
+  overrides: Partial<{ baseUrl: string; maxResponseBytes: number; timeoutMs: number }> = {},
 ) {
   return createHostApplicationPorts({
     baseUrl: overrides.baseUrl ?? "http://127.0.0.1:4173",
     fetchImpl,
-    ...(overrides.resolveHost === undefined ? {} : { resolveHost: overrides.resolveHost }),
+    ...(overrides.timeoutMs === undefined ? {} : { timeoutMs: overrides.timeoutMs }),
     ...(overrides.maxResponseBytes === undefined ? {} : { maxResponseBytes: overrides.maxResponseBytes }),
   });
 }
@@ -81,11 +87,19 @@ describe("A-MCP Host client refuses what must not leave", () => {
     expect(calls).toHaveLength(0);
   });
 
-  it("refuses a base URL that is not a loopback literal", () => {
+  it("refuses a base URL that is not a loopback address literal", () => {
     const { fetchImpl } = recordingFetch(() => new Response("{}", { status: 200 }));
     expect(() => clientWith(fetchImpl, { baseUrl: "http://example.com:4173" }))
       .toThrow(HostEndpointPolicyError);
     expect(() => clientWith(fetchImpl, { baseUrl: "http://10.0.0.5:4173" }))
+      .toThrow(HostEndpointPolicyError);
+  });
+
+  it("refuses a host name: the address that is checked must be the address that is fetched", () => {
+    const { fetchImpl } = recordingFetch(() => new Response("{}", { status: 200 }));
+    expect(() => clientWith(fetchImpl, { baseUrl: "http://localhost:4173" }))
+      .toThrow(HostEndpointPolicyError);
+    expect(() => clientWith(fetchImpl, { baseUrl: "http://narralens-host.local:4173" }))
       .toThrow(HostEndpointPolicyError);
   });
 
@@ -103,26 +117,54 @@ describe("A-MCP Host client refuses what must not leave", () => {
       .toThrow(HostEndpointPolicyError);
   });
 
-  it("refuses a host name unless a resolution policy restricts it to loopback", () => {
-    const { fetchImpl } = recordingFetch(() => new Response("{}", { status: 200 }));
-    expect(() => clientWith(fetchImpl, { baseUrl: "http://localhost:4173" }))
-      .toThrow(HostEndpointPolicyError);
-    expect(() => clientWith(fetchImpl, {
-      baseUrl: "http://localhost:4173",
-      resolveHost: () => ["203.0.113.7"],
-    })).toThrow(HostEndpointPolicyError);
-    expect(() => clientWith(fetchImpl, {
-      baseUrl: "http://localhost:4173",
-      resolveHost: () => [],
-    })).toThrow(HostEndpointPolicyError);
+  it("accepts an IPv6 loopback literal", async () => {
+    const { fetchImpl, calls } = recordingFetch(() => new Response(JSON.stringify({
+      project_id: "p1",
+      origin: "created",
+      project_revision: 1,
+      control_revision: 1,
+      snapshot_id: "snap1",
+      source_digest: "a".repeat(64),
+      workflow_revision: 1,
+      selection_version: 0,
+      current_selection: null,
+      active_jobs: [],
+      artifacts: [],
+      capabilities: [],
+      next_actions: [],
+      active_run: null,
+      native_ack: null,
+      native_sync: "unknown",
+    }), { status: 200 }));
+    const ports = clientWith(fetchImpl, { baseUrl: "http://[::1]:4173" }) as unknown as Record<
+      string,
+      (input: unknown) => Promise<unknown>
+    >;
+
+    await ports["context.read"]!(PROJECT_READ);
+    // The address that was checked is the address that was fetched.
+    expect(calls[0]?.url).toBe("http://[::1]:4173/api/agent/v1/projects/p1/context");
   });
 
-  it("accepts a host name that the policy resolves to loopback", () => {
+  it("fetches the loopback literal it was configured with", async () => {
+    const { fetchImpl, calls } = recordingFetch(() => new Response("{}", { status: 404 }));
+    const ports = clientWith(fetchImpl, { baseUrl: "http://127.0.0.1:4173" }) as unknown as Record<
+      string,
+      (input: unknown) => Promise<unknown>
+    >;
+
+    await ports["context.read"]!(PROJECT_READ).catch(() => undefined);
+    expect(calls[0]?.url).toBe("http://127.0.0.1:4173/api/agent/v1/projects/p1/context");
+  });
+
+  it("refuses a timeout or a response limit that is not a positive finite bound", () => {
     const { fetchImpl } = recordingFetch(() => new Response("{}", { status: 200 }));
-    expect(() => clientWith(fetchImpl, {
-      baseUrl: "http://localhost:4173",
-      resolveHost: () => ["127.0.0.1"],
-    })).not.toThrow();
+    for (const timeoutMs of [0, -1, Number.POSITIVE_INFINITY, Number.NaN]) {
+      expect(() => clientWith(fetchImpl, { timeoutMs })).toThrow(HostConfigurationError);
+    }
+    for (const maxResponseBytes of [0, -1, Number.POSITIVE_INFINITY, Number.NaN]) {
+      expect(() => clientWith(fetchImpl, { maxResponseBytes })).toThrow(HostConfigurationError);
+    }
   });
 });
 
@@ -132,9 +174,7 @@ describe("A-MCP Host client transport refusals", () => {
       status: 302,
       headers: { location: "http://example.com/elsewhere" },
     }));
-    const ports = clientWith(fetchImpl, {
-      baseUrl: "http://127.0.0.1:4173",
-    }) as unknown as Record<string, (input: unknown) => Promise<unknown>>;
+    const ports = clientWith(fetchImpl) as unknown as Record<string, (input: unknown) => Promise<unknown>>;
 
     const failure = await ports["context.read"]!(PROJECT_READ).then(() => null, (error: unknown) => error);
     const envelope = await envelopeOf(failure);

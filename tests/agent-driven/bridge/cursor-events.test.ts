@@ -451,16 +451,45 @@ describe("A-EVENTS scan position", () => {
     })).toThrow(EventBatchError);
   });
 
-  it("refuses unordered or duplicated rows", () => {
-    expect(() => projectEvents({
-      events: [event(12), event(11)],
+  it("normalises duplicate, reordered and late rows instead of refusing them", () => {
+    // A reconnect re-delivers a row, a partitioned log delivers rows out of order,
+    // and a late row arrives after the client has moved on. All three are normal.
+    const result = projectEvents({
+      events: [event(12), event(11), event(12), event(10)],
       fromWatermark: 10,
       scannedWatermark: 12,
       highWatermark: 40,
       project_id: "p1",
-    })).toThrow(EventBatchError);
+    });
+    // Ordered, de-duplicated, and the rows the client already has are gone.
+    expect(result.events.map((entry) => entry.event_id)).toEqual([11, 12]);
+    expect(result.nextWatermark).toBe(12);
+  });
+
+  it("refuses the same event id carrying two different rows", () => {
+    const conflicting = { ...event(11), state: "failed" };
     expect(() => projectEvents({
-      events: [event(11), event(11)],
+      events: [event(11), conflicting],
+      fromWatermark: 10,
+      scannedWatermark: 11,
+      highWatermark: 40,
+      project_id: "p1",
+    })).toThrow(EventBatchError);
+  });
+
+  it("refuses a row that lies beyond the position the batch claims", () => {
+    expect(() => projectEvents({
+      events: [event(11), event(30)],
+      fromWatermark: 10,
+      scannedWatermark: 11,
+      highWatermark: 40,
+      project_id: "p1",
+    })).toThrow(EventBatchError);
+  });
+
+  it("refuses a row with an impossible id", () => {
+    expect(() => projectEvents({
+      events: [{ ...event(11), event_id: 0 }],
       fromWatermark: 10,
       scannedWatermark: 11,
       highWatermark: 40,

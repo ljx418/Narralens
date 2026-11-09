@@ -1,0 +1,25 @@
+All five REVIEW-2 findings are corrected. Source-only round: no install, no `tsc`, no tests, no browser, no ffmpeg (the light slot belongs to PRODUCT). Nothing committed — the changes are uncommitted working-tree modifications on top of Codex's `8292d43`.
+
+## The five fixes
+
+**1 — Wrapper streams + no arbitrary entry override**
+The wrapper had `stdio: "inherit"` *and* `process.stdin.resume()`, so wrapper and server read the same input FD and split the JSON-RPC stream. It now spawns with pipes and wires them by hand (`process.stdin.pipe(child.stdin)`, `child.stdout/stderr.pipe(process.stdout/stderr)`), never interpreting a byte of the protocol. `NARRALENS_MCP_ENTRY` is **removed** — the wrapper always starts the real server. Child shutdown: SIGTERM → SIGKILL after a 2 s grace, on client disconnect, on SIGINT/SIGTERM, plus an `exit` safety net; the Host is never touched. The case now runs the **real** path: SDK `Client` → SDK `StdioClientTransport` → actual skill wrapper → actual stdio server, with only a micro HTTP stand-in for the Host; it asserts the handshake completed and 24 tools were listed (streams not corrupted), the wrapper's child is found while running, and both are gone after disconnect. The `long-lived-child` helper is deleted.
+
+**2 — Endpoint policy simplified**
+`url.hostname` for IPv6 is `"[::1]"`, so the loopback literal was being refused — now unwrapped (`normalizeHost`). The resolver hook is **removed** entirely: a name is re-resolved on every connection, so checking a name and then fetching the name left a window; the base URL must now be an address literal, and the checked address is the fetched address. `timeoutMs`/`maxResponseBytes` must be positive, finite, safe integers.
+
+**3 — Handshake repeated, not remembered**
+Success is no longer memoised — a Host can be replaced under a connected façade. Every non-instance dispatch is preceded by a fresh handshake; concurrent dispatches share one in-flight handshake whose result is never kept. Case: one connected client → valid Host → Host replaced with a mismatched one → the **write** is refused (`CAPABILITY_UNAVAILABLE`) and the write port is never called.
+
+**4 — Projection normalises instead of refusing**
+Rows already delivered are dropped, rows are ordered, a repeated row is shown once. Still refused: an impossible id, a row beyond the scanned bounds, the *same* id with *different* content, and a batch not covering the position it claims. Scanned/high invariants, forced project scope and the port contract are unchanged; no schema touched.
+
+**5 — Resource URI parsed once, strictly**
+Query = everything after the **first** `?` (the old `split("?")` dropped the tail); fragments refused; a repeated query key refused (the old code silently took the first value); the percent-decode now happens exactly **once**, in the façade, inside the error handling — `matchResourceUri` returns the raw segment and no longer decodes or throws.
+
+## State
+
+- **NOT_RUN (exact):** `pnpm install --offline --frozen-lockfile`, `pnpm exec vitest run tests/agent-driven/bridge --maxWorkers=1`, `pnpm exec tsc --noEmit`. No type-check has been performed on any of this code in any round; the first real `tsc` run may still find type errors. The stdio/wrapper cases additionally need the repo's `tsx`, which is not installed here.
+- Commands run this round: read-only only — a static import/export cross-check (which caught and fixed a reintroduced wrong import depth in `event-projection.ts`), `node --check` on the two `.mjs` files, `sha256sum`, `git status`/`diff`. No `find /`, no cross-drive traversal, no provider/credential change, no subagents.
+- `HANDOFF.md` updated: a "Round 3 — the REVIEW-2 fixes" section per finding, the new 33-file SHA256 table (verified against the files), the corrected test table, and the remaining NOT_RUN/limitations. Original logs preserved byte-identical (`claude-A.stdout.log`, `claude-A.stderr.log`, `claude-A-review1.*`, `claude-A-review2.*`).
+- Declaration ceiling unchanged: module-level only; A-COLD/A-MCP/A-EVENTS remain **NOT_RUN**; independent review REVIEW_PENDING; production assembly and human acceptance NOT_RUN.

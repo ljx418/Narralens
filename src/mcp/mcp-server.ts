@@ -12,12 +12,15 @@
  *   and native-bridge routes have no tool, so no MCP client can call
  *   `review.decide` or `editor.native.ack` and pretend to be the human or the
  *   editor.
- * - **A contract handshake before the first dispatch.** Before the façade asks the
+ * - **A contract handshake before every dispatch.** Before the façade asks the
  *   Host for anything except the instance itself, it verifies the Host's
- *   `api_version` and `contract_version` against the frozen contract. A Host that
- *   speaks a different contract is refused *before* a write is sent, not after.
- *   The handshake is a real read of the Host's own instance; the façade does not
- *   invent capabilities or a registration.
+ *   `api_version` and `contract_version` against the frozen contract. The check is
+ *   repeated for every dispatch and its result is never remembered: a Host can be
+ *   replaced under a façade that is still connected, and a remembered "the contract
+ *   was fine earlier" would keep dispatching to a Host the façade has never
+ *   spoken to. A Host that speaks a different contract is refused *before* a write
+ *   is sent, not after. The handshake is a real read of the Host's own instance;
+ *   the façade does not invent capabilities or a registration.
  * - **Strict inputs and outputs, on both surfaces.** Every tool call and every
  *   resource read validates its input against the route's contract definition
  *   before the port is called, and validates the port's output against the route's
@@ -226,18 +229,25 @@ const SNAPSHOT_QUERY_PARAMETERS: ReadonlySet<string> = new Set([
  */
 export function createMcpServer(options: McpFacadeOptions): Server {
   const ports = options.ports as unknown as Record<string, (input: unknown) => Promise<unknown>>;
-  let handshake: Promise<Instance> | undefined;
+  let inFlight: Promise<Instance> | undefined;
 
   /**
-   * Verify the Host's contract version, once, before the first dispatch.
+   * Verify the Host's contract version before a dispatch.
    *
-   * A successful handshake is remembered: the contract version of a running Host
-   * does not change under the façade. A failed one is *not* remembered, because a
-   * Host that was starting up may answer a moment later.
+   * The handshake is **not** memoised. A Host can be replaced under a façade that
+   * is still connected — restarted, upgraded, or taken over by another process —
+   * and a remembered "the contract was fine an hour ago" would let the façade keep
+   * dispatching to a Host it has never spoken to. Every non-instance dispatch is
+   * therefore preceded by a fresh handshake, and a dispatch to a replaced Host
+   * fails closed.
+   *
+   * Concurrent dispatches share one handshake in flight, so a burst of parallel
+   * calls does not turn into a burst of instance reads, but the result is never
+   * kept for later.
    */
   async function ensureHandshake(): Promise<void> {
-    if (handshake !== undefined) {
-      await handshake;
+    if (inFlight !== undefined) {
+      await inFlight;
       return;
     }
     const attempt = (async () => {
@@ -256,12 +266,11 @@ export function createMcpServer(options: McpFacadeOptions): Server {
       }
       return validateAgentRouteOutput("instance", raw);
     })();
-    handshake = attempt;
+    inFlight = attempt;
     try {
       await attempt;
-    } catch (error) {
-      handshake = undefined;
-      throw error;
+    } finally {
+      if (inFlight === attempt) inFlight = undefined;
     }
   }
 
@@ -408,7 +417,27 @@ export function createMcpServer(options: McpFacadeOptions): Server {
   server.setRequestHandler(ReadResourceRequestSchema, async (request): Promise<ReadResourceResult> => {
     const correlationId = randomUUID();
     const rawUri = request.params.uri;
-    const [uriPath = rawUri, query = ""] = rawUri.split("?");
+
+    // The URI is parsed once, and strictly. A fragment has no meaning on a
+    // resource URI, and the query is everything after the *first* question mark:
+    // splitting on every question mark would silently drop the tail of a URI that
+    // carries one.
+    if (rawUri.includes("#")) {
+      return {
+        contents: [{
+          uri: rawUri,
+          mimeType: "application/json",
+          text: JSON.stringify(errorFromInvalidRequest(
+            "The resource URI must not carry a fragment.",
+            correlationId,
+          )),
+        }],
+      };
+    }
+    const questionMark = rawUri.indexOf("?");
+    const uriPath = questionMark === -1 ? rawUri : rawUri.slice(0, questionMark);
+    const query = questionMark === -1 ? "" : rawUri.slice(questionMark + 1);
+
     const match = matchResourceUri(uriPath);
     if (match === null) {
       return {
@@ -422,7 +451,8 @@ export function createMcpServer(options: McpFacadeOptions): Server {
     const route = routeById(match.resource.source);
 
     // A percent-decode failure is a client error, not a crash: the URI is what the
-    // client sent, and refusing it is an answer.
+    // client sent, and refusing it is an answer. The decode happens here, exactly
+    // once, inside the error handling.
     let projectId: string;
     try {
       projectId = match.projectId === null ? "" : decodeURIComponent(match.projectId);
@@ -441,7 +471,23 @@ export function createMcpServer(options: McpFacadeOptions): Server {
 
     const parameters = new URLSearchParams(query);
     const allowed = route.id === "events.snapshot" ? SNAPSHOT_QUERY_PARAMETERS : new Set<string>();
+    const seen = new Set<string>();
     for (const key of parameters.keys()) {
+      if (seen.has(key)) {
+        // A repeated parameter has two values, and taking the first one silently
+        // would answer a different question from the one that was asked.
+        return {
+          contents: [{
+            uri: rawUri,
+            mimeType: "application/json",
+            text: JSON.stringify(errorFromInvalidRequest(
+              `The resource ${uriPath} was given the query parameter ${key} more than once.`,
+              correlationId,
+            )),
+          }],
+        };
+      }
+      seen.add(key);
       if (!allowed.has(key)) {
         return {
           contents: [{

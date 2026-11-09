@@ -1,20 +1,23 @@
 # A BRIDGE handoff
 
 Base/contract/HEAD: ca5b67a8285b130c79055317c6202f73cfbb99c8. Owner Codex
-/root/a_bridge_lead. Writer for both rounds: Claude Code session
+/root/a_bridge_lead. Writer for all three rounds: Claude Code session
 d94ac073-b5b8-42c6-9b4d-f0eef57d7850 (sole writer, implementation only, no commit).
 
 Round 1 delivered the A-BRIDGE-001 implementation. Codex reviewed it read-only
 (`REVIEW-1.md`, NEEDS_WORK) and transferred the same session back to Claude for the
-fixes. Round 2 is the result. The original session logs are preserved unchanged:
-`claude-A.stdout.log`, `claude-A.stderr.log`, `claude-A-review1.stdout.log`,
+fixes; round 2 is that result. Codex reviewed the round-2 source again
+(`REVIEW-2.md`, NEEDS_WORK, focused source corrections) and transferred the session
+back once more; round 3 is that result. The original session logs are preserved
+unchanged: `claude-A.stdout.log`, `claude-A.stderr.log`, `claude-A-review1.stdout.log`,
 `claude-A-review1.stderr.log`.
 
-Status: **code and tests written; nothing executed.** MAIN resource reservation 62928
-is still RUNNING, so no install, no `tsc`, no vitest, no browser and no media ran in
-either round. This work tree has no `node_modules`: the repository's dependencies are
-not installed here, so even the real-SDK stdio case cannot start until MAIN releases
-the reservation and `pnpm install --offline --frozen-lockfile` runs.
+Status: **code and tests written; nothing executed in any round.** MAIN resource
+reservation 62928 is still RUNNING and the light slot belongs to PRODUCT, so no
+install, no `tsc`, no vitest, no browser and no media ran. This work tree has no
+`node_modules`: the repository's dependencies are not installed here, so even the
+real-SDK stdio cases cannot start until MAIN releases the reservation and
+`pnpm install --offline --frozen-lockfile` runs.
 
 ## Round 1 — what was delivered (unchanged by round 2)
 
@@ -213,6 +216,94 @@ so "covered" means "the case exists", not "the case passes".
 - Cases: `mcp-wrapper-cleanup.test.ts` (new) — "stops the server it started when the
   client disconnects", "does not stop anything but its own child".
 
+## Round 3 — the REVIEW-2 fixes
+
+Codex reviewed the round-2 source again (`REVIEW-2.md`, NEEDS_WORK, focused source
+corrections) and transferred the session back. The light slot belongs to PRODUCT, so
+this round was source-only: no install, no `tsc`, no test run, no browser, no
+ffmpeg. All five findings are addressed below; every one of them still needs the
+released commands before it can be claimed as proven.
+
+### 1 — the wrapper's streams, and the arbitrary entry override
+
+- The wrapper had `stdio: "inherit"` *and* `process.stdin.resume()`: the wrapper
+  and the server read the **same** input descriptor, and the client's JSON-RPC
+  stream was split between them. The wrapper now spawns the server with pipes and
+  wires them by hand — the client's stdin is forwarded into the child's stdin, the
+  child's stdout and stderr are copied out — so the wrapper never interprets a byte
+  of the protocol.
+- The `NARRALENS_MCP_ENTRY` override is **removed**. There is no way to point the
+  wrapper at another program any more, and the wrapper always starts the real
+  server (`src/mcp/stdio-main.ts`).
+- The child is shut down with `SIGTERM` and then `SIGKILL` after a two second
+  grace period, on a client disconnect, on `SIGINT`/`SIGTERM`, and as an `exit`
+  safety net. The Host is never touched.
+- The wrapper's own case now runs the **real** path: the SDK's `Client`, over the
+  SDK's `StdioClientTransport`, against the **actual** skill wrapper, which starts
+  the **actual** stdio server. The only stand-in is a micro HTTP server standing in
+  for the Host. The case asserts that the handshake completed and the 24 tools were
+  listed (the proof that the streams are not corrupted), that the wrapper's child
+  is found while it runs, and that both are gone after the client disconnects.
+
+### 2 — the endpoint policy, simplified
+
+- `new URL("http://[::1]:4173").hostname` is `"[::1]"`, brackets included, so the
+  IPv6 loopback literal was being refused. The host is now unwrapped before it is
+  compared (`normalizeHost`).
+- The resolver hook is **removed**: a name is resolved again by the network stack
+  on every connection, so a policy that checked a name once and then fetched the
+  name left a window in which the name pointed somewhere else. The base URL must
+  now be an address literal, and the address that is checked is the address that is
+  fetched.
+- `timeoutMs` and `maxResponseBytes` must be positive, finite, safe integers, and
+  are checked when the client is built (`HostConfigurationError`).
+- Cases: `mcp-host-client.test.ts` — "refuses a host name: the address that is
+  checked must be the address that is fetched", "accepts an IPv6 loopback literal",
+  "fetches the loopback literal it was configured with", "refuses a timeout or a
+  response limit that is not a positive finite bound".
+
+### 3 — the handshake is repeated, not remembered
+
+- The façade no longer memoises a successful handshake. A Host can be replaced
+  under a façade that is still connected — restarted, upgraded, taken over — and a
+  remembered "the contract was fine earlier" would keep dispatching to a Host the
+  façade has never spoken to. Every non-instance dispatch is now preceded by a
+  fresh handshake; concurrent dispatches share one handshake in flight, and its
+  result is never kept.
+- Case: `mcp-registry.test.ts` — "rechecks the handshake before every dispatch and
+  fails closed when the host is replaced": the same connected client, a first
+  dispatch against a valid Host, then the Host replaced by one that speaks another
+  contract, and the next **write** is refused with the write port never called.
+
+### 4 — a late, repeated or reordered log is normal; only a lying batch is refused
+
+- The projection no longer refuses every duplicate or out-of-order batch. Rows the
+  client has already seen are dropped, rows are ordered before they are shown, and
+  a row that arrives twice is shown once. What it still refuses: an impossible
+  event id, a row beyond the position the batch claims, the *same* id carrying
+  *different* content, and a batch that does not cover the position it claims.
+- The scanned/high invariants, the forced project scope and the port contract
+  (the port returns every row it scanned) are unchanged, and no schema was
+  touched.
+- Cases: `cursor-events.test.ts` — "normalises duplicate, reordered and late rows
+  instead of refusing them", "refuses the same event id carrying two different
+  rows", "refuses a row that lies beyond the position the batch claims", "refuses
+  a row with an impossible id".
+
+### 5 — the resource URI is parsed once, strictly
+
+- The query is everything after the **first** question mark; `split("?")` used to
+  drop the tail of a URI that carried two. A URI with a fragment is refused.
+- A query parameter given more than once is refused: taking the first value
+  silently would answer a different question from the one that was asked.
+- The percent-decode now happens exactly **once**, in the façade, inside the error
+  handling. `matchResourceUri` returns the raw segment and no longer decodes (and
+  no longer throws from inside a matching helper).
+- Cases: `mcp-registry.test.ts` — "decodes a percent-encoded project exactly
+  once", "refuses a URI that carries a fragment", "refuses a query parameter that
+  is given more than once", "does not silently drop the tail of a URI that carries
+  two question marks", "refuses a URI that cannot be percent-decoded".
+
 ## Files and SHA256
 
 ```
@@ -221,9 +312,9 @@ bd7c79c79f8d36d01799ab3ce1fd8751c4829b04494c85f4814cf07a0fe9986b  skills/narrale
 6ca1921d3a45506a3e0d46bb260c69cc274acc42e6687daa2118a92e387337a4  skills/narralens-lib/lib/errors.md
 7c3ddb8bbe661e30f9c57780126f80ef27beaef9a29f857cbf10ffb76dde01d2  skills/narralens-lib/lib/reconnect.md
 1fc19e32ba4fb2401531bc7d8b5a5cee421f5cf6af1f150dba55e814536b7cb8  skills/narralens/SKILL.md
-9eebe096a7c668fbabeb7008f58a11b4a258634d44f6670688cf2843d7efae24  skills/narralens/bin/narralens-mcp.mjs
+c8f4144053ca33ed33f0a65b70d5dc6222a26f5f84f84e1c74e2f9f790933187  skills/narralens/bin/narralens-mcp.mjs
 9350b1084968c2629cc2ff58120e0f3c8cfe0c460c3b87879f9a9405dfc0d1b7  src/host/observability/cursor.ts
-525a8f9a532e63d74e970da4c182f3b076d9fcbc9e03fd1b3e44db60b9a221cc  src/host/observability/event-projection.ts
+7e40641684559701fcb22002cd0ab48ce43dc600ca5097bd0de8e1d512c4fdbf  src/host/observability/event-projection.ts
 2a84cf3648ffab54d3bf1c9587620cfdfc8a6723524b876f801f4a980397e4b7  src/host/observability/event-snapshot.ts
 988c709f5efb2229f874e7d76aeb20c9afd6ff648bcaa698a61a6ce4ca51320b  src/host/observability/index.ts
 0d8f36abe472bf1af32d26c4a971730c7d4203d192b28572027a8bc022e104e2  src/host/observability/ports.ts
@@ -233,21 +324,20 @@ e6bc8306ebd4fc80fc99ef12d12aa43254df198f36d8a562d64f97fcdc1813d9  src/launcher/i
 bc51d9954267b6743c8abc8be5f0d0e8c9d54a96c743ce3483e56263fa1363e1  src/launcher/launcher-plan.ts
 c36d146a53840970829d83062176b1e97d69d899e2a53da9dca754325d96d6eb  src/launcher/launcher-types.ts
 65a2f69750bf7cee4c8846eaa5ba46326271d7ba4cbe5d7744ff6656c1961cac  src/launcher/service-supervisor.ts
-233623b71d92b4f7ad36dc38bb578ef83ffe5c5bbcf6296329f9288dbce361d2  src/mcp/host-application-ports.ts
+dfa4f2226c3a940962e7effaaa2934193327d14816f81b5e48c316d6585c3f54  src/mcp/host-application-ports.ts
 bb0a5d610d164b3c4d43c0ccd779921bca073c3cd9725529c72ce59846066594  src/mcp/host-error-mapping.ts
-65b388af3345b32b3ecbbe452fb6f8d371064c6cf2bac4c5de3d10e4e413fa52  src/mcp/index.ts
-97ac8d0f8f30e474b472901a9e9ec064098c348f36d4b09041c6809a7649f96f  src/mcp/mcp-server.ts
-f97dc42716a80bc97390c31e1fa2b0b2095241dfdaca063b5778ee0a43c33d15  src/mcp/registry-view.ts
+fd87aead27542881fb762fa4188bfc932afaac738e29ab78c7e248697e79776b  src/mcp/index.ts
+1e0dc41ba957b8615f8143d165c1bffa79eebd946f77e6e3ffdf4a54ab250ac7  src/mcp/mcp-server.ts
+f0d431951318a86d1ba3feef681428431e8fad026d922ee9c147984c703ca0e6  src/mcp/registry-view.ts
 8a34ce53223067abb2a14bd7469589f7a2cf2005ea88a118350b1a185128fc83  src/mcp/stdio-main.ts
 070e096f3f000cf21ecb0b2cd0cfdf8fcf5fbc8b17b69de32f763a2a9e2f2c2d  src/mcp/tool-schemas.ts
-c38ff1e4d758198d0039793ce64125b978d0b9804a0d8ea6f99d53575edd914f  tests/agent-driven/bridge/cursor-events.test.ts
+00f2868069d5aa9f01f8ca5f2176963b48adaf5767d1da49d8b6a24a7a37316a  tests/agent-driven/bridge/cursor-events.test.ts
 c4c5b2406b67d6f2f01e6783393ca2c56c5597944b6d4377151397df90c1f765  tests/agent-driven/bridge/helpers/cursor-codec.ts
-4a5e26365d7df2183f18e41e09aa6a581558ac2fe14d1d69b73a044312e28876  tests/agent-driven/bridge/helpers/long-lived-child.mjs
 358ed227395587dd1272ba9c90be30ffedd1bcf519c5e988f9847f05fdea0613  tests/agent-driven/bridge/launcher-cold.test.ts
-95f054decbc7e29ab27c8cb3e8502f96d24545e7130ead5c6ab880f35a7e49fe  tests/agent-driven/bridge/mcp-host-client.test.ts
-5e76a8b095da9f73be904816e99059c62cf5ebb8b8ec9faee86df0174ae57f76  tests/agent-driven/bridge/mcp-registry.test.ts
+3f73b5b1d8dffb94fb7402b4b741a25b8c36767c3bc9fff41cf760ab21a47302  tests/agent-driven/bridge/mcp-host-client.test.ts
+057ddbbd6da5062e4153804a0c940c8e92945613c6301e2c1f2bf074b8d96981  tests/agent-driven/bridge/mcp-registry.test.ts
 2152c6bf30790084511e46080bd0598e063bae82290ef378cbfcaa9a8cce49f3  tests/agent-driven/bridge/mcp-stdio-client.test.ts
-a99f19b6178a51cf33d23f4db767f1897378bec0fc2ff612e257e377a7cbbf7e  tests/agent-driven/bridge/mcp-wrapper-cleanup.test.ts
+91ab245adc1e778877c80e8350caab4884aa05f48c22de04df85d71d97bbcf77  tests/agent-driven/bridge/mcp-wrapper-cleanup.test.ts
 d874d8b111a9c0d061c8487e62d39fdc5373cadd31c031cfaff96332975931ae  tests/agent-driven/bridge/skill-library.test.ts
 4920e19e34be778caf158d308008029379eb7980aa9a8c153161b377337f3527  tools/agent-driven/bridge/probe-mcp.mjs
 ```
@@ -255,6 +345,8 @@ d874d8b111a9c0d061c8487e62d39fdc5373cadd31c031cfaff96332975931ae  tests/agent-dr
 Removed in round 2: `src/host/observability/local-cursor-codec.ts` (moved to
 `tests/agent-driven/bridge/helpers/cursor-codec.ts`, rewritten to MAIN's agreed
 61-character scheme).
+Removed in round 3: `tests/agent-driven/bridge/helpers/long-lived-child.mjs` (the
+arbitrary entry override it existed for is gone).
 
 ## Tests written — all NOT_RUN
 
@@ -264,7 +356,7 @@ Removed in round 2: `src/host/observability/local-cursor-codec.ts` (moved to
 | `mcp-registry.test.ts` | A-MCP | the exact 24-tool allowlist, no trusted-UI or native-bridge route, each tool's contract input schema, path/query/body building, the error mapping rules, the contract handshake (success, mismatch, injected), the resource input validation, the query-parameter refusal, the configuration failure, the jobs projection, four templates + one concrete resource |
 | `mcp-host-client.test.ts` | A-MCP | the Host client's refusals before a request leaves: invalid input, non-loopback and name-based base URLs, credentials/query/fragment/path in the URL, redirects, an unbounded body, and the read-failure versus unknown-write-outcome split |
 | `mcp-stdio-client.test.ts` | A-MCP | a **real** SDK `Client` against the **real** façade in a **real** child process over stdio, against a local stand-in Host that records the requests: tool discovery, four templates + one concrete resource, the health resource's contents, the handshake order, a call that reaches the Host, a resource read, an invalid field that never reaches the Host, an unreachable Host, recovery when the Host returns, an unknown tool |
-| `mcp-wrapper-cleanup.test.ts` | A-MCP | the bin wrapper stops the server it started when the client disconnects, and stops nothing else |
+| `mcp-wrapper-cleanup.test.ts` | A-MCP | the **real** SDK client over the **real** wrapper running the **real** stdio server: the handshake completes and the 24 tools are listed (the streams are not corrupted), the wrapper's child is found while it runs, and both are gone after the client disconnects; the Host is untouched |
 | `cursor-events.test.ts` | A-EVENTS | the atomic snapshot and its cursor, resuming, `Last-Event-ID` precedence, both cursors verified separately, the four scope mismatches, expiry, tampering, malformation, malformed claims, a broken interval, the retention floor, the refusal-to-code table, the TTL policy, the context identity, and the scan-position rules |
 | `skill-library.test.ts` | A-MCP | the skill library describing exactly what the façade exposes |
 
@@ -275,7 +367,7 @@ Removed in round 2: `src/host/observability/local-cursor-codec.ts` (moved to
 | `git -C … rev-parse HEAD` / `git status --porcelain` | 0 | HEAD `ca5b67a…`; only untracked new files under the allowed prefixes plus the lane docs |
 | `find` / `grep` / `cat` over the contract, the registry, the schema, the existing host code and the installed SDK (read-only, `/mnt/c/workspace/videoworkline/Narralens/node_modules/@modelcontextprotocol/sdk`) | 0 | read for the implementation |
 | `python3` cross-check of the registry ↔ `ROUTE_PATH_BINDINGS` ↔ contract schema | 0 | `tools: 24, routes: 31, problems: none` |
-| `python3` import/export cross-check of every lane module and test | 0 | `no problems` — and it found a real defect: the observability modules imported `../../../contracts/…` instead of `../../contracts/…`, which would not have resolved. Fixed |
+| `python3` import/export cross-check of every lane module and test | 0 | `no problems` — and it found two real defects: the observability modules imported `../../../contracts/…` instead of `../../contracts/…` (rounds 2 and 3), which would not have resolved. Both fixed |
 | `node --check` on the three `.mjs` files (the wrapper, the probe tool, the test helper) | 0 | syntax ok — those files are outside `tsconfig`'s `include` and are not covered by `tsc --noEmit` |
 | `sha256sum` over every new file | 0 | the table above |
 
@@ -287,7 +379,7 @@ No `find /`, no traversal of `/mnt/J/` or any other drive.
   `node_modules`; the MCP SDK, the test runner and `tsx` are not present here.
 - `pnpm exec vitest run tests/agent-driven/bridge --maxWorkers=1` — NOT_RUN.
 - `pnpm exec tsc --noEmit` — NOT_RUN. **No type-check has been performed on any of
-  the code above**, in either round; the first real `tsc` run is still outstanding
+  the code above**, in any round; the first real `tsc` run is still outstanding
   and may find type errors.
 - No browser, no ffmpeg, no media, no network, no paid request, no model download.
 
@@ -311,7 +403,7 @@ the cursor TTL and the cursor codec were all removed in round 2.
 
 ## Limitations and caveats that remain
 
-1. **Nothing has been executed, in either round.** No install, no type-check, no
+1. **Nothing has been executed, in any round.** No install, no type-check, no
    test run. The code and the cases are written; they are not proven.
 2. **The SDK API surface was verified by reading the installed SDK elsewhere**, not
    by installing it here: the 1.26.0 `.d.ts`/`.js` were read (read-only) from
@@ -336,8 +428,9 @@ the cursor TTL and the cursor codec were all removed in round 2.
 7. **The health registry lives in `src/launcher/`**, next to the launcher that owns
    the service inventory, with a re-export at the path the implementation design
    names. One implementation, two documented paths.
-8. **The wrapper's `NARRALENS_MCP_ENTRY` is a local override**, used by the lane's
-   own cleanup case. It is not part of the client's contract.
+8. **The wrapper has no configuration hook left.** It always starts the real
+   server, and the Host address comes from the environment like any other
+   configuration. The lane's own case exercises it through the real path.
 9. **Nothing here is registered.** The modules are dormant: no route is registered,
    no process is started, no key is read, no database is touched.
 
