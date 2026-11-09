@@ -15,6 +15,8 @@ import { validateAdoptRequest, validateComparisonReplayRequest, validateComparis
 import type { EngineResponse } from "../contracts/engine-types.js";
 import type { ApiError, JobEvent, ProjectResponse, ProposalComparisonRequest } from "../contracts/types.js";
 import { HttpError, normalizeError } from "./api-error.js";
+import { AgentHttpRouter, type AgentDispatcher } from "./agent-driven/agent-http-router.js";
+import { ScopedAgentAuth } from "./agent-driven/scoped-auth.js";
 import { HostDiagnostics } from "./host-diagnostics.js";
 import { AssetImportService } from "./assets/asset-import-service.js";
 import { JobStore } from "./job-store.js";
@@ -211,7 +213,13 @@ function adoptionStagingRootFor(revisions: RevisionStore, configured: string | u
   return defaultAdoptionStagingRoot(revisions.databasePath);
 }
 
+export interface AgentHostApplication {
+  readonly auth: ScopedAgentAuth;
+  readonly dispatcher: AgentDispatcher;
+}
 interface HostDependencies {
+  /** A-mode uses the same Host and DB. Omitted only by the preserved legacy entry. */
+  agentApplication?: (host: NarralensHost) => AgentHostApplication;
   catalog?: ProjectCatalog;
   runner?: ControlledAgentRunner;
   proposals?: ProposalAdapter;
@@ -374,6 +382,8 @@ export class NarralensHost {
   #stopOutbox: (() => void) | undefined;
   #leaseReaper: ReturnType<typeof setInterval> | undefined;
   #server: Server | undefined;
+  readonly #agentApplication: AgentHostApplication | undefined;
+  readonly #agentRouter: AgentHttpRouter | undefined;
   /**
    * M4C's fault seam, kept so the OpenFilm composition can be given it at listen time.
    *
@@ -635,6 +645,9 @@ export class NarralensHost {
     this.#materializeDrainIntervalMs = dependencies.materializeDrainIntervalMs ?? 250;
     this.#outboxReplayIntervalMs = dependencies.outboxReplayIntervalMs ?? 250;
     this.sessionExpiresAt = new Date(Date.now() + (dependencies.sessionTtlMs ?? 3_600_000));
+    this.#agentApplication = dependencies.agentApplication?.(this);
+    this.#agentRouter = this.#agentApplication === undefined ? undefined
+      : new AgentHttpRouter(this.#agentApplication.auth, () => this.origin, this.#agentApplication.dispatcher);
   }
 
   async listen(port = 4173): Promise<number> {
@@ -760,6 +773,11 @@ export class NarralensHost {
   async #handle(request: IncomingMessage, response: ServerResponse): Promise<void> {
     try {
       const host = request.headers.host;
+      // The new protocol is authenticated by scoped credentials before any old route.
+      // Do not fall through to the legacy session bootstrap or bearer authority.
+      if (this.#agentRouter && new URL(request.url ?? "/", "http://127.0.0.1").pathname.startsWith("/api/agent/v1/")) {
+        return await this.#agentRouter.handle(request, response);
+      }
       if (request.method === "GET" && request.url && !request.url.startsWith("/api/")) {
         return await serveStatic(request.url, response);
       }
@@ -771,6 +789,7 @@ export class NarralensHost {
       }
       const url = new URL(request.url ?? "/", `http://${host}`);
       if (request.method === "GET" && url.pathname === "/api/session") {
+        if (this.#agentApplication) this.#authenticate(request);
         return json(response, 200, { token: this.sessionToken, expires_at: this.sessionExpiresAt.toISOString() });
       }
       this.#authenticate(request);
@@ -855,6 +874,24 @@ export class NarralensHost {
   }
 
   #authenticate(request: IncomingMessage): void {
+    if (this.#agentApplication) {
+      // Legacy protocol remains available for trusted UI reads. Its old session bearer
+      // cannot create an A-mode permission or bypass an approval/attempt gate.
+      if (request.method !== "GET" && request.method !== "HEAD") throw new HttpError(403, "ORIGIN_REJECTED", "Use the controlled project command path");
+      try {
+        this.#agentApplication.auth.authenticate({
+          method: request.method ?? "", origin: request.headers.origin,
+          authorization: request.headers.authorization,
+          ...(request.headers.cookie ? { cookie: request.headers.cookie } : {}),
+          ...(request.headers.referer ? { referer: request.headers.referer } : {}),
+          ...(typeof request.headers["sec-fetch-site"] === "string" ? { secFetchSite: request.headers["sec-fetch-site"] } : {}),
+          rawHeaders: request.rawHeaders,
+        }, "trusted_ui");
+      } catch {
+        throw new HttpError(403, "ORIGIN_REJECTED", "Use the trusted workbench session");
+      }
+      return;
+    }
     if (Date.now() >= this.sessionExpiresAt.getTime()) throw new HttpError(401, "INVALID_SESSION", "Session expired");
     const header = request.headers.authorization;
     const token = header?.startsWith("Bearer ") ? header.slice(7) : undefined;
@@ -1271,6 +1308,9 @@ export class NarralensHost {
     const projectId = input.project_id;
     const body = (input.body ?? {}) as Record<string, unknown>;
     try {
+      if (this.#agentApplication && !["workbench", "inventory", "materialization.read", "history.read"].includes(input.operation)) {
+        throw new HttpError(403, "ORIGIN_REJECTED", "Use the controlled project command path");
+      }
       switch (input.operation) {
         case "workbench": {
           if (projectId === "") throw new HttpError(400, "INVALID_REQUEST", "The request names no project");
@@ -1458,6 +1498,9 @@ export class NarralensHost {
     entry_id: string; project_id: string; body: unknown; correlation_id: string;
   }): Promise<{ status: number; body: unknown }> {
     const projectId = input.project_id;
+    if (this.#agentApplication) {
+      return { status: 403, body: { code: "ORIGIN_REJECTED", message: "Use the controlled project command path" } };
+    }
     if (projectId === "") {
       return { status: 400, body: { code: "INVALID_REQUEST", message: "the request names no project" } };
     }

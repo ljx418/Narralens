@@ -1,0 +1,48 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+ ✓ tests/agent-driven/bridge/mcp-registry.test.ts (38 tests) 96ms
+ ✓ tests/agent-driven/bridge/cursor-events.test.ts (26 tests) 38ms
+ ✓ tests/agent-driven/bridge/launcher-cold.test.ts (16 tests) 20ms
+ ✓ tests/agent-driven/bridge/mcp-host-client.test.ts (15 tests) 59ms
+ ✓ tests/agent-driven/bridge/mcp-stdio-client.test.ts (8 tests) 39448ms
+   ✓ A-MCP stdio façade > advertises exactly the registry's tool allowlist over a real stdio transport  7507ms
+   ✓ A-MCP stdio façade > reads the concrete health resource over the real transport  3888ms
+   ✓ A-MCP stdio façade > reaches the host over http and returns the contract output  3960ms
+   ✓ A-MCP stdio façade > verifies the host's contract version before the first dispatch  3639ms
+   ✓ A-MCP stdio façade > reads a project resource through the host  3509ms
+   ✓ A-MCP stdio façade > rejects an invalid field without reaching the host  4164ms
+   ✓ A-MCP stdio façade > reports an unreachable host and recovers when the host returns  8595ms
+   ✓ A-MCP stdio façade > refuses an unknown tool name  4159ms
+ ✓ tests/agent-driven/bridge/mcp-wrapper-cleanup.test.ts (2 tests) 7097ms
+   ✓ A-MCP skill bin wrapper > serves the real client through the real wrapper and leaves nothing behind  3552ms
+   ✓ A-MCP skill bin wrapper > does not stop anything but its own child  3544ms
+ ✓ tests/agent-driven/integration/contract-freeze.test.ts (3 tests) 395ms
+(node:3715422) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/host-application.test.ts (1 test) 4628ms
+   ✓ mounts real creative SQL in NarralensHost and denies the legacy bearer/session/write bypass  4627ms
+(node:3715656) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/agent-http-router.test.ts (5 tests) 216ms
+(node:3715763) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/agent-schema.test.ts (8 tests) 372ms
+(node:3715784) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/durable-cursor.test.ts (3 tests) 167ms
+(node:3715808) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/product-sqlite-repository.test.ts (9 tests) 87ms
+(node:3715898) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/observation-cursor-ports.test.ts (3 tests) 10ms
+ ✓ tests/agent-driven/integration/scoped-auth.test.ts (6 tests) 5ms
+ ✓ tests/agent-driven/bridge/skill-library.test.ts (3 tests) 2ms
+ ✓ tests/agent-driven/integration/capability-fingerprint.test.ts (2 tests) 3ms
+
+ Test Files  16 passed (16)
+      Tests  148 passed (148)
+   Start at  22:53:58
+   Duration  118.80s (transform 2.20s, setup 0ms, collect 36.24s, tests 52.64s, environment 2ms, prepare 19.74s)
+

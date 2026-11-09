@@ -1,0 +1,19 @@
+{
+  "scope": "Host/transport/module integration; not whole A acceptance",
+  "commands": [
+    "corepack pnpm exec tsc --noEmit",
+    "corepack pnpm exec vitest run tests/agent-driven/integration tests/agent-driven/bridge tests/agent-driven/observability --maxWorkers=1 --minWorkers=1"
+  ],
+  "results": {
+    "typecheck": 0,
+    "integration": 0,
+    "files": 16,
+    "tests": 148
+  },
+  "artifacts": {
+    "integration.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "integration.txt": "0d9e61d255f11b7d380598eec0e2e1021766873b45509c522cc203e2ca056483",
+    "typecheck.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "typecheck.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

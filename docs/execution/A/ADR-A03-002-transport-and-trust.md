@@ -7,3 +7,9 @@ HTTP只注册冻结31路由；身份由服务端凭据决定，trusted_ui只接�
 Cursor采用持久随机handle加HMAC，签名校验与时间检查分离，先验证project/filter scope，再判断未来签发与到期，跨scope不泄漏到期事实。本次MAIN修订BRIDGE cursor内部not_yet_valid分类；wire合同未变，仍须重跑BRIDGE回归。
 
 main-composition-first保存35/38失败原始事实；r2修复了测试把更新intake向量当创建、保留占位style摘要的错误，实际tsc0及38/38通过。合同padding向量仅证明wire形态，不是业务可用输入。以上不证明NarralensHost已挂载、真实原生确认、生产密钥保管或完整A验收。Host挂载、持久运行门、素材和渲染接线仍待实施，独立复核尚未签署。
+
+## 真实Host挂载复验
+
+AgentApplication作为同一NarralensHost的显式装配入口，共用现有RevisionStore。agent.v1在旧鉴权之前分发；Agent模式旧session只向可信UI读取开放，旧bearer不能获得A权限；旧HTTP写与尚未接统一门的Studio mutation暂时拒绝。默认legacy入口仍保持旧行为。后续必须逐动作接可信会话/CSRF与Coordinator再开放，不能将临时拒绝当作保留编辑体验验收通过。
+
+MCP Node客户端从已验证loopback baseURL固定Origin，剔除大小写重复，凭据仍另验。main-host-first：tsc0、40测试；main-host-sdk：tsc0、16文件148测试，含BRIDGE108回归与MAIN40。后者通过真实SDK stdio子进程→NarralensHost→ScopedAuth→真实SQLite简报读取；实例握手为测试元数据，不证明生产supervisor，也不证明三个实际Agent客户端均已接通。无UI自动化、人验、真实视频或付费请求。本次独立源码审查由未实现MAIN模块的BRIDGE lead继续进行，尚未签整阶段PASS。

@@ -357,6 +357,11 @@ export function createHostApplicationPorts(options: HostClientOptions): Applicat
       "x-correlation-id": id,
       ...(options.headers?.() ?? {}),
     };
+    // Node's fetch does not add Origin. Bind it to the already validated loopback
+    // endpoint, including when injected headers use a differently cased key. Origin
+    // is a transport boundary, never a substitute for the scoped bearer credential.
+    for (const key of Object.keys(headers)) if (key.toLowerCase() === "origin") delete headers[key];
+    headers.origin = new URL(baseUrl).origin;
     if (request.body !== undefined) headers["content-type"] = "application/json";
 
     let response: Response;
