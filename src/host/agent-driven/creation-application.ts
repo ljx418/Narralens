@@ -1,3 +1,4 @@
+import {validateNativeEntry} from '../../contracts/owned-projects.js';
 import {CreatedWorkbenchService} from './created-workbench-service.js';
 import {CreatedWorkbenchHttp} from './created-workbench-http.js';
 import {CreatedNativeWorkspaceService} from './created-native-workspace.js';
@@ -57,7 +58,7 @@ export class CreationApplication implements AgentHostApplication {
    const path=new URL(descriptor.url).pathname.match(/^\/projects\/([A-Za-z0-9_-]{1,200})$/);if(!path)throw new ProductError('CAPABILITY_UNAVAILABLE','The native project identity is unavailable');
    const generation=options.instance?.().generation??1;
    const entry=host.issueNativeEntry({project_id:projectId,native_project_id:path[1]!,owner_session_ref:principal.session_ref,instance_generation:generation,revision:prepared.revision,snapshot_id:prepared.snapshot_id,source_digest:prepared.source_digest,isCurrent:()=>(options.instance?.().generation??1)===generation&&this.auth.isPrincipalActive(principal)&&this.nativeWorkspaces.isPrepared(prepared),readWorkbench:()=>this.createdWorkbench.read(projectId,caller)});
-   return {format:'narralens.native-entry@1.0',project_id:projectId,revision:prepared.revision,snapshot_id:prepared.snapshot_id,native_state:'unconfirmed',...entry};
+   return validateNativeEntry({format:'narralens.native-entry@1.0',project_id:projectId,revision:prepared.revision,snapshot_id:prepared.snapshot_id,native_state:'unconfirmed',...entry});
   });
   this.localAssets=options.localAssets?new LocalAssetRegistry(host.revisions,this.creation,{...options.localAssets,projectsRoot:options.createdRoot,snapshotsRoot:host.snapshots.projectRoot('')}):null;
   this.worker=new ProjectCreationService({store:this.creation,coordinator:host.coordinator,snapshots:host.snapshots,verifier,createdRoot:options.createdRoot,...options.worker});

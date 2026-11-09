@@ -1,0 +1,31 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/bridge-observability/var/independent-native-entry-2a196ed/source
+
+ ❯ tests/agent-driven/integration/controlled-native-session-capacity.test.ts (2 tests | 1 failed | 1 skipped) 102ms
+   ↓ reopens the same actual scope 80 times without exhausting capacity or invalidating an existing tab proof
+   × reclaims 64 revoked owners and workspace versions while retaining a bounded stale-token answer and a usable fresh owner 102ms
+     → expected 503 to be 200 // Object.is equality
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 1 skipped (2)
+   Start at  07:26:17
+   Duration  2.10s (transform 64ms, setup 0ms, collect 149ms, tests 102ms, environment 0ms, prepare 1.24s)
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/controlled-native-session-capacity.test.ts > reclaims 64 revoked owners and workspace versions while retaining a bounded stale-token answer and a usable fresh owner
+AssertionError: expected 503 to be 200 // Object.is equality
+
+- Expected
++ Received
+
+- 200
++ 503
+
+ ❯ exchange tests/agent-driven/integration/controlled-native-session-capacity.test.ts:16:159
+
+ ❯ tests/agent-driven/integration/controlled-native-session-capacity.test.ts:34:35
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+

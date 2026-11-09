@@ -1,3 +1,4 @@
+import {validateOwnedProjects,type OwnedProjectsPage} from '../../contracts/owned-projects.js';
 import type {NarralensHost} from '../server.js';
 import type {ProjectCreationStore} from '../projects/project-creation-store.js';
 import type {TrustedCallerContext} from '../creative/product-repository.js';
@@ -12,6 +13,22 @@ export class CreatedWorkbenchService {
  #closed=false;
  constructor(private readonly host:NarralensHost,creation:ProjectCreationStore){this.#authority=new CreativeProjectAuthority(creation);}
  close(){this.#closed=true;}
+ list(caller:TrustedCallerContext,after:string|null=null):OwnedProjectsPage {
+  if(this.#closed)throw new ProductError('CAPABILITY_UNAVAILABLE','The workbench is closing');
+  if(!isTrustedCallerContext(caller)||caller.channel!=='trusted_ui')throw new ProductError('ORIGIN_REJECTED','A trusted workbench session is required');
+  if(after!==null&&!/^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$/.test(after))throw new ProductError('INVALID_REQUEST','Invalid project page');
+  const rows=this.host.revisions.compose(db=>db.prepare(`SELECT c.reserved_project_id AS project_id FROM cp_a0_bootstrap_command c
+    JOIN cp_a0_project_origin o ON o.project_id=c.reserved_project_id
+    WHERE c.principal_id=? AND c.state='committed' AND o.origin='created' AND c.reserved_project_id>?
+    ORDER BY c.reserved_project_id LIMIT 25`).all(caller.principal_id,after??''));
+  const projects=rows.slice(0,24).map(row=>{
+   const id=String(row.project_id);this.#authority.assertOwner(id,caller.principal_id);
+   const reservation=this.#authority.creation.forProject(id);if(!reservation)throw new ProductError('CAPABILITY_UNAVAILABLE','A saved project has no creation facts');
+   const commit=this.host.revisions.activeCommit(id),fact=commit?this.#authority.creation.sourceFact(id,commit.snapshot_id):null;
+   return {project_id:id,title:reservation.brief.topic,project_revision:commit?.revision??null,snapshot_id:commit?.snapshot_id??null,saved_at:commit?.created_at??null,frame_count:fact?.frame_count??null,state:!commit||!fact||this.host.revisions.recoveryGate(id,0)?'attention':'saved'};
+  });
+  return validateOwnedProjects({format:'narralens.owned-projects@1.0',projects,next_after:rows.length>24?projects[projects.length-1]!.project_id:null});
+ }
  async read(projectId:string,caller:TrustedCallerContext):Promise<CreatedWorkbenchProjection>{
   if(this.#closed)throw new ProductError('CAPABILITY_UNAVAILABLE','The workbench is closing');
   if(!isTrustedCallerContext(caller)||caller.channel!=='trusted_ui')throw new ProductError('ORIGIN_REJECTED','A trusted workbench session is required');

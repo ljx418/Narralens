@@ -1,0 +1,15 @@
+{
+ "$schema":"https://json-schema.org/draft/2020-12/schema",
+ "$id":"https://narralens.local/schemas/native-entry.schema.json",
+ "type":"object","additionalProperties":false,
+ "required":["format","project_id","revision","snapshot_id","native_state","url","expires_at"],
+ "properties":{
+  "format":{"const":"narralens.native-entry@1.0"},
+  "project_id":{"type":"string","pattern":"^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$"},
+  "revision":{"type":"integer","minimum":1},
+  "snapshot_id":{"type":"string","pattern":"^[a-f0-9]{64}$"},
+  "native_state":{"const":"unconfirmed"},
+  "url":{"type":"string","pattern":"^http://127\\.0\\.0\\.1:[0-9]{1,5}/narralens/entry#native_ticket=[A-Za-z0-9_-]{43}$"},
+  "expires_at":{"type":"integer","minimum":1}
+ }
+}

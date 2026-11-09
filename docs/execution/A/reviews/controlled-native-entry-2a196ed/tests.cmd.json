@@ -1,0 +1,20 @@
+{
+  "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/bridge-observability/var/independent-native-entry-2a196ed/source",
+  "command": [
+    "corepack",
+    "pnpm",
+    "exec",
+    "vitest",
+    "run",
+    "tests/agent-driven/integration/controlled-native-session-capacity.test.ts",
+    "tests/agent-driven/integration/created-native-entry.test.ts",
+    "tests/agent-driven/headless/created-native-entry.test.ts",
+    "tests/contracts/native-workbench-static.test.ts",
+    "--maxWorkers=1",
+    "--minWorkers=1"
+  ],
+  "environment_overrides": {
+    "COREPACK_ENABLE_NETWORK": "0",
+    "CI": "1"
+  }
+}

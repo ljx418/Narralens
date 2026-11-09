@@ -1,0 +1,18 @@
+{
+  "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+  "argv": [
+    "corepack",
+    "pnpm",
+    "exec",
+    "vitest",
+    "run",
+    "tests/agent-driven/integration/owned-projects.test.ts",
+    "tests/agent-driven/integration/owned-project-client.test.ts",
+    "tests/agent-driven/integration/created-workbench-read.test.ts",
+    "--maxWorkers=1",
+    "--minWorkers=1"
+  ],
+  "session": 1946,
+  "exit": 0,
+  "output": "narralens-owned-projects-tests-r1.txt"
+}

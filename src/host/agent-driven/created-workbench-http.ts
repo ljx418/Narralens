@@ -23,6 +23,12 @@ export class CreatedWorkbenchHttp {
    // A local same-host service receives cookies across ports. It cannot read this UI
    // without the proof held only in the correct origin's sessionStorage.
    if(!headers.csrf)throw new AgentRouteError('ORIGIN_REJECTED');
+   if(url.pathname==='/api/ui/v1/projects'){
+    if(request.method!=='GET')throw new AgentRouteError('NOT_FOUND');
+    if([...url.searchParams.keys()].some(k=>k!=='after')||url.searchParams.getAll('after').length>1||request.headers['transfer-encoding']||Number(request.headers['content-length']??0)!==0)throw new AgentRouteError('INVALID_REQUEST');
+    const result=this.service.list(createTrustedCallerContext({principal_id:principal.principal_id,channel:'trusted_ui',source:'trusted_ui',session_ref:principal.session_ref}),url.searchParams.get('after'));
+    this.auth.authenticate(headers,'trusted_ui');send(200,result);return true;
+   }
    const match=url.pathname.match(/^\/api\/ui\/v1\/projects\/([A-Za-z0-9][A-Za-z0-9_-]{0,63})\/(created-workbench|native-open)$/);
    if(!match)throw new AgentRouteError('NOT_FOUND');
    if(match[2]==='native-open'){

@@ -1,0 +1,14 @@
+{
+  "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/bridge-observability/var/independent-native-entry-2a196ed/source",
+  "command": [
+    "corepack",
+    "pnpm",
+    "exec",
+    "tsc",
+    "--noEmit"
+  ],
+  "environment_overrides": {
+    "COREPACK_ENABLE_NETWORK": "0",
+    "CI": "1"
+  }
+}
