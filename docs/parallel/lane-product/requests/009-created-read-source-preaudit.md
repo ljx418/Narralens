@@ -25,3 +25,7 @@ schema history maxItems=256，而service未分页/截断；超过256个committed
 ## 当前证据边界
 
 已读测试源码覆盖真实HTTP创建→零帧GET、匿名/driver/cookie-only/跨Origin/foreign owner拒绝、source drift拒绝、service关闭、schema伪字段拒绝、读完后credential撤销不泄露projection。未在本次执行，不把测试存在写成通过。后续native Gateway delegate、实际原生loaded观察、M5 union挂载、Run/assembly/Review/Delivery等仍按A目标继续；本预审没有新增人工模块门。
+
+### 后续源码修正观察
+
+MAIN反馈后再次只读核对 `created-workbench-service.ts:36`，现已变为有sound→`narration:'unknown'`、无sound→`'absent'`。这消除了“音乐/效果音误称旁白present”的已见误报；unknown只是缺少真实旁白角色关联，**不代表旁白素材/许可/质量通过**。真实旁白关联证实后才能present。读取时HEAD仍为`8638ee182fd53251b6461904016ddce62b9bc4eb`，修正可能在dirty源码，不将该HEAD冒充最终修正提交。MAIN称17项实际通过对应修正前源码；此增量尚待MAIN对最终源复验，本agent未运行检查。
