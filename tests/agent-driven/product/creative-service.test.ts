@@ -76,16 +76,104 @@ describe("the creative service", () => {
       RELAY_CALLER,
     );
     const second = await service.putIntake(
-      { meta: meta("k-2"), intake_id: first.intake_id, base_version: 1, brief: BRIEF },
+      {
+        meta: meta("k-2"),
+        intake_id: first.intake_id,
+        base_version: 1,
+        brief: { ...BRIEF, topic: "另一个主题" },
+      },
       RELAY_CALLER,
     );
     expect(second.version).toBe(2);
     await expect(
       service.putIntake(
-        { meta: meta("k-3"), intake_id: first.intake_id, base_version: 1, brief: BRIEF },
+        {
+          meta: meta("k-3"),
+          intake_id: first.intake_id,
+          base_version: 1,
+          brief: { ...BRIEF, topic: "第三个主题" },
+        },
         RELAY_CALLER,
       ),
     ).rejects.toMatchObject({ code: "REVISION_CONFLICT" });
+  });
+
+  it("does not advance the version when the brief did not change", async () => {
+    const { service } = newService();
+    const first = await service.putIntake(
+      { meta: meta("k-1"), intake_id: null, base_version: 0, brief: BRIEF },
+      RELAY_CALLER,
+    );
+    const again = await service.putIntake(
+      { meta: meta("k-2"), intake_id: first.intake_id, base_version: 1, brief: BRIEF },
+      RELAY_CALLER,
+    );
+    expect(again.version).toBe(1);
+  });
+
+  it("refuses a brief that another principal owns", async () => {
+    const { service } = newService();
+    const first = await service.putIntake(
+      { meta: meta("k-1"), intake_id: null, base_version: 0, brief: BRIEF },
+      RELAY_CALLER,
+    );
+    await expect(
+      service.putIntake(
+        {
+          meta: meta("k-2"),
+          intake_id: first.intake_id,
+          base_version: 1,
+          brief: { ...BRIEF, topic: "另一个主题" },
+        },
+        OTHER_RELAY_CALLER,
+      ),
+    ).rejects.toMatchObject({ code: "UNAUTHORIZED" });
+  });
+
+  it("refuses a brief whose material strategy does not match it", async () => {
+    const { service } = newService();
+    await expect(
+      service.putIntake(
+        {
+          meta: meta("k-bad-brief"),
+          intake_id: null,
+          base_version: 0,
+          brief: {
+            ...BRIEF,
+            local_asset_ids: ["asset-1"],
+            content_brief: {
+              ...BRIEF.content_brief,
+              material_strategy: {
+                ...BRIEF.content_brief.material_strategy,
+                asset_ids: [],
+              },
+            },
+          },
+        },
+        RELAY_CALLER,
+      ),
+    ).rejects.toMatchObject({ code: "INVALID_REQUEST" });
+  });
+
+  it("refuses a brief whose style digest is not the recomputed one", async () => {
+    const { service } = newService();
+    await expect(
+      service.putIntake(
+        {
+          meta: meta("k-bad-style"),
+          intake_id: null,
+          base_version: 0,
+          brief: {
+            ...BRIEF,
+            content_brief: {
+              ...BRIEF.content_brief,
+              style: { ...BRIEF.content_brief.style, style_digest: "f".repeat(64) },
+            },
+          },
+        },
+        RELAY_CALLER,
+      ),
+    ).rejects.toMatchObject({ code: "INVALID_REQUEST" });
   });
 
   it("replays a repeated request and refuses the same key with other content", async () => {

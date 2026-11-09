@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import type { HealthRead, ServiceHealth } from "../../contracts/agent-driven-types.js";
+import type { HealthMetric, HealthRead, ServiceHealth } from "../../contracts/agent-driven-types.js";
 
 /**
  * The R4 system control panel.
@@ -11,8 +11,9 @@ import type { HealthRead, ServiceHealth } from "../../contracts/agent-driven-typ
  * Two rules govern what it shows and what it may do:
  *
  * - **A stale sample is unknown.** The health contract samples every five seconds and
- *   treats a sample older than fifteen seconds as unknown. The panel applies that rule
- *   itself instead of showing a stale "ready".
+ *   treats a sample older than fifteen seconds as unknown. A sample that says "ready" but
+ *   has expired is shown as unknown, and so is a sample from the future or one whose
+ *   timestamp cannot be read at all.
  * - **Shared services are read-only.** The panel never offers to restart, unload or clear
  *   a shared instance. And in this round there is no model mutation at all: `A` does not
  *   authorize a runtime write, so the model section states that it is unverified and
@@ -50,8 +51,9 @@ export const DEFAULT_STALE_AFTER_MS = 15000;
 /**
  * The state of a service as the panel shows it.
  *
- * A sample that is older than the stale window is `unknown`, even when the sample itself
- * said `ready`: the panel shows what it knows, and it knows that the sample is too old.
+ * A sample is only usable when it can be read, is not from the future, is inside the
+ * stale window and has not passed its own expiry. Anything else is `unknown`: the panel
+ * shows what it knows, and what it knows in those cases is nothing.
  */
 export function effectiveServiceState(
   service: ServiceHealth,
@@ -60,7 +62,10 @@ export function effectiveServiceState(
 ): ServiceHealth["state"] {
   const sampledAt = Date.parse(service.sampled_at);
   if (Number.isNaN(sampledAt)) return "unknown";
+  if (sampledAt > nowMs) return "unknown";
   if (nowMs - sampledAt > staleAfterMs) return "unknown";
+  const expiresAt = Date.parse(service.expires_at);
+  if (!Number.isNaN(expiresAt) && nowMs > expiresAt) return "unknown";
   return service.state;
 }
 
@@ -74,12 +79,39 @@ const SERVICE_STATE_LABEL: Readonly<Record<ServiceHealth["state"], string>> = {
 
 export function SystemControlPanel(props: SystemControlPanelProps) {
   const headingRef = useRef<HTMLHeadingElement | null>(null);
+  const openerRef = useRef<HTMLElement | null>(null);
+  const wasOpen = useRef(false);
 
   useEffect(() => {
     // The panel is not modal, so opening it must not steal the focus. The heading is only
     // given a tab stop so that a keyboard user can reach it deliberately.
     if (headingRef.current !== null) headingRef.current.tabIndex = -1;
   }, [props.open]);
+
+  useEffect(() => {
+    if (props.open && !wasOpen.current) {
+      const active = document.activeElement;
+      openerRef.current = active instanceof HTMLElement ? active : null;
+    }
+    if (!props.open && wasOpen.current) {
+      // The host integration returns the focus to whatever opened the panel.
+      openerRef.current?.focus();
+      openerRef.current = null;
+    }
+    wasOpen.current = props.open;
+  }, [props.open]);
+
+  useEffect(() => {
+    if (!props.open) return undefined;
+    const onKeyDown = (event: KeyboardEvent): void => {
+      if (event.key === "Escape") {
+        event.stopPropagation();
+        props.onClose?.();
+      }
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [props.open, props.onClose]);
 
   if (!props.open) return null;
 
@@ -125,6 +157,15 @@ export function SystemControlPanel(props: SystemControlPanelProps) {
                       检查就绪状态
                     </button>
                   )}
+                  {service.metrics.length === 0 ? null : (
+                    <ul className="nl-metric-list">
+                      {service.metrics.map((metric) => (
+                        <li key={`${service.service_id}-${metric.unit}-${metric.source}`}>
+                          {describeMetric(metric)}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </li>
               );
             })}
@@ -153,4 +194,17 @@ export function SystemControlPanel(props: SystemControlPanelProps) {
       </section>
     </aside>
   );
+}
+
+/**
+ * A metric, told truthfully.
+ *
+ * A metric without a value is unknown, and it is shown as unknown. A metric that was not
+ * sampled at all says so rather than showing a zero.
+ */
+export function describeMetric(metric: HealthMetric): string {
+  if (metric.value === null) {
+    return metric.source === "unavailable" ? "未知（未采集）" : "未知";
+  }
+  return `${metric.value} ${metric.unit === "percent" ? "%" : metric.unit === "bytes" ? "字节" : ""}`.trim();
 }

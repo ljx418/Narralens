@@ -189,6 +189,31 @@ export function deterministicId(prefix: string, parts: readonly string[]): strin
 }
 
 /**
+ * The digest of a style direction.
+ *
+ * The frozen contract says the style digest is recomputed rather than trusted, but it
+ * does not fix the formula. This is the lane's formula: the digest of the style's own
+ * five fields, with the digest field itself excluded. MAIN's own brief writer has to use
+ * the same formula; the exact text is in `INTEGRATION.md`, and it is one of the open
+ * items in `requests/004-project-fact-port.md`.
+ */
+export function styleDigest(style: {
+  readonly style_id: string;
+  readonly version: number;
+  readonly visual_direction: string;
+  readonly voice_direction: string;
+  readonly subtitle_direction: string;
+}): string {
+  return canonicalDigest({
+    style_id: style.style_id,
+    version: style.version,
+    visual_direction: style.visual_direction,
+    voice_direction: style.voice_direction,
+    subtitle_direction: style.subtitle_direction,
+  });
+}
+
+/**
  * The digest of a request body, ignoring its transport metadata.
  *
  * `meta` carries the idempotency key and the correlation id. Neither is part of the

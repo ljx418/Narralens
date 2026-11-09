@@ -40,6 +40,14 @@ export interface CreativeReviewPanelProps {
   readonly onReject?: () => void;
   /** Accept and adopt in one trusted act. Only offered when the package allows it. */
   readonly onAcceptAndAdopt?: () => void;
+  /**
+   * Opens one part of the package in the host's own player.
+   *
+   * The panel has no player, no timeline and no clock of its own: the workbench keeps
+   * its original player, selection and clock, and the panel only asks the host to show
+   * the part there.
+   */
+  readonly onOpenPart?: (part: ReviewPart) => void;
   /** Close the panel. This produces no decision. */
   readonly onClose?: () => void;
 }
@@ -100,10 +108,15 @@ export function CreativeReviewPanel(props: CreativeReviewPanelProps) {
                 <span className="nl-muted">
                   {part.artifact_ref.id}@{part.artifact_ref.version}
                 </span>
+                {props.onOpenPart === undefined ? null : (
+                  <button type="button" onClick={() => props.onOpenPart?.(part)}>
+                    在工作台中查看
+                  </button>
+                )}
                 {part.download_ref === null ? (
                   <span className="nl-muted">尚无可下载文件</span>
                 ) : (
-                  <a href={part.download_ref}>打开</a>
+                  <a href={part.download_ref}>下载</a>
                 )}
               </li>
             ))}

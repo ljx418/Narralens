@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 import type { ExecutionBinding, RunGate, RunScope } from "../../../src/contracts/agent-driven-types.js";
-import { guardExecution } from "../../../src/host/creative/execution-guard.js";
+import { canonicalDigest } from "../../../src/host/creative/digest.js";
+import {
+  guardExecution,
+  type ExecutionGuardFacts,
+  type GuardedEffect,
+} from "../../../src/host/creative/execution-guard.js";
 
 const SCOPE: RunScope = {
   project_id: "project-1",
@@ -19,15 +24,19 @@ const SCOPE: RunScope = {
   allow_runtime_mutation: false,
 };
 
+const SCOPE_DIGEST = canonicalDigest(SCOPE);
+
 const BINDING: ExecutionBinding = {
   run_id: "run-1",
   plan_version: 1,
   step_id: "first_chapter",
   attempt: 1,
   input_digest: "a".repeat(64),
-  run_scope_digest: "d".repeat(64),
+  run_scope_digest: SCOPE_DIGEST,
   authorization_id: "grant-1",
 };
+
+const NOW = 1794000000;
 
 function gate(kind: RunGate["kind"], state: RunGate["state"]): RunGate {
   return {
@@ -44,82 +53,237 @@ function gate(kind: RunGate["kind"], state: RunGate["state"]): RunGate {
   };
 }
 
+function facts(overrides: Partial<ExecutionGuardFacts> = {}): ExecutionGuardFacts {
+  return {
+    project_id: "project-1",
+    run: {
+      run_id: "run-1",
+      current_plan_version: 1,
+      state: "running",
+      scope: SCOPE,
+      run_scope_digest: SCOPE_DIGEST,
+    },
+    grant: {
+      grant_id: "grant-1",
+      run_scope_digest: SCOPE_DIGEST,
+      principal_id: "human-1",
+      state: "active",
+      expires_at: NOW + 3600,
+    },
+    attempt: {
+      step_id: "first_chapter",
+      attempt: 1,
+      state: "running",
+      input_digest: "a".repeat(64),
+      grant_id: "grant-1",
+    },
+    gates: [gate("definition", "accepted"), gate("sample", "accepted")],
+    principal_id: "human-1",
+    now_epoch_seconds: NOW,
+    ...overrides,
+  };
+}
+
+const EFFECT = { kind: "action", action: "clip.prepare", stage_id: "first_chapter" } as const;
+
 describe("the execution guard", () => {
-  it("blocks a first chapter while the sample gate is not accepted", () => {
-    expect(() =>
-      guardExecution(BINDING, "clip.prepare", {
-        scope: SCOPE,
-        run_scope_digest: BINDING.run_scope_digest,
-        gates: [gate("sample", "pending")],
-        stage_id: "first_chapter",
-      }),
-    ).toThrowError(expect.objectContaining({ code: "RUN_GATE_BLOCKED" }));
+  it("refuses to authorize anything without the durable facts", () => {
+    expect(() => guardExecution(BINDING, EFFECT, undefined)).toThrowError(
+      expect.objectContaining({ code: "RUN_SCOPE_REQUIRED" }),
+    );
   });
 
-  it("allows a first chapter once the sample gate is accepted", () => {
+  it("allows an effect whose prerequisites are accepted", () => {
+    expect(() => guardExecution(BINDING, EFFECT, facts())).not.toThrow();
+  });
+
+  it("blocks a first chapter while the sample gate is not accepted", () => {
     expect(() =>
-      guardExecution(BINDING, "clip.prepare", {
-        scope: SCOPE,
-        run_scope_digest: BINDING.run_scope_digest,
-        gates: [gate("sample", "accepted")],
-        stage_id: "first_chapter",
-      }),
-    ).not.toThrow();
+      guardExecution(
+        BINDING,
+        EFFECT,
+        facts({ gates: [gate("definition", "accepted"), gate("sample", "pending")] }),
+      ),
+    ).toThrowError(expect.objectContaining({ code: "RUN_GATE_BLOCKED" }));
   });
 
   it("refuses a binding that belongs to another scope", () => {
     expect(() =>
-      guardExecution(BINDING, "clip.prepare", {
-        scope: SCOPE,
-        run_scope_digest: "9".repeat(64),
-        gates: [gate("sample", "accepted")],
-        stage_id: "first_chapter",
-      }),
+      guardExecution(
+        { ...BINDING, run_scope_digest: "9".repeat(64) },
+        EFFECT,
+        facts(),
+      ),
     ).toThrowError(expect.objectContaining({ code: "RUN_SCOPE_REQUIRED" }));
+  });
+
+  it("refuses a scope that does not hash to the run's own digest", () => {
+    expect(() =>
+      guardExecution(
+        BINDING,
+        EFFECT,
+        facts({
+          run: {
+            ...facts().run,
+            run_scope_digest: "8".repeat(64),
+          },
+        }),
+      ),
+    ).toThrowError(expect.objectContaining({ code: "RUN_PLAN_STALE" }));
   });
 
   it("refuses an action the scope does not allow", () => {
+    const narrow: RunScope = { ...SCOPE, allowed_actions: ["clip.prepare"] };
+    const narrowFacts = facts({
+      run: { ...facts().run, scope: narrow, run_scope_digest: canonicalDigest(narrow) },
+    });
     expect(() =>
-      guardExecution(BINDING, "delivery.package", {
-        scope: SCOPE,
-        run_scope_digest: BINDING.run_scope_digest,
-        gates: [],
-        stage_id: "delivery",
-      }),
+      guardExecution(
+        { ...BINDING, step_id: "chapters" },
+        { kind: "action", action: "snapshot.render", stage_id: "chapters" },
+        narrowFacts,
+      ),
     ).toThrowError(expect.objectContaining({ code: "RUN_SCOPE_REQUIRED" }));
   });
 
-  it("refuses a scope that asks for a paid, external or runtime action", () => {
+  it("refuses an action that is not one of the fixed actions", () => {
     expect(() =>
-      guardExecution(BINDING, "clip.prepare", {
-        scope: { ...SCOPE, allow_paid: true },
-        run_scope_digest: BINDING.run_scope_digest,
-        gates: [],
-      }),
+      guardExecution(
+        BINDING,
+        {
+          kind: "action",
+          action: "not.an.action",
+          stage_id: "first_chapter",
+        } as unknown as GuardedEffect,
+        facts(),
+      ),
     ).toThrowError(expect.objectContaining({ code: "CAPABILITY_UNAVAILABLE" }));
   });
 
+  it("refuses an action that does not belong to the step", () => {
+    expect(() =>
+      guardExecution(
+        { ...BINDING, step_id: "cover" },
+        { kind: "action", action: "clip.prepare", stage_id: "cover" },
+        facts(),
+      ),
+    ).toThrowError(expect.objectContaining({ code: "CAPABILITY_UNAVAILABLE" }));
+  });
+
+  it("refuses an unknown step", () => {
+    expect(() =>
+      guardExecution(
+        BINDING,
+        { kind: "action", action: "clip.prepare", stage_id: "not_a_stage" },
+        facts(),
+      ),
+    ).toThrowError(expect.objectContaining({ code: "CAPABILITY_UNAVAILABLE" }));
+  });
+
+  it("refuses a scope that asks for a paid, external or runtime action", () => {
+    const paid: RunScope = { ...SCOPE, allow_paid: true };
+    expect(() =>
+      guardExecution(
+        BINDING,
+        EFFECT,
+        facts({
+          run: { ...facts().run, scope: paid, run_scope_digest: canonicalDigest(paid) },
+        }),
+      ),
+    ).toThrowError(expect.objectContaining({ code: "CAPABILITY_UNAVAILABLE" }));
+  });
+
+  it("refuses a revoked or expired authorization", () => {
+    expect(() =>
+      guardExecution(BINDING, EFFECT, facts({ grant: { ...facts().grant!, state: "revoked" } })),
+    ).toThrowError(expect.objectContaining({ code: "RUN_SCOPE_REQUIRED" }));
+    expect(() =>
+      guardExecution(
+        BINDING,
+        EFFECT,
+        facts({ grant: { ...facts().grant!, expires_at: NOW - 1 } }),
+      ),
+    ).toThrowError(expect.objectContaining({ code: "RUN_SCOPE_REQUIRED" }));
+  });
+
+  it("refuses an effect under another principal", () => {
+    expect(() =>
+      guardExecution(BINDING, EFFECT, facts({ principal_id: "human-2" })),
+    ).toThrowError(expect.objectContaining({ code: "UNAUTHORIZED" }));
+  });
+
+  it("refuses a stale attempt", () => {
+    expect(() =>
+      guardExecution(
+        { ...BINDING, attempt: 2 },
+        EFFECT,
+        facts(),
+      ),
+    ).toThrowError(expect.objectContaining({ code: "RUN_PLAN_STALE" }));
+  });
+
+  it("refuses an attempt that is over", () => {
+    expect(() =>
+      guardExecution(
+        BINDING,
+        EFFECT,
+        facts({ attempt: { ...facts().attempt!, state: "succeeded" } }),
+      ),
+    ).toThrowError(expect.objectContaining({ code: "RUN_PLAN_STALE" }));
+  });
+
+  it("refuses a run that is paused, cancelled or waiting for a decision", () => {
+    for (const state of ["paused", "cancelled", "waiting_user", "blocked"] as const) {
+      expect(() =>
+        guardExecution(BINDING, EFFECT, facts({ run: { ...facts().run, state } })),
+      ).toThrowError(expect.objectContaining({ code: "RUN_PLAN_STALE" }));
+    }
+  });
+
+  it("keeps the safe controls available without a grant", () => {
+    expect(() =>
+      guardExecution(
+        BINDING,
+        { kind: "safe_control", control: "pause" },
+        facts({ grant: null, attempt: null }),
+      ),
+    ).not.toThrow();
+    expect(() =>
+      guardExecution(
+        BINDING,
+        { kind: "safe_control", control: "cancel" },
+        facts({ grant: null, attempt: null }),
+      ),
+    ).not.toThrow();
+  });
+
+  it("refuses to pause a run that was already cancelled", () => {
+    expect(() =>
+      guardExecution(
+        BINDING,
+        { kind: "safe_control", control: "pause" },
+        facts({ run: { ...facts().run, state: "cancelled" } }),
+      ),
+    ).toThrowError(expect.objectContaining({ code: "RUN_PLAN_STALE" }));
+  });
+
   it("refuses a binding without a plan version, an attempt or an authorization", () => {
-    expect(() => guardExecution({ ...BINDING, plan_version: 2 as 1 }, "clip.prepare")).toThrowError(
+    expect(() => guardExecution({ ...BINDING, plan_version: 2 as 1 }, EFFECT, facts())).toThrowError(
       expect.objectContaining({ code: "RUN_PLAN_STALE" }),
     );
-    expect(() => guardExecution({ ...BINDING, attempt: 0 }, "clip.prepare")).toThrowError(
+    expect(() => guardExecution({ ...BINDING, attempt: 0 }, EFFECT, facts())).toThrowError(
       expect.objectContaining({ code: "INVALID_REQUEST" }),
     );
-    expect(() => guardExecution({ ...BINDING, authorization_id: "" }, "clip.prepare")).toThrowError(
+    expect(() => guardExecution({ ...BINDING, authorization_id: "" }, EFFECT, facts())).toThrowError(
       expect.objectContaining({ code: "RUN_SCOPE_REQUIRED" }),
     );
   });
 
   it("never accepts a gate on its own", () => {
-    const gates = [gate("sample", "pending")];
+    const gates = [gate("definition", "accepted"), gate("sample", "pending")];
     expect(() =>
-      guardExecution(BINDING, "clip.prepare", {
-        scope: SCOPE,
-        gates,
-        stage_id: "first_chapter",
-      }),
+      guardExecution(BINDING, EFFECT, facts({ gates })),
     ).toThrow();
-    expect(gates[0]?.state).toBe("pending");
+    expect(gates[1]?.state).toBe("pending");
   });
 });
