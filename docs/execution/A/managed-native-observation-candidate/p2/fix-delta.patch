@@ -1,0 +1,24 @@
+--- pre-p2/packages/openfilm/studio/ui/src/editor/use-film.ts
++++ p2/packages/openfilm/studio/ui/src/editor/use-film.ts
+@@ -111,7 +111,12 @@
+   /** The film as the folder has it now; false when film.html cannot be read (`broken` says why). */
+   const fromServer = useCallback(async (): Promise<boolean> => {
+     invalidateDocument('refresh');
++    // A response cannot acquire a fresh proof after a newer request/edit/replacement invalidated it.
++    const requestEpoch = observation.current.epoch;
+     const latest = await api.film(projectId);
++    const currentRequest = observation.current.mounted && observation.current.epoch === requestEpoch;
++    // Preserve native reducer behavior, but invalidate any newer proof before an old response replaces its UI.
++    if (!currentRequest) invalidateDocument('refresh');
+     if (!latest.doc || !latest.value) {
+       invalidateDocument('broken');
+       brokenRev.current = latest.rev;
+@@ -119,7 +124,7 @@
+       return false;
+     }
+     if (brokenRev.current) { brokenRev.current = null; setBroken(null); setError(null); }
+-    const next = { value: latest.value, rev: latest.rev, document: serverDocument(latest.value, latest.rev, latest.text) };
++    const next = { value: latest.value, rev: latest.rev, document: currentRequest ? serverDocument(latest.value, latest.rev, latest.text) : null };
+     ref.current = next;
+     setState(next);
+     changed.current(next.value, 'server', filmHead(latest.text));

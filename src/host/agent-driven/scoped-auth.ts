@@ -42,6 +42,11 @@ export class ScopedAgentAuth {
     if(!Number.isSafeInteger(expires_at)||expires_at<=now||expires_at<record.principal.expires_at)throw new Error('Invalid credential lifetime');
     record.principal=Object.freeze({...record.principal,expires_at});return record.principal;
   }
+  /** Host-only liveness of an already authenticated delegate owner; never accepts a DTO identity. */
+  isPrincipalActive(principal:AgentPrincipal):boolean {
+    for(const record of this.#credentials.values())if(!record.revoked&&record.principal.expires_at>this.now()&&record.principal.session_ref===principal.session_ref&&record.principal.principal_id===principal.principal_id&&record.principal.channel===principal.channel)return true;
+    return false;
+  }
   revoke(token:string){const record=this.#credentials.get(hash(token).toString('hex'));if(record)record.revoked=true;}
   /** Origin and credential channel are checked BEFORE resource lookup. Body fields are never consulted. */
   authenticate(input:{method:string;origin:string|undefined;authorization:string|undefined;cookie?:string;csrf?:string;referer?:string;secFetchSite?:string;rawHeaders?:readonly string[]},expected?:AgentChannel):AgentPrincipal {

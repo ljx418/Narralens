@@ -29,6 +29,8 @@ import { join, resolve } from "node:path";
 export interface ChromeLaunchOptions {
   /** The isolated profile directory. The launcher creates it. */
   readonly profileRoot: string;
+  /** Optional test-owned deny proxy; loopback alone bypasses it. */
+  readonly proxyOrigin?: string;
   /** The window size, in CSS pixels, for the outer window. */
   readonly width?: number;
   readonly height?: number;
@@ -122,6 +124,7 @@ export async function launchChrome(options: ChromeLaunchOptions): Promise<Chrome
   const width = options.width ?? 1440;
   const height = options.height ?? 900;
 
+  if(options.proxyOrigin){const proxy=new URL(options.proxyOrigin);if(proxy.protocol!=='http:'||proxy.hostname!=='127.0.0.1'||proxy.origin!==options.proxyOrigin)throw new Error('INVALID_LOCAL_TEST_PROXY');}
   const args = [
     "--headless=new",
     "--mute-audio",
@@ -132,6 +135,7 @@ export async function launchChrome(options: ChromeLaunchOptions): Promise<Chrome
     "--disable-gpu",
     "--disable-background-networking",
     "--disable-sync",
+    ...(options.proxyOrigin?[`--proxy-server=${options.proxyOrigin}`,'--proxy-bypass-list=127.0.0.1;localhost;[::1]']:[]),
     "--autoplay-policy=no-user-gesture-required",
     `--window-size=${width},${height}`,
     "about:blank",

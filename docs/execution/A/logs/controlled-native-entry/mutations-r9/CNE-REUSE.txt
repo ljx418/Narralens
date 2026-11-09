@@ -1,0 +1,32 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+ ❯ tests/agent-driven/integration/controlled-native-session-capacity.test.ts (2 tests | 1 failed | 1 skipped) 41ms
+   × reopens the same actual scope 80 times without exhausting capacity or invalidating an existing tab proof 40ms
+     → expected 'OS8xM6ml5YpCUNTB-adWz7ZgU5AmZbWoLKOXX…' to be 'SRfriwmh8g2FzT0acYYE8fVGJil5lbqt4VKfQ…' // Object.is equality
+   ↓ reclaims 64 revoked owners and workspace versions while retaining a bounded stale-token answer and a usable fresh owner
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 1 skipped (2)
+   Start at  07:08:01
+   Duration  2.08s (transform 70ms, setup 0ms, collect 173ms, tests 41ms, environment 0ms, prepare 1.24s)
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/controlled-native-session-capacity.test.ts > reopens the same actual scope 80 times without exhausting capacity or invalidating an existing tab proof
+AssertionError: expected 'OS8xM6ml5YpCUNTB-adWz7ZgU5AmZbWoLKOXX…' to be 'SRfriwmh8g2FzT0acYYE8fVGJil5lbqt4VKfQ…' // Object.is equality
+
+Expected: "SRfriwmh8g2FzT0acYYE8fVGJil5lbqt4VKfQIQukDY"
+Received: "OS8xM6ml5YpCUNTB-adWz7ZgU5AmZbWoLKOXXkqqIXo"
+
+ ❯ tests/agent-driven/integration/controlled-native-session-capacity.test.ts:24:74
+     22|  try{
+     23|   const first=await exchange(f,g);
+     24|   for(let i=0;i<80;i++){const next=await exchange(f,g);expect(next.csr…
+       |                                                                          ^
+     25|   expect((await fetch(f.origin+'/probe',{headers:{Origin:f.origin,Cook…
+     26|  }finally{await f.close();}
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+

@@ -19,6 +19,7 @@ import type { WorkbenchClipV1, WorkbenchProjectionV1 } from "../../contracts/wav
  *   legal; otherwise the draft is kept and the operator is asked to choose again. A
  *   pointer that silently jumps to frame zero is a lie about what is selected.
  */
+export type WorkbenchSelectionView=Pick<WorkbenchProjectionV1,'project_id'|'active_snapshot_id'|'clips'>;
 export class SelectionCoordinator {
   readonly #selection: SelectionStore;
   #relocating = false;
@@ -35,7 +36,7 @@ export class SelectionCoordinator {
    * The range is clamped to the clip: a half-open range that leaves the clip is not a
    * selection of that clip.
    */
-  selectClip(projection: WorkbenchProjectionV1, clipId: string,
+  selectClip(projection: WorkbenchSelectionView, clipId: string,
     range?: { start_frame: number; end_frame_exclusive: number }): SelectionContext | null {
     const clip = projection.clips.find((candidate) => candidate.clip_id === clipId);
     if (clip === undefined) return null;
@@ -59,7 +60,7 @@ export class SelectionCoordinator {
    * projection's own rational fps — never in the component and never with a float
    * accumulation.
    */
-  selectFromStudio(projection: WorkbenchProjectionV1, input: {
+  selectFromStudio(projection: WorkbenchSelectionView, input: {
     clipId: string | null; startFrame: number; endFrameExclusive: number;
   }): SelectionContext | null {
     if (input.clipId === null || input.clipId === "") return null;
@@ -74,7 +75,7 @@ export class SelectionCoordinator {
    * Returns true when the selection still means the same thing, and false when the
    * operator has to choose again. The draft is never thrown away either way.
    */
-  relocate(projection: WorkbenchProjectionV1): boolean {
+  relocate(projection: WorkbenchSelectionView): boolean {
     const current = this.#selection.value;
     if (current === null) return true;
     if (current.project_id !== projection.project_id) return false;
@@ -117,7 +118,7 @@ export class SelectionCoordinator {
 }
 
 /** The clip a selection names, in the projection it was made in. */
-export function clipOf(projection: WorkbenchProjectionV1,
+export function clipOf(projection: WorkbenchSelectionView,
   selection: SelectionContext | null): WorkbenchClipV1 | undefined {
   if (selection === null) return undefined;
   return projection.clips.find((clip) => clip.clip_id === selection.clip_id);

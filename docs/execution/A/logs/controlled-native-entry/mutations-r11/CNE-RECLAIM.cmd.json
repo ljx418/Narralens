@@ -1,0 +1,13 @@
+{
+  "file": "/usr/bin/node",
+  "args": [
+    "node_modules/vitest/vitest.mjs",
+    "run",
+    "--config",
+    "vitest.config.ts",
+    "tests/agent-driven/integration/controlled-native-session-capacity.test.ts",
+    "--testNamePattern",
+    "reclaims 64 revoked owners"
+  ],
+  "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration"
+}

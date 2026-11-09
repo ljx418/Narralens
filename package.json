@@ -9,7 +9,7 @@
   },
   "scripts": {
     "check": "tsc --noEmit && vitest run --config vitest.config.ts && python3 -I tests/wave2/m4a/impact-hash.golden.py tests/wave2/m4a/impact-hash.vectors.json && vite build && vite build --config vite.m5.config.ts",
-    "build": "vite build && vite build --config vite.m5.config.ts",
+    "build": "tsx tools/build-native-workbench-validators.ts --check && vite build && vite build --config vite.m5.config.ts",
     "build:m5": "vite build --config vite.m5.config.ts",
     "start": "tsx src/host/start.ts",
     "recover": "tsx src/host/recover.ts",
@@ -61,7 +61,8 @@
     "evidence:wave1": "bash tools/wave1-run-evidence.sh",
     "evidence:wave1:manifest": "tsx tools/wave1-evidence-manifest.ts",
     "evidence:wave1:integrity": "node tools/wave1-evidence-integrity.mjs",
-    "evidence:wave1:historical": "node tools/wave1-evidence-historical.mjs"
+    "evidence:wave1:historical": "node tools/wave1-evidence-historical.mjs",
+    "check:workbench-contracts": "tsx tools/build-native-workbench-validators.ts --check"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.26.0",

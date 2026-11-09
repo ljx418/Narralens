@@ -1,0 +1,11 @@
+/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tools/check-native-session-mutations.mts:27
+  results.push({id:gate.id,exit:result.status,expected_assertion_failed:expected});if(!expected)throw new Error('MUTATION_DID_NOT_HIT_EXPECTED_ASSERTION:'+gate.id);
+                                                                                                      ^
+
+Error: MUTATION_DID_NOT_HIT_EXPECTED_ASSERTION:CNE-REUSE
+    at <anonymous> (/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tools/check-native-session-mutations.mts:27:103)
+    at ModuleJob.run (node:internal/modules/esm/module_job:343:25)
+    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:665:26)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)
+
+Node.js v22.22.1

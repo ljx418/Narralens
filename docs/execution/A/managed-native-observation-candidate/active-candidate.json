@@ -1,0 +1,14 @@
+{
+  "revision": "p2-request-start-fence",
+  "patch": "candidate.patch",
+  "patch_sha256": "214c629238c2635f5c6212e5e9207eab18f61d17454c08ee64ccd32be41dffa6",
+  "source_manifest": "source-manifest.json",
+  "source_files_sha256": "54756f72de8284327637da5aaffb7a3c9ed31f7e929a7929897df4c0976952bd",
+  "build_manifest": "p2/build-manifest.json",
+  "build_dist_manifest_sha256": "f8e4890c18c046382457b7b07f7dbb49360a854f01e769acf9b021a6c3cfa5c8",
+  "archive": "p2/managed-ui-dist.tar.gz",
+  "archive_sha256": "9112a4543c1aa450c15d976654bb7036407a398c1145fb6aef9ba25b1edfa15d",
+  "checks": "p2/ui-checks.json",
+  "runtime_race_test": "NOT_RUN",
+  "independent_review": "PENDING"
+}

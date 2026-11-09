@@ -1,3 +1,4 @@
+import type {NativeStudioGrant} from './m5/controlled-studio-access.js';
 import { createHash, randomBytes } from "node:crypto";
 import { createReadStream } from "node:fs";
 import { stat } from "node:fs/promises";
@@ -272,7 +273,7 @@ interface HostDependencies {
   /** Owned A Studio state; never the operator global OpenFilm home. */
   isolatedStudioRuntimeRoot?: string;
   /** Host-only lifecycle fault/diagnostic seam, never supplied by an HTTP body. */
-  studioBeforeGatewayPublish?: (state: { gateway_origin: string; studio_origin: string; film_origin: string }) => Promise<void>;
+  studioBeforeGatewayPublish?: (state: { gateway_origin: string; studio_origin: string; film_origin: string; close_native:()=>Promise<void>; gateway_is_listening:()=>boolean }) => Promise<void>;
   /**
    * M5C: the directory the fixture media lives in.
    *
@@ -635,8 +636,12 @@ export class NarralensHost {
         return view.source_root.value;
       },
       onStudio: async (studio: StartedStudio) => {
+        // A replacement native child must not orphan the previous privileged listeners.
+        await this.#m5Gateway?.close();
+        if(this.#closePromise)throw new HttpError(503,'ENGINE_UNAVAILABLE','The Host is closing');
         const gateway = new OpenFilmStudioGateway({
           studio,
+          controlled:dependencies.agentApplication!==undefined,
           services: this.#studioServices(),
           bridgeScript: STUDIO_HOST_BRIDGE_SCRIPT,
           panelAssets: await readPanelAssets(projectRoot),
@@ -644,7 +649,7 @@ export class NarralensHost {
         });
         try {
           const origin = await gateway.start();
-          await dependencies.studioBeforeGatewayPublish?.({ gateway_origin: origin, studio_origin: studio.origin, film_origin: studio.filmOrigin });
+          await dependencies.studioBeforeGatewayPublish?.({ gateway_origin: origin, studio_origin: studio.origin, film_origin: studio.filmOrigin, close_native:studio.close, gateway_is_listening:()=>gateway.isListening });
           if (this.#closePromise) throw new HttpError(503, "ENGINE_UNAVAILABLE", "The Host is closing");
           this.#m5Gateway = gateway;
           this.m5Supervisor.setGatewayBase(origin);
@@ -807,6 +812,12 @@ export class NarralensHost {
     await new Promise<void>((resolvePromise, reject) => server.close((error) => error ? reject(error) : resolvePromise()));
     await new Promise((resolvePromise) => setImmediate(resolvePromise));
     this.revisions.close();
+  }
+
+  /** Host-only, after real owner/committed workspace/native-ID checks. No URL can mint this scope. */
+  issueNativeEntry(grant:NativeStudioGrant){
+    if(this.#closePromise||!this.#agentApplication||!this.#m5Gateway)throw new HttpError(503,'ENGINE_UNAVAILABLE','The controlled native entry is unavailable');
+    return this.#m5Gateway.issueNativeEntry(grant);
   }
 
   async #handle(request: IncomingMessage, response: ServerResponse): Promise<void> {

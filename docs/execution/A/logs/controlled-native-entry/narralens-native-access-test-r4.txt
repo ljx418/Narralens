@@ -1,0 +1,15 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:4149187) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/created-native-entry.test.ts (3 tests) 12305ms
+   ✓ opens the real owned committed project and scopes native API, film assets and panel reads without elevating a cookie or read token  4928ms
+   ✓ keeps independent tab proofs with a stable transport cookie and revokes old native IDs when the actual prepared copy changes  4743ms
+   ✓ requires actual UI authority and an empty validated open command before starting native  2634ms
+
+ Test Files  1 passed (1)
+      Tests  3 passed (3)
+   Start at  06:45:48
+   Duration  18.95s (transform 2.21s, setup 0ms, collect 4.71s, tests 12.31s, environment 0ms, prepare 1.29s)
+

@@ -1,4 +1,6 @@
-import { randomBytes, randomUUID } from "node:crypto";
+import {ControlledStudioAccess,StudioAccessError,type NativeStudioGrant,type NativeStudioSession} from './controlled-studio-access.js';
+import {CONTROLLED_NATIVE_ENTRY_HTML,CONTROLLED_NATIVE_TRANSPORT_SCRIPT} from './controlled-studio-browser.js';
+import { createHmac, randomBytes, randomUUID } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { createServer, request as httpRequest, type IncomingMessage, type Server, type ServerResponse } from "node:http";
 import type { Duplex } from "node:stream";
@@ -74,6 +76,8 @@ export interface StudioHostService {
 
 export interface OpenFilmStudioGatewayDeps {
   readonly studio: StartedStudio;
+  /** A-mode owner-scoped access; legacy remains unchanged when omitted. */
+  readonly controlled?: boolean;
   readonly services: StudioHostService;
   /** The panel bridge the page loads. Served as a classic script, before the Studio's modules. */
   readonly bridgeScript?: string | undefined;
@@ -163,6 +167,7 @@ export function rewriteFilmDocument(source: string, studioOrigin: string, gatewa
 export class OpenFilmStudioGateway {
   readonly #deps: OpenFilmStudioGatewayDeps;
   readonly #sessions = new Set<string>();
+  readonly #access:ControlledStudioAccess|undefined;
   #server: Server | undefined;
   #filmServer: Server | undefined;
   #origin = "";
@@ -172,9 +177,23 @@ export class OpenFilmStudioGateway {
 
   constructor(deps: OpenFilmStudioGatewayDeps) {
     this.#deps = deps;
+    this.#access=deps.controlled?new ControlledStudioAccess(()=>this.#origin):undefined;
   }
 
   get origin(): string { return this.#origin; }
+  get isListening(){return this.#server?.listening===true||this.#filmServer?.listening===true;}
+  issueNativeEntry(grant:NativeStudioGrant){
+    if(!this.#access||this.#deps.studio.isAlive?.()!==true)throw new StudioAccessError(503,'CAPABILITY_UNAVAILABLE');
+    return this.#access.issue({...grant,isCurrent:()=>this.#deps.studio.isAlive?.()===true&&grant.isCurrent()});
+  }
+  #accessFailure(response:ServerResponse,error:unknown){
+    if(response.destroyed||response.writableEnded)return;
+    if(response.headersSent){response.destroy();return;}
+    const failure=error instanceof StudioAccessError?error:new StudioAccessError(503,'CAPABILITY_UNAVAILABLE');
+    response.writeHead(failure.status,{'Content-Type':'application/json','Cache-Control':'no-store'});response.end(JSON.stringify({code:failure.code,message:'原生工程会话不可用，请从工作台重新打开。'}));
+  }
+  #filmPrefix(session:NativeStudioSession){return '/p/'+createHmac('sha256',this.#deps.studio.key).update('film origin\0'+session.grant.native_project_id).digest().subarray(0,18).toString('base64url')+'/';}
+
 
   async start(): Promise<string> {
     if (this.#server !== undefined) return this.#origin;
@@ -183,7 +202,7 @@ export class OpenFilmStudioGateway {
     // proxy at a listener that may not exist and fails to rewrite the real `localhost`
     // URL returned by the API/event stream.
     this.#filmOrigin = this.#deps.studio.filmOrigin;
-    const server = createServer((request, response) => { void this.#handle(request, response); });
+    const server = createServer((request, response) => { void this.#handle(request, response).catch(error=>this.#accessFailure(response,error)); });
     server.on("upgrade", (request, socket, head) => { this.#upgrade(request, socket, head); });
     await new Promise<void>((done, fail) => {
       server.once("error", fail);
@@ -206,7 +225,7 @@ export class OpenFilmStudioGateway {
     // render and postMessage to the editor, but it cannot read the panel DOM, its cookie
     // or its API. This second server is still a read-only, Host-checked Gateway — never
     // the upstream origin and never a filesystem server.
-    const filmServer = createServer((request, response) => { void this.#handleFilm(request, response); });
+    const filmServer = createServer((request, response) => { void this.#handleFilm(request, response).catch(error=>this.#accessFailure(response,error)); });
     await new Promise<void>((done, fail) => {
       filmServer.once("error", fail);
       filmServer.listen(0, "127.0.0.1", () => { filmServer.removeListener("error", fail); done(); });
@@ -223,6 +242,7 @@ export class OpenFilmStudioGateway {
   }
 
   async close(): Promise<void> {
+    this.#access?.close();
     for (const socket of this.#sockets) socket.destroy();
     this.#sockets.clear();
     const server = this.#server;
@@ -237,7 +257,7 @@ export class OpenFilmStudioGateway {
 
   async #handleFilm(request: IncomingMessage, response: ServerResponse): Promise<void> {
     const url = new URL(request.url ?? "/", this.#filmGatewayOrigin);
-    if (!this.#hostHeaderAllowed(request, this.#filmGatewayOrigin)) {
+    if (!this.#hostHeaderAllowed(request, this.#filmGatewayOrigin)||url.origin!==this.#filmGatewayOrigin) {
       response.writeHead(421, { "content-type": "text/plain" });
       response.end("misdirected request\n");
       return;
@@ -253,6 +273,14 @@ export class OpenFilmStudioGateway {
     response.setHeader("Access-Control-Allow-Origin", this.#origin);
     response.setHeader("X-Content-Type-Options", "nosniff");
     response.setHeader("Cache-Control", "no-store");
+    if(this.#access){
+      const match=url.pathname.match(/^\/s\/([A-Za-z0-9_-]{43})(\/film\/.*)$/);
+      if(!match)throw new StudioAccessError(401,'UNAUTHORIZED');
+      const session=this.#access.readSession(match[1]);
+      const filmPath=match[2]!.slice('/film'.length);
+      if(!filmPath.startsWith(this.#filmPrefix(session)))throw new StudioAccessError(403,'ORIGIN_REJECTED');
+      await this.#proxyFilm(filmPath,url,request,response,session);return;
+    }
     if (!url.pathname.startsWith("/film/")) {
       response.writeHead(404, { "content-type": "text/plain" }); response.end("not found\n"); return;
     }
@@ -267,15 +295,23 @@ export class OpenFilmStudioGateway {
 
     // The Host header check comes first: a name pointed at this machine (DNS rebinding)
     // gets nothing at all, not even a 404 that describes the Gateway.
-    if (!this.#hostHeaderAllowed(request, this.#origin)) {
+    if (!this.#hostHeaderAllowed(request, this.#origin)||url.origin!==this.#origin) {
       response.writeHead(421, { "content-type": "text/plain" });
       response.end("misdirected request\n");
       return;
     }
     this.#securityHeaders(response, path);
 
+    if(this.#access&&path==='/narralens/entry'){
+      if(request.method!=='GET'||url.search)throw new StudioAccessError(400,'INVALID_REQUEST');
+      response.writeHead(200,{'Content-Type':'text/html; charset=utf-8'});response.end(CONTROLLED_NATIVE_ENTRY_HTML);return;
+    }
+    if(this.#access&&path==='/narralens/session/exchange'){
+      if(url.search)throw new StudioAccessError(400,'INVALID_REQUEST');
+      await this.#access.exchange(request,response);return;
+    }
     if (path === "/narralens/studio-host.js") {
-      const script = this.#deps.bridgeScript ?? "";
+      const script = (this.#access?CONTROLLED_NATIVE_TRANSPORT_SCRIPT:"")+(this.#deps.bridgeScript ?? "");
       response.writeHead(200, { "content-type": "text/javascript; charset=utf-8" });
       response.end(script);
       return;
@@ -320,6 +356,7 @@ export class OpenFilmStudioGateway {
     // The media the panel may play. The allowlist is exact: a name that is not in it is
     // not served, and the Gateway never becomes a way to read a directory.
     if (path.startsWith("/narralens/media/")) {
+      if(this.#access){this.#access.authenticate(request);throw new StudioAccessError(503,'CAPABILITY_UNAVAILABLE');}
       await this.#media(response, path.slice("/narralens/media/".length));
       return;
     }
@@ -386,6 +423,22 @@ export class OpenFilmStudioGateway {
 
   async #proxyApi(request: IncomingMessage, response: ServerResponse, path: string, url: URL): Promise<void> {
     const method = (request.method ?? "GET").toUpperCase();
+    if(this.#access){
+      const media=/^\/api\/projects\/([A-Za-z0-9_-]+)\/(media|poster)$/.exec(path);
+      const session=media&&url.searchParams.has('native_read')?this.#access.readSession(url.searchParams.get('native_read')):this.#access.authenticate(request);
+      const project=/^\/api\/projects\/([A-Za-z0-9_-]+)(?:\/|$)/.exec(path);
+      if(project)this.#access.assertNative(session,project[1]!);
+      if(method!=='GET'&&method!=='HEAD')throw new StudioAccessError(403,'ORIGIN_REJECTED');
+      if(url.searchParams.has('native_read')&&!media)throw new StudioAccessError(403,'ORIGIN_REJECTED');
+      url.searchParams.delete('native_read');
+      const allowed=ALLOWED_READS.some(entry=>(entry.method===method||method==='HEAD'&&entry.method==='GET')&&entry.pattern.test(path))
+        || /^\/api\/projects\/[A-Za-z0-9_-]+\/(settings|markers|subtitles)$/.test(path)
+        || path==='/api/prefs'||path==='/api/health';
+      if(!allowed)throw new StudioAccessError(403,'ORIGIN_REJECTED');
+      // Version reads must never trigger npm/update checks or accept arbitrary query knobs.
+      if(path==='/api/version'&&url.search)throw new StudioAccessError(400,'INVALID_REQUEST');
+      await this.#relay(request,response,`${this.#deps.studio.origin}${path}${url.search}`,true,session,path==='/api/projects');return;
+    }
 
     if (method === "GET" || method === "HEAD") {
       const allowed = ALLOWED_READS.find((entry) => entry.method === method && entry.pattern.test(path));
@@ -418,6 +471,7 @@ export class OpenFilmStudioGateway {
    * never reach the author's source.
    */
   async #nativeWrite(request: IncomingMessage, response: ServerResponse, path: string): Promise<void> {
+    if(this.#access){this.#access.authenticate(request);throw new StudioAccessError(403,'ORIGIN_REJECTED');}
     const match = /^\/narralens\/native\/([A-Za-z0-9_.]+)$/u.exec(path);
     if (match === null) {
       this.#refuse(response, 422, "the Gateway accepts only the registered native write entries");
@@ -497,6 +551,16 @@ export class OpenFilmStudioGateway {
   async #narralensOperation(request: IncomingMessage, response: ServerResponse,
     path: string, url: URL): Promise<void> {
     const method = (request.method ?? "GET").toUpperCase();
+    if(this.#access){
+      const session=this.#access.authenticate(request);
+      const projects=url.searchParams.getAll('project_id');
+      if(projects.length!==1||[...url.searchParams.keys()].some(k=>k!=='project_id'))throw new StudioAccessError(400,'INVALID_REQUEST');
+      this.#access.assertProject(session,projects[0]!);
+      if(method!=='GET'||path!=='/narralens/api/workbench')throw new StudioAccessError(503,'CAPABILITY_UNAVAILABLE');
+      const result=await session.grant.readWorkbench();this.#access.recheck(session);
+      if(result.project_id!==session.grant.project_id||result.revision!==session.grant.revision||result.active_snapshot_id!==session.grant.snapshot_id||result.source_digest!==session.grant.source_digest)throw new StudioAccessError(409,'NATIVE_SESSION_STALE');
+      response.writeHead(200,{'Content-Type':'application/json'});response.end(JSON.stringify(result));return;
+    }
     if (!this.#sessionValid(request)) {
       this.#refuse(response, 401, "the Gateway's session cookie is missing or stale");
       return;
@@ -552,7 +616,7 @@ export class OpenFilmStudioGateway {
       return;
     }
     const html = await upstream.text();
-    this.#issueSession(response);
+    if(!this.#access)this.#issueSession(response);
     response.writeHead(upstream.status, { "content-type": "text/html; charset=utf-8" });
     response.end(this.#injectBridge(html));
   }
@@ -573,7 +637,7 @@ export class OpenFilmStudioGateway {
 
   // ── the film's own origin ──────────────────────────────────────────────────────────
 
-  async #proxyFilm(path: string, url: URL, request: IncomingMessage, response: ServerResponse): Promise<void> {
+  async #proxyFilm(path: string, url: URL, request: IncomingMessage, response: ServerResponse, session?:NativeStudioSession): Promise<void> {
     const method = (request.method ?? "GET").toUpperCase();
     if (method !== "GET" && method !== "HEAD") {
       this.#refuse(response, 422, "the film's files are read-only through the Gateway");
@@ -586,21 +650,19 @@ export class OpenFilmStudioGateway {
     const requestHeaders: Record<string, string> = { accept: request.headers.accept ?? "*/*" };
     if (typeof request.headers.range === "string") requestHeaders.range = request.headers.range;
     const upstream = await fetch(`${this.#filmOrigin}${path}${url.search}`, {
-      method, headers: requestHeaders,
+      method, headers: requestHeaders,...(session?{signal:AbortSignal.timeout(30000)}:{}),
     });
+    if(session&&!upstream.ok){await upstream.arrayBuffer();this.#access!.recheck(session);throw new StudioAccessError(upstream.status>=400&&upstream.status<500?upstream.status:503,upstream.status===404?'NOT_FOUND':'INVALID_REQUEST');}
     const contentType = upstream.headers.get("content-type") ?? "";
     const headers: Record<string, string> = { "content-type": contentType };
     for (const name of ["content-range", "accept-ranges"] as const) {
       const value = upstream.headers.get(name);
       if (value !== null) headers[name] = value;
     }
-    response.writeHead(upstream.status, headers);
-    if (method === "HEAD") { response.end(); return; }
-    if (contentType.includes("text/html") || contentType.includes("javascript")) {
-      response.end(rewriteFilmDocument(await upstream.text(), this.#deps.studio.origin, this.#origin));
-      return;
-    }
-    response.end(Buffer.from(await upstream.arrayBuffer()));
+    const bytes=method==='HEAD'?null:contentType.includes('text/html')||contentType.includes('javascript')
+      ?rewriteFilmDocument(await upstream.text(),this.#deps.studio.origin,this.#origin):Buffer.from(await upstream.arrayBuffer());
+    if(session)this.#access!.recheck(session);
+    response.writeHead(upstream.status,headers);response.end(bytes);
   }
 
   // ── relaying ────────────────────────────────────────────────────────────────────────
@@ -613,28 +675,34 @@ export class OpenFilmStudioGateway {
    * Gateway's. Absolute paths are stripped from JSON answers: the project list carries
    * the folder on disk, and the browser has no business knowing it.
    */
-  async #relay(request: IncomingMessage, response: ServerResponse, target: string, sanitize: boolean): Promise<void> {
+  async #relay(request: IncomingMessage, response: ServerResponse, target: string, sanitize: boolean, session?:NativeStudioSession, projectList=false): Promise<void> {
     const upstream = await fetch(target, {
       method: request.method ?? "GET",
       headers: { "x-studio-key": this.#deps.studio.key, accept: request.headers.accept ?? "*/*" },
+      ...(session?{signal:AbortSignal.timeout(30000)}:{}),
     });
+    if(session&&!upstream.ok){await upstream.arrayBuffer();this.#access!.recheck(session);throw new StudioAccessError(upstream.status>=400&&upstream.status<500?upstream.status:503,upstream.status===404?'NOT_FOUND':upstream.status>=500?'CAPABILITY_UNAVAILABLE':'INVALID_REQUEST');}
     const contentType = upstream.headers.get("content-type") ?? "";
     const headers: Record<string, string> = { "content-type": contentType };
     if (contentType.includes("application/json")) {
-      const text = await upstream.text();
+      let text = await upstream.text();
+      if(session){
+        this.#access!.recheck(session);
+        if(projectList){const data=JSON.parse(text) as {projects?:{id?:unknown}[]};if(!Array.isArray(data.projects))throw new StudioAccessError(503,'CAPABILITY_UNAVAILABLE');text=JSON.stringify({...data,projects:data.projects.filter(project=>project.id===session.grant.native_project_id)});}
+      }
       response.writeHead(upstream.status, headers);
-      response.end(sanitize ? this.#sanitize(text) : text);
+      response.end(sanitize ? this.#sanitize(text,session) : text);
       return;
     }
-    response.writeHead(upstream.status, headers);
-    response.end(Buffer.from(await upstream.arrayBuffer()));
+    const bytes=Buffer.from(await upstream.arrayBuffer());if(session)this.#access!.recheck(session);
+    response.writeHead(upstream.status, headers);response.end(bytes);
   }
 
   /** Strip the machine's layout out of a JSON answer and point it back at the Gateway. */
-  #sanitize(text: string): string {
+  #sanitize(text: string,session?:NativeStudioSession): string {
     let value: unknown;
     try { value = JSON.parse(text); } catch { return text; }
-    const rewritten = rewriteValue(value, this.#filmOrigin, this.#filmGatewayOrigin);
+    const rewritten = rewriteValue(value, this.#filmOrigin, this.#filmGatewayOrigin+(session?'/s/'+session.read_token:''));
     return JSON.stringify(rewritten);
   }
 
@@ -644,6 +712,19 @@ export class OpenFilmStudioGateway {
     const url = new URL(request.url ?? "/", this.#origin);
     const path = url.pathname;
     const key = request.headers["sec-websocket-key"];
+    if(this.#access){
+      try{
+        if(typeof key!=='string'||!key||!this.#hostHeaderAllowed(request,this.#origin)||!ALLOWED_SOCKETS.some(pattern=>pattern.test(path)))throw new StudioAccessError(401,'UNAUTHORIZED');
+        const session=this.#access.streamSession(request),project=/^\/api\/projects\/([A-Za-z0-9_-]+)\/events$/.exec(path);
+        if(project)this.#access.assertNative(session,project[1]!);
+        // The root Studio stream includes other projects' open events. Both native
+        // listeners read only the delegated project's actual event stream here.
+        url.pathname='/api/projects/'+session.grant.native_project_id+'/events';url.search='';
+        this.#sockets.add(socket);
+        void this.#relaySocket(url,socket,head,key,session).catch(()=>{if(!socket.destroyed)socket.destroy();});
+      }catch{socket.end('HTTP/1.1 401 Unauthorized\r\nConnection: close\r\n\r\n');}
+      return;
+    }
     if (typeof key !== "string" || key === ""
       || !this.#hostHeaderAllowed(request, this.#origin)
       || !this.#sessionValid(request)
@@ -658,11 +739,15 @@ export class OpenFilmStudioGateway {
     });
   }
 
-  async #relaySocket(url: URL, browser: Duplex, head: Buffer, browserKey: string): Promise<void> {
+  async #relaySocket(url: URL, browser: Duplex, head: Buffer, browserKey: string,session?:NativeStudioSession): Promise<void> {
     const upstream = await openUpstreamSocket(
       `${this.#deps.studio.origin}${url.pathname}${url.search}`, this.#deps.studio.key);
     if (browser.destroyed) { upstream.destroy(); return; }
-    writeHandshake(browser, browserKey);
+    try{if(session)this.#access!.recheck(session);}catch(error){upstream.destroy();throw error;}
+    writeHandshake(browser,browserKey,session?{'Sec-WebSocket-Protocol':'narralens.read.v1'}:{});
+    const check=()=>{try{if(session)this.#access!.recheck(session);return true;}catch{browser.destroy();upstream.destroy();return false;}};
+    const heartbeat=session?setInterval(check,1000):undefined;heartbeat?.unref();
+    const dispose=()=>{if(heartbeat)clearInterval(heartbeat);};browser.once('close',dispose);upstream.once('close',dispose);
     if (head.length > 0) browser.unshift(head);
     let browserPending = Buffer.alloc(0);
     let upstreamPending = Buffer.alloc(0);
@@ -670,6 +755,11 @@ export class OpenFilmStudioGateway {
       browserPending = Buffer.concat([browserPending, chunk]);
       const decoded = decodeFrames(browserPending); browserPending = Buffer.from(decoded.rest);
       for (const frame of decoded.frames) {
+        if(!check())return;
+        if(session&&frame.opcode===OPCODE.text){
+          try{const body=JSON.parse(frame.payload.toString('utf8')) as unknown;if(frame.payload.length>256||!body||typeof body!=='object'||Array.isArray(body)||Object.keys(body).length!==1||!('visible' in body)||typeof body.visible!=='boolean'){browser.destroy();upstream.destroy();return;}}
+          catch{browser.destroy();upstream.destroy();return;}
+        }
         if (frame.opcode === OPCODE.close) {
           upstream.write(encodeClientFrame(OPCODE.close, frame.payload.subarray(0, 2))); browser.end(); return;
         }
@@ -682,11 +772,12 @@ export class OpenFilmStudioGateway {
       upstreamPending = Buffer.concat([upstreamPending, chunk]);
       const decoded = decodeFrames(upstreamPending); upstreamPending = Buffer.from(decoded.rest);
       for (const frame of decoded.frames) {
+        if(!check())return;
         if (frame.opcode === OPCODE.close) { browser.end(encodeFrame(OPCODE.close, frame.payload.subarray(0, 2))); return; }
         if (frame.opcode === OPCODE.ping) { upstream.write(encodeClientFrame(OPCODE.pong, frame.payload)); continue; }
         if (frame.opcode === OPCODE.pong) continue;
         const payload = frame.opcode === OPCODE.text
-          ? Buffer.from(this.#sanitize(frame.payload.toString("utf8")), "utf8") : frame.payload;
+          ? Buffer.from(this.#sanitize(frame.payload.toString("utf8"),session), "utf8") : frame.payload;
         browser.write(encodeFrame(frame.opcode, payload));
       }
     });

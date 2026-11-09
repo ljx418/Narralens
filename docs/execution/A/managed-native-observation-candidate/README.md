@@ -1,0 +1,47 @@
+# Managed native document observation candidate
+
+**Current candidate: P2 request-start fencing correction.** Use active-candidate.json and p2/README.md. Root-level original build/log/archive records below are historical pre-P2, not corrected-source evidence.
+
+MAIN explicitly authorized this controlled candidate on 2026-11-10. Writer: PRODUCT Codex; no Claude CLI/provider started. Upstream is read-only full SHA `e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3`. Base Narralens CP `ca5b67a8285b130c79055317c6202f73cfbb99c8`, frozen manifest `532cd43c963a1c94de5f8ce34f3c6eb7281fded80047f74dc5dbe1a70aa65170` unchanged. This is a candidate patch, not independent approval or A05 PASS.
+
+Only exported `lib/host.ts`, `editor/use-film.ts`, `components/ProjectView.tsx` observation seams and the MAIN-authorized `lib/media-queue.ts` readonly URL wrapper change. No api transport extension, source reducer, Timeline/Player/clock, undo algebra, vendor source/dist, Host/shared contracts or legacy UI change. Other files in this directory are preparation/hash records, not production modules. Private physical tree: `var/managed-native-observation/source`.
+
+## Observations
+
+The optional managed StudioHost extension is `narralensObservation:{version:1,onDocumentState}`. The official Host version remains1. It emits `invalidated` and `document_dom_committed`, both tagged protocol_version1/project_id/editor_view_id/document_epoch. Committed includes exact UTF8 byte length, full SHA256 and native16hex rev; no filesystem paths, full film bytes, expected Host revision, grants or secrets are sent.
+
+The existing useFilm state carries evidence linking the exact server text/rev to the current value pointer. Pending optimistic edits have no evidence; dirty invalidation is synchronous before state mutation. Refresh/broken/external-file edit/replacement/unmount invalidate. Successful edit responses restore proof only when all pending edits settle, response parsed doc is valid, and the current rendered value matches that response. The unchanged server/current-value equality branch cannot retain an old text proof while only updating revision.
+
+ProjectView attaches a ref to its actual workspace-shell and starts SHA256 in useLayoutEffect after its real DOM commit. The async completion rechecks root connection, view, exact evidence token and actual state value/rev; cleanup cancels it. Native revision must equal full SHA256 prefix. This is neither GET interception nor queue-settled/onSelection acknowledgement. App key={id} already separates projects; the evidence also checks projectId. StrictMode cleanup invalidates and setup renews a fresh token from the same coherent state; late results after actual unmount cannot become current.
+
+No native preview-ready promise is made. Document DOM committed does not prove video decoded or subtitle/settings source closure loaded. Source closure, session identity, private workspace binding, expected immutable snapshot comparison and final CP NativeAck mapping remain MAIN responsibilities. The callback alone grants no permission. External-file history invalidates conservatively and remains unconfirmed until a real film read restores coherent evidence.
+
+## Reproduction / artifacts
+
+`prepare-candidate.py` exports the exact Git tree into a previously nonexistent private source directory, then applies exact-once source transformations. It refuses overwriting an existing candidate. `candidate.patch` is a portable four-file unified diff; apply to a clean exact-SHA export using `git apply` (or `patch -p1`). `source-manifest.json` records every exact pre/post file hash and patch SHA. `refresh-manifest.py` only re-derives that diff and hash record from the private export; it never writes vendor.
+
+`prepare-offline-deps.py` copies existing upstream package symlinks and their transitive pnpm virtual entries into **private physical directories**, with all symlink targets checked inside the private export; it omits .bin wrappers because those contain upstream absolute NODE_PATH. It does not run install, lifecycle scripts, package binaries, network or builds. `offline-dependencies.json` records actual copied package versions and complete sorted path/file-hash closure. Using Host node_modules or symlinking writable upstream dependencies is forbidden. Missing dependencies fail explicitly.
+
+When MAIN grants resources, use direct local package entrypoints with NODE_PATH unset (not copied .bin wrappers): from `source/packages/openfilm`, `node node_modules/typescript/bin/tsc -p studio/ui`; then `node node_modules/vite/bin/vite.js build --config studio/ui/vite.config.ts`. Record actual Node/tool versions and exits. Build writes only exported ui/dist, never vendor/legacy dist. Hash complete dist tree for a composite pin: full original SHA + patch/source hashes + exact dependency closure + actual build runtime/command + output manifest digest. No output hash is claimed until build actually runs. Do not enable upstream root prepare or upgrade the lock.
+
+## Resource and acceptance status
+
+Source export process56352 exit0. Offline dependency preparation process61652/PID4133326 completed exit0: 92 virtual entries, 6769 files, 157011567 bytes, isolated copied closure SHA6805315c6e5d9f3759541a6b7db780c5f805d243020db257b5ec15588ab3bde2. Initial source patch creation succeeded; static reading found a StrictMode token issue before compilation and corrected it without touching upstream. At source-preparation time build/typecheck/browser/Host were NOT_RUN; the later actual tsc/build results are recorded below. Browser/Host remain NOT_RUN. Need real native/browser assertions for initial valid empty and populated film, matching/mismatching fullhash+native rev, dirty/pending/rebase/undo/redo, broken recovery, rapid navigation/stale async hash, StrictMode/remount/unmount and observer callback throwing. Those are test intentions, not executed results.
+
+MAIN will verify/pin the managed editorDir and connect the trusted bridge/session; no arbitrary browser-supplied editorDir. Original server/guard pin and legacy UI path stay unchanged. Removing the optional observation extension/disabling this candidate returns the old UI with unknown native status; do not delete author/workspace/snapshot facts as rollback.
+
+## Additional MAIN transport authorization
+
+MAIN authorized media-queue readonly normalization. Its narrow optional global `narralensNativeTransport.mediaUrl(url)` owns no grant/approval authority. mediaImage, useMediaImage and useMediaImages normalize at entry, so LOADED/WAITING/ready keys and final returned DOM URLs all use the same scoped URL. No Host extension remains identity behavior; original concurrency/order/cache limits are unchanged. MAIN helper must be idempotent for an already scoped URL. api.ts is unchanged: fetch/WS proof is MAIN classic bootstrap responsibility. Direct history posters and other bypasses remain BRIDGE inventory/MAIN integration scope.
+
+MAIN subsequently granted UI tsc then Vite build after dependency copying finishes; no browser/Host grant. Earlier intermediate patch hashes are superseded by source-manifest.json and must not be treated as final artifacts. Source transformation reproduction on four fresh exact-SHA file preimages and read-only git apply --check actually passed; no compile result inferred from that.
+
+## Actual final build result
+
+After MAIN resource admission, exec29580 terminated exit0: `node node_modules/typescript/bin/tsc -p studio/ui` exit0; `node node_modules/vite/bin/vite.js build --config studio/ui/vite.config.ts` exit0. Node v22.22.1, native React19.3.0/Vite7.3.7/TypeScript5.9.3, original lock unchanged. See ui-checks.json and original checks/*-first.log for exact UTC times/commands/cwd/exits. Build emits only the normal chunk-size advisory, preserved in the log. Slot explicitly released immediately on completion. No browser/Host/media execution.
+
+Final patch SHA71135c54f97672d698e9d24741b67f7e98fca4900757b7484ec9d324a06c867a; actual dist manifest SHAd4cb3b22dcdf5f58e94979c5220d9594514358285b97a8a06bb9f1705d555bab (10 files). managed-ui-dist.tar.gz bundles those actual files; archive hash/bytes are in build-manifest.json. MAIN should extract to its own verified immutable managed editorDir, compare every member to the manifest, and preserve the original upstream server/guard/legacy pin. Do not serve the tar itself or treat this PRODUCT private tree as a permanent production root. Independent review/real native DOM-loaded observations remain pending.
+
+## P2 correction handoff
+
+MEDIA found stale fromServer response proof renewal; fixed source retains native reducer behavior and fences proof against request-start epoch, invalidating any newer proof before stale-response UI replacement. Current exact patch and new build evidence are in active-candidate.json and p2/. Prior source/patch/check records are retained in history/pre-p2 and original root build artifacts. Runtime race test/independent re-review remain pending.

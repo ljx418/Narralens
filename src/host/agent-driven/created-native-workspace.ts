@@ -1,5 +1,5 @@
 import {randomUUID,createHash} from 'node:crypto';
-import {constants,lstatSync,realpathSync} from 'node:fs';
+import {constants,lstatSync,realpathSync,fstatSync} from 'node:fs';
 import {open,mkdir,rm,realpath,lstat} from 'node:fs/promises';
 import type {FileHandle} from 'node:fs/promises';
 import {dirname,resolve,relative,sep} from 'node:path';
@@ -124,6 +124,18 @@ export class CreatedNativeWorkspaceService {
    }
   });
   this.#flights.set(key,work);void work.then(()=>this.#flights.delete(key),()=>this.#flights.delete(key));return work;
+ }
+ /** Host-only delegate lease check: the exact issued object and directory identities,
+  * not a client-supplied root or a fresh per-request copy of every large media asset. */
+ isPrepared(view:PreparedNativeWorkspace):boolean {
+  try{
+   const record=this.#prepared.get(view.project_id);if(!record||record.view!==view||!this.#root)return false;
+   this.#check(record.binding);
+   const root=fstatSync(this.#root.fd),named=lstatSync(this.#path);
+   if(!named.isDirectory()||named.isSymbolicLink()||named.dev!==root.dev||named.ino!==root.ino||realpathSync(this.#path)!==this.#path)return false;
+   const held=fstatSync(record.directory.fd),path=fdPath(this.#root)+'/'+record.name,current=lstatSync(path);
+   return current.isDirectory()&&!current.isSymbolicLink()&&held.dev===current.dev&&held.ino===current.ino&&realpathSync(path)===view.source_root.value;
+  }catch{return false;}
  }
  /** Host-only lookup; an arbitrary URL/query cannot open an unprepared or stale project. */
  rootFor(projectId:string):Promise<AbsoluteServerPath>{

@@ -135,6 +135,20 @@
         "build_exit": 0
       },
       "evidence": "docs/execution/A/created-workbench-read-evidence.json"
+    },
+    {
+      "scope": "owned created native entry/original editor and M5 same document/scoped media/events/child replacement",
+      "review": "INTERNAL_EVIDENCED_EXTERNAL_PENDING",
+      "evidence": "docs/execution/A/controlled-native-entry-evidence.json",
+      "internal": {
+        "affected_regression_tests_before_capacity_repair": 56,
+        "current_production_scope_tests": 9,
+        "final_capacity_component_tests": 2,
+        "negative_mutation_gates": 2,
+        "build_exit": 0,
+        "scan_findings": 0
+      },
+      "not_proven": "native loaded ack, author writes, film, delivery and overall A"
     }
   ],
   "not_closed": [

@@ -1,3 +1,4 @@
+import type {NativeWorkbenchProjection} from '../../contracts/created-workbench.js';
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { ComparisonReplayResponseV1, WorkbenchProjectionV1 } from "../../contracts/wave3-types.js";
 import type { ImpactSpecV1 } from "../../contracts/wave2-types.js";
@@ -116,7 +117,11 @@ export function stageFromHash(hash: string): { stage: M5Stage; target: string } 
 
 /** Read the stage from the hash, and follow it when it changes. */
 export function useStage(): { stage: M5Stage; target: string } {
-  const read = (): { stage: M5Stage; target: string } => stageFromHash(window.location.hash);
+  const read = (): { stage: M5Stage; target: string } => {
+    const controlled=(window as {narralensNativeTransport?:{projectId?:string}}).narralensNativeTransport;
+    if(controlled?.projectId)return {stage:'refine',target:controlled.projectId};
+    return stageFromHash(window.location.hash);
+  };
   const [value, setValue] = useState(read);
   useEffect(() => {
     const onHash = (): void => setValue(read());
@@ -137,7 +142,7 @@ export function M5Panel({ client, targetProjectId }: M5PanelProps): React.JSX.El
     return new URLSearchParams(window.location.search).get("target") ?? "";
   }, [stage.stage, stage.target, targetProjectId]);
 
-  const [projection, setProjection] = useState<WorkbenchProjectionV1>();
+  const [projection, setProjection] = useState<NativeWorkbenchProjection>();
   const [blocked, setBlocked] = useState<string>("");
   const [replay, setReplay] = useState<ComparisonReplayResponseV1>();
   const [materialization, setMaterialization] = useState<{
@@ -633,7 +638,7 @@ export function M5Panel({ client, targetProjectId }: M5PanelProps): React.JSX.El
     return <div className="m5-panel" data-narralens-panel="loading"><h2>Narralens</h2><p>正在读取工作台…</p></div>;
   }
 
-  return <div className="m5-panel" data-narralens-panel="ready" data-stage="refine" data-phase={ui.phase}
+  return <div className="m5-panel" data-narralens-panel="ready" data-stage="refine" data-phase={projection.format==='narralens.created-workbench@1.0'?'not_started':ui.phase}
     data-target={projection.project_id} data-revision={projection.revision}
     data-control-revision={projection.control_revision}
     data-selection-clip={selection?.clip_id ?? ""}
@@ -657,11 +662,11 @@ export function M5Panel({ client, targetProjectId }: M5PanelProps): React.JSX.El
       </label>
       <p className="m5-facts">
         <span>target {projection.project_id}</span>
-        <span>source {projection.source_project_id}</span>
+        <span>{projection.format==='narralens.created-workbench@1.0'?'新建工程':`source ${projection.source_project_id}`}</span>
         <span>r{projection.revision} · c{projection.control_revision}</span>
         <span>{projection.frame_count} 帧 · 旁白 {projection.narration === "present" ? "有" : projection.narration === "absent" ? "无" : "未知"}</span>
       </p>
-      <p className="m5-phase" role="status" aria-live="polite">{PHASE_LABELS[ui.phase] ?? ui.phase}</p>
+      <p className="m5-phase" role="status" aria-live="polite">{projection.format==='narralens.created-workbench@1.0'?'尚未开始制作；原生版本待确认':PHASE_LABELS[ui.phase] ?? ui.phase}</p>
     </header>
 
     {ui.error !== null && <div className="m5-error" role="alert" data-error-code={ui.error.code}>
@@ -710,7 +715,7 @@ export function M5Panel({ client, targetProjectId }: M5PanelProps): React.JSX.El
       </p>
     </section>
 
-    <section className="m5-section" aria-labelledby="m5-proxy-title">
+    {projection.format==='narralens.workbench@1.0'&&<><section className="m5-section" aria-labelledby="m5-proxy-title">
       <h3 id="m5-proxy-title">三路真实 proxy</h3>
       <p className="m5-fineprint">三路同时播放，只有一路持有音频焦点；离开视口的一路会暂停。</p>
       <div className="m5-proxies">
@@ -778,6 +783,8 @@ export function M5Panel({ client, targetProjectId }: M5PanelProps): React.JSX.El
       </button>
     </section>
 
+    </>}
+
     <section className="m5-section" aria-labelledby="m5-locks-title">
       <h3 id="m5-locks-title">锁</h3>
       <ul className="m5-locks">
@@ -786,11 +793,11 @@ export function M5Panel({ client, targetProjectId }: M5PanelProps): React.JSX.El
             <b>{lock.lock_type} · {lock.scope}</b>
             <span>{lock.owner_label} · {lock.reason_code}</span>
             <small>{lock.start_frame}—{lock.end_frame_exclusive} 帧 · c{lock.control_revision}</small>
-            <button type="button" onClick={() => void releaseLock(lock.lock_id)}>显式释放</button>
+            <button type="button" disabled={projection.format!=='narralens.workbench@1.0'} onClick={() => void releaseLock(lock.lock_id)}>显式释放</button>
           </li>
         ))}
       </ul>
-      <button type="button" disabled={busy !== ""} onClick={() => void createLock()}>
+      <button type="button" disabled={busy !== ""||projection.format!=='narralens.workbench@1.0'} onClick={() => void createLock()}>
         {busy === "lock" ? "正在加锁…" : "加项目级画面锁"}
       </button>
     </section>
@@ -806,10 +813,10 @@ export function M5Panel({ client, targetProjectId }: M5PanelProps): React.JSX.El
         ))}
       </ul>
       <div className="m5-history-actions">
-        <button type="button" disabled={busy !== ""} onClick={() => void runIntent("undo")}>
+        <button type="button" disabled={busy !== ""||projection.format!=='narralens.workbench@1.0'} onClick={() => void runIntent("undo")}>
           {busy === "undo" ? "正在生成恢复意图…" : "准备撤回"}
         </button>
-        <button type="button" disabled={busy !== ""} onClick={() => void runIntent("redo")}>
+        <button type="button" disabled={busy !== ""||projection.format!=='narralens.workbench@1.0'} onClick={() => void runIntent("redo")}>
           {busy === "redo" ? "正在生成恢复意图…" : "准备重做"}
         </button>
       </div>

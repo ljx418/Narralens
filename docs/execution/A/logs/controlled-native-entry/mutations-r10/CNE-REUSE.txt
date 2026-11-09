@@ -1,0 +1,25 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+ ❯ tests/agent-driven/integration/controlled-native-session-capacity.test.ts (2 tests | 1 failed | 1 skipped) 94ms
+   × reopens the same actual scope 80 times without exhausting capacity or invalidating an existing tab proof 94ms
+     → The controlled native session is unavailable
+   ↓ reclaims 64 revoked owners and workspace versions while retaining a bounded stale-token answer and a usable fresh owner
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 1 skipped (2)
+   Start at  07:12:28
+   Duration  2.08s (transform 68ms, setup 0ms, collect 165ms, tests 94ms, environment 0ms, prepare 1.21s)
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/controlled-native-session-capacity.test.ts > reopens the same actual scope 80 times without exhausting capacity or invalidating an existing tab proof
+Error: The controlled native session is unavailable
+ ❯ ControlledStudioAccess.issue src/host/m5/controlled-studio-access.ts:57:82
+
+ ❯ exchange tests/agent-driven/integration/controlled-native-session-capacity.test.ts:16:32
+ ❯ tests/agent-driven/integration/controlled-native-session-capacity.test.ts:24:58
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+

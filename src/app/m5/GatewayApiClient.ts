@@ -1,3 +1,4 @@
+import {validateNativeWorkbench,type NativeWorkbenchProjection} from '../../contracts/created-workbench.js';
 import type {
   ComparisonReplayRequestV1, ComparisonReplayResponseV1, LockCreateRequestV1,
   LockMutationResponseV1, WorkbenchProjectionV1,
@@ -53,8 +54,8 @@ export class GatewayApiClient {
     return body as T;
   }
 
-  workbench(projectId: string): Promise<WorkbenchProjectionV1> {
-    return this.#request(`/narralens/api/workbench?project_id=${encodeURIComponent(projectId)}`);
+  async workbench(projectId: string): Promise<NativeWorkbenchProjection> {
+    return validateNativeWorkbench(await this.#request(`/narralens/api/workbench?project_id=${encodeURIComponent(projectId)}`));
   }
 
   replay(projectId: string, request: ComparisonReplayRequestV1): Promise<ComparisonReplayResponseV1> {

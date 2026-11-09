@@ -1,0 +1,37 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:4152473) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/agent-driven/headless/created-native-entry.test.ts (1 test | 1 failed) 36152ms
+   × uses the actual native entry in a quiet browser with the original editor and the existing panel, without a fabricated loaded acknowledgement 36151ms
+     → {"hash":"","workspace":1,"timeline":true,"panel":"idea","proxies":0,"range":null,"phase":"","proofStored":true}: expected false to be true // Object.is equality
+(node:4153145) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/created-native-entry.test.ts (3 tests) 13879ms
+   ✓ opens the real owned committed project and scopes native API, film assets and panel reads without elevating a cookie or read token  5990ms
+   ✓ keeps independent tab proofs with a stable transport cookie and revokes old native IDs when the actual prepared copy changes  5209ms
+   ✓ requires actual UI authority and an empty validated open command before starting native  2679ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/headless/created-native-entry.test.ts > uses the actual native entry in a quiet browser with the original editor and the existing panel, without a fabricated loaded acknowledgement
+AssertionError: {"hash":"","workspace":1,"timeline":true,"panel":"idea","proxies":0,"range":null,"phase":"","proofStored":true}: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ tests/agent-driven/headless/created-native-entry.test.ts:30:42
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 3 passed (4)
+   Start at  06:51:37
+   Duration  61.13s (transform 2.41s, setup 0ms, collect 7.46s, tests 50.03s, environment 0ms, prepare 2.42s)
+

@@ -1,0 +1,88 @@
+{
+  "scope": "Read-only fixed patch/source and current dist hash verification; no test/build/service executed",
+  "patch_sha256": "214c629238c2635f5c6212e5e9207eab18f61d17454c08ee64ccd32be41dffa6",
+  "upstream_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+  "source": [
+    {
+      "path": "packages/openfilm/studio/ui/src/lib/host.ts",
+      "pre_sha256": "84b6b549a80a695d68a0915681b865f0a22c7e49b8533fc5d8d889ef8a966053",
+      "post_sha256": "39860da114016dfee4dec65bcce28a94d4f35dececfd86cdb7a2f0d78a1abf4b",
+      "pre_matches": true,
+      "post_matches": true
+    },
+    {
+      "path": "packages/openfilm/studio/ui/src/editor/use-film.ts",
+      "pre_sha256": "8e88ca064e0a3e5292523952fff567101da0170418641d6e02400772c974dc26",
+      "post_sha256": "9361b5cbbe4dc11984ec5b05305ff1a823c0f432b6b62f7cb796f037475d7b48",
+      "pre_matches": true,
+      "post_matches": true
+    },
+    {
+      "path": "packages/openfilm/studio/ui/src/components/ProjectView.tsx",
+      "pre_sha256": "1dd6e2e7330924897299e082e7a0a962319da16238d8063b72b9ccd2276dc405",
+      "post_sha256": "0344b39cbad1356651b31a8ac72d881cfbf2e92ecbd4fce8a8057f5747a92d70",
+      "pre_matches": true,
+      "post_matches": true
+    },
+    {
+      "path": "packages/openfilm/studio/ui/src/lib/media-queue.ts",
+      "pre_sha256": "104eaa8d1b260ca64b38557c59524dbd847f5fb98c0a089b13f515bc2f724724",
+      "post_sha256": "669b2add59d9cdbe2e53a438fd0de47f717f35ef6d7879bd13bb2c36ad474d25",
+      "pre_matches": true,
+      "post_matches": true
+    }
+  ],
+  "dist": [
+    {
+      "path": "assets/index-DKX5Qsob.js",
+      "matches": true
+    },
+    {
+      "path": "assets/index-Dd2b43hG.css",
+      "matches": true
+    },
+    {
+      "path": "assets/inter-cyrillic-ext-wght-normal-BOeWTOD4.woff2",
+      "matches": true
+    },
+    {
+      "path": "assets/inter-cyrillic-wght-normal-DqGufNeO.woff2",
+      "matches": true
+    },
+    {
+      "path": "assets/inter-greek-ext-wght-normal-DlzME5K_.woff2",
+      "matches": true
+    },
+    {
+      "path": "assets/inter-greek-wght-normal-CkhJZR-_.woff2",
+      "matches": true
+    },
+    {
+      "path": "assets/inter-latin-ext-wght-normal-DO1Apj_S.woff2",
+      "matches": true
+    },
+    {
+      "path": "assets/inter-latin-wght-normal-Dx4kXJAl.woff2",
+      "matches": true
+    },
+    {
+      "path": "assets/inter-vietnamese-wght-normal-CBcvBZtf.woff2",
+      "matches": true
+    },
+    {
+      "path": "index.html",
+      "matches": true
+    }
+  ],
+  "captured_metadata_sha256": {
+    "build-manifest.json": "cea9012bb015b36259f64e59fe2bc200f7a530a4695603891b30350784107c43",
+    "candidate.patch": "214c629238c2635f5c6212e5e9207eab18f61d17454c08ee64ccd32be41dffa6",
+    "packages__openfilm__studio__ui__src__components__ProjectView.tsx": "0344b39cbad1356651b31a8ac72d881cfbf2e92ecbd4fce8a8057f5747a92d70",
+    "packages__openfilm__studio__ui__src__editor__use-film.ts": "9361b5cbbe4dc11984ec5b05305ff1a823c0f432b6b62f7cb796f037475d7b48",
+    "packages__openfilm__studio__ui__src__lib__host.ts": "39860da114016dfee4dec65bcce28a94d4f35dececfd86cdb7a2f0d78a1abf4b",
+    "packages__openfilm__studio__ui__src__lib__media-queue.ts": "669b2add59d9cdbe2e53a438fd0de47f717f35ef6d7879bd13bb2c36ad474d25",
+    "source-manifest.json": "7ff2d96bc3dd5be589ca960d631c554b1a01800b38df6798d9f8f28a6d300bd9",
+    "source-preparation-checks.json": "f0ea8b65a8b60ccf942b5b5684a4f201797f4b788c65363566b026976845f4cd",
+    "ui-checks.json": "ee9d3108f9beb8c47caac489718ee67ee241a9cc76eb74bd5a52ce8838a7516a"
+  }
+}

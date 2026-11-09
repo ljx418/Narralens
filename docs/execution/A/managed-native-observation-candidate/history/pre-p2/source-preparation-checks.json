@@ -1,0 +1,23 @@
+{
+  "scope": "source preparation only; no build or TypeScript executed",
+  "exact_transform_reproduction": [
+    {
+      "path": "packages/openfilm/studio/ui/src/lib/host.ts",
+      "reproduced_postimage": true
+    },
+    {
+      "path": "packages/openfilm/studio/ui/src/editor/use-film.ts",
+      "reproduced_postimage": true
+    },
+    {
+      "path": "packages/openfilm/studio/ui/src/components/ProjectView.tsx",
+      "reproduced_postimage": true
+    },
+    {
+      "path": "packages/openfilm/studio/ui/src/lib/media-queue.ts",
+      "reproduced_postimage": true
+    }
+  ],
+  "git_apply_check_exit": 0,
+  "vendor_status": ""
+}

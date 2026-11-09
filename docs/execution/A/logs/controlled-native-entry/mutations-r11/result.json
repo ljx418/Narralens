@@ -1,0 +1,16 @@
+{
+  "scope": "native transport capacity component gates only",
+  "results": [
+    {
+      "id": "CNE-REUSE",
+      "exit": 1,
+      "expected_assertion_failed": true
+    },
+    {
+      "id": "CNE-RECLAIM",
+      "exit": 1,
+      "expected_assertion_failed": true
+    }
+  ],
+  "source_restored": true
+}

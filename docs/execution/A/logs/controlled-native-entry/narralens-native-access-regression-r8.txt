@@ -1,0 +1,65 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:4156645) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/created-native-workspace.test.ts (11 tests) 40907ms
+   ✓ opens the real HTTP-created committed project in native Studio using only its independent verified working copy  4434ms
+   ✓ coalesces identical preparation, rejects a foreign principal before I/O, and does not turn a copy into a revision  2690ms
+   ✓ refuses a modified disposable source, then rebuilds from the still-proven immutable snapshot  2665ms
+   ✓ rejects storage overlapping an author or snapshot root before creating any directories  2576ms
+   ✓ does not follow a symbolic-link leaf in a damaged derived copy  3133ms
+   ✓ wires the actual Host Supervisor to a prepared committed copy and removes it only after native shutdown  4772ms
+   ✓ closes every actual late-created Gateway/Studio listener when Host close races Gateway publication  5007ms
+   ✓ rechecks the actual cached preparation after its awaited verification when shutdown begins  2791ms
+   ✓ rejects an ancestor alias installed after construction without creating anything inside the real snapshot  2775ms
+   ✓ refuses an obsolete prepared version after the actual native startup window  5054ms
+   ✓ does not publish a preview when the actual native-open response races a prepared version replacement  5007ms
+(node:4157433) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m5/studio-gateway.test.ts (9 tests) 33385ms
+   ✓ M5 Studio Gateway: the only origin the browser sees > binds 127.0.0.1 on a random port and answers a rebound Host header with nothing  7333ms
+   ✓ M5 Studio Gateway: the only origin the browser sees > requires its session cookie for the API, and issues it HttpOnly and SameSite  3679ms
+   ✓ M5 Studio Gateway: the only origin the browser sees > answers every page with a no-referrer policy, a self-only CSP and no framing  4405ms
+   ✓ M5 Studio Gateway: the only origin the browser sees > never publishes the project's absolute path  3566ms
+   ✓ M5 Studio Gateway: the only origin the browser sees > refuses every write that the OpenFilm capability map does not open  3580ms
+   ✓ M5 Studio Gateway: the only origin the browser sees > never proxies the upstream's own edit endpoint  3546ms
+   ✓ M5 Studio Gateway: the only origin the browser sees > refuses a write that does not come from the Gateway's own origin  3688ms
+   ✓ M5 Studio Gateway: the only origin the browser sees > refuses a direct call from the Gateway's origin to the Host, and changes nothing  3586ms
+ ✓ tests/m5/contracts.test.ts (9 tests) 34ms
+(node:4157809) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/created-workbench-read.test.ts (5 tests) 13178ms
+   ✓ reads the actual HTTP-created zero-frame native project without starting native or creating a workspace or revision  2686ms
+   ✓ rejects anonymous, driver, cross-origin, and cookie-only reads before resolving an unavailable project  2666ms
+   ✓ refuses genuine source drift and closed service reads without publishing stale committed facts  2597ms
+   ✓ validates explicit created lineage, zero frames and unknown native state rather than permitting old migration claims  2616ms
+   ✓ rechecks the genuine UI credential after the actual project read before returning any private projection  2612ms
+(node:4157963) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/created-native-entry.test.ts (3 tests) 12923ms
+   ✓ opens the real owned committed project and scopes native API, film assets and panel reads without elevating a cookie or read token  5002ms
+   ✓ keeps independent tab proofs with a stable transport cookie and revokes old native IDs when the actual prepared copy changes  5125ms
+   ✓ requires actual UI authority and an empty validated open command before starting native  2794ms
+(node:4158129) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/headless/created-native-entry.test.ts (1 test) 8769ms
+   ✓ uses the actual native entry in a quiet browser with the original editor and the existing panel, without a fabricated loaded acknowledgement  8768ms
+(node:4158231) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m5/workbench.test.ts (3 tests) 9207ms
+   ✓ M5 workbench: the read model over a real migrated target > publishes the target's own projection, its source lineage and the Gateway's preview  4639ms
+   ✓ M5 workbench: the read model over a real migrated target > publishes no path, no token and no adapter class name  3548ms
+   ✓ M5 workbench: the read model over a real migrated target > refuses a project that was never migrated, and one that does not exist  1020ms
+(node:4158344) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/workbench-session-host.test.ts (11 tests) 2515ms
+   ✓ does not exhaust session capacity after 80 real renewals and still permits an operator reopen  326ms
+ ✓ tests/contracts/native-workbench-static.test.ts (2 tests) 53ms
+ ✓ tests/m5/websocket-relay.test.ts (2 tests) 3ms
+
+ Test Files  10 passed (10)
+      Tests  56 passed (56)
+   Start at  06:58:43
+   Duration  163.49s (transform 5.58s, setup 0ms, collect 23.71s, tests 120.97s, environment 1ms, prepare 12.57s)
+

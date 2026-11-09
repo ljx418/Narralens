@@ -11,7 +11,7 @@ import type {IntakePut,Intake,Decision,JobReceipt} from '../../../../src/contrac
 export const vendorRoot='/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm';
 /** Real HTTP/bootstrap/pinned snapshot, not a synthetic migration or verifier. UI
  * credentials below are fixture authority; these tests never claim human acceptance. */
-export async function createdProjectFixture(options:{studioBeforeGatewayPublish?:(state:{gateway_origin:string;studio_origin:string;film_origin:string})=>Promise<void>}={}){
+export async function createdProjectFixture(options:{studioBeforeGatewayPublish?:(state:{gateway_origin:string;studio_origin:string;film_origin:string;close_native:()=>Promise<void>;gateway_is_listening:()=>boolean})=>Promise<void>}={}){
  const root=await mkdtemp(join(tmpdir(),'narralens-created-workspace-'));let app!:CreationApplication;
  const host=new NarralensHost({...options,catalog:new ProjectCatalog(new Map()),dbPath:join(root,'host.sqlite'),snapshotsRoot:join(root,'snapshots'),adoptionStagingRoot:join(root,'stage'),migrationsRoot:join(root,'migrations'),derivedRoot:join(root,'derived'),openFilmVendorRoot:vendorRoot,isolatedStudioRuntimeRoot:join(root,'studio-runtime'),agentApplication:instance=>app=new CreationApplication(instance,{createdRoot:join(root,'projects'),vendorRoot,worker:{pollMs:10}})});
  try{
