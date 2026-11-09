@@ -9,9 +9,14 @@ The previous CLI invocations ended by controlled TERM (exit 143), **not** by a 4
 source edits were lost and no child process was left running. The lane log is
 `logs/claude-4548ddcb.jsonl` and `logs/claude-4548ddcb-resume1.jsonl`.
 
-**Implementation commit: `23434c116d12fa1f21cd25135acbc3a3e01d3a8b`** on
-`agent-driven/lane-product`, 31 files, +8696 lines. It contains only the lane's own
-source, test, tool and document paths. Nothing outside
+**Implementation commits on `agent-driven/lane-product`:**
+
+| SHA | What |
+| --- | --- |
+| `23434c116d12fa1f21cd25135acbc3a3e01d3a8b` | The implementation: 31 files, +8696 lines. |
+| `d438362` | The static-review fixes: the explicit head/append-only lists, the time-helper module split. |
+
+Both contain only the lane's own source, test, tool and document paths. Nothing outside
 `src/app/observation/`, `src/app/system/`, `src/host/creative/`,
 `tests/agent-driven/product/`, `tools/agent-driven/product/` and the lane's own
 documents was staged. MAIN's `ReleaseAssignment.json`, request 001, the Codex scratch
