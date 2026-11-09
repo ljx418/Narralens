@@ -279,3 +279,30 @@ it('re-proves reused snapshot durability through its source and both parent dire
     await expect(interrupted.prove(input.reservation, reused, input.fact)).rejects.toThrow('snapshot fsync boundary interrupted');
     expect(f.store.activeCommit(input.reservation.project_id)).toBeUndefined();
 });
+it('reclaims only an expired creation lease and never steals a newly acquired attempt at transaction admission',async()=>{
+ const f=await fixture(), reservation=await f.creation.reserve(f.input,'owner');
+ const jobs=new PersistentJobStore(f.store);
+ expect(jobs.acquireLease(reservation.job_id,{owner:'old',now:f.now(),leaseMs:1000})).toBe(true);
+ expect(await f.creation.reclaimExpired(reservation.command_id)).toBe(false);
+ f.setNow(new Date(f.now().getTime()+2000));
+ const original=f.store.atomic.bind(f.store);let inject=true;
+ f.store.atomic=work=>{
+  if(inject){inject=false;f.store.compose(db=>db.prepare("UPDATE job SET attempt=2,lease_owner='fresh',lease_expires_at=? WHERE job_id=?").run(f.now().getTime()+60000,reservation.job_id));}
+  return original(work);
+ };
+ expect(await f.creation.reclaimExpired(reservation.command_id)).toBe(false);
+ expect(f.store.readJob(reservation.job_id)).toMatchObject({state:'running',attempt:2,lease_owner:'fresh'});
+ f.setNow(new Date(f.now().getTime()+60001));
+ expect(await f.creation.reclaimExpired(reservation.command_id)).toBe(true);
+ expect(f.store.readJob(reservation.job_id)).toMatchObject({state:'queued',attempt:2,lease_owner:null});
+});
+it('atomically closes a queued cancellation without inventing a lease or publishing a project',async()=>{
+ const f=await fixture(), reservation=await f.creation.reserve(f.input,'owner');
+ new PersistentJobStore(f.store).requestCancel(reservation.job_id,f.now());
+ expect(await f.creation.fail(reservation.command_id,null,0,'INVALID_REQUEST')).toBe(true);
+ expect(f.store.readJob(reservation.job_id)).toMatchObject({state:'cancelled',attempt:0,lease_owner:null});
+ expect(f.creation.read(reservation.command_id)?.state).toBe('failed');
+ expect(f.store.projectTransaction(reservation.transaction_id)?.state).toBe('aborted');
+ expect(f.creation.origin(reservation.project_id)).toBeNull();
+ expect(f.store.activeCommit(reservation.project_id)).toBeUndefined();
+});

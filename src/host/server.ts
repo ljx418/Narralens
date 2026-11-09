@@ -216,6 +216,11 @@ function adoptionStagingRootFor(revisions: RevisionStore, configured: string | u
 export interface AgentHostApplication {
   readonly auth: ScopedAgentAuth;
   readonly dispatcher: AgentDispatcher;
+  /** Decide owned creation journals before generic recovery can quarantine them. */
+  recoverBeforeGeneric?(): Promise<void>;
+  leaseReaperExclusions?(): readonly string[];
+  start?(): void;
+  close?(): Promise<void>;
 }
 interface HostDependencies {
   /** A-mode uses the same Host and DB. Omitted only by the preserved legacy entry. */
@@ -382,7 +387,9 @@ export class NarralensHost {
   #stopOutbox: (() => void) | undefined;
   #leaseReaper: ReturnType<typeof setInterval> | undefined;
   #server: Server | undefined;
+  #closePromise: Promise<void> | undefined;
   readonly #agentApplication: AgentHostApplication | undefined;
+  readonly #openFilmVendorRoot: string;
   readonly #agentRouter: AgentHttpRouter | undefined;
   /**
    * M4C's fault seam, kept so the OpenFilm composition can be given it at listen time.
@@ -393,6 +400,7 @@ export class NarralensHost {
   readonly #historyFault: ((boundary: string) => void) | undefined;
 
   constructor(dependencies: HostDependencies = {}) {
+    this.#openFilmVendorRoot = dependencies.openFilmVendorRoot ?? openfilmVendorRoot();
     this.catalog = dependencies.catalog ?? new ProjectCatalog();
     this.runner = dependencies.runner ?? new ControlledAgentRunner({ cwd: projectRoot });
     this.proposals = dependencies.proposals ?? new ProposalAdapter(resolve(projectRoot, "var/proposals"));
@@ -605,7 +613,7 @@ export class NarralensHost {
     // M5's composition. The Studio is started lazily — the first workbench read needs it —
     // so a Host that is never asked for the workbench never starts an editor.
     this.m5Supervisor = new OpenFilmStudioSupervisor({
-      vendorRoot: dependencies.openFilmVendorRoot ?? openfilmVendorRoot(),
+      vendorRoot: this.#openFilmVendorRoot,
       targetRootOf: async (projectId: string) => {
         const view = await this.projectResolver.resolveActivated(projectId);
         return view.source_root.value;
@@ -670,7 +678,7 @@ export class NarralensHost {
     // already describe — rather than a Host wedged half-recovered.
     try {
       this.openFilmComposition = await composeOpenFilmPort({
-        registry: this.engines, vendorRoot: openfilmVendorRoot(),
+        registry: this.engines, vendorRoot: this.#openFilmVendorRoot,
         ...(this.#historyFault === undefined ? {} : { fault: this.#historyFault }),
       });
     } catch (error) {
@@ -681,6 +689,7 @@ export class NarralensHost {
     // proved the pinned checkout. Before this line a restarted Host had no way to inspect
     // its own migrated target, because only a test could call `registerLayout()`.
     this.projections.attachRegistrar(this.openFilmComposition?.registrar);
+    await this.#agentApplication?.recoverBeforeGeneric?.();
     // M4C's history recovery runs first among the controlled recoveries. A provable prepared
     // restore has to be decided by the module that owns it: the generic journal recovery
     // would move it to `attention` and throw away the evidence that would have let it
@@ -723,7 +732,7 @@ export class NarralensHost {
     this.#stopOutbox = this.outbox.start(this.#outboxReplayIntervalMs);
     if (this.jobs instanceof PersistentJobStore) {
       this.#leaseReaper = setInterval(() => this.jobs instanceof PersistentJobStore
-        && this.jobs.reapExpiredLeases(), this.#leaseReapIntervalMs);
+        && this.jobs.reapExpiredLeases(new Date(), new Set(this.#agentApplication?.leaseReaperExclusions?.() ?? [])), this.#leaseReapIntervalMs);
       this.#leaseReaper.unref?.();
     }
     this.#server = createServer((request, response) => { void this.#handle(request, response); });
@@ -734,12 +743,18 @@ export class NarralensHost {
     const address = this.#server.address();
     if (!address || typeof address === "string") throw new Error("HOST_ADDRESS_UNAVAILABLE");
     this.origin = `http://127.0.0.1:${address.port}`;
+    this.#agentApplication?.start?.();
     return address.port;
   }
 
-  async close(): Promise<void> {
+  close(): Promise<void> {
+    return this.#closePromise ??= this.#close();
+  }
+
+  async #close(): Promise<void> {
     const server = this.#server;
     this.#server = undefined;
+    await this.#agentApplication?.close?.();
     // Stop in-flight jobs before the store goes away, so a durable job never touches a
     // closed database while it is still running.
     for (const controller of this.#controllers.values()) controller.abort();

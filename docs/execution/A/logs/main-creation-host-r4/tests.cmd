@@ -1,0 +1,1 @@
+corepack pnpm exec vitest run tests/agent-driven/integration/project-creation-host.test.ts tests/agent-driven/integration/project-creation-store.test.ts tests/agent-driven/integration/host-application.test.ts --maxWorkers=1 --minWorkers=1

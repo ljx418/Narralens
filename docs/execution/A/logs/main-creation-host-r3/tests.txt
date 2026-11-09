@@ -1,0 +1,56 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:3798488) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/agent-driven/integration/project-creation-host.test.ts (3 tests | 1 failed) 8861ms
+   × creates through HTTP and Host scheduling only; reopens native source without migration or manual registration 2910ms
+     → expected '<!doctype html>\n<html>\n<head>\n<met…' to contain 'window.film'
+   ✓ refuses unknown fields and driver-minted confirmation before creating any Job  1530ms
+   ✓ rejects modified initial source before committing a pointer or origin  4420ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/project-creation-host.test.ts > creates through HTTP and Host scheduling only; reopens native source without migration or manual registration
+AssertionError: expected '<!doctype html>\n<html>\n<head>\n<met…' to contain 'window.film'
+
+- Expected
++ Received
+
+- window.film
++ <!doctype html>
++ <html>
++ <head>
++ <meta charset="utf-8">
++ <meta name="viewport" content="width=1280, height=720">
++ <style>
++   iframe { width: 1280px; height: 720px; left: 0; top: 0; }
++ </style>
++ </head>
++ <body>
++ <section data-track="picture">
++
++ </section>
++ <section data-track="narration">
++
++ </section>
++ </body>
++ </html>
++
+
+ ❯ tests/agent-driven/integration/project-creation-host.test.ts:47:115
+     45|   expect(current.host.revisions.compose(db=>db.prepare('SELECT count(*…
+     46|   const view=await current.host.projectResolver.resolveNative(result.p…
+     47|   const before=await readFile(join(root,'projects',result.project_id,'…
+       |                                                                                                                   ^
+     48|   await current.host.close();current=undefined;
+     49|   current=await fixture(root);const reopened=await current.poll(accept…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 2 passed (3)
+   Start at  00:35:23
+   Duration  15.44s (transform 2.15s, setup 0ms, collect 4.68s, tests 8.86s, environment 0ms, prepare 1.27s)
+

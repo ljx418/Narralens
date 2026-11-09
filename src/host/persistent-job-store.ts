@@ -150,8 +150,9 @@ export class PersistentJobStore {
    * Reclaim a lease nobody is holding any more. A reclaimed job goes back to `queued` while
    * attempts remain, and to `attention` once they do. It never becomes `succeeded`.
    */
-  reapExpiredLeases(now = new Date()): Array<{ job_id: string; requeued: boolean; attention: boolean }> {
-    const expired = this.#store.expiredLeases(now.getTime());
+  reapExpiredLeases(now = new Date(), excludedJobIds: ReadonlySet<string> = new Set()): Array<{ job_id: string; requeued: boolean; attention: boolean }> {
+    // Dedicated journal owners settle these jobs before generic attention handling.
+    const expired = this.#store.expiredLeases(now.getTime()).filter(job => !excludedJobIds.has(job.job_id));
     for (const job of expired) {
       const requeue = job.state === "running" && job.attempt < job.max_attempts;
       let event: ReturnType<RevisionStore["appendJobEvent"]> | undefined;

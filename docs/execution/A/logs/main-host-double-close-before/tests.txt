@@ -1,0 +1,31 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:3804211) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/agent-driven/integration/host-close-lifecycle.test.ts (1 test | 1 failed) 276ms
+   × joins simultaneous Host closes and lets an admitted real HTTP handler finish before closing SQLite 275ms
+     → database is not open
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/host-close-lifecycle.test.ts > joins simultaneous Host closes and lets an admitted real HTTP handler finish before closing SQLite
+Error: database is not open
+ ❯ RevisionStore.close src/host/projects/revision-store.ts:1659:28
+    1657|   }
+    1658| 
+    1659|   close(): void { this.#db.close(); }
+       |                            ^
+    1660| 
+    1661|   #state(transactionId: string, state: JournalState, now = new Date())…
+ ❯ NarralensHost.close src/host/server.ts:777:35
+ ❯ tests/agent-driven/integration/host-close-lifecycle.test.ts:27:21
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed (1)
+   Start at  00:43:39
+   Duration  5.64s (transform 1.45s, setup 0ms, collect 3.68s, tests 276ms, environment 0ms, prepare 1.12s)
+

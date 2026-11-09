@@ -156,7 +156,64 @@ export class ProjectCreationStore {
         const reservation = this.read(String(row.command_id))!;
         if (reservation.job_id !== jobId)
             throw conflict();
-        return validateAgentDefinition<JobReceipt>('JobReceipt', { ...reservation.accepted, state: job.state, attempt: job.attempt, snapshot_id: reservation.result?.initial_snapshot_id ?? null, bootstrap: reservation.result, next_actions: reservation.result ? ['read_context'] : ['poll_job'] });
+        return validateAgentDefinition<JobReceipt>('JobReceipt', { ...reservation.accepted, state: job.state, attempt: job.attempt, snapshot_id: reservation.result?.initial_snapshot_id ?? null, bootstrap: reservation.result, next_actions: reservation.result ? ['read_context'] : ['failed','cancelled','attention'].includes(job.state) ? ['review_failure','confirm_brief'] : ['poll_job'] });
+    }
+    ownsProject(projectId: string, principal: string): boolean {
+        const row = this.#db.prepare('SELECT command_id FROM cp_a0_bootstrap_command WHERE reserved_project_id=? AND principal_id=?').get(projectId, principal);
+        if (!row) return false;
+        const reservation = this.read(String(row.command_id))!;
+        const intake = this.#db.prepare('SELECT principal_id FROM cp_a0_intake_version WHERE intake_id=? AND version=?').get(reservation.request.intake_id, reservation.request.intake_version);
+        return intake?.principal_id === principal;
+    }
+    async assertContinuation(commandId: string): Promise<CreationReservation> {
+        return this.#repository.transaction(tx => {
+            this.assertSchema();
+            const reservation = this.read(commandId);
+            const row = this.#db.prepare('SELECT principal_id FROM cp_a0_bootstrap_command WHERE command_id=?').get(commandId);
+            if (!reservation || !row) throw conflict();
+            if (reservation.state !== 'committed') {
+                const facts = this.confirmed(tx, reservation.request, String(row.principal_id), this.now());
+                if (facts.briefDigest !== reservation.brief_digest || facts.closureDigest !== reservation.closure_digest) throw conflict();
+            }
+            return reservation;
+        });
+    }
+    async reclaimExpired(commandId: string): Promise<boolean> {
+        return this.#repository.transaction(() => {
+            this.assertSchema();
+            const reservation = this.read(commandId), now = this.now();
+            if (!reservation || !['reserved','staging'].includes(reservation.state)) return false;
+            const job = this.revisions.readJob(reservation.job_id);
+            if (!job || job.state !== 'running' || job.lease_expires_at === null || job.lease_expires_at > now.getTime()) return false;
+            const changed = this.#db.prepare("UPDATE job SET state='queued',lease_owner=NULL,lease_expires_at=NULL,updated_at=? WHERE job_id=? AND state='running' AND lease_owner IS ? AND attempt=? AND lease_expires_at=? AND lease_expires_at<=?").run(now.toISOString(), job.job_id, job.lease_owner, job.attempt, job.lease_expires_at, now.getTime());
+            if (Number(changed.changes) !== 1) return false;
+            this.revisions.appendJobEvent(job.job_id, 'queued', now.toISOString(), {message:'Expired creation worker reclaimed'}, true);
+            return true;
+        });
+    }
+    async fail(commandId: string, owner: string | null, attempt: number, code: string): Promise<boolean> {
+        return this.#repository.transaction(() => {
+            this.assertSchema();
+            const reservation = this.read(commandId), now = this.now();
+            if (!reservation || !['reserved','staging'].includes(reservation.state)) return false;
+            const job = this.revisions.readJob(reservation.job_id);
+            if (!job || job.lease_owner !== owner || job.attempt !== attempt || !['running','cancel_requested'].includes(job.state)) return false;
+            const live = owner !== null && job.lease_expires_at !== null && job.lease_expires_at > now.getTime();
+            const orphanedCancel = job.state === 'cancel_requested' && (job.lease_expires_at === null || job.lease_expires_at <= now.getTime());
+            if (!live && !orphanedCancel) return false;
+            const transaction = this.revisions.projectTransaction(reservation.transaction_id);
+            if (!transaction || !['received','preconditions_checked','staged','validated','prepared'].includes(transaction.state) || this.revisions.activeCommit(reservation.project_id)) return false;
+            this.revisions.transition(reservation.transaction_id, transaction.state, 'aborted', {error_code: /^[A-Z][A-Z0-9_]{0,63}$/.test(code) ? code : 'INTERNAL_ERROR', terminal_reason: 'CREATION_FAILED_BEFORE_COMMIT'}, now);
+            const changed = job.state === 'cancel_requested'
+                ? Number(this.#db.prepare("UPDATE job SET state='cancelled',lease_owner=NULL,lease_expires_at=NULL,updated_at=? WHERE job_id=? AND state='cancel_requested' AND lease_owner IS ? AND attempt=?").run(now.toISOString(), reservation.job_id, owner, attempt).changes) === 1
+                : this.revisions.completeCallback(reservation.job_id, owner!, attempt, 'failed', 'known', canonicalJson({kind:'local.bootstrap_failure@1',code:/^[A-Z][A-Z0-9_]{0,63}$/.test(code)?code:'INTERNAL_ERROR'}), 'CREATION_FAILED_BEFORE_COMMIT', undefined, undefined, now);
+            if (!changed) throw conflict();
+            const moved = this.#db.prepare("UPDATE cp_a0_bootstrap_command SET state='failed' WHERE command_id=? AND state IN('reserved','staging')").run(commandId);
+            if (Number(moved.changes) !== 1) throw conflict();
+            this.revisions.appendJobEvent(reservation.job_id, job.state === 'cancel_requested' ? 'cancelled' : 'failed', now.toISOString(), {message:'Project creation stopped before its initial commit'}, true);
+            this.revisions.enqueueOutbox('project.creation.failed', reservation.project_id, canonicalJson({project_id:reservation.project_id,job_id:reservation.job_id,code:/^[A-Z][A-Z0-9_]{0,63}$/.test(code)?code:'INTERNAL_ERROR'}), now);
+            return true;
+        });
     }
     sourceFact(projectId: string, snapshotId: string): CreatedSourceFact | null {
         this.assertSchema();

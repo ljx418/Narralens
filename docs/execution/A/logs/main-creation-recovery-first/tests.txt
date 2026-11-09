@@ -1,0 +1,23 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:3800863) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/project-creation-host.test.ts (11 tests) 58298ms
+   ✓ creates through HTTP and Host scheduling only; reopens native source without migration or manual registration  3307ms
+   ✓ refuses unknown fields and driver-minted confirmation before creating any Job  1454ms
+   ✓ rejects modified initial source before committing a pointer or origin  3477ms
+   ✓ quiesces an interrupted creation before closing SQLite, then resumes the same durable Job on reopen  3974ms
+   ✓ settles owner cancellation without publishing or wedging a subsequent Host start  1948ms
+   ✓ survives actual SIGKILL at after_lease and decides its own journal before generic recovery  7488ms
+   ✓ survives actual SIGKILL at after_source and decides its own journal before generic recovery  7343ms
+   ✓ survives actual SIGKILL at after_snapshot and decides its own journal before generic recovery  7208ms
+   ✓ survives actual SIGKILL at before_commit and decides its own journal before generic recovery  8212ms
+   ✓ survives actual SIGKILL at after_commit and decides its own journal before generic recovery  7006ms
+   ✓ survives actual SIGKILL at cancel_after_source and decides its own journal before generic recovery  6878ms
+
+ Test Files  1 passed (1)
+      Tests  11 passed (11)
+   Start at  00:38:58
+   Duration  65.02s (transform 1.93s, setup 0ms, collect 4.58s, tests 58.30s, environment 0ms, prepare 1.46s)
+

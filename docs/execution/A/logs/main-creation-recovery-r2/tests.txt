@@ -1,0 +1,90 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:3802623) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/agent-driven/integration/project-creation-host.test.ts (12 tests | 1 failed) 58039ms
+   ✓ creates through HTTP and Host scheduling only; reopens native source without migration or manual registration  3077ms
+   ✓ refuses unknown fields and driver-minted confirmation before creating any Job  1135ms
+   ✓ rejects modified initial source before committing a pointer or origin  3929ms
+   ✓ quiesces an interrupted creation before closing SQLite, then resumes the same durable Job on reopen  2565ms
+   ✓ settles owner cancellation without publishing or wedging a subsequent Host start  1815ms
+   ✓ survives actual SIGKILL at after_lease and decides its own journal before generic recovery  6944ms
+   ✓ survives actual SIGKILL at after_source and decides its own journal before generic recovery  6843ms
+   ✓ survives actual SIGKILL at after_snapshot and decides its own journal before generic recovery  7852ms
+   ✓ survives actual SIGKILL at before_commit and decides its own journal before generic recovery  7747ms
+   ✓ survives actual SIGKILL at after_commit and decides its own journal before generic recovery  7207ms
+   ✓ survives actual SIGKILL at cancel_after_source and decides its own journal before generic recovery  7611ms
+   × lets the dedicated owner settle expired cancellation while the real global reaper is ticking 1313ms
+     → expected 'UNKNOWN' to be null
+(node:3803335) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/project-creation-store.test.ts (36 tests) 38004ms
+   ✓ reserves the one actual Job/transaction and replays the original receipt, ignoring only correlation metadata  417ms
+   ✓ commits real published snapshot metadata atomically, survives DB reopen and preserves the accepted response  1099ms
+   ✓ rolls back every initial commit fact when failure occurs after state  1055ms
+   ✓ rolls back every initial commit fact when failure occurs after binding  1182ms
+   ✓ rolls back every initial commit fact when failure occurs after snapshot  1168ms
+   ✓ rolls back every initial commit fact when failure occurs after transaction  1057ms
+   ✓ rolls back every initial commit fact when failure occurs after pointer  1052ms
+   ✓ rolls back every initial commit fact when failure occurs after source_fact  1059ms
+   ✓ rolls back every initial commit fact when failure occurs after origin  1686ms
+   ✓ rolls back every initial commit fact when failure occurs after brief  1525ms
+   ✓ rolls back every initial commit fact when failure occurs after command  1109ms
+   ✓ rolls back every initial commit fact when failure occurs after job  1184ms
+   ✓ rolls back every initial commit fact when failure occurs after outbox  1053ms
+   ✓ refuses a stale worker before any commit effect: owner  1046ms
+   ✓ refuses a stale worker before any commit effect: attempt  1055ms
+   ✓ refuses a stale worker before any commit effect: expired  1056ms
+   ✓ refuses a stale worker before any commit effect: cancelled  1065ms
+   ✓ fails closed on changed created-fact schema instead of silently recreating a removed trigger  409ms
+   ✓ rechecks creation schema in a live store, not only after constructing a replacement  1068ms
+   ✓ samples lease time after transaction admission instead of using time from before BEGIN  1069ms
+   ✓ samples trusted confirmation time after reservation transaction admission  311ms
+   ✓ rolls back when lease expires after the final writes  1058ms
+   ✓ rolls back when confirmation expires after the final writes  1060ms
+   ✓ does not mint a source proof for false native metadata: frame-count  1818ms
+   ✓ does not mint a source proof for false native metadata: fps  1727ms
+   ✓ does not mint a source proof for false native metadata: upstream  1072ms
+   ✓ rejects a forged proof and byte changes after genuine pinned verification  1058ms
+   ✓ resolves a genuine created project without migration/cached layout, including after reopen  1070ms
+   ✓ refuses created source symlink escape even with byte-identical committed content  1068ms
+   ✓ does not commit a proved snapshot when its author-source publication is replaced or absent  1058ms
+   ✓ lets the real Host rebuild a created layout and inventory without a migration or registration hook  1194ms
+   ✓ refuses a same-bytes canonical path substitution after pinned proof  1009ms
+   ✓ re-proves reused snapshot durability through its source and both parent directories  2383ms
+(node:3803811) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.2/persistent-job-store.test.ts (19 tests) 232ms
+(node:3803835) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/host-application.test.ts (1 test) 4533ms
+   ✓ mounts real creative SQL in NarralensHost and denies the legacy bearer/session/write bypass  4533ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/project-creation-host.test.ts > lets the dedicated owner settle expired cancellation while the real global reaper is ticking
+AssertionError: expected 'UNKNOWN' to be null
+
+- Expected: 
+null
+
++ Received: 
+"UNKNOWN"
+
+ ❯ tests/agent-driven/integration/project-creation-host.test.ts:129:72
+    127|   const response=await current.request('/api/agent/v1/projects',await …
+    128|   const done=await current.poll(accepted);expect(done.state).toBe('can…
+    129|   expect(current.host.revisions.attentionReason(accepted.project_id!))…
+       |                                                                        ^
+    130|   await current.host.close();current=undefined;current=await fixture(r…
+    131|  }finally{await current?.host.close();await rm(root,{recursive:true,fo…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 3 passed (4)
+      Tests  1 failed | 67 passed (68)
+   Start at  00:41:24
+   Duration  118.02s (transform 2.01s, setup 0ms, collect 10.09s, tests 100.81s, environment 1ms, prepare 4.62s)
+

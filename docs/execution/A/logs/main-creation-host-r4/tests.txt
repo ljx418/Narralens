@@ -1,0 +1,57 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:3799147) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/project-creation-host.test.ts (4 tests) 12359ms
+   ✓ creates through HTTP and Host scheduling only; reopens native source without migration or manual registration  3403ms
+   ✓ refuses unknown fields and driver-minted confirmation before creating any Job  1505ms
+   ✓ rejects modified initial source before committing a pointer or origin  4305ms
+   ✓ quiesces an interrupted creation before closing SQLite, then resumes the same durable Job on reopen  3145ms
+(node:3799337) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/project-creation-store.test.ts (34 tests) 47306ms
+   ✓ reserves the one actual Job/transaction and replays the original receipt, ignoring only correlation metadata  568ms
+   ✓ does not turn a missing/foreign/expired trusted confirmation into creation permission  504ms
+   ✓ commits real published snapshot metadata atomically, survives DB reopen and preserves the accepted response  1404ms
+   ✓ rolls back every initial commit fact when failure occurs after state  1468ms
+   ✓ rolls back every initial commit fact when failure occurs after binding  1381ms
+   ✓ rolls back every initial commit fact when failure occurs after snapshot  1444ms
+   ✓ rolls back every initial commit fact when failure occurs after transaction  1375ms
+   ✓ rolls back every initial commit fact when failure occurs after pointer  1489ms
+   ✓ rolls back every initial commit fact when failure occurs after source_fact  1376ms
+   ✓ rolls back every initial commit fact when failure occurs after origin  1433ms
+   ✓ rolls back every initial commit fact when failure occurs after brief  1328ms
+   ✓ rolls back every initial commit fact when failure occurs after command  1353ms
+   ✓ rolls back every initial commit fact when failure occurs after job  1354ms
+   ✓ rolls back every initial commit fact when failure occurs after outbox  1461ms
+   ✓ refuses a stale worker before any commit effect: owner  1389ms
+   ✓ refuses a stale worker before any commit effect: attempt  1467ms
+   ✓ refuses a stale worker before any commit effect: expired  1473ms
+   ✓ refuses a stale worker before any commit effect: cancelled  1537ms
+   ✓ fails closed on changed created-fact schema instead of silently recreating a removed trigger  432ms
+   ✓ rechecks creation schema in a live store, not only after constructing a replacement  1432ms
+   ✓ samples lease time after transaction admission instead of using time from before BEGIN  1423ms
+   ✓ samples trusted confirmation time after reservation transaction admission  513ms
+   ✓ rolls back when lease expires after the final writes  1473ms
+   ✓ rolls back when confirmation expires after the final writes  1384ms
+   ✓ does not mint a source proof for false native metadata: frame-count  2036ms
+   ✓ does not mint a source proof for false native metadata: fps  1999ms
+   ✓ does not mint a source proof for false native metadata: upstream  1371ms
+   ✓ rejects a forged proof and byte changes after genuine pinned verification  1472ms
+   ✓ resolves a genuine created project without migration/cached layout, including after reopen  1379ms
+   ✓ refuses created source symlink escape even with byte-identical committed content  1444ms
+   ✓ does not commit a proved snapshot when its author-source publication is replaced or absent  1349ms
+   ✓ lets the real Host rebuild a created layout and inventory without a migration or registration hook  1575ms
+   ✓ refuses a same-bytes canonical path substitution after pinned proof  1347ms
+   ✓ re-proves reused snapshot durability through its source and both parent directories  2871ms
+(node:3799683) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/host-application.test.ts (1 test) 4276ms
+   ✓ mounts real creative SQL in NarralensHost and denies the legacy bearer/session/write bypass  4275ms
+
+ Test Files  3 passed (3)
+      Tests  39 passed (39)
+   Start at  00:36:05
+   Duration  79.02s (transform 1.86s, setup 0ms, collect 9.89s, tests 63.94s, environment 1ms, prepare 3.46s)
+
