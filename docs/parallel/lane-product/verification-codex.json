@@ -1,5 +1,5 @@
 {
-  "status": "REGISTERED_FINGERPRINT_PORT_ADDED_RETEST_PENDING",
+  "status": "INTERNAL_VALIDATION_PASSED_INTEGRATION_AND_INDEPENDENT_REVIEW_PENDING",
   "writer": "Codex /root/a_product_lead (MAIN third-rework takeover)",
   "base_sha": "ca5b67a8285b130c79055317c6202f73cfbb99c8",
   "contract_manifest_sha256": "532cd43c963a1c94de5f8ce34f3c6eb7281fded80047f74dc5dbe1a70aa65170",
@@ -9,15 +9,17 @@
     {
       "argv": "pnpm exec tsc --noEmit",
       "exit": 0,
-      "exec_handle": 92282
+      "exec_handle": 25124,
+      "log": "docs/parallel/lane-product/logs/tsc-fingerprint-final.log"
     },
     {
       "argv": "pnpm exec vitest run --config vitest.config.ts tests/agent-driven/product --maxWorkers=1",
       "exit": 0,
-      "exec_handle": 51186,
+      "exec_handle": 65703,
       "test_files": 5,
-      "tests_passed": 98,
-      "duration_seconds": 26.1
+      "tests_passed": 100,
+      "duration_seconds": 25.47,
+      "log": "docs/parallel/lane-product/logs/vitest-fingerprint-final.log"
     }
   ],
   "first_failures_preserved": true,
@@ -61,15 +63,27 @@
       "path": "docs/parallel/lane-product/logs/vitest-codex2.log",
       "exit_code": 0,
       "sha256": "23d93156f0ea9fc2e03a46405202e8373c7a44682cfbcefb6da576dd8b10025b"
+    },
+    {
+      "path": "docs/parallel/lane-product/logs/tsc-fingerprint-final.log",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/parallel/lane-product/logs/vitest-fingerprint-final.log",
+      "exit_code": 0,
+      "sha256": "15ebad633e1e195d3c0e1820e2c0d3106a6b0bf8a386994ed77ae4ac1079dff7"
     }
   ],
-  "resources": "PRODUCT-light explicitly admitted by MAIN; released after exec51186 exit0",
+  "resources": "PRODUCT-light final fingerprint admission; exec25124/65703 terminated exit0; slot released to MAIN",
   "independent_review": "REVIEW_PENDING (Codex participated in fixes)",
   "host_browser_media_tests": "NOT_RUN",
   "human_gate": "NOT_RUN",
   "pending": [
-    "Retest final registered fingerprint port field (98 green applies pre-field source)",
-    "MAIN actual catalog/rights/ref/snapshot dispatch/apply assembly and bootstrap Brief carrier",
-    "Independent nonimplementer review and actual Host/editor/media/human acceptance"
-  ]
+    "MAIN production catalog fingerprint, action/ref/asset/rights/snapshot guards at actual dispatch/apply boundaries",
+    "MAIN bootstrap real immutable Brief style carrier and real M5/player/selection/clock mounting",
+    "Independent nonimplementer review; real Host/DB/editor/media/browser and human stage acceptance"
+  ],
+  "source_sha": "9eb701d901cf39aa03a7ea3d04cc5a938fa3386f",
+  "validation_head": "e90e6e7bdf898c110585b0078fd2b49f0b0333ba"
 }

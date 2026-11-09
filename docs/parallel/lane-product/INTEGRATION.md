@@ -4,7 +4,7 @@ Lane: PRODUCT. Session `4548ddcb-e870-405b-863f-a17a4a7ed683`.
 Base/contract `ca5b67a8285b130c79055317c6202f73cfbb99c8`, manifest
 `532cd43c963a1c94de5f8ce34f3c6eb7281fded80047f74dc5dbe1a70aa65170`.
 
-Current internal validation: tsc exit0 and 5 files/98 tests passed under MAIN PRODUCT-light admission. Codex implemented the final corrections; independent review REVIEW_PENDING. Original first failures retained; production Host/browser/media/human acceptance NOT_RUN. See verification-codex.json.
+Current internal validation: tsc exit0 and 5 files/100 tests passed under MAIN PRODUCT-light admission. Codex implemented the final corrections; independent review REVIEW_PENDING. Original first failures retained; production Host/browser/media/human acceptance NOT_RUN. See verification-codex.json.
 
 This is the document MAIN needs to wire the lane in. It states what MAIN implements, what
 MAIN injects, which route maps to which service call, and the exact commands.
