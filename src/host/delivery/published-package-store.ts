@@ -355,6 +355,10 @@ export class PublishedPackageStore {
         files.push({ id: file.id, file: name, sha256: digest, bytes: info.size });
       }
       const complete: PackageReceipt = { ...receipt, files };
+      // Staging bytes are compared against the approved manifest before a public
+      // receipt exists; recomputing a new hash must never redefine approved bytes.
+      validateReceipt(complete);
+      await this.#verifyReceipt(complete);
       await this.#syncDir(objectTarget);
       await this.#syncDir(this.objectsDir);
 
@@ -377,6 +381,10 @@ export class PublishedPackageStore {
           );
         }
         this.#assertSameKey(existing, complete);
+        await this.#verifyReceipt(existing);
+        // A predecessor may have linked the receipt then failed the directory sync.
+        // A retry must establish durability before it can report a usable winner.
+        await this.#syncDir(this.publishedDir);
         await this.#removeOwnObject(objectTarget, objectCreated);
         return {
           status: "already_published",
@@ -445,7 +453,8 @@ export class PublishedPackageStore {
     }
     try {
       const parsed = JSON.parse(raw) as PackageReceipt;
-      return validateReceipt(parsed);
+      const receipt = validateReceipt(parsed);
+      return receipt.package_id === packageId ? receipt : null;
     } catch {
       return null;
     }
@@ -462,6 +471,10 @@ export class PublishedPackageStore {
   async verifyPackage(packageId: string, options: { readonly except_ref_id?: string } = {}): Promise<PackageReceipt | null> {
     const receipt = await this.readReceipt(packageId);
     if (receipt === null) return null;
+    return await this.#verifyReceipt(receipt, options);
+  }
+
+  async #verifyReceipt(receipt: PackageReceipt, options: { readonly except_ref_id?: string } = {}): Promise<PackageReceipt> {
     const directory = this.objectPath(receipt.object_id);
 
     const ids = new Set<string>();
@@ -660,5 +673,10 @@ export function validateReceipt(value: unknown): PackageReceipt {
     throw new PublishedPackageError("RECEIPT_MALFORMED", "the receipt has no file list");
   }
   const manifest = validateDeliveryManifest(receipt.manifest);
+  for (const field of ["delivery_id", "project_id", "snapshot_id", "source_digest", "render_config_digest", "attempt", "download_ref", "published_at"] as const) {
+    if (receipt[field] !== manifest[field]) {
+      throw new PublishedPackageError("RECEIPT_MANIFEST_MISMATCH", `the receipt's ${field} does not match its manifest`);
+    }
+  }
   return { ...(receipt as PackageReceipt), manifest };
 }

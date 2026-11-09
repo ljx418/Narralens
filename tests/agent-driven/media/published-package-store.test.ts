@@ -73,6 +73,17 @@ async function stagePackage(
 }
 
 describe("publishing a package", () => {
+  it("rejects staging bytes changed after the manifest was approved", async () => {
+    const root = await directory("store-prepublish-tamper");
+    const store = new PublishedPackageStore({ root });
+    const staged = await stagePackage(store, "attempt1", "the film");
+    await writeFile(join(staged.staging, PACKAGE_FILES.media), "bad film");
+    await expect(store.publish({
+      package_id: PACKAGE_ID, staging_dir: staged.staging, files: staged.files,
+      manifest: staged.manifest, published_at: staged.manifest.published_at,
+    })).rejects.toThrow(/manifest/);
+    expect(await store.readReceipt(PACKAGE_ID)).toBeNull();
+  });
   it("publishes a receipt that names a complete object", async () => {
     const root = await directory("store-publish");
     const store = new PublishedPackageStore({ root });
