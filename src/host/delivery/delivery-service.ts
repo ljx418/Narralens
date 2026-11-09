@@ -1,4 +1,5 @@
 import type { Delivery, DeliveryManifest, Ref } from "../../contracts/agent-driven-types.js";
+import { canonicalJson } from "../engine/source-digest-v1.js";
 import { buildDelivery, DeliveryContractError } from "./manifest.js";
 import { openDeliveryDownload, type DownloadRequest, type DownloadResponse } from "./download.js";
 import type { PublishedPackageStore } from "./published-package-store.js";
@@ -44,20 +45,31 @@ export interface DeliveryRecordPort {
 /**
  * Whether two manifests describe the same delivery.
  *
- * The record and the published package have to agree on everything that identifies the
- * bytes: the delivery, the film, the source, the configuration, the attempt and the
- * media itself.
+ * The comparison is over the whole manifest, canonically: the render spec, every
+ * reference with its version and its digest, every quality check, the moment it was
+ * published. Comparing a few fields would let a record and a package agree about the
+ * delivery while disagreeing about the thing that is delivered.
  */
 export function sameDelivery(recorded: DeliveryManifest, published: DeliveryManifest): boolean {
-  return recorded.delivery_id === published.delivery_id
-    && recorded.project_id === published.project_id
-    && recorded.snapshot_id === published.snapshot_id
-    && recorded.source_digest === published.source_digest
-    && recorded.render_config_digest === published.render_config_digest
-    && recorded.attempt === published.attempt
-    && recorded.download_ref === published.download_ref
-    && recorded.media_ref.id === published.media_ref.id
-    && recorded.media_ref.sha256 === published.media_ref.sha256;
+  return canonicalJson(recorded) === canonicalJson(published);
+}
+
+/**
+ * Whether a stored record describes the manifest it carries.
+ *
+ * The record's own fields have to agree with the manifest: the project, the snapshot,
+ * the artifact it points at and the download reference. A record whose artifact
+ * reference names something else than the manifest's media is not a record of that
+ * delivery.
+ */
+export function recordMatchesManifest(record: DeliveryRecord, manifest: DeliveryManifest): boolean {
+  return record.project_id === manifest.project_id
+    && record.snapshot_id === manifest.snapshot_id
+    && record.download_ref === manifest.download_ref
+    && record.artifact_ref !== null
+    && record.artifact_ref.id === manifest.media_ref.id
+    && record.artifact_ref.version === manifest.media_ref.version
+    && record.artifact_ref.sha256 === manifest.media_ref.sha256;
 }
 
 export class DeliveryService {
@@ -93,6 +105,16 @@ export class DeliveryService {
       if (!sameDelivery(record.manifest, resolved.receipt.manifest)) {
         throw new DeliveryContractError("Delivery", "the delivery is recorded as ready but the published package describes something else");
       }
+      if (!recordMatchesManifest(record, record.manifest)) {
+        throw new DeliveryContractError("Delivery", "the delivery record and its manifest do not describe the same delivery");
+      }
+      // The package is checked in full: every file is hashed against the receipt. A
+      // record that says "ready" is only true while the bytes it names are the bytes
+      // that are there.
+      const verified = await this.#packages.verifyPackage(resolved.package_id);
+      if (verified === null) {
+        throw new DeliveryContractError("Delivery", "the delivery is recorded as ready but its package does not match its receipt");
+      }
     }
 
     return buildDelivery({
@@ -123,6 +145,7 @@ export class DeliveryService {
     if (record.state !== "ready" || record.qc !== "passed") return null;
     if (record.download_ref !== request.download_ref) return null;
     if (record.manifest === null) return null;
+    if (!recordMatchesManifest(record, record.manifest)) return null;
 
     const resolved = await this.#packages.resolveDownloadRef(request.download_ref, request.project_id);
     if (resolved === null) return null;

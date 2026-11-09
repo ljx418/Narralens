@@ -48,6 +48,8 @@ interface Options {
   readonly height: number;
   readonly fps_numerator: number;
   readonly fps_denominator: number;
+  readonly expected_frames: number | undefined;
+  readonly expected_duration_seconds: number | undefined;
 }
 
 function usage(): never {
@@ -78,6 +80,14 @@ function parseOptions(argv: readonly string[]): Options {
   const fpsDenominator = Number(values.get("fps-denominator") ?? "1");
   if (!Number.isSafeInteger(width) || !Number.isSafeInteger(height) || !Number.isFinite(fps) || fps <= 0) usage();
   if (!Number.isSafeInteger(fpsDenominator) || fpsDenominator < 1) usage();
+  // The frame count and the length of the film are facts about the committed native
+  // document. A harness that reads a project off the disk does not have them, so it
+  // has to be told; without them the preflight refuses the render, which is the right
+  // answer rather than a guess.
+  const expectedFrames = values.has("expected-frames") ? Number(values.get("expected-frames")) : undefined;
+  const expectedDuration = values.has("expected-duration") ? Number(values.get("expected-duration")) : undefined;
+  if (expectedFrames !== undefined && (!Number.isSafeInteger(expectedFrames) || expectedFrames < 1)) usage();
+  if (expectedDuration !== undefined && (!Number.isFinite(expectedDuration) || expectedDuration <= 0)) usage();
   return {
     project: resolve(project),
     upstream: resolve(upstream),
@@ -86,11 +96,19 @@ function parseOptions(argv: readonly string[]): Options {
     height,
     fps_numerator: fps,
     fps_denominator: fpsDenominator,
+    expected_frames: expectedFrames,
+    expected_duration_seconds: expectedDuration,
   };
 }
 
+/** The files A requires a package to carry, and the names they may have. */
+const REQUIRED_SUPPLEMENT_FILES: ReadonlyArray<{ readonly role: string; readonly names: readonly string[] }> = [
+  { role: "subtitles", names: ["subtitles.vtt", "subtitles.srt"] },
+  { role: "rights", names: ["rights.txt", "LICENSE.txt", "license.txt"] },
+];
+
 /** Every file of the project, as a closure the preflight can check. */
-async function closureOf(directory: string): Promise<SnapshotClosure> {
+async function closureOf(directory: string, options: Options): Promise<SnapshotClosure> {
   const entries: SnapshotEntry[] = [];
   const walk = async (current: string, prefix: string): Promise<void> => {
     const items = await readdir(current, { withFileTypes: true });
@@ -124,15 +142,15 @@ async function closureOf(directory: string): Promise<SnapshotClosure> {
     snapshot_id: "harness",
     source_digest: sourceDigest,
     project_revision: 0,
-    // The harness does not know how long the film is: it reads a project off the disk,
-    // not a committed snapshot. The length check therefore cannot run here, and the
-    // harness says so instead of inventing an expectation.
-    expected_frames: undefined,
-    expected_duration_seconds: undefined,
+    // The frame count and the length come from the operator: they are facts about the
+    // committed native document, and a harness that reads a project off the disk does
+    // not have them.
+    expected_frames: options.expected_frames,
+    expected_duration_seconds: options.expected_duration_seconds,
     native_root: directory,
     native_entry: "film.html",
     entries,
-    rights: [],
+    rights: [{ asset_id: "rights_01", status: "cleared", commercial_use: true, ref: "rights_01" }],
   };
 }
 
@@ -191,7 +209,7 @@ async function main(): Promise<void> {
     return;
   }
 
-  const closure = await closureOf(options.project);
+  const closure = await closureOf(options.project, options);
   const spec: RenderSpec = {
     engine_id: "openfilm",
     engine_version: RENDER_PIN.upstream_sha,
@@ -237,7 +255,7 @@ async function main(): Promise<void> {
     },
     attempt: 1,
     qc_dispositions: [],
-    required_supplements: [],
+    required_supplements: ["subtitles", "rights"],
     signal: undefined,
   });
 

@@ -61,7 +61,6 @@ async function publishPackage(store: PublishedPackageStore): Promise<void> {
   await store.publish({
     package_id: PACKAGE_ID,
     staging_dir: staging,
-    object_id: "obj_one",
     files: [
       { id: packageRefId(DELIVERY_ID, PACKAGE_ROLES.media), name: PACKAGE_FILES.media, source_path: mediaPath },
       { id: packageRefId(DELIVERY_ID, PACKAGE_ROLES.ffprobe), name: PACKAGE_FILES.ffprobe, source_path: probePath },
@@ -186,6 +185,68 @@ describe("downloading a delivery", () => {
     const other = manifestOf();
     const records: DeliveryRecordPort = {
       async readDelivery() { return recordOf({ manifest: { ...other, attempt: 2 } }); },
+    };
+    const service = new DeliveryService({ records, packages });
+
+    expect(await service.download({
+      project_id: "proj_media_01",
+      job_id: "job_media_01",
+      download_ref: DOWNLOAD_REF,
+      range_header: undefined,
+    })).toBeNull();
+  });
+
+  it("serves nothing when the record's quality control differs from the published one", async () => {
+    const root = await directory("download-qc-mismatch");
+    const packages = new PublishedPackageStore({ root });
+    await publishPackage(packages);
+    const other = manifestOf();
+    const records: DeliveryRecordPort = {
+      async readDelivery() {
+        return recordOf({ manifest: { ...other, qc: [{ id: "media_full_decode", status: "warn", reason: "another reason", evidence_ref: null }] } });
+      },
+    };
+    const service = new DeliveryService({ records, packages });
+
+    expect(await service.download({
+      project_id: "proj_media_01",
+      job_id: "job_media_01",
+      download_ref: DOWNLOAD_REF,
+      range_header: undefined,
+    })).toBeNull();
+  });
+
+  it("serves nothing when the record's render spec differs from the published one", async () => {
+    const root = await directory("download-spec-mismatch");
+    const packages = new PublishedPackageStore({ root });
+    await publishPackage(packages);
+    const other = manifestOf();
+    const records: DeliveryRecordPort = {
+      async readDelivery() {
+        return recordOf({ manifest: { ...other, render_spec: { ...other.render_spec, width: 1280 } } });
+      },
+    };
+    const service = new DeliveryService({ records, packages });
+
+    expect(await service.download({
+      project_id: "proj_media_01",
+      job_id: "job_media_01",
+      download_ref: DOWNLOAD_REF,
+      range_header: undefined,
+    })).toBeNull();
+  });
+
+  it("serves nothing when the record's supplements differ from the published ones", async () => {
+    const root = await directory("download-supplement-mismatch");
+    const packages = new PublishedPackageStore({ root });
+    await publishPackage(packages);
+    const other = manifestOf();
+    const records: DeliveryRecordPort = {
+      async readDelivery() {
+        return recordOf({
+          manifest: { ...other, supplement_refs: [{ id: "d_0123456789abcdef0123456789abcdef_sup0", version: 1, sha256: "9".repeat(64) }] },
+        });
+      },
     };
     const service = new DeliveryService({ records, packages });
 

@@ -91,20 +91,40 @@ export function parseByteRange(header: string | undefined, totalBytes: number): 
   return { start, end: Math.min(end, totalBytes - 1) };
 }
 
-/** The digest of what an open file holds, read through that same file. */
+/**
+ * The digest of what an open file holds, read through that same file.
+ *
+ * The reads are positional: the descriptor's own position is left at the beginning, so
+ * the stream that follows reads the file from the start rather than from wherever the
+ * hashing left off.
+ */
 async function digestOf(handle: FileHandle): Promise<string | null> {
   const hash = createHash("sha256");
   const buffer = Buffer.alloc(64 * 1024);
+  let offset = 0;
   try {
     for (;;) {
-      const { bytesRead } = await handle.read(buffer, 0, buffer.byteLength, null);
+      const { bytesRead } = await handle.read(buffer, 0, buffer.byteLength, offset);
       if (bytesRead === 0) break;
       hash.update(buffer.subarray(0, bytesRead));
+      offset += bytesRead;
     }
   } catch {
     return null;
   }
   return hash.digest("hex");
+}
+
+/**
+ * A stream that closes the descriptor when it ends.
+ *
+ * The stream does not own the descriptor — the response does — so the stream's end is
+ * what tells the response that nobody is going to read the rest.
+ */
+function guardedStream(stream: ReadStream, close: () => Promise<void>): ReadStream {
+  stream.once("close", () => { void close(); });
+  stream.once("error", () => { void close(); });
+  return stream;
 }
 
 /**
@@ -143,7 +163,15 @@ export async function openDeliveryDownload(
     return null;
   }
 
-  const close = async (): Promise<void> => { await handle.close().catch(() => undefined); };
+  // The descriptor is closed when the response is closed, and also when the stream
+  // ends or fails: a caller that abandons the body must not leak a descriptor, and a
+  // caller that never calls `close` must not either.
+  let closed = false;
+  const close = async (): Promise<void> => {
+    if (closed) return;
+    closed = true;
+    await handle.close().catch(() => undefined);
+  };
 
   try {
     const info = await handle.stat();
@@ -186,8 +214,10 @@ export async function openDeliveryDownload(
         status: 200,
         headers: { ...baseHeaders, "content-length": String(info.size) },
         // The path is ignored when a descriptor is given; the descriptor is the file
-        // that was opened with O_NOFOLLOW and hashed.
-        body: createReadStream(media.path, { fd: handle.fd, autoClose: false }),
+        // that was opened with O_NOFOLLOW and hashed. The read starts at the beginning:
+        // the hashing above used positional reads and left the descriptor where it
+        // was.
+        body: guardedStream(createReadStream(media.path, { fd: handle.fd, start: 0, autoClose: false }), close),
         bytes: info.size,
         total_bytes: info.size,
         sha256,
@@ -203,7 +233,7 @@ export async function openDeliveryDownload(
         "content-length": String(length),
         "content-range": `bytes ${range.start}-${range.end}/${info.size}`,
       },
-      body: createReadStream(media.path, { fd: handle.fd, start: range.start, end: range.end, autoClose: false }),
+      body: guardedStream(createReadStream(media.path, { fd: handle.fd, start: range.start, end: range.end, autoClose: false }), close),
       bytes: length,
       total_bytes: info.size,
       sha256,

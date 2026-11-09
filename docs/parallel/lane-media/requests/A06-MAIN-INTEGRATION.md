@@ -85,7 +85,7 @@ export interface DeliveryCommitPort {
 `RenderRequest`（`src/host/render/ports.ts`）需要的字段：`project_id` / `job_id` / `snapshot_id` / `source_digest` / `render_spec` / `execution` / `attempt` / `qc_dispositions` / `required_supplements` / `signal`。
 
 - `qc_dispositions` 是**MAIN已持久化的**用户对warn级检查的处置（检查id列表）。它**不是客户端字段**：客户端不能提交它，MAIN从自己的持久事实里取。MEDIA遇到warn且无处置记录时按block处理（不静默通过）。
-- `required_supplements` 是这次交付承诺的角色列表（如 `["rights","subtitles"]`）。快照闭包里没有对应角色的附属件时，preflight直接block；QC也会再查一次。
+- `required_supplements` 是这次交付**额外**承诺的角色列表。A固定要求的两个角色（`subtitles`字幕、`rights`许可文件）**始终**被要求，请求只能加、不能减：MEDIA的preflight与QC都会把`MANDATORY_A_SUPPLEMENT_ROLES`（`["subtitles","rights"]`）与请求的角色合并后检查。快照闭包里缺任何一个角色就block。A还没有"这一项不适用"的持久理由模型，因此不存在可以声明不适用而放行的路径——MAIN若要支持不适用，需要先有那样的持久模型，再由MEDIA接上。
 - `signal` 由MAIN的job.cancel接到；MEDIA会**等待子进程组真正退出**后才返回取消结果。
 
 ## 3. `RenderSpec.config_digest` 的计算规则
@@ -122,6 +122,16 @@ const config_digest = computeRenderConfigDigest({
 - **请求MAIN把四个上游摘要并入 `contracts/openfilm-upstream-lock.json`**（该文件属MAIN保护路径，MEDIA不得写）：`packages/openfilm/src/render.mjs`、`timeline.mjs`、`seekable.mjs`、`overrides.mjs`，以及worker与守卫的摘要（见 `src/host/render/openfilm-render-pin.json`；改动这些文件必须同步更新摘要）。在并入之前，MEDIA用同一pin文件作为lane内pin；两条pin的模块摘要当前逐字节一致。
 - 探针：`pnpm exec tsx tools/agent-driven/media/verify-render-pin.mjs`（缺失checkout报`NOT_RUN`退出0，漂移报`FAIL`退出1）。
 
+## 5b. 包里那份"原生源"到底是什么（诚实的范围）
+
+包里带两样原生相关的东西：`native_film.html`（快照里影片自己的入口文档的字节）与`native_source.json`（原生清单）。清单里的字段说明了范围，请照此理解，MAIN的对外文案不要写成"导出了可编辑工程"：
+
+- `scope: "document_and_closure_reference"`、`editable_project_complete: false`；
+- `copied`：真正在包里的文件（目前是入口文档）；
+- `referenced`：快照闭包里其余文件（素材等）——**它们不在包里**，快照才是权威的可编辑源。
+
+也就是说：交付包的MP4是原生工程的一份导出物，原生工程本身仍在快照里；包里带的是它的文档与闭包清单，用于核对这份导出物来自哪一个快照。MEDIA不写回原生工程，也不把原生工程换成MP4。
+
 ## 6. 运行根配置
 
 MAIN为每个worktree配置独立的交付根（不得共用、不得复制可写运行根）：
@@ -133,7 +143,12 @@ MAIN为每个worktree配置独立的交付根（不得共用、不得复制可�
 <delivery_root>/quarantine/   # 被取消、被拦下或读取失败的attempt产物（隔离，不删除）
 ```
 
-构造：`new PublishedPackageStore({ root })`（`src/host/delivery/published-package-store.ts`）。发布分两步：对象在自己的staging里**建完整并整体移入**`objects/`，然后receipt用**硬链接**发布到`published/<package_id>`——链接在名字被占用时失败，所以**同名只发布一个**，败者只删自己的对象，**从不触碰canonical路径**。receipt是发布标记：没有receipt的对象只是没人认领的产物，不是交付。
+构造：`new PublishedPackageStore({ root })`（`src/host/delivery/published-package-store.ts`）。发布分两步：
+
+1. 对象目录`objects/<uuid>`由store**自己生成名字并独占创建**（`mkdir`不带recursive，已存在即拒绝，绝不接管别人的目录），完整的文件用硬链接链进去；
+2. receipt用**硬链接**发布到`published/<package_id>`——链接在名字被占用时失败，所以**同名只发布一个**，败者只删**自己创建**的那个对象，**从不触碰canonical路径**。
+
+receipt是发布标记：没有receipt的对象只是没人认领的产物，不是交付。**receipt一旦链上，它指向的对象就不再被删除**——即使之后的目录fsync失败，失败会向上抛，但对象与receipt都留着，等MAIN的恢复按key对账（这正是T20-E"rename后/DB前"崩溃要留下的状态）。
 
 ## 7. MAIN需要的其他依赖
 

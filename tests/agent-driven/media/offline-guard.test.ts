@@ -5,6 +5,13 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { renderWorkerPath, RENDER_PIN } from "../../../src/host/render/upstream-pin.js";
+import {
+  BLOCKING_FLAGS,
+  guardBrowser,
+  guardedLaunchArgs,
+  guardedPageOptions,
+  type GuardableBrowser,
+} from "../../../src/host/render/openfilm-guard-rules.mjs";
 import { removeDirectory, temporaryDirectory } from "./support.js";
 
 /**
@@ -14,12 +21,16 @@ import { removeDirectory, temporaryDirectory } from "./support.js";
  * that the pinned `host.mjs` is replaced by at load time, and the worker refuses to
  * render when the guard did not take effect.
  *
- * These are module checks. The last one is a real process: it loads the pinned
- * upstream through the guard and proves that the guard was installed — the worker gets
- * as far as reading the film, which it can only do when the guard is in place. It
- * starts no browser and no encoder. The genuine network denial probe — a render that
- * tries to reach the outside and is seen to fail — is part of the heavy acceptance and
- * is `NOT_RUN`.
+ * The rules are checked against a browser that is not a browser: the point is that the
+ * restrictions are *applied* — the context is closed to service workers, every
+ * WebSocket is closed, the flags are there — not that some text mentions them.
+ *
+ * These are module checks. The last one is a real process: it loads the pinned upstream
+ * through the guard and proves that the guard was installed — the worker gets as far as
+ * reading the film, which it can only do when the guard is in place. It starts no
+ * browser and no encoder. The genuine network denial probe — a render that tries to
+ * reach the outside and is seen to fail — is part of the heavy acceptance and is
+ * `NOT_RUN`.
  */
 
 const REAL_UPSTREAM = "/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm";
@@ -39,6 +50,7 @@ async function directory(label: string): Promise<string> {
 describe("the offline guard", () => {
   it("is pinned next to the upstream it stands in front of", () => {
     expect(Object.keys(RENDER_PIN.guard_module_sha256).sort()).toEqual([
+      "src/host/render/openfilm-guard-rules.mjs",
       "src/host/render/openfilm-offline-hooks.mjs",
       "src/host/render/openfilm-offline-wrapper.mjs",
     ]);
@@ -51,18 +63,55 @@ describe("the offline guard", () => {
     }
   });
 
-  it("forces the page offline and the browser closed to the network", async () => {
-    const wrapper = await readFile(join(process.cwd(), "src/host/render/openfilm-offline-wrapper.mjs"), "utf8");
-    // The options the upstream understands: only the film's own origin may load, and
-    // every other request is blocked and recorded.
-    expect(wrapper).toContain("offline: true");
-    expect(wrapper).toContain("network: { allow: [] }");
-    // The browser flags: everything that is not loopback has nowhere to go.
-    expect(wrapper).toContain("--proxy-server=http://127.0.0.1:1");
-    expect(wrapper).toContain("--host-resolver-rules=MAP * ~NOTFOUND, EXCLUDE 127.0.0.1");
-    // A service worker fetches outside the context's route handler, so it is blocked
-    // in the context itself.
-    expect(wrapper).toContain("serviceWorkers: \"block\"");
+  it("forces the page offline and to its own origin", () => {
+    const options = guardedPageOptions({ scale: 2, transparent: false });
+    expect(options.offline).toBe(true);
+    expect(options.network).toEqual({ allow: [] });
+    // The caller's own options are kept.
+    expect(options.scale).toBe(2);
+  });
+
+  it("leaves the browser no way out that the proxy does not carry", () => {
+    const args = guardedLaunchArgs(["--from-the-caller"]);
+    expect(args).toContain("--from-the-caller");
+    // HTTP goes through a closed port, DNS for everything but loopback is refused.
+    expect(args).toContain("--proxy-server=http://127.0.0.1:1");
+    expect(args).toContain("--host-resolver-rules=MAP * ~NOTFOUND, EXCLUDE 127.0.0.1");
+    // QUIC and WebRTC can carry traffic the proxy cannot see, so they are turned off.
+    expect(args).toContain("--disable-quic");
+    expect(args).toContain("--force-webrtc-ip-handling-policy=disable_non_proxied_udp");
+    // And the background traffic a browser starts on its own.
+    expect(args).toContain("--disable-background-networking");
+    expect(BLOCKING_FLAGS).toContain("--disable-features=ServiceWorker,BackgroundNetworking,OptimizationHints,MediaRouter,AutofillServerCommunication,CertificateTransparencyComponentUpdater,InterestFeedContentSuggestions,Translate");
+  });
+
+  it("closes service workers and every WebSocket of every context it makes", async () => {
+    const contextOptions: Array<Record<string, unknown>> = [];
+    const routed: string[] = [];
+    let closed = 0;
+    const context = {
+      routeWebSocket: (pattern: string, handler: (socket: { close: () => void }) => void) => {
+        routed.push(pattern);
+        handler({ close: () => { closed += 1; } });
+      },
+    };
+    const browser = {
+      newContext: async (options: Record<string, unknown>) => {
+        contextOptions.push(options);
+        return context;
+      },
+    };
+
+    guardBrowser(browser as unknown as GuardableBrowser);
+    await browser.newContext({ viewport: { width: 1920, height: 1080 } });
+
+    expect(contextOptions).toHaveLength(1);
+    expect(contextOptions[0]?.serviceWorkers).toBe("block");
+    expect(contextOptions[0]?.viewport).toEqual({ width: 1920, height: 1080 });
+    // A WebSocket is not an HTTP request: it never passes the route handler that blocks
+    // pages from leaving their origin, so it is closed at the browser's own door.
+    expect(routed).toEqual(["**/*"]);
+    expect(closed).toBe(1);
   });
 
   it("makes the renderer refuse to reach the network of its own accord", async () => {

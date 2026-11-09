@@ -98,3 +98,38 @@ Claude初始 PID3509997 / exec41695 已被Codex负责人显式中断（为补充
 - 未自签外审、未代签人验、未合main、未push；本泳道实现由Claude完成，Codex冻结SHA后需未参与者独立复核。
 
 R1 Claude exec31438 exit0；PID3593893已停止且无存活子进程。唯一writer现为Codex文档/验收，未接管实现；准备冻结并请求轻测槽。
+
+R1冻结9e1de1879c214f4a1e00e195ced4bd8e8c6085e0，静态R2仍NEEDS_WORK；交同Claude session唯一writer修REVIEW-R2.md。Codex转只读。未运行测试，轻槽待MAIN。
+
+## R2修复轮（本轮，唯一writer：Claude 25d0705c…）
+
+R1冻结于 `9e1de1879c214f4a1e00e195ced4bd8e8c6085e0`；Codex静态审查 `REVIEW-R2.md`=NEEDS_WORK（七条具体缺陷）。按七条逐条修复，**仍然没有跑任何命令**：本轮开工前读了MAIN的资源预约文件 `/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/resource-reservation.json`——状态`A-BASELINE-CHECK / RUNNING`，`lanePolicy`写明"BRIDGE one light slot; … other lanes source-only"，`admissions`里**只有BRIDGE-light**，**MEDIA-light未授予**。因此本轮为纯源码轮：没有install、没有tsc、没有vitest、没有ffmpeg/browser/Host、没有用别的lane的node_modules。未提交、未push、未reset/stash，未动任何受保护路径。
+
+改动的源码：
+
+- `src/host/delivery/published-package-store.ts`：object id改为store自己生成（`object_identity`仅测试可注入），对象目录用**独占mkdir**创建、文件链进这个私有目录（不再用rename覆盖）；`receiptVisible`标记——**receipt可见的对象一律不删**（链接后fsync失败也留着，失败照抛）；只删**自己创建**的对象；`createStaging`改独占mkdir+内部uuid。（R2-1/2）
+- `src/host/delivery/download.ts`：`digestOf`改**定位读**（显式offset，fd位置不动），200的流显式`start:0`；描述符在流结束/出错/`close()`时都关闭；同尺寸篡改仍失败。（R2-3）
+- `src/host/delivery/delivery-service.ts`：`sameDelivery`改为**整份manifest的规范化比较**（用仓库的`canonicalJson`）；新增`recordMatchesManifest`（记录的project/snapshot/artifact_ref/download_ref要与manifest一致）；**ready读取校验包里的每一个字节**（`verifyPackage`全量哈希）；下载要求持久ready+整份manifest一致。（R2-4）
+- `src/host/render/openfilm-guard-rules.mjs`（新）+ `openfilm-guard-rules.d.mts`（新）：守卫规则从wrapper里抽出来，与上游无关因而可单测——页面`offline:true`+`network.allow:[]`、上下文`serviceWorkers:"block"`、**`context.routeWebSocket("**/*")`关闭每个socket**、浏览器加`--disable-quic`与`--force-webrtc-ip-handling-policy=disable_non_proxied_udp`。（R2-5）
+- `src/host/render/openfilm-offline-wrapper.mjs`：改用上面的规则模块。（R2-5）
+- `src/host/render/native-renderer.ts`：`group_settled`在**所有**失败路径上传播（超时/非零/无响应/取消）；写完请求文件后再查一次signal才spawn；`awaitChildExit`/`awaitGroupEnd`导出为可用假child与假group驱动的函数（`group_exists`/`signal_group`为测试缝）。（R2-6）
+- `src/host/render/render-snapshot.ts`：任何未收敛的进程组（渲染失败或QC被取消）都产生`requires_reconciliation`并**保留attempt**；A固定要求的两个角色`["subtitles","rights"]`与请求角色合并后交给preflight与QC；原生清单改为诚实范围（`scope`/`editable_project_complete:false`/`copied`与`referenced`分开）。（R2-6/7）
+- `src/host/preflight/preflight.ts`：新增`MANDATORY_A_SUPPLEMENT_ROLES`并在检查里与请求角色合并（请求不能减）。（R2-7）
+- `src/host/render/openfilm-render-pin.json`：pin新增守卫规则模块的摘要；wrapper摘要随其改动更新。
+
+测试（全部仍NOT_RUN）：`tests/agent-driven/media/` 13个文件——新增`native-renderer.test.ts`（假child：干净退出、被停止且组已消失、组仍在、从不退出）；`offline-guard.test.ts`改用**假browser/context**断言守卫真的施加限制（上下文`serviceWorkers:"block"`、`routeWebSocket("**/*")`被装上且socket被关闭、flags含QUIC与WebRTC的UDP禁用），保留真实进程"守卫已装上"的探针；`published-package-store.test.ts`新增链接后fsync失败仍完整且重试不覆盖、对象目录被占用时不接管、staging目录被占用时拒绝；`delivery-service.test.ts`新增QC/render_spec/附属件不符都不供字节；`preflight.test.ts`新增缺A必需角色即block；`render-snapshot.test.ts`新增失败留下活进程组时保留attempt；`download.test.ts`保持整文件字节断言。
+
+文档：`A06-MODULE-NOTES.md`加R2七条对照表并更新模块地图；`requests/A06-MAIN-INTEGRATION.md`更新必需角色规则、发布模型（对象独占创建、receipt可见的对象永不删）、以及"包里那份原生源到底是什么"的诚实范围说明。
+
+产物摘要（改动后重算）：worker `87c29133a553ea30bb4d2dba50ff246bb8ba43e1f7e8ae3a6b4918b3c2d88dd1`；守卫wrapper `3da8a0b3a817d80bc9fad8be3d92f022b638c6919e4c959b9a5d895b62a08d30`；守卫hooks `1f73d6b61741062d8b2419323174743ea42ffc93ae282a08cab6f97fe1a7f1ee`；守卫规则 `001f30e71e68a2d4e849e3d8851a870135d2af2df44ae16cc3119196dc8b221c`（同一pin文件记录；改动这些文件必须同步更新摘要）。
+
+限制与声明（本轮仍然成立）：
+
+- **所有命令NOT_RUN**：install/tsc/vitest/ffmpeg/browser/真实渲染/真实网络拒绝探针都没跑。本轮候选**未经**任何测试运行验证，**未经**独立复核，**未经**人验。
+- MEDIA-light未授予，因此本轮连"纯模块测试"都没有跑；测试是写好的，不是跑过的。
+- **真实T20-E仍不能由钩子抛异常冒充**：钩子只是MAIN杀进程的接点；真实四杀点未跑。
+- `tools/agent-driven/media/render-delivery.ts`里的fence/commit/hook是harness的内存实现，只作模块证据，**不是生产Job store**。
+- 守卫的WebSocket/UDP限制在**模块层**用假browser/context验证过；真实"渲染时尝试访问外网并被看到失败"的探针属重型验收，`NOT_RUN`。
+- 未自签外审、未代签人验、未合main、未push；本泳道实现由Claude完成，Codex冻结SHA后需未参与者独立复核。
+
+R2 Claude exec20750 exit0，PID3628459已终止，writer现为Codex文档/验收。仍未安装或运行测试。等MAIN MEDIA-light后独立执行冻结候选检查。
