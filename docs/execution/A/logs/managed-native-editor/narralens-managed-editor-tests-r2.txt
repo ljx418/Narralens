@@ -1,0 +1,45 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+ ❯ tests/agent-driven/integration/managed-editor.test.ts (2 tests | 2 failed) 1793ms
+   × publishes exactly the fixed managed build, reuses it without writes and verifies independently before serving 903ms
+     → MANAGED_EDITOR_UNVERIFIED
+   × rejects aliased roots, foreign editor directories, added files and unsupported vendor before serving 890ms
+     → MANAGED_EDITOR_UNVERIFIED
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/managed-editor.test.ts > publishes exactly the fixed managed build, reuses it without writes and verifies independently before serving
+Error: MANAGED_EDITOR_UNVERIFIED
+ ❯ fail src/host/m5/managed-editor.mjs:11:23
+      9| import pin from './managed-editor-pin.json' with {type:'json'};
+     10| const sha=bytes=>createHash('sha256').update(bytes).digest('hex');
+     11| const fail=()=>{throw new Error('MANAGED_EDITOR_UNVERIFIED');};
+       |                       ^
+     12| const safePath=p=>typeof p==='string'&&p.length>0&&!p.includes('\\')&&…
+     13| function canonicalDirectory(root){
+ ❯ prepareManagedEditor src/host/m5/managed-editor.mjs:81:9
+ ❯ tests/agent-driven/integration/managed-editor.test.ts:12:13
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/agent-driven/integration/managed-editor.test.ts > rejects aliased roots, foreign editor directories, added files and unsupported vendor before serving
+Error: MANAGED_EDITOR_UNVERIFIED
+ ❯ fail src/host/m5/managed-editor.mjs:11:23
+      9| import pin from './managed-editor-pin.json' with {type:'json'};
+     10| const sha=bytes=>createHash('sha256').update(bytes).digest('hex');
+     11| const fail=()=>{throw new Error('MANAGED_EDITOR_UNVERIFIED');};
+       |                       ^
+     12| const safePath=p=>typeof p==='string'&&p.length>0&&!p.includes('\\')&&…
+     13| function canonicalDirectory(root){
+ ❯ prepareManagedEditor src/host/m5/managed-editor.mjs:81:9
+ ❯ tests/agent-driven/integration/managed-editor.test.ts:25:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed (2)
+   Start at  07:50:21
+   Duration  4.32s (transform 76ms, setup 0ms, collect 208ms, tests 1.79s, environment 0ms, prepare 1.55s)
+

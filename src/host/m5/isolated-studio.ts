@@ -1,3 +1,4 @@
+import {prepareManagedEditor} from './managed-editor.mjs';
 import {spawn} from 'node:child_process';
 import {randomUUID} from 'node:crypto';
 import {rm} from 'node:fs/promises';
@@ -13,12 +14,14 @@ const loopback=(value:unknown,film=false):value is string=>{try{const url=new UR
  * shares the operator's ~/.openfilm or another worktree. No global env mutation.
  */
 export interface IsolatedStudio extends StartedStudio { readonly childPid:number; isAlive():boolean; }
-export async function startIsolatedStudio(input:{vendorRoot:string;runtimeRoot:string}):Promise<IsolatedStudio>{
+export async function startIsolatedStudio(input:{vendorRoot:string;runtimeRoot:string;managedEditor?:boolean}):Promise<IsolatedStudio>{
  let root:string;
  try{root=privateRuntimeRoot(input.runtimeRoot);privateRuntimeRoot(join(root,'home'));privateRuntimeRoot(join(root,'library'));}
  catch{throw unavailable('private_root','OWNERSHIP_UNVERIFIED');}
+ let managed:ReturnType<typeof prepareManagedEditor>|undefined;
+ try{if(input.managedEditor)managed=prepareManagedEditor(root,input.vendorRoot);}catch{throw unavailable('managed_editor','UNVERIFIED');}
  const temporaryRoot=privateRuntimeRoot(join(root,'tmp-'+randomUUID()));
- const child=spawn(process.execPath,[fileURLToPath(new URL('./openfilm-studio-child.mjs',import.meta.url)),resolve(input.vendorRoot)],{
+ const child=spawn(process.execPath,[fileURLToPath(new URL('./openfilm-studio-child.mjs',import.meta.url)),resolve(input.vendorRoot),...(managed?[managed.directory,root]:[])],{
   stdio:['ignore','pipe','pipe','ipc'],windowsHide:true,detached:true,
   env:{...process.env,OPENFILM_HOME:join(root,'home'),OPENFILM_LIBRARY:join(root,'library'),OPENFILM_NO_UPDATE_CHECK:'1',TMPDIR:temporaryRoot,NARRALENS_STUDIO_TEMP_ROOT:temporaryRoot},
  });
@@ -53,7 +56,7 @@ export async function startIsolatedStudio(input:{vendorRoot:string;runtimeRoot:s
    const message=(value:unknown)=>{
     if(!value||typeof value!=='object')return failed();const row=value as Record<string,unknown>;
     if(row.kind==='failed') {
-     const stage=['configuration','offline_guard','module_load','start_studio','ipc_ready'].includes(String(row.stage))?String(row.stage):'owned_studio';
+     const stage=['configuration','offline_guard','module_load','managed_editor','start_studio','ipc_ready'].includes(String(row.stage))?String(row.stage):'owned_studio';
      const reason=['ENOMEM','EMFILE','ENFILE','EACCES','EPERM','ENOENT','EADDRINUSE','ERR_MODULE_NOT_FOUND','ERR_UNKNOWN_FILE_EXTENSION','UPSTREAM_START_FAILED'].includes(String(row.reason))?String(row.reason):'UNAVAILABLE';
      cleanup();reject(unavailable(stage,reason));return;
     }
@@ -64,6 +67,6 @@ export async function startIsolatedStudio(input:{vendorRoot:string;runtimeRoot:s
    child.on('message',message);child.once('error',failed);child.once('close',failed);
   });
   if(!Number.isSafeInteger(child.pid)||child.pid!<=0){await close();throw unavailable();}
-  return {...ready,close,childPid:child.pid!,isAlive:()=>!closing&&leaderAlive()};
+  return {...ready,close,childPid:child.pid!,isAlive:()=>!closing&&leaderAlive()&&(!managed||managed.isCurrent())};
  }catch(error){await close();throw error instanceof HttpError?error:unavailable();}
 }

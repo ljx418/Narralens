@@ -1,0 +1,57 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+ ❯ tests/agent-driven/integration/managed-editor.test.ts (2 tests | 2 failed) 1764ms
+   × publishes exactly the fixed managed build, reuses it without writes and verifies independently before serving 881ms
+     → MANAGED_EDITOR_UNVERIFIED
+   × rejects aliased roots, foreign editor directories, added files and unsupported vendor before serving 883ms
+     → MANAGED_EDITOR_UNVERIFIED
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/managed-editor.test.ts > publishes exactly the fixed managed build, reuses it without writes and verifies independently before serving
+Error: MANAGED_EDITOR_UNVERIFIED
+ ❯ fail src/host/m5/managed-editor.mjs:11:28
+      9| import pin from './managed-editor-pin.json' with {type:'json'};
+     10| const sha=bytes=>createHash('sha256').update(bytes).digest('hex');
+     11| const fail=(cause)=>{throw new Error('MANAGED_EDITOR_UNVERIFIED',cause…
+       |                            ^
+     12| const safePath=p=>typeof p==='string'&&p.length>0&&!p.includes('\\')&&…
+     13| function canonicalDirectory(root){
+ ❯ prepareManagedEditor src/host/m5/managed-editor.mjs:81:16
+ ❯ tests/agent-driven/integration/managed-editor.test.ts:12:13
+
+Caused by: Error: MANAGED_EDITOR_UNVERIFIED
+ ❯ fail src/host/m5/managed-editor.mjs:11:28
+ ❯ archiveFiles src/host/m5/managed-editor.mjs:45:84
+ ❯ prepareManagedEditor src/host/m5/managed-editor.mjs:74:15
+ ❯ tests/agent-driven/integration/managed-editor.test.ts:12:13
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/agent-driven/integration/managed-editor.test.ts > rejects aliased roots, foreign editor directories, added files and unsupported vendor before serving
+Error: MANAGED_EDITOR_UNVERIFIED
+ ❯ fail src/host/m5/managed-editor.mjs:11:28
+      9| import pin from './managed-editor-pin.json' with {type:'json'};
+     10| const sha=bytes=>createHash('sha256').update(bytes).digest('hex');
+     11| const fail=(cause)=>{throw new Error('MANAGED_EDITOR_UNVERIFIED',cause…
+       |                            ^
+     12| const safePath=p=>typeof p==='string'&&p.length>0&&!p.includes('\\')&&…
+     13| function canonicalDirectory(root){
+ ❯ prepareManagedEditor src/host/m5/managed-editor.mjs:81:16
+ ❯ tests/agent-driven/integration/managed-editor.test.ts:25:16
+
+Caused by: Error: MANAGED_EDITOR_UNVERIFIED
+ ❯ fail src/host/m5/managed-editor.mjs:11:28
+ ❯ archiveFiles src/host/m5/managed-editor.mjs:45:84
+ ❯ prepareManagedEditor src/host/m5/managed-editor.mjs:74:15
+ ❯ tests/agent-driven/integration/managed-editor.test.ts:25:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed (2)
+   Start at  07:51:05
+   Duration  4.21s (transform 74ms, setup 0ms, collect 191ms, tests 1.76s, environment 0ms, prepare 1.50s)
+

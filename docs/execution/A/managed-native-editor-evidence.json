@@ -1,0 +1,96 @@
+{
+  "format": "narralens.managed-native-editor-evidence@1",
+  "base_commit": "01c234011ef2c3248a1bd67aefbdc6534e27c84a",
+  "capture_worktree_dirty": true,
+  "declaration": "MANAGED_NATIVE_EDITOR_LAUNCH_INTERNAL_EVIDENCED",
+  "external": "REVIEW_PENDING",
+  "human": "NOT_RUN",
+  "scope": "fixed managed UI artifact in the actual A-mode private Studio; document observer remains unregistered",
+  "internal": {
+    "final_session": 86349,
+    "typecheck": 0,
+    "build": 0,
+    "files": 4,
+    "tests": 19,
+    "tests_exit": 0,
+    "secret_scan": {
+      "session": 76385,
+      "exit": 0,
+      "scanned_files": 554,
+      "findings": 0
+    }
+  },
+  "failures_retained": [
+    {
+      "session": 53905,
+      "reason": "exactOptionalPropertyTypes explicit undefined; tests NOT_RUN"
+    },
+    {
+      "session": 7697,
+      "reason": "strict regular-only archive parser rejects source PAX headers; typecheck0 tests1"
+    },
+    {
+      "session": 62702,
+      "reason": "same PAX failure with internal cause diagnosis"
+    }
+  ],
+  "repair": {
+    "packaging": "fixed source archive verified and repacked deterministic USTAR; all 10 dist files unchanged",
+    "runtime_ancestor_alias": "true rename-and-symlink negative passes in final test",
+    "child_rechecks": "actual private child independently rejects modified parent-prepared directory"
+  },
+  "source_hashes": {
+    "src/host/m5/managed-editor.mjs": "886b09babbedb70c6ac5ff55ae72b8c160c40cbcff135541d3500cab6fa16690",
+    "src/host/m5/managed-editor.d.mts": "7f35b4ba7ba1555f8a3fec2d8a8375eeabf87f3492774158743e418914720883",
+    "src/host/m5/managed-editor-pin.json": "8b038adb80f387bd783918689d09b173716782c0199d77f5f589d4feb50e997d",
+    "src/host/m5/managed-editor-dist.tar.gz": "0fbdb3ac52b5bb4cc5f31e435f269d2ea8070bb4bbb04ffbe25febd106fd9bca",
+    "src/host/m5/isolated-studio.ts": "c6dfec0581682284c5d50787d10d89b637dbcfe84755f617613404c0efa21c48",
+    "src/host/m5/openfilm-studio-child.mjs": "531a7c67b6dee03eeaaf8da842f03f0e124359c1d4f012929e1092ffedc9be40",
+    "src/host/m5/openfilm-studio-supervisor.ts": "6d4c4d4dc3f88ae624d0a2d705f92fe6a2b66ce722af2174c4bb7e3f35d10886",
+    "src/host/server.ts": "f1b9029158730bd24967361f4cd677b1d37c8c9474c1b0af7049e9ca5dd5025d",
+    "tests/agent-driven/integration/managed-editor.test.ts": "da64b9c472890a12737789d43d85bdff5debe0344b73c1fc967a500f2e888955"
+  },
+  "artifact_hashes": {
+    "docs/execution/A/logs/managed-native-editor/credential-scan.json": "d6a7dd140ff00d23cd68a4115dafa535919f915fbd770893c16fdcbbe1260bf5",
+    "docs/execution/A/logs/managed-native-editor/narralens-managed-editor-build-r1.txt": "977bce9a112ceff7e69f2f0dd792588b43d61f9d875afc87a9911f1e027c9280",
+    "docs/execution/A/logs/managed-native-editor/narralens-managed-editor-secret-scan-r1.txt": "cd507e22a9495cd570329432105c93e1aadc06c6583beb41f7a52be7229b2866",
+    "docs/execution/A/logs/managed-native-editor/narralens-managed-editor-tests-r2.txt": "8f0975c1427ee77296f710c0fa03c3ec4df01b82162576ef96aa3118d0386cb6",
+    "docs/execution/A/logs/managed-native-editor/narralens-managed-editor-tests-r3.txt": "47e8a7095bf5438df3cd3310735c4448ec812b3d70d0e4dcd4f1a532b35cf7bf",
+    "docs/execution/A/logs/managed-native-editor/narralens-managed-editor-tests-r4.txt": "acbf13773d98d536927dbe7ab23c236af1310ee579d0080a44b5b31316177276",
+    "docs/execution/A/logs/managed-native-editor/narralens-managed-editor-tests-r5.txt": "08a72a01d834d52ac974fa6d11285b075bbeba5501ef6b50ade3292a8fc42c04",
+    "docs/execution/A/logs/managed-native-editor/narralens-managed-editor-tsc-r1.txt": "4da273bc3d0edfbfd7878884fc42b53ae4b635ab1621cc038ccae965e7073008",
+    "docs/execution/A/logs/managed-native-editor/narralens-managed-editor-tsc-r2.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "docs/execution/A/logs/managed-native-editor/narralens-managed-editor-tsc-r3.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "docs/execution/A/logs/managed-native-editor/r1-build.cmd.json": "db8acfe593d8da979b959ee60b6ec3e930385a2e0b45428c2b01bb65dbaefd6b",
+    "docs/execution/A/logs/managed-native-editor/r1-build.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "docs/execution/A/logs/managed-native-editor/r1-secret-scan.cmd.json": "770510298995b2c4f90145bb7635caf84eefccca131bdcc392382ca08a51a107",
+    "docs/execution/A/logs/managed-native-editor/r1-secret-scan.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "docs/execution/A/logs/managed-native-editor/r1-type.cmd.json": "60145724ffc9924cd33678f8444de53d2ec96faeaf376a593f84ae06122bd7cb",
+    "docs/execution/A/logs/managed-native-editor/r1-type.exit": "53c234e5e8472b6ac51c1ae1cab3fe06fad053beb8ebfd8977b010655bfdd3c3",
+    "docs/execution/A/logs/managed-native-editor/r2-tests.cmd.json": "1ff576ebdb6742088038613547fa6bca536cbf6fde2708a32ad10fb3cc9f3994",
+    "docs/execution/A/logs/managed-native-editor/r2-tests.exit": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+    "docs/execution/A/logs/managed-native-editor/r2-type.cmd.json": "93d0caf8d35fbe215476eb0de2b99d70aadf6000fcaf375de69924423e6d5e5d",
+    "docs/execution/A/logs/managed-native-editor/r2-type.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "docs/execution/A/logs/managed-native-editor/r3-tests.cmd.json": "cfe9fdc801e5d5b1b86282cd10eb8eef637b47bb997ef65872fd504c102ebaa3",
+    "docs/execution/A/logs/managed-native-editor/r3-tests.exit": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+    "docs/execution/A/logs/managed-native-editor/r3-type.cmd.json": "d52f0317f0311bc887d2cb9db44c5b36031a14c5f86940718c81ec1545322561",
+    "docs/execution/A/logs/managed-native-editor/r3-type.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "docs/execution/A/logs/managed-native-editor/r4-tests.cmd.json": "4520024cad72021c57ea868a7eb70b70f33909e4e54c5ce0e3c72e3059c57829",
+    "docs/execution/A/logs/managed-native-editor/r4-tests.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "docs/execution/A/logs/managed-native-editor/r5-tests.cmd.json": "290ecad1c65c7e06befd9cdd998ae989826280ded584f4da85bd10f74dd3c1a9",
+    "docs/execution/A/logs/managed-native-editor/r5-tests.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "docs/execution/A/logs/owned-project-entry-1794268658924/observed.json": "2d1495ff918379716c1d07d759f32f708507fc496bf66d7ed83dfe97ac541a8c",
+    "docs/execution/A/logs/owned-project-entry-1794268658924/opened-native.png": "92834de6b806c0645341db5b12c790025533e32a04cbbc1f61d4a046c22ef00d",
+    "docs/execution/A/logs/owned-project-entry-1794268658924/owned-dark.png": "0892ba15776729de9148f15675a7bc2d9f25b781a3339d6a373747427d76fbc3",
+    "docs/execution/A/logs/owned-project-entry-1794268658924/owned-light.png": "ebc6f83ab4d58750eb46838c4718b34f249417d11fb9a98911bb12f9df29628e",
+    "docs/execution/A/reviews/managed-editor-pre-review/input-hashes.json": "b2441e85415080f334e1f5a53185282b98f3daf9da0047ada90631df75017fc2",
+    "docs/execution/A/reviews/managed-editor-pre-review/r1-fix-hashes.json": "d201e32285cee244ba9ea82fa7124b4bb9a1d489428452c24f05c7e638a84729",
+    "docs/execution/A/reviews/managed-editor-pre-review/REVIEW.md": "19d3e0a67906c999e2ffb4884e85e1c7c32b6dba5b92df636dbc409c165ff03e",
+    "docs/execution/A/reviews/managed-editor-pre-review/tar-readonly-inspection.json": "9a4eadc248b98ec48a7c5098598b1236d0c43a5dac8031c5a6dc1a27765c640c"
+  },
+  "not_proven": [
+    "hydration observation or NativeAck",
+    "real film/source assembly/adoption/rendered subtitles/Delivery",
+    "full A regression/recovery/human acceptance"
+  ]
+}

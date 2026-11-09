@@ -25,3 +25,5 @@
 受控入口实现补充：MAIN最小挂载M5的created/legacy显式联合读模型，保留原SelectionStore/clock；A-mode默认进入当前owned工程refine，不落旧idea占位；不展示旧录制提案/固定三proxy，未接写能力禁用。新增tools/build-native-workbench-validators.ts产出CSP可用静态schema校验器，三份输入摘要可复验，build先--check拒陈旧输出；既有CSP不加unsafe-eval。MAIN允许package build命令这一个静态校验前置及tests headless launcher可选本机deny proxy，后者只在新测试明确使用，旧入口不改。新公开HTTP native-open只给真实UI，原Agent31合同不扩。
 
 第六切面：MAIN增加UI-only owned-projects@1.0纯读列表与已有native-entry@1.0响应校验、Host根入口最小导航。只展示当前真实owner已committed created工程，持久事实并不表示新鲜媒体或native已加载；attention不可打开。列表按project_id keyset分页，不伪装最近排序。无新Agent工具/CP合同，无写入/原生启动/审批；可信UI同origin proof。Root仅明确legacy session保留原导演页，A-mode不请求固定d1-30s。PRODUCT仅提供OwnedProjectEntry纯props展示候选；MAIN独占客户端、root/data挂载与鉴权测试。
+
+第七切面：MAIN独占managed-editor.mjs/.d.mts/显式复合pin和固定tar产物、isolated child/parent最小接线及Supervisor/server A-mode开关。仅固定PRODUCT e96ca4ce的原native薄patch；父解包前核archive/每文件闭包、私有目录发布，child独立复验后才传editorDir给原startStudio。父捕获运行产物inode/时间戳指纹，变动使child liveness失效；legacy不启用。该版本只观察film DOM，不自动产生NativeAck；字幕/settings/真实媒体ready须另接事实，禁止提前宣称完整source hydration或影片通过。

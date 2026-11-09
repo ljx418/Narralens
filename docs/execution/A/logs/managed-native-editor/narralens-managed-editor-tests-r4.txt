@@ -1,0 +1,13 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+ ✓ tests/agent-driven/integration/managed-editor.test.ts (3 tests) 6121ms
+   ✓ publishes exactly the fixed managed build, reuses it without writes and verifies independently before serving  3797ms
+   ✓ rejects aliased roots, foreign editor directories, added files and unsupported vendor before serving  1506ms
+   ✓ invalidates the running guard if the runtime ancestor is replaced by an alias to the same files  817ms
+
+ Test Files  1 passed (1)
+      Tests  3 passed (3)
+   Start at  07:51:48
+   Duration  8.20s (transform 67ms, setup 0ms, collect 173ms, tests 6.12s, environment 0ms, prepare 1.27s)
+

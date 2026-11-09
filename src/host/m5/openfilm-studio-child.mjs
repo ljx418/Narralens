@@ -1,6 +1,7 @@
 /** Host-owned native Studio child. No browser and no automatic external update check.
  * Private IPC is the only place the upstream launch key leaves this process.
  */
+import {assertManagedEditor} from './managed-editor.mjs';
 import {resolve} from 'node:path';
 import {readFileSync} from 'node:fs';
 import {rm} from 'node:fs/promises';
@@ -34,8 +35,12 @@ try{
  const upstream=await import(pathToFileURL(resolve(vendor,'packages/openfilm/studio/server/server.mjs')).href);
  if(globalThis.__narralensOfflineGuard?.installed!==true)throw new Error('Offline guard absent');
  if(stopping)process.exit(0);
+ stage='managed_editor';
+ const managedDirectory=process.argv[3],managedRoot=process.argv[4];
+ if(!!managedDirectory!==!!managedRoot)throw new Error('MANAGED_EDITOR_UNVERIFIED');
+ const editorDir=managedDirectory?assertManagedEditor(managedDirectory,managedRoot,vendor):resolve(vendor,'packages/openfilm/studio/ui/dist');
  stage='start_studio';
- studio=await upstream.startStudio({port:0,openBrowser:()=>undefined,advertise:false,onQuit:()=>undefined,stays:true,editorDir:resolve(vendor,'packages/openfilm/studio/ui/dist'),working:()=>[]});
+ studio=await upstream.startStudio({port:0,openBrowser:()=>undefined,advertise:false,onQuit:()=>undefined,stays:true,editorDir,working:()=>[]});
  if(stopping||!process.connected){await studio.close();process.exit(0);}
  stage='ipc_ready';
  process.send({kind:'ready',offline_guard:true,origin:studio.origin,filmOrigin:studio.filmOrigin,port:studio.port,key:studio.key});

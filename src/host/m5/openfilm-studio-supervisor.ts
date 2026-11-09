@@ -88,6 +88,8 @@ export interface OpenFilmStudioSupervisorDeps {
   readonly vendorRoot: string;
   /** A-mode private state; absent only for the preserved legacy entry. */
   readonly isolatedRuntimeRoot?: string;
+  /** Explicit managed UI composite pin for the A application only. */
+  readonly managedEditor?: boolean;
   /** The migrated target's directory, so the Studio can open it. */
   readonly targetRootOf: (projectId: string) => Promise<string>;
   /** Called with the started Studio, so the Gateway can be built around it. */
@@ -246,7 +248,7 @@ export class OpenFilmStudioSupervisor {
     if (this.#closing) throw new HttpError(503, "ENGINE_UNAVAILABLE", "The native Studio is closing");
     this.#studio ??= (async () => {
       if (this.#deps.isolatedRuntimeRoot) {
-        const studio = await startIsolatedStudio({vendorRoot:this.#deps.vendorRoot,runtimeRoot:this.#deps.isolatedRuntimeRoot});
+        const studio = await startIsolatedStudio({vendorRoot:this.#deps.vendorRoot,runtimeRoot:this.#deps.isolatedRuntimeRoot,managedEditor:this.#deps.managedEditor??false});
         try { await this.#deps.onStudio(studio); return studio; }
         catch(error) { await studio.close(); throw error; }
       }

@@ -1,0 +1,4 @@
+src/host/m5/openfilm-studio-supervisor.ts(251,50): error TS2379: Argument of type '{ vendorRoot: string; runtimeRoot: string; managedEditor: boolean | undefined; }' is not assignable to parameter of type '{ vendorRoot: string; runtimeRoot: string; managedEditor?: boolean; }' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'managedEditor' are incompatible.
+    Type 'boolean | undefined' is not assignable to type 'boolean'.
+      Type 'undefined' is not assignable to type 'boolean'.

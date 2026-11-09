@@ -4,7 +4,7 @@
   "capture_worktree_dirty": true,
   "scope": "UI-only durable owned created project list and root navigation to the original native editor",
   "declaration": "OWNED_PROJECT_ENTRY_INTERNAL_EVIDENCED",
-  "external": "REVIEW_PENDING_FROZEN_REVIEW",
+  "external": "PASS_LIMITED_FROZEN_OWNED_NAVIGATION",
   "pre_review": {
     "report": "docs/execution/A/reviews/owned-project-entry-pre-review/REVIEW.md",
     "sha256": "7ecd322ac722c49c647e4dd50da698365f6fcd52f1dd7c72e98e7191af836c5c",
@@ -96,5 +96,12 @@
     "managed observation or native loaded acknowledgement",
     "nonempty real film, Run/Task, assembly/adoption/Delivery",
     "complete A regressions/recovery/human acceptance"
-  ]
+  ],
+  "external_review": {
+    "frozen_commit": "01c234011ef2c3248a1bd67aefbdc6534e27c84a",
+    "report": "docs/execution/A/reviews/owned-project-entry-01c2340/REVIEW.md",
+    "sha256": "b0f9d4f709af4b122eb2ae160d81058061c24d003cf82b1e06e9edd4eadcbc73",
+    "excluded_archive": "source.tar; reproducible from frozen git tree",
+    "does_not_sign": "managed UI/NativeAck/film/full A"
+  }
 }

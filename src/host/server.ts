@@ -626,6 +626,7 @@ export class NarralensHost {
       ?? (dependencies.agentApplication ? adoptionStagingRootFor(this.revisions, dependencies.adoptionStagingRoot) + "-studio" : undefined);
     this.m5Supervisor = new OpenFilmStudioSupervisor({
       vendorRoot: this.#openFilmVendorRoot,
+      managedEditor: !!dependencies.agentApplication,
       ...(this.nativeStudioRuntimeRoot ? { isolatedRuntimeRoot: this.nativeStudioRuntimeRoot } : {}),
       targetRootOf: async (projectId: string) => {
         if (this.#agentApplication) {
