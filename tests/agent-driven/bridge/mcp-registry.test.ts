@@ -96,15 +96,19 @@ interface FakePorts {
   readonly ports: ApplicationPorts;
   /** The routes the façade actually called, in order. */
   readonly calls: string[];
+  /** The last input the façade passed to a route. */
+  inputFor(route: string): unknown;
 }
 
 function fakePorts(responses: Record<string, unknown>): FakePorts {
   const calls: string[] = [];
+  const inputs = new Map<string, unknown>();
   const ports = new Proxy({}, {
     get(_target: object, property: string | symbol) {
       const routeId = String(property);
-      return async () => {
+      return async (input: unknown) => {
         calls.push(routeId);
+        inputs.set(routeId, input);
         const response = responses[routeId];
         if (response === undefined) {
           throw new HostCallError({
@@ -121,7 +125,7 @@ function fakePorts(responses: Record<string, unknown>): FakePorts {
       };
     },
   }) as unknown as ApplicationPorts;
-  return { ports, calls };
+  return { ports, calls, inputFor: (route: string) => inputs.get(route) };
 }
 
 async function connect(
@@ -357,7 +361,7 @@ describe("A-MCP contract handshake", () => {
         project_id: "p1",
         ref: { id: "a1", version: 1, sha256: "a".repeat(64) },
         input_digest: "b".repeat(64),
-        content: { kind: "script", paragraphs: [] },
+        content: { kind: "script", paragraphs: [{ paragraph_id: "para-1", text: "a line" }] },
         created_at: "2026-11-09T00:00:00.000Z",
         input_refs: [],
       },
@@ -392,7 +396,7 @@ describe("A-MCP contract handshake", () => {
         artifact_id: null,
         base_version: 0,
         input_digest: "b".repeat(64),
-        content: { kind: "script", paragraphs: [] },
+        content: { kind: "script", paragraphs: [{ paragraph_id: "para-1", text: "a line" }] },
         input_refs: [],
       },
     });
@@ -557,12 +561,13 @@ describe("A-MCP resource reads", () => {
   });
 
   it("decodes a percent-encoded project exactly once", async () => {
-    const { ports } = fakePorts({ instance: INSTANCE, "context.read": CONTEXT });
+    const { ports, inputFor } = fakePorts({ instance: INSTANCE, "context.read": CONTEXT });
     const client = await connect(ports);
     const result = await client.readResource({ uri: "narralens://projects/p%2D1/context" });
     const payload = JSON.parse(resourceText(result));
     expect(payload.code).toBeUndefined();
-    expect(payload.project_id).toBe("p-1");
+    // The address the port was given is the decoded one, decoded exactly once.
+    expect(inputFor("context.read")).toEqual({ project_id: "p-1" });
     await client.close();
   });
 

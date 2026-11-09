@@ -12,12 +12,19 @@ back once more; round 3 is that result. The original session logs are preserved
 unchanged: `claude-A.stdout.log`, `claude-A.stderr.log`, `claude-A-review1.stdout.log`,
 `claude-A-review1.stderr.log`.
 
-Status: **code and tests written; nothing executed in any round.** MAIN resource
-reservation 62928 is still RUNNING and the light slot belongs to PRODUCT, so no
-install, no `tsc`, no vitest, no browser and no media ran. This work tree has no
-`node_modules`: the repository's dependencies are not installed here, so even the
-real-SDK stdio cases cannot start until MAIN releases the reservation and
-`pnpm install --offline --frozen-lockfile` runs.
+Status: **validated in the lane.** MAIN granted BRIDGE-light (see
+`VALIDATION-TASK.md` and MAIN's `docs/execution/A/resource-reservation.json`): an
+offline frozen install with `--ignore-scripts`, `tsc`, and the lane's own tests with
+one worker. The install, the type-check and the whole bridge suite have been run in
+this lane and are **green**: `tsc --noEmit` exits 0, and the suite is 7 files /
+108 tests, all passing. Every raw stdout, stderr and exit code is in
+`docs/parallel/lane-bridge/evidence/`, and the first failing run is preserved
+alongside the later green ones.
+
+The ceiling is unchanged by that: this is still **module-level evidence only**. No
+real Narralens Host, no ffmpeg, no browser, no full suite, no production
+registration, no production keys, no external client and no human acceptance were
+touched, and none of them were run.
 
 ## Round 1 — what was delivered (unchanged by round 2)
 
@@ -304,6 +311,122 @@ released commands before it can be claimed as proven.
   is given more than once", "does not silently drop the tail of a URI that carries
   two question marks", "refuses a URI that cannot be percent-decoded".
 
+## Round 4 — admitted validation (BRIDGE-light)
+
+Authority: MAIN's `VALIDATION-TASK.md` and
+`/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/resource-reservation.json`
+(holder MAIN, status RUNNING, `admissions[0] = BRIDGE-light`, `maxConcurrentWorkers: 1`;
+allowed: offline frozen install `--ignore-scripts`, tsc, pure modules and real SDK
+stdio with a small HTTP stand-in; forbidden: real Narralens Host, ffmpeg, Chrome,
+full suite). Candidate HEAD `1d60ff9ed22851d2647e81a840b5f2af65aa3427`.
+
+Everything ran **in the lane only**, **sequentially**, with the lane's own
+`node_modules`. No parallel compiler, test or install run. Nothing was committed.
+
+### Environment actually used
+
+| tool | version |
+|---|---|
+| node | v22.22.1 |
+| pnpm | 10.33.0 |
+| @modelcontextprotocol/sdk | 1.26.0 |
+| typescript | 5.9.2 |
+| vitest | 3.2.4 |
+| tsx | 4.20.5 |
+
+### Commands, in order, with their exits
+
+| # | command | exit | result |
+|---|---|---|---|
+| 01 | `pnpm install --offline --frozen-lockfile --ignore-scripts` | 0 | Done in 31.3 s; the pinned versions above installed from the local store. No network, no scripts, no lockfile change |
+| 02 | `pnpm exec tsc --noEmit` | 0 | no diagnostics — the lane's TypeScript was already clean |
+| 03 | `pnpm exec vitest run tests/agent-driven/bridge --maxWorkers=1 --minWorkers=1` | **1** | **first failure — preserved.** 7 files, 108 tests: **104 passed, 4 failed** |
+| 04 | `pnpm exec vitest run tests/agent-driven/bridge/mcp-registry.test.ts tests/agent-driven/bridge/mcp-stdio-client.test.ts --maxWorkers=1 --minWorkers=1` | 0 | the two failing files re-run after the fixes: 46 passed |
+| 05 | `pnpm exec tsc --noEmit` | 0 | still clean after the test fixes |
+| 06 | `pnpm exec vitest run tests/agent-driven/bridge --maxWorkers=1 --minWorkers=1` | 0 | whole lane suite green: 7 files, 108 tests |
+| 07 | `pnpm exec tsc --noEmit` | 0 | after the timeout bound was widened |
+| 08 | `pnpm exec vitest run tests/agent-driven/bridge --maxWorkers=1 --minWorkers=1` | 0 | **final**: 7 files, 108 tests, all passing (worst case 8.3 s against a 60 s bound) |
+
+Every run wrote `NN-<name>.stdout.log`, `NN-<name>.stderr.log` and `NN-<name>.exit`
+into `docs/parallel/lane-bridge/evidence/`. **No first-failure log was overwritten**:
+run 03 still carries the failing output, and the green runs are separate files.
+
+### The four first-run failures — all mine, all fixed
+
+None of them was a production defect: they were defects in my own test fixtures and
+in my own timing assumptions.
+
+1. **`narralens_artifact_put` fixture was invalid.** The payload used
+   `paragraphs: []`, and the contract's `Script` requires `minItems: 1`, so the
+   façade correctly rejected it with `INVALID_REQUEST` **before** the handshake. The
+   fixture now carries one paragraph, and the case exercises the handshake refusal it
+   was written for.
+2. **The percent-decode case asserted the wrong thing.** It read
+   `project_id` out of the *context payload* (the fixture's own id) instead of the
+   input the façade passed to the port. The fake now records the last input per
+   route, and the case asserts `{ project_id: "p-1" }` — the decode happens, and it
+   happens once.
+3. and 4. **Two stdio cases hit the default five second timeout.** The server is
+   started as a child process and loaded through the repository's own `tsx`, which
+   takes about four seconds on this filesystem; the two cases that spawn a client
+   *and* restart the Host could not finish inside five. The stdio and wrapper cases
+   now carry an explicit 60 second bound, chosen with room for a loaded machine —
+   the observed worst case in the final run was 8.3 s.
+
+### Evidence hashes (SHA256)
+
+```
+9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa  evidence/01-install.exit
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  evidence/01-install.stderr.log
+880c46ede4bf1e3f539105cff079b84155ba07e7e293a148c83957eae1389f4d  evidence/01-install.stdout.log
+9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa  evidence/02-tsc.exit
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  evidence/02-tsc.stderr.log
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  evidence/02-tsc.stdout.log
+4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865  evidence/03-vitest-bridge.exit   <- the failing run
+3a96496239900a2f20a41e1a7c241166c92eae3622bc958f28194f3c5896a85c  evidence/03-vitest-bridge.stderr.log
+f303b73e24e1af58ab994fd4cbee0d807863815dd4fd54479b81f064bbf383f3  evidence/03-vitest-bridge.stdout.log
+9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa  evidence/04-vitest-targeted.exit
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  evidence/04-vitest-targeted.stderr.log
+c7e8c72d41b3f11499f77c3c18a13ba08f7c416b616df05d6e4ea95b274d96ab  evidence/04-vitest-targeted.stdout.log
+9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa  evidence/05-tsc-after-fixes.exit
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  evidence/05-tsc-after-fixes.stderr.log
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  evidence/05-tsc-after-fixes.stdout.log
+9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa  evidence/06-vitest-bridge-final.exit
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  evidence/06-vitest-bridge-final.stderr.log
+db120cbc2ee91217747696d085d69f1a182a76960d1b8ca12efbfd0792a64f10  evidence/06-vitest-bridge-final.stdout.log
+9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa  evidence/07-tsc-final.exit
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  evidence/07-tsc-final.stderr.log
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  evidence/07-tsc-final.stdout.log
+9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa  evidence/08-vitest-bridge-final.exit
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  evidence/08-vitest-bridge-final.stderr.log
+963c7cc99cbb7cb4eb9a8577c71596e2af200d6571fa423a0ca3c898ec5897cb  evidence/08-vitest-bridge-final.stdout.log
+```
+
+### What the green run does and does not prove
+
+It proves: the frozen registry is exposed as exactly 24 tools and 5 resources; the
+input, output, error and handshake rules behave as specified; the stdio façade
+really answers a real SDK client over a real child process; the skill's wrapper
+really forwards the client's stream and really takes its child down on disconnect;
+the cursor's scope, expiry, retention and scan-position rules hold; and the
+launcher's cold/duplicate/shared/health rules hold — all against frozen contract
+vectors and small local stand-ins.
+
+It does **not** prove: anything about the real Narralens Host, the real
+registration, the real authentication, the real database, the production cursor keys
+or their rotation, a real media or render chain, an external MCP client, or human
+acceptance. Those remain MAIN's and remain NOT_RUN.
+
+### Still NOT_RUN (out of the admitted scope)
+
+- The real Narralens Host, its registration and its authentication.
+- The production cursor keys, their rotation and the durable cursor store.
+- ffmpeg, media, rendering and delivery.
+- Chrome or any browser, the Vite build, and the production bundle.
+- The full repository test suite and the other lanes' suites.
+- Any online install, package fetch or external upload.
+- An external MCP client (a real Codex/DSH session) and human acceptance.
+
 ## Files and SHA256
 
 ```
@@ -335,9 +458,9 @@ f0d431951318a86d1ba3feef681428431e8fad026d922ee9c147984c703ca0e6  src/mcp/regist
 c4c5b2406b67d6f2f01e6783393ca2c56c5597944b6d4377151397df90c1f765  tests/agent-driven/bridge/helpers/cursor-codec.ts
 358ed227395587dd1272ba9c90be30ffedd1bcf519c5e988f9847f05fdea0613  tests/agent-driven/bridge/launcher-cold.test.ts
 3f73b5b1d8dffb94fb7402b4b741a25b8c36767c3bc9fff41cf760ab21a47302  tests/agent-driven/bridge/mcp-host-client.test.ts
-057ddbbd6da5062e4153804a0c940c8e92945613c6301e2c1f2bf074b8d96981  tests/agent-driven/bridge/mcp-registry.test.ts
-2152c6bf30790084511e46080bd0598e063bae82290ef378cbfcaa9a8cce49f3  tests/agent-driven/bridge/mcp-stdio-client.test.ts
-91ab245adc1e778877c80e8350caab4884aa05f48c22de04df85d71d97bbcf77  tests/agent-driven/bridge/mcp-wrapper-cleanup.test.ts
+273604c4eec7a10bb71c354dfa47e25ea2ed1d5f1f0e20b8bec23a6a87a62c43  tests/agent-driven/bridge/mcp-registry.test.ts
+c5c73b67d7d68a8af73e7d1742b72456a51d3c3cbe6612aae076fb2f30cb69ad  tests/agent-driven/bridge/mcp-stdio-client.test.ts
+ae229b365d22bf8c89ba8437735a419371c79ab36f07af12751e3242ec5547ee  tests/agent-driven/bridge/mcp-wrapper-cleanup.test.ts
 d874d8b111a9c0d061c8487e62d39fdc5373cadd31c031cfaff96332975931ae  tests/agent-driven/bridge/skill-library.test.ts
 4920e19e34be778caf158d308008029379eb7980aa9a8c153161b377337f3527  tools/agent-driven/bridge/probe-mcp.mjs
 ```
@@ -360,28 +483,29 @@ arbitrary entry override it existed for is gone).
 | `cursor-events.test.ts` | A-EVENTS | the atomic snapshot and its cursor, resuming, `Last-Event-ID` precedence, both cursors verified separately, the four scope mismatches, expiry, tampering, malformation, malformed claims, a broken interval, the retention floor, the refusal-to-code table, the TTL policy, the context identity, and the scan-position rules |
 | `skill-library.test.ts` | A-MCP | the skill library describing exactly what the façade exposes |
 
-## Commands actually run (all read-only; none of them builds, type-checks or tests)
+## Commands actually run in rounds 1–3 (all read-only)
+
+These are superseded for the build and test commands by round 4; the read-only
+inspection commands below are still the record of rounds 1–3.
 
 | command | exit | result |
 |---|---|---|
-| `git -C … rev-parse HEAD` / `git status --porcelain` | 0 | HEAD `ca5b67a…`; only untracked new files under the allowed prefixes plus the lane docs |
+| `git -C … rev-parse HEAD` / `git status --porcelain` | 0 | the lane's own commits and working tree, tracked each round |
 | `find` / `grep` / `cat` over the contract, the registry, the schema, the existing host code and the installed SDK (read-only, `/mnt/c/workspace/videoworkline/Narralens/node_modules/@modelcontextprotocol/sdk`) | 0 | read for the implementation |
 | `python3` cross-check of the registry ↔ `ROUTE_PATH_BINDINGS` ↔ contract schema | 0 | `tools: 24, routes: 31, problems: none` |
 | `python3` import/export cross-check of every lane module and test | 0 | `no problems` — and it found two real defects: the observability modules imported `../../../contracts/…` instead of `../../contracts/…` (rounds 2 and 3), which would not have resolved. Both fixed |
-| `node --check` on the three `.mjs` files (the wrapper, the probe tool, the test helper) | 0 | syntax ok — those files are outside `tsconfig`'s `include` and are not covered by `tsc --noEmit` |
+| `node --check` on the `.mjs` files (the wrapper, the probe tool) | 0 | syntax ok — those files are outside `tsconfig`'s `include` and are not covered by `tsc --noEmit` |
 | `sha256sum` over every new file | 0 | the table above |
 
 No `find /`, no traversal of `/mnt/J/` or any other drive.
 
-### NOT_RUN (blocked by MAIN reservation 62928, still RUNNING)
+### The build and test commands
 
-- `pnpm install --offline --frozen-lockfile` — NOT_RUN. This work tree has no
-  `node_modules`; the MCP SDK, the test runner and `tsx` are not present here.
-- `pnpm exec vitest run tests/agent-driven/bridge --maxWorkers=1` — NOT_RUN.
-- `pnpm exec tsc --noEmit` — NOT_RUN. **No type-check has been performed on any of
-  the code above**, in any round; the first real `tsc` run is still outstanding
-  and may find type errors.
-- No browser, no ffmpeg, no media, no network, no paid request, no model download.
+`pnpm install --offline --frozen-lockfile --ignore-scripts`, `pnpm exec tsc --noEmit`
+and `pnpm exec vitest run tests/agent-driven/bridge --maxWorkers=1 --minWorkers=1`
+were **NOT_RUN in rounds 1–3** and were **run in round 4**, where they are green.
+See "Round 4 — admitted validation" above for the exact commands, exits and logs.
+The remaining NOT_RUN items are listed there.
 
 ## Dependencies and policy injection
 
@@ -389,7 +513,7 @@ What the lane modules need from MAIN, and what they deliberately do not decide:
 
 | need | supplied by MAIN | where it is injected |
 |---|---|---|
-| Host address and credentials | MAIN | `NARRALENS_HOST_URL`, `NARRALENS_HOST_TOKEN`, or `createHostApplicationPorts`'s options; a name-based host needs `resolveHost` |
+| Host address and credentials | MAIN | `NARRALENS_HOST_URL`, `NARRALENS_HOST_TOKEN`, or `createHostApplicationPorts`'s options; the address must be a loopback literal — the client refuses a host name |
 | the filter digest for the snapshot resource | MAIN | `NARRALENS_FILTER_DIGEST`, or `McpFacadeOptions.filterDigest` |
 | the cursor lifetime | MAIN | `EventSnapshotOptions.cursorTtlMs` (required, positive, finite) |
 | the cursor keys, the nonce/claims store and the rotation | MAIN | `CursorSigningPort` / `CursorVerificationPort` |
@@ -403,8 +527,10 @@ the cursor TTL and the cursor codec were all removed in round 2.
 
 ## Limitations and caveats that remain
 
-1. **Nothing has been executed, in any round.** No install, no type-check, no
-   test run. The code and the cases are written; they are not proven.
+1. **Only the lane has been exercised.** The install, the type-check and the
+   bridge suite ran in this lane and are green (round 4). Nothing outside the lane
+   was run: no real Host, no ffmpeg, no browser, no full suite, no other lane's
+   tests.
 2. **The SDK API surface was verified by reading the installed SDK elsewhere**, not
    by installing it here: the 1.26.0 `.d.ts`/`.js` were read (read-only) from
    `/mnt/c/workspace/videoworkline/Narralens/node_modules/@modelcontextprotocol/sdk`.
@@ -452,18 +578,45 @@ the cursor TTL and the cursor codec were all removed in round 2.
 
 ## Declaration ceiling
 
-Module-level only. A-COLD, A-MCP and A-EVENTS are **NOT_RUN**: the code and the
-cases exist, and nothing has been executed. This is not a production Host PASS, not
-an integration PASS, not an independent external review and not a human acceptance.
-Independent review: REVIEW_PENDING (REVIEW-1 was a code-reading review by the lane
-owner, not an independent external review). Production assembly and human
+**Module-level only, with the lane's own validation green.** A-COLD, A-MCP and
+A-EVENTS are covered by cases that ran and passed in this lane (round 4: 7 files,
+108 tests, exit 0; `tsc --noEmit` exit 0). What that is: the lane's modules behave as
+the frozen contract specifies, checked against the frozen vectors and small local
+stand-ins.
+
+What it is **not**: this is not a production Host PASS, not an integration PASS, not
+a cross-lane or full-suite PASS, not an independent external review and not a human
+acceptance. The real Host, its registration and authentication, the production
+cursor keys and their rotation, the durable cursor store, media/render/delivery,
+Chrome, the production build, the full repository suite, an external MCP client and
+the human gate all remain NOT_RUN.
+
+Independent review: REVIEW_PENDING. REVIEW-1 and REVIEW-2 were code-reading reviews
+by the lane owner, not independent external reviews. Production assembly and human
 acceptance: NOT_RUN.
 
-Next allowed action: MAIN releases the resource reservation, then
-`pnpm install --offline --frozen-lockfile`,
-`pnpm exec vitest run tests/agent-driven/bridge --maxWorkers=1` and
-`pnpm exec tsc --noEmit` are run and the real failures — including any type errors
-— are reported as they are.
+Next allowed action: Codex independently rechecks the frozen source and the round-4
+evidence. The source writer is stopped; this session does not write again unless
+Codex hands it back.
 
 ## Codex review 2
 review1 exec63426 exit0, old PID3563078 terminal; source review still NEEDS_WORK. Focused corrections in REVIEW-2.md. PRODUCT holds light slot; BRIDGE source-only. Codex freezing review1 candidate before returning sole writer to Claude.
+
+## Validation admission
+MAIN BRIDGE-light formally admitted after MAIN exec64238 terminal; source review2 exec78749 terminal, clean HEAD1d60ff9ed22851d2647e81a840b5f2af65aa3427. Transfer same Claude sole writer to execute VALIDATION-TASK.md. No final acceptance until author ends and Codex independently rechecks frozen source.
+
+## Round 4 close — writer stopped
+Claude session d94ac073-b5b8-42c6-9b4d-f0eef57d7850 finished the admitted
+validation and stopped. Final state: offline frozen install with `--ignore-scripts`
+exit 0; `pnpm exec tsc --noEmit` exit 0 (twice, after the fixes); the bridge suite
+green at 7 files / 108 tests, exit 0, run last as evidence 08. The first failing run
+(evidence 03, exit 1, 104/108) is preserved and was fixed in the lane's own test
+fixtures and timing bounds only — no production source change was needed for it.
+Working tree: `docs/parallel/lane-bridge/HANDOFF.md` plus the three lane test files
+modified, `docs/parallel/lane-bridge/evidence/` added; `node_modules/` is ignored and
+was not committed; nothing outside the allowed prefixes was written; no commit was
+made. No orphan test processes remain. Codex recheck is next; this writer does not
+write again unless it is handed back.
+
+## Codex acceptance transfer (actual)
+Validation exec44062 exit0; Claude PID3614630 and immediate children absent. Initial37149, review1 63426, review2 78749 all terminal; no429. Single writer now Codex for documents/acceptance only. Production source unchanged in validation; test fixture and explicit stdio bound fixes frozen next. Original first FAIL03 retained. MAIN slot remains BRIDGE-light for one final Codex independent frozen tsc+108 tests, then release.
