@@ -1,0 +1,18 @@
+src/host/creative/execution-guard.ts(94,11): error TS2322: Type '"chapters"' is not assignable to type '"cover" | "adoption" | "definition" | "sample" | "first_chapter" | "chapter_pack" | "risk" | "qc"'.
+src/host/creative/fixed-workflow-service.ts(69,47): error TS2305: Module '"./trusted-context.js"' has no exported member 'nowEpochSeconds'.
+src/host/creative/fixed-workflow-service.ts(719,11): error TS2322: Type '(RunCheckpointAttempt | { state: "unknown" | "running" | "cancelled" | "succeeded" | "failed" | "stale" | "pending" | "waiting_user"; job_id: string | null; ... 6 more ...; input_digest: string; })[]' is not assignable to type 'RunCheckpointAttempt[]'.
+  Type 'RunCheckpointAttempt | { state: "unknown" | "running" | "cancelled" | "succeeded" | "failed" | "stale" | "pending" | "waiting_user"; job_id: string | null; ... 6 more ...; input_digest: string; }' is not assignable to type 'RunCheckpointAttempt'.
+    Type '{ state: "unknown" | "running" | "cancelled" | "succeeded" | "failed" | "stale" | "pending" | "waiting_user"; job_id: string | null; output_artifact_id: string | null; output_version: number | null; ... 4 more ...; input_digest: string; }' is not assignable to type 'RunCheckpointAttempt'.
+      Types of property 'input_refs' are incompatible.
+        The type 'readonly Ref[]' is 'readonly' and cannot be assigned to the mutable type 'Ref[]'.
+src/host/creative/fixed-workflow-service.ts(769,11): error TS2322: Type 'RunCheckpointAttempt | { step_id: string; attempt: number; state: "unknown" | "running" | "cancelled" | "succeeded" | "failed" | "stale" | "pending" | "waiting_user"; ... 5 more ...; output_refs: readonly Ref[]; }' is not assignable to type 'RunCheckpointAttempt'.
+  Type '{ step_id: string; attempt: number; state: "unknown" | "running" | "cancelled" | "succeeded" | "failed" | "stale" | "pending" | "waiting_user"; input_digest: string; job_id: string | null; output_artifact_id: string | null; output_version: number | null; input_refs: readonly Ref[]; output_refs: readonly Ref[]; }' is not assignable to type 'RunCheckpointAttempt'.
+    Types of property 'input_refs' are incompatible.
+      The type 'readonly Ref[]' is 'readonly' and cannot be assigned to the mutable type 'Ref[]'.
+src/host/creative/fixed-workflow-service.ts(780,13): error TS4104: The type 'readonly Ref[]' is 'readonly' and cannot be assigned to the mutable type 'Ref[]'.
+src/host/creative/fixed-workflow-service.ts(781,13): error TS4104: The type 'readonly Ref[]' is 'readonly' and cannot be assigned to the mutable type 'Ref[]'.
+src/host/creative/fixed-workflow-service.ts(1326,87): error TS7053: Element implicitly has an 'any' type because expression of type '"cover" | "definition" | "sample" | "first_chapter" | "chapters" | "delivery"' can't be used to index type 'Readonly<Record<"cover" | "adoption" | "definition" | "sample" | "first_chapter" | "chapter_pack" | "risk" | "qc", string>>'.
+  Property 'chapters' does not exist on type 'Readonly<Record<"cover" | "adoption" | "definition" | "sample" | "first_chapter" | "chapter_pack" | "risk" | "qc", string>>'.
+tests/agent-driven/product/execution-guard.test.ts(184,40): error TS2322: Type 'true' is not assignable to type 'false'.
+tests/agent-driven/product/support/memory-repository.ts(353,56): error TS2339: Property 'filter' does not exist on type 'MapIterator<Row>'.
+tests/agent-driven/product/support/memory-repository.ts(353,64): error TS7006: Parameter 'row' implicitly has an 'any' type.
