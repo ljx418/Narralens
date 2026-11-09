@@ -7,3 +7,5 @@ Root cause: signal delivery was treated as a sufficient lifecycle action while t
 QC now propagates process convergence, does not launch decode after an unsettled probe, and carries unknown through RenderOutcome.requires_reconciliation to MAIN. MAIN retains durable claim/lease and reconciles; this lane creates no persistent Job state machine. Offline guard awaits WebSocket interception before page creation and rejects missing interception APIs.
 
 Validation status: source diff/pin inspection complete; tsc and module rerun NOT_RUN until next MEDIA-light reservation. Real ffmpeg/Chrome/Host/T20 crash cases NOT_RUN. Codex participated in implementation: its future checks are internal validation only; independent review must come from an uninvolved context.
+
+原生源码核对进一步发现render()会在成功返回的lines中携带页面失败；worker明确阻断该输出。worker局部进程policy在每个媒体输入前加本地协议白名单、单线程参数，避免本地playlist暗含网络；guard/process-policy摘要一起纳入config digest。所有真实编码/网络拒绝探针仍NOT_RUN。

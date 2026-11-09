@@ -6,13 +6,14 @@
   "render_module": "packages/openfilm/src/render.mjs",
   "film_doc_module": "packages/openfilm/src/film-doc.mjs",
   "worker_path": "src/host/render/openfilm-render-worker.mjs",
-  "worker_sha256": "87c29133a553ea30bb4d2dba50ff246bb8ba43e1f7e8ae3a6b4918b3c2d88dd1",
+  "worker_sha256": "ae738f87be536d64fe3dc37d42a68873cc864fbee3597fc57f8155247ffdc25a",
   "guard_wrapper_file": "openfilm-offline-wrapper.mjs",
   "guard_hooks_file": "openfilm-offline-hooks.mjs",
   "guard_module_sha256": {
     "src/host/render/openfilm-offline-wrapper.mjs": "3da8a0b3a817d80bc9fad8be3d92f022b638c6919e4c959b9a5d895b62a08d30",
     "src/host/render/openfilm-offline-hooks.mjs": "1f73d6b61741062d8b2419323174743ea42ffc93ae282a08cab6f97fe1a7f1ee",
-    "src/host/render/openfilm-guard-rules.mjs": "8ff1f73170dc0fd8414fb8fc8015416ac9e8522d0d7d092b903782f657c90c0a"
+    "src/host/render/openfilm-guard-rules.mjs": "8ff1f73170dc0fd8414fb8fc8015416ac9e8522d0d7d092b903782f657c90c0a",
+    "src/host/render/media-process-policy.mjs": "cfdd587f53987a787ed6fc89b3ad60956c88accd4901090bef21b20a82a755de"
   },
   "loaded_module_sha256": {
     "packages/openfilm/src/render.mjs": "d308b672e7e2d60b6e06ea432bbf009ae96b5e197b3f4d1d50bab7c40fcae84f",

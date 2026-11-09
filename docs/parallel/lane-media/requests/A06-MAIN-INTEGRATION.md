@@ -50,7 +50,7 @@ export interface AttemptFencePort {
 
 - `claimAttempt` 必须在同一`(project_id, job_id, attempt)`上唯一；返回false时MEDIA不启动任何渲染。
 - `checkAttempt` 被问三次：渲染前、发布前、**提交前**。取消或被取代的attempt不得发布、不得记录。
-- `releaseAttempt` 无论成败都要调用；MEDIA把它当best-effort，抛错不会把已完成渲染变成失败。**唯一例外**：渲染被取消但子进程组未能确认结束时，MEDIA不会释放attempt，而是把 `requires_reconciliation` 置真——此时必须由MAIN持久化一条“待收敛”事实并保持attempt被占用。
+- `releaseAttempt` 无论成败都要调用；MEDIA把它当best-effort，抛错不会把已完成渲染变成失败。**例外**：worker或QC工具在任一成功/失败/取消/超时路径不能确认close与进程组结束时，MEDIA不会释放attempt，而是把 `requires_reconciliation` 置真——此时必须由MAIN持久化一条“待收敛”事实并保持attempt被占用。
 
 ### 1.3 `DeliveryCommitPort`
 
@@ -165,3 +165,5 @@ MEDIA的模块测试是**模块级检查**（渲染器与解码器是替身；�
 ## Codex第三返修：统一有界进程生命周期
 
 worker与QC的probe/decode均使用有界timeout→TERM grace→KILL→确认close+group。无法确认时RenderOutcome.requires_reconciliation=true；MAIN必须保持原attempt/claim，不派发新attempt，不置ready/下载，持久记录待收敛并对账。成功response也不能越过group未收敛。资源轻测仅内部验证，真实ffmpeg/Chrome/T20-A..H及独立复核仍待统一预约。
+
+原生OpenFilm render()可能返回编码成功并在lines中附带`✗`页面/请求错误；worker现明确拒绝此输出。worker局部media-process-policy对每个ffmpeg输入及ffprobe强制file,pipe协议白名单，固定解码/编码线程；未改upstream。config_digest现同时覆盖worker、upstream模块及guard/process-policy摘要，MAIN必须重新调用同一computeRenderConfigDigest，不能复用旧候选配置摘要。部署须包括新的media-process-policy.mjs。
