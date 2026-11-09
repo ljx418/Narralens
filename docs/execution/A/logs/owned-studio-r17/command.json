@@ -1,0 +1,8 @@
+{
+  "session": 29179,
+  "command": "corepack pnpm exec vitest run --config vitest.config.ts tests/agent-driven/integration/host-close-lifecycle.test.ts tests/agent-driven/integration/owned-runtime.test.ts && NARRALENS_SECRET_SCAN_OUT=docs/execution/A/logs/owned-studio-r17/credential-scan.json corepack pnpm exec tsx tools/secret-scan.ts",
+  "actual_composite_exit": 0,
+  "actual_files": 2,
+  "actual_tests": 8,
+  "note": "before addition of stopped-Studio retry observation; unchanged launcher path"
+}

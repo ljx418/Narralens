@@ -1,0 +1,14 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+ ✓ tests/agent-driven/integration/isolated-studio.test.ts (6 tests) 9665ms
+   ✓ starts the actual pinned Studio in an owned child, isolates its key/state, and waits for both listeners to stop  2316ms
+   ✓ stops its real Studio child when the owning parent is actually killed  3078ms
+   ✓ retries a failed Gateway composition using a fresh actual native child instead of caching a rejected startup  3212ms
+   ✓ does not launch a native server when close races the real upstream probe  1054ms
+
+ Test Files  1 passed (1)
+      Tests  6 passed (6)
+   Start at  04:52:01
+   Duration  12.02s (transform 220ms, setup 0ms, collect 371ms, tests 9.66s, environment 0ms, prepare 1.35s)
+

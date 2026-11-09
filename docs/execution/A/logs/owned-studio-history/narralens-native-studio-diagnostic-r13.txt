@@ -1,0 +1,36 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+ ❯ tests/agent-driven/integration/isolated-studio.test.ts (8 tests | 1 failed | 7 skipped) 1554ms
+   ↓ starts the actual pinned Studio in an owned child, isolates its key/state, and waits for both listeners to stop
+   ↓ refuses a symlinked runtime directory before importing or starting upstream
+   ↓ stops its real Studio child when the owning parent is actually killed
+   ↓ retries a failed Gateway composition using a fresh actual native child instead of caching a rejected startup
+   ↓ rejects a symlinked existing ancestor before creating any new runtime directory
+   ↓ does not launch a native server when close races the real upstream probe
+   × renders an actual nonempty native page offline, blocks a different-origin local request, and closes its real Chromium group 1554ms
+     → [{"pid":4041375,"comm":"chrome-headless","flags":[],"argCount":2,"rawMute":true,"rawHeadless":true,"bytes":2731},{"pid":4041377,"comm":"chrome-headless","flags":[],"argCount":2,"rawMute":false,"rawHeadless":true,"bytes":180},{"pid":4041378,"comm":"chrome-headless","flags":[],"argCount":2,"rawMute":false,"rawHeadless":true,"bytes":160},{"pid":4041394,"comm":"chrome-headless","flags":[],"argCount":2,"rawMute":false,"rawHeadless":true,"bytes":970},{"pid":4041396,"comm":"chrome-headless","flags":[],"argCount":2,"rawMute":true,"rawHeadless":true,"bytes":951},{"pid":4041410,"comm":"chrome-headless","flags":[],"argCount":2,"rawMute":false,"rawHeadless":true,"bytes":1259}]: expected false to be true // Object.is equality
+   ↓ also cleans failed Gateway composition in the preserved legacy startup branch before retry
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/isolated-studio.test.ts > renders an actual nonempty native page offline, blocks a different-origin local request, and closes its real Chromium group
+AssertionError: [{"pid":4041375,"comm":"chrome-headless","flags":[],"argCount":2,"rawMute":true,"rawHeadless":true,"bytes":2731},{"pid":4041377,"comm":"chrome-headless","flags":[],"argCount":2,"rawMute":false,"rawHeadless":true,"bytes":180},{"pid":4041378,"comm":"chrome-headless","flags":[],"argCount":2,"rawMute":false,"rawHeadless":true,"bytes":160},{"pid":4041394,"comm":"chrome-headless","flags":[],"argCount":2,"rawMute":false,"rawHeadless":true,"bytes":970},{"pid":4041396,"comm":"chrome-headless","flags":[],"argCount":2,"rawMute":true,"rawHeadless":true,"bytes":951},{"pid":4041410,"comm":"chrome-headless","flags":[],"argCount":2,"rawMute":false,"rawHeadless":true,"bytes":1259}]: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ tests/agent-driven/integration/isolated-studio.test.ts:125:85
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 7 skipped (8)
+   Start at  05:03:47
+   Duration  3.96s (transform 241ms, setup 0ms, collect 397ms, tests 1.55s, environment 0ms, prepare 1.35s)
+

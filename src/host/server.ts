@@ -267,6 +267,8 @@ interface HostDependencies {
    * another revision. The default is the same resolution the OpenFilm composition uses.
    */
   openFilmVendorRoot?: string;
+  /** Owned A Studio state; never the operator global OpenFilm home. */
+  isolatedStudioRuntimeRoot?: string;
   /**
    * M5C: the directory the fixture media lives in.
    *
@@ -616,6 +618,7 @@ export class NarralensHost {
     // so a Host that is never asked for the workbench never starts an editor.
     this.m5Supervisor = new OpenFilmStudioSupervisor({
       vendorRoot: this.#openFilmVendorRoot,
+      ...(dependencies.isolatedStudioRuntimeRoot ? { isolatedRuntimeRoot: dependencies.isolatedStudioRuntimeRoot } : {}),
       targetRootOf: async (projectId: string) => {
         const view = await this.projectResolver.resolveActivated(projectId);
         return view.source_root.value;
@@ -628,9 +631,12 @@ export class NarralensHost {
           panelAssets: await readPanelAssets(projectRoot),
           mediaFiles: mediaFilesFor(dependencies.mediaRoot),
         });
-        const origin = await gateway.start();
-        this.#m5Gateway = gateway;
-        this.m5Supervisor.setGatewayBase(origin);
+        try {
+          const origin = await gateway.start();
+          if (this.#closePromise) throw new HttpError(503, "ENGINE_UNAVAILABLE", "The Host is closing");
+          this.#m5Gateway = gateway;
+          this.m5Supervisor.setGatewayBase(origin);
+        } catch (error) { await gateway.close(); throw error; }
       },
     });
     this.m5Workbench = new WorkbenchService({
@@ -773,12 +779,14 @@ export class NarralensHost {
     // M5's Gateway is a server of its own, on its own loopback port. It is closed with
     // the Host: a Gateway left listening would keep the Studio and the browser's session
     // alive after the Host that owned them is gone.
-    const gateway = this.#m5Gateway;
-    this.#m5Gateway = null;
-    if (gateway !== null) await gateway.close();
-    // The Studio is a server of its own; a Host that closed without stopping it would
-    // leave an editor listening on loopback.
-    await this.m5Supervisor.close();
+    try { await this.m5Supervisor.close(); }
+    finally {
+      // Quiesce startup callbacks first; otherwise a late callback could publish a
+      // Gateway after this field was collected, leaving its two listeners alive.
+      const gateway = this.#m5Gateway;
+      this.#m5Gateway = null;
+      if (gateway !== null) await gateway.close();
+    }
     if (this.#leaseReaper !== undefined) clearInterval(this.#leaseReaper);
     this.#leaseReaper = undefined;
     if (!server) { this.revisions.close(); return; }
@@ -789,6 +797,7 @@ export class NarralensHost {
 
   async #handle(request: IncomingMessage, response: ServerResponse): Promise<void> {
     try {
+      if (this.#closePromise) throw new HttpError(503, "ENGINE_UNAVAILABLE", "The Host is closing");
       const host = request.headers.host;
       // The new protocol is authenticated by scoped credentials before any old route.
       // Do not fall through to the legacy session bootstrap or bearer authority.

@@ -1,0 +1,35 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+ ❯ tests/agent-driven/integration/isolated-studio.test.ts (7 tests | 1 failed) 9520ms
+   ✓ starts the actual pinned Studio in an owned child, isolates its key/state, and waits for both listeners to stop  2401ms
+   ✓ refuses a symlinked runtime directory before importing or starting upstream 1ms
+   ✓ stops its real Studio child when the owning parent is actually killed  2129ms
+   ✓ retries a failed Gateway composition using a fresh actual native child instead of caching a rejected startup  2934ms
+   ✓ rejects a symlinked existing ancestor before creating any new runtime directory 1ms
+   ✓ does not launch a native server when close races the real upstream probe  746ms
+   × renders an actual nonempty native page offline, blocks a different-origin local request, and closes its real Chromium group 1306ms
+     → expected false to be true // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/isolated-studio.test.ts > renders an actual nonempty native page offline, blocks a different-origin local request, and closes its real Chromium group
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ tests/agent-driven/integration/isolated-studio.test.ts:125:60
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 6 passed (7)
+   Start at  04:57:17
+   Duration  12.21s (transform 250ms, setup 0ms, collect 420ms, tests 9.52s, environment 0ms, prepare 1.57s)
+

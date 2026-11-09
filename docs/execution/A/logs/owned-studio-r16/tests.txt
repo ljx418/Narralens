@@ -1,0 +1,34 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:4051811) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m5/studio-gateway.test.ts (9 tests) 36285ms
+   ✓ M5 Studio Gateway: the only origin the browser sees > binds 127.0.0.1 on a random port and answers a rebound Host header with nothing  7523ms
+   ✓ M5 Studio Gateway: the only origin the browser sees > requires its session cookie for the API, and issues it HttpOnly and SameSite  6776ms
+   ✓ M5 Studio Gateway: the only origin the browser sees > answers every page with a no-referrer policy, a self-only CSP and no framing  3481ms
+   ✓ M5 Studio Gateway: the only origin the browser sees > never publishes the project's absolute path  3735ms
+   ✓ M5 Studio Gateway: the only origin the browser sees > refuses every write that the OpenFilm capability map does not open  3742ms
+   ✓ M5 Studio Gateway: the only origin the browser sees > never proxies the upstream's own edit endpoint  3550ms
+   ✓ M5 Studio Gateway: the only origin the browser sees > refuses a write that does not come from the Gateway's own origin  3662ms
+   ✓ M5 Studio Gateway: the only origin the browser sees > refuses a direct call from the Gateway's origin to the Host, and changes nothing  3814ms
+ ✓ tests/agent-driven/integration/isolated-studio.test.ts (9 tests) 14687ms
+   ✓ starts the actual pinned Studio in an owned child, isolates its key/state, and waits for both listeners to stop  2200ms
+   ✓ stops its real Studio child when the owning parent is actually killed  2154ms
+   ✓ retries a failed Gateway composition using a fresh actual native child instead of caching a rejected startup  3094ms
+   ✓ does not launch a native server when close races the real upstream probe  1028ms
+   ✓ renders an actual nonempty native page offline, blocks a different-origin local request, and closes its real Chromium group  1331ms
+   ✓ also cleans failed Gateway composition in the preserved legacy startup branch before retry  2668ms
+   ✓ aborts an actually hanging native open request before waiting for shutdown  2209ms
+(node:4053686) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m5/workbench.test.ts (3 tests) 9348ms
+   ✓ M5 workbench: the read model over a real migrated target > publishes the target's own projection, its source lineage and the Gateway's preview  4256ms
+   ✓ M5 workbench: the read model over a real migrated target > publishes no path, no token and no adapter class name  3936ms
+   ✓ M5 workbench: the read model over a real migrated target > refuses a project that was never migrated, and one that does not exist  1156ms
+
+ Test Files  3 passed (3)
+      Tests  21 passed (21)
+   Start at  05:16:13
+   Duration  72.60s (transform 4.85s, setup 0ms, collect 6.72s, tests 60.32s, environment 0ms, prepare 3.70s)
+

@@ -1,0 +1,19 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+ ✓ tests/agent-driven/integration/owned-runtime.test.ts (7 tests) 75748ms
+   ✓ uses real flock, persistent instance generations, authenticated HTTP and actual MCP without fake readiness  46523ms
+   ✓ refuses the actual Host child entry without an inherited kernel lock  3593ms
+   ✓ refuses a second Host after its live predecessor lock path is unlinked, then permits a real stopped restart  22614ms
+   ✓ rejects a private FIFO without blocking the launcher event loop  395ms
+   ✓ cancels only its spawned Host when TERM reaches the wrapper before Host readiness  2603ms
+(node:4058288) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/host-close-lifecycle.test.ts (1 test) 3270ms
+   ✓ joins simultaneous Host closes and lets an admitted real HTTP handler finish before closing SQLite  3269ms
+
+ Test Files  2 passed (2)
+      Tests  8 passed (8)
+   Start at  05:18:40
+   Duration  91.03s (transform 1.81s, setup 0ms, collect 8.20s, tests 79.02s, environment 0ms, prepare 2.54s)
+

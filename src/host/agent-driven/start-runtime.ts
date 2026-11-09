@@ -29,7 +29,7 @@ async function start(){
   rotationFailed=false;credential={token:next.token,expires_at:next.principal.expires_at};
  })().finally(()=>{rotating=undefined;});
  let listening=false;
- const host=new NarralensHost({catalog:new ProjectCatalog(new Map()),dbPath:join(root,'host.sqlite'),snapshotsRoot:join(root,'snapshots'),adoptionStagingRoot:join(root,'adoption-stage'),migrationsRoot:join(root,'migrations'),derivedRoot:join(root,'derived'),openFilmVendorRoot:vendorRoot,
+ const host=new NarralensHost({catalog:new ProjectCatalog(new Map()),dbPath:join(root,'host.sqlite'),snapshotsRoot:join(root,'snapshots'),adoptionStagingRoot:join(root,'adoption-stage'),migrationsRoot:join(root,'migrations'),derivedRoot:join(root,'derived'),openFilmVendorRoot:vendorRoot,isolatedStudioRuntimeRoot:join(root,'studio-runtime','generation-'+identity.generation),
   agentApplication:instance=>app=new CreationApplication(instance,{createdRoot:join(root,'projects'),vendorRoot,
    workbench:{principalId:'local-owner',operatorSecret},
    ...(process.env.NARRALENS_LOCAL_ASSETS_ROOT?{localAssets:{sourceRoot:resolve(process.env.NARRALENS_LOCAL_ASSETS_ROOT),storageRoot:join(root,'local-assets')}}:{}),

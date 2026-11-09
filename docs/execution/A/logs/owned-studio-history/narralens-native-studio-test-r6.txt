@@ -1,0 +1,30 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:4023651) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m5/studio-gateway.test.ts (9 tests) 35208ms
+   ✓ M5 Studio Gateway: the only origin the browser sees > binds 127.0.0.1 on a random port and answers a rebound Host header with nothing  7671ms
+   ✓ M5 Studio Gateway: the only origin the browser sees > requires its session cookie for the API, and issues it HttpOnly and SameSite  3759ms
+   ✓ M5 Studio Gateway: the only origin the browser sees > answers every page with a no-referrer policy, a self-only CSP and no framing  4646ms
+   ✓ M5 Studio Gateway: the only origin the browser sees > never publishes the project's absolute path  4063ms
+   ✓ M5 Studio Gateway: the only origin the browser sees > refuses every write that the OpenFilm capability map does not open  4002ms
+   ✓ M5 Studio Gateway: the only origin the browser sees > never proxies the upstream's own edit endpoint  3745ms
+   ✓ M5 Studio Gateway: the only origin the browser sees > refuses a write that does not come from the Gateway's own origin  3534ms
+   ✓ M5 Studio Gateway: the only origin the browser sees > refuses a direct call from the Gateway's origin to the Host, and changes nothing  3785ms
+ ✓ tests/agent-driven/integration/isolated-studio.test.ts (4 tests) 6608ms
+   ✓ starts the actual pinned Studio in an owned child, isolates its key/state, and waits for both listeners to stop  2006ms
+   ✓ stops its real Studio child when the owning parent is actually killed  1475ms
+   ✓ retries a failed Gateway composition using a fresh actual native child instead of caching a rejected startup  3125ms
+(node:4024673) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m5/workbench.test.ts (3 tests) 9301ms
+   ✓ M5 workbench: the read model over a real migrated target > publishes the target's own projection, its source lineage and the Gateway's preview  4348ms
+   ✓ M5 workbench: the read model over a real migrated target > publishes no path, no token and no adapter class name  3915ms
+   ✓ M5 workbench: the read model over a real migrated target > refuses a project that was never migrated, and one that does not exist  1037ms
+
+ Test Files  3 passed (3)
+      Tests  16 passed (16)
+   Start at  04:44:19
+   Duration  63.42s (transform 4.77s, setup 0ms, collect 6.72s, tests 51.12s, environment 0ms, prepare 3.63s)
+

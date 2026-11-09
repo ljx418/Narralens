@@ -1,0 +1,25 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+ ❯ tests/agent-driven/integration/isolated-studio.test.ts (2 tests | 1 failed) 1840ms
+   × starts the actual pinned Studio in an owned child, isolates its key/state, and waits for both listeners to stop 1837ms
+     → The owned native Studio is unavailable (owned_studio: UNAVAILABLE)
+   ✓ refuses a symlinked runtime directory before importing or starting upstream 2ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/isolated-studio.test.ts > starts the actual pinned Studio in an owned child, isolates its key/state, and waits for both listeners to stop
+Error: The owned native Studio is unavailable (owned_studio: UNAVAILABLE)
+ ❯ unavailable src/host/m5/isolated-studio.ts:7:64
+
+ ❯ failed src/host/m5/isolated-studio.ts:41:39
+ ❯ ChildProcess.message src/host/m5/isolated-studio.ts:49:228
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 1 passed (2)
+   Start at  04:39:05
+   Duration  3.75s (transform 107ms, setup 0ms, collect 215ms, tests 1.84s, environment 0ms, prepare 1.12s)
+

@@ -1,0 +1,8 @@
+{
+  "session": 96169,
+  "command": "corepack pnpm exec tsc --noEmit && NARRALENS_A_STUDIO_EVIDENCE_ROOT=docs/execution/A/logs/owned-studio-r18/artifacts corepack pnpm exec vitest run --config vitest.config.ts tests/agent-driven/integration/isolated-studio.test.ts tests/m5/workbench.test.ts tests/m5/studio-gateway.test.ts tests/agent-driven/integration/host-close-lifecycle.test.ts",
+  "actual_composite_exit": 0,
+  "actual_files": 4,
+  "actual_tests": 23,
+  "note": "final current source typecheck and affected regression, not whole A"
+}

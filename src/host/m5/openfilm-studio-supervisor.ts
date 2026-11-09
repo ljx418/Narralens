@@ -1,3 +1,4 @@
+import {startIsolatedStudio} from './isolated-studio.js';
 import { createHash } from "node:crypto";
 import type { Dirent } from "node:fs";
 import { readFile, readdir, realpath } from "node:fs/promises";
@@ -85,6 +86,8 @@ export interface StudioSeamProbe {
 export interface OpenFilmStudioSupervisorDeps {
   /** The pinned checkout. Never searched for; never another revision. */
   readonly vendorRoot: string;
+  /** A-mode private state; absent only for the preserved legacy entry. */
+  readonly isolatedRuntimeRoot?: string;
   /** The migrated target's directory, so the Studio can open it. */
   readonly targetRootOf: (projectId: string) => Promise<string>;
   /** Called with the started Studio, so the Gateway can be built around it. */
@@ -100,6 +103,8 @@ export interface StartedStudio {
   readonly port: number;
   readonly key: string;
   readonly close: () => Promise<void>;
+  /** Private owned-child liveness; absent for the retained in-process legacy seam. */
+  readonly isAlive?: () => boolean;
 }
 
 const sha256 = (bytes: Buffer | string): string => createHash("sha256").update(bytes).digest("hex");
@@ -149,6 +154,11 @@ export async function digestDirectory(root: string, prefix: string): Promise<Rec
 }
 
 export class OpenFilmStudioSupervisor {
+  #closing = false;
+  readonly #stop = new AbortController();
+  #closeTask: Promise<void> | undefined;
+  readonly #inFlight = new Set<Promise<unknown>>();
+
   readonly #deps: OpenFilmStudioSupervisorDeps;
   #probe: Promise<StudioSeamProbe> | undefined;
   #studio: Promise<StartedStudio> | undefined;
@@ -185,16 +195,22 @@ export class OpenFilmStudioSupervisor {
   async ensure(projectId: string, correlationId: string): Promise<{
     kind: "openfilm-studio"; url: string; bridge_version: 1;
   }> {
-    const probe = await this.probe();
-    if (!probe.ok) {
-      throw new HttpError(503, "ENGINE_UNAVAILABLE",
-        `OpenFilm Studio is unavailable: ${probe.reason}`,
-        { stage: "M5_BLOCKED_ENV" }, correlationId);
-    }
-    const studio = await this.#start();
-    const root = await this.#deps.targetRootOf(projectId);
-    const opened = await this.#openInStudio(studio, root, projectId, correlationId);
-    return { kind: "openfilm-studio", url: opened, bridge_version: 1 };
+    if (this.#closing) throw new HttpError(503, "ENGINE_UNAVAILABLE", "The native Studio is closing");
+    const operation = (async () => {
+      const probe = await this.probe();
+      if (this.#closing) throw new HttpError(503, "ENGINE_UNAVAILABLE", "The native Studio is closing");
+      if (!probe.ok) throw new HttpError(503, "ENGINE_UNAVAILABLE", "OpenFilm Studio is unavailable", { stage: "M5_BLOCKED_ENV" }, correlationId);
+      const root = await this.#deps.targetRootOf(projectId);
+      if (this.#closing) throw new HttpError(503, "ENGINE_UNAVAILABLE", "The native Studio is closing");
+      const studio = await this.#start();
+      if (this.#closing) throw new HttpError(503, "ENGINE_UNAVAILABLE", "The native Studio is closing");
+      const opened = await this.#openInStudio(studio, root, projectId, correlationId);
+      if (this.#closing) throw new HttpError(503, "ENGINE_UNAVAILABLE", "The native Studio is closing");
+      return { kind: "openfilm-studio" as const, url: opened, bridge_version: 1 as const };
+    })();
+    this.#inFlight.add(operation);
+    try { return await operation; }
+    finally { this.#inFlight.delete(operation); }
   }
 
   /**
@@ -204,15 +220,34 @@ export class OpenFilmStudioSupervisor {
    * an editor listening on loopback with a launch key nobody is holding. The Host calls
    * this when it closes, and a second call is a no-op.
    */
-  async close(): Promise<void> {
-    const started = this.#studio;
-    this.#studio = undefined;
-    if (started === undefined) return;
-    const studio = await started.catch(() => undefined);
-    await studio?.close();
+  close(): Promise<void> {
+    this.#closing = true;
+    this.#stop.abort();
+    return this.#closeTask ??= (async () => {
+      await Promise.allSettled([...this.#inFlight]);
+      const started = this.#studio;
+      this.#studio = undefined;
+      const studio = await started?.catch(() => undefined);
+      await studio?.close();
+    })();
   }
 
-  async #start(): Promise<StartedStudio> {    this.#studio ??= (async () => {
+  async #start(): Promise<StartedStudio> {
+    if (this.#studio) {
+      const previous = this.#studio;
+      const running = await previous;
+      if (running.isAlive?.() === false) {
+        await running.close();
+        if (this.#studio === previous) this.#studio = undefined;
+      }
+    }
+    if (this.#closing) throw new HttpError(503, "ENGINE_UNAVAILABLE", "The native Studio is closing");
+    this.#studio ??= (async () => {
+      if (this.#deps.isolatedRuntimeRoot) {
+        const studio = await startIsolatedStudio({vendorRoot:this.#deps.vendorRoot,runtimeRoot:this.#deps.isolatedRuntimeRoot});
+        try { await this.#deps.onStudio(studio); return studio; }
+        catch(error) { await studio.close(); throw error; }
+      }
       const moduleUrl = pathToFileURL(resolve(this.#deps.vendorRoot, STUDIO_SERVER_MODULE)).href;
       let loaded: Record<string, unknown>;
       try { loaded = await import(/* @vite-ignore */ moduleUrl) as Record<string, unknown>; }
@@ -232,10 +267,15 @@ export class OpenFilmStudioSupervisor {
         editorDir: resolve(this.#deps.vendorRoot, STUDIO_EDITOR_DIR),
         working: () => [],
       });
-      await this.#deps.onStudio(studio);
-      return studio;
+      try { await this.#deps.onStudio(studio); return studio; }
+      catch (error) { await studio.close(); throw error; }
     })();
-    return await this.#studio;
+    const pending = this.#studio;
+    try { return await pending; }
+    catch (error) {
+      if (this.#studio === pending) this.#studio = undefined;
+      throw error;
+    }
   }
 
   /**
@@ -249,6 +289,7 @@ export class OpenFilmStudioSupervisor {
     correlationId: string): Promise<string> {
     const response = await fetch(`${studio.origin}/api/projects`, {
       method: "POST",
+      signal: AbortSignal.any([this.#stop.signal, AbortSignal.timeout(30000)]),
       headers: { "x-studio-key": studio.key, "content-type": "application/json" },
       body: JSON.stringify({ path: root, create: false }),
     });

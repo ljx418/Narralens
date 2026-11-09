@@ -1,0 +1,390 @@
+{
+  "schema_version": 1,
+  "base_commit": "452b4a2605381ef8d71de8cca1f539df2b2296e1",
+  "capture_dirty": true,
+  "declaration": "OWNED_STUDIO_COMPONENT_INTERNAL_EVIDENCED",
+  "scope": "owned native Studio process/offline frame/shutdown only; no created-workbench/whole-A claim",
+  "sources": [
+    {
+      "path": "src/host/agent-driven/start-runtime.ts",
+      "bytes": 5800,
+      "sha256": "191949a72ae4bd76c24ea4e59791149c2334db30cfaa19809c41c571de4b304a"
+    },
+    {
+      "path": "src/host/m5/isolated-studio.ts",
+      "bytes": 5419,
+      "sha256": "444c19526af3962023d587ef5009d11bdd3a6fa2addfb064d5d4c1ca800b9fcd"
+    },
+    {
+      "path": "src/host/m5/openfilm-studio-child.mjs",
+      "bytes": 3119,
+      "sha256": "e0fe77a46b2d3eb5be50882eb45b942bc05e9facb83714488ce6a5128a28ad8c"
+    },
+    {
+      "path": "src/host/m5/openfilm-studio-offline-wrapper.mjs",
+      "bytes": 1105,
+      "sha256": "dc10f33fd1442ddaf205c69cadc66e9f9cf6b3354d7d10e4ffc0dd37ba028106"
+    },
+    {
+      "path": "src/host/m5/openfilm-studio-supervisor.ts",
+      "bytes": 17992,
+      "sha256": "d2fec538dad76d55846d7f5f08f555e3676bbc9d8125ad866c2ddc92735eb3d7"
+    },
+    {
+      "path": "src/host/server.ts",
+      "bytes": 106102,
+      "sha256": "34b6f05153beb87fe979b962d7f4b943ffe6a4af3b5d1cfbad5213534f14391d"
+    },
+    {
+      "path": "tests/agent-driven/integration/helpers/isolated-studio-parent.ts",
+      "bytes": 1971,
+      "sha256": "fc81ef0ceb2a3bc3036560cc53c48e9d56c49c19f2e44a3b0134ac94487e80b2"
+    },
+    {
+      "path": "tests/agent-driven/integration/helpers/legacy-studio-retry.ts",
+      "bytes": 1018,
+      "sha256": "91b2654fbe7d73667faf45783457a0a3a002d1c73e8f9cc86a27de7393bafa07"
+    },
+    {
+      "path": "tests/agent-driven/integration/isolated-studio.test.ts",
+      "bytes": 16893,
+      "sha256": "c23a69d77008a66733bc197e5b166956c08e153162cc8af421e0ff7978b3017a"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "docs/execution/A/logs/owned-studio-r16/artifacts/nonempty-diagnostic-frame.jpg",
+      "bytes": 870,
+      "sha256": "09d7df475beb66756147ccde1c834e83ce7405c89102ecde438077e0302b63ac"
+    },
+    {
+      "path": "docs/execution/A/logs/owned-studio-r16/artifacts/nonempty-diagnostic.json",
+      "bytes": 440,
+      "sha256": "18b7da9715c0e67a3dc49452e33a8e73a6165fa952a9275bfd97b9c2febb59e8"
+    },
+    {
+      "path": "docs/execution/A/logs/owned-studio-r16/command.json",
+      "bytes": 563,
+      "sha256": "3861b26bb655a3da5d203932df2ff3d7b5e09a934e048bfbe9a2ca2c4c03d1e4"
+    },
+    {
+      "path": "docs/execution/A/logs/owned-studio-r16/tests.txt",
+      "bytes": 3072,
+      "sha256": "32c7f3ffac73c5d0a68af6ad2f96a443b620bca28e45281f347a5e158a256c76"
+    },
+    {
+      "path": "docs/execution/A/logs/owned-studio-r16/typecheck.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/execution/A/logs/owned-studio-r17/command.json",
+      "bytes": 503,
+      "sha256": "c9c89323e92e20facb5d4a35e38408a794791ada13f79cfae975f07b57dc2e5a"
+    },
+    {
+      "path": "docs/execution/A/logs/owned-studio-r17/credential-scan.json",
+      "bytes": 1198,
+      "sha256": "fc9f3b0ae4bf3dbac3496f1d1e7f7b1a889d1c7c65f145c49522b6501eb43a83"
+    },
+    {
+      "path": "docs/execution/A/logs/owned-studio-r17/secret-scan.txt",
+      "bytes": 89,
+      "sha256": "e6e59db05d8418c10b4b2bb64d0f7a03fd1dbee7b7c1666cea958b422fc41728"
+    },
+    {
+      "path": "docs/execution/A/logs/owned-studio-r17/tests.txt",
+      "bytes": 1214,
+      "sha256": "c651bf9ebc02f84f768aed76a528168d31ccabaff87ac6c1343c9af02c23d1b5"
+    },
+    {
+      "path": "docs/execution/A/logs/owned-studio-r18/artifacts/nonempty-diagnostic-frame.jpg",
+      "bytes": 870,
+      "sha256": "09d7df475beb66756147ccde1c834e83ce7405c89102ecde438077e0302b63ac"
+    },
+    {
+      "path": "docs/execution/A/logs/owned-studio-r18/artifacts/nonempty-diagnostic.json",
+      "bytes": 440,
+      "sha256": "18b7da9715c0e67a3dc49452e33a8e73a6165fa952a9275bfd97b9c2febb59e8"
+    },
+    {
+      "path": "docs/execution/A/logs/owned-studio-r18/command.json",
+      "bytes": 540,
+      "sha256": "b159c3cfb29f7bc5dc434d9147a237db59aa5b3e7b490e65add161185469b8ee"
+    },
+    {
+      "path": "docs/execution/A/logs/owned-studio-r18/tests.txt",
+      "bytes": 3563,
+      "sha256": "48a0cd172b9cfaca5ed0c87af77f87476c3359c08864913567c07c517aa3e194"
+    },
+    {
+      "path": "docs/execution/A/logs/owned-studio-r18/typecheck.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/execution/A/logs/owned-studio-history/narralens-native-studio-diagnostic-r12.txt",
+      "bytes": 2364,
+      "sha256": "99e3385738113d564c9ef89adbcd35578e8bf9cdc776da3f8384a751bca34bc7"
+    },
+    {
+      "path": "docs/execution/A/logs/owned-studio-history/narralens-native-studio-diagnostic-r13.txt",
+      "bytes": 3084,
+      "sha256": "9c3796dc5d69eb5c8b15588525c1b6cf0a0239beac184cb0263fe3b1f57bcf6d"
+    },
+    {
+      "path": "docs/execution/A/logs/owned-studio-history/narralens-native-studio-test-r10.txt",
+      "bytes": 1663,
+      "sha256": "30071d4ce54607a5ee0a8500097e134f2229c3bc79ebb9e83f18274ff9bec84d"
+    },
+    {
+      "path": "docs/execution/A/logs/owned-studio-history/narralens-native-studio-test-r11.txt",
+      "bytes": 1771,
+      "sha256": "9e6ab4b72d7a7b1022a41dd3c2c7b347e7bf533ca43df56189ec832b501ddb20"
+    },
+    {
+      "path": "docs/execution/A/logs/owned-studio-history/narralens-native-studio-test-r14.txt",
+      "bytes": 2981,
+      "sha256": "6af37388709e8026f37070eb6437de8f30756be9f25e8cb18613c6dd07db821e"
+    },
+    {
+      "path": "docs/execution/A/logs/owned-studio-history/narralens-native-studio-test-r15.txt",
+      "bytes": 1102,
+      "sha256": "76d3d8824cb03e125f4c5f5b5ff0b6eef8dcf37c19dc2cfb3d12fdee6c054fa8"
+    },
+    {
+      "path": "docs/execution/A/logs/owned-studio-history/narralens-native-studio-test-r2.txt",
+      "bytes": 1171,
+      "sha256": "6f8278c17a3e4c5c9a943405cc868198d28f3c4ba94bd661c25869fb410a14c8"
+    },
+    {
+      "path": "docs/execution/A/logs/owned-studio-history/narralens-native-studio-test-r3.txt",
+      "bytes": 1212,
+      "sha256": "6a32efd441ae89f0a8947da7af56e8dbbe9dd266971271b7ba4e42aea2cb896c"
+    },
+    {
+      "path": "docs/execution/A/logs/owned-studio-history/narralens-native-studio-test-r4.txt",
+      "bytes": 468,
+      "sha256": "7e3f4d6fabfabe67011aed4c6c360985d22e3aba5aedf76a2c6f377296a28f38"
+    },
+    {
+      "path": "docs/execution/A/logs/owned-studio-history/narralens-native-studio-test-r5.txt",
+      "bytes": 553,
+      "sha256": "7d1af0ea1e1941bf6c34aabea3194ceeadfac4df6eb0beeee6fd54b2e94aa6c5"
+    },
+    {
+      "path": "docs/execution/A/logs/owned-studio-history/narralens-native-studio-test-r6.txt",
+      "bytes": 2648,
+      "sha256": "cd1747f935425e92044a4ad4a335057f4f436e586d5170018f4b9f3d394692aa"
+    },
+    {
+      "path": "docs/execution/A/logs/owned-studio-history/narralens-native-studio-test-r7.txt",
+      "bytes": 2523,
+      "sha256": "f8cf784c5f3bd119ecc3f0860fb30ee298e0c1ba5d4233243de17be9c46e4ac5"
+    },
+    {
+      "path": "docs/execution/A/logs/owned-studio-history/narralens-native-studio-test-r8.txt",
+      "bytes": 766,
+      "sha256": "f32943cf2bf68527baf992fda8fba634138549d1e6cd40a4caae3fc70fc024b9"
+    },
+    {
+      "path": "docs/execution/A/logs/owned-studio-history/narralens-native-studio-test-r9.txt",
+      "bytes": 2472,
+      "sha256": "cea122a9be5226ef8417c7fae6c3ebd9aef09e077157b6d103a7fc52e3c567fc"
+    },
+    {
+      "path": "docs/execution/A/logs/owned-studio-history/narralens-native-studio-tsc-r1.txt",
+      "bytes": 159,
+      "sha256": "26608f3ce89075e8abe577f680e2d5ee64bc1ad5985bb09bb4083165789a4ccd"
+    },
+    {
+      "path": "docs/execution/A/logs/owned-studio-history/narralens-native-studio-tsc-r10.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/execution/A/logs/owned-studio-history/narralens-native-studio-tsc-r11.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/execution/A/logs/owned-studio-history/narralens-native-studio-tsc-r14.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/execution/A/logs/owned-studio-history/narralens-native-studio-tsc-r15.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/execution/A/logs/owned-studio-history/narralens-native-studio-tsc-r2.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/execution/A/logs/owned-studio-history/narralens-native-studio-tsc-r4.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/execution/A/logs/owned-studio-history/narralens-native-studio-tsc-r5.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/execution/A/logs/owned-studio-history/narralens-native-studio-tsc-r6.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/execution/A/logs/owned-studio-history/narralens-native-studio-tsc-r7.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/execution/A/logs/owned-studio-history/narralens-native-studio-tsc-r8.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/execution/A/logs/owned-studio-history/narralens-native-studio-tsc-r9.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/execution/A/reviews/isolated-studio-pre-review/REVIEW.md",
+      "bytes": 12157,
+      "sha256": "d272f708a472df5918520a4a8f590bfd538612bba6568b119896030f5d8d9e48"
+    },
+    {
+      "path": "docs/execution/A/reviews/isolated-studio-pre-review/fix-input-hashes.json",
+      "bytes": 2095,
+      "sha256": "7c6a4d3f566f39b7c51af3887a7bfe54e44213828891f3a9e5c389386f2e472d"
+    },
+    {
+      "path": "docs/execution/A/reviews/isolated-studio-pre-review/fix-read/src__host__m5__isolated-studio.ts",
+      "bytes": 5068,
+      "sha256": "4e5bba911e8a522e881d7696a705b7ffdd726808d7bd4fb3ed344dde54bf3e7f"
+    },
+    {
+      "path": "docs/execution/A/reviews/isolated-studio-pre-review/fix-read/src__host__m5__openfilm-studio-child.mjs",
+      "bytes": 3119,
+      "sha256": "e0fe77a46b2d3eb5be50882eb45b942bc05e9facb83714488ce6a5128a28ad8c"
+    },
+    {
+      "path": "docs/execution/A/reviews/isolated-studio-pre-review/fix-read/src__host__m5__openfilm-studio-offline-wrapper.mjs",
+      "bytes": 1105,
+      "sha256": "dc10f33fd1442ddaf205c69cadc66e9f9cf6b3354d7d10e4ffc0dd37ba028106"
+    },
+    {
+      "path": "docs/execution/A/reviews/isolated-studio-pre-review/fix-read/src__host__m5__openfilm-studio-supervisor.ts",
+      "bytes": 17367,
+      "sha256": "da8679282db1b866b2b794210c06376e735e59b943b5155ecdcf9f2881348da3"
+    },
+    {
+      "path": "docs/execution/A/reviews/isolated-studio-pre-review/fix-read/src__host__render__openfilm-render-pin.json",
+      "bytes": 2693,
+      "sha256": "1b0ddd3dd031352092ae83535f598c7bda1f1ca2cccbb83ad9e377a0ec71bb06"
+    },
+    {
+      "path": "docs/execution/A/reviews/isolated-studio-pre-review/fix-read/src__host__server.ts",
+      "bytes": 105745,
+      "sha256": "87fee45adf43ee8ad93cde9ca11314177f4e4b50492d6bf391cf4d38f2cfe795"
+    },
+    {
+      "path": "docs/execution/A/reviews/isolated-studio-pre-review/fix-read/tests__agent-driven__integration__helpers__legacy-studio-retry.ts",
+      "bytes": 1018,
+      "sha256": "91b2654fbe7d73667faf45783457a0a3a002d1c73e8f9cc86a27de7393bafa07"
+    },
+    {
+      "path": "docs/execution/A/reviews/isolated-studio-pre-review/fix-read/tests__agent-driven__integration__isolated-studio.test.ts",
+      "bytes": 13722,
+      "sha256": "c5b3559caa112c7b65925c77976b2184e49230d7f989078fffccca4628bf9ce5"
+    },
+    {
+      "path": "docs/execution/A/reviews/isolated-studio-pre-review/input-hashes.json",
+      "bytes": 2158,
+      "sha256": "44f7f6477f93badd6626d4681dbefce94dadc7fba3e11a3e9db8f54b683a88cb"
+    },
+    {
+      "path": "docs/execution/A/reviews/isolated-studio-pre-review/inputs/docs__execution__A__releases__A05-created-native-workbench.md",
+      "bytes": 2541,
+      "sha256": "b7ba822644aaf720d3395bfc6493c6277dc3a509d50cc37251bda8126c0220b6"
+    },
+    {
+      "path": "docs/execution/A/reviews/isolated-studio-pre-review/inputs/src__host__agent-driven__start-runtime.ts",
+      "bytes": 5800,
+      "sha256": "191949a72ae4bd76c24ea4e59791149c2334db30cfaa19809c41c571de4b304a"
+    },
+    {
+      "path": "docs/execution/A/reviews/isolated-studio-pre-review/inputs/src__host__m5__isolated-studio.ts",
+      "bytes": 4708,
+      "sha256": "cd5e316f542cf3cdc5089be2674b86521e4af085e5598549c8a2464344f962dc"
+    },
+    {
+      "path": "docs/execution/A/reviews/isolated-studio-pre-review/inputs/src__host__m5__openfilm-studio-child.mjs",
+      "bytes": 2955,
+      "sha256": "842e210196cf918d99fd6605acf5076ca76db4af7478abadd55884cf3744b6fa"
+    },
+    {
+      "path": "docs/execution/A/reviews/isolated-studio-pre-review/inputs/src__host__m5__openfilm-studio-supervisor.ts",
+      "bytes": 17367,
+      "sha256": "da8679282db1b866b2b794210c06376e735e59b943b5155ecdcf9f2881348da3"
+    },
+    {
+      "path": "docs/execution/A/reviews/isolated-studio-pre-review/inputs/src__host__server.ts",
+      "bytes": 105745,
+      "sha256": "87fee45adf43ee8ad93cde9ca11314177f4e4b50492d6bf391cf4d38f2cfe795"
+    },
+    {
+      "path": "docs/execution/A/reviews/isolated-studio-pre-review/inputs/tests__agent-driven__integration__helpers__isolated-studio-parent.ts",
+      "bytes": 479,
+      "sha256": "8cf29fe5745b85f04ae5327ef8653307f945eb636897ea22a30c9257ae8ed396"
+    },
+    {
+      "path": "docs/execution/A/reviews/isolated-studio-pre-review/inputs/tests__agent-driven__integration__isolated-studio.test.ts",
+      "bytes": 7251,
+      "sha256": "9f0fd28d3f0c00416945f74ca716273bd84eacef957d814d9b5ed8fc9aac5521"
+    }
+  ],
+  "commands": {
+    "owned-studio-r16": {
+      "session": 78911,
+      "command": "corepack pnpm exec tsc --noEmit && NARRALENS_A_STUDIO_EVIDENCE_ROOT=docs/execution/A/logs/owned-studio-r16/artifacts corepack pnpm exec vitest run --config vitest.config.ts tests/agent-driven/integration/isolated-studio.test.ts tests/m5/workbench.test.ts tests/m5/studio-gateway.test.ts tests/agent-driven/integration/host-close.test.ts",
+      "actual_composite_exit": 0,
+      "actual_files": 3,
+      "actual_tests": 21,
+      "note": "host-close.test.ts selector did not exist and was not exercised; r17 explicitly ran the correct file"
+    },
+    "owned-studio-r17": {
+      "session": 29179,
+      "command": "corepack pnpm exec vitest run --config vitest.config.ts tests/agent-driven/integration/host-close-lifecycle.test.ts tests/agent-driven/integration/owned-runtime.test.ts && NARRALENS_SECRET_SCAN_OUT=docs/execution/A/logs/owned-studio-r17/credential-scan.json corepack pnpm exec tsx tools/secret-scan.ts",
+      "actual_composite_exit": 0,
+      "actual_files": 2,
+      "actual_tests": 8,
+      "note": "before addition of stopped-Studio retry observation; unchanged launcher path"
+    },
+    "owned-studio-r18": {
+      "session": 96169,
+      "command": "corepack pnpm exec tsc --noEmit && NARRALENS_A_STUDIO_EVIDENCE_ROOT=docs/execution/A/logs/owned-studio-r18/artifacts corepack pnpm exec vitest run --config vitest.config.ts tests/agent-driven/integration/isolated-studio.test.ts tests/m5/workbench.test.ts tests/m5/studio-gateway.test.ts tests/agent-driven/integration/host-close-lifecycle.test.ts",
+      "actual_composite_exit": 0,
+      "actual_files": 4,
+      "actual_tests": 23,
+      "note": "final current source typecheck and affected regression, not whole A"
+    }
+  },
+  "review": {
+    "internal": "actual typecheck + final four files23 tests; runtime seven tests separately earlier on same launcher configuration",
+    "independent": "REVIEW_PENDING",
+    "pre_review": "four concrete findings retained; source fixes and targeted tests, Host-specific late callback real integration still pending"
+  },
+  "not_closed": [
+    "created snapshot-derived workspace (never hand author/snapshot directly to native metadata writer)",
+    "created UI read model and scoped Gateway delegate",
+    "actual loaded document/settings/subtitle observation and NativeAck",
+    "Run/task/assembly/adoption/formal render/QC/Delivery",
+    "authorized human footage/Chinese recording real short film and dual exports",
+    "whole A regression/recovery/independent review/report/services/human acceptance"
+  ]
+}

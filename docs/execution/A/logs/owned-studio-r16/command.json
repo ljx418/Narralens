@@ -1,0 +1,8 @@
+{
+  "session": 78911,
+  "command": "corepack pnpm exec tsc --noEmit && NARRALENS_A_STUDIO_EVIDENCE_ROOT=docs/execution/A/logs/owned-studio-r16/artifacts corepack pnpm exec vitest run --config vitest.config.ts tests/agent-driven/integration/isolated-studio.test.ts tests/m5/workbench.test.ts tests/m5/studio-gateway.test.ts tests/agent-driven/integration/host-close.test.ts",
+  "actual_composite_exit": 0,
+  "actual_files": 3,
+  "actual_tests": 21,
+  "note": "host-close.test.ts selector did not exist and was not exercised; r17 explicitly ran the correct file"
+}

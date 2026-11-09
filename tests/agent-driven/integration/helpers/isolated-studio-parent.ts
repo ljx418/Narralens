@@ -1,0 +1,20 @@
+import {mkdir,writeFile} from 'node:fs/promises';
+import {join,dirname} from 'node:path';
+import {filmHtml,clipIdFor} from '../../../../src/host/projects/openfilm-migrator.js';
+import {FPS_30} from '../../../../src/host/engine/time-model.js';
+import {startIsolatedStudio} from '../../../../src/host/m5/isolated-studio.js';
+const [runtimeRoot,vendorRoot]=process.argv.slice(2);
+if(!runtimeRoot||!vendorRoot)throw new Error('Missing test arguments');
+const studio=await startIsolatedStudio({runtimeRoot,vendorRoot});
+const projection=join(dirname(runtimeRoot),'projection'),clip=clipIdFor('diagnostic');
+await mkdir(join(projection,'scenes'),{recursive:true,mode:0o700});
+await writeFile(join(projection,'film.html'),filmHtml([{source_id:'diagnostic',start_frame:0,end_frame_exclusive:30,title:'Parent-loss diagnostic'}],null,FPS_30,30,{width:1280,height:720}),{mode:0o600});
+await writeFile(join(projection,'scenes',clip+'.html'),'<!doctype html><html><body>Diagnostic<script>window.film={duration:1,width:1280,height:720,frame(){}};</script></body></html>',{mode:0o600});
+const opened=await fetch(studio.origin+'/api/projects',{method:'POST',headers:{'x-studio-key':studio.key,'Content-Type':'application/json'},body:JSON.stringify({path:projection,create:false})});
+if(!opened.ok)throw new Error('Diagnostic native open failed');
+const project=await opened.json() as {project:{id:string}};
+const frame=await fetch(studio.origin+'/api/projects/'+project.project.id+'/media?what=frame&path='+encodeURIComponent('scenes/'+clip+'.html')+'&ms=0&w=160',{headers:{'x-studio-key':studio.key},signal:AbortSignal.timeout(30000)});
+if(!frame.ok||frame.headers.get('content-type')!=='image/jpeg')throw new Error('Diagnostic browser frame failed');
+await frame.arrayBuffer();
+// Never print its private launch key. Parent lifetime is deliberately controlled by test.
+process.stdout.write(JSON.stringify({origin:studio.origin,filmOrigin:studio.filmOrigin,pid:studio.childPid})+'\n');
