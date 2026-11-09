@@ -31,7 +31,7 @@ no install, no `tsc`, no test run, no browser and no ffmpeg. Every test in this 
 `src/host/creative/product-repository.ts` and
 `requests/002-exact-record-mapping.md`.
 
-- A **closed** `ProductCollection` union of 24 members, one per frozen `cp_a0_*` table.
+- A **closed** `ProductCollection` union of 25 members, one per frozen `cp_a0_*` table.
   `cp_a0_render_attempt` and `cp_a0_delivery` are deliberately excluded (MEDIA's rows);
   `cp_a0_migration` is MAIN's; `cp_a0_event` is read-only for the lane because its
   `event_id` is a foreign key onto MAIN's `outbox`.

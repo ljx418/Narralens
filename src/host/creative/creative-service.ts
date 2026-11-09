@@ -46,7 +46,8 @@ import type {
   QuestionVersionRecord,
   TrustedCallerContext,
 } from "./product-repository.js";
-import { isTrustedCallerContext, isTrustedUi, nowEpochSeconds, ProductError } from "./trusted-context.js";
+import { nowEpochSeconds } from "./time.js";
+import { isTrustedCallerContext, isTrustedUi, ProductError } from "./trusted-context.js";
 
 /** The operations the lane records idempotency receipts for. */
 export const CREATIVE_OPERATIONS = {
