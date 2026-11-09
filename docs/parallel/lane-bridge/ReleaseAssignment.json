@@ -13,7 +13,7 @@
   "contract_manifest_sha256": "532cd43c963a1c94de5f8ce34f3c6eb7281fded80047f74dc5dbe1a70aa65170",
   "directory": "/mnt/c/workspace/videoworkline/Narralens-agents/bridge-observability",
   "owner": "Codex /root/a_bridge_lead",
-  "writer": "Codex lead acceptance/documentation only; Claude source writer stopped",
+  "writer": "Codex documentation only; all source writers stopped",
   "session": "d94ac073-b5b8-42c6-9b4d-f0eef57d7850",
   "allowed_new_prefixes": [
     "src/launcher/",
@@ -36,14 +36,17 @@
     "pnpm exec vitest run tests/agent-driven/bridge --maxWorkers=1",
     "pnpm exec tsc --noEmit"
   ],
-  "resource_reservation": "BRIDGE-light admitted; Codex frozen recheck only; no other lane test",
+  "resource_reservation": "RELEASED to MAIN, exec36533 exit0; no more lane checks",
   "rollback": "Unregistered module disable; preserve old editor and all content",
-  "independent_review": "Codex module recheck pending; MAIN external composition review pending",
+  "independent_review": "Codex recheck PASS; MAIN external composition review REVIEW_PENDING",
   "human_gate": "NOT_RUN",
   "previous_exec_session": 37149,
   "previous_exit_code": 0,
   "source_writer_session": "d94ac073-b5b8-42c6-9b4d-f0eef57d7850",
   "source_writer_pid": 3614630,
   "source_writer_exec": 44062,
-  "source_writer_exit_code": 0
+  "source_writer_exit_code": 0,
+  "completion": "MODULE_VALIDATED_PRODUCTION_ASSEMBLY_PENDING",
+  "tested_code_sha": "a325f9483cb5106aeb829121fc20ac34496e34e3",
+  "acceptance_evidence": "docs/parallel/lane-bridge/MODULE-ACCEPTANCE.json"
 }

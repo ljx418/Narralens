@@ -581,7 +581,7 @@ the cursor TTL and the cursor codec were all removed in round 2.
 **Module-level only, with the lane's own validation green.** A-COLD, A-MCP and
 A-EVENTS are covered by cases that ran and passed in this lane (round 4: 7 files,
 108 tests, exit 0; `tsc --noEmit` exit 0). What that is: the lane's modules behave as
-the frozen contract specifies, checked against the frozen vectors and small local
+the frozen contract specifies, checked against the frozen runtime schema/registry and explicit test cases with small local
 stand-ins.
 
 What it is **not**: this is not a production Host PASS, not an integration PASS, not
@@ -620,3 +620,14 @@ write again unless it is handed back.
 
 ## Codex acceptance transfer (actual)
 Validation exec44062 exit0; Claude PID3614630 and immediate children absent. Initial37149, review1 63426, review2 78749 all terminal; no429. Single writer now Codex for documents/acceptance only. Production source unchanged in validation; test fixture and explicit stdio bound fixes frozen next. Original first FAIL03 retained. MAIN slot remains BRIDGE-light for one final Codex independent frozen tsc+108 tests, then release.
+
+
+## Final Codex recheck and handoff
+
+Source/test freeze: `a325f9483cb5106aeb829121fc20ac34496e34e3`. Claude validation exec44062 exited0 and PID3614630/children are terminal; no429 occurred. Codex independently ran the frozen tree: `pnpm exec tsc --noEmit` exit0; `pnpm exec vitest run tests/agent-driven/bridge --maxWorkers=1 --minWorkers=1` exit0, **7 files / 108 tests PASS**, 91.80s, exec36533 terminal. Evidence09/10 binds that SHA; original FAIL03 remains. No production source changed during validation; fixture correction and dedicated stdio subprocess timeout were reviewed. Acceptance metadata in MODULE-ACCEPTANCE.json. Node v22.22.1, pnpm10.33.0, SDK1.26.0, TS5.9.2, Vitest3.2.4.
+
+BRIDGE-light released to MAIN after recheck, no observed lane test/stdio remnants; subsequent work here is documentation only. Code can be cherry-picked from this branch after MAIN review. Docs/evidence-only follow-up commit does not alter tested production/test bytes. No package, lock, public contract, DB, protected core or other-lane file changed.
+
+Consumption: `src/launcher/index.ts` exposes supervisor and health pure ports; `src/mcp/index.ts` exposes createMcpServer(ApplicationPorts)/createHostApplicationPorts(local HTTP); `src/mcp/stdio-main.ts` and `skills/narralens/bin/narralens-mcp.mjs` are real SDK stdio entrypoints; `src/host/observability/index.ts` exposes snapshot/projection/cursor APIs. Set NARRALENS_HOST_URL and token from MAIN trusted configuration; NARRALENS_FILTER_DIGEST is MAIN policy. MAIN alone registers Host HTTP and injects real auth/persistence/process capabilities.
+
+Module checks pass. Actual A-COLD/A-MCP/A-EVENTS production chains, real Codex/Claude/DSH clients, real Host, whole-suite/build/media/native acknowledgement, external independent review and human gate remain NOT_RUN/REVIEW_PENDING. No A phase or B release is implied.
