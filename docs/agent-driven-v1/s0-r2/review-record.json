@@ -1,0 +1,50 @@
+{
+  "kind": "S0_R2_DESIGN_REVIEW",
+  "status": "READY_FOR_HUMAN_DESIGN_REVIEW",
+  "productionRelease": "NOT_RELEASED",
+  "productionAcceptance": "NOT_RUN",
+  "independentReviews": [
+    {
+      "reviewer": "s0_ux_acceptance_review",
+      "mode": "read-only static and source-image review",
+      "blocker": 0,
+      "major": 0,
+      "fixed": [
+        "old header/theme retained as original image region",
+        "only two product sections",
+        "last-known offline state"
+      ]
+    },
+    {
+      "reviewer": "s0_contract_review",
+      "mode": "read-only contract/source review",
+      "blocker": 0,
+      "major": 0,
+      "fixed": [
+        "all promised DTO fields",
+        "SSE invalidation and snapshot watermark response ordering",
+        "native read acknowledgement independent",
+        "idle nullable agent/range"
+      ]
+    }
+  ],
+  "automatedEvidence": {
+    "design": "design-check.json",
+    "headless": "browser-check.json",
+    "firstFailure": "browser-check.failed-1.json",
+    "metadataToolRegression": "../parallel-tool-tests.json"
+  },
+  "failureExplanation": "first browser check guessed width1420 while real PNG IHDR width1414; derive expected width from the immutable source bytes and correct image-region geometry, no assertion removed",
+  "archify": {
+    "deliver": "9/9 checks, zero composition errors or warnings",
+    "nativeBrowser": "SKIPPED due WSL Chrome discovery; original receipt retained",
+    "supplementaryWindowsCDP": "PASS four desktop sizes; separate from native status",
+    "perceptualReview": "MAIN inspected actual prototype and architecture screenshots; original UI identity preserved, folded by default to retain controls"
+  },
+  "limits": [
+    "historical screenshot is not a live editor",
+    "simulated commit/editor acknowledgement is not business evidence",
+    "old UI functional regression and native loaded-snapshot bridge still NOT_RUN",
+    "MCP/backend/video implementation remains required before A acceptance"
+  ]
+}

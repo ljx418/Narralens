@@ -1,5 +1,7 @@
 # Agent 驱动 V1：后续迭代执行计划
 
+> 2026-11-09用户纠偏（前端实施优先）：保留现有OpenFilm剪辑区和M5导演面板，仅在原导演面板中新增工作流展示、Agent控制台两个可折叠section；服务监控归控制台。工作台呈现同一项目的真实剪辑状态，禁止另建agent-workbench独立前端/聊天入口/时间轴。详情与当前原型见`s0-r2/README.md`（本段路径按当前文档目录解析）。原始PRD功能目标和后台制作计划继续保留，既有审阅/批准/编辑尽量复用原入口。新S0 R2仍待用户核验，不是生产实现release。
+
 版本：R3 / 2026-11-08。文档现场基线 `46ac74138fd668569112969f644e338b891be1b8`，分支 `migration/m2.2-coordinator-persistence`，工作树编写前清洁。
 授权：用户批准继续落盘并重新规划迭代开发计划；**未据此推断批准生产代码实现**。本文件是后续实施主线，六阶段编号与原PRD承诺不变。
 
@@ -24,7 +26,7 @@ R4并行覆盖：用户已认可本计划目标文档，现要求主Agent重划�
 
 AD-S0完成以下可审核交付，不能把当前文档示意直接当产品原型通过：
 
-1. 三阶段实际交互原型：启发简报、选案、业务图/NodeInspector、前后差异、可信批准、监控、断线/错误/重开与导出；模拟部分明确标识。
+1. 依现有工作台逐阶段制作增量原型：两块观测面板、定位原选案/差异/批准/历史入口、监控、断线/错误与原生同步；其余业务继续复用原控件；模拟部分明确标识。
 2. 首轮合同：production instance与auth、MCP tool/resource注册、创建项目与origin、artifact版本/工作流/Decision、审批、job/事件/cursor、导出snapshot、错误与兼容矩阵。
 3. 同步runtime schema/TS/validator的预期定义与黄金向量；DB表/索引/CHECK/迁移/旧库重开方案；不新建第二事实库。
 4. 首轮实际case步骤/fixtures/输出断言、负向矩阵、真实CLI调用与无窗口证据方案；任何需外传/费用单列授权。
@@ -44,7 +46,7 @@ AD-S0完成以下可审核交付，不能把当前文档示意直接当产品原
 | IT-A01 | AD-S1 | 生产实例supervisor、持久目录/启动停止、基础服务就绪与健康TTL | IT-P02 | AD-T01,AD-T32,AD-T34 | PLANNED |
 | IT-A02 | AD-S1 | MCP façade/能力目录、入口Skill、首端真实连接与三端探针 | IT-P02 | AD-T02,AD-T03,AD-T04,AD-T22 | PLANNED |
 | IT-A03 | AD-S1 | 公共创作合同/事件快照游标、提问回答、任务幂等/恢复接缝、Comfy只读目录 | IT-P02 | AD-T09,AD-T26,AD-T27,AD-T33 | PLANNED |
-| IT-A04 | AD-S2 | 一般项目创建/Resolver、初始snapshot、启发简报、结构化脚本/分镜入库 | IT-A01,IT-A03 | AD-T05,AD-T07,AD-T27 | PLANNED |
+| IT-A04 | AD-S2 | 一般项目创建/Resolver、初始snapshot、Agent简报与结构化脚本/分镜入库（不新建前端） | IT-A01,IT-A03 | AD-T05,AD-T07,AD-T27 | PLANNED |
 | IT-A05 | AD-S2 | 本地资产/录音→所选分镜→原生可编辑工程、只读实时业务图/审批、最小局部修改 | IT-A02,IT-A03,IT-A04 | AD-T06,AD-T10,AD-T11,AD-T33 | PLANNED |
 | IT-A06 | AD-S2 | committed snapshot渲染/QC/持久交付、关服重开/中断/改单镜双导出，首轮冻结 | IT-A01,IT-A02,IT-A04,IT-A05 | AD-T06,AD-T07,AD-T08,AD-T09,AD-T20,AD-T35 | PLANNED |
 | IT-B01 | AD-S3 | 3–6任意选案与真实前后对比、NodeInspector/产物编辑、依赖影响与局部重算 | IT-A06 | AD-T10,AD-T11,AD-T15,AD-T27,AD-T31 | PLANNED |
@@ -151,3 +153,7 @@ manifest至少包含repo/upstream/合同版本、命令exit与日志、逐case�
 完成：PRD目标、L0/L1方案、Comfy只读候选、实时监控合同草案、三轮迭代与任务依赖、验收映射已形成文档。
 未完成：真正产品原型、精确runtime schema/DDL/迁移合同、首轮逐case运行文件、客户端真实探针、独立文档外审、明确生产实现准入。
 下一允许：执行ticket:IT-P01/IT-P02的文档/原型部分，闭环所有开工前缺口。本文件不能直接当作“全部开发已无阻塞”的Claude Code实现提示词。
+
+## 本次前端纠偏的实施顺序
+
+A1优先在原M5中完成两块只读观测section，真实观察一个Host任务/准备/commit与原生加载状态，再接一般创建和短片。取消独立agent-workbench前端任务；不新增大阶段，不减17包/35验收族。A2必须证明原播放器/时间轴中的镜头变化可见、原手工操作未回归；B/C继续在这两个面板补观测能力，既有业务入口继续承载编辑/审批。

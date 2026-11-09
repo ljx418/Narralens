@@ -1,0 +1,217 @@
+{
+  "kind": "S0_R2_DESIGN_CHECK",
+  "status": "PASS",
+  "checks": [
+    {
+      "id": "valid-Scope",
+      "status": "PASS"
+    },
+    {
+      "id": "strict-Scope",
+      "status": "PASS"
+    },
+    {
+      "id": "valid-Step",
+      "status": "PASS"
+    },
+    {
+      "id": "strict-Step",
+      "status": "PASS"
+    },
+    {
+      "id": "valid-Log",
+      "status": "PASS"
+    },
+    {
+      "id": "strict-Log",
+      "status": "PASS"
+    },
+    {
+      "id": "valid-Commit",
+      "status": "PASS"
+    },
+    {
+      "id": "strict-Commit",
+      "status": "PASS"
+    },
+    {
+      "id": "valid-EditorView",
+      "status": "PASS"
+    },
+    {
+      "id": "strict-EditorView",
+      "status": "PASS"
+    },
+    {
+      "id": "valid-Observation",
+      "status": "PASS"
+    },
+    {
+      "id": "strict-Observation",
+      "status": "PASS"
+    },
+    {
+      "id": "valid-Range",
+      "status": "PASS"
+    },
+    {
+      "id": "strict-Range",
+      "status": "PASS"
+    },
+    {
+      "id": "valid-ArtifactRef",
+      "status": "PASS"
+    },
+    {
+      "id": "strict-ArtifactRef",
+      "status": "PASS"
+    },
+    {
+      "id": "valid-AgentIdentity",
+      "status": "PASS"
+    },
+    {
+      "id": "strict-AgentIdentity",
+      "status": "PASS"
+    },
+    {
+      "id": "valid-HealthMetric",
+      "status": "PASS"
+    },
+    {
+      "id": "strict-HealthMetric",
+      "status": "PASS"
+    },
+    {
+      "id": "valid-ServiceHealth",
+      "status": "PASS"
+    },
+    {
+      "id": "strict-ServiceHealth",
+      "status": "PASS"
+    },
+    {
+      "id": "valid-HealthRead",
+      "status": "PASS"
+    },
+    {
+      "id": "strict-HealthRead",
+      "status": "PASS"
+    },
+    {
+      "id": "idle-no-invented-identity-or-range",
+      "status": "PASS"
+    },
+    {
+      "id": "progress-cannot-exceed100",
+      "status": "PASS"
+    },
+    {
+      "id": "native-unknown-allowed",
+      "status": "PASS"
+    },
+    {
+      "id": "native-unknown-cannot-claim-revision",
+      "status": "PASS"
+    },
+    {
+      "id": "native-proof-requires-snapshot",
+      "status": "PASS"
+    },
+    {
+      "id": "typescript-single-source",
+      "status": "PASS"
+    },
+    {
+      "id": "reuse-health-HealthMetric",
+      "status": "PASS"
+    },
+    {
+      "id": "reuse-health-ServiceHealth",
+      "status": "PASS"
+    },
+    {
+      "id": "reuse-health-HealthRead",
+      "status": "PASS"
+    },
+    {
+      "id": "health-source-bound",
+      "status": "PASS"
+    },
+    {
+      "id": "stream-invalidation-only",
+      "status": "PASS"
+    },
+    {
+      "id": "baseline-unchanged-src/app/m5/M5Panel.tsx",
+      "status": "PASS"
+    },
+    {
+      "id": "baseline-unchanged-src/app/m5/panel.tsx",
+      "status": "PASS"
+    },
+    {
+      "id": "baseline-unchanged-src/app/m5/m5.css",
+      "status": "PASS"
+    },
+    {
+      "id": "baseline-unchanged-src/app/m5/stores.ts",
+      "status": "PASS"
+    },
+    {
+      "id": "baseline-unchanged-src/app/m5/SelectionCoordinator.ts",
+      "status": "PASS"
+    },
+    {
+      "id": "baseline-unchanged-src/host/m5/openfilm-studio-gateway.ts",
+      "status": "PASS"
+    },
+    {
+      "id": "baseline-unchanged-src/app/main.tsx",
+      "status": "PASS"
+    },
+    {
+      "id": "baseline-unchanged-src/app/director/NarralensApp.tsx",
+      "status": "PASS"
+    },
+    {
+      "id": "baseline-unchanged-docs/evidence/WAVE3/M5/captures/ff807c332eab04f0a28c03f78734da7b73bc802d/screenshots/UX-11.png",
+      "status": "PASS"
+    },
+    {
+      "id": "baseline-image-unmodified",
+      "status": "PASS"
+    },
+    {
+      "id": "exactly-two-new-panels",
+      "status": "PASS"
+    },
+    {
+      "id": "old-header-visible",
+      "status": "PASS"
+    },
+    {
+      "id": "no-new-application-root",
+      "status": "PASS"
+    },
+    {
+      "id": "prototype-script-parses",
+      "status": "PASS"
+    },
+    {
+      "id": "historical-s0-freeze-preserved",
+      "status": "PASS"
+    }
+  ],
+  "productionAcceptance": "NOT_RUN",
+  "hashes": {
+    "README.md": "f69b60216c058c2f4750c61d6eb587f346bcae1d70ceeba58b959745a9e00bf3",
+    "observation.schema.json": "0b32479af5a0ba62536cdc33911cbccec9331ebd8b276474a48a60f49777efe1",
+    "observation.ts": "04ec09f9bd8ff262e638977eca922ff2e881a2bdddc019cf09eebbb83e8e3304",
+    "registry.json": "24d3ac2e31b77bde0e8489598339307d852ea91b9de1c4ceaec7ea062d7c7181",
+    "prototype.html": "623972c7dd7631fe76009264f2011ed54a16b0d87296cddb16214d30b9ccc2f3",
+    "baseline.json": "c3626729ac74b8b4fbbec843c10cd2567ec72e8a871cfbebe43365781bcb874b",
+    "baseline.png": "9dce2cf5ec20099abadffe7a75dbc13dbb4217553948641d2b41ff43a7a6f4b6"
+  },
+  "historicalFreezeSha256": "314f92d39e0b82c852febc9c3ca72c852ea51c8acc44ef1a7e7409a928b016fb"
+}

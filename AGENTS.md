@@ -44,4 +44,8 @@ Codex接手实现后，其自测只能称内部验证，不能自签独立外审
 
 ## S0工作入口
 
-用户已批准完成并汇报S0原型与首轮合同冻结方案。最新候选见docs/agent-driven-v1/s0/README.md、review.html和FREEZE.json。所有schema/TS/SQL位于文档包，尚未注册生产；S0-HUMAN=REVIEW_PENDING，CP-A0=NOT_RELEASED。下一步等待具体原型核验，开A前先汇报任务与实际分配，不能把本次文档批准当实现release。
+用户已批准完成并汇报S0原型与首轮合同冻结方案。旧候选见docs/agent-driven-v1/s0/并保留冻结；当前前端候选见docs/agent-driven-v1/s0-r2/review.html。所有schema/TS/SQL位于文档包，尚未注册生产；S0-HUMAN=REVIEW_PENDING，CP-A0=NOT_RELEASED。下一步等待具体原型核验，开A前先汇报任务与实际分配，不能把本次文档批准当实现release。
+
+## 2026-11-09 前端纠偏（最新约束）
+
+用户要求只在现有剪辑工作台增加工作流展示和Agent控制台，其他前端保留；目标是在Agent操作时可见目标/动作/准备/待批/commit/编辑区同步状态，及早介入减少返工。上一版独立创作工作台原型不再指导前端。当前S0 R2见docs/agent-driven-v1/s0-r2/README.md；旧s0冻结包保留历史。PRODUCT新增组件放src/app/observation，MAIN最小挂载M5Panel；不加第二应用根、聊天页、时间轴或播放头。Job完成≠commit，commit≠原生编辑区已加载，无法核对native版本时显示未确认。生产实现未释放。

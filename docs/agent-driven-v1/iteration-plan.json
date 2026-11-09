@@ -1,7 +1,7 @@
 {
   "format": "narralens.iteration-plan@2",
   "source": "docs/agent-driven-v1/06_ITERATION_EXECUTION_PLAN.md",
-  "source_sha256": "605300a9bd4d6904e7efe6d4743f6ac18c124cb07332b155fe82891b92f3f14d",
+  "source_sha256": "a5d08001083e2d7e45f702d7f0194cee968558c597c796e9fc76fcc6f0cba210",
   "validation": "DOC_CONSISTENT_NOT_BUSINESS_ACCEPTANCE",
   "implementationAuthorization": "NOT_GRANTED_BY_CURRENT_PLANNING_REQUEST",
   "dependenciesMeaning": "PACKAGE_ACCEPTANCE; coding may start earlier on frozen ports with MAIN release",
@@ -104,7 +104,7 @@
       "id": "IT-A04",
       "stage": "AD-S2",
       "wave": "A",
-      "deliverable": "一般项目创建/Resolver、初始snapshot、启发简报、结构化脚本/分镜入库",
+      "deliverable": "一般项目创建/Resolver、初始snapshot、Agent简报与结构化脚本/分镜入库（不新建前端）",
       "dependencies": [
         "IT-A01",
         "IT-A03"

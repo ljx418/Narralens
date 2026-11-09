@@ -1,5 +1,12 @@
 # 叙镜：决策与待确认项
 
+## 2026-11-09 前端增量纠偏
+
+用户明确：保留现有OpenFilm与M5，只新增工作流展示、Agent控制台。新候选为agent-driven-v1/s0-r2/review.html；旧s0原型仅历史，旧冻结/原Gate保留。AD-E15/E20/E21与AD-T15/T32..35在原工作台增量接线，新增OBS-01..10生产验收目标（全部NOT_RUN）。新增展示组件由PRODUCT实现src/app/observation，MAIN最小挂载旧M5；不建设第二前端/时间轴/聊天入口。
+
+本轮仅设计/原型校验，用户核验与CP-A0仍待完成。Job完成、Host commit、原生已加载三个事实分开；不能用Host rN冒充用户编辑区已刷新。原始PRD视频制作/下载/声音/渲染和A/B/C门不删减。
+
+
 ## 最新认可与并行实施规划
 
 用户已认可截至867b3b3的目标/迭代文档，要求主Agent重划多Agent架构/目录/任务；采用同父目录三worktree与MAIN统一集成方案。文档、原型、精确合同、实现release分开记录；本轮不自动启动生产代码。详见`agent-driven-v1/07_PARALLEL_DEVELOPMENT.md`与两路设计复核记录10文档。

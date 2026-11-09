@@ -1,5 +1,7 @@
 # Agent 驱动目标架构 L0 / L1
 
+> 2026-11-09用户纠偏（前端实施优先）：保留现有OpenFilm剪辑区和M5导演面板，仅在原导演面板中新增工作流展示、Agent控制台两个可折叠section；服务监控归控制台。工作台呈现同一项目的真实剪辑状态，禁止另建agent-workbench独立前端/聊天入口/时间轴。详情与当前原型见`s0-r2/README.md`（本段路径按当前文档目录解析）。原始PRD功能目标和后台制作计划继续保留，既有审阅/批准/编辑尽量复用原入口。新S0 R2仍待用户核验，不是生产实现release。
+
 状态：R2待核对设计；本文所有“拟新增路径/接口”都不是现有 API。源码基线见 `00_READ_FIRST.md`。
 约束源：PRD v1.2 §11–16。当前图为 `docs/architecture/agent-driven-v1-r2.architecture.html`；R1图与用户核验原件保留。
 
@@ -23,7 +25,7 @@ L0 主路径：用户意图 → 外部 Agent → Skill/技能库 → MCP → 应
 | AD-A06 | 单项目写串行已有，缺驱动接管语义 | 单活动驱动负责编排；ResourceScheduler 按IO/CPU/RAM/GPU池调度多个镜头下载、章节合成与音频child jobs | 新 `src/host/agents/driver-session.ts`、`src/host/jobs/resource-scheduler.ts`、现有JobStore | 编排租约不串行化准备任务；正式工程提交仍串行 |
 | AD-A07 | materialize/impact/adopt/history 已有受控提交 | 两入口复用 application commands；新增意图绑定的审批，与 impact/base/锁/许可共同校验 | 保留 `projects/project-coordinator.ts`、`impact/`、`adoption/`、`history/` | 不改 EnginePort 七方法，不双写，不绕 gateway |
 | AD-A08 | 资产导入/账本与部分适配已有 | AssetPlanService 先按主题/章节/台词缺口检索，再对选中方案分批下载/生成，缓存与来源/许可关联 | 新 `src/host/assets/asset-plan-service.ts`、ProviderGateway、retrieval/voice/subtitles/cover adapters | 资源准备不一次性批量获取所有素材 |
-| AD-A09 | 面板暴露内部 ID、固定第一案、三路预览关联不清 | BriefInterview、WorkflowGraph、NodeInspector 与候选/差异/审批；用户在界面补需求、查输入输出、单独编辑产物 | 改 `src/app/m5/`；新 `src/host/workspace/{question,workflow-view,artifact-edit}-service.ts` | 业务图为Host只读投影，编辑命令先生成新版本与影响 |
+| AD-A09 | 面板暴露内部 ID、固定第一案、三路预览关联不清 | 保留现有OpenFilm+M5；仅新增WorkflowPanel和AgentConsolePanel，复查输入输出并定位既有批准/编辑入口 | MAIN最小挂载改动 `src/app/m5/M5Panel.tsx`；新增 `src/app/observation/{WorkflowPanel,AgentConsolePanel,ProjectObservationAdapter}.tsx`；复用workspace服务 | 业务图为Host只读投影，编辑命令先生成新版本与影响 |
 | AD-A10 | 正式 Render/QC/Delivery 未闭环 | SnapshotRenderService、PreflightService、DeliveryPackage；任务查询、取消、审计 | 新 `src/host/{render,preflight,delivery}/` | 所有导出绑定 committed snapshot，工作区改动不污染在途导出 |
 | AD-A11 | 本地已有多套ComfyUI JSON与执行器，Narralens尚未接通 | ComfyWorkflowRegistry/ComfyAdapter固定模板与参数映射；能力预检→作业关联→结果资产验证→受控采用 | 新 `src/adapters/comfyui/`、`src/host/providers/comfy-workflow-registry.ts`，复用已有固定执行器 | 不复制模型、不自动安装节点、不导入任意有副作用图 |
 | AD-A12 | 概念说明/AI转场没有明确语义合同 | ConceptSceneSpec/TransitionSpec 分离可编辑图形与生成背景；检验术语/首尾/时长/音轨再组装 | 新 `src/host/creative/{concept-scene,transition-plan}.ts`，复用原生图形和EnginePort | 生成素材不等于概念事实正确；原生clip与文字可编辑 |

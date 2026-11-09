@@ -33,9 +33,9 @@ try{
   await new Promise((resolve,reject)=>{socket.addEventListener('open',resolve,{once:true});socket.addEventListener('error',reject,{once:true})});
   socket.addEventListener('message',event=>{const msg=JSON.parse(event.data);if(msg.method?.startsWith('Browser.download')){(receipt.downloadEvents??=[]).push(msg)}if(msg.id&&pending.has(msg.id)){pending.get(msg.id)(msg);pending.delete(msg.id)}});
   await call('Page.enable');
-  for(const architectureFile of ['agent-driven-v1-r2.architecture.html','parallel-development.architecture.html']){
-  const architecturePath=join(root,'docs/architecture',architectureFile);
-  const parallel=architectureFile.startsWith('parallel');
+  for(const architectureFile of ['docs/agent-driven-v1/s0-r2/architecture.html','docs/architecture/parallel-development.architecture.html']){
+  const architecturePath=join(root,architectureFile);
+  const parallel=architectureFile.includes('parallel-development');
   const bytes=await readFile(architecturePath);receipt[parallel?'parallelArchitecture':'architecture']={sha256:createHash('sha256').update(bytes).digest('hex'),bytes:bytes.length};
   await navigate(architecturePath);
   for(const [width,height] of [[1440,900],[1600,1000],[1920,1080],[2048,1320]]){

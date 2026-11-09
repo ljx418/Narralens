@@ -1,0 +1,20 @@
+{
+  "kind": "supplementary-windows-headless-CDP",
+  "status": "fail",
+  "businessAcceptance": "NOT_RUN",
+  "viewports": [],
+  "screenshots": [],
+  "hashes": {
+    "prototype.html": "2b4ce4b66d3d60282ea2e0f71f431c918d16bdacee117b6743e488322efd59e6",
+    "review.html": "70c2c88e659898d07a62fbf4433298d0f6c1c64c9f72c0531454c0e8f188ce66",
+    "architecture.html": "4be0288f64588d7ca5072351213bd8b6c97b6ae22d125f12dae3674202ab7f64",
+    "baseline.png": "9dce2cf5ec20099abadffe7a75dbc13dbb4217553948641d2b41ff43a7a6f4b6"
+  },
+  "checks": [
+    {
+      "id": "two-new-sections-only",
+      "status": "PASS"
+    }
+  ],
+  "error": "Error: historical-editor-image-loaded"
+}

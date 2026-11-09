@@ -1,5 +1,7 @@
 # 并行Agent任务入口与交付协议
 
+> 2026-11-09用户纠偏（前端实施优先）：保留现有OpenFilm剪辑区和M5导演面板，仅在原导演面板中新增工作流展示、Agent控制台两个可折叠section；服务监控归控制台。工作台呈现同一项目的真实剪辑状态，禁止另建agent-workbench独立前端/聊天入口/时间轴。详情与当前原型见`s0-r2/README.md`（本段路径按当前文档目录解析）。原始PRD功能目标和后台制作计划继续保留，既有审阅/批准/编辑尽量复用原入口。新S0 R2仍待用户核验，不是生产实现release。
+
 目前所有泳道只允许基线复核、IT-P01/IT-P02文档/原型协作。生产实现须等待MAIN发布CP-A0合同SHA与明确的release。工作目录已准备不代表任务已启动或准入已通过。
 
 ## Codex与Claude Code执行分工（用户批准）
@@ -49,7 +51,7 @@ Host、DB、引擎与服务控制通过冻结ApplicationPort调用；不能改se
 先读AGENTS.md、docs/agent-driven-v1/00_READ_FIRST.md、07_PARALLEL_DEVELOPMENT.md、08_PARALLEL_PORTS_AND_OWNERSHIP.md、parallel-plan.json。
 先核对SHA/分支/干净度与MAIN的ReleaseAssignment；不reset/stash。
 没有CP-A0与明确IMPLEMENTATION_RELEASE时，只做IT-P01/IT-P02指定原型/文档，不实现生产功能。
-获释放后实现新agent-workbench与creative/workspace允许模块：启发简报、工作流节点、产物复查编辑、选案/差异/审批/监控UI。
+获释放后实现原工作台内的两块observation展示组件与允许的creative/workspace服务。只新增工作流、Agent控制台；复查/批准/编辑接既有入口，不另建前端或聊天页。
 使用冻结Repository/Project/Job/Decision/Application/Selection端口；新工程bootstrap与正式commit由MAIN接线。
 不要改project-creation-service、公共DDL/合同、server、旧M5/唯一clock-selection或第二timeline。旧M5挂载需要提出补丁请求。
 合同fixture可用于显式组件开发，必须标组件级；不能据此声明生产接线。真实状态/unknown/断线不能用假计时器代替。

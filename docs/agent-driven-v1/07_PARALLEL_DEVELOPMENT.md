@@ -1,5 +1,7 @@
 # 多Agent并行实施与主Agent集成方案
 
+> 2026-11-09用户纠偏（前端实施优先）：保留现有OpenFilm剪辑区和M5导演面板，仅在原导演面板中新增工作流展示、Agent控制台两个可折叠section；服务监控归控制台。工作台呈现同一项目的真实剪辑状态，禁止另建agent-workbench独立前端/聊天入口/时间轴。详情与当前原型见`s0-r2/README.md`（本段路径按当前文档目录解析）。原始PRD功能目标和后台制作计划继续保留，既有审阅/批准/编辑尽量复用原入口。新S0 R2仍待用户核验，不是生产实现release。
+
 状态：`DOCUMENTS_ACCEPTED_PARALLEL_PLAN_PREPARED`；用户认可截至`867b3b33b9dd88c88e7bcca6c997d1ceba9c3051`的规划文档，并授权重新划分多Agent工作目录/任务/架构。此状态不等于IT-P01原型、IT-P02精确合同或生产实现准入已通过。当前可准备隔离工作目录与执行文档工作，生产代码等主Agent明确释放。
 
 ## 1. 剩余阶段与可并行程度
@@ -44,7 +46,7 @@ Codex接手实现后，其自测只能称内部验证，不能自签独立外审
 |---|---|---|---|
 | MAIN 主Agent | PRD/架构/合同、数据与事务内核、一般项目创建接缝、审批/DriverSession/资源租约、公共装配、集成及验收 | 所有公共合同、旧核心文件、共享配置、跨泳道测试/证据 | 唯一能改server/DDL/registry/核心write路径并合入候选 |
 | BRIDGE 接入观测 | stdio MCP外观、入口Skill/技能库、客户端探针、事件/健康/资源read model、launcher纯模块 | `src/mcp/`、`skills/narralens/`、`skills/narralens-lib/`、`src/launcher/`、`src/host/observability/`、`tests/agent-driven/bridge/` | Host应用端口、服务启动命令、可信service control由MAIN注册 |
-| PRODUCT 创作工作台 | 启发简报、任务/产物/工作流业务逻辑、选案/差异/审批呈现、节点编辑与监控UI | `src/app/agent-workbench/`、`src/host/creative/`、`src/host/workspace/`、`tests/agent-driven/product/` | 生产入口与旧M5挂载、公共仓储/项目创建/bootstrap与提交由MAIN |
+| PRODUCT 创作工作台 | 后台任务/产物服务；前端只新增工作流与控制台展示，链接原操作入口 | `src/app/observation/`、`src/host/creative/`、`src/host/workspace/`、`tests/agent-driven/product/` | 生产入口与旧M5挂载、公共仓储/项目创建/bootstrap与提交由MAIN |
 | MEDIA 媒体交付 | snapshot render/QC/包、Comfy固定模板/媒体验证、下载/声音/字幕/封面workers | `src/host/render/`、`src/host/preflight/`、`src/host/delivery/`、`src/host/providers/`、批准的`src/adapters/`子目录、`tests/agent-driven/media/` | ResourceClaim/Job/Asset/Approval端口与最终采用由MAIN |
 
 拟新增目录是所有权规划，不宣称已经存在。详见机器规则`parallel-plan.json`；任何与旧源码同路径实体只允许MAIN发起单独文件授权，不靠宽泛目录白名单覆盖旧实现。
@@ -81,10 +83,10 @@ PRODUCT不得独立实现第二条timeline/数据库；BRIDGE不得导入数据�
 | 批次 | MAIN关键路径 | BRIDGE | PRODUCT | MEDIA | 汇合条件 |
 |---|---|---|---|---|---|
 | P文档 | 合同/DDL/原型与授权闭环 | 接入/健康协议建议 | 可操作原型与状态 | fixture/Comfy/渲染合同审视 | IT-P02+CP-A0真实冻结 |
-| A1基础并行 | 一般project/bootstrap/持久共享仓储与AppPort | A01生命周期模块、A02 MCP+Skill、观测基础 | A03创作对象/提问、A04界面与业务模块 | A06 renderer/QC模块基于SnapshotReadPort | 各模块编译/消费者合同，MAIN早期接线 |
+| A1基础并行 | 一般project/bootstrap/持久共享仓储与AppPort | A01生命周期模块、A02 MCP+Skill、观测基础 | A03创作对象与两面板、A04后台业务模块 | A06 renderer/QC模块基于SnapshotReadPort | 各模块编译/消费者合同，MAIN早期接线 |
 | A2首链 | 新项目/可信批准/源发布接缝，组合真实调用 | MCP/事件真实接线、首端探针 | A05真实选案/本地组装、实时业务图 | A06真实snapshot渲染、改单镜第二导出 | IT-A01..A06生产链+统一A门 |
 | B1协作 | CP-B0、DriverSession/审批/资源租约与事务适配 | B03监控read model、重连/归属 | B01产物编辑/选案/差异、B03监控UI | B02 worker/下载执行器消费者 | 资源/版本/取消/产物基础真实接通 |
-| B2制作 | schema/路由/来源费用/正式采用接线 | Comfy/worker健康关联、客户端回归 | B06交付界面、概念/转场编辑 | B04下载/Comfy→B05声音→B06 QC交付；同泳道内部串行 | 各能力实证+统一B门 |
+| B2制作 | schema/路由/来源费用/正式采用接线 | Comfy/worker健康关联、客户端回归 | B06交付/概念/转场任务观测与原入口定位 | B04下载/Comfy→B05声音→B06 QC交付；同泳道内部串行 | 各能力实证+统一B门 |
 | C完整V1 | CP-C0、旧后期契约与整片集成 | C02多驱动/监控接力 | C01风格/反馈与后期交互 | C01/C02后期能力与长片媒体 | C01/C02汇合→C03正式终验 |
 
 可并行不代表所有模块同时开始：渲染模块可基于冻结snapshot端口写代码，真实短片验收必须等一般项目与提交事实接通。B2同一MEDIA泳道的任务并不虚构为同时有三名媒体Agent；需要扩大人数时必须重分互斥子目录与资源。

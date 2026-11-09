@@ -1,5 +1,7 @@
 # 并行架构：公共端口、代码所有权和集成接缝
 
+> 2026-11-09用户纠偏（前端实施优先）：保留现有OpenFilm剪辑区和M5导演面板，仅在原导演面板中新增工作流展示、Agent控制台两个可折叠section；服务监控归控制台。工作台呈现同一项目的真实剪辑状态，禁止另建agent-workbench独立前端/聊天入口/时间轴。详情与当前原型见`s0-r2/README.md`（本段路径按当前文档目录解析）。原始PRD功能目标和后台制作计划继续保留，既有审阅/批准/编辑尽量复用原入口。新S0 R2仍待用户核验，不是生产实现release。
+
 状态：执行设计，精确运行时合同待CP-A0冻结；本文定义责任与必需字段，不冒充已经新增API或schema。
 
 ## 1. 架构调整的原则
@@ -45,7 +47,7 @@ MAIN持有RevisionStore一个连接与DDL/迁移、项目写队列、commit/snap
 
 ## 5. UI与原生Studio分工
 
-PRODUCT拥有新`agent-workbench`组件、API client抽象、状态呈现与监控面板；使用唯一selection/clock的桥接，不维护可独立重建全片的clip数组。旧M5挂载点和原生Gateway由MAIN接线/审核，避免与BRIDGE同时修改M5Panel。
+PRODUCT仅拥有新增`observation`内WorkflowPanel、AgentConsolePanel及只读投影hook，复用旧GatewayApiClient传入的typed port；使用唯一selection/clock的桥接，不维护可独立重建全片的clip数组。旧M5挂载点和原生Gateway由MAIN接线/审核，避免与BRIDGE同时修改M5Panel。
 
 任务状态来自Host/事件，不用浏览器计时器模拟生产进度；服务指标带来源、采样时间/TTL，不支持就unknown。原型的模拟仅在明确demo模式，不进入业务验收或混入真实监控。
 
@@ -56,3 +58,7 @@ PRODUCT拥有新`agent-workbench`组件、API client抽象、状态呈现与监�
 3. 轮级：A/B/C冻结同一组合commit，运行适用全量与实际用户路径、恢复/性能/安全/Headless，独立外审+人工签署。
 
 全量通过前不得靠不同worktree的模块日志相加得出“整体PASS”。独立审查不能由该实现作者自签；同样不能将主Agent的集成权当成外审权。
+
+## 当前前端接口约束
+
+ProjectObservationReadPort读Host commit/Job/workflow/脱敏日志；EditorViewReadPort从既有UI桥接读实际加载project/revision/snapshot，不是把Host新值当编辑器ack。点击定位走SelectionCoordinator；共享SelectionStore/PlaybackClock不复制。两面板没有独立createRoot/路由/数据库/工程写方法。MAIN挂载旧M5，PRODUCT不得直接改旧M5文件。显示Job成功、commit成功、编辑区同步确认三个不同事实；public Agent说明不能推进Host状态。

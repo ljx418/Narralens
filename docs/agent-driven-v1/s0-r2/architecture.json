@@ -1,0 +1,175 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "保留剪辑工作台，增量展示 Agent 操作",
+    "locale": "zh-CN",
+    "quality_profile": "showcase"
+  },
+  "components": [
+    {
+      "id": "agent",
+      "type": "external",
+      "label": "外部 Agent（保留定位）",
+      "sublabel": "意图 / Skill / MCP",
+      "pos": [
+        80,
+        60
+      ],
+      "size": [
+        290,
+        90
+      ]
+    },
+    {
+      "id": "host",
+      "type": "backend",
+      "label": "应用服务（扩展）",
+      "sublabel": "同一 Host / 鉴权 / 准备任务",
+      "pos": [
+        500,
+        60
+      ],
+      "size": [
+        290,
+        90
+      ]
+    },
+    {
+      "id": "core",
+      "type": "security",
+      "label": "提交与编辑内核（保留）",
+      "sublabel": "Coordinator / EnginePort / journal",
+      "pos": [
+        920,
+        60
+      ],
+      "size": [
+        290,
+        90
+      ]
+    },
+    {
+      "id": "facts",
+      "type": "database",
+      "label": "工程与任务事实（复用）",
+      "sublabel": "revision / snapshot / Job / outbox",
+      "pos": [
+        920,
+        260
+      ],
+      "size": [
+        290,
+        90
+      ]
+    },
+    {
+      "id": "observe",
+      "type": "backend",
+      "label": "观测投影（拟新增）",
+      "sublabel": "Workflow / Console / SSE cursor",
+      "pos": [
+        500,
+        260
+      ],
+      "size": [
+        290,
+        90
+      ]
+    },
+    {
+      "id": "panels",
+      "type": "frontend",
+      "label": "仅新增两块面板",
+      "sublabel": "工作流 + Agent 控制台",
+      "pos": [
+        80,
+        260
+      ],
+      "size": [
+        290,
+        90
+      ]
+    },
+    {
+      "id": "editor",
+      "type": "frontend",
+      "label": "现有工作台（保留）",
+      "sublabel": "OpenFilm + M5 / 单一选区与播放头",
+      "pos": [
+        80,
+        460
+      ],
+      "size": [
+        290,
+        90
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "agent-host",
+      "from": "agent",
+      "to": "host",
+      "label": "受控调用"
+    },
+    {
+      "id": "host-core",
+      "from": "host",
+      "to": "core",
+      "label": "正式提交"
+    },
+    {
+      "id": "core-facts",
+      "from": "core",
+      "to": "facts",
+      "label": "持久事实",
+      "labelDy": 24
+    },
+    {
+      "id": "facts-observe",
+      "from": "facts",
+      "to": "observe",
+      "label": "只读投影"
+    },
+    {
+      "id": "observe-panels",
+      "from": "observe",
+      "to": "panels",
+      "label": "事件与状态"
+    },
+    {
+      "id": "panels-editor",
+      "from": "panels",
+      "to": "editor",
+      "label": "同页嵌入",
+      "labelDy": 24
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "保持原有操作面",
+      "items": [
+        "素材 / 播放器 / 检查器 / 原生时间轴",
+        "导演面板原有选案、批准与历史继续用"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "用户看到真实阶段",
+      "items": [
+        "准备不等于提交，提交不等于已显示",
+        "核对编辑区 revision / snapshot 同步确认"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "观察不越权",
+      "items": [
+        "不重做前端、不加第二时间轴或聊天入口",
+        "控制台不是Shell；日志脱敏、断线标未知"
+      ]
+    }
+  ]
+}

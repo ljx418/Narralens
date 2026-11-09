@@ -1,0 +1,24 @@
+{
+  "repo_observed": "df4ef5704a35a7ed8bb8bdcaaafc1c8d43488491",
+  "capture_commit": "ff807c332eab04f0a28c03f78734da7b73bc802d",
+  "screenshot": "docs/evidence/WAVE3/M5/captures/ff807c332eab04f0a28c03f78734da7b73bc802d/screenshots/UX-11.png",
+  "screenshot_kind": "HISTORICAL_REAL_CAPTURE_NOT_CURRENT_LIVE_UI",
+  "source_comparison": "git diff capture_commit HEAD -- src/app/m5 src/host/m5 was empty; screenshot remains historical, not re-executed",
+  "files": {
+    "src/app/m5/M5Panel.tsx": "458aec89283a7b8a14ecb62f6682327edf937a6d95d83943d5c8796b0e5e17c1",
+    "src/app/m5/panel.tsx": "9d09fb4b437286d40056400aaf5ae53b577fad608052c771833879a023b653d1",
+    "src/app/m5/m5.css": "9c9450853c9e4f236a97cdae6a199cb29ab61df6329a3b299a5f687013c35ba7",
+    "src/app/m5/stores.ts": "6f9502f2c062f7cf327c974f77db7a434b730ecc3bedd13e638e517e1825848f",
+    "src/app/m5/SelectionCoordinator.ts": "f7cbb741bdd61932d942bf63bd7b4b88ee0180d746ab16389e1b4163e02a5cf4",
+    "src/host/m5/openfilm-studio-gateway.ts": "2d5f66e7f88d18f605224e344563e4d4b6eb7278f35a22e18436c275741aed75",
+    "src/app/main.tsx": "d7032f9fea780c0bd676e2aad0b3f775de98d99d68197460e4a3f53cccace7ac",
+    "src/app/director/NarralensApp.tsx": "08df59ba7d40debf8743c9ee58eebc7f7bc646239e75f42702e00f32ad30fd0c",
+    "docs/evidence/WAVE3/M5/captures/ff807c332eab04f0a28c03f78734da7b73bc802d/screenshots/UX-11.png": "9dce2cf5ec20099abadffe7a75dbc13dbb4217553948641d2b41ff43a7a6f4b6"
+  },
+  "screenshot_geometry": {
+    "width": 1414,
+    "height": 800,
+    "native_width": 1034,
+    "director_width": 380
+  }
+}

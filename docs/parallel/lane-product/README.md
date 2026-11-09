@@ -7,3 +7,5 @@
 ## 双CLI执行
 
 本目录Codex负责设计、文档、任务单与验收；Claude Code CLI负责已释放范围的实现。Claude报429时Codex核对旧writer停止后自动接手。TASK.md/HANDOFF.md记录任务、SHA、dirty工作、进程与唯一writer；不能同时写入。接手实现后需未参与者复核，MAIN统一集成。完整规则见根AGENTS.md。
+
+最新前端范围：只新增src/app/observation内WorkflowPanel、AgentConsolePanel与只读适配，不实现独立agent-workbench前端。M5挂载/共享store由MAIN负责。当前原型/验收约束见docs/agent-driven-v1/s0-r2/README.md；旧s0为历史候选。

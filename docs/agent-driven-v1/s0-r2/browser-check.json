@@ -1,0 +1,195 @@
+{
+  "kind": "supplementary-windows-headless-CDP",
+  "status": "pass",
+  "businessAcceptance": "NOT_RUN",
+  "viewports": [
+    {
+      "artifact": "prototype",
+      "width": 1440,
+      "scrollWidth": 1425
+    },
+    {
+      "artifact": "prototype",
+      "width": 1920,
+      "scrollWidth": 1905
+    },
+    {
+      "artifact": "prototype",
+      "width": 390,
+      "scrollWidth": 375
+    },
+    {
+      "artifact": "architecture",
+      "width": 1440,
+      "height": 900,
+      "scrollWidth": 1440,
+      "scrollHeight": 900
+    },
+    {
+      "artifact": "architecture",
+      "width": 1600,
+      "height": 1000,
+      "scrollWidth": 1600,
+      "scrollHeight": 1000
+    },
+    {
+      "artifact": "architecture",
+      "width": 1920,
+      "height": 1080,
+      "scrollWidth": 1920,
+      "scrollHeight": 1080
+    },
+    {
+      "artifact": "architecture",
+      "width": 2048,
+      "height": 1320,
+      "scrollWidth": 2048,
+      "scrollHeight": 1320
+    },
+    {
+      "artifact": "review",
+      "width": 1440,
+      "scrollWidth": 1425,
+      "count": 6
+    },
+    {
+      "artifact": "review",
+      "width": 390,
+      "scrollWidth": 375,
+      "count": 6
+    }
+  ],
+  "screenshots": [
+    "panels-expanded-1440.png",
+    "prototype-1440.png",
+    "prototype-1920.png",
+    "prototype-390.png",
+    "architecture-2048.png",
+    "review-1440.png",
+    "review-390.png"
+  ],
+  "hashes": {
+    "prototype.html": "623972c7dd7631fe76009264f2011ed54a16b0d87296cddb16214d30b9ccc2f3",
+    "review.html": "427a459cf1487334ab4b22e60f17d8390e365c69ad70756294a592997db95fa3",
+    "architecture.html": "4be0288f64588d7ca5072351213bd8b6c97b6ae22d125f12dae3674202ab7f64",
+    "baseline.png": "9dce2cf5ec20099abadffe7a75dbc13dbb4217553948641d2b41ff43a7a6f4b6"
+  },
+  "checks": [
+    {
+      "id": "two-new-sections-only",
+      "status": "PASS"
+    },
+    {
+      "id": "historical-editor-image-loaded",
+      "status": "PASS"
+    },
+    {
+      "id": "collapse-does-not-replace-or-resize-editor-image",
+      "status": "PASS"
+    },
+    {
+      "id": "agent-claim-does-not-commit",
+      "status": "PASS"
+    },
+    {
+      "id": "prepare-and-wait-no-write",
+      "status": "PASS"
+    },
+    {
+      "id": "link-to-old-ui-not-an-approval",
+      "status": "PASS"
+    },
+    {
+      "id": "commit-not-editor-ack",
+      "status": "PASS"
+    },
+    {
+      "id": "committed-content-cannot-cancel",
+      "status": "PASS"
+    },
+    {
+      "id": "editor-ack-honestly-simulated",
+      "status": "PASS"
+    },
+    {
+      "id": "baseline-image-unmodified-after-simulation",
+      "status": "PASS"
+    },
+    {
+      "id": "cancel-request-not-cancelled",
+      "status": "PASS"
+    },
+    {
+      "id": "cancelled-late-result-not-adopted",
+      "status": "PASS"
+    },
+    {
+      "id": "offline-last-known-not-fake-running",
+      "status": "PASS"
+    },
+    {
+      "id": "error-visible-with-console-folded",
+      "status": "PASS"
+    },
+    {
+      "id": "console-untrusted-text-not-html",
+      "status": "PASS"
+    },
+    {
+      "id": "log-filter-matches-error",
+      "status": "PASS"
+    },
+    {
+      "id": "idle-no-invented-agent-or-range",
+      "status": "PASS"
+    },
+    {
+      "id": "locate-only-explicit-highlight",
+      "status": "PASS"
+    },
+    {
+      "id": "prototype-no-overflow-1440",
+      "status": "PASS"
+    },
+    {
+      "id": "prototype-no-overflow-1920",
+      "status": "PASS"
+    },
+    {
+      "id": "prototype-no-overflow-390",
+      "status": "PASS"
+    },
+    {
+      "id": "diagram-fit-1440",
+      "status": "PASS"
+    },
+    {
+      "id": "diagram-fit-1600",
+      "status": "PASS"
+    },
+    {
+      "id": "diagram-fit-1920",
+      "status": "PASS"
+    },
+    {
+      "id": "diagram-fit-2048",
+      "status": "PASS"
+    },
+    {
+      "id": "review-layout-1440",
+      "status": "PASS"
+    },
+    {
+      "id": "review-layout-390",
+      "status": "PASS"
+    },
+    {
+      "id": "opinion-saved",
+      "status": "PASS"
+    },
+    {
+      "id": "download-six-opinions-version-bound",
+      "status": "PASS"
+    }
+  ]
+}

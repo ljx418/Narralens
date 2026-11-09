@@ -88,3 +88,7 @@
 ## S0当前交付
 
 用户批准先完成并汇报S0原型与首轮合同冻结方案。候选在docs/agent-driven-v1/s0/，两路独立只读设计复核无剩余B/M；仍需用户原型核验，不启动A生产实现。旧全权session/confirmed写入口隔离、approval原子consume内部接缝、created origin/空工程与SSE游标均是A必须实现的明确差距，不得当成现有能力。
+
+## 2026-11-09 前端纠偏（最新约束）
+
+用户要求只在现有剪辑工作台增加工作流展示和Agent控制台，其他前端保留；目标是在Agent操作时可见目标/动作/准备/待批/commit/编辑区同步状态，及早介入减少返工。上一版独立创作工作台原型不再指导前端。当前S0 R2见docs/agent-driven-v1/s0-r2/README.md；旧s0冻结包保留历史。PRODUCT新增组件放src/app/observation，MAIN最小挂载M5Panel；不加第二应用根、聊天页、时间轴或播放头。Job完成≠commit，commit≠原生编辑区已加载，无法核对native版本时显示未确认。生产实现未释放。

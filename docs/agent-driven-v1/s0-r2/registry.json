@@ -1,0 +1,36 @@
+{
+  "state": "DESIGN_CANDIDATE_NOT_PRODUCTION",
+  "route": {
+    "method": "GET",
+    "path": "/api/agent/v1/projects/:id/observation",
+    "output": "Observation",
+    "scope": "read_same_project",
+    "pagination": "logs limited 128, has_more_logs+opaque next_log_cursor; after query bound to same principal/project/filter; invalid/expired cursor rejects",
+    "source": "existing Job/outbox/workflow/committed project facts, consistent read transaction"
+  },
+  "stream": "reuse /api/agent/v1/projects/:id/events with scope cursor; no second event authority",
+  "editorPort": {
+    "name": "EditorViewReadPort",
+    "input": "UI current project context",
+    "output": "EditorView",
+    "transport": "UI-local native bridge read, no new server write endpoint",
+    "unknown": "revision/snapshot null and evidence=unknown; no synthetic ack"
+  },
+  "reuse": "backend commands from ../s0 remain proposed; only frontend presentation is superseded",
+  "productionCases": "OBS-01..10 NOT_RUN",
+  "updateRules": {
+    "streamMeaning": "invalidation_only_not_observation_patch",
+    "snapshotWatermark": "same transaction facts and global outbox watermark; projection not caught up -> 503",
+    "responseGuard": [
+      "same UI project epoch",
+      "same instance generation and view_scope_id",
+      "snapshot_event_id >= highest required event watermark",
+      "snapshot_event_id >= last applied watermark",
+      "equal watermark: reject older request sequence; health merges only newer observed_at"
+    ],
+    "agentPublicLog": "display only, never updates Step or last_commit",
+    "globalIdGaps": "normal under project/topic filter, not proof of loss",
+    "health": "copied HealthRead definitions from previous schema; values keep own sampled_at/expires_at, equal business watermark does not freshen samples"
+  },
+  "healthSchemaSourceSha256": "6ad9c956edafdd09eac447a785d9ef9bfe60a52b3802fb5d7bbcf7e93fe182b6"
+}
