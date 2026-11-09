@@ -52,6 +52,24 @@
         "hashes_verified": 61,
         "report": "docs/execution/A/reviews/creative-context-791fd1d/REVIEW.md"
       }
+    },
+    {
+      "scope": "exact committed snapshot native read authority",
+      "frozen_commit": "d15e44d1d9739febdc0f47e260b06b4a3881ab1c",
+      "review": "PASS_LIMITED_SCOPE",
+      "internal": {
+        "affected_regression_tests": 134,
+        "hardened_snapshot_media_tests": 29,
+        "current_native_probe_tests": 1,
+        "exit": 0
+      },
+      "independent": {
+        "files": 4,
+        "tests": 30,
+        "exit": 0,
+        "hashes_verified": 51,
+        "report": "docs/execution/A/reviews/committed-snapshot-d15e44d/REVIEW.md"
+      }
     }
   ],
   "not_closed": [
@@ -71,5 +89,5 @@
     "MEDIA-independent": "frozen runtime independent review and real tests",
     "Claude": "not started"
   },
-  "next": "Complete committed-snapshot authority parser race regression, then production rights-backed asset/Run/task and existing native workbench seams; formal render fence/Delivery/full A still incomplete"
+  "next": "Complete local asset/UI provenance/media lifecycle and actual Run/task/native assembly/Workbench formal delivery integration; all overall A tickets still incomplete"
 }

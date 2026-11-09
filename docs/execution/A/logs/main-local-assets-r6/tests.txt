@@ -1,0 +1,75 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+ ✓ tests/agent-driven/integration/owned-runtime.test.ts (7 tests) 73157ms
+   ✓ uses real flock, persistent instance generations, authenticated HTTP and actual MCP without fake readiness  43979ms
+   ✓ refuses the actual Host child entry without an inherited kernel lock  3597ms
+   ✓ refuses a second Host after its live predecessor lock path is unlinked, then permits a real stopped restart  22064ms
+   ✓ rejects a private FIFO without blocking the launcher event loop  420ms
+   ✓ cancels only its spawned Host when TERM reaches the wrapper before Host readiness  3077ms
+(node:3941879) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/agent-driven/integration/local-assets-host.test.ts (19 tests | 1 failed) 37272ms
+   ✓ actually probes and fully decodes video and synthetic diagnostic audio into the same Host database without modifying native source  2397ms
+   ✓ requires real trusted UI provenance and ownership before reading files or recording rights  2207ms
+   ✓ replays the original registration without reimporting changed input and refuses a conflicting key  2010ms
+   ✓ rolls back row, command and outbox together at before_insert, preserving an unreferenced blob for a safe retry  2322ms
+   ✓ rolls back row, command and outbox together at after_insert, preserving an unreferenced blob for a safe retry  2279ms
+   ✓ rolls back row, command and outbox together at after_receipt, preserving an unreferenced blob for a safe retry  2058ms
+   ✓ rolls back row, command and outbox together at after_event, preserving an unreferenced blob for a safe retry  2142ms
+   ✓ checks real input hashes, paths and media rather than accepting metadata as proof  2226ms
+   ✓ preserves unknown license and synthetic origin as facts rather than silently clearing them  2118ms
+   ✓ detects a published blob changed inside the final SQL boundary and commits no registration  2292ms
+   ✓ converges concurrent same-key imports to one immutable row, one command and one business event  2328ms
+   ✓ rounds audio directly from sample time to project frames rather than rounding through displayed milliseconds  1882ms
+   ✓ refuses truncated audio and a video with a damaged audio track even when video-only legacy validation passes  2409ms
+   ✓ refuses local storage overlapping author, snapshot or input domains before creating directories  1906ms
+   ✓ does not follow a newly redirected configured source root, even when replacement bytes have the declared hash  2139ms
+   ✓ captures trusted input by value before asynchronous inspection rather than accepting later permission changes  1992ms
+   ✓ waits for the actual media child to close after cancel and reports a retryable tool boundary 108ms
+   ✓ waits for the actual media child to close after timeout and reports a retryable tool boundary 107ms
+   × bounds real concurrent imports to two and removes a cancelled queued request without leaking a slot 2182ms
+     → Local asset facts or bytes changed
+(node:3943232) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/creative-context-host.test.ts (13 tests) 27448ms
+   ✓ writes Script and bound Storyboard through real HTTP and observes them beside the actual committed native project  1957ms
+   ✓ rejects foreign owner access and unresolved or altered lineage without inserting content/outbox/command facts  2023ms
+   ✓ keeps original artifact replay after input changes but refuses new stale writes and rejects dangling storyboard paragraphs  2015ms
+   ✓ reports an actual non-creator active Job as missing its producer, never hides it or misreports a revision conflict  2042ms
+   ✓ does not resolve another real project artifact even for the same owner and matching hash  2975ms
+   ✓ binds new draft writes to the question closure, while replay keeps the original artifact after a new question  1929ms
+   ✓ maps a real native source drift to conflict and checks ownership before unavailable source lookup  2163ms
+   ✓ component observer uses the authorization written during native observation in its one final SQLite projection  2280ms
+   ✓ component observer reports expired grants honestly and prefers a new valid authorization over expired predecessors  2004ms
+   ✓ rejects a committed author source replaced by a FIFO without hanging the HTTP request or Host close  2182ms
+   ✓ component safe-control pause still commits with a future-issued grant and does not authorize a new action  1912ms
+   ✓ component safe-control cancel still commits with a future-issued grant and does not authorize a new action  1943ms
+   ✓ binds content relay project scope to its owned project and originating intake while preserving pre-project decisions  2021ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/local-assets-host.test.ts > bounds real concurrent imports to two and removes a cancelled queued request without leaking a slot
+ProductError: Local asset facts or bytes changed
+ ❯ conflict src/host/agent-driven/local-asset-registry.ts:62:20
+     60| const MAX_BYTES=2*1024*1024*1024;
+     61| const invalid=()=>new ProductError('INVALID_REQUEST','Invalid local as…
+     62| const conflict=()=>new ProductError('REVISION_CONFLICT','Local asset f…
+       |                    ^
+     63| function keys(value:unknown,expected:string):boolean{return !!value&&t…
+     64| function fingerprint(info:BigIntStats):string{return [info.dev,info.in…
+ ❯ LocalAssetRegistry.#assertBlob src/host/agent-driven/local-asset-registry.ts:219:119
+ ❯ src/host/agent-driven/local-asset-registry.ts:200:10
+ ❯ RevisionStore.atomic src/host/projects/revision-store.ts:332:22
+ ❯ LocalAssetRegistry.#import src/host/agent-driven/local-asset-registry.ts:189:26
+ ❯ LocalAssetRegistry.import src/host/agent-driven/local-asset-registry.ts:155:11
+ ❯ tests/agent-driven/integration/local-assets-host.test.ts:161:3
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  1 failed | 38 passed (39)
+   Start at  03:24:49
+   Duration  154.58s (transform 2.33s, setup 0ms, collect 10.95s, tests 137.88s, environment 0ms, prepare 3.79s)
+

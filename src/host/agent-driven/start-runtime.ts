@@ -29,6 +29,7 @@ async function start(){
  let listening=false;
  const host=new NarralensHost({catalog:new ProjectCatalog(new Map()),dbPath:join(root,'host.sqlite'),snapshotsRoot:join(root,'snapshots'),adoptionStagingRoot:join(root,'adoption-stage'),migrationsRoot:join(root,'migrations'),derivedRoot:join(root,'derived'),openFilmVendorRoot:vendorRoot,
   agentApplication:instance=>app=new CreationApplication(instance,{createdRoot:join(root,'projects'),vendorRoot,
+   ...(process.env.NARRALENS_LOCAL_ASSETS_ROOT?{localAssets:{sourceRoot:resolve(process.env.NARRALENS_LOCAL_ASSETS_ROOT),storageRoot:join(root,'local-assets')}}:{}),
    instance:()=>validateAgentDefinition<Instance>('Instance',{instance_id:identity.instance_id,generation:identity.generation,api_version:'agent.v1',contract_version:'cp-a0-r4',capabilities:[],health:listening?'degraded':'starting'}),
    health:()=>registry.read(identity.instance_id),
   })});

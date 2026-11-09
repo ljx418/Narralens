@@ -1,0 +1,44 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:3936991) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/local-assets-host.test.ts (18 tests) 31329ms
+   ✓ actually probes and fully decodes video and synthetic diagnostic audio into the same Host database without modifying native source  2192ms
+   ✓ requires real trusted UI provenance and ownership before reading files or recording rights  1781ms
+   ✓ replays the original registration without reimporting changed input and refuses a conflicting key  1906ms
+   ✓ rolls back row, command and outbox together at before_insert, preserving an unreferenced blob for a safe retry  2021ms
+   ✓ rolls back row, command and outbox together at after_insert, preserving an unreferenced blob for a safe retry  2161ms
+   ✓ rolls back row, command and outbox together at after_receipt, preserving an unreferenced blob for a safe retry  1995ms
+   ✓ rolls back row, command and outbox together at after_event, preserving an unreferenced blob for a safe retry  2010ms
+   ✓ checks real input hashes, paths and media rather than accepting metadata as proof  1832ms
+   ✓ preserves unknown license and synthetic origin as facts rather than silently clearing them  1918ms
+   ✓ detects a published blob changed inside the final SQL boundary and commits no registration  1879ms
+   ✓ converges concurrent same-key imports to one immutable row, one command and one business event  1882ms
+   ✓ rounds audio directly from sample time to project frames rather than rounding through displayed milliseconds  1808ms
+   ✓ refuses truncated audio and a video with a damaged audio track even when video-only legacy validation passes  2000ms
+   ✓ refuses local storage overlapping author, snapshot or input domains before creating directories  1810ms
+   ✓ does not follow a newly redirected configured source root, even when replacement bytes have the declared hash  1887ms
+   ✓ captures trusted input by value before asynchronous inspection rather than accepting later permission changes  1847ms
+(node:3937590) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/creative-context-host.test.ts (13 tests) 27077ms
+   ✓ writes Script and bound Storyboard through real HTTP and observes them beside the actual committed native project  1905ms
+   ✓ rejects foreign owner access and unresolved or altered lineage without inserting content/outbox/command facts  1798ms
+   ✓ keeps original artifact replay after input changes but refuses new stale writes and rejects dangling storyboard paragraphs  1812ms
+   ✓ reports an actual non-creator active Job as missing its producer, never hides it or misreports a revision conflict  1862ms
+   ✓ does not resolve another real project artifact even for the same owner and matching hash  2828ms
+   ✓ binds new draft writes to the question closure, while replay keeps the original artifact after a new question  1935ms
+   ✓ maps a real native source drift to conflict and checks ownership before unavailable source lookup  3928ms
+   ✓ component observer uses the authorization written during native observation in its one final SQLite projection  1948ms
+   ✓ component observer reports expired grants honestly and prefers a new valid authorization over expired predecessors  1763ms
+   ✓ rejects a committed author source replaced by a FIFO without hanging the HTTP request or Host close  1747ms
+   ✓ component safe-control pause still commits with a future-issued grant and does not authorize a new action  1791ms
+   ✓ component safe-control cancel still commits with a future-issued grant and does not authorize a new action  1911ms
+   ✓ binds content relay project scope to its owned project and originating intake while preserving pre-project decisions  1847ms
+
+ Test Files  2 passed (2)
+      Tests  31 passed (31)
+   Start at  03:21:51
+   Duration  68.34s (transform 2.06s, setup 0ms, collect 6.53s, tests 58.41s, environment 0ms, prepare 2.27s)
+

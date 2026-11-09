@@ -1,0 +1,1 @@
+corepack pnpm exec vitest run tests/agent-driven/integration/committed-snapshot-host.test.ts tests/agent-driven/integration/pinned-snapshot-inspection.test.ts tests/agent-driven/media/preflight.test.ts tests/agent-driven/media/snapshot-copy.test.ts --maxWorkers=1 --minWorkers=1

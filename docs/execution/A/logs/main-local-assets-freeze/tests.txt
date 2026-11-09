@@ -1,0 +1,33 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:3963428) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/local-assets-host.test.ts (23 tests) 47886ms
+   ✓ actually probes and fully decodes video and synthetic diagnostic audio into the same Host database without modifying native source  2546ms
+   ✓ requires real trusted UI provenance and ownership before reading files or recording rights  2213ms
+   ✓ replays the original registration without reimporting changed input and refuses a conflicting key  2097ms
+   ✓ rolls back row, command and outbox together at before_insert, preserving an unreferenced blob for a safe retry  2458ms
+   ✓ rolls back row, command and outbox together at after_insert, preserving an unreferenced blob for a safe retry  2238ms
+   ✓ rolls back row, command and outbox together at after_receipt, preserving an unreferenced blob for a safe retry  2256ms
+   ✓ rolls back row, command and outbox together at after_event, preserving an unreferenced blob for a safe retry  2372ms
+   ✓ checks real input hashes, paths and media rather than accepting metadata as proof  1791ms
+   ✓ preserves unknown license and synthetic origin as facts rather than silently clearing them  2018ms
+   ✓ detects a published blob changed inside the final SQL boundary and commits no registration  2016ms
+   ✓ converges concurrent same-key imports to one immutable row, one command and one business event  2265ms
+   ✓ rounds audio directly from sample time to project frames rather than rounding through displayed milliseconds  3513ms
+   ✓ refuses truncated audio and a video with a damaged audio track even when video-only legacy validation passes  2306ms
+   ✓ refuses local storage overlapping author, snapshot or input domains before creating directories  2138ms
+   ✓ does not follow a newly redirected configured source root, even when replacement bytes have the declared hash  2151ms
+   ✓ captures trusted input by value before asynchronous inspection rather than accepting later permission changes  2172ms
+   ✓ bounds real concurrent imports to two and removes a cancelled queued request without leaking a slot  2501ms
+   ✓ preserves cancellation through the actual video validator wrapper and waits for its media child before returning  2179ms
+   ✓ quiesces admitted local imports and their real media child before the Host closes its shared database  1965ms
+   ✓ keeps snapshot bytes untouched when a storage parent is replaced exactly at before_stage_create  2271ms
+   ✓ keeps snapshot bytes untouched when a storage parent is replaced exactly at before_publish  2028ms
+
+ Test Files  1 passed (1)
+      Tests  23 passed (23)
+   Start at  03:44:24
+   Duration  54.79s (transform 2.16s, setup 0ms, collect 5.01s, tests 47.89s, environment 0ms, prepare 1.18s)
+

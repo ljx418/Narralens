@@ -1,0 +1,25 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+ ✓ tests/agent-driven/integration/committed-snapshot-host.test.ts (11 tests) 26852ms
+   ✓ uses a real committed Host transaction and pinned native parser for its immutable snapshot, never claims a draft is a film  3021ms
+   ✓ continues to read the committed snapshot after the live author source drifts  2920ms
+   ✓ refuses another principal, another transaction, another snapshot and a false expected digest  1989ms
+   ✓ rechecks the committed transaction on every read rather than trusting a once-created reader  1932ms
+   ✓ rejects mutated immutable bytes even while the database digest stays unchanged  1975ms
+   ✓ refuses a snapshot source symlink to identical bytes outside its own snapshot directory  1916ms
+   ✓ refuses a FIFO substituted for a snapshot entry without occupying the request forever  1776ms
+   ✓ reports unavailable snapshot paths without leaking absolute server paths or latching a read failure  2969ms
+   ✓ retries a failed pinned upstream initialization instead of caching unavailable forever  2825ms
+   ✓ refuses a FIFO installed after the digest but immediately before the actual pinned parser reads the film  2952ms
+   ✓ refuses changed film bytes between digest and pinned parsing even when its editable document is equivalent  2574ms
+ ✓ tests/agent-driven/integration/pinned-snapshot-inspection.test.ts (1 test) 759ms
+   ✓ reads the actual three-page/audio project through the pinned parser and keeps completeness, source and cancellation guards  758ms
+ ✓ tests/agent-driven/media/snapshot-copy.test.ts (8 tests) 20ms
+ ✓ tests/agent-driven/media/preflight.test.ts (10 tests) 20ms
+
+ Test Files  4 passed (4)
+      Tests  30 passed (30)
+   Start at  03:01:16
+   Duration  40.87s (transform 2.15s, setup 0ms, collect 4.98s, tests 27.65s, environment 0ms, prepare 5.77s)
+

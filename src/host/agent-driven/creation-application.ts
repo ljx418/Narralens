@@ -11,6 +11,7 @@ import {FixedWorkflowService} from '../creative/fixed-workflow-service.js';
 import {createTrustedCallerContext} from '../creative/trusted-context.js';
 import {CreativeProjectAuthority} from './creative-project-authority.js';
 import {ProjectContextService} from './project-context-service.js';
+import {LocalAssetRegistry,type LocalAssetRegistryOptions} from './local-asset-registry.js';
 import {CommittedSnapshotAuthority} from './committed-snapshot-authority.js';
 import {AgentRouteError} from './agent-http-router.js';
 
@@ -23,13 +24,16 @@ export class CreationApplication implements AgentHostApplication {
  readonly dispatcher:ApplicationDispatcher;
  readonly creation:ProjectCreationStore;
  readonly committedSnapshots:CommittedSnapshotAuthority;
+ readonly localAssets:LocalAssetRegistry|null;
+ #closing:Promise<void>|undefined;
  readonly worker:ProjectCreationService;
- constructor(host:NarralensHost,options:{createdRoot:string;vendorRoot:string;worker?:Pick<CreationServiceDeps,'leaseMs'|'pollMs'|'boundary'>;instance?:()=>Instance;health?:()=>HealthRead}){
+ constructor(host:NarralensHost,options:{createdRoot:string;vendorRoot:string;worker?:Pick<CreationServiceDeps,'leaseMs'|'pollMs'|'boundary'>;instance?:()=>Instance;health?:()=>HealthRead;localAssets?:Omit<LocalAssetRegistryOptions,'projectsRoot'|'snapshotsRoot'>}){
   this.auth=new ScopedAgentAuth(()=>host.origin);
   const verifier=new CreationSourceVerifier(host.snapshots,options.vendorRoot,options.createdRoot);
   this.creation=new ProjectCreationStore(host.revisions,()=>new Date(),verifier);
   host.projectResolver.attachCreatedProjects(this.creation,options.createdRoot);
   this.committedSnapshots=new CommittedSnapshotAuthority(host.revisions,host.snapshots,this.creation,options.vendorRoot);
+  this.localAssets=options.localAssets?new LocalAssetRegistry(host.revisions,this.creation,{...options.localAssets,projectsRoot:options.createdRoot,snapshotsRoot:host.snapshots.projectRoot('')}):null;
   this.worker=new ProjectCreationService({store:this.creation,coordinator:host.coordinator,snapshots:host.snapshots,verifier,createdRoot:options.createdRoot,...options.worker});
   const authority=new CreativeProjectAuthority(this.creation);
   const repository=new ProductSqliteRepository(host.revisions);
@@ -66,5 +70,5 @@ export class CreationApplication implements AgentHostApplication {
  leaseReaperExclusions(){return this.creation.pending().map(row=>row.job_id);}
  recoverBeforeGeneric(){return this.worker.recoverBeforeGeneric();}
  start(){this.worker.start();}
- close(){return this.worker.close();}
+ close(){return this.#closing??=Promise.all([this.worker.close(),this.localAssets?.close()]).then(()=>undefined);}
 }

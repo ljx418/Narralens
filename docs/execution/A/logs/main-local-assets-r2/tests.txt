@@ -1,0 +1,81 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:3926411) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/agent-driven/integration/local-assets-host.test.ts (11 tests | 3 failed) 22021ms
+   × actually probes and fully decodes video and synthetic diagnostic audio into the same Host database without modifying native source 2257ms
+     → Local asset facts or bytes changed
+   ✓ requires real trusted UI provenance and ownership before reading files or recording rights  1818ms
+   × replays the original registration without reimporting changed input and refuses a conflicting key 1888ms
+     → Local asset facts or bytes changed
+   ✓ rolls back row, command and outbox together at before_insert, preserving an unreferenced blob for a safe retry  1960ms
+   ✓ rolls back row, command and outbox together at after_insert, preserving an unreferenced blob for a safe retry  2056ms
+   ✓ rolls back row, command and outbox together at after_receipt, preserving an unreferenced blob for a safe retry  1964ms
+   ✓ rolls back row, command and outbox together at after_event, preserving an unreferenced blob for a safe retry  1936ms
+   ✓ checks real input hashes, paths and media rather than accepting metadata as proof  1855ms
+   ✓ preserves unknown license and synthetic origin as facts rather than silently clearing them  1864ms
+   ✓ detects a published blob changed inside the final SQL boundary and commits no registration  1850ms
+   × converges concurrent same-key imports to one immutable row, one command and one business event 2503ms
+     → Local asset facts or bytes changed
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/local-assets-host.test.ts > actually probes and fully decodes video and synthetic diagnostic audio into the same Host database without modifying native source
+ProductError: Local asset facts or bytes changed
+ ❯ conflict src/host/agent-driven/local-asset-registry.ts:61:20
+     59| const MAX_BYTES=2*1024*1024*1024;
+     60| const invalid=()=>new ProductError('INVALID_REQUEST','Invalid local as…
+     61| const conflict=()=>new ProductError('REVISION_CONFLICT','Local asset f…
+       |                    ^
+     62| function keys(value:unknown,expected:string):boolean{return !!value&&t…
+     63| function fingerprint(info:BigIntStats):string{return [info.dev,info.in…
+ ❯ LocalAssetRegistry.#row src/host/agent-driven/local-asset-registry.ts:108:455
+ ❯ src/host/agent-driven/local-asset-registry.ts:112:225
+ ❯ LocalAssetRegistry.list src/host/agent-driven/local-asset-registry.ts:112:211
+ ❯ tests/agent-driven/integration/local-assets-host.test.ts:47:21
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  tests/agent-driven/integration/local-assets-host.test.ts > replays the original registration without reimporting changed input and refuses a conflicting key
+ProductError: Local asset facts or bytes changed
+ ❯ conflict src/host/agent-driven/local-asset-registry.ts:61:20
+     59| const MAX_BYTES=2*1024*1024*1024;
+     60| const invalid=()=>new ProductError('INVALID_REQUEST','Invalid local as…
+     61| const conflict=()=>new ProductError('REVISION_CONFLICT','Local asset f…
+       |                    ^
+     62| function keys(value:unknown,expected:string):boolean{return !!value&&t…
+     63| function fingerprint(info:BigIntStats):string{return [info.dev,info.in…
+ ❯ LocalAssetRegistry.#row src/host/agent-driven/local-asset-registry.ts:108:455
+ ❯ LocalAssetRegistry.#replay src/host/agent-driven/local-asset-registry.ts:116:82
+ ❯ LocalAssetRegistry.#import src/host/agent-driven/local-asset-registry.ts:131:85
+ ❯ LocalAssetRegistry.import src/host/agent-driven/local-asset-registry.ts:122:22
+ ❯ tests/agent-driven/integration/local-assets-host.test.ts:61:27
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  tests/agent-driven/integration/local-assets-host.test.ts > converges concurrent same-key imports to one immutable row, one command and one business event
+ProductError: Local asset facts or bytes changed
+ ❯ conflict src/host/agent-driven/local-asset-registry.ts:61:20
+     59| const MAX_BYTES=2*1024*1024*1024;
+     60| const invalid=()=>new ProductError('INVALID_REQUEST','Invalid local as…
+     61| const conflict=()=>new ProductError('REVISION_CONFLICT','Local asset f…
+       |                    ^
+     62| function keys(value:unknown,expected:string):boolean{return !!value&&t…
+     63| function fingerprint(info:BigIntStats):string{return [info.dev,info.in…
+ ❯ LocalAssetRegistry.#row src/host/agent-driven/local-asset-registry.ts:108:455
+ ❯ LocalAssetRegistry.#replay src/host/agent-driven/local-asset-registry.ts:116:82
+ ❯ src/host/agent-driven/local-asset-registry.ts:155:91
+ ❯ RevisionStore.atomic src/host/projects/revision-store.ts:332:22
+ ❯ LocalAssetRegistry.#import src/host/agent-driven/local-asset-registry.ts:154:26
+ ❯ LocalAssetRegistry.import src/host/agent-driven/local-asset-registry.ts:122:11
+ ❯ tests/agent-driven/integration/local-assets-host.test.ts:92:17
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 8 passed (11)
+   Start at  03:12:45
+   Duration  28.00s (transform 1.96s, setup 0ms, collect 4.22s, tests 22.02s, environment 0ms, prepare 1.16s)
+

@@ -1,0 +1,1 @@
+corepack pnpm exec vitest run --config vitest.config.ts --maxWorkers=1 tests/agent-driven/integration/local-assets-host.test.ts tests/agent-driven/integration/product-sqlite-repository.test.ts tests/agent-driven/integration/host-close-lifecycle.test.ts tests/agent-driven/integration/committed-snapshot-host.test.ts
