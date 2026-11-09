@@ -1,0 +1,1 @@
+corepack pnpm exec vitest run --config vitest.config.ts --maxWorkers=1 tests/agent-driven/integration/committed-snapshot-host.test.ts tests/agent-driven/media/preflight.test.ts tests/agent-driven/media/snapshot-copy.test.ts

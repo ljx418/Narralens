@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
-import { copyFile, cp, mkdir, mkdtemp, readFile, realpath, rm, writeFile } from "node:fs/promises";
+import {constants} from "node:fs";
+import { copyFile, cp, mkdir, mkdtemp, open, readFile, realpath, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { basename, dirname, join, resolve } from "node:path";
 import { HttpError } from "../../host/api-error.js";
@@ -225,6 +226,7 @@ export class OpenFilmEngineAdapter implements EnginePort {
 
   async #inspectLayout(layout: OpenFilmProjectLayout, snapshot: SnapshotRef,
     ctx: ReadContext): Promise<EngineProjection> {
+    ctx.signal.throwIfAborted();
     const root = await realpath(layout.root);
     // Recompute the byte-level source identity before interpreting the document. If a
     // previously committed film becomes malformed, that is still a deterministic source
@@ -241,7 +243,13 @@ export class OpenFilmEngineAdapter implements EnginePort {
       throw new HttpError(409, "SOURCE_CHANGED", "OpenFilm source changed since the snapshot was taken", undefined, ctx.correlationId);
     }
 
+    ctx.signal.throwIfAborted();
     const read = await this.#upstream.readProjectFilm(root);
+    ctx.signal.throwIfAborted();
+    const filmFact=digest.manifest.files.find(file=>file.path==="film.html");
+    if(!filmFact||createHash("sha256").update(read.text).digest("hex")!==filmFact.sha256){
+      throw new HttpError(409,"SOURCE_CHANGED","OpenFilm film changed during inspection",undefined,ctx.correlationId);
+    }
     if (read.problems.length > 0) {
       throw new HttpError(503, "ENGINE_UNAVAILABLE", "OpenFilm reports the project film does not read",
         { problem_count: read.problems.length }, ctx.correlationId);
@@ -340,7 +348,15 @@ export class OpenFilmEngineAdapter implements EnginePort {
 
     const subtitles: EngineSubtitle[] = [];
     for (const subtitle of layout.subtitles ?? []) {
-      const bytes = await readFile(resolve(root, subtitle.path));
+      ctx.signal.throwIfAborted();
+      const handle=await open(resolve(root,subtitle.path),constants.O_RDONLY|constants.O_NONBLOCK|constants.O_NOFOLLOW);
+      let bytes:Buffer;
+      try{
+        if(!(await handle.stat()).isFile())throw new HttpError(409,"SOURCE_CHANGED","OpenFilm subtitle is not a regular file",undefined,ctx.correlationId);
+        bytes=await handle.readFile();
+      }finally{await handle.close();}
+      const subtitleFact=digest.manifest.files.find(file=>file.path===subtitle.path);
+      if(!subtitleFact||createHash("sha256").update(bytes).digest("hex")!==subtitleFact.sha256)throw new HttpError(409,"SOURCE_CHANGED","OpenFilm subtitle changed during inspection",undefined,ctx.correlationId);
       subtitles.push({ subtitle_id: subtitle.subtitle_id, source_ref: subtitle.path,
         content_sha256: createHash("sha256").update(bytes).digest("hex") });
     }

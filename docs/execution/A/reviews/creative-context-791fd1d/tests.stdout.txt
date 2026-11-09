@@ -1,0 +1,24 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+ ✓ tests/agent-driven/integration/creative-context-host.test.ts (13 tests) 30307ms
+   ✓ writes Script and bound Storyboard through real HTTP and observes them beside the actual committed native project  2176ms
+   ✓ rejects foreign owner access and unresolved or altered lineage without inserting content/outbox/command facts  1770ms
+   ✓ keeps original artifact replay after input changes but refuses new stale writes and rejects dangling storyboard paragraphs  1829ms
+   ✓ reports an actual non-creator active Job as missing its producer, never hides it or misreports a revision conflict  1778ms
+   ✓ does not resolve another real project artifact even for the same owner and matching hash  4039ms
+   ✓ binds new draft writes to the question closure, while replay keeps the original artifact after a new question  1866ms
+   ✓ maps a real native source drift to conflict and checks ownership before unavailable source lookup  1793ms
+   ✓ component observer uses the authorization written during native observation in its one final SQLite projection  1928ms
+   ✓ component observer reports expired grants honestly and prefers a new valid authorization over expired predecessors  3064ms
+   ✓ rejects a committed author source replaced by a FIFO without hanging the HTTP request or Host close  2261ms
+   ✓ component safe-control pause still commits with a future-issued grant and does not authorize a new action  2252ms
+   ✓ component safe-control cancel still commits with a future-issued grant and does not authorize a new action  1796ms
+   ✓ binds content relay project scope to its owned project and originating intake while preserving pre-project decisions  3752ms
+ ✓ tests/agent-driven/integration/agent-http-router.test.ts (5 tests) 226ms
+
+ Test Files  2 passed (2)
+      Tests  18 passed (18)
+   Start at  02:41:06
+   Duration  40.78s (transform 2.03s, setup 0ms, collect 6.31s, tests 30.53s, environment 0ms, prepare 2.77s)
+

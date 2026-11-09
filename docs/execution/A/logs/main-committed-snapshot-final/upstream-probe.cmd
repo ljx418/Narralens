@@ -1,0 +1,1 @@
+corepack pnpm exec tsx tests/m2.1-probe/openfilm-upstream-probe.mjs /mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm /mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/spikes/openfilm-m1b/project docs/execution/A/logs/main-committed-snapshot-final/upstream-probe.json

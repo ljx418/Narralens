@@ -1,0 +1,77 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:3908060) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/committed-snapshot-host.test.ts (10 tests) 22540ms
+   ✓ uses a real committed Host transaction and pinned native parser for its immutable snapshot, never claims a draft is a film  2662ms
+   ✓ continues to read the committed snapshot after the live author source drifts  3209ms
+   ✓ refuses another principal, another transaction, another snapshot and a false expected digest  1813ms
+   ✓ rechecks the committed transaction on every read rather than trusting a once-created reader  1905ms
+   ✓ rejects mutated immutable bytes even while the database digest stays unchanged  1771ms
+   ✓ refuses a snapshot source symlink to identical bytes outside its own snapshot directory  1791ms
+   ✓ refuses a FIFO substituted for a snapshot entry without occupying the request forever  1811ms
+   ✓ reports unavailable snapshot paths without leaking absolute server paths or latching a read failure  2555ms
+   ✓ retries a failed pinned upstream initialization instead of caching unavailable forever  2475ms
+   ✓ refuses a FIFO installed after the digest but immediately before the actual pinned parser reads the film  2549ms
+(node:3908460) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.1/engine-route.test.ts (8 tests) 1323ms
+   ✓ M2.1 route activation > AC-019 leaves every legacy route in place  951ms
+ ✓ tests/m2.1/source-digest-v1.test.ts (18 tests) 1117ms
+(node:3908579) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.1/native-bypass.test.ts (13 tests) 1019ms
+ ❯ tests/m2.1/engine-port.test.ts (10 tests | 1 failed) 326ms
+   ✓ EnginePort shape > AC-002 exposes exactly the seven governed operations 1ms
+   ✓ EnginePort shape > AC-002 declares no commit, revision write, lock write or command execution on the port 0ms
+   ✓ EnginePort shape > AC-002 accepts only Host-constructed absolute paths, never a client-supplied one 6ms
+   ✓ Engine adapters hold no commit power > AC-002 no adapter declares a commit, revision or lock mutator 4ms
+   ✓ Engine adapters hold no commit power > AC-002 both adapters implement the whole port or none of it 0ms
+   ✓ Engine adapters hold no commit power > AC-004 the OpenFilm adapter refuses to plan any write instead of inventing one 1ms
+   × Engine adapters hold no commit power > AC-004 the OpenFilm adapter surfaces an unreadable film as ENGINE_UNAVAILABLE, not a guess 81ms
+     → expected Error: OpenFilm film changed during inspe… { …(4) } to match object { status: 503, …(1) }
+(2 matching properties omitted from actual)
+   ✓ Engine adapters hold no commit power > EN-06 an unregistered project layout is unavailable rather than defaulted 0ms
+   ✓ OpenFilmEngineAdapter staging > AC-004 refuses a stale base before the upstream mutator is ever called 68ms
+   ✓ OpenFilmEngineAdapter staging > AC-004 never accepts an upstream rebased result as success 163ms
+ ✓ tests/m2.1/openfilm-upstream-lock.test.ts (14 tests) 111ms
+ ✓ tests/m2.1/time-model.test.ts (11 tests) 24ms
+ ✓ tests/m2.1/native-write-gateway.test.ts (20 tests) 13ms
+(node:3908824) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.1/engine-binding-store.test.ts (10 tests) 14ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/m2.1/engine-port.test.ts > Engine adapters hold no commit power > AC-004 the OpenFilm adapter surfaces an unreadable film as ENGINE_UNAVAILABLE, not a guess
+AssertionError: expected Error: OpenFilm film changed during inspe… { …(4) } to match object { status: 503, …(1) }
+(2 matching properties omitted from actual)
+
+- Expected
++ Received
+
+- {
+-   "code": "ENGINE_UNAVAILABLE",
+-   "status": 503,
++ HttpError {
++   "code": "SOURCE_CHANGED",
++   "status": 409,
+  }
+
+ ❯ tests/m2.1/engine-port.test.ts:100:5
+     98|     });
+     99|     adapter.registerLayout("of-2", { root: "tests/fixtures/m2.1/openfi…
+    100|     await expect(adapter.inspect(
+       |     ^
+    101|       { project_id: "of-2", engine: "openfilm", source_digest: "" },
+    102|       { correlationId: "test-correlation-id", projectId: "of-2", signa…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 8 passed (9)
+      Tests  1 failed | 113 passed (114)
+   Start at  02:52:00
+   Duration  54.82s (transform 2.08s, setup 0ms, collect 12.70s, tests 26.49s, environment 1ms, prepare 10.55s)
+

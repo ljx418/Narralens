@@ -1,0 +1,39 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:3905282) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/creative-context-host.test.ts (13 tests) 31939ms
+   ✓ writes Script and bound Storyboard through real HTTP and observes them beside the actual committed native project  4828ms
+   ✓ rejects foreign owner access and unresolved or altered lineage without inserting content/outbox/command facts  3025ms
+   ✓ keeps original artifact replay after input changes but refuses new stale writes and rejects dangling storyboard paragraphs  2293ms
+   ✓ reports an actual non-creator active Job as missing its producer, never hides it or misreports a revision conflict  2468ms
+   ✓ does not resolve another real project artifact even for the same owner and matching hash  4081ms
+   ✓ binds new draft writes to the question closure, while replay keeps the original artifact after a new question  1850ms
+   ✓ maps a real native source drift to conflict and checks ownership before unavailable source lookup  1827ms
+   ✓ component observer uses the authorization written during native observation in its one final SQLite projection  1970ms
+   ✓ component observer reports expired grants honestly and prefers a new valid authorization over expired predecessors  1838ms
+   ✓ rejects a committed author source replaced by a FIFO without hanging the HTTP request or Host close  1959ms
+   ✓ component safe-control pause still commits with a future-issued grant and does not authorize a new action  1824ms
+   ✓ component safe-control cancel still commits with a future-issued grant and does not authorize a new action  1940ms
+   ✓ binds content relay project scope to its owned project and originating intake while preserving pre-project decisions  2035ms
+(node:3906014) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/committed-snapshot-host.test.ts (9 tests) 19552ms
+   ✓ uses a real committed Host transaction and pinned native parser for its immutable snapshot, never claims a draft is a film  2644ms
+   ✓ continues to read the committed snapshot after the live author source drifts  2485ms
+   ✓ refuses another principal, another transaction, another snapshot and a false expected digest  1789ms
+   ✓ rechecks the committed transaction on every read rather than trusting a once-created reader  1800ms
+   ✓ rejects mutated immutable bytes even while the database digest stays unchanged  1896ms
+   ✓ refuses a snapshot source symlink to identical bytes outside its own snapshot directory  1884ms
+   ✓ refuses a FIFO substituted for a snapshot entry without occupying the request forever  1966ms
+   ✓ reports unavailable snapshot paths without leaking absolute server paths or latching a read failure  2525ms
+   ✓ retries a failed pinned upstream initialization instead of caching unavailable forever  2561ms
+ ✓ tests/agent-driven/media/snapshot-copy.test.ts (8 tests) 21ms
+ ✓ tests/agent-driven/media/preflight.test.ts (10 tests) 20ms
+
+ Test Files  4 passed (4)
+      Tests  40 passed (40)
+   Start at  02:47:55
+   Duration  65.51s (transform 2.23s, setup 0ms, collect 7.02s, tests 51.53s, environment 0ms, prepare 4.68s)
+

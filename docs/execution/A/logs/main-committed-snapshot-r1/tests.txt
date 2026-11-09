@@ -1,0 +1,21 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+ ✓ tests/agent-driven/media/snapshot-copy.test.ts (8 tests) 24ms
+ ✓ tests/agent-driven/media/preflight.test.ts (10 tests) 19ms
+(node:3904498) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/committed-snapshot-host.test.ts (7 tests) 13669ms
+   ✓ uses a real committed Host transaction and pinned native parser for its immutable snapshot, never claims a draft is a film  2624ms
+   ✓ continues to read the committed snapshot after the live author source drifts  2370ms
+   ✓ refuses another principal, another transaction, another snapshot and a false expected digest  1722ms
+   ✓ rechecks the committed transaction on every read rather than trusting a once-created reader  1716ms
+   ✓ rejects mutated immutable bytes even while the database digest stays unchanged  1715ms
+   ✓ refuses a snapshot source symlink to identical bytes outside its own snapshot directory  1814ms
+   ✓ refuses a FIFO substituted for a snapshot entry without occupying the request forever  1706ms
+
+ Test Files  3 passed (3)
+      Tests  25 passed (25)
+   Start at  02:46:24
+   Duration  23.68s (transform 1.90s, setup 0ms, collect 4.50s, tests 13.71s, environment 0ms, prepare 3.64s)
+

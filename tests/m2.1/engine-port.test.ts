@@ -93,7 +93,7 @@ describe("Engine adapters hold no commit power", () => {
   it("AC-004 the OpenFilm adapter surfaces an unreadable film as ENGINE_UNAVAILABLE, not a guess", async () => {
     const adapter = new OpenFilmEngineAdapter({
       revOf: () => "0",
-      readProjectFilm: async () => ({ text: "<html>", rev: "0", value: null, doc: null, problems: ["film.html is broken"] }),
+      readProjectFilm: async () => ({ text: readFileSync(resolve("tests/fixtures/m2.1/openfilm-project/film.html"), "utf8"), rev: "0", value: null, doc: null, problems: ["film.html is broken"] }),
       editProjectFilm: async () => { throw new Error("unreachable"); },
     });
     adapter.registerLayout("of-2", { root: "tests/fixtures/m2.1/openfilm-project", roots: ["film.html"] });

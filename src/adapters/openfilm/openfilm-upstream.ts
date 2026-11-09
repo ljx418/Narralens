@@ -1,7 +1,9 @@
 import { createHash } from "node:crypto";
 import { execFile } from "node:child_process";
-import { readFile, realpath } from "node:fs/promises";
-import { resolve } from "node:path";
+import { mkdtemp, open, readFile, realpath, rm, writeFile } from "node:fs/promises";
+import {constants} from "node:fs";
+import {tmpdir} from "node:os";
+import { join, resolve } from "node:path";
 import { promisify } from "node:util";
 import { pathToFileURL } from "node:url";
 import lock from "../../../contracts/openfilm-upstream-lock.json" with { type: "json" };
@@ -263,7 +265,24 @@ export async function createPinnedOpenFilmUpstream(vendorRoot: string,
   }
   return {
     revOf: (text: string) => String((loaded.revOf as (value: string) => string)(text)),
-    readProjectFilm: async (root: string) => await (loaded.readProjectFilm as (value: string) => Promise<OpenFilmFilmRead>)(root),
+    readProjectFilm: async (root: string) => {
+      // Preserve the pinned parser, but never give its blocking readFile an externally
+      // replaceable path. Only the validated film bytes enter this private parse folder.
+      let bytes:Buffer=Buffer.alloc(0);
+      const handle=await open(resolve(root,"film.html"),constants.O_RDONLY|constants.O_NONBLOCK|constants.O_NOFOLLOW)
+        .catch(error=>{if(error?.code==='ENOENT')return null;throw error;});
+      if(handle){
+        try{
+          if(!(await handle.stat()).isFile())throw new HttpError(503,"ENGINE_UNAVAILABLE","OpenFilm film is not a regular file");
+          bytes=await handle.readFile();
+        }finally{await handle.close();}
+      }
+      const isolated=await mkdtemp(join(tmpdir(),"narralens-film-read-"));
+      try{
+        await writeFile(join(isolated,"film.html"),bytes,{flag:"wx",mode:0o600});
+        return await (loaded.readProjectFilm as (value: string) => Promise<OpenFilmFilmRead>)(isolated);
+      }finally{await rm(isolated,{recursive:true,force:true});}
+    },
     editProjectFilm: async (root: string, base: string | null, ops: readonly OpenFilmOp[]) =>
       await (loaded.editProjectFilm as (value: string, base: string | null, ops: readonly OpenFilmOp[]) => Promise<OpenFilmFilmEdit>)(root, base, ops),
   };

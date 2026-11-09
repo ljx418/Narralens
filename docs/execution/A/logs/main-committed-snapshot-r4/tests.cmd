@@ -1,0 +1,1 @@
+corepack pnpm exec vitest run --config vitest.config.ts --maxWorkers=1 tests/agent-driven/integration/committed-snapshot-host.test.ts tests/m2.1 tests/wave2/m4a/activated-projection.test.ts tests/wave2/m4a/openfilm-projection-completeness.test.ts

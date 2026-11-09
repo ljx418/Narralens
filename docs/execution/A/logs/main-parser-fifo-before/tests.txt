@@ -1,0 +1,33 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:3907313) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/agent-driven/integration/committed-snapshot-host.test.ts (10 tests | 1 failed | 9 skipped) 5765ms
+   ↓ uses a real committed Host transaction and pinned native parser for its immutable snapshot, never claims a draft is a film
+   ↓ continues to read the committed snapshot after the live author source drifts
+   ↓ refuses another principal, another transaction, another snapshot and a false expected digest
+   ↓ rechecks the committed transaction on every read rather than trusting a once-created reader
+   ↓ rejects mutated immutable bytes even while the database digest stays unchanged
+   ↓ refuses a snapshot source symlink to identical bytes outside its own snapshot directory
+   ↓ refuses a FIFO substituted for a snapshot entry without occupying the request forever
+   ↓ reports unavailable snapshot paths without leaking absolute server paths or latching a read failure
+   ↓ retries a failed pinned upstream initialization instead of caching unavailable forever
+   × refuses a FIFO installed after the digest but immediately before the actual pinned parser reads the film 5765ms
+     → The pinned parser blocked after digest verification
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/committed-snapshot-host.test.ts > refuses a FIFO installed after the digest but immediately before the actual pinned parser reads the film
+Error: The pinned parser blocked after digest verification
+ ❯ Timeout.<anonymous> tests/agent-driven/integration/committed-snapshot-host.test.ts:114:167
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 9 skipped (10)
+   Start at  02:50:52
+   Duration  11.58s (transform 1.90s, setup 0ms, collect 4.11s, tests 5.77s, environment 0ms, prepare 1.13s)
+

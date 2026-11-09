@@ -1,0 +1,48 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+ ✓ tests/m2.1/engine-port.test.ts (10 tests) 298ms
+(node:3909596) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/committed-snapshot-host.test.ts (11 tests) 24761ms
+   ✓ uses a real committed Host transaction and pinned native parser for its immutable snapshot, never claims a draft is a film  2935ms
+   ✓ continues to read the committed snapshot after the live author source drifts  2529ms
+   ✓ refuses another principal, another transaction, another snapshot and a false expected digest  1836ms
+   ✓ rechecks the committed transaction on every read rather than trusting a once-created reader  1846ms
+   ✓ rejects mutated immutable bytes even while the database digest stays unchanged  1829ms
+   ✓ refuses a snapshot source symlink to identical bytes outside its own snapshot directory  1895ms
+   ✓ refuses a FIFO substituted for a snapshot entry without occupying the request forever  1819ms
+   ✓ reports unavailable snapshot paths without leaking absolute server paths or latching a read failure  2532ms
+   ✓ retries a failed pinned upstream initialization instead of caching unavailable forever  2490ms
+   ✓ refuses a FIFO installed after the digest but immediately before the actual pinned parser reads the film  2540ms
+   ✓ refuses changed film bytes between digest and pinned parsing even when its editable document is equivalent  2509ms
+(node:3909877) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/m4a/activated-projection.test.ts (8 tests) 16275ms
+   ✓ M4A-P01: a fresh Host rebuilds the active layout from durable facts > cannot inspect an activated target at all without a layout — the gap M4A closes  2625ms
+   ✓ M4A-P01: a fresh Host rebuilds the active layout from durable facts > inspects a restarted Host's own migrated target, with no test hook anywhere  3708ms
+   ✓ M4A-P01: a fresh Host rebuilds the active layout from durable facts > keys its cache by project, snapshot and source digest  2410ms
+   ✓ M4A-P01: a fresh Host rebuilds the active layout from durable facts > fails closed when the migrated copy's bytes move under it  2338ms
+   ✓ M4A-P01: a fresh Host rebuilds the active layout from durable facts > refuses a layout whose declared root escapes the target  2727ms
+   ✓ M4A-P01: a fresh Host rebuilds the active layout from durable facts > refuses when the ledger names a target the plan does not cover  2466ms
+(node:3910172) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.1/engine-route.test.ts (8 tests) 1252ms
+   ✓ M2.1 route activation > AC-019 leaves every legacy route in place  899ms
+ ✓ tests/m2.1/source-digest-v1.test.ts (18 tests) 1102ms
+(node:3910355) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.1/native-bypass.test.ts (13 tests) 1017ms
+ ✓ tests/m2.1/openfilm-upstream-lock.test.ts (14 tests) 118ms
+ ✓ tests/wave2/m4a/openfilm-projection-completeness.test.ts (11 tests) 29ms
+ ✓ tests/m2.1/time-model.test.ts (11 tests) 25ms
+(node:3910600) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.1/engine-binding-store.test.ts (10 tests) 13ms
+ ✓ tests/m2.1/native-write-gateway.test.ts (20 tests) 16ms
+
+ Test Files  11 passed (11)
+      Tests  134 passed (134)
+   Start at  02:54:10
+   Duration  79.30s (transform 2.15s, setup 0ms, collect 15.29s, tests 44.91s, environment 1ms, prepare 12.87s)
+

@@ -11,6 +11,7 @@ import {FixedWorkflowService} from '../creative/fixed-workflow-service.js';
 import {createTrustedCallerContext} from '../creative/trusted-context.js';
 import {CreativeProjectAuthority} from './creative-project-authority.js';
 import {ProjectContextService} from './project-context-service.js';
+import {CommittedSnapshotAuthority} from './committed-snapshot-authority.js';
 import {AgentRouteError} from './agent-http-router.js';
 
 /** Actual Host composition for the first creation chain, not an alternate server.
@@ -21,12 +22,14 @@ export class CreationApplication implements AgentHostApplication {
  readonly auth:ScopedAgentAuth;
  readonly dispatcher:ApplicationDispatcher;
  readonly creation:ProjectCreationStore;
+ readonly committedSnapshots:CommittedSnapshotAuthority;
  readonly worker:ProjectCreationService;
  constructor(host:NarralensHost,options:{createdRoot:string;vendorRoot:string;worker?:Pick<CreationServiceDeps,'leaseMs'|'pollMs'|'boundary'>;instance?:()=>Instance;health?:()=>HealthRead}){
   this.auth=new ScopedAgentAuth(()=>host.origin);
   const verifier=new CreationSourceVerifier(host.snapshots,options.vendorRoot,options.createdRoot);
   this.creation=new ProjectCreationStore(host.revisions,()=>new Date(),verifier);
   host.projectResolver.attachCreatedProjects(this.creation,options.createdRoot);
+  this.committedSnapshots=new CommittedSnapshotAuthority(host.revisions,host.snapshots,this.creation,options.vendorRoot);
   this.worker=new ProjectCreationService({store:this.creation,coordinator:host.coordinator,snapshots:host.snapshots,verifier,createdRoot:options.createdRoot,...options.worker});
   const authority=new CreativeProjectAuthority(this.creation);
   const repository=new ProductSqliteRepository(host.revisions);

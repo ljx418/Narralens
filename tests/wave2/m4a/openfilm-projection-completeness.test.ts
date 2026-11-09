@@ -1,4 +1,4 @@
-import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
@@ -53,7 +53,7 @@ async function project(): Promise<{ root: string; adapter: OpenFilmEngineAdapter
      </body></html>\n`, "utf8");
   const adapter = new OpenFilmEngineAdapter({
     revOf: () => "0000000000000000",
-    readProjectFilm: async () => ({ text: "<html/>", rev: "0000000000000000", value: null,
+    readProjectFilm: async (inputRoot: string) => ({ text: await readFile(join(inputRoot,"film.html"),"utf8"), rev: "0000000000000000", value: null,
       doc: CLEAN, problems: [] }),
     editProjectFilm: async () => { throw new Error("must not be called"); },
   } as never);
@@ -65,7 +65,7 @@ async function problemsFor(doc: unknown): Promise<readonly string[]> {
   adapter.registerLayout("p1", { root, roots: ["film.html"] });
   const stub = new OpenFilmEngineAdapter({
     revOf: () => "0000000000000000",
-    readProjectFilm: async () => ({ text: "<html/>", rev: "0000000000000000", value: null,
+    readProjectFilm: async (inputRoot: string) => ({ text: await readFile(join(inputRoot,"film.html"),"utf8"), rev: "0000000000000000", value: null,
       doc, problems: [] }),
     editProjectFilm: async () => { throw new Error("must not be called"); },
   } as never);
@@ -141,7 +141,7 @@ describe("M4A-P01: the adapter reports every node it could not map", () => {
     const { root } = await project();
     const adapter = new OpenFilmEngineAdapter({
       revOf: () => "0000000000000000",
-      readProjectFilm: async () => ({ text: "<html/>", rev: "0000000000000000", value: null,
+      readProjectFilm: async (inputRoot: string) => ({ text: await readFile(join(inputRoot,"film.html"),"utf8"), rev: "0000000000000000", value: null,
         doc: { ...CLEAN, tracks: [{ attrs: { "data-track": "picture" }, clips: [
           { id: "shot-001", src: "scenes/shot-001.html", time: [0, 10] },
           { id: "shot-002", src: "scenes/shot-002.qqq", time: [0, 10] },
