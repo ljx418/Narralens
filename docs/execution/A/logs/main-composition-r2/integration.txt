@@ -1,0 +1,27 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:3704912) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/agent-http-router.test.ts (4 tests) 185ms
+(node:3704935) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/product-sqlite-repository.test.ts (9 tests) 87ms
+ ✓ tests/agent-driven/integration/contract-freeze.test.ts (3 tests) 405ms
+(node:3705156) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/agent-schema.test.ts (8 tests) 263ms
+(node:3705262) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/durable-cursor.test.ts (3 tests) 176ms
+(node:3705388) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/observation-cursor-ports.test.ts (3 tests) 10ms
+ ✓ tests/agent-driven/integration/scoped-auth.test.ts (6 tests) 5ms
+ ✓ tests/agent-driven/integration/capability-fingerprint.test.ts (2 tests) 3ms
+
+ Test Files  8 passed (8)
+      Tests  38 passed (38)
+   Start at  22:48:06
+   Duration  26.70s (transform 499ms, setup 0ms, collect 10.97s, tests 1.13s, environment 1ms, prepare 10.02s)
+

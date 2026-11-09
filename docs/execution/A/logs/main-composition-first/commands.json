@@ -1,0 +1,27 @@
+[
+  {
+    "name": "typecheck",
+    "argv": [
+      "corepack",
+      "pnpm",
+      "exec",
+      "tsc",
+      "--noEmit"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "integration",
+    "argv": [
+      "corepack",
+      "pnpm",
+      "exec",
+      "vitest",
+      "run",
+      "--config",
+      "vitest.config.ts",
+      "tests/agent-driven/integration"
+    ],
+    "exit": 1
+  }
+]

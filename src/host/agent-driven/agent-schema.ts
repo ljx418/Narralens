@@ -1,10 +1,12 @@
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import type { DatabaseSync } from 'node:sqlite';
+import { matchesFrozenAgentSchema } from './agent-schema-definition.js';
 
 const migration = readFileSync(new URL('../../../contracts/agent-driven-a.migration.sql', import.meta.url), 'utf8');
 const migrationSHA = createHash('sha256').update(migration).digest('hex');
 const expectedMigrationSHA = '5572530b5036728e414a0653fc36fd43958874a3a89cc8223e3984194c4a1fa4';
+const receiptDDL="CREATE TABLE IF NOT EXISTS agent_driven_schema_receipt(id TEXT PRIMARY KEY CHECK(id='cp-a0-r4'), schema_sha256 TEXT NOT NULL, schema_fingerprint TEXT NOT NULL)";
 export interface AgentSchemaReceipt { schema_sha256: string; schema_fingerprint: string; }
 export class AgentSchemaError extends Error {
   readonly code = 'AGENT_SCHEMA_DRIFT';
@@ -26,7 +28,7 @@ export function applyAgentSchema(db: DatabaseSync, hooks: { beforeReceipt?: () =
     const receipt = db.prepare("SELECT schema_sha256,schema_fingerprint FROM agent_driven_schema_receipt WHERE id='cp-a0-r4'").get();
     if (receipt) {
       if (Number(db.prepare('SELECT count(*) AS n FROM agent_driven_schema_receipt').get()?.n) !== 1) throw new AgentSchemaError();
-      if (receipt.schema_sha256 !== migrationSHA || receipt.schema_fingerprint !== fingerprint(db)) throw new AgentSchemaError();
+      if (receipt.schema_sha256 !== migrationSHA || receipt.schema_fingerprint !== fingerprint(db) || !matchesFrozenAgentSchema(db,migration,receiptDDL)) throw new AgentSchemaError();
       return { schema_sha256: String(receipt.schema_sha256), schema_fingerprint: String(receipt.schema_fingerprint) };
     }
     throw new AgentSchemaError();
@@ -38,8 +40,9 @@ export function applyAgentSchema(db: DatabaseSync, hooks: { beforeReceipt?: () =
   const body = migration.replace(/^PRAGMA foreign_keys=ON;\r?\n/m, '').replace(/^BEGIN IMMEDIATE;\r?\n/m, '').replace(/^COMMIT;\s*$/m, '');
   db.exec('BEGIN IMMEDIATE');
   try {
-    db.exec("CREATE TABLE IF NOT EXISTS agent_driven_schema_receipt(id TEXT PRIMARY KEY CHECK(id='cp-a0-r4'), schema_sha256 TEXT NOT NULL, schema_fingerprint TEXT NOT NULL)");
+    db.exec(receiptDDL);
     db.exec(body);
+    if(!matchesFrozenAgentSchema(db,migration,receiptDDL))throw new AgentSchemaError();
     const schema_fingerprint = fingerprint(db);
     hooks.beforeReceipt?.();
     db.prepare('INSERT INTO agent_driven_schema_receipt VALUES(?,?,?)').run('cp-a0-r4', migrationSHA, schema_fingerprint);

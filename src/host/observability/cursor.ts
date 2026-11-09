@@ -39,7 +39,8 @@ export type CursorRejectionKind =
   | "unknown"
   | "expired"
   | "scope_mismatch"
-  | "outside_retention";
+  | "outside_retention"
+  | "not_yet_valid";
 
 /** The error codes the contract defines for cursor failures. */
 export type CursorErrorCode = "INVALID_REQUEST" | "ORIGIN_REJECTED" | "CURSOR_EXPIRED";
@@ -68,6 +69,7 @@ export function rejectionToCode(kind: CursorRejectionKind): CursorErrorCode {
     case "tampered":
     case "unknown":
     case "scope_mismatch":
+    case "not_yet_valid":
       return "ORIGIN_REJECTED";
   }
 }
@@ -159,6 +161,7 @@ export async function verifyCursor(
     throw new CursorRejection("malformed", "cursor_watermark_invalid");
   }
   assertCursorScope(claims, input.scope);
+  if (Date.parse(claims.issued_at) > input.nowMs) throw new CursorRejection("not_yet_valid", "cursor_not_yet_valid");
   if (isCursorExpired(claims, input.nowMs)) {
     throw new CursorRejection("expired", "cursor_expired");
   }

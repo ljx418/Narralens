@@ -4,6 +4,7 @@ import type { Brief, IntakePut } from '../../../src/contracts/agent-driven-types
 import { validateAgentDefinition } from '../../../src/contracts/agent-driven-validator.js';
 import { RevisionStore } from '../../../src/host/projects/revision-store.js';
 import { ProductSqliteRepository } from '../../../src/host/agent-driven/product-sqlite-repository.js';
+import { styleDigest } from '../../../src/host/creative/digest.js';
 import { CreativeService } from '../../../src/host/creative/creative-service.js';
 import { createTrustedCallerContext } from '../../../src/host/creative/trusted-context.js';
 import type { ProductEvent, ProductTransaction, IntakeVersionRecord, ProductIdempotencyReceipt } from '../../../src/host/creative/product-repository.js';
@@ -39,6 +40,16 @@ describe('PRODUCT adapter on the real shared SQLite connection',()=>{
    for(const table of ['cp_a0_intake_version','cp_a0_intake_head','operation_idempotency','outbox'])expect(count(store,table),table).toBe(0);
   }finally{store.close();}
  });
+ it('poisons a transaction even if the domain callback catches a failed event mirror or CAS',async()=>{
+  const {store,repo}=fixture();try{
+   const bad:ProductEvent={...event,scope:{kind:'run',project_id:'project1',run_id:'missing',run_scope_digest:'a'.repeat(64),plan_version:1}};
+   await expect(repo.transaction(tx=>{try{tx.emit(bad);}catch{};return 'swallowed';})).rejects.toThrow();
+   expect(count(store,'outbox')).toBe(0);expect(count(store,'cp_a0_event')).toBe(0);
+   await repo.transaction(tx=>{tx.put('intake_version',{intake_id:'intake1',version:1},row());tx.compareAndSet('intake_head',{intake_id:'intake1'},0,{intake_id:'intake1',current_version:1});});
+   await expect(repo.transaction(tx=>{tx.put('intake_version',{intake_id:'intake1',version:2},row(2));try{tx.compareAndSet('intake_head',{intake_id:'intake1'},0,{intake_id:'intake1',current_version:2});}catch{};return 'swallowed';})).rejects.toThrow();
+   expect(count(store,'cp_a0_intake_version')).toBe(1);
+  }finally{store.close();}
+ });
  it('uses a real head CAS and rolls back the new version on stale input',async()=>{
   const {store,repo}=fixture();try{
    await repo.transaction(tx=>{tx.put('intake_version',{intake_id:'intake1',version:1},row());tx.compareAndSet('intake_head',{intake_id:'intake1'},0,{intake_id:'intake1',current_version:1});});
@@ -54,6 +65,14 @@ describe('PRODUCT adapter on the real shared SQLite connection',()=>{
    expect(await repo.transaction(tx=>tx.recallIdempotency({kind:'principal',principal_id:'other'},'test.put','key1'))).toBeNull();
    await expect(repo.transaction(tx=>tx.recallIdempotency({kind:'project',project_id:'principal:principal1'},'test.put','key1'))).rejects.toMatchObject({code:'INVALID_REQUEST'});
    expect(store.compose(db=>db.prepare('SELECT project_id,operation_kind FROM operation_idempotency').get())).toMatchObject({project_id:'principal:principal1',operation_kind:'agent.v1:test.put'});
+  }finally{store.close();}
+ });
+ it('checks the immutable command digest instead of trusting the embedded receipt copy',async()=>{
+  const {store,repo}=fixture();try{
+   await repo.transaction(tx=>tx.recordIdempotency(scope,'test.put','key1',receipt,{ok:true}));
+   const forged={format:'agent.idempotency@1',receipt:{...receipt,request_digest:'b'.repeat(64)},response:{ok:true}};
+   store.compose(db=>db.prepare('UPDATE operation_idempotency SET response_json=?').run(JSON.stringify(forged)));
+   await expect(repo.transaction(tx=>tx.recallIdempotency(scope,'test.put','key1'))).rejects.toMatchObject({code:'REVISION_CONFLICT'});
   }finally{store.close();}
  });
  it('rejects async callbacks, leaked transactions and nested transactions without committing partial rows',async()=>{
@@ -79,7 +98,9 @@ describe('PRODUCT adapter on the real shared SQLite connection',()=>{
   const {store,repo}=fixture();try{
    const service=new CreativeService({repository:repo,now:()=>1794229000});
    const caller=createTrustedCallerContext({principal_id:'principal1',channel:'authenticated',source:'driver_relay',session_ref:'session1'});
-   const input=sample<IntakePut>('IntakePut');
+   const input=structuredClone(sample<IntakePut>('IntakePut'));
+   input.intake_id=null;input.base_version=0;
+   input.brief.content_brief.style.style_digest=styleDigest(input.brief.content_brief.style);
    const first=await service.putIntake(input,caller);
    const outboxBefore=count(store,'outbox');
    const second=await service.putIntake({...input,meta:{...input.meta,correlation_id:'different-correlation'}},caller);

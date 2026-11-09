@@ -1,0 +1,19 @@
+{
+  "scope": "MAIN integration microtests, not A acceptance",
+  "commands": [
+    "corepack pnpm exec tsc --noEmit",
+    "corepack pnpm exec vitest run tests/agent-driven/integration --maxWorkers=1 --minWorkers=1"
+  ],
+  "results": {
+    "typecheck": 0,
+    "integration": 0,
+    "files": 8,
+    "tests": 38
+  },
+  "artifacts": {
+    "integration.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "integration.txt": "eb3c5b86ad8901ac9a7b85ae66abfe6415f81bc1aacdeb393016cf8b55a3ac34",
+    "typecheck.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "typecheck.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

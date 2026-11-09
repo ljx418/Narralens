@@ -38,7 +38,7 @@ export class DurableCursorCodec {
     const token=nonce+'_'+sig; // 17+1+43=61, first character is alphabetic, exactly within frozen ID bounds.
     return token;
   }
-  async verify(token:string):Promise<CursorClaims> {
+  async verifySignature(token:string):Promise<CursorClaims> {
     if(!/^c[A-Za-z0-9_-]{16}_[A-Za-z0-9_-]{43}$/.test(token))throw new CursorError('INVALID_REQUEST');
     const nonce=token.slice(0,17),sig=token.slice(18);
     const row=this.#db.prepare('SELECT claims_json FROM agent_cursor_claim WHERE nonce=?').get(nonce);
@@ -48,6 +48,10 @@ export class DurableCursorCodec {
     catch{throw new CursorError('ORIGIN_REJECTED');}
     const expected=this.signature(nonce,claims);
     if(!timingSafeEqual(Buffer.from(sig),Buffer.from(expected)))throw new CursorError('ORIGIN_REJECTED');
+    return claims;
+  }
+  async verify(token:string):Promise<CursorClaims> {
+    const claims=await this.verifySignature(token);
     this.dates(claims);
     return claims;
   }

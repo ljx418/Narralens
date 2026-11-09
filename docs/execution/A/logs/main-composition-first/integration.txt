@@ -1,0 +1,97 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:3700554) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/agent-driven/integration/agent-http-router.test.ts (4 tests | 2 failed) 186ms
+   × Agent HTTP transport with the actual SQLite creative service (not full NarralensHost acceptance) > creates and replays one actual intake, preserving unknown-field validation 67ms
+     → expected 404 to be 200 // Object.is equality
+   × Agent HTTP transport with the actual SQLite creative service (not full NarralensHost acceptance) > cannot let a driver impersonate a trusted decision, and checks Origin before resource existence 35ms
+     → expected 400 to be 200 // Object.is equality
+   ✓ Agent HTTP transport with the actual SQLite creative service (not full NarralensHost acceptance) > restores nullable GET cursor fields and refuses disagreement with Last-Event-ID 49ms
+   ✓ Agent HTTP transport with the actual SQLite creative service (not full NarralensHost acceptance) > redacts producer errors, rejects invalid producer DTOs, and bounds body bytes before dispatch 34ms
+ ✓ tests/agent-driven/integration/scoped-auth.test.ts (6 tests) 4ms
+(node:3700713) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/observation-cursor-ports.test.ts (3 tests) 11ms
+(node:3700803) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/durable-cursor.test.ts (3 tests) 162ms
+ ✓ tests/agent-driven/integration/contract-freeze.test.ts (3 tests) 402ms
+(node:3700871) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/agent-schema.test.ts (8 tests) 336ms
+(node:3700891) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/agent-driven/integration/product-sqlite-repository.test.ts (9 tests | 1 failed) 87ms
+   ✓ PRODUCT adapter on the real shared SQLite connection > roundtrips immutable typed JSON without a second store and rejects different data at the same key 21ms
+   ✓ PRODUCT adapter on the real shared SQLite connection > rolls back version/head/receipt/outbox together on a real SQL failure 6ms
+   ✓ PRODUCT adapter on the real shared SQLite connection > poisons a transaction even if the domain callback catches a failed event mirror or CAS 7ms
+   ✓ PRODUCT adapter on the real shared SQLite connection > uses a real head CAS and rolls back the new version on stale input 6ms
+   ✓ PRODUCT adapter on the real shared SQLite connection > keeps project and principal scopes disjoint in the ORIGINAL command authority 7ms
+   ✓ PRODUCT adapter on the real shared SQLite connection > checks the immutable command digest instead of trusting the embedded receipt copy 6ms
+   ✓ PRODUCT adapter on the real shared SQLite connection > rejects async callbacks, leaked transactions and nested transactions without committing partial rows 5ms
+   ✓ PRODUCT adapter on the real shared SQLite connection > validates every collection/key/scope and never exposes a global list or arbitrary table name 7ms
+   × PRODUCT adapter on the real shared SQLite connection > runs the ACTUAL CreativeService against durable SQL and replays unchanged content despite a new correlation id 20ms
+     → The style digest does not match the style it names
+ ✓ tests/agent-driven/integration/capability-fingerprint.test.ts (2 tests) 3ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/agent-http-router.test.ts > Agent HTTP transport with the actual SQLite creative service (not full NarralensHost acceptance) > creates and replays one actual intake, preserving unknown-field validation
+AssertionError: expected 404 to be 200 // Object.is equality
+
+- Expected
++ Received
+
+- 200
++ 404
+
+ ❯ tests/agent-driven/integration/agent-http-router.test.ts:35:103
+     33|  it('creates and replays one actual intake, preserving unknown-field v…
+     34|   const f=await fixture();try{
+     35|    const body=intake();const first=await f.request('/api/agent/v1/inta…
+       |                                                                                                       ^
+     36|    const second=await f.request('/api/agent/v1/intakes',{...body,meta:…
+     37|    const bad=await f.request('/api/agent/v1/intakes',{...body,actor:'h…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  tests/agent-driven/integration/agent-http-router.test.ts > Agent HTTP transport with the actual SQLite creative service (not full NarralensHost acceptance) > cannot let a driver impersonate a trusted decision, and checks Origin before resource existence
+AssertionError: expected 400 to be 200 // Object.is equality
+
+- Expected
++ Received
+
+- 200
++ 400
+
+ ❯ tests/agent-driven/integration/agent-http-router.test.ts:50:28
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  tests/agent-driven/integration/product-sqlite-repository.test.ts > PRODUCT adapter on the real shared SQLite connection > runs the ACTUAL CreativeService against durable SQL and replays unchanged content despite a new correlation id
+ProductError: The style digest does not match the style it names
+ ❯ assertBriefConsistency src/host/creative/creative-service.ts:1131:11
+    1129|   const recomputed = styleDigest(style);
+    1130|   if (style.style_digest !== recomputed) {
+    1131|     throw new ProductError("INVALID_REQUEST", "The style digest does n…
+       |           ^
+    1132|       details: { expected: recomputed, received: style.style_digest },
+    1133|     });
+ ❯ src/host/creative/creative-service.ts:112:7
+ ❯ src/host/agent-driven/product-sqlite-repository.ts:83:21
+ ❯ RevisionStore.atomic src/host/projects/revision-store.ts:332:22
+ ❯ ProductSqliteRepository.transaction src/host/agent-driven/product-sqlite-repository.ts:73:35
+ ❯ CreativeService.putIntake src/host/creative/creative-service.ts:101:29
+ ❯ tests/agent-driven/integration/product-sqlite-repository.test.ts:101:30
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  2 failed | 6 passed (8)
+      Tests  3 failed | 35 passed (38)
+   Start at  22:41:58
+   Duration  24.94s (transform 504ms, setup 0ms, collect 9.86s, tests 1.19s, environment 1ms, prepare 9.32s)
+

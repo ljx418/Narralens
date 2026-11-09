@@ -49,6 +49,7 @@ export class ProductSqliteRepository implements ProductRepository {
   readonly #db: DatabaseSync;
   readonly #commands: OperationIdempotencyStore;
   #inside = false;
+  #poison:((error:unknown)=>void)|undefined;
   #schemaVersion = 0;
   constructor(private readonly revisions: RevisionStore) {
     this.#db = revisions.compose(db => { applyAgentSchema(db); return db; });
@@ -56,33 +57,40 @@ export class ProductSqliteRepository implements ProductRepository {
     this.#schemaVersion = Number(this.#db.prepare('PRAGMA schema_version').get()?.schema_version);
   }
   transaction<T>(work:(tx:ProductTransaction)=>T):Promise<T> {
-    if (this.#inside) throw invalid();
-    let live = true;
-    const guard=()=>{if(!live) throw invalid();};
+    if (this.#inside) {const error=invalid();this.#poison?.(error);throw error;}
+    let live = true,poisoned=false;
+    let fault:unknown;
+    this.#poison=error=>{poisoned=true;fault=error;};
+    const guarded=<V>(operation:()=>V):V=>{
+      if(!live)throw invalid();
+      if(poisoned)throw fault;
+      try{return operation();}catch(error){poisoned=true;fault=error;throw error;}
+    };
     try {
       const current = Number(this.#db.prepare('PRAGMA schema_version').get()?.schema_version);
       if(current!==this.#schemaVersion){applyAgentSchema(this.#db);this.#schemaVersion=current;}
       this.#inside=true;
       const result=this.revisions.atomic(()=>{
         const tx:ProductTransaction={
-          get:(c,k)=>{guard();return this.read(c,k);},
-          list:(c,s)=>{guard();return this.list(c,s);},
-          put:(c,k,v)=>{guard();return this.write(c,k,v);},
-          compareAndSet:(c,k,n,v)=>{guard();return this.cas(c,k,n,v);},
-          recallIdempotency:(s,o,k)=>{guard();return this.recall(s,o,k);},
-          recordIdempotency:(s,o,k,r,v)=>{guard();this.remember(s,o,k,r,v);},
-          emit:e=>{guard();return this.emit(e);},
+          get:(c,k)=>guarded(()=>this.read(c,k)),
+          list:(c,s)=>guarded(()=>this.list(c,s)),
+          put:(c,k,v)=>guarded(()=>this.write(c,k,v)),
+          compareAndSet:(c,k,n,v)=>guarded(()=>this.cas(c,k,n,v)),
+          recallIdempotency:(s,o,k)=>guarded(()=>this.recall(s,o,k)),
+          recordIdempotency:(s,o,k,r,v)=>guarded(()=>this.remember(s,o,k,r,v)),
+          emit:e=>guarded(()=>this.emit(e)),
         };
         const value=work(tx);
         if(value && typeof (value as {then?:unknown}).then==='function') {
           void Promise.resolve(value).catch(()=>{});
           throw invalid();
         }
+        if(poisoned)throw fault;
         return value;
       });
       return Promise.resolve(result);
     } catch(error){ return Promise.reject(error); }
-    finally {live=false;this.#inside=false;}
+    finally {live=false;this.#inside=false;this.#poison=undefined;}
   }
   private spec(c:ProductCollection) {
     if(!Object.hasOwn(PRODUCT_COLLECTIONS,c)) throw invalid();
@@ -151,7 +159,9 @@ export class ProductSqliteRepository implements ProductRepository {
     if(!found)return null;
     const entry=object(JSON.parse(found.response_json));
     if(entry.format!=='agent.idempotency@1')throw conflict();
-    return {receipt:entry.receipt as ProductIdempotencyReceipt,response:entry.response};
+    const receipt=object(entry.receipt);
+    if(receipt.request_digest!==found.request_digest||receipt.operation!==operation||receipt.idempotency_key!==key||receipt.project_id!==(scope.kind==='project'?scope.project_id:null)||typeof receipt.principal_id!=='string'||scope.kind==='principal'&&receipt.principal_id!==scope.principal_id)throw conflict();
+    return {receipt:receipt as unknown as ProductIdempotencyReceipt,response:entry.response};
   }
   private remember(scope:ProductIdempotencyScope,operation:string,key:string,receipt:ProductIdempotencyReceipt,response:unknown) {
     const principal=scope.kind==='principal'?scope.principal_id:receipt.principal_id;

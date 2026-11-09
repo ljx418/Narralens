@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { describe, it, expect } from 'vitest';
 import { mkdtempSync, rmSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -67,6 +68,19 @@ describe('A schema on the real shared RevisionStore', () => {
       other.compose(db => db.exec("UPDATE agent_driven_schema_receipt SET schema_sha256='bad'"));
       expect(() => apply(other)).toThrow(AgentSchemaError);
     } finally { other.close(); }
+  });
+  it('rejects altered DDL even if its database receipt is made self-consistent', () => {
+    const store=new RevisionStore();
+    try{
+      apply(store);
+      store.compose(db=>{
+        db.exec('DROP TRIGGER cp_a0_question_version_update');
+        const rows=db.prepare("SELECT type,name,tbl_name,sql FROM sqlite_schema WHERE name GLOB 'cp_a0_*' OR name='agent_driven_schema_receipt' ORDER BY type,name").all();
+        const forged=createHash('sha256').update(JSON.stringify(rows)).digest('hex');
+        db.prepare('UPDATE agent_driven_schema_receipt SET schema_fingerprint=?').run(forged);
+      });
+      expect(()=>apply(store)).toThrow(AgentSchemaError);
+    }finally{store.close();}
   });
   it('enforces the frozen FK/immutability constraints on Node, not only on the Python fixture', () => {
     const store = new RevisionStore();
