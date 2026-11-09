@@ -21,6 +21,7 @@ import { randomUUID } from "node:crypto";
 import type {
   Artifact,
   ArtifactPut,
+  Brief,
   ContentDecision,
   ContentDecisionRelay,
   Decision,
@@ -35,7 +36,14 @@ import type {
 } from "../../contracts/agent-driven-types.js";
 import { validateAgentRouteInput, validateAgentRouteOutput } from "../../contracts/agent-driven-validator.js";
 import { creativeInputClosure } from "./creative-closure.js";
-import { briefDigest, canonicalDigest, contentDigest, deterministicId } from "./digest.js";
+import {
+  briefDigest,
+  canonicalDigest,
+  canonicalJson,
+  contentDigest,
+  deterministicId,
+  styleDigest,
+} from "./digest.js";
 import type {
   AnswerVersionRecord,
   ArtifactVersionRecord,
@@ -101,6 +109,7 @@ export class CreativeService {
         return validateAgentRouteOutput("intake.put", stored.response) as Intake;
       }
 
+      assertBriefConsistency(request.brief);
       const briefSha = briefDigest(request.brief);
       const now = this.#now();
       const createdAt = new Date(now * 1000).toISOString();
@@ -126,6 +135,29 @@ export class CreativeService {
           throw new ProductError("REVISION_CONFLICT", "The brief was changed by someone else", {
             details: { expected: request.base_version, actual: current },
           });
+        }
+        const owner = tx.get("intake_version", { intake_id: intakeId, version: current });
+        if (owner === null) {
+          throw new ProductError("NOT_FOUND", "The intake head points at a missing brief version");
+        }
+        if (owner.principal_id !== caller.principal_id) {
+          throw new ProductError("UNAUTHORIZED", "The brief belongs to another principal", {
+            details: { intake_id: intakeId },
+          });
+        }
+        if (owner.input_digest === briefSha) {
+          // The brief did not change. Writing it again would advance the version and make
+          // every question, answer and decision that binds the old digest stale for no
+          // reason, so the head stays where it is.
+          const unchanged = this.#projectIntake(tx, intakeId, current);
+          tx.recordIdempotency(
+            { kind: "principal", principal_id: caller.principal_id },
+            CREATIVE_OPERATIONS.intakePut,
+            request.meta.idempotency_key,
+            receipt,
+            unchanged,
+          );
+          return unchanged;
         }
         expectedHeadVersion = request.base_version;
         version = request.base_version + 1;
@@ -1054,5 +1086,45 @@ export class CreativeService {
     if (!isTrustedCallerContext(caller)) {
       throw new ProductError("UNAUTHORIZED", "The caller context was not minted by the dispatcher");
     }
+  }
+}
+
+/**
+ * Checks that a brief agrees with itself.
+ *
+ * Three things are checked, and all three are facts the lane owns:
+ *
+ * - the material strategy's asset list is the brief's local asset list, and its narration
+ *   is the brief's narration. A brief that names one set of assets and authorizes
+ *   another is not a brief anybody can act on;
+ * - the style digest is the digest of the style's own fields. The client's digest is a
+ *   claim; the recomputed one is the fact.
+ *
+ * Whether the material is actually licensed is not the lane's to decide — that is MAIN's
+ * project fact, and the run preparation asks for it through the fact port.
+ */
+export function assertBriefConsistency(brief: Brief): void {
+  const strategy = brief.content_brief.material_strategy;
+  const assets = [...strategy.asset_ids].sort();
+  const local = [...brief.local_asset_ids].sort();
+  if (canonicalJson(assets) !== canonicalJson(local)) {
+    throw new ProductError("INVALID_REQUEST", "The material strategy and the brief name different assets", {
+      details: { material_assets: assets, brief_assets: local },
+    });
+  }
+  if (strategy.narration_asset_id !== brief.narration_asset_id) {
+    throw new ProductError("INVALID_REQUEST", "The material strategy and the brief name different narrations");
+  }
+  if (strategy.mode !== "authorized_local_only") {
+    throw new ProductError("INVALID_REQUEST", "Only the authorized local material strategy is available", {
+      details: { mode: strategy.mode },
+    });
+  }
+  const style = brief.content_brief.style;
+  const recomputed = styleDigest(style);
+  if (style.style_digest !== recomputed) {
+    throw new ProductError("INVALID_REQUEST", "The style digest does not match the style it names", {
+      details: { expected: recomputed, received: style.style_digest },
+    });
   }
 }

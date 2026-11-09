@@ -222,6 +222,14 @@ export interface RunRecord {
 export interface RunCheckpoint {
   /** The observation revision of the workflow; it advances with every checkpoint change. */
   readonly workflow_revision: number;
+  /**
+   * When the checkpoint was last written, in ISO-8601.
+   *
+   * The workflow's `observed_at` comes from here, not from the clock at read time: a read
+   * must not pretend that something was observed now when the durable facts were last
+   * written earlier.
+   */
+  readonly observed_at: string;
   readonly gates: RunGate[];
   readonly attempts: RunCheckpointAttempt[];
   readonly review_packages: RunCheckpointPackage[];
@@ -249,6 +257,16 @@ export interface RunCheckpointPackage {
   readonly quality_digest: string;
   readonly state: "pending" | "accepted" | "changes_requested" | "rejected" | "stale";
   readonly reuse_of_package_id: string | null;
+  /** The gate this package satisfied, or `null` when it satisfied none. */
+  readonly reuse_of_gate_id: string | null;
+  /**
+   * The durable step attempt that produced the package.
+   *
+   * The adoption has to name a real attempt, and the frozen `ReviewPackage` DTO has no
+   * field for it, so the lineage lives in the checkpoint instead of the wire document.
+   */
+  readonly step_id: string;
+  readonly attempt: number;
 }
 
 export interface PlanVersionRecord {

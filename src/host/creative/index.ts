@@ -107,6 +107,7 @@ export {
   canonicalJson,
   contentDigest,
   briefDigest,
+  styleDigest,
   creativeInputClosureDigest,
   requestDigest,
   runScopeDigest,
@@ -122,12 +123,31 @@ export { creativeInputClosure } from "./creative-closure.js";
 
 export {
   guardExecution,
+  guardExecutionInTransaction,
+  readGuardFacts,
   assertAbleScope,
   A_ALLOWED_ACTIONS,
   A_CAPABILITY_IDS,
+  A_STAGE_ACTIONS,
   A_STAGE_GATE_REQUIREMENTS,
+  A_ACTION_GATE_REQUIREMENTS,
+  A_DISPATCHABLE_RUN_STATES,
+  A_DISPATCHABLE_ATTEMPT_STATES,
 } from "./execution-guard.js";
-export type { GuardedAction, ExecutionGuardContext } from "./execution-guard.js";
+export type {
+  GuardedAction,
+  GuardedEffect,
+  ExecutionGuardFacts,
+  FixedStageId,
+} from "./execution-guard.js";
+
+export {
+  requireFactPort,
+  assertProjectFacts,
+} from "./product-facts.js";
+export type { ProductFactPort, ProductProjectFacts } from "./product-facts.js";
+
+export { assertBriefConsistency } from "./creative-service.js";
 
 export {
   createTrustedCallerContext,

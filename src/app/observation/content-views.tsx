@@ -107,10 +107,13 @@ export interface NativeSyncState {
  * The native-sync state of a project.
  *
  * "Loaded" is only ever said when the context says so *and* the acknowledgement matches
- * the project's current revision, snapshot and source digest. A succeeded job or a
- * committed film is not a native acknowledgement: the editor may still be showing the
- * previous version, and claiming otherwise is the "commit ≠ native loaded" mistake the
- * contract keeps calling out.
+ * the project's current revision, snapshot, source digest and selection. A succeeded job
+ * or a committed film is not a native acknowledgement: the editor may still be showing
+ * the previous version, and claiming otherwise is the "commit ≠ native loaded" mistake
+ * the contract keeps calling out.
+ *
+ * The `native_sync` flag alone is never enough. It says what the Host believes; only the
+ * acknowledgement says what the editor actually loaded.
  */
 export function nativeSyncState(context: Context | null): NativeSyncState {
   if (context === null) {
@@ -137,6 +140,9 @@ export function nativeSyncState(context: Context | null): NativeSyncState {
   }
   if (ack.source_digest !== context.source_digest) {
     return { state: "unknown", reason: "编辑区确认的内容摘要与工程当前摘要不同。" };
+  }
+  if (ack.selection_version !== context.selection_version) {
+    return { state: "unknown", reason: "编辑区确认的选区与工程当前选区不同。" };
   }
   return { state: "loaded", reason: "编辑区已载入同一版本。" };
 }

@@ -1,7 +1,7 @@
 # A PRODUCT implementation
 
 Base and contract: `ca5b67a8285b130c79055317c6202f73cfbb99c8`. Manifest SHA256 `532cd43c963a1c94de5f8ce34f3c6eb7281fded80047f74dc5dbe1a70aa65170` (docs/execution/A/contract-freeze.json).
-Session allocated for Claude: `4548ddcb-e870-405b-863f-a17a4a7ed683`. Status: **IMPLEMENTATION COMPLETE, SOURCE ONLY, NOT_RUN**.
+Session allocated for Claude: `4548ddcb-e870-405b-863f-a17a4a7ed683`. Status: **SOURCE REPAIR batch 1 complete, source only, NOT_RUN**.
 
 Implement only ReleaseAssignment allowed prefixes, excluding protected project-creation-service. Use production DTO/validator. Creative intake/questions/answer/content relay/artifacts: CAS, exact idempotency, digest closure, content-only authority, deterministic fixed A workflow, trusted review gates, input/attempt isolation. No second DB or production memory fallback. MAIN injects atomic repository and trusted authority/adoption ports. Existing BootstrapPort is MAIN-owned; product returns data only.
 
@@ -17,11 +17,12 @@ Cases/commands and rollback in ReleaseAssignment. Resource reservation currently
 | --- | --- | --- |
 | 2026-11-09 | Codex | Task single, ReleaseAssignment `A-PRODUCT-001` released, base frozen. |
 | 2026-11-09 | Claude Code CLI (session `4548ddcb-e870-405b-863f-a17a4a7ed683`) | First pass ended by a controlled TERM (exit 143), not a 429. No source edits lost. |
-| 2026-11-09 | Claude Code CLI (same session, resumed) | Read `AGENTS.md`, `TASK.md`, `ReleaseAssignment.json`, requests 001–003, `AGENTS.md`, cp-a0 01/02/03, implementation-design 07/08, the R4 prototype and the frozen schema. |
-| 2026-11-09 | Claude Code CLI (same session) | Built the seam first (`product-repository.ts` + request 002), then the services, the R4 frontend and the tests. |
+| 2026-11-09 | Claude Code CLI (same session, resumed) | Built the seam (`product-repository.ts` + request 002), then the services, the R4 frontend and the tests. Committed as `23434c1`, `d438362`, `7e4f8b0`. |
+| 2026-11-09 | Codex | First independent acceptance: install exit 0, `tsc` exit 2 (8 errors), `vitest` exit 1 (37 passed / 15 failed / 52). Decision record `22cc663a`. |
+| 2026-11-09 | Claude Code CLI (same session, resumed) | SOURCE REPAIR batch 1: the eight `tsc` errors, the fifteen test failures (six of them false, caused by a missing DOM cleanup) and the seven consolidated review cases. Record: `logs/2026-11-09-source-repair-batch1.md`. |
 
-Codex was read-only throughout the Claude writing windows. No concurrent modification of
-the code, the git index, the branch or the run root.
+Codex was read-only during every Claude writing window. No concurrent modification of the
+code, the git index, the branch or the run root.
 
 ## What exists now
 
@@ -30,13 +31,14 @@ the code, the git index, the branch or the run root.
 | Path | Purpose |
 | --- | --- |
 | `src/host/creative/product-repository.ts` | The closed repository seam: 25-member `ProductCollection` union, per-collection record DTOs, primary keys, list scopes, collection specs with the exact `cp_a0_*` table, write/CAS semantics, `tx.emit`, idempotency recall/record on the transaction, `TrustedAdoptionAuthority`, the runtime-branded `TrustedCallerContext`. |
-| `src/host/creative/digest.ts` | Restricted-JCS canonical JSON, SHA-256 digests, the metadata-free request digest, the exact golden `FIXED_PLAN` and its digest assertion. |
+| `src/host/creative/digest.ts` | Restricted-JCS canonical JSON, SHA-256 digests, the metadata-free request digest, the style digest recomputation, the exact golden `FIXED_PLAN` and its digest assertion. |
 | `src/host/creative/time.ts` | Epoch seconds ↔ ISO-8601 (the frozen SQL stores deadlines as INTEGER epoch seconds). |
 | `src/host/creative/trusted-context.ts` | The out-of-band caller context, the frozen error code → HTTP status map, the lane's `ProductError`. |
 | `src/host/creative/creative-closure.ts` | The creative input closure and its digest. |
-| `src/host/creative/execution-guard.ts` | `guardExecution(binding, action, context)` — the one gate MAIN calls before every actual side effect. |
-| `src/host/creative/creative-service.ts` | Intake put/read/confirm, question put, answer (relay and workbench), content relay, artifact put. |
-| `src/host/creative/fixed-workflow-service.ts` | Run prepare/authorize/start/pause/resume/cancel/read, review package publication/read/decision, the workflow nodes. |
+| `src/host/creative/execution-guard.ts` | `guardExecution(binding, effect, facts)` and `guardExecutionInTransaction(...)` — the one gate MAIN calls before every actual side effect. It fails closed without the durable facts. |
+| `src/host/creative/product-facts.ts` | The mandatory read-only project fact port MAIN injects. |
+| `src/host/creative/creative-service.ts` | Intake put/read/confirm, question put, answer (relay and workbench), content relay, artifact put, and the brief's own consistency rules. |
+| `src/host/creative/fixed-workflow-service.ts` | Run prepare/authorize/start/pause/resume/cancel/read, `recordStepAttempt`, review package publication/read/decision, the workflow nodes. |
 | `src/host/creative/index.ts` | The lane's public entry point. |
 | `src/app/observation/WorkflowTopBar.tsx` | The R4 collapsed-by-default stage bar with the task detail dialog. |
 | `src/app/observation/CreativeReviewPanel.tsx` | The review panel: the chapter bundle, the independent cover, the separated decisions. |
@@ -51,22 +53,25 @@ the code, the git index, the branch or the run root.
 
 `tests/agent-driven/product/` — `digest.test.ts`, `creative-service.test.ts`,
 `fixed-workflow-service.test.ts`, `execution-guard.test.ts`, `observation-ui.test.tsx`,
-plus `support/memory-repository.ts` (a test-only seam implementation) and
-`support/fixtures.ts`.
+plus `support/memory-repository.ts` (a test-only seam implementation that enforces the
+frozen foreign keys, triggers and binding rules) and `support/fixtures.ts`.
 
 ### Lane documents
 
-`INTEGRATION.md` (how MAIN wires it, the exact commands), `requests/002-exact-record-mapping.md`,
-`requests/003-idempotency-scope-and-route-ownership.md`,
-`logs/2026-11-09-closed-ports-and-records.md`.
+`INTEGRATION.md` (how MAIN wires it, the exact commands),
+`requests/002-exact-record-mapping.md`,
+`requests/003-idempotency-scope-and-route-ownership.md` (**MAIN's decisions, final**),
+`requests/004-project-fact-port.md` (the one open item),
+`logs/2026-11-09-closed-ports-and-records.md`,
+`logs/2026-11-09-source-repair-batch1.md` (the repair record).
 
 ## Still open for MAIN
 
-1. The pre-project idempotency namespace in the existing `operation_idempotency` table
-   (request 003 §1).
-2. The route-ownership conflict between the frozen registry and the A release assignment
-   for `intake.confirm`, `workflow.run.authorize/start/pause/resume/cancel` and
-   `review.decide` (request 003 §2).
-3. The storage decisions listed in request 002 §7 and request 003 §3.
-4. The `ProductRepository` adapter itself, over MAIN's `RevisionStore` connection.
-5. The resource release for `tsc` and the test run. Everything here is `NOT_RUN`.
+1. The **project fact port** — request 004. The lane cannot prepare a run without it, by
+   design.
+2. The **style digest formula** — the lane's proposal is in request 004 §5 and
+   `INTEGRATION.md` §6.1; MAIN's brief writer has to match it.
+3. The **repository adapter** over MAIN's `RevisionStore` connection, with the write rules
+   of request 002 §4.
+4. The **resource release** for `tsc` and the test run. Everything here is `NOT_RUN`, and
+   the lane does not claim the A round or the module is ready.

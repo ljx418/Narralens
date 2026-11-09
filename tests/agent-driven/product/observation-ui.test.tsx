@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
-import { describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import type {
   Context,
   HealthRead,
@@ -12,6 +12,17 @@ import { WorkflowTopBar } from "../../../src/app/observation/WorkflowTopBar.js";
 import { CreativeReviewPanel } from "../../../src/app/observation/CreativeReviewPanel.js";
 import { nativeSyncState } from "../../../src/app/observation/content-views.js";
 import { SystemControlPanel } from "../../../src/app/system/SystemControlPanel.js";
+
+/**
+ * The DOM is cleaned between the cases.
+ *
+ * Without it the panels of the earlier cases stay in the document and every query finds
+ * two elements, which is how six cases failed for a reason that had nothing to do with
+ * the behaviour they were checking.
+ */
+afterEach(() => {
+  cleanup();
+});
 
 const WORKFLOW: Workflow = {
   project_id: "project-1",
@@ -68,13 +79,16 @@ const PACKAGE: ReviewPackage = {
   state: "pending",
 };
 
+const SAMPLED_AT = new Date(1794000000000).toISOString();
+const EXPIRES_AT = new Date(1794000015000).toISOString();
+
 function service(overrides: Partial<ServiceHealth>): ServiceHealth {
   return {
     service_id: "media-worker",
     state: "ready",
     ownership: "owned",
-    sampled_at: new Date(1794000000000).toISOString(),
-    expires_at: new Date(1794000015000).toISOString(),
+    sampled_at: SAMPLED_AT,
+    expires_at: EXPIRES_AT,
     reason: "",
     metrics: [],
     ...overrides,
@@ -86,23 +100,27 @@ describe("the R4 workflow bar", () => {
     render(<WorkflowTopBar workflow={WORKFLOW} />);
     const toggle = screen.getByRole("button", { name: "工作流" });
     expect(toggle.getAttribute("aria-expanded")).toBe("false");
-    expect(screen.getByText("等你决定：sample")).toBeTruthy();
+    expect(screen.getByText("等你决定：样片")).toBeTruthy();
     expect(screen.queryByRole("dialog")).toBeNull();
   });
 
-  it("shows the stages horizontally when it is expanded", () => {
+  it("shows the stages horizontally with their creative names", () => {
     render(<WorkflowTopBar workflow={WORKFLOW} />);
     fireEvent.click(screen.getByRole("button", { name: "工作流" }));
     expect(screen.getByRole("button", { name: /工作流/ }).getAttribute("aria-expanded")).toBe("true");
-    expect(screen.getByRole("button", { name: /sample/ })).toBeTruthy();
-    expect(screen.getByRole("button", { name: /first_chapter/ })).toBeTruthy();
+    expect(screen.getByRole("button", { name: /样片/ })).toBeTruthy();
+    expect(screen.getByRole("button", { name: /首章/ })).toBeTruthy();
+    // The internal identifiers stay in the detail, not in the rail.
+    expect(screen.queryByText("first_chapter")).toBeNull();
   });
 
   it("shows the real attempt, input and output of a node", () => {
     render(<WorkflowTopBar workflow={WORKFLOW} />);
     fireEvent.click(screen.getByRole("button", { name: "工作流" }));
-    fireEvent.click(screen.getByRole("button", { name: /sample/ }));
+    fireEvent.click(screen.getByRole("button", { name: /样片/ }));
     const dialog = screen.getByRole("dialog");
+    expect(dialog.textContent).toContain("内部标识");
+    expect(dialog.textContent).toContain("sample");
     expect(dialog.textContent).toContain("2");
     expect(dialog.textContent).toContain("job-7");
     expect(dialog.textContent).toContain("in-1@2");
@@ -112,7 +130,7 @@ describe("the R4 workflow bar", () => {
   it("closes the dialog with Escape and returns the focus to the stage", () => {
     render(<WorkflowTopBar workflow={WORKFLOW} />);
     fireEvent.click(screen.getByRole("button", { name: "工作流" }));
-    const trigger = screen.getByRole("button", { name: /sample/ });
+    const trigger = screen.getByRole("button", { name: /样片/ });
     fireEvent.click(trigger);
     expect(screen.getByRole("dialog")).toBeTruthy();
     fireEvent.keyDown(document, { key: "Escape" });
@@ -124,10 +142,16 @@ describe("the R4 workflow bar", () => {
     const onLocate = vi.fn();
     render(<WorkflowTopBar workflow={WORKFLOW} onLocate={onLocate} />);
     fireEvent.click(screen.getByRole("button", { name: "工作流" }));
-    fireEvent.click(screen.getByRole("button", { name: /sample/ }));
+    fireEvent.click(screen.getByRole("button", { name: /样片/ }));
     fireEvent.click(screen.getByRole("button", { name: "关闭" }));
     expect(screen.queryByRole("dialog")).toBeNull();
     expect(onLocate).not.toHaveBeenCalled();
+  });
+
+  it("says when the connection is broken instead of pretending the state is current", () => {
+    render(<WorkflowTopBar workflow={WORKFLOW} connection="disconnected" />);
+    expect(screen.getByText("连接中断 · 保留最后已知状态")).toBeTruthy();
+    expect(screen.getByText("连接已断开，结果尚未确认。")).toBeTruthy();
   });
 });
 
@@ -151,6 +175,16 @@ describe("the creative review panel", () => {
     expect(adopt.disabled).toBe(true);
   });
 
+  it("asks the host to open a part instead of playing it itself", () => {
+    const onOpenPart = vi.fn();
+    render(<CreativeReviewPanel package={PACKAGE} onOpenPart={onOpenPart} />);
+    fireEvent.click(screen.getAllByRole("button", { name: "在工作台中查看" })[0] as HTMLElement);
+    expect(onOpenPart).toHaveBeenCalled();
+    // The panel has no player and no timeline of its own.
+    expect(document.querySelector("video")).toBeNull();
+    expect(document.querySelector("timeline")).toBeNull();
+  });
+
   it("presents the cover as its own review", () => {
     render(
       <CreativeReviewPanel
@@ -167,11 +201,7 @@ describe("the system control panel", () => {
   const health: HealthRead = {
     services: [
       service({}),
-      service({
-        service_id: "shared-comfy",
-        ownership: "shared",
-        sampled_at: new Date(1794000000000).toISOString(),
-      }),
+      service({ service_id: "shared-comfy", ownership: "shared" }),
     ],
     sample_interval_ms: 5000,
     stale_after_ms: 15000,
@@ -185,11 +215,64 @@ describe("the system control panel", () => {
     expect(screen.getByRole("complementary", { name: /系统控制/ })).toBeTruthy();
   });
 
+  it("closes on Escape without taking the focus when it opens", () => {
+    const onClose = vi.fn();
+    render(
+      <SystemControlPanel health={health} nowMs={1794000000000} open onClose={onClose} />,
+    );
+    fireEvent.keyDown(document, { key: "Escape" });
+    expect(onClose).toHaveBeenCalled();
+  });
+
   it("shows a stale sample as unknown", () => {
     render(
       <SystemControlPanel health={health} nowMs={1794000000000 + 60000} open onClose={vi.fn()} />,
     );
     expect(screen.getAllByText(/未知/).length).toBeGreaterThan(0);
+  });
+
+  it("shows a sample from the future or an unreadable one as unknown", () => {
+    render(
+      <SystemControlPanel
+        health={{
+          ...health,
+          services: [
+            service({ sampled_at: new Date(1794000000000 + 60000).toISOString() }),
+            service({ service_id: "broken", sampled_at: "not-a-date" }),
+          ],
+        }}
+        nowMs={1794000000000}
+        open
+        onClose={vi.fn()}
+      />,
+    );
+    expect(screen.getAllByText(/未知/).length).toBeGreaterThan(0);
+  });
+
+  it("tells the truth about a metric that has no value", () => {
+    render(
+      <SystemControlPanel
+        health={{
+          ...health,
+          services: [
+            service({
+              metrics: [
+                {
+                  value: null,
+                  unit: "bytes",
+                  source: "unavailable",
+                  observed_at: SAMPLED_AT,
+                },
+              ],
+            }),
+          ],
+        }}
+        nowMs={1794000000000}
+        open
+        onClose={vi.fn()}
+      />,
+    );
+    expect(screen.getByText("未知（未采集）")).toBeTruthy();
   });
 
   it("offers no control for a shared service and no model mutation at all", () => {
@@ -230,6 +313,17 @@ describe("the native sync indicator", () => {
     native_sync: "pending",
   };
 
+  const ack = {
+    project_id: "project-1",
+    bridge_session_id: "session-1",
+    instance_generation: 1,
+    loaded_project_revision: 3,
+    loaded_snapshot_id: "snapshot-3",
+    source_digest: "a".repeat(64),
+    selection_version: 1,
+    observed_at: new Date(1794000000000).toISOString(),
+  };
+
   it("does not claim the editor is loaded before the acknowledgement arrives", () => {
     expect(nativeSyncState(base).state).toBe("pending");
   });
@@ -238,35 +332,27 @@ describe("the native sync indicator", () => {
     const state = nativeSyncState({
       ...base,
       native_sync: "loaded",
-      native_ack: {
-        project_id: "project-1",
-        bridge_session_id: "session-1",
-        instance_generation: 1,
-        loaded_project_revision: 2,
-        loaded_snapshot_id: "snapshot-3",
-        source_digest: "a".repeat(64),
-        selection_version: 1,
-        observed_at: new Date(1794000000000).toISOString(),
-      },
+      native_ack: { ...ack, loaded_project_revision: 2 },
     });
     expect(state.state).toBe("unknown");
   });
 
-  it("claims the editor is loaded only when the acknowledgement matches", () => {
+  it("does not claim the editor is loaded when the selection does not match", () => {
     const state = nativeSyncState({
       ...base,
       native_sync: "loaded",
-      native_ack: {
-        project_id: "project-1",
-        bridge_session_id: "session-1",
-        instance_generation: 1,
-        loaded_project_revision: 3,
-        loaded_snapshot_id: "snapshot-3",
-        source_digest: "a".repeat(64),
-        selection_version: 1,
-        observed_at: new Date(1794000000000).toISOString(),
-      },
+      native_ack: { ...ack, selection_version: 9 },
     });
+    expect(state.state).toBe("unknown");
+  });
+
+  it("does not claim the editor is loaded when the caller only says so", () => {
+    const state = nativeSyncState({ ...base, native_sync: "loaded", native_ack: null });
+    expect(state.state).toBe("unknown");
+  });
+
+  it("claims the editor is loaded only when the acknowledgement matches", () => {
+    const state = nativeSyncState({ ...base, native_sync: "loaded", native_ack: ack });
     expect(state.state).toBe("loaded");
   });
 });

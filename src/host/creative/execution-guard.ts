@@ -1,19 +1,21 @@
 /**
  * The single gate every actual side effect has to pass.
  *
- * MAIN calls `guardExecution` before it dispatches a job, prepares a change, applies a
- * change, loads a runtime or publishes a delivery. The reason it exists separately from
- * the run service is that the run service is not the only thing that produces side
- * effects: MAIN's own change and delivery paths do too, and the contract is explicit that
+ * MAIN calls `guardExecution` (or `guardExecutionInTransaction`, which reads the durable
+ * facts itself) before it dispatches a job, prepares a change, applies a change, loads a
+ * runtime or publishes a delivery. The reason it exists separately from the run service
+ * is that the run service is not the only thing that produces side effects: MAIN's own
+ * change and delivery paths do too, and the contract is explicit that
  * "所有副作用入口共同执行的门" — the same gate, not one gate per call site.
  *
- * The guard checks the things that can be checked without guessing:
+ * The guard is **fail closed**. The durable facts are a required argument: a call without
+ * them is refused, because a guard that succeeds when it knows nothing is worse than no
+ * guard at all — it looks like a check while authorizing whatever the caller asked for.
  *
- * - the binding is a well-formed `ExecutionBinding` for plan version 1;
- * - the action is one of the fixed A actions, and it is inside the run's own scope;
- * - the scope itself is a valid A scope (paid, external write and runtime mutation are
- *   all false, and the actions are a subset of the frozen set);
- * - the gates the action depends on are accepted.
+ * Every fact comes from the server's own records. Nothing the caller sends can become
+ * authority: the scope is the one the run row holds, its digest is recomputed here, the
+ * grant is the one the run's authorization table holds, and the attempt is the durable
+ * attempt row. A scope flag or a digest in a request body is a claim, not a fact.
  *
  * What the guard deliberately does **not** do: it never marks a gate accepted, never
  * advances a step and never creates an artifact. A guard that also progresses the
@@ -21,7 +23,19 @@
  * a decision, and a decision has to be recorded by the decision path.
  */
 
-import type { ExecutionBinding, RunGate, RunScope } from "../../contracts/agent-driven-types.js";
+import type {
+  ExecutionBinding,
+  RunGate,
+  RunScope,
+} from "../../contracts/agent-driven-types.js";
+import { canonicalDigest } from "./digest.js";
+import type {
+  ProductRepository,
+  ProductTransaction,
+  RunRecord,
+  RunState,
+  StepAttemptRecord,
+} from "./product-repository.js";
 import { ProductError } from "./trusted-context.js";
 
 /** The actions an A run may perform. Nothing outside this set is dispatchable. */
@@ -45,13 +59,32 @@ export const A_CAPABILITY_IDS = [
   "delivery.package",
 ] as const;
 
+/** The stages of the fixed plan. */
+export type FixedStageId =
+  | "definition"
+  | "sample"
+  | "first_chapter"
+  | "chapters"
+  | "cover"
+  | "delivery";
+
+/** The actions each fixed stage may perform. */
+export const A_STAGE_ACTIONS: Readonly<Record<string, ReadonlyArray<GuardedAction>>> = {
+  definition: ["clip.prepare"],
+  sample: ["clip.prepare"],
+  first_chapter: ["clip.prepare"],
+  chapters: ["snapshot.render"],
+  cover: ["snapshot.render"],
+  delivery: ["qc.inspect", "delivery.package"],
+};
+
 /**
  * The gates each fixed stage depends on.
  *
- * This is the "样片之后，稳定前另审首章" rule in its executable form: `first_chapter` may
- * not be dispatched until the `sample` gate is accepted, and `chapters` may not be
- * dispatched until `first_chapter` is accepted. A stability authorization would relax the
- * first-chapter gate in B; A has no such authorization, so the gate stays.
+ * These are the review gates of the *predecessor* stages. The gate a stage produces is
+ * not its own prerequisite — that would be circular — and the QC and adoption gates are
+ * produced inside the delivery stage and are therefore prerequisites of the actions that
+ * come after them, not of the stage that produces them.
  */
 export const A_STAGE_GATE_REQUIREMENTS: Readonly<Record<string, ReadonlyArray<RunGate["kind"]>>> = {
   definition: [],
@@ -59,29 +92,78 @@ export const A_STAGE_GATE_REQUIREMENTS: Readonly<Record<string, ReadonlyArray<Ru
   first_chapter: ["sample"],
   chapters: ["first_chapter"],
   cover: ["chapters"],
-  delivery: ["cover", "qc", "adoption"],
+  delivery: ["cover"],
 };
 
-/** The context the guard reads the durable facts from. */
-export interface ExecutionGuardContext {
+/**
+ * The gates each action depends on, on top of the stage's own requirements.
+ *
+ * `delivery.package` needs the QC gate: a delivery cannot be packaged before the QC
+ * recorded its evidence, and the QC gate is accepted by the delivery stage's own review.
+ */
+export const A_ACTION_GATE_REQUIREMENTS: Readonly<Record<string, ReadonlyArray<RunGate["kind"]>>> = {
+  "clip.prepare": [],
+  "snapshot.render": [],
+  "qc.inspect": [],
+  "delivery.package": ["qc"],
+  "change.prepare": [],
+  "change.apply": [],
+};
+
+/** The run states in which a new side effect may be dispatched. */
+export const A_DISPATCHABLE_RUN_STATES: ReadonlyArray<RunState> = ["ready", "running"];
+
+/** The attempt states in which a new side effect may be dispatched. */
+export const A_DISPATCHABLE_ATTEMPT_STATES: ReadonlyArray<StepAttemptRecord["state"]> = [
+  "pending",
+  "running",
+];
+
+/** The durable facts the guard reads. Every one of them comes from the server's records. */
+export interface ExecutionGuardFacts {
+  /** The project the run belongs to. */
+  readonly project_id: string;
+  /** The durable run row. */
+  readonly run: {
+    readonly run_id: string;
+    readonly current_plan_version: 1;
+    readonly state: RunState;
+    readonly scope: RunScope;
+    readonly run_scope_digest: string;
+  };
   /**
-   * The run's scope, read from the durable `cp_a0_run.scope_json` — never from the client.
+   * The durable grant row the binding names, or `null` when there is none.
+   *
+   * The grant is read from the run's own authorization table, never from the request.
    */
-  readonly scope: RunScope;
-  /**
-   * The run's scope digest, as the durable `cp_a0_run.run_scope_digest` records it. The
-   * digest is not part of the scope itself, so it is passed separately.
-   */
-  readonly run_scope_digest: string;
-  /** The run's gates, read from the durable checkpoint in the same transaction. */
+  readonly grant: {
+    readonly grant_id: string;
+    readonly run_scope_digest: string;
+    readonly principal_id: string;
+    readonly state: "active" | "revoked" | "expired";
+    /** Epoch seconds. */
+    readonly expires_at: number;
+  } | null;
+  /** The durable attempt row of the step the binding names, or `null`. */
+  readonly attempt: {
+    readonly step_id: string;
+    readonly attempt: number;
+    readonly state: StepAttemptRecord["state"];
+    readonly input_digest: string;
+    readonly grant_id: string;
+  } | null;
+  /** The run's gates, from the durable checkpoint. */
   readonly gates: ReadonlyArray<RunGate>;
-  /**
-   * The stage the action belongs to. The guard needs it to resolve the gate
-   * requirements; a side effect that is not part of a fixed stage (a change preparation,
-   * for example) states the stage it serves.
-   */
-  readonly stage_id?: string;
+  /** The authenticated principal that is about to cause the side effect. */
+  readonly principal_id: string;
+  /** The current time, in epoch seconds. */
+  readonly now_epoch_seconds: number;
 }
+
+/** The effect the caller is about to cause. */
+export type GuardedEffect =
+  | { readonly kind: "action"; readonly action: GuardedAction; readonly stage_id: string }
+  | { readonly kind: "safe_control"; readonly control: "pause" | "cancel" };
 
 /**
  * Guards one actual side effect.
@@ -91,9 +173,39 @@ export interface ExecutionGuardContext {
  */
 export function guardExecution(
   binding: ExecutionBinding,
-  action: GuardedAction,
-  context?: ExecutionGuardContext,
+  effect: GuardedEffect,
+  facts: ExecutionGuardFacts | undefined,
 ): void {
+  if (facts === undefined || facts === null) {
+    throw new ProductError(
+      "RUN_SCOPE_REQUIRED",
+      "The guard needs the durable run, grant and attempt facts; without them it cannot authorize anything",
+    );
+  }
+
+  assertBinding(binding);
+  assertRunIdentity(binding, facts);
+
+  if (effect.kind === "safe_control") {
+    // A safe control only tightens: it checks who is asking and which run they mean.
+    // It must stay available when the grant is gone or a gate is open.
+    if (facts.run.state === "cancelled" && effect.control === "pause") {
+      throw new ProductError("RUN_PLAN_STALE", "The run was already cancelled", {
+        details: { state: facts.run.state },
+      });
+    }
+    return;
+  }
+
+  assertAction(effect.action);
+  assertRunDispatchable(facts);
+  assertScope(facts, binding);
+  assertGrant(facts, binding);
+  assertAttempt(facts, binding);
+  assertStageAndGates(effect, facts);
+}
+
+function assertBinding(binding: ExecutionBinding): void {
   if (binding.plan_version !== 1) {
     throw new ProductError("RUN_PLAN_STALE", "Only plan version 1 is dispatchable in this round", {
       details: { plan_version: binding.plan_version },
@@ -112,30 +224,66 @@ export function guardExecution(
   }
   assertDigest(binding.input_digest, "input_digest");
   assertDigest(binding.run_scope_digest, "run_scope_digest");
+}
 
+function assertRunIdentity(binding: ExecutionBinding, facts: ExecutionGuardFacts): void {
+  if (facts.run.run_id !== binding.run_id) {
+    throw new ProductError("RUN_SCOPE_REQUIRED", "The binding does not belong to this run", {
+      details: { expected: facts.run.run_id, received: binding.run_id },
+    });
+  }
+  if (facts.run.current_plan_version !== binding.plan_version) {
+    throw new ProductError("RUN_PLAN_STALE", "The run moved on since this binding was made", {
+      details: { expected: facts.run.current_plan_version, received: binding.plan_version },
+    });
+  }
+}
+
+function assertAction(action: GuardedAction): void {
   if (!A_ALLOWED_ACTIONS.includes(action)) {
     throw new ProductError("CAPABILITY_UNAVAILABLE", "This action is not part of the fixed workflow", {
       details: { action },
     });
   }
+}
 
-  if (context === undefined) return;
+function assertRunDispatchable(facts: ExecutionGuardFacts): void {
+  if (!A_DISPATCHABLE_RUN_STATES.includes(facts.run.state)) {
+    throw new ProductError("RUN_PLAN_STALE", "The run is not in a state that allows a new effect", {
+      details: { state: facts.run.state },
+    });
+  }
+}
 
-  const { scope, gates } = context;
+/**
+ * Validates the run's own scope and recomputes its digest.
+ *
+ * The digest is recomputed here rather than compared against a value the caller
+ * supplied: the run row holds the scope, and if the two disagree then something wrote a
+ * scope that does not belong to this run.
+ */
+function assertScope(facts: ExecutionGuardFacts, binding: ExecutionBinding): void {
+  const scope = facts.run.scope;
   assertAbleScope(scope);
-  if (context.run_scope_digest !== binding.run_scope_digest) {
+  const recomputed = canonicalDigest(scope);
+  if (recomputed !== facts.run.run_scope_digest) {
+    throw new ProductError("RUN_PLAN_STALE", "The stored scope does not match its own digest", {
+      details: { expected: facts.run.run_scope_digest, received: recomputed },
+    });
+  }
+  if (facts.run.run_scope_digest !== binding.run_scope_digest) {
     throw new ProductError("RUN_SCOPE_REQUIRED", "The binding does not belong to this run scope", {
-      details: { expected: context.run_scope_digest, received: binding.run_scope_digest },
+      details: { expected: facts.run.run_scope_digest, received: binding.run_scope_digest },
     });
   }
-  if (scope.run_id !== binding.run_id) {
-    throw new ProductError("RUN_SCOPE_REQUIRED", "The binding does not belong to this run", {
-      details: { expected: scope.run_id, received: binding.run_id },
+  if (scope.run_id !== facts.run.run_id) {
+    throw new ProductError("RUN_SCOPE_REQUIRED", "The stored scope belongs to another run", {
+      details: { expected: facts.run.run_id, received: scope.run_id },
     });
   }
-  if (!scope.allowed_actions.includes(action)) {
-    throw new ProductError("RUN_SCOPE_REQUIRED", "The action is outside the authorized scope", {
-      details: { action, allowed_actions: scope.allowed_actions },
+  if (scope.project_id !== facts.project_id) {
+    throw new ProductError("RUN_SCOPE_REQUIRED", "The stored scope belongs to another project", {
+      details: { expected: facts.project_id, received: scope.project_id },
     });
   }
   if (scope.input_digest !== binding.input_digest) {
@@ -143,25 +291,102 @@ export function guardExecution(
       details: { expected: scope.input_digest, received: binding.input_digest },
     });
   }
+}
 
-  if (context.stage_id === undefined) return;
-  const required = A_STAGE_GATE_REQUIREMENTS[context.stage_id];
-  if (required === undefined) {
-    throw new ProductError("CAPABILITY_UNAVAILABLE", "Unknown stage for this workflow", {
-      details: { stage_id: context.stage_id },
+function assertGrant(facts: ExecutionGuardFacts, binding: ExecutionBinding): void {
+  const grant = facts.grant;
+  if (grant === null || grant === undefined) {
+    throw new ProductError("RUN_SCOPE_REQUIRED", "The run has no authorization for this effect");
+  }
+  if (grant.grant_id !== binding.authorization_id) {
+    throw new ProductError("RUN_SCOPE_REQUIRED", "The binding names another authorization", {
+      details: { expected: grant.grant_id, received: binding.authorization_id },
     });
   }
+  if (grant.run_scope_digest !== facts.run.run_scope_digest) {
+    throw new ProductError("RUN_SCOPE_REQUIRED", "The authorization belongs to a different scope");
+  }
+  if (grant.state !== "active") {
+    throw new ProductError("RUN_SCOPE_REQUIRED", "The authorization is not active", {
+      details: { state: grant.state },
+    });
+  }
+  if (facts.now_epoch_seconds >= grant.expires_at) {
+    throw new ProductError("RUN_SCOPE_REQUIRED", "The authorization has expired", {
+      details: { expires_at: grant.expires_at, now: facts.now_epoch_seconds },
+    });
+  }
+  if (grant.principal_id !== facts.principal_id) {
+    throw new ProductError("UNAUTHORIZED", "The authorization belongs to another principal", {
+      details: { expected: grant.principal_id, received: facts.principal_id },
+    });
+  }
+}
+
+function assertAttempt(facts: ExecutionGuardFacts, binding: ExecutionBinding): void {
+  const attempt = facts.attempt;
+  if (attempt === null || attempt === undefined) {
+    throw new ProductError("RUN_PLAN_STALE", "The step has no durable attempt to continue");
+  }
+  if (attempt.step_id !== binding.step_id) {
+    throw new ProductError("RUN_PLAN_STALE", "The binding names another step", {
+      details: { expected: attempt.step_id, received: binding.step_id },
+    });
+  }
+  if (attempt.attempt !== binding.attempt) {
+    throw new ProductError("RUN_PLAN_STALE", "The attempt is not the current attempt of this step", {
+      details: { expected: attempt.attempt, received: binding.attempt },
+    });
+  }
+  if (attempt.input_digest !== binding.input_digest) {
+    throw new ProductError("RUN_PLAN_STALE", "The attempt was made against another input", {
+      details: { expected: attempt.input_digest, received: binding.input_digest },
+    });
+  }
+  if (attempt.grant_id !== binding.authorization_id) {
+    throw new ProductError("RUN_SCOPE_REQUIRED", "The attempt was made under another authorization");
+  }
+  if (!A_DISPATCHABLE_ATTEMPT_STATES.includes(attempt.state)) {
+    throw new ProductError("RUN_PLAN_STALE", "The attempt is over", {
+      details: { state: attempt.state },
+    });
+  }
+}
+
+function assertStageAndGates(effect: Extract<GuardedEffect, { kind: "action" }>, facts: ExecutionGuardFacts): void {
+  const stage = effect.stage_id;
+  const allowed = A_STAGE_ACTIONS[stage];
+  if (allowed === undefined) {
+    throw new ProductError("CAPABILITY_UNAVAILABLE", "Unknown step for this workflow", {
+      details: { stage_id: stage },
+    });
+  }
+  if (!allowed.includes(effect.action)) {
+    throw new ProductError("CAPABILITY_UNAVAILABLE", "This action does not belong to this step", {
+      details: { stage_id: stage, action: effect.action, allowed_actions: allowed },
+    });
+  }
+  if (!facts.run.scope.allowed_actions.includes(effect.action)) {
+    throw new ProductError("RUN_SCOPE_REQUIRED", "The action is outside the authorized scope", {
+      details: { action: effect.action, allowed_actions: facts.run.scope.allowed_actions },
+    });
+  }
+
+  const required = new Set<RunGate["kind"]>([
+    ...(A_STAGE_GATE_REQUIREMENTS[stage] ?? []),
+    ...(A_ACTION_GATE_REQUIREMENTS[effect.action] ?? []),
+  ]);
   for (const kind of required) {
-    const gate = gates.find((candidate) => candidate.kind === kind);
+    const gate = facts.gates.find((candidate) => candidate.kind === kind);
     if (gate === undefined) {
-      throw new ProductError("RUN_GATE_BLOCKED", "The run has no gate for this stage yet", {
-        details: { stage_id: context.stage_id, gate_kind: kind },
+      throw new ProductError("RUN_GATE_BLOCKED", "The run has no gate for this step yet", {
+        details: { stage_id: stage, gate_kind: kind },
       });
     }
     if (gate.state !== "accepted") {
-      throw new ProductError("RUN_GATE_BLOCKED", "The stage is still waiting for a review decision", {
+      throw new ProductError("RUN_GATE_BLOCKED", "The step is still waiting for a review decision", {
         details: {
-          stage_id: context.stage_id,
+          stage_id: stage,
           gate_kind: kind,
           gate_id: gate.gate_id,
           gate_state: gate.state,
@@ -200,4 +425,99 @@ function assertDigest(value: string, field: string): void {
       details: { field },
     });
   }
+}
+
+/**
+ * Reads the durable facts and guards the effect, in one transaction.
+ *
+ * This is the call MAIN makes. It opens the transaction, reads the run, the grant, the
+ * attempt and the gates from the lane's own records, and then guards the effect against
+ * what it just read — so the facts and the check cannot come from different moments.
+ *
+ * The guard never dispatches anything: it authorizes or refuses. MAIN owns the dispatch.
+ */
+export async function guardExecutionInTransaction(
+  repository: ProductRepository,
+  binding: ExecutionBinding,
+  effect: GuardedEffect,
+  principalId: string,
+  options: { readonly project_id: string; readonly now?: () => number },
+): Promise<void> {
+  const now = options.now ?? (() => Math.floor(Date.now() / 1000));
+  await repository.transaction((tx) => {
+    guardExecution(
+      binding,
+      effect,
+      readGuardFacts(tx, options.project_id, binding, principalId, now()),
+    );
+  });
+}
+
+/** Reads the guard's facts from the durable records. */
+export function readGuardFacts(
+  tx: ProductTransaction,
+  projectId: string,
+  binding: ExecutionBinding,
+  principalId: string,
+  nowEpochSeconds: number,
+): ExecutionGuardFacts {
+  const run = findRun(tx, projectId, binding);
+  const grant = tx.get("execution_grant", {
+    project_id: run.project_id,
+    run_id: run.run_id,
+    grant_id: binding.authorization_id,
+  });
+  const attempts = tx.list("step_attempt", {
+    project_id: run.project_id,
+    run_id: run.run_id,
+    step_id: binding.step_id,
+  });
+  const current = attempts
+    .filter((candidate) => candidate.attempt === binding.attempt)
+    .at(0) ?? null;
+  return {
+    project_id: run.project_id,
+    run: {
+      run_id: run.run_id,
+      current_plan_version: run.current_plan_version,
+      state: run.state,
+      scope: run.scope_json,
+      run_scope_digest: run.run_scope_digest,
+    },
+    grant: grant === null
+      ? null
+      : {
+          grant_id: grant.grant_id,
+          run_scope_digest: grant.run_scope_digest,
+          principal_id: grant.principal_id,
+          state: grant.state,
+          expires_at: grant.expires_at,
+        },
+    attempt: current === null
+      ? null
+      : {
+          step_id: current.step_id,
+          attempt: current.attempt,
+          state: current.state,
+          input_digest: current.input_digest,
+          grant_id: current.grant_id,
+        },
+    gates: run.checkpoint_json.gates,
+    principal_id: principalId,
+    now_epoch_seconds: nowEpochSeconds,
+  };
+}
+
+function findRun(
+  tx: ProductTransaction,
+  projectId: string,
+  binding: ExecutionBinding,
+): RunRecord {
+  const run = tx.get("run", { project_id: projectId, run_id: binding.run_id });
+  if (run === null) {
+    throw new ProductError("NOT_FOUND", "No such run", {
+      details: { project_id: projectId, run_id: binding.run_id },
+    });
+  }
+  return run;
 }
