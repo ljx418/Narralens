@@ -1,0 +1,26 @@
+# A04 真正新建工程：来源、首提交与恢复契约
+
+在既有共享RevisionStore/Coordinator项目队列上实现ProjectCreationStore/Service。冻结CP-A0的bootstrap_command是建工程唯一预留权威，不能复用migration target或伪造migration_id。project.create的普通MCP凭据只允许代执行已有、同principal、同intake/version/digest且未过期的trusted_ui创建确认；content relay不生成安全确认。先建初始原生工程，再在该工程内保存script/storyboard；不是新建另一份前端或时间轴。
+
+预留同一事务生成command/project/job/transaction IDs、持久queued Job和原始POST response。response_json内部为{accepted,result}：accepted永不因完成改变；result最初null、提交时写BootstrapResult。重复POST返回原始accepted，GET job按现有job状态和result投影；无第二Job状态机，不挪用proposal/comparison/quarantine字段存成功结果。
+
+增加内部created_source_fact：按(project,snapshot)持久化来源闭包roots/subtitles、帧数/fps和实际资产许可事实，JSON与其SHA256绑定，FK指向同项目snapshot，UPDATE/DELETE触发器禁止改写。它是已提交原生内容的读取/证明元数据，不是第二timeline、Job或revision权威。初始空工程frame_count可为0，render/QC仍要求真实有内容；不能以空工程冒充A片完成。以后采用/恢复须在自己的同一最终提交内记录该snapshot匹配事实，不能仅支持首次创建。
+
+首提交在一个共享连接事务中重验：原预留/request/creative closure、trusted确认期限/owner、当前Job lease/attempt、prepared transaction、无其他pending/attention/指针/绑定、已发布snapshot identity。原子写revision=1/control=0、pinned单引擎绑定、snapshot、真实committed transaction、active_commit、created_source_fact、cp_origin、不可变Brief style载体与head、command result、Job成功事件/outbox。任何故障全部回滚；文件持久化及pinned parse必须在此之前真实完成。
+
+CreatedProjectView必须来自cp_origin+committed transaction+active pointer+binding+source fact和受控root实路径。不能降级查legacy catalog。既有activated/migration断言不放宽。新建、迁移各自保留真实来源，M5/投影/资产/历史/渲染通过明确native工程接口读取；UI原生loaded须真实桥ack，默认unconfirmed。
+
+恢复在通用Coordinator扫描之前按明确bootstrap discriminator接管，只清理有所有权证明且未committed的自身staging；已发布内容重读原始plan、hash和fsync证据后才允许幂等完成。不能reset、删已提交snapshot或产生新项目ID掩盖中断。素材入口仅服务端受信本地登记；用户未给授权视频/真实录音时仍开发无依赖模块，不读取J盘，不用假旁白声明A片验收。
+
+
+## 本轮实现观察（2026-11-10）
+
+ProjectCreationStore/CreationSourceVerifier/CreatedProjectView与已有layout/inventory读取分支已落代码。首次验证18测试仅证明组件事务，之后加入真实pinned解析和源证明，不借前次18/18宣称后来源码通过。最新main-created-foundation-r2为tsc0、7文件90/90；包括33项新建组件与既有resolver/inventory/activated projection回归。
+
+独立审查发现R1时钟提前采样、R2 metadata与真实snapshot缺共同证明、R3长寿命store运行中DDL漂移，MAIN已修并各有负向。写事务取得后和最后写入后均重新读时钟/确认/原lease期限；created_source_fact按schema_version复验自身固定namespace。CreationSourceVerifier实际重算固定upstream摘要，调用pinned OpenFilm解析器核帧/fps/完整性，核资产闭包path/hash/size，发布author source与snapshot必须同时存在、路径无逃逸且字节一致，fsync author文件/目录/父目录后才签发进程内不可伪造proof；最终事务起止同步再验，拒绝伪proof、错帧/fps/upstream、相同bytes路径替换及事后篡改。资产来源/许可证及媒体属性的可信登记仍属待接的真实catalog，不把byte证明当作已完成权利审核。
+
+CP01 §85明确script_ref与narration_asset_id允许null，合法前期路径是nullable draft Brief→真实空工程→项目内script/storyboard与真实素材→新版Brief/closed run。测试按此路径，无虚构preproject脚本引用；不把空工程视为成片。非空授权素材和真人录音的实际业务验收仍NOT_RUN。
+
+第一次扩大旧回归main-created-foundation保留80通过/6失败，6项因隔离worktree未包含.gitignore中的D1生成媒体而ENOENT。随后只复制canonical已验旧测试资产为独立文件，视觉SHA逐字匹配冻结Manifest，收据在legacy-fixture-copy；没有生成替代语音或修改旧断言，重跑90/90通过。旧D1语音不是A真人语音。
+
+仍未实现/启用：自动creation worker与专用启动恢复、一般project.create/job/context生产装配、授权资产catalog、created后续adopt/history事实写入、M5 created交互接线、真实native ack/A片/T20。独立组件复核待更新，A04 package与A整轮均保持进行中，不据本组件宣布完成。

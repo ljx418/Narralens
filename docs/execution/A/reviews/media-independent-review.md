@@ -148,3 +148,50 @@ R2生产端口/下载/事务/重启对账仍OPEN P1；R3harness分类错误仍OP
 | `docs/execution/A/logs/main-media-process-final/tests.txt` | `9eaaf7f966fe99853bc383c52e8722cca1b9396511e28e988d256b1839a86b0d` |
 | `docs/execution/A/logs/main-media-process-final/tests.exit` | `9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa` |
 | `docs/execution/A/logs/main-media-process-final/typecheck.exit` | `9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa` |
+
+## 最终提交绑定追加：10fe3d1
+
+只读复核修复提交fullSHA **`10fe3d122a1b87bb3c710743861bc10aa8f4ac16`**。读取时当前HEAD已经是PRODUCT文档提交 `218c40cb9a90b6a33359c5d0f556991166002eef`；对上述两SHA限定render/delivery/preflight、MEDIA tests/tools执行只读diff，无差异。本节没有重复整模块审查，也没有运行测试、Chromium、ffmpeg、Host或探针。
+
+最后增量已确认：policy在options为null/undefined且有占位时先shift再插入受控options，保留callback正确位置；真实Node测试新增明确undefined options调用，结果数4。前节低优先options占位兼容性注记现标FIXED。没有据此宣称Node全部可能API/平台均通过。
+
+强化版process-group-probe在等待remaining时不再排除Z，按pid+start身份等待采样对象全部消失。MAIN r3证据normal-close/kill-group各采样6个进程（**含worker，即5个后代**），全同owner组，remaining=[]，分别code0/SIGKILL，probe.exit=0。policy_sha256与本节源码一致。原来“probe忽略僵尸”的局限已在此次采样路径修正；一次后代快照、未打开页面/未渲染影片、未经过生产NativeRenderer取消/持久lease的范围边界仍保留。
+
+只读验证r3日志：typecheck.exit=0，tests.exit=0，14文件137/137；不是审查者重跑。artifacts.json列出的7项日志SHA逐项重算，全部一致。历史失败不删除、不改写。
+
+**最终判定保持：R1具体Playwright detached问题FIXED / TARGETED_EVIDENCE_PASS；R4 FIXED；R2生产接线P1、R3harness P2仍OPEN。A06整体NEEDS_WORK，真实成片与完整T20-A..H仍NOT_RUN。** 不将本次进程归属定向实测当成真实成片或T20端到端恢复通过。
+
+最终修复源码/证据字节绑定如下：
+
+| 文件 | SHA256 |
+|---|---|
+| `src/host/render/media-process-policy.mjs` | `bcadcfecda8080a337b1ceb14b2ffb96c42ba1f3f583f94a1eeceb46261f0559` |
+| `src/host/render/render-snapshot.ts` | `baf4c3457eaee0ea67aaabfe5e79ce91f36cb3260edca670fff81da535851c30` |
+| `src/host/render/openfilm-render-pin.json` | `a166bc74f7612917d11b39b03c3dc0c1d965cfde8acaca8cc1f24ec5efee2b3f` |
+| `tests/agent-driven/media/process-group-inheritance.test.ts` | `61212fa04b02ef8fcf24c683156c44a2469fb029a72b7fb5eb3c675d8cacccc7` |
+| `tests/agent-driven/media/render-snapshot.test.ts` | `037f7b5d59a2137a6b46562f883fe7416b6d394814b1078581782ed8130ddb45` |
+| `tools/agent-driven/media/process-group-probe.mjs` | `7b151896505d685c7e0abf919b1e8ca731eb55a701c0179844e815bf75b00d37` |
+| `docs/execution/A/logs/main-media-process-r3/chromium-groups.json` | `8d2ae4175d523aec1df2d0ddc69a6bc147c5c025d55919ac0f12d757ffe45ccc` |
+| `docs/execution/A/logs/main-media-process-r3/artifacts.json` | `ce4619c1fa0059fe28cc209a2d13c014b40625575f216612d088350dcf61755f` |
+| `docs/execution/A/logs/main-media-process-r3/tests.txt` | `4981b27a75c7e8dcbba6b329d56e1c166bcd2465d4394b704051ef9364e87508` |
+
+## R3 harness helper/CLI接线独立增量复核
+
+本次仅只读源码、测试和MAIN已留日志；未运行tests/Host/ffmpeg/CLI。读取时HEAD `218c40cb9a90b6a33359c5d0f556991166002eef`，harness修复尚为工作树字节，以本节摘要绑定。
+
+原R3的“即使有字幕/许可也因全部kind=native_source必block”根因已修正：render-delivery.ts实际import并调用buildHarnessClosure，--rights-manifest路径传入helper；harness-closure.ts:17,50-53将顶层已知字幕/许可名分类为supplement、设置相应role。识别的媒体分类为asset。没有manifest时rights=[]，不再自动生成cleared许可；有manifest时要求显式path/SHA/asset ID/rights ref/status/commercial/evidence，校验精确字段、相对路径、摘要、重复和跨行ID/ref别名，声明的文件必须存在于实际闭包。目录拒绝symlink与非普通文件。现有SnapshotRenderService/preflight的必需角色和许可门保留。
+
+MAIN main-harness-rights日志只证明tsc.exit0、6个helper测试通过（分类/无虚构许可、明确声明、错摘要、缺文件、跨别名、symlink）；fixture的clip.mp4明确是不可播放诊断字节，film.html也不是有效影片。这些测试不是实际CLI、native render、成片或T20证据。**原R3必block源码缺陷：FIXED；真正render-delivery CLI到encode/QC/package：NOT_RUN。** 必须以后用已授权真实fixture实测，不能将手填operator declaration升格为生产版权权威；其evidence_ref目前是非空操作员声明，并未外部核实许可内容。
+
+残余 MEDIA-R3b，P2：`tools/agent-driven/media/harness-closure.ts:18,53`按媒体扩展名识别asset，但遗漏woff/woff2/ttf/otf等字体。前置：合法film.html引用font.woff2，所有其他媒体/字幕/许可均有显式声明，唯字体无声明；字体会落native_source/rights_ref=null，preflight只检查asset/supplement，因此无声明字体不会block。现有真实源fixture包含font.woff2，非凭空猜测资源类别。建议将字体纳入asset或对未知资源fail-closed，并检验未声明字体被挡；不能泛称任意资源缺声明都受门控。复现建议尚NOT_RUN；本问题只针对诊断harness分类，不能据此推断尚未实现的生产SnapshotReadPort有同一缺陷。
+
+总评仍**NEEDS_WORK**：MAIN生产R2开放，R3b残余分类问题需处理，实际成片/CLI与T20仍NOT_RUN。
+
+| 本节文件 | SHA256 |
+|---|---|
+| `tools/agent-driven/media/harness-closure.ts` | `9776b70d5f422911e296a20552372d0055c136ace1e2973de4df8f5060ef0ecc` |
+| `tools/agent-driven/media/render-delivery.ts` | `b16fdc392b09c47240e01c551e7ccc91ae5af5a1f26aa81d41a3d4f16270f80a` |
+| `tests/agent-driven/media/harness-closure.test.ts` | `04184b98723c55cfc6e5d05e75d048c46229554cf5050370593b41876c69fb44` |
+| `docs/execution/A/logs/main-harness-rights/tests.txt` | `e765caf819b31855b477c86e181301f58dc81f6631f68b288feda3bed73e3048` |
+| `docs/execution/A/logs/main-harness-rights/tests.exit` | `9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa` |
+| `docs/execution/A/logs/main-harness-rights/typecheck.exit` | `9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa` |

@@ -1,0 +1,174 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:3763691) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/project-creation-store.test.ts (32 tests) 31379ms
+   ✓ commits real published snapshot metadata atomically, survives DB reopen and preserves the accepted response  1102ms
+   ✓ rolls back every initial commit fact when failure occurs after state  923ms
+   ✓ rolls back every initial commit fact when failure occurs after binding  3292ms
+   ✓ rolls back every initial commit fact when failure occurs after snapshot  937ms
+   ✓ rolls back every initial commit fact when failure occurs after transaction  924ms
+   ✓ rolls back every initial commit fact when failure occurs after pointer  923ms
+   ✓ rolls back every initial commit fact when failure occurs after source_fact  942ms
+   ✓ rolls back every initial commit fact when failure occurs after origin  970ms
+   ✓ rolls back every initial commit fact when failure occurs after brief  968ms
+   ✓ rolls back every initial commit fact when failure occurs after command  968ms
+   ✓ rolls back every initial commit fact when failure occurs after job  1078ms
+   ✓ rolls back every initial commit fact when failure occurs after outbox  1032ms
+   ✓ refuses a stale worker before any commit effect: owner  935ms
+   ✓ refuses a stale worker before any commit effect: attempt  917ms
+   ✓ refuses a stale worker before any commit effect: expired  901ms
+   ✓ refuses a stale worker before any commit effect: cancelled  889ms
+   ✓ rechecks creation schema in a live store, not only after constructing a replacement  947ms
+   ✓ samples lease time after transaction admission instead of using time from before BEGIN  892ms
+   ✓ rolls back when lease expires after the final writes  892ms
+   ✓ rolls back when confirmation expires after the final writes  906ms
+   ✓ does not mint a source proof for false native metadata: frame-count  1649ms
+   ✓ does not mint a source proof for false native metadata: fps  1667ms
+   ✓ does not mint a source proof for false native metadata: upstream  942ms
+   ✓ rejects a forged proof and byte changes after genuine pinned verification  996ms
+   ✓ resolves a genuine created project without migration/cached layout, including after reopen  1067ms
+   ✓ refuses created source symlink escape even with byte-identical committed content  943ms
+   ✓ does not commit a proved snapshot when its author-source publication is replaced or absent  940ms
+   ✓ lets the real Host rebuild a created layout and inventory without a migration or registration hook  1014ms
+(node:3764073) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/w2-asset-inventory-port.test.ts (14 tests) 188ms
+(node:3764116) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/w2-project-resolver.test.ts (16 tests) 3464ms
+   ✓ ACT-02 every way a migrated target must not resolve is closed > refuses a migration in attention, and a recovery-parked one, with 423  341ms
+   ✓ ACT-02 every way a migrated target must not resolve is closed > refuses a target with no engine binding and one with no active commit  376ms
+(node:3764154) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/wave2/m4a/activated-projection.test.ts (8 tests | 6 failed) 6141ms
+   × M4A-P01: a fresh Host rebuilds the active layout from durable facts > cannot inspect an activated target at all without a layout — the gap M4A closes 1107ms
+     → MIGRATE_500: {"code":"INTERNAL_ERROR","message":"Internal host error","correlation_id":"5ff242d2-be9b-44a4-9730-61ddf8abeb61"}
+ diagnostic=route:Error:ENOENT: no such file or directory, open '<path>'
+   × M4A-P01: a fresh Host rebuilds the active layout from durable facts > inspects a restarted Host's own migrated target, with no test hook anywhere 1081ms
+     → MIGRATE_500: {"code":"INTERNAL_ERROR","message":"Internal host error","correlation_id":"95f2a695-d413-44b3-94c0-5f70cfcab612"}
+ diagnostic=route:Error:ENOENT: no such file or directory, open '<path>'
+   × M4A-P01: a fresh Host rebuilds the active layout from durable facts > keys its cache by project, snapshot and source digest 987ms
+     → MIGRATE_500: {"code":"INTERNAL_ERROR","message":"Internal host error","correlation_id":"d4c7695f-b0a8-43a9-83b0-477bdfaf387d"}
+ diagnostic=route:Error:ENOENT: no such file or directory, open '<path>'
+   × M4A-P01: a fresh Host rebuilds the active layout from durable facts > fails closed when the migrated copy's bytes move under it 968ms
+     → MIGRATE_500: {"code":"INTERNAL_ERROR","message":"Internal host error","correlation_id":"5664789b-85d2-420a-a809-315b2ae1d780"}
+ diagnostic=route:Error:ENOENT: no such file or directory, open '<path>'
+   × M4A-P01: a fresh Host rebuilds the active layout from durable facts > refuses a layout whose declared root escapes the target 1011ms
+     → MIGRATE_500: {"code":"INTERNAL_ERROR","message":"Internal host error","correlation_id":"a4ee9173-0351-4001-8046-4ba7cc5321fe"}
+ diagnostic=route:Error:ENOENT: no such file or directory, open '<path>'
+   × M4A-P01: a fresh Host rebuilds the active layout from durable facts > refuses when the ledger names a target the plan does not cover 984ms
+     → MIGRATE_500: {"code":"INTERNAL_ERROR","message":"Internal host error","correlation_id":"86ac5ef5-3761-4065-9bb7-be0be5dfe11c"}
+ diagnostic=route:Error:ENOENT: no such file or directory, open '<path>'
+   ✓ M4A-P01: a fresh Host rebuilds the active layout from durable facts > derives exactly the roots the migration published, from one implementation 1ms
+   ✓ M4A-P01: a fresh Host rebuilds the active layout from durable facts > names a subtitle by its stem, and refuses two subtitles with the same stem 1ms
+(node:3764789) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/agent-schema.test.ts (8 tests) 254ms
+ ✓ tests/agent-driven/media/harness-closure.test.ts (8 tests) 23ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/wave2/m4a/activated-projection.test.ts > M4A-P01: a fresh Host rebuilds the active layout from durable facts > cannot inspect an activated target at all without a layout — the gap M4A closes
+Error: MIGRATE_500: {"code":"INTERNAL_ERROR","message":"Internal host error","correlation_id":"5ff242d2-be9b-44a4-9730-61ddf8abeb61"}
+ diagnostic=route:Error:ENOENT: no such file or directory, open '<path>'
+ ❯ tests/wave2/m4a/harness.ts:131:23
+    129|       const suffix = diagnostic === undefined ? ""
+    130|         : ` diagnostic=${diagnostic.stage}:${diagnostic.kind}:${diagno…
+    131|       const failure = new Error(`MIGRATE_${attempt.status}: ${text.sli…
+       |                       ^
+    132|       // Keep the structured fields used by retryRecoverable without c…
+    133|       // the actionable local message above.
+ ❯ retryRecoverable tests/support/retry-recoverable.ts:11:18
+ ❯ migrate tests/wave2/m4a/harness.ts:110:20
+ ❯ tests/wave2/m4a/activated-projection.test.ts:30:33
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯
+
+ FAIL  tests/wave2/m4a/activated-projection.test.ts > M4A-P01: a fresh Host rebuilds the active layout from durable facts > inspects a restarted Host's own migrated target, with no test hook anywhere
+Error: MIGRATE_500: {"code":"INTERNAL_ERROR","message":"Internal host error","correlation_id":"95f2a695-d413-44b3-94c0-5f70cfcab612"}
+ diagnostic=route:Error:ENOENT: no such file or directory, open '<path>'
+ ❯ tests/wave2/m4a/harness.ts:131:23
+    129|       const suffix = diagnostic === undefined ? ""
+    130|         : ` diagnostic=${diagnostic.stage}:${diagnostic.kind}:${diagno…
+    131|       const failure = new Error(`MIGRATE_${attempt.status}: ${text.sli…
+       |                       ^
+    132|       // Keep the structured fields used by retryRecoverable without c…
+    133|       // the actionable local message above.
+ ❯ retryRecoverable tests/support/retry-recoverable.ts:11:18
+ ❯ migrate tests/wave2/m4a/harness.ts:110:20
+ ❯ tests/wave2/m4a/activated-projection.test.ts:43:33
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/6]⎯
+
+ FAIL  tests/wave2/m4a/activated-projection.test.ts > M4A-P01: a fresh Host rebuilds the active layout from durable facts > keys its cache by project, snapshot and source digest
+Error: MIGRATE_500: {"code":"INTERNAL_ERROR","message":"Internal host error","correlation_id":"d4c7695f-b0a8-43a9-83b0-477bdfaf387d"}
+ diagnostic=route:Error:ENOENT: no such file or directory, open '<path>'
+ ❯ tests/wave2/m4a/harness.ts:131:23
+    129|       const suffix = diagnostic === undefined ? ""
+    130|         : ` diagnostic=${diagnostic.stage}:${diagnostic.kind}:${diagno…
+    131|       const failure = new Error(`MIGRATE_${attempt.status}: ${text.sli…
+       |                       ^
+    132|       // Keep the structured fields used by retryRecoverable without c…
+    133|       // the actionable local message above.
+ ❯ retryRecoverable tests/support/retry-recoverable.ts:11:18
+ ❯ migrate tests/wave2/m4a/harness.ts:110:20
+ ❯ tests/wave2/m4a/activated-projection.test.ts:74:33
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/6]⎯
+
+ FAIL  tests/wave2/m4a/activated-projection.test.ts > M4A-P01: a fresh Host rebuilds the active layout from durable facts > fails closed when the migrated copy's bytes move under it
+Error: MIGRATE_500: {"code":"INTERNAL_ERROR","message":"Internal host error","correlation_id":"5664789b-85d2-420a-a809-315b2ae1d780"}
+ diagnostic=route:Error:ENOENT: no such file or directory, open '<path>'
+ ❯ tests/wave2/m4a/harness.ts:131:23
+    129|       const suffix = diagnostic === undefined ? ""
+    130|         : ` diagnostic=${diagnostic.stage}:${diagnostic.kind}:${diagno…
+    131|       const failure = new Error(`MIGRATE_${attempt.status}: ${text.sli…
+       |                       ^
+    132|       // Keep the structured fields used by retryRecoverable without c…
+    133|       // the actionable local message above.
+ ❯ retryRecoverable tests/support/retry-recoverable.ts:11:18
+ ❯ migrate tests/wave2/m4a/harness.ts:110:20
+ ❯ tests/wave2/m4a/activated-projection.test.ts:94:33
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/6]⎯
+
+ FAIL  tests/wave2/m4a/activated-projection.test.ts > M4A-P01: a fresh Host rebuilds the active layout from durable facts > refuses a layout whose declared root escapes the target
+Error: MIGRATE_500: {"code":"INTERNAL_ERROR","message":"Internal host error","correlation_id":"a4ee9173-0351-4001-8046-4ba7cc5321fe"}
+ diagnostic=route:Error:ENOENT: no such file or directory, open '<path>'
+ ❯ tests/wave2/m4a/harness.ts:131:23
+    129|       const suffix = diagnostic === undefined ? ""
+    130|         : ` diagnostic=${diagnostic.stage}:${diagnostic.kind}:${diagno…
+    131|       const failure = new Error(`MIGRATE_${attempt.status}: ${text.sli…
+       |                       ^
+    132|       // Keep the structured fields used by retryRecoverable without c…
+    133|       // the actionable local message above.
+ ❯ retryRecoverable tests/support/retry-recoverable.ts:11:18
+ ❯ migrate tests/wave2/m4a/harness.ts:110:20
+ ❯ tests/wave2/m4a/activated-projection.test.ts:111:27
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/6]⎯
+
+ FAIL  tests/wave2/m4a/activated-projection.test.ts > M4A-P01: a fresh Host rebuilds the active layout from durable facts > refuses when the ledger names a target the plan does not cover
+Error: MIGRATE_500: {"code":"INTERNAL_ERROR","message":"Internal host error","correlation_id":"86ac5ef5-3761-4065-9bb7-be0be5dfe11c"}
+ diagnostic=route:Error:ENOENT: no such file or directory, open '<path>'
+ ❯ tests/wave2/m4a/harness.ts:131:23
+    129|       const suffix = diagnostic === undefined ? ""
+    130|         : ` diagnostic=${diagnostic.stage}:${diagnostic.kind}:${diagno…
+    131|       const failure = new Error(`MIGRATE_${attempt.status}: ${text.sli…
+       |                       ^
+    132|       // Keep the structured fields used by retryRecoverable without c…
+    133|       // the actionable local message above.
+ ❯ retryRecoverable tests/support/retry-recoverable.ts:11:18
+ ❯ migrate tests/wave2/m4a/harness.ts:110:20
+ ❯ tests/wave2/m4a/activated-projection.test.ts:129:27
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/6]⎯
+
+
+ Test Files  1 failed | 5 passed (6)
+      Tests  6 failed | 80 passed (86)
+   Start at  23:44:27
+   Duration  62.62s (transform 1.99s, setup 0ms, collect 10.39s, tests 41.45s, environment 1ms, prepare 7.18s)
+

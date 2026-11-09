@@ -1,0 +1,13 @@
+{
+  "scope": "Development component/diagnostic evidence only; not A or human acceptance",
+  "commands": [
+    "corepack pnpm exec tsc --noEmit",
+    "corepack pnpm exec vitest run tests/agent-driven/integration/project-creation-store.test.ts --maxWorkers=1 --minWorkers=1"
+  ],
+  "artifact_sha256": {
+    "tests.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "tests.txt": "071f1fa289f80023cdb27d3b2360a65b569c36c29d55b54f286d296ef9d0caac",
+    "typecheck.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "typecheck.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

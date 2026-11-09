@@ -9,12 +9,13 @@ export function localMediaArgs(command, args) {
   if (!Array.isArray(args) || args.some((arg) => typeof arg !== "string")) {
     throw new Error("Invalid native media argument vector");
   }
-  if (name === "ffprobe") return ["-protocol_whitelist", "file,pipe", "-threads", "1", ...args];
+  if (name === "ffprobe") return ["-protocol_whitelist", "file,pipe,fd", "-threads", "1", ...args];
   const result = ["-filter_threads", "1", "-filter_complex_threads", "1"];
   for (const arg of args) {
+    // fd is FFmpeg 7's local descriptor transport for stdin; no network protocol is added.
     // FFmpeg treats these as per-input options; each input needs its own policy,
     // including local playlists which could otherwise reference network URLs.
-    if (arg === "-i") result.push("-protocol_whitelist", "file,pipe", "-threads", "1");
+    if (arg === "-i") result.push("-protocol_whitelist", "file,pipe,fd", "-threads", "1");
     result.push(arg);
   }
   return result;

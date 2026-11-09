@@ -2,7 +2,7 @@ import { HttpError } from "../api-error.js";
 import { OPENFILM_UPSTREAM_SHA } from "./engine-binding-store.js";
 import type { OpenFilmProjectLayout } from "../../adapters/openfilm/openfilm-engine-adapter.js";
 import type { MigratedAssetLedger } from "../projects/migrated-asset-ledger.js";
-import type { ActivatedProjectView } from "../projects/project-resolver.js";
+import type { ActivatedProjectView,NativeProjectView } from "../projects/project-resolver.js";
 import type { RevisionStore } from "../projects/revision-store.js";
 import {
   assertLedgerStaysInsideTheProject, assertLedgerWithinRoots, assertRelativeInsideRoot,
@@ -96,7 +96,7 @@ export class ActivatedProjectionService {
    * single Host answer for "which target, at which commit, with which digest", and this
    * method cross-checks every durable fact against it instead of re-deriving one.
    */
-  async layoutFor(view: ActivatedProjectView, correlationId?: string): Promise<ActivatedLayout> {
+  async layoutFor(view: NativeProjectView, correlationId?: string): Promise<ActivatedLayout> {
     const cacheKey = `${view.project_id}|${view.snapshot_id}|${view.source_digest}`;
     const cached = this.#cache.get(cacheKey);
     const layout = cached ?? this.#rebuild(view, correlationId);
@@ -164,8 +164,12 @@ export class ActivatedProjectionService {
     this.#registrar?.registerLayout(projectId, layout);
   }
 
-  #rebuild(view: ActivatedProjectView, correlationId?: string): OpenFilmProjectLayout {
+  #rebuild(view: NativeProjectView, correlationId?: string): OpenFilmProjectLayout {
     const projectId = view.project_id;
+    if(view.kind==='created'){
+      if(view.frame_count!==view.source_fact.frame_count)throw new HttpError(423,'PROJECT_ATTENTION_REQUIRED','Created source facts disagree');
+      return {root:view.source_root.value,roots:view.source_fact.roots,subtitles:view.source_fact.subtitles,fps:view.source_fact.fps};
+    }
     const adopted = this.#adoption?.projectionFact(view.snapshot_id);
     if (adopted !== undefined) {
       if (adopted.project_id !== projectId || adopted.migration_id !== view.migration_id

@@ -6,14 +6,14 @@ describe("native media subprocess policy", () => {
     const argv = localMediaArgs("ffmpeg", ["-i", "/project/one.mp4", "-i", "/project/two.mp4", "-c", "copy", "/out.mp4"]);
     expect(argv.filter((arg) => arg === "-protocol_whitelist")).toHaveLength(2);
     for (const [index, arg] of argv.entries()) {
-      if (arg === "-i") expect(argv.slice(index - 4, index)).toEqual(["-protocol_whitelist", "file,pipe", "-threads", "1"]);
+      if (arg === "-i") expect(argv.slice(index - 4, index)).toEqual(["-protocol_whitelist", "file,pipe,fd", "-threads", "1"]);
     }
     expect(argv).not.toContain("http");
   });
 
   it("restricts ffprobe and leaves the Chromium command unchanged", () => {
     expect(localMediaArgs("ffprobe", ["-of", "json", "/project/clip.mp4"]).slice(0, 4))
-      .toEqual(["-protocol_whitelist", "file,pipe", "-threads", "1"]);
+      .toEqual(["-protocol_whitelist", "file,pipe,fd", "-threads", "1"]);
     const browser = ["--headless", "--disable-background-networking"];
     expect(localMediaArgs("/runtime/chromium", browser)).toBe(browser);
   });

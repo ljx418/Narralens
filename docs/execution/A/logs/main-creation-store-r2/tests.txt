@@ -1,0 +1,14 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:3741700) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/project-creation-store.test.ts (18 tests) 4583ms
+   ✓ rolls back every initial commit fact when failure occurs after binding  312ms
+   ✓ rolls back every initial commit fact when failure occurs after command  333ms
+
+ Test Files  1 passed (1)
+      Tests  18 passed (18)
+   Start at  23:20:55
+   Duration  9.61s (transform 462ms, setup 0ms, collect 2.77s, tests 4.58s, environment 0ms, prepare 1.55s)
+

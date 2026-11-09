@@ -1,0 +1,41 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:3753761) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/project-creation-store.test.ts (30 tests) 27826ms
+   ✓ commits real published snapshot metadata atomically, survives DB reopen and preserves the accepted response  1241ms
+   ✓ rolls back every initial commit fact when failure occurs after state  1031ms
+   ✓ rolls back every initial commit fact when failure occurs after binding  980ms
+   ✓ rolls back every initial commit fact when failure occurs after snapshot  989ms
+   ✓ rolls back every initial commit fact when failure occurs after transaction  1008ms
+   ✓ rolls back every initial commit fact when failure occurs after pointer  998ms
+   ✓ rolls back every initial commit fact when failure occurs after source_fact  1010ms
+   ✓ rolls back every initial commit fact when failure occurs after origin  998ms
+   ✓ rolls back every initial commit fact when failure occurs after brief  952ms
+   ✓ rolls back every initial commit fact when failure occurs after command  946ms
+   ✓ rolls back every initial commit fact when failure occurs after job  962ms
+   ✓ rolls back every initial commit fact when failure occurs after outbox  972ms
+   ✓ refuses a stale worker before any commit effect: owner  928ms
+   ✓ refuses a stale worker before any commit effect: attempt  955ms
+   ✓ refuses a stale worker before any commit effect: expired  969ms
+   ✓ refuses a stale worker before any commit effect: cancelled  925ms
+   ✓ rechecks creation schema in a live store, not only after constructing a replacement  929ms
+   ✓ samples lease time after transaction admission instead of using time from before BEGIN  1559ms
+   ✓ rolls back when lease expires after the final writes  913ms
+   ✓ rolls back when confirmation expires after the final writes  905ms
+   ✓ does not mint a source proof for false native metadata: frame-count  1587ms
+   ✓ does not mint a source proof for false native metadata: fps  1558ms
+   ✓ does not mint a source proof for false native metadata: upstream  908ms
+   ✓ rejects a forged proof and byte changes after genuine pinned verification  896ms
+   ✓ resolves a genuine created project without migration/cached layout, including after reopen  929ms
+   ✓ refuses created source symlink escape even with byte-identical committed content  911ms
+(node:3754930) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/agent-schema.test.ts (8 tests) 273ms
+
+ Test Files  2 passed (2)
+      Tests  38 passed (38)
+   Start at  23:33:39
+   Duration  34.99s (transform 894ms, setup 0ms, collect 3.12s, tests 28.10s, environment 0ms, prepare 2.50s)
+

@@ -1,0 +1,37 @@
+{
+  "base_commit": "218c40cb9a90b6a33359c5d0f556991166002eef",
+  "scope": "A04 foundation and A06 diagnostic repairs; full package open",
+  "source_sha256": {
+    "src/host/projects/project-creation-store.ts": "203b3b043fb6ea13064c698eade333e5e4bf36fed30dd1c877dc070aebba506b",
+    "src/host/projects/creation-source-verifier.ts": "87a15a0db84ef37b5c1d8db8e2c66cd53b2383354ea49eaa2117ba21830366f0",
+    "src/host/projects/project-resolver.ts": "d4d4c05f9b3ba847b7eae4526d6196f2eddb6a2b7669e5c90c2b13029be31cfd",
+    "src/host/projects/asset-inventory-port.ts": "25a1c17a319f067195f2d17035b10ee865961db46b4d7bd4be5bca93a2da2ea7",
+    "src/host/engine/activated-projection-service.ts": "0757c37deceb6c4bcff35da250badede7beca61f32643b3e66364b4c63aceb4e",
+    "src/host/agent-driven/agent-schema-definition.ts": "581974592352a9fd6da2affa47afe722274581933d1cbbf569f6c94b18e6a46d",
+    "src/host/render/media-process-policy.mjs": "3d448ff79c497ee5e123f6931c554a716bc033088e05e701e1de42e48ae995bc",
+    "src/host/render/openfilm-render-pin.json": "1b0ddd3dd031352092ae83535f598c7bda1f1ca2cccbb83ad9e377a0ec71bb06",
+    "tools/agent-driven/media/harness-closure.ts": "de0bcad153cbc17846da330382fcc064d303bac81c4aebf548b112a01ca6ddd9",
+    "tools/agent-driven/media/render-delivery.ts": "8f57fbe56d3869cfc298b0fab42a9f1a2bd01237a148630c525317cacf7e1fdb",
+    "tools/agent-driven/media/make-diagnostic-project.ts": "7252eaab3ea57322c186447eccb14c8be3e8a0025eb9ef50ba49532593c5b78e",
+    "tests/agent-driven/integration/project-creation-store.test.ts": "d7e9ace31e5a954d3defcfbdf1fd49ca58b13e0c5a63dc013243ca409a512e4c",
+    "tests/agent-driven/media/harness-closure.test.ts": "ed51d03d32cef4867403c4e8ed34ea034589746b2405becc60be1eebc88d2c88",
+    "tests/agent-driven/media/media-process-policy.test.ts": "2c8071a78ee833b6b828e2dca749455f6bd65c3c12f7d65e88dbc4cb75d83de4"
+  },
+  "latest_check": {
+    "typecheck": 0,
+    "files": 7,
+    "tests": 90,
+    "log": "logs/main-created-foundation-r2"
+  },
+  "diagnostic_render": {
+    "exit": 0,
+    "frames": 30,
+    "seconds": 1,
+    "real_human_narration": false,
+    "production_ready": false,
+    "log": "logs/main-harness-real-r2"
+  },
+  "independent_review": "REVIEW_PENDING",
+  "A_acceptance": "NOT_RUN",
+  "T20_complete": "NOT_RUN"
+}

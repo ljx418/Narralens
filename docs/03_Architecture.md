@@ -317,6 +317,18 @@ journal 目标状态为 `prepared → source_validated → metadata_committed`�
 允许：依据固定上游版本修正真实命令、入口、文件路径、时间单位、Adapter 接口和测试夹具。  
 不允许：改变三阶段体验、绕开统一事务、建立第二时间轴、允许 OpenMontage 直写主工程、用 mock 取代真实出门证据。若确需改变不允许项，退回 PRD/原型审批。
 
-### 当前统一设计交付
+### 2026-11-09 统一设计交付（历史快照）
 
 目标0/1层、22实体状态与8页GAP汇总在`agent-driven-v1/final-review/index.html`。精确A准备合同/DDL/恢复/验收/分工见`agent-driven-v1/cp-a0/00_READ_FIRST.md`，仍文档候选；不改变当前代码实体实现状态，不把拟新增组件写成已实现。
+
+
+### A轮源码实施观察（2026-11-10，取代上段“仅文档”的当前状态）
+
+已批准CP-A0/原型字节锁不改。A轮实际实现授权与范围见docs/execution/A；当前源码增加了同RevisionStore的typed HTTP/ScopedAuth、PRODUCT仓储接线及创建来源基础，不能再概括为所有A实体均未实现。
+
+- ProjectCreationStore：bootstrap_command唯一预留、原Job/transaction、首提交原子写、Brief carrier和immutable created_source_fact；组件已验证，创建worker/生产handler仍待接。
+- CreationSourceVerifier：真实pinned parse/源摘要/空原生工程frame0及snapshot/author字节共同证明，提交前后复验；不是媒体权利授权者。
+- ProjectResolver：原legacy/activated语义保持，新增显式created/native分支；ActivatedProjectionService与AssetInventoryPort已从created事实读取，无伪migration，需MAIN实际装配才可用。
+- MEDIA工具：真实1秒技术诊断encode/decode/包发布通过，harness不提交DB；A真实60–180秒视频与完整生产render/下载/T20尚未完成。
+
+原M5前端保留；增量工作流Bar/系统侧栏组件尚未完整挂载。A模式旧写动作的临时拒绝需由同Coordinator的受控翻译接线替代，不能以拒绝写代替编辑体验出门。旧Gate历史不改，A整体、人验与B/C未据此通过。

@@ -1,20 +1,16 @@
-import { createHash } from "node:crypto";
-import { readdir, readFile, stat } from "node:fs/promises";
+import { stat } from "node:fs/promises";
 import { resolve } from "node:path";
 import { SnapshotRenderService } from "../../../src/host/render/render-snapshot.js";
 import { NativeRenderer } from "../../../src/host/render/native-renderer.js";
 import { PublishedPackageStore } from "../../../src/host/delivery/published-package-store.js";
 import { computeRenderConfigDigest } from "../../../src/host/render/render-profile.js";
 import { RENDER_PIN, verifyRenderPin } from "../../../src/host/render/upstream-pin.js";
-import { assertSafeRelativePath } from "../../../src/host/render/snapshot-copy.js";
+import { buildHarnessClosure } from "./harness-closure.js";
 import type {
   AttemptFencePort,
   DeliveryCommitPort,
   RenderBoundary,
-  RenderBoundaryContext,
   RenderBoundaryHooks,
-  SnapshotClosure,
-  SnapshotEntry,
 } from "../../../src/host/render/ports.js";
 import type { RenderSpec } from "../../../src/contracts/agent-driven-types.js";
 
@@ -50,12 +46,13 @@ interface Options {
   readonly fps_denominator: number;
   readonly expected_frames: number | undefined;
   readonly expected_duration_seconds: number | undefined;
+  readonly rights_manifest: string | undefined;
 }
 
 function usage(): never {
   process.stderr.write(
     "usage: render-delivery --project <dir> --upstream <dir> --delivery-root <dir> "
-    + "[--width 1920] [--height 1080] [--fps 30] [--fps-denominator 1]\n",
+    + "[--width 1920] [--height 1080] [--fps 30] [--fps-denominator 1] [--rights-manifest <operator fixture manifest>]\n",
   );
   process.exit(2);
 }
@@ -98,59 +95,7 @@ function parseOptions(argv: readonly string[]): Options {
     fps_denominator: fpsDenominator,
     expected_frames: expectedFrames,
     expected_duration_seconds: expectedDuration,
-  };
-}
-
-/** The files A requires a package to carry, and the names they may have. */
-const REQUIRED_SUPPLEMENT_FILES: ReadonlyArray<{ readonly role: string; readonly names: readonly string[] }> = [
-  { role: "subtitles", names: ["subtitles.vtt", "subtitles.srt"] },
-  { role: "rights", names: ["rights.txt", "LICENSE.txt", "license.txt"] },
-];
-
-/** Every file of the project, as a closure the preflight can check. */
-async function closureOf(directory: string, options: Options): Promise<SnapshotClosure> {
-  const entries: SnapshotEntry[] = [];
-  const walk = async (current: string, prefix: string): Promise<void> => {
-    const items = await readdir(current, { withFileTypes: true });
-    for (const item of items) {
-      const relative = prefix === "" ? item.name : `${prefix}/${item.name}`;
-      if (item.isDirectory()) {
-        if (item.name === ".film" || item.name === "node_modules" || item.name === ".git") continue;
-        await walk(resolve(current, item.name), relative);
-        continue;
-      }
-      if (!item.isFile()) continue;
-      const path = resolve(current, item.name);
-      const bytes = await readFile(path);
-      entries.push({
-        relative_path: assertSafeRelativePath(relative),
-        absolute_path: path,
-        sha256: createHash("sha256").update(bytes).digest("hex"),
-        bytes: bytes.byteLength,
-        kind: "native_source",
-        rights_ref: null,
-        role: null,
-      });
-    }
-  };
-  await walk(directory, "");
-  const sourceDigest = createHash("sha256")
-    .update(entries.map((entry) => `${entry.relative_path}:${entry.sha256}`).sort().join("\n"), "utf8")
-    .digest("hex");
-  return {
-    project_id: "harness",
-    snapshot_id: "harness",
-    source_digest: sourceDigest,
-    project_revision: 0,
-    // The frame count and the length come from the operator: they are facts about the
-    // committed native document, and a harness that reads a project off the disk does
-    // not have them.
-    expected_frames: options.expected_frames,
-    expected_duration_seconds: options.expected_duration_seconds,
-    native_root: directory,
-    native_entry: "film.html",
-    entries,
-    rights: [{ asset_id: "rights_01", status: "cleared", commercial_use: true, ref: "rights_01" }],
+    rights_manifest: values.has("rights-manifest") ? resolve(values.get("rights-manifest")!) : undefined,
   };
 }
 
@@ -161,26 +106,9 @@ const fence: AttemptFencePort = {
   async releaseAttempt() { /* nothing to release */ },
 };
 
-/** A commit that prints what MAIN would have to record. */
+/** A diagnostic sink, never a database commit or an outbox publication. */
 const commit: DeliveryCommitPort = {
-  async commitReady(request, hooks: RenderBoundaryHooks) {
-    await hooks.onBoundary("ready_committed", {
-      project_id: request.project_id,
-      job_id: request.job_id,
-      snapshot_id: request.snapshot_id,
-      attempt: request.attempt,
-      manifest: request.manifest,
-      delivery_id: request.delivery_id,
-    });
-    await hooks.onBoundary("events_published", {
-      project_id: request.project_id,
-      job_id: request.job_id,
-      snapshot_id: request.snapshot_id,
-      attempt: request.attempt,
-      manifest: request.manifest,
-      delivery_id: request.delivery_id,
-    });
-  },
+  async commitReady() { /* Only the real Host may record ready_committed/events_published. */ },
 };
 
 const boundaries: RenderBoundary[] = [];
@@ -209,7 +137,7 @@ async function main(): Promise<void> {
     return;
   }
 
-  const closure = await closureOf(options.project, options);
+  const closure = await buildHarnessClosure(options.project, options);
   const spec: RenderSpec = {
     engine_id: "openfilm",
     engine_version: RENDER_PIN.upstream_sha,
@@ -260,7 +188,9 @@ async function main(): Promise<void> {
   });
 
   process.stdout.write(`${JSON.stringify({
-    status: outcome.state === "ready" ? "READY" : outcome.state.toUpperCase(),
+    status: outcome.state === "ready" ? "MODULE_PACKAGE_CREATED" : outcome.state.toUpperCase(),
+    production_ready: false,
+    durable_commit: false,
     note: "module evidence only: this harness clears no rights and records nothing durably",
     boundaries,
     failure: outcome.failure,

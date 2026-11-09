@@ -57,3 +57,11 @@ export function matchesFrozenAgentSchema(db:DatabaseSync,migration:string,receip
  const actual=db.prepare("SELECT type,name,tbl_name,sql FROM sqlite_schema WHERE name GLOB 'cp_a0_*' OR name='agent_driven_schema_receipt' ORDER BY type,name").all().map(row=>({type:String(row.type),name:String(row.name),tbl_name:String(row.tbl_name),sql:normalize(tokens(String(row.sql)))}));
  return JSON.stringify(actual)===JSON.stringify(expected);
 }
+
+/** A separate MAIN internal namespace; never weakens the frozen CP-A0 comparison. */
+export function matchesFrozenSchemaNamespace(db:DatabaseSync,ddl:string,prefix:string):boolean {
+ if(!/^[a-z][a-z0-9_]*$/.test(prefix))throw new Error('Invalid internal schema namespace');
+ const expected=frozenDefinitions(ddl).sort(sort);
+ const actual=db.prepare('SELECT type,name,tbl_name,sql FROM sqlite_schema WHERE name GLOB ? ORDER BY type,name').all(prefix+'*').map(row=>({type:String(row.type),name:String(row.name),tbl_name:String(row.tbl_name),sql:normalize(tokens(String(row.sql)))}));
+ return JSON.stringify(actual)===JSON.stringify(expected);
+}

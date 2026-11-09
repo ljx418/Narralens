@@ -1,0 +1,299 @@
+{
+  "status": "MODULE_PACKAGE_CREATED",
+  "production_ready": false,
+  "durable_commit": false,
+  "note": "module evidence only: this harness clears no rights and records nothing durably",
+  "boundaries": [
+    "encode_finished",
+    "qc_finished",
+    "package_published"
+  ],
+  "failure": null,
+  "qc": [
+    {
+      "id": "snapshot_identity",
+      "status": "pass",
+      "reason": "the closure is snapshot harness at revision 0"
+    },
+    {
+      "id": "inputs_local",
+      "status": "pass",
+      "reason": "7 local file(s) with recorded digests"
+    },
+    {
+      "id": "inputs_rights",
+      "status": "pass",
+      "reason": "3 asset(s) and supplement(s) are cleared for this use"
+    },
+    {
+      "id": "inputs_complete",
+      "status": "pass",
+      "reason": "the snapshot carries 2 promised supplement(s) and the film's own source"
+    },
+    {
+      "id": "render_spec",
+      "status": "pass",
+      "reason": "320x180 at 30/1 fps, mp4/h264/aac"
+    },
+    {
+      "id": "render_config",
+      "status": "pass",
+      "reason": "the configuration digest names this renderer, this upstream and these options"
+    },
+    {
+      "id": "upstream_pin",
+      "status": "pass",
+      "reason": "the pinned upstream e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3 and the worker match their digests"
+    },
+    {
+      "id": "output_space",
+      "status": "pass",
+      "reason": "the staging area has room"
+    },
+    {
+      "id": "media_container",
+      "status": "pass",
+      "reason": "the container is mov,mp4,m4a,3gp,3g2,mj2"
+    },
+    {
+      "id": "media_video_codec",
+      "status": "pass",
+      "reason": "the video codec is h264"
+    },
+    {
+      "id": "media_audio_codec",
+      "status": "pass",
+      "reason": "the audio codec is aac"
+    },
+    {
+      "id": "media_dimensions",
+      "status": "pass",
+      "reason": "the picture is 320x180"
+    },
+    {
+      "id": "media_frame_rate",
+      "status": "pass",
+      "reason": "the frame rate is 30/1"
+    },
+    {
+      "id": "media_streams",
+      "status": "pass",
+      "reason": "the file holds one video stream and one audio stream"
+    },
+    {
+      "id": "media_frames",
+      "status": "pass",
+      "reason": "the file holds 30 frame(s), as the snapshot's native document says"
+    },
+    {
+      "id": "media_duration",
+      "status": "pass",
+      "reason": "the film is 1s long, as the snapshot's native document says"
+    },
+    {
+      "id": "media_full_decode",
+      "status": "pass",
+      "reason": "the whole file decodes"
+    },
+    {
+      "id": "supplements",
+      "status": "pass",
+      "reason": "2 supplement(s) match their digests and every promised one is there"
+    }
+  ],
+  "manifest": {
+    "delivery_id": "d_9f543cb30638975ea6e92b95b8c70824",
+    "project_id": "harness",
+    "snapshot_id": "harness",
+    "source_digest": "1283104c1d295867cdbfec6cc3759c68c11a81517d63aa9144f86cbb42384f75",
+    "render_spec": {
+      "engine_id": "openfilm",
+      "engine_version": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+      "config_digest": "8cd7a768b3613b23d5735da0ad1f5a7d8defbfe954cc8271cfa42ea70adcaeae",
+      "width": 320,
+      "height": 180,
+      "fps_numerator": 30,
+      "fps_denominator": 1,
+      "container": "mp4",
+      "video_codec": "h264",
+      "audio_codec": "aac"
+    },
+    "render_config_digest": "8cd7a768b3613b23d5735da0ad1f5a7d8defbfe954cc8271cfa42ea70adcaeae",
+    "attempt": 1,
+    "media_ref": {
+      "id": "d_9f543cb30638975ea6e92b95b8c70824_media",
+      "version": 1,
+      "sha256": "a90543f11554712051704a3e7fc4d682b8be28f75c982bd183bc9b83e24960e3"
+    },
+    "ffprobe_ref": {
+      "id": "d_9f543cb30638975ea6e92b95b8c70824_ffprobe",
+      "version": 1,
+      "sha256": "3cd5d0364048b86b5189cd9df5cceaf44fe28648b62b1f5b9c2b331c73c7b382"
+    },
+    "full_decode_ref": {
+      "id": "d_9f543cb30638975ea6e92b95b8c70824_full_decode",
+      "version": 1,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "supplement_refs": [
+      {
+        "id": "d_9f543cb30638975ea6e92b95b8c70824_sup0",
+        "version": 1,
+        "sha256": "e8a78f270477024f2b332c5eeaa09d996e9f87139c406fca6982b8c1c9e9d659"
+      },
+      {
+        "id": "d_9f543cb30638975ea6e92b95b8c70824_sup1",
+        "version": 1,
+        "sha256": "413da1380bfcc58402195d7ac3e857a248a2b67f8d6271e2baae872ed745daf8"
+      }
+    ],
+    "qc": [
+      {
+        "id": "snapshot_identity",
+        "status": "pass",
+        "reason": "the closure is snapshot harness at revision 0",
+        "evidence_ref": null
+      },
+      {
+        "id": "inputs_local",
+        "status": "pass",
+        "reason": "7 local file(s) with recorded digests",
+        "evidence_ref": null
+      },
+      {
+        "id": "inputs_rights",
+        "status": "pass",
+        "reason": "3 asset(s) and supplement(s) are cleared for this use",
+        "evidence_ref": null
+      },
+      {
+        "id": "inputs_complete",
+        "status": "pass",
+        "reason": "the snapshot carries 2 promised supplement(s) and the film's own source",
+        "evidence_ref": null
+      },
+      {
+        "id": "render_spec",
+        "status": "pass",
+        "reason": "320x180 at 30/1 fps, mp4/h264/aac",
+        "evidence_ref": null
+      },
+      {
+        "id": "render_config",
+        "status": "pass",
+        "reason": "the configuration digest names this renderer, this upstream and these options",
+        "evidence_ref": null
+      },
+      {
+        "id": "upstream_pin",
+        "status": "pass",
+        "reason": "the pinned upstream e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3 and the worker match their digests",
+        "evidence_ref": null
+      },
+      {
+        "id": "output_space",
+        "status": "pass",
+        "reason": "the staging area has room",
+        "evidence_ref": null
+      },
+      {
+        "id": "media_container",
+        "status": "pass",
+        "reason": "the container is mov,mp4,m4a,3gp,3g2,mj2",
+        "evidence_ref": {
+          "id": "d_9f543cb30638975ea6e92b95b8c70824_ffprobe",
+          "version": 1,
+          "sha256": "3cd5d0364048b86b5189cd9df5cceaf44fe28648b62b1f5b9c2b331c73c7b382"
+        }
+      },
+      {
+        "id": "media_video_codec",
+        "status": "pass",
+        "reason": "the video codec is h264",
+        "evidence_ref": {
+          "id": "d_9f543cb30638975ea6e92b95b8c70824_ffprobe",
+          "version": 1,
+          "sha256": "3cd5d0364048b86b5189cd9df5cceaf44fe28648b62b1f5b9c2b331c73c7b382"
+        }
+      },
+      {
+        "id": "media_audio_codec",
+        "status": "pass",
+        "reason": "the audio codec is aac",
+        "evidence_ref": {
+          "id": "d_9f543cb30638975ea6e92b95b8c70824_ffprobe",
+          "version": 1,
+          "sha256": "3cd5d0364048b86b5189cd9df5cceaf44fe28648b62b1f5b9c2b331c73c7b382"
+        }
+      },
+      {
+        "id": "media_dimensions",
+        "status": "pass",
+        "reason": "the picture is 320x180",
+        "evidence_ref": {
+          "id": "d_9f543cb30638975ea6e92b95b8c70824_ffprobe",
+          "version": 1,
+          "sha256": "3cd5d0364048b86b5189cd9df5cceaf44fe28648b62b1f5b9c2b331c73c7b382"
+        }
+      },
+      {
+        "id": "media_frame_rate",
+        "status": "pass",
+        "reason": "the frame rate is 30/1",
+        "evidence_ref": {
+          "id": "d_9f543cb30638975ea6e92b95b8c70824_ffprobe",
+          "version": 1,
+          "sha256": "3cd5d0364048b86b5189cd9df5cceaf44fe28648b62b1f5b9c2b331c73c7b382"
+        }
+      },
+      {
+        "id": "media_streams",
+        "status": "pass",
+        "reason": "the file holds one video stream and one audio stream",
+        "evidence_ref": {
+          "id": "d_9f543cb30638975ea6e92b95b8c70824_ffprobe",
+          "version": 1,
+          "sha256": "3cd5d0364048b86b5189cd9df5cceaf44fe28648b62b1f5b9c2b331c73c7b382"
+        }
+      },
+      {
+        "id": "media_frames",
+        "status": "pass",
+        "reason": "the file holds 30 frame(s), as the snapshot's native document says",
+        "evidence_ref": {
+          "id": "d_9f543cb30638975ea6e92b95b8c70824_ffprobe",
+          "version": 1,
+          "sha256": "3cd5d0364048b86b5189cd9df5cceaf44fe28648b62b1f5b9c2b331c73c7b382"
+        }
+      },
+      {
+        "id": "media_duration",
+        "status": "pass",
+        "reason": "the film is 1s long, as the snapshot's native document says",
+        "evidence_ref": {
+          "id": "d_9f543cb30638975ea6e92b95b8c70824_ffprobe",
+          "version": 1,
+          "sha256": "3cd5d0364048b86b5189cd9df5cceaf44fe28648b62b1f5b9c2b331c73c7b382"
+        }
+      },
+      {
+        "id": "media_full_decode",
+        "status": "pass",
+        "reason": "the whole file decodes",
+        "evidence_ref": {
+          "id": "d_9f543cb30638975ea6e92b95b8c70824_full_decode",
+          "version": 1,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      {
+        "id": "supplements",
+        "status": "pass",
+        "reason": "2 supplement(s) match their digests and every promised one is there",
+        "evidence_ref": null
+      }
+    ],
+    "published_at": "2026-11-09T15:51:11.782Z",
+    "download_ref": "dl_9f543cb30638975ea6e92b95b8c70824"
+  }
+}

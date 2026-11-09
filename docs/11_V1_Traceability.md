@@ -220,3 +220,13 @@ Gate D4.2、`Gate V1-P0`、`V1-Full`、M6 与 M7 均未关闭。
 ### 2026-11-09 设计交付边界
 
 统一核对入口：`agent-driven-v1/final-review/index.html`；A精确准备包：`agent-driven-v1/cp-a0/`。35 AD-T族、23 EX子case及R4-UX门保留；文档自检/候选字节锁不关闭任何真实业务Gate。A/B/C实现、真实客户端/媒体/人验仍按原计划NOT_RUN。
+
+
+### A轮实现增量（2026-11-10，当前源码观察；不改旧Gate历史）
+
+| 包/规格 | 实际增量与证据 | 未证明项/当前状态 |
+|---|---|---|
+| IT-A04 / AD-T05、07、27 | 同连接creation reservation/首提交、真实pinned snapshot proof、created resolver/layout/inventory；docs/execution/A/logs/main-created-foundation-r2，tsc0/90测试 | 仅组件与相关旧回归；worker/恢复/生产路由未装配，包IN_PROGRESS |
+| IT-A06 / AD-T08、20、35 | docs/execution/A/logs/main-harness-real-r2：30帧技术诊断真实encode/full decode/包发布；actual hashes见artifact-inventory | 非真人/非A片/非DB ready；生产ports、真实双导出、T20与人验NOT_RUN |
+
+首次扩大旧回归80通过6失败的原始日志、真实harness协议失败均保留，不从旧证据挑绿替代。最新状态/源码摘要见created-foundation-evidence.json。35族、R4-UX和全部A片要求仍须最终同SHA实证，不用上述计数关闭整族。独立审查pending，不能宣布A、V1-P0或V1-Full完成。

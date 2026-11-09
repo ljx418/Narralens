@@ -1,0 +1,72 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:3772063) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/m4a/activated-projection.test.ts (8 tests) 21387ms
+   ✓ M4A-P01: a fresh Host rebuilds the active layout from durable facts > cannot inspect an activated target at all without a layout — the gap M4A closes  2755ms
+   ✓ M4A-P01: a fresh Host rebuilds the active layout from durable facts > inspects a restarted Host's own migrated target, with no test hook anywhere  4011ms
+   ✓ M4A-P01: a fresh Host rebuilds the active layout from durable facts > keys its cache by project, snapshot and source digest  2532ms
+   ✓ M4A-P01: a fresh Host rebuilds the active layout from durable facts > fails closed when the migrated copy's bytes move under it  2598ms
+   ✓ M4A-P01: a fresh Host rebuilds the active layout from durable facts > refuses a layout whose declared root escapes the target  6718ms
+   ✓ M4A-P01: a fresh Host rebuilds the active layout from durable facts > refuses when the ledger names a target the plan does not cover  2772ms
+(node:3772594) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/project-creation-store.test.ts (33 tests) 39423ms
+   ✓ commits real published snapshot metadata atomically, survives DB reopen and preserves the accepted response  979ms
+   ✓ rolls back every initial commit fact when failure occurs after state  1171ms
+   ✓ rolls back every initial commit fact when failure occurs after binding  1231ms
+   ✓ rolls back every initial commit fact when failure occurs after snapshot  1189ms
+   ✓ rolls back every initial commit fact when failure occurs after transaction  1363ms
+   ✓ rolls back every initial commit fact when failure occurs after pointer  1243ms
+   ✓ rolls back every initial commit fact when failure occurs after source_fact  1138ms
+   ✓ rolls back every initial commit fact when failure occurs after origin  976ms
+   ✓ rolls back every initial commit fact when failure occurs after brief  990ms
+   ✓ rolls back every initial commit fact when failure occurs after command  1270ms
+   ✓ rolls back every initial commit fact when failure occurs after job  1180ms
+   ✓ rolls back every initial commit fact when failure occurs after outbox  1155ms
+   ✓ refuses a stale worker before any commit effect: owner  1146ms
+   ✓ refuses a stale worker before any commit effect: attempt  1166ms
+   ✓ refuses a stale worker before any commit effect: expired  1257ms
+   ✓ refuses a stale worker before any commit effect: cancelled  1031ms
+   ✓ rechecks creation schema in a live store, not only after constructing a replacement  1318ms
+   ✓ samples lease time after transaction admission instead of using time from before BEGIN  1122ms
+   ✓ samples trusted confirmation time after reservation transaction admission  329ms
+   ✓ rolls back when lease expires after the final writes  1146ms
+   ✓ rolls back when confirmation expires after the final writes  1140ms
+   ✓ does not mint a source proof for false native metadata: frame-count  1863ms
+   ✓ does not mint a source proof for false native metadata: fps  1864ms
+   ✓ does not mint a source proof for false native metadata: upstream  974ms
+   ✓ rejects a forged proof and byte changes after genuine pinned verification  4362ms
+   ✓ resolves a genuine created project without migration/cached layout, including after reopen  1718ms
+   ✓ refuses created source symlink escape even with byte-identical committed content  1149ms
+   ✓ does not commit a proved snapshot when its author-source publication is replaced or absent  952ms
+   ✓ lets the real Host rebuild a created layout and inventory without a migration or registration hook  1228ms
+   ✓ refuses a same-bytes canonical path substitution after pinned proof  1140ms
+(node:3773365) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/w2-project-resolver.test.ts (16 tests) 5126ms
+   ✓ ACT-01 a terminal migrated target resolves from durable facts alone > resolves after the process that migrated it is gone  356ms
+   ✓ ACT-01 a terminal migrated target resolves from durable facts alone > reaches the same answer through a store reopened on the same database file  368ms
+   ✓ ACT-02 every way a migrated target must not resolve is closed > refuses a migration in attention, and a recovery-parked one, with 423  328ms
+   ✓ ACT-02 every way a migrated target must not resolve is closed > refuses a target with no engine binding and one with no active commit  727ms
+   ✓ ACT-02 every way a migrated target must not resolve is closed > refuses a binding to an engine the migration did not target  368ms
+   ✓ ACT-02 every way a migrated target must not resolve is closed > refuses a binding pinned to an OpenFilm upstream other than the frozen one  354ms
+   ✓ ACT-02 every way a migrated target must not resolve is closed > refuses a migration that placed no content at all  350ms
+   ✓ ACT-02 every way a migrated target must not resolve is closed > refuses an unknown project id the same way whether or not a migration exists  363ms
+   ✓ ACT-02 every way a migrated target must not resolve is closed > refuses an ambiguous target that two terminal migrations both claim  429ms
+(node:3773527) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/agent-schema.test.ts (8 tests) 505ms
+   ✓ A schema on the real shared RevisionStore > persists receipt across a real database close and reopen without reapplying the schema  401ms
+(node:3773577) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/w2-asset-inventory-port.test.ts (14 tests) 198ms
+ ✓ tests/agent-driven/media/harness-closure.test.ts (8 tests) 27ms
+ ✓ tests/agent-driven/media/media-process-policy.test.ts (3 tests) 3ms
+
+ Test Files  7 passed (7)
+      Tests  90 passed (90)
+   Start at  23:54:07
+   Duration  90.68s (transform 1.92s, setup 0ms, collect 10.67s, tests 66.67s, environment 1ms, prepare 8.68s)
+

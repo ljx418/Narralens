@@ -1,4 +1,4 @@
-import { realpath } from "node:fs/promises";
+import { realpath, lstat } from "node:fs/promises";
 import { resolve, sep } from "node:path";
 import { HttpError } from "../api-error.js";
 import { absoluteServerPath } from "../engine/isolated-root.js";
@@ -8,6 +8,7 @@ import type { AbsoluteServerPath } from "../engine/engine-port.js";
 import type { ProjectResponse } from "../../contracts/types.js";
 import { ProjectCatalog, type ProjectDescriptor } from "./project-catalog.js";
 import type { MigrationRow } from "./migration-store.js";
+import type { ProjectCreationStore,CreatedSourceFact } from './project-creation-store.js';
 import type { RevisionStore } from "./revision-store.js";
 
 /**
@@ -81,7 +82,16 @@ export interface LegacyProjectView {
   readonly source_root: AbsoluteServerPath;
 }
 
-export type ResolvedProjectView = LegacyProjectView | ActivatedProjectView;
+export interface CreatedProjectView extends Omit<ActivatedProjectView,'kind'|'migration_id'|'publicView'|'migrated_from'> {
+  readonly kind:'created';
+  readonly migrated_from:null;
+  /** Host-only committed metadata, not another timeline or a migration identity. */
+  readonly source_fact:CreatedSourceFact;
+  publicView():CreatedProjectProjection;
+}
+export type CreatedProjectProjection=Omit<CreatedProjectView,'source_root'|'source_fact'|'publicView'>;
+export type NativeProjectView=ActivatedProjectView|CreatedProjectView;
+export type ResolvedProjectView = LegacyProjectView | NativeProjectView;
 
 export interface ProjectResolverDeps {
   readonly catalog: ProjectCatalog;
@@ -97,6 +107,7 @@ export class ProjectResolver {
   readonly #catalog: ProjectCatalog;
   readonly #revisions: RevisionStore;
   readonly #migrationRoot: string;
+  #created:{store:ProjectCreationStore;root:string}|undefined;
 
   constructor(deps: ProjectResolverDeps) {
     this.#catalog = deps.catalog;
@@ -110,9 +121,46 @@ export class ProjectResolver {
    * a silent fall through to the legacy catalog.
    */
   async resolve(projectId: string): Promise<ResolvedProjectView> {
+    if(this.#created?.store.forProject(projectId))return await this.resolveCreated(projectId);
     const migrations = this.#migrationsFor(projectId);
     if (migrations.length > 0) return await this.resolveActivated(projectId);
     return await this.resolveLegacy(projectId);
+  }
+
+  /** MAIN composition only. Rebinding to a different authority/root is forbidden. */
+  attachCreatedProjects(store:ProjectCreationStore,root:string):void {
+    if(store.revisions!==this.#revisions||this.#created&&(this.#created.store!==store||this.#created.root!==resolve(root)))throw new Error('CREATED_PROJECT_AUTHORITY_MISMATCH');
+    this.#created={store,root:resolve(root)};
+  }
+
+  async resolveNative(projectId:string):Promise<NativeProjectView> {
+    const view=await this.resolve(projectId);
+    if(view.kind==='legacy')throw new HttpError(404,'CAPABILITY_NOT_ENABLED','This project has no native OpenFilm source');
+    return view;
+  }
+
+  async resolveCreated(projectId:string):Promise<CreatedProjectView> {
+    const authority=this.#created,reservation=authority?.store.forProject(projectId),origin=authority?.store.origin(projectId);
+    if(!authority||!reservation||!origin||reservation.state!=='committed')throw new HttpError(404,'NOT_FOUND','Project creation is not committed');
+    const reject=()=>new HttpError(423,'PROJECT_ATTENTION_REQUIRED','Created project facts are inconsistent');
+    if(origin.origin!=='created'||origin.project_id!==projectId||origin.command_id!==reservation.command_id||origin.root_ref!==projectId||origin.creation_transaction_id!==reservation.transaction_id||origin.initial_snapshot_id!==reservation.result?.initial_snapshot_id||origin.intake_digest!==reservation.brief_digest||origin.intake_confirmation_id!==reservation.request.decision_id||this.#migrationsFor(projectId).length)throw reject();
+    const commit=this.#revisions.activeCommit(projectId),binding=this.#revisions.readEngineBinding(projectId),initial=this.#revisions.projectTransaction(origin.creation_transaction_id);
+    if(!commit||!binding||binding.engine!=='openfilm'||binding.engine_upstream_sha!==OPENFILM_UPSTREAM_SHA||binding.migrated_from!==null||initial?.state!=='committed'||initial.snapshot_id!==origin.initial_snapshot_id||this.#revisions.recoveryGate(projectId,0))throw reject();
+    const transaction=this.#revisions.projectTransaction(commit.transaction_id),snapshot=this.#revisions.snapshotRow(commit.snapshot_id);
+    const state=this.#revisions.compose(db=>db.prepare('SELECT revision,source_digest FROM project_state WHERE project_id=?').get(projectId));
+    if(commit.engine!=='openfilm'||commit.revision<1||transaction?.state!=='committed'||transaction.project_id!==projectId||transaction.snapshot_id!==commit.snapshot_id||transaction.source_digest_after!==commit.source_digest||snapshot?.project_id!==projectId||snapshot.source_digest!==commit.source_digest||snapshot.engine!=='openfilm'||Number(state?.revision)!==commit.revision||state?.source_digest!==commit.source_digest||!this.#revisions.snapshotIsCommitted(projectId,commit.snapshot_id))throw reject();
+    const fact=authority.store.sourceFact(projectId,commit.snapshot_id);if(!fact)throw reject();
+    let base:string,source:string;
+    try{
+      base=await realpath(authority.root);
+      const directory=resolve(base,origin.root_ref),entry=resolve(directory,'source');
+      const [dirStat,sourceStat]=await Promise.all([lstat(directory),lstat(entry)]);
+      if(dirStat.isSymbolicLink()||sourceStat.isSymbolicLink()||!dirStat.isDirectory()||!sourceStat.isDirectory())throw new Error('invalid owned source');
+      const canonicalDirectory=await realpath(directory);source=await realpath(entry);
+      if(canonicalDirectory!==directory||source!==entry||!source.startsWith(base+sep))throw new Error('escaped owned source');
+    }catch{throw new HttpError(423,'PROJECT_ATTENTION_REQUIRED','The created source is unavailable or outside its owned root');}
+    const view={kind:'created' as const,project_id:projectId,engine:'openfilm' as const,engine_upstream_sha:binding.engine_upstream_sha,migrated_from:null,revision:commit.revision,snapshot_id:commit.snapshot_id,source_digest:commit.source_digest,control_revision:this.#revisions.controlRevision(projectId,commit.revision),frame_count:fact.frame_count,fps:fact.fps};
+    return {...view,source_root:absoluteServerPath(source),source_fact:fact,publicView:()=>({...view})};
   }
 
   async resolveLegacy(projectId: string): Promise<LegacyProjectView> {

@@ -1,0 +1,11 @@
+{
+  "scope": "Development component/diagnostic evidence only; not A or human acceptance",
+  "commands": [
+    "corepack pnpm exec tsx tools/agent-driven/media/render-delivery.ts --project var/a-diagnostics/harness-rights-first/project --upstream /mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm --delivery-root var/a-diagnostics/harness-rights-first/delivery-r2 --width 320 --height 180 --fps 30 --expected-frames 30 --expected-duration 1 --rights-manifest var/a-diagnostics/harness-rights-first/rights-manifest.json"
+  ],
+  "artifact_sha256": {
+    "artifact-inventory.json": "fb0ea7f0703ed5095e41925437d802f2a3191dd36ee658a5e35fc8319e7c29aa",
+    "render.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "render.txt": "22d01f16f3bdd5b8c5807772ab93b26180a510ae7de5bdbbc37b858a8daf6ab5"
+  }
+}

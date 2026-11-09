@@ -1,0 +1,13 @@
+{
+  "scope": "Development component/diagnostic evidence only; not A or human acceptance",
+  "commands": [
+    "corepack pnpm exec tsc --noEmit",
+    "corepack pnpm exec vitest run tests/agent-driven/integration/project-creation-store.test.ts tests/agent-driven/integration/agent-schema.test.ts tests/agent-driven/media/harness-closure.test.ts tests/wave2/w2-project-resolver.test.ts tests/wave2/w2-asset-inventory-port.test.ts tests/wave2/m4a/activated-projection.test.ts --maxWorkers=1 --minWorkers=1"
+  ],
+  "artifact_sha256": {
+    "tests.exit": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+    "tests.txt": "51d1ade9a45bd230bd047cdbd45cb5ab882349b8390199529678adc18b1de103",
+    "typecheck.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "typecheck.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

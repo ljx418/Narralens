@@ -1,0 +1,28 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:3752432) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/project-creation-store.test.ts (19 tests) 16846ms
+   ✓ commits real published snapshot metadata atomically, survives DB reopen and preserves the accepted response  1774ms
+   ✓ rolls back every initial commit fact when failure occurs after state  1004ms
+   ✓ rolls back every initial commit fact when failure occurs after binding  961ms
+   ✓ rolls back every initial commit fact when failure occurs after snapshot  939ms
+   ✓ rolls back every initial commit fact when failure occurs after transaction  948ms
+   ✓ rolls back every initial commit fact when failure occurs after pointer  942ms
+   ✓ rolls back every initial commit fact when failure occurs after source_fact  997ms
+   ✓ rolls back every initial commit fact when failure occurs after origin  989ms
+   ✓ rolls back every initial commit fact when failure occurs after brief  948ms
+   ✓ rolls back every initial commit fact when failure occurs after command  937ms
+   ✓ rolls back every initial commit fact when failure occurs after job  945ms
+   ✓ rolls back every initial commit fact when failure occurs after outbox  966ms
+   ✓ refuses a stale worker before any commit effect: owner  975ms
+   ✓ refuses a stale worker before any commit effect: attempt  964ms
+   ✓ refuses a stale worker before any commit effect: expired  937ms
+   ✓ refuses a stale worker before any commit effect: cancelled  964ms
+
+ Test Files  1 passed (1)
+      Tests  19 passed (19)
+   Start at  23:31:00
+   Duration  21.06s (transform 720ms, setup 0ms, collect 2.43s, tests 16.85s, environment 0ms, prepare 1.18s)
+

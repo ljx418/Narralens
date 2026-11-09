@@ -1,9 +1,11 @@
+import { realpath } from 'node:fs/promises';
+import { resolve,sep } from 'node:path';
 import { createHash } from "node:crypto";
 import { HttpError } from "../api-error.js";
 import type { AssetBlockingReason, AssetLicense, AssetSource } from "../../contracts/types.js";
 import type { AssetRegistry } from "./asset-registry.js";
 import type { MigratedAssetLedger } from "./migrated-asset-ledger.js";
-import type { ProjectResolver } from "./project-resolver.js";
+import type { ProjectResolver,CreatedProjectView } from "./project-resolver.js";
 import { sha256File } from "./openfilm-migrator.js";
 
 /**
@@ -41,9 +43,9 @@ export interface InventoryAsset {
 }
 
 export interface AssetInventory {
-  readonly kind: "legacy" | "activated";
+  readonly kind: "legacy" | "activated" | "created";
   readonly project_id: string;
-  readonly store: "asset_manifest" | "migrated_asset_ledger";
+  readonly store: "asset_manifest" | "migrated_asset_ledger" | "created_source_fact";
   /** Digest of the whole inventory, so an impact spec can bind what it read. */
   readonly inventory_sha256: string;
   readonly assets: readonly InventoryAsset[];
@@ -73,6 +75,7 @@ export class AssetInventoryPort {
   async inventory(projectId: string): Promise<AssetInventory> {
     const view = await this.#resolver.resolve(projectId);
     if (view.kind === "legacy") return await this.#fromManifest(projectId);
+    if (view.kind === "created") return await this.#fromCreated(view);
     return await this.#fromLedger(projectId, view.source_root.value, view.kind);
   }
 
@@ -96,6 +99,21 @@ export class AssetInventoryPort {
         `Asset is not usable: ${found.blocking_reasons.join(",")}`, undefined, projectId);
     }
     return found;
+  }
+
+  async #fromCreated(view:CreatedProjectView):Promise<AssetInventory>{
+    const assets:InventoryAsset[]=[];
+    for(const row of view.source_fact.assets){
+      const candidate=await realpath(resolve(view.source_root.value,row.path)).catch(()=>null);
+      if(candidate!==null&&!candidate.startsWith(view.source_root.value+sep))throw new HttpError(423,'PROJECT_ATTENTION_REQUIRED','A created asset escapes its project');
+      const observed=candidate===null?null:await this.#targetHash(view.source_root.value,row.path);
+      const blocking:AssetBlockingReason[]=[];
+      if(observed===null)blocking.push('BYTES_UNAVAILABLE');else if(observed!==row.sha256)blocking.push('HASH_MISMATCH');
+      if(row.license.status!=='cleared')blocking.push('LICENSE_NOT_CLEARED');
+      if(!row.license.commercial_use)blocking.push('COMMERCIAL_USE_NOT_ALLOWED');
+      assets.push({asset_id:row.asset_id,sha256:row.sha256,media_type:row.media_type,duration_frames:row.duration_frames,source:row.source,license:row.license,availability:observed===null?'unavailable':'available',eligible:blocking.length===0,blocking_reasons:blocking});
+    }
+    return {kind:'created',project_id:view.project_id,store:'created_source_fact',inventory_sha256:inventoryDigest(assets,'created:'+view.snapshot_id),assets};
   }
 
   async #fromManifest(projectId: string): Promise<AssetInventory> {
