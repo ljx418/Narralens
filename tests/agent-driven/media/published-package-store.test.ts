@@ -372,7 +372,7 @@ describe("publishing a package", () => {
     await store.publish({
       package_id: PACKAGE_ID,
       staging_dir: other.staging,
-      files: other.files,
+      files: other.files.map((file) => ({ ...file, id: file.id.replace(DELIVERY_ID, otherManifest.delivery_id) })),
       manifest: otherManifest,
       published_at: "2026-11-09T10:00:00.000Z",
     });
