@@ -1,3 +1,4 @@
+import {randomBytes} from 'node:crypto';
 /** Private child entry. The launcher passes the kernel lock on fd9; never start unlocked. */
 import {join,resolve} from 'node:path';
 import {NarralensHost} from '../server.js';
@@ -13,6 +14,7 @@ async function start(){
  const root=runtimeRoot(rootInput),vendorRoot=resolve(vendorInput);
  let identity:RuntimeState=await beginRuntime(root),app!:CreationApplication;
  const registry=new ServiceHealthRegistry();
+ const operatorSecret=randomBytes(32).toString('base64url');
  const ttl=Number(process.env.NARRALENS_AGENT_TOKEN_TTL_MS??86400000);
  if(!Number.isSafeInteger(ttl)||ttl<1000||ttl>86400000)throw new Error('INVALID_RUNTIME_TOKEN_TTL');
  let credential:{token:string;expires_at:number}|undefined;
@@ -29,6 +31,7 @@ async function start(){
  let listening=false;
  const host=new NarralensHost({catalog:new ProjectCatalog(new Map()),dbPath:join(root,'host.sqlite'),snapshotsRoot:join(root,'snapshots'),adoptionStagingRoot:join(root,'adoption-stage'),migrationsRoot:join(root,'migrations'),derivedRoot:join(root,'derived'),openFilmVendorRoot:vendorRoot,
   agentApplication:instance=>app=new CreationApplication(instance,{createdRoot:join(root,'projects'),vendorRoot,
+   workbench:{principalId:'local-owner',operatorSecret},
    ...(process.env.NARRALENS_LOCAL_ASSETS_ROOT?{localAssets:{sourceRoot:resolve(process.env.NARRALENS_LOCAL_ASSETS_ROOT),storageRoot:join(root,'local-assets')}}:{}),
    instance:()=>validateAgentDefinition<Instance>('Instance',{instance_id:identity.instance_id,generation:identity.generation,api_version:'agent.v1',contract_version:'cp-a0-r4',capabilities:[],health:listening?'degraded':'starting'}),
    health:()=>registry.read(identity.instance_id),
@@ -54,6 +57,7 @@ async function start(){
   await host.listen(Number(portInput));listening=true;
   identity={...identity,state:'listening',origin:host.origin};
   await rotate();
+  await writePrivateJson(root,'workbench-operator.json',{format:'narralens.workbench-operator@1',instance_id:identity.instance_id,generation:identity.generation,origin:host.origin,token:operatorSecret});
   await writePrivateJson(root,'instance.json',identity);
   sample();sampler=setInterval(sample,HEALTH_SAMPLE_INTERVAL_MS);sampler.unref();
   rotator=setInterval(()=>{void rotate().catch(()=>{registry.record({service_id:'credentials',instance_id:identity.instance_id,ownership:'owned',state:'degraded',reason:'credential_rotation_failed',sampled_at_ms:Date.now(),metrics:[]});});},Math.min(5000,Math.floor(ttl/4)));rotator.unref();

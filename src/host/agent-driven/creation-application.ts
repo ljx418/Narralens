@@ -1,3 +1,6 @@
+import {createHash} from 'node:crypto';
+import type {IncomingMessage,ServerResponse} from 'node:http';
+import {WorkbenchSessionService} from './workbench-session.js';
 import type {Instance,HealthRead} from '../../contracts/agent-driven-types.js';
 import type {NarralensHost,AgentHostApplication} from '../server.js';
 import {CreativeService} from '../creative/creative-service.js';
@@ -21,14 +24,17 @@ import {AgentRouteError} from './agent-http-router.js';
  */
 export class CreationApplication implements AgentHostApplication {
  readonly auth:ScopedAgentAuth;
+ readonly workbenchSessions:WorkbenchSessionService|null;
  readonly dispatcher:ApplicationDispatcher;
  readonly creation:ProjectCreationStore;
  readonly committedSnapshots:CommittedSnapshotAuthority;
  readonly localAssets:LocalAssetRegistry|null;
  #closing:Promise<void>|undefined;
  readonly worker:ProjectCreationService;
- constructor(host:NarralensHost,options:{createdRoot:string;vendorRoot:string;worker?:Pick<CreationServiceDeps,'leaseMs'|'pollMs'|'boundary'>;instance?:()=>Instance;health?:()=>HealthRead;localAssets?:Omit<LocalAssetRegistryOptions,'projectsRoot'|'snapshotsRoot'>}){
-  this.auth=new ScopedAgentAuth(()=>host.origin);
+ constructor(host:NarralensHost,options:{createdRoot:string;vendorRoot:string;worker?:Pick<CreationServiceDeps,'leaseMs'|'pollMs'|'boundary'>;instance?:()=>Instance;health?:()=>HealthRead;workbench?:{principalId:string;operatorSecret:string};localAssets?:Omit<LocalAssetRegistryOptions,'projectsRoot'|'snapshotsRoot'>}){
+  const cookieName=options.instance?'narralens_a_'+createHash('sha256').update(options.instance().instance_id).digest('hex').slice(0,24):'narralens_a_session';
+  this.auth=new ScopedAgentAuth(()=>host.origin,Date.now,cookieName,{requireUiReadProof:!!options.workbench});
+  this.workbenchSessions=options.workbench?new WorkbenchSessionService(this.auth,()=>host.origin,options.workbench.principalId,options.workbench.operatorSecret):null;
   const verifier=new CreationSourceVerifier(host.snapshots,options.vendorRoot,options.createdRoot);
   this.creation=new ProjectCreationStore(host.revisions,()=>new Date(),verifier);
   host.projectResolver.attachCreatedProjects(this.creation,options.createdRoot);
@@ -67,8 +73,9 @@ export class CreationApplication implements AgentHostApplication {
    },
   });
  }
+ handleWorkbenchSession(request:IncomingMessage,response:ServerResponse){return this.workbenchSessions?.handle(request,response)??Promise.resolve(false);}
  leaseReaperExclusions(){return this.creation.pending().map(row=>row.job_id);}
  recoverBeforeGeneric(){return this.worker.recoverBeforeGeneric();}
  start(){this.worker.start();}
- close(){return this.#closing??=Promise.all([this.worker.close(),this.localAssets?.close()]).then(()=>undefined);}
+ close(){this.workbenchSessions?.close();return this.#closing??=Promise.all([this.worker.close(),this.localAssets?.close()]).then(()=>undefined);}
 }

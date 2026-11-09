@@ -216,6 +216,8 @@ function adoptionStagingRootFor(revisions: RevisionStore, configured: string | u
 export interface AgentHostApplication {
   readonly auth: ScopedAgentAuth;
   readonly dispatcher: AgentDispatcher;
+  /** Separate UI entry, never an Agent tool or a creative approval. */
+  handleWorkbenchSession?(request: IncomingMessage, response: ServerResponse): Promise<boolean>;
   /** Decide owned creation journals before generic recovery can quarantine them. */
   recoverBeforeGeneric?(): Promise<void>;
   leaseReaperExclusions?(): readonly string[];
@@ -793,6 +795,7 @@ export class NarralensHost {
       if (this.#agentRouter && new URL(request.url ?? "/", "http://127.0.0.1").pathname.startsWith("/api/agent/v1/")) {
         return await this.#agentRouter.handle(request, response);
       }
+      if (await this.#agentApplication?.handleWorkbenchSession?.(request, response)) return;
       if (request.method === "GET" && request.url && !request.url.startsWith("/api/")) {
         return await serveStatic(request.url, response);
       }
@@ -804,7 +807,10 @@ export class NarralensHost {
       }
       const url = new URL(request.url ?? "/", `http://${host}`);
       if (request.method === "GET" && url.pathname === "/api/session") {
-        if (this.#agentApplication) this.#authenticate(request);
+        if (this.#agentApplication) {
+          this.#authenticate(request);
+          return json(response, 200, { mode: "trusted_ui" });
+        }
         return json(response, 200, { token: this.sessionToken, expires_at: this.sessionExpiresAt.toISOString() });
       }
       this.#authenticate(request);
@@ -898,6 +904,7 @@ export class NarralensHost {
           method: request.method ?? "", origin: request.headers.origin,
           authorization: request.headers.authorization,
           ...(request.headers.cookie ? { cookie: request.headers.cookie } : {}),
+          ...(typeof request.headers["x-narralens-csrf"] === "string" ? { csrf: request.headers["x-narralens-csrf"] } : {}),
           ...(request.headers.referer ? { referer: request.headers.referer } : {}),
           ...(typeof request.headers["sec-fetch-site"] === "string" ? { secFetchSite: request.headers["sec-fetch-site"] } : {}),
           rawHeaders: request.rawHeaders,

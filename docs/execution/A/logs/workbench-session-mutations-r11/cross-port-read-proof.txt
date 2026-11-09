@@ -1,0 +1,46 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:4005647) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/agent-driven/integration/workbench-session-host.test.ts (11 tests | 1 failed | 10 skipped) 312ms
+   ↓ exchanges a genuine Host-only ticket once; browser cookie reads a session without creating any approval or project
+   ↓ does not allow ordinary Agent credentials, a body-supplied role, or a UI cookie to obtain operator authority
+   ↓ requires CSRF for renewal, preserves a predecessor after lost responses, and permits reopening with an existing cookie
+   ↓ rejects cross-origin, malformed ticket, unknown fields, oversized body, and unavailable paths without leaking credentials
+   ↓ rejects UI bearer transport and invalidates its actual cookie on application close
+   ↓ expires tickets exactly at their deadline and never accepts tickets in a different Host instance
+   ↓ rechecks expiry after a slow renewal body instead of extending an invalid session
+   ↓ rechecks revocation after a slow renewal body instead of extending an invalid session
+   × refuses a stolen cookie on both session discovery and Agent UI reads without the port-scoped proof 312ms
+     → expected 200 to be 403 // Object.is equality
+   ↓ does not exhaust session capacity after 80 real renewals and still permits an operator reopen
+   ↓ allows an explicit operator ticket to reopen after the prior cookie was revoked
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/workbench-session-host.test.ts > refuses a stolen cookie on both session discovery and Agent UI reads without the port-scoped proof
+AssertionError: expected 200 to be 403 // Object.is equality
+
+- Expected
++ Received
+
+- 403
++ 200
+
+ ❯ tests/agent-driven/integration/workbench-session-host.test.ts:110:71
+    108|  const headers={Origin:f.host.origin,Cookie:stolen.cookie};
+    109|  expect((await fetch(f.host.origin+'/api/workbench/session',{headers})…
+    110|  expect((await fetch(f.host.origin+'/api/session',{headers})).status).…
+       |                                                                       ^
+    111|  expect((await fetch(f.host.origin+'/api/agent/v1/intakes/not-owned',{…
+    112|  expect((await f.post('/renew',{},headers)).status).toBe(403);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 10 skipped (11)
+   Start at  04:20:43
+   Duration  7.15s (transform 2.05s, setup 0ms, collect 4.85s, tests 312ms, environment 0ms, prepare 1.32s)
+

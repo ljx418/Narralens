@@ -1,0 +1,34 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+ ✓ tests/agent-driven/integration/local-assets-host.test.ts (23 tests) 51121ms
+   ✓ actually probes and fully decodes video and synthetic diagnostic audio into the same Host database without modifying native source  2467ms
+   ✓ requires real trusted UI provenance and ownership before reading files or recording rights  2262ms
+   ✓ replays the original registration without reimporting changed input and refuses a conflicting key  1925ms
+   ✓ rolls back row, command and outbox together at before_insert, preserving an unreferenced blob for a safe retry  2404ms
+   ✓ rolls back row, command and outbox together at after_insert, preserving an unreferenced blob for a safe retry  2253ms
+   ✓ rolls back row, command and outbox together at after_receipt, preserving an unreferenced blob for a safe retry  2280ms
+   ✓ rolls back row, command and outbox together at after_event, preserving an unreferenced blob for a safe retry  2315ms
+   ✓ checks real input hashes, paths and media rather than accepting metadata as proof  1922ms
+   ✓ preserves unknown license and synthetic origin as facts rather than silently clearing them  1934ms
+   ✓ detects a published blob changed inside the final SQL boundary and commits no registration  2176ms
+   ✓ converges concurrent same-key imports to one immutable row, one command and one business event  2088ms
+   ✓ rounds audio directly from sample time to project frames rather than rounding through displayed milliseconds  2204ms
+   ✓ refuses truncated audio and a video with a damaged audio track even when video-only legacy validation passes  2358ms
+   ✓ refuses local storage overlapping author, snapshot or input domains before creating directories  2604ms
+   ✓ does not follow a newly redirected configured source root, even when replacement bytes have the declared hash  2724ms
+   ✓ captures trusted input by value before asynchronous inspection rather than accepting later permission changes  2710ms
+   ✓ bounds real concurrent imports to two and removes a cancelled queued request without leaking a slot  2319ms
+   ✓ preserves cancellation through the actual video validator wrapper and waits for its media child before returning  2055ms
+   ✓ quiesces admitted local imports and their real media child before the Host closes its shared database  4008ms
+   ✓ keeps snapshot bytes untouched when a storage parent is replaced exactly at before_stage_create  3623ms
+   ✓ keeps snapshot bytes untouched when a storage parent is replaced exactly at before_publish  2097ms
+ ✓ tests/agent-driven/integration/host-close-lifecycle.test.ts (1 test) 3464ms
+   ✓ joins simultaneous Host closes and lets an admitted real HTTP handler finish before closing SQLite  3463ms
+ ✓ tests/agent-driven/integration/product-sqlite-repository.test.ts (9 tests) 88ms
+
+ Test Files  3 passed (3)
+      Tests  33 passed (33)
+   Start at  03:53:38
+   Duration  70.03s (transform 2.21s, setup 0ms, collect 9.33s, tests 54.67s, environment 0ms, prepare 4.11s)
+

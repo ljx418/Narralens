@@ -1,3 +1,4 @@
+import {workbenchProofHeaders} from "../../workbench-session.js";
 import type { AssetImportMetadata, AssetImportResponse, AssetInventoryResponse, EditRequest, EditResponse, JobEvent, JobResponse, ProjectResponse, ProposalBundle, ProposalComparison, ProposalComparisonRequest } from "../../../contracts/types.js";
 
 export class HostApiError extends Error {
@@ -6,13 +7,23 @@ export class HostApiError extends Error {
 
 export class HostApiClient {
   #token = "";
+  #csrf: string | null = null;
   constructor(private readonly baseUrl = "") {}
 
   async start(): Promise<void> {
-    const response = await fetch(`${this.baseUrl}/api/session`);
-    const body = await response.json() as { token: string };
+    const response = await fetch(`${this.baseUrl}/api/session`, { credentials: "same-origin", headers: workbenchProofHeaders() });
+    const body = await response.json() as { token?: string; mode?: string };
     if (!response.ok) throw new HostApiError(response.status, "SESSION_FAILED", "无法建立本地会话");
-    this.#token = body.token;
+    if (body.mode === "trusted_ui") {
+      const sessionResponse = await fetch(`${this.baseUrl}/api/workbench/session`, { credentials: "same-origin", cache: "no-store", headers: workbenchProofHeaders() });
+      const session = await sessionResponse.json() as { csrf?: string };
+      if (!sessionResponse.ok || typeof session.csrf !== "string" || !/^[A-Za-z0-9_-]{43}$/.test(session.csrf)) throw new HostApiError(sessionResponse.status, "SESSION_FAILED", "请从本机启动入口重新打开工作台");
+      this.#csrf = session.csrf;
+      this.#token = "";
+    } else if (typeof body.token === "string" && body.token) {
+      this.#token = body.token;
+      this.#csrf = null;
+    } else throw new HostApiError(response.status, "SESSION_FAILED", "无法建立本地会话");
   }
 
   project(projectId: string): Promise<ProjectResponse> { return this.#get(`/api/projects/${projectId}`); }
@@ -38,7 +49,8 @@ export class HostApiClient {
       const abort = (): void => request.abort();
       const finish = (): void => options.signal?.removeEventListener("abort", abort);
       request.open("POST", `${this.baseUrl}/api/projects/${projectId}/assets/import`);
-      request.setRequestHeader("authorization", `Bearer ${this.#token}`);
+      if (this.#csrf !== null) request.setRequestHeader("X-Narralens-CSRF", this.#csrf);
+      else request.setRequestHeader("authorization", `Bearer ${this.#token}`);
       request.setRequestHeader("content-type", `multipart/form-data; boundary=${boundary}`);
       request.upload.addEventListener("load", () => options.onUploadComplete?.(), { once: true });
       request.addEventListener("load", () => {
@@ -61,16 +73,18 @@ export class HostApiClient {
 
   async cancel(jobId: string): Promise<void> { await this.#request(`/api/jobs/${jobId}/cancel`, { method: "POST" }); }
 
+  #headers(): Record<string, string> { return this.#csrf !== null ? { "X-Narralens-CSRF": this.#csrf } : { authorization: `Bearer ${this.#token}` }; }
+
   async #get<T>(path: string): Promise<T> { return this.#request<T>(path); }
   async #request<T>(path: string, init: RequestInit = {}): Promise<T> {
-    const response = await fetch(`${this.baseUrl}${path}`, { ...init, headers: { ...init.headers, authorization: `Bearer ${this.#token}` } });
+    const response = await fetch(`${this.baseUrl}${path}`, { ...init, credentials: "same-origin", headers: { ...init.headers, ...this.#headers() } });
     const body = await response.json() as { code?: string; message?: string } & T;
     if (!response.ok) throw new HostApiError(response.status, body.code ?? "UNKNOWN", body.message ?? "本地服务请求失败");
     return body;
   }
 
   async #getSse(path: string): Promise<JobEvent[]> {
-    const response = await fetch(`${this.baseUrl}${path}`, { headers: { authorization: `Bearer ${this.#token}` } });
+    const response = await fetch(`${this.baseUrl}${path}`, { credentials: "same-origin", headers: this.#headers() });
     if (!response.ok) {
       const body = await response.json() as { code?: string; message?: string };
       throw new HostApiError(response.status, body.code ?? "UNKNOWN", body.message ?? "任务事件读取失败");

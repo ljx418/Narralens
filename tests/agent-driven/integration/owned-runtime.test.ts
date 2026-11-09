@@ -1,3 +1,4 @@
+import {requestWorkbenchEntry} from '../../../src/launcher/workbench-entry.js';
 import {it,expect} from 'vitest';
 import {spawn,spawnSync} from 'node:child_process';
 import {mkdtemp,rm,stat,readFile,mkdir,symlink,writeFile,chmod,lstat,unlink} from 'node:fs/promises';
@@ -27,7 +28,7 @@ function launch(root:string){
  });
  return {child,ready,exited};
 }
-async function control(root:string,command:'status'|'stop'){
+async function control(root:string,command:'status'|'stop'|'open'){
  const child=spawn(process.execPath,['--import',loader,resolve('tools/agent-runtime.ts'),command,'--root',root],{stdio:['ignore','pipe','pipe']});
  let out='',err='';child.stdout.on('data',b=>{out+=String(b);});child.stderr.on('data',b=>{err+=String(b);});
  const code=await new Promise<number|null>((r,reject)=>{child.once('error',reject);child.once('exit',r);});return {code,out,err};
@@ -47,6 +48,14 @@ it('uses real flock, persistent instance generations, authenticated HTTP and act
   const healthResponse=await fetch(connection.origin+'/api/agent/v1/health',{headers:headers()});expect(healthResponse.status).toBe(200);const health=await healthResponse.json() as HealthRead;
   expect(health.services.find(s=>s.service_id==='host')?.state).toBe('ready');expect(health.services.find(s=>s.service_id==='video-production')?.state).toBe('degraded');
   expect((await fetch(connection.origin+'/api/agent/v1/instance',{headers:{Origin:connection.origin,Authorization:'Bearer invalid'}})).status).toBe(401);
+  const operator=readPrivateJson(root,'workbench-operator.json') as {token:string;generation:number};
+  expect(operator.generation).toBe(1);expect(operator.token===connection.token).toBe(false);expect((await stat(join(root,'workbench-operator.json'))).mode&0o077).toBe(0);
+  expect((await fetch(connection.origin+'/api/workbench/session/open',{method:'POST',headers:{...headers(),'Content-Type':'application/json'},body:'{}'})).status).toBe(401);
+  const entry=await requestWorkbenchEntry(root),ticket=new URL(entry.url).hash.slice('#workbench_ticket='.length);
+  const exchange=await fetch(connection.origin+'/api/workbench/session/exchange',{method:'POST',headers:{Origin:connection.origin,'Content-Type':'application/json'},body:JSON.stringify({ticket})});
+  expect(exchange.status).toBe(200);const uiSession=await exchange.json() as {csrf:string};const uiCookie=exchange.headers.get('set-cookie')!.split(';')[0]!;
+  const uiRead=await fetch(connection.origin+'/api/workbench/session',{headers:{Origin:connection.origin,Cookie:uiCookie,'X-Narralens-CSRF':uiSession.csrf}});expect(uiRead.status).toBe(200);expect(await uiRead.json()).toMatchObject({principal_id:'local-owner'});
+  const cliEntry=await control(root,'open');expect(cliEntry.code,cliEntry.err).toBe(0);expect(JSON.parse(cliEntry.out).event).toBe('workbench.entry');
   const snapshot=readRuntimeState(root)!;
   try{await expect(probeRuntime(root,async(url,init)=>{const response=await fetch(url,init);await writePrivateJson(root,'instance.json',{...snapshot,generation:snapshot.generation+1});return response;})).rejects.toThrow('INSTANCE_CHANGED_DURING_PROBE');}
   finally{await writePrivateJson(root,'instance.json',snapshot);}
@@ -77,6 +86,8 @@ it('uses real flock, persistent instance generations, authenticated HTTP and act
   const deadline=Date.now()+10000;while(Date.now()<deadline&&readRuntimeState(root)?.state!=='stopped')await new Promise(r=>setTimeout(r,25));
   expect(readRuntimeState(root)?.state).toBe('stopped');
   const restarted=launch(root);wrappers.push(restarted);const second=await restarted.ready;owned.set(second.pid,processStart(second.pid));expect(second.instance_id).toBe(first.instance_id);expect(second.generation).toBe(2);
+  expect((readPrivateJson(root,'workbench-operator.json') as {token:string}).token===operator.token).toBe(false);
+  expect((await fetch(second.origin+'/api/workbench/session',{headers:{Origin:second.origin,Cookie:uiCookie,'X-Narralens-CSRF':uiSession.csrf}})).status).toBe(401);
   const fresh=readRuntimeConnection(root)!;expect((await fetch(fresh.origin+'/api/agent/v1/instance',{headers:{Origin:fresh.origin,Authorization:'Bearer '+connection.token}})).status).toBe(401);
   // Crash the actual Host; its next launch advances, never resets, the generation.
   process.kill(second.pid,'SIGKILL');expect((await restarted.exited).code).toBe(1);

@@ -1,0 +1,52 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:4006017) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/agent-driven/integration/workbench-session-host.test.ts (11 tests | 2 failed | 9 skipped) 65ms
+   ↓ exchanges a genuine Host-only ticket once; browser cookie reads a session without creating any approval or project
+   ↓ does not allow ordinary Agent credentials, a body-supplied role, or a UI cookie to obtain operator authority
+   ↓ requires CSRF for renewal, preserves a predecessor after lost responses, and permits reopening with an existing cookie
+   ↓ rejects cross-origin, malformed ticket, unknown fields, oversized body, and unavailable paths without leaking credentials
+   ↓ rejects UI bearer transport and invalidates its actual cookie on application close
+   ↓ expires tickets exactly at their deadline and never accepts tickets in a different Host instance
+   × rechecks expiry after a slow renewal body instead of extending an invalid session 43ms
+     → expected { status: 200, …(1) } to deeply equal { status: 401, cookie: undefined }
+   × rechecks revocation after a slow renewal body instead of extending an invalid session 21ms
+     → expected { status: 200, …(1) } to deeply equal { status: 401, cookie: undefined }
+   ↓ refuses a stolen cookie on both session discovery and Agent UI reads without the port-scoped proof
+   ↓ does not exhaust session capacity after 80 real renewals and still permits an operator reopen
+   ↓ allows an explicit operator ticket to reopen after the prior cookie was revoked
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/workbench-session-host.test.ts > rechecks expiry after a slow renewal body instead of extending an invalid session
+ FAIL  tests/agent-driven/integration/workbench-session-host.test.ts > rechecks revocation after a slow renewal body instead of extending an invalid session
+AssertionError: expected { status: 200, …(1) } to deeply equal { status: 401, cookie: undefined }
+
+- Expected
++ Received
+
+  {
+-   "cookie": undefined,
+-   "status": 401,
++   "cookie": "narralens_a_session=F-bPI45oTNP9xjIrqOa7v9hp5GPRGvarcGJ68ZUqZxY; HttpOnly; SameSite=Strict; Path=/; Max-Age=28800",
++   "status": 200,
+  }
+
+ ❯ tests/agent-driven/integration/workbench-session-host.test.ts:97:40
+     95|  request.write('{');await received;
+     96|  if(mode==='expiry')now=session.expires_at;else auth.revoke(cookie.sli…
+     97|  request.end('}');expect(await result).toEqual({status:401,cookie:unde…
+       |                                        ^
+     98| });
+     99| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 9 skipped (11)
+   Start at  04:20:54
+   Duration  6.77s (transform 2.09s, setup 0ms, collect 4.73s, tests 65ms, environment 0ms, prepare 1.38s)
+

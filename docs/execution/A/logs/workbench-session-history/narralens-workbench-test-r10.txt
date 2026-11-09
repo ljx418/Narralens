@@ -1,0 +1,23 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:4003232) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/workbench-session-host.test.ts (11 tests) 2755ms
+   ✓ requires CSRF for renewal, preserves a predecessor after lost responses, and permits reopening with an existing cookie  308ms
+   ✓ rejects cross-origin, malformed ticket, unknown fields, oversized body, and unavailable paths without leaking credentials  301ms
+   ✓ rejects UI bearer transport and invalidates its actual cookie on application close  358ms
+   ✓ refuses a stolen cookie on both session discovery and Agent UI reads without the port-scoped proof  348ms
+   ✓ does not exhaust session capacity after 80 real renewals and still permits an operator reopen  349ms
+(node:4003521) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/agent-http-router.test.ts (7 tests) 269ms
+ ✓ tests/app/WorkbenchSession.test.ts (4 tests) 7ms
+ ✓ tests/agent-driven/integration/scoped-auth.test.ts (6 tests) 4ms
+ ✓ tests/app/HostApiClient.test.ts (1 test) 4ms
+
+ Test Files  5 passed (5)
+      Tests  29 passed (29)
+   Start at  04:19:25
+   Duration  29.11s (transform 2.15s, setup 0ms, collect 7.13s, tests 3.04s, environment 7.89s, prepare 7.80s)
+

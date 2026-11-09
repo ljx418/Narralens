@@ -1,0 +1,34 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+ ✓ tests/agent-driven/integration/owned-runtime.test.ts (7 tests) 73698ms
+   ✓ uses real flock, persistent instance generations, authenticated HTTP and actual MCP without fake readiness  44227ms
+   ✓ refuses the actual Host child entry without an inherited kernel lock  3784ms
+   ✓ refuses a second Host after its live predecessor lock path is unlinked, then permits a real stopped restart  22595ms
+   ✓ rejects a private FIFO without blocking the launcher event loop  393ms
+   ✓ cancels only its spawned Host when TERM reaches the wrapper before Host readiness  2680ms
+(node:3999336) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/headless/workbench-session.test.ts (1 test) 4092ms
+   ✓ exchanges the real built page entry, survives reload and shared-cookie renewal, and rejects a cookie leaked to another local port  4092ms
+(node:3999650) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/host-application.test.ts (1 test) 4829ms
+   ✓ mounts real creative SQL in NarralensHost and denies the legacy bearer/session/write bypass  4829ms
+(node:4000089) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/workbench-session-host.test.ts (11 tests) 2533ms
+   ✓ rejects UI bearer transport and invalidates its actual cookie on application close  333ms
+   ✓ does not exhaust session capacity after 80 real renewals and still permits an operator reopen  318ms
+(node:4000153) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/agent-http-router.test.ts (5 tests) 221ms
+ ✓ tests/app/WorkbenchSession.test.ts (4 tests) 6ms
+ ✓ tests/agent-driven/integration/scoped-auth.test.ts (6 tests) 6ms
+ ✓ tests/app/HostApiClient.test.ts (1 test) 5ms
+
+ Test Files  8 passed (8)
+      Tests  36 passed (36)
+   Start at  04:15:46
+   Duration  126.82s (transform 2.61s, setup 0ms, collect 18.21s, tests 85.39s, environment 7.73s, prepare 10.70s)
+

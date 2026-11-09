@@ -1,5 +1,5 @@
 import {describe,it,expect} from 'vitest';
-import {createServer,type Server} from 'node:http';
+import {createServer,request as httpRequest,type Server} from 'node:http';
 import {createHash} from 'node:crypto';
 import {readFileSync} from 'node:fs';
 import {RevisionStore} from '../../../src/host/projects/revision-store.js';
@@ -18,9 +18,9 @@ function intake():IntakePut {
  style.style_digest=createHash('sha256').update(canonicalJson(preimage)).digest('hex');
  return body;
 }
-async function fixture(extra:AgentHandlers={}){
+async function fixture(extra:AgentHandlers={},clock:()=>number=Date.now){
  const store=new RevisionStore(),repo=new ProductSqliteRepository(store),service=new CreativeService({repository:repo});let origin='';
- const auth=new ScopedAgentAuth(()=>origin),dispatcher=new ApplicationDispatcher({...creativeHandlers(service),...extra});
+ const auth=new ScopedAgentAuth(()=>origin,clock),dispatcher=new ApplicationDispatcher({...creativeHandlers(service),...extra});
  const router=new AgentHttpRouter(auth,()=>origin,dispatcher);
  const server=createServer((req,res)=>{void router.handle(req,res);});
  await new Promise<void>(resolve=>server.listen(0,'127.0.0.1',resolve));origin='http://127.0.0.1:'+(server.address() as {port:number}).port;
@@ -28,7 +28,7 @@ async function fixture(extra:AgentHandlers={}){
  const ui=auth.issue({principal_id:'local-user',channel:'trusted_ui',expires_at:Date.now()+60000});
  const request=(path:string,body?:unknown,headers:Record<string,string>={})=>fetch(origin+path,{method:body===undefined?'GET':'POST',headers:{Origin:origin,Authorization:'Bearer '+driver.token,...(body===undefined?{}:{'Content-Type':'application/json'}),...headers},...(body===undefined?{}:{body:JSON.stringify(body)})});
  const close=async()=>{server.closeAllConnections();await new Promise<void>((resolve,reject)=>server.close(e=>e?reject(e):resolve()));store.close();};
- return {store,auth,origin,driver,ui,request,close};
+ return {store,auth,origin,driver,ui,request,close,server};
 }
 describe('Agent HTTP transport with the actual SQLite creative service (not full NarralensHost acceptance)',()=>{
  it('creates and replays one actual intake, preserving unknown-field validation',async()=>{
@@ -85,3 +85,22 @@ describe('Agent HTTP transport with the actual SQLite creative service (not full
   }finally{await f.close();}
  },20000);
 });
+
+for(const mode of ['expiry','revocation'] as const)it(`does not commit an actual intake confirmation after trusted UI ${mode} during the request body`,async()=>{
+ let now=Date.now();const f=await fixture({},()=>now);
+ try{
+  const saved=await (await f.request('/api/agent/v1/intakes',intake())).json() as Intake;
+  const input={meta:{idempotency_key:'slow-human-confirm',correlation_id:'slow-human-confirm'},intake_version:saved.version,brief_sha256:saved.brief_sha256,choice:'confirm_brief'};
+  const body=JSON.stringify(input);now=f.ui.principal.expires_at-1;
+  const received=new Promise<void>(resolve=>f.server.once('request',()=>resolve()));
+  const request=httpRequest(f.origin+`/api/agent/v1/intakes/${saved.intake_id}/decision`,{method:'POST',headers:{Origin:f.origin,Cookie:f.auth.cookieName+'='+f.ui.token,'X-Narralens-CSRF':f.ui.csrf!,'Content-Type':'application/json','Content-Length':String(Buffer.byteLength(body))}});
+  const result=new Promise<number>((resolve,reject)=>{request.once('error',reject);request.once('response',response=>{response.resume();response.once('end',()=>resolve(response.statusCode!));});});
+  request.write(body.slice(0,1));await received;
+  if(mode==='expiry')now=f.ui.principal.expires_at;else f.auth.revoke(f.ui.token);
+  request.end(body.slice(1));expect(await result).toBe(401);
+  expect(f.store.compose(db=>db.prepare('SELECT count(*) AS n FROM cp_a0_intake_confirmation').get()?.n)).toBe(0);
+  const fresh=f.auth.issue({principal_id:'local-user',channel:'trusted_ui',expires_at:now+60000});
+  const accepted=await fetch(f.origin+`/api/agent/v1/intakes/${saved.intake_id}/decision`,{method:'POST',headers:{Origin:f.origin,Cookie:f.auth.cookieName+'='+fresh.token,'X-Narralens-CSRF':fresh.csrf!,'Content-Type':'application/json'},body});
+  expect(accepted.status).toBe(200);expect(f.store.compose(db=>db.prepare('SELECT count(*) AS n FROM cp_a0_intake_confirmation').get()?.n)).toBe(1);
+ }finally{await f.close();}
+},20000);

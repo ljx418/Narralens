@@ -22,15 +22,25 @@ const forbidden=()=>new AgentAuthError('ORIGIN_REJECTED');
 /** MAIN supplies credentials out-of-band. Nothing in the protocol can mint a human identity. */
 export class ScopedAgentAuth {
   readonly #credentials=new Map<string,Credential>();
-  constructor(private readonly origin:()=>string,private readonly now:()=>number=Date.now,readonly cookieName='narralens_a_session'){}
-  issue(input:{principal_id:string;channel:AgentChannel;expires_at:number;session_ref?:string}) {
+  constructor(private readonly origin:()=>string,private readonly now:()=>number=Date.now,readonly cookieName='narralens_a_session',private readonly options:{requireUiReadProof?:boolean}={}){}
+  issue(input:{principal_id:string;channel:AgentChannel;expires_at:number;session_ref?:string},options:{csrf?:string}={}) {
     if(typeof input.principal_id!=='string'||!/^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$/.test(input.principal_id)||!['authenticated','trusted_ui','native_bridge'].includes(input.channel)||!Number.isSafeInteger(input.expires_at)||input.expires_at<=this.now())throw new Error('Invalid credential lifetime');
+    if(options.csrf!==undefined&&(input.channel!=='trusted_ui'||!/^[A-Za-z0-9_-]{43}$/.test(options.csrf)))throw new Error('Invalid UI proof');
     // Rotation keeps valid predecessor credentials until their natural expiry.
     for(const [key,record] of this.#credentials)if(record.revoked||record.principal.expires_at<=this.now())this.#credentials.delete(key);
-    const token=randomBytes(32).toString('base64url'),csrf=input.channel==='trusted_ui'?randomBytes(32).toString('base64url'):null;
+    const token=randomBytes(32).toString('base64url'),csrf=input.channel==='trusted_ui'?(options.csrf??randomBytes(32).toString('base64url')):null;
     const principal=Object.freeze({...input,session_ref:input.session_ref??'session_'+randomBytes(12).toString('hex')});
     this.#credentials.set(hash(token).toString('hex'),{digest:hash(token),csrfDigest:csrf?hash(csrf):null,principal,revoked:false});
     return {token,csrf,principal};
+  }
+  /** Host-only renewal. A browser/driver cannot choose a lifetime or a principal.
+   * Stable UI transport avoids shared-cookie/tab races and bounded-store exhaustion.
+   */
+  renewTrustedUi(token:string,expires_at:number):AgentPrincipal {
+    const now=this.now(),record=this.#credentials.get(hash(token).toString('hex'));
+    if(!record||record.revoked||record.principal.channel!=='trusted_ui'||now>=record.principal.expires_at)throw new AgentAuthError('UNAUTHORIZED');
+    if(!Number.isSafeInteger(expires_at)||expires_at<=now||expires_at<record.principal.expires_at)throw new Error('Invalid credential lifetime');
+    record.principal=Object.freeze({...record.principal,expires_at});return record.principal;
   }
   revoke(token:string){const record=this.#credentials.get(hash(token).toString('hex'));if(record)record.revoked=true;}
   /** Origin and credential channel are checked BEFORE resource lookup. Body fields are never consulted. */
@@ -61,7 +71,7 @@ export class ScopedAgentAuth {
     if(channel==='trusted_ui') {
       // A known UI token is still NOT a bearer credential. It requires the verified browser session.
       if(!cookie||bearer)throw forbidden();
-      if(!['GET','HEAD'].includes(input.method)&&(!input.csrf||!record.csrfDigest||!match(input.csrf,record.csrfDigest)))throw forbidden();
+      if((this.options.requireUiReadProof||input.csrf!==undefined||!['GET','HEAD'].includes(input.method))&&(!input.csrf||!record.csrfDigest||!match(input.csrf,record.csrfDigest)))throw forbidden();
     } else if(!bearer||cookie)throw forbidden();
     return record.principal;
   }

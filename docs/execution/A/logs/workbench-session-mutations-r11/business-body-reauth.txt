@@ -1,0 +1,44 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:4005303) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/agent-driven/integration/agent-http-router.test.ts (7 tests | 2 failed | 5 skipped) 109ms
+   ↓ Agent HTTP transport with the actual SQLite creative service (not full NarralensHost acceptance) > creates and replays one actual intake, preserving unknown-field validation
+   ↓ Agent HTTP transport with the actual SQLite creative service (not full NarralensHost acceptance) > cannot let a driver impersonate a trusted decision, and checks Origin before resource existence
+   ↓ Agent HTTP transport with the actual SQLite creative service (not full NarralensHost acceptance) > binds native acknowledgement to its nested project identity without inventing a DTO field
+   ↓ Agent HTTP transport with the actual SQLite creative service (not full NarralensHost acceptance) > restores nullable GET cursor fields and refuses disagreement with Last-Event-ID
+   ↓ Agent HTTP transport with the actual SQLite creative service (not full NarralensHost acceptance) > redacts producer errors, rejects invalid producer DTOs, and bounds body bytes before dispatch
+   × does not commit an actual intake confirmation after trusted UI expiry during the request body 78ms
+     → expected 200 to be 401 // Object.is equality
+   × does not commit an actual intake confirmation after trusted UI revocation during the request body 31ms
+     → expected 200 to be 401 // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/agent-http-router.test.ts > does not commit an actual intake confirmation after trusted UI expiry during the request body
+ FAIL  tests/agent-driven/integration/agent-http-router.test.ts > does not commit an actual intake confirmation after trusted UI revocation during the request body
+AssertionError: expected 200 to be 401 // Object.is equality
+
+- Expected
++ Received
+
+- 401
++ 200
+
+ ❯ tests/agent-driven/integration/agent-http-router.test.ts:100:51
+     98|   request.write(body.slice(0,1));await received;
+     99|   if(mode==='expiry')now=f.ui.principal.expires_at;else f.auth.revoke(…
+    100|   request.end(body.slice(1));expect(await result).toBe(401);
+       |                                                   ^
+    101|   expect(f.store.compose(db=>db.prepare('SELECT count(*) AS n FROM cp_…
+    102|   const fresh=f.auth.issue({principal_id:'local-user',channel:'trusted…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 5 skipped (7)
+   Start at  04:20:35
+   Duration  4.49s (transform 371ms, setup 0ms, collect 2.27s, tests 109ms, environment 0ms, prepare 1.52s)
+

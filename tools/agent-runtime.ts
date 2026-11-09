@@ -2,13 +2,14 @@
 import {closeSync} from 'node:fs';
 import {resolve} from 'node:path';
 import {runtimeRoot,openRuntimeLock,readRuntimeState,initialInstanceId} from '../src/host/agent-driven/owned-runtime.js';
+import {requestWorkbenchEntry} from '../src/launcher/workbench-entry.js';
 import {LauncherSupervisor} from '../src/launcher/service-supervisor.js';
 import {LocalRuntimePorts} from '../src/launcher/local-runtime-ports.js';
 function args(){
  const input=process.argv.slice(2);let command='start',root=resolve('var/agent-a'),vendor=process.env.NARRALENS_OPENFILM_VENDOR?resolve(process.env.NARRALENS_OPENFILM_VENDOR,'vendor/openfilm'):resolve('../Narralens-openfilm-m1b/vendor/openfilm'),port='0';
  for(let i=0;i<input.length;i++){
   const value=input[i]!;
-  if(['start','status','stop'].includes(value)&&i===0)command=value;
+  if(['start','status','stop','open'].includes(value)&&i===0)command=value;
   else if(value==='--root'&&input[i+1])root=resolve(input[++i]!);
   else if(value==='--vendor'&&input[i+1])vendor=resolve(input[++i]!);
   else if(value==='--port'&&input[i+1]&&/^\d+$/.test(input[i+1]!)&&Number(input[i+1])<=65535)port=input[++i]!;
@@ -26,6 +27,11 @@ async function main(){
   const outcome=await supervisor.start({runtime_root:config.root,instance_id:instanceId});
   const authenticated=ports.authenticatedInstance;
   if(outcome.instance.state!=='ready'||!authenticated||authenticated.instance_id!==outcome.instance.instance_id||authenticated.generation!==outcome.instance.generation)throw new Error('INSTANCE_UNVERIFIED');
+  if(config.command==='open'){
+   const entry=await requestWorkbenchEntry(config.root);
+   // Explicit operator output only: this short-lived fragment must not enter runtime logs.
+   process.stdout.write(JSON.stringify({event:'workbench.entry',...entry})+'\n');return;
+  }
   if(config.command==='stop'){
    const stopped=await supervisor.stop(outcome.instance.instance_id);
    if(!stopped.stopped)throw new Error('STOP_NOT_CONFIRMED');

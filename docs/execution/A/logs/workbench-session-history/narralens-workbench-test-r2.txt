@@ -1,0 +1,36 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:3985016) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/agent-driven/integration/workbench-session-host.test.ts (6 tests | 1 failed) 1855ms
+   × exchanges a genuine Host-only ticket once; browser cookie reads a session without creating any approval or project 439ms
+     → no such table: created_project_origin
+   ✓ does not allow ordinary Agent credentials, a body-supplied role, or a UI cookie to obtain operator authority 265ms
+   ✓ requires CSRF for renewal, preserves a predecessor after lost responses, and permits reopening with an existing cookie 251ms
+   ✓ rejects cross-origin, malformed ticket, unknown fields, oversized body, and unavailable paths without leaking credentials 251ms
+   ✓ rejects UI bearer transport and invalidates its actual cookie on application close  330ms
+   ✓ expires tickets exactly at their deadline and never accepts tickets in a different Host instance  318ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/workbench-session-host.test.ts > exchanges a genuine Host-only ticket once; browser cookie reads a session without creating any approval or project
+Error: no such table: created_project_origin
+ ❯ tests/agent-driven/integration/workbench-session-host.test.ts:35:41
+     33|  expect((await f.post('/exchange',{ticket})).status).toBe(401);
+     34|  const read=await fetch(f.host.origin+'/api/workbench/session',{header…
+     35|  expect(f.host.revisions.compose(db=>db.prepare('SELECT count(*) AS n …
+       |                                         ^
+     36| });
+     37| it('does not allow ordinary Agent credentials, a body-supplied role, o…
+ ❯ RevisionStore.compose src/host/projects/revision-store.ts:327:60
+ ❯ tests/agent-driven/integration/workbench-session-host.test.ts:35:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 5 passed (6)
+   Start at  04:02:09
+   Duration  8.58s (transform 1.96s, setup 0ms, collect 4.70s, tests 1.85s, environment 0ms, prepare 1.39s)
+

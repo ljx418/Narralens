@@ -87,6 +87,10 @@ export class AgentHttpRouter {
     if(url.search)throw new AgentRouteError('INVALID_REQUEST');
     body=await jsonBody(request);
    }
+   // A valid header is not a reservation of authority across an awaited body read.
+   // Re-check revocation/expiry before any business handler sees a trusted context.
+   const current=this.auth.authenticate(headers,found.authChannel as AgentChannel);
+   if(current.principal_id!==principal.principal_id||current.session_ref!==principal.session_ref||current.channel!==principal.channel)throw new AgentRouteError('UNAUTHORIZED');
    for(const [field,value] of Object.entries(params)){
     if(id==='editor.native.ack'&&field==='project_id'){
      // The frozen DTO nests its identity in ack; do not invent a top-level field.
@@ -100,7 +104,7 @@ export class AgentHttpRouter {
    // Preserve all unknown fields: stripping them before validation would defeat additionalProperties.
    const input=validateAgentRouteInput(id,found.input===null?(Object.keys(body).length?body:undefined):body);
    if(input&&typeof input==='object'&&'meta' in input){const meta=input.meta as {correlation_id?:unknown};if(typeof meta.correlation_id==='string')correlation=meta.correlation_id;}
-   const result=await this.dispatcher.invoke(id,input,principal);
+   const result=await this.dispatcher.invoke(id,input,current);
    let output:unknown;try{output=validateAgentRouteOutput(id,result);}catch{throw new AgentRouteError('INTERNAL_ERROR');}
    send(response,id==='project.create'||id==='task.prepare'?202:200,output);
   } catch(error){

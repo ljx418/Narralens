@@ -1,0 +1,6 @@
+{
+  "exec_session": 97235,
+  "command": "corepack pnpm exec tsc --noEmit && corepack pnpm build && corepack pnpm exec vitest run --config vitest.config.ts tests/agent-driven/integration/workbench-session-host.test.ts tests/app/WorkbenchSession.test.ts tests/app/HostApiClient.test.ts tests/agent-driven/integration/scoped-auth.test.ts tests/agent-driven/integration/agent-http-router.test.ts tests/agent-driven/headless/workbench-session.test.ts tests/agent-driven/integration/owned-runtime.test.ts tests/agent-driven/integration/host-application.test.ts && NARRALENS_SECRET_SCAN_OUT=docs/execution/A/logs/workbench-session-final/credential-scan.json corepack pnpm exec tsx tools/secret-scan.ts",
+  "actual_composite_exit": 0,
+  "sequential_success": "Each step was joined with &&; final actual handle exit was 0."
+}
