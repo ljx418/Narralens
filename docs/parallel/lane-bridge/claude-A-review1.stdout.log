@@ -1,0 +1,27 @@
+All ten REVIEW-1 findings are corrected in the uncommitted implementation. Same provider/model/credentials, sole writer, no commits, no protected writes, no subagents.
+
+## What changed, per finding
+
+| # | fix | where |
+|---|---|---|
+| 1 | Resources now validate their **input** as well as their output; injected off-contract output → `INTERNAL_ERROR`; every envelope crossing the protocol is schema-checked; percent-decode failure → `INVALID_REQUEST`; unsupported query params refused; jobs projection kept | `src/mcp/mcp-server.ts` |
+| 2 | Input validated **before** any network request; base URL must be an `http` loopback literal (`localhost` only with an injected loopback resolver); no userinfo/query/hash/path; `redirect: "manual"` refusal; bounded body read; network/body failures handled | `src/mcp/host-application-ports.ts` |
+| 3 | Strict `api_version`/`contract_version` handshake (frozen `Instance` schema) before the first non-instance dispatch — refused **before** any write; injectable verified handshake; `tools/list` stays protocol-only | `src/mcp/mcp-server.ts` |
+| 4 | Ambiguous POST (timeout / unreadable body / off-contract success) → `PROVIDER_RESULT_UNKNOWN`, **non-retryable**, next actions *reconcile by the original idempotency key*; never-delivered stays retryable; the Host envelope's own retryability/next actions preserved; skill now separates authenticated-safe cancel from unconditional authority | `host-application-ports.ts`, `host-error-mapping.ts`, `skills/…` |
+| 5 | Health roll-up fails closed (stopped/degraded/unknown → degraded; starting → starting) and is scoped to the instance's own services | `src/launcher/launcher-plan.ts`, `health-registry.ts`, `service-supervisor.ts` |
+| 6 | `EventBatch` splits `scanned_watermark` (reached) from `high_watermark` (tail); inconsistent batches refused (`EventBatchError`); the project scope is always enforced | `src/host/observability/event-projection.ts`, `ports.ts` |
+| 7 | `local-cursor-codec.ts` **deleted** — the production index exports only the injected ports; the codec moved to `tests/…/helpers/` speaking MAIN's 61-char full-HMAC scheme; cursor TTL now **required**; claims/interval/watermark/context validated; both cursors still verified independently | `src/host/observability/*`, `tests/…/helpers/cursor-codec.ts` |
+| 8 | The invented empty-filter digest is gone; `NARRALENS_FILTER_DIGEST` / `McpFacadeOptions.filterDigest` is MAIN's policy, with a typed configuration failure that leaves the other tools working | `stdio-main.ts`, `mcp-server.ts` |
+| 9 | The resource expectation was wrong: now **4 templates + 1 concrete** health resource, whose contents are read over real stdio; fixtures typed with `satisfies` | `mcp-stdio-client.test.ts`, `mcp-registry.test.ts` |
+| 10 | The wrapper handles spawn errors, forwards SIGINT/SIGTERM, kills its child on stdin close (no orphan), and never touches the Host | `skills/narralens/bin/narralens-mcp.mjs` |
+
+New regression tests: `mcp-host-client.test.ts` (mocked fetch: invalid input, URL policy, redirect, unbounded body, read-failure vs unknown-write), `mcp-wrapper-cleanup.test.ts` (child cleanup + "stops nothing else"), plus new cases in the launcher, registry, stdio and cursor/event files.
+
+## One real defect found and fixed
+A static import/export cross-check found the observability modules importing `../../../contracts/…` instead of `../../contracts/…` — those paths would not have resolved. Fixed.
+
+## Status
+- **Still NOT_RUN:** `pnpm install --offline --frozen-lockfile`, `pnpm exec vitest run tests/agent-driven/bridge --maxWorkers=1`, `pnpm exec tsc --noEmit`. MAIN reservation 62928 is still RUNNING and this work tree has no `node_modules`, so **no type-check has been performed on any of this code** — the first real `tsc` run may still find type errors.
+- Commands actually run were read-only only (git, reads, two `python3` cross-checks, `sha256sum`, `node --check` on the three `.mjs` files, which `tsc` does not cover). No `find /`, no other drives; the SDK was read only at the exact path given.
+- Original logs preserved byte-identical (`claude-A.stdout.log`, `claude-A.stderr.log`, `claude-A-review1.*`).
+- `HANDOFF.md` rewritten: per-finding fix list, the new dependency/policy-injection table, the 34-file SHA256 table (verified against the files), and the remaining NOT_RUN/limitations. Nothing committed; no protected path touched.

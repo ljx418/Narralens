@@ -1,0 +1,38 @@
+Implementation complete. Everything below is **module evidence only — nothing was executed**, because MAIN's resource reservation 62928 was still `RUNNING`.
+
+## Report
+
+```
+lane            BRIDGE (bridge-observability, agent-driven/lane-bridge)
+release         A-BRIDGE-001 RELEASED (IT-A01/A02/A03), contract cp-a0-r4
+repo/branch     /mnt/c/workspace/videoworkline/Narralens-agents/bridge-observability
+base/HEAD       ca5b67a8285b130c79055317c6202f73cfbb99c8  (unchanged, nothing committed)
+status          31 new untracked files, all inside the allowed prefixes
+```
+
+### Implemented
+
+**A01 — launcher (pure, `src/launcher/`)** — planning (`planLaunch`/`planStop`/`planHealth`/`planInstanceHealth`), instance types + 3 injected ports, `ServiceHealthRegistry` with the contract constants 5000/15000 and real expiry → `unknown`, `LauncherSupervisor` (cold start, duplicate start incl. concurrent convergence, shared attach + refusal to stop shared, owned stop/reopen with the next generation, detach-without-stop, contract `Instance` descriptor).
+
+**A02 — MCP façade (`src/mcp/`, `skills/`)** — checked registry view (31 routes / **24 tools** / 5 resources, throws on drift), contract-derived JSON Schemas with `$ref`s inlined, typed local Host HTTP client on `ApplicationPorts` (path/query/body binding table, output validation, contract `Error` mapping), SDK 1.26.0 stdio server + executable, `skills/narralens` entry skill + bin wrapper, `skills/narralens-lib` library (registry re-export, error table, reconnect runbook). No trusted-UI or native-bridge route is exposed.
+
+**A03 — observation projection (`src/host/observability/`)** — injected atomic-read/sign/verify ports, cursor scope/expiry/retention rules, `Last-Event-ID` dual verification (both verified separately; precedence only decides the *position*), global skipped-watermark advancement, atomic snapshot + signed cursor, local HMAC codec for tests.
+
+### Tests written — all **NOT_RUN**
+
+`launcher-cold.test.ts` (A-COLD), `mcp-registry.test.ts` + **`mcp-stdio-client.test.ts`** (real SDK `Client` → real façade child process over stdio → local stand-in Host that records requests, incl. Host-down → `CAPABILITY_UNAVAILABLE` → Host returns → works again), `cursor-events.test.ts` (A-EVENTS), `skill-library.test.ts`.
+
+### Actual commands (read-only only)
+
+`git rev-parse/status`, contract/registry/schema reads, a `python3` cross-check of registry ↔ path-binding table ↔ schema (**31 routes, 24 tools, problems: none**), `sha256sum` (table in HANDOFF, verified against the files). **Not run:** `pnpm install --offline --frozen-lockfile`, `pnpm exec vitest run tests/agent-driven/bridge --maxWorkers=1`, `pnpm exec tsc --noEmit` — this worktree has no `node_modules` and the reservation was still RUNNING.
+
+### Caveats worth MAIN's attention (also in `docs/parallel/lane-bridge/HANDOFF.md`)
+
+- SDK 1.26.0's API was verified by **reading** the installed SDK in the main checkout (read-only), not by installing here — the first real vitest/tsc run is the check.
+- The wire cursor must be an **opaque handle**: the contract pins `EventSnapshot.cursor` to ≤64 chars, so claims cannot be inline; the sign/verify ports have to be stateful.
+- The events-snapshot resource needs MAIN's real empty-filter digest (module default is documented).
+- The global watermark is assumed to share the event-id space — MAIN must confirm.
+- `local-cursor-codec.ts` is not production key management.
+- No route is registered, no process started, no key read, no DB touched. Independent review `REVIEW_PENDING`; production assembly and human acceptance `NOT_RUN`.
+
+Nothing committed, no subagents, no protected path touched.
