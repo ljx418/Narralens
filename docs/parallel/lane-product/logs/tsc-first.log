@@ -1,0 +1,11 @@
+src/app/observation/WorkflowTopBar.tsx(62,5): error TS2322: Type 'HTMLElement | null' is not assignable to type 'HTMLButtonElement | null'.
+  Type 'HTMLElement' is missing the following properties from type 'HTMLButtonElement': disabled, form, formAction, formEnctype, and 15 more.
+src/host/creative/execution-guard.ts(61,11): error TS2322: Type '"chapters"' is not assignable to type '"cover" | "adoption" | "definition" | "sample" | "first_chapter" | "chapter_pack" | "risk" | "qc"'.
+src/host/creative/fixed-workflow-service.ts(368,29): error TS2304: Cannot find name 'RunAuthorize'.
+src/host/creative/fixed-workflow-service.ts(882,29): error TS2339: Property 'change_id' does not exist on type 'Change'.
+src/host/creative/fixed-workflow-service.ts(889,31): error TS2339: Property 'change_id' does not exist on type 'Change'.
+src/host/creative/fixed-workflow-service.ts(1045,87): error TS7053: Element implicitly has an 'any' type because expression of type '"cover" | "definition" | "sample" | "first_chapter" | "chapters" | "delivery"' can't be used to index type 'Readonly<Record<"cover" | "adoption" | "definition" | "sample" | "first_chapter" | "chapter_pack" | "risk" | "qc", string>>'.
+  Property 'chapters' does not exist on type 'Readonly<Record<"cover" | "adoption" | "definition" | "sample" | "first_chapter" | "chapter_pack" | "risk" | "qc", string>>'.
+tests/agent-driven/product/execution-guard.test.ts(95,28): error TS2322: Type 'true' is not assignable to type 'false'.
+tests/agent-driven/product/execution-guard.test.ts(117,47): error TS2345: Argument of type '{ scope: RunScope; gates: RunGate[]; stage_id: string; }' is not assignable to parameter of type 'ExecutionGuardContext'.
+  Property 'run_scope_digest' is missing in type '{ scope: RunScope; gates: RunGate[]; stage_id: string; }' but required in type 'ExecutionGuardContext'.

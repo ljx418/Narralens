@@ -1,0 +1,4273 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/product-workbench
+
+ ❯ tests/agent-driven/product/creative-service.test.ts (14 tests | 1 failed) 65ms
+   ✓ the creative service > creates a brief version and refuses a second create of the same intake 24ms
+   ✓ the creative service > moves the brief forward only against the current version 1ms
+   ✓ the creative service > replays a repeated request and refuses the same key with other content 1ms
+   ✓ the creative service > binds a question to the brief version it was asked against 7ms
+   ✓ the creative service > refuses an answer whose answer version moved, and one that skips a required question 6ms
+   ✓ the creative service > records an answer as content-only and never as an approval 1ms
+   ✓ the creative service > makes a changed answer invalidate the decision that was made on the old closure 5ms
+   ✓ the creative service > refuses a relay from a trusted UI session and a relay whose source does not match 1ms
+   ✓ the creative service > refuses a caller context that the dispatcher did not mint 0ms
+   ✓ the creative service > keeps the workbench answer on the trusted channel and refuses a relay caller 1ms
+   × the creative service > confirms a brief only in a trusted session 10ms
+     → expected false to be true // Object.is equality
+   ✓ the creative service > writes artifacts with a compare-and-set and replays the same request 8ms
+   ✓ the creative service > reports the frozen error code and status for a lane failure 0ms
+   ✓ the creative service > scopes the idempotency receipt by principal 0ms
+ ❯ tests/agent-driven/product/fixed-workflow-service.test.ts (12 tests | 7 failed) 71ms
+   ✓ the fixed workflow service > prepares a run with the fixed scope and no paid, external or runtime authority 42ms
+   ✓ the fixed workflow service > refuses to start without an active authorization 4ms
+   × the fixed workflow service > authorizes a run in a trusted session and then starts it 12ms
+     → This key was already used with different content
+   × the fixed workflow service > keeps pause and cancel available without a grant, because they are safe controls 2ms
+     → This key was already used with different content
+   ✓ the fixed workflow service > refuses a first chapter before the sample gate is accepted 1ms
+   ✓ the fixed workflow service > refuses a chapter package that does not carry every chapter part 1ms
+   × the fixed workflow service > keeps the cover an independent package 1ms
+     → This key was already used with different content
+   × the fixed workflow service > refuses a decision that is bound to another package version 1ms
+     → This key was already used with different content
+   × the fixed workflow service > records a plain review without granting any approval 1ms
+     → This key was already used with different content
+   × the fixed workflow service > fails the adoption closed when MAIN cannot register the approval 1ms
+     → This key was already used with different content
+   × the fixed workflow service > records the limited approval in the same transaction as the decision 1ms
+     → This key was already used with different content
+   ✓ the fixed workflow service > shows the real attempts of the workflow nodes 4ms
+ ❯ tests/agent-driven/product/execution-guard.test.ts (7 tests | 1 failed) 12ms
+   ✓ the execution guard > blocks a first chapter while the sample gate is not accepted 1ms
+   ✓ the execution guard > allows a first chapter once the sample gate is accepted 0ms
+   ✓ the execution guard > refuses a binding that belongs to another scope 0ms
+   × the execution guard > refuses an action the scope does not allow 9ms
+     → expected error to match asymmetric matcher
+   ✓ the execution guard > refuses a scope that asks for a paid, external or runtime action 0ms
+   ✓ the execution guard > refuses a binding without a plan version, an attempt or an authorization 0ms
+   ✓ the execution guard > never accepts a gate on its own 0ms
+ ✓ tests/agent-driven/product/digest.test.ts (5 tests) 4ms
+ ❯ tests/agent-driven/product/observation-ui.test.tsx (14 tests | 6 failed) 97ms
+   ✓ the R4 workflow bar > starts collapsed and shows a stage summary 16ms
+   × the R4 workflow bar > shows the stages horizontally when it is expanded 18ms
+     → Found multiple elements with the role "button" and name "工作流"
+
+Here are the matching elements:
+
+Ignored nodes: comments, script, style
+[36m<button[39m
+  [33maria-controls[39m=[32m"nl-workflow-stages"[39m
+  [33maria-expanded[39m=[32m"false"[39m
+  [33mtype[39m=[32m"button"[39m
+[36m>[39m
+  [0m工作流[0m
+[36m</button>[39m
+
+Ignored nodes: comments, script, style
+[36m<button[39m
+  [33maria-controls[39m=[32m"nl-workflow-stages"[39m
+  [33maria-expanded[39m=[32m"false"[39m
+  [33mtype[39m=[32m"button"[39m
+[36m>[39m
+  [0m工作流[0m
+[36m</button>[39m
+
+(If this is intentional, then use the `*AllBy*` variant of the query (like `queryAllByText`, `getAllByText`, or `findAllByText`)).
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<section[39m
+      [33maria-label[39m=[32m"当前工作流"[39m
+      [33mclass[39m=[32m"nl-topbar"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"nl-topbar-head"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"nl-topbar-summary"[39m
+        [36m>[39m
+          [36m<strong>[39m
+            [0m等你决定：sample[0m
+          [36m</strong>[39m
+          [36m<span>[39m
+            [0m展开“工作流”可查看每个阶段与它的真实任务。[0m
+          [36m</span>[39m
+        [36m</div>[39m
+        [36m<button[39m
+          [33maria-controls[39m=[32m"nl-workflow-stages"[39m
+          [33maria-expanded[39m=[32m"false"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0m工作流[0m
+        [36m</button>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mhidden[39m=[32m""[39m
+        [33mid[39m=[32m"nl-workflow-stages"[39m
+      [36m>[39m
+        [36m<ol[39m
+          [33mclass[39m=[32m"nl-stage-rail"[39m
+        [36m>[39m
+          [36m<li>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"nl-stage nl-stage-waiting_user"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-name"[39m
+              [36m>[39m
+                [0msample[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-state"[39m
+              [36m>[39m
+                [0m待你决定[0m
+              [36m</span>[39m
+            [36m</button>[39m
+          [36m</li>[39m
+          [36m<li>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"nl-stage nl-stage-pending"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-name"[39m
+              [36m>[39m
+                [0mfirst_chapter[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-state"[39m
+              [36m>[39m
+                [0m待开始[0m
+              [36m</span>[39m
+            [36m</button>[39m
+          [36m</li>[39m
+        [36m</ol>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"nl-stage-hint"[39m
+        [36m>[39m
+          [0m点击阶段查看真实任务、输入与输出；查看不会暂停或改动工程。[0m
+        [36m</p>[39m
+      [36m</div>[39m
+    [36m</section>[39m
+  [36m</div>[39m
+  [36m<div>[39m
+    [36m<section[39m
+      [33maria-label[39m=[32m"当前工作流"[39m
+      [33mclass[39m=[32m"nl-topbar"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"nl-topbar-head"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"nl-topbar-summary"[39m
+        [36m>[39m
+          [36m<strong>[39m
+            [0m等你决定：sample[0m
+          [36m</strong>[39m
+          [36m<span>[39m
+            [0m展开“工作流”可查看每个阶段与它的真实任务。[0m
+          [36m</span>[39m
+        [36m</div>[39m
+        [36m<button[39m
+          [33maria-controls[39m=[32m"nl-workflow-stages"[39m
+          [33maria-expanded[39m=[32m"false"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0m工作流[0m
+        [36m</button>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mhidden[39m=[32m""[39m
+        [33mid[39m=[32m"nl-workflow-stages"[39m
+      [36m>[39m
+        [36m<ol[39m
+          [33mclass[39m=[32m"nl-stage-rail"[39m
+        [36m>[39m
+          [36m<li>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"nl-stage nl-stage-waiting_user"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-name"[39m
+              [36m>[39m
+                [0msample[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-state"[39m
+              [36m>[39m
+                [0m待你决定[0m
+              [36m</span>[39m
+            [36m</button>[39m
+          [36m</li>[39m
+          [36m<li>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"nl-stage nl-stage-pending"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-name"[39m
+              [36m>[39m
+                [0mfirst_chapter[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-state"[39m
+              [36m>[39m
+                [0m待开始[0m
+              [36m</span>[39m
+            [36m</button>[39m
+          [36m</li>[39m
+        [36m</ol>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"nl-stage-hint"[39m
+        [36m>[39m
+          [0m点击阶段查看真实任务、输入与输出；查看不会暂停或改动工程。[0m
+        [36m</p>[39m
+      [36m</div>[39m
+    [36m</section>[39m
+  [36m</div>[39m
+[36m</body>[39m
+   × the R4 workflow bar > shows the real attempt, input and output of a node 5ms
+     → Found multiple elements with the role "button" and name "工作流"
+
+Here are the matching elements:
+
+Ignored nodes: comments, script, style
+[36m<button[39m
+  [33maria-controls[39m=[32m"nl-workflow-stages"[39m
+  [33maria-expanded[39m=[32m"false"[39m
+  [33mtype[39m=[32m"button"[39m
+[36m>[39m
+  [0m工作流[0m
+[36m</button>[39m
+
+Ignored nodes: comments, script, style
+[36m<button[39m
+  [33maria-controls[39m=[32m"nl-workflow-stages"[39m
+  [33maria-expanded[39m=[32m"false"[39m
+  [33mtype[39m=[32m"button"[39m
+[36m>[39m
+  [0m工作流[0m
+[36m</button>[39m
+
+Ignored nodes: comments, script, style
+[36m<button[39m
+  [33maria-controls[39m=[32m"nl-workflow-stages"[39m
+  [33maria-expanded[39m=[32m"false"[39m
+  [33mtype[39m=[32m"button"[39m
+[36m>[39m
+  [0m工作流[0m
+[36m</button>[39m
+
+(If this is intentional, then use the `*AllBy*` variant of the query (like `queryAllByText`, `getAllByText`, or `findAllByText`)).
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<section[39m
+      [33maria-label[39m=[32m"当前工作流"[39m
+      [33mclass[39m=[32m"nl-topbar"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"nl-topbar-head"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"nl-topbar-summary"[39m
+        [36m>[39m
+          [36m<strong>[39m
+            [0m等你决定：sample[0m
+          [36m</strong>[39m
+          [36m<span>[39m
+            [0m展开“工作流”可查看每个阶段与它的真实任务。[0m
+          [36m</span>[39m
+        [36m</div>[39m
+        [36m<button[39m
+          [33maria-controls[39m=[32m"nl-workflow-stages"[39m
+          [33maria-expanded[39m=[32m"false"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0m工作流[0m
+        [36m</button>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mhidden[39m=[32m""[39m
+        [33mid[39m=[32m"nl-workflow-stages"[39m
+      [36m>[39m
+        [36m<ol[39m
+          [33mclass[39m=[32m"nl-stage-rail"[39m
+        [36m>[39m
+          [36m<li>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"nl-stage nl-stage-waiting_user"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-name"[39m
+              [36m>[39m
+                [0msample[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-state"[39m
+              [36m>[39m
+                [0m待你决定[0m
+              [36m</span>[39m
+            [36m</button>[39m
+          [36m</li>[39m
+          [36m<li>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"nl-stage nl-stage-pending"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-name"[39m
+              [36m>[39m
+                [0mfirst_chapter[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-state"[39m
+              [36m>[39m
+                [0m待开始[0m
+              [36m</span>[39m
+            [36m</button>[39m
+          [36m</li>[39m
+        [36m</ol>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"nl-stage-hint"[39m
+        [36m>[39m
+          [0m点击阶段查看真实任务、输入与输出；查看不会暂停或改动工程。[0m
+        [36m</p>[39m
+      [36m</div>[39m
+    [36m</section>[39m
+  [36m</div>[39m
+  [36m<div>[39m
+    [36m<section[39m
+      [33maria-label[39m=[32m"当前工作流"[39m
+      [33mclass[39m=[32m"nl-topbar"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"nl-topbar-head"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"nl-topbar-summary"[39m
+        [36m>[39m
+          [36m<strong>[39m
+            [0m等你决定：sample[0m
+          [36m</strong>[39m
+          [36m<span>[39m
+            [0m展开“工作流”可查看每个阶段与它的真实任务。[0m
+          [36m</span>[39m
+        [36m</div>[39m
+        [36m<button[39m
+          [33maria-controls[39m=[32m"nl-workflow-stages"[39m
+          [33maria-expanded[39m=[32m"false"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0m工作流[0m
+        [36m</button>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mhidden[39m=[32m""[39m
+        [33mid[39m=[32m"nl-workflow-stages"[39m
+      [36m>[39m
+        [36m<ol[39m
+          [33mclass[39m=[32m"nl-stage-rail"[39m
+        [36m>[39m
+          [36m<li>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"nl-stage nl-stage-waiting_user"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-name"[39m
+              [36m>[39m
+                [0msample[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-state"[39m
+              [36m>[39m
+                [0m待你决定[0m
+              [36m</span>[39m
+            [36m</button>[39m
+          [36m</li>[39m
+          [36m<li>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"nl-stage nl-stage-pending"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-name"[39m
+              [36m>[39m
+                [0mfirst_chapter[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-state"[39m
+              [36m>[39m
+                [0m待开始[0m
+              [36m</span>[39m
+            [36m</button>[39m
+          [36m</li>[39m
+        [36m</ol>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"nl-stage-hint"[39m
+        [36m>[39m
+          [0m点击阶段查看真实任务、输入与输出；查看不会暂停或改动工程。[0m
+        [36m</p>[39m
+      [36m</div>[39m
+    [36m</section>[39m
+  [36m</div>[39m
+  [36m<div>[39m
+    [36m<section[39m
+      [33maria-label[39m=[32m"当前工作流"[39m
+      [33mclass[39m=[32m"nl-topbar"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"nl-topbar-head"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"nl-topbar-summary"[39m
+        [36m>[39m
+          [36m<strong>[39m
+            [0m等你决定：sample[0m
+          [36m</strong>[39m
+          [36m<span>[39m
+            [0m展开“工作流”可查看每个阶段与它的真实任务。[0m
+          [36m</span>[39m
+        [36m</div>[39m
+        [36m<button[39m
+          [33maria-controls[39m=[32m"nl-workflow-stages"[39m
+          [33maria-expanded[39m=[32m"false"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0m工作流[0m
+        [36m</button>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mhidden[39m=[32m""[39m
+        [33mid[39m=[32m"nl-workflow-stages"[39m
+      [36m>[39m
+        [36m<ol[39m
+          [33mclass[39m=[32m"nl-stage-rail"[39m
+        [36m>[39m
+          [36m<li>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"nl-stage nl-stage-waiting_user"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-name"[39m
+              [36m>[39m
+                [0msample[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-state"[39m
+              [36m>[39m
+                [0m待你决定[0m
+              [36m</span>[39m
+            [36m</button>[39m
+          [36m</li>[39m
+          [36m<li>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"nl-stage nl-stage-pending"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-name"[39m
+              [36m>[39m
+                [0mfirst_chapter[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-state"[39m
+              [36m>[39m
+                [0m待开始[0m
+              [36m</span>[39m
+            [36m</button>[39m
+          [36m</li>[39m
+        [36m</ol>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"nl-stage-hint"[39m
+        [36m>[39m
+          [0m点击阶段查看真实任务、输入与输出；查看不会暂停或改动工程。[0m
+        [36m</p>[39m
+      [36m</div>[39m
+    [36m</section>[39m
+  [36m</div>[39m
+[36m</body>[39m
+   × the R4 workflow bar > closes the dialog with Escape and returns the focus to the stage 5ms
+     → Found multiple elements with the role "button" and name "工作流"
+
+Here are the matching elements:
+
+Ignored nodes: comments, script, style
+[36m<button[39m
+  [33maria-controls[39m=[32m"nl-workflow-stages"[39m
+  [33maria-expanded[39m=[32m"false"[39m
+  [33mtype[39m=[32m"button"[39m
+[36m>[39m
+  [0m工作流[0m
+[36m</button>[39m
+
+Ignored nodes: comments, script, style
+[36m<button[39m
+  [33maria-controls[39m=[32m"nl-workflow-stages"[39m
+  [33maria-expanded[39m=[32m"false"[39m
+  [33mtype[39m=[32m"button"[39m
+[36m>[39m
+  [0m工作流[0m
+[36m</button>[39m
+
+Ignored nodes: comments, script, style
+[36m<button[39m
+  [33maria-controls[39m=[32m"nl-workflow-stages"[39m
+  [33maria-expanded[39m=[32m"false"[39m
+  [33mtype[39m=[32m"button"[39m
+[36m>[39m
+  [0m工作流[0m
+[36m</button>[39m
+
+Ignored nodes: comments, script, style
+[36m<button[39m
+  [33maria-controls[39m=[32m"nl-workflow-stages"[39m
+  [33maria-expanded[39m=[32m"false"[39m
+  [33mtype[39m=[32m"button"[39m
+[36m>[39m
+  [0m工作流[0m
+[36m</button>[39m
+
+(If this is intentional, then use the `*AllBy*` variant of the query (like `queryAllByText`, `getAllByText`, or `findAllByText`)).
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<section[39m
+      [33maria-label[39m=[32m"当前工作流"[39m
+      [33mclass[39m=[32m"nl-topbar"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"nl-topbar-head"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"nl-topbar-summary"[39m
+        [36m>[39m
+          [36m<strong>[39m
+            [0m等你决定：sample[0m
+          [36m</strong>[39m
+          [36m<span>[39m
+            [0m展开“工作流”可查看每个阶段与它的真实任务。[0m
+          [36m</span>[39m
+        [36m</div>[39m
+        [36m<button[39m
+          [33maria-controls[39m=[32m"nl-workflow-stages"[39m
+          [33maria-expanded[39m=[32m"false"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0m工作流[0m
+        [36m</button>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mhidden[39m=[32m""[39m
+        [33mid[39m=[32m"nl-workflow-stages"[39m
+      [36m>[39m
+        [36m<ol[39m
+          [33mclass[39m=[32m"nl-stage-rail"[39m
+        [36m>[39m
+          [36m<li>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"nl-stage nl-stage-waiting_user"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-name"[39m
+              [36m>[39m
+                [0msample[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-state"[39m
+              [36m>[39m
+                [0m待你决定[0m
+              [36m</span>[39m
+            [36m</button>[39m
+          [36m</li>[39m
+          [36m<li>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"nl-stage nl-stage-pending"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-name"[39m
+              [36m>[39m
+                [0mfirst_chapter[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-state"[39m
+              [36m>[39m
+                [0m待开始[0m
+              [36m</span>[39m
+            [36m</button>[39m
+          [36m</li>[39m
+        [36m</ol>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"nl-stage-hint"[39m
+        [36m>[39m
+          [0m点击阶段查看真实任务、输入与输出；查看不会暂停或改动工程。[0m
+        [36m</p>[39m
+      [36m</div>[39m
+    [36m</section>[39m
+  [36m</div>[39m
+  [36m<div>[39m
+    [36m<section[39m
+      [33maria-label[39m=[32m"当前工作流"[39m
+      [33mclass[39m=[32m"nl-topbar"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"nl-topbar-head"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"nl-topbar-summary"[39m
+        [36m>[39m
+          [36m<strong>[39m
+            [0m等你决定：sample[0m
+          [36m</strong>[39m
+          [36m<span>[39m
+            [0m展开“工作流”可查看每个阶段与它的真实任务。[0m
+          [36m</span>[39m
+        [36m</div>[39m
+        [36m<button[39m
+          [33maria-controls[39m=[32m"nl-workflow-stages"[39m
+          [33maria-expanded[39m=[32m"false"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0m工作流[0m
+        [36m</button>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mhidden[39m=[32m""[39m
+        [33mid[39m=[32m"nl-workflow-stages"[39m
+      [36m>[39m
+        [36m<ol[39m
+          [33mclass[39m=[32m"nl-stage-rail"[39m
+        [36m>[39m
+          [36m<li>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"nl-stage nl-stage-waiting_user"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-name"[39m
+              [36m>[39m
+                [0msample[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-state"[39m
+              [36m>[39m
+                [0m待你决定[0m
+              [36m</span>[39m
+            [36m</button>[39m
+          [36m</li>[39m
+          [36m<li>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"nl-stage nl-stage-pending"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-name"[39m
+              [36m>[39m
+                [0mfirst_chapter[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-state"[39m
+              [36m>[39m
+                [0m待开始[0m
+              [36m</span>[39m
+            [36m</button>[39m
+          [36m</li>[39m
+        [36m</ol>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"nl-stage-hint"[39m
+        [36m>[39m
+          [0m点击阶段查看真实任务、输入与输出；查看不会暂停或改动工程。[0m
+        [36m</p>[39m
+      [36m</div>[39m
+    [36m</section>[39m
+  [36m</div>[39m
+  [36m<div>[39m
+    [36m<section[39m
+      [33maria-label[39m=[32m"当前工作流"[39m
+      [33mclass[39m=[32m"nl-topbar"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"nl-topbar-head"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"nl-topbar-summary"[39m
+        [36m>[39m
+          [36m<strong>[39m
+            [0m等你决定：sample[0m
+          [36m</strong>[39m
+          [36m<span>[39m
+            [0m展开“工作流”可查看每个阶段与它的真实任务。[0m
+          [36m</span>[39m
+        [36m</div>[39m
+        [36m<button[39m
+          [33maria-controls[39m=[32m"nl-workflow-stages"[39m
+          [33maria-expanded[39m=[32m"false"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0m工作流[0m
+        [36m</button>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mhidden[39m=[32m""[39m
+        [33mid[39m=[32m"nl-workflow-stages"[39m
+      [36m>[39m
+        [36m<ol[39m
+          [33mclass[39m=[32m"nl-stage-rail"[39m
+        [36m>[39m
+          [36m<li>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"nl-stage nl-stage-waiting_user"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-name"[39m
+              [36m>[39m
+                [0msample[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-state"[39m
+              [36m>[39m
+                [0m待你决定[0m
+              [36m</span>[39m
+            [36m</button>[39m
+          [36m</li>[39m
+          [36m<li>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"nl-stage nl-stage-pending"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-name"[39m
+              [36m>[39m
+                [0mfirst_chapter[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-state"[39m
+              [36m>[39m
+                [0m待开始[0m
+              [36m</span>[39m
+            [36m</button>[39m
+          [36m</li>[39m
+        [36m</ol>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"nl-stage-hint"[39m
+        [36m>[39m
+          [0m点击阶段查看真实任务、输入与输出；查看不会暂停或改动工程。[0m
+        [36m</p>[39m
+      [36m</div>[39m
+    [36m</section>[39m
+  [36m</div>[39m
+  [36m<div>[39m
+    [36m<section[39m
+      [33maria-label[39m=[32m"当前工作流"[39m
+      [33mclass[39m=[32m"nl-topbar"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"nl-topbar-head"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"nl-topbar-summary"[39m
+        [36m>[39m
+          [36m<strong>[39m
+            [0m等你决定：sample[0m
+          [36m</strong>[39m
+          [36m<span>[39m
+            [0m展开“工作流”可查看每个阶段与它的真实任务。[0m
+          [36m</span>[39m
+        [36m</div>[39m
+        [36m<button[39m
+          [33maria-controls[39m=[32m"nl-workflow-stages"[39m
+          [33maria-expanded[39m=[32m"false"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0m工作流[0m
+        [36m</button>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mhidden[39m=[32m""[39m
+        [33mid[39m=[32m"nl-workflow-stages"[39m
+      [36m>[39m
+        [36m<ol[39m
+          [33mclass[39m=[32m"nl-stage-rail"[39m
+        [36m>[39m
+          [36m<li>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"nl-stage nl-stage-waiting_user"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-name"[39m
+              [36m>[39m
+                [0msample[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-state"[39m
+              [36m>[39m
+                [0m待你决定[0m
+              [36m</span>[39m
+            [36m</button>[39m
+          [36m</li>[39m
+          [36m<li>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"nl-stage nl-stage-pending"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-name"[39m
+              [36m>[39m
+                [0mfirst_chapter[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-state"[39m
+              [36m>[39m
+                [0m待开始[0m
+              [36m</span>[39m
+            [36m</button>[39m
+          [36m</li>[39m
+        [36m</ol>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"nl-stage-hint"[39m
+        [36m>[39m
+          [0m点击阶段查看真实任务、输入与输出；查看不会暂停或改动工程。[0m
+        [36m</p>[39m
+      [36m</div>[39m
+    [36m</section>[39m
+  [36m</div>[39m
+[36m</body>[39m
+   × the R4 workflow bar > has no control effect when the dialog is closed 6ms
+     → Found multiple elements with the role "button" and name "工作流"
+
+Here are the matching elements:
+
+Ignored nodes: comments, script, style
+[36m<button[39m
+  [33maria-controls[39m=[32m"nl-workflow-stages"[39m
+  [33maria-expanded[39m=[32m"false"[39m
+  [33mtype[39m=[32m"button"[39m
+[36m>[39m
+  [0m工作流[0m
+[36m</button>[39m
+
+Ignored nodes: comments, script, style
+[36m<button[39m
+  [33maria-controls[39m=[32m"nl-workflow-stages"[39m
+  [33maria-expanded[39m=[32m"false"[39m
+  [33mtype[39m=[32m"button"[39m
+[36m>[39m
+  [0m工作流[0m
+[36m</button>[39m
+
+Ignored nodes: comments, script, style
+[36m<button[39m
+  [33maria-controls[39m=[32m"nl-workflow-stages"[39m
+  [33maria-expanded[39m=[32m"false"[39m
+  [33mtype[39m=[32m"button"[39m
+[36m>[39m
+  [0m工作流[0m
+[36m</button>[39m
+
+Ignored nodes: comments, script, style
+[36m<button[39m
+  [33maria-controls[39m=[32m"nl-workflow-stages"[39m
+  [33maria-expanded[39m=[32m"false"[39m
+  [33mtype[39m=[32m"button"[39m
+[36m>[39m
+  [0m工作流[0m
+[36m</button>[39m
+
+Ignored nodes: comments, script, style
+[36m<button[39m
+  [33maria-controls[39m=[32m"nl-workflow-stages"[39m
+  [33maria-expanded[39m=[32m"false"[39m
+  [33mtype[39m=[32m"button"[39m
+[36m>[39m
+  [0m工作流[0m
+[36m</button>[39m
+
+(If this is intentional, then use the `*AllBy*` variant of the query (like `queryAllByText`, `getAllByText`, or `findAllByText`)).
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<section[39m
+      [33maria-label[39m=[32m"当前工作流"[39m
+      [33mclass[39m=[32m"nl-topbar"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"nl-topbar-head"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"nl-topbar-summary"[39m
+        [36m>[39m
+          [36m<strong>[39m
+            [0m等你决定：sample[0m
+          [36m</strong>[39m
+          [36m<span>[39m
+            [0m展开“工作流”可查看每个阶段与它的真实任务。[0m
+          [36m</span>[39m
+        [36m</div>[39m
+        [36m<button[39m
+          [33maria-controls[39m=[32m"nl-workflow-stages"[39m
+          [33maria-expanded[39m=[32m"false"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0m工作流[0m
+        [36m</button>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mhidden[39m=[32m""[39m
+        [33mid[39m=[32m"nl-workflow-stages"[39m
+      [36m>[39m
+        [36m<ol[39m
+          [33mclass[39m=[32m"nl-stage-rail"[39m
+        [36m>[39m
+          [36m<li>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"nl-stage nl-stage-waiting_user"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-name"[39m
+              [36m>[39m
+                [0msample[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-state"[39m
+              [36m>[39m
+                [0m待你决定[0m
+              [36m</span>[39m
+            [36m</button>[39m
+          [36m</li>[39m
+          [36m<li>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"nl-stage nl-stage-pending"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-name"[39m
+              [36m>[39m
+                [0mfirst_chapter[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-state"[39m
+              [36m>[39m
+                [0m待开始[0m
+              [36m</span>[39m
+            [36m</button>[39m
+          [36m</li>[39m
+        [36m</ol>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"nl-stage-hint"[39m
+        [36m>[39m
+          [0m点击阶段查看真实任务、输入与输出；查看不会暂停或改动工程。[0m
+        [36m</p>[39m
+      [36m</div>[39m
+    [36m</section>[39m
+  [36m</div>[39m
+  [36m<div>[39m
+    [36m<section[39m
+      [33maria-label[39m=[32m"当前工作流"[39m
+      [33mclass[39m=[32m"nl-topbar"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"nl-topbar-head"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"nl-topbar-summary"[39m
+        [36m>[39m
+          [36m<strong>[39m
+            [0m等你决定：sample[0m
+          [36m</strong>[39m
+          [36m<span>[39m
+            [0m展开“工作流”可查看每个阶段与它的真实任务。[0m
+          [36m</span>[39m
+        [36m</div>[39m
+        [36m<button[39m
+          [33maria-controls[39m=[32m"nl-workflow-stages"[39m
+          [33maria-expanded[39m=[32m"false"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0m工作流[0m
+        [36m</button>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mhidden[39m=[32m""[39m
+        [33mid[39m=[32m"nl-workflow-stages"[39m
+      [36m>[39m
+        [36m<ol[39m
+          [33mclass[39m=[32m"nl-stage-rail"[39m
+        [36m>[39m
+          [36m<li>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"nl-stage nl-stage-waiting_user"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-name"[39m
+              [36m>[39m
+                [0msample[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-state"[39m
+              [36m>[39m
+                [0m待你决定[0m
+              [36m</span>[39m
+            [36m</button>[39m
+          [36m</li>[39m
+          [36m<li>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"nl-stage nl-stage-pending"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-name"[39m
+              [36m>[39m
+                [0mfirst_chapter[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-state"[39m
+              [36m>[39m
+                [0m待开始[0m
+              [36m</span>[39m
+            [36m</button>[39m
+          [36m</li>[39m
+        [36m</ol>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"nl-stage-hint"[39m
+        [36m>[39m
+          [0m点击阶段查看真实任务、输入与输出；查看不会暂停或改动工程。[0m
+        [36m</p>[39m
+      [36m</div>[39m
+    [36m</section>[39m
+  [36m</div>[39m
+  [36m<div>[39m
+    [36m<section[39m
+      [33maria-label[39m=[32m"当前工作流"[39m
+      [33mclass[39m=[32m"nl-topbar"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"nl-topbar-head"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"nl-topbar-summary"[39m
+        [36m>[39m
+          [36m<strong>[39m
+            [0m等你决定：sample[0m
+          [36m</strong>[39m
+          [36m<span>[39m
+            [0m展开“工作流”可查看每个阶段与它的真实任务。[0m
+          [36m</span>[39m
+        [36m</div>[39m
+        [36m<button[39m
+          [33maria-controls[39m=[32m"nl-workflow-stages"[39m
+          [33maria-expanded[39m=[32m"false"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0m工作流[0m
+        [36m</button>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mhidden[39m=[32m""[39m
+        [33mid[39m=[32m"nl-workflow-stages"[39m
+      [36m>[39m
+        [36m<ol[39m
+          [33mclass[39m=[32m"nl-stage-rail"[39m
+        [36m>[39m
+          [36m<li>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"nl-stage nl-stage-waiting_user"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-name"[39m
+              [36m>[39m
+                [0msample[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-state"[39m
+              [36m>[39m
+                [0m待你决定[0m
+              [36m</span>[39m
+            [36m</button>[39m
+          [36m</li>[39m
+          [36m<li>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"nl-stage nl-stage-pending"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-name"[39m
+              [36m>[39m
+                [0mfirst_chapter[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-state"[39m
+              [36m>[39m
+                [0m待开始[0m
+              [36m</span>[39m
+            [36m</button>[39m
+          [36m</li>[39m
+        [36m</ol>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"nl-stage-hint"[39m
+        [36m>[39m
+          [0m点击阶段查看真实任务、输入与输出；查看不会暂停或改动工程。[0m
+        [36m</p>[39m
+      [36m</div>[39m
+    [36m</section>[39m
+  [36m</div>[39m
+  [36m<div>[39m
+    [36m<section[39m
+      [33maria-label[39m=[32m"当前工作流"[39m
+      [33mclass[39m=[32m"nl-topbar"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"nl-topbar-head"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"nl-topbar-summary"[39m
+        [36m>[39m
+          [36m<strong>[39m
+            [0m等你决定：sample[0m
+          [36m</strong>[39m
+          [36m<span>[39m
+            [0m展开“工作流”可查看每个阶段与它的真实任务。[0m
+          [36m</span>[39m
+        [36m</div>[39m
+        [36m<button[39m
+          [33maria-controls[39m=[32m"nl-workflow-stages"[39m
+          [33maria-expanded[39m=[32m"false"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0m工作流[0m
+        [36m</button>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mhidden[39m=[32m""[39m
+        [33mid[39m=[32m"nl-workflow-stages"[39m
+      [36m>[39m
+        [36m<ol[39m
+          [33mclass[39m=[32m"nl-stage-rail"[39m
+        [36m>[39m
+          [36m<li>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"nl-stage nl-stage-waiting_user"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-name"[39m
+              [36m>[39m
+                [0msample[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-state"[39m
+              [36m>[39m
+                [0m待你决定[0m
+              [36m</span>[39m
+            [36m</button>[39m
+          [36m</li>[39m
+          [36m<li>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"nl-stage nl-stage-pending"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-name"[39m
+              [36m>[39m
+                [0mfirst_chapter[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-state"[39m
+              [36m>[39m
+                [0m待开始[0m
+              [36m</span>[39m
+            [36m</button>[39m
+          [36m</li>[39m
+        [36m</ol>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"nl-stage-hint"[39m
+        [36m>[39m
+          [0m点击阶段查看真实任务、输入与输出；查看不会暂停或改动工程。[0m
+        [36m</p>[39m
+      [36m</div>[39m
+    [36m</section>[39m
+  [36m</div>[39m
+  [36m<div>[39m
+    [36m<section[39m
+      [33maria-label[39m=[32m"当前工作流"[39m
+      [33mclass[39m=[32m"nl-topbar"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"nl-topbar-head"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"nl-topbar-summary"[39m
+        [36m>[39m
+          [36m<strong>[39m
+            [0m等你决定：sample[0m
+          [36m</strong>[39m
+          [36m<span>[39m
+            [0m展开“工作流”可查看每个阶段与它的真实任务。[0m
+          [36m</span>[39m
+        [36m</div>[39m
+        [36m<button[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0m定位当前事项[0m
+        [36m</button>[39m
+        [36m<button[39m
+          [33maria-controls[39m=[32m"nl-workflow-stages"[39m
+          [33maria-expanded[39m=[32m"false"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0m工作流[0m
+        [36m</button>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mhidden[39m=[32m""[39m
+        [33mid[39m=[32m"nl-workflow-stages"[39m
+      [36m>[39m
+        [36m<ol[39m
+          [33mclass[39m=[32m"nl-stage-rail"[39m
+        [36m>[39m
+          [36m<li>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"nl-stage nl-stage-waiting_user"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-name"[39m
+              [36m>[39m
+                [0msample[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-state"[39m
+              [36m>[39m
+                [0m待你决定[0m
+              [36m</span>[39m
+            [36m</button>[39m
+          [36m</li>[39m
+          [36m<li>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"nl-stage nl-stage-pending"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-name"[39m
+              [36m>[39m
+                [0mfirst_chapter[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-state"[39m
+              [36m>[39m
+                [0m待开始[0m
+              [36m</span>[39m
+            [36m</button>[39m
+          [36m</li>[39m
+        [36m</ol>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"nl-stage-hint"[39m
+        [36m>[39m
+          [0m点击阶段查看真实任务、输入与输出；查看不会暂停或改动工程。[0m
+        [36m</p>[39m
+      [36m</div>[39m
+    [36m</section>[39m
+  [36m</div>[39m
+[36m</body>[39m
+   ✓ the creative review panel > separates closing from deciding 7ms
+   × the creative review panel > shows the chapter bundle as one package and offers only the allowed choices 6ms
+     → Found multiple elements with the text: 音画字幕同包
+
+Here are the matching elements:
+
+Ignored nodes: comments, script, style
+[36m<h3>[39m
+  [0m音画字幕同包[0m
+[36m</h3>[39m
+
+Ignored nodes: comments, script, style
+[36m<h3>[39m
+  [0m音画字幕同包[0m
+[36m</h3>[39m
+
+(If this is intentional, then use the `*AllBy*` variant of the query (like `queryAllByText`, `getAllByText`, or `findAllByText`)).
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<section[39m
+      [33maria-label[39m=[32m"当前工作流"[39m
+      [33mclass[39m=[32m"nl-topbar"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"nl-topbar-head"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"nl-topbar-summary"[39m
+        [36m>[39m
+          [36m<strong>[39m
+            [0m等你决定：sample[0m
+          [36m</strong>[39m
+          [36m<span>[39m
+            [0m展开“工作流”可查看每个阶段与它的真实任务。[0m
+          [36m</span>[39m
+        [36m</div>[39m
+        [36m<button[39m
+          [33maria-controls[39m=[32m"nl-workflow-stages"[39m
+          [33maria-expanded[39m=[32m"false"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0m工作流[0m
+        [36m</button>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mhidden[39m=[32m""[39m
+        [33mid[39m=[32m"nl-workflow-stages"[39m
+      [36m>[39m
+        [36m<ol[39m
+          [33mclass[39m=[32m"nl-stage-rail"[39m
+        [36m>[39m
+          [36m<li>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"nl-stage nl-stage-waiting_user"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-name"[39m
+              [36m>[39m
+                [0msample[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-state"[39m
+              [36m>[39m
+                [0m待你决定[0m
+              [36m</span>[39m
+            [36m</button>[39m
+          [36m</li>[39m
+          [36m<li>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"nl-stage nl-stage-pending"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-name"[39m
+              [36m>[39m
+                [0mfirst_chapter[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-state"[39m
+              [36m>[39m
+                [0m待开始[0m
+              [36m</span>[39m
+            [36m</button>[39m
+          [36m</li>[39m
+        [36m</ol>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"nl-stage-hint"[39m
+        [36m>[39m
+          [0m点击阶段查看真实任务、输入与输出；查看不会暂停或改动工程。[0m
+        [36m</p>[39m
+      [36m</div>[39m
+    [36m</section>[39m
+  [36m</div>[39m
+  [36m<div>[39m
+    [36m<section[39m
+      [33maria-label[39m=[32m"当前工作流"[39m
+      [33mclass[39m=[32m"nl-topbar"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"nl-topbar-head"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"nl-topbar-summary"[39m
+        [36m>[39m
+          [36m<strong>[39m
+            [0m等你决定：sample[0m
+          [36m</strong>[39m
+          [36m<span>[39m
+            [0m展开“工作流”可查看每个阶段与它的真实任务。[0m
+          [36m</span>[39m
+        [36m</div>[39m
+        [36m<button[39m
+          [33maria-controls[39m=[32m"nl-workflow-stages"[39m
+          [33maria-expanded[39m=[32m"false"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0m工作流[0m
+        [36m</button>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mhidden[39m=[32m""[39m
+        [33mid[39m=[32m"nl-workflow-stages"[39m
+      [36m>[39m
+        [36m<ol[39m
+          [33mclass[39m=[32m"nl-stage-rail"[39m
+        [36m>[39m
+          [36m<li>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"nl-stage nl-stage-waiting_user"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-name"[39m
+              [36m>[39m
+                [0msample[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-state"[39m
+              [36m>[39m
+                [0m待你决定[0m
+              [36m</span>[39m
+            [36m</button>[39m
+          [36m</li>[39m
+          [36m<li>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"nl-stage nl-stage-pending"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-name"[39m
+              [36m>[39m
+                [0mfirst_chapter[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-state"[39m
+              [36m>[39m
+                [0m待开始[0m
+              [36m</span>[39m
+            [36m</button>[39m
+          [36m</li>[39m
+        [36m</ol>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"nl-stage-hint"[39m
+        [36m>[39m
+          [0m点击阶段查看真实任务、输入与输出；查看不会暂停或改动工程。[0m
+        [36m</p>[39m
+      [36m</div>[39m
+    [36m</section>[39m
+  [36m</div>[39m
+  [36m<div>[39m
+    [36m<section[39m
+      [33maria-label[39m=[32m"当前工作流"[39m
+      [33mclass[39m=[32m"nl-topbar"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"nl-topbar-head"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"nl-topbar-summary"[39m
+        [36m>[39m
+          [36m<strong>[39m
+            [0m等你决定：sample[0m
+          [36m</strong>[39m
+          [36m<span>[39m
+            [0m展开“工作流”可查看每个阶段与它的真实任务。[0m
+          [36m</span>[39m
+        [36m</div>[39m
+        [36m<button[39m
+          [33maria-controls[39m=[32m"nl-workflow-stages"[39m
+          [33maria-expanded[39m=[32m"false"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0m工作流[0m
+        [36m</button>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mhidden[39m=[32m""[39m
+        [33mid[39m=[32m"nl-workflow-stages"[39m
+      [36m>[39m
+        [36m<ol[39m
+          [33mclass[39m=[32m"nl-stage-rail"[39m
+        [36m>[39m
+          [36m<li>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"nl-stage nl-stage-waiting_user"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-name"[39m
+              [36m>[39m
+                [0msample[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-state"[39m
+              [36m>[39m
+                [0m待你决定[0m
+              [36m</span>[39m
+            [36m</button>[39m
+          [36m</li>[39m
+          [36m<li>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"nl-stage nl-stage-pending"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-name"[39m
+              [36m>[39m
+                [0mfirst_chapter[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-state"[39m
+              [36m>[39m
+                [0m待开始[0m
+              [36m</span>[39m
+            [36m</button>[39m
+          [36m</li>[39m
+        [36m</ol>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"nl-stage-hint"[39m
+        [36m>[39m
+          [0m点击阶段查看真实任务、输入与输出；查看不会暂停或改动工程。[0m
+        [36m</p>[39m
+      [36m</div>[39m
+    [36m</section>[39m
+  [36m</div>[39m
+  [36m<div>[39m
+    [36m<section[39m
+      [33maria-label[39m=[32m"当前工作流"[39m
+      [33mclass[39m=[32m"nl-topbar"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"nl-topbar-head"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"nl-topbar-summary"[39m
+        [36m>[39m
+          [36m<strong>[39m
+            [0m等你决定：sample[0m
+          [36m</strong>[39m
+          [36m<span>[39m
+            [0m展开“工作流”可查看每个阶段与它的真实任务。[0m
+          [36m</span>[39m
+        [36m</div>[39m
+        [36m<button[39m
+          [33maria-controls[39m=[32m"nl-workflow-stages"[39m
+          [33maria-expanded[39m=[32m"false"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0m工作流[0m
+        [36m</button>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mhidden[39m=[32m""[39m
+        [33mid[39m=[32m"nl-workflow-stages"[39m
+      [36m>[39m
+        [36m<ol[39m
+          [33mclass[39m=[32m"nl-stage-rail"[39m
+        [36m>[39m
+          [36m<li>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"nl-stage nl-stage-waiting_user"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-name"[39m
+              [36m>[39m
+                [0msample[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-state"[39m
+              [36m>[39m
+                [0m待你决定[0m
+              [36m</span>[39m
+            [36m</button>[39m
+          [36m</li>[39m
+          [36m<li>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"nl-stage nl-stage-pending"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-name"[39m
+              [36m>[39m
+                [0mfirst_chapter[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-state"[39m
+              [36m>[39m
+                [0m待开始[0m
+              [36m</span>[39m
+            [36m</button>[39m
+          [36m</li>[39m
+        [36m</ol>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"nl-stage-hint"[39m
+        [36m>[39m
+          [0m点击阶段查看真实任务、输入与输出；查看不会暂停或改动工程。[0m
+        [36m</p>[39m
+      [36m</div>[39m
+    [36m</section>[39m
+  [36m</div>[39m
+  [36m<div>[39m
+    [36m<section[39m
+      [33maria-label[39m=[32m"当前工作流"[39m
+      [33mclass[39m=[32m"nl-topbar"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"nl-topbar-head"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"nl-topbar-summary"[39m
+        [36m>[39m
+          [36m<strong>[39m
+            [0m等你决定：sample[0m
+          [36m</strong>[39m
+          [36m<span>[39m
+            [0m展开“工作流”可查看每个阶段与它的真实任务。[0m
+          [36m</span>[39m
+        [36m</div>[39m
+        [36m<button[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0m定位当前事项[0m
+        [36m</button>[39m
+        [36m<button[39m
+          [33maria-controls[39m=[32m"nl-workflow-stages"[39m
+          [33maria-expanded[39m=[32m"false"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0m工作流[0m
+        [36m</button>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mhidden[39m=[32m""[39m
+        [33mid[39m=[32m"nl-workflow-stages"[39m
+      [36m>[39m
+        [36m<ol[39m
+          [33mclass[39m=[32m"nl-stage-rail"[39m
+        [36m>[39m
+          [36m<li>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"nl-stage nl-stage-waiting_user"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-name"[39m
+              [36m>[39m
+                [0msample[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-state"[39m
+              [36m>[39m
+                [0m待你决定[0m
+              [36m</span>[39m
+            [36m</button>[39m
+          [36m</li>[39m
+          [36m<li>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"nl-stage nl-stage-pending"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-name"[39m
+              [36m>[39m
+                [0mfirst_chapter[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-state"[39m
+              [36m>[39m
+                [0m待开始[0m
+              [36m</span>[39m
+            [36m</button>[39m
+          [36m</li>[39m
+        [36m</ol>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"nl-stage-hint"[39m
+        [36m>[39m
+          [0m点击阶段查看真实任务、输入与输出；查看不会暂停或改动工程。[0m
+        [36m</p>[39m
+      [36m</div>[39m
+    [36m</section>[39m
+  [36m</div>[39m
+  [36m<div>[39m
+    [36m<section[39m
+      [33maria-label[39m=[32m"创作审阅"[39m
+      [33mclass[39m=[32m"nl-review"[39m
+    [36m>[39m
+      [36m<header[39m
+        [33mclass[39m=[32m"nl-review-head"[39m
+      [36m>[39m
+        [36m<div>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"nl-result-label"[39m
+          [36m>[39m
+            [0m章节包[0m
+          [36m</span>[39m
+          [36m<h2>[39m
+            [0m整章审阅[0m
+          [36m</h2>[39m
+          [36m<p[39m
+            [33mclass[39m=[32m"nl-muted"[39m
+          [36m>[39m
+            [0m章节候选[0m
+          [36m</p>[39m
+        [36m</div>[39m
+        [36m<button[39m
+          [33maria-label[39m=[32m"关闭审阅"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0m关闭[0m
+        [36m</button>[39m
+      [36m</header>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"nl-review-body"[39m
+      [36m>[39m
+        [36m<section[39m
+          [33maria-label[39m=[32m"章节内容包"[39m
+          [33mclass[39m=[32m"nl-review-bundle"[39m
+        [36m>[39m
+          [36m<h3>[39m
+            [0m音画字幕同包[0m
+          [36m</h3>[39m
+          [36m<ul[39m
+            [33mclass[39m=[32m"nl-parts"[39m
+          [36m>[39m
+            [36m<li[39m
+              [33mclass[39m=[32m"nl-part"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-part-kind"[39m
+              [36m>[39m
+                [0m画面[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-muted"[39m
+              [36m>[39m
+                [0mvideo[0m
+                [0m@[0m
+                [0m1[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-muted"[39m
+              [36m>[39m
+                [0m尚无可下载文件[0m
+              [36m</span>[39m
+            [36m</li>[39m
+            [36m<li[39m
+              [33mclass[39m=[32m"nl-part"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-part-kind"[39m
+              [36m>[39m
+                [0m旁白[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-muted"[39m
+              [36m>[39m
+                [0maudio[0m
+                [0m@[0m
+                [0m1[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-muted"[39m
+              [36m>[39m
+                [0m尚无可下载文件[0m
+              [36m</span>[39m
+            [36m</li>[39m
+            [36m<li[39m
+              [33mclass[39m=[32m"nl-part"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-part-kind"[39m
+              [36m>[39m
+                [0m字幕[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-muted"[39m
+              [36m>[39m
+                [0msubs[0m
+                [0m@[0m
+                [0m1[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-muted"[39m
+              [36m>[39m
+                [0m尚无可下载文件[0m
+              [36m</span>[39m
+            [36m</li>[39m
+          [36m</ul>[39m
+          [36m<p[39m
+            [33mclass[39m=[32m"nl-muted"[39m
+          [36m>[39m
+            [0m来源镜头 [0m
+            [0mshot-1[0m
+          [36m</p>[39m
+        [36m</section>[39m
+        [36m<section[39m
+          [33maria-label[39m=[32m"创作内容"[39m
+          [33mclass[39m=[32m"nl-review-content"[39m
+        [36m>[39m
+          [36m<p[39m
+            [33mclass[39m=[32m"nl-muted"[39m
+          [36m>[39m
+            [0m还没有简报。[0m
+          [36m</p>[39m
+          [36m<p[39m
+            [33mclass[39m=[32m"nl-muted"[39m
+          [36m>[39m
+            [0m还没有脚本。[0m
+          [36m</p>[39m
+          [36m<p[39m
+            [33mclass[39m=[32m"nl-muted"[39m
+          [36m>[39m
+            [0m还没有分镜。[0m
+          [36m</p>[39m
+        [36m</section>[39m
+      [36m</div>[39m
+      [36m<footer[39m
+        [33mclass[39m=[32m"nl-review-actions"[39m
+      [36m>[39m
+        [36m<button[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0m接受[0m
+        [36m</button>[39m
+        [36m<button[39m
+          [33mdisabled[39m=[32m""[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0m提出修改[0m
+        [36m</button>[39m
+        [36m<button[39m
+          [33mdisabled[39m=[32m""[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0m拒绝[0m
+        [36m</button>[39m
+        [36m<button[39m
+          [33mclass[39m=[32m"nl-primary"[39m
+          [33mdisabled[39m=[32m""[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0m确认并采用[0m
+        [36m</button>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"nl-muted"[39m
+        [36m>[39m
+          [0m关闭面板不会产生任何决定。[0m
+        [36m</p>[39m
+      [36m</footer>[39m
+    [36m</section>[39m
+  [36m</div>[39m
+  [36m<div>[39m
+    [36m<section[39m
+      [33maria-label[39m=[32m"创作审阅"[39m
+      [33mclass[39m=[32m"nl-review"[39m
+    [36m>[39m
+      [36m<header[39m
+        [33mclass[39m=[32m"nl-review-head"[39m
+      [36m>[39m
+        [36m<div>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"nl-result-label"[39m
+          [36m>[39m
+            [0m章节包[0m
+          [36m</span>[39m
+          [36m<h2>[39m
+            [0m整章审阅[0m
+          [36m</h2>[39m
+          [36m<p[39m
+            [33mclass[39m=[32m"nl-muted"[39m
+          [36m>[39m
+            [0m章节候选[0m
+          [36m</p>[39m
+        [36m</div>[39m
+      [36m</header>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"nl-review-body"[39m
+      [36m>[39m
+        [36m<section[39m
+          [33maria-label[39m=[32m"章节内容包"[39m
+          [33mclass[39m=[32m"nl-review-bundle"[39m
+        [36m>[39m
+          [36m<h3>[39m
+            [0m音画字幕同包[0m
+          [36m</h3>[39m
+          [36m<ul[39m
+            [33mclass[39m=[32m"nl-parts"[39m
+          [36m>[39m
+            [36m<li[39m
+              [33mclass[39m=[32m"nl-part"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-part-kind"[39m
+              [36m>[39m
+                [0m画面[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-muted"[39m
+              [36m>[39m
+                [0mvideo[0m
+                [0m@[0m
+                [0m1[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-muted"[39m
+              [36m>[39m
+                [0m尚无可下载文件[0m
+              [36m</span>[39m
+            [36m</li>[39m
+            [36m<li[39m
+              [33mclass[39m=[32m"nl-part"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-part-kind"[39m
+              [36m>[39m
+                [0m旁白[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-muted"[39m
+              [36m>[39m
+                [0maudio[0m
+                [0m@[0m
+                [0m1[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-muted"[39m
+              [36m>[39m
+                [0m尚无可下载文件[0m
+              [36m</span>[39m
+            [36m</li>[39m
+            [36m<li[39m
+              [33mclass[39m=[32m"nl-part"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-part-kind"[39m
+              [36m>[39m
+                [0m字幕[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-muted"[39m
+              [36m>[39m
+                [0msubs[0m
+                [0m@[0m
+                [0m1[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-muted"[39m
+              [36m>[39m
+                [0m尚无可下载文件[0m
+              [36m</span>[39m
+            [36m</li>[39m
+          [36m</ul>[39m
+          [36m<p[39m
+            [33mclass[39m=[32m"nl-muted"[39m
+          [36m>[39m
+            [0m来源镜头 [0m
+            [0mshot-1[0m
+          [36m</p>[39m
+        [36m</section>[39m
+        [36m<section[39m
+          [33maria-label[39m=[32m"创作内容"[39m
+          [33mclass[39m=[32m"nl-review-content"[39m
+        [36m>[39m
+          [36m<p[39m
+            [33mclass[39m=[32m"nl-muted"[39m
+          [36m>[39m
+            [0m还没有简报。[0m
+          [36m</p>[39m
+          [36m<p[39m
+            [33mclass[39m=[32m"nl-muted"[39m
+          [36m>[39m
+            [0m还没有脚本。[0m
+          [36m</p>[39m
+          [36m<p[39m
+            [33mclass[39m=[32m"nl-muted"[39m
+          [36m>[39m
+            [0m还没有分镜。[0m
+          [36m</p>[39m
+        [36m</section>[39m
+      [36m</div>[39m
+      [36m<footer[39m
+        [33mclass[39m=[32m"nl-review-actions"[39m
+      [36m>[39m
+        [36m<button[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0m接受[0m
+        [36m</button>[39m
+        [36m<button[39m
+          [33mdisabled[39m=[32m""[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0m提出修改[0m
+        [36m</button>[39m
+        [36m<button[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0m拒绝[0m
+        [36m</button>[39m
+        [36m<button[39m
+          [33mclass[39m=[32m"nl-primary"[39m
+          [33mdisabled[39m=[32m""[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0m确认并采用[0m
+        [36m</button>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"nl-muted"[39m
+        [36m>[39m
+          [0m关闭面板不会产生任何决定。[0m
+        [36m</p>[39m
+      [36m</footer>[39m
+    [36m</section>[39m
+  [36m</div>[39m
+[36m</body>[39m
+   ✓ the creative review panel > presents the cover as its own review 3ms
+   ✓ the system control panel > renders a non-modal aside without a backdrop 4ms
+   ✓ the system control panel > shows a stale sample as unknown 3ms
+   × the system control panel > offers no control for a shared service and no model mutation at all 24ms
+     → expected [ '检查就绪状态', '检查就绪状态', '检查就绪状态' ] to have a length of 1 but got 3
+   ✓ the native sync indicator > does not claim the editor is loaded before the acknowledgement arrives 0ms
+   ✓ the native sync indicator > does not claim the editor is loaded when the acknowledgement is from another revision 0ms
+   ✓ the native sync indicator > claims the editor is loaded only when the acknowledgement matches 0ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 15 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/product/creative-service.test.ts > the creative service > confirms a brief only in a trusted session
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ tests/agent-driven/product/creative-service.test.ts:405:33
+    403|     expect(decision.choice).toBe("confirm_brief");
+    404|     const confirmed = await service.readIntake({ intake_id: intake.int…
+    405|     expect(confirmed.confirmed).toBe(true);
+       |                                 ^
+    406|   });
+    407| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/15]⎯
+
+ FAIL  tests/agent-driven/product/execution-guard.test.ts > the execution guard > refuses an action the scope does not allow
+AssertionError: expected error to match asymmetric matcher
+
+- Expected
++ Received
+
+- ObjectContaining {
+-   "code": "RUN_SCOPE_REQUIRED",
++ ProductError {
++   "message": "The run has no gate for this stage yet",
++   "code": "RUN_GATE_BLOCKED",
++   "http_status": 428,
++   "retryable": false,
++   "next_actions": [],
++   "details": {
++     "gate_kind": "cover",
++     "stage_id": "delivery",
++   },
++   "name": "ProductError",
+  }
+
+ ❯ tests/agent-driven/product/execution-guard.test.ts:89:7
+     87|         stage_id: "delivery",
+     88|       }),
+     89|     ).toThrowError(expect.objectContaining({ code: "RUN_SCOPE_REQUIRED…
+       |       ^
+     90|   });
+     91| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/15]⎯
+
+ FAIL  tests/agent-driven/product/fixed-workflow-service.test.ts > the fixed workflow service > authorizes a run in a trusted session and then starts it
+ProductError: This key was already used with different content
+ ❯ Object.put tests/agent-driven/product/support/memory-repository.ts:225:17
+    223|             return { record: existing.value as ProductRecords[K], repl…
+    224|           }
+    225|           throw new ProductError(
+       |                 ^
+    226|             "IDEMPOTENCY_CONFLICT",
+    227|             "This key was already used with different content",
+ ❯ src/host/creative/fixed-workflow-service.ts:535:10
+ ❯ MemoryProductRepository.transaction tests/agent-driven/product/support/memory-repository.ts:132:14
+ ❯ FixedWorkflowService.#command src/host/creative/fixed-workflow-service.ts:504:29
+ ❯ FixedWorkflowService.startRun src/host/creative/fixed-workflow-service.ts:474:17
+ ❯ tests/agent-driven/product/fixed-workflow-service.test.ts:159:35
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/15]⎯
+
+ FAIL  tests/agent-driven/product/fixed-workflow-service.test.ts > the fixed workflow service > keeps pause and cancel available without a grant, because they are safe controls
+ProductError: This key was already used with different content
+ ❯ Object.put tests/agent-driven/product/support/memory-repository.ts:225:17
+    223|             return { record: existing.value as ProductRecords[K], repl…
+    224|           }
+    225|           throw new ProductError(
+       |                 ^
+    226|             "IDEMPOTENCY_CONFLICT",
+    227|             "This key was already used with different content",
+ ❯ src/host/creative/fixed-workflow-service.ts:535:10
+ ❯ MemoryProductRepository.transaction tests/agent-driven/product/support/memory-repository.ts:132:14
+ ❯ FixedWorkflowService.#command src/host/creative/fixed-workflow-service.ts:504:29
+ ❯ FixedWorkflowService.pauseRun src/host/creative/fixed-workflow-service.ts:479:17
+ ❯ tests/agent-driven/product/fixed-workflow-service.test.ts:175:34
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/15]⎯
+
+ FAIL  tests/agent-driven/product/fixed-workflow-service.test.ts > the fixed workflow service > keeps the cover an independent package
+ProductError: This key was already used with different content
+ ❯ Object.put tests/agent-driven/product/support/memory-repository.ts:225:17
+    223|             return { record: existing.value as ProductRecords[K], repl…
+    224|           }
+    225|           throw new ProductError(
+       |                 ^
+    226|             "IDEMPOTENCY_CONFLICT",
+    227|             "This key was already used with different content",
+ ❯ src/host/creative/fixed-workflow-service.ts:702:10
+ ❯ MemoryProductRepository.transaction tests/agent-driven/product/support/memory-repository.ts:132:14
+ ❯ FixedWorkflowService.publishReviewPackage src/host/creative/fixed-workflow-service.ts:584:29
+ ❯ tests/agent-driven/product/fixed-workflow-service.test.ts:249:33
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/15]⎯
+
+ FAIL  tests/agent-driven/product/fixed-workflow-service.test.ts > the fixed workflow service > refuses a decision that is bound to another package version
+ProductError: This key was already used with different content
+ ❯ Object.put tests/agent-driven/product/support/memory-repository.ts:225:17
+    223|             return { record: existing.value as ProductRecords[K], repl…
+    224|           }
+    225|           throw new ProductError(
+       |                 ^
+    226|             "IDEMPOTENCY_CONFLICT",
+    227|             "This key was already used with different content",
+ ❯ src/host/creative/fixed-workflow-service.ts:702:10
+ ❯ MemoryProductRepository.transaction tests/agent-driven/product/support/memory-repository.ts:132:14
+ ❯ FixedWorkflowService.publishReviewPackage src/host/creative/fixed-workflow-service.ts:584:29
+ ❯ tests/agent-driven/product/fixed-workflow-service.test.ts:273:19
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/15]⎯
+
+ FAIL  tests/agent-driven/product/fixed-workflow-service.test.ts > the fixed workflow service > records a plain review without granting any approval
+ProductError: This key was already used with different content
+ ❯ Object.put tests/agent-driven/product/support/memory-repository.ts:225:17
+    223|             return { record: existing.value as ProductRecords[K], repl…
+    224|           }
+    225|           throw new ProductError(
+       |                 ^
+    226|             "IDEMPOTENCY_CONFLICT",
+    227|             "This key was already used with different content",
+ ❯ src/host/creative/fixed-workflow-service.ts:702:10
+ ❯ MemoryProductRepository.transaction tests/agent-driven/product/support/memory-repository.ts:132:14
+ ❯ FixedWorkflowService.publishReviewPackage src/host/creative/fixed-workflow-service.ts:584:29
+ ❯ tests/agent-driven/product/fixed-workflow-service.test.ts:313:19
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/15]⎯
+
+ FAIL  tests/agent-driven/product/fixed-workflow-service.test.ts > the fixed workflow service > fails the adoption closed when MAIN cannot register the approval
+ProductError: This key was already used with different content
+ ❯ Object.put tests/agent-driven/product/support/memory-repository.ts:225:17
+    223|             return { record: existing.value as ProductRecords[K], repl…
+    224|           }
+    225|           throw new ProductError(
+       |                 ^
+    226|             "IDEMPOTENCY_CONFLICT",
+    227|             "This key was already used with different content",
+ ❯ src/host/creative/fixed-workflow-service.ts:702:10
+ ❯ MemoryProductRepository.transaction tests/agent-driven/product/support/memory-repository.ts:132:14
+ ❯ FixedWorkflowService.publishReviewPackage src/host/creative/fixed-workflow-service.ts:584:29
+ ❯ tests/agent-driven/product/fixed-workflow-service.test.ts:355:19
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/15]⎯
+
+ FAIL  tests/agent-driven/product/fixed-workflow-service.test.ts > the fixed workflow service > records the limited approval in the same transaction as the decision
+ProductError: This key was already used with different content
+ ❯ Object.put tests/agent-driven/product/support/memory-repository.ts:225:17
+    223|             return { record: existing.value as ProductRecords[K], repl…
+    224|           }
+    225|           throw new ProductError(
+       |                 ^
+    226|             "IDEMPOTENCY_CONFLICT",
+    227|             "This key was already used with different content",
+ ❯ src/host/creative/fixed-workflow-service.ts:702:10
+ ❯ MemoryProductRepository.transaction tests/agent-driven/product/support/memory-repository.ts:132:14
+ ❯ FixedWorkflowService.publishReviewPackage src/host/creative/fixed-workflow-service.ts:584:29
+ ❯ tests/agent-driven/product/fixed-workflow-service.test.ts:396:19
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/15]⎯
+
+ FAIL  tests/agent-driven/product/observation-ui.test.tsx > the R4 workflow bar > shows the stages horizontally when it is expanded
+TestingLibraryElementError: Found multiple elements with the role "button" and name "工作流"
+
+Here are the matching elements:
+
+Ignored nodes: comments, script, style
+[36m<button[39m
+  [33maria-controls[39m=[32m"nl-workflow-stages"[39m
+  [33maria-expanded[39m=[32m"false"[39m
+  [33mtype[39m=[32m"button"[39m
+[36m>[39m
+  [0m工作流[0m
+[36m</button>[39m
+
+Ignored nodes: comments, script, style
+[36m<button[39m
+  [33maria-controls[39m=[32m"nl-workflow-stages"[39m
+  [33maria-expanded[39m=[32m"false"[39m
+  [33mtype[39m=[32m"button"[39m
+[36m>[39m
+  [0m工作流[0m
+[36m</button>[39m
+
+(If this is intentional, then use the `*AllBy*` variant of the query (like `queryAllByText`, `getAllByText`, or `findAllByText`)).
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<section[39m
+      [33maria-label[39m=[32m"当前工作流"[39m
+      [33mclass[39m=[32m"nl-topbar"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"nl-topbar-head"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"nl-topbar-summary"[39m
+        [36m>[39m
+          [36m<strong>[39m
+            [0m等你决定：sample[0m
+          [36m</strong>[39m
+          [36m<span>[39m
+            [0m展开“工作流”可查看每个阶段与它的真实任务。[0m
+          [36m</span>[39m
+        [36m</div>[39m
+        [36m<button[39m
+          [33maria-controls[39m=[32m"nl-workflow-stages"[39m
+          [33maria-expanded[39m=[32m"false"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0m工作流[0m
+        [36m</button>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mhidden[39m=[32m""[39m
+        [33mid[39m=[32m"nl-workflow-stages"[39m
+      [36m>[39m
+        [36m<ol[39m
+          [33mclass[39m=[32m"nl-stage-rail"[39m
+        [36m>[39m
+          [36m<li>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"nl-stage nl-stage-waiting_user"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-name"[39m
+              [36m>[39m
+                [0msample[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-state"[39m
+              [36m>[39m
+                [0m待你决定[0m
+              [36m</span>[39m
+            [36m</button>[39m
+          [36m</li>[39m
+          [36m<li>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"nl-stage nl-stage-pending"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-name"[39m
+              [36m>[39m
+                [0mfirst_chapter[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-state"[39m
+              [36m>[39m
+                [0m待开始[0m
+              [36m</span>[39m
+            [36m</button>[39m
+          [36m</li>[39m
+        [36m</ol>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"nl-stage-hint"[39m
+        [36m>[39m
+          [0m点击阶段查看真实任务、输入与输出；查看不会暂停或改动工程。[0m
+        [36m</p>[39m
+      [36m</div>[39m
+    [36m</section>[39m
+  [36m</div>[39m
+  [36m<div>[39m
+    [36m<section[39m
+      [33maria-label[39m=[32m"当前工作流"[39m
+      [33mclass[39m=[32m"nl-topbar"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"nl-topbar-head"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"nl-topbar-summary"[39m
+        [36m>[39m
+          [36m<strong>[39m
+            [0m等你决定：sample[0m
+          [36m</strong>[39m
+          [36m<span>[39m
+            [0m展开“工作流”可查看每个阶段与它的真实任务。[0m
+          [36m</span>[39m
+        [36m</div>[39m
+        [36m<button[39m
+          [33maria-controls[39m=[32m"nl-workflow-stages"[39m
+          [33maria-expanded[39m=[32m"false"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0m工作流[0m
+        [36m</button>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mhidden[39m=[32m""[39m
+        [33mid[39m=[32m"nl-workflow-stages"[39m
+      [36m>[39m
+        [36m<ol[39m
+          [33mclass[39m=[32m"nl-stage-rail"[39m
+        [36m>[39m
+          [36m<li>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"nl-stage nl-stage-waiting_user"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-name"[39m
+              [36m>[39m
+                [0msample[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-state"[39m
+              [36m>[39m
+                [0m待你决定[0m
+              [36m</span>[39m
+            [36m</button>[39m
+          [36m</li>[39m
+          [36m<li>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"nl-stage nl-stage-pending"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-name"[39m
+              [36m>[39m
+                [0mfirst_chapter[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-state"[39m
+              [36m>[39m
+                [0m待开始[0m
+              [36m</span>[39m
+            [36m</button>[39m
+          [36m</li>[39m
+        [36m</ol>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"nl-stage-hint"[39m
+        [36m>[39m
+          [0m点击阶段查看真实任务、输入与输出；查看不会暂停或改动工程。[0m
+        [36m</p>[39m
+      [36m</div>[39m
+    [36m</section>[39m
+  [36m</div>[39m
+[36m</body>[39m
+ ❯ Object.getElementError node_modules/.pnpm/@testing-library+dom@10.4.2/node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ getElementError node_modules/.pnpm/@testing-library+dom@10.4.2/node_modules/@testing-library/dom/dist/query-helpers.js:20:35
+ ❯ getMultipleElementsFoundError node_modules/.pnpm/@testing-library+dom@10.4.2/node_modules/@testing-library/dom/dist/query-helpers.js:23:10
+ ❯ node_modules/.pnpm/@testing-library+dom@10.4.2/node_modules/@testing-library/dom/dist/query-helpers.js:55:13
+ ❯ node_modules/.pnpm/@testing-library+dom@10.4.2/node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ tests/agent-driven/product/observation-ui.test.tsx:95:28
+     93|   it("shows the stages horizontally when it is expanded", () => {
+     94|     render(<WorkflowTopBar workflow={WORKFLOW} />);
+     95|     fireEvent.click(screen.getByRole("button", { name: "工作流" }));
+       |                            ^
+     96|     expect(screen.getByRole("button", { name: /工作流/ }).getAttribute("a…
+     97|     expect(screen.getByRole("button", { name: /sample/ })).toBeTruthy(…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/15]⎯
+
+ FAIL  tests/agent-driven/product/observation-ui.test.tsx > the R4 workflow bar > shows the real attempt, input and output of a node
+TestingLibraryElementError: Found multiple elements with the role "button" and name "工作流"
+
+Here are the matching elements:
+
+Ignored nodes: comments, script, style
+[36m<button[39m
+  [33maria-controls[39m=[32m"nl-workflow-stages"[39m
+  [33maria-expanded[39m=[32m"false"[39m
+  [33mtype[39m=[32m"button"[39m
+[36m>[39m
+  [0m工作流[0m
+[36m</button>[39m
+
+Ignored nodes: comments, script, style
+[36m<button[39m
+  [33maria-controls[39m=[32m"nl-workflow-stages"[39m
+  [33maria-expanded[39m=[32m"false"[39m
+  [33mtype[39m=[32m"button"[39m
+[36m>[39m
+  [0m工作流[0m
+[36m</button>[39m
+
+Ignored nodes: comments, script, style
+[36m<button[39m
+  [33maria-controls[39m=[32m"nl-workflow-stages"[39m
+  [33maria-expanded[39m=[32m"false"[39m
+  [33mtype[39m=[32m"button"[39m
+[36m>[39m
+  [0m工作流[0m
+[36m</button>[39m
+
+(If this is intentional, then use the `*AllBy*` variant of the query (like `queryAllByText`, `getAllByText`, or `findAllByText`)).
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<section[39m
+      [33maria-label[39m=[32m"当前工作流"[39m
+      [33mclass[39m=[32m"nl-topbar"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"nl-topbar-head"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"nl-topbar-summary"[39m
+        [36m>[39m
+          [36m<strong>[39m
+            [0m等你决定：sample[0m
+          [36m</strong>[39m
+          [36m<span>[39m
+            [0m展开“工作流”可查看每个阶段与它的真实任务。[0m
+          [36m</span>[39m
+        [36m</div>[39m
+        [36m<button[39m
+          [33maria-controls[39m=[32m"nl-workflow-stages"[39m
+          [33maria-expanded[39m=[32m"false"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0m工作流[0m
+        [36m</button>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mhidden[39m=[32m""[39m
+        [33mid[39m=[32m"nl-workflow-stages"[39m
+      [36m>[39m
+        [36m<ol[39m
+          [33mclass[39m=[32m"nl-stage-rail"[39m
+        [36m>[39m
+          [36m<li>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"nl-stage nl-stage-waiting_user"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-name"[39m
+              [36m>[39m
+                [0msample[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-state"[39m
+              [36m>[39m
+                [0m待你决定[0m
+              [36m</span>[39m
+            [36m</button>[39m
+          [36m</li>[39m
+          [36m<li>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"nl-stage nl-stage-pending"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-name"[39m
+              [36m>[39m
+                [0mfirst_chapter[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-state"[39m
+              [36m>[39m
+                [0m待开始[0m
+              [36m</span>[39m
+            [36m</button>[39m
+          [36m</li>[39m
+        [36m</ol>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"nl-stage-hint"[39m
+        [36m>[39m
+          [0m点击阶段查看真实任务、输入与输出；查看不会暂停或改动工程。[0m
+        [36m</p>[39m
+      [36m</div>[39m
+    [36m</section>[39m
+  [36m</div>[39m
+  [36m<div>[39m
+    [36m<section[39m
+      [33maria-label[39m=[32m"当前工作流"[39m
+      [33mclass[39m=[32m"nl-topbar"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"nl-topbar-head"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"nl-topbar-summary"[39m
+        [36m>[39m
+          [36m<strong>[39m
+            [0m等你决定：sample[0m
+          [36m</strong>[39m
+          [36m<span>[39m
+            [0m展开“工作流”可查看每个阶段与它的真实任务。[0m
+          [36m</span>[39m
+        [36m</div>[39m
+        [36m<button[39m
+          [33maria-controls[39m=[32m"nl-workflow-stages"[39m
+          [33maria-expanded[39m=[32m"false"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0m工作流[0m
+        [36m</button>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mhidden[39m=[32m""[39m
+        [33mid[39m=[32m"nl-workflow-stages"[39m
+      [36m>[39m
+        [36m<ol[39m
+          [33mclass[39m=[32m"nl-stage-rail"[39m
+        [36m>[39m
+          [36m<li>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"nl-stage nl-stage-waiting_user"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-name"[39m
+              [36m>[39m
+                [0msample[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-state"[39m
+              [36m>[39m
+                [0m待你决定[0m
+              [36m</span>[39m
+            [36m</button>[39m
+          [36m</li>[39m
+          [36m<li>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"nl-stage nl-stage-pending"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-name"[39m
+              [36m>[39m
+                [0mfirst_chapter[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-state"[39m
+              [36m>[39m
+                [0m待开始[0m
+              [36m</span>[39m
+            [36m</button>[39m
+          [36m</li>[39m
+        [36m</ol>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"nl-stage-hint"[39m
+        [36m>[39m
+          [0m点击阶段查看真实任务、输入与输出；查看不会暂停或改动工程。[0m
+        [36m</p>[39m
+      [36m</div>[39m
+    [36m</section>[39m
+  [36m</div>[39m
+  [36m<div>[39m
+    [36m<section[39m
+      [33maria-label[39m=[32m"当前工作流"[39m
+      [33mclass[39m=[32m"nl-topbar"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"nl-topbar-head"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"nl-topbar-summary"[39m
+        [36m>[39m
+          [36m<strong>[39m
+            [0m等你决定：sample[0m
+          [36m</strong>[39m
+          [36m<span>[39m
+            [0m展开“工作流”可查看每个阶段与它的真实任务。[0m
+          [36m</span>[39m
+        [36m</div>[39m
+        [36m<button[39m
+          [33maria-controls[39m=[32m"nl-workflow-stages"[39m
+          [33maria-expanded[39m=[32m"false"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0m工作流[0m
+        [36m</button>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mhidden[39m=[32m""[39m
+        [33mid[39m=[32m"nl-workflow-stages"[39m
+      [36m>[39m
+        [36m<ol[39m
+          [33mclass[39m=[32m"nl-stage-rail"[39m
+        [36m>[39m
+          [36m<li>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"nl-stage nl-stage-waiting_user"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-name"[39m
+              [36m>[39m
+                [0msample[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-state"[39m
+              [36m>[39m
+                [0m待你决定[0m
+              [36m</span>[39m
+            [36m</button>[39m
+          [36m</li>[39m
+          [36m<li>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"nl-stage nl-stage-pending"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-name"[39m
+              [36m>[39m
+                [0mfirst_chapter[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-state"[39m
+              [36m>[39m
+                [0m待开始[0m
+              [36m</span>[39m
+            [36m</button>[39m
+          [36m</li>[39m
+        [36m</ol>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"nl-stage-hint"[39m
+        [36m>[39m
+          [0m点击阶段查看真实任务、输入与输出；查看不会暂停或改动工程。[0m
+        [36m</p>[39m
+      [36m</div>[39m
+    [36m</section>[39m
+  [36m</div>[39m
+[36m</body>[39m
+ ❯ Object.getElementError node_modules/.pnpm/@testing-library+dom@10.4.2/node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ getElementError node_modules/.pnpm/@testing-library+dom@10.4.2/node_modules/@testing-library/dom/dist/query-helpers.js:20:35
+ ❯ getMultipleElementsFoundError node_modules/.pnpm/@testing-library+dom@10.4.2/node_modules/@testing-library/dom/dist/query-helpers.js:23:10
+ ❯ node_modules/.pnpm/@testing-library+dom@10.4.2/node_modules/@testing-library/dom/dist/query-helpers.js:55:13
+ ❯ node_modules/.pnpm/@testing-library+dom@10.4.2/node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ tests/agent-driven/product/observation-ui.test.tsx:103:28
+    101|   it("shows the real attempt, input and output of a node", () => {
+    102|     render(<WorkflowTopBar workflow={WORKFLOW} />);
+    103|     fireEvent.click(screen.getByRole("button", { name: "工作流" }));
+       |                            ^
+    104|     fireEvent.click(screen.getByRole("button", { name: /sample/ }));
+    105|     const dialog = screen.getByRole("dialog");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/15]⎯
+
+ FAIL  tests/agent-driven/product/observation-ui.test.tsx > the R4 workflow bar > closes the dialog with Escape and returns the focus to the stage
+TestingLibraryElementError: Found multiple elements with the role "button" and name "工作流"
+
+Here are the matching elements:
+
+Ignored nodes: comments, script, style
+[36m<button[39m
+  [33maria-controls[39m=[32m"nl-workflow-stages"[39m
+  [33maria-expanded[39m=[32m"false"[39m
+  [33mtype[39m=[32m"button"[39m
+[36m>[39m
+  [0m工作流[0m
+[36m</button>[39m
+
+Ignored nodes: comments, script, style
+[36m<button[39m
+  [33maria-controls[39m=[32m"nl-workflow-stages"[39m
+  [33maria-expanded[39m=[32m"false"[39m
+  [33mtype[39m=[32m"button"[39m
+[36m>[39m
+  [0m工作流[0m
+[36m</button>[39m
+
+Ignored nodes: comments, script, style
+[36m<button[39m
+  [33maria-controls[39m=[32m"nl-workflow-stages"[39m
+  [33maria-expanded[39m=[32m"false"[39m
+  [33mtype[39m=[32m"button"[39m
+[36m>[39m
+  [0m工作流[0m
+[36m</button>[39m
+
+Ignored nodes: comments, script, style
+[36m<button[39m
+  [33maria-controls[39m=[32m"nl-workflow-stages"[39m
+  [33maria-expanded[39m=[32m"false"[39m
+  [33mtype[39m=[32m"button"[39m
+[36m>[39m
+  [0m工作流[0m
+[36m</button>[39m
+
+(If this is intentional, then use the `*AllBy*` variant of the query (like `queryAllByText`, `getAllByText`, or `findAllByText`)).
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<section[39m
+      [33maria-label[39m=[32m"当前工作流"[39m
+      [33mclass[39m=[32m"nl-topbar"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"nl-topbar-head"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"nl-topbar-summary"[39m
+        [36m>[39m
+          [36m<strong>[39m
+            [0m等你决定：sample[0m
+          [36m</strong>[39m
+          [36m<span>[39m
+            [0m展开“工作流”可查看每个阶段与它的真实任务。[0m
+          [36m</span>[39m
+        [36m</div>[39m
+        [36m<button[39m
+          [33maria-controls[39m=[32m"nl-workflow-stages"[39m
+          [33maria-expanded[39m=[32m"false"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0m工作流[0m
+        [36m</button>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mhidden[39m=[32m""[39m
+        [33mid[39m=[32m"nl-workflow-stages"[39m
+      [36m>[39m
+        [36m<ol[39m
+          [33mclass[39m=[32m"nl-stage-rail"[39m
+        [36m>[39m
+          [36m<li>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"nl-stage nl-stage-waiting_user"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-name"[39m
+              [36m>[39m
+                [0msample[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-state"[39m
+              [36m>[39m
+                [0m待你决定[0m
+              [36m</span>[39m
+            [36m</button>[39m
+          [36m</li>[39m
+          [36m<li>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"nl-stage nl-stage-pending"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-name"[39m
+              [36m>[39m
+                [0mfirst_chapter[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-state"[39m
+              [36m>[39m
+                [0m待开始[0m
+              [36m</span>[39m
+            [36m</button>[39m
+          [36m</li>[39m
+        [36m</ol>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"nl-stage-hint"[39m
+        [36m>[39m
+          [0m点击阶段查看真实任务、输入与输出；查看不会暂停或改动工程。[0m
+        [36m</p>[39m
+      [36m</div>[39m
+    [36m</section>[39m
+  [36m</div>[39m
+  [36m<div>[39m
+    [36m<section[39m
+      [33maria-label[39m=[32m"当前工作流"[39m
+      [33mclass[39m=[32m"nl-topbar"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"nl-topbar-head"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"nl-topbar-summary"[39m
+        [36m>[39m
+          [36m<strong>[39m
+            [0m等你决定：sample[0m
+          [36m</strong>[39m
+          [36m<span>[39m
+            [0m展开“工作流”可查看每个阶段与它的真实任务。[0m
+          [36m</span>[39m
+        [36m</div>[39m
+        [36m<button[39m
+          [33maria-controls[39m=[32m"nl-workflow-stages"[39m
+          [33maria-expanded[39m=[32m"false"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0m工作流[0m
+        [36m</button>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mhidden[39m=[32m""[39m
+        [33mid[39m=[32m"nl-workflow-stages"[39m
+      [36m>[39m
+        [36m<ol[39m
+          [33mclass[39m=[32m"nl-stage-rail"[39m
+        [36m>[39m
+          [36m<li>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"nl-stage nl-stage-waiting_user"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-name"[39m
+              [36m>[39m
+                [0msample[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-state"[39m
+              [36m>[39m
+                [0m待你决定[0m
+              [36m</span>[39m
+            [36m</button>[39m
+          [36m</li>[39m
+          [36m<li>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"nl-stage nl-stage-pending"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-name"[39m
+              [36m>[39m
+                [0mfirst_chapter[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-state"[39m
+              [36m>[39m
+                [0m待开始[0m
+              [36m</span>[39m
+            [36m</button>[39m
+          [36m</li>[39m
+        [36m</ol>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"nl-stage-hint"[39m
+        [36m>[39m
+          [0m点击阶段查看真实任务、输入与输出；查看不会暂停或改动工程。[0m
+        [36m</p>[39m
+      [36m</div>[39m
+    [36m</section>[39m
+  [36m</div>[39m
+  [36m<div>[39m
+    [36m<section[39m
+      [33maria-label[39m=[32m"当前工作流"[39m
+      [33mclass[39m=[32m"nl-topbar"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"nl-topbar-head"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"nl-topbar-summary"[39m
+        [36m>[39m
+          [36m<strong>[39m
+            [0m等你决定：sample[0m
+          [36m</strong>[39m
+          [36m<span>[39m
+            [0m展开“工作流”可查看每个阶段与它的真实任务。[0m
+          [36m</span>[39m
+        [36m</div>[39m
+        [36m<button[39m
+          [33maria-controls[39m=[32m"nl-workflow-stages"[39m
+          [33maria-expanded[39m=[32m"false"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0m工作流[0m
+        [36m</button>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mhidden[39m=[32m""[39m
+        [33mid[39m=[32m"nl-workflow-stages"[39m
+      [36m>[39m
+        [36m<ol[39m
+          [33mclass[39m=[32m"nl-stage-rail"[39m
+        [36m>[39m
+          [36m<li>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"nl-stage nl-stage-waiting_user"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-name"[39m
+              [36m>[39m
+                [0msample[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-state"[39m
+              [36m>[39m
+                [0m待你决定[0m
+              [36m</span>[39m
+            [36m</button>[39m
+          [36m</li>[39m
+          [36m<li>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"nl-stage nl-stage-pending"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-name"[39m
+              [36m>[39m
+                [0mfirst_chapter[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-state"[39m
+              [36m>[39m
+                [0m待开始[0m
+              [36m</span>[39m
+            [36m</button>[39m
+          [36m</li>[39m
+        [36m</ol>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"nl-stage-hint"[39m
+        [36m>[39m
+          [0m点击阶段查看真实任务、输入与输出；查看不会暂停或改动工程。[0m
+        [36m</p>[39m
+      [36m</div>[39m
+    [36m</section>[39m
+  [36m</div>[39m
+  [36m<div>[39m
+    [36m<section[39m
+      [33maria-label[39m=[32m"当前工作流"[39m
+      [33mclass[39m=[32m"nl-topbar"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"nl-topbar-head"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"nl-topbar-summary"[39m
+        [36m>[39m
+          [36m<strong>[39m
+            [0m等你决定：sample[0m
+          [36m</strong>[39m
+          [36m<span>[39m
+            [0m展开“工作流”可查看每个阶段与它的真实任务。[0m
+          [36m</span>[39m
+        [36m</div>[39m
+        [36m<button[39m
+          [33maria-controls[39m=[32m"nl-workflow-stages"[39m
+          [33maria-expanded[39m=[32m"false"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0m工作流[0m
+        [36m</button>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mhidden[39m=[32m""[39m
+        [33mid[39m=[32m"nl-workflow-stages"[39m
+      [36m>[39m
+        [36m<ol[39m
+          [33mclass[39m=[32m"nl-stage-rail"[39m
+        [36m>[39m
+          [36m<li>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"nl-stage nl-stage-waiting_user"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-name"[39m
+              [36m>[39m
+                [0msample[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-state"[39m
+              [36m>[39m
+                [0m待你决定[0m
+              [36m</span>[39m
+            [36m</button>[39m
+          [36m</li>[39m
+          [36m<li>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"nl-stage nl-stage-pending"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-name"[39m
+              [36m>[39m
+                [0mfirst_chapter[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-state"[39m
+              [36m>[39m
+                [0m待开始[0m
+              [36m</span>[39m
+            [36m</button>[39m
+          [36m</li>[39m
+        [36m</ol>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"nl-stage-hint"[39m
+        [36m>[39m
+          [0m点击阶段查看真实任务、输入与输出；查看不会暂停或改动工程。[0m
+        [36m</p>[39m
+      [36m</div>[39m
+    [36m</section>[39m
+  [36m</div>[39m
+[36m</body>[39m
+ ❯ Object.getElementError node_modules/.pnpm/@testing-library+dom@10.4.2/node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ getElementError node_modules/.pnpm/@testing-library+dom@10.4.2/node_modules/@testing-library/dom/dist/query-helpers.js:20:35
+ ❯ getMultipleElementsFoundError node_modules/.pnpm/@testing-library+dom@10.4.2/node_modules/@testing-library/dom/dist/query-helpers.js:23:10
+ ❯ node_modules/.pnpm/@testing-library+dom@10.4.2/node_modules/@testing-library/dom/dist/query-helpers.js:55:13
+ ❯ node_modules/.pnpm/@testing-library+dom@10.4.2/node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ tests/agent-driven/product/observation-ui.test.tsx:114:28
+    112|   it("closes the dialog with Escape and returns the focus to the stage…
+    113|     render(<WorkflowTopBar workflow={WORKFLOW} />);
+    114|     fireEvent.click(screen.getByRole("button", { name: "工作流" }));
+       |                            ^
+    115|     const trigger = screen.getByRole("button", { name: /sample/ });
+    116|     fireEvent.click(trigger);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/15]⎯
+
+ FAIL  tests/agent-driven/product/observation-ui.test.tsx > the R4 workflow bar > has no control effect when the dialog is closed
+TestingLibraryElementError: Found multiple elements with the role "button" and name "工作流"
+
+Here are the matching elements:
+
+Ignored nodes: comments, script, style
+[36m<button[39m
+  [33maria-controls[39m=[32m"nl-workflow-stages"[39m
+  [33maria-expanded[39m=[32m"false"[39m
+  [33mtype[39m=[32m"button"[39m
+[36m>[39m
+  [0m工作流[0m
+[36m</button>[39m
+
+Ignored nodes: comments, script, style
+[36m<button[39m
+  [33maria-controls[39m=[32m"nl-workflow-stages"[39m
+  [33maria-expanded[39m=[32m"false"[39m
+  [33mtype[39m=[32m"button"[39m
+[36m>[39m
+  [0m工作流[0m
+[36m</button>[39m
+
+Ignored nodes: comments, script, style
+[36m<button[39m
+  [33maria-controls[39m=[32m"nl-workflow-stages"[39m
+  [33maria-expanded[39m=[32m"false"[39m
+  [33mtype[39m=[32m"button"[39m
+[36m>[39m
+  [0m工作流[0m
+[36m</button>[39m
+
+Ignored nodes: comments, script, style
+[36m<button[39m
+  [33maria-controls[39m=[32m"nl-workflow-stages"[39m
+  [33maria-expanded[39m=[32m"false"[39m
+  [33mtype[39m=[32m"button"[39m
+[36m>[39m
+  [0m工作流[0m
+[36m</button>[39m
+
+Ignored nodes: comments, script, style
+[36m<button[39m
+  [33maria-controls[39m=[32m"nl-workflow-stages"[39m
+  [33maria-expanded[39m=[32m"false"[39m
+  [33mtype[39m=[32m"button"[39m
+[36m>[39m
+  [0m工作流[0m
+[36m</button>[39m
+
+(If this is intentional, then use the `*AllBy*` variant of the query (like `queryAllByText`, `getAllByText`, or `findAllByText`)).
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<section[39m
+      [33maria-label[39m=[32m"当前工作流"[39m
+      [33mclass[39m=[32m"nl-topbar"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"nl-topbar-head"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"nl-topbar-summary"[39m
+        [36m>[39m
+          [36m<strong>[39m
+            [0m等你决定：sample[0m
+          [36m</strong>[39m
+          [36m<span>[39m
+            [0m展开“工作流”可查看每个阶段与它的真实任务。[0m
+          [36m</span>[39m
+        [36m</div>[39m
+        [36m<button[39m
+          [33maria-controls[39m=[32m"nl-workflow-stages"[39m
+          [33maria-expanded[39m=[32m"false"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0m工作流[0m
+        [36m</button>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mhidden[39m=[32m""[39m
+        [33mid[39m=[32m"nl-workflow-stages"[39m
+      [36m>[39m
+        [36m<ol[39m
+          [33mclass[39m=[32m"nl-stage-rail"[39m
+        [36m>[39m
+          [36m<li>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"nl-stage nl-stage-waiting_user"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-name"[39m
+              [36m>[39m
+                [0msample[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-state"[39m
+              [36m>[39m
+                [0m待你决定[0m
+              [36m</span>[39m
+            [36m</button>[39m
+          [36m</li>[39m
+          [36m<li>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"nl-stage nl-stage-pending"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-name"[39m
+              [36m>[39m
+                [0mfirst_chapter[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-state"[39m
+              [36m>[39m
+                [0m待开始[0m
+              [36m</span>[39m
+            [36m</button>[39m
+          [36m</li>[39m
+        [36m</ol>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"nl-stage-hint"[39m
+        [36m>[39m
+          [0m点击阶段查看真实任务、输入与输出；查看不会暂停或改动工程。[0m
+        [36m</p>[39m
+      [36m</div>[39m
+    [36m</section>[39m
+  [36m</div>[39m
+  [36m<div>[39m
+    [36m<section[39m
+      [33maria-label[39m=[32m"当前工作流"[39m
+      [33mclass[39m=[32m"nl-topbar"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"nl-topbar-head"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"nl-topbar-summary"[39m
+        [36m>[39m
+          [36m<strong>[39m
+            [0m等你决定：sample[0m
+          [36m</strong>[39m
+          [36m<span>[39m
+            [0m展开“工作流”可查看每个阶段与它的真实任务。[0m
+          [36m</span>[39m
+        [36m</div>[39m
+        [36m<button[39m
+          [33maria-controls[39m=[32m"nl-workflow-stages"[39m
+          [33maria-expanded[39m=[32m"false"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0m工作流[0m
+        [36m</button>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mhidden[39m=[32m""[39m
+        [33mid[39m=[32m"nl-workflow-stages"[39m
+      [36m>[39m
+        [36m<ol[39m
+          [33mclass[39m=[32m"nl-stage-rail"[39m
+        [36m>[39m
+          [36m<li>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"nl-stage nl-stage-waiting_user"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-name"[39m
+              [36m>[39m
+                [0msample[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-state"[39m
+              [36m>[39m
+                [0m待你决定[0m
+              [36m</span>[39m
+            [36m</button>[39m
+          [36m</li>[39m
+          [36m<li>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"nl-stage nl-stage-pending"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-name"[39m
+              [36m>[39m
+                [0mfirst_chapter[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-state"[39m
+              [36m>[39m
+                [0m待开始[0m
+              [36m</span>[39m
+            [36m</button>[39m
+          [36m</li>[39m
+        [36m</ol>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"nl-stage-hint"[39m
+        [36m>[39m
+          [0m点击阶段查看真实任务、输入与输出；查看不会暂停或改动工程。[0m
+        [36m</p>[39m
+      [36m</div>[39m
+    [36m</section>[39m
+  [36m</div>[39m
+  [36m<div>[39m
+    [36m<section[39m
+      [33maria-label[39m=[32m"当前工作流"[39m
+      [33mclass[39m=[32m"nl-topbar"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"nl-topbar-head"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"nl-topbar-summary"[39m
+        [36m>[39m
+          [36m<strong>[39m
+            [0m等你决定：sample[0m
+          [36m</strong>[39m
+          [36m<span>[39m
+            [0m展开“工作流”可查看每个阶段与它的真实任务。[0m
+          [36m</span>[39m
+        [36m</div>[39m
+        [36m<button[39m
+          [33maria-controls[39m=[32m"nl-workflow-stages"[39m
+          [33maria-expanded[39m=[32m"false"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0m工作流[0m
+        [36m</button>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mhidden[39m=[32m""[39m
+        [33mid[39m=[32m"nl-workflow-stages"[39m
+      [36m>[39m
+        [36m<ol[39m
+          [33mclass[39m=[32m"nl-stage-rail"[39m
+        [36m>[39m
+          [36m<li>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"nl-stage nl-stage-waiting_user"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-name"[39m
+              [36m>[39m
+                [0msample[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-state"[39m
+              [36m>[39m
+                [0m待你决定[0m
+              [36m</span>[39m
+            [36m</button>[39m
+          [36m</li>[39m
+          [36m<li>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"nl-stage nl-stage-pending"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-name"[39m
+              [36m>[39m
+                [0mfirst_chapter[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-state"[39m
+              [36m>[39m
+                [0m待开始[0m
+              [36m</span>[39m
+            [36m</button>[39m
+          [36m</li>[39m
+        [36m</ol>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"nl-stage-hint"[39m
+        [36m>[39m
+          [0m点击阶段查看真实任务、输入与输出；查看不会暂停或改动工程。[0m
+        [36m</p>[39m
+      [36m</div>[39m
+    [36m</section>[39m
+  [36m</div>[39m
+  [36m<div>[39m
+    [36m<section[39m
+      [33maria-label[39m=[32m"当前工作流"[39m
+      [33mclass[39m=[32m"nl-topbar"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"nl-topbar-head"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"nl-topbar-summary"[39m
+        [36m>[39m
+          [36m<strong>[39m
+            [0m等你决定：sample[0m
+          [36m</strong>[39m
+          [36m<span>[39m
+            [0m展开“工作流”可查看每个阶段与它的真实任务。[0m
+          [36m</span>[39m
+        [36m</div>[39m
+        [36m<button[39m
+          [33maria-controls[39m=[32m"nl-workflow-stages"[39m
+          [33maria-expanded[39m=[32m"false"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0m工作流[0m
+        [36m</button>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mhidden[39m=[32m""[39m
+        [33mid[39m=[32m"nl-workflow-stages"[39m
+      [36m>[39m
+        [36m<ol[39m
+          [33mclass[39m=[32m"nl-stage-rail"[39m
+        [36m>[39m
+          [36m<li>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"nl-stage nl-stage-waiting_user"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-name"[39m
+              [36m>[39m
+                [0msample[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-state"[39m
+              [36m>[39m
+                [0m待你决定[0m
+              [36m</span>[39m
+            [36m</button>[39m
+          [36m</li>[39m
+          [36m<li>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"nl-stage nl-stage-pending"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-name"[39m
+              [36m>[39m
+                [0mfirst_chapter[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-state"[39m
+              [36m>[39m
+                [0m待开始[0m
+              [36m</span>[39m
+            [36m</button>[39m
+          [36m</li>[39m
+        [36m</ol>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"nl-stage-hint"[39m
+        [36m>[39m
+          [0m点击阶段查看真实任务、输入与输出；查看不会暂停或改动工程。[0m
+        [36m</p>[39m
+      [36m</div>[39m
+    [36m</section>[39m
+  [36m</div>[39m
+  [36m<div>[39m
+    [36m<section[39m
+      [33maria-label[39m=[32m"当前工作流"[39m
+      [33mclass[39m=[32m"nl-topbar"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"nl-topbar-head"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"nl-topbar-summary"[39m
+        [36m>[39m
+          [36m<strong>[39m
+            [0m等你决定：sample[0m
+          [36m</strong>[39m
+          [36m<span>[39m
+            [0m展开“工作流”可查看每个阶段与它的真实任务。[0m
+          [36m</span>[39m
+        [36m</div>[39m
+        [36m<button[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0m定位当前事项[0m
+        [36m</button>[39m
+        [36m<button[39m
+          [33maria-controls[39m=[32m"nl-workflow-stages"[39m
+          [33maria-expanded[39m=[32m"false"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0m工作流[0m
+        [36m</button>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mhidden[39m=[32m""[39m
+        [33mid[39m=[32m"nl-workflow-stages"[39m
+      [36m>[39m
+        [36m<ol[39m
+          [33mclass[39m=[32m"nl-stage-rail"[39m
+        [36m>[39m
+          [36m<li>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"nl-stage nl-stage-waiting_user"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-name"[39m
+              [36m>[39m
+                [0msample[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-state"[39m
+              [36m>[39m
+                [0m待你决定[0m
+              [36m</span>[39m
+            [36m</button>[39m
+          [36m</li>[39m
+          [36m<li>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"nl-stage nl-stage-pending"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-name"[39m
+              [36m>[39m
+                [0mfirst_chapter[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-state"[39m
+              [36m>[39m
+                [0m待开始[0m
+              [36m</span>[39m
+            [36m</button>[39m
+          [36m</li>[39m
+        [36m</ol>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"nl-stage-hint"[39m
+        [36m>[39m
+          [0m点击阶段查看真实任务、输入与输出；查看不会暂停或改动工程。[0m
+        [36m</p>[39m
+      [36m</div>[39m
+    [36m</section>[39m
+  [36m</div>[39m
+[36m</body>[39m
+ ❯ Object.getElementError node_modules/.pnpm/@testing-library+dom@10.4.2/node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ getElementError node_modules/.pnpm/@testing-library+dom@10.4.2/node_modules/@testing-library/dom/dist/query-helpers.js:20:35
+ ❯ getMultipleElementsFoundError node_modules/.pnpm/@testing-library+dom@10.4.2/node_modules/@testing-library/dom/dist/query-helpers.js:23:10
+ ❯ node_modules/.pnpm/@testing-library+dom@10.4.2/node_modules/@testing-library/dom/dist/query-helpers.js:55:13
+ ❯ node_modules/.pnpm/@testing-library+dom@10.4.2/node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ tests/agent-driven/product/observation-ui.test.tsx:126:28
+    124|     const onLocate = vi.fn();
+    125|     render(<WorkflowTopBar workflow={WORKFLOW} onLocate={onLocate} />);
+    126|     fireEvent.click(screen.getByRole("button", { name: "工作流" }));
+       |                            ^
+    127|     fireEvent.click(screen.getByRole("button", { name: /sample/ }));
+    128|     fireEvent.click(screen.getByRole("button", { name: "关闭" }));
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/15]⎯
+
+ FAIL  tests/agent-driven/product/observation-ui.test.tsx > the creative review panel > shows the chapter bundle as one package and offers only the allowed choices
+TestingLibraryElementError: Found multiple elements with the text: 音画字幕同包
+
+Here are the matching elements:
+
+Ignored nodes: comments, script, style
+[36m<h3>[39m
+  [0m音画字幕同包[0m
+[36m</h3>[39m
+
+Ignored nodes: comments, script, style
+[36m<h3>[39m
+  [0m音画字幕同包[0m
+[36m</h3>[39m
+
+(If this is intentional, then use the `*AllBy*` variant of the query (like `queryAllByText`, `getAllByText`, or `findAllByText`)).
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<section[39m
+      [33maria-label[39m=[32m"当前工作流"[39m
+      [33mclass[39m=[32m"nl-topbar"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"nl-topbar-head"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"nl-topbar-summary"[39m
+        [36m>[39m
+          [36m<strong>[39m
+            [0m等你决定：sample[0m
+          [36m</strong>[39m
+          [36m<span>[39m
+            [0m展开“工作流”可查看每个阶段与它的真实任务。[0m
+          [36m</span>[39m
+        [36m</div>[39m
+        [36m<button[39m
+          [33maria-controls[39m=[32m"nl-workflow-stages"[39m
+          [33maria-expanded[39m=[32m"false"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0m工作流[0m
+        [36m</button>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mhidden[39m=[32m""[39m
+        [33mid[39m=[32m"nl-workflow-stages"[39m
+      [36m>[39m
+        [36m<ol[39m
+          [33mclass[39m=[32m"nl-stage-rail"[39m
+        [36m>[39m
+          [36m<li>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"nl-stage nl-stage-waiting_user"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-name"[39m
+              [36m>[39m
+                [0msample[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-state"[39m
+              [36m>[39m
+                [0m待你决定[0m
+              [36m</span>[39m
+            [36m</button>[39m
+          [36m</li>[39m
+          [36m<li>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"nl-stage nl-stage-pending"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-name"[39m
+              [36m>[39m
+                [0mfirst_chapter[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-state"[39m
+              [36m>[39m
+                [0m待开始[0m
+              [36m</span>[39m
+            [36m</button>[39m
+          [36m</li>[39m
+        [36m</ol>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"nl-stage-hint"[39m
+        [36m>[39m
+          [0m点击阶段查看真实任务、输入与输出；查看不会暂停或改动工程。[0m
+        [36m</p>[39m
+      [36m</div>[39m
+    [36m</section>[39m
+  [36m</div>[39m
+  [36m<div>[39m
+    [36m<section[39m
+      [33maria-label[39m=[32m"当前工作流"[39m
+      [33mclass[39m=[32m"nl-topbar"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"nl-topbar-head"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"nl-topbar-summary"[39m
+        [36m>[39m
+          [36m<strong>[39m
+            [0m等你决定：sample[0m
+          [36m</strong>[39m
+          [36m<span>[39m
+            [0m展开“工作流”可查看每个阶段与它的真实任务。[0m
+          [36m</span>[39m
+        [36m</div>[39m
+        [36m<button[39m
+          [33maria-controls[39m=[32m"nl-workflow-stages"[39m
+          [33maria-expanded[39m=[32m"false"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0m工作流[0m
+        [36m</button>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mhidden[39m=[32m""[39m
+        [33mid[39m=[32m"nl-workflow-stages"[39m
+      [36m>[39m
+        [36m<ol[39m
+          [33mclass[39m=[32m"nl-stage-rail"[39m
+        [36m>[39m
+          [36m<li>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"nl-stage nl-stage-waiting_user"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-name"[39m
+              [36m>[39m
+                [0msample[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-state"[39m
+              [36m>[39m
+                [0m待你决定[0m
+              [36m</span>[39m
+            [36m</button>[39m
+          [36m</li>[39m
+          [36m<li>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"nl-stage nl-stage-pending"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-name"[39m
+              [36m>[39m
+                [0mfirst_chapter[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-state"[39m
+              [36m>[39m
+                [0m待开始[0m
+              [36m</span>[39m
+            [36m</button>[39m
+          [36m</li>[39m
+        [36m</ol>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"nl-stage-hint"[39m
+        [36m>[39m
+          [0m点击阶段查看真实任务、输入与输出；查看不会暂停或改动工程。[0m
+        [36m</p>[39m
+      [36m</div>[39m
+    [36m</section>[39m
+  [36m</div>[39m
+  [36m<div>[39m
+    [36m<section[39m
+      [33maria-label[39m=[32m"当前工作流"[39m
+      [33mclass[39m=[32m"nl-topbar"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"nl-topbar-head"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"nl-topbar-summary"[39m
+        [36m>[39m
+          [36m<strong>[39m
+            [0m等你决定：sample[0m
+          [36m</strong>[39m
+          [36m<span>[39m
+            [0m展开“工作流”可查看每个阶段与它的真实任务。[0m
+          [36m</span>[39m
+        [36m</div>[39m
+        [36m<button[39m
+          [33maria-controls[39m=[32m"nl-workflow-stages"[39m
+          [33maria-expanded[39m=[32m"false"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0m工作流[0m
+        [36m</button>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mhidden[39m=[32m""[39m
+        [33mid[39m=[32m"nl-workflow-stages"[39m
+      [36m>[39m
+        [36m<ol[39m
+          [33mclass[39m=[32m"nl-stage-rail"[39m
+        [36m>[39m
+          [36m<li>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"nl-stage nl-stage-waiting_user"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-name"[39m
+              [36m>[39m
+                [0msample[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-state"[39m
+              [36m>[39m
+                [0m待你决定[0m
+              [36m</span>[39m
+            [36m</button>[39m
+          [36m</li>[39m
+          [36m<li>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"nl-stage nl-stage-pending"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-name"[39m
+              [36m>[39m
+                [0mfirst_chapter[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-state"[39m
+              [36m>[39m
+                [0m待开始[0m
+              [36m</span>[39m
+            [36m</button>[39m
+          [36m</li>[39m
+        [36m</ol>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"nl-stage-hint"[39m
+        [36m>[39m
+          [0m点击阶段查看真实任务、输入与输出；查看不会暂停或改动工程。[0m
+        [36m</p>[39m
+      [36m</div>[39m
+    [36m</section>[39m
+  [36m</div>[39m
+  [36m<div>[39m
+    [36m<section[39m
+      [33maria-label[39m=[32m"当前工作流"[39m
+      [33mclass[39m=[32m"nl-topbar"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"nl-topbar-head"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"nl-topbar-summary"[39m
+        [36m>[39m
+          [36m<strong>[39m
+            [0m等你决定：sample[0m
+          [36m</strong>[39m
+          [36m<span>[39m
+            [0m展开“工作流”可查看每个阶段与它的真实任务。[0m
+          [36m</span>[39m
+        [36m</div>[39m
+        [36m<button[39m
+          [33maria-controls[39m=[32m"nl-workflow-stages"[39m
+          [33maria-expanded[39m=[32m"false"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0m工作流[0m
+        [36m</button>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mhidden[39m=[32m""[39m
+        [33mid[39m=[32m"nl-workflow-stages"[39m
+      [36m>[39m
+        [36m<ol[39m
+          [33mclass[39m=[32m"nl-stage-rail"[39m
+        [36m>[39m
+          [36m<li>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"nl-stage nl-stage-waiting_user"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-name"[39m
+              [36m>[39m
+                [0msample[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-state"[39m
+              [36m>[39m
+                [0m待你决定[0m
+              [36m</span>[39m
+            [36m</button>[39m
+          [36m</li>[39m
+          [36m<li>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"nl-stage nl-stage-pending"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-name"[39m
+              [36m>[39m
+                [0mfirst_chapter[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-state"[39m
+              [36m>[39m
+                [0m待开始[0m
+              [36m</span>[39m
+            [36m</button>[39m
+          [36m</li>[39m
+        [36m</ol>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"nl-stage-hint"[39m
+        [36m>[39m
+          [0m点击阶段查看真实任务、输入与输出；查看不会暂停或改动工程。[0m
+        [36m</p>[39m
+      [36m</div>[39m
+    [36m</section>[39m
+  [36m</div>[39m
+  [36m<div>[39m
+    [36m<section[39m
+      [33maria-label[39m=[32m"当前工作流"[39m
+      [33mclass[39m=[32m"nl-topbar"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"nl-topbar-head"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"nl-topbar-summary"[39m
+        [36m>[39m
+          [36m<strong>[39m
+            [0m等你决定：sample[0m
+          [36m</strong>[39m
+          [36m<span>[39m
+            [0m展开“工作流”可查看每个阶段与它的真实任务。[0m
+          [36m</span>[39m
+        [36m</div>[39m
+        [36m<button[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0m定位当前事项[0m
+        [36m</button>[39m
+        [36m<button[39m
+          [33maria-controls[39m=[32m"nl-workflow-stages"[39m
+          [33maria-expanded[39m=[32m"false"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0m工作流[0m
+        [36m</button>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mhidden[39m=[32m""[39m
+        [33mid[39m=[32m"nl-workflow-stages"[39m
+      [36m>[39m
+        [36m<ol[39m
+          [33mclass[39m=[32m"nl-stage-rail"[39m
+        [36m>[39m
+          [36m<li>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"nl-stage nl-stage-waiting_user"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-name"[39m
+              [36m>[39m
+                [0msample[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-state"[39m
+              [36m>[39m
+                [0m待你决定[0m
+              [36m</span>[39m
+            [36m</button>[39m
+          [36m</li>[39m
+          [36m<li>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"nl-stage nl-stage-pending"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-name"[39m
+              [36m>[39m
+                [0mfirst_chapter[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-stage-state"[39m
+              [36m>[39m
+                [0m待开始[0m
+              [36m</span>[39m
+            [36m</button>[39m
+          [36m</li>[39m
+        [36m</ol>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"nl-stage-hint"[39m
+        [36m>[39m
+          [0m点击阶段查看真实任务、输入与输出；查看不会暂停或改动工程。[0m
+        [36m</p>[39m
+      [36m</div>[39m
+    [36m</section>[39m
+  [36m</div>[39m
+  [36m<div>[39m
+    [36m<section[39m
+      [33maria-label[39m=[32m"创作审阅"[39m
+      [33mclass[39m=[32m"nl-review"[39m
+    [36m>[39m
+      [36m<header[39m
+        [33mclass[39m=[32m"nl-review-head"[39m
+      [36m>[39m
+        [36m<div>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"nl-result-label"[39m
+          [36m>[39m
+            [0m章节包[0m
+          [36m</span>[39m
+          [36m<h2>[39m
+            [0m整章审阅[0m
+          [36m</h2>[39m
+          [36m<p[39m
+            [33mclass[39m=[32m"nl-muted"[39m
+          [36m>[39m
+            [0m章节候选[0m
+          [36m</p>[39m
+        [36m</div>[39m
+        [36m<button[39m
+          [33maria-label[39m=[32m"关闭审阅"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0m关闭[0m
+        [36m</button>[39m
+      [36m</header>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"nl-review-body"[39m
+      [36m>[39m
+        [36m<section[39m
+          [33maria-label[39m=[32m"章节内容包"[39m
+          [33mclass[39m=[32m"nl-review-bundle"[39m
+        [36m>[39m
+          [36m<h3>[39m
+            [0m音画字幕同包[0m
+          [36m</h3>[39m
+          [36m<ul[39m
+            [33mclass[39m=[32m"nl-parts"[39m
+          [36m>[39m
+            [36m<li[39m
+              [33mclass[39m=[32m"nl-part"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-part-kind"[39m
+              [36m>[39m
+                [0m画面[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-muted"[39m
+              [36m>[39m
+                [0mvideo[0m
+                [0m@[0m
+                [0m1[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-muted"[39m
+              [36m>[39m
+                [0m尚无可下载文件[0m
+              [36m</span>[39m
+            [36m</li>[39m
+            [36m<li[39m
+              [33mclass[39m=[32m"nl-part"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-part-kind"[39m
+              [36m>[39m
+                [0m旁白[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-muted"[39m
+              [36m>[39m
+                [0maudio[0m
+                [0m@[0m
+                [0m1[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-muted"[39m
+              [36m>[39m
+                [0m尚无可下载文件[0m
+              [36m</span>[39m
+            [36m</li>[39m
+            [36m<li[39m
+              [33mclass[39m=[32m"nl-part"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-part-kind"[39m
+              [36m>[39m
+                [0m字幕[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-muted"[39m
+              [36m>[39m
+                [0msubs[0m
+                [0m@[0m
+                [0m1[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-muted"[39m
+              [36m>[39m
+                [0m尚无可下载文件[0m
+              [36m</span>[39m
+            [36m</li>[39m
+          [36m</ul>[39m
+          [36m<p[39m
+            [33mclass[39m=[32m"nl-muted"[39m
+          [36m>[39m
+            [0m来源镜头 [0m
+            [0mshot-1[0m
+          [36m</p>[39m
+        [36m</section>[39m
+        [36m<section[39m
+          [33maria-label[39m=[32m"创作内容"[39m
+          [33mclass[39m=[32m"nl-review-content"[39m
+        [36m>[39m
+          [36m<p[39m
+            [33mclass[39m=[32m"nl-muted"[39m
+          [36m>[39m
+            [0m还没有简报。[0m
+          [36m</p>[39m
+          [36m<p[39m
+            [33mclass[39m=[32m"nl-muted"[39m
+          [36m>[39m
+            [0m还没有脚本。[0m
+          [36m</p>[39m
+          [36m<p[39m
+            [33mclass[39m=[32m"nl-muted"[39m
+          [36m>[39m
+            [0m还没有分镜。[0m
+          [36m</p>[39m
+        [36m</section>[39m
+      [36m</div>[39m
+      [36m<footer[39m
+        [33mclass[39m=[32m"nl-review-actions"[39m
+      [36m>[39m
+        [36m<button[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0m接受[0m
+        [36m</button>[39m
+        [36m<button[39m
+          [33mdisabled[39m=[32m""[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0m提出修改[0m
+        [36m</button>[39m
+        [36m<button[39m
+          [33mdisabled[39m=[32m""[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0m拒绝[0m
+        [36m</button>[39m
+        [36m<button[39m
+          [33mclass[39m=[32m"nl-primary"[39m
+          [33mdisabled[39m=[32m""[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0m确认并采用[0m
+        [36m</button>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"nl-muted"[39m
+        [36m>[39m
+          [0m关闭面板不会产生任何决定。[0m
+        [36m</p>[39m
+      [36m</footer>[39m
+    [36m</section>[39m
+  [36m</div>[39m
+  [36m<div>[39m
+    [36m<section[39m
+      [33maria-label[39m=[32m"创作审阅"[39m
+      [33mclass[39m=[32m"nl-review"[39m
+    [36m>[39m
+      [36m<header[39m
+        [33mclass[39m=[32m"nl-review-head"[39m
+      [36m>[39m
+        [36m<div>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"nl-result-label"[39m
+          [36m>[39m
+            [0m章节包[0m
+          [36m</span>[39m
+          [36m<h2>[39m
+            [0m整章审阅[0m
+          [36m</h2>[39m
+          [36m<p[39m
+            [33mclass[39m=[32m"nl-muted"[39m
+          [36m>[39m
+            [0m章节候选[0m
+          [36m</p>[39m
+        [36m</div>[39m
+      [36m</header>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"nl-review-body"[39m
+      [36m>[39m
+        [36m<section[39m
+          [33maria-label[39m=[32m"章节内容包"[39m
+          [33mclass[39m=[32m"nl-review-bundle"[39m
+        [36m>[39m
+          [36m<h3>[39m
+            [0m音画字幕同包[0m
+          [36m</h3>[39m
+          [36m<ul[39m
+            [33mclass[39m=[32m"nl-parts"[39m
+          [36m>[39m
+            [36m<li[39m
+              [33mclass[39m=[32m"nl-part"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-part-kind"[39m
+              [36m>[39m
+                [0m画面[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-muted"[39m
+              [36m>[39m
+                [0mvideo[0m
+                [0m@[0m
+                [0m1[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-muted"[39m
+              [36m>[39m
+                [0m尚无可下载文件[0m
+              [36m</span>[39m
+            [36m</li>[39m
+            [36m<li[39m
+              [33mclass[39m=[32m"nl-part"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-part-kind"[39m
+              [36m>[39m
+                [0m旁白[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-muted"[39m
+              [36m>[39m
+                [0maudio[0m
+                [0m@[0m
+                [0m1[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-muted"[39m
+              [36m>[39m
+                [0m尚无可下载文件[0m
+              [36m</span>[39m
+            [36m</li>[39m
+            [36m<li[39m
+              [33mclass[39m=[32m"nl-part"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-part-kind"[39m
+              [36m>[39m
+                [0m字幕[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-muted"[39m
+              [36m>[39m
+                [0msubs[0m
+                [0m@[0m
+                [0m1[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"nl-muted"[39m
+              [36m>[39m
+                [0m尚无可下载文件[0m
+              [36m</span>[39m
+            [36m</li>[39m
+          [36m</ul>[39m
+          [36m<p[39m
+            [33mclass[39m=[32m"nl-muted"[39m
+          [36m>[39m
+            [0m来源镜头 [0m
+            [0mshot-1[0m
+          [36m</p>[39m
+        [36m</section>[39m
+        [36m<section[39m
+          [33maria-label[39m=[32m"创作内容"[39m
+          [33mclass[39m=[32m"nl-review-content"[39m
+        [36m>[39m
+          [36m<p[39m
+            [33mclass[39m=[32m"nl-muted"[39m
+          [36m>[39m
+            [0m还没有简报。[0m
+          [36m</p>[39m
+          [36m<p[39m
+            [33mclass[39m=[32m"nl-muted"[39m
+          [36m>[39m
+            [0m还没有脚本。[0m
+          [36m</p>[39m
+          [36m<p[39m
+            [33mclass[39m=[32m"nl-muted"[39m
+          [36m>[39m
+            [0m还没有分镜。[0m
+          [36m</p>[39m
+        [36m</section>[39m
+      [36m</div>[39m
+      [36m<footer[39m
+        [33mclass[39m=[32m"nl-review-actions"[39m
+      [36m>[39m
+        [36m<button[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0m接受[0m
+        [36m</button>[39m
+        [36m<button[39m
+          [33mdisabled[39m=[32m""[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0m提出修改[0m
+        [36m</button>[39m
+        [36m<button[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0m拒绝[0m
+        [36m</button>[39m
+        [36m<button[39m
+          [33mclass[39m=[32m"nl-primary"[39m
+          [33mdisabled[39m=[32m""[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0m确认并采用[0m
+        [36m</button>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"nl-muted"[39m
+        [36m>[39m
+          [0m关闭面板不会产生任何决定。[0m
+        [36m</p>[39m
+      [36m</footer>[39m
+    [36m</section>[39m
+  [36m</div>[39m
+[36m</body>[39m
+ ❯ Object.getElementError node_modules/.pnpm/@testing-library+dom@10.4.2/node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ getElementError node_modules/.pnpm/@testing-library+dom@10.4.2/node_modules/@testing-library/dom/dist/query-helpers.js:20:35
+ ❯ getMultipleElementsFoundError node_modules/.pnpm/@testing-library+dom@10.4.2/node_modules/@testing-library/dom/dist/query-helpers.js:23:10
+ ❯ node_modules/.pnpm/@testing-library+dom@10.4.2/node_modules/@testing-library/dom/dist/query-helpers.js:55:13
+ ❯ node_modules/.pnpm/@testing-library+dom@10.4.2/node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ tests/agent-driven/product/observation-ui.test.tsx:146:19
+    144|   it("shows the chapter bundle as one package and offers only the allo…
+    145|     render(<CreativeReviewPanel package={PACKAGE} onAccept={vi.fn()} o…
+    146|     expect(screen.getByText("音画字幕同包")).toBeTruthy();
+       |                   ^
+    147|     expect(screen.getByText("画面")).toBeTruthy();
+    148|     expect(screen.getByText("旁白")).toBeTruthy();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/15]⎯
+
+ FAIL  tests/agent-driven/product/observation-ui.test.tsx > the system control panel > offers no control for a shared service and no model mutation at all
+AssertionError: expected [ '检查就绪状态', '检查就绪状态', '检查就绪状态' ] to have a length of 1 but got 3
+
+- Expected
++ Received
+
+- 1
++ 3
+
+ ❯ tests/agent-driven/product/observation-ui.test.tsx:209:59
+    207|     expect(buttons).not.toContain("预热");
+    208|     expect(buttons).not.toContain("卸载");
+    209|     expect(buttons.filter((label) => label === "检查就绪状态")).toHaveLength…
+       |                                                           ^
+    210|   });
+    211| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[15/15]⎯
+
+
+ Test Files  4 failed | 1 passed (5)
+      Tests  15 failed | 37 passed (52)
+   Start at  21:34:42
+   Duration  32.23s (transform 498ms, setup 0ms, collect 13.13s, tests 250ms, environment 8.24s, prepare 7.05s)
+

@@ -1,0 +1,270 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/product-workbench
+
+ ❯ tests/agent-driven/product/observation-ui.test.tsx (21 tests | 1 failed) 92ms
+   ✓ the R4 workflow bar > starts collapsed and shows a stage summary 17ms
+   ✓ the R4 workflow bar > shows the stages horizontally with their creative names 8ms
+   ✓ the R4 workflow bar > shows the real attempt, input and output of a node 9ms
+   × the R4 workflow bar > closes the dialog with Escape and returns the focus to the stage 18ms
+     → expected <body><div>…(1)</div></body> to be <button type="button" …(1)>…(2)</button> // Object.is equality
+   ✓ the R4 workflow bar > has no control effect when the dialog is closed 11ms
+   ✓ the R4 workflow bar > says when the connection is broken instead of pretending the state is current 2ms
+   ✓ the creative review panel > separates closing from deciding 4ms
+   ✓ the creative review panel > shows the chapter bundle as one package and offers only the allowed choices 4ms
+   ✓ the creative review panel > asks the host to open a part instead of playing it itself 6ms
+   ✓ the creative review panel > presents the cover as its own review 2ms
+   ✓ the system control panel > renders a non-modal aside without a backdrop 3ms
+   ✓ the system control panel > closes on Escape without taking the focus when it opens 1ms
+   ✓ the system control panel > shows a stale sample as unknown 2ms
+   ✓ the system control panel > shows a sample from the future or an unreadable one as unknown 2ms
+   ✓ the system control panel > tells the truth about a metric that has no value 1ms
+   ✓ the system control panel > offers no control for a shared service and no model mutation at all 2ms
+   ✓ the native sync indicator > does not claim the editor is loaded before the acknowledgement arrives 0ms
+   ✓ the native sync indicator > does not claim the editor is loaded when the acknowledgement is from another revision 0ms
+   ✓ the native sync indicator > does not claim the editor is loaded when the selection does not match 0ms
+   ✓ the native sync indicator > does not claim the editor is loaded when the caller only says so 0ms
+   ✓ the native sync indicator > claims the editor is loaded only when the acknowledgement matches 0ms
+ ❯ tests/agent-driven/product/fixed-workflow-service.test.ts (26 tests | 3 failed) 138ms
+   ✓ the fixed workflow service > prepares a run with the fixed scope and an accepted definition gate 48ms
+   ✓ the fixed workflow service > refuses to prepare a run without the project facts 1ms
+   ✓ the fixed workflow service > refuses a content decision that did not accept the content 2ms
+   ✓ the fixed workflow service > refuses to start without an active authorization 2ms
+   × the fixed workflow service > authorizes a run in a trusted session and then starts it 13ms
+     → The authorization belongs to another principal
+   ✓ the fixed workflow service > refuses to start under another principal's authorization 1ms
+   ✓ the fixed workflow service > keeps pause and cancel available without a grant, because they are safe controls 1ms
+   ✓ the fixed workflow service > refuses a first chapter before the sample gate is accepted 2ms
+   × the fixed workflow service > refuses a chapter package before the first chapter is accepted 37ms
+     → expected ProductError: The package names an attemp… { …(5) } to match object { code: 'RUN_GATE_BLOCKED' }
+(7 matching properties omitted from actual)
+   ✓ the fixed workflow service > does not let an audio package stand in for the chapter gate 2ms
+   ✓ the fixed workflow service > refuses a chapter package that does not carry every chapter part 2ms
+   ✓ the fixed workflow service > refuses a package that comes from an attempt that is not the current one 2ms
+   ✓ the fixed workflow service > refuses a package that comes from a cancelled attempt 1ms
+   ✓ the fixed workflow service > publishes the same package twice without resetting anything 1ms
+   ✓ the fixed workflow service > refuses a reuse whose quality is different 2ms
+   × the fixed workflow service > keeps the cover an independent package 1ms
+     → The chapter package cannot be published before its predecessors are accepted
+   ✓ the fixed workflow service > refuses a decision that is bound to another package version 1ms
+   ✓ the fixed workflow service > refuses a choice the package does not allow 1ms
+   ✓ the fixed workflow service > records a plain review without granting any approval 2ms
+   ✓ the fixed workflow service > fails the adoption closed when MAIN cannot register the approval 2ms
+   ✓ the fixed workflow service > refuses an adoption whose impact has expired 1ms
+   ✓ the fixed workflow service > refuses an adoption whose impact belongs to another project 2ms
+   ✓ the fixed workflow service > records the limited approval against the real attempt and the frozen change id 2ms
+   ✓ the fixed workflow service > refuses a trusted confirmation that does not match the action 1ms
+   ✓ the fixed workflow service > guards a dispatch against the durable facts of the run 2ms
+   ✓ the fixed workflow service > shows the real attempts of the workflow nodes 5ms
+ ✓ tests/agent-driven/product/creative-service.test.ts (18 tests) 66ms
+ ❯ tests/agent-driven/product/execution-guard.test.ts (19 tests | 1 failed) 14ms
+   ✓ the execution guard > refuses to authorize anything without the durable facts 1ms
+   ✓ the execution guard > allows an effect whose prerequisites are accepted 1ms
+   ✓ the execution guard > blocks a first chapter while the sample gate is not accepted 0ms
+   ✓ the execution guard > refuses a binding that belongs to another scope 0ms
+   ✓ the execution guard > refuses a scope that does not hash to the run's own digest 0ms
+   ✓ the execution guard > refuses an action the scope does not allow 0ms
+   ✓ the execution guard > refuses an action that is not one of the fixed actions 0ms
+   × the execution guard > refuses an action that does not belong to the step 8ms
+     → expected error to match asymmetric matcher
+   ✓ the execution guard > refuses an unknown step 0ms
+   ✓ the execution guard > refuses a scope that asks for a paid, external or runtime action 0ms
+   ✓ the execution guard > refuses a revoked or expired authorization 0ms
+   ✓ the execution guard > refuses an effect under another principal 0ms
+   ✓ the execution guard > refuses a stale attempt 0ms
+   ✓ the execution guard > refuses an attempt that is over 0ms
+   ✓ the execution guard > refuses a run that is paused, cancelled or waiting for a decision 0ms
+   ✓ the execution guard > keeps the safe controls available without a grant 0ms
+   ✓ the execution guard > refuses to pause a run that was already cancelled 0ms
+   ✓ the execution guard > refuses a binding without a plan version, an attempt or an authorization 0ms
+   ✓ the execution guard > never accepts a gate on its own 1ms
+ ✓ tests/agent-driven/product/digest.test.ts (5 tests) 3ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/product/execution-guard.test.ts > the execution guard > refuses an action that does not belong to the step
+AssertionError: expected error to match asymmetric matcher
+
+- Expected
++ Received
+
+- ObjectContaining {
+-   "code": "CAPABILITY_UNAVAILABLE",
++ ProductError {
++   "message": "The binding names another step",
++   "code": "RUN_PLAN_STALE",
++   "http_status": 409,
++   "retryable": false,
++   "next_actions": [],
++   "details": {
++     "expected": "first_chapter",
++     "received": "cover",
++   },
++   "name": "ProductError",
+  }
+
+ ❯ tests/agent-driven/product/execution-guard.test.ts:170:7
+    168|         facts(),
+    169|       ),
+    170|     ).toThrowError(expect.objectContaining({ code: "CAPABILITY_UNAVAIL…
+       |       ^
+    171|   });
+    172| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  tests/agent-driven/product/fixed-workflow-service.test.ts > the fixed workflow service > authorizes a run in a trusted session and then starts it
+ProductError: The authorization belongs to another principal
+ ❯ FixedWorkflowService.#requireActiveGrant src/host/creative/fixed-workflow-service.ts:1422:13
+    1420|     }
+    1421|     if (grant.principal_id !== principalId) {
+    1422|       throw new ProductError("UNAUTHORIZED", "The authorization belong…
+       |             ^
+    1423|         details: { expected: grant.principal_id, received: principalId…
+    1424|       });
+ ❯ src/host/creative/fixed-workflow-service.ts:615:14
+ ❯ MemoryProductRepository.transaction tests/agent-driven/product/support/memory-repository.ts:201:14
+ ❯ FixedWorkflowService.#command src/host/creative/fixed-workflow-service.ts:592:29
+ ❯ FixedWorkflowService.startRun src/host/creative/fixed-workflow-service.ts:562:17
+ ❯ tests/agent-driven/product/fixed-workflow-service.test.ts:357:43
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  tests/agent-driven/product/fixed-workflow-service.test.ts > the fixed workflow service > refuses a chapter package before the first chapter is accepted
+AssertionError: expected ProductError: The package names an attemp… { …(5) } to match object { code: 'RUN_GATE_BLOCKED' }
+(7 matching properties omitted from actual)
+
+- Expected
++ Received
+
+- {
+-   "code": "RUN_GATE_BLOCKED",
++ ProductError {
++   "code": "RUN_PLAN_STALE",
+  }
+
+ ❯ tests/agent-driven/product/fixed-workflow-service.test.ts:451:5
+    449|       TRUSTED_CALLER,
+    450|     );
+    451|     await expect(
+       |     ^
+    452|       publish(context, { package_id: "package-chapter", kind: "chapter…
+    453|     ).rejects.toMatchObject({ code: "RUN_GATE_BLOCKED" });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ FAIL  tests/agent-driven/product/fixed-workflow-service.test.ts > the fixed workflow service > keeps the cover an independent package
+ProductError: The chapter package cannot be published before its predecessors are accepted
+ ❯ FixedWorkflowService.#assertGatePrerequisites src/host/creative/fixed-workflow-service.ts:1502:15
+    1500|       const gate = run.checkpoint_json.gates.find((candidate) => candi…
+    1501|       if (gate === undefined || gate.state !== "accepted") {
+    1502|         throw new ProductError(
+       |               ^
+    1503|           "RUN_GATE_BLOCKED",
+    1504|           "The chapter package cannot be published before its predeces…
+ ❯ src/host/creative/fixed-workflow-service.ts:842:12
+ ❯ MemoryProductRepository.transaction tests/agent-driven/product/support/memory-repository.ts:201:14
+ ❯ FixedWorkflowService.publishReviewPackage src/host/creative/fixed-workflow-service.ts:830:29
+ ❯ publish tests/agent-driven/product/fixed-workflow-service.test.ts:214:26
+ ❯ tests/agent-driven/product/fixed-workflow-service.test.ts:556:25
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+
+ FAIL  tests/agent-driven/product/observation-ui.test.tsx > the R4 workflow bar > closes the dialog with Escape and returns the focus to the stage
+AssertionError: expected <body><div>…(1)</div></body> to be <button type="button" …(1)>…(2)</button> // Object.is equality
+
+- Expected
++ Received
+
+@@ -1,5 +1,39 @@
++ <body>
++   <div>
++     <section
++       aria-label="当前工作流"
++       class="nl-topbar"
++     >
++       <div
++         class="nl-topbar-head"
++       >
++         <div
++           class="nl-topbar-summary"
++         >
++           <strong>
++             等你决定：样片
++           </strong>
++           <span>
++             展开“工作流”可查看每个阶段与它的真实任务。
++           </span>
++         </div>
++         <button
++           aria-controls="nl-workflow-stages"
++           aria-expanded="true"
++           type="button"
++         >
++           收起工作流
++         </button>
++       </div>
++       <div
++         id="nl-workflow-stages"
++       >
++         <ol
++           class="nl-stage-rail"
++         >
++           <li>
+              <button
+                class="nl-stage nl-stage-waiting_user"
+                type="button"
+              >
+                <span
+@@ -9,7 +43,35 @@
+                </span>
+                <span
+                  class="nl-stage-state"
+                >
+                  待你决定
++               </span>
++             </button>
++           </li>
++           <li>
++             <button
++               class="nl-stage nl-stage-pending"
++               type="button"
++             >
++               <span
++                 class="nl-stage-name"
++               >
++                 首章
++               </span>
++               <span
++                 class="nl-stage-state"
++               >
++                 待开始
+                </span>
+              </button>
++           </li>
++         </ol>
++         <p
++           class="nl-stage-hint"
++         >
++           点击阶段查看真实任务、输入与输出；查看不会暂停或改动工程。
++         </p>
++       </div>
++     </section>
++   </div>
++ </body>
+
+ ❯ tests/agent-driven/product/observation-ui.test.tsx:138:36
+    136|     fireEvent.keyDown(document, { key: "Escape" });
+    137|     expect(screen.queryByRole("dialog")).toBeNull();
+    138|     expect(document.activeElement).toBe(trigger);
+       |                                    ^
+    139|   });
+    140| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯
+
+
+ Test Files  3 failed | 2 passed (5)
+      Tests  5 failed | 84 passed (89)
+   Start at  22:04:33
+   Duration  28.24s (transform 509ms, setup 0ms, collect 9.40s, tests 313ms, environment 7.48s, prepare 7.34s)
+
