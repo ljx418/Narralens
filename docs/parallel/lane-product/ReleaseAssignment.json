@@ -1,0 +1,63 @@
+{
+  "assignment_id": "A-PRODUCT-001",
+  "ticket": [
+    "IT-A03",
+    "IT-A04",
+    "IT-A05"
+  ],
+  "phase": "A",
+  "status": "RELEASED",
+  "authorization": "MAIN task delegates active user goal IT-A01..A06 actual development",
+  "base_sha": "ca5b67a8285b130c79055317c6202f73cfbb99c8",
+  "contract_sha": "ca5b67a8285b130c79055317c6202f73cfbb99c8",
+  "contract_manifest_sha256": "532cd43c963a1c94de5f8ce34f3c6eb7281fded80047f74dc5dbe1a70aa65170",
+  "directory": "/mnt/c/workspace/videoworkline/Narralens-agents/product-workbench",
+  "branch": "agent-driven/lane-product",
+  "owner": "PRODUCT Codex",
+  "writer": "Codex documentation and acceptance; Claude stopped exit0",
+  "session": "4548ddcb-e870-405b-863f-a17a4a7ed683",
+  "allowed_new_prefixes": [
+    "src/app/observation/",
+    "src/app/system/",
+    "src/host/creative/",
+    "src/host/workspace/",
+    "tests/agent-driven/product/",
+    "tools/agent-driven/product/",
+    "docs/parallel/lane-product/"
+  ],
+  "protected_exceptions": [],
+  "commands": [
+    "pnpm exec tsc --noEmit",
+    "pnpm exec vitest run --config vitest.config.ts tests/agent-driven/product --maxWorkers=1"
+  ],
+  "resource_reservation": "MAIN A-BASELINE-CHECK RUNNING: no install/tsc/test/browser/ffmpeg until released",
+  "rollback": "Remove new mounts via MAIN; preserve old editor and source. No DB downgrade/reset/stash.",
+  "independent_review": "REVIEW_PENDING",
+  "human_gate": "NOT_RUN",
+  "network": "no paid/external transfer/download/provider switch/J drive",
+  "outputs": [
+    "persistence-injected creative service",
+    "fixed workflow/review service",
+    "R4 workbench components"
+  ],
+  "acceptance_case_ids": [
+    "A-CREATE",
+    "A-WRITE",
+    "A-ENTRANCES",
+    "A-UI",
+    "EX-01",
+    "EX-03",
+    "EX-04",
+    "EX-05",
+    "EX-09",
+    "EX-18",
+    "EX-23"
+  ],
+  "process": {
+    "pid": 3531672,
+    "exec_handle": 59591,
+    "exit_code": 0,
+    "log": "docs/parallel/lane-product/logs/claude-4548ddcb-resume2.jsonl"
+  },
+  "implementation_sha": "7e4f8b0a4ea318f0c607ed72bcfc4f4e521306f6"
+}
