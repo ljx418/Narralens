@@ -265,3 +265,17 @@ it('refuses a same-bytes canonical path substitution after pinned proof', async 
     await expect(f.creation.commit(input)).rejects.toMatchObject({ code: 'REVISION_CONFLICT' });
     expect(f.count('cp_a0_project_origin')).toBe(0);
 });
+
+it('re-proves reused snapshot durability through its source and both parent directories', async () => {
+    const f = await fixture(), input = await prepared(f);
+    const reused = await f.snapshots.publish({projectId: input.reservation.project_id, engine: 'openfilm', engineUpstreamSha: OPENFILM_UPSTREAM_SHA, sourceRoot: input.sourceRoot, roots: ['film.html']});
+    expect(reused.created).toBe(false);
+    const visited: string[] = [];
+    const verifier = new CreationSourceVerifier(f.snapshots, '/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm', f.createdRoot, {afterFsync: path => { visited.push(path); }});
+    await verifier.prove(input.reservation, reused, input.fact);
+    const snapshotRoot = f.snapshots.snapshotRoot(input.reservation.project_id, input.snapshot.snapshot_id);
+    expect(visited).toEqual(expect.arrayContaining([join(snapshotRoot, 'source', 'film.html'), join(snapshotRoot, 'source'), snapshotRoot, f.snapshots.projectRoot(input.reservation.project_id), join(f.root, 'snapshots'), input.sourceRoot, join(f.createdRoot, input.reservation.project_id), f.createdRoot]));
+    const interrupted = new CreationSourceVerifier(f.snapshots, '/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm', f.createdRoot, {afterFsync: path => { if (path === snapshotRoot) throw new Error('snapshot fsync boundary interrupted'); }});
+    await expect(interrupted.prove(input.reservation, reused, input.fact)).rejects.toThrow('snapshot fsync boundary interrupted');
+    expect(f.store.activeCommit(input.reservation.project_id)).toBeUndefined();
+});

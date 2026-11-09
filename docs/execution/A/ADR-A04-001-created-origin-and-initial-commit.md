@@ -24,3 +24,8 @@ CP01 §85明确script_ref与narration_asset_id允许null，合法前期路径是
 第一次扩大旧回归main-created-foundation保留80通过/6失败，6项因隔离worktree未包含.gitignore中的D1生成媒体而ENOENT。随后只复制canonical已验旧测试资产为独立文件，视觉SHA逐字匹配冻结Manifest，收据在legacy-fixture-copy；没有生成替代语音或修改旧断言，重跑90/90通过。旧D1语音不是A真人语音。
 
 仍未实现/启用：自动creation worker与专用启动恢复、一般project.create/job/context生产装配、授权资产catalog、created后续adopt/history事实写入、M5 created交互接线、真实native ack/A片/T20。独立组件复核待更新，A04 package与A整轮均保持进行中，不据本组件宣布完成。
+
+
+### 复用snapshot的耐久性补强
+
+3476独立复核指出：SnapshotStore.publish对已有finalRoot返回created:false，不能由“目录存在”推断上次已完成parent fsync。CreationSourceVerifier现在无论snapshot是否复用，都重新fsync author/source两棵树的每个闭包文件、目录、snapshot目录、project snapshot父目录及全局snapshot根；失败不签proof。新增真实同步后的只读observer记录验证路径，并在snapshot同步边界抛错验证不产生指针（控制性异常，不冒充真实进程死亡/ENOSPC）。main-created-durability：tsc0、34/34；完整worker/recovery与真实T20依旧未运行。

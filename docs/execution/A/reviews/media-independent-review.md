@@ -195,3 +195,34 @@ MAIN main-harness-rights日志只证明tsc.exit0、6个helper测试通过（分�
 | `docs/execution/A/logs/main-harness-rights/tests.txt` | `e765caf819b31855b477c86e181301f58dc81f6631f68b288feda3bed73e3048` |
 | `docs/execution/A/logs/main-harness-rights/tests.exit` | `9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa` |
 | `docs/execution/A/logs/main-harness-rights/typecheck.exit` | `9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa` |
+
+## 最终增量复核：3476b40955e1267568547f0f73d429a22a7aa217（2026-11-10）
+
+只读确认HEAD为上述fullSHA，git status --porcelain为空。本次只读差异、源码、测试、日志、实际文件摘要，不运行测试、render CLI、Host、ffmpeg或Chrome，不修改MAIN及运行根。本节覆盖自上节之后的harness分类/诚实输出、本地fd协议修正及其诊断实证，不重新签署整个模块。
+
+**R3及R3b源码缺陷关闭。** harness-closure.ts只把html/htm/css/js/mjs/cjs/json视为native_source，已知字幕/许可为supplement，其他未声明资源全部asset；字体和opaque.dat不再逃过rights检查。声明仍按实际SHA绑定，不存在文件、跨ID/ref别名、重复、symlink继续拒绝；未声明asset仍无rights_ref，由既有preflight阻断。新测试含font.woff2与opaque.dat。只读main-created-foundation-r2日志：helper8/8包含于7文件90/90组合，tests.exit0及typecheck.exit0；不把历史main-harness-rights的旧6/6日志当成新版8/8证据。
+
+**首个真实CLI失败保留且原因可核对。** main-harness-real-first/worker-failure-response.json明确报“Protocol 'fd' not on whitelist 'file,pipe'”，encode未完成。当前media-process-policy将每个ffmpeg输入及ffprobe的协议集合扩为file,pipe,fd；只添加本地文件描述符传输，没有新增HTTP/网络协议。pin policy摘要已同步且独立重算一致。代码注释称“FFmpeg 7”而实际inventory记ffmpeg6.1.1，属于注释版本表述不精确，不影响本次由真实错误指明fd需求的因果证据；不据此声称所有FFmpeg版本验证。
+
+**真正诊断CLI到encode/QC/package现有实证，原来的CLI NOT_RUN仅对此狭窄case升级。** 读取main-harness-real-r2/capture.json记录的实际命令及render.exit=0、render.txt。输入为make-diagnostic-project.ts生成的1秒/30帧、3个page clip、320×180影片，440Hz合成测试音；字幕明确说不是人类旁白，许可/manifest明确为内部生成诊断事实。未混淆成授权真人素材A片。
+
+日志输出MODULE_PACKAGE_CREATED，failure=null，只有encode_finished / qc_finished / package_published三个真实技术边界。ffprobe实体显示h264、AAC、单视频/音频流、30帧、1.000000秒；full_decode.log为空且QC记录完整decode通过。只读独立重算capture列出的3项日志摘要，0不符；进一步核对inventory列出的15个实际文件的bytes及SHA256，0缺失/不符。真实MP4为40274 bytes，SHA256 `a90543f11554712051704a3e7fc4d682b8be28f75c982bd183bc9b83e24960e3`，与manifest.media_ref一致。字幕/许可/原生附件、probe/decode及published receipt均有实际文件和摘要，不仅是stdout断言。我没有重跑decode或播放，不额外签署视听内容。
+
+**诚实输出改动确认。** render-delivery.ts:109-112的commit只是明确的diagnostic sink，不再发送假的ready_committed/events_published；:190-194成功只报MODULE_PACKAGE_CREATED，production_ready=false、durable_commit=false。内存fence仍是harness专用，内部RenderOutcome.ready不能被转述为持久生产ready。此次输出/边界与实际日志相符。
+
+判定：R3原必block分类、R3b字体许可漏检均FIXED；当前一秒synthetic fixture的实际CLI encode/probe/full-decode/atomic-package为**DIAGNOSTIC_EVIDENCE_PASS**。不外推真实人类中文录音/60–180秒授权影片、可编辑重开改单镜双导出、生产鉴权下载、SQLite ready/receipt/outbox事务、重启对账或任何T20故障矩阵case已通过。R1/R4此前具体修复结论保持，MAIN生产R2及完整A/T20仍开放，**总评NEEDS_WORK**。
+
+| 本次源码/证据 | SHA256 |
+|---|---|
+| `tools/agent-driven/media/harness-closure.ts` | `de0bcad153cbc17846da330382fcc064d303bac81c4aebf548b112a01ca6ddd9` |
+| `tools/agent-driven/media/render-delivery.ts` | `8f57fbe56d3869cfc298b0fab42a9f1a2bd01237a148630c525317cacf7e1fdb` |
+| `tools/agent-driven/media/make-diagnostic-project.ts` | `7252eaab3ea57322c186447eccb14c8be3e8a0025eb9ef50ba49532593c5b78e` |
+| `src/host/render/media-process-policy.mjs` | `3d448ff79c497ee5e123f6931c554a716bc033088e05e701e1de42e48ae995bc` |
+| `src/host/render/openfilm-render-pin.json` | `1b0ddd3dd031352092ae83535f598c7bda1f1ca2cccbb83ad9e377a0ec71bb06` |
+| `tests/agent-driven/media/harness-closure.test.ts` | `ed51d03d32cef4867403c4e8ed34ea034589746b2405becc60be1eebc88d2c88` |
+| `docs/execution/A/logs/main-created-foundation-r2/tests.txt` | `c6f039fbdabd852dfe100c7f41b4bc473df7931c0dceff0f4bb7e8fc2dd54549` |
+| `docs/execution/A/logs/main-harness-real-first/worker-failure-response.json` | `62f46506eb708ee625ab4a5e97c50f47b3f7eff7cba753c45f593c58860b9cac` |
+| `docs/execution/A/logs/main-harness-real-r2/capture.json` | `b742e97c70913e4cccc0b28925e6f98dd1aa941bb2aaa9f2866721eefadbed23` |
+| `docs/execution/A/logs/main-harness-real-r2/artifact-inventory.json` | `fb0ea7f0703ed5095e41925437d802f2a3191dd36ee658a5e35fc8319e7c29aa` |
+| `docs/execution/A/logs/main-harness-real-r2/render.txt` | `22d01f16f3bdd5b8c5807772ab93b26180a510ae7de5bdbbc37b858a8daf6ab5` |
+| `docs/execution/A/logs/main-harness-real-r2/render.exit` | `9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa` |

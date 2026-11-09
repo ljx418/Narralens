@@ -1,0 +1,16 @@
+{
+  "commands": [
+    "corepack pnpm exec tsc --noEmit",
+    "corepack pnpm exec vitest run tests/agent-driven/integration/project-creation-store.test.ts --maxWorkers=1 --minWorkers=1"
+  ],
+  "typecheck_exit": 0,
+  "tests_exit": 0,
+  "tests": 34,
+  "scope": "Created-source durability/component validation; not process crash or A acceptance",
+  "artifacts": {
+    "tests.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "tests.txt": "4dae26257a3946705a3c5fc3d7b70d0ae3f0249a9fad58b695ca4d6aa5889271",
+    "typecheck.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "typecheck.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

@@ -1,0 +1,45 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:3781633) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/project-creation-store.test.ts (34 tests) 38292ms
+   ✓ reserves the one actual Job/transaction and replays the original receipt, ignoring only correlation metadata  402ms
+   ✓ does not turn a missing/foreign/expired trusted confirmation into creation permission  339ms
+   ✓ commits real published snapshot metadata atomically, survives DB reopen and preserves the accepted response  1292ms
+   ✓ rolls back every initial commit fact when failure occurs after state  1229ms
+   ✓ rolls back every initial commit fact when failure occurs after binding  1155ms
+   ✓ rolls back every initial commit fact when failure occurs after snapshot  1134ms
+   ✓ rolls back every initial commit fact when failure occurs after transaction  1132ms
+   ✓ rolls back every initial commit fact when failure occurs after pointer  978ms
+   ✓ rolls back every initial commit fact when failure occurs after source_fact  960ms
+   ✓ rolls back every initial commit fact when failure occurs after origin  960ms
+   ✓ rolls back every initial commit fact when failure occurs after brief  1152ms
+   ✓ rolls back every initial commit fact when failure occurs after command  1145ms
+   ✓ rolls back every initial commit fact when failure occurs after job  1134ms
+   ✓ rolls back every initial commit fact when failure occurs after outbox  1260ms
+   ✓ refuses a stale worker before any commit effect: owner  1296ms
+   ✓ refuses a stale worker before any commit effect: attempt  1234ms
+   ✓ refuses a stale worker before any commit effect: expired  946ms
+   ✓ refuses a stale worker before any commit effect: cancelled  947ms
+   ✓ rechecks creation schema in a live store, not only after constructing a replacement  1548ms
+   ✓ samples lease time after transaction admission instead of using time from before BEGIN  1147ms
+   ✓ samples trusted confirmation time after reservation transaction admission  337ms
+   ✓ rolls back when lease expires after the final writes  1153ms
+   ✓ rolls back when confirmation expires after the final writes  1165ms
+   ✓ does not mint a source proof for false native metadata: frame-count  1897ms
+   ✓ does not mint a source proof for false native metadata: fps  1793ms
+   ✓ does not mint a source proof for false native metadata: upstream  914ms
+   ✓ rejects a forged proof and byte changes after genuine pinned verification  926ms
+   ✓ resolves a genuine created project without migration/cached layout, including after reopen  1169ms
+   ✓ refuses created source symlink escape even with byte-identical committed content  1098ms
+   ✓ does not commit a proved snapshot when its author-source publication is replaced or absent  1102ms
+   ✓ lets the real Host rebuild a created layout and inventory without a migration or registration hook  1294ms
+   ✓ refuses a same-bytes canonical path substitution after pinned proof  1287ms
+   ✓ re-proves reused snapshot durability through its source and both parent directories  2563ms
+
+ Test Files  1 passed (1)
+      Tests  34 passed (34)
+   Start at  00:10:40
+   Duration  43.97s (transform 1.73s, setup 0ms, collect 3.93s, tests 38.29s, environment 0ms, prepare 1.13s)
+

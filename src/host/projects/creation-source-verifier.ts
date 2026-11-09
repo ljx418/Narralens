@@ -33,7 +33,7 @@ const sha = (bytes: Uint8Array) => createHash('sha256').update(bytes).digest('he
 /** Actual pinned parsing + immutable snapshot bytes; no injectable fake verification callback. */
 export class CreationSourceVerifier {
     readonly #proofs = new WeakMap<object, ProofRecord>();
-    constructor(private readonly snapshots: SnapshotStore, private readonly vendorRoot: string, private readonly createdRoot: string) { }
+    constructor(private readonly snapshots: SnapshotStore, private readonly vendorRoot: string, private readonly createdRoot: string, private readonly hooks: { afterFsync?: (path: string) => void } = {}) { }
     async prove(reservation: CreationReservation, snapshot: PublishedSnapshot, fact: CreatedSourceFact): Promise<VerifiedCreationSource> {
         if (snapshot.project_id !== reservation.project_id || snapshot.engine !== 'openfilm' || snapshot.snapshot_id !== snapshotIdFor(reservation.project_id, snapshot.source_digest))
             throw reject();
@@ -62,22 +62,21 @@ export class CreationSourceVerifier {
         const projection = await adapter.inspectSnapshot({ root, roots: fact.roots, subtitles: fact.subtitles }, snapshot.source_digest, { projectId: reservation.project_id, correlationId: reservation.request.meta.correlation_id, signal: new AbortController().signal });
         if (projection.problems.length || projection.frame_count !== fact.frame_count || projection.fps.num !== fact.fps.num || projection.fps.den !== fact.fps.den || projection.source_digest !== snapshot.source_digest)
             throw reject();
-        // Publication of the source and its parent entry must be durable before the DB pointer.
-        for (const file of [...digest.manifest.files, ...digest.manifest.assets])
-            await fsyncPath(resolve(authorRoot, file.path));
-        const directories = new Set<string>();
-        for (const file of [...digest.manifest.files, ...digest.manifest.assets]) {
-            let path = resolve(authorRoot, file.path, '..');
-            while (path.startsWith(authorRoot + sep)) {
-                directories.add(path);
-                path = resolve(path, '..');
+        // A reused snapshot may come from a crash after rename but before parent fsync.
+        // Prove both trees again; existence/created:false is not a durability receipt.
+        const sync = async (path: string) => { await fsyncPath(path); this.hooks.afterFsync?.(path); };
+        for (const tree of [authorRoot, root]) {
+            for (const file of [...digest.manifest.files, ...digest.manifest.assets]) await sync(resolve(tree, file.path));
+            const directories = new Set<string>();
+            for (const file of [...digest.manifest.files, ...digest.manifest.assets]) {
+                let path = resolve(tree, file.path, '..');
+                while (path.startsWith(tree + sep)) { directories.add(path); path = resolve(path, '..'); }
             }
+            for (const path of [...directories].sort((a, b) => b.length - a.length)) await sync(path);
+            await sync(tree);
         }
-        for (const path of [...directories].sort((a, b) => b.length - a.length))
-            await fsyncPath(path);
-        await fsyncPath(authorRoot);
-        await fsyncPath(project);
-        await fsyncPath(base);
+        await sync(project); await sync(base);
+        await sync(canonicalDirectory); await sync(projectRoot); await sync(resolve(projectRoot, '..'));
         const proof = Object.freeze({}) as VerifiedCreationSource;
         this.#proofs.set(proof, { command_id: reservation.command_id, project_id: reservation.project_id, snapshot_id: snapshot.snapshot_id, source_digest: snapshot.source_digest, fact_digest: canonicalDigest(fact), root, author_root: authorRoot, files: [...digest.manifest.files, ...digest.manifest.assets].map(({ path, sha256, size }) => ({ path, sha256, size })) });
         this.assertCurrent(proof, reservation, snapshot, fact);

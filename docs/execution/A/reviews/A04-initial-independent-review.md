@@ -1,3 +1,5 @@
+> **冻结3476续轮结论：A04-R1/R2/R3原发现已有针对性源码修正，已只读核实际字节及MAIN证据摘要；本审查未重跑90项。创建worker/专用恢复、生产route和完整A仍未完成；existing snapshot复用时的durability再证明继续列为恢复接线门。以下最初NEEDS_WORK和旧快照保留为历史，不表示旧三个路径仍未修正。**
+
 # A04 ProjectCreationStore独立只读审查
 
 结论：**NEEDS_WORK / 组件装配未完成**。发现租约/授权时间采样窗口（A04-R1，MAIN已给源码修正候选，待测）、source fact/engine version与真实snapshot的证明绑定缺口（A04-R2）、长寿命实例的内部DDL漂移检查缺口（A04-R3）。均是源码推导及确定复现方案，**本审查没有运行测试/SQL/Host/ffmpeg，也没有编辑MAIN文件**。store尚未进入生产project.create handler，不称线上漏洞或A04通过。
@@ -63,3 +65,51 @@ MAIN随后候选001093…已经只读检查：reserve/commit在transaction callb
 CreatedProjectView新reader分支、通用Coordinator前的bootstrap恢复接管、实际project.create/job.read/context消费、旧UI原生打开和后续采用/恢复同样记录新snapshot fact，均须在同一冻结组合SHA接线验收。本store还未被生产project.create启用，故本报告不签A04整体PASS，更不签A阶段影片/双导出/人验或B准入。
 
 本报告仅留在BRIDGE lane reviews；MAIN源未改，测试未跑、轻量槽未申请。R1修正候选已注明，R2/R3仍待设计落实及真实负向/成功对照。后续新字节另行绑定，不能以本文自动覆盖。
+
+## 冻结3476差异复核（最终只读记录，2026-11-10）
+
+MAIN实际目录仍为`/mnt/c/workspace/videoworkline/Narralens-agents/main-integration`；本次读取前后HEAD均为 **3476b40955e1267568547f0f73d429a22a7aa217**，git status clean。仅复核旧发现相关差异、新proof factory、created reader分支和证据，不重复旧全段审查。本人没有运行测试/Host/ffmpeg，也没有修改MAIN源、索引、runtime或申请轻量槽。原BRIDGE50f4候选及其108历史证据不变。
+
+| 冻结输入 | SHA256 |
+| --- | --- |
+| src/host/projects/project-creation-store.ts | `203b3b043fb6ea13064c698eade333e5e4bf36fed30dd1c877dc070aebba506b` |
+| src/host/projects/creation-source-verifier.ts | `87a15a0db84ef37b5c1d8db8e2c66cd53b2383354ea49eaa2117ba21830366f0` |
+| tests/agent-driven/integration/project-creation-store.test.ts | `d7e9ace31e5a954d3defcfbdf1fd49ca58b13e0c5a63dc013243ca409a512e4c` |
+| src/host/projects/project-resolver.ts | `d4d4c05f9b3ba847b7eae4526d6196f2eddb6a2b7669e5c90c2b13029be31cfd` |
+| src/host/projects/asset-inventory-port.ts | `25a1c17a319f067195f2d17035b10ee865961db46b4d7bd4be5bca93a2da2ea7` |
+| docs/execution/A/ADR-A04-001-created-origin-and-initial-commit.md | `a2268dfd78fdb7bfa73efda115c044ebc6175710f045d3ab48b91bfe1ccb61be` |
+| docs/execution/A/created-foundation-evidence.json | `05f47a0a8367db25d8cb349161d3719bddd3521d1caf4159a6360251185fa656` |
+| docs/execution/A/logs/main-created-foundation-r2/capture.json | `5eb6cd38ea926c228622cca4ab30fe105fd6aa71786c5789a353ee7b43443277` |
+| docs/execution/A/logs/legacy-fixture-copy/receipt.json | `b926d746498eb1f28b765e45ab164b4a0bc0c672fbc0fd8fd0457d124e2026d6` |
+
+### 旧发现修正状态
+
+**R1 SOURCE_ADDRESSED。** reserve/commit第一次clock在repository transaction callback内采集；reserve写预留前再次检查trusted confirmation；commit最后业务outbox后、COMMIT前再核schema/proof、fresh clock、原lease期限及trusted confirmation。新增确定性transaction admission推进clock、最后outbox边界推进lease/confirmation clock负向；原owner/attempt/cancelled与11点回滚成功对照仍保留。它们是确定性注入，不冒充真实跨进程锁竞争。
+
+**R2 SOURCE_ADDRESSED（parse/bytes/upstream门）。** 新CreationSourceVerifier使用固定OPENFILM_UPSTREAM_SHA实际计算snapshot和author source两个闭包摘要，拒外部引用并比较两树摘要；完整asset path/hash/size集合比对；实际pinned OpenFilm inspectSnapshot核frame_count/fps/problems/source_digest。WeakMap保存内部proof记录并绑定command/project/snapshot/source/fact digest；普通JSON伪proof无记录。store的非重放commit没有verifier就拒绝，事务首尾均同步重验proof两树canonical path/bytes/hash/size，路径symlink替换即便bytes相同也拒绝。原“改900帧/fps、错upstream、伪proof、prove后改字节/替换路径”的负向均有明确新增case。
+
+scope边界：该证明现在确实保护native parse和byte事实；资产license/source/media属性的真实受信catalog登记尚未接入，ADR明确保留该门，不能把byte闭包证明解释为权利授权已通过。新fixture将script_ref及两个narration_asset_id依法置null，符合空draft的允许路径，不伪造前项目脚本/真人旁白，不把frame_count0当A片。
+
+**R3 SOURCE_ADDRESSED。** store记录schema_version；reserve callback、commit首尾和sourceFact读入口调用assertSchema，变化时独立核created_source_fact固定namespace，故旧实例中删trigger不再因CP-only复验而漏过。新增live-store drop trigger后commit拒绝case，原constructor拒绝case保留。
+
+### created reader分支核对边界
+
+新ProjectResolver.resolveCreated从bootstrap reservation+origin+initial committed transaction+active pointer+binding+snapshot/project_state/source fact交叉重建；拒未提交、错误created/migration混用、recovery gate、错snapshot/source/engine及symlink外逃。resolveActivated并未因created路径放宽原迁移激活规则。CreatedProjectView不虚构migration_id，publicView不泄漏source_root/source_fact；layout/inventory对created有独立分支，不查legacy catalog冒充new origin。新增真实Host对象重建layout/inventory的case只证明读取接缝，不等于生产project.create/worker已启用。
+
+### 仍须在恢复接线解决的durability门
+
+CreationSourceVerifier.prove的显式fsync循环覆盖author_root文件/目录及其project/base；snapshot树的新发布路径由既有SnapshotStore.publish负责文件、staging/rename及parent fsync，正常新发布成功路径有这条保证。但SnapshotStore.publish遇existing finalRoot会直接返回created:false，未再次fsync snapshot文件/目录/parent；Verifier也不重新fsync snapshot树。
+
+因此专用恢复worker不能仅凭“snapshot目录存在+bytes相同+可签proof”就认定其rename durability已获证明：例如先前进程在rename后、parent fsync前被真实终止，遗留树在重试中走existing分支。当前worker/恢复未注册，此项作为**恢复接线门**，不重报新发布成功路径的parse/byte证明未修，也未运行故障实证。上线该恢复路径前应重建/重验snapshot durability（包括parent entry）或提供可验证的持久发布证明；不能靠typed PublishedSnapshot/created:false元数据代替。实际kill/power-loss耐久验证仍属于后续正式恢复实证。
+
+### 本人只读核对的MAIN证据
+
+读取main-created-foundation-r2：tsc exit0；7 files、90/90、90.68s。组成明确为creation33、旧resolver16/inventory14/activated8、CP schema8、helper8、media3。created-foundation-evidence.json的14个source_sha256与当前冻结字节全部匹配；capture.json的4个日志摘要也全部匹配。这些是**文件完整性核对和MAIN运行记录读取，不是我独立运行tsc或90个case**。
+
+保留首次扩大回归80/86和后续90/90，不改写首次失败。legacy-fixture-copy receipt记录4个旧生成媒体独立copy且source/copy bytes SHA相同；其中2个visual媒体标记匹配冻结visual Manifest，2个旧wav仅copy hash一致，未宣称其在visual Manifest或变成A真人录音。原旧断言未因补齐ignored fixture而改变，不能把这批旧生成语音挪作人类音频验收证据。
+
+### 当前出口
+
+指定冻结字节上，A04-R1/R2/R3已针对性修正并有MAIN组件负向/成功对照记录；本次只读差异复核没有发现这三个旧路径仍然开放。完整创建worker/启动恢复及snapshot复用durability、生产project.create/job/context装配、真实授权asset catalog、created后续adopt/history source fact同事务写、M5 created交互、真实native ack/A片/双导出/T20与人验仍未完成。
+
+本次记录只支持**组件源码修正复核**，不自签A04包完成或完整A通过。MAIN后续更改另冻新SHA；本lane仅追加此报告，原源/测试证明范围保持。
