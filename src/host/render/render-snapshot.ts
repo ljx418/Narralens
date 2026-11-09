@@ -197,6 +197,12 @@ export class SnapshotRenderService implements RenderPort {
     let staging: string | null = null;
     let requiresReconciliation = false;
     try {
+      const initialVerdict = await this.#deps.fence.checkAttempt(identity);
+      if (initialVerdict !== "proceed" || request.signal?.aborted) {
+        const cancelled = initialVerdict === "cancelled" || request.signal?.aborted;
+        return failure(cancelled ? "ATTEMPT_CANCELLED" : "ATTEMPT_SUPERSEDED",
+          "the persistent attempt no longer permits rendering", true);
+      }
       await this.#deps.packages.prepare();
 
       // 1. The snapshot. MAIN is the only one that knows whether it is committed.
@@ -262,6 +268,15 @@ export class SnapshotRenderService implements RenderPort {
         throw error;
       }
 
+      // A copy can be slow. Re-read durable cancellation/fencing immediately before
+      // launching any browser/encoder; an AbortSignal is not the durable authority.
+      const renderVerdict = await this.#deps.fence.checkAttempt(identity);
+      if (renderVerdict !== "proceed" || request.signal?.aborted) {
+        await this.#deps.packages.quarantineStaging(staging, `fenced-before-render-${request.attempt}`);
+        const cancelled = renderVerdict === "cancelled" || request.signal?.aborted;
+        return failure(cancelled ? "ATTEMPT_CANCELLED" : "ATTEMPT_SUPERSEDED",
+          "the persistent attempt changed while preparing the snapshot", true);
+      }
       // 5. The render itself.
       const outPath = resolve(staging, PACKAGE_FILES.media);
       try {

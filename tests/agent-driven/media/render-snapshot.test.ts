@@ -343,8 +343,23 @@ describe("rendering a committed snapshot", () => {
     expect(built.commits).toHaveLength(0);
   });
 
+  it.each(["cancelled", "superseded"] as const)("does not launch native work for an already %s durable attempt", async (verdict) => {
+    let calls = 0;
+    const built = await harness({label: `pre-render-${verdict}`, verdict, renderer: {async render() {
+      calls++; throw new Error("native work must never start");
+    }}});
+    const outcome = await built.service.render(requestFor(built));
+    expect(outcome.state).toBe("failed");
+    expect(outcome.failure?.code).toBe(verdict === "cancelled" ? "ATTEMPT_CANCELLED" : "ATTEMPT_SUPERSEDED");
+    expect(calls).toBe(0); expect(built.boundaries).toEqual([]); expect(built.commits).toEqual([]); expect(built.released()).toBe(1);
+  });
+
   it("does not publish a delivery that was cancelled while it encoded", async () => {
-    const built = await harness({ label: "render-fenced", verdict: "cancelled" });
+    let built: Harness;
+    const renderer = fakeRenderer("write");
+    built = await harness({ label: "render-fenced", renderer: { async render(request) {
+      const result = await renderer.render(request); built.setVerdict("cancelled"); return result;
+    } } });
     const outcome = await built.service.render(requestFor(built));
 
     expect(outcome.state).toBe("failed");

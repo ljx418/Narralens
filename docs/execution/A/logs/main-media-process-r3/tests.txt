@@ -1,0 +1,25 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+ ✓ tests/agent-driven/media/upstream-pin.test.ts (5 tests) 749ms
+   ✓ the render pin > verifies the pinned checkout when it is on this machine  741ms
+ ✓ tests/agent-driven/media/offline-guard.test.ts (8 tests) 597ms
+   ✓ the offline guard > is installed in front of the pinned renderer  584ms
+ ✓ tests/agent-driven/media/published-package-store.test.ts (17 tests) 662ms
+ ✓ tests/agent-driven/media/render-snapshot.test.ts (21 tests) 557ms
+ ✓ tests/agent-driven/media/delivery-service.test.ts (12 tests) 325ms
+ ✓ tests/agent-driven/media/native-renderer.test.ts (6 tests) 311ms
+ ✓ tests/agent-driven/media/download.test.ts (14 tests) 306ms
+ ✓ tests/agent-driven/media/render-worker.test.ts (7 tests) 202ms
+ ✓ tests/agent-driven/media/process-group-inheritance.test.ts (1 test) 80ms
+ ✓ tests/agent-driven/media/manifest.test.ts (10 tests) 26ms
+ ✓ tests/agent-driven/media/snapshot-copy.test.ts (8 tests) 22ms
+ ✓ tests/agent-driven/media/preflight.test.ts (10 tests) 18ms
+ ✓ tests/agent-driven/media/qc.test.ts (15 tests) 5ms
+ ✓ tests/agent-driven/media/media-process-policy.test.ts (3 tests) 3ms
+
+ Test Files  14 passed (14)
+      Tests  137 passed (137)
+   Start at  23:07:57
+   Duration  39.23s (transform 577ms, setup 0ms, collect 10.34s, tests 3.86s, environment 1ms, prepare 17.06s)
+

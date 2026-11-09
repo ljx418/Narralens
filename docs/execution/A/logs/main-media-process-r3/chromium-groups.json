@@ -1,0 +1,117 @@
+{
+  "scope": "Real headless Chromium process containment only; no render/Host/T20 acceptance",
+  "policy_sha256": "bcadcfecda8080a337b1ceb14b2ffb96c42ba1f3f583f94a1eeceb46261f0559",
+  "results": [
+    {
+      "mode": "normal-close",
+      "owner": 3728237,
+      "owned": [
+        {
+          "pid": 3728237,
+          "state": "S",
+          "ppid": 3728230,
+          "pgid": 3728237,
+          "start": "11290008"
+        },
+        {
+          "pid": 3728249,
+          "state": "S",
+          "ppid": 3728237,
+          "pgid": 3728237,
+          "start": "11290058"
+        },
+        {
+          "pid": 3728252,
+          "state": "S",
+          "ppid": 3728249,
+          "pgid": 3728237,
+          "start": "11290059"
+        },
+        {
+          "pid": 3728253,
+          "state": "S",
+          "ppid": 3728249,
+          "pgid": 3728237,
+          "start": "11290059"
+        },
+        {
+          "pid": 3728269,
+          "state": "S",
+          "ppid": 3728252,
+          "pgid": 3728237,
+          "start": "11290061"
+        },
+        {
+          "pid": 3728271,
+          "state": "S",
+          "ppid": 3728249,
+          "pgid": 3728237,
+          "start": "11290061"
+        }
+      ],
+      "remaining": [],
+      "outcome": {
+        "code": 0,
+        "signal": null
+      },
+      "all_in_owner_group": true,
+      "passed": true
+    },
+    {
+      "mode": "kill-group",
+      "owner": 3728310,
+      "owned": [
+        {
+          "pid": 3728310,
+          "state": "S",
+          "ppid": 3728230,
+          "pgid": 3728310,
+          "start": "11290075"
+        },
+        {
+          "pid": 3728329,
+          "state": "S",
+          "ppid": 3728310,
+          "pgid": 3728310,
+          "start": "11290125"
+        },
+        {
+          "pid": 3728331,
+          "state": "S",
+          "ppid": 3728329,
+          "pgid": 3728310,
+          "start": "11290126"
+        },
+        {
+          "pid": 3728332,
+          "state": "S",
+          "ppid": 3728329,
+          "pgid": 3728310,
+          "start": "11290126"
+        },
+        {
+          "pid": 3728348,
+          "state": "S",
+          "ppid": 3728331,
+          "pgid": 3728310,
+          "start": "11290127"
+        },
+        {
+          "pid": 3728350,
+          "state": "S",
+          "ppid": 3728329,
+          "pgid": 3728310,
+          "start": "11290128"
+        }
+      ],
+      "remaining": [],
+      "outcome": {
+        "code": null,
+        "signal": "SIGKILL"
+      },
+      "all_in_owner_group": true,
+      "passed": true
+    }
+  ],
+  "passed": true
+}

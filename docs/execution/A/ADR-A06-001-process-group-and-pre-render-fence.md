@@ -1,0 +1,14 @@
+# A06 独立审查返修：进程归属与渲染前持久门
+
+独立审查原始报告保持NEEDS_WORK；MAIN直接修复，不把作者单元测试视为真实T20验收。
+
+固定Playwright会以detached:true创建Chromium，原worker进程组的消失不足以证明它结束。现有worker-local media-process-policy在加载固定上游之前安装，扩展为强制spawn/spawnSync/execFile的detached:false，并正常化已省略argv/options/callback的Node重载。Host渲染worker仍是独立PGID owner；固定上游只读不改。render pin显式更新本地guard摘要，不用改测试绕过pin。独立Node探针用三个真实子进程验证原先要求detached:true也保持owner PGID。
+
+main-media-process-r1保留134通过/1失败，新增探针误将包装execFile的promisify结果当{stdout}，而固定上游使用callback；修测试按实际callback接口，不改超时。r2独立Node探针通过。
+
+tools/agent-driven/media/process-group-probe.mjs使用实际固定上游Playwright与Headless Chromium、强制离线flags、静音，无网页外传。分别记录正常close与kill-group前所有/proc后代的PID/PGID/start tick，并验证没有相同身份的活动后代；仅清理该探针确知的子进程。实际JSON与命令exit在main-media-process-r2。该探针不证明完整RenderService取消、Host重启或T20-A..H；未来二进制改变或不能确认归属时仍须unknown并保留claim，不能声称成功释放。
+
+SnapshotRenderService在claim后立即重读持久fence，在snapshot复制后、启动browser前再读；原publish前/commit前门保留。已取消/被替换的尝试不可调用renderer；取消发生在encode期间的旧测试改为真实在renderer返回时改变fence，避免新早门让旧场景名存实亡。实际Job/授权/Attempt/Commit生产port仍须MAIN接线，不能由此宣布A06完成。
+
+
+独立复核进一步要求不丢失execFile的undefined/null options占位后的callback；MAIN补重载归一化，并在真实Node探针加入显式undefined options调用。真实Chrome探针从仅无活动后代加强为所有采样身份/proc项均消失（包括Z），不能只过滤僵尸。main-media-process-final历史14文件137/137已通过；上述最后加强后的完整结果保留于main-media-process-r3，不覆盖历史。

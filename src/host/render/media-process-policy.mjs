@@ -24,6 +24,20 @@ export function installMediaProcessPolicy() {
   for (const method of ["spawn", "spawnSync", "execFile"]) {
     const original = childProcess[method];
     childProcess[method] = function(command, args, ...rest) {
+      // Playwright explicitly asks for detached:true on POSIX. Without overriding
+      // that option, the browser escapes the worker group which MAIN owns/kills.
+      // Normalize Node's omitted-args/options/callback overloads before the policy.
+      if (!Array.isArray(args)) {
+        if (args !== undefined) rest.unshift(args);
+        args = [];
+      }
+      const options = rest[0];
+      if (options !== null && typeof options === "object") {
+        rest[0] = { ...options, detached: false };
+      } else {
+        if (options === null || options === undefined && rest.length > 0) rest.shift();
+        rest.unshift({ detached: false });
+      }
       return Reflect.apply(original, this, [command, localMediaArgs(command, args), ...rest]);
     };
   }
