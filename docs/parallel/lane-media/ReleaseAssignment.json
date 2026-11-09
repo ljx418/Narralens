@@ -1,0 +1,25 @@
+{
+  "id": "A-MEDIA-IT-A06",
+  "base_sha": "ca5b67a8285b130c79055317c6202f73cfbb99c8",
+  "contract_sha": "ca5b67a8285b130c79055317c6202f73cfbb99c8",
+  "upstream_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+  "session_uuid": "25d0705c-223a-4408-a5c6-2222e7c59c1e",
+  "writer": "Codex preparing; Claude after launch",
+  "input_sha256": {
+    "docs/agent-driven-v1/cp-a0/01_PROTOCOL_AND_AUTH.md": "8b3a4c2793928727541082d7e0242116ce2049d31b8acdb2c76fc2a382e58573",
+    "docs/agent-driven-v1/cp-a0/02_DATA_AND_RECOVERY.md": "8d2e8086d61fc73c2c577dffbe30876aea3c88d1b6231373050428b8929c93e0",
+    "docs/agent-driven-v1/cp-a0/03_EXECUTABLE_ACCEPTANCE.md": "b0c5c33717983f386ceda4ca207c6538452966374da6ae7919675a211f6077ac",
+    "docs/agent-driven-v1/cp-a0/04_RELEASE_ASSIGNMENTS.md": "891e0d08a6044c5293c95b803be70c800f478b987c3e25b45c50f8693cb252a9",
+    "src/contracts/agent-driven-types.ts": "54356697802c0bf048e5cbcde1f54eb33713d4fe58943b346406804011cb3644"
+  },
+  "write_paths": [
+    "src/host/render",
+    "src/host/preflight",
+    "src/host/delivery",
+    "tests/agent-driven/media",
+    "tools/agent-driven/media",
+    "docs/parallel/lane-media"
+  ],
+  "resource": "MAIN baseline RUNNING: no install/tsc/tests/ffmpeg/browser until released",
+  "review": "REVIEW_PENDING; module checks do not certify A"
+}
