@@ -204,7 +204,9 @@ export class OpenFilmStudioSupervisor {
       if (this.#closing) throw new HttpError(503, "ENGINE_UNAVAILABLE", "The native Studio is closing");
       const studio = await this.#start();
       if (this.#closing) throw new HttpError(503, "ENGINE_UNAVAILABLE", "The native Studio is closing");
+      await this.#assertSameRoot(root, projectId, correlationId);
       const opened = await this.#openInStudio(studio, root, projectId, correlationId);
+      await this.#assertSameRoot(root, projectId, correlationId);
       if (this.#closing) throw new HttpError(503, "ENGINE_UNAVAILABLE", "The native Studio is closing");
       return { kind: "openfilm-studio" as const, url: opened, bridge_version: 1 as const };
     })();
@@ -285,6 +287,12 @@ export class OpenFilmStudioSupervisor {
    * own API, over loopback, with the launch key the Gateway holds. Nothing about the
    * target's location reaches the browser.
    */
+  async #assertSameRoot(root: string, projectId: string, correlationId: string): Promise<void> {
+    const current = await this.#deps.targetRootOf(projectId);
+    if (current !== root) throw new HttpError(409, "SOURCE_CHANGED", "The native project version changed while opening", undefined, correlationId);
+    if (this.#closing) throw new HttpError(503, "ENGINE_UNAVAILABLE", "The native Studio is closing");
+  }
+
   async #openInStudio(studio: StartedStudio, root: string, projectId: string,
     correlationId: string): Promise<string> {
     const response = await fetch(`${studio.origin}/api/projects`, {

@@ -13,3 +13,7 @@
 第三切面：显式created读合同允许0帧和null migration/source lineage；顶层原生Gateway/film/Host origin隔离；匿名Gateway cookie不能升级trusted_ui，owner/project/Host代际绑定的受控delegate与各origin自己的proof；原生观察不产生批准。真正版本化loaded观察接缝单列实测，无观察保持unknown。
 
 验收：真实pinned模块/隔离root/真实启停与父失联；新工程实际HTTP创建、snapshot闭包副本、原生open/关闭重开、原始author/snapshot bytes/revision不变；错误归属/漂移/未准备/旧代际拒绝；真实headless打开native、同stores/clock、native版本观察。仅本切面实证不提前签A05/A，人类素材/中文录音、影片/双导出等整A要求不减。
+
+下一实体明确允许src/host/agent-driven/created-native-workspace.ts、实际Host/SQLite/pinned Studio集成测试和CreationApplication/server的before/after native close装配。它只消费CommittedSnapshotAuthority读权威复制闭包到私有FD锚定目录，缓存不成为第二事实库、不给公开接口返回绝对路径。prepare按真实caller归属/active committed tuple，完成与resolve时重验；关服先停copy，native关完后才删除副本/关目录FD。Snapshot/author/J盘均不得作为Studio可写root。现阶段未实现Run/assembly等仍不注册capability。
+
+第四切面：独立created-workbench@1.0纯读合同及GET /api/ui/v1/projects/:id/created-workbench，MAIN独占src/contracts/created-workbench.ts、contracts/created-workbench.schema.json、src/host/agent-driven/created-workbench-{service,http}.ts与实际Host测试。旧workbench@1/旧migration GET及31个CP-A0 Agent合同不变；明确origin=created、迁移来源null、frame_count>=0。真实projection来自当前committed resolver与pinned EnginePort，完成后复验active transaction/control/recovery；权限在资源查找前及所有await后验证。只读GET不启动Studio、不准备workspace、不产生approval/revision，preview暂为null，native_sync取真实Context unknown/pending（没有producer时不得声称loaded）。新read并不开放匿名Gateway，受限delegate仍是Gateway接线前置。

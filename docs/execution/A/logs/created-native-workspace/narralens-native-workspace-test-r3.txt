@@ -1,0 +1,19 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:4091143) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/created-native-workspace.test.ts (7 tests) 25556ms
+   ✓ opens the real HTTP-created committed project in native Studio using only its independent verified working copy  4295ms
+   ✓ coalesces identical preparation, rejects a foreign principal before I/O, and does not turn a copy into a revision  2955ms
+   ✓ refuses a modified disposable source, then rebuilds from the still-proven immutable snapshot  3056ms
+   ✓ rejects storage overlapping an author or snapshot root before creating any directories  2785ms
+   ✓ does not follow a symbolic-link leaf in a damaged derived copy  2763ms
+   ✓ wires the actual Host Supervisor to a prepared committed copy and removes it only after native shutdown  4783ms
+   ✓ closes every actual late-created Gateway/Studio listener when Host close races Gateway publication  4917ms
+
+ Test Files  1 passed (1)
+      Tests  7 passed (7)
+   Start at  05:51:04
+   Duration  32.26s (transform 2.26s, setup 0ms, collect 4.75s, tests 25.56s, environment 0ms, prepare 1.32s)
+

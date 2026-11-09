@@ -1,3 +1,4 @@
+import {CreatedNativeWorkspaceService} from './created-native-workspace.js';
 import {createHash} from 'node:crypto';
 import type {IncomingMessage,ServerResponse} from 'node:http';
 import {WorkbenchSessionService} from './workbench-session.js';
@@ -29,9 +30,10 @@ export class CreationApplication implements AgentHostApplication {
  readonly creation:ProjectCreationStore;
  readonly committedSnapshots:CommittedSnapshotAuthority;
  readonly localAssets:LocalAssetRegistry|null;
+ readonly nativeWorkspaces:CreatedNativeWorkspaceService;
  #closing:Promise<void>|undefined;
  readonly worker:ProjectCreationService;
- constructor(host:NarralensHost,options:{createdRoot:string;vendorRoot:string;worker?:Pick<CreationServiceDeps,'leaseMs'|'pollMs'|'boundary'>;instance?:()=>Instance;health?:()=>HealthRead;workbench?:{principalId:string;operatorSecret:string};localAssets?:Omit<LocalAssetRegistryOptions,'projectsRoot'|'snapshotsRoot'>}){
+ constructor(host:NarralensHost,options:{createdRoot:string;vendorRoot:string;nativeWorkspaceRoot?:string;worker?:Pick<CreationServiceDeps,'leaseMs'|'pollMs'|'boundary'>;instance?:()=>Instance;health?:()=>HealthRead;workbench?:{principalId:string;operatorSecret:string};localAssets?:Omit<LocalAssetRegistryOptions,'projectsRoot'|'snapshotsRoot'>}){
   const cookieName=options.instance?'narralens_a_'+createHash('sha256').update(options.instance().instance_id).digest('hex').slice(0,24):'narralens_a_session';
   this.auth=new ScopedAgentAuth(()=>host.origin,Date.now,cookieName,{requireUiReadProof:!!options.workbench});
   this.workbenchSessions=options.workbench?new WorkbenchSessionService(this.auth,()=>host.origin,options.workbench.principalId,options.workbench.operatorSecret):null;
@@ -39,6 +41,7 @@ export class CreationApplication implements AgentHostApplication {
   this.creation=new ProjectCreationStore(host.revisions,()=>new Date(),verifier);
   host.projectResolver.attachCreatedProjects(this.creation,options.createdRoot);
   this.committedSnapshots=new CommittedSnapshotAuthority(host.revisions,host.snapshots,this.creation,options.vendorRoot);
+  this.nativeWorkspaces=new CreatedNativeWorkspaceService(host.revisions,this.creation,this.committedSnapshots,{root:options.nativeWorkspaceRoot??options.createdRoot+'-native-workspaces',protectedRoots:[options.createdRoot,host.snapshots.projectRoot(''),options.vendorRoot,...(host.nativeStudioRuntimeRoot?[host.nativeStudioRuntimeRoot]:[])]});
   this.localAssets=options.localAssets?new LocalAssetRegistry(host.revisions,this.creation,{...options.localAssets,projectsRoot:options.createdRoot,snapshotsRoot:host.snapshots.projectRoot('')}):null;
   this.worker=new ProjectCreationService({store:this.creation,coordinator:host.coordinator,snapshots:host.snapshots,verifier,createdRoot:options.createdRoot,...options.worker});
   const authority=new CreativeProjectAuthority(this.creation);
@@ -74,8 +77,10 @@ export class CreationApplication implements AgentHostApplication {
   });
  }
  handleWorkbenchSession(request:IncomingMessage,response:ServerResponse){return this.workbenchSessions?.handle(request,response)??Promise.resolve(false);}
+ nativeSourceRootFor(projectId:string){return this.nativeWorkspaces.rootFor(projectId).then(root=>root.value);}
+ closeAfterNative(){return this.nativeWorkspaces.disposeAfterNative();}
  leaseReaperExclusions(){return this.creation.pending().map(row=>row.job_id);}
  recoverBeforeGeneric(){return this.worker.recoverBeforeGeneric();}
  start(){this.worker.start();}
- close(){this.workbenchSessions?.close();return this.#closing??=Promise.all([this.worker.close(),this.localAssets?.close()]).then(()=>undefined);}
+ close(){this.workbenchSessions?.close();return this.#closing??=Promise.all([this.worker.close(),this.localAssets?.close(),this.nativeWorkspaces.close()]).then(()=>undefined);}
 }

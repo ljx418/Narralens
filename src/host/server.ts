@@ -216,6 +216,8 @@ function adoptionStagingRootFor(revisions: RevisionStore, configured: string | u
 export interface AgentHostApplication {
   readonly auth: ScopedAgentAuth;
   readonly dispatcher: AgentDispatcher;
+  nativeSourceRootFor?(projectId: string): Promise<string>;
+  closeAfterNative?(): Promise<void>;
   /** Separate UI entry, never an Agent tool or a creative approval. */
   handleWorkbenchSession?(request: IncomingMessage, response: ServerResponse): Promise<boolean>;
   /** Decide owned creation journals before generic recovery can quarantine them. */
@@ -269,6 +271,8 @@ interface HostDependencies {
   openFilmVendorRoot?: string;
   /** Owned A Studio state; never the operator global OpenFilm home. */
   isolatedStudioRuntimeRoot?: string;
+  /** Host-only lifecycle fault/diagnostic seam, never supplied by an HTTP body. */
+  studioBeforeGatewayPublish?: (state: { gateway_origin: string; studio_origin: string; film_origin: string }) => Promise<void>;
   /**
    * M5C: the directory the fixture media lives in.
    *
@@ -362,6 +366,7 @@ export class NarralensHost {
    * idempotency table would be a second authority, which is what Wave 2 ruled out by name.
    */
   readonly m5Supervisor: OpenFilmStudioSupervisor;
+  readonly nativeStudioRuntimeRoot: string | undefined;
   readonly m5Workbench: WorkbenchService;
   readonly m5Locks: LockMutationService;
   readonly m5Replay: ComparisonReplayService;
@@ -616,10 +621,16 @@ export class NarralensHost {
     this.#historyFault = dependencies.historyFault;
     // M5's composition. The Studio is started lazily — the first workbench read needs it —
     // so a Host that is never asked for the workbench never starts an editor.
+    this.nativeStudioRuntimeRoot = dependencies.isolatedStudioRuntimeRoot
+      ?? (dependencies.agentApplication ? adoptionStagingRootFor(this.revisions, dependencies.adoptionStagingRoot) + "-studio" : undefined);
     this.m5Supervisor = new OpenFilmStudioSupervisor({
       vendorRoot: this.#openFilmVendorRoot,
-      ...(dependencies.isolatedStudioRuntimeRoot ? { isolatedRuntimeRoot: dependencies.isolatedStudioRuntimeRoot } : {}),
+      ...(this.nativeStudioRuntimeRoot ? { isolatedRuntimeRoot: this.nativeStudioRuntimeRoot } : {}),
       targetRootOf: async (projectId: string) => {
+        if (this.#agentApplication) {
+          if (!this.#agentApplication.nativeSourceRootFor) throw new HttpError(503, "ENGINE_UNAVAILABLE", "The controlled native source producer is unavailable");
+          return this.#agentApplication.nativeSourceRootFor(projectId);
+        }
         const view = await this.projectResolver.resolveActivated(projectId);
         return view.source_root.value;
       },
@@ -633,6 +644,7 @@ export class NarralensHost {
         });
         try {
           const origin = await gateway.start();
+          await dependencies.studioBeforeGatewayPublish?.({ gateway_origin: origin, studio_origin: studio.origin, film_origin: studio.filmOrigin });
           if (this.#closePromise) throw new HttpError(503, "ENGINE_UNAVAILABLE", "The Host is closing");
           this.#m5Gateway = gateway;
           this.m5Supervisor.setGatewayBase(origin);
@@ -779,13 +791,15 @@ export class NarralensHost {
     // M5's Gateway is a server of its own, on its own loopback port. It is closed with
     // the Host: a Gateway left listening would keep the Studio and the browser's session
     // alive after the Host that owned them is gone.
-    try { await this.m5Supervisor.close(); }
+    let nativeStopped = false;
+    try { await this.m5Supervisor.close(); nativeStopped = true; }
     finally {
       // Quiesce startup callbacks first; otherwise a late callback could publish a
       // Gateway after this field was collected, leaving its two listeners alive.
       const gateway = this.#m5Gateway;
       this.#m5Gateway = null;
       if (gateway !== null) await gateway.close();
+      if (nativeStopped) await this.#agentApplication?.closeAfterNative?.();
     }
     if (this.#leaseReaper !== undefined) clearInterval(this.#leaseReaper);
     this.#leaseReaper = undefined;
