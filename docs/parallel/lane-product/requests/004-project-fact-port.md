@@ -123,3 +123,9 @@ fix the formula, so this is the lane's proposal rather than a frozen rule.
   wire `plan_sha256` maps to `action_digest`, and the non-run events reach the outbox only;
 - the bootstrap command lifecycle state is MAIN's dedicated service; the lane's surface is
   the initial append-only reservation and the read.
+
+
+## MAIN disposition after stable batch (2026-11-09)
+The style preimage in §5 is accepted: exact original strings, no implicit trim/translation/Unicode normalization. Server recomputes before authorization/real execution; schema example placeholder hashes are not semantic proof. PRODUCT must preserve a real golden and a single-field mutation negative.
+
+`readProjectFacts(projectId)` is candidate preparation pre-read only. It is NOT sufficient for final side-effect authorization. MAIN binds actual action, specific input refs/assets/rights, capability fingerprint, and committed snapshot for render, then rechecks current durable grant/attempt/gates/source/rights/locks inside project serialization. Render already bound to an immutable committed snapshot must neither rebind to later project revision nor be cancelled as stale merely because project advanced. Adoption/apply must strictly match current base. MAIN owns actual dispatcher/Coordinator checks; generic booleans in this port do not replace them. No new schema or arbitrary capability claim is authorized.
