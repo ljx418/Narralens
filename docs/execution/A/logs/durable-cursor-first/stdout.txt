@@ -1,0 +1,13 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:3612633) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/durable-cursor.test.ts (3 tests) 2058ms
+   ✓ durable signed opaque cursors > fits BOTH frozen cursor schemas and preserves every claim across actual close/reopen  2052ms
+
+ Test Files  1 passed (1)
+      Tests  3 passed (3)
+   Start at  21:42:44
+   Duration  6.58s (transform 257ms, setup 0ms, collect 2.49s, tests 2.06s, environment 0ms, prepare 1.37s)
+
