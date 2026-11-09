@@ -1,0 +1,26 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+ ❯ tests/agent-driven/integration/owned-runtime.test.ts (5 tests | 1 failed | 4 skipped) 12375ms
+   ↓ uses real flock, persistent instance generations, authenticated HTTP and actual MCP without fake readiness
+   ↓ rejects a symlink ancestor before creating an aliased runtime and never loosens an existing directory
+   ↓ bounds and no-follows private JSON, rejecting unknown names, permissions and malformed metadata
+   ↓ refuses the actual Host child entry without an inherited kernel lock
+   × refuses a second Host after its live predecessor lock path is unlinked, then permits a real stopped restart 12375ms
+     → expected 'ready' not to be 'ready' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/owned-runtime.test.ts > refuses a second Host after its live predecessor lock path is unlinked, then permits a real stopped restart
+AssertionError: expected 'ready' not to be 'ready' // Object.is equality
+ ❯ tests/agent-driven/integration/owned-runtime.test.ts:119:29
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 4 skipped (5)
+   Start at  01:10:00
+   Duration  17.40s (transform 210ms, setup 0ms, collect 3.33s, tests 12.38s, environment 0ms, prepare 1.13s)
+

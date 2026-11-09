@@ -1,0 +1,64 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+ ❯ tests/agent-driven/integration/owned-runtime.test.ts (7 tests | 2 failed | 5 skipped) 17353ms
+   ↓ uses real flock, persistent instance generations, authenticated HTTP and actual MCP without fake readiness
+   ↓ rejects a symlink ancestor before creating an aliased runtime and never loosens an existing directory
+   ↓ bounds and no-follows private JSON, rejecting unknown names, permissions and malformed metadata
+   ↓ refuses the actual Host child entry without an inherited kernel lock
+   ↓ refuses a second Host after its live predecessor lock path is unlinked, then permits a real stopped restart
+   × rejects a private FIFO without blocking the launcher event loop 10020ms
+     → expected { code: null, signal: 'SIGKILL' } to deeply equal { code: 1, signal: null }
+   × cancels only its spawned Host when TERM reaches the wrapper before Host readiness 7332ms
+     → wrapper cancellation left a hidden Host running: expected true to be false // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/owned-runtime.test.ts > rejects a private FIFO without blocking the launcher event loop
+AssertionError: expected { code: null, signal: 'SIGKILL' } to deeply equal { code: 1, signal: null }
+
+- Expected
++ Received
+
+  {
+-   "code": 1,
+-   "signal": null,
++   "code": null,
++   "signal": "SIGKILL",
+  }
+
+ ❯ tests/agent-driven/integration/owned-runtime.test.ts:141:16
+    139|   const timer=setTimeout(()=>child.kill('SIGKILL'),10000);
+    140|   const exit=await new Promise<{code:number|null;signal:NodeJS.Signals…
+    141|   expect(exit).toEqual({code:1,signal:null});
+       |                ^
+    142|  }finally{await rm(root,{recursive:true,force:true});}
+    143| },20000);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/agent-driven/integration/owned-runtime.test.ts > cancels only its spawned Host when TERM reaches the wrapper before Host readiness
+AssertionError: wrapper cancellation left a hidden Host running: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ tests/agent-driven/integration/owned-runtime.test.ts:159:67
+    157|   const deadline=Date.now()+5000;let alive=true;
+    158|   while(Date.now()<deadline){try{alive=processStart(pid!)===start;}cat…
+    159|   expect(alive,'wrapper cancellation left a hidden Host running').toBe…
+       |                                                                   ^
+    160|  }finally{
+    161|   if(pid&&start)spawnSync('python3',['-I',resolve('tools/agent-signal-…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 5 skipped (7)
+   Start at  01:26:30
+   Duration  22.55s (transform 220ms, setup 0ms, collect 3.47s, tests 17.35s, environment 0ms, prepare 1.14s)
+

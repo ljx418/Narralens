@@ -1,0 +1,14 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+ ✓ tests/agent-driven/integration/owned-runtime.test.ts (5 tests) 64661ms
+   ✓ uses real flock, persistent instance generations, authenticated HTTP and actual MCP without fake readiness  39004ms
+   ✓ refuses the actual Host child entry without an inherited kernel lock  3212ms
+   ✓ refuses a second Host after its live predecessor lock path is unlinked, then permits a real stopped restart  22427ms
+ ✓ tests/agent-driven/integration/scoped-auth.test.ts (6 tests) 5ms
+
+ Test Files  2 passed (2)
+      Tests  11 passed (11)
+   Start at  01:11:45
+   Duration  71.56s (transform 225ms, setup 0ms, collect 3.51s, tests 64.67s, environment 0ms, prepare 2.26s)
+

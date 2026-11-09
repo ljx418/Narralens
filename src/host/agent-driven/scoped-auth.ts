@@ -25,6 +25,8 @@ export class ScopedAgentAuth {
   constructor(private readonly origin:()=>string,private readonly now:()=>number=Date.now,readonly cookieName='narralens_a_session'){}
   issue(input:{principal_id:string;channel:AgentChannel;expires_at:number;session_ref?:string}) {
     if(typeof input.principal_id!=='string'||!/^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$/.test(input.principal_id)||!['authenticated','trusted_ui','native_bridge'].includes(input.channel)||!Number.isSafeInteger(input.expires_at)||input.expires_at<=this.now())throw new Error('Invalid credential lifetime');
+    // Rotation keeps valid predecessor credentials until their natural expiry.
+    for(const [key,record] of this.#credentials)if(record.revoked||record.principal.expires_at<=this.now())this.#credentials.delete(key);
     const token=randomBytes(32).toString('base64url'),csrf=input.channel==='trusted_ui'?randomBytes(32).toString('base64url'):null;
     const principal=Object.freeze({...input,session_ref:input.session_ref??'session_'+randomBytes(12).toString('hex')});
     this.#credentials.set(hash(token).toString('hex'),{digest:hash(token),csrfDigest:csrf?hash(csrf):null,principal,revoked:false});

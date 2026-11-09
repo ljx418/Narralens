@@ -1,3 +1,4 @@
+import type {Instance,HealthRead} from '../../contracts/agent-driven-types.js';
 import type {NarralensHost,AgentHostApplication} from '../server.js';
 import {CreativeService} from '../creative/creative-service.js';
 import {ProjectCreationStore} from '../projects/project-creation-store.js';
@@ -17,7 +18,7 @@ export class CreationApplication implements AgentHostApplication {
  readonly dispatcher:ApplicationDispatcher;
  readonly creation:ProjectCreationStore;
  readonly worker:ProjectCreationService;
- constructor(host:NarralensHost,options:{createdRoot:string;vendorRoot:string;worker?:Pick<CreationServiceDeps,'leaseMs'|'pollMs'|'boundary'>}){
+ constructor(host:NarralensHost,options:{createdRoot:string;vendorRoot:string;worker?:Pick<CreationServiceDeps,'leaseMs'|'pollMs'|'boundary'>;instance?:()=>Instance;health?:()=>HealthRead}){
   this.auth=new ScopedAgentAuth(()=>host.origin);
   const verifier=new CreationSourceVerifier(host.snapshots,options.vendorRoot,options.createdRoot);
   this.creation=new ProjectCreationStore(host.revisions,()=>new Date(),verifier);
@@ -27,6 +28,8 @@ export class CreationApplication implements AgentHostApplication {
   // Artifact validation requires a real project-fact/capability port; never advertise a placeholder.
   delete creative['artifact.put'];
   this.dispatcher=new ApplicationDispatcher({...creative,
+   ...(options.instance?{instance:async()=>options.instance!()}:{}),
+   ...(options.health?{'health.read':async()=>options.health!()}:{}),
    'project.create':async(input,principal)=>{
     if(principal.channel==='native_bridge')throw new AgentRouteError('ORIGIN_REJECTED');
     if(!host.openFilmComposition)throw new AgentRouteError('CAPABILITY_UNAVAILABLE');

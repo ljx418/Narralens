@@ -1,0 +1,26 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+ ✓ tests/agent-driven/integration/project-creation-host.test.ts (14 tests) 67094ms
+   ✓ creates through HTTP and Host scheduling only; reopens native source without migration or manual registration  2821ms
+   ✓ refuses unknown fields and driver-minted confirmation before creating any Job  966ms
+   ✓ rejects modified initial source before committing a pointer or origin  3722ms
+   ✓ quiesces an interrupted creation before closing SQLite, then resumes the same durable Job on reopen  2429ms
+   ✓ settles owner cancellation without publishing or wedging a subsequent Host start  1729ms
+   ✓ survives actual SIGKILL at after_lease and decides its own journal before generic recovery  6720ms
+   ✓ survives actual SIGKILL at after_project_directory and decides its own journal before generic recovery  6178ms
+   ✓ survives actual SIGKILL at after_owner_claim and decides its own journal before generic recovery  6744ms
+   ✓ survives actual SIGKILL at after_source and decides its own journal before generic recovery  6719ms
+   ✓ survives actual SIGKILL at after_snapshot and decides its own journal before generic recovery  6914ms
+   ✓ survives actual SIGKILL at before_commit and decides its own journal before generic recovery  7491ms
+   ✓ survives actual SIGKILL at after_commit and decides its own journal before generic recovery  6829ms
+   ✓ survives actual SIGKILL at cancel_after_source and decides its own journal before generic recovery  6084ms
+   ✓ lets the dedicated owner settle expired cancellation while the real global reaper is ticking  1747ms
+ ✓ tests/agent-driven/integration/host-close-lifecycle.test.ts (1 test) 3260ms
+   ✓ joins simultaneous Host closes and lets an admitted real HTTP handler finish before closing SQLite  3260ms
+
+ Test Files  2 passed (2)
+      Tests  15 passed (15)
+   Start at  00:49:03
+   Duration  79.51s (transform 1.73s, setup 0ms, collect 5.83s, tests 70.35s, environment 0ms, prepare 2.21s)
+

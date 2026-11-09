@@ -1,0 +1,1 @@
+corepack pnpm exec vitest run tests/agent-driven/integration/owned-runtime.test.ts tests/agent-driven/integration/scoped-auth.test.ts tests/agent-driven/bridge/launcher-cold.test.ts --maxWorkers=1 --minWorkers=1

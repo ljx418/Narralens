@@ -1,0 +1,51 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:3820149) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/project-creation-host.test.ts (14 tests) 73402ms
+   ✓ creates through HTTP and Host scheduling only; reopens native source without migration or manual registration  3884ms
+   ✓ refuses unknown fields and driver-minted confirmation before creating any Job  1035ms
+   ✓ rejects modified initial source before committing a pointer or origin  3845ms
+   ✓ quiesces an interrupted creation before closing SQLite, then resumes the same durable Job on reopen  2598ms
+   ✓ settles owner cancellation without publishing or wedging a subsequent Host start  1954ms
+   ✓ survives actual SIGKILL at after_lease and decides its own journal before generic recovery  7346ms
+   ✓ survives actual SIGKILL at after_project_directory and decides its own journal before generic recovery  6503ms
+   ✓ survives actual SIGKILL at after_owner_claim and decides its own journal before generic recovery  7154ms
+   ✓ survives actual SIGKILL at after_source and decides its own journal before generic recovery  7215ms
+   ✓ survives actual SIGKILL at after_snapshot and decides its own journal before generic recovery  7166ms
+   ✓ survives actual SIGKILL at before_commit and decides its own journal before generic recovery  8972ms
+   ✓ survives actual SIGKILL at after_commit and decides its own journal before generic recovery  7120ms
+   ✓ survives actual SIGKILL at cancel_after_source and decides its own journal before generic recovery  6576ms
+   ✓ lets the dedicated owner settle expired cancellation while the real global reaper is ticking  2032ms
+ ✓ tests/agent-driven/integration/owned-runtime.test.ts (4 tests) 43448ms
+   ✓ uses real flock, persistent instance generations, authenticated HTTP and actual MCP without fake readiness  40108ms
+   ✓ refuses the actual Host child entry without an inherited kernel lock  3323ms
+ ✓ tests/agent-driven/bridge/mcp-stdio-client.test.ts (8 tests) 31882ms
+   ✓ A-MCP stdio façade > advertises exactly the registry's tool allowlist over a real stdio transport  3284ms
+   ✓ A-MCP stdio façade > reads the concrete health resource over the real transport  3314ms
+   ✓ A-MCP stdio façade > reaches the host over http and returns the contract output  3259ms
+   ✓ A-MCP stdio façade > verifies the host's contract version before the first dispatch  3402ms
+   ✓ A-MCP stdio façade > reads a project resource through the host  4717ms
+   ✓ A-MCP stdio façade > rejects an invalid field without reaching the host  3535ms
+   ✓ A-MCP stdio façade > reports an unreachable host and recovers when the host returns  6961ms
+   ✓ A-MCP stdio façade > refuses an unknown tool name  3383ms
+ ✓ tests/agent-driven/bridge/mcp-wrapper-cleanup.test.ts (2 tests) 6666ms
+   ✓ A-MCP skill bin wrapper > serves the real client through the real wrapper and leaves nothing behind  3353ms
+   ✓ A-MCP skill bin wrapper > does not stop anything but its own child  3312ms
+(node:3826066) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/host-application.test.ts (1 test) 4018ms
+   ✓ mounts real creative SQL in NarralensHost and denies the legacy bearer/session/write bypass  4017ms
+ ✓ tests/agent-driven/bridge/mcp-registry.test.ts (38 tests) 93ms
+ ✓ tests/agent-driven/bridge/mcp-host-client.test.ts (15 tests) 56ms
+ ✓ tests/agent-driven/bridge/cursor-events.test.ts (26 tests) 37ms
+ ✓ tests/agent-driven/bridge/launcher-cold.test.ts (16 tests) 20ms
+ ✓ tests/agent-driven/integration/scoped-auth.test.ts (6 tests) 5ms
+ ✓ tests/agent-driven/bridge/skill-library.test.ts (3 tests) 3ms
+
+ Test Files  11 passed (11)
+      Tests  133 passed (133)
+   Start at  01:05:48
+   Duration  208.80s (transform 3.19s, setup 0ms, collect 30.47s, tests 159.63s, environment 1ms, prepare 12.48s)
+
