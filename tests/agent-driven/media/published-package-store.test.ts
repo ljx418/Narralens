@@ -52,7 +52,6 @@ async function stagePackage(
   store: PublishedPackageStore,
   label: string,
   mediaBytes: string,
-  objectId: string,
 ): Promise<{ staging: string; manifest: ReturnType<typeof manifestFor>; files: Array<{ id: string; name: string; source_path: string }> }> {
   const staging = await store.createStaging(label, "00000000-0000-4000-8000-000000000001");
   const mediaPath = join(staging, PACKAGE_FILES.media);
@@ -77,12 +76,11 @@ describe("publishing a package", () => {
   it("publishes a receipt that names a complete object", async () => {
     const root = await directory("store-publish");
     const store = new PublishedPackageStore({ root });
-    const staged = await stagePackage(store, "attempt1", "the film", "obj_one");
+    const staged = await stagePackage(store, "attempt1", "the film");
 
     const outcome = await store.publish({
       package_id: PACKAGE_ID,
       staging_dir: staged.staging,
-      object_id: "obj_one",
       files: staged.files,
       manifest: staged.manifest,
       published_at: "2026-11-09T10:00:00.000Z",
@@ -97,7 +95,7 @@ describe("publishing a package", () => {
 
     // The object holds the files, and the receipt is the only thing at the canonical
     // path.
-    const objectFiles = await readdir(join(root, "objects", "obj_one"));
+    const objectFiles = await readdir(join(root, "objects", outcome.object_id));
     expect(objectFiles.sort()).toEqual([PACKAGE_FILES.fullDecode, PACKAGE_FILES.ffprobe, PACKAGE_FILES.media].sort());
     const published = await readdir(join(root, "published"));
     expect(published).toEqual([PACKAGE_ID]);
@@ -106,13 +104,12 @@ describe("publishing a package", () => {
   it("publishes into the same place twice and keeps the first package's bytes", async () => {
     const root = await directory("store-twice");
     const store = new PublishedPackageStore({ root });
-    const first = await stagePackage(store, "attempt1", "the first film", "obj_one");
-    const second = await stagePackage(store, "attempt2", "a different film", "obj_two");
+    const first = await stagePackage(store, "attempt1", "the first film");
+    const second = await stagePackage(store, "attempt2", "a different film");
 
     await store.publish({
       package_id: PACKAGE_ID,
       staging_dir: first.staging,
-      object_id: "obj_one",
       files: first.files,
       manifest: first.manifest,
       published_at: "2026-11-09T10:00:00.000Z",
@@ -120,7 +117,6 @@ describe("publishing a package", () => {
     const secondOutcome = await store.publish({
       package_id: PACKAGE_ID,
       staging_dir: second.staging,
-      object_id: "obj_two",
       files: second.files,
       manifest: second.manifest,
       published_at: "2026-11-09T10:00:00.000Z",
@@ -128,31 +124,30 @@ describe("publishing a package", () => {
 
     expect(secondOutcome.status).toBe("already_published");
     // The loser removed only its own object, and it never touched the canonical path.
-    const objects = await readdir(join(root, "objects"));
-    expect(objects).toEqual(["obj_one"]);
     const receipt = await store.readReceipt(PACKAGE_ID);
-    expect(receipt?.object_id).toBe("obj_one");
-    const media = await readFile(join(root, "objects", "obj_one", PACKAGE_FILES.media), "utf8");
+    expect(receipt?.object_id).toBeDefined();
+    const objects = await readdir(join(root, "objects"));
+    expect(objects).toEqual([receipt?.object_id]);
+    const media = await readFile(join(root, "objects", receipt?.object_id ?? "", PACKAGE_FILES.media), "utf8");
     expect(media).toBe("the first film");
   });
 
   it("lets exactly one of two concurrent attempts publish, without the loser touching the winner", async () => {
     const root = await directory("store-concurrent");
     const store = new PublishedPackageStore({ root });
-    const first = await stagePackage(store, "attempt1", "the film", "obj_one");
-    const second = await stagePackage(store, "attempt2", "the film", "obj_two");
+    const first = await stagePackage(store, "attempt1", "the film");
+    const second = await stagePackage(store, "attempt2", "the film");
 
-    const publish = async (staged: typeof first, objectId: string) =>
+    const publish = async (staged: typeof first) =>
       await store.publish({
         package_id: PACKAGE_ID,
         staging_dir: staged.staging,
-        object_id: objectId,
         files: staged.files,
         manifest: staged.manifest,
         published_at: "2026-11-09T10:00:00.000Z",
       });
 
-    const outcomes = await Promise.all([publish(first, "obj_one"), publish(second, "obj_two")]);
+    const outcomes = await Promise.all([publish(first), publish(second)]);
 
     const statuses = outcomes.map((outcome) => outcome.status).sort();
     expect(statuses).toEqual(["already_published", "published"]);
@@ -179,23 +174,22 @@ describe("publishing a package", () => {
         await waiting;
       },
     });
-    const first = await stagePackage(store, "attempt1", "the film", "obj_one");
-    const second = await stagePackage(store, "attempt2", "the film", "obj_two");
+    const first = await stagePackage(store, "attempt1", "the film");
+    const second = await stagePackage(store, "attempt2", "the film");
 
-    const publish = async (staged: typeof first, objectId: string) =>
+    const publish = async (staged: typeof first) =>
       await store.publish({
         package_id: PACKAGE_ID,
         staging_dir: staged.staging,
-        object_id: objectId,
         files: staged.files,
         manifest: staged.manifest,
         published_at: "2026-11-09T10:00:00.000Z",
       });
 
-    const firstPublish = publish(first, "obj_one");
+    const firstPublish = publish(first);
     // Let the first one reach the barrier, then let the second one through.
     await new Promise((resolvePromise) => setTimeout(resolvePromise, 50));
-    const secondOutcome = await publish(second, "obj_two");
+    const secondOutcome = await publish(second);
     release?.();
     const firstOutcome = await firstPublish;
 
@@ -204,9 +198,104 @@ describe("publishing a package", () => {
     // The canonical path holds the receipt of the attempt that published it, and the
     // attempt that lost removed only its own object.
     const receipt = await store.readReceipt(PACKAGE_ID);
-    expect(receipt?.object_id).toBe("obj_two");
+    expect(receipt?.object_id).toBe(secondOutcome.object_id);
     const objects = await readdir(join(root, "objects"));
-    expect(objects).toEqual(["obj_two"]);
+    expect(objects).toEqual([secondOutcome.object_id]);
+  });
+
+  it("keeps the package when the directory cannot be made durable after the receipt is linked", async () => {
+    const root = await directory("store-post-link-sync");
+    const store = new PublishedPackageStore({
+      root,
+      // The receipt is linked before the published directory is synced. A failure there
+      // must not take the package away: the canonical receipt names it.
+      sync_directory: async (path: string) => {
+        if (path.endsWith("published")) throw new Error("the disk said no, after the link");
+      },
+    });
+    const staged = await stagePackage(store, "attempt1", "the film");
+
+    await expect(store.publish({
+      package_id: PACKAGE_ID,
+      staging_dir: staged.staging,
+      files: staged.files,
+      manifest: staged.manifest,
+      published_at: "2026-11-09T10:00:00.000Z",
+    })).rejects.toThrow(/the disk said no/);
+
+    // The receipt is there and it is complete: the package exists.
+    const receipt = await store.readReceipt(PACKAGE_ID);
+    expect(receipt?.manifest.delivery_id).toBe(DELIVERY_ID);
+    const verified = await store.verifyPackage(PACKAGE_ID);
+    expect(verified?.object_id).toBe(receipt?.object_id);
+    const media = await readFile(join(root, "objects", receipt?.object_id ?? "", PACKAGE_FILES.media), "utf8");
+    expect(media).toBe("the film");
+  });
+
+  it("does not overwrite a package when a later attempt retries the same key", async () => {
+    const root = await directory("store-retry");
+    const store = new PublishedPackageStore({ root });
+    const first = await stagePackage(store, "attempt1", "the first film");
+    const second = await stagePackage(store, "attempt2", "a different film");
+
+    await store.publish({
+      package_id: PACKAGE_ID,
+      staging_dir: first.staging,
+      files: first.files,
+      manifest: first.manifest,
+      published_at: "2026-11-09T10:00:00.000Z",
+    });
+    const receiptBefore = await store.readReceipt(PACKAGE_ID);
+
+    const retried = await store.publish({
+      package_id: PACKAGE_ID,
+      staging_dir: second.staging,
+      files: second.files,
+      manifest: second.manifest,
+      published_at: "2026-11-09T10:00:00.000Z",
+    });
+
+    expect(retried.status).toBe("already_published");
+    const receiptAfter = await store.readReceipt(PACKAGE_ID);
+    expect(receiptAfter?.object_id).toBe(receiptBefore?.object_id);
+    const media = await readFile(join(root, "objects", receiptAfter?.object_id ?? "", PACKAGE_FILES.media), "utf8");
+    expect(media).toBe("the first film");
+  });
+
+  it("refuses an object directory that is already there, and leaves it alone", async () => {
+    const root = await directory("store-object-taken");
+    let identity = 0;
+    const store = new PublishedPackageStore({
+      root,
+      // The same identity twice: the second attempt must find the directory taken and
+      // must not take it over.
+      object_identity: () => `obj_fixed_${identity++}`,
+    });
+    await store.prepare();
+    const occupied = join(root, "objects", "obj_fixed_0");
+    await mkdir(occupied, { recursive: true });
+    await writeFile(join(occupied, "somebody-elses-file"), "not ours", "utf8");
+
+    const staged = await stagePackage(store, "attempt1", "the film");
+    await expect(store.publish({
+      package_id: PACKAGE_ID,
+      staging_dir: staged.staging,
+      files: staged.files,
+      manifest: staged.manifest,
+      published_at: "2026-11-09T10:00:00.000Z",
+    })).rejects.toThrow(/already exists/);
+
+    // The directory that was there is untouched.
+    expect(await readFile(join(occupied, "somebody-elses-file"), "utf8")).toBe("not ours");
+    expect(await store.isPublished(PACKAGE_ID)).toBe(false);
+  });
+
+  it("refuses a staging directory that is already there", async () => {
+    const root = await directory("store-staging-taken");
+    const store = new PublishedPackageStore({ root });
+    const first = await store.createStaging("attempt1", "the-same-identity");
+    expect(first.endsWith("attempt1-the-same-identity")).toBe(true);
+    await expect(store.createStaging("attempt1", "the-same-identity")).rejects.toThrow(/already exists/);
   });
 
   it("does not publish when a directory cannot be made durable", async () => {
@@ -215,12 +304,11 @@ describe("publishing a package", () => {
       root,
       sync_directory: async () => { throw new Error("the disk said no"); },
     });
-    const staged = await stagePackage(store, "attempt1", "the film", "obj_one");
+    const staged = await stagePackage(store, "attempt1", "the film");
 
     await expect(store.publish({
       package_id: PACKAGE_ID,
       staging_dir: staged.staging,
-      object_id: "obj_one",
       files: staged.files,
       manifest: staged.manifest,
       published_at: "2026-11-09T10:00:00.000Z",
@@ -238,11 +326,10 @@ describe("publishing a package", () => {
     const canonical = join(root, "published", PACKAGE_ID);
     await writeFile(canonical, "this is not a receipt", "utf8");
 
-    const staged = await stagePackage(store, "attempt1", "the film", "obj_one");
+    const staged = await stagePackage(store, "attempt1", "the film");
     await expect(store.publish({
       package_id: PACKAGE_ID,
       staging_dir: staged.staging,
-      object_id: "obj_one",
       files: staged.files,
       manifest: staged.manifest,
       published_at: "2026-11-09T10:00:00.000Z",
@@ -254,7 +341,7 @@ describe("publishing a package", () => {
   it("fails closed when the name is taken by a receipt of another delivery", async () => {
     const root = await directory("store-conflict");
     const store = new PublishedPackageStore({ root });
-    const other = await stagePackage(store, "attempt-other", "another film's bytes", "obj_other");
+    const other = await stagePackage(store, "attempt-other", "another film's bytes");
     const otherManifest = buildDeliveryManifest({
       delivery_id: "d_ffffffffffffffffffffffffffffffff",
       project_id: "proj_media_02",
@@ -274,17 +361,15 @@ describe("publishing a package", () => {
     await store.publish({
       package_id: PACKAGE_ID,
       staging_dir: other.staging,
-      object_id: "obj_other",
       files: other.files,
       manifest: otherManifest,
       published_at: "2026-11-09T10:00:00.000Z",
     });
 
-    const staged = await stagePackage(store, "attempt1", "the film", "obj_one");
+    const staged = await stagePackage(store, "attempt1", "the film");
     await expect(store.publish({
       package_id: PACKAGE_ID,
       staging_dir: staged.staging,
-      object_id: "obj_one",
       files: staged.files,
       manifest: staged.manifest,
       published_at: "2026-11-09T10:00:00.000Z",
@@ -297,14 +382,13 @@ describe("publishing a package", () => {
   it("refuses to publish a file that is not inside the staging directory", async () => {
     const root = await directory("store-escape");
     const store = new PublishedPackageStore({ root });
-    const staged = await stagePackage(store, "attempt1", "the film", "obj_one");
+    const staged = await stagePackage(store, "attempt1", "the film");
     const outside = join(root, "outside.bin");
     await writeFile(outside, "not ours", "utf8");
 
     await expect(store.publish({
       package_id: PACKAGE_ID,
       staging_dir: staged.staging,
-      object_id: "obj_one",
       files: [{ id: "x", name: PACKAGE_FILES.media, source_path: outside }],
       manifest: staged.manifest,
       published_at: "2026-11-09T10:00:00.000Z",
@@ -316,51 +400,50 @@ describe("verifying a published package", () => {
   it("accepts a package that matches its receipt", async () => {
     const root = await directory("store-verify");
     const store = new PublishedPackageStore({ root });
-    const staged = await stagePackage(store, "attempt1", "the film", "obj_one");
+    const staged = await stagePackage(store, "attempt1", "the film");
     await store.publish({
       package_id: PACKAGE_ID,
       staging_dir: staged.staging,
-      object_id: "obj_one",
       files: staged.files,
       manifest: staged.manifest,
       published_at: "2026-11-09T10:00:00.000Z",
     });
 
     const verified = await store.verifyPackage(PACKAGE_ID);
-    expect(verified?.object_id).toBe("obj_one");
+    expect(verified?.object_id).toBeDefined();
   });
 
   it("notices a file that was changed after it was published", async () => {
     const root = await directory("store-tampered");
     const store = new PublishedPackageStore({ root });
-    const staged = await stagePackage(store, "attempt1", "the film", "obj_one");
+    const staged = await stagePackage(store, "attempt1", "the film");
     await store.publish({
       package_id: PACKAGE_ID,
       staging_dir: staged.staging,
-      object_id: "obj_one",
       files: staged.files,
       manifest: staged.manifest,
       published_at: "2026-11-09T10:00:00.000Z",
     });
 
-    await writeFile(join(root, "objects", "obj_one", PACKAGE_FILES.media), "a different film", "utf8");
+    const receipt = await store.readReceipt(PACKAGE_ID);
+    await writeFile(join(root, "objects", receipt?.object_id ?? "", PACKAGE_FILES.media), "a different film", "utf8");
     await expect(store.verifyPackage(PACKAGE_ID)).rejects.toThrow(/digest/);
   });
 
   it("refuses a file that is a link rather than the file the receipt names", async () => {
     const root = await directory("store-link");
     const store = new PublishedPackageStore({ root });
-    const staged = await stagePackage(store, "attempt1", "the film", "obj_one");
+    const staged = await stagePackage(store, "attempt1", "the film");
     await store.publish({
       package_id: PACKAGE_ID,
       staging_dir: staged.staging,
-      object_id: "obj_one",
       files: staged.files,
       manifest: staged.manifest,
       published_at: "2026-11-09T10:00:00.000Z",
     });
 
-    const mediaPath = join(root, "objects", "obj_one", PACKAGE_FILES.media);
+    const receipt = await store.readReceipt(PACKAGE_ID);
+    const mediaPath = join(root, "objects", receipt?.object_id ?? "", PACKAGE_FILES.media);
     const elsewhere = join(root, "elsewhere.mp4");
     await writeFile(elsewhere, "the film", "utf8");
     await symlink(elsewhere, mediaPath);
@@ -370,17 +453,17 @@ describe("verifying a published package", () => {
   it("notices a file that is not there at all", async () => {
     const root = await directory("store-missing");
     const store = new PublishedPackageStore({ root });
-    const staged = await stagePackage(store, "attempt1", "the film", "obj_one");
+    const staged = await stagePackage(store, "attempt1", "the film");
     await store.publish({
       package_id: PACKAGE_ID,
       staging_dir: staged.staging,
-      object_id: "obj_one",
       files: staged.files,
       manifest: staged.manifest,
       published_at: "2026-11-09T10:00:00.000Z",
     });
 
-    await rm(join(root, "objects", "obj_one", PACKAGE_FILES.media), { force: true });
+    const receipt = await store.readReceipt(PACKAGE_ID);
+    await rm(join(root, "objects", receipt?.object_id ?? "", PACKAGE_FILES.media), { force: true });
     await expect(store.verifyPackage(PACKAGE_ID)).rejects.toThrow(/missing/);
   });
 });

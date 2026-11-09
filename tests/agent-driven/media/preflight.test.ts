@@ -181,6 +181,32 @@ describe("the preflight", () => {
     expect(report.ok).toBe(false);
   });
 
+  it("blocks a snapshot that does not carry the roles A always requires", async () => {
+    const source = await directory("preflight-mandatory-source");
+    const staging = await directory("preflight-mandatory-staging");
+    const closure = await makeClosure({ directory: source, with_supplement: true });
+    // The subtitles are taken out of the closure. The request asks for nothing, and it
+    // may not ask for less: A's promised roles are not the caller's to drop.
+    const withoutSubtitles = {
+      ...closure,
+      entries: closure.entries.filter((entry) => entry.role !== "subtitles"),
+    };
+
+    const report = await runPreflight({
+      closure: withoutSubtitles,
+      render_spec: renderSpec(),
+      project_id: withoutSubtitles.project_id,
+      snapshot_id: withoutSubtitles.snapshot_id,
+      expected_source_digest: withoutSubtitles.source_digest,
+      upstream_root: join(source, "no-checkout-here"),
+      staging_parent: staging,
+      required_supplements: [],
+    });
+
+    expect(findingStatus(report, "inputs_complete")).toBe("block");
+    expect(report.ok).toBe(false);
+  });
+
   it("blocks when the pinned upstream is not there", async () => {
     const source = await directory("preflight-upstream-source");
     const staging = await directory("preflight-upstream-staging");

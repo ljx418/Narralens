@@ -72,6 +72,16 @@ export interface PreflightInput {
 /** The free space below which a render is flagged. */
 export const LOW_FREE_BYTES = 2 * 1024 * 1024 * 1024;
 
+/**
+ * The roles every A delivery has to carry.
+ *
+ * A轮承诺的附属项是字幕与许可文件两份：字幕让影片能被读懂，许可文件说明这份影片凭什么
+ * 可以交付。这两个角色不是请求可以关掉的——请求里的`required_supplements`只会在这个
+ * 之上再加，不会减。A还没有"这一项不适用"的持久理由模型，所以缺任何一项都直接拦住，
+ * 而不是当作不适用放过去。
+ */
+export const MANDATORY_A_SUPPLEMENT_ROLES: readonly string[] = Object.freeze(["subtitles", "rights"]);
+
 const SHA256_PATTERN = /^[a-f0-9]{64}$/u;
 
 /**
@@ -182,7 +192,8 @@ export async function runPreflight(input: PreflightInput): Promise<PreflightRepo
   const rolesPresent = new Set(
     closure.entries.filter((entry) => entry.kind === "supplement").map((entry) => entry.role ?? ""),
   );
-  for (const role of input.required_supplements) {
+  const requiredRoles = new Set([...MANDATORY_A_SUPPLEMENT_ROLES, ...input.required_supplements]);
+  for (const role of requiredRoles) {
     if (!rolesPresent.has(role)) supplementProblems.push(`the snapshot does not carry the promised ${role}`);
   }
   if (!closure.entries.some((entry) => entry.relative_path === closure.native_entry)) {
@@ -195,7 +206,7 @@ export async function runPreflight(input: PreflightInput): Promise<PreflightRepo
     id: "inputs_complete",
     status: supplementProblems.length === 0 ? "pass" : "block",
     reason: supplementProblems.length === 0
-      ? `the snapshot carries ${input.required_supplements.length} promised supplement(s) and the film's own source`
+      ? `the snapshot carries ${requiredRoles.size} promised supplement(s) and the film's own source`
       : supplementProblems.join("; "),
   });
 

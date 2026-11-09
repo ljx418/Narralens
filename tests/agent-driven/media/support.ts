@@ -151,17 +151,32 @@ export async function makeClosure(input: {
   }
 
   if (input.with_supplement === true) {
-    const supplementText = "licence text";
-    const supplementPath = join(input.directory, "rights.txt");
-    await writeFile(supplementPath, supplementText, "utf8");
+    // The roles A promises: the licence and the subtitles. A delivery that is missing
+    // either of them is blocked, so the tests' good case carries both.
+    const licenceText = "licence text";
+    const licencePath = join(input.directory, "rights.txt");
+    await writeFile(licencePath, licenceText, "utf8");
     entries.push({
       relative_path: "rights.txt",
-      absolute_path: supplementPath,
-      sha256: sha256Of(supplementText),
-      bytes: Buffer.byteLength(supplementText),
+      absolute_path: licencePath,
+      sha256: sha256Of(licenceText),
+      bytes: Buffer.byteLength(licenceText),
       kind: "supplement",
       rights_ref: "rights_01",
       role: input.supplement_role ?? RIGHTS_ROLE,
+    });
+
+    const subtitleText = "1\n00:00:00,000 --> 00:00:02,000\nhello\n";
+    const subtitlePath = join(input.directory, "subtitles.vtt");
+    await writeFile(subtitlePath, subtitleText, "utf8");
+    entries.push({
+      relative_path: "subtitles.vtt",
+      absolute_path: subtitlePath,
+      sha256: sha256Of(subtitleText),
+      bytes: Buffer.byteLength(subtitleText),
+      kind: "supplement",
+      rights_ref: "rights_01",
+      role: SUBTITLES_ROLE,
     });
   }
 

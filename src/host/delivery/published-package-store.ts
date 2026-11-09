@@ -12,9 +12,9 @@ import { validateDeliveryManifest } from "./manifest.js";
  * parts and the order between them is the whole design:
  *
  * - **The object.** The complete package — the media, the probe, the decode, the
- *   supplements, the native source — is built in the attempt's own staging area and
- *   moved, whole, into `objects/<uuid>`. Nothing is added to it afterwards and nothing
- *   is ever taken out of it.
+ *   supplements, the native source — is linked into `objects/<uuid>`, a directory this
+ *   attempt creates exclusively and whose name it generates itself. Nothing is added to
+ *   it afterwards and nothing is ever taken out of it.
  * - **The receipt.** A small file at `published/<package_id>` that names the object and
  *   carries the manifest and the digest of every file. It is published by a hard link,
  *   and a hard link fails when the name is taken.
@@ -56,6 +56,14 @@ export interface PublishedPackageStoreOptions {
    * publications at the same time does not know which of them got there first.
    */
   readonly before_publish_link?: (package_id: string) => Promise<void>;
+  /**
+   * How the identity of a published object is chosen.
+   *
+   * The identity is the store's own: a caller cannot name the directory its package
+   * will live in, so two attempts cannot be pointed at the same one. The seam exists
+   * so that a test can make the identity predictable; the default is a fresh UUID.
+   */
+  readonly object_identity?: () => string;
   /**
    * How a directory is made durable.
    *
@@ -111,8 +119,6 @@ export interface ReceiptFile {
 export interface PublishInput {
   readonly package_id: string;
   readonly staging_dir: string;
-  /** The identity of this attempt's object. It names a directory nobody else uses. */
-  readonly object_id: string;
   readonly files: readonly PublishFile[];
   readonly manifest: DeliveryManifest;
   readonly published_at: string;
@@ -190,6 +196,7 @@ export class PublishedPackageStore {
   readonly quarantineDir: string;
   readonly #beforePublishLink: ((package_id: string) => Promise<void>) | undefined;
   readonly #syncDirectory: (path: string) => Promise<void>;
+  readonly #objectIdentity: () => string;
 
   constructor(options: PublishedPackageStoreOptions) {
     this.root = resolve(options.root);
@@ -199,6 +206,7 @@ export class PublishedPackageStore {
     this.quarantineDir = resolve(options.quarantine_dir ?? resolve(this.root, "quarantine"));
     this.#beforePublishLink = options.before_publish_link;
     this.#syncDirectory = options.sync_directory ?? (async (path: string) => { await syncDirectoryOf(path); });
+    this.#objectIdentity = options.object_identity ?? (() => `obj_${randomUUID().replace(/-/gu, "")}`);
   }
 
   /** Create the directories the store needs. */
@@ -216,10 +224,21 @@ export class PublishedPackageStore {
    * in the same millisecond and a name built from the clock alone would let the second
    * one write into the first one's directory.
    */
-  async createStaging(label: string, identity: string = randomUUID()): Promise<string> {
+  async createStaging(label: string, identity?: string): Promise<string> {
+    await mkdir(this.stagingDir, { recursive: true, mode: 0o700 });
     const cleaned = label.replace(/[^A-Za-z0-9_-]/gu, "-").slice(0, 48);
-    const path = resolve(this.stagingDir, `${cleaned.length === 0 ? "attempt" : cleaned}-${identity.replace(/[^A-Za-z0-9_-]/gu, "-").slice(0, 64)}`);
-    await mkdir(path, { recursive: true, mode: 0o700 });
+    const unique = (identity ?? randomUUID()).replace(/[^A-Za-z0-9_-]/gu, "-").slice(0, 64);
+    const path = resolve(this.stagingDir, `${cleaned.length === 0 ? "attempt" : cleaned}-${unique}`);
+    // The directory is created exclusively: a name that is already there is somebody
+    // else's, and reusing it would put this attempt's files next to theirs.
+    try {
+      await mkdir(path, { mode: 0o700 });
+    } catch (error) {
+      if (isAlreadyExists(error)) {
+        throw new PublishedPackageError("STAGING_NAME_TAKEN", "the staging directory of this attempt already exists");
+      }
+      throw error;
+    }
     return path;
   }
 
@@ -252,26 +271,35 @@ export class PublishedPackageStore {
   /**
    * Publish a package.
    *
-   * The object is built whole in the attempt's own staging area and moved into place
-   * first; the receipt is published afterwards by a hard link. The receipt is the
-   * publication: a package exists when and only when a receipt names a complete object.
+   * The object's directory is created exclusively under a name this store generates,
+   * and the complete files are linked into it. The receipt is published afterwards by a
+   * hard link. The receipt is the publication: a package exists when and only when a
+   * receipt names a complete object, and readers only ever go through the receipt.
    *
    * A loser — an attempt whose receipt link finds the name taken — reads the winner's
    * receipt, checks that it is the same delivery key, and reports it. It removes only
-   * the object it built itself, and it never touches the canonical path.
+   * the object it created itself, and it never touches the canonical path.
+   *
+   * Once the receipt is linked, the object it names is the package: it is kept even if
+   * something after the link fails, because a package that its own receipt points at
+   * must still be there when the recovery looks for it.
    */
   async publish(input: PublishInput): Promise<PublishOutcome> {
     await this.prepare();
 
-    const objectSource = resolve(input.staging_dir, "object");
-    const objectTarget = this.objectPath(input.object_id);
     const receiptSource = resolve(input.staging_dir, "receipt.json");
     const receiptTarget = this.receiptPath(input.package_id);
+    // The object is this attempt's own. The name is generated here and never taken from
+    // the caller, and the directory is created exclusively: two attempts cannot be
+    // pointed at the same directory, and a directory that is already there is
+    // somebody else's.
+    const objectId = this.#objectIdentity();
+    const objectTarget = this.objectPath(objectId);
 
     const receipt: PackageReceipt = {
       kind: "narralens.delivery_package_receipt@1.0",
       package_id: input.package_id,
-      object_id: input.object_id,
+      object_id: objectId,
       delivery_id: input.manifest.delivery_id,
       project_id: input.manifest.project_id,
       snapshot_id: input.manifest.snapshot_id,
@@ -284,17 +312,35 @@ export class PublishedPackageStore {
       files: [],
     };
 
+    // Whether the canonical receipt names this attempt's object. Once it does, the
+    // object is the package: it is never removed, not even when something after the
+    // link fails, because a published package that its receipt points at must stay
+    // there for the recovery to find.
+    let receiptVisible = false;
+    // Whether this attempt is the one that created the object directory. Only such a
+    // directory may ever be removed: a directory that was already there belongs to
+    // somebody else, and this attempt has no business deleting it.
+    let objectCreated = false;
+
     try {
-      // 1. The object, built whole in the attempt's own staging area.
-      await mkdir(objectSource, { recursive: true, mode: 0o700 });
+      // 1. The object's own directory, created exclusively.
+      try {
+        await mkdir(objectTarget, { mode: 0o700 });
+        objectCreated = true;
+      } catch (error) {
+        if (isAlreadyExists(error)) {
+          throw new PublishedPackageError("OBJECT_NAME_TAKEN", "the directory of this attempt's object already exists");
+        }
+        throw error;
+      }
       const files: ReceiptFile[] = [];
       for (const file of input.files) {
         const name = assertPlainFileName(file.name);
         if (!contained(input.staging_dir, file.source_path)) {
           throw new PublishedPackageError("STAGING_ESCAPE", `a file to publish is not inside the staging directory: ${name}`);
         }
-        const destination = resolve(objectSource, name);
-        if (!contained(objectSource, destination)) {
+        const destination = resolve(objectTarget, name);
+        if (!contained(objectTarget, destination)) {
           throw new PublishedPackageError("STAGING_ESCAPE", `a file to publish would land outside the package: ${name}`);
         }
         await link(file.source_path, destination);
@@ -309,17 +355,17 @@ export class PublishedPackageStore {
         files.push({ id: file.id, file: name, sha256: digest, bytes: info.size });
       }
       const complete: PackageReceipt = { ...receipt, files };
-      await this.#writeAndSync(receiptSource, `${JSON.stringify(complete, null, 2)}\n`);
-      await this.#syncDir(objectSource);
-
-      // 2. The object moves into place, whole.
-      await rename(objectSource, objectTarget);
+      await this.#syncDir(objectTarget);
       await this.#syncDir(this.objectsDir);
+
+      // 2. The receipt, written beside the attempt's own staging and made durable.
+      await this.#writeAndSync(receiptSource, `${JSON.stringify(complete, null, 2)}\n`);
 
       // 3. The receipt is published. The link fails when the name is taken.
       if (this.#beforePublishLink !== undefined) await this.#beforePublishLink(input.package_id);
       try {
         await link(receiptSource, receiptTarget);
+        receiptVisible = true;
       } catch (error) {
         if (!isAlreadyExists(error)) throw error;
         // The name is taken. The canonical path is not ours to touch.
@@ -331,7 +377,7 @@ export class PublishedPackageStore {
           );
         }
         this.#assertSameKey(existing, complete);
-        await this.#removeOwnObject(objectTarget);
+        await this.#removeOwnObject(objectTarget, objectCreated);
         return {
           status: "already_published",
           package_id: input.package_id,
@@ -345,14 +391,14 @@ export class PublishedPackageStore {
       return {
         status: "published",
         package_id: input.package_id,
-        object_id: input.object_id,
+        object_id: objectId,
         manifest: input.manifest,
         receipt: complete,
       };
     } catch (error) {
-      // Only what this attempt built: its own object and its own staging.
-      await this.#removeOwnObject(objectTarget);
-      await rm(objectSource, { recursive: true, force: true }).catch(() => undefined);
+      // An object the canonical receipt names is the package and stays. Anything else
+      // this attempt built is removed — and only what this attempt built.
+      if (!receiptVisible) await this.#removeOwnObject(objectTarget, objectCreated);
       throw error;
     }
   }
@@ -377,8 +423,14 @@ export class PublishedPackageStore {
     }
   }
 
-  /** Remove an object this attempt built. Nobody else's object is ever removed. */
-  async #removeOwnObject(path: string): Promise<void> {
+  /**
+   * Remove an object this attempt built.
+   *
+   * Nobody else's object is ever removed: the directory has to be one this attempt
+   * created, and it has to be inside the objects root.
+   */
+  async #removeOwnObject(path: string, createdByThisAttempt: boolean): Promise<void> {
+    if (!createdByThisAttempt) return;
     if (!contained(this.objectsDir, path)) return;
     await rm(path, { recursive: true, force: true }).catch(() => undefined);
   }

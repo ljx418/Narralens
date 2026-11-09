@@ -21,6 +21,18 @@
 | 9 | `media`/`ffprobe`引用id在所有交付里撞车 | 引用id带交付身份：`d_<32hex>_media`、`d_<32hex>_ffprobe`…；索引/manifest/QC证据一致；去重时核对project/snapshot/source/config，并保留**胜者的attempt**，不把胜者的attempt与败者的ExecutionBinding混用 |
 | 10 | 证据不诚实 | HANDOFF更正中断主体（Codex负责人，非用户）、记录exec/PID/无429；本文明确：**钩子抛异常不是真实T20-E**，真实杀进程未跑；harness的内存fence/commit是demo，**不是生产Job store** |
 
+## 0b. R2修复对照（Codex的七条）
+
+| # | Codex的指出 | 这次怎么改的 |
+|---|---|---|
+| 1 | receipt链上之后若fsync失败，catch仍会删掉对象 | 记录`receiptVisible`：**receipt指向的对象一律不删**（哪怕之后fsync失败），失败照抛，对象与receipt都留给恢复；测试：链接后fsync失败→receipt仍完整可校验、重试不覆盖 |
+| 2 | object id由调用方给、rename可能覆盖既有空目录 | object id由store**自己生成**（`object_identity`仅供测试注入），对象目录用**独占mkdir**创建（已存在即`OBJECT_NAME_TAKEN`），文件链进这个私有目录；只删**自己创建**的目录；`createStaging`改为独占mkdir+内部uuid；测试：同名对象目录/同名staging目录都不被接管 |
+| 3 | `digestOf`把fd读到EOF，200整文件流因此返回空 | 哈希改为**定位读**（显式offset，fd位置不动），200的流显式`start:0`；描述符在流结束/出错/调用方`close()`时都关闭；测试：整文件字节逐字节相同 |
+| 4 | `sameDelivery`只比部分字段 | 改为**整份manifest的规范化比较**（render_spec、每个ref的version与sha、QC、published_at全在内）；记录自身的project/snapshot/artifact_ref/download_ref也要与manifest一致；**ready读取会校验包里的每一个字节**；下载要求持久ready+整份manifest一致；测试：QC/render_spec/附属件不符都不供字节 |
+| 5 | WebSocket与不经代理的WebRTC UDP仍能出去 | 守卫规则抽到`openfilm-guard-rules.mjs`（可单测）：`context.routeWebSocket("**/*")`关闭每个socket、上下文`serviceWorkers:"block"`、浏览器加`--disable-quic`与`--force-webrtc-ip-handling-policy=disable_non_proxied_udp`；测试用**假browser/context**断言这些限制真的被施加（不只是源码里有这几个词） |
+| 6 | 只有取消才传播group_settled | `group_settled`现在在**所有**失败路径上传播（超时/非零/无响应/取消）；任何未收敛的进程组都产生`requires_reconciliation`并**保留attempt**；写完请求文件后再查一次signal才spawn；QC期间取消也保留attempt；`awaitChildExit`导出为可用假child驱动的函数，测试覆盖干净退出、被停止且组已消失、组仍在、从不退出 |
+| 7 | `required_supplements`空列表即可绕开A的字幕/许可 | 固定要求A的两个角色`["subtitles","rights"]`（`MANDATORY_A_SUPPLEMENT_ROLES`），请求只能加不能减；A没有"不适用"的持久理由模型，所以缺项一律block；原生清单改为诚实范围（`scope`、`editable_project_complete:false`、`copied`与`referenced`分开），不冒充可编辑工程导出 |
+
 ## 1. 模块地图
 
 | 文件 | 职责 |
@@ -31,21 +43,22 @@
 | `src/host/render/upstream-pin.ts` | 校验上游checkout：commit、干净树、模块摘要、守卫摘要、worker摘要 |
 | `src/host/render/openfilm-offline-wrapper.mjs` | **离线守卫**：包装固定上游的`FilmPage.open`与`launch` |
 | `src/host/render/openfilm-offline-hooks.mjs` | Node module hooks：把守卫装到固定上游前面 |
+| `src/host/render/openfilm-guard-rules.mjs` | 守卫的**规则**（页面选项/上下文选项/浏览器flags/WebSocket关闭），与上游无关，因此可单测 |
 | `src/host/render/openfilm-render-worker.mjs` | 无shell固定argv worker：校验请求与pin、装守卫、调用上游`render(args, opts)` |
-| `src/host/render/native-renderer.ts` | 拉起worker；取消按进程组停止并**等到组消失**；超时；失败分类 |
+| `src/host/render/native-renderer.ts` | 拉起worker；停止按进程组并**等到组消失**；`awaitChildExit`导出为可测函数；任何未收敛的组都上报 |
 | `src/host/render/snapshot-copy.ts` | 快照闭包的不可变复制与摘要复校；拒绝链接与越界路径 |
 | `src/host/render/render-snapshot.ts` | 编排：preflight → 复制 → 渲染 → 复校 → QC → 组包 → 原子发布 → MAIN记录 |
 | `src/host/preflight/preflight.ts` | 渲染前事实：快照身份、闭包、许可（含附属件）、完整性、spec、配置摘要、上游pin、空间 |
 | `src/host/delivery/qc.ts` | 真实ffprobe + **完整解码**（全部流、严格、单线程、限协议）；帧数/时长/流/帧率比对；附属件 |
 | `src/host/delivery/manifest.ts` | 精确`DeliveryManifest` / `Delivery` DTO，用冻结schema校验 |
 | `src/host/delivery/package-layout.ts` | 包内文件名、**带交付身份的引用id**、delivery/package/download id派生 |
-| `src/host/delivery/published-package-store.ts` | 对象+receipt两步发布（硬链接、不可覆盖）、receipt校验、隔离 |
+| `src/host/delivery/published-package-store.ts` | 独占对象目录+receipt硬链接发布（不可覆盖、receipt可见的对象永不删）、receipt校验、隔离 |
 | `src/host/delivery/download.ts` | 单range下载：200/206/416、ETag=真实SHA、无重定向、跨项目拒绝、`O_NOFOLLOW`同描述符哈希 |
 | `src/host/delivery/delivery-service.ts` | 读模型：只读不渲染；下载要MAIN的持久记录说ready |
 | `tools/agent-driven/media/render-delivery.ts` | 模块harness（**内存fence/commit，只是demo，不是生产Job store**） |
 | `tools/agent-driven/media/verify-render-pin.mjs` | pin探针：缺失→`NOT_RUN`(exit 0)，漂移→`FAIL`(exit 1) |
 
-测试：`tests/agent-driven/media/`（12个文件，含support.ts共享夹具）。
+测试：`tests/agent-driven/media/`（13个文件，含support.ts共享夹具）：新增`native-renderer.test.ts`（假child的进程生命周期）与扩充后的`offline-guard.test.ts`（假browser/context的守卫行为）。
 
 ## 2. 交付路径（顺序即约束）
 

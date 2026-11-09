@@ -69,10 +69,9 @@ async function publishedStore(label: string): Promise<{ store: PublishedPackageS
     download_ref: DOWNLOAD_REF,
   });
 
-  await store.publish({
+  const outcome = await store.publish({
     package_id: PACKAGE_ID,
     staging_dir: staging,
-    object_id: "obj_one",
     files: [
       { id: packageRefId(DELIVERY_ID, PACKAGE_ROLES.media), name: PACKAGE_FILES.media, source_path: mediaPath },
       { id: packageRefId(DELIVERY_ID, PACKAGE_ROLES.ffprobe), name: PACKAGE_FILES.ffprobe, source_path: probePath },
@@ -81,7 +80,7 @@ async function publishedStore(label: string): Promise<{ store: PublishedPackageS
     manifest,
     published_at: "2026-11-09T10:00:00.000Z",
   });
-  return { store, objectDir: join(root, "objects", "obj_one") };
+  return { store, objectDir: join(root, "objects", outcome.object_id) };
 }
 
 describe("a byte range", () => {

@@ -24,7 +24,19 @@ import { FIXED_RENDER_OPTIONS } from "./render-profile.js";
 
 /** A failure of the native render. */
 export class NativeRenderError extends Error {
-  constructor(readonly code: string, message: string, readonly retryable: boolean = false) {
+  /**
+   * Whether the renderer's process group was seen to end.
+   *
+   * It is false when the group might still be running: the renderer is gone, but the
+   * ffmpeg or the browser it started may not be. Nothing may be adopted and no attempt
+   * may be given up while that is true.
+   */
+  constructor(
+    readonly code: string,
+    message: string,
+    readonly retryable: boolean = false,
+    readonly group_settled: boolean = true,
+  ) {
     super(message);
     this.name = "NativeRenderError";
   }
@@ -39,8 +51,8 @@ export class NativeRenderCancelled extends NativeRenderError {
    * and only the second means that nothing can still write. When it is false, MAIN has
    * to record a reconciling fact and keep the attempt claimed.
    */
-  constructor(message: string, readonly group_settled: boolean) {
-    super("RENDER_CANCELLED", message, true);
+  constructor(message: string, groupSettled: boolean) {
+    super("RENDER_CANCELLED", message, true, groupSettled);
     this.name = "NativeRenderCancelled";
   }
 }
@@ -115,7 +127,7 @@ export const GROUP_SETTLE_TIMEOUT_MS = 15_000;
 export const MAX_LOG_BYTES = 64 * 1024;
 
 /** Whether a process group still exists. A signal of zero only asks. */
-export function groupExists(pid: number): boolean {
+export function groupExistsOfProcess(pid: number): boolean {
   try {
     process.kill(-pid, 0);
     return true;
@@ -126,7 +138,7 @@ export function groupExists(pid: number): boolean {
   }
 }
 
-function signalGroup(child: ChildProcess, signal: NodeJS.Signals): void {
+export function signalProcessGroup(child: ChildProcess, signal: NodeJS.Signals): void {
   if (child.pid === undefined) return;
   try {
     // The negative pid is the process group the child leads.
@@ -162,6 +174,125 @@ export function redactRoots(text: string, roots: readonly string[]): string {
  */
 export interface NativeRenderPort {
   render(request: NativeRenderRequest): Promise<NativeRenderResult>;
+}
+
+/** What the exit wait needs to know. */
+export interface ChildExitOptions {
+  readonly signal: AbortSignal | undefined;
+  readonly timeout_ms: number;
+  /** How long the process group is watched for its end. */
+  readonly group_settle_timeout_ms?: number;
+  /** Whether a process group still exists. The seam exists for the tests. */
+  readonly group_exists?: (pid: number) => boolean;
+  /** How a process group is signalled. The seam exists for the tests. */
+  readonly signal_group?: (child: ChildProcess, signal: NodeJS.Signals) => void;
+}
+
+/** What came of waiting for a child. */
+export interface ChildExitResult {
+  readonly code: number | null;
+  readonly signal: NodeJS.Signals | null;
+  readonly timedOut: boolean;
+  /**
+   * False when the process group might still be running.
+   *
+   * The worker closing is not the same as its ffmpeg and Chromium children being gone,
+   * and only the second means that nothing can still write.
+   */
+  readonly group_settled: boolean;
+}
+
+/**
+ * Wait for a child to exit, and for its group to end.
+ *
+ * A cancellation stops the whole group, waits for the grace period, and then stops it
+ * outright; the promise still waits for the process to be gone, because a cancel that
+ * returns while the encoder is running is a cancel that lies. When the group cannot be
+ * seen to end, the result says so: the caller has to keep the attempt claimed and let
+ * MAIN record a reconciling fact.
+ */
+export async function awaitChildExit(child: ChildProcess, options: ChildExitOptions): Promise<ChildExitResult> {
+  const groupExists = options.group_exists ?? groupExistsOfProcess;
+  const signalGroup = options.signal_group ?? signalProcessGroup;
+  const groupSettleTimeout = options.group_settle_timeout_ms ?? GROUP_SETTLE_TIMEOUT_MS;
+
+  let timedOut = false;
+  let escalation: NodeJS.Timeout | null = null;
+
+  const escalate = (): void => {
+    signalGroup(child, "SIGTERM");
+    escalation = setTimeout(() => {
+      // The group is asked before it is signalled: a group id that the system has
+      // given to something else must not be killed.
+      if (child.pid !== undefined && groupExists(child.pid)) signalGroup(child, "SIGKILL");
+    }, CANCEL_GRACE_MS);
+    escalation.unref();
+  };
+  const onAbort = (): void => { escalate(); };
+  const onTimeout = (): void => {
+    timedOut = true;
+    escalate();
+  };
+
+  if (options.signal?.aborted === true) onAbort();
+  else options.signal?.addEventListener("abort", onAbort, { once: true });
+  const timer = setTimeout(onTimeout, options.timeout_ms);
+  timer.unref();
+
+  try {
+    const exited = await new Promise<{ code: number | null; signal: NodeJS.Signals | null; timedOut: boolean }>((resolvePromise) => {
+      child.once("close", (code, closeSignal) => {
+        resolvePromise({ code, signal: closeSignal, timedOut });
+      });
+      child.once("error", () => {
+        resolvePromise({ code: null, signal: null, timedOut });
+      });
+    });
+
+    // The worker is gone; its children may not be. The group is watched until it is
+    // seen to end, and only then is the escalation timer cleared — a timer that fired
+    // later would signal a process group id that the system may have given to
+    // something else by then.
+    // A render that was stopped is watched until its group is gone. A render that
+    // ended on its own is only asked once: the group id may have been given to
+    // something else by then, and waiting for it would mean waiting for a stranger.
+    const stopped = timedOut || options.signal?.aborted === true;
+    const groupSettled = stopped
+      ? await awaitGroupEnd(child, groupExists, groupSettleTimeout)
+      : child.pid === undefined || !groupExists(child.pid);
+    if (groupSettled && escalation !== null) {
+      clearTimeout(escalation);
+      escalation = null;
+    }
+
+    return { ...exited, group_settled: groupSettled };
+  } finally {
+    clearTimeout(timer);
+    if (escalation !== null) clearTimeout(escalation);
+    options.signal?.removeEventListener("abort", onAbort);
+  }
+}
+
+/**
+ * Wait until the child's process group is seen to end.
+ *
+ * The worker spawns ffmpeg and Chromium, and they are in the same group. The worker
+ * closing does not mean they are gone, so the group itself is asked: a signal of zero
+ * does not disturb anything, it only says whether the group is still there.
+ */
+export async function awaitGroupEnd(
+  child: ChildProcess,
+  groupExists: (pid: number) => boolean = groupExistsOfProcess,
+  timeoutMs: number = GROUP_SETTLE_TIMEOUT_MS,
+): Promise<boolean> {
+  const pid = child.pid;
+  if (pid === undefined) return true;
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    if (!groupExists(pid)) return true;
+    await new Promise((resolvePromise) => setTimeout(resolvePromise, 100));
+  }
+  return !groupExists(pid);
 }
 
 export class NativeRenderer implements NativeRenderPort {
@@ -206,6 +337,12 @@ export class NativeRenderer implements NativeRenderPort {
       shutter: FIXED_RENDER_OPTIONS.shutter,
     })}\n`, { encoding: "utf8", mode: 0o600 });
 
+    // The request file was written; the signal is asked again. A cancellation that
+    // arrived while it was being written must not start a renderer.
+    if (request.signal?.aborted === true) {
+      throw new NativeRenderCancelled("the render was cancelled before the renderer started", true);
+    }
+
     const child = spawn(this.#nodeBinary, [workerPath, requestPath, responsePath], {
       cwd: resolve(request.project_root),
       env: workerEnvironment(),
@@ -225,13 +362,13 @@ export class NativeRenderer implements NativeRenderPort {
       if (stderr.length > MAX_LOG_BYTES) stderr = stderr.slice(0, MAX_LOG_BYTES);
     });
 
-    const exited = await this.#awaitExit(child, request.signal, request.timeout_ms);
+    const exited = await awaitChildExit(child, { signal: request.signal, timeout_ms: request.timeout_ms });
 
     if (request.signal?.aborted === true) {
       throw new NativeRenderCancelled("the render was cancelled", exited.group_settled);
     }
     if (exited.timedOut) {
-      throw new NativeRenderError("RENDER_TIMEOUT", "the renderer did not finish in time", true);
+      throw new NativeRenderError("RENDER_TIMEOUT", "the renderer did not finish in time", true, exited.group_settled);
     }
 
     const response = await this.#readResponse(responsePath);
@@ -240,6 +377,8 @@ export class NativeRenderer implements NativeRenderPort {
       throw new NativeRenderError(
         "RENDER_NO_RESPONSE",
         `the renderer exited without an answer (exit ${String(exited.code)})${detail.length > 0 ? `: ${detail}` : ""}`,
+        false,
+        exited.group_settled,
       );
     }
     if (response.ok !== true) {
@@ -248,101 +387,13 @@ export class NativeRenderer implements NativeRenderPort {
         : null;
       const code = typeof failure?.code === "string" ? failure.code : "RENDER_FAILED";
       const message = typeof failure?.message === "string" ? failure.message : "the renderer failed";
-      throw new NativeRenderError(code, message);
+      throw new NativeRenderError(code, message, false, exited.group_settled);
     }
     return {
       out_path: resolve(request.out_path),
       lines: Array.isArray(response.lines) ? response.lines.filter((line): line is string => typeof line === "string") : [],
       elapsed_ms: typeof response.elapsed_ms === "number" ? response.elapsed_ms : 0,
     };
-  }
-
-  /**
-   * Wait for the child to exit.
-   *
-   * A cancellation stops the whole group, waits for the grace period, and then stops
-   * it outright; the promise still waits for the process to be gone, because a cancel
-   * that returns while the encoder is running is a cancel that lies.
-   */
-  async #awaitExit(child: ChildProcess, signal: AbortSignal | undefined, timeoutMs: number): Promise<{
-    code: number | null;
-    signal: NodeJS.Signals | null;
-    timedOut: boolean;
-    group_settled: boolean;
-  }> {
-    let timedOut = false;
-    let escalation: NodeJS.Timeout | null = null;
-
-    const escalate = (): void => {
-      signalGroup(child, "SIGTERM");
-      escalation = setTimeout(() => {
-        // The group is asked before it is signalled: a group id that the system has
-        // given to something else must not be killed.
-        if (child.pid !== undefined && groupExists(child.pid)) signalGroup(child, "SIGKILL");
-      }, CANCEL_GRACE_MS);
-      escalation.unref();
-    };
-    const onAbort = (): void => { escalate(); };
-    const onTimeout = (): void => {
-      timedOut = true;
-      escalate();
-    };
-
-    if (signal?.aborted === true) onAbort();
-    else signal?.addEventListener("abort", onAbort, { once: true });
-    const timer = setTimeout(onTimeout, timeoutMs);
-    timer.unref();
-
-    try {
-      const exited = await new Promise<{ code: number | null; signal: NodeJS.Signals | null; timedOut: boolean }>((resolvePromise) => {
-        child.once("close", (code, closeSignal) => {
-          resolvePromise({ code, signal: closeSignal, timedOut });
-        });
-        child.once("error", () => {
-          resolvePromise({ code: null, signal: null, timedOut });
-        });
-      });
-
-      // The worker is gone; its children may not be. The group is watched until it is
-      // seen to end, and only then is the escalation timer cleared — a timer that fired
-      // later would signal a process group id that the system may have given to
-      // something else by then.
-      // A render that was stopped is watched until its group is gone. A render that
-      // ended on its own is only asked once: the group id may have been given to
-      // something else by then, and waiting for it would mean waiting for a stranger.
-      const stopped = timedOut || signal?.aborted === true;
-      const groupSettled = stopped
-        ? await this.#awaitGroupEnd(child)
-        : child.pid === undefined || !groupExists(child.pid);
-      if (groupSettled && escalation !== null) {
-        clearTimeout(escalation);
-        escalation = null;
-      }
-
-      return { ...exited, group_settled: groupSettled };
-    } finally {
-      clearTimeout(timer);
-      if (escalation !== null) clearTimeout(escalation);
-      signal?.removeEventListener("abort", onAbort);
-    }
-  }
-
-  /**
-   * Wait until the child's process group is seen to end.
-   *
-   * The worker spawns ffmpeg and Chromium, and they are in the same group. The worker
-   * closing does not mean they are gone, so the group itself is asked: a signal of
-   * zero does not disturb anything, it only says whether the group is still there.
-   */
-  async #awaitGroupEnd(child: ChildProcess): Promise<boolean> {
-    const pid = child.pid;
-    if (pid === undefined) return true;
-    const deadline = Date.now() + GROUP_SETTLE_TIMEOUT_MS;
-    while (Date.now() < deadline) {
-      if (!groupExists(pid)) return true;
-      await new Promise((resolvePromise) => setTimeout(resolvePromise, 100));
-    }
-    return !groupExists(pid);
   }
 
   async #readResponse(path: string): Promise<Record<string, unknown> | null> {

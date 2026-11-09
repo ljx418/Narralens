@@ -1,9 +1,9 @@
-import { createHash, randomUUID } from "node:crypto";
+import { createHash } from "node:crypto";
 import { createReadStream } from "node:fs";
 import { copyFile, mkdir, readFile, stat, writeFile } from "node:fs/promises";
 import { extname, resolve } from "node:path";
 import type { DeliveryManifest, QCItem, Ref } from "../../contracts/agent-driven-types.js";
-import { runPreflight } from "../preflight/preflight.js";
+import { MANDATORY_A_SUPPLEMENT_ROLES, runPreflight } from "../preflight/preflight.js";
 import { assertManifestMatches, buildDeliveryManifest } from "../delivery/manifest.js";
 import { realMediaToolRunner, runQualityControl, type MediaToolRunner, type SupplementCheck } from "../delivery/qc.js";
 import type { PublishedPackageStore } from "../delivery/published-package-store.js";
@@ -115,7 +115,7 @@ function failure(code: string, message: string, retryable: boolean, requiresReco
   };
 }
 
-function blocked(items: readonly QCItem[], message: string): RenderOutcome {
+function blocked(items: readonly QCItem[], message: string, requiresReconciliation = false): RenderOutcome {
   return {
     state: "blocked",
     manifest: null,
@@ -124,7 +124,7 @@ function blocked(items: readonly QCItem[], message: string): RenderOutcome {
     download_ref: null,
     failure: { code: "QC_BLOCKED", message, retryable: false },
     qc_items: items,
-    requires_reconciliation: false,
+    requires_reconciliation: requiresReconciliation,
   };
 }
 
@@ -220,7 +220,7 @@ export class SnapshotRenderService implements RenderPort {
         expected_source_digest: request.source_digest,
         upstream_root: this.#deps.upstream_root,
         staging_parent: this.#deps.packages.stagingRoot,
-        required_supplements: request.required_supplements,
+        required_supplements: [...MANDATORY_A_SUPPLEMENT_ROLES, ...request.required_supplements],
         ...(this.#deps.pin_verifier === undefined ? {} : { pin_verifier: this.#deps.pin_verifier }),
       });
       const preflightItems: QCItem[] = preflight.findings.map((finding) => ({
@@ -249,10 +249,9 @@ export class SnapshotRenderService implements RenderPort {
       const deliveryId = deriveDeliveryId(key);
       const packageId = derivePackageId(key);
       const downloadRef = deriveDownloadRef(packageId);
-      const objectId = `obj_${randomUUID().replace(/-/gu, "")}`;
 
       // 4. The film's own copy. The live project is never rendered.
-      staging = await this.#deps.packages.createStaging(`attempt${request.attempt}`, randomUUID());
+      staging = await this.#deps.packages.createStaging(`attempt${request.attempt}`);
       let copy: SnapshotCopy;
       try {
         copy = await copySnapshotClosure({ closure, staging_root: staging });
@@ -288,8 +287,12 @@ export class SnapshotRenderService implements RenderPort {
         }
         if (error instanceof NativeRenderError) {
           const classified = classifyRenderFailure(error);
+          // The renderer is gone, but its children may not be. That is true for a
+          // failure and for a timeout, not only for a cancellation: whatever may still
+          // be running has to be reported, and the attempt has to stay claimed.
+          requiresReconciliation = error.group_settled !== true;
           await this.#deps.packages.quarantineStaging(staging, `failed-${request.attempt}`);
-          return failure(classified.code, classified.message, classified.retryable);
+          return failure(classified.code, classified.message, classified.retryable, requiresReconciliation);
         }
         throw error;
       }
@@ -343,13 +346,18 @@ export class SnapshotRenderService implements RenderPort {
         delivery_id: deliveryId,
         render_spec: request.render_spec,
         supplements: supplementChecks,
-        required_supplements: request.required_supplements,
+        required_supplements: [...MANDATORY_A_SUPPLEMENT_ROLES, ...request.required_supplements],
         expected_frames: closure.expected_frames,
         expected_duration_seconds: closure.expected_duration_seconds,
         runner: this.#deps.qc_runner ?? realMediaToolRunner,
         timeout_ms: this.#deps.qc_timeout_ms ?? DEFAULT_QC_TIMEOUT_MS,
         signal: request.signal,
       });
+
+      // The decoder may still be running when the quality control returns: a
+      // cancellation that arrived during the decode leaves the probe and the decoder
+      // to be waited for, and until they are gone nothing may be adopted.
+      if (request.signal?.aborted === true) requiresReconciliation = true;
 
       // Every check the preflight made is carried on. A warning that the preflight
       // raised is a warning the delivery has, and a warning without a recorded
@@ -370,7 +378,11 @@ export class SnapshotRenderService implements RenderPort {
 
       if (qcItems.some((item) => item.status === "block")) {
         await this.#deps.packages.quarantineStaging(staging, `blocked-${request.attempt}`);
-        return blocked(qcItems, qcItems.filter((item) => item.status === "block").map((item) => `${item.id}: ${item.reason}`).join("; "));
+        return blocked(
+          qcItems,
+          qcItems.filter((item) => item.status === "block").map((item) => `${item.id}: ${item.reason}`).join("; "),
+          requiresReconciliation,
+        );
       }
 
       // 8. The fence, once more. A render that was cancelled while it encoded must not
@@ -427,6 +439,12 @@ export class SnapshotRenderService implements RenderPort {
       const nativeSourcePath = resolve(staging, PACKAGE_FILES.nativeSource);
       await writeFile(nativeSourcePath, `${JSON.stringify({
         kind: "narralens.native_project_attachment@1.0",
+        // What this file is, exactly: the film's own document and the list of the
+        // snapshot's files. It is not an export of the whole editable project — the
+        // assets stay in the snapshot, which is the authoritative editable source.
+        scope: "document_and_closure_reference",
+        editable_project_complete: false,
+        note: "the package carries the film's entry document; the snapshot remains the authoritative editable source",
         project_id: closure.project_id,
         snapshot_id: closure.snapshot_id,
         source_digest: closure.source_digest,
@@ -434,8 +452,11 @@ export class SnapshotRenderService implements RenderPort {
         native_entry: copy.native_entry,
         expected_frames: closure.expected_frames ?? null,
         expected_duration_seconds: closure.expected_duration_seconds ?? null,
-        files: closure.entries
-          .filter((entry) => entry.kind === "native_source")
+        copied: closure.entries
+          .filter((entry) => entry.relative_path === copy.native_entry)
+          .map((entry) => ({ relative_path: entry.relative_path, sha256: entry.sha256, bytes: entry.bytes })),
+        referenced: closure.entries
+          .filter((entry) => entry.relative_path !== copy.native_entry)
           .map((entry) => ({ relative_path: entry.relative_path, sha256: entry.sha256, bytes: entry.bytes })),
       }, null, 2)}\n`, { encoding: "utf8", mode: 0o600 });
       files.push({
@@ -488,7 +509,6 @@ export class SnapshotRenderService implements RenderPort {
       const published = await this.#deps.packages.publish({
         package_id: packageId,
         staging_dir: staging,
-        object_id: objectId,
         files,
         manifest,
         published_at: manifest.published_at,

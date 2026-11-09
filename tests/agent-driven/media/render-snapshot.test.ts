@@ -283,6 +283,24 @@ describe("rendering a committed snapshot", () => {
     expect(built.released()).toBe(1);
   });
 
+  it("keeps the attempt claimed when a failure left the process group running", async () => {
+    const built = await harness({
+      label: "render-unsettled-failure",
+      renderer: {
+        async render() {
+          // The renderer is gone, but something it started may not be.
+          throw new NativeRenderError("RENDER_FAILED", "the film could not be rendered", false, false);
+        },
+      },
+    });
+    const outcome = await built.service.render(requestFor(built));
+
+    expect(outcome.state).toBe("failed");
+    expect(outcome.requires_reconciliation).toBe(true);
+    expect(built.released()).toBe(0);
+    expect(built.commits).toHaveLength(0);
+  });
+
   it("keeps the attempt claimed when the cancellation could not be seen to settle", async () => {
     const built = await harness({ label: "render-unsettled", renderer: fakeRenderer("unsettled") });
     const outcome = await built.service.render(requestFor(built));
@@ -308,7 +326,7 @@ describe("rendering a committed snapshot", () => {
 
   it("blocks without publishing when a promised supplement is missing", async () => {
     const built = await harness({ label: "render-missing-supplement" });
-    const outcome = await built.service.render(requestFor(built, 1, ["rights", "subtitles"]));
+    const outcome = await built.service.render(requestFor(built, 1, ["cover"]));
 
     expect(outcome.state).toBe("blocked");
     expect(outcome.qc_items.find((item) => item.id === "inputs_complete")?.status).toBe("block");
