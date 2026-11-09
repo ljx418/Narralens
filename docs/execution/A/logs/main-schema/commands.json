@@ -1,0 +1,28 @@
+[
+  {
+    "name": "typecheck",
+    "argv": [
+      "corepack",
+      "pnpm",
+      "exec",
+      "tsc",
+      "--noEmit"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "schema",
+    "argv": [
+      "corepack",
+      "pnpm",
+      "exec",
+      "vitest",
+      "run",
+      "--config",
+      "vitest.config.ts",
+      "tests/agent-driven/integration/agent-schema.test.ts",
+      "tests/agent-driven/integration/contract-freeze.test.ts"
+    ],
+    "exit": 0
+  }
+]
