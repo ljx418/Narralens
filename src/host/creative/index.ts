@@ -8,6 +8,8 @@
 
 export {
   PRODUCT_COLLECTIONS,
+  PRODUCT_HEAD_COLLECTIONS,
+  PRODUCT_APPEND_ONLY_COLLECTIONS,
   TrustedContextBrand,
   isTrustedCallerContext,
   reviewImpactOf,
@@ -132,11 +134,14 @@ export {
   isTrustedUi,
   isPlainAuthenticated,
   isProductError,
-  nowEpochSeconds,
-  epochSecondsToIso,
-  isoToEpochSeconds,
-  isExpired,
   ProductError,
   PRODUCT_ERROR_HTTP_STATUS,
 } from "./trusted-context.js";
 export type { ProductErrorCode } from "./trusted-context.js";
+
+export {
+  nowEpochSeconds,
+  epochSecondsToIso,
+  isoToEpochSeconds,
+  isExpired,
+} from "./time.js";

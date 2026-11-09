@@ -777,17 +777,47 @@ export const PRODUCT_COLLECTIONS = {
 export type ProductCollectionKindOf<K extends ProductCollection> =
   (typeof PRODUCT_COLLECTIONS)[K]["kind"];
 
-/** The collections advanced by a compare-and-set on their version column. */
-export type ProductHeadCollection = {
-  [K in ProductCollection]: ProductCollectionKindOf<K> extends "head" ? K : never;
-}[ProductCollection];
+/**
+ * The collections advanced by a compare-and-set on their version column.
+ *
+ * The list is written out rather than derived from the collection kinds. A derived
+ * conditional type over the descriptor literal resolves to `never` for exactly the
+ * reason it looks like it should work — the kind of bug that silently turns
+ * `compareAndSet` into a function that accepts nothing.
+ */
+export const PRODUCT_HEAD_COLLECTIONS = [
+  "intake_head",
+  "question_head",
+  "answer_head",
+  "template_head",
+  "artifact_head",
+] as const;
 
-/** The collections that may only be appended, never updated. */
-export type ProductAppendOnlyCollection = {
-  [K in ProductCollection]: ProductCollectionKindOf<K> extends "immutable_version" | "append_only"
-    ? K
-    : never;
-}[ProductCollection];
+export type ProductHeadCollection = (typeof PRODUCT_HEAD_COLLECTIONS)[number];
+
+/**
+ * The collections that may only be appended, never updated.
+ *
+ * These are the immutable version families and the append-only fact rows.
+ */
+export const PRODUCT_APPEND_ONLY_COLLECTIONS = [
+  "intake_version",
+  "question_version",
+  "answer_version",
+  "template_version",
+  "artifact_version",
+  "plan_version",
+  "intake_content_decision",
+  "intake_confirmation",
+  "content_decision",
+  "trusted_confirmation",
+  "prepared_authorization",
+  "bootstrap_command",
+  "project_origin",
+  "native_ack",
+] as const;
+
+export type ProductAppendOnlyCollection = (typeof PRODUCT_APPEND_ONLY_COLLECTIONS)[number];
 
 /* -------------------------------------------------------------------------------------- */
 /* Events                                                                                 */

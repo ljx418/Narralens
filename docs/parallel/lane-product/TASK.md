@@ -29,7 +29,7 @@ the code, the git index, the branch or the run root.
 
 | Path | Purpose |
 | --- | --- |
-| `src/host/creative/product-repository.ts` | The closed repository seam: 24-member `ProductCollection` union, per-collection record DTOs, primary keys, list scopes, collection specs with the exact `cp_a0_*` table, write/CAS semantics, `tx.emit`, idempotency recall/record on the transaction, `TrustedAdoptionAuthority`, the runtime-branded `TrustedCallerContext`. |
+| `src/host/creative/product-repository.ts` | The closed repository seam: 25-member `ProductCollection` union, per-collection record DTOs, primary keys, list scopes, collection specs with the exact `cp_a0_*` table, write/CAS semantics, `tx.emit`, idempotency recall/record on the transaction, `TrustedAdoptionAuthority`, the runtime-branded `TrustedCallerContext`. |
 | `src/host/creative/digest.ts` | Restricted-JCS canonical JSON, SHA-256 digests, the metadata-free request digest, the exact golden `FIXED_PLAN` and its digest assertion. |
 | `src/host/creative/time.ts` | Epoch seconds ↔ ISO-8601 (the frozen SQL stores deadlines as INTEGER epoch seconds). |
 | `src/host/creative/trusted-context.ts` | The out-of-band caller context, the frozen error code → HTTP status map, the lane's `ProductError`. |

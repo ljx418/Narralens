@@ -42,7 +42,7 @@ which is written by MAIN's Coordinator path, not by the lane.
 
 ## 2. Closed collection union
 
-`ProductCollection` has exactly 24 members and each maps to exactly one `cp_a0_*` table:
+`ProductCollection` has exactly 25 members and each maps to exactly one `cp_a0_*` table:
 
 ```
 intake_version           -> cp_a0_intake_version
@@ -71,6 +71,20 @@ project_origin           -> cp_a0_project_origin
 native_ack               -> cp_a0_native_ack
 event                    -> cp_a0_event          (read-only for the lane; written by MAIN)
 ```
+
+The union has three disjoint groups, and the two closed lists are written out rather than
+derived from the descriptor kinds:
+
+| Group | List | Write rule |
+| --- | --- | --- |
+| `PRODUCT_HEAD_COLLECTIONS` | `intake_head`, `question_head`, `answer_head`, `template_head`, `artifact_head` | compare-and-set on the version column |
+| `PRODUCT_APPEND_ONLY_COLLECTIONS` | the six immutable version families and the eight append-only fact rows | insert; an identical row is a replay, a different one is a conflict |
+| the rest | `run`, `review_request`, `execution_grant`, `step_attempt`, `approval` | the mutable columns move; the binding columns do not |
+
+`cp_a0_event` carries the `append_only` kind but is **not** in the append-only list: MAIN
+writes it from the same `outbox` insert, so the lane may only read it. The mapping tool
+cross-checks the two closed lists against the descriptor literal and fails when they
+disagree.
 
 Deliberately **not** in the union, with the reason:
 

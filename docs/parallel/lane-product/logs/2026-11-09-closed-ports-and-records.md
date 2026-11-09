@@ -13,7 +13,7 @@ edits were lost; the working tree at resumption contained only the untracked lan
 
 | Path | Purpose |
 | --- | --- |
-| `src/host/creative/product-repository.ts` | The closed repository seam: `ProductCollection` union (24 members), per-collection record DTOs, primary keys, list scopes, collection specs with the exact table, write semantics, `tx.emit`, `ProductIdempotencyReceipt`, `TrustedAdoptionAuthority`. |
+| `src/host/creative/product-repository.ts` | The closed repository seam: `ProductCollection` union (25 members), per-collection record DTOs, primary keys, list scopes, collection specs with the exact table, write semantics, `tx.emit`, `ProductIdempotencyReceipt`, `TrustedAdoptionAuthority`. |
 | `src/host/creative/digest.ts` | Restricted-JCS canonical JSON, SHA-256 digests, deterministic ids. |
 | `src/host/creative/trusted-context.ts` | Out-of-band caller context minting plus the frozen error vocabulary. |
 | `docs/parallel/lane-product/requests/002-exact-record-mapping.md` | Column-level mapping of every collection to its `cp_a0_*` table, write/CAS semantics, event mapping, trusted adoption contract, and the six points MAIN still has to decide. |
