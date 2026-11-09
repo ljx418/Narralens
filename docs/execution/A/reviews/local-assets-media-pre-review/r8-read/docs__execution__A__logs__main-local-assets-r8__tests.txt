@@ -1,0 +1,38 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:3948198) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/local-assets-host.test.ts (21 tests) 36222ms
+   ✓ actually probes and fully decodes video and synthetic diagnostic audio into the same Host database without modifying native source  2169ms
+   ✓ requires real trusted UI provenance and ownership before reading files or recording rights  1757ms
+   ✓ replays the original registration without reimporting changed input and refuses a conflicting key  1860ms
+   ✓ rolls back row, command and outbox together at before_insert, preserving an unreferenced blob for a safe retry  1995ms
+   ✓ rolls back row, command and outbox together at after_insert, preserving an unreferenced blob for a safe retry  1967ms
+   ✓ rolls back row, command and outbox together at after_receipt, preserving an unreferenced blob for a safe retry  1967ms
+   ✓ rolls back row, command and outbox together at after_event, preserving an unreferenced blob for a safe retry  1956ms
+   ✓ checks real input hashes, paths and media rather than accepting metadata as proof  1863ms
+   ✓ preserves unknown license and synthetic origin as facts rather than silently clearing them  1836ms
+   ✓ detects a published blob changed inside the final SQL boundary and commits no registration  1928ms
+   ✓ converges concurrent same-key imports to one immutable row, one command and one business event  1880ms
+   ✓ rounds audio directly from sample time to project frames rather than rounding through displayed milliseconds  1858ms
+   ✓ refuses truncated audio and a video with a damaged audio track even when video-only legacy validation passes  2020ms
+   ✓ refuses local storage overlapping author, snapshot or input domains before creating directories  1771ms
+   ✓ does not follow a newly redirected configured source root, even when replacement bytes have the declared hash  1784ms
+   ✓ captures trusted input by value before asynchronous inspection rather than accepting later permission changes  1835ms
+   ✓ bounds real concurrent imports to two and removes a cancelled queued request without leaking a slot  1887ms
+   ✓ preserves cancellation through the actual video validator wrapper and waits for its media child before returning  1746ms
+   ✓ quiesces admitted local imports and their real media child before the Host closes its shared database  1753ms
+(node:3948824) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/host-close-lifecycle.test.ts (1 test) 3280ms
+   ✓ joins simultaneous Host closes and lets an admitted real HTTP handler finish before closing SQLite  3279ms
+(node:3948871) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/product-sqlite-repository.test.ts (9 tests) 86ms
+
+ Test Files  3 passed (3)
+      Tests  31 passed (31)
+   Start at  03:32:08
+   Duration  54.03s (transform 2.14s, setup 0ms, collect 8.83s, tests 39.59s, environment 1ms, prepare 3.79s)
+

@@ -1,0 +1,19 @@
+# A05 本地素材/旁白登记至原生组装接线
+
+基线d15e44d1d9739febdc0f47e260b06b4a3881ab1c。MAIN唯一writer；MEDIA/BRIDGE可只读审查；Claude无运行会话。保持公开CP-A0及旧Manifest@2/旧导入入口，不把video-only的旧合同冒充音频能力。
+
+本批允许：新增src/host/agent-driven/local-asset-registry.ts与local-media-probe.ts；CreationApplication及start-runtime.ts最小Host-only装配；对应真实Host/SQLite/本地ffmpeg探测/解码测试和证据。后续同批组装/Run/Task接线逐实体扩展release后执行，当前不以空producer放行。
+
+本地素材由Host配置允许源目录，输入只能是相对文件；存储位于独立私有根，不能写author source/snapshot。可信UI+项目归属+同请求实际bytes hash是登记前提。旧MCP authenticated/native_bridge不可伪装许可审批。使用同一RevisionStore连接下created_local_asset不可变事实表；沿用operation_idempotency和outbox，禁止第二数据库/第二幂等权威。媒体完成固定本地协议/格式白名单的真实probe与全量decode，成功blob fsync/no-clobber后一次SQL原子登记+回执+事件；中断遗留blob只是未引用缓存，不成为可用素材。
+
+保留human_recording/synthetic/unknown来源事实，诊断音调明确synthetic，不冒充真人。A末实际真人中文录音/授权素材仍需真实输入，登记不等于A成片通过。资产导入不递增project revision、不写author source；真实采用时仍经Coordinator/base/source/锁/许可/审批与snapshot。
+
+内部素材ID不得复用旧70字符assetIdentity冒充CP<=64字符ID；使用带完整registration_digest验证的<=64字符项目作用域ID，碰撞逐字段拒绝。许可不能因CLI传rights_refs字符串或字节恢复自动成立。无路径/凭据进入公共素材回执。全程Headless静音，无模型、网络、付费或J盘访问。
+
+首次真实测试r2为8/11：已登记事实的exact keys漏source，导致list/replay/concurrent replay失败；修正为source仍进入immutable fact及core/hash，原失败保留。独立预审同时闭环：storage与projects/snapshots/input目录双向交叠在创建前拒绝；source根在配置期固定canonical/dev/ino，每次读取及最终提交拒绝根被改名/重定向；video codec改为真实ffprobe值；音频帧数从duration_ts/time_base直接整数有理数取ceil，不能先ceil到ms后二次ceil；保留旧视频CFR验证并额外-xerror/err_detect explode解码所有视频/音频，音频同样严格decode/错误stderr阻断。测试新增1/30秒1600samples帧数、实际损坏音轨、截断音频、保留域/源根漂移、异步metadata变更。
+
+媒体取消/超时由本模块固定spawn runner消费：仅ffmpeg/ffprobe、固定localMediaArgs及format白名单、bounded stdout/stderr；abort/deadline/输出超限发SIGKILL至该ChildProcess并等其close，随后才回收staging。Node资源错误保留HOST_RESOURCE_EXHAUSTED，超时/中断为CAPABILITY_UNAVAILABLE，不当作永久坏媒体。视频复用旧validator时保留execute原域错误，防其包装成INVALID_MEDIA。新增真实-re FFmpeg取消/100ms deadline并核进程已退出，非假clock或替身媒体。允许local-media-probe.ts中Host-only导出该runner供内部验证，不注册任何任意命令工具。
+
+实际owned runtime可通过Host环境NARRALENS_LOCAL_ASSETS_ROOT配置允许目录并使用自身root/local-assets私有存储；未配置不创建假目录/素材能力，不自动扫描文件。start-runtime.ts为本批明确允许的最小接线例外。登记并发按Host实测事实限制2个，排队可取消；非持久import内部队列不冒充Run/Job状态。新增真实并发槽/排队取消回归，所有路径finally释放。仅保存无凭据/无查询参数的http(s)来源URI，避免把本地路径或签名token带进素材回执。
+
+r6真实组合38/39，登记并发槽用例抓出ctime假冲突：另一个成功发布者删除其staging硬链接会更新共享blob的ctime。保留inode/size/mtime校验，ctime变化时在最终事务重新实际hash证明内容，不直接放宽字节门；原失败保留。新增Host关闭契约：LocalAssetRegistry拒绝新请求、取消admitted/queued并await所有工具close/staging清理，然后CreationApplication才允许共享DB关闭。Host-only mediaObserver只作诊断/测试，不读取请求字段；真实取消注入于ffprobe spawn，证明旧validator包装后仍保留可重试边界、Host关闭无残留工具。
