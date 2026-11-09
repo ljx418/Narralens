@@ -1,5 +1,7 @@
 # Managed native document observation candidate
 
+**Current candidate: P2 request-start fencing correction.** Use active-candidate.json and p2/README.md. Root-level original build/log/archive records below are historical pre-P2, not corrected-source evidence.
+
 MAIN explicitly authorized this controlled candidate on 2026-11-10. Writer: PRODUCT Codex; no Claude CLI/provider started. Upstream is read-only full SHA `e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3`. Base Narralens CP `ca5b67a8285b130c79055317c6202f73cfbb99c8`, frozen manifest `532cd43c963a1c94de5f8ce34f3c6eb7281fded80047f74dc5dbe1a70aa65170` unchanged. This is a candidate patch, not independent approval or A05 PASS.
 
 Only exported `lib/host.ts`, `editor/use-film.ts`, `components/ProjectView.tsx` observation seams and the MAIN-authorized `lib/media-queue.ts` readonly URL wrapper change. No api transport extension, source reducer, Timeline/Player/clock, undo algebra, vendor source/dist, Host/shared contracts or legacy UI change. Other files in this directory are preparation/hash records, not production modules. Private physical tree: `var/managed-native-observation/source`.
@@ -39,3 +41,7 @@ MAIN subsequently granted UI tsc then Vite build after dependency copying finish
 After MAIN resource admission, exec29580 terminated exit0: `node node_modules/typescript/bin/tsc -p studio/ui` exit0; `node node_modules/vite/bin/vite.js build --config studio/ui/vite.config.ts` exit0. Node v22.22.1, native React19.3.0/Vite7.3.7/TypeScript5.9.3, original lock unchanged. See ui-checks.json and original checks/*-first.log for exact UTC times/commands/cwd/exits. Build emits only the normal chunk-size advisory, preserved in the log. Slot explicitly released immediately on completion. No browser/Host/media execution.
 
 Final patch SHA71135c54f97672d698e9d24741b67f7e98fca4900757b7484ec9d324a06c867a; actual dist manifest SHAd4cb3b22dcdf5f58e94979c5220d9594514358285b97a8a06bb9f1705d555bab (10 files). managed-ui-dist.tar.gz bundles those actual files; archive hash/bytes are in build-manifest.json. MAIN should extract to its own verified immutable managed editorDir, compare every member to the manifest, and preserve the original upstream server/guard/legacy pin. Do not serve the tar itself or treat this PRODUCT private tree as a permanent production root. Independent review/real native DOM-loaded observations remain pending.
+
+## P2 correction handoff
+
+MEDIA found stale fromServer response proof renewal; fixed source retains native reducer behavior and fences proof against request-start epoch, invalidating any newer proof before stale-response UI replacement. Current exact patch and new build evidence are in active-candidate.json and p2/. Prior source/patch/check records are retained in history/pre-p2 and original root build artifacts. Runtime race test/independent re-review remain pending.

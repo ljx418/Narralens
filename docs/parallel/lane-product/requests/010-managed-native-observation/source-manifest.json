@@ -1,6 +1,6 @@
 {
   "upstream_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
-  "patch_sha256": "71135c54f97672d698e9d24741b67f7e98fca4900757b7484ec9d324a06c867a",
+  "patch_sha256": "214c629238c2635f5c6212e5e9207eab18f61d17454c08ee64ccd32be41dffa6",
   "files": [
     {
       "path": "packages/openfilm/studio/ui/src/lib/host.ts",
@@ -10,7 +10,7 @@
     {
       "path": "packages/openfilm/studio/ui/src/editor/use-film.ts",
       "pre_sha256": "8e88ca064e0a3e5292523952fff567101da0170418641d6e02400772c974dc26",
-      "post_sha256": "b68d40c3630c41ffa2339bdcc70ec0e478fc4e06d62ef1109ebee814d0f0fc95"
+      "post_sha256": "9361b5cbbe4dc11984ec5b05305ff1a823c0f432b6b62f7cb796f037475d7b48"
     },
     {
       "path": "packages/openfilm/studio/ui/src/components/ProjectView.tsx",
@@ -23,9 +23,11 @@
       "post_sha256": "669b2add59d9cdbe2e53a438fd0de47f717f35ef6d7879bd13bb2c36ad474d25"
     }
   ],
-  "status": "CANDIDATE_UI_TYPES_AND_BUILD_EXIT_0",
+  "status": "P2_FIXED_UI_TYPES_AND_BUILD_EXIT_0",
   "build": "EXIT_0",
   "browser": "NOT_RUN",
   "typecheck": "EXIT_0",
-  "independent_review": "PENDING"
+  "independent_review": "PENDING",
+  "build_evidence": "p2/ui-checks.json",
+  "build_manifest": "p2/build-manifest.json"
 }

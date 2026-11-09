@@ -76,7 +76,7 @@
    const [steps, setStepsState] = useState<{ done: Step[]; undone: Step[] }>({ done: [], undone: [] });
    /* the steps as they are now, ahead of the render: an undo pressed right after an edit (a nudge written the moment
       before it) undoes that edit, not the one before */
-@@ -65,23 +89,42 @@
+@@ -65,23 +89,47 @@
    };
    const changed = useRef(onChange);
    changed.current = onChange;
@@ -103,7 +103,12 @@
    /** The film as the folder has it now; false when film.html cannot be read (`broken` says why). */
    const fromServer = useCallback(async (): Promise<boolean> => {
 +    invalidateDocument('refresh');
++    // A response cannot acquire a fresh proof after a newer request/edit/replacement invalidated it.
++    const requestEpoch = observation.current.epoch;
      const latest = await api.film(projectId);
++    const currentRequest = observation.current.mounted && observation.current.epoch === requestEpoch;
++    // Preserve native reducer behavior, but invalidate any newer proof before an old response replaces its UI.
++    if (!currentRequest) invalidateDocument('refresh');
      if (!latest.doc || !latest.value) {
 +      invalidateDocument('broken');
        brokenRev.current = latest.rev;
@@ -112,7 +117,7 @@
      }
      if (brokenRev.current) { brokenRev.current = null; setBroken(null); setError(null); }
 -    const next = { value: latest.value, rev: latest.rev };
-+    const next = { value: latest.value, rev: latest.rev, document: serverDocument(latest.value, latest.rev, latest.text) };
++    const next = { value: latest.value, rev: latest.rev, document: currentRequest ? serverDocument(latest.value, latest.rev, latest.text) : null };
      ref.current = next;
      setState(next);
      changed.current(next.value, 'server', filmHead(latest.text));
@@ -122,7 +127,7 @@
  
    /* the agent's writes: the film becomes the folder's (an edit of ours still on its way is applied on top by the server) */
    useEffect(() => projectEvents(projectId, (event) => {
-@@ -111,7 +154,8 @@
+@@ -111,7 +159,8 @@
        return Promise.resolve(why);
      }
      const before = current.value;
@@ -132,7 +137,7 @@
      ref.current = next;
      setState(next);
      setError(null);
-@@ -132,12 +176,15 @@
+@@ -132,12 +181,15 @@
          /* every edit here written: the folder's film is the truth (another write came in under this one) */
          const theirs = pending.current === 0 ? done.value : null;
          if (theirs && (done.rebased || JSON.stringify(theirs) !== JSON.stringify(here.value))) {
@@ -151,7 +156,7 @@
          }
          return null;
        } catch (e) {
-@@ -148,8 +195,8 @@
+@@ -148,8 +200,8 @@
          if (!(await fromServer())) {
            /* the folder's film cannot be read: back to the film as it was before this edit (the note on the film says
               why, so it is not said again) */
@@ -162,7 +167,7 @@
            changed.current(current.value, 'server');
            return null;
          }
-@@ -159,11 +206,12 @@
+@@ -159,11 +211,12 @@
      });
      queue.current = written.then(() => {});
      return written;
@@ -176,7 +181,7 @@
      setSteps((s) => (kind === 'undo' ? { done: s.done.slice(0, -1), undone: [...s.undone, step] } : { done: [...s.done, step], undone: s.undone.slice(0, -1) }));
      const written = queue.current.then(async () => {
        const why = await step.outside![kind]().catch((e: unknown) => String(e instanceof Error ? e.message : e));
-@@ -173,7 +221,7 @@
+@@ -173,7 +226,7 @@
        }
      });
      queue.current = written;
@@ -185,7 +190,7 @@
    const step = useCallback((one: Step, kind: 'undo' | 'redo') => {
      if (one.outside) runOutside(one, kind);
      else void run(kind === 'undo' ? one.undo : one.redo, kind);
-@@ -195,13 +243,17 @@
+@@ -195,13 +248,17 @@
    const edit = useCallback((ops: Op[], label?: string, quiet?: boolean) => run(ops, 'do', label, quiet), [run]);
    /** An edit of another file, made already: kept as a step, so ⌘Z undoes it in turn with the film's. */
    const record = useCallback((label: string, outside: OutsideStep) => {

@@ -1,0 +1,15 @@
+{
+  "finding": "MEDIA independent read-only P2 stale fromServer response re-mints proof",
+  "previous_patch_sha256": "71135c54f97672d698e9d24741b67f7e98fca4900757b7484ec9d324a06c867a",
+  "fixed_patch_sha256": "214c629238c2635f5c6212e5e9207eab18f61d17454c08ee64ccd32be41dffa6",
+  "source_files_sha256": "54756f72de8284327637da5aaffb7a3c9ed31f7e929a7929897df4c0976952bd",
+  "delta_files": [
+    {
+      "path": "packages/openfilm/studio/ui/src/editor/use-film.ts",
+      "pre_p2_sha256": "b68d40c3630c41ffa2339bdcc70ec0e478fc4e06d62ef1109ebee814d0f0fc95",
+      "post_p2_sha256": "9361b5cbbe4dc11984ec5b05305ff1a823c0f432b6b62f7cb796f037475d7b48"
+    }
+  ],
+  "runtime_race_test": "NOT_RUN",
+  "independent_re_review": "PENDING"
+}

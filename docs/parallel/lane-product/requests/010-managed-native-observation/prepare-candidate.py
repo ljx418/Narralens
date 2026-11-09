@@ -75,9 +75,15 @@ s=replace(s,'  useEffect(() => { if (initial && !ref.current) setState(initial);
     }
     return () => { invalidateDocument('unmounted'); observation.current.mounted = false; };
   }, [invalidateDocument, serverDocument]);''')
-s=replace(s,'    const latest = await api.film(projectId);', "    invalidateDocument('refresh');\n    const latest = await api.film(projectId);")
+s=replace(s,'    const latest = await api.film(projectId);', """    invalidateDocument('refresh');
+    // A response cannot acquire a fresh proof after a newer request/edit/replacement invalidated it.
+    const requestEpoch = observation.current.epoch;
+    const latest = await api.film(projectId);
+    const currentRequest = observation.current.mounted && observation.current.epoch === requestEpoch;
+    // Preserve native reducer behavior, but invalidate any newer proof before an old response replaces its UI.
+    if (!currentRequest) invalidateDocument('refresh');""")
 s=replace(s,'      brokenRev.current = latest.rev;', "      invalidateDocument('broken');\n      brokenRev.current = latest.rev;")
-s=replace(s,'    const next = { value: latest.value, rev: latest.rev };', '    const next = { value: latest.value, rev: latest.rev, document: serverDocument(latest.value, latest.rev, latest.text) };')
+s=replace(s,'    const next = { value: latest.value, rev: latest.rev };', '    const next = { value: latest.value, rev: latest.rev, document: currentRequest ? serverDocument(latest.value, latest.rev, latest.text) : null };')
 s=replace(s,'  }, [projectId]);\n\n  /* the agent', '  }, [projectId, invalidateDocument, serverDocument]);\n\n  /* the agent')
 s=replace(s,'    const next = { value: after, rev: current.rev };', "    invalidateDocument('dirty');\n    const next = { value: after, rev: current.rev, document: null };")
 s=replace(s,'          ref.current = { value: theirs, rev: done.rev };', '          ref.current = { value: theirs, rev: done.rev, document: done.doc ? serverDocument(theirs, done.rev, done.text) : null };')
