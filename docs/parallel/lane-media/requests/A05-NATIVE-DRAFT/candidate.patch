@@ -1,0 +1,726 @@
+diff --git a/src/host/render/assembly-ports.ts b/src/host/render/assembly-ports.ts
+--- a/src/host/render/assembly-ports.ts
++++ b/src/host/render/assembly-ports.ts
+@@ -31,6 +31,8 @@
+   recording_origin:NativeDraftAsset['recording_origin'];
+  }[];
+  readonly plan_digest:string;
++ /** Approved storyboard intervals, never an ASR/word-alignment claim. */
++ readonly subtitle_timing_basis:'storyboard_plan';
+ }
+ /** Preparation only. MAIN owns real Run/Job fencing, current facts, review and commit. */
+ export interface NativeDraftAssembler {prepare(request:NativeDraftRequest):Promise<StagedNativeDraft>;}
+diff --git a/src/host/render/native-draft-plan.ts b/src/host/render/native-draft-plan.ts
+new file mode 100644
+--- /dev/null
++++ b/src/host/render/native-draft-plan.ts
+@@ -0,0 +1,114 @@
++import { createHash } from 'node:crypto';
++import { validateAgentDefinition } from '../../contracts/agent-driven-validator.js';
++import type { Script, Storyboard } from '../../contracts/agent-driven-types.js';
++import type { NativeDraftAsset, NativeDraftRequest } from './assembly-ports.js';
++
++export class NativeDraftError extends Error {
++  constructor(readonly code: 'INVALID_DRAFT' | 'DRAFT_RIGHTS_BLOCKED' | 'DRAFT_SOURCE_CHANGED' | 'DRAFT_PATH_REJECTED' | 'DRAFT_CANCELLED' | 'DRAFT_IO_FAILED' | 'DRAFT_FORMAT_UNAVAILABLE', message: string) {
++    super(message); this.name = 'NativeDraftError';
++  }
++}
++export function draftCheck(ok: unknown, message: string): asserts ok {
++  if (!ok) throw new NativeDraftError('INVALID_DRAFT', message);
++}
++export function checkDraftAbort(signal?: AbortSignal): void {
++  if (signal?.aborted) throw new NativeDraftError('DRAFT_CANCELLED', 'Native draft preparation cancelled');
++}
++export const digestBytes = (bytes: Uint8Array | string): string => createHash('sha256').update(bytes).digest('hex');
++/** Stable JSON over contract facts, never host paths. */
++export function canonicalDraftJson(value: unknown): string {
++  if (Array.isArray(value)) return `[${value.map(canonicalDraftJson).join(',')}]`;
++  if (value !== null && typeof value === 'object') return `{${Object.entries(value).sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0).map(([key, item]) => `${JSON.stringify(key)}:${canonicalDraftJson(item)}`).join(',')}}`;
++  const text = JSON.stringify(value); draftCheck(text !== undefined, 'Draft facts must be JSON'); return text;
++}
++const idOk = (id: unknown): id is string => typeof id === 'string' && /^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$/.test(id);
++const textOk = (value: unknown): value is string => typeof value === 'string' && value.trim().length > 0 && value.length <= 6000 && !/[\u0000-\u0008\u000b\u000c\u000e-\u001f\ud800-\udfff]/u.test(value);
++function uniqueIds(values: readonly string[], kind: string): void {
++  draftCheck(values.every(idOk) && new Set(values.map(v => v.toLowerCase())).size === values.length, `Duplicate or aliased ${kind} identifiers`);
++}
++export interface DraftPlan {
++  readonly projectId: string; readonly script: Script; readonly storyboard: Storyboard;
++  readonly assets: readonly NativeDraftAsset[]; readonly narration: NativeDraftAsset | null;
++  readonly totalFrames: number; readonly width: number; readonly height: number;
++  readonly factJson: string; readonly digest: string;
++}
++/** Detaches mutable caller objects before the first asynchronous operation. */
++export function planNativeDraft(request: NativeDraftRequest): DraftPlan {
++  let script: Script, storyboard: Storyboard, assets: NativeDraftAsset[];
++  try {
++    script = structuredClone(validateAgentDefinition<Script>('Script', request.script));
++    storyboard = structuredClone(validateAgentDefinition<Storyboard>('Storyboard', request.storyboard));
++    assets = structuredClone([...request.assets]);
++  } catch { throw new NativeDraftError('INVALID_DRAFT', 'Invalid Script, Storyboard or registry facts'); }
++  draftCheck(idOk(request.project_id), 'Invalid project identifier');
++  draftCheck(assets.every(asset => asset !== null && typeof asset === 'object'), 'Invalid registry fact');
++  draftCheck(Number.isSafeInteger(request.width) && request.width >= 16 && request.width <= 8192 && Number.isSafeInteger(request.height) && request.height >= 16 && request.height <= 8192, 'Invalid native stage size');
++  uniqueIds(script.paragraphs.map(p => p.paragraph_id), 'paragraph');
++  uniqueIds(storyboard.shots.map(s => s.shot_id), 'shot');
++  uniqueIds(assets.map(a => a.asset_id), 'asset');
++  const paragraphs = new Set(script.paragraphs.map(p => p.paragraph_id));
++  const usedParagraphs = new Set(storyboard.shots.map(s => s.paragraph_id));
++  draftCheck(script.paragraphs.every(p => textOk(p.text)) && usedParagraphs.size === paragraphs.size && [...usedParagraphs].every(p => paragraphs.has(p)), 'Storyboard must cover the actual Script paragraphs');
++  const byId = new Map(assets.map(a => [a.asset_id, a]));
++  const usedAssets = new Set<string>();
++  let totalFrames = 0;
++  for (const shot of storyboard.shots) {
++    draftCheck(!shot.caption || textOk(shot.caption), 'Invalid caption text');
++    draftCheck(!shot.concept_text || textOk(shot.concept_text), 'Invalid concept text');
++    draftCheck(shot.asset_id !== null || shot.concept_text.trim().length > 0, 'A concept shot needs actual concept text');
++    if (shot.asset_id !== null) {
++      const asset = byId.get(shot.asset_id);
++      draftCheck(asset?.kind === 'video' && asset.duration_frames >= shot.duration_frames, 'A shot requires enough registered video frames');
++      usedAssets.add(shot.asset_id);
++    }
++    totalFrames += shot.duration_frames;
++  }
++  draftCheck(Number.isSafeInteger(totalFrames) && totalFrames > 0, 'Invalid total frame count');
++  draftCheck(request.narration_asset_id === null || idOk(request.narration_asset_id), 'Invalid narration identifier');
++  const narration = request.narration_asset_id === null ? null : byId.get(request.narration_asset_id);
++  if (request.narration_asset_id !== null) {
++    draftCheck(narration?.kind === 'audio' && narration.duration_frames === totalFrames, 'Narration must cover the complete draft at 30 fps without trimming or retiming');
++    usedAssets.add(request.narration_asset_id);
++  } else {
++    draftCheck(storyboard.shots.every(s => !s.caption), 'Native planned captions currently require the complete narration source');
++  }
++  draftCheck(usedAssets.size === assets.length, 'Only explicitly used registry assets may enter the draft');
++  for (const asset of assets) {
++    draftCheck(Object.keys(asset).sort().join(',') === 'absolute_path,asset_id,bytes,duration_frames,kind,license,mime_type,project_id,recording_origin,rights_ref,sha256,source', 'Unexpected registry fact fields');
++    draftCheck(asset.project_id === request.project_id && /^[a-f0-9]{64}$/.test(asset.sha256) && Number.isSafeInteger(asset.bytes) && asset.bytes > 0 && Number.isSafeInteger(asset.duration_frames) && asset.duration_frames > 0, 'Invalid registry asset identity');
++    draftCheck(asset.kind === 'video' || asset.kind === 'audio', 'Unsupported registry media kind');
++    draftCheck(asset.kind === 'video' ? asset.mime_type === 'video/mp4' : ['audio/wav', 'audio/x-wav', 'audio/mpeg', 'audio/mp4', 'audio/flac', 'audio/ogg', 'audio/webm'].includes(asset.mime_type), 'Unsupported registered media type');
++    draftCheck(asset.recording_origin === null || ['human_recording', 'synthetic', 'unknown'].includes(asset.recording_origin), 'Invalid recording origin');
++    if (asset.license?.status !== 'cleared' || asset.license.commercial_use !== true || !textOk(asset.rights_ref) || !textOk(asset.license.label)) throw new NativeDraftError('DRAFT_RIGHTS_BLOCKED', 'Every used asset requires explicit cleared commercial rights');
++    draftCheck(Object.keys(asset.license).sort().join(',') === 'commercial_use,label,status', 'Unexpected license fields');
++    draftCheck(asset.source && ['owned', 'generated', 'licensed', 'derived'].includes(asset.source.kind) && textOk(asset.source.label), 'Invalid asset provenance');
++    const sourceKeys = Object.keys(asset.source).sort().join(',');
++    draftCheck(asset.source.kind === 'derived' ? sourceKeys === 'kind,label,lineage' : sourceKeys === 'kind,label' || sourceKeys === 'kind,label,uri', 'Unexpected provenance fields');
++    if (asset.source.kind === 'derived') draftCheck(Array.isArray(asset.source.lineage) && asset.source.lineage.length > 0 && asset.source.lineage.every(idOk), 'Derived asset requires actual lineage');
++    else if (asset.source.uri !== undefined) {
++      let url: URL; try { url = new URL(asset.source.uri); } catch { throw new NativeDraftError('INVALID_DRAFT', 'Invalid provenance URI'); }
++      draftCheck(['http:', 'https:'].includes(url.protocol) && !url.username && !url.password && !url.search && !url.hash, 'Provenance URI must not contain local paths or credentials');
++    }
++  }
++  const facts = { format: 'narralens.native-draft-plan@1', status: 'SOURCE_ONLY', timing_basis: 'storyboard_plan', project_id: request.project_id, script, storyboard, narration_asset_id: request.narration_asset_id, width: request.width, height: request.height, fps: { num: 30, den: 1 }, assets: assets.map(({ absolute_path: _hostPath, ...asset }) => asset) };
++  const factJson = canonicalDraftJson(facts);
++  return { projectId: request.project_id, script, storyboard, assets, narration: narration ?? null, totalFrames, width: request.width, height: request.height, factJson, digest: digestBytes(factJson) };
++}
++
++export const escapeDraftHtml = (text: string): string => text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
++export const frameSeconds = (frame: number): string => (frame / 30).toFixed(12).replace(/0+$/, '').replace(/\.$/, '');
++const vttStamp = (frame: number): string => {
++  const ms = Math.round(frame * 1000 / 30);
++  return `${String(Math.floor(ms / 3600000)).padStart(2, '0')}:${String(Math.floor(ms / 60000) % 60).padStart(2, '0')}:${String(Math.floor(ms / 1000) % 60).padStart(2, '0')}.${String(ms % 1000).padStart(3, '0')}`;
++};
++/** Native transcript control marker preserves pre-cut storyboard cues; it is no human approval. */
++export function draftVtt(plan: DraftPlan): string {
++  let frame = 0;
++  const cues = plan.storyboard.shots.flatMap(shot => {
++    const start = frame; frame += shot.duration_frames;
++    const payload = shot.caption.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\s+/g, ' ').trim();
++    return shot.caption ? [`${vttStamp(start)} --> ${vttStamp(frame)}\n${payload}`] : [];
++  });
++  // Fixed transcripts.mjs CUT_NOTE_RE accepts this prefix; the suffix states real plan provenance.
++  return `WEBVTT\n\nNOTE Each cue is one subtitle, timed from the storyboard plan (not speech alignment).\n\n${cues.join('\n\n')}\n`;
++}
+diff --git a/src/host/render/native-draft-io.ts b/src/host/render/native-draft-io.ts
+new file mode 100644
+--- /dev/null
++++ b/src/host/render/native-draft-io.ts
+@@ -0,0 +1,224 @@
++import { constants, type BigIntStats } from 'node:fs';
++import { lstat, mkdir, open, readdir, realpath, rmdir, unlink, type FileHandle } from 'node:fs/promises';
++import { basename, dirname, isAbsolute, join, resolve, sep } from 'node:path';
++import { createHash } from 'node:crypto';
++import type { NativeDraftAsset, NativeDraftFile } from './assembly-ports.js';
++import { NativeDraftError, checkDraftAbort } from './native-draft-plan.js';
++
++function rejected(): never { throw new NativeDraftError('DRAFT_PATH_REJECTED', 'Draft paths must be private, distinct and outside every protected source domain'); }
++function changed(): never { throw new NativeDraftError('DRAFT_SOURCE_CHANGED', 'Draft input or output identity changed'); }
++const inside = (root: string, child: string): boolean => root === '/' || child === root || child.startsWith(root + sep);
++const identity = (s: BigIntStats): string => `${s.dev}:${s.ino}`;
++const fingerprint = (s: BigIntStats): string => `${identity(s)}:${s.size}:${s.mtimeNs}:${s.ctimeNs}`;
++function absolute(path: string): string {
++  if (typeof path !== 'string' || !isAbsolute(path) || path !== resolve(path) || /[\u0000-\u001f]/.test(path)) rejected();
++  return path;
++}
++interface Directory { path: string; handle: FileHandle; stat: BigIntStats }
++interface Input { asset: NativeDraftAsset; handle: FileHandle; stat: BigIntStats }
++/** Linux/WSL fd-relative anchoring; it never follows a caller-provided link for a write. */
++export class DraftWorkspace {
++  readonly #dirs = new Map<string, Directory>();
++  readonly #inputs = new Map<string, Input>();
++  readonly #outputs = new Map<string, BigIntStats>();
++  readonly #outputDirs = new Map<string, Directory>();
++  #target: Directory | null = null;
++  #parent: Directory | null = null;
++  #createdStat: BigIntStats | null = null;
++  #leaf = '';
++  #finished = false;
++  private constructor(readonly root: string, readonly signal?: AbortSignal) {}
++  static async create(root: string, protectedRoots: readonly string[], assets: readonly NativeDraftAsset[], signal?: AbortSignal): Promise<DraftWorkspace> {
++    const workspace = new DraftWorkspace(absolute(root), signal);
++    try { await workspace.#initialize(protectedRoots, assets); return workspace; }
++    catch (error) { await workspace.dispose(); throw error; }
++  }
++  #at(directory: Directory, name = ''): string { return `/proc/self/fd/${directory.handle.fd}${name ? '/' + name : ''}`; }
++  async #directory(path: string): Promise<Directory> {
++    absolute(path);
++    const known = this.#dirs.get(path); if (known) return known;
++    const parent = path === '/' ? null : await this.#directory(dirname(path));
++    const handle = await open(parent ? this.#at(parent, basename(path)) : '/', constants.O_RDONLY | constants.O_DIRECTORY | constants.O_NOFOLLOW);
++    try {
++      const stat = await handle.stat({ bigint: true });
++      if (!stat.isDirectory() || await realpath(this.#at({ path, handle, stat })) !== path) rejected();
++      const directory = { path, handle, stat }; this.#dirs.set(path, directory); return directory;
++    } catch (error) { await handle.close(); throw error; }
++  }
++  async #initialize(protectedRoots: readonly string[], assets: readonly NativeDraftAsset[]): Promise<void> {
++    checkDraftAbort(this.signal);
++    const getuid = process.getuid;
++    if (process.platform !== 'linux' || !getuid || this.root === '/' || protectedRoots.length === 0) rejected();
++    const uid = BigInt(getuid());
++    const paths = [...protectedRoots.map(absolute), ...assets.map(asset => dirname(absolute(asset.absolute_path)))];
++    if (paths.some(path => inside(path, this.root) || inside(this.root, path))) rejected();
++    const domains = [];
++    for (const path of new Set(paths)) { checkDraftAbort(this.signal); domains.push(await this.#directory(path)); }
++    this.#parent = await this.#directory(dirname(this.root));
++    if (this.#parent.stat.uid !== uid || (this.#parent.stat.mode & 0o077n) !== 0n) rejected();
++    // A mounted alias can share identity without sharing its textual path.
++    for (const directory of this.#dirs.values()) {
++      if (inside(directory.path, dirname(this.root)) && domains.some(domain => identity(domain.stat) === identity(directory.stat))) rejected();
++    }
++    const seen = new Set<string>();
++    for (const asset of assets) {
++      checkDraftAbort(this.signal);
++      const parent = await this.#directory(dirname(asset.absolute_path));
++      const handle = await open(this.#at(parent, basename(asset.absolute_path)), constants.O_RDONLY | constants.O_NOFOLLOW | constants.O_NONBLOCK);
++      try {
++        const stat = await handle.stat({ bigint: true });
++        if (!stat.isFile() || stat.size !== BigInt(asset.bytes) || seen.has(identity(stat)) || await realpath(`/proc/self/fd/${handle.fd}`) !== asset.absolute_path) rejected();
++        seen.add(identity(stat)); this.#inputs.set(asset.asset_id, { asset, handle, stat });
++      } catch (error) { await handle.close(); throw error; }
++    }
++    await this.verify(); checkDraftAbort(this.signal);
++    this.#leaf = basename(this.root);
++    // Not recursive; EEXIST never becomes owned and is never cleaned up.
++    await mkdir(this.#at(this.#parent, this.#leaf), { mode: 0o700 });
++    this.#createdStat = await lstat(this.#at(this.#parent, this.#leaf), { bigint: true });
++    const handle = await open(this.#at(this.#parent, this.#leaf), constants.O_RDONLY | constants.O_DIRECTORY | constants.O_NOFOLLOW);
++    try {
++      const stat = await handle.stat({ bigint: true });
++      this.#target = { path: this.root, handle, stat };
++      this.#outputDirs.set('', this.#target);
++      if ((stat.mode & 0o077n) !== 0n || stat.uid !== uid) rejected();
++    } catch (error) { if (!this.#target) await handle.close(); throw error; }
++    await this.verify();
++  }
++  async verify(): Promise<void> {
++    checkDraftAbort(this.signal);
++    for (const directory of this.#dirs.values()) {
++      const current = await lstat(directory.path, { bigint: true });
++      if (!current.isDirectory() || current.isSymbolicLink() || identity(current) !== identity(directory.stat)) changed();
++    }
++    for (const input of this.#inputs.values()) {
++      const current = await lstat(input.asset.absolute_path, { bigint: true });
++      if (!current.isFile() || fingerprint(current) !== fingerprint(input.stat) || fingerprint(await input.handle.stat({ bigint: true })) !== fingerprint(input.stat)) changed();
++    }
++    if (this.#parent && (await this.#parent.handle.stat({ bigint: true })).mode !== this.#parent.stat.mode) changed();
++    for (const directory of this.#outputDirs.values()) {
++      const current = await lstat(directory.path, { bigint: true });
++      if (!current.isDirectory() || identity(current) !== identity(directory.stat) || (current.mode & 0o077n) !== 0n) changed();
++    }
++  }
++  async #outDirectory(relative: string): Promise<Directory> {
++    const known = this.#outputDirs.get(relative); if (known) return known;
++    const parentPath = dirname(relative) === '.' ? '' : dirname(relative);
++    const parent = await this.#outDirectory(parentPath);
++    checkDraftAbort(this.signal);
++    await mkdir(this.#at(parent, basename(relative)), { mode: 0o700 });
++    const handle = await open(this.#at(parent, basename(relative)), constants.O_RDONLY | constants.O_DIRECTORY | constants.O_NOFOLLOW);
++    let tracked = false;
++    try {
++      const stat = await handle.stat({ bigint: true });
++      const directory = { path: join(this.root, relative), handle, stat }; this.#outputDirs.set(relative, directory); tracked = true;
++      if ((stat.mode & 0o077n) !== 0n) rejected();
++      return directory;
++    } catch (error) { if (!tracked) await handle.close(); throw error; }
++  }
++  #relative(path: string): void {
++    if (!/^[a-zA-Z0-9_.\/-]+$/.test(path) || isAbsolute(path) || path.split('/').some(part => !part || part === '.' || part === '..') || this.#outputs.has(path)) rejected();
++  }
++  async #write(path: string, chunks: AsyncIterable<Uint8Array>): Promise<NativeDraftFile> {
++    this.#relative(path); checkDraftAbort(this.signal); await this.verify();
++    const directory = await this.#outDirectory(dirname(path) === '.' ? '' : dirname(path));
++    const handle = await open(this.#at(directory, basename(path)), constants.O_WRONLY | constants.O_CREAT | constants.O_EXCL | constants.O_NOFOLLOW, 0o600);
++    const hash = createHash('sha256'); let bytes = 0;
++    try {
++      this.#outputs.set(path, await handle.stat({ bigint: true }));
++      for await (const chunk of chunks) {
++        checkDraftAbort(this.signal); hash.update(chunk); bytes += chunk.byteLength;
++        let at = 0;
++        while (at < chunk.byteLength) { checkDraftAbort(this.signal); const { bytesWritten } = await handle.write(chunk, at, chunk.byteLength - at); if (bytesWritten <= 0) throw new NativeDraftError('DRAFT_IO_FAILED', 'Draft write made no progress'); at += bytesWritten; }
++      }
++      await handle.sync(); this.#outputs.set(path, await handle.stat({ bigint: true }));
++    } finally { await handle.close(); }
++    await this.verify();
++    return { relative_path: path, bytes, sha256: hash.digest('hex') };
++  }
++  async writeText(path: string, text: string): Promise<NativeDraftFile> {
++    async function* chunks(): AsyncGenerator<Uint8Array> { yield Buffer.from(text, 'utf8'); }
++    return this.#write(path, chunks());
++  }
++  async copyAsset(id: string, path: string): Promise<NativeDraftFile> {
++    const input = this.#inputs.get(id); if (!input) rejected();
++    const signal = this.signal;
++    async function* chunks(): AsyncGenerator<Uint8Array> {
++      let position = 0;
++      const buffer = Buffer.allocUnsafe(1024 * 1024);
++      for (;;) {
++        checkDraftAbort(signal);
++        const { bytesRead } = await input!.handle.read(buffer, 0, Math.min(buffer.length, input!.asset.bytes + 1 - position), position);
++        if (!bytesRead) break;
++        position += bytesRead;
++        if (position > input!.asset.bytes) changed();
++        yield buffer.subarray(0, bytesRead);
++      }
++    }
++    const copied = await this.#write(path, chunks());
++    if (copied.sha256 !== input.asset.sha256 || copied.bytes !== input.asset.bytes) changed();
++    return copied;
++  }
++  async finish(files: readonly NativeDraftFile[]): Promise<void> {
++    await this.verify();
++    if (files.length !== this.#outputs.size || new Set(files.map(file => file.relative_path)).size !== files.length) changed();
++    for (const [relative, directory] of this.#outputDirs) {
++      const expected = [
++        ...[...this.#outputs.keys()].filter(path => (dirname(path) === '.' ? '' : dirname(path)) === relative).map(path => basename(path)),
++        ...[...this.#outputDirs.keys()].filter(path => path && (dirname(path) === '.' ? '' : dirname(path)) === relative).map(path => basename(path)),
++      ].sort();
++      if (JSON.stringify((await readdir(this.#at(directory))).sort()) !== JSON.stringify(expected)) changed();
++    }
++    // Re-read exact final bytes via the owned directory fd; hash returned descriptors, not just write buffers.
++    for (const file of files) {
++      checkDraftAbort(this.signal);
++      const parent = this.#outputDirs.get(dirname(file.relative_path) === '.' ? '' : dirname(file.relative_path)); if (!parent) changed();
++      const handle = await open(this.#at(parent, basename(file.relative_path)), constants.O_RDONLY | constants.O_NOFOLLOW | constants.O_NONBLOCK);
++      try {
++        const stat = await handle.stat({ bigint: true });
++        if (!stat.isFile() || fingerprint(stat) !== fingerprint(this.#outputs.get(file.relative_path)!)) changed();
++        const hash = createHash('sha256'); let bytes = 0; const buffer = Buffer.allocUnsafe(1024 * 1024);
++        for (;;) { checkDraftAbort(this.signal); const read = await handle.read(buffer, 0, buffer.length, bytes); if (!read.bytesRead) break; bytes += read.bytesRead; if (bytes > file.bytes) changed(); hash.update(buffer.subarray(0, read.bytesRead)); }
++        if (bytes !== file.bytes || hash.digest('hex') !== file.sha256 || fingerprint(await handle.stat({ bigint: true })) !== fingerprint(stat)) changed();
++      } finally { await handle.close(); }
++    }
++    for (const directory of [...this.#outputDirs.values()].reverse()) await directory.handle.sync();
++    await this.#parent!.handle.sync(); await this.verify(); checkDraftAbort(this.signal);
++    this.#finished = true;
++  }
++  async dispose(): Promise<void> {
++    let failed = false;
++    try {
++      if (!this.#finished && this.#createdStat && this.#parent) {
++        // Never recurse through names that may now point somewhere else. Remove only held/recorded inodes.
++        for (const [relative, stat] of [...this.#outputs].reverse()) {
++          const directory = this.#outputDirs.get(dirname(relative) === '.' ? '' : dirname(relative));
++          if (!directory) { failed = true; continue; }
++          const path = this.#at(directory, basename(relative));
++          const current = await lstat(path, { bigint: true }).catch(() => null);
++          if (current && identity(current) === identity(stat) && !current.isDirectory()) await unlink(path);
++          else if (current) failed = true;
++        }
++        for (const [relative, directory] of [...this.#outputDirs].reverse()) {
++          if (!relative) continue;
++          const parent = this.#outputDirs.get(dirname(relative) === '.' ? '' : dirname(relative));
++          if (!parent) { failed = true; continue; }
++          const path = this.#at(parent, basename(relative));
++          const current = await lstat(path, { bigint: true }).catch(() => null);
++          if (current?.isDirectory() && identity(current) === identity(directory.stat)) await rmdir(path);
++          else if (current) failed = true;
++        }
++        const path = this.#at(this.#parent, this.#leaf);
++        const current = await lstat(path, { bigint: true }).catch(() => null);
++        if (current?.isDirectory() && identity(current) === identity(this.#createdStat)) await rmdir(path);
++        else if (current) failed = true;
++        // A renamed/replaced root is never guessed at or removed as someone else's path.
++      }
++    } catch { failed = true;
++    } finally {
++      const handles = [...this.#inputs.values(), ...[...this.#outputDirs.values()].reverse(), ...[...this.#dirs.values()].reverse()].map(value => value.handle);
++      if ((await Promise.allSettled(handles.map(handle => handle.close()))).some(result => result.status === 'rejected')) failed = true;
++    }
++    if (failed) throw new NativeDraftError('DRAFT_IO_FAILED', 'Native draft cleanup could not be confirmed');
++  }
++}
+diff --git a/src/host/render/native-draft-assembler.ts b/src/host/render/native-draft-assembler.ts
+new file mode 100644
+--- /dev/null
++++ b/src/host/render/native-draft-assembler.ts
+@@ -0,0 +1,120 @@
++import { readFile } from 'node:fs/promises';
++import { resolve } from 'node:path';
++import { pathToFileURL } from 'node:url';
++import type { NativeDraftAssembler, NativeDraftAsset, NativeDraftFile, NativeDraftRequest, StagedNativeDraft } from './assembly-ports.js';
++import { verifyRenderPin } from './upstream-pin.js';
++import { DraftWorkspace } from './native-draft-io.js';
++import { NativeDraftError, canonicalDraftJson, checkDraftAbort, digestBytes, draftCheck, draftVtt, escapeDraftHtml, frameSeconds, planNativeDraft, type DraftPlan } from './native-draft-plan.js';
++
++const STYLE_MODULE = 'packages/openfilm/studio/server/film-subtitle.mjs';
++const STYLE_SHA256 = 'be4b1852bc254ff597e43694a732044ef51dd43a78df13735c2ff023957687dd';
++const extensionOf = (asset: NativeDraftAsset): string => ({ 'video/mp4': 'mp4', 'audio/wav': 'wav', 'audio/x-wav': 'wav', 'audio/mpeg': 'mp3', 'audio/mp4': 'm4a', 'audio/flac': 'flac', 'audio/ogg': 'ogg', 'audio/webm': 'webm' })[asset.mime_type]!;
++const object = (value: unknown): value is Record<string, unknown> => value !== null && typeof value === 'object' && !Array.isArray(value);
++
++interface DraftFormat {
++  readFilmFile(text: string): { doc: unknown; problems: readonly unknown[] };
++  subtitleStyle: unknown;
++}
++async function loadDraftFormat(upstreamRoot: string, signal?: AbortSignal): Promise<DraftFormat> {
++  checkDraftAbort(signal);
++  const pin = await verifyRenderPin(upstreamRoot);
++  if (!pin.ok) throw new NativeDraftError('DRAFT_FORMAT_UNAVAILABLE', 'The fixed native format is unavailable');
++  const stylePath = resolve(pin.upstream_root, STYLE_MODULE);
++  if (digestBytes(await readFile(stylePath)) !== STYLE_SHA256) throw new NativeDraftError('DRAFT_FORMAT_UNAVAILABLE', 'The fixed native subtitle style does not match');
++  const film: unknown = await import(pathToFileURL(resolve(pin.upstream_root, 'packages/openfilm/src/film-doc.mjs')).href);
++  const subtitle: unknown = await import(pathToFileURL(stylePath).href);
++  checkDraftAbort(signal);
++  if (!object(film) || typeof film.readFilmFile !== 'function' || !object(subtitle) || !object(subtitle.FILM_SUBTITLE_DEFAULT)) throw new NativeDraftError('DRAFT_FORMAT_UNAVAILABLE', 'The fixed native format exports are unavailable');
++  return { readFilmFile: film.readFilmFile as DraftFormat['readFilmFile'], subtitleStyle: structuredClone(subtitle.FILM_SUBTITLE_DEFAULT) };
++}
++
++function conceptPage(plan: DraftPlan, text: string, frames: number): string {
++  return `<!doctype html>\n<html><head><meta charset="utf-8"><meta name="viewport" content="width=${plan.width}, height=${plan.height}"><style>
++html,body{margin:0;width:${plan.width}px;height:${plan.height}px;overflow:hidden;background:#101b2c;color:#f4f7fc;font-family:ui-sans-serif,system-ui,sans-serif}body{display:grid;place-items:center}article{box-sizing:border-box;width:86%;max-height:78%;padding:5%;border:2px solid #6dc7d9;border-radius:24px;background:#172943;white-space:pre-wrap;overflow-wrap:anywhere;overflow:hidden;font-size:${Math.max(16, Math.round(Math.min(plan.width, plan.height) * 0.045))}px;line-height:1.45}
++</style></head><body><article>${escapeDraftHtml(text)}</article><script>
++const ready=document.fonts.ready.then(()=>{const card=document.querySelector('article');if(card.scrollHeight>card.clientHeight+1||card.scrollWidth>card.clientWidth+1)throw new Error('Concept text does not fit its native card; revise the storyboard instead of hiding text.');});
++window.film={width:${plan.width},height:${plan.height},duration:${frameSeconds(frames)},ready,frame(){}};</script></body></html>\n`;
++}
++
++/** Prepares source only. It neither renders a video nor publishes a committed project/snapshot. */
++export class PinnedNativeDraftAssembler implements NativeDraftAssembler {
++  constructor(private readonly upstreamRoot: string) {}
++  async prepare(request: NativeDraftRequest): Promise<StagedNativeDraft> {
++    checkDraftAbort(request.signal);
++    const plan = planNativeDraft(request);
++    // Copy all path-domain facts before any await as well as the creative plan/registry facts.
++    const target = request.target_root;
++    const protectedRoots = [...request.protected_roots];
++    const signal = request.signal;
++    let workspace: DraftWorkspace | undefined;
++    try {
++      const format = await loadDraftFormat(this.upstreamRoot, signal);
++      workspace = await DraftWorkspace.create(target, protectedRoots, plan.assets, signal);
++      const files: NativeDraftFile[] = [];
++      const paths = new Map<string, string>();
++      const assets: StagedNativeDraft['assets'][number][] = [];
++      for (const [index, asset] of plan.assets.entries()) {
++        const path = `${asset.kind === 'audio' ? 'assets/vo' : 'assets/video'}/${String(index + 1).padStart(3, '0')}-${asset.sha256}.${extensionOf(asset)}`;
++        const copied = await workspace.copyAsset(asset.asset_id, path); files.push(copied); paths.set(asset.asset_id, path);
++        assets.push({ asset_id: asset.asset_id, path, sha256: asset.sha256, bytes: asset.bytes, duration_frames: asset.duration_frames, media_type: asset.mime_type, source: asset.source, license: asset.license, rights_ref: asset.rights_ref, recording_origin: asset.recording_origin });
++      }
++      const visuals: string[] = [], concepts: string[] = [];
++      const clipIds: string[] = [];
++      let frame = 0;
++      for (const [index, shot] of plan.storyboard.shots.entries()) {
++        const id = `shot-${shot.shot_id}`;
++        clipIds.push(id);
++        const page = `scenes/${String(index + 1).padStart(3, '0')}.html`;
++        if (shot.concept_text) files.push(await workspace.writeText(page, conceptPage(plan, shot.concept_text, shot.duration_frames)));
++        const at = frameSeconds(frame), duration = frameSeconds(shot.duration_frames);
++        if (shot.asset_id !== null) {
++          visuals.push(`<video id="${id}" src="${paths.get(shot.asset_id)}#t=0,${duration}" at="${at}"${plan.narration ? ' muted' : ''} style="object-fit: contain"></video>`);
++          if (shot.concept_text) {
++            const overlay = `concept-${shot.shot_id}`; clipIds.push(overlay);
++            // A separate editable page clip; it does not flatten the video's source into a composite MP4.
++            concepts.push(`<iframe id="${overlay}" src="${page}#t=0,${duration}" at="${at}" style="left: ${Math.round(plan.width * 0.62)}px; top: ${Math.round(plan.height * 0.06)}px; width: ${Math.round(plan.width * 0.34)}px; height: ${Math.round(plan.height * 0.74)}px"></iframe>`);
++          }
++        } else visuals.push(`<iframe id="${id}" src="${page}#t=0,${duration}" at="${at}"></iframe>`);
++        frame += shot.duration_frames;
++      }
++      const subtitles: StagedNativeDraft['subtitles'][number][] = [];
++      const sounds: string[] = [];
++      if (plan.narration) {
++        const path = paths.get(plan.narration.asset_id)!;
++        // No #t trim, no speed, no mute or gain: the complete source is its one native sound clip.
++        sounds.push(`<audio id="narration" src="${path}" at="0"></audio>`); clipIds.push('narration');
++        if (plan.storyboard.shots.some(s => s.caption)) {
++          const vtt = path.replace(/\.[a-z0-9]+$/, '.vtt');
++          files.push(await workspace.writeText(vtt, draftVtt(plan)));
++          subtitles.push({ subtitle_id: 'storyboard-captions', path: vtt });
++        }
++      }
++      const sections = [concepts, visuals, sounds].filter(clips => clips.length).map(clips => `<section>\n${clips.join('\n')}\n</section>`).join('\n');
++      const film = `<!doctype html>\n<html><head><meta charset="utf-8"><meta name="viewport" content="width=${plan.width}, height=${plan.height}"><title>Native draft</title></head><body>\n${sections}\n</body></html>\n`;
++      const parsed = format.readFilmFile(film);
++      if (!parsed.doc || parsed.problems.length) throw new NativeDraftError('DRAFT_FORMAT_UNAVAILABLE', 'The generated source was rejected by the fixed native parser');
++      draftCheck(object(parsed.doc) && object(parsed.doc.stage) && parsed.doc.stage.w === plan.width && parsed.doc.stage.h === plan.height, 'The native parser did not preserve stage dimensions');
++      draftCheck(Array.isArray(parsed.doc.tracks), 'The native parser did not return tracks');
++      const nativeClipIds = parsed.doc.tracks.flatMap((track: unknown) => {
++        draftCheck(object(track) && Array.isArray(track.clips), 'The native parser did not return clips');
++        return track.clips.map((clip: unknown) => { draftCheck(object(clip) && typeof clip.id === 'string', 'The native parser did not preserve clip identifiers'); return clip.id; });
++      });
++      draftCheck(nativeClipIds.length === clipIds.length && new Set(nativeClipIds).size === clipIds.length && clipIds.every(id => nativeClipIds.includes(id)), 'The native parser changed draft clip identities');
++      files.push(await workspace.writeText('film.html', film));
++      files.push(await workspace.writeText('.film/settings.json', canonicalDraftJson({ fps: 30 }) + '\n'));
++      files.push(await workspace.writeText('.film/subtitles.json', canonicalDraftJson(format.subtitleStyle) + '\n'));
++      files.push(await workspace.writeText('draft-plan.json', plan.factJson + '\n'));
++      files.push(await workspace.writeText('rights.json', canonicalDraftJson({ format: 'narralens.staged-rights@1', project_id: plan.projectId, assets }) + '\n'));
++      files.sort((a, b) => a.relative_path < b.relative_path ? -1 : a.relative_path > b.relative_path ? 1 : 0);
++      // VTT/editor settings are implicit native sidecars, not HTML src edges. Explicit roots bind them too.
++      const mediaPaths = new Set(assets.map(asset => asset.path));
++      const roots = ['film.html', ...files.map(file => file.relative_path).filter(path => path !== 'film.html' && !mediaPaths.has(path))];
++      await workspace.finish(files);
++      return { format: 'narralens.staged-native-draft@1', project_id: plan.projectId, root: target, fps: { num: 30, den: 1 }, frame_count: plan.totalFrames, clip_ids: nativeClipIds, roots, files, subtitles, assets, plan_digest: plan.digest, subtitle_timing_basis: 'storyboard_plan' };
++    } catch (error) {
++      if (error instanceof NativeDraftError) throw error;
++      if (signal?.aborted) throw new NativeDraftError('DRAFT_CANCELLED', 'Native draft preparation cancelled');
++      throw new NativeDraftError('DRAFT_IO_FAILED', 'Native draft preparation could not complete');
++    } finally { await workspace?.dispose(); }
++  }
++}
+diff --git a/src/host/render/native-subtitle-burn-source.ts b/src/host/render/native-subtitle-burn-source.ts
+new file mode 100644
+--- /dev/null
++++ b/src/host/render/native-subtitle-burn-source.ts
+@@ -0,0 +1,79 @@
++import { NativeDraftError, digestBytes, draftCheck } from './native-draft-plan.js';
++
++export const NATIVE_SUBTITLE_MODULE_SHA256 = 'be4b1852bc254ff597e43694a732044ef51dd43a78df13735c2ff023957687dd';
++export const NATIVE_SUBTITLE_BURN_ENTRY = '.film/cache/narralens-subtitle-burn/index.html';
++export interface NativeBurnCue {
++  readonly text: string; readonly startMs: number; readonly durMs: number;
++  readonly [nativeField: string]: unknown;
++}
++export interface NativeSubtitleBurnSource {
++  readonly entry: typeof NATIVE_SUBTITLE_BURN_ENTRY;
++  readonly files: readonly { relative_path: string; bytes: Uint8Array; sha256: string }[];
++}
++
++/**
++ * Pure render-stage source adapter, adapted from fixed exports.mjs burnFilm (private, NOT an exported API).
++ * MAIN must pin this helper, resolve cues/style with the fixed public subtitlesForExport, and write EXCL only
++ * in its copied render staging root. This helper never writes author/snapshot files or starts a render/Job.
++ * The normal pinned render engine still draws the wrapper; filmSounds/cuts are forwarded from the real film.
++ */
++export function buildPinnedNativeSubtitleBurnSource(input: {
++  width: number; height: number; frame_count: number;
++  cues: readonly NativeBurnCue[];
++  /** Actual normalized style from fixed readSubtitleStyle/subtitlesForExport, never a tool body. */
++  style: Readonly<Record<string, unknown>>;
++  /** Actual bytes of fixed studio/server/film-subtitle.mjs, checked again before copying to render stage. */
++  subtitle_module_bytes: Uint8Array;
++}): NativeSubtitleBurnSource {
++  draftCheck(Number.isSafeInteger(input.width) && input.width > 0 && Number.isSafeInteger(input.height) && input.height > 0 && Number.isSafeInteger(input.frame_count) && input.frame_count > 0, 'Invalid subtitle burn stage');
++  if (digestBytes(input.subtitle_module_bytes) !== NATIVE_SUBTITLE_MODULE_SHA256) throw new NativeDraftError('DRAFT_FORMAT_UNAVAILABLE', 'The fixed native subtitle renderer does not match');
++  draftCheck(input.cues.length > 0 && input.cues.every(cue => typeof cue.text === 'string' && cue.text.trim().length > 0 && Number.isFinite(cue.startMs) && cue.startMs >= 0 && Number.isFinite(cue.durMs) && cue.durMs > 0 && cue.startMs + cue.durMs <= input.frame_count * 1000 / 30 + 1), 'Native subtitle cues must fit the complete film');
++  const json = (value: unknown): string => JSON.stringify(value).replace(/</g, '\\u003c');
++  const page = `<!doctype html>
++<html><head><meta charset="utf-8"><style>
++html,body{margin:0;width:${input.width}px;height:${input.height}px;overflow:hidden;background:#000}
++#film{position:absolute;left:0;top:0;width:${input.width}px;height:${input.height}px;border:0}
++#subs{position:absolute;left:0;top:0;width:${input.width}px;height:${input.height}px}
++</style></head><body><div id="subs"></div><script type="module">
++import { filmSubtitleFrameHtml } from './film-subtitle.mjs';
++const cues = ${json(input.cues)};
++const style = ${json({ ...input.style, on: true })};
++const size = { w: ${input.width}, h: ${input.height} };
++const subs = document.getElementById('subs');
++const el = document.createElement('iframe');
++el.id = 'film';
++let inner = null;
++const loaded = new Promise((ok) => el.addEventListener('load', ok, { once: true }));
++el.src = '/film.html';
++document.body.prepend(el);
++const ready = loaded.then(async () => {
++  const win = el.contentWindow;
++  const t0 = performance.now();
++  while (!(win.film && typeof win.film.frame === 'function')) {
++    if (performance.now() - t0 > 10000) throw new Error('the film did not set window.film');
++    await new Promise((r) => setTimeout(r, 20));
++  }
++  await (typeof win.film.ready === 'function' ? win.film.ready() : win.film.ready);
++  inner = win;
++});
++window.film = {
++  get duration() { return inner ? inner.film.duration : 0.001; },
++  width: size.w, height: size.h,
++  ready,
++  async frame(t) {
++    inner.filmHost?.time?.(t);
++    await inner.film.frame(t);
++    inner.filmHost?.settle?.(t);
++    subs.innerHTML = filmSubtitleFrameHtml(cues, style, size, t * 1000);
++    await document.fonts?.ready;
++  },
++};
++window.__filmCuts = () => inner?.__filmCuts?.() ?? null;
++window.__filmSounds = () => inner?.__filmSounds?.() ?? [];
++</script></body></html>\n`;
++  const module = new Uint8Array(input.subtitle_module_bytes);
++  return { entry: NATIVE_SUBTITLE_BURN_ENTRY, files: [
++    { relative_path: NATIVE_SUBTITLE_BURN_ENTRY, bytes: Buffer.from(page, 'utf8'), sha256: digestBytes(page) },
++    { relative_path: '.film/cache/narralens-subtitle-burn/film-subtitle.mjs', bytes: module, sha256: digestBytes(module) },
++  ] };
++}
+diff --git a/tests/agent-driven/media/native-draft.test.ts b/tests/agent-driven/media/native-draft.test.ts
+new file mode 100644
+--- /dev/null
++++ b/tests/agent-driven/media/native-draft.test.ts
+@@ -0,0 +1,152 @@
++import { afterEach, beforeEach, describe, expect, it } from 'vitest';
++import { chmod, link, lstat, mkdir, mkdtemp, readFile, readdir, rename, rm, symlink, writeFile } from 'node:fs/promises';
++import { tmpdir } from 'node:os';
++import { join } from 'node:path';
++import { execFileSync } from 'node:child_process';
++import type { NativeDraftAsset, NativeDraftRequest } from '../../../src/host/render/assembly-ports.js';
++import { PinnedNativeDraftAssembler } from '../../../src/host/render/native-draft-assembler.js';
++import { DraftWorkspace } from '../../../src/host/render/native-draft-io.js';
++import { digestBytes, draftVtt, planNativeDraft } from '../../../src/host/render/native-draft-plan.js';
++import { computeSourceDigest } from '../../../src/host/engine/source-digest-v1.js';
++
++// These bytes are deliberate non-media unit fixtures. Registry facts are the Host-only trust seam.
++// No test here establishes real decode, recorded speech, render, visible captions or native loaded ack.
++const unitVideo = Buffer.from('unit registry-owned video bytes');
++const unitAudio = Buffer.from('unit registry-owned synthetic diagnostic audio bytes');
++const upstream = '/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm';
++let root: string, source: string, stage: string, protectedRoot: string;
++beforeEach(async () => {
++  root = await mkdtemp(join(tmpdir(), 'narralens-draft-unit-'));
++  source = join(root, 'source'); stage = join(root, 'private'); protectedRoot = join(root, 'snapshot');
++  for (const path of [root, source, stage, protectedRoot]) { await mkdir(path, { recursive: true }); await chmod(path, 0o700); }
++  await writeFile(join(source, 'video.mp4'), unitVideo);
++  await writeFile(join(source, 'voice.wav'), unitAudio);
++  await writeFile(join(protectedRoot, 'author-fact'), 'must remain exact');
++});
++afterEach(async () => { await rm(root, { recursive: true, force: true }); });
++function asset(id: string, kind: 'video' | 'audio'): NativeDraftAsset {
++  const bytes = kind === 'video' ? unitVideo : unitAudio;
++  return { project_id: 'project1', asset_id: id, absolute_path: join(source, kind === 'video' ? 'video.mp4' : 'voice.wav'), sha256: digestBytes(bytes), bytes: bytes.length, duration_frames: kind === 'video' ? 90 : 60, kind, mime_type: kind === 'video' ? 'video/mp4' : 'audio/wav', source: { kind: 'owned', label: 'unit fixture owned by test' }, license: { status: 'cleared', label: 'explicit unit-only fact', commercial_use: true }, rights_ref: `rights_${id}`, recording_origin: kind === 'audio' ? 'synthetic' : null };
++}
++function request(): NativeDraftRequest {
++  return { project_id: 'project1', target_root: join(stage, 'draft'), protected_roots: [source, protectedRoot], width: 640, height: 360,
++    script: { kind: 'script', paragraphs: [{ paragraph_id: 'p1', text: 'The actual script.' }, { paragraph_id: 'p2', text: 'Second explanation.' }] },
++    storyboard: { kind: 'storyboard', fps: 30, shots: [
++      { shot_id: 's1', paragraph_id: 'p1', asset_id: 'v1', duration_frames: 30, caption: 'A "quote" & <literal>', concept_text: '' },
++      { shot_id: 's2', paragraph_id: 'p2', asset_id: null, duration_frames: 30, caption: 'Second explanation.', concept_text: 'Concept <script> must be literal.' },
++    ] }, assets: [asset('v1', 'video'), asset('a1', 'audio')], narration_asset_id: 'a1' };
++}
++describe('native draft creative and rights planning', () => {
++  it('binds actual script, source facts, complete narration and explicit storyboard timing without host paths', () => {
++    const input = request(), plan = planNativeDraft(input);
++    expect(plan.totalFrames).toBe(60); expect(plan.narration?.recording_origin).toBe('synthetic');
++    expect(plan.factJson).not.toContain(source); expect(plan.factJson).toContain('"timing_basis":"storyboard_plan"');
++    input.script.paragraphs[0]!.text = 'caller mutation';
++    expect(plan.script.paragraphs[0]!.text).toBe('The actual script.');
++    expect(digestBytes(plan.factJson)).toBe(plan.digest);
++    const vtt = draftVtt(plan);
++    expect(vtt).toContain('00:00:00.000 --> 00:00:01.000');
++    expect(vtt).toContain('00:00:01.000 --> 00:00:02.000');
++    expect(vtt).toContain('A "quote" &amp; &lt;literal&gt;'); expect(vtt).not.toContain('&quot;');
++  });
++  it.each([59, 61])('rejects narration frame length %s instead of trimming or retiming', frames => {
++    const input = request(); (input.assets[1] as { duration_frames: number }).duration_frames = frames;
++    expect(() => planNativeDraft(input)).toThrow(/complete draft/);
++  });
++  it('blocks unknown rights, wrong project, source alias IDs and omitted script content', () => {
++    const unknown = request(); unknown.assets[0]!.license.status = 'unknown'; expect(() => planNativeDraft(unknown)).toThrow(/rights/);
++    const owner = request(); (owner.assets[0] as { project_id: string }).project_id = 'other'; expect(() => planNativeDraft(owner)).toThrow(/identity/);
++    const alias = request(); (alias.assets[1] as { asset_id: string }).asset_id = 'V1'; expect(() => planNativeDraft(alias)).toThrow(/aliased asset/);
++    const omit = request(); omit.script.paragraphs.push({ paragraph_id: 'p3', text: 'Do not silently omit this.' }); expect(() => planNativeDraft(omit)).toThrow(/cover/);
++  });
++  it('fails closed on planned captions without the full narration source', () => {
++    const input = { ...request(), assets: [asset('v1', 'video')], narration_asset_id: null };
++    expect(() => planNativeDraft(input)).toThrow(/captions/);
++  });
++});
++
++describe('private fd-anchored draft IO (unit bytes, no media process)', () => {
++  it('streams and fsyncs exact copied bytes, rejects wrong digest and cleans only its new root', async () => {
++    const input = request(); const wrong = { ...input.assets[0]!, sha256: '0'.repeat(64) };
++    const workspace = await DraftWorkspace.create(input.target_root, input.protected_roots, [wrong]);
++    try { await expect(workspace.copyAsset('v1', 'assets/v.mp4')).rejects.toMatchObject({ code: 'DRAFT_SOURCE_CHANGED' }); }
++    finally { await workspace.dispose(); }
++    await expect(lstat(input.target_root)).rejects.toMatchObject({ code: 'ENOENT' });
++    expect(await readFile(join(protectedRoot, 'author-fact'), 'utf8')).toBe('must remain exact');
++  });
++  it('no-clobber leaves a pre-existing root and its contents unchanged', async () => {
++    const input = request(); await mkdir(input.target_root); await writeFile(join(input.target_root, 'sentinel'), 'mine');
++    await expect(DraftWorkspace.create(input.target_root, input.protected_roots, [])).rejects.toMatchObject({ code: 'EEXIST' });
++    expect(await readFile(join(input.target_root, 'sentinel'), 'utf8')).toBe('mine');
++  });
++  it('rejects protected overlap and symlink ancestors before any target mkdir', async () => {
++    await expect(DraftWorkspace.create(join(protectedRoot, 'bad'), [protectedRoot], [])).rejects.toMatchObject({ code: 'DRAFT_PATH_REJECTED' });
++    const alias = join(root, 'alias'); await symlink(stage, alias);
++    await expect(DraftWorkspace.create(join(alias, 'bad'), [protectedRoot], [])).rejects.toBeDefined();
++    expect(await readdir(stage)).toEqual([]); expect(await readdir(protectedRoot)).toEqual(['author-fact']);
++  });
++  it('rejects a non-private parent and cross-ID hardlink inputs without creating output', async () => {
++    const input = request(); await chmod(stage, 0o755);
++    await expect(DraftWorkspace.create(input.target_root, input.protected_roots, [])).rejects.toMatchObject({ code: 'DRAFT_PATH_REJECTED' });
++    await chmod(stage, 0o700);
++    await link(join(source, 'video.mp4'), join(source, 'alias.mp4'));
++    await expect(DraftWorkspace.create(input.target_root, input.protected_roots, [asset('v1', 'video'), { ...asset('v2', 'video'), absolute_path: join(source, 'alias.mp4') }])).rejects.toMatchObject({ code: 'DRAFT_PATH_REJECTED' });
++    expect(await readdir(stage)).toEqual([]);
++  });
++  it('opens FIFO nonblocking and rejects non-regular source without leaving a root', async () => {
++    const fifo = join(source, 'fifo.mp4'); execFileSync('mkfifo', [fifo]);
++    await expect(DraftWorkspace.create(join(stage, 'fifo'), [protectedRoot], [{ ...asset('v1', 'video'), absolute_path: fifo }])).rejects.toMatchObject({ code: 'DRAFT_PATH_REJECTED' });
++    expect(await readdir(stage)).toEqual([]);
++  });
++  it('cancels before the next copied chunk, closes files and removes partial owned stage', async () => {
++    const input = request(), controller = new AbortController();
++    const workspace = await DraftWorkspace.create(input.target_root, input.protected_roots, input.assets, controller.signal);
++    await workspace.writeText('partial.json', '{}'); controller.abort();
++    try { await expect(workspace.copyAsset('v1', 'assets/v.mp4')).rejects.toMatchObject({ code: 'DRAFT_CANCELLED' }); }
++    finally { await workspace.dispose(); }
++    await expect(lstat(input.target_root)).rejects.toMatchObject({ code: 'ENOENT' });
++  });
++  it('source replacement is rejected and cleanup leaves the replacement source untouched', async () => {
++    const input = request(), workspace = await DraftWorkspace.create(input.target_root, input.protected_roots, input.assets);
++    await rename(join(source, 'video.mp4'), join(source, 'old.mp4')); await writeFile(join(source, 'video.mp4'), 'replacement');
++    try { await expect(workspace.copyAsset('v1', 'assets/v.mp4')).rejects.toMatchObject({ code: 'DRAFT_SOURCE_CHANGED' }); }
++    finally { await workspace.dispose(); }
++    expect(await readFile(join(source, 'video.mp4'), 'utf8')).toBe('replacement');
++    expect(await readdir(stage)).toEqual([]);
++  });
++  it('a swapped output ancestor cannot redirect writes or cleanup into snapshot', async () => {
++    const input = request(), workspace = await DraftWorkspace.create(input.target_root, input.protected_roots, input.assets);
++    await rename(stage, join(root, 'private-old')); await symlink(protectedRoot, stage);
++    try { await expect(workspace.writeText('forbidden.json', '{}')).rejects.toMatchObject({ code: 'DRAFT_SOURCE_CHANGED' }); }
++    finally { await workspace.dispose(); }
++    expect(await readdir(protectedRoot)).toEqual(['author-fact']); expect(await readdir(join(root, 'private-old'))).toEqual([]);
++  });
++});
++
++describe('source-only integration with the real fixed pure parser, no browser/render/decode', () => {
++  it('creates editable primary clips and exact native source/settings/VTT closure from registry unit facts', async () => {
++    const input = request(); const result = await new PinnedNativeDraftAssembler(upstream).prepare(input);
++    expect(result.frame_count).toBe(60); expect(result.subtitle_timing_basis).toBe('storyboard_plan');
++    expect(result.clip_ids).toEqual(['shot-s1', 'shot-s2', 'narration']);
++    expect(result.assets[1]!.recording_origin).toBe('synthetic');
++    const film = await readFile(join(result.root, 'film.html'), 'utf8');
++    expect(film).toContain('<video id="shot-s1"'); expect(film).toContain('<iframe id="shot-s2"');
++    const audio = film.match(/<audio[^>]+>/)![0]; expect(audio).not.toMatch(/#t=|speed=|muted|volume=/);
++    expect(JSON.parse(await readFile(join(result.root, '.film/settings.json'), 'utf8'))).toEqual({ fps: 30 });
++    expect(JSON.parse(await readFile(join(result.root, '.film/subtitles.json'), 'utf8')).on).toBe(true);
++    expect(await readFile(join(result.root, 'scenes/002.html'), 'utf8')).toContain('Concept &lt;script&gt; must be literal.');
++    for (const file of result.files) {
++      const bytes = await readFile(join(result.root, file.relative_path)); expect(bytes.length).toBe(file.bytes); expect(digestBytes(bytes)).toBe(file.sha256);
++    }
++    expect(await readFile(join(result.root, result.assets[1]!.path))).toEqual(unitAudio);
++    expect((await lstat(result.root)).mode & 0o077).toBe(0);
++    expect(result.roots[0]).toBe('film.html');
++    expect(result.roots).toContain('.film/settings.json'); expect(result.roots).toContain('.film/subtitles.json');
++    expect(result.roots).toContain(result.subtitles[0]!.path);
++    const before = await computeSourceDigest({ root: result.root, roots: result.roots, engine: 'openfilm', engineUpstreamSha: 'e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3' });
++    expect(new Set([...before.manifest.files, ...before.manifest.assets].map(file => file.path))).toEqual(new Set(result.files.map(file => file.relative_path)));
++    await writeFile(join(result.root, '.film/settings.json'), '{"fps":24}\n');
++    const after = await computeSourceDigest({ root: result.root, roots: result.roots, engine: 'openfilm', engineUpstreamSha: 'e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3' });
++    expect(after.source_digest).not.toBe(before.source_digest);
++  });
++});

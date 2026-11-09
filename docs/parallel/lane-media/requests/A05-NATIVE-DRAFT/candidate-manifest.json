@@ -1,0 +1,40 @@
+{
+  "base_sha": "824b7dba9cd37ced3da597e2b490c555c17e8c01",
+  "upstream_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+  "patch_sha256": "2d553dfe38af27fbcf9ee31dadd58304b48bba3ef5c95ae5de867283cfce41d3",
+  "files": [
+    {
+      "path": "src/host/render/assembly-ports.ts",
+      "pre_sha256": "b92ee91b2fafb28681243342d43a39c0b717c6b2cabcbe6546404d9656a428cc",
+      "post_sha256": "d80b7d1e82366e507617c6d5496eaa771a8b85b7387dac436b3da6712da41547"
+    },
+    {
+      "path": "src/host/render/native-draft-plan.ts",
+      "pre_sha256": null,
+      "post_sha256": "b4091aa1ffa786fe703a59296b291ae0485e5032e57f9aa4dfa31e9d37631d3e"
+    },
+    {
+      "path": "src/host/render/native-draft-io.ts",
+      "pre_sha256": null,
+      "post_sha256": "6505c5d2648f0c2e53ad3bca8e136fea017d425c036ddce529d918c4c2055034"
+    },
+    {
+      "path": "src/host/render/native-draft-assembler.ts",
+      "pre_sha256": null,
+      "post_sha256": "aad468fa4b9dafab9b2b3ac2559ede4c393943643927fdaf9a3d458863a65e6e"
+    },
+    {
+      "path": "src/host/render/native-subtitle-burn-source.ts",
+      "pre_sha256": null,
+      "post_sha256": "f6c5b66a1ccb73bc61cb5e281d4b2a9d7285816da36639666b0cca35935cde12"
+    },
+    {
+      "path": "tests/agent-driven/media/native-draft.test.ts",
+      "pre_sha256": null,
+      "post_sha256": "4ae6beb523b9c5a34e64a76c235433240901ef6a4c3f8a2b60626716bd69acb4"
+    }
+  ],
+  "review": "REVIEW_PENDING",
+  "actual_media": "NOT_RUN",
+  "host_adoption": "NOT_IMPLEMENTED"
+}
