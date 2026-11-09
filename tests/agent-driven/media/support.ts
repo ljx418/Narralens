@@ -101,6 +101,10 @@ export function renderSpec(overrides: Partial<RenderSpec> = {}): RenderSpec {
   };
 }
 
+/** The roles the tests promise in a package. */
+export const RIGHTS_ROLE = "rights";
+export const SUBTITLES_ROLE = "subtitles";
+
 /** A closure with a film, an asset and a supplement, written to disk. */
 export async function makeClosure(input: {
   readonly directory: string;
@@ -108,8 +112,11 @@ export async function makeClosure(input: {
   readonly snapshot_id?: string;
   readonly with_asset?: boolean;
   readonly with_supplement?: boolean;
+  readonly supplement_role?: string;
   readonly rights?: SnapshotRightsFact[];
   readonly source_digest?: string;
+  readonly expected_frames?: number;
+  readonly expected_duration_seconds?: number;
 }): Promise<SnapshotClosure> {
   const projectId = input.project_id ?? "proj_media_01";
   const snapshotId = input.snapshot_id ?? "snap_media_01";
@@ -125,6 +132,7 @@ export async function makeClosure(input: {
     bytes: Buffer.byteLength(filmText),
     kind: "native_source",
     rights_ref: null,
+    role: null,
   });
 
   if (input.with_asset === true) {
@@ -138,6 +146,7 @@ export async function makeClosure(input: {
       bytes: Buffer.byteLength(assetText),
       kind: "asset",
       rights_ref: "rights_01",
+      role: null,
     });
   }
 
@@ -152,6 +161,7 @@ export async function makeClosure(input: {
       bytes: Buffer.byteLength(supplementText),
       kind: "supplement",
       rights_ref: "rights_01",
+      role: input.supplement_role ?? RIGHTS_ROLE,
     });
   }
 
@@ -160,6 +170,8 @@ export async function makeClosure(input: {
     snapshot_id: snapshotId,
     source_digest: input.source_digest ?? "a".repeat(64),
     project_revision: 7,
+    expected_frames: input.expected_frames ?? 60,
+    expected_duration_seconds: input.expected_duration_seconds ?? 2,
     native_root: input.directory,
     native_entry: "film.html",
     entries,

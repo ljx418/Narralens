@@ -1,7 +1,8 @@
 import { createHash } from "node:crypto";
 import { readFileSync, statSync, writeFileSync } from "node:fs";
-import { isAbsolute, resolve, sep } from "node:path";
-import { pathToFileURL } from "node:url";
+import { dirname, isAbsolute, join, resolve, sep } from "node:path";
+import { register } from "node:module";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 /**
  * The pinned native render worker.
@@ -30,16 +31,21 @@ import { pathToFileURL } from "node:url";
  * - It never loads upstream bytes it has not hashed. The digests come from the pin file
  *   next to this file, and every module in the render's import graph is checked before
  *   the first import happens.
- * - It never reaches the network. The upstream serves the film over loopback only, and
- *   nothing here opens a socket.
- *
- * Exit codes: 0 the render finished, 1 the render failed, 2 the worker refused (bad
- * request, or an upstream that does not match its pin).
+ * - It never lets the renderer reach the network. The offline guard is loaded in front
+ *   of the pinned host module, and the worker refuses to render when the guard did not
+ *   take effect.
  */
-
 const PIN_FILE = new URL("./openfilm-render-pin.json", import.meta.url);
 const REQUEST_KIND = "narralens.native_render_request@1.0";
 const RESPONSE_KIND = "narralens.native_render_response@1.0";
+/** The marker the offline guard sets on the global object when it is in place. */
+const GUARD_MARKER = "__narralensOfflineGuard";
+/** The query the guard uses to reach the original module. */
+const GUARD_QUERY = "?narralens-original";
+
+const WORKER_DIRECTORY = dirname(fileURLToPath(import.meta.url));
+/** The repository root, three levels up from `src/host/render`. */
+const REPOSITORY_ROOT = resolve(WORKER_DIRECTORY, "..", "..", "..");
 
 /** The response the parent reads. Written even when the render fails. */
 function writeResponse(path, response) {
@@ -144,6 +150,7 @@ async function main() {
     reject("PIN_UNREADABLE", `the render pin could not be read: ${String(error?.message ?? error)}`);
     return;
   }
+
   const mismatched = [];
   for (const [relative, expected] of Object.entries(pin.loaded_module_sha256 ?? {})) {
     const path = resolve(upstreamRoot, relative);
@@ -153,8 +160,33 @@ async function main() {
     catch { mismatched.push(relative); continue; }
     if (actual !== expected) mismatched.push(relative);
   }
+  // The guard is ours, and it is pinned next to the upstream: a guard that was changed
+  // without being re-pinned would be a guard nobody reviewed.
+  for (const [relative, expected] of Object.entries(pin.guard_module_sha256 ?? {})) {
+    const path = resolve(REPOSITORY_ROOT, relative);
+    if (!contained(REPOSITORY_ROOT, path)) { mismatched.push(relative); continue; }
+    let actual;
+    try { actual = sha256File(path); }
+    catch { mismatched.push(relative); continue; }
+    if (actual !== expected) mismatched.push(relative);
+  }
+  const workerActual = sha256File(fileURLToPath(import.meta.url));
+  if (workerActual !== pin.worker_sha256) mismatched.push("worker");
+
   if (mismatched.length > 0) {
-    reject("UPSTREAM_PIN_MISMATCH", `the pinned upstream does not match its digests: ${mismatched.join(", ")}`);
+    reject("UPSTREAM_PIN_MISMATCH", `the pinned render inputs are not intact: ${mismatched.join(", ")}`);
+  }
+
+  // The guard goes in front of the pinned host module before the renderer is loaded.
+  const hostUrl = pathToFileURL(resolve(upstreamRoot, "packages/openfilm/src/host.mjs")).href;
+  const wrapperUrl = pathToFileURL(resolve(WORKER_DIRECTORY, pin.guard_wrapper_file)).href;
+  const hooksUrl = pathToFileURL(resolve(WORKER_DIRECTORY, pin.guard_hooks_file)).href;
+  process.env.NARRALENS_OPENFILM_ROOT = upstreamRoot;
+  try {
+    register(hooksUrl, { data: { host_url: hostUrl, wrapper_url: wrapperUrl, marker: GUARD_QUERY } });
+  } catch (error) {
+    reject("OFFLINE_GUARD_NOT_INSTALLED", `the offline guard could not be loaded: ${String(error?.message ?? error)}`);
+    return;
   }
 
   let renderModule;
@@ -169,11 +201,16 @@ async function main() {
   if (typeof renderModule.render !== "function" || typeof filmDocModule.readFilmFile !== "function") {
     reject("UPSTREAM_SEAM_MISSING", "the pinned upstream does not export the render seam");
   }
+  // The guard has to be in place, not merely loaded: the worker refuses to render a
+  // film with a browser that may reach the network.
+  if (globalThis[GUARD_MARKER]?.installed !== true) {
+    reject("OFFLINE_GUARD_NOT_INSTALLED", "the offline guard did not take effect in front of the renderer");
+  }
 
   // The film's own size decides the scale. The delivery has to come out at the exact
-  // size that was asked for, so the size has to be an exact multiple of the stage; a
-  // film that is 1280 wide cannot become 1920 without a scale that would make 1080 into
-  // something else, and pretending otherwise would deliver a film of a different shape.
+  // size that was asked for, so the size has to scale the stage exactly; a film that is
+  // 1280 wide cannot become 1920 without a scale that would make 1080 into something
+  // else, and pretending otherwise would deliver a film of a different shape.
   let stage;
   try {
     const read = filmDocModule.readFilmFile(readFileSync(filmPath, "utf8"));
@@ -206,6 +243,9 @@ async function main() {
     workers: Number(request.workers ?? 1),
     samples: Number(request.samples ?? 1),
     shutter: Number(request.shutter ?? 0.5),
+    // The fast-seeking copies are not made. They are made by running ffmpeg over the
+    // source videos, and they are a cache of the sources rather than part of the film.
+    seekable: false,
   };
 
   const started = Date.now();

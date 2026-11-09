@@ -1,17 +1,18 @@
 import { createHash } from "node:crypto";
-import type { DeliveryManifest, Ref } from "../../contracts/agent-driven-types.js";
 
 /**
  * The layout of a delivery package.
  *
- * A package is a directory of files plus an index and a manifest. The names are fixed
- * here because three different things have to agree on them: the renderer that writes
- * the files, the index that describes them, and the download route that serves them.
+ * A package is a set of files plus a receipt that names them. The names are fixed here
+ * because three different things have to agree on them: the renderer that writes the
+ * files, the receipt that describes them, and the download route that serves them.
  *
- * The reference ids are dotless on purpose. The contract's `Ref.id` and `download_ref`
- * patterns allow letters, digits, `_` and `-` and nothing else, so an id can never be a
- * file name that a caller could confuse with a path. The file names carry their
- * extensions; the ids do not.
+ * The reference ids are dotless and carry the delivery's own identity. The contract's
+ * `Ref.id` and `download_ref` patterns allow letters, digits, `_` and `-` and nothing
+ * else, so an id can never be a file name that a caller could confuse with a path —
+ * and an id that names only its role (`media`, `ffprobe`) would collide with every
+ * other delivery's in whatever registry the ids end up in. An id that carries the
+ * delivery id cannot collide with another delivery's.
  */
 
 /** The names of the files inside a package. */
@@ -19,18 +20,20 @@ export const PACKAGE_FILES = Object.freeze({
   media: "media.mp4",
   ffprobe: "ffprobe.json",
   fullDecode: "full_decode.log",
-  index: "index.json",
-  manifest: "manifest.json",
+  nativeDocument: "native_film.html",
+  nativeSource: "native_source.json",
 });
 
-/** The reference ids of the files inside a package. */
-export const PACKAGE_REF_IDS = Object.freeze({
+/** The roles the package's files have. */
+export const PACKAGE_ROLES = Object.freeze({
   media: "media",
   ffprobe: "ffprobe",
   fullDecode: "full_decode",
+  nativeDocument: "native_document",
+  nativeSource: "native_source",
 });
 
-/** The prefix of a supplement's file name and reference id. */
+/** The prefix of a supplement's file name. */
 export const PACKAGE_SUPPLEMENT_PREFIX = "supplement_";
 
 /** The file name of the n-th supplement. */
@@ -39,41 +42,18 @@ export function supplementFileName(index: number, extension: string): string {
   return `${PACKAGE_SUPPLEMENT_PREFIX}${index}${cleaned.length > 0 ? `.${cleaned}` : ""}`;
 }
 
-/** The reference id of the n-th supplement. */
-export function supplementRefId(index: number): string {
-  return `${PACKAGE_SUPPLEMENT_PREFIX}${index}`;
-}
-
-/** One file of the package, as the index records it. */
-export interface PackageIndexEntry {
-  readonly id: string;
-  readonly file: string;
-  readonly sha256: string;
-  readonly bytes: number;
-}
-
 /**
- * The index of a package.
+ * The reference id of a file of a delivery.
  *
- * The index says what the package contains and what every file hashes to, so that a
- * reader can check a package without trusting the manifest alone — and so that a
- * download can answer with the real digest of the bytes it is about to serve.
+ * The id is the delivery's id and the role, so it is unique per delivery and stable
+ * for the same delivery.
  */
-export interface PackageIndex {
-  readonly kind: "narralens.delivery_package_index@1.0";
-  readonly delivery_id: string;
-  readonly project_id: string;
-  readonly snapshot_id: string;
-  readonly source_digest: string;
-  readonly render_config_digest: string;
-  readonly attempt: number;
-  readonly download_ref: string;
-  readonly files: readonly PackageIndexEntry[];
-}
-
-/** The reference of a package file, as the manifest carries it. */
-export function packageRef(id: string, sha256: string): Ref {
-  return { id, version: 1, sha256 };
+export function packageRefId(deliveryId: string, role: string): string {
+  const id = `${deliveryId}_${role}`;
+  if (id.length > 64 || !/^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$/u.test(id)) {
+    throw new Error(`PACKAGE_REF_ID_REJECTED:${id}`);
+  }
+  return id;
 }
 
 /** The key a delivery is identified by: one film, one configuration. */
@@ -123,6 +103,3 @@ function digestOfKey(key: DeliveryKey): string {
     .update(`${key.project_id}|${key.snapshot_id}|${key.render_config_digest}`, "utf8")
     .digest("hex");
 }
-
-/** The manifest of a published package, read back from disk. */
-export type PublishedManifest = DeliveryManifest;

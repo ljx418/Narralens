@@ -19,7 +19,11 @@ import pin from "./openfilm-render-pin.json" with { type: "json" };
  * 2. This module's extra digests: the four modules MAIN's lock does not cover
  *    (`render.mjs`, `timeline.mjs`, `seekable.mjs`, `overrides.mjs`) and the film
  *    document module.
- * 3. The worker's own digest: the file that does the loading is pinned too, so the
+ * 3. The offline guard's digests: the module that stands in front of the pinned
+ *    renderer, and the hooks that put it there. A guard that was changed without being
+ *    re-pinned would be a guard nobody reviewed — and it is the guard that keeps the
+ *    render off the network.
+ * 4. The worker's own digest: the file that does the loading is pinned too, so the
  *    thing that checks the pin cannot be swapped for one that does not.
  *
  * A checkout that fails any of these is refused. There is no fallback to another
@@ -29,6 +33,10 @@ import pin from "./openfilm-render-pin.json" with { type: "json" };
  */
 
 const WORKER_URL = new URL("./openfilm-render-worker.mjs", import.meta.url);
+const WRAPPER_URL = new URL("./openfilm-offline-wrapper.mjs", import.meta.url);
+const HOOKS_URL = new URL("./openfilm-offline-hooks.mjs", import.meta.url);
+/** The repository root, three levels up from `src/host/render`. */
+const REPOSITORY_ROOT = fileURLToPath(new URL("../../..", import.meta.url));
 
 /** The pinned facts, as they are recorded. */
 export const RENDER_PIN = Object.freeze({
@@ -38,8 +46,21 @@ export const RENDER_PIN = Object.freeze({
   film_doc_module: pin.film_doc_module,
   worker_path: pin.worker_path,
   worker_sha256: pin.worker_sha256,
+  guard_wrapper_file: pin.guard_wrapper_file,
+  guard_hooks_file: pin.guard_hooks_file,
+  guard_module_sha256: Object.freeze({ ...pin.guard_module_sha256 }),
   loaded_module_sha256: Object.freeze({ ...pin.loaded_module_sha256 }),
 });
+
+/** The absolute path of the offline guard that stands in front of the pinned renderer. */
+export function renderGuardWrapperPath(): string {
+  return fileURLToPath(WRAPPER_URL);
+}
+
+/** The absolute path of the loader hooks that install the guard. */
+export function renderGuardHooksPath(): string {
+  return fileURLToPath(HOOKS_URL);
+}
 
 /** The absolute path of the worker this module spawns. */
 export function renderWorkerPath(): string {
@@ -66,6 +87,13 @@ async function sha256File(path: string): Promise<string | null> {
   } catch {
     return null;
   }
+}
+
+/** Whether a path is inside a root. Both are resolved first, so `..` cannot escape. */
+function contained(root: string, path: string): boolean {
+  const base = resolve(root);
+  const target = resolve(path);
+  return target === base || target.startsWith(`${base}${sep}`);
 }
 
 /**
@@ -120,6 +148,17 @@ export async function verifyRenderPin(upstreamRoot: string): Promise<RenderPinVe
       mismatched.push(relative);
       continue;
     }
+    const actual = await sha256File(path);
+    if (actual === null) missing.push(relative);
+    else if (actual !== expected) mismatched.push(relative);
+  }
+
+  // The guard and the worker are ours, and they are pinned next to the upstream: a
+  // guard that was changed without being re-pinned would be a guard nobody reviewed.
+  for (const [relative, expected] of Object.entries(RENDER_PIN.guard_module_sha256)) {
+    checked.push(relative);
+    const path = resolve(REPOSITORY_ROOT, relative);
+    if (!contained(REPOSITORY_ROOT, path)) { mismatched.push(relative); continue; }
     const actual = await sha256File(path);
     if (actual === null) missing.push(relative);
     else if (actual !== expected) mismatched.push(relative);

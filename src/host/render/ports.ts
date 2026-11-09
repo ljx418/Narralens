@@ -44,6 +44,13 @@ export interface SnapshotEntry {
   readonly kind: "native_source" | "asset" | "supplement";
   /** The rights reference that covers this entry. Null only for the film's own source. */
   readonly rights_ref: string | null;
+  /**
+   * The role the entry fills, when it has one.
+   *
+   * A supplement is not "a supplement": a package that promises subtitles and a licence
+   * has to carry both, and the role is how the promise is checked.
+   */
+  readonly role: string | null;
 }
 
 /** What the rights record says about one asset of a snapshot. */
@@ -66,6 +73,17 @@ export interface SnapshotClosure {
   readonly snapshot_id: string;
   readonly source_digest: string;
   readonly project_revision: number;
+  /**
+   * How many frames the film has, as the committed native document says.
+   *
+   * The quality control compares the rendered file against this: a file that decodes
+   * and holds fewer frames than the film has is a shortened film. It comes from the
+   * snapshot, not from the renderer — a renderer that reports its own length is not a
+   * check.
+   */
+  readonly expected_frames: number | undefined;
+  /** How long the film is, in seconds, as the committed native document says. */
+  readonly expected_duration_seconds: number | undefined;
   /** Absolute path of the native project folder that holds the film's entry document. */
   readonly native_root: string;
   /** The film document's path relative to `native_root`. */
@@ -167,13 +185,25 @@ export interface DeliveryCommitRequest {
   readonly job_id: string;
   readonly snapshot_id: string;
   readonly source_digest: string;
+  /**
+   * The attempt that produced the published bytes.
+   *
+   * It may be an earlier attempt's: when two attempts race for one delivery key, the
+   * winner's package is the one that exists, and the record has to describe the bytes
+   * that are actually published.
+   */
   readonly attempt: number;
   readonly delivery_id: string;
   /** The exact `DeliveryManifest` DTO. Validated against the frozen schema before it is passed on. */
   readonly manifest: DeliveryManifest;
   /** The controlled download token of the published media. */
   readonly download_ref: string;
+  /** The binding of the attempt that is recording this. */
   readonly execution: ExecutionBinding;
+  /** The package that was published, so MAIN can reconcile it by name. */
+  readonly package_id: string;
+  /** The immutable object the package's receipt names. */
+  readonly object_id: string;
 }
 
 /**
@@ -189,6 +219,11 @@ export interface DeliveryCommitPort {
    *
    * `hooks` is passed on so MAIN can emit `ready_committed` and `events_published` from
    * inside its own transaction, which is the only place those two boundaries exist.
+   *
+   * The transaction has to check the attempt fence again. This module checks it before
+   * it publishes, but a cancellation that arrives between that check and the commit
+   * must still stop the record: the check that matters is the one inside the
+   * transaction that makes the record durable.
    */
   commitReady(request: DeliveryCommitRequest, hooks: RenderBoundaryHooks): Promise<void>;
 }
@@ -211,6 +246,13 @@ export interface RenderRequest {
    * recorded, and a warning without one blocks the delivery.
    */
   readonly qc_dispositions: readonly string[] | undefined;
+  /**
+   * The roles the package has to carry.
+   *
+   * A promised supplement that is not in the package blocks the delivery: a package
+   * with a film and no licence is not the delivery that was promised.
+   */
+  readonly required_supplements: readonly string[];
   /** Cancels the render. The child process is awaited before this promise settles. */
   readonly signal: AbortSignal | undefined;
 }
@@ -235,6 +277,14 @@ export interface RenderOutcome {
   readonly failure: RenderFailure | null;
   /** The QC items as they were recorded, so a blocked delivery can say why. */
   readonly qc_items: readonly QCItem[];
+  /**
+   * True when something is still running that this module could not confirm stopped.
+   *
+   * A cancelled render whose descendants could not be seen to end is not finished: MAIN
+   * has to record a reconciling fact and keep the attempt claimed, because a process
+   * that is still running may still write.
+   */
+  readonly requires_reconciliation: boolean;
 }
 
 /**

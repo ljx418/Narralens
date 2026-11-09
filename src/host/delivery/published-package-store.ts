@@ -1,27 +1,35 @@
-import { createHash } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { constants } from "node:fs";
-import { access, link, mkdir, open, readFile, readdir, rename, rm, stat } from "node:fs/promises";
+import { access, link, lstat, mkdir, open, readFile, rename, rm, stat } from "node:fs/promises";
 import { resolve, sep } from "node:path";
 import type { DeliveryManifest } from "../../contracts/agent-driven-types.js";
-import { PACKAGE_FILES, type PackageIndex, type PackageIndexEntry } from "./package-layout.js";
 import { validateDeliveryManifest } from "./manifest.js";
 
 /**
  * The store of published delivery packages.
  *
- * A published package is immutable and is never overwritten. Three properties matter:
+ * A published package is immutable and is never overwritten. The publication has two
+ * parts and the order between them is the whole design:
  *
- * - **No clobber.** The package is built in the staging area and moved into place with
- *   one `rename`, which fails when the name is taken by something that is not empty.
- *   Two attempts for the same delivery key therefore produce one package: the first
- *   one wins, the second one finds the winner's package and reports it.
- * - **No half package.** The whole directory appears at its final name in one step, so
- *   a reader never finds a package that is still being written. The manifest inside it
- *   says the package is complete, and a directory without a manifest is not one.
- * - **No touching anyone else's data.** Cleanup only ever removes a directory this
- *   attempt created, under a root this attempt was given. A published package is never
- *   removed, and a name that is taken by something this Host did not publish is left
- *   exactly as it was found.
+ * - **The object.** The complete package — the media, the probe, the decode, the
+ *   supplements, the native source — is built in the attempt's own staging area and
+ *   moved, whole, into `objects/<uuid>`. Nothing is added to it afterwards and nothing
+ *   is ever taken out of it.
+ * - **The receipt.** A small file at `published/<package_id>` that names the object and
+ *   carries the manifest and the digest of every file. It is published by a hard link,
+ *   and a hard link fails when the name is taken.
+ *
+ * Why two parts: the receipt is the publication, and the object it names is complete
+ * before the receipt exists. A reader that finds a receipt finds a whole package. A
+ * reader that finds an object without a receipt finds an object nobody claimed — the
+ * attempt was killed between the two steps — and that is not a delivery.
+ *
+ * Why a link and not a rename: a rename onto an existing name replaces it, which is
+ * exactly the clobber this store must never do. A link fails with `EEXIST` instead,
+ * and the loser learns that the name is taken and reads the winner's receipt.
+ *
+ * Nothing of anybody else's is touched: the canonical path is never removed, never
+ * replaced and never quarantined, and a loser removes only the object it built itself.
  */
 
 export class PublishedPackageError extends Error {
@@ -36,26 +44,78 @@ export interface PublishedPackageStoreOptions {
   /** The delivery root. Every directory this store touches is under it. */
   readonly root: string;
   readonly published_dir?: string;
+  readonly objects_dir?: string;
   readonly staging_dir?: string;
   readonly quarantine_dir?: string;
+  /**
+   * Called just before the receipt is linked into place.
+   *
+   * The seam exists so that the race can be tested at the exact point where it
+   * matters: a loser that arrives while the winner is publishing must find the
+   * canonical path taken and must not touch it. A test that only starts two
+   * publications at the same time does not know which of them got there first.
+   */
+  readonly before_publish_link?: (package_id: string) => Promise<void>;
+  /**
+   * How a directory is made durable.
+   *
+   * The seam exists so that a failing sync can be exercised: a publication whose
+   * directory cannot be made durable is not a durable publication, and the failure has
+   * to reach the caller rather than be swallowed.
+   */
+  readonly sync_directory?: (path: string) => Promise<void>;
 }
 
-/** One file to publish. */
+/** One file of a package. */
 export interface PublishFile {
+  /** The reference id the file is known by. It is unique inside the package. */
+  readonly id: string;
   /** The name inside the package. It must be a plain file name. */
   readonly name: string;
   /** Where the bytes are now. It must be inside the staging directory. */
   readonly source_path: string;
 }
 
+/**
+ * The receipt: what a published package is and what it contains.
+ *
+ * It carries the manifest, so a reader needs one file to know everything, and the
+ * digest of every file, so a reader can check the package without trusting the
+ * manifest alone.
+ */
+export interface PackageReceipt {
+  readonly kind: "narralens.delivery_package_receipt@1.0";
+  readonly package_id: string;
+  readonly object_id: string;
+  readonly delivery_id: string;
+  readonly project_id: string;
+  readonly snapshot_id: string;
+  readonly source_digest: string;
+  readonly render_config_digest: string;
+  readonly attempt: number;
+  readonly download_ref: string;
+  readonly published_at: string;
+  readonly manifest: DeliveryManifest;
+  readonly files: readonly ReceiptFile[];
+}
+
+/** One file of the package, as the receipt records it. */
+export interface ReceiptFile {
+  readonly id: string;
+  readonly file: string;
+  readonly sha256: string;
+  readonly bytes: number;
+}
+
 /** What to publish. */
 export interface PublishInput {
   readonly package_id: string;
   readonly staging_dir: string;
+  /** The identity of this attempt's object. It names a directory nobody else uses. */
+  readonly object_id: string;
   readonly files: readonly PublishFile[];
-  /** The manifest file inside the staging directory. It is published last. */
-  readonly manifest_path: string;
   readonly manifest: DeliveryManifest;
+  readonly published_at: string;
 }
 
 /** What happened. */
@@ -63,32 +123,38 @@ export type PublishOutcome =
   | {
     readonly status: "published";
     readonly package_id: string;
+    readonly object_id: string;
     /** The manifest that is published — this attempt's own. */
     readonly manifest: DeliveryManifest;
-    readonly path: string;
+    readonly receipt: PackageReceipt;
   }
   | {
     readonly status: "already_published";
     readonly package_id: string;
+    readonly object_id: string;
     /** The manifest that is published — the winner's, not this attempt's. */
     readonly manifest: DeliveryManifest;
-    readonly path: string;
+    readonly receipt: PackageReceipt;
   };
+
+/**
+ * Make a directory durable.
+ *
+ * The failure is not swallowed. A publication whose directory cannot be made durable is
+ * not a durable publication, and saying so is better than a package that a crash can
+ * empty.
+ */
+async function syncDirectoryOf(path: string): Promise<void> {
+  const handle = await open(path, constants.O_RDONLY);
+  try {
+    await handle.sync();
+  } finally {
+    await handle.close();
+  }
+}
 
 function isAlreadyExists(error: unknown): boolean {
   return (error as { code?: unknown }).code === "EEXIST";
-}
-
-/**
- * Whether the filesystem says the name is taken.
- *
- * A `rename` onto a directory that exists and is not empty fails with `ENOTEMPTY`; onto
- * a file it fails with `ENOTDIR`. Both mean the same thing here: somebody else's bytes
- * are under that name.
- */
-function isNameTaken(error: unknown): boolean {
-  const code = (error as { code?: unknown }).code;
-  return code === "EEXIST" || code === "ENOTEMPTY" || code === "ENOTDIR";
 }
 
 /** A file name that cannot walk out of the package. */
@@ -119,19 +185,26 @@ async function sha256File(path: string): Promise<string | null> {
 export class PublishedPackageStore {
   readonly root: string;
   readonly publishedDir: string;
+  readonly objectsDir: string;
   readonly stagingDir: string;
   readonly quarantineDir: string;
+  readonly #beforePublishLink: ((package_id: string) => Promise<void>) | undefined;
+  readonly #syncDirectory: (path: string) => Promise<void>;
 
   constructor(options: PublishedPackageStoreOptions) {
     this.root = resolve(options.root);
     this.publishedDir = resolve(options.published_dir ?? resolve(this.root, "published"));
+    this.objectsDir = resolve(options.objects_dir ?? resolve(this.root, "objects"));
     this.stagingDir = resolve(options.staging_dir ?? resolve(this.root, "staging"));
     this.quarantineDir = resolve(options.quarantine_dir ?? resolve(this.root, "quarantine"));
+    this.#beforePublishLink = options.before_publish_link;
+    this.#syncDirectory = options.sync_directory ?? (async (path: string) => { await syncDirectoryOf(path); });
   }
 
   /** Create the directories the store needs. */
   async prepare(): Promise<void> {
     await mkdir(this.publishedDir, { recursive: true, mode: 0o700 });
+    await mkdir(this.objectsDir, { recursive: true, mode: 0o700 });
     await mkdir(this.stagingDir, { recursive: true, mode: 0o700 });
     await mkdir(this.quarantineDir, { recursive: true, mode: 0o700 });
   }
@@ -143,15 +216,15 @@ export class PublishedPackageStore {
    * in the same millisecond and a name built from the clock alone would let the second
    * one write into the first one's directory.
    */
-  async createStaging(label: string, identity: string): Promise<string> {
+  async createStaging(label: string, identity: string = randomUUID()): Promise<string> {
     const cleaned = label.replace(/[^A-Za-z0-9_-]/gu, "-").slice(0, 48);
     const path = resolve(this.stagingDir, `${cleaned.length === 0 ? "attempt" : cleaned}-${identity.replace(/[^A-Za-z0-9_-]/gu, "-").slice(0, 64)}`);
     await mkdir(path, { recursive: true, mode: 0o700 });
     return path;
   }
 
-  /** The directory of a published package. */
-  packagePath(packageId: string): string {
+  /** The path of a published package's receipt. */
+  receiptPath(packageId: string): string {
     const safe = packageId.replace(/[^A-Za-z0-9_-]/gu, "");
     if (safe.length === 0 || safe !== packageId) {
       throw new PublishedPackageError("PACKAGE_ID_REJECTED", "the package id is not a plain name");
@@ -163,186 +236,258 @@ export class PublishedPackageStore {
     return path;
   }
 
+  /** The path of an object. */
+  objectPath(objectId: string): string {
+    const safe = objectId.replace(/[^A-Za-z0-9_-]/gu, "");
+    if (safe.length === 0 || safe !== objectId) {
+      throw new PublishedPackageError("OBJECT_ID_REJECTED", "the object id is not a plain name");
+    }
+    const path = resolve(this.objectsDir, safe);
+    if (!contained(this.objectsDir, path)) {
+      throw new PublishedPackageError("OBJECT_ID_REJECTED", "the object id names something outside the objects");
+    }
+    return path;
+  }
+
   /**
    * Publish a package.
    *
-   * The whole package is built in the staging area and then moved into place with one
-   * `rename`. That is the whole atomicity argument: a package either is at its final
-   * name, complete, or it is not there at all. There is no window in which a reader
-   * can find half a package, and no window in which a crash leaves a directory that
-   * looks like a delivery.
+   * The object is built whole in the attempt's own staging area and moved into place
+   * first; the receipt is published afterwards by a hard link. The receipt is the
+   * publication: a package exists when and only when a receipt names a complete object.
    *
-   * The move fails when the name is taken by something that is not empty. The winner's
-   * package is then read, checked and reported: the delivery that exists is the
-   * published one, whoever produced it. A name that is taken by something that is not a
-   * package is refused — it is not this Host's to overwrite.
+   * A loser — an attempt whose receipt link finds the name taken — reads the winner's
+   * receipt, checks that it is the same delivery key, and reports it. It removes only
+   * the object it built itself, and it never touches the canonical path.
    */
   async publish(input: PublishInput): Promise<PublishOutcome> {
     await this.prepare();
-    const target = this.packagePath(input.package_id);
-    const packageDir = resolve(input.staging_dir, "package");
-    await mkdir(packageDir, { recursive: true, mode: 0o700 });
+
+    const objectSource = resolve(input.staging_dir, "object");
+    const objectTarget = this.objectPath(input.object_id);
+    const receiptSource = resolve(input.staging_dir, "receipt.json");
+    const receiptTarget = this.receiptPath(input.package_id);
+
+    const receipt: PackageReceipt = {
+      kind: "narralens.delivery_package_receipt@1.0",
+      package_id: input.package_id,
+      object_id: input.object_id,
+      delivery_id: input.manifest.delivery_id,
+      project_id: input.manifest.project_id,
+      snapshot_id: input.manifest.snapshot_id,
+      source_digest: input.manifest.source_digest,
+      render_config_digest: input.manifest.render_config_digest,
+      attempt: input.manifest.attempt,
+      download_ref: input.manifest.download_ref,
+      published_at: input.published_at,
+      manifest: input.manifest,
+      files: [],
+    };
 
     try {
-      await this.#linkFiles(input, packageDir);
-      await this.#fsyncDir(packageDir);
-      await rename(packageDir, target);
+      // 1. The object, built whole in the attempt's own staging area.
+      await mkdir(objectSource, { recursive: true, mode: 0o700 });
+      const files: ReceiptFile[] = [];
+      for (const file of input.files) {
+        const name = assertPlainFileName(file.name);
+        if (!contained(input.staging_dir, file.source_path)) {
+          throw new PublishedPackageError("STAGING_ESCAPE", `a file to publish is not inside the staging directory: ${name}`);
+        }
+        const destination = resolve(objectSource, name);
+        if (!contained(objectSource, destination)) {
+          throw new PublishedPackageError("STAGING_ESCAPE", `a file to publish would land outside the package: ${name}`);
+        }
+        await link(file.source_path, destination);
+        // The bytes have to be durable before the name that points at them is durable.
+        // A hard link shares the inode, so syncing the link syncs the data.
+        await this.#syncFile(destination);
+        const digest = await sha256File(destination);
+        const info = await stat(destination);
+        if (digest === null) {
+          throw new PublishedPackageError("PUBLISHED_BYTES_UNREADABLE", `a file to publish could not be read: ${name}`);
+        }
+        files.push({ id: file.id, file: name, sha256: digest, bytes: info.size });
+      }
+      const complete: PackageReceipt = { ...receipt, files };
+      await this.#writeAndSync(receiptSource, `${JSON.stringify(complete, null, 2)}\n`);
+      await this.#syncDir(objectSource);
+
+      // 2. The object moves into place, whole.
+      await rename(objectSource, objectTarget);
+      await this.#syncDir(this.objectsDir);
+
+      // 3. The receipt is published. The link fails when the name is taken.
+      if (this.#beforePublishLink !== undefined) await this.#beforePublishLink(input.package_id);
+      try {
+        await link(receiptSource, receiptTarget);
+      } catch (error) {
+        if (!isAlreadyExists(error)) throw error;
+        // The name is taken. The canonical path is not ours to touch.
+        const existing = await this.readReceipt(input.package_id);
+        if (existing === null) {
+          throw new PublishedPackageError(
+            "PACKAGE_OCCUPIED",
+            "the package's name is taken by something that is not a published package; it was left alone",
+          );
+        }
+        this.#assertSameKey(existing, complete);
+        await this.#removeOwnObject(objectTarget);
+        return {
+          status: "already_published",
+          package_id: input.package_id,
+          object_id: existing.object_id,
+          manifest: existing.manifest,
+          receipt: existing,
+        };
+      }
+      await this.#syncDir(this.publishedDir);
+
+      return {
+        status: "published",
+        package_id: input.package_id,
+        object_id: input.object_id,
+        manifest: input.manifest,
+        receipt: complete,
+      };
     } catch (error) {
-      // Only the directory this attempt built.
-      await rm(packageDir, { recursive: true, force: true }).catch(() => undefined);
-      if (!isNameTaken(error)) throw error;
-      const existing = await this.#readManifestFile(target);
-      if (existing === null) {
-        throw new PublishedPackageError(
-          "PACKAGE_OCCUPIED",
-          "the package's name is taken by something that is not a published package; it was left alone",
-        );
-      }
-      await this.#verifyPublished(target, existing);
-      return { status: "already_published", package_id: input.package_id, manifest: existing, path: target };
+      // Only what this attempt built: its own object and its own staging.
+      await this.#removeOwnObject(objectTarget);
+      await rm(objectSource, { recursive: true, force: true }).catch(() => undefined);
+      throw error;
     }
-
-    await this.#fsyncDir(this.publishedDir);
-    return { status: "published", package_id: input.package_id, manifest: input.manifest, path: target };
-  }
-
-  async #linkFiles(input: PublishInput, target: string): Promise<void> {
-    for (const file of input.files) {
-      const name = assertPlainFileName(file.name);
-      if (!contained(input.staging_dir, file.source_path)) {
-        throw new PublishedPackageError("STAGING_ESCAPE", `a file to publish is not inside the staging directory: ${name}`);
-      }
-      const destination = resolve(target, name);
-      if (!contained(target, destination)) {
-        throw new PublishedPackageError("STAGING_ESCAPE", `a file to publish would land outside the package: ${name}`);
-      }
-      await this.#linkOrVerify(file.source_path, destination);
-    }
-    // The manifest is the marker that says the package is a package. It is written
-    // into the package before the package is moved into place, so a reader never finds
-    // a package without one.
-    if (!contained(input.staging_dir, input.manifest_path)) {
-      throw new PublishedPackageError("STAGING_ESCAPE", "the manifest to publish is not inside the staging directory");
-    }
-    await this.#linkOrVerify(input.manifest_path, resolve(target, PACKAGE_FILES.manifest));
   }
 
   /**
-   * Link a file into the package.
+   * Two receipts of the same name have to describe the same delivery.
    *
-   * A link fails when the name is taken, which is the property wanted: the first
-   * publisher wins and every other learns the name is taken and checks the bytes
-   * instead of overwriting them.
+   * A receipt of another project, another snapshot, another source or another
+   * configuration under this name is a conflict, not a duplicate: the canonical path
+   * stays as it is, and this attempt fails rather than claiming a delivery that is not
+   * its own.
    */
-  async #linkOrVerify(source: string, destination: string): Promise<void> {
-    try {
-      await link(source, destination);
-      return;
-    } catch (error) {
-      if (!isAlreadyExists(error)) throw error;
-    }
-    const [sourceDigest, destinationDigest] = await Promise.all([sha256File(source), sha256File(destination)]);
-    if (sourceDigest === null || sourceDigest !== destinationDigest) {
-      throw new PublishedPackageError("PUBLISHED_BYTES_DIFFER", "the published package holds different bytes for a file of the same name");
+  #assertSameKey(existing: PackageReceipt, attempted: PackageReceipt): void {
+    const problems: string[] = [];
+    if (existing.project_id !== attempted.project_id) problems.push("another project");
+    if (existing.snapshot_id !== attempted.snapshot_id) problems.push("another snapshot");
+    if (existing.source_digest !== attempted.source_digest) problems.push("another source digest");
+    if (existing.render_config_digest !== attempted.render_config_digest) problems.push("another configuration");
+    if (existing.delivery_id !== attempted.delivery_id) problems.push("another delivery");
+    if (problems.length > 0) {
+      throw new PublishedPackageError("PACKAGE_CONFLICT", `the package's name is taken by ${problems.join(", ")}`);
     }
   }
 
-  async #readManifestFile(directory: string): Promise<DeliveryManifest | null> {
+  /** Remove an object this attempt built. Nobody else's object is ever removed. */
+  async #removeOwnObject(path: string): Promise<void> {
+    if (!contained(this.objectsDir, path)) return;
+    await rm(path, { recursive: true, force: true }).catch(() => undefined);
+  }
+
+  /** The receipt of a published package, or null when there is none there. */
+  async readReceipt(packageId: string): Promise<PackageReceipt | null> {
+    let raw: string;
     try {
-      const raw = await readFile(resolve(directory, PACKAGE_FILES.manifest), "utf8");
-      return validateDeliveryManifest(JSON.parse(raw));
+      raw = await readFile(this.receiptPath(packageId), "utf8");
+    } catch {
+      return null;
+    }
+    try {
+      const parsed = JSON.parse(raw) as PackageReceipt;
+      return validateReceipt(parsed);
     } catch {
       return null;
     }
   }
 
   /**
-   * Check that a published package is the package its manifest says it is.
+   * Check a published package against its receipt.
    *
-   * The media's digest is recomputed. A package whose media does not hash to the
-   * manifest's `media_ref` is not a package this Host may serve, and saying so is
-   * better than serving bytes under somebody else's digest.
+   * Every file is hashed and compared, and the receipt's file list is checked against
+   * the manifest's references: the ids have to be unique, the names have to be plain,
+   * and every reference in the manifest has to name a file that is there. A package
+   * that does not satisfy this is not a package this Host may serve.
    */
-  async #verifyPublished(directory: string, manifest: DeliveryManifest): Promise<void> {
-    const index = await this.#readIndexFile(directory);
-    if (index === null) {
-      throw new PublishedPackageError("PUBLISHED_INDEX_MISSING", "the published package has no index");
-    }
-    if (index.project_id !== manifest.project_id || index.download_ref !== manifest.download_ref) {
-      throw new PublishedPackageError("PUBLISHED_INDEX_MISMATCH", "the published package's index does not match its manifest");
-    }
-    const media = index.files.find((file) => file.id === manifest.media_ref.id);
-    if (media === undefined || media.sha256 !== manifest.media_ref.sha256) {
-      throw new PublishedPackageError("PUBLISHED_MEDIA_MISMATCH", "the published package's media does not match its manifest");
-    }
-    const actual = await sha256File(resolve(directory, media.file));
-    if (actual !== manifest.media_ref.sha256) {
-      throw new PublishedPackageError("PUBLISHED_MEDIA_DIGEST_MISMATCH", "the published package's media does not hash to its digest");
-    }
-  }
+  async verifyPackage(packageId: string, options: { readonly except_ref_id?: string } = {}): Promise<PackageReceipt | null> {
+    const receipt = await this.readReceipt(packageId);
+    if (receipt === null) return null;
+    const directory = this.objectPath(receipt.object_id);
 
-  /** The index of a published package, looked up by project and delivery id. */
-  async readIndex(projectId: string, deliveryId: string): Promise<PackageIndex | null> {
-    const names = await readdir(this.publishedDir, { withFileTypes: true }).catch(() => []);
-    for (const entry of names) {
-      if (!entry.isDirectory()) continue;
-      const directory = resolve(this.publishedDir, entry.name);
-      const manifest = await this.#readManifestFile(directory);
-      if (manifest === null) continue;
-      if (manifest.project_id !== projectId || manifest.delivery_id !== deliveryId) continue;
-      try {
-        const raw = await readFile(resolve(directory, PACKAGE_FILES.index), "utf8");
-        return JSON.parse(raw) as PackageIndex;
-      } catch {
-        return null;
+    const ids = new Set<string>();
+    for (const file of receipt.files) {
+      if (ids.has(file.id)) {
+        throw new PublishedPackageError("RECEIPT_DUPLICATE_ID", `the receipt names ${file.id} twice`);
+      }
+      ids.add(file.id);
+      assertPlainFileName(file.file);
+      const path = resolve(directory, file.file);
+      if (!contained(directory, path)) {
+        throw new PublishedPackageError("RECEIPT_PATH_ESCAPE", `the receipt names a file outside the package: ${file.file}`);
+      }
+      // `lstat`, not `stat`: a link is not the file the receipt names, and following it
+      // would read bytes from outside the package.
+      const info = await lstat(path).catch(() => null);
+      if (info === null || !info.isFile()) {
+        throw new PublishedPackageError("RECEIPT_FILE_MISSING", `the package is missing ${file.file}`);
+      }
+      if (info.size !== file.bytes) {
+        throw new PublishedPackageError("RECEIPT_SIZE_MISMATCH", `the package's ${file.file} is not the size its receipt records`);
+      }
+      // The file that is about to be served is hashed through the descriptor it is
+      // served from, so that the bytes and the digest are the same bytes. Hashing it
+      // here as well would only cost a second read.
+      if (file.id === options.except_ref_id) continue;
+      const digest = await sha256File(path);
+      if (digest !== file.sha256) {
+        throw new PublishedPackageError("RECEIPT_DIGEST_MISMATCH", `the package's ${file.file} does not hash to its digest`);
       }
     }
-    return null;
-  }
 
-  /** The manifest of a published package. */
-  async readManifest(packageId: string): Promise<DeliveryManifest | null> {
-    return await this.#readManifestFile(this.packagePath(packageId));
+    // Every reference in the manifest has to name a file of the package.
+    const referenced = [
+      receipt.manifest.media_ref,
+      receipt.manifest.ffprobe_ref,
+      receipt.manifest.full_decode_ref,
+      ...receipt.manifest.supplement_refs,
+    ];
+    for (const reference of referenced) {
+      if (!ids.has(reference.id)) {
+        throw new PublishedPackageError("RECEIPT_REF_MISSING", `the package has no file for the reference ${reference.id}`);
+      }
+      const entry = receipt.files.find((file) => file.id === reference.id);
+      if (entry !== undefined && entry.sha256 !== reference.sha256) {
+        throw new PublishedPackageError("RECEIPT_REF_DIGEST_MISMATCH", `the package's ${reference.id} does not match the manifest`);
+      }
+    }
+
+    return receipt;
   }
 
   /** The file of a published package, by its reference id. */
-  async resolvePackageFile(packageId: string, refId: string): Promise<{ path: string; entry: PackageIndexEntry } | null> {
-    const directory = this.packagePath(packageId);
-    const index = await this.#readIndexFile(directory);
-    if (index === null) return null;
-    const entry = index.files.find((file) => file.id === refId);
+  async resolvePackageFile(packageId: string, refId: string): Promise<{ path: string; entry: ReceiptFile; directory: string } | null> {
+    const receipt = await this.readReceipt(packageId);
+    if (receipt === null) return null;
+    const entry = receipt.files.find((file) => file.id === refId);
     if (entry === undefined) return null;
+    const directory = this.objectPath(receipt.object_id);
     const path = resolve(directory, entry.file);
     if (!contained(directory, path)) return null;
-    return { path, entry };
-  }
-
-  async #readIndexFile(directory: string): Promise<PackageIndex | null> {
-    try {
-      const raw = await readFile(resolve(directory, PACKAGE_FILES.index), "utf8");
-      return JSON.parse(raw) as PackageIndex;
-    } catch {
-      return null;
-    }
+    return { path, entry, directory };
   }
 
   /** The package a download token names, if it is published and belongs to the project. */
-  async resolveDownloadRef(downloadRef: string, projectId: string): Promise<{ package_id: string; manifest: DeliveryManifest } | null> {
+  async resolveDownloadRef(downloadRef: string, projectId: string): Promise<{ package_id: string; receipt: PackageReceipt } | null> {
     if (typeof downloadRef !== "string" || !/^dl_[A-Za-z0-9_-]{1,60}$/u.test(downloadRef)) return null;
     const packageId = `pkg_${downloadRef.slice(3)}`;
-    let directory: string;
-    try { directory = this.packagePath(packageId); }
-    catch { return null; }
-    const manifest = await this.#readManifestFile(directory);
-    if (manifest === null) return null;
-    if (manifest.project_id !== projectId) return null;
-    if (manifest.download_ref !== downloadRef) return null;
-    return { package_id: packageId, manifest };
+    const receipt = await this.readReceipt(packageId);
+    if (receipt === null) return null;
+    if (receipt.project_id !== projectId) return null;
+    if (receipt.download_ref !== downloadRef) return null;
+    return { package_id: packageId, receipt };
   }
 
-  /** Whether a package is published and complete. */
+  /** Whether a package is published. */
   async isPublished(packageId: string): Promise<boolean> {
-    return (await this.#readManifestFile(this.packagePath(packageId))) !== null;
+    return (await this.readReceipt(packageId)) !== null;
   }
 
   /**
@@ -378,17 +523,36 @@ export class PublishedPackageStore {
     }
   }
 
-  async #fsyncDir(path: string): Promise<void> {
-    let handle;
+  /** Write a file and make it durable. */
+  async #writeAndSync(path: string, contents: string): Promise<void> {
+    const handle = await open(path, "wx", 0o600);
     try {
-      handle = await open(path, constants.O_RDONLY);
+      await handle.writeFile(contents, "utf8");
       await handle.sync();
-    } catch {
-      // Directory fsync is not portable everywhere; a failure here is reported by the
-      // caller's own durability checks rather than treated as success.
     } finally {
-      await handle?.close().catch(() => undefined);
+      await handle.close();
     }
+  }
+
+  /** Make a file's bytes durable. */
+  async #syncFile(path: string): Promise<void> {
+    const handle = await open(path, constants.O_RDONLY);
+    try {
+      await handle.sync();
+    } finally {
+      await handle.close();
+    }
+  }
+
+  /**
+   * Make a directory durable.
+   *
+   * The failure is not swallowed. A publication whose directory cannot be made durable
+   * is not a durable publication, and saying so is better than a package that a crash
+   * can empty.
+   */
+  async #syncDir(path: string): Promise<void> {
+    await this.#syncDirectory(path);
   }
 
   /** The size of a file, for a download that has to answer with a length. */
@@ -411,18 +575,38 @@ export class PublishedPackageStore {
     }
   }
 
-  /** The directory a published package lives in. */
-  directoryOf(packageId: string): string {
-    return this.packagePath(packageId);
-  }
-
-  /** The directory of a staging area. */
+  /** The directory staging areas are created in. */
   get stagingRoot(): string {
     return this.stagingDir;
   }
 }
 
-/** The index of a package, written by the caller into the staging directory. */
-export function serializePackageIndex(index: PackageIndex): Buffer {
-  return Buffer.from(`${JSON.stringify(index, null, 2)}\n`, "utf8");
+/**
+ * Check a receipt's shape.
+ *
+ * A receipt that came from somewhere else, or that was written by an older version, is
+ * not a receipt this Host may act on: the fields it must have are checked here rather
+ * than trusted.
+ */
+export function validateReceipt(value: unknown): PackageReceipt {
+  if (typeof value !== "object" || value === null) {
+    throw new PublishedPackageError("RECEIPT_MALFORMED", "the receipt is not an object");
+  }
+  const receipt = value as Partial<PackageReceipt>;
+  if (receipt.kind !== "narralens.delivery_package_receipt@1.0") {
+    throw new PublishedPackageError("RECEIPT_MALFORMED", "the receipt is not a delivery receipt");
+  }
+  for (const field of ["package_id", "object_id", "delivery_id", "project_id", "snapshot_id", "source_digest", "render_config_digest", "download_ref", "published_at"] as const) {
+    if (typeof receipt[field] !== "string" || receipt[field].length === 0) {
+      throw new PublishedPackageError("RECEIPT_MALFORMED", `the receipt has no ${field}`);
+    }
+  }
+  if (!Number.isSafeInteger(receipt.attempt) || (receipt.attempt ?? 0) < 1) {
+    throw new PublishedPackageError("RECEIPT_MALFORMED", "the receipt has no attempt");
+  }
+  if (!Array.isArray(receipt.files)) {
+    throw new PublishedPackageError("RECEIPT_MALFORMED", "the receipt has no file list");
+  }
+  const manifest = validateDeliveryManifest(receipt.manifest);
+  return { ...(receipt as PackageReceipt), manifest };
 }
