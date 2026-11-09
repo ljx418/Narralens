@@ -1,0 +1,218 @@
+{
+  "status": "MODULE_VALIDATED_PRODUCTION_ASSEMBLY_PENDING",
+  "base_sha": "ca5b67a8285b130c79055317c6202f73cfbb99c8",
+  "contract_sha": "ca5b67a8285b130c79055317c6202f73cfbb99c8",
+  "contract_manifest_sha256": "532cd43c963a1c94de5f8ce34f3c6eb7281fded80047f74dc5dbe1a70aa65170",
+  "tested_code_sha": "a325f9483cb5106aeb829121fc20ac34496e34e3",
+  "source_author": "local Claude Code CLI, existing configuration",
+  "source_session": "d94ac073-b5b8-42c6-9b4d-f0eef57d7850",
+  "source_calls": [
+    {
+      "exec": 37149,
+      "pid": 3507857,
+      "exit": 0
+    },
+    {
+      "exec": 63426,
+      "pid": 3563078,
+      "exit": 0
+    },
+    {
+      "exec": 78749,
+      "pid": 3597394,
+      "exit": 0
+    },
+    {
+      "exec": 44062,
+      "pid": 3614630,
+      "exit": 0
+    }
+  ],
+  "reviewer": "Codex /root/a_bridge_lead, separate from source writer; lane review, not external acceptance",
+  "independent_recheck": {
+    "exec": 36533,
+    "exit": 0,
+    "tsc_exit": 0,
+    "files_passed": 7,
+    "tests_passed": 108,
+    "tests_failed": 0,
+    "duration_seconds": 91.8,
+    "worker_max": 1,
+    "commands": [
+      "pnpm exec tsc --noEmit",
+      "pnpm exec vitest run tests/agent-driven/bridge --maxWorkers=1 --minWorkers=1"
+    ]
+  },
+  "original_failure": {
+    "evidence": "03-vitest-bridge",
+    "exit": 1,
+    "passed": 104,
+    "failed": 4,
+    "preserved": true
+  },
+  "limits": {
+    "production_host": "NOT_RUN",
+    "real_external_mcp_clients": "NOT_RUN",
+    "full_suite_build_media": "NOT_RUN",
+    "independent_external_review": "REVIEW_PENDING",
+    "human_acceptance": "NOT_RUN"
+  },
+  "resources": "BRIDGE-light RELEASED to MAIN after exec36533 exit0; no observed lane stdio/test process remains",
+  "files": [
+    {
+      "path": "docs/parallel/lane-bridge/evidence/01-install.exit",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "docs/parallel/lane-bridge/evidence/01-install.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/parallel/lane-bridge/evidence/01-install.stdout.log",
+      "bytes": 1575,
+      "sha256": "880c46ede4bf1e3f539105cff079b84155ba07e7e293a148c83957eae1389f4d"
+    },
+    {
+      "path": "docs/parallel/lane-bridge/evidence/02-tsc.exit",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "docs/parallel/lane-bridge/evidence/02-tsc.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/parallel/lane-bridge/evidence/02-tsc.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/parallel/lane-bridge/evidence/03-vitest-bridge.exit",
+      "bytes": 2,
+      "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+    },
+    {
+      "path": "docs/parallel/lane-bridge/evidence/03-vitest-bridge.stderr.log",
+      "bytes": 2787,
+      "sha256": "3a96496239900a2f20a41e1a7c241166c92eae3622bc958f28194f3c5896a85c"
+    },
+    {
+      "path": "docs/parallel/lane-bridge/evidence/03-vitest-bridge.stdout.log",
+      "bytes": 5691,
+      "sha256": "f303b73e24e1af58ab994fd4cbee0d807863815dd4fd54479b81f064bbf383f3"
+    },
+    {
+      "path": "docs/parallel/lane-bridge/evidence/04-vitest-targeted.exit",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "docs/parallel/lane-bridge/evidence/04-vitest-targeted.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/parallel/lane-bridge/evidence/04-vitest-targeted.stdout.log",
+      "bytes": 1154,
+      "sha256": "c7e8c72d41b3f11499f77c3c18a13ba08f7c416b616df05d6e4ea95b274d96ab"
+    },
+    {
+      "path": "docs/parallel/lane-bridge/evidence/05-tsc-after-fixes.exit",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "docs/parallel/lane-bridge/evidence/05-tsc-after-fixes.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/parallel/lane-bridge/evidence/05-tsc-after-fixes.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/parallel/lane-bridge/evidence/06-vitest-bridge-final.exit",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "docs/parallel/lane-bridge/evidence/06-vitest-bridge-final.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/parallel/lane-bridge/evidence/06-vitest-bridge-final.stdout.log",
+      "bytes": 1709,
+      "sha256": "db120cbc2ee91217747696d085d69f1a182a76960d1b8ca12efbfd0792a64f10"
+    },
+    {
+      "path": "docs/parallel/lane-bridge/evidence/07-tsc-final.exit",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "docs/parallel/lane-bridge/evidence/07-tsc-final.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/parallel/lane-bridge/evidence/07-tsc-final.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/parallel/lane-bridge/evidence/08-vitest-bridge-final.exit",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "docs/parallel/lane-bridge/evidence/08-vitest-bridge-final.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/parallel/lane-bridge/evidence/08-vitest-bridge-final.stdout.log",
+      "bytes": 1707,
+      "sha256": "963c7cc99cbb7cb4eb9a8577c71596e2af200d6571fa423a0ca3c898ec5897cb"
+    },
+    {
+      "path": "docs/parallel/lane-bridge/evidence/09-codex-frozen-sha.txt",
+      "bytes": 41,
+      "sha256": "0dd6e19e9d16c88d45acf48b64839250fb027a3c67d2d99cd3e53b48870dc47a"
+    },
+    {
+      "path": "docs/parallel/lane-bridge/evidence/09-codex-tsc.exit",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "docs/parallel/lane-bridge/evidence/09-codex-tsc.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/parallel/lane-bridge/evidence/09-codex-tsc.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/parallel/lane-bridge/evidence/10-codex-bridge.exit",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "docs/parallel/lane-bridge/evidence/10-codex-bridge.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/parallel/lane-bridge/evidence/10-codex-bridge.stdout.log",
+      "bytes": 1706,
+      "sha256": "67883edd94270e74f1a2e70a5c3f08e1214f79ed1018a3a3d903de2865bf5e2f"
+    }
+  ]
+}
