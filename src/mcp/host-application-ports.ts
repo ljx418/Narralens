@@ -70,6 +70,14 @@ export class HostEndpointPolicyError extends Error {
   }
 }
 
+/** A client option is outside the bounds the client can honour. */
+export class HostConfigurationError extends Error {
+  constructor(readonly reason: string, message: string) {
+    super(message);
+    this.name = "HostConfigurationError";
+  }
+}
+
 /** The response body was larger than the client is willing to read. */
 export class HostResponseTooLargeError extends Error {
   constructor(readonly limitBytes: number) {
@@ -77,15 +85,6 @@ export class HostResponseTooLargeError extends Error {
     this.name = "HostResponseTooLargeError";
   }
 }
-
-/**
- * Resolves a hostname to the addresses it points at.
- *
- * It is injected because the decision "is `localhost` safe here?" is a policy
- * decision, and a module that resolves names itself would be making that decision
- * silently. The resolver must return only loopback literals.
- */
-export type HostAddressResolver = (hostname: string) => readonly string[];
 
 export interface HostClientOptions {
   /** The Host's base URL, e.g. `http://127.0.0.1:4173`. */
@@ -103,13 +102,6 @@ export interface HostClientOptions {
   readonly headers?: () => Record<string, string>;
   /** Injected correlation id provider. */
   readonly correlationId?: () => string;
-  /**
-   * The resolution policy for a hostname.
-   *
-   * Required to use a name such as `localhost`; without it, only the loopback
-   * literals are accepted. The resolver's answers must all be loopback literals.
-   */
-  readonly resolveHost?: HostAddressResolver;
   /** The largest response body the client will read. */
   readonly maxResponseBytes?: number;
 }
@@ -154,12 +146,28 @@ function rootField(path: string): string {
 }
 
 /**
+ * The host of a URL, without the brackets an IPv6 literal carries.
+ *
+ * `new URL("http://[::1]:4173").hostname` is `"[::1]"`, brackets included, so the
+ * literal has to be unwrapped before it can be compared with an address.
+ */
+export function normalizeHost(hostname: string): string {
+  return hostname.startsWith("[") && hostname.endsWith("]") ? hostname.slice(1, -1) : hostname;
+}
+
+/**
  * Check the base URL against the endpoint policy and return its normalised form.
  *
  * The policy is deliberately narrow. This client holds credentials for one local
- * Host; a base URL that points anywhere else — a different host, a different port
- * scheme, a path that would silently prefix every route, or a URL with embedded
- * credentials — is a mistake that must be visible at start-up.
+ * Host, and the address that is checked has to be the address that is fetched:
+ *
+ * - the scheme is `http`,
+ * - the host is an **address literal** — `127.0.0.1` or `[::1]`. A *name* is
+ *   refused outright: a name is resolved again on every connection, so a name that
+ *   was checked once can point somewhere else by the time the request is made.
+ *   There is no resolver hook that could close that window, because the fetch would
+ *   still use the name,
+ * - no userinfo, no query, no fragment, no path prefix.
  */
 export function assertEndpointPolicy(options: HostClientOptions): string {
   let url: URL;
@@ -183,39 +191,24 @@ export function assertEndpointPolicy(options: HostClientOptions): string {
   if (url.pathname !== "" && url.pathname !== "/") {
     throw new HostEndpointPolicyError("base_url_path_refused", "The host base URL must not carry a path prefix.");
   }
-  const hostname = url.hostname;
-  if (!LOOPBACK_LITERALS.has(hostname)) {
-    if (hostname !== "localhost") {
-      throw new HostEndpointPolicyError(
-        "base_url_not_loopback",
-        "The host base URL must address a loopback address.",
-      );
-    }
-    const resolveHost = options.resolveHost;
-    if (resolveHost === undefined) {
-      throw new HostEndpointPolicyError(
-        "base_url_name_without_policy",
-        "The host base URL uses a host name; a resolution policy that restricts it to loopback is required.",
-      );
-    }
-    const addresses = resolveHost(hostname);
-    if (!Array.isArray(addresses) || addresses.length === 0) {
-      throw new HostEndpointPolicyError(
-        "base_url_name_unresolved",
-        "The host base URL's host name did not resolve to any address.",
-      );
-    }
-    for (const address of addresses) {
-      if (!LOOPBACK_LITERALS.has(address)) {
-        throw new HostEndpointPolicyError(
-          "base_url_name_not_loopback",
-          "The host base URL's host name does not resolve to a loopback address.",
-        );
-      }
-    }
+  if (!LOOPBACK_LITERALS.has(normalizeHost(url.hostname))) {
+    throw new HostEndpointPolicyError(
+      "base_url_not_loopback",
+      "The host base URL must address a loopback address literal; a host name is refused.",
+    );
   }
   const base = options.baseUrl.endsWith("/") ? options.baseUrl.slice(0, -1) : options.baseUrl;
   return base;
+}
+
+/** Check that a duration or size the client honours is a positive, finite bound. */
+export function assertBoundedOption(value: number, label: string): void {
+  if (!Number.isSafeInteger(value) || value <= 0) {
+    throw new HostConfigurationError(
+      `invalid_${label}`,
+      `The ${label} must be a positive, finite number.`,
+    );
+  }
 }
 
 interface BuiltRequest {
@@ -329,6 +322,8 @@ export function createHostApplicationPorts(options: HostClientOptions): Applicat
   const fetchImpl = options.fetchImpl ?? globalThis.fetch;
   const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
   const maxResponseBytes = options.maxResponseBytes ?? DEFAULT_MAX_RESPONSE_BYTES;
+  assertBoundedOption(timeoutMs, "timeout");
+  assertBoundedOption(maxResponseBytes, "maximum response size");
   const correlationId = options.correlationId ?? (() => randomUUID());
 
   async function callRoute(route: AgentRouteView, input: unknown): Promise<unknown> {

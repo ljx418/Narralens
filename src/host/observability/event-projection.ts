@@ -5,7 +5,7 @@
  * Host's ordered event log into the ordered, de-duplicated event list a client may
  * consume, and it keeps the client's position honest.
  *
- * Two rules carry the weight here.
+ * Three rules carry the weight here.
  *
  * **The position is a position, not a count.** A client's watermark says how far it
  * has read in the *global* log, not how many rows it was shown. A scan that read
@@ -21,6 +21,15 @@
  * the rows beyond it have not been looked at, so the client may not be told they
  * were delivered. A batch that claims a position the rows do not cover is refused
  * rather than accepted, because accepting it would lose a window silently.
+ *
+ * **A log that is late, out of order or repeated is normal.** A reconnect
+ * re-delivers rows the client already has; a partitioned log delivers them out of
+ * order; a retry delivers the same row twice. The projection handles all three
+ * rather than refusing them: rows the client has already seen are dropped, rows are
+ * ordered before they are shown, and a row that arrives twice is shown once. What
+ * it does refuse is a row it cannot place — an impossible id, a row beyond the
+ * position the batch claims, or the *same* id carrying *different* content, which
+ * is not a re-delivery but a source that changed under an id.
  *
  * The project filter is not optional. Even a caller that supplies its own
  * `matches` predicate gets only the rows of the project it asked for: a filter is
@@ -80,15 +89,18 @@ function assertWatermark(value: number, label: string): void {
 }
 
 /**
- * Check that a batch is internally consistent.
+ * Check that a batch is internally consistent, and normalise what is normal.
  *
  * The checks are the ones a client can make without trusting the port's word:
  *
- * - the positions are safe, non-negative integers,
- * - the scan did not go backwards and did not pass the tail,
- * - the rows are ascending, unique and strictly after the client's position,
- * - the rows cover the range the scan claims: the last row is the position the
- *   scan reached, and an empty batch means the scan read nothing.
+ * - the positions are safe, non-negative integers, the scan did not go backwards,
+ *   and it did not pass the tail,
+ * - every row has a usable id, and no row lies beyond the position the batch
+ *   claims,
+ * - the rows cover the position the scan claims: the last row is the position the
+ *   scan reached, and an empty batch means the scan read nothing,
+ * - a repeated id is a re-delivery only if the row is the same row; the same id
+ *   with different content is refused.
  */
 export function assertConsistentBatch(input: {
   readonly events: readonly Event[];
@@ -105,24 +117,35 @@ export function assertConsistentBatch(input: {
   if (input.highWatermark < input.scannedWatermark) {
     throw new EventBatchError("scanned_watermark_ahead_of_tail", "The scanned position is ahead of the log tail.");
   }
-  let previous = input.fromWatermark;
+  const seen = new Map<number, string>();
+  let highest = input.fromWatermark;
   for (const event of input.events) {
     if (!Number.isSafeInteger(event.event_id) || event.event_id < 1) {
       throw new EventBatchError("invalid_event_id", "An event carries an invalid event id.");
     }
-    if (event.event_id <= previous) {
-      throw new EventBatchError("unordered_event", "The events are not strictly ascending.");
+    if (event.event_id > input.scannedWatermark) {
+      throw new EventBatchError("event_beyond_scanned_bounds", "An event lies beyond the position the batch claims.");
     }
-    previous = event.event_id;
+    const serialized = JSON.stringify(event);
+    const previous = seen.get(event.event_id);
+    if (previous !== undefined) {
+      if (previous !== serialized) {
+        // The same id with different content is not a re-delivery. It is a log that
+        // changed under an id, and there is no safe way to show either version.
+        throw new EventBatchError("conflicting_duplicate_event", "The same event id carries two different rows.");
+      }
+      continue;
+    }
+    seen.set(event.event_id, serialized);
+    if (event.event_id > highest) highest = event.event_id;
   }
-  const last = input.events[input.events.length - 1];
   if (input.events.length === 0) {
     if (input.scannedWatermark !== input.fromWatermark) {
       throw new EventBatchError("missing_rows", "The batch claims a position but carries no rows.");
     }
     return;
   }
-  if (last === undefined || last.event_id !== input.scannedWatermark) {
+  if (highest !== input.scannedWatermark) {
     throw new EventBatchError("missing_rows", "The batch does not cover the position it claims to have reached.");
   }
 }
@@ -140,10 +163,20 @@ export function projectEvents(input: ProjectionInput): ProjectionResult {
     scannedWatermark: input.scannedWatermark,
     highWatermark: input.highWatermark,
   });
-  const selected = input.events.filter((event) => {
-    if (event.project_id !== input.project_id) return false;
-    return input.matches === undefined ? true : input.matches(event);
-  });
+  const unique = new Map<number, Event>();
+  for (const event of input.events) {
+    // A row the client has already seen is dropped: it is a late delivery or a
+    // re-delivery, and showing it again would let a stale row overwrite a newer
+    // state in the client.
+    if (event.event_id <= input.fromWatermark) continue;
+    unique.set(event.event_id, event);
+  }
+  const selected = [...unique.values()]
+    .filter((event) => {
+      if (event.project_id !== input.project_id) return false;
+      return input.matches === undefined ? true : input.matches(event);
+    })
+    .sort((left, right) => left.event_id - right.event_id);
   return {
     events: selected,
     nextWatermark: input.scannedWatermark,

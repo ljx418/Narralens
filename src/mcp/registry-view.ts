@@ -271,6 +271,11 @@ function resourceUriPattern(template: string): RegExp {
  * is why the substitution is a table and not a heuristic. A resource without a
  * placeholder (`narralens://services/health`) matches literally and carries no
  * project id.
+ *
+ * The captured segment is returned **as it appears in the URI**. It is not
+ * percent-decoded here: a decode can fail, and a failure has to be reported to the
+ * client as a bad request rather than thrown from a matching helper. The caller
+ * decodes once, inside its own error handling.
  */
 export function matchResourceUri(uri: string): { resource: AgentResourceView; projectId: string | null } | null {
   for (const resource of AGENT_RESOURCES) {
@@ -279,7 +284,7 @@ export function matchResourceUri(uri: string): { resource: AgentResourceView; pr
     const captured = match[1];
     return {
       resource,
-      projectId: captured === undefined ? null : decodeURIComponent(captured),
+      projectId: captured === undefined ? null : captured,
     };
   }
   return null;

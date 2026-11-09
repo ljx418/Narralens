@@ -54,14 +54,16 @@ export {
   sanitizeMessage,
 } from "./host-error-mapping.js";
 export {
+  assertBoundedOption,
   assertEndpointPolicy,
   buildRequest,
   createHostApplicationPorts,
   HostCallError,
+  HostConfigurationError,
   HostEndpointPolicyError,
   HostResponseTooLargeError,
+  normalizeHost,
   readBoundedBody,
-  type HostAddressResolver,
   type HostClientOptions,
 } from "./host-application-ports.js";
 export {
