@@ -21,3 +21,9 @@ r6真实组合38/39，登记并发槽用例抓出ctime假冲突：另一个成�
 目录替换闭环：输入根和私有root/objects/staging持有Linux/WSL directory fd，来源逐级O_DIRECTORY/O_NOFOLLOW打开，写入/发布/清理使用本进程proc-fd相对锚点，不跟随可被替换的父路径；发起实际写前及最终提交校验原路径身份/权限。目录句柄保持到所有admitted import/resolve结束才关闭。新增before_stage_create/before_publish两条实际竞态故障点，将对应父目录重定向至真实snapshot/source，必须拒绝且snapshot文件列表及bytes不变、原staging清理。ctime fallback重新hash还要求current→post完整fingerprint稳定，不以元数据变化豁免字节证明。此为同一隔离边界的补强，不新开阶段/公共API。
 
 最后资源清理修正：逐级open输入leaf后若canonical realpath抛错，异常路径显式close leaf和全部父句柄；正常返回才转移leaf所有权。不依赖FileHandle GC。最终minor修后typecheck及23项真实导入全部通过，最后组合4文件44项通过在该清理微修前；二者按各自源码捕获范围记录，不机械相加冒充全量A。
+
+## 连续并行准备：真实native draft生产者候选
+
+MAIN冻结src/host/render/assembly-ports.ts作为Host-only内部port，不改变CP31或开放路由。输入是实际Script/Storyboard及MAIN通过LocalAssetRegistry.resolve得到的owner/project验证事实和绝对blob路径；路径从不进入工具DTO。模块只准备私有uncommitted source，不能操作RevisionStore、Job、approval、author、snapshot或Delivery。所有素材字节/hash、源kind/rights/recording_origin必须保留，不能把诊断音调变真人。输出显式staged-native-draft，不冒充SnapshotReadPort或committed snapshot。
+
+MEDIA仅在自身render白名单或docs/var候选编写纯assembler：一镜对应一个主要原生可编辑clip，真实video/narration/concept代码、字幕/设置及引用闭包；要求固定上游真实解析/实际渲染证明，不能只有HTML结构测试或整片flat MP4。旁白若请求则必须存在且长度与分镜可安全匹配；不可默默丢弃/任意裁切/变速，不能自签许可。字幕准确语义以固定上游实际支持的原生存储确认后实现；未知能力fail closed并报告，不发明上游API。target_root私有且原先不存在，protected roots双向不交叠、拒别名/符号链接、可取消、失败只清自己目录。MAIN之后才接实际Task/Run/受控采用。重型ffmpeg/原生render需MAIN资源准入；可以先写代码和静态候选，不能自签整体A。
