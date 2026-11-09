@@ -1,0 +1,9 @@
+# Third rework: Codex takes the shared lifecycle root cause
+
+Authorization: MAIN relayed the user latest rule that after two reworks Codex fixes the root cause. This supersedes the default 429-only implementation handoff. Claude R2 exec20750 exit0, PID3628459 and children stopped; sole writer=Codex. Candidate input4a369d601793cd39dfb81117594c20f3c943aca5. First install0/tsc2/116-of-125 module result retained in evidence/first-check-receipt.json and original logs.
+
+Root cause: signal delivery was treated as a sufficient lifecycle action while the promise waited forever for close; successful worker response also bypassed unresolved descendants. Worker and real QC tool runner now use one finite TERM/grace/KILL/confirmation lifecycle. Only close plus vanished owned group settles; unknown stays explicit, blocks package/ready, retains attempt. No test timeout was raised. A fake child with no close event must terminate the host promise as unknown; successful response cannot override unresolved group. Preflight/worker/file fixtures were corrected to actually hit their named boundary, preserving their refusal assertions.
+
+QC now propagates process convergence, does not launch decode after an unsettled probe, and carries unknown through RenderOutcome.requires_reconciliation to MAIN. MAIN retains durable claim/lease and reconciles; this lane creates no persistent Job state machine. Offline guard awaits WebSocket interception before page creation and rejects missing interception APIs.
+
+Validation status: source diff/pin inspection complete; tsc and module rerun NOT_RUN until next MEDIA-light reservation. Real ffmpeg/Chrome/Host/T20 crash cases NOT_RUN. Codex participated in implementation: its future checks are internal validation only; independent review must come from an uninvolved context.

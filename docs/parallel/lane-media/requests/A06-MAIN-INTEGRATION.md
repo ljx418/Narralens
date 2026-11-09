@@ -161,3 +161,7 @@ receipt是发布标记：没有receipt的对象只是没人认领的产物，不
 MEDIA的模块测试是**模块级检查**（渲染器与解码器是替身；真实网络拒绝探针未跑）。真实T20-A..H（真实encode、真实ENOSPC、真实截断/坏帧、真实并发、真实取消、**真实杀进程**的四个崩溃点、真实篡改、真实新revision、真实重启后重复下载、**真实网络拒绝**）全部`NOT_RUN`，需要MAIN的全机资源预约与真实媒体/录音授权。逐项对应见 `docs/parallel/lane-media/A06-MODULE-NOTES.md`。
 
 `tools/agent-driven/media/render-delivery.ts` 里的fence/commit/hook是**harness的内存实现**，只用于模块证据，**不是生产的Job store**，其结果不得当作生产记录。
+
+## Codex第三返修：统一有界进程生命周期
+
+worker与QC的probe/decode均使用有界timeout→TERM grace→KILL→确认close+group。无法确认时RenderOutcome.requires_reconciliation=true；MAIN必须保持原attempt/claim，不派发新attempt，不置ready/下载，持久记录待收敛并对账。成功response也不能越过group未收敛。资源轻测仅内部验证，真实ffmpeg/Chrome/T20-A..H及独立复核仍待统一预约。

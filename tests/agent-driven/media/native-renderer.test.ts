@@ -1,7 +1,7 @@
 import { EventEmitter } from "node:events";
 import type { ChildProcess } from "node:child_process";
 import { describe, expect, it } from "vitest";
-import { awaitChildExit } from "../../../src/host/render/native-renderer.js";
+import { awaitChildExit, NativeRenderError, requireSuccessfulRendererExit } from "../../../src/host/render/native-renderer.js";
 
 /**
  * The lifecycle of a renderer's process.
@@ -71,6 +71,7 @@ describe("waiting for a renderer's process", () => {
       signal: controller.signal,
       timeout_ms: 1000,
       group_settle_timeout_ms: 150,
+      cancel_grace_ms: 5,
       // The group never goes away: something is still running.
       group_exists: () => true,
       signal_group: () => undefined,
@@ -86,10 +87,41 @@ describe("waiting for a renderer's process", () => {
       signal: undefined,
       timeout_ms: 50,
       group_settle_timeout_ms: 50,
+      cancel_grace_ms: 5,
       group_exists: () => false,
       signal_group: () => undefined,
     });
 
     expect(exited.timedOut).toBe(true);
+    expect(exited.group_settled).toBe(false);
+    expect(child.listenerCount("close")).toBe(0);
+  });
+
+  it("escalates an unresponsive cancelled child then returns reconciliation", async () => {
+    const child = new FakeChild();
+    const controller = new AbortController();
+    const signals: string[] = [];
+    const pending = awaitChildExit(asChild(child), {
+      signal: controller.signal, timeout_ms: 1000, cancel_grace_ms: 5,
+      group_settle_timeout_ms: 20, group_exists: () => true,
+      signal_group: (_child, signal) => { signals.push(signal); },
+    });
+    controller.abort();
+    const exited = await pending;
+    expect(signals).toEqual(["SIGTERM", "SIGKILL"]);
+    expect(exited.group_settled).toBe(false);
+    child.emit("close", 0, null); // A late close cannot turn unknown into success.
+    expect(exited.group_settled).toBe(false);
+  });
+
+  it("rejects a successful response when descendants remain or the exit failed", () => {
+    let failure: unknown;
+    try {
+      requireSuccessfulRendererExit({ code: 0, signal: null, timedOut: false, group_settled: false });
+    } catch (error) { failure = error; }
+    expect(failure).toBeInstanceOf(NativeRenderError);
+    expect((failure as NativeRenderError).group_settled).toBe(false);
+    expect(() => requireSuccessfulRendererExit({ code: 1, signal: null, timedOut: false, group_settled: true }))
+      .toThrow(/exit successfully/);
   });
 });

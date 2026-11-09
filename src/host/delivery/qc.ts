@@ -1,5 +1,6 @@
-import { execFile } from "node:child_process";
+import { spawn } from "node:child_process";
 import { createHash } from "node:crypto";
+import { awaitChildExit } from "../render/native-renderer.js";
 import type { QCItem, Ref, RenderSpec } from "../../contracts/agent-driven-types.js";
 import { PACKAGE_ROLES, packageRefId } from "./package-layout.js";
 
@@ -37,6 +38,8 @@ export interface ToolResult {
   readonly signal: string | null;
   readonly stdout: string;
   readonly stderr: string;
+  /** Real runners always supply this; false means MAIN must retain the attempt. */
+  readonly group_settled?: boolean;
 }
 
 /**
@@ -58,39 +61,34 @@ export interface MediaToolRunner {
 /** The real tools, run without a shell. */
 export const realMediaToolRunner: MediaToolRunner = {
   async run(tool, args, options) {
-    return await new Promise<ToolResult>((resolvePromise, rejectPromise) => {
-      execFile(tool, [...args], {
-        timeout: options.timeout_ms,
-        maxBuffer: 16 * 1024 * 1024,
-        windowsHide: true,
-        env: { PATH: process.env.PATH ?? "/usr/bin:/bin", LANG: "C", TMPDIR: process.env.TMPDIR ?? "/tmp" },
-        // The signal travels into the child, so a cancelled render stops the decoder as
-        // well as the encoder, and the promise settles when the child is gone.
-        ...(options.signal === undefined ? {} : { signal: options.signal }),
-      }, (error, stdout, stderr) => {
-        if (error === null) {
-          resolvePromise({ code: 0, signal: null, stdout: String(stdout), stderr: String(stderr) });
-          return;
-        }
-        const facts = error as { code?: unknown; killed?: boolean; signal?: string; name?: string };
-        const exitCode = typeof facts.code === "number" ? facts.code : null;
-        if (exitCode !== null || facts.killed === true || typeof facts.signal === "string" || facts.name === "AbortError") {
-          // The tool ran and failed, or it was stopped. That is a result, not an
-          // exception: the QC has to be able to report "the decoder refused the file" as
-          // a blocked check, and "the decoder was stopped" as another one.
-          resolvePromise({
-            code: exitCode,
-            signal: facts.signal ?? null,
-            stdout: String(stdout),
-            stderr: String(stderr),
-          });
-          return;
-        }
-        // The tool could not be started at all. That is not a media fact, so it stays an
-        // exception and the caller reports it as an unavailable tool.
-        rejectPromise(error);
-      });
+    if (options.signal?.aborted) {
+      return { code: null, signal: "SIGTERM", stdout: "", stderr: "cancelled before start", group_settled: true };
+    }
+    const controller = new AbortController();
+    const signal = options.signal === undefined ? controller.signal : AbortSignal.any([options.signal, controller.signal]);
+    const child = spawn(tool, [...args], {
+      windowsHide: true, detached: true, stdio: ["ignore", "pipe", "pipe"],
+      env: { PATH: process.env.PATH ?? "/usr/bin:/bin", LANG: "C", TMPDIR: process.env.TMPDIR ?? "/tmp" },
     });
+    const streams: { stdout: Buffer[]; stderr: Buffer[] } = { stdout: [], stderr: [] };
+    let bytes = 0;
+    let overflow = false;
+    const collect = (name: keyof typeof streams) => (chunk: Buffer): void => {
+      if (overflow) return;
+      bytes += chunk.byteLength;
+      if (bytes > 16 * 1024 * 1024) { overflow = true; controller.abort(); return; }
+      streams[name].push(chunk);
+    };
+    child.stdout.on("data", collect("stdout"));
+    child.stderr.on("data", collect("stderr"));
+    const exited = await awaitChildExit(child, { signal, timeout_ms: options.timeout_ms });
+    return {
+      code: exited.timedOut || overflow || !exited.group_settled ? null : exited.code,
+      signal: exited.signal,
+      stdout: Buffer.concat(streams.stdout).toString("utf8"),
+      stderr: overflow ? "media tool exceeded its output limit" : Buffer.concat(streams.stderr).toString("utf8"),
+      group_settled: exited.group_settled,
+    };
   },
 };
 
@@ -155,6 +153,7 @@ export interface QcResult {
   /** The decoder's own output, kept as the evidence of the full decode. */
   readonly decode_bytes: Buffer;
   readonly probe: ProbeFacts | null;
+  readonly requires_reconciliation: boolean;
 }
 
 /** The digest of a buffer, as a `Ref` carries it. */
@@ -339,7 +338,9 @@ export async function runQualityControl(input: QcInput): Promise<QcResult> {
   //    first error, so a file that decodes with errors is a failure and not a warning.
   //    Every stream is mapped, because a decode that only looked at the video would
   //    pass a file whose audio is broken.
-  const decodeResult = await input.runner.run("ffmpeg", [
+  const decodeResult: ToolResult = probeResult.group_settled === false || input.signal?.aborted
+    ? { code: null, signal: null, stdout: "", stderr: "decode not started after an unsettled or cancelled probe", group_settled: true }
+    : await input.runner.run("ffmpeg", [
     "-v", "error",
     "-nostdin",
     "-xerror",
@@ -359,7 +360,7 @@ export async function runQualityControl(input: QcInput): Promise<QcResult> {
   const decodeBytes = Buffer.from(`${decodeResult.stdout}${decodeResult.stderr}`, "utf8");
   const decodeRef = refFor(packageRefId(input.delivery_id, PACKAGE_ROLES.fullDecode), decodeBytes);
   const decodeErrorText = `${decodeResult.stderr}${decodeResult.stdout}`.trim();
-  const decodeOk = decodeResult.code === 0 && decodeErrorText.length === 0;
+  const decodeOk = decodeResult.code === 0 && decodeResult.group_settled !== false && decodeErrorText.length === 0;
   items.push({
     id: "media_full_decode",
     status: decodeOk ? "pass" : "block",
@@ -399,5 +400,6 @@ export async function runQualityControl(input: QcInput): Promise<QcResult> {
     probe_bytes: probeBytes,
     decode_bytes: decodeBytes,
     probe,
+    requires_reconciliation: probeResult.group_settled === false || decodeResult.group_settled === false,
   };
 }

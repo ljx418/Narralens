@@ -48,7 +48,7 @@ describe("the render pin", () => {
       "packages/openfilm/src/seekable.mjs",
       "packages/openfilm/src/overrides.mjs",
       "packages/openfilm/src/media-links.mjs",
-    ]) {
+    ] as const) {
       expect(RENDER_PIN.loaded_module_sha256[module]).toMatch(/^[a-f0-9]{64}$/u);
     }
   });

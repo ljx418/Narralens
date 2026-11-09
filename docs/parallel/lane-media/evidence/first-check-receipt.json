@@ -1,0 +1,34 @@
+{
+  "candidate_sha": "4a369d601793cd39dfb81117594c20f3c943aca5",
+  "install": {
+    "exec": 83438,
+    "exit": 0
+  },
+  "tsc": {
+    "exec": 27561,
+    "exit": 2
+  },
+  "vitest": {
+    "exec": 25520,
+    "exit": 1,
+    "files": 12,
+    "passed": 116,
+    "failed": 9,
+    "total": 125
+  },
+  "classification": "FIRST_FAIL_PRESERVED",
+  "logs": {
+    "docs/parallel/lane-media/evidence/install-first.log": {
+      "sha256": "2068060ee2dd35496ffefcbd350da0fafcaf1c5839ce83ac70dba2e799fba90f",
+      "bytes": 1457
+    },
+    "docs/parallel/lane-media/evidence/tsc-first.log": {
+      "sha256": "5890598d00069319a4528f92503ab55938e8c1092e5dea93b5e96639c23d91ea",
+      "bytes": 2508
+    },
+    "docs/parallel/lane-media/evidence/vitest-first.log": {
+      "sha256": "5873b5db7e67c70abd4c1611e007c90d696795d836779339a3da561bf824fefc",
+      "bytes": 12520
+    }
+  }
+}

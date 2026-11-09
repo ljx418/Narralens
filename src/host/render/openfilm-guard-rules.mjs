@@ -87,12 +87,11 @@ export function guardBrowser(browser) {
   const originalNewContext = browser.newContext.bind(browser);
   browser.newContext = async (options = {}) => {
     const context = await originalNewContext(guardedContextOptions(options));
-    if (context !== null && context !== undefined && typeof context.routeWebSocket === "function") {
-      context.routeWebSocket("**/*", (socket) => {
-        try { socket.close(); }
-        catch { /* the socket is already gone */ }
-      });
+    if (context === null || context === undefined || typeof context.routeWebSocket !== "function") {
+      await context?.close?.();
+      throw new Error("The browser cannot enforce the WebSocket guard");
     }
+    await context.routeWebSocket("**/*", (socket) => { void socket.close(); });
     return context;
   };
   return browser;

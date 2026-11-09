@@ -354,10 +354,12 @@ export class SnapshotRenderService implements RenderPort {
         signal: request.signal,
       });
 
-      // The decoder may still be running when the quality control returns: a
-      // cancellation that arrived during the decode leaves the probe and the decoder
-      // to be waited for, and until they are gone nothing may be adopted.
-      if (request.signal?.aborted === true) requiresReconciliation = true;
+      // The same bounded process lifecycle governs QC. A cancellation is not proof
+      // that a tool stopped; only the runner's close/group confirmation can say that.
+      requiresReconciliation = qc.requires_reconciliation;
+      if (request.signal?.aborted === true) {
+        return failure("RENDER_CANCELLED", "the render was cancelled during quality control", true, requiresReconciliation);
+      }
 
       // Every check the preflight made is carried on. A warning that the preflight
       // raised is a warning the delivery has, and a warning without a recorded

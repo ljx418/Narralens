@@ -310,6 +310,16 @@ describe("rendering a committed snapshot", () => {
     expect(built.released()).toBe(0);
   });
 
+  it("retains the attempt and publishes nothing when the decoder cannot be confirmed stopped", async () => {
+    const built = await harness({ label: "decode-unsettled", qc: { decode: { code: 0, group_settled: false } } });
+    const outcome = await built.service.render(requestFor(built));
+    expect(outcome.state).toBe("blocked");
+    expect(outcome.requires_reconciliation).toBe(true);
+    expect(built.released()).toBe(0);
+    expect(built.commits).toHaveLength(0);
+    expect(outcome.download_ref).toBeNull();
+  });
+
   it("blocks without publishing when the decode refuses the file", async () => {
     const built = await harness({
       label: "render-blocked",

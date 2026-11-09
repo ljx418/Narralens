@@ -42,6 +42,17 @@ function recordingRunner(results: Parameters<typeof runnerOf>[0]): { runner: Med
 }
 
 describe("the quality control", () => {
+  it("does not start decode after an unsettled probe and reports reconciliation", async () => {
+    const { runner, calls } = recordingRunner({ probe: { group_settled: false } });
+    const result = await runQualityControl({
+      media_path: MEDIA, delivery_id: DELIVERY, render_spec: renderSpec(),
+      supplements: [], required_supplements: [], expected_frames: 60,
+      expected_duration_seconds: 2, runner, timeout_ms: 1000, signal: undefined,
+    });
+    expect(calls.map((call) => call.tool)).toEqual(["ffprobe"]);
+    expect(result.blocked).toBe(true);
+    expect(result.requires_reconciliation).toBe(true);
+  });
   it("passes a file that is what the spec asked for", async () => {
     const result = await runQualityControl({
       media_path: MEDIA,

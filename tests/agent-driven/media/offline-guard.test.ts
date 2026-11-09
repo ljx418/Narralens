@@ -123,6 +123,14 @@ describe("the offline guard", () => {
     expect(worker).toContain("OFFLINE_GUARD_NOT_INSTALLED");
   });
 
+  it("refuses contexts without WebSocket interception", async () => {
+    let closed = false;
+    const browser = { newContext: async () => ({ close: async () => { closed = true; } }) };
+    guardBrowser(browser as unknown as GuardableBrowser);
+    await expect(browser.newContext()).rejects.toThrow(/WebSocket guard/);
+    expect(closed).toBe(true);
+  });
+
   it.skipIf(!existsSync(REAL_UPSTREAM))("is installed in front of the pinned renderer", async () => {
     const workspace = await directory("guard-worker");
     const project = join(workspace, "project");

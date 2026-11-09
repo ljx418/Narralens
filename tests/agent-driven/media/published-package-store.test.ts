@@ -1,4 +1,4 @@
-import { readFile, readdir, rm, symlink, writeFile } from "node:fs/promises";
+import { mkdir, readFile, readdir, rm, symlink, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { PublishedPackageStore, PublishedPackageError } from "../../../src/host/delivery/published-package-store.js";
@@ -161,7 +161,7 @@ describe("publishing a package", () => {
 
   it("does not touch the canonical path when the loser arrives while the winner publishes", async () => {
     const root = await directory("store-barrier");
-    let release: (() => void) | null = null;
+    let release: () => void = () => { throw new Error("barrier not initialized"); };
     const waiting = new Promise<void>((resolvePromise) => { release = resolvePromise; });
     let held = false;
     const store = new PublishedPackageStore({
@@ -190,7 +190,7 @@ describe("publishing a package", () => {
     // Let the first one reach the barrier, then let the second one through.
     await new Promise((resolvePromise) => setTimeout(resolvePromise, 50));
     const secondOutcome = await publish(second);
-    release?.();
+    release();
     const firstOutcome = await firstPublish;
 
     expect(secondOutcome.status).toBe("published");
@@ -426,7 +426,8 @@ describe("verifying a published package", () => {
     });
 
     const receipt = await store.readReceipt(PACKAGE_ID);
-    await writeFile(join(root, "objects", receipt?.object_id ?? "", PACKAGE_FILES.media), "a different film", "utf8");
+    // Same byte length forces the digest check, rather than only the size check.
+    await writeFile(join(root, "objects", receipt?.object_id ?? "", PACKAGE_FILES.media), "bad film", "utf8");
     await expect(store.verifyPackage(PACKAGE_ID)).rejects.toThrow(/digest/);
   });
 
@@ -446,6 +447,7 @@ describe("verifying a published package", () => {
     const mediaPath = join(root, "objects", receipt?.object_id ?? "", PACKAGE_FILES.media);
     const elsewhere = join(root, "elsewhere.mp4");
     await writeFile(elsewhere, "the film", "utf8");
+    await rm(mediaPath);
     await symlink(elsewhere, mediaPath);
     await expect(store.verifyPackage(PACKAGE_ID)).rejects.toThrow(/missing/);
   });
