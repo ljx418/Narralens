@@ -127,9 +127,9 @@ claim attempt
 4. 帧数/时长的“期望值”来自MAIN的快照（原生文档的事实）。MEDIA信任快照在这件事上的诚实，因此`expected_frames`缺失时preflight直接block，而不是跳过检查。
 5. 模块测试用替身渲染器与替身解码器；它们证明**编排与边界**的行为，不证明真实编码，也不证明真实网络拒绝。
 6. `quarantine/`与未被receipt引用的`objects/`会累积，需要MAIN的恢复流程定期清理（MEDIA不自动删已发布或未被认领的数据）。
-7. 上游的ffmpeg helper没有协议白名单；MEDIA不改动上游字节，因此协议限制落在**输入侧**（上游的`fileOf`把影片里引用的路径解析为影片目录内的本地文件，外部URL解析不到本地文件）并在QC侧对本地路径加`-protocol_whitelist file,pipe`。这是比"改上游"弱一层的保证，已如实记录。
+7. 不改上游字节；worker局部media-process-policy在每个原生ffmpeg输入和ffprobe调用加file,pipe协议白名单与固定线程参数。真实网络拒绝与完整编码仍需重型验收，不能由参数单测代签。
 
-## 7. 待MAIN释放后执行的命令（当前全部NOT_RUN）
+## 7. 历史建议命令（实际运行/未跑状态以HANDOFF与evidence/verification.json为准）
 
 ```sh
 corepack pnpm install --offline --frozen-lockfile
