@@ -1,0 +1,45 @@
+{
+  "assignment_id": "A-BRIDGE-001",
+  "ticket": [
+    "IT-A01",
+    "IT-A02",
+    "IT-A03"
+  ],
+  "phase": "A",
+  "status": "RELEASED",
+  "authorization": "MAIN delegation of active user IT-A01..A06 goal 2026-11-09",
+  "base_sha": "ca5b67a8285b130c79055317c6202f73cfbb99c8",
+  "contract_sha": "ca5b67a8285b130c79055317c6202f73cfbb99c8",
+  "contract_manifest_sha256": "532cd43c963a1c94de5f8ce34f3c6eb7281fded80047f74dc5dbe1a70aa65170",
+  "directory": "/mnt/c/workspace/videoworkline/Narralens-agents/bridge-observability",
+  "owner": "Codex /root/a_bridge_lead",
+  "writer": "Claude Code CLI for review-1 corrections after Codex documentation",
+  "session": "d94ac073-b5b8-42c6-9b4d-f0eef57d7850",
+  "allowed_new_prefixes": [
+    "src/launcher/",
+    "src/mcp/",
+    "src/host/observability/",
+    "skills/narralens/",
+    "skills/narralens-lib/",
+    "tests/agent-driven/bridge/",
+    "tools/agent-driven/bridge/",
+    "docs/parallel/lane-bridge/"
+  ],
+  "protected_exceptions": [],
+  "acceptance_case_ids": [
+    "A-COLD",
+    "A-MCP",
+    "A-EVENTS"
+  ],
+  "commands": [
+    "pnpm install --offline --frozen-lockfile",
+    "pnpm exec vitest run tests/agent-driven/bridge --maxWorkers=1",
+    "pnpm exec tsc --noEmit"
+  ],
+  "resource_reservation": "MAIN 62928 RUNNING: implementation only until released",
+  "rollback": "Unregistered module disable; preserve old editor and all content",
+  "independent_review": "REVIEW_PENDING",
+  "human_gate": "NOT_RUN",
+  "previous_exec_session": 37149,
+  "previous_exit_code": 0
+}
