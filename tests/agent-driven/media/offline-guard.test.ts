@@ -50,6 +50,7 @@ async function directory(label: string): Promise<string> {
 describe("the offline guard", () => {
   it("is pinned next to the upstream it stands in front of", () => {
     expect(Object.keys(RENDER_PIN.guard_module_sha256).sort()).toEqual([
+      "src/host/render/media-process-policy.mjs",
       "src/host/render/openfilm-guard-rules.mjs",
       "src/host/render/openfilm-offline-hooks.mjs",
       "src/host/render/openfilm-offline-wrapper.mjs",

@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import { canonicalJson } from "../engine/source-digest-v1.js";
 import type { RenderSpec } from "../../contracts/agent-driven-types.js";
+import pin from "./openfilm-render-pin.json" with { type: "json" };
 
 /**
  * The render profile and its configuration digest.
@@ -73,6 +74,8 @@ export function computeRenderConfigDigest(input: RenderConfigInput): string {
     shutter: String(FIXED_RENDER_OPTIONS.shutter),
     upstream_sha: input.upstream_sha,
     worker_sha256: input.worker_sha256,
+    renderer_modules: pin.loaded_module_sha256,
+    renderer_policies: pin.guard_module_sha256,
   });
   return createHash("sha256").update(canonical, "utf8").digest("hex");
 }

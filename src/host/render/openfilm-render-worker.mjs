@@ -177,6 +177,9 @@ async function main() {
     reject("UPSTREAM_PIN_MISMATCH", `the pinned render inputs are not intact: ${mismatched.join(", ")}`);
   }
 
+  const mediaPolicy = await import(new URL("./media-process-policy.mjs", import.meta.url));
+  mediaPolicy.installMediaProcessPolicy();
+
   // The guard goes in front of the pinned host module before the renderer is loaded.
   const hostUrl = pathToFileURL(resolve(upstreamRoot, "packages/openfilm/src/host.mjs")).href;
   const wrapperUrl = pathToFileURL(resolve(WORKER_DIRECTORY, pin.guard_wrapper_file)).href;
@@ -240,9 +243,14 @@ async function main() {
     out: outPath,
     fps,
     scale: factor,
-    workers: Number(request.workers ?? 1),
-    samples: Number(request.samples ?? 1),
-    shutter: Number(request.shutter ?? 0.5),
+    workers: 1,
+    samples: 1,
+    shutter: 0.5,
+    format: {
+      video: ["-c:v", "libx264", "-preset", "medium", "-crf", "16", "-threads", "1",
+        "-colorspace", "bt709", "-color_primaries", "bt709", "-color_trc", "bt709", "-color_range", "tv"],
+      audio: ["-c:a", "aac", "-b:a", "192k", "-threads", "1"],
+    },
     // The fast-seeking copies are not made. They are made by running ffmpeg over the
     // source videos, and they are a cache of the sources rather than part of the film.
     seekable: false,
@@ -251,7 +259,9 @@ async function main() {
   const started = Date.now();
   let result;
   try {
-    result = await renderModule.render([projectRoot], options);
+    result = await renderModule.render([filmPath], options);
+    const problems = mediaPolicy.nativeOutputProblems(result);
+    if (problems.length > 0) throw new Error("native content validation failed");
   } catch (error) {
     writeResponse(responsePath, {
       ok: false,
