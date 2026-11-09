@@ -33,7 +33,7 @@ describe("the preflight", () => {
   it("clears a closure whose rights, digest and configuration all hold", async () => {
     const source = await directory("preflight-ok-source");
     const staging = await directory("preflight-ok-staging");
-    const closure = await makeClosure({ directory: source, with_asset: true });
+    const closure = await makeClosure({ directory: source, with_asset: true, with_supplement: true });
     const spec = renderSpec({
       config_digest: computeRenderConfigDigest({
         render_spec: renderSpec(),
@@ -50,6 +50,7 @@ describe("the preflight", () => {
       expected_source_digest: closure.source_digest,
       upstream_root: join(source, "no-checkout-here"),
       staging_parent: staging,
+      required_supplements: [],
     });
 
     expect(findingStatus(report, "snapshot_identity")).toBe("pass");
@@ -77,6 +78,7 @@ describe("the preflight", () => {
       expected_source_digest: closure.source_digest,
       upstream_root: join(source, "no-checkout-here"),
       staging_parent: staging,
+      required_supplements: [],
     });
 
     expect(findingStatus(report, "inputs_rights")).toBe("block");
@@ -96,6 +98,7 @@ describe("the preflight", () => {
       expected_source_digest: closure.source_digest,
       upstream_root: join(source, "no-checkout-here"),
       staging_parent: staging,
+      required_supplements: [],
     });
 
     expect(findingStatus(report, "inputs_rights")).toBe("block");
@@ -114,6 +117,7 @@ describe("the preflight", () => {
       expected_source_digest: closure.source_digest,
       upstream_root: join(source, "no-checkout-here"),
       staging_parent: staging,
+      required_supplements: [],
     });
 
     expect(findingStatus(report, "render_config")).toBe("block");
@@ -132,6 +136,7 @@ describe("the preflight", () => {
       expected_source_digest: closure.source_digest,
       upstream_root: join(source, "no-checkout-here"),
       staging_parent: staging,
+      required_supplements: [],
     });
 
     expect(findingStatus(report, "render_spec")).toBe("block");
@@ -150,9 +155,30 @@ describe("the preflight", () => {
       expected_source_digest: closure.source_digest,
       upstream_root: join(source, "no-checkout-here"),
       staging_parent: staging,
+      required_supplements: [],
     });
 
     expect(findingStatus(report, "snapshot_identity")).toBe("block");
+  });
+
+  it("blocks a snapshot that does not carry what was promised", async () => {
+    const source = await directory("preflight-supplement-source");
+    const staging = await directory("preflight-supplement-staging");
+    const closure = await makeClosure({ directory: source, with_supplement: true });
+
+    const report = await runPreflight({
+      closure,
+      render_spec: renderSpec(),
+      project_id: closure.project_id,
+      snapshot_id: closure.snapshot_id,
+      expected_source_digest: closure.source_digest,
+      upstream_root: join(source, "no-checkout-here"),
+      staging_parent: staging,
+      required_supplements: ["rights", "subtitles"],
+    });
+
+    expect(findingStatus(report, "inputs_complete")).toBe("block");
+    expect(report.ok).toBe(false);
   });
 
   it("blocks when the pinned upstream is not there", async () => {
@@ -168,6 +194,7 @@ describe("the preflight", () => {
       expected_source_digest: closure.source_digest,
       upstream_root: join(source, "no-checkout-here"),
       staging_parent: staging,
+      required_supplements: [],
     });
 
     expect(findingStatus(report, "upstream_pin")).toBe("block");
@@ -186,6 +213,7 @@ describe("the preflight", () => {
       expected_source_digest: closure.source_digest,
       upstream_root: join(source, "no-checkout-here"),
       staging_parent: join(source, "no-staging-here"),
+      required_supplements: [],
     });
 
     expect(findingStatus(report, "output_space")).toBe("block");

@@ -57,6 +57,8 @@ export interface PreflightInput {
   readonly upstream_root: string;
   /** The directory staging directories are created in. */
   readonly staging_parent: string;
+  /** The roles the package has to carry. */
+  readonly required_supplements: readonly string[];
   /**
    * How the pinned upstream is checked.
    *
@@ -152,7 +154,7 @@ export async function runPreflight(input: PreflightInput): Promise<PreflightRepo
     rightsByKey.set(fact.asset_id, fact);
     if (fact.ref !== null) rightsByKey.set(fact.ref, fact);
   }
-  const assetEntries = closure.entries.filter((entry) => entry.kind === "asset");
+  const assetEntries = closure.entries.filter((entry) => entry.kind === "asset" || entry.kind === "supplement");
   for (const entry of assetEntries) {
     const fact = entry.rights_ref === null ? undefined : rightsByKey.get(entry.rights_ref);
     if (fact === undefined) {
@@ -171,8 +173,30 @@ export async function runPreflight(input: PreflightInput): Promise<PreflightRepo
     id: "inputs_rights",
     status: rightsProblems.length === 0 ? "pass" : "block",
     reason: rightsProblems.length === 0
-      ? `${assetEntries.length} asset(s) are cleared for this use`
+      ? `${assetEntries.length} asset(s) and supplement(s) are cleared for this use`
       : rightsProblems.join("; "),
+  });
+
+  // 3b. The promised supplements are in the closure, and the film itself is.
+  const supplementProblems: string[] = [];
+  const rolesPresent = new Set(
+    closure.entries.filter((entry) => entry.kind === "supplement").map((entry) => entry.role ?? ""),
+  );
+  for (const role of input.required_supplements) {
+    if (!rolesPresent.has(role)) supplementProblems.push(`the snapshot does not carry the promised ${role}`);
+  }
+  if (!closure.entries.some((entry) => entry.relative_path === closure.native_entry)) {
+    supplementProblems.push("the snapshot does not carry the film's own entry document");
+  }
+  if (closure.expected_frames === undefined || closure.expected_frames < 1) {
+    supplementProblems.push("the snapshot does not say how many frames the film has");
+  }
+  findings.push({
+    id: "inputs_complete",
+    status: supplementProblems.length === 0 ? "pass" : "block",
+    reason: supplementProblems.length === 0
+      ? `the snapshot carries ${input.required_supplements.length} promised supplement(s) and the film's own source`
+      : supplementProblems.join("; "),
   });
 
   // 4. The render spec says something this Host can actually do.

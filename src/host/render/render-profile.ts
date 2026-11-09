@@ -25,16 +25,16 @@ export const FIXED_RENDER_OPTIONS = Object.freeze({
    * the frames are produced even when the film does not change. One worker keeps a render
    * reproducible and keeps the machine usable for whatever else the Host is doing.
    */
-  readonly workers: 1,
+  workers: 1,
   /**
    * One sample per frame.
    *
    * Several samples average the frame over the shutter (motion blur). That is a creative
    * choice, not a delivery requirement, and it multiplies the render cost.
    */
-  readonly samples: 1,
+  samples: 1,
   /** The shutter angle, in fractions of a frame. Only meaningful with several samples. */
-  readonly shutter: 0.5,
+  shutter: 0.5,
 });
 
 /** The inputs the configuration digest is computed over. */

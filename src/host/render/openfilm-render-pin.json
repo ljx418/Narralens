@@ -1,12 +1,18 @@
 {
-  "$comment": "The render pin for IT-A06. The upstream commit and the studio modules come from contracts/openfilm-upstream-lock.json, which MAIN owns; this file adds the four modules that lock does not cover (render.mjs, timeline.mjs, seekable.mjs, overrides.mjs) plus the digest of the worker that loads them, because a render is only reproducible when every byte that can change the produced frames is named. MAIN is asked to fold these digests into the canonical lock (see docs/parallel/lane-media/requests/A06-MAIN-INTEGRATION.md).",
+  "$comment": "The render pin for IT-A06. The upstream commit and the studio modules come from contracts/openfilm-upstream-lock.json, which MAIN owns; this file adds the four modules that lock does not cover (render.mjs, timeline.mjs, seekable.mjs, overrides.mjs), the offline guard that stands in front of the pinned renderer, and the digest of the worker that loads them, because a render is only reproducible and only safe when every byte that can change the produced frames — or the network the renderer may reach — is named. MAIN is asked to fold the upstream digests into the canonical lock (see docs/parallel/lane-media/requests/A06-MAIN-INTEGRATION.md).",
   "kind": "narralens.openfilm_render_pin@1.0",
   "upstream_repository": "https://github.com/openfilm/openfilm.git",
   "upstream_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
   "render_module": "packages/openfilm/src/render.mjs",
   "film_doc_module": "packages/openfilm/src/film-doc.mjs",
   "worker_path": "src/host/render/openfilm-render-worker.mjs",
-  "worker_sha256": "ea5e9099f440b2cd3ab21a4153971e3f6d8be968f5c58245477c1f1917d94e2c",
+  "worker_sha256": "87c29133a553ea30bb4d2dba50ff246bb8ba43e1f7e8ae3a6b4918b3c2d88dd1",
+  "guard_wrapper_file": "openfilm-offline-wrapper.mjs",
+  "guard_hooks_file": "openfilm-offline-hooks.mjs",
+  "guard_module_sha256": {
+    "src/host/render/openfilm-offline-wrapper.mjs": "0eb01964e17f61867c34b619b63aa35fc9914a5a53e50480156b45227314ae22",
+    "src/host/render/openfilm-offline-hooks.mjs": "1f73d6b61741062d8b2419323174743ea42ffc93ae282a08cab6f97fe1a7f1ee"
+  },
   "loaded_module_sha256": {
     "packages/openfilm/src/render.mjs": "d308b672e7e2d60b6e06ea432bbf009ae96b5e197b3f4d1d50bab7c40fcae84f",
     "packages/openfilm/src/host.mjs": "dfed0fd5b068823d06b5091fbc01821791f0f470bbf061741bf21a25dc0bb170",

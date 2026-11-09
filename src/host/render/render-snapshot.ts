@@ -9,14 +9,12 @@ import { realMediaToolRunner, runQualityControl, type MediaToolRunner, type Supp
 import type { PublishedPackageStore } from "../delivery/published-package-store.js";
 import {
   PACKAGE_FILES,
-  PACKAGE_REF_IDS,
+  PACKAGE_ROLES,
   deriveDeliveryId,
   deriveDownloadRef,
   derivePackageId,
+  packageRefId,
   supplementFileName,
-  supplementRefId,
-  type PackageIndex,
-  type PackageIndexEntry,
 } from "../delivery/package-layout.js";
 import { copySnapshotClosure, SnapshotCopyError, verifySnapshotCopy, type SnapshotCopy } from "./snapshot-copy.js";
 import { NativeRenderCancelled, NativeRenderError, type NativeRenderPort } from "./native-renderer.js";
@@ -25,6 +23,7 @@ import { RENDER_PIN, type RenderPinVerdict } from "./upstream-pin.js";
 import type {
   AttemptIdentity,
   DeliveryCommitPort,
+  RenderBoundary,
   RenderBoundaryContext,
   RenderBoundaryHooks,
   RenderOutcome,
@@ -43,16 +42,20 @@ import type {
  * preflight → copy the snapshot → render → verify the copy → probe and decode →
  * build the package → publish it atomically → let MAIN record it.
  *
- * Three rules shape the code:
+ * Four rules shape the code:
  *
  * - **Nothing durable happens here.** This module writes files and asks MAIN to record
  *   facts. The job state, the delivery record and the business event are MAIN's.
  * - **Nothing is published before it is checked.** A package is published only after
- *   the whole file has decoded and every supplement matches its digest. A blocked
- *   check ends the render without a package.
+ *   the whole file has decoded, the file is as long as the native document says, every
+ *   supplement matches its committed digest and every promised supplement is there. A
+ *   blocked check ends the render without a package.
  * - **Nothing of somebody else's is touched.** Every attempt has its own staging
  *   directory, a publish never overwrites, and a cancelled attempt's output is moved
  *   aside rather than adopted or deleted.
+ * - **Nothing is dropped on the way.** Every check the preflight made is carried into
+ *   the delivery's own list, so a warning cannot disappear between the preflight and
+ *   the manifest.
  */
 
 /** What the service is made of. */
@@ -99,7 +102,7 @@ async function sha256File(path: string): Promise<string | null> {
   });
 }
 
-function failure(code: string, message: string, retryable: boolean): RenderOutcome {
+function failure(code: string, message: string, retryable: boolean, requiresReconciliation = false): RenderOutcome {
   return {
     state: "failed",
     manifest: null,
@@ -108,6 +111,7 @@ function failure(code: string, message: string, retryable: boolean): RenderOutco
     download_ref: null,
     failure: { code, message, retryable },
     qc_items: [],
+    requires_reconciliation: requiresReconciliation,
   };
 }
 
@@ -120,6 +124,7 @@ function blocked(items: readonly QCItem[], message: string): RenderOutcome {
     download_ref: null,
     failure: { code: "QC_BLOCKED", message, retryable: false },
     qc_items: items,
+    requires_reconciliation: false,
   };
 }
 
@@ -144,6 +149,31 @@ export function classifyRenderFailure(error: NativeRenderError): { code: string;
   return { code: error.code, message, retryable: error.retryable };
 }
 
+/**
+ * Apply the rule that a warned check needs a recorded decision.
+ *
+ * A warning is not a failure, but it is not a silent pass either: the contract asks
+ * for a decision that a person made, and the decision is MAIN's to hold. A warning
+ * whose id is not among the recorded decisions blocks the delivery.
+ *
+ * The function is exported so that the rule can be checked on its own, with the checks
+ * it is about, and not only through a whole render.
+ */
+export function applyDispositionGate(items: readonly QCItem[], dispositions: readonly string[]): QCItem[] {
+  const recorded = new Set(dispositions);
+  const undispositioned = items.filter((item) => item.status === "warn" && !recorded.has(item.id));
+  if (undispositioned.length === 0) return [...items];
+  return [
+    ...items,
+    {
+      id: "qc_disposition",
+      status: "block",
+      reason: `a warned check has no recorded decision: ${undispositioned.map((item) => item.id).join(", ")}`,
+      evidence_ref: null,
+    },
+  ];
+}
+
 export class SnapshotRenderService implements RenderPort {
   readonly #deps: SnapshotRenderServiceDeps;
 
@@ -165,6 +195,7 @@ export class SnapshotRenderService implements RenderPort {
     }
 
     let staging: string | null = null;
+    let requiresReconciliation = false;
     try {
       await this.#deps.packages.prepare();
 
@@ -189,16 +220,17 @@ export class SnapshotRenderService implements RenderPort {
         expected_source_digest: request.source_digest,
         upstream_root: this.#deps.upstream_root,
         staging_parent: this.#deps.packages.stagingRoot,
+        required_supplements: request.required_supplements,
         ...(this.#deps.pin_verifier === undefined ? {} : { pin_verifier: this.#deps.pin_verifier }),
       });
+      const preflightItems: QCItem[] = preflight.findings.map((finding) => ({
+        id: finding.id,
+        status: finding.status,
+        reason: finding.reason,
+        evidence_ref: null,
+      }));
       if (!preflight.ok) {
-        const items: QCItem[] = preflight.findings.map((finding) => ({
-          id: finding.id,
-          status: finding.status,
-          reason: finding.reason,
-          evidence_ref: null,
-        }));
-        return blocked(items, preflight.blocking.map((finding) => `${finding.id}: ${finding.reason}`).join("; "));
+        return blocked(preflightItems, preflight.blocking.map((finding) => `${finding.id}: ${finding.reason}`).join("; "));
       }
 
       // 3. The delivery key. One key, one package: a second attempt for the same film
@@ -217,6 +249,7 @@ export class SnapshotRenderService implements RenderPort {
       const deliveryId = deriveDeliveryId(key);
       const packageId = derivePackageId(key);
       const downloadRef = deriveDownloadRef(packageId);
+      const objectId = `obj_${randomUUID().replace(/-/gu, "")}`;
 
       // 4. The film's own copy. The live project is never rendered.
       staging = await this.#deps.packages.createStaging(`attempt${request.attempt}`, randomUUID());
@@ -247,8 +280,11 @@ export class SnapshotRenderService implements RenderPort {
         });
       } catch (error) {
         if (error instanceof NativeRenderCancelled) {
+          // The renderer is gone; its children may not be. When they could not be seen
+          // to end, MAIN has to record a reconciling fact and the attempt stays claimed.
+          requiresReconciliation = error.group_settled !== true;
           await this.#deps.packages.quarantineStaging(staging, `cancelled-${request.attempt}`);
-          return failure("RENDER_CANCELLED", "the render was cancelled", true);
+          return failure("RENDER_CANCELLED", "the render was cancelled", true, requiresReconciliation);
         }
         if (error instanceof NativeRenderError) {
           const classified = classifyRenderFailure(error);
@@ -257,6 +293,7 @@ export class SnapshotRenderService implements RenderPort {
         }
         throw error;
       }
+
       // 6. The inputs have to be the inputs the snapshot recorded.
       try {
         await verifySnapshotCopy(copy);
@@ -284,13 +321,16 @@ export class SnapshotRenderService implements RenderPort {
       });
 
       // 7. The quality control: the file itself, and the files that travel with it.
+      //    The digests are the ones the snapshot committed to, not the ones the copies
+      //    happen to have.
       const supplementChecks: SupplementCheck[] = [];
       const supplementEntries = closure.entries.filter((entry) => entry.kind === "supplement");
       for (const [index, entry] of supplementEntries.entries()) {
         const path = resolve(copy.project_root, entry.relative_path);
         const bytes = await readFile(path).catch(() => null);
         supplementChecks.push({
-          id: supplementRefId(index),
+          id: `sup${index}`,
+          role: entry.role ?? "",
           sha256: entry.sha256,
           bytes: entry.bytes,
           actual_sha256: bytes === null ? null : sha256Of(bytes),
@@ -300,23 +340,24 @@ export class SnapshotRenderService implements RenderPort {
 
       const qc = await runQualityControl({
         media_path: outPath,
+        delivery_id: deliveryId,
         render_spec: request.render_spec,
         supplements: supplementChecks,
+        required_supplements: request.required_supplements,
+        expected_frames: closure.expected_frames,
+        expected_duration_seconds: closure.expected_duration_seconds,
         runner: this.#deps.qc_runner ?? realMediaToolRunner,
         timeout_ms: this.#deps.qc_timeout_ms ?? DEFAULT_QC_TIMEOUT_MS,
+        signal: request.signal,
       });
 
-      const dispositions = new Set(request.qc_dispositions ?? []);
-      const undispositioned = qc.items.filter((item) => item.status === "warn" && !dispositions.has(item.id));
-      const qcItems: QCItem[] = [...qc.items];
-      if (undispositioned.length > 0) {
-        qcItems.push({
-          id: "qc_disposition",
-          status: "block",
-          reason: `a warned check has no recorded decision: ${undispositioned.map((item) => item.id).join(", ")}`,
-          evidence_ref: null,
-        });
-      }
+      // Every check the preflight made is carried on. A warning that the preflight
+      // raised is a warning the delivery has, and a warning without a recorded
+      // decision blocks it.
+      const qcItems = applyDispositionGate(
+        [...preflightItems, ...qc.items],
+        request.qc_dispositions ?? [],
+      );
 
       await this.#boundary("qc_finished", {
         project_id: request.project_id,
@@ -347,25 +388,66 @@ export class SnapshotRenderService implements RenderPort {
       await writeFile(probePath, qc.probe_bytes, { mode: 0o600 });
       await writeFile(decodePath, qc.decode_bytes, { mode: 0o600 });
 
-      const files: Array<{ name: string; source_path: string }> = [
-        { name: PACKAGE_FILES.media, source_path: outPath },
-        { name: PACKAGE_FILES.ffprobe, source_path: probePath },
-        { name: PACKAGE_FILES.fullDecode, source_path: decodePath },
+      const files: Array<{ id: string; name: string; source_path: string }> = [
+        { id: packageRefId(deliveryId, PACKAGE_ROLES.media), name: PACKAGE_FILES.media, source_path: outPath },
+        { id: packageRefId(deliveryId, PACKAGE_ROLES.ffprobe), name: PACKAGE_FILES.ffprobe, source_path: probePath },
+        { id: packageRefId(deliveryId, PACKAGE_ROLES.fullDecode), name: PACKAGE_FILES.fullDecode, source_path: decodePath },
       ];
-      const indexEntries: PackageIndexEntry[] = [];
-      const supplementRefs: Ref[] = [];
 
+      const supplementRefs: Ref[] = [];
       for (const [index, entry] of supplementEntries.entries()) {
         const source = resolve(copy.project_root, entry.relative_path);
         const name = supplementFileName(index, extname(entry.relative_path));
         const target = resolve(staging, name);
         await copyFile(source, target);
-        const bytes = await readFile(target);
-        const digest = sha256Of(bytes);
-        supplementRefs.push({ id: supplementRefId(index), version: 1, sha256: digest });
-        files.push({ name, source_path: target });
-        indexEntries.push({ id: supplementRefId(index), file: name, sha256: digest, bytes: bytes.byteLength });
+        const digest = await sha256File(target);
+        if (digest === null || digest !== entry.sha256) {
+          // The copy does not match what the snapshot committed to. The committed
+          // digest is the one that goes into the manifest; a copy that disagrees is
+          // not published under it.
+          await this.#deps.packages.quarantineStaging(staging, `supplement-${request.attempt}`);
+          return failure("SUPPLEMENT_CHANGED", `the copied ${entry.role ?? entry.relative_path} does not match the bytes the snapshot committed to`, false);
+        }
+        supplementRefs.push({ id: packageRefId(deliveryId, `sup${index}`), version: 1, sha256: digest });
+        files.push({ id: packageRefId(deliveryId, `sup${index}`), name, source_path: target });
       }
+
+      // The native, editable source travels with the package: the film's own document
+      // and a list of the source files with the digests the snapshot committed to. A
+      // package that holds only an MP4 would present a flat film as if it were the
+      // project; this one says which project it came from and carries its document.
+      const nativeDocumentPath = resolve(staging, PACKAGE_FILES.nativeDocument);
+      await copyFile(resolve(copy.project_root, copy.native_entry), nativeDocumentPath);
+      const nativeDocumentDigest = await sha256File(nativeDocumentPath);
+      const nativeEntry = closure.entries.find((entry) => entry.relative_path === copy.native_entry);
+      if (nativeDocumentDigest === null || nativeDocumentDigest !== nativeEntry?.sha256) {
+        await this.#deps.packages.quarantineStaging(staging, `native-${request.attempt}`);
+        return failure("NATIVE_DOCUMENT_CHANGED", "the film's own document does not match the bytes the snapshot committed to", false);
+      }
+      const nativeSourcePath = resolve(staging, PACKAGE_FILES.nativeSource);
+      await writeFile(nativeSourcePath, `${JSON.stringify({
+        kind: "narralens.native_project_attachment@1.0",
+        project_id: closure.project_id,
+        snapshot_id: closure.snapshot_id,
+        source_digest: closure.source_digest,
+        project_revision: closure.project_revision,
+        native_entry: copy.native_entry,
+        expected_frames: closure.expected_frames ?? null,
+        expected_duration_seconds: closure.expected_duration_seconds ?? null,
+        files: closure.entries
+          .filter((entry) => entry.kind === "native_source")
+          .map((entry) => ({ relative_path: entry.relative_path, sha256: entry.sha256, bytes: entry.bytes })),
+      }, null, 2)}\n`, { encoding: "utf8", mode: 0o600 });
+      files.push({
+        id: packageRefId(deliveryId, PACKAGE_ROLES.nativeDocument),
+        name: PACKAGE_FILES.nativeDocument,
+        source_path: nativeDocumentPath,
+      });
+      files.push({
+        id: packageRefId(deliveryId, PACKAGE_ROLES.nativeSource),
+        name: PACKAGE_FILES.nativeSource,
+        source_path: nativeSourcePath,
+      });
 
       const mediaDigest = await sha256File(outPath);
       if (mediaDigest === null) {
@@ -373,9 +455,9 @@ export class SnapshotRenderService implements RenderPort {
         return failure("MEDIA_UNREADABLE", "the rendered file could not be read", true);
       }
       const mediaBytes = (await stat(outPath)).size;
-      const mediaRef: Ref = { id: PACKAGE_REF_IDS.media, version: 1, sha256: mediaDigest };
-      const ffprobeRef: Ref = { id: PACKAGE_REF_IDS.ffprobe, version: 1, sha256: sha256Of(qc.probe_bytes) };
-      const fullDecodeRef: Ref = { id: PACKAGE_REF_IDS.fullDecode, version: 1, sha256: sha256Of(qc.decode_bytes) };
+      const mediaRef: Ref = { id: packageRefId(deliveryId, PACKAGE_ROLES.media), version: 1, sha256: mediaDigest };
+      const ffprobeRef: Ref = { id: packageRefId(deliveryId, PACKAGE_ROLES.ffprobe), version: 1, sha256: sha256Of(qc.probe_bytes) };
+      const fullDecodeRef: Ref = { id: packageRefId(deliveryId, PACKAGE_ROLES.fullDecode), version: 1, sha256: sha256Of(qc.decode_bytes) };
 
       const manifest: DeliveryManifest = buildDeliveryManifest({
         delivery_id: deliveryId,
@@ -401,37 +483,15 @@ export class SnapshotRenderService implements RenderPort {
         attempt: request.attempt,
       });
 
-      const manifestPath = resolve(staging, PACKAGE_FILES.manifest);
-      await writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`, { encoding: "utf8", mode: 0o600 });
-
-      indexEntries.unshift(
-        { id: PACKAGE_REF_IDS.media, file: PACKAGE_FILES.media, sha256: mediaRef.sha256, bytes: mediaBytes },
-        { id: PACKAGE_REF_IDS.ffprobe, file: PACKAGE_FILES.ffprobe, sha256: ffprobeRef.sha256, bytes: qc.probe_bytes.byteLength },
-        { id: PACKAGE_REF_IDS.fullDecode, file: PACKAGE_FILES.fullDecode, sha256: fullDecodeRef.sha256, bytes: qc.decode_bytes.byteLength },
-        { id: "manifest", file: PACKAGE_FILES.manifest, sha256: sha256Of(await readFile(manifestPath)), bytes: (await stat(manifestPath)).size },
-      );
-      const packageIndex: PackageIndex = {
-        kind: "narralens.delivery_package_index@1.0",
-        delivery_id: deliveryId,
-        project_id: request.project_id,
-        snapshot_id: request.snapshot_id,
-        source_digest: request.source_digest,
-        render_config_digest: configDigest,
-        attempt: request.attempt,
-        download_ref: downloadRef,
-        files: indexEntries,
-      };
-      const indexPath = resolve(staging, PACKAGE_FILES.index);
-      await writeFile(indexPath, `${JSON.stringify(packageIndex, null, 2)}\n`, { encoding: "utf8", mode: 0o600 });
-      files.push({ name: PACKAGE_FILES.index, source_path: indexPath });
-
-      // 10. Publish. One package per key, no overwriting, and the manifest last.
+      // 10. Publish. One package per key, no overwriting, and the object is complete
+      //     before the receipt that names it exists.
       const published = await this.#deps.packages.publish({
         package_id: packageId,
         staging_dir: staging,
+        object_id: objectId,
         files,
-        manifest_path: manifestPath,
         manifest,
+        published_at: manifest.published_at,
       });
 
       await this.#boundary("package_published", {
@@ -443,7 +503,18 @@ export class SnapshotRenderService implements RenderPort {
         delivery_id: published.manifest.delivery_id,
       });
 
-      // 11. MAIN records it. One transaction: the receipt, the state and the event.
+      // 11. The fence, a third time. The package is published but the record is not
+      //     written yet, and a cancelled attempt must not produce a record.
+      const finalVerdict = await this.#deps.fence.checkAttempt(identity);
+      if (finalVerdict !== "proceed") {
+        await this.#deps.packages.quarantineStaging(staging, `fenced-late-${request.attempt}`);
+        return failure(finalVerdict === "cancelled" ? "ATTEMPT_CANCELLED" : "ATTEMPT_SUPERSEDED",
+          finalVerdict === "cancelled"
+            ? "the attempt was cancelled before the delivery was recorded; the package is published and awaits reconciliation"
+            : "another attempt took over; the package is published and awaits reconciliation", true);
+      }
+
+      // 12. MAIN records it. One transaction: the receipt, the state and the event.
       try {
         await this.#deps.commit.commitReady({
           project_id: request.project_id,
@@ -455,6 +526,8 @@ export class SnapshotRenderService implements RenderPort {
           manifest: published.manifest,
           download_ref: published.manifest.download_ref,
           execution: request.execution,
+          package_id: published.package_id,
+          object_id: published.object_id,
         }, this.#deps.hooks);
       } catch (error) {
         // The package is published but not recorded. That is one of the three states a
@@ -471,20 +544,31 @@ export class SnapshotRenderService implements RenderPort {
         download_ref: published.manifest.download_ref,
         failure: null,
         qc_items: qcItems,
+        requires_reconciliation: false,
       };
     } finally {
       if (staging !== null) {
         // Only this attempt's own staging directory. A published package lives in the
-        // published root, holds its own links to the bytes, and is not touched here.
-        await this.#deps.packages.discardStaging(staging);
+        // published root and in the objects root, and is not touched here.
+        if (requiresReconciliation) {
+          // Something may still be running: the bytes are kept, not thrown away.
+          await this.#deps.packages.quarantineStaging(staging, `unsettled-${request.attempt}`);
+        } else {
+          await this.#deps.packages.discardStaging(staging);
+        }
       }
-      // The release is best effort: an attempt that cannot give its claim back must
-      // not turn a completed render into a failed one.
-      await this.#deps.fence.releaseAttempt(identity).catch(() => undefined);
+      if (requiresReconciliation) {
+        // The attempt stays claimed: a process that may still be writing must not be
+        // allowed to start a second attempt against the same job.
+      } else {
+        // The release is best effort: an attempt that cannot give its claim back must
+        // not turn a completed render into a failed one.
+        await this.#deps.fence.releaseAttempt(identity).catch(() => undefined);
+      }
     }
   }
 
-  async #boundary(boundary: Parameters<RenderBoundaryHooks["onBoundary"]>[0], context: RenderBoundaryContext): Promise<void> {
+  async #boundary(boundary: RenderBoundary, context: RenderBoundaryContext): Promise<void> {
     await this.#deps.hooks.onBoundary(boundary, context);
   }
 }

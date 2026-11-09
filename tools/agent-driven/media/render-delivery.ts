@@ -111,6 +111,7 @@ async function closureOf(directory: string): Promise<SnapshotClosure> {
         bytes: bytes.byteLength,
         kind: "native_source",
         rights_ref: null,
+        role: null,
       });
     }
   };
@@ -123,6 +124,11 @@ async function closureOf(directory: string): Promise<SnapshotClosure> {
     snapshot_id: "harness",
     source_digest: sourceDigest,
     project_revision: 0,
+    // The harness does not know how long the film is: it reads a project off the disk,
+    // not a committed snapshot. The length check therefore cannot run here, and the
+    // harness says so instead of inventing an expectation.
+    expected_frames: undefined,
+    expected_duration_seconds: undefined,
     native_root: directory,
     native_entry: "film.html",
     entries,
@@ -231,6 +237,7 @@ async function main(): Promise<void> {
     },
     attempt: 1,
     qc_dispositions: [],
+    required_supplements: [],
     signal: undefined,
   });
 
