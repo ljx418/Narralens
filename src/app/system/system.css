@@ -1,0 +1,111 @@
+/*
+ * The non-modal system control panel.
+ *
+ * It is an aside beside the editor, not a modal over it: there is no backdrop and no
+ * focus trap, so the operator keeps editing while it is open. The palette is the R4
+ * prototype's, shared with the observation surfaces.
+ */
+
+.nl-system-panel {
+  --nl-bg: #f5f4f1;
+  --nl-surface: #fffaf3;
+  --nl-ink: #241b12;
+  --nl-muted: #605448;
+  --nl-border: #b6a894;
+  --nl-accent: #0f6b67;
+  --nl-soft: #e9f2ef;
+  --nl-focus: #9b4f00;
+
+  min-height: 0;
+  overflow-y: auto;
+  padding: 14px;
+  background: #f9f8f5;
+  border-left: 1px solid var(--nl-border);
+  color: var(--nl-ink);
+  font: 14px/1.55 system-ui, "Microsoft YaHei UI", sans-serif;
+}
+
+.nl-system-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.nl-system-head h2 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.nl-system-head p {
+  margin: 3px 0 0;
+  font-size: 12px;
+  color: var(--nl-muted);
+}
+
+.nl-system-impact {
+  font-size: 12px;
+  color: var(--nl-muted);
+  margin: 10px 0 14px;
+}
+
+.nl-system-panel h3 {
+  font-size: 15px;
+  margin: 18px 0 6px;
+}
+
+.nl-service-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.nl-service-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 10px 0;
+  border-bottom: 1px solid #d5cbbf;
+}
+
+.nl-service-row > span {
+  font-size: 12px;
+  color: var(--nl-muted);
+}
+
+.nl-service-row strong {
+  min-width: 96px;
+}
+
+.nl-system-panel button {
+  background: transparent;
+  border: 1px solid var(--nl-border);
+  border-radius: 5px;
+  padding: 6px 9px;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.nl-system-panel button:hover:not(:disabled) {
+  background: var(--nl-soft);
+}
+
+.nl-system-panel button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.nl-system-panel button:focus-visible {
+  outline: 3px solid var(--nl-focus);
+  outline-offset: 3px;
+}
+
+@media (max-width: 950px) {
+  .nl-system-panel {
+    border-left: 0;
+    border-top: 1px solid var(--nl-border);
+    max-height: none;
+  }
+}
