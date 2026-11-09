@@ -1,0 +1,75 @@
+{
+  "status": "REGISTERED_FINGERPRINT_PORT_ADDED_RETEST_PENDING",
+  "writer": "Codex /root/a_product_lead (MAIN third-rework takeover)",
+  "base_sha": "ca5b67a8285b130c79055317c6202f73cfbb99c8",
+  "contract_manifest_sha256": "532cd43c963a1c94de5f8ce34f3c6eb7281fded80047f74dc5dbe1a70aa65170",
+  "pre_fix_head": "3c429c020ceb33889fe4645344349331b1e4c1e4",
+  "source_diff_sha256": "eb40197382545a28e0ae6db4d0df0822c86b29cad0011ee46dfd78ffc760e2d8",
+  "commands": [
+    {
+      "argv": "pnpm exec tsc --noEmit",
+      "exit": 0,
+      "exec_handle": 92282
+    },
+    {
+      "argv": "pnpm exec vitest run --config vitest.config.ts tests/agent-driven/product --maxWorkers=1",
+      "exit": 0,
+      "exec_handle": 51186,
+      "test_files": 5,
+      "tests_passed": 98,
+      "duration_seconds": 26.1
+    }
+  ],
+  "first_failures_preserved": true,
+  "logs": [
+    {
+      "path": "docs/parallel/lane-product/logs/install-first.log",
+      "exit_code": 0,
+      "sha256": "2474d0886e8cc8f56a6e0a999c19916b4112c236065d12cb3c3ae2ad1d07eecd"
+    },
+    {
+      "path": "docs/parallel/lane-product/logs/tsc-first.log",
+      "exit_code": 2,
+      "sha256": "4d92ff61e3143697ca2fa55ecfba32d526d8c4c0e008e83500c52e8bbbb4063a"
+    },
+    {
+      "path": "docs/parallel/lane-product/logs/vitest-first.log",
+      "exit_code": 1,
+      "sha256": "a735ba296057f9380574ed62bd4063885ed457ce99056b01946b9d84b2578668"
+    },
+    {
+      "path": "docs/parallel/lane-product/logs/tsc-repair1.log",
+      "exit_code": 2,
+      "sha256": "7df0708c47f57d98e41176fc715cec03014f6d2662d44da2e4be3a3d7cdec4ba"
+    },
+    {
+      "path": "docs/parallel/lane-product/logs/vitest-repair1.log",
+      "exit_code": 1,
+      "sha256": "f9f930398863343c9098442bd8f842b9285f97d35cb7c886e2d8986e11bd94a8"
+    },
+    {
+      "path": "docs/parallel/lane-product/logs/tsc-codex1.log",
+      "exit_code": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/parallel/lane-product/logs/vitest-codex1.log",
+      "exit_code": 1,
+      "sha256": "37f938d148278ca55ad6166fea3a8cfaedf5b7a25485bf8a56adbb353ac645d2"
+    },
+    {
+      "path": "docs/parallel/lane-product/logs/vitest-codex2.log",
+      "exit_code": 0,
+      "sha256": "23d93156f0ea9fc2e03a46405202e8373c7a44682cfbcefb6da576dd8b10025b"
+    }
+  ],
+  "resources": "PRODUCT-light explicitly admitted by MAIN; released after exec51186 exit0",
+  "independent_review": "REVIEW_PENDING (Codex participated in fixes)",
+  "host_browser_media_tests": "NOT_RUN",
+  "human_gate": "NOT_RUN",
+  "pending": [
+    "Retest final registered fingerprint port field (98 green applies pre-field source)",
+    "MAIN actual catalog/rights/ref/snapshot dispatch/apply assembly and bootstrap Brief carrier",
+    "Independent nonimplementer review and actual Host/editor/media/human acceptance"
+  ]
+}

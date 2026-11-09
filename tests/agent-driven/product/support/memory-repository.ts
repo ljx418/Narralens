@@ -350,7 +350,7 @@ export class MemoryProductRepository implements ProductRepository {
         }
       }
       if (collection === "step_attempt") {
-        const active = rowsOf("step_attempt").values().filter((row) =>
+        const active = [...rowsOf("step_attempt").values()].filter((row) =>
           row.value.project_id === value.project_id &&
           row.value.run_id === value.run_id &&
           row.value.plan_version === value.plan_version &&

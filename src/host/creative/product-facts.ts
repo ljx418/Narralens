@@ -35,6 +35,8 @@ export interface ProductProjectFacts {
   readonly rights_reason: string;
   /** Whether the capability fingerprint the run asks for is registered and available. */
   readonly capability_available: boolean;
+  /** MAIN's digest of the actual four registered implementation/configuration descriptors. */
+  readonly capability_fingerprint: string;
   readonly capability_reason: string;
 }
 
@@ -84,6 +86,9 @@ export function assertProjectFacts(facts: ProductProjectFacts, projectId: string
     throw new ProductError("IMPACT_STALE", "The local material strategy is not authorized", {
       details: { reason: facts.rights_reason },
     });
+  }
+  if (typeof facts.capability_fingerprint !== "string" || !/^[a-f0-9]{64}$/.test(facts.capability_fingerprint)) {
+    throw new ProductError("CAPABILITY_UNAVAILABLE", "The registered capability fingerprint is missing or invalid");
   }
   if (!facts.capability_available) {
     throw new ProductError("CAPABILITY_UNAVAILABLE", "The registered capability is not available", {

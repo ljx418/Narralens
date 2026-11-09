@@ -28,6 +28,7 @@ import type {
   RunGate,
   RunScope,
 } from "../../contracts/agent-driven-types.js";
+import { validateAgentDefinition } from "../../contracts/agent-driven-validator.js";
 import { canonicalDigest } from "./digest.js";
 import type {
   ProductRepository,
@@ -71,10 +72,10 @@ export type FixedStageId =
 /** The actions each fixed stage may perform. */
 export const A_STAGE_ACTIONS: Readonly<Record<string, ReadonlyArray<GuardedAction>>> = {
   definition: ["clip.prepare"],
-  sample: ["clip.prepare"],
-  first_chapter: ["clip.prepare"],
-  chapters: ["snapshot.render"],
-  cover: ["snapshot.render"],
+  sample: ["clip.prepare", "change.prepare", "change.apply"],
+  first_chapter: ["clip.prepare", "change.prepare", "change.apply"],
+  chapters: ["snapshot.render", "change.prepare", "change.apply"],
+  cover: ["snapshot.render", "change.prepare", "change.apply"],
   delivery: ["qc.inspect", "delivery.package"],
 };
 
@@ -91,7 +92,7 @@ export const A_STAGE_GATE_REQUIREMENTS: Readonly<Record<string, ReadonlyArray<Ru
   sample: ["definition"],
   first_chapter: ["sample"],
   chapters: ["first_chapter"],
-  cover: ["chapters"],
+  cover: ["chapter_pack"],
   delivery: ["cover"],
 };
 
@@ -184,6 +185,7 @@ export function guardExecution(
   }
 
   assertBinding(binding);
+  validateAgentDefinition("ExecutionBinding", binding);
   assertRunIdentity(binding, facts);
 
   if (effect.kind === "safe_control") {
@@ -264,6 +266,7 @@ function assertRunDispatchable(facts: ExecutionGuardFacts): void {
  */
 function assertScope(facts: ExecutionGuardFacts, binding: ExecutionBinding): void {
   const scope = facts.run.scope;
+  validateAgentDefinition("RunScope", scope);
   assertAbleScope(scope);
   const recomputed = canonicalDigest(scope);
   if (recomputed !== facts.run.run_scope_digest) {
@@ -360,6 +363,9 @@ function assertStageAndGates(effect: Extract<GuardedEffect, { kind: "action" }>,
     throw new ProductError("CAPABILITY_UNAVAILABLE", "Unknown step for this workflow", {
       details: { stage_id: stage },
     });
+  }
+  if (facts.attempt?.step_id !== stage) {
+    throw new ProductError("RUN_PLAN_STALE", "The effect stage does not match the durable step");
   }
   if (!allowed.includes(effect.action)) {
     throw new ProductError("CAPABILITY_UNAVAILABLE", "This action does not belong to this step", {
@@ -473,8 +479,8 @@ export function readGuardFacts(
     step_id: binding.step_id,
   });
   const current = attempts
-    .filter((candidate) => candidate.attempt === binding.attempt)
-    .at(0) ?? null;
+    .filter((candidate) => candidate.plan_version === run.current_plan_version)
+    .sort((left, right) => right.attempt - left.attempt)[0] ?? null;
   return {
     project_id: run.project_id,
     run: {

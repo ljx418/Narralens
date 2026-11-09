@@ -165,7 +165,7 @@ describe("the execution guard", () => {
       guardExecution(
         { ...BINDING, step_id: "cover" },
         { kind: "action", action: "clip.prepare", stage_id: "cover" },
-        facts(),
+        facts({ attempt: { ...facts().attempt!, step_id: "cover" } }),
       ),
     ).toThrowError(expect.objectContaining({ code: "CAPABILITY_UNAVAILABLE" }));
   });
@@ -180,8 +180,21 @@ describe("the execution guard", () => {
     ).toThrowError(expect.objectContaining({ code: "CAPABILITY_UNAVAILABLE" }));
   });
 
+  it("refuses a caller-selected stage that differs from the durable step", () => {
+    expect(() => guardExecution(BINDING, { ...EFFECT, stage_id: "sample" }, facts())).toThrowError(expect.objectContaining({ code: "RUN_PLAN_STALE" }));
+  });
+
+  it("permits scoped prepare/apply while leaving finite approval consumption to MAIN", () => {
+    const scope: RunScope = { ...SCOPE, allowed_actions: [...SCOPE.allowed_actions, "change.prepare", "change.apply"] };
+    const digest = canonicalDigest(scope);
+    const context = facts({ run: { ...facts().run, scope, run_scope_digest: digest }, grant: { ...facts().grant!, run_scope_digest: digest } });
+    for (const action of ["change.prepare", "change.apply"] as const) {
+      expect(() => guardExecution({ ...BINDING, run_scope_digest: digest }, { kind: "action", action, stage_id: "first_chapter" }, context)).not.toThrow();
+    }
+  });
+
   it("refuses a scope that asks for a paid, external or runtime action", () => {
-    const paid: RunScope = { ...SCOPE, allow_paid: true };
+    const paid = { ...SCOPE, allow_paid: true } as unknown as RunScope;
     expect(() =>
       guardExecution(
         BINDING,
@@ -190,7 +203,7 @@ describe("the execution guard", () => {
           run: { ...facts().run, scope: paid, run_scope_digest: canonicalDigest(paid) },
         }),
       ),
-    ).toThrowError(expect.objectContaining({ code: "CAPABILITY_UNAVAILABLE" }));
+    ).toThrowError(expect.objectContaining({ code: "INVALID_REQUEST" }));
   });
 
   it("refuses a revoked or expired authorization", () => {

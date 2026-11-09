@@ -5,6 +5,7 @@ import {
   canonicalDigest,
   canonicalJson,
   contentDigest,
+  styleDigest,
   FIXED_PLAN,
   FIXED_PLAN_EXECUTION_DIGEST,
 } from "../../../src/host/creative/digest.js";
@@ -24,6 +25,13 @@ const golden = JSON.parse(
 };
 
 describe("the PRODUCT canonicalization", () => {
+  it("matches the approved style preimage golden without normalization", () => {
+    const value = { style_id: "style-1", version: 1, visual_direction: "自然光，暖色调。", voice_direction: "平稳解说。", subtitle_direction: "底部单行。" };
+    expect(canonicalJson(value)).toBe('{"style_id":"style-1","subtitle_direction":"底部单行。","version":1,"visual_direction":"自然光，暖色调。","voice_direction":"平稳解说。"}');
+    expect(styleDigest(value)).toBe("a5ba48ece6ba64b110a6b755ae36449c0a96b5effb2f7dc7bbc90efc7f20f8d3");
+    expect(styleDigest({ ...value, visual_direction: value.visual_direction + " " })).not.toBe("a5ba48ece6ba64b110a6b755ae36449c0a96b5effb2f7dc7bbc90efc7f20f8d3");
+  });
+
   it("reproduces the frozen brief, closure and scope vectors byte for byte", () => {
     const vectors = golden.referenceVectors;
     const cases = [
