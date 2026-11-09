@@ -4,7 +4,7 @@
   "contract_sha": "ca5b67a8285b130c79055317c6202f73cfbb99c8",
   "upstream_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
   "session_uuid": "25d0705c-223a-4408-a5c6-2222e7c59c1e",
-  "writer": "Codex preparing; Claude after launch",
+  "writer": "Codex; no active Claude/test child",
   "input_sha256": {
     "docs/agent-driven-v1/cp-a0/01_PROTOCOL_AND_AUTH.md": "8b3a4c2793928727541082d7e0242116ce2049d31b8acdb2c76fc2a382e58573",
     "docs/agent-driven-v1/cp-a0/02_DATA_AND_RECOVERY.md": "8d2e8086d61fc73c2c577dffbe30876aea3c88d1b6231373050428b8929c93e0",
@@ -20,6 +20,54 @@
     "tools/agent-driven/media",
     "docs/parallel/lane-media"
   ],
-  "resource": "MAIN baseline RUNNING: no install/tsc/tests/ffmpeg/browser until released",
-  "review": "REVIEW_PENDING; module checks do not certify A"
+  "resource": "MEDIA-light checks completed and released; heavy reservation remains MAIN; no ffmpeg/Chrome/Host/full suite run",
+  "review": "REVIEW_PENDING from uninvolved context; Codex verification internal only",
+  "ticket": "IT-A06",
+  "phase": "A",
+  "status": "RELEASED_MODULE_INTERNAL_VERIFIED",
+  "directory": "/mnt/c/workspace/videoworkline/Narralens-agents/media-delivery",
+  "branch": "agent-driven/lane-media",
+  "owner": "MEDIA lane Codex",
+  "implementation_sha": "7439c0a9f3541c2d7345c2105dea3249e4cd725e",
+  "contract_manifest_sha256": "08f3f2ec7b42fec8a92276977a8cb9625fbe450318afa5f29ec575327453f420",
+  "contract_manifest_files": {
+    "contracts/agent-driven-a.schema.json": "088a451e9646199618261a6cc95a84e3767dbf4cc87004f3e5995dda86b60964",
+    "contracts/agent-driven-a.registry.json": "05f29d947ec65398fee37851a583afc781adc87d6b7d382b1da45eb46f80dc4f",
+    "src/contracts/agent-driven-types.ts": "54356697802c0bf048e5cbcde1f54eb33713d4fe58943b346406804011cb3644",
+    "src/contracts/agent-driven-validator.ts": "f11a68bad982b7914e73f396ce48e99195ffc8fa88e842f137ffabf31900ea73"
+  },
+  "session_history": [
+    {
+      "session_uuid": "25d0705c-223a-4408-a5c6-2222e7c59c1e",
+      "phase": "initial exploration",
+      "pid": 3509997,
+      "exec": 41695,
+      "exit": 0,
+      "stop_reason": "Codex interrupted to provide exact upstream path"
+    },
+    {
+      "session_uuid": "25d0705c-223a-4408-a5c6-2222e7c59c1e",
+      "phase": "initial implementation",
+      "pid": 3518322,
+      "exec": 44824,
+      "exit": 0
+    },
+    {
+      "session_uuid": "25d0705c-223a-4408-a5c6-2222e7c59c1e",
+      "phase": "R1",
+      "pid": 3593893,
+      "exec": 31438,
+      "exit": 0
+    },
+    {
+      "session_uuid": "25d0705c-223a-4408-a5c6-2222e7c59c1e",
+      "phase": "R2",
+      "pid": 3628459,
+      "exec": 20750,
+      "exit": 0
+    }
+  ],
+  "takeover": "MAIN relayed latest user rule: after two reworks Codex fixes common root cause; old Claude fully stopped; no429 observed",
+  "network": "no model download, paid call, external transfer or provider change",
+  "rollback": "revert explicit lane commits before integration; preserve published package receipts/objects, reconcile durable MAIN records; never delete another staging/object"
 }

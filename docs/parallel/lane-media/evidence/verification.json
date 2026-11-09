@@ -1,0 +1,125 @@
+{
+  "implementation_sha": "7439c0a9f3541c2d7345c2105dea3249e4cd725e",
+  "classification": "INTERNAL_MODULE_VERIFIED_REVIEW_PENDING",
+  "writer": "Codex (implementation contributor)",
+  "commands": [
+    {
+      "command": "pnpm install --offline --frozen-lockfile --ignore-scripts",
+      "exec": 83438,
+      "exit": 0
+    },
+    {
+      "command": "pnpm exec tsc --noEmit",
+      "exec": 83042,
+      "exit": 0
+    },
+    {
+      "command": "pnpm exec vitest run --config vitest.config.ts tests/agent-driven/media --maxWorkers=1 --no-file-parallelism",
+      "exec": 51309,
+      "exit": 0,
+      "files": 13,
+      "passed": 134,
+      "failed": 0,
+      "seconds": 38.71
+    }
+  ],
+  "previous_results": [
+    {
+      "sha": "4a369d601793cd39dfb81117594c20f3c943aca5",
+      "tsc_exec": 27561,
+      "tsc_exit": 2,
+      "vitest_exec": 25520,
+      "vitest_exit": 1,
+      "passed": 116,
+      "failed": 9
+    },
+    {
+      "sha": "fe4420693fbec7b20ccb696ec7b369ac3463fcc1",
+      "tsc_exec": 91920,
+      "tsc_exit": 0,
+      "vitest_exec": 91092,
+      "vitest_exit": 1,
+      "passed": 133,
+      "failed": 1
+    }
+  ],
+  "logs": {
+    "docs/parallel/lane-media/evidence/claude-r1.stderr.log": {
+      "sha256": "bdd8a0f14d5b8181982a3d64069e696c5853b942bbb7511bcfe428b41939f4a8",
+      "bytes": 97
+    },
+    "docs/parallel/lane-media/evidence/claude-r1.stdout.log": {
+      "sha256": "01328256223b36fe537e4a94a212538b2cf3cd05a696c4ba400c7fbfde0b5454",
+      "bytes": 3864709
+    },
+    "docs/parallel/lane-media/evidence/claude-r2.stderr.log": {
+      "sha256": "bdd8a0f14d5b8181982a3d64069e696c5853b942bbb7511bcfe428b41939f4a8",
+      "bytes": 97
+    },
+    "docs/parallel/lane-media/evidence/claude-r2.stdout.log": {
+      "sha256": "0f85b7b1f9e7b898ac57ac33b03bf79c946c75c13cf4308b8f5dde329dd90b09",
+      "bytes": 1371593
+    },
+    "docs/parallel/lane-media/evidence/claude-resume.stderr.log": {
+      "sha256": "bdd8a0f14d5b8181982a3d64069e696c5853b942bbb7511bcfe428b41939f4a8",
+      "bytes": 97
+    },
+    "docs/parallel/lane-media/evidence/claude-resume.stdout.log": {
+      "sha256": "56f7430cbb37b5774c5a6f5cb8d1150ca1e859f3c000827557536f546f9a7dee",
+      "bytes": 5608672
+    },
+    "docs/parallel/lane-media/evidence/claude.stderr.log": {
+      "sha256": "bdd8a0f14d5b8181982a3d64069e696c5853b942bbb7511bcfe428b41939f4a8",
+      "bytes": 97
+    },
+    "docs/parallel/lane-media/evidence/claude.stdout.log": {
+      "sha256": "2a3afc2f1a01b890eadc609ca30dd511ee683bd9c38807a767e6a9ceae39d37b",
+      "bytes": 769581
+    },
+    "docs/parallel/lane-media/evidence/install-first.log": {
+      "sha256": "2068060ee2dd35496ffefcbd350da0fafcaf1c5839ce83ac70dba2e799fba90f",
+      "bytes": 1457
+    },
+    "docs/parallel/lane-media/evidence/tsc-codex-1.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "docs/parallel/lane-media/evidence/tsc-codex-final.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "docs/parallel/lane-media/evidence/tsc-first.log": {
+      "sha256": "5890598d00069319a4528f92503ab55938e8c1092e5dea93b5e96639c23d91ea",
+      "bytes": 2508
+    },
+    "docs/parallel/lane-media/evidence/vitest-codex-1.log": {
+      "sha256": "e943e8ca52cbdfa56afd7bd5c43e35f2e96ac1daa32be8f7ec0a0a27cef50e91",
+      "bytes": 4150
+    },
+    "docs/parallel/lane-media/evidence/vitest-codex-final.log": {
+      "sha256": "967d294adc00815c0b877466f0d4502458ef9c9260a2c186ff221ad05b806be9",
+      "bytes": 1319
+    },
+    "docs/parallel/lane-media/evidence/vitest-first.log": {
+      "sha256": "5873b5db7e67c70abd4c1611e007c90d696795d836779339a3da561bf824fefc",
+      "bytes": 12520
+    }
+  },
+  "real_media": "NOT_RUN",
+  "T20_real": {
+    "T20-A": "NOT_RUN",
+    "T20-B": "NOT_RUN",
+    "T20-C": "NOT_RUN",
+    "T20-D": "NOT_RUN",
+    "T20-E_encode_QC": "NOT_RUN",
+    "T20-E_pre_publish": "NOT_RUN",
+    "T20-E_post_publish_pre_DB": "NOT_RUN",
+    "T20-E_post_DB_pre_event": "NOT_RUN",
+    "T20-F": "NOT_RUN",
+    "T20-G": "NOT_RUN",
+    "T20-H": "NOT_RUN"
+  },
+  "independent_review": "REVIEW_PENDING",
+  "human_acceptance": "NOT_RUN",
+  "light_slot": "RELEASED to MAIN after exec51309 exit0; no residual owned test/worker process"
+}
