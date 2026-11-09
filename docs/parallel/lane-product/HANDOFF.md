@@ -8,6 +8,11 @@ Session `4548ddcb-e870-405b-863f-a17a4a7ed683`. Branch `agent-driven/lane-produc
 The earlier CLI invocations ended by controlled TERM (exit 143), **not** by a 429: no
 source edits were lost and no child process was left running.
 
+**Repair commit: `5ae49ea321ed70cba177ff43b5f381f15d0aba8d`** on `agent-driven/lane-product`.
+It contains only the lane's own source, test and document paths; MAIN's release
+assignment, the Codex scratch notes and the raw CLI transcripts were left untracked. The
+commit that carries this handoff follows it.
+
 **State at the end of this session: SOURCE REPAIR batch 1 complete, source only, nothing
 executed.** The PRODUCT light slot is released to MAIN, so there was no install, no `tsc`,
 no test run, no browser, no Host and no ffmpeg. Every test in this lane is `NOT_RUN`.
