@@ -80,3 +80,5 @@ frozen foreign keys, triggers and binding rules) and `support/fixtures.ts`.
 MAIN explicitly directed takeover after repeated roots across two actual checks. Claude repair2 PID3658688/exec77491 stopped exit143 before any source edits. Codex became unique implementation writer and corrected domain mapping/import/readonly/iterator errors, actual trigger focus, authenticated user fixtures and real review predecessor sequence; added style Brief carrier role+payload/hash binding, latest attempt/stage guards, exact frozen runtime validation, native project checks, style golden+single-field mutation and owner/closure checks.
 
 Internal tsc exit0 and five files/98 tests PASS (26.10s); verification-codex.json records raw logs/handles/hashes and earlier failures. Codex implemented fixes, so independent review stays REVIEW_PENDING; no A/Host/browser/media/human PASS. MAIN has the next integration and final effect boundary.
+
+Final fingerprint increment retested at frozen source9eb701d901cf39aa03a7ea3d04cc5a938fa3386f: tsc0 and100/100 internal tests. No source edits afterwards. Independent review and MAIN composition remain pending.
