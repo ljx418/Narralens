@@ -145,6 +145,14 @@ function childEnvironment(hostUrl: string): Record<string, string> {
   return env;
 }
 
+/**
+ * The wrapper starts the server as a child process and loads it through the
+ * repository's own `tsx`, which takes a few seconds on this filesystem. The
+ * default five second timeout is therefore too tight for these cases; they are
+ * given a bound that fits the slowest thing they do, not the whole suite.
+ */
+const STDIO_TIMEOUT_MS = 60_000;
+
 describe("A-MCP skill bin wrapper", () => {
   it("serves the real client through the real wrapper and leaves nothing behind", async () => {
     // The wrapper loads the TypeScript server through the repository's own `tsx`,
@@ -192,7 +200,7 @@ describe("A-MCP skill bin wrapper", () => {
       await client.close().catch(() => undefined);
       await host.stop();
     }
-  });
+  }, STDIO_TIMEOUT_MS);
 
   it("does not stop anything but its own child", async () => {
     // A local service that is not the wrapper's child: the Host, in this shape.
@@ -220,5 +228,5 @@ describe("A-MCP skill bin wrapper", () => {
       await client.close().catch(() => undefined);
       await host.stop();
     }
-  });
+  }, STDIO_TIMEOUT_MS);
 });

@@ -1,0 +1,19 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/bridge-observability
+
+ ✓ tests/agent-driven/bridge/mcp-stdio-client.test.ts (8 tests) 45826ms
+   ✓ A-MCP stdio façade > advertises exactly the registry's tool allowlist over a real stdio transport  8430ms
+   ✓ A-MCP stdio façade > reads the concrete health resource over the real transport  4312ms
+   ✓ A-MCP stdio façade > reaches the host over http and returns the contract output  5223ms
+   ✓ A-MCP stdio façade > verifies the host's contract version before the first dispatch  4287ms
+   ✓ A-MCP stdio façade > reads a project resource through the host  5264ms
+   ✓ A-MCP stdio façade > rejects an invalid field without reaching the host  3999ms
+   ✓ A-MCP stdio façade > reports an unreachable host and recovers when the host returns  8491ms
+   ✓ A-MCP stdio façade > refuses an unknown tool name  5782ms
+ ✓ tests/agent-driven/bridge/mcp-registry.test.ts (38 tests) 102ms
+
+ Test Files  2 passed (2)
+      Tests  46 passed (46)
+   Start at  21:48:40
+   Duration  60.27s (transform 532ms, setup 0ms, collect 9.56s, tests 45.93s, environment 0ms, prepare 3.42s)
+

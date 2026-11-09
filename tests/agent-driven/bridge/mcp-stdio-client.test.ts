@@ -24,7 +24,17 @@ import { fileURLToPath } from "node:url";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 import type { Context, HealthRead, Instance } from "../../../src/contracts/agent-driven-types.js";
+
 import { exposedToolNames } from "../../../src/mcp/index.js";
+
+/**
+ * The stdio server is started as a child process and loaded through the repository's own
+ * `tsx`, which takes a few seconds on this filesystem. The default five second
+ * timeout is therefore too tight for these cases; they are given a bound that fits
+ * the slowest thing they do with room to spare for a loaded machine, not the whole
+ * suite.
+ */
+const STDIO_TIMEOUT_MS = 60_000;
 
 const require = createRequire(import.meta.url);
 const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
@@ -208,7 +218,7 @@ describe("A-MCP stdio façade", () => {
     } finally {
       await client.close();
     }
-  });
+  }, STDIO_TIMEOUT_MS);
 
   it("reads the concrete health resource over the real transport", async () => {
     const client = await spawnClient(host.baseUrl);
@@ -222,7 +232,7 @@ describe("A-MCP stdio façade", () => {
     } finally {
       await client.close();
     }
-  });
+  }, STDIO_TIMEOUT_MS);
 
   it("reaches the host over http and returns the contract output", async () => {
     const before = host.requests.length;
@@ -239,7 +249,7 @@ describe("A-MCP stdio façade", () => {
     } finally {
       await client.close();
     }
-  });
+  }, STDIO_TIMEOUT_MS);
 
   it("verifies the host's contract version before the first dispatch", async () => {
     const before = host.requests.length;
@@ -257,7 +267,7 @@ describe("A-MCP stdio façade", () => {
     } finally {
       await client.close();
     }
-  });
+  }, STDIO_TIMEOUT_MS);
 
   it("reads a project resource through the host", async () => {
     const client = await spawnClient(host.baseUrl);
@@ -270,7 +280,7 @@ describe("A-MCP stdio façade", () => {
     } finally {
       await client.close();
     }
-  });
+  }, STDIO_TIMEOUT_MS);
 
   it("rejects an invalid field without reaching the host", async () => {
     const before = host.requests.length;
@@ -286,7 +296,7 @@ describe("A-MCP stdio façade", () => {
     } finally {
       await client.close();
     }
-  });
+  }, STDIO_TIMEOUT_MS);
 
   it("reports an unreachable host and recovers when the host returns", async () => {
     const port = host.port;
@@ -312,7 +322,7 @@ describe("A-MCP stdio façade", () => {
     } finally {
       await reconnected.close();
     }
-  });
+  }, STDIO_TIMEOUT_MS);
 
   it("refuses an unknown tool name", async () => {
     const client = await spawnClient(host.baseUrl);
@@ -323,5 +333,5 @@ describe("A-MCP stdio façade", () => {
     } finally {
       await client.close();
     }
-  });
+  }, STDIO_TIMEOUT_MS);
 });

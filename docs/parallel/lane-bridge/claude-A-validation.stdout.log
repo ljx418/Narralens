@@ -1,0 +1,37 @@
+BRIDGE-light validation is complete and green. The writer is stopped.
+
+## What ran (lane only, sequential, one worker)
+
+| # | command | exit | result |
+|---|---|---|---|
+| 01 | `pnpm install --offline --frozen-lockfile --ignore-scripts` | **0** | 31.3 s from the local store; node v22.22.1, pnpm 10.33.0, SDK 1.26.0, typescript 5.9.2, vitest 3.2.4, tsx 4.20.5. No network, no scripts, no lockfile change |
+| 02 | `pnpm exec tsc --noEmit` | **0** | no diagnostics |
+| 03 | `pnpm exec vitest run tests/agent-driven/bridge --maxWorkers=1 --minWorkers=1` | **1** | **first failure, preserved** — 104/108 |
+| 04 | vitest on the two failing files | 0 | 46 passed |
+| 05 | `pnpm exec tsc --noEmit` | 0 | clean after the fixes |
+| 06 | full bridge suite | 0 | 7 files / 108 tests green |
+| 07 | `pnpm exec tsc --noEmit` | 0 | after widening the timeout bound |
+| 08 | full bridge suite (**final**) | **0** | **7 files / 108 tests, all passing**, worst case 8.3 s against a 60 s bound |
+
+Every run wrote `NN-<name>.{stdout,stderr}.log` + `.exit` into `docs/parallel/lane-bridge/evidence/`; **no first-failure log was overwritten** (evidence 03 still carries the failing output, exit 1, with its hashes listed in the HANDOFF).
+
+## The four first-run failures — all mine, all in my own test code
+
+No production source change was needed for any of them:
+
+1. **`narralens_artifact_put` fixture invalid** — `paragraphs: []` violates the contract's `Script` `minItems: 1`, so the façade correctly answered `INVALID_REQUEST` *before* the handshake. Fixture fixed to one paragraph; the case now exercises the handshake refusal it was written for.
+2. **Percent-decode case asserted the wrong thing** — it read `project_id` from the *context payload* instead of the input the façade passed to the port. The fake now records per-route inputs; the case asserts `{ project_id: "p-1" }`.
+3. + 4. **Two stdio cases hit the 5 s default timeout** — the server is a child process loaded through the repo's own `tsx` (~4 s on this filesystem), and two cases spawn a client *and* restart the Host. Those cases now carry an explicit 60 s bound; the final run's worst case was 8.3 s.
+
+I also widened the bound from 30 s → 60 s after the first green run showed a 20.9 s case (run-to-run variance on a loaded machine), then re-ran tsc and the whole suite once more — that is evidence 07/08.
+
+## State
+
+- Working tree: `docs/parallel/lane-bridge/HANDOFF.md` + the three lane test files modified; `docs/parallel/lane-bridge/evidence/` added; `node_modules/` gitignored and not committed. **No commit made**, nothing outside the allowed prefixes written, no protected file touched, no subagents, no provider/credential change, no online install, no orphan test processes.
+- HANDOFF updated: round-4 section with authority, environment versions, per-command exits, the four failures and their fixes, evidence hashes, the 33-file source hash table (re-verified), and the refreshed declaration ceiling.
+
+## Ceiling (explicit)
+
+Module-level, with the lane's own validation green. **NOT_RUN:** the real Narralens Host, its registration and authentication, production cursor keys/rotation and the durable cursor store, ffmpeg/media/render/delivery, Chrome and the production build, the full repository suite and other lanes, any online fetch, an external MCP client, and the human gate. REVIEW-1/REVIEW-2 were lane-owner code reads, not independent review — independent review remains REVIEW_PENDING.
+
+Codex's independent recheck of the frozen source and the round-4 evidence is next; this writer does not write again unless it is handed back.

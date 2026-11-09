@@ -1,0 +1,70 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/bridge-observability
+
+ ❯ tests/agent-driven/bridge/mcp-registry.test.ts (38 tests | 2 failed) 106ms
+   ✓ A-MCP tool allowlist > exposes exactly the registry's routes that carry a tool name 1ms
+   ✓ A-MCP tool allowlist > exposes no trusted-UI or native-bridge route 0ms
+   ✓ A-MCP tool allowlist > covers all 31 routes and keeps every path placeholder bound 0ms
+   ✓ A-MCP tool allowlist > gives every tool the contract's own input schema 2ms
+   ✓ A-MCP tool allowlist > inlines the contract's local references into a self-contained schema 1ms
+   ✓ A-MCP request building > fills path placeholders from the audited bindings 0ms
+   ✓ A-MCP request building > sends the fields the path did not consume as query parameters 0ms
+   ✓ A-MCP request building > sends the whole input as the body of a write route 0ms
+   ✓ A-MCP request building > refuses to address a route whose identifier is missing 0ms
+   ✓ A-MCP error mapping > keeps the host's code and status when they match the contract 11ms
+   ✓ A-MCP error mapping > keeps the host's own retryability and next actions 0ms
+   ✓ A-MCP error mapping > falls back to the status when the body carries no contract code 0ms
+   ✓ A-MCP error mapping > refuses a code and status the contract does not pair 0ms
+   ✓ A-MCP error mapping > reports an unreachable host as a retryable capability failure 0ms
+   ✓ A-MCP error mapping > reports an unknown write outcome as non-retryable and asks for reconciliation 0ms
+   ✓ A-MCP error mapping > never echoes a local path 0ms
+   ✓ A-MCP contract handshake > verifies the host's contract version before the first dispatch 37ms
+   ✓ A-MCP contract handshake > refuses a host that speaks another contract, before any write is sent 2ms
+   ✓ A-MCP contract handshake > accepts an explicitly injected, verified handshake 1ms
+   × A-MCP contract handshake > rechecks the handshake before every dispatch and fails closed when the host is replaced 18ms
+     → expected 'INVALID_REQUEST' to be 'CAPABILITY_UNAVAILABLE' // Object.is equality
+   ✓ A-MCP façade behaviour > advertises exactly the allowlist and the registered resource templates 6ms
+   ✓ A-MCP façade behaviour > returns the contract output for a valid call 1ms
+   ✓ A-MCP façade behaviour > rejects an unknown tool without reaching the host 1ms
+   ✓ A-MCP façade behaviour > rejects an unknown field before reaching the host 1ms
+   ✓ A-MCP façade behaviour > refuses an injected output that is not the route's contract 1ms
+   ✓ A-MCP façade behaviour > reports the host's error envelope unchanged 1ms
+   ✓ A-MCP resource reads > reads a project resource as the projection the registry describes 2ms
+   ✓ A-MCP resource reads > projects the jobs resource as an object, not a bare array 1ms
+   ✓ A-MCP resource reads > refuses a malformed project id without calling the port 1ms
+   ✓ A-MCP resource reads > refuses a query parameter the resource does not accept 1ms
+   ✓ A-MCP resource reads > answers the snapshot resource with a configuration failure when no digest is configured 1ms
+   ✓ A-MCP resource reads > uses the configured digest for the snapshot resource 10ms
+   ✓ A-MCP resource reads > refuses a URI that cannot be percent-decoded 1ms
+   × A-MCP resource reads > decodes a percent-encoded project exactly once 1ms
+     → expected 'p1' to be 'p-1' // Object.is equality
+   ✓ A-MCP resource reads > refuses a URI that carries a fragment 1ms
+   ✓ A-MCP resource reads > refuses a query parameter that is given more than once 1ms
+   ✓ A-MCP resource reads > does not silently drop the tail of a URI that carries two question marks 0ms
+   ✓ A-MCP resource reads > matches the registered resource URIs 0ms
+ ✓ tests/agent-driven/bridge/cursor-events.test.ts (26 tests) 38ms
+ ✓ tests/agent-driven/bridge/launcher-cold.test.ts (16 tests) 21ms
+ ✓ tests/agent-driven/bridge/mcp-host-client.test.ts (15 tests) 62ms
+ ❯ tests/agent-driven/bridge/mcp-stdio-client.test.ts (8 tests | 2 failed) 35153ms
+   ✓ A-MCP stdio façade > advertises exactly the registry's tool allowlist over a real stdio transport  4373ms
+   ✓ A-MCP stdio façade > reads the concrete health resource over the real transport  4119ms
+   ✓ A-MCP stdio façade > reaches the host over http and returns the contract output  4920ms
+   ✓ A-MCP stdio façade > verifies the host's contract version before the first dispatch  4093ms
+   ✓ A-MCP stdio façade > reads a project resource through the host  4115ms
+   × A-MCP stdio façade > rejects an invalid field without reaching the host 4243ms
+     → Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+   × A-MCP stdio façade > reports an unreachable host and recovers when the host returns 5001ms
+     → Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+   ✓ A-MCP stdio façade > refuses an unknown tool name  4257ms
+ ✓ tests/agent-driven/bridge/mcp-wrapper-cleanup.test.ts (2 tests) 8411ms
+   ✓ A-MCP skill bin wrapper > serves the real client through the real wrapper and leaves nothing behind  4264ms
+   ✓ A-MCP skill bin wrapper > does not stop anything but its own child  4146ms
+ ✓ tests/agent-driven/bridge/skill-library.test.ts (3 tests) 3ms
+
+ Test Files  2 failed | 5 passed (7)
+      Tests  4 failed | 104 passed (108)
+   Start at  21:46:08
+   Duration  84.75s (transform 607ms, setup 0ms, collect 24.83s, tests 43.79s, environment 1ms, prepare 11.08s)
+

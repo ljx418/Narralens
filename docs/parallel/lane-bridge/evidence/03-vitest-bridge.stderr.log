@@ -1,0 +1,61 @@
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/bridge/mcp-registry.test.ts > A-MCP contract handshake > rechecks the handshake before every dispatch and fails closed when the host is replaced
+AssertionError: expected 'INVALID_REQUEST' to be 'CAPABILITY_UNAVAILABLE' // Object.is equality
+
+Expected: "CAPABILITY_UNAVAILABLE"
+Received: "INVALID_REQUEST"
+
+ ❯ tests/agent-driven/bridge/mcp-registry.test.ts:401:27
+    399|     expect(second.isError).toBe(true);
+    400|     const envelope = second.structuredContent as { code: string };
+    401|     expect(envelope.code).toBe("CAPABILITY_UNAVAILABLE");
+       |                           ^
+    402|     // The write was never dispatched.
+    403|     expect(calls).not.toContain("artifact.put");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  tests/agent-driven/bridge/mcp-registry.test.ts > A-MCP resource reads > decodes a percent-encoded project exactly once
+AssertionError: expected 'p1' to be 'p-1' // Object.is equality
+
+Expected: "p-1"
+Received: "p1"
+
+ ❯ tests/agent-driven/bridge/mcp-registry.test.ts:565:32
+    563|     const payload = JSON.parse(resourceText(result));
+    564|     expect(payload.code).toBeUndefined();
+    565|     expect(payload.project_id).toBe("p-1");
+       |                                ^
+    566|     await client.close();
+    567|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  tests/agent-driven/bridge/mcp-stdio-client.test.ts > A-MCP stdio façade > rejects an invalid field without reaching the host
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ tests/agent-driven/bridge/mcp-stdio-client.test.ts:275:3
+    273|   });
+    274| 
+    275|   it("rejects an invalid field without reaching the host", async () =>…
+       |   ^
+    276|     const before = host.requests.length;
+    277|     const client = await spawnClient(host.baseUrl);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  tests/agent-driven/bridge/mcp-stdio-client.test.ts > A-MCP stdio façade > reports an unreachable host and recovers when the host returns
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ tests/agent-driven/bridge/mcp-stdio-client.test.ts:291:3
+    289|   });
+    290| 
+    291|   it("reports an unreachable host and recovers when the host returns",…
+       |   ^
+    292|     const port = host.port;
+    293|     await host.stop();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
