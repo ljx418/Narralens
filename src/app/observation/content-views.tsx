@@ -129,6 +129,9 @@ export function nativeSyncState(context: Context | null): NativeSyncState {
   if (ack === null) {
     return { state: "unknown", reason: "编辑区没有返回确认记录。" };
   }
+  if (ack.project_id !== context.project_id) {
+    return { state: "unknown", reason: "编辑区确认属于另一工程。" };
+  }
   if (ack.loaded_project_revision !== context.project_revision) {
     return {
       state: "unknown",

@@ -1,7 +1,7 @@
 # A PRODUCT implementation
 
 Base and contract: `ca5b67a8285b130c79055317c6202f73cfbb99c8`. Manifest SHA256 `532cd43c963a1c94de5f8ce34f3c6eb7281fded80047f74dc5dbe1a70aa65170` (docs/execution/A/contract-freeze.json).
-Session allocated for Claude: `4548ddcb-e870-405b-863f-a17a4a7ed683`. Status: **SOURCE REPAIR batch 1 complete, source only, NOT_RUN**.
+Session allocated for Claude: `4548ddcb-e870-405b-863f-a17a4a7ed683`. Status: **Codex takeover source fixes internally validated; MAIN integration/independent review pending**.
 
 Implement only ReleaseAssignment allowed prefixes, excluding protected project-creation-service. Use production DTO/validator. Creative intake/questions/answer/content relay/artifacts: CAS, exact idempotency, digest closure, content-only authority, deterministic fixed A workflow, trusted review gates, input/attempt isolation. No second DB or production memory fallback. MAIN injects atomic repository and trusted authority/adoption ports. Existing BootstrapPort is MAIN-owned; product returns data only.
 
@@ -75,3 +75,8 @@ frozen foreign keys, triggers and binding rules) and `support/fixtures.ts`.
    of request 002 §4.
 4. The **resource release** for `tsc` and the test run. Everything here is `NOT_RUN`, and
    the lane does not claim the A round or the module is ready.
+
+## Codex takeover outcome
+MAIN explicitly directed takeover after repeated roots across two actual checks. Claude repair2 PID3658688/exec77491 stopped exit143 before any source edits. Codex became unique implementation writer and corrected domain mapping/import/readonly/iterator errors, actual trigger focus, authenticated user fixtures and real review predecessor sequence; added style Brief carrier role+payload/hash binding, latest attempt/stage guards, exact frozen runtime validation, native project checks, style golden+single-field mutation and owner/closure checks.
+
+Internal tsc exit0 and five files/98 tests PASS (26.10s); verification-codex.json records raw logs/handles/hashes and earlier failures. Codex implemented fixes, so independent review stays REVIEW_PENDING; no A/Host/browser/media/human PASS. MAIN has the next integration and final effect boundary.

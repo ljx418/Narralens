@@ -75,9 +75,8 @@ export function WorkflowTopBar(props: WorkflowTopBarProps) {
     [props],
   );
 
-  const openNode = useCallback((nodeId: string) => {
-    const active = document.activeElement;
-    triggerRef.current = active instanceof HTMLElement ? active : null;
+  const openNode = useCallback((nodeId: string, trigger: HTMLElement) => {
+    triggerRef.current = trigger;
     setOpenNodeId(nodeId);
   }, []);
 
@@ -131,7 +130,7 @@ export function WorkflowTopBar(props: WorkflowTopBarProps) {
                 type="button"
                 className={`nl-stage nl-stage-${node.state}`}
                 aria-current={node.state === "running" ? "step" : undefined}
-                onClick={() => openNode(node.node_id)}
+                onClick={(event) => openNode(node.node_id, event.currentTarget)}
               >
                 <span className="nl-stage-name">{STAGE_LABELS[node.node_id] ?? node.node_id}</span>
                 <span className="nl-stage-state">{STATE_LABEL[node.state] ?? node.state}</span>

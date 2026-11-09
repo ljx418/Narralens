@@ -4,6 +4,8 @@ Lane: PRODUCT. Session `4548ddcb-e870-405b-863f-a17a4a7ed683`.
 Base/contract `ca5b67a8285b130c79055317c6202f73cfbb99c8`, manifest
 `532cd43c963a1c94de5f8ce34f3c6eb7281fded80047f74dc5dbe1a70aa65170`.
 
+Current internal validation: tsc exit0 and 5 files/98 tests passed under MAIN PRODUCT-light admission. Codex implemented the final corrections; independent review REVIEW_PENDING. Original first failures retained; production Host/browser/media/human acceptance NOT_RUN. See verification-codex.json.
+
 This is the document MAIN needs to wire the lane in. It states what MAIN implements, what
 MAIN injects, which route maps to which service call, and the exact commands.
 
@@ -314,3 +316,12 @@ with the capabilities in the fixed order of the golden plan.
   project-creation service.
 - It did not consume an adoption approval: the Coordinator does that in the final commit.
 - It did not run anything.
+
+## Stable Codex integration clarifications
+`RunPrepare.style_ref` resolves only to the immutable project `kind=brief` carrier MAIN creates during bootstrap/confirmed new Brief. Ref SHA is the entire Brief document hash; the embedded style must match selected intake style fields/version/recomputed digest. Script/storyboard cannot substitute for style carrier. Script refs resolve script payloads; ordinary refs resolve validated Brief/Script/Storyboard immutable documents in the same project.
+
+Principal is the authenticated user across MCP and UI transports, not the CLI process identity. Draft intake reads and mutations require that principal's ownership. MAIN dispatcher remains the authority for session, Origin, project access and trusted operations.
+
+`guardExecution` requires durable facts and exact stage/step/latest plan attempt; action checks run/grant state/expiry/owner/full scope and predecessor gates. `change.prepare/apply` are scoped to sample/first_chapter/chapters/cover; MAIN still validates impact/finite approval/currentbase/source/rights/locks and Coordinator consumes approval atomically. Call `readGuardFacts` and `guardExecution` inside MAIN's actual serialized side-effect boundary; the standalone transaction-check wrapper must not be mistaken for atomic dispatch/apply. Committed snapshot render stays bound to its snapshot despite later project revisions.
+
+MAIN fingerprint seam resolved in request005: facts.capability_fingerprint is required lowercase64hex, supplied by MAIN actual registered catalog and stored directly in RunScope; missing/invalid values fail closed. PRODUCT never constructs production descriptor provenance. MAIN still verifies descriptor/config scope at authorization and actual serialized effect. No boolean/project-only fact pre-read substitutes for action/ref/rights/snapshot checks.

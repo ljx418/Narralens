@@ -35,7 +35,7 @@ import type {
   QuestionPut,
 } from "../../contracts/agent-driven-types.js";
 import { validateAgentRouteInput, validateAgentRouteOutput } from "../../contracts/agent-driven-validator.js";
-import { creativeInputClosure } from "./creative-closure.js";
+import { assertIntakeOwner, creativeInputClosure } from "./creative-closure.js";
 import {
   briefDigest,
   canonicalDigest,
@@ -210,6 +210,7 @@ export class CreativeService {
     const request = validateAgentRouteInput("intake.read", input);
     this.#requireAuthenticated(caller);
     return this.#repository.transaction((tx) => {
+      assertIntakeOwner(tx, request.intake_id, caller.principal_id);
       const head = tx.get("intake_head", { intake_id: request.intake_id });
       if (head === null) {
         throw new ProductError("NOT_FOUND", "No such intake", {
@@ -237,6 +238,7 @@ export class CreativeService {
     const digest = contentDigest(request);
 
     return this.#repository.transaction((tx) => {
+      assertIntakeOwner(tx, request.intake_id, caller.principal_id);
       const stored = tx.recallIdempotency(
         { kind: "principal", principal_id: caller.principal_id },
         CREATIVE_OPERATIONS.intakeConfirm,
@@ -319,6 +321,7 @@ export class CreativeService {
     const digest = contentDigest(request);
 
     return this.#repository.transaction((tx) => {
+      assertIntakeOwner(tx, request.intake_id, caller.principal_id);
       const stored = tx.recallIdempotency(
         { kind: "principal", principal_id: caller.principal_id },
         CREATIVE_OPERATIONS.questionPut,
@@ -497,6 +500,7 @@ export class CreativeService {
     const digest = contentDigest(request);
 
     return this.#repository.transaction((tx) => {
+      assertIntakeOwner(tx, request.intake_id, caller.principal_id);
       const stored = tx.recallIdempotency(
         { kind: "principal", principal_id: caller.principal_id },
         CREATIVE_OPERATIONS.questionAnswer,
@@ -733,6 +737,7 @@ export class CreativeService {
     const digest = contentDigest(request);
 
     return this.#repository.transaction((tx) => {
+      assertIntakeOwner(tx, request.intake_id, caller.principal_id);
       const stored = tx.recallIdempotency(
         { kind: "principal", principal_id: caller.principal_id },
         CREATIVE_OPERATIONS.contentRelay,

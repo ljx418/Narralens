@@ -13,7 +13,8 @@
  * change the closure without changing the digest.
  */
 
-import type { CreativeInputClosure } from "../../contracts/agent-driven-types.js";
+import type { CreativeInputClosure, Brief, Question, QuestionAnswer } from "../../contracts/agent-driven-types.js";
+import { validateAgentDefinition } from "../../contracts/agent-driven-validator.js";
 import { canonicalDigest } from "./digest.js";
 import type { ProductTransaction } from "./product-repository.js";
 import { ProductError } from "./trusted-context.js";
@@ -30,12 +31,25 @@ export function creativeInputClosure(
       details: { intake_id: intakeId, intake_version: intakeVersion },
     });
   }
+  const brief = validateAgentDefinition<Brief>("Brief", version.content_json);
+  if (canonicalDigest(brief) !== version.input_digest) throw new ProductError("REVIEW_STALE", "The stored brief digest is inconsistent");
   const heads = tx.list("question_head", { intake_id: intakeId, intake_version: intakeVersion });
   const questions = [...heads]
     .sort((left, right) =>
       left.question_id < right.question_id ? -1 : left.question_id > right.question_id ? 1 : 0,
     )
     .map((head) => {
+      const questionRow = tx.get("question_version", {
+        intake_id: intakeId, intake_version: intakeVersion,
+        question_id: head.question_id, question_version: head.current_question_version,
+      });
+      if (questionRow === null) throw new ProductError("REVIEW_STALE", "The question head has no immutable question");
+      const question = validateAgentDefinition<Question>("Question", questionRow.question_json);
+      if (question.intake_id !== intakeId || question.intake_version !== intakeVersion ||
+          question.question_id !== head.question_id || question.version !== head.current_question_version ||
+          question.input_digest !== version.input_digest || questionRow.input_digest !== version.input_digest) {
+        throw new ProductError("REVIEW_STALE", "The question is bound to different creative input");
+      }
       const answerHead = tx.get("answer_head", {
         intake_id: intakeId,
         intake_version: intakeVersion,
@@ -59,6 +73,13 @@ export function creativeInputClosure(
       if (answer === null) {
         throw new ProductError("NOT_FOUND", "The answer head points at a missing answer version");
       }
+      const payload = validateAgentDefinition<QuestionAnswer>("QuestionAnswer", answer.answer_json);
+      if (payload.intake_id !== intakeId || payload.intake_version !== intakeVersion ||
+          payload.question_id !== head.question_id || payload.question_version !== question.version ||
+          payload.answer_id !== answer.answer_id || payload.version !== answer.answer_version ||
+          payload.input_digest !== version.input_digest || answer.input_digest !== version.input_digest) {
+        throw new ProductError("REVIEW_STALE", "The answer is bound to different creative input");
+      }
       return {
         question_id: head.question_id,
         question_version: head.current_question_version,
@@ -80,4 +101,13 @@ export function creativeInputClosureDigest(
   intakeVersion: number,
 ): string {
   return canonicalDigest(creativeInputClosure(tx, intakeId, intakeVersion));
+}
+
+/** Pre-project drafts belong to the authenticated user, regardless of transport. */
+export function assertIntakeOwner(tx: ProductTransaction, intakeId: string, principalId: string): void {
+  const head = tx.get("intake_head", { intake_id: intakeId });
+  const record = head === null ? null : tx.get("intake_version", { intake_id: intakeId, version: head.current_version });
+  if (record === null || record.principal_id !== principalId) {
+    throw new ProductError("NOT_FOUND", "No accessible intake");
+  }
 }

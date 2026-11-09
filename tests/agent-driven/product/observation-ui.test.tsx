@@ -351,6 +351,10 @@ describe("the native sync indicator", () => {
     expect(state.state).toBe("unknown");
   });
 
+  it("rejects another project's acknowledgement with otherwise matching values", () => {
+    expect(nativeSyncState({ ...base, native_sync: "loaded", native_ack: { ...ack, project_id: "other-project" } }).state).toBe("unknown");
+  });
+
   it("claims the editor is loaded only when the acknowledgement matches", () => {
     const state = nativeSyncState({ ...base, native_sync: "loaded", native_ack: ack });
     expect(state.state).toBe("loaded");

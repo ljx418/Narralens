@@ -77,7 +77,7 @@ export const BRIEF: Brief = {
 
 /** An authenticated relay caller. */
 export const RELAY_CALLER: TrustedCallerContext = createTrustedCallerContext({
-  principal_id: "agent-1",
+  principal_id: "human-1",
   channel: "authenticated",
   source: "driver_relay",
   session_ref: "session-relay-1",
@@ -134,6 +134,8 @@ export class TestFactPort implements ProductFactPort {
     rights_authorized: true,
     rights_reason: "授权材料已登记。",
     capability_available: true,
+    // Unit fixture only: production descriptor provenance belongs to MAIN's catalog.
+    capability_fingerprint: "6".repeat(64),
     capability_reason: "能力已登记。",
   };
 

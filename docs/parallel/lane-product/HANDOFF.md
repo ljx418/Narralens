@@ -106,3 +106,17 @@ touch `main`, and it does not re-open a write window on its own.
 
 ## Codex acceptance intake after repair1
 PID3600132 and exec59724 exit0, no remaining child; source5ae49ea321ed70cba177ff43b5f381f15d0aba8d and docsdb7241cbc36481844006e964de84b799fe371da7. Current writer Codex for docs/acceptance only. Claude stopped pending next explicit handoff. BRIDGE owns light slot; tsc/vitest repair1 NOT_RUN. Latest MAIN style/final-dispatch decisions appended request004. First FAIL logs retained unchanged.
+
+## SOURCE REPAIR batch2 transfer
+Independent repair1 tsc exit2 (10 diagnostics), vitest exit1 (84 passed/5 failed/89) recorded tsc-repair1.log/vitest-repair1.log; no runtime processes remain. PRODUCT light slot released to MAIN. Claude resumes same UUID for source-only batch2 with exact failures and final MAIN style-carrier/fact boundary decisions. Codex read-only until exit.
+
+## MAIN-directed Codex implementation takeover
+Repeated root causes after two actual checks triggered MAIN explicit AGENTS third-rework takeover. Newly launched Claude repair2 PID3658688/exec77491 controlled TERM exit143 before any source changes, no descendants remain. Unique implementation writer now Codex. Logs retained; next tests are internal validation only, independent review pending MAIN/nonimplementer. No further Claude implementation loop.
+
+## Codex takeover stable implementation outcome
+Common root fixes produced tsc-codex1 exit0. First internal test run 97/98 (exit1) retained in vitest-codex1.log; the remaining domain-error precedence was corrected without weakening assertion. Final vitest-codex2 exit0: five files/98 tests passed26.10s; exec51186 ended, no remaining process, light slot released to MAIN for MEDIA. Original first/rework failures untouched. Internal validation only: Codex participated in implementation, independent review REVIEW_PENDING. MAIN Host/media/browser/human acceptance NOT_RUN. Details/hashes verification-codex.json.
+
+Selected styleRef now names kind=brief carrier, sha256 entire validated Brief, style matches selected intake fields/version/recomputed digest. MAIN must create/discover that carrier. Guard change.prepare/change.apply may target sample/first_chapter/chapters/cover only with the same durable step and required predecessor gates; this never generates finite adoption approval or consumes it, which remains MAIN/Coordinator. guardExecutionInTransaction is a checking convenience, not an effect transaction; MAIN must call readGuardFacts+guardExecution inside its actual dispatch/apply serialization boundary. Preparation facts are only pre-read, and actual capability fingerprint is still pending MAIN source decision.
+
+## Registered capability field final alignment
+MAIN accepted request005: ProductProjectFacts.capability_fingerprint required64hex, RunPrepare consumes actual MAIN-supplied value rather than hashing capability names. Missing/malformed facts fail closed. PRODUCT produces no production descriptors. Added supplied-value and invalid/missing unit cases. Source-only amendment after 98/98 green; final tsc/vitest recheck pending next PRODUCT-light admission. MEDIA may use its current slot.

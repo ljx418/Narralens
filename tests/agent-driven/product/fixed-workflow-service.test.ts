@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
-import type { Change, ReviewPart } from "../../../src/contracts/agent-driven-types.js";
+import type { Brief, Change, ReviewPart } from "../../../src/contracts/agent-driven-types.js";
 import { creativeInputClosure } from "../../../src/host/creative/creative-closure.js";
-import { canonicalDigest } from "../../../src/host/creative/digest.js";
+import { canonicalDigest, styleDigest } from "../../../src/host/creative/digest.js";
 import { CreativeService } from "../../../src/host/creative/creative-service.js";
 import { FixedWorkflowService } from "../../../src/host/creative/fixed-workflow-service.js";
-import { guardExecutionInTransaction } from "../../../src/host/creative/execution-guard.js";
+import { guardExecutionInTransaction, readGuardFacts } from "../../../src/host/creative/execution-guard.js";
 import { MemoryProductRepository } from "./support/memory-repository.js";
 import {
   BRIEF,
@@ -74,7 +74,7 @@ interface Prepared {
   readonly intakeVersion: number;
 }
 
-async function prepared(options: { adoption?: TestAdoptionAuthority; facts?: TestFactPort } = {}): Promise<Prepared> {
+async function prepared(options: { adoption?: TestAdoptionAuthority; facts?: TestFactPort; styleCarrier?: Brief | typeof SCRIPT | typeof STORYBOARD } = {}): Promise<Prepared> {
   const repository = new MemoryProductRepository();
   const adoption = options.adoption ?? new TestAdoptionAuthority();
   const facts = options.facts ?? new TestFactPort();
@@ -86,18 +86,19 @@ async function prepared(options: { adoption?: TestAdoptionAuthority; facts?: Tes
     RELAY_CALLER,
   );
   // The run's refs have to resolve to real immutable artifacts, so the test writes them.
-  const styleArtifact = await creative.putArtifact(
-    {
-      meta: meta("k-style"),
-      project_id: "project-1",
-      artifact_id: null,
-      base_version: 0,
-      input_digest: "e".repeat(64),
-      content: SCRIPT,
-      input_refs: [],
-    },
-    RELAY_CALLER,
-  );
+  // MAIN bootstrap persists the selected Brief as the immutable style carrier.
+  const carrier = options.styleCarrier ?? BRIEF;
+  const carrierKind = "kind" in carrier ? carrier.kind : "brief";
+  const styleArtifact = { ref: { id: "brief-carrier", version: 1, sha256: canonicalDigest(carrier) } };
+  await repository.transaction((tx) => {
+    tx.put("artifact_version", { project_id: "project-1", artifact_id: "brief-carrier", version: 1 }, {
+      project_id: "project-1", artifact_id: "brief-carrier", version: 1, kind: carrierKind, schema_version: 1,
+      input_digest: canonicalDigest(BRIEF), content_digest: canonicalDigest(carrier),
+      content_json: carrier, input_refs_json: [], created_at: NOW_ISO,
+    });
+    tx.compareAndSet("artifact_head", { project_id: "project-1", artifact_id: "brief-carrier" }, 0,
+      { project_id: "project-1", artifact_id: "brief-carrier", draft_version: 1 });
+  });
   const inputArtifact = await creative.putArtifact(
     {
       meta: meta("k-input"),
@@ -235,6 +236,48 @@ async function publish(
 }
 
 describe("the fixed workflow service", () => {
+  it("takes the registered fingerprint from MAIN facts rather than capability names", async () => {
+    const facts = new TestFactPort();
+    facts.facts = { ...facts.facts, capability_fingerprint: "7".repeat(64) };
+    const context = await prepared({ facts });
+    const run = await context.service.readRun({ project_id: "project-1", run_id: context.runId }, RELAY_CALLER);
+    expect(run.scope.capability_fingerprint).toBe(facts.facts.capability_fingerprint);
+    expect(run.scope_digest).toBe(canonicalDigest(run.scope));
+  });
+
+  it("fails closed without a valid registered capability fingerprint", async () => {
+    for (const fingerprint of [undefined, "unverified", "F".repeat(64)]) {
+      const facts = new TestFactPort();
+      facts.facts = { ...facts.facts, capability_fingerprint: fingerprint } as unknown as typeof facts.facts;
+      await expect(prepared({ facts })).rejects.toMatchObject({ code: "CAPABILITY_UNAVAILABLE" });
+    }
+  });
+
+  it("rejects script and storyboard artifacts presented as the style carrier", async () => {
+    for (const styleCarrier of [SCRIPT, STORYBOARD]) {
+      await expect(prepared({ styleCarrier })).rejects.toMatchObject({ code: "INVALID_REQUEST" });
+    }
+  });
+
+  it("rejects a real brief carrier whose style differs from the selected intake", async () => {
+    const style = { ...BRIEF.content_brief.style, version: 2 };
+    style.style_digest = styleDigest(style);
+    await expect(prepared({ styleCarrier: { ...BRIEF, content_brief: { ...BRIEF.content_brief, style } } })).rejects.toMatchObject({ code: "REVIEW_STALE" });
+  });
+
+  it("reads the newest durable attempt when an old binding is replayed", async () => {
+    const context = await prepared();
+    const grantId = await authorized(context);
+    await recordAttempt(context, grantId, "sample", 1, "succeeded");
+    await recordAttempt(context, grantId, "sample", 2, "running");
+    const binding = { run_id: context.runId, plan_version: 1 as const, step_id: "sample", attempt: 1,
+      input_digest: context.inputDigest, run_scope_digest: context.scopeDigest, authorization_id: grantId };
+    const facts = await context.repository.transaction((tx) => readGuardFacts(tx, "project-1", binding, "human-1", fixedClock()));
+    expect(facts.attempt?.attempt).toBe(2);
+    await expect(guardExecutionInTransaction(context.repository, binding, { kind: "action", action: "clip.prepare", stage_id: "sample" }, "human-1", { project_id: "project-1", now: fixedClock })).rejects.toMatchObject({ code: "RUN_PLAN_STALE" });
+    await expect(guardExecutionInTransaction(context.repository, { ...binding, attempt: 2 }, { kind: "action", action: "clip.prepare", stage_id: "sample" }, "human-1", { project_id: "project-1", now: fixedClock })).resolves.toBeUndefined();
+  });
+
   it("prepares a run with the fixed scope and an accepted definition gate", async () => {
     const context = await prepared();
     const run = await context.service.readRun(
@@ -448,8 +491,9 @@ describe("the fixed workflow service", () => {
       },
       TRUSTED_CALLER,
     );
+    await recordAttempt(context, grantId, "chapters");
     await expect(
-      publish(context, { package_id: "package-chapter", kind: "chapter_pack", step_id: "first_chapter" }),
+      publish(context, { package_id: "package-chapter", kind: "chapter_pack", step_id: "chapters" }),
     ).rejects.toMatchObject({ code: "RUN_GATE_BLOCKED" });
   });
 
@@ -552,6 +596,16 @@ describe("the fixed workflow service", () => {
   it("keeps the cover an independent package", async () => {
     const context = await prepared();
     const grantId = await authorized(context);
+    for (const [step, kind] of [["sample", "sample"], ["first_chapter", "first_chapter"], ["chapters", "chapter_pack"]] as const) {
+      await recordAttempt(context, grantId, step);
+      const pack = await publish(context, { package_id: `accepted-${step}`, kind, step_id: step, chapter_id: "chapter-1" });
+      await context.service.decideReview({
+        meta: meta(`accept-${step}`), project_id: "project-1", run_id: context.runId,
+        package_id: pack.package_id, package_version: pack.version, plan_version: 1,
+        input_digest: pack.input_digest, output_digest: pack.output_digest, quality_digest: pack.quality_digest,
+        choice: "accept", impact_id: null, plan_sha256: null,
+      }, TRUSTED_CALLER);
+    }
     await recordAttempt(context, grantId, "cover");
     const cover = await publish(context, {
       package_id: "package-cover",

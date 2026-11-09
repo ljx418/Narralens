@@ -23,6 +23,7 @@
 import { randomUUID } from "node:crypto";
 import type {
   Change,
+  Brief,
   FixedWorkflowVersion,
   Ref,
   ReviewDecision,
@@ -41,8 +42,9 @@ import type {
   WorkflowNode,
   WorkflowRun,
 } from "../../contracts/agent-driven-types.js";
-import { validateAgentRouteInput, validateAgentRouteOutput } from "../../contracts/agent-driven-validator.js";
-import { creativeInputClosure } from "./creative-closure.js";
+import { validateAgentDefinition, validateAgentRouteInput, validateAgentRouteOutput } from "../../contracts/agent-driven-validator.js";
+import { nowEpochSeconds } from "./time.js";
+import { assertIntakeOwner, creativeInputClosure } from "./creative-closure.js";
 import { assertBriefConsistency } from "./creative-service.js";
 import {
   canonicalDigest,
@@ -66,7 +68,7 @@ import type {
   TrustedCallerContext,
   TrustedConfirmationRecord,
 } from "./product-repository.js";
-import { isTrustedCallerContext, isTrustedUi, nowEpochSeconds, ProductError } from "./trusted-context.js";
+import { isTrustedCallerContext, isTrustedUi, ProductError } from "./trusted-context.js";
 
 /** The operations the lane records idempotency receipts for. */
 export const WORKFLOW_OPERATIONS = {
@@ -113,6 +115,11 @@ export const GATE_STAGE: Readonly<Record<RunGate["kind"], string>> = {
   adoption: "delivery",
   risk: "sample",
 };
+
+const STAGE_GATE = {
+  definition: "definition", sample: "sample", first_chapter: "first_chapter",
+  chapters: "chapter_pack", cover: "cover", delivery: "qc",
+} as const;
 
 /**
  * The gate a package kind may satisfy.
@@ -289,6 +296,7 @@ export class FixedWorkflowService {
         );
       }
 
+      assertIntakeOwner(tx, decision.intake_id, caller.principal_id);
       const closure = creativeInputClosure(tx, decision.intake_id, decision.intake_version);
       const closureDigest = canonicalDigest(closure);
       if (decision.input_digest !== closureDigest) {
@@ -312,9 +320,16 @@ export class FixedWorkflowService {
       }
       assertBriefConsistency(brief.content_json);
 
-      this.#assertRefResolves(tx, request.project_id, request.style_ref);
+      this.#assertRefResolves(tx, request.project_id, request.style_ref, "style", brief.content_json);
       for (const ref of request.input_refs) {
-        this.#assertRefResolves(tx, request.project_id, ref);
+        this.#assertRefResolves(tx, request.project_id, ref, "input");
+      }
+      const scriptRef = brief.content_json.content_brief.script_ref;
+      if (scriptRef !== null) {
+        this.#assertRefResolves(tx, request.project_id, scriptRef, "script");
+        if (!request.input_refs.some((ref) => canonicalDigest(ref) === canonicalDigest(scriptRef))) {
+          throw new ProductError("REVIEW_STALE", "The confirmed script is missing from the run inputs");
+        }
       }
 
       const runId = `run-${randomUUID()}`;
@@ -328,7 +343,7 @@ export class FixedWorkflowService {
         input_digest: closureDigest,
         content_type: request.content_type,
         style_ref: request.style_ref,
-        capability_fingerprint: canonicalDigest(FIXED_PLAN.capabilities),
+        capability_fingerprint: projectFacts.capability_fingerprint,
         allowed_actions: [
           "clip.prepare",
           "snapshot.render",
@@ -724,8 +739,8 @@ export class FixedWorkflowService {
                   job_id: advanced.job_id,
                   output_artifact_id: advanced.output_artifact_id,
                   output_version: advanced.output_version,
-                  input_refs: input.input_refs ?? attempt.input_refs,
-                  output_refs: input.output_refs ?? attempt.output_refs,
+                  input_refs: [...(input.input_refs ?? attempt.input_refs)],
+                  output_refs: [...(input.output_refs ?? attempt.output_refs)],
                 }
               : attempt,
           ),
@@ -777,8 +792,8 @@ export class FixedWorkflowService {
             job_id: record.job_id,
             output_artifact_id: record.output_artifact_id,
             output_version: record.output_version,
-            input_refs: input.input_refs ?? [],
-            output_refs: input.output_refs ?? [],
+            input_refs: [...(input.input_refs ?? [])],
+            output_refs: [...(input.output_refs ?? [])],
           },
         ],
       };
@@ -1323,7 +1338,7 @@ export class FixedWorkflowService {
       const nodes: WorkflowNode[] = FIXED_PLAN.stages.map((stage) => {
         const attempts = run.checkpoint_json.attempts.filter((attempt) => attempt.step_id === stage.id);
         const latest = attempts.length === 0 ? undefined : attempts[attempts.length - 1];
-        const gate = run.checkpoint_json.gates.find((candidate) => candidate.kind === GATE_STAGE[stage.id]);
+        const gate = run.checkpoint_json.gates.find((candidate) => candidate.kind === STAGE_GATE[stage.id]);
         const state = latest?.state ?? (gate?.state === "accepted" ? "succeeded" : "pending");
         return {
           node_id: stage.id,
@@ -1603,23 +1618,36 @@ export class FixedWorkflowService {
     return impact;
   }
 
-  /** A ref has to resolve to an immutable artifact the project actually holds. */
-  #assertRefResolves(tx: ProductTransaction, projectId: string, ref: Ref): void {
+  /** Resolve the actual immutable document and verify the role it serves. */
+  #assertRefResolves(
+    tx: ProductTransaction, projectId: string, ref: Ref,
+    role: "input" | "script" | "style", selectedBrief?: Brief,
+  ): ArtifactVersionRecord {
     const artifact = tx.get("artifact_version", {
-      project_id: projectId,
-      artifact_id: ref.id,
-      version: ref.version,
+      project_id: projectId, artifact_id: ref.id, version: ref.version,
     });
-    if (artifact === null) {
-      throw new ProductError("NOT_FOUND", "The referenced artifact does not exist", {
-        details: { artifact_id: ref.id, version: ref.version },
-      });
+    if (artifact === null) throw new ProductError("NOT_FOUND", "The referenced artifact does not exist");
+    if (artifact.project_id !== projectId || artifact.artifact_id !== ref.id || artifact.version !== ref.version ||
+        artifact.content_digest !== ref.sha256 || canonicalDigest(artifact.content_json) !== ref.sha256) {
+      throw new ProductError("REVIEW_STALE", "The reference does not match its immutable content");
     }
-    if (artifact.content_digest !== ref.sha256) {
-      throw new ProductError("REVIEW_STALE", "The reference does not match the artifact it names", {
-        details: { expected: artifact.content_digest, received: ref.sha256 },
-      });
+    if (role === "style") {
+      if (artifact.kind !== "brief") throw new ProductError("INVALID_REQUEST", "The style reference must name a brief carrier");
+      const carrier = validateAgentDefinition<Brief>("Brief", artifact.content_json);
+      assertBriefConsistency(carrier);
+      if (selectedBrief === undefined || canonicalDigest(carrier.content_brief.style) !== canonicalDigest(selectedBrief.content_brief.style)) {
+        throw new ProductError("REVIEW_STALE", "The style carrier does not match the selected intake style");
+      }
+    } else if (artifact.kind === "script" || artifact.kind === "storyboard") {
+      validateAgentDefinition(artifact.kind === "script" ? "Script" : "Storyboard", artifact.content_json);
+      if (role === "script" && artifact.kind !== "script") throw new ProductError("INVALID_REQUEST", "The script reference must name a script");
+    } else if (artifact.kind === "brief" && role === "input") {
+      const brief = validateAgentDefinition<Brief>("Brief", artifact.content_json);
+      assertBriefConsistency(brief);
+    } else {
+      throw new ProductError("INVALID_REQUEST", "The artifact cannot serve this input role");
     }
+    return artifact;
   }
 
   /** A mandatory question has to be answered before a run can be prepared. */

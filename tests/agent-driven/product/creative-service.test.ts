@@ -50,6 +50,29 @@ async function intakeWithQuestion(): Promise<{
 }
 
 describe("the creative service", () => {
+  it("rejects a single changed style field carrying the previous digest without writing", async () => {
+    const { service, repository } = newService();
+    await expect(service.putIntake({
+      meta: meta("stale-style"), intake_id: null, base_version: 0,
+      brief: { ...BRIEF, content_brief: { ...BRIEF.content_brief,
+        style: { ...BRIEF.content_brief.style, visual_direction: BRIEF.content_brief.style.visual_direction + " " },
+      } },
+    }, RELAY_CALLER)).rejects.toMatchObject({ code: "INVALID_REQUEST" });
+    expect(repository.events).toHaveLength(0);
+  });
+
+  it("keeps intake reads and questions inside their authenticated owner", async () => {
+    const { service, repository, intakeId, briefSha } = await intakeWithQuestion();
+    const before = repository.events.length;
+    await expect(service.readIntake({ intake_id: intakeId }, OTHER_RELAY_CALLER)).rejects.toMatchObject({ code: "NOT_FOUND" });
+    await expect(service.putQuestion({ meta: meta("foreign-question"), intake_id: intakeId,
+      expected_intake_version: 1, question_id: null, expected_question_version: 0,
+      input_digest: briefSha, prompt: "另一个问题", kind: "text", choices: [], skip_allowed: false,
+    }, OTHER_RELAY_CALLER)).rejects.toMatchObject({ code: "NOT_FOUND" });
+    expect(repository.events).toHaveLength(before);
+    expect((await service.readIntake({ intake_id: intakeId }, RELAY_CALLER)).questions).toHaveLength(1);
+  });
+
   it("creates a brief version and refuses a second create of the same intake", async () => {
     const { service } = newService();
     const intake = await service.putIntake(
