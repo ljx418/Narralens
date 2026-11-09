@@ -24,7 +24,13 @@
   "review": {
     "bridge_pre": "findings addressed in source; no frozen test verdict",
     "media_pre": "capacity/router findings addressed; no frozen test verdict",
-    "external": "REVIEW_PENDING"
+    "external": {
+      "status": "PASS_LIMITED_SCOPE",
+      "frozen_commit": "bb5a29bde02fdc77db6332384ffa3ada80e1259a",
+      "tests": 38,
+      "report": "docs/execution/A/reviews/workbench-session-bb5a29b/REVIEW.md",
+      "sha256": "cd80c0f037cfc64f2129a0881cad10ffd88943eb7014cdb36e9c9f85ea4c76e1"
+    }
   },
   "sources": [
     {

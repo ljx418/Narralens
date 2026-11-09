@@ -1,0 +1,26 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+ ✓ tests/agent-driven/integration/owned-runtime.test.ts (7 tests) 75258ms
+   ✓ uses real flock, persistent instance generations, authenticated HTTP and actual MCP without fake readiness  45271ms
+   ✓ refuses the actual Host child entry without an inherited kernel lock  3990ms
+   ✓ refuses a second Host after its live predecessor lock path is unlinked, then permits a real stopped restart  22794ms
+   ✓ rejects a private FIFO without blocking the launcher event loop  462ms
+   ✓ cancels only its spawned Host when TERM reaches the wrapper before Host readiness  2722ms
+ ✓ tests/agent-driven/integration/host-application.test.ts (1 test) 4297ms
+   ✓ mounts real creative SQL in NarralensHost and denies the legacy bearer/session/write bypass  4297ms
+ ✓ tests/agent-driven/headless/workbench-session.test.ts (1 test) 4093ms
+   ✓ exchanges the real built page entry, survives reload and shared-cookie renewal, and rejects a cookie leaked to another local port  4093ms
+ ✓ tests/agent-driven/integration/workbench-session-host.test.ts (11 tests) 2558ms
+   ✓ exchanges a genuine Host-only ticket once; browser cookie reads a session without creating any approval or project  357ms
+   ✓ does not exhaust session capacity after 80 real renewals and still permits an operator reopen  317ms
+ ✓ tests/agent-driven/integration/agent-http-router.test.ts (7 tests) 269ms
+ ✓ tests/app/WorkbenchSession.test.ts (4 tests) 7ms
+ ✓ tests/agent-driven/integration/scoped-auth.test.ts (6 tests) 5ms
+ ✓ tests/app/HostApiClient.test.ts (1 test) 4ms
+
+ Test Files  8 passed (8)
+      Tests  38 passed (38)
+   Start at  04:27:03
+   Duration  128.76s (transform 2.24s, setup 0ms, collect 18.52s, tests 86.49s, environment 7.86s, prepare 10.33s)
+
