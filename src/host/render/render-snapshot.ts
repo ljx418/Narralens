@@ -283,6 +283,7 @@ export class SnapshotRenderService implements RenderPort {
         await this.#deps.native_renderer.render({
           project_root: copy.project_root,
           native_entry: copy.native_entry,
+          ...(closure.expected_frames===undefined?{}:{frame_count:closure.expected_frames}),
           out_path: outPath,
           staging_root: staging,
           upstream_root: this.#deps.upstream_root,

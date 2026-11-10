@@ -1,0 +1,34 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:60171) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/media/native-draft-real-render.test.ts (2 tests) 44229ms
+   ✓ registers real media and visibly burns native captions: 'Chinese full-stop normalization'  22377ms
+   ✓ registers real media and visibly burns native captions: 'fractional final audio frame'  21852ms
+ ✓ tests/agent-driven/media/native-draft.test.ts (16 tests) 877ms
+   ✓ source-only integration with the real fixed pure parser, no browser/render/decode > creates editable primary clips and exact native source/settings/VTT closure from registry unit facts  796ms
+ ✓ tests/agent-driven/media/offline-guard.test.ts (8 tests) 616ms
+   ✓ the offline guard > is installed in front of the pinned renderer  604ms
+ ✓ tests/agent-driven/media/upstream-pin.test.ts (5 tests) 697ms
+   ✓ the render pin > verifies the pinned checkout when it is on this machine  690ms
+ ✓ tests/agent-driven/media/published-package-store.test.ts (17 tests) 543ms
+ ✓ tests/agent-driven/media/render-snapshot.test.ts (21 tests) 510ms
+ ✓ tests/agent-driven/media/delivery-service.test.ts (12 tests) 326ms
+ ✓ tests/agent-driven/media/native-renderer.test.ts (6 tests) 312ms
+ ✓ tests/agent-driven/media/download.test.ts (14 tests) 236ms
+ ✓ tests/agent-driven/media/render-worker.test.ts (7 tests) 215ms
+ ✓ tests/agent-driven/media/native-subtitle-burn.test.ts (5 tests) 112ms
+ ✓ tests/agent-driven/media/process-group-inheritance.test.ts (1 test) 84ms
+ ✓ tests/agent-driven/media/harness-closure.test.ts (8 tests) 24ms
+ ✓ tests/agent-driven/media/manifest.test.ts (10 tests) 25ms
+ ✓ tests/agent-driven/media/snapshot-copy.test.ts (8 tests) 23ms
+ ✓ tests/agent-driven/media/preflight.test.ts (10 tests) 18ms
+ ✓ tests/agent-driven/media/qc.test.ts (15 tests) 5ms
+ ✓ tests/agent-driven/media/media-process-policy.test.ts (3 tests) 3ms
+
+ Test Files  18 passed (18)
+      Tests  168 passed (168)
+   Start at  09:12:54
+   Duration  96.16s (transform 2.76s, setup 0ms, collect 16.48s, tests 48.86s, environment 2ms, prepare 20.60s)
+

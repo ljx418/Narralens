@@ -29,3 +29,9 @@ MAIN冻结src/host/render/assembly-ports.ts作为Host-only内部port，不改变
 MEDIA仅在自身render白名单或docs/var候选编写纯assembler：一镜对应一个主要原生可编辑clip，真实video/narration/concept代码、字幕/设置及引用闭包；要求固定上游真实解析/实际渲染证明，不能只有HTML结构测试或整片flat MP4。旁白若请求则必须存在且长度与分镜可安全匹配；不可默默丢弃/任意裁切/变速，不能自签许可。字幕准确语义以固定上游实际支持的原生存储确认后实现；未知能力fail closed并报告，不发明上游API。target_root私有且原先不存在，protected roots双向不交叠、拒别名/符号链接、可取消、失败只清自己目录。MAIN之后才接实际Task/Run/受控采用。重型ffmpeg/原生render需MAIN资源准入；可以先写代码和静态候选，不能自签整体A。
 
 MAIN逐文件纳入MEDIA冻结afa862778c5b10c3d068101cd847d58b4d003875的native-draft-{plan,io,assembler}.ts、纯native-subtitle-burn-source.ts与明确unit-only测试。assembly-ports.ts已与该候选post SHA逐字节相等，未再次覆盖。MEDIA在私有archive对824base+精确候选type0/14纯文件与固定native parser用例通过，仅作模块证据；MAIN当前集成还需重新type/纯case。无public route/producer/DB/author写能力注册。真实媒体、Run/Task/fencing、review、Coordinator采用、正式render/burn/QC/Delivery待后续实际接线和验收，候选unit bytes不能冒充媒体事实。
+
+后续A06允许MAIN纳入MEDIA 7bc5f2b纯mjs字幕wrapper（.d.mts+TS兼容re-export，不保留两份实现）。Node worker实际用mjs，避免依赖未声明TS loader。源pre/post及6文件按候选manifest核对；在type/短case/plain Node probe和真实render通过前保持NOT_RUN。MAIN后续独占原worker/pin/ConfigDigest与真实caption读取闭包接线，不另建Job/全片后端，不改author/snapshot。
+
+MAIN A06接线扩展：在原openfilm-render-worker.mjs中保留原film入口stage验证，用固定公开subtitlesForExport读取真实copied source（含受控ffprobe/cache副作用），按native style.on与真实cues决定同原render引擎的wrapper烧录。新增已核14个upstream模块及单mjs实现pin；Host-only frame_count由SnapshotClosure.expected_frames传入，A字幕要求30fps和正整数已知源帧数，不能从输出倒证。存在Host draft-plan时核预期字幕文本/区间/数量、全帧及真实完整native style，空cue降级不能假兑现字幕。ConfigDigest绑定策略/实现闭包，私有OPENFILM_HOME只在attempt staging中，不改HOME。纯helper已MAIN type0、2files21cases0；新worker尚待真实encode/decode/像素与音频证据及回归。诊断fixture真实注册synthetic音画，非人声、非committed正式导出、非整A。
+
+实际接线证据收口见ADR-A06-001与native-subtitle-render-evidence.json。18files/168媒体回归、旧worker反向字幕像素门、最终build/scan通过；仅synthetic prepared-source，不扩张为人声/正式导出/整A。

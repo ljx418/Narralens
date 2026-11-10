@@ -76,6 +76,9 @@ export function computeRenderConfigDigest(input: RenderConfigInput): string {
     worker_sha256: input.worker_sha256,
     renderer_modules: pin.loaded_module_sha256,
     renderer_policies: pin.guard_module_sha256,
+    renderer_helpers: pin.implementation_module_sha256,
+    subtitle_strategy: pin.subtitle_strategy,
+    caption_text_strategy: pin.caption_text_strategy,
   });
   return createHash("sha256").update(canonical, "utf8").digest("hex");
 }

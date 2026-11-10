@@ -1,0 +1,1073 @@
+{
+  "scope": "Read-only source/import/call-map; no module import/eval/provider/tool/compiler/tests executed",
+  "upstream_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+  "media_head": "7bc5f2b3d6e28181f0e3265012616469435d0f08",
+  "main_head_at_capture": "7b48bc17fb65d966d6239c537f856ff240846766",
+  "inputs_sha256": {
+    "canonical_lock": "69c4da1decfb27fd6002a030228a2ccadd1a9fb4392e42320cf249ae311b301b",
+    "render_pin": "1b0ddd3dd031352092ae83535f598c7bda1f1ca2cccbb83ad9e377a0ec71bb06"
+  },
+  "entry": "packages/openfilm/studio/server/captions.mjs",
+  "static_relative_modules": 18,
+  "with_host_browser_source_reads": 20,
+  "modules": [
+    {
+      "path": "packages/openfilm/src/film-doc.mjs",
+      "sha256": "feef7be8181e7ec63cf2b8760f3a32b7b7e22cd851d4e5a233c04f1768cf719d",
+      "bytes": 54861,
+      "git_tree_equal": true,
+      "relative_static_closure": true,
+      "render_pin": true,
+      "canonical_top": true,
+      "canonical_studio": true
+    },
+    {
+      "path": "packages/openfilm/src/host.mjs",
+      "sha256": "dfed0fd5b068823d06b5091fbc01821791f0f470bbf061741bf21a25dc0bb170",
+      "bytes": 29805,
+      "git_tree_equal": true,
+      "relative_static_closure": true,
+      "render_pin": true,
+      "canonical_top": false,
+      "canonical_studio": true
+    },
+    {
+      "path": "packages/openfilm/src/media-links.mjs",
+      "sha256": "ff65c045f37edfdc1e3f39454dd6d93f2fb5a112991dd595a46a5e049ab9438f",
+      "bytes": 3127,
+      "git_tree_equal": true,
+      "relative_static_closure": true,
+      "render_pin": true,
+      "canonical_top": false,
+      "canonical_studio": true
+    },
+    {
+      "path": "packages/openfilm/src/overrides.mjs",
+      "sha256": "919fe02956cafaa6f81e63898bae98302a24677d4fd8e7e3537ab0a4c733f6dd",
+      "bytes": 3913,
+      "git_tree_equal": true,
+      "relative_static_closure": false,
+      "render_pin": true,
+      "canonical_top": false,
+      "canonical_studio": false
+    },
+    {
+      "path": "packages/openfilm/src/shared.mjs",
+      "sha256": "80aae1cac71dbdc71a8a782a457202a28e9d0becf97da05d63ad0655a264543a",
+      "bytes": 18702,
+      "git_tree_equal": true,
+      "relative_static_closure": true,
+      "render_pin": true,
+      "canonical_top": false,
+      "canonical_studio": true
+    },
+    {
+      "path": "packages/openfilm/src/timeline.mjs",
+      "sha256": "75b4cca45fd22937e1fa6dbc5f67af001ab591d4a2f85efee49fb025e154e0a4",
+      "bytes": 48623,
+      "git_tree_equal": true,
+      "relative_static_closure": false,
+      "render_pin": true,
+      "canonical_top": false,
+      "canonical_studio": false
+    },
+    {
+      "path": "packages/openfilm/studio/server/atomic.mjs",
+      "sha256": "61374e50c67d76e03d70d73e05ed307378d866d579847c316c4203fbc9cde94f",
+      "bytes": 1643,
+      "git_tree_equal": true,
+      "relative_static_closure": true,
+      "render_pin": false,
+      "canonical_top": true,
+      "canonical_studio": true
+    },
+    {
+      "path": "packages/openfilm/studio/server/captions.mjs",
+      "sha256": "7a9bd076c307b6296be6e3d05153bf3f386aa01e97503d23f5d5deac1f0d2df0",
+      "bytes": 28918,
+      "git_tree_equal": true,
+      "relative_static_closure": true,
+      "render_pin": false,
+      "canonical_top": false,
+      "canonical_studio": true
+    },
+    {
+      "path": "packages/openfilm/studio/server/derived.mjs",
+      "sha256": "fdc4ae961d25735a87fe1d6e1012cb55278c4c04073a2a5f804548ab06384a99",
+      "bytes": 12196,
+      "git_tree_equal": true,
+      "relative_static_closure": true,
+      "render_pin": false,
+      "canonical_top": false,
+      "canonical_studio": true
+    },
+    {
+      "path": "packages/openfilm/studio/server/files.mjs",
+      "sha256": "93d65bb02d76ab09e112588d7a852b3d4ada3083ebcd1d9ea2e7d216e82dcf99",
+      "bytes": 29455,
+      "git_tree_equal": true,
+      "relative_static_closure": true,
+      "render_pin": false,
+      "canonical_top": false,
+      "canonical_studio": true
+    },
+    {
+      "path": "packages/openfilm/studio/server/film-subtitle.mjs",
+      "sha256": "be4b1852bc254ff597e43694a732044ef51dd43a78df13735c2ff023957687dd",
+      "bytes": 36308,
+      "git_tree_equal": true,
+      "relative_static_closure": true,
+      "render_pin": false,
+      "canonical_top": false,
+      "canonical_studio": true
+    },
+    {
+      "path": "packages/openfilm/studio/server/film.mjs",
+      "sha256": "eb0aab3a4770082a0b273f448b6bda3b0ca043aee791d5444148c459af855d85",
+      "bytes": 4218,
+      "git_tree_equal": true,
+      "relative_static_closure": true,
+      "render_pin": false,
+      "canonical_top": true,
+      "canonical_studio": true
+    },
+    {
+      "path": "packages/openfilm/studio/server/http.mjs",
+      "sha256": "357da4dad30c36ca14d7bde8fd02587b58653e915bddb36c220ba02d10c70524",
+      "bytes": 1505,
+      "git_tree_equal": true,
+      "relative_static_closure": true,
+      "render_pin": false,
+      "canonical_top": false,
+      "canonical_studio": true
+    },
+    {
+      "path": "packages/openfilm/studio/server/ops.mjs",
+      "sha256": "e44a93286d500391cd61b6f27cc426ecb6fd49f777f816593c17133f0bd15957",
+      "bytes": 21743,
+      "git_tree_equal": true,
+      "relative_static_closure": true,
+      "render_pin": false,
+      "canonical_top": true,
+      "canonical_studio": true
+    },
+    {
+      "path": "packages/openfilm/studio/server/page-links.mjs",
+      "sha256": "5489ce9616f2eea8309e7776dcf20f358fd97886e7cd250d6ab813b80fbf8c8e",
+      "bytes": 5467,
+      "git_tree_equal": true,
+      "relative_static_closure": true,
+      "render_pin": false,
+      "canonical_top": false,
+      "canonical_studio": true
+    },
+    {
+      "path": "packages/openfilm/studio/server/projects.mjs",
+      "sha256": "f2905720ecc890c4f27a36eb579bfdd4a754774720a03d53b965d3ea0a3c7c3f",
+      "bytes": 18392,
+      "git_tree_equal": true,
+      "relative_static_closure": true,
+      "render_pin": false,
+      "canonical_top": false,
+      "canonical_studio": true
+    },
+    {
+      "path": "packages/openfilm/studio/server/subtitle-edits.mjs",
+      "sha256": "59e13625179f2c843667722989149e6ec1c01afd459b1c5b5328a91b6c866e8f",
+      "bytes": 13087,
+      "git_tree_equal": true,
+      "relative_static_closure": true,
+      "render_pin": false,
+      "canonical_top": false,
+      "canonical_studio": true
+    },
+    {
+      "path": "packages/openfilm/studio/server/subtitle-segments.mjs",
+      "sha256": "b4791b6ec527379aeedaa5329ee7efc3855b8b5dc99cf36db25c2d4652e5784f",
+      "bytes": 34218,
+      "git_tree_equal": true,
+      "relative_static_closure": true,
+      "render_pin": false,
+      "canonical_top": false,
+      "canonical_studio": true
+    },
+    {
+      "path": "packages/openfilm/studio/server/transcripts.mjs",
+      "sha256": "ff2c765bec47e7238a56f787c88da7cd1eea3ce893c8fe2959f0a1bdc6da50d3",
+      "bytes": 23994,
+      "git_tree_equal": true,
+      "relative_static_closure": true,
+      "render_pin": false,
+      "canonical_top": false,
+      "canonical_studio": true
+    },
+    {
+      "path": "packages/openfilm/studio/server/trash.mjs",
+      "sha256": "26ec5e0a12ca1b836658744db2482643af985325093a63f08d093130e17e046f",
+      "bytes": 3572,
+      "git_tree_equal": true,
+      "relative_static_closure": true,
+      "render_pin": false,
+      "canonical_top": false,
+      "canonical_studio": true
+    }
+  ],
+  "imports": [
+    {
+      "from": "packages/openfilm/studio/server/captions.mjs",
+      "line": 22,
+      "kind": "static",
+      "specifier": "node:fs/promises",
+      "target": "node:fs/promises",
+      "repo_relative": false
+    },
+    {
+      "from": "packages/openfilm/studio/server/captions.mjs",
+      "line": 23,
+      "kind": "static",
+      "specifier": "node:path",
+      "target": "node:path",
+      "repo_relative": false
+    },
+    {
+      "from": "packages/openfilm/studio/server/captions.mjs",
+      "line": 24,
+      "kind": "static",
+      "specifier": "../../src/film-doc.mjs",
+      "target": "packages/openfilm/src/film-doc.mjs",
+      "repo_relative": true
+    },
+    {
+      "from": "packages/openfilm/studio/server/captions.mjs",
+      "line": 25,
+      "kind": "static",
+      "specifier": "./derived.mjs",
+      "target": "packages/openfilm/studio/server/derived.mjs",
+      "repo_relative": true
+    },
+    {
+      "from": "packages/openfilm/studio/server/captions.mjs",
+      "line": 26,
+      "kind": "static",
+      "specifier": "./film.mjs",
+      "target": "packages/openfilm/studio/server/film.mjs",
+      "repo_relative": true
+    },
+    {
+      "from": "packages/openfilm/studio/server/captions.mjs",
+      "line": 27,
+      "kind": "static",
+      "specifier": "./http.mjs",
+      "target": "packages/openfilm/studio/server/http.mjs",
+      "repo_relative": true
+    },
+    {
+      "from": "packages/openfilm/studio/server/captions.mjs",
+      "line": 28,
+      "kind": "static",
+      "specifier": "./projects.mjs",
+      "target": "packages/openfilm/studio/server/projects.mjs",
+      "repo_relative": true
+    },
+    {
+      "from": "packages/openfilm/studio/server/captions.mjs",
+      "line": 29,
+      "kind": "static",
+      "specifier": "./film-subtitle.mjs",
+      "target": "packages/openfilm/studio/server/film-subtitle.mjs",
+      "repo_relative": true
+    },
+    {
+      "from": "packages/openfilm/studio/server/captions.mjs",
+      "line": 30,
+      "kind": "static",
+      "specifier": "./atomic.mjs",
+      "target": "packages/openfilm/studio/server/atomic.mjs",
+      "repo_relative": true
+    },
+    {
+      "from": "packages/openfilm/studio/server/captions.mjs",
+      "line": 31,
+      "kind": "static",
+      "specifier": "./files.mjs",
+      "target": "packages/openfilm/studio/server/files.mjs",
+      "repo_relative": true
+    },
+    {
+      "from": "packages/openfilm/studio/server/captions.mjs",
+      "line": 32,
+      "kind": "static",
+      "specifier": "./subtitle-segments.mjs",
+      "target": "packages/openfilm/studio/server/subtitle-segments.mjs",
+      "repo_relative": true
+    },
+    {
+      "from": "packages/openfilm/studio/server/captions.mjs",
+      "line": 33,
+      "kind": "static",
+      "specifier": "./transcripts.mjs",
+      "target": "packages/openfilm/studio/server/transcripts.mjs",
+      "repo_relative": true
+    },
+    {
+      "from": "packages/openfilm/studio/server/captions.mjs",
+      "line": 34,
+      "kind": "static",
+      "specifier": "./subtitle-edits.mjs",
+      "target": "packages/openfilm/studio/server/subtitle-edits.mjs",
+      "repo_relative": true
+    },
+    {
+      "from": "packages/openfilm/studio/server/captions.mjs",
+      "line": 36,
+      "kind": "reexport",
+      "specifier": "./transcripts.mjs",
+      "target": "packages/openfilm/studio/server/transcripts.mjs",
+      "repo_relative": true
+    },
+    {
+      "from": "packages/openfilm/studio/server/captions.mjs",
+      "line": 37,
+      "kind": "reexport",
+      "specifier": "./subtitle-segments.mjs",
+      "target": "packages/openfilm/studio/server/subtitle-segments.mjs",
+      "repo_relative": true
+    },
+    {
+      "from": "packages/openfilm/studio/server/derived.mjs",
+      "line": 10,
+      "kind": "static",
+      "specifier": "node:child_process",
+      "target": "node:child_process",
+      "repo_relative": false
+    },
+    {
+      "from": "packages/openfilm/studio/server/derived.mjs",
+      "line": 11,
+      "kind": "static",
+      "specifier": "node:crypto",
+      "target": "node:crypto",
+      "repo_relative": false
+    },
+    {
+      "from": "packages/openfilm/studio/server/derived.mjs",
+      "line": 12,
+      "kind": "static",
+      "specifier": "node:fs",
+      "target": "node:fs",
+      "repo_relative": false
+    },
+    {
+      "from": "packages/openfilm/studio/server/derived.mjs",
+      "line": 13,
+      "kind": "static",
+      "specifier": "node:fs/promises",
+      "target": "node:fs/promises",
+      "repo_relative": false
+    },
+    {
+      "from": "packages/openfilm/studio/server/derived.mjs",
+      "line": 14,
+      "kind": "static",
+      "specifier": "node:path",
+      "target": "node:path",
+      "repo_relative": false
+    },
+    {
+      "from": "packages/openfilm/studio/server/derived.mjs",
+      "line": 15,
+      "kind": "static",
+      "specifier": "./files.mjs",
+      "target": "packages/openfilm/studio/server/files.mjs",
+      "repo_relative": true
+    },
+    {
+      "from": "packages/openfilm/studio/server/derived.mjs",
+      "line": 16,
+      "kind": "static",
+      "specifier": "./projects.mjs",
+      "target": "packages/openfilm/studio/server/projects.mjs",
+      "repo_relative": true
+    },
+    {
+      "from": "packages/openfilm/studio/server/derived.mjs",
+      "line": 17,
+      "kind": "static",
+      "specifier": "./atomic.mjs",
+      "target": "packages/openfilm/studio/server/atomic.mjs",
+      "repo_relative": true
+    },
+    {
+      "from": "packages/openfilm/studio/server/film.mjs",
+      "line": 11,
+      "kind": "static",
+      "specifier": "node:crypto",
+      "target": "node:crypto",
+      "repo_relative": false
+    },
+    {
+      "from": "packages/openfilm/studio/server/film.mjs",
+      "line": 12,
+      "kind": "static",
+      "specifier": "node:fs/promises",
+      "target": "node:fs/promises",
+      "repo_relative": false
+    },
+    {
+      "from": "packages/openfilm/studio/server/film.mjs",
+      "line": 13,
+      "kind": "static",
+      "specifier": "node:path",
+      "target": "node:path",
+      "repo_relative": false
+    },
+    {
+      "from": "packages/openfilm/studio/server/film.mjs",
+      "line": 14,
+      "kind": "static",
+      "specifier": "../../src/film-doc.mjs",
+      "target": "packages/openfilm/src/film-doc.mjs",
+      "repo_relative": true
+    },
+    {
+      "from": "packages/openfilm/studio/server/film.mjs",
+      "line": 15,
+      "kind": "static",
+      "specifier": "./ops.mjs",
+      "target": "packages/openfilm/studio/server/ops.mjs",
+      "repo_relative": true
+    },
+    {
+      "from": "packages/openfilm/studio/server/film.mjs",
+      "line": 16,
+      "kind": "static",
+      "specifier": "./atomic.mjs",
+      "target": "packages/openfilm/studio/server/atomic.mjs",
+      "repo_relative": true
+    },
+    {
+      "from": "packages/openfilm/studio/server/projects.mjs",
+      "line": 16,
+      "kind": "static",
+      "specifier": "./trash.mjs",
+      "target": "packages/openfilm/studio/server/trash.mjs",
+      "repo_relative": true
+    },
+    {
+      "from": "packages/openfilm/studio/server/projects.mjs",
+      "line": 17,
+      "kind": "static",
+      "specifier": "node:crypto",
+      "target": "node:crypto",
+      "repo_relative": false
+    },
+    {
+      "from": "packages/openfilm/studio/server/projects.mjs",
+      "line": 18,
+      "kind": "static",
+      "specifier": "node:fs",
+      "target": "node:fs",
+      "repo_relative": false
+    },
+    {
+      "from": "packages/openfilm/studio/server/projects.mjs",
+      "line": 19,
+      "kind": "static",
+      "specifier": "node:fs/promises",
+      "target": "node:fs/promises",
+      "repo_relative": false
+    },
+    {
+      "from": "packages/openfilm/studio/server/projects.mjs",
+      "line": 20,
+      "kind": "static",
+      "specifier": "node:os",
+      "target": "node:os",
+      "repo_relative": false
+    },
+    {
+      "from": "packages/openfilm/studio/server/projects.mjs",
+      "line": 21,
+      "kind": "static",
+      "specifier": "node:path",
+      "target": "node:path",
+      "repo_relative": false
+    },
+    {
+      "from": "packages/openfilm/studio/server/projects.mjs",
+      "line": 22,
+      "kind": "static",
+      "specifier": "./film.mjs",
+      "target": "packages/openfilm/studio/server/film.mjs",
+      "repo_relative": true
+    },
+    {
+      "from": "packages/openfilm/studio/server/projects.mjs",
+      "line": 23,
+      "kind": "static",
+      "specifier": "../../src/film-doc.mjs",
+      "target": "packages/openfilm/src/film-doc.mjs",
+      "repo_relative": true
+    },
+    {
+      "from": "packages/openfilm/studio/server/projects.mjs",
+      "line": 24,
+      "kind": "static",
+      "specifier": "./atomic.mjs",
+      "target": "packages/openfilm/studio/server/atomic.mjs",
+      "repo_relative": true
+    },
+    {
+      "from": "packages/openfilm/studio/server/atomic.mjs",
+      "line": 8,
+      "kind": "static",
+      "specifier": "node:crypto",
+      "target": "node:crypto",
+      "repo_relative": false
+    },
+    {
+      "from": "packages/openfilm/studio/server/atomic.mjs",
+      "line": 9,
+      "kind": "static",
+      "specifier": "node:fs/promises",
+      "target": "node:fs/promises",
+      "repo_relative": false
+    },
+    {
+      "from": "packages/openfilm/studio/server/files.mjs",
+      "line": 11,
+      "kind": "static",
+      "specifier": "node:child_process",
+      "target": "node:child_process",
+      "repo_relative": false
+    },
+    {
+      "from": "packages/openfilm/studio/server/files.mjs",
+      "line": 12,
+      "kind": "static",
+      "specifier": "node:crypto",
+      "target": "node:crypto",
+      "repo_relative": false
+    },
+    {
+      "from": "packages/openfilm/studio/server/files.mjs",
+      "line": 13,
+      "kind": "static",
+      "specifier": "node:fs",
+      "target": "node:fs",
+      "repo_relative": false
+    },
+    {
+      "from": "packages/openfilm/studio/server/files.mjs",
+      "line": 14,
+      "kind": "static",
+      "specifier": "node:fs/promises",
+      "target": "node:fs/promises",
+      "repo_relative": false
+    },
+    {
+      "from": "packages/openfilm/studio/server/files.mjs",
+      "line": 15,
+      "kind": "static",
+      "specifier": "node:path",
+      "target": "node:path",
+      "repo_relative": false
+    },
+    {
+      "from": "packages/openfilm/studio/server/files.mjs",
+      "line": 16,
+      "kind": "static",
+      "specifier": "node:stream",
+      "target": "node:stream",
+      "repo_relative": false
+    },
+    {
+      "from": "packages/openfilm/studio/server/files.mjs",
+      "line": 17,
+      "kind": "static",
+      "specifier": "node:stream/promises",
+      "target": "node:stream/promises",
+      "repo_relative": false
+    },
+    {
+      "from": "packages/openfilm/studio/server/files.mjs",
+      "line": 18,
+      "kind": "static",
+      "specifier": "../../src/film-doc.mjs",
+      "target": "packages/openfilm/src/film-doc.mjs",
+      "repo_relative": true
+    },
+    {
+      "from": "packages/openfilm/studio/server/files.mjs",
+      "line": 19,
+      "kind": "static",
+      "specifier": "../../src/media-links.mjs",
+      "target": "packages/openfilm/src/media-links.mjs",
+      "repo_relative": true
+    },
+    {
+      "from": "packages/openfilm/studio/server/files.mjs",
+      "line": 20,
+      "kind": "static",
+      "specifier": "./film.mjs",
+      "target": "packages/openfilm/studio/server/film.mjs",
+      "repo_relative": true
+    },
+    {
+      "from": "packages/openfilm/studio/server/files.mjs",
+      "line": 21,
+      "kind": "static",
+      "specifier": "./projects.mjs",
+      "target": "packages/openfilm/studio/server/projects.mjs",
+      "repo_relative": true
+    },
+    {
+      "from": "packages/openfilm/studio/server/files.mjs",
+      "line": 22,
+      "kind": "static",
+      "specifier": "./trash.mjs",
+      "target": "packages/openfilm/studio/server/trash.mjs",
+      "repo_relative": true
+    },
+    {
+      "from": "packages/openfilm/studio/server/files.mjs",
+      "line": 23,
+      "kind": "static",
+      "specifier": "./page-links.mjs",
+      "target": "packages/openfilm/studio/server/page-links.mjs",
+      "repo_relative": true
+    },
+    {
+      "from": "packages/openfilm/studio/server/files.mjs",
+      "line": 24,
+      "kind": "static",
+      "specifier": "../../src/shared.mjs",
+      "target": "packages/openfilm/src/shared.mjs",
+      "repo_relative": true
+    },
+    {
+      "from": "packages/openfilm/studio/server/transcripts.mjs",
+      "line": 17,
+      "kind": "static",
+      "specifier": "node:fs/promises",
+      "target": "node:fs/promises",
+      "repo_relative": false
+    },
+    {
+      "from": "packages/openfilm/studio/server/transcripts.mjs",
+      "line": 18,
+      "kind": "static",
+      "specifier": "node:path",
+      "target": "node:path",
+      "repo_relative": false
+    },
+    {
+      "from": "packages/openfilm/studio/server/transcripts.mjs",
+      "line": 19,
+      "kind": "static",
+      "specifier": "./atomic.mjs",
+      "target": "packages/openfilm/studio/server/atomic.mjs",
+      "repo_relative": true
+    },
+    {
+      "from": "packages/openfilm/studio/server/transcripts.mjs",
+      "line": 20,
+      "kind": "static",
+      "specifier": "./files.mjs",
+      "target": "packages/openfilm/studio/server/files.mjs",
+      "repo_relative": true
+    },
+    {
+      "from": "packages/openfilm/studio/server/transcripts.mjs",
+      "line": 21,
+      "kind": "static",
+      "specifier": "./subtitle-segments.mjs",
+      "target": "packages/openfilm/studio/server/subtitle-segments.mjs",
+      "repo_relative": true
+    },
+    {
+      "from": "packages/openfilm/studio/server/subtitle-edits.mjs",
+      "line": 19,
+      "kind": "static",
+      "specifier": "node:fs/promises",
+      "target": "node:fs/promises",
+      "repo_relative": false
+    },
+    {
+      "from": "packages/openfilm/studio/server/subtitle-edits.mjs",
+      "line": 20,
+      "kind": "static",
+      "specifier": "node:path",
+      "target": "node:path",
+      "repo_relative": false
+    },
+    {
+      "from": "packages/openfilm/studio/server/subtitle-edits.mjs",
+      "line": 21,
+      "kind": "static",
+      "specifier": "./atomic.mjs",
+      "target": "packages/openfilm/studio/server/atomic.mjs",
+      "repo_relative": true
+    },
+    {
+      "from": "packages/openfilm/studio/server/subtitle-edits.mjs",
+      "line": 22,
+      "kind": "static",
+      "specifier": "./film-subtitle.mjs",
+      "target": "packages/openfilm/studio/server/film-subtitle.mjs",
+      "repo_relative": true
+    },
+    {
+      "from": "packages/openfilm/studio/server/subtitle-edits.mjs",
+      "line": 23,
+      "kind": "static",
+      "specifier": "./files.mjs",
+      "target": "packages/openfilm/studio/server/files.mjs",
+      "repo_relative": true
+    },
+    {
+      "from": "packages/openfilm/studio/server/subtitle-edits.mjs",
+      "line": 24,
+      "kind": "static",
+      "specifier": "./http.mjs",
+      "target": "packages/openfilm/studio/server/http.mjs",
+      "repo_relative": true
+    },
+    {
+      "from": "packages/openfilm/studio/server/subtitle-edits.mjs",
+      "line": 25,
+      "kind": "static",
+      "specifier": "./subtitle-segments.mjs",
+      "target": "packages/openfilm/studio/server/subtitle-segments.mjs",
+      "repo_relative": true
+    },
+    {
+      "from": "packages/openfilm/studio/server/subtitle-edits.mjs",
+      "line": 26,
+      "kind": "static",
+      "specifier": "./transcripts.mjs",
+      "target": "packages/openfilm/studio/server/transcripts.mjs",
+      "repo_relative": true
+    },
+    {
+      "from": "packages/openfilm/studio/server/ops.mjs",
+      "line": 7,
+      "kind": "static",
+      "specifier": "../../src/film-doc.mjs",
+      "target": "packages/openfilm/src/film-doc.mjs",
+      "repo_relative": true
+    },
+    {
+      "from": "packages/openfilm/studio/server/trash.mjs",
+      "line": 12,
+      "kind": "static",
+      "specifier": "node:child_process",
+      "target": "node:child_process",
+      "repo_relative": false
+    },
+    {
+      "from": "packages/openfilm/studio/server/trash.mjs",
+      "line": 13,
+      "kind": "static",
+      "specifier": "node:fs",
+      "target": "node:fs",
+      "repo_relative": false
+    },
+    {
+      "from": "packages/openfilm/studio/server/trash.mjs",
+      "line": 14,
+      "kind": "static",
+      "specifier": "node:fs/promises",
+      "target": "node:fs/promises",
+      "repo_relative": false
+    },
+    {
+      "from": "packages/openfilm/studio/server/trash.mjs",
+      "line": 15,
+      "kind": "static",
+      "specifier": "node:os",
+      "target": "node:os",
+      "repo_relative": false
+    },
+    {
+      "from": "packages/openfilm/studio/server/trash.mjs",
+      "line": 16,
+      "kind": "static",
+      "specifier": "node:path",
+      "target": "node:path",
+      "repo_relative": false
+    },
+    {
+      "from": "packages/openfilm/studio/server/trash.mjs",
+      "line": 17,
+      "kind": "static",
+      "specifier": "node:util",
+      "target": "node:util",
+      "repo_relative": false
+    },
+    {
+      "from": "packages/openfilm/src/media-links.mjs",
+      "line": 10,
+      "kind": "static",
+      "specifier": "node:fs",
+      "target": "node:fs",
+      "repo_relative": false
+    },
+    {
+      "from": "packages/openfilm/src/media-links.mjs",
+      "line": 11,
+      "kind": "static",
+      "specifier": "node:os",
+      "target": "node:os",
+      "repo_relative": false
+    },
+    {
+      "from": "packages/openfilm/src/media-links.mjs",
+      "line": 12,
+      "kind": "static",
+      "specifier": "node:path",
+      "target": "node:path",
+      "repo_relative": false
+    },
+    {
+      "from": "packages/openfilm/studio/server/page-links.mjs",
+      "line": 15,
+      "kind": "static",
+      "specifier": "node:path",
+      "target": "node:path",
+      "repo_relative": false
+    },
+    {
+      "from": "packages/openfilm/src/shared.mjs",
+      "line": 1,
+      "kind": "static",
+      "specifier": "node:child_process",
+      "target": "node:child_process",
+      "repo_relative": false
+    },
+    {
+      "from": "packages/openfilm/src/shared.mjs",
+      "line": 2,
+      "kind": "static",
+      "specifier": "node:crypto",
+      "target": "node:crypto",
+      "repo_relative": false
+    },
+    {
+      "from": "packages/openfilm/src/shared.mjs",
+      "line": 3,
+      "kind": "static",
+      "specifier": "node:fs",
+      "target": "node:fs",
+      "repo_relative": false
+    },
+    {
+      "from": "packages/openfilm/src/shared.mjs",
+      "line": 4,
+      "kind": "static",
+      "specifier": "node:path",
+      "target": "node:path",
+      "repo_relative": false
+    },
+    {
+      "from": "packages/openfilm/src/shared.mjs",
+      "line": 5,
+      "kind": "static",
+      "specifier": "./host.mjs",
+      "target": "packages/openfilm/src/host.mjs",
+      "repo_relative": true
+    },
+    {
+      "from": "packages/openfilm/src/shared.mjs",
+      "line": 6,
+      "kind": "static",
+      "specifier": "./film-doc.mjs",
+      "target": "packages/openfilm/src/film-doc.mjs",
+      "repo_relative": true
+    },
+    {
+      "from": "packages/openfilm/src/shared.mjs",
+      "line": 7,
+      "kind": "static",
+      "specifier": "./media-links.mjs",
+      "target": "packages/openfilm/src/media-links.mjs",
+      "repo_relative": true
+    },
+    {
+      "from": "packages/openfilm/src/host.mjs",
+      "line": 2,
+      "kind": "static",
+      "specifier": "node:child_process",
+      "target": "node:child_process",
+      "repo_relative": false
+    },
+    {
+      "from": "packages/openfilm/src/host.mjs",
+      "line": 3,
+      "kind": "static",
+      "specifier": "node:http",
+      "target": "node:http",
+      "repo_relative": false
+    },
+    {
+      "from": "packages/openfilm/src/host.mjs",
+      "line": 4,
+      "kind": "static",
+      "specifier": "node:fs",
+      "target": "node:fs",
+      "repo_relative": false
+    },
+    {
+      "from": "packages/openfilm/src/host.mjs",
+      "line": 5,
+      "kind": "static",
+      "specifier": "node:url",
+      "target": "node:url",
+      "repo_relative": false
+    },
+    {
+      "from": "packages/openfilm/src/host.mjs",
+      "line": 6,
+      "kind": "static",
+      "specifier": "node:path",
+      "target": "node:path",
+      "repo_relative": false
+    },
+    {
+      "from": "packages/openfilm/src/host.mjs",
+      "line": 7,
+      "kind": "static",
+      "specifier": "playwright-core",
+      "target": "playwright-core",
+      "repo_relative": false
+    },
+    {
+      "from": "packages/openfilm/src/host.mjs",
+      "line": 8,
+      "kind": "static",
+      "specifier": "./film-doc.mjs",
+      "target": "packages/openfilm/src/film-doc.mjs",
+      "repo_relative": true
+    },
+    {
+      "from": "packages/openfilm/src/host.mjs",
+      "line": 9,
+      "kind": "static",
+      "specifier": "./media-links.mjs",
+      "target": "packages/openfilm/src/media-links.mjs",
+      "repo_relative": true
+    }
+  ],
+  "actual_runtime_dynamic_imports": [
+    {
+      "from": "packages/openfilm/studio/server/trash.mjs",
+      "line": 42,
+      "specifier": "node:fs",
+      "read_chain_reachable": false,
+      "context": "moveToTrash Windows branch, not subtitlesForExport"
+    }
+  ],
+  "top_level_code_reads": [
+    {
+      "from": "packages/openfilm/src/host.mjs",
+      "line": 27,
+      "target": "packages/openfilm/src/timeline.mjs"
+    },
+    {
+      "from": "packages/openfilm/src/host.mjs",
+      "line": 29,
+      "target": "packages/openfilm/src/film-doc.mjs"
+    },
+    {
+      "from": "packages/openfilm/src/host.mjs",
+      "line": 31,
+      "target": "packages/openfilm/src/overrides.mjs"
+    }
+  ],
+  "missing_from_render_loaded": [
+    "packages/openfilm/studio/server/atomic.mjs",
+    "packages/openfilm/studio/server/captions.mjs",
+    "packages/openfilm/studio/server/derived.mjs",
+    "packages/openfilm/studio/server/files.mjs",
+    "packages/openfilm/studio/server/film-subtitle.mjs",
+    "packages/openfilm/studio/server/film.mjs",
+    "packages/openfilm/studio/server/http.mjs",
+    "packages/openfilm/studio/server/ops.mjs",
+    "packages/openfilm/studio/server/page-links.mjs",
+    "packages/openfilm/studio/server/projects.mjs",
+    "packages/openfilm/studio/server/subtitle-edits.mjs",
+    "packages/openfilm/studio/server/subtitle-segments.mjs",
+    "packages/openfilm/studio/server/transcripts.mjs",
+    "packages/openfilm/studio/server/trash.mjs"
+  ],
+  "missing_from_render_and_canonical_top_loaded": [
+    "packages/openfilm/studio/server/captions.mjs",
+    "packages/openfilm/studio/server/derived.mjs",
+    "packages/openfilm/studio/server/files.mjs",
+    "packages/openfilm/studio/server/film-subtitle.mjs",
+    "packages/openfilm/studio/server/http.mjs",
+    "packages/openfilm/studio/server/page-links.mjs",
+    "packages/openfilm/studio/server/projects.mjs",
+    "packages/openfilm/studio/server/subtitle-edits.mjs",
+    "packages/openfilm/studio/server/subtitle-segments.mjs",
+    "packages/openfilm/studio/server/transcripts.mjs",
+    "packages/openfilm/studio/server/trash.mjs"
+  ],
+  "missing_from_all_recorded_loaded_maps": [],
+  "external_package": {
+    "name": "playwright-core",
+    "version": "1.61.1",
+    "entry_chain_files": [
+      {
+        "package_relative_path": "package.json",
+        "sha256": "759e376f995bf39edd4810d699b99469bab1d7428b6fbc78d41912f367df7ba9",
+        "bytes": 876
+      },
+      {
+        "package_relative_path": "index.mjs",
+        "sha256": "3d36e2132d3c8b62397d23f0bb4177336aaee503203ae2a2c90fbeb5bf3317dd",
+        "bytes": 1063
+      },
+      {
+        "package_relative_path": "index.js",
+        "sha256": "a58fb2cec4293e7dcf73c58a179898a4f3986666451a19da4e731fa3af63265b",
+        "bytes": 697
+      },
+      {
+        "package_relative_path": "lib/bootstrap.js",
+        "sha256": "97ffe165e8e45f1b51a713b3f380d383e4e183727135fe9a5e045ec62e9310ab",
+        "bytes": 3481
+      },
+      {
+        "package_relative_path": "lib/coreBundle.js",
+        "sha256": "6be5c2ea035554e9b184b1dbc7aa5e7f1fb428dd1b5c202022858dcfae9bee27",
+        "bytes": 3352341
+      }
+    ],
+    "full_physical_package_closure_audited": false,
+    "new_relative_caption_external_edge": false,
+    "note": "same pre-existing shared->host->playwright edge as native renderer; package CJS bundled import internals are not the tracked OpenFilm relative graph"
+  },
+  "main_support_source_sha256": {
+    "src/adapters/openfilm/openfilm-upstream.ts": {
+      "sha256": "7593c4d7e0cbffeb309d29dd8204aa765b769d7d7c6ffffa3f1b32bcffcb19ca",
+      "equals_capture_head": true
+    },
+    "src/host/render/upstream-pin.ts": {
+      "sha256": "406057d2f505b638553bc7041737e14ea0eab324f387d23fa914e5550313a22f",
+      "equals_capture_head": true
+    },
+    "src/host/render/snapshot-copy.ts": {
+      "sha256": "4727d1227d54d38414d9c2b5e9c5bedd23bcb6d7548c4896df15bf8a1a4b8575",
+      "equals_capture_head": true
+    },
+    "src/host/render/render-snapshot.ts": {
+      "sha256": "baf4c3457eaee0ea67aaabfe5e79ce91f36cb3260edca670fff81da535851c30",
+      "equals_capture_head": true
+    },
+    "src/host/render/native-renderer.ts": {
+      "sha256": "4c1ae6da9773c7e711b269f45ce2a4a1f5623f7014109d54bf46c541b69ec7ec",
+      "equals_capture_head": true
+    }
+  }
+}

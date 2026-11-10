@@ -1,0 +1,33 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:48847) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/agent-driven/media/native-draft-real-render.test.ts (2 tests | 2 failed) 8864ms
+   × registers real media and visibly burns native captions: 'Chinese full-stop normalization' 4567ms
+     → planned native captions were not reproduced
+   × registers real media and visibly burns native captions: 'fractional final audio frame' 4296ms
+     → planned native captions were not reproduced
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/media/native-draft-real-render.test.ts > registers real media and visibly burns native captions: 'Chinese full-stop normalization'
+ FAIL  tests/agent-driven/media/native-draft-real-render.test.ts > registers real media and visibly burns native captions: 'fractional final audio frame'
+NativeRenderError: planned native captions were not reproduced
+ ❯ NativeRenderer.render src/host/render/native-renderer.ts:438:13
+    436|       const code = typeof failure?.code === "string" ? failure.code : …
+    437|       const message = typeof failure?.message === "string" ? failure.m…
+    438|       throw new NativeRenderError(code, message, false, exited.group_s…
+       |             ^
+    439|     }
+    440|     // An ok envelope cannot turn a nonzero exit into a successful ren…
+ ❯ tests/agent-driven/media/native-draft-real-render.test.ts:42:48
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed (2)
+   Start at  08:57:21
+   Duration  15.38s (transform 2.30s, setup 0ms, collect 4.74s, tests 8.86s, environment 0ms, prepare 1.18s)
+

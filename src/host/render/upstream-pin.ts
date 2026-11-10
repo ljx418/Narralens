@@ -48,6 +48,7 @@ export const RENDER_PIN = Object.freeze({
   worker_sha256: pin.worker_sha256,
   guard_wrapper_file: pin.guard_wrapper_file,
   guard_hooks_file: pin.guard_hooks_file,
+  implementation_module_sha256: Object.freeze({...pin.implementation_module_sha256}),
   guard_module_sha256: Object.freeze({ ...pin.guard_module_sha256 }),
   loaded_module_sha256: Object.freeze({ ...pin.loaded_module_sha256 }),
 });
@@ -155,7 +156,7 @@ export async function verifyRenderPin(upstreamRoot: string): Promise<RenderPinVe
 
   // The guard and the worker are ours, and they are pinned next to the upstream: a
   // guard that was changed without being re-pinned would be a guard nobody reviewed.
-  for (const [relative, expected] of Object.entries(RENDER_PIN.guard_module_sha256)) {
+  for (const [relative, expected] of Object.entries({...RENDER_PIN.guard_module_sha256,...RENDER_PIN.implementation_module_sha256})) {
     checked.push(relative);
     const path = resolve(REPOSITORY_ROOT, relative);
     if (!contained(REPOSITORY_ROOT, path)) { mismatched.push(relative); continue; }

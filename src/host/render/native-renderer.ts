@@ -62,6 +62,8 @@ export interface NativeRenderRequest {
   /** The copied film's folder. It holds the film's entry document. */
   readonly project_root: string;
   readonly native_entry: string;
+  /** Verified source frame count; required for native planned subtitle burn at A's 30fps. */
+  readonly frame_count?: number;
   /** Where the renderer writes the film. It has to end in `.mp4`. */
   readonly out_path: string;
   /** The attempt's own staging directory. The film and the output are inside it. */
@@ -369,6 +371,7 @@ export class NativeRenderer implements NativeRenderPort {
       upstream_root: this.#upstreamRoot,
       project_root: resolve(request.project_root),
       native_entry: request.native_entry,
+      frame_count: request.frame_count ?? null,
       out_path: resolve(request.out_path),
       staging_root: stagingRoot,
       width: request.width,
@@ -412,7 +415,9 @@ export class NativeRenderer implements NativeRenderPort {
     if (exited.timedOut) {
       throw new NativeRenderError("RENDER_TIMEOUT", "the renderer did not finish in time", true, exited.group_settled);
     }
-    requireSuccessfulRendererExit(exited);
+    // Never interpret a response from a still-live group or a signalled process.
+    // A settled worker's deliberate nonzero rejection still carries its precise reason.
+    if (!exited.group_settled || exited.signal !== null) requireSuccessfulRendererExit(exited);
 
     const response = await this.#readResponse(responsePath);
     if (response === null) {
@@ -432,6 +437,8 @@ export class NativeRenderer implements NativeRenderPort {
       const message = typeof failure?.message === "string" ? failure.message : "the renderer failed";
       throw new NativeRenderError(code, message, false, exited.group_settled);
     }
+    // An ok envelope cannot turn a nonzero exit into a successful render.
+    requireSuccessfulRendererExit(exited);
     return {
       out_path: resolve(request.out_path),
       lines: Array.isArray(response.lines) ? response.lines.filter((line): line is string => typeof line === "string") : [],

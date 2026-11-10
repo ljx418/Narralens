@@ -1,0 +1,28 @@
+{
+  "$comment": "The render pin for IT-A06. The upstream commit and the studio modules come from contracts/openfilm-upstream-lock.json, which MAIN owns; this file adds the four modules that lock does not cover (render.mjs, timeline.mjs, seekable.mjs, overrides.mjs), the offline guard that stands in front of the pinned renderer (its wrapper, its loader hooks and the rules they apply), and the digest of the worker that loads them, because a render is only reproducible and only safe when every byte that can change the produced frames \u2014 or the network the renderer may reach \u2014 is named. MAIN is asked to fold the upstream digests into the canonical lock (see docs/parallel/lane-media/requests/A06-MAIN-INTEGRATION.md).",
+  "kind": "narralens.openfilm_render_pin@1.0",
+  "upstream_repository": "https://github.com/openfilm/openfilm.git",
+  "upstream_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+  "render_module": "packages/openfilm/src/render.mjs",
+  "film_doc_module": "packages/openfilm/src/film-doc.mjs",
+  "worker_path": "src/host/render/openfilm-render-worker.mjs",
+  "worker_sha256": "ae738f87be536d64fe3dc37d42a68873cc864fbee3597fc57f8155247ffdc25a",
+  "guard_wrapper_file": "openfilm-offline-wrapper.mjs",
+  "guard_hooks_file": "openfilm-offline-hooks.mjs",
+  "guard_module_sha256": {
+    "src/host/render/openfilm-offline-wrapper.mjs": "3da8a0b3a817d80bc9fad8be3d92f022b638c6919e4c959b9a5d895b62a08d30",
+    "src/host/render/openfilm-offline-hooks.mjs": "1f73d6b61741062d8b2419323174743ea42ffc93ae282a08cab6f97fe1a7f1ee",
+    "src/host/render/openfilm-guard-rules.mjs": "8ff1f73170dc0fd8414fb8fc8015416ac9e8522d0d7d092b903782f657c90c0a",
+    "src/host/render/media-process-policy.mjs": "3d448ff79c497ee5e123f6931c554a716bc033088e05e701e1de42e48ae995bc"
+  },
+  "loaded_module_sha256": {
+    "packages/openfilm/src/render.mjs": "d308b672e7e2d60b6e06ea432bbf009ae96b5e197b3f4d1d50bab7c40fcae84f",
+    "packages/openfilm/src/host.mjs": "dfed0fd5b068823d06b5091fbc01821791f0f470bbf061741bf21a25dc0bb170",
+    "packages/openfilm/src/shared.mjs": "80aae1cac71dbdc71a8a782a457202a28e9d0becf97da05d63ad0655a264543a",
+    "packages/openfilm/src/film-doc.mjs": "feef7be8181e7ec63cf2b8760f3a32b7b7e22cd851d4e5a233c04f1768cf719d",
+    "packages/openfilm/src/timeline.mjs": "75b4cca45fd22937e1fa6dbc5f67af001ab591d4a2f85efee49fb025e154e0a4",
+    "packages/openfilm/src/seekable.mjs": "fa3b91513d666ebd414fc6c4fc1798f3aad5c09c6be1e760ca3ae9d95be85b79",
+    "packages/openfilm/src/overrides.mjs": "919fe02956cafaa6f81e63898bae98302a24677d4fd8e7e3537ab0a4c733f6dd",
+    "packages/openfilm/src/media-links.mjs": "ff65c045f37edfdc1e3f39454dd6d93f2fb5a112991dd595a46a5e049ab9438f"
+  }
+}

@@ -1,0 +1,24 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:33573) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/agent-driven/media/native-draft-real-render.test.ts (1 test | 1 failed) 18273ms
+   × registers real diagnostic video/audio, prepares three editable native shots, and visibly burns planned Chinese subtitles through the same pinned renderer 18272ms
+     → expected 0 to be greater than 40
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/media/native-draft-real-render.test.ts > registers real diagnostic video/audio, prepares three editable native shots, and visibly burns planned Chinese subtitles through the same pinned renderer
+AssertionError: expected 0 to be greater than 40
+ ❯ tests/agent-driven/media/native-draft-real-render.test.ts:60:28
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed (1)
+   Start at  08:35:38
+   Duration  25.33s (transform 2.55s, setup 0ms, collect 5.14s, tests 18.27s, environment 0ms, prepare 1.27s)
+

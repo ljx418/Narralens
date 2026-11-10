@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { readFileSync, statSync, writeFileSync } from "node:fs";
+import { readFileSync, statSync, writeFileSync, mkdirSync, lstatSync, realpathSync } from "node:fs";
 import { dirname, isAbsolute, join, resolve, sep } from "node:path";
 import { register } from "node:module";
 import { fileURLToPath, pathToFileURL } from "node:url";
@@ -162,7 +162,7 @@ async function main() {
   }
   // The guard is ours, and it is pinned next to the upstream: a guard that was changed
   // without being re-pinned would be a guard nobody reviewed.
-  for (const [relative, expected] of Object.entries(pin.guard_module_sha256 ?? {})) {
+  for (const [relative, expected] of Object.entries({...pin.guard_module_sha256,...pin.implementation_module_sha256})) {
     const path = resolve(REPOSITORY_ROOT, relative);
     if (!contained(REPOSITORY_ROOT, path)) { mismatched.push(relative); continue; }
     let actual;
@@ -170,6 +170,8 @@ async function main() {
     catch { mismatched.push(relative); continue; }
     if (actual !== expected) mismatched.push(relative);
   }
+  if(!pin.implementation_module_sha256?.['src/host/render/native-subtitle-burn-source.mjs'])mismatched.push('native-subtitle-burn-source');
+  if(!pin.loaded_module_sha256?.['packages/openfilm/studio/server/captions.mjs']||!pin.loaded_module_sha256?.['packages/openfilm/studio/server/film-subtitle.mjs'])mismatched.push('native-captions-closure');
   const workerActual = sha256File(fileURLToPath(import.meta.url));
   if (workerActual !== pin.worker_sha256) mismatched.push("worker");
 
@@ -177,6 +179,13 @@ async function main() {
     reject("UPSTREAM_PIN_MISMATCH", `the pinned render inputs are not intact: ${mismatched.join(", ")}`);
   }
 
+  // Native transcript reads may consult OPENFILM_HOME for links. This attempt owns
+  // its own namespace; HOME itself is never changed or used as a writable run root.
+  const privateHome=resolve(stagingRoot,'native-home');
+  try{
+    if(realpathSync(stagingRoot)!==resolve(stagingRoot)||realpathSync(projectRoot)!==resolve(projectRoot))reject('STAGING_ROOT_REJECTED','native staging must be canonical');
+    mkdirSync(privateHome,{mode:0o700});process.env.OPENFILM_HOME=privateHome;process.env.OPENFILM_NO_UPDATE_CHECK='1';
+  }catch(error){reject('NATIVE_HOME_UNAVAILABLE','the private native metadata root could not be created');}
   const mediaPolicy = await import(new URL("./media-process-policy.mjs", import.meta.url));
   mediaPolicy.installMediaProcessPolicy();
 
@@ -215,12 +224,14 @@ async function main() {
   // 1280 wide cannot become 1920 without a scale that would make 1080 into something
   // else, and pretending otherwise would deliver a film of a different shape.
   let stage;
+  let nativeDoc;
   try {
     const read = filmDocModule.readFilmFile(readFileSync(filmPath, "utf8"));
     if (read?.doc == null) {
       reject("FILM_DOCUMENT_INVALID", `the film's edit does not read: ${(read?.problems ?? []).join("; ")}`);
       return;
     }
+    nativeDoc=read.doc;
     stage = read.doc.stage ?? { w: 1920, h: 1080 };
   } catch (error) {
     reject("FILM_DOCUMENT_UNREADABLE", `the film's edit could not be read: ${String(error?.message ?? error)}`);
@@ -256,10 +267,68 @@ async function main() {
     seekable: false,
   };
 
+  let renderPath=filmPath;
+  try{
+    const captions=await import(pathToFileURL(resolve(upstreamRoot,'packages/openfilm/studio/server/captions.mjs')).href);
+    const nativeSubtitles=await import(pathToFileURL(resolve(upstreamRoot,'packages/openfilm/studio/server/film-subtitle.mjs')).href);
+    if(typeof captions.subtitlesForExport!=='function'||typeof captions.clipCues!=='function'||typeof nativeSubtitles.parseFilmSubtitleStyle!=='function')throw new Error('fixed native subtitle seam absent');
+    const data=await captions.subtitlesForExport(projectRoot);
+    // Match the exact JSON domain the original Studio export serializes into its page.
+    const cues=JSON.parse(JSON.stringify(data.cues)),style=JSON.parse(JSON.stringify(data.style));
+    if(!Array.isArray(cues)||!style||typeof style.on!=='boolean')throw new Error('invalid native caption facts');
+    const canonical=value=>Array.isArray(value)?'['+value.map(canonical).join(',')+']':value&&typeof value==='object'?'{'+Object.keys(value).sort().map(k=>JSON.stringify(k)+':'+canonical(value[k])).join(',')+'}':JSON.stringify(value);
+    let plan;
+    try{plan=JSON.parse(readFileSync(resolve(projectRoot,'draft-plan.json'),'utf8'));}
+    catch(error){if(error?.code!=='ENOENT')throw new Error('invalid native draft source plan');}
+    if(plan!==undefined){
+      if(plan.format!=='narralens.native-draft-plan@1'||plan.timing_basis!=='storyboard_plan'||plan.fps?.num!==30||plan.fps?.den!==1||!Array.isArray(plan.storyboard?.shots))throw new Error('invalid planned native subtitle facts');
+      const lines=[];let frame=0;
+      for(const shot of plan.storyboard.shots){
+        if(!Number.isSafeInteger(shot.duration_frames)||shot.duration_frames<=0||typeof shot.caption!=='string')throw new Error('invalid planned cue interval');
+        const startMs=Math.round(frame*1000/30);frame+=shot.duration_frames;
+        if(!Number.isSafeInteger(frame))throw new Error('invalid planned frame total');
+        if(shot.caption)lines.push({text:shot.caption.replace(/\s+/g,' ').trim(),startMs,endMs:Math.round(frame*1000/30)});
+      }
+      if(frame!==request.frame_count)throw new Error('source frame count does not match the planned native film');
+      let expected=[];
+      if(lines.length){
+        const voice=nativeDoc.tracks.flatMap(track=>track.clips).find(clip=>clip.id==='narration');
+        if(!voice||filmDocModule.clipKind(voice.src)!=='sound'||!/^assets\/vo\/[A-Za-z0-9_.-]+$/.test(voice.src)||voice.time!=null||(voice.at??0)!==0||(voice.speed??1)!==1)throw new Error('the complete planned narration is not present');
+        const transcripts=await import(pathToFileURL(resolve(upstreamRoot,'packages/openfilm/studio/server/transcripts.mjs')).href);
+        const transcript=await transcripts.readTranscript(projectRoot,voice.src);
+        if(!transcript||transcript.cut!==true||transcript.lines.length!==lines.length||lines.some((line,i)=>line.text!==transcript.lines[i]?.text||line.startMs!==transcript.lines[i]?.startMs||line.endMs!==transcript.lines[i]?.endMs))throw new Error('the planned source transcript is missing or changed');
+        const derived=await import(pathToFileURL(resolve(upstreamRoot,'packages/openfilm/studio/server/derived.mjs')).href);
+        const media=await derived.probe(projectRoot,voice.src),seconds=media.duration;
+        // Match the existing ceil-to-source-frame model without stretching/trimming
+        // the real recording. A subframe tail is transformed by the native span logic.
+        if(!Number.isFinite(seconds)||seconds<=(frame-1)/30-0.000001||seconds>frame/30+0.000001)throw new Error('narration duration differs from verified source frames');
+        const span=filmDocModule.clipSpan(voice,seconds);
+        expected=captions.clipCues(lines,{fromMs:span.from*1000,startMs:(voice.at??0)*1000,durMs:span.length*1000,speed:span.speed},{cut:true});
+      }
+      if(expected.length!==cues.length||expected.some((c,i)=>c.text!==cues[i]?.text||Math.abs(c.startMs-cues[i]?.startMs)>1||Math.abs(c.durMs-cues[i]?.durMs)>1))throw new Error('planned native captions were not reproduced');
+      const rawStyle=JSON.parse(readFileSync(resolve(projectRoot,'.film/subtitles.json'),'utf8'));
+      if(canonical(rawStyle)!==canonical(nativeSubtitles.parseFilmSubtitleStyle(rawStyle))||canonical(style)!==canonical(rawStyle))throw new Error('native project subtitle style was not preserved');
+    }
+    if(style.on&&cues.length){
+      if(fps!==30||!Number.isSafeInteger(request.frame_count)||request.frame_count<=0)throw new Error('native subtitle burn requires verified source frames at 30fps');
+      const helper=await import(new URL('./native-subtitle-burn-source.mjs',import.meta.url));
+      const wrapped=helper.buildPinnedNativeSubtitleBurnSource({width:stage.w,height:stage.h,frame_count:request.frame_count,cues,style,subtitle_module_bytes:readFileSync(resolve(upstreamRoot,'packages/openfilm/studio/server/film-subtitle.mjs'))});
+      let current=projectRoot;
+      for(const name of ['.film','cache']){
+        current=resolve(current,name);try{mkdirSync(current,{mode:0o700});}catch(error){if(error?.code!=='EEXIST')throw error;}
+        if(!lstatSync(current).isDirectory()||lstatSync(current).isSymbolicLink()||realpathSync(current)!==current)throw new Error('unsafe native subtitle cache');
+      }
+      // Reserved per-attempt directory: never overwrite source or an old attempt's cache.
+      mkdirSync(resolve(current,'narralens-subtitle-burn'),{mode:0o700});
+      for(const file of wrapped.files){const target=resolve(projectRoot,file.relative_path);if(!contained(resolve(current,'narralens-subtitle-burn'),target))throw new Error('invalid subtitle wrapper path');writeFileSync(target,file.bytes,{flag:'wx',mode:0o600});}
+      renderPath=resolve(projectRoot,wrapped.entry);
+    }
+  }catch(error){reject('NATIVE_SUBTITLE_PREPARATION_FAILED',String(error?.message??'native subtitle preparation failed'));}
+
   const started = Date.now();
   let result;
   try {
-    result = await renderModule.render([filmPath], options);
+    result = await renderModule.render([renderPath], options);
     const problems = mediaPolicy.nativeOutputProblems(result);
     if (problems.length > 0) throw new Error("native content validation failed");
   } catch (error) {

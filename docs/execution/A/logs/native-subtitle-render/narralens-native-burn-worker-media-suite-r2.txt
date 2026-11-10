@@ -1,0 +1,33 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:42842) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/media/native-draft-real-render.test.ts (1 test) 22262ms
+   ✓ registers real diagnostic video/audio, prepares three editable native shots, and visibly burns planned Chinese subtitles through the same pinned renderer  22262ms
+ ✓ tests/agent-driven/media/native-draft.test.ts (16 tests) 971ms
+   ✓ source-only integration with the real fixed pure parser, no browser/render/decode > creates editable primary clips and exact native source/settings/VTT closure from registry unit facts  890ms
+ ✓ tests/agent-driven/media/upstream-pin.test.ts (5 tests) 696ms
+   ✓ the render pin > verifies the pinned checkout when it is on this machine  687ms
+ ✓ tests/agent-driven/media/offline-guard.test.ts (8 tests) 848ms
+   ✓ the offline guard > is installed in front of the pinned renderer  824ms
+ ✓ tests/agent-driven/media/published-package-store.test.ts (17 tests) 537ms
+ ✓ tests/agent-driven/media/render-snapshot.test.ts (21 tests) 519ms
+ ✓ tests/agent-driven/media/delivery-service.test.ts (12 tests) 341ms
+ ✓ tests/agent-driven/media/native-renderer.test.ts (6 tests) 313ms
+ ✓ tests/agent-driven/media/download.test.ts (14 tests) 236ms
+ ✓ tests/agent-driven/media/render-worker.test.ts (7 tests) 209ms
+ ✓ tests/agent-driven/media/native-subtitle-burn.test.ts (5 tests) 112ms
+ ✓ tests/agent-driven/media/process-group-inheritance.test.ts (1 test) 78ms
+ ✓ tests/agent-driven/media/manifest.test.ts (10 tests) 23ms
+ ✓ tests/agent-driven/media/harness-closure.test.ts (8 tests) 25ms
+ ✓ tests/agent-driven/media/snapshot-copy.test.ts (8 tests) 21ms
+ ✓ tests/agent-driven/media/preflight.test.ts (10 tests) 17ms
+ ✓ tests/agent-driven/media/qc.test.ts (15 tests) 5ms
+ ✓ tests/agent-driven/media/media-process-policy.test.ts (3 tests) 2ms
+
+ Test Files  18 passed (18)
+      Tests  167 passed (167)
+   Start at  08:46:12
+   Duration  74.39s (transform 2.65s, setup 0ms, collect 16.37s, tests 27.22s, environment 2ms, prepare 21.01s)
+
