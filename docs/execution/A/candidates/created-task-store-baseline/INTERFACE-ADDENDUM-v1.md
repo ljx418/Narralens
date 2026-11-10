@@ -1,0 +1,11 @@
+# Candidate interface addendum v1
+
+This does not edit frozen DESIGN-v1. The implementation strengthens sync hooks: db is TaskTransactionDb.prepare(sql), exposing positional get/all/run on the SAME compose connection, accepting SELECT/INSERT/UPDATE/DELETE only. It is a synchronous scoped capability, not the raw DatabaseSync instance or a second connection. Hook return revokes its methods/statements; thenables are rejected/absorbed and delayed SQL fails lifetime checks. Any SQL failure poisons the hook even when swallowed, preventing partial commit. Hooks must not call nested transaction APIs or capture unrelated raw DB handles. No transaction/schema/close SQL is offered. MAIN ports can use literal closed row SQL for step/checkpoint/event mirror work. No callable hook is exposed via HTTP/MCP.
+
+Prepared file bytes are nonnegative safe integers, allowing legitimate empty sidecars (the design's earlier positive-only wording was unnecessarily restrictive); files/roots remain nonempty, case-fold aliased paths rejected. Fact validation proves shape/digest only. Real filesystem and rights proof is exclusively required assertPrepared context.proof, an unchanged opaque Host object; candidate does not invent a generic token/metadata proof or register a production verifier.
+
+Policy is detached/frozen before any hook; queued new job remains queued/attempt0/no lease after all reserve hooks. Lease is sampled within BEGIN and checked after both assertPrepared calls, including after final prepared/outbox write. Original same-key receipt replay is access-checked before ledger and again with a fresh clock, preserving the original queued receipt even if existing job is terminal.
+
+Hooks are composition-time single writer functions. Owner/Run/grant/input/step validation and step/checkpoint+event mirror binding must be supplied by MAIN; fixture no-op authorization and WeakMap-like identity objects are NOT production proofs. No CP schema/runtime/source truth is inferred from test fixture assertions. This revision has NOT been typechecked, tested or executed. It is reviewable source candidate only.
+
+Phase precision: access precedes lookup; only a ledger miss enters new_reserve; replay/final_reserve receive the bound job_id. This is an explicit integration contract, not implicit legacy workflow authorization. See MAIN-PORTS.md.

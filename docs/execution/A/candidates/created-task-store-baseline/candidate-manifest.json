@@ -1,0 +1,170 @@
+{
+  "base_sha": "7b48bc17fb65d966d6239c537f856ff240846766",
+  "writer": "Codex BRIDGE",
+  "session": "source-only; archive preparation exec14607 terminal0",
+  "intended_files": [
+    {
+      "path": "src/host/agent-driven/created-task-store.ts",
+      "bytes": 18401,
+      "sha256": "f7c4c74c86a8e38c74673ab9656f751162436cba2325bfeb82ad1dd9639b8012"
+    },
+    {
+      "path": "tests/agent-driven/integration/created-task-store.test.ts",
+      "bytes": 13804,
+      "sha256": "92a560a51594e37da8ee347090f5da2e2058232dd3f15c57c0744f900e29359c"
+    }
+  ],
+  "patch_sha256": "79c4fe8a7e4d121304127ec5a24221458fc8647bf1165510f7b387968aa63ece",
+  "design_sha256": "c6334a49e593b069623b4ed938222291e5d8da2854afe442d7c13fe33a5e99ec",
+  "interface_addendum_sha256": "66a286058c35d6df526bb779043da938352e1b079a99155c8ccbdcee70365b99",
+  "relative_imports": [
+    {
+      "importer": "src/host/agent-driven/created-task-store.ts",
+      "target": "../../contracts/agent-driven-types.js",
+      "exists": true
+    },
+    {
+      "importer": "src/host/agent-driven/created-task-store.ts",
+      "target": "../../contracts/agent-driven-validator.js",
+      "exists": true
+    },
+    {
+      "importer": "src/host/agent-driven/created-task-store.ts",
+      "target": "../creative/digest.js",
+      "exists": true
+    },
+    {
+      "importer": "src/host/agent-driven/created-task-store.ts",
+      "target": "../projects/revision-store.js",
+      "exists": true
+    },
+    {
+      "importer": "src/host/agent-driven/created-task-store.ts",
+      "target": "../projects/operation-idempotency-store.js",
+      "exists": true
+    },
+    {
+      "importer": "src/host/agent-driven/created-task-store.ts",
+      "target": "../projects/job-kind-migration.js",
+      "exists": true
+    },
+    {
+      "importer": "src/host/agent-driven/created-task-store.ts",
+      "target": "../job-defaults.js",
+      "exists": true
+    },
+    {
+      "importer": "src/host/agent-driven/created-task-store.ts",
+      "target": "../render/snapshot-copy.js",
+      "exists": true
+    },
+    {
+      "importer": "src/host/agent-driven/created-task-store.ts",
+      "target": "./agent-schema-definition.js",
+      "exists": true
+    },
+    {
+      "importer": "tests/agent-driven/integration/created-task-store.test.ts",
+      "target": "../../../src/contracts/agent-driven-types.js",
+      "exists": true
+    },
+    {
+      "importer": "tests/agent-driven/integration/created-task-store.test.ts",
+      "target": "../../../src/host/projects/revision-store.js",
+      "exists": true
+    },
+    {
+      "importer": "tests/agent-driven/integration/created-task-store.test.ts",
+      "target": "../../../src/host/persistent-job-store.js",
+      "exists": true
+    },
+    {
+      "importer": "tests/agent-driven/integration/created-task-store.test.ts",
+      "target": "../../../src/host/agent-driven/created-task-store.js",
+      "exists": true
+    }
+  ],
+  "typecheck": {
+    "exit": 0,
+    "exec": 60630,
+    "evidence": "validation-r2/tsc.*"
+  },
+  "tests": {
+    "exit": 0,
+    "exec": 60630,
+    "files": 1,
+    "cases": 21,
+    "evidence": "validation-r2/tests.*",
+    "scope": "author internal storage/hook/lease tests only; no production Run/gate/rights/FS proof"
+  },
+  "install": {
+    "exit": 0,
+    "exec": 39626,
+    "offline": true,
+    "initial_failure": {
+      "exec": 60992,
+      "exit": 1,
+      "reason": "default Linux cache missing SDK; retained"
+    }
+  },
+  "production_registration": "NOT_DONE_MAIN_ONLY",
+  "evidence": "INTERNAL_STORAGE_VALIDATION_ONLY, independent and production gates pending",
+  "main_ports_sha256": "17e9506fa49d86d9d24866f348945d5aa4c7470ea11309672787ff42895671ee",
+  "base_dependency_hashes": [
+    {
+      "path": "src/host/projects/revision-store.ts",
+      "sha256": "fea46b6310be044d2c90b6c846b07e04600da286643411a53313680230978dae"
+    },
+    {
+      "path": "src/host/projects/operation-idempotency-store.ts",
+      "sha256": "d7ac446fdd7007c023f86d15c98a385447c10e79788e8f9188d83b9b59dba24d"
+    },
+    {
+      "path": "src/host/projects/job-kind-migration.ts",
+      "sha256": "e0f5e6c8aeaf13ddd3dafbbedbf777db3e81c60524754b68cde11e0dde0f66f0"
+    },
+    {
+      "path": "src/host/agent-driven/agent-schema-definition.ts",
+      "sha256": "581974592352a9fd6da2affa47afe722274581933d1cbbf569f6c94b18e6a46d"
+    },
+    {
+      "path": "src/contracts/agent-driven-types.ts",
+      "sha256": "54356697802c0bf048e5cbcde1f54eb33713d4fe58943b346406804011cb3644"
+    },
+    {
+      "path": "src/contracts/agent-driven-validator.ts",
+      "sha256": "f11a68bad982b7914e73f396ce48e99195ffc8fa88e842f137ffabf31900ea73"
+    },
+    {
+      "path": "src/host/creative/digest.ts",
+      "sha256": "0a67cb54d1e7b5edf22a26dc8d23eb411da856d872f1f00ca3a8027375214e3d"
+    },
+    {
+      "path": "src/host/persistent-job-store.ts",
+      "sha256": "56dcb72f1784739ae2ebabf5d2eb8c74c76c0f1f5b6fe37432e910e4a4fdbe54"
+    },
+    {
+      "path": "src/host/job-defaults.ts",
+      "sha256": "a97f1f4fb31b3743aa1016c2c2ac6b1200ff0e8d84e98451b9d63041d94b8582"
+    },
+    {
+      "path": "package.json",
+      "sha256": "edace26fdfa5a9808f2706fe15ab3935d0512d08f765d4cffec268eb7e783263"
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "sha256": "66d38478d0b035777472a8cdb53954559a6c1a5f8803f7247caaffce1ac3584d"
+    }
+  ],
+  "test_source_calls": {
+    "ordinary_it": 16,
+    "parameterized_it_each": 1,
+    "actual_executed_cases": 21
+  },
+  "revision": "r2-tests-gate-and-real-lease-cas",
+  "temporary_source_cleanup": {
+    "root": "/tmp/narralens-bridge-task-7b48-uf80hr16",
+    "removed": true,
+    "scope": "only own exact temp root with matching owner nonce"
+  }
+}

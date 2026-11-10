@@ -1,0 +1,15 @@
+# A03-009：真实任务预约、工作流步骤与事件同事务
+
+MAIN纳入BRIDGE的CreatedTaskStore私有候选，以原RevisionStore同连接、原job和operation_idempotency为权威。新增created_task_input/prepared仅记录不可变输入/准备事实；不新增另一套Job、项目提交或工作流状态机，不修改冻结cp_a0 DDL/DTO。未完成实际worker及准备证明前不注册task.prepare生产handler，避免202后永远排队。
+
+TaskStore的临时SQL能力在WeakMap中绑定实际DatabaseSync并在同步callback返回即撤销。ProductSqliteRepository.joinTaskTransaction只能接受同DB、当前事务、仍live的能力，复用原表级适配器且不开第二个BEGIN。任意scope内SQL/业务失败均poison整个预约；异步port、异步join和被忽略的async-within均拒绝，Promise晚到拒绝被吸收，前置写入全部回滚。
+
+独立预审发现within未直接检查thenable，旧码专用复现真实红灯（含异步晚到错误），MAIN补入口检查，新增26项task存储测试，原repository9及FixedWorkflow31项继续通过；此前type重构IIFE漏调用失败原日志保留。预审闭环PASS只限同连接seam，没有自签整轮。
+
+FixedWorkflowService新增recordStepAttemptInTransaction，原async方法delegate；原callback业务体逐字节保留，兼容既有状态/检查点/投影。原existing分支无事件已单独登记，接实际worker前补齐生产实时性，不靠轮询假装业务事件。
+
+CreatedTaskGate为MAIN的预约授权边界：先实际owned created project；新预约读取当前committed base、source producer、creative closure、固定plan、原run.prepared事件内输入refs，再用原guardExecution验证真实Run/grant/期限/scope/gates。第一次预约对严格连续且前一个已终结的attempt建立prospective pending检查，尚未伪称它存在；同事务bind原step后，最终必须重读真实pending+job绑定并再次guard，失败整体回滚。历史同key重放只返回原accepted回执，不产生新执行或自动续授权；调度worker仍必须重验当前真实Run/lease/输入/源字节/许可，不能把receipt当授权。
+
+四项真实Host创建/原creative与workflow服务/SQLite接缝测试通过，包含成功+幂等、九类非法输入、bind后撤销授权整体回滚、创作closure变化拒绝。其权益/能力/可信确认port明确是component test fixture；不宣称生产Run已开放、媒体版权真实通过或任务完成。
+
+剩余生产接线：当前实际能力/权益事实、可信确认、原始输入与准备路径、后台lease worker、stage字节与rights验证、恢复及停止、受控审批/唯一Coordinator采用、snapshot渲染/QC/Delivery与真实native ack。不得从预约测试声明这些已实现。

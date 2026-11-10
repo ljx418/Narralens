@@ -1,0 +1,16 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:75772) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/created-task-gate.test.ts (4 tests) 11744ms
+   ✓ reserves one real job, cp step/checkpoint and mirrored event atomically, then replays without new effects  2819ms
+   ✓ rejects stale base, altered refs/scope/attempt and crossing the sample gate before creating any job  2758ms
+   ✓ rolls back real job, step, checkpoint, event and grant mutation if final authorization is revoked  3538ms
+   ✓ rejects a creative closure changed after authorization without task side effects  2628ms
+
+ Test Files  1 passed (1)
+      Tests  4 passed (4)
+   Start at  09:35:22
+   Duration  18.47s (transform 2.39s, setup 0ms, collect 4.92s, tests 11.74s, environment 0ms, prepare 1.21s)
+

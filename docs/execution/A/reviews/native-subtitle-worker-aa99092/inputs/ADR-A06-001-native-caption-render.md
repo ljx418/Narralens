@@ -1,0 +1,9 @@
+# A06-001：原渲染器的原生字幕输出闭包
+
+沿用固定OpenFilm renderer与现有snapshot-bound导出链。worker读取副本中的真实字幕/样式，经同一原生captionText/clipCues及真实旁白clipSpan变换后烧录；无第二全片后端。新增上游与mjs helper均绑定pin和ConfigDigest。原始film仍先验，wrapper仅为私有渲染输入，不写author或snapshot。
+
+有Host draft-plan时，核对原始VTT与计划、完整旁白音轨及真实时长；再按原生变换比对导出cue。中文句末规范化和2.99秒向上取整90帧的尾cue边界均先真实复现失败、后用原生函数修复。不得靠忽略标点或宽泛时间误差放行。缺VTT/非法style拒绝并无MP4；父进程保留worker的明确失败码，成功仍要求进程正常退出。
+
+真实验证范围：三镜、三秒synthetic注册音画、字幕on/off真实编码、90帧完整decode、音轨RMS与可见字形像素；两种边界均通过。旧worker在保持其正确pin后故意退回，字形像素为0，专用断言失败；finally恢复源码，非因pin错误产生假红。最新完整媒体套件18files/168tests通过，build通过，scan564files/0findings。之前失败捕获全部保留。
+
+不是人声或真实内容成片，不是Run/Coordinator采用或正式Delivery验收。首次当前-source type通过后有测试用例与worker变更，最新完整媒体及build消费最终源码；后续仍需全量type/check与真实任务链。独立外审待冻结后进行，不能由实现者自签。

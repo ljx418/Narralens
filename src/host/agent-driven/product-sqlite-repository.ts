@@ -2,6 +2,7 @@ import type { DatabaseSync, SQLInputValue } from 'node:sqlite';
 import { canonicalJson } from '../engine/source-digest-v1.js';
 import { RevisionStore } from '../projects/revision-store.js';
 import { OperationIdempotencyStore } from '../projects/operation-idempotency-store.js';
+import {isCurrentTaskTransaction,type TaskTransactionDb} from './created-task-store.js';
 import { applyAgentSchema } from './agent-schema.js';
 import {
   PRODUCT_COLLECTIONS,
@@ -57,6 +58,17 @@ export class ProductSqliteRepository implements ProductRepository {
     this.#schemaVersion = Number(this.#db.prepare('PRAGMA schema_version').get()?.schema_version);
   }
   transaction<T>(work:(tx:ProductTransaction)=>T):Promise<T> {
+    if(this.#inside){const error=invalid();this.#poison?.(error);throw error;}
+    try{return Promise.resolve(this.revisions.atomic(()=>this.scope(work)));}
+    catch(error){return Promise.reject(error);}
+  }
+  /** Join only the live same-connection TaskStore scope. No BEGIN, promise or leaked tx.
+   * The enclosing task capability is poisoned even if a composition hook catches failure. */
+  joinTaskTransaction<T>(rows:TaskTransactionDb,work:(tx:ProductTransaction)=>T):T {
+    if(!isCurrentTaskTransaction(rows,this.#db)||!this.#db.isTransaction)throw invalid();
+    return rows.within(()=>this.scope(work));
+  }
+  private scope<T>(work:(tx:ProductTransaction)=>T):T {
     if (this.#inside) {const error=invalid();this.#poison?.(error);throw error;}
     let live = true,poisoned=false;
     let fault:unknown;
@@ -70,7 +82,7 @@ export class ProductSqliteRepository implements ProductRepository {
       const current = Number(this.#db.prepare('PRAGMA schema_version').get()?.schema_version);
       if(current!==this.#schemaVersion){applyAgentSchema(this.#db);this.#schemaVersion=current;}
       this.#inside=true;
-      const result=this.revisions.atomic(()=>{
+      const result=(()=>{
         const tx:ProductTransaction={
           get:(c,k)=>guarded(()=>this.read(c,k)),
           list:(c,s)=>guarded(()=>this.list(c,s)),
@@ -87,9 +99,9 @@ export class ProductSqliteRepository implements ProductRepository {
         }
         if(poisoned)throw fault;
         return value;
-      });
-      return Promise.resolve(result);
-    } catch(error){ return Promise.reject(error); }
+      })();
+      return result;
+    } catch(error){ throw error; }
     finally {live=false;this.#inside=false;this.#poison=undefined;}
   }
   private spec(c:ProductCollection) {

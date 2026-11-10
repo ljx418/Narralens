@@ -1,0 +1,81 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:74443) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/agent-driven/integration/created-task-store.test.ts (26 tests | 1 failed | 25 skipped) 52ms
+   ↓ commits one existing job, original ledger/input, synchronous link, event and outbox on the real same connection
+   ↓ replays the original accepted receipt after real job success and correlation change, with no duplicate effects
+   ↓ checks access before replay and rejects different key payload/principal or duplicate execution job
+   ↓ permits a distinct execution-attempt storage identity under fixture authority without duplicate jobs
+   ↓ reads a real same-DB fixture gate before any write/replay and accepts again only after that row is restored
+   ↓ rolls back job/input/fixture link and all effects on synchronous hook failure
+   ↓ rolls back all already-written effects when final same-transaction authorization fails
+   ↓ poisons a swallowed SQL hook failure so an outer transaction cannot partially commit
+   ↓ rejects thenable hooks, rolls back, and revokes escaped SQL methods before delayed continuation
+   ↓ requires explicit policy instead of inventing attempts or a legacy task kind
+   ↓ persists immutable input and server-selected opaque token over a real close/reopen
+   ↓ records only a prepared fact under the real lease and never completes the existing job
+   ↓ rejects owner late worker facts without inserting a prepared result
+   ↓ rejects attempt late worker facts without inserting a prepared result
+   ↓ rejects expiry late worker facts without inserting a prepared result
+   ↓ rejects cancel late worker facts without inserting a prepared result
+   ↓ rejects terminal late worker facts without inserting a prepared result
+   ↓ uses actual lease CAS and reclaim: old worker facts stay late while the newly leased worker can record
+   ↓ rejects a wrong Host proof/token and rolls back if the lease expires at the final proof boundary
+   ↓ rejects absolute/traversing/aliased closure facts and disallows mutation of recorded facts
+   ↓ rejects runtime namespace tampering rather than silently recreating an immutable trigger
+   ↓ joins the live same-connection product transaction and atomically mirrors a product event
+   ↓ poisons the task reservation if a joined product callback fails even when the hook swallows it
+   ↓ rejects a foreign connection and forged SQL capability without treating it as a joined transaction
+   ↓ rolls back joined async work and rejects product continuation after its synchronous scope ends
+   × rejects ignored async-within before partial task or SQL-prefix effects can commit 51ms
+     → expected [Function] to throw an error
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/created-task-store.test.ts > rejects ignored async-within before partial task or SQL-prefix effects can commit
+AssertionError: expected [Function] to throw an error
+
+- Expected: 
+null
+
++ Received: 
+undefined
+
+ ❯ tests/agent-driven/integration/created-task-store.test.ts:200:57
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+⎯⎯⎯⎯⎯⎯ Unhandled Errors ⎯⎯⎯⎯⎯⎯
+
+Vitest caught 1 unhandled error during the test run.
+This might cause false positive tests. Resolve unhandled errors to make sure your tests are not affected.
+
+⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯
+Error: SQL hook lifetime ended
+ ❯ fail src/host/agent-driven/created-task-store.ts:17:74
+     15|   constructor(readonly code:'INVALID_REQUEST'|'REVISION_CONFLICT'|'IDE…
+     16| }
+     17| function fail(code:CreatedTaskError['code'],message:string):never {thr…
+       |                                                                          ^
+     18| const ID=/^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$/;
+     19| const HASH=/^[a-f0-9]{64}$/;
+ ❯ guard src/host/agent-driven/created-task-store.ts:130:16
+ ❯ Object.prepare src/host/agent-driven/created-task-store.ts:134:71
+ ❯ tests/agent-driven/integration/created-task-store.test.ts:199:193
+ ❯ processTicksAndRejections node:internal/process/task_queues:103:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 'INVALID_REQUEST' }
+This error originated in "tests/agent-driven/integration/created-task-store.test.ts" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 25 skipped (26)
+     Errors  1 error
+   Start at  09:32:36
+   Duration  4.47s (transform 375ms, setup 0ms, collect 2.50s, tests 52ms, environment 0ms, prepare 1.28s)
+

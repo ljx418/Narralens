@@ -174,6 +174,24 @@ export const CAPABILITY_SLUG = {
   delivery: "delivery_package",
 } as const;
 
+/** Shared unchanged input shape for async entry and same-transaction composition. */
+export type RecordStepAttemptInput = {
+  project_id: string;
+  run_id: string;
+  plan_version: 1;
+  step_id: string;
+  attempt: number;
+  grant_id: string;
+  input_digest: string;
+  state: StepAttemptRecord["state"];
+  job_id?: string | null;
+  output_artifact_id?: string | null;
+  output_version?: number | null;
+  input_refs?: ReadonlyArray<Ref>;
+  output_refs?: ReadonlyArray<Ref>;
+  observed_at: string;
+};
+
 /** The publication input of a review package. */
 export interface PublishReviewPackageInput {
   readonly project_id: string;
@@ -680,26 +698,23 @@ export class FixedWorkflowService {
    * own. The attempt row is the durable fact the execution guard later checks.
    */
   async recordStepAttempt(
-    input: {
-      project_id: string;
-      run_id: string;
-      plan_version: 1;
-      step_id: string;
-      attempt: number;
-      grant_id: string;
-      input_digest: string;
-      state: StepAttemptRecord["state"];
-      job_id?: string | null;
-      output_artifact_id?: string | null;
-      output_version?: number | null;
-      input_refs?: ReadonlyArray<Ref>;
-      output_refs?: ReadonlyArray<Ref>;
-      observed_at: string;
-    },
+    input: RecordStepAttemptInput,
     caller: TrustedCallerContext,
   ): Promise<WorkflowRun> {
     this.#requireContext(caller);
-    return this.#repository.transaction((tx) => {
+    return this.#repository.transaction(tx => this.recordStepAttemptInTransaction(tx, input, caller));
+  }
+
+  /** MAIN-only composition over an already-live ProductTransaction. Opens no transaction.
+   * Caller must establish existing owner/Run/grant/job eligibility; this retains the
+   * exact original attempt/checkpoint/event/projection rules, not a new state machine.
+   */
+  recordStepAttemptInTransaction(
+    tx: ProductTransaction,
+    input: RecordStepAttemptInput,
+    caller: TrustedCallerContext,
+  ): WorkflowRun {
+    this.#requireContext(caller);
       const run = this.#requireRun(tx, input.project_id, input.run_id);
       const existing = tx.list("step_attempt", {
         project_id: input.project_id,
@@ -819,7 +834,6 @@ export class FixedWorkflowService {
       });
 
       return this.#projectRun(tx, updated);
-    });
   }
 
   /* ------------------------------------------------------------------------------------ */

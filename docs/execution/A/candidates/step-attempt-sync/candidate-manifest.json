@@ -1,0 +1,20 @@
+{
+  "head_observed": "aa9909232edfaf22ec7fb82366a0ff8f0fad66b7",
+  "input_mode": "actual current MAIN file captured once; no production edits",
+  "input_file": "src/host/creative/fixed-workflow-service.ts",
+  "original_sha256": "87d32389c94613e96e7835a953dd072c05507a39722e7425660031356838c10f",
+  "candidate_sha256": "214b4697011b55efc32db5bea12d84d39e61574e62c2f0da03a4ddb3264e6356",
+  "original_method_sha256": "e438fadf5d16bb3f281817a71f646ca05807d47a10fe263f3efc1f34a1894aee",
+  "shared_callback_body_sha256": "9a5201141e788f4b0e7e0a68c2940b75f571d9d1a4cec16e98d8376e93ee814c",
+  "callback_body_verbatim_preserved": true,
+  "patch_sha256": "ad488c905061dea5b80885dc2699b9b131f5f0b28b3bc1050818a94065df835c",
+  "candidate_source": "/mnt/c/workspace/videoworkline/Narralens-agents/bridge-observability/var/workflow-step-tx-aa9909/source/src/host/creative/fixed-workflow-service.ts",
+  "typecheck": "NOT_RUN",
+  "tests": "NOT_RUN",
+  "production_changes": false,
+  "writer": "Codex /root/a_bridge_lead",
+  "public_method": "FixedWorkflowService.recordStepAttemptInTransaction(tx,input,caller):WorkflowRun",
+  "exported_type": "RecordStepAttemptInput",
+  "context_guard": "same minted-caller check; async entry preserves pretransaction check and sync method rechecks like existing readCurrentRunInTransaction",
+  "event_parity": "new branch emits original event; existing branch still no emit, not repaired"
+}

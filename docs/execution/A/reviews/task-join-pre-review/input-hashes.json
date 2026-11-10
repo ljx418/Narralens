@@ -1,0 +1,17 @@
+{
+  "kind": "narralens.task-join-pre-review-inputs@1",
+  "reviewed_at": "2026-11-10",
+  "base_commit": "aa9909232edfaf22ec7fb82366a0ff8f0fad66b7",
+  "mode": "independent-static-read-only",
+  "inputs": {
+    "src/host/agent-driven/created-task-store.ts": "5ec58eb2fa7acda5ed114aff7f913b3ad2214594fe3d701fbb95cbc61ec44f80",
+    "src/host/agent-driven/product-sqlite-repository.ts": "e0beb9353f8f34fcdef9a5b434959f0b63c990aef3de8588cae25cea34a328a1",
+    "tests/agent-driven/integration/created-task-store.test.ts": "b5671ffa9348527c198a815eaa20f6a5d222e437397e0ff0039e9cdf25787e38",
+    "tests/agent-driven/integration/product-sqlite-repository.test.ts": "9079f4ff2f1047daeecb823496f253a865bb3c44f3120530d3c591957147a97a"
+  },
+  "commands_run": [
+    "static source and diff inspection only",
+    "sha256sum on four reviewed inputs"
+  ],
+  "tests_run": false
+}

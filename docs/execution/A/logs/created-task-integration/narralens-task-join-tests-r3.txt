@@ -1,0 +1,16 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:74878) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/created-task-store.test.ts (26 tests) 300ms
+ ✓ tests/agent-driven/product/fixed-workflow-service.test.ts (31 tests) 158ms
+(node:75037) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/product-sqlite-repository.test.ts (9 tests) 90ms
+
+ Test Files  3 passed (3)
+      Tests  66 passed (66)
+   Start at  09:33:20
+   Duration  14.40s (transform 623ms, setup 0ms, collect 6.73s, tests 548ms, environment 0ms, prepare 4.17s)
+

@@ -1,0 +1,22 @@
+{
+  "kind": "narralens.task-join-pre-review-closure-inputs@1",
+  "reviewed_at": "2026-11-10",
+  "base_commit": "aa9909232edfaf22ec7fb82366a0ff8f0fad66b7",
+  "mode": "independent-static-read-only-closure",
+  "supersedes_findings_only": "input-hashes.json",
+  "inputs": {
+    "src/host/agent-driven/created-task-store.ts": "09576c2f222cb87bd4980bd7ea755cba4302f2395981571e386d299e26e63e7a",
+    "src/host/agent-driven/product-sqlite-repository.ts": "e0beb9353f8f34fcdef9a5b434959f0b63c990aef3de8588cae25cea34a328a1",
+    "tests/agent-driven/integration/created-task-store.test.ts": "c7be6b9db48cb32c5a889542bcd28e15469ed0f02221faf4c73ed379685a1b7e",
+    "tests/agent-driven/integration/product-sqlite-repository.test.ts": "9079f4ff2f1047daeecb823496f253a865bb3c44f3120530d3c591957147a97a"
+  },
+  "reported_external_sessions": {
+    "old_code_red": "66498",
+    "repaired_three_files_66_tests_type0": "35369"
+  },
+  "commands_run_by_this_reviewer": [
+    "static source and diff inspection only",
+    "sha256sum on four reviewed inputs"
+  ],
+  "tests_run_by_this_reviewer": false
+}

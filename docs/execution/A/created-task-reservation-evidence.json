@@ -1,0 +1,92 @@
+{
+  "format": "narralens.created-task-reservation-evidence@1",
+  "base_commit": "aa9909232edfaf22ec7fb82366a0ff8f0fad66b7",
+  "declaration": "TASK_RESERVATION_SEAM_INTERNAL_EVIDENCED",
+  "production_registered": false,
+  "tests": [
+    {
+      "session": 94914,
+      "typecheck_exit": 0,
+      "files": 1,
+      "tests": 21,
+      "exit": 0,
+      "scope": "original candidate only"
+    },
+    {
+      "session": 82015,
+      "typecheck_exit": 2,
+      "scope": "IIFE refactor compile failure retained"
+    },
+    {
+      "session": 41604,
+      "typecheck_exit": 0,
+      "files": 2,
+      "tests": 34,
+      "exit": 0,
+      "scope": "join before ignored async-within finding"
+    },
+    {
+      "session": 66498,
+      "exit": 1,
+      "scope": "deliberate old implementation async-within defect reproduction"
+    },
+    {
+      "session": 35369,
+      "typecheck_exit": 0,
+      "files": 3,
+      "tests": 66,
+      "exit": 0,
+      "scope": "join repaired + unchanged workflow regression"
+    },
+    {
+      "session": 68781,
+      "typecheck_exit": 2,
+      "scope": "test used non-existent wire steps field; fixed to actual cp checkpoint/step records"
+    },
+    {
+      "session": 73415,
+      "typecheck_exit": 0,
+      "files": 1,
+      "tests": 4,
+      "exit": 0,
+      "scope": "real created Host + original workflow + SQL reservation; explicit test eligibility/confirmation ports"
+    }
+  ],
+  "reviews": {
+    "same_connection_join": "SCOPED_STATIC_PASS",
+    "created_task_gate": "SCOPED_STATIC_PASS"
+  },
+  "source_hashes": {
+    "src/host/agent-driven/created-task-store.ts": "09576c2f222cb87bd4980bd7ea755cba4302f2395981571e386d299e26e63e7a",
+    "src/host/agent-driven/created-task-gate.ts": "151422111f9eacd90b4abfca3c762226fb1b348ffab04522cd7ab5f41554764b",
+    "src/host/agent-driven/product-sqlite-repository.ts": "e0beb9353f8f34fcdef9a5b434959f0b63c990aef3de8588cae25cea34a328a1",
+    "src/host/creative/fixed-workflow-service.ts": "214b4697011b55efc32db5bea12d84d39e61574e62c2f0da03a4ddb3264e6356",
+    "tests/agent-driven/integration/created-task-store.test.ts": "c7be6b9db48cb32c5a889542bcd28e15469ed0f02221faf4c73ed379685a1b7e",
+    "tests/agent-driven/integration/created-task-gate.test.ts": "c9b569162a307bbcd13199e34e6b7df193fcbb530de24721d99afa84993c7a37"
+  },
+  "artifact_hashes": {
+    "docs/execution/A/logs/created-task-integration/narralens-created-task-store-tests-r1.txt": "7177e6c1931954f829c10d546307f6f653b2c19f40aff6b88b756a5b0b64611d",
+    "docs/execution/A/logs/created-task-integration/narralens-created-task-store-tsc-r1.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "docs/execution/A/logs/created-task-integration/narralens-task-gate-tests-r2.txt": "785efa16df8bff43f28b92925c27a39d84d397a091372afadf7a5ff4cd097b2c",
+    "docs/execution/A/logs/created-task-integration/narralens-task-gate-tsc-r1.txt": "3300523c4cef3bec5718234b528432a9949e8dcdc2a7c1acaaa540d86ab19141",
+    "docs/execution/A/logs/created-task-integration/narralens-task-gate-tsc-r2.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "docs/execution/A/logs/created-task-integration/narralens-task-join-ignored-async-red-r1.txt": "463a645ca2e7278bb662d3cc8c2c1c1359a3a463485a8b6eb73d29f42919cfb7",
+    "docs/execution/A/logs/created-task-integration/narralens-task-join-tests-r2.txt": "ea4595f7c9325c539d7a5df36febe0241225595f2598f8e7f4d230cf30534f00",
+    "docs/execution/A/logs/created-task-integration/narralens-task-join-tests-r3.txt": "81dfff9c84b6a3bcaa82e58cf56ad05a08ca5131ccaa7c6e899450a9435d8f73",
+    "docs/execution/A/logs/created-task-integration/narralens-task-join-tsc-r1.txt": "43888ec5818cc14ee03be9b54b40f892309ff11711192e56305a40ea497bae33",
+    "docs/execution/A/logs/created-task-integration/narralens-task-join-tsc-r2.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "docs/execution/A/logs/created-task-integration/narralens-task-join-tsc-r3.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "not_proven": [
+    "production task.prepare/Run grants or worker",
+    "stage/rights proof",
+    "Coordinator adoption/NativeAck/formal delivery",
+    "real human-recorded A film or full acceptance"
+  ],
+  "review_hashes": {
+    "docs/execution/A/reviews/task-join-pre-review/closure-input-hashes.json": "ed59265e5d505ce437a641fa93702c80a0b12e50ee8c3f838e3642dced001d89",
+    "docs/execution/A/reviews/task-join-pre-review/gate-input-hashes.json": "0ab79d21193953ab83a294e9b7088f07e88a1df0c3e1b7e034e025580bea0e28",
+    "docs/execution/A/reviews/task-join-pre-review/input-hashes.json": "1e8890190d77e5824ecdcbf7ef0472024a0cdaf5df5a8938a9ecf82544064c89",
+    "docs/execution/A/reviews/task-join-pre-review/REVIEW.md": "b4d0f2fd8624e25e47ed8398cfccf466952b0381c18626079f3ec2b3d49ed157"
+  }
+}
