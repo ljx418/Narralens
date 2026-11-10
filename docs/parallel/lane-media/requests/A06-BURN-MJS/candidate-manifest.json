@@ -1,0 +1,48 @@
+{
+  "base_sha": "afa862778c5b10c3d068101cd847d58b4d003875",
+  "upstream_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+  "native_style_module_sha256": "be4b1852bc254ff597e43694a732044ef51dd43a78df13735c2ff023957687dd",
+  "old_ts_sha256": "f6c5b66a1ccb73bc61cb5e281d4b2a9d7285816da36639666b0cca35935cde12",
+  "template_literal_identical": true,
+  "template_literal_sha256": "cc89dae0461d0a9f91fed90754f42e9588e7595536176984326b87f0439286c8",
+  "runtime_dependency": "node:crypto only; inline page imports copied fixed film-subtitle.mjs when rendered",
+  "mjs_no_ts_or_plan_runtime_import": true,
+  "patch_sha256": "182eb18af6de9da74834d666f92c8c827d9db561e05a18ab447bf0d60771cec4",
+  "files": [
+    {
+      "path": "src/host/render/native-subtitle-burn-source.ts",
+      "pre_sha256": "f6c5b66a1ccb73bc61cb5e281d4b2a9d7285816da36639666b0cca35935cde12",
+      "post_sha256": "b7f69956bf0187ac844c865194769f7a259b71c56d7c15656ae0d80c00b3f6e9"
+    },
+    {
+      "path": "src/host/render/native-subtitle-burn-source.mjs",
+      "pre_sha256": null,
+      "post_sha256": "c65096deb5e5660f2b8b209ea1380ad7a3c2c1eefaa41254b7fc720cff8ff619"
+    },
+    {
+      "path": "src/host/render/native-subtitle-burn-source.d.mts",
+      "pre_sha256": null,
+      "post_sha256": "0557b6e2a103f552b0f8202b72ae5c0d9fa8ed207b403aeda529823c51c1f6a4"
+    },
+    {
+      "path": "tests/agent-driven/media/native-subtitle-burn.test.ts",
+      "pre_sha256": null,
+      "post_sha256": "a6c336e0aa489ec87eba612ea7b3c0c0bcaf42bf15cd6cf4d4acb815fa4ee3c8"
+    },
+    {
+      "path": "tests/agent-driven/media/native-subtitle-burn-node-probe.mjs",
+      "pre_sha256": null,
+      "post_sha256": "4a2c3f44e3f80beb9a3d9433013aff6ff88a8554c50eedd76ae5c15dd9945987"
+    },
+    {
+      "path": "tests/agent-driven/media/native-subtitle-burn.fixture.json",
+      "pre_sha256": null,
+      "post_sha256": "c1c0d8d9be8a56d7aee59fd04da7e2f059922132b52095ee3c1fc744ab9a710b"
+    }
+  ],
+  "typecheck": "NOT_RUN",
+  "unit_tests": "NOT_RUN",
+  "plain_node_probe": "NOT_RUN",
+  "browser_render_media": "NOT_RUN",
+  "review": "REVIEW_PENDING"
+}
