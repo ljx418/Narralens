@@ -1,0 +1,228 @@
+{
+  "scope": "Literal source-contract hash vectors, not browser/parser/hydration PASS",
+  "format": "narralens.native-hydration-effective@1",
+  "upstream_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+  "canonical": "UTF8 JSON sorted object keys/no whitespace; array order retained; no trim/translation; finite JSON values only; undefined object members omitted by JS implementation",
+  "vectors": [
+    {
+      "id": "settings-base",
+      "envelope": {
+        "format": "narralens.native-hydration-effective@1",
+        "part": "settings",
+        "value": {
+          "settings": {},
+          "resolved_fps": 30,
+          "fps_source": "footage_or_default",
+          "track_names": [],
+          "track_heights": []
+        }
+      },
+      "canonical_utf8": "{\"format\":\"narralens.native-hydration-effective@1\",\"part\":\"settings\",\"value\":{\"fps_source\":\"footage_or_default\",\"resolved_fps\":30,\"settings\":{},\"track_heights\":[],\"track_names\":[]}}",
+      "sha256": "cd74363b2b4cce037495c2647c4633c58d6f7bbfc84837e81a5658d7e16069b6",
+      "relation": "base"
+    },
+    {
+      "id": "settings-single-field-change",
+      "envelope": {
+        "format": "narralens.native-hydration-effective@1",
+        "part": "settings",
+        "value": {
+          "settings": {},
+          "resolved_fps": 25,
+          "fps_source": "footage_or_default",
+          "track_names": [],
+          "track_heights": []
+        }
+      },
+      "canonical_utf8": "{\"format\":\"narralens.native-hydration-effective@1\",\"part\":\"settings\",\"value\":{\"fps_source\":\"footage_or_default\",\"resolved_fps\":25,\"settings\":{},\"track_heights\":[],\"track_names\":[]}}",
+      "sha256": "fe08e3983d5ec64655c96cd89202217d380d5d3339841dfab4bcc7e3455c7ba4",
+      "relation": "must_differ_from_base"
+    },
+    {
+      "id": "subtitle_style-base",
+      "envelope": {
+        "format": "narralens.native-hydration-effective@1",
+        "part": "subtitle_style",
+        "value": {
+          "on": true,
+          "pos": {
+            "x": 0.5,
+            "y": 0.94
+          },
+          "maxWidthPct": 100,
+          "align": "center",
+          "font": {
+            "family": "ui-sans-serif, system-ui, -apple-system, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", \"Helvetica Neue\", Arial, sans-serif",
+            "sizePct": 4,
+            "weight": 500,
+            "italic": false,
+            "letterSpacingEm": 0.04,
+            "lineHeight": 1.45,
+            "upper": false
+          },
+          "fill": "#ffffff",
+          "stroke": {
+            "widthEm": 0.055,
+            "color": "rgba(0,0,0,0.84)"
+          },
+          "shadow": {
+            "dxEm": 0,
+            "dyEm": 0.05,
+            "blurEm": 0.22,
+            "color": "rgba(0,0,0,0.72)"
+          },
+          "box": null,
+          "karaoke": null,
+          "language": null,
+          "bilingual": false
+        }
+      },
+      "canonical_utf8": "{\"format\":\"narralens.native-hydration-effective@1\",\"part\":\"subtitle_style\",\"value\":{\"align\":\"center\",\"bilingual\":false,\"box\":null,\"fill\":\"#ffffff\",\"font\":{\"family\":\"ui-sans-serif, system-ui, -apple-system, \\\"PingFang SC\\\", \\\"Hiragino Sans GB\\\", \\\"Microsoft YaHei\\\", \\\"Helvetica Neue\\\", Arial, sans-serif\",\"italic\":false,\"letterSpacingEm\":0.04,\"lineHeight\":1.45,\"sizePct\":4,\"upper\":false,\"weight\":500},\"karaoke\":null,\"language\":null,\"maxWidthPct\":100,\"on\":true,\"pos\":{\"x\":0.5,\"y\":0.94},\"shadow\":{\"blurEm\":0.22,\"color\":\"rgba(0,0,0,0.72)\",\"dxEm\":0,\"dyEm\":0.05},\"stroke\":{\"color\":\"rgba(0,0,0,0.84)\",\"widthEm\":0.055}}}",
+      "sha256": "f51e3a627adeba7021b7bf386c7911dac7de66f005f70e87d17490fe1cfb82e6",
+      "relation": "base"
+    },
+    {
+      "id": "subtitle_style-single-field-change",
+      "envelope": {
+        "format": "narralens.native-hydration-effective@1",
+        "part": "subtitle_style",
+        "value": {
+          "on": false,
+          "pos": {
+            "x": 0.5,
+            "y": 0.94
+          },
+          "maxWidthPct": 100,
+          "align": "center",
+          "font": {
+            "family": "ui-sans-serif, system-ui, -apple-system, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", \"Helvetica Neue\", Arial, sans-serif",
+            "sizePct": 4,
+            "weight": 500,
+            "italic": false,
+            "letterSpacingEm": 0.04,
+            "lineHeight": 1.45,
+            "upper": false
+          },
+          "fill": "#ffffff",
+          "stroke": {
+            "widthEm": 0.055,
+            "color": "rgba(0,0,0,0.84)"
+          },
+          "shadow": {
+            "dxEm": 0,
+            "dyEm": 0.05,
+            "blurEm": 0.22,
+            "color": "rgba(0,0,0,0.72)"
+          },
+          "box": null,
+          "karaoke": null,
+          "language": null,
+          "bilingual": false
+        }
+      },
+      "canonical_utf8": "{\"format\":\"narralens.native-hydration-effective@1\",\"part\":\"subtitle_style\",\"value\":{\"align\":\"center\",\"bilingual\":false,\"box\":null,\"fill\":\"#ffffff\",\"font\":{\"family\":\"ui-sans-serif, system-ui, -apple-system, \\\"PingFang SC\\\", \\\"Hiragino Sans GB\\\", \\\"Microsoft YaHei\\\", \\\"Helvetica Neue\\\", Arial, sans-serif\",\"italic\":false,\"letterSpacingEm\":0.04,\"lineHeight\":1.45,\"sizePct\":4,\"upper\":false,\"weight\":500},\"karaoke\":null,\"language\":null,\"maxWidthPct\":100,\"on\":false,\"pos\":{\"x\":0.5,\"y\":0.94},\"shadow\":{\"blurEm\":0.22,\"color\":\"rgba(0,0,0,0.72)\",\"dxEm\":0,\"dyEm\":0.05},\"stroke\":{\"color\":\"rgba(0,0,0,0.84)\",\"widthEm\":0.055}}}",
+      "sha256": "df17b54df92cfe6e5db0338aeffeed3c466f73b20d28726372f610d77a765e18",
+      "relation": "must_differ_from_base"
+    },
+    {
+      "id": "captions-base",
+      "envelope": {
+        "format": "narralens.native-hydration-effective@1",
+        "part": "captions",
+        "value": {
+          "cues": [
+            {
+              "startMs": 0,
+              "durMs": 1000,
+              "text": "第一章",
+              "clip": "voice-1",
+              "src": "assets/voice.wav",
+              "line": 0,
+              "part": 0
+            }
+          ],
+          "sourceLanguage": "zh",
+          "languages": [],
+          "untranscribed": []
+        }
+      },
+      "canonical_utf8": "{\"format\":\"narralens.native-hydration-effective@1\",\"part\":\"captions\",\"value\":{\"cues\":[{\"clip\":\"voice-1\",\"durMs\":1000,\"line\":0,\"part\":0,\"src\":\"assets/voice.wav\",\"startMs\":0,\"text\":\"第一章\"}],\"languages\":[],\"sourceLanguage\":\"zh\",\"untranscribed\":[]}}",
+      "sha256": "5eab991ff926d1bd30a62fdd80815862529a440c2ce3b4398cef97e7624b8040",
+      "relation": "base"
+    },
+    {
+      "id": "captions-single-field-change",
+      "envelope": {
+        "format": "narralens.native-hydration-effective@1",
+        "part": "captions",
+        "value": {
+          "cues": [
+            {
+              "startMs": 0,
+              "durMs": 1000,
+              "text": "第二章",
+              "clip": "voice-1",
+              "src": "assets/voice.wav",
+              "line": 0,
+              "part": 0
+            }
+          ],
+          "sourceLanguage": "zh",
+          "languages": [],
+          "untranscribed": []
+        }
+      },
+      "canonical_utf8": "{\"format\":\"narralens.native-hydration-effective@1\",\"part\":\"captions\",\"value\":{\"cues\":[{\"clip\":\"voice-1\",\"durMs\":1000,\"line\":0,\"part\":0,\"src\":\"assets/voice.wav\",\"startMs\":0,\"text\":\"第二章\"}],\"languages\":[],\"sourceLanguage\":\"zh\",\"untranscribed\":[]}}",
+      "sha256": "bdf9688fb58591cd4cb9bd8861a078649046ac426dcf9fbf74ac2f2f1fbcd702",
+      "relation": "must_differ_from_base"
+    },
+    {
+      "id": "markers-base",
+      "envelope": {
+        "format": "narralens.native-hydration-effective@1",
+        "part": "markers",
+        "value": {
+          "placed": [
+            {
+              "marker": {
+                "id": "marker-1",
+                "t": 1,
+                "name": "首章",
+                "color": "blue"
+              },
+              "ms": 1000,
+              "clip_id": null
+            }
+          ]
+        }
+      },
+      "canonical_utf8": "{\"format\":\"narralens.native-hydration-effective@1\",\"part\":\"markers\",\"value\":{\"placed\":[{\"clip_id\":null,\"marker\":{\"color\":\"blue\",\"id\":\"marker-1\",\"name\":\"首章\",\"t\":1},\"ms\":1000}]}}",
+      "sha256": "396b4b301d1fbea51e938c6d9d273e834dfb478f8e5a02b19c327aaec5d29e45",
+      "relation": "base"
+    },
+    {
+      "id": "markers-single-field-change",
+      "envelope": {
+        "format": "narralens.native-hydration-effective@1",
+        "part": "markers",
+        "value": {
+          "placed": [
+            {
+              "marker": {
+                "id": "marker-1",
+                "t": 1,
+                "name": "首章",
+                "color": "blue"
+              },
+              "ms": 1100,
+              "clip_id": null
+            }
+          ]
+        }
+      },
+      "canonical_utf8": "{\"format\":\"narralens.native-hydration-effective@1\",\"part\":\"markers\",\"value\":{\"placed\":[{\"clip_id\":null,\"marker\":{\"color\":\"blue\",\"id\":\"marker-1\",\"name\":\"首章\",\"t\":1},\"ms\":1100}]}}",
+      "sha256": "25badeb2addd0b7eb5bb5937fc3db3baa74b07bef0c42dbc314634be1419a5c5",
+      "relation": "must_differ_from_base"
+    }
+  ]
+}

@@ -1,0 +1,818 @@
+--- a/packages/openfilm/studio/ui/src/lib/host.ts
++++ b/packages/openfilm/studio/ui/src/lib/host.ts
+@@ -8,6 +8,23 @@
+  */
+ /** Settings → Developer, as the app keeps it (`developer` below). */
+ export interface HostDeveloper { logs: boolean; changes: boolean }
++
++/** Managed Narralens extension; document DOM commit is distinct from preview/media readiness. */
++export type NarralensDocumentState = {
++  protocol_version: 1; project_id: string; editor_view_id: string; document_epoch: number;
++} & ({ kind: 'document_dom_committed'; native_rev: string; film_sha256: string; utf8_byte_length: number }
++  | { kind: 'invalidated'; reason: 'dirty' | 'refresh' | 'broken' | 'external_edit' | 'replaced' | 'hash_failed' | 'unmounted' });
++
++export type NarralensHydrationPart = 'settings' | 'subtitle_style' | 'captions' | 'markers';
++export type NarralensHydrationOrigin = 'project' | 'explicit_default' | 'browser_preference';
++export type NarralensHydrationPartState = {
++  state: 'pending' | 'hydrated' | 'absent_default' | 'dirty' | 'failed' | 'unsupported';
++  origin: NarralensHydrationOrigin; effective_sha256: string | null;
++};
++export type NarralensHydrationState = {
++  project_id: string; editor_view_id: string; document_epoch: number; hydration_epoch: number;
++  parts: Record<NarralensHydrationPart, NarralensHydrationPartState>;
++};
+ 
+ export interface StudioHost {
+   /** the version of this interface the app speaks */
+@@ -32,6 +49,10 @@
+    * a second while playing): what a chat's "@current selection" and "@current time" point at.
+    */
+   onSelection?: (selection: StudioSelection) => void;
++  /** Optional managed extension. Its callback grants no write/approval authority. */
++  narralensObservation?: { version: 1; onDocumentState: (state: NarralensDocumentState) => void };
++  /** Managed editor hydration only; it never asserts media decoded or authorizes writes. */
++  narralensHydration?: { version: 1; onState: (state: NarralensHydrationState) => void };
+   /**
+    * What the pointer is over in Studio, each time that changes (null: nothing it points at): a clip's block on the
+    * timeline, a layer on the picture. A chat lights its pills that point at the same thing.
+--- a/packages/openfilm/studio/ui/src/editor/use-film.ts
++++ b/packages/openfilm/studio/ui/src/editor/use-film.ts
+@@ -16,8 +16,13 @@
+ import { filmHead } from '../../../../src/film-doc.mjs';
+ import { api, ApiError, projectEvents, type Film, type Op } from '../api';
+ import { inverse } from './undo';
+-
+-export type FilmState = { value: Film; rev: string };
++import { studioHost, type NarralensDocumentState } from '../lib/host';
++import type { NativeHydrationScope } from '../lib/native-hydration';
++
++export type FilmDocumentEvidence = {
++  projectId: string; editorViewId: string; epoch: number; text: string; rev: string; value: Film;
++};
++export type FilmState = { value: Film; rev: string; text?: string; document?: FilmDocumentEvidence | null };
+ 
+ /**
+  * One edit a person made here, undoable: what undoes it, what makes it again, and what to call it in the history.
+@@ -33,13 +38,33 @@
+  * file's head when known (a changed one is the film loaded again: its styles are not in the value).
+  */
+ export function useFilm(projectId: string, initial: FilmState | null, onChange: (value: Film, kind: 'edit' | 'server', head?: string) => void) {
+-  const [state, setState] = useState<FilmState | null>(initial);
++  // Observation metadata follows this very editor store, never a second document reducer.
++  const [editorViewId] = useState(() => crypto.randomUUID());
++  const observation = useRef<{ epoch: number; evidence: FilmDocumentEvidence | null; mounted: boolean }>({ epoch: 0, evidence: null, mounted: true });
++  const pending = useRef(0);
++  const report = useCallback((event: NarralensDocumentState) => {
++    try { if (studioHost?.narralensObservation?.version === 1) studioHost.narralensObservation.onDocumentState(event); }
++    catch { /* An optional observer cannot break native editing. */ }
++  }, []);
++  const invalidateDocument = useCallback((reason: Extract<NarralensDocumentState, {kind: 'invalidated'}>['reason']) => {
++    observation.current.evidence = null;
++    const epoch = ++observation.current.epoch;
++    if (!observation.current.mounted) return;
++    report({ protocol_version: 1, kind: 'invalidated', project_id: projectId, editor_view_id: editorViewId, document_epoch: epoch, reason });
++  }, [projectId, editorViewId, report]);
++  const serverDocument = useCallback((value: Film, rev: string, text: string | undefined): FilmDocumentEvidence | null => {
++    if (!observation.current.mounted || pending.current !== 0 || text === undefined) return null;
++    const evidence = { projectId, editorViewId, epoch: ++observation.current.epoch, text, rev, value };
++    observation.current.evidence = evidence;
++    return evidence;
++  }, [projectId, editorViewId]);
++  const [state, setState] = useState<FilmState | null>(() => initial
++    ? { ...initial, document: null } : null);
+   const [error, setError] = useState<string | null>(null);
+   /** why film.html cannot be read now (null: it can) */
+   const [broken, setBroken] = useState<string | null>(null);
+   const brokenRev = useRef<string | null>(null);
+-  /** edits applied here and not yet written */
+-  const pending = useRef(0);
++  /** pending above also prevents proof of optimistic bytes under an old server revision. */
+   const [steps, setStepsState] = useState<{ done: Step[]; undone: Step[] }>({ done: [], undone: [] });
+   /* the steps as they are now, ahead of the render: an undo pressed right after an edit (a nudge written the moment
+      before it) undoes that edit, not the one before */
+@@ -50,6 +75,15 @@
+   }, []);
+   const ref = useRef(state);
+   ref.current = state;
++  const hydrationScope = useRef<NativeHydrationScope | null>(null);
++  if (!hydrationScope.current) hydrationScope.current = {
++    projectId, editorViewId,
++    current: () => {
++      const evidence = observation.current.evidence;
++      return { epoch: observation.current.epoch, valid: observation.current.mounted && pending.current === 0
++        && !brokenRev.current && evidence !== null && ref.current?.value === evidence.value && ref.current?.rev === evidence.rev };
++    },
++  };
+   const queue = useRef(Promise.resolve());
+   /**
+    * revisions this editor wrote, oldest first: their echo from the folder watcher is not news. The watcher reports the
+@@ -65,23 +99,47 @@
+   };
+   const changed = useRef(onChange);
+   changed.current = onChange;
+-  useEffect(() => { if (initial && !ref.current) setState(initial); }, [initial]);
++  useEffect(() => {
++    if (initial && (!ref.current || (observation.current.epoch === 0
++      && ref.current.value === initial.value && ref.current.rev === initial.rev))) {
++      ref.current = { ...initial, document: serverDocument(initial.value, initial.rev, initial.text) };
++      setState(ref.current);
++    }
++  }, [initial, serverDocument]);
++  // Stable view identity plus a monotonically increasing epoch makes StrictMode/remounts distinguishable.
++  useEffect(() => {
++    observation.current.mounted = true;
++    const here = ref.current;
++    // StrictMode cleanup/setup must renew the token; real unmounts cannot publish late responses.
++    if (here?.document && !observation.current.evidence && pending.current === 0 && !brokenRev.current) {
++      ref.current = { ...here, document: serverDocument(here.value, here.rev, here.document.text) };
++      setState(ref.current);
++    }
++    return () => { invalidateDocument('unmounted'); observation.current.mounted = false; };
++  }, [invalidateDocument, serverDocument]);
+ 
+   /** The film as the folder has it now; false when film.html cannot be read (`broken` says why). */
+   const fromServer = useCallback(async (): Promise<boolean> => {
++    invalidateDocument('refresh');
++    // A response cannot acquire a fresh proof after a newer request/edit/replacement invalidated it.
++    const requestEpoch = observation.current.epoch;
+     const latest = await api.film(projectId);
++    const currentRequest = observation.current.mounted && observation.current.epoch === requestEpoch;
++    // Preserve native reducer behavior, but invalidate any newer proof before an old response replaces its UI.
++    if (!currentRequest) invalidateDocument('refresh');
+     if (!latest.doc || !latest.value) {
++      invalidateDocument('broken');
+       brokenRev.current = latest.rev;
+       setBroken(latest.problems.join('\n') || 'film.html cannot be read');
+       return false;
+     }
+     if (brokenRev.current) { brokenRev.current = null; setBroken(null); setError(null); }
+-    const next = { value: latest.value, rev: latest.rev };
++    const next = { value: latest.value, rev: latest.rev, document: currentRequest ? serverDocument(latest.value, latest.rev, latest.text) : null };
+     ref.current = next;
+     setState(next);
+     changed.current(next.value, 'server', filmHead(latest.text));
+     return true;
+-  }, [projectId]);
++  }, [projectId, invalidateDocument, serverDocument]);
+ 
+   /* the agent's writes: the film becomes the folder's (an edit of ours still on its way is applied on top by the server) */
+   useEffect(() => projectEvents(projectId, (event) => {
+@@ -111,7 +169,8 @@
+       return Promise.resolve(why);
+     }
+     const before = current.value;
+-    const next = { value: after, rev: current.rev };
++    invalidateDocument('dirty');
++    const next = { value: after, rev: current.rev, document: null };
+     ref.current = next;
+     setState(next);
+     setError(null);
+@@ -132,12 +191,15 @@
+         /* every edit here written: the folder's film is the truth (another write came in under this one) */
+         const theirs = pending.current === 0 ? done.value : null;
+         if (theirs && (done.rebased || JSON.stringify(theirs) !== JSON.stringify(here.value))) {
+-          ref.current = { value: theirs, rev: done.rev };
++          ref.current = { value: theirs, rev: done.rev, document: done.doc ? serverDocument(theirs, done.rev, done.text) : null };
+           setState(ref.current);
+           changed.current(theirs, 'server', filmHead(done.text));
+         } else {
+-          ref.current = { ...here, rev: done.rev };
+-          setState((s) => (s ? { ...s, rev: done.rev } : s));
++          const document = done.doc && done.value && pending.current === 0
++            && JSON.stringify(done.value) === JSON.stringify(here.value)
++            ? serverDocument(here.value, done.rev, done.text) : null;
++          ref.current = { ...here, rev: done.rev, document };
++          setState((s) => (s ? { ...s, rev: done.rev, document: s.value === here.value ? document : null } : s));
+         }
+         return null;
+       } catch (e) {
+@@ -148,8 +210,8 @@
+         if (!(await fromServer())) {
+           /* the folder's film cannot be read: back to the film as it was before this edit (the note on the film says
+              why, so it is not said again) */
+-          ref.current = current;
+-          setState(current);
++          ref.current = { ...current, document: null };
++          setState(ref.current);
+           changed.current(current.value, 'server');
+           return null;
+         }
+@@ -159,11 +221,12 @@
+     });
+     queue.current = written.then(() => {});
+     return written;
+-  }, [projectId, fromServer, setSteps]);
++  }, [projectId, fromServer, setSteps, invalidateDocument, serverDocument]);
+ 
+   /* a step of another file: moved between the lists at once, its call made in turn with the film's writes; one that
+      cannot be undone (the file changed since, elsewhere) leaves both lists, and says why */
+   const runOutside = useCallback((step: Step, kind: 'undo' | 'redo') => {
++    invalidateDocument('external_edit');
+     setSteps((s) => (kind === 'undo' ? { done: s.done.slice(0, -1), undone: [...s.undone, step] } : { done: [...s.done, step], undone: s.undone.slice(0, -1) }));
+     const written = queue.current.then(async () => {
+       const why = await step.outside![kind]().catch((e: unknown) => String(e instanceof Error ? e.message : e));
+@@ -173,7 +236,7 @@
+       }
+     });
+     queue.current = written;
+-  }, [setSteps]);
++  }, [setSteps, invalidateDocument]);
+   const step = useCallback((one: Step, kind: 'undo' | 'redo') => {
+     if (one.outside) runOutside(one, kind);
+     else void run(kind === 'undo' ? one.undo : one.redo, kind);
+@@ -195,13 +258,17 @@
+   const edit = useCallback((ops: Op[], label?: string, quiet?: boolean) => run(ops, 'do', label, quiet), [run]);
+   /** An edit of another file, made already: kept as a step, so ⌘Z undoes it in turn with the film's. */
+   const record = useCallback((label: string, outside: OutsideStep) => {
++    invalidateDocument('external_edit');
+     setSteps((s) => ({ done: [...s.done.slice(-99), { undo: [], redo: [], label, at: Date.now(), outside }], undone: [] }));
+-  }, [setSteps]);
++  }, [setSteps, invalidateDocument]);
+   /** The film was replaced as a whole (an earlier version put back): the edits made before are not undone into it. */
+-  const forget = useCallback(() => setSteps(() => ({ done: [], undone: [] })), [setSteps]);
++  const forget = useCallback(() => { invalidateDocument('replaced'); setSteps(() => ({ done: [], undone: [] })); }, [setSteps, invalidateDocument]);
+ 
+   return {
+     film: state?.value ?? null, rev: state?.rev ?? null, error, broken, edit, record, undo, redo, rollbackTo, forget, steps,
++    document: state?.document ?? null, invalidateDocument, reportDocument: report, hydrationScope: hydrationScope.current,
++    isDocumentCurrent: (evidence: FilmDocumentEvidence) => observation.current.mounted && observation.current.evidence === evidence
++      && pending.current === 0 && !brokenRev.current && ref.current?.value === evidence.value && ref.current?.rev === evidence.rev,
+     canUndo: steps.done.length > 0, canRedo: steps.undone.length > 0, settled: () => queue.current,
+   };
+ }
+--- a/packages/openfilm/studio/ui/src/components/ProjectView.tsx
++++ b/packages/openfilm/studio/ui/src/components/ProjectView.tsx
+@@ -59,8 +59,11 @@
+ import { SubtitleOverlay } from './SubtitleOverlay';
+ import { SubtitleInspector, subtitleLineKey, type SubtitleLineAt, type SubtitleLineRefer } from './SubtitleInspector';
+ import { useFilmSubtitles } from '@/lib/use-film-subtitles';
++import { useNativeHydration, hydrationCanonicalJson, type HydrationSnapshots } from '@/lib/native-hydration';
++import { parseMarkers } from '@/lib/markers';
++import { ownTrackHeight } from '@/lib/track-heights';
+ import { speakerAt, useSubtitleEdits } from '@/lib/use-subtitle-edits';
+-import { cueAt, filmSubtitleStyleFor, sameFilmSubtitleLanguage } from '@/lib/subtitles';
++import { cueAt, filmSubtitleStyleFor, sameFilmSubtitleLanguage, fetchFilmCaptions, fetchSubtitleStyle, SUBTITLE_DEFAULT } from '@/lib/subtitles';
+ import { DEFAULT_INSPECTOR, DOCK_GAP, DockPaneDivider, MIN_DOCK_H, MIN_INSPECTOR, MIN_STAGE_H, MIN_VIEWER, PaneDivider, usePaneSize } from './PaneDivider';
+ import { PANE_BAR, PANE_BTN_ON, PANE_TOGGLE, PANE_TOGGLE_ICON } from './dock-pane-bar';
+ import { Tooltip } from './Tooltip';
+@@ -229,7 +232,7 @@
+   const [undone, setUndone] = React.useState<PersonEdit[]>([]);
+   const personSteps = React.useRef<readonly Step[]>([]);
+   const settledEdits = React.useRef(new Set<PersonEdit>());
+-  const initial = React.useMemo(() => (loaded?.doc && loaded.value ? { value: loaded.value, rev: loaded.rev } : null), [loaded]);
++  const initial = React.useMemo(() => (loaded?.doc && loaded.value ? { value: loaded.value, rev: loaded.rev, text: loaded.project.id === projectId ? loaded.text : undefined } : null), [loaded, projectId]);
+   React.useEffect(() => { if (initial) lastServerDoc.current = initial.value; }, [initial]);
+   const film = useFilm(projectId, initial, React.useCallback((value: Film, kind: 'edit' | 'server', head?: string) => {
+     preview.current?.update(value, head);
+@@ -250,6 +253,12 @@
+       lastServerDoc.current = value;
+     }
+   }, []));
++  const hydration = useNativeHydration(film.hydrationScope);
++  const subtitleHydration = React.useMemo(() => ({ style: hydration.observer.parts.subtitle_style,
++    captions: hydration.observer.parts.captions }), [hydration.observer]);
++  React.useEffect(() => projectEvents(projectId, (event) => {
++    if (event.type === 'film' || event.type === 'files') hydration.observer.invalidateChecks();
++  }), [projectId, hydration.observer]);
+   personSteps.current = film.steps.done;
+   const filmRef = React.useRef(film.film);
+   filmRef.current = film.film;
+@@ -541,12 +550,15 @@
+   /* ── the project's editor settings (`.film/settings.json`): its frame rate, its tracks' names ── */
+   const [settings, setSettings] = React.useState<ProjectSettings | null>(null);
+   React.useEffect(() => {
++    const ticket = hydration.observer.parts.settings.begin();
+     setSettings(null);
+-    void api.settings(projectId).then(setSettings, () => setSettings({}));
+-  }, [projectId]);
++    void api.settings(projectId).then((next) => { setSettings(next); hydration.observer.parts.settings.success(ticket); },
++      () => { setSettings({}); hydration.observer.parts.settings.failed(ticket); });
++  }, [projectId, hydration.observer]);
+   const patchSettings = React.useCallback((patch: Parameters<typeof api.patchSettings>[1]) => {
++    hydration.observer.parts.settings.dirty();
+     void api.patchSettings(projectId, patch).then(setSettings, (e: Error) => toast.showError(e.message));
+-  }, [projectId, toast]);
++  }, [projectId, toast, hydration.observer]);
+   /* the rate frames are counted in: the project's own, else its first footage's (on the film by time, then the
+      project's other videos), else 30 */
+   const footageRate = React.useMemo(() => footageFps([
+@@ -651,7 +663,7 @@
+   /* the inspector shows a media file, or what is selected */
+   const [pickedMedia, setPickedMedia] = React.useState<WorkspaceResource | null>(null);
+   const [inspectorContent, setInspectorContent] = React.useState<'selection' | 'subtitles' | WorkspaceResource>('selection');
+-  const subs = useFilmSubtitles(projectId);
++  const subs = useFilmSubtitles(projectId, subtitleHydration);
+   /* fullscreen's CC button (and c): only what is shown, not the film's own setting */
+   const [captionsOn, setCaptionsOn] = React.useState(true);
+   const configureSubtitles = React.useCallback(() => {
+@@ -1016,6 +1028,7 @@
+   const pickReplacement = React.useCallback((family: ReplaceFamily) => pickReplacementRef.current(family), []);
+   const tools = useEditorTools({
+     projectId, tracks: timelineTracks, film: film.film, settings, patchSettings, player, timeRef, seek, edit: editOps, record: film.record,
++    markerHydration: hydration.observer.parts.markers, settingsHydration: hydration.observer.parts.settings,
+     editModel, selectedClipIds: selectedKeys, listing, toast, pickFile: pickReplacement,
+   });
+ 
+@@ -2320,6 +2333,67 @@
+     [film.film, info, mediaFacts],
+   );
+ 
++  const documentRoot = React.useRef<HTMLDivElement>(null);
++  const documentEvidence = film.document;
++  const hydrationSnapshots: HydrationSnapshots = {
++    settings: settings === null ? null : {
++      basis: settings,
++      value: { settings, resolved_fps: projectFps, fps_source: settings.fps == null ? 'footage_or_default' : 'project',
++        track_names: [...trackNames].sort(([a], [b]) => a - b).map(([doc_index, name]) => ({ doc_index, name })),
++        track_heights: tools.tracks.map((track) => ({ lane: track.lane, doc_index: track.docIndex ?? null,
++          index: track.index, height: track.height ?? ownTrackHeight(track) })) },
++      read: async () => ({ basis: await api.settings(projectId), origin: 'project', state: 'hydrated' }),
++    },
++    subtitle_style: {
++      basis: subs.style, value: subs.style,
++      read: async () => { const kept = await fetchSubtitleStyle(projectId);
++        return { basis: kept ?? SUBTITLE_DEFAULT, origin: kept ? 'project' : 'explicit_default', state: kept ? 'hydrated' : 'absent_default' }; },
++    },
++    captions: subs.captions === null ? null : {
++      basis: { cues: subs.captions.cues, sourceLanguage: subs.captions.sourceLanguage,
++        languages: subs.captions.languages, untranscribed: subs.captions.untranscribed },
++      value: { cues: subs.captions.cues, sourceLanguage: subs.captions.sourceLanguage,
++        languages: subs.captions.languages, untranscribed: subs.captions.untranscribed },
++      read: async () => { const next = await fetchFilmCaptions(projectId);
++        return { basis: { cues: next.cues, sourceLanguage: next.sourceLanguage, languages: next.languages,
++          untranscribed: next.untranscribed }, origin: 'project', state: 'hydrated' }; },
++    },
++    markers: {
++      basis: tools.hydrationMarkers, value: { placed: tools.hydrationPlacedMarkers },
++      read: async () => ({ basis: parseMarkers(await api.markers(projectId)), origin: 'project', state: 'hydrated' }),
++    },
++  };
++  let hydrationKey = 'unsupported';
++  try { hydrationKey = hydrationCanonicalJson(Object.fromEntries(Object.entries(hydrationSnapshots)
++    .map(([part, snapshot]) => [part, snapshot ? { basis: snapshot.basis, value: snapshot.value } : null]))); }
++  catch { /* The managed observer reports unsupported values without breaking the editor. */ }
++  React.useLayoutEffect(() => {
++    const root = documentRoot.current;
++    if (!root || failure) return;
++    return hydration.observer.observe(root, hydrationSnapshots);
++  }, [hydration.observer, hydration.revision, hydrationKey, documentEvidence, failure, projectId]);
++  // Hash the exact server text only after the actual native document render committed.
++  React.useLayoutEffect(() => {
++    const evidence = documentEvidence;
++    const root = documentRoot.current;
++    if (!evidence || !root || failure || evidence.projectId !== projectId || !film.isDocumentCurrent(evidence)) return;
++    let cancelled = false;
++    const bytes = new TextEncoder().encode(evidence.text);
++    void crypto.subtle.digest('SHA-256', bytes).then((digest) => {
++      if (cancelled || !root.isConnected || documentRoot.current !== root || !film.isDocumentCurrent(evidence)) return;
++      const sha256 = Array.from(new Uint8Array(digest), (b) => b.toString(16).padStart(2, '0')).join('');
++      if (!/^[a-f0-9]{16}$/.test(evidence.rev) || sha256.slice(0, 16) !== evidence.rev) {
++        film.invalidateDocument('hash_failed'); return;
++      }
++      film.reportDocument({ protocol_version: 1, kind: 'document_dom_committed', project_id: projectId,
++        editor_view_id: evidence.editorViewId, document_epoch: evidence.epoch,
++        native_rev: evidence.rev, film_sha256: sha256, utf8_byte_length: bytes.byteLength });
++    }).catch(() => {
++      if (!cancelled && film.isDocumentCurrent(evidence)) film.invalidateDocument('hash_failed');
++    });
++    return () => { cancelled = true; };
++  }, [documentEvidence, failure, projectId]);
++
+   if (failure) {
+     return (
+       <div className="workspace-shell flex flex-col items-center justify-center gap-3 bg-[var(--dock-shell)] text-[13px] text-[var(--text-muted)]">
+@@ -2333,7 +2407,7 @@
+   const value = film.film;
+   const viewerReady = Boolean(info);
+   return (
+-    <div className="workspace-shell flex flex-col bg-[var(--dock-shell)]">
++    <div ref={documentRoot} className="workspace-shell flex flex-col bg-[var(--dock-shell)]">
+       <div className="relative flex min-h-0 min-w-0 flex-1 flex-col" style={{ paddingLeft: DOCK_GAP, paddingRight: DOCK_GAP, paddingBottom: DOCK_GAP }}>
+         <div className="relative z-10 grid min-h-0 min-w-0 flex-1" style={{ gridTemplateColumns: 'minmax(0, 1fr)', gridTemplateRows: 'auto minmax(0, 1fr)', gridTemplateAreas: '"bar" "main"' }}>
+           {/* ── top bar: the title centered, whatever is on either side ── */}
+--- a/packages/openfilm/studio/ui/src/lib/media-queue.ts
++++ b/packages/openfilm/studio/ui/src/lib/media-queue.ts
+@@ -12,6 +12,14 @@
+  * clip's length is in film.html already).
+  */
+ import * as React from 'react';
++
++// Managed readonly media transport; the Host owns project/path/capability validation.
++declare global {
++  var narralensNativeTransport: { readonly mediaUrl: (url: string) => string } | undefined;
++}
++
++/** Identity without a managed Host; Host normalization must be idempotent for an already scoped URL. */
++const mediaUrl = (url: string): string => globalThis.narralensNativeTransport?.mediaUrl(url) ?? url;
+ 
+ export const MEDIA_IN_FLIGHT = 2;
+ export const PAGES_IN_FLIGHT = 1;
+@@ -54,6 +62,7 @@
+  * for at all (null).
+  */
+ export async function mediaImage(url: string, still?: () => boolean): Promise<boolean | null> {
++  url = mediaUrl(url);
+   if (LOADED.has(url)) return true;
+   /* asked again while waiting (the timeline asks again on every change): one request, wanted while anyone wants it */
+   const queued = WAITING.get(url);
+@@ -81,6 +90,7 @@
+  * the last one that had it, so a picture made again never flickers. `wanted` false: not asked for yet (off screen).
+  */
+ export function useMediaImage(url: string | null | undefined, wanted = true): string | null {
++  url = url ? mediaUrl(url) : url;
+   const [ready, setReady] = React.useState<string | null>(() => (url && LOADED.has(url) ? url : null));
+   React.useEffect(() => {
+     if (!url || !wanted || ready === url) return undefined;
+@@ -93,6 +103,9 @@
+ 
+ /** The pictures of `urls` (by any key) that have had their turn: what can be drawn now. */
+ export function useMediaImages(urls: Readonly<Record<string, string>>): Readonly<Record<string, string>> {
++  const inputUrls = urls;
++  urls = React.useMemo(() => globalThis.narralensNativeTransport
++    ? Object.fromEntries(Object.entries(inputUrls).map(([key, url]) => [key, mediaUrl(url)])) : inputUrls, [inputUrls]);
+   const [ready, setReady] = React.useState<ReadonlySet<string>>(() => new Set());
+   const wanted = React.useRef(urls);
+   wanted.current = urls;
+--- a/packages/openfilm/studio/ui/src/lib/use-film-subtitles.ts
++++ b/packages/openfilm/studio/ui/src/lib/use-film-subtitles.ts
+@@ -12,6 +12,7 @@
+  *   captions        the server's answer as it is (the lines, the speech with no transcript, …)
+  */
+ import * as React from 'react';
++import type { NativePartObserver } from './native-hydration';
+ 
+ import { projectEvents } from '@/api';
+ import {
+@@ -50,19 +51,20 @@
+   refresh: () => Promise<void>;
+ }
+ 
+-export function useFilmSubtitles(projectId: string): FilmSubtitles {
++export function useFilmSubtitles(projectId: string, hydration?: { style: NativePartObserver; captions: NativePartObserver }): FilmSubtitles {
+   const [captions, setCaptions] = React.useState<FilmCaptions | null>(null);
+-  const [style, setStyle] = useSubtitleStyle(projectId);
++  const [style, setStyle] = useSubtitleStyle(projectId, hydration?.style);
+   const [transcribing, setTranscribing] = React.useState(false);
+ 
+   const latest = React.useRef(0);
+   const refresh = React.useCallback(async () => {
+     const ask = ++latest.current;
++    const ticket = hydration?.captions.begin();
+     try {
+       const next = await fetchFilmCaptions(projectId);
+-      if (ask === latest.current) setCaptions(next);
+-    } catch { /* keep what is shown; the next change asks again */ }
+-  }, [projectId]);
++      if (ask === latest.current) { setCaptions(next); if (ticket) hydration?.captions.success(ticket); }
++    } catch { if (ask === latest.current && ticket) hydration?.captions.failed(ticket); /* keep what is shown */ }
++  }, [projectId, hydration]);
+ 
+   React.useEffect(() => {
+     setCaptions(null);
+@@ -70,11 +72,12 @@
+     let timer: ReturnType<typeof setTimeout> | null = null;
+     const stop = projectEvents(projectId, (event) => {
+       if (event.type !== 'film' && event.type !== 'files') return;
++      hydration?.captions.pending();
+       if (timer) clearTimeout(timer);
+       timer = setTimeout(() => { timer = null; void refresh(); }, REFRESH_MS);
+     });
+     return () => { stop(); if (timer) clearTimeout(timer); };
+-  }, [projectId, refresh]);
++  }, [projectId, refresh, hydration]);
+ 
+   const cues = React.useMemo(() => filmSubtitleShown(captions?.cues ?? [], style), [captions, style]);
+   const count = React.useMemo(() => (captions?.cues ?? []).filter((c) => c.durMs > 0).length, [captions]);
+@@ -82,13 +85,15 @@
+   const toggle = React.useCallback(() => setStyle((v) => ({ ...v, on: !v.on })), [setStyle]);
+   const move = React.useCallback((pos: { x: number; y: number }) => setStyle((v) => ({ ...v, pos })), [setStyle]);
+   const translate = React.useCallback(async (language: string) => {
++    hydration?.captions.dirty();
+     const result = await requestSubtitleTranslation(projectId, language);
+     /* ask again even when nothing new came: lines may still lack translations made before */
+     await refresh();
+     return result;
+-  }, [projectId, refresh]);
++  }, [projectId, refresh, hydration]);
+ 
+   const transcribe = React.useCallback(async () => {
++    hydration?.captions.dirty();
+     setTranscribing(true);
+     try {
+       const result = await requestSubtitleTranscription(projectId);
+@@ -96,13 +101,14 @@
+       if (result.ok) setStyle((v) => ({ ...v, on: true }));
+       return result;
+     } finally { setTranscribing(false); }
+-  }, [projectId, refresh, setStyle]);
++  }, [projectId, refresh, setStyle, hydration]);
+   const setLine = React.useCallback(async (cue: SubtitleCue, text: string, language?: string) => {
+     if (cue.src === undefined || cue.line === undefined) return false;
++    hydration?.captions.dirty();
+     const ok = await saveSubtitleLine(projectId, { src: cue.src, line: cue.line, ...(cue.part !== undefined ? { part: cue.part } : {}), text, ...(language ? { language } : {}) });
+     await refresh();
+     return ok;
+-  }, [projectId, refresh]);
++  }, [projectId, refresh, hydration]);
+ 
+   return {
+     cues, count, style, setStyle, patchStyle, toggle, move, translate, transcribe, transcribing, setLine,
+--- a/packages/openfilm/studio/ui/src/lib/use-subtitle-style.ts
++++ b/packages/openfilm/studio/ui/src/lib/use-subtitle-style.ts
+@@ -7,6 +7,7 @@
+  * see readLastSubtitleStyle), else the default; nothing is written for it until the person changes something.
+  */
+ import * as React from 'react';
++import type { NativePartObserver } from './native-hydration';
+ 
+ import {
+   fetchSubtitleStyle,
+@@ -22,7 +23,7 @@
+ 
+ const startingStyle = (): SubtitleStyle => readLastSubtitleStyle() ?? SUBTITLE_DEFAULT;
+ 
+-export function useSubtitleStyle(projectId: string): [SubtitleStyle, React.Dispatch<React.SetStateAction<SubtitleStyle>>] {
++export function useSubtitleStyle(projectId: string, hydration?: NativePartObserver): [SubtitleStyle, React.Dispatch<React.SetStateAction<SubtitleStyle>>] {
+   const [style, setStyle] = React.useState<SubtitleStyle>(startingStyle);
+   /* the JSON last known to match the project's file (null: not loaded yet; '': unknown, the next change is written) */
+   const saved = React.useRef<string | null>(null);
+@@ -31,7 +32,9 @@
+ 
+   React.useEffect(() => {
+     saved.current = null;
+-    const start = startingStyle();
++    const remembered = readLastSubtitleStyle();
++    const start = remembered ?? SUBTITLE_DEFAULT;
++    const ticket = hydration?.begin();
+     const startJson = JSON.stringify(start);
+     setStyle(start);
+     const ask = new AbortController();
+@@ -41,11 +44,15 @@
+       if (kept && !dirty) setStyle(kept);
+       saved.current = dirty ? '' : JSON.stringify(kept ?? start);
+       if (dirty) setStyle((s) => ({ ...s }));
++      if (!ask.signal.aborted && ticket) {
++        if (dirty) hydration?.dirty();
++        else hydration?.success(ticket, kept ? 'project' : remembered ? 'browser_preference' : 'explicit_default');
++      }
+     }, () => {
+-      if (!ask.signal.aborted) saved.current = '';
++      if (!ask.signal.aborted) { saved.current = ''; if (ticket) hydration?.failed(ticket); }
+     });
+     return () => ask.abort();
+-  }, [projectId]);
++  }, [projectId, hydration]);
+ 
+   React.useEffect(() => {
+     /* not loaded yet: writing now could overwrite the project's own style */
+@@ -64,5 +71,8 @@
+     return () => clearTimeout(timer);
+   }, [projectId, style]);
+ 
+-  return [style, setStyle];
++  const observedSetStyle = React.useCallback<React.Dispatch<React.SetStateAction<SubtitleStyle>>>((next) => {
++    hydration?.dirty(); setStyle(next);
++  }, [hydration]);
++  return [style, observedSetStyle];
+ }
+--- a/packages/openfilm/studio/ui/src/components/use-editor-tools.tsx
++++ b/packages/openfilm/studio/ui/src/components/use-editor-tools.tsx
+@@ -5,6 +5,7 @@
+  * here; the edits go through the page's own edit, one write and one undo step each.
+  */
+ import * as React from 'react';
++import type { NativePartObserver } from '@/lib/native-hydration';
+ import { AudioLines, HardDriveUpload, Replace, Snowflake } from 'lucide-react';
+ 
+ import { api, type Clip, type Film, type Op, type ProjectSettings } from '@/api';
+@@ -42,12 +43,14 @@
+ ) && b.volume !== 0;
+ 
+ export function useEditorTools({
+-  projectId, tracks, film, settings, patchSettings, player, timeRef, seek, edit, record, editModel, selectedClipIds, listing, toast, pickFile,
++  projectId, tracks, film, settings, patchSettings, player, timeRef, seek, edit, record, editModel, selectedClipIds, listing, toast, pickFile, markerHydration, settingsHydration,
+ }: {
+   projectId: string;
+   tracks: readonly TimelineTrack[];
+   film: Film | null;
+   settings: ProjectSettings | null;
++  markerHydration?: NativePartObserver;
++  settingsHydration?: NativePartObserver;
+   patchSettings: (patch: Parameters<typeof api.patchSettings>[1]) => void;
+   player: React.MutableRefObject<Player>;
+   /** where the playhead is, ms */
+@@ -86,17 +89,19 @@
+   const writes = React.useRef<Promise<unknown>>(Promise.resolve());
+   React.useEffect(() => {
+     let live = true;
++    const ticket = markerHydration?.begin();
+     setMarkers([]);
+-    void api.markers(projectId).then((raw) => { if (live) setMarkers(parseMarkers(raw)); }, () => {});
++    void api.markers(projectId).then((raw) => { if (live) { setMarkers(parseMarkers(raw)); if (ticket) markerHydration?.success(ticket); } }, () => { if (live && ticket) markerHydration?.failed(ticket); });
+     return () => { live = false; };
+-  }, [projectId]);
++  }, [projectId, markerHydration]);
+   const writeMarkers = React.useCallback((next: Marker[]): Promise<string | null> => {
++    markerHydration?.dirty();
+     setMarkers(next);
+     markersRef.current = next;
+     const done = writes.current.then(() => api.putMarkers(projectId, next)).then(() => null, (e: Error) => e.message);
+     writes.current = done;
+     return done;
+-  }, [projectId]);
++  }, [projectId, markerHydration]);
+   const saveMarkers = React.useCallback((next: Marker[]) => {
+     const was = markersRef.current;
+     void writeMarkers(next).then((err) => { if (err) toast.showError(err); });
+@@ -169,10 +174,10 @@
+   }, [settings, patchSettings]);
+   const onResizeTrack = React.useCallback((track: TimelineTrack, height: number | null, done: boolean) => {
+     if (track.docIndex == null) return;
+-    if (!done && height != null) { setLive({ docIndex: track.docIndex, height }); return; }
++    if (!done && height != null) { settingsHydration?.dirty(); setLive({ docIndex: track.docIndex, height }); return; }
+     /* back to its own height, or the one dragged to (the timeline's own one is not kept) */
+     setHeights([track.docIndex], height == null || height === ownTrackHeight(track) ? null : height);
+-  }, [setHeights]);
++  }, [setHeights, settingsHydration]);
+   const headMenuExtra = React.useCallback((track: TimelineTrack): ContextMenuEntry[] => {
+     const docIndex = track.docIndex;
+     if (docIndex == null) return [];
+@@ -396,6 +401,8 @@
+   return {
+     /** the timeline's tracks with the heights they are drawn at */
+     tracks: shownTracks,
++    hydrationMarkers: markers,
++    hydrationPlacedMarkers: placed.map(({ marker, ms, clip }) => ({ marker, ms, clip_id: clip?.clipId ?? null })),
+     timeline: { solo: soloProp, markerLane, onAddMarker, rulerMenu, trackOverlay, snapPointsMs, onResizeTrack, onReplaceDrop },
+     menuExtra,
+     /** what can replace a clip (the inspector's Replace) */
+--- /dev/null
++++ b/packages/openfilm/studio/ui/src/lib/native-hydration.ts
+@@ -0,0 +1,167 @@
++/** Managed observation metadata only. Original native state/reducers remain the authority. */
++import * as React from 'react';
++import { studioHost, type NarralensHydrationPart as Part, type NarralensHydrationOrigin as Origin,
++  type NarralensHydrationPartState as PartState, type NarralensHydrationState } from './host';
++import type { ProjectSettings } from '../api';
++import type { SubtitleStyle, FilmCaptions } from './subtitles';
++import type { Marker } from './markers';
++
++/** Frozen managed effective-value shapes; original parsers still define native field semantics. */
++export interface SettingsHydrationValue {
++  settings: ProjectSettings;
++  resolved_fps: number;
++  fps_source: 'project' | 'footage_or_default';
++  track_names: Array<{ doc_index: number; name: string }>;
++  track_heights: Array<{ lane: string; doc_index: number | null; index: number; height: number }>;
++}
++export interface HydrationEffectiveValues {
++  settings: SettingsHydrationValue;
++  subtitle_style: SubtitleStyle;
++  captions: Pick<FilmCaptions, 'cues' | 'sourceLanguage' | 'languages' | 'untranscribed'>;
++  markers: { placed: Array<{ marker: Marker; ms: number; clip_id: string | null }> };
++}
++export type HydrationSnapshots = { [P in Part]: HydrationSnapshot<HydrationEffectiveValues[P]> | null };
++
++export interface NativeHydrationScope {
++  readonly projectId: string;
++  readonly editorViewId: string;
++  current(): { epoch: number; valid: boolean };
++}
++export interface NativeReadTicket { readonly sequence: number; readonly documentEpoch: number }
++export interface NativePartObserver {
++  begin(): NativeReadTicket;
++  success(ticket: NativeReadTicket, origin?: Origin): void;
++  failed(ticket: NativeReadTicket): void;
++  dirty(): void;
++  pending(): void;
++}
++export interface HydrationSnapshot<T = unknown> {
++  /** The actual native state used as this read's input to the effective projection. */
++  readonly basis: unknown;
++  /** Exact part-specific projection of actual consuming state, documented by the managed contract. */
++  readonly value: T;
++  /** Read-only verification. It must never set/reseed the native state or start a producer. */
++  read(): Promise<{ basis: unknown; origin: Origin; state: 'hydrated' | 'absent_default' | 'unsupported' }>;
++}
++type NativeOutcome = 'pending' | 'success' | 'failed' | 'dirty';
++type Receipt = { sequence: number; version: number; outcome: NativeOutcome; origin: Origin; dirty: boolean; nativeCurrent: boolean };
++const PARTS: readonly Part[] = ['settings', 'subtitle_style', 'captions', 'markers'];
++
++/** Sorted object keys, array order retained. Undefined object members are omitted; non-JSON values fail closed. */
++export function hydrationCanonicalJson(value: unknown): string {
++  if (value === null || typeof value === 'boolean' || typeof value === 'string') return JSON.stringify(value);
++  if (typeof value === 'number' && Number.isFinite(value)) return JSON.stringify(value);
++  if (Array.isArray(value)) return `[${value.map(hydrationCanonicalJson).join(',')}]`;
++  if (value && typeof value === 'object' && Object.getPrototypeOf(value) === Object.prototype) {
++    const record = value as Record<string, unknown>;
++    return `{${Object.keys(record).filter((key) => record[key] !== undefined).sort()
++      .map((key) => `${JSON.stringify(key)}:${hydrationCanonicalJson(record[key])}`).join(',')}}`;
++  }
++  throw new Error('UNSUPPORTED_HYDRATION_VALUE');
++}
++
++class NativeHydrationObserver {
++  readonly enabled = studioHost?.narralensHydration?.version === 1;
++  readonly parts: Record<Part, NativePartObserver>;
++  private active = true;
++  private round = 0;
++  private eventEpoch = 0;
++  private root: HTMLElement | null = null;
++  private receipts = Object.fromEntries(PARTS.map((part) => [part,
++    { sequence: 0, version: 0, outcome: 'pending', origin: 'project', dirty: false, nativeCurrent: false }])) as Record<Part, Receipt>;
++
++  constructor(readonly scope: NativeHydrationScope, private changed: () => void) {
++    this.parts = Object.fromEntries(PARTS.map((part) => [part, {
++      begin: () => {
++        const record = this.receipts[part]; record.sequence++; record.version++;
++        record.outcome = record.dirty ? 'dirty' : 'pending'; record.nativeCurrent = false; this.touch();
++        return { sequence: record.sequence, documentEpoch: scope.current().epoch };
++      },
++      success: (ticket: NativeReadTicket, origin: Origin = 'project') => {
++        const record = this.receipts[part];
++        if (!this.active || ticket.sequence !== record.sequence) return;
++        // Even same-epoch native GET success is not a proof. A fresh fenced read below must match actual state.
++        record.nativeCurrent = ticket.documentEpoch === scope.current().epoch && scope.current().valid;
++        record.outcome = record.dirty ? 'dirty' : 'success'; record.origin = origin; record.version++; this.touch();
++      },
++      failed: (ticket: NativeReadTicket) => {
++        const record = this.receipts[part];
++        if (!this.active || ticket.sequence !== record.sequence) return;
++        record.outcome = record.dirty ? 'dirty' : 'failed'; record.version++; this.touch();
++      },
++      dirty: () => {
++        const record = this.receipts[part]; record.dirty = true; record.outcome = 'dirty';
++        record.sequence++; record.version++; this.touch();
++      },
++      pending: () => {
++        const record = this.receipts[part]; record.sequence++; record.version++;
++        record.outcome = record.dirty ? 'dirty' : 'pending'; record.nativeCurrent = false; this.touch();
++      },
++    }])) as Record<Part, NativePartObserver>;
++  }
++  mount() { this.active = true; this.touch(); }
++  unmount() { this.round++; if (this.active) this.publish(this.pendingStates()); this.active = false; }
++  invalidateChecks() {
++    this.round++;
++    if (this.enabled && this.active && this.root?.isConnected) this.publish(this.pendingStates());
++    if (this.enabled && this.active) this.changed();
++  }
++  private touch() { this.invalidateChecks(); }
++  private pendingStates(): Record<Part, PartState> {
++    return Object.fromEntries(PARTS.map((part) => {
++      const record = this.receipts[part];
++      return [part, { state: record.outcome === 'success' ? record.nativeCurrent ? 'pending' : 'unsupported' : record.outcome,
++        origin: record.origin, effective_sha256: null }];
++    })) as Record<Part, PartState>;
++  }
++  private publish(parts: Record<Part, PartState>) {
++    if (!this.enabled || !this.active) return;
++    const event: NarralensHydrationState = { project_id: this.scope.projectId, editor_view_id: this.scope.editorViewId,
++      document_epoch: this.scope.current().epoch, hydration_epoch: ++this.eventEpoch, parts };
++    try { studioHost?.narralensHydration?.onState(event); } catch { /* Observers cannot break native editing. */ }
++  }
++  /** Called only by ProjectView's real layout commit, not by a GET or a queue Promise. */
++  observe(root: HTMLElement, snapshots: HydrationSnapshots): () => void {
++    this.root = root;
++    const scope = this.scope.current();
++    const round = ++this.round;
++    if (!this.enabled || !this.active) return () => {};
++    this.publish(this.pendingStates());
++    if (!scope.valid) return () => { if (this.round === round) this.round++; };
++    const current = () => this.active && this.round === round && root.isConnected && this.root === root
++      && this.scope.current().valid && this.scope.current().epoch === scope.epoch;
++    void Promise.all(PARTS.map(async (part): Promise<[Part, PartState]> => {
++      const record = this.receipts[part]; const version = record.version; const snapshot = snapshots[part];
++      const outcome = record.outcome; const origin = record.origin;
++      const empty = (state: PartState['state'], from = origin): [Part, PartState] => [part, { state, origin: from, effective_sha256: null }];
++      if (outcome !== 'success') return empty(outcome);
++      if (!snapshot) return empty('pending');
++      try {
++        const basis = hydrationCanonicalJson(snapshot.basis);
++        const value = hydrationCanonicalJson({ format: 'narralens.native-hydration-effective@1', part, value: snapshot.value });
++        // Verification starts after the DOM commit and captures this request's view/epoch/part version.
++        const requestEpoch = this.scope.current().epoch;
++        const result = await snapshot.read();
++        if (!current() || requestEpoch !== scope.epoch || this.receipts[part].version !== version) return empty('unsupported');
++        if (result.origin !== origin || result.origin === 'browser_preference' || result.state === 'unsupported'
++          || hydrationCanonicalJson(result.basis) !== basis || hydrationCanonicalJson(snapshot.basis) !== basis) return empty('unsupported');
++        const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value));
++        if (!current() || this.receipts[part].version !== version) return empty('unsupported');
++        return [part, { state: result.state, origin: result.origin,
++          effective_sha256: Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, '0')).join('') }];
++      } catch { return empty('failed'); }
++    })).then((states) => {
++      if (current()) this.publish(Object.fromEntries(states) as Record<Part, PartState>);
++    }).catch(() => { /* A rejected verification never becomes success. */ });
++    return () => { if (this.round === round) this.round++; };
++  }
++}
++
++export function useNativeHydration(scope: NativeHydrationScope) {
++  const [revision, setRevision] = React.useState(0);
++  const observer = React.useRef<NativeHydrationObserver | null>(null);
++  if (!observer.current) observer.current = new NativeHydrationObserver(scope, () => setRevision((value) => value + 1));
++  const current = observer.current;
++  React.useEffect(() => { current.mount(); return () => current.unmount(); }, [current]);
++  return { observer: current, revision };
++}
