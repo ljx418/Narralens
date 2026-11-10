@@ -1,0 +1,61 @@
+# Fixed captions read implementation map
+
+Read-only map of fixed upstream e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3, entry packages/openfilm/studio/server/captions.mjs, public subtitlesForExport(root):473. No module import/eval/private burnFilm evaluation, compiler/test/provider/ffprobe/browser/export was executed. Exact input MAIN HEAD and captured pin/lock SHA are in import-closure.json; captured JSON copies prevent future MAIN pin edits from changing this map's meaning. All20 upstream worktree bytes independently compared to the fixed Git blob and match. No MAIN edits.
+
+## Exact import and SHA scope
+
+Runtime static relative module/re-export closure is18 files, detailed edge-by-edge with source line/specifier/target in import-closure.json. Top-level host.mjs:27/29/31 additionally reads timeline.mjs, film-doc.mjs and overrides.mjs as browser source strings; film-doc is already present, giving20 distinct tracked source files. Exact20 SHA rows and pin membership are SHA-TABLE.md. All existing recorded digests agree. `render-loaded-additions.json` provides the precise14 additional path->SHA pairs needed to cover the expanded20 in worker RENDER_PIN.loaded_module_sha256. It is data for MAIN review, not a modification to the pin.
+
+Current render-loaded8 contains6 of these20 (host/shared/film-doc/media-links/timeline/overrides). Canonical top loaded4 adds film/ops/atomic, yielding9/20 covered by the parent verifier union, leaving11. Canonical Studio loaded63 already records every20, so there is zero new upstream digest to invent, but recorded Studio hashes are not automatically an active worker gate: openfilm-upstream.ts:35,195-199 uses the canonical top loaded table; worker checks its render table. Existing availability also checks pinned Git/tree cleanliness; do not confuse this with the explicit per-module worker pin. Safest worker adaptation copies all14 recorded Studio hashes into the render table and verifies before first import.
+
+Relative runtime dynamic import is absent. The only genuine dynamic import in these18 is trash.mjs:42 `import('node:fs')` in the Windows delete branch; it is a builtin and not called by subtitlesForExport. JSDoc imports of types are not runtime import edges. No provider/translator/transcriber implementation is imported by this relative closure. The static scanner's output was manually checked against source declarations; it is not an ESM execution trace.
+
+The sole external package edge is host.mjs:7 -> playwright-core, already reached by existing native render through shared/host. Actual installed package1.61.1 entry chain is index.mjs -> index.js -> lib/bootstrap.js + lib/coreBundle.js; exact entry file/package hashes are captured. Playwright initializes its in-process object on import; no new launch method is called by the captions read. This map does not claim an exhaustive physical CJS/dependency closure or all global reads inside that pre-existing bundled package; retain existing isolated dependencies/env/guards. The committed OpenFilm relative20 and installed package entry bytes are explicitly separate scopes.
+
+## Actual read call chain and effects
+
+| Entry and evidence | Actual effect | Not implied |
+|---|---|---|
+|captions:473-475 subtitlesForExport|Parallel filmCaptions(root) and readSubtitleStyle(root); style missing/unreadable/invalid object -> native default|Not a pure no-write or no-tool read|
+|filmCaptions:223-228 -> film.mjs:29-38 readProjectFilm|Read root/film.html, native parser/revision; invalid or empty doc -> empty captions|Does not reject all missing-caption states|
+|captions:180-184 heardClips; film-doc:722|Only nonhidden/nonmuted tracks, sound/video with volume>0 and inProject paths; muted HTML clip normalizes to volume0|No claim actual sound amplitude or speech|
+|captions:231-246 -> transcripts:151-158|Read same-name VTT via inProject/readText/parseVtt|Does not transcribe or verify script words against audio|
+|transcripts:221-232 translationsOf, then readTranscript per language|Read media parent directory, matching name.language.vtt files; read translated VTTs|Do not omit relevant translation sidecars from closed snapshot roots|
+|captions:248-263 lengthOf -> derived:79-98 probe|Probe each transcript's source duration (even with explicit two-ended trim, because outlasts check comes first); cache by source path/size/rounded mtime|Native captions are not actual full media QC|
+|derived:53-69 source/cached; :38 execFile|Cache hit reads .film/cache/probe/key.3.json. Miss starts ffprobe -v error -print_format json -show_format -show_streams ABS, then mkdir and atomic cache write|This apparently read-only public seam writes cache and starts a process|
+|captions:192-194 wantsTranscript|No transcript: audio classified by soundRole; video may probe for audio stream|Listing untranscribed does not request ASR|
+|captions:294-296 readSubtitleStyle -> jsonObject:57-63|Read root/.film/subtitles.json and native field normalization; fallback default if unreadable/unparseable|No global prefs/provider setting read on this path|
+
+`lengthOf` caches per-read Promise per source; derived has three tool slots per module, not a durable Job queue. Its execFile has maxBuffer64MiB and no explicit timeout/AbortSignal. The worker's deadline/group cancellation must cover it and wait for tool exit. Install media-process-policy before importing captions (it imports named execFile); existing syncBuiltinESMExports ensures named imports see the patch. `trash.mjs:19` also captures promisify(execFile) on import, although this read never calls trash. Do not invoke any subtitle edit/translate/transcribe routes as a read workaround.
+
+## Global configuration and network boundary
+
+The actual caption read has no provider lookup, translation callback, transcription callback, fetch or external HTTP call. captions:342 translation only calls the explicitly supplied translate callback; captionRoutes:408 receives transcribe/translate dependencies; subtitlesForExport supplies none and calls neither. Merely defining those routes does not start them.
+
+A conditional local-global read exists: files.mjs:45-65 inside/readable/inProject -> onDiskInside:96-116; if a project asset actually resolves outside the project, the fallback calls media-links.mjs:71-74 readableLink -> linkAllowed -> linkedPlaces:23-34, which stats/reads OPENFILM_HOME/links.json or ~/.openfilm/links.json. A normal symlink-free in-project copied file passes onDiskInside and short-circuits that fallback. Setting OPENFILM_HOME to an attempt-private staging directory before imports (without changing HOME), plus closed no-alias input validation, prevents inheriting user's allowed links. No settings/provider global write is required.
+
+Import side effects in the tracked OpenFilm18 are constant/maps/function setup plus host's three readFileSync code reads; projects.studioHome/libraryRoot, trash and media-links home are lazy functions. Native host launch/HTTP server/network routes are exported but not called by subtitlesForExport. Actual native render later calls them; host.FilmPage.open defaults offline=false, so existing offline loader/own-origin guard must already intercept host before import. Its network.fetch/route.continue paths at host:318-329 must remain inaccessible for denied origins. FFprobe local protocol policy blocks network media protocols; it does not by itself prove arbitrary local playlist references stay inside a source domain. Retain input format/regular-file/closure checks.
+
+## Copy, cache and cleanup
+
+MAIN snapshot-copy.ts:16-19 deliberately makes a writable attempt copy for native caches. verifySnapshotCopy:161+ rehashes original `copy.files` only, not an exact no-extra tree; new cache files are therefore permitted. Native caption probe cache and wrapper can live in this copy without changing committed input hashes. Never write these into author or committed snapshot. Do not add transient cache to source roots/committed sourceDigest or native Delivery attachment inventory just to make it look like source.
+
+Reserve `.film/cache/narralens-subtitle-burn/{index.html,film-subtitle.mjs}` with no-clobber and known-private directory creation. If committed input already declares those paths or a probe cache, do not overwrite/delete a copied input to force regeneration: reject/resolve the source/cache policy explicitly. Upstream cached() trusts an existing cache by metadata-derived key, so copying arbitrary prepopulated probe cache could suppress real source probing and use stale/forged durations; fresh private cache is preferable, with an explicit policy for any input cache. Input files must remain byte-identical after render.
+
+RenderService:586-600 discards only its own staging after confirmed stop; unsettled descendants quarantine staging and retain the claim for reconciliation. Wrapper/probe cache require no new independent cleanup state machine; preserve this existing whole-attempt cleanup. Do not remove files while a caption ffprobe or browser may still be writing. Unknown cleanup/worker state must not be reclassified as successful cancel.
+
+## Native audio and source validation
+
+Keep original filmDoc validation on original film.html and its stage, not on the generated wrapper page. Then render wrapper with the same original render([wrapperAbsolutePath], {root: copy.project_root, ...fixedOptions}); it is a page containing the native film iframe, not a second film format or export queue.
+
+Audio forwarding is valid for actual fixed native timeline: timeline.mjs:513-518 emits each sound src as URL(...).pathname (root-absolute URL path), not the relative asset spelling. Wrapper's raw __filmSounds forwarding therefore survives its nested cache directory. shared.mjs:152-163 fileOf resolves that absolute URL path under root; shared:198-212 filmSound/audioClips additionally requires existing file and hasAudio(ffprobe). host:354-363 waits native ready before reading sounds. __filmCuts forwarding likewise must remain. A custom page exposing relative sound paths would need a separate mapping policy; do not infer it is covered by the native-film case. Actual audible contribution, no trimming and full narration must still be measured in real media output; presence of forwarding strings is insufficient.
+
+## Frame-count, cue and ConfigDigest policy
+
+MAIN's proposed Host-only frame_count from closure.expected_frames is the correct authority; do not derive expected duration from encoded output or helper. Require safe positive frame_count and fps30 whenever native captions are nonempty, per A's source clock. Non30/missing count must be explicit rejection, not inferred from probe/produced movie. This map changes no DTO or MAIN source.
+
+Default native policy can burn only when normalized style.on is true and cues are nonempty, while otherwise rendering original film. Record this policy and effective choice, helper hash, exact loaded graph/pin, expected frame count/fps and normalized cue/style derivation strategy in ConfigDigest/worker pin. Helper internally forces style.on=true like official burnFilm; with the style.on gate it cannot override a native-off request. Never change project style to achieve export.
+
+Conditional A gate: subtitlesForExport drops filmCaptions.untranscribed from its return. Missing/invalid VTT yields no cues, invalid film yields no cues, invalid style falls back to default, and probe failure is converted to undefined duration (full clip may fall back to transcript end). Native policy alone therefore cannot prove an A export's promised subtitle coverage or actual speech/media validity. If current approved RenderSpec/A acceptance requires captions, missing/empty/insufficient cues must be explicitly refused or failed in QC, rather than quietly taking the no-burn branch. No ASR/semantic-quality expansion is proposed: time/text derive from actual approved Storyboard, followed by required human Chinese content/listening review.
+
+MAIN reported19323 tsc0 and2files21cases0 (draft16+burn5 with actual plain Node probe). This is MAIN internal evidence, not this read-only map's independent rerun or real-media proof. Actual subtitle pixels/audio/native render/decode/cancel/Delivery proof remains pending the reserved media run.
