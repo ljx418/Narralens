@@ -1,0 +1,10 @@
+{
+  "scope": "Build guard plus read-only emitted import inventory, not independent review",
+  "library_imports": [],
+  "wrapper_imports": [
+    "import { createHash } from 'node:crypto';",
+    "import { filmShape, filmSrcKind, layoutTracks, trackNamesOf, trackHeightsOf, ownTrackHeight,\n  parseMarkers, placeMarkers, footageFps, parseProjectSettings, hydrationCanonicalJson } from './native-pure-library.mjs';"
+  ],
+  "build_guard_exit": 0,
+  "actual_node_import_vector_exit": 0
+}
