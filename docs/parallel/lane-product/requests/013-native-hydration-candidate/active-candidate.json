@@ -1,16 +1,27 @@
 {
+  "revision": "H-R1-callback-round-fence",
+  "source_commit": "eeb6c7b0b6c046d39d7c633f4ee0029e23b3f7d6",
   "upstream_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
   "patch": "candidate.patch",
-  "patch_sha256": "198c8b5e6873d6cf7b3d6f2171b55c9859ca73d3bf2725b2b9da118db258d753",
-  "source_files_sha256": "9694f79084ab645b5c42eada8c61a9eebcdfd3e6777fa2a4aa448b37753162bc",
-  "internal_contract_sha256": "456e9bf3e1664f068c38894861bb8e828e102fd2d81d7d8753162149fa157aad",
+  "patch_sha256": "f699889206e129dfe4fd913618b34baa8d7e04363f1940d3659664a1e7b9d435",
+  "source_files_sha256": "6f0e1f0371fc3f472c0758f2d759b4e1f94fa0b3d19420b92122c1ad0f7c1efc",
+  "internal_contract_sha256": "7088d0ba83bec3674d2421f85e6b6c7f5faa38395cec2c20481b0998a0a68c07",
   "typecheck_exit": 0,
   "build_exit": 0,
-  "evidence": "check1/results.json",
-  "dist_manifest_sha256": "76cbc5e98b968f01824630dbe0295ed05c7f386b17727cd818d5cf40aa267458",
-  "archive": "check1/managed-ui-dist.tar.gz",
-  "archive_sha256": "1fa86a01d2d74fe996fc236e946832a83fb6dfec1153a3ceec592a2775aaae14",
+  "evidence": "check2/results.json",
+  "helper_behavior_before": "check2/helper-before.json",
+  "helper_behavior_after": "check2/helper-after.json",
+  "dist_manifest_sha256": "1009cc7ae04a1cc842a895ac76109f5b8a2b3ca5e018f034b3c2cafd3ca4da7d",
+  "archives": {
+    "check2/managed-ui-dist.tar.gz": {
+      "sha256": "a4e623618a94f9411f36d6e8c70e2553e9029d251304f9d0b56a34fed680693b",
+      "bytes": 747098
+    },
+    "check2/source-candidate.tar.gz": {
+      "sha256": "7240a2e80d5ca1995fa533ef3c9bd6a99efb170f3ca10898577443079eb018c5",
+      "bytes": 78087
+    }
+  },
   "browser": "NOT_RUN",
-  "runtime_tests": "NOT_RUN",
   "independent_review": "PENDING"
 }

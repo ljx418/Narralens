@@ -55,11 +55,14 @@
       "post_sha256": "5db47837e690590c9e9678a97e53a10a7115631bd05807ddf6afc925904e2f64"
     }
   ],
-  "status": "SOURCE_CANDIDATE_ONLY",
-  "typecheck": "NOT_RUN",
-  "build": "NOT_RUN",
-  "tests": "NOT_RUN",
+  "status": "H_R1_UNIT_AND_NATIVE_UI_TYPES_BUILD_EXIT_0_BROWSER_PENDING",
+  "typecheck": "EXIT_0",
+  "build": "EXIT_0",
+  "tests": "VM_HELPER_UNIT_ONLY",
   "browser": "NOT_RUN",
   "host": "NOT_RUN",
-  "independent_review": "PENDING"
+  "independent_review": "PENDING",
+  "helper_unit": "OLD_SOURCE_EXIT_1_FIXED_SOURCE_EXIT_0",
+  "helper_canonical_goldens": "MATCH_8_VM_UNIT",
+  "type_build_evidence": "check2/results.json"
 }
