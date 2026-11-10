@@ -1,0 +1,13 @@
+{
+  "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+  "argv": [
+    "corepack",
+    "pnpm",
+    "exec",
+    "vitest",
+    "run",
+    "tests/agent-driven/media/native-draft.test.ts",
+    "--maxWorkers=1",
+    "--minWorkers=1"
+  ]
+}

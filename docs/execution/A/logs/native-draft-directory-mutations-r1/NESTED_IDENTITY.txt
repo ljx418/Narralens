@@ -1,0 +1,49 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+ ❯ tests/agent-driven/media/native-draft.test.ts (16 tests | 1 failed | 15 skipped) 34ms
+   ↓ native draft creative and rights planning > binds actual script, source facts, complete narration and explicit storyboard timing without host paths
+   ↓ native draft creative and rights planning > rejects narration frame length 59 instead of trimming or retiming
+   ↓ native draft creative and rights planning > rejects narration frame length 61 instead of trimming or retiming
+   ↓ native draft creative and rights planning > blocks unknown rights, wrong project, source alias IDs and omitted script content
+   ↓ native draft creative and rights planning > fails closed on planned captions without the full narration source
+   ↓ private fd-anchored draft IO (unit bytes, no media process) > streams and fsyncs exact copied bytes, rejects wrong digest and cleans only its new root
+   ↓ private fd-anchored draft IO (unit bytes, no media process) > no-clobber leaves a pre-existing root and its contents unchanged
+   ↓ private fd-anchored draft IO (unit bytes, no media process) > rejects protected overlap and symlink ancestors before any target mkdir
+   ↓ private fd-anchored draft IO (unit bytes, no media process) > rejects a non-private parent and cross-ID hardlink inputs without creating output
+   ↓ private fd-anchored draft IO (unit bytes, no media process) > opens FIFO nonblocking and rejects non-regular source without leaving a root
+   ↓ private fd-anchored draft IO (unit bytes, no media process) > cancels before the next copied chunk, closes files and removes partial owned stage
+   ↓ private fd-anchored draft IO (unit bytes, no media process) > source replacement is rejected and cleanup leaves the replacement source untouched
+   ↓ private fd-anchored draft IO (unit bytes, no media process) > refuses a different real directory substituted after new root stat, without writing or deleting the replacement
+   × private fd-anchored draft IO (unit bytes, no media process) > refuses a substituted nested real output directory and never writes into its replacement 33ms
+     → promise resolved "{ …(3) }" instead of rejecting
+   ↓ private fd-anchored draft IO (unit bytes, no media process) > a swapped output ancestor cannot redirect writes or cleanup into snapshot
+   ↓ source-only integration with the real fixed pure parser, no browser/render/decode > creates editable primary clips and exact native source/settings/VTT closure from registry unit facts
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/media/native-draft.test.ts > private fd-anchored draft IO (unit bytes, no media process) > refuses a substituted nested real output directory and never writes into its replacement
+AssertionError: promise resolved "{ …(3) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "bytes": 2,
++   "relative_path": "nested/not-ours.json",
++   "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+  }
+
+ ❯ tests/agent-driven/media/native-draft.test.ts:131:70
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 15 skipped (16)
+   Start at  08:05:44
+   Duration  4.08s (transform 215ms, setup 0ms, collect 2.14s, tests 34ms, environment 0ms, prepare 1.25s)
+

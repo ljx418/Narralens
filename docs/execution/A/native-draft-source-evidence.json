@@ -1,0 +1,90 @@
+{
+  "format": "narralens.native-draft-source-evidence@1",
+  "base_commit": "5b97400c5f42d7607af3b836901ebecac1a09d78",
+  "candidate_commit": "afa862778c5b10c3d068101cd847d58b4d003875",
+  "declaration": "NATIVE_DRAFT_PREPARATION_INTERNAL_EVIDENCED",
+  "external": "REVIEW_PENDING_AFTER_MAIN_REPAIR",
+  "scope": "private SOURCE_ONLY stage, real fixed pure parser with explicitly non-media unit fixture bytes",
+  "tests": [
+    {
+      "session": 67660,
+      "files": 1,
+      "tests": 14,
+      "exit": 0,
+      "typecheck": 0,
+      "note": "unrepaired original candidate integration"
+    },
+    {
+      "session": 47114,
+      "files": 1,
+      "tests": 16,
+      "exit": 0,
+      "typecheck": 0,
+      "note": "production inode repairs; final test-only cleanup improvement came next"
+    },
+    {
+      "session": 36786,
+      "files": 1,
+      "tests": 16,
+      "exit": 0,
+      "note": "final-source baseline before two mutations; no repeated typecheck after test-only cleanup adjustment"
+    }
+  ],
+  "mutations": {
+    "session": 36786,
+    "outer_exit": 0,
+    "gates": 2,
+    "expected_child_exit": 1,
+    "source_bytes_restored": true
+  },
+  "repair": {
+    "ND-R1": "recorded root inode must match opened directory before it becomes owned",
+    "nested": "same compare for newly created output subdirectories",
+    "trust_boundary": "MAIN-exclusive private parent; not an atomic mkdir-to-first-stat guarantee against arbitrary same-UID OS mutation"
+  },
+  "source_hashes": {
+    "src/host/render/assembly-ports.ts": "d80b7d1e82366e507617c6d5496eaa771a8b85b7387dac436b3da6712da41547",
+    "src/host/render/native-draft-plan.ts": "b4091aa1ffa786fe703a59296b291ae0485e5032e57f9aa4dfa31e9d37631d3e",
+    "src/host/render/native-draft-io.ts": "4228400591b5561b795a72cfab551bed9b214378e6222b49f415b91ac0d7436a",
+    "src/host/render/native-draft-assembler.ts": "aad468fa4b9dafab9b2b3ac2559ede4c393943643927fdaf9a3d458863a65e6e",
+    "src/host/render/native-subtitle-burn-source.ts": "f6c5b66a1ccb73bc61cb5e281d4b2a9d7285816da36639666b0cca35935cde12",
+    "tests/agent-driven/media/native-draft.test.ts": "e3f7a92723034cfcf24b2fdaca64c8b152b8fd7e649e58985350f0ee6dd88fdb",
+    "tools/check-native-draft-directory-mutations.py": "16d8a7ee799d0fc8f5ca6364beb8f20a45933c236d4564d28d79a5cbe0c9f1f1"
+  },
+  "artifact_hashes": {
+    "docs/execution/A/logs/native-draft-integration/directory-mutations-r1.cmd.json": "4857b9261925de237a5272382153a56bdbcb945e11d50d2b0e90e571ce3983a9",
+    "docs/execution/A/logs/native-draft-integration/directory-mutations-r1.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "docs/execution/A/logs/native-draft-integration/directory-mutations-r1.txt": "c90abc10f96b1d5018608352ae1646c6ee088b8b250d2c2134754a5748eca278",
+    "docs/execution/A/logs/native-draft-integration/narralens-native-draft-integration-tests-r1.txt": "f5d70cb9efbc4bf5b8ab4f65a9ad59f6afab97858ed8313992a9fa6d3cb10133",
+    "docs/execution/A/logs/native-draft-integration/narralens-native-draft-integration-tests-r2.txt": "dbc8c100d3103d67ed2e6585c1c3c269d5cdfef04a137323ca5ecba6f6f08af4",
+    "docs/execution/A/logs/native-draft-integration/narralens-native-draft-integration-tsc-r1.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "docs/execution/A/logs/native-draft-integration/narralens-native-draft-integration-tsc-r2.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "docs/execution/A/logs/native-draft-integration/r1-tests.cmd.json": "1e82ada6ffdbebc665065ca13ae46affe83342fa5f1814c0d41c603fb8e96f57",
+    "docs/execution/A/logs/native-draft-integration/r1-tests.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "docs/execution/A/logs/native-draft-integration/r1-type.cmd.json": "39fe9d9eaf0019a6d005b1c61f19761352746b3bc464b8678ed583d09624344f",
+    "docs/execution/A/logs/native-draft-integration/r1-type.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "docs/execution/A/logs/native-draft-integration/r2-tests.cmd.json": "dea9d29cf6c586369bad4659a1d77496478ad4ee6400f24c23809d884769c671",
+    "docs/execution/A/logs/native-draft-integration/r2-tests.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "docs/execution/A/logs/native-draft-integration/r2-type.cmd.json": "50598d5ad8cd0abd6935c4a820d5cbc1d60b715fc1b6c86a8b81a0ca26367ff7",
+    "docs/execution/A/logs/native-draft-integration/r2-type.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "docs/execution/A/logs/native-draft-directory-mutations-r1/baseline.cmd.json": "7bfa5e48df82985f28ca1047ad7066e78f0add68f405d4bd2a9816b11bd661a4",
+    "docs/execution/A/logs/native-draft-directory-mutations-r1/baseline.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "docs/execution/A/logs/native-draft-directory-mutations-r1/baseline.txt": "f50747b283602c7a34e3c2f4c27c29c98a6565f37d7956ac090f65b6ae8e6ada",
+    "docs/execution/A/logs/native-draft-directory-mutations-r1/NESTED_IDENTITY.cmd.json": "2ff86d1b345883735969cf99fb4a25c8dc3e4de60d4eb1414a64aabb6ae9b521",
+    "docs/execution/A/logs/native-draft-directory-mutations-r1/NESTED_IDENTITY.exit": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+    "docs/execution/A/logs/native-draft-directory-mutations-r1/NESTED_IDENTITY.txt": "3392a54b29d16805f51da5c45887f85265cc35576d3f6aeef408de17497d7962",
+    "docs/execution/A/logs/native-draft-directory-mutations-r1/original-native-draft-io.ts": "4228400591b5561b795a72cfab551bed9b214378e6222b49f415b91ac0d7436a",
+    "docs/execution/A/logs/native-draft-directory-mutations-r1/result.json": "b7db51047182324f654f3ddd0ac9f38168938bf811cbbaac74db2e4cbe8fdd78",
+    "docs/execution/A/logs/native-draft-directory-mutations-r1/ROOT_IDENTITY.cmd.json": "842409edc508f6d2938c14f54eb125fea62b323e82a7e373e00dd842c98a4512",
+    "docs/execution/A/logs/native-draft-directory-mutations-r1/ROOT_IDENTITY.exit": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+    "docs/execution/A/logs/native-draft-directory-mutations-r1/ROOT_IDENTITY.txt": "bca54f8442d9180ac1468c21b13fad80c96b61c82a6c5208a19b0fab50427db9",
+    "docs/execution/A/reviews/native-draft-afa8627-static/input-hashes.json": "f2531fcfb4ef5a7f62be4f6018e6c8ee9394c97ffbb608c4ab325d1289770b2e",
+    "docs/execution/A/reviews/native-draft-afa8627-static/REVIEW.md": "c34a91253ae9d51dfc02c3306029d51795d5a21eb1e4136b4388b84cfba67113"
+  },
+  "not_proven": [
+    "real decoded video or human Chinese recording",
+    "rendered subtitle burn (helper only prepared/typechecked)",
+    "Host Run/Task/approval/Coordinator adoption/Delivery wiring",
+    "full A tests/recovery/native acknowledgement/human acceptance"
+  ]
+}
