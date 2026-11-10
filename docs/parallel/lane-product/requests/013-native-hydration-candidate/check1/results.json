@@ -1,0 +1,45 @@
+{
+  "scope": "native hydration candidate UI types/build only",
+  "source_commit": "f6c2ea23d6fe54e6f8d69251d2477df13b0f4b29",
+  "network": "NONE",
+  "started_at": "2026-11-10T00:07:40.114300+00:00",
+  "node": "v22.22.1",
+  "upstream_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+  "patch_sha256": "198c8b5e6873d6cf7b3d6f2171b55c9859ca73d3bf2725b2b9da118db258d753",
+  "source_files_sha256": "9694f79084ab645b5c42eada8c61a9eebcdfd3e6777fa2a4aa448b37753162bc",
+  "internal_contract_sha256": "456e9bf3e1664f068c38894861bb8e828e102fd2d81d7d8753162149fa157aad",
+  "lock_sha256": "d9faf24e9480b847be99b61ec2b220ef5290530a54b1f6f667845fb8ac2905f9",
+  "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/product-workbench/var/managed-native-observation/source/packages/openfilm",
+  "commands": [
+    {
+      "name": "typecheck",
+      "argv": [
+        "node",
+        "node_modules/typescript/bin/tsc",
+        "-p",
+        "studio/ui"
+      ],
+      "pid": 14883,
+      "started_at": "2026-11-10T00:07:40.123080+00:00",
+      "ended_at": "2026-11-10T00:07:49.316905+00:00",
+      "exit": 0,
+      "log": "check1/typecheck.log"
+    },
+    {
+      "name": "build",
+      "argv": [
+        "node",
+        "node_modules/vite/bin/vite.js",
+        "build",
+        "--config",
+        "studio/ui/vite.config.ts"
+      ],
+      "pid": 15016,
+      "started_at": "2026-11-10T00:07:49.319568+00:00",
+      "ended_at": "2026-11-10T00:08:14.888429+00:00",
+      "exit": 0,
+      "log": "check1/build.log"
+    }
+  ],
+  "ended_at": "2026-11-10T00:08:14.988028+00:00"
+}

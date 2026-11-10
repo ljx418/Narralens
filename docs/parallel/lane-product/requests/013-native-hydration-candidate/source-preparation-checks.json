@@ -1,0 +1,40 @@
+{
+  "scope": "Source transformation reproduction and portable apply check only; no native runtime tests",
+  "transformation_reproduction": [
+    {
+      "path": "packages/openfilm/studio/ui/src/lib/host.ts",
+      "matches_postimage": true
+    },
+    {
+      "path": "packages/openfilm/studio/ui/src/editor/use-film.ts",
+      "matches_postimage": true
+    },
+    {
+      "path": "packages/openfilm/studio/ui/src/components/ProjectView.tsx",
+      "matches_postimage": true
+    },
+    {
+      "path": "packages/openfilm/studio/ui/src/lib/media-queue.ts",
+      "matches_postimage": true
+    },
+    {
+      "path": "packages/openfilm/studio/ui/src/lib/use-film-subtitles.ts",
+      "matches_postimage": true
+    },
+    {
+      "path": "packages/openfilm/studio/ui/src/lib/use-subtitle-style.ts",
+      "matches_postimage": true
+    },
+    {
+      "path": "packages/openfilm/studio/ui/src/components/use-editor-tools.tsx",
+      "matches_postimage": true
+    },
+    {
+      "path": "packages/openfilm/studio/ui/src/lib/native-hydration.ts",
+      "matches_postimage": true
+    }
+  ],
+  "git_apply_check_exit": 0,
+  "git_apply_stderr": "",
+  "vendor_status": ""
+}
