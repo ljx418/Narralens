@@ -1,0 +1,224 @@
+{
+  "upstream_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+  "canonical_managed_source_commit": "eeb6c7b0b6c046d39d7c633f4ee0029e23b3f7d6",
+  "files": [
+    {
+      "path": "LICENSE",
+      "origin": "upstream-fixed",
+      "sha256": "4f39fecc5d074a4795bb7c55c5aaad1a4505b5e022ae6c2c3b55b4f26e7c43fc",
+      "runtime_imports": []
+    },
+    {
+      "path": "package.json",
+      "origin": "upstream-fixed",
+      "sha256": "80301a283538721f513ef57c6fccb1b01dd8a0a49c1793554aecac3a91a77452",
+      "runtime_imports": []
+    },
+    {
+      "path": "packages/openfilm/package.json",
+      "origin": "upstream-fixed",
+      "sha256": "5be3d28593830700d3a6257c8831a83f97998ee5a6830121a37bee572394c8b0",
+      "runtime_imports": []
+    },
+    {
+      "path": "packages/openfilm/src/film-doc.mjs",
+      "origin": "upstream-fixed",
+      "sha256": "feef7be8181e7ec63cf2b8760f3a32b7b7e22cd851d4e5a233c04f1768cf719d",
+      "runtime_imports": []
+    },
+    {
+      "path": "packages/openfilm/studio/server/atomic.mjs",
+      "origin": "upstream-fixed",
+      "sha256": "61374e50c67d76e03d70d73e05ed307378d866d579847c316c4203fbc9cde94f",
+      "runtime_imports": [
+        "node:crypto",
+        "node:fs/promises"
+      ]
+    },
+    {
+      "path": "packages/openfilm/studio/server/film.mjs",
+      "origin": "upstream-fixed",
+      "sha256": "eb0aab3a4770082a0b273f448b6bda3b0ca043aee791d5444148c459af855d85",
+      "runtime_imports": [
+        "node:crypto",
+        "node:fs/promises",
+        "node:path",
+        "../../src/film-doc.mjs",
+        "./ops.mjs",
+        "./atomic.mjs"
+      ]
+    },
+    {
+      "path": "packages/openfilm/studio/server/http.mjs",
+      "origin": "upstream-fixed",
+      "sha256": "357da4dad30c36ca14d7bde8fd02587b58653e915bddb36c220ba02d10c70524",
+      "runtime_imports": []
+    },
+    {
+      "path": "packages/openfilm/studio/server/ops.mjs",
+      "origin": "upstream-fixed",
+      "sha256": "e44a93286d500391cd61b6f27cc426ecb6fd49f777f816593c17133f0bd15957",
+      "runtime_imports": [
+        "../../src/film-doc.mjs"
+      ]
+    },
+    {
+      "path": "packages/openfilm/studio/server/project-settings.mjs",
+      "origin": "upstream-fixed",
+      "sha256": "c1e794bd481022ad61e8306bb16e5e3d8304c6787b4285641bb36a3605432e39",
+      "runtime_imports": [
+        "node:fs/promises",
+        "node:path",
+        "./atomic.mjs",
+        "./http.mjs",
+        "./projects.mjs"
+      ]
+    },
+    {
+      "path": "packages/openfilm/studio/server/projects.mjs",
+      "origin": "upstream-fixed",
+      "sha256": "f2905720ecc890c4f27a36eb579bfdd4a754774720a03d53b965d3ea0a3c7c3f",
+      "runtime_imports": [
+        "./trash.mjs",
+        "node:crypto",
+        "node:fs",
+        "node:fs/promises",
+        "node:os",
+        "node:path",
+        "./film.mjs",
+        "../../src/film-doc.mjs",
+        "./atomic.mjs"
+      ]
+    },
+    {
+      "path": "packages/openfilm/studio/server/trash.mjs",
+      "origin": "upstream-fixed",
+      "sha256": "26ec5e0a12ca1b836658744db2482643af985325093a63f08d093130e17e046f",
+      "runtime_imports": [
+        "node:child_process",
+        "node:fs",
+        "node:fs/promises",
+        "node:os",
+        "node:path",
+        "node:util"
+      ]
+    },
+    {
+      "path": "packages/openfilm/studio/ui/src/lib/film-shape.ts",
+      "origin": "upstream-fixed",
+      "sha256": "23699e27a8ee6c8d98417cec1b700c3e569ebd0c165746592da70c06b2c55416",
+      "runtime_imports": [
+        "./film.ts"
+      ]
+    },
+    {
+      "path": "packages/openfilm/studio/ui/src/lib/film.ts",
+      "origin": "upstream-fixed",
+      "sha256": "a344a3d2f06860254c315e677db8e4a540c9dc61dd162b550d2240607c7bbfef",
+      "runtime_imports": [
+        "../../../../src/film-doc.mjs"
+      ]
+    },
+    {
+      "path": "packages/openfilm/studio/ui/src/lib/host.ts",
+      "origin": "managed013-H-R1",
+      "sha256": "62facd2ebf670defb1d4ba100c2fe6e26c0a6227bde8ba5d85482b337e959f0b",
+      "runtime_imports": [
+        "react"
+      ]
+    },
+    {
+      "path": "packages/openfilm/studio/ui/src/lib/markers.ts",
+      "origin": "upstream-fixed",
+      "sha256": "524c389f26a88286978505d873d0791d04043a4184576902fe3d7f0f0c4fbbfb",
+      "runtime_imports": [
+        "./timecode.ts"
+      ]
+    },
+    {
+      "path": "packages/openfilm/studio/ui/src/lib/native-hydration.ts",
+      "origin": "managed013-H-R1",
+      "sha256": "5db47837e690590c9e9678a97e53a10a7115631bd05807ddf6afc925904e2f64",
+      "runtime_imports": [
+        "react",
+        "./host"
+      ]
+    },
+    {
+      "path": "packages/openfilm/studio/ui/src/lib/timecode.ts",
+      "origin": "upstream-fixed",
+      "sha256": "11e46f4b2ee305e9a2e4fc3b2ef19a377cafe1c0b1954d73103bc3e77d02457f",
+      "runtime_imports": [
+        "react"
+      ]
+    },
+    {
+      "path": "packages/openfilm/studio/ui/src/lib/timeline-drag.ts",
+      "origin": "upstream-fixed",
+      "sha256": "f14b136aa460b3734ec66e5e858a5b20682e80b6b29affe6e3958e5f89d69f5c",
+      "runtime_imports": [
+        "./timecode.ts"
+      ]
+    },
+    {
+      "path": "packages/openfilm/studio/ui/src/lib/timeline-edit.ts",
+      "origin": "upstream-fixed",
+      "sha256": "76ee3acc5fb689c1aad778c78421b3d4ab9e0b2f86cbac0810023a9acfe0e727",
+      "runtime_imports": [
+        "./timeline-drag.ts",
+        "./timecode.ts"
+      ]
+    },
+    {
+      "path": "packages/openfilm/studio/ui/src/lib/timeline-layout.ts",
+      "origin": "upstream-fixed",
+      "sha256": "e004d51430bcee151fdeb4b7ac8f37c0c54b6a9193d762a75271855327464968",
+      "runtime_imports": [
+        "../../../../src/film-doc.mjs",
+        "./film.ts",
+        "./timecode.ts",
+        "./timeline-drag.ts"
+      ]
+    },
+    {
+      "path": "packages/openfilm/studio/ui/src/lib/timeline-nav.ts",
+      "origin": "upstream-fixed",
+      "sha256": "5888c17c861984a6bc4b6872e0f13679051f5535eebe50d39a676b67d80e3ddf",
+      "runtime_imports": [
+        "./timeline-drag.ts",
+        "./timeline-edit.ts",
+        "./timecode.ts"
+      ]
+    },
+    {
+      "path": "packages/openfilm/studio/ui/src/lib/track-heights.ts",
+      "origin": "upstream-fixed",
+      "sha256": "e9e44ca690ed01e929ba333bb4ad6a6032ae053c0345d883cc75623d603eafba",
+      "runtime_imports": [
+        "./timeline-nav.ts"
+      ]
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "origin": "upstream-fixed",
+      "sha256": "d9faf24e9480b847be99b61ec2b220ef5290530a54b1f6f667845fb8ac2905f9",
+      "runtime_imports": []
+    }
+  ],
+  "external_imports": [
+    "node:child_process",
+    "node:crypto",
+    "node:fs",
+    "node:fs/promises",
+    "node:os",
+    "node:path",
+    "node:util",
+    "react"
+  ],
+  "closure_sha256": "530a5b3993ce230d6116e8ddb3237358f36816a5bf18b61fa4d1b52a0e8b858c",
+  "static_only": true,
+  "javascript_execution": "NOT_RUN",
+  "typecheck": "NOT_RUN",
+  "build": "NOT_RUN",
+  "tests": "NOT_RUN"
+}

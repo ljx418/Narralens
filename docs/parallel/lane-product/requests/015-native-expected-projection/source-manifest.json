@@ -1,0 +1,174 @@
+{
+  "kind": "narralens.native-expected-projection-source@1",
+  "upstream_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+  "canonical_source_commit": "eeb6c7b0b6c046d39d7c633f4ee0029e23b3f7d6",
+  "native_closure_sha256": "530a5b3993ce230d6116e8ddb3237358f36816a5bf18b61fa4d1b52a0e8b858c",
+  "source_files_sha256": "de57a3b27e70b56a9ff3f8769f4e3562eba173bdc859a798b712f646d6754418",
+  "files": [
+    {
+      "path": "LICENSE",
+      "sha256": "4f39fecc5d074a4795bb7c55c5aaad1a4505b5e022ae6c2c3b55b4f26e7c43fc",
+      "origin": "upstream-fixed"
+    },
+    {
+      "path": "managed-expected/build-expected.mjs",
+      "sha256": "60027ead5a509522f2d35fda33749675923dee523bb8cc12f2b7de3dca8f840d",
+      "origin": "candidate-adapter"
+    },
+    {
+      "path": "managed-expected/expected-projection.d.ts",
+      "sha256": "0f5f565a3d8b70de995aeb0dfdfb6052acad53cbf452c8d70168f555a8937f80",
+      "origin": "candidate-adapter"
+    },
+    {
+      "path": "managed-expected/expected-projection.mjs",
+      "sha256": "3500b1d6485791b13ec9364c6eb80740531142c16754877e21923ad73e9d494e",
+      "origin": "candidate-adapter"
+    },
+    {
+      "path": "managed-expected/native-pure.entry.ts",
+      "sha256": "1ca8590535d412f0d91a522fbf942cbacabba7d95c64f3e849ca9f0fbf416354",
+      "origin": "candidate-adapter"
+    },
+    {
+      "path": "managed-expected/vite.expected.config.mjs",
+      "sha256": "ffac37faeb5e9fcc53460f19d235cc9c38251b3bf969a9183e8cffe5e0657f29",
+      "origin": "candidate-adapter"
+    },
+    {
+      "path": "package.json",
+      "sha256": "80301a283538721f513ef57c6fccb1b01dd8a0a49c1793554aecac3a91a77452",
+      "origin": "upstream-fixed"
+    },
+    {
+      "path": "packages/openfilm/package.json",
+      "sha256": "5be3d28593830700d3a6257c8831a83f97998ee5a6830121a37bee572394c8b0",
+      "origin": "upstream-fixed"
+    },
+    {
+      "path": "packages/openfilm/src/film-doc.mjs",
+      "sha256": "feef7be8181e7ec63cf2b8760f3a32b7b7e22cd851d4e5a233c04f1768cf719d",
+      "origin": "upstream-fixed"
+    },
+    {
+      "path": "packages/openfilm/studio/server/atomic.mjs",
+      "sha256": "61374e50c67d76e03d70d73e05ed307378d866d579847c316c4203fbc9cde94f",
+      "origin": "upstream-fixed"
+    },
+    {
+      "path": "packages/openfilm/studio/server/film.mjs",
+      "sha256": "eb0aab3a4770082a0b273f448b6bda3b0ca043aee791d5444148c459af855d85",
+      "origin": "upstream-fixed"
+    },
+    {
+      "path": "packages/openfilm/studio/server/http.mjs",
+      "sha256": "357da4dad30c36ca14d7bde8fd02587b58653e915bddb36c220ba02d10c70524",
+      "origin": "upstream-fixed"
+    },
+    {
+      "path": "packages/openfilm/studio/server/ops.mjs",
+      "sha256": "e44a93286d500391cd61b6f27cc426ecb6fd49f777f816593c17133f0bd15957",
+      "origin": "upstream-fixed"
+    },
+    {
+      "path": "packages/openfilm/studio/server/project-settings.mjs",
+      "sha256": "c1e794bd481022ad61e8306bb16e5e3d8304c6787b4285641bb36a3605432e39",
+      "origin": "upstream-fixed"
+    },
+    {
+      "path": "packages/openfilm/studio/server/projects.mjs",
+      "sha256": "f2905720ecc890c4f27a36eb579bfdd4a754774720a03d53b965d3ea0a3c7c3f",
+      "origin": "upstream-fixed"
+    },
+    {
+      "path": "packages/openfilm/studio/server/trash.mjs",
+      "sha256": "26ec5e0a12ca1b836658744db2482643af985325093a63f08d093130e17e046f",
+      "origin": "upstream-fixed"
+    },
+    {
+      "path": "packages/openfilm/studio/ui/src/lib/film-shape.ts",
+      "sha256": "23699e27a8ee6c8d98417cec1b700c3e569ebd0c165746592da70c06b2c55416",
+      "origin": "upstream-fixed"
+    },
+    {
+      "path": "packages/openfilm/studio/ui/src/lib/film.ts",
+      "sha256": "a344a3d2f06860254c315e677db8e4a540c9dc61dd162b550d2240607c7bbfef",
+      "origin": "upstream-fixed"
+    },
+    {
+      "path": "packages/openfilm/studio/ui/src/lib/host.ts",
+      "sha256": "62facd2ebf670defb1d4ba100c2fe6e26c0a6227bde8ba5d85482b337e959f0b",
+      "origin": "managed013-H-R1"
+    },
+    {
+      "path": "packages/openfilm/studio/ui/src/lib/markers.ts",
+      "sha256": "524c389f26a88286978505d873d0791d04043a4184576902fe3d7f0f0c4fbbfb",
+      "origin": "upstream-fixed"
+    },
+    {
+      "path": "packages/openfilm/studio/ui/src/lib/native-hydration.ts",
+      "sha256": "5db47837e690590c9e9678a97e53a10a7115631bd05807ddf6afc925904e2f64",
+      "origin": "managed013-H-R1"
+    },
+    {
+      "path": "packages/openfilm/studio/ui/src/lib/timecode.ts",
+      "sha256": "11e46f4b2ee305e9a2e4fc3b2ef19a377cafe1c0b1954d73103bc3e77d02457f",
+      "origin": "upstream-fixed"
+    },
+    {
+      "path": "packages/openfilm/studio/ui/src/lib/timeline-drag.ts",
+      "sha256": "f14b136aa460b3734ec66e5e858a5b20682e80b6b29affe6e3958e5f89d69f5c",
+      "origin": "upstream-fixed"
+    },
+    {
+      "path": "packages/openfilm/studio/ui/src/lib/timeline-edit.ts",
+      "sha256": "76ee3acc5fb689c1aad778c78421b3d4ab9e0b2f86cbac0810023a9acfe0e727",
+      "origin": "upstream-fixed"
+    },
+    {
+      "path": "packages/openfilm/studio/ui/src/lib/timeline-layout.ts",
+      "sha256": "e004d51430bcee151fdeb4b7ac8f37c0c54b6a9193d762a75271855327464968",
+      "origin": "upstream-fixed"
+    },
+    {
+      "path": "packages/openfilm/studio/ui/src/lib/timeline-nav.ts",
+      "sha256": "5888c17c861984a6bc4b6872e0f13679051f5535eebe50d39a676b67d80e3ddf",
+      "origin": "upstream-fixed"
+    },
+    {
+      "path": "packages/openfilm/studio/ui/src/lib/track-heights.ts",
+      "sha256": "e9e44ca690ed01e929ba333bb4ad6a6032ae053c0345d883cc75623d603eafba",
+      "origin": "upstream-fixed"
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "sha256": "d9faf24e9480b847be99b61ec2b220ef5290530a54b1f6f667845fb8ac2905f9",
+      "origin": "upstream-fixed"
+    }
+  ],
+  "contract_files": [
+    {
+      "path": "CONTRACT.md",
+      "sha256": "479f42ec75b3650b556a77b4dcc995a4f76858c3be56d7a0f81b8e27f9de24a0"
+    },
+    {
+      "path": "candidate/expected-projection.d.ts",
+      "sha256": "0f5f565a3d8b70de995aeb0dfdfb6052acad53cbf452c8d70168f555a8937f80"
+    },
+    {
+      "path": "literal-vectors.json",
+      "sha256": "5e6488b3371673244d5068110d91eaf1332d1a7a5492f676283209fbde4fe55d"
+    }
+  ],
+  "contract_sha256": "664d0d82839ac8f9fe176307465e9ea10b21fb196c88d95ad33c01c3b24e88dd",
+  "source_archive_sha256": "e27fb73fec9a8bdd450253a7fadf2b5bff2c9bb258ae976cc2c17596efa34624",
+  "source_archive_bytes": 179747,
+  "status": "SOURCE_CANDIDATE_ONLY",
+  "node_import": "NOT_RUN",
+  "typecheck": "NOT_RUN",
+  "library_build": "NOT_RUN",
+  "tests": "NOT_RUN",
+  "browser": "NOT_RUN",
+  "host": "NOT_RUN",
+  "independent_review": "PENDING"
+}
