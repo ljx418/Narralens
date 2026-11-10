@@ -1,0 +1,69 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:83663) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/agent-driven/integration/created-task-worker.test.ts (11 tests | 3 failed | 8 skipped) 301ms
+   ↓ starts another queued job when one slot frees while a different processor remains busy
+   ↓ renews the real lease during a long processor and only the current lease can settle
+   ↓ awaits aborted processor cleanup before close and returns its live unfinished lease to queued
+   ↓ never executes a processor after close immediately follows synchronous claiming
+   ↓ settles a synchronous/async processor fault through its explicit original-job authority and frees its slot even if diagnostics throw
+   ↓ refuses an un-settled processor return instead of inventing success
+   ↓ aborts a reclaimed lease and quarantines its late result before the queued task is taken with a new attempt
+   ↓ signals actual job cancellation and never adopts the processor result that arrives afterwards
+   × settles cancellation when the processor returns after abort without a result 242ms
+     → expected +0 to be 1 // Object.is equality
+   × finishes user cancellation through its authority even when shutdown begins next to it 35ms
+     → expected false to be true // Object.is equality
+   × reports an explicit processor contract violation when its failure handler also returns without settlement 24ms
+     → expected [] to include 'TASK_PROCESSOR_NOT_SETTLED'
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/created-task-worker.test.ts > settles cancellation when the processor returns after abort without a result
+AssertionError: expected +0 to be 1 // Object.is equality
+
+- Expected
++ Received
+
+- 1
++ 0
+
+ ❯ tests/agent-driven/integration/created-task-worker.test.ts:80:137
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  tests/agent-driven/integration/created-task-worker.test.ts > finishes user cancellation through its authority even when shutdown begins next to it
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ tests/agent-driven/integration/created-task-worker.test.ts:86:184
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  tests/agent-driven/integration/created-task-worker.test.ts > reports an explicit processor contract violation when its failure handler also returns without settlement
+AssertionError: expected [] to include 'TASK_PROCESSOR_NOT_SETTLED'
+ ❯ tests/agent-driven/integration/created-task-worker.test.ts:92:81
+     90|  const f=fixture(),task=f.reserve('no-failure-settlement'),diagnostics…
+     91|  const worker=new CreatedTaskWorker(f.revisions,f.tasks,f.jobs,{execut…
+     92|  try{worker.start();await until(()=>worker.activeCount===0);expect(dia…
+       |                                                                                 ^
+     93|  finally{await worker.close();f.revisions.close();}
+     94| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 8 skipped (11)
+   Start at  09:46:22
+   Duration  4.48s (transform 313ms, setup 0ms, collect 2.25s, tests 301ms, environment 0ms, prepare 1.28s)
+

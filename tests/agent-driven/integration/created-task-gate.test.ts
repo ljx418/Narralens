@@ -65,3 +65,18 @@ it('rejects a creative closure changed after authorization without task side eff
   const before=f.counts();expect(()=>f.store.reserve(f.input,'owner',policy)).toThrowError(expect.objectContaining({code:'REVIEW_STALE'}));expect(f.counts()).toEqual(before);
  }finally{await f.close();}
 },120000);
+it('emits real pending-to-running progress and rolls back step/checkpoint/outbox if the event mirror fails',async()=>{
+ const f=await fixture();try{
+  const task=f.store.reserve(f.input,'owner',policy).task,e=f.input.execution;
+  const command={project_id:f.projectId,run_id:e.run_id,plan_version:1 as const,step_id:e.step_id,attempt:e.attempt,grant_id:e.authorization_id,input_digest:e.input_digest,job_id:task.job_id,observed_at:new Date().toISOString()};
+  const before=f.counts();await f.workflow.recordStepAttempt({...command,state:'running'},f.owner);
+  expect(f.counts()).toMatchObject({outbox:before.outbox!+1,cp_a0_event:before.cp_a0_event!+1});
+  const payload=f.host.revisions.compose(db=>JSON.parse(String(db.prepare("SELECT payload_json FROM outbox WHERE topic='workflow.run.state_changed' AND project_id=? ORDER BY event_id DESC LIMIT 1").get(f.projectId)?.payload_json)));
+  expect(payload.payload).toMatchObject({step_id:'sample',state:'running',job_id:task.job_id});
+  const checkpoint=await f.repo.transaction(tx=>tx.get('run',{project_id:f.projectId,run_id:e.run_id})),settled=f.counts();
+  f.host.revisions.compose(db=>db.exec("CREATE TEMP TRIGGER fixture_fail_workflow_event BEFORE INSERT ON cp_a0_event BEGIN SELECT RAISE(ABORT,'fixture event mirror failure'); END;"));
+  await expect(f.workflow.recordStepAttempt({...command,state:'waiting_user'},f.owner)).rejects.toThrow('fixture event mirror failure');
+  expect(f.counts()).toEqual(settled);expect(await f.repo.transaction(tx=>tx.get('run',{project_id:f.projectId,run_id:e.run_id}))).toEqual(checkpoint);
+  expect(await f.repo.transaction(tx=>tx.get('step_attempt',{project_id:f.projectId,run_id:e.run_id,plan_version:1,step_id:'sample',attempt:1}))).toMatchObject({state:'running'});
+ }finally{await f.close();}
+},120000);

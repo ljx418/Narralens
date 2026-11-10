@@ -1,0 +1,13 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:80366) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/created-task-worker.test.ts (6 tests) 1049ms
+   ✓ renews the real lease during a long processor and only the current lease can settle  925ms
+
+ Test Files  1 passed (1)
+      Tests  6 passed (6)
+   Start at  09:42:36
+   Duration  6.31s (transform 290ms, setup 0ms, collect 2.22s, tests 1.05s, environment 0ms, prepare 2.40s)
+

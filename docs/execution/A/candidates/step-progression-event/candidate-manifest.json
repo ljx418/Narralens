@@ -1,0 +1,24 @@
+{
+  "observed_head": "8bd3df0d80931687c3a129f50a36c5d97c85bb9d",
+  "input_file": "src/host/creative/fixed-workflow-service.ts",
+  "original_sha256": "214b4697011b55efc32db5bea12d84d39e61574e62c2f0da03a4ddb3264e6356",
+  "candidate_sha256": "affb339613036d4b7a6572d63247f53754725a98488ae671c76b7317995aaf7e",
+  "service_patch_sha256": "b3587edb8b888a1be69d38005932896d32afed0ae637a01fb120f281c06bc754",
+  "semantic_change": "separately MAIN-approved A real-time existing-attempt progression event; not original factoring parity",
+  "event_vocabulary": "workflow.run.state_changed",
+  "only_event_payload_change_from_new_branch": "record.job_id -> advanced.job_id",
+  "typecheck": "NOT_RUN",
+  "tests": "NOT_RUN",
+  "MAIN_modified": false,
+  "source": "/mnt/c/workspace/videoworkline/Narralens-agents/bridge-observability/var/workflow-step-event-aa9909/source/src/host/creative/fixed-workflow-service.ts",
+  "selected_files": [
+    "src/host/creative/fixed-workflow-service.ts"
+  ],
+  "test_owner": "MAIN existing created-task-gate.test.ts fixture",
+  "unselected_test_draft": {
+    "path": "history/unused-sqlite-test-draft.ts",
+    "sha256": "4dc1259fdf7ddf91775bcce1094dde3e07d1a6a7b8d664cad1c680061d8588c0",
+    "status": "written before steering; NOT_RUN/NOT_SELECTED, do not integrate by default"
+  },
+  "approval": "explicit separate MAIN task for A real-time progression correction; not silent factoring parity repair"
+}

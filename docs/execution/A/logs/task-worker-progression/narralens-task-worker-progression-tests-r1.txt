@@ -1,0 +1,28 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:82627) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/created-task-gate.test.ts (5 tests) 14664ms
+   ✓ reserves one real job, cp step/checkpoint and mirrored event atomically, then replays without new effects  3027ms
+   ✓ rejects stale base, altered refs/scope/attempt and crossing the sample gate before creating any job  3456ms
+   ✓ rolls back real job, step, checkpoint, event and grant mutation if final authorization is revoked  2796ms
+   ✓ rejects a creative closure changed after authorization without task side effects  2677ms
+   ✓ emits real pending-to-running progress and rolls back step/checkpoint/outbox if the event mirror fails  2706ms
+(node:82898) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/created-task-worker.test.ts (8 tests) 1466ms
+   ✓ renews the real lease during a long processor and only the current lease can settle  923ms
+(node:82961) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/created-task-store.test.ts (26 tests) 329ms
+ ✓ tests/agent-driven/product/fixed-workflow-service.test.ts (31 tests) 140ms
+(node:83110) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/product-sqlite-repository.test.ts (9 tests) 93ms
+
+ Test Files  5 passed (5)
+      Tests  79 passed (79)
+   Start at  09:45:06
+   Duration  38.77s (transform 2.60s, setup 0ms, collect 12.69s, tests 16.69s, environment 1ms, prepare 6.27s)
+

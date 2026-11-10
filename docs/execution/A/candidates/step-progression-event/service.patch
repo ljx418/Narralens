@@ -1,0 +1,28 @@
+--- a/src/host/creative/fixed-workflow-service.ts
++++ b/src/host/creative/fixed-workflow-service.ts
+@@ -763,7 +763,24 @@
+         };
+         const advancedRun: RunRecord = { ...run, checkpoint_json: advancedCheckpoint };
+         tx.put("run", { project_id: run.project_id, run_id: run.run_id }, advancedRun);
+-        return this.#projectRun(tx, advancedRun);
++        tx.emit({
++        topic: "workflow.run.state_changed",
++        source: "worker",
++        scope: {
++          kind: "run",
++          project_id: input.project_id,
++          run_id: input.run_id,
++          run_scope_digest: run.run_scope_digest,
++          plan_version: input.plan_version,
++        },
++        entity: { type: "task", id: input.step_id, version: input.attempt, state: input.state },
++        attempt: input.attempt,
++        input_digest: input.input_digest,
++        observed_at: input.observed_at,
++        payload: { step_id: input.step_id, attempt: input.attempt, state: input.state, job_id: advanced.job_id },
++      });
++
++      return this.#projectRun(tx, advancedRun);
+       }
+ 
+       const record: StepAttemptRecord = {

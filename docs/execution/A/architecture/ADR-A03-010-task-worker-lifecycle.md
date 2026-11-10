@@ -1,0 +1,11 @@
+# A03-010：任务调度生命周期与真实步骤推进事件
+
+复用原job表和PersistentJobStore lease CAS。pump只做同步有界领取并登记active，再进入异步processor；不await整批长任务，任一槽位完成可继续取下一项。原lease定时续租；失lease/实际取消触发AbortSignal，晚结果只能走原callback quarantine。没有第二队列/DB、没有自造成功；processor必须自己通过MAIN原有授权与提交服务结算。实际processor尚未注册，task.prepare仍保持不可用。
+
+close先停止取任务和定时pump，发出abort，等待全部processor清理确认后才能关数据库。无五秒detach。单纯停服的running在清理后释放回queued；真实用户取消即使与停服相邻也必须通过failure/cancel authority收敛，不能留cancel_requested让generic reaper误转attention。failure handler若仍无结算回执，发确定TASK_PROCESSOR_NOT_SETTLED诊断；无/故障观察器向stderr只输出固定code/job_id，不泄露文件/异常/凭据。
+
+原FixedWorkflow existing attempt分支更新了checkpoint但缺业务事件。单独增补与new分支相同的workflow.run.state_changed，job_id来自advanced当前事实，不扩事件词汇/DDL。MAIN在真实Host+原Run+task fixture先复现event缺失红灯，修后验证pending→running的outbox+cp_event，以及镜像故障令原step/checkpoint/outbox全部回滚。
+
+独立静态预审抓出worker未检查cancel_requested返回的MAJOR，MAIN三项真实SQLite边界测试均在旧码红，补齐关闭/取消/失败handler后重跑类型与五文件82项全部通过，独立静态闭环PASS（历史NOT PASS保留）。此前6/8/79项捕获按各自版本记录，不相加当全量。
+
+这些是scheduler+event接缝证据，处理器及Run事实/权益/源字节/stage proof、完整任务恢复、原生受控采用、正式snapshot交付和真实中文影片均未因此通过。实际processor接入前继续保留不可用的公共任务入口，避免202假接单。

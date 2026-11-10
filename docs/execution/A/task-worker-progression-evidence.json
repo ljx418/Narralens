@@ -1,0 +1,83 @@
+{
+  "format": "narralens.created-task-worker-evidence@1",
+  "base_commit": "8bd3df0d80931687c3a129f50a36c5d97c85bb9d",
+  "declaration": "TASK_SCHEDULER_AND_PROGRESS_INTERNAL_EVIDENCED",
+  "production_registered": false,
+  "scope": "actual original SQLite/lease scheduler + real Host/workflow progress seam; mandatory processor uses explicit test callbacks, not production media",
+  "captures": [
+    {
+      "session": 95214,
+      "typecheck_exit": 0,
+      "tests": 6,
+      "exit": 0
+    },
+    {
+      "session": 25925,
+      "tests": 8,
+      "exit": 0
+    },
+    {
+      "session": 81401,
+      "tests_failed": 1,
+      "exit": 1,
+      "reason": "old existing-attempt path emitted no cp event; expected regression red"
+    },
+    {
+      "session": 91855,
+      "typecheck_exit": 0,
+      "files": 5,
+      "tests": 79,
+      "exit": 0,
+      "scope": "before independent worker cancellation finding"
+    },
+    {
+      "session": 54248,
+      "tests_failed": 3,
+      "exit": 1,
+      "reason": "old worker cancellation/shutdown and silent failed-noop defects; direct red tests"
+    },
+    {
+      "session": 98166,
+      "typecheck_exit": 0,
+      "files": 5,
+      "tests": 82,
+      "exit": 0
+    }
+  ],
+  "final_commands": [
+    "corepack pnpm exec tsc --noEmit",
+    "corepack pnpm exec vitest run tests/agent-driven/integration/created-task-worker.test.ts tests/agent-driven/integration/created-task-gate.test.ts tests/agent-driven/integration/created-task-store.test.ts tests/agent-driven/integration/product-sqlite-repository.test.ts tests/agent-driven/product/fixed-workflow-service.test.ts --maxWorkers=1 --minWorkers=1"
+  ],
+  "source_hashes": {
+    "src/host/agent-driven/created-task-worker.ts": "5401641d91d3a30f96176023ae0de85421b4eb91075d2d4ce4f755d5d3c7c2ee",
+    "src/host/creative/fixed-workflow-service.ts": "affb339613036d4b7a6572d63247f53754725a98488ae671c76b7317995aaf7e",
+    "tests/agent-driven/integration/created-task-worker.test.ts": "654371f0bfe167ba324e78216c82074d0b52eae337bcdc8de19247e0a4311d24",
+    "tests/agent-driven/integration/created-task-gate.test.ts": "eefff8ae3b267528ac8789cda9c7f8d4a8883b8def44775282d785af7d4a5e37"
+  },
+  "artifact_hashes": {
+    "docs/execution/A/logs/task-worker-progression/narralens-task-progression-red-r1.txt": "c6c924d3c5f98222cb58acc5a622b58605df375e7ecfed16e67d58bb9f1fbe55",
+    "docs/execution/A/logs/task-worker-progression/narralens-task-worker-cancel-red-r1.txt": "2dbdcad83ccca10a473b0388db9ef96058d3f8da62115a36496a3cb859ff62d9",
+    "docs/execution/A/logs/task-worker-progression/narralens-task-worker-progression-tests-r1.txt": "0c8f8a8e259a563f568ca9796c230527b4616769b9589d81192c0bbd7e213d1e",
+    "docs/execution/A/logs/task-worker-progression/narralens-task-worker-progression-tests-r2.txt": "631b243fae81bb75eb0f957d3b1dc1f497d19a19a3891935fe58ea5f07a03186",
+    "docs/execution/A/logs/task-worker-progression/narralens-task-worker-progression-tsc-r1.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "docs/execution/A/logs/task-worker-progression/narralens-task-worker-progression-tsc-r2.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "docs/execution/A/logs/task-worker-progression/narralens-task-worker-tests-r1.txt": "9eb16b32e29e7b1d90faaab5292704b28a6a15e350ca00c5294cb6aa88ac271a",
+    "docs/execution/A/logs/task-worker-progression/narralens-task-worker-tests-r2.txt": "169eb37688076fe90fbf373040c9e02d191b996da5b28e8697a0446d2656af5a",
+    "docs/execution/A/logs/task-worker-progression/narralens-task-worker-tsc-r1.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "review": {
+    "kind": "independent-static-scoped",
+    "result": "PASS",
+    "artifacts": {
+      "docs/execution/A/reviews/task-worker-pre-review/closure-input-hashes.json": "d6b6982a374205e92b36492c45fd826b33347ec67349d9134bcc3d1c2daf7d07",
+      "docs/execution/A/reviews/task-worker-pre-review/input-hashes.json": "1d6d8f2a255cd83dacadd8fa4a2dafdc7dbaf015977a8eba1632e7fa8ea066d6",
+      "docs/execution/A/reviews/task-worker-pre-review/REVIEW.md": "ffb9797e1fec29907947d11ad6ac503216b15c80727fd7c0d06373e828851e7e"
+    }
+  },
+  "not_proven": [
+    "actual production Run grants/right/live-byte stage processor",
+    "production task.prepare/worker composition",
+    "prepared adoption/commit/NativeAck",
+    "human-recorded film/formal Delivery/full A"
+  ]
+}

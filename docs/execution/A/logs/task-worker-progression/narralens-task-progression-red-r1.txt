@@ -1,0 +1,41 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:81767) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/agent-driven/integration/created-task-gate.test.ts (5 tests | 1 failed | 4 skipped) 2997ms
+   ↓ reserves one real job, cp step/checkpoint and mirrored event atomically, then replays without new effects
+   ↓ rejects stale base, altered refs/scope/attempt and crossing the sample gate before creating any job
+   ↓ rolls back real job, step, checkpoint, event and grant mutation if final authorization is revoked
+   ↓ rejects a creative closure changed after authorization without task side effects
+   × emits real pending-to-running progress and rolls back step/checkpoint/outbox if the event mirror fails 2996ms
+     → expected { job: 2, job_event: 4, …(5) } to match object { outbox: 9, cp_a0_event: 3 }
+(5 matching properties omitted from actual)
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/created-task-gate.test.ts > emits real pending-to-running progress and rolls back step/checkpoint/outbox if the event mirror fails
+AssertionError: expected { job: 2, job_event: 4, …(5) } to match object { outbox: 9, cp_a0_event: 3 }
+(5 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+-   "cp_a0_event": 3,
+-   "outbox": 9,
++   "cp_a0_event": 2,
++   "outbox": 8,
+  }
+
+ ❯ tests/agent-driven/integration/created-task-gate.test.ts:73:22
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 4 skipped (5)
+   Start at  09:44:15
+   Duration  9.99s (transform 2.50s, setup 0ms, collect 5.14s, tests 3.00s, environment 0ms, prepare 1.22s)
+

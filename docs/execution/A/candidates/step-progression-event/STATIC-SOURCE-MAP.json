@@ -1,0 +1,30 @@
+{
+  "existing_advanced_run_line": 764,
+  "new_existing_emit_line": 766,
+  "existing_branch_return_line": 783,
+  "existing_new_branch_emit_line": 836,
+  "event_matches_original_new_branch_except_job_variable": true,
+  "event_vocabulary": "workflow.run.state_changed",
+  "scope": [
+    "kind=run",
+    "project_id=input.project_id",
+    "run_id=input.run_id",
+    "run_scope_digest=run.run_scope_digest",
+    "plan_version=input.plan_version"
+  ],
+  "entity": [
+    "type=task",
+    "id=input.step_id",
+    "version=input.attempt",
+    "state=input.state"
+  ],
+  "payload": [
+    "step_id",
+    "attempt",
+    "state",
+    "job_id=advanced.job_id"
+  ],
+  "no_ddl_or_state_machine_change": true,
+  "typecheck": "NOT_RUN",
+  "tests": "MAIN will own selected real Host/Run/task fixture regression; own draft NOT_RUN and NOT_SELECTED"
+}
