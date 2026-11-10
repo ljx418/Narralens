@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """MAIN-admitted sequential native UI type/build, no browser/Host/network/provider."""
 import datetime,hashlib,json,os,pathlib,subprocess,sys
-here=pathlib.Path(__file__).resolve().parent;lane=here.parents[4];root=lane/'var/managed-native-observation/source';cwd=root/'packages/openfilm';evidence=here/(sys.argv[1] if len(sys.argv)>1 else 'check1');evidence.mkdir(exist_ok=False)
+here=pathlib.Path(__file__).resolve().parent;lane=here.parents[4];root=lane/'var/managed-native-observation/source';cwd=root/'packages/openfilm';evidence=here/(sys.argv[1] if len(sys.argv)>1 else 'check1');evidence.mkdir(exist_ok=True)
 source=json.loads((here/'source-manifest.json').read_text())
 for file in source['files']:
  if hashlib.sha256((root/file['path']).read_bytes()).hexdigest()!=file['post_sha256']:raise SystemExit('CANDIDATE_SOURCE_CHANGED')

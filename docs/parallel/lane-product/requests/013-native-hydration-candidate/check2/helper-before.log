@@ -1,0 +1,12 @@
+AssertionError [ERR_ASSERTION]: A pending callback failure must prevent every verification GET in that round
+
+4 !== 0
+
+    at evalmachine.<anonymous>:22:3 {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: 4,
+  expected: 0,
+  operator: 'strictEqual',
+  diff: 'simple'
+}

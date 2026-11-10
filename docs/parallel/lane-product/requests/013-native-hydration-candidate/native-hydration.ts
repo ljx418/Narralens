@@ -114,11 +114,15 @@ class NativeHydrationObserver {
         origin: record.origin, effective_sha256: null }];
     })) as Record<Part, PartState>;
   }
-  private publish(parts: Record<Part, PartState>) {
-    if (!this.enabled || !this.active) return;
+  private publish(parts: Record<Part, PartState>): boolean {
+    if (!this.enabled || !this.active) return false;
     const event: NarralensHydrationState = { project_id: this.scope.projectId, editor_view_id: this.scope.editorViewId,
       document_epoch: this.scope.current().epoch, hydration_epoch: ++this.eventEpoch, parts };
-    try { studioHost?.narralensHydration?.onState(event); } catch { /* Observers cannot break native editing. */ }
+    try {
+      const receiver = studioHost?.narralensHydration;
+      if (receiver?.version !== 1 || typeof receiver.onState !== 'function') return false;
+      receiver.onState(event); return true;
+    } catch { return false; /* A receiver failure invalidates proof, never native editing. */ }
   }
   /** Called only by ProjectView's real layout commit, not by a GET or a queue Promise. */
   observe(root: HTMLElement, snapshots: HydrationSnapshots): () => void {
@@ -126,7 +130,10 @@ class NativeHydrationObserver {
     const scope = this.scope.current();
     const round = ++this.round;
     if (!this.enabled || !this.active) return () => {};
-    this.publish(this.pendingStates());
+    if (!this.publish(this.pendingStates())) {
+      if (this.round === round) this.round++;
+      return () => {}; // No GET/hash work or same-round recovery after failed pending delivery.
+    }
     if (!scope.valid) return () => { if (this.round === round) this.round++; };
     const current = () => this.active && this.round === round && root.isConnected && this.root === root
       && this.scope.current().valid && this.scope.current().epoch === scope.epoch;
@@ -151,7 +158,9 @@ class NativeHydrationObserver {
           effective_sha256: Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, '0')).join('') }];
       } catch { return empty('failed'); }
     })).then((states) => {
-      if (current()) this.publish(Object.fromEntries(states) as Record<Part, PartState>);
+      if (current() && !this.publish(Object.fromEntries(states) as Record<Part, PartState>)) {
+        if (this.round === round) this.round++; // A failed final delivery cannot revive this round.
+      }
     }).catch(() => { /* A rejected verification never becomes success. */ });
     return () => { if (this.round === round) this.round++; };
   }

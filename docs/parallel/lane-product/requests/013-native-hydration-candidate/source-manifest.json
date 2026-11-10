@@ -2,9 +2,9 @@
   "upstream_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
   "previous_candidate_commit": "e96ca4ce06fc6515c6351844ac4375f15e481a78",
   "previous_patch_sha256": "214c629238c2635f5c6212e5e9207eab18f61d17454c08ee64ccd32be41dffa6",
-  "patch_sha256": "198c8b5e6873d6cf7b3d6f2171b55c9859ca73d3bf2725b2b9da118db258d753",
-  "extension_patch_sha256": "5d7116944f155c59e31e643a4041c581ad3399525e2244d2d48e6cacb8180d1a",
-  "source_files_sha256": "9694f79084ab645b5c42eada8c61a9eebcdfd3e6777fa2a4aa448b37753162bc",
+  "patch_sha256": "f699889206e129dfe4fd913618b34baa8d7e04363f1940d3659664a1e7b9d435",
+  "extension_patch_sha256": "64b2f5bccdc3045af5e195bbbaa9697cee099d464f970045a50ac98d622392da",
+  "source_files_sha256": "6f0e1f0371fc3f472c0758f2d759b4e1f94fa0b3d19420b92122c1ad0f7c1efc",
   "files": [
     {
       "path": "packages/openfilm/studio/ui/src/lib/host.ts",
@@ -52,15 +52,14 @@
       "path": "packages/openfilm/studio/ui/src/lib/native-hydration.ts",
       "pre_sha256": null,
       "pre_extension_sha256": null,
-      "post_sha256": "022dc3bea2cae45b8ba3f5a03ae0b024d9050ef19daba8df88e2d53793f69d6d"
+      "post_sha256": "5db47837e690590c9e9678a97e53a10a7115631bd05807ddf6afc925904e2f64"
     }
   ],
-  "status": "UI_TYPES_BUILD_EXIT_0_RUNTIME_PENDING",
-  "typecheck": "EXIT_0",
-  "build": "EXIT_0",
+  "status": "SOURCE_CANDIDATE_ONLY",
+  "typecheck": "NOT_RUN",
+  "build": "NOT_RUN",
   "tests": "NOT_RUN",
   "browser": "NOT_RUN",
   "host": "NOT_RUN",
-  "independent_review": "PENDING",
-  "type_build_evidence": "check1/results.json"
+  "independent_review": "PENDING"
 }
