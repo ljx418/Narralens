@@ -294,7 +294,6 @@ export function validateNativeObservationEnvelope(value: unknown): Check<NativeO
   });
 }
 
-/** The original p2 document state, in its original shape. */
 /**
  * The body of one observation, parsed and checked.
  *
@@ -312,6 +311,7 @@ export function parseNativeObservationBody(raw: string): Check<NativeObservation
   return validateNativeObservationEnvelope(value);
 }
 
+/** The original p2 document state, in its original shape. */
 export function validateNativeDocumentObservation(value: unknown): Check<NativeDocumentObservation> {
   if (!isPlainObject(value)) return no('DOCUMENT_NOT_AN_OBJECT');
   if (value.protocol_version !== 1) return no('DOCUMENT_PROTOCOL_VERSION_UNKNOWN');
