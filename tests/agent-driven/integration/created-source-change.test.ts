@@ -79,6 +79,7 @@ describe("the D09 prepared adoption plan", () => {
     const accepted = VECTORS.cases.filter((entry) => entry.expect === "accepted");
     expect(accepted.length).toBeGreaterThan(0);
     for (const entry of accepted) {
+      expect(assertPreparedAdoptionPlan(entry.plan)).toBe(entry.plan);
       expect(preparedAdoptionPlanPreimage(entry.plan)).toBe(entry.preimage);
       expect(preparedAdoptionPlanDigest(entry.plan)).toBe(entry.digest);
     }
@@ -189,50 +190,25 @@ describe("the opacity of the created-source capabilities", () => {
     revisions.close();
   });
 
-  it("refuses a scope from another store and a scope whose transaction has ended", () => {
-    const first = new RevisionStore(":memory:");
-    const second = new RevisionStore(":memory:");
-    const secondRepository = new ProductSqliteRepository(second);
-    let captured: import("../../../src/host/agent-driven/created-source-ports.js").CreatedSourceCommitScope | undefined;
-    first.withCreatedSourceCommitScope("project-1", "txn-1", (scope) => {
-      captured = scope;
-      // Another store's repository must not accept this scope, even while it is live.
-      expect(() => secondRepository.joinCreatedSourceCommit(scope, () => undefined)).toThrow();
-      // The owning repository does accept it: it is the same connection and the same
-      // live transaction.
-      expect(() => first.compose(() => undefined)).not.toThrow();
-    });
-    // The transaction has ended, so the scope authorises nothing any more.
-    expect(captured).toBeDefined();
-    expect(() => secondRepository.joinCreatedSourceCommit(captured!, () => undefined)).toThrow();
-    first.close();
-    second.close();
+  it("has no public arbitrary-name transaction scope issuer", () => {
+    const revisions = new RevisionStore(":memory:");
+    expect(Reflect.has(revisions, 'withCreatedSourceCommitScope')).toBe(false);
+    expect(Reflect.has(revisions, '#withCreatedSourceCommitScope')).toBe(false);
+    revisions.close();
   });
 
-  it("rolls the transaction back when the joined failure is swallowed", () => {
+  it("refuses closed-commit input carrying a work callback without changing the ledger", () => {
     const revisions = new RevisionStore(":memory:");
-    const repository = new ProductSqliteRepository(revisions);
     const before = revisions.outboxRowCount();
-    expect(() => revisions.withCreatedSourceCommitScope("project-1", "txn-1", (scope) => {
-      try {
-        repository.joinCreatedSourceCommit(scope, () => {
-          throw new Error("the joined work failed");
-        });
-      } catch {
-        // The caller swallows the failure. The scope remembers it, so the transaction
-        // still rolls back.
-      }
-    })).toThrow();
+    const request = {project_id:'project-1',transaction_id:'arbitrary',work:()=>undefined};
+    expect(() => Reflect.apply(revisions.commitPreparedCreatedSource,revisions,[request])).toThrow();
     expect(revisions.outboxRowCount()).toBe(before);
     revisions.close();
   });
 
-  it("refuses a joined work that returns a thenable", () => {
+  it("refuses closed-commit input carrying a thenable as authority", () => {
     const revisions = new RevisionStore(":memory:");
-    const repository = new ProductSqliteRepository(revisions);
-    expect(() => revisions.withCreatedSourceCommitScope("project-1", "txn-1", (scope) => {
-      repository.joinCreatedSourceCommit(scope, () => Promise.resolve(1) as unknown as number);
-    })).toThrow();
+    expect(() => Reflect.apply(revisions.commitPreparedCreatedSource,revisions,[Promise.resolve({})])).toThrow();
     revisions.close();
   });
 });

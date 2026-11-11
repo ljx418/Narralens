@@ -1,0 +1,32 @@
+{
+  "head_before": "f346ded078831c04df7c418ae35639426f746f21",
+  "timestamp": "2026-11-11T20:12:47.349419+00:00",
+  "writer": "Codex sole writer; R2 ctx_ef761fb42ca4 stopped/exited; old R1 terminal tui-idle satisfied, pid738006 has no children; no runtime commands in cwd census",
+  "archive_sha256": "81249c77503bd20b1e52fa37756e8f80ec64248b3bb82c07f74ec12738e924a6",
+  "files": [
+    {
+      "path": "tests/agent-driven/integration/created-source-adoption.test.ts",
+      "tracked_before": true,
+      "before_sha256": "05ce345dcec3a37bf6c0ea79c8c5df2e65103c82d203c927c34ce53d67a62931",
+      "after_sha256": "640279551752cc96fe2e73db61cdbc1e74f80defefee69c7c1aff6592546a454"
+    },
+    {
+      "path": "tests/agent-driven/integration/created-source-change.test.ts",
+      "tracked_before": true,
+      "before_sha256": "d8c31d2edc4491f45564f20760453d90cb49a555c0b9955066596655ce33fb82",
+      "after_sha256": "9d82c3c47b23a44ee27cf129ea51aa61c7e29259e94d6d14a27ed43fc6817860"
+    },
+    {
+      "path": "tests/agent-driven/integration/helpers/created-draft-fixture.ts",
+      "tracked_before": true,
+      "before_sha256": "3e553993afcb4c9364227b86806fb64466e3ce595ed838433ee1cfcbb5b92ffb",
+      "after_sha256": "a584e60359237c3bb45a54640f8320aa9827bd2d474be2770f1ea410d9feb218"
+    },
+    {
+      "path": "src/host/agent-driven/created-source-change-service.ts",
+      "tracked_before": false,
+      "before_sha256": "81249c77503bd20b1e52fa37756e8f80ec64248b3bb82c07f74ec12738e924a6",
+      "after_sha256": "65d123e91866ea1a6e3096a062daabf73bcfad778eec280e5689d25f7dd564fe"
+    }
+  ]
+}
