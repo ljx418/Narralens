@@ -581,6 +581,11 @@ export class NativeObservationService implements NativeContextPort, NativeObserv
     const existing = this.#sessions.get(binding.bridge_session_id);
     if (existing !== undefined) {
       existing.closed = false;
+      // The editor opened again. The profile of the previous view is void until the
+      // new view reports, and the selection version moves because the selection is no
+      // longer known. The sequence is not reset: the editor's counter continues, and a
+      // sequence that went backwards would be refused.
+      this.#voidProfile(existing);
       this.#active.set(binding.project_id, existing);
       return;
     }
@@ -958,6 +963,21 @@ export class NativeObservationService implements NativeContextPort, NativeObserv
       start_frame: mapped.start_frame,
       end_frame_exclusive: mapped.end_frame_exclusive,
     };
+  }
+
+  /**
+   * The profile of a view that is gone.
+   *
+   * The document, the parts and the selection are no longer known, and the
+   * acknowledgement that spoke for them is void. The selection version moves, because
+   * the selection changed: it is not known any more.
+   */
+  #voidProfile(session: SessionState): void {
+    session.document = null;
+    session.parts = emptyParts();
+    session.mapped = null;
+    session.ack = null;
+    session.selectionVersion += 1;
   }
 
   /** A new view, a new document or a closed session void every part. */

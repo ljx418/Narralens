@@ -1036,6 +1036,29 @@ describe("the controlled session and the observation binding", () => {
     expect(closed[0]).toBe(binding);
   });
 
+  it("tells the producer again when the editor opens again on the same session", async () => {
+    const opened: NativeObservationSessionBinding[] = [];
+    const closed: NativeObservationSessionBinding[] = [];
+    const access = new ControlledStudioAccess(() => ORIGIN);
+    const grant = grantOf(opened, closed);
+    const exchange = async (): Promise<void> => {
+      const issued = access.issue(grant);
+      const request = fakeRequest(
+        { host: "127.0.0.1:1234", origin: ORIGIN, "content-type": "application/json" },
+        JSON.stringify({ ticket: issued.url.split("#native_ticket=")[1]! }),
+      );
+      await access.exchange(request as never, fakeResponse() as never);
+    };
+    await exchange();
+    expect(opened.length).toBe(1);
+    // The editor opened again: the same session, and the producer is told again, so
+    // that the profile of the view that is gone can be voided.
+    await exchange();
+    expect(opened.length).toBe(2);
+    // And it is the same session: the same bridge session id.
+    expect(opened[1]?.bridge_session_id).toBe(opened[0]?.bridge_session_id);
+  });
+
   it("refuses an exchange from another origin", async () => {
     const opened: NativeObservationSessionBinding[] = [];
     const closed: NativeObservationSessionBinding[] = [];
@@ -1622,6 +1645,95 @@ describe("the document and the hydration against the upstream sources", () => {
     for (const kind of upstreamParts) {
       expect(parts.properties[kind], kind).toBeDefined();
       expect(parts.properties[kind]?.$ref, kind).toBe("#/$defs/NativeHydrationPart");
+    }
+  });
+});
+
+describe("the editor that opens again", () => {
+  it("voids the acknowledgement of the view that is gone", async () => {
+    const root = mkdtempSync(join(tmpdir(), 'narralens-r2-reopen-'));
+    try {
+      const source = resolve(root, 'source');
+      mkdirSync(source, { recursive: true });
+      const film = 'the original film';
+      writeFileSync(resolve(source, 'film.html'), film);
+      const reader = realReader(source, ['film.html']);
+      const staged = stageLibrary(root, { computed: true });
+      const expected = new OpenFilmNativeExpected({
+        source: reader.port,
+        loader: nativeExpectedLibraryLoader({ distRoot: staged.dist, inputsRoot: staged.inputs, runtimeRoot: staged.runtime }),
+        approved: await approvedOf(staged),
+      });
+      const canonical = (await import(pathToFileURL(resolve(staged.dist, 'native-pure-library.mjs')).href)) as {
+        hydrationCanonicalJson: (value: unknown) => string;
+      };
+      const digestOfPart = (part: string, value: unknown): string =>
+        sha256(Buffer.from(canonical.hydrationCanonicalJson({ format: 'narralens.native-hydration-effective@1', part, value }), 'utf8'));
+      const revisions = new RevisionStore(':memory:');
+      const now = new Date().toISOString();
+      revisions.compose(db => {
+        db.prepare('INSERT INTO snapshot(snapshot_id,project_id,source_digest,engine,created_at) VALUES(?,?,?,?,?)')
+          .run('snap1', 'p1', HASH_A, 'openfilm', now);
+        db.prepare('INSERT INTO active_commit(project_id,revision,snapshot_id,source_digest,engine,transaction_id,created_at) VALUES(?,?,?,?,?,?,?)')
+          .run('p1', 3, 'snap1', HASH_A, 'openfilm', 'tx1', now);
+      });
+      const ackStore = new NativeAckStore({ revisions });
+      const service = new NativeObservationService({
+        ackStore,
+        expected,
+        selectionMapping: { mapSelection: async () => ({ shot_ids: [], start_frame: 0, end_frame_exclusive: 1 }) },
+      });
+      const binding: NativeObservationSessionBinding = {
+        bridge_session_id: 'f'.repeat(32),
+        instance_generation: 1,
+        project_id: 'p1',
+        native_project_id: 'n1',
+        owner_session_ref: 'owner1',
+        revision: 3,
+        snapshot_id: 'snap1',
+        source_digest: HASH_A,
+        workspace: { workspace_ref: 'ws1', snapshot_id: 'snap1', source_digest: HASH_A, revision: 3 },
+        isCurrent: () => true,
+      };
+      service.sessionOpened(binding);
+      const envelope = (sequence: number, event_kind: 'document' | 'hydration' | 'selection', event: unknown) => ({
+        format: 'narralens.native-observation@1' as const, sequence, event_kind, event,
+      });
+      const filmBytes = Buffer.from(film, 'utf8');
+      await service.observe(binding, envelope(1, 'document', {
+        protocol_version: 1, kind: 'document_dom_committed', project_id: 'n1',
+        editor_view_id: 'view1', document_epoch: 1, native_rev: 'rev-1',
+        film_sha256: sha256(filmBytes), utf8_byte_length: filmBytes.byteLength,
+      }));
+      await service.observe(binding, envelope(2, 'hydration', {
+        project_id: 'n1', editor_view_id: 'view1', document_epoch: 1, hydration_epoch: 1,
+        parts: {
+          settings: { state: 'hydrated', origin: 'project', effective_sha256: HASH_A },
+          subtitle_style: { state: 'absent_default', origin: 'explicit_default', effective_sha256: digestOfPart('subtitle_style', {}) },
+          captions: { state: 'hydrated', origin: 'project', effective_sha256: digestOfPart('captions', { cues: [] }) },
+          markers: { state: 'hydrated', origin: 'project', effective_sha256: HASH_A },
+        },
+      }));
+      const selection = await service.observe(binding, envelope(3, 'selection', { projectId: 'n1', time: 1, refs: [] }));
+      expect(selection.ack).not.toBeNull();
+      expect((await service.read('p1')).ack).not.toBeNull();
+
+      // The editor opens again on the same session. The acknowledgement of the view that
+      // is gone must not survive it.
+      service.sessionOpened(binding);
+      const after = await service.read('p1');
+      expect(after.ack).toBeNull();
+      expect(after.sync).toBe('unknown');
+      expect(after.selection).toBeNull();
+      // The sequence is not reset: the editor's counter continues.
+      const next = await service.observe(binding, envelope(4, 'document', {
+        protocol_version: 1, kind: 'document_dom_committed', project_id: 'n1',
+        editor_view_id: 'view2', document_epoch: 1, native_rev: 'rev-1',
+        film_sha256: sha256(filmBytes), utf8_byte_length: filmBytes.byteLength,
+      }));
+      expect(next.accepted).toBe(true);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
     }
   });
 });

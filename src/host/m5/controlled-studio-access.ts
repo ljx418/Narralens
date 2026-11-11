@@ -414,6 +414,12 @@ export class ControlledStudioAccess {
     try{stored.grant.nativeObservation?.port.sessionOpened(observation);}
     catch{this.#proofs.delete(key(session.proof));this.#reads.delete(key(session.read_token));throw new StudioAccessError(503,'CAPABILITY_UNAVAILABLE');}
    }
+  }else if(session.observation!==undefined){
+   // The editor opened again on the same session. The producer is told, so that the
+   // profile of the previous view is void until the new view reports: an
+   // acknowledgement of a view that is gone must not survive the editor's reopening.
+   try{stored.grant.nativeObservation?.port.sessionOpened(session.observation);}
+   catch{throw new StudioAccessError(503,'CAPABILITY_UNAVAILABLE');}
   }
   this.#tickets.delete(key(ticket));
   // The UI delegate is minted from the grant alone. A native entry without one stays
