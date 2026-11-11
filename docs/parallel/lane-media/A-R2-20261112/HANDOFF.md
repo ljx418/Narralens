@@ -292,3 +292,82 @@ The four gaps, quoted from the review and mapped to what will be done here:
 Each gap gets a targeted negative case that is shown to **fail against the immutable
 old source** (`6c22182a` / `f626669d`) before the fix and to pass afterwards, and the
 old source's failure log is kept beside the new one.
+
+## Review batch 1 — MP01..MP04 closed (2026-11-11T17:29Z)
+
+Corrected candidate: `99b6ee8cd91f0ba77473618485272113256067f9`. The candidate at
+`f626669d5efdca97ff3a1ca80b1aa123968c112d` is preserved unchanged; the old source of
+the implementation is preserved as the blob `66a358e691b18ba91b57216038092b1f3f0889433471b9fe65a792faa4889c06`.
+
+### What each gap was, and what closed it
+
+| Gap | The defect | The fix | The negative case |
+|---|---|---|---|
+| **MP01** | `closureDigestOf` put the raw `expected_duration_seconds` into the restricted canonical digest, so a film of 91 frames at 30 fps could not be digested at all. | The length goes in as the **exact rational** it is — a double is exactly `mantissa * 2^-k`, so it is an integer numerator over a power-of-two denominator, both safe integers (`exactRationalOf`). The canonicalization is **not** weakened: a length that cannot be written exactly is refused, not rounded. | `computes a digest for a duration that is not a whole number of seconds` (old: `CanonicalizationError: Non-integer number`) and `encodes and inspects a film whose frame rate is a rational number` (old: the same throw at `expected_duration_seconds`). |
+| **MP02** | The resolver checked the path lexically and opened only the last component with `O_NOFOLLOW`, so a symlinked root, object or parent directory still escaped; the digest was computed once, so bytes changed in place afterwards were served; an error while hashing left the descriptor open; and `close` could finish while an open was still hashing, the handle then being registered after it. | The whole path is opened **on descriptors**: the root, `objects`, the object, every directory and the file, each with `O_NOFOLLOW` and each compared with the named entry it came from. The root additionally has to be the root and not an alias of it. The fingerprint of the descriptor is checked again **before every read**, so bytes changed in place are refused. Every error path closes what it opened. `close` waits for the work it has to account for and closes the handles that were registered while it waited. | `refuses an object root that is an alias of the real root`, `refuses an object that is a symlink`, `refuses a file that lives under a symlinked directory inside the object`, `refuses to serve bytes that were changed in place after the file was opened` and `leaks no descriptor when close runs while an open is still hashing` (old: the descriptor count went from 23 to 24 — the leak). |
+| **MP03** | The inspection materialized only the media, and the supplement checks compared the supplement's metadata against itself, so a corrupt, missing or reordered supplement was not noticed. | Every promised file of the encoded object is **opened and hashed** against the committed closure. The number, the order, the roles and the bytes of the supplements all have to be the ones the closure promised; an omitted, duplicated, reordered, re-roled or changed file ends the inspection with its own code. | `refuses an encoded object whose actual subtitle bytes changed`, `refuses an encoded object whose actual licence file is missing` and `refuses an encoded object whose supplements were reordered` (old: all three resolved instead of rejecting). |
+| **MP04** | The receipt of a private object existed only in RAM, a staging directory that could not be removed was swallowed, and `close` did not account for the phases that were still running. | Every published object carries a **durable, fsynced receipt** of its own files, written into the object before it is published, so an object that exists always carries it and a crash before the database knows about the object still leaves something a reconciliation can read (`PhaseObjectReceiptV1`, `readObjectReceipt`). A staging directory that cannot be removed is reported as `PHASE_CLEANUP_FAILED` and asks for a reconciliation. `close` waits for the running phases and reports their outcome. | `publishes an immutable receipt beside the object it describes`, `reads the durable receipt of an object through the anchored resolver`, `keeps the object and its receipt across a restart of the service`, `reports a cleanup failure instead of swallowing it` and `waits for the phases that are still running when it closes` (old: the receipt did not exist, the cleanup failure was swallowed and `close` resolved before the phase). |
+
+### The old-source negative evidence, and how to reproduce it
+
+The negative run was produced against the **immutable** old implementation, restored
+byte for byte from the old commit and then restored again afterwards:
+
+```
+git show f626669d5efdca97ff3a1ca80b1aa123968c112d:src/host/render/committed-render-phases.ts > src/host/render/committed-render-phases.ts
+corepack pnpm exec vitest run --config vitest.config.ts tests/agent-driven/media/committed-render-phases.test.ts --maxWorkers=1 --minWorkers=1 -t "MP0"
+git checkout HEAD -- src/host/render/committed-render-phases.ts
+```
+
+- Against the old source: **15 of the 15 batch-1 cases failed**, exit 1
+  (`logs/vitest-batch1-negative-old-source-reproduced.log`, sha256
+  `488567269d241e8a557d82841136a2f8a661afb4336cbe0f97b0cb5908dfeff8`; the first run of
+  the same cases is kept beside it as `vitest-batch1-negative-old-source.log`, sha256
+  `ba1356ff50ec2f13234ab4846751e62cac830e57ce965b2dd91ec6e7079f4583`).
+- Against the corrected source: **68 passed, 1 skipped** across the two media files
+  (`logs/vitest-batch1-fixed-004.log`, sha256
+  `8854f19f7040b067759bcf4c1f3d08259f3537c6c36315465ead5c10b39a0487`). The one skip
+  is the real-tool block, which is selected explicitly and is not part of the light run.
+- `corepack pnpm exec tsc --noEmit`: exit 0.
+
+The batch-1 cases are **module** checks: the renderer and the media tools are faked,
+so they prove the boundaries and not the bytes. The real bytes are the real-tool
+block below.
+
+### The real-tool path
+
+`tests/agent-driven/media/committed-render-phases.test.ts` now contains a **selectable**
+real-tool case. It uses the pinned OpenFilm checkout that is already on this machine,
+the **real** `NativeRenderer` and the **real** `ffprobe`/`ffmpeg` (no `qc_runner` at
+all, so the inspection runs the real tools), against a real closure built from a real
+native draft. Nothing is installed, nothing is fetched, and the media is generated
+locally with the `ffmpeg` that is already installed. The exact selection command:
+
+```
+NARRALENS_PHASE_REAL_TOOLS=1 corepack pnpm exec vitest run --config vitest.config.ts \
+  tests/agent-driven/media/committed-render-phases.test.ts --maxWorkers=1 --minWorkers=1 \
+  -t "the real tools"
+```
+
+It is **NOT_RUN**: a real OpenFilm render drives a headless browser, so it belongs to
+a MAIN heavy slot, and no heavy slot is granted for this batch. The selection was
+verified without executing it (`vitest list` with the variable set returns exactly the
+one case).
+
+### What is still not run
+
+- The real-tool phase run above: needs the MAIN heavy slot (browser, `ffmpeg`).
+- The T20-A..H kill/reopen acceptance at the phase boundaries: MAIN's owned-process
+  kill harness, not an exception.
+- The BRIDGE integrated targets, once those files exist:
+  `tests/agent-driven/integration/created-render-delivery.test.ts`,
+  `created-delivery-recovery.test.ts`, `created-qc-review.test.ts`, and the R2 group
+  `created-source-change.test.ts`, `created-source-adoption.test.ts`,
+  `created-source-process-recovery.test.ts`, `created-schema-upgrade.test.ts`. The
+  same-DB registration of the encoded and QC facts, the opaque publication proof and
+  the final transaction re-check are BRIDGE's and MAIN's.
+- The final combined clean acceptance of the whole tree: MAIN's.
+
+The R2 proof result of the previous batch (19/19 under `R2-MEDIA-PROOF-001`) is **not**
+reclassified by this batch: it was the R2 prepared-source proof, not an acceptance of
+the phase chain.

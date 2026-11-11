@@ -1,0 +1,27 @@
+# A-R2 MEDIA — review batch 1 (MP01-MP04) evidence
+utc=2026-11-11T17:28:45Z
+follow_up_task=task_d8b43874e3b8
+follow_up_dispatch=ctx_a1215e8134ef
+follow_up_terminal=term_346f185e2780a8916b52c5f4d6e0e1d9
+old_source_commit=f626669d5efdca97ff3a1ca80b1aa123968c112d
+old_source_blob_sha256=66a358e691b18ba91b57216038092b1f3f0889433471b9fe65a792faa4889c06
+fixed_commit=99b6ee8cd91f0ba77473618485272113256067f9
+cwd=/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-MEDIA
+
+--- how the old-source run was produced (reproducible) ---
+git show f626669d5efdca97ff3a1ca80b1aa123968c112d:src/host/render/committed-render-phases.ts > src/host/render/committed-render-phases.ts
+corepack pnpm exec vitest run --config vitest.config.ts tests/agent-driven/media/committed-render-phases.test.ts --maxWorkers=1 --minWorkers=1 -t "MP0"
+git checkout HEAD -- src/host/render/committed-render-phases.ts
+
+--- log digests ---
+07eaa6eacbb40bce3a0950f91f340e15ca77d6d6f61c51075d848fc5e149df70  docs/parallel/lane-media/A-R2-20261112/logs/vitest-batch1-fixed-001.log
+356ded85e09493500b57fc6af31bb3f4f952aed8f11fd769204a13b91cccd2fe  docs/parallel/lane-media/A-R2-20261112/logs/vitest-batch1-fixed-002.log
+d86fdaae7a8adaaed6c267f45908d1fd5c16911c79cb242cd7d5f528dc67d3d1  docs/parallel/lane-media/A-R2-20261112/logs/vitest-batch1-fixed-003.log
+8854f19f7040b067759bcf4c1f3d08259f3537c6c36315465ead5c10b39a0487  docs/parallel/lane-media/A-R2-20261112/logs/vitest-batch1-fixed-004.log
+488567269d241e8a557d82841136a2f8a661afb4336cbe0f97b0cb5908dfeff8  docs/parallel/lane-media/A-R2-20261112/logs/vitest-batch1-negative-old-source-reproduced.log
+ba1356ff50ec2f13234ab4846751e62cac830e57ce965b2dd91ec6e7079f4583  docs/parallel/lane-media/A-R2-20261112/logs/vitest-batch1-negative-old-source.log
+
+--- product bytes after the fix ---
+a61fb88c7565c90e8afd01d265c6b6f777c1bb06d5a6fe23f90d374ed8b18bd8  src/host/render/committed-render-phases.ts
+cf160521775ea6fc0841a72af91b88599f88ecf5426429826d52cefa7e74dca1  src/host/render/ports.ts
+126fdcdf70d1c3ed7bc94e5df906932948e90e76850ca9d7433d7878b73948de  tests/agent-driven/media/committed-render-phases.test.ts
