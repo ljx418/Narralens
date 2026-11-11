@@ -1,0 +1,95 @@
+
+> narralens@0.1.0 test /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-PRODUCT
+> vitest run --config vitest.config.ts tests/agent-driven/product/native-effective-sidecars.test.ts --maxWorkers=1 --minWorkers=1
+
+
+ RUN  v3.2.4 /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-PRODUCT
+
+ ❯ tests/agent-driven/product/native-effective-sidecars.test.ts (27 tests | 2 failed) 43ms
+   ✓ pinned native effective sidecars, pure independent inputs > absent-style-empty-film 3ms
+   ✓ pinned native effective sidecars, pure independent inputs > chinese-trim-offset-speed-translated 14ms
+   ✓ pinned native effective sidecars, pure independent inputs > latin-filler-false-start 1ms
+   ✓ pinned native effective sidecars, pure independent inputs > hand-cut-marks 1ms
+   ✓ pinned native effective sidecars, pure independent inputs > word-cues 2ms
+   ✓ pinned native effective sidecars, pure independent inputs > missing-voice-transcript 1ms
+   ✓ pinned native effective sidecars, pure independent inputs > malformed-vtt-native-untranscribed 1ms
+   ✓ pinned native effective sidecars, pure independent inputs > outlasts-source 1ms
+   ✓ pinned native effective sidecars, pure independent inputs > native-style-clamps 1ms
+   ✓ pinned native effective sidecars, pure independent inputs > malformed-style-refused 1ms
+   ✓ pinned native effective sidecars, pure independent inputs > muted 0ms
+   ✓ pinned native effective sidecars, pure independent inputs > missing-video-transcript 1ms
+   ✓ pinned native effective sidecars, pure independent inputs > two-speakers 1ms
+   ✓ pinned native effective sidecars, pure independent inputs > oracle has real Chinese timing, translations and speaker behavior 1ms
+   ✓ pinned native effective sidecars, pure independent inputs > unknown sidecar is not absent 0ms
+   ✓ pinned native effective sidecars, pure independent inputs > missing directory cannot drop translations 1ms
+   ✓ pinned native effective sidecars, pure independent inputs > missing media cannot silently become unknown duration 1ms
+   ✓ pinned native effective sidecars, pure independent inputs > new translation listed but bytes not supplied refuses 1ms
+   ✓ pinned native effective sidecars, pure independent inputs > closed negative reads and consumed/listing facts are returned 1ms
+   ✓ pinned native effective sidecars, pure independent inputs > listing and negative read conflict refuses 0ms
+   ✓ pinned native effective sidecars, pure independent inputs > bad film never becomes empty captions 0ms
+   ✓ pinned native effective sidecars, pure independent inputs > external source is unsupported 1ms
+   ✓ pinned native effective sidecars, pure independent inputs > caller mutation after call cannot change pending projection 0ms
+   ✓ pinned native effective sidecars, pure independent inputs > result defaults do not alias later calls 0ms
+   × pinned native effective sidecars, pure independent inputs > rejects present translation omitted from queried listing 6ms
+     → expected { status: 'computed', …(6) } to match object { status: 'unsupported', …(1) }
+(10 matching properties omitted from actual)
+   × pinned native effective sidecars, pure independent inputs > rejects listed absent direct child even when native never discovers it 2ms
+     → expected { status: 'computed', …(6) } to match object { status: 'unsupported', …(1) }
+(10 matching properties omitted from actual)
+   ✓ pinned native effective sidecars, pure independent inputs > does not equate nested or unqueried children with direct listing members 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/product/native-effective-sidecars.test.ts > pinned native effective sidecars, pure independent inputs > rejects present translation omitted from queried listing
+AssertionError: expected { status: 'computed', …(6) } to match object { status: 'unsupported', …(1) }
+(10 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+-   "reason": "DIRECTORY_FILE_CONFLICT",
+-   "status": "unsupported",
++   "status": "computed",
+  }
+
+ ❯ tests/agent-driven/product/native-effective-sidecars.test.ts:32:51
+     30|  it('rejects present translation omitted from queried listing',async()…
+     31|   const i=input(1);(i.directories as Record<string,string[]>)['assets/…
+     32|   expect(await computeNativeEffectiveSidecars(i)).toMatchObject({statu…
+       |                                                   ^
+     33|  });
+     34|  it('rejects listed absent direct child even when native never discove…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/agent-driven/product/native-effective-sidecars.test.ts > pinned native effective sidecars, pure independent inputs > rejects listed absent direct child even when native never discovers it
+AssertionError: expected { status: 'computed', …(6) } to match object { status: 'unsupported', …(1) }
+(10 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+-   "reason": "DIRECTORY_FILE_CONFLICT",
+-   "status": "unsupported",
++   "status": "computed",
+  }
+
+ ❯ tests/agent-driven/product/native-effective-sidecars.test.ts:37:51
+     35|   const i=input(1);(i.files as Record<string,string|null>)['assets/vo/…
+     36|   (i.directories['assets/vo'] as string[]).push('unrelated.txt');
+     37|   expect(await computeNativeEffectiveSidecars(i)).toMatchObject({statu…
+       |                                                   ^
+     38|  });
+     39|  it('does not equate nested or unqueried children with direct listing …
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 25 passed (27)
+   Start at  07:47:13
+   Duration  316ms (transform 95ms, setup 0ms, collect 106ms, tests 43ms, environment 0ms, prepare 33ms)
+
+ ELIFECYCLE  Test failed. See above for more details.

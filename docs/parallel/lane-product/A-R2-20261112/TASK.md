@@ -163,3 +163,8 @@ All other source remains protected, including static validator generator/public 
 MAIN task task_b791e12b46a4 / dispatch ctx_2b91bed536f5 releases only new native-effective-sidecars.ts, its test, oracle and vectors plus own docs. Sole writer PRODUCT Codex under recorded prior safe 429 takeover; previous Claude remains stopped. MAIN immutable base d8fdc1a0b16cd5a594ba7516dd0cb932d3cc910f; own pre-task HEAD 0f527060d0ab002bb472cee2505b06dfb7386082. Existing untracked evidence stays. Pure independently supplied native sidecar computation only: no proof/Ack/rights authority, FS/probe/provider calls or existing-source edits. Targeted isolated pure oracle/tests and typecheck only; no heavy slot, Host/browser/build/ffmpeg or new dependencies. Frozen pinned consumer algorithms are retained verbatim where possible; missing closed inputs refuse rather than default-empty.
 
 Completed component scope at `25b417556a617267a79b276acb7d39ab516edd00`; see SIDECARS_DELIVERY.md and SIDECARS_VALIDATION.json for exact commands/hashes and honest limitations.
+
+
+First independent repair M1: task_83441a57be84 / ctx_edd56c43673d; sole Codex fallback, same four-path release plus docs, stopped Claude unchanged. Prove new adapter-contract negatives against unchanged25b4175 source before fixing queried direct-child listing consistency; preserve all old evidence. No heavy/runtime work.
+
+M1 repair frozen9e14cbc7cd3348f0c1895e1715089e60d9cf6756: unchanged tests prove original25b 2fail/25pass then repaired27pass; oracle13 and both tsc commands exit0 with four inputs unchanged. See SIDECARS_M1_REPAIR.md, SIDECARS_M1_OLDFAIL.json, SIDECARS_M1_VALIDATION.json. Await MAIN independent re-review; no additional source/runtime work.

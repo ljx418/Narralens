@@ -306,3 +306,8 @@ MAIN task task_b791e12b46a4 / dispatch ctx_2b91bed536f5 releases only new native
 
 
 Native sidecars delivered: source commit `25b417556a617267a79b276acb7d39ab516edd00`; final oracle13/unit24/project+oracle typechecks all exit0 with unchanged inputs, receipt SIDECARS_VALIDATION.json and limits SIDECARS_DELIVERY.md. Sole Codex writer now frozen; no live validation commands or child restart; MAIN review/integration pending, no NativeAck/A claim.
+
+
+First independent repair M1: task_83441a57be84 / ctx_edd56c43673d; sole Codex fallback, same four-path release plus docs, stopped Claude unchanged. Prove new adapter-contract negatives against unchanged25b4175 source before fixing queried direct-child listing consistency; preserve all old evidence. No heavy/runtime work.
+
+M1 repair frozen9e14cbc7cd3348f0c1895e1715089e60d9cf6756: unchanged tests prove original25b 2fail/25pass then repaired27pass; oracle13 and both tsc commands exit0 with four inputs unchanged. See SIDECARS_M1_REPAIR.md, SIDECARS_M1_OLDFAIL.json, SIDECARS_M1_VALIDATION.json. Await MAIN independent re-review; no additional source/runtime work.

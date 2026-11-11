@@ -1,0 +1,17 @@
+{
+  "original_source_commit": "25b417556a617267a79b276acb7d39ab516edd00",
+  "source_matches_original": true,
+  "source_sha256": "c59ae0d2fa197f4439bb5da883a5674740894981424f37e0fea7e6df1ede15ce",
+  "regression_test_sha256": "c5f9dd1918370791ab96aadd373a52f63516448d26e02da7231a73c02b82757b",
+  "command": [
+    "corepack",
+    "pnpm",
+    "test",
+    "tests/agent-driven/product/native-effective-sidecars.test.ts",
+    "--maxWorkers=1",
+    "--minWorkers=1"
+  ],
+  "exit": 1,
+  "log": "docs/parallel/lane-product/A-R2-20261112/logs/sidecars-m1-oldfail.txt",
+  "log_sha256": "545068d71c76964d6c85297cef210b1e951e1c7fc38b5ae09a7b1b43c73716f2"
+}
