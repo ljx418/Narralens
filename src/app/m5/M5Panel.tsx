@@ -27,7 +27,7 @@ import type {
   PreviewMediaDescriptorV1,
 } from "../../contracts/prepared-preview.js";
 import { WorkflowTopBar } from "../observation/WorkflowTopBar.js";
-import { CreativeReviewPanel } from "../observation/CreativeReviewPanel.js";
+import { CreativeReviewPanel, reviewAdoptionState, type AdoptionFacts } from "../observation/CreativeReviewPanel.js";
 import { LocalAssetRegistrationPanel } from "../observation/LocalAssetRegistrationPanel.js";
 import { NativeSyncIndicator } from "../observation/NativeSyncIndicator.js";
 import { PreparedTextView } from "../observation/content-views.js";
@@ -422,6 +422,13 @@ export function M5Panel({ client, targetProjectId, ui: uiProp }: M5PanelProps): 
   const [health, setHealth] = useState<HealthRead | null>(null);
   const [review, setReview] = useState<ReviewPackage | null>(null);
   const [reviewDecision, setReviewDecision] = useState<ReviewDecision | null>(null);
+  /**
+   * The project's own facts at the moment the decision was recorded.
+   *
+   * They are the baseline the adoption is read against: the commit is proven by the
+   * project's own revision moving, not by the decision and not by a job.
+   */
+  const [decisionBaseline, setDecisionBaseline] = useState<AdoptionFacts | null>(null);
   /** Whether the package on screen is no longer the one the Host would answer about. */
   const [reviewStale, setReviewStale] = useState(false);
   /** Why the observation surfaces show what they show. It is never empty. */
@@ -1345,6 +1352,13 @@ export function M5Panel({ client, targetProjectId, ui: uiProp }: M5PanelProps): 
     choice: "accept" | "changes_requested" | "reject" | "accept_and_adopt",
   ): Promise<void> => {
     if (uiClient === undefined || review === null) return;
+    // The project's facts *before* the decision: they are the baseline the adoption is
+    // read against, and the baseline has to be the one the decision was made on.
+    const baseline: AdoptionFacts | null = context === null ? null : {
+      project_revision: context.project_revision,
+      snapshot_id: context.snapshot_id,
+      source_digest: context.source_digest,
+    };
     const slot = `${review.package_id}@${review.version}:${choice}`;
     const idempotency_key = decisionKeys.current.get(slot) ?? `m5-${crypto.randomUUID()}`;
     decisionKeys.current.set(slot, idempotency_key);
@@ -1356,6 +1370,7 @@ export function M5Panel({ client, targetProjectId, ui: uiProp }: M5PanelProps): 
         choice,
       });
       setReviewDecision(decision);
+      setDecisionBaseline(baseline);
       // The facts are read again: the decision changed the package's own state, and the
       // panel must show what the Host says now, not what it said before.
       try {
@@ -1367,22 +1382,29 @@ export function M5Panel({ client, targetProjectId, ui: uiProp }: M5PanelProps): 
       }
     } catch (reason) { fail(reason); }
     finally { setBusy(""); }
-  }, [fail, readReviewPackage, review, uiClient]);
+  }, [context, fail, readReviewPackage, review, uiClient]);
 
   /**
    * What is known about the adoption.
    *
-   * A recorded decision that asked for adoption leaves the adoption *pending*: the
-   * commit and the native acknowledgement are separate facts, and neither is produced
-   * on this path in R1.
+   * It is read from the project's own facts, not from the decision: the decision says
+   * a person chose, the commit says the Host published a new version, and the native
+   * acknowledgement says the editor loaded it.
+   *
+   * A revision that advanced is a commit that happened, not necessarily *this*
+   * adoption: an unrelated native edit or another adoption moves it too. The adoption
+   * is registered only when a commit is bound to this decision, and the panel has no
+   * such binding today, so it stays pending until the Host supplies one.
    */
-  const adoption = reviewDecision === null ? null : {
-    state: (reviewDecision.choice === "accept_and_adopt" ? "requested" : "not_requested") as
-      "requested" | "not_requested",
-    reason: reviewDecision.choice === "accept_and_adopt"
-      ? "决定已登记；实际提交与原生确认尚未取得，采用保持待完成。"
-      : "这次决定没有请求采用。",
-  };
+  const adoption = reviewDecision === null ? null : reviewAdoptionState({
+    decision: reviewDecision,
+    atDecision: decisionBaseline,
+    current: context === null ? null : {
+      project_revision: context.project_revision,
+      snapshot_id: context.snapshot_id,
+      source_digest: context.source_digest,
+    },
+  });
 
   // The recorded comparison the page replays. It is named by the operator, and it is
   // always an *existing* D4.1 recording: M5 never calls a provider.
@@ -1733,6 +1755,7 @@ export function M5Panel({ client, targetProjectId, ui: uiProp }: M5PanelProps): 
         package={review}
         decision={reviewDecision}
         adoption={adoption}
+        committedRevision={context?.project_revision ?? null}
         busy={busy === "review"}
         stale={reviewStale}
         onOpenPart={(part) => void openPreparedPart(part)}

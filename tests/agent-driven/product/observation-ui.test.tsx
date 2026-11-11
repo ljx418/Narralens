@@ -10,7 +10,7 @@ import type {
   Workflow,
 } from "../../../src/contracts/agent-driven-types.js";
 import { WorkflowTopBar } from "../../../src/app/observation/WorkflowTopBar.js";
-import { CreativeReviewPanel } from "../../../src/app/observation/CreativeReviewPanel.js";
+import { CreativeReviewPanel, reviewAdoptionState } from "../../../src/app/observation/CreativeReviewPanel.js";
 import { nativeSyncState } from "../../../src/app/observation/content-views.js";
 import { PreparedTextView } from "../../../src/app/observation/content-views.js";
 import { nativeSyncState as nativeSyncStateFromItsOwnModule } from "../../../src/app/observation/NativeSyncIndicator.js";
@@ -18,6 +18,8 @@ import { SystemControlPanel } from "../../../src/app/system/SystemControlPanel.j
 import { AgentWorkbenchClient } from "../../../src/app/agent-workbench-client.js";
 import { GatewayApiError, type GatewayApiClient } from "../../../src/app/m5/GatewayApiClient.js";
 import { M5Panel } from "../../../src/app/m5/M5Panel.js";
+import { STUDIO_HOST_BRIDGE_SCRIPT } from "../../../src/host/m5/studio-host-bridge.js";
+import vm from "node:vm";
 
 /**
  * The DOM is cleaned between the cases.
@@ -1458,5 +1460,326 @@ describe("the controlled listings, at the edges", () => {
     });
     expect(screen.queryByRole("radio", { name: /麦克风录音 A/ })).toBeNull();
     expect(screen.queryByRole("radio", { name: /cand-old/ })).toBeNull();
+  });
+});
+
+/**
+ * The four facts stay apart: the decision, the adoption, the commit and the native
+ * acknowledgement.
+ *
+ * These cases are pure: no Host, no listener, no browser, no fixture.
+ */
+describe("the review adoption state", () => {
+  const digest = "a".repeat(64);
+  const otherDigest = "b".repeat(64);
+  const decisionOf = (choice: string, id = "dec-1") => ({
+    decision_id: id,
+    project_id: "project-1",
+    run_id: "run-1",
+    package_id: "pkg-1",
+    package_version: 1,
+    input_digest: digest,
+    output_digest: digest,
+    quality_digest: digest,
+    choice,
+    principal_id: "principal-1",
+    channel: "trusted_ui",
+    recorded_at: "2026-11-12T00:00:00.000Z",
+    approval: null,
+  }) as never;
+  const facts = (revision: number, snapshot = "snap-1", source = digest) => ({
+    project_revision: revision, snapshot_id: snapshot, source_digest: source,
+  });
+
+  it("says that nothing was requested when there is no decision", () => {
+    expect(reviewAdoptionState({ decision: null, atDecision: null, current: null }).state).toBe("not_requested");
+  });
+
+  it("says that nothing was requested when the decision did not ask for an adoption", () => {
+    const state = reviewAdoptionState({
+      decision: decisionOf("accept"),
+      atDecision: facts(3),
+      current: facts(3),
+    });
+    expect(state.state).toBe("not_requested");
+  });
+
+  it("keeps the adoption pending while the project's own revision has not moved", () => {
+    const state = reviewAdoptionState({
+      decision: decisionOf("accept_and_adopt"),
+      atDecision: facts(3),
+      current: facts(3),
+    });
+    expect(state.state).toBe("requested");
+  });
+
+  it("does not credit this adoption with a commit that moved the revision for another reason", () => {
+    // The revision advanced by one, but nothing binds that commit to this decision: an
+    // unrelated native edit, another adoption, or anything else that commits.
+    const state = reviewAdoptionState({
+      decision: decisionOf("accept_and_adopt"),
+      atDecision: facts(3),
+      current: facts(4, "snap-2", otherDigest),
+    });
+    expect(state.state).toBe("requested");
+    expect(state.reason).toContain("没有与这次决定绑定的提交记录");
+  });
+
+  it("does not credit this adoption with a commit that is bound to another decision", () => {
+    const state = reviewAdoptionState({
+      decision: decisionOf("accept_and_adopt"),
+      atDecision: facts(3),
+      current: facts(4, "snap-2", otherDigest),
+      committed: {
+        decision: decisionOf("accept_and_adopt", "dec-other"),
+        project_revision: 4,
+        snapshot_id: "snap-2",
+        source_digest: otherDigest,
+      },
+    });
+    expect(state.state).toBe("unknown");
+    expect(state.reason).toContain("另一个决定");
+  });
+
+  it("does not credit this adoption with a commit that names the wrong target", () => {
+    // The commit is bound to this decision, but it is not the project's current source.
+    const state = reviewAdoptionState({
+      decision: decisionOf("accept_and_adopt"),
+      atDecision: facts(3),
+      current: facts(4, "snap-2", otherDigest),
+      committed: {
+        decision: decisionOf("accept_and_adopt"),
+        project_revision: 4,
+        snapshot_id: "snap-other",
+        source_digest: otherDigest,
+      },
+    });
+    expect(state.state).toBe("unknown");
+    expect(state.reason).toContain("快照或内容摘要");
+  });
+
+  it("registers the adoption when a commit is bound to this decision and is the current one", () => {
+    const state = reviewAdoptionState({
+      decision: decisionOf("accept_and_adopt"),
+      atDecision: facts(3),
+      current: facts(4, "snap-2", otherDigest),
+      committed: {
+        decision: decisionOf("accept_and_adopt"),
+        project_revision: 4,
+        snapshot_id: "snap-2",
+        source_digest: otherDigest,
+      },
+    });
+    expect(state.state).toBe("registered");
+  });
+
+  it("says unknown rather than guessing when the facts cannot be lined up", () => {
+    expect(reviewAdoptionState({
+      decision: decisionOf("accept_and_adopt"),
+      atDecision: null,
+      current: facts(4),
+    }).state).toBe("unknown");
+    expect(reviewAdoptionState({
+      decision: decisionOf("accept_and_adopt"),
+      atDecision: facts(3),
+      current: null,
+    }).state).toBe("unknown");
+  });
+
+  it("never claims a native load from the adoption", () => {
+    const state = reviewAdoptionState({
+      decision: decisionOf("accept_and_adopt"),
+      atDecision: facts(3),
+      current: facts(4, "snap-2", otherDigest),
+      committed: {
+        decision: decisionOf("accept_and_adopt"),
+        project_revision: 4,
+        snapshot_id: "snap-2",
+        source_digest: otherDigest,
+      },
+    });
+    expect(state.reason).toContain("提交与原生确认仍是两件事");
+  });
+});
+/**
+ * The Studio bridge that reports into the native observation ingress.
+ *
+ * The bridge is the real source that the Gateway serves to the editor, so the cases
+ * below evaluate that exact source in a controlled sandbox: they are not a
+ * re-implementation of it, and they load nothing from the network.
+ */
+describe("the Studio bridge and the native observation", () => {
+  const bridgeOf = (options: { readonly session?: boolean; readonly storedSequence?: number } = {}) => {
+    const sent: Array<{ readonly url: string; readonly body: Record<string, unknown> }> = [];
+    const store = () => {
+      const values = new Map<string, string>();
+      return {
+        getItem: (key: string) => values.get(key) ?? null,
+        setItem: (key: string, value: string) => { values.set(key, value); },
+        removeItem: (key: string) => { values.delete(key); },
+        clear: () => { values.clear(); },
+      };
+    };
+    const session = store();
+    const shared = store();
+    if (options.session !== false) session.setItem("narralens.native.session", JSON.stringify({ csrf: "c".repeat(43) }));
+    if (options.storedSequence !== undefined) session.setItem("narralens.native.observation.sequence", String(options.storedSequence));
+    const element = () => ({ id: "", style: {}, setAttribute: () => undefined, appendChild: () => undefined });
+    const document = {
+      body: { contains: () => false, appendChild: () => undefined },
+      head: { appendChild: () => undefined },
+      documentElement: {},
+      addEventListener: () => undefined,
+      createElement: element,
+    };
+    const windowStub: Record<string, unknown> = {
+      location: { search: "" },
+      dispatchEvent: () => undefined,
+    };
+    const sandbox: Record<string, unknown> = {
+      window: windowStub,
+      document,
+      sessionStorage: session,
+      localStorage: shared,
+      CustomEvent: class { constructor(readonly type: string, readonly init: { detail: unknown }) {} },
+      MutationObserver: class { observe(): void {} },
+      URLSearchParams,
+      JSON, String, Number, Object, Array, Boolean, parseInt, isFinite, console,
+      fetch: async (input: unknown, init?: { body?: string }) => {
+        sent.push({ url: String(input), body: JSON.parse(String(init?.body ?? "{}")) as Record<string, unknown> });
+        return { ok: true, status: 200 };
+      },
+    };
+    vm.createContext(sandbox);
+    vm.runInContext(STUDIO_HOST_BRIDGE_SCRIPT, sandbox);
+    return {
+      sent,
+      host: windowStub.openfilmHost as {
+        narralensObservation: { onDocumentState: (state: unknown) => void };
+        narralensHydration: { onState: (state: unknown) => void };
+        onSelection: (selection: unknown) => void;
+      },
+      session,
+    };
+  };
+
+  it("reports a document event with a strictly increasing sequence", () => {
+    const bridge = bridgeOf();
+    bridge.host.narralensObservation.onDocumentState({
+      protocol_version: 1, kind: "invalidated", project_id: "n1",
+      editor_view_id: "view1", document_epoch: 1, reason: "dirty",
+    });
+    bridge.host.narralensObservation.onDocumentState({
+      protocol_version: 1, kind: "invalidated", project_id: "n1",
+      editor_view_id: "view1", document_epoch: 2, reason: "dirty",
+    });
+    expect(bridge.sent.length).toBe(2);
+    expect(bridge.sent[0]?.url).toBe("/narralens/native/observation");
+    expect(bridge.sent[0]?.body.format).toBe("narralens.native-observation@1");
+    expect(bridge.sent[0]?.body.event_kind).toBe("document");
+    expect(bridge.sent[1]?.body.sequence).toBe(2);
+  });
+
+  it("reports a hydration event with the four parts it carries", () => {
+    const bridge = bridgeOf();
+    bridge.host.narralensHydration.onState({
+      project_id: "n1", editor_view_id: "view1", document_epoch: 1, hydration_epoch: 4,
+      parts: {
+        settings: { state: "hydrated", origin: "project", effective_sha256: "a".repeat(64) },
+        subtitle_style: { state: "pending", origin: "project", effective_sha256: null },
+        captions: { state: "pending", origin: "project", effective_sha256: null },
+        markers: { state: "pending", origin: "project", effective_sha256: null },
+      },
+    });
+    expect(bridge.sent.length).toBe(1);
+    expect(bridge.sent[0]?.body.event_kind).toBe("hydration");
+    const event = bridge.sent[0]?.body.event as { hydration_epoch: number };
+    expect(event.hydration_epoch).toBe(4);
+  });
+
+  it("reports a selection when it changes, and not on every report", () => {
+    const bridge = bridgeOf();
+    const selection = { projectId: "n1", time: 1, refs: [{ kind: "clip", id: "shot1" }] };
+    bridge.host.onSelection(selection);
+    bridge.host.onSelection(selection);
+    expect(bridge.sent.length).toBe(1);
+    expect(bridge.sent[0]?.body.event_kind).toBe("selection");
+    // The playhead moved, but the selection itself did not: the Host owns the
+    // selection version, and a moved playhead is not a changed selection.
+    bridge.host.onSelection({ ...selection, time: 2 });
+    expect(bridge.sent.length).toBe(1);
+    // The selected clip changed: that is a changed selection.
+    bridge.host.onSelection({ ...selection, time: 2, refs: [{ kind: "clip", id: "shot2" }] });
+    expect(bridge.sent.length).toBe(2);
+  });
+
+  it("sends nothing at all without a native session", () => {
+    const bridge = bridgeOf({ session: false });
+    bridge.host.narralensObservation.onDocumentState({
+      protocol_version: 1, kind: "invalidated", project_id: "n1",
+      editor_view_id: "view1", document_epoch: 1, reason: "dirty",
+    });
+    bridge.host.onSelection({ projectId: "n1", time: 1, refs: [] });
+    expect(bridge.sent.length).toBe(0);
+  });
+
+  it("keeps the sequence above what an earlier session already sent", () => {
+    // The counter is read when the bridge loads, so a reload of the editor starts
+    // above the number the previous page already used.
+    const bridge = bridgeOf({ storedSequence: 40 });
+    bridge.host.narralensObservation.onDocumentState({
+      protocol_version: 1, kind: "invalidated", project_id: "n1",
+      editor_view_id: "view1", document_epoch: 1, reason: "dirty",
+    });
+    expect(bridge.sent[0]?.body.sequence).toBe(41);
+  });
+});
+
+/**
+ * The committed revision is its own fact.
+ */
+describe("the committed revision and the adoption", () => {
+  it("shows the project's committed revision on its own line, apart from the adoption", () => {
+    render(
+      <CreativeReviewPanel
+        package={PACKAGE}
+        decision={{
+          decision_id: "decision-1",
+          project_id: "project-1",
+          run_id: "run-1",
+          package_id: PACKAGE.package_id,
+          package_version: PACKAGE.version,
+          input_digest: PACKAGE.input_digest,
+          output_digest: PACKAGE.output_digest,
+          quality_digest: PACKAGE.quality_digest,
+          choice: "accept_and_adopt",
+          principal_id: "operator",
+          channel: "trusted_ui",
+          recorded_at: "2026-11-12T00:00:00.000Z",
+          approval: null,
+        }}
+        adoption={{ state: "requested", reason: "决定已登记；实际提交与原生确认尚未取得，采用保持待完成。" }}
+        committedRevision={4}
+      />,
+    );
+    // The commit is visible, and it is not the adoption.
+    const committed = document.querySelector("[data-nl-review-committed]");
+    expect(committed?.textContent).toContain("4");
+    const adoption = document.querySelector("[data-nl-review-adoption]");
+    expect(adoption?.getAttribute("data-nl-review-adoption")).toBe("requested");
+  });
+
+  it("shows no revision line when there is no revision to show", () => {
+    render(<CreativeReviewPanel package={PACKAGE} committedRevision={null} />);
+    expect(document.querySelector("[data-nl-review-committed]")).toBeNull();
+  });
+
+  it("names the revision the editor has not confirmed yet", () => {
+    const context = {
+      ...CONTEXT_WITH_RUN, native_sync: "pending" as const, project_revision: 7,
+    };
+    const state = nativeSyncStateFromItsOwnModule(context);
+    expect(state.state).toBe("pending");
+    expect(state.reason).toContain("7");
   });
 });

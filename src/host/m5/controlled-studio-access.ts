@@ -2,6 +2,7 @@ import type {CreatedWorkbenchProjection} from '../../contracts/created-workbench
 import {PREPARED_REVIEW_MAX_READ_BYTES} from '../render/assembly-ports.js';
 import {createHash,randomBytes,timingSafeEqual} from 'node:crypto';
 import type {IncomingMessage,ServerResponse} from 'node:http';
+import type {NativeObservationGrant,NativeObservationSessionBinding} from './native-observation.js';
 
 /**
  * The independent workbench UI delegate (CR-R1-001 §2).
@@ -93,8 +94,20 @@ export interface NativeStudioGrant {
  * Context, and the native proof can never stand in for it.
  */
  readonly ui?:NativeStudioUiGrantV1;
+ /**
+  * The optional native observation producer (A-R2, L05).
+  *
+  * It is a third, separate purpose: it opens no native write and it grants no
+  * approval. The client cannot construct one — it is captured by the Host in the
+  * `#openNative` closure, with the real owner, the real project, the real commit, the
+  * instance generation, the verified workspace and the authoritative selection
+  * authority.
+  */
+ readonly nativeObservation?:NativeObservationGrant;
 }
-export interface NativeStudioSession {readonly grant:NativeStudioGrant;readonly proof:string;readonly read_token:string;readonly expires_at:number}
+export interface NativeStudioSession {readonly grant:NativeStudioGrant;readonly proof:string;readonly read_token:string;readonly expires_at:number;
+/** The Host-created binding of the observation session, when the grant carries one. */
+readonly observation?:NativeObservationSessionBinding}
 /** The independent UI session: its own proof, its own expiry, its own lifetime. */
 export interface NativeStudioUiSession {readonly grant:NativeStudioUiGrantV1;readonly proof:string;readonly expires_at:number}
 interface Ticket {grant:NativeStudioGrant;expires_at:number}
@@ -131,7 +144,44 @@ export class ControlledStudioAccess {
  readonly #uiRetired=new Map<string,number>();
  #closed=false;
  constructor(private readonly origin:()=>string,private readonly now:()=>number=Date.now){}
- close(){this.#closed=true;this.#tickets.clear();this.#proofs.clear();this.#reads.clear();this.#retired.clear();this.#uiProofs.clear();this.#uiRetired.clear();}
+ close(){
+  this.#closed=true;this.#tickets.clear();this.#reads.clear();this.#retired.clear();this.#uiProofs.clear();this.#uiRetired.clear();
+  // The observation sessions are told first: the ingress stops before the credentials
+  // go away, so a late callback can never answer a session that no longer exists.
+  for(const session of this.#proofs.values())this.#closeObservation(session);
+  this.#proofs.clear();
+ }
+ /**
+  * The Host's binding of one observation session.
+  *
+  * The `bridge_session_id` is a non-secret identifier, minted here at the exchange. It
+  * is not a credential: the credential is the native cookie and the native CSRF proof,
+  * and neither of them is derived from it.
+  */
+ #observationBinding(grant:NativeStudioGrant):NativeObservationSessionBinding|undefined{
+  const observation=grant.nativeObservation;
+  if(observation===undefined)return undefined;
+  return Object.freeze({
+   bridge_session_id:randomBytes(16).toString('hex'),
+   instance_generation:observation.instance_generation,
+   project_id:observation.project_id,
+   native_project_id:observation.native_project_id,
+   owner_session_ref:observation.owner_session_ref,
+   revision:observation.revision,
+   snapshot_id:observation.snapshot_id,
+   source_digest:observation.source_digest,
+   workspace:observation.workspace,
+   isCurrent:observation.isCurrent,
+  });
+ }
+ /** Tell the observation producer that one session is gone. */
+ #closeObservation(session:NativeStudioSession):void{
+  const binding=session.observation;
+  if(binding===undefined)return;
+  const port=session.grant.nativeObservation?.port;
+  if(port===undefined)return;
+  try{port.sessionClosed(binding);}catch{/* a closed producer must not break the close. */}
+ }
  #current(grant:NativeStudioGrant){try{return !this.#closed&&grant.isCurrent();}catch{return false;}}
  #sameScope(a:NativeStudioGrant,b:NativeStudioGrant){return a.project_id===b.project_id&&a.native_project_id===b.native_project_id&&a.owner_session_ref===b.owner_session_ref&&a.instance_generation===b.instance_generation&&a.revision===b.revision&&a.snapshot_id===b.snapshot_id&&a.source_digest===b.source_digest;}
  #existing(grant:NativeStudioGrant){return [...this.#proofs.values()].find(session=>this.#sameScope(session.grant,grant));}
@@ -353,8 +403,23 @@ export class ControlledStudioAccess {
   let session=this.#existing(stored.grant);
   if(!session){
    if(this.#proofs.size>=64)throw new StudioAccessError(503,'CAPABILITY_UNAVAILABLE');
-   session=Object.freeze({grant:stored.grant,proof:secret(),read_token:secret(),expires_at:this.now()+28800000});
+   // The observation binding is created here, at the exchange, and only here: the
+   // client cannot name a session, a bridge id or an instance generation.
+   const observation=this.#observationBinding(stored.grant);
+   session=Object.freeze({grant:stored.grant,proof:secret(),read_token:secret(),expires_at:this.now()+28800000,...(observation===undefined?{}:{observation})});
    this.#proofs.set(key(session.proof),session);this.#reads.set(key(session.read_token),session);
+   if(observation!==undefined){
+    // The session exists before the producer is told about it, so a callback that
+    // arrives immediately already finds a live session.
+    try{stored.grant.nativeObservation?.port.sessionOpened(observation);}
+    catch{this.#proofs.delete(key(session.proof));this.#reads.delete(key(session.read_token));throw new StudioAccessError(503,'CAPABILITY_UNAVAILABLE');}
+   }
+  }else if(session.observation!==undefined){
+   // The editor opened again on the same session. The producer is told, so that the
+   // profile of the previous view is void until the new view reports: an
+   // acknowledgement of a view that is gone must not survive the editor's reopening.
+   try{stored.grant.nativeObservation?.port.sessionOpened(session.observation);}
+   catch{throw new StudioAccessError(503,'CAPABILITY_UNAVAILABLE');}
   }
   this.#tickets.delete(key(ticket));
   // The UI delegate is minted from the grant alone. A native entry without one stays

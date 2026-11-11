@@ -588,3 +588,57 @@ describe("the adjunct protocol readers on their own", () => {
     expect(inventory.items[0]!.recording_origin).toBeNull();
   });
 });
+
+/**
+ * The decision, the adoption and the commit are three different things, and the client
+ * is what keeps them apart.
+ */
+describe("the review client and the adoption", () => {
+  it("refuses a choice that asks for an adoption without the impact it adopts", async () => {
+    const bus = transport({});
+    const client = new AgentWorkbenchClient(bus, "project-1");
+    const withoutImpact: ReviewPackage = { ...PACKAGE, impact: null };
+    await expect(client.decideReview({
+      meta: { idempotency_key: "key-1", correlation_id: "corr-1" },
+      package: withoutImpact,
+      choice: "accept_and_adopt",
+    })).rejects.toThrow("INVALID_ADOPTION_IMPACT");
+    // Nothing was sent: the refusal happens before the call.
+    expect(bus.calls).toHaveLength(0);
+  });
+
+  it("accepts a plain accept without any impact, because a plain accept adopts nothing", async () => {
+    const bus = transport({ "agent.v1/review.decide": DECISION_ACCEPT });
+    const client = new AgentWorkbenchClient(bus, "project-1");
+    const withoutImpact: ReviewPackage = { ...PACKAGE, impact: null };
+    const decision = await client.decideReview({
+      meta: { idempotency_key: "key-1", correlation_id: "corr-1" },
+      package: withoutImpact,
+      choice: "accept",
+    });
+    expect(decision.decision_id).toBe("decision-1");
+    // Exactly one closed call, and it is the decision. There is no commit, no apply
+    // and no acknowledgement anywhere in this client's surface.
+    expect(bus.calls.map((call) => call.operation)).toEqual(["review.decide"]);
+    const input = bus.calls[0]!.input as Record<string, unknown>;
+    expect(input.impact_id).toBeNull();
+    expect(input.plan_sha256).toBeNull();
+  });
+
+  it("sends the impact and the plan hash of the adoption, and nothing else", async () => {
+    const bus = transport({ "agent.v1/review.decide": DECISION_ADOPT });
+    const client = new AgentWorkbenchClient(bus, "project-1");
+    await client.decideReview({
+      meta: { idempotency_key: "key-1", correlation_id: "corr-1" },
+      package: PACKAGE,
+      choice: "accept_and_adopt",
+    });
+    const input = bus.calls[0]!.input as Record<string, unknown>;
+    expect(input.impact_id).toBe("impact-1");
+    expect(input.plan_sha256).toBe("4".repeat(64));
+    expect(Object.keys(input).sort()).toEqual([
+      "choice", "impact_id", "input_digest", "meta", "output_digest", "package_id",
+      "package_version", "plan_sha256", "plan_version", "project_id", "quality_digest", "run_id",
+    ]);
+  });
+});

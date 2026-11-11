@@ -46,7 +46,9 @@ export function nativeSyncState(context: Context | null): NativeSyncState {
     return { state: "unknown", reason: "编辑区状态未知，未收到原生确认。" };
   }
   if (context.native_sync === "pending") {
-    return { state: "pending", reason: "工程已提交，等待编辑区确认。" };
+    // The revision is named, so the reader can tell which version is waiting. The
+    // commit and the acknowledgement are two different facts.
+    return { state: "pending", reason: `工程已提交（版本 ${context.project_revision}），等待编辑区确认。` };
   }
   const ack = context.native_ack;
   if (ack === null) {

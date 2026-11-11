@@ -1,0 +1,334 @@
+{
+  "format": "narralens.product-r2-incremental-import@1",
+  "base_sha": "de086f32c48c44fb72d0212ef80365f1c786408c",
+  "candidate_sha": "d02bb53b44ca36848eeae79dc50f5fa6dc6709c8",
+  "release_base_sha": "39201d932cd10e0ce60b023bdde2f233dfb009e5",
+  "release_path_count": 31,
+  "changed_product_count": 26,
+  "files": [
+    {
+      "path": "contracts/native-observation-v1.registry.json",
+      "owner": "PRODUCT; released31-path assignment",
+      "change": "new",
+      "bytes": 7321,
+      "sha256": "139b3bb79c1817b09775424ba106ab25fcaed85430985e59e72ed570567b31ea",
+      "base_sha256": null
+    },
+    {
+      "path": "contracts/native-observation-v1.schema.json",
+      "owner": "PRODUCT; released31-path assignment",
+      "change": "new",
+      "bytes": 20158,
+      "sha256": "10760bb78b6fed79341070d65560f80ddcf0319fa97490d1f55c29fc39c93339",
+      "base_sha256": null
+    },
+    {
+      "path": "src/app/agent-workbench-client.ts",
+      "owner": "PRODUCT; released31-path assignment",
+      "change": "modified",
+      "bytes": 40918,
+      "sha256": "8be894e1759816a1a1ef40d0d192589d407c35668adf873e1427f5f3bb9a9f81",
+      "base_sha256": "5a3f6108d4d46512f52460430fc595632603c1348e9aa7570f0ed0d04a194add"
+    },
+    {
+      "path": "src/app/m5/M5Panel.tsx",
+      "owner": "PRODUCT; released31-path assignment",
+      "change": "modified",
+      "bytes": 93780,
+      "sha256": "ccf394502b45665f3db7f7176aa3f4659f3e5ec76631a06dd80e13283e52ee8d",
+      "base_sha256": "dca67b2c0432770f0ccb92f6d43ddbc390c7296d59ce1886ec8cdb979c1e4d7c"
+    },
+    {
+      "path": "src/app/observation/CreativeReviewPanel.tsx",
+      "owner": "PRODUCT; released31-path assignment",
+      "change": "modified",
+      "bytes": 16250,
+      "sha256": "49186eb82dc06c1446c4a69335711730784c6d2d14e76312229a75d3cfe07639",
+      "base_sha256": "65b7af36ca9730f5df16934ff675b6456b383ff842198dd9f3ee267e0bad6660"
+    },
+    {
+      "path": "src/app/observation/NativeSyncIndicator.tsx",
+      "owner": "PRODUCT; released31-path assignment",
+      "change": "modified",
+      "bytes": 3810,
+      "sha256": "88a07e9420ae6f3bc9c66d5b516b24c8e7d1a2bb414977f74b9052c9e25c1066",
+      "base_sha256": "ac9523d58c02c71adfb75f45943f0be8b0b096abe87b1a72761f38d27cf540fd"
+    },
+    {
+      "path": "src/host/m5/controlled-studio-access.ts",
+      "owner": "PRODUCT; released31-path assignment",
+      "change": "modified",
+      "bytes": 27272,
+      "sha256": "cf4ceedcf212fd0313a4706823047c818f2b283dfb815a9ab2402148fd752403",
+      "base_sha256": "8d8825ea2392dec02040e728579abd522d202bb4fe56a027fba9515c0fa68ac6"
+    },
+    {
+      "path": "src/host/m5/managed-editor-dist.tar.gz",
+      "owner": "PRODUCT; released31-path assignment",
+      "change": "modified",
+      "bytes": 745783,
+      "sha256": "2e009cc28a6784daa555c34196fef3bb6a60fd0f1ac874982492a3712bd436c7",
+      "base_sha256": "0fbdb3ac52b5bb4cc5f31e435f269d2ea8070bb4bbb04ffbe25febd106fd9bca"
+    },
+    {
+      "path": "src/host/m5/managed-editor-pin.json",
+      "owner": "PRODUCT; released31-path assignment",
+      "change": "modified",
+      "bytes": 2830,
+      "sha256": "5849de0dcfb18c9d4e4e8f7e1d533310f419ee75391666a170789a42fa274ccc",
+      "base_sha256": "8b038adb80f387bd783918689d09b173716782c0199d77f5f589d4feb50e997d"
+    },
+    {
+      "path": "src/host/m5/native-ack-store.ts",
+      "owner": "PRODUCT; released31-path assignment",
+      "change": "new",
+      "bytes": 5715,
+      "sha256": "d42a38f6b56d9912130f90559b94ff8ae0004e6937fd5e9862034790f0a32ee2",
+      "base_sha256": null
+    },
+    {
+      "path": "src/host/m5/native-observation.ts",
+      "owner": "PRODUCT; released31-path assignment",
+      "change": "new",
+      "bytes": 47210,
+      "sha256": "7d246c7a518fcbaecf4f9e569c5d78c47ad5cd0860ef36af49112d22471074f4",
+      "base_sha256": null
+    },
+    {
+      "path": "src/host/m5/openfilm-native-expected.ts",
+      "owner": "PRODUCT; released31-path assignment",
+      "change": "new",
+      "bytes": 33943,
+      "sha256": "9f9d2c820510beee15d926f3d7e6e11034843ff829d15b5526ac45028848ab14",
+      "base_sha256": null
+    },
+    {
+      "path": "src/host/m5/openfilm-studio-gateway.ts",
+      "owner": "PRODUCT; released31-path assignment",
+      "change": "modified",
+      "bytes": 60627,
+      "sha256": "a154ab81dcddfec00752337a4ff3858f099e860dd39bed93b65f616ff152d68e",
+      "base_sha256": "451e0ba8e8c2013f2eff429b66e57a2d62659b97d86e9fff809e32f50a11f2a2"
+    },
+    {
+      "path": "src/host/m5/openfilm-studio-ui-pin.json",
+      "owner": "PRODUCT; released31-path assignment",
+      "change": "new",
+      "bytes": 4570,
+      "sha256": "ebb3072522aee6220b4cf2ea6fd69913aa1ea71cb338b0524d5c6e51801b8bb5",
+      "base_sha256": null
+    },
+    {
+      "path": "src/host/m5/studio-host-bridge.ts",
+      "owner": "PRODUCT; released31-path assignment",
+      "change": "modified",
+      "bytes": 8374,
+      "sha256": "02ff4292306dcd5a059612bd27e5e74f20652a517453b63eeaa1501437a7391f",
+      "base_sha256": "7f7cf826b4bff7d959f37aaf4edaa6176515060549707d47be5a9cf496fe6bd9"
+    },
+    {
+      "path": "tests/agent-driven/integration/created-native-ack.test.ts",
+      "owner": "PRODUCT; released31-path assignment",
+      "change": "new",
+      "bytes": 86106,
+      "sha256": "12c3e8b3e70f4a2a278f2998941c6d24133234157a1106cdda66efbde225e5bc",
+      "base_sha256": null
+    },
+    {
+      "path": "tests/agent-driven/integration/created-workbench-headless.test.ts",
+      "owner": "PRODUCT; released31-path assignment",
+      "change": "new",
+      "bytes": 2742,
+      "sha256": "5b34ed67436c594698667761ecb3532c0bdbdfd7688a602ddf960cc4ae930cb8",
+      "base_sha256": null
+    },
+    {
+      "path": "tests/agent-driven/integration/created-workbench-review.test.ts",
+      "owner": "PRODUCT; released31-path assignment",
+      "change": "modified",
+      "bytes": 27904,
+      "sha256": "f6cd57e9dd685f707eb355d102618e95a3912f99b13d44df5ab3a584d17a1197",
+      "base_sha256": "70709c066bff998cad7518afc8b5484b946bdf284afd035789c3075167d5f6e4"
+    },
+    {
+      "path": "tests/agent-driven/product/observation-ui.test.tsx",
+      "owner": "PRODUCT; released31-path assignment",
+      "change": "modified",
+      "bytes": 71379,
+      "sha256": "57e72a065b349d87e093fdd2593fa9ed26d4492c977550085f8586ddedf4309c",
+      "base_sha256": "0674ea16e5f9a09e3f894d4db9b81c8e8c4bd6665d55f58beced5cd98f897c98"
+    },
+    {
+      "path": "tools/agent-driven/product/build-native-hydration.ts",
+      "owner": "PRODUCT; released31-path assignment",
+      "change": "new",
+      "bytes": 19623,
+      "sha256": "27bc17f0befa7984c74e2c0ccd8a68feb57f0a0317b15608fc6a067a0c4b39f8",
+      "base_sha256": null
+    },
+    {
+      "path": "tools/agent-driven/product/native-inputs/build-expected.mjs",
+      "owner": "PRODUCT; released31-path assignment",
+      "change": "new",
+      "bytes": 2320,
+      "sha256": "60027ead5a509522f2d35fda33749675923dee523bb8cc12f2b7de3dca8f840d",
+      "base_sha256": null
+    },
+    {
+      "path": "tools/agent-driven/product/native-inputs/expected-projection.d.ts",
+      "owner": "PRODUCT; released31-path assignment",
+      "change": "new",
+      "bytes": 4691,
+      "sha256": "0f5f565a3d8b70de995aeb0dfdfb6052acad53cbf452c8d70168f555a8937f80",
+      "base_sha256": null
+    },
+    {
+      "path": "tools/agent-driven/product/native-inputs/expected-projection.mjs",
+      "owner": "PRODUCT; released31-path assignment",
+      "change": "new",
+      "bytes": 14342,
+      "sha256": "3500b1d6485791b13ec9364c6eb80740531142c16754877e21923ad73e9d494e",
+      "base_sha256": null
+    },
+    {
+      "path": "tools/agent-driven/product/native-inputs/native-pure.entry.ts",
+      "owner": "PRODUCT; released31-path assignment",
+      "change": "new",
+      "bytes": 933,
+      "sha256": "1ca8590535d412f0d91a522fbf942cbacabba7d95c64f3e849ca9f0fbf416354",
+      "base_sha256": null
+    },
+    {
+      "path": "tools/agent-driven/product/native-inputs/request013.patch",
+      "owner": "PRODUCT; released31-path assignment",
+      "change": "new",
+      "bytes": 46806,
+      "sha256": "f699889206e129dfe4fd913618b34baa8d7e04363f1940d3659664a1e7b9d435",
+      "base_sha256": null
+    },
+    {
+      "path": "tools/agent-driven/product/native-inputs/vite.expected.config.mjs",
+      "owner": "PRODUCT; released31-path assignment",
+      "change": "new",
+      "bytes": 836,
+      "sha256": "ffac37faeb5e9fcc53460f19d235cc9c38251b3bf969a9183e8cffe5e0657f29",
+      "base_sha256": null
+    }
+  ],
+  "released_but_unchanged": [
+    "src/app/m5/GatewayApiClient.ts",
+    "src/host/m5/controlled-studio-browser.ts",
+    "src/host/m5/isolated-studio.ts",
+    "src/host/m5/managed-editor.d.mts",
+    "src/host/m5/managed-editor.mjs"
+  ],
+  "unexpected_product_paths": [],
+  "import_order": [
+    {
+      "order": 1,
+      "unit": "Pinned source inputs and adjunct contract",
+      "paths": [
+        "contracts/native-observation-v1.registry.json",
+        "contracts/native-observation-v1.schema.json",
+        "tools/agent-driven/product/build-native-hydration.ts",
+        "tools/agent-driven/product/native-inputs/build-expected.mjs",
+        "tools/agent-driven/product/native-inputs/expected-projection.d.ts",
+        "tools/agent-driven/product/native-inputs/expected-projection.mjs",
+        "tools/agent-driven/product/native-inputs/native-pure.entry.ts",
+        "tools/agent-driven/product/native-inputs/request013.patch",
+        "tools/agent-driven/product/native-inputs/vite.expected.config.mjs"
+      ],
+      "notes": "Exact013-f699 + five015 sources; preserve CP31/80/frozen SQL; observation Gateway endpoint is separately counted+1."
+    },
+    {
+      "order": 2,
+      "unit": "Expected proof and Host observation types/services",
+      "paths": [
+        "src/host/m5/openfilm-native-expected.ts",
+        "src/host/m5/native-ack-store.ts",
+        "src/host/m5/native-observation.ts",
+        "src/host/m5/openfilm-studio-ui-pin.json"
+      ],
+      "notes": "BRIDGE consumes NativeExpectedSourcePort retained descriptors+verifyClosure and NativeObservation/NativeSelectionVersion ports; same real source reader/session authority, same RevisionStore connection. Expected approved pin bytes are reviewed; actual peer committed-reader proof production not exercised."
+    },
+    {
+      "order": 3,
+      "unit": "Native ingress/session/Studio callbacks",
+      "paths": [
+        "src/host/m5/controlled-studio-access.ts",
+        "src/host/m5/openfilm-studio-gateway.ts",
+        "src/host/m5/studio-host-bridge.ts"
+      ],
+      "notes": "Grant.nativeObservation/sessionOpened/observe/sessionClosed and real exchange identity must be injected by BRIDGE. Closed envelope before native-write catch-all; native-only proof never UI approval."
+    },
+    {
+      "order": 4,
+      "unit": "Actual013 packaged editor (atomic pair)",
+      "paths": [
+        "src/host/m5/managed-editor-pin.json",
+        "src/host/m5/managed-editor-dist.tar.gz"
+      ],
+      "notes": "Import archive and matching pin together; existing managed-editor.mjs guard unchanged. Do not import a new pin with old p2 archive. UI typecheck/build and actual loader/cold browser passed."
+    },
+    {
+      "order": 5,
+      "unit": "Current workbench consumers",
+      "paths": [
+        "src/app/agent-workbench-client.ts",
+        "src/app/m5/M5Panel.tsx",
+        "src/app/observation/CreativeReviewPanel.tsx",
+        "src/app/observation/NativeSyncIndicator.tsx"
+      ],
+      "notes": "Decision, committed revision, native loaded remain independent; package Ref naturally supplied by actual publishReviewPackage/Context.artifacts; no fabricated producer or readiness."
+    },
+    {
+      "order": 6,
+      "unit": "Consumer/producer tests",
+      "paths": [
+        "tests/agent-driven/integration/created-native-ack.test.ts",
+        "tests/agent-driven/integration/created-workbench-headless.test.ts",
+        "tests/agent-driven/integration/created-workbench-review.test.ts",
+        "tests/agent-driven/product/observation-ui.test.tsx"
+      ],
+      "notes": "Import the complete26-path coherent candidate before typecheck. Intermediate groups are dependency ordering, not claims that each group alone compiles. New created-workbench-headless file is real Host/no-browser despite name."
+    }
+  ],
+  "external_dependency_order": [
+    "MAIN owns current core authority commits; preserve them and import only listed PRODUCT bytes, not a merge of full lane branch.",
+    "BRIDGE supplies actual retained committed-reader SourceFacts with canonical root/full closure plus per-FD synchronous identity/bytes verification, complete independently derived captions/style/film/native015 inputs.",
+    "BRIDGE injects same NativeObservationService into NativeContextPort, NativeSelectionVersionPort and native grant lifecycle, using actual owner/generation/commit/workspace and selection mapping; close before DB.",
+    "BRIDGE supplies real transactional review-package/media binding and approved adoption commit; all four real capabilities remain required.",
+    "Expected library runtime is per-worktree; do not copy/share writable var or node_modules. MAIN independently verified existing candidate bytes and15 vectors; reproduce own library under its slot against same approved inputs/toolchain, reverify module/build pin.",
+    "After exact imports and real peer assembly, MAIN schedules combined source-proof/native Ack tests and independent review; current tests do not substitute."
+  ],
+  "verification": {
+    "actual_expected_library_build": "PASS codex-build003-result.json",
+    "actual015_math": "PASS15 literal vectors codex-actual015-vectors.json; MAIN independent limited approval",
+    "actual_approved_loader_smoke": "PASS codex-approved-loader.json; not complete loader security audit",
+    "actual013_ui_type_build": "PASS codex-studio001-result.json",
+    "actual_app_build": "PASS codex-studio-validation001-result.json",
+    "managed_archive_guards": "PASS4 real managed-editor tests including private-child rejection",
+    "real_host_no_ack": "PASS3 created-workbench-headless cases",
+    "real_cold_browser": "PASS1 existing created-native-entry headless; single timeline, ready panel, zero uncaught errors,17 external attempts denied",
+    "component_units": "Claude reported189 at5031bc; uses helper stand-in for acknowledgement cases, not actual015 full source proof",
+    "actual_committed_source_expected_proof": "NOT_RUN: real BRIDGE reader/assembly unavailable in lane",
+    "actual_adopted_source_native_ack": "NOT_RUN: no full Run/adopt/browser proof",
+    "independent_product_review": "PENDING: parent implemented takeover/pins, cannot self-sign",
+    "R2_R3_A_human": "NOT_CLAIMED"
+  },
+  "evidence_commit": "d02bb53b44ca36848eeae79dc50f5fa6dc6709c8",
+  "evidence_paths": [
+    "docs/parallel/lane-product/A-R2-20261112/CODEX_429_TAKEOVER.json",
+    "docs/parallel/lane-product/A-R2-20261112/EXPECTED_BUILD003_CANDIDATE.json",
+    "docs/parallel/lane-product/A-R2-20261112/STUDIO_ARCHIVE_PROVENANCE.json",
+    "docs/parallel/lane-product/A-R2-20261112/logs/codex-studio-validation001-result.json",
+    "docs/execution/A/logs/controlled-native-headless-1794425888275/observed.json",
+    "docs/execution/A/logs/controlled-native-headless-1794425888275/observation-system.json"
+  ],
+  "remaining_risks": [
+    "Peer reader/service integration and current-session source proofs are not established by UI builds/noAck regression.",
+    "Existing old unauthorized Host run and build001/002 failures retained; evidence-summary inaccuracies corrected by MAIN index, not rewritten as passes.",
+    "Real UI JS build emitted chunk-size warning; no performance acceptance claim."
+  ],
+  "writer": "Frozen/read-only product source/index for MAIN exact import; no old Claude resume; no heavy process started after slot return"
+}

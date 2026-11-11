@@ -1,5 +1,6 @@
 import {ControlledStudioAccess,StudioAccessError,UI_MAX_READ_BYTES,type NativeStudioGrant,type NativeStudioSession,type NativeStudioUiReviewMedia} from './controlled-studio-access.js';
 import {CONTROLLED_NATIVE_ENTRY_HTML,CONTROLLED_NATIVE_TRANSPORT_SCRIPT} from './controlled-studio-browser.js';
+import {parseNativeObservationBody} from './native-observation.js';
 import { createHmac, randomBytes, randomUUID } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { createServer, request as httpRequest, type IncomingMessage, type Server, type ServerResponse } from "node:http";
@@ -155,6 +156,14 @@ export async function loadGatewayUiRegistry(root: string = gatewayUiRegistryRoot
  * They are counted separately from the Host routes: 31 frozen Host + 5 reviewed adjunct
  * Host + 2 explicitly additional Gateway HTTP. The count is never "still 31+5".
  */
+/**
+ * The one additional Gateway route (A-R2, L05).
+ *
+ * It is counted separately from the frozen Host routes, from the reviewed adjuncts
+ * and from the two UI aliases, and it is the only route the native observation uses.
+ */
+export const NATIVE_OBSERVATION_ROUTE = "/narralens/native/observation";
+
 export const GATEWAY_UI_ALIASES: readonly { readonly method: "POST" | "GET"; readonly path: string }[] = Object.freeze([
   Object.freeze({ method: "POST", path: "/narralens/api/ui/call" }),
   Object.freeze({ method: "GET", path: "/narralens/api/ui/review-media/:ref" }),
@@ -422,6 +431,15 @@ export class OpenFilmStudioGateway {
       return;
     }
 
+    // The native observation ingress (A-R2, L05). It is exactly one additional Gateway
+    // HTTP route, counted separately, and it is dispatched before the native write
+    // catch-all so it can never be mistaken for a write. It opens no write surface, it
+    // joins no MCP tool set, and it replaces no UI alias.
+    if (path === NATIVE_OBSERVATION_ROUTE) {
+      await this.#nativeObservation(request, response);
+      return;
+    }
+
     // The native writes are addressed by their registry entry id, never as a raw upstream
     // operation. They are the Gateway's own surface, so they are routed before the
     // catch-all below.
@@ -685,6 +703,68 @@ export class OpenFilmStudioGateway {
     }
 
     this.#refuse(response, 422, `the Gateway does not proxy ${method} ${path}`);
+  }
+
+  /**
+   * The native observation ingress (A-R2, L05).
+   *
+   * The order is the contract's: the native cookie and the native CSRF proof of a live
+   * controlled session first, then the Host-created session binding, then the closed
+   * envelope, and only then the producer. A UI cookie, a read token, another origin, a
+   * missing cookie, a retired session or a body that carries an identity of its own is
+   * refused before anything is believed.
+   */
+  async #nativeObservation(request: IncomingMessage, response: ServerResponse): Promise<void> {
+    if (this.#access === undefined) throw new StudioAccessError(503, "CAPABILITY_UNAVAILABLE");
+    const method = (request.method ?? "GET").toUpperCase();
+    if (method !== "POST") {
+      this.#refuse(response, 405, "the Gateway accepts only a native observation by POST");
+      return;
+    }
+    const session = this.#access.authenticate(request);
+    const binding = session.observation;
+    const port = session.grant.nativeObservation?.port;
+    if (binding === undefined || port === undefined) {
+      throw new StudioAccessError(503, "CAPABILITY_UNAVAILABLE");
+    }
+    const body = await this.#observationBody(request);
+    const envelope = parseNativeObservationBody(body);
+    if (!envelope.ok) {
+      this.#refuse(response, 400, `the native observation is not a closed envelope: ${envelope.reason}`);
+      return;
+    }
+    const outcome = await port.observe(binding, envelope.value);
+    response.writeHead(200, { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" });
+    response.end(JSON.stringify({
+      format: "narralens.native-observation-outcome@1",
+      accepted: outcome.accepted,
+      reason: outcome.reason,
+      sequence: outcome.sequence,
+    }));
+  }
+
+  /**
+   * The bounded body of one observation.
+   *
+   * It is JSON, it is not encoded, and it is small: an observation is a state report,
+   * never a payload.
+   */
+  async #observationBody(request: IncomingMessage): Promise<string> {
+    if (request.headers["content-type"]?.split(";")[0]?.trim() !== "application/json") {
+      throw new StudioAccessError(400, "INVALID_REQUEST");
+    }
+    if (request.headers["content-encoding"] && request.headers["content-encoding"] !== "identity") {
+      throw new StudioAccessError(400, "INVALID_REQUEST");
+    }
+    const chunks: Buffer[] = [];
+    let bytes = 0;
+    for await (const chunk of request) {
+      const data = Buffer.from(chunk);
+      bytes += data.length;
+      if (bytes > 65536) throw new StudioAccessError(400, "INVALID_REQUEST");
+      chunks.push(data);
+    }
+    return Buffer.concat(chunks).toString("utf8");
   }
 
   /**
