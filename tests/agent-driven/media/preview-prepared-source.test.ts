@@ -129,8 +129,20 @@ it('renders an isolated preview of a completed prepared source with five real pa
   // An object that this receipt does not name is refused.
   await expect(f.reader.open(receipt,'obj_'+'0'.repeat(32))).rejects.toBeTruthy();
   await expect(f.reader.open(receipt,video.object_id.replace(/.$/,'1'))).rejects.toBeTruthy();
+  // A receipt whose content no longer matches its digest is refused.
+  await expect(f.reader.open({...receipt,frame_count:receipt.frame_count+1},video.object_id)).rejects.toBeTruthy();
+  await expect(f.reader.open({...receipt,receipt_digest:'0'.repeat(64)},video.object_id)).rejects.toBeTruthy();
+  // An object that changed after the receipt was made is refused.
+  const objectPath=join(f.objects,video.object_id);
+  await writeFile(objectPath,Buffer.concat([await readFile(objectPath),Buffer.from('x')]));
+  await expect(f.reader.open(receipt,video.object_id)).rejects.toBeTruthy();
   f.verifier.release(proof);
  }finally{await f.close();}
+ // Every descriptor the preview and the reader opened is closed, also the ones of the
+ // failed opens above.
+ const {readlink}=await import('node:fs/promises');
+ const targets=await Promise.all((await readdir('/proc/self/fd')).map(fd=>readlink('/proc/self/fd/'+fd).catch(()=>'')));
+ expect(targets.filter(path=>path.startsWith(f.root))).toEqual([]);
 },600000);
 
 it('refuses a preview whose proof is not a proof of this prepared source',async()=>{

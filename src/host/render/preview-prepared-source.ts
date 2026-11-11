@@ -205,9 +205,15 @@ export class PreparedReviewMediaReaderImpl implements PreparedReviewMediaReader 
  async open(receipt:PreparedPreviewReceiptV1,object_id:string,options?:{readonly signal?:AbortSignal}):Promise<PreparedReviewMediaHandleV1> {
   try{
    if(!receipt||receipt.format!=='narralens.prepared-preview-receipt@1')throw changed();
+   // The receipt is self-describing: its digest has to cover the content it carries,
+   // so a receipt that was altered after it was made is not a receipt any more.
+   const {receipt_digest,...content}=receipt;
+   if(typeof receipt_digest!=='string'||!HASH.test(receipt_digest)||canonicalDigest(content)!==receipt_digest)throw changed();
    if(typeof object_id!=='string'||!OBJECT_ID.test(object_id))throw changed();
    const part=receipt.parts.find(value=>value.object_id===object_id);
    if(!part||!HASH.test(part.sha256)||!Number.isSafeInteger(part.bytes)||part.bytes<0)throw changed();
+   // A video part has to carry the timeline of its receipt.
+   if(part.media_facts.kind==='video'&&(!sameRate(part.media_facts.fps,receipt.fps)||part.media_facts.frame_count!==receipt.frame_count))throw changed();
    if(options?.signal?.aborted)throw unavailable('The prepared preview read was cancelled');
    const path=resolve(this.#objectRoot,object_id);
    if(!path.startsWith(this.#objectRoot+sep))throw changed();
