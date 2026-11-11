@@ -1,0 +1,318 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Narralens 当前 R1：已实现的生产接缝",
+    "locale": "zh-CN",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "https://github.com/ljx418/Narralens",
+      "provider": "github",
+      "link_mode": "local-only",
+      "revision": "dd2be1f08e65305dac6d0e4ecb05a03e1875e5b2"
+    },
+    "viewBox": [
+      1390,
+      710
+    ]
+  },
+  "components": [
+    {
+      "id": "creator",
+      "type": "frontend",
+      "label": "原生工作台",
+      "sublabel": "M5Panel / 原 Studio",
+      "pos": [
+        30,
+        65
+      ],
+      "size": [
+        250,
+        80
+      ],
+      "tag": "限定浏览器实证",
+      "sources": [
+        {
+          "path": "src/app/m5/M5Panel.tsx"
+        }
+      ]
+    },
+    {
+      "id": "gateway",
+      "type": "security",
+      "label": "独立界面鉴权",
+      "sublabel": "ControlledStudioAccess",
+      "pos": [
+        385,
+        65
+      ],
+      "size": [
+        250,
+        80
+      ],
+      "tag": "已实现",
+      "sources": [
+        {
+          "path": "src/host/m5/controlled-studio-access.ts"
+        },
+        {
+          "path": "src/host/m5/openfilm-studio-gateway.ts"
+        }
+      ]
+    },
+    {
+      "id": "app",
+      "type": "backend",
+      "label": "应用与真实事实",
+      "sublabel": "CreationApplication",
+      "pos": [
+        740,
+        65
+      ],
+      "size": [
+        250,
+        80
+      ],
+      "tag": "已实现；Run 未准入",
+      "sources": [
+        {
+          "path": "src/host/agent-driven/creation-application.ts"
+        },
+        {
+          "path": "src/host/agent-driven/project-context-service.ts"
+        }
+      ]
+    },
+    {
+      "id": "core",
+      "type": "backend",
+      "label": "创建与唯一提交",
+      "sublabel": "Coordinator / RevisionStore",
+      "pos": [
+        1095,
+        65
+      ],
+      "size": [
+        250,
+        80
+      ],
+      "tag": "初始工程已提交",
+      "sources": [
+        {
+          "path": "src/host/projects/project-coordinator.ts"
+        },
+        {
+          "path": "src/host/projects/revision-store.ts"
+        }
+      ]
+    },
+    {
+      "id": "driver",
+      "type": "external",
+      "label": "外部驱动 Agent",
+      "sublabel": "Skill / MCP stdio",
+      "pos": [
+        30,
+        315
+      ],
+      "size": [
+        250,
+        80
+      ],
+      "tag": "传输接缝有实证",
+      "sources": [
+        {
+          "path": "skills/narralens/SKILL.md"
+        },
+        {
+          "path": "src/mcp/stdio-main.ts"
+        }
+      ]
+    },
+    {
+      "id": "mcp",
+      "type": "backend",
+      "label": "原 MCP 应用端口",
+      "sublabel": "HostApplicationPorts",
+      "pos": [
+        385,
+        315
+      ],
+      "size": [
+        250,
+        80
+      ],
+      "tag": "31 原工具 + 附属只读资源",
+      "sources": [
+        {
+          "path": "src/mcp/host-application-ports.ts"
+        },
+        {
+          "path": "src/mcp/asset-inventory-resource.ts"
+        }
+      ]
+    },
+    {
+      "id": "task",
+      "type": "messagebus",
+      "label": "准备任务与原 Job",
+      "sublabel": "CreatedTaskApplication",
+      "pos": [
+        740,
+        315
+      ],
+      "size": [
+        250,
+        80
+      ],
+      "tag": "成功仅 SOURCE_ONLY",
+      "sources": [
+        {
+          "path": "src/host/agent-driven/created-task-application.ts"
+        },
+        {
+          "path": "src/host/agent-driven/created-task-store.ts"
+        }
+      ]
+    },
+    {
+      "id": "db",
+      "type": "database",
+      "label": "单一同库事实",
+      "sublabel": "SQLite / snapshot / journal",
+      "pos": [
+        1095,
+        315
+      ],
+      "size": [
+        250,
+        80
+      ],
+      "tag": "没有第二状态机",
+      "sources": [
+        {
+          "path": "src/host/projects/revision-store.ts"
+        }
+      ]
+    },
+    {
+      "id": "preview",
+      "type": "backend",
+      "label": "隔离预览与五产物",
+      "sublabel": "PreparedPreviewService",
+      "pos": [
+        740,
+        565
+      ],
+      "size": [
+        250,
+        80
+      ],
+      "tag": "诊断 3 秒；不是交付",
+      "sources": [
+        {
+          "path": "src/host/render/preview-prepared-source.ts"
+        },
+        {
+          "path": "src/host/agent-driven/prepared-draft-verifier.ts"
+        }
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "ui-gateway",
+      "from": "creator",
+      "to": "gateway",
+      "label": "UI cookie / proof",
+      "variant": "default"
+    },
+    {
+      "id": "gateway-app",
+      "from": "gateway",
+      "to": "app",
+      "label": "封闭 RPC",
+      "variant": "default"
+    },
+    {
+      "id": "app-core",
+      "from": "app",
+      "to": "core",
+      "label": "初始创建",
+      "variant": "default"
+    },
+    {
+      "id": "driver-mcp",
+      "from": "driver",
+      "to": "mcp",
+      "label": "stdio",
+      "variant": "default"
+    },
+    {
+      "id": "mcp-app",
+      "from": "mcp",
+      "to": "app",
+      "label": "原 DTO / owner",
+      "variant": "default"
+    },
+    {
+      "id": "app-task",
+      "from": "app",
+      "to": "task",
+      "label": "原任务 / lease",
+      "variant": "default",
+      "labelAt": [
+        865,
+        159
+      ]
+    },
+    {
+      "id": "task-preview",
+      "from": "task",
+      "to": "preview",
+      "label": "已准备闭包",
+      "variant": "default",
+      "labelAt": [
+        865,
+        409
+      ]
+    },
+    {
+      "id": "core-db",
+      "from": "core",
+      "to": "db",
+      "label": "原子首提交",
+      "variant": "default",
+      "labelAt": [
+        1220,
+        159
+      ]
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "实证范围",
+      "items": [
+        "R1 源冻结 de086；接口冻结 dd2be1",
+        "原编辑器、折叠工作流、非模态系统已联调"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "尚未完成",
+      "items": [
+        "包→批准→采用→原生确认待 R2",
+        "正式编码、QC、发布和恢复待 R3"
+      ]
+    },
+    {
+      "dot": "slate",
+      "title": "声明边界",
+      "items": [
+        "当前图不证明 A / V1 或人工验收",
+        "真实两主题人声、双导出仍待最终实证"
+      ]
+    }
+  ]
+}

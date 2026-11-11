@@ -1,0 +1,303 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Narralens R2：审阅、受控采用与原生确认",
+    "locale": "zh-CN",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "https://github.com/ljx418/Narralens",
+      "provider": "github",
+      "link_mode": "local-only",
+      "revision": "dd2be1f08e65305dac6d0e4ecb05a03e1875e5b2"
+    },
+    "viewBox": [
+      1390,
+      710
+    ]
+  },
+  "components": [
+    {
+      "id": "ui",
+      "type": "frontend",
+      "label": "原编辑区与审阅",
+      "sublabel": "M5Panel / 单一 clock",
+      "pos": [
+        30,
+        300
+      ],
+      "size": [
+        250,
+        80
+      ],
+      "tag": "已有；扩展确认路径",
+      "sources": [
+        {
+          "path": "src/app/m5/M5Panel.tsx"
+        },
+        {
+          "path": "src/app/observation/NativeSyncIndicator.tsx"
+        }
+      ]
+    },
+    {
+      "id": "gateway",
+      "type": "security",
+      "label": "鉴权与观察入口",
+      "sublabel": "Gateway / Native session",
+      "pos": [
+        385,
+        300
+      ],
+      "size": [
+        250,
+        80
+      ],
+      "tag": "需增加独立观察接口",
+      "sources": [
+        {
+          "path": "src/host/m5/openfilm-studio-gateway.ts"
+        },
+        {
+          "path": "src/host/m5/controlled-studio-access.ts"
+        }
+      ]
+    },
+    {
+      "id": "app",
+      "type": "backend",
+      "label": "审阅与采用服务",
+      "sublabel": "Workflow / ChangeService",
+      "pos": [
+        740,
+        300
+      ],
+      "size": [
+        250,
+        80
+      ],
+      "tag": "已有工作流；待接采用",
+      "sources": [
+        {
+          "path": "src/host/creative/fixed-workflow-service.ts"
+        },
+        {
+          "path": "docs/execution/A/implementation-20261111/R2/INTERFACE_LOCK.md",
+          "label": "已审目标；尚未实现"
+        },
+        {
+          "path": "src/host/agent-driven/creation-application.ts"
+        }
+      ]
+    },
+    {
+      "id": "core",
+      "type": "backend",
+      "label": "唯一受控提交",
+      "sublabel": "Coordinator / RevisionStore",
+      "pos": [
+        1095,
+        300
+      ],
+      "size": [
+        250,
+        80
+      ],
+      "tag": "需新增 created 提交分支",
+      "sources": [
+        {
+          "path": "src/host/projects/project-coordinator.ts"
+        },
+        {
+          "path": "src/host/projects/revision-store.ts"
+        }
+      ]
+    },
+    {
+      "id": "observe",
+      "type": "backend",
+      "label": "独立核对原生状态",
+      "sublabel": "Observation / Expected / Ack",
+      "pos": [
+        385,
+        65
+      ],
+      "size": [
+        250,
+        80
+      ],
+      "tag": "待实现；不能抄 Host 版本",
+      "sources": [
+        {
+          "path": "docs/execution/A/implementation-20261111/R2/INTERFACE_LOCK.md",
+          "label": "已审目标；尚未实现"
+        }
+      ]
+    },
+    {
+      "id": "publisher",
+      "type": "backend",
+      "label": "完整原生源发布",
+      "sublabel": "CreatedSourcePublisher",
+      "pos": [
+        1095,
+        65
+      ],
+      "size": [
+        250,
+        80
+      ],
+      "tag": "待实现；完整树与备份",
+      "sources": [
+        {
+          "path": "docs/execution/A/implementation-20261111/R2/INTERFACE_LOCK.md",
+          "label": "已审目标；尚未实现"
+        }
+      ]
+    },
+    {
+      "id": "media",
+      "type": "backend",
+      "label": "准备证明与阶段媒体",
+      "sublabel": "Verifier / RenderPhases",
+      "pos": [
+        740,
+        565
+      ],
+      "size": [
+        250,
+        80
+      ],
+      "tag": "proof 已有；阶段端口待实现",
+      "sources": [
+        {
+          "path": "src/host/agent-driven/prepared-draft-verifier.ts"
+        },
+        {
+          "path": "docs/execution/A/implementation-20261111/R2/INTERFACE_LOCK.md",
+          "label": "已审目标；尚未实现"
+        },
+        {
+          "path": "src/host/render/assembly-ports.ts"
+        }
+      ]
+    },
+    {
+      "id": "db",
+      "type": "database",
+      "label": "同库批准与不可变事实",
+      "sublabel": "SQLite / created_* facts",
+      "pos": [
+        1095,
+        565
+      ],
+      "size": [
+        250,
+        80
+      ],
+      "tag": "旧权威保留；只增附属事实",
+      "sources": [
+        {
+          "path": "src/host/projects/revision-store.ts"
+        },
+        {
+          "path": "docs/execution/A/implementation-20261111/R2/INTERFACE_LOCK.md",
+          "label": "已审目标；尚未实现"
+        }
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "ui-gw",
+      "from": "ui",
+      "to": "gateway",
+      "label": "原界面 / proof",
+      "variant": "default"
+    },
+    {
+      "id": "gw-app",
+      "from": "gateway",
+      "to": "app",
+      "label": "原 change / review",
+      "variant": "dashed"
+    },
+    {
+      "id": "app-core",
+      "from": "app",
+      "to": "core",
+      "label": "唯一队列与守卫",
+      "variant": "dashed"
+    },
+    {
+      "id": "gw-observe",
+      "from": "gateway",
+      "to": "observe",
+      "label": "新增 1 条观察",
+      "variant": "dashed"
+    },
+    {
+      "id": "observe-context",
+      "from": "observe",
+      "to": "app",
+      "label": "独立核验 → Context",
+      "variant": "dashed",
+      "toSide": "top"
+    },
+    {
+      "id": "app-media",
+      "from": "app",
+      "to": "media",
+      "label": "真实 receipt / proof",
+      "variant": "dashed",
+      "labelAt": [
+        865,
+        394
+      ]
+    },
+    {
+      "id": "core-publish",
+      "from": "core",
+      "to": "publisher",
+      "label": "完整源 / journal",
+      "variant": "dashed"
+    },
+    {
+      "id": "core-db",
+      "from": "core",
+      "to": "db",
+      "label": "同事务 +1 一次",
+      "variant": "dashed",
+      "labelAt": [
+        1220,
+        394
+      ]
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "前端承诺",
+      "items": [
+        "保留原 Studio、selection 和 clock",
+        "决定已登记 ≠ 已提交 ≠ 已加载"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "开发顺序",
+      "items": [
+        "R3 能力基础提前并行，门禁仍分开",
+        "真实四能力未就绪时 Run 继续不可用"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "不得放宽",
+      "items": [
+        "原 31 工具 / 80 定义与 7 方法不变",
+        "普通等待状态不准派发，观察不授批准"
+      ]
+    }
+  ]
+}
