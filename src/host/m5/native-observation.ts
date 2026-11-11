@@ -494,7 +494,10 @@ interface SessionState {
   parts: Record<NativeExpectedPartKind, NativeHydrationPartObservation>;
   selection: NativeSelectionObservation | null;
   selectionVersion: number;
+  /** The selection the Host currently believes. It is null while it is not known. */
   mapped: { readonly shot_ids: readonly string[]; readonly start_frame: number; readonly end_frame_exclusive: number } | null;
+  /** The last observed mapping. It decides whether the version moves. */
+  lastMapped: { readonly shot_ids: readonly string[]; readonly start_frame: number; readonly end_frame_exclusive: number } | null;
   ack: NativeAck | null;
   closed: boolean;
 }
@@ -601,6 +604,7 @@ export class NativeObservationService implements NativeContextPort, NativeObserv
       selection: null,
       selectionVersion: 0,
       mapped: null,
+      lastMapped: null,
       ack: null,
       closed: false,
     };
@@ -758,16 +762,17 @@ export class NativeObservationService implements NativeContextPort, NativeObserv
       session.ack = null;
       return { accepted: false, reason: 'SELECTION_NOT_MAPPABLE', sequence, ack: null };
     }
-    // The version moves when the *selection* moves, not when a report arrives. A
-    // repeated report of the same selection keeps the version, and with it the
-    // acknowledgement that was written for it.
-    if (!this.#sameSelection(session.mapped, mapped)) {
+    // The version moves when the *selection* moves, not when a report arrives and not
+    // when the view is replaced. A repeated report of the same selection keeps the
+    // version, and with it the acknowledgement that was written for it; the editor
+    // reopening and reporting the same selection again keeps it as well, because the
+    // selection did not change, only the view did.
+    if (!this.#sameSelection(session.lastMapped, mapped)) {
       session.selectionVersion += 1;
-      session.mapped = mapped;
       session.ack = null;
-    } else {
-      session.mapped = mapped;
     }
+    session.lastMapped = mapped;
+    session.mapped = mapped;
     const ack = await this.#acknowledge(session, sequence);
     return { accepted: true, reason: 'SELECTION_ACCEPTED', sequence, ack };
   }
@@ -975,9 +980,11 @@ export class NativeObservationService implements NativeContextPort, NativeObserv
   #voidProfile(session: SessionState): void {
     session.document = null;
     session.parts = emptyParts();
+    // The selection is not known any more, but it did not change: the last observed
+    // mapping stays, so that the editor reporting the same selection again does not
+    // move the version.
     session.mapped = null;
     session.ack = null;
-    session.selectionVersion += 1;
   }
 
   /** A new view, a new document or a closed session void every part. */

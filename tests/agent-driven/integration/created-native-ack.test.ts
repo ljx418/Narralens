@@ -1681,7 +1681,13 @@ describe("the editor that opens again", () => {
       const service = new NativeObservationService({
         ackStore,
         expected,
-        selectionMapping: { mapSelection: async () => ({ shot_ids: [], start_frame: 0, end_frame_exclusive: 1 }) },
+        selectionMapping: {
+          mapSelection: async ({ selection }) => ({
+            shot_ids: selection.refs.map((ref) => ref.id ?? 'none'),
+            start_frame: 0,
+            end_frame_exclusive: 1,
+          }),
+        },
       });
       const binding: NativeObservationSessionBinding = {
         bridge_session_id: 'f'.repeat(32),
@@ -1724,7 +1730,10 @@ describe("the editor that opens again", () => {
       const after = await service.read('p1');
       expect(after.ack).toBeNull();
       expect(after.sync).toBe('unknown');
+      // The selection is not known any more, but it did not change, so the version
+      // stays where it was and a plan that named it is still checked against it.
       expect(after.selection).toBeNull();
+      expect(after.selection_version).toBe(1);
       // The sequence is not reset: the editor's counter continues.
       const next = await service.observe(binding, envelope(4, 'document', {
         protocol_version: 1, kind: 'document_dom_committed', project_id: 'n1',
@@ -1732,6 +1741,18 @@ describe("the editor that opens again", () => {
         film_sha256: sha256(filmBytes), utf8_byte_length: filmBytes.byteLength,
       }));
       expect(next.accepted).toBe(true);
+      // The editor reports the same selection again after the reopening: the view
+      // changed, the selection did not, so the version does not move and a plan that
+      // named it is still checked against it.
+      const again = await service.observe(binding, envelope(5, 'selection', { projectId: 'n1', time: 1, refs: [] }));
+      expect(again.accepted).toBe(true);
+      expect(service.currentSelectionVersion('p1')).toBe(1);
+      // A selection that really is different does move it.
+      const different = await service.observe(binding, envelope(6, 'selection', {
+        projectId: 'n1', time: 1, refs: [{ kind: 'clip', id: 'other' }],
+      }));
+      expect(different.accepted).toBe(true);
+      expect(service.currentSelectionVersion('p1')).toBe(2);
     } finally {
       rmSync(root, { recursive: true, force: true });
     }
