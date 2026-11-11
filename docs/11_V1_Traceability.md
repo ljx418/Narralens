@@ -2,7 +2,7 @@
 
 > 体验讨论增补：Agent/工作台分阶段决策、小样+稳定前首章、章节审阅、稳定授权、MCP模板/运行计划与按需服务准备已形成07/08详细规格；EX-01..23映射原AD-T，均NOT_RUN。V1不做工作台编排编辑器。该增补不改旧Gate/R4冻结。
 
-## 当前实施差距追踪（文档设计，真实case均NOT_RUN）
+## 目标差距追踪（历史设计分类；实际进度见2026-11-12增量）
 
 | 差距 | 实体/主要包 | 用户结果与直接验收 |
 |---|---|---|
@@ -222,7 +222,7 @@ Gate D4.2、`Gate V1-P0`、`V1-Full`、M6 与 M7 均未关闭。
 统一核对入口：`agent-driven-v1/final-review/index.html`；A精确准备包：`agent-driven-v1/cp-a0/`。35 AD-T族、23 EX子case及R4-UX门保留；文档自检/候选字节锁不关闭任何真实业务Gate。A/B/C实现、真实客户端/媒体/人验仍按原计划NOT_RUN。
 
 
-### A轮实现增量（2026-11-10，当前源码观察；不改旧Gate历史）
+### A轮实现增量（2026-11-10历史源码观察；不改旧Gate历史）
 
 | 包/规格 | 实际增量与证据 | 未证明项/当前状态 |
 |---|---|---|
@@ -230,3 +230,21 @@ Gate D4.2、`Gate V1-P0`、`V1-Full`、M6 与 M7 均未关闭。
 | IT-A06 / AD-T08、20、35 | docs/execution/A/logs/main-harness-real-r2：30帧技术诊断真实encode/full decode/包发布；actual hashes见artifact-inventory | 非真人/非A片/非DB ready；生产ports、真实双导出、T20与人验NOT_RUN |
 
 首次扩大旧回归80通过6失败的原始日志、真实harness协议失败均保留，不从旧证据挑绿替代。最新状态/源码摘要见created-foundation-evidence.json。35族、R4-UX和全部A片要求仍须最终同SHA实证，不用上述计数关闭整族。独立审查pending，不能宣布A、V1-P0或V1-Full完成。
+
+
+### 2026-11-12 A/R1当前实现—证据—剩余差距
+
+源冻结`de086f32c48c44fb72d0212ef80365f1c786408c`。本节覆盖前述旧“worker未接/组件未挂载/新路线仅文档”作为当前事实的表述，不覆盖任何旧验收结论。下表限定内部证据不关闭整条AD-T/EX/R4-UX、IT-A01..06或原P0/P1/NFR。
+
+|原差距/体验关联|当前实证与直接来源|仍须完成|
+|---|---|---|
+|G01/03 创建入口与生命周期；IT-A01/A04、AD-T05/07|实际创建HTTP/worker/首commit/closure、R0-M01关闭同库收敛、d582组合25Host+229兼容；新14Host含无Run只读/owner/无副作用|真实用户两主题工程、完整工作流恢复与人验；现有空工程创建不等于完整影片|
+|G02 MCP/Skill；IT-A02、AD-T02/03/04/22|d582兼容日志含真实stdio/wrapper/路由安全；31原tools+5附属Host+2Gateway显式计数，另有只读MCP resource|三真实外部Agent驱动端全链与最终交付矩阵未证明|
+|G04 创作事实；IT-A03/A04、AD-T27/31|真实Host Script/Storyboard/Ref/owner/current closure及统一Job receipt；creative-context-host14项中未冒充生产Run的component observer另标范围|真实对话定义/选风格/审核内容后进入制作、全部版本与重放体验|
+|G05/07 增量UI/状态；IT-A05、AD-T15/32..35、R4-UX|de086内真实headless：原编辑器/时间轴保留，Gateway真实Context/Workflow/Health，折叠Bar、非模态系统与焦点、native未确认；280component/parity另有范围；原浏览器panelnull/CSP及404/503失败均保留|真实非空影片的预览/选镜/采用、真实NativeAck、各用户路径完整截图/独立验收/人工门|
+|G06 审阅与批准；IT-A03/A05、AD-T12/13/14|MEDIA7b proof/preview限定14测试与3旧码负控、独立限定PASS；BRIDGE包/采用当前缺producer仍503|R2完整ps_映射/计划hash/锁/许可/可信Decision/Approval/commit+1/native loaded闭环；纯accept+0|
+|G09 素材与声音；AD-T16/17/26/29/30|受控本地素材登记/库存/权利，以及合成3秒技术诊断准备与五part预览|真人录音/真实授权素材，两主题60–180秒；B的下载/生成/Comfy不据此通过|
+|G10 正式交付；IT-A06、AD-T19/20|原render/QC/package诊断原语存在；阶段化committed媒体与完整生产消费者尚未装配|R3编码/技术QC/可信QC决定/同Job发布/鉴权下载和T20全部真实门；读不渲染、恢复不重编码、关服重开/改单镜/双导出|
+|G08/11 后续完整V1|原B/C规划保留|长片/通用资源费用/完整P0/P1/NFR仍规划，不以A模块通过代签|
+
+R2详细文档准备已通过Orca下发；实现顺序为R3媒体端口/受控能力基础与R2并行准备，四真实能力未齐仍不可启动生产Run，不造TestGrant。精确当前码图与依赖裁决见`execution/A/implementation-20261111/R2`；不会把doc-only派发写为代码开工。资源预约、独立复核、失败捕获和范围上限见同目录CONTINUE/state/resources。A/V1及人工验收仍未通过。
