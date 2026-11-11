@@ -18,6 +18,7 @@ import {PreparedDraftVerifier} from './prepared-draft-verifier.js';
 import {preparedSourceConsumerGraph,type CreatedSourceSelectionPort} from './created-source-publisher.js';
 import type {PreparedAdoptionPlanV1,PreparedSourceFileFact} from './created-source-ports.js';
 import {RetainedSourceTree} from './retained-source-tree.js';
+import {PublicationCleanup,PublicationCleanupError} from './publication-cleanup.js';
 
 export interface CreatedPreparedReadInput {
  readonly project_id:string;readonly prepared_source_id:string;readonly execution:ExecutionBinding;
@@ -42,11 +43,11 @@ const ordered=(files:readonly PreparedSourceFileFact[])=>[...files].sort((a,b)=>
  * and purpose-separated prepared bytes remain held until the caller's final guard. */
 export class CreatedSourceFactsReader {
  readonly #proofs=new WeakMap<object,RecordOfRead>();readonly #issued=new Set<object>();
- readonly #pending=new Set<Promise<CreatedPreparedFactsProof>>();#closed=false;#closing:Promise<void>|undefined;
+ readonly #pending=new Set<Promise<CreatedPreparedFactsProof>>();readonly #cleanup=new PublicationCleanup();#failed=false;#closed=false;#closing:Promise<void>|undefined;
  constructor(private readonly options:{readonly host:NarralensHost;readonly authority:CreativeProjectAuthority;
   readonly prepared:CreatedPreparedSourceStore;readonly tasks:CreatedTaskStore;readonly assets:LocalAssetRegistry;
   readonly verifier:PreparedDraftVerifier;readonly selection:CreatedSourceSelectionPort;readonly stageDomainRoot:string}){}
- #open():void{if(this.#closed)throw new ProductError('CAPABILITY_UNAVAILABLE','Prepared source reader is closed');}
+ #open():void{if(this.#failed)this.#cleanup.drain();if(this.#closed)throw new ProductError('CAPABILITY_UNAVAILABLE','Prepared source reader is closed');}
  #row(sql:string,...values:SQLInputValue[]):Record<string,unknown>{
   const row=this.options.host.revisions.compose(db=>db.prepare(sql).get(...values));if(!row)changed();return row;
  }
@@ -107,7 +108,7 @@ export class CreatedSourceFactsReader {
   this.options.authority.assertOwner(input.project_id,principal);const {completed,mappingDigest}=this.#completed(input,principal);
   const mapping=this.options.prepared.read(input.prepared_source_id)!;
   let original:RetainedSourceTree|undefined,stage:RetainedSourceTree|undefined,preparedProof:(PreparedReadProofV1&{purpose:'impact'})|undefined;
-  let transferred=false;
+  let transferred=false,failed=false;let primary:unknown,issued:CreatedPreparedFactsProof|undefined;
   try{
    const view=await this.options.host.projectResolver.resolveCreated(input.project_id);this.#open();
    if(view.revision!==mapping.base_revision||view.source_digest!==mapping.source_digest||view.engine_upstream_sha!==OPENFILM_UPSTREAM_SHA)changed();
@@ -141,8 +142,22 @@ export class CreatedSourceFactsReader {
     affected_ranges:graph.clips.map(c=>({start_frame:c.start_frame,end_frame_exclusive:c.end_frame_exclusive,clip_id:c.clip_id})),
     locks_checked:[],engine_upstream_sha:OPENFILM_UPSTREAM_SHA});
    const record:RecordOfRead={input,principal,mappingDigest,completed,binding,preparedProof,original,registry:freeze(structuredClone(registry)),facts};
-   this.#current(record);const proof=Object.freeze({facts});this.#proofs.set(proof,record);this.#issued.add(proof);transferred=true;return proof;
-  }finally{try{if(!transferred){try{if(preparedProof)this.options.verifier.release(preparedProof);}finally{original?.close();}}}finally{stage?.close();}}
+   this.#current(record);const proof=Object.freeze({facts});this.#proofs.set(proof,record);this.#issued.add(proof);issued=proof;transferred=true;return proof;
+  }catch(error){failed=true;primary=error;throw error;}
+  finally{
+   const owner={},resources=[];
+   if(stage)resources.push({identity:stage,close:()=>stage!.close()});
+   if(!transferred){
+    if(preparedProof)resources.push({identity:preparedProof,close:()=>this.options.verifier.release(preparedProof!)});
+    if(original)resources.push({identity:original,close:()=>original!.close()});
+   }
+   this.#cleanup.register(owner,resources);
+   try{this.#cleanup.run(owner);}catch(error){
+    this.#failed=true;const errors=[...(failed?[primary]:[]),error];
+    if(issued)try{this.release(issued);}catch(cleanup){errors.push(cleanup);}
+    throw new PublicationCleanupError(errors);
+   }
+  }
  }
  assertCurrent(input:CreatedPreparedReadInput,principal:string,value:unknown):CreatedPreparedFacts{
   const record=value&&typeof value==='object'?this.#proofs.get(value):undefined;
@@ -160,13 +175,21 @@ export class CreatedSourceFactsReader {
    fact_digest:canonicalDigest(record.completed.fact),execution:structuredClone(record.completed.task.request.execution)});
  }
  release(value:unknown):void{
-  if(!value||typeof value!=='object')return;const record=this.#proofs.get(value);if(!record)return;
-  this.#proofs.delete(value);this.#issued.delete(value);
-  try{this.options.verifier.release(record.preparedProof);}finally{record.original.close();}
+  if(!value||typeof value!=='object')return;const record=this.#proofs.get(value);
+  if(record){
+   // Own every close before revoking the read capability. Ownership survives failure.
+   this.#cleanup.register(value,[{identity:record.preparedProof,close:()=>this.options.verifier.release(record.preparedProof)},
+    {identity:record.original,close:()=>record.original.close()}]);
+   this.#proofs.delete(value);this.#issued.delete(value);
+  }
+  try{this.#cleanup.run(value);}catch(error){this.#failed=true;throw error;}
  }
  close():Promise<void>{
-  this.#closed=true;return this.#closing??=(async()=>{await Promise.allSettled([...this.#pending]);const errors:unknown[]=[];
-   for(const proof of [...this.#issued])try{this.release(proof);}catch(e){errors.push(e);}
-   if(errors.length)throw new AggregateError(errors,'Prepared source reader cleanup failed');})();
+  this.#closed=true;if(this.#closing)return this.#closing;
+  const closing=(async()=>{await Promise.allSettled([...this.#pending]);const errors:unknown[]=[];
+   for(const proof of [...this.#issued])try{this.release(proof);}catch(error){errors.push(error);}
+   try{this.#cleanup.drain();}catch(error){errors.push(error);}
+   if(errors.length)throw new PublicationCleanupError(errors);
+  })();this.#closing=closing;void closing.catch(()=>{if(this.#closing===closing)this.#closing=undefined;});return closing;
  }
 }

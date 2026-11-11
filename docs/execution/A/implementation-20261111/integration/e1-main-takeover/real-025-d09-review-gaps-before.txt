@@ -1,0 +1,155 @@
+
+> narralens@0.1.0 test /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+> vitest run --config vitest.config.ts tests/agent-driven/integration/created-run-authority.test.ts --maxWorkers=1 --minWorkers=1 -t 'D09 final insertion|D09 real prepared refuses confirmation expiry during|D09 real prepared retains post-commit'
+
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:1838586) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+stdout | tests/agent-driven/integration/created-run-authority.test.ts > D09 real prepared refuses confirmation expiry during actual retained-byte verification
+{"case":"D09 real prepared cleanup","pid":1838586,"root":"/tmp/narralens-created-workspace-Gf0YKr","removed":true}
+
+stdout | tests/agent-driven/integration/created-run-authority.test.ts > D09 real prepared retains post-commit read cleanup uncertainty and refuses normal replay
+{"case":"D09 real prepared cleanup","pid":1838586,"root":"/tmp/narralens-created-workspace-azuSjP","removed":true}
+
+ ❯ tests/agent-driven/integration/created-run-authority.test.ts (29 tests | 4 failed | 25 skipped) 16080ms
+   ↓ persists the trusted confirmation inside the caller transaction and binds it to the real session
+   ↓ refuses a confirmation whose session is no longer active and writes nothing
+   ↓ refuses a confirmation with an expired lifetime
+   ↓ refuses a confirmation with a lifetime that is not in the future
+   ↓ refuses a confirmation with an issued time in the future
+   ↓ refuses a confirmation with a review purpose without a review
+   ↓ refuses a confirmation with a non hash input digest
+   ↓ refuses a confirmation with a foreign actor
+   ↓ rolls the confirmation back with the transaction that wrote it
+   ↓ returns no approval when the current confirmation, run or attempt is missing
+   ↓ writes the limited approval only when the current run, attempt and confirmation are real
+   ↓ answers the project facts from the real authorities and fails closed without a capability
+   ↓ D09 refuses a prepared id without actual Host proof even with real confirmation and attempt
+   ↓ D09 refuses changed action against the original trusted confirmation
+   ↓ D09 refuses extended confirmation lifetime against the original trusted confirmation
+   ↓ D09 confirmation replay returns one original approval and rejects changed bindings
+   ↓ D09 real prepared succeeds with full plan digest, replays once and releases held source FDs
+   ↓ D09 real prepared refuses changed plan without approval and releases held source FDs
+   ↓ D09 real prepared refuses changed package without approval and releases held source FDs
+   ↓ D09 real prepared refuses changed rights without approval and releases held source FDs
+   ↓ D09 real prepared refuses changed selection without approval and releases held source FDs
+   ↓ D09 real prepared refuses changed expiry without approval and releases held source FDs
+   ↓ D09 real prepared refuses changed closure without approval and releases held source FDs
+   ↓ D09 real prepared refuses a copied transaction object even while actual proof is held
+   ↓ D09 canonical range and lock comparison preserves native-order plan identity
+   × D09 final insertion rechecks expiry after approval enumeration (existing=false) 23ms
+     → expected { project_id: 'project-1', …(17) } to be null
+   × D09 final insertion rechecks expiry after approval enumeration (existing=true) 12ms
+     → expected { project_id: 'project-1', …(17) } to be null
+   × D09 real prepared refuses confirmation expiry during actual retained-byte verification 9752ms
+     → expected [Function] to throw error including 'rollback expired confirmation' but got 'expected { …(18) } to be null'
+   × D09 real prepared retains post-commit read cleanup uncertainty and refuses normal replay 6292ms
+     → promise resolved "{ approval: { …(6) }, …(12) }" instead of rejecting
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/created-run-authority.test.ts > D09 final insertion rechecks expiry after approval enumeration (existing=false)
+ FAIL  tests/agent-driven/integration/created-run-authority.test.ts > D09 final insertion rechecks expiry after approval enumeration (existing=true)
+AssertionError: expected { project_id: 'project-1', …(17) } to be null
+
+- Expected: 
+null
+
++ Received: 
+{
+  "action_digest": "3333333333333333333333333333333333333333333333333333333333333333",
+  "approval_id": "approval_bb6c927495e44a22ad607b1ab6723a05",
+  "attempt": 1,
+  "base_revision": 1,
+  "change_id": "change-1",
+  "confirmation_id": "confirm_30f35465ab6644f398b080e8a56deb41",
+  "consumed_transaction_id": null,
+  "control_revision": 0,
+  "expires_at": 1794355800,
+  "facts_digest": "4444444444444444444444444444444444444444444444444444444444444444",
+  "impact_id": "impact-1",
+  "input_digest": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+  "plan_version": 1,
+  "project_id": "project-1",
+  "run_id": "run-1",
+  "run_scope_digest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+  "state": "active",
+  "step_id": "sample",
+}
+
+ ❯ tests/agent-driven/integration/created-run-authority.test.ts:457:18
+    455|    return authority.registerApproval(wrapped,f.input);
+    456|   });
+    457|   expect(result).toBeNull();
+       |                  ^
+    458|   expect(await f.repository.transaction(tx=>tx.list('approval',{projec…
+    459|  }finally{f.close();}
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  tests/agent-driven/integration/created-run-authority.test.ts > D09 real prepared refuses confirmation expiry during actual retained-byte verification
+AssertionError: expected [Function] to throw error including 'rollback expired confirmation' but got 'expected { …(18) } to be null'
+
+Expected: "rollback expired confirmation"
+Received: "expected { …(18) } to be null"
+
+ ❯ tests/agent-driven/integration/created-run-authority.test.ts:465:3
+    463|  const f=await d09RealFixture();let restore:(()=>void)|undefined;
+    464|  try{
+    465|   await expect(f.authority.reviewTransaction!(f.request,f.ui,(tx,diges…
+       |   ^
+    466|    const now=f.clockNow(),expires=now+60;
+    467|    const confirmation=f.authority.registerConfirmation(tx,{project_id:…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  tests/agent-driven/integration/created-run-authority.test.ts > D09 real prepared retains post-commit read cleanup uncertainty and refuses normal replay
+AssertionError: promise resolved "{ approval: { …(6) }, …(12) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "approval": {
++     "approval_id": "approval_48b36959b440458cbc74332fd214c235",
++     "expires_at": "2026-11-11T21:52:26.000Z",
++     "impact_id": "imp_ce9cd7f6c6b8411084f0c3b8b8c28a36",
++     "plan_sha256": "6ce32d18dc103092d5aef249a5a83d3699df6d36ea49c24637c6ea35cb07ee53",
++     "project_id": "project_d033c1109347480890d563596878b143",
++     "state": "active",
++   },
++   "channel": "trusted_ui",
++   "choice": "accept_and_adopt",
++   "decision_id": "review-decision-71ff5929-e7a9-495f-b6e8-d8859a1707b8",
++   "input_digest": "d5e8ebbcf65d1395fb5a45d9dd9ea12e6129813017b2bc4eda544d4a4e871875",
++   "output_digest": "c8da21371c27f9daea370817def129ace2860d20083a18ce1d450999cf139a2a",
++   "package_id": "d09-package",
++   "package_version": 1,
++   "principal_id": "owner",
++   "project_id": "project_d033c1109347480890d563596878b143",
++   "quality_digest": "e475c59dae105d160e11e38b9f8d52ab819c13bd2fb8231ba6c2d50f1c916bcf",
++   "recorded_at": "2026-11-11T21:37:25.000Z",
++   "run_id": "run-30efc089-d052-42b8-a5a3-6f9f6a714808",
+  }
+
+ ❯ tests/agent-driven/integration/created-run-authority.test.ts:491:55
+    489|   expect(await f.repo.transaction(tx=>tx.list('approval',{project_id:f…
+    490|   expect(await f.repo.transaction(tx=>tx.get('review_request',{project…
+    491|   await expect(f.workflow.decideReview(f.request,f.ui)).rejects.toMatc…
+       |                                                       ^
+    492|   expect(f.host.revisions.activeCommit(f.projectId)!.revision).toBe(1);
+    493|  }finally{spy.mockRestore();await f.close();}
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  4 failed | 25 skipped (29)
+   Start at  05:37:03
+   Duration  21.23s (transform 3.21s, setup 0ms, collect 2.88s, tests 16.08s, environment 0ms, prepare 1.32s)
+
+ ELIFECYCLE  Test failed. See above for more details.

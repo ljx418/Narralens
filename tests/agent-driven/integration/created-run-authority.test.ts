@@ -1,4 +1,4 @@
-import {it,expect} from 'vitest';
+import {it,expect,vi} from 'vitest';
 import {RevisionStore} from '../../../src/host/projects/revision-store.js';
 import {ProjectCreationStore} from '../../../src/host/projects/project-creation-store.js';
 import {ProductSqliteRepository} from '../../../src/host/agent-driven/product-sqlite-repository.js';
@@ -324,7 +324,7 @@ async function d09RealFixture(planMutation = false) {
       const {existsSync}=await import('node:fs');expect(existsSync(f.root)).toBe(false);
       console.info(JSON.stringify({case:'D09 real prepared cleanup',pid:process.pid,root:f.root,removed:true}));};
     return {...f,completed,prepared,impacts,projectAuthority,authority,workflow,request,ui,change,execution,
-      clockNow:()=>clock,advanceSelection:()=>{selection++;},expire:()=>{clock=Math.ceil(Date.parse(change.expires_at)/1000);},close};
+      readDependencies:dependencies,clockNow:()=>clock,advanceClock:(seconds:number)=>{clock+=seconds;},advanceSelection:()=>{selection++;},expire:()=>{clock=Math.ceil(Date.parse(change.expires_at)/1000);},close};
   } catch(error) {try {await reader?.close();} finally {await f.close();}
     const {existsSync}=await import('node:fs');
     console.info(JSON.stringify({case:'D09 real prepared setup failure cleanup',pid:process.pid,root:f.root,removed:!existsSync(f.root)}));
@@ -443,3 +443,91 @@ it('D09 canonical range and lock comparison preserves native-order plan identity
   expect(preparedAdoptionPlanDigest({...plan,affected_ranges:impact.affected_ranges,locks_checked:impact.locks_checked})).toBe(preparedAdoptionPlanDigest(plan));
   expect(plan).toEqual(input);
 });
+
+
+it.each([false,true])('D09 final insertion rechecks expiry after approval enumeration (existing=%s)',async existing=>{
+ const f=await approvalFixture();let clock=NOW;const authority=new CreatedRunAuthority({now:()=>clock});
+ try{
+  if(existing)expect(await f.repository.transaction(tx=>authority.registerApproval(tx,f.input))).not.toBeNull();
+  const result=await f.repository.transaction(tx=>{
+   const original=tx.list;
+   const wrapped={...tx,list:(...args:Parameters<typeof tx.list>)=>{const rows=Reflect.apply(original,tx,args);if(args[0]==='approval')clock=NOW+601;return rows;}} as typeof tx;
+   return authority.registerApproval(wrapped,f.input);
+  });
+  expect(result).toBeNull();
+  expect(await f.repository.transaction(tx=>tx.list('approval',{project_id:'project-1',run_id:'run-1'}))).toHaveLength(existing?1:0);
+ }finally{f.close();}
+});
+
+it('D09 real prepared refuses confirmation expiry during actual retained-byte verification',async()=>{
+ const f=await d09RealFixture();let restore:(()=>void)|undefined;
+ try{
+  await expect(f.authority.reviewTransaction!(f.request,f.ui,(tx,digest)=>{
+   const now=f.clockNow(),expires=now+60;
+   const confirmation=f.authority.registerConfirmation(tx,{project_id:f.projectId,run_id:f.execution.run_id,review_id:f.request.package_id,
+    input_digest:f.request.input_digest,purpose:'change.approve',authenticated_actor:'owner',session_ref:f.ui.session_ref,
+    action_digest:digest!,issued_at:now,expires_at:expires});
+   const original=f.verifier.assertCurrentForRead.bind(f.verifier);let advanced=false;
+   const spy=vi.spyOn(f.verifier,'assertCurrentForRead').mockImplementation((...args)=>{original(...args);if(!advanced){advanced=true;f.advanceClock(61);}});restore=()=>spy.mockRestore();
+   const result=f.authority.registerApproval(tx,{project_id:f.projectId,run_id:f.execution.run_id,run_scope_digest:f.execution.run_scope_digest,
+    confirmation_id:confirmation.confirmation_id,plan_version:1,step_id:f.execution.step_id,attempt:f.execution.attempt,input_digest:f.request.input_digest,
+    change_id:f.change.materialization_id,impact_id:f.change.impact_id,base_revision:f.change.base_revision,control_revision:f.change.control_revision,
+    action_digest:digest!,facts_digest:digest!,expires_at:expires});
+   expect(advanced).toBe(true);expect(result).toBeNull();throw Error('rollback expired confirmation');
+  })).rejects.toThrow('rollback expired confirmation');
+  expect(await f.repo.transaction(tx=>tx.list('approval',{project_id:f.projectId,run_id:f.execution.run_id}))).toEqual([]);
+  expect(f.host.revisions.activeCommit(f.projectId)!.revision).toBe(1);
+ }finally{restore?.();await f.close();}
+},120000);
+
+it('D09 real prepared retains post-commit read cleanup uncertainty and refuses normal replay',async()=>{
+ const f=await d09RealFixture(),fault=new Error('injected review-proof close uncertainty');
+ const original=f.verifier.release.bind(f.verifier);let injected=false;
+ const spy=vi.spyOn(f.verifier,'release').mockImplementation(proof=>{original(proof);if(!injected){injected=true;throw fault;}});
+ try{
+  await expect(f.workflow.decideReview(f.request,f.ui)).rejects.toBeDefined();expect(injected).toBe(true);
+  expect(await f.repo.transaction(tx=>tx.list('approval',{project_id:f.projectId,run_id:f.execution.run_id}))).toHaveLength(1);
+  expect(await f.repo.transaction(tx=>tx.get('review_request',{project_id:f.projectId,run_id:f.execution.run_id,review_id:f.request.package_id})?.state)).toBe('accepted');
+  await expect(f.workflow.decideReview(f.request,f.ui)).rejects.toMatchObject({code:'CAPABILITY_UNAVAILABLE',requires_reconciliation:true,retryable:false});
+  spy.mockRestore();await expect(f.authority.close()).rejects.toMatchObject({requires_reconciliation:true});
+  expect(await d09SourceDescriptors([f.authorRoot,f.completed.root])).toEqual([]);
+  expect(f.host.revisions.activeCommit(f.projectId)!.revision).toBe(1);
+ }finally{spy.mockRestore();await f.close();}
+},120000);
+
+
+it.each(['release','acquire-stage'] as const)('D09 real reader retains all resource ownership after %s cleanup fails',async mode=>{
+ const f=await d09RealFixture();const {CreatedSourceFactsReader}=await import('../../../src/host/agent-driven/created-source-facts-reader.js');
+ const {RetainedSourceTree}=await import('../../../src/host/agent-driven/retained-source-tree.js');
+ const reader=new CreatedSourceFactsReader({...f.readDependencies,prepared:f.prepared});
+ const fault=new Error('injected reader resource close uncertainty'),read={project_id:f.projectId,prepared_source_id:f.change.materialization_id,execution:f.execution};
+ let restore:(()=>void)|undefined,injected=false,authorClosed=false;
+ const originalTreeClose=RetainedSourceTree.prototype.close;
+ try{
+  if(mode==='acquire-stage'){
+   const spy=vi.spyOn(RetainedSourceTree.prototype,'close').mockImplementation(function(this:InstanceType<typeof RetainedSourceTree>){
+    if(this.root===f.authorRoot)authorClosed=true;
+    if(this.root===f.completed.root&&!injected){injected=true;throw fault;}
+    originalTreeClose.call(this);
+   });restore=()=>spy.mockRestore();
+   await expect(reader.acquire(read,'owner')).rejects.toMatchObject({requires_reconciliation:true});
+  }else{
+   const proof=await reader.acquire(read,'owner'),original=f.verifier.release.bind(f.verifier);
+   const spy=vi.spyOn(f.verifier,'release').mockImplementation(value=>{if(!injected){injected=true;throw fault;}original(value);});
+   const tree=vi.spyOn(RetainedSourceTree.prototype,'close').mockImplementation(function(this:InstanceType<typeof RetainedSourceTree>){if(this.root===f.authorRoot)authorClosed=true;originalTreeClose.call(this);});
+   restore=()=>{spy.mockRestore();tree.mockRestore();};
+   expect(()=>reader.release(proof)).toThrow();
+   expect(()=>reader.assertCurrent(read,'owner',proof)).toThrow();
+  }
+  expect(injected).toBe(true);expect(authorClosed).toBe(true);
+  expect(()=>reader.acquire(read,'owner')).toThrow();
+  restore?.();restore=undefined;
+  await expect(reader.close()).rejects.toMatchObject({requires_reconciliation:true});
+  expect(await d09SourceDescriptors([f.authorRoot,f.completed.root])).toEqual([]);
+  expect(f.host.revisions.activeCommit(f.projectId)!.revision).toBe(1);
+ }finally{restore?.();try{try{await reader.close();}catch(error){
+   const {PublicationCleanupError}=await import('../../../src/host/agent-driven/publication-cleanup.js');
+   const leaves=(value:unknown):unknown[]=>value instanceof PublicationCleanupError?value.errors.flatMap(leaves):[value];
+   if(!(error instanceof PublicationCleanupError)||leaves(error).some(value=>value!==fault))throw error;
+  }}finally{await f.close();}}
+},120000);

@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto';
+import { PublicationCleanupError } from './publication-cleanup.js';
 import { isTrustedCallerContext } from '../creative/product-repository.js';
 import type { ReviewDecisionInput, ReviewPackage } from '../../contracts/agent-driven-types.js';
 import { canonicalDigest, contentDigest, FIXED_PLAN } from '../creative/digest.js';
@@ -72,6 +73,9 @@ export class CreatedRunAuthority implements TrustedAdoptionAuthority {
   readonly #repository: ProductSqliteRepository | undefined;
   readonly #options: CreatedRunAuthorityOptions;
   readonly #reviews = new WeakMap<ProductTransaction, PreparedReviewScope>();
+  #cleanupFailure:PublicationCleanupError|undefined;#closed=false;#closing:Promise<void>|undefined;
+  #usable():void{if(this.#cleanupFailure)throw this.#cleanupFailure;if(this.#closed)throw new ProductError('CAPABILITY_UNAVAILABLE','Review authority is closed');}
+  close():Promise<void>{this.#closed=true;return this.#closing??=(async()=>{const errors:unknown[]=this.#cleanupFailure?[this.#cleanupFailure]:[];try{await this.#reader?.close();}catch(error){errors.push(error);}if(errors.length)throw new PublicationCleanupError(errors);})();}
 
   constructor(options: CreatedRunAuthorityOptions = {}) {
     this.#options = options;
@@ -92,6 +96,7 @@ export class CreatedRunAuthority implements TrustedAdoptionAuthority {
 
   async #reviewTransaction<T>(raw: ReviewDecisionInput, caller: TrustedCallerContext,
     work: (tx: ProductTransaction, digest: string | null) => T): Promise<T> {
+    this.#usable();
     if (!isTrustedCallerContext(caller) || caller.channel !== 'trusted_ui')
       throw new ProductError('UNAUTHORIZED', 'A trusted UI session is required');
     const request = structuredClone(raw);
@@ -113,7 +118,11 @@ export class CreatedRunAuthority implements TrustedAdoptionAuthority {
       return {project_id:request.project_id,prepared_source_id:mapping.prepared_source_id,execution:mapping.execution};
     });
     if (!read) return this.#repository!.transaction(tx => work(tx, null));
-    const proof = await this.#reader!.acquire(read, caller.principal_id);
+    let proof:CreatedPreparedFactsProof;
+    try{proof=await this.#reader!.acquire(read, caller.principal_id);}catch(error){
+      if(error instanceof PublicationCleanupError)this.#cleanupFailure=error;throw error;
+    }
+    let failed=false,primary:unknown;
     try {
       return await this.#repository!.transaction(tx => {
         if (tx.recallIdempotency({kind:'project',project_id:request.project_id},
@@ -125,7 +134,10 @@ export class CreatedRunAuthority implements TrustedAdoptionAuthority {
         this.#reviews.set(tx, scope);
         try { return work(tx, scope.digest); } finally { this.#reviews.delete(tx); }
       });
-    } finally { this.#reader!.release(proof); }
+    }catch(error){failed=true;primary=error;throw error;}
+    finally{try{this.#reader!.release(proof);}catch(error){
+      this.#cleanupFailure=new PublicationCleanupError([...(failed?[primary]:[]),error]);throw this.#cleanupFailure;
+    }}
   }
 
   #assertPrepared(tx: ProductTransaction, scope: PreparedReviewScope): void {
@@ -195,6 +207,7 @@ export class CreatedRunAuthority implements TrustedAdoptionAuthority {
   }
 
   registerConfirmation(tx: ProductTransaction, input: TrustedConfirmationInput): TrustedConfirmationRecord {
+    this.#usable();
     if (!input || typeof input !== 'object') throw new ProductError('INVALID_REQUEST', 'The confirmation input is missing');
     if (!ID.test(input.project_id) || !ID.test(input.run_id) || !ID.test(input.authenticated_actor))
       throw new ProductError('INVALID_REQUEST', 'The confirmation identity is invalid');
@@ -236,6 +249,7 @@ export class CreatedRunAuthority implements TrustedAdoptionAuthority {
   }
 
   registerApproval(tx: ProductTransaction, input: TrustedApprovalInput): ApprovalRecord | null {
+    this.#usable();
     if (!input || typeof input !== 'object') return null;
     if (!ID.test(input.project_id) || !ID.test(input.run_id) || !ID.test(input.confirmation_id)) return null;
     if (!HASH.test(input.input_digest) || !HASH.test(input.action_digest) || !HASH.test(input.facts_digest)) return null;
@@ -290,7 +304,8 @@ export class CreatedRunAuthority implements TrustedAdoptionAuthority {
       .find(row => row.confirmation_id === input.confirmation_id);
     if (previous) {
       const {approval_id:_id,state,consumed_transaction_id:_consumed,...binding} = previous;
-      return state === 'active' && canonicalDigest(binding) === canonicalDigest(input) ? previous : null;
+      const same=state === 'active' && canonicalDigest(binding) === canonicalDigest(input);
+      return same && this.#finalApprovalClock(tx,input,confirmation,scope) ? previous : null;
     }
     const record: ApprovalRecord = {
       project_id: input.project_id,
@@ -312,6 +327,7 @@ export class CreatedRunAuthority implements TrustedAdoptionAuthority {
       expires_at: input.expires_at,
       consumed_transaction_id: null,
     };
+    if(!this.#finalApprovalClock(tx,input,confirmation,scope))return null;
     tx.put('approval', {
       project_id: record.project_id,
       run_id: record.run_id,
@@ -319,4 +335,21 @@ export class CreatedRunAuthority implements TrustedAdoptionAuthority {
     }, record);
     return record;
   }
+  /** Capture the clock only after all reads, hashing, session checks and binding
+   * comparisons. This is the final synchronous boundary before put/return. */
+  #finalApprovalClock(tx:ProductTransaction,input:TrustedApprovalInput,confirmation:TrustedConfirmationRecord,scope:PreparedReviewScope|undefined):boolean{
+    const impact=scope?this.#impacts!.read(input.impact_id):undefined;
+    const active=scope?this.#impacts!.state(input.impact_id):undefined;
+    const fact=scope?this.#impacts!.planFact(input.impact_id):undefined;
+    const plan=scope&&fact?assertPreparedAdoptionPlan(fact.plan as PreparedAdoptionPlanV1):undefined;
+    const grant=scope?tx.get('execution_grant',{project_id:input.project_id,run_id:input.run_id,grant_id:scope.read.execution.authorization_id}):null;
+    const grantConfirmation=grant?tx.get('trusted_confirmation',{project_id:input.project_id,run_id:input.run_id,confirmation_id:grant.confirmation_id}):null;
+    const sessionActive=!this.#sessionGuard||this.#sessionGuard({principal_id:confirmation.authenticated_actor,session_ref:confirmation.session_ref});
+    const now=this.#now();
+    return Number.isSafeInteger(now)&&sessionActive&&input.expires_at>now&&confirmation.expires_at>now
+      &&(!scope||!!(impact&&active==='active'&&fact&&plan&&fact.plan_sha256===scope.digest
+        &&Date.parse(impact.expires_at)>now*1000&&Date.parse(plan.expires_at)>now*1000
+        &&grant&&grant.state==='active'&&grant.expires_at>now&&grantConfirmation&&grantConfirmation.expires_at>now));
+  }
+
 }
