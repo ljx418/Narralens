@@ -1,0 +1,20 @@
+{
+  "argv": [
+    "corepack",
+    "pnpm",
+    "exec",
+    "vitest",
+    "run",
+    "--config",
+    "vitest.config.ts",
+    "tests/wave2/m4b/adoption-route.test.ts",
+    "tests/wave2/m4c/history-crash-and-race.test.ts",
+    "-t",
+    "own pending rows|request cannot be read|legacy edit row|sweeps an adoption|pre-publish crash boundary|crash after the publication"
+  ],
+  "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+  "started_at": "2026-11-11T23:14:54.397247+00:00",
+  "runner_version": 3,
+  "git_head": "6ff5a14f5fc72db00d6ce8d5b87a57394c5a216e",
+  "input_scope": "source/contracts/test/tool text, config/lock, D09 vectors and this runner; upstream pin and binary fixture receipts remain separate"
+}

@@ -1,0 +1,32 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:1990221) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/m4b/adoption-route.test.ts (34 tests | 24 skipped) 48834ms
+   ✓ M4B production adoption route > converges the pre-publish crash boundary after_received to aborted with revision +0  8519ms
+   ✓ M4B production adoption route > converges the pre-publish crash boundary after_preconditions to aborted with revision +0  6521ms
+   ✓ M4B production adoption route > converges the pre-publish crash boundary after_plan to aborted with revision +0  6639ms
+   ✓ M4B production adoption route > converges the pre-publish crash boundary after_stage to aborted with revision +0  6515ms
+   ✓ M4B production adoption route > converges the pre-publish crash boundary after_validate to aborted with revision +0  6465ms
+   ✓ M4B production adoption route > converges the pre-publish crash boundary after_snapshot_publish to aborted with revision +0  6584ms
+   ✓ M4B production adoption route > latches a row whose request cannot be read, rather than leaving it to a recovery with no way out  2632ms
+   ✓ M4B production adoption route > does not let one of its own pending rows block the recovery of another  1625ms
+   ✓ M4B production adoption route > leaves another module's transaction alone: a legacy edit row is not M4B's to decide  1685ms
+   ✓ M4B production adoption route > sweeps an adoption staging tree left behind by a hard crash  1648ms
+(node:1991253) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/m4c/history-crash-and-race.test.ts (19 tests | 12 skipped) 73316ms
+   ✓ M4C TX-08C: the crash matrix converges to a decided state > converges the pre-publish crash boundary after_received to aborted with revision +0  10428ms
+   ✓ M4C TX-08C: the crash matrix converges to a decided state > converges the pre-publish crash boundary after_preconditions to aborted with revision +0  9271ms
+   ✓ M4C TX-08C: the crash matrix converges to a decided state > converges the pre-publish crash boundary after_plan to aborted with revision +0  10820ms
+   ✓ M4C TX-08C: the crash matrix converges to a decided state > converges the pre-publish crash boundary after_stage to aborted with revision +0  9977ms
+   ✓ M4C TX-08C: the crash matrix converges to a decided state > converges the pre-publish crash boundary after_validate to aborted with revision +0  10554ms
+   ✓ M4C TX-08C: the crash matrix converges to a decided state > converges the pre-publish crash boundary after_snapshot_publish to aborted with revision +0  11657ms
+   ✓ M4C TX-08C: the crash matrix converges to a decided state > converges a crash after the publication to one durable commit with revision +1  10607ms
+
+ Test Files  2 passed (2)
+      Tests  17 passed | 36 skipped (53)
+   Start at  07:14:56
+   Duration  132.10s (transform 2.09s, setup 0ms, collect 6.56s, tests 122.15s, environment 1ms, prepare 2.26s)
+
