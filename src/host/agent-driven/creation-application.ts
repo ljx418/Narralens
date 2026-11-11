@@ -17,6 +17,7 @@ import {ApplicationDispatcher,creativeHandlers} from './application-dispatcher.j
 import {AssetInventory} from './asset-inventory.js';
 import {LocalAssetHttp} from './local-asset-http.js';
 import {ReviewMediaHttp} from './review-media-http.js';
+import {PreparedReviewMediaReaderImpl} from '../render/preview-prepared-source.js';
 import {CreatedRunFacts} from './created-run-facts.js';
 import {CreatedRunAuthority} from './created-run-authority.js';
 import {CreatedTaskApplication} from './created-task-application.js';
@@ -59,6 +60,10 @@ export interface CreationApplicationOptions {
   readonly nativeWorkspaceRoot?: string;
   readonly taskRoot?: string;
   readonly nativeStage?: { readonly width: number; readonly height: number };
+  /** The private domain the prepared preview objects live in. The real MEDIA reader is
+   * bound to it; the review package publication that would register a binding is not
+   * produced in this ticket, so the surface stays fail closed. */
+  readonly reviewMediaObjectRoot?: string;
   readonly worker?: Pick<CreationServiceDeps,'leaseMs'|'pollMs'|'boundary'>;
   readonly instance?: () => Instance;
   readonly health?: () => HealthRead;
@@ -105,9 +110,12 @@ export class CreationApplication implements AgentHostApplication {
   this.#inventory=this.localAssets?new AssetInventory({registry:this.localAssets}):null;
   this.#localAssetsHttp=this.#inventory?new LocalAssetHttp(this.auth,()=>host.origin,this.#inventory):null;
   const authority=new CreativeProjectAuthority(this.creation);
-  // The review media transport. It has NO binding producer and NO reader yet, so every
-  // request answers 503: the real package/receipt linkage is not published.
-  this.#reviewMedia=new ReviewMediaHttp({auth:this.auth,origin:()=>host.origin,assertOwner:(projectId,principalId)=>authority.assertOwner(projectId,principalId)});
+  // The review media transport uses the REAL MEDIA reader over the private preview
+  // object domain. It has NO binding producer, because the real current package and
+  // the immutable receipt linkage are not published in this ticket: every request
+  // answers 503 until that producer exists, and nothing is ever served from an
+  // in-memory map.
+  this.#reviewMedia=new ReviewMediaHttp({auth:this.auth,origin:()=>host.origin,assertOwner:(projectId,principalId)=>authority.assertOwner(projectId,principalId),reader:new PreparedReviewMediaReaderImpl(options.reviewMediaObjectRoot??options.createdRoot+'-preview-objects')});
   this.worker=new ProjectCreationService({store:this.creation,coordinator:host.coordinator,snapshots:host.snapshots,verifier,createdRoot:options.createdRoot,...options.worker});
   const repository=new ProductSqliteRepository(host.revisions);
   // The facts are the real ones: the active commit, the control revision, the CURRENT
@@ -132,11 +140,15 @@ export class CreationApplication implements AgentHostApplication {
   const context=new ProjectContextService(host,this.creation,authority,workflow,undefined,options.instance?()=>options.instance!().generation:undefined,{
    // ONE receipt resolver for the creation job and the created task jobs. The context
    // and job.read read the same facts.
-   read:(jobId,principalId)=>{
+   read:(projectId,jobId,principalId)=>{
     if(this.#tasks){
      const receipt=this.#tasks.tasks.taskReceipt(jobId,principalId);
-     if(receipt)return receipt;
+     if(receipt&&receipt.project_id===projectId)return receipt;
     }
+    // Only the creation job of THIS project has a receipt producer here. A foreign job
+    // of an owned project has none, and it is reported as unavailable rather than as a
+    // revision conflict.
+    if(this.creation.forProject(projectId)?.job_id!==jobId)return null;
     return this.creation.receiptForJob(jobId,principalId);
    },
   });

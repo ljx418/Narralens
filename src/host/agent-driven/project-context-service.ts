@@ -19,7 +19,7 @@ export interface NativeContextFacts {
 export interface NativeContextPort {read(projectId:string):Promise<NativeContextFacts>;}
 /** The ONE receipt resolver of the active jobs. The creation job and the created task
  * jobs are read through it, so the context and job.read never disagree. */
-export interface ProjectJobReceiptPort {read(jobId:string,principalId:string):JobReceipt|null;}
+export interface ProjectJobReceiptPort {read(project_id:string,job_id:string,principal_id:string):JobReceipt|null;}
 /** Reads committed Host facts; never dispatches, registers a fake capability or invents a native ack. */
 export class ProjectContextService {
  readonly #repo:ProductSqliteRepository;
@@ -55,7 +55,7 @@ export class ProjectContextService {
    const creator=this.creation.forProject(projectId);
    const jobs:JobReceipt[]=activeJobs.map(row=>{
     // The shared resolver answers for the creation job and for the created task jobs.
-    const resolved=this.jobReceipts?.read(String(row.job_id),caller.principal_id)??null;
+    const resolved=this.jobReceipts?.read(projectId,String(row.job_id),caller.principal_id)??null;
     if(resolved){
      if(resolved.project_id!==projectId)throw new ProductError('REVISION_CONFLICT','The active job belongs to another project');
      return resolved;
