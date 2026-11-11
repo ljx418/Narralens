@@ -803,6 +803,8 @@ describe('the selection version port', () => {
       expect(again.accepted).toBe(true);
       expect(service.currentSelectionVersion('p1')).toBe(1);
       expect((await service.read('p1')).ack).not.toBeNull();
+      // A repeated report of the same state does not write a second acknowledgement.
+      expect((await ackStore.latest('p1'))?.ack_seq).toBe(1);
 
       // A different selection: the version moves and the acknowledgement is void.
       const changed = await service.observe(binding, envelope(5, 'selection', {
@@ -811,6 +813,10 @@ describe('the selection version port', () => {
       expect(changed.accepted).toBe(true);
       expect(service.currentSelectionVersion('p1')).toBe(2);
       expect((await service.read('p1')).ack).toBeNull();
+      // The changed selection produced no new acknowledgement of its own: the profile
+      // is complete but the selection moved, so the old acknowledgement is void and
+      // the next complete round writes the new one.
+      expect((await ackStore.latest('p1'))?.ack_seq).toBe(1);
 
       service.close();
       expect(() => service.currentSelectionVersion('p1')).toThrow('NATIVE_OBSERVATION_CLOSED');

@@ -747,6 +747,18 @@ export class NativeObservationService implements NativeContextPort, NativeObserv
    */
   async #acknowledge(session: SessionState, sequence: number): Promise<NativeAck | null> {
     if (!this.#profileComplete(session)) return null;
+    // The acknowledgement is written once per state, not once per report. A repeated
+    // report of the same state keeps the acknowledgement it already has, so the
+    // durable table records one acknowledgement per real change and not a row per
+    // event.
+    const existing = session.ack;
+    if (existing !== null
+      && existing.loaded_project_revision === session.binding.revision
+      && existing.loaded_snapshot_id === session.binding.snapshot_id
+      && existing.source_digest === session.binding.source_digest
+      && existing.selection_version === session.selectionVersion) {
+      return existing;
+    }
     const binding = this.#expectedBinding(session);
     let proof: NativeExpectedProof;
     try {
