@@ -1,10 +1,14 @@
 # A-R2 MEDIA - final evidence hashes (computed after every other file was written)
-utc=2026-11-11T17:30:43Z
-head=40aa51263602e8c583944246fe631bf35aecb826
+utc=2026-11-11T17:39:36Z
+head=f300c252aba32b1581b7cba82cc33041567f1acb
 branch=agent-driven/a-r1-media
 cwd=/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-MEDIA
 
 --- implementation commits since the release base ---
+f300c252aba32b1581b7cba82cc33041567f1acb docs(A-R2): record the MP01 iteration-2 correction and its old-source evidence
+6af9507fdceb3bff6ddb975d2d360ba0a7b8c6fd fix(A-R2): digest the closure length as the approved frame rational
+4abaf889ab8f89be70df01a60b7e90faaf3cc94e docs(A-R2): record the MP01 residual iteration and its reproduction
+624635d0e799987d81c5697e3c8ee777d1200ade docs(A-R2): refresh the final evidence hash list after batch 1
 40aa51263602e8c583944246fe631bf35aecb826 docs(A-R2): record the batch-1 correction, its negative evidence and the real-tool selection
 99b6ee8cd91f0ba77473618485272113256067f9 fix(A-R2): close the review batch 1 gaps MP01-MP04
 8d8788013a7d052649508660132d6bec93808e83 docs(A-R2): record the batch-1 follow-up dispatch and the four gaps to close
@@ -19,11 +23,11 @@ ef9e095c2ae8781fd58cfc6f4daaca3032d74364 feat(A-R2): implement the committed ren
 
 --- product paths under the released scope (sha256 of the working-tree bytes) ---
 cf160521775ea6fc0841a72af91b88599f88ecf5426429826d52cefa7e74dca1  src/host/render/ports.ts
-a61fb88c7565c90e8afd01d265c6b6f777c1bb06d5a6fe23f90d374ed8b18bd8  src/host/render/committed-render-phases.ts
+0d4dbf159e7ce639d823d87618ee15078aefd17f57c1e0b068be02d4cf821e5a  src/host/render/committed-render-phases.ts
 42cb9658e80e280dfd3842d30e023fad2740806b026f87c4e154b5792e5a10ab  src/host/render/render-snapshot.ts
 f69770afba85137d0dfd7a33be6115093538a411c2a4308295b523a018bbe93f  src/host/agent-driven/prepared-draft-verifier.ts
 6c0d0f18602d4fb7a0c334d51e2c5a0f0c21c7cab4ff4a980fbe77f8461eb596  src/host/render/assembly-ports.ts
-126fdcdf70d1c3ed7bc94e5df906932948e90e76850ca9d7433d7878b73948de  tests/agent-driven/media/committed-render-phases.test.ts
+eb47b75098380f885a3c87059e66488c24c4ee0dcf8daf5f3a7ffbb04074b539  tests/agent-driven/media/committed-render-phases.test.ts
 397d34a1fd5befbd9d5c4f86e4a9493ea93b6677531b10ca08444515f51765f8  tests/agent-driven/media/prepared-source-adoption-proof.test.ts
 8a2d83e7c04dac76b462c1ec3f058d54ddd1972fd58e145dce2e223a6937b560  tests/agent-driven/media/render-snapshot.test.ts
 1bfec77cb01bc2dce86c7728f30bec1943b7dd01e701d0903419d72e957c8455  tests/agent-driven/integration/created-draft-processor.test.ts
@@ -45,6 +49,9 @@ d86fdaae7a8adaaed6c267f45908d1fd5c16911c79cb242cd7d5f528dc67d3d1  docs/parallel/
 ba1356ff50ec2f13234ab4846751e62cac830e57ce965b2dd91ec6e7079f4583  docs/parallel/lane-media/A-R2-20261112/logs/vitest-batch1-negative-old-source.log
 6345e51a75e1beafcb5db12cea2bead1daf2cd6bd7b78c2e13167ec3661820fd  docs/parallel/lane-media/A-R2-20261112/logs/vitest-committed-render-phases-001.log
 1711f3cc26ebd1ccf82af6d37e55a8a1e338e2e75e152dedfe8ec3e5bf436912  docs/parallel/lane-media/A-R2-20261112/logs/vitest-media-module-002.log
+5928677f484b563d5e77868da1d2d5dfc81dbd6a4629fb99be867174856e2c46  docs/parallel/lane-media/A-R2-20261112/logs/vitest-mp01-iter2-fixed-001.log
+4a29ed4c0c81adf37c9130cef97c5e5c7c9541ffb1ee97fd34a7435f6196ec42  docs/parallel/lane-media/A-R2-20261112/logs/vitest-mp01-iter2-fixed-002.log
+44272e39cbae1675d4ba93a3a2bb74e8a281ce9eafd0f2c6d3c76636d82028f8  docs/parallel/lane-media/A-R2-20261112/logs/vitest-mp01-iter2-negative-old-source.log
 30e088a8eb6ce9b4cb0ef1a9a74c0bb1715911105f7ebe35825ad637cf15157d  docs/parallel/lane-media/A-R2-20261112/logs/vitest-render-snapshot-001.log
 
 # The sha256 of this file itself is reported externally, in the message to the parent, because a file cannot carry its own digest.
