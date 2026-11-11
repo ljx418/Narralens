@@ -28,7 +28,7 @@ import {PersistentJobStore} from '../persistent-job-store.js';
 import {FixedWorkflowService} from '../creative/fixed-workflow-service.js';
 import {createTrustedCallerContext,ProductError} from '../creative/trusted-context.js';
 import {CreativeProjectAuthority} from './creative-project-authority.js';
-import {ProjectContextService} from './project-context-service.js';
+import {ProjectContextService,type ProjectJobReceiptPort} from './project-context-service.js';
 import {LocalAssetRegistry,type LocalAssetRegistryOptions} from './local-asset-registry.js';
 import {CommittedSnapshotAuthority} from './committed-snapshot-authority.js';
 import {AgentRouteError} from './agent-http-router.js';
@@ -137,21 +137,20 @@ export class CreationApplication implements AgentHostApplication {
    const jobs=host.jobs instanceof PersistentJobStore?host.jobs:new PersistentJobStore(host.revisions);
    this.#tasks=new CreatedTaskApplication({revisions:host.revisions,repository,workflow,authority,jobs,worker:{pollMs:options.worker?.pollMs??250},createProcessor:(store)=>new CreatedDraftTaskProcessor(host,store,gate,repository,workflow,authority,this.localAssets!,verifier,{root:taskRoot,vendorRoot:options.vendorRoot,protectedRoots:[options.createdRoot,host.snapshots.projectRoot(''),options.vendorRoot],width:stage.width,height:stage.height})});
   }
-  const context=new ProjectContextService(host,this.creation,authority,workflow,undefined,options.instance?()=>options.instance!().generation:undefined,{
-   // ONE receipt resolver for the creation job and the created task jobs. The context
-   // and job.read read the same facts.
-   read:(projectId,jobId,principalId)=>{
-    if(this.#tasks){
-     const receipt=this.#tasks.tasks.taskReceipt(jobId,principalId);
-     if(receipt&&receipt.project_id===projectId)return receipt;
-    }
-    // Only the creation job of THIS project has a receipt producer here. A foreign job
-    // of an owned project has none, and it is reported as unavailable rather than as a
-    // revision conflict.
-    if(this.creation.forProject(projectId)?.job_id!==jobId)return null;
-    return this.creation.receiptForJob(jobId,principalId);
-   },
-  });
+  // One owner/project/Job lookup, shared by Context and job.read. An unknown
+  // producer is unavailable, not a bootstrap revision conflict or hidden Job.
+  const jobReceipts:ProjectJobReceiptPort={read:(projectId,jobId,principalId)=>{
+   // Bootstrap receipts exist before the first committed origin. Receipt visibility
+   // uses reserved project ownership; creative/context authority still requires commit.
+   if(!this.creation.ownsProject(projectId,principalId))throw new AgentRouteError('NOT_FOUND');
+   const job=host.revisions.readJob(jobId);
+   if(!job||job.project_id!==projectId)throw new AgentRouteError('NOT_FOUND');
+   const taskReceipt=this.#tasks?.tasks.taskReceipt(jobId,principalId)??null;
+   if(taskReceipt){if(taskReceipt.project_id!==projectId)throw new AgentRouteError('NOT_FOUND');return taskReceipt;}
+   if(this.creation.forProject(projectId)?.job_id!==jobId)return null;
+   return this.creation.receiptForJob(jobId,principalId);
+  }};
+  const context=new ProjectContextService(host,this.creation,authority,workflow,undefined,options.instance?()=>options.instance!().generation:undefined,jobReceipts);
   const creative=creativeHandlers(new CreativeService({repository,artifactAuthority:authority.assertArtifact,contentAuthority:authority.assertContent}));
   const caller=(principal:AgentPrincipal)=>{
    if(principal.channel==='native_bridge')throw new AgentRouteError('ORIGIN_REJECTED');
@@ -180,18 +179,8 @@ export class CreationApplication implements AgentHostApplication {
    },
    'job.read':async(input,principal)=>{
     if(principal.channel==='native_bridge')throw new AgentRouteError('ORIGIN_REJECTED');
-    if(!this.creation.ownsProject(input.project_id,principal.principal_id))throw new AgentRouteError('NOT_FOUND');
-    const job=host.revisions.readJob(input.job_id);
-    if(!job||job.project_id!==input.project_id)throw new AgentRouteError('NOT_FOUND');
-    // A created task and a created project share ONE receipt resolver, so a task job
-    // and a creation job are read through the same facts.
-    if(this.#tasks){
-     const taskReceipt=this.#tasks.tasks.taskReceipt(input.job_id,principal.principal_id);
-     if(taskReceipt&&taskReceipt.project_id===input.project_id)return taskReceipt;
-    }
-    if(this.creation.forProject(input.project_id)?.job_id!==input.job_id)throw new AgentRouteError('CAPABILITY_UNAVAILABLE');
-    const receipt=this.creation.receiptForJob(input.job_id,principal.principal_id);
-    if(!receipt||receipt.project_id!==input.project_id)throw new AgentRouteError('NOT_FOUND');
+    const receipt=jobReceipts.read(input.project_id,input.job_id,principal.principal_id);
+    if(!receipt)throw new AgentRouteError('CAPABILITY_UNAVAILABLE');
     return receipt;
    },
    'task.prepare':async(input,principal)=>{
@@ -273,21 +262,22 @@ export class CreationApplication implements AgentHostApplication {
    if(input.surface==='agent.v1'){
     const route=agentRoutes.find(row=>row.id===input.operation);
     if(!route)throw new AgentRouteError('CAPABILITY_UNAVAILABLE');
+    if(route.input===null&&input.input!==null&&(typeof input.input!=='object'||Array.isArray(input.input)||Object.keys(input.input).length!==0))throw new AgentRouteError('INVALID_REQUEST');
     const validated=route.input===null?undefined:validateAgentRouteInput(route.id as AgentRouteId,input.input);
     const result=await (this.dispatcher.invoke as unknown as (id:string,value:unknown,who:AgentPrincipal)=>Promise<unknown>)(route.id,validated,principal);
     return {status:200,body:validateAgentRouteOutput(route.id as AgentRouteId,result)};
    }
    if(input.surface==='local-assets.v1'){
     if(!this.#inventory)throw new AgentRouteError('CAPABILITY_UNAVAILABLE');
-    if(input.operation==='local-source-files.read')return {status:200,body:await this.#inventory.listSourceFiles(projectId,caller,this.#query(input.input))};
+    if(input.operation==='local-source-files.read')return {status:200,body:await this.#inventory.listSourceFiles(projectId,caller,this.#query(input.input,projectId))};
     if(input.operation==='local-assets.import')return {status:200,body:await this.#inventory.importAsset(projectId,input.input,caller)};
-    if(input.operation==='local-assets.read.ui'||input.operation==='asset-inventory.read')return {status:200,body:await this.#inventory.readInventory(projectId,caller,this.#query(input.input))};
+    if(input.operation==='local-assets.read.ui'||input.operation==='asset-inventory.read')return {status:200,body:await this.#inventory.readInventory(projectId,caller,this.#query(input.input,projectId))};
     throw new AgentRouteError('CAPABILITY_UNAVAILABLE');
    }
    if(input.surface==='workbench.v1'){
     if(input.operation==='native.reopen'){
      // The input is exactly empty: the project comes from the delegate.
-     if(input.input!==undefined&&input.input!==null&&(typeof input.input!=='object'||Array.isArray(input.input))&&Object.keys(input.input as object).length>0)throw new AgentRouteError('INVALID_REQUEST');
+     if(input.input===null||typeof input.input!=='object'||Array.isArray(input.input)||Object.keys(input.input).length!==0)throw new AgentRouteError('INVALID_REQUEST');
      return {status:200,body:await this.#openNative(projectId,principal)};
     }
     if(input.operation==='review.part.describe'){
@@ -313,13 +303,15 @@ export class CreationApplication implements AgentHostApplication {
  }
 
  /** The closed query of the adjunct reads. */
- #query(value:unknown):{limit?:number;cursor?:string|null}{
+ #query(value:unknown,projectId:string):{limit?:number;cursor?:string|null}{
   if(value===undefined||value===null)return {};
   if(typeof value!=='object'||Array.isArray(value))throw new AgentRouteError('INVALID_REQUEST');
   const record=value as Record<string,unknown>;
+  if(Object.keys(record).some(key=>!['project_id','limit','cursor'].includes(key)))throw new AgentRouteError('INVALID_REQUEST');
+  if(record['project_id']!==undefined&&(typeof record['project_id']!=='string'||record['project_id']!==projectId))throw new AgentRouteError('INVALID_REQUEST');
   const out:{limit?:number;cursor?:string|null}={};
   if(record['limit']!==undefined){
-   if(!Number.isSafeInteger(record['limit']))throw new AgentRouteError('INVALID_REQUEST');
+   if(!Number.isSafeInteger(record['limit'])||(record['limit'] as number)<1||(record['limit'] as number)>64)throw new AgentRouteError('INVALID_REQUEST');
    out.limit=record['limit'] as number;
   }
   if(record['cursor']!==undefined&&record['cursor']!==null){

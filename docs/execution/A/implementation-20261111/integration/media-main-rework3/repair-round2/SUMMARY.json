@@ -1,0 +1,29 @@
+{
+  "status": "SELF_VALIDATED_DELTA_REVIEW_PENDING",
+  "findings": "M1/M2/m1/m2 from05889NOTPASS",
+  "positive": {
+    "exit": 0,
+    "cases": 11,
+    "log_sha256": "85cf72ac3def81b4c161d95764e01003a2a6be701d5bc29bc53ff3d221dcebae"
+  },
+  "negative_controls": {
+    "reader": "2expectedfail, noHost/renderer",
+    "other5": {
+      "test_exit": 1,
+      "cases_failed": 5,
+      "restored": true,
+      "log_sha256": "7450bc5985c8b4f7f4c6e011256f55daf16a33958807a9c5ba0c10ef70348535"
+    }
+  },
+  "public_types": "16c0c401f34116264f3515eee8af039333c9124b, unchanged wire shapes; post-extraction reader2passed; wholeA NOT_RUN",
+  "cleanup": {
+    "recorded_command_pids_absent": {
+      "928673": true,
+      "932655": true,
+      "932762": true,
+      "940989": true,
+      "949004": true
+    },
+    "limit": "exact command/test PID observations plus per-test ownedfixture/fd checks, not global service absence"
+  }
+}

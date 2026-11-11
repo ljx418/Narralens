@@ -1,5 +1,6 @@
 import type {
   Brief,
+  ReviewDecision,
   ReviewPackage,
   ReviewPart,
   Script,
@@ -11,7 +12,7 @@ import { BriefView, ScriptView, StoryboardView } from "./content-views.js";
  * The creative review panel.
  *
  * It shows one review package and the creative objects it belongs to, and it offers the
- * decisions the package allows. Three rules shape it:
+ * decisions the package allows. Four rules shape it:
  *
  * - **The chapter bundle is one package.** The preview, the narration, the subtitles, the
  *   shot summary and the rights/quality evidence are parts of the same package and the
@@ -21,6 +22,10 @@ import { BriefView, ScriptView, StoryboardView } from "./content-views.js";
  * - **Closing is not deciding.** The close button and the "viewed" state produce no
  *   decision at all. Accepting, asking for changes and rejecting are separate actions,
  *   and only the ones the package allows are offered.
+ * - **A decision is not a commit and not an acknowledgement.** When the Host records a
+ *   decision, the panel says the decision was recorded. The adoption is a separate fact
+ *   with its own state, and the panel never turns "accepted" into "adopted" or
+ *   "loaded".
  */
 
 export interface CreativeReviewPanelProps {
@@ -50,6 +55,42 @@ export interface CreativeReviewPanelProps {
   readonly onOpenPart?: (part: ReviewPart) => void;
   /** Close the panel. This produces no decision. */
   readonly onClose?: () => void;
+  /**
+   * The decision the Host recorded, when there is one.
+   *
+   * It is the record of a decision, not of a commit: the panel shows it as such and
+   * never as an adoption.
+   */
+  readonly decision?: ReviewDecision | null;
+  /** What is known about the adoption a decision may have started. */
+  readonly adoption?: ReviewAdoptionState | null;
+  /**
+   * The controlled media address of *this* instance.
+   *
+   * A `download_ref` is only followed when it belongs to this instance: another
+   * instance's address is shown as unusable rather than linked.
+   */
+  readonly controlledMediaBase?: string;
+  /**
+   * Whether a decision is in flight.
+   *
+   * A decision that is on its way must not be sent twice: the buttons are disabled
+   * until the Host has answered.
+   */
+  readonly busy?: boolean;
+  /**
+   * Whether the package on screen is no longer the one the Host would answer about.
+   *
+   * The last known package stays on screen, but it cannot be decided until it has been
+   * read again.
+   */
+  readonly stale?: boolean;
+}
+
+/** The adoption state the panel shows. It is never derived from the decision itself. */
+export interface ReviewAdoptionState {
+  readonly state: "not_requested" | "requested" | "registered" | "unknown";
+  readonly reason: string;
 }
 
 const PART_LABEL: Readonly<Record<ReviewPart["kind"], string>> = {
@@ -68,6 +109,13 @@ const KIND_LABEL: Readonly<Record<ReviewPackage["kind"], string>> = {
   cover: "封面",
 };
 
+const ADOPTION_LABEL: Readonly<Record<ReviewAdoptionState["state"], string>> = {
+  not_requested: "尚未请求采用",
+  requested: "采用待完成",
+  registered: "采用已登记",
+  unknown: "采用状态未知",
+};
+
 export function CreativeReviewPanel(props: CreativeReviewPanelProps) {
   const packageDocument = props.package;
   if (packageDocument === null) {
@@ -84,9 +132,20 @@ export function CreativeReviewPanel(props: CreativeReviewPanelProps) {
   const allowed = new Set(packageDocument.allowed_choices);
   const canAdopt = allowed.has("accept_and_adopt") && packageDocument.impact !== null;
   const isCover = packageDocument.kind === "cover";
+  const decision = props.decision ?? null;
+  const adoption = props.adoption ?? null;
+  // A package that is stale, or that the Host has already decided, cannot be decided
+  // again: the buttons are disabled rather than offered and refused.
+  const decidable = packageDocument.state === "pending" && props.busy !== true && props.stale !== true;
 
   return (
-    <section className="nl-review" aria-label="创作审阅">
+    <section
+      className="nl-review"
+      aria-label="创作审阅"
+      data-nl-review-package={packageDocument.package_id}
+      data-nl-review-package-version={packageDocument.version}
+      data-nl-review-run={packageDocument.run_id}
+    >
       <header className="nl-review-head">
         <div>
           <span className="nl-result-label">{KIND_LABEL[packageDocument.kind]}</span>
@@ -113,10 +172,12 @@ export function CreativeReviewPanel(props: CreativeReviewPanelProps) {
                     在工作台中查看
                   </button>
                 )}
-                {part.download_ref === null ? (
-                  <span className="nl-muted">尚无可下载文件</span>
+                {downloadOf(part.download_ref, props.controlledMediaBase) === null ? (
+                  <span className="nl-muted">
+                    {part.download_ref === null ? "尚无可下载文件" : "下载不可用：不是本实例的受控引用"}
+                  </span>
                 ) : (
-                  <a href={part.download_ref}>下载</a>
+                  <a href={downloadOf(part.download_ref, props.controlledMediaBase)!}>下载</a>
                 )}
               </li>
             ))}
@@ -129,6 +190,12 @@ export function CreativeReviewPanel(props: CreativeReviewPanelProps) {
               ? "未记录"
               : packageDocument.source_shot_ids.join("、")}
           </p>
+          {packageDocument.reuse_of_package_id === null ? null : (
+            <p className="nl-muted" data-nl-review-reuse={packageDocument.reuse_of_package_id}>
+              复用自上一份包 {packageDocument.reuse_of_package_id}：内容与来源沿用该包的真实记录。
+            </p>
+          )}
+          <p className="nl-muted">预览是准备内容，尚未采用，也不是正式交付。</p>
         </section>
 
         <section className="nl-review-content" aria-label="创作内容">
@@ -138,24 +205,40 @@ export function CreativeReviewPanel(props: CreativeReviewPanelProps) {
         </section>
       </div>
 
+      {decision === null ? null : (
+        <section className="nl-review-decision" aria-label="决定记录">
+          <p className="nl-review-decision-line" role="status" aria-live="polite"
+            data-nl-review-decision={decision.decision_id}>
+            决定已登记：{decision.choice} · {decision.decision_id}
+          </p>
+          <p className="nl-muted">登记一条决定不等于已经提交，也不等于编辑区已经载入。</p>
+        </section>
+      )}
+
+      {adoption === null ? null : (
+        <p className="nl-review-adoption" data-nl-review-adoption={adoption.state}>
+          {ADOPTION_LABEL[adoption.state]}：{adoption.reason}
+        </p>
+      )}
+
       <footer className="nl-review-actions">
         <button
           type="button"
-          disabled={!allowed.has("accept") || props.onAccept === undefined}
+          disabled={!decidable || !allowed.has("accept") || props.onAccept === undefined}
           onClick={() => props.onAccept?.()}
         >
           接受
         </button>
         <button
           type="button"
-          disabled={!allowed.has("changes_requested") || props.onRequestChanges === undefined}
+          disabled={!decidable || !allowed.has("changes_requested") || props.onRequestChanges === undefined}
           onClick={() => props.onRequestChanges?.()}
         >
           提出修改
         </button>
         <button
           type="button"
-          disabled={!allowed.has("reject") || props.onReject === undefined}
+          disabled={!decidable || !allowed.has("reject") || props.onReject === undefined}
           onClick={() => props.onReject?.()}
         >
           拒绝
@@ -163,13 +246,36 @@ export function CreativeReviewPanel(props: CreativeReviewPanelProps) {
         <button
           type="button"
           className="nl-primary"
-          disabled={!canAdopt || props.onAcceptAndAdopt === undefined}
+          disabled={!decidable || !canAdopt || props.onAcceptAndAdopt === undefined}
           onClick={() => props.onAcceptAndAdopt?.()}
         >
           确认并采用
         </button>
+        {packageDocument.state === "stale" ? (
+          <p className="nl-muted" data-nl-review-stale="true">这份内容包已过期：请重新读取当前待审的内容包。</p>
+        ) : null}
+        {props.stale === true ? (
+          <p className="nl-muted" data-nl-review-stale="true">
+            这份内容包没有重新读到：它不能被决定了，请稍后重试。
+          </p>
+        ) : null}
         <p className="nl-muted">关闭面板不会产生任何决定。</p>
       </footer>
     </section>
   );
+}
+
+/**
+ * The download address of this instance, or `null`.
+ *
+ * A `download_ref` is the frozen contract's own opaque token — a path, a URL or a
+ * foreign address is not one, and is never turned into one. The controlled address is
+ * built from this instance's own base and that token, and nothing else is linked: a
+ * panel never links an address it cannot vouch for.
+ */
+function downloadOf(ref: string | null, base: string | undefined): string | null {
+  if (ref === null) return null;
+  if (base === undefined || base === "") return null;
+  if (!/^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$/.test(ref)) return null;
+  return `${base}${encodeURIComponent(ref)}`;
 }

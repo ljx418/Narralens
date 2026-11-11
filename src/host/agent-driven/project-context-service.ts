@@ -55,15 +55,13 @@ export class ProjectContextService {
    const creator=this.creation.forProject(projectId);
    const jobs:JobReceipt[]=activeJobs.map(row=>{
     // The shared resolver answers for the creation job and for the created task jobs.
-    const resolved=this.jobReceipts?.read(projectId,String(row.job_id),caller.principal_id)??null;
-    if(resolved){
-     if(resolved.project_id!==projectId)throw new ProductError('REVISION_CONFLICT','The active job belongs to another project');
-     return resolved;
-    }
-    if(String(row.job_id)!==creator?.job_id)throw new ProductError('CAPABILITY_UNAVAILABLE','The active job receipt producer is not registered');
-    const result=this.creation.receiptForJob(String(row.job_id),caller.principal_id);
-    if(!result)throw new ProductError('CAPABILITY_UNAVAILABLE','The active job receipt producer is not registered');
-    return result;
+    const id=String(row.job_id);
+    const resolved=this.jobReceipts
+     ?this.jobReceipts.read(projectId,id,caller.principal_id)
+     :id===creator?.job_id?this.creation.receiptForJob(id,caller.principal_id):null;
+    if(!resolved)throw new ProductError('CAPABILITY_UNAVAILABLE','The active job receipt producer is not registered');
+    if(resolved.project_id!==projectId||resolved.job_id!==id)throw new ProductError('REVISION_CONFLICT','The active job receipt binding changed');
+    return resolved;
    });
    if(!this.native&&this.host.revisions.compose(db=>db.prepare('SELECT 1 FROM cp_a0_native_ack WHERE project_id=? LIMIT 1').get(projectId)))throw new ProductError('CAPABILITY_UNAVAILABLE','Durable native state needs its trusted bridge producer');
    if(native.ack&&native.ack.project_id!==projectId)throw new ProductError('NATIVE_ACK_STALE','The native state belongs to another project');

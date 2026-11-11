@@ -1,0 +1,18 @@
+{
+  "slot": "R1-MAIN-MEDIA-SAFETY-NEGATIVE-008",
+  "purpose": "five expected failures on old05889: publication substitution/partial-zero writes/finalcancel-close",
+  "argv": [
+    "corepack",
+    "pnpm",
+    "test",
+    "tests/agent-driven/media/preview-prepared-source.test.ts",
+    "--maxWorkers=1",
+    "--minWorkers=1",
+    "-t",
+    "cannot redirect|handles a .* target write|does not expose"
+  ],
+  "start": "2026-11-11T15:26:37.161953+00:00",
+  "fixed_backup": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/integration/media-main-rework3/repair-round2/fixed-source-before-negative.ts",
+  "fixed_sha256": "b50016728357c91bb748314297fa9e5e87fbfbf33b48caa7e799c3889032bafc",
+  "pid": 940989
+}

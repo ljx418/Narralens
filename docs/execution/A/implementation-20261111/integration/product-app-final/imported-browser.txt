@@ -1,0 +1,31 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:1014243) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/agent-driven/headless/created-native-entry.test.ts (1 test | 1 failed) 42173ms
+   × uses the actual native entry in a quiet browser with the original editor and the existing panel, without a fabricated loaded acknowledgement 42172ms
+     → {"hash":"","workspace":1,"timeline":true,"panel":null,"proxies":0,"range":null,"phase":"","proofStored":true}: expected false to be true // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/headless/created-native-entry.test.ts > uses the actual native entry in a quiet browser with the original editor and the existing panel, without a fabricated loaded acknowledgement
+AssertionError: {"hash":"","workspace":1,"timeline":true,"panel":null,"proxies":0,"range":null,"phase":"","proofStored":true}: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ tests/agent-driven/headless/created-native-entry.test.ts:30:42
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed (1)
+   Start at  00:07:36
+   Duration  50.16s (transform 3.01s, setup 0ms, collect 6.03s, tests 42.17s, environment 0ms, prepare 1.29s)
+

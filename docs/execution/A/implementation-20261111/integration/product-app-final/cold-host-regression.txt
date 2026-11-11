@@ -1,0 +1,26 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:1033406) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/creative-context-host.test.ts (14 tests) 27452ms
+   ✓ writes Script and bound Storyboard through real HTTP and observes them beside the actual committed native project  2032ms
+   ✓ rejects foreign owner access and unresolved or altered lineage without inserting content/outbox/command facts  1765ms
+   ✓ keeps original artifact replay after input changes but refuses new stale writes and rejects dangling storyboard paragraphs  1759ms
+   ✓ reports an actual non-creator active Job as missing its producer, never hides it or misreports a revision conflict  1749ms
+   ✓ does not resolve another real project artifact even for the same owner and matching hash  2563ms
+   ✓ binds new draft writes to the question closure, while replay keeps the original artifact after a new question  1883ms
+   ✓ maps a real native source drift to conflict and checks ownership before unavailable source lookup  1891ms
+   ✓ component observer uses the authorization written during native observation in its one final SQLite projection  1925ms
+   ✓ component observer reports expired grants honestly and prefers a new valid authorization over expired predecessors  1886ms
+   ✓ rejects a committed author source replaced by a FIFO without hanging the HTTP request or Host close  1878ms
+   ✓ component safe-control pause still commits with a future-issued grant and does not authorize a new action  2266ms
+   ✓ component safe-control cancel still commits with a future-issued grant and does not authorize a new action  2022ms
+   ✓ binds content relay project scope to its owned project and originating intake while preserving pre-project decisions  1923ms
+   ✓ observes a real owned project before its first Run without creating workflow, Job or command facts  1908ms
+
+ Test Files  1 passed (1)
+      Tests  14 passed (14)
+   Start at  00:16:58
+   Duration  35.37s (transform 2.66s, setup 0ms, collect 6.07s, tests 27.45s, environment 0ms, prepare 1.22s)
+

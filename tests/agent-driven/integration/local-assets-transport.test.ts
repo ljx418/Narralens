@@ -182,3 +182,32 @@ it('refuses an unknown candidate, a foreign reader and an unusable cursor withou
   expect(inventory.items).toEqual([]);
  }finally{await f.close();}
 },180000);
+
+
+it('uses the real independent UI delegate for strict empty reopen and closed paginated source reads',async()=>{
+ const f=await fixture();try{
+  const opened=await f.ui(`/api/ui/v1/projects/${f.projectId}/native-open`,{});
+  expect(opened.status).toBe(200);const entry=new URL((await opened.json() as {url:string}).url);
+  const exchanged=await fetch(entry.origin+'/narralens/session/exchange',{method:'POST',headers:{Origin:entry.origin,'Content-Type':'application/json'},body:JSON.stringify({ticket:entry.hash.slice('#native_ticket='.length)})});
+  expect(exchanged.status).toBe(200);
+  const grant=await exchanged.json() as {ui?:{csrf:string}};
+  expect(grant.ui).toBeDefined();
+  const cookies=exchanged.headers.getSetCookie();
+  const cookie=cookies.find(value=>/^narralens_ui_[0-9a-f]+=/.test(value))!.split(';')[0]!;
+  const call=(surface:string,operation:string,input:unknown)=>fetch(entry.origin+'/narralens/api/ui/call',{method:'POST',headers:{Origin:entry.origin,Cookie:cookie,'X-Narralens-Workbench-CSRF':grant.ui!.csrf,'Content-Type':'application/json'},body:JSON.stringify({surface,operation,input})});
+  const before=f.host.revisions.activeCommit(f.projectId);
+  expect((await call('agent.v1','health.read',{unexpected:true})).status).toBe(400);
+  for(const input of [null,[],0,'', {unexpected:true}])expect((await call('workbench.v1','native.reopen',input)).status).toBe(400);
+  for(const input of [{root:'/'},{limit:0},{limit:65},{limit:'1'},{cursor:1},{project_id:123}])expect((await call('local-assets.v1','local-source-files.read',input)).status).toBe(400);
+  const page1=await call('local-assets.v1','local-source-files.read',{project_id:f.projectId,limit:1,cursor:null});
+  expect(page1.status).toBe(200);
+  const first=await page1.json() as {items:Array<{candidate_id:string}>;cursor_next:string|null};
+  expect(first.items).toHaveLength(1);expect(typeof first.cursor_next).toBe('string');
+  const page2=await call('local-assets.v1','local-source-files.read',{project_id:f.projectId,limit:1,cursor:first.cursor_next});
+  expect(page2.status).toBe(200);
+  const second=await page2.json() as {items:Array<{candidate_id:string}>;cursor_next:string|null};
+  expect(second.items).toHaveLength(1);expect(second.items[0]!.candidate_id).not.toBe(first.items[0]!.candidate_id);
+  expect(second.cursor_next).toBeNull();
+  expect(f.host.revisions.activeCommit(f.projectId)).toEqual(before);
+ }finally{await f.close();}
+},180000);

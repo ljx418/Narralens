@@ -1,0 +1,19 @@
+{
+  "head": "d5821863ca9670ff8d2f25dad52e3be26a70982c",
+  "argv": [
+    "corepack",
+    "pnpm",
+    "exec",
+    "vitest",
+    "run",
+    "tests/agent-driven/media/preview-prepared-source.test.ts",
+    "--maxWorkers=1",
+    "--minWorkers=1"
+  ],
+  "inputs": {
+    "src/host/render/preview-prepared-source.ts": "630d9222c33bcd44e01bd2dad46328e59c4db95dc90069af9b310be0d51fced0",
+    "tests/agent-driven/media/preview-prepared-source.test.ts": "1e0e32e9d30f5576c328d1a3622e059093ffde4aac7e272d94c6e7ccdf204c83"
+  },
+  "start": "2026-11-11T15:59:27.448083+00:00",
+  "scope": "14 real diagnostic preview cases; not A real-footage or human acceptance"
+}

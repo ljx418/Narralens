@@ -1,8 +1,11 @@
 import {preparedDraftFixture,waitForCompletedDraft,readBinding,registryFacts} from '../integration/helpers/created-draft-fixture.js';
-import {it,expect} from 'vitest';
+import {it,expect,vi,afterEach} from 'vitest';
 import {execFileSync} from 'node:child_process';
 import {createHash} from 'node:crypto';
-import {mkdir,readFile,readdir,writeFile} from 'node:fs/promises';
+import {mkdir,readFile,readdir,writeFile,mkdtemp,rm,rename,symlink} from 'node:fs/promises';
+import {constants} from 'node:fs';
+import {tmpdir} from 'node:os';
+import {NativeRenderer} from '../../../src/host/render/native-renderer.js';
 import {join} from 'node:path';
 import {createdProjectFixture} from '../integration/helpers/created-project-fixture.js';
 import {LocalAssetRegistry} from '../../../src/host/agent-driven/local-asset-registry.js';
@@ -14,6 +17,44 @@ import {createTrustedCallerContext} from '../../../src/host/creative/trusted-con
 import type {Script,Storyboard,TaskPrepare} from '../../../src/contracts/agent-driven-types.js';
 import type {TaskReservation} from '../../../src/host/agent-driven/created-task-store.js';
 import type {CompletedPreparedSourceV1,NativeDraftAsset,PreparedPreviewBindingV1,PreparedPreviewReceiptV1} from '../../../src/host/render/assembly-ports.js';
+
+const ioFault=vi.hoisted(()=>({cleanupRoot:'',onCleanupClose:undefined as undefined|(()=>void),root:'',readerMode:'' as ''|'read'|'hash-eof',onRead:undefined as undefined|(()=>Promise<void>),beforePublish:undefined as undefined|(()=>Promise<void>),onFifthSync:undefined as undefined|(()=>void),shortWrite:false,zeroWrite:false,shortHits:0,closes:0,publishes:0}));
+vi.mock('node:fs/promises',async importOriginal=>{
+ const actual=await importOriginal<typeof import('node:fs/promises')>();
+ return {...actual,open:async(path:Parameters<typeof actual.open>[0],flags:Parameters<typeof actual.open>[1],...rest:any[])=>{
+  const name=String(path),object=/\/obj_[a-f0-9]{32}$/.test(name);
+  if(object&&typeof flags==='number'&&(flags&constants.O_CREAT)!==0&&ioFault.beforePublish){const hook=ioFault.beforePublish;ioFault.beforePublish=undefined;await hook();}
+  const handle=await (actual.open as (...args:any[])=>ReturnType<typeof actual.open>)(path,flags,...rest);
+  if(name===ioFault.cleanupRoot&&typeof flags==='number'&&(flags&constants.O_DIRECTORY)!==0){
+   const close=handle.close.bind(handle);
+   handle.close=async()=>{const hook=ioFault.onCleanupClose;ioFault.onCleanupClose=undefined;hook?.();await close();};
+  }
+  if(object&&typeof flags==='number'&&(flags&constants.O_CREAT)!==0){
+   const sync=handle.sync.bind(handle);
+   handle.sync=async()=>{ioFault.publishes++;if(ioFault.publishes===5)ioFault.onFifthSync?.();await sync();};
+  }
+  if(object&&ioFault.root&&name.startsWith(ioFault.root+'/')){
+   const read=handle.read.bind(handle) as (...args:any[])=>Promise<any>,close=handle.close.bind(handle);
+   handle.close=async()=>{ioFault.closes++;await close();};
+   handle.read=(async(...args:any[])=>{
+    if(ioFault.readerMode==='read'&&typeof args[3]==='number'&&ioFault.onRead){const hook=ioFault.onRead;ioFault.onRead=undefined;await hook();}
+    const result=await read(...args);
+    if(ioFault.readerMode==='hash-eof'&&args[3]===null&&result.bytesRead===0&&ioFault.onRead){const hook=ioFault.onRead;ioFault.onRead=undefined;await hook();}
+    return result;
+   }) as typeof handle.read;
+  }
+  if(name.endsWith('/film.html')&&typeof flags==='number'&&(flags&constants.O_CREAT)!==0&&(ioFault.shortWrite||ioFault.zeroWrite)){
+   const write=handle.write.bind(handle) as (...args:any[])=>Promise<any>;
+   handle.write=(async(buffer:Buffer,offset:number,length:number,position?:number|null)=>{
+    ioFault.shortHits++;
+    if(ioFault.zeroWrite)return {bytesWritten:0,buffer};
+    return write(buffer,offset,Math.min(length,7),position??null);
+   }) as typeof handle.write;
+  }
+  return handle;
+ }};
+});
+afterEach(()=>{Object.assign(ioFault,{cleanupRoot:'',onCleanupClose:undefined,root:'',readerMode:'',onRead:undefined,beforePublish:undefined,onFifthSync:undefined,shortWrite:false,zeroWrite:false,shortHits:0,closes:0,publishes:0});vi.restoreAllMocks();});
 
 const vendorRoot='/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm';
 const sha=(bytes:Uint8Array)=>createHash('sha256').update(bytes).digest('hex');
@@ -201,5 +242,91 @@ it('refuses a part whose content type or media facts do not belong to its slot',
   await expect(f.reader.open(retype('text/plain; charset=utf-8',video.media_facts),video.object_id)).rejects.toBeTruthy();
   await expect(f.reader.open(retype(video.content_type,{kind:'text'}),video.object_id)).rejects.toBeTruthy();
   f.verifier.release(proof);
+ }finally{await f.close();}
+},600000);
+
+
+it.each(['read','hash-eof'] as const)('refuses a same-inode rewrite during %s and closes its verified descriptor once',async mode=>{
+ const root=await mkdtemp(join(tmpdir(),'narralens-review-reader-race-'));
+ try{
+  const evidence='docs/parallel/lane-media/A-R1-20261111/evidence/prepared-preview-real-1794409475326';
+  const receipt=JSON.parse(await readFile(join(evidence,'receipt.json'),'utf8')) as PreparedPreviewReceiptV1;
+  const part=receipt.parts.find(p=>p.slot==='preview')!,path=join(root,part.object_id),bytes=await readFile(join(evidence,'preview.mp4'));
+  await writeFile(path,bytes,{mode:0o600});
+  ioFault.root=root;ioFault.readerMode=mode;
+  ioFault.onRead=async()=>{const changed=Buffer.from(bytes);changed[0]=changed[0]!^1;await writeFile(path,changed);};
+  const reader=new PreparedReviewMediaReaderImpl(root);
+  if(mode==='hash-eof'){
+   let unexpected:Awaited<ReturnType<PreparedReviewMediaReaderImpl['open']>>|undefined;
+   try{await expect(reader.open(receipt,part.object_id).then(handle=>{unexpected=handle;return 'unexpected verified handle';})).rejects.toBeTruthy();}
+   finally{await unexpected?.close();}
+  }
+  else{
+   const handle=await reader.open(receipt,part.object_id);
+   try{await expect(handle.read({offset:0,length:bytes.length}).then(()=>'unexpected changed bytes')).rejects.toBeTruthy();}
+   finally{await handle.close();}
+  }
+  expect(ioFault.onRead).toBeUndefined();expect(ioFault.closes).toBe(1);
+ }finally{await rm(root,{recursive:true,force:true});}
+});
+
+it('cannot redirect object publication into author source by replacing the object directory at open',async()=>{
+ const f=await fixture();try{
+  const authorBefore=await treeDigest(f.authorRoot);
+  const held=join(f.root,'objects-held');
+  ioFault.beforePublish=async()=>{await rename(f.objects,held);await symlink(f.authorRoot,f.objects,'dir');};
+  const proof=await f.verifier.proveForRead(f.completed,f.binding,f.registryFacts);
+  try{await expect(f.service.preview({format:'narralens.prepared-preview-request@1',completed:f.completed,binding:f.binding,proof})).rejects.toBeTruthy();}
+  finally{f.verifier.release(proof);}
+  expect(ioFault.beforePublish).toBeUndefined();
+  expect(await treeDigest(f.authorRoot)).toEqual(authorBefore);
+  expect(await readdir(held)).toEqual([]);
+ }finally{await f.close();}
+},600000);
+
+it.each(['partial','zero'] as const)('handles a %s target write without rendering different copied bytes',async mode=>{
+ const f=await fixture();let observed:string|undefined;
+ try{
+  const expected=f.completed.fact.files.find(file=>file.relative_path==='film.html')!.sha256;
+  vi.spyOn(NativeRenderer.prototype,'render').mockImplementation(async request=>{
+   observed=sha(await readFile(join(request.project_root,'film.html')));
+   throw new Error('stop after actual copy inspection; no renderer stand-in acceptance');
+  });
+  ioFault.shortWrite=mode==='partial';ioFault.zeroWrite=mode==='zero';
+  const proof=await f.verifier.proveForRead(f.completed,f.binding,f.registryFacts);
+  try{await expect(f.service.preview({format:'narralens.prepared-preview-request@1',completed:f.completed,binding:f.binding,proof})).rejects.toBeTruthy();}
+  finally{f.verifier.release(proof);}
+  expect(ioFault.shortHits).toBeGreaterThan(0);
+  if(mode==='partial')expect(observed).toBe(expected);else expect(observed).toBeUndefined();
+ }finally{await f.close();}
+},600000);
+
+it.each(['cancel','close'] as const)('does not expose a receipt after %s at the fifth publication',async mode=>{
+ const f=await fixture(),controller=new AbortController();let closing:Promise<void>|undefined;
+ try{
+  ioFault.publishes=0;
+  ioFault.onFifthSync=()=>{if(mode==='cancel')controller.abort();else closing=f.service.close();};
+  const proof=await f.verifier.proveForRead(f.completed,f.binding,f.registryFacts);
+  try{await expect(f.service.preview({format:'narralens.prepared-preview-request@1',completed:f.completed,binding:f.binding,proof,signal:controller.signal})).rejects.toBeTruthy();}
+  finally{f.verifier.release(proof);}
+  await closing;
+  expect(ioFault.publishes).toBe(5);
+  expect(await readdir(f.objects)).toEqual([]);
+ }finally{await f.close();}
+},600000);
+
+it.each(['cancel','close','revoke'] as const)('does not expose a receipt after %s during awaited copy cleanup',async mode=>{
+ const f=await fixture(),controller=new AbortController();let closing:Promise<void>|undefined;
+ try{
+  const proof=await f.verifier.proveForRead(f.completed,f.binding,f.registryFacts);
+  ioFault.cleanupRoot=f.completed.root;
+  let hit=false;
+  ioFault.onCleanupClose=()=>{hit=true;if(mode==='cancel')controller.abort();else if(mode==='close')closing=f.service.close();else f.verifier.release(proof);};
+  try{await expect(f.service.preview({format:'narralens.prepared-preview-request@1',completed:f.completed,binding:f.binding,proof,signal:controller.signal})).rejects.toBeTruthy();}
+  finally{f.verifier.release(proof);}
+  await closing;
+  expect(hit).toBe(true);
+  expect(ioFault.publishes).toBe(5);
+  expect(await readdir(f.objects)).toEqual([]);
  }finally{await f.close();}
 },600000);

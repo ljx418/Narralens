@@ -1,0 +1,25 @@
+
+> narralens@0.1.0 test /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+> vitest run --config vitest.config.ts tests/agent-driven/media/preview-prepared-source.test.ts --maxWorkers=1 --minWorkers=1
+
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:932762) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/media/preview-prepared-source.test.ts (11 tests) 91912ms
+   ✓ renders an isolated preview of a completed prepared source with five real parts and measured facts  13189ms
+   ✓ refuses a preview whose proof is not a proof of this prepared source  5691ms
+   ✓ refuses the boundaries a prepared preview must not cross  5747ms
+   ✓ refuses a part whose content type or media facts do not belong to its slot  13034ms
+   ✓ cannot redirect object publication into author source by replacing the object directory at open  12833ms
+   ✓ handles a partial target write without rendering different copied bytes  5656ms
+   ✓ handles a zero target write without rendering different copied bytes  9422ms
+   ✓ does not expose a receipt after cancel at the fifth publication  13010ms
+   ✓ does not expose a receipt after close at the fifth publication  13318ms
+
+ Test Files  1 passed (1)
+      Tests  11 passed (11)
+   Start at  23:22:44
+   Duration  98.54s (transform 2.48s, setup 0ms, collect 4.82s, tests 91.91s, environment 0ms, prepare 1.18s)
+

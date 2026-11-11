@@ -1,11 +1,11 @@
 # 叙镜架构设计 v1.0
 
-> 当前实施设计：`agent-driven-v1/implementation-design/01_ARCHITECTURE_AND_GAP.md`及8页GAP。已有migration/materialize/impact/adoption/history为源码生产接缝；render在两个adapter仍CAPABILITY_NOT_ENABLED；一般创建/MCP/R4/媒体交付待实现。下面旧Gate状态仅描述其历史范围，不能据旧“待开发D4.2”语句否定当前接线，也不代表新路线通过。
+> 当前源码观察：A轮R1集成冻结 `de086f32c48c44fb72d0212ef80365f1c786408c`，详见本文末“2026-11-12 R1实际实现”。一般创建、同库创作、MCP传输、SOURCE_ONLY准备与工作台增量已有限定实现/证据；审阅采用、真实原生确认及正式交付仍待R2/R3。目标设计见 `agent-driven-v1/implementation-design/01_ARCHITECTURE_AND_GAP.md`及GAP；当前实施事实/精确release见`execution/A/implementation-20261111`。以下旧Gate只保留其绑定版本与范围，不代表A/V1通过。
 
 > 2026-11-08 新路线入口：PRD v1.1 将目标调整为“外部 Agent + Skill/技能库 + MCP + Narralens 服务/工作台”。
 > 待批准 L0/L1 见 [目标架构分析](agent-driven-v1/01_TARGET_ARCHITECTURE.md)，
 > 新 Archify 图见 [R2 Agent 驱动目标架构](architecture/agent-driven-v1-r2.architecture.html)。R2增加可见工作流、资源并行和本地Comfy适配，PRD已修订为v1.2；R1图保留。
-> 下文继续保留原实现与历史 Gate，不能解释为新目标已实现；新路线尚处文档核对阶段。
+> 下文保留原实现与历史Gate；设计/原型历史状态以其记录日期为准，当前A实施状态以本文最新增量与精确release为准。
 <!-- M2.1_REWORK_BASE_SHA=ee58ab5c6a9d4bbdf05e8ac8a394fd75218cae59 REVIEW_STATUS=PASS -->
 
 文档状态：Gate D1–D3、D4.0/D4.1 与 Wave 1/Wave 2 历史结论保留。旧 M5 捕获已被语义审计否决并保留为
@@ -19,7 +19,7 @@ UX-11 直接记录快捷键窗口前后 Document loader `5→5`、WebSocket crea
 UX-12 人工体验；UX-12 仍为 `HUMAN_NOT_RUN`，不得由自动化代签。
 Gate D4.2、`Gate V1-P0`、`V1-Full`、M6 与 M7 仍未关闭。
 
-当前阶段的可视化权威架构为 `docs/architecture/m5-stage-current.architecture.html`；其 Archify 源为同目录
+历史M5阶段的可视化架构为 `docs/architecture/m5-stage-current.architecture.html`；其 Archify 源为同目录
 `.architecture.json`，PNG 是人工快速复核用快照。图中代码实体、状态和边界绑定上述冻结提交。
 
 ## 1. 零层架构
@@ -322,7 +322,7 @@ journal 目标状态为 `prepared → source_validated → metadata_committed`�
 目标0/1层、22实体状态与8页GAP汇总在`agent-driven-v1/final-review/index.html`。精确A准备合同/DDL/恢复/验收/分工见`agent-driven-v1/cp-a0/00_READ_FIRST.md`，仍文档候选；不改变当前代码实体实现状态，不把拟新增组件写成已实现。
 
 
-### A轮源码实施观察（2026-11-10，取代上段“仅文档”的当前状态）
+### A轮源码实施观察（2026-11-10历史快照；当前由2026-11-12增量覆盖）
 
 已批准CP-A0/原型字节锁不改。A轮实际实现授权与范围见docs/execution/A；当前源码增加了同RevisionStore的typed HTTP/ScopedAuth、PRODUCT仓储接线及创建来源基础，不能再概括为所有A实体均未实现。
 
@@ -332,3 +332,24 @@ journal 目标状态为 `prepared → source_validated → metadata_committed`�
 - MEDIA工具：真实1秒技术诊断encode/decode/包发布通过，harness不提交DB；A真实60–180秒视频与完整生产render/下载/T20尚未完成。
 
 原M5前端保留；增量工作流Bar/系统侧栏组件尚未完整挂载。A模式旧写动作的临时拒绝需由同Coordinator的受控翻译接线替代，不能以拒绝写代替编辑体验出门。旧Gate历史不改，A整体、人验与B/C未据此通过。
+
+
+### 2026-11-12 R1实际实现与R2边界
+
+当前源码冻结`de086f32c48c44fb72d0212ef80365f1c786408c`，父`7b7b55cbdd8afb85470b07e2981ca103dd32e493`。这不是A阶段验收提交。
+
+|层与具体实体|当前实际关联/状态|尚未达成|
+|---|---|---|
+|入口/MCP：ScopedAgentAuth、CreationApplication、ApplicationDispatcher、MCP Host ports/stdio|同一个Host/原RevisionStore连接；认证/owner/原DTO验证后调应用服务。BRIDGE组合25 Host+229兼容证据见d5821863提交内bridge-main-rework3|三外部驱动端完整创作路径、正式Run全部四能力生产接线|
+|创建：ProjectCreationService/Store、CreationSourceVerifier、CommittedSnapshotAuthority|真实HTTP创建worker和首commit/snapshot/immutable created_source_fact已接；worker关闭同库收敛已修；Source-only准备不产生新影片提交|完整片采用、改单镜、双导出及全恢复门|
+|素材/准备：LocalAssetRegistry、AssetInventory、CreatedTaskApplication/Store/Worker、CreatedDraftTaskProcessor|真实受控候选/登记/权利及Job回执；同queue/Job/step。processor生成未提交的原生准备源，Job成功terminal_reason=SOURCE_ONLY|ps_不可变映射、完整计划impact、唯一批准和created提交|
+|媒体读：PreparedDraftVerifier、PreparedPreviewService、PreparedReviewMediaReaderImpl|原read/adoption双purpose proof与FD闭包复验；隔离副本预览五part、真实测量，单目录FD与最终公开边界；14限定测试、旧码3负控、7b独立限定PASS|生产ReviewPackage→receipt/object持久绑定尚无producer；GET缺该事实继续503；不等于Delivery|
+|工作台：M5Panel、AgentWorkbenchClient、WorkflowTopBar、SystemControlPanel、NativeSyncIndicator|保留原Studio/时间轴/clock；独立trusted-UI delegate/cookie/proof经固定Gateway别名读Host；实际浏览器验证Context/Workflow/Health读取、折叠Bar、非模态侧栏与焦点、未收到原生确认|非空已采用影片的UI观察/expected/Ack仍属R2；不将当前空工程挂载证据扩大|
+|公共校验：agent-workbench-validator、native-workbench-validators、build-native-workbench-validators|浏览器用原5个冻结CP-A0定义预编译静态输出，不运行Ajv compiler/不放宽CSP；64冻结向量与Host一致，额外未知定义/动态输出测试|不扩原31路由/80定义/冻结SQL|
+|写入/恢复：ProjectCoordinator、RevisionStore、ProductSqliteRepository|旧migrated adoption/history保持；同库Task join能力已存在，普通guard仍只允许action/safe_control|created专用窄effect/impact/adopter/publisher/受限commit join及真实NativeAck未实现，严禁假migration_id|
+
+工程无Run时，workflow只读返回revision0/空nodes/define_content；没有凭空建立Run或Job。健康服务样本保留5000ms采样和15000ms过期语义。浏览器测试中的可选真实HealthRegistry仅证明测试Host已绑定与TTL，不冒充生产launcher全生命周期。
+
+实施顺序调整详见`execution/A/implementation-20261111/R2/MAIN_RECONCILIATION.md`：四真实能力是Run准入条件，R3阶段端口与受控执行器基础将提前并行实施以支撑R2真链；R2采用/原生加载与R3正式QC/发布/T20仍分别验收。当前三领域只做R2详细任务/接口/验收文档，未发本票source release。B/C不启动。
+
+所有限定通过、失败截图、scope与未运行项见de086提交内`integration/product-app-final`和各源提交证据。历史M5图仍绑定旧M5版本；A当前目标图不是已实现图，不能据此宣称实际架构全绿。A最终同SHA架构/可视化报告、真实两主题60–180秒中文人声与授权素材、关服重开/改单镜/双正式导出、T20-A..H与独立/人工验收均尚未完成。
