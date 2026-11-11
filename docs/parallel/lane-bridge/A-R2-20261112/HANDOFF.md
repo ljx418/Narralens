@@ -149,4 +149,13 @@ peer 端口状态：MEDIA `CommittedRenderPhasesPort`、PRODUCT 原生接口的�
 - 符号链接一律拒绝（`lstat` 判定）。
 - journal 表 `created_publication_journal` 追加写、无 state 列，只有 `prepared`/`published` 相位。
 
+**E4（本次，commit 见下方）**：审阅包与媒体绑定（**未触碰 MAIN 冻结的 9 个文件**）。
+- `created-review-media-bindings.ts`：真实绑定生产者。它读**冻结的** `cp_a0_review_request` / `cp_a0_artifact_version`，按 review 表自己指向的**当前包**解析 part，并用新增的 `created_review_media_binding`（追加写、无 state 列）绑定不可变 `PreparedPreviewReceiptV1` 与 object_id/slot。未发布包时该表为空 → **不提供任何绑定**（不是"空绑定"）；跨包版本、跨项目、未知 Ref 一律 `null`；同包同 part 的不同绑定被拒。
+- `created-review-package-service.ts`：prove → preview → **finally 中 release proof** → 校验收据（项目/运行/prepared_source_id/每个 part 都有真实对象）→ 在**同一个事务作用域**内发布包并写绑定（包、不可变收据关系、可见 result_ref 一起可见）。`FixedWorkflowService` 新增 `publishReviewPackageInScope(tx, input, caller)`，公开方法仍保留封闭事务包装（未改其行为）。
+- 未做：把该服务接进 `creation-application.ts` 的 dispatcher（`change.prepare`/`change.apply` 路由仍无生产接线）、Host reader（L05，等 PRODUCT 更正类型）。
+
+**MAIN 冻结边界遵守情况**：本次只新增 `created-review-media-bindings.ts`、`created-review-package-service.ts`，只修改 `fixed-workflow-service.ts`（新增 in-scope 发布）与 `tests/agent-driven/integration/review-media-transport.test.ts`；**未**修改 revision-store.ts / product-sqlite-repository.ts / created-source-ports.ts / created-source-publisher.ts 及其消费与测试。`created-source-adoption-store.ts` 与 `created-schema-upgrade.test.ts` 按 MAIN msg_143b64d7bf90 的 `created_source_fact` 命名冲突裁决**保持不动**，等 MAIN 根补丁（`created_adopted_source_fact` + 逐表精确检查、保留 R1 geometry 表）。
+
+**dirty change-service 的偏差（如实记录）**：STOP ACK 时 parent 记录的 dirty `created-source-change-service.ts` sha256 是 `0bf1c09f43d3369abb6d69f938675eb67b7657fab89589726b4b6f0aaedd89fc`；在收到冻结指令**之前**我已把该文件补全了一处（plan 的 `rights` 由 facts 端口提供，不再恒为空），当前 sha256 为 `81249c77503bd20b1e52fa37756e8f80ec64248b3bb82c07f74ec12738e924a6`。除该处外无其他改动；文件**仍未提交**，留在工作树里等 MAIN 决定，未再扩展。
+
 本阶段实证：`pnpm test created-source-adoption.test.ts` exit 0 / 6 passed（log `…-016.txt` sha256 `bd150dd5735e5e700de151a1028fade946c3589abb8bd11a062ccd567f50df1f`；首失败 `…-015.txt` 保留：proof 未绑定发行实例）；C1 轻量子集 8 文件 exit 0 / 102 passed（log `…-017.txt` sha256 `918e5828c63290e9a810b8c75fd4b305be10f3439a4ea90ca8462f44666f0f8b`）；`tsc --noEmit` exit 0（log `…-018.txt` sha256 `ffcfa2c5ffeb6e7a8caa3ccb4669c88fe714cec69dff2824e5ac4c17489152ec`）。该测试为私有临时目录中的轻量文件系统用例，**未**使用 Host/media/browser/ffmpeg。

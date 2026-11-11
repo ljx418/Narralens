@@ -1,0 +1,64 @@
+command: corepack pnpm test tests/agent-driven/integration/review-media-transport.test.ts --maxWorkers=1 --minWorkers=1
+cwd: /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+started: 2026-11-11T17:24:04Z
+--- output ---
+
+> narralens@0.1.0 test /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+> vitest run --config vitest.config.ts tests/agent-driven/integration/review-media-transport.test.ts --maxWorkers=1 --minWorkers=1
+
+
+ RUN  v3.2.4 /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+
+(node:1198404) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/agent-driven/integration/review-media-transport.test.ts (9 tests | 4 failed) 77ms
+   ✓ fails closed with no binding producer and no reader instead of serving anything 16ms
+   ✓ refuses a cross-owner reader before it reaches the producer 1ms
+   ✓ streams the whole object in bounded reads and closes the descriptor exactly once 7ms
+   ✓ answers a bounded range with 206 and refuses an unsatisfiable range with 416 1ms
+   ✓ describes a part only when the owner, the current package and the receipt agree 2ms
+   × the created review media bindings > resolves the current package part and the reference behind it 19ms
+     → FOREIGN KEY constraint failed
+   × the created review media bindings > refuses a part of another package version, another project and an unknown reference 11ms
+     → FOREIGN KEY constraint failed
+   × the created review media bindings > serves nothing when the package was published without a binding 11ms
+     → FOREIGN KEY constraint failed
+   × the created review media bindings > refuses a second, different binding of the same package part 10ms
+     → FOREIGN KEY constraint failed
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/review-media-transport.test.ts > the created review media bindings > resolves the current package part and the reference behind it
+ FAIL  tests/agent-driven/integration/review-media-transport.test.ts > the created review media bindings > refuses a part of another package version, another project and an unknown reference
+ FAIL  tests/agent-driven/integration/review-media-transport.test.ts > the created review media bindings > serves nothing when the package was published without a binding
+ FAIL  tests/agent-driven/integration/review-media-transport.test.ts > the created review media bindings > refuses a second, different binding of the same package part
+Error: FOREIGN KEY constraint failed
+ ❯ ProductSqliteRepository.insert src/host/agent-driven/product-sqlite-repository.ts:154:137
+    152|     const supplied=Object.keys(record);
+    153|     if(!supplied.length||supplied.some(k=>!cols.includes(k)))throw inv…
+    154|     this.#db.prepare(`INSERT INTO ${quote(spec.table)} (${supplied.map…
+       |                                                                                                                                         ^
+    155|     return this.read(c,key)!;
+    156|   }
+ ❯ ProductSqliteRepository.write src/host/agent-driven/product-sqlite-repository.ts:161:33
+ ❯ src/host/agent-driven/product-sqlite-repository.ts:110:41
+ ❯ guarded src/host/agent-driven/product-sqlite-repository.ts:100:18
+ ❯ Object.put src/host/agent-driven/product-sqlite-repository.ts:110:24
+ ❯ tests/agent-driven/integration/review-media-transport.test.ts:214:7
+ ❯ src/host/agent-driven/product-sqlite-repository.ts:116:21
+ ❯ ProductSqliteRepository.scope src/host/agent-driven/product-sqlite-repository.ts:123:7
+ ❯ src/host/agent-driven/product-sqlite-repository.ts:64:63
+ ❯ RevisionStore.atomic src/host/projects/revision-store.ts:407:22
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  4 failed | 5 passed (9)
+   Start at  01:24:05
+   Duration  448ms (transform 152ms, setup 0ms, collect 246ms, tests 77ms, environment 0ms, prepare 34ms)
+
+ ELIFECYCLE  Test failed. See above for more details.
+--- end ---
+exit: 1
+finished: 2026-11-11T17:24:05Z

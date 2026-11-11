@@ -1,0 +1,149 @@
+command: corepack pnpm test tests/agent-driven/integration/review-media-transport.test.ts --maxWorkers=1 --minWorkers=1
+cwd: /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+head: cfadc136c29b8d5c5cbc2911f01dd09d4916401b
+started: 2026-11-11T17:23:37Z
+--- output ---
+
+> narralens@0.1.0 test /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+> vitest run --config vitest.config.ts tests/agent-driven/integration/review-media-transport.test.ts --maxWorkers=1 --minWorkers=1
+
+
+ RUN  v3.2.4 /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+
+(node:1197681) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/agent-driven/integration/review-media-transport.test.ts (9 tests | 1 failed) 66ms
+   ✓ fails closed with no binding producer and no reader instead of serving anything 14ms
+   ✓ refuses a cross-owner reader before it reaches the producer 1ms
+   ✓ streams the whole object in bounded reads and closes the descriptor exactly once 6ms
+   ✓ answers a bounded range with 206 and refuses an unsatisfiable range with 416 1ms
+   ✓ describes a part only when the owner, the current package and the receipt agree 1ms
+   × the created review media bindings > resolves the current package part and the reference behind it 16ms
+     → expected null not to be null
+   ✓ the created review media bindings > refuses a part of another package version, another project and an unknown reference 9ms
+   ✓ the created review media bindings > serves nothing when the package was published without a binding 9ms
+   ✓ the created review media bindings > refuses a second, different binding of the same package part 8ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/review-media-transport.test.ts > the created review media bindings > resolves the current package part and the reference behind it
+AssertionError: expected null not to be null
+ ❯ tests/agent-driven/integration/review-media-transport.test.ts:236:20
+    234|   const f=fixtureWithBindings();
+    235|   const part=await f.bindings.currentPart({project_id:'project-1',run_…
+    236|   expect(part).not.toBeNull();
+       |                    ^
+    237|   expect(part!.package_id).toBe('package-1');
+    238|   expect(part!.object_id).toBe('object-1');
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+⎯⎯⎯⎯⎯⎯ Unhandled Errors ⎯⎯⎯⎯⎯⎯
+
+Vitest caught 4 unhandled errors during the test run.
+This might cause false positive tests. Resolve unhandled errors to make sure your tests are not affected.
+
+⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯
+Error: FOREIGN KEY constraint failed
+ ❯ ProductSqliteRepository.insert src/host/agent-driven/product-sqlite-repository.ts:154:137
+    152|     const supplied=Object.keys(record);
+    153|     if(!supplied.length||supplied.some(k=>!cols.includes(k)))throw inv…
+    154|     this.#db.prepare(`INSERT INTO ${quote(spec.table)} (${supplied.map…
+       |                                                                                                                                         ^
+    155|     return this.read(c,key)!;
+    156|   }
+ ❯ ProductSqliteRepository.write src/host/agent-driven/product-sqlite-repository.ts:161:33
+ ❯ src/host/agent-driven/product-sqlite-repository.ts:110:41
+ ❯ guarded src/host/agent-driven/product-sqlite-repository.ts:100:18
+ ❯ Object.put src/host/agent-driven/product-sqlite-repository.ts:110:24
+ ❯ tests/agent-driven/integration/review-media-transport.test.ts:214:7
+ ❯ src/host/agent-driven/product-sqlite-repository.ts:116:21
+ ❯ ProductSqliteRepository.scope src/host/agent-driven/product-sqlite-repository.ts:123:7
+ ❯ src/host/agent-driven/product-sqlite-repository.ts:64:63
+ ❯ RevisionStore.atomic src/host/projects/revision-store.ts:407:22
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 'ERR_SQLITE_ERROR', errcode: 787, errstr: 'constraint failed' }
+This error originated in "tests/agent-driven/integration/review-media-transport.test.ts" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+
+⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯
+Error: FOREIGN KEY constraint failed
+ ❯ ProductSqliteRepository.insert src/host/agent-driven/product-sqlite-repository.ts:154:137
+    152|     const supplied=Object.keys(record);
+    153|     if(!supplied.length||supplied.some(k=>!cols.includes(k)))throw inv…
+    154|     this.#db.prepare(`INSERT INTO ${quote(spec.table)} (${supplied.map…
+       |                                                                                                                                         ^
+    155|     return this.read(c,key)!;
+    156|   }
+ ❯ ProductSqliteRepository.write src/host/agent-driven/product-sqlite-repository.ts:161:33
+ ❯ src/host/agent-driven/product-sqlite-repository.ts:110:41
+ ❯ guarded src/host/agent-driven/product-sqlite-repository.ts:100:18
+ ❯ Object.put src/host/agent-driven/product-sqlite-repository.ts:110:24
+ ❯ tests/agent-driven/integration/review-media-transport.test.ts:214:7
+ ❯ src/host/agent-driven/product-sqlite-repository.ts:116:21
+ ❯ ProductSqliteRepository.scope src/host/agent-driven/product-sqlite-repository.ts:123:7
+ ❯ src/host/agent-driven/product-sqlite-repository.ts:64:63
+ ❯ RevisionStore.atomic src/host/projects/revision-store.ts:407:22
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 'ERR_SQLITE_ERROR', errcode: 787, errstr: 'constraint failed' }
+This error originated in "tests/agent-driven/integration/review-media-transport.test.ts" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+
+⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯
+Error: FOREIGN KEY constraint failed
+ ❯ ProductSqliteRepository.insert src/host/agent-driven/product-sqlite-repository.ts:154:137
+    152|     const supplied=Object.keys(record);
+    153|     if(!supplied.length||supplied.some(k=>!cols.includes(k)))throw inv…
+    154|     this.#db.prepare(`INSERT INTO ${quote(spec.table)} (${supplied.map…
+       |                                                                                                                                         ^
+    155|     return this.read(c,key)!;
+    156|   }
+ ❯ ProductSqliteRepository.write src/host/agent-driven/product-sqlite-repository.ts:161:33
+ ❯ src/host/agent-driven/product-sqlite-repository.ts:110:41
+ ❯ guarded src/host/agent-driven/product-sqlite-repository.ts:100:18
+ ❯ Object.put src/host/agent-driven/product-sqlite-repository.ts:110:24
+ ❯ tests/agent-driven/integration/review-media-transport.test.ts:214:7
+ ❯ src/host/agent-driven/product-sqlite-repository.ts:116:21
+ ❯ ProductSqliteRepository.scope src/host/agent-driven/product-sqlite-repository.ts:123:7
+ ❯ src/host/agent-driven/product-sqlite-repository.ts:64:63
+ ❯ RevisionStore.atomic src/host/projects/revision-store.ts:407:22
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 'ERR_SQLITE_ERROR', errcode: 787, errstr: 'constraint failed' }
+This error originated in "tests/agent-driven/integration/review-media-transport.test.ts" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+
+⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯
+Error: FOREIGN KEY constraint failed
+ ❯ ProductSqliteRepository.insert src/host/agent-driven/product-sqlite-repository.ts:154:137
+    152|     const supplied=Object.keys(record);
+    153|     if(!supplied.length||supplied.some(k=>!cols.includes(k)))throw inv…
+    154|     this.#db.prepare(`INSERT INTO ${quote(spec.table)} (${supplied.map…
+       |                                                                                                                                         ^
+    155|     return this.read(c,key)!;
+    156|   }
+ ❯ ProductSqliteRepository.write src/host/agent-driven/product-sqlite-repository.ts:161:33
+ ❯ src/host/agent-driven/product-sqlite-repository.ts:110:41
+ ❯ guarded src/host/agent-driven/product-sqlite-repository.ts:100:18
+ ❯ Object.put src/host/agent-driven/product-sqlite-repository.ts:110:24
+ ❯ tests/agent-driven/integration/review-media-transport.test.ts:214:7
+ ❯ src/host/agent-driven/product-sqlite-repository.ts:116:21
+ ❯ ProductSqliteRepository.scope src/host/agent-driven/product-sqlite-repository.ts:123:7
+ ❯ src/host/agent-driven/product-sqlite-repository.ts:64:63
+ ❯ RevisionStore.atomic src/host/projects/revision-store.ts:407:22
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 'ERR_SQLITE_ERROR', errcode: 787, errstr: 'constraint failed' }
+This error originated in "tests/agent-driven/integration/review-media-transport.test.ts" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 8 passed (9)
+     Errors  4 errors
+   Start at  01:23:38
+   Duration  432ms (transform 144ms, setup 0ms, collect 242ms, tests 66ms, environment 0ms, prepare 34ms)
+
+ ELIFECYCLE  Test failed. See above for more details.
+--- end ---
+exit: 1
+finished: 2026-11-11T17:23:38Z

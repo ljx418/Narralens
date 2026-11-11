@@ -1,9 +1,13 @@
-import {it,expect} from 'vitest';
+import {it,expect,describe} from 'vitest';
 import type {IncomingMessage,ServerResponse} from 'node:http';
 import {ScopedAgentAuth} from '../../../src/host/agent-driven/scoped-auth.js';
 import {ReviewMediaHttp,type ReviewMediaBinding,type ReviewMediaBindingPort} from '../../../src/host/agent-driven/review-media-http.js';
 import type {PreparedPreviewReceiptV1,PreparedReviewMediaHandleV1,PreparedReviewMediaReader} from '../../../src/host/render/assembly-ports.js';
-import type {ReviewPart} from '../../../src/contracts/agent-driven-types.js';
+import type {ReviewPackage,ReviewPart} from '../../../src/contracts/agent-driven-types.js';
+import {RevisionStore} from '../../../src/host/projects/revision-store.js';
+import {ProductSqliteRepository} from '../../../src/host/agent-driven/product-sqlite-repository.js';
+import {CreatedReviewMediaBindings} from '../../../src/host/agent-driven/created-review-media-bindings.js';
+import {canonicalDigest} from '../../../src/host/creative/digest.js';
 
 /**
  * The review media transport's own behaviour, over a real scoped auth, a real binding
@@ -181,4 +185,95 @@ it('describes a part only when the owner, the current package and the receipt ag
  await expect(f.http.describe({run_id:'run-1',package_id:'package-1',package_version:1,part_kind:'narration',artifact_ref:{id:'artifact-1',version:1,sha256:'a'.repeat(64)}},'project-1',{principal_id:'owner',channel:'trusted_ui',session_ref:'session-1'})).rejects.toThrow();
  // A foreign owner is not described either.
  await expect(f.http.describe({run_id:'run-1',package_id:'package-1',package_version:1,part_kind:'preview',artifact_ref:{id:'artifact-1',version:1,sha256:'a'.repeat(64)}},'project-1',{principal_id:'other',channel:'trusted_ui',session_ref:'session-2'})).rejects.toThrow();
+});
+
+/**
+ * The real binding producer.
+ *
+ * The cases above use a test binding port, because they are the transport's evidence.
+ * These are the producer's: the bindings are read back out of the real tables, and
+ * the package that names them is the one the review table points at.
+ */
+describe('the created review media bindings',()=>{
+ const ORIGIN2='http://127.0.0.1:4173';
+ function packageDocument(parts:ReviewPart[]):ReviewPackage{
+  return {
+   project_id:'project-1',run_id:'run-1',plan_version:1,package_id:'package-1',version:1,kind:'sample',
+   chapter_id:'chapter-1',input_digest:'b'.repeat(64),output_digest:'c'.repeat(64),quality_digest:'2'.repeat(64),
+   parts,source_shot_ids:['shot-1'],selection_reason:'the only shot',allowed_choices:['accept','accept_and_adopt'],
+   impact:null,reuse_of_package_id:null,review_url:'/workbench/projects/project-1/reviews/package-1',state:'pending',
+  };
+ }
+ async function fixtureWithBindings(options:{package?:ReviewPackage;bind?:boolean}={}){
+  const revisions=new RevisionStore(':memory:');
+  const repository=new ProductSqliteRepository(revisions);
+  const bindings=new CreatedReviewMediaBindings(revisions);
+  const document=options.package??packageDocument([PART]);
+  const digest=canonicalDigest(document);
+  // The frozen CP-A0 tables have real foreign keys, so the parents of a review
+  // request are written first: the project, the published template, the run and its
+  // plan version. Nothing here is a shortcut around the schema.
+  const db=revisions.compose(d=>d);
+  const at='2026-11-12T00:00:00.000Z';
+  db.prepare(`INSERT OR IGNORE INTO project_state(project_id,revision,visual_locked,attention,source_digest,source_digest_observed,source_digest_detected_at,updated_at) VALUES(?,?,0,0,'','','',?)`).run('project-1',1,at);
+  db.prepare(`INSERT OR IGNORE INTO cp_a0_template_version(template_id,version,parent_version,execution_digest,capability_id,capability_version,definition_json,created_at) VALUES('local-short-film',1,NULL,?,'clip.prepare','1','{}',?)`).run('b70615d5ad4246caac7d0e770022429de5826831b222447e4be7637e4a07ca32',at);
+  db.prepare(`INSERT OR IGNORE INTO cp_a0_run(project_id,run_id,run_scope_digest,template_id,template_version,current_plan_version,state,scope_json,checkpoint_json,created_at) VALUES('project-1','run-1',?,'local-short-film',1,1,'running','{}','{}',?)`).run('a'.repeat(64),at);
+  db.prepare(`INSERT OR IGNORE INTO cp_a0_plan_version(project_id,run_id,plan_version,run_scope_digest,input_digest,plan_json,created_at) VALUES('project-1','run-1',1,?,?,'{}',?)`).run('a'.repeat(64),'b'.repeat(64),at);
+  await repository.transaction(tx=>{
+   tx.put('artifact_version',{project_id:'project-1',artifact_id:'package-1',version:1},{
+    project_id:'project-1',artifact_id:'package-1',version:1,kind:'chapter',schema_version:1,
+    input_digest:'b'.repeat(64),content_digest:digest,content_json:document,input_refs_json:[PART.artifact_ref],
+    created_at:'2026-11-12T00:00:00.000Z',
+   });
+   tx.put('review_request',{project_id:'project-1',run_id:'run-1',review_id:'package-1'},{
+    project_id:'project-1',run_id:'run-1',review_id:'package-1',plan_version:1,
+    run_scope_digest:'a'.repeat(64),gate:'sample',artifact_id:'package-1',artifact_version:1,
+    input_digest:'b'.repeat(64),package_digest:digest,state:'pending',reuse_review_id:null,
+    created_at:'2026-11-12T00:00:00.000Z',
+   });
+  });
+  if(options.bind!==false)bindings.bind({
+   project_id:'project-1',run_id:'run-1',package_id:'package-1',package_version:1,package_digest:digest,
+   receipt:receiptOf(64),parts:document.parts,now:new Date('2026-11-12T00:00:00.000Z'),
+  });
+  return {revisions,repository,bindings,document,digest};
+ }
+
+ it('resolves the current package part and the reference behind it',async()=>{
+  const f=await fixtureWithBindings();
+  const part=await f.bindings.currentPart({project_id:'project-1',run_id:'run-1',part_kind:'preview',artifact_ref:PART.artifact_ref});
+  expect(part).not.toBeNull();
+  expect(part!.package_id).toBe('package-1');
+  expect(part!.object_id).toBe('object-1');
+  expect(part!.slot).toBe('preview');
+  expect(part!.receipt.receipt_digest).toBe('f'.repeat(64));
+  const byReference=await f.bindings.currentByReference('project-1',PART.artifact_ref.id);
+  expect(byReference!.object_id).toBe('object-1');
+  f.revisions.close();
+ });
+
+ it('refuses a part of another package version, another project and an unknown reference',async()=>{
+  const f=await fixtureWithBindings();
+  expect(await f.bindings.currentPart({project_id:'project-1',run_id:'run-1',part_kind:'preview',artifact_ref:{...PART.artifact_ref,version:2}})).toBeNull();
+  expect(await f.bindings.currentPart({project_id:'project-2',run_id:'run-1',part_kind:'preview',artifact_ref:PART.artifact_ref})).toBeNull();
+  expect(await f.bindings.currentPart({project_id:'project-1',run_id:'run-1',part_kind:'narration',artifact_ref:PART.artifact_ref})).toBeNull();
+  expect(await f.bindings.currentByReference('project-1','ref-unknown')).toBeNull();
+  f.revisions.close();
+ });
+
+ it('serves nothing when the package was published without a binding',async()=>{
+  const f=await fixtureWithBindings({bind:false});
+  expect(await f.bindings.currentPart({project_id:'project-1',run_id:'run-1',part_kind:'preview',artifact_ref:PART.artifact_ref})).toBeNull();
+  expect(await f.bindings.currentByReference('project-1',PART.artifact_ref.id)).toBeNull();
+  f.revisions.close();
+ });
+
+ it('refuses a second, different binding of the same package part',async()=>{
+  const f=await fixtureWithBindings();
+  expect(()=>f.bindings.bind({
+   project_id:'project-1',run_id:'run-1',package_id:'package-1',package_version:1,package_digest:f.digest,
+   receipt:receiptOf(128),parts:f.document.parts,now:new Date('2026-11-12T00:01:00.000Z'),
+  })).toThrow();
+  f.revisions.close();
+ });
 });

@@ -1,0 +1,49 @@
+command: corepack pnpm test tests/agent-driven/integration/created-source-change.test.ts tests/agent-driven/integration/created-source-adoption.test.ts tests/agent-driven/integration/created-schema-upgrade.test.ts tests/agent-driven/integration/review-media-transport.test.ts tests/agent-driven/integration/created-run-authority.test.ts tests/agent-driven/integration/created-task-gate.test.ts tests/agent-driven/integration/capability-fingerprint.test.ts tests/agent-driven/product/fixed-workflow-service.test.ts tests/agent-driven/product/execution-guard.test.ts --maxWorkers=1 --minWorkers=1
+cwd: /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+head: cfadc136c29b8d5c5cbc2911f01dd09d4916401b
+started: 2026-11-11T17:25:23Z
+--- output ---
+
+> narralens@0.1.0 test /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+> vitest run --config vitest.config.ts tests/agent-driven/integration/created-source-change.test.ts tests/agent-driven/integration/created-source-adoption.test.ts tests/agent-driven/integration/created-schema-upgrade.test.ts tests/agent-driven/integration/review-media-transport.test.ts tests/agent-driven/integration/created-run-authority.test.ts tests/agent-driven/integration/created-task-gate.test.ts tests/agent-driven/integration/capability-fingerprint.test.ts tests/agent-driven/product/fixed-workflow-service.test.ts tests/agent-driven/product/execution-guard.test.ts --maxWorkers=1 --minWorkers=1
+
+
+ RUN  v3.2.4 /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+
+(node:1202100) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/created-task-gate.test.ts (7 tests) 23612ms
+   ✓ reserves one real job, cp step/checkpoint and mirrored event atomically, then replays without new effects  3104ms
+   ✓ rejects stale base, altered refs/scope/attempt and crossing the sample gate before creating any job  2959ms
+   ✓ rolls back real job, step, checkpoint, event and grant mutation if final authorization is revoked  3901ms
+   ✓ rejects a creative closure changed after authorization without task side effects  4544ms
+   ✓ emits real pending-to-running progress and rolls back step/checkpoint/outbox if the event mirror fails  3100ms
+   ✓ recovers exhausted leases atomically with the real workflow checkpoint, and is idempotent after SQLite reopen  3046ms
+   ✓ recovers cancelled leases atomically with the real workflow checkpoint, and is idempotent after SQLite reopen  2956ms
+ ✓ tests/agent-driven/product/fixed-workflow-service.test.ts (31 tests) 139ms
+(node:1202862) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/created-run-authority.test.ts (12 tests) 112ms
+(node:1202882) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/created-source-adoption.test.ts (6 tests) 68ms
+(node:1202914) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/review-media-transport.test.ts (9 tests) 70ms
+(node:1202941) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/created-source-change.test.ts (11 tests) 36ms
+(node:1202962) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/created-schema-upgrade.test.ts (11 tests) 22ms
+ ✓ tests/agent-driven/product/execution-guard.test.ts (22 tests) 17ms
+ ✓ tests/agent-driven/integration/capability-fingerprint.test.ts (2 tests) 3ms
+
+ Test Files  9 passed (9)
+      Tests  111 passed (111)
+   Start at  01:25:23
+   Duration  26.76s (transform 947ms, setup 0ms, collect 1.62s, tests 24.08s, environment 1ms, prepare 312ms)
+
+--- end ---
+exit: 0
+finished: 2026-11-11T17:25:52Z

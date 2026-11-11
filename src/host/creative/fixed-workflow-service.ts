@@ -874,7 +874,36 @@ export class FixedWorkflowService {
     caller: TrustedCallerContext,
   ): Promise<ReviewPackage> {
     this.#requireContext(caller);
-    return this.#repository.transaction((tx) => {
+    return this.#repository.transaction((tx) => this.publishReviewPackageInScope(tx, input, caller));
+  }
+
+  /**
+   * The same publication inside a caller's own transaction scope.
+   *
+   * The published package, the immutable receipt linkage of its parts and the visible
+   * result reference have to become visible together. A caller that has to write its
+   * own facts in the same transaction as the publication needs the publication to run
+   * in the scope it already owns, so the body of the publication is available here
+   * without opening a second transaction.
+   *
+   * The caller owns the scope: this method neither opens nor closes one, and it never
+   * catches an error that the scope has to roll back.
+   */
+  publishReviewPackageInScope(
+    tx: ProductTransaction,
+    input: PublishReviewPackageInput,
+    caller: TrustedCallerContext,
+  ): ReviewPackage {
+    this.#requireContext(caller);
+    return this.#publishReviewPackage(tx, input, caller);
+  }
+
+  #publishReviewPackage(
+    tx: ProductTransaction,
+    input: PublishReviewPackageInput,
+    caller: TrustedCallerContext,
+  ): ReviewPackage {
+    {
       const run = this.#requireRun(tx, input.project_id, input.run_id);
       if (run.state === "cancelled") {
         throw new ProductError("RUN_PLAN_STALE", "The run was cancelled", { details: { state: run.state } });
@@ -1040,7 +1069,7 @@ export class FixedWorkflowService {
       });
 
       return validateAgentRouteOutput("review.read", packageDocument) as ReviewPackage;
-    });
+    }
   }
 
   /** Reads a review package. */

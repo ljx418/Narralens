@@ -1,0 +1,39 @@
+command: corepack pnpm test tests/agent-driven/integration/review-media-transport.test.ts --maxWorkers=1 --minWorkers=1
+cwd: /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+head: cfadc136c29b8d5c5cbc2911f01dd09d4916401b
+started: 2026-11-11T17:23:27Z
+--- output ---
+
+> narralens@0.1.0 test /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+> vitest run --config vitest.config.ts tests/agent-driven/integration/review-media-transport.test.ts --maxWorkers=1 --minWorkers=1
+
+
+ RUN  v3.2.4 /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+
+(node:1197141) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/review-media-transport.test.ts [ tests/agent-driven/integration/review-media-transport.test.ts ]
+ReferenceError: describe is not defined
+ ❯ tests/agent-driven/integration/review-media-transport.test.ts:197:1
+    195|  * the package that names them is the one the review table points at.
+    196|  */
+    197| describe('the created review media bindings',()=>{
+       | ^
+    198|  const ORIGIN2='http://127.0.0.1:4173';
+    199|  function packageDocument(parts:ReviewPart[]):ReviewPackage{
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  no tests
+   Start at  01:23:28
+   Duration  413ms (transform 158ms, setup 0ms, collect 0ms, tests 0ms, environment 0ms, prepare 42ms)
+
+ ELIFECYCLE  Test failed. See above for more details.
+--- end ---
+exit: 1
+finished: 2026-11-11T17:23:28Z
