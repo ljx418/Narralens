@@ -612,3 +612,48 @@ describe("A-MCP resource reads", () => {
     expect(matchResourceUri("narralens://not/a/resource")).toBeNull();
   });
 });
+
+describe("A-MCP workbench UI registry", () => {
+  it("is readable by the gateway's own loader and names the three closed surfaces", async () => {
+    // The gateway parses BRIDGE's runtime registry with its own loader. If the file has
+    // a shape the loader cannot read, the gateway refuses its own UI aliases with 503 -
+    // so the interop is checked here with the real loader, not with a copy of it.
+    const { loadGatewayUiRegistry } = await import("../../../src/host/m5/openfilm-studio-gateway.js");
+    const runtime = await loadGatewayUiRegistry();
+    expect(runtime).not.toBeNull();
+    expect(Object.keys(runtime!.operations).sort()).toEqual(["agent.v1", "local-assets.v1", "workbench.v1"]);
+    expect(runtime!.operations["workbench.v1"]).toEqual(["native.reopen", "review.part.describe"]);
+    expect(runtime!.operations["local-assets.v1"]).toEqual([
+      "local-source-files.read",
+      "local-assets.import",
+      "local-assets.read.ui",
+      "asset-inventory.read",
+    ]);
+    // The frozen route set is untouched by the adjunct surface.
+    expect(runtime!.operations["agent.v1"]).toContain("context.read");
+    expect(runtime!.operations["agent.v1"]).toContain("job.read");
+    expect(AGENT_ROUTES.length).toBe(31);
+  });
+
+  it("counts the adjunct transport separately from the frozen registry", () => {
+    const ui = JSON.parse(readFileSync("contracts/agent-workbench-ui-v1.registry.json", "utf8")) as {
+      format: string;
+      counting: { frozen_host_http: number; reviewed_adjunct_host_http: number; additional_gateway_http: number; note: string };
+      operation_allowlist: Record<string, string[]>;
+    };
+    expect(ui.format).toBe("narralens.gateway-ui-runtime-registry@1");
+    expect(ui.counting).toEqual({
+      frozen_host_http: 31,
+      reviewed_adjunct_host_http: 5,
+      additional_gateway_http: 2,
+      note: ui.counting.note,
+    });
+    // The allowlist is closed: every named operation belongs to one of the three
+    // surfaces, and no surface lists an operation twice.
+    for (const [surface, operations] of Object.entries(ui.operation_allowlist)) {
+      expect(["agent.v1", "local-assets.v1", "workbench.v1"]).toContain(surface);
+      expect(new Set(operations).size).toBe(operations.length);
+      for (const operation of operations) expect(operation).toMatch(/^[a-z][a-z0-9.-]*$/);
+    }
+  });
+});
