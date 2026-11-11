@@ -1,0 +1,16 @@
+{
+  "argv": [
+    "ffprobe",
+    "-v",
+    "error",
+    "-show_entries",
+    "stream=index,codec_type,codec_name,sample_rate,channels,avg_frame_rate:format=duration",
+    "-of",
+    "json",
+    "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/parallel/lane-media/A-R1-20261111/evidence/prepared-preview-real-1794409475326/preview.mp4"
+  ],
+  "exit": 0,
+  "stdout": "{\n    \"programs\": [\n\n    ],\n    \"streams\": [\n        {\n            \"index\": 0,\n            \"codec_name\": \"h264\",\n            \"codec_type\": \"video\",\n            \"avg_frame_rate\": \"30/1\"\n        },\n        {\n            \"index\": 1,\n            \"codec_name\": \"aac\",\n            \"codec_type\": \"audio\",\n            \"sample_rate\": \"48000\",\n            \"channels\": 2,\n            \"avg_frame_rate\": \"0/0\"\n        }\n    ],\n    \"format\": {\n        \"duration\": \"3.000000\"\n    }\n}\n",
+  "stderr": "",
+  "artifact_sha256": "011bd960b4cc2d41b575af6e91a252ee6f96524e24a22f3a608603957378e1ec"
+}

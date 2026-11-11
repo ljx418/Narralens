@@ -157,6 +157,10 @@ export interface PreparedSourceProofPort {
  assertCurrentForRead<P extends PreparedReadBindingV1['purpose']>(completed:CompletedPreparedSourceV1,binding:PreparedReadBindingV1&{readonly purpose:P},proof:PreparedReadProofV1&{readonly purpose:P},assertCurrentAuthorAndRights:()=>void):void;
  proveForAdoption(completed:CompletedPreparedSourceV1,binding:PreparedAdoptionBindingV1,registryFacts:readonly LocalAsset[]):Promise<PreparedAdoptionProofV1>;
  assertCurrentForAdoption(completed:CompletedPreparedSourceV1,binding:PreparedAdoptionBindingV1,proof:PreparedAdoptionProofV1,assertCurrentAuthorAndRights:()=>void):void;
+ /** The descriptors of one proof are released explicitly. GC is never the release path. */
+ release(proof:object):Promise<void>|void;
+ /** Every descriptor this port still holds is closed. */
+ close():Promise<void>|void;
 }
 
 /* -------------------------------------------------------------------------------------- */
