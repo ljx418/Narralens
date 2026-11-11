@@ -410,3 +410,88 @@ weakened and the binary-float expansion is removed rather than kept beside it.
 
 This is the second iteration on the same root (MP01), so MAIN takes the work over if
 another residual on it appears.
+
+## MP01 iteration 2 — the approved frame rational (2026-11-11T17:40Z)
+
+Corrected candidate: `6af9507fdceb3bff6ddb975d2d360ba0a7b8c6fd`. The batch-1 candidate
+`99b6ee8cd91f0ba77473618485272113256067f9` (blob `a61fb88c7565c90e8afd01d265c6b6f777c1bb06d5a6fe23f90d374ed8b18bd8`)
+and its evidence are preserved unchanged.
+
+### What was wrong with the first fix
+
+The first fix expressed the stated length as the **exact binary value of the double**.
+That is not the approved rational, and it refuses legitimate lengths. Reproduced with
+pure arithmetic, no module involved:
+
+| stated length | binary expansion | first fix |
+|---|---|---|
+| `91/30` | `1707614858711313/562949953421312` | accepted |
+| `1/30` | denominator reaches `2^53 = 9007199254740992` | `DURATION_NOT_EXACT` |
+| `1001/30000` | denominator reaches `2^53 = 9007199254740992` | `DURATION_NOT_EXACT` |
+
+A film of one frame at 30 fps and one frame at `30000/1001` are legitimate lengths.
+`91/30` fitting was luck, not correctness.
+
+### What the correction does
+
+The canonical duration is now the **approved rational**: the integer `frame_count` of
+the closure and the integer `fps` numerator and denominator of the render. The preimage
+carries those integers and never the float.
+
+The float the closure states is used only to **check** that it agrees with the frame
+count and the frame rate, within half a frame. A closure whose stated length disagrees
+with its own frame count is refused (`CLOSURE_DURATION_INCONSISTENT`) instead of being
+hashed. The restricted canonical domain is not weakened — the preimage holds safe
+integers, strings, booleans and null only, exactly as before — and the binary-float
+expansion is **removed**, not kept beside the new preimage.
+
+The digest therefore depends on the frame rate of the render, which is already bound:
+the configuration digest covers the frame rate, and a delivery request whose
+configuration differs from the encode is refused with `CONFIG_MISMATCH` before the
+closure digest is compared.
+
+### The cases, and what they do against the old source
+
+The old source was restored byte for byte from `99b6ee8c` and restored again
+afterwards:
+
+```
+git show 99b6ee8cd91f0ba77473618485272113256067f9:src/host/render/committed-render-phases.ts > src/host/render/committed-render-phases.ts
+corepack pnpm exec vitest run --config vitest.config.ts tests/agent-driven/media/committed-render-phases.test.ts --maxWorkers=1 --minWorkers=1 -t "MP01"
+git checkout HEAD -- src/host/render/committed-render-phases.ts
+```
+
+- Against the old source: **3 of the 5 MP01 cases failed**, exit 1
+  (`logs/vitest-mp01-iter2-negative-old-source.log`, sha256
+  `44272e39cbae1675d4ba93a3a2bb74e8a281ce9eafd0f2c6d3c76636d82028f8`):
+  - `computes a digest for a film of one frame at 30 fps` — refused;
+  - `computes a digest for a film of one frame at 30000/1001` — refused;
+  - `does not carry the stated seconds into the digest` — the digests differed, so the
+    float **was** in the old preimage.
+  The two that passed on the old source are the pre-existing 91-frame and rational-fps
+  cases, which the old code also handled; they are kept as regressions.
+- Against the corrected source: **71 passed, 1 skipped** across the two media files
+  (`logs/vitest-mp01-iter2-fixed-002.log`, sha256
+  `4a29ed4c0c81adf37c9130cef97c5e5c7c9541ffb1ee97fd34a7435f6196ec42`); the one skip is
+  the real-tool block, which is selected explicitly and is not part of the light run.
+- `corepack pnpm exec tsc --noEmit`: exit 0.
+- Product bytes after the correction: `src/host/render/committed-render-phases.ts`
+  sha256 `0d4dbf159e7ce639d823d87618ee15078aefd17f57c1e0b068be02d4cf821e5a`,
+  `tests/agent-driven/media/committed-render-phases.test.ts` sha256
+  `eb47b75098380f885a3c87059e66488c24c4ee0dcf8daf5f3a7ffbb04074b539`.
+
+### What this does and does not claim
+
+The concrete counterexample MAIN gave — a valid one-frame duration being rejected — is
+closed, and the corrected preimage is the approved frame rational rather than a
+binary-float fraction. **MP01 is not declared closed here**: the closing judgement is
+MAIN's, and this is the second iteration on the same root, so a further residual on it
+goes to MAIN for takeover.
+
+Everything else is unchanged from the batch-1 report: the real-tool path is still
+selectable and still `NOT_RUN` (it needs a MAIN heavy slot, because a real OpenFilm
+render drives a headless browser), the T20-A..H kill/reopen acceptance still needs
+MAIN's owned-process harness, the BRIDGE integrated targets still need BRIDGE's files
+to exist, and MAIN still owns the final combined clean acceptance. The previous
+batch's 19/19 proof result is not reclassified as an acceptance of the phase chain, and
+this candidate carries no independent review, no A-stage PASS and no human acceptance.
