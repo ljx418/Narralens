@@ -1,0 +1,93 @@
+{
+  "slot": "R2-PRODUCT-EXPECTED-BUILD-003",
+  "argv": [
+    "corepack",
+    "pnpm",
+    "exec",
+    "tsx",
+    "tools/agent-driven/product/build-native-hydration.ts",
+    "--upstream",
+    "/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm",
+    "--build"
+  ],
+  "cwd": "/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-PRODUCT",
+  "head": "5031bc189d7691338fc4094cbd2a613c944706de",
+  "index_tree": "5b543bfc2e281130c14d3277f7a0b055ff353fcc",
+  "start": "2026-11-11T18:41:17.740027+00:00",
+  "end": "2026-11-11T18:41:18.604049+00:00",
+  "launcher_pid": 1472093,
+  "exit": 0,
+  "observed_processes": [
+    {
+      "pid": 1472093,
+      "ppid": 1472070,
+      "start_ticks": "4433334",
+      "comm": "node",
+      "cwd": "/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-PRODUCT"
+    },
+    {
+      "pid": 1472112,
+      "ppid": 1472093,
+      "start_ticks": "4433349",
+      "comm": "node",
+      "cwd": "/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-PRODUCT"
+    },
+    {
+      "pid": 1472128,
+      "ppid": 1472112,
+      "start_ticks": "4433353",
+      "comm": "node",
+      "cwd": "/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-PRODUCT"
+    },
+    {
+      "pid": 1472140,
+      "ppid": 1472128,
+      "start_ticks": "4433363",
+      "comm": "esbuild",
+      "cwd": "/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-PRODUCT"
+    },
+    {
+      "pid": 1472150,
+      "ppid": 1472128,
+      "start_ticks": "4433365",
+      "comm": "git",
+      "cwd": "/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm"
+    },
+    {
+      "pid": 1472151,
+      "ppid": 1472128,
+      "start_ticks": "4433368",
+      "comm": "git",
+      "cwd": "/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm"
+    },
+    {
+      "pid": 1472154,
+      "ppid": 1472128,
+      "start_ticks": "4433387",
+      "comm": "node",
+      "cwd": "/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-PRODUCT/var/native-hydration-r2/managed-native-expected/source"
+    },
+    {
+      "pid": 1472166,
+      "ppid": 1472154,
+      "start_ticks": "4433400",
+      "comm": "esbuild",
+      "cwd": "/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-PRODUCT/var/native-hydration-r2/managed-native-expected/source"
+    }
+  ],
+  "observed_survivors": [],
+  "source_inputs_unchanged": true,
+  "head_unchanged": true,
+  "index_unchanged": true,
+  "log_sha256": "ae9a7ccefa89d0ec34b0fef8b70d0a0ce3663b8c4c90824eebaffabee197af1c",
+  "artifacts": {
+    "var/native-hydration-r2/managed-native-expected/dist/expected-projection.mjs": "3500b1d6485791b13ec9364c6eb80740531142c16754877e21923ad73e9d494e",
+    "var/native-hydration-r2/managed-native-expected/dist/build-manifest.json": "13c803b00dc4d0dc40d62209dc03b7f0d2707404a7cce6fcd4c3739a8daf8c95",
+    "var/native-hydration-r2/managed-native-expected/dist/NATIVE_LICENSE.txt": "4f39fecc5d074a4795bb7c55c5aaad1a4505b5e022ae6c2c3b55b4f26e7c43fc",
+    "var/native-hydration-r2/managed-native-expected/dist/native-pure-library.mjs": "9cb18aebe9a5daf08a2c92259b6314493fe98e40fe8a1b410bad444671a9904c",
+    "var/native-hydration-r2/managed-native-expected/dist/expected-projection.d.ts": "0f5f565a3d8b70de995aeb0dfdfb6052acad53cbf452c8d70168f555a8937f80",
+    "var/native-hydration-r2/expected-approval-candidate.json": "7f94b823d6f2a7e5652487d2008898fd0f73179bef2e7cdd338553e34ed3ccae",
+    "var/native-hydration-r2/build-report.json": "8722b2f25f016d31424f273577388603b961228a00cd5931851dd5fdad77d57a"
+  },
+  "scope": "expected library only; no Studio UI/Host/browser/media/full gate"
+}

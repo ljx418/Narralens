@@ -1,0 +1,43 @@
+{
+  "kind": "narralens.r2-native-hydration-preparation@1",
+  "upstream_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+  "patch_sha256": "f699889206e129dfe4fd913618b34baa8d7e04363f1940d3659664a1e7b9d435",
+  "inputs": {
+    "build-expected.mjs": "60027ead5a509522f2d35fda33749675923dee523bb8cc12f2b7de3dca8f840d",
+    "expected-projection.d.ts": "0f5f565a3d8b70de995aeb0dfdfb6052acad53cbf452c8d70168f555a8937f80",
+    "expected-projection.mjs": "3500b1d6485791b13ec9364c6eb80740531142c16754877e21923ad73e9d494e",
+    "native-pure.entry.ts": "1ca8590535d412f0d91a522fbf942cbacabba7d95c64f3e849ca9f0fbf416354",
+    "request013.patch": "f699889206e129dfe4fd913618b34baa8d7e04363f1940d3659664a1e7b9d435",
+    "vite.expected.config.mjs": "ffac37faeb5e9fcc53460f19d235cc9c38251b3bf969a9183e8cffe5e0657f29"
+  },
+  "runtime_root": "/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-PRODUCT/var/native-hydration-r2",
+  "staged_source_files": 624,
+  "staged_source_digest": "b127dbd9004ce300951e0390ce7268b6688a1308a28758357ce77e52ad30e5f8",
+  "toolchain": {
+    "vite": "7.3.7",
+    "react": "19.3.0"
+  },
+  "build": "NOT_RUN"
+}
+vite v7.3.7 building client environment for production...
+transforming...
+✓ 28 modules transformed.
+rendering chunks...
+computing gzip size...
+../dist/native-pure-library.mjs  28.06 kB │ gzip: 8.12 kB
+✓ built in 190ms
+{"kind":"narralens.native-expected-projection-build@1","upstream_sha":"e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3","vite":"7.3.7","node":"v22.22.1","files":[{"path":"NATIVE_LICENSE.txt","bytes":1078,"sha256":"4f39fecc5d074a4795bb7c55c5aaad1a4505b5e022ae6c2c3b55b4f26e7c43fc"},{"path":"expected-projection.d.ts","bytes":4691,"sha256":"0f5f565a3d8b70de995aeb0dfdfb6052acad53cbf452c8d70168f555a8937f80"},{"path":"expected-projection.mjs","bytes":14342,"sha256":"3500b1d6485791b13ec9364c6eb80740531142c16754877e21923ad73e9d494e"},{"path":"native-pure-library.mjs","bytes":28064,"sha256":"9cb18aebe9a5daf08a2c92259b6314493fe98e40fe8a1b410bad444671a9904c"}],"files_sha256":"33b81b6df8ec7798c52ea2a189e98c3747157ad2f0d1f27e2a334b87bf6fe781","runtime_tests":"NOT_RUN"}
+
+{
+  "kind": "narralens.r2-native-expected-approval-candidate@1",
+  "upstream_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+  "inputs_sha256": "c5b53099b2f94fc12b5f9d184c0c8c2b12c51349051eddf67794fb0866e8dfd1",
+  "build_sha256": "13c803b00dc4d0dc40d62209dc03b7f0d2707404a7cce6fcd4c3739a8daf8c95",
+  "modules": {
+    "NATIVE_LICENSE.txt": "4f39fecc5d074a4795bb7c55c5aaad1a4505b5e022ae6c2c3b55b4f26e7c43fc",
+    "build-manifest.json": "13c803b00dc4d0dc40d62209dc03b7f0d2707404a7cce6fcd4c3739a8daf8c95",
+    "expected-projection.d.ts": "0f5f565a3d8b70de995aeb0dfdfb6052acad53cbf452c8d70168f555a8937f80",
+    "expected-projection.mjs": "3500b1d6485791b13ec9364c6eb80740531142c16754877e21923ad73e9d494e",
+    "native-pure-library.mjs": "9cb18aebe9a5daf08a2c92259b6314493fe98e40fe8a1b410bad444671a9904c"
+  }
+}

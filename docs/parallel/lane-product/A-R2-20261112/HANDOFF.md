@@ -267,3 +267,13 @@ the type check exits 0 and the unit round passes, with their boundaries in
 
 The unauthorized run of the M5 studio gateway suite, the first build failure and their
 process evidence are kept as they are, in `logs/`, and neither is re-run.
+
+
+## Actual429 safe writer transfer
+
+Orca reported real429 quota error2056 on child ctx_e1ce32b44d5c/task_3eaa8996288a. Exact worker-stop confirmed stopped/ptyKilled and closed the failed agent terminal; current parent Codex window remains visible. Process scan confirms old R2 CLI1107051 absent and no checkout/private-root node/vitest/build/media processes; old retained R1 CLI is not assigned work. HEAD and all dirty/untracked bytes preserved in CODEX_429_TAKEOVER.json, no reset/stash. Unique source/index/runtime writer now parent Codex under existing429 authorization; Claude may not auto-resume. Heavy build003 remains queued, no grant implied. Any Codex implementation/self-test is internal only; MAIN or uninvolved context must independently review.
+
+
+## Codex expected-library build003 and actual015 vectors
+
+MAIN grant msg8ff3cfc1bb3d executed once against frozen HEAD5031bc189d7691338fc4094cbd2a613c944706de/d0e22e-identical tool; exit0. Captured launcher and observed descendants with start ticks; none survived wait. HEAD/index/all tracked source input hashes unchanged. Exact evidence logs/codex-build003.txt, codex-build003-inputs.json, codex-build003-result.json; slot release reported to MAIN msg7a55b26c69b5. Runtime artifacts retained and candidate linkage copied to EXPECTED_BUILD003_CANDIDATE.json for review; tracked approval still pending. Ran actual built015 against original15 literal vectors read-only, exit0; logs/codex-actual015-vectors.txt/.json. This proves pure expected math on those vectors, not native UI/Host/browser. Studio managed archive remains old p2 and no013 hydration bundle has yet been built.
