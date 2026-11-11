@@ -1,0 +1,55 @@
+
+> narralens@0.1.0 test /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+> vitest run --config vitest.config.ts tests/agent-driven/integration/created-consumer-graph.test.ts --maxWorkers=1 --minWorkers=1
+
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:1624234) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/agent-driven/integration/created-consumer-graph.test.ts (5 tests | 2 failed) 10ms
+   × actual native consumer graph membership > includes each native overlay and narration independently of track traversal order 8ms
+     → Native consumer membership differs
+   ✓ actual native consumer graph membership > rejects missing, invented or duplicate native consumers: "shot-v" 1ms
+   ✓ actual native consumer graph membership > rejects missing, invented or duplicate native consumers: "shot-v" 0ms
+   ✓ actual native consumer graph membership > rejects missing, invented or duplicate native consumers: "shot-v" 0ms
+   × actual native consumer graph membership > omits narration only when the immutable plan omits it 0ms
+     → Native consumer membership differs
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/created-consumer-graph.test.ts > actual native consumer graph membership > includes each native overlay and narration independently of track traversal order
+CreatedSourcePublishError: Native consumer membership differs
+ ❯ fail src/host/agent-driven/created-source-publisher.ts:79:9
+     77| 
+     78| function fail(code: CreatedSourcePublishError['code'], message: string…
+     79|   throw new CreatedSourcePublishError(code, message);
+       |         ^
+     80| }
+     81| 
+ ❯ preparedSourceConsumerGraph src/host/agent-driven/created-source-publisher.ts:122:58
+ ❯ tests/agent-driven/integration/created-consumer-graph.test.ts:12:15
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/agent-driven/integration/created-consumer-graph.test.ts > actual native consumer graph membership > omits narration only when the immutable plan omits it
+CreatedSourcePublishError: Native consumer membership differs
+ ❯ fail src/host/agent-driven/created-source-publisher.ts:79:9
+     77| 
+     78| function fail(code: CreatedSourcePublishError['code'], message: string…
+     79|   throw new CreatedSourcePublishError(code, message);
+       |         ^
+     80| }
+     81| 
+ ❯ preparedSourceConsumerGraph src/host/agent-driven/created-source-publisher.ts:122:58
+ ❯ tests/agent-driven/integration/created-consumer-graph.test.ts:29:15
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 3 passed (5)
+   Start at  03:38:14
+   Duration  5.69s (transform 585ms, setup 0ms, collect 2.70s, tests 10ms, environment 0ms, prepare 1.58s)
+
+ ELIFECYCLE  Test failed. See above for more details.

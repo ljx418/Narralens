@@ -117,16 +117,24 @@ type PreparedNativeConsumerPlan={readonly storyboard:Storyboard;readonly narrati
 /** Derived consumer edges of the already-verified immutable native plan. This is a
  * hash preimage, not another writable timeline or a source of approval authority. */
 export function preparedSourceConsumerGraph(metadata:PreparedNativeMetadata,draft:PreparedNativeConsumerPlan){
-  const expected=[...draft.storyboard.shots.map(s=>'shot-'+s.shot_id),...(draft.narration_asset_id===null?[]:['narration'])];
+  const expected=[...draft.storyboard.shots.flatMap(s=>['shot-'+s.shot_id,
+    ...(s.asset_id!==null&&s.concept_text?['concept-'+s.shot_id]:[])]),...(draft.narration_asset_id===null?[]:['narration'])];
   if(new Set(metadata.clip_ids).size!==metadata.clip_ids.length||metadata.clip_ids.length!==expected.length
     ||expected.some(id=>!metadata.clip_ids.includes(id)))fail('REVISION_CONFLICT','Native consumer membership differs');
+  type Consumer={clip_id:string;kind:'visual'|'concept'|'narration';shot_id:string|null;paragraph_id:string|null;
+    asset_id:string|null;start_frame:number;end_frame_exclusive:number};
   let start=0;
-  const clips=draft.storyboard.shots.map((shot,index)=>{const begin=start;start+=shot.duration_frames;
-    return {clip_id:'shot-'+shot.shot_id,kind:'visual' as const,shot_id:shot.shot_id,paragraph_id:shot.paragraph_id,asset_id:shot.asset_id,
-      start_frame:begin,end_frame_exclusive:start};});
+  const nativeClips:Consumer[]=[];
+  for(const shot of draft.storyboard.shots){const begin=start;start+=shot.duration_frames;
+    const range={shot_id:shot.shot_id,paragraph_id:shot.paragraph_id,start_frame:begin,end_frame_exclusive:start};
+    nativeClips.push({...range,clip_id:'shot-'+shot.shot_id,kind:'visual',asset_id:shot.asset_id});
+    // Match the actual assembler's separate editable page above an asset-backed shot.
+    // A concept-only shot already uses shot-<id> and must not acquire a second clip.
+    if(shot.asset_id!==null&&shot.concept_text)nativeClips.push({...range,clip_id:'concept-'+shot.shot_id,kind:'concept',asset_id:null});
+  }
   if(start!==metadata.frame_count)fail('REVISION_CONFLICT','Native consumer frames differ');
-  const nativeClips=draft.narration_asset_id===null?clips:[...clips,{clip_id:'narration',kind:'narration' as const,shot_id:null,paragraph_id:null,
-    asset_id:draft.narration_asset_id,start_frame:0,end_frame_exclusive:metadata.frame_count}];
+  if(draft.narration_asset_id!==null)nativeClips.push({clip_id:'narration',kind:'narration',shot_id:null,paragraph_id:null,
+    asset_id:draft.narration_asset_id,start_frame:0,end_frame_exclusive:metadata.frame_count});
   return {clips:nativeClips,narration_asset_id:draft.narration_asset_id,subtitles:metadata.subtitles,
     assets:metadata.assets.map(a=>({asset_id:a.asset_id,path:a.path,rights_ref:a.rights_ref})).sort((a,b)=>a.asset_id<b.asset_id?-1:1)};
 }

@@ -1,0 +1,68 @@
+
+> narralens@0.1.0 test /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+> vitest run --config vitest.config.ts tests/agent-driven/integration/created-consumer-graph.test.ts --maxWorkers=1 --minWorkers=1
+
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:1625815) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/agent-driven/integration/created-consumer-graph.test.ts (5 tests | 3 failed) 17ms
+   × actual native consumer graph membership > includes each native overlay and narration independently of track traversal order 7ms
+     → Native consumer membership differs
+   × actual native consumer graph membership > rejects missing, invented or duplicate native consumers: ["shot-v","shot-c","narration"] 9ms
+     → expected [Function] to throw an error
+   ✓ actual native consumer graph membership > rejects missing, invented or duplicate native consumers: ["shot-v","concept-v","shot-c","narration","concept-c"] 0ms
+   ✓ actual native consumer graph membership > rejects missing, invented or duplicate native consumers: ["shot-v","concept-v","shot-c","narration","narration"] 0ms
+   × actual native consumer graph membership > omits narration only when the immutable plan omits it 0ms
+     → Native consumer membership differs
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/created-consumer-graph.test.ts > actual native consumer graph membership > includes each native overlay and narration independently of track traversal order
+CreatedSourcePublishError: Native consumer membership differs
+ ❯ fail src/host/agent-driven/created-source-publisher.ts:79:9
+     77| 
+     78| function fail(code: CreatedSourcePublishError['code'], message: string…
+     79|   throw new CreatedSourcePublishError(code, message);
+       |         ^
+     80| }
+     81| 
+ ❯ preparedSourceConsumerGraph src/host/agent-driven/created-source-publisher.ts:122:58
+ ❯ tests/agent-driven/integration/created-consumer-graph.test.ts:12:15
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  tests/agent-driven/integration/created-consumer-graph.test.ts > actual native consumer graph membership > rejects missing, invented or duplicate native consumers: ["shot-v","shot-c","narration"]
+AssertionError: expected [Function] to throw an error
+ ❯ tests/agent-driven/integration/created-consumer-graph.test.ts:26:73
+     24|   [['shot-v','concept-v','shot-c','narration','narration']],
+     25|  ])('rejects missing, invented or duplicate native consumers: %j',clip…
+     26|   expect(()=>preparedSourceConsumerGraph({...metadata,clip_ids},draft)…
+       |                                                                         ^
+     27|  });
+     28|  it('omits narration only when the immutable plan omits it',()=>{
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  tests/agent-driven/integration/created-consumer-graph.test.ts > actual native consumer graph membership > omits narration only when the immutable plan omits it
+CreatedSourcePublishError: Native consumer membership differs
+ ❯ fail src/host/agent-driven/created-source-publisher.ts:79:9
+     77| 
+     78| function fail(code: CreatedSourcePublishError['code'], message: string…
+     79|   throw new CreatedSourcePublishError(code, message);
+       |         ^
+     80| }
+     81| 
+ ❯ preparedSourceConsumerGraph src/host/agent-driven/created-source-publisher.ts:122:58
+ ❯ tests/agent-driven/integration/created-consumer-graph.test.ts:29:15
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 2 passed (5)
+   Start at  03:38:56
+   Duration  4.04s (transform 529ms, setup 0ms, collect 2.36s, tests 17ms, environment 0ms, prepare 1.11s)
+
+ ELIFECYCLE  Test failed. See above for more details.

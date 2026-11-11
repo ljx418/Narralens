@@ -1,0 +1,26 @@
+{
+  "base_main": "a9b3709",
+  "command": [
+    "corepack",
+    "pnpm",
+    "test",
+    "tests/agent-driven/integration/created-consumer-graph.test.ts",
+    "--maxWorkers=1",
+    "--minWorkers=1"
+  ],
+  "old_implementation": {
+    "exit": 1,
+    "failed": 2,
+    "passed": 3,
+    "note": "initial negative parameter rows were corrected into single array arguments; corrected before run retained separately"
+  },
+  "new_implementation": {
+    "exit": 0,
+    "passed": 5
+  },
+  "source_sha256": {
+    "src/host/agent-driven/created-source-publisher.ts": "424496b432b36b648d3555cec9729bb8245f2bf3ed384ae339c07dded56018fe",
+    "tests/agent-driven/integration/created-consumer-graph.test.ts": "215ddf5e98e77c6e4a37507b8b0ff4b86b51c517b5e6467b4a3b9639687f3e79"
+  },
+  "limits": "pure graph tests only; actual assembler plus overlay and full Host adoption NOT_RUN on this candidate; no M7 closure claim"
+}
