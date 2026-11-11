@@ -295,6 +295,23 @@ export function validateNativeObservationEnvelope(value: unknown): Check<NativeO
 }
 
 /** The original p2 document state, in its original shape. */
+/**
+ * The body of one observation, parsed and checked.
+ *
+ * It is the same check the ingress makes, in one place, so the Gateway and the
+ * service cannot drift apart: a body that is not JSON, or not the closed envelope,
+ * is refused here and never reaches the producer.
+ */
+export function parseNativeObservationBody(raw: string): Check<NativeObservationEnvelope> {
+  let value: unknown;
+  try {
+    value = JSON.parse(raw);
+  } catch {
+    return no('ENVELOPE_NOT_JSON');
+  }
+  return validateNativeObservationEnvelope(value);
+}
+
 export function validateNativeDocumentObservation(value: unknown): Check<NativeDocumentObservation> {
   if (!isPlainObject(value)) return no('DOCUMENT_NOT_AN_OBJECT');
   if (value.protocol_version !== 1) return no('DOCUMENT_PROTOCOL_VERSION_UNKNOWN');

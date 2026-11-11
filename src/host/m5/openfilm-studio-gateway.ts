@@ -1,6 +1,6 @@
 import {ControlledStudioAccess,StudioAccessError,UI_MAX_READ_BYTES,type NativeStudioGrant,type NativeStudioSession,type NativeStudioUiReviewMedia} from './controlled-studio-access.js';
 import {CONTROLLED_NATIVE_ENTRY_HTML,CONTROLLED_NATIVE_TRANSPORT_SCRIPT} from './controlled-studio-browser.js';
-import {validateNativeObservationEnvelope} from './native-observation.js';
+import {parseNativeObservationBody} from './native-observation.js';
 import { createHmac, randomBytes, randomUUID } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { createServer, request as httpRequest, type IncomingMessage, type Server, type ServerResponse } from "node:http";
@@ -728,7 +728,7 @@ export class OpenFilmStudioGateway {
       throw new StudioAccessError(503, "CAPABILITY_UNAVAILABLE");
     }
     const body = await this.#observationBody(request);
-    const envelope = validateNativeObservationEnvelope(body);
+    const envelope = parseNativeObservationBody(body);
     if (!envelope.ok) {
       this.#refuse(response, 400, `the native observation is not a closed envelope: ${envelope.reason}`);
       return;
@@ -749,7 +749,7 @@ export class OpenFilmStudioGateway {
    * It is JSON, it is not encoded, and it is small: an observation is a state report,
    * never a payload.
    */
-  async #observationBody(request: IncomingMessage): Promise<unknown> {
+  async #observationBody(request: IncomingMessage): Promise<string> {
     if (request.headers["content-type"]?.split(";")[0]?.trim() !== "application/json") {
       throw new StudioAccessError(400, "INVALID_REQUEST");
     }
@@ -764,11 +764,7 @@ export class OpenFilmStudioGateway {
       if (bytes > 65536) throw new StudioAccessError(400, "INVALID_REQUEST");
       chunks.push(data);
     }
-    try {
-      return JSON.parse(Buffer.concat(chunks).toString("utf8"));
-    } catch {
-      throw new StudioAccessError(400, "INVALID_REQUEST");
-    }
+    return Buffer.concat(chunks).toString("utf8");
   }
 
   async #nativeWrite(request: IncomingMessage, response: ServerResponse, path: string): Promise<void> {

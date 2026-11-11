@@ -688,7 +688,7 @@ describe('the binding snapshot', () => {
 import { pathToFileURL } from 'node:url';
 import Ajv2020 from 'ajv/dist/2020.js';
 import { NativeAckStore } from '../../../src/host/m5/native-ack-store.js';
-import { NativeObservationService, type NativeObservationSessionBinding } from '../../../src/host/m5/native-observation.js';
+import { NativeObservationService, parseNativeObservationBody, type NativeObservationSessionBinding } from '../../../src/host/m5/native-observation.js';
 import { ControlledStudioAccess, type NativeStudioGrant } from '../../../src/host/m5/controlled-studio-access.js';
 import { RevisionStore } from '../../../src/host/projects/revision-store.js';
 
@@ -1152,5 +1152,30 @@ describe("the tracked candidate pin", () => {
     } finally {
       rmSync(root, { recursive: true, force: true });
     }
+  });
+});
+
+describe("the body of one observation", () => {
+  it("parses the closed envelope and refuses anything else", () => {
+    const good = parseNativeObservationBody(JSON.stringify({
+      format: "narralens.native-observation@1", sequence: 7, event_kind: "document",
+      event: { protocol_version: 1, kind: "invalidated", project_id: "n1", editor_view_id: "v1", document_epoch: 1, reason: "dirty" },
+    }));
+    expect(good.ok).toBe(true);
+    if (good.ok) expect(good.value.sequence).toBe(7);
+
+    const notJson = parseNativeObservationBody("not json at all");
+    expect(notJson.ok).toBe(false);
+    if (!notJson.ok) expect(notJson.reason).toBe("ENVELOPE_NOT_JSON");
+
+    const withIdentity = parseNativeObservationBody(JSON.stringify({
+      format: "narralens.native-observation@1", sequence: 7, event_kind: "document",
+      event: {}, project_id: "p1",
+    }));
+    expect(withIdentity.ok).toBe(false);
+    if (!withIdentity.ok) expect(withIdentity.reason).toBe("ENVELOPE_FIELDS_NOT_CLOSED");
+
+    const empty = parseNativeObservationBody("");
+    expect(empty.ok).toBe(false);
   });
 });
