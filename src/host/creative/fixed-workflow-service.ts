@@ -1379,6 +1379,13 @@ export class FixedWorkflowService {
   async readWorkflow(projectId: string, caller: TrustedCallerContext): Promise<Workflow> {
     this.#requireContext(caller);
     return this.#repository.transaction((tx) => {
+      // An owned, created project can be observed before any Run exists. Report
+      // the actual empty history; never manufacture a Run, attempt or capability.
+      if (tx.list("run", {project_id: projectId}).length === 0) {
+        return validateAgentRouteOutput("workflow.read", {
+          project_id: projectId,workflow_revision: 0,nodes: [],next_actions: ["define_content"],
+        }) as Workflow;
+      }
       const run = this.#selectActiveRun(tx, projectId);
       const nodes: WorkflowNode[] = FIXED_PLAN.stages.map((stage) => {
         const attempts = run.checkpoint_json.attempts.filter((attempt) => attempt.step_id === stage.id);

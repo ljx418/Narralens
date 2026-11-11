@@ -1,16 +1,58 @@
 import type {
   Brief,
-  Context,
   Script,
   Storyboard,
 } from "../../contracts/agent-driven-types.js";
 
 /**
- * Read-only views of the creative objects, and the native-sync indicator.
+ * Read-only views of the creative objects.
  *
  * The views read the frozen DTOs and nothing else. They never fetch, never decide and
  * never claim that something happened because a job says so.
+ *
+ * The native-sync indicator moved into its own module — it is shown next to the
+ * prepared preview, where a wrong claim would be read as "the prepared media is on
+ * screen". It is re-exported here so the original import path keeps working, and there
+ * is still exactly one implementation of its rules.
  */
+export { NativeSyncIndicator, nativeSyncState } from "./NativeSyncIndicator.js";
+export type { NativeSyncState } from "./NativeSyncIndicator.js";
+
+/**
+ * One prepared text or JSON product, shown as text.
+ *
+ * A subtitle track or a JSON product is *text*, and it is shown item by item as text:
+ * the content is escaped by the renderer and never handed to the browser as markup, so
+ * a prepared product can never become a script. A product that claims to be HTML is
+ * refused outright rather than shown.
+ */
+export function PreparedTextView(props: {
+  /** The content type the descriptor reported. */
+  readonly contentType: string;
+  /** The bytes, already decoded as UTF-8 text. */
+  readonly text: string;
+}) {
+  const contentType = props.contentType.toLowerCase();
+  if (contentType.includes("html")) {
+    return (
+      <p className="nl-muted" role="alert" data-nl-prepared-text="refused">
+        这一部分声明为 HTML，已拒绝展示：这里只显示安全的文本内容。
+      </p>
+    );
+  }
+  const isJson = contentType.includes("json");
+  let body = props.text;
+  if (isJson) {
+    try {
+      body = JSON.stringify(JSON.parse(props.text) as unknown, null, 2);
+    } catch {
+      body = props.text;
+    }
+  }
+  return (
+    <pre className="nl-prepared-text" data-nl-prepared-text={isJson ? "json" : "text"}>{body}</pre>
+  );
+}
 
 /** The brief: the topic, the audience, the length and the structured content brief. */
 export function BriefView(props: { readonly brief: Brief | null }) {
@@ -94,68 +136,5 @@ export function StoryboardView(props: { readonly storyboard: Storyboard | null }
         ))}
       </ol>
     </section>
-  );
-}
-
-/** The native-sync state the indicator shows. */
-export interface NativeSyncState {
-  readonly state: "loaded" | "pending" | "unknown";
-  readonly reason: string;
-}
-
-/**
- * The native-sync state of a project.
- *
- * "Loaded" is only ever said when the context says so *and* the acknowledgement matches
- * the project's current revision, snapshot, source digest and selection. A succeeded job
- * or a committed film is not a native acknowledgement: the editor may still be showing
- * the previous version, and claiming otherwise is the "commit ≠ native loaded" mistake
- * the contract keeps calling out.
- *
- * The `native_sync` flag alone is never enough. It says what the Host believes; only the
- * acknowledgement says what the editor actually loaded.
- */
-export function nativeSyncState(context: Context | null): NativeSyncState {
-  if (context === null) {
-    return { state: "unknown", reason: "尚未读取工程状态。" };
-  }
-  if (context.native_sync === "unknown") {
-    return { state: "unknown", reason: "编辑区状态未知，未收到原生确认。" };
-  }
-  if (context.native_sync === "pending") {
-    return { state: "pending", reason: "工程已提交，等待编辑区确认。" };
-  }
-  const ack = context.native_ack;
-  if (ack === null) {
-    return { state: "unknown", reason: "编辑区没有返回确认记录。" };
-  }
-  if (ack.project_id !== context.project_id) {
-    return { state: "unknown", reason: "编辑区确认属于另一工程。" };
-  }
-  if (ack.loaded_project_revision !== context.project_revision) {
-    return {
-      state: "unknown",
-      reason: "编辑区确认的版本与工程当前版本不同。",
-    };
-  }
-  if (ack.loaded_snapshot_id !== context.snapshot_id) {
-    return { state: "unknown", reason: "编辑区确认的快照与工程当前快照不同。" };
-  }
-  if (ack.source_digest !== context.source_digest) {
-    return { state: "unknown", reason: "编辑区确认的内容摘要与工程当前摘要不同。" };
-  }
-  if (ack.selection_version !== context.selection_version) {
-    return { state: "unknown", reason: "编辑区确认的选区与工程当前选区不同。" };
-  }
-  return { state: "loaded", reason: "编辑区已载入同一版本。" };
-}
-
-/** The native-sync indicator. */
-export function NativeSyncIndicator(props: { readonly context: Context | null }) {
-  const state = nativeSyncState(props.context);
-  return (
-    <p className={`nl-native-sync nl-native-sync-${state.state}`} role="status" aria-live="polite">
-      {state.reason}
-    </p>
   );
 }

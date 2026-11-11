@@ -1,0 +1,53 @@
+{
+  "base_sha": "84deba07927fa59b45a24039b4740a2f9d3fd430",
+  "candidate_sha": "ed44a9b96ea4368175f99ff66c60253975ba0576",
+  "app_test_import_whitelist": [
+    "src/app/agent-workbench-client.ts",
+    "src/app/m5/GatewayApiClient.ts",
+    "src/app/m5/M5Panel.tsx",
+    "src/app/observation/CreativeReviewPanel.tsx",
+    "src/app/observation/LocalAssetRegistrationPanel.tsx",
+    "src/app/observation/NativeSyncIndicator.tsx",
+    "src/app/observation/content-views.tsx",
+    "src/app/observation/index.ts",
+    "src/app/observation/observation.css",
+    "tests/agent-driven/integration/created-workbench-review.test.ts",
+    "tests/agent-driven/product/local-asset-registration.test.tsx",
+    "tests/agent-driven/product/observation-ui.test.tsx"
+  ],
+  "app_test_count": 12,
+  "separate_product_host_browser_adapter": [
+    "src/host/m5/controlled-studio-browser.ts"
+  ],
+  "exclude_from_import": [
+    "src/contracts/prepared-preview.ts",
+    "src/host/m5/controlled-studio-access.ts",
+    "src/host/m5/openfilm-studio-gateway.ts",
+    "src/host/render/assembly-ports.ts",
+    "tests/agent-driven/integration/created-native-ui-transport.test.ts"
+  ],
+  "sha256": {
+    "src/app/agent-workbench-client.ts": "41b4913745ad0df3973e5f708269263fd9349a76fc99a49fcfe0350b17158a3e",
+    "src/app/m5/GatewayApiClient.ts": "5d93ada98617e8857388900d74cb76b0c411fb36e69c6432a1361945c7e94dbd",
+    "src/app/m5/M5Panel.tsx": "dca67b2c0432770f0ccb92f6d43ddbc390c7296d59ce1886ec8cdb979c1e4d7c",
+    "src/app/observation/CreativeReviewPanel.tsx": "65b7af36ca9730f5df16934ff675b6456b383ff842198dd9f3ee267e0bad6660",
+    "src/app/observation/LocalAssetRegistrationPanel.tsx": "105def35237749f8b019d451f3c6d73d500d59aa992eb9140792d75535d038f8",
+    "src/app/observation/NativeSyncIndicator.tsx": "ac9523d58c02c71adfb75f45943f0be8b0b096abe87b1a72761f38d27cf540fd",
+    "src/app/observation/content-views.tsx": "485921a5b632ea34a026693345f0a7ce2d966bca51977ecedb7662301d8fe1b6",
+    "src/app/observation/index.ts": "46a577ced9dd1b4cc659ab723a1f0e64842c6fe65de3ab12f90a79c7569fb503",
+    "src/app/observation/observation.css": "d8d3f7a14a03d6accb3a24d80224510c9e4944d233e9be49f5326032f79de382",
+    "tests/agent-driven/integration/created-workbench-review.test.ts": "70709c066bff998cad7518afc8b5484b946bdf284afd035789c3075167d5f6e4",
+    "tests/agent-driven/product/local-asset-registration.test.tsx": "c41c540a1c8b4960521ca26c1012975957ee274da25b1a48587f21dddff4ea50",
+    "tests/agent-driven/product/observation-ui.test.tsx": "0674ea16e5f9a09e3f894d4db9b81c8e8c4bd6665d55f58beced5cd98f897c98",
+    "src/host/m5/controlled-studio-browser.ts": "44c5a5437ca8ff9f7d3a265cbd62d5c8065987e3bb01ab283d28c4015af02dfd"
+  },
+  "verification": {
+    "tsc": 0,
+    "focused_tests": 108,
+    "focused_files": 3,
+    "build": 0,
+    "heavy_slot": "R1-PRODUCT-BUILD-012 released"
+  },
+  "remaining": "MAIN exact-byte integration, actual combined context review-package Ref and native/browser behavior, independent review and human acceptance; local known two architecture baseline failures not integrated",
+  "writer": "none; source/index frozen read-only"
+}

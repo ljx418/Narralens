@@ -204,3 +204,19 @@ it('binds content relay project scope to its owned project and originating intak
   const preproject=await f.request('/api/agent/v1/content-decisions',{...foreign,project_id:null},'other');expect(preproject.status).toBe(200);expect((await preproject.json()).project_id).toBeNull();
  }finally{await f.close();}
 },120000);
+
+it('observes a real owned project before its first Run without creating workflow, Job or command facts',async()=>{
+ const f=await fixture();try{
+  const baseline={runs:f.count('cp_a0_run'),commands:f.count('operation_idempotency'),commit:f.host.revisions.activeCommit(f.projectId)};
+  const bytes=await readFile(join(f.root,'projects',f.projectId,'source','film.html'),'utf8');
+  const path='/api/agent/v1/projects/'+f.projectId+'/workflow';
+  for(let read=0;read<2;read++){
+   const response=await f.request(path);expect(response.status).toBe(200);
+   expect(await response.json()).toEqual({project_id:f.projectId,workflow_revision:0,nodes:[],next_actions:['define_content']});
+  }
+  expect((await f.request(path,undefined,'other')).status).toBe(404);
+  expect((await f.request('/api/agent/v1/projects/missing-owned-project/workflow')).status).toBe(404);
+  expect({runs:f.count('cp_a0_run'),commands:f.count('operation_idempotency'),commit:f.host.revisions.activeCommit(f.projectId)}).toEqual(baseline);
+  expect(await readFile(join(f.root,'projects',f.projectId,'source','film.html'),'utf8')).toBe(bytes);
+ }finally{await f.close();}
+},120000);
