@@ -1,6 +1,82 @@
 import type {CreatedWorkbenchProjection} from '../../contracts/created-workbench.js';
 import {createHash,randomBytes,timingSafeEqual} from 'node:crypto';
 import type {IncomingMessage,ServerResponse} from 'node:http';
+
+/**
+ * The independent workbench UI delegate (CR-R1-001 §2).
+ *
+ * It is a **second, separate purpose** — not a wider native session. The native grant
+ * below can read the native workbench projection and can never approve anything. This
+ * grant can call the closed workbench RPC set, and it can open a prepared review medium,
+ * and it still cannot write to the native editor.
+ *
+ * The value is never built from a request body. The Host's own authenticated
+ * `trusted_ui` branch creates it, and it carries the real principal, the real project and
+ * the real owner session; the browser can neither name a principal nor widen it.
+ */
+
+/** The three closed surfaces the UI delegate may reach. */
+export type NativeStudioUiSurface='agent.v1'|'local-assets.v1'|'workbench.v1';
+
+/** One closed UI call: a surface, an operation, and the original input DTO. */
+export interface NativeStudioUiInvokeInput{
+ readonly surface:NativeStudioUiSurface;
+ readonly operation:string;
+ readonly input:unknown;
+ readonly correlation_id:string;
+}
+
+/** The Host's own answer: the status and the body it would have answered itself. */
+export interface NativeStudioUiInvokeResult{
+ readonly status:number;
+ readonly body:unknown;
+}
+
+/** A byte range inside one prepared review object. */
+export interface NativeStudioUiMediaRange{
+ readonly offset:number;
+ readonly length:number;
+}
+
+/**
+ * One opened review medium.
+ *
+ * The reader is a verified handle, not a path and not a URL: the bytes come from the
+ * object the Host has already bound to the current package, and `close` releases it. The
+ * caller closes it in a `finally`, on success and on failure alike.
+ */
+export interface NativeStudioUiReviewMedia{
+ readonly content_type:string;
+ readonly bytes:number;
+ readonly sha256:string;
+ /** The quoted sha256, as the media alias answers it. */
+ readonly etag:string;
+ readonly read:(range:NativeStudioUiMediaRange)=>Promise<Uint8Array>;
+ readonly close:()=>Promise<void>;
+}
+
+/**
+ * The UI delegate a native grant may carry.
+ *
+ * It is optional: a native entry without it stays native-only, and the browser is told
+ * the workbench surface is not ready rather than being handed a native proof that would
+ * look like one.
+ */
+export interface NativeStudioUiGrantV1{
+ /** The project the delegate is bound to. It is never taken from the request. */
+ readonly project_id:string;
+ readonly owner_session_ref:string;
+ readonly instance_generation:number;
+ /** The delegate's own expiry. It never outlasts its parent session. */
+ readonly expires_at:number;
+ /** Re-checks the real parent session's liveness, owner and generation. */
+ readonly isCurrent:()=>boolean;
+ /** Calls the Host's own closed dispatcher. It never loops back through HTTP. */
+ readonly invoke:(input:NativeStudioUiInvokeInput)=>Promise<NativeStudioUiInvokeResult>;
+ /** Opens one prepared review object for reading. */
+ readonly openReviewMedia:(input:{readonly ref:string;readonly range?:NativeStudioUiMediaRange})=>Promise<NativeStudioUiReviewMedia>;
+}
+
 export interface NativeStudioGrant {
  readonly project_id:string;readonly native_project_id:string;
  readonly owner_session_ref:string;readonly instance_generation:number;
@@ -8,6 +84,14 @@ export interface NativeStudioGrant {
  /** Captures authenticated owner and exact Host-issued prepared view, never body fields. */
  readonly isCurrent:()=>boolean;
  readonly readWorkbench:()=>Promise<CreatedWorkbenchProjection>;
+ /**
+ * The optional independent UI delegate.
+ *
+ * It is a separate purpose with its own cookie, its own proof and its own lifetime: the
+ * native session may go stale after a commit while this delegate may still read the new
+ * Context, and the native proof can never stand in for it.
+ */
+ readonly ui?:NativeStudioUiGrantV1;
 }
 export interface NativeStudioSession {readonly grant:NativeStudioGrant;readonly proof:string;readonly read_token:string;readonly expires_at:number}
 interface Ticket {grant:NativeStudioGrant;expires_at:number}
