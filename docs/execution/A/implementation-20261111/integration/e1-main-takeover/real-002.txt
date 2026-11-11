@@ -1,0 +1,44 @@
+
+> narralens@0.1.0 test /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+> vitest run --config vitest.config.ts tests/agent-driven/integration/created-source-adoption.test.ts --maxWorkers=1 --minWorkers=1 -t 'publishes complete native source'
+
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:1274564) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/agent-driven/integration/created-source-adoption.test.ts (8 tests | 1 failed | 7 skipped) 5272ms
+   × actual closed created-source commit and publisher > publishes complete native source, commits once, preserves R1 geometry and replays without a second commit 5271ms
+     → The created impact digests are invalid
+   ↓ actual closed created-source commit and publisher > refuses JSON-cloned publication proof without moving database authorities
+   ↓ actual closed created-source commit and publisher > refuses author bytes changed after publication even while database base is unchanged
+   ↓ actual closed created-source commit and publisher > refuses current selection changed after publication
+   ↓ actual closed created-source commit and publisher > refuses a symlink replacement of the committed snapshot source
+   ↓ actual closed created-source commit and publisher > rolls every database authority back if an actual post-consume write fails
+   ↓ actual closed created-source commit and publisher > poisons the outer transaction when a project-bound repository guard failure is swallowed
+   ↓ actual closed created-source commit and publisher > refuses a real scope used against another database and invalidates it after commit
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/created-source-adoption.test.ts > actual closed created-source commit and publisher > publishes complete native source, commits once, preserves R1 geometry and replays without a second commit
+CreatedImpactError: The created impact digests are invalid
+ ❯ fail src/host/agent-driven/created-source-impact-store.ts:135:9
+    133| 
+    134| function fail(code: CreatedImpactError['code'], message: string): neve…
+    135|   throw new CreatedImpactError(code, message);
+       |         ^
+    136| }
+    137| 
+ ❯ CreatedSourceImpactStore.create src/host/agent-driven/created-source-impact-store.ts:357:7
+ ❯ fixture tests/agent-driven/integration/created-source-adoption.test.ts:56:23
+ ❯ tests/agent-driven/integration/created-source-adoption.test.ts:100:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 7 skipped (8)
+   Start at  01:50:38
+   Duration  14.02s (transform 3.35s, setup 0ms, collect 6.70s, tests 5.27s, environment 0ms, prepare 1.39s)
+
+ ELIFECYCLE  Test failed. See above for more details.

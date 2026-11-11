@@ -1,0 +1,53 @@
+{
+  "candidate": "cfadc136c29b8d5c5cbc2911f01dd09d4916401b",
+  "actual_stop_ack": "msg_11b356df322e; child msg_0920cd379941; exact9 files match immutable candidate",
+  "main_base": "15e4b3030ca11ede2c4cde79fb9721211ed1bf4d",
+  "paths": [
+    {
+      "path": "src/host/projects/revision-store.ts",
+      "candidate_sha256": "0487217c8ddfa5650216322c13f41ccbeaa3aceaa6ecbe84aa24cdedcf004606",
+      "main_before_sha256": "95a2158d8bf69a680227a525090724d2e0721aba7bf08b9332a7f3dbfd4c8c0f"
+    },
+    {
+      "path": "src/host/agent-driven/product-sqlite-repository.ts",
+      "candidate_sha256": "1ce454a3565867bedb9a64489fb3edd01de210767dcef3fcfb90aea73753dacc",
+      "main_before_sha256": "e0beb9353f8f34fcdef9a5b434959f0b63c990aef3de8588cae25cea34a328a1"
+    },
+    {
+      "path": "src/host/agent-driven/created-source-ports.ts",
+      "candidate_sha256": "1d9c7668bae28cfb5e7aa129db8f54b69f3e6add8a970a7bd1efca729b99a87c",
+      "main_before_sha256": null
+    },
+    {
+      "path": "src/host/agent-driven/created-source-publisher.ts",
+      "candidate_sha256": "58d1205a6c370c3882db8129ae53bc92d9790c5e04a0419365fa9dbed5230e0d",
+      "main_before_sha256": null
+    },
+    {
+      "path": "src/host/agent-driven/created-prepared-source-store.ts",
+      "candidate_sha256": "f234fc0d74bee887ad4c09ff711d52f7b22d44559a8302e2327b5674f86611d1",
+      "main_before_sha256": null
+    },
+    {
+      "path": "src/host/agent-driven/created-source-impact-store.ts",
+      "candidate_sha256": "c972dbbf82e06a2a6911a601b170ee4c080ec263b2a6425c16069a3fd7744ed4",
+      "main_before_sha256": null
+    },
+    {
+      "path": "src/host/agent-driven/created-source-adoption-store.ts",
+      "candidate_sha256": "21157f7ec5d2f32a5c37d7576b0bc47573834414a9d479cbd5b770f42393fc05",
+      "main_before_sha256": null
+    },
+    {
+      "path": "tests/agent-driven/integration/created-source-change.test.ts",
+      "candidate_sha256": "d8c31d2edc4491f45564f20760453d90cb49a555c0b9955066596655ce33fb82",
+      "main_before_sha256": null
+    },
+    {
+      "path": "tests/agent-driven/integration/created-source-adoption.test.ts",
+      "candidate_sha256": "05ce345dcec3a37bf6c0ea79c8c5df2e65103c82d203c927c34ce53d67a62931",
+      "main_before_sha256": null
+    }
+  ],
+  "status": "UNACCEPTED_INPUT_FOR_MAIN_ROOT_CAUSE_FIX; no scope/helper acceptance"
+}

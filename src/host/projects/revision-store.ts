@@ -6,6 +6,97 @@ import type { ApiError, AssetImportResponse, EditResponse, JobEvent, JobState } 
 import type { ControlledWriteFailureResponseV1, ControlledWriteResponseV1 } from "../../contracts/wave2-types.js";
 import { HttpError } from "../api-error.js";
 import { verifyOrInsertProjectionFact } from "../adoption/adoption-store.js";
+import { assertPreparedAdoptionPlan, preparedAdoptionPlanDigest, type PreparedAdoptionPlanV1,
+  type CommitPreparedCreatedSourceInput, type CreatedSourceCommitScope } from "../agent-driven/created-source-ports.js";
+import type { Applied, ReviewPackage } from "../../contracts/agent-driven-types.js";
+import { validateAgentDefinition } from "../../contracts/agent-driven-validator.js";
+import { canonicalDigest, canonicalJson, FIXED_PLAN } from "../creative/digest.js";
+import { ProductSqliteRepository } from "../agent-driven/product-sqlite-repository.js";
+import { OperationIdempotencyStore } from "./operation-idempotency-store.js";
+import { snapshotIdFor } from "./snapshot-store.js";
+import { computeCreatedImpactHash, type CreatedImpactSpecV1 } from "../agent-driven/created-source-impact-store.js";
+import { CreatedSourceAdoptionStore } from "../agent-driven/created-source-adoption-store.js";
+import { assertCreatedPublicationForCommit } from "../agent-driven/created-source-publisher.js";
+
+/* ── the created-source commit scope ───────────────────────────────────────────────────── */
+
+/**
+ * The live state of one created-source commit scope.
+ *
+ * The scope is a capability, and a capability is identified by identity rather than by
+ * shape: the entry lives in a module-private map, so an object that merely has the
+ * right fields is not a scope. It is bound to the store that opened it, to the exact
+ * connection that opened it, and to the project and transaction of the commit.
+ */
+interface CreatedSourceScopeEntry {
+  readonly owner: RevisionStore;
+  readonly db: DatabaseSync;
+  readonly project_id: string;
+  readonly transaction_id: string;
+  live: boolean;
+  poisoned: boolean;
+  fault: unknown;
+}
+
+/**
+ * The live scopes of this process.
+ *
+ * Module-private on purpose. A shared module that could open a scope would be a shared
+ * module anybody could open one in, and a scope that authorises joining a transaction
+ * is not something a request may carry.
+ */
+function decodeCreatedCommitReplay(value: unknown): Applied {
+  if (!value || typeof value !== 'object' || !('format' in value) || value.format !== 'agent.idempotency@1'
+    || !('response' in value)) throw new Error('CREATED_COMMIT_REPLAY_ENVELOPE_INVALID');
+  return validateAgentDefinition<Applied>('Applied', value.response);
+}
+
+const liveCreatedSourceScopes = new WeakMap<object, CreatedSourceScopeEntry>();
+
+class CreatedSourceScope implements CreatedSourceCommitScope {
+  readonly #entry: CreatedSourceScopeEntry;
+
+  constructor(entry: CreatedSourceScopeEntry) {
+    this.#entry = entry;
+  }
+
+  get project_id(): string { return this.#entry.project_id; }
+
+  get transaction_id(): string { return this.#entry.transaction_id; }
+
+  /**
+   * Records that the joined work failed.
+   *
+   * The failure is remembered rather than only thrown, so the outer transaction rolls
+   * back even when a caller swallows the error and carries on.
+   */
+  poison(error: unknown): void {
+    this.#entry.poisoned = true;
+    this.#entry.fault = error;
+  }
+
+  get poisoned(): boolean { return this.#entry.poisoned; }
+}
+
+/**
+ * The repository's validation of a commit scope.
+ *
+ * Three things have to hold, and all three are about identity: the scope was opened by
+ * this exact store, it is bound to this exact connection, and it is still live. A scope
+ * from another store, a scope from another database and a scope whose transaction has
+ * already ended are all refused, and so is an object that only looks like one.
+ */
+export function isLiveCreatedSourceCommitScope(
+  scope: unknown,
+  owner: RevisionStore,
+  db: DatabaseSync,
+): boolean {
+  if (typeof scope !== "object" || scope === null) return false;
+  const entry = liveCreatedSourceScopes.get(scope);
+  if (entry === undefined) return false;
+  return entry.live && entry.owner === owner && entry.db === db;
+}
+
 
 export type JournalState = "prepared" | "source_validated" | "metadata_committed" | "aborted" | "compensated" | "attention";
 
@@ -333,6 +424,232 @@ export class RevisionStore {
       this.#db.exec("COMMIT");
       return result;
     } catch (error) { this.#db.exec("ROLLBACK"); throw error; }
+  }
+
+  /**
+   * Runs `work` inside this store's own transaction and hands it the live scope of that
+   * transaction.
+   *
+   * The scope exists only for the synchronous call it was opened for. It is bound to
+   * this store, to this connection and to the project and transaction named here, and it
+   * stops being live the moment the transaction ends — so a scope that is kept and used
+   * later authorises nothing.
+   *
+   * A failure inside the joined work is remembered on the scope as well as thrown, so a
+   * caller that swallows the error still cannot commit a half-written transaction.
+   */
+  #withCreatedSourceCommitScope<T>(
+    projectId: string,
+    transactionId: string,
+    work: (scope: CreatedSourceCommitScope) => T,
+  ): T {
+    return this.atomic(() => {
+      const entry: CreatedSourceScopeEntry = {
+        owner: this,
+        db: this.#db,
+        project_id: projectId,
+        transaction_id: transactionId,
+        live: true,
+        poisoned: false,
+        fault: undefined,
+      };
+      const scope = new CreatedSourceScope(entry);
+      liveCreatedSourceScopes.set(scope, entry);
+      try {
+        const result = work(scope);
+        if (result && typeof (result as { then?: unknown }).then === "function") {
+          void Promise.resolve(result).catch(() => {});
+          throw new Error("CREATED_COMMIT_ASYNC_SCOPE_REJECTED");
+        }
+        if (entry.poisoned) throw entry.fault;
+        return result;
+      } finally {
+        entry.live = false;
+        liveCreatedSourceScopes.delete(scope);
+      }
+    });
+  }
+
+  /** The closed created-source commit. No caller receives a transaction capability. */
+  commitPreparedCreatedSource(input: CommitPreparedCreatedSourceInput): Applied {
+    const keys = ['project_id', 'transaction_id', 'impact_id', 'approval_id', 'prepared_source_id',
+      'execution', 'idempotency_key', 'request_digest', 'publication_proof'].sort();
+    if (!input || typeof input !== 'object' || Object.keys(input).sort().join(',') !== keys.join(','))
+      throw new Error('CREATED_COMMIT_INPUT_REJECTED');
+    validateAgentDefinition('ExecutionBinding', input.execution);
+    if (!/^[a-f0-9]{64}$/.test(input.request_digest) || !input.idempotency_key)
+      throw new Error('CREATED_COMMIT_INPUT_REJECTED');
+    const repo = new ProductSqliteRepository(this);
+    const commands = new OperationIdempotencyStore(this.#db);
+    const now = new Date(), at = now.toISOString(), seconds = Math.floor(now.getTime() / 1000);
+    const operation = 'agent.v1:change.apply';
+    return this.#withCreatedSourceCommitScope(input.project_id, input.transaction_id, scope => {
+      function fail(message: string): never { throw new Error(`CREATED_COMMIT_${message}`); }
+      const same = (a: unknown, b: unknown): boolean => canonicalDigest(a) === canonicalDigest(b);
+      const row = (sql: string, ...values: SQLInputValue[]): Record<string, unknown> => {
+        const found = this.#db.prepare(sql).get(...values);
+        if (!found) return fail('FACT_MISSING');
+        return found;
+      };
+      const remembered = commands.recall(input.project_id, operation, input.idempotency_key);
+      if (remembered) {
+        commands.assertSameRequest(remembered, input.request_digest, operation, input.project_id);
+        if (remembered.transaction_id !== input.transaction_id) fail('REPLAY_TRANSACTION_MISMATCH');
+        const committed = this.projectTransaction(input.transaction_id);
+        if (!committed || committed.state !== 'committed' || committed.project_id !== input.project_id)
+          fail('REPLAY_NOT_COMMITTED');
+        const envelope: unknown = JSON.parse(remembered.response_json);
+        const response = decodeCreatedCommitReplay(envelope);
+        if (response.project_id !== input.project_id || response.transaction_id !== input.transaction_id
+          || response.snapshot_id !== committed.snapshot_id || response.source_digest !== committed.source_digest_after)
+          fail('REPLAY_RESPONSE_MISMATCH');
+        return { ...response, replayed: true };
+      }
+      const transaction = this.projectTransaction(input.transaction_id);
+      if (!transaction || transaction.project_id !== input.project_id || transaction.state !== 'prepared'
+        || transaction.request_hash !== input.request_digest) fail('TRANSACTION_MISMATCH');
+      const adoption = row('SELECT * FROM created_adoption_fact WHERE transaction_id=?', input.transaction_id);
+      if (adoption.project_id !== input.project_id || adoption.impact_id !== input.impact_id
+        || adoption.approval_id !== input.approval_id || adoption.prepared_source_id !== input.prepared_source_id
+        || !same(JSON.parse(String(adoption.execution_json)), input.execution)) fail('ADOPTION_MISMATCH');
+      const impactRow = row('SELECT * FROM impact WHERE impact_id=?', input.impact_id);
+      const planRow = row('SELECT * FROM created_impact_fact WHERE impact_id=?', input.impact_id);
+      const plan = assertPreparedAdoptionPlan(JSON.parse(String(planRow.plan_json)) as PreparedAdoptionPlanV1);
+      const digest = preparedAdoptionPlanDigest(plan);
+      const impact = JSON.parse(String(impactRow.canonical_json)) as CreatedImpactSpecV1;
+      if (computeCreatedImpactHash(impact) !== impactRow.impact_hash || impact.project_id !== input.project_id
+        || impact.operation !== 'adopt_prepared_source' || impact.materialization_id !== input.prepared_source_id
+        || impact.native_plan_sha256 !== digest || impactRow.project_id !== input.project_id
+        || impactRow.operation !== 'adopt_prepared_source' || impactRow.reference_id !== input.prepared_source_id
+        || impactRow.state !== 'active' || Date.parse(String(impactRow.expires_at)) <= now.getTime()
+        || impact.expires_at !== plan.expires_at || impactRow.expires_at !== plan.expires_at
+        || digest !== planRow.plan_sha256 || digest !== adoption.plan_sha256 || digest !== adoption.facts_digest
+        || planRow.prepared_source_id !== input.prepared_source_id || plan.project_id !== input.project_id
+        || plan.materialization_id !== input.prepared_source_id || !same(plan.producer_execution, input.execution)
+        || plan.base_revision !== transaction.base_revision || plan.base_source_digest !== adoption.original_source_digest
+        || plan.target_source_digest !== adoption.target_source_digest || plan.target_snapshot_id !== adoption.expected_snapshot_id
+        || snapshotIdFor(input.project_id, plan.target_source_digest) !== plan.target_snapshot_id
+        || !same(plan.files, JSON.parse(String(adoption.target_closure_json)))) fail('PLAN_MISMATCH');
+      const state = row('SELECT * FROM project_state WHERE project_id=?', input.project_id);
+      const active = this.activeCommit(input.project_id);
+      if (!active || active.engine !== 'openfilm' || active.revision !== plan.base_revision
+        || active.source_digest !== plan.base_source_digest || Number(state.revision) !== plan.base_revision
+        || state.source_digest !== plan.base_source_digest || Number(state.control_revision) !== plan.control_revision
+        || Number(state.attention) !== 0) fail('BASE_MOVED');
+      const pending = this.#db.prepare("SELECT transaction_id FROM project_transaction WHERE project_id=? AND transaction_id<>? AND state IN ('prepared','recovering','attention') LIMIT 1")
+        .get(input.project_id, input.transaction_id);
+      if (pending) fail('OTHER_TRANSACTION_PENDING');
+      const prepared = row('SELECT * FROM created_prepared_source WHERE prepared_source_id=?', input.prepared_source_id);
+      if (prepared.project_id !== input.project_id || prepared.fact_digest !== plan.prepared_fact_digest
+        || Number(prepared.base_revision) !== plan.base_revision || prepared.source_digest !== plan.base_source_digest
+        || !same(JSON.parse(String(prepared.execution_json)), input.execution)
+        || !same(JSON.parse(String(prepared.files_json)), plan.files)
+        || !same(JSON.parse(String(prepared.roots_json)), plan.roots)
+        || prepared.rights_digest !== impact.rights_digest || prepared.rights_digest !== impactRow.rights_digest) fail('PREPARED_MAPPING_MISMATCH');
+      // The publisher owns this opaque proof and rechecks actual backup, complete target,
+      // durable snapshot and current selection synchronously. No callback comes from input.
+      const publication = assertCreatedPublicationForCommit(input.publication_proof, this, {
+        project_id: input.project_id, transaction_id: input.transaction_id,
+        prepared_source_id: input.prepared_source_id, target_snapshot_id: plan.target_snapshot_id,
+        original_source_digest: plan.base_source_digest, published_source_digest: plan.target_source_digest,
+        selection_version: plan.selection_version,
+      });
+      return repo.joinCreatedSourceCommit(scope, tx => {
+        const execution = input.execution;
+        const run = tx.get('run', { project_id: input.project_id, run_id: execution.run_id });
+        const grant = tx.get('execution_grant', { project_id: input.project_id, run_id: execution.run_id, grant_id: execution.authorization_id });
+        const approval = tx.get('approval', { project_id: input.project_id, run_id: execution.run_id, approval_id: input.approval_id });
+        const stepKey = { project_id: input.project_id, run_id: execution.run_id, plan_version: 1 as const, step_id: execution.step_id, attempt: execution.attempt };
+        const step = tx.get('step_attempt', stepKey);
+        const fixed = tx.get('plan_version',{project_id:input.project_id,run_id:execution.run_id,plan_version:1});
+        if(!fixed||fixed.input_digest!==execution.input_digest||fixed.run_scope_digest!==execution.run_scope_digest
+          ||canonicalDigest(fixed.plan_json)!==canonicalDigest(FIXED_PLAN)) fail('FIXED_PLAN_CHANGED');
+        const currentAttempt = tx.list('step_attempt', {project_id:input.project_id,run_id:execution.run_id,step_id:execution.step_id})
+          .reduce((highest, entry) => Math.max(highest, entry.attempt), 0);
+        if (!run || !grant || !approval || !step || !['ready','running','waiting_user'].includes(run.state)
+          || run.current_plan_version !== 1 || run.run_scope_digest !== execution.run_scope_digest
+          || canonicalDigest(run.scope_json) !== execution.run_scope_digest
+          || grant.state !== 'active' || grant.expires_at <= seconds || grant.run_scope_digest !== execution.run_scope_digest
+          || grant.allow_paid !== 0 || grant.allow_external !== 0 || !run.scope_json.allowed_actions.includes('change.apply')
+          || run.scope_json.project_id !== input.project_id || run.scope_json.run_id !== execution.run_id
+          || run.scope_json.input_digest !== execution.input_digest || run.scope_json.allow_paid
+          || run.scope_json.allow_external_write || run.scope_json.allow_runtime_mutation
+          || grant.grant_id !== step.grant_id || step.input_digest !== execution.input_digest
+          || step.run_scope_digest !== execution.run_scope_digest || currentAttempt !== execution.attempt
+          || !['running','waiting_user'].includes(step.state)) fail('EXECUTION_STALE');
+        if (approval.state !== 'active' || approval.expires_at <= seconds || approval.impact_id !== input.impact_id
+          || approval.base_revision !== plan.base_revision || approval.control_revision !== plan.control_revision
+          || approval.facts_digest !== digest || approval.run_scope_digest !== execution.run_scope_digest
+          || approval.plan_version !== execution.plan_version || approval.step_id !== execution.step_id
+          || approval.attempt !== execution.attempt || approval.input_digest !== execution.input_digest
+          || approval.action_digest !== digest || approval.consumed_transaction_id !== null) fail('APPROVAL_STALE');
+        const confirmation = tx.get('trusted_confirmation', {project_id:input.project_id,run_id:execution.run_id,confirmation_id:approval.confirmation_id});
+        const grantConfirmation = tx.get('trusted_confirmation', {project_id:input.project_id,run_id:execution.run_id,confirmation_id:grant.confirmation_id});
+        const authorization = tx.get('prepared_authorization', {transaction_id:input.transaction_id});
+        if (!confirmation || !grantConfirmation || confirmation.channel !== 'trusted_ui'
+          || confirmation.purpose !== 'change.approve' || confirmation.expires_at <= seconds
+          || confirmation.action_digest !== approval.action_digest || confirmation.input_digest !== execution.input_digest
+          || confirmation.authenticated_actor !== grant.principal_id || confirmation.issued_at > seconds
+          || grantConfirmation.issued_at > seconds || grantConfirmation.action_digest !== execution.run_scope_digest
+          || grantConfirmation.purpose !== 'run.authorize' || grantConfirmation.expires_at <= seconds
+          || grantConfirmation.authenticated_actor !== grant.principal_id || !authorization
+          || authorization.project_id !== input.project_id || authorization.run_id !== execution.run_id
+          || authorization.approval_id !== input.approval_id || authorization.facts_digest !== digest) fail('CONFIRMATION_STALE');
+        if (!confirmation.review_id) fail('REVIEW_MISSING');
+        const review = tx.get('review_request', {project_id:input.project_id,run_id:execution.run_id,review_id:confirmation.review_id});
+        if (!review || review.state !== 'accepted' || review.input_digest !== execution.input_digest
+          || review.run_scope_digest !== execution.run_scope_digest) fail('REVIEW_STALE');
+        const bound = row('SELECT * FROM created_prepared_source_package WHERE prepared_source_id=?', input.prepared_source_id);
+        if (bound.package_id !== review.artifact_id || Number(bound.package_version) !== review.artifact_version) fail('PACKAGE_MISMATCH');
+        const packageArtifact = tx.get('artifact_version', {project_id:input.project_id,artifact_id:review.artifact_id,version:review.artifact_version});
+        if (!packageArtifact || packageArtifact.content_digest !== review.package_digest || canonicalDigest(packageArtifact.content_json)!==review.package_digest) fail('PACKAGE_STALE');
+        const pkg=validateAgentDefinition<ReviewPackage>('ReviewPackage',packageArtifact.content_json);
+        if(pkg.project_id!==input.project_id||pkg.run_id!==execution.run_id||pkg.package_id!==review.artifact_id
+          ||pkg.version!==review.artifact_version||pkg.input_digest!==execution.input_digest||pkg.impact?.impact_id!==input.impact_id
+          ||pkg.impact.plan_sha256!==digest||pkg.impact.materialization_id!==input.prepared_source_id) fail('PACKAGE_IMPACT_MISMATCH');
+        // Full-project source replacement affects all three lock dimensions. Refuse an
+        // active relevant lock; actual consumers remain explicitly in the immutable plan.
+        if (this.activeLocks(input.project_id).some(lock => lock.active)) fail('TARGET_LOCKED');
+        assertCreatedPublicationForCommit(input.publication_proof, this, {
+          project_id:input.project_id,transaction_id:input.transaction_id,prepared_source_id:input.prepared_source_id,
+          target_snapshot_id:plan.target_snapshot_id,original_source_digest:plan.base_source_digest,
+          published_source_digest:plan.target_source_digest,selection_version:plan.selection_version,
+        });
+        const changed = this.#db.prepare("UPDATE project_state SET revision=revision+1,source_digest=?,updated_at=? WHERE project_id=? AND revision=? AND source_digest=? AND CAST(control_revision AS INTEGER)=? AND attention=0")
+          .run(plan.target_source_digest,at,input.project_id,plan.base_revision,plan.base_source_digest,plan.control_revision);
+        if (Number(changed.changes)!==1) fail('PROJECT_CAS');
+        tx.put('approval',{project_id:input.project_id,run_id:execution.run_id,approval_id:input.approval_id},
+          {...approval,state:'consumed',consumed_transaction_id:input.transaction_id});
+        if (Number(this.#db.prepare("UPDATE impact SET state='consumed',updated_at=? WHERE impact_id=? AND project_id=? AND state='active' AND impact_hash=?")
+          .run(at,input.impact_id,input.project_id,impactRow.impact_hash as string).changes)!==1) fail('IMPACT_CAS');
+        const snapshot = this.snapshotRow(plan.target_snapshot_id);
+        if (snapshot && (snapshot.project_id!==input.project_id || snapshot.source_digest!==plan.target_source_digest || snapshot.engine!=='openfilm')) fail('SNAPSHOT_CONFLICT');
+        if (!snapshot) this.#db.prepare("INSERT INTO snapshot(snapshot_id,project_id,source_digest,engine,created_at) VALUES(?,?,?,'openfilm',?)")
+          .run(plan.target_snapshot_id,input.project_id,plan.target_source_digest,at);
+        const geometryText=canonicalJson(publication.geometry), geometryDigest=canonicalDigest(publication.geometry);
+        const oldGeometry=this.#db.prepare('SELECT fact_json,fact_sha256 FROM created_source_fact WHERE project_id=? AND snapshot_id=?').get(input.project_id,plan.target_snapshot_id);
+        if (oldGeometry && (oldGeometry.fact_sha256!==geometryDigest || oldGeometry.fact_json!==geometryText)) fail('GEOMETRY_CONFLICT');
+        if (!oldGeometry) this.#db.prepare('INSERT INTO created_source_fact(project_id,snapshot_id,fact_json,fact_sha256) VALUES(?,?,?,?)')
+          .run(input.project_id,plan.target_snapshot_id,geometryText,geometryDigest);
+        const provenance = new CreatedSourceAdoptionStore(this);
+        provenance.insertOrVerifySourceFact({fact:{format:'narralens.created-source-fact@1',project_id:input.project_id,
+          transaction_id:input.transaction_id,prepared_source_id:input.prepared_source_id,impact_id:input.impact_id,
+          approval_id:input.approval_id,snapshot_id:plan.target_snapshot_id,source_digest:plan.target_source_digest,
+          plan_sha256:digest,facts_digest:digest,revision:plan.base_revision+1,execution,created_at:at},now});
+        this.#db.prepare("INSERT INTO active_commit(project_id,revision,snapshot_id,source_digest,engine,transaction_id,created_at) VALUES(?,?,?,?,'openfilm',?,?) ON CONFLICT(project_id) DO UPDATE SET revision=excluded.revision,snapshot_id=excluded.snapshot_id,source_digest=excluded.source_digest,engine=excluded.engine,transaction_id=excluded.transaction_id,created_at=excluded.created_at")
+          .run(input.project_id,plan.base_revision+1,plan.target_snapshot_id,plan.target_source_digest,input.transaction_id,at);
+        tx.put('step_attempt',stepKey,{...step,state:'succeeded',updated_at:at});
+        const response: Applied = {project_id:input.project_id,transaction_id:input.transaction_id,project_revision:plan.base_revision+1,
+          snapshot_id:plan.target_snapshot_id,source_digest:plan.target_source_digest,replayed:false};
+        tx.emit({topic:'workflow.run.state_changed',scope:{kind:'run',project_id:input.project_id,run_id:execution.run_id,run_scope_digest:execution.run_scope_digest,plan_version:1},entity:{type:'task',id:execution.step_id,version:execution.attempt,state:'succeeded'},attempt:execution.attempt,source:'host',input_digest:execution.input_digest,observed_at:at,payload:{operation:'adopt_prepared_source',transaction_id:input.transaction_id,revision:response.project_revision,snapshot_id:response.snapshot_id}});
+        // Same shared command authority and envelope as every Agent operation.
+        commands.record({projectId:input.project_id,operationKind:operation,idempotencyKey:input.idempotency_key,requestDigest:input.request_digest,transactionId:input.transaction_id,now,
+          response:{format:'agent.idempotency@1',receipt:{operation:'change.apply',idempotency_key:input.idempotency_key,request_digest:input.request_digest,principal_id:grant.principal_id,project_id:input.project_id,correlation_id:transaction.correlation_id},response}});
+        this.enqueueOutbox('project.committed',input.project_id,JSON.stringify({project_id:input.project_id,transaction_id:input.transaction_id,revision:response.project_revision,snapshot_id:response.snapshot_id}),now);
+        this.transition(input.transaction_id,'prepared','committed',{snapshot_id:plan.target_snapshot_id,source_digest_after:plan.target_source_digest},now);
+        return response;
+      });
+    });
   }
 
   // ── M2.2: one authoritative transaction machine, predecessor-checked everywhere ───────

@@ -1,0 +1,50 @@
+{
+  "command": [
+    "corepack",
+    "pnpm",
+    "test",
+    "tests/agent-driven/integration/created-source-adoption.test.ts",
+    "--maxWorkers=1",
+    "--minWorkers=1",
+    "-t",
+    "publishes complete native source"
+  ],
+  "paths": [
+    {
+      "path": "src/host/projects/revision-store.ts",
+      "sha256": "a2d12de5f795bb98a6d2662f464f01ae45254a64134390219801d74dc3e2f2fe"
+    },
+    {
+      "path": "src/host/agent-driven/product-sqlite-repository.ts",
+      "sha256": "223e008d3e281e27dede01747935b7d880193395b6adf949c3c8dd19392ef5a7"
+    },
+    {
+      "path": "src/host/agent-driven/created-source-ports.ts",
+      "sha256": "1d9c7668bae28cfb5e7aa129db8f54b69f3e6add8a970a7bd1efca729b99a87c"
+    },
+    {
+      "path": "src/host/agent-driven/created-source-publisher.ts",
+      "sha256": "8fafd3bfcb97eac292c5afca650ce620b9eb2981b00088a55c8517b00db60814"
+    },
+    {
+      "path": "src/host/agent-driven/created-prepared-source-store.ts",
+      "sha256": "f234fc0d74bee887ad4c09ff711d52f7b22d44559a8302e2327b5674f86611d1"
+    },
+    {
+      "path": "src/host/agent-driven/created-source-impact-store.ts",
+      "sha256": "c972dbbf82e06a2a6911a601b170ee4c080ec263b2a6425c16069a3fd7744ed4"
+    },
+    {
+      "path": "src/host/agent-driven/created-source-adoption-store.ts",
+      "sha256": "ff2c6a0ce18b38169071a4c27c38359ec18d79bd95ce2f52d9c78bacd3df3a01"
+    },
+    {
+      "path": "tests/agent-driven/integration/created-source-change.test.ts",
+      "sha256": "2ae4f96a3c6329d96cd92674f47c138602184231630c6fd06755d58d90070148"
+    },
+    {
+      "path": "tests/agent-driven/integration/created-source-adoption.test.ts",
+      "sha256": "85d36ab05731048d10a1c919c8af239b51e650ba06149c621529dbcef7ecfd40"
+    }
+  ]
+}

@@ -1,0 +1,48 @@
+src/host/projects/revision-store.ts(19,10): error TS2305: Module '"../agent-driven/created-source-publisher.js"' has no exported member 'assertCreatedPublicationForCommit'.
+src/host/projects/revision-store.ts(498,32): error TS2551: Property 'transaction' does not exist on type 'RevisionStore'. Did you mean 'transition'?
+src/host/projects/revision-store.ts(508,32): error TS2551: Property 'transaction' does not exist on type 'RevisionStore'. Did you mean 'transition'?
+src/host/projects/revision-store.ts(567,84): error TS2339: Property 'input_digest' does not exist on type 'RunRecord'.
+src/host/projects/revision-store.ts(573,13): error TS18047: 'approval' is possibly 'null'.
+src/host/projects/revision-store.ts(573,44): error TS18047: 'approval' is possibly 'null'.
+src/host/projects/revision-store.ts(573,78): error TS18047: 'approval' is possibly 'null'.
+src/host/projects/revision-store.ts(574,14): error TS18047: 'approval' is possibly 'null'.
+src/host/projects/revision-store.ts(574,63): error TS18047: 'approval' is possibly 'null'.
+src/host/projects/revision-store.ts(575,14): error TS18047: 'approval' is possibly 'null'.
+src/host/projects/revision-store.ts(575,50): error TS18047: 'approval' is possibly 'null'.
+src/host/projects/revision-store.ts(576,14): error TS18047: 'approval' is possibly 'null'.
+src/host/projects/revision-store.ts(576,66): error TS18047: 'approval' is possibly 'null'.
+src/host/projects/revision-store.ts(577,14): error TS18047: 'approval' is possibly 'null'.
+src/host/projects/revision-store.ts(577,56): error TS18047: 'approval' is possibly 'null'.
+src/host/projects/revision-store.ts(578,14): error TS18047: 'approval' is possibly 'null'.
+src/host/projects/revision-store.ts(579,130): error TS18047: 'approval' is possibly 'null'.
+src/host/projects/revision-store.ts(580,135): error TS18047: 'grant' is possibly 'null'.
+src/host/projects/revision-store.ts(584,45): error TS18047: 'approval' is possibly 'null'.
+src/host/projects/revision-store.ts(586,56): error TS18047: 'grant' is possibly 'null'.
+src/host/projects/revision-store.ts(589,14): error TS18047: 'confirmation' is possibly 'null'.
+src/host/projects/revision-store.ts(590,102): error TS2322: Type 'string | null' is not assignable to type 'string'.
+  Type 'null' is not assignable to type 'string'.
+src/host/projects/revision-store.ts(590,112): error TS18047: 'confirmation' is possibly 'null'.
+src/host/projects/revision-store.ts(594,34): error TS18047: 'review' is possibly 'null'.
+src/host/projects/revision-store.ts(594,90): error TS18047: 'review' is possibly 'null'.
+src/host/projects/revision-store.ts(595,101): error TS18047: 'review' is possibly 'null'.
+src/host/projects/revision-store.ts(595,128): error TS18047: 'review' is possibly 'null'.
+src/host/projects/revision-store.ts(596,49): error TS2339: Property 'sha256' does not exist on type 'ArtifactVersionRecord'.
+src/host/projects/revision-store.ts(596,60): error TS18047: 'review' is possibly 'null'.
+src/host/projects/revision-store.ts(599,18): error TS2339: Property 'listEngineLocks' does not exist on type 'RevisionStore'.
+src/host/projects/revision-store.ts(599,57): error TS7006: Parameter 'lock' implicitly has an 'any' type.
+src/host/projects/revision-store.ts(609,11): error TS2345: Argument of type '{ state: "consumed"; consumed_transaction_id: string; project_id?: string; run_id?: string; approval_id?: string; run_scope_digest?: string; confirmation_id?: string; plan_version?: 1; step_id?: string; ... 8 more ...; expires_at?: number; }' is not assignable to parameter of type 'ApprovalRecord'.
+  Property 'project_id' is optional in type '{ state: "consumed"; consumed_transaction_id: string; project_id?: string; run_id?: string; approval_id?: string; run_scope_digest?: string; confirmation_id?: string; plan_version?: 1; step_id?: string; ... 8 more ...; expires_at?: number; }' but required in type 'ApprovalRecord'.
+src/host/projects/revision-store.ts(628,39): error TS2345: Argument of type '{ state: "succeeded"; updated_at: string; project_id?: string; run_id?: string; plan_version?: 1; step_id?: string; attempt?: number; run_scope_digest?: string; grant_id?: string; input_digest?: string; dependencies_json?: string[]; job_id?: string | null; output_artifact_id?: string | null; output_version?: number ...' is not assignable to parameter of type 'StepAttemptRecord'.
+  Property 'project_id' is optional in type '{ state: "succeeded"; updated_at: string; project_id?: string; run_id?: string; plan_version?: 1; step_id?: string; attempt?: number; run_scope_digest?: string; grant_id?: string; input_digest?: string; dependencies_json?: string[]; job_id?: string | null; output_artifact_id?: string | null; output_version?: number ...' but required in type 'StepAttemptRecord'.
+src/host/projects/revision-store.ts(631,18): error TS2322: Type '"project.committed"' is not assignable to type 'ProductEventTopic'.
+src/host/projects/revision-store.ts(631,44): error TS2322: Type '{ kind: "run"; project_id: string; run_id: string; run_scope_digest: string; }' is not assignable to type 'ProductEventScope'.
+  Property 'plan_version' is missing in type '{ kind: "run"; project_id: string; run_id: string; run_scope_digest: string; }' but required in type '{ readonly kind: "run"; readonly project_id: string; readonly run_id: string; readonly run_scope_digest: string; readonly plan_version: 1; }'.
+src/host/projects/revision-store.ts(634,11): error TS2345: Argument of type '{ operation: string; idempotency_key: string; request_digest: string; principal_id: string; project_id: string; }' is not assignable to parameter of type 'ProductIdempotencyReceipt'.
+  Property 'correlation_id' is missing in type '{ operation: string; idempotency_key: string; request_digest: string; principal_id: string; project_id: string; }' but required in type 'ProductIdempotencyReceipt'.
+src/host/projects/revision-store.ts(635,26): error TS18047: 'grant' is possibly 'null'.
+tests/agent-driven/integration/created-source-change.test.ts(197,11): error TS2339: Property 'withCreatedSourceCommitScope' does not exist on type 'RevisionStore'.
+tests/agent-driven/integration/created-source-change.test.ts(197,63): error TS7006: Parameter 'scope' implicitly has an 'any' type.
+tests/agent-driven/integration/created-source-change.test.ts(216,28): error TS2339: Property 'withCreatedSourceCommitScope' does not exist on type 'RevisionStore'.
+tests/agent-driven/integration/created-source-change.test.ts(216,80): error TS7006: Parameter 'scope' implicitly has an 'any' type.
+tests/agent-driven/integration/created-source-change.test.ts(233,28): error TS2339: Property 'withCreatedSourceCommitScope' does not exist on type 'RevisionStore'.
+tests/agent-driven/integration/created-source-change.test.ts(233,80): error TS7006: Parameter 'scope' implicitly has an 'any' type.

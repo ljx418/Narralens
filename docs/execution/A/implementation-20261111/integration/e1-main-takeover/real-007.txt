@@ -1,0 +1,27 @@
+
+> narralens@0.1.0 test /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+> vitest run --config vitest.config.ts tests/agent-driven/integration/created-source-change.test.ts tests/agent-driven/integration/created-source-adoption.test.ts --maxWorkers=1 --minWorkers=1
+
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:1331717) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/created-source-adoption.test.ts (8 tests) 48889ms
+   ✓ actual closed created-source commit and publisher > publishes complete native source, commits once, preserves R1 geometry and replays without a second commit  7418ms
+   ✓ actual closed created-source commit and publisher > refuses JSON-cloned publication proof without moving database authorities  6258ms
+   ✓ actual closed created-source commit and publisher > refuses author bytes changed after publication even while database base is unchanged  5940ms
+   ✓ actual closed created-source commit and publisher > refuses current selection changed after publication  5740ms
+   ✓ actual closed created-source commit and publisher > refuses a symlink replacement of the committed snapshot source  5845ms
+   ✓ actual closed created-source commit and publisher > rolls every database authority back if an actual post-consume write fails  5957ms
+   ✓ actual closed created-source commit and publisher > poisons the outer transaction when a project-bound repository guard failure is swallowed  5904ms
+   ✓ actual closed created-source commit and publisher > refuses a real scope used against another database and invalidates it after commit  5826ms
+(node:1335168) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/created-source-change.test.ts (11 tests) 20ms
+
+ Test Files  2 passed (2)
+      Tests  19 passed (19)
+   Start at  01:58:16
+   Duration  65.49s (transform 4.93s, setup 0ms, collect 11.35s, tests 48.91s, environment 0ms, prepare 3.68s)
+

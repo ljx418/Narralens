@@ -1,0 +1,10 @@
+{
+  "at": "2026-11-11T17:49:52.131052+00:00",
+  "action": "SIGINT exact owned Vitest main process",
+  "pid": 1268521,
+  "worker": 1268621,
+  "owned_fixture_roots": [
+    "/tmp/narralens-created-workspace-jPV6po"
+  ],
+  "reason": "Confirmed actual queued preparation; added test forgot to call worker.start before waitForCompletedDraft. Deliberate failed capture, not environment failure."
+}

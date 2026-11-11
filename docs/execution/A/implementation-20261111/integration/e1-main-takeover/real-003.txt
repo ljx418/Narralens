@@ -1,0 +1,50 @@
+
+> narralens@0.1.0 test /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+> vitest run --config vitest.config.ts tests/agent-driven/integration/created-source-adoption.test.ts --maxWorkers=1 --minWorkers=1 -t 'publishes complete native source'
+
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:1294266) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/agent-driven/integration/created-source-adoption.test.ts (8 tests | 1 failed | 7 skipped) 6159ms
+   × actual closed created-source commit and publisher > publishes complete native source, commits once, preserves R1 geometry and replays without a second commit 6159ms
+     → FOREIGN KEY constraint failed
+   ↓ actual closed created-source commit and publisher > refuses JSON-cloned publication proof without moving database authorities
+   ↓ actual closed created-source commit and publisher > refuses author bytes changed after publication even while database base is unchanged
+   ↓ actual closed created-source commit and publisher > refuses current selection changed after publication
+   ↓ actual closed created-source commit and publisher > refuses a symlink replacement of the committed snapshot source
+   ↓ actual closed created-source commit and publisher > rolls every database authority back if an actual post-consume write fails
+   ↓ actual closed created-source commit and publisher > poisons the outer transaction when a project-bound repository guard failure is swallowed
+   ↓ actual closed created-source commit and publisher > refuses a real scope used against another database and invalidates it after commit
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/created-source-adoption.test.ts > actual closed created-source commit and publisher > publishes complete native source, commits once, preserves R1 geometry and replays without a second commit
+Error: FOREIGN KEY constraint failed
+ ❯ ProductSqliteRepository.insert src/host/agent-driven/product-sqlite-repository.ts:200:137
+    198|     const supplied=Object.keys(record);
+    199|     if(!supplied.length||supplied.some(k=>!cols.includes(k)))throw inv…
+    200|     this.#db.prepare(`INSERT INTO ${quote(spec.table)} (${supplied.map…
+       |                                                                                                                                         ^
+    201|     return this.read(c,key)!;
+    202|   }
+ ❯ ProductSqliteRepository.write src/host/agent-driven/product-sqlite-repository.ts:207:33
+ ❯ src/host/agent-driven/product-sqlite-repository.ts:156:41
+ ❯ guarded src/host/agent-driven/product-sqlite-repository.ts:146:18
+ ❯ Object.put src/host/agent-driven/product-sqlite-repository.ts:156:24
+ ❯ tests/agent-driven/integration/created-source-adoption.test.ts:78:6
+ ❯ src/host/agent-driven/product-sqlite-repository.ts:162:21
+ ❯ ProductSqliteRepository.scope src/host/agent-driven/product-sqlite-repository.ts:169:7
+ ❯ src/host/agent-driven/product-sqlite-repository.ts:64:63
+ ❯ RevisionStore.atomic src/host/projects/revision-store.ts:423:22
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 7 skipped (8)
+   Start at  01:55:19
+   Duration  14.37s (transform 3.66s, setup 0ms, collect 6.48s, tests 6.16s, environment 0ms, prepare 1.15s)
+
+ ELIFECYCLE  Test failed. See above for more details.

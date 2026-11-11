@@ -1,0 +1,1292 @@
+{
+  "format": "narralens.d09-plan-golden-vectors@1",
+  "domain": "narralens.prepared-adoption-plan@1",
+  "version": 1,
+  "cases": [
+    {
+      "name": "accepted-base",
+      "expect": "accepted",
+      "plan": {
+        "format": "narralens.prepared-adoption-plan@1",
+        "version": 1,
+        "source_kind": "created_prepared_source",
+        "project_id": "proj_alpha",
+        "base_revision": 3,
+        "base_source_digest": "e999436749e9c441bbf1449492194fdf99a7df648125ce181675d03b1ce01bde",
+        "control_revision": 2,
+        "selection_version": 1,
+        "materialization_id": "ps_0123456789abcdef0123456789abcdef0123456789abcdef01234567",
+        "prepared_fact_digest": "62c0d1af51bcaddc9ce25f568eada023ab1a21aab427e768967aad9226e0db96",
+        "request_digest": "1f58b9145b24d108d7ac38887338b3ea3229833b9c1e418250343f907bfd1047",
+        "producer_execution": {
+          "run_id": "run_alpha",
+          "plan_version": 1,
+          "step_id": "chapters",
+          "attempt": 1,
+          "input_digest": "1675eff597c30ff940f93e7af4b5ba9e08a441ee80bb585f5cf7ffc0d3421dd5",
+          "run_scope_digest": "7f153e5e104af9fc419a5eb1cb327872f0763bfb1fb78b6da8f279e6a6a24f19",
+          "authorization_id": "grant_alpha"
+        },
+        "target_source_digest": "2556cd0b7e3459842a627f0ae01a931e984131d26509b1135838e869dc552397",
+        "target_snapshot_id": "snapshot_beta",
+        "roots": [
+          "film.html",
+          "settings.json"
+        ],
+        "files": [
+          {
+            "relative_path": "film.html",
+            "bytes": 1024,
+            "sha256": "bc5ff17ae1eb7d4b6b9e0cac44e4b0d9248407c76d77e32160ffcbf780e2c2e3"
+          },
+          {
+            "relative_path": "settings.json",
+            "bytes": 128,
+            "sha256": "b14b8928e11265b8697267550c7bb08796ec3c72aa9566561698f167e041416e"
+          },
+          {
+            "relative_path": "subtitles.srt",
+            "bytes": 64,
+            "sha256": "1876af8ea746bbce07b204b06a419999e11da92a34ac1d8ab8f8b2336cea5ed3"
+          }
+        ],
+        "rights": [
+          {
+            "ref_id": "asset_alpha",
+            "artifact_version": 1,
+            "sha256": "6dd60fe4e7f9f49d975a568b34570cafce7cd5f94d806b87bb4d55fb2b02be0b"
+          }
+        ],
+        "consumer": {
+          "consumer_id": "native_observer",
+          "project_id": "proj_alpha",
+          "run_id": "run_alpha",
+          "graph_digest": "e80182107bbcd1c9b5401de934106423a12507bf049559c9dd2c91cb5017dad8"
+        },
+        "native_plan": {
+          "native_plan_sha256": "f716a14a4d85acc04280b3f1c77de2c2d1ca165f90930f99e6cec75cabb44d28",
+          "film_sha256": "9292ae319f253258311475b692bedc79a9afe9672fbb7d1b42aed38f1a9b1ebf",
+          "film_bytes": 1024,
+          "settings_digest": "792cd51329b8f7d11f918b72954ce24d7a8cf0c43179190470de51557e72ccc2",
+          "subtitle_style_digest": "6f501f80236154cf3ab34e2bf65c0d2d5f13c14d6d5e084a4387d4d0ed96ce34",
+          "captions_digest": "609c56b7bd20dcca8869bb5924a994f39ea855cc59ca1f520ba767d9fe88719b",
+          "markers_digest": "ef1ccb7e7401a32da399b894acc393cb71e09aaa77a761ae82bc7f975fa2d7ed"
+        },
+        "frame_count": 1200,
+        "fps_numerator": 25,
+        "fps_denominator": 1,
+        "affected_ranges": [
+          {
+            "start_frame": 600,
+            "end_frame_exclusive": 900,
+            "clip_id": "clip_b"
+          },
+          {
+            "start_frame": 0,
+            "end_frame_exclusive": 300,
+            "clip_id": "clip_a"
+          }
+        ],
+        "locks_checked": [
+          {
+            "lock_id": "lock_visual",
+            "lock_type": "visual",
+            "scope": "project",
+            "target_id": "",
+            "start_frame": 0,
+            "end_frame_exclusive": 1200
+          },
+          {
+            "lock_id": "lock_narration",
+            "lock_type": "narration",
+            "scope": "project",
+            "target_id": "",
+            "start_frame": 0,
+            "end_frame_exclusive": 1200
+          },
+          {
+            "lock_id": "lock_duration",
+            "lock_type": "duration",
+            "scope": "shot",
+            "target_id": "clip_a",
+            "start_frame": 0,
+            "end_frame_exclusive": 300
+          }
+        ],
+        "engine_upstream_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+        "expires_at": "2026-11-12T00:15:00.000Z"
+      },
+      "preimage": "{\"domain\":\"narralens.prepared-adoption-plan@1\",\"facts\":{\"affected_ranges\":[{\"clip_id\":\"clip_a\",\"end_frame_exclusive\":300,\"start_frame\":0},{\"clip_id\":\"clip_b\",\"end_frame_exclusive\":900,\"start_frame\":600}],\"base_revision\":3,\"base_source_digest\":\"e999436749e9c441bbf1449492194fdf99a7df648125ce181675d03b1ce01bde\",\"consumer\":{\"consumer_id\":\"native_observer\",\"graph_digest\":\"e80182107bbcd1c9b5401de934106423a12507bf049559c9dd2c91cb5017dad8\",\"project_id\":\"proj_alpha\",\"run_id\":\"run_alpha\"},\"control_revision\":2,\"engine_upstream_sha\":\"e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3\",\"expires_at\":\"2026-11-12T00:15:00.000Z\",\"files\":[{\"bytes\":1024,\"relative_path\":\"film.html\",\"sha256\":\"bc5ff17ae1eb7d4b6b9e0cac44e4b0d9248407c76d77e32160ffcbf780e2c2e3\"},{\"bytes\":128,\"relative_path\":\"settings.json\",\"sha256\":\"b14b8928e11265b8697267550c7bb08796ec3c72aa9566561698f167e041416e\"},{\"bytes\":64,\"relative_path\":\"subtitles.srt\",\"sha256\":\"1876af8ea746bbce07b204b06a419999e11da92a34ac1d8ab8f8b2336cea5ed3\"}],\"fps_denominator\":1,\"fps_numerator\":25,\"frame_count\":1200,\"locks_checked\":[{\"end_frame_exclusive\":300,\"lock_id\":\"lock_duration\",\"lock_type\":\"duration\",\"scope\":\"shot\",\"start_frame\":0,\"target_id\":\"clip_a\"},{\"end_frame_exclusive\":1200,\"lock_id\":\"lock_narration\",\"lock_type\":\"narration\",\"scope\":\"project\",\"start_frame\":0,\"target_id\":\"\"},{\"end_frame_exclusive\":1200,\"lock_id\":\"lock_visual\",\"lock_type\":\"visual\",\"scope\":\"project\",\"start_frame\":0,\"target_id\":\"\"}],\"materialization_id\":\"ps_0123456789abcdef0123456789abcdef0123456789abcdef01234567\",\"native_plan\":{\"captions_digest\":\"609c56b7bd20dcca8869bb5924a994f39ea855cc59ca1f520ba767d9fe88719b\",\"film_bytes\":1024,\"film_sha256\":\"9292ae319f253258311475b692bedc79a9afe9672fbb7d1b42aed38f1a9b1ebf\",\"markers_digest\":\"ef1ccb7e7401a32da399b894acc393cb71e09aaa77a761ae82bc7f975fa2d7ed\",\"native_plan_sha256\":\"f716a14a4d85acc04280b3f1c77de2c2d1ca165f90930f99e6cec75cabb44d28\",\"settings_digest\":\"792cd51329b8f7d11f918b72954ce24d7a8cf0c43179190470de51557e72ccc2\",\"subtitle_style_digest\":\"6f501f80236154cf3ab34e2bf65c0d2d5f13c14d6d5e084a4387d4d0ed96ce34\"},\"prepared_fact_digest\":\"62c0d1af51bcaddc9ce25f568eada023ab1a21aab427e768967aad9226e0db96\",\"producer_execution\":{\"attempt\":1,\"authorization_id\":\"grant_alpha\",\"input_digest\":\"1675eff597c30ff940f93e7af4b5ba9e08a441ee80bb585f5cf7ffc0d3421dd5\",\"plan_version\":1,\"run_id\":\"run_alpha\",\"run_scope_digest\":\"7f153e5e104af9fc419a5eb1cb327872f0763bfb1fb78b6da8f279e6a6a24f19\",\"step_id\":\"chapters\"},\"project_id\":\"proj_alpha\",\"request_digest\":\"1f58b9145b24d108d7ac38887338b3ea3229833b9c1e418250343f907bfd1047\",\"rights\":[{\"artifact_version\":1,\"ref_id\":\"asset_alpha\",\"sha256\":\"6dd60fe4e7f9f49d975a568b34570cafce7cd5f94d806b87bb4d55fb2b02be0b\"}],\"roots\":[\"film.html\",\"settings.json\"],\"selection_version\":1,\"source_kind\":\"created_prepared_source\",\"target_snapshot_id\":\"snapshot_beta\",\"target_source_digest\":\"2556cd0b7e3459842a627f0ae01a931e984131d26509b1135838e869dc552397\"},\"version\":1}",
+      "digest": "f23b24fec3afbc896eefbd148b1b005ea652da0ecd4379517db7499a5ffc8797"
+    },
+    {
+      "name": "reject-duplicate-file",
+      "expect": "rejected",
+      "plan": {
+        "format": "narralens.prepared-adoption-plan@1",
+        "version": 1,
+        "source_kind": "created_prepared_source",
+        "project_id": "proj_alpha",
+        "base_revision": 3,
+        "base_source_digest": "e999436749e9c441bbf1449492194fdf99a7df648125ce181675d03b1ce01bde",
+        "control_revision": 2,
+        "selection_version": 1,
+        "materialization_id": "ps_0123456789abcdef0123456789abcdef0123456789abcdef01234567",
+        "prepared_fact_digest": "62c0d1af51bcaddc9ce25f568eada023ab1a21aab427e768967aad9226e0db96",
+        "request_digest": "1f58b9145b24d108d7ac38887338b3ea3229833b9c1e418250343f907bfd1047",
+        "producer_execution": {
+          "run_id": "run_alpha",
+          "plan_version": 1,
+          "step_id": "chapters",
+          "attempt": 1,
+          "input_digest": "1675eff597c30ff940f93e7af4b5ba9e08a441ee80bb585f5cf7ffc0d3421dd5",
+          "run_scope_digest": "7f153e5e104af9fc419a5eb1cb327872f0763bfb1fb78b6da8f279e6a6a24f19",
+          "authorization_id": "grant_alpha"
+        },
+        "target_source_digest": "2556cd0b7e3459842a627f0ae01a931e984131d26509b1135838e869dc552397",
+        "target_snapshot_id": "snapshot_beta",
+        "roots": [
+          "film.html",
+          "settings.json"
+        ],
+        "files": [
+          {
+            "relative_path": "film.html",
+            "bytes": 1024,
+            "sha256": "bc5ff17ae1eb7d4b6b9e0cac44e4b0d9248407c76d77e32160ffcbf780e2c2e3"
+          },
+          {
+            "relative_path": "settings.json",
+            "bytes": 128,
+            "sha256": "b14b8928e11265b8697267550c7bb08796ec3c72aa9566561698f167e041416e"
+          },
+          {
+            "relative_path": "subtitles.srt",
+            "bytes": 64,
+            "sha256": "1876af8ea746bbce07b204b06a419999e11da92a34ac1d8ab8f8b2336cea5ed3"
+          },
+          {
+            "relative_path": "film.html",
+            "bytes": 1,
+            "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+          }
+        ],
+        "rights": [
+          {
+            "ref_id": "asset_alpha",
+            "artifact_version": 1,
+            "sha256": "6dd60fe4e7f9f49d975a568b34570cafce7cd5f94d806b87bb4d55fb2b02be0b"
+          }
+        ],
+        "consumer": {
+          "consumer_id": "native_observer",
+          "project_id": "proj_alpha",
+          "run_id": "run_alpha",
+          "graph_digest": "e80182107bbcd1c9b5401de934106423a12507bf049559c9dd2c91cb5017dad8"
+        },
+        "native_plan": {
+          "native_plan_sha256": "f716a14a4d85acc04280b3f1c77de2c2d1ca165f90930f99e6cec75cabb44d28",
+          "film_sha256": "9292ae319f253258311475b692bedc79a9afe9672fbb7d1b42aed38f1a9b1ebf",
+          "film_bytes": 1024,
+          "settings_digest": "792cd51329b8f7d11f918b72954ce24d7a8cf0c43179190470de51557e72ccc2",
+          "subtitle_style_digest": "6f501f80236154cf3ab34e2bf65c0d2d5f13c14d6d5e084a4387d4d0ed96ce34",
+          "captions_digest": "609c56b7bd20dcca8869bb5924a994f39ea855cc59ca1f520ba767d9fe88719b",
+          "markers_digest": "ef1ccb7e7401a32da399b894acc393cb71e09aaa77a761ae82bc7f975fa2d7ed"
+        },
+        "frame_count": 1200,
+        "fps_numerator": 25,
+        "fps_denominator": 1,
+        "affected_ranges": [
+          {
+            "start_frame": 600,
+            "end_frame_exclusive": 900,
+            "clip_id": "clip_b"
+          },
+          {
+            "start_frame": 0,
+            "end_frame_exclusive": 300,
+            "clip_id": "clip_a"
+          }
+        ],
+        "locks_checked": [
+          {
+            "lock_id": "lock_visual",
+            "lock_type": "visual",
+            "scope": "project",
+            "target_id": "",
+            "start_frame": 0,
+            "end_frame_exclusive": 1200
+          },
+          {
+            "lock_id": "lock_narration",
+            "lock_type": "narration",
+            "scope": "project",
+            "target_id": "",
+            "start_frame": 0,
+            "end_frame_exclusive": 1200
+          },
+          {
+            "lock_id": "lock_duration",
+            "lock_type": "duration",
+            "scope": "shot",
+            "target_id": "clip_a",
+            "start_frame": 0,
+            "end_frame_exclusive": 300
+          }
+        ],
+        "engine_upstream_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+        "expires_at": "2026-11-12T00:15:00.000Z"
+      }
+    },
+    {
+      "name": "reject-duplicate-lock",
+      "expect": "rejected",
+      "plan": {
+        "format": "narralens.prepared-adoption-plan@1",
+        "version": 1,
+        "source_kind": "created_prepared_source",
+        "project_id": "proj_alpha",
+        "base_revision": 3,
+        "base_source_digest": "e999436749e9c441bbf1449492194fdf99a7df648125ce181675d03b1ce01bde",
+        "control_revision": 2,
+        "selection_version": 1,
+        "materialization_id": "ps_0123456789abcdef0123456789abcdef0123456789abcdef01234567",
+        "prepared_fact_digest": "62c0d1af51bcaddc9ce25f568eada023ab1a21aab427e768967aad9226e0db96",
+        "request_digest": "1f58b9145b24d108d7ac38887338b3ea3229833b9c1e418250343f907bfd1047",
+        "producer_execution": {
+          "run_id": "run_alpha",
+          "plan_version": 1,
+          "step_id": "chapters",
+          "attempt": 1,
+          "input_digest": "1675eff597c30ff940f93e7af4b5ba9e08a441ee80bb585f5cf7ffc0d3421dd5",
+          "run_scope_digest": "7f153e5e104af9fc419a5eb1cb327872f0763bfb1fb78b6da8f279e6a6a24f19",
+          "authorization_id": "grant_alpha"
+        },
+        "target_source_digest": "2556cd0b7e3459842a627f0ae01a931e984131d26509b1135838e869dc552397",
+        "target_snapshot_id": "snapshot_beta",
+        "roots": [
+          "film.html",
+          "settings.json"
+        ],
+        "files": [
+          {
+            "relative_path": "film.html",
+            "bytes": 1024,
+            "sha256": "bc5ff17ae1eb7d4b6b9e0cac44e4b0d9248407c76d77e32160ffcbf780e2c2e3"
+          },
+          {
+            "relative_path": "settings.json",
+            "bytes": 128,
+            "sha256": "b14b8928e11265b8697267550c7bb08796ec3c72aa9566561698f167e041416e"
+          },
+          {
+            "relative_path": "subtitles.srt",
+            "bytes": 64,
+            "sha256": "1876af8ea746bbce07b204b06a419999e11da92a34ac1d8ab8f8b2336cea5ed3"
+          }
+        ],
+        "rights": [
+          {
+            "ref_id": "asset_alpha",
+            "artifact_version": 1,
+            "sha256": "6dd60fe4e7f9f49d975a568b34570cafce7cd5f94d806b87bb4d55fb2b02be0b"
+          }
+        ],
+        "consumer": {
+          "consumer_id": "native_observer",
+          "project_id": "proj_alpha",
+          "run_id": "run_alpha",
+          "graph_digest": "e80182107bbcd1c9b5401de934106423a12507bf049559c9dd2c91cb5017dad8"
+        },
+        "native_plan": {
+          "native_plan_sha256": "f716a14a4d85acc04280b3f1c77de2c2d1ca165f90930f99e6cec75cabb44d28",
+          "film_sha256": "9292ae319f253258311475b692bedc79a9afe9672fbb7d1b42aed38f1a9b1ebf",
+          "film_bytes": 1024,
+          "settings_digest": "792cd51329b8f7d11f918b72954ce24d7a8cf0c43179190470de51557e72ccc2",
+          "subtitle_style_digest": "6f501f80236154cf3ab34e2bf65c0d2d5f13c14d6d5e084a4387d4d0ed96ce34",
+          "captions_digest": "609c56b7bd20dcca8869bb5924a994f39ea855cc59ca1f520ba767d9fe88719b",
+          "markers_digest": "ef1ccb7e7401a32da399b894acc393cb71e09aaa77a761ae82bc7f975fa2d7ed"
+        },
+        "frame_count": 1200,
+        "fps_numerator": 25,
+        "fps_denominator": 1,
+        "affected_ranges": [
+          {
+            "start_frame": 600,
+            "end_frame_exclusive": 900,
+            "clip_id": "clip_b"
+          },
+          {
+            "start_frame": 0,
+            "end_frame_exclusive": 300,
+            "clip_id": "clip_a"
+          }
+        ],
+        "locks_checked": [
+          {
+            "lock_id": "lock_visual",
+            "lock_type": "visual",
+            "scope": "project",
+            "target_id": "",
+            "start_frame": 0,
+            "end_frame_exclusive": 1200
+          },
+          {
+            "lock_id": "lock_narration",
+            "lock_type": "narration",
+            "scope": "project",
+            "target_id": "",
+            "start_frame": 0,
+            "end_frame_exclusive": 1200
+          },
+          {
+            "lock_id": "lock_duration",
+            "lock_type": "duration",
+            "scope": "shot",
+            "target_id": "clip_a",
+            "start_frame": 0,
+            "end_frame_exclusive": 300
+          },
+          {
+            "lock_id": "lock_visual",
+            "lock_type": "visual",
+            "scope": "project",
+            "target_id": "",
+            "start_frame": 0,
+            "end_frame_exclusive": 1200
+          }
+        ],
+        "engine_upstream_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+        "expires_at": "2026-11-12T00:15:00.000Z"
+      }
+    },
+    {
+      "name": "reject-duplicate-range",
+      "expect": "rejected",
+      "plan": {
+        "format": "narralens.prepared-adoption-plan@1",
+        "version": 1,
+        "source_kind": "created_prepared_source",
+        "project_id": "proj_alpha",
+        "base_revision": 3,
+        "base_source_digest": "e999436749e9c441bbf1449492194fdf99a7df648125ce181675d03b1ce01bde",
+        "control_revision": 2,
+        "selection_version": 1,
+        "materialization_id": "ps_0123456789abcdef0123456789abcdef0123456789abcdef01234567",
+        "prepared_fact_digest": "62c0d1af51bcaddc9ce25f568eada023ab1a21aab427e768967aad9226e0db96",
+        "request_digest": "1f58b9145b24d108d7ac38887338b3ea3229833b9c1e418250343f907bfd1047",
+        "producer_execution": {
+          "run_id": "run_alpha",
+          "plan_version": 1,
+          "step_id": "chapters",
+          "attempt": 1,
+          "input_digest": "1675eff597c30ff940f93e7af4b5ba9e08a441ee80bb585f5cf7ffc0d3421dd5",
+          "run_scope_digest": "7f153e5e104af9fc419a5eb1cb327872f0763bfb1fb78b6da8f279e6a6a24f19",
+          "authorization_id": "grant_alpha"
+        },
+        "target_source_digest": "2556cd0b7e3459842a627f0ae01a931e984131d26509b1135838e869dc552397",
+        "target_snapshot_id": "snapshot_beta",
+        "roots": [
+          "film.html",
+          "settings.json"
+        ],
+        "files": [
+          {
+            "relative_path": "film.html",
+            "bytes": 1024,
+            "sha256": "bc5ff17ae1eb7d4b6b9e0cac44e4b0d9248407c76d77e32160ffcbf780e2c2e3"
+          },
+          {
+            "relative_path": "settings.json",
+            "bytes": 128,
+            "sha256": "b14b8928e11265b8697267550c7bb08796ec3c72aa9566561698f167e041416e"
+          },
+          {
+            "relative_path": "subtitles.srt",
+            "bytes": 64,
+            "sha256": "1876af8ea746bbce07b204b06a419999e11da92a34ac1d8ab8f8b2336cea5ed3"
+          }
+        ],
+        "rights": [
+          {
+            "ref_id": "asset_alpha",
+            "artifact_version": 1,
+            "sha256": "6dd60fe4e7f9f49d975a568b34570cafce7cd5f94d806b87bb4d55fb2b02be0b"
+          }
+        ],
+        "consumer": {
+          "consumer_id": "native_observer",
+          "project_id": "proj_alpha",
+          "run_id": "run_alpha",
+          "graph_digest": "e80182107bbcd1c9b5401de934106423a12507bf049559c9dd2c91cb5017dad8"
+        },
+        "native_plan": {
+          "native_plan_sha256": "f716a14a4d85acc04280b3f1c77de2c2d1ca165f90930f99e6cec75cabb44d28",
+          "film_sha256": "9292ae319f253258311475b692bedc79a9afe9672fbb7d1b42aed38f1a9b1ebf",
+          "film_bytes": 1024,
+          "settings_digest": "792cd51329b8f7d11f918b72954ce24d7a8cf0c43179190470de51557e72ccc2",
+          "subtitle_style_digest": "6f501f80236154cf3ab34e2bf65c0d2d5f13c14d6d5e084a4387d4d0ed96ce34",
+          "captions_digest": "609c56b7bd20dcca8869bb5924a994f39ea855cc59ca1f520ba767d9fe88719b",
+          "markers_digest": "ef1ccb7e7401a32da399b894acc393cb71e09aaa77a761ae82bc7f975fa2d7ed"
+        },
+        "frame_count": 1200,
+        "fps_numerator": 25,
+        "fps_denominator": 1,
+        "affected_ranges": [
+          {
+            "start_frame": 600,
+            "end_frame_exclusive": 900,
+            "clip_id": "clip_b"
+          },
+          {
+            "start_frame": 0,
+            "end_frame_exclusive": 300,
+            "clip_id": "clip_a"
+          },
+          {
+            "start_frame": 600,
+            "end_frame_exclusive": 900,
+            "clip_id": "clip_b"
+          }
+        ],
+        "locks_checked": [
+          {
+            "lock_id": "lock_visual",
+            "lock_type": "visual",
+            "scope": "project",
+            "target_id": "",
+            "start_frame": 0,
+            "end_frame_exclusive": 1200
+          },
+          {
+            "lock_id": "lock_narration",
+            "lock_type": "narration",
+            "scope": "project",
+            "target_id": "",
+            "start_frame": 0,
+            "end_frame_exclusive": 1200
+          },
+          {
+            "lock_id": "lock_duration",
+            "lock_type": "duration",
+            "scope": "shot",
+            "target_id": "clip_a",
+            "start_frame": 0,
+            "end_frame_exclusive": 300
+          }
+        ],
+        "engine_upstream_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+        "expires_at": "2026-11-12T00:15:00.000Z"
+      }
+    },
+    {
+      "name": "reject-duplicate-right",
+      "expect": "rejected",
+      "plan": {
+        "format": "narralens.prepared-adoption-plan@1",
+        "version": 1,
+        "source_kind": "created_prepared_source",
+        "project_id": "proj_alpha",
+        "base_revision": 3,
+        "base_source_digest": "e999436749e9c441bbf1449492194fdf99a7df648125ce181675d03b1ce01bde",
+        "control_revision": 2,
+        "selection_version": 1,
+        "materialization_id": "ps_0123456789abcdef0123456789abcdef0123456789abcdef01234567",
+        "prepared_fact_digest": "62c0d1af51bcaddc9ce25f568eada023ab1a21aab427e768967aad9226e0db96",
+        "request_digest": "1f58b9145b24d108d7ac38887338b3ea3229833b9c1e418250343f907bfd1047",
+        "producer_execution": {
+          "run_id": "run_alpha",
+          "plan_version": 1,
+          "step_id": "chapters",
+          "attempt": 1,
+          "input_digest": "1675eff597c30ff940f93e7af4b5ba9e08a441ee80bb585f5cf7ffc0d3421dd5",
+          "run_scope_digest": "7f153e5e104af9fc419a5eb1cb327872f0763bfb1fb78b6da8f279e6a6a24f19",
+          "authorization_id": "grant_alpha"
+        },
+        "target_source_digest": "2556cd0b7e3459842a627f0ae01a931e984131d26509b1135838e869dc552397",
+        "target_snapshot_id": "snapshot_beta",
+        "roots": [
+          "film.html",
+          "settings.json"
+        ],
+        "files": [
+          {
+            "relative_path": "film.html",
+            "bytes": 1024,
+            "sha256": "bc5ff17ae1eb7d4b6b9e0cac44e4b0d9248407c76d77e32160ffcbf780e2c2e3"
+          },
+          {
+            "relative_path": "settings.json",
+            "bytes": 128,
+            "sha256": "b14b8928e11265b8697267550c7bb08796ec3c72aa9566561698f167e041416e"
+          },
+          {
+            "relative_path": "subtitles.srt",
+            "bytes": 64,
+            "sha256": "1876af8ea746bbce07b204b06a419999e11da92a34ac1d8ab8f8b2336cea5ed3"
+          }
+        ],
+        "rights": [
+          {
+            "ref_id": "asset_alpha",
+            "artifact_version": 1,
+            "sha256": "6dd60fe4e7f9f49d975a568b34570cafce7cd5f94d806b87bb4d55fb2b02be0b"
+          },
+          {
+            "ref_id": "asset_alpha",
+            "artifact_version": 1,
+            "sha256": "6dd60fe4e7f9f49d975a568b34570cafce7cd5f94d806b87bb4d55fb2b02be0b"
+          }
+        ],
+        "consumer": {
+          "consumer_id": "native_observer",
+          "project_id": "proj_alpha",
+          "run_id": "run_alpha",
+          "graph_digest": "e80182107bbcd1c9b5401de934106423a12507bf049559c9dd2c91cb5017dad8"
+        },
+        "native_plan": {
+          "native_plan_sha256": "f716a14a4d85acc04280b3f1c77de2c2d1ca165f90930f99e6cec75cabb44d28",
+          "film_sha256": "9292ae319f253258311475b692bedc79a9afe9672fbb7d1b42aed38f1a9b1ebf",
+          "film_bytes": 1024,
+          "settings_digest": "792cd51329b8f7d11f918b72954ce24d7a8cf0c43179190470de51557e72ccc2",
+          "subtitle_style_digest": "6f501f80236154cf3ab34e2bf65c0d2d5f13c14d6d5e084a4387d4d0ed96ce34",
+          "captions_digest": "609c56b7bd20dcca8869bb5924a994f39ea855cc59ca1f520ba767d9fe88719b",
+          "markers_digest": "ef1ccb7e7401a32da399b894acc393cb71e09aaa77a761ae82bc7f975fa2d7ed"
+        },
+        "frame_count": 1200,
+        "fps_numerator": 25,
+        "fps_denominator": 1,
+        "affected_ranges": [
+          {
+            "start_frame": 600,
+            "end_frame_exclusive": 900,
+            "clip_id": "clip_b"
+          },
+          {
+            "start_frame": 0,
+            "end_frame_exclusive": 300,
+            "clip_id": "clip_a"
+          }
+        ],
+        "locks_checked": [
+          {
+            "lock_id": "lock_visual",
+            "lock_type": "visual",
+            "scope": "project",
+            "target_id": "",
+            "start_frame": 0,
+            "end_frame_exclusive": 1200
+          },
+          {
+            "lock_id": "lock_narration",
+            "lock_type": "narration",
+            "scope": "project",
+            "target_id": "",
+            "start_frame": 0,
+            "end_frame_exclusive": 1200
+          },
+          {
+            "lock_id": "lock_duration",
+            "lock_type": "duration",
+            "scope": "shot",
+            "target_id": "clip_a",
+            "start_frame": 0,
+            "end_frame_exclusive": 300
+          }
+        ],
+        "engine_upstream_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+        "expires_at": "2026-11-12T00:15:00.000Z"
+      }
+    },
+    {
+      "name": "reject-range-past-end",
+      "expect": "rejected",
+      "plan": {
+        "format": "narralens.prepared-adoption-plan@1",
+        "version": 1,
+        "source_kind": "created_prepared_source",
+        "project_id": "proj_alpha",
+        "base_revision": 3,
+        "base_source_digest": "e999436749e9c441bbf1449492194fdf99a7df648125ce181675d03b1ce01bde",
+        "control_revision": 2,
+        "selection_version": 1,
+        "materialization_id": "ps_0123456789abcdef0123456789abcdef0123456789abcdef01234567",
+        "prepared_fact_digest": "62c0d1af51bcaddc9ce25f568eada023ab1a21aab427e768967aad9226e0db96",
+        "request_digest": "1f58b9145b24d108d7ac38887338b3ea3229833b9c1e418250343f907bfd1047",
+        "producer_execution": {
+          "run_id": "run_alpha",
+          "plan_version": 1,
+          "step_id": "chapters",
+          "attempt": 1,
+          "input_digest": "1675eff597c30ff940f93e7af4b5ba9e08a441ee80bb585f5cf7ffc0d3421dd5",
+          "run_scope_digest": "7f153e5e104af9fc419a5eb1cb327872f0763bfb1fb78b6da8f279e6a6a24f19",
+          "authorization_id": "grant_alpha"
+        },
+        "target_source_digest": "2556cd0b7e3459842a627f0ae01a931e984131d26509b1135838e869dc552397",
+        "target_snapshot_id": "snapshot_beta",
+        "roots": [
+          "film.html",
+          "settings.json"
+        ],
+        "files": [
+          {
+            "relative_path": "film.html",
+            "bytes": 1024,
+            "sha256": "bc5ff17ae1eb7d4b6b9e0cac44e4b0d9248407c76d77e32160ffcbf780e2c2e3"
+          },
+          {
+            "relative_path": "settings.json",
+            "bytes": 128,
+            "sha256": "b14b8928e11265b8697267550c7bb08796ec3c72aa9566561698f167e041416e"
+          },
+          {
+            "relative_path": "subtitles.srt",
+            "bytes": 64,
+            "sha256": "1876af8ea746bbce07b204b06a419999e11da92a34ac1d8ab8f8b2336cea5ed3"
+          }
+        ],
+        "rights": [
+          {
+            "ref_id": "asset_alpha",
+            "artifact_version": 1,
+            "sha256": "6dd60fe4e7f9f49d975a568b34570cafce7cd5f94d806b87bb4d55fb2b02be0b"
+          }
+        ],
+        "consumer": {
+          "consumer_id": "native_observer",
+          "project_id": "proj_alpha",
+          "run_id": "run_alpha",
+          "graph_digest": "e80182107bbcd1c9b5401de934106423a12507bf049559c9dd2c91cb5017dad8"
+        },
+        "native_plan": {
+          "native_plan_sha256": "f716a14a4d85acc04280b3f1c77de2c2d1ca165f90930f99e6cec75cabb44d28",
+          "film_sha256": "9292ae319f253258311475b692bedc79a9afe9672fbb7d1b42aed38f1a9b1ebf",
+          "film_bytes": 1024,
+          "settings_digest": "792cd51329b8f7d11f918b72954ce24d7a8cf0c43179190470de51557e72ccc2",
+          "subtitle_style_digest": "6f501f80236154cf3ab34e2bf65c0d2d5f13c14d6d5e084a4387d4d0ed96ce34",
+          "captions_digest": "609c56b7bd20dcca8869bb5924a994f39ea855cc59ca1f520ba767d9fe88719b",
+          "markers_digest": "ef1ccb7e7401a32da399b894acc393cb71e09aaa77a761ae82bc7f975fa2d7ed"
+        },
+        "frame_count": 1200,
+        "fps_numerator": 25,
+        "fps_denominator": 1,
+        "affected_ranges": [
+          {
+            "start_frame": 600,
+            "end_frame_exclusive": 900,
+            "clip_id": "clip_b"
+          },
+          {
+            "start_frame": 0,
+            "end_frame_exclusive": 300,
+            "clip_id": "clip_a"
+          },
+          {
+            "start_frame": 0,
+            "end_frame_exclusive": 99999,
+            "clip_id": "clip_z"
+          }
+        ],
+        "locks_checked": [
+          {
+            "lock_id": "lock_visual",
+            "lock_type": "visual",
+            "scope": "project",
+            "target_id": "",
+            "start_frame": 0,
+            "end_frame_exclusive": 1200
+          },
+          {
+            "lock_id": "lock_narration",
+            "lock_type": "narration",
+            "scope": "project",
+            "target_id": "",
+            "start_frame": 0,
+            "end_frame_exclusive": 1200
+          },
+          {
+            "lock_id": "lock_duration",
+            "lock_type": "duration",
+            "scope": "shot",
+            "target_id": "clip_a",
+            "start_frame": 0,
+            "end_frame_exclusive": 300
+          }
+        ],
+        "engine_upstream_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+        "expires_at": "2026-11-12T00:15:00.000Z"
+      }
+    },
+    {
+      "name": "reject-uppercase-hash",
+      "expect": "rejected",
+      "plan": {
+        "format": "narralens.prepared-adoption-plan@1",
+        "version": 1,
+        "source_kind": "created_prepared_source",
+        "project_id": "proj_alpha",
+        "base_revision": 3,
+        "base_source_digest": "e999436749e9c441bbf1449492194fdf99a7df648125ce181675d03b1ce01bde",
+        "control_revision": 2,
+        "selection_version": 1,
+        "materialization_id": "ps_0123456789abcdef0123456789abcdef0123456789abcdef01234567",
+        "prepared_fact_digest": "62c0d1af51bcaddc9ce25f568eada023ab1a21aab427e768967aad9226e0db96",
+        "request_digest": "1f58b9145b24d108d7ac38887338b3ea3229833b9c1e418250343f907bfd1047",
+        "producer_execution": {
+          "run_id": "run_alpha",
+          "plan_version": 1,
+          "step_id": "chapters",
+          "attempt": 1,
+          "input_digest": "1675eff597c30ff940f93e7af4b5ba9e08a441ee80bb585f5cf7ffc0d3421dd5",
+          "run_scope_digest": "7f153e5e104af9fc419a5eb1cb327872f0763bfb1fb78b6da8f279e6a6a24f19",
+          "authorization_id": "grant_alpha"
+        },
+        "target_source_digest": "2556CD0B7E3459842A627F0AE01A931E984131D26509B1135838E869DC552397",
+        "target_snapshot_id": "snapshot_beta",
+        "roots": [
+          "film.html",
+          "settings.json"
+        ],
+        "files": [
+          {
+            "relative_path": "film.html",
+            "bytes": 1024,
+            "sha256": "bc5ff17ae1eb7d4b6b9e0cac44e4b0d9248407c76d77e32160ffcbf780e2c2e3"
+          },
+          {
+            "relative_path": "settings.json",
+            "bytes": 128,
+            "sha256": "b14b8928e11265b8697267550c7bb08796ec3c72aa9566561698f167e041416e"
+          },
+          {
+            "relative_path": "subtitles.srt",
+            "bytes": 64,
+            "sha256": "1876af8ea746bbce07b204b06a419999e11da92a34ac1d8ab8f8b2336cea5ed3"
+          }
+        ],
+        "rights": [
+          {
+            "ref_id": "asset_alpha",
+            "artifact_version": 1,
+            "sha256": "6dd60fe4e7f9f49d975a568b34570cafce7cd5f94d806b87bb4d55fb2b02be0b"
+          }
+        ],
+        "consumer": {
+          "consumer_id": "native_observer",
+          "project_id": "proj_alpha",
+          "run_id": "run_alpha",
+          "graph_digest": "e80182107bbcd1c9b5401de934106423a12507bf049559c9dd2c91cb5017dad8"
+        },
+        "native_plan": {
+          "native_plan_sha256": "f716a14a4d85acc04280b3f1c77de2c2d1ca165f90930f99e6cec75cabb44d28",
+          "film_sha256": "9292ae319f253258311475b692bedc79a9afe9672fbb7d1b42aed38f1a9b1ebf",
+          "film_bytes": 1024,
+          "settings_digest": "792cd51329b8f7d11f918b72954ce24d7a8cf0c43179190470de51557e72ccc2",
+          "subtitle_style_digest": "6f501f80236154cf3ab34e2bf65c0d2d5f13c14d6d5e084a4387d4d0ed96ce34",
+          "captions_digest": "609c56b7bd20dcca8869bb5924a994f39ea855cc59ca1f520ba767d9fe88719b",
+          "markers_digest": "ef1ccb7e7401a32da399b894acc393cb71e09aaa77a761ae82bc7f975fa2d7ed"
+        },
+        "frame_count": 1200,
+        "fps_numerator": 25,
+        "fps_denominator": 1,
+        "affected_ranges": [
+          {
+            "start_frame": 600,
+            "end_frame_exclusive": 900,
+            "clip_id": "clip_b"
+          },
+          {
+            "start_frame": 0,
+            "end_frame_exclusive": 300,
+            "clip_id": "clip_a"
+          }
+        ],
+        "locks_checked": [
+          {
+            "lock_id": "lock_visual",
+            "lock_type": "visual",
+            "scope": "project",
+            "target_id": "",
+            "start_frame": 0,
+            "end_frame_exclusive": 1200
+          },
+          {
+            "lock_id": "lock_narration",
+            "lock_type": "narration",
+            "scope": "project",
+            "target_id": "",
+            "start_frame": 0,
+            "end_frame_exclusive": 1200
+          },
+          {
+            "lock_id": "lock_duration",
+            "lock_type": "duration",
+            "scope": "shot",
+            "target_id": "clip_a",
+            "start_frame": 0,
+            "end_frame_exclusive": 300
+          }
+        ],
+        "engine_upstream_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+        "expires_at": "2026-11-12T00:15:00.000Z"
+      }
+    },
+    {
+      "name": "reject-consumer-project",
+      "expect": "rejected",
+      "plan": {
+        "format": "narralens.prepared-adoption-plan@1",
+        "version": 1,
+        "source_kind": "created_prepared_source",
+        "project_id": "proj_alpha",
+        "base_revision": 3,
+        "base_source_digest": "e999436749e9c441bbf1449492194fdf99a7df648125ce181675d03b1ce01bde",
+        "control_revision": 2,
+        "selection_version": 1,
+        "materialization_id": "ps_0123456789abcdef0123456789abcdef0123456789abcdef01234567",
+        "prepared_fact_digest": "62c0d1af51bcaddc9ce25f568eada023ab1a21aab427e768967aad9226e0db96",
+        "request_digest": "1f58b9145b24d108d7ac38887338b3ea3229833b9c1e418250343f907bfd1047",
+        "producer_execution": {
+          "run_id": "run_alpha",
+          "plan_version": 1,
+          "step_id": "chapters",
+          "attempt": 1,
+          "input_digest": "1675eff597c30ff940f93e7af4b5ba9e08a441ee80bb585f5cf7ffc0d3421dd5",
+          "run_scope_digest": "7f153e5e104af9fc419a5eb1cb327872f0763bfb1fb78b6da8f279e6a6a24f19",
+          "authorization_id": "grant_alpha"
+        },
+        "target_source_digest": "2556cd0b7e3459842a627f0ae01a931e984131d26509b1135838e869dc552397",
+        "target_snapshot_id": "snapshot_beta",
+        "roots": [
+          "film.html",
+          "settings.json"
+        ],
+        "files": [
+          {
+            "relative_path": "film.html",
+            "bytes": 1024,
+            "sha256": "bc5ff17ae1eb7d4b6b9e0cac44e4b0d9248407c76d77e32160ffcbf780e2c2e3"
+          },
+          {
+            "relative_path": "settings.json",
+            "bytes": 128,
+            "sha256": "b14b8928e11265b8697267550c7bb08796ec3c72aa9566561698f167e041416e"
+          },
+          {
+            "relative_path": "subtitles.srt",
+            "bytes": 64,
+            "sha256": "1876af8ea746bbce07b204b06a419999e11da92a34ac1d8ab8f8b2336cea5ed3"
+          }
+        ],
+        "rights": [
+          {
+            "ref_id": "asset_alpha",
+            "artifact_version": 1,
+            "sha256": "6dd60fe4e7f9f49d975a568b34570cafce7cd5f94d806b87bb4d55fb2b02be0b"
+          }
+        ],
+        "consumer": {
+          "consumer_id": "native_observer",
+          "project_id": "proj_other",
+          "run_id": "run_alpha",
+          "graph_digest": "e80182107bbcd1c9b5401de934106423a12507bf049559c9dd2c91cb5017dad8"
+        },
+        "native_plan": {
+          "native_plan_sha256": "f716a14a4d85acc04280b3f1c77de2c2d1ca165f90930f99e6cec75cabb44d28",
+          "film_sha256": "9292ae319f253258311475b692bedc79a9afe9672fbb7d1b42aed38f1a9b1ebf",
+          "film_bytes": 1024,
+          "settings_digest": "792cd51329b8f7d11f918b72954ce24d7a8cf0c43179190470de51557e72ccc2",
+          "subtitle_style_digest": "6f501f80236154cf3ab34e2bf65c0d2d5f13c14d6d5e084a4387d4d0ed96ce34",
+          "captions_digest": "609c56b7bd20dcca8869bb5924a994f39ea855cc59ca1f520ba767d9fe88719b",
+          "markers_digest": "ef1ccb7e7401a32da399b894acc393cb71e09aaa77a761ae82bc7f975fa2d7ed"
+        },
+        "frame_count": 1200,
+        "fps_numerator": 25,
+        "fps_denominator": 1,
+        "affected_ranges": [
+          {
+            "start_frame": 600,
+            "end_frame_exclusive": 900,
+            "clip_id": "clip_b"
+          },
+          {
+            "start_frame": 0,
+            "end_frame_exclusive": 300,
+            "clip_id": "clip_a"
+          }
+        ],
+        "locks_checked": [
+          {
+            "lock_id": "lock_visual",
+            "lock_type": "visual",
+            "scope": "project",
+            "target_id": "",
+            "start_frame": 0,
+            "end_frame_exclusive": 1200
+          },
+          {
+            "lock_id": "lock_narration",
+            "lock_type": "narration",
+            "scope": "project",
+            "target_id": "",
+            "start_frame": 0,
+            "end_frame_exclusive": 1200
+          },
+          {
+            "lock_id": "lock_duration",
+            "lock_type": "duration",
+            "scope": "shot",
+            "target_id": "clip_a",
+            "start_frame": 0,
+            "end_frame_exclusive": 300
+          }
+        ],
+        "engine_upstream_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+        "expires_at": "2026-11-12T00:15:00.000Z"
+      }
+    },
+    {
+      "name": "reject-root-not-a-file",
+      "expect": "rejected",
+      "plan": {
+        "format": "narralens.prepared-adoption-plan@1",
+        "version": 1,
+        "source_kind": "created_prepared_source",
+        "project_id": "proj_alpha",
+        "base_revision": 3,
+        "base_source_digest": "e999436749e9c441bbf1449492194fdf99a7df648125ce181675d03b1ce01bde",
+        "control_revision": 2,
+        "selection_version": 1,
+        "materialization_id": "ps_0123456789abcdef0123456789abcdef0123456789abcdef01234567",
+        "prepared_fact_digest": "62c0d1af51bcaddc9ce25f568eada023ab1a21aab427e768967aad9226e0db96",
+        "request_digest": "1f58b9145b24d108d7ac38887338b3ea3229833b9c1e418250343f907bfd1047",
+        "producer_execution": {
+          "run_id": "run_alpha",
+          "plan_version": 1,
+          "step_id": "chapters",
+          "attempt": 1,
+          "input_digest": "1675eff597c30ff940f93e7af4b5ba9e08a441ee80bb585f5cf7ffc0d3421dd5",
+          "run_scope_digest": "7f153e5e104af9fc419a5eb1cb327872f0763bfb1fb78b6da8f279e6a6a24f19",
+          "authorization_id": "grant_alpha"
+        },
+        "target_source_digest": "2556cd0b7e3459842a627f0ae01a931e984131d26509b1135838e869dc552397",
+        "target_snapshot_id": "snapshot_beta",
+        "roots": [
+          "film.html",
+          "settings.json",
+          "missing.html"
+        ],
+        "files": [
+          {
+            "relative_path": "film.html",
+            "bytes": 1024,
+            "sha256": "bc5ff17ae1eb7d4b6b9e0cac44e4b0d9248407c76d77e32160ffcbf780e2c2e3"
+          },
+          {
+            "relative_path": "settings.json",
+            "bytes": 128,
+            "sha256": "b14b8928e11265b8697267550c7bb08796ec3c72aa9566561698f167e041416e"
+          },
+          {
+            "relative_path": "subtitles.srt",
+            "bytes": 64,
+            "sha256": "1876af8ea746bbce07b204b06a419999e11da92a34ac1d8ab8f8b2336cea5ed3"
+          }
+        ],
+        "rights": [
+          {
+            "ref_id": "asset_alpha",
+            "artifact_version": 1,
+            "sha256": "6dd60fe4e7f9f49d975a568b34570cafce7cd5f94d806b87bb4d55fb2b02be0b"
+          }
+        ],
+        "consumer": {
+          "consumer_id": "native_observer",
+          "project_id": "proj_alpha",
+          "run_id": "run_alpha",
+          "graph_digest": "e80182107bbcd1c9b5401de934106423a12507bf049559c9dd2c91cb5017dad8"
+        },
+        "native_plan": {
+          "native_plan_sha256": "f716a14a4d85acc04280b3f1c77de2c2d1ca165f90930f99e6cec75cabb44d28",
+          "film_sha256": "9292ae319f253258311475b692bedc79a9afe9672fbb7d1b42aed38f1a9b1ebf",
+          "film_bytes": 1024,
+          "settings_digest": "792cd51329b8f7d11f918b72954ce24d7a8cf0c43179190470de51557e72ccc2",
+          "subtitle_style_digest": "6f501f80236154cf3ab34e2bf65c0d2d5f13c14d6d5e084a4387d4d0ed96ce34",
+          "captions_digest": "609c56b7bd20dcca8869bb5924a994f39ea855cc59ca1f520ba767d9fe88719b",
+          "markers_digest": "ef1ccb7e7401a32da399b894acc393cb71e09aaa77a761ae82bc7f975fa2d7ed"
+        },
+        "frame_count": 1200,
+        "fps_numerator": 25,
+        "fps_denominator": 1,
+        "affected_ranges": [
+          {
+            "start_frame": 600,
+            "end_frame_exclusive": 900,
+            "clip_id": "clip_b"
+          },
+          {
+            "start_frame": 0,
+            "end_frame_exclusive": 300,
+            "clip_id": "clip_a"
+          }
+        ],
+        "locks_checked": [
+          {
+            "lock_id": "lock_visual",
+            "lock_type": "visual",
+            "scope": "project",
+            "target_id": "",
+            "start_frame": 0,
+            "end_frame_exclusive": 1200
+          },
+          {
+            "lock_id": "lock_narration",
+            "lock_type": "narration",
+            "scope": "project",
+            "target_id": "",
+            "start_frame": 0,
+            "end_frame_exclusive": 1200
+          },
+          {
+            "lock_id": "lock_duration",
+            "lock_type": "duration",
+            "scope": "shot",
+            "target_id": "clip_a",
+            "start_frame": 0,
+            "end_frame_exclusive": 300
+          }
+        ],
+        "engine_upstream_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+        "expires_at": "2026-11-12T00:15:00.000Z"
+      }
+    },
+    {
+      "name": "reject-sha256-as-git-commit",
+      "expect": "rejected",
+      "plan": {
+        "format": "narralens.prepared-adoption-plan@1",
+        "version": 1,
+        "source_kind": "created_prepared_source",
+        "project_id": "proj_alpha",
+        "base_revision": 3,
+        "base_source_digest": "e999436749e9c441bbf1449492194fdf99a7df648125ce181675d03b1ce01bde",
+        "control_revision": 2,
+        "selection_version": 1,
+        "materialization_id": "ps_0123456789abcdef0123456789abcdef0123456789abcdef01234567",
+        "prepared_fact_digest": "62c0d1af51bcaddc9ce25f568eada023ab1a21aab427e768967aad9226e0db96",
+        "request_digest": "1f58b9145b24d108d7ac38887338b3ea3229833b9c1e418250343f907bfd1047",
+        "producer_execution": {
+          "run_id": "run_alpha",
+          "plan_version": 1,
+          "step_id": "chapters",
+          "attempt": 1,
+          "input_digest": "1675eff597c30ff940f93e7af4b5ba9e08a441ee80bb585f5cf7ffc0d3421dd5",
+          "run_scope_digest": "7f153e5e104af9fc419a5eb1cb327872f0763bfb1fb78b6da8f279e6a6a24f19",
+          "authorization_id": "grant_alpha"
+        },
+        "target_source_digest": "2556cd0b7e3459842a627f0ae01a931e984131d26509b1135838e869dc552397",
+        "target_snapshot_id": "snapshot_beta",
+        "roots": [
+          "film.html",
+          "settings.json"
+        ],
+        "files": [
+          {
+            "relative_path": "film.html",
+            "bytes": 1024,
+            "sha256": "bc5ff17ae1eb7d4b6b9e0cac44e4b0d9248407c76d77e32160ffcbf780e2c2e3"
+          },
+          {
+            "relative_path": "settings.json",
+            "bytes": 128,
+            "sha256": "b14b8928e11265b8697267550c7bb08796ec3c72aa9566561698f167e041416e"
+          },
+          {
+            "relative_path": "subtitles.srt",
+            "bytes": 64,
+            "sha256": "1876af8ea746bbce07b204b06a419999e11da92a34ac1d8ab8f8b2336cea5ed3"
+          }
+        ],
+        "rights": [
+          {
+            "ref_id": "asset_alpha",
+            "artifact_version": 1,
+            "sha256": "6dd60fe4e7f9f49d975a568b34570cafce7cd5f94d806b87bb4d55fb2b02be0b"
+          }
+        ],
+        "consumer": {
+          "consumer_id": "native_observer",
+          "project_id": "proj_alpha",
+          "run_id": "run_alpha",
+          "graph_digest": "e80182107bbcd1c9b5401de934106423a12507bf049559c9dd2c91cb5017dad8"
+        },
+        "native_plan": {
+          "native_plan_sha256": "f716a14a4d85acc04280b3f1c77de2c2d1ca165f90930f99e6cec75cabb44d28",
+          "film_sha256": "9292ae319f253258311475b692bedc79a9afe9672fbb7d1b42aed38f1a9b1ebf",
+          "film_bytes": 1024,
+          "settings_digest": "792cd51329b8f7d11f918b72954ce24d7a8cf0c43179190470de51557e72ccc2",
+          "subtitle_style_digest": "6f501f80236154cf3ab34e2bf65c0d2d5f13c14d6d5e084a4387d4d0ed96ce34",
+          "captions_digest": "609c56b7bd20dcca8869bb5924a994f39ea855cc59ca1f520ba767d9fe88719b",
+          "markers_digest": "ef1ccb7e7401a32da399b894acc393cb71e09aaa77a761ae82bc7f975fa2d7ed"
+        },
+        "frame_count": 1200,
+        "fps_numerator": 25,
+        "fps_denominator": 1,
+        "affected_ranges": [
+          {
+            "start_frame": 600,
+            "end_frame_exclusive": 900,
+            "clip_id": "clip_b"
+          },
+          {
+            "start_frame": 0,
+            "end_frame_exclusive": 300,
+            "clip_id": "clip_a"
+          }
+        ],
+        "locks_checked": [
+          {
+            "lock_id": "lock_visual",
+            "lock_type": "visual",
+            "scope": "project",
+            "target_id": "",
+            "start_frame": 0,
+            "end_frame_exclusive": 1200
+          },
+          {
+            "lock_id": "lock_narration",
+            "lock_type": "narration",
+            "scope": "project",
+            "target_id": "",
+            "start_frame": 0,
+            "end_frame_exclusive": 1200
+          },
+          {
+            "lock_id": "lock_duration",
+            "lock_type": "duration",
+            "scope": "shot",
+            "target_id": "clip_a",
+            "start_frame": 0,
+            "end_frame_exclusive": 300
+          }
+        ],
+        "engine_upstream_sha": "2222222222222222222222222222222222222222222222222222222222222222",
+        "expires_at": "2026-11-12T00:15:00.000Z"
+      }
+    },
+    {
+      "name": "reject-abbreviated-git-commit",
+      "expect": "rejected",
+      "plan": {
+        "format": "narralens.prepared-adoption-plan@1",
+        "version": 1,
+        "source_kind": "created_prepared_source",
+        "project_id": "proj_alpha",
+        "base_revision": 3,
+        "base_source_digest": "e999436749e9c441bbf1449492194fdf99a7df648125ce181675d03b1ce01bde",
+        "control_revision": 2,
+        "selection_version": 1,
+        "materialization_id": "ps_0123456789abcdef0123456789abcdef0123456789abcdef01234567",
+        "prepared_fact_digest": "62c0d1af51bcaddc9ce25f568eada023ab1a21aab427e768967aad9226e0db96",
+        "request_digest": "1f58b9145b24d108d7ac38887338b3ea3229833b9c1e418250343f907bfd1047",
+        "producer_execution": {
+          "run_id": "run_alpha",
+          "plan_version": 1,
+          "step_id": "chapters",
+          "attempt": 1,
+          "input_digest": "1675eff597c30ff940f93e7af4b5ba9e08a441ee80bb585f5cf7ffc0d3421dd5",
+          "run_scope_digest": "7f153e5e104af9fc419a5eb1cb327872f0763bfb1fb78b6da8f279e6a6a24f19",
+          "authorization_id": "grant_alpha"
+        },
+        "target_source_digest": "2556cd0b7e3459842a627f0ae01a931e984131d26509b1135838e869dc552397",
+        "target_snapshot_id": "snapshot_beta",
+        "roots": [
+          "film.html",
+          "settings.json"
+        ],
+        "files": [
+          {
+            "relative_path": "film.html",
+            "bytes": 1024,
+            "sha256": "bc5ff17ae1eb7d4b6b9e0cac44e4b0d9248407c76d77e32160ffcbf780e2c2e3"
+          },
+          {
+            "relative_path": "settings.json",
+            "bytes": 128,
+            "sha256": "b14b8928e11265b8697267550c7bb08796ec3c72aa9566561698f167e041416e"
+          },
+          {
+            "relative_path": "subtitles.srt",
+            "bytes": 64,
+            "sha256": "1876af8ea746bbce07b204b06a419999e11da92a34ac1d8ab8f8b2336cea5ed3"
+          }
+        ],
+        "rights": [
+          {
+            "ref_id": "asset_alpha",
+            "artifact_version": 1,
+            "sha256": "6dd60fe4e7f9f49d975a568b34570cafce7cd5f94d806b87bb4d55fb2b02be0b"
+          }
+        ],
+        "consumer": {
+          "consumer_id": "native_observer",
+          "project_id": "proj_alpha",
+          "run_id": "run_alpha",
+          "graph_digest": "e80182107bbcd1c9b5401de934106423a12507bf049559c9dd2c91cb5017dad8"
+        },
+        "native_plan": {
+          "native_plan_sha256": "f716a14a4d85acc04280b3f1c77de2c2d1ca165f90930f99e6cec75cabb44d28",
+          "film_sha256": "9292ae319f253258311475b692bedc79a9afe9672fbb7d1b42aed38f1a9b1ebf",
+          "film_bytes": 1024,
+          "settings_digest": "792cd51329b8f7d11f918b72954ce24d7a8cf0c43179190470de51557e72ccc2",
+          "subtitle_style_digest": "6f501f80236154cf3ab34e2bf65c0d2d5f13c14d6d5e084a4387d4d0ed96ce34",
+          "captions_digest": "609c56b7bd20dcca8869bb5924a994f39ea855cc59ca1f520ba767d9fe88719b",
+          "markers_digest": "ef1ccb7e7401a32da399b894acc393cb71e09aaa77a761ae82bc7f975fa2d7ed"
+        },
+        "frame_count": 1200,
+        "fps_numerator": 25,
+        "fps_denominator": 1,
+        "affected_ranges": [
+          {
+            "start_frame": 600,
+            "end_frame_exclusive": 900,
+            "clip_id": "clip_b"
+          },
+          {
+            "start_frame": 0,
+            "end_frame_exclusive": 300,
+            "clip_id": "clip_a"
+          }
+        ],
+        "locks_checked": [
+          {
+            "lock_id": "lock_visual",
+            "lock_type": "visual",
+            "scope": "project",
+            "target_id": "",
+            "start_frame": 0,
+            "end_frame_exclusive": 1200
+          },
+          {
+            "lock_id": "lock_narration",
+            "lock_type": "narration",
+            "scope": "project",
+            "target_id": "",
+            "start_frame": 0,
+            "end_frame_exclusive": 1200
+          },
+          {
+            "lock_id": "lock_duration",
+            "lock_type": "duration",
+            "scope": "shot",
+            "target_id": "clip_a",
+            "start_frame": 0,
+            "end_frame_exclusive": 300
+          }
+        ],
+        "engine_upstream_sha": "e70d9d9",
+        "expires_at": "2026-11-12T00:15:00.000Z"
+      }
+    }
+  ]
+}
