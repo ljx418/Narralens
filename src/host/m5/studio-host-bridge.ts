@@ -90,7 +90,7 @@ export const STUDIO_HOST_BRIDGE_SCRIPT = `/* The Narralens panel's bridge into t
     observationSequence += 1;
     rememberSequence(observationSequence);
     try {
-      fetch("/narralens/native/observation", {
+      fetch("/narralens/native/observation", {  /* the one additional Gateway route */
         method: "POST",
         credentials: "same-origin",
         cache: "no-store",

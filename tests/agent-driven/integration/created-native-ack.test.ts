@@ -690,6 +690,8 @@ import Ajv2020 from 'ajv/dist/2020.js';
 import { NativeAckStore } from '../../../src/host/m5/native-ack-store.js';
 import { NativeObservationService, parseNativeObservationBody, type NativeObservationSessionBinding } from '../../../src/host/m5/native-observation.js';
 import { ControlledStudioAccess, type NativeStudioGrant } from '../../../src/host/m5/controlled-studio-access.js';
+import { NATIVE_OBSERVATION_ROUTE } from '../../../src/host/m5/openfilm-studio-gateway.js';
+import { STUDIO_HOST_BRIDGE_SCRIPT } from '../../../src/host/m5/studio-host-bridge.js';
 import { RevisionStore } from '../../../src/host/projects/revision-store.js';
 
 describe('the selection version port', () => {
@@ -1177,5 +1179,27 @@ describe("the body of one observation", () => {
 
     const empty = parseNativeObservationBody("");
     expect(empty.ok).toBe(false);
+  });
+});
+
+describe("the counted observation route", () => {
+  it("is exactly one additional Gateway route, and the registry says the same", () => {
+    const registry = JSON.parse(readFileSync(resolve("contracts/native-observation-v1.registry.json"), "utf8")) as {
+      readonly counting: { readonly additional_gateway_http: number; readonly mcp_tools: number };
+      readonly additional_gateway_http: ReadonlyArray<{ readonly id: string; readonly method: string; readonly path: string }>;
+    };
+    // Exactly one, and it is the route the Gateway dispatches.
+    expect(registry.additional_gateway_http.length).toBe(1);
+    expect(registry.additional_gateway_http[0]?.path).toBe(NATIVE_OBSERVATION_ROUTE);
+    expect(registry.additional_gateway_http[0]?.method).toBe("POST");
+    expect(registry.counting.additional_gateway_http).toBe(1);
+    // It joins no MCP tool set.
+    expect(registry.counting.mcp_tools).toBe(0);
+  });
+
+  it("is the same path the Studio bridge reports into", () => {
+    // The bridge is a served script, so it cannot import the constant; the case
+    // exists so the two cannot drift apart unnoticed.
+    expect(STUDIO_HOST_BRIDGE_SCRIPT).toContain(NATIVE_OBSERVATION_ROUTE);
   });
 });

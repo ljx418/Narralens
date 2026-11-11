@@ -156,6 +156,14 @@ export async function loadGatewayUiRegistry(root: string = gatewayUiRegistryRoot
  * They are counted separately from the Host routes: 31 frozen Host + 5 reviewed adjunct
  * Host + 2 explicitly additional Gateway HTTP. The count is never "still 31+5".
  */
+/**
+ * The one additional Gateway route (A-R2, L05).
+ *
+ * It is counted separately from the frozen Host routes, from the reviewed adjuncts
+ * and from the two UI aliases, and it is the only route the native observation uses.
+ */
+export const NATIVE_OBSERVATION_ROUTE = "/narralens/native/observation";
+
 export const GATEWAY_UI_ALIASES: readonly { readonly method: "POST" | "GET"; readonly path: string }[] = Object.freeze([
   Object.freeze({ method: "POST", path: "/narralens/api/ui/call" }),
   Object.freeze({ method: "GET", path: "/narralens/api/ui/review-media/:ref" }),
@@ -427,7 +435,7 @@ export class OpenFilmStudioGateway {
     // HTTP route, counted separately, and it is dispatched before the native write
     // catch-all so it can never be mistaken for a write. It opens no write surface, it
     // joins no MCP tool set, and it replaces no UI alias.
-    if (path === "/narralens/native/observation") {
+    if (path === NATIVE_OBSERVATION_ROUTE) {
       await this.#nativeObservation(request, response);
       return;
     }
