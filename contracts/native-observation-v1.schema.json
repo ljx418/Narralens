@@ -1,0 +1,140 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://narralens.local/internal/native-observation-v1.schema.json",
+  "title": "narralens.native-observation@1",
+  "description": "The one closed native observation envelope and its three original event kinds. This is an adjunct Gateway ingress, not a CP-A0 route, not an MCP tool and not a write surface. The envelope carries no identity: the logical project, the actor, the session, the grant, the Host revision, the snapshot, the source digest, the approval and the proof all come from the session binding.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["format", "sequence", "event_kind", "event"],
+  "properties": {
+    "format": { "const": "narralens.native-observation@1" },
+    "sequence": { "type": "integer", "minimum": 1, "maximum": 9007199254740991 },
+    "event_kind": { "enum": ["document", "hydration", "selection"] },
+    "event": { "type": "object" }
+  },
+  "$defs": {
+    "NativeDocumentObservation": {
+      "description": "The original p2 NarralensDocumentState: a committed document DOM or an invalidation.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["protocol_version", "kind", "project_id", "editor_view_id", "document_epoch"],
+      "properties": {
+        "protocol_version": { "const": 1 },
+        "kind": { "enum": ["document_dom_committed", "invalidated"] },
+        "project_id": { "type": "string", "minLength": 1 },
+        "editor_view_id": { "type": "string", "minLength": 1 },
+        "document_epoch": { "type": "integer", "minimum": 0 },
+        "native_rev": { "type": "string", "minLength": 1 },
+        "film_sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "utf8_byte_length": { "type": "integer", "minimum": 0 },
+        "reason": {
+          "enum": ["dirty", "refresh", "broken", "external_edit", "replaced", "hash_failed", "unmounted"]
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "kind": { "const": "document_dom_committed" } }, "required": ["kind"] },
+          "then": { "required": ["native_rev", "film_sha256", "utf8_byte_length"] }
+        },
+        {
+          "if": { "properties": { "kind": { "const": "invalidated" } }, "required": ["kind"] },
+          "then": { "required": ["reason"] }
+        }
+      ]
+    },
+    "NativeHydrationPart": {
+      "description": "One original 013 hydration part. Only a hydrated or an absent_default part may carry a digest, and only a project or an explicit default may be one.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state", "origin", "effective_sha256"],
+      "properties": {
+        "state": { "enum": ["pending", "hydrated", "absent_default", "dirty", "failed", "unsupported"] },
+        "origin": { "enum": ["project", "explicit_default", "browser_preference"] },
+        "effective_sha256": { "type": ["string", "null"], "pattern": "^[a-f0-9]{64}$" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "state": { "enum": ["pending", "dirty", "failed", "unsupported"] } }, "required": ["state"] },
+          "then": { "properties": { "effective_sha256": { "type": "null" } } }
+        },
+        {
+          "if": { "properties": { "state": { "enum": ["hydrated", "absent_default"] } }, "required": ["state"] },
+          "then": {
+            "properties": {
+              "effective_sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+              "origin": { "enum": ["project", "explicit_default"] }
+            }
+          }
+        }
+      ]
+    },
+    "NativeHydrationObservation": {
+      "description": "The original 013 hydration event: five fields and exactly four parts.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["project_id", "editor_view_id", "document_epoch", "hydration_epoch", "parts"],
+      "properties": {
+        "project_id": { "type": "string", "minLength": 1 },
+        "editor_view_id": { "type": "string", "minLength": 1 },
+        "document_epoch": { "type": "integer", "minimum": 0 },
+        "hydration_epoch": { "type": "integer", "minimum": 1 },
+        "parts": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["settings", "subtitle_style", "captions", "markers"],
+          "properties": {
+            "settings": { "$ref": "#/$defs/NativeHydrationPart" },
+            "subtitle_style": { "$ref": "#/$defs/NativeHydrationPart" },
+            "captions": { "$ref": "#/$defs/NativeHydrationPart" },
+            "markers": { "$ref": "#/$defs/NativeHydrationPart" }
+          }
+        }
+      }
+    },
+    "NativeSelectionObservation": {
+      "description": "The original StudioSelection. Its seconds are a fractional native domain of their own and never enter the integer canonical domain of the contract.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["projectId", "time", "refs"],
+      "properties": {
+        "projectId": { "type": "string", "minLength": 1 },
+        "time": { "type": "number" },
+        "refs": {
+          "type": "array",
+          "maxItems": 256,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["kind"],
+            "properties": {
+              "kind": { "enum": ["clip", "layer", "region", "time", "range", "track", "file", "subtitle"] },
+              "id": { "type": ["string", "null"] },
+              "loc": { "type": ["string", "null"] },
+              "clipId": { "type": ["string", "null"] },
+              "track": { "type": "number" },
+              "time": { "type": "number" },
+              "start": { "type": "number" },
+              "end": { "type": "number" },
+              "path": { "type": "string" },
+              "text": { "type": ["string", "null"] },
+              "index": { "type": "number" },
+              "clipIds": { "type": "array", "items": { "type": "string" } }
+            }
+          }
+        },
+        "range": {
+          "type": ["object", "null"],
+          "additionalProperties": false,
+          "required": ["start", "end"],
+          "properties": { "start": { "type": "number" }, "end": { "type": "number" } }
+        },
+        "stage": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["w", "h"],
+          "properties": { "w": { "type": "number" }, "h": { "type": "number" } }
+        }
+      }
+    }
+  }
+}
