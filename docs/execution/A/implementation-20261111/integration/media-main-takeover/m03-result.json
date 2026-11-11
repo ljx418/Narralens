@@ -1,0 +1,30 @@
+{
+  "base": "5d99e47c750aea7c8cd0fd0adfc60bd93222a38e",
+  "fix": "returned file handles track in-flight reads; handle/service close share one promise; service marks every returned handle closing before awaiting any; newly-started reads refused, existing reads settle before FD close",
+  "test": "real FileHandle.read prototype latch after resolver open; no timing/large-file heuristic; fake encoder and QC module fixtures",
+  "before": {
+    "case_count": 2,
+    "failures": 2,
+    "capture": "media-m03-before"
+  },
+  "partial_serial_close": {
+    "failures": 1,
+    "capture": "media-m03-serial-close-negative",
+    "reason": "later handles still allowed new reads while first read held; retained then fixed"
+  },
+  "final": {
+    "exit": 0,
+    "passed": 50,
+    "real_tools_skipped": 1,
+    "capture": "media-m03-final"
+  },
+  "typecheck19": {
+    "exit": 0
+  },
+  "evidence_root": "../e1-main-takeover/",
+  "limits": [
+    "independent M03 closure pending",
+    "MEDIA B01 M01 M04 still open",
+    "real media phase/Host executor/export NOT_RUN on current candidate"
+  ]
+}

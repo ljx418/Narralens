@@ -1,6 +1,6 @@
 import { readFile, stat, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { CommittedRenderPhases, closureDigestOf, frameRateOf, rightsDigestOf } from "../../../src/host/render/committed-render-phases.js";
 import { PublishedPackageStore } from "../../../src/host/delivery/published-package-store.js";
 import { computeRenderConfigDigest } from "../../../src/host/render/render-profile.js";
@@ -892,6 +892,50 @@ describe("MP03 — the actual bytes of the promised supplements are checked", ()
 });
 
 describe("MP04 — the object carries a durable receipt and the cleanup is honest", () => {
+  it.each(["handle", "service"] as const)("shares the %s close barrier and waits for an in-flight descriptor read", async owner => {
+    const built = await harness({ label: "mp04-read-barrier-" + owner });
+    const encoded = await built.phases.prepareEncoded(requestFor(built));
+    const media = encoded.files.find(file => file.role === "media")!;
+    const handle = await built.phases.openPhaseObject({ object_id: encoded.media_object_id,
+      relative_path: media.relative_path, sha256: media.sha256, bytes: media.bytes });
+    const fs = await import("node:fs/promises");
+    const probe = await fs.open(resolve(built.objectRoot, "objects", encoded.media_object_id, media.relative_path), "r");
+    const prototype = Object.getPrototypeOf(probe);
+    await probe.close();
+    const original = prototype.read;
+    let enter!: () => void, release!: () => void;
+    const entered = new Promise<void>(done => { enter = done; });
+    const gate = new Promise<void>(done => { release = done; });
+    let armed = true;
+    const spy = vi.spyOn(prototype, "read").mockImplementation(function(this: unknown, ...args: unknown[]) {
+      if (armed) { armed = false; enter(); return gate.then(() => Reflect.apply(original, this, args)); }
+      return Reflect.apply(original, this, args);
+    });
+    const reading = handle.read({ offset: 0, length: media.bytes });
+    const observed = reading.then(bytes => ({ bytes }), error => ({ error }));
+    await entered;
+    const another = owner === "service" ? await built.phases.openPhaseObject({ object_id: encoded.media_object_id,
+      relative_path: media.relative_path, sha256: media.sha256, bytes: media.bytes }) : undefined;
+    const target = owner === "handle" ? handle : built.phases;
+    const first = target.close(), second = target.close();
+    const settled: string[] = [];
+    const observers = [first.then(() => { settled.push("first"); }, () => { settled.push("first_error"); }),
+      second.then(() => { settled.push("second"); }, () => { settled.push("second_error"); })];
+    try {
+      await new Promise<void>(done => setImmediate(done));
+      expect(settled).toEqual([]);
+      expect(second).toBe(first);
+      if (another) await expect(another.read({ offset: 0, length: 1 })).rejects.toMatchObject({ code: "OBJECT_CLOSED" });
+      release();
+      expect(await observed).toHaveProperty("bytes");
+      await Promise.all([first, second]);
+      await expect(handle.read({ offset: 0, length: 1 })).rejects.toMatchObject({ code: "OBJECT_CLOSED" });
+    } finally {
+      release(); await observed; await Promise.all(observers); spy.mockRestore();
+      await built.phases.close().catch(() => undefined);
+    }
+  });
+
   it("publishes an immutable receipt beside the object it describes", async () => {
     const built = await harness({ label: "mp04-receipt" });
     const encoded = await built.phases.prepareEncoded(requestFor(built));

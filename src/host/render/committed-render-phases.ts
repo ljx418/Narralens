@@ -224,6 +224,8 @@ class AnchoredPhaseObjectHandle implements PhaseObjectHandle {
   readonly #fileIdentity: string;
   readonly #fileFingerprint: string;
   readonly #directories: readonly AnchoredDirectory[];
+  readonly #reads = new Set<Promise<Uint8Array>>();
+  #closePromise: Promise<void> | undefined;
   #closed = false;
 
   constructor(input: {
@@ -278,7 +280,15 @@ class AnchoredPhaseObjectHandle implements PhaseObjectHandle {
     }
   }
 
-  async read(range: { readonly offset: number; readonly length: number }): Promise<Uint8Array> {
+  read(range: { readonly offset: number; readonly length: number }): Promise<Uint8Array> {
+    if (this.#closePromise) return Promise.reject(new CommittedRenderPhaseError("OBJECT_CLOSED", "the phase object handle is closing", false));
+    const reading = this.#readRange(range);
+    this.#reads.add(reading);
+    void reading.then(() => this.#reads.delete(reading), () => this.#reads.delete(reading));
+    return reading;
+  }
+
+  async #readRange(range: { readonly offset: number; readonly length: number }): Promise<Uint8Array> {
     this.#assertUnchanged();
     const offset = range.offset;
     const length = range.length;
@@ -319,8 +329,12 @@ class AnchoredPhaseObjectHandle implements PhaseObjectHandle {
     return buffer;
   }
 
-  async close(): Promise<void> {
-    if (this.#closed) return;
+  close(): Promise<void> {
+    return this.#closePromise ??= this.#closeAfterReads();
+  }
+
+  async #closeAfterReads(): Promise<void> {
+    await Promise.allSettled([...this.#reads]);
     this.#closed = true;
     let failed = false;
     try {
@@ -355,6 +369,7 @@ export class CommittedRenderPhases implements CommittedRenderPhasesPort, PhaseOb
   readonly #open = new Set<AnchoredPhaseObjectHandle>();
   readonly #pending = new Set<Promise<unknown>>();
   readonly #failures: Error[] = [];
+  #closePromise: Promise<void> | undefined;
   #closing = false;
   #closed = false;
 
@@ -950,7 +965,11 @@ export class CommittedRenderPhases implements CommittedRenderPhasesPort, PhaseOb
    * in-flight phase is about to open has to be closed by this call, not leaked by it.
    * A published object is not a descriptor and is not touched here.
    */
-  async close(): Promise<void> {
+  close(): Promise<void> {
+    return this.#closePromise ??= this.#closeAll();
+  }
+
+  async #closeAll(): Promise<void> {
     this.#closing = true;
     this.#closed = true;
     const failuresBefore = this.#failures.length;
@@ -959,15 +978,11 @@ export class CommittedRenderPhases implements CommittedRenderPhasesPort, PhaseOb
     }
     const handles = [...this.#open];
     this.#open.clear();
-    let failed = false;
-    for (const handle of handles) {
-      try {
-        await handle.close();
-      } catch {
-        failed = true;
-      }
-    }
-    if (failed) throw new CommittedRenderPhaseError("OBJECT_CLOSE_FAILED", "a phase object descriptor could not be closed", false);
+    // Mark every returned handle closing before waiting on any one reader. A
+    // blocked read on the first handle must not leave later handles accepting work.
+    const closed = await Promise.allSettled(handles.map(handle => handle.close()));
+    if (closed.some(result => result.status === "rejected"))
+      throw new CommittedRenderPhaseError("OBJECT_CLOSE_FAILED", "a phase object descriptor could not be closed", false);
     const during = this.#failures.slice(failuresBefore);
     if (during.length > 0) {
       throw new CommittedRenderPhaseError(
