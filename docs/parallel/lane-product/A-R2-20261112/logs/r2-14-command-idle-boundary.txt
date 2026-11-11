@@ -26,3 +26,25 @@ Every command this ticket started has terminated on its own. There is no owned H
 build001: FAILED, exit 1, on my staging defect; the evidence and the failure are kept; the slot is HELD by MAIN's ledger.
 build002: QUEUED after MAIN's E1 regression; NOT GRANTED; not started.
 end=2026-11-11T17:47:10+0000
+
+--- CORRECTION, appended on request; the original observations above are unchanged ---
+
+1. The classification of 1263829 and 1263847 is a HYPOTHESIS, not a finding: both were
+   gone before the observation, so nothing about them was read. The argv and the exit
+   of the two commands they most plausibly came from are recorded in this ticket's own
+   logs, and those two commands are finished; that is the whole of the evidence.
+2. "ended 2026-11-11T17:45:36+0000" is the recorded end of the unit run. The type
+   check's own end is recorded in logs/r2-12-tsc.txt; the approximate "17:45:2x" in the
+   line above was a summary of it and is not a measurement.
+3. "no Studio UI build, no Host run, no browser, no ffmpeg, no media and no full gate
+   was started at any point" is FALSE as written, and it is withdrawn: the unauthorized
+   run of tests/m5/studio-gateway.test.ts did start a real Host listener before it
+   failed on the missing fixture. What is true is that none of those was started under
+   a grant in this round, and that the unauthorized run was not repeated. The Host
+   listener that run started is not among the pids reconciled above, which were already
+   gone; its own evidence is in logs/r2-05-gateway-suite-process-evidence.txt and in
+   logs/r2-10-build001-process-evidence.txt.
+4. "present since boot" about the remaining PRODUCT-cwd listener is unsupported: its
+   start time in ticks is non-zero, so it started after boot. It is the PRODUCT lane's
+   own long-lived Codex CLI process, it is not a process this ticket started, and it is
+   not a leftover of any of this ticket's commands.

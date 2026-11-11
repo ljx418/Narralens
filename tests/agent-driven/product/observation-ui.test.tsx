@@ -18,6 +18,8 @@ import { SystemControlPanel } from "../../../src/app/system/SystemControlPanel.j
 import { AgentWorkbenchClient } from "../../../src/app/agent-workbench-client.js";
 import { GatewayApiError, type GatewayApiClient } from "../../../src/app/m5/GatewayApiClient.js";
 import { M5Panel } from "../../../src/app/m5/M5Panel.js";
+import { STUDIO_HOST_BRIDGE_SCRIPT } from "../../../src/host/m5/studio-host-bridge.js";
+import vm from "node:vm";
 
 /**
  * The DOM is cleaned between the cases.
@@ -1597,5 +1599,138 @@ describe("the review adoption state", () => {
       },
     });
     expect(state.reason).toContain("提交与原生确认仍是两件事");
+  });
+});
+/**
+ * The Studio bridge that reports into the native observation ingress.
+ *
+ * The bridge is the real source that the Gateway serves to the editor, so the cases
+ * below evaluate that exact source in a controlled sandbox: they are not a
+ * re-implementation of it, and they load nothing from the network.
+ */
+describe("the Studio bridge and the native observation", () => {
+  const bridgeOf = (options: { readonly session?: boolean; readonly storedSequence?: number } = {}) => {
+    const sent: Array<{ readonly url: string; readonly body: Record<string, unknown> }> = [];
+    const store = () => {
+      const values = new Map<string, string>();
+      return {
+        getItem: (key: string) => values.get(key) ?? null,
+        setItem: (key: string, value: string) => { values.set(key, value); },
+        removeItem: (key: string) => { values.delete(key); },
+        clear: () => { values.clear(); },
+      };
+    };
+    const session = store();
+    const shared = store();
+    if (options.session !== false) session.setItem("narralens.native.session", JSON.stringify({ csrf: "c".repeat(43) }));
+    if (options.storedSequence !== undefined) session.setItem("narralens.native.observation.sequence", String(options.storedSequence));
+    const element = () => ({ id: "", style: {}, setAttribute: () => undefined, appendChild: () => undefined });
+    const document = {
+      body: { contains: () => false, appendChild: () => undefined },
+      head: { appendChild: () => undefined },
+      documentElement: {},
+      addEventListener: () => undefined,
+      createElement: element,
+    };
+    const windowStub: Record<string, unknown> = {
+      location: { search: "" },
+      dispatchEvent: () => undefined,
+    };
+    const sandbox: Record<string, unknown> = {
+      window: windowStub,
+      document,
+      sessionStorage: session,
+      localStorage: shared,
+      CustomEvent: class { constructor(readonly type: string, readonly init: { detail: unknown }) {} },
+      MutationObserver: class { observe(): void {} },
+      URLSearchParams,
+      JSON, String, Number, Object, Array, Boolean, parseInt, isFinite, console,
+      fetch: async (input: unknown, init?: { body?: string }) => {
+        sent.push({ url: String(input), body: JSON.parse(String(init?.body ?? "{}")) as Record<string, unknown> });
+        return { ok: true, status: 200 };
+      },
+    };
+    vm.createContext(sandbox);
+    vm.runInContext(STUDIO_HOST_BRIDGE_SCRIPT, sandbox);
+    return {
+      sent,
+      host: windowStub.openfilmHost as {
+        narralensObservation: { onDocumentState: (state: unknown) => void };
+        narralensHydration: { onState: (state: unknown) => void };
+        onSelection: (selection: unknown) => void;
+      },
+      session,
+    };
+  };
+
+  it("reports a document event with a strictly increasing sequence", () => {
+    const bridge = bridgeOf();
+    bridge.host.narralensObservation.onDocumentState({
+      protocol_version: 1, kind: "invalidated", project_id: "n1",
+      editor_view_id: "view1", document_epoch: 1, reason: "dirty",
+    });
+    bridge.host.narralensObservation.onDocumentState({
+      protocol_version: 1, kind: "invalidated", project_id: "n1",
+      editor_view_id: "view1", document_epoch: 2, reason: "dirty",
+    });
+    expect(bridge.sent.length).toBe(2);
+    expect(bridge.sent[0]?.url).toBe("/narralens/native/observation");
+    expect(bridge.sent[0]?.body.format).toBe("narralens.native-observation@1");
+    expect(bridge.sent[0]?.body.event_kind).toBe("document");
+    expect(bridge.sent[1]?.body.sequence).toBe(2);
+  });
+
+  it("reports a hydration event with the four parts it carries", () => {
+    const bridge = bridgeOf();
+    bridge.host.narralensHydration.onState({
+      project_id: "n1", editor_view_id: "view1", document_epoch: 1, hydration_epoch: 4,
+      parts: {
+        settings: { state: "hydrated", origin: "project", effective_sha256: "a".repeat(64) },
+        subtitle_style: { state: "pending", origin: "project", effective_sha256: null },
+        captions: { state: "pending", origin: "project", effective_sha256: null },
+        markers: { state: "pending", origin: "project", effective_sha256: null },
+      },
+    });
+    expect(bridge.sent.length).toBe(1);
+    expect(bridge.sent[0]?.body.event_kind).toBe("hydration");
+    const event = bridge.sent[0]?.body.event as { hydration_epoch: number };
+    expect(event.hydration_epoch).toBe(4);
+  });
+
+  it("reports a selection when it changes, and not on every report", () => {
+    const bridge = bridgeOf();
+    const selection = { projectId: "n1", time: 1, refs: [{ kind: "clip", id: "shot1" }] };
+    bridge.host.onSelection(selection);
+    bridge.host.onSelection(selection);
+    expect(bridge.sent.length).toBe(1);
+    expect(bridge.sent[0]?.body.event_kind).toBe("selection");
+    // The playhead moved, but the selection itself did not: the Host owns the
+    // selection version, and a moved playhead is not a changed selection.
+    bridge.host.onSelection({ ...selection, time: 2 });
+    expect(bridge.sent.length).toBe(1);
+    // The selected clip changed: that is a changed selection.
+    bridge.host.onSelection({ ...selection, time: 2, refs: [{ kind: "clip", id: "shot2" }] });
+    expect(bridge.sent.length).toBe(2);
+  });
+
+  it("sends nothing at all without a native session", () => {
+    const bridge = bridgeOf({ session: false });
+    bridge.host.narralensObservation.onDocumentState({
+      protocol_version: 1, kind: "invalidated", project_id: "n1",
+      editor_view_id: "view1", document_epoch: 1, reason: "dirty",
+    });
+    bridge.host.onSelection({ projectId: "n1", time: 1, refs: [] });
+    expect(bridge.sent.length).toBe(0);
+  });
+
+  it("keeps the sequence above what an earlier session already sent", () => {
+    // The counter is read when the bridge loads, so a reload of the editor starts
+    // above the number the previous page already used.
+    const bridge = bridgeOf({ storedSequence: 40 });
+    bridge.host.narralensObservation.onDocumentState({
+      protocol_version: 1, kind: "invalidated", project_id: "n1",
+      editor_view_id: "view1", document_epoch: 1, reason: "dirty",
+    });
+    expect(bridge.sent[0]?.body.sequence).toBe(41);
   });
 });
