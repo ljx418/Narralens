@@ -297,6 +297,7 @@ describe('the created review media bindings',()=>{
  */
 describe('the review package publication and its bindings',()=>{
  const STYLE_EXEC='b70615d5ad4246caac7d0e770022429de5826831b222447e4be7637e4a07ca32';
+ const BASE_SOURCE='9'.repeat(64);
  const PACKAGE_PARTS:ReviewPart[]=[
   {kind:'preview',artifact_ref:{id:'video',version:1,sha256:'a'.repeat(64)},download_ref:null},
   {kind:'narration',artifact_ref:{id:'audio',version:1,sha256:'b'.repeat(64)},download_ref:null},
@@ -411,7 +412,7 @@ describe('the review package publication and its bindings',()=>{
    },
    registryFacts:()=>[],
    ...(options.omitAuthorProbe?{}:{currentAuthorAndRights:()=>({
-     source_digest:options.source_digest??receipt.source_digest,
+     source_digest:options.source_digest??BASE_SOURCE,
      rights_digest:receipt.rights_digest,
      authorized:options.authorized??true,
      reason:'the current author and rights were read',
@@ -429,7 +430,7 @@ describe('the review package publication and its bindings',()=>{
 
  it('publishes the package and writes its binding in one scope',async()=>{
   const f=await publicationFixture();
-  const published=await f.reviewService.publish({package:packageInput(f.runId,f.inputDigest) as never,completed:COMPLETED as never,binding:BINDING as never},RELAY_CALLER);
+  const published=await f.reviewService.publish({package:packageInput(f.runId,f.inputDigest) as never,completed:COMPLETED as never,binding:BINDING as never,base_source_digest:BASE_SOURCE},RELAY_CALLER);
   expect(published.package_id).toBe('package-1');
   // The proof was released exactly once, and the final check ran while it was held.
   expect(f.media.released).toBe(1);
@@ -451,7 +452,7 @@ describe('the review package publication and its bindings',()=>{
    project_id:'project-1',run_id:f.runId,package_id:'package-1',package_version:1,package_digest:'a'.repeat(64),
    receipt:f.receipt,parts:PACKAGE_PARTS,now:new Date(NOW_ISO),
   });
-  await expect(f.reviewService.publish({package:packageInput(f.runId,f.inputDigest) as never,completed:COMPLETED as never,binding:BINDING as never},RELAY_CALLER)).rejects.toThrow();
+  await expect(f.reviewService.publish({package:packageInput(f.runId,f.inputDigest) as never,completed:COMPLETED as never,binding:BINDING as never,base_source_digest:BASE_SOURCE},RELAY_CALLER)).rejects.toThrow();
   // The package was rolled back with the binding.
   const review=await f.repository.transaction(tx=>tx.get('review_request',{project_id:'project-1',run_id:f.runId,review_id:'package-1'}));
   expect(review).toBeNull();
@@ -463,27 +464,28 @@ describe('the review package publication and its bindings',()=>{
   const broken={...f0.receipt,frame_count:91};
   f0.revisions.close();
   const f=await publicationFixture({receipt:broken});
-  await expect(f.reviewService.publish({package:packageInput(f.runId,f.inputDigest) as never,completed:COMPLETED as never,binding:BINDING as never},RELAY_CALLER)).rejects.toMatchObject({code:'REVIEW_STALE'});
+  await expect(f.reviewService.publish({package:packageInput(f.runId,f.inputDigest) as never,completed:COMPLETED as never,binding:BINDING as never,base_source_digest:BASE_SOURCE},RELAY_CALLER)).rejects.toMatchObject({code:'REVIEW_STALE'});
   // The proof was still released.
   expect(f.media.released).toBe(1);
   f.revisions.close();
  });
 
  it('refuses to publish when the committed source moved after the proof was released',async()=>{
+  // The committed source moved away from the base the preparation was made against.
   const f=await publicationFixture({source_digest:'0'.repeat(64)});
-  await expect(f.reviewService.publish({package:packageInput(f.runId,f.inputDigest) as never,completed:COMPLETED as never,binding:BINDING as never},RELAY_CALLER)).rejects.toMatchObject({code:'REVISION_CONFLICT'});
+  await expect(f.reviewService.publish({package:packageInput(f.runId,f.inputDigest) as never,completed:COMPLETED as never,binding:BINDING as never,base_source_digest:BASE_SOURCE},RELAY_CALLER)).rejects.toMatchObject({code:'REVISION_CONFLICT'});
   f.revisions.close();
  });
 
  it('refuses to publish when the rights are no longer authorized',async()=>{
   const f=await publicationFixture({authorized:false});
-  await expect(f.reviewService.publish({package:packageInput(f.runId,f.inputDigest) as never,completed:COMPLETED as never,binding:BINDING as never},RELAY_CALLER)).rejects.toMatchObject({code:'APPROVAL_REQUIRED'});
+  await expect(f.reviewService.publish({package:packageInput(f.runId,f.inputDigest) as never,completed:COMPLETED as never,binding:BINDING as never,base_source_digest:BASE_SOURCE},RELAY_CALLER)).rejects.toMatchObject({code:'APPROVAL_REQUIRED'});
   f.revisions.close();
  });
 
  it('refuses to publish when the current author and rights cannot be read at all',async()=>{
   const f=await publicationFixture({omitAuthorProbe:true});
-  await expect(f.reviewService.publish({package:packageInput(f.runId,f.inputDigest) as never,completed:COMPLETED as never,binding:BINDING as never},RELAY_CALLER)).rejects.toMatchObject({code:'CAPABILITY_UNAVAILABLE'});
+  await expect(f.reviewService.publish({package:packageInput(f.runId,f.inputDigest) as never,completed:COMPLETED as never,binding:BINDING as never,base_source_digest:BASE_SOURCE},RELAY_CALLER)).rejects.toMatchObject({code:'CAPABILITY_UNAVAILABLE'});
   f.revisions.close();
  });
 });

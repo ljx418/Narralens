@@ -158,31 +158,118 @@ export interface ExecutionGuardFacts {
   /** The run's gates, from the durable checkpoint. */
   readonly gates: ReadonlyArray<RunGate>;
   /**
-   * The review package the narrow Host-only effects are about.
+   * The durable facts of the narrow Host-only effects.
    *
-   * It is absent when the caller did not read it, and a narrow effect without it is
-   * refused: the guard does not look it up itself, because it has no authority to.
+   * They are read by `readNarrowEffectFacts` from the real records: the review and
+   * the approval out of the product tables, the gate out of the run's checkpoint and
+   * the impact out of the impact authority. A narrow effect without them is refused:
+   * the guard does not look them up itself, because it has no authority to.
    */
-  readonly review?: {
-    readonly package_id: string;
-    readonly package_digest: string;
-    readonly state: "pending" | "accepted" | "changes_requested" | "rejected" | "stale";
-  } | null;
-  /** The approval a narrow adoption effect would consume. */
-  readonly approval?: {
-    readonly approval_id: string;
-    readonly impact_id: string;
-    readonly state: "active" | "consumed" | "rejected" | "revoked";
-  } | null;
-  /** The impact a narrow effect would authorise or consume. */
-  readonly impact?: {
-    readonly impact_id: string;
-    readonly state: "active" | "consumed" | "expired" | "stale";
-  } | null;
+  readonly narrow?: NarrowEffectFacts | null | undefined;
   /** The authenticated principal that is about to cause the side effect. */
   readonly principal_id: string;
   /** The current time, in epoch seconds. */
   readonly now_epoch_seconds: number;
+}
+
+/* -------------------------------------------------------------------------------------- */
+/* The narrow Host-only effects                                                            */
+/* -------------------------------------------------------------------------------------- */
+
+/** The state of a review package, as the review table holds it. */
+export type NarrowReviewState = "pending" | "accepted" | "changes_requested" | "rejected" | "stale";
+
+/** The state of an approval, as the approval table holds it. */
+export type NarrowApprovalState = "active" | "consumed" | "rejected" | "revoked";
+
+/** The state of an impact, as the impact table holds it. */
+export type NarrowImpactState = "active" | "consumed" | "expired" | "stale";
+
+/** The durable facts of one narrow Host-only effect. */
+export interface NarrowEffectFacts {
+  /** The review package the effect is about. */
+  readonly review: {
+    readonly package_id: string;
+    readonly package_digest: string;
+    readonly state: NarrowReviewState;
+  } | null;
+  /** The approval the adoption effect would consume. */
+  readonly approval: {
+    readonly approval_id: string;
+    readonly impact_id: string;
+    readonly state: NarrowApprovalState;
+  } | null;
+  /** The impact the effect would authorise or consume. */
+  readonly impact: {
+    readonly impact_id: string;
+    readonly state: NarrowImpactState;
+  } | null;
+}
+
+/**
+ * The reader of the impact's state.
+ *
+ * The impact table is not one of the product collections, so its state is read through
+ * the impact authority and handed in. It is optional because a caller that has no
+ * impact authority cannot produce an adoption effect anyway: the adoption is refused
+ * without it.
+ */
+export type NarrowImpactStateReader = (impact_id: string) => NarrowImpactState | undefined;
+
+/**
+ * The real repository reader of the narrow facts.
+ *
+ * The review and the approval come out of the product tables, the gate out of the run
+ * checkpoint the caller holds, and the impact out of the impact authority. Nothing
+ * here is a default: a row that is not there is `null`, and the guard refuses a
+ * narrow effect without the facts it needs.
+ */
+export function readNarrowEffectFacts(
+  tx: ProductTransaction,
+  input: {
+    readonly project_id: string;
+    readonly run_id: string;
+    readonly package_id: string;
+    readonly approval_id?: string | undefined;
+    readonly impact_id?: string | undefined;
+  },
+  impactState?: NarrowImpactStateReader,
+): NarrowEffectFacts {
+  const review = tx.get("review_request", {
+    project_id: input.project_id,
+    run_id: input.run_id,
+    review_id: input.package_id,
+  });
+  const approval = input.approval_id === undefined
+    ? null
+    : tx.get("approval", {
+        project_id: input.project_id,
+        run_id: input.run_id,
+        approval_id: input.approval_id,
+      });
+  const impactId = input.impact_id ?? (approval === null ? undefined : approval.impact_id);
+  const impactStateValue = impactId === undefined || impactState === undefined
+    ? undefined
+    : impactState(impactId);
+  return {
+    review: review === null
+      ? null
+      : {
+          package_id: review.review_id,
+          package_digest: review.package_digest,
+          state: review.state as NarrowReviewState,
+        },
+    approval: approval === null
+      ? null
+      : {
+          approval_id: approval.approval_id,
+          impact_id: approval.impact_id,
+          state: approval.state as NarrowApprovalState,
+        },
+    impact: impactId === undefined || impactStateValue === undefined
+      ? null
+      : { impact_id: impactId, state: impactStateValue },
+  };
 }
 
 /**
@@ -449,8 +536,12 @@ function assertNarrowEffect(
   }
   // The reviewed product is the only thing the effect may act on. A package of
   // another run, of another state, or with another digest is not this effect's.
-  const review = facts.review;
-  if (review === undefined || review === null) {
+  const narrow = facts.narrow;
+  if (narrow === undefined || narrow === null) {
+    throw new ProductError("REVIEW_STALE", "The reviewed package was not read");
+  }
+  const review = narrow.review;
+  if (review === null) {
     throw new ProductError("REVIEW_STALE", "The reviewed package was not read");
   }
   if (review.package_id !== effect.package_id) {
@@ -458,24 +549,33 @@ function assertNarrowEffect(
       details: { expected: review.package_id, received: effect.package_id },
     });
   }
-  if (review.state !== "pending" && review.state !== "changes_requested") {
-    throw new ProductError("REVIEW_STALE", "The reviewed package is not waiting for a decision", {
-      details: { state: review.state },
-    });
-  }
   if (effect.kind === "review_impact_prepare") {
+    // The impact is prepared for a product that is WAITING for a decision. A package
+    // that was already decided is not this effect's.
+    if (review.state !== "pending") {
+      throw new ProductError("REVIEW_STALE", "The reviewed package is not waiting for a decision", {
+        details: { state: review.state },
+      });
+    }
     if (review.package_digest !== effect.package_digest) {
       throw new ProductError("REVIEW_STALE", "The effect names another version of the package", {
         details: { expected: review.package_digest, received: effect.package_digest },
       });
     }
   } else {
-    const approval = facts.approval;
-    const impact = facts.impact;
-    if (approval === undefined || approval === null) {
+    // The adoption happens AFTER the trusted decision accepted the product. An
+    // adoption of a package that is still pending would be an adoption nobody decided.
+    if (review.state !== "accepted") {
+      throw new ProductError("REVIEW_STALE", "The reviewed package was not accepted", {
+        details: { state: review.state },
+      });
+    }
+    const approval = narrow.approval;
+    const impact = narrow.impact;
+    if (approval === null) {
       throw new ProductError("APPROVAL_REQUIRED", "The approval was not read");
     }
-    if (impact === undefined || impact === null) {
+    if (impact === null) {
       throw new ProductError("IMPACT_REQUIRED", "The impact was not read");
     }
     if (approval.approval_id !== effect.approval_id) {

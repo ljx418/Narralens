@@ -1,0 +1,104 @@
+command: corepack pnpm test tests/agent-driven/product/execution-guard.test.ts --maxWorkers=1 --minWorkers=1
+cwd: /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+started: 2026-11-11T18:08:33Z
+--- output ---
+
+> narralens@0.1.0 test /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+> vitest run --config vitest.config.ts tests/agent-driven/product/execution-guard.test.ts --maxWorkers=1 --minWorkers=1
+
+
+ RUN  v3.2.4 /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+
+ ❯ tests/agent-driven/product/execution-guard.test.ts (36 tests | 3 failed) 21ms
+   ✓ the execution guard > refuses future-issued or missing issuance facts, while cancellation stays available 7ms
+   ✓ the execution guard > refuses to authorize anything without the durable facts 0ms
+   ✓ the execution guard > allows an effect whose prerequisites are accepted 0ms
+   ✓ the execution guard > blocks a first chapter while the sample gate is not accepted 0ms
+   ✓ the execution guard > refuses a binding that belongs to another scope 0ms
+   ✓ the execution guard > refuses a scope that does not hash to the run's own digest 0ms
+   ✓ the execution guard > refuses an action the scope does not allow 0ms
+   ✓ the execution guard > refuses an action that is not one of the fixed actions 0ms
+   ✓ the execution guard > refuses an action that does not belong to the step 0ms
+   ✓ the execution guard > refuses an unknown step 0ms
+   ✓ the execution guard > refuses a caller-selected stage that differs from the durable step 0ms
+   ✓ the execution guard > permits scoped prepare/apply while leaving finite approval consumption to MAIN 0ms
+   ✓ the execution guard > refuses a scope that asks for a paid, external or runtime action 0ms
+   ✓ the execution guard > refuses a revoked or expired authorization 0ms
+   ✓ the execution guard > refuses an effect under another principal 0ms
+   ✓ the execution guard > refuses a stale attempt 0ms
+   ✓ the execution guard > refuses an attempt that is over 0ms
+   ✓ the execution guard > refuses a run that is paused, cancelled or waiting for a decision 1ms
+   ✓ the execution guard > keeps the safe controls available without a grant 0ms
+   ✓ the execution guard > refuses to pause a run that was already cancelled 0ms
+   ✓ the execution guard > refuses a binding without a plan version, an attempt or an authorization 0ms
+   ✓ the execution guard > never accepts a gate on its own 0ms
+   ✓ the two narrow Host-only effects > prepares the impact of a product that is still waiting for a decision 0ms
+   ✓ the two narrow Host-only effects > refuses an impact preparation for a package that was already decided 0ms
+   ✓ the two narrow Host-only effects > refuses an impact preparation for another package or another version 0ms
+   ✓ the two narrow Host-only effects > refuses a narrow effect whose facts were not read 0ms
+   × the two narrow Host-only effects > refuses a narrow effect in a run that is paused, cancelled or stale 3ms
+     → expected function to throw an error, but it didn't
+   ✓ the two narrow Host-only effects > does not widen the ordinary dispatch: an action is still refused while the run waits 0ms
+   ✓ the two narrow Host-only effects > consumes an approval of an accepted product 0ms
+   ✓ the two narrow Host-only effects > refuses an adoption whose product was not accepted 0ms
+   ✓ the two narrow Host-only effects > refuses an adoption whose approval or impact is not active 0ms
+   ✓ the two narrow Host-only effects > refuses an adoption whose approval names another impact 0ms
+   ✓ the two narrow Host-only effects > refuses an adoption without an approval or without an impact 0ms
+   × the two narrow Host-only effects > refuses a narrow effect when the run has no gate for the reviewed package 0ms
+     → expected function to throw an error, but it didn't
+   × the narrow effect facts reader > reads the review and the approval out of the real records 1ms
+     → The row references a plan_version row that does not exist
+   ✓ the narrow effect facts reader > reports a record that is not there as nothing, not as a default 0ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/product/execution-guard.test.ts > the two narrow Host-only effects > refuses a narrow effect in a run that is paused, cancelled or stale
+AssertionError: expected function to throw an error, but it didn't
+ ❯ tests/agent-driven/product/execution-guard.test.ts:384:10
+    382|     for (const state of ["paused", "cancelled", "failed", "blocked"] a…
+    383|       expect(() => guardExecution(BINDING, PREPARE, withNarrow(narrowF…
+    384|         .toThrowError(expect.objectContaining({ code: "RUN_PLAN_STALE"…
+       |          ^
+    385|     }
+    386|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  tests/agent-driven/product/execution-guard.test.ts > the two narrow Host-only effects > refuses a narrow effect when the run has no gate for the reviewed package
+AssertionError: expected function to throw an error, but it didn't
+ ❯ tests/agent-driven/product/execution-guard.test.ts:439:8
+    437|   it("refuses a narrow effect when the run has no gate for the reviewe…
+    438|     expect(() => guardExecution(BINDING, PREPARE, withNarrow(narrowFac…
+    439|       .toThrowError(expect.objectContaining({ code: "RUN_GATE_BLOCKED"…
+       |        ^
+    440|   });
+    441| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  tests/agent-driven/product/execution-guard.test.ts > the narrow effect facts reader > reads the review and the approval out of the real records
+ProductError: The row references a plan_version row that does not exist
+ ❯ assertForeignKeys tests/agent-driven/product/support/memory-repository.ts:279:17
+    277|         const parent = findByFields(rule.parent, rule.project(value));
+    278|         if (parent === undefined) {
+    279|           throw new ProductError(
+       |                 ^
+    280|             "REVISION_CONFLICT",
+    281|             `The row references a ${rule.parent} row that does not exi…
+ ❯ Object.put tests/agent-driven/product/support/memory-repository.ts:443:9
+ ❯ tests/agent-driven/product/execution-guard.test.ts:447:10
+ ❯ MemoryProductRepository.transaction tests/agent-driven/product/support/memory-repository.ts:201:14
+ ❯ tests/agent-driven/product/execution-guard.test.ts:446:22
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 33 passed (36)
+   Start at  02:08:34
+   Duration  300ms (transform 81ms, setup 0ms, collect 152ms, tests 21ms, environment 0ms, prepare 34ms)
+
+ ELIFECYCLE  Test failed. See above for more details.
+--- end ---
+exit: 1
+finished: 2026-11-11T18:08:34Z

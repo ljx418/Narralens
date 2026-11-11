@@ -1,0 +1,58 @@
+command: corepack pnpm test tests/agent-driven/integration/created-source-change.test.ts tests/agent-driven/integration/created-source-adoption.test.ts tests/agent-driven/integration/created-schema-upgrade.test.ts tests/agent-driven/integration/review-media-transport.test.ts tests/agent-driven/integration/created-render-delivery.test.ts tests/agent-driven/integration/created-delivery-recovery.test.ts tests/agent-driven/integration/created-qc-review.test.ts tests/agent-driven/integration/created-run-authority.test.ts tests/agent-driven/integration/created-task-gate.test.ts tests/agent-driven/integration/capability-fingerprint.test.ts tests/agent-driven/product/fixed-workflow-service.test.ts tests/agent-driven/product/execution-guard.test.ts --maxWorkers=1 --minWorkers=1
+cwd: /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+head: 1b99e26a818ba1c84904ec868fae4622cf13b7c7
+started: 2026-11-11T18:11:25Z
+--- output ---
+
+> narralens@0.1.0 test /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+> vitest run --config vitest.config.ts tests/agent-driven/integration/created-source-change.test.ts tests/agent-driven/integration/created-source-adoption.test.ts tests/agent-driven/integration/created-schema-upgrade.test.ts tests/agent-driven/integration/review-media-transport.test.ts tests/agent-driven/integration/created-render-delivery.test.ts tests/agent-driven/integration/created-delivery-recovery.test.ts tests/agent-driven/integration/created-qc-review.test.ts tests/agent-driven/integration/created-run-authority.test.ts tests/agent-driven/integration/created-task-gate.test.ts tests/agent-driven/integration/capability-fingerprint.test.ts tests/agent-driven/product/fixed-workflow-service.test.ts tests/agent-driven/product/execution-guard.test.ts --maxWorkers=1 --minWorkers=1
+
+
+ RUN  v3.2.4 /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+
+(node:1422981) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/created-task-gate.test.ts (7 tests) 20472ms
+   ✓ reserves one real job, cp step/checkpoint and mirrored event atomically, then replays without new effects  4286ms
+   ✓ rejects stale base, altered refs/scope/attempt and crossing the sample gate before creating any job  2794ms
+   ✓ rolls back real job, step, checkpoint, event and grant mutation if final authorization is revoked  2569ms
+   ✓ rejects a creative closure changed after authorization without task side effects  2590ms
+   ✓ emits real pending-to-running progress and rolls back step/checkpoint/outbox if the event mirror fails  2621ms
+   ✓ recovers exhausted leases atomically with the real workflow checkpoint, and is idempotent after SQLite reopen  3036ms
+   ✓ recovers cancelled leases atomically with the real workflow checkpoint, and is idempotent after SQLite reopen  2575ms
+(node:1424802) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/review-media-transport.test.ts (15 tests) 198ms
+ ✓ tests/agent-driven/product/fixed-workflow-service.test.ts (31 tests) 129ms
+(node:1424852) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/created-run-authority.test.ts (12 tests) 108ms
+(node:1424872) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/created-render-delivery.test.ts (8 tests) 67ms
+(node:1424892) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/created-source-adoption.test.ts (6 tests) 62ms
+(node:1424916) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/created-qc-review.test.ts (7 tests) 52ms
+(node:1424943) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/created-delivery-recovery.test.ts (6 tests) 48ms
+(node:1424963) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/created-source-change.test.ts (11 tests) 34ms
+(node:1424983) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/created-schema-upgrade.test.ts (11 tests) 21ms
+ ✓ tests/agent-driven/product/execution-guard.test.ts (36 tests) 15ms
+ ✓ tests/agent-driven/integration/capability-fingerprint.test.ts (2 tests) 3ms
+
+ Test Files  12 passed (12)
+      Tests  152 passed (152)
+   Start at  02:11:25
+   Duration  24.42s (transform 1.01s, setup 0ms, collect 1.93s, tests 21.21s, environment 1ms, prepare 382ms)
+
+--- end ---
+exit: 0
+finished: 2026-11-11T18:11:51Z

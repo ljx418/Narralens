@@ -55,7 +55,9 @@ export interface CreatedReviewPackagePorts {
     readonly project_id: string;
     readonly prepared_source_id: string;
   }) => {
+    /** The CURRENT committed source digest of the project. */
     readonly source_digest: string;
+    /** The rights digest the project's current facts carry. */
     readonly rights_digest: string;
     readonly authorized: boolean;
     readonly reason: string;
@@ -67,6 +69,14 @@ export interface PublishCreatedReviewPackageInput {
   readonly package: PublishReviewPackageInput;
   readonly completed: CompletedPreparedSourceV1;
   readonly binding: PreparedPreviewBindingV1;
+  /**
+   * The committed source the preparation was made against.
+   *
+   * It is the base the publication will replace, and it is what the CURRENT committed
+   * source is compared against at the publication boundary. A project that moved after
+   * the preparation does not get a package published over it.
+   */
+  readonly base_source_digest: string;
 }
 
 /**
@@ -171,6 +181,9 @@ export class CreatedReviewPackageService {
     if (receipt.prepared_source_id !== input.binding.prepared_source_id) {
       throw new ProductError('REVIEW_STALE', 'The preview receipt is of another prepared source');
     }
+    if (receipt.source_digest !== input.binding.source_digest) {
+      throw new ProductError('REVIEW_STALE', 'The preview receipt is of another source');
+    }
     if (!HASH.test(receipt.receipt_digest)) {
       throw new ProductError('REVIEW_STALE', 'The preview receipt carries no digest');
     }
@@ -218,9 +231,9 @@ export class CreatedReviewPackageService {
     if (current.authorized !== true) {
       throw new ProductError('APPROVAL_REQUIRED', 'The declared rights are not authorized right now');
     }
-    if (current.source_digest !== receipt.source_digest) {
+    if (current.source_digest !== input.base_source_digest) {
       throw new ProductError('REVISION_CONFLICT', 'The committed source moved after the preview was rendered', {
-        details: { expected: receipt.source_digest, received: current.source_digest },
+        details: { expected: input.base_source_digest, received: current.source_digest },
       });
     }
     if (current.rights_digest !== receipt.rights_digest) {

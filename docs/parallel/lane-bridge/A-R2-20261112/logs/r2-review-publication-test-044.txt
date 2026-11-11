@@ -1,0 +1,23 @@
+command: corepack pnpm test tests/agent-driven/integration/review-media-transport.test.ts --maxWorkers=1 --minWorkers=1
+cwd: /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+started: 2026-11-11T18:05:26Z
+--- output ---
+
+> narralens@0.1.0 test /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+> vitest run --config vitest.config.ts tests/agent-driven/integration/review-media-transport.test.ts --maxWorkers=1 --minWorkers=1
+
+
+ RUN  v3.2.4 /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+
+(node:1400402) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/review-media-transport.test.ts (15 tests) 208ms
+
+ Test Files  1 passed (1)
+      Tests  15 passed (15)
+   Start at  02:05:27
+   Duration  661ms (transform 211ms, setup 0ms, collect 333ms, tests 208ms, environment 0ms, prepare 32ms)
+
+--- end ---
+exit: 0
+finished: 2026-11-11T18:05:27Z
