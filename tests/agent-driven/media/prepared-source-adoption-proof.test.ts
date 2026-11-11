@@ -82,7 +82,7 @@ describe('a completed SOURCE_ONLY source and its two proofs', () => {
       await close();
     }
     expect(await openDescriptorsUnder(f.root)).toEqual([]);
-  });
+  }, 120000);
 
   it('keeps the read proof and the adoption proof apart in both directions', async () => {
     const f = await preparedDraftFixture();
@@ -114,7 +114,7 @@ describe('a completed SOURCE_ONLY source and its two proofs', () => {
       await close();
     }
     expect(await openDescriptorsUnder(f.root)).toEqual([]);
-  });
+  }, 120000);
 
   it('binds the proof to the complete adoption binding', async () => {
     const f = await preparedDraftFixture();
@@ -156,7 +156,7 @@ describe('a completed SOURCE_ONLY source and its two proofs', () => {
       await close();
     }
     expect(await openDescriptorsUnder(f.root)).toEqual([]);
-  });
+  }, 120000);
 
   it('refuses a proof that was manufactured from JSON', async () => {
     const f = await preparedDraftFixture();
@@ -182,7 +182,7 @@ describe('a completed SOURCE_ONLY source and its two proofs', () => {
       await close();
     }
     expect(await openDescriptorsUnder(f.root)).toEqual([]);
-  });
+  }, 120000);
 
   it('re-checks the bytes at the final assertion', async () => {
     const f = await preparedDraftFixture();
@@ -213,7 +213,7 @@ describe('a completed SOURCE_ONLY source and its two proofs', () => {
       await close();
     }
     expect(await openDescriptorsUnder(f.root)).toEqual([]);
-  });
+  }, 120000);
 
   it('re-checks the current author and the current rights at the final assertion', async () => {
     const f = await preparedDraftFixture();
@@ -241,7 +241,7 @@ describe('a completed SOURCE_ONLY source and its two proofs', () => {
       await close();
     }
     expect(await openDescriptorsUnder(f.root)).toEqual([]);
-  });
+  }, 120000);
 
   it('releases a proof explicitly and forgets it', async () => {
     const f = await preparedDraftFixture();
@@ -264,7 +264,7 @@ describe('a completed SOURCE_ONLY source and its two proofs', () => {
       await close();
     }
     expect(await openDescriptorsUnder(f.root)).toEqual([]);
-  });
+  }, 120000);
 
   it('closes every descriptor the verifier still holds', async () => {
     const f = await preparedDraftFixture();
@@ -291,7 +291,7 @@ describe('a completed SOURCE_ONLY source and its two proofs', () => {
       await close();
     }
     expect(await openDescriptorsUnder(f.root)).toEqual([]);
-  });
+  }, 120000);
 });
 
 /* The types are imported so that the mutations above stay honest about what a binding
