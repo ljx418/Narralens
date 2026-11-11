@@ -1,6 +1,6 @@
 # D10 created 原生发布专项恢复实施与验收
 
-状态：MAIN 已授权实现范围内的详细设计；实现未开始，全部 RCV-D10 case NOT_RUN。原 D10/T20/CP-A0 编号含义及历史 Gate 不改。不得据此开放生产写入口。
+状态：独立设计审查返修候选（2026-11-12）；MAIN 已授权实现范围内，恢复实现未开始，全部 RCV-D10 case NOT_RUN。原 f0fa6c3 设计保留，因缺失 snapshot 身份证据判定 REQUEST_CHANGES，未追改原结论。原 D10/T20/CP-A0 编号含义及历史 Gate 不改。不得据此开放生产写入口。
 
 ## 实体、权威及先后顺序
 
@@ -18,7 +18,7 @@ Author 根必须由配置 createdRoot + 已验证 project_id + source 派生并�
 
 |观察事实|恢复动作|业务结果|
 |---|---|---|
-|事务已 committed，原 receipt/指针/快照/来源事实一致|仅验证并读回原事实；不再次发布/编码/消费|revision 不再+1|
+|事务已 committed，原 receipt/快照/来源事实一致（仍为当前提交时才要求 active pointer 等于该事务；若已有合法更新，不能把历史作者位置当当前位置）|仅验证并读回原事实；不再次发布/编码/消费|revision 不再+1|
 |received/prechecked/staged/validated/prepared，无 publication journal，author 完整等于原 committed closure|中止未发布事务；保留准备材料/快照/失败证据|原 revision/source；不消费批准|
 |prepared journal 存在，但 author 仍为原完整闭包、没有已移动 backup|校验并中止未发布事务；不把已暂存 target 自动当已采用|原 revision/source|
 |author 缺失、backup 为完整原闭包（两次 rename 之间）|以持有 guard 的 backup 原子移回固定 author，目录 fsync，验证完整闭包后中止|原 revision/source；不消费批准|
@@ -49,10 +49,50 @@ Author 根必须由配置 createdRoot + 已验证 project_id + source 派生并�
 
 ## 持久文件身份补充（内部设计，未实现）
 
-当前 journal 只记录路径与 hash；它不足以证明跨进程后的 backup/target 与移动前是同一目录/文件身份。为满足本计划的“不拿同字节新 inode 重新建立信任”，增加同库 immutable created_publication_identity 附属事实：transaction_id/project_id、format/version、原 author 与 target staging 的完整目录/文件 dev+ino（十进制字符串）、相对路径集合、清单 hash。没有 state/ready/approved 字段，CP-A0 namespace/冻结 wire/原 journal DDL 不变。
+当前 journal 只记录路径与 hash；它不足以证明跨进程后的 backup/target 与移动前是同一目录/文件身份。为满足本计划的“不拿同字节新 inode 重新建立信任”，增加同库 immutable created_publication_identity 附属事实：transaction_id/project_id、format/version、原 author、target staging、已发布 target snapshot/source 三棵树的完整目录/文件 dev+ino（十进制字符串）、相对路径集合、清单 hash，以及 snapshot 容器目录的 dev+ino。没有 state/ready/approved 字段，CP-A0 namespace/冻结 wire/原 journal DDL 不变。
 
-Publisher 在持有原 author 和隔离 target 的 RetainedSourceTree 后，从实际已校验 FD 生成身份事实；与 prepared journal 同一数据库原子事务提交，之后才允许任一 rename。尚无此事实的旧未发布行只能经完整 base 证明安全中止；已移动且缺失跨进程身份的旧行诚实 attention，不伪称具备新证据。原字段或 schema 冲突 fail closed，追加表须做同库重开/不可变触发器/逐字段验证/未知版本拒绝测试。
+Publisher 在完成 target snapshot 发布并同时持有原 author、隔离 target、真实 target snapshot/source 的 RetainedSourceTree 后，从实际已校验 FD 生成三方身份事实；snapshot 容器身份也取该 guard 已持有的父目录 FD，不能在校验后按名字另开一份替代。与 prepared journal 同一数据库原子事务提交，之后才允许任一 rename。尚无此事实的旧未发布行只能经完整 base 证明安全中止；已移动且缺失跨进程身份的旧行诚实 attention，不伪称具备新证据。原字段或 schema 冲突 fail closed，追加表须做同库重开/不可变触发器/逐字段验证/未知版本拒绝测试。
 
 恢复用新 FD 独立复核完整 hash、canonical 路径和持久 dev+ino，排除 inode 重建或替换；只保存源根内的目录/文件身份，不把原父目录的名字变化误当内容变化。FD 数字永不持久或跨进程重用。迁机/重新复制 runtime 后 inode 改变时不能静默继续旧 pending；保全并报告需审计恢复。Git 代码迁移不等于搬迁未完成发布的文件事务。
 
 identity 是关闭与 rename 恢复的事实，不是新的 Approval/publication proof；恢复 proof 仍须由当前 Publisher 重验全部权威后私有签发。此处为明确设计裁决，待独立设计核对与实际实施，不计任何 RCV case 通过。
+
+
+## 本次独立意见逐项裁决（待复验，不宣称 PASS）
+
+### RD-01：持久 snapshot 身份，不降低已承诺门限
+
+接受原审 MAJOR：单独保留 author/staging dev+ino 无法发现 SnapshotStore 单独复制出的 snapshot 被同字节重建。本修订增加 snapshot/source 完整树和 snapshot 容器身份，均在原发布移动前持久化，和 prepared journal 同一事务。恢复分别对 original backup、current target author（或其隔离目录）、snapshot/source + container 做身份和完整 bytes/闭包验证。三个不同物理树不可互相用 hash 冒充 inode 身份。RCV-D10-06 必须实际替换 snapshot source 整树、单文件与容器各自变红；source_digest 相等仍拒绝。
+
+### RD-02：明确原状态机，不回写 terminal 状态
+
+新创建采用中正常崩溃的恢复前态只包括 received/preconditions_checked/staged/validated/prepared。服务在 prepared 发布中断后保留 prepared，不调用通用 attention 把所有可恢复错误封死。完成仍仅 prepared→committed，安全中止沿原前态→aborted。确认未知身份/内容/权威不一致才进入原 attention。已有 attention/recovering 行不自动恢复为 prepared，不裸 SQL 清 attention；它们作为需审计的旧异常报告且不开放该项目写。当前 generic markRecovering 只允许早期三态，不能把其当作新 prepared 恢复跳板。RCV-D10-01/08 包含这些边界与明确拒绝，不假称旧未知行可自动收敛。
+
+### RD-03：rename 后 journal 前
+
+prepared journal + 三方 identity 早于任何 rename。若 observed author 正是持久 target identity、backup 正是 original identity、snapshot 也匹配，则目标移动已经被重新观察证明。当前 Publisher 在原同事务/同 input 的专用入口幂等追加缺失的 published journal（现存行逐字段校验），然后仅在原当前授权仍有效时签发当前实例的 opaque proof 并走原 commit。journal 是事实，不独立批准；不允许仅根据 prepared JSON 宣称 published。
+
+### RD-04：补偿自身也可重启
+
+隔离目录必须为原 publication workspace 下固定名称 rollback-target，不使用未记名随机路径。按持久身份区分 O=original、T=target：
+
+|实际文件位置|恢复动作|
+|---|---|
+|author=T, backup=O, quarantine 不存在|持有两边 guard；author 原子移到固定 quarantine，再移动 backup 回 author|
+|author 缺失, backup=O, quarantine=T|前次补偿停在两次 rename 之间；验证后继续 backup→author|
+|author=O, backup 缺失, quarantine=T|前次补偿已还原但未 fsync/abort；重做目录 fsync、验证 O 后中止原事务|
+|author 缺失, backup=O, quarantine 不存在, staging=T|原发布停在两次 rename 之间；恢复 backup→author，保留 staging|
+|author=O, backup 缺失, quarantine 不存在|未移动或已恢复的安全原状；校验 O、身份（若已有记录）和旧 committed base 后中止|
+|任一未知/重复/冲突身份或当前 pointer 已不是该 base|保全并 attention，不猜、不删、不覆盖其他内容|
+
+每次 rename 后 fsync 所有发生目录项变动的父目录；中止在完整 O 与持久目录证明后发生。若当前 DB 已 committed，以上文件回退分支完全禁止，旧内容恢复只能新 revision。再次 SIGKILL 覆盖上述每个中间状态。
+
+### RD-05：specialized 恢复的域间顺序与 deferred
+
+不能仅在现有 agent recoverBeforeGeneric 一次处理后把未完成行交给 generic。MAIN 将引入 Host 内部第二次恢复 hook（暂定 recoverAfterControlled），放在既有 history/adoption 多 pass 之后、generic 之前；它不增加公共协议。首 pass 可延迟被更老受控行挡住的 created，第二 pass 再决定；若可重试 I/O/资源仍使 own pending 未决，Host 本次启动保持未就绪/可重试退出，generic 不得误转 terminal attention。
+
+既有 src/host/projects/controlled-write-formats.ts 的纯识别函数需认识精确 created apply operation；旧 history/adoption 的 pending 集合和老少判定统一包含三个域，仅用于恢复排序，不授予写权限。相同 created_at 用 transaction_id 确定稳定次序，拒绝两个相等时戳互等。未知 edit/import 不得加入可忽略集合。正常在线队列必须仍重验当前 gate。RCV-D10-08/10 用实际旧 history/legacy pending 混合、两个顺序与相等时戳验证，不能只单测分类字符串。
+
+### RD-06：环境与证据界限
+
+原 author/private publication 根必须支持同文件系统原子目录 rename 与父目录 fsync；不同 device/不支持目录持久性不得宣称恢复可用。A 范围保持单 Host 写实例，不把原未验证的跨进程共享 SQLite 竞争说成支持；启动恢复前必须验证实际运行根的独占所有权，活跃或不确定的另一 owner 不得当作崩溃清理。完整进程丢失用自身 child PID 的实际 SIGKILL/重新开库验证；不宣称物理断电/文件系统灾难恢复已验。/tmp 证据与实际部署根证据分别记录，不互相冒充。
