@@ -194,6 +194,9 @@ every commit adds explicit paths only.
 | `8c408e72544b0e2f534497c26de3275c68c703eb` | The cases over the controlled session that carries the observation binding. |
 | `c7b77568f12ca56fc00fabd9868c7eb87b45c807` | The shipped observation contract made strict-mode valid, and the cases over it and over the tracked pin. |
 | `b0dc5f8c1f8bd850be9b5b2ed12cbdbabb5cdacb` | One body check shared by the ingress and the service. |
+| `d4542681c3ccdd2e28808311e8325516937eedd0` | The counted observation route made verifiable against the registry. |
+| `dd8a3ea9f51b1c73e67c382b832380bd5d2ede5b` | One acknowledgement per state, not one per report. |
+| `d0e22e4687242ca68877b8ef2ae199934db85d46` | The build tool hands the pinned build a child without `NODE_PATH`. |
 
 ## Released path coverage
 
@@ -239,9 +242,15 @@ cases; the toolchain copy is byte-identical to the historical closure; the
 acknowledgement path, the selection version, the release, the attribution and the
 guards are exercised over real files and real descriptors.
 
-NOT_RUN: the expected library build (the first attempt failed on my staging defect and
-the fix awaits a fresh grant), the Studio UI build, the browser, the real Host, ffmpeg,
-the media, the full gate and the real end-to-end Run. The pinned 015 candidate is not
+NOT_RUN: the expected library build, the Studio UI build, the browser, the real Host,
+ffmpeg, the media, the full gate and the real end-to-end Run. Two build attempts are
+kept as failures: the first failed on my staging defect, which is fixed; the second ran
+under the granted slot and failed on the pinned build script's own `NODE_PATH` guard,
+because the runner that starts it sets `NODE_PATH` for its own module resolution. The
+tool now hands the pinned script a child without that variable, which is what the
+pinned script asks for, and the mechanism was checked without running the build. Both
+failures, their logs and their process evidence are in `logs/`, and neither was
+retried. The pinned 015 candidate is not
 built, so the helper under test in the unit cases is a local stand-in for the pinned
 API: the guards, the approval chain and the cleanup are what those cases prove, not the
 015 math.
