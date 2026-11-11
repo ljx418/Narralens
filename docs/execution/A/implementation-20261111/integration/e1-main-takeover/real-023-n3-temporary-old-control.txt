@@ -1,0 +1,148 @@
+
+> narralens@0.1.0 test /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+> vitest run --config vitest.config.ts tests/agent-driven/integration/created-source-adoption.test.ts --maxWorkers=1 --minWorkers=1 -t 'N3 real temporary'
+
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:1823397) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/agent-driven/integration/created-source-adoption.test.ts (39 tests | 4 failed | 35 skipped) 34554ms
+   ↓ actual closed created-source commit and publisher > N3 real issuance revokes a genuine token when the stage guard cleanup fails
+   ↓ actual closed created-source commit and publisher > N3 real issuance revokes a genuine token when the outer held guard cleanup fails
+   ↓ actual closed created-source commit and publisher > N3 real pending close waits for publication and never returns an issued proof after closing
+   × actual closed created-source commit and publisher > N3 real temporary default fsync close preserves uncertainty (sync also fails=false) 8736ms
+     → expected Error: injected observed fsync close fail… { code: '…' } to match object { Object (code, http_status, ...) }
+   × actual closed created-source commit and publisher > N3 real temporary default fsync close preserves uncertainty (sync also fails=true) 8497ms
+     → expected [ …(1) ] to deeply equal ArrayContaining{…}
+   × actual closed created-source commit and publisher > N3 real temporary style descriptor close preserves uncertainty (stat also fails=false) 8036ms
+     → expected [ …(1) ] to deeply equal ArrayContaining{…}
+   × actual closed created-source commit and publisher > N3 real temporary style descriptor close preserves uncertainty (stat also fails=true) 9284ms
+     → expected [ …(1) ] to deeply equal ArrayContaining{…}
+   ↓ actual closed created-source commit and publisher > N3 real publication attempts every guard when verifier release fails and never revives the proof
+   ↓ actual closed created-source commit and publisher > N3 real publication attempts other guards after the first guard close fails
+   ↓ actual closed created-source commit and publisher > N3 real publication preserves the primary publish failure and cleanup failures together
+   ↓ actual closed created-source commit and publisher > refuses authority expiring during the final creative closure scan
+   ↓ actual closed created-source commit and publisher > rolls back checkpoint, attempt and every authority after a post-checkpoint transaction failure
+   ↓ actual closed created-source commit and publisher > poisons a swallowed read of another intake inside the project commit scope
+   ↓ actual closed created-source commit and publisher > rejects a real intake update after approval without consuming database authorities
+   ↓ actual closed created-source commit and publisher > rejects a predecessor gate changed to pending after approval
+   ↓ actual closed created-source commit and publisher > rejects a predecessor gate changed to rejected after approval
+   ↓ actual closed created-source commit and publisher > persists the same succeeded attempt in workflow checkpoint and a freshly opened SQLite reader
+   ↓ actual closed created-source commit and publisher > publishes complete native source, commits once, preserves R1 geometry and replays without a second commit
+   ↓ actual closed created-source commit and publisher > refuses a prepared transaction of another kind before publishing source
+   ↓ actual closed created-source commit and publisher > refuses a workflow attempt detached from the actual prepared job
+   ↓ actual closed created-source commit and publisher > refuses JSON-cloned publication proof without moving database authorities
+   ↓ actual closed created-source commit and publisher > refuses author bytes changed after publication even while database base is unchanged
+   ↓ actual closed created-source commit and publisher > refuses current selection changed after publication
+   ↓ actual closed created-source commit and publisher > refuses a symlink replacement of the committed snapshot source
+   ↓ actual closed created-source commit and publisher > rolls every database authority back if an actual post-consume write fails
+   ↓ actual closed created-source commit and publisher > poisons the outer transaction when a project-bound repository guard failure is swallowed
+   ↓ actual closed created-source commit and publisher > poisons the owner if a real scope is used against another database even when the error is swallowed
+   ↓ actual closed created-source commit and publisher > invalidates an authentic joined scope when its successful commit ends
+   ↓ actual closed created-source commit and publisher > does not expose mutable issuer, guard or geometry authority on a real publication token
+   ↓ actual closed created-source commit and publisher > refuses an authority that expires during final synchronous file verification
+   ↓ actual closed created-source commit and publisher > retains the original backup inode when a same-byte replacement happens after rename
+   ↓ actual closed created-source commit and publisher > refuses a fully rehashed approved plan that lies about film
+   ↓ actual closed created-source commit and publisher > refuses a fully rehashed approved plan that lies about settings
+   ↓ actual closed created-source commit and publisher > refuses a fully rehashed approved plan that lies about captions
+   ↓ actual closed created-source commit and publisher > refuses a fully rehashed approved plan that lies about native_plan
+   ↓ actual closed created-source commit and publisher > refuses a fully rehashed approved plan that lies about rights
+   ↓ actual closed created-source commit and publisher > refuses a fully rehashed approved plan that lies about consumer
+   ↓ actual closed created-source commit and publisher > refuses a fully rehashed approved plan that lies about upstream
+   ↓ actual closed created-source commit and publisher > refuses a fully rehashed approved plan that lies about ranges
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/created-source-adoption.test.ts > actual closed created-source commit and publisher > N3 real temporary default fsync close preserves uncertainty (sync also fails=false)
+AssertionError: expected Error: injected observed fsync close fail… { code: '…' } to match object { Object (code, http_status, ...) }
+
+- Expected
++ Received
+
+- {
+-   "code": "CAPABILITY_UNAVAILABLE",
+-   "http_status": 503,
+-   "requires_reconciliation": true,
+-   "retryable": false,
++ Error {
++   "code": "EIO",
+  }
+
+ ❯ tests/agent-driven/integration/created-source-adoption.test.ts:204:20
+    202|    expect(injected).toBe(true);
+    203|    expect(leaves(failure)).toEqual(expect.arrayContaining(dual?[primar…
+    204|    expect(failure).toMatchObject({code:'CAPABILITY_UNAVAILABLE',http_s…
+       |                    ^
+    205|    expect(JSON.stringify(failure)).not.toContain(prepared!.root);expec…
+    206|    if(handle&&restoreClose)handle.close=restoreClose;
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  tests/agent-driven/integration/created-source-adoption.test.ts > actual closed created-source commit and publisher > N3 real temporary default fsync close preserves uncertainty (sync also fails=true)
+AssertionError: expected [ …(1) ] to deeply equal ArrayContaining{…}
+
+- Expected
++ Received
+
+- ArrayContaining [
+-   Error {
+-     "message": "injected sync failure",
+-   },
++ [
+    Error {
+      "message": "injected observed fsync close failure",
+      "code": "EIO",
+    },
+  ]
+
+ ❯ tests/agent-driven/integration/created-source-adoption.test.ts:203:28
+    201|    let failure:unknown;try{await fixture({onPrepared:f=>{prepared=f;},…
+    202|    expect(injected).toBe(true);
+    203|    expect(leaves(failure)).toEqual(expect.arrayContaining(dual?[primar…
+       |                            ^
+    204|    expect(failure).toMatchObject({code:'CAPABILITY_UNAVAILABLE',http_s…
+    205|    expect(JSON.stringify(failure)).not.toContain(prepared!.root);expec…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  tests/agent-driven/integration/created-source-adoption.test.ts > actual closed created-source commit and publisher > N3 real temporary style descriptor close preserves uncertainty (stat also fails=false)
+ FAIL  tests/agent-driven/integration/created-source-adoption.test.ts > actual closed created-source commit and publisher > N3 real temporary style descriptor close preserves uncertainty (stat also fails=true)
+AssertionError: expected [ …(1) ] to deeply equal ArrayContaining{…}
+
+- Expected
++ Received
+
+- ArrayContaining [
+-   Error {
+-     "message": "injected observed style close failure",
+-     "code": "EIO",
++ [
++   ProductError {
++     "message": "Prepared native source verification could not complete",
++     "code": "HOST_RESOURCE_EXHAUSTED",
++     "http_status": 503,
++     "retryable": true,
++     "next_actions": [],
++     "details": {},
++     "name": "ProductError",
+    },
+  ]
+
+ ❯ tests/agent-driven/integration/created-source-adoption.test.ts:229:28
+    227|    }});}catch(error){failure=error;}
+    228|    expect(injected).toBe(true);
+    229|    expect(leaves(failure)).toEqual(expect.arrayContaining(dual?[primar…
+       |                            ^
+    230|    expect(failure).toMatchObject({code:'CAPABILITY_UNAVAILABLE',http_s…
+    231|    expect(publisher!.isUsable()).toBe(false);expect(JSON.stringify(fai…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  4 failed | 35 skipped (39)
+   Start at  05:27:26
+   Duration  44.34s (transform 3.40s, setup 0ms, collect 7.29s, tests 34.55s, environment 0ms, prepare 1.91s)
+
+ ELIFECYCLE  Test failed. See above for more details.

@@ -1,6 +1,6 @@
 import { createHash, randomUUID } from 'node:crypto';
 import { constants } from 'node:fs';
-import { access, copyFile, mkdir, open, rename, rm } from 'node:fs/promises';
+import { access, copyFile, mkdir, open, rename, rm, type FileHandle } from 'node:fs/promises';
 import { dirname, basename, resolve, sep } from 'node:path';
 import type { DatabaseSync } from 'node:sqlite';
 import { canonicalJson, canonicalDigest } from '../creative/digest.js';
@@ -172,12 +172,21 @@ export class CreatedSourcePublisher {
   readonly #now:()=>Date;readonly #fsync:(path:string)=>Promise<void>;readonly #instance=`publisher_${randomUUID()}`;
   readonly #issued=new Set<object>();readonly #pending=new Set<Promise<unknown>>();
   readonly #cleanup=new PublicationCleanup();
+  readonly #fsyncHandles=new Set<FileHandle>();
   #failed=false;#closed=false;#closing:Promise<void>|undefined;
   constructor(options:CreatedSourcePublisherOptions){
     this.#owner=options.revisions;this.#db=options.revisions.compose(db=>db);this.#authorRoot=resolve(options.authorRoot);this.#privateRoot=resolve(options.privateRoot);
     this.#stageDomainRoot=resolve(options.stageDomainRoot);
     this.#snapshots=options.snapshots;this.#selection=options.selection;this.#assets=options.assets;this.#tasks=options.tasks;this.#verifier=options.verifier;this.#now=options.now??(()=>new Date());
-    this.#fsync=options.fsync??(async path=>{const fd=await open(path,constants.O_RDONLY);try{await fd.sync();}finally{await fd.close();}});
+    this.#fsync=options.fsync??(async path=>{
+      const fd=await open(path,constants.O_RDONLY);this.#fsyncHandles.add(fd);
+      let primary:unknown,failed=false;
+      try{await fd.sync();}catch(error){primary=error;failed=true;throw error;}
+      finally{try{await fd.close();this.#fsyncHandles.delete(fd);}catch(error){
+        this.#cleanup.recordFailure(fd,error);
+        throw new PublicationCleanupError([...(failed?[primary]:[]),error]);
+      }}
+    });
     const exists=this.#db.prepare("SELECT name FROM sqlite_master WHERE name='created_publication_journal'").get();
     if(!exists)this.#db.exec(CREATED_PUBLICATION_JOURNAL_DDL);
     else if(!matchesFrozenSchemaNamespace(this.#db,CREATED_PUBLICATION_JOURNAL_DDL,'created_publication_journal'))fail('REVISION_CONFLICT','Publication journal schema differs');
@@ -425,7 +434,13 @@ export class CreatedSourcePublisher {
     const closing=(async()=>{
       await Promise.allSettled([...this.#pending]);
       for(const proof of [...this.#issued])this.#retire(proof);
-      this.#cleanup.drain();
+      const failures:unknown[]=[];
+      try{this.#cleanup.drain();}catch(error){failures.push(error);}
+      // Retry only the original FileHandle operation, never an unowned numeric FD.
+      // Historical close uncertainty remains sticky even if this is now a no-op.
+      for(const handle of [...this.#fsyncHandles])try{await handle.close();this.#fsyncHandles.delete(handle);}
+      catch(error){this.#cleanup.recordFailure(handle,error);failures.push(error);}
+      if(failures.length)throw new PublicationCleanupError(failures);
     })();
     this.#closing=closing;
     void closing.catch(()=>{if(this.#closing===closing)this.#closing=undefined;});

@@ -168,7 +168,15 @@ export class PreparedDraftVerifier {
  async #format():Promise<NativeFormat>{
   const pin=await verifyRenderPin(this.vendorRoot);check(!this.#closed);if(!pin.ok)throw new ProductError('CAPABILITY_UNAVAILABLE','Pinned native format is unavailable');
   const fd=openSync(resolve(pin.upstream_root,STYLE),constants.O_RDONLY|constants.O_NOFOLLOW|constants.O_NONBLOCK);
-  try{const stat=fstatSync(fd,{bigint:true});check(stat.isFile());const file:File={path:resolve(pin.upstream_root,STYLE),fd,stat,bytes:Number(stat.size),sha256:STYLE_SHA};check(this.#hash(file)===STYLE_SHA);}finally{closeSync(fd);}
+  let primary:unknown,failed=false;
+  try{const stat=fstatSync(fd,{bigint:true});check(stat.isFile());const file:File={path:resolve(pin.upstream_root,STYLE),fd,stat,bytes:Number(stat.size),sha256:STYLE_SHA};check(this.#hash(file)===STYLE_SHA);}
+  catch(error){primary=error;failed=true;throw error;}
+  finally{try{closeSync(fd);}catch(error){
+   // Temporary format descriptors are not proof records; retain their uncertainty
+   // explicitly and never retry a raw descriptor that might have been recycled.
+   this.#cleanupFaults.add(error);
+   throw new PublicationCleanupError([...(failed?[primary]:[]),error]);
+  }}
   const film:unknown=await import(pathToFileURL(resolve(pin.upstream_root,'packages/openfilm/src/film-doc.mjs')).href);
   const style:unknown=await import(pathToFileURL(resolve(pin.upstream_root,STYLE)).href);
   check(film&&typeof film==='object'&&'readFilmFile'in film&&typeof film.readFilmFile==='function'&&style&&typeof style==='object'&&'FILM_SUBTITLE_DEFAULT'in style&&obj(style.FILM_SUBTITLE_DEFAULT));

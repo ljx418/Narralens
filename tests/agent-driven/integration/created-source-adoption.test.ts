@@ -1,6 +1,8 @@
 import {readFile,writeFile,symlink,rename,open,readdir} from 'node:fs/promises';
 import {join,dirname} from 'node:path';
 import {randomUUID} from 'node:crypto';
+import {createRequire,syncBuiltinESMExports} from 'node:module';
+import {vendorRoot} from './helpers/created-project-fixture.js';
 import {afterEach,describe,it,expect,vi} from 'vitest';
 import {preparedDraftFixture,waitForCompletedDraft,registryFacts} from './helpers/created-draft-fixture.js';
 import {canonicalDigest} from '../../../src/host/creative/digest.js';
@@ -134,6 +136,120 @@ async function fixture(options:{transactionKind?:'edit'|'snapshot_publish';mutat
 }
 
 describe('actual closed created-source commit and publisher',()=>{
+ it.each(['stage','outer held'] as const)('N3 real issuance revokes a genuine token when the %s guard cleanup fails',async mode=>{
+  const fault=new Error('injected post-issuance '+mode+' close');
+  let prepared:Awaited<ReturnType<typeof preparedDraftFixture>>|undefined,publisher:CreatedSourcePublisher|undefined;
+  let captured:import('../../../src/host/agent-driven/created-source-ports.js').CreatedSourcePublicationProof|undefined;
+  let armed=false,matches=0,injected=false,restoreGuard:(()=>void)|undefined,restoreAssert:(()=>void)|undefined;
+  const originalClose=RetainedSourceTree.prototype.close;
+  try{
+   let failure:unknown;
+   try{await fixture({onPrepared:f=>{prepared=f;},onPublisher:(p,close)=>{
+    publisher=p;ownFaultCleanup(close);
+    const originalAssert=p.assertCurrentForCommit.bind(p);
+    const assertion=vi.spyOn(p,'assertCurrentForCommit').mockImplementation((...args)=>{
+     originalAssert(...args);if(!isCreatedSourcePublicationProof(args[0]))throw Error('Expected genuine issued proof');captured=args[0];armed=true;
+    });restoreAssert=()=>assertion.mockRestore();
+    const guard=vi.spyOn(RetainedSourceTree.prototype,'close').mockImplementation(function(this:RetainedSourceTree){
+     if(armed&&this.root.startsWith(prepared!.taskRoot+'/')&&++matches===(mode==='stage'?1:2)){injected=true;throw fault;}
+     return originalClose.call(this);
+    });restoreGuard=()=>guard.mockRestore();
+   }});}catch(error){failure=error;}
+   expect(injected).toBe(true);expect(captured).toBeDefined();
+   expect(isCreatedSourcePublicationProof(captured)).toBe(false);
+   expect(leaves(failure)).toContain(fault);expect(failure).toMatchObject({requires_reconciliation:true});
+   expect(publisher!.isUsable()).toBe(false);expect(prepared!.host.revisions.activeCommit(prepared!.projectId)?.revision).toBe(1);
+   expect(await readFile(join(captured!.facts.backup_root,'film.html'))).toEqual(prepared!.authorBytes);
+  }finally{restoreGuard?.();restoreAssert?.();if(publisher)await settleFaultCleanup(publisher,[fault]);}
+ },120000);
+ it('N3 real pending close waits for publication and never returns an issued proof after closing',async()=>{
+  let entered!:()=>void,release!:()=>void,publisher:CreatedSourcePublisher|undefined,prepared:Awaited<ReturnType<typeof preparedDraftFixture>>|undefined,parked=false;
+  const entry=new Promise<void>(done=>{entered=done;}),gate=new Promise<void>(done=>{release=done;});
+  const work=fixture({onPrepared:f=>{prepared=f;},onPublisher:p=>{publisher=p;},fsync:async path=>{
+   if(!parked&&path.includes('/staging/')){parked=true;entered();await gate;}
+   const fd=await open(path,'r');try{await fd.sync();}finally{await fd.close();}
+  }});
+  const observed=work.then(result=>({result,error:undefined}),error=>({result:undefined,error}));
+  let closing:Promise<void>|undefined;
+  try{
+   await Promise.race([entry,observed.then(value=>{throw value.error??Error('Publication did not pause at fsync');})]);
+   const first=publisher!.close(),second=publisher!.close();closing=first;
+   expect(second).toBe(first);let done=false;const closeObserved=first.then(()=>{done=true;},()=>{done=true;});
+   await new Promise<void>(resolve=>setImmediate(resolve));expect(done).toBe(false);
+   release();const outcome=await observed;expect(outcome.result).toBeUndefined();expect(outcome.error).toBeDefined();
+   await Promise.all([first,second,closeObserved]);
+   expect(prepared!.host.revisions.activeCommit(prepared!.projectId)?.revision).toBe(1);
+   expect(await readFile(join(prepared!.authorRoot,'film.html'))).toEqual(prepared!.authorBytes);
+  }finally{release();await observed;if(closing)await closing;}
+ },120000);
+ it.each([false,true])('N3 real temporary default fsync close preserves uncertainty (sync also fails=%s)',async dual=>{
+  const closeFault=Object.assign(new Error('injected observed fsync close failure'),{code:'EIO'}),primary=new Error('injected sync failure');
+  let prepared:Awaited<ReturnType<typeof preparedDraftFixture>>|undefined,publisher:CreatedSourcePublisher|undefined;
+  let handle:Awaited<ReturnType<typeof open>>|undefined,restoreClose:(()=>Promise<void>)|undefined,injected=false;
+  const probe=await open('/dev/null','r'),prototype=Object.getPrototypeOf(probe);await probe.close();
+  const original=prototype.sync;
+  const spy=vi.spyOn(prototype,'sync').mockImplementation(async function(this:Awaited<ReturnType<typeof open>>,...args:unknown[]){
+   const path=await(await import('node:fs/promises')).readlink('/proc/self/fd/'+this.fd);
+   if(!injected&&path.includes('/publication-')&&path.includes('/staging/')){
+    injected=true;handle=this;restoreClose=this.close.bind(this);
+    this.close=async()=>{await restoreClose!();throw closeFault;};
+    if(dual)throw primary;
+   }
+   return Reflect.apply(original,this,args);
+  });
+  try{
+   let failure:unknown;try{await fixture({onPrepared:f=>{prepared=f;},onPublisher:(p,close)=>{publisher=p;ownFaultCleanup(close);}});}catch(error){failure=error;}
+   expect(injected).toBe(true);
+   expect(leaves(failure)).toEqual(expect.arrayContaining(dual?[primary,closeFault]:[closeFault]));
+   expect(failure).toMatchObject({code:'CAPABILITY_UNAVAILABLE',http_status:503,retryable:false,requires_reconciliation:true});
+   expect(JSON.stringify(failure)).not.toContain(prepared!.root);expect(publisher!.isUsable()).toBe(false);
+   if(handle&&restoreClose)handle.close=restoreClose;
+   await expect(publisher!.close()).rejects.toBeInstanceOf(PublicationCleanupError);
+   expect(prepared!.host.revisions.activeCommit(prepared!.projectId)?.revision).toBe(1);
+  }finally{spy.mockRestore();if(handle&&restoreClose)handle.close=restoreClose;if(publisher)await settleFaultCleanup(publisher,dual?[primary,closeFault]:[closeFault]);}
+ },120000);
+ it.each([false,true])('N3 real temporary style descriptor close preserves uncertainty (stat also fails=%s)',async dual=>{
+  const closeFault=Object.assign(new Error('injected observed style close failure'),{code:'EIO'}),primary=new Error('injected style stat failure');
+  const native=createRequire(import.meta.url)('node:fs') as typeof import('node:fs');
+  const originalClose=native.closeSync,originalStat=Object.getOwnPropertyDescriptor(native,'fstatSync')!;
+  const target=native.realpathSync(join(vendorRoot,'packages/openfilm/studio/server/film-subtitle.mjs'));
+  let prepared:Awaited<ReturnType<typeof preparedDraftFixture>>|undefined,publisher:CreatedSourcePublisher|undefined,injected=false;
+  const targetOf=(fd:number)=>{try{return native.readlinkSync('/proc/self/fd/'+fd);}catch{return '';}};
+  try{
+   let failure:unknown;
+   try{await fixture({onPrepared:f=>{prepared=f;ownFaultCleanup(f.close);},onPublisher:(p,close)=>{
+    publisher=p;ownFaultCleanup(close);
+    native.closeSync=(fd:number)=>{const matched=targetOf(fd)===target;originalClose(fd);if(matched){injected=true;throw closeFault;}};
+    Object.defineProperty(native,'fstatSync',{...originalStat,value:(...args:unknown[])=>{
+     if(dual&&targetOf(args[0] as number)===target)throw primary;
+     return Reflect.apply(originalStat.value,native,args);
+    }});syncBuiltinESMExports();
+   }});}catch(error){failure=error;}
+   expect(injected).toBe(true);
+   expect(leaves(failure)).toEqual(expect.arrayContaining(dual?[primary,closeFault]:[closeFault]));
+   expect(failure).toMatchObject({code:'CAPABILITY_UNAVAILABLE',http_status:503,retryable:false,requires_reconciliation:true});
+   expect(publisher!.isUsable()).toBe(false);expect(JSON.stringify(failure)).not.toContain(prepared!.root);
+   await expect(prepared!.verifier.close()).rejects.toBeInstanceOf(PublicationCleanupError);
+   await expect(publisher!.close()).rejects.toBeInstanceOf(PublicationCleanupError);
+   expect(prepared!.host.revisions.activeCommit(prepared!.projectId)?.revision).toBe(1);
+  }finally{
+   native.closeSync=originalClose;Object.defineProperty(native,'fstatSync',originalStat);syncBuiltinESMExports();
+   const known:readonly unknown[]=dual?[primary,closeFault]:[closeFault];if(publisher)await settleFaultCleanup(publisher,known);
+   if(prepared){
+    // The fixture's generic close stops at verifier failure. This case owns each
+    // teardown step and permits only the deliberately recorded close uncertainty.
+    const unexpected:unknown[]=[];
+    try{await prepared.worker.close();}catch(error){unexpected.push(error);}
+    let verifierFailed=false;
+    try{await prepared.verifier.close();}catch(error){verifierFailed=true;if(!(error instanceof PublicationCleanupError)||leaves(error).some(cause=>!known.includes(cause)))unexpected.push(error);}
+    try{await prepared.processor.close();}catch(error){if(!verifierFailed||!(error&&typeof error==='object'&&'code'in error&&error.code==='CAPABILITY_UNAVAILABLE'))unexpected.push(error);}
+    try{await prepared.registry.close();}catch(error){unexpected.push(error);}
+    try{await prepared.host.close();}catch(error){unexpected.push(error);}
+    try{await(await import('node:fs/promises')).rm(prepared.root,{recursive:true,force:true});}catch(error){unexpected.push(error);}
+    if(unexpected.length)throw new AggregateError(unexpected,'Unexpected temporary-handle fixture cleanup failure');
+   }
+  }
+ },120000);
  const leaves=(error:unknown):unknown[]=>error instanceof PublicationCleanupError?error.errors.flatMap(leaves):[error];
  const ownFaultCleanup=(close:()=>Promise<void>)=>{const index=cleanups.indexOf(close);expect(index).toBeGreaterThanOrEqual(0);cleanups.splice(index,1);};
  const settleFaultCleanup=async(publisher:CreatedSourcePublisher,known:readonly unknown[])=>{
