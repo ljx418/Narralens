@@ -62,122 +62,93 @@
     },
     "NativeDocumentObservation": {
       "description": "The original p2 NarralensDocumentState: a committed document DOM or an invalidation.",
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "protocol_version",
-        "kind",
-        "project_id",
-        "editor_view_id",
-        "document_epoch"
-      ],
-      "properties": {
-        "protocol_version": {
-          "const": 1
-        },
-        "kind": {
-          "enum": [
-            "document_dom_committed",
-            "invalidated"
-          ]
-        },
-        "project_id": {
-          "type": "string",
-          "minLength": 1
-        },
-        "editor_view_id": {
-          "type": "string",
-          "minLength": 1
-        },
-        "document_epoch": {
-          "type": "integer",
-          "minimum": 0
-        },
-        "native_rev": {
-          "type": "string",
-          "minLength": 1
-        },
-        "film_sha256": {
-          "type": "string",
-          "pattern": "^[a-f0-9]{64}$"
-        },
-        "utf8_byte_length": {
-          "type": "integer",
-          "minimum": 0
-        },
-        "reason": {
-          "enum": [
-            "dirty",
-            "refresh",
-            "broken",
-            "external_edit",
-            "replaced",
-            "hash_failed",
-            "unmounted"
-          ]
-        }
-      },
-      "allOf": [
+      "oneOf": [
         {
-          "if": {
-            "properties": {
-              "kind": {
-                "const": "document_dom_committed"
-              }
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "protocol_version",
+            "kind",
+            "project_id",
+            "editor_view_id",
+            "document_epoch",
+            "native_rev",
+            "film_sha256",
+            "utf8_byte_length"
+          ],
+          "properties": {
+            "protocol_version": {
+              "const": 1
             },
-            "required": [
-              "kind"
-            ]
-          },
-          "then": {
-            "required": [
-              "native_rev",
-              "film_sha256",
-              "utf8_byte_length"
-            ],
-            "properties": {
-              "native_rev": {
-                "type": "string",
-                "minLength": 1
-              },
-              "film_sha256": {
-                "type": "string",
-                "pattern": "^[a-f0-9]{64}$"
-              },
-              "utf8_byte_length": {
-                "type": "integer",
-                "minimum": 0
-              }
+            "project_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "editor_view_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "document_epoch": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "kind": {
+              "const": "document_dom_committed"
+            },
+            "native_rev": {
+              "type": "string",
+              "minLength": 1
+            },
+            "film_sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "utf8_byte_length": {
+              "type": "integer",
+              "minimum": 0
             }
           }
         },
         {
-          "if": {
-            "properties": {
-              "kind": {
-                "const": "invalidated"
-              }
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "protocol_version",
+            "kind",
+            "project_id",
+            "editor_view_id",
+            "document_epoch",
+            "reason"
+          ],
+          "properties": {
+            "protocol_version": {
+              "const": 1
             },
-            "required": [
-              "kind"
-            ]
-          },
-          "then": {
-            "required": [
-              "reason"
-            ],
-            "properties": {
-              "reason": {
-                "enum": [
-                  "dirty",
-                  "refresh",
-                  "broken",
-                  "external_edit",
-                  "replaced",
-                  "hash_failed",
-                  "unmounted"
-                ]
-              }
+            "project_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "editor_view_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "document_epoch": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "kind": {
+              "const": "invalidated"
+            },
+            "reason": {
+              "enum": [
+                "dirty",
+                "refresh",
+                "broken",
+                "external_edit",
+                "replaced",
+                "hash_failed",
+                "unmounted"
+              ]
             }
           }
         }

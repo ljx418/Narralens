@@ -1434,3 +1434,105 @@ describe("the closed shape of the document and the hydration event", () => {
     if (!hydration.ok) expect(hydration.reason).toBe("HYDRATION_FIELDS_NOT_CLOSED");
   });
 });
+
+describe("the document branches of the shipped contract", () => {
+  it("accepts each branch on its own and refuses a mixture", () => {
+    const schema = JSON.parse(readFileSync(resolve("contracts/native-observation-v1.schema.json"), "utf8")) as Record<string, unknown>;
+    const ajv = new Ajv2020({ allErrors: true, strict: true });
+    ajv.addSchema(schema);
+    const schemaId = String((schema as { $id?: string }).$id ?? "");
+    const validate = ajv.compile({
+      $id: "https://narralens.local/internal/native-observation-document-case@1",
+      $ref: `${schemaId}#/$defs/NativeDocumentObservation`,
+    });
+    expect(validate({
+      protocol_version: 1, kind: "document_dom_committed", project_id: "n1", editor_view_id: "v1",
+      document_epoch: 2, native_rev: "rev-1", film_sha256: "a".repeat(64), utf8_byte_length: 10,
+    })).toBe(true);
+    expect(validate({
+      protocol_version: 1, kind: "invalidated", project_id: "n1", editor_view_id: "v1",
+      document_epoch: 2, reason: "dirty",
+    })).toBe(true);
+    // A committed document that also carries an invalidate reason is neither branch.
+    expect(validate({
+      protocol_version: 1, kind: "document_dom_committed", project_id: "n1", editor_view_id: "v1",
+      document_epoch: 2, native_rev: "rev-1", film_sha256: "a".repeat(64), utf8_byte_length: 10, reason: "dirty",
+    })).toBe(false);
+    // An invalidation that also carries the committed fields is neither branch.
+    expect(validate({
+      protocol_version: 1, kind: "invalidated", project_id: "n1", editor_view_id: "v1",
+      document_epoch: 2, reason: "dirty", native_rev: "rev-1",
+    })).toBe(false);
+  });
+});
+
+/**
+ * The selection reference, against the real upstream source.
+ *
+ * The contract is not free to invent a shape: the reference it declares is the one the
+ * pinned upstream declares, and this case reads that upstream source and compares the
+ * two, branch by branch and field by field. An invented variant would fail here.
+ */
+describe("the selection reference against the upstream source", () => {
+  const upstreamPath = resolve(
+    "docs/execution/A/reviews/managed-native-observation-pre-review/p2/packages__openfilm__studio__ui__src__lib__host.ts",
+  );
+  const upstreamBranches = (): Map<string, { readonly fields: string[]; readonly required: string[] }> => {
+    const source = readFileSync(upstreamPath, "utf8");
+    const start = source.indexOf("export type StudioRef = (");
+    const end = source.indexOf(") & { image?: StudioRefImage };", start);
+    if (start < 0 || end < 0) throw new Error("THE_UPSTREAM_STUDIO_REF_IS_MISSING");
+    const body = source.slice(start, end);
+    const branches = new Map<string, { fields: string[]; required: string[] }>();
+    for (const part of body.split("\n  | ")) {
+      const kind = /kind: '([a-z]+)'/.exec(part)?.[1];
+      if (kind === undefined) continue;
+      const fields: string[] = [];
+      const required: string[] = [];
+      for (const match of part.matchAll(/(\w+)(\??):/g)) {
+        const name = match[1]!;
+        if (fields.includes(name)) continue;
+        fields.push(name);
+        if (match[2] !== "?") required.push(name);
+      }
+      branches.set(kind, { fields, required });
+    }
+    return branches;
+  };
+
+  it("declares exactly the branches and the fields the upstream declares", () => {
+    const schema = JSON.parse(readFileSync(resolve("contracts/native-observation-v1.schema.json"), "utf8")) as {
+      readonly $defs: {
+        readonly NativeSelectionObservation: {
+          readonly properties: {
+            readonly refs: {
+              readonly items: {
+                readonly oneOf: ReadonlyArray<{
+                  readonly required: readonly string[];
+                  readonly properties: Record<string, unknown>;
+                }>;
+              };
+            };
+          };
+        };
+      };
+    };
+    const upstream = upstreamBranches();
+    expect(upstream.size).toBe(8);
+    const branches = schema.$defs.NativeSelectionObservation.properties.refs.items.oneOf;
+    expect(branches.length).toBe(upstream.size);
+    for (const branch of branches) {
+      const kind = (branch.properties.kind as { const: string }).const;
+      const declared = upstream.get(kind);
+      expect(declared, kind).toBeDefined();
+      if (declared === undefined) continue;
+      // The contract's fields are the upstream's fields, and the same ones are required.
+      const contractFields = Object.keys(branch.properties).filter((name) => name !== "image").sort();
+      expect(contractFields, kind).toEqual([...declared.fields].sort());
+      const contractRequired = [...branch.required].sort();
+      expect(contractRequired, kind).toEqual([...declared.required].sort());
+      // And the picture the pill shows is the upstream's own optional field.
+      expect(Object.hasOwn(branch.properties, "image"), kind).toBe(true);
+    }
+  });
+});
