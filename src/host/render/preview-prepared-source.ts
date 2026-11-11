@@ -7,7 +7,7 @@ import {canonicalDigest} from '../creative/digest.js';
 import {ProductError} from '../creative/trusted-context.js';
 import {runLocalMediaTool} from '../agent-driven/local-media-probe.js';
 import {NativeRenderCancelled,NativeRenderError,NativeRenderer} from './native-renderer.js';
-import {assertSafeRelativePath} from './snapshot-copy.js';
+import {SnapshotCopyError,assertSafeRelativePath} from './snapshot-copy.js';
 import type {
  CompletedPreparedSourceV1,PreparedPreviewMediaFactsV1,PreparedPreviewPartKind,PreparedPreviewPartV1,
  PreparedPreviewPort,PreparedPreviewReceiptV1,PreparedPreviewRequestV1,PreparedPreviewTimelineV1,
@@ -40,6 +40,7 @@ function failure(error:unknown):never {
  if(error&&typeof error==='object'){
   const resource=asHostResourceError(error);if(resource)throw resource;
   if(error instanceof ProductError)throw error;
+  if(error instanceof SnapshotCopyError)throw new ProductError('REVISION_CONFLICT','The prepared source names a file outside its own tree');
   if(error instanceof NativeRenderCancelled)throw new ProductError('CAPABILITY_UNAVAILABLE','The prepared preview was cancelled');
   if(error instanceof NativeRenderError)throw new ProductError('CAPABILITY_UNAVAILABLE','The prepared preview could not be rendered');
  }
@@ -77,7 +78,12 @@ export interface PreparedPreviewOptions {
 }
 
 /** The measured facts of the rendered film. */
-interface VideoFacts {readonly fps:{readonly num:number;readonly den:number};readonly frame_count:number;}
+interface VideoFacts {
+ readonly fps:{readonly num:number;readonly den:number};
+ readonly frame_count:number;
+ /** The raw probe values the measurement was made from. They are kept as facts. */
+ readonly raw:{readonly avg_frame_rate:string;readonly r_frame_rate:string;readonly nb_read_frames:number;readonly duration:string};
+}
 interface AudioFacts {readonly sample_rate:number;readonly sample_count:number;readonly channels:number;}
 
 async function probeVideo(path:string,expected:{num:number;den:number},expectedFrames:number,signal?:AbortSignal):Promise<VideoFacts> {
@@ -103,7 +109,8 @@ async function probeVideo(path:string,expected:{num:number;den:number},expectedF
  catch(error){return failure(error);}
  if(decoded.stderr.trim())throw changed('The rendered preview did not decode cleanly');
  if(frames!==expectedFrames)throw changed('The rendered preview does not hold the planned number of frames');
- return {fps,frame_count:frames};
+ const duration=typeof parsed.format==='object'&&parsed.format!==null&&typeof (parsed.format as Record<string,unknown>).duration==='string'?String((parsed.format as Record<string,unknown>).duration):'';
+ return {fps,frame_count:frames,raw:{avg_frame_rate:String(video.avg_frame_rate),r_frame_rate:String(video.r_frame_rate),nb_read_frames:frames,duration}};
 }
 
 async function probeAudio(path:string,expectedFrames:number,fps:{num:number;den:number},signal?:AbortSignal):Promise<AudioFacts> {
@@ -315,7 +322,8 @@ export class PreparedPreviewService implements PreparedPreviewPort {
      source_digest:fact.source_digest,plan_digest:fact.plan_digest,rights_digest:fact.rights_digest,
      assets:assets.map(value=>({asset_id:value.asset_id,rights_ref:value.rights_ref,license:value.license,source:value.source,recording_origin:value.recording_origin,sha256:value.sha256,bytes:value.bytes})),
      quality:{width:this.#options.width,height:this.#options.height,fps:measured.fps,frame_count:measured.frame_count,
-      planned_fps:plannedFps,planned_frame_count:plannedFrames,narration:{sample_rate:audio.sample_rate,sample_count:audio.sample_count,channels:audio.channels}},
+      planned_fps:plannedFps,planned_frame_count:plannedFrames,narration:{sample_rate:audio.sample_rate,sample_count:audio.sample_count,channels:audio.channels},
+      measured_video:measured.raw},
     })+'\n','utf8');
     const parts:PreparedPreviewPartV1[]=[];
     parts.push(await this.#publish('preview',CONTENT_TYPES.preview,await readFile(outPath),{kind:'video',fps:measured.fps,frame_count:measured.frame_count}));

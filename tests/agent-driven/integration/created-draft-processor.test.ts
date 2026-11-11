@@ -20,6 +20,7 @@ import {canonicalDigest} from '../../../src/host/creative/digest.js';
 import {createTrustedCallerContext} from '../../../src/host/creative/trusted-context.js';
 import {TestAdoptionAuthority} from '../product/support/fixtures.js';
 import type {TaskPrepare} from '../../../src/contracts/agent-driven-types.js';
+import type {CompletedPreparedSourceV1,PreparedReadBindingV1,PreparedAdoptionBindingV1} from '../../../src/host/render/assembly-ports.js';
 const openFault=vi.hoisted(()=>({path:'',remaining:0,hits:0}));
 vi.mock('node:fs/promises',async importOriginal=>{const actual=await importOriginal<typeof import('node:fs/promises')>();return {...actual,open:async(path:Parameters<typeof actual.open>[0],...args:unknown[])=>{if(String(path)===openFault.path&&openFault.remaining>0){openFault.remaining--;openFault.hits++;throw Object.assign(Error('injected private domain open resource failure'),{code:'EMFILE'});}return (actual.open as (...args:unknown[])=>unknown)(path,...args);}};});
 const sha=(data:Uint8Array)=>createHash('sha256').update(data).digest('hex');
@@ -56,7 +57,7 @@ async function fixture(boundary?:(point:string,task:TaskReservation,context:{hos
   const jobs=f.host.jobs;if(!(jobs instanceof PersistentJobStore))throw Error('Real persistent Host jobs required');
   worker=new CreatedTaskWorker(f.host.revisions,tasks,jobs,processor,{pollMs:10});
   const task=tasks.reserve(request,'owner',{job_kind:'snapshot_publish',max_attempts:3}).task;
-  return {...f,registry,worker,processor,tasks,task,repo,run,taskRoot,grant,close:async()=>{await worker!.close();await processor!.close();await registry!.close();await f.close();}};
+  return {...f,registry,worker,processor,verifier,tasks,task,repo,run,taskRoot,grant,close:async()=>{await worker!.close();await processor!.close();await registry!.close();await f.close();}};
  }catch(e){await worker?.close();await processor?.close();await registry?.close();await f.close();throw e;}
 }
 it('autonomously prepares actual registered media into editable native source with matching immutable facts and no author commit',async()=>{
@@ -69,7 +70,7 @@ it('autonomously prepares actual registered media into editable native source wi
   for(const file of fact.files)expect(sha(await readFile(join(root,file.relative_path)))).toBe(file.sha256);
   const run=await f.repo.transaction(tx=>tx.get('run',{project_id:f.projectId,run_id:f.run.run_id}));expect(run?.checkpoint_json.attempts[0]).toMatchObject({state:'waiting_user',job_id:f.task.job_id});
   expect(f.host.revisions.activeCommit(f.projectId)).toEqual(f.commit);expect(await readFile(join(f.authorRoot,'film.html'))).toEqual(f.authorBytes);
-  const evidence=resolve('docs/execution/A/logs','draft-processor-real-'+Date.now());await mkdir(evidence,{recursive:true});await writeFile(join(evidence,'observed.json'),JSON.stringify({scope:'real synthetic registered media + actual source-only processor; not production Run rights/MCP/human voice/adoption/Delivery',job:f.tasks.receipt(f.task.job_id,'owner'),fact,metadata,author_unchanged:true},null,2)+'\n');await cp(join(root,'film.html'),join(evidence,'film.html'));await cp(join(root,'assets/vo',metadata.assets.find((a:{media_type:string})=>a.media_type.startsWith('audio/')).path.split('/').at(-1)),join(evidence,'diagnostic.wav'));
+  const evidence=resolve('docs/parallel/lane-media/A-R1-20261111/evidence','draft-processor-real-'+Date.now());await mkdir(evidence,{recursive:true});await writeFile(join(evidence,'observed.json'),JSON.stringify({scope:'real synthetic registered media + actual source-only processor; not production Run rights/MCP/human voice/adoption/Delivery',job:f.tasks.receipt(f.task.job_id,'owner'),fact,metadata,author_unchanged:true},null,2)+'\n');await cp(join(root,'film.html'),join(evidence,'film.html'));await cp(join(root,'assets/vo',metadata.assets.find((a:{media_type:string})=>a.media_type.startsWith('audio/')).path.split('/').at(-1)),join(evidence,'diagnostic.wav'));
  }finally{await f.close();}
 },120000);
 it('rechecks a revoked grant after asynchronous resolution and writes no stage or prepared fact',async()=>{
@@ -98,4 +99,83 @@ it('recovers a real asynchronous domain-open resource failure in the same proces
   expect(f.tasks.receipt(f.task.job_id,'owner')).toMatchObject({state:'succeeded',attempt:2});expect(openFault.hits).toBe(1);expect(f.tasks.preparedLeaseAttempt(f.task.job_id,'owner')).toBe(2);
  }finally{openFault.path='';openFault.remaining=0;await f.close();}
  const {readlink}=await import('node:fs/promises');const targets=await Promise.all((await readdir('/proc/self/fd')).map(fd=>readlink('/proc/self/fd/'+fd).catch(()=>'')));expect(targets.filter(path=>path.startsWith(f.root))).toEqual([]);
+},120000);
+
+/* ---- CR-R1-001 section 5: the completed SOURCE_ONLY source and its two proofs. The
+ * job has succeeded and its lease is gone, so nothing here may claim it again. ---- */
+type Fixture=Awaited<ReturnType<typeof fixture>>;
+function completedSource(f:Fixture):CompletedPreparedSourceV1{
+ const task=f.tasks.read(f.task.job_id,'owner'),fact=f.tasks.readPrepared(f.task.job_id,'owner'),attempt=f.tasks.preparedLeaseAttempt(f.task.job_id,'owner');
+ const row=f.host.revisions.compose(db=>db.prepare('SELECT terminal_reason,provider_receipt_json FROM job WHERE job_id=?').get(f.task.job_id)) as {terminal_reason:string;provider_receipt_json:string}|undefined;
+ if(!row||!fact||attempt===null)throw Error('The completed preparation is missing');
+ const provider=JSON.parse(row.provider_receipt_json) as {kind:string;source_digest:string;stage:string};
+ return {format:'narralens.completed-prepared-source@1',project_id:f.projectId,task,producer_attempt:attempt,job:f.tasks.receipt(f.task.job_id,'owner'),
+  terminal_reason:row.terminal_reason as 'SOURCE_ONLY',
+  provider_receipt:{kind:provider.kind as 'local.native-draft@1',source_digest:provider.source_digest,stage:provider.stage as 'SOURCE_ONLY'},
+  fact,root:join(f.taskRoot,task.stage_token,'attempt-'+attempt,'source')};
+}
+function readBinding(completed:CompletedPreparedSourceV1,purpose:'impact'|'preview'):PreparedReadBindingV1{
+ const execution=completed.task.request.execution;
+ return {purpose,project_id:completed.project_id,run_id:execution.run_id,execution,
+  prepared_source_id:'prepared_'+completed.fact.source_digest.slice(0,24),prepared_job_id:completed.task.job_id,
+  fact_digest:canonicalDigest(completed.fact),base_revision:completed.task.request.base_revision,
+  control_revision:0,source_digest:completed.fact.source_digest,selection_version:0};
+}
+function adoptionBinding(completed:CompletedPreparedSourceV1):PreparedAdoptionBindingV1{
+ return {...readBinding(completed,'preview'),purpose:'adoption',transaction_id:'txn_'+'1'.repeat(32),impact_id:'imp_'+'2'.repeat(32),
+  impact_hash:'3'.repeat(64),plan_sha256:'4'.repeat(64),approval_id:'apr_'+'5'.repeat(32),target_snapshot_id:'snap_'+'6'.repeat(32)};
+}
+function registryFacts(f:Fixture){return f.registry!.list(f.projectId,createTrustedCallerContext({principal_id:'owner',channel:'authenticated',source:'driver_relay',session_ref:f.task.job_id}));}
+
+it('re-proves a succeeded SOURCE_ONLY source without a live lease and keeps the read proof away from the adoption assertion',async()=>{
+ const f=await fixture();try{
+  f.worker.start();await until(()=>['succeeded','failed','attention','cancelled'].includes(f.host.revisions.readJob(f.task.job_id)!.state));
+  expect(f.tasks.receipt(f.task.job_id,'owner').state).toBe('succeeded');
+  const completed=completedSource(f);
+  expect(completed.terminal_reason).toBe('SOURCE_ONLY');
+  expect(completed.provider_receipt).toMatchObject({kind:'local.native-draft@1',stage:'SOURCE_ONLY'});
+  expect(completed.provider_receipt.source_digest).toBe(completed.fact.source_digest);
+  expect(completed.producer_attempt).toBe(1);
+  const assets=registryFacts(f);expect(assets.length).toBe(2);
+  const binding=readBinding(completed,'preview'),adoption=adoptionBinding(completed);
+  const proof=await f.verifier.proveForRead(completed,binding,assets);
+  expect(()=>f.verifier.assertCurrentForRead(completed,binding,proof,()=>{})).not.toThrow();
+  // A read proof is never an adoption proof, and another binding is not this binding.
+  expect(()=>f.verifier.assertCurrentForAdoption(completed,adoption,proof as never,()=>{})).toThrow();
+  expect(()=>f.verifier.assertCurrentForRead(completed,{...binding,base_revision:binding.base_revision+1},proof,()=>{})).toThrow();
+  expect(()=>f.verifier.assertCurrentForRead(completed,{...binding,source_digest:'0'.repeat(64)},proof,()=>{})).toThrow();
+  // A JSON fact is not a proof.
+  expect(()=>f.verifier.assertCurrentForRead(completed,binding,JSON.parse(JSON.stringify(completed)) as never,()=>{})).toThrow();
+  // The final check is synchronous: an asynchronous callback is refused.
+  expect(()=>f.verifier.assertCurrentForRead(completed,binding,proof,(()=>Promise.resolve()) as never)).toThrow();
+  // The current author and rights are re-checked by the Host, and their refusal stops the assertion.
+  expect(()=>f.verifier.assertCurrentForRead(completed,binding,proof,()=>{throw new Error('the current author changed');})).toThrow();
+  const adoptionProof=await f.verifier.proveForAdoption(completed,adoption,assets);
+  expect(()=>f.verifier.assertCurrentForAdoption(completed,adoption,adoptionProof,()=>{})).not.toThrow();
+  expect(()=>f.verifier.assertCurrentForRead(completed,binding,adoptionProof as never,()=>{})).toThrow();
+  expect(()=>f.verifier.assertCurrentForAdoption(completed,{...adoption,transaction_id:'txn_'+'9'.repeat(32)},adoptionProof,()=>{})).toThrow();
+  f.verifier.release(proof);f.verifier.release(adoptionProof);
+  // A released proof is gone.
+  expect(()=>f.verifier.assertCurrentForRead(completed,binding,proof,()=>{})).toThrow();
+ }finally{await f.close();}
+ const {readlink}=await import('node:fs/promises');
+ const targets=await Promise.all((await readdir('/proc/self/fd')).map(fd=>readlink('/proc/self/fd/'+fd).catch(()=>'')));
+ expect(targets.filter(path=>path.startsWith(f.root))).toEqual([]);
+},120000);
+
+it('refuses a read proof of prepared bytes that changed under the same size and closes its descriptors',async()=>{
+ const f=await fixture();try{
+  f.worker.start();await until(()=>['succeeded','failed','attention','cancelled'].includes(f.host.revisions.readJob(f.task.job_id)!.state));
+  const completed=completedSource(f),file=completed.fact.files.find(entry=>entry.relative_path==='film.html');
+  if(!file)throw Error('The prepared film is missing');
+  const path=join(completed.root,file.relative_path),original=await readFile(path),tampered=Buffer.from(original);
+  tampered[0]=tampered[0]===0x3c?0x3e:0x3c;expect(tampered.length).toBe(original.length);
+  await writeFile(path,tampered);
+  const binding=readBinding(completed,'preview');
+  await expect(f.verifier.proveForRead(completed,binding,registryFacts(f))).rejects.toMatchObject({code:'REVISION_CONFLICT'});
+  expect(f.host.revisions.activeCommit(f.projectId)).toEqual(f.commit);
+ }finally{await f.close();}
+ const {readlink}=await import('node:fs/promises');
+ const targets=await Promise.all((await readdir('/proc/self/fd')).map(fd=>readlink('/proc/self/fd/'+fd).catch(()=>'')));
+ expect(targets.filter(path=>path.startsWith(f.root))).toEqual([]);
 },120000);
