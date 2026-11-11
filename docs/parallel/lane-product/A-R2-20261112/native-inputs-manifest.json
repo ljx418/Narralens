@@ -1,0 +1,65 @@
+{
+  "kind": "narralens.r2-native-inputs-manifest@1",
+  "ticket": "A-R2-PRODUCT",
+  "status": "SOURCE_CANDIDATE_COPIED_NOT_BUILT",
+  "written_by": "PRODUCT-Claude (task_3eaa8996288a / ctx_e1ce32b44d5c)",
+  "base_sha": "39201d932cd10e0ce60b023bdde2f233dfb009e5",
+  "rule": "Every tracked input lists its source commit, its original path, its byte hash and every change made to it in this ticket. Nothing here is a build, a runtime or an acceptance.",
+  "inputs": [
+    {
+      "tracked_path": "tools/agent-driven/product/native-inputs/request013.patch",
+      "source_commit": "eeb6c7b0b6c046d39d7c633f4ee0029e23b3f7d6",
+      "source_path": "docs/parallel/lane-product/requests/013-native-hydration-candidate/candidate.patch",
+      "sha256": "f699889206e129dfe4fd913618b34baa8d7e04363f1940d3659664a1e7b9d435",
+      "candidate": "request013-f699-p2-hr1",
+      "upstream_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+      "previous_patch_sha256": "214c629238c2635f5c6212e5e9207eab18f61d17454c08ee64ccd32be41dffa6",
+      "changes_in_this_ticket": "none; the bytes are the pinned candidate patch, copied verbatim",
+      "note": "This is the patch MAIN measured and pinned in R2_RELEASE_PREFLIGHT: the eight post hashes match, the helper is 5db47837e690590c9e9678a97e53a10a7115631bd05807ddf6afc925904e2f64, and the p2 request-start fence and the H-R1 callback-round fence are both inherited. The stale active metadata that names patch 198c8b5e is not a valid pin and is not used here; the historical metadata bytes are preserved unchanged."
+    },
+    {
+      "tracked_path": "tools/agent-driven/product/native-inputs/expected-projection.mjs",
+      "source_commit": "7141357f0453caa9253b43098ef43ab50fddeeea",
+      "source_path": "docs/parallel/lane-product/requests/015-native-expected-projection/candidate/expected-projection.mjs",
+      "sha256": "3500b1d6485791b13ec9364c6eb80740531142c16754877e21923ad73e9d494e",
+      "changes_in_this_ticket": "none; the bytes are the pinned candidate adapter, copied verbatim"
+    },
+    {
+      "tracked_path": "tools/agent-driven/product/native-inputs/expected-projection.d.ts",
+      "source_commit": "7141357f0453caa9253b43098ef43ab50fddeeea",
+      "source_path": "docs/parallel/lane-product/requests/015-native-expected-projection/candidate/expected-projection.d.ts",
+      "sha256": "0f5f565a3d8b70de995aeb0dfdfb6052acad53cbf452c8d70168f555a8937f80",
+      "changes_in_this_ticket": "none; the bytes are the pinned candidate adapter, copied verbatim",
+      "note": "This file is the single source of truth for the expected input and result types. src/host/m5/openfilm-native-expected.ts imports its types from here, so the Host never carries a second, drifting copy of the pinned shape."
+    },
+    {
+      "tracked_path": "tools/agent-driven/product/native-inputs/native-pure.entry.ts",
+      "source_commit": "7141357f0453caa9253b43098ef43ab50fddeeea",
+      "source_path": "docs/parallel/lane-product/requests/015-native-expected-projection/candidate/native-pure.entry.ts",
+      "sha256": "1ca8590535d412f0d91a522fbf942cbacabba7d95c64f3e849ca9f0fbf416354",
+      "changes_in_this_ticket": "none; the bytes are the pinned candidate adapter, copied verbatim"
+    },
+    {
+      "tracked_path": "tools/agent-driven/product/native-inputs/vite.expected.config.mjs",
+      "source_commit": "7141357f0453caa9253b43098ef43ab50fddeeea",
+      "source_path": "docs/parallel/lane-product/requests/015-native-expected-projection/candidate/vite.expected.config.mjs",
+      "sha256": "ffac37faeb5e9fcc53460f19d235cc9c38251b3bf969a9183e8cffe5e0657f29",
+      "changes_in_this_ticket": "none; the bytes are the pinned candidate adapter, copied verbatim"
+    },
+    {
+      "tracked_path": "tools/agent-driven/product/native-inputs/build-expected.mjs",
+      "source_commit": "7141357f0453caa9253b43098ef43ab50fddeeea",
+      "source_path": "docs/parallel/lane-product/requests/015-native-expected-projection/candidate/build-expected.mjs",
+      "sha256": "60027ead5a509522f2d35fda33749675923dee523bb8cc12f2b7de3dca8f840d",
+      "changes_in_this_ticket": "none; the bytes are the pinned candidate adapter, copied verbatim",
+      "note": "Its relative paths require the staged layout var/native-hydration-r2/managed-native-expected/source/managed-expected/ with the pinned upstream closure beside it and var/native-hydration-r2/managed-native-observation/source/packages/openfilm/ as the 013 source. The build tool stages exactly that layout, in this worktree's private root only."
+    }
+  ],
+  "not_done_here": {
+    "build": "NOT_RUN; the native hydration build needs a MAIN heavy-resource grant",
+    "browser": "NOT_RUN; it needs a MAIN heavy-resource grant",
+    "host": "NOT_RUN; it needs a MAIN heavy-resource grant",
+    "expected_projection_runtime": "NOT_RUN; the generated library is not present and the source wrapper is not claimed executable",
+    "native_ack": "NOT_RUN; no real Host, Studio or media evidence is claimed here"
+  }
+}

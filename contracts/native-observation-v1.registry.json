@@ -1,0 +1,98 @@
+{
+  "format": "narralens.native-observation-registry@1",
+  "status": "R2_RELEASED",
+  "owner": "PRODUCT-Claude",
+  "version": "native-observation-v1",
+  "schema": "contracts/native-observation-v1.schema.json",
+  "frozen_cp_a0_routes": 31,
+  "frozen_cp_a0_files": "unchanged",
+  "counting": {
+    "frozen_host_http": 31,
+    "adjunct_host_http": 5,
+    "additional_gateway_http": 1,
+    "mcp_tools": 0,
+    "mcp_resources": 0,
+    "note": "The observation ingress is exactly one additional Gateway HTTP route, counted separately. It joins no MCP tool set, replaces no UI alias, and opens no native write surface. The count is never 'still 31+5'."
+  },
+  "additional_gateway_http": [
+    {
+      "id": "native.observation",
+      "method": "POST",
+      "path": "/narralens/native/observation",
+      "channel": "controlled_native_session",
+      "input": "narralens.native-observation@1",
+      "response": "narralens.native-observation-outcome@1",
+      "dispatch": "strictly before the native write catch-all; the write catch-all keeps every other /narralens/native/ path"
+    }
+  ],
+  "authentication": {
+    "cookie": "the existing native HttpOnly SameSite=Strict cookie, issued by the controlled session exchange",
+    "csrf": "the existing native CSRF proof header of the same session",
+    "session": "a real, live ControlledStudioAccess session; a retired or superseded session answers 409",
+    "refused": [
+      "the independent workbench UI cookie and its proof",
+      "a native read token",
+      "another origin, a missing Host header or a duplicated header",
+      "a request without a cookie or without the CSRF proof",
+      "a session that was closed, superseded or whose generation moved"
+    ]
+  },
+  "body": {
+    "content_type": "application/json",
+    "encoding": "identity only",
+    "max_bytes": 65536,
+    "shape": "exactly the four fields format, sequence, event_kind and event",
+    "sequence": "1..MAX_SAFE_INTEGER, strictly monotonic inside one real session; the latest sequence is recorded before the asynchronous verification, so a late callback can never re-green a session",
+    "identity": "the envelope carries no logical project, actor, session, grant, Host revision, snapshot, source digest, approval or proof; every one of those comes from the session binding"
+  },
+  "event_kinds": {
+    "document": "the original p2 NarralensDocumentState (protocol_version 1, native project and view, document epoch, committed or invalidated)",
+    "hydration": "the original 013 hydration event (five fields, exactly the four parts settings, subtitle_style, captions and markers)",
+    "selection": "the original StudioSelection, mapped onto the committed clip and time mapping"
+  },
+  "native_canonicalisation": {
+    "seconds": "native seconds are a fractional domain of their own; they are rounded half away from zero at the native millisecond and never enter the integer canonical domain of the contract",
+    "effective_values": "the exact 013 preimage narralens.native-hydration-effective@1 over {part,value}, hashed with the pinned canonical implementation"
+  },
+  "errors": {
+    "400": "malformed envelope, closed-field violation, body too large or an event that does not match its original schema",
+    "401": "no native cookie, no CSRF proof or an unknown session",
+    "403": "wrong origin, a duplicated header or a Host header that does not name the Gateway",
+    "409": "a retired, superseded or stale session; a sequence that is not monotonic",
+    "503": "no live controlled session, no observation producer, or the independent expected side is unavailable"
+  },
+  "side_effects": {
+    "ingress": "the observation only advances the Host's own observation state; it never writes a revision, an approval, a source or an a run",
+    "acknowledgement": "the frozen NativeAck DTO is written through the existing cp_a0_native_ack table on the existing Host connection; no new table, no second queue and no relaxed fingerprint",
+    "no_media": "an observation never starts a media producer, never decodes, never writes a preference and never mutates the native source"
+  },
+  "pins": {
+    "managed_013": {
+      "candidate": "request013-f699-p2-hr1",
+      "source_commit": "eeb6c7b0b6c046d39d7c633f4ee0029e23b3f7d6",
+      "patch_sha256": "f699889206e129dfe4fd913618b34baa8d7e04363f1940d3659664a1e7b9d435",
+      "previous_patch_sha256": "214c629238c2635f5c6212e5e9207eab18f61d17454c08ee64ccd32be41dffa6",
+      "upstream_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+      "helper_sha256": "5db47837e690590c9e9678a97e53a10a7115631bd05807ddf6afc925904e2f64",
+      "tracked_input": "tools/agent-driven/product/native-inputs/request013.patch",
+      "note": "The stale active metadata that names patch 198c8b5e is not a valid pin and is not used. The historical metadata bytes are preserved unchanged."
+    },
+    "native_015": {
+      "source_commit": "7141357f0453caa9253b43098ef43ab50fddeeea",
+      "upstream_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+      "profile": "narralens.native-expected-numeric@1",
+      "tracked_inputs": [
+        "tools/agent-driven/product/native-inputs/expected-projection.mjs",
+        "tools/agent-driven/product/native-inputs/expected-projection.d.ts",
+        "tools/agent-driven/product/native-inputs/native-pure.entry.ts",
+        "tools/agent-driven/product/native-inputs/vite.expected.config.mjs",
+        "tools/agent-driven/product/native-inputs/build-expected.mjs"
+      ],
+      "scope": "the pinned helper proves settings and markers only. The film, the source closure, the subtitle style and the captions are proved independently, by the Host's committed reader and the fixed original native parser and consumer rules."
+    }
+  },
+  "provenance": {
+    "manifest": "docs/parallel/lane-product/A-R2-20261112/native-inputs-manifest.json",
+    "rule": "every tracked input lists its source commit, its original path, its byte hash and every change made to it in this ticket"
+  }
+}

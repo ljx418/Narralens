@@ -1,0 +1,23 @@
+command: corepack pnpm test tests/agent-driven/integration/created-native-ack.test.ts --maxWorkers=1 --minWorkers=1
+cwd: /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+head: 8e410fe82557be8063e3087cd89fc3ac70376134
+note: PRODUCT candidate e0aaa242 imported verbatim; this is the candidate's own pure-unit suite, run in the BRIDGE tree
+started: 2026-11-11T17:05:19Z
+--- output ---
+
+> narralens@0.1.0 test /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+> vitest run --config vitest.config.ts tests/agent-driven/integration/created-native-ack.test.ts --maxWorkers=1 --minWorkers=1
+
+
+ RUN  v3.2.4 /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+
+ ✓ tests/agent-driven/integration/created-native-ack.test.ts (14 tests) 4ms
+
+ Test Files  1 passed (1)
+      Tests  14 passed (14)
+   Start at  01:05:19
+   Duration  164ms (transform 42ms, setup 0ms, collect 43ms, tests 4ms, environment 0ms, prepare 31ms)
+
+--- end ---
+exit: 0
+finished: 2026-11-11T17:05:19Z

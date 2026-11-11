@@ -1,0 +1,16 @@
+command: corepack pnpm exec tsc --noEmit
+cwd: /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+head: 8e410fe82557be8063e3087cd89fc3ac70376134
+imported: PRODUCT candidate e0aaa242c9d1b19211366a53ce8d6c989b07a912 (16 paths, all previously absent)
+started: 2026-11-11T17:03:37Z
+--- output ---
+tests/agent-driven/integration/created-source-change.test.ts(8,3): error TS2724: '"../../../src/host/agent-driven/created-source-ports.js"' has no exported member named 'closeCreatedSourceCommitScope'. Did you mean 'CreatedSourceCommitScope'?
+tests/agent-driven/integration/created-source-change.test.ts(9,3): error TS2305: Module '"../../../src/host/agent-driven/created-source-ports.js"' has no exported member 'closeCreatedSourcePublisherLease'.
+tests/agent-driven/integration/created-source-change.test.ts(10,3): error TS2305: Module '"../../../src/host/agent-driven/created-source-ports.js"' has no exported member 'createCreatedSourceProofIssuer'.
+tests/agent-driven/integration/created-source-change.test.ts(11,3): error TS2724: '"../../../src/host/agent-driven/created-source-ports.js"' has no exported member named 'isCreatedSourceCommitScope'. Did you mean 'CreatedSourceCommitScope'?
+tests/agent-driven/integration/created-source-change.test.ts(12,3): error TS2724: '"../../../src/host/agent-driven/created-source-ports.js"' has no exported member named 'isCreatedSourcePublicationProof'. Did you mean 'CreatedSourcePublicationProof'?
+tests/agent-driven/integration/created-source-change.test.ts(13,3): error TS2724: '"../../../src/host/agent-driven/created-source-ports.js"' has no exported member named 'openCreatedSourceCommitScope'. Did you mean 'CreatedSourceCommitScope'?
+tests/agent-driven/integration/created-source-change.test.ts(14,3): error TS2305: Module '"../../../src/host/agent-driven/created-source-ports.js"' has no exported member 'openCreatedSourcePublisherLease'.
+--- end ---
+exit: 2
+finished: 2026-11-11T17:03:43Z
