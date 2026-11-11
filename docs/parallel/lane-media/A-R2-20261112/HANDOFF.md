@@ -586,3 +586,8 @@ refuted by this run.
 The full record is in `logs/r2-media-phase-real-001-baseline.txt` (before the run) and
 `logs/r2-media-phase-real-001-terminal.txt` sha256
 `2bb10506e44e13a491b88a4a9021bad94ec33419cda685d809332db1383711af` (after it).
+
+
+## Actual429 safe Codex takeover
+
+Claude ctx_4738ccde9619 hit actual API429 Token Plan2056 after preserving REAL001 failure. Guarded worker-stop confirmed stopped/ptyKilled; original agent1424331 and shell1424290 absent, no named media/test children observed; old R1 idle terminal not resumed. See CODEX_429_TAKEOVER.json for full pre-edit dirty/hash snapshot and process evidence. Parent Codex is sole writer under prior authorization; no provider/config/credential change, all failed candidates/logs retained. HEAD before correction9a5d0071eee0a5152f7cf8d0d0da4415d63e9326 is child evidence-only commit atop frozen0e843e. One-line released test correction removes destination parent workspace from assembler protected domains, retaining actual source/object/delivery/vendor protection. No product guard weakened, no heavy retry launched; subsequent Codex checks are internal, uninvolved MAIN review required.

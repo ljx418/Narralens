@@ -1077,7 +1077,7 @@ describe.skipIf(!REAL_TOOLS)("the real tools (NARRALENS_PHASE_REAL_TOOLS=1)", ()
       assets,
       narration_asset_id: "asset_voice",
       target_root: join(workspace, "native"),
-      protected_roots: [source, objectRoot, workspace, deliveryRoot, vendorRoot],
+      protected_roots: [source, objectRoot, deliveryRoot, vendorRoot],
       width: 320,
       height: 180,
     });

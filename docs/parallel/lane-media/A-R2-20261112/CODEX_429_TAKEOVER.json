@@ -1,0 +1,94 @@
+{
+  "at": "2026-11-11T18:28:31.171772+00:00",
+  "reason": "actual Claude API429 Token Plan limit2056, no provider/config change",
+  "stopped_dispatch": "ctx_4738ccde9619",
+  "stopped_task": "task_58761655aa05",
+  "stop_receipt": "state=stopped processAction=closed_agent_terminal ptyKilled=true request4db9f201-6f6f-4f60-a78a-a9fa6bb1e917",
+  "agent_pid1424331_absent": true,
+  "shell_pid1424290_absent": true,
+  "process_observation": [
+    {
+      "pid": "671684",
+      "comm": "bash",
+      "cwd": "/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-MEDIA"
+    },
+    {
+      "pid": "735595",
+      "comm": "bash",
+      "cwd": "/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-MEDIA"
+    },
+    {
+      "pid": "735622",
+      "comm": "claude",
+      "cwd": "/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-MEDIA"
+    },
+    {
+      "pid": "1102036",
+      "comm": "bash",
+      "cwd": "/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-MEDIA"
+    },
+    {
+      "pid": "1102351",
+      "comm": "codex",
+      "cwd": "/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-MEDIA"
+    },
+    {
+      "pid": "1102851",
+      "comm": "powershell.exe",
+      "cwd": "/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-MEDIA"
+    },
+    {
+      "pid": "1103348",
+      "comm": "codex-code-mode",
+      "cwd": "/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-MEDIA"
+    },
+    {
+      "pid": "1454004",
+      "comm": "bash",
+      "cwd": "/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-MEDIA"
+    },
+    {
+      "pid": "1454005",
+      "comm": "python3",
+      "cwd": "/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-MEDIA"
+    }
+  ],
+  "head": "9a5d0071eee0a5152f7cf8d0d0da4415d63e9326",
+  "dirty": "?? docs/parallel/lane-media/A-R1-20261111/CLAUDE_IMPLEMENT.md\n?? docs/parallel/lane-media/A-R1-20261111/HANDOFF.md\n?? docs/parallel/lane-media/A-R1-20261111/MAIN_DELTA_HANDOFF.md\n?? docs/parallel/lane-media/A-R1-20261111/MAIN_DELTA_MANIFEST.json\n?? docs/parallel/lane-media/A-R1-20261111/MAIN_START.md\n?? docs/parallel/lane-media/A-R1-20261111/ReleaseAssignment.json\n?? docs/parallel/lane-media/A-R1-20261111/TASK.md\n?? docs/parallel/lane-media/A-R1-20261111/evidence/cleanup-20261111-224528.txt\n?? docs/parallel/lane-media/A-R1-20261111/evidence/draft-processor-real-1794408261304/film.html\n?? docs/parallel/lane-media/A-R1-20261111/evidence/draft-processor-real-1794408261304/observed.json\n?? docs/parallel/lane-media/A-R1-20261111/evidence/draft-processor-real-1794416514046/film.html\n?? docs/parallel/lane-media/A-R1-20261111/evidence/draft-processor-real-1794416514046/observed.json\n?? docs/parallel/lane-media/A-R1-20261111/evidence/draft-processor-real-1794416805157/film.html\n?? docs/parallel/lane-media/A-R1-20261111/evidence/draft-processor-real-1794416805157/observed.json\n?? docs/parallel/lane-media/A-R1-20261111/logs/tsc-after-correction-round.meta.json\n?? docs/parallel/lane-media/A-R1-20261111/logs/tsc-after-proof-ports.meta.json\n?? docs/parallel/lane-media/A-R1-20261111/logs/tsc-after-tests-and-preview-fixes.meta.json\n?? docs/parallel/lane-media/A-R1-20261111/logs/vitest-architecture-fitness-after-corrections.meta.json\n?? docs/parallel/lane-media/A-R1-20261111/logs/vitest-architecture-fitness.meta.json\n?? docs/parallel/lane-media/A-R1-20261111/logs/vitest-collect-only-after-corrections.meta.json\n?? docs/parallel/lane-media/A-R1-20261111/logs/vitest-collect-only-new-tests.meta.json\n?? docs/parallel/lane-media/A-R1-20261111/logs/vitest-contracts.meta.json\n?? docs/parallel/lane-media/A-R1-20261111/logs/vitest-heavy-preview-002.meta.json\n?? docs/parallel/lane-media/A-R1-20261111/logs/vitest-lightweight-unit.meta.json\n?? docs/parallel/lane-media/A-R1-20261111/run-ticket-command.sh\n",
+  "ticket_hashes_before_takeover": {
+    "docs/parallel/lane-media/A-R2-20261112/ALIGNMENT_BEFORE.json": "31c3e824ab7d7533e12ac7e56d30780360cbe1968856e232a0b57740d208a611",
+    "docs/parallel/lane-media/A-R2-20261112/HANDOFF.md": "e4685c2fa044a8608ec2a71b53856f942fa56b86c9699dc152f4c4776882902f",
+    "docs/parallel/lane-media/A-R2-20261112/R2_RELEASE_PREFLIGHT.json": "44d7e1dc0da1d6758a89eb35d1d8cb4279d6517443e4aa8933aa12cd072e1c1d",
+    "docs/parallel/lane-media/A-R2-20261112/ALIGNMENT.md": "8b721039aa7b56c6e94b212d3d3a0b5e84e4b0db4caf04ae8f7e98d86cad4000",
+    "docs/parallel/lane-media/A-R2-20261112/CLAUDE_IMPLEMENT.md": "922e3380fd1ac31069f44b3b31cd5ccb20a32e063516738126d769a8ce639dd0",
+    "docs/parallel/lane-media/A-R2-20261112/TASK.md": "dfbe81855cfda6c00f1573f392bab3266e4599d8071ab01dc757385e0cd80ef0",
+    "docs/parallel/lane-media/A-R2-20261112/R2_CHILD_SPEC.md": "3d02d7717533190078ca35c3dc8f7c904aea3e4bf0478a12047a0ae0306eb06b",
+    "docs/parallel/lane-media/A-R2-20261112/ALIGNMENT_AFTER.json": "833b9079cd191272082d10da685619e7679398564cef225187d1334c9d11a3f7",
+    "docs/parallel/lane-media/A-R2-20261112/logs/batch1-evidence.txt": "c00bc483abf6219511a22efc08553c7938324430121a38ba64b888f0649a5563",
+    "docs/parallel/lane-media/A-R2-20261112/logs/r2-media-phase-real-001-run.log": "40b0450d6a96ede14f82d4c5bdfd1e5382b9d889f37afc8b5259a0d2aa7bc30d",
+    "docs/parallel/lane-media/A-R2-20261112/logs/r2-media-proof-001-run-attempt2.log": "f0e3e4336fa2f8c83f1b65ab80a0d81f3e1fdbe770f681042b2199fcb2848a62",
+    "docs/parallel/lane-media/A-R2-20261112/logs/vitest-committed-render-phases-001.log": "6345e51a75e1beafcb5db12cea2bead1daf2cd6bd7b78c2e13167ec3661820fd",
+    "docs/parallel/lane-media/A-R2-20261112/logs/vitest-batch1-fixed-004.log": "8854f19f7040b067759bcf4c1f3d08259f3537c6c36315465ead5c10b39a0487",
+    "docs/parallel/lane-media/A-R2-20261112/logs/r2-media-proof-001-input-freeze-attempt1.txt": "7dd1b78d093d8b7e6b7cbfc95732efabef37599b7564b93079e0cc157fdb4270",
+    "docs/parallel/lane-media/A-R2-20261112/logs/vitest-batch1-fixed-002.log": "356ded85e09493500b57fc6af31bb3f4f952aed8f11fd769204a13b91cccd2fe",
+    "docs/parallel/lane-media/A-R2-20261112/logs/final-evidence-hashes.txt": "2ad2bc45e4bf000680a4b04d1b91253dcd4899450f722dbb2739f1f2f27b2c0c",
+    "docs/parallel/lane-media/A-R2-20261112/logs/tsc-ports-first.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "docs/parallel/lane-media/A-R2-20261112/logs/vitest-mp01-iter2-fixed-001.log": "5928677f484b563d5e77868da1d2d5dfc81dbd6a4629fb99be867174856e2c46",
+    "docs/parallel/lane-media/A-R2-20261112/logs/vitest-batch1-fixed-001.log": "07eaa6eacbb40bce3a0950f91f340e15ca77d6d6f61c51075d848fc5e149df70",
+    "docs/parallel/lane-media/A-R2-20261112/logs/r2-media-proof-001-ordering.md": "1aaad7a4fac86c511c430d0d0ae87f2f92447fe9cac173ebf329a577dab23ee0",
+    "docs/parallel/lane-media/A-R2-20261112/logs/vitest-render-snapshot-001.log": "30e088a8eb6ce9b4cb0ef1a9a74c0bb1715911105f7ebe35825ad637cf15157d",
+    "docs/parallel/lane-media/A-R2-20261112/logs/vitest-batch1-negative-old-source-reproduced.log": "488567269d241e8a557d82841136a2f8a661afb4336cbe0f97b0cb5908dfeff8",
+    "docs/parallel/lane-media/A-R2-20261112/logs/vitest-mp01-iter2-fixed-002.log": "4a29ed4c0c81adf37c9130cef97c5e5c7c9541ffb1ee97fd34a7435f6196ec42",
+    "docs/parallel/lane-media/A-R2-20261112/logs/r2-media-proof-001-run.log": "5395630bad6869436eb61c1e33a432974f9648790cce6fedc5aa0e787478f8c1",
+    "docs/parallel/lane-media/A-R2-20261112/logs/r2-media-phase-real-001-terminal.txt": "2bb10506e44e13a491b88a4a9021bad94ec33419cda685d809332db1383711af",
+    "docs/parallel/lane-media/A-R2-20261112/logs/vitest-mp01-iter2-negative-old-source.log": "44272e39cbae1675d4ba93a3a2bb74e8a281ce9eafd0f2c6d3c76636d82028f8",
+    "docs/parallel/lane-media/A-R2-20261112/logs/r2-media-proof-001-cleanup.txt": "c3e16b505c961bc54e38da6ad6b12ba6d68165b73acd37b008b54f7ae7ed4833",
+    "docs/parallel/lane-media/A-R2-20261112/logs/vitest-batch1-fixed-003.log": "d86fdaae7a8adaaed6c267f45908d1fd5c16911c79cb242cd7d5f528dc67d3d1",
+    "docs/parallel/lane-media/A-R2-20261112/logs/vitest-batch1-negative-old-source.log": "ba1356ff50ec2f13234ab4846751e62cac830e57ce965b2dd91ec6e7079f4583",
+    "docs/parallel/lane-media/A-R2-20261112/logs/r2-media-proof-001-input-freeze.txt": "1c49564f9ee5eee955e5add07b77fe6673df2741371afb4d57cb76f6993446f0",
+    "docs/parallel/lane-media/A-R2-20261112/logs/r2-media-phase-real-001-baseline.txt": "ee21dcedf8164e18ec985ab984a94b83092b37f8742b36cddf13e3117c87ab32",
+    "docs/parallel/lane-media/A-R2-20261112/logs/vitest-media-module-002.log": "1711f3cc26ebd1ccf82af6d37e55a8a1e338e2e75e152dedfe8ec3e5bf436912"
+  },
+  "writer": "Codex parent term_84cbf3b186ee5d4cfc8860e84d7e972f under preauthorized429 rule",
+  "next": "preserve REAL001 failure; fix only test protected roots; no heavy rerun until fresh MAIN slot; internal checks not independent review"
+}
