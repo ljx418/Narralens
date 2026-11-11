@@ -861,3 +861,68 @@ describe('the selection version port', () => {
     }
   });
 });
+
+describe("the selection version of a stale session", () => {
+  it("yields no current authority when the binding is no longer current", async () => {
+    const root = mkdtempSync(join(tmpdir(), 'narralens-r2-stale-'));
+    try {
+      const source = resolve(root, 'source');
+      mkdirSync(source, { recursive: true });
+      writeFileSync(resolve(source, 'film.html'), 'the original film');
+      const reader = realReader(source, ['film.html']);
+      const staged = stageLibrary(root, { computed: true });
+      const expected = new OpenFilmNativeExpected({
+        source: reader.port,
+        loader: nativeExpectedLibraryLoader({ distRoot: staged.dist, inputsRoot: staged.inputs, runtimeRoot: staged.runtime }),
+        approved: await approvedOf(staged),
+      });
+      const revisions = new RevisionStore(':memory:');
+      const ackStore = new NativeAckStore({ revisions });
+      const service = new NativeObservationService({
+        ackStore,
+        expected,
+        selectionMapping: {
+          mapSelection: async ({ selection }) => ({
+            shot_ids: selection.refs.map(ref => ref.id ?? 'shot'),
+            start_frame: 0,
+            end_frame_exclusive: 1,
+          }),
+        },
+      });
+      // The session starts live.
+      let live = true;
+      const binding: NativeObservationSessionBinding = {
+        bridge_session_id: 'c'.repeat(32),
+        instance_generation: 1,
+        project_id: 'p1',
+        native_project_id: 'n1',
+        owner_session_ref: 'owner1',
+        revision: 3,
+        snapshot_id: 'snap1',
+        source_digest: HASH_A,
+        workspace: { workspace_ref: 'ws1', snapshot_id: 'snap1', source_digest: HASH_A, revision: 3 },
+        isCurrent: () => live,
+      };
+      service.sessionOpened(binding);
+      await service.observe(binding, {
+        format: 'narralens.native-observation@1', sequence: 1, event_kind: 'selection',
+        event: { projectId: 'n1', time: 1, refs: [{ kind: 'clip', id: 'shot1' }] },
+      });
+      expect(service.currentSelectionVersion('p1')).toBe(1);
+
+      // The generation moves, or the owner is revoked: the binding is no longer current.
+      live = false;
+      // The version yields no current authority, and it never yields the stale number.
+      expect(service.currentSelectionVersion('p1')).toBe(0);
+      // The session is void, so the context has no stale facts either.
+      const facts = await service.read('p1');
+      expect(facts.selection_version).toBe(0);
+      expect(facts.selection).toBeNull();
+      expect(facts.ack).toBeNull();
+      expect(facts.active_bridge_session_id).toBeNull();
+      expect(facts.sync).toBe('unknown');
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+});

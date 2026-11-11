@@ -1356,6 +1356,7 @@ export function M5Panel({ client, targetProjectId, ui: uiProp }: M5PanelProps): 
     // read against, and the baseline has to be the one the decision was made on.
     const baseline: AdoptionFacts | null = context === null ? null : {
       project_revision: context.project_revision,
+      snapshot_id: context.snapshot_id,
       source_digest: context.source_digest,
     };
     const slot = `${review.package_id}@${review.version}:${choice}`;
@@ -1396,6 +1397,7 @@ export function M5Panel({ client, targetProjectId, ui: uiProp }: M5PanelProps): 
     atDecision: decisionBaseline,
     current: context === null ? null : {
       project_revision: context.project_revision,
+      snapshot_id: context.snapshot_id,
       source_digest: context.source_digest,
     },
   });

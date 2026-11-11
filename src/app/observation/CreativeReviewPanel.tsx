@@ -96,6 +96,7 @@ export interface ReviewAdoptionState {
 /** The project's own facts the adoption is read against. */
 export interface AdoptionFacts {
   readonly project_revision: number;
+  readonly snapshot_id: string;
   readonly source_digest: string;
 }
 
@@ -105,12 +106,15 @@ export interface AdoptionFacts {
  * The four facts stay apart, and this function reads only one of them: the *commit*.
  * The decision says that a person chose; the commit says that the Host published a new
  * version; the native acknowledgement says that the editor loaded it. Each is read from
- * its own source, and none of them is inferred from another.
+ * its own source, and none of it is inferred from another.
  *
- * The comparison is the project's own revision and source digest before and after the
- * decision. A revision that advanced is a commit that really happened; a revision that
- * did not is a pending adoption; anything the app cannot line up is *unknown*, because
- * an adoption that cannot be checked is not an adoption that happened.
+ * A project whose revision advanced is a project that committed — but it is not
+ * necessarily *this* decision that was committed. An unrelated native edit, another
+ * adoption, or a commit that happened for another reason all move the revision, and
+ * none of them is evidence for this one. So the adoption is registered only when a
+ * commit is bound to this decision, this package and this impact, and when the
+ * committed facts are the project's current facts. Otherwise the adoption stays
+ * pending, or unknown when the facts cannot be lined up.
  */
 export function reviewAdoptionState(input: {
   readonly decision: ReviewDecision | null;
@@ -118,6 +122,19 @@ export function reviewAdoptionState(input: {
   readonly atDecision: AdoptionFacts | null;
   /** The project's facts now. */
   readonly current: AdoptionFacts | null;
+  /**
+   * The commit, when the Host bound one to a decision.
+   *
+   * The bound decision is the *existing* decision record, so nothing new is invented
+   * here: the caller says which decision the commit belongs to, and the function
+   * checks that it is this one and that the committed facts are the current ones.
+   */
+  readonly committed?: {
+    readonly decision: ReviewDecision;
+    readonly project_revision: number;
+    readonly snapshot_id: string;
+    readonly source_digest: string;
+  } | null;
 }): ReviewAdoptionState {
   const decision = input.decision;
   if (decision === null) return { state: "not_requested", reason: "尚未登记任何决定。" };
@@ -126,16 +143,36 @@ export function reviewAdoptionState(input: {
   const current = input.current;
   if (atDecision === null) return { state: "unknown", reason: "登记决定时的工程版本未知，采用状态无法核对。" };
   if (current === null) return { state: "unknown", reason: "尚未读到工程的当前版本，采用状态未知。" };
-  if (current.project_revision > atDecision.project_revision) {
+  const committed = input.committed ?? null;
+  if (committed === null) {
+    // The project may well have committed for another reason. That is not this
+    // adoption, so this adoption stays pending.
     return {
-      state: "registered",
-      reason: `采用已提交：工程版本已从 ${atDecision.project_revision} 前进到 ${current.project_revision}。提交与原生确认仍是两件事。`,
+      state: "requested",
+      reason: `决定已登记；工程当前版本为 ${current.project_revision}，但没有与这次决定绑定的提交记录，采用保持待完成。`,
     };
   }
-  if (current.project_revision === atDecision.project_revision && current.source_digest === atDecision.source_digest) {
-    return { state: "requested", reason: "决定已登记；实际提交与原生确认尚未取得，采用保持待完成。" };
+  if (committed.decision.decision_id !== decision.decision_id
+    || committed.decision.package_id !== decision.package_id
+    || committed.decision.package_version !== decision.package_version
+    || (decision.approval?.impact_id ?? null) !== (committed.decision.approval?.impact_id ?? null)) {
+    // The commit belongs to another decision. The revision moved; this adoption did
+    // not, and it is not credited with the other one's commit.
+    return {
+      state: "unknown",
+      reason: "工程已前进，但那次提交绑定的是另一个决定，不能算作这次采用。",
+    };
   }
-  return { state: "unknown", reason: "工程版本与登记决定时对不上，采用状态未知。" };
+  if (committed.snapshot_id !== current.snapshot_id || committed.source_digest !== current.source_digest) {
+    return { state: "unknown", reason: "那次提交的快照或内容摘要与工程当前状态不同，采用状态未知。" };
+  }
+  if (committed.project_revision < atDecision.project_revision) {
+    return { state: "unknown", reason: "那次提交的版本早于登记决定时的版本，采用状态未知。" };
+  }
+  return {
+    state: "registered",
+    reason: `采用已提交：工程版本已从 ${atDecision.project_revision} 前进到 ${committed.project_revision}。提交与原生确认仍是两件事。`,
+  };
 }
 
 const PART_LABEL: Readonly<Record<ReviewPart["kind"], string>> = {

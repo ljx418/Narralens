@@ -328,6 +328,11 @@ function main(): void {
   applyPinnedPatch();
   stageObservationSource();
   stageExpectedAdapter();
+  // The link into the private toolchain belongs to the 013 source root, and the
+  // staging above rewrites that root. It is restored here whenever the toolchain is
+  // already there, so a build does not depend on the copy having been made in the
+  // same invocation.
+  if (existsSync(resolve(runtimeRoot, 'toolchain/packages/openfilm/node_modules'))) linkObservationToolchain();
   if (has('toolchain')) {
     // The authorised isolated copy of the pinned offline closure. It is a copy, never
     // an install: the source and the vendor are read-only and stay that way. It runs

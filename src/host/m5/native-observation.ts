@@ -471,6 +471,13 @@ export class NativeObservationService implements NativeContextPort, NativeObserv
     if (session === undefined || session.closed || this.#closed) {
       return { selection: null, selection_version: 0, ack: null, sync: 'unknown', active_bridge_session_id: null };
     }
+    // The same liveness as the observation path: a revoked session, a moved generation
+    // or a stale owner is not the active session any more, and it is void here rather
+    // than served as a stale cached fact.
+    if (!this.#bindingCurrent(session)) {
+      this.#closeSession(session, 'SESSION_STALE');
+      return { selection: null, selection_version: 0, ack: null, sync: 'unknown', active_bridge_session_id: null };
+    }
     return {
       selection: this.#selectionOf(session),
       selection_version: session.selectionVersion,
@@ -492,6 +499,13 @@ export class NativeObservationService implements NativeContextPort, NativeObserv
     if (this.#closed) throw new Error('NATIVE_OBSERVATION_CLOSED');
     const session = this.#active.get(project_id);
     if (session === undefined || session.closed) return 0;
+    // The same liveness the observation path uses. A revoked session, a moved
+    // generation or a stale owner yields no current authority, and it never yields a
+    // stale cached number either: the session is void and the answer is 0.
+    if (!this.#bindingCurrent(session)) {
+      this.#closeSession(session, 'SESSION_STALE');
+      return 0;
+    }
     return session.selectionVersion;
   }
 
