@@ -1,9 +1,9 @@
-import {readFile} from 'node:fs/promises';
-import {join} from 'node:path';
+import {resolve} from 'node:path';
 import type {SQLInputValue} from 'node:sqlite';
 import type {ExecutionBinding} from '../../contracts/agent-driven-types.js';
 import {validateAgentDefinition} from '../../contracts/agent-driven-validator.js';
 import {canonicalDigest} from '../creative/digest.js';
+import type {PreparedImpactFacts} from '../creative/execution-guard.js';
 import {createTrustedCallerContext,ProductError} from '../creative/trusted-context.js';
 import {computeSourceDigest} from '../engine/source-digest-v1.js';
 import {OPENFILM_UPSTREAM_SHA} from '../engine/engine-binding-store.js';
@@ -45,7 +45,7 @@ export class CreatedSourceFactsReader {
  readonly #pending=new Set<Promise<CreatedPreparedFactsProof>>();#closed=false;#closing:Promise<void>|undefined;
  constructor(private readonly options:{readonly host:NarralensHost;readonly authority:CreativeProjectAuthority;
   readonly prepared:CreatedPreparedSourceStore;readonly tasks:CreatedTaskStore;readonly assets:LocalAssetRegistry;
-  readonly verifier:PreparedDraftVerifier;readonly selection:CreatedSourceSelectionPort}){}
+  readonly verifier:PreparedDraftVerifier;readonly selection:CreatedSourceSelectionPort;readonly stageDomainRoot:string}){}
  #open():void{if(this.#closed)throw new ProductError('CAPABILITY_UNAVAILABLE','Prepared source reader is closed');}
  #row(sql:string,...values:SQLInputValue[]):Record<string,unknown>{
   const row=this.options.host.revisions.compose(db=>db.prepare(sql).get(...values));if(!row)changed();return row;
@@ -64,9 +64,11 @@ export class CreatedSourceFactsReader {
    ||canonicalDigest(mapping.execution)!==canonicalDigest(input.execution)
    ||canonicalDigest([...mapping.roots].sort())!==canonicalDigest([...fact.roots].sort())
    ||canonicalDigest(ordered(mapping.files))!==canonicalDigest(ordered(fact.files)))changed();
+  const root=resolve(this.options.stageDomainRoot,task.stage_token,'attempt-'+attempt,'source');
+  if(mapping.stage_root!==root)changed('Prepared source does not have its producer-owned location');
   return {mappingDigest:canonicalDigest(mapping),completed:freeze({format:'narralens.completed-prepared-source@1',project_id:input.project_id,
    task,producer_attempt:attempt,job:this.options.tasks.receipt(task.job_id,principal),terminal_reason:'SOURCE_ONLY',
-   provider_receipt:JSON.parse(String(job.provider_receipt_json)) as CompletedPreparedSourceV1['provider_receipt'],fact,root:mapping.stage_root})};
+   provider_receipt:JSON.parse(String(job.provider_receipt_json)) as CompletedPreparedSourceV1['provider_receipt'],fact,root})};
  }
  #registry(project:string,principal:string,ids:readonly string[]):LocalAsset[]{
   const caller=createTrustedCallerContext({principal_id:principal,channel:'authenticated',source:'driver_relay',session_ref:'host-prepared-facts'});
@@ -101,7 +103,7 @@ export class CreatedSourceFactsReader {
  async #acquire(input:CreatedPreparedReadInput,principal:string):Promise<CreatedPreparedFactsProof>{
   this.options.authority.assertOwner(input.project_id,principal);const {completed,mappingDigest}=this.#completed(input,principal);
   const mapping=this.options.prepared.read(input.prepared_source_id)!;
-  let original:RetainedSourceTree|undefined,preparedProof:(PreparedReadProofV1&{purpose:'impact'})|undefined;
+  let original:RetainedSourceTree|undefined,stage:RetainedSourceTree|undefined,preparedProof:(PreparedReadProofV1&{purpose:'impact'})|undefined;
   let transferred=false;
   try{
    const view=await this.options.host.projectResolver.resolveCreated(input.project_id);this.#open();
@@ -109,8 +111,9 @@ export class CreatedSourceFactsReader {
    const source=await computeSourceDigest({root:view.source_root.value,roots:view.source_fact.roots,engine:'openfilm',engineUpstreamSha:OPENFILM_UPSTREAM_SHA});this.#open();
    if(source.external_reference_count!==0||source.source_digest!==view.source_digest)changed('Original author bytes changed');
    original=new RetainedSourceTree(view.source_root.value,[...source.manifest.files,...source.manifest.assets].map(f=>({relative_path:f.path,bytes:f.size,sha256:f.sha256})));
-   const metadata=JSON.parse(await readFile(join(completed.root,'prepared-native.json'),'utf8')) as Metadata;
-   const draft=JSON.parse(await readFile(join(completed.root,'draft-plan.json'),'utf8')) as Draft;this.#open();
+   stage=new RetainedSourceTree(completed.root,completed.fact.files);
+   const metadata=JSON.parse(stage.readBytes('prepared-native.json').toString('utf8')) as Metadata;
+   const draft=JSON.parse(stage.readBytes('draft-plan.json').toString('utf8')) as Draft;this.#open();
    const registry=this.#registry(input.project_id,principal,metadata.assets.map(a=>a.asset_id));
    const selection=this.options.selection.currentSelectionVersion(input.project_id);
    const binding:PreparedReadBindingV1&{purpose:'impact'}={purpose:'impact',project_id:input.project_id,run_id:input.execution.run_id,execution:input.execution,
@@ -136,12 +139,22 @@ export class CreatedSourceFactsReader {
     locks_checked:[],engine_upstream_sha:OPENFILM_UPSTREAM_SHA});
    const record:RecordOfRead={input,principal,mappingDigest,completed,binding,preparedProof,original,registry:freeze(structuredClone(registry)),facts};
    this.#current(record);const proof=Object.freeze({facts});this.#proofs.set(proof,record);this.#issued.add(proof);transferred=true;return proof;
-  }finally{if(!transferred){try{if(preparedProof)this.options.verifier.release(preparedProof);}finally{original?.close();}}}
+  }finally{try{if(!transferred){try{if(preparedProof)this.options.verifier.release(preparedProof);}finally{original?.close();}}}finally{stage?.close();}}
  }
  assertCurrent(input:CreatedPreparedReadInput,principal:string,value:unknown):CreatedPreparedFacts{
   const record=value&&typeof value==='object'?this.#proofs.get(value):undefined;
   if(!record||record.principal!==principal||canonicalDigest(record.input)!==canonicalDigest(input))changed('Prepared read proof is not owned or bound');
   this.#current(record);return record.facts;
+ }
+ /** Projection for the common Host-only narrow guard. It is derived only after
+  * checking this reader's live token; a structural projection never replaces it. */
+ preparedImpactFacts(input:CreatedPreparedReadInput,principal:string,value:unknown):PreparedImpactFacts {
+  this.assertCurrent(input,principal,value);
+  const record=this.#proofs.get(value as object)!;
+  if(record.completed.job.state!=='succeeded'||record.completed.terminal_reason!=='SOURCE_ONLY')changed();
+  return freeze({project_id:input.project_id,completed_job:{job_id:record.completed.job.job_id,state:record.completed.job.state,
+   terminal_reason:record.completed.terminal_reason},prepared_source_id:input.prepared_source_id,
+   fact_digest:canonicalDigest(record.completed.fact),execution:structuredClone(record.completed.task.request.execution)});
  }
  release(value:unknown):void{
   if(!value||typeof value!=='object')return;const record=this.#proofs.get(value);if(!record)return;

@@ -28,3 +28,14 @@
 新增CreatedSourceFactsReader：从真实完成任务与prepared映射取得目标摘要/预期snapshot，复用实际purpose=impact验证器，私有WeakMap token持有原author FD与完整prepared proof到最终同步复验；release/close失效。不写工程/Job/Approval/snapshot。RetainedSourceTree从publisher抽为共同文件守卫，retained-tree-01实际4例通过；typecheck11通过。现有真实adoption测试夹具已增加reader与独立手工计划事实逐项对比，尚未实际运行，不能宣称reader真链通过。
 
 重读原冻结D03/D04确认impact允许先于ReviewPackage。BRIDGE E5先要求已发布review会造成循环，MAIN已按原冻结要求纠正；未新设临时包/第二Approval/伪运行状态，服务接线继续等待正确共同guard接口。MEDIA仍有许可，单次cwd空观察不证明它所有任务已退出，MAIN已请求具体执行边界/必要时先取得writer暂缓ACK再交回资源；未擅自抢占。
+
+
+## 实际影响服务接线候选（未运行Host门）
+
+按BRIDGE a6ee51e精确导入execution-guard.ts及其测试，actual E5 PreparedImpactFacts只从MAIN真实私有reader token同步投影，允许impact先包后，无假review/own gate。新增created-source-change-service.ts：真实当前brief闭包/固定plan/owner/grant/stage/前序门、base/selection、FD/registry/完成Job复核，与impact/完整plan/原幂等响应同一Host事务；active重放重新核世界，terminal重放不复活，不创建Approval或正式snapshot。真实adoption夹具正常路径已改用此服务及幂等重放；反例仍明确直接构造错误计划以检验最后拒绝边界。
+
+Reader/publisher阶段目录现在严格由Host stageDomainRoot+原task.stage_token+真实prepared lease_attempt导出，先与映射/输入比较，再通过原FD读取metadata，不以存储路径字符串当定位权威。该Host-only构造配置必须由实际producer runtime root注入，不是wire字段。RetainedSourceTree增加bounded descriptor读取，5个文件系统测试含同字节替换拒绝。
+
+prepare-foundation-light-02：4文件63例PASS；typecheck14 PASS。runner升级v2，输入绑定扩展到src/contracts/tests/tools文本、配置/锁、D09及自身，并检查新增文件；旧runner捕获范围较窄仍原样保留，不能扩大旧证据声明。新服务及现有20个真实Host/媒体边界例尚未运行，外审未通过、生产composition/能力未准入、无UI/人验结论。
+
+三领域真实429后各Codex已按原授权成为唯一writer、旧Claude已guarded stop，保全报告由父节点给出。MEDIA REAL001夹具失败，phase NOT_RUN；PRODUCT003已取得slot并绑定原修正脚本。媒体报告另一Vitest heavy并发，MAIN读取旧BRIDGE源码证明这些文件是SQLite/临时FS+MEDIA doubles，不能凭文件名认定heavy；实际PID归属仍待原命令证据，保留旧观察不追认排他性。

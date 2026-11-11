@@ -81,6 +81,18 @@ export class RetainedSourceTree {
       if(canonicalDigest(found.sort())!==canonicalDigest([...this.#files.keys()].sort()))fail('REVISION_CONFLICT','Source closure membership changed');
     }
   }
+  /** Read metadata from the retained descriptor rather than reopening its pathname.
+   * Limits apply before allocation; each actual read remains at most one MiB. */
+  readBytes(relative:string,maxBytes=64*1024*1024):Buffer {
+    assertSafeRelativePath(relative);this.verify();const file=this.#files.get(relative);
+    if(!file||!Number.isSafeInteger(maxBytes)||maxBytes<0||file.bytes>maxBytes)
+      fail('REVISION_CONFLICT','Source metadata exceeds its bounded read size');
+    const chunks:Buffer[]=[];let offset=0;
+    while(offset<file.bytes){const chunk=Buffer.allocUnsafe(Math.min(1024*1024,file.bytes-offset));
+      const count=readSync(file.fd,chunk,0,chunk.length,offset);if(!count)fail('REVISION_CONFLICT','Source metadata was truncated');
+      chunks.push(chunk.subarray(0,count));offset+=count;}
+    this.verify();return Buffer.concat(chunks,offset);
+  }
   close():void {if(this.#closed)return;this.#closed=true;let failed=false;for(const f of [...this.#files.values()].reverse())try{closeSync(f.fd);}catch{failed=true;}
     for(const d of [...this.#dirs.values()].reverse())try{closeSync(d.fd);}catch{failed=true;}
     this.#files.clear();this.#dirs.clear();if(failed)fail('REVISION_CONFLICT','Source descriptors could not be closed');}

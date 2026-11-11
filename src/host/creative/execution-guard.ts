@@ -157,16 +157,173 @@ export interface ExecutionGuardFacts {
   } | null;
   /** The run's gates, from the durable checkpoint. */
   readonly gates: ReadonlyArray<RunGate>;
+  /**
+   * The durable facts of the narrow Host-only effects.
+   *
+   * They are read by `readNarrowEffectFacts` from the real records: the review and
+   * the approval out of the product tables, the gate out of the run's checkpoint and
+   * the impact out of the impact authority. A narrow effect without them is refused:
+   * the guard does not look them up itself, because it has no authority to.
+   */
+  readonly narrow?: NarrowEffectFacts | null | undefined;
+  readonly preparedImpact?: PreparedImpactFacts | null | undefined;
   /** The authenticated principal that is about to cause the side effect. */
   readonly principal_id: string;
   /** The current time, in epoch seconds. */
   readonly now_epoch_seconds: number;
 }
 
-/** The effect the caller is about to cause. */
+/* -------------------------------------------------------------------------------------- */
+/* The narrow Host-only effects                                                            */
+/* -------------------------------------------------------------------------------------- */
+
+/** The state of a review package, as the review table holds it. */
+export type NarrowReviewState = "pending" | "accepted" | "changes_requested" | "rejected" | "stale";
+
+/** The state of an approval, as the approval table holds it. */
+export type NarrowApprovalState = "active" | "consumed" | "rejected" | "revoked";
+
+/** The state of an impact, as the impact table holds it. */
+export type NarrowImpactState = "active" | "consumed" | "expired" | "stale";
+
+/** Projection from MAIN's verified prepared-source reader, not a proof capability.
+ * The caller must assert the reader's opaque token in the same synchronous transaction
+ * as this guard. HTTP/JSON input cannot establish these facts. */
+export interface PreparedImpactFacts {
+  readonly project_id: string;
+  readonly completed_job: {
+    readonly job_id: string;
+    readonly state: "succeeded";
+    readonly terminal_reason: "SOURCE_ONLY";
+  };
+  readonly prepared_source_id: string;
+  readonly fact_digest: string;
+  readonly execution: ExecutionBinding;
+}
+
+/** The durable facts of one narrow Host-only effect. */
+export interface NarrowEffectFacts {
+  /** The review package the effect is about. */
+  readonly review: {
+    readonly package_id: string;
+    readonly package_digest: string;
+    readonly state: NarrowReviewState;
+  } | null;
+  /** The approval the adoption effect would consume. */
+  readonly approval: {
+    readonly approval_id: string;
+    readonly impact_id: string;
+    readonly state: NarrowApprovalState;
+  } | null;
+  /** The impact the effect would authorise or consume. */
+  readonly impact: {
+    readonly impact_id: string;
+    readonly state: NarrowImpactState;
+  } | null;
+}
+
+/**
+ * The reader of the impact's state.
+ *
+ * The impact table is not one of the product collections, so its state is read through
+ * the impact authority and handed in. It is optional because a caller that has no
+ * impact authority cannot produce an adoption effect anyway: the adoption is refused
+ * without it.
+ */
+export type NarrowImpactStateReader = (impact_id: string) => NarrowImpactState | undefined;
+
+/**
+ * The real repository reader of the narrow facts.
+ *
+ * The review and the approval come out of the product tables, the gate out of the run
+ * checkpoint the caller holds, and the impact out of the impact authority. Nothing
+ * here is a default: a row that is not there is `null`, and the guard refuses a
+ * narrow effect without the facts it needs.
+ */
+export function readNarrowEffectFacts(
+  tx: ProductTransaction,
+  input: {
+    readonly project_id: string;
+    readonly run_id: string;
+    readonly package_id: string;
+    readonly approval_id?: string | undefined;
+    readonly impact_id?: string | undefined;
+  },
+  impactState?: NarrowImpactStateReader,
+): NarrowEffectFacts {
+  const review = tx.get("review_request", {
+    project_id: input.project_id,
+    run_id: input.run_id,
+    review_id: input.package_id,
+  });
+  const approval = input.approval_id === undefined
+    ? null
+    : tx.get("approval", {
+        project_id: input.project_id,
+        run_id: input.run_id,
+        approval_id: input.approval_id,
+      });
+  const impactId = input.impact_id ?? (approval === null ? undefined : approval.impact_id);
+  const impactStateValue = impactId === undefined || impactState === undefined
+    ? undefined
+    : impactState(impactId);
+  return {
+    review: review === null
+      ? null
+      : {
+          package_id: review.review_id,
+          package_digest: review.package_digest,
+          state: review.state as NarrowReviewState,
+        },
+    approval: approval === null
+      ? null
+      : {
+          approval_id: approval.approval_id,
+          impact_id: approval.impact_id,
+          state: approval.state as NarrowApprovalState,
+        },
+    impact: impactId === undefined || impactStateValue === undefined
+      ? null
+      : { impact_id: impactId, state: impactStateValue },
+  };
+}
+
+/**
+ * The effect the caller is about to cause.
+ *
+ * The two narrow Host-only effects are not reachable from a request: a body cannot
+ * name an effect kind, and the ordinary dispatch set does not grow because they
+ * exist. They are the two things that happen while a run is waiting for a decision —
+ * preparing the impact of a reviewed product, and consuming an approval to adopt it.
+ */
 export type GuardedEffect =
   | { readonly kind: "action"; readonly action: GuardedAction; readonly stage_id: string }
-  | { readonly kind: "safe_control"; readonly control: "pause" | "cancel" };
+  | { readonly kind: "safe_control"; readonly control: "pause" | "cancel" }
+  | {
+      readonly kind: "review_impact_prepare";
+      readonly prepared_source_id: string;
+      readonly prepared_job_id: string;
+      readonly fact_digest: string;
+    }
+  | {
+      readonly kind: "approved_prepared_adoption";
+      readonly package_id: string;
+      readonly impact_id: string;
+      readonly approval_id: string;
+    };
+
+/**
+ * The run states in which a narrow Host-only effect may happen.
+ *
+ * A run that is waiting for a decision is exactly the state the narrow effects are
+ * for. A run that is paused, cancelled or stale is not, and a successful job is never
+ * put back to running.
+ */
+export const A_NARROW_DISPATCHABLE_RUN_STATES: ReadonlyArray<RunState> = [
+  "ready",
+  "running",
+  "waiting_user",
+];
 
 /**
  * Guards one actual side effect.
@@ -198,6 +355,11 @@ export function guardExecution(
         details: { state: facts.run.state },
       });
     }
+    return;
+  }
+
+  if (effect.kind === "review_impact_prepare" || effect.kind === "approved_prepared_adoption") {
+    assertNarrowEffect(effect, facts, binding);
     return;
   }
 
@@ -361,8 +523,166 @@ function assertAttempt(facts: ExecutionGuardFacts, binding: ExecutionBinding): v
   }
 }
 
-function assertStageAndGates(effect: Extract<GuardedEffect, { kind: "action" }>, facts: ExecutionGuardFacts): void {
-  const stage = effect.stage_id;
+/**
+ * The two narrow Host-only effects.
+ *
+ * They are the two things that happen while a run waits for a decision: preparing the
+ * impact of the reviewed product, and consuming an approval to adopt it. They are
+ * narrow on purpose. The run's identity, scope, grant and attempt still have to hold,
+ * the run has to be in a state where a decision can be acted on, and the effect has to
+ * be about the very package, approval and impact it names.
+ *
+ * What they do NOT do is widen the ordinary dispatch: an ordinary action is still
+ * refused in `waiting_user`, a paused or cancelled or stale run is refused, and the
+ * gate that is open is only the one of the reviewed product.
+ */
+function assertNarrowEffect(
+  effect: Extract<GuardedEffect, { kind: "review_impact_prepare" | "approved_prepared_adoption" }>,
+  facts: ExecutionGuardFacts,
+  binding: ExecutionBinding,
+): void {
+  assertRunIdentity(binding, facts);
+  assertScope(facts, binding);
+  assertGrant(facts, binding);
+  assertAttemptIdentity(facts, binding);
+  if (!A_NARROW_DISPATCHABLE_RUN_STATES.includes(facts.run.state)) {
+    throw new ProductError("RUN_PLAN_STALE", "The run is not in a state that allows this effect", {
+      details: { state: facts.run.state },
+    });
+  }
+  // The effect stands for one of the two ordinary actions, and it is checked the same
+  // way: the fixed stage has to allow the action, the action has to be inside the
+  // authorized scope, and every predecessor gate has to be accepted. The current
+  // stage's own review gate is not a prerequisite in the fixed stage table.
+  const action: GuardedAction = effect.kind === "review_impact_prepare" ? "change.prepare" : "change.apply";
+  assertStageAndAction(binding.step_id, action, facts);
+  // Fixed-stage requirements contain predecessors, never the current stage's own
+  // review gate. No package identity can exempt a predecessor.
+  assertGates(binding.step_id, action, facts);
+  if (effect.kind === "review_impact_prepare") {
+    const prepared = facts.preparedImpact;
+    if (!prepared || prepared.project_id !== facts.project_id ||
+      prepared.completed_job.state !== "succeeded" ||
+      prepared.completed_job.terminal_reason !== "SOURCE_ONLY" ||
+      prepared.completed_job.job_id !== effect.prepared_job_id ||
+      prepared.prepared_source_id !== effect.prepared_source_id ||
+      prepared.fact_digest !== effect.fact_digest ||
+      !effect.prepared_job_id || !/^ps_[a-f0-9]{60}$/.test(effect.prepared_source_id) ||
+      !/^[a-f0-9]{64}$/.test(effect.fact_digest)) {
+      throw new ProductError("REVIEW_STALE", "The completed prepared source was not proved");
+    }
+    validateAgentDefinition("ExecutionBinding", prepared.execution);
+    if (canonicalDigest(prepared.execution) !== canonicalDigest(binding) ||
+      facts.attempt?.state !== "waiting_user") {
+      throw new ProductError("RUN_PLAN_STALE", "The prepared proof is not for the current waiting attempt");
+    }
+    return;
+  }
+  // The reviewed product is the only thing the effect may act on. A package of
+  // another run, of another state, or with another digest is not this effect's.
+  const narrow = facts.narrow;
+  if (narrow === undefined || narrow === null) {
+    throw new ProductError("REVIEW_STALE", "The reviewed package was not read");
+  }
+  const review = narrow.review;
+  if (review === null) {
+    throw new ProductError("REVIEW_STALE", "The reviewed package was not read");
+  }
+  if (review.package_id !== effect.package_id) {
+    throw new ProductError("REVIEW_STALE", "The effect names another package", {
+      details: { expected: review.package_id, received: effect.package_id },
+    });
+  }
+  {
+    // The adoption happens AFTER the trusted decision accepted the product. An
+    // adoption of a package that is still pending would be an adoption nobody decided.
+    if (review.state !== "accepted") {
+      throw new ProductError("REVIEW_STALE", "The reviewed package was not accepted", {
+        details: { state: review.state },
+      });
+    }
+    const approval = narrow.approval;
+    const impact = narrow.impact;
+    if (approval === null) {
+      throw new ProductError("APPROVAL_REQUIRED", "The approval was not read");
+    }
+    if (impact === null) {
+      throw new ProductError("IMPACT_REQUIRED", "The impact was not read");
+    }
+    if (approval.approval_id !== effect.approval_id) {
+      throw new ProductError("APPROVAL_REQUIRED", "The effect names another approval", {
+        details: { expected: approval.approval_id, received: effect.approval_id },
+      });
+    }
+    if (approval.impact_id !== effect.impact_id || impact.impact_id !== effect.impact_id) {
+      throw new ProductError("APPROVAL_REQUIRED", "The approval does not belong to the named impact");
+    }
+    if (approval.state !== "active") {
+      throw new ProductError("APPROVAL_REQUIRED", "The approval is not active", {
+        details: { state: approval.state },
+      });
+    }
+    if (impact.state !== "active") {
+      throw new ProductError("IMPACT_STALE", "The impact is not active", {
+        details: { state: impact.state },
+      });
+    }
+  }
+  // Only the gate of the reviewed product is exempt, and it has to exist.
+  const gate = facts.gates.find((candidate) => candidate.review_package_id === effect.package_id);
+  if (gate === undefined) {
+    throw new ProductError("RUN_GATE_BLOCKED", "The run has no gate for the reviewed package", {
+      details: { package_id: effect.package_id },
+    });
+  }
+}
+
+/**
+ * The identity of the attempt, without the dispatchable states.
+ *
+ * A narrow effect happens while the run waits for a decision, and the attempt that
+ * produced the reviewed product has usually finished. What still has to hold is that
+ * it is the current attempt of the step, made against the same input.
+ */
+function assertAttemptIdentity(facts: ExecutionGuardFacts, binding: ExecutionBinding): void {
+  const attempt = facts.attempt;
+  if (attempt === null || attempt === undefined) {
+    throw new ProductError("RUN_PLAN_STALE", "The step has no durable attempt to continue");
+  }
+  if (attempt.step_id !== binding.step_id) {
+    throw new ProductError("RUN_PLAN_STALE", "The binding names another step", {
+      details: { expected: attempt.step_id, received: binding.step_id },
+    });
+  }
+  if (attempt.attempt !== binding.attempt) {
+    throw new ProductError("RUN_PLAN_STALE", "The attempt is not the current attempt of this step", {
+      details: { expected: attempt.attempt, received: binding.attempt },
+    });
+  }
+  if (attempt.input_digest !== binding.input_digest) {
+    throw new ProductError("RUN_PLAN_STALE", "The attempt was made against another input", {
+      details: { expected: attempt.input_digest, received: binding.input_digest },
+    });
+  }
+  if (attempt.grant_id !== binding.authorization_id) {
+    throw new ProductError("RUN_SCOPE_REQUIRED", "The attempt was made under another authorization");
+  }
+  if (attempt.state === "stale") {
+    throw new ProductError("RUN_PLAN_STALE", "The attempt was superseded", {
+      details: { state: attempt.state },
+    });
+  }
+}
+
+/**
+ * The stage and the action of an effect.
+ *
+ * It is the same check for the ordinary actions and for the two narrow ones: the
+ * effect has to belong to the durable step, the action has to be one the fixed stage
+ * allows, and the action has to be inside the authorized scope. A narrow effect is
+ * not a way around the fixed plan.
+ */
+function assertStageAndAction(stage: string, action: GuardedAction, facts: ExecutionGuardFacts): void {
   const allowed = A_STAGE_ACTIONS[stage];
   if (allowed === undefined) {
     throw new ProductError("CAPABILITY_UNAVAILABLE", "Unknown step for this workflow", {
@@ -372,20 +692,27 @@ function assertStageAndGates(effect: Extract<GuardedEffect, { kind: "action" }>,
   if (facts.attempt?.step_id !== stage) {
     throw new ProductError("RUN_PLAN_STALE", "The effect stage does not match the durable step");
   }
-  if (!allowed.includes(effect.action)) {
+  if (!allowed.includes(action)) {
     throw new ProductError("CAPABILITY_UNAVAILABLE", "This action does not belong to this step", {
-      details: { stage_id: stage, action: effect.action, allowed_actions: allowed },
+      details: { stage_id: stage, action, allowed_actions: allowed },
     });
   }
-  if (!facts.run.scope.allowed_actions.includes(effect.action)) {
+  if (!facts.run.scope.allowed_actions.includes(action)) {
     throw new ProductError("RUN_SCOPE_REQUIRED", "The action is outside the authorized scope", {
-      details: { action: effect.action, allowed_actions: facts.run.scope.allowed_actions },
+      details: { action, allowed_actions: facts.run.scope.allowed_actions },
     });
   }
+}
 
+/** Checks every predecessor in the fixed stage/action tables. */
+function assertGates(
+  stage: string,
+  action: GuardedAction,
+  facts: ExecutionGuardFacts,
+): void {
   const required = new Set<RunGate["kind"]>([
     ...(A_STAGE_GATE_REQUIREMENTS[stage] ?? []),
-    ...(A_ACTION_GATE_REQUIREMENTS[effect.action] ?? []),
+    ...(A_ACTION_GATE_REQUIREMENTS[action] ?? []),
   ]);
   for (const kind of required) {
     const gate = facts.gates.find((candidate) => candidate.kind === kind);
@@ -405,6 +732,11 @@ function assertStageAndGates(effect: Extract<GuardedEffect, { kind: "action" }>,
       });
     }
   }
+}
+
+function assertStageAndGates(effect: Extract<GuardedEffect, { kind: "action" }>, facts: ExecutionGuardFacts): void {
+  assertStageAndAction(effect.stage_id, effect.action, facts);
+  assertGates(effect.stage_id, effect.action, facts);
 }
 
 /**

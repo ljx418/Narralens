@@ -15,6 +15,12 @@ async function fixture(){
  cleanup.push(async()=>guard.close());return {root,source,backup,bytes,guard};
 }
 describe('retained source descriptor identity across publication rename',()=>{
+ it('reads original metadata through its retained descriptor and bounds allocation',async()=>{
+  const f=await fixture();expect(f.guard.readBytes('film.html')).toEqual(f.bytes);
+  expect(()=>f.guard.readBytes('film.html',1)).toThrow(/bounded/);
+  await writeFile(join(f.source,'replacement'),f.bytes);await rename(join(f.source,'replacement'),join(f.source,'film.html'));
+  expect(()=>f.guard.readBytes('film.html')).toThrow(/identity changed/);
+ });
  it('follows the actual original descriptor to its backup location',async()=>{
   const f=await fixture();await rename(f.source,f.backup);f.guard.relocatedTo(f.backup);
   expect(()=>f.guard.verify()).not.toThrow();expect(f.guard.root).toBe(f.backup);

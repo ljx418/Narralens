@@ -7,6 +7,7 @@ import {canonicalDigest} from '../../../src/host/creative/digest.js';
 import {CreatedPreparedSourceStore} from '../../../src/host/agent-driven/created-prepared-source-store.js';
 import {CreatedSourceImpactStore} from '../../../src/host/agent-driven/created-source-impact-store.js';
 import {CreatedSourceAdoptionStore} from '../../../src/host/agent-driven/created-source-adoption-store.js';
+import {CreatedSourceChangeService} from '../../../src/host/agent-driven/created-source-change-service.js';
 import {CreatedSourceFactsReader} from '../../../src/host/agent-driven/created-source-facts-reader.js';
 import {CreativeProjectAuthority} from '../../../src/host/agent-driven/creative-project-authority.js';
 import {CreatedSourcePublisher,isCreatedSourcePublicationProof,preparedSourceConsumerGraph} from '../../../src/host/agent-driven/created-source-publisher.js';
@@ -45,7 +46,7 @@ async function fixture(options:{mutatePlan?:(plan:PreparedAdoptionPlanV1)=>void;
   fact_digest:factDigest,execution,base_revision:1,source_digest:f.commit.source_digest,plan_sha256:completed.fact.plan_digest,
   rights_digest:completed.fact.rights_digest,frame_count:90,fps_numerator:30,fps_denominator:1,stage_root:completed.root,roots:completed.fact.roots,files:completed.fact.files});
  const hashFor=(path:string)=>completed.fact.files.find(file=>file.relative_path===path)?.sha256??canonicalDigest([]);
- const plan:PreparedAdoptionPlanV1={format:'narralens.prepared-adoption-plan@1',version:1,source_kind:'created_prepared_source',project_id:f.projectId,
+ let plan:PreparedAdoptionPlanV1={format:'narralens.prepared-adoption-plan@1',version:1,source_kind:'created_prepared_source',project_id:f.projectId,
   base_revision:1,base_source_digest:f.commit.source_digest,control_revision:0,selection_version:0,materialization_id:mapping.prepared_source_id,
   prepared_fact_digest:factDigest,request_digest:execution.input_digest,producer_execution:execution,target_source_digest:completed.fact.source_digest,
   target_snapshot_id:snapshotIdFor(f.projectId,completed.fact.source_digest),roots:mapping.roots,files:mapping.files,
@@ -56,7 +57,7 @@ async function fixture(options:{mutatePlan?:(plan:PreparedAdoptionPlanV1)=>void;
   frame_count:90,fps_numerator:30,fps_denominator:1,affected_ranges:graph.clips.map(c=>({start_frame:c.start_frame,end_frame_exclusive:c.end_frame_exclusive,clip_id:c.clip_id})),locks_checked:[],engine_upstream_sha:OPENFILM_UPSTREAM_SHA,
   expires_at:new Date(now.getTime()+900000).toISOString()};
  const reader=new CreatedSourceFactsReader({host:f.host,authority:new CreativeProjectAuthority(f.app.creation),prepared,tasks:f.tasks,
-  assets:f.registry,verifier:f.verifier,selection:{currentSelectionVersion:()=>selection}});
+  assets:f.registry,verifier:f.verifier,selection:{currentSelectionVersion:()=>selection},stageDomainRoot:f.taskRoot});
  cleanups.push(()=>reader.close());
  const readInput={project_id:f.projectId,prepared_source_id:mapping.prepared_source_id,execution};
  const readProof=await reader.acquire(readInput,'owner');
@@ -65,10 +66,22 @@ async function fixture(options:{mutatePlan?:(plan:PreparedAdoptionPlanV1)=>void;
  expect(observed).toEqual(expected);expect(observedRights).toBe(completed.fact.rights_digest);
  reader.release(readProof);
  options.mutatePlan?.(plan);options.onPrepared?.(f);
- const planDigest=preparedAdoptionPlanDigest(plan),transactionId='txn_'+randomUUID().replaceAll('-',''),impactId='imp_'+randomUUID().replaceAll('-','');
+ let impactId='imp_'+randomUUID().replaceAll('-','');
+ let preparedByService=false;
+ if(!options.mutatePlan){
+  const service=new CreatedSourceChangeService({host:f.host,prepared,impacts,facts:reader,authority:new CreativeProjectAuthority(f.app.creation)});
+  const request={meta:{idempotency_key:'module-prepare',correlation_id:'module-prepare'},project_id:f.projectId,materialization_id:mapping.prepared_source_id,
+   base_revision:1,source_digest:f.commit.source_digest,selection_version:0,execution};
+  const beforeRevision=revisions.activeCommit(f.projectId)!.revision;
+  const change=await service.prepare(request,'owner');impactId=change.impact_id;
+  expect(await service.prepare({...request,meta:{...request.meta,correlation_id:'module-prepare-replay'}},'owner')).toEqual(change);
+  expect(revisions.activeCommit(f.projectId)!.revision).toBe(beforeRevision);
+  plan=impacts.planFact(impactId)!.plan as PreparedAdoptionPlanV1;preparedByService=true;
+ }
+ const planDigest=preparedAdoptionPlanDigest(plan),transactionId='txn_'+randomUUID().replaceAll('-','');
  const approvalId='approval_'+randomUUID().replaceAll('-',''),confirmationId='confirm_'+randomUUID().replaceAll('-',''),reviewId='review_'+randomUUID().replaceAll('-',''),packageId='package_'+randomUUID().replaceAll('-','');
  const requestDigest=canonicalDigest({project_id:f.projectId,impact_id:impactId,execution});
- const impact=impacts.create({impact_id:impactId,project_id:f.projectId,materialization_id:mapping.prepared_source_id,target_snapshot_id:plan.target_snapshot_id,
+ const impact=preparedByService?impacts.read(impactId)!:impacts.create({impact_id:impactId,project_id:f.projectId,materialization_id:mapping.prepared_source_id,target_snapshot_id:plan.target_snapshot_id,
   base_revision:1,source_digest:plan.base_source_digest,control_revision:0,engine_upstream_sha:OPENFILM_UPSTREAM_SHA,affected_ranges:plan.affected_ranges,
   affected_consumers:[{kind:'native',id:'native',action:'replace'}],locks_checked:[],rights_digest:completed.fact.rights_digest,native_plan_sha256:planDigest,
   approvals_required:['change.approve'],request_digest:requestDigest,plan,now});
@@ -99,7 +112,7 @@ async function fixture(options:{mutatePlan?:(plan:PreparedAdoptionPlanV1)=>void;
   native_plan:plan.native_plan,original_closure:originalFiles,target_closure:plan.files,stage_root:completed.root,backup_token:'backup_'+transactionId,execution,now});
  for(const [from,to]of [['received','preconditions_checked'],['preconditions_checked','staged'],['staged','validated'],['validated','prepared']] as const)revisions.transition(transactionId,from,to);
  const publisher=new CreatedSourcePublisher({revisions,authorRoot:f.authorRoot,privateRoot:join(f.root,'publication'),snapshots:new SnapshotStore({snapshotsRoot:join(f.root,'snapshots')}),
-  selection:{currentSelectionVersion:()=>selection},assets:f.registry,tasks:f.tasks,verifier:f.verifier,...(options.fsync?{fsync:options.fsync}:{})});
+  selection:{currentSelectionVersion:()=>selection},assets:f.registry,tasks:f.tasks,verifier:f.verifier,stageDomainRoot:f.taskRoot,...(options.fsync?{fsync:options.fsync}:{})});
  cleanups.push(()=>publisher.close());
  const publicationInput={project_id:f.projectId,transaction_id:transactionId,prepared_source_id:mapping.prepared_source_id,stage_root:completed.root,files:plan.files,
   original_source_digest:plan.base_source_digest,published_source_digest:plan.target_source_digest,target_snapshot_id:plan.target_snapshot_id};

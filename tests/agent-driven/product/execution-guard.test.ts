@@ -3,9 +3,15 @@ import type { ExecutionBinding, RunGate, RunScope } from "../../../src/contracts
 import { canonicalDigest } from "../../../src/host/creative/digest.js";
 import {
   guardExecution,
+  readNarrowEffectFacts,
   type ExecutionGuardFacts,
   type GuardedEffect,
+  type NarrowApprovalState,
+  type NarrowImpactState,
+  type NarrowEffectFacts,
+  type NarrowReviewState,
 } from "../../../src/host/creative/execution-guard.js";
+import { MemoryProductRepository } from "./support/memory-repository.js";
 
 const SCOPE: RunScope = {
   project_id: "project-1",
@@ -307,5 +313,297 @@ describe("the execution guard", () => {
       guardExecution(BINDING, EFFECT, facts({ gates })),
     ).toThrow();
     expect(gates[1]?.state).toBe("pending");
+  });
+});
+
+describe("the two narrow Host-only effects", () => {
+  // The scope that authorizes the two change actions. The narrow effects stand for
+  // them, so the scope has to allow them exactly as it allows any other action.
+  const NARROW_SCOPE: RunScope = { ...SCOPE, allowed_actions: [...SCOPE.allowed_actions, "change.prepare", "change.apply"] };
+  const NARROW_SCOPE_DIGEST = canonicalDigest(NARROW_SCOPE);
+  const NARROW_BINDING: ExecutionBinding = { ...BINDING, run_scope_digest: NARROW_SCOPE_DIGEST };
+
+  const ownGate = (state: RunGate["state"]): RunGate => ({
+    ...gate("first_chapter", state), review_package_id: "package-1",
+  });
+  const narrowFacts = (overrides: {
+    readonly review?: NarrowReviewState;
+    readonly approval?: NarrowApprovalState;
+    readonly impact?: NarrowImpactState;
+  } = {}) => ({
+    review: {
+      package_id: "package-1",
+      package_digest: "b".repeat(64),
+      state: overrides.review ?? ("pending" as NarrowReviewState),
+    },
+    approval: {
+      approval_id: "approval-1",
+      impact_id: "impact-1",
+      state: overrides.approval ?? ("active" as NarrowApprovalState),
+    },
+    impact: {
+      impact_id: "impact-1",
+      state: overrides.impact ?? ("active" as NarrowImpactState),
+    },
+  });
+  /** A run that waits for the decision of its own first chapter. */
+  const waiting = (overrides: Partial<ExecutionGuardFacts> = {}): ExecutionGuardFacts => ({
+    ...facts(),
+    run: { ...facts().run, state: "waiting_user", scope: NARROW_SCOPE, run_scope_digest: NARROW_SCOPE_DIGEST },
+    // The grant belongs to the scope the run holds, so it carries that scope's digest.
+    grant: { ...facts().grant!, run_scope_digest: NARROW_SCOPE_DIGEST },
+    gates: [gate("definition", "accepted"), gate("sample", "accepted"), ownGate("pending")],
+    attempt: { ...facts().attempt!, state: "waiting_user" },
+    preparedImpact: {
+      project_id: "project-1",
+      completed_job: { job_id: "job-prepared", state: "succeeded", terminal_reason: "SOURCE_ONLY" },
+      prepared_source_id: "ps_" + "d".repeat(60), fact_digest: "e".repeat(64), execution: NARROW_BINDING,
+    },
+    ...overrides,
+  });
+  const withNarrow = (narrow: NarrowEffectFacts | null | undefined, overrides: Partial<ExecutionGuardFacts> = {}) =>
+    waiting({ ...overrides, narrow });
+  const PREPARE = { kind: "review_impact_prepare", prepared_source_id: "ps_" + "d".repeat(60), prepared_job_id: "job-prepared", fact_digest: "e".repeat(64) } as const;
+  const ADOPT = { kind: "approved_prepared_adoption", package_id: "package-1", impact_id: "impact-1", approval_id: "approval-1" } as const;
+
+  it("prepares the impact of a product that is still waiting for a decision", () => {
+    expect(() => guardExecution(NARROW_BINDING, PREPARE, withNarrow(narrowFacts()))).not.toThrow();
+  });
+
+  it("consumes an approval of an accepted product", () => {
+    expect(() => guardExecution(NARROW_BINDING, ADOPT, withNarrow(narrowFacts({ review: "accepted" })))).not.toThrow();
+  });
+
+  it("prepares before any review package or own review gate exists", () => {
+    expect(() => guardExecution(NARROW_BINDING, PREPARE, waiting({
+      narrow: undefined, gates: [gate("definition", "accepted"), gate("sample", "accepted")],
+    }))).not.toThrow();
+  });
+
+  it("rejects uncompleted jobs and mismatched prepared execution", () => {
+    const f = waiting();
+    for (const completed_job of [
+      { ...f.preparedImpact!.completed_job, state: "running" },
+      { ...f.preparedImpact!.completed_job, terminal_reason: "OTHER" },
+    ]) {
+      expect(() => guardExecution(NARROW_BINDING, PREPARE, {...f, preparedImpact: {
+        ...f.preparedImpact!, completed_job,
+      } as never})).toThrow();
+    }
+    expect(() => guardExecution(NARROW_BINDING, PREPARE, {...f, preparedImpact: {
+      ...f.preparedImpact!, execution: {...NARROW_BINDING, attempt: 2},
+    }})).toThrowError(expect.objectContaining({code: "RUN_PLAN_STALE"}));
+    expect(() => guardExecution(NARROW_BINDING, PREPARE, {...f,
+      attempt: {...f.attempt!, state: "succeeded"},
+    })).toThrowError(expect.objectContaining({code: "RUN_PLAN_STALE"}));
+  });
+
+  it("refuses an adoption whose product was not accepted", () => {
+    // The adoption happens AFTER the trusted decision. Adopting a package that is
+    // still pending would be an adoption nobody decided.
+    for (const state of ["pending", "changes_requested", "rejected", "stale"] as const) {
+      expect(() => guardExecution(NARROW_BINDING, ADOPT, withNarrow(narrowFacts({ review: state }))))
+        .toThrowError(expect.objectContaining({ code: "REVIEW_STALE" }));
+    }
+  });
+
+  it("refuses another prepared source, job or digest", () => {
+    for (const changed of [
+      {...PREPARE, prepared_source_id: "ps_" + "a".repeat(60)},
+      {...PREPARE, prepared_job_id: "job-other"},
+      {...PREPARE, fact_digest: "f".repeat(64)},
+    ]) expect(() => guardExecution(NARROW_BINDING, changed, waiting()))
+      .toThrowError(expect.objectContaining({code: "REVIEW_STALE"}));
+  });
+
+  it("refuses preparation without actual prepared-reader facts", () => {
+    for (const preparedImpact of [undefined, null]) {
+      expect(() => guardExecution(NARROW_BINDING, PREPARE, waiting({preparedImpact})))
+        .toThrowError(expect.objectContaining({code: "REVIEW_STALE"}));
+    }
+  });
+
+  it("refuses a narrow effect whose predecessor gate is not accepted", () => {
+    // The predecessor of the first chapter is the sample. A sample that is still
+    // waiting, or that failed, stops the effect.
+    for (const state of ["pending", "blocked", "rejected", "stale"] as const) {
+      expect(() => guardExecution(NARROW_BINDING, PREPARE, withNarrow(narrowFacts(), {
+        gates: [gate("definition", "accepted"), { ...gate("sample", state) }, ownGate("pending")],
+      }))).toThrowError(expect.objectContaining({ code: "RUN_GATE_BLOCKED" }));
+    }
+    // A predecessor gate that belongs to ANOTHER package is not exempt either.
+    expect(() => guardExecution(NARROW_BINDING, PREPARE, withNarrow(narrowFacts(), {
+      gates: [gate("definition", "accepted"), { ...gate("sample", "pending"), review_package_id: "package-other" }, ownGate("pending")],
+    }))).toThrowError(expect.objectContaining({ code: "RUN_GATE_BLOCKED" }));
+    // And a missing predecessor stops it as well.
+    expect(() => guardExecution(NARROW_BINDING, PREPARE, withNarrow(narrowFacts(), {
+      gates: [gate("definition", "accepted"), ownGate("pending")],
+    }))).toThrowError(expect.objectContaining({ code: "RUN_GATE_BLOCKED" }));
+  });
+
+  it("refuses a narrow effect whose scope does not allow the action", () => {
+    const withoutPrepare: RunScope = { ...SCOPE, allowed_actions: [...SCOPE.allowed_actions, "change.apply"] };
+    const withoutApply: RunScope = { ...SCOPE, allowed_actions: [...SCOPE.allowed_actions, "change.prepare"] };
+    const factsOf = (scope: RunScope): ExecutionGuardFacts => ({
+      ...waiting(),
+      run: { ...facts().run, state: "waiting_user", scope, run_scope_digest: canonicalDigest(scope) },
+      grant: { ...facts().grant!, run_scope_digest: canonicalDigest(scope) },
+    });
+    const bindingOf = (scope: RunScope): ExecutionBinding => ({ ...BINDING, run_scope_digest: canonicalDigest(scope) });
+    expect(() => guardExecution(bindingOf(withoutPrepare), PREPARE, { ...factsOf(withoutPrepare), narrow: narrowFacts() }))
+      .toThrowError(expect.objectContaining({ code: "RUN_SCOPE_REQUIRED" }));
+    expect(() => guardExecution(bindingOf(withoutApply), ADOPT, { ...factsOf(withoutApply), narrow: narrowFacts({ review: "accepted" }) }))
+      .toThrowError(expect.objectContaining({ code: "RUN_SCOPE_REQUIRED" }));
+  });
+
+  it("refuses a narrow effect at a stage that does not allow the action", () => {
+    // The definition stage allows clip.prepare only. A narrow effect there is not a
+    // way around the fixed plan.
+    const atDefinition = (): ExecutionGuardFacts => ({
+      ...waiting(),
+      run: { ...facts().run, state: "waiting_user", scope: NARROW_SCOPE, run_scope_digest: NARROW_SCOPE_DIGEST },
+      gates: [gate("definition", "accepted"), ownGate("pending")],
+      attempt: { ...facts().attempt!, step_id: "definition" },
+    });
+    expect(() => guardExecution({ ...NARROW_BINDING, step_id: "definition" }, PREPARE, atDefinition()))
+      .toThrowError(expect.objectContaining({ code: "CAPABILITY_UNAVAILABLE" }));
+  });
+
+  it("refuses a narrow effect in a run that is paused, cancelled or stale", () => {
+    for (const state of ["paused", "cancelled", "failed", "blocked"] as const) {
+      expect(() => guardExecution(NARROW_BINDING, PREPARE, withNarrow(narrowFacts(), { run: { ...facts().run, state, scope: NARROW_SCOPE, run_scope_digest: NARROW_SCOPE_DIGEST } })))
+        .toThrowError(expect.objectContaining({ code: "RUN_PLAN_STALE" }));
+    }
+  });
+
+  it("does not widen the ordinary dispatch: an action is still refused while the run waits", () => {
+    // A run that waits for a decision refuses an ordinary action outright, and the
+    // narrow effects do not change that.
+    expect(() => guardExecution(NARROW_BINDING, EFFECT, waiting({ gates: [gate("definition", "accepted"), gate("sample", "pending"), ownGate("pending")] })))
+      .toThrowError(expect.objectContaining({ code: "RUN_PLAN_STALE" }));
+    // And the ordinary gate check is untouched: a running run with an open gate is
+    // still blocked at that gate.
+    expect(() => guardExecution(BINDING, EFFECT, facts({ gates: [gate("definition", "accepted"), gate("sample", "pending")] })))
+      .toThrowError(expect.objectContaining({ code: "RUN_GATE_BLOCKED" }));
+  });
+
+  it("refuses an adoption whose approval or impact is not active", () => {
+    for (const approval of ["consumed", "rejected", "revoked"] as const) {
+      expect(() => guardExecution(NARROW_BINDING, ADOPT, withNarrow(narrowFacts({ review: "accepted", approval }))))
+        .toThrowError(expect.objectContaining({ code: "APPROVAL_REQUIRED" }));
+    }
+    for (const impact of ["consumed", "expired", "stale"] as const) {
+      expect(() => guardExecution(NARROW_BINDING, ADOPT, withNarrow(narrowFacts({ review: "accepted", impact }))))
+        .toThrowError(expect.objectContaining({ code: "IMPACT_STALE" }));
+    }
+  });
+
+  it("refuses an adoption whose approval names another impact", () => {
+    const narrow = narrowFacts({ review: "accepted" });
+    expect(() => guardExecution(NARROW_BINDING, ADOPT, withNarrow({ ...narrow, approval: { ...narrow.approval!, impact_id: "impact-2" } })))
+      .toThrowError(expect.objectContaining({ code: "APPROVAL_REQUIRED" }));
+  });
+
+  it("refuses an adoption without an approval or without an impact", () => {
+    const narrow = narrowFacts({ review: "accepted" });
+    expect(() => guardExecution(NARROW_BINDING, ADOPT, withNarrow({ ...narrow, approval: null })))
+      .toThrowError(expect.objectContaining({ code: "APPROVAL_REQUIRED" }));
+    expect(() => guardExecution(NARROW_BINDING, ADOPT, withNarrow({ ...narrow, impact: null })))
+      .toThrowError(expect.objectContaining({ code: "IMPACT_REQUIRED" }));
+  });
+
+  it("refuses adoption when the run has no gate for the accepted package", () => {
+    expect(() => guardExecution(NARROW_BINDING, ADOPT, withNarrow(narrowFacts({review: "accepted"}), {
+      gates: [gate("definition", "accepted"), gate("sample", "accepted")],
+    }))).toThrowError(expect.objectContaining({ code: "RUN_GATE_BLOCKED" }));
+  });
+});
+
+describe("the narrow effect facts reader", () => {
+  /** The real chain of records an approval hangs off. */
+  async function chainWithApproval(repository: MemoryProductRepository): Promise<void> {
+    await repository.transaction((tx) => {
+      tx.put("template_version", { template_id: "local-short-film", version: 1 }, {
+        template_id: "local-short-film", version: 1, parent_version: null,
+        execution_digest: "b70615d5ad4246caac7d0e770022429de5826831b222447e4be7637e4a07ca32",
+        capability_id: "clip.prepare", capability_version: "1", definition_json: {} as never,
+        created_at: "2026-11-12T00:00:00.000Z",
+      });
+      tx.put("run", { project_id: "project-1", run_id: "run-1" }, {
+        project_id: "project-1", run_id: "run-1", run_scope_digest: "a".repeat(64),
+        template_id: "local-short-film", template_version: 1, current_plan_version: 1, state: "running",
+        scope_json: {} as never, checkpoint_json: { gates: [] } as never, created_at: "2026-11-12T00:00:00.000Z",
+      });
+      tx.put("plan_version", { project_id: "project-1", run_id: "run-1", plan_version: 1 }, {
+        project_id: "project-1", run_id: "run-1", plan_version: 1, run_scope_digest: "a".repeat(64),
+        input_digest: "b".repeat(64), plan_json: {} as never, created_at: "2026-11-12T00:00:00.000Z",
+      });
+      tx.put("artifact_version", { project_id: "project-1", artifact_id: "package-1", version: 1 }, {
+        project_id: "project-1", artifact_id: "package-1", version: 1, kind: "chapter", schema_version: 1,
+        input_digest: "b".repeat(64), content_digest: "c".repeat(64), content_json: {} as never,
+        input_refs_json: [], created_at: "2026-11-12T00:00:00.000Z",
+      });
+      tx.put("review_request", { project_id: "project-1", run_id: "run-1", review_id: "package-1" }, {
+        project_id: "project-1", run_id: "run-1", review_id: "package-1", plan_version: 1,
+        run_scope_digest: "a".repeat(64), gate: "sample", artifact_id: "package-1", artifact_version: 1,
+        input_digest: "b".repeat(64), package_digest: "c".repeat(64), state: "accepted",
+        reuse_review_id: null, created_at: "2026-11-12T00:00:00.000Z",
+      });
+      tx.put("trusted_confirmation", { project_id: "project-1", run_id: "run-1", confirmation_id: "conf-1" }, {
+        project_id: "project-1", run_id: "run-1", confirmation_id: "conf-1", review_id: null,
+        input_digest: "b".repeat(64), purpose: "run.authorize", channel: "trusted_ui",
+        authenticated_actor: "human-1", session_ref: "session-1", action_digest: "a".repeat(64),
+        issued_at: NOW - 60, expires_at: NOW + 3600,
+      });
+      tx.put("execution_grant", { project_id: "project-1", run_id: "run-1", grant_id: "grant-1" }, {
+        project_id: "project-1", run_id: "run-1", grant_id: "grant-1", run_scope_digest: "a".repeat(64),
+        confirmation_id: "conf-1", principal_id: "human-1", action: "clip.prepare",
+        capability_id: "clip.prepare", capability_version: "1", allow_paid: 0, allow_external: 0,
+        state: "active", expires_at: NOW + 3600,
+      });
+      tx.put("step_attempt", { project_id: "project-1", run_id: "run-1", plan_version: 1, step_id: "sample", attempt: 1 }, {
+        project_id: "project-1", run_id: "run-1", plan_version: 1, step_id: "sample", attempt: 1,
+        run_scope_digest: "a".repeat(64), grant_id: "grant-1", input_digest: "b".repeat(64),
+        dependencies_json: [], state: "succeeded", job_id: null, output_artifact_id: null,
+        output_version: null, updated_at: "2026-11-12T00:00:00.000Z",
+      });
+      tx.put("trusted_confirmation", { project_id: "project-1", run_id: "run-1", confirmation_id: "conf-2" }, {
+        project_id: "project-1", run_id: "run-1", confirmation_id: "conf-2", review_id: "package-1",
+        input_digest: "b".repeat(64), purpose: "change.approve", channel: "trusted_ui",
+        authenticated_actor: "human-1", session_ref: "session-1", action_digest: "d".repeat(64),
+        issued_at: NOW - 60, expires_at: NOW + 3600,
+      });
+      tx.put("approval", { project_id: "project-1", run_id: "run-1", approval_id: "approval-1" }, {
+        project_id: "project-1", run_id: "run-1", approval_id: "approval-1", run_scope_digest: "a".repeat(64),
+        confirmation_id: "conf-2", plan_version: 1, step_id: "sample", attempt: 1, input_digest: "b".repeat(64),
+        change_id: "change-1", impact_id: "impact-1", base_revision: 3, control_revision: 1,
+        action_digest: "d".repeat(64), facts_digest: "e".repeat(64), state: "active",
+        expires_at: NOW + 3600, consumed_transaction_id: null,
+      });
+    });
+  }
+
+  it("reads the review and the approval out of the real records", async () => {
+    const repository = new MemoryProductRepository();
+    await chainWithApproval(repository);
+    const narrow = await repository.transaction((tx) => readNarrowEffectFacts(tx, {
+      project_id: "project-1", run_id: "run-1", package_id: "package-1",
+      approval_id: "approval-1",
+    }, (impactId) => (impactId === "impact-1" ? "active" : undefined)));
+    expect(narrow.review?.state).toBe("accepted");
+    expect(narrow.review?.package_digest).toBe("c".repeat(64));
+    expect(narrow.approval?.impact_id).toBe("impact-1");
+    expect(narrow.approval?.state).toBe("active");
+    expect(narrow.impact?.state).toBe("active");
+  });
+
+  it("reports a record that is not there as nothing, not as a default", async () => {
+    const repository = new MemoryProductRepository();
+    const narrow = await repository.transaction((tx) => readNarrowEffectFacts(tx, {
+      project_id: "project-1", run_id: "run-1", package_id: "package-missing",
+    }));
+    expect(narrow.review).toBeNull();
+    expect(narrow.approval).toBeNull();
+    expect(narrow.impact).toBeNull();
   });
 });

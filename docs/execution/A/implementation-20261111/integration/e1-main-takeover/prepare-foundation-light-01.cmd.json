@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "corepack",
+    "pnpm",
+    "test",
+    "tests/agent-driven/product/execution-guard.test.ts",
+    "tests/agent-driven/integration/retained-source-tree.test.ts",
+    "tests/agent-driven/integration/created-impact-atomic.test.ts",
+    "tests/agent-driven/integration/created-source-change.test.ts",
+    "--maxWorkers=1",
+    "--minWorkers=1"
+  ],
+  "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+  "started_at": "2026-11-11T18:48:55.669396+00:00"
+}

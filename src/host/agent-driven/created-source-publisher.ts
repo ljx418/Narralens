@@ -1,6 +1,6 @@
 import { createHash, randomUUID } from 'node:crypto';
 import { constants } from 'node:fs';
-import { access, copyFile, mkdir, open, readFile, rename, rm } from 'node:fs/promises';
+import { access, copyFile, mkdir, open, rename, rm } from 'node:fs/promises';
 import { dirname, basename, resolve, sep } from 'node:path';
 import type { DatabaseSync } from 'node:sqlite';
 import { canonicalJson, canonicalDigest } from '../creative/digest.js';
@@ -144,7 +144,7 @@ export function assertCreatedPublicationForCommit(value:unknown,owner:RevisionSt
 export interface CreatedSourcePublisherOptions {
   readonly revisions:RevisionStore;readonly authorRoot:string;readonly privateRoot:string;
   readonly snapshots:SnapshotStore;readonly selection:CreatedSourceSelectionPort;readonly assets:LocalAssetRegistry;
-  readonly tasks:CreatedTaskStore;readonly verifier:PreparedDraftVerifier;
+  readonly tasks:CreatedTaskStore;readonly verifier:PreparedDraftVerifier;readonly stageDomainRoot:string;
   readonly now?:()=>Date;readonly fsync?:(path:string)=>Promise<void>;
 }
 export interface PublishCreatedSourceInput {
@@ -155,12 +155,13 @@ export interface PublishCreatedSourceInput {
 export class CreatedSourcePublisher {
   readonly #db:DatabaseSync;readonly #owner:RevisionStore;readonly #authorRoot:string;readonly #privateRoot:string;
   readonly #snapshots:SnapshotStore;readonly #selection:CreatedSourceSelectionPort;readonly #assets:LocalAssetRegistry;
-  readonly #tasks:CreatedTaskStore;readonly #verifier:PreparedDraftVerifier;
+  readonly #tasks:CreatedTaskStore;readonly #verifier:PreparedDraftVerifier;readonly #stageDomainRoot:string;
   readonly #now:()=>Date;readonly #fsync:(path:string)=>Promise<void>;readonly #instance=`publisher_${randomUUID()}`;
   readonly #issued=new Set<object>();readonly #pending=new Set<Promise<unknown>>();
   #failed=false;#closed=false;#closing:Promise<void>|undefined;
   constructor(options:CreatedSourcePublisherOptions){
     this.#owner=options.revisions;this.#db=options.revisions.compose(db=>db);this.#authorRoot=resolve(options.authorRoot);this.#privateRoot=resolve(options.privateRoot);
+    this.#stageDomainRoot=resolve(options.stageDomainRoot);
     this.#snapshots=options.snapshots;this.#selection=options.selection;this.#assets=options.assets;this.#tasks=options.tasks;this.#verifier=options.verifier;this.#now=options.now??(()=>new Date());
     this.#fsync=options.fsync??(async path=>{const fd=await open(path,constants.O_RDONLY);try{await fd.sync();}finally{await fd.close();}});
     const exists=this.#db.prepare("SELECT name FROM sqlite_master WHERE name='created_publication_journal'").get();
@@ -232,6 +233,18 @@ export class CreatedSourcePublisher {
       fail('REVISION_CONFLICT','Approved native plan contradicts the prepared source');
   }
   async #publish(input:PublishCreatedSourceInput):Promise<CreatedSourcePublicationProof>{
+    this.#assertOpen();this.#plan(input);
+    const mapping=this.#row('SELECT job_id,stage_root FROM created_prepared_source WHERE prepared_source_id=?',input.prepared_source_id);
+    const taskInput=this.#row('SELECT principal_id FROM created_task_input WHERE job_id=?',String(mapping.job_id));
+    const task=this.#tasks.read(String(mapping.job_id),String(taskInput.principal_id));
+    const fact=this.#tasks.readPrepared(task.job_id,task.principal_id),attempt=this.#tasks.preparedLeaseAttempt(task.job_id,task.principal_id);
+    if(!fact||attempt===null)fail('REVISION_CONFLICT','Prepared producer is unavailable');
+    const expected=resolve(this.#stageDomainRoot,task.stage_token,'attempt-'+attempt,'source');
+    if(input.stage_root!==expected||mapping.stage_root!==expected)fail('REVISION_CONFLICT','Prepared location is not producer-owned');
+    const held=new RetainedTree(expected,fact.files);
+    try{return await this.#publishGuarded(input,held);}finally{held.close();}
+  }
+  async #publishGuarded(input:PublishCreatedSourceInput,held:RetainedTree):Promise<CreatedSourcePublicationProof>{
     this.#assertOpen();const plan=this.#plan(input),active=this.#owner.activeCommit(input.project_id)!;
     const originalRow=this.#row('SELECT fact_json,fact_sha256 FROM created_source_fact WHERE project_id=? AND snapshot_id=?',input.project_id,active.snapshot_id);
     const original=validateCreatedSourceFact(JSON.parse(String(originalRow.fact_json)) as CreatedSourceFact);
@@ -242,8 +255,8 @@ export class CreatedSourcePublisher {
     const targetFiles=manifestFiles(targetDigest);
     if(targetDigest.external_reference_count||targetDigest.source_digest!==plan.target_source_digest
       ||canonicalDigest(targetFiles)!==canonicalDigest(ordered(plan.files)))fail('REVISION_CONFLICT','Prepared source differs');
-    const metadata=JSON.parse(await readFile(resolve(input.stage_root,'prepared-native.json'),'utf8')) as PreparedNativeMetadata;
-    const draft=JSON.parse(await readFile(resolve(input.stage_root,'draft-plan.json'),'utf8')) as PreparedNativeConsumerPlan;
+    const metadata=JSON.parse(held.readBytes('prepared-native.json').toString('utf8')) as PreparedNativeMetadata;
+    const draft=JSON.parse(held.readBytes('draft-plan.json').toString('utf8')) as PreparedNativeConsumerPlan;
     if(metadata.format!=='narralens.prepared-native-output@1'||metadata.project_id!==input.project_id||metadata.frame_count!==plan.frame_count
       ||metadata.fps.num!==plan.fps_numerator||metadata.fps.den!==plan.fps_denominator)fail('REVISION_CONFLICT','Prepared native geometry differs');
     const geometry=freeze(validateCreatedSourceFact({schema_version:1,roots:['film.html',...plan.roots.filter(root=>root!=='film.html')],subtitles:metadata.subtitles,
