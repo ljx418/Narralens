@@ -29,8 +29,8 @@
 
 import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
-import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from 'node:fs';
-import { dirname, resolve } from 'node:path';
+import { copyFileSync, existsSync, lstatSync, mkdirSync, readFileSync, readdirSync, readlinkSync, realpathSync, rmSync, statSync, symlinkSync, writeFileSync } from 'node:fs';
+import { dirname, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -174,7 +174,7 @@ function stageExpectedAdapter(): void {
  * with another vite would not be the pinned candidate.
  */
 function verifyPinnedToolchain(): void {
-  const nodeModules = resolve(observationRoot, 'source/packages/openfilm/node_modules');
+  const nodeModules = resolve(runtimeRoot, 'toolchain/packages/openfilm/node_modules');
   const vite = resolve(nodeModules, 'vite/package.json');
   const react = resolve(nodeModules, 'react/package.json');
   if (!existsSync(vite) || !existsSync(react)) {
@@ -201,6 +201,126 @@ function closureDigest(root: string): { readonly digest: string; readonly files:
   return { digest: sha256(Buffer.from(files.join('\n'), 'utf8')), files: files.length };
 }
 
+/**
+ * The pinned offline toolchain closure.
+ *
+ * It is *copied*, never installed: the resolved dependency and symlink closure of the
+ * pinned upstream is reproduced inside this worktree's private root, and the source and
+ * the vendor stay read-only. Every link must resolve inside the private tree; a link
+ * that would escape it, or one that does not resolve at all, stops the copy.
+ */
+function copyToolchainClosure(vendorRoot: string): { readonly entries: number; readonly files: number; readonly bytes: number; readonly digest: string; readonly versions: Record<string, string> } {
+  const outRoot = resolve(runtimeRoot, 'toolchain');
+  const seedRelative = 'packages/openfilm/node_modules';
+  const seedSource = resolve(vendorRoot, seedRelative);
+  if (!existsSync(seedSource)) throw new BuildRefused('THE_PINNED_DEPENDENCY_SEED_IS_MISSING');
+  rmSync(outRoot, { recursive: true, force: true });
+  mkdirSync(outRoot, { recursive: true });
+
+  const links: Array<{ readonly path: string; readonly raw: string }> = [];
+  const copyTree = (source: string, destination: string): void => {
+    mkdirSync(destination, { recursive: true });
+    for (const entry of readdirSync(source, { withFileTypes: true })) {
+      if (entry.name === '.bin') continue;
+      const from = resolve(source, entry.name);
+      const to = resolve(destination, entry.name);
+      if (entry.isSymbolicLink()) {
+        links.push({ path: to, raw: readlinkSync(from) });
+        symlinkSync(readlinkSync(from), to);
+        continue;
+      }
+      if (entry.isDirectory()) {
+        copyTree(from, to);
+        continue;
+      }
+      copyFileSync(from, to);
+    }
+  };
+  copyTree(seedSource, resolve(outRoot, seedRelative));
+
+  // Every link must land inside the private tree. A link that points into a pnpm
+  // virtual store brings that whole entry with it; anything else is refused.
+  const copied = new Set<string>();
+  let pending = [...links];
+  while (pending.length > 0) {
+    const link = pending.shift()!;
+    const target = resolve(dirname(link.path), link.raw);
+    const relativeTarget = relative(outRoot, target);
+    if (relativeTarget.startsWith('..')) throw new BuildRefused(`THE_DEPENDENCY_LINK_ESCAPES ${relativeTarget}`);
+    if (existsSync(target)) continue;
+    const vendorTarget = resolve(vendorRoot, relativeTarget);
+    if (!existsSync(vendorTarget)) throw new BuildRefused(`THE_DEPENDENCY_LINK_IS_UNRESOLVED ${relativeTarget}`);
+    const parts = relativeTarget.split('/');
+    if (parts[0] !== 'node_modules' || parts[1] !== '.pnpm' || parts.length < 3) {
+      throw new BuildRefused(`THE_DEPENDENCY_LINK_IS_NOT_VIRTUAL ${relativeTarget}`);
+    }
+    const entry = `node_modules/.pnpm/${parts[2]}`;
+    if (copied.has(entry)) continue;
+    copied.add(entry);
+    const before = links.length;
+    copyTree(resolve(vendorRoot, entry), resolve(outRoot, entry));
+    pending = pending.concat(links.slice(before));
+  }
+
+  // The final pass: nothing may point out of the private tree any more.
+  const files: string[] = [];
+  let bytes = 0;
+  const walk = (directory: string): void => {
+    for (const entry of readdirSync(directory, { withFileTypes: true })) {
+      const full = resolve(directory, entry.name);
+      if (entry.isSymbolicLink()) {
+        const resolved = resolve(dirname(full), readlinkSync(full));
+        if (!resolved.startsWith(outRoot + '/') && resolved !== outRoot) {
+          throw new BuildRefused(`THE_DEPENDENCY_LINK_ESCAPES ${relative(outRoot, resolved)}`);
+        }
+        continue;
+      }
+      if (entry.isDirectory()) {
+        walk(full);
+        continue;
+      }
+      const blob = readFileSync(full);
+      bytes += blob.byteLength;
+      files.push(`${relative(outRoot, full).split('\\').join('/')}\0${sha256(blob)}`);
+    }
+  };
+  walk(outRoot);
+  files.sort();
+  const versions: Record<string, string> = {};
+  for (const name of ['react', 'react-dom', 'vite', 'typescript', '@vitejs/plugin-react', '@tailwindcss/vite', 'tailwindcss']) {
+    const manifest = resolve(outRoot, seedRelative, name, 'package.json');
+    if (!existsSync(manifest)) throw new BuildRefused(`THE_PINNED_DEPENDENCY_IS_MISSING ${name}`);
+    versions[name] = String(JSON.parse(readFileSync(manifest, 'utf8')).version ?? '');
+  }
+  if (versions.vite !== PINNED_VITE) throw new BuildRefused(`PINNED_NATIVE_VITE_REQUIRED ${versions.vite}`);
+  if (versions.react !== PINNED_REACT) throw new BuildRefused(`PINNED_NATIVE_REACT_REQUIRED ${versions.react}`);
+  return {
+    entries: copied.size,
+    files: files.length,
+    bytes,
+    digest: sha256(Buffer.from(JSON.stringify(files.map((entry) => entry.split('\0'))), 'utf8')),
+    versions,
+  };
+}
+
+/**
+ * The link from the 013 source root to the private toolchain.
+ *
+ * The pinned build resolves its react alias and its helper beside that root, so the
+ * root must find the closure. It is a relative link inside the private tree: nothing
+ * points outside it, and the shared node_modules is never written to.
+ */
+function linkObservationToolchain(): void {
+  const target = resolve(runtimeRoot, 'toolchain/packages/openfilm/node_modules');
+  const link = resolve(observationRoot, 'source/packages/openfilm/node_modules');
+  mkdirSync(dirname(link), { recursive: true });
+  rmSync(link, { recursive: true, force: true });
+  symlinkSync(relative(dirname(link), target), link);
+  const resolved = realpathSync(link);
+  if (!resolved.startsWith(runtimeRoot + '/')) throw new BuildRefused('THE_TOOLCHAIN_LINK_ESCAPES');
+}
+
+
 function main(): void {
   verifyTrackedInputs();
   const root = upstreamRoot();
@@ -208,6 +328,27 @@ function main(): void {
   applyPinnedPatch();
   stageObservationSource();
   stageExpectedAdapter();
+  if (has('toolchain')) {
+    // The authorised isolated copy of the pinned offline closure. It is a copy, never
+    // an install: the source and the vendor are read-only and stay that way. It runs
+    // after the source staging, because the link into it belongs to that root.
+    const closure = copyToolchainClosure(root);
+    linkObservationToolchain();
+    const report = {
+      kind: 'narralens.r2-native-toolchain-copy@1',
+      source: resolve(root, 'packages/openfilm/node_modules'),
+      private_root: resolve(runtimeRoot, 'toolchain'),
+      method: 'private physical copies with private relative symlinks; no pnpm install, no lifecycle scripts, no network',
+      virtual_entries: closure.entries,
+      files: closure.files,
+      file_bytes: closure.bytes,
+      versions: closure.versions,
+      closure_sha256: closure.digest,
+      build: 'NOT_RUN',
+    } as const;
+    writeFileSync(resolve(runtimeRoot, 'toolchain-report.json'), `${JSON.stringify(report, null, 2)}\n`);
+    process.stdout.write(`${JSON.stringify(report, null, 2)}\n`);
+  }
   const staged = closureDigest(resolve(expectedRoot, 'source'));
   const report = {
     kind: 'narralens.r2-native-hydration-preparation@1',

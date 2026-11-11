@@ -1,0 +1,47 @@
+cwd=/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-PRODUCT
+argv=corepack pnpm exec tsx tools/agent-driven/product/build-native-hydration.ts --upstream /mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm --toolchain
+start=2026-11-11T17:24:16+0000
+{
+  "kind": "narralens.r2-native-toolchain-copy@1",
+  "source": "/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm/packages/openfilm/node_modules",
+  "private_root": "/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-PRODUCT/var/native-hydration-r2/toolchain",
+  "method": "private physical copies with private relative symlinks; no pnpm install, no lifecycle scripts, no network",
+  "virtual_entries": 92,
+  "files": 6769,
+  "file_bytes": 157011567,
+  "versions": {
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "vite": "7.3.7",
+    "typescript": "5.9.3",
+    "@vitejs/plugin-react": "5.2.0",
+    "@tailwindcss/vite": "4.3.3",
+    "tailwindcss": "4.3.3"
+  },
+  "closure_sha256": "6805315c6e5d9f3759541a6b7db780c5f805d243020db257b5ec15588ab3bde2",
+  "build": "NOT_RUN"
+}
+{
+  "kind": "narralens.r2-native-hydration-preparation@1",
+  "upstream_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+  "patch_sha256": "f699889206e129dfe4fd913618b34baa8d7e04363f1940d3659664a1e7b9d435",
+  "inputs": {
+    "build-expected.mjs": "60027ead5a509522f2d35fda33749675923dee523bb8cc12f2b7de3dca8f840d",
+    "expected-projection.d.ts": "0f5f565a3d8b70de995aeb0dfdfb6052acad53cbf452c8d70168f555a8937f80",
+    "expected-projection.mjs": "3500b1d6485791b13ec9364c6eb80740531142c16754877e21923ad73e9d494e",
+    "native-pure.entry.ts": "1ca8590535d412f0d91a522fbf942cbacabba7d95c64f3e849ca9f0fbf416354",
+    "request013.patch": "f699889206e129dfe4fd913618b34baa8d7e04363f1940d3659664a1e7b9d435",
+    "vite.expected.config.mjs": "ffac37faeb5e9fcc53460f19d235cc9c38251b3bf969a9183e8cffe5e0657f29"
+  },
+  "runtime_root": "/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-PRODUCT/var/native-hydration-r2",
+  "staged_source_files": 624,
+  "staged_source_digest": "b127dbd9004ce300951e0390ce7268b6688a1308a28758357ce77e52ad30e5f8",
+  "toolchain": {
+    "vite": "7.3.7",
+    "react": "19.3.0"
+  },
+  "build": "NOT_RUN"
+}
+THE_BUILD_WAS_NOT_REQUESTED
+exit=0
+end=2026-11-11T17:24:50+0000
