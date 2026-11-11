@@ -840,6 +840,22 @@ export class CommittedRenderPhases implements CommittedRenderPhasesPort, PhaseOb
           throw new CommittedRenderPhaseError("QC_EVIDENCE_MISSING", "the inspection receipt does not name its evidence", false);
         }
 
+        // Persist the exact encoded/QC lineage in the package itself. The package
+        // key intentionally excludes attempt identity, so an older winner must be
+        // proved to have these parents before it can stand for this phase result.
+        const lineage = await this.#stageWrittenFile(staging, "phase_lineage.json", "phase_lineage",
+          packageRefId(stageKeys.delivery_id, "phase_lineage"), `${JSON.stringify({
+            format: "narralens.package-phase-lineage@1", project_id: request.project_id,
+            snapshot_id: request.snapshot_id, source_digest: request.source_digest,
+            config_digest: stageKeys.config_digest, parent_encoded_digest: encoded.receipt_digest,
+            parent_qc_digest: qc.receipt_digest, qc_decision_digest: canonicalDigest(qcItems),
+          }, null, 2)}\n`);
+        packageFiles.push({ id: lineage.id, name: lineage.relative_path, source_path: resolve(staging, lineage.relative_path) });
+        supplementRefs.push({ id: lineage.id, version: 1, sha256: lineage.sha256 });
+        const expectedFiles = [...encoded.files, ...qc.files, lineage].map(file => ({
+          id: file.id, file: file.relative_path, sha256: file.sha256, bytes: file.bytes,
+        })).sort((a,b) => a.id < b.id ? -1 : a.id > b.id ? 1 : 0);
+
         const mediaRef: Ref = { id: encoded.media_ref.id, version: 1, sha256: media.sha256 };
         const ffprobeRef: Ref = { id: probe.id, version: 1, sha256: probe.sha256 };
         const fullDecodeRef: Ref = { id: decode.id, version: 1, sha256: decode.sha256 };
@@ -879,6 +895,16 @@ export class CommittedRenderPhases implements CommittedRenderPhasesPort, PhaseOb
           published_at: manifest.published_at,
         });
 
+        // The package store preserves the first winner. Never relabel an older
+        // winner with this attempt's parents, even when the MP4 bytes happen to match.
+        // Legacy packages without the durable lineage file also fail closed here.
+        const winnerFiles = [...published.receipt.files].sort((a,b) => a.id < b.id ? -1 : a.id > b.id ? 1 : 0);
+        if (canonicalDigest(winnerFiles) !== canonicalDigest(expectedFiles)
+          || canonicalDigest(published.receipt.manifest.qc) !== canonicalDigest(qcItems)
+          || canonicalDigest(published.receipt.manifest.supplement_refs) !== canonicalDigest(supplementRefs)) {
+          throw new CommittedRenderPhaseError("PACKAGE_LINEAGE_CONFLICT",
+            "the published winner is not the verified encoded and QC parent chain", false, true);
+        }
         // The package is published but the record is not written yet.
         await this.#fence(request, identity, "after the package was published");
 

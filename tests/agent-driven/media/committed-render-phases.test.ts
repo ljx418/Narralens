@@ -362,6 +362,68 @@ describe("inspecting an encoded object", () => {
 });
 
 describe("publishing from the encoded and inspected bytes", () => {
+  it("refuses a legacy winner without lineage and preserves its verified files", async () => {
+    const built = await harness({ label: "phase-legacy-winner" });
+    const encoded = await built.phases.prepareEncoded(requestFor(built));
+    const qc = await built.phases.inspectEncoded({ request: deliveryRequestFor(built), encoded });
+    const original = built.packages.publish.bind(built.packages);
+    let legacy: Awaited<ReturnType<PublishedPackageStore['publish']>> | undefined;
+    // Create the actual old package layout through the real immutable package
+    // store; only the newly added phase lineage supplement is deliberately absent.
+    const spy = vi.spyOn(built.packages, "publish").mockImplementation(async input => {
+      const lineage = input.files.find(file => file.name === "phase_lineage.json");
+      legacy = await original({ ...input, files: input.files.filter(file => file.name !== "phase_lineage.json"),
+        manifest: { ...input.manifest, supplement_refs: input.manifest.supplement_refs.filter(ref => ref.id !== lineage?.id) } });
+      return legacy;
+    });
+    try {
+      await expect(built.phases.publishValidated({ request: deliveryRequestFor(built), encoded, qc }))
+        .rejects.toMatchObject({ code: "PACKAGE_LINEAGE_CONFLICT" });
+    } finally { spy.mockRestore(); }
+    expect(legacy).toBeDefined();
+    await expect(built.phases.publishValidated({ request: deliveryRequestFor(built, 2), encoded, qc }))
+      .rejects.toMatchObject({ code: "PACKAGE_LINEAGE_CONFLICT" });
+    expect(await built.packages.verifyPackage(legacy!.package_id)).toEqual(legacy!.receipt);
+    await built.phases.close();
+  });
+
+  it.each(["different media", "different encoder parent", "different QC parent"] as const)("refuses an existing winner with %s without relabelling or replacing it", async mode => {
+    let rendered = 0;
+    const built = await harness({ label: "phase-winner-lineage-" + mode.replaceAll(" ", "-"), renderer: {
+      async render(request) { await writeFile(request.out_path, mode === "different media" ? `film-${++rendered}` : "same film bytes");
+        return { out_path: request.out_path, lines: [], elapsed_ms: 1 }; },
+    } });
+    const encoded = await built.phases.prepareEncoded(requestFor(built));
+    const qc = await built.phases.inspectEncoded({ request: deliveryRequestFor(built), encoded });
+    const winner = await built.phases.publishValidated({ request: deliveryRequestFor(built), encoded, qc });
+    const nextEncoded = mode === "different QC parent" ? encoded : await built.phases.prepareEncoded(requestFor(built, 2));
+    const nextQc = await built.phases.inspectEncoded({ request: deliveryRequestFor(built, 2), encoded: nextEncoded });
+    if (mode === "different media") expect(nextEncoded.media_ref.sha256).not.toBe(encoded.media_ref.sha256);
+    else expect(nextEncoded.media_ref.sha256).toBe(encoded.media_ref.sha256);
+    if (mode === "different encoder parent") expect(nextEncoded.receipt_digest).not.toBe(encoded.receipt_digest);
+    expect(nextQc.receipt_digest).not.toBe(qc.receipt_digest);
+    await expect(built.phases.publishValidated({ request: deliveryRequestFor(built, 2), encoded: nextEncoded, qc: nextQc }))
+      .rejects.toMatchObject({ code: "PACKAGE_LINEAGE_CONFLICT" });
+    expect(await built.packages.verifyPackage(winner.package_receipt.package_id)).toEqual(winner.package_receipt);
+    await built.phases.close();
+  });
+
+  it("replays the same verified parent chain under a later publication lease", async () => {
+    const built = await harness({ label: "phase-winner-same-lineage" });
+    const encoded = await built.phases.prepareEncoded(requestFor(built));
+    const qc = await built.phases.inspectEncoded({ request: deliveryRequestFor(built), encoded });
+    const first = await built.phases.publishValidated({ request: deliveryRequestFor(built), encoded, qc });
+    const replay = await built.phases.publishValidated({ request: deliveryRequestFor(built, 2), encoded, qc });
+    expect(replay.package_receipt).toEqual(first.package_receipt);
+    expect(replay.parent_encoded_digest).toBe(first.parent_encoded_digest);
+    expect(replay.parent_qc_digest).toBe(first.parent_qc_digest);
+    expect(replay.publication_lease_attempt).toBe(2);
+    const lineage = replay.package_receipt.files.find(file => file.file === "phase_lineage.json");
+    expect(lineage).toBeDefined();
+    expect(replay.package_receipt.manifest.supplement_refs).toContainEqual({ id: lineage!.id, version: 1, sha256: lineage!.sha256 });
+    await built.phases.close();
+  });
+
   it("publishes one package and returns a receipt that names it", async () => {
     const built = await harness({ label: "phase-publish" });
     const encoded = await built.phases.prepareEncoded(requestFor(built));

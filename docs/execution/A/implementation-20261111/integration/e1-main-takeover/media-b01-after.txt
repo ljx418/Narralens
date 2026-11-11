@@ -1,0 +1,16 @@
+
+> narralens@0.1.0 test /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+> vitest run --config vitest.config.ts tests/agent-driven/media/committed-render-phases.test.ts --maxWorkers=1 --minWorkers=1
+
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+ ✓ tests/agent-driven/media/committed-render-phases.test.ts (55 tests | 1 skipped) 3916ms
+   ✓ publishing from the encoded and inspected bytes > refuses an existing winner with different media without relabelling or replacing it  331ms
+   ✓ publishing from the encoded and inspected bytes > refuses an existing winner with different encoder parent without relabelling or replacing it  324ms
+
+ Test Files  1 passed (1)
+      Tests  54 passed | 1 skipped (55)
+   Start at  04:04:51
+   Duration  8.53s (transform 474ms, setup 0ms, collect 2.65s, tests 3.92s, environment 0ms, prepare 1.31s)
+
