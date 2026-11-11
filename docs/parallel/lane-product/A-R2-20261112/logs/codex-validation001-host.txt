@@ -1,0 +1,24 @@
+
+> narralens@0.1.0 test /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-PRODUCT
+> vitest run --config vitest.config.ts tests/agent-driven/integration/managed-editor.test.ts tests/agent-driven/integration/created-workbench-headless.test.ts --maxWorkers=1 --minWorkers=1
+
+
+ RUN  v3.2.4 /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-PRODUCT
+
+ ✓ tests/agent-driven/integration/managed-editor.test.ts (4 tests) 9014ms
+   ✓ publishes exactly the fixed managed build, reuses it without writes and verifies independently before serving  3982ms
+   ✓ rejects aliased roots, foreign editor directories, added files and unsupported vendor before serving  1564ms
+   ✓ invalidates the running guard if the runtime ancestor is replaced by an alias to the same files  798ms
+   ✓ the actual private child independently refuses a modified prepared editor rather than trusting parent arguments  2669ms
+(node:1623363) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/created-workbench-headless.test.ts (3 tests) 8107ms
+   ✓ the workbench of a created project > claims no native load, because nothing was ever acknowledged  3008ms
+   ✓ the workbench of a created project > keeps the durable acknowledgement table empty  2555ms
+   ✓ the workbench of a created project > refuses to read the context of another project for a foreign principal  2542ms
+
+ Test Files  2 passed (2)
+      Tests  7 passed (7)
+   Start at  03:37:41
+   Duration  18.51s (transform 889ms, setup 0ms, collect 1.16s, tests 17.12s, environment 0ms, prepare 65ms)
+

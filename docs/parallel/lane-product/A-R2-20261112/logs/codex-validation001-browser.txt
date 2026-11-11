@@ -1,0 +1,17 @@
+
+> narralens@0.1.0 test /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-PRODUCT
+> vitest run --config vitest.config.ts tests/agent-driven/headless/created-native-entry.test.ts --maxWorkers=1 --minWorkers=1
+
+
+ RUN  v3.2.4 /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-PRODUCT
+
+(node:1623684) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/headless/created-native-entry.test.ts (1 test) 13254ms
+   ✓ uses the actual native entry in a quiet browser with the original editor and the existing panel, without a fabricated loaded acknowledgement  13253ms
+
+ Test Files  1 passed (1)
+      Tests  1 passed (1)
+   Start at  03:38:00
+   Duration  14.50s (transform 848ms, setup 0ms, collect 1.12s, tests 13.25s, environment 0ms, prepare 32ms)
+

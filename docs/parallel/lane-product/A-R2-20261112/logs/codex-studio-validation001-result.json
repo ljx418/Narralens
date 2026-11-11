@@ -1,0 +1,412 @@
+{
+  "slot": "R2-PRODUCT-STUDIO-VALIDATE-001",
+  "head": "8cdd98ed24b6dad9450a2c28fddffe2b5d15d651",
+  "index_tree": "4dfcccc57e22ea76a629fb35e8b79806b1068bf1",
+  "commands": [
+    {
+      "name": "app-build",
+      "argv": [
+        "corepack",
+        "pnpm",
+        "build"
+      ],
+      "cwd": "/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-PRODUCT",
+      "start": "2026-11-11T19:37:38.533696+00:00",
+      "end": "2026-11-11T19:37:40.769324+00:00",
+      "launcher_pid": 1622881,
+      "exit": 0,
+      "observed_processes": [
+        {
+          "pid": 1622881,
+          "ppid": 1622874,
+          "start_ticks": "4749935",
+          "comm": "node",
+          "cwd": "/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-PRODUCT"
+        },
+        {
+          "pid": 1622900,
+          "ppid": 1622881,
+          "start_ticks": "4749951",
+          "comm": "sh",
+          "cwd": "/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-PRODUCT"
+        },
+        {
+          "pid": 1622901,
+          "ppid": 1622900,
+          "start_ticks": "4749951",
+          "comm": "node",
+          "cwd": "/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-PRODUCT"
+        },
+        {
+          "pid": 1622917,
+          "ppid": 1622901,
+          "start_ticks": "4749955",
+          "comm": "node",
+          "cwd": "/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-PRODUCT"
+        },
+        {
+          "pid": 1622952,
+          "ppid": 1622917,
+          "start_ticks": "4749967",
+          "comm": "esbuild",
+          "cwd": "/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-PRODUCT"
+        },
+        {
+          "pid": 1622986,
+          "ppid": 1622900,
+          "start_ticks": "4749990",
+          "comm": "node",
+          "cwd": "/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-PRODUCT"
+        },
+        {
+          "pid": 1622999,
+          "ppid": 1622986,
+          "start_ticks": "4749999",
+          "comm": "esbuild",
+          "cwd": "/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-PRODUCT"
+        },
+        {
+          "pid": 1623043,
+          "ppid": 1622900,
+          "start_ticks": "4750072",
+          "comm": "node",
+          "cwd": "/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-PRODUCT"
+        },
+        {
+          "pid": 1623056,
+          "ppid": 1623043,
+          "start_ticks": "4750080",
+          "comm": "esbuild",
+          "cwd": "/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-PRODUCT"
+        }
+      ],
+      "observed_survivors": [],
+      "log_sha256": "baf7b3e3fe0dd627910ba945e9a8b4f60d0a2c5297bcb8e55056257ac1faba9b"
+    },
+    {
+      "name": "host",
+      "argv": [
+        "corepack",
+        "pnpm",
+        "test",
+        "tests/agent-driven/integration/managed-editor.test.ts",
+        "tests/agent-driven/integration/created-workbench-headless.test.ts",
+        "--maxWorkers=1",
+        "--minWorkers=1"
+      ],
+      "cwd": "/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-PRODUCT",
+      "start": "2026-11-11T19:37:40.769451+00:00",
+      "end": "2026-11-11T19:37:59.771807+00:00",
+      "launcher_pid": 1623075,
+      "exit": 0,
+      "observed_processes": [
+        {
+          "pid": 1623075,
+          "ppid": 1622874,
+          "start_ticks": "4750158",
+          "comm": "node",
+          "cwd": "/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-PRODUCT"
+        },
+        {
+          "pid": 1623087,
+          "ppid": 1623075,
+          "start_ticks": "4750174",
+          "comm": "sh",
+          "cwd": "/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-PRODUCT"
+        },
+        {
+          "pid": 1623088,
+          "ppid": 1623087,
+          "start_ticks": "4750174",
+          "comm": "node (vitest)",
+          "cwd": "/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-PRODUCT"
+        },
+        {
+          "pid": 1623120,
+          "ppid": 1623088,
+          "start_ticks": "4750190",
+          "comm": "esbuild",
+          "cwd": "/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-PRODUCT"
+        },
+        {
+          "pid": 1623130,
+          "ppid": 1623088,
+          "start_ticks": "4750194",
+          "comm": "node (vitest 1)",
+          "cwd": "/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-PRODUCT"
+        },
+        {
+          "pid": 1623158,
+          "ppid": 1623130,
+          "start_ticks": "4750210",
+          "comm": "git",
+          "cwd": "/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm"
+        },
+        {
+          "pid": 1623170,
+          "ppid": 1623130,
+          "start_ticks": "4750290",
+          "comm": "git",
+          "cwd": "/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm"
+        },
+        {
+          "pid": 1623180,
+          "ppid": 1623130,
+          "start_ticks": "4750368",
+          "comm": "git",
+          "cwd": "/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm"
+        },
+        {
+          "pid": 1623225,
+          "ppid": 1623130,
+          "start_ticks": "4750450",
+          "comm": "git",
+          "cwd": "/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm"
+        },
+        {
+          "pid": 1623228,
+          "ppid": 1623130,
+          "start_ticks": "4750529",
+          "comm": "git",
+          "cwd": "/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm"
+        },
+        {
+          "pid": 1623239,
+          "ppid": 1623130,
+          "start_ticks": "4750607",
+          "comm": "git",
+          "cwd": "/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm"
+        },
+        {
+          "pid": 1623243,
+          "ppid": 1623130,
+          "start_ticks": "4750686",
+          "comm": "git",
+          "cwd": "/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm"
+        },
+        {
+          "pid": 1623247,
+          "ppid": 1623130,
+          "start_ticks": "4750764",
+          "comm": "git",
+          "cwd": "/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm"
+        },
+        {
+          "pid": 1623265,
+          "ppid": 1623130,
+          "start_ticks": "4750844",
+          "comm": "git",
+          "cwd": "/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm"
+        },
+        {
+          "pid": 1623270,
+          "ppid": 1623130,
+          "start_ticks": "4750919",
+          "comm": "node",
+          "cwd": "/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-PRODUCT"
+        },
+        {
+          "pid": 1623296,
+          "ppid": 1623270,
+          "start_ticks": "4751033",
+          "comm": "git",
+          "cwd": "/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm"
+        },
+        {
+          "pid": 1623363,
+          "ppid": 1623088,
+          "start_ticks": "4751109",
+          "comm": "node (vitest 1)",
+          "cwd": "/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-PRODUCT"
+        },
+        {
+          "pid": 1623406,
+          "ppid": 1623363,
+          "start_ticks": "4751257",
+          "comm": "git",
+          "cwd": "/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm"
+        },
+        {
+          "pid": 1623512,
+          "ppid": 1623363,
+          "start_ticks": "4751366",
+          "comm": "git",
+          "cwd": "/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm"
+        },
+        {
+          "pid": 1623520,
+          "ppid": 1623363,
+          "start_ticks": "4751449",
+          "comm": "git",
+          "cwd": "/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm"
+        },
+        {
+          "pid": 1623540,
+          "ppid": 1623363,
+          "start_ticks": "4751557",
+          "comm": "git",
+          "cwd": "/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm"
+        },
+        {
+          "pid": 1623551,
+          "ppid": 1623363,
+          "start_ticks": "4751638",
+          "comm": "git",
+          "cwd": "/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm"
+        },
+        {
+          "pid": 1623559,
+          "ppid": 1623363,
+          "start_ticks": "4751713",
+          "comm": "git",
+          "cwd": "/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm"
+        },
+        {
+          "pid": 1623573,
+          "ppid": 1623363,
+          "start_ticks": "4751812",
+          "comm": "git",
+          "cwd": "/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm"
+        },
+        {
+          "pid": 1623574,
+          "ppid": 1623363,
+          "start_ticks": "4751891",
+          "comm": "git",
+          "cwd": "/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm"
+        },
+        {
+          "pid": 1623582,
+          "ppid": 1623363,
+          "start_ticks": "4751966",
+          "comm": "git",
+          "cwd": "/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm"
+        }
+      ],
+      "observed_survivors": [],
+      "log_sha256": "c309bb1f0ff87a87fcabf25e86161856b24dd7aad719eb2a1201d9a356e5b44c"
+    },
+    {
+      "name": "browser",
+      "argv": [
+        "corepack",
+        "pnpm",
+        "test",
+        "tests/agent-driven/headless/created-native-entry.test.ts",
+        "--maxWorkers=1",
+        "--minWorkers=1"
+      ],
+      "cwd": "/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-PRODUCT",
+      "start": "2026-11-11T19:37:59.771940+00:00",
+      "end": "2026-11-11T19:38:16.218112+00:00",
+      "launcher_pid": 1623621,
+      "exit": 0,
+      "observed_processes": [
+        {
+          "pid": 1623621,
+          "ppid": 1622874,
+          "start_ticks": "4752058",
+          "comm": "node",
+          "cwd": "/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-PRODUCT"
+        },
+        {
+          "pid": 1623641,
+          "ppid": 1623621,
+          "start_ticks": "4752075",
+          "comm": "sh",
+          "cwd": "/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-PRODUCT"
+        },
+        {
+          "pid": 1623642,
+          "ppid": 1623641,
+          "start_ticks": "4752075",
+          "comm": "node (vitest)",
+          "cwd": "/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-PRODUCT"
+        },
+        {
+          "pid": 1623684,
+          "ppid": 1623642,
+          "start_ticks": "4752094",
+          "comm": "node (vitest 1)",
+          "cwd": "/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-PRODUCT"
+        },
+        {
+          "pid": 1623674,
+          "ppid": 1623642,
+          "start_ticks": "4752091",
+          "comm": "esbuild",
+          "cwd": "/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-PRODUCT"
+        },
+        {
+          "pid": 1623755,
+          "ppid": 1623684,
+          "start_ticks": "4752241",
+          "comm": "git",
+          "cwd": "/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm"
+        },
+        {
+          "pid": 1623795,
+          "ppid": 1623684,
+          "start_ticks": "4752352",
+          "comm": "git",
+          "cwd": "/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm"
+        },
+        {
+          "pid": 1623814,
+          "ppid": 1623684,
+          "start_ticks": "4752430",
+          "comm": "git",
+          "cwd": "/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm"
+        },
+        {
+          "pid": 1623816,
+          "ppid": 1623684,
+          "start_ticks": "4752505",
+          "comm": "git",
+          "cwd": "/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm"
+        },
+        {
+          "pid": 1623836,
+          "ppid": 1623684,
+          "start_ticks": "4752600",
+          "comm": "git",
+          "cwd": "/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm"
+        },
+        {
+          "pid": 1623844,
+          "ppid": 1623684,
+          "start_ticks": "4752669",
+          "comm": "node",
+          "cwd": "/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-PRODUCT"
+        },
+        {
+          "pid": 1623869,
+          "ppid": 1623844,
+          "start_ticks": "4752778",
+          "comm": "git",
+          "cwd": "/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm"
+        },
+        {
+          "pid": 1623885,
+          "ppid": 1623684,
+          "start_ticks": "4752856",
+          "comm": "chrome.exe",
+          "cwd": "/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-PRODUCT"
+        },
+        {
+          "pid": 1623946,
+          "ppid": 1623684,
+          "start_ticks": "4752986",
+          "comm": "powershell.exe",
+          "cwd": "/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-PRODUCT"
+        }
+      ],
+      "observed_survivors": [],
+      "log_sha256": "df81352a0ecf23ce1e60d0bbfc56398372517e3acc82b0ee53e8590975ec6ad1"
+    }
+  ],
+  "source_inputs_unchanged": true,
+  "head_unchanged": true,
+  "index_unchanged": true,
+  "scope": "package/runtime loader and truthful noAck/cold workbench regression, not adopted-source Ack"
+}
