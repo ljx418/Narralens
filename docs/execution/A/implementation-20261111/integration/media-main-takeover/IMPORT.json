@@ -1,0 +1,28 @@
+{
+  "base_main": "d8adb9c0d3fb698b960585ba85ba2d2561211b3a",
+  "candidate": "ff2646f3ca59c8980b57a2a68710148f1c58e22e",
+  "ack": {
+    "time": "2026-11-11T19:11:42.364774+00:00",
+    "head": "ff2646f3ca59c8980b57a2a68710148f1c58e22e",
+    "frozen_paths": {
+      "src/host/render/committed-render-phases.ts": "0d4dbf159e7ce639d823d87618ee15078aefd17f57c1e0b068be02d4cf821e5a",
+      "tests/agent-driven/media/committed-render-phases.test.ts": "a1e73c68bcfbd960ff34ee33f94d1dd314cb1699b691edf34de950bb4088e7fb"
+    },
+    "tracked_diff": "",
+    "index_diff": "",
+    "dirty_before_this_receipt": "?? docs/parallel/lane-media/A-R1-20261111/CLAUDE_IMPLEMENT.md\n?? docs/parallel/lane-media/A-R1-20261111/HANDOFF.md\n?? docs/parallel/lane-media/A-R1-20261111/MAIN_DELTA_HANDOFF.md\n?? docs/parallel/lane-media/A-R1-20261111/MAIN_DELTA_MANIFEST.json\n?? docs/parallel/lane-media/A-R1-20261111/MAIN_START.md\n?? docs/parallel/lane-media/A-R1-20261111/ReleaseAssignment.json\n?? docs/parallel/lane-media/A-R1-20261111/TASK.md\n?? docs/parallel/lane-media/A-R1-20261111/evidence/cleanup-20261111-224528.txt\n?? docs/parallel/lane-media/A-R1-20261111/evidence/draft-processor-real-1794408261304/film.html\n?? docs/parallel/lane-media/A-R1-20261111/evidence/draft-processor-real-1794408261304/observed.json\n?? docs/parallel/lane-media/A-R1-20261111/evidence/draft-processor-real-1794416514046/film.html\n?? docs/parallel/lane-media/A-R1-20261111/evidence/draft-processor-real-1794416514046/observed.json\n?? docs/parallel/lane-media/A-R1-20261111/evidence/draft-processor-real-1794416805157/film.html\n?? docs/parallel/lane-media/A-R1-20261111/evidence/draft-processor-real-1794416805157/observed.json\n?? docs/parallel/lane-media/A-R1-20261111/logs/tsc-after-correction-round.meta.json\n?? docs/parallel/lane-media/A-R1-20261111/logs/tsc-after-proof-ports.meta.json\n?? docs/parallel/lane-media/A-R1-20261111/logs/tsc-after-tests-and-preview-fixes.meta.json\n?? docs/parallel/lane-media/A-R1-20261111/logs/vitest-architecture-fitness-after-corrections.meta.json\n?? docs/parallel/lane-media/A-R1-20261111/logs/vitest-architecture-fitness.meta.json\n?? docs/parallel/lane-media/A-R1-20261111/logs/vitest-collect-only-after-corrections.meta.json\n?? docs/parallel/lane-media/A-R1-20261111/logs/vitest-collect-only-new-tests.meta.json\n?? docs/parallel/lane-media/A-R1-20261111/logs/vitest-contracts.meta.json\n?? docs/parallel/lane-media/A-R1-20261111/logs/vitest-heavy-preview-002.meta.json\n?? docs/parallel/lane-media/A-R1-20261111/logs/vitest-lightweight-unit.meta.json\n?? docs/parallel/lane-media/A-R1-20261111/run-ticket-command.sh\n",
+    "ack": "STOPPED writing both paths; MAIN sole root-fix writer; no helper/test/media command launched or in flight by this parent, REAL002 suspended; old failed R1 Claude735622 retained idle and not resumed, stopped R2 Claude1424331 absent; no reset/stash/cleanup, all candidate and dirty bytes preserved",
+    "scope": "No phase/R2/A/human PASS; remaining other paths no active writes"
+  },
+  "files": [
+    {
+      "path": "src/host/render/committed-render-phases.ts",
+      "sha256": "0d4dbf159e7ce639d823d87618ee15078aefd17f57c1e0b068be02d4cf821e5a"
+    },
+    {
+      "path": "tests/agent-driven/media/committed-render-phases.test.ts",
+      "sha256": "a1e73c68bcfbd960ff34ee33f94d1dd314cb1699b691edf34de950bb4088e7fb"
+    }
+  ],
+  "scope": "two exact frozen paths; lane originals and all dirty data untouched"
+}

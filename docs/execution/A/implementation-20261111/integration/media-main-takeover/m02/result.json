@@ -1,0 +1,31 @@
+{
+  "base_main": "d8adb9c0d3fb698b960585ba85ba2d2561211b3a",
+  "argv": [
+    "corepack",
+    "pnpm",
+    "test",
+    "tests/agent-driven/media/committed-render-phases.test.ts",
+    "--maxWorkers=1",
+    "--minWorkers=1",
+    "-t",
+    "releases every opened root descriptor"
+  ],
+  "before": {
+    "exit": 1,
+    "reason": "fixture unnecessarily called prepareEncoded; missing MAIN renderStageKeys dependency, not leak evidence"
+  },
+  "before2": {
+    "exit": 1,
+    "reason": "actual six leaked root descriptors from six rejected ancestor aliases"
+  },
+  "after": {
+    "exit": 0,
+    "tests": 1,
+    "skipped": 48
+  },
+  "files": {
+    "src/host/render/committed-render-phases.ts": "1efafa3326cdc4a8289e47f71b9dc53f0586ed321173e443bf3b9293bbde92cf",
+    "tests/agent-driven/media/committed-render-phases.test.ts": "7df4d32dab4482c4987ed3df450df18ed71842dc7245013aaad9031d0ff31185"
+  },
+  "scope": "pure temporary filesystem fake-render module; no Host/media tool/browser; rest of phases and integration NOT_RUN"
+}
