@@ -1,0 +1,30 @@
+{
+  "base": "c5234fef7a03087744842ec8381ad7d3192576b3",
+  "status": "IMPLEMENTED_LIGHT_VERIFIED_REAL_CASES_NOT_RUN",
+  "implementation": [
+    "private runtime cleanup ownership retained before opaque proof revocation",
+    "all guards/verifier/held/stage resources attempted independently",
+    "shared resource identity prevents duplicate close across cleanup owners",
+    "primary and cleanup failures retained, safe ProductError CAPABILITY_UNAVAILABLE503 nonretryable/reconciliation",
+    "close waits pending publishes and drains all ownership; rejected barrier may be retried at original object methods",
+    "historical uncertain native-close faults stay recorded; later no-op is not proof of cleanup, no raw descriptor retry",
+    "native verifier and retained-tree cleanup exceptions preserve primary and underlying failures"
+  ],
+  "actual_verification": {
+    "n3-cleanup-light-004": "11PASS (6 bookkeeping +5real filesystem retained-tree)",
+    "typecheck28": "exit0"
+  },
+  "earlier_verification": "n3-cleanup-unit001/light002/light003 and typecheck25/26/27 preserved; final code differs from their source byte sets as expected",
+  "real_tests_written": [
+    "N3 real publication verifier release failure",
+    "N3 real publication first guard close failure",
+    "N3 real publication primary fsync plus cleanup failure"
+  ],
+  "real_tests_status": "NOT_RUN until BRIDGE heavy slot returned and confirmed; no old implementation counterfactual yet",
+  "independent": "REVIEW_PENDING",
+  "limits": [
+    "bookkeeping unit faults do not substitute for real publication proof",
+    "no actual OS kernel close failure claimed; uncertain native close requires controlled runtime reconciliation/restart",
+    "all32 current adoption tests/full integration/recovery/nativeAck/export/A pending"
+  ]
+}

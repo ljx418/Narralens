@@ -13,6 +13,7 @@ import {planNativeDraft,draftVtt,frameSeconds,type DraftPlan} from '../render/na
 import {verifyRenderPin} from '../render/upstream-pin.js';
 import type {StagedNativeDraft,NativeDraftAsset,CompletedPreparedSourceV1,PreparedReadBindingV1,PreparedAdoptionBindingV1,PreparedReadProofV1,PreparedAdoptionProofV1} from '../render/assembly-ports.js';
 import type {LocalAsset} from './local-asset-registry.js';
+import {PublicationCleanupError} from './publication-cleanup.js';
 import type {TaskReservation,TaskLease,PreparedTaskFact} from './created-task-store.js';
 
 const META='prepared-native.json';
@@ -22,6 +23,7 @@ const HASH=/^[a-f0-9]{64}$/;
 const reject=()=>new ProductError('REVISION_CONFLICT','Prepared native source is stale or unverified');
 function check(value:unknown):asserts value {if(!value)throw reject();}
 function failure(error:unknown):never {
+ if(error instanceof PublicationCleanupError)throw error;
  if(error&&typeof error==='object'){
   const resource=asHostResourceError(error);if(resource)throw resource;
   if(error instanceof ProductError)throw new ProductError(error.code,'Prepared native source verification could not complete');
@@ -74,6 +76,7 @@ export class PreparedDraftVerifier {
  readonly #blobPath:(asset:LocalAsset)=>string;
  readonly #proofs=new WeakMap<object,RecordProof>();
  readonly #records=new Set<RecordProof>();
+ readonly #cleanupFaults=new Set<unknown>();
  readonly #pending=new Set<Promise<unknown>>();
  #closing:Promise<void>|undefined;
  #closed=false;
@@ -144,18 +147,22 @@ export class PreparedDraftVerifier {
   this.#tree(record);
  }
  #dispose(record:RecordProof):void {
-  if(record.closed)return;record.closed=true;this.#records.delete(record);let failed=false;
-  for(const fd of [...record.fds].reverse()){record.fds.delete(fd);try{closeSync(fd);}catch{failed=true;}}
-  if(failed)throw new ProductError('CAPABILITY_UNAVAILABLE','Prepared source descriptors could not close');
+  if(record.closed)return;record.closed=true;this.#records.delete(record);const failures:unknown[]=[];
+  for(const fd of [...record.fds].reverse()){record.fds.delete(fd);try{closeSync(fd);}catch(error){failures.push(error);}}
+  if(failures.length){for(const error of failures)this.#cleanupFaults.add(error);throw new PublicationCleanupError(failures);}
  }
  release(proof:object):void {const record=this.#proofs.get(proof);if(!record)return;this.#proofs.delete(proof);this.#dispose(record);}
  close():Promise<void> {
   this.#closed=true;
   return this.#closing??=(async()=>{
-   let failed=false;for(const record of [...this.#records])try{this.#dispose(record);}catch{failed=true;}
-   await Promise.allSettled([...this.#pending]);
-   for(const record of [...this.#records])try{this.#dispose(record);}catch{failed=true;}
-   if(failed)throw new ProductError('CAPABILITY_UNAVAILABLE','Prepared source descriptors could not close');
+   const failures=new Set<unknown>(this.#cleanupFaults);
+   const collect=(error:unknown)=>{if(error instanceof PublicationCleanupError)for(const cause of error.errors)failures.add(cause);else failures.add(error);};
+   for(const record of [...this.#records])try{this.#dispose(record);}catch(error){collect(error);}
+   const pending=await Promise.allSettled([...this.#pending]);
+   for(const result of pending)if(result.status==='rejected'&&result.reason instanceof PublicationCleanupError)collect(result.reason);
+   for(const record of [...this.#records])try{this.#dispose(record);}catch(error){collect(error);}
+   for(const error of this.#cleanupFaults)failures.add(error);
+   if(failures.size)throw new PublicationCleanupError([...failures]);
   })();
  }
  async #format():Promise<NativeFormat>{
@@ -248,7 +255,10 @@ export class PreparedDraftVerifier {
    check(same(digest.manifest.assets.map(a=>({path:a.path,sha256:a.sha256,bytes:a.size})).sort((a,b)=>a.path<b.path?-1:1),draft.assets.map(a=>({path:a.path,sha256:a.sha256,bytes:a.bytes})).sort((a,b)=>a.path<b.path?-1:1)));
    const fact=freeze({format:'narralens.created-task-prepared@1',stage_token:task.stage_token,source_digest:digest.source_digest,plan_digest:plan.digest,rights_digest:canonicalDigest(record.registry),files:structuredClone([...files]),roots:[...roots]} as PreparedTaskFact);
    if(options.expected)check(same(fact,options.expected));record.factDigest=canonicalDigest(fact);const proof=Object.freeze(options.proofValue??{});this.#proofs.set(proof,record);return {fact,proof};
-  }catch(error){this.#dispose(record);failure(error);}
+  }catch(error){
+   try{this.#dispose(record);}catch(cleanup){throw new PublicationCleanupError([error,cleanup]);}
+   failure(error);
+  }
  }
  async prove(task:TaskReservation,lease:TaskLease,draft:StagedNativeDraft,registryFacts:readonly LocalAsset[]):Promise<{fact:PreparedTaskFact;proof:object}>{
   let work:Promise<{fact:PreparedTaskFact;proof:object}>|undefined;

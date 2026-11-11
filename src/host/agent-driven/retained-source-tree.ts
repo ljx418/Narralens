@@ -5,6 +5,7 @@ import {canonicalDigest} from '../creative/digest.js';
 import {ProductError} from '../creative/trusted-context.js';
 import {assertSafeRelativePath} from '../render/snapshot-copy.js';
 import type {PreparedSourceFileFact} from './created-source-ports.js';
+import {PublicationCleanupError} from './publication-cleanup.js';
 function fail(_code:'REVISION_CONFLICT',message:string):never{throw new ProductError('REVISION_CONFLICT',message);}
 
 /** A retained tree guards original file descriptors, names and complete membership. */
@@ -28,7 +29,10 @@ export class RetainedSourceTree {
         if(!info.isFile())fail('REVISION_CONFLICT','The source entry is not a regular file');
       }
       this.verify();
-    } catch(error) { this.close(); throw error; }
+    } catch(error) {
+      try { this.close(); } catch(cleanup) { throw new PublicationCleanupError([error,cleanup]); }
+      throw error;
+    }
   }
   /** Follow the actual retained directory through a Host rename. Never reopen the
    * backup and establish a new inode as authority merely because its bytes match. */
@@ -93,9 +97,12 @@ export class RetainedSourceTree {
       chunks.push(chunk.subarray(0,count));offset+=count;}
     this.verify();return Buffer.concat(chunks,offset);
   }
-  close():void {if(this.#closed)return;this.#closed=true;let failed=false;for(const f of [...this.#files.values()].reverse())try{closeSync(f.fd);}catch{failed=true;}
-    for(const d of [...this.#dirs.values()].reverse())try{closeSync(d.fd);}catch{failed=true;}
-    this.#files.clear();this.#dirs.clear();if(failed)fail('REVISION_CONFLICT','Source descriptors could not be closed');}
+  close():void {if(this.#closed)return;this.#closed=true;const failures:unknown[]=[];
+    for(const f of [...this.#files.values()].reverse())try{closeSync(f.fd);}catch(error){failures.push(error);}
+    for(const d of [...this.#dirs.values()].reverse())try{closeSync(d.fd);}catch(error){failures.push(error);}
+    this.#files.clear();this.#dirs.clear();
+    if(failures.length)throw new PublicationCleanupError(failures);
+  }
 }
 const directoryStamp=(s:BigIntStats)=>`${s.dev}:${s.ino}:${s.mode}:${s.uid}`;
 const stamp=(s:BigIntStats)=>`${directoryStamp(s)}:${s.size}:${s.mtimeNs}:${s.ctimeNs}`;

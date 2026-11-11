@@ -18,6 +18,7 @@ import type {PreparedDraftVerifier} from './prepared-draft-verifier.js';
 import type {CompletedPreparedSourceV1,PreparedAdoptionBindingV1,PreparedAdoptionProofV1} from '../render/assembly-ports.js';
 import type {StagedNativeDraft} from '../render/assembly-ports.js';
 import type {Storyboard} from '../../contracts/agent-driven-types.js';
+import {PublicationCleanup,PublicationCleanupError,type PublicationCleanupResource} from './publication-cleanup.js';
 
 /**
  * The publication journal of the created source.
@@ -170,6 +171,7 @@ export class CreatedSourcePublisher {
   readonly #tasks:CreatedTaskStore;readonly #verifier:PreparedDraftVerifier;readonly #stageDomainRoot:string;
   readonly #now:()=>Date;readonly #fsync:(path:string)=>Promise<void>;readonly #instance=`publisher_${randomUUID()}`;
   readonly #issued=new Set<object>();readonly #pending=new Set<Promise<unknown>>();
+  readonly #cleanup=new PublicationCleanup();
   #failed=false;#closed=false;#closing:Promise<void>|undefined;
   constructor(options:CreatedSourcePublisherOptions){
     this.#owner=options.revisions;this.#db=options.revisions.compose(db=>db);this.#authorRoot=resolve(options.authorRoot);this.#privateRoot=resolve(options.privateRoot);
@@ -184,7 +186,13 @@ export class CreatedSourcePublisher {
   isUsable():boolean{return !this.#closed&&!this.#failed;}
   #assertOpen():void{if(!this.isUsable())fail('REVISION_CONFLICT','Publisher is not usable');}
   publish(input:PublishCreatedSourceInput):Promise<CreatedSourcePublicationProof>{
-    this.#assertOpen();const task=Promise.resolve().then(()=>this.#publish(freeze(structuredClone(input))));this.#pending.add(task);
+    this.#assertOpen();const cleanupOwner={};
+    const task=Promise.resolve().then(()=>this.#publish(freeze(structuredClone(input)))).catch(error=>{
+      if(error instanceof PublicationCleanupError || (error && typeof error==='object' && 'requires_reconciliation' in error && error.requires_reconciliation===true)){
+        this.#failed=true;this.#cleanup.recordFailure(cleanupOwner,error);
+      }
+      throw error;
+    });this.#pending.add(task);
     return task.finally(()=>this.#pending.delete(task));
   }
   #row(sql:string,...args:string[]):Record<string,unknown>{const value=this.#db.prepare(sql).get(...args);if(!value)fail('REVISION_CONFLICT','Publication fact missing');return value;}
@@ -254,7 +262,18 @@ export class CreatedSourcePublisher {
     const expected=resolve(this.#stageDomainRoot,task.stage_token,'attempt-'+attempt,'source');
     if(input.stage_root!==expected||mapping.stage_root!==expected)fail('REVISION_CONFLICT','Prepared location is not producer-owned');
     const held=new RetainedTree(expected,fact.files);
-    try{return await this.#publishGuarded(input,held);}finally{held.close();}
+    let result:CreatedSourcePublicationProof|undefined,primary:unknown;
+    try{result=await this.#publishGuarded(input,held);return result;}
+    catch(error){primary=error;throw error;}
+    finally{
+      this.#cleanup.register(held,[{identity:held,close:()=>held.close()}]);
+      try{this.#cleanup.run(held);}
+      catch(error){
+        this.#failed=true;const failures:unknown[]=[...(primary===undefined?[]:[primary]),error];
+        if(result)try{this.release(result);}catch(releaseError){failures.push(releaseError);}
+        throw new PublicationCleanupError(failures);
+      }
+    }
   }
   async #publishGuarded(input:PublishCreatedSourceInput,held:RetainedTree):Promise<CreatedSourcePublicationProof>{
     this.#assertOpen();const plan=this.#plan(input),active=this.#owner.activeCommit(input.project_id)!;
@@ -305,6 +324,7 @@ export class CreatedSourcePublisher {
     const originalFiles=manifestFiles(originalDigest),blobGuards:RetainedTree[]=[];
     let originalGuard:RetainedTree|undefined,stageGuard:RetainedTree|undefined,workspace='',moved=false,published=false,transferred=false;
     const finalGuards:RetainedTree[]=[];let issuedToken:object|undefined;
+    const cleanupOwner={};let primary:unknown;
     try{
       originalGuard=new RetainedTree(this.#authorRoot,originalFiles);stageGuard=new RetainedTree(input.stage_root,targetFiles);
       for(const asset of registry){const path=this.#assets.blobPathForFact(asset);blobGuards.push(new RetainedTree(dirname(path),[{relative_path:basename(path),sha256:asset.sha256,bytes:asset.bytes}],false));}
@@ -340,14 +360,28 @@ export class CreatedSourcePublisher {
       this.assertCurrentForCommit(proof,this.#owner,{...input,selection_version:plan.selection_version});
       transferred=true;return proof;
     }catch(error){
-      if(issuedToken){liveProofs.delete(issuedToken);this.#issued.delete(issuedToken);}
-      this.#failed=true;
-      for(const guard of finalGuards)guard.close();for(const guard of blobGuards)guard.close();
-      // After either rename the durable journal and all evidence remain for recovery.
-      // Never erase the original backup or conceal an unproven compensation.
-      if(!moved&&workspace)await rm(workspace,{recursive:true,force:true});
+      primary=error;this.#failed=true;
+      if(issuedToken)this.#retire(issuedToken);
       throw error;
-    }finally{originalGuard?.close();stageGuard?.close();if(!transferred)this.#verifier.release(preparedProof);void published;}
+    }finally{
+      const guards=[...(originalGuard?[originalGuard]:[]),...(stageGuard?[stageGuard]:[]),
+        ...(!transferred?[...finalGuards,...blobGuards]:[])];
+      const resources:PublicationCleanupResource[]=guards.map(guard=>({identity:guard,close:()=>guard.close()}));
+      if(!transferred)resources.push({identity:preparedProof,close:()=>this.#verifier.release(preparedProof)});
+      this.#cleanup.register(cleanupOwner,resources);
+      const failures:unknown[]=[];
+      try{this.#cleanup.run(cleanupOwner);}catch(error){failures.push(error);}
+      // After either rename preserve original backup/journal for recovery. Never
+      // erase evidence or claim an unproven compensation succeeded.
+      if(primary!==undefined&&!moved&&workspace)try{await rm(workspace,{recursive:true,force:true});}
+      catch(error){this.#cleanup.recordFailure(cleanupOwner,error);failures.push(error);}
+      // A temporary-guard cleanup failure after issuance must also revoke the
+      // would-be returned token and attempt every transferred resource.
+      if(failures.length&&issuedToken)this.#retire(issuedToken);
+      if(issuedToken&&!liveProofs.has(issuedToken))try{this.#cleanup.run(issuedToken);}catch(error){failures.push(error);}
+      if(failures.length){this.#failed=true;throw new PublicationCleanupError([...(primary===undefined?[]:[primary]),...failures]);}
+      void published;
+    }
   }
   assertCurrentForCommit(value:unknown,owner:RevisionStore,expected:PublicationCommitExpectation):void{
     this.#assertOpen();if(owner!==this.#owner||!value||typeof value!=='object')fail('REVISION_CONFLICT','Publication owner differs');
@@ -374,12 +408,28 @@ export class CreatedSourcePublisher {
     if(!value||typeof value!=='object')fail('REVISION_CONFLICT','Proof missing');const proof=liveProofs.get(value);if(!proof)fail('REVISION_CONFLICT','Proof not issued');
     this.assertCurrentForCommit(value,this.#owner,{...expected,selection_version:proof.plan.selection_version});
   }
+  #retire(value:object):void{
+    const proof=liveProofs.get(value);if(!proof||proof.issuer!==this)return;
+    // Preserve all cleanup ownership BEFORE revoking opaque commit authority.
+    this.#cleanup.register(value,[{identity:proof.preparedProof,close:()=>this.#verifier.release(proof.preparedProof)},
+      ...proof.guards.map(guard=>({identity:guard,close:()=>guard.close()}))]);
+    liveProofs.delete(value);this.#issued.delete(value);
+  }
   release(value:unknown):void{
     if(!value||typeof value!=='object')return;
-    const proof=liveProofs.get(value);if(!proof||proof.issuer!==this)return;liveProofs.delete(value);this.#issued.delete(value);this.#verifier.release(proof.preparedProof);for(const guard of proof.guards)guard.close();
+    this.#retire(value);
+    try{this.#cleanup.run(value);}catch(error){this.#failed=true;throw error;}
   }
   close():Promise<void>{
-    this.#closed=true;return this.#closing??=(async()=>{await Promise.allSettled([...this.#pending]);for(const proof of [...this.#issued])this.release(proof);})();
+    this.#closed=true;if(this.#closing)return this.#closing;
+    const closing=(async()=>{
+      await Promise.allSettled([...this.#pending]);
+      for(const proof of [...this.#issued])this.#retire(proof);
+      this.#cleanup.drain();
+    })();
+    this.#closing=closing;
+    void closing.catch(()=>{if(this.#closing===closing)this.#closing=undefined;});
+    return closing;
   }
   journal(id:string):PublicationJournalRow|undefined{
     const r=this.#db.prepare('SELECT * FROM created_publication_journal WHERE journal_id=?').get(id);if(!r)return undefined;

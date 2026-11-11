@@ -1,0 +1,15 @@
+
+> narralens@0.1.0 test /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+> vitest run --config vitest.config.ts tests/agent-driven/integration/publication-cleanup.test.ts tests/agent-driven/integration/retained-source-tree.test.ts --maxWorkers=1 --minWorkers=1
+
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+ ✓ tests/agent-driven/integration/retained-source-tree.test.ts (5 tests) 18ms
+ ✓ tests/agent-driven/integration/publication-cleanup.test.ts (6 tests) 4ms
+
+ Test Files  2 passed (2)
+      Tests  11 passed (11)
+   Start at  04:49:17
+   Duration  4.57s (transform 153ms, setup 0ms, collect 743ms, tests 22ms, environment 0ms, prepare 2.52s)
+

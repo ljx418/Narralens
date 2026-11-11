@@ -13,6 +13,8 @@ import {CreatedSourceChangeService} from '../../../src/host/agent-driven/created
 import {CreatedSourceFactsReader} from '../../../src/host/agent-driven/created-source-facts-reader.js';
 import {CreativeProjectAuthority} from '../../../src/host/agent-driven/creative-project-authority.js';
 import {CreatedSourcePublisher,isCreatedSourcePublicationProof,preparedSourceConsumerGraph} from '../../../src/host/agent-driven/created-source-publisher.js';
+import {PublicationCleanupError} from '../../../src/host/agent-driven/publication-cleanup.js';
+import {RetainedSourceTree} from '../../../src/host/agent-driven/retained-source-tree.js';
 import {ProductSqliteRepository} from '../../../src/host/agent-driven/product-sqlite-repository.js';
 import {RevisionStore} from '../../../src/host/projects/revision-store.js';
 import {SnapshotStore,snapshotIdFor} from '../../../src/host/projects/snapshot-store.js';
@@ -30,7 +32,7 @@ import type {ProductTransaction} from '../../../src/host/creative/product-reposi
 // It never claims that a person reviewed the film or that the review UI path passed.
 const cleanups:Array<()=>Promise<void>>=[];
 afterEach(async()=>{vi.restoreAllMocks();for(const close of cleanups.splice(0).reverse())await close();});
-async function fixture(options:{transactionKind?:'edit'|'snapshot_publish';mutatePlan?:(plan:PreparedAdoptionPlanV1)=>void;fsync?:(path:string)=>Promise<void>;onPrepared?:(f:Awaited<ReturnType<typeof preparedDraftFixture>>)=>void}={}){
+async function fixture(options:{transactionKind?:'edit'|'snapshot_publish';mutatePlan?:(plan:PreparedAdoptionPlanV1)=>void;fsync?:(path:string)=>Promise<void>;onPrepared?:(f:Awaited<ReturnType<typeof preparedDraftFixture>>)=>void;onPublisher?:(publisher:CreatedSourcePublisher,close:()=>Promise<void>)=>void}={}){
  const f=await preparedDraftFixture();cleanups.push(f.close);f.worker.start();const completed=await waitForCompletedDraft(f);await f.worker.close();
  const revisions=f.host.revisions,repo=f.repo,now=new Date(),execution=f.task.request.execution;
  if(completed.fact.plan_digest===null)throw Error('Assembly must produce a native plan digest');
@@ -122,16 +124,69 @@ async function fixture(options:{transactionKind?:'edit'|'snapshot_publish';mutat
  for(const [from,to]of [['received','preconditions_checked'],['preconditions_checked','staged'],['staged','validated'],['validated','prepared']] as const)revisions.transition(transactionId,from,to);
  const publisher=new CreatedSourcePublisher({revisions,authorRoot:f.authorRoot,privateRoot:join(f.root,'publication'),snapshots:new SnapshotStore({snapshotsRoot:join(f.root,'snapshots')}),
   selection:{currentSelectionVersion:()=>selection},assets:f.registry,tasks:f.tasks,verifier:f.verifier,stageDomainRoot:f.taskRoot,...(options.fsync?{fsync:options.fsync}:{})});
- cleanups.push(()=>publisher.close());
+ const closePublisher=()=>publisher.close();cleanups.push(closePublisher);options.onPublisher?.(publisher,closePublisher);
  const publicationInput={project_id:f.projectId,transaction_id:transactionId,prepared_source_id:mapping.prepared_source_id,stage_root:completed.root,files:plan.files,
   original_source_digest:plan.base_source_digest,published_source_digest:plan.target_source_digest,target_snapshot_id:plan.target_snapshot_id};
  const proof=await publisher.publish(publicationInput);
  const input:CommitPreparedCreatedSourceInput={project_id:f.projectId,transaction_id:transactionId,impact_id:impactId,approval_id:approvalId,prepared_source_id:mapping.prepared_source_id,
   execution,idempotency_key:'module-apply',request_digest:requestDigest,publication_proof:proof};
- return {...f,revisions,repo,plan,impact,adoptions,publisher,input,publicationInput,proof,advanceSelection:()=>selection++};
+ return {...f,revisions,repo,plan,impact,adoptions,publisher,closePublisher,input,publicationInput,proof,advanceSelection:()=>selection++};
 }
 
 describe('actual closed created-source commit and publisher',()=>{
+ const leaves=(error:unknown):unknown[]=>error instanceof PublicationCleanupError?error.errors.flatMap(leaves):[error];
+ const ownFaultCleanup=(close:()=>Promise<void>)=>{const index=cleanups.indexOf(close);expect(index).toBeGreaterThanOrEqual(0);cleanups.splice(index,1);};
+ const settleFaultCleanup=async(publisher:CreatedSourcePublisher,known:readonly unknown[])=>{
+  try{await publisher.close();}catch(error){
+   if(!(error instanceof PublicationCleanupError)||leaves(error).some(cause=>!known.includes(cause)))throw error;
+  }
+ };
+ it('N3 real publication attempts every guard when verifier release fails and never revives the proof',async()=>{
+  const f=await fixture();ownFaultCleanup(f.closePublisher);
+  const fault=new Error('injected verifier release before close'),roots:string[]=[],original=RetainedSourceTree.prototype.close;
+  const guardSpy=vi.spyOn(RetainedSourceTree.prototype,'close').mockImplementation(function(this:RetainedSourceTree){roots.push(this.root);return original.call(this);});
+  const releaseSpy=vi.spyOn(f.verifier,'release').mockImplementationOnce(()=>{throw fault;});
+  try{
+   expect(()=>f.publisher.release(f.proof)).toThrow(PublicationCleanupError);
+   expect(isCreatedSourcePublicationProof(f.proof)).toBe(false);expect(f.publisher.isUsable()).toBe(false);
+   expect(roots).toEqual(expect.arrayContaining([f.authorRoot,f.proof.facts.backup_root,join(f.root,'snapshots',f.projectId,f.plan.target_snapshot_id,'source')]));
+   releaseSpy.mockRestore();guardSpy.mockRestore();
+   const first=f.publisher.close(),second=f.publisher.close();expect(second).toBe(first);
+   await Promise.all([expect(first).rejects.toBeInstanceOf(PublicationCleanupError),expect(second).rejects.toBeInstanceOf(PublicationCleanupError)]);
+   expect(()=>f.revisions.commitPreparedCreatedSource(f.input)).toThrow();expect(f.revisions.activeCommit(f.projectId)?.revision).toBe(1);
+  }finally{releaseSpy.mockRestore();guardSpy.mockRestore();await settleFaultCleanup(f.publisher,[fault]);}
+ },120000);
+ it('N3 real publication attempts other guards after the first guard close fails',async()=>{
+  const f=await fixture();ownFaultCleanup(f.closePublisher);
+  const fault=new Error('injected guard close before close'),completed:string[]=[],original=RetainedSourceTree.prototype.close;let injected=false;
+  const spy=vi.spyOn(RetainedSourceTree.prototype,'close').mockImplementation(function(this:RetainedSourceTree){
+   if(!injected){injected=true;throw fault;}original.call(this);completed.push(this.root);
+  });
+  try{
+   expect(()=>f.publisher.release(f.proof)).toThrow(PublicationCleanupError);expect(injected).toBe(true);
+   expect(completed).toEqual(expect.arrayContaining([f.authorRoot,f.proof.facts.backup_root]));
+   expect(isCreatedSourcePublicationProof(f.proof)).toBe(false);
+  }finally{spy.mockRestore();await settleFaultCleanup(f.publisher,[fault]);}
+ },120000);
+ it('N3 real publication preserves the primary publish failure and cleanup failures together',async()=>{
+  const primary=new Error('injected publish fsync failure'),cleanup=new Error('injected cleanup before close');
+  let prepared:Awaited<ReturnType<typeof preparedDraftFixture>>|undefined,publisher:CreatedSourcePublisher|undefined,armed=false,injected=false;
+  let spy:ReturnType<typeof vi.spyOn>|undefined;
+  const original=RetainedSourceTree.prototype.close;
+  try{
+   let failure:unknown;
+   try{await fixture({onPrepared:f=>{prepared=f;spy=vi.spyOn(RetainedSourceTree.prototype,'close').mockImplementation(function(this:RetainedSourceTree){
+     if(armed&&!injected){injected=true;throw cleanup;}return original.call(this);
+    });},onPublisher:(value,close)=>{publisher=value;ownFaultCleanup(close);},fsync:async path=>{
+     if(path.includes('/staging/')&&path.endsWith('/film.html')){armed=true;throw primary;}
+     const fd=await open(path,'r');try{await fd.sync();}finally{await fd.close();}
+    }});}catch(error){failure=error;}
+   expect(injected).toBe(true);expect(failure).toBeInstanceOf(PublicationCleanupError);
+   expect(leaves(failure)).toEqual(expect.arrayContaining([primary,cleanup]));
+   expect(await readFile(join(prepared!.authorRoot,'film.html'))).toEqual(prepared!.authorBytes);
+   expect(prepared!.host.revisions.activeCommit(prepared!.projectId)?.revision).toBe(1);
+  }finally{spy?.mockRestore();if(publisher)await settleFaultCleanup(publisher,[primary,cleanup]);}
+ },120000);
  it('refuses authority expiring during the final creative closure scan',async()=>{
   const f=await fixture(),workflow=new FixedWorkflowService({repository:f.repo});
   const before=await workflow.readWorkflow(f.projectId,f.owner),outbox=f.revisions.outboxRowCount();
