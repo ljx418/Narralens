@@ -147,9 +147,10 @@ describe('actual closed created-source commit and publisher',()=>{
   const guardSpy=vi.spyOn(RetainedSourceTree.prototype,'close').mockImplementation(function(this:RetainedSourceTree){roots.push(this.root);return original.call(this);});
   const releaseSpy=vi.spyOn(f.verifier,'release').mockImplementationOnce(()=>{throw fault;});
   try{
-   expect(()=>f.publisher.release(f.proof)).toThrow(PublicationCleanupError);
-   expect(isCreatedSourcePublicationProof(f.proof)).toBe(false);expect(f.publisher.isUsable()).toBe(false);
+   let failure:unknown;try{f.publisher.release(f.proof);}catch(error){failure=error;}
+   expect(isCreatedSourcePublicationProof(f.proof)).toBe(false);
    expect(roots).toEqual(expect.arrayContaining([f.authorRoot,f.proof.facts.backup_root,join(f.root,'snapshots',f.projectId,f.plan.target_snapshot_id,'source')]));
+   expect(failure).toBeInstanceOf(PublicationCleanupError);expect(f.publisher.isUsable()).toBe(false);
    releaseSpy.mockRestore();guardSpy.mockRestore();
    const first=f.publisher.close(),second=f.publisher.close();expect(second).toBe(first);
    await Promise.all([expect(first).rejects.toBeInstanceOf(PublicationCleanupError),expect(second).rejects.toBeInstanceOf(PublicationCleanupError)]);
@@ -163,9 +164,10 @@ describe('actual closed created-source commit and publisher',()=>{
    if(!injected){injected=true;throw fault;}original.call(this);completed.push(this.root);
   });
   try{
-   expect(()=>f.publisher.release(f.proof)).toThrow(PublicationCleanupError);expect(injected).toBe(true);
+   let failure:unknown;try{f.publisher.release(f.proof);}catch(error){failure=error;}
+   expect(injected).toBe(true);
    expect(completed).toEqual(expect.arrayContaining([f.authorRoot,f.proof.facts.backup_root]));
-   expect(isCreatedSourcePublicationProof(f.proof)).toBe(false);
+   expect(failure).toBeInstanceOf(PublicationCleanupError);expect(isCreatedSourcePublicationProof(f.proof)).toBe(false);
   }finally{spy.mockRestore();await settleFaultCleanup(f.publisher,[fault]);}
  },120000);
  it('N3 real publication preserves the primary publish failure and cleanup failures together',async()=>{
@@ -181,8 +183,9 @@ describe('actual closed created-source commit and publisher',()=>{
      if(path.includes('/staging/')&&path.endsWith('/film.html')){armed=true;throw primary;}
      const fd=await open(path,'r');try{await fd.sync();}finally{await fd.close();}
     }});}catch(error){failure=error;}
-   expect(injected).toBe(true);expect(failure).toBeInstanceOf(PublicationCleanupError);
+   expect(injected).toBe(true);
    expect(leaves(failure)).toEqual(expect.arrayContaining([primary,cleanup]));
+   expect(failure).toBeInstanceOf(PublicationCleanupError);
    expect(await readFile(join(prepared!.authorRoot,'film.html'))).toEqual(prepared!.authorBytes);
    expect(prepared!.host.revisions.activeCommit(prepared!.projectId)?.revision).toBe(1);
   }finally{spy?.mockRestore();if(publisher)await settleFaultCleanup(publisher,[primary,cleanup]);}

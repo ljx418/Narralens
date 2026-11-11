@@ -1,0 +1,18 @@
+{
+  "observed": [
+    {
+      "pid": 1781075,
+      "currently_present": false
+    },
+    {
+      "pid": 1784069,
+      "currently_present": false
+    },
+    {
+      "pid": 1784794,
+      "currently_present": false
+    }
+  ],
+  "scope": "actual test node PIDs from raw logs absent after awaited commands; fixtures awaited own teardown, not a global process or historical exclusivity claim",
+  "old_control_limit": "old publisher can lose guard cleanup ownership; old Node process termination closed its remaining FDs, not old publisher.close evidence"
+}

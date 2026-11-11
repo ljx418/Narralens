@@ -1,0 +1,126 @@
+
+> narralens@0.1.0 test /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+> vitest run --config vitest.config.ts tests/agent-driven/integration/created-source-adoption.test.ts --maxWorkers=1 --minWorkers=1 -t 'N3 real publication'
+
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:1784069) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/agent-driven/integration/created-source-adoption.test.ts (32 tests | 3 failed | 29 skipped) 26242ms
+   × actual closed created-source commit and publisher > N3 real publication attempts every guard when verifier release fails and never revives the proof 9883ms
+     → expected [] to deeply equal ArrayContaining{…}
+   × actual closed created-source commit and publisher > N3 real publication attempts other guards after the first guard close fails 8418ms
+     → expected [] to deeply equal ArrayContaining{…}
+   × actual closed created-source commit and publisher > N3 real publication preserves the primary publish failure and cleanup failures together 7940ms
+     → expected [ Array(1) ] to deeply equal ArrayContaining{…}
+   ↓ actual closed created-source commit and publisher > refuses authority expiring during the final creative closure scan
+   ↓ actual closed created-source commit and publisher > rolls back checkpoint, attempt and every authority after a post-checkpoint transaction failure
+   ↓ actual closed created-source commit and publisher > poisons a swallowed read of another intake inside the project commit scope
+   ↓ actual closed created-source commit and publisher > rejects a real intake update after approval without consuming database authorities
+   ↓ actual closed created-source commit and publisher > rejects a predecessor gate changed to pending after approval
+   ↓ actual closed created-source commit and publisher > rejects a predecessor gate changed to rejected after approval
+   ↓ actual closed created-source commit and publisher > persists the same succeeded attempt in workflow checkpoint and a freshly opened SQLite reader
+   ↓ actual closed created-source commit and publisher > publishes complete native source, commits once, preserves R1 geometry and replays without a second commit
+   ↓ actual closed created-source commit and publisher > refuses a prepared transaction of another kind before publishing source
+   ↓ actual closed created-source commit and publisher > refuses a workflow attempt detached from the actual prepared job
+   ↓ actual closed created-source commit and publisher > refuses JSON-cloned publication proof without moving database authorities
+   ↓ actual closed created-source commit and publisher > refuses author bytes changed after publication even while database base is unchanged
+   ↓ actual closed created-source commit and publisher > refuses current selection changed after publication
+   ↓ actual closed created-source commit and publisher > refuses a symlink replacement of the committed snapshot source
+   ↓ actual closed created-source commit and publisher > rolls every database authority back if an actual post-consume write fails
+   ↓ actual closed created-source commit and publisher > poisons the outer transaction when a project-bound repository guard failure is swallowed
+   ↓ actual closed created-source commit and publisher > poisons the owner if a real scope is used against another database even when the error is swallowed
+   ↓ actual closed created-source commit and publisher > invalidates an authentic joined scope when its successful commit ends
+   ↓ actual closed created-source commit and publisher > does not expose mutable issuer, guard or geometry authority on a real publication token
+   ↓ actual closed created-source commit and publisher > refuses an authority that expires during final synchronous file verification
+   ↓ actual closed created-source commit and publisher > retains the original backup inode when a same-byte replacement happens after rename
+   ↓ actual closed created-source commit and publisher > refuses a fully rehashed approved plan that lies about film
+   ↓ actual closed created-source commit and publisher > refuses a fully rehashed approved plan that lies about settings
+   ↓ actual closed created-source commit and publisher > refuses a fully rehashed approved plan that lies about captions
+   ↓ actual closed created-source commit and publisher > refuses a fully rehashed approved plan that lies about native_plan
+   ↓ actual closed created-source commit and publisher > refuses a fully rehashed approved plan that lies about rights
+   ↓ actual closed created-source commit and publisher > refuses a fully rehashed approved plan that lies about consumer
+   ↓ actual closed created-source commit and publisher > refuses a fully rehashed approved plan that lies about upstream
+   ↓ actual closed created-source commit and publisher > refuses a fully rehashed approved plan that lies about ranges
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/created-source-adoption.test.ts > actual closed created-source commit and publisher > N3 real publication attempts every guard when verifier release fails and never revives the proof
+AssertionError: expected [] to deeply equal ArrayContaining{…}
+
+- Expected
++ Received
+
+- ArrayContaining [
+-   "/tmp/narralens-created-workspace-9sLy4o/projects/project_16a6a7c9c9684b2b9ae3e80f03ac69da/source",
+-   "/tmp/narralens-created-workspace-9sLy4o/publication/publication-9ce9a2a4-e1f8-4238-ae87-c019a9eb8ed5/backup",
+-   "/tmp/narralens-created-workspace-9sLy4o/snapshots/project_16a6a7c9c9684b2b9ae3e80f03ac69da/87c2f4b46f068c2f5bd0216ecff9db87e8e3b3a41b44ce5b9ac9e0839914f564/source",
+- ]
++ []
+
+ ❯ tests/agent-driven/integration/created-source-adoption.test.ts:152:18
+    150|    let failure:unknown;try{f.publisher.release(f.proof);}catch(error){…
+    151|    expect(isCreatedSourcePublicationProof(f.proof)).toBe(false);
+    152|    expect(roots).toEqual(expect.arrayContaining([f.authorRoot,f.proof.…
+       |                  ^
+    153|    expect(failure).toBeInstanceOf(PublicationCleanupError);expect(f.pu…
+    154|    releaseSpy.mockRestore();guardSpy.mockRestore();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  tests/agent-driven/integration/created-source-adoption.test.ts > actual closed created-source commit and publisher > N3 real publication attempts other guards after the first guard close fails
+AssertionError: expected [] to deeply equal ArrayContaining{…}
+
+- Expected
++ Received
+
+- ArrayContaining [
+-   "/tmp/narralens-created-workspace-ZCNDPK/projects/project_5cc0290e4dd74daf9d373609fec9a0ae/source",
+-   "/tmp/narralens-created-workspace-ZCNDPK/publication/publication-c5ebbdc5-5e6c-4224-9327-d6a32dc6b547/backup",
+- ]
++ []
+
+ ❯ tests/agent-driven/integration/created-source-adoption.test.ts:169:22
+    167|    let failure:unknown;try{f.publisher.release(f.proof);}catch(error){…
+    168|    expect(injected).toBe(true);
+    169|    expect(completed).toEqual(expect.arrayContaining([f.authorRoot,f.pr…
+       |                      ^
+    170|    expect(failure).toBeInstanceOf(PublicationCleanupError);expect(isCr…
+    171|   }finally{spy.mockRestore();await settleFaultCleanup(f.publisher,[fau…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  tests/agent-driven/integration/created-source-adoption.test.ts > actual closed created-source commit and publisher > N3 real publication preserves the primary publish failure and cleanup failures together
+AssertionError: expected [ Array(1) ] to deeply equal ArrayContaining{…}
+
+- Expected
++ Received
+
+- ArrayContaining [
+-   Error {
+-     "message": "injected publish fsync failure",
+-   },
++ [
+    Error {
+      "message": "injected cleanup before close",
+    },
+  ]
+
+ ❯ tests/agent-driven/integration/created-source-adoption.test.ts:187:28
+    185|     }});}catch(error){failure=error;}
+    186|    expect(injected).toBe(true);
+    187|    expect(leaves(failure)).toEqual(expect.arrayContaining([primary,cle…
+       |                            ^
+    188|    expect(failure).toBeInstanceOf(PublicationCleanupError);
+    189|    expect(await readFile(join(prepared!.authorRoot,'film.html'))).toEq…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 29 skipped (32)
+   Start at  04:57:23
+   Duration  33.55s (transform 3.02s, setup 0ms, collect 5.59s, tests 26.24s, environment 0ms, prepare 1.14s)
+
+ ELIFECYCLE  Test failed. See above for more details.
