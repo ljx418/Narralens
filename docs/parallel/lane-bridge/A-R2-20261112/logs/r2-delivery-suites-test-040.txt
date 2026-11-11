@@ -1,0 +1,73 @@
+command: corepack pnpm test tests/agent-driven/integration/created-render-delivery.test.ts tests/agent-driven/integration/created-delivery-recovery.test.ts tests/agent-driven/integration/created-qc-review.test.ts --maxWorkers=1 --minWorkers=1
+cwd: /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+head: 5a3c1fca7d5757978f0decf49b221bc2c624063c
+started: 2026-11-11T18:00:34Z
+--- output ---
+
+> narralens@0.1.0 test /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+> vitest run --config vitest.config.ts tests/agent-driven/integration/created-render-delivery.test.ts tests/agent-driven/integration/created-delivery-recovery.test.ts tests/agent-driven/integration/created-qc-review.test.ts --maxWorkers=1 --minWorkers=1
+
+
+ RUN  v3.2.4 /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+
+(node:1355519) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/created-render-delivery.test.ts (8 tests) 72ms
+(node:1355792) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/agent-driven/integration/created-delivery-recovery.test.ts (6 tests | 1 failed) 59ms
+   ✓ the delivery recovery > continues from the recorded encoded fact instead of encoding again 16ms
+   ✓ the delivery recovery > tells the recovery which phase the delivery reached 9ms
+   ✓ the delivery recovery > records the published phase idempotently when the record is written after the publication 8ms
+   ✓ the delivery recovery > refuses a different receipt for a phase that was already recorded 8ms
+   × the delivery recovery > keeps the recorded evidence immutable 10ms
+     → expected [Function] to throw an error
+   ✓ the delivery recovery > refuses a late phase that arrives with a lease the job no longer holds 8ms
+(node:1355968) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/agent-driven/integration/created-qc-review.test.ts (7 tests | 1 failed) 58ms
+   ✓ the quality-control gate binding > binds the gate to the receipt of a real inspection 14ms
+   ✓ the quality-control gate binding > refuses a gate that is bound to something which is not an inspection 7ms
+   ✓ the quality-control gate binding > refuses a gate that is bound to a receipt of another project 7ms
+   ✓ the quality-control gate binding > refuses a receipt that was edited after it was made 6ms
+   × the quality-control gate binding > refuses a gate that is already bound to another receipt 10ms
+     → expected [Function] to throw an error
+   ✓ the quality-control gate binding > keeps the binding immutable 8ms
+   ✓ the quality-control gate binding > does not let a chapter package stand in for an inspection 6ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/created-delivery-recovery.test.ts > the delivery recovery > keeps the recorded evidence immutable
+AssertionError: expected [Function] to throw an error
+ ❯ tests/agent-driven/integration/created-delivery-recovery.test.ts:96:110
+     94|     expect(() => db.prepare("UPDATE created_render_evidence SET media_…
+     95|       .run(`${f.request.job_id}:encoded`)).toThrow();
+     96|     expect(() => db.prepare("DELETE FROM created_delivery_phase_fact W…
+       |                                                                                                              ^
+     97|     expect(f.delivery.encodedFact(f.request.job_id)).not.toBeUndefined…
+     98|     f.revisions.close();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/agent-driven/integration/created-qc-review.test.ts > the quality-control gate binding > refuses a gate that is already bound to another receipt
+AssertionError: expected [Function] to throw an error
+ ❯ tests/agent-driven/integration/created-qc-review.test.ts:85:9
+     83|       receipt: other,
+     84|       now: new Date('2026-11-12T00:01:00.000Z'),
+     85|     })).toThrow();
+       |         ^
+     86|     f.revisions.close();
+     87|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  2 failed | 1 passed (3)
+      Tests  2 failed | 19 passed (21)
+   Start at  02:00:35
+   Duration  972ms (transform 176ms, setup 0ms, collect 427ms, tests 190ms, environment 0ms, prepare 101ms)
+
+ ELIFECYCLE  Test failed. See above for more details.
+--- end ---
+exit: 1
+finished: 2026-11-11T18:00:36Z

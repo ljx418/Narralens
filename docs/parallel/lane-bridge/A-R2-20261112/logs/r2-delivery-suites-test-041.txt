@@ -1,0 +1,29 @@
+command: corepack pnpm test tests/agent-driven/integration/created-render-delivery.test.ts tests/agent-driven/integration/created-delivery-recovery.test.ts tests/agent-driven/integration/created-qc-review.test.ts --maxWorkers=1 --minWorkers=1
+cwd: /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+started: 2026-11-11T18:01:41Z
+--- output ---
+
+> narralens@0.1.0 test /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+> vitest run --config vitest.config.ts tests/agent-driven/integration/created-render-delivery.test.ts tests/agent-driven/integration/created-delivery-recovery.test.ts tests/agent-driven/integration/created-qc-review.test.ts --maxWorkers=1 --minWorkers=1
+
+
+ RUN  v3.2.4 /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+
+(node:1374923) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/created-delivery-recovery.test.ts (6 tests) 56ms
+(node:1375186) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/created-qc-review.test.ts (7 tests) 57ms
+(node:1375326) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/created-render-delivery.test.ts (8 tests) 76ms
+
+ Test Files  3 passed (3)
+      Tests  21 passed (21)
+   Start at  02:01:42
+   Duration  1.02s (transform 180ms, setup 0ms, collect 442ms, tests 190ms, environment 0ms, prepare 115ms)
+
+--- end ---
+exit: 0
+finished: 2026-11-11T18:01:43Z

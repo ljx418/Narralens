@@ -1,0 +1,115 @@
+command: corepack pnpm test tests/agent-driven/integration/created-render-delivery.test.ts --maxWorkers=1 --minWorkers=1
+cwd: /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+started: 2026-11-11T17:57:23Z
+--- output ---
+
+> narralens@0.1.0 test /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+> vitest run --config vitest.config.ts tests/agent-driven/integration/created-render-delivery.test.ts --maxWorkers=1 --minWorkers=1
+
+
+ RUN  v3.2.4 /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+
+(node:1311529) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/agent-driven/integration/created-render-delivery.test.ts (8 tests | 5 failed) 21ms
+   × the fixed phase executor > encodes once and records the encoded fact as immutable evidence 7ms
+     → foreign key mismatch - "created_render_evidence" referencing "job"
+   × the fixed phase executor > inspects the recorded encoded fact and binds the quality-control gate as pending 2ms
+     → foreign key mismatch - "created_render_evidence" referencing "job"
+   × the fixed phase executor > publishes from the recorded bytes and records the published phase 2ms
+     → foreign key mismatch - "created_render_evidence" referencing "job"
+   × the fixed phase executor > refuses to publish a blocked inspection and a warning without a disposition 3ms
+     → foreign key mismatch - "created_render_evidence" referencing "job"
+   × the fixed phase executor > publishes a warning that has a recorded disposition 2ms
+     → foreign key mismatch - "created_render_evidence" referencing "job"
+   ✓ the fixed phase executor > refuses the work when the job does not hold a live lease 2ms
+   ✓ the fixed phase executor > refuses the work when the attempt may no longer act 1ms
+   ✓ the fixed phase executor > refuses a lease of another execution attempt 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/created-render-delivery.test.ts > the fixed phase executor > encodes once and records the encoded fact as immutable evidence
+Error: foreign key mismatch - "created_render_evidence" referencing "job"
+ ❯ CreatedRenderDeliveryStore.#writeEvidence src/host/agent-driven/created-render-delivery-store.ts:217:14
+    215|       return;
+    216|     }
+    217|     this.#db.prepare(`INSERT INTO created_render_evidence(
+       |              ^
+    218|       evidence_id, project_id, job_id, snapshot_id, source_digest, con…
+    219|       producer_execution_json, producer_lease_attempt, kind, receipt_j…
+ ❯ CreatedRenderDeliveryStore.recordEvidence src/host/agent-driven/created-render-delivery-store.ts:174:12
+ ❯ FixedPhaseExecutor.encode src/host/agent-driven/fixed-phase-executor.ts:134:26
+ ❯ tests/agent-driven/integration/created-render-delivery.test.ts:231:21
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  tests/agent-driven/integration/created-render-delivery.test.ts > the fixed phase executor > inspects the recorded encoded fact and binds the quality-control gate as pending
+Error: foreign key mismatch - "created_render_evidence" referencing "job"
+ ❯ CreatedRenderDeliveryStore.#writeEvidence src/host/agent-driven/created-render-delivery-store.ts:217:14
+    215|       return;
+    216|     }
+    217|     this.#db.prepare(`INSERT INTO created_render_evidence(
+       |              ^
+    218|       evidence_id, project_id, job_id, snapshot_id, source_digest, con…
+    219|       producer_execution_json, producer_lease_attempt, kind, receipt_j…
+ ❯ CreatedRenderDeliveryStore.recordEvidence src/host/agent-driven/created-render-delivery-store.ts:174:12
+ ❯ FixedPhaseExecutor.encode src/host/agent-driven/fixed-phase-executor.ts:134:26
+ ❯ tests/agent-driven/integration/created-render-delivery.test.ts:244:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  tests/agent-driven/integration/created-render-delivery.test.ts > the fixed phase executor > publishes from the recorded bytes and records the published phase
+Error: foreign key mismatch - "created_render_evidence" referencing "job"
+ ❯ CreatedRenderDeliveryStore.#writeEvidence src/host/agent-driven/created-render-delivery-store.ts:217:14
+    215|       return;
+    216|     }
+    217|     this.#db.prepare(`INSERT INTO created_render_evidence(
+       |              ^
+    218|       evidence_id, project_id, job_id, snapshot_id, source_digest, con…
+    219|       producer_execution_json, producer_lease_attempt, kind, receipt_j…
+ ❯ CreatedRenderDeliveryStore.recordEvidence src/host/agent-driven/created-render-delivery-store.ts:174:12
+ ❯ FixedPhaseExecutor.encode src/host/agent-driven/fixed-phase-executor.ts:134:26
+ ❯ tests/agent-driven/integration/created-render-delivery.test.ts:263:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ FAIL  tests/agent-driven/integration/created-render-delivery.test.ts > the fixed phase executor > refuses to publish a blocked inspection and a warning without a disposition
+Error: foreign key mismatch - "created_render_evidence" referencing "job"
+ ❯ CreatedRenderDeliveryStore.#writeEvidence src/host/agent-driven/created-render-delivery-store.ts:217:14
+    215|       return;
+    216|     }
+    217|     this.#db.prepare(`INSERT INTO created_render_evidence(
+       |              ^
+    218|       evidence_id, project_id, job_id, snapshot_id, source_digest, con…
+    219|       producer_execution_json, producer_lease_attempt, kind, receipt_j…
+ ❯ CreatedRenderDeliveryStore.recordEvidence src/host/agent-driven/created-render-delivery-store.ts:174:12
+ ❯ FixedPhaseExecutor.encode src/host/agent-driven/fixed-phase-executor.ts:134:26
+ ❯ tests/agent-driven/integration/created-render-delivery.test.ts:278:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+
+ FAIL  tests/agent-driven/integration/created-render-delivery.test.ts > the fixed phase executor > publishes a warning that has a recorded disposition
+Error: foreign key mismatch - "created_render_evidence" referencing "job"
+ ❯ CreatedRenderDeliveryStore.#writeEvidence src/host/agent-driven/created-render-delivery-store.ts:217:14
+    215|       return;
+    216|     }
+    217|     this.#db.prepare(`INSERT INTO created_render_evidence(
+       |              ^
+    218|       evidence_id, project_id, job_id, snapshot_id, source_digest, con…
+    219|       producer_execution_json, producer_lease_attempt, kind, receipt_j…
+ ❯ CreatedRenderDeliveryStore.recordEvidence src/host/agent-driven/created-render-delivery-store.ts:174:12
+ ❯ FixedPhaseExecutor.encode src/host/agent-driven/fixed-phase-executor.ts:134:26
+ ❯ tests/agent-driven/integration/created-render-delivery.test.ts:297:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  5 failed | 3 passed (8)
+   Start at  01:57:24
+   Duration  275ms (transform 113ms, setup 0ms, collect 137ms, tests 21ms, environment 0ms, prepare 31ms)
+
+ ELIFECYCLE  Test failed. See above for more details.
+--- end ---
+exit: 1
+finished: 2026-11-11T17:57:24Z

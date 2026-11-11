@@ -1,0 +1,141 @@
+command: corepack pnpm test tests/agent-driven/integration/created-render-delivery.test.ts --maxWorkers=1 --minWorkers=1
+cwd: /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+head: 5a3c1fca7d5757978f0decf49b221bc2c624063c
+started: 2026-11-11T17:56:29Z
+--- output ---
+
+> narralens@0.1.0 test /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+> vitest run --config vitest.config.ts tests/agent-driven/integration/created-render-delivery.test.ts --maxWorkers=1 --minWorkers=1
+
+
+ RUN  v3.2.4 /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+
+(node:1302434) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/agent-driven/integration/created-render-delivery.test.ts (8 tests | 6 failed) 26ms
+   × the fixed phase executor > encodes once and records the encoded fact as immutable evidence 9ms
+     → The render delivery schema differs from the one this build expects
+   × the fixed phase executor > inspects the recorded encoded fact and binds the quality-control gate as pending 3ms
+     → The render delivery schema differs from the one this build expects
+   × the fixed phase executor > publishes from the recorded bytes and records the published phase 2ms
+     → The render delivery schema differs from the one this build expects
+   × the fixed phase executor > refuses to publish a blocked inspection and a warning without a disposition 2ms
+     → The render delivery schema differs from the one this build expects
+   × the fixed phase executor > publishes a warning that has a recorded disposition 3ms
+     → The render delivery schema differs from the one this build expects
+   ✓ the fixed phase executor > refuses the work when the job does not hold a live lease 2ms
+   × the fixed phase executor > refuses the work when the attempt may no longer act 3ms
+     → expected +0 to be 1 // Object.is equality
+   ✓ the fixed phase executor > refuses a lease of another execution attempt 2ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/created-render-delivery.test.ts > the fixed phase executor > encodes once and records the encoded fact as immutable evidence
+CreatedRenderDeliveryError: The render delivery schema differs from the one this build expects
+ ❯ fail src/host/agent-driven/created-render-delivery-store.ts:71:9
+     69| 
+     70| function fail(code: CreatedRenderDeliveryError['code'], message: strin…
+     71|   throw new CreatedRenderDeliveryError(code, message);
+       |         ^
+     72| }
+     73| 
+ ❯ CreatedRenderDeliveryStore.#schema src/host/agent-driven/created-render-delivery-store.ts:130:7
+ ❯ CreatedRenderDeliveryStore.recordEvidence src/host/agent-driven/created-render-delivery-store.ts:143:10
+ ❯ FixedPhaseExecutor.encode src/host/agent-driven/fixed-phase-executor.ts:134:26
+ ❯ tests/agent-driven/integration/created-render-delivery.test.ts:231:21
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯
+
+ FAIL  tests/agent-driven/integration/created-render-delivery.test.ts > the fixed phase executor > inspects the recorded encoded fact and binds the quality-control gate as pending
+CreatedRenderDeliveryError: The render delivery schema differs from the one this build expects
+ ❯ fail src/host/agent-driven/created-render-delivery-store.ts:71:9
+     69| 
+     70| function fail(code: CreatedRenderDeliveryError['code'], message: strin…
+     71|   throw new CreatedRenderDeliveryError(code, message);
+       |         ^
+     72| }
+     73| 
+ ❯ CreatedRenderDeliveryStore.#schema src/host/agent-driven/created-render-delivery-store.ts:130:7
+ ❯ CreatedRenderDeliveryStore.recordEvidence src/host/agent-driven/created-render-delivery-store.ts:143:10
+ ❯ FixedPhaseExecutor.encode src/host/agent-driven/fixed-phase-executor.ts:134:26
+ ❯ tests/agent-driven/integration/created-render-delivery.test.ts:244:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/6]⎯
+
+ FAIL  tests/agent-driven/integration/created-render-delivery.test.ts > the fixed phase executor > publishes from the recorded bytes and records the published phase
+CreatedRenderDeliveryError: The render delivery schema differs from the one this build expects
+ ❯ fail src/host/agent-driven/created-render-delivery-store.ts:71:9
+     69| 
+     70| function fail(code: CreatedRenderDeliveryError['code'], message: strin…
+     71|   throw new CreatedRenderDeliveryError(code, message);
+       |         ^
+     72| }
+     73| 
+ ❯ CreatedRenderDeliveryStore.#schema src/host/agent-driven/created-render-delivery-store.ts:130:7
+ ❯ CreatedRenderDeliveryStore.recordEvidence src/host/agent-driven/created-render-delivery-store.ts:143:10
+ ❯ FixedPhaseExecutor.encode src/host/agent-driven/fixed-phase-executor.ts:134:26
+ ❯ tests/agent-driven/integration/created-render-delivery.test.ts:263:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/6]⎯
+
+ FAIL  tests/agent-driven/integration/created-render-delivery.test.ts > the fixed phase executor > refuses to publish a blocked inspection and a warning without a disposition
+CreatedRenderDeliveryError: The render delivery schema differs from the one this build expects
+ ❯ fail src/host/agent-driven/created-render-delivery-store.ts:71:9
+     69| 
+     70| function fail(code: CreatedRenderDeliveryError['code'], message: strin…
+     71|   throw new CreatedRenderDeliveryError(code, message);
+       |         ^
+     72| }
+     73| 
+ ❯ CreatedRenderDeliveryStore.#schema src/host/agent-driven/created-render-delivery-store.ts:130:7
+ ❯ CreatedRenderDeliveryStore.recordEvidence src/host/agent-driven/created-render-delivery-store.ts:143:10
+ ❯ FixedPhaseExecutor.encode src/host/agent-driven/fixed-phase-executor.ts:134:26
+ ❯ tests/agent-driven/integration/created-render-delivery.test.ts:278:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/6]⎯
+
+ FAIL  tests/agent-driven/integration/created-render-delivery.test.ts > the fixed phase executor > publishes a warning that has a recorded disposition
+CreatedRenderDeliveryError: The render delivery schema differs from the one this build expects
+ ❯ fail src/host/agent-driven/created-render-delivery-store.ts:71:9
+     69| 
+     70| function fail(code: CreatedRenderDeliveryError['code'], message: strin…
+     71|   throw new CreatedRenderDeliveryError(code, message);
+       |         ^
+     72| }
+     73| 
+ ❯ CreatedRenderDeliveryStore.#schema src/host/agent-driven/created-render-delivery-store.ts:130:7
+ ❯ CreatedRenderDeliveryStore.recordEvidence src/host/agent-driven/created-render-delivery-store.ts:143:10
+ ❯ FixedPhaseExecutor.encode src/host/agent-driven/fixed-phase-executor.ts:134:26
+ ❯ tests/agent-driven/integration/created-render-delivery.test.ts:297:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/6]⎯
+
+ FAIL  tests/agent-driven/integration/created-render-delivery.test.ts > the fixed phase executor > refuses the work when the attempt may no longer act
+AssertionError: expected +0 to be 1 // Object.is equality
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 1[39m
+[31m+ 0[39m
+
+ ❯ tests/agent-driven/integration/created-render-delivery.test.ts:320:28
+    318|     f.setVerdict('superseded');
+    319|     await expect(f.executor.encode(f.request, f.lease)).rejects.toMatc…
+    320|     expect(f.calls.encode).toBe(1);
+       |                            ^
+    321|     expect(f.delivery.encodedFact(f.request.job_id)).toBeUndefined();
+    322|     f.revisions.close();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/6]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  6 failed | 2 passed (8)
+   Start at  01:56:30
+   Duration  359ms (transform 138ms, setup 0ms, collect 167ms, tests 26ms, environment 0ms, prepare 38ms)
+
+ ELIFECYCLE  Test failed. See above for more details.
+--- end ---
+exit: 1
+finished: 2026-11-11T17:56:30Z

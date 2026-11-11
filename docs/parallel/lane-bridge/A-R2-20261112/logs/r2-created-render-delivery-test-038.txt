@@ -1,0 +1,58 @@
+command: corepack pnpm test tests/agent-driven/integration/created-render-delivery.test.ts --maxWorkers=1 --minWorkers=1
+cwd: /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+started: 2026-11-11T17:57:40Z
+--- output ---
+
+> narralens@0.1.0 test /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+> vitest run --config vitest.config.ts tests/agent-driven/integration/created-render-delivery.test.ts --maxWorkers=1 --minWorkers=1
+
+
+ RUN  v3.2.4 /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+
+(node:1315487) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/agent-driven/integration/created-render-delivery.test.ts (8 tests | 1 failed) 74ms
+   ✓ the fixed phase executor > encodes once and records the encoded fact as immutable evidence 12ms
+   ✓ the fixed phase executor > inspects the recorded encoded fact and binds the quality-control gate as pending 8ms
+   × the fixed phase executor > publishes from the recorded bytes and records the published phase 12ms
+     → expected [ 'package_published', 'qc_inspected' ] to deeply equal [ 'qc_inspected', 'package_published' ]
+   ✓ the fixed phase executor > refuses to publish a blocked inspection and a warning without a disposition 15ms
+   ✓ the fixed phase executor > publishes a warning that has a recorded disposition 7ms
+   ✓ the fixed phase executor > refuses the work when the job does not hold a live lease 7ms
+   ✓ the fixed phase executor > refuses the work when the attempt may no longer act 6ms
+   ✓ the fixed phase executor > refuses a lease of another execution attempt 7ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/created-render-delivery.test.ts > the fixed phase executor > publishes from the recorded bytes and records the published phase
+AssertionError: expected [ 'package_published', 'qc_inspected' ] to deeply equal [ 'qc_inspected', 'package_published' ]
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  [[22m
+[32m-   "qc_inspected",[39m
+[2m    "package_published",[22m
+[31m+   "qc_inspected",[39m
+[2m  ][22m
+
+ ❯ tests/agent-driven/integration/created-render-delivery.test.ts:272:71
+    270|     expect(published.parent_encoded_digest).toBe(f.delivery.encodedFac…
+    271|     expect(f.calls.publish).toBe(1);
+    272|     expect(f.delivery.phases(f.request.project_id, f.request.job_id)).…
+       |                                                                       ^
+    273|     // A second publish does not publish again.
+    274|     const again = await f.executor.publish(f.request, f.lease);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 7 passed (8)
+   Start at  01:57:40
+   Duration  444ms (transform 154ms, setup 0ms, collect 246ms, tests 74ms, environment 0ms, prepare 35ms)
+
+ ELIFECYCLE  Test failed. See above for more details.
+--- end ---
+exit: 1
+finished: 2026-11-11T17:57:41Z
