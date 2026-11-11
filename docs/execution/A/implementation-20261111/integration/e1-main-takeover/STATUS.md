@@ -39,3 +39,8 @@ Reader/publisher阶段目录现在严格由Host stageDomainRoot+原task.stage_to
 prepare-foundation-light-02：4文件63例PASS；typecheck14 PASS。runner升级v2，输入绑定扩展到src/contracts/tests/tools文本、配置/锁、D09及自身，并检查新增文件；旧runner捕获范围较窄仍原样保留，不能扩大旧证据声明。新服务及现有20个真实Host/媒体边界例尚未运行，外审未通过、生产composition/能力未准入、无UI/人验结论。
 
 三领域真实429后各Codex已按原授权成为唯一writer、旧Claude已guarded stop，保全报告由父节点给出。MEDIA REAL001夹具失败，phase NOT_RUN；PRODUCT003已取得slot并绑定原修正脚本。媒体报告另一Vitest heavy并发，MAIN读取旧BRIDGE源码证明这些文件是SQLite/临时FS+MEDIA doubles，不能凭文件名认定heavy；实际PID归属仍待原命令证据，保留旧观察不追认排他性。
+
+
+## D10事务与实际Job关系补强
+
+自审对照原D10补齐最后提交和发布前的journal marker：仅接受kind=edit且request.operation=agent.created_source.apply@1，拒绝借snapshot_publish事务写created source。原真实夹具之前误用了snapshot_publish，现已修正，并新增拒绝错误kind用例（NOT_RUN）。reader与commit也核对当前step_attempt.job_id为实际准备Job，新增脱离Job关系拒绝用例（NOT_RUN）。typecheck15通过；之前63轻量结果不扩大为本增量的真实Host验收。

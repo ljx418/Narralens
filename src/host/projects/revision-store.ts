@@ -7,7 +7,7 @@ import type { ControlledWriteFailureResponseV1, ControlledWriteResponseV1 } from
 import { HttpError } from "../api-error.js";
 import { verifyOrInsertProjectionFact } from "../adoption/adoption-store.js";
 import { assertPreparedAdoptionPlan, preparedAdoptionPlanDigest, type PreparedAdoptionPlanV1,
-  type CommitPreparedCreatedSourceInput, type CreatedSourceCommitScope } from "../agent-driven/created-source-ports.js";
+  isCreatedSourceApplyTransaction, type CommitPreparedCreatedSourceInput, type CreatedSourceCommitScope } from "../agent-driven/created-source-ports.js";
 import type { Applied, ReviewPackage } from "../../contracts/agent-driven-types.js";
 import { validateAgentDefinition } from "../../contracts/agent-driven-validator.js";
 import { canonicalDigest, canonicalJson, FIXED_PLAN } from "../creative/digest.js";
@@ -516,7 +516,7 @@ export class RevisionStore {
         return { ...response, replayed: true };
       }
       const transaction = this.projectTransaction(input.transaction_id);
-      if (!transaction || transaction.project_id !== input.project_id || transaction.state !== 'prepared'
+      if (!transaction || !isCreatedSourceApplyTransaction(transaction) || transaction.project_id !== input.project_id || transaction.state !== 'prepared'
         || transaction.request_hash !== input.request_digest) fail('TRANSACTION_MISMATCH');
       const adoption = row('SELECT * FROM created_adoption_fact WHERE transaction_id=?', input.transaction_id);
       if (adoption.project_id !== input.project_id || adoption.impact_id !== input.impact_id
@@ -584,7 +584,7 @@ export class RevisionStore {
           || run.scope_json.project_id !== input.project_id || run.scope_json.run_id !== execution.run_id
           || run.scope_json.input_digest !== execution.input_digest || run.scope_json.allow_paid
           || run.scope_json.allow_external_write || run.scope_json.allow_runtime_mutation
-          || grant.grant_id !== step.grant_id || step.input_digest !== execution.input_digest
+          || grant.grant_id !== step.grant_id || step.job_id !== prepared.job_id || step.input_digest !== execution.input_digest
           || step.run_scope_digest !== execution.run_scope_digest || currentAttempt !== execution.attempt
           || !['running','waiting_user'].includes(step.state)) fail('EXECUTION_STALE');
         if (approval.state !== 'active' || approval.expires_at <= seconds || approval.impact_id !== input.impact_id

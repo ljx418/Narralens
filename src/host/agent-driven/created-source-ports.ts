@@ -66,6 +66,15 @@ export const PREPARED_ADOPTION_IMPACT_TTL_SECONDS = 15 * 60;
 /** The kind of source an adoption applies to. Only one kind is created-source. */
 export const PREPARED_ADOPTION_SOURCE_KIND = 'created_prepared_source';
 
+/** D10's internal journal marker. This predicate is never a write capability:
+ * callers must pass the transaction read from the original RevisionStore. */
+export function isCreatedSourceApplyTransaction(transaction:{readonly kind:string;readonly request_json:string}):boolean {
+  if(transaction.kind!=='edit')return false;
+  try{const request:unknown=JSON.parse(transaction.request_json);
+    return !!request&&typeof request==='object'&&'operation' in request&&request.operation==='agent.created_source.apply@1';
+  }catch{return false;}
+}
+
 /** One file of the prepared closure. */
 export interface PreparedSourceFileFact {
   readonly relative_path: string;

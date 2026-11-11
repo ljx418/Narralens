@@ -28,7 +28,7 @@ import type {ProductTransaction} from '../../../src/host/creative/product-reposi
 // It never claims that a person reviewed the film or that the review UI path passed.
 const cleanups:Array<()=>Promise<void>>=[];
 afterEach(async()=>{vi.restoreAllMocks();for(const close of cleanups.splice(0).reverse())await close();});
-async function fixture(options:{mutatePlan?:(plan:PreparedAdoptionPlanV1)=>void;fsync?:(path:string)=>Promise<void>;onPrepared?:(f:Awaited<ReturnType<typeof preparedDraftFixture>>)=>void}={}){
+async function fixture(options:{transactionKind?:'edit'|'snapshot_publish';mutatePlan?:(plan:PreparedAdoptionPlanV1)=>void;fsync?:(path:string)=>Promise<void>;onPrepared?:(f:Awaited<ReturnType<typeof preparedDraftFixture>>)=>void}={}){
  const f=await preparedDraftFixture();cleanups.push(f.close);f.worker.start();const completed=await waitForCompletedDraft(f);await f.worker.close();
  const revisions=f.host.revisions,repo=f.repo,now=new Date(),execution=f.task.request.execution;
  if(completed.fact.plan_digest===null)throw Error('Assembly must produce a native plan digest');
@@ -92,7 +92,7 @@ async function fixture(options:{mutatePlan?:(plan:PreparedAdoptionPlanV1)=>void;
    selection_version:0,plan_sha256:planDigest,target_snapshot_id:plan.target_snapshot_id,expires_at:plan.expires_at,state:'active',summary:'module fixture'},
   reuse_of_package_id:null,review_url:`/workbench/projects/${f.projectId}/reviews/${reviewId}`,state:'accepted'};
  const packageDigest=canonicalDigest(pkg),actionDigest=planDigest;
- revisions.beginTransaction({transaction_id:transactionId,project_id:f.projectId,kind:'snapshot_publish',correlation_id:'module-root',request_json:JSON.stringify({operation:'adopt_prepared_source'}),request_hash:requestDigest,base_revision:1});
+ revisions.beginTransaction({transaction_id:transactionId,project_id:f.projectId,kind:options.transactionKind??'edit',correlation_id:'module-root',request_json:JSON.stringify({operation:'agent.created_source.apply@1'}),request_hash:requestDigest,base_revision:1});
  await repo.transaction(tx=>{
   tx.put('artifact_version',{project_id:f.projectId,artifact_id:packageId,version:1},{project_id:f.projectId,artifact_id:packageId,version:1,kind:'chapter',schema_version:1,
    input_digest:execution.input_digest,content_digest:packageDigest,content_json:pkg,input_refs_json:[],created_at:now.toISOString()});
@@ -131,6 +131,17 @@ describe('actual closed created-source commit and publisher',()=>{
   expect(f.revisions.activeCommit(f.projectId)?.revision).toBe(2);
   expect(f.revisions.commitPreparedCreatedSource(f.input)).toEqual({...applied,replayed:true});
   expect(f.revisions.outboxRowCount()).toBe(before+2);
+ },120000);
+ it('refuses a prepared transaction of another kind before publishing source',async()=>{
+  let prepared:Awaited<ReturnType<typeof preparedDraftFixture>>|undefined;
+  await expect(fixture({transactionKind:'snapshot_publish',onPrepared:f=>{prepared=f;}})).rejects.toThrow(/bindings changed/);
+  expect(prepared!.host.revisions.activeCommit(prepared!.projectId)?.revision).toBe(1);
+ },120000);
+ it('refuses a workflow attempt detached from the actual prepared job',async()=>{
+  const f=await fixture(),execution=f.input.execution;
+  await f.repo.transaction(tx=>{const key={project_id:f.projectId,run_id:execution.run_id,plan_version:1 as const,step_id:execution.step_id,attempt:execution.attempt};
+   const step=tx.get('step_attempt',key)!;tx.put('step_attempt',key,{...step,job_id:null});});
+  expect(()=>f.revisions.commitPreparedCreatedSource(f.input)).toThrow();expect(f.revisions.activeCommit(f.projectId)?.revision).toBe(1);
  },120000);
  it('refuses JSON-cloned publication proof without moving database authorities',async()=>{
   const f=await fixture();expect(()=>f.revisions.commitPreparedCreatedSource({...f.input,publication_proof:JSON.parse(JSON.stringify(f.proof))})).toThrow();

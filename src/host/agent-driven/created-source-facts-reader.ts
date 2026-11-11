@@ -64,6 +64,9 @@ export class CreatedSourceFactsReader {
    ||canonicalDigest(mapping.execution)!==canonicalDigest(input.execution)
    ||canonicalDigest([...mapping.roots].sort())!==canonicalDigest([...fact.roots].sort())
    ||canonicalDigest(ordered(mapping.files))!==canonicalDigest(ordered(fact.files)))changed();
+  const step=this.#row('SELECT job_id FROM cp_a0_step_attempt WHERE project_id=? AND run_id=? AND plan_version=? AND step_id=? AND attempt=?',
+   input.project_id,input.execution.run_id,input.execution.plan_version,input.execution.step_id,input.execution.attempt);
+  if(step.job_id!==task.job_id)changed('The current workflow attempt belongs to another job');
   const root=resolve(this.options.stageDomainRoot,task.stage_token,'attempt-'+attempt,'source');
   if(mapping.stage_root!==root)changed('Prepared source does not have its producer-owned location');
   return {mappingDigest:canonicalDigest(mapping),completed:freeze({format:'narralens.completed-prepared-source@1',project_id:input.project_id,

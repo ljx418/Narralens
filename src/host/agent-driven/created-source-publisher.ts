@@ -7,7 +7,7 @@ import { canonicalJson, canonicalDigest } from '../creative/digest.js';
 import { RevisionStore } from '../projects/revision-store.js';
 import { matchesFrozenSchemaNamespace } from './agent-schema-definition.js';
 import {RetainedSourceTree as RetainedTree} from './retained-source-tree.js';
-import {assertPreparedAdoptionPlan,preparedAdoptionPlanDigest,type PreparedAdoptionPlanV1,type CreatedSourcePublicationFacts,type CreatedSourcePublicationProof,type PreparedSourceFileFact} from './created-source-ports.js';
+import {assertPreparedAdoptionPlan,preparedAdoptionPlanDigest,isCreatedSourceApplyTransaction,type PreparedAdoptionPlanV1,type CreatedSourcePublicationFacts,type CreatedSourcePublicationProof,type PreparedSourceFileFact} from './created-source-ports.js';
 import {SnapshotStore,snapshotIdFor} from '../projects/snapshot-store.js';
 import {validateCreatedSourceFact,type CreatedSourceFact} from '../projects/project-creation-store.js';
 import {computeSourceDigest,type SourceDigestResult} from '../engine/source-digest-v1.js';
@@ -183,7 +183,7 @@ export class CreatedSourcePublisher {
     const plan=assertPreparedAdoptionPlan(JSON.parse(String(row.plan_json)) as PreparedAdoptionPlanV1);
     const digest=preparedAdoptionPlanDigest(plan),active=this.#owner.activeCommit(input.project_id);
     const engine=this.#owner.readEngineBinding(input.project_id);
-    if(!transaction||transaction.project_id!==input.project_id||transaction.state!=='prepared'
+    if(!transaction||!isCreatedSourceApplyTransaction(transaction)||transaction.project_id!==input.project_id||transaction.state!=='prepared'
       ||fact.project_id!==input.project_id||fact.prepared_source_id!==input.prepared_source_id
       ||row.prepared_source_id!==input.prepared_source_id||digest!==row.plan_sha256||digest!==fact.plan_sha256||digest!==fact.facts_digest
       ||plan.project_id!==input.project_id||plan.materialization_id!==input.prepared_source_id
