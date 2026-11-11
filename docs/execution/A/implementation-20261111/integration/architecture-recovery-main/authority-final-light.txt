@@ -1,0 +1,21 @@
+
+> narralens@0.1.0 test /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+> vitest run --config vitest.config.ts tests/architecture/m2.2-fitness.test.ts tests/agent-driven/integration/created-task-store.test.ts tests/agent-driven/integration/job-recovery-authority.test.ts --maxWorkers=1 --minWorkers=1
+
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+ ✓ tests/architecture/m2.2-fitness.test.ts (17 tests) 1766ms
+   ✓ M2.2 fitness: one state machine, no arbitrary state writes > 1. every production `UPDATE ... SET state` lives in transition, advanceJournal or markRecovering  390ms
+(node:910093) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/created-task-store.test.ts (39 tests) 310ms
+(node:910201) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/job-recovery-authority.test.ts (8 tests) 13ms
+
+ Test Files  3 passed (3)
+      Tests  64 passed (64)
+   Start at  23:09:45
+   Duration  11.38s (transform 398ms, setup 0ms, collect 3.44s, tests 2.09s, environment 0ms, prepare 3.93s)
+

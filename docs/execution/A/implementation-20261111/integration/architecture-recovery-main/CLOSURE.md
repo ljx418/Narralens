@@ -1,0 +1,7 @@
+# 状态写入架构门闭环（MAIN自验证）
+
+在MAIN6402中央helper基础上，仅消费BRIDGE作者c89a906的一个生产表达式：null-owner取消改调用RevisionStore.completeUnownedCancellation。同DB settle回调和事件原样保留；没有把BRIDGE其余待验实现混入。
+
+静态scanner改用TS语法所属方法，保留原allowlist，不增加豁免。两个检测器反例保证私有四空格方法可识别、新非法方法不再误归属给前一个合法方法。它曾检出此前被弱regex遮蔽的ledger.#seed第二状态写入口，现已归入原transitionBootstrap的同一原子事务。
+
+最终3文件64项通过：17fitness（原规则加2扫描器反例）、39原任务store、8真实SQLite CAS。创建/ledger/原子回归4文件87项在6402已经通过。两次早期红灯和具体offender原样留证，不把新绿覆盖历史失败。此为状态写入范围自验证，独立模块复核和完整R1/A仍需其他证据。

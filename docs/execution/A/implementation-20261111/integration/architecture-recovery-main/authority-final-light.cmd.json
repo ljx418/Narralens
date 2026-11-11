@@ -1,0 +1,16 @@
+{
+  "scope": "static architecture scans and small SQLite unit tests only; no Host/render/browser, permitted while BRIDGE holds heavy slot",
+  "argv": [
+    "corepack",
+    "pnpm",
+    "test",
+    "tests/architecture/m2.2-fitness.test.ts",
+    "tests/agent-driven/integration/created-task-store.test.ts",
+    "tests/agent-driven/integration/job-recovery-authority.test.ts",
+    "--maxWorkers=1",
+    "--minWorkers=1"
+  ],
+  "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+  "start": "2026-11-11T15:09:42.470588+00:00",
+  "pid": 909718
+}
