@@ -1,0 +1,1097 @@
+{
+  "upstream_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+  "source_hashes": {
+    "packages/openfilm/src/film-doc.mjs": "feef7be8181e7ec63cf2b8760f3a32b7b7e22cd851d4e5a233c04f1768cf719d",
+    "packages/openfilm/studio/server/film-subtitle.mjs": "be4b1852bc254ff597e43694a732044ef51dd43a78df13735c2ff023957687dd",
+    "packages/openfilm/studio/server/subtitle-segments.mjs": "b4791b6ec527379aeedaa5329ee7efc3855b8b5dc99cf36db25c2d4652e5784f",
+    "packages/openfilm/studio/server/transcripts.mjs": "ff2c765bec47e7238a56f787c88da7cd1eea3ce893c8fe2959f0a1bdc6da50d3",
+    "packages/openfilm/studio/server/captions.mjs": "7a9bd076c307b6296be6e3d05153bf3f386aa01e97503d23f5d5deac1f0d2df0"
+  },
+  "node": "v22.22.1",
+  "icu": "78.2",
+  "oracle": "Exact Git blob modules in isolated VM; virtual readFile/readdir/probe and pinned readFilmFile; no production implementation imported",
+  "vectors": [
+    {
+      "name": "absent-style-empty-film",
+      "input": {
+        "upstream_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+        "files": {
+          "film.html": "<html><head><meta name=\"viewport\" content=\"width=1280, height=720\"></head><body><section ></section></body></html>",
+          ".film/subtitles.json": null
+        },
+        "directories": {
+          ".": [
+            "film.html"
+          ]
+        },
+        "media": {}
+      },
+      "expected": {
+        "style": {
+          "state": "absent",
+          "value": {
+            "on": true,
+            "pos": {
+              "x": 0.5,
+              "y": 0.94
+            },
+            "maxWidthPct": 100,
+            "align": "center",
+            "font": {
+              "family": "ui-sans-serif, system-ui, -apple-system, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", \"Helvetica Neue\", Arial, sans-serif",
+              "sizePct": 4,
+              "weight": 500,
+              "italic": false,
+              "letterSpacingEm": 0.04,
+              "lineHeight": 1.45,
+              "upper": false
+            },
+            "fill": "#ffffff",
+            "stroke": {
+              "widthEm": 0.055,
+              "color": "rgba(0,0,0,0.84)"
+            },
+            "shadow": {
+              "dxEm": 0,
+              "dyEm": 0.05,
+              "blurEm": 0.22,
+              "color": "rgba(0,0,0,0.72)"
+            },
+            "box": null,
+            "karaoke": null,
+            "language": null,
+            "bilingual": false
+          }
+        },
+        "captions": {
+          "state": "present",
+          "value": {
+            "cues": [],
+            "sourceLanguage": null,
+            "languages": [],
+            "untranscribed": []
+          }
+        }
+      }
+    },
+    {
+      "name": "chinese-trim-offset-speed-translated",
+      "input": {
+        "upstream_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+        "files": {
+          "film.html": "<html><head><meta name=\"viewport\" content=\"width=1280, height=720\"></head><body><section ><audio id=\"voice\" src=\"assets/vo/a.wav#t=1,5\" at=\"2\" speed=\"2\"></audio></section></body></html>",
+          ".film/subtitles.json": null,
+          "assets/vo/a.vtt": "WEBVTT\n\n00:00:00.000 --> 00:00:06.000\n<v 小林>你好，<00:00:01.000>今天<00:00:02.000>我们一起<00:00:03.000>学习中文，<00:00:04.000>非常开心。\n",
+          "assets/vo/a.en.vtt": "WEBVTT\n\n00:00:00.000 --> 00:00:06.000\nHello, today we learn Chinese together. Very happy.\n"
+        },
+        "directories": {
+          ".": [
+            "film.html"
+          ],
+          "assets/vo": [
+            "a.vtt",
+            "a.en.vtt",
+            "a.wav"
+          ]
+        },
+        "media": {
+          "assets/vo/a.wav": {
+            "duration": 6,
+            "audio": true
+          }
+        }
+      },
+      "expected": {
+        "style": {
+          "state": "absent",
+          "value": {
+            "on": true,
+            "pos": {
+              "x": 0.5,
+              "y": 0.94
+            },
+            "maxWidthPct": 100,
+            "align": "center",
+            "font": {
+              "family": "ui-sans-serif, system-ui, -apple-system, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", \"Helvetica Neue\", Arial, sans-serif",
+              "sizePct": 4,
+              "weight": 500,
+              "italic": false,
+              "letterSpacingEm": 0.04,
+              "lineHeight": 1.45,
+              "upper": false
+            },
+            "fill": "#ffffff",
+            "stroke": {
+              "widthEm": 0.055,
+              "color": "rgba(0,0,0,0.84)"
+            },
+            "shadow": {
+              "dxEm": 0,
+              "dyEm": 0.05,
+              "blurEm": 0.22,
+              "color": "rgba(0,0,0,0.72)"
+            },
+            "box": null,
+            "karaoke": null,
+            "language": null,
+            "bilingual": false
+          }
+        },
+        "captions": {
+          "state": "present",
+          "value": {
+            "cues": [
+              {
+                "startMs": 2000,
+                "durMs": 350,
+                "text": "今天",
+                "alt": {
+                  "en": "we learn"
+                },
+                "clip": "voice",
+                "src": "assets/vo/a.wav",
+                "line": 0,
+                "part": 1
+              },
+              {
+                "startMs": 2500,
+                "durMs": 1000,
+                "text": "我们一起学习中文",
+                "words": [
+                  {
+                    "text": "我们一起",
+                    "startMs": 2500,
+                    "durMs": 500
+                  },
+                  {
+                    "text": "学习中文",
+                    "startMs": 3000,
+                    "durMs": 500
+                  }
+                ],
+                "alt": {
+                  "en": "Chinese together."
+                },
+                "clip": "voice",
+                "src": "assets/vo/a.wav",
+                "line": 0,
+                "part": 2
+              },
+              {
+                "startMs": 3500,
+                "durMs": 500,
+                "text": "非常开心",
+                "alt": {
+                  "en": "Very happy."
+                },
+                "clip": "voice",
+                "src": "assets/vo/a.wav",
+                "line": 0,
+                "part": 3
+              }
+            ],
+            "sourceLanguage": "zh",
+            "languages": [
+              "en"
+            ],
+            "untranscribed": []
+          }
+        }
+      }
+    },
+    {
+      "name": "latin-filler-false-start",
+      "input": {
+        "upstream_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+        "files": {
+          "film.html": "<html><head><meta name=\"viewport\" content=\"width=1280, height=720\"></head><body><section ><audio id=\"voice\" src=\"assets/vo/a.wav#t=1,5\" at=\"2\" speed=\"2\"></audio></section></body></html>",
+          ".film/subtitles.json": null,
+          "assets/vo/a.vtt": "WEBVTT\n\n00:00:00.000 --> 00:00:06.000\nUm, th- the quick brown fox jumps over the lazy dog.\n"
+        },
+        "directories": {
+          ".": [
+            "film.html"
+          ],
+          "assets/vo": [
+            "a.vtt",
+            "a.wav"
+          ]
+        },
+        "media": {
+          "assets/vo/a.wav": {
+            "duration": 6,
+            "audio": true
+          }
+        }
+      },
+      "expected": {
+        "style": {
+          "state": "absent",
+          "value": {
+            "on": true,
+            "pos": {
+              "x": 0.5,
+              "y": 0.94
+            },
+            "maxWidthPct": 100,
+            "align": "center",
+            "font": {
+              "family": "ui-sans-serif, system-ui, -apple-system, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", \"Helvetica Neue\", Arial, sans-serif",
+              "sizePct": 4,
+              "weight": 500,
+              "italic": false,
+              "letterSpacingEm": 0.04,
+              "lineHeight": 1.45,
+              "upper": false
+            },
+            "fill": "#ffffff",
+            "stroke": {
+              "widthEm": 0.055,
+              "color": "rgba(0,0,0,0.84)"
+            },
+            "shadow": {
+              "dxEm": 0,
+              "dyEm": 0.05,
+              "blurEm": 0.22,
+              "color": "rgba(0,0,0,0.72)"
+            },
+            "box": null,
+            "karaoke": null,
+            "language": null,
+            "bilingual": false
+          }
+        },
+        "captions": {
+          "state": "present",
+          "value": {
+            "cues": [
+              {
+                "startMs": 2000,
+                "durMs": 969,
+                "text": "the quick brown fox",
+                "clip": "voice",
+                "src": "assets/vo/a.wav",
+                "line": 0,
+                "part": 0
+              },
+              {
+                "startMs": 2969,
+                "durMs": 1032,
+                "text": "jumps over the lazy dog.",
+                "clip": "voice",
+                "src": "assets/vo/a.wav",
+                "line": 0,
+                "part": 1
+              }
+            ],
+            "sourceLanguage": null,
+            "languages": [],
+            "untranscribed": []
+          }
+        }
+      }
+    },
+    {
+      "name": "hand-cut-marks",
+      "input": {
+        "upstream_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+        "files": {
+          "film.html": "<html><head><meta name=\"viewport\" content=\"width=1280, height=720\"></head><body><section ><audio id=\"voice\" src=\"assets/vo/a.wav#t=1,5\" at=\"2\" speed=\"2\"></audio></section></body></html>",
+          ".film/subtitles.json": null,
+          "assets/vo/a.vtt": "WEBVTT\n\nNOTE Each cue is one subtitle, as cut by hand in OpenFilm Studio.\n\n00:00:00.000 --> 00:00:06.000\nOne <00:00:01.000>two <00:00:02.000>three <00:00:04.000>four\n"
+        },
+        "directories": {
+          ".": [
+            "film.html"
+          ],
+          "assets/vo": [
+            "a.vtt",
+            "a.wav"
+          ]
+        },
+        "media": {
+          "assets/vo/a.wav": {
+            "duration": 6,
+            "audio": true
+          }
+        }
+      },
+      "expected": {
+        "style": {
+          "state": "absent",
+          "value": {
+            "on": true,
+            "pos": {
+              "x": 0.5,
+              "y": 0.94
+            },
+            "maxWidthPct": 100,
+            "align": "center",
+            "font": {
+              "family": "ui-sans-serif, system-ui, -apple-system, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", \"Helvetica Neue\", Arial, sans-serif",
+              "sizePct": 4,
+              "weight": 500,
+              "italic": false,
+              "letterSpacingEm": 0.04,
+              "lineHeight": 1.45,
+              "upper": false
+            },
+            "fill": "#ffffff",
+            "stroke": {
+              "widthEm": 0.055,
+              "color": "rgba(0,0,0,0.84)"
+            },
+            "shadow": {
+              "dxEm": 0,
+              "dyEm": 0.05,
+              "blurEm": 0.22,
+              "color": "rgba(0,0,0,0.72)"
+            },
+            "box": null,
+            "karaoke": null,
+            "language": null,
+            "bilingual": false
+          }
+        },
+        "captions": {
+          "state": "present",
+          "value": {
+            "cues": [
+              {
+                "startMs": 2000,
+                "durMs": 2000,
+                "text": "two three four",
+                "words": [
+                  {
+                    "text": "two",
+                    "startMs": 2000,
+                    "durMs": 500
+                  },
+                  {
+                    "text": "three",
+                    "startMs": 2500,
+                    "durMs": 1000
+                  },
+                  {
+                    "text": "four",
+                    "startMs": 3500,
+                    "durMs": 500
+                  }
+                ],
+                "clip": "voice",
+                "src": "assets/vo/a.wav",
+                "line": 0
+              }
+            ],
+            "sourceLanguage": null,
+            "languages": [],
+            "untranscribed": []
+          }
+        }
+      }
+    },
+    {
+      "name": "word-cues",
+      "input": {
+        "upstream_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+        "files": {
+          "film.html": "<html><head><meta name=\"viewport\" content=\"width=1280, height=720\"></head><body><section ><audio id=\"voice\" src=\"assets/vo/a.wav#t=0,3\"></audio></section></body></html>",
+          ".film/subtitles.json": null,
+          "assets/vo/a.vtt": "WEBVTT\n\n00:00:00.000 --> 00:00:00.500\nHello\n\n00:00:00.500 --> 00:00:01.000\nworld\n\n00:00:01.000 --> 00:00:01.500\ntoday\n"
+        },
+        "directories": {
+          ".": [
+            "film.html"
+          ],
+          "assets/vo": [
+            "a.vtt",
+            "a.wav"
+          ]
+        },
+        "media": {
+          "assets/vo/a.wav": {
+            "duration": 6,
+            "audio": true
+          }
+        }
+      },
+      "expected": {
+        "style": {
+          "state": "absent",
+          "value": {
+            "on": true,
+            "pos": {
+              "x": 0.5,
+              "y": 0.94
+            },
+            "maxWidthPct": 100,
+            "align": "center",
+            "font": {
+              "family": "ui-sans-serif, system-ui, -apple-system, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", \"Helvetica Neue\", Arial, sans-serif",
+              "sizePct": 4,
+              "weight": 500,
+              "italic": false,
+              "letterSpacingEm": 0.04,
+              "lineHeight": 1.45,
+              "upper": false
+            },
+            "fill": "#ffffff",
+            "stroke": {
+              "widthEm": 0.055,
+              "color": "rgba(0,0,0,0.84)"
+            },
+            "shadow": {
+              "dxEm": 0,
+              "dyEm": 0.05,
+              "blurEm": 0.22,
+              "color": "rgba(0,0,0,0.72)"
+            },
+            "box": null,
+            "karaoke": null,
+            "language": null,
+            "bilingual": false
+          }
+        },
+        "captions": {
+          "state": "present",
+          "value": {
+            "cues": [
+              {
+                "startMs": 0,
+                "durMs": 1500,
+                "text": "Hello world today",
+                "words": [
+                  {
+                    "text": "Hello",
+                    "startMs": 0,
+                    "durMs": 500
+                  },
+                  {
+                    "text": "world",
+                    "startMs": 500,
+                    "durMs": 500
+                  },
+                  {
+                    "text": "today",
+                    "startMs": 1000,
+                    "durMs": 500
+                  }
+                ],
+                "clip": "voice",
+                "src": "assets/vo/a.wav",
+                "line": 0
+              }
+            ],
+            "sourceLanguage": null,
+            "languages": [],
+            "untranscribed": []
+          }
+        }
+      }
+    },
+    {
+      "name": "missing-voice-transcript",
+      "input": {
+        "upstream_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+        "files": {
+          "film.html": "<html><head><meta name=\"viewport\" content=\"width=1280, height=720\"></head><body><section ><audio id=\"voice\" src=\"assets/vo/a.wav#t=1,5\" at=\"2\" speed=\"2\"></audio></section></body></html>",
+          ".film/subtitles.json": null,
+          "assets/vo/a.vtt": null
+        },
+        "directories": {
+          ".": [
+            "film.html"
+          ],
+          "assets/vo": [
+            "a.wav"
+          ]
+        },
+        "media": {
+          "assets/vo/a.wav": {
+            "duration": 6,
+            "audio": true
+          }
+        }
+      },
+      "expected": {
+        "style": {
+          "state": "absent",
+          "value": {
+            "on": true,
+            "pos": {
+              "x": 0.5,
+              "y": 0.94
+            },
+            "maxWidthPct": 100,
+            "align": "center",
+            "font": {
+              "family": "ui-sans-serif, system-ui, -apple-system, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", \"Helvetica Neue\", Arial, sans-serif",
+              "sizePct": 4,
+              "weight": 500,
+              "italic": false,
+              "letterSpacingEm": 0.04,
+              "lineHeight": 1.45,
+              "upper": false
+            },
+            "fill": "#ffffff",
+            "stroke": {
+              "widthEm": 0.055,
+              "color": "rgba(0,0,0,0.84)"
+            },
+            "shadow": {
+              "dxEm": 0,
+              "dyEm": 0.05,
+              "blurEm": 0.22,
+              "color": "rgba(0,0,0,0.72)"
+            },
+            "box": null,
+            "karaoke": null,
+            "language": null,
+            "bilingual": false
+          }
+        },
+        "captions": {
+          "state": "present",
+          "value": {
+            "cues": [],
+            "sourceLanguage": null,
+            "languages": [],
+            "untranscribed": [
+              "assets/vo/a.wav"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "malformed-vtt-native-untranscribed",
+      "input": {
+        "upstream_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+        "files": {
+          "film.html": "<html><head><meta name=\"viewport\" content=\"width=1280, height=720\"></head><body><section ><audio id=\"voice\" src=\"assets/vo/a.wav#t=1,5\" at=\"2\" speed=\"2\"></audio></section></body></html>",
+          ".film/subtitles.json": null,
+          "assets/vo/a.vtt": "WEBVTT\n\nnot a cue"
+        },
+        "directories": {
+          ".": [
+            "film.html"
+          ],
+          "assets/vo": [
+            "a.vtt",
+            "a.wav"
+          ]
+        },
+        "media": {
+          "assets/vo/a.wav": {
+            "duration": 6,
+            "audio": true
+          }
+        }
+      },
+      "expected": {
+        "style": {
+          "state": "absent",
+          "value": {
+            "on": true,
+            "pos": {
+              "x": 0.5,
+              "y": 0.94
+            },
+            "maxWidthPct": 100,
+            "align": "center",
+            "font": {
+              "family": "ui-sans-serif, system-ui, -apple-system, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", \"Helvetica Neue\", Arial, sans-serif",
+              "sizePct": 4,
+              "weight": 500,
+              "italic": false,
+              "letterSpacingEm": 0.04,
+              "lineHeight": 1.45,
+              "upper": false
+            },
+            "fill": "#ffffff",
+            "stroke": {
+              "widthEm": 0.055,
+              "color": "rgba(0,0,0,0.84)"
+            },
+            "shadow": {
+              "dxEm": 0,
+              "dyEm": 0.05,
+              "blurEm": 0.22,
+              "color": "rgba(0,0,0,0.72)"
+            },
+            "box": null,
+            "karaoke": null,
+            "language": null,
+            "bilingual": false
+          }
+        },
+        "captions": {
+          "state": "present",
+          "value": {
+            "cues": [],
+            "sourceLanguage": null,
+            "languages": [],
+            "untranscribed": [
+              "assets/vo/a.wav"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "outlasts-source",
+      "input": {
+        "upstream_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+        "files": {
+          "film.html": "<html><head><meta name=\"viewport\" content=\"width=1280, height=720\"></head><body><section ><audio id=\"voice\" src=\"assets/vo/a.wav#t=1,5\" at=\"2\" speed=\"2\"></audio></section></body></html>",
+          ".film/subtitles.json": null,
+          "assets/vo/a.vtt": "WEBVTT\n\n00:00:00.000 --> 00:00:06.000\nA transcript that is longer than its source.\n"
+        },
+        "directories": {
+          ".": [
+            "film.html"
+          ],
+          "assets/vo": [
+            "a.vtt",
+            "a.wav"
+          ]
+        },
+        "media": {
+          "assets/vo/a.wav": {
+            "duration": 2,
+            "audio": true
+          }
+        }
+      },
+      "expected": {
+        "style": {
+          "state": "absent",
+          "value": {
+            "on": true,
+            "pos": {
+              "x": 0.5,
+              "y": 0.94
+            },
+            "maxWidthPct": 100,
+            "align": "center",
+            "font": {
+              "family": "ui-sans-serif, system-ui, -apple-system, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", \"Helvetica Neue\", Arial, sans-serif",
+              "sizePct": 4,
+              "weight": 500,
+              "italic": false,
+              "letterSpacingEm": 0.04,
+              "lineHeight": 1.45,
+              "upper": false
+            },
+            "fill": "#ffffff",
+            "stroke": {
+              "widthEm": 0.055,
+              "color": "rgba(0,0,0,0.84)"
+            },
+            "shadow": {
+              "dxEm": 0,
+              "dyEm": 0.05,
+              "blurEm": 0.22,
+              "color": "rgba(0,0,0,0.72)"
+            },
+            "box": null,
+            "karaoke": null,
+            "language": null,
+            "bilingual": false
+          }
+        },
+        "captions": {
+          "state": "present",
+          "value": {
+            "cues": [
+              {
+                "startMs": 2261,
+                "durMs": 1740,
+                "text": "that is longer than its source.",
+                "clip": "voice",
+                "src": "assets/vo/a.wav",
+                "line": 0,
+                "part": 1
+              }
+            ],
+            "sourceLanguage": null,
+            "languages": [],
+            "untranscribed": [
+              "assets/vo/a.wav"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "native-style-clamps",
+      "input": {
+        "upstream_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+        "files": {
+          "film.html": "<html><head><meta name=\"viewport\" content=\"width=1280, height=720\"></head><body><section ></section></body></html>",
+          ".film/subtitles.json": "{\"font\":{\"sizePct\":999,\"weight\":123},\"position\":{\"x\":-9,\"y\":99},\"language\":\"zh\"}"
+        },
+        "directories": {
+          ".": [
+            "film.html"
+          ],
+          ".film": [
+            "subtitles.json"
+          ]
+        },
+        "media": {}
+      },
+      "expected": {
+        "style": {
+          "state": "present",
+          "value": {
+            "on": true,
+            "pos": {
+              "x": 0.5,
+              "y": 0.94
+            },
+            "maxWidthPct": 100,
+            "align": "center",
+            "font": {
+              "family": "ui-sans-serif, system-ui, -apple-system, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", \"Helvetica Neue\", Arial, sans-serif",
+              "sizePct": 10,
+              "weight": 123,
+              "italic": false,
+              "letterSpacingEm": 0.04,
+              "lineHeight": 1.45,
+              "upper": false
+            },
+            "fill": "#ffffff",
+            "stroke": {
+              "widthEm": 0.055,
+              "color": "rgba(0,0,0,0.84)"
+            },
+            "shadow": {
+              "dxEm": 0,
+              "dyEm": 0.05,
+              "blurEm": 0.22,
+              "color": "rgba(0,0,0,0.72)"
+            },
+            "box": null,
+            "karaoke": null,
+            "language": "zh",
+            "bilingual": false
+          }
+        },
+        "captions": {
+          "state": "present",
+          "value": {
+            "cues": [],
+            "sourceLanguage": null,
+            "languages": [],
+            "untranscribed": []
+          }
+        }
+      }
+    },
+    {
+      "name": "malformed-style-refused",
+      "input": {
+        "upstream_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+        "files": {
+          "film.html": "<html><head><meta name=\"viewport\" content=\"width=1280, height=720\"></head><body><section ></section></body></html>",
+          ".film/subtitles.json": "{"
+        },
+        "directories": {
+          ".": [
+            "film.html"
+          ],
+          ".film": [
+            "subtitles.json"
+          ]
+        },
+        "media": {}
+      },
+      "unsupported": "STYLE_JSON_INVALID",
+      "expected": {
+        "style": {
+          "state": "absent",
+          "value": {
+            "on": true,
+            "pos": {
+              "x": 0.5,
+              "y": 0.94
+            },
+            "maxWidthPct": 100,
+            "align": "center",
+            "font": {
+              "family": "ui-sans-serif, system-ui, -apple-system, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", \"Helvetica Neue\", Arial, sans-serif",
+              "sizePct": 4,
+              "weight": 500,
+              "italic": false,
+              "letterSpacingEm": 0.04,
+              "lineHeight": 1.45,
+              "upper": false
+            },
+            "fill": "#ffffff",
+            "stroke": {
+              "widthEm": 0.055,
+              "color": "rgba(0,0,0,0.84)"
+            },
+            "shadow": {
+              "dxEm": 0,
+              "dyEm": 0.05,
+              "blurEm": 0.22,
+              "color": "rgba(0,0,0,0.72)"
+            },
+            "box": null,
+            "karaoke": null,
+            "language": null,
+            "bilingual": false
+          }
+        },
+        "captions": {
+          "state": "present",
+          "value": {
+            "cues": [],
+            "sourceLanguage": null,
+            "languages": [],
+            "untranscribed": []
+          }
+        }
+      }
+    },
+    {
+      "name": "muted",
+      "input": {
+        "upstream_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+        "files": {
+          "film.html": "<html><head><meta name=\"viewport\" content=\"width=1280, height=720\"></head><body><section muted><audio id=\"voice\" src=\"assets/vo/a.wav#t=1,5\" at=\"2\" speed=\"2\"></audio></section></body></html>",
+          ".film/subtitles.json": null
+        },
+        "directories": {
+          ".": [
+            "film.html"
+          ]
+        },
+        "media": {}
+      },
+      "expected": {
+        "style": {
+          "state": "absent",
+          "value": {
+            "on": true,
+            "pos": {
+              "x": 0.5,
+              "y": 0.94
+            },
+            "maxWidthPct": 100,
+            "align": "center",
+            "font": {
+              "family": "ui-sans-serif, system-ui, -apple-system, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", \"Helvetica Neue\", Arial, sans-serif",
+              "sizePct": 4,
+              "weight": 500,
+              "italic": false,
+              "letterSpacingEm": 0.04,
+              "lineHeight": 1.45,
+              "upper": false
+            },
+            "fill": "#ffffff",
+            "stroke": {
+              "widthEm": 0.055,
+              "color": "rgba(0,0,0,0.84)"
+            },
+            "shadow": {
+              "dxEm": 0,
+              "dyEm": 0.05,
+              "blurEm": 0.22,
+              "color": "rgba(0,0,0,0.72)"
+            },
+            "box": null,
+            "karaoke": null,
+            "language": null,
+            "bilingual": false
+          }
+        },
+        "captions": {
+          "state": "present",
+          "value": {
+            "cues": [],
+            "sourceLanguage": null,
+            "languages": [],
+            "untranscribed": []
+          }
+        }
+      }
+    },
+    {
+      "name": "missing-video-transcript",
+      "input": {
+        "upstream_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+        "files": {
+          "film.html": "<html><head><meta name=\"viewport\" content=\"width=1280, height=720\"></head><body><section ><video id=\"v\" src=\"assets/v.mp4#t=0,4\"></video></section></body></html>",
+          ".film/subtitles.json": null,
+          "assets/v.vtt": null
+        },
+        "directories": {
+          ".": [
+            "film.html"
+          ],
+          "assets": [
+            "v.mp4"
+          ]
+        },
+        "media": {
+          "assets/v.mp4": {
+            "duration": 4,
+            "audio": true
+          }
+        }
+      },
+      "expected": {
+        "style": {
+          "state": "absent",
+          "value": {
+            "on": true,
+            "pos": {
+              "x": 0.5,
+              "y": 0.94
+            },
+            "maxWidthPct": 100,
+            "align": "center",
+            "font": {
+              "family": "ui-sans-serif, system-ui, -apple-system, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", \"Helvetica Neue\", Arial, sans-serif",
+              "sizePct": 4,
+              "weight": 500,
+              "italic": false,
+              "letterSpacingEm": 0.04,
+              "lineHeight": 1.45,
+              "upper": false
+            },
+            "fill": "#ffffff",
+            "stroke": {
+              "widthEm": 0.055,
+              "color": "rgba(0,0,0,0.84)"
+            },
+            "shadow": {
+              "dxEm": 0,
+              "dyEm": 0.05,
+              "blurEm": 0.22,
+              "color": "rgba(0,0,0,0.72)"
+            },
+            "box": null,
+            "karaoke": null,
+            "language": null,
+            "bilingual": false
+          }
+        },
+        "captions": {
+          "state": "present",
+          "value": {
+            "cues": [],
+            "sourceLanguage": null,
+            "languages": [],
+            "untranscribed": [
+              "assets/v.mp4"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "two-speakers",
+      "input": {
+        "upstream_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+        "files": {
+          "film.html": "<html><head><meta name=\"viewport\" content=\"width=1280, height=720\"></head><body><section ><audio id=\"a\" src=\"assets/vo/a.wav#t=0,5\"></audio><audio id=\"b\" src=\"assets/vo/b.wav#t=0,5\" at=\"6\"></audio></section></body></html>",
+          ".film/subtitles.json": null,
+          "assets/vo/a.vtt": "WEBVTT\n\n00:00:00.000 --> 00:00:06.000\n<v Alice>Hello world.\n",
+          "assets/vo/b.vtt": "WEBVTT\n\n00:00:00.000 --> 00:00:06.000\n<v Bob>Another voice.\n"
+        },
+        "directories": {
+          ".": [
+            "film.html"
+          ],
+          "assets/vo": [
+            "a.vtt",
+            "b.vtt",
+            "a.wav",
+            "b.wav"
+          ]
+        },
+        "media": {
+          "assets/vo/a.wav": {
+            "duration": 6,
+            "audio": true
+          },
+          "assets/vo/b.wav": {
+            "duration": 6,
+            "audio": true
+          }
+        }
+      },
+      "expected": {
+        "style": {
+          "state": "absent",
+          "value": {
+            "on": true,
+            "pos": {
+              "x": 0.5,
+              "y": 0.94
+            },
+            "maxWidthPct": 100,
+            "align": "center",
+            "font": {
+              "family": "ui-sans-serif, system-ui, -apple-system, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", \"Helvetica Neue\", Arial, sans-serif",
+              "sizePct": 4,
+              "weight": 500,
+              "italic": false,
+              "letterSpacingEm": 0.04,
+              "lineHeight": 1.45,
+              "upper": false
+            },
+            "fill": "#ffffff",
+            "stroke": {
+              "widthEm": 0.055,
+              "color": "rgba(0,0,0,0.84)"
+            },
+            "shadow": {
+              "dxEm": 0,
+              "dyEm": 0.05,
+              "blurEm": 0.22,
+              "color": "rgba(0,0,0,0.72)"
+            },
+            "box": null,
+            "karaoke": null,
+            "language": null,
+            "bilingual": false
+          }
+        },
+        "captions": {
+          "state": "present",
+          "value": {
+            "cues": [
+              {
+                "startMs": 0,
+                "durMs": 5000,
+                "text": "Hello world.",
+                "speaker": "Alice",
+                "clip": "a",
+                "src": "assets/vo/a.wav",
+                "line": 0
+              },
+              {
+                "startMs": 6000,
+                "durMs": 5000,
+                "text": "Another voice.",
+                "speaker": "Bob",
+                "clip": "b",
+                "src": "assets/vo/b.wav",
+                "line": 0
+              }
+            ],
+            "sourceLanguage": null,
+            "languages": [],
+            "untranscribed": []
+          }
+        }
+      }
+    }
+  ]
+}
