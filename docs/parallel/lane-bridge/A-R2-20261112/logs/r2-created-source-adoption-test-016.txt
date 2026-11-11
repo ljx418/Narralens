@@ -1,0 +1,25 @@
+command: corepack pnpm test tests/agent-driven/integration/created-source-adoption.test.ts --maxWorkers=1 --minWorkers=1
+cwd: /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+head: f3cd9583c57a601850409a08545d3a523c41c94c
+note: light filesystem test in a private temp directory; no Host, no media, no browser
+started: 2026-11-11T17:15:13Z
+--- output ---
+
+> narralens@0.1.0 test /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+> vitest run --config vitest.config.ts tests/agent-driven/integration/created-source-adoption.test.ts --maxWorkers=1 --minWorkers=1
+
+
+ RUN  v3.2.4 /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+
+(node:1179699) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/created-source-adoption.test.ts (6 tests) 69ms
+
+ Test Files  1 passed (1)
+      Tests  6 passed (6)
+   Start at  01:15:13
+   Duration  327ms (transform 115ms, setup 0ms, collect 136ms, tests 69ms, environment 0ms, prepare 33ms)
+
+--- end ---
+exit: 0
+finished: 2026-11-11T17:15:14Z

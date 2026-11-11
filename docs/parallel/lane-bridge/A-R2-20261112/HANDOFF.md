@@ -139,3 +139,14 @@ peer 端口状态：MEDIA `CommittedRenderPhasesPort`、PRODUCT 原生接口的�
 - `created-source-adoption.test.ts` / `created-source-process-recovery.test.ts` / 三个 delivery/qc 测试文件（尚未创建）
 
 全部 R2-01..R2-08 / R2-F case 与重型 Host/media/ffmpeg/browser/build/full 仍 **NOT_RUN**。重型槽当前 FREE 但**需 MAIN 显式 grant**，本 child 未申请也未使用。
+
+**E3（本次，commit 见下方）**：`created-source-publisher.ts` —— created source 的真实发布者，**proof 的唯一发行者**。
+- 发布顺序按 D10：先核 live 旧 author（实际重算整树摘要，与计划里的 `original_source_digest` 不符即拒）→ 把完整闭包私有复制到 `privateRoot/<txn>-<uuid>/staging` → 逐文件 fsync + 自底向上目录 fsync + staging/workspace fsync → 写 journal `prepared` → 旧 author rename 到本事务私有 backup → 新树 rename 到固定 author 根 → 父目录 fsync → 写 journal `published`。
+- 失败即回滚：旧根 rename 成功而新树 rename 失败时，旧闭包被移回原位；publisher 标记为不可用，**不再发行也不承认任何 proof**。
+- proof 为模块私有类实例 + 模块私有 `WeakMap`：**结构相同的普通对象与 JSON 克隆都不被承认**；`verify()` 还要求该 proof 由**本 publisher 实例**发行（别人的 proof 不承认）。
+- `verify()` 不只信 proof：它重查 journal 的 `published` 相位、author 根当前整树摘要、backup 中原闭包摘要，任一漂移即拒。
+- 树摘要 `createdSourceTreeDigest(files)` = 排序后 `{relative_path, bytes, sha256}` 的 canonical 摘要；成员增删或字节变化都会改变它。
+- 符号链接一律拒绝（`lstat` 判定）。
+- journal 表 `created_publication_journal` 追加写、无 state 列，只有 `prepared`/`published` 相位。
+
+本阶段实证：`pnpm test created-source-adoption.test.ts` exit 0 / 6 passed（log `…-016.txt` sha256 `bd150dd5735e5e700de151a1028fade946c3589abb8bd11a062ccd567f50df1f`；首失败 `…-015.txt` 保留：proof 未绑定发行实例）；C1 轻量子集 8 文件 exit 0 / 102 passed（log `…-017.txt` sha256 `918e5828c63290e9a810b8c75fd4b305be10f3439a4ea90ca8462f44666f0f8b`）；`tsc --noEmit` exit 0（log `…-018.txt` sha256 `ffcfa2c5ffeb6e7a8caa3ccb4669c88fe714cec69dff2824e5ac4c17489152ec`）。该测试为私有临时目录中的轻量文件系统用例，**未**使用 Host/media/browser/ffmpeg。
