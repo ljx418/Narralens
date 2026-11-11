@@ -587,7 +587,7 @@ export class CommittedRenderPhaseError extends Error {
  * The canonicalization is the frozen restricted one: safe integers, strings, booleans
  * and null only.
  */
-export function phaseReceiptDigest(receipt: { readonly receipt_digest: string }): string {
-  const { receipt_digest: _self, ...content } = receipt as { readonly receipt_digest: string } & Record<string, unknown>;
+export function phaseReceiptDigest<T extends { readonly receipt_digest: string }>(receipt: T): string {
+  const { receipt_digest: _self, ...content } = receipt;
   return canonicalDigest(content);
 }
