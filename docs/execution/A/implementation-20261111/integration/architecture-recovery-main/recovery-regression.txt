@@ -1,0 +1,56 @@
+
+> narralens@0.1.0 test /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+> vitest run --config vitest.config.ts tests/agent-driven/integration/project-creation-store.test.ts tests/wave2/w2-asset-ledger.test.ts tests/wave2/w2-asset-03-atomic.test.ts tests/agent-driven/integration/job-recovery-authority.test.ts --maxWorkers=1 --minWorkers=1
+
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:892242) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/w2-asset-ledger.test.ts (30 tests) 316ms
+(node:892523) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/project-creation-store.test.ts (36 tests) 38208ms
+   ✓ does not turn a missing/foreign/expired trusted confirmation into creation permission  446ms
+   ✓ commits real published snapshot metadata atomically, survives DB reopen and preserves the accepted response  2473ms
+   ✓ rolls back every initial commit fact when failure occurs after state  1053ms
+   ✓ rolls back every initial commit fact when failure occurs after binding  967ms
+   ✓ rolls back every initial commit fact when failure occurs after snapshot  947ms
+   ✓ rolls back every initial commit fact when failure occurs after transaction  1013ms
+   ✓ rolls back every initial commit fact when failure occurs after pointer  945ms
+   ✓ rolls back every initial commit fact when failure occurs after source_fact  1630ms
+   ✓ rolls back every initial commit fact when failure occurs after origin  1111ms
+   ✓ rolls back every initial commit fact when failure occurs after brief  959ms
+   ✓ rolls back every initial commit fact when failure occurs after command  932ms
+   ✓ rolls back every initial commit fact when failure occurs after job  899ms
+   ✓ rolls back every initial commit fact when failure occurs after outbox  1596ms
+   ✓ refuses a stale worker before any commit effect: owner  1164ms
+   ✓ refuses a stale worker before any commit effect: attempt  1124ms
+   ✓ refuses a stale worker before any commit effect: expired  970ms
+   ✓ refuses a stale worker before any commit effect: cancelled  968ms
+   ✓ rechecks creation schema in a live store, not only after constructing a replacement  913ms
+   ✓ samples lease time after transaction admission instead of using time from before BEGIN  913ms
+   ✓ rolls back when lease expires after the final writes  929ms
+   ✓ rolls back when confirmation expires after the final writes  1001ms
+   ✓ does not mint a source proof for false native metadata: frame-count  1752ms
+   ✓ does not mint a source proof for false native metadata: fps  1816ms
+   ✓ does not mint a source proof for false native metadata: upstream  945ms
+   ✓ rejects a forged proof and byte changes after genuine pinned verification  1011ms
+   ✓ resolves a genuine created project without migration/cached layout, including after reopen  1029ms
+   ✓ refuses created source symlink escape even with byte-identical committed content  1010ms
+   ✓ does not commit a proved snapshot when its author-source publication is replaced or absent  1005ms
+   ✓ lets the real Host rebuild a created layout and inventory without a migration or registration hook  1405ms
+   ✓ refuses a same-bytes canonical path substitution after pinned proof  1251ms
+   ✓ re-proves reused snapshot durability through its source and both parent directories  2987ms
+(node:894086) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/w2-asset-03-atomic.test.ts (13 tests) 158ms
+(node:894148) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/job-recovery-authority.test.ts (8 tests) 13ms
+
+ Test Files  4 passed (4)
+      Tests  87 passed (87)
+   Start at  23:00:23
+   Duration  54.52s (transform 2.47s, setup 0ms, collect 8.50s, tests 38.69s, environment 0ms, prepare 4.82s)
+

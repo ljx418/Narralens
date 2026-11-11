@@ -1,0 +1,24 @@
+{
+  "slot": "R1-MAIN-RECOVERY-005",
+  "argv": [
+    "corepack",
+    "pnpm",
+    "test",
+    "tests/agent-driven/integration/project-creation-store.test.ts",
+    "tests/wave2/w2-asset-ledger.test.ts",
+    "tests/wave2/w2-asset-03-atomic.test.ts",
+    "tests/agent-driven/integration/job-recovery-authority.test.ts",
+    "--maxWorkers=1",
+    "--minWorkers=1"
+  ],
+  "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+  "started_at": "2026-11-11T15:00:21.046396+00:00",
+  "wrapper_pid": 892174,
+  "inputs": {
+    "src/host/projects/revision-store.ts": "95a2158d8bf69a680227a525090724d2e0721aba7bf08b9332a7f3dbfd4c8c0f",
+    "src/host/projects/project-creation-store.ts": "2ca8d5cea9dc3148f90d46d44f419bc87c9466027641172daf725e61d6e05e8e",
+    "src/host/projects/migrated-asset-ledger.ts": "67cf33e938ad98c3a995ae02759d6f1fd82e1110775a6da1c3e6710916e814f9",
+    "tests/agent-driven/integration/job-recovery-authority.test.ts": "2140d19334d6b66381af99616349ad588f7438757e13fc98276e09d9725aae14"
+  },
+  "command_pid": 892175
+}
