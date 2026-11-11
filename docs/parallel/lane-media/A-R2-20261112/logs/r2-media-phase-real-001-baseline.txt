@@ -1,0 +1,44 @@
+# R2-MEDIA-PHASE-REAL-001 — before-run baseline
+utc=2026-11-11T18:18:04Z
+task=task_58761655aa05
+dispatch=ctx_4738ccde9619
+terminal=term_5b7144ed0c1007caa7c1df73455e1211
+creator_terminal=term_84cbf3b186ee5d4cfc8860e84d7e972f
+follow_up_of=ctx_ed58920f84a9
+cwd=/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-MEDIA
+head=0e843e583fc2fe5e77632145633e20402e88106d
+branch=agent-driven/a-r1-media
+--- verified product bytes (must match the grant) ---
+0d4dbf159e7ce639d823d87618ee15078aefd17f57c1e0b068be02d4cf821e5a  src/host/render/committed-render-phases.ts
+eb47b75098380f885a3c87059e66488c24c4ee0dcf8daf5f3a7ffbb04074b539  tests/agent-driven/media/committed-render-phases.test.ts
+--- product/index state ---
+(tracked tree and index clean)
+--- untracked inventory (preserved R1 + lane docs) ---
+?? docs/parallel/lane-media/A-R1-20261111/CLAUDE_IMPLEMENT.md
+?? docs/parallel/lane-media/A-R1-20261111/HANDOFF.md
+?? docs/parallel/lane-media/A-R1-20261111/MAIN_DELTA_HANDOFF.md
+?? docs/parallel/lane-media/A-R1-20261111/MAIN_DELTA_MANIFEST.json
+?? docs/parallel/lane-media/A-R1-20261111/MAIN_START.md
+?? docs/parallel/lane-media/A-R1-20261111/ReleaseAssignment.json
+?? docs/parallel/lane-media/A-R1-20261111/TASK.md
+?? docs/parallel/lane-media/A-R1-20261111/evidence/cleanup-20261111-224528.txt
+?? docs/parallel/lane-media/A-R1-20261111/evidence/draft-processor-real-1794408261304/
+?? docs/parallel/lane-media/A-R1-20261111/evidence/draft-processor-real-1794416514046/
+?? docs/parallel/lane-media/A-R1-20261111/evidence/draft-processor-real-1794416805157/
+?? docs/parallel/lane-media/A-R1-20261111/logs/
+?? docs/parallel/lane-media/A-R1-20261111/run-ticket-command.sh
+?? docs/parallel/lane-media/A-R2-20261112/logs/r2-media-phase-real-001-baseline.txt
+--- descendant baseline: no vitest/ffmpeg/chromium/openfilm process of this run ---
+(none)
+--- fixture baseline: /tmp narralens workspaces ---
+/tmp/narralens-e1-commit-method.txt
+/tmp/narralens-e1-publisher-body.txt
+/tmp/narralens-e1-root-tests.txt
+--- read-only pinned inputs ---
+pinned_upstream=/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm
+pinned_upstream_head=e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3
+playwright_core=/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm/node_modules/.pnpm/playwright-core@1.61.1/node_modules/playwright-core/index.js
+chromium_cache=/home/administrator/.cache/ms-playwright
+ffmpeg=ffmpeg version 6.1.1-3ubuntu5 Copyright (c) 2000-2023 the FFmpeg developers
+node=v22.22.1
+pnpm=10.33.0

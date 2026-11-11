@@ -1,0 +1,78 @@
+# R2-MEDIA-PHASE-REAL-001 — terminal result and owned-resource disposition
+utc=2026-11-11T18:23:30Z
+task=task_58761655aa05
+dispatch=ctx_4738ccde9619
+terminal=term_5b7144ed0c1007caa7c1df73455e1211
+cwd=/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-MEDIA
+head_before_and_after=0e843e583fc2fe5e77632145633e20402e88106d
+
+--- the exact command, run once ---
+NARRALENS_PHASE_REAL_TOOLS=1 corepack pnpm exec vitest run --config vitest.config.ts tests/agent-driven/media/committed-render-phases.test.ts --maxWorkers=1 --minWorkers=1 -t "the real tools"
+start_utc=2026-11-11T18:20:35.015581971Z
+end_utc=2026-11-11T18:20:37Z (the case ended at 2124 ms; the runner appended the end stamp)
+exit=1
+raw_log=docs/parallel/lane-media/A-R2-20261112/logs/r2-media-phase-real-001-run.log
+
+--- what the run reported ---
+1 failed | 47 skipped | 48 tests in the file
+FAIL tests/agent-driven/media/committed-render-phases.test.ts > the real tools (NARRALENS_PHASE_REAL_TOOLS=1) > encodes, inspects and publishes with the pinned renderer and the real ffprobe and ffmpeg
+NativeDraftError: Draft paths must be private, distinct and outside every protected source domain
+  at DraftWorkspace.#initialize (src/host/render/native-draft-io.ts:56:81)
+  at Function.create (src/host/render/native-draft-io.ts:35:27)
+  at PinnedNativeDraftAssembler.prepare (src/host/render/native-draft-assembler.ts:53:40)
+  at tests/agent-driven/media/committed-render-phases.test.ts:1065:19
+
+--- where the failure happened ---
+In the SETUP of the real-tool case, in the real PinnedNativeDraftAssembler, BEFORE any phase code ran.
+The rule at native-draft-io.ts:56 is: for every protected root and for every asset's
+parent directory, the draft's target root must be neither inside it nor contain it.
+Pure arithmetic reproduction of that rule with the paths this case used:
+  ok        /tmp/narralens-phase-real-source-XXXX
+  ok        /tmp/narralens-phase-real-objects-YYYY
+  VIOLATION /tmp/narralens-phase-real-workspace-ZZZZ
+  ok        /tmp/narralens-phase-real-delivery-WWWW
+  ok        /mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm
+  ok        /tmp/narralens-phase-real-source-XXXX/inputs
+  target_root = /tmp/narralens-phase-real-workspace-ZZZZ/native
+The single violating path is the phase workspace, which the case listed as a protected
+root while the assembler's target root sits inside it. The phase implementation under
+test was not reached, and nothing about it is refuted or confirmed by this run.
+
+--- what a corrected case would need (NOT applied under this grant) ---
+One line in the released test file tests/agent-driven/media/committed-render-phases.test.ts:
+the assembler's protected_roots must not contain the directory the draft target_root is in.
+The repo's own real-render case does this correctly: its protected roots are the media
+source, the blob root, the projects and snapshots roots and the vendor, and its draft
+target sits in a separate attempt directory that is not among them.
+
+--- descendant lifecycle ---
+my run: shell pid 1440549, vitest node pid 1440618; both exited with the command.
+no browser was ever launched: the failure happened in the assembler, before the render.
+ps for vitest|ffmpeg|ffprobe|chromium|chrome-linux|openfilm-render-worker after the run: (none)
+
+--- concurrency observed during the run (reported, not inferred) ---
+At 18:21Z a separate heavy vitest was running in another lane:
+  pid 1442724  corepack pnpm test tests/agent-driven/integration/created-source-change.test.ts
+    ... created-source-adoption ... created-render-delivery ... created-delivery-recovery ... --maxWorkers=1 --minWorkers=1
+  pid 1442736  sh -c vitest run ... ; pid 1442737  node (vitest 1)
+Its process tree had exited by 18:22Z (its cwd was no longer readable) and its own
+fixture workspace was removed. It was a different command and a different tree from mine;
+it is recorded here because the whole-host single slot was not exclusive at that moment.
+
+--- owned roots and cleanup ---
+fixture roots created by this run (narralens-phase-real-source/objects/workspace/delivery-*):
+  removed by the test's own afterEach; none remains under /tmp.
+remaining /tmp entries matching narralens-*: three plain text files
+  narralens-e1-commit-method.txt, narralens-e1-publisher-body.txt, narralens-e1-root-tests.txt
+  they are not this run's artefacts and not directories; they were left untouched.
+
+--- product state after the run ---
+tracked tree and index: clean; HEAD unchanged; no source or index mutation during the run
+0d4dbf159e7ce639d823d87618ee15078aefd17f57c1e0b068be02d4cf821e5a  src/host/render/committed-render-phases.ts
+eb47b75098380f885a3c87059e66488c24c4ee0dcf8daf5f3a7ffbb04074b539  tests/agent-driven/media/committed-render-phases.test.ts
+
+--- log digests ---
+ee21dcedf8164e18ec985ab984a94b83092b37f8742b36cddf13e3117c87ab32  docs/parallel/lane-media/A-R2-20261112/logs/r2-media-phase-real-001-baseline.txt
+40b0450d6a96ede14f82d4c5bdfd1e5382b9d889f37afc8b5259a0d2aa7bc30d  docs/parallel/lane-media/A-R2-20261112/logs/r2-media-phase-real-001-run.log
+# The sha256 of this terminal record itself is reported externally, in the message to the parent,
+# because a file cannot carry its own digest.

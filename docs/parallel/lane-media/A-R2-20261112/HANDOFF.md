@@ -495,3 +495,94 @@ MAIN's owned-process harness, the BRIDGE integrated targets still need BRIDGE's 
 to exist, and MAIN still owns the final combined clean acceptance. The previous
 batch's 19/19 proof result is not reclassified as an acceptance of the phase chain, and
 this candidate carries no independent review, no A-stage PASS and no human acceptance.
+
+## R2-MEDIA-PHASE-REAL-001 — the granted real-tool run FAILED (2026-11-11T18:24Z)
+
+- Task `task_58761655aa05`, dispatch `ctx_4738ccde9619`, terminal
+  `term_5b7144ed0c1007caa7c1df73455e1211`.
+- Verified before the run: HEAD `0e843e583fc2fe5e77632145633e20402e88106d`, phase
+  source sha256 `0d4dbf159e7ce639d823d87618ee15078aefd17f57c1e0b068be02d4cf821e5a`,
+  test sha256 `eb47b75098380f885a3c87059e66488c24c4ee0dcf8daf5f3a7ffbb04074b539`,
+  tracked tree and index clean. All three matched the grant exactly.
+- The command was run **exactly once**, with no source or index mutation during it:
+  `NARRALENS_PHASE_REAL_TOOLS=1 corepack pnpm exec vitest run --config vitest.config.ts
+  tests/agent-driven/media/committed-render-phases.test.ts --maxWorkers=1 --minWorkers=1
+  -t "the real tools"`.
+- **Exit 1**, started 2026-11-11T18:20:35Z, the case ended after 2124 ms. Raw log
+  `logs/r2-media-phase-real-001-run.log` sha256
+  `40b0450d6a96ede14f82d4c5bdfd1e5382b9d889f37afc8b5259a0d2aa7bc30d`; 1 failed and 47
+  skipped of the 48 tests in the file.
+
+### Why it failed
+
+The failure is in the **setup of the real-tool case**, in the real
+`PinnedNativeDraftAssembler`, **before any phase code ran**:
+
+```
+NativeDraftError: Draft paths must be private, distinct and outside every protected source domain
+  at DraftWorkspace.#initialize (src/host/render/native-draft-io.ts:56:81)
+  at Function.create (src/host/render/native-draft-io.ts:35:27)
+  at PinnedNativeDraftAssembler.prepare (src/host/render/native-draft-assembler.ts:53:40)
+  at tests/agent-driven/media/committed-render-phases.test.ts:1065:19
+```
+
+The rule at `native-draft-io.ts:56` is that the draft's target root must be neither
+inside a protected root nor contain one. The case listed the phase's own workspace
+among the assembler's protected roots while the assembler's target root sat inside it.
+Reproduced with pure arithmetic over the paths the case used, without touching any
+code: the workspace is the **only** violating path; the media source, the object root,
+the delivery root, the vendor and the assets' parent directory are all fine.
+
+So this is a defect in my own real-tool case, in the released test file
+`tests/agent-driven/media/committed-render-phases.test.ts`, and not a defect in the
+phase implementation: the phase code was never reached, so this run neither refutes nor
+confirms anything about it. The repo's own real-render case does this correctly — its
+protected roots are the media source, the blob root, the projects and snapshots roots
+and the vendor, and its draft target sits in a separate attempt directory that is not
+among them.
+
+**No retry was made.** The grant allowed the command exactly once and forbade
+implementation changes, so the case was left exactly as it is and the failure is
+reported as it happened. The correction is one line in the released test file — the
+assembler's `protected_roots` must not contain the directory the draft target root is
+in — and it needs a new grant to be applied and re-run.
+
+### Descendants, roots and cleanup
+
+- My run's tree: shell pid 1440549 and vitest node pid 1440618; both exited with the
+  command. **No browser was ever launched** — the failure was in the assembler, before
+  the render.
+- After the run, `ps` for `vitest|ffmpeg|ffprobe|chromium|chrome-linux|openfilm-render-worker`:
+  **(none)**.
+- The fixture roots this run created (`narralens-phase-real-source/objects/workspace/delivery-*`)
+  were removed by the test's own `afterEach`; **none remains** under `/tmp`.
+- Three plain text files matching `narralens-*` remain in `/tmp`
+  (`narralens-e1-commit-method.txt`, `narralens-e1-publisher-body.txt`,
+  `narralens-e1-root-tests.txt`). They are not this run's artefacts and not
+  directories, and they were left untouched.
+- The tracked tree and the index are clean and unchanged, and both product hashes are
+  still exactly what the grant named.
+
+### One fact about the slot
+
+While my run was in flight, a separate heavy vitest was running in another lane:
+`corepack pnpm test tests/agent-driven/integration/created-source-change.test.ts
+… created-source-adoption … created-render-delivery … created-delivery-recovery …
+--maxWorkers=1 --minWorkers=1` (pid 1442724, its `sh` 1442736 and `node (vitest 1)`
+1442737). It was a different command and a different process tree, and its own fixture
+workspace was removed by 18:22Z. It is recorded because the whole-host single slot was
+**not exclusive** at that moment, which MAIN should know when it schedules the next
+slot.
+
+### What this run does and does not claim
+
+It claims exactly one thing: the granted command was run once, on the frozen bytes the
+grant named, and it **failed** in the setup of its own test case. The real-tool
+validation of the phase chain is therefore **NOT achieved** and stays `NOT_RUN`. No
+implementation change was made, no retry was made, no Host, adoption, T20, full-suite
+or human acceptance is claimed, and the phase implementation is neither confirmed nor
+refuted by this run.
+
+The full record is in `logs/r2-media-phase-real-001-baseline.txt` (before the run) and
+`logs/r2-media-phase-real-001-terminal.txt` sha256
+`2bb10506e44e13a491b88a4a9021bad94ec33419cda685d809332db1383711af` (after it).
