@@ -1,0 +1,12 @@
+{
+  "command": [
+    "corepack",
+    "pnpm",
+    "test",
+    "tests/agent-driven/product/execution-guard.test.ts",
+    "--maxWorkers=1",
+    "--minWorkers=1"
+  ],
+  "exit": 1,
+  "log_sha256": "fb011fdac91959f7a501d0af63ea7c3980f458e064d0cff25a0b8bd2fca9ee9e"
+}

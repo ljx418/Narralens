@@ -166,6 +166,7 @@ export interface ExecutionGuardFacts {
    * the guard does not look them up itself, because it has no authority to.
    */
   readonly narrow?: NarrowEffectFacts | null | undefined;
+  readonly preparedImpact?: PreparedImpactFacts | null | undefined;
   /** The authenticated principal that is about to cause the side effect. */
   readonly principal_id: string;
   /** The current time, in epoch seconds. */
@@ -184,6 +185,21 @@ export type NarrowApprovalState = "active" | "consumed" | "rejected" | "revoked"
 
 /** The state of an impact, as the impact table holds it. */
 export type NarrowImpactState = "active" | "consumed" | "expired" | "stale";
+
+/** Projection from MAIN's verified prepared-source reader, not a proof capability.
+ * The caller must assert the reader's opaque token in the same synchronous transaction
+ * as this guard. HTTP/JSON input cannot establish these facts. */
+export interface PreparedImpactFacts {
+  readonly project_id: string;
+  readonly completed_job: {
+    readonly job_id: string;
+    readonly state: "succeeded";
+    readonly terminal_reason: "SOURCE_ONLY";
+  };
+  readonly prepared_source_id: string;
+  readonly fact_digest: string;
+  readonly execution: ExecutionBinding;
+}
 
 /** The durable facts of one narrow Host-only effect. */
 export interface NarrowEffectFacts {
@@ -285,9 +301,9 @@ export type GuardedEffect =
   | { readonly kind: "safe_control"; readonly control: "pause" | "cancel" }
   | {
       readonly kind: "review_impact_prepare";
-      /** The package the impact is prepared for. */
-      readonly package_id: string;
-      readonly package_digest: string;
+      readonly prepared_source_id: string;
+      readonly prepared_job_id: string;
+      readonly fact_digest: string;
     }
   | {
       readonly kind: "approved_prepared_adoption";
@@ -536,11 +552,32 @@ function assertNarrowEffect(
   }
   // The effect stands for one of the two ordinary actions, and it is checked the same
   // way: the fixed stage has to allow the action, the action has to be inside the
-  // authorized scope, and the predecessor gates have to be accepted. Only the gate of
-  // the very package the effect is about is exempt.
+  // authorized scope, and every predecessor gate has to be accepted. The current
+  // stage's own review gate is not a prerequisite in the fixed stage table.
   const action: GuardedAction = effect.kind === "review_impact_prepare" ? "change.prepare" : "change.apply";
   assertStageAndAction(binding.step_id, action, facts);
-  assertGates(binding.step_id, action, facts, effect.package_id);
+  // Fixed-stage requirements contain predecessors, never the current stage's own
+  // review gate. No package identity can exempt a predecessor.
+  assertGates(binding.step_id, action, facts);
+  if (effect.kind === "review_impact_prepare") {
+    const prepared = facts.preparedImpact;
+    if (!prepared || prepared.project_id !== facts.project_id ||
+      prepared.completed_job.state !== "succeeded" ||
+      prepared.completed_job.terminal_reason !== "SOURCE_ONLY" ||
+      prepared.completed_job.job_id !== effect.prepared_job_id ||
+      prepared.prepared_source_id !== effect.prepared_source_id ||
+      prepared.fact_digest !== effect.fact_digest ||
+      !effect.prepared_job_id || !/^ps_[a-f0-9]{60}$/.test(effect.prepared_source_id) ||
+      !/^[a-f0-9]{64}$/.test(effect.fact_digest)) {
+      throw new ProductError("REVIEW_STALE", "The completed prepared source was not proved");
+    }
+    validateAgentDefinition("ExecutionBinding", prepared.execution);
+    if (canonicalDigest(prepared.execution) !== canonicalDigest(binding) ||
+      facts.attempt?.state !== "waiting_user") {
+      throw new ProductError("RUN_PLAN_STALE", "The prepared proof is not for the current waiting attempt");
+    }
+    return;
+  }
   // The reviewed product is the only thing the effect may act on. A package of
   // another run, of another state, or with another digest is not this effect's.
   const narrow = facts.narrow;
@@ -556,20 +593,7 @@ function assertNarrowEffect(
       details: { expected: review.package_id, received: effect.package_id },
     });
   }
-  if (effect.kind === "review_impact_prepare") {
-    // The impact is prepared for a product that is WAITING for a decision. A package
-    // that was already decided is not this effect's.
-    if (review.state !== "pending") {
-      throw new ProductError("REVIEW_STALE", "The reviewed package is not waiting for a decision", {
-        details: { state: review.state },
-      });
-    }
-    if (review.package_digest !== effect.package_digest) {
-      throw new ProductError("REVIEW_STALE", "The effect names another version of the package", {
-        details: { expected: review.package_digest, received: effect.package_digest },
-      });
-    }
-  } else {
+  {
     // The adoption happens AFTER the trusted decision accepted the product. An
     // adoption of a package that is still pending would be an adoption nobody decided.
     if (review.state !== "accepted") {
@@ -680,22 +704,11 @@ function assertStageAndAction(stage: string, action: GuardedAction, facts: Execu
   }
 }
 
-/**
- * The gates an effect depends on.
- *
- * `exemptPackageId` is the ONE gate that is not required to be accepted: the gate of
- * the very product the effect is about. It is the gate the effect exists for, and it
- * is pending by definition while the decision is being made.
- *
- * Every other gate has to be accepted, including one that belongs to another
- * package. A predecessor that is pending or failed stops the effect, and so does an
- * unrelated package's gate: the exemption is for the current product and nothing else.
- */
+/** Checks every predecessor in the fixed stage/action tables. */
 function assertGates(
   stage: string,
   action: GuardedAction,
   facts: ExecutionGuardFacts,
-  exemptPackageId?: string,
 ): void {
   const required = new Set<RunGate["kind"]>([
     ...(A_STAGE_GATE_REQUIREMENTS[stage] ?? []),
@@ -707,9 +720,6 @@ function assertGates(
       throw new ProductError("RUN_GATE_BLOCKED", "The run has no gate for this step yet", {
         details: { stage_id: stage, gate_kind: kind },
       });
-    }
-    if (exemptPackageId !== undefined && gate.review_package_id === exemptPackageId) {
-      continue;
     }
     if (gate.state !== "accepted") {
       throw new ProductError("RUN_GATE_BLOCKED", "The step is still waiting for a review decision", {
