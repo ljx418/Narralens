@@ -1,4 +1,4 @@
-import { readFile, stat } from "node:fs/promises";
+import { readFile, stat, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { CommittedRenderPhases, closureDigestOf, rightsDigestOf } from "../../../src/host/render/committed-render-phases.js";
@@ -301,7 +301,8 @@ describe("inspecting an encoded object", () => {
     expect(after).toBe(before);
     expect(qc.qc_object_id).not.toBe(encoded.media_object_id);
     const qcFiles = await import("node:fs/promises").then((fs) => fs.readdir(resolve(built.objectRoot, "objects", qc.qc_object_id)));
-    expect(qcFiles.sort()).toEqual(["ffprobe.json", "full_decode.log"]);
+    // The object carries its own durable receipt beside its evidence.
+    expect(qcFiles.sort()).toEqual(["ffprobe.json", "full_decode.log", "receipt.json"]);
   });
 
   it("refuses an encoded fact whose digest does not describe it", async () => {
@@ -569,4 +570,572 @@ describe("the objects a phase leaves behind", () => {
     // Nothing is left open: closing the service succeeds.
     await expect(built.phases.close()).resolves.toBeUndefined();
   });
+});
+
+/**
+ * Review batch 1 — the four gaps MAIN found in the source review.
+ *
+ * These cases are written against the *behaviour* the review asked for, not against an
+ * internal shape, so they can be run against the old candidate to show the gap and
+ * against the corrected one to show it is closed. Each case is labelled with the gap
+ * it belongs to.
+ */
+
+async function openDescriptorCount(): Promise<number> {
+  const { readdir } = await import("node:fs/promises");
+  return (await readdir("/proc/self/fd")).length;
+}
+
+describe("MP01 — a closure digest over a fractional duration", () => {
+  it("computes a digest for a duration that is not a whole number of seconds", async () => {
+    const built = await harness({ label: "mp01-fractional" });
+    const fractional: SnapshotClosure = {
+      ...built.closure,
+      expected_frames: 91,
+      expected_duration_seconds: 91 / 30,
+    };
+
+    expect(() => closureDigestOf(fractional)).not.toThrow();
+    const digest = closureDigestOf(fractional);
+    expect(digest).toBe(closureDigestOf({ ...fractional }));
+    expect(digest).not.toBe(closureDigestOf({ ...fractional, expected_duration_seconds: 92 / 30 }));
+  });
+
+  it("encodes and inspects a film whose frame rate is a rational number", async () => {
+    const built = await harness({ label: "mp01-rational-fps" });
+    const rational = renderSpec({
+      fps_numerator: 30000,
+      fps_denominator: 1001,
+      config_digest: computeRenderConfigDigest({
+        render_spec: renderSpec({ fps_numerator: 30000, fps_denominator: 1001 }),
+        upstream_sha: RENDER_PIN.upstream_sha,
+        worker_sha256: RENDER_PIN.worker_sha256,
+      }),
+    });
+    const closure: SnapshotClosure = {
+      ...built.closure,
+      expected_frames: 91,
+      expected_duration_seconds: (91 * 1001) / 30000,
+    };
+    const phases = new CommittedRenderPhases({
+      snapshots: { async readSnapshot() { return closure; } },
+      fence: { async claimAttempt() { return true; }, async checkAttempt() { return "proceed"; }, async releaseAttempt() { /* executor owns it */ } },
+      packages: built.packages,
+      native_renderer: fakeRenderer(),
+      upstream_root: join(built.objectRoot, "no-checkout-here"),
+      object_root: built.objectRoot,
+      workspace_root: built.workspace,
+      qc_runner: runnerOf({}),
+      pin_verifier: async () => ({
+        ok: true, reason: "stated", checked: [], missing: [], mismatched: [],
+        upstream_root: built.objectRoot, observed_sha: RENDER_PIN.upstream_sha,
+        expected_sha: RENDER_PIN.upstream_sha, worker_sha256: RENDER_PIN.worker_sha256,
+      }),
+    });
+    const request = { ...requestFor(built), render_spec: rational };
+
+    const encoded = await phases.prepareEncoded(request);
+    expect(encoded.fps_numerator).toBe(30000);
+    expect(encoded.fps_denominator).toBe(1001);
+    const qc = await phases.inspectEncoded({ request, encoded });
+    expect(qc.parent_encoded_digest).toBe(encoded.receipt_digest);
+  });
+});
+
+describe("MP02 — the resolver may not be walked out of, nor serve changed bytes", () => {
+  it("refuses an object root that is an alias of the real root", async () => {
+    const built = await harness({ label: "mp02-alias-root" });
+    const encoded = await built.phases.prepareEncoded(requestFor(built));
+    const media = encoded.files.find((file) => file.role === "media");
+    if (media === undefined) throw new Error("the encoded object holds no media");
+
+    const alias = join(built.objectRoot, "alias-root");
+    await import("node:fs/promises").then((fs) => fs.symlink(built.objectRoot, alias));
+    const aliased = new CommittedRenderPhases({
+      snapshots: { async readSnapshot() { return built.closure; } },
+      fence: { async claimAttempt() { return true; }, async checkAttempt() { return "proceed"; }, async releaseAttempt() { /* executor owns it */ } },
+      packages: built.packages,
+      native_renderer: fakeRenderer(),
+      upstream_root: join(built.objectRoot, "no-checkout-here"),
+      object_root: alias,
+      workspace_root: built.workspace,
+      qc_runner: runnerOf({}),
+      pin_verifier: async () => ({
+        ok: true, reason: "stated", checked: [], missing: [], mismatched: [],
+        upstream_root: built.objectRoot, observed_sha: RENDER_PIN.upstream_sha,
+        expected_sha: RENDER_PIN.upstream_sha, worker_sha256: RENDER_PIN.worker_sha256,
+      }),
+    });
+
+    await expect(aliased.openPhaseObject({
+      object_id: encoded.media_object_id,
+      relative_path: media.relative_path,
+      sha256: media.sha256,
+      bytes: media.bytes,
+    })).rejects.toBeTruthy();
+  });
+
+  it("refuses an object that is a symlink", async () => {
+    const built = await harness({ label: "mp02-alias-object" });
+    const encoded = await built.phases.prepareEncoded(requestFor(built));
+    const media = encoded.files.find((file) => file.role === "media");
+    if (media === undefined) throw new Error("the encoded object holds no media");
+
+    const fs = await import("node:fs/promises");
+    const objects = resolve(built.objectRoot, "objects");
+    const elsewhere = join(built.objectRoot, "elsewhere");
+    await fs.mkdir(elsewhere, { recursive: true, mode: 0o700 });
+    await fs.copyFile(resolve(objects, encoded.media_object_id, media.relative_path), join(elsewhere, media.relative_path));
+    await fs.symlink(elsewhere, join(objects, "obj_alias"));
+
+    await expect(built.phases.openPhaseObject({
+      object_id: "obj_alias",
+      relative_path: media.relative_path,
+      sha256: media.sha256,
+      bytes: media.bytes,
+    })).rejects.toBeTruthy();
+  });
+
+  it("refuses a file that lives under a symlinked directory inside the object", async () => {
+    const built = await harness({ label: "mp02-alias-parent" });
+    const encoded = await built.phases.prepareEncoded(requestFor(built));
+    const media = encoded.files.find((file) => file.role === "media");
+    if (media === undefined) throw new Error("the encoded object holds no media");
+
+    const fs = await import("node:fs/promises");
+    const objects = resolve(built.objectRoot, "objects");
+    const elsewhere = join(built.objectRoot, "elsewhere-parent");
+    await fs.mkdir(elsewhere, { recursive: true, mode: 0o700 });
+    await fs.copyFile(resolve(objects, encoded.media_object_id, media.relative_path), join(elsewhere, media.relative_path));
+    await fs.symlink(elsewhere, resolve(objects, encoded.media_object_id, "nested"));
+
+    await expect(built.phases.openPhaseObject({
+      object_id: encoded.media_object_id,
+      relative_path: `nested/${media.relative_path}`,
+      sha256: media.sha256,
+      bytes: media.bytes,
+    })).rejects.toBeTruthy();
+  });
+
+  it("refuses to serve bytes that were changed in place after the file was opened", async () => {
+    const built = await harness({ label: "mp02-in-place" });
+    const encoded = await built.phases.prepareEncoded(requestFor(built));
+    const media = encoded.files.find((file) => file.role === "media");
+    if (media === undefined) throw new Error("the encoded object holds no media");
+
+    const handle = await built.phases.openPhaseObject({
+      object_id: encoded.media_object_id,
+      relative_path: media.relative_path,
+      sha256: media.sha256,
+      bytes: media.bytes,
+    });
+    const path = resolve(built.objectRoot, "objects", encoded.media_object_id, media.relative_path);
+    const original = await readFile(path);
+    const tampered = Buffer.from(original);
+    tampered[0] = tampered[0] === 0x00 ? 0x01 : 0x00;
+    await import("node:fs/promises").then((fs) => fs.writeFile(path, tampered));
+
+    await expect(handle.read({ offset: 0, length: media.bytes })).rejects.toMatchObject({ code: "OBJECT_MUTATED" });
+    await handle.close();
+  });
+
+  it("leaks no descriptor when close runs while an open is still hashing", async () => {
+    const built = await harness({ label: "mp02-close-race" });
+    const fs = await import("node:fs/promises");
+    const objects = resolve(built.objectRoot, "objects");
+    const objectId = "obj_slow";
+    await fs.mkdir(resolve(objects, objectId), { recursive: true, mode: 0o700 });
+    const big = resolve(objects, objectId, "big.bin");
+    await fs.writeFile(big, Buffer.alloc(0));
+    await fs.truncate(big, 32 * 1024 * 1024);
+    const digest = (await import("node:crypto")).createHash("sha256")
+      .update(await fs.readFile(big)).digest("hex");
+
+    const before = await openDescriptorCount();
+    const opening = built.phases.openPhaseObject({
+      object_id: objectId,
+      relative_path: "big.bin",
+      sha256: digest,
+      bytes: 32 * 1024 * 1024,
+    });
+    await built.phases.close();
+    const handle = await opening;
+    try {
+      // The service closed the descriptor it opened while the close was running.
+      expect(await openDescriptorCount()).toBe(before);
+    } finally {
+      await handle.close();
+    }
+  });
+});
+
+describe("MP03 — the actual bytes of the promised supplements are checked", () => {
+  it("refuses an encoded object whose actual subtitle bytes changed", async () => {
+    const built = await harness({ label: "mp03-corrupt-subtitle" });
+    const encoded = await built.phases.prepareEncoded(requestFor(built));
+    const subtitle = encoded.files.find((file) => file.role === "subtitles");
+    if (subtitle === undefined) throw new Error("the encoded object holds no subtitles");
+
+    const path = resolve(built.objectRoot, "objects", encoded.media_object_id, subtitle.relative_path);
+    const original = await readFile(path);
+    const tampered = Buffer.from(original);
+    tampered[0] = tampered[0] === 0x31 ? 0x32 : 0x31;
+    await import("node:fs/promises").then((fs) => fs.writeFile(path, tampered));
+
+    await expect(built.phases.inspectEncoded({ request: deliveryRequestFor(built), encoded }))
+      .rejects.toBeTruthy();
+  });
+
+  it("refuses an encoded object whose actual licence file is missing", async () => {
+    const built = await harness({ label: "mp03-missing-licence" });
+    const encoded = await built.phases.prepareEncoded(requestFor(built));
+    const licence = encoded.files.find((file) => file.role === "rights");
+    if (licence === undefined) throw new Error("the encoded object holds no licence");
+
+    await import("node:fs/promises").then((fs) => fs.rm(resolve(built.objectRoot, "objects", encoded.media_object_id, licence.relative_path)));
+
+    await expect(built.phases.inspectEncoded({ request: deliveryRequestFor(built), encoded }))
+      .rejects.toBeTruthy();
+  });
+
+  it("refuses an encoded object whose supplements were reordered", async () => {
+    const built = await harness({ label: "mp03-reordered" });
+    const encoded = await built.phases.prepareEncoded(requestFor(built));
+    const supplements = encoded.files.filter((file) => file.role === "rights" || file.role === "subtitles");
+    if (supplements.length < 2) throw new Error("the encoded object holds no pair of supplements");
+
+    const reordered = { ...encoded, files: [...encoded.files.filter((file) => file.role !== "rights" && file.role !== "subtitles"), supplements[1]!, supplements[0]!] };
+    const tampered: EncodedFactV1 = { ...reordered, receipt_digest: phaseReceiptDigest(reordered) };
+
+    await expect(built.phases.inspectEncoded({ request: deliveryRequestFor(built), encoded: tampered }))
+      .rejects.toBeTruthy();
+  });
+});
+
+describe("MP04 — the object carries a durable receipt and the cleanup is honest", () => {
+  it("publishes an immutable receipt beside the object it describes", async () => {
+    const built = await harness({ label: "mp04-receipt" });
+    const encoded = await built.phases.prepareEncoded(requestFor(built));
+    const objectDir = resolve(built.objectRoot, "objects", encoded.media_object_id);
+
+    const names = await import("node:fs/promises").then((fs) => fs.readdir(objectDir));
+    expect(names).toContain("receipt.json");
+    const receipt = JSON.parse(await readFile(resolve(objectDir, "receipt.json"), "utf8")) as {
+      object_id: string; files: Array<{ relative_path: string; sha256: string }>;
+    };
+    expect(receipt.object_id).toBe(encoded.media_object_id);
+    const media = receipt.files.find((file) => file.relative_path === encoded.files.find((f) => f.role === "media")?.relative_path);
+    expect(media?.sha256).toBe(encoded.media_ref.sha256);
+  });
+
+  it("reads the durable receipt of an object through the anchored resolver", async () => {
+    const built = await harness({ label: "mp04-read-receipt" });
+    const encoded = await built.phases.prepareEncoded(requestFor(built));
+
+    const receipt = await built.phases.readObjectReceipt(encoded.media_object_id);
+
+    expect(receipt.format).toBe("narralens.phase-object-receipt@1");
+    expect(receipt.kind).toBe("encoded");
+    expect(receipt.object_id).toBe(encoded.media_object_id);
+    expect(receipt.project_id).toBe(encoded.project_id);
+    expect(receipt.files.find((file) => file.role === "media")?.sha256).toBe(encoded.media_ref.sha256);
+    expect(receipt.receipt_digest).toBe(phaseReceiptDigest(receipt));
+  });
+
+  it("keeps the object and its receipt across a restart of the service", async () => {
+    const built = await harness({ label: "mp04-restart" });
+    const encoded = await built.phases.prepareEncoded(requestFor(built));
+    await built.phases.close();
+
+    const restarted = new CommittedRenderPhases({
+      snapshots: { async readSnapshot() { return built.closure; } },
+      fence: { async claimAttempt() { return true; }, async checkAttempt() { return "proceed"; }, async releaseAttempt() { /* executor owns it */ } },
+      packages: built.packages,
+      native_renderer: fakeRenderer(),
+      upstream_root: join(built.objectRoot, "no-checkout-here"),
+      object_root: built.objectRoot,
+      workspace_root: built.workspace,
+      qc_runner: runnerOf({}),
+      pin_verifier: async () => ({
+        ok: true, reason: "stated", checked: [], missing: [], mismatched: [],
+        upstream_root: built.objectRoot, observed_sha: RENDER_PIN.upstream_sha,
+        expected_sha: RENDER_PIN.upstream_sha, worker_sha256: RENDER_PIN.worker_sha256,
+      }),
+    });
+
+    const media = encoded.files.find((file) => file.role === "media");
+    if (media === undefined) throw new Error("the encoded object holds no media");
+    const handle = await restarted.openPhaseObject({
+      object_id: encoded.media_object_id,
+      relative_path: media.relative_path,
+      sha256: media.sha256,
+      bytes: media.bytes,
+    });
+    const bytes = await handle.read({ offset: 0, length: media.bytes });
+    expect(bytes.byteLength).toBe(media.bytes);
+    await handle.close();
+
+    // The receipt of the object survived the restart and still describes it.
+    const objectDir = resolve(built.objectRoot, "objects", encoded.media_object_id);
+    const receipt = JSON.parse(await readFile(resolve(objectDir, "receipt.json"), "utf8")) as {
+      object_id: string; files: Array<{ relative_path: string; sha256: string; bytes: number }>;
+    };
+    expect(receipt.object_id).toBe(encoded.media_object_id);
+    expect(receipt.files.find((file) => file.relative_path === media.relative_path)?.sha256).toBe(media.sha256);
+    await restarted.close();
+  });
+
+  it("reports a cleanup failure instead of swallowing it", async () => {
+    const built = await harness({ label: "mp04-cleanup" });
+    const locking = new CommittedRenderPhases({
+      snapshots: { async readSnapshot() { return built.closure; } },
+      fence: { async claimAttempt() { return true; }, async checkAttempt() { return "proceed"; }, async releaseAttempt() { /* executor owns it */ } },
+      packages: built.packages,
+      native_renderer: {
+        async render(request: NativeRenderRequest) {
+          await writeFile(request.out_path, "the rendered film", "utf8");
+          // The attempt's own staging can no longer be emptied afterwards.
+          await import("node:fs/promises").then((fs) => fs.chmod(request.staging_root, 0o500));
+          return { out_path: request.out_path, lines: [], elapsed_ms: 1 };
+        },
+      },
+      upstream_root: join(built.objectRoot, "no-checkout-here"),
+      object_root: built.objectRoot,
+      workspace_root: built.workspace,
+      qc_runner: runnerOf({}),
+      pin_verifier: async () => ({
+        ok: true, reason: "stated", checked: [], missing: [], mismatched: [],
+        upstream_root: built.objectRoot, observed_sha: RENDER_PIN.upstream_sha,
+        expected_sha: RENDER_PIN.upstream_sha, worker_sha256: RENDER_PIN.worker_sha256,
+      }),
+    });
+
+    try {
+      await expect(locking.prepareEncoded(requestFor(built))).rejects.toBeTruthy();
+    } finally {
+      await import("node:fs/promises").then(async (fs) => {
+        for (const entry of await fs.readdir(built.workspace).catch(() => [] as string[])) {
+          await fs.chmod(resolve(built.workspace, entry), 0o700).catch(() => undefined);
+        }
+      });
+    }
+  });
+
+  it("waits for the phases that are still running when it closes", async () => {
+    const built = await harness({ label: "mp04-close-waits" });
+    const order: string[] = [];
+
+    const phase = built.phases.prepareEncoded(requestFor(built))
+      .then(() => { order.push("phase"); }, () => { order.push("phase"); });
+    const closing = built.phases.close().then(() => { order.push("close"); });
+    await Promise.all([phase, closing]);
+
+    expect(order).toEqual(["phase", "close"]);
+  });
+});
+
+/**
+ * The real tools.
+ *
+ * Everything above this block fakes the renderer and the media tools, and the cases
+ * above are therefore *module* checks: they prove the boundaries, not the bytes. This
+ * block is the other thing: the pinned OpenFilm checkout, the real renderer and the
+ * real `ffprobe`/`ffmpeg` against a real committed closure.
+ *
+ * It is not part of the ordinary run. A real OpenFilm render drives a headless
+ * browser, so it belongs to a MAIN heavy slot, and it is selected explicitly:
+ *
+ * ```
+ * NARRALENS_PHASE_REAL_TOOLS=1 corepack pnpm exec vitest run --config vitest.config.ts \
+ *   tests/agent-driven/media/committed-render-phases.test.ts --maxWorkers=1 --minWorkers=1 \
+ *   -t "the real tools"
+ * ```
+ *
+ * Nothing is installed and nothing is fetched: the pinned checkout is the read-only
+ * one that is already on this machine, and the media is generated locally with the
+ * `ffmpeg` that is already installed.
+ */
+const REAL_TOOLS = process.env.NARRALENS_PHASE_REAL_TOOLS === "1";
+
+describe.skipIf(!REAL_TOOLS)("the real tools (NARRALENS_PHASE_REAL_TOOLS=1)", () => {
+  it("encodes, inspects and publishes with the pinned renderer and the real ffprobe and ffmpeg", async () => {
+    const { execFileSync } = await import("node:child_process");
+    const { mkdir } = await import("node:fs/promises");
+    const { vendorRoot } = await import("../integration/helpers/created-project-fixture.js");
+    const { PinnedNativeDraftAssembler } = await import("../../../src/host/render/native-draft-assembler.js");
+    const { NativeRenderer } = await import("../../../src/host/render/native-renderer.js");
+    const { sha256Of } = await import("./support.js");
+    const ffmpeg = (args: string[]): void => {
+      execFileSync("ffmpeg", ["-nostdin", "-hide_banner", "-v", "error", ...args], { stdio: ["ignore", "pipe", "pipe"], windowsHide: true, timeout: 120000, maxBuffer: 16 * 1024 * 1024 });
+    };
+
+    const source = await directory("phase-real-source");
+    const objectRoot = await directory("phase-real-objects");
+    const workspace = await directory("phase-real-workspace");
+    const deliveryRoot = await directory("phase-real-delivery");
+    const inputs = join(source, "inputs");
+    await mkdir(inputs, { recursive: true, mode: 0o700 });
+    const videoPath = join(inputs, "video.mp4");
+    const audioPath = join(inputs, "voice.wav");
+    ffmpeg(["-f", "lavfi", "-i", "color=c=0x185a88:s=320x180:r=30:d=3", "-threads", "1", "-c:v", "libx264", "-pix_fmt", "yuv420p", videoPath]);
+    ffmpeg(["-f", "lavfi", "-i", "sine=frequency=430:sample_rate=48000:duration=3", "-threads", "1", "-c:a", "pcm_s16le", audioPath]);
+
+    const videoBytes = await readFile(videoPath);
+    const audioBytes = await readFile(audioPath);
+    const projectId = "proj_phase_real";
+    const assets = [
+      {
+        project_id: projectId,
+        asset_id: "asset_video",
+        absolute_path: videoPath,
+        sha256: sha256Of(videoBytes),
+        bytes: videoBytes.byteLength,
+        duration_frames: 90,
+        kind: "video" as const,
+        mime_type: "video/mp4",
+        source: { kind: "generated" as const, label: "Locally generated diagnostic media" },
+        license: { status: "cleared" as const, label: "Diagnostic fixture only", commercial_use: true },
+        rights_ref: "rights_diagnostic",
+        recording_origin: null,
+      },
+      {
+        project_id: projectId,
+        asset_id: "asset_voice",
+        absolute_path: audioPath,
+        sha256: sha256Of(audioBytes),
+        bytes: audioBytes.byteLength,
+        duration_frames: 90,
+        kind: "audio" as const,
+        mime_type: "audio/wav",
+        source: { kind: "generated" as const, label: "Locally generated diagnostic media" },
+        license: { status: "cleared" as const, label: "Diagnostic fixture only", commercial_use: true },
+        rights_ref: "rights_diagnostic",
+        recording_origin: "synthetic" as const,
+      },
+    ];
+
+    // The real native draft, built by the pinned assembler from the real media.
+    const assembler = new PinnedNativeDraftAssembler(vendorRoot);
+    const draft = await assembler.prepare({
+      project_id: projectId,
+      script: { kind: "script", paragraphs: [{ paragraph_id: "p1", text: "第一条诊断内容。" }, { paragraph_id: "p2", text: "第二条诊断内容。" }, { paragraph_id: "p3", text: "原生概念说明。" }] },
+      storyboard: {
+        kind: "storyboard",
+        fps: 30,
+        shots: [
+          { shot_id: "s1", paragraph_id: "p1", asset_id: "asset_video", duration_frames: 31, caption: "第一条诊断字幕。", concept_text: "" },
+          { shot_id: "s2", paragraph_id: "p2", asset_id: "asset_video", duration_frames: 29, caption: "第二条诊断字幕。", concept_text: "" },
+          { shot_id: "s3", paragraph_id: "p3", asset_id: null, duration_frames: 30, caption: "概念说明字幕。", concept_text: "可编辑概念" },
+        ],
+      },
+      assets,
+      narration_asset_id: "asset_voice",
+      target_root: join(workspace, "native"),
+      protected_roots: [source, objectRoot, workspace, deliveryRoot, vendorRoot],
+      width: 320,
+      height: 180,
+    });
+
+    // The committed closure of that draft. The subtitles and the licence are the two
+    // supplements an A delivery always carries.
+    const entries = draft.files.map((file) => {
+      const isSubtitle = file.relative_path.endsWith(".vtt");
+      const isRights = file.relative_path === "rights.json";
+      const isAsset = file.relative_path.startsWith("assets/") && !isSubtitle;
+      return {
+        relative_path: file.relative_path,
+        absolute_path: resolve(draft.root, file.relative_path),
+        sha256: file.sha256,
+        bytes: file.bytes,
+        kind: isAsset ? "asset" as const : (isSubtitle || isRights) ? "supplement" as const : "native_source" as const,
+        rights_ref: isAsset || isSubtitle || isRights ? "rights_diagnostic" : null,
+        role: isSubtitle ? "subtitles" : isRights ? "rights" : null,
+      };
+    });
+    const closure: SnapshotClosure = {
+      project_id: projectId,
+      snapshot_id: "snap_phase_real",
+      source_digest: "a".repeat(64),
+      project_revision: 1,
+      expected_frames: draft.frame_count,
+      expected_duration_seconds: draft.frame_count / 30,
+      native_root: draft.root,
+      native_entry: "film.html",
+      entries,
+      rights: [{ asset_id: "rights_diagnostic", status: "cleared", commercial_use: true, ref: "rights_diagnostic" }],
+    };
+
+    const spec = renderSpec({
+      engine_version: RENDER_PIN.upstream_sha,
+      width: 320,
+      height: 180,
+      config_digest: computeRenderConfigDigest({
+        render_spec: renderSpec({ engine_version: RENDER_PIN.upstream_sha, width: 320, height: 180 }),
+        upstream_sha: RENDER_PIN.upstream_sha,
+        worker_sha256: RENDER_PIN.worker_sha256,
+      }),
+    });
+    const request: RenderRequest = {
+      project_id: projectId,
+      job_id: "job_phase_render",
+      snapshot_id: closure.snapshot_id,
+      source_digest: closure.source_digest,
+      render_spec: spec,
+      execution: {
+        run_id: "run_phase_real",
+        plan_version: 1,
+        step_id: "snapshot.render",
+        attempt: 1,
+        input_digest: closure.source_digest,
+        run_scope_digest: "0".repeat(64),
+        authorization_id: "auth_phase_real",
+      },
+      attempt: 1,
+      qc_dispositions: ["output_space"],
+      required_supplements: ["rights"],
+      signal: undefined,
+    };
+    const deliveryRequest: RenderRequest = {
+      ...request,
+      job_id: "job_phase_delivery",
+      execution: { ...request.execution, step_id: "delivery.package" },
+    };
+
+    const packages = new PublishedPackageStore({ root: deliveryRoot });
+    const phases = new CommittedRenderPhases({
+      snapshots: { async readSnapshot() { return closure; } },
+      fence: {
+        async claimAttempt() { return true; },
+        async checkAttempt() { return "proceed"; },
+        async releaseAttempt() { /* the executor owns the claim */ },
+      },
+      packages,
+      // The real renderer against the pinned checkout, and no qc_runner at all, so the
+      // inspection uses the real ffprobe and the real full decode.
+      native_renderer: new NativeRenderer({ upstream_root: vendorRoot }),
+      upstream_root: vendorRoot,
+      object_root: objectRoot,
+      workspace_root: workspace,
+      render_timeout_ms: 600000,
+      qc_timeout_ms: 600000,
+    });
+
+    const encoded = await phases.prepareEncoded(request);
+    expect(encoded.frame_count).toBe(draft.frame_count);
+    expect(encoded.files.find((file) => file.role === "media")?.bytes).toBeGreaterThan(0);
+
+    const qc = await phases.inspectEncoded({ request: deliveryRequest, encoded });
+    expect(qc.qc_items.find((item) => item.id === "media_container")?.status).toBe("pass");
+    expect(qc.qc_items.find((item) => item.id === "media_full_decode")?.status).toBe("pass");
+    expect(qc.qc_items.find((item) => item.id === "supplements")?.status).toBe("pass");
+
+    const published = await phases.publishValidated({ request: deliveryRequest, encoded, qc });
+    const names = published.package_receipt.files.map((file) => file.file);
+    expect(names).toContain("media.mp4");
+    expect(names).toContain("ffprobe.json");
+    expect(names).toContain("full_decode.log");
+    expect(published.package_receipt.files.find((file) => file.file === "media.mp4")?.sha256).toBe(encoded.media_ref.sha256);
+
+    await phases.close();
+  }, 900000);
 });
