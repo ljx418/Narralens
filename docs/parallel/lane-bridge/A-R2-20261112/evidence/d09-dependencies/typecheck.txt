@@ -1,0 +1,8 @@
+tests/agent-driven/integration/created-source-adoption.test.ts(46,37): error TS2345: Argument of type '{ revisions: RevisionStore; authorRoot: string; privateRoot: string; }' is not assignable to parameter of type 'CreatedSourcePublisherOptions'.
+  Type '{ revisions: RevisionStore; authorRoot: string; privateRoot: string; }' is missing the following properties from type 'CreatedSourcePublisherOptions': snapshots, selection, assets, tasks, and 2 more.
+tests/agent-driven/integration/created-source-change.test.ts(197,11): error TS2339: Property 'withCreatedSourceCommitScope' does not exist on type 'RevisionStore'.
+tests/agent-driven/integration/created-source-change.test.ts(197,63): error TS7006: Parameter 'scope' implicitly has an 'any' type.
+tests/agent-driven/integration/created-source-change.test.ts(216,28): error TS2339: Property 'withCreatedSourceCommitScope' does not exist on type 'RevisionStore'.
+tests/agent-driven/integration/created-source-change.test.ts(216,80): error TS7006: Parameter 'scope' implicitly has an 'any' type.
+tests/agent-driven/integration/created-source-change.test.ts(233,28): error TS2339: Property 'withCreatedSourceCommitScope' does not exist on type 'RevisionStore'.
+tests/agent-driven/integration/created-source-change.test.ts(233,80): error TS7006: Parameter 'scope' implicitly has an 'any' type.
