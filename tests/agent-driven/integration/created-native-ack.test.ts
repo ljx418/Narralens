@@ -1536,3 +1536,92 @@ describe("the selection reference against the upstream source", () => {
     }
   });
 });
+
+/**
+ * The document and the hydration, against the real upstream sources.
+ *
+ * The document state is read from the pinned upstream's own host declaration, and the
+ * hydration state is read from the pinned 013 patch that adds it. The contract is
+ * compared with those, so it cannot drift into a shape the editor never sends.
+ */
+describe("the document and the hydration against the upstream sources", () => {
+  const upstreamHostPath = resolve(
+    "docs/execution/A/reviews/managed-native-observation-pre-review/p2/packages__openfilm__studio__ui__src__lib__host.ts",
+  );
+  const patchPath = resolve("tools/agent-driven/product/native-inputs/request013.patch");
+
+  it("declares the document state the upstream declares", () => {
+    const source = readFileSync(upstreamHostPath, "utf8");
+    const start = source.indexOf("export type NarralensDocumentState = {");
+    const end = source.indexOf(");", start);
+    expect(start).toBeGreaterThan(-1);
+    const body = source.slice(start, end);
+    const committed = /kind: 'document_dom_committed'; ([^}]*)\}/.exec(body)?.[1] ?? "";
+    const invalidated = /kind: 'invalidated'; reason: ([^}]*)\}/.exec(body)?.[1] ?? "";
+    const committedFields = [...committed.matchAll(/(\w+):/g)].map((match) => match[1]!).sort();
+    const reasons = [...invalidated.matchAll(/'([a-z_]+)'/g)].map((match) => match[1]!).sort();
+
+    interface DocumentSchema {
+      readonly $defs: {
+        readonly NativeDocumentObservation: {
+          readonly oneOf: ReadonlyArray<{ readonly required: readonly string[]; readonly properties: Record<string, unknown> }>;
+        };
+      };
+    }
+    const schema = JSON.parse(readFileSync(resolve("contracts/native-observation-v1.schema.json"), "utf8")) as DocumentSchema;
+    const branches = schema.$defs.NativeDocumentObservation.oneOf;
+    const committedBranch = branches.find((branch) => (branch.properties.kind as { const: string }).const === "document_dom_committed");
+    const invalidatedBranch = branches.find((branch) => (branch.properties.kind as { const: string }).const === "invalidated");
+    expect(committedBranch).toBeDefined();
+    expect(invalidatedBranch).toBeDefined();
+    if (committedBranch === undefined || invalidatedBranch === undefined) return;
+    // The committed branch carries exactly the upstream's fields.
+    expect([...committedBranch.required].filter((name) => name !== "kind" && name !== "protocol_version" && name !== "project_id"
+      && name !== "editor_view_id" && name !== "document_epoch").sort()).toEqual(committedFields);
+    // And the invalidation carries exactly the upstream's reasons.
+    const declared = (invalidatedBranch.properties.reason as { enum: readonly string[] }).enum;
+    expect([...declared].sort()).toEqual(reasons);
+  });
+
+  it("declares the hydration state the pinned patch adds", () => {
+    const patch = readFileSync(patchPath, "utf8");
+    const partNames = /NarralensHydrationPart = '([a-z_]+)' \| '([a-z_]+)' \| '([a-z_]+)' \| '([a-z_]+)'/.exec(patch);
+    const states = /state: '([a-z_]+)' \| '([a-z_]+)' \| '([a-z_]+)' \| '([a-z_]+)' \| '([a-z_]+)' \| '([a-z_]+)'/.exec(patch);
+    const origins = /NarralensHydrationOrigin = '([a-z_]+)' \| '([a-z_]+)' \| '([a-z_]+)'/.exec(patch);
+    expect(partNames).not.toBeNull();
+    expect(states).not.toBeNull();
+    expect(origins).not.toBeNull();
+    if (partNames === null || states === null || origins === null) return;
+    const upstreamParts = partNames.slice(1).sort();
+    const upstreamStates = states.slice(1).sort();
+    const upstreamOrigins = origins.slice(1).sort();
+
+    interface HydrationPartSchema {
+      readonly properties: {
+        readonly state: { readonly enum: readonly string[] };
+        readonly origin: { readonly enum: readonly string[] };
+      };
+    }
+    interface HydrationSchema {
+      readonly $defs: {
+        readonly NativeHydrationPart: HydrationPartSchema;
+        readonly NativeHydrationObservation: {
+          readonly properties: {
+            readonly parts: { readonly required: readonly string[]; readonly properties: Record<string, { readonly $ref?: string }> };
+          };
+        };
+      };
+    }
+    const schema = JSON.parse(readFileSync(resolve("contracts/native-observation-v1.schema.json"), "utf8")) as HydrationSchema;
+    const parts = schema.$defs.NativeHydrationObservation.properties.parts;
+    expect([...parts.required].sort()).toEqual(upstreamParts);
+    // Every part is the one closed definition, referenced from the four names.
+    const part = schema.$defs.NativeHydrationPart;
+    expect([...part.properties.state.enum].sort()).toEqual(upstreamStates);
+    expect([...part.properties.origin.enum].sort()).toEqual(upstreamOrigins);
+    for (const kind of upstreamParts) {
+      expect(parts.properties[kind], kind).toBeDefined();
+      expect(parts.properties[kind]?.$ref, kind).toBe("#/$defs/NativeHydrationPart");
+    }
+  });
+});
