@@ -7,6 +7,8 @@ import {canonicalDigest} from '../../../src/host/creative/digest.js';
 import {CreatedPreparedSourceStore} from '../../../src/host/agent-driven/created-prepared-source-store.js';
 import {CreatedSourceImpactStore} from '../../../src/host/agent-driven/created-source-impact-store.js';
 import {CreatedSourceAdoptionStore} from '../../../src/host/agent-driven/created-source-adoption-store.js';
+import {CreatedSourceFactsReader} from '../../../src/host/agent-driven/created-source-facts-reader.js';
+import {CreativeProjectAuthority} from '../../../src/host/agent-driven/creative-project-authority.js';
 import {CreatedSourcePublisher,isCreatedSourcePublicationProof,preparedSourceConsumerGraph} from '../../../src/host/agent-driven/created-source-publisher.js';
 import {ProductSqliteRepository} from '../../../src/host/agent-driven/product-sqlite-repository.js';
 import {RevisionStore} from '../../../src/host/projects/revision-store.js';
@@ -30,6 +32,7 @@ async function fixture(options:{mutatePlan?:(plan:PreparedAdoptionPlanV1)=>void;
  const revisions=f.host.revisions,repo=f.repo,now=new Date(),execution=f.task.request.execution;
  if(completed.fact.plan_digest===null)throw Error('Assembly must produce a native plan digest');
  const prepared=new CreatedPreparedSourceStore(revisions),adoptions=new CreatedSourceAdoptionStore(revisions);
+ let selection=0;
  const operations=new OperationIdempotencyStore(revisions.compose(db=>db));
  const impacts=new CreatedSourceImpactStore(revisions,new ImpactStore(revisions,operations));
  const metadata=JSON.parse(await readFile(join(completed.root,'prepared-native.json'),'utf8')) as Parameters<typeof preparedSourceConsumerGraph>[0];
@@ -52,6 +55,15 @@ async function fixture(options:{mutatePlan?:(plan:PreparedAdoptionPlanV1)=>void;
    settings_digest:hashFor('.film/settings.json'),subtitle_style_digest:hashFor('.film/subtitles.json'),captions_digest:hashFor(completed.fact.roots.find(x=>x.endsWith('.vtt'))??''),markers_digest:canonicalDigest([])},
   frame_count:90,fps_numerator:30,fps_denominator:1,affected_ranges:graph.clips.map(c=>({start_frame:c.start_frame,end_frame_exclusive:c.end_frame_exclusive,clip_id:c.clip_id})),locks_checked:[],engine_upstream_sha:OPENFILM_UPSTREAM_SHA,
   expires_at:new Date(now.getTime()+900000).toISOString()};
+ const reader=new CreatedSourceFactsReader({host:f.host,authority:new CreativeProjectAuthority(f.app.creation),prepared,tasks:f.tasks,
+  assets:f.registry,verifier:f.verifier,selection:{currentSelectionVersion:()=>selection}});
+ cleanups.push(()=>reader.close());
+ const readInput={project_id:f.projectId,prepared_source_id:mapping.prepared_source_id,execution};
+ const readProof=await reader.acquire(readInput,'owner');
+ const {rights_digest:observedRights,...observed}=reader.assertCurrent(readInput,'owner',readProof);
+ const {format:_format,version:_version,source_kind:_kind,expires_at:_expiry,...expected}=plan;
+ expect(observed).toEqual(expected);expect(observedRights).toBe(completed.fact.rights_digest);
+ reader.release(readProof);
  options.mutatePlan?.(plan);options.onPrepared?.(f);
  const planDigest=preparedAdoptionPlanDigest(plan),transactionId='txn_'+randomUUID().replaceAll('-',''),impactId='imp_'+randomUUID().replaceAll('-','');
  const approvalId='approval_'+randomUUID().replaceAll('-',''),confirmationId='confirm_'+randomUUID().replaceAll('-',''),reviewId='review_'+randomUUID().replaceAll('-',''),packageId='package_'+randomUUID().replaceAll('-','');
@@ -86,7 +98,6 @@ async function fixture(options:{mutatePlan?:(plan:PreparedAdoptionPlanV1)=>void;
   plan_sha256:planDigest,facts_digest:planDigest,original_source_digest:plan.base_source_digest,target_source_digest:plan.target_source_digest,expected_snapshot_id:plan.target_snapshot_id,
   native_plan:plan.native_plan,original_closure:originalFiles,target_closure:plan.files,stage_root:completed.root,backup_token:'backup_'+transactionId,execution,now});
  for(const [from,to]of [['received','preconditions_checked'],['preconditions_checked','staged'],['staged','validated'],['validated','prepared']] as const)revisions.transition(transactionId,from,to);
- let selection=0;
  const publisher=new CreatedSourcePublisher({revisions,authorRoot:f.authorRoot,privateRoot:join(f.root,'publication'),snapshots:new SnapshotStore({snapshotsRoot:join(f.root,'snapshots')}),
   selection:{currentSelectionVersion:()=>selection},assets:f.registry,tasks:f.tasks,verifier:f.verifier,...(options.fsync?{fsync:options.fsync}:{})});
  cleanups.push(()=>publisher.close());

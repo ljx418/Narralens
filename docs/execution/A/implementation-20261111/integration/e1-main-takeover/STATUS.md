@@ -21,3 +21,10 @@
 8f35330实际独立结论REQUEST_CHANGES：1 BLOCKER/6 MAJOR/2 MINOR（含增补）；原始Orca回报与逐项矩阵已保存。当前已编码隔离token与私有record、末端新时钟、真实native/权利/consumer/ranges/上游对账、原FD跨rename跟踪、跨库poison、impact幂等冲突等修复。新增真实媒体边界用例尚未运行，因此不能写已闭环。
 
 当前仅impact-atomic-04轻量两文件18例、typecheck-10通过。另发现旧accepted黄金向量只测hash未测validator，补上了真正接受断言并修复与原LockService一致的project scope空target。旧失败impact-atomic-03/typecheck-08保留。重型真实回归等待MEDIA与PRODUCT003之后的MAIN预约，不并发。
+
+
+## 实际影响事实读取者（未接线）
+
+新增CreatedSourceFactsReader：从真实完成任务与prepared映射取得目标摘要/预期snapshot，复用实际purpose=impact验证器，私有WeakMap token持有原author FD与完整prepared proof到最终同步复验；release/close失效。不写工程/Job/Approval/snapshot。RetainedSourceTree从publisher抽为共同文件守卫，retained-tree-01实际4例通过；typecheck11通过。现有真实adoption测试夹具已增加reader与独立手工计划事实逐项对比，尚未实际运行，不能宣称reader真链通过。
+
+重读原冻结D03/D04确认impact允许先于ReviewPackage。BRIDGE E5先要求已发布review会造成循环，MAIN已按原冻结要求纠正；未新设临时包/第二Approval/伪运行状态，服务接线继续等待正确共同guard接口。MEDIA仍有许可，单次cwd空观察不证明它所有任务已退出，MAIN已请求具体执行边界/必要时先取得writer暂缓ACK再交回资源；未擅自抢占。
