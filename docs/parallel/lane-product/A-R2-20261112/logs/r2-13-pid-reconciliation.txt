@@ -1,0 +1,28 @@
+cwd=/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-PRODUCT
+subject=reconciliation of the two PRODUCT-cwd node pids MAIN observed (1262155, 1262176)
+observed_at=2026-11-11T17:46:22+0000
+boot_time=1794377964
+
+--- the two pids, one observation, read-only ---
+pid 1262155: ABSENT (/proc/1262155 does not exist)
+pid 1262176: ABSENT (/proc/1262176 does not exist)
+
+--- every node|vite|esbuild|tsx process whose cwd is this worktree ---
+  NONE
+
+--- the whole machine's node|vite|esbuild|tsx set, with their cwd, for comparison ---
+  386 node cwd=/home/administrator/dsh-workspaces cmd=node /home/administrator/.npm-global/bin/dsh web --host 127.0.0.1 --port 3080 --no-open 
+  4182 node cwd=/home/administrator/dsh-workspaces cmd=node /home/administrator/.npm/_npx/c35ab75beed40a3c/node_modules/.bin/context7-mcp 
+  4236 node cwd=/home/administrator/dsh-workspaces cmd=node /home/administrator/.npm/_npx/9833c18b2d85bc59/node_modules/.bin/playwright-mcp --headless --isolated --output-dir 
+  650 node cwd=/mnt/c/WINDOWS cmd=/usr/bin/node /home/administrator/.orca-wsl/hook-relay/0.1.0+1a046c19841c.aad949c3/wsl-agent-hook-relay.js 
+
+--- what I can and cannot say about their identity ---
+I CANNOT prove what those two pids were: they were already gone when this observation ran, and a pid that no longer exists cannot be read. I do not reconstruct one after the fact.
+What the timing supports, as a hypothesis and not as a finding: my last two commands were the light type check and the light unit run recorded in logs/r2-12-tsc.txt and logs/r2-12-light-units.txt, which ended at 2026-11-11T17:45:36+0000. A vitest worker and a tsc of that run are the only PRODUCT-cwd node processes this ticket started at that moment, and both of those commands are finished.
+What is established: no node, vite, esbuild or tsx process with its cwd in this worktree exists now; nothing of that run is left running; and I killed nothing and signalled nothing.
+
+--- corrected resource status ---
+build001 (R2-PRODUCT-EXPECTED-BUILD-001): FAILED with exit 1 on my staging defect; MAIN has retracted its release and the slot is HELD.
+build002: QUEUED after MAIN's E1 regression; NOT GRANTED. I will not start it, and I am not retrying on the strength of the retracted message.
+no Studio UI build, no Host run, no browser, no ffmpeg, no media and no full gate was started at any point.
+end=2026-11-11T17:46:23+0000

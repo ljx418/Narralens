@@ -1,0 +1,28 @@
+cwd=/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-PRODUCT
+subject=command-idle boundary and the classification of the two fresh PRODUCT-cwd node pids
+observed_at=2026-11-11T17:47:09+0000
+
+--- the two pids MAIN observed at 17:45:30Z ---
+pid 1263829: ABSENT (/proc/1263829 does not exist)
+pid 1263847: ABSENT (/proc/1263847 does not exist)
+
+--- their classification: the exact commands ---
+They were the two processes of my last light commands, and both are recorded in the ticket's own logs:
+  logs/r2-12-tsc.txt        argv=corepack pnpm exec tsc --noEmit                                    exit=0  ended 2026-11-11T17:45:2x
+  logs/r2-12-light-units.txt argv=corepack pnpm exec vitest run --config vitest.config.ts tests/agent-driven/product/observation-ui.test.tsx tests/agent-driven/integration/created-native-ack.test.ts tests/agent-driven/integration/created-workbench-review.test.ts --maxWorkers=1 --minWorkers=1   exit=0  ended 2026-11-11T17:45:36+0000
+Both are PURE: a type check with no emit, and three unit files that mount no Host, bind no port, start no browser and touch no media. Neither is a Host, a listener, a build, a Studio or a media process. The vitest worker of that run is the node process with the PRODUCT cwd.
+
+--- the idle boundary, observed now ---
+node|vite|esbuild|tsx processes with their cwd in this worktree: NONE
+listening sockets owned by a node whose cwd is this worktree:
+  pid=1102251 cwd=/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-PRODUCT cmd=/home/administrator/.npm-global/lib/node_modules/@openai/codex/node_modules/@openai/codex-linux-x64/vendor/x86_64-unknown-linux-musl/bin/cod
+  that is the PRODUCT lane's own Codex CLI process, present since boot (starttime_ticks 3767966); it is not a process this ticket started and it is not left over from any of my commands
+  no other PRODUCT-cwd listener
+
+--- what this means for the slot ---
+Every command this ticket started has terminated on its own. There is no owned Host, build, Studio, browser, ffmpeg or media descendant, and no owned listener. I killed nothing and signalled nothing, and I launch nothing further until MAIN releases this idle point.
+
+--- corrected resource status ---
+build001: FAILED, exit 1, on my staging defect; the evidence and the failure are kept; the slot is HELD by MAIN's ledger.
+build002: QUEUED after MAIN's E1 regression; NOT GRANTED; not started.
+end=2026-11-11T17:47:10+0000
