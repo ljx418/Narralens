@@ -1,0 +1,51 @@
+{
+  "format": "narralens.additive-transport-design@1",
+  "status": "DESIGN_REVIEW_PENDING_NOT_REGISTERED",
+  "version": "review-media@1",
+  "owner": "MAIN",
+  "implementation_writer": "BRIDGE-Claude",
+  "media_producer": "MEDIA PreviewPreparedSource / genuine supplementary receipt",
+  "consumers": [
+    "PRODUCT original player / escaped text views",
+    "owner-scoped Agent reads"
+  ],
+  "frozen_cp_a0_files": "unchanged",
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/api/ui/v1/projects/:id/review-media/:ref",
+      "auth": "current trusted_ui read-proof or owner-scoped driver; native_bridge forbidden",
+      "response": "immutable media/text bytes with original type and controlled Content-Length/Range"
+    }
+  ],
+  "reference": "ReviewPart.download_ref is this same-instance loopback URL with opaque :ref; server maps it to project/run/package/version/output+quality/producer attempt and real receipt, not a caller path",
+  "allowed_content_types": [
+    "video/mp4",
+    "audio/wav",
+    "audio/mp4",
+    "audio/mpeg",
+    "audio/flac",
+    "audio/ogg",
+    "text/vtt; charset=utf-8",
+    "application/json; charset=utf-8"
+  ],
+  "forbidden": [
+    "arbitrary path/query filename/root",
+    "HTML/native source execution",
+    "unregistered stage file",
+    "old/cancelled/superseded attempt publication",
+    "cross-project/owner receipt",
+    "token/absolute host path response"
+  ],
+  "integrity": "same current record + open FD regular-file identity + bytes/hash validation; Range uses existing guarded MEDIA download semantics and closes own FD on disconnect/416/error; no ready Delivery implied",
+  "lifecycle": "GET never starts rendering/registers state; unavailable/expired reference reports error, never creates fake preview; unknown fields/body not accepted",
+  "errors": {
+    "401": "no auth",
+    "403": "channel/Origin/read-proof rejected",
+    "404": "unknown or not owned or invalid public ref",
+    "409": "stored bytes/hash mismatch or scope superseded",
+    "416": "invalid media range",
+    "503": "preview producer unavailable or transient resource failure"
+  },
+  "counting": "one explicitly additional read route; do not count as original frozen31 or as asset-inventory four routes"
+}

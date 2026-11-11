@@ -18,7 +18,7 @@ function fixture(){
 }
 it('starts another queued job when one slot frees while a different processor remains busy',async()=>{
  const f=fixture(),one=f.reserve('one'),two=f.reserve('two'),three=f.reserve('three'),gates=new Map([one,two,three].map(t=>[t.job_id,deferred()])),started:string[]=[];
- const processor:CreatedTaskProcessor={execute:async(task,lease)=>{started.push(task.job_id);await gates.get(task.job_id)!.promise;f.jobs.recordCallback(task.job_id,lease,{state:'succeeded'});},failed:async()=>{throw Error('unexpected');}};
+ const processor:CreatedTaskProcessor={recover:()=>{},execute:async(task,lease)=>{started.push(task.job_id);await gates.get(task.job_id)!.promise;f.jobs.recordCallback(task.job_id,lease,{state:'succeeded'});},failed:async()=>{throw Error('unexpected');}};
  const worker=new CreatedTaskWorker(f.revisions,f.tasks,f.jobs,processor,{pollMs:10});
  try{
   worker.start();await until(()=>started.length===2);const finished=started[0]!,blocked=started[1]!;gates.get(finished)!.resolve();await until(()=>started.length===3);
@@ -28,37 +28,37 @@ it('starts another queued job when one slot frees while a different processor re
 });
 it('renews the real lease during a long processor and only the current lease can settle',async()=>{
  const f=fixture(),task=f.reserve('long'),finish=deferred();let started=false;
- const worker=new CreatedTaskWorker(f.revisions,f.tasks,f.jobs,{execute:async(t,l)=>{started=true;await finish.promise;expect(f.jobs.holdsLease(t.job_id,l)).toBe(true);f.jobs.recordCallback(t.job_id,l,{state:'succeeded'});},failed:async(t,l)=>{f.jobs.recordCallback(t.job_id,l,{state:'failed'});}},{pollMs:10,leaseMs:600});
+ const worker=new CreatedTaskWorker(f.revisions,f.tasks,f.jobs,{recover:()=>{},execute:async(t,l)=>{started=true;await finish.promise;expect(f.jobs.holdsLease(t.job_id,l)).toBe(true);f.jobs.recordCallback(t.job_id,l,{state:'succeeded'});},failed:async(t,l)=>{f.jobs.recordCallback(t.job_id,l,{state:'failed'});}},{pollMs:10,leaseMs:600});
  try{worker.start();await until(()=>started);const first=f.revisions.readJob(task.job_id)!;await sleep(900);expect(f.revisions.readJob(task.job_id)?.lease_expires_at).toBeGreaterThan(first.lease_expires_at!);finish.resolve();await until(()=>worker.activeCount===0);expect(f.revisions.readJob(task.job_id)?.state).toBe('succeeded');}
  finally{finish.resolve();await worker.close();f.revisions.close();}
 });
 it('awaits aborted processor cleanup before close and returns its live unfinished lease to queued',async()=>{
  const f=fixture(),task=f.reserve('shutdown'),cleanup=deferred();let signalled=false,started=false,failed=false;
- const worker=new CreatedTaskWorker(f.revisions,f.tasks,f.jobs,{execute:async(_t,_l,signal)=>{started=true;await new Promise<void>(r=>signal.addEventListener('abort',()=>{signalled=true;r();},{once:true}));await cleanup.promise;},failed:async()=>{failed=true;}},{pollMs:10});
+ const worker=new CreatedTaskWorker(f.revisions,f.tasks,f.jobs,{recover:()=>{},execute:async(_t,_l,signal)=>{started=true;await new Promise<void>(r=>signal.addEventListener('abort',()=>{signalled=true;r();},{once:true}));await cleanup.promise;},failed:async()=>{failed=true;}},{pollMs:10});
  try{worker.start();await until(()=>started);let closed=false;const closing=worker.close().then(()=>{closed=true;});await until(()=>signalled);await sleep(20);expect(closed).toBe(false);expect(f.revisions.readJob(task.job_id)?.state).toBe('running');cleanup.resolve();await closing;expect(failed).toBe(false);expect(f.revisions.readJob(task.job_id)).toMatchObject({state:'queued',lease_owner:null});expect(worker.activeCount).toBe(0);expect(()=>worker.start()).toThrow();}
  finally{cleanup.resolve();await worker.close();f.revisions.close();}
 });
 it('never executes a processor after close immediately follows synchronous claiming',async()=>{
  const f=fixture(),task=f.reserve('immediate');let calls=0;
- const worker=new CreatedTaskWorker(f.revisions,f.tasks,f.jobs,{execute:async()=>{calls++;},failed:async()=>{calls++;}});
+ const worker=new CreatedTaskWorker(f.revisions,f.tasks,f.jobs,{recover:()=>{},execute:async()=>{calls++;},failed:async()=>{calls++;}});
  try{worker.start();await worker.close();expect(calls).toBe(0);expect(f.revisions.readJob(task.job_id)?.state).toBe('queued');}
  finally{await worker.close();f.revisions.close();}
 });
 it('settles a synchronous/async processor fault through its explicit original-job authority and frees its slot even if diagnostics throw',async()=>{
  const f=fixture(),one=f.reserve('fault1'),two=f.reserve('fault2');let failed=0;
- const worker=new CreatedTaskWorker(f.revisions,f.tasks,f.jobs,{execute:()=>{throw Error('processor fault');},failed:async(task,lease)=>{failed++;f.jobs.recordCallback(task.job_id,lease,{state:'failed',terminalReason:'fixture failure'});}},{capacity:1,pollMs:10,diagnostic:()=>{throw Error('observer');}});
+ const worker=new CreatedTaskWorker(f.revisions,f.tasks,f.jobs,{recover:()=>{},execute:()=>{throw Error('processor fault');},failed:async(task,lease)=>{failed++;f.jobs.recordCallback(task.job_id,lease,{state:'failed',terminalReason:'fixture failure'});}},{capacity:1,pollMs:10,diagnostic:()=>{throw Error('observer');}});
  try{worker.start();await until(()=>failed===2&&worker.activeCount===0);expect(f.revisions.readJob(one.job_id)?.state).toBe('failed');expect(f.revisions.readJob(two.job_id)?.state).toBe('failed');}
  finally{await worker.close();f.revisions.close();}
 });
 it('refuses an un-settled processor return instead of inventing success',async()=>{
  const f=fixture(),task=f.reserve('no-settlement');let error='';
- const worker=new CreatedTaskWorker(f.revisions,f.tasks,f.jobs,{execute:async()=>{},failed:async(t,l,e)=>{error=String(e);f.jobs.recordCallback(t.job_id,l,{state:'failed'});}});
+ const worker=new CreatedTaskWorker(f.revisions,f.tasks,f.jobs,{recover:()=>{},execute:async()=>{},failed:async(t,l,e)=>{error=String(e);f.jobs.recordCallback(t.job_id,l,{state:'failed'});}});
  try{worker.start();await until(()=>worker.activeCount===0&&f.revisions.readJob(task.job_id)?.state==='failed');expect(error).toContain('without durable settlement');}
  finally{await worker.close();f.revisions.close();}
 });
 it('aborts a reclaimed lease and quarantines its late result before the queued task is taken with a new attempt',async()=>{
  const f=fixture(),task=f.reserve('reclaimed');let calls=0,aborted=false,oldQuarantined=false;
- const worker=new CreatedTaskWorker(f.revisions,f.tasks,f.jobs,{execute:async(t,l,signal)=>{
+ const worker=new CreatedTaskWorker(f.revisions,f.tasks,f.jobs,{recover:()=>{},execute:async(t,l,signal)=>{
   calls++;
   if(l.attempt===1){await new Promise<void>(r=>signal.addEventListener('abort',()=>{aborted=true;r();},{once:true}));oldQuarantined=f.jobs.recordCallback(t.job_id,l,{state:'succeeded',artifact:{late:'fixture'}}).quarantined;}
   else f.jobs.recordCallback(t.job_id,l,{state:'succeeded'});
@@ -70,25 +70,32 @@ it('aborts a reclaimed lease and quarantines its late result before the queued t
 });
 it('signals actual job cancellation and never adopts the processor result that arrives afterwards',async()=>{
  const f=fixture(),task=f.reserve('cancelled');let started=false,aborted=false,quarantined=false;
- const worker=new CreatedTaskWorker(f.revisions,f.tasks,f.jobs,{execute:async(t,l,signal)=>{started=true;await new Promise<void>(r=>signal.addEventListener('abort',()=>{aborted=true;r();},{once:true}));quarantined=f.jobs.recordCallback(t.job_id,l,{state:'succeeded',artifact:{late:'fixture'}}).quarantined;},failed:async()=>{throw Error('unexpected failure');}},{pollMs:10,leaseMs:600});
+ const worker=new CreatedTaskWorker(f.revisions,f.tasks,f.jobs,{recover:()=>{},execute:async(t,l,signal)=>{started=true;await new Promise<void>(r=>signal.addEventListener('abort',()=>{aborted=true;r();},{once:true}));quarantined=f.jobs.recordCallback(t.job_id,l,{state:'succeeded',artifact:{late:'fixture'}}).quarantined;},failed:async()=>{throw Error('unexpected failure');}},{pollMs:10,leaseMs:600});
  try{worker.start();await until(()=>started);f.jobs.requestCancel(task.job_id);await until(()=>worker.activeCount===0);expect(aborted).toBe(true);expect(quarantined).toBe(true);expect(f.revisions.readJob(task.job_id)?.state).toBe('cancelled');}
  finally{await worker.close();f.revisions.close();}
 });
 it('settles cancellation when the processor returns after abort without a result',async()=>{
  const f=fixture(),task=f.reserve('cancel-no-result');let started=false,failures=0;
- const worker=new CreatedTaskWorker(f.revisions,f.tasks,f.jobs,{execute:async(_t,_l,signal)=>{started=true;await new Promise<void>(r=>signal.addEventListener('abort',()=>r(),{once:true}));},failed:async(t,l)=>{failures++;f.jobs.recordCallback(t.job_id,l,{state:'cancelled'});}},{pollMs:10,leaseMs:600});
+ const worker=new CreatedTaskWorker(f.revisions,f.tasks,f.jobs,{recover:()=>{},execute:async(_t,_l,signal)=>{started=true;await new Promise<void>(r=>signal.addEventListener('abort',()=>r(),{once:true}));},failed:async(t,l)=>{failures++;f.jobs.recordCallback(t.job_id,l,{state:'cancelled'});}},{pollMs:10,leaseMs:600});
  try{worker.start();await until(()=>started);f.jobs.requestCancel(task.job_id);await until(()=>worker.activeCount===0);expect(failures).toBe(1);expect(f.revisions.readJob(task.job_id)?.state).toBe('cancelled');}
  finally{await worker.close();f.revisions.close();}
 });
 it('finishes user cancellation through its authority even when shutdown begins next to it',async()=>{
  const f=fixture(),task=f.reserve('cancel-then-close'),cleanup=deferred();let started=false,settling=false;
- const worker=new CreatedTaskWorker(f.revisions,f.tasks,f.jobs,{execute:async(_t,_l,signal)=>{started=true;await new Promise<void>(r=>signal.addEventListener('abort',()=>r(),{once:true}));},failed:async(t,l)=>{settling=true;await cleanup.promise;f.jobs.recordCallback(t.job_id,l,{state:'cancelled'});}},{pollMs:10});
+ const worker=new CreatedTaskWorker(f.revisions,f.tasks,f.jobs,{recover:()=>{},execute:async(_t,_l,signal)=>{started=true;await new Promise<void>(r=>signal.addEventListener('abort',()=>r(),{once:true}));},failed:async(t,l)=>{settling=true;await cleanup.promise;f.jobs.recordCallback(t.job_id,l,{state:'cancelled'});}},{pollMs:10});
  try{worker.start();await until(()=>started);f.jobs.requestCancel(task.job_id);let closed=false;const closing=worker.close().then(()=>{closed=true;});await sleep(20);expect(settling).toBe(true);expect(closed).toBe(false);cleanup.resolve();await closing;expect(f.revisions.readJob(task.job_id)?.state).toBe('cancelled');}
  finally{cleanup.resolve();await worker.close();f.revisions.close();}
 });
 it('reports an explicit processor contract violation when its failure handler also returns without settlement',async()=>{
  const f=fixture(),task=f.reserve('no-failure-settlement'),diagnostics:string[]=[];
- const worker=new CreatedTaskWorker(f.revisions,f.tasks,f.jobs,{execute:async()=>{throw Error('fixture failure');},failed:async()=>{}},{diagnostic:event=>{diagnostics.push(event.code);}});
+ const worker=new CreatedTaskWorker(f.revisions,f.tasks,f.jobs,{recover:()=>{},execute:async()=>{throw Error('fixture failure');},failed:async()=>{}},{diagnostic:event=>{diagnostics.push(event.code);}});
  try{worker.start();await until(()=>worker.activeCount===0);expect(diagnostics).toContain('TASK_PROCESSOR_NOT_SETTLED');expect(f.revisions.readJob(task.job_id)?.state).toBe('running');}
+ finally{await worker.close();f.revisions.close();}
+});
+it('recovers the original expired task before a new lease can be claimed',async()=>{
+ const f=fixture(),task=f.reserve('recover-before-claim');let recovered=false,executed=false;
+ f.jobs.acquireLease(task.job_id,{owner:'old-worker',leaseMs:1,now:new Date(Date.now()-1000)});
+ const worker=new CreatedTaskWorker(f.revisions,f.tasks,f.jobs,{recover:()=>{f.tasks.reapExpired((_rows,t,state)=>{expect(t.job_id).toBe(task.job_id);expect(state).toBe('pending');recovered=true;});},execute:async(t,l)=>{expect(recovered).toBe(true);expect(l.attempt).toBe(2);executed=true;f.jobs.recordCallback(t.job_id,l,{state:'succeeded'});},failed:async()=>{throw Error('unexpected');}},{pollMs:10});
+ try{worker.start();await until(()=>executed&&worker.activeCount===0);expect(f.revisions.readJob(task.job_id)).toMatchObject({state:'succeeded',attempt:2});}
  finally{await worker.close();f.revisions.close();}
 });

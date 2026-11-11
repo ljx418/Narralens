@@ -540,6 +540,14 @@ export class LocalAssetRegistry {
             closeSync(fd);
         }
     }
+    /** Host-only path resolution for a verifier, never serialized or accepted as a DTO. */
+    blobPathForFact(asset:LocalAsset):string {
+        if(this.#closed)throw new ProductError('CAPABILITY_UNAVAILABLE','Local asset service is stopping');
+        const row=this.#row(asset.project_id,asset.asset_id);
+        if(!row||canonicalDigest(row.asset)!==canonicalDigest(asset))throw conflict();
+        this.#assertStorage();return join(this.#objects,row.token);
+    }
+    protectedRoots():readonly string[]{return [this.#sourceRoot,this.#root];}
     resolve(project: string, assetId: string, caller: TrustedCallerContext) {
         if (this.#closed)
             return Promise.reject(new ProductError('CAPABILITY_UNAVAILABLE', 'Local asset service is stopping'));

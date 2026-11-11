@@ -1,0 +1,159 @@
+{
+  "scope": "real synthetic registered media + actual source-only processor; not production Run rights/MCP/human voice/adoption/Delivery",
+  "job": {
+    "attempt": 1,
+    "bootstrap": null,
+    "execution": {
+      "attempt": 1,
+      "authorization_id": "grant-a93503a1-f1de-4cc7-b70f-dca1fea1f904",
+      "input_digest": "caf685342c18c90cfd7f900c98eff4acf981e24e5193c1f61f239f1a9de57b45",
+      "plan_version": 1,
+      "run_id": "run-d632bf0c-15f8-44d0-b082-71a1a2462cd5",
+      "run_scope_digest": "b29d48cd6f2d6c9d655f07104c5d1b34130010959a60a7db1068510af595431c",
+      "step_id": "sample"
+    },
+    "job_id": "job_21e89deb0eb44eb7aad73ea91828945f",
+    "next_actions": [
+      "review_prepared_source"
+    ],
+    "project_id": "project_50253ff280db41189c48e029566f026c",
+    "result_ref": null,
+    "snapshot_id": "daeb47a794450b5bff83462ea052171017b53f5c9aadea50aad5e945933e32d4",
+    "state": "succeeded"
+  },
+  "fact": {
+    "files": [
+      {
+        "bytes": 11,
+        "relative_path": ".film/settings.json",
+        "sha256": "5f098b8911b608c4f0ebefa7a838289331f490c8fb79880249941c10866e2ad9"
+      },
+      {
+        "bytes": 530,
+        "relative_path": ".film/subtitles.json",
+        "sha256": "2ac9c6ecad02ee5b179565bb0d73ff6e0a88051c4cbd52bd5b2bb398077d97d2"
+      },
+      {
+        "bytes": 4112,
+        "relative_path": "assets/video/001-23cfae6d486bb5558e398f8b48069b68c773910cf7eb360e157adb9a83b39bc5.mp4",
+        "sha256": "23cfae6d486bb5558e398f8b48069b68c773910cf7eb360e157adb9a83b39bc5"
+      },
+      {
+        "bytes": 259,
+        "relative_path": "assets/vo/002-42c9992dbd4dcfbeaf52790767beb0febee1279ce37e2e46d5cb474bdd8e1a1d.vtt",
+        "sha256": "7589688eff6e9ca5ee39341deb23d149f5a6cccec1da8ac9299fbb07230b88d9"
+      },
+      {
+        "bytes": 288078,
+        "relative_path": "assets/vo/002-42c9992dbd4dcfbeaf52790767beb0febee1279ce37e2e46d5cb474bdd8e1a1d.wav",
+        "sha256": "42c9992dbd4dcfbeaf52790767beb0febee1279ce37e2e46d5cb474bdd8e1a1d"
+      },
+      {
+        "bytes": 2189,
+        "relative_path": "draft-plan.json",
+        "sha256": "411a3956d473dd6fa0fec77c9fe3ff9c8a3c1fa2427a5cc83bae6646b64f3bfe"
+      },
+      {
+        "bytes": 770,
+        "relative_path": "film.html",
+        "sha256": "1ec8a5ee0d98ce3a61d0a65a234ec25d1f159853c547c9f522c3fe0b265d1c7c"
+      },
+      {
+        "bytes": 1633,
+        "relative_path": "prepared-native.json",
+        "sha256": "f56d0f6716c5cb256b59d1a4d8bbfd0c74a09df4c353f4bfef7397339850b4b7"
+      },
+      {
+        "bytes": 1260,
+        "relative_path": "rights.json",
+        "sha256": "60575de50686823bb7e45ec8b259e27ef7fe7ccd20f3dd1340d08b12d36a94be"
+      },
+      {
+        "bytes": 939,
+        "relative_path": "scenes/003.html",
+        "sha256": "bc3520cfecfd1210f0a2d1a7605dd35349ad87c71d3cb5c051daa4e6c6651b8e"
+      }
+    ],
+    "format": "narralens.created-task-prepared@1",
+    "plan_digest": "0bf9622c0da6b637d9083838216dafe27adab490c802715d8ae9267b4841b272",
+    "rights_digest": "1b2abc8a2ea90b34047c7fd580f705a9ee5ce94059a6fe6b70c7a4da84b5a688",
+    "roots": [
+      "film.html",
+      ".film/settings.json",
+      ".film/subtitles.json",
+      "assets/vo/002-42c9992dbd4dcfbeaf52790767beb0febee1279ce37e2e46d5cb474bdd8e1a1d.vtt",
+      "draft-plan.json",
+      "rights.json",
+      "scenes/003.html",
+      "prepared-native.json",
+      "assets/video/001-23cfae6d486bb5558e398f8b48069b68c773910cf7eb360e157adb9a83b39bc5.mp4",
+      "assets/vo/002-42c9992dbd4dcfbeaf52790767beb0febee1279ce37e2e46d5cb474bdd8e1a1d.wav"
+    ],
+    "source_digest": "5f0edfaaa80ab9b238eb27ae2e551ee0c3681d47cf8c15107911f30f3a6f7ffe",
+    "stage_token": "stage_CWDExc8TGnT4FR2-yF2p1MH2vvi0idcJ"
+  },
+  "metadata": {
+    "assets": [
+      {
+        "asset_id": "asset_716926f8a767a2c81379efcb4ec5cff8389b264fa73592a89f1722d6",
+        "bytes": 4112,
+        "duration_frames": 90,
+        "license": {
+          "commercial_use": true,
+          "label": "Diagnostic fixture only",
+          "status": "cleared"
+        },
+        "media_type": "video/mp4",
+        "path": "assets/video/001-23cfae6d486bb5558e398f8b48069b68c773910cf7eb360e157adb9a83b39bc5.mp4",
+        "recording_origin": null,
+        "rights_ref": "rights_716926f8a767a2c81379efcb4ec5cff8389b264fa73592a89f1722d6",
+        "sha256": "23cfae6d486bb5558e398f8b48069b68c773910cf7eb360e157adb9a83b39bc5",
+        "source": {
+          "kind": "generated",
+          "label": "Test-created local diagnostic media"
+        }
+      },
+      {
+        "asset_id": "asset_1bfb17fa34af0aeacaa62792a9923d26fe798e7fc32c40e4685a05f2",
+        "bytes": 288078,
+        "duration_frames": 90,
+        "license": {
+          "commercial_use": true,
+          "label": "Diagnostic fixture only",
+          "status": "cleared"
+        },
+        "media_type": "audio/wav",
+        "path": "assets/vo/002-42c9992dbd4dcfbeaf52790767beb0febee1279ce37e2e46d5cb474bdd8e1a1d.wav",
+        "recording_origin": "synthetic",
+        "rights_ref": "rights_1bfb17fa34af0aeacaa62792a9923d26fe798e7fc32c40e4685a05f2",
+        "sha256": "42c9992dbd4dcfbeaf52790767beb0febee1279ce37e2e46d5cb474bdd8e1a1d",
+        "source": {
+          "kind": "generated",
+          "label": "Test-created local diagnostic media"
+        }
+      }
+    ],
+    "clip_ids": [
+      "shot-s1",
+      "shot-s2",
+      "shot-s3",
+      "narration"
+    ],
+    "format": "narralens.prepared-native-output@1",
+    "fps": {
+      "den": 1,
+      "num": 30
+    },
+    "frame_count": 90,
+    "plan_digest": "0bf9622c0da6b637d9083838216dafe27adab490c802715d8ae9267b4841b272",
+    "project_id": "project_50253ff280db41189c48e029566f026c",
+    "subtitle_timing_basis": "storyboard_plan",
+    "subtitles": [
+      {
+        "path": "assets/vo/002-42c9992dbd4dcfbeaf52790767beb0febee1279ce37e2e46d5cb474bdd8e1a1d.vtt",
+        "subtitle_id": "storyboard-captions"
+      }
+    ]
+  },
+  "author_unchanged": true
+}

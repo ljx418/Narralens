@@ -6,6 +6,7 @@ import type {CreatedTaskStore,TaskReservation} from './created-task-store.js';
 /** Actual processors MUST validate Run/rights/live bytes and settle using the existing
  * job + workflow/Coordinator authorities. Scheduler never fabricates a success. */
 export interface CreatedTaskProcessor {
+ recover():void;
  execute(task:TaskReservation,lease:LeaseIdentity,signal:AbortSignal):Promise<void>;
  failed(task:TaskReservation,lease:LeaseIdentity,error:unknown):Promise<void>;
 }
@@ -17,7 +18,7 @@ export interface CreatedTaskWorkerOptions {
  * slot can start the next job even while another slot is busy. No second queue/DB. */
 export class CreatedTaskWorker {
  readonly #owner='created_worker_'+randomUUID().replaceAll('-','');
- readonly #active=new Map<string,{controller:AbortController;done:Promise<void>}>();
+ readonly #active=new Map<string,{controller:AbortController;done:Promise<void>;lease:LeaseIdentity}>();
  readonly #capacity:number;readonly #leaseMs:number;readonly #pollMs:number;
  #timer:ReturnType<typeof setInterval>|undefined;#closed=false;#pumping=false;#close:Promise<void>|undefined;
  constructor(private readonly revisions:RevisionStore,private readonly tasks:CreatedTaskStore,private readonly jobs:PersistentJobStore,private readonly processor:CreatedTaskProcessor,private readonly options:CreatedTaskWorkerOptions={}){
@@ -33,6 +34,11 @@ export class CreatedTaskWorker {
   if(this.#closed||this.#pumping)return;
   this.#pumping=true;
   try{
+   const recovery:unknown=this.processor.recover();
+   if(recovery&&typeof (recovery as {then?:unknown}).then==='function'){void Promise.resolve(recovery).catch(()=>{});throw Error('Task recovery must be synchronous');}
+   // Cancellation/lease fencing follows the ordinary poll cadence rather than
+   // waiting up to a third of a long lease for the renewal heartbeat.
+   for(const [jobId,entry] of this.#active){if(!this.jobs.holdsLease(jobId,entry.lease))entry.controller.abort(Error('Task cancelled or lease lost'));}
    const free=this.#capacity-this.#active.size;if(free<=0)return;
    const queued=this.revisions.compose(db=>db.prepare(`SELECT t.job_id,t.principal_id FROM created_task_input t JOIN job j ON j.job_id=t.job_id WHERE j.state='queued' ORDER BY j.created_at,j.job_id LIMIT ?`).all(this.#capacity));
    for(const row of queued){
@@ -46,7 +52,7 @@ export class CreatedTaskWorker {
      // Register before entering any processor or observer. Synchronous throws and
      // immediate resolve must still release exactly this registered slot.
      const done=Promise.resolve().then(()=>this.#execute(task,lease,controller)).finally(()=>{this.#active.delete(id);if(!this.#closed)queueMicrotask(()=>this.drain());});
-     this.#active.set(id,{controller,done});
+     this.#active.set(id,{controller,done,lease});
     }catch{this.#diagnostic('TASK_CLAIM_FAILED',id);}
    }
   }catch{this.#diagnostic('TASK_QUEUE_READ_FAILED',null);}

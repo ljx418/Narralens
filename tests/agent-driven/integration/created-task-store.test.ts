@@ -200,3 +200,67 @@ it('rejects ignored async-within before partial task or SQL-prefix effects can c
   expect(()=>f.store.reserve(request(),'owner',policy)).toThrow('Async SQL hooks');empty(f);await Promise.resolve();await Promise.resolve();empty(f);
  }finally{f.close();}
 });
+it('settles an actually prepared fact and product-side row with the original job in one transaction',()=>{
+ const f=fixture();try{
+  const task=running(f),lease={owner:'worker',attempt:1},value=fact(task.stage_token);f.store.recordPrepared(task.job_id,lease,value,f.proof);
+  f.store.finishPrepared(task.job_id,lease,f.proof,(rows,t,actual)=>{expect(t).toEqual(task);expect(actual).toEqual(value);rows.prepare("UPDATE fixture_task_link SET tag='prepared for review' WHERE job_id=?").run(t.job_id);});
+  expect(f.revisions.readJob(task.job_id)).toMatchObject({state:'succeeded',lease_owner:null});expect(f.store.receipt(task.job_id,'owner')).toMatchObject({state:'succeeded',attempt:1,result_ref:null,next_actions:['review_prepared_source']});expect(f.store.preparedLeaseAttempt(task.job_id,'owner')).toBe(1);
+ }finally{f.close();}
+});
+it('rolls back settlement/checkpoint-side writes and job state when completion fails after a prepared fact exists',()=>{
+ const f=fixture();try{
+  const task=running(f),lease={owner:'worker',attempt:1},value=fact(task.stage_token);f.store.recordPrepared(task.job_id,lease,value,f.proof);
+  expect(()=>f.store.finishPrepared(task.job_id,lease,f.proof,rows=>{rows.prepare("UPDATE fixture_task_link SET tag='must rollback' WHERE job_id=?").run(task.job_id);throw Error('completion boundary');})).toThrow('completion boundary');
+  expect(f.revisions.readJob(task.job_id)?.state).toBe('running');expect(f.revisions.compose(db=>db.prepare('SELECT tag FROM fixture_task_link WHERE job_id=?').get(task.job_id)?.tag)).toBe('fixture SQL hook only');expect(f.store.readPrepared(task.job_id,'owner')).toEqual(value);
+ }finally{f.close();}
+});
+it('keeps cancelled work cancelled during failure settlement and refuses stale-lease failure writes',()=>{
+ const f=fixture();try{
+  const task=running(f),lease={owner:'worker',attempt:1};f.jobs.requestCancel(task.job_id,new Date(NOW));
+  expect(f.store.finishFailed(task.job_id,{owner:'foreign',attempt:1},'INVALID_DRAFT',()=>{throw Error('not called');})).toBe(false);
+  expect(f.store.finishFailed(task.job_id,lease,'INVALID_DRAFT',(rows,_t,state)=>{expect(state).toBe('cancelled');rows.prepare("UPDATE fixture_task_link SET tag='cancelled' WHERE job_id=?").run(task.job_id);})).toBe(true);
+  expect(f.revisions.readJob(task.job_id)).toMatchObject({state:'cancelled',lease_owner:null});
+ }finally{f.close();}
+});
+it('guards synchronous worker composition and rejects an ignored asynchronous continuation atomically',async()=>{
+ const f=fixture();try{
+  const task=running(f),lease={owner:'worker',attempt:1};
+  expect(()=>f.store.withRunningTask(task.job_id,lease,async rows=>{rows.prepare("UPDATE fixture_task_link SET tag='must rollback' WHERE job_id=?").run(task.job_id);await Promise.resolve();rows.prepare('SELECT 1').get();})).toThrow('Async SQL hooks');
+  await Promise.resolve();await Promise.resolve();expect(f.revisions.compose(db=>db.prepare('SELECT tag FROM fixture_task_link WHERE job_id=?').get(task.job_id)?.tag)).toBe('fixture SQL hook only');
+ }finally{f.close();}
+});
+it.each(['requeue','exhausted','cancel-expired','cancel-queued'] as const)('recovers %s with synchronous workflow-side effects in the same original DB',mode=>{
+ const f=fixture();try{
+  const task=f.store.reserve(request(),'owner',{...policy,max_attempts:mode==='exhausted'?1:7}).task;
+  if(mode!=='cancel-queued')f.jobs.acquireLease(task.job_id,{owner:'worker',leaseMs:1000,now:new Date(NOW)});
+  if(mode.startsWith('cancel'))f.jobs.requestCancel(task.job_id,new Date(NOW));f.setClock(NOW+1000);
+  let state='';const recover=()=>f.store.reapExpired((rows,t,next)=>{state=next;rows.prepare('UPDATE fixture_task_link SET tag=? WHERE job_id=?').run(next,t.job_id);});
+  expect(recover()).toBe(1);expect(state).toBe(mode==='requeue'?'pending':mode==='exhausted'?'failed':'cancelled');
+  expect(f.revisions.readJob(task.job_id)).toMatchObject({state:mode==='requeue'?'queued':mode==='exhausted'?'attention':'cancelled',lease_owner:null});
+  const events=f.count('job_event');expect(recover()).toBe(0);expect(f.count('job_event')).toBe(events);
+ }finally{f.close();}
+});
+it('rolls back expired-job recovery as well as workflow-side SQL when the recovery hook fails',()=>{
+ const f=fixture();try{
+  const task=running(f);f.setClock(NOW+1000);const before=f.revisions.readJob(task.job_id),events=f.count('job_event');
+  expect(()=>f.store.reapExpired((rows,t)=>{rows.prepare("UPDATE fixture_task_link SET tag='must rollback' WHERE job_id=?").run(t.job_id);throw Error('recovery boundary');})).toThrow('recovery boundary');
+  expect(f.revisions.readJob(task.job_id)).toEqual(before);expect(f.count('job_event')).toBe(events);expect(f.revisions.compose(db=>db.prepare('SELECT tag FROM fixture_task_link WHERE job_id=?').get(task.job_id)?.tag)).toBe('fixture SQL hook only');
+ }finally{f.close();}
+});
+it.each(['expiry','attempt','policy'] as const)('rechecks %s after a synchronous recoverable-retry hook and rolls back its prefix',mode=>{
+ const f=fixture();try{
+  const task=running(f),lease={owner:'worker',attempt:1},before=f.revisions.readJob(task.job_id),events=f.count('job_event');
+  expect(()=>f.store.retryRecoverable(task.job_id,lease,(rows,t)=>{
+   rows.prepare("UPDATE fixture_task_link SET tag='must rollback' WHERE job_id=?").run(t.job_id);
+   if(mode==='expiry')f.setClock(NOW+1001);else if(mode==='attempt')rows.prepare('UPDATE job SET attempt=attempt+1 WHERE job_id=?').run(t.job_id);else rows.prepare('UPDATE job SET max_attempts=1 WHERE job_id=?').run(t.job_id);
+  })).toThrow();
+  expect(f.revisions.readJob(task.job_id)).toEqual(before);expect(f.count('job_event')).toBe(events);expect(f.revisions.compose(db=>db.prepare('SELECT tag FROM fixture_task_link WHERE job_id=?').get(task.job_id)?.tag)).toBe('fixture SQL hook only');
+ }finally{f.close();}
+});
+it('never permits a recovery hook to consume or forge an additional lease attempt',()=>{
+ const f=fixture();try{
+  const task=running(f),before=f.revisions.readJob(task.job_id),events=f.count('job_event');f.setClock(NOW+1001);
+  expect(()=>f.store.reapExpired((rows,t)=>{rows.prepare("UPDATE fixture_task_link SET tag='must rollback' WHERE job_id=?").run(t.job_id);rows.prepare('UPDATE job SET attempt=attempt+1 WHERE job_id=?').run(t.job_id);})).toThrow();
+  expect(f.revisions.readJob(task.job_id)).toEqual(before);expect(f.count('job_event')).toBe(events);expect(f.revisions.compose(db=>db.prepare('SELECT tag FROM fixture_task_link WHERE job_id=?').get(task.job_id)?.tag)).toBe('fixture SQL hook only');
+ }finally{f.close();}
+});

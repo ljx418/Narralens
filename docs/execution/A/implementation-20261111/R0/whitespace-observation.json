@@ -1,0 +1,11 @@
+{
+  "argv": [
+    "git",
+    "diff",
+    "--cached",
+    "--check"
+  ],
+  "exit": 2,
+  "output": "docs/execution/A/implementation-20261111/R0/logs/affected.txt:66: new blank line at EOF.\ndocs/execution/A/relaunch-20261111/product/CLAUDE_READINESS.md:149: trailing whitespace.\n+|**D-05**|render/QC 不可变结果与正式 publish 分段；阶段化端口；`CommittedRenderReceiptV1`|**前提坐实**：旧 facade `render()`(`:184`) 内部 `:557` 直接 `commit.commitReady({...})`|**成立**|**E11：补源码行号 + 「新生产装配不得调用旧 facade」**| \ndocs/execution/A/relaunch-20261111/product/CLAUDE_READINESS.md:163: trailing whitespace.\n+|**D-10**|created 采用完整闭包与恢复：`Coordinator.controlledWrite` + `project_transaction(kind=edit, operation='agent.created_source.apply@1')`；`CreatedSourcePublisher` 原子 rename + 父目录 fsync + 缺口由 pending recovery gate 挡住；`RevisionStore` 新增 `commitPreparedCreatedSource` 同一 `BEGIN IMMEDIATE`；revision 恰 +1|既有 `RevisionStore.commitAdoption` 依赖 migrated projection/ledger；`AdoptionCoordinator` 走 `deps.materialize.read(request.materialization_id)` + `impact.requireCurrent` + `gateway.decide`|`CreatedSourcePublisher` 不存在（MISS）。**D-10 已把 N-1 的落点写清（`commitPreparedCreatedSource` 新分支），但 `CreatedSourcePublisher` 与 `cp_a0_created_adoption_fact` 的 DDL 尚无实现载体**| \n",
+  "disposition": "Preserve byte-sealed historical documentation and actual raw test output, including whitespace. No source/test/policy whitespace issues; separate exact source check exit0. This is not a passing full whitespace gate."
+}

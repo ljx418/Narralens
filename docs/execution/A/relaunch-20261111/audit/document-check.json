@@ -1,0 +1,270 @@
+{
+  "format": "narralens.documentation-check@1",
+  "passed": true,
+  "business_tests": "NOT_RUN",
+  "production_implementation": "NOT_STARTED",
+  "checks": [
+    {
+      "check": "adjunct-schema-valid",
+      "passed": true,
+      "detail": "Draft 2020-12 structural check only"
+    },
+    {
+      "check": "inventory-positive-shape",
+      "passed": true,
+      "detail": "synthetic documentation JSON, not media or legal validation"
+    },
+    {
+      "check": "inventory-item-response-shape",
+      "passed": true,
+      "detail": "POST InventoryItem response is explicitly in schema top-level union"
+    },
+    {
+      "check": "legacy-valid-long-labels",
+      "passed": true,
+      "detail": "inventory must represent labels allowed by existing LocalAssetRegistry, not narrow to512"
+    },
+    {
+      "check": "inventory-reject-wrong-rights-version",
+      "passed": true,
+      "detail": "schema must reject this precise negative shape"
+    },
+    {
+      "check": "inventory-reject-unknown-field",
+      "passed": true,
+      "detail": "schema must reject this precise negative shape"
+    },
+    {
+      "check": "inventory-reject-bad-ref-hash",
+      "passed": true,
+      "detail": "schema must reject this precise negative shape"
+    },
+    {
+      "check": "inventory-reject-oversize-page",
+      "passed": true,
+      "detail": "schema must reject this precise negative shape"
+    },
+    {
+      "check": "inventory-reject-wrong-format",
+      "passed": true,
+      "detail": "schema must reject this precise negative shape"
+    },
+    {
+      "check": "single-writer",
+      "passed": true,
+      "detail": "123 exact paths"
+    },
+    {
+      "check": "known-writers",
+      "passed": true,
+      "detail": "MAIN coordinates, no implicit second writer"
+    },
+    {
+      "check": "frozen-not-released",
+      "passed": true,
+      "detail": "frozen contract files and lockfile are outside release list"
+    },
+    {
+      "check": "explicit-additive-count",
+      "passed": true,
+      "detail": "4 inventory/source UI HTTP plus one resource, original31 separate"
+    },
+    {
+      "check": "preview-explicitly-separate",
+      "passed": true,
+      "detail": "fifth adjunct HTTP; not a Delivery or hidden frozen registry edit"
+    },
+    {
+      "check": "head-main-integration",
+      "passed": true,
+      "detail": "full commit unchanged"
+    },
+    {
+      "check": "dirty-set-main-integration",
+      "passed": true,
+      "detail": "exact git/index dirty set unchanged, not only original file hashes"
+    },
+    {
+      "check": "preserved-main-integration",
+      "passed": true,
+      "detail": "25 original dirty entries unchanged"
+    },
+    {
+      "check": "backup-main-integration",
+      "passed": true,
+      "detail": "local archive hash; not committed/uploaded"
+    },
+    {
+      "check": "head-bridge-observability",
+      "passed": true,
+      "detail": "full commit unchanged"
+    },
+    {
+      "check": "dirty-set-bridge-observability",
+      "passed": true,
+      "detail": "exact git/index dirty set unchanged, not only original file hashes"
+    },
+    {
+      "check": "preserved-bridge-observability",
+      "passed": true,
+      "detail": "310 original dirty entries unchanged"
+    },
+    {
+      "check": "backup-bridge-observability",
+      "passed": true,
+      "detail": "local archive hash; not committed/uploaded"
+    },
+    {
+      "check": "head-product-workbench",
+      "passed": true,
+      "detail": "full commit unchanged"
+    },
+    {
+      "check": "dirty-set-product-workbench",
+      "passed": true,
+      "detail": "exact git/index dirty set unchanged, not only original file hashes"
+    },
+    {
+      "check": "preserved-product-workbench",
+      "passed": true,
+      "detail": "0 original dirty entries unchanged"
+    },
+    {
+      "check": "backup-product-workbench",
+      "passed": true,
+      "detail": "local archive hash; not committed/uploaded"
+    },
+    {
+      "check": "head-media-delivery",
+      "passed": true,
+      "detail": "full commit unchanged"
+    },
+    {
+      "check": "dirty-set-media-delivery",
+      "passed": true,
+      "detail": "exact git/index dirty set unchanged, not only original file hashes"
+    },
+    {
+      "check": "preserved-media-delivery",
+      "passed": true,
+      "detail": "0 original dirty entries unchanged"
+    },
+    {
+      "check": "backup-media-delivery",
+      "passed": true,
+      "detail": "local archive hash; not committed/uploaded"
+    },
+    {
+      "check": "frozen-contracts/agent-driven-a.schema.json",
+      "passed": true,
+      "detail": "historical frozen bytes unchanged"
+    },
+    {
+      "check": "frozen-contracts/agent-driven-a.registry.json",
+      "passed": true,
+      "detail": "historical frozen bytes unchanged"
+    },
+    {
+      "check": "frozen-src/contracts/agent-driven-types.ts",
+      "passed": true,
+      "detail": "historical frozen bytes unchanged"
+    },
+    {
+      "check": "frozen-src/contracts/agent-driven-validator.ts",
+      "passed": true,
+      "detail": "historical frozen bytes unchanged"
+    },
+    {
+      "check": "frozen-sql",
+      "passed": true,
+      "detail": "exact shipped SQL protected"
+    },
+    {
+      "check": "canonical-no-product-edit",
+      "passed": true,
+      "detail": [
+        "AGENTS.md",
+        "docs/AGENT_MEMORY.md",
+        "docs/agent-driven-v1/06_ITERATION_EXECUTION_PLAN.md",
+        "docs/agent-driven-v1/07_PARALLEL_DEVELOPMENT.md",
+        "docs/agent-driven-v1/08_PARALLEL_PORTS_AND_OWNERSHIP.md",
+        "docs/agent-driven-v1/09_PARALLEL_AGENT_HANDOFFS.md"
+      ]
+    },
+    {
+      "check": "deliverable-bridge-DESIGN.md",
+      "passed": true,
+      "detail": "presence only; MAIN semantic review is separate"
+    },
+    {
+      "check": "deliverable-bridge-ACCEPTANCE.md",
+      "passed": true,
+      "detail": "presence only; MAIN semantic review is separate"
+    },
+    {
+      "check": "deliverable-bridge-TASK.md",
+      "passed": true,
+      "detail": "presence only; MAIN semantic review is separate"
+    },
+    {
+      "check": "deliverable-bridge-CLAUDE_PROMPT.md",
+      "passed": true,
+      "detail": "presence only; MAIN semantic review is separate"
+    },
+    {
+      "check": "deliverable-bridge-CLAUDE_READINESS.md",
+      "passed": true,
+      "detail": "presence only; MAIN semantic review is separate"
+    },
+    {
+      "check": "deliverable-product-DESIGN.md",
+      "passed": true,
+      "detail": "presence only; MAIN semantic review is separate"
+    },
+    {
+      "check": "deliverable-product-ACCEPTANCE.md",
+      "passed": true,
+      "detail": "presence only; MAIN semantic review is separate"
+    },
+    {
+      "check": "deliverable-product-TASK.md",
+      "passed": true,
+      "detail": "presence only; MAIN semantic review is separate"
+    },
+    {
+      "check": "deliverable-product-CLAUDE_PROMPT.md",
+      "passed": true,
+      "detail": "presence only; MAIN semantic review is separate"
+    },
+    {
+      "check": "deliverable-product-CLAUDE_READINESS.md",
+      "passed": true,
+      "detail": "presence only; MAIN semantic review is separate"
+    },
+    {
+      "check": "deliverable-media-DESIGN.md",
+      "passed": true,
+      "detail": "presence only; MAIN semantic review is separate"
+    },
+    {
+      "check": "deliverable-media-ACCEPTANCE.md",
+      "passed": true,
+      "detail": "presence only; MAIN semantic review is separate"
+    },
+    {
+      "check": "deliverable-media-TASK.md",
+      "passed": true,
+      "detail": "presence only; MAIN semantic review is separate"
+    },
+    {
+      "check": "deliverable-media-CLAUDE_PROMPT.md",
+      "passed": true,
+      "detail": "presence only; MAIN semantic review is separate"
+    },
+    {
+      "check": "deliverable-media-CLAUDE_READINESS.md",
+      "passed": true,
+      "detail": "presence only; MAIN semantic review is separate"
+    }
+  ]
+}

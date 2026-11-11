@@ -1,0 +1,465 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:narralens:design:asset-inventory-v1",
+  "$comment": "DESIGN_ONLY; additive read protocol + trusted UI registration. Not production registration or business acceptance. Runtime must separately validate source/permission/identity/hash, and normalize owned source uri:null to absent for existing LocalAssetInput.",
+  "anyOf": [
+    {
+      "$ref": "#/$defs/Inventory"
+    },
+    {
+      "$ref": "#/$defs/SourceFileListing"
+    },
+    {
+      "$ref": "#/$defs/RegistrationRequest"
+    },
+    {
+      "$ref": "#/$defs/InventoryItem"
+    }
+  ],
+  "$defs": {
+    "InventoryItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "asset_id": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$"
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "bytes": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "registration_digest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "media": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "enum": [
+                "video",
+                "audio"
+              ]
+            },
+            "media_type": {
+              "type": "string",
+              "maxLength": 128
+            },
+            "extension": {
+              "enum": [
+                "mp4",
+                "wav",
+                "m4a",
+                "mp3",
+                "flac",
+                "ogg"
+              ]
+            },
+            "duration_frames": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "duration_ms": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "width": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "height": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "sample_rate": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "channels": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "codec": {
+              "type": "string",
+              "maxLength": 128
+            }
+          },
+          "required": [
+            "kind",
+            "media_type",
+            "extension",
+            "duration_frames",
+            "duration_ms",
+            "width",
+            "height",
+            "sample_rate",
+            "channels",
+            "codec"
+          ]
+        },
+        "rights_ref": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$"
+            },
+            "version": {
+              "const": 1
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "id",
+            "version",
+            "sha256"
+          ]
+        },
+        "source_label": {
+          "type": "string",
+          "maxLength": 2000
+        },
+        "license": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "status": {
+              "enum": [
+                "cleared",
+                "restricted",
+                "unknown"
+              ]
+            },
+            "label": {
+              "type": "string",
+              "maxLength": 2000,
+              "minLength": 1
+            },
+            "commercial_use": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "status",
+            "label",
+            "commercial_use"
+          ]
+        },
+        "recording_origin": {
+          "enum": [
+            "human_recording",
+            "synthetic",
+            "unknown",
+            null
+          ]
+        }
+      },
+      "required": [
+        "asset_id",
+        "sha256",
+        "bytes",
+        "registration_digest",
+        "media",
+        "rights_ref",
+        "source_label",
+        "license",
+        "recording_origin"
+      ]
+    },
+    "Inventory": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "format": {
+          "const": "narralens.asset-inventory@1"
+        },
+        "project_id": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/InventoryItem"
+          },
+          "maxItems": 64
+        },
+        "cursor_next": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2048
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "format",
+        "project_id",
+        "items",
+        "cursor_next"
+      ]
+    },
+    "SourceFileListing": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "format": {
+          "const": "narralens.local-source-files@1"
+        },
+        "project_id": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "candidate_id": {
+                "type": "string",
+                "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$"
+              },
+              "display_name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              },
+              "kind": {
+                "enum": [
+                  "video",
+                  "audio"
+                ]
+              },
+              "bytes": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "expires_at": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "required": [
+              "candidate_id",
+              "display_name",
+              "kind",
+              "bytes",
+              "expires_at"
+            ]
+          },
+          "maxItems": 64
+        },
+        "cursor_next": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2048
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "format",
+        "project_id",
+        "items",
+        "cursor_next"
+      ]
+    },
+    "RegistrationRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "meta": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "idempotency_key": {
+              "type": "string",
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$"
+            },
+            "correlation_id": {
+              "type": "string",
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$"
+            }
+          },
+          "required": [
+            "idempotency_key",
+            "correlation_id"
+          ]
+        },
+        "project_id": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$"
+        },
+        "candidate_id": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$"
+        },
+        "source": {
+          "oneOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "kind": {
+                  "enum": [
+                    "owned",
+                    "generated",
+                    "licensed"
+                  ]
+                },
+                "label": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 2000
+                },
+                "uri": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "maxLength": 2048
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "kind",
+                "label",
+                "uri"
+              ]
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "kind": {
+                  "const": "derived"
+                },
+                "label": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 2000
+                },
+                "lineage": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$"
+                  },
+                  "minItems": 1,
+                  "maxItems": 256
+                }
+              },
+              "required": [
+                "kind",
+                "label",
+                "lineage"
+              ]
+            }
+          ]
+        },
+        "license": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "status": {
+              "enum": [
+                "cleared",
+                "restricted",
+                "unknown"
+              ]
+            },
+            "label": {
+              "type": "string",
+              "maxLength": 2000,
+              "minLength": 1
+            },
+            "commercial_use": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "status",
+            "label",
+            "commercial_use"
+          ]
+        },
+        "recording_origin": {
+          "enum": [
+            "human_recording",
+            "synthetic",
+            "unknown",
+            null
+          ]
+        }
+      },
+      "required": [
+        "meta",
+        "project_id",
+        "candidate_id",
+        "source",
+        "license",
+        "recording_origin"
+      ]
+    }
+  }
+}

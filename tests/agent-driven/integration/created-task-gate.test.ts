@@ -1,6 +1,7 @@
 import {it,expect} from 'vitest';
 import type {TaskPrepare,ArtifactPut,Artifact} from '../../../src/contracts/agent-driven-types.js';
 import {createdProjectFixture} from './helpers/created-project-fixture.js';
+import {PersistentJobStore} from '../../../src/host/persistent-job-store.js';
 import {ProductSqliteRepository} from '../../../src/host/agent-driven/product-sqlite-repository.js';
 import {CreatedTaskStore,type CreatedTaskPorts} from '../../../src/host/agent-driven/created-task-store.js';
 import {CreatedTaskGate} from '../../../src/host/agent-driven/created-task-gate.js';
@@ -79,4 +80,23 @@ it('emits real pending-to-running progress and rolls back step/checkpoint/outbox
   expect(f.counts()).toEqual(settled);expect(await f.repo.transaction(tx=>tx.get('run',{project_id:f.projectId,run_id:e.run_id}))).toEqual(checkpoint);
   expect(await f.repo.transaction(tx=>tx.get('step_attempt',{project_id:f.projectId,run_id:e.run_id,plan_version:1,step_id:'sample',attempt:1}))).toMatchObject({state:'running'});
  }finally{await f.close();}
+},120000);
+it.each(['exhausted','cancelled'] as const)('recovers %s leases atomically with the real workflow checkpoint, and is idempotent after SQLite reopen',async mode=>{
+ const f=await fixture();let reopened:import('../../../src/host/projects/revision-store.js').RevisionStore|undefined;
+ try{
+  const task=f.store.reserve(f.input,'owner',{...policy,max_attempts:1}).task,lease={owner:'expired-worker',attempt:1};
+  const jobs=f.host.jobs;if(!(jobs instanceof PersistentJobStore))throw Error('Real persistent Host required');expect(jobs.acquireLease(task.job_id,{owner:lease.owner,leaseMs:60000})).toBe(true);
+  f.store.withRunningTask(task.job_id,lease,(rows,t,now)=>f.repo.joinTaskTransaction(rows,tx=>f.workflow.recordStepAttemptInTransaction(tx,{project_id:f.projectId,run_id:f.run.run_id,plan_version:1,step_id:'sample',attempt:1,grant_id:f.grant.authorization_id,input_digest:t.request.execution.input_digest,state:'running',job_id:t.job_id,observed_at:now.toISOString()},f.owner)));
+  if(mode==='cancelled')f.host.jobs.requestCancel(task.job_id);
+  f.host.revisions.compose(db=>db.prepare('UPDATE job SET lease_expires_at=0 WHERE job_id=?').run(task.job_id));
+  expect(f.store.leaseReaperExclusions()).toContain(task.job_id);
+  const recover=(rows:import('../../../src/host/agent-driven/created-task-store.js').TaskTransactionDb,t:import('../../../src/host/agent-driven/created-task-store.js').TaskReservation,state:'pending'|'failed'|'cancelled',now:Date)=>f.repo.joinTaskTransaction(rows,tx=>f.workflow.recordStepAttemptInTransaction(tx,{project_id:f.projectId,run_id:f.run.run_id,plan_version:1,step_id:'sample',attempt:1,grant_id:f.grant.authorization_id,input_digest:t.request.execution.input_digest,state,job_id:t.job_id,observed_at:now.toISOString()},f.owner));
+  expect(f.store.reapExpired(recover)).toBe(1);expect(f.host.revisions.readJob(task.job_id)?.state).toBe(mode==='exhausted'?'attention':'cancelled');
+  const state=mode==='exhausted'?'failed':'cancelled';expect(await f.repo.transaction(tx=>tx.get('step_attempt',{project_id:f.projectId,run_id:f.run.run_id,plan_version:1,step_id:'sample',attempt:1}))).toMatchObject({state});
+  expect((await f.repo.transaction(tx=>tx.get('run',{project_id:f.projectId,run_id:f.run.run_id})))?.checkpoint_json.attempts[0]?.state).toBe(state);expect(f.host.revisions.activeCommit(f.projectId)).toEqual(f.commit);expect(f.host.revisions.recoveryGate(f.projectId,0)).toBe(false);
+  const counts=f.counts();await f.host.close();
+  const {RevisionStore}=await import('../../../src/host/projects/revision-store.js');const {join}=await import('node:path');reopened=new RevisionStore(join(f.root,'host.sqlite'));
+  const next=new CreatedTaskStore(reopened,{assertAllowed:()=>{throw Error('not dispatching');},bindStep:()=>{throw Error('not dispatching');},assertPrepared:()=>{throw Error('not preparing');}});
+  expect(next.reapExpired(()=>{throw Error('terminal recovery must not replay effects');})).toBe(0);expect(reopened.readJob(task.job_id)?.state).toBe(mode==='exhausted'?'attention':'cancelled');expect(reopened.compose(db=>Number(db.prepare('SELECT count(*) AS n FROM outbox').get()?.n))).toBe(counts.outbox);
+ }finally{reopened?.close();await f.close();}
 },120000);

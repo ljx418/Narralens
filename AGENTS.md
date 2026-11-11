@@ -1,3 +1,7 @@
+## 2026-11-11 最新授权：A恢复后实际开发
+
+用户新active goal明确批准按docs/execution/A/relaunch-20261111审定包进入A实际开发，覆盖旧暂停/仅准备文字。MAIN先R0当前字节复审、受影响验证、真实共同commit及精确ReleaseAssignment，再通过Orca领域Codex管理Claude实施与自验证；无release不跨owner写。当前进度与授权记录在canonical docs/execution/A/implementation-20261111，不修改已封存relaunch包。B仍不进入；不代签人验。Claude凭据事件处置待用户回答，确认前不新调用相关Claude，先推进不依赖它的本地R0/Codex工作。429安全接手、超过两次返工MAIN接管、Headless静音、保全原候选与旧Gate历史继续有效。
+
 # Narralens 多Agent工作约定
 
 最新已批准体验基线：docs/agent-driven-v1/s0-r4/prototype.html。用户批准R4原型通过，作为V1前端体验出门门限；冻结见同目录FREEZE.json/APPROVAL.json，验收见docs/agent-driven-v1/V1_FRONTEND_EXIT_GATE.md（R4-UX-01..12）。已有工程改单镜、顶部可折叠横向工作流、可继续剪辑的非模态系统侧面板必须保持。原型人工PASS；真实产品验收NOT_RUN，IT-P02/生产release未据此释放，历史Gate不变。

@@ -1,0 +1,49 @@
+{
+  "scope": "R0 affected validation only",
+  "commands": [
+    {
+      "argv": [
+        "corepack",
+        "pnpm",
+        "exec",
+        "tsc",
+        "--noEmit"
+      ],
+      "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+      "started_at": "2026-11-11T13:01:59.330033+00:00",
+      "scope": "R0 affected checks; component/actual synthetic media, not A acceptance",
+      "source_head": "838ba5f2c8500f0103f56dbe51264ea9f70086fc",
+      "ended_at": "2026-11-11T13:02:18.172263+00:00",
+      "exit": 0,
+      "log": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R0/logs/typecheck.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "corepack",
+        "pnpm",
+        "test",
+        "tests/agent-driven/integration/created-task-store.test.ts",
+        "tests/agent-driven/integration/created-task-worker.test.ts",
+        "tests/agent-driven/integration/created-task-gate.test.ts",
+        "tests/agent-driven/integration/created-draft-processor.test.ts",
+        "tests/agent-driven/integration/source-digest-resource-boundary.test.ts",
+        "tests/agent-driven/integration/local-assets-host.test.ts",
+        "tests/agent-driven/media/native-draft.test.ts",
+        "tests/m2.1/source-digest-v1.test.ts",
+        "--maxWorkers=1",
+        "--minWorkers=1"
+      ],
+      "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+      "started_at": "2026-11-11T13:02:18.175166+00:00",
+      "scope": "R0 affected checks; component/actual synthetic media, not A acceptance",
+      "source_head": "838ba5f2c8500f0103f56dbe51264ea9f70086fc",
+      "ended_at": "2026-11-11T13:04:39.243385+00:00",
+      "exit": 0,
+      "log": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R0/logs/affected.txt",
+      "sha256": "06e24458cd176bf4c213ef8a24839ab1877da3687a7fea20c6842f6e82816545"
+    }
+  ],
+  "all_requested_completed": true,
+  "passed": true
+}

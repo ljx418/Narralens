@@ -1,0 +1,66 @@
+
+> narralens@0.1.0 test /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+> vitest run --config vitest.config.ts tests/agent-driven/integration/created-task-store.test.ts tests/agent-driven/integration/created-task-worker.test.ts tests/agent-driven/integration/created-task-gate.test.ts tests/agent-driven/integration/created-draft-processor.test.ts tests/agent-driven/integration/source-digest-resource-boundary.test.ts tests/agent-driven/integration/local-assets-host.test.ts tests/agent-driven/media/native-draft.test.ts tests/m2.1/source-digest-v1.test.ts --maxWorkers=1 --minWorkers=1
+
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:634199) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/local-assets-host.test.ts (23 tests) 44994ms
+   ✓ actually probes and fully decodes video and synthetic diagnostic audio into the same Host database without modifying native source  2865ms
+   ✓ requires real trusted UI provenance and ownership before reading files or recording rights  1920ms
+   ✓ replays the original registration without reimporting changed input and refuses a conflicting key  2157ms
+   ✓ rolls back row, command and outbox together at before_insert, preserving an unreferenced blob for a safe retry  2149ms
+   ✓ rolls back row, command and outbox together at after_insert, preserving an unreferenced blob for a safe retry  2445ms
+   ✓ rolls back row, command and outbox together at after_receipt, preserving an unreferenced blob for a safe retry  2367ms
+   ✓ rolls back row, command and outbox together at after_event, preserving an unreferenced blob for a safe retry  2178ms
+   ✓ checks real input hashes, paths and media rather than accepting metadata as proof  1937ms
+   ✓ preserves unknown license and synthetic origin as facts rather than silently clearing them  2127ms
+   ✓ detects a published blob changed inside the final SQL boundary and commits no registration  2147ms
+   ✓ converges concurrent same-key imports to one immutable row, one command and one business event  2120ms
+   ✓ rounds audio directly from sample time to project frames rather than rounding through displayed milliseconds  2082ms
+   ✓ refuses truncated audio and a video with a damaged audio track even when video-only legacy validation passes  2277ms
+   ✓ refuses local storage overlapping author, snapshot or input domains before creating directories  2307ms
+   ✓ does not follow a newly redirected configured source root, even when replacement bytes have the declared hash  1809ms
+   ✓ captures trusted input by value before asynchronous inspection rather than accepting later permission changes  1886ms
+   ✓ bounds real concurrent imports to two and removes a cancelled queued request without leaking a slot  2225ms
+   ✓ preserves cancellation through the actual video validator wrapper and waits for its media child before returning  1827ms
+   ✓ quiesces admitted local imports and their real media child before the Host closes its shared database  1880ms
+   ✓ keeps snapshot bytes untouched when a storage parent is replaced exactly at before_stage_create  1760ms
+   ✓ keeps snapshot bytes untouched when a storage parent is replaced exactly at before_publish  2131ms
+(node:639078) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/created-draft-processor.test.ts (5 tests) 23453ms
+   ✓ autonomously prepares actual registered media into editable native source with matching immutable facts and no author commit  5019ms
+   ✓ rechecks a revoked grant after asynchronous resolution and writes no stage or prepared fact  3080ms
+   ✓ cancels after real preparation without publishing a prepared result or changing author state  5572ms
+   ✓ reproves a durable complete source after lease loss instead of re-encoding or trusting an old in-memory proof  5298ms
+   ✓ recovers a real asynchronous domain-open resource failure in the same processor and closes its descriptors  4484ms
+(node:639765) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/created-task-gate.test.ts (7 tests) 22552ms
+   ✓ reserves one real job, cp step/checkpoint and mirrored event atomically, then replays without new effects  3169ms
+   ✓ rejects stale base, altered refs/scope/attempt and crossing the sample gate before creating any job  4571ms
+   ✓ rolls back real job, step, checkpoint, event and grant mutation if final authorization is revoked  3341ms
+   ✓ rejects a creative closure changed after authorization without task side effects  2664ms
+   ✓ emits real pending-to-running progress and rolls back step/checkpoint/outbox if the event mirror fails  3616ms
+   ✓ recovers exhausted leases atomically with the real workflow checkpoint, and is idempotent after SQLite reopen  2550ms
+   ✓ recovers cancelled leases atomically with the real workflow checkpoint, and is idempotent after SQLite reopen  2641ms
+ ✓ tests/m2.1/source-digest-v1.test.ts (18 tests) 1254ms
+(node:648889) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/created-task-worker.test.ts (12 tests) 1196ms
+   ✓ renews the real lease during a long processor and only the current lease can settle  926ms
+ ✓ tests/agent-driven/media/native-draft.test.ts (16 tests) 987ms
+   ✓ source-only integration with the real fixed pure parser, no browser/render/decode > creates editable primary clips and exact native source/settings/VTT closure from registry unit facts  889ms
+(node:649196) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/created-task-store.test.ts (39 tests) 346ms
+ ✓ tests/agent-driven/integration/source-digest-resource-boundary.test.ts (3 tests) 14ms
+
+ Test Files  8 passed (8)
+      Tests  123 passed (123)
+   Start at  21:02:21
+   Duration  131.07s (transform 2.79s, setup 0ms, collect 19.59s, tests 94.80s, environment 1ms, prepare 11.43s)
+

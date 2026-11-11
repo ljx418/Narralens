@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import { open, realpath } from "node:fs/promises";
 import { constants } from "node:fs";
 import { resolve, sep } from "node:path";
-import { HttpError } from "../api-error.js";
+import { HttpError, asHostResourceError } from "../api-error.js";
 
 /**
  * SourceDigestV1 (`03_M2_M4_MODULE_DESIGN.md` §1.5, AC-006).
@@ -195,7 +195,7 @@ interface ResolvedFile {
 async function loadFile(rootAbsolute: string, resolved: string, label: string, correlationId?: string): Promise<ResolvedFile> {
   let canonical: string;
   try { canonical = await realpath(resolved); }
-  catch { throw fail("SOURCE_REFERENCE_UNRESOLVED", label, correlationId); }
+  catch (error) { const resource=asHostResourceError(error,correlationId);if(resource)throw resource;throw fail("SOURCE_REFERENCE_UNRESOLVED", label, correlationId); }
   if (canonical !== rootAbsolute && !canonical.startsWith(`${rootAbsolute}${sep}`)) {
     throw fail("SOURCE_PATH_ESCAPE", label, correlationId);
   }

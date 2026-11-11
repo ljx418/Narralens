@@ -1,0 +1,18 @@
+{
+  "review": "CreatedDraftTaskProcessor MAJOR closure static review",
+  "reviewed_at": "2026-11-10",
+  "method": "read-only static inspection; no tests, typecheck, build, index or runtime commands",
+  "sources": {
+    "src/host/agent-driven/created-draft-processor.ts": "3b702b9382e4b49101c717b62e93fc7ac0919137b963c983e12ff87b332571af",
+    "src/host/agent-driven/created-task-store.ts": "8d3d98a252031c51a019214a9c76a0026043773fa33a46d5085f4dab79228c0a",
+    "src/host/agent-driven/created-task-gate.ts": "1a65d8f3e9950847decdea2478a2d8542bb33d5018119282c18144c2694a8860",
+    "src/host/agent-driven/local-asset-registry.ts": "84ce639583427de6adfbf4dab892b9a77fd888de1c5f005d824d22bc3aca2e92",
+    "src/host/agent-driven/created-task-worker.ts": "38f5fe5b194758a806e134df0cf2d402db93f7d85eb848106a1e5214a3fdc7be"
+  },
+  "tests_inspected": {
+    "tests/agent-driven/integration/created-draft-processor.test.ts": "62eb60cbc05d02513c2327eb4ab596957d627f32c8307461a2dbe2b6a1d34807",
+    "tests/agent-driven/integration/created-task-store.test.ts": "b6aae16d4cd77aeff6c7b648372ba71136636cb31b3c424232ebaf9863956a78",
+    "tests/agent-driven/integration/created-task-worker.test.ts": "b3e77acd9cb3b89aec844a505db343fdeaaa4efa0e50032d6add12f7fba2c638",
+    "tests/agent-driven/integration/created-task-gate.test.ts": "3cacff5dbac8c3cf0acc790fbb30cbdc82803862fe4d95d94c52756adae9a36d"
+  }
+}

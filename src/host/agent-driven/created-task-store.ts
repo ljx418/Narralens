@@ -216,6 +216,76 @@ export class CreatedTaskStore {
       check();return fact;
     });
   }
+  /** Same live lease + scoped composition, without another BEGIN or worker state machine. */
+  withRunningTask<T>(jobId:string,lease:TaskLease,work:(db:TaskTransactionDb,task:TaskReservation,now:Date)=>T):T {
+    return this.#atomic(()=>{const task=this.#task(jobId);this.#lease(task,lease,date(this.now));let result!:T;
+      this.#hook(db=>{result=work(db,task,date(this.now));return result;});
+      this.#lease(task,lease,date(this.now));return result;
+    });
+  }
+  /** Immutable PREPARED fact is not commit/approval. Job + step/checkpoint/events settle
+   * in one original-DB transaction after current Run/rights/FS proof verification. */
+  finishPrepared(jobId:string,lease:TaskLease,proof:unknown,settle:(db:TaskTransactionDb,task:TaskReservation,fact:PreparedTaskFact,now:Date)=>void):void {
+    this.#atomic(()=>{
+      const task=this.#task(jobId),fact=this.readPrepared(jobId,task.principal_id);if(!fact)fail('NOT_FOUND','Prepared source is missing');
+      const at=date(this.now);this.#lease(task,lease,at);
+      this.#hook(db=>this.ports.assertPrepared(db,{task,fact,proof,lease,now:at}));this.#lease(task,lease,date(this.now));
+      this.#hook(db=>settle(db,task,fact,date(this.now)));this.#lease(task,lease,date(this.now));
+      if(!this.revisions.completeCallback(jobId,lease.owner,lease.attempt,'succeeded','known',canonicalJson({kind:'local.native-draft@1',source_digest:fact.source_digest,stage:'SOURCE_ONLY'}),'SOURCE_ONLY',undefined,undefined,date(this.now)))fail('REVISION_CONFLICT','Task completion lost its lease');
+      this.revisions.appendJobEvent(jobId,'succeeded',date(this.now).toISOString(),{message:'Native source prepared; project remains unchanged'},true);
+    });
+  }
+  finishFailed(jobId:string,lease:TaskLease,code:string,settle:(db:TaskTransactionDb,task:TaskReservation,state:'failed'|'cancelled',now:Date)=>void):boolean {
+    return this.#atomic(()=>{
+      const task=this.#task(jobId),job=this.#job(task),at=date(this.now);
+      if(job.lease_owner!==lease.owner||job.attempt!==lease.attempt||!['running','cancel_requested'].includes(job.state))return false;
+      if(job.state==='running'&&(job.lease_expires_at===null||job.lease_expires_at<=at.getTime()))return false;
+      const state=job.state==='cancel_requested'?'cancelled':'failed';
+      const safeCode=/^[A-Z][A-Z0-9_]{0,63}$/.test(code)?code:'INTERNAL_ERROR';
+      this.#hook(db=>settle(db,task,state,at));if(state==='failed')this.#lease(task,lease,date(this.now));
+      const applied=state==='cancelled'?this.revisions.completeCancelledCallback(jobId,lease.owner,lease.attempt,at):this.revisions.completeCallback(jobId,lease.owner,lease.attempt,'failed','known',canonicalJson({kind:'local.native-draft-failure@1',code:safeCode}),safeCode,undefined,undefined,at);
+      if(!applied)fail('REVISION_CONFLICT','Failure settlement lost its lease');
+      this.revisions.appendJobEvent(jobId,state,at.toISOString(),{message:state==='cancelled'?'Native preparation cancelled':'Native preparation failed'},true);return true;
+    });
+  }
+  retryRecoverable(jobId:string,lease:TaskLease,settle:(db:TaskTransactionDb,task:TaskReservation,now:Date)=>void):boolean {
+    return this.#atomic(()=>{
+      const task=this.#task(jobId),job=this.#job(task),at=date(this.now);
+      if(job.state!=='running'||job.lease_owner!==lease.owner||job.attempt!==lease.attempt||job.lease_expires_at===null||job.lease_expires_at<=at.getTime()||job.attempt>=job.max_attempts)return false;
+      this.#hook(db=>settle(db,task,at));this.#lease(task,lease,date(this.now));
+      const current=this.#job(task);if(current.attempt>=current.max_attempts)fail('REVISION_CONFLICT','Retry policy changed');
+      if(!this.revisions.releaseLease(jobId,lease.owner,at.getTime()))fail('REVISION_CONFLICT','Recoverable retry lost its lease');
+      this.revisions.appendJobEvent(jobId,'queued',at.toISOString(),{message:'Local preparation resource unavailable; safely requeued'},true);return true;
+    });
+  }
+  /** Dedicated recovery owns these jobs so generic reaping cannot split CP/job state. */
+  leaseReaperExclusions():string[]{return this.#db.prepare("SELECT t.job_id FROM created_task_input t JOIN job j ON j.job_id=t.job_id WHERE j.state IN('queued','running','cancel_requested')").all().map(row=>String(row.job_id));}
+  reapExpired(settle:(db:TaskTransactionDb,task:TaskReservation,state:'pending'|'failed'|'cancelled',now:Date)=>void):number {
+    const ids=this.#db.prepare("SELECT t.job_id FROM created_task_input t JOIN job j ON j.job_id=t.job_id WHERE (j.state='running' AND j.lease_expires_at IS NOT NULL AND j.lease_expires_at<=?) OR (j.state='cancel_requested' AND (j.lease_expires_at IS NULL OR j.lease_expires_at<=?))").all(date(this.now).getTime(),date(this.now).getTime());let count=0;
+    for(const id of ids)this.#atomic(()=>{
+      const task=this.#task(String(id.job_id)),job=this.#job(task),at=date(this.now);
+      if(!['running','cancel_requested'].includes(job.state)||job.state==='running'&&job.lease_expires_at===null||job.lease_expires_at!==null&&job.lease_expires_at>at.getTime())return;
+      const cancel=job.state==='cancel_requested',requeue=!cancel&&job.attempt<job.max_attempts;
+      const applied=cancel?(job.lease_owner!==null?this.revisions.completeCancelledCallback(job.job_id,job.lease_owner,job.attempt,at):Number(this.#db.prepare("UPDATE job SET state='cancelled',lease_owner=NULL,lease_expires_at=NULL,updated_at=? WHERE job_id=? AND state='cancel_requested' AND lease_owner IS NULL AND attempt=? AND lease_expires_at IS ?").run(at.toISOString(),job.job_id,job.attempt,job.lease_expires_at).changes)===1):this.revisions.reclaimLease(job.job_id,requeue,at);
+      if(!applied)return;
+      this.#hook(db=>settle(db,task,cancel?'cancelled':requeue?'pending':'failed',at));
+      const settled=this.#job(task);if(settled.attempt!==job.attempt||settled.state!==(cancel?'cancelled':requeue?'queued':'attention')||settled.lease_owner!==null||settled.lease_expires_at!==null)fail('REVISION_CONFLICT','Recovery settlement changed');
+      const state=cancel?'cancelled':requeue?'queued':'attention';
+      this.revisions.appendJobEvent(job.job_id,state,at.toISOString(),{message:cancel?'Expired cancelled preparation settled':requeue?'Expired preparation lease requeued':'Preparation attempts exhausted; inspect task result'},true);
+      // Preparation has never published author state. Job attention is sufficient;
+      // do not invent a project transaction or latch a healthy project into attention.
+      count++;
+    });return count;
+  }
+  preparedLeaseAttempt(jobId:string,principalId:string):number|null {
+    const fact=this.readPrepared(jobId,principalId);if(!fact)return null;
+    const row=this.#db.prepare('SELECT lease_attempt FROM created_task_prepared WHERE job_id=?').get(jobId);
+    if(!row||!Number.isSafeInteger(row.lease_attempt)||Number(row.lease_attempt)<1)fail('CAPABILITY_UNAVAILABLE','Prepared lease binding differs');return Number(row.lease_attempt);
+  }
+  receipt(jobId:string,principalId:string):JobReceipt {
+    const task=this.read(jobId,principalId),job=this.#job(task);
+    return validateAgentDefinition<JobReceipt>('JobReceipt',{...task.accepted,state:job.state,attempt:job.attempt,next_actions:job.state==='succeeded'?['review_prepared_source']:['queued','running','cancel_requested'].includes(job.state)?['poll_job']:['inspect_task_result']});
+  }
   readPrepared(jobId:string,principalId:string):PreparedTaskFact|null {
     const task=this.read(jobId,principalId),row=this.#db.prepare('SELECT fact_json,fact_digest,stage_token FROM created_task_prepared WHERE job_id=?').get(jobId);
     if(!row)return null;

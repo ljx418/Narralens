@@ -1,3 +1,4 @@
+import {asHostResourceError} from '../api-error.js';
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -112,6 +113,7 @@ export class PinnedNativeDraftAssembler implements NativeDraftAssembler {
       await workspace.finish(files);
       return { format: 'narralens.staged-native-draft@1', project_id: plan.projectId, root: target, fps: { num: 30, den: 1 }, frame_count: plan.totalFrames, clip_ids: nativeClipIds, roots, files, subtitles, assets, plan_digest: plan.digest, subtitle_timing_basis: 'storyboard_plan' };
     } catch (error) {
+      const resource=asHostResourceError(error);if(resource)throw resource;
       if (error instanceof NativeDraftError) throw error;
       if (signal?.aborted) throw new NativeDraftError('DRAFT_CANCELLED', 'Native draft preparation cancelled');
       throw new NativeDraftError('DRAFT_IO_FAILED', 'Native draft preparation could not complete');

@@ -38,6 +38,16 @@ export class CreatedTaskGate {
    guardExecution(request.execution,{kind:'action',action:request.kind==='assemble_draft'?'clip.prepare':'snapshot.render',stage_id:request.execution.step_id},actual);
   });
  };
+ /** Worker checks actual persisted attempt; no prospective dispatch exception here. */
+ assertWorker(rows:TaskTransactionDb,task:{request:TaskPrepare;principal_id:string;job_id:string},now:Date):void {
+  this.repository.joinTaskTransaction(rows,tx=>{
+   this.authority.assertOwner(task.request.project_id,task.principal_id);
+   this.assertCurrent(tx,rows,task.request,task.principal_id);
+   const e=task.request.execution,step=tx.get('step_attempt',{project_id:task.request.project_id,run_id:e.run_id,plan_version:1,step_id:e.step_id,attempt:e.attempt});
+   if(!step||step.job_id!==task.job_id)throw new ProductError('RUN_PLAN_STALE','The worker does not own the durable step job');
+   guardExecution(e,{kind:'action',action:task.request.kind==='assemble_draft'?'clip.prepare':'snapshot.render',stage_id:e.step_id},readGuardFacts(tx,task.request.project_id,e,task.principal_id,Math.floor(now.getTime()/1000)));
+  });
+ }
  private assertCurrent(tx:ProductTransaction,rows:TaskTransactionDb,request:TaskPrepare,principal:string):void {
   const project=request.project_id,current=this.revisions.activeCommit(project);
   if(!current||current.revision!==request.base_revision||current.source_digest!==request.source_digest||this.revisions.recoveryGate(project,0))throw new ProductError('REVISION_CONFLICT','The committed project base is unavailable or changed');

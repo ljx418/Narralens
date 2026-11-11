@@ -1,0 +1,107 @@
+{
+  "format": "narralens.a-relaunch-source-map@1",
+  "source_root": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+  "head": "838ba5f2c8500f0103f56dbe51264ea9f70086fc",
+  "overlay_manifest": "baseline-observed.json",
+  "contract_observation": [
+    {
+      "path": "contracts/agent-driven-a.schema.json",
+      "sha256": "088a451e9646199618261a6cc95a84e3767dbf4cc87004f3e5995dda86b60964",
+      "matches_original_freeze": true
+    },
+    {
+      "path": "contracts/agent-driven-a.registry.json",
+      "sha256": "05f29d947ec65398fee37851a583afc781adc87d6b7d382b1da45eb46f80dc4f",
+      "matches_original_freeze": true
+    },
+    {
+      "path": "src/contracts/agent-driven-types.ts",
+      "sha256": "54356697802c0bf048e5cbcde1f54eb33713d4fe58943b346406804011cb3644",
+      "matches_original_freeze": true
+    },
+    {
+      "path": "src/contracts/agent-driven-validator.ts",
+      "sha256": "f11a68bad982b7914e73f396ce48e99195ffc8fa88e842f137ffabf31900ea73",
+      "matches_original_freeze": true
+    }
+  ],
+  "source_files": [
+    {
+      "path": "src/host/agent-driven/creation-application.ts",
+      "sha256": "20247ab174bc36bfc506a49126b80aa0ec784478f498f84b16121ad9581192f9"
+    },
+    {
+      "path": "src/host/agent-driven/created-draft-processor.ts",
+      "sha256": "6727b0b64bc07cfdea0346e7f885d0ffcbd74832a66f939056735c66872eeef5"
+    },
+    {
+      "path": "src/host/agent-driven/prepared-draft-verifier.ts",
+      "sha256": "ffefbd4169dfd07930723e2606997845fc1bc4a1aa9d0f6b60b7bfd6eb5276db"
+    },
+    {
+      "path": "src/host/agent-driven/created-task-store.ts",
+      "sha256": "d7a4734cc9ed5924b7088a4cfaebecdd2ff202c373a9621c21078908f10e7b14"
+    },
+    {
+      "path": "src/host/agent-driven/created-task-worker.ts",
+      "sha256": "41a7658520d68a90be976690a9c27311f4be47a4a58776686e950ce3a563d4c4"
+    },
+    {
+      "path": "src/host/agent-driven/created-task-gate.ts",
+      "sha256": "1a65d8f3e9950847decdea2478a2d8542bb33d5018119282c18144c2694a8860"
+    },
+    {
+      "path": "src/host/agent-driven/project-context-service.ts",
+      "sha256": "56f55e16646b7e3cb5847719251defd8f58f4da055611e958240727822433687"
+    },
+    {
+      "path": "src/host/agent-driven/committed-snapshot-authority.ts",
+      "sha256": "91fd1e8b517bfbcf4dcc385d3b243df3e945b48f8fec27ea7bee71e80fb1d0aa"
+    },
+    {
+      "path": "src/host/agent-driven/local-asset-registry.ts",
+      "sha256": "84ce639583427de6adfbf4dab892b9a77fd888de1c5f005d824d22bc3aca2e92"
+    },
+    {
+      "path": "src/host/creative/fixed-workflow-service.ts",
+      "sha256": "affb339613036d4b7a6572d63247f53754725a98488ae671c76b7317995aaf7e"
+    },
+    {
+      "path": "src/host/creative/product-facts.ts",
+      "sha256": "de93e00c5478c17a20af4bb2ed1dafd654faa794b4b28d61e65a866df7913a64"
+    },
+    {
+      "path": "src/host/creative/product-repository.ts",
+      "sha256": "f071a02f1ed691e70a7f7cc774c6f4b5948c088e4a8411491fb51adb7affc3b7"
+    },
+    {
+      "path": "src/host/projects/project-coordinator.ts",
+      "sha256": "36a996d700f7009bc08f9aaafe489081058033fe8adbf2ae20019c8568143e02"
+    },
+    {
+      "path": "src/host/projects/project-creation-store.ts",
+      "sha256": "39dc98931ebde7efb9e2f690780b735a54522d8856a7c57efbacf78b2fe0b4db"
+    },
+    {
+      "path": "src/host/render/render-snapshot.ts",
+      "sha256": "cb5d187e5d7b3493259d68739992001b2f19aecaea6aeff4fd8064b6d8627e46"
+    },
+    {
+      "path": "src/host/render/native-draft-assembler.ts",
+      "sha256": "1b8a6bc403053091e74a3357815b35fddc3d9fb71aa5e8448782f66feb58877e"
+    },
+    {
+      "path": "src/host/render/ports.ts",
+      "sha256": "06ab9bea87df660e7e2297886b259a0d90d8561a6b01199f7bd16265f1ecee6a"
+    },
+    {
+      "path": "src/host/server.ts",
+      "sha256": "f1b9029158730bd24967361f4cd677b1d37c8c9474c1b0af7049e9ca5dd5025d"
+    },
+    {
+      "path": "package.json",
+      "sha256": "edace26fdfa5a9808f2706fe15ab3935d0512d08f765d4cffec268eb7e783263"
+    }
+  ],
+  "business_validation": "NOT_RUN_IN_THIS_PREPARATION_ROUND"
+}
