@@ -1,0 +1,25 @@
+=== pre-run owned process/listener state ===
+recorded_at_utc=2026-11-11T14:31:04Z
+(no vitest/narralens/ffmpeg/ffprobe process running)
+--- listening sockets owned by this user ---
+State  Recv-Q Send-Q  Local Address:Port  Peer Address:PortProcess                                   
+LISTEN 0      4096       127.0.0.54:53         0.0.0.0:*                                             
+LISTEN 0      128         127.0.0.1:45061      0.0.0.0:*    users:(("codex",pid=632068,fd=36))       
+LISTEN 0      128         127.0.0.1:45189      0.0.0.0:*    users:(("codex",pid=648753,fd=36))       
+LISTEN 0      1000   10.255.255.254:53         0.0.0.0:*                                             
+LISTEN 0      128         127.0.0.1:46197      0.0.0.0:*    users:(("codex",pid=39626,fd=42))        
+LISTEN 0      511         127.0.0.1:46231      0.0.0.0:*    users:(("node",pid=650,fd=22))           
+LISTEN 0      128         127.0.0.1:46583      0.0.0.0:*    users:(("codex",pid=32024,fd=42))        
+LISTEN 0      511         127.0.0.1:18792      0.0.0.0:*    users:(("openclaw-gatewa",pid=387,fd=28))
+LISTEN 0      511         127.0.0.1:18791      0.0.0.0:*    users:(("openclaw-gatewa",pid=387,fd=27))
+LISTEN 0      511         127.0.0.1:18789      0.0.0.0:*    users:(("openclaw-gatewa",pid=387,fd=23))
+LISTEN 0      4096    127.0.0.53%lo:53         0.0.0.0:*                                             
+LISTEN 0      128         127.0.0.1:44647      0.0.0.0:*    users:(("codex",pid=23127,fd=42))        
+LISTEN 0      128         127.0.0.1:44645      0.0.0.0:*    users:(("codex",pid=725764,fd=36))       
+LISTEN 0      128         127.0.0.1:44677      0.0.0.0:*    users:(("codex",pid=226430,fd=36))       
+LISTEN 0      128         127.0.0.1:44701      0.0.0.0:*    users:(("codex",pid=725871,fd=36))       
+LISTEN 0      128         127.0.0.1:44723      0.0.0.0:*    users:(("codex",pid=725762,fd=36))       
+LISTEN 0      128         127.0.0.1:44739      0.0.0.0:*    users:(("codex",pid=196221,fd=36))       
+LISTEN 0      128         127.0.0.1:44853      0.0.0.0:*    users:(("codex",pid=1576,fd=37))         
+LISTEN 0      511         127.0.0.1:3080       0.0.0.0:*    users:(("node",pid=386,fd=28))           
+LISTEN 0      511             [::1]:18789         [::]:*    users:(("openclaw-gatewa",pid=387,fd=24))

@@ -216,6 +216,57 @@ interface BuiltRequest {
   readonly body: string | undefined;
 }
 
+/** One addressable Host endpoint. The frozen routes and the reviewed adjunct
+ * transports share this shape, so they also share the credential, the endpoint policy,
+ * the redirect refusal and the bounded response read. */
+interface EndpointSpec {
+  readonly id: string;
+  readonly method: "GET" | "POST";
+  readonly path: string;
+  readonly bindings: Readonly<Record<string, string>>;
+  readonly output: string;
+  readonly validateInput?: (input: unknown) => void;
+  readonly validateOutput?: (payload: unknown) => unknown;
+}
+
+function buildEndpointRequest(
+  spec: EndpointSpec,
+  input: unknown,
+  baseUrl: string,
+): BuiltRequest {
+  const fields = isRecord(input) ? input : {};
+  let path = spec.path;
+  const consumed = new Set<string>();
+  for (const [placeholder, field] of Object.entries(spec.bindings)) {
+    const value = readField(fields, field);
+    if (typeof value !== "string" || value.length === 0) {
+      throw new HostCallError({
+        schema_version: "agent.v1",
+        correlation_id: "unknown",
+        code: "INVALID_REQUEST",
+        http_status: 400,
+        message: `The route ${spec.id} requires ${field}.`,
+        retryable: false,
+        next_actions: ["fix_request_payload"],
+      });
+    }
+    consumed.add(rootField(field));
+    path = path.replace(`:${placeholder}`, encodeURIComponent(value));
+  }
+  const base = baseUrl.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl;
+  if (spec.method === "GET") {
+    const query = new URLSearchParams();
+    for (const [key, value] of Object.entries(fields)) {
+      if (consumed.has(key)) continue;
+      if (value === null || value === undefined) continue;
+      query.set(key, typeof value === "string" ? value : JSON.stringify(value));
+    }
+    const suffix = query.toString();
+    return { url: `${base}${path}${suffix.length > 0 ? `?${suffix}` : ""}`, body: undefined };
+  }
+  return { url: `${base}${path}`, body: JSON.stringify(input ?? {}) };
+}
+
 /**
  * Fill the path placeholders and decide what is left over.
  *
@@ -227,38 +278,13 @@ export function buildRequest(
   input: unknown,
   baseUrl: string,
 ): BuiltRequest {
-  const bindings = ROUTE_PATH_BINDINGS[route.id] ?? {};
-  const fields = isRecord(input) ? input : {};
-  let path = route.path;
-  const consumed = new Set<string>();
-  for (const [placeholder, field] of Object.entries(bindings)) {
-    const value = readField(fields, field);
-    if (typeof value !== "string" || value.length === 0) {
-      throw new HostCallError({
-        schema_version: "agent.v1",
-        correlation_id: "unknown",
-        code: "INVALID_REQUEST",
-        http_status: 400,
-        message: `The route ${route.id} requires ${field}.`,
-        retryable: false,
-        next_actions: ["fix_request_payload"],
-      });
-    }
-    consumed.add(rootField(field));
-    path = path.replace(`:${placeholder}`, encodeURIComponent(value));
-  }
-  const base = baseUrl.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl;
-  if (route.method === "GET") {
-    const query = new URLSearchParams();
-    for (const [key, value] of Object.entries(fields)) {
-      if (consumed.has(key)) continue;
-      if (value === null || value === undefined) continue;
-      query.set(key, typeof value === "string" ? value : JSON.stringify(value));
-    }
-    const suffix = query.toString();
-    return { url: `${base}${path}${suffix.length > 0 ? `?${suffix}` : ""}`, body: undefined };
-  }
-  return { url: `${base}${path}`, body: JSON.stringify(input ?? {}) };
+  return buildEndpointRequest({
+    id: route.id,
+    method: route.method,
+    path: route.path,
+    bindings: ROUTE_PATH_BINDINGS[route.id] ?? {},
+    output: route.output,
+  }, input, baseUrl);
 }
 
 /**
@@ -317,7 +343,14 @@ export async function readBoundedBody(response: Response, maxBytes: number): Pro
  * without an implementation here fails the route-count check in `registry-view.ts`
  * rather than being silently absent at runtime.
  */
-export function createHostApplicationPorts(options: HostClientOptions): ApplicationPorts {
+/**
+ * The one client that talks to the Host. The frozen routes and the reviewed adjunct
+ * transports share it, so they also share the endpoint policy, the credential, the
+ * redirect refusal, the timeout and the bounded response read.
+ */
+function createEndpointCaller(options: HostClientOptions): {
+  readonly callEndpoint: (spec: EndpointSpec, input: unknown) => Promise<unknown>;
+} {
   const baseUrl = assertEndpointPolicy(options);
   const fetchImpl = options.fetchImpl ?? globalThis.fetch;
   const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
@@ -326,25 +359,25 @@ export function createHostApplicationPorts(options: HostClientOptions): Applicat
   assertBoundedOption(maxResponseBytes, "maximum response size");
   const correlationId = options.correlationId ?? (() => randomUUID());
 
-  async function callRoute(route: AgentRouteView, input: unknown): Promise<unknown> {
+  async function callEndpoint(spec: EndpointSpec, input: unknown): Promise<unknown> {
     const id = correlationId();
-    const isWrite = route.method === "POST";
+    const isWrite = spec.method === "POST";
 
     // The input is validated before anything is sent: a payload the contract does
     // not describe must never reach the Host.
     try {
-      validateAgentRouteInput(route.id, input);
+      spec.validateInput?.(input);
     } catch (error) {
       const detail = error instanceof Error ? error.message : "the payload was rejected";
       throw new HostCallError(errorFromInvalidRequest(
-        `The input for ${route.id} does not match the contract (${detail}).`,
+        `The input for ${spec.id} does not match the contract (${detail}).`,
         id,
       ));
     }
 
     let request: BuiltRequest;
     try {
-      request = buildRequest(route, input, baseUrl);
+      request = buildEndpointRequest(spec, input, baseUrl);
     } catch (error) {
       if (error instanceof HostCallError) {
         throw new HostCallError({ ...error.envelope, correlation_id: id });
@@ -367,7 +400,7 @@ export function createHostApplicationPorts(options: HostClientOptions): Applicat
     let response: Response;
     try {
       response = await fetchImpl(request.url, {
-        method: route.method,
+        method: spec.method,
         headers,
         ...(request.body === undefined ? {} : { body: request.body }),
         signal: AbortSignal.timeout(timeoutMs),
@@ -440,14 +473,14 @@ export function createHostApplicationPorts(options: HostClientOptions): Applicat
     }
 
     try {
-      return validateAgentRouteOutput(route.id, payload);
+      return spec.validateOutput ? spec.validateOutput(payload) : payload;
     } catch {
       // The Host answered with something that is not the contract's output for this
       // route. For a write, the request may still have been applied, so the outcome
       // is unknown rather than failed.
       throw new HostCallError(isWrite
         ? errorFromUnknownOutcome(
-          `The host answered ${route.id} with something that is not the ${route.output} contract, so the write's outcome is unknown.`,
+          `The host answered ${spec.id} with something that is not the ${spec.output} contract, so the write's outcome is unknown.`,
           id,
         )
         : {
@@ -455,16 +488,63 @@ export function createHostApplicationPorts(options: HostClientOptions): Applicat
           correlation_id: id,
           code: "INTERNAL_ERROR",
           http_status: 500,
-          message: `The host response for ${route.id} did not match the ${route.output} contract.`,
+          message: `The host response for ${spec.id} did not match the ${spec.output} contract.`,
           retryable: false,
           next_actions: ["check_host_logs"],
         });
     }
   }
 
+  return { callEndpoint };
+}
+
+/** The frozen contract's routes, addressed over the same client. */
+export function createHostApplicationPorts(options: HostClientOptions): ApplicationPorts {
+  const { callEndpoint } = createEndpointCaller(options);
   const ports: Record<string, unknown> = {};
   for (const route of AGENT_ROUTES) {
-    ports[route.id] = (input: unknown) => callRoute(route, input);
+    ports[route.id] = (input: unknown) => callEndpoint({
+      id: route.id,
+      method: route.method,
+      path: route.path,
+      bindings: ROUTE_PATH_BINDINGS[route.id] ?? {},
+      output: route.output,
+      validateInput: (value: unknown) => { validateAgentRouteInput(route.id, value); },
+      validateOutput: (value: unknown) => validateAgentRouteOutput(route.id, value),
+    }, input);
   }
   return ports as unknown as ApplicationPorts;
+}
+
+/** One reviewed adjunct route. It is not in the frozen registry, so it carries its own
+ * path, its own bindings and its own validators. */
+export interface HostAdjunctRoute {
+  readonly id: string;
+  readonly method: "GET" | "POST";
+  readonly path: string;
+  readonly bindings?: Readonly<Record<string, string>>;
+  readonly output: string;
+  readonly validateInput?: (input: unknown) => void;
+  readonly validateOutput?: (payload: unknown) => unknown;
+}
+
+/** The adjunct transports, addressed over the same client and the same credentials. */
+export function createHostAdjunctPorts(
+  options: HostClientOptions,
+  routes: readonly HostAdjunctRoute[],
+): Record<string, (input: unknown) => Promise<unknown>> {
+  const { callEndpoint } = createEndpointCaller(options);
+  const ports: Record<string, (input: unknown) => Promise<unknown>> = {};
+  for (const route of routes) {
+    ports[route.id] = (input: unknown) => callEndpoint({
+      id: route.id,
+      method: route.method,
+      path: route.path,
+      bindings: route.bindings ?? {},
+      output: route.output,
+      ...(route.validateInput ? { validateInput: route.validateInput } : {}),
+      ...(route.validateOutput ? { validateOutput: route.validateOutput } : {}),
+    }, input);
+  }
+  return ports;
 }

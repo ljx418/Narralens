@@ -1,0 +1,28 @@
+# BRIDGE safe boundary before the MAIN cca95020 integration
+recorded_at_utc=2026-11-11T14:41:55Z
+head=69a26e57fb73a09286baca01627ece4c469ab545
+branch=agent-driven/a-r1-bridge
+index_staged=
+3a8bebdc321d545d34b7df803c88ae7e321a9343942575542fc80c7e16f904c2  src/host/agent-driven/created-task-store.ts
+79f141851e449a6e5dfc2139c78a511f62c0f99a6843eb58649c86627d91692f  src/host/agent-driven/created-task-worker.ts
+42798b0ff021eaf9bd9d20803ca066a5b9eb2068df7185cbba4fe1fbef08491c  src/host/agent-driven/creation-application.ts
+2d8e087ae0f57c72db418433ef7c6237e67d97d2e54cd4f2272d32e0eb141823  src/host/agent-driven/local-asset-registry.ts
+8c08130d23e0b80611856dc94ded585aa2677a480604f22243bc8e3823f45b31  src/host/projects/project-creation-store.ts
+5c59a20ff312f4760b1b6f6a58611e6358effc37280a2ce626c18da56f81a2a4  src/mcp/host-application-ports.ts
+daa0119d8669f55d880a8223e60a2b9a7b0aa61106b090a0da54ef0eb3d16718  src/mcp/mcp-server.ts
+1fa0f5665c774ce18be9695ea163a25d654af7742c6ad3cc2884a04103ffb173  src/mcp/stdio-main.ts
+e769bcc9d52c103a8385d9013ef791ec45388504a18aba7adaf118cf1f123099  tests/agent-driven/integration/created-task-store.test.ts
+9cc01611a7b59c5c7b10566866277e03a7188b1573ec86be15df5ed02a951e2a  tests/agent-driven/integration/created-task-worker.test.ts
+145568f5c8b860288e60d0604ec76d362777fa603fd6556297dfa114f0d13ad7  tests/agent-driven/integration/host-close-lifecycle.test.ts
+053914b00b4b409eea06dc863be7abd97fac6f0a21756388e8ecf891081510b7  contracts/agent-local-assets-v1.registry.json
+80dfa4918118bf7b57c65e52142dc95ebed69b6fb5951dead2f8a18f01ec0d6a  contracts/agent-local-assets-v1.schema.json
+1d372a55ac1c6b5db772377672b6675394f3b42d0ae62f038b71259fb300235e  contracts/agent-workbench-ui-v1.registry.json
+9bf605c786e2b6d1a797ab7ec8c450810a91ece87039eb28b7880a1d46f54076  src/contracts/agent-local-assets-types.ts
+73d24cbed71989fb26f14a5464c06da615e835991938fa0c8ac512c32708d7a0  src/contracts/agent-local-assets-validator.ts
+7be972da9ec263b22a6f74bd5d25466d404f8d3d9227db343a3b1c95b86297ec  src/host/agent-driven/asset-inventory.ts
+571da409fd742705d1293cab81312a24766410679e223c354590724f98fa749a  src/host/agent-driven/created-run-authority.ts
+90ac6c61b3fc87b0e34c5234564e97b9bc86a759df5178e0ac1d101b23e3c48c  src/host/agent-driven/created-run-facts.ts
+4203e55493c330ea537b11601cd48eb736a6bd29915565a9c4f5cae046288493  src/host/agent-driven/created-task-application.ts
+32e9e8efb17dd1d6801c997b691e65bf79348a3d21233b89b4452d6a36f4ddc2  src/host/agent-driven/local-asset-http.ts
+20dbf98190b75b1c2600979780aa7986c5c82062b65565f6da113c1384b483ca  src/mcp/asset-inventory-resource.ts
+7a8396a2f8ca3dea8237fb2c51beb6deceba3d299355b708de8b00ab160027a2  tests/agent-driven/integration/local-assets-transport.test.ts

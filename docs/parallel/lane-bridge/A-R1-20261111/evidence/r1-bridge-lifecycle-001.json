@@ -1,0 +1,47 @@
+{
+  "format": "narralens.bridge-evidence@1",
+  "ticket": "A-R1-BRIDGE",
+  "case": "R0-M01 same-DB graceful shutdown / reopen / resume",
+  "slot": "R1-BRIDGE-LIFECYCLE-001",
+  "scope": "real Host + real SQLite + real ffmpeg media + real pinned OpenFilm vendor + real CreatedDraftTaskProcessor + real PreparedDraftVerifier + real cp_a0 rows; NOT a fixture processor",
+  "command": {
+    "argv": ["corepack","pnpm","exec","vitest","run","tests/agent-driven/integration/host-close-lifecycle.test.ts","--maxWorkers=1","--minWorkers=1"],
+    "cwd": "/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE",
+    "start_utc": "2026-11-11T14:31:13Z",
+    "end_utc": "2026-11-11T14:31:29Z",
+    "duration_seconds": 16,
+    "exit_code": 0
+  },
+  "frozen_inputs": {
+    "head": "69a26e57fb73a09286baca01627ece4c469ab545",
+    "branch": "agent-driven/a-r1-bridge",
+    "manifest": "docs/parallel/lane-bridge/A-R1-20261111/logs/r1-bridge-lifecycle-001-frozen-inputs.txt",
+    "manifest_sha256": "a0e73ddd46108c77a1767fedfcd296cbdccf432404ffd5397bf865d69dd89f1d"
+  },
+  "logs": {
+    "run": {"path": "docs/parallel/lane-bridge/A-R1-20261111/logs/r1-bridge-lifecycle-001-run.txt", "sha256": "488fab8d88b5d3b337f52910052de927b98d95db60585e40c3251ef6fe367072"},
+    "pre_run_state": {"path": "docs/parallel/lane-bridge/A-R1-20261111/logs/r1-bridge-lifecycle-001-pre-run-state.txt", "sha256": "4ccf26132e76c5cd99d3eb932c3b2559fddce5891794603fa14b643f56f69485"},
+    "post_run_state": {"path": "docs/parallel/lane-bridge/A-R1-20261111/logs/r1-bridge-lifecycle-001-post-run-state.txt", "sha256": "fd59b05984ec642737db94629c046f594eac079989cb42df5823bf984a566209"}
+  },
+  "result": {"test_files": 1, "tests_passed": 3, "tests_failed": 0, "not_run": 0},
+  "cases": [
+    {"id": "existing:simultaneous-host-close", "state": "PASS", "note": "pre-existing lifecycle case, unchanged behaviour"},
+    {"id": "R0-M01:graceful-close-release", "state": "PASS", "note": "real processor reached before_prepare with a running cp_a0 step; worker.close() released the live lease to queued AND returned the step/checkpoint to pending in ONE same-DB transaction; exactly one extra job event (queued,running,queued); author bytes, active commit and source digest unchanged"},
+    {"id": "R0-M01:reopen-durable-facts", "state": "PASS", "note": "the same isolated database was closed and reopened; the job stayed queued with a null lease and the durable step attempt stayed pending and bound to the same job"},
+    {"id": "R0-M01:recovery-no-double-settle", "state": "PASS", "note": "the dedicated recovery excluded the queued task job and settled nothing; the job was not settled twice"},
+    {"id": "R0-M01:resume-same-job", "state": "PASS", "note": "the reopened worker resumed the ORIGINAL job; the job succeeded, the lease attempt advanced 1->2 while the execution attempt stayed 1, the prepared fact is bound to lease attempt 2, result_ref stayed null and the author/revision/source stayed unchanged"},
+    {"id": "R0-M01:cancellation-counterexample", "state": "PASS", "note": "a user cancellation during the same shutdown converged to cancelled through the real processor failure path, was not requeued, published no prepared fact and left the author unchanged"}
+  ],
+  "cleanup": {
+    "owned_test_processes_after_run": 0,
+    "owned_media_processes_after_run": 0,
+    "new_listening_sockets_after_run": 0,
+    "leftover_fixture_roots": 0,
+    "note": "the only matching processes after the run were the three pre-existing Codex lane agents; the socket list is identical to the pre-run state"
+  },
+  "not_run": [
+    "any other Host, ffmpeg, Chromium, build, full or large-fixture command: the grant covered exactly this one command",
+    "the local-asset transport import path that needs a real media probe (the file exists but its import case is still to be added and run under a future slot)"
+  ],
+  "claims": "This is a module/case-level self-validation of the released R1 scope. It is NOT an independent review, NOT a product acceptance and NOT a human acceptance."
+}

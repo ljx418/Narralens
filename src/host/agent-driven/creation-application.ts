@@ -14,6 +14,15 @@ import {CreationSourceVerifier} from '../projects/creation-source-verifier.js';
 import {ProductSqliteRepository} from './product-sqlite-repository.js';
 import {ScopedAgentAuth,type AgentPrincipal} from './scoped-auth.js';
 import {ApplicationDispatcher,creativeHandlers} from './application-dispatcher.js';
+import {AssetInventory} from './asset-inventory.js';
+import {LocalAssetHttp} from './local-asset-http.js';
+import {CreatedRunFacts} from './created-run-facts.js';
+import {CreatedRunAuthority} from './created-run-authority.js';
+import {CreatedTaskApplication} from './created-task-application.js';
+import {CreatedTaskGate} from './created-task-gate.js';
+import {CreatedDraftTaskProcessor} from './created-draft-processor.js';
+import {PreparedDraftVerifier} from './prepared-draft-verifier.js';
+import {PersistentJobStore} from '../persistent-job-store.js';
 import {FixedWorkflowService} from '../creative/fixed-workflow-service.js';
 import {createTrustedCallerContext,ProductError} from '../creative/trusted-context.js';
 import {CreativeProjectAuthority} from './creative-project-authority.js';
@@ -36,9 +45,12 @@ export class CreationApplication implements AgentHostApplication {
  readonly nativeWorkspaces:CreatedNativeWorkspaceService;
  readonly createdWorkbench:CreatedWorkbenchService;
  readonly #workbenchRead:CreatedWorkbenchHttp;
+ readonly #inventory:AssetInventory|null;
+ readonly #localAssetsHttp:LocalAssetHttp|null;
+ #tasks:CreatedTaskApplication|null=null;
  #closing:Promise<void>|undefined;
  readonly worker:ProjectCreationService;
- constructor(host:NarralensHost,options:{createdRoot:string;vendorRoot:string;nativeWorkspaceRoot?:string;worker?:Pick<CreationServiceDeps,'leaseMs'|'pollMs'|'boundary'>;instance?:()=>Instance;health?:()=>HealthRead;workbench?:{principalId:string;operatorSecret:string};localAssets?:Omit<LocalAssetRegistryOptions,'projectsRoot'|'snapshotsRoot'>}){
+ constructor(host:NarralensHost,options:{createdRoot:string;vendorRoot:string;nativeWorkspaceRoot?:string;taskRoot?:string;nativeStage?:{width:number;height:number};worker?:Pick<CreationServiceDeps,'leaseMs'|'pollMs'|'boundary'>;instance?:()=>Instance;health?:()=>HealthRead;workbench?:{principalId:string;operatorSecret:string};localAssets?:Omit<LocalAssetRegistryOptions,'projectsRoot'|'snapshotsRoot'>}){
   const cookieName=options.instance?'narralens_a_'+createHash('sha256').update(options.instance().instance_id).digest('hex').slice(0,24):'narralens_a_session';
   this.auth=new ScopedAgentAuth(()=>host.origin,Date.now,cookieName,{requireUiReadProof:!!options.workbench});
   this.workbenchSessions=options.workbench?new WorkbenchSessionService(this.auth,()=>host.origin,options.workbench.principalId,options.workbench.operatorSecret):null;
@@ -61,10 +73,32 @@ export class CreationApplication implements AgentHostApplication {
    return validateNativeEntry({format:'narralens.native-entry@1.0',project_id:projectId,revision:prepared.revision,snapshot_id:prepared.snapshot_id,native_state:'unconfirmed',...entry});
   });
   this.localAssets=options.localAssets?new LocalAssetRegistry(host.revisions,this.creation,{...options.localAssets,projectsRoot:options.createdRoot,snapshotsRoot:host.snapshots.projectRoot('')}):null;
+  // The adjunct local-material transport. It exists only when the Host configured a
+  // source root; without one there is nothing to list, to register or to read.
+  this.#inventory=this.localAssets?new AssetInventory({registry:this.localAssets}):null;
+  this.#localAssetsHttp=this.#inventory?new LocalAssetHttp(this.auth,()=>host.origin,this.#inventory):null;
   this.worker=new ProjectCreationService({store:this.creation,coordinator:host.coordinator,snapshots:host.snapshots,verifier,createdRoot:options.createdRoot,...options.worker});
   const authority=new CreativeProjectAuthority(this.creation);
   const repository=new ProductSqliteRepository(host.revisions);
-  const workflow=new FixedWorkflowService({repository});
+  // The facts are the real ones: the active commit, the control revision, the local
+  // material closure and the registered capability manifest. A missing capability is
+  // not a capability, so a run stays unavailable until MAIN registers the producers.
+  const facts=new CreatedRunFacts({revisions:host.revisions,creation:this.creation,...(this.#inventory?{inventory:this.#inventory}:{})});
+  // The trusted confirmation is bound to a real trusted UI session. The guard re-checks
+  // the STORED session lifetime; the probe's own expiry field is not part of that check.
+  const adoption=new CreatedRunAuthority({sessionGuard:({principal_id,session_ref})=>this.auth.isPrincipalActive({principal_id,channel:'trusted_ui',session_ref,expires_at:0})});
+  const workflow=new FixedWorkflowService({repository,facts,adoption});
+  // The created-task chain is assembled over the ORIGINAL database. It is activated
+  // only with the local material registry, because the real preparation proof needs
+  // the registered bytes; without them the chain stays unavailable.
+  const taskRoot=options.taskRoot??options.createdRoot+'-tasks';
+  const stage=options.nativeStage??{width:1280,height:720};
+  if(this.localAssets){
+   const gate=new CreatedTaskGate(host.revisions,repository,authority);
+   const verifier=new PreparedDraftVerifier(options.vendorRoot,{stageDomainRoot:taskRoot,blobPath:asset=>this.localAssets!.blobPathForFact(asset)});
+   const jobs=host.jobs instanceof PersistentJobStore?host.jobs:new PersistentJobStore(host.revisions);
+   this.#tasks=new CreatedTaskApplication({revisions:host.revisions,repository,workflow,authority,jobs,worker:{pollMs:options.worker?.pollMs??250},createProcessor:(store)=>new CreatedDraftTaskProcessor(host,store,gate,repository,workflow,authority,this.localAssets!,verifier,{root:taskRoot,vendorRoot:options.vendorRoot,protectedRoots:[options.createdRoot,host.snapshots.projectRoot(''),options.vendorRoot],width:stage.width,height:stage.height})});
+  }
   const context=new ProjectContextService(host,this.creation,authority,workflow,undefined,options.instance?()=>options.instance!().generation:undefined);
   const creative=creativeHandlers(new CreativeService({repository,artifactAuthority:authority.assertArtifact,contentAuthority:authority.assertContent}));
   const caller=(principal:import('./scoped-auth.js').AgentPrincipal)=>{
@@ -87,18 +121,47 @@ export class CreationApplication implements AgentHostApplication {
     if(!this.creation.ownsProject(input.project_id,principal.principal_id))throw new AgentRouteError('NOT_FOUND');
     const job=host.revisions.readJob(input.job_id);
     if(!job||job.project_id!==input.project_id)throw new AgentRouteError('NOT_FOUND');
+    // A created task and a created project share ONE receipt resolver, so a task job
+    // and a creation job are read through the same facts.
+    if(this.#tasks){
+     const taskReceipt=this.#tasks.tasks.taskReceipt(input.job_id,principal.principal_id);
+     if(taskReceipt&&taskReceipt.project_id===input.project_id)return taskReceipt;
+    }
     if(this.creation.forProject(input.project_id)?.job_id!==input.job_id)throw new AgentRouteError('CAPABILITY_UNAVAILABLE');
     const receipt=this.creation.receiptForJob(input.job_id,principal.principal_id);
     if(!receipt||receipt.project_id!==input.project_id)throw new AgentRouteError('NOT_FOUND');
     return receipt;
    },
+   'task.prepare':async(input,principal)=>{
+    if(principal.channel==='native_bridge')throw new AgentRouteError('ORIGIN_REJECTED');
+    if(!this.#tasks)throw new AgentRouteError('CAPABILITY_UNAVAILABLE');
+    // Only the kind that has a real executor is admitted. The other kind stays
+    // unavailable rather than occupying a job with nothing behind it.
+    if(input.kind!=='assemble_draft')throw new AgentRouteError('CAPABILITY_UNAVAILABLE');
+    if(!this.creation.ownsProject(input.project_id,principal.principal_id))throw new AgentRouteError('NOT_FOUND');
+    const reserved=this.#tasks.tasks.reserve(input,principal.principal_id,{job_kind:'snapshot_publish',max_attempts:3});
+    return reserved.task.accepted;
+   },
+   'job.cancel':async(input,principal)=>{
+    if(principal.channel==='native_bridge')throw new AgentRouteError('ORIGIN_REJECTED');
+    if(!this.#tasks)throw new AgentRouteError('CAPABILITY_UNAVAILABLE');
+    if(!this.creation.ownsProject(input.project_id,principal.principal_id))throw new AgentRouteError('NOT_FOUND');
+    const task=this.#tasks.tasks.read(input.job_id,principal.principal_id);
+    if(task.request.project_id!==input.project_id)throw new AgentRouteError('NOT_FOUND');
+    // The cancellation must name the very execution binding of the reservation.
+    const execution=input.execution,e=task.request.execution;
+    if(execution.run_id!==e.run_id||execution.plan_version!==e.plan_version||execution.step_id!==e.step_id||execution.attempt!==e.attempt||execution.input_digest!==e.input_digest||execution.run_scope_digest!==e.run_scope_digest||execution.authorization_id!==e.authorization_id)throw new AgentRouteError('REVISION_CONFLICT');
+    const jobs=host.jobs instanceof PersistentJobStore?host.jobs:new PersistentJobStore(host.revisions);
+    jobs.requestCancel(input.job_id);
+    return this.#tasks.tasks.receipt(input.job_id,principal.principal_id);
+   },
   });
  }
- async handleWorkbenchSession(request:IncomingMessage,response:ServerResponse){if(await this.workbenchSessions?.handle(request,response))return true;return this.#workbenchRead.handle(request,response);}
+ async handleWorkbenchSession(request:IncomingMessage,response:ServerResponse){if(await this.workbenchSessions?.handle(request,response))return true;if(await this.#localAssetsHttp?.handle(request,response))return true;return this.#workbenchRead.handle(request,response);}
  nativeSourceRootFor(projectId:string){return this.nativeWorkspaces.rootFor(projectId).then(root=>root.value);}
  closeAfterNative(){return this.nativeWorkspaces.disposeAfterNative();}
- leaseReaperExclusions(){return this.creation.pending().map(row=>row.job_id);}
- recoverBeforeGeneric(){return this.worker.recoverBeforeGeneric();}
- start(){this.worker.start();}
- close(){this.createdWorkbench.close();this.workbenchSessions?.close();return this.#closing??=Promise.all([this.worker.close(),this.localAssets?.close(),this.nativeWorkspaces.close()]).then(()=>undefined);}
+ leaseReaperExclusions(){return [...this.creation.pending().map(row=>row.job_id),...(this.#tasks?.leaseReaperExclusions()??[])];}
+ async recoverBeforeGeneric(){await this.worker.recoverBeforeGeneric();this.#tasks?.recoverBeforeGeneric();}
+ start(){this.worker.start();this.#tasks?.start();}
+ close(){this.createdWorkbench.close();this.workbenchSessions?.close();return this.#closing??=Promise.all([this.worker.close(),this.#tasks?.close(),this.localAssets?.close(),this.nativeWorkspaces.close()]).then(()=>undefined);}
 }

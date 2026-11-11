@@ -1,0 +1,90 @@
+{
+  "format": "narralens.gateway-ui-runtime-registry@1",
+  "status": "R1_RUNTIME_REGISTERED",
+  "owner": "BRIDGE-Claude",
+  "version": "agent-workbench-ui-v1",
+  "design_source": "docs/execution/A/implementation-20261111/contracts/gateway-ui.registry.json",
+  "interface_lock": "docs/execution/A/implementation-20261111/CR-R1-001-INTERFACE-LOCK.md sections 1-8",
+  "frozen_cp_a0_files": "unchanged",
+  "counting": {
+    "frozen_host_http": 31,
+    "reviewed_adjunct_host_http": 5,
+    "additional_gateway_http": 2,
+    "note": "31 frozen Host + 5 reviewed adjunct Host + 2 additional Gateway HTTP; there is no third alias and no claim that the total exposure is unchanged."
+  },
+  "envelope": {
+    "fields": ["surface", "operation", "input"],
+    "exact": true,
+    "note": "The envelope carries exactly three fields. Unknown fields are rejected, not stripped. The input keeps every field of the original DTO and is validated by the original validator."
+  },
+  "gateway_routes": [
+    {
+      "method": "POST",
+      "path": "/narralens/api/ui/call",
+      "input": "exact {surface,operation,input}; original DTO validators reused"
+    },
+    {
+      "method": "GET",
+      "path": "/narralens/api/ui/review-media/:ref",
+      "input": "opaque ref; project comes from independent UI grant, no secret query"
+    }
+  ],
+  "surfaces": {
+    "agent.v1": {
+      "description": "The frozen agent route set. The original DTO validators, the original status/body and the original error semantics are reused unchanged.",
+      "operations": [
+        { "operation": "context.read", "availability": "R1" },
+        { "operation": "workflow.read", "availability": "R1" },
+        { "operation": "workflow.run.read", "availability": "R1" },
+        { "operation": "job.read", "availability": "R1" },
+        { "operation": "health.read", "availability": "R1" },
+        { "operation": "workflow.run.prepare", "availability": "BLOCKED_NO_PRODUCER" },
+        { "operation": "workflow.run.authorize", "availability": "BLOCKED_NO_PRODUCER" },
+        { "operation": "workflow.run.start", "availability": "BLOCKED_NO_PRODUCER" },
+        { "operation": "workflow.run.pause", "availability": "BLOCKED_NO_PRODUCER" },
+        { "operation": "workflow.run.resume", "availability": "BLOCKED_NO_PRODUCER" },
+        { "operation": "workflow.run.cancel", "availability": "BLOCKED_NO_PRODUCER" },
+        { "operation": "review.read", "availability": "BLOCKED_NO_PRODUCER" },
+        { "operation": "review.decide", "availability": "BLOCKED_NO_PRODUCER" },
+        { "operation": "job.cancel", "availability": "BLOCKED_NO_PRODUCER" },
+        { "operation": "delivery.read", "availability": "BLOCKED_NO_PRODUCER" },
+        { "operation": "change.prepare", "availability": "BLOCKED_NO_PRODUCER" },
+        { "operation": "change.approve", "availability": "BLOCKED_NO_PRODUCER" },
+        { "operation": "change.apply", "availability": "BLOCKED_NO_PRODUCER" }
+      ]
+    },
+    "local-assets.v1": {
+      "description": "The reviewed adjunct local material transport. Registration is trusted-UI only; the inventory read is owner scoped.",
+      "operations": [
+        { "operation": "local-source-files.read", "availability": "R1" },
+        { "operation": "local-assets.import", "availability": "R1" },
+        { "operation": "local-assets.read.ui", "availability": "R1" },
+        { "operation": "asset-inventory.read", "availability": "R1" }
+      ]
+    },
+    "workbench.v1": {
+      "description": "The trusted workbench surface. The project always comes from the independent UI delegate.",
+      "operations": [
+        { "operation": "native.reopen", "availability": "R1" },
+        { "operation": "review.part.describe", "availability": "BLOCKED_NO_PRODUCER" }
+      ]
+    }
+  },
+  "native_reopen": {
+    "surface": "workbench.v1",
+    "operation": "native.reopen",
+    "input": "exact empty object {}",
+    "response": "the existing validated NativeEntry, produced by the same internal native-open service the Host entry uses",
+    "note": "It re-obtains a real view entry for the current project. It adds no Host route, grants no native write authority and does not modify the author state or the version."
+  },
+  "review_part_describe": {
+    "surface": "workbench.v1",
+    "operation": "review.part.describe",
+    "input": "exact {run_id,package_id,package_version,part_kind,artifact_ref}; the Ref is validated with the frozen schema; the project comes from the delegate",
+    "response": "PreviewMediaDescriptorV1 per CR section 8, exact fields; the verified rational fps/frame_count and the sample facts are bound to receipt_digest; no private path, credential or descriptor",
+    "count": "one read-only operation on the existing added RPC alias, no third HTTP route",
+    "availability": "BLOCKED_NO_PRODUCER: the MEDIA prepared preview receipt and the prepared review media reader are not delivered yet; the consumer stays fail closed and never fabricates a descriptor."
+  },
+  "unknown_combination": "reject; an allowlist entry for a future operation is not an implemented handler and answers 503 CAPABILITY_UNAVAILABLE",
+  "authorization": "The native cookie, the native read proof, the Host/MCP bearer credential and the driver request JSON never grant UI authority. Only the independent UI cookie plus the UI CSRF proof on the correct origin do."
+}

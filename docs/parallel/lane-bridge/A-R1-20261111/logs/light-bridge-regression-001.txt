@@ -1,0 +1,39 @@
+argv=corepack pnpm exec vitest run tests/agent-driven/bridge tests/agent-driven/integration/created-task-store.test.ts tests/agent-driven/integration/created-task-worker.test.ts tests/agent-driven/product/fixed-workflow-service.test.ts tests/agent-driven/product/execution-guard.test.ts --maxWorkers=1 --minWorkers=1
+cwd=/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+class=LIGHT (no real Host, no ffmpeg/ffprobe, no Chromium, no large fixture)
+start_utc=2026-11-11T14:38:21Z
+
+ RUN  v3.2.4 /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+
+ ✓ tests/agent-driven/product/fixed-workflow-service.test.ts (31 tests) 173ms
+(node:828974) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/created-task-store.test.ts (46 tests) 504ms
+   ✓ persists immutable input and server-selected opaque token over a real close/reopen  308ms
+ ✓ tests/agent-driven/bridge/mcp-registry.test.ts (38 tests) 122ms
+ ✓ tests/agent-driven/bridge/cursor-events.test.ts (26 tests) 56ms
+ ✓ tests/agent-driven/bridge/launcher-cold.test.ts (16 tests) 21ms
+(node:829103) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/created-task-worker.test.ts (14 tests) 1241ms
+   ✓ renews the real lease during a long processor and only the current lease can settle  925ms
+ ✓ tests/agent-driven/bridge/mcp-host-client.test.ts (15 tests) 63ms
+ ✓ tests/agent-driven/bridge/mcp-stdio-client.test.ts (8 tests) 2733ms
+   ✓ A-MCP stdio façade > advertises exactly the registry's tool allowlist over a real stdio transport  395ms
+   ✓ A-MCP stdio façade > reads the concrete health resource over the real transport  335ms
+   ✓ A-MCP stdio façade > reaches the host over http and returns the contract output  349ms
+   ✓ A-MCP stdio façade > verifies the host's contract version before the first dispatch  357ms
+   ✓ A-MCP stdio façade > reports an unreachable host and recovers when the host returns  509ms
+ ✓ tests/agent-driven/product/execution-guard.test.ts (22 tests) 17ms
+ ✓ tests/agent-driven/bridge/mcp-wrapper-cleanup.test.ts (2 tests) 680ms
+   ✓ A-MCP skill bin wrapper > serves the real client through the real wrapper and leaves nothing behind  335ms
+   ✓ A-MCP skill bin wrapper > does not stop anything but its own child  344ms
+ ✓ tests/agent-driven/bridge/skill-library.test.ts (3 tests) 3ms
+
+ Test Files  11 passed (11)
+      Tests  221 passed (221)
+   Start at  22:38:21
+   Duration  8.82s (transform 363ms, setup 0ms, collect 1.62s, tests 5.61s, environment 1ms, prepare 436ms)
+
+exit_code=0
+end_utc=2026-11-11T14:38:30Z

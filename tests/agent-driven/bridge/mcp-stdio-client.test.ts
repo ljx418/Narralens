@@ -207,10 +207,15 @@ describe("A-MCP stdio façade", () => {
       expect(tools.tools.map((tool) => tool.name).sort()).toEqual(exposedToolNames().slice().sort());
       expect(tools.tools).toHaveLength(24);
 
-      // Four of the five registered resources are templates. The fifth is concrete
-      // and is listed as a resource, not as a template.
+      // Four of the five FROZEN registered resources are templates. The fifth is
+      // concrete and is listed as a resource, not as a template. The reviewed adjunct
+      // local-material resource is a template too, and it is counted SEPARATELY from
+      // the frozen ones: the frozen registry bytes are unchanged.
       const templates = await client.listResourceTemplates();
-      expect(templates.resourceTemplates).toHaveLength(4);
+      const templateUris = templates.resourceTemplates.map((template) => template.uriTemplate);
+      expect(templateUris).toHaveLength(5);
+      expect(templateUris.filter((uri) => uri !== "narralens://projects/{id}/local-assets")).toHaveLength(4);
+      expect(templateUris).toContain("narralens://projects/{id}/local-assets");
 
       const resources = await client.listResources();
       expect(resources.resources).toHaveLength(1);

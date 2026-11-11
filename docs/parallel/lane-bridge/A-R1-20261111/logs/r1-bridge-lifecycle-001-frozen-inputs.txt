@@ -1,0 +1,42 @@
+# R1-BRIDGE-LIFECYCLE-001 frozen tested inputs
+recorded_at_utc=2026-11-11T14:30:45Z
+cwd=/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+head=69a26e57fb73a09286baca01627ece4c469ab545
+branch=agent-driven/a-r1-bridge
+index_staged=
+--- sha256 of every tested source, contract and test file ---
+145568f5c8b860288e60d0604ec76d362777fa603fd6556297dfa114f0d13ad7  tests/agent-driven/integration/host-close-lifecycle.test.ts
+8c45a25d4d075334ef9c3bc727e38f8ff32725799998c4dc32dbc930459dbfec  tests/agent-driven/integration/helpers/created-project-fixture.ts
+f82435463801a5718e54434c412e8bf42f31ad122e03248e25a8632f332742b4  tests/agent-driven/product/support/fixtures.ts
+f1b9029158730bd24967361f4cd677b1d37c8c9474c1b0af7049e9ca5dd5025d  src/host/server.ts
+fea46b6310be044d2c90b6c846b07e04600da286643411a53313680230978dae  src/host/projects/revision-store.ts
+8c08130d23e0b80611856dc94ded585aa2677a480604f22243bc8e3823f45b31  src/host/projects/project-creation-store.ts
+d4d4c05f9b3ba847b7eae4526d6196f2eddb6a2b7669e5c90c2b13029be31cfd  src/host/projects/project-resolver.ts
+8182b0f5a6b69aa37de4b5cfa1ac4280bbf6545350b06521f60bc8f1b0f529fb  src/host/projects/creation-source-verifier.ts
+20247ab174bc36bfc506a49126b80aa0ec784478f498f84b16121ad9581192f9  src/host/agent-driven/creation-application.ts
+4203e55493c330ea537b11601cd48eb736a6bd29915565a9c4f5cae046288493  src/host/agent-driven/created-task-application.ts
+a86de44dd0a9ff1a1715e7ff845db18c7791cdda90efc57806bc322ad6fc3244  src/host/agent-driven/created-task-store.ts
+79f141851e449a6e5dfc2139c78a511f62c0f99a6843eb58649c86627d91692f  src/host/agent-driven/created-task-worker.ts
+1a65d8f3e9950847decdea2478a2d8542bb33d5018119282c18144c2694a8860  src/host/agent-driven/created-task-gate.ts
+6727b0b64bc07cfdea0346e7f885d0ffcbd74832a66f939056735c66872eeef5  src/host/agent-driven/created-draft-processor.ts
+ffefbd4169dfd07930723e2606997845fc1bc4a1aa9d0f6b60b7bfd6eb5276db  src/host/agent-driven/prepared-draft-verifier.ts
+2d8e087ae0f57c72db418433ef7c6237e67d97d2e54cd4f2272d32e0eb141823  src/host/agent-driven/local-asset-registry.ts
+e0beb9353f8f34fcdef9a5b434959f0b63c990aef3de8588cae25cea34a328a1  src/host/agent-driven/product-sqlite-repository.ts
+63abf1659a84b73fe68e4b61abffc067678ac160a88a6bafd18c2e5859f94ca4  src/host/agent-driven/creative-project-authority.ts
+c46ba726c8f8550b61104ca7bb23f4ec3fe0b83f907ec3f8dea4d66d91184912  src/host/agent-driven/scoped-auth.ts
+25a772d8d0f9b00bf985be6b13cf09a7d27234221d5f86935407d1205e20d9d0  src/host/agent-driven/application-dispatcher.ts
+affb339613036d4b7a6572d63247f53754725a98488ae671c76b7317995aaf7e  src/host/creative/fixed-workflow-service.ts
+b896b99e4b0e5f293d8d95c282aad4fa23614a5d252c933f0a4f46bff8f6fa8c  src/host/creative/creative-service.ts
+f071a02f1ed691e70a7f7cc774c6f4b5948c088e4a8411491fb51adb7affc3b7  src/host/creative/product-repository.ts
+e9ddb03a7d50b1f4e247405c7579beb7e6ccd311a714d3dd688a75322bba6010  src/host/creative/execution-guard.ts
+7d899a4c7cdd9138a98f4e49ac2100a2d4d260d10ef888cad40a4aa4d4d67245  src/host/creative/trusted-context.ts
+0a67cb54d1e7b5edf22a26dc8d23eb411da856d872f1f00ca3a8027375214e3d  src/host/creative/digest.ts
+d55c1a06ef542eaf1d1d1bf697231676d6f9e1819f312b4ddaf9329a3467b800  src/host/creative/creative-closure.ts
+56dcb72f1784739ae2ebabf5d2eb8c74c76c0f1f5b6fe37432e910e4a4fdbe54  src/host/persistent-job-store.ts
+029a4b762ac936cd12fd20e55a8180aca5687c3e80d270225efaee4f02051b91  src/host/render/assembly-ports.ts
+1b8a6bc403053091e74a3357815b35fddc3d9fb71aa5e8448782f66feb58877e  src/host/render/native-draft-assembler.ts
+54356697802c0bf048e5cbcde1f54eb33713d4fe58943b346406804011cb3644  src/contracts/agent-driven-types.ts
+f11a68bad982b7914e73f396ce48e99195ffc8fa88e842f137ffabf31900ea73  src/contracts/agent-driven-validator.ts
+088a451e9646199618261a6cc95a84e3767dbf4cc87004f3e5995dda86b60964  contracts/agent-driven-a.schema.json
+05f29d947ec65398fee37851a583afc781adc87d6b7d382b1da45eb46f80dc4f  contracts/agent-driven-a.registry.json
+5572530b5036728e414a0653fc36fd43958874a3a89cc8223e3984194c4a1fa4  contracts/agent-driven-a.migration.sql

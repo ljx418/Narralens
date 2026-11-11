@@ -1,0 +1,24 @@
+argv=corepack pnpm exec vitest run tests/agent-driven/integration/host-close-lifecycle.test.ts --maxWorkers=1 --minWorkers=1
+cwd=/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+slot=R1-BRIDGE-LIFECYCLE-001
+start_utc=2026-11-11T14:31:13Z
+start_epoch=1794407473
+
+ RUN  v3.2.4 /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+
+(node:813097) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/host-close-lifecycle.test.ts (3 tests) 12771ms
+   ✓ joins simultaneous Host closes and lets an admitted real HTTP handler finish before closing SQLite  403ms
+   ✓ releases the live lease and its checkpoint together on a graceful close, survives a reopen and resumes the same job  8213ms
+   ✓ settles a user cancellation through the real processor instead of requeueing it  4051ms
+
+ Test Files  1 passed (1)
+      Tests  3 passed (3)
+   Start at  22:31:13
+   Duration  13.96s (transform 906ms, setup 0ms, collect 1.05s, tests 12.77s, environment 0ms, prepare 34ms)
+
+end_utc=2026-11-11T14:31:29Z
+end_epoch=1794407489
+duration_seconds=16
+exit_code=0
