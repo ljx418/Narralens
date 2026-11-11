@@ -18,10 +18,13 @@ import {canonicalJson,canonicalDigest} from '../creative/digest.js';
 import {computeSourceDigest} from '../engine/source-digest-v1.js';
 import {OPENFILM_UPSTREAM_SHA} from '../engine/engine-binding-store.js';
 import {PinnedNativeDraftAssembler} from '../render/native-draft-assembler.js';
-import type {StagedNativeDraft,NativeDraftAsset} from '../render/assembly-ports.js';
+import type {StagedNativeDraft,NativeDraftAsset,PreparedSourceProofPort} from '../render/assembly-ports.js';
 import {runtimeRoot} from './owned-runtime.js';
 
-export interface PreparedDraftProofPort {
+/** The proof surface of the preparation lane. The running-task path keeps its own
+ * lease-bound proof; the completed-source path adds the purpose-separated read and
+ * adoption proofs of CR-R1-001 §5. */
+export interface PreparedDraftProofPort extends PreparedSourceProofPort {
  release(proof:object):Promise<void>|void;
  close():Promise<void>|void;
  prove(task:TaskReservation,lease:TaskLease,draft:StagedNativeDraft,assets:readonly LocalAsset[]):Promise<{fact:PreparedTaskFact;proof:object}>;

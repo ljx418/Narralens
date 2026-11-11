@@ -11,7 +11,7 @@ import {OPENFILM_UPSTREAM_SHA} from '../engine/engine-binding-store.js';
 import {assertSafeRelativePath} from '../render/snapshot-copy.js';
 import {planNativeDraft,draftVtt,frameSeconds,type DraftPlan} from '../render/native-draft-plan.js';
 import {verifyRenderPin} from '../render/upstream-pin.js';
-import type {StagedNativeDraft,NativeDraftAsset} from '../render/assembly-ports.js';
+import type {StagedNativeDraft,NativeDraftAsset,CompletedPreparedSourceV1,PreparedReadBindingV1,PreparedAdoptionBindingV1,PreparedReadProofV1,PreparedAdoptionProofV1} from '../render/assembly-ports.js';
 import type {LocalAsset} from './local-asset-registry.js';
 import type {TaskReservation,TaskLease,PreparedTaskFact} from './created-task-store.js';
 
@@ -53,6 +53,12 @@ interface File {path:string;fd:number;stat:BigIntStats;sha256:string;bytes:numbe
 interface RecordProof {
  taskDigest:string;leaseDigest:string;factDigest:string;root:string;registry:readonly LocalAsset[];
  dirs:Map<string,Dir>;files:Map<string,File>;blobs:Map<string,File>;fds:Set<number>;closed:boolean;
+ /** Which purpose this record was opened for. A read proof is never an adoption proof. */
+ purpose:'lease'|'read'|'adoption';
+ /** The digest of the complete binding this record was opened with. */
+ bindingDigest:string;
+ /** The attempt that produced the bytes, for a completed-source proof. Zero otherwise. */
+ producerAttempt:number;
 }
 interface NativeFormat {readFilmFile:(text:string)=>{doc:unknown;problems:readonly unknown[]};style:unknown;}
 export interface PreparedDraftVerifierOptions {
@@ -75,12 +81,16 @@ export class PreparedDraftVerifier {
   check(process.platform==='linux'&&typeof process.getuid==='function'&&options&&typeof options.blobPath==='function');
   this.#domain=absolute(options.stageDomainRoot);this.#blobPath=options.blobPath;
  }
- #binding(task:TaskReservation,lease:TaskLease):void {
+ #bindingTask(task:TaskReservation):void {
   const {meta:_meta,...request}=task.request;
   check(task.request.kind==='assemble_draft'&&task.request_digest===canonicalDigest({principal_id:task.principal_id,request}));
   check(task.accepted.job_id===task.job_id&&task.accepted.project_id===task.request.project_id&&same(task.accepted.execution,task.request.execution));
-  check(/^stage_[A-Za-z0-9_-]{32}$/.test(task.stage_token)&&typeof lease.owner==='string'&&lease.owner.length>0&&Number.isSafeInteger(lease.attempt)&&lease.attempt>=1);
+  check(/^stage_[A-Za-z0-9_-]{32}$/.test(task.stage_token));
  }
+ #bindingLease(lease:TaskLease):void {
+  check(typeof lease.owner==='string'&&lease.owner.length>0&&Number.isSafeInteger(lease.attempt)&&lease.attempt>=1);
+ }
+ #binding(task:TaskReservation,lease:TaskLease):void {this.#bindingTask(task);this.#bindingLease(lease);}
  #dir(record:RecordProof,path:string):Dir {
   absolute(path);const known=record.dirs.get(path);if(known)return known;
   const parent=path==='/'?null:this.#dir(record,dirname(path));const before=lstatSync(path,{bigint:true});
@@ -214,10 +224,12 @@ export class PreparedDraftVerifier {
   if(plan.narration){const audio=clips.find(c=>obj(c)&&c.id==='narration');check(obj(audio)&&audio.src===draft.assets.find(a=>a.asset_id===plan.narration!.asset_id)!.path&&audio.at===0&&audio.time===undefined&&audio.speed===undefined&&audio.volume===undefined);}
   return plan;
  }
- async #prove(taskInput:TaskReservation,leaseInput:TaskLease,rootInput:string,files:StagedNativeDraft['files'],roots:readonly string[],registryInput:readonly LocalAsset[],known?:StagedNativeDraft,expected?:PreparedTaskFact):Promise<{fact:PreparedTaskFact;proof:object}>{
-  const task=freeze(structuredClone(taskInput)),lease=freeze({...leaseInput});this.#binding(task,lease);check(!this.#closed);
+ async #prove(taskInput:TaskReservation,leaseInput:TaskLease|null,rootInput:string,files:StagedNativeDraft['files'],roots:readonly string[],registryInput:readonly LocalAsset[],options:{readonly purpose:'lease'|'read'|'adoption';readonly bindingDigest?:string;readonly proofValue?:object;readonly producerAttempt?:number;readonly known?:StagedNativeDraft;readonly expected?:PreparedTaskFact}):Promise<{fact:PreparedTaskFact;proof:object}>{
+  const task=freeze(structuredClone(taskInput)),lease=leaseInput===null?null:freeze({...leaseInput});
+  if(lease)this.#binding(task,lease);else this.#bindingTask(task);
+  check(!this.#closed);
   const root=absolute(rootInput);check(inside(this.#domain,root));
-  const record:RecordProof={taskDigest:canonicalDigest(task),leaseDigest:canonicalDigest(lease),factDigest:'',root,registry:this.#registry(task,registryInput),dirs:new Map(),files:new Map(),blobs:new Map(),fds:new Set(),closed:false};this.#records.add(record);
+  const record:RecordProof={taskDigest:canonicalDigest(task),leaseDigest:lease?canonicalDigest(lease):'',factDigest:'',root,registry:this.#registry(task,registryInput),dirs:new Map(),files:new Map(),blobs:new Map(),fds:new Set(),closed:false,purpose:options.purpose,bindingDigest:options.bindingDigest??'',producerAttempt:options.producerAttempt??0};this.#records.add(record);
   try{
    const domain=this.#dir(record,this.#domain),directory=this.#dir(record,root);for(const d of [domain,directory])check(d.stat.uid===BigInt(process.getuid!())&&(d.stat.mode&0o077n)===0n);
    check(files.length>0&&roots[0]==='film.html'&&new Set(roots).size===roots.length);
@@ -227,7 +239,7 @@ export class PreparedDraftVerifier {
    const metadata=this.#json(record,META);check(obj(metadata)&&Object.keys(metadata).sort().join(',')==='assets,clip_ids,format,fps,frame_count,plan_digest,project_id,subtitle_timing_basis,subtitles');
    check(metadata.format==='narralens.prepared-native-output@1'&&metadata.project_id===task.request.project_id&&metadata.subtitle_timing_basis==='storyboard_plan');
    const draft=freeze({format:'narralens.staged-native-draft@1',project_id:metadata.project_id,root,fps:metadata.fps,frame_count:metadata.frame_count,clip_ids:metadata.clip_ids,roots:[...roots],files:structuredClone([...files]),subtitles:metadata.subtitles,assets:metadata.assets,plan_digest:metadata.plan_digest,subtitle_timing_basis:metadata.subtitle_timing_basis} as StagedNativeDraft);
-   if(known)check(same(draft,known));check(Array.isArray(draft.assets)&&draft.assets.every(asset=>roots.includes(asset.path)));
+   if(options.known)check(same(draft,options.known));check(Array.isArray(draft.assets)&&draft.assets.every(asset=>roots.includes(asset.path)));
    const format=await this.#format();this.#current(record,true);const plan=this.#plan(record,task,draft,format);
    const digest=await computeSourceDigest({root,roots,engine:'openfilm',engineUpstreamSha:OPENFILM_UPSTREAM_SHA});this.#current(record,true);
    check(digest.external_reference_count===0);
@@ -235,27 +247,133 @@ export class PreparedDraftVerifier {
    const described=[...files].sort((a,b)=>a.relative_path<b.relative_path?-1:a.relative_path>b.relative_path?1:0);check(same(actual,described));
    check(same(digest.manifest.assets.map(a=>({path:a.path,sha256:a.sha256,bytes:a.size})).sort((a,b)=>a.path<b.path?-1:1),draft.assets.map(a=>({path:a.path,sha256:a.sha256,bytes:a.bytes})).sort((a,b)=>a.path<b.path?-1:1)));
    const fact=freeze({format:'narralens.created-task-prepared@1',stage_token:task.stage_token,source_digest:digest.source_digest,plan_digest:plan.digest,rights_digest:canonicalDigest(record.registry),files:structuredClone([...files]),roots:[...roots]} as PreparedTaskFact);
-   if(expected)check(same(fact,expected));record.factDigest=canonicalDigest(fact);const proof=Object.freeze({});this.#proofs.set(proof,record);return {fact,proof};
+   if(options.expected)check(same(fact,options.expected));record.factDigest=canonicalDigest(fact);const proof=Object.freeze(options.proofValue??{});this.#proofs.set(proof,record);return {fact,proof};
   }catch(error){this.#dispose(record);failure(error);}
  }
  async prove(task:TaskReservation,lease:TaskLease,draft:StagedNativeDraft,registryFacts:readonly LocalAsset[]):Promise<{fact:PreparedTaskFact;proof:object}>{
   let work:Promise<{fact:PreparedTaskFact;proof:object}>|undefined;
   try{
    const copy=freeze(structuredClone(draft)),binding=freeze(structuredClone(task)),identity=freeze({...lease}),registry=freeze(structuredClone([...registryFacts]));
-   work=Promise.resolve().then(()=>this.#prove(binding,identity,copy.root,copy.files,copy.roots,registry,copy));this.#pending.add(work);return await work;
+   work=Promise.resolve().then(()=>this.#prove(binding,identity,copy.root,copy.files,copy.roots,registry,{purpose:'lease',known:copy}));this.#pending.add(work);return await work;
   }catch(error){return failure(error);}finally{if(work)this.#pending.delete(work);}
  }
  async proveExisting(task:TaskReservation,lease:TaskLease,root:string,fact:PreparedTaskFact,registryFacts:readonly LocalAsset[]):Promise<object>{
   let work:Promise<{fact:PreparedTaskFact;proof:object}>|undefined;
   try{
    const expected=freeze(structuredClone(fact)),binding=freeze(structuredClone(task)),identity=freeze({...lease}),registry=freeze(structuredClone([...registryFacts]));check(expected.stage_token===binding.stage_token);
-   work=Promise.resolve().then(()=>this.#prove(binding,identity,root,expected.files,expected.roots,registry,undefined,expected));this.#pending.add(work);return (await work).proof;
+   work=Promise.resolve().then(()=>this.#prove(binding,identity,root,expected.files,expected.roots,registry,{purpose:'lease',expected}));this.#pending.add(work);return (await work).proof;
   }catch(error){return failure(error);}finally{if(work)this.#pending.delete(work);}
+ }
+ /* ---- CR-R1-001 §5: the completed-source proofs.
+  A succeeded SOURCE_ONLY job has no live lease by then, so these never claim one and
+  never borrow an old TaskLease proof: they reopen the real descriptors, rebuild the
+  closure facts and bind the result to their own purpose and their own complete
+  binding. A read proof is never an adoption proof, in the type or at runtime. ---- */
+ #completedSource(completed:CompletedPreparedSourceV1):void {
+  check(completed&&typeof completed==='object'&&completed.format==='narralens.completed-prepared-source@1');
+  const task=completed.task;check(task&&typeof task==='object');this.#bindingTask(task);
+  check(completed.project_id===task.request.project_id);
+  check(completed.job&&typeof completed.job==='object'&&completed.job.job_id===task.job_id&&completed.job.project_id===task.request.project_id&&completed.job.state==='succeeded');
+  check(same(completed.job.execution,task.request.execution));
+  check(completed.terminal_reason==='SOURCE_ONLY');
+  check(completed.provider_receipt&&typeof completed.provider_receipt==='object'&&completed.provider_receipt.kind==='local.native-draft@1'&&completed.provider_receipt.stage==='SOURCE_ONLY');
+  check(completed.fact&&typeof completed.fact==='object'&&completed.fact.format==='narralens.created-task-prepared@1'&&completed.fact.stage_token===task.stage_token);
+  check(completed.provider_receipt.source_digest===completed.fact.source_digest);
+  check(Number.isSafeInteger(completed.producer_attempt)&&completed.producer_attempt>=1);
+ }
+ /** The prepared root of the producer attempt. It is the attempt's own directory, and
+  * nothing else: a root of another attempt or another stage is not this source. */
+ #completedRoot(completed:CompletedPreparedSourceV1):string {
+  const root=absolute(completed.root);check(inside(this.#domain,root));
+  check(root.endsWith('/'+completed.task.stage_token+'/attempt-'+completed.producer_attempt+'/source'));
+  return root;
+ }
+ #baseBinding(completed:CompletedPreparedSourceV1,binding:PreparedReadBindingV1|PreparedAdoptionBindingV1):void {
+  const task=completed.task;check(binding&&typeof binding==='object');
+  check(binding.project_id===task.request.project_id);
+  check(binding.run_id===task.request.execution.run_id);
+  // The execution identifies the run and the step of the preparation. Its attempt may
+  // have advanced when the preparation was retried, so only the run, plan and step are
+  // required to be the same; the attempt itself is a positive integer.
+  // The binding is the current author baseline of the preparation. The execution is
+  // the producer's own execution: a lease retry is a lease attempt, not a change of
+  // the execution, so the whole binding has to be the one the preparation ran under.
+  check(binding.execution&&typeof binding.execution==='object'&&same(binding.execution,task.request.execution));
+  check(typeof binding.prepared_source_id==='string'&&binding.prepared_source_id.length>0&&binding.prepared_source_id.length<=128&&!/[\u0000-\u001f\u007f]/u.test(binding.prepared_source_id));
+  check(binding.prepared_job_id===task.job_id);
+  check(binding.fact_digest===canonicalDigest(completed.fact));
+  check(binding.source_digest===task.request.source_digest);
+  check(binding.base_revision===task.request.base_revision);
+  check(Number.isSafeInteger(binding.control_revision)&&binding.control_revision>=0);
+  check(Number.isSafeInteger(binding.selection_version)&&binding.selection_version>=0);
+ }
+ #readBinding(completed:CompletedPreparedSourceV1,binding:PreparedReadBindingV1):void {
+  check(binding.purpose==='impact'||binding.purpose==='preview');this.#baseBinding(completed,binding);
+ }
+ #adoptionBinding(completed:CompletedPreparedSourceV1,binding:PreparedAdoptionBindingV1):void {
+  check(binding.purpose==='adoption');this.#baseBinding(completed,binding);
+  for(const value of [binding.transaction_id,binding.impact_id,binding.approval_id,binding.target_snapshot_id])check(typeof value==='string'&&value.length>0&&value.length<=128&&!/[\u0000-\u001f\u007f]/u.test(value));
+  check(typeof binding.impact_hash==='string'&&HASH.test(binding.impact_hash));
+  check(typeof binding.plan_sha256==='string'&&HASH.test(binding.plan_sha256));
+ }
+ async #proveCompleted(completed:CompletedPreparedSourceV1,binding:PreparedReadBindingV1|PreparedAdoptionBindingV1,purpose:'read'|'adoption',registry:readonly LocalAsset[]):Promise<object>{
+  check(!this.#closed);this.#completedSource(completed);
+  if(purpose==='read')this.#readBinding(completed,binding as PreparedReadBindingV1);else this.#adoptionBinding(completed,binding as PreparedAdoptionBindingV1);
+  const root=this.#completedRoot(completed),bindingDigest=canonicalDigest(binding);
+  const proofValue=purpose==='read'
+   ?Object.freeze({format:'narralens.prepared-read-proof@1',purpose:(binding as PreparedReadBindingV1).purpose})
+   :Object.freeze({format:'narralens.prepared-adoption-proof@1',purpose:'adoption'});
+  const result=await this.#prove(completed.task,null,root,completed.fact.files,completed.fact.roots,registry,{purpose,bindingDigest,proofValue,producerAttempt:completed.producer_attempt,expected:completed.fact});
+  return result.proof;
+ }
+ async proveForRead<P extends PreparedReadBindingV1['purpose']>(completed:CompletedPreparedSourceV1,binding:PreparedReadBindingV1&{readonly purpose:P},registryFacts:readonly LocalAsset[]):Promise<PreparedReadProofV1&{readonly purpose:P}>{
+  let work:Promise<PreparedReadProofV1&{readonly purpose:P}>|undefined;
+  try{
+   const source=freeze(structuredClone(completed)),bound=freeze(structuredClone(binding)) as PreparedReadBindingV1&{readonly purpose:P},registry=freeze(structuredClone([...registryFacts]));
+   work=Promise.resolve().then(()=>this.#proveCompleted(source,bound,'read',registry) as Promise<PreparedReadProofV1&{readonly purpose:P}>);this.#pending.add(work);return await work;
+  }catch(error){return failure(error);}finally{if(work)this.#pending.delete(work);}
+ }
+ async proveForAdoption(completed:CompletedPreparedSourceV1,binding:PreparedAdoptionBindingV1,registryFacts:readonly LocalAsset[]):Promise<PreparedAdoptionProofV1>{
+  let work:Promise<PreparedAdoptionProofV1>|undefined;
+  try{
+   const source=freeze(structuredClone(completed)),bound=freeze(structuredClone(binding)),registry=freeze(structuredClone([...registryFacts]));
+   work=Promise.resolve().then(()=>this.#proveCompleted(source,bound,'adoption',registry) as Promise<PreparedAdoptionProofV1>);this.#pending.add(work);return await work;
+  }catch(error){return failure(error);}finally{if(work)this.#pending.delete(work);}
+ }
+ /** The final synchronous check inside BRIDGE's controlled transaction. It is
+  * synchronous on purpose: an asynchronous callback would leave the window open. */
+ #assertRights(assertCurrentRights:()=>void):void {
+  check(typeof assertCurrentRights==='function');
+  const result:unknown=assertCurrentRights();
+  if(result&&typeof(result as {then?:unknown}).then==='function'){void Promise.resolve(result).catch(()=>{});throw reject();}
+  check(result===undefined);
+ }
+ assertCurrentForRead<P extends PreparedReadBindingV1['purpose']>(completed:CompletedPreparedSourceV1,binding:PreparedReadBindingV1&{readonly purpose:P},proof:PreparedReadProofV1&{readonly purpose:P},assertCurrentRights:()=>void):void {
+  const record=proof&&typeof proof==='object'?this.#proofs.get(proof):undefined;
+  try{
+   check(record&&record.purpose==='read'&&!record.closed&&!this.#closed&&this.#records.has(record));
+   this.#completedSource(completed);this.#readBinding(completed,binding);
+   check(record.bindingDigest===canonicalDigest(binding)&&record.taskDigest===canonicalDigest(completed.task)&&record.factDigest===canonicalDigest(completed.fact));
+   // The opened descriptors belong to this root and to this producer attempt. A root
+   // that was changed after the proof was made is not the proof's root.
+   check(record.root===this.#completedRoot(completed)&&record.producerAttempt===completed.producer_attempt);
+   this.#assertRights(assertCurrentRights);this.#current(record,true);this.#assertRights(assertCurrentRights);this.#current(record,false);
+  }catch(error){failure(error);}
+ }
+ assertCurrentForAdoption(completed:CompletedPreparedSourceV1,binding:PreparedAdoptionBindingV1,proof:PreparedAdoptionProofV1,assertCurrentRights:()=>void):void {
+  const record=proof&&typeof proof==='object'?this.#proofs.get(proof):undefined;
+  try{
+   check(record&&record.purpose==='adoption'&&!record.closed&&!this.#closed&&this.#records.has(record));
+   this.#completedSource(completed);this.#adoptionBinding(completed,binding);
+   check(record.bindingDigest===canonicalDigest(binding)&&record.taskDigest===canonicalDigest(completed.task)&&record.factDigest===canonicalDigest(completed.fact));
+   check(record.root===this.#completedRoot(completed)&&record.producerAttempt===completed.producer_attempt);
+   this.#assertRights(assertCurrentRights);this.#current(record,true);this.#assertRights(assertCurrentRights);this.#current(record,false);
+  }catch(error){failure(error);}
  }
  assertCurrent(task:TaskReservation,lease:TaskLease,fact:PreparedTaskFact,proof:object,assertCurrentRights:()=>void):void {
   const record=proof&&typeof proof==='object'?this.#proofs.get(proof):undefined;
   try{
-   check(record&&!record.closed&&!this.#closed&&this.#records.has(record));this.#binding(task,lease);check(record.taskDigest===canonicalDigest(task)&&record.leaseDigest===canonicalDigest(lease)&&record.factDigest===canonicalDigest(fact));
+   check(record&&record.purpose==='lease'&&!record.closed&&!this.#closed&&this.#records.has(record));this.#binding(task,lease);check(record.taskDigest===canonicalDigest(task)&&record.leaseDigest===canonicalDigest(lease)&&record.factDigest===canonicalDigest(fact));
    const rights=()=>{check(typeof assertCurrentRights==='function');const result:unknown=assertCurrentRights();if(result&&typeof(result as {then?:unknown}).then==='function'){void Promise.resolve(result).catch(()=>{});throw reject();}check(result===undefined);};
    rights();this.#current(record,true);rights();this.#current(record,false);
   }catch(error){failure(error);}

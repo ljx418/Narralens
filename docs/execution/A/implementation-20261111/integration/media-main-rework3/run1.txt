@@ -1,0 +1,66 @@
+
+> narralens@0.1.0 test /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+> vitest run --config vitest.config.ts tests/agent-driven/integration/created-draft-processor.test.ts tests/agent-driven/media/preview-prepared-source.test.ts --maxWorkers=1 --minWorkers=1
+
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:885565) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/created-draft-processor.test.ts (7 tests) 34969ms
+   ✓ autonomously prepares actual registered media into editable native source with matching immutable facts and no author commit  5099ms
+   ✓ rechecks a revoked grant after asynchronous resolution and writes no stage or prepared fact  3035ms
+   ✓ cancels after real preparation without publishing a prepared result or changing author state  4945ms
+   ✓ reproves a durable complete source after lease loss instead of re-encoding or trusting an old in-memory proof  5467ms
+   ✓ recovers a real asynchronous domain-open resource failure in the same processor and closes its descriptors  4618ms
+   ✓ re-proves a succeeded SOURCE_ONLY source without a live lease and keeps the read proof away from the adoption assertion  6187ms
+   ✓ refuses a read proof of prepared bytes that changed under the same size and closes its descriptors  5616ms
+(node:886567) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/agent-driven/media/preview-prepared-source.test.ts (4 tests | 2 failed) 24807ms
+   × renders an isolated preview of a completed prepared source with five real parts and measured facts 5695ms
+     → The prepared preview could not be rendered (PROJECT_ROOT_OUTSIDE_STAGING)
+   ✓ refuses a preview whose proof is not a proof of this prepared source  6313ms
+   ✓ refuses the boundaries a prepared preview must not cross  5566ms
+   × refuses a part whose content type or media facts do not belong to its slot 7233ms
+     → The prepared preview could not be rendered (PROJECT_ROOT_OUTSIDE_STAGING)
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/media/preview-prepared-source.test.ts > renders an isolated preview of a completed prepared source with five real parts and measured facts
+ProductError: The prepared preview could not be rendered (PROJECT_ROOT_OUTSIDE_STAGING)
+ ❯ failure src/host/render/preview-prepared-source.ts:56:47
+     54|   if(error instanceof SnapshotCopyError)throw new ProductError('REVISI…
+     55|   if(error instanceof NativeRenderCancelled)throw new ProductError('CA…
+     56|   if(error instanceof NativeRenderError)throw new ProductError('CAPABI…
+       |                                               ^
+     57|  }
+     58|  throw unavailable();
+ ❯ PreparedPreviewService.#run src/host/render/preview-prepared-source.ts:497:24
+ ❯ PreparedPreviewService.preview src/host/render/preview-prepared-source.ts:385:14
+ ❯ tests/agent-driven/media/preview-prepared-source.test.ts:64:17
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/agent-driven/media/preview-prepared-source.test.ts > refuses a part whose content type or media facts do not belong to its slot
+ProductError: The prepared preview could not be rendered (PROJECT_ROOT_OUTSIDE_STAGING)
+ ❯ failure src/host/render/preview-prepared-source.ts:56:47
+     54|   if(error instanceof SnapshotCopyError)throw new ProductError('REVISI…
+     55|   if(error instanceof NativeRenderCancelled)throw new ProductError('CA…
+     56|   if(error instanceof NativeRenderError)throw new ProductError('CAPABI…
+       |                                               ^
+     57|  }
+     58|  throw unavailable();
+ ❯ PreparedPreviewService.#run src/host/render/preview-prepared-source.ts:497:24
+ ❯ PreparedPreviewService.preview src/host/render/preview-prepared-source.ts:385:14
+ ❯ tests/agent-driven/media/preview-prepared-source.test.ts:173:17
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  2 failed | 9 passed (11)
+   Start at  22:55:59
+   Duration  70.83s (transform 2.61s, setup 0ms, collect 7.54s, tests 59.78s, environment 0ms, prepare 2.34s)
+
+ ELIFECYCLE  Test failed. See above for more details.

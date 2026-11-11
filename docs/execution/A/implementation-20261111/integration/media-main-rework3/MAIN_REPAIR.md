@@ -1,0 +1,11 @@
+# MAIN接管MEDIA第三返工
+
+原实现c8a06729在唯一重型运行中processor7通过、preview4在夹具prove处失败，原失败和cleanup记录保留。MAIN只消费其6个实际released变更文件，原12清单其余不臆改；SOURCE_ONLY、read/adoption proof、五part合同继续沿CR。
+
+根因一：preview夹具自造Task和succeeded Job，未经过Host真实metadata/prove/完成事实，返回前失败还泄漏资源。两套件现共享actual processor/store/worker testhelper，从真实持久Job/provider/fact提取completedSource；所有测试权限/eligibility与synthetic媒体限制明确，不把它们当生产Run与人验。没有引入第二个生产metadata写者。原7个processor断言与反例保留。
+
+根因二：probeVideo把fps数值当秒/帧，30fps被要求30秒增量；改为den/num，实际解码测量和quality对象校验1/30秒。根因三：NativeRenderer收到render兄弟子目录作为staging，复制的project在其外，guard真实拒绝。生产者改用同一自有workspace包含project与render，不放宽renderer根隔离检查。
+
+MAIN运行先保留9通过/2渲染门失败，修复后preview4项真实通过；为可复核产物只重跑一个positive，1通过/3跳过，落盘5个实际对象与receipt/observed，逐项bytes+sha256核验。此前processor7无新相关改动不重复；这不是简单挑一次全绿。来源、每次命令、时间、输入摘要、日志和knownfailure均在同目录。87项创建/账本/精确CAS回归另有中央helper提交。
+
+当前仅实现自验证；新MEDIA源码独立复审待完成，BRIDGE/PRODUCT真实组合与A短片体验未验证。三秒诊断片不是60–180秒真实中文人声验收，也不等于正式Delivery。
