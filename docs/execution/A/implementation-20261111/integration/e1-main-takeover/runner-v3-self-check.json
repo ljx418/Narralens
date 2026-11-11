@@ -1,0 +1,23 @@
+{
+  "scope": "HARNESS_ONLY_NOT_BUSINESS_ACCEPTANCE",
+  "argv": [
+    "/usr/bin/python3",
+    "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/execution/A/implementation-20261111/integration/e1-main-takeover/run-recorded.py",
+    "runner-v3-exit7",
+    "/usr/bin/python3",
+    "-c",
+    "raise SystemExit(7)"
+  ],
+  "actual_first_exit": 7,
+  "actual_duplicate_exit": 1,
+  "duplicate_stderr": "CAPTURE_NAME_ALREADY_EXISTS:runner-v3-exit7\n",
+  "preserved_hashes": {
+    "runner-v3-exit7.claim.json": "862c0fa925707b582b02a9c8881993123c8d583448ef54cab186862fad7dff49",
+    "runner-v3-exit7.cmd.json": "496f8f5ee35634b606306fad67b48fef5f050ada3f98139fc4b848e64c02a878",
+    "runner-v3-exit7.exit": "10159baf262b43a92d95db59dae1f72c645127301661e0a3ce4e38b295a97c58",
+    "runner-v3-exit7.inputs.json": "702715143297a15e005809c5642f801420c135c1c07c1c7f3364413c1b225d19",
+    "runner-v3-exit7.result.json": "4cdc834cec3d0ee58c706d38cd0fecdb7b3905168220797fa778c49c09245b28",
+    "runner-v3-exit7.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "script_sha256": "503001e00c19e8c899a656850a503c85d80d2beba5960927551369893ab53c47"
+}

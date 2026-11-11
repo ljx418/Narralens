@@ -2,6 +2,13 @@ import sys,subprocess,json,hashlib,datetime
 from pathlib import Path
 r=Path(__file__).resolve().parent
 name=sys.argv[1];cmd=sys.argv[2:]
+if not name or any(c not in 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_' for c in name) or not cmd:
+ raise SystemExit('INVALID_CAPTURE_ARGUMENTS')
+for suffix in ['.inputs.json','.cmd.json','.txt','.exit','.result.json','.claim.json']:
+ if (r/(name+suffix)).exists():raise SystemExit('CAPTURE_NAME_ALREADY_EXISTS:'+name)
+with (r/(name+'.claim.json')).open('x') as claim:
+ json.dump({'runner_version':3,'name':name,'argv':cmd,'claimed_at':datetime.datetime.now(datetime.timezone.utc).isoformat()},claim)
+
 def inputs():
  suffixes={'.ts','.tsx','.js','.mjs','.cjs','.json','.py','.html','.css','.sql','.sh'}
  found={p for prefix in ['src','contracts','tests','tools','docs/parallel/lane-bridge/A-R2-20261112']
@@ -14,7 +21,7 @@ h=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
 before={str(p):h(p) for p in files}
 (r/(name+'.inputs.json')).write_text(json.dumps(before,indent=2))
 (r/(name+'.cmd.json')).write_text(json.dumps({'argv':cmd,'cwd':str(Path.cwd()),'started_at':datetime.datetime.now(datetime.timezone.utc).isoformat(),
- 'runner_version':2,'git_head':subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),
+ 'runner_version':3,'git_head':subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),
  'input_scope':'source/contracts/test/tool text, config/lock, D09 vectors and this runner; upstream pin and binary fixture receipts remain separate'},indent=2))
 with (r/(name+'.txt')).open('w') as log:
  result=subprocess.run(cmd,stdout=log,stderr=subprocess.STDOUT)
@@ -23,3 +30,4 @@ out={'exit':result.returncode,'source_changed':[str(p) for p in files if not p.e
  'source_added':[str(p) for p in inputs() if str(p) not in before],
  'log_sha256':h(r/(name+'.txt')),'finished_at':datetime.datetime.now(datetime.timezone.utc).isoformat()}
 (r/(name+'.result.json')).write_text(json.dumps(out,indent=2));print(json.dumps(out))
+sys.exit(result.returncode)

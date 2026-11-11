@@ -1,0 +1,64 @@
+
+> narralens@0.1.0 test /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+> vitest run --config vitest.config.ts tests/agent-driven/integration/retained-source-tree.test.ts tests/agent-driven/integration/created-publication-identity-store.test.ts --maxWorkers=1 --minWorkers=1
+
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:1928425) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/agent-driven/integration/created-publication-identity-store.test.ts (15 tests | 5 failed) 2881ms
+   ✓ requires the existing journal transaction and rolls back with its owner 192ms
+   ✓ persists exactly one immutable fact, reopens the original database and rejects conflicting replay 196ms
+   ✓ matches original and target after actual directory renames without borrowing old parent names 198ms
+   × refuses same-byte replaced original file against persisted real descriptors 212ms
+     → expected [Function] to throw an error
+   × refuses same-byte replaced target file against persisted real descriptors 195ms
+     → expected [Function] to throw an error
+   × refuses same-byte replaced snapshot file against persisted real descriptors 205ms
+     → expected [Function] to throw an error
+   × refuses same-byte replaced snapshot tree against persisted real descriptors 193ms
+     → expected [Function] to throw an error
+   × refuses same-byte replaced snapshot container against persisted real descriptors 202ms
+     → expected [Function] to throw an error
+   ✓ rejects invalid missing dir without storing a resource fact 182ms
+   ✓ rejects invalid unclosed field without storing a resource fact 181ms
+   ✓ rejects invalid unknown version without storing a resource fact 182ms
+   ✓ rejects invalid wrong snapshot without storing a resource fact 178ms
+   ✓ rejects invalid target closure without storing a resource fact 184ms
+   ✓ fails closed on a checksum-valid future JSON version with the exact schema restored 199ms
+   ✓ refuses an existing partial schema instead of silently accepting missing immutability 181ms
+ ✓ tests/agent-driven/integration/retained-source-tree.test.ts (7 tests) 23ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/created-publication-identity-store.test.ts > refuses same-byte replaced original file against persisted real descriptors
+ FAIL  tests/agent-driven/integration/created-publication-identity-store.test.ts > refuses same-byte replaced target file against persisted real descriptors
+ FAIL  tests/agent-driven/integration/created-publication-identity-store.test.ts > refuses same-byte replaced snapshot file against persisted real descriptors
+ FAIL  tests/agent-driven/integration/created-publication-identity-store.test.ts > refuses same-byte replaced snapshot tree against persisted real descriptors
+ FAIL  tests/agent-driven/integration/created-publication-identity-store.test.ts > refuses same-byte replaced snapshot container against persisted real descriptors
+AssertionError: expected [Function] to throw an error
+
+- Expected: 
+null
+
++ Received: 
+undefined
+
+ ❯ tests/agent-driven/integration/created-publication-identity-store.test.ts:71:89
+     69|  // Even the container-only replacement preserves every source file/ro…
+     70|  // the separately persisted actual container descriptor must still re…
+     71|  expect(()=>f.store.assertCurrent('txn_identity',original,target,snaps…
+       |                                                                                         ^
+     72| });
+     73| it.each(['missing dir','unclosed field','unknown version','wrong snaps…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  5 failed | 17 passed (22)
+   Start at  06:35:24
+   Duration  12.13s (transform 747ms, setup 0ms, collect 2.84s, tests 2.90s, environment 0ms, prepare 2.80s)
+
+ ELIFECYCLE  Test failed. See above for more details.

@@ -1,0 +1,36 @@
+{
+  "scope": "DESIGN_MODEL_ONLY_NOT_BUSINESS_ACCEPTANCE",
+  "script_sha256": "d9496dae66f60811eb114f7b7a044af332de69b6f78ed5752c2706dc8a373d49",
+  "fixed_pass_counterexample": {
+    "chain": "A1-C2-H3",
+    "outcome": [
+      "aborted",
+      "aborted",
+      "pending"
+    ]
+  },
+  "exhaustive_configurations": 9837,
+  "max_progress_passes_observed": 33,
+  "longest_chain": 96,
+  "alternating_examples": [
+    {
+      "length": 3,
+      "passes": 2,
+      "unresolved": 0
+    },
+    {
+      "length": 5,
+      "passes": 3,
+      "unresolved": 0
+    },
+    {
+      "length": 96,
+      "passes": 33,
+      "unresolved": 0
+    }
+  ],
+  "blocked_oldest_stops_without_false_progress": true,
+  "reported_counts_without_state_change_not_progress": true,
+  "source_impl_scheduler": "NOT_IMPLEMENTED",
+  "all_RCV_D10_cases": "NOT_RUN"
+}

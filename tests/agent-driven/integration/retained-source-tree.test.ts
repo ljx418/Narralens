@@ -41,3 +41,23 @@ describe('retained source descriptor identity across publication rename',()=>{
   f.guard.close();expect(()=>f.guard.verify()).toThrow(/released/);
  });
 });
+
+
+it('captures stable frozen identities from held descriptors across a real rename',async()=>{
+ const f=await fixture(),before=f.guard.identity(),parent=f.guard.directoryIdentity(f.root);
+ expect(Object.isFrozen(before)).toBe(true);expect(Object.isFrozen(before.files[0])).toBe(true);
+ expect(before.directories[0]?.relative_path).toBe('');expect(before.files[0]?.relative_path).toBe('film.html');
+ expect(parent.ino).toMatch(/^[1-9][0-9]*$/);expect(Object.keys(parent).sort()).toEqual(['dev','ino']);
+ await rename(f.source,f.backup);f.guard.relocatedTo(f.backup);expect(f.guard.identity()).toEqual(before);
+ expect(()=>f.guard.directoryIdentity(join(f.root,'not-held'))).toThrow(/not retained/);
+ f.guard.close();expect(()=>f.guard.identity()).toThrow(/released/);
+});
+it('distinguishes a freshly opened same-byte replacement from the persisted file identity',async()=>{
+ const f=await fixture(),before=f.guard.identity();
+ const replacement=join(f.source,'replacement');await writeFile(replacement,f.bytes);await rename(replacement,join(f.source,'film.html'));
+ const fresh=new RetainedSourceTree(f.source,[{relative_path:'film.html',bytes:f.bytes.length,sha256:createHash('sha256').update(f.bytes).digest('hex')}]);
+ cleanup.push(async()=>fresh.close());
+ expect(fresh.identity().files[0]?.sha256).toBe(before.files[0]?.sha256);
+ expect(fresh.identity().files[0]?.ino).not.toBe(before.files[0]?.ino);
+ expect(()=>f.guard.identity()).toThrow(/identity changed/);
+});

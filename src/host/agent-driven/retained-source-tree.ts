@@ -8,6 +8,14 @@ import type {PreparedSourceFileFact} from './created-source-ports.js';
 import {PublicationCleanupError} from './publication-cleanup.js';
 function fail(_code:'REVISION_CONFLICT',message:string):never{throw new ProductError('REVISION_CONFLICT',message);}
 
+/** Host-only filesystem observations, never a publication/commit capability. */
+export interface RetainedDirectoryIdentity {readonly dev:string;readonly ino:string;}
+export interface RetainedTreeIdentity {
+ readonly format:'narralens.retained-tree-identity@1';
+ readonly directories:readonly (RetainedDirectoryIdentity&{readonly relative_path:string})[];
+ readonly files:readonly (RetainedDirectoryIdentity&{readonly relative_path:string;readonly bytes:number;readonly sha256:string})[];
+}
+
 /** A retained tree guards original file descriptors, names and complete membership. */
 export class RetainedSourceTree {
   readonly #dirs = new Map<string, {fd:number; identity:string}>();
@@ -84,6 +92,24 @@ export class RetainedSourceTree {
       };walk(this.root,'');
       if(canonicalDigest(found.sort())!==canonicalDigest([...this.#files.keys()].sort()))fail('REVISION_CONFLICT','Source closure membership changed');
     }
+  }
+  /** Capture ONLY already-held descriptors; relocation does not change this identity.
+   * Parent names outside the consumed root are excluded because rename changes them. */
+  identity():RetainedTreeIdentity {
+    this.verify();
+    const directories=[...this.#dirs].filter(([path])=>path===this.#root||path.startsWith(this.#root+sep)).map(([path,entry])=>{
+      const stat=fstatSync(entry.fd,{bigint:true});return Object.freeze({relative_path:path===this.#root?'':path.slice(this.#root.length+1),dev:String(stat.dev),ino:String(stat.ino)});
+    }).sort((a,b)=>a.relative_path<b.relative_path?-1:a.relative_path>b.relative_path?1:0);
+    const files=[...this.#files].map(([path,file])=>{
+      const stat=fstatSync(file.fd,{bigint:true});return Object.freeze({relative_path:path,dev:String(stat.dev),ino:String(stat.ino),bytes:file.bytes,sha256:file.sha256});
+    }).sort((a,b)=>a.relative_path<b.relative_path?-1:a.relative_path>b.relative_path?1:0);
+    this.verify();return Object.freeze({format:'narralens.retained-tree-identity@1',directories:Object.freeze(directories),files:Object.freeze(files)});
+  }
+  /** Observe a directory already retained by this guard, including a snapshot container.
+   * This never opens a name or establishes trust in a new directory. */
+  directoryIdentity(path:string):RetainedDirectoryIdentity {
+    this.verify();const entry=this.#dirs.get(path);if(!entry)fail('REVISION_CONFLICT','The directory is not retained');
+    const stat=fstatSync(entry.fd,{bigint:true});this.verify();return Object.freeze({dev:String(stat.dev),ino:String(stat.ino)});
   }
   /** Read metadata from the retained descriptor rather than reopening its pathname.
    * Limits apply before allocation; each actual read remains at most one MiB. */
