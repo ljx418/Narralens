@@ -1,7 +1,13 @@
 import { writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import { SnapshotRenderService, applyDispositionGate } from "../../../src/host/render/render-snapshot.js";
+import {
+  SnapshotRenderService,
+  applyDispositionGate,
+  buildSupplementChecks,
+  nativeSourceAttachment,
+  renderStageKeys,
+} from "../../../src/host/render/render-snapshot.js";
 import { PublishedPackageStore } from "../../../src/host/delivery/published-package-store.js";
 import { computeRenderConfigDigest } from "../../../src/host/render/render-profile.js";
 import { RENDER_PIN } from "../../../src/host/render/upstream-pin.js";
@@ -403,5 +409,56 @@ describe("rendering a committed snapshot", () => {
     expect(second.state).toBe("ready");
     expect(second.manifest?.delivery_id).toBe(first.manifest?.delivery_id);
     expect(second.manifest?.download_ref).toBe(first.manifest?.download_ref);
+  });
+});
+
+/**
+ * The stage primitives.
+ *
+ * The legacy facade and the phase port share the same primitives, so a change to one
+ * of them has to change both in the same way. These cases pin that: the delivery key,
+ * the supplement comparison and the closure attachment are the same facts whichever
+ * path produced them.
+ */
+describe("the stage primitives the facade and the phase port share", () => {
+  it("derives the delivery key the package is published under", async () => {
+    const built = await harness({ label: "render-stage-keys" });
+    const request = requestFor(built);
+    const outcome = await built.service.render(request);
+
+    const keys = renderStageKeys(request.project_id, request.snapshot_id, request.render_spec);
+    expect(outcome.manifest?.delivery_id).toBe(keys.delivery_id);
+    expect(outcome.manifest?.download_ref).toBe(keys.download_ref);
+    expect(outcome.manifest?.render_config_digest).toBe(keys.config_digest);
+  });
+
+  it("compares the supplements against the digests the snapshot committed to", async () => {
+    const built = await harness({ label: "render-stage-supplements" });
+    const checks = await buildSupplementChecks(built.closure, built.closure.native_root);
+
+    expect(checks.map((check) => check.role)).toEqual(["rights", "subtitles"]);
+    expect(checks.every((check) => check.actual_sha256 === check.sha256)).toBe(true);
+    expect(checks.every((check) => check.actual_bytes === check.bytes)).toBe(true);
+
+    // A supplement that changed after the copy is not the supplement that was cleared.
+    await writeFile(join(built.closure.native_root, "rights.txt"), "tampered bytes!", "utf8");
+    const after = await buildSupplementChecks(built.closure, built.closure.native_root);
+    expect(after[0]?.actual_sha256).not.toBe(after[0]?.sha256);
+    expect(after[1]?.actual_sha256).toBe(after[1]?.sha256);
+  });
+
+  it("describes the closure in the attachment that travels with the film", async () => {
+    const built = await harness({ label: "render-stage-attachment" });
+    const attachment = nativeSourceAttachment(built.closure, built.closure.native_entry);
+
+    expect(attachment.kind).toBe("narralens.native_project_attachment@1.0");
+    expect(attachment.scope).toBe("document_and_closure_reference");
+    expect(attachment.editable_project_complete).toBe(false);
+    expect(attachment.project_id).toBe(built.closure.project_id);
+    expect(attachment.snapshot_id).toBe(built.closure.snapshot_id);
+    expect(attachment.source_digest).toBe(built.closure.source_digest);
+    expect(attachment.copied.map((file) => file.relative_path)).toEqual(["film.html"]);
+    expect(attachment.referenced.map((file) => file.relative_path))
+      .toEqual(["clip.mp4", "rights.txt", "subtitles.vtt"]);
   });
 });
