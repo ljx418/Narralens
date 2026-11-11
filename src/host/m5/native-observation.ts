@@ -669,7 +669,14 @@ export class NativeObservationService implements NativeContextPort, NativeObserv
     }
     try {
       if (!this.#stillCurrent(session, sequence)) return null;
-      const projection = this.#expected.assertCurrent(binding, proof);
+      let projection: NativeExpectedProjection;
+      try {
+        projection = this.#expected.assertCurrent(binding, proof);
+      } catch {
+        // The final guard refused: the closure moved, the proof is foreign or released.
+        // No acknowledgement is written, and the event itself stays accepted.
+        return null;
+      }
       if (!this.#agrees(session, projection)) return null;
       if (!this.#stillCurrent(session, sequence)) return null;
       const current = this.#ackStore.currentState(session.binding.project_id);
@@ -689,6 +696,14 @@ export class NativeObservationService implements NativeContextPort, NativeObserv
         selection_version: session.selectionVersion,
         observed_at: this.#now().toISOString(),
       };
+      // The final guard runs again, immediately before the insert, with no `await` in
+      // between: the closure and every retained file must still be exactly what the
+      // proof was made against at the very moment the acknowledgement is written.
+      try {
+        this.#expected.assertCurrent(binding, proof);
+      } catch {
+        return null;
+      }
       await this.#ackStore.record({
         project_id: ack.project_id,
         bridge_session_id: ack.bridge_session_id,

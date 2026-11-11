@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { readFile } from 'node:fs/promises';
+import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import type {
@@ -27,8 +27,8 @@ import type {
  *   acknowledgement.
  *
  * The interface is fixed: `prove(binding)` / `assertCurrent(binding, proof)` /
- * `release(proof)` / `close()`. The proof is opaque and holds the original file
- * identities for as long as the verification needs them; it cannot be rebuilt from JSON.
+ * `release(proof)` / `close()`. The proof is opaque, it holds the *retained* file
+ * identity for as long as the verification needs it, and it cannot be rebuilt from JSON.
  */
 
 /** The upstream the pinned candidate was cut from. It is a pin, not a version guess. */
@@ -69,10 +69,69 @@ export interface NativeExpectedBinding {
   readonly isCurrent: () => boolean;
 }
 
+/**
+ * The immutable snapshot of a binding's fields.
+ *
+ * The identity of an object does not protect its *fields*: a caller could mutate the
+ * binding between `prove` and `assertCurrent`. The snapshot is the field-by-field truth
+ * the proof was made against, and it is the comparison `assertCurrent` performs.
+ */
+export interface NativeExpectedBindingSnapshot {
+  readonly project_id: string;
+  readonly native_project_id: string;
+  readonly revision: number;
+  readonly snapshot_id: string;
+  readonly source_digest: string;
+  readonly instance_generation: number;
+  readonly selection_version: number;
+  readonly workspace_ref: string;
+  readonly workspace_snapshot_id: string;
+  readonly workspace_source_digest: string;
+  readonly workspace_revision: number;
+}
+
+/** The snapshot of one binding's fields. */
+export function snapshotNativeExpectedBinding(binding: NativeExpectedBinding): NativeExpectedBindingSnapshot {
+  return Object.freeze({
+    project_id: binding.project_id,
+    native_project_id: binding.native_project_id,
+    revision: binding.revision,
+    snapshot_id: binding.snapshot_id,
+    source_digest: binding.source_digest,
+    instance_generation: binding.instance_generation,
+    selection_version: binding.selection_version,
+    workspace_ref: binding.workspace.workspace_ref,
+    workspace_snapshot_id: binding.workspace.snapshot_id,
+    workspace_source_digest: binding.workspace.source_digest,
+    workspace_revision: binding.workspace.revision,
+  });
+}
+
 /** One closed source file of the committed workspace. */
 export interface NativeExpectedSourceEntry {
   readonly relative_path: string;
   readonly sha256: string;
+}
+
+/**
+ * One retained, still-open descriptor of a committed source file.
+ *
+ * The reader opens the file, hashes it and keeps the descriptor. `verify` is the
+ * *synchronous* guard of one file: it checks that the canonical root and the current
+ * path still name the retained device and inode (no symlink, no escape, no replacement)
+ * and that the bytes behind the same descriptor still hash to the recorded digest.
+ *
+ * `close` releases the descriptor. It is idempotent, and the Host calls it exactly once
+ * per retained file on every path out of the verification.
+ */
+export interface NativeExpectedRetainedFile {
+  readonly relative_path: string;
+  readonly sha256: string;
+  readonly bytes: number;
+  /** The synchronous guard. Never throws; a failure is `false`. */
+  readonly verify: () => boolean;
+  /** Release the retained descriptor. Idempotent. */
+  readonly close: () => void;
 }
 
 /**
@@ -104,14 +163,33 @@ export interface NativeExpectedSourceFacts {
   readonly style: { readonly state: 'present' | 'absent'; readonly value: unknown };
   /** The effective captions, from the fixed original native consumer rules. */
   readonly captions: { readonly state: 'present' | 'absent'; readonly value: unknown };
+  /**
+   * The retained descriptors. The proof holds them for the whole verification.
+   *
+   * The Host takes ownership of these handles the moment the read resolves, and closes
+   * all of them if anything after that fails.
+   */
+  readonly retained: readonly NativeExpectedRetainedFile[];
+  /**
+   * The closure guard.
+   *
+   * It answers, synchronously, whether the *entire* relevant closure is still the one
+   * that was read: the membership of every path and dependency, including the settings,
+   * the style, the captions, the markers and the film, and any addition to or removal
+   * from that closure. It is never derived from a request and it is never `true` by
+   * default.
+   */
+  readonly verifyClosure: () => boolean;
 }
 
 /**
  * MAIN's committed reader (the I4 closure).
  *
  * It is a port, not a second implementation: the Host owns the committed source, and
- * this service consumes what the Host reads. When the reader is absent or refuses, the
- * expected value is `unsupported` and no acknowledgement is produced.
+ * this service consumes what the Host reads. The reader must return the files it read
+ * **still open**, so the proof can hold a real file identity instead of a copy of one.
+ * When the reader is absent or refuses, the expected value is `unsupported` and no
+ * acknowledgement is produced.
  */
 export interface NativeExpectedSourcePort {
   readSource(input: { readonly binding: NativeExpectedBinding }): Promise<NativeExpectedSourceFacts>;
@@ -131,7 +209,8 @@ export interface NativeExpectedPart {
  * The expected projection of the committed source.
  *
  * It is what the editor is compared against. Every part carries its *own* digest, and an
- * absent part carries the digest of the pinned default rather than a null.
+ * absent part carries the digest of the pinned default rather than a null. Everything in
+ * it is frozen: the caller can never reach a mutable nested fact.
  */
 export interface NativeExpectedProjection {
   readonly project_id: string;
@@ -146,13 +225,6 @@ export interface NativeExpectedProjection {
   readonly parts: Readonly<Record<NativeExpectedPartKind, NativeExpectedPart>>;
 }
 
-/** The facts a proof holds while a verification is in flight. */
-export interface NativeExpectedFacts {
-  readonly binding: NativeExpectedBinding;
-  readonly projection: NativeExpectedProjection;
-  readonly input_sha256: string;
-}
-
 /**
  * The brand of a real proof.
  *
@@ -161,41 +233,86 @@ export interface NativeExpectedFacts {
  */
 const PROOF_BRAND = Symbol('narralens.native-expected-proof@1');
 
+/** The facts a proof holds while a verification is in flight. */
+interface NativeExpectedFacts {
+  /** The issuing instance's own token. A proof from another instance is refused. */
+  readonly instance: object;
+  /** The very binding object `prove` was given. `assertCurrent` requires this one. */
+  readonly binding: NativeExpectedBinding;
+  /** The immutable field snapshot of that binding, taken when the proof was made. */
+  readonly binding_snapshot: NativeExpectedBindingSnapshot;
+  readonly projection: NativeExpectedProjection;
+  readonly input_sha256: string;
+  /** The retained descriptors, still open. */
+  readonly retained: readonly NativeExpectedRetainedFile[];
+  /** The closure guard, owned by the reader. */
+  readonly verifyClosure: () => boolean;
+}
+
+/**
+ * The held facts, outside every object's reach.
+ *
+ * A `WeakMap` is used on purpose: the facts are not a property of the proof, so no
+ * caller can read them, mutate them or fabricate them. Membership in this map *is* the
+ * outstanding-membership check.
+ */
+const HELD_FACTS = new WeakMap<NativeExpectedProof, NativeExpectedFacts>();
+
 /**
  * An opaque proof.
  *
- * It holds the original file identities for as long as the verification needs them, and
- * it is released explicitly. `assertCurrent` refuses a released proof.
+ * It carries nothing but its own identity. The facts live in a module-private map, so a
+ * proof cannot be rebuilt from JSON, cannot be mutated from outside and cannot be
+ * presented to another instance.
  */
 export class NativeExpectedProof {
-  readonly #facts: NativeExpectedFacts;
   #released = false;
 
-  constructor(brand: symbol, facts: NativeExpectedFacts) {
+  constructor(brand: symbol) {
     if (brand !== PROOF_BRAND) throw new Error('NATIVE_EXPECTED_PROOF_FORGED');
-    this.#facts = facts;
   }
-
-  /** The held facts. They are readable only by the service that owns the proof. */
-  get facts(): NativeExpectedFacts { return this.#facts; }
 
   /** Whether the proof has been released. */
   get released(): boolean { return this.#released; }
 
-  /** Drop the held identities. The proof is dead afterwards. */
-  release(): void { this.#released = true; }
+  /** Mark the proof released. Only the owning service may do this. */
+  markReleased(): void { this.#released = true; }
 }
 
 /** The fixed expected interface. */
 export interface NativeExpectedPort {
   /** Read and hash the committed source independently of the editor. */
   prove(binding: NativeExpectedBinding): Promise<NativeExpectedProof>;
-  /** Re-check that the binding and the proof still describe the same current source. */
+  /**
+   * The final synchronous guard.
+   *
+   * It requires the proof to be outstanding, to come from this instance, to carry the
+   * very binding it was proved against and that binding's original field snapshot, and
+   * to still hold a source closure whose identity and bytes have not changed. It throws
+   * when any of that is false.
+   */
   assertCurrent(binding: NativeExpectedBinding, proof: NativeExpectedProof): NativeExpectedProjection;
-  /** Drop the proof's held identities. */
+  /** Drop the proof's held facts and release its retained descriptors. */
   release(proof: NativeExpectedProof): void;
-  /** Close the service: no further proof may be produced, and the held ones are dropped. */
+  /** Close the service: no further proof may be produced, and the held ones are released. */
   close(): void;
+}
+
+/**
+ * The approved build record.
+ *
+ * It is a *reviewed* record, not the manifest that sits next to the built files. The
+ * built modules are only accepted when their bytes match a digest that a review
+ * approved, and the approval is itself linked to the digest of the tracked inputs.
+ */
+export interface NativeExpectedApprovedBuild {
+  readonly upstream_sha: string;
+  /** The digest of the tracked build inputs, recomputed and compared on every load. */
+  readonly inputs_sha256: string;
+  /** The digest of the approved build manifest. */
+  readonly build_sha256: string;
+  /** The approved digest of each built module, by its file name. */
+  readonly modules: Readonly<Record<string, string>>;
 }
 
 /** The pinned built candidate, as it is loaded from the private runtime root. */
@@ -206,15 +323,8 @@ export interface NativeExpectedLibrary {
   readonly hydrationCanonicalJson: (value: unknown) => string;
 }
 
-/** The build manifest the pinned candidate leaves behind. */
-interface NativeExpectedBuildManifest {
-  readonly kind: string;
-  readonly upstream_sha: string;
-  readonly files: ReadonlyArray<{ readonly path: string; readonly bytes: number; readonly sha256: string }>;
-}
-
 export interface NativeExpectedLibraryLoader {
-  load(): Promise<NativeExpectedLibrary>;
+  load(approved: NativeExpectedApprovedBuild): Promise<NativeExpectedLibrary>;
 }
 
 /**
@@ -233,46 +343,144 @@ export function nativeExpectedDistRoot(): string {
   return resolve(nativeExpectedRuntimeRoot(), 'managed-native-expected', 'dist');
 }
 
+/** The tracked build inputs of this ticket. They are reviewed source, not build output. */
+export function nativeExpectedInputsRoot(): string {
+  return resolve(fileURLToPath(new URL('../../../tools/agent-driven/product/native-inputs', import.meta.url)));
+}
+
+/** The tracked inputs the expected candidate is built from, by name. */
+export const NATIVE_EXPECTED_INPUT_FILES = Object.freeze([
+  'build-expected.mjs',
+  'expected-projection.d.ts',
+  'expected-projection.mjs',
+  'native-pure.entry.ts',
+  'request013.patch',
+  'vite.expected.config.mjs',
+]);
+
 const sha256 = (bytes: Uint8Array): string => createHash('sha256').update(bytes).digest('hex');
+
+/**
+ * The digest of the tracked build inputs.
+ *
+ * It is the digest of the reviewed source files themselves, so a changed input is
+ * detected before anything is built or loaded.
+ */
+export async function nativeExpectedInputsDigest(inputsRoot: string = nativeExpectedInputsRoot()): Promise<string> {
+  const lines: string[] = [];
+  for (const name of NATIVE_EXPECTED_INPUT_FILES) {
+    const bytes = await readFile(resolve(inputsRoot, name));
+    lines.push(`${name}\0${sha256(bytes)}`);
+  }
+  return sha256(Buffer.from(lines.join('\n'), 'utf8'));
+}
+
+/**
+ * The dependency specifiers a built module declares.
+ *
+ * Only a `node:` builtin and a relative path that stays inside the verified directory
+ * may be imported: a bare specifier would resolve outside the verified bytes, and a
+ * relative path that climbs out would too. Either would be an unverified dependency.
+ */
+export function nativeExpectedModuleSpecifiers(source: string): readonly string[] {
+  const found = new Set<string>();
+  const patterns = [
+    /(?:^|[^\w$])(?:import|export)\s[^;'"]*?from\s*['"]([^'"]+)['"]/gu,
+    /(?:^|[^\w$])import\s*['"]([^'"]+)['"]/gu,
+    /(?:^|[^\w$])import\s*\(\s*['"]([^'"]+)['"]\s*\)/gu,
+    /(?:^|[^\w$])require\s*\(\s*['"]([^'"]+)['"]\s*\)/gu,
+  ];
+  for (const pattern of patterns) {
+    for (const match of source.matchAll(pattern)) {
+      const specifier = match[1];
+      if (specifier !== undefined) found.add(specifier);
+    }
+  }
+  return [...found].sort();
+}
 
 /**
  * Load the pinned built candidate from the private runtime root.
  *
- * The loader is deliberately strict: the build manifest must name the pinned upstream,
- * and the two modules it loads must be the exact bytes the manifest recorded. A
- * missing build, a changed byte or a different upstream is a refusal — never a silent
- * fallback to another candidate.
+ * The loader is deliberately strict, and it is strict in this order:
+ *
+ * 1. the approved record must name the pinned upstream;
+ * 2. the tracked inputs are re-hashed and must match the approved `inputs_sha256`;
+ * 3. the build manifest is hashed and must match the approved `build_sha256`, so a
+ *    co-located manifest can never bless a module it did not describe;
+ * 4. every module's bytes must match the approved module digest, and every dependency
+ *    it declares must be a builtin or a path that stays inside the verified directory;
+ * 5. the verified bytes are materialised into a private directory and *those* bytes are
+ *    imported, so there is no window between the check and the import;
+ * 6. the private directory is removed again once the import has resolved.
+ *
+ * A missing build, a changed input, a changed manifest, a swapped module, an unbound
+ * dependency or a different upstream is a refusal. There is no fallback to another
+ * candidate.
  */
-export function nativeExpectedLibraryLoader(distRoot: string = nativeExpectedDistRoot()): NativeExpectedLibraryLoader {
+export function nativeExpectedLibraryLoader(deps: {
+  readonly distRoot?: string;
+  readonly inputsRoot?: string;
+  readonly runtimeRoot?: string;
+} = {}): NativeExpectedLibraryLoader {
+  const distRoot = deps.distRoot ?? nativeExpectedDistRoot();
+  const inputsRoot = deps.inputsRoot ?? nativeExpectedInputsRoot();
+  const runtimeRoot = deps.runtimeRoot ?? nativeExpectedRuntimeRoot();
   return {
-    async load(): Promise<NativeExpectedLibrary> {
-      const manifestRaw = await readFile(resolve(distRoot, 'build-manifest.json'), 'utf8')
+    async load(approved: NativeExpectedApprovedBuild): Promise<NativeExpectedLibrary> {
+      if (approved.upstream_sha !== NATIVE_EXPECTED_UPSTREAM_SHA) throw new Error('NATIVE_EXPECTED_UPSTREAM_MISMATCH');
+      const inputs = await nativeExpectedInputsDigest(inputsRoot);
+      if (inputs !== approved.inputs_sha256) throw new Error('NATIVE_EXPECTED_INPUTS_MISMATCH');
+      const manifestBytes = await readFile(resolve(distRoot, 'build-manifest.json'))
         .catch(() => { throw new Error('NATIVE_EXPECTED_BUILD_MISSING'); });
-      const manifest = JSON.parse(manifestRaw) as NativeExpectedBuildManifest;
-      if (manifest.kind !== 'narralens.native-expected-projection-build@1') throw new Error('NATIVE_EXPECTED_BUILD_MANIFEST_INVALID');
-      if (manifest.upstream_sha !== NATIVE_EXPECTED_UPSTREAM_SHA) throw new Error('NATIVE_EXPECTED_UPSTREAM_MISMATCH');
-      const recorded = new Map(manifest.files.map(file => [file.path, file.sha256]));
-      const expectedModule = resolve(distRoot, 'expected-projection.mjs');
-      const pureModule = resolve(distRoot, 'native-pure-library.mjs');
-      for (const [file, path] of [[expectedModule, 'expected-projection.mjs'], [pureModule, 'native-pure-library.mjs']] as const) {
-        const bytes = await readFile(file).catch(() => { throw new Error('NATIVE_EXPECTED_BUILD_MISSING'); });
-        if (recorded.get(path) !== sha256(bytes)) throw new Error('NATIVE_EXPECTED_BUILD_BYTES_MISMATCH');
+      if (sha256(manifestBytes) !== approved.build_sha256) throw new Error('NATIVE_EXPECTED_BUILD_MANIFEST_MISMATCH');
+      const names = Object.keys(approved.modules).sort();
+      if (names.length === 0) throw new Error('NATIVE_EXPECTED_BUILD_NOT_APPROVED');
+      const verifiedRoot = resolve(runtimeRoot, 'verified', approved.build_sha256);
+      await mkdir(verifiedRoot, { recursive: true, mode: 0o700 });
+      const verified: Array<[string, string]> = [];
+      for (const name of names) {
+        const bytes = await readFile(resolve(distRoot, name)).catch(() => { throw new Error('NATIVE_EXPECTED_BUILD_MISSING'); });
+        if (sha256(bytes) !== approved.modules[name]) throw new Error('NATIVE_EXPECTED_MODULE_MISMATCH');
+        // The imported file is a private copy of the *verified* bytes, so nothing can be
+        // substituted between the check and the import.
+        const target = resolve(verifiedRoot, name);
+        await writeFile(target, bytes, { flag: 'wx', mode: 0o600 }).catch(() => undefined);
+        const copied = await readFile(target);
+        if (sha256(copied) !== approved.modules[name]) throw new Error('NATIVE_EXPECTED_VERIFIED_COPY_MISMATCH');
+        // Every declared dependency must stay inside the verified directory.
+        for (const specifier of nativeExpectedModuleSpecifiers(copied.toString('utf8'))) {
+          if (specifier.startsWith('node:')) continue;
+          if (!specifier.startsWith('.')) throw new Error('NATIVE_EXPECTED_MODULE_DEPENDENCY_UNBOUND');
+          const target2 = resolve(verifiedRoot, specifier);
+          if (!target2.startsWith(verifiedRoot + '/')) throw new Error('NATIVE_EXPECTED_MODULE_DEPENDENCY_UNBOUND');
+          if (!names.includes(target2.slice(verifiedRoot.length + 1))) throw new Error('NATIVE_EXPECTED_MODULE_DEPENDENCY_UNBOUND');
+        }
+        verified.push([name, target]);
       }
-      const expected = (await import(pathToFileURL(expectedModule).href)) as unknown as {
-        readonly EXPECTED_PROFILE: string;
-        computeExpectedProjection(input: unknown): ExpectedProjectionResult;
-      };
-      const pure = (await import(pathToFileURL(pureModule).href)) as unknown as {
-        readonly hydrationCanonicalJson: (value: unknown) => string;
-      };
-      if (expected.EXPECTED_PROFILE !== NATIVE_EXPECTED_PROFILE) throw new Error('NATIVE_EXPECTED_PROFILE_MISMATCH');
-      if (typeof pure.hydrationCanonicalJson !== 'function') throw new Error('NATIVE_EXPECTED_CANONICAL_MISSING');
-      return Object.freeze({
-        EXPECTED_PROFILE: NATIVE_EXPECTED_PROFILE,
-        upstream_sha: NATIVE_EXPECTED_UPSTREAM_SHA,
-        computeExpectedProjection: expected.computeExpectedProjection,
-        hydrationCanonicalJson: pure.hydrationCanonicalJson,
-      });
+      const expectedPath = verified.find(([name]) => name === 'expected-projection.mjs');
+      const purePath = verified.find(([name]) => name === 'native-pure-library.mjs');
+      if (expectedPath === undefined || purePath === undefined) throw new Error('NATIVE_EXPECTED_MODULE_MISSING');
+      try {
+        const expected = (await import(pathToFileURL(expectedPath[1]).href)) as unknown as {
+          readonly EXPECTED_PROFILE: string;
+          computeExpectedProjection(input: unknown): ExpectedProjectionResult;
+        };
+        const pure = (await import(pathToFileURL(purePath[1]).href)) as unknown as {
+          readonly hydrationCanonicalJson: (value: unknown) => string;
+        };
+        if (expected.EXPECTED_PROFILE !== NATIVE_EXPECTED_PROFILE) throw new Error('NATIVE_EXPECTED_PROFILE_MISMATCH');
+        if (typeof pure.hydrationCanonicalJson !== 'function') throw new Error('NATIVE_EXPECTED_CANONICAL_MISSING');
+        return Object.freeze({
+          EXPECTED_PROFILE: NATIVE_EXPECTED_PROFILE,
+          upstream_sha: NATIVE_EXPECTED_UPSTREAM_SHA,
+          computeExpectedProjection: expected.computeExpectedProjection,
+          hydrationCanonicalJson: pure.hydrationCanonicalJson,
+        });
+      } finally {
+        // The private copy exists only for the import; nothing is left behind.
+        await rm(verifiedRoot, { recursive: true, force: true }).catch(() => undefined);
+      }
     },
   };
 }
@@ -282,6 +490,8 @@ export interface OpenFilmNativeExpectedDeps {
   readonly source: NativeExpectedSourcePort;
   /** The pinned built candidate's loader. */
   readonly loader: NativeExpectedLibraryLoader;
+  /** The reviewed approval of the build. Without it nothing is loaded. */
+  readonly approved: NativeExpectedApprovedBuild;
 }
 
 /**
@@ -294,6 +504,9 @@ export interface OpenFilmNativeExpectedDeps {
 export class OpenFilmNativeExpected implements NativeExpectedPort {
   readonly #source: NativeExpectedSourcePort;
   readonly #loader: NativeExpectedLibraryLoader;
+  readonly #approved: NativeExpectedApprovedBuild;
+  /** This instance's own token. A proof from another instance is refused. */
+  readonly #instance = {};
   readonly #outstanding = new Set<NativeExpectedProof>();
   #library: Promise<NativeExpectedLibrary> | null = null;
   #closed = false;
@@ -301,10 +514,11 @@ export class OpenFilmNativeExpected implements NativeExpectedPort {
   constructor(deps: OpenFilmNativeExpectedDeps) {
     this.#source = deps.source;
     this.#loader = deps.loader;
+    this.#approved = deps.approved;
   }
 
   #load(): Promise<NativeExpectedLibrary> {
-    this.#library ??= this.#loader.load();
+    this.#library ??= this.#loader.load(this.#approved);
     return this.#library;
   }
 
@@ -314,39 +528,76 @@ export class OpenFilmNativeExpected implements NativeExpectedPort {
     const library = await this.#load();
     if (!binding.isCurrent()) throw new Error('NATIVE_EXPECTED_BINDING_STALE');
     const facts = await this.#source.readSource({ binding });
-    if (!binding.isCurrent()) throw new Error('NATIVE_EXPECTED_BINDING_STALE');
-    const projection = this.#projection(binding, facts, library);
-    const proof = new NativeExpectedProof(PROOF_BRAND, {
-      binding,
-      projection,
-      input_sha256: sha256(Buffer.from(library.hydrationCanonicalJson(facts.expected_input), 'utf8')),
-    });
-    this.#outstanding.add(proof);
-    return proof;
+    // The handles are taken over the moment the read resolves. From here on they are
+    // this service's, and every failure path closes them.
+    const retained = facts.retained;
+    try {
+      if (!binding.isCurrent()) throw new Error('NATIVE_EXPECTED_BINDING_STALE');
+      const projection = this.#projection(binding, facts, library);
+      const proof = new NativeExpectedProof(PROOF_BRAND);
+      HELD_FACTS.set(proof, {
+        instance: this.#instance,
+        binding,
+        binding_snapshot: snapshotNativeExpectedBinding(binding),
+        projection,
+        input_sha256: sha256(Buffer.from(library.hydrationCanonicalJson(facts.expected_input), 'utf8')),
+        retained,
+        verifyClosure: facts.verifyClosure,
+      });
+      this.#outstanding.add(proof);
+      return proof;
+    } catch (error) {
+      // Nothing may leak: a failure after the reader returned still releases its files.
+      for (const file of retained) file.close();
+      throw error;
+    }
   }
 
   assertCurrent(binding: NativeExpectedBinding, proof: NativeExpectedProof): NativeExpectedProjection {
     if (this.#closed) throw new Error('NATIVE_EXPECTED_CLOSED');
     if (proof.released) throw new Error('NATIVE_EXPECTED_PROOF_RELEASED');
-    const facts = proof.facts;
+    const facts = HELD_FACTS.get(proof);
+    if (facts === undefined) throw new Error('NATIVE_EXPECTED_PROOF_FOREIGN');
+    if (facts.instance !== this.#instance) throw new Error('NATIVE_EXPECTED_PROOF_FOREIGN');
+    if (!this.#outstanding.has(proof)) throw new Error('NATIVE_EXPECTED_PROOF_FOREIGN');
+    // The very binding object, and its immutable field snapshot: neither the object's
+    // identity nor the fields alone are enough, so both are checked.
+    if (facts.binding !== binding) throw new Error('NATIVE_EXPECTED_BINDING_MOVED');
+    const snapshot = snapshotNativeExpectedBinding(binding);
+    const held = facts.binding_snapshot;
+    if (snapshot.project_id !== held.project_id
+      || snapshot.native_project_id !== held.native_project_id
+      || snapshot.revision !== held.revision
+      || snapshot.snapshot_id !== held.snapshot_id
+      || snapshot.source_digest !== held.source_digest
+      || snapshot.instance_generation !== held.instance_generation
+      || snapshot.selection_version !== held.selection_version
+      || snapshot.workspace_ref !== held.workspace_ref
+      || snapshot.workspace_snapshot_id !== held.workspace_snapshot_id
+      || snapshot.workspace_source_digest !== held.workspace_source_digest
+      || snapshot.workspace_revision !== held.workspace_revision) throw new Error('NATIVE_EXPECTED_BINDING_MOVED');
     if (!binding.isCurrent()) throw new Error('NATIVE_EXPECTED_BINDING_STALE');
-    if (facts.binding.revision !== binding.revision
-      || facts.binding.snapshot_id !== binding.snapshot_id
-      || facts.binding.source_digest !== binding.source_digest
-      || facts.binding.selection_version !== binding.selection_version
-      || facts.binding.instance_generation !== binding.instance_generation
-      || facts.binding.project_id !== binding.project_id) throw new Error('NATIVE_EXPECTED_BINDING_MOVED');
+    // The synchronous final guard: the whole closure, and then every retained file.
+    if (facts.verifyClosure() !== true) throw new Error('NATIVE_EXPECTED_CLOSURE_MOVED');
+    for (const file of facts.retained) {
+      if (file.verify() !== true) throw new Error('NATIVE_EXPECTED_SOURCE_MOVED');
+    }
     return facts.projection;
   }
 
   release(proof: NativeExpectedProof): void {
+    const facts = HELD_FACTS.get(proof);
     this.#outstanding.delete(proof);
-    proof.release();
+    if (facts !== undefined) {
+      HELD_FACTS.delete(proof);
+      for (const file of facts.retained) file.close();
+    }
+    proof.markReleased();
   }
 
   close(): void {
     this.#closed = true;
-    for (const proof of this.#outstanding) proof.release();
+    for (const proof of [...this.#outstanding]) this.release(proof);
     this.#outstanding.clear();
     this.#library = null;
   }
@@ -359,7 +610,7 @@ export class OpenFilmNativeExpected implements NativeExpectedPort {
    * they are hashed with the *same* canonical implementation the editor used.
    */
   #projection(binding: NativeExpectedBinding, facts: NativeExpectedSourceFacts, library: NativeExpectedLibrary): NativeExpectedProjection {
-    const unsupported = (reason: string): NativeExpectedPart => ({ state: 'unsupported', effective_sha256: null, reason });
+    const unsupported = (reason: string): NativeExpectedPart => Object.freeze({ state: 'unsupported', effective_sha256: null, reason });
     const computed = library.computeExpectedProjection(facts.expected_input);
     const parts: Record<NativeExpectedPartKind, NativeExpectedPart> = {
       settings: unsupported('NOT_COMPUTED'),
@@ -371,8 +622,8 @@ export class OpenFilmNativeExpected implements NativeExpectedPort {
       const reason = `EXPECTED_${computed.reason}`;
       for (const kind of NATIVE_EXPECTED_PARTS) parts[kind] = unsupported(reason);
     } else {
-      parts.settings = this.#part('settings', facts.expected_input.settings.file.state === 'present' ? 'hydrated' : 'absent_default', computed.settings.sha256);
-      parts.markers = this.#part('markers', facts.expected_input.markers.file.state === 'present' ? 'hydrated' : 'absent_default', computed.markers.sha256);
+      parts.settings = this.#part(facts.expected_input.settings.file.state === 'present' ? 'hydrated' : 'absent_default', computed.settings.sha256);
+      parts.markers = this.#part(facts.expected_input.markers.file.state === 'present' ? 'hydrated' : 'absent_default', computed.markers.sha256);
       parts.subtitle_style = this.#effective('subtitle_style', facts.style, library);
       parts.captions = this.#effective('captions', facts.captions, library);
     }
@@ -384,13 +635,13 @@ export class OpenFilmNativeExpected implements NativeExpectedPort {
       film_sha256: facts.film.sha256,
       film_bytes: facts.film.bytes,
       native_rev: facts.film.native_rev,
-      source_closure: Object.freeze([...facts.entries].map(entry => Object.freeze({ ...entry }))),
+      source_closure: Object.freeze(facts.entries.map(entry => Object.freeze({ relative_path: entry.relative_path, sha256: entry.sha256 }))),
       selection_version: binding.selection_version,
       parts: Object.freeze(parts),
     });
   }
 
-  #part(kind: NativeExpectedPartKind, state: 'hydrated' | 'absent_default', sha256: string): NativeExpectedPart {
+  #part(state: 'hydrated' | 'absent_default', sha256: string): NativeExpectedPart {
     return Object.freeze({ state, effective_sha256: sha256, reason: null });
   }
 

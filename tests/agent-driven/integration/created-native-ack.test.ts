@@ -1,4 +1,8 @@
 import { describe, expect, it } from 'vitest';
+import { createHash } from 'node:crypto';
+import { closeSync, fstatSync, lstatSync, mkdirSync, mkdtempSync, openSync, readFileSync, readSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join, relative, resolve, sep } from 'node:path';
 import {
   NATIVE_OBSERVATION_FORMAT,
   nativeSecondsCanonical,
@@ -7,6 +11,18 @@ import {
   validateNativeObservationEnvelope,
   validateNativeSelectionObservation,
 } from '../../../src/host/m5/native-observation.js';
+import {
+  NATIVE_EXPECTED_INPUT_FILES,
+  NATIVE_EXPECTED_UPSTREAM_SHA,
+  OpenFilmNativeExpected,
+  nativeExpectedInputsDigest,
+  nativeExpectedLibraryLoader,
+  snapshotNativeExpectedBinding,
+  type NativeExpectedBinding,
+  type NativeExpectedRetainedFile,
+  type NativeExpectedSourceFacts,
+  type NativeExpectedSourcePort,
+} from '../../../src/host/m5/openfilm-native-expected.js';
 
 /**
  * The closed native observation envelope (A-R2, L05).
@@ -201,5 +217,454 @@ describe('the native seconds canonicalisation', () => {
 
   it('refuses a value that is not finite', () => {
     expect(() => nativeSecondsCanonical(Number.POSITIVE_INFINITY)).toThrow('NATIVE_SECONDS_NOT_FINITE');
+  });
+});
+
+/* ────────────────────────────────────────────────────────────────────────────────────
+ * The independent expected side.
+
+ * Everything below runs on real files and real descriptors in a temporary directory.
+ * The pinned 015 candidate is **not built** — building it needs a MAIN heavy-resource
+ * grant — so the *library* is a local stand-in whose own API shape is the pinned one.
+ * What is under test here is not the 015 math: it is the retained-identity guard, the
+ * closure guard, the proof's membership rules, the loader's approval chain and the
+ * descriptor cleanup. Those are the parts this ticket owns.
+ * ──────────────────────────────────────────────────────────────────────────────────── */
+
+const sha256 = (bytes: Uint8Array): string => createHash('sha256').update(bytes).digest('hex');
+const HASH_A = 'a'.repeat(64);
+
+const bindingOf = (overrides: Partial<NativeExpectedBinding> = {}): NativeExpectedBinding => ({
+  project_id: 'p1',
+  native_project_id: 'n1',
+  revision: 3,
+  snapshot_id: 'snap1',
+  source_digest: HASH_A,
+  instance_generation: 2,
+  selection_version: 4,
+  workspace: { workspace_ref: 'ws1', snapshot_id: 'snap1', source_digest: HASH_A, revision: 3 },
+  isCurrent: () => true,
+  ...overrides,
+});
+
+/**
+ * A reader over real files.
+ *
+ * It keeps the descriptors open, binds the current path to the retained device and
+ * inode, re-hashes the bytes behind the same descriptor and checks the whole closure
+ * membership. This is the port's contract, exercised for real.
+ */
+function realReader(root: string, names: readonly string[]): {
+  port: NativeExpectedSourcePort;
+  readonly openDescriptors: () => number;
+  readonly closedDescriptors: () => number;
+} {
+  const descriptors: number[] = [];
+  let closed = 0;
+  const retained: NativeExpectedRetainedFile[] = [];
+  for (const name of names) {
+    const path = resolve(root, name);
+    const fd = openSync(path, 'r');
+    descriptors.push(fd);
+    const bytes = readFileSync(path);
+    const identity = fstatSync(fd);
+    retained.push({
+      relative_path: name,
+      sha256: sha256(bytes),
+      bytes: bytes.byteLength,
+      verify: () => {
+        try {
+          const stat = lstatSync(path);
+          // A symlink, a different file or a different inode is a failure, even when
+          // the bytes behind the retained descriptor are unchanged.
+          if (!stat.isFile() || stat.dev !== identity.dev || stat.ino !== identity.ino) return false;
+          const buffer = Buffer.alloc(bytes.byteLength);
+          const read = readSync(fd, buffer, 0, buffer.byteLength, 0);
+          if (read !== buffer.byteLength) return false;
+          return sha256(buffer) === sha256(bytes);
+        } catch {
+          return false;
+        }
+      },
+      close: () => {
+        try { closeSync(fd); } catch { /* already closed */ }
+        closed += 1;
+      },
+    });
+  }
+  const listing = (): string[] => {
+    const found: string[] = [];
+    const walk = (directory: string): void => {
+      for (const entry of readdirSync(directory, { withFileTypes: true })) {
+        const full = resolve(directory, entry.name);
+        if (entry.isDirectory()) walk(full);
+        else if (entry.isFile()) found.push(relative(root, full).split(sep).join('/'));
+      }
+    };
+    walk(root);
+    return found.sort();
+  };
+  const closedSet = listing();
+  const rootIdentity = lstatSync(root);
+  const port: NativeExpectedSourcePort = {
+    readSource: async () => {
+      const facts: NativeExpectedSourceFacts = {
+        entries: retained.map(file => ({ relative_path: file.relative_path, sha256: file.sha256 })),
+        film: { relative_path: 'film.html', sha256: retained[0]?.sha256 ?? HASH_A, bytes: retained[0]?.bytes ?? 0, native_rev: 'rev-1' },
+        expected_input: {
+          format: 'narralens.native-expected-input@1',
+          upstream_sha: NATIVE_EXPECTED_UPSTREAM_SHA,
+          profile: 'narralens.native-expected-numeric@1',
+          binding: { project_id: 'p1', project_revision: 3, snapshot_id: 'snap1', source_digest: HASH_A, film_sha256: HASH_A },
+          provenance: { origin: 'host_independent', source_manifest_digest: HASH_A, rights_digest: null, media_catalog_digest: null, listing_digest: HASH_A },
+          ui_profile: { pending_drops: 'excluded', preview_error: 'excluded', live_height: 'excluded', browser_preferences: 'excluded' },
+          source_entries: [{ relative_path: 'film.html', sha256: HASH_A }],
+          film: { file: { relative_path: 'film.html', state: 'present', sha256: HASH_A }, value: { tracks: [] } },
+          settings: { file: { relative_path: '.film/settings.json', state: 'absent', sha256: null }, value: {} },
+          markers: { file: { relative_path: '.film/markers.json', state: 'absent', sha256: null }, value: [] },
+          clip_refs: [],
+          media_facts: [],
+          video_files_in_native_order: [],
+          span_facts: { profile: 'numeric_source_only', origin: 'not_used', proof_digest: null, values: [] },
+        },
+        style: { state: 'absent', value: {} },
+        captions: { state: 'absent', value: { cues: [] } },
+        retained,
+        verifyClosure: () => {
+          // The root identity, and the membership of the closure. The *contents* are
+          // the per-file guard's business, not the closure's.
+          const rootStat = lstatSync(root);
+          if (!rootStat.isDirectory() || rootStat.dev !== rootIdentity.dev || rootStat.ino !== rootIdentity.ino) return false;
+          const now = listing();
+          if (now.length !== closedSet.length) return false;
+          for (let index = 0; index < now.length; index += 1) if (now[index] !== closedSet[index]) return false;
+          return true;
+        },
+      };
+      return facts;
+    },
+  };
+  return { port, openDescriptors: () => descriptors.length, closedDescriptors: () => closed };
+}
+
+/** A loader stand-in that is loaded through the *real* loader path. */
+function stageLibrary(root: string, options: { readonly throwOnCompute?: boolean } = {}): { dist: string; inputs: string; runtime: string; digestOf: (name: string) => string } {
+  const dist = resolve(root, 'dist');
+  const inputs = resolve(root, 'inputs');
+  const runtime = resolve(root, 'runtime');
+  mkdirSync(dist, { recursive: true });
+  mkdirSync(inputs, { recursive: true });
+  mkdirSync(runtime, { recursive: true });
+  for (const name of NATIVE_EXPECTED_INPUT_FILES) {
+    writeFileSync(resolve(inputs, name), readFileSync(resolve(nativeExpectedInputsRoot(), name)));
+  }
+  writeFileSync(resolve(dist, 'native-pure-library.mjs'),
+    'export function hydrationCanonicalJson(value) {\n'
+    + '  if (value === null || typeof value === "boolean" || typeof value === "string") return JSON.stringify(value);\n'
+    + '  if (typeof value === "number" && Number.isFinite(value)) return JSON.stringify(value);\n'
+    + '  if (Array.isArray(value)) return "[" + value.map(hydrationCanonicalJson).join(",") + "]";\n'
+    + '  if (value && typeof value === "object" && Object.getPrototypeOf(value) === Object.prototype) {\n'
+    + '    const record = value;\n'
+    + '    return "{" + Object.keys(record).filter((key) => record[key] !== undefined).sort()\n'
+    + '      .map((key) => JSON.stringify(key) + ":" + hydrationCanonicalJson(record[key])).join(",") + "}";\n'
+    + '  }\n'
+    + '  throw new Error("UNSUPPORTED_HYDRATION_VALUE");\n'
+    + '}\n');
+  writeFileSync(resolve(dist, 'expected-projection.mjs'),
+    'import { hydrationCanonicalJson } from "./native-pure-library.mjs";\n'
+    + 'export const EXPECTED_PROFILE = "narralens.native-expected-numeric@1";\n'
+    + (options.throwOnCompute === true
+      ? 'export function computeExpectedProjection() { throw new Error("THE_PROJECTION_FAILED"); }\n'
+      : 'export function computeExpectedProjection() {\n'
+        + '  return { status: "unsupported", profile: EXPECTED_PROFILE, reason: "INPUT_INVALID" };\n'
+        + '}\n')
+    + 'export { hydrationCanonicalJson };\n');
+  writeFileSync(resolve(dist, 'build-manifest.json'), JSON.stringify({ kind: 'narralens.native-expected-projection-build@1', upstream_sha: NATIVE_EXPECTED_UPSTREAM_SHA }));
+  return {
+    dist,
+    inputs,
+    runtime,
+    digestOf: (name: string) => sha256(readFileSync(resolve(dist, name))),
+  };
+}
+
+function nativeExpectedInputsRoot(): string {
+  return resolve(process.cwd(), 'tools/agent-driven/product/native-inputs');
+}
+
+async function approvedOf(staged: ReturnType<typeof stageLibrary>): Promise<{
+  upstream_sha: string;
+  inputs_sha256: string;
+  build_sha256: string;
+  modules: Record<string, string>;
+}> {
+  return {
+    upstream_sha: NATIVE_EXPECTED_UPSTREAM_SHA,
+    inputs_sha256: await nativeExpectedInputsDigest(staged.inputs),
+    build_sha256: sha256(readFileSync(resolve(staged.dist, 'build-manifest.json'))),
+    modules: {
+      'native-pure-library.mjs': staged.digestOf('native-pure-library.mjs'),
+      'expected-projection.mjs': staged.digestOf('expected-projection.mjs'),
+    },
+  };
+}
+
+describe('the retained source identity', () => {
+  it('refuses a proof whose file bytes drifted between prove and the acknowledgement', async () => {
+    const root = mkdtempSync(join(tmpdir(), 'narralens-r2-expected-'));
+    try {
+      const source = resolve(root, 'source');
+      mkdirSync(source, { recursive: true });
+      writeFileSync(resolve(source, 'film.html'), 'the original film');
+      const reader = realReader(source, ['film.html']);
+      const facts = await reader.port.readSource({ binding: bindingOf() });
+      // The bytes drift: the same length, different content. The membership of the
+      // closure did not move, so the closure guard still holds and the file guard is
+      // the one that refuses.
+      writeFileSync(resolve(source, 'film.html'), 'the drifted film');
+      expect(facts.retained[0]?.verify()).toBe(false);
+      expect(facts.verifyClosure()).toBe(true);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it('refuses a proof whose file was replaced by another file with the same bytes', async () => {
+    const root = mkdtempSync(join(tmpdir(), 'narralens-r2-expected-'));
+    try {
+      const source = resolve(root, 'source');
+      mkdirSync(source, { recursive: true });
+      const original = 'the original film';
+      writeFileSync(resolve(source, 'film.html'), original);
+      const reader = realReader(source, ['film.html']);
+      const facts = await reader.port.readSource({ binding: bindingOf() });
+      // The same bytes, a different file: the inode moved. The membership did not
+      // move, so the file guard is the one that refuses.
+      rmSync(resolve(source, 'film.html'));
+      writeFileSync(resolve(source, 'film.html'), original);
+      expect(facts.retained[0]?.verify()).toBe(false);
+      expect(facts.verifyClosure()).toBe(true);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it('refuses a closure that gained or lost a file', async () => {
+    const root = mkdtempSync(join(tmpdir(), 'narralens-r2-expected-'));
+    try {
+      const source = resolve(root, 'source');
+      mkdirSync(source, { recursive: true });
+      writeFileSync(resolve(source, 'film.html'), 'the original film');
+      const reader = realReader(source, ['film.html']);
+      const facts = await reader.port.readSource({ binding: bindingOf() });
+      expect(facts.verifyClosure()).toBe(true);
+      writeFileSync(resolve(source, 'extra.txt'), 'an addition');
+      expect(facts.verifyClosure()).toBe(false);
+      rmSync(resolve(source, 'extra.txt'));
+      expect(facts.verifyClosure()).toBe(true);
+      rmSync(resolve(source, 'film.html'));
+      expect(facts.verifyClosure()).toBe(false);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+});
+
+describe('the expected proof', () => {
+  const serviceOf = async (root: string, reader: { port: NativeExpectedSourcePort }, staged: ReturnType<typeof stageLibrary>): Promise<OpenFilmNativeExpected> =>
+    new OpenFilmNativeExpected({
+      source: reader.port,
+      loader: nativeExpectedLibraryLoader({ distRoot: staged.dist, inputsRoot: staged.inputs, runtimeRoot: staged.runtime }),
+      approved: await approvedOf(staged),
+    });
+
+  it('refuses a proof whose file drifted between prove and the acknowledgement', async () => {
+    const root = mkdtempSync(join(tmpdir(), 'narralens-r2-proof-'));
+    try {
+      const source = resolve(root, 'source');
+      mkdirSync(source, { recursive: true });
+      writeFileSync(resolve(source, 'film.html'), 'the original film');
+      const reader = realReader(source, ['film.html']);
+      const staged = stageLibrary(root);
+      const service = await serviceOf(root, reader, staged);
+      const binding = bindingOf();
+      const proof = await service.prove(binding);
+      writeFileSync(resolve(source, 'film.html'), 'the drifted film');
+      expect(() => service.assertCurrent(binding, proof)).toThrow('NATIVE_EXPECTED_SOURCE_MOVED');
+      service.release(proof);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it('refuses a proof whose file was replaced by an identical file, and a closure that changed', async () => {
+    const root = mkdtempSync(join(tmpdir(), 'narralens-r2-proof-'));
+    try {
+      const source = resolve(root, 'source');
+      mkdirSync(source, { recursive: true });
+      const original = 'the original film';
+      writeFileSync(resolve(source, 'film.html'), original);
+      const reader = realReader(source, ['film.html']);
+      const staged = stageLibrary(root);
+      const service = await serviceOf(root, reader, staged);
+      const binding = bindingOf();
+      const proof = await service.prove(binding);
+      rmSync(resolve(source, 'film.html'));
+      writeFileSync(resolve(source, 'film.html'), original);
+      expect(() => service.assertCurrent(binding, proof)).toThrow('NATIVE_EXPECTED_SOURCE_MOVED');
+      service.release(proof);
+
+      const second = await service.prove(binding);
+      writeFileSync(resolve(source, 'extra.txt'), 'an addition');
+      expect(() => service.assertCurrent(binding, second)).toThrow('NATIVE_EXPECTED_CLOSURE_MOVED');
+      service.release(second);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it('refuses a released proof and a proof from another instance', async () => {
+    const root = mkdtempSync(join(tmpdir(), 'narralens-r2-proof-'));
+    try {
+      const source = resolve(root, 'source');
+      mkdirSync(source, { recursive: true });
+      writeFileSync(resolve(source, 'film.html'), 'the original film');
+      const reader = realReader(source, ['film.html']);
+      const staged = stageLibrary(root);
+      const service = await serviceOf(root, reader, staged);
+      const other = await serviceOf(root, reader, staged);
+      const binding = bindingOf();
+      const proof = await service.prove(binding);
+      // Another instance may not assert this proof.
+      expect(() => other.assertCurrent(binding, proof)).toThrow('NATIVE_EXPECTED_PROOF_FOREIGN');
+      service.release(proof);
+      expect(() => service.assertCurrent(binding, proof)).toThrow('NATIVE_EXPECTED_PROOF_RELEASED');
+      // A fabricated proof is refused as well.
+      const fabricated = Object.create(Object.getPrototypeOf(proof)) as typeof proof;
+      expect(() => service.assertCurrent(binding, fabricated)).toThrow();
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it('refuses a binding that is not the one the proof was made against', async () => {
+    const root = mkdtempSync(join(tmpdir(), 'narralens-r2-proof-'));
+    try {
+      const source = resolve(root, 'source');
+      mkdirSync(source, { recursive: true });
+      writeFileSync(resolve(source, 'film.html'), 'the original film');
+      const reader = realReader(source, ['film.html']);
+      const staged = stageLibrary(root);
+      const service = await serviceOf(root, reader, staged);
+      const binding = bindingOf();
+      const proof = await service.prove(binding);
+      // The same fields, a different object.
+      expect(() => service.assertCurrent(bindingOf(), proof)).toThrow('NATIVE_EXPECTED_BINDING_MOVED');
+      service.release(proof);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it('closes every descriptor when the projection fails, and when the service is closed', async () => {
+    const root = mkdtempSync(join(tmpdir(), 'narralens-r2-proof-'));
+    try {
+      const source = resolve(root, 'source');
+      mkdirSync(source, { recursive: true });
+      writeFileSync(resolve(source, 'film.html'), 'the original film');
+      const reader = realReader(source, ['film.html']);
+      const staged = stageLibrary(root, { throwOnCompute: true });
+      const service = await serviceOf(root, reader, staged);
+      const binding = bindingOf();
+      await expect(service.prove(binding)).rejects.toThrow('THE_PROJECTION_FAILED');
+      // The reader's handles are the service's from the moment the read resolved.
+      expect(reader.closedDescriptors()).toBe(1);
+
+      const stagedOk = stageLibrary(resolve(root, 'second'));
+      const serviceOk = await serviceOf(resolve(root, 'second'), reader, stagedOk);
+      const proof = await serviceOk.prove(binding);
+      expect(reader.closedDescriptors()).toBe(1);
+      serviceOk.close();
+      expect(reader.closedDescriptors()).toBe(2);
+      expect(() => serviceOk.assertCurrent(binding, proof)).toThrow();
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+});
+
+describe('the expected loader approval chain', () => {
+  it('loads a candidate whose inputs, manifest and modules all match the approval', async () => {
+    const root = mkdtempSync(join(tmpdir(), 'narralens-r2-loader-'));
+    try {
+      const staged = stageLibrary(root);
+      const approved = await approvedOf(staged);
+      const library = await nativeExpectedLibraryLoader({ distRoot: staged.dist, inputsRoot: staged.inputs, runtimeRoot: staged.runtime }).load(approved);
+      expect(library.EXPECTED_PROFILE).toBe('narralens.native-expected-numeric@1');
+      expect(library.upstream_sha).toBe(NATIVE_EXPECTED_UPSTREAM_SHA);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it('refuses a changed input, a changed manifest and a swapped module', async () => {
+    const root = mkdtempSync(join(tmpdir(), 'narralens-r2-loader-'));
+    try {
+      const staged = stageLibrary(root);
+      const approved = await approvedOf(staged);
+      const loader = nativeExpectedLibraryLoader({ distRoot: staged.dist, inputsRoot: staged.inputs, runtimeRoot: staged.runtime });
+      // The tracked input moved.
+      writeFileSync(resolve(staged.inputs, 'expected-projection.mjs'), '// tampered\n');
+      await expect(loader.load(approved)).rejects.toThrow('NATIVE_EXPECTED_INPUTS_MISMATCH');
+      writeFileSync(resolve(staged.inputs, 'expected-projection.mjs'), readFileSync(resolve(nativeExpectedInputsRoot(), 'expected-projection.mjs')));
+      // The manifest moved.
+      writeFileSync(resolve(staged.dist, 'build-manifest.json'), '{"kind":"other"}');
+      await expect(loader.load(approved)).rejects.toThrow('NATIVE_EXPECTED_BUILD_MANIFEST_MISMATCH');
+      writeFileSync(resolve(staged.dist, 'build-manifest.json'), JSON.stringify({ kind: 'narralens.native-expected-projection-build@1', upstream_sha: NATIVE_EXPECTED_UPSTREAM_SHA }));
+      // The module moved.
+      writeFileSync(resolve(staged.dist, 'expected-projection.mjs'), 'export const EXPECTED_PROFILE = "other";\n');
+      await expect(loader.load(approved)).rejects.toThrow('NATIVE_EXPECTED_MODULE_MISMATCH');
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it('refuses a module that reaches outside the verified directory', async () => {
+    const root = mkdtempSync(join(tmpdir(), 'narralens-r2-loader-'));
+    try {
+      const staged = stageLibrary(root);
+      const approved = await approvedOf(staged);
+      writeFileSync(resolve(staged.dist, 'expected-projection.mjs'),
+        'import { something } from "some-package";\n'
+        + 'export const EXPECTED_PROFILE = "narralens.native-expected-numeric@1";\n'
+        + 'export function computeExpectedProjection() { return { status: "unsupported", profile: EXPECTED_PROFILE, reason: "INPUT_INVALID" }; }\n');
+      approved.modules['expected-projection.mjs'] = staged.digestOf('expected-projection.mjs');
+      await expect(nativeExpectedLibraryLoader({ distRoot: staged.dist, inputsRoot: staged.inputs, runtimeRoot: staged.runtime }).load(approved))
+        .rejects.toThrow('NATIVE_EXPECTED_MODULE_DEPENDENCY_UNBOUND');
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it('refuses a candidate whose upstream is not the pinned one', async () => {
+    const root = mkdtempSync(join(tmpdir(), 'narralens-r2-loader-'));
+    try {
+      const staged = stageLibrary(root);
+      const approved = await approvedOf(staged);
+      await expect(nativeExpectedLibraryLoader({ distRoot: staged.dist, inputsRoot: staged.inputs, runtimeRoot: staged.runtime })
+        .load({ ...approved, upstream_sha: '0'.repeat(40) })).rejects.toThrow('NATIVE_EXPECTED_UPSTREAM_MISMATCH');
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+});
+
+describe('the binding snapshot', () => {
+  it('captures the fields, so a mutated binding cannot pass for the original', () => {
+    const binding = bindingOf();
+    const snapshot = snapshotNativeExpectedBinding(binding);
+    expect(snapshot.project_id).toBe('p1');
+    expect(snapshot.workspace_ref).toBe('ws1');
+    expect(Object.isFrozen(snapshot)).toBe(true);
   });
 });
