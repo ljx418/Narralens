@@ -1,0 +1,13 @@
+{
+  "base": "ad5ac7dd26459c739b942850cdbbfebe6db4dce7",
+  "fix": "exact equality of winner media/ffprobe/full-decode Ref including version and complete render_spec, in addition to lineage/files/QC/supplement refs",
+  "old": "media-b01-mainrefs-before actual7 failures (3 role swaps,3 version drifts,render spec width)",
+  "new": "media-b01-mainrefs-after 72PASS1realtoolSKIP, typecheck24PASS",
+  "seed": "real immutable PublishedPackageStore seeded with schema-valid wrong manifest; actual files/lineage/QC/supplements unchanged; subsequent normal-store replay refused and winner verified unchanged",
+  "declaration": "qc_decision_digest binds QC item values only, not a trusted human decision/Approval; actual trusted decision remains BRIDGE/Host responsibility",
+  "independent": "REVIEW_PENDING",
+  "limits": [
+    "fake renderer/QC module fixtures",
+    "not real Host lease/ready/nativeAck/full A"
+  ]
+}

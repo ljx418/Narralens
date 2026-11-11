@@ -1,0 +1,402 @@
+
+> narralens@0.1.0 test /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+> vitest run --config vitest.config.ts tests/agent-driven/media/committed-render-phases.test.ts --maxWorkers=1 --minWorkers=1 -t 'persisted winner with wrong'
+
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+ ❯ tests/agent-driven/media/committed-render-phases.test.ts (73 tests | 7 failed | 66 skipped) 1238ms
+   ↓ encoding a committed closure > returns an encoded fact that describes the bytes it produced
+   ↓ encoding a committed closure > carries no quality-control verdict and no readiness
+   ↓ encoding a committed closure > names an immutable object that holds the film and its supplements
+   ↓ encoding a committed closure > never puts a physical path into the receipt
+   ↓ encoding a committed closure > asks the fence before the film is rendered and before the object is published
+   ↓ encoding a committed closure > does not encode when the attempt may not act
+   ↓ encoding a committed closure > leaves no published object behind when the renderer fails
+   ↓ encoding a committed closure > refuses a closure that does not say how many frames the film has
+   ↓ inspecting an encoded object > does not start a decode after the probe settles into durable cancelled
+   ↓ inspecting an encoded object > does not start a decode after the probe settles into durable superseded
+   ↓ inspecting an encoded object > does not start QC tools when preflight observes a durable cancelled attempt
+   ↓ inspecting an encoded object > does not start QC tools when preflight observes a durable superseded attempt
+   ↓ inspecting an encoded object > returns a receipt that is bound to the encoded fact
+   ↓ inspecting an encoded object > writes its own object and leaves the encoded object alone
+   ↓ inspecting an encoded object > refuses an encoded fact whose digest does not describe it
+   ↓ inspecting an encoded object > refuses an encoded fact that is about another snapshot
+   ↓ inspecting an encoded object > refuses when the closure is no longer the closure the film was rendered from
+   ↓ inspecting an encoded object > blocks when the decoder refuses the file
+   × publishing from the encoded and inspected bytes > refuses a persisted winner with wrong media role while preserving the winner 220ms
+     → promise resolved "{ …(7) }" instead of rejecting
+   × publishing from the encoded and inspected bytes > refuses a persisted winner with wrong probe role while preserving the winner 171ms
+     → promise resolved "{ …(7) }" instead of rejecting
+   × publishing from the encoded and inspected bytes > refuses a persisted winner with wrong decode role while preserving the winner 173ms
+     → promise resolved "{ …(7) }" instead of rejecting
+   × publishing from the encoded and inspected bytes > refuses a persisted winner with wrong media version while preserving the winner 170ms
+     → promise resolved "{ …(7) }" instead of rejecting
+   × publishing from the encoded and inspected bytes > refuses a persisted winner with wrong probe version while preserving the winner 167ms
+     → promise resolved "{ …(7) }" instead of rejecting
+   × publishing from the encoded and inspected bytes > refuses a persisted winner with wrong decode version while preserving the winner 169ms
+     → promise resolved "{ …(7) }" instead of rejecting
+   × publishing from the encoded and inspected bytes > refuses a persisted winner with wrong render spec while preserving the winner 165ms
+     → promise resolved "{ …(7) }" instead of rejecting
+   ↓ publishing from the encoded and inspected bytes > refuses a successful publication result if durable cancellation arrives during cleanup
+   ↓ publishing from the encoded and inspected bytes > refuses a legacy winner without lineage and preserves its verified files
+   ↓ publishing from the encoded and inspected bytes > refuses an existing winner with different media without relabelling or replacing it
+   ↓ publishing from the encoded and inspected bytes > refuses an existing winner with different encoder parent without relabelling or replacing it
+   ↓ publishing from the encoded and inspected bytes > refuses an existing winner with different QC parent without relabelling or replacing it
+   ↓ publishing from the encoded and inspected bytes > replays the same verified parent chain under a later publication lease
+   ↓ publishing from the encoded and inspected bytes > publishes one package and returns a receipt that names it
+   ↓ publishing from the encoded and inspected bytes > publishes the very bytes the encoder produced
+   ↓ publishing from the encoded and inspected bytes > does not publish a blocked inspection
+   ↓ publishing from the encoded and inspected bytes > does not publish a warning that has no recorded decision
+   ↓ publishing from the encoded and inspected bytes > publishes a warned inspection when the decision is recorded
+   ↓ publishing from the encoded and inspected bytes > refuses an inspection receipt that is not about this encoded fact
+   ↓ publishing from the encoded and inspected bytes > publishes under another job and another lease without changing the encoded fact
+   ↓ the phase object resolver > opens a file of an object and reads it in bounded pieces
+   ↓ the phase object resolver > refuses a read that is larger than the bound
+   ↓ the phase object resolver > refuses a file that is not the bytes it was recorded to be
+   ↓ the phase object resolver > refuses a path that walks out of the object
+   ↓ the phase object resolver > refuses an object id that is not a plain name
+   ↓ the objects a phase leaves behind > keeps a published object when the service is closed
+   ↓ the objects a phase leaves behind > keeps the encoded object when a later stage fails
+   ↓ the objects a phase leaves behind > holds no descriptor across the phases
+   ↓ MP01 — a closure digest over a fractional duration > computes a digest for a duration that is not a whole number of seconds
+   ↓ MP01 — a closure digest over a fractional duration > computes a digest for a film of one frame at 30 fps
+   ↓ MP01 — a closure digest over a fractional duration > computes a digest for a film of one frame at 30000/1001
+   ↓ MP01 — a closure digest over a fractional duration > does not carry the stated seconds into the digest
+   ↓ MP01 — a closure digest over a fractional duration > encodes and inspects a film whose frame rate is a rational number
+   ↓ MP02 — the resolver may not be walked out of, nor serve changed bytes > releases every opened root descriptor when an ancestor alias is rejected
+   ↓ MP02 — the resolver may not be walked out of, nor serve changed bytes > refuses an object root that is an alias of the real root
+   ↓ MP02 — the resolver may not be walked out of, nor serve changed bytes > refuses an object that is a symlink
+   ↓ MP02 — the resolver may not be walked out of, nor serve changed bytes > refuses a file that lives under a symlinked directory inside the object
+   ↓ MP02 — the resolver may not be walked out of, nor serve changed bytes > refuses to serve bytes that were changed in place after the file was opened
+   ↓ MP02 — the resolver may not be walked out of, nor serve changed bytes > leaks no descriptor when close runs while an open is still hashing
+   ↓ MP03 — the actual bytes of the promised supplements are checked > refuses an encoded object whose actual subtitle bytes changed
+   ↓ MP03 — the actual bytes of the promised supplements are checked > refuses an encoded object whose actual licence file is missing
+   ↓ MP03 — the actual bytes of the promised supplements are checked > refuses an encoded object whose supplements were reordered
+   ↓ MP04 — the object carries a durable receipt and the cleanup is honest > preserves the primary publication failure and a failed staging discard
+   ↓ MP04 — the object carries a durable receipt and the cleanup is honest > preserves the primary QC failure and an actual object-staging removal failure
+   ↓ MP04 — the object carries a durable receipt and the cleanup is honest > refuses a encode result when cancellation arrives during object publication fsync
+   ↓ MP04 — the object carries a durable receipt and the cleanup is honest > refuses a qc result when cancellation arrives during object publication fsync
+   ↓ MP04 — the object carries a durable receipt and the cleanup is honest > refuses new reads on returned handles while another open is pending at service close
+   ↓ MP04 — the object carries a durable receipt and the cleanup is honest > shares the handle close barrier and waits for an in-flight descriptor read
+   ↓ MP04 — the object carries a durable receipt and the cleanup is honest > shares the service close barrier and waits for an in-flight descriptor read
+   ↓ MP04 — the object carries a durable receipt and the cleanup is honest > publishes an immutable receipt beside the object it describes
+   ↓ MP04 — the object carries a durable receipt and the cleanup is honest > reads the durable receipt of an object through the anchored resolver
+   ↓ MP04 — the object carries a durable receipt and the cleanup is honest > keeps the object and its receipt across a restart of the service
+   ↓ MP04 — the object carries a durable receipt and the cleanup is honest > reports a cleanup failure instead of swallowing it
+   ↓ MP04 — the object carries a durable receipt and the cleanup is honest > waits for the phases that are still running when it closes
+   ↓ the real tools (NARRALENS_PHASE_REAL_TOOLS=1) > encodes, inspects and publishes with the pinned renderer and the real ffprobe and ffmpeg
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 7 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/media/committed-render-phases.test.ts > publishing from the encoded and inspected bytes > refuses a persisted winner with wrong media role while preserving the winner
+ FAIL  tests/agent-driven/media/committed-render-phases.test.ts > publishing from the encoded and inspected bytes > refuses a persisted winner with wrong probe role while preserving the winner
+ FAIL  tests/agent-driven/media/committed-render-phases.test.ts > publishing from the encoded and inspected bytes > refuses a persisted winner with wrong decode role while preserving the winner
+ FAIL  tests/agent-driven/media/committed-render-phases.test.ts > publishing from the encoded and inspected bytes > refuses a persisted winner with wrong media version while preserving the winner
+ FAIL  tests/agent-driven/media/committed-render-phases.test.ts > publishing from the encoded and inspected bytes > refuses a persisted winner with wrong probe version while preserving the winner
+ FAIL  tests/agent-driven/media/committed-render-phases.test.ts > publishing from the encoded and inspected bytes > refuses a persisted winner with wrong decode version while preserving the winner
+ FAIL  tests/agent-driven/media/committed-render-phases.test.ts > publishing from the encoded and inspected bytes > refuses a persisted winner with wrong render spec while preserving the winner
+AssertionError: promise resolved "{ …(7) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "format": "narralens.published-phase-receipt@1",
++   "package_receipt": {
++     "attempt": 1,
++     "delivery_id": "d_f4a12998a2f846e6f601c4bb4ba55796",
++     "download_ref": "dl_f4a12998a2f846e6f601c4bb4ba55796",
++     "files": [
++       {
++         "bytes": 17,
++         "file": "media.mp4",
++         "id": "d_f4a12998a2f846e6f601c4bb4ba55796_media",
++         "sha256": "0216f244c714f98a86961b8d29990ee6af7c50c7b1344c673b945f7ac9eafb88",
++       },
++       {
++         "bytes": 112,
++         "file": "native_film.html",
++         "id": "d_f4a12998a2f846e6f601c4bb4ba55796_native_document",
++         "sha256": "259e0134e8231bc1dbc9f31730c0933713ac92a1c025c9904e876430a7c09159",
++       },
++       {
++         "bytes": 1172,
++         "file": "native_source.json",
++         "id": "d_f4a12998a2f846e6f601c4bb4ba55796_native_source",
++         "sha256": "11cb18591dcffd4af7de21c622a4036ffb52e76707d87fee54016e3b9d9059ab",
++       },
++       {
++         "bytes": 12,
++         "file": "supplement_0.txt",
++         "id": "d_f4a12998a2f846e6f601c4bb4ba55796_sup0",
++         "sha256": "064545f991197adc34b55c1c08e1f3448d3e205d9fe86f374e2d9ead2440050f",
++       },
++       {
++         "bytes": 38,
++         "file": "supplement_1.vtt",
++         "id": "d_f4a12998a2f846e6f601c4bb4ba55796_sup1",
++         "sha256": "301288e7e342d01a7864366943814ac5cc91bb4ca6f09bbb26973247d2c3aac9",
++       },
++       {
++         "bytes": 330,
++         "file": "ffprobe.json",
++         "id": "d_f4a12998a2f846e6f601c4bb4ba55796_ffprobe",
++         "sha256": "0b179e9717d0ad9e2e2726839c5e5c105b609a6d87ede1abafda1242f97106bd",
++       },
++       {
++         "bytes": 0,
++         "file": "full_decode.log",
++         "id": "d_f4a12998a2f846e6f601c4bb4ba55796_full_decode",
++         "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
++       },
++       {
++         "bytes": 570,
++         "file": "phase_lineage.json",
++         "id": "d_f4a12998a2f846e6f601c4bb4ba55796_phase_lineage",
++         "sha256": "454ad03a7d025e71fc632fac6e94e891905302ed47835e9f03c494355aa54537",
++       },
++     ],
++     "kind": "narralens.delivery_package_receipt@1.0",
++     "manifest": {
++       "attempt": 1,
++       "delivery_id": "d_f4a12998a2f846e6f601c4bb4ba55796",
++       "download_ref": "dl_f4a12998a2f846e6f601c4bb4ba55796",
++       "ffprobe_ref": {
++         "id": "d_f4a12998a2f846e6f601c4bb4ba55796_ffprobe",
++         "sha256": "0b179e9717d0ad9e2e2726839c5e5c105b609a6d87ede1abafda1242f97106bd",
++         "version": 1,
++       },
++       "full_decode_ref": {
++         "id": "d_f4a12998a2f846e6f601c4bb4ba55796_full_decode",
++         "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
++         "version": 1,
++       },
++       "media_ref": {
++         "id": "d_f4a12998a2f846e6f601c4bb4ba55796_ffprobe",
++         "sha256": "0b179e9717d0ad9e2e2726839c5e5c105b609a6d87ede1abafda1242f97106bd",
++         "version": 1,
++       },
++       "project_id": "proj_media_01",
++       "published_at": "2026-11-11T20:26:33.872Z",
++       "qc": [
++         {
++           "evidence_ref": null,
++           "id": "snapshot_identity",
++           "reason": "the closure is snapshot snap_media_01 at revision 7",
++           "status": "pass",
++         },
++         {
++           "evidence_ref": null,
++           "id": "inputs_local",
++           "reason": "4 local file(s) with recorded digests",
++           "status": "pass",
++         },
++         {
++           "evidence_ref": null,
++           "id": "inputs_rights",
++           "reason": "3 asset(s) and supplement(s) are cleared for this use",
++           "status": "pass",
++         },
++         {
++           "evidence_ref": null,
++           "id": "inputs_complete",
++           "reason": "the snapshot carries 2 promised supplement(s) and the film's own source",
++           "status": "pass",
++         },
++         {
++           "evidence_ref": null,
++           "id": "render_spec",
++           "reason": "1920x1080 at 30/1 fps, mp4/h264/aac",
++           "status": "pass",
++         },
++         {
++           "evidence_ref": null,
++           "id": "render_config",
++           "reason": "the configuration digest names this renderer, this upstream and these options",
++           "status": "pass",
++         },
++         {
++           "evidence_ref": null,
++           "id": "upstream_pin",
++           "reason": "the pinned upstream e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3 and the worker match their digests",
++           "status": "pass",
++         },
++         {
++           "evidence_ref": null,
++           "id": "output_space",
++           "reason": "the staging area has room",
++           "status": "pass",
++         },
++         {
++           "evidence_ref": {
++             "id": "d_f4a12998a2f846e6f601c4bb4ba55796_ffprobe",
++             "sha256": "0b179e9717d0ad9e2e2726839c5e5c105b609a6d87ede1abafda1242f97106bd",
++             "version": 1,
++           },
++           "id": "media_container",
++           "reason": "the container is mov,mp4,m4a,3gp,3g2,mj2",
++           "status": "pass",
++         },
++         {
++           "evidence_ref": {
++             "id": "d_f4a12998a2f846e6f601c4bb4ba55796_ffprobe",
++             "sha256": "0b179e9717d0ad9e2e2726839c5e5c105b609a6d87ede1abafda1242f97106bd",
++             "version": 1,
++           },
++           "id": "media_video_codec",
++           "reason": "the video codec is h264",
++           "status": "pass",
++         },
++         {
++           "evidence_ref": {
++             "id": "d_f4a12998a2f846e6f601c4bb4ba55796_ffprobe",
++             "sha256": "0b179e9717d0ad9e2e2726839c5e5c105b609a6d87ede1abafda1242f97106bd",
++             "version": 1,
++           },
++           "id": "media_audio_codec",
++           "reason": "the audio codec is aac",
++           "status": "pass",
++         },
++         {
++           "evidence_ref": {
++             "id": "d_f4a12998a2f846e6f601c4bb4ba55796_ffprobe",
++             "sha256": "0b179e9717d0ad9e2e2726839c5e5c105b609a6d87ede1abafda1242f97106bd",
++             "version": 1,
++           },
++           "id": "media_dimensions",
++           "reason": "the picture is 1920x1080",
++           "status": "pass",
++         },
++         {
++           "evidence_ref": {
++             "id": "d_f4a12998a2f846e6f601c4bb4ba55796_ffprobe",
++             "sha256": "0b179e9717d0ad9e2e2726839c5e5c105b609a6d87ede1abafda1242f97106bd",
++             "version": 1,
++           },
++           "id": "media_frame_rate",
++           "reason": "the frame rate is 30/1",
++           "status": "pass",
++         },
++         {
++           "evidence_ref": {
++             "id": "d_f4a12998a2f846e6f601c4bb4ba55796_ffprobe",
++             "sha256": "0b179e9717d0ad9e2e2726839c5e5c105b609a6d87ede1abafda1242f97106bd",
++             "version": 1,
++           },
++           "id": "media_streams",
++           "reason": "the file holds one video stream and one audio stream",
++           "status": "pass",
++         },
++         {
++           "evidence_ref": {
++             "id": "d_f4a12998a2f846e6f601c4bb4ba55796_ffprobe",
++             "sha256": "0b179e9717d0ad9e2e2726839c5e5c105b609a6d87ede1abafda1242f97106bd",
++             "version": 1,
++           },
++           "id": "media_frames",
++           "reason": "the file holds 60 frame(s), as the snapshot's native document says",
++           "status": "pass",
++         },
++         {
++           "evidence_ref": {
++             "id": "d_f4a12998a2f846e6f601c4bb4ba55796_ffprobe",
++             "sha256": "0b179e9717d0ad9e2e2726839c5e5c105b609a6d87ede1abafda1242f97106bd",
++             "version": 1,
++           },
++           "id": "media_duration",
++           "reason": "the film is 2s long, as the snapshot's native document says",
++           "status": "pass",
++         },
++         {
++           "evidence_ref": {
++             "id": "d_f4a12998a2f846e6f601c4bb4ba55796_full_decode",
++             "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
++             "version": 1,
++           },
++           "id": "media_full_decode",
++           "reason": "the whole file decodes",
++           "status": "pass",
++         },
++         {
++           "evidence_ref": null,
++           "id": "supplements",
++           "reason": "2 supplement(s) match their digests and every promised one is there",
++           "status": "pass",
++         },
++       ],
++       "render_config_digest": "5a7ed99f322463f58dfb1d4ede0c6595a51209fd1fb640f18d8839f9bcceb6dc",
++       "render_spec": {
++         "audio_codec": "aac",
++         "config_digest": "5a7ed99f322463f58dfb1d4ede0c6595a51209fd1fb640f18d8839f9bcceb6dc",
++         "container": "mp4",
++         "engine_id": "openfilm",
++         "engine_version": "openfilm@0.1.7",
++         "fps_denominator": 1,
++         "fps_numerator": 30,
++         "height": 1080,
++         "video_codec": "h264",
++         "width": 1920,
++       },
++       "snapshot_id": "snap_media_01",
++       "source_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
++       "supplement_refs": [
++         {
++           "id": "d_f4a12998a2f846e6f601c4bb4ba55796_sup0",
++           "sha256": "064545f991197adc34b55c1c08e1f3448d3e205d9fe86f374e2d9ead2440050f",
++           "version": 1,
++         },
++         {
++           "id": "d_f4a12998a2f846e6f601c4bb4ba55796_sup1",
++           "sha256": "301288e7e342d01a7864366943814ac5cc91bb4ca6f09bbb26973247d2c3aac9",
++           "version": 1,
++         },
++         {
++           "id": "d_f4a12998a2f846e6f601c4bb4ba55796_phase_lineage",
++           "sha256": "454ad03a7d025e71fc632fac6e94e891905302ed47835e9f03c494355aa54537",
++           "version": 1,
++         },
++       ],
++     },
++     "object_id": "obj_8dc70a62025c4e6a901b13badc09ffd1",
++     "package_id": "pkg_f4a12998a2f846e6f601c4bb4ba55796",
++     "project_id": "proj_media_01",
++     "published_at": "2026-11-11T20:26:33.872Z",
++     "render_config_digest": "5a7ed99f322463f58dfb1d4ede0c6595a51209fd1fb640f18d8839f9bcceb6dc",
++     "snapshot_id": "snap_media_01",
++     "source_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
++   },
++   "parent_encoded_digest": "0edfe8cf6e303d5f8912bb0f38e78ec174195f558d7e51a5c9efb1c0ef86d862",
++   "parent_qc_digest": "23ab30e3d67cad05e2364ceaa0170296d5829203ee975fb61277f9b881eae38d",
++   "publication_execution": {
++     "attempt": 1,
++     "authorization_id": "auth_media_01",
++     "input_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
++     "plan_version": 1,
++     "run_id": "run_media_01",
++     "run_scope_digest": "0000000000000000000000000000000000000000000000000000000000000000",
++     "step_id": "delivery.package",
++   },
++   "publication_lease_attempt": 1,
++   "receipt_digest": "49103a33ed80584ac5eee25d2ae13380b2a1d9e5246318934a0b4a92db517c70",
+  }
+
+ ❯ tests/agent-driven/media/committed-render-phases.test.ts:428:102
+    426|     });
+    427|     try {
+    428|       await expect(built.phases.publishValidated({ request: deliveryRe…
+       |                                                                                                      ^
+    429|         .rejects.toMatchObject({ code: "PACKAGE_LINEAGE_CONFLICT" });
+    430|     } finally { spy.mockRestore(); }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/7]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  7 failed | 66 skipped (73)
+   Start at  04:26:27
+   Duration  5.44s (transform 422ms, setup 0ms, collect 2.39s, tests 1.24s, environment 0ms, prepare 1.15s)
+
+ ELIFECYCLE  Test failed. See above for more details.

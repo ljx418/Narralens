@@ -404,6 +404,37 @@ describe("inspecting an encoded object", () => {
 });
 
 describe("publishing from the encoded and inspected bytes", () => {
+  it.each(["media role", "probe role", "decode role", "media version", "probe version", "decode version", "render spec"] as const)("refuses a persisted winner with wrong %s while preserving the winner", async mutation => {
+    const built = await harness({ label: "phase-main-ref-" + mutation.replaceAll(" ", "-") });
+    const encoded = await built.phases.prepareEncoded(requestFor(built));
+    const qc = await built.phases.inspectEncoded({ request: deliveryRequestFor(built), encoded });
+    const original = built.packages.publish.bind(built.packages);
+    let winner: Awaited<ReturnType<PublishedPackageStore['publish']>> | undefined;
+    const spy = vi.spyOn(built.packages, "publish").mockImplementation(async input => {
+      const manifest = structuredClone(input.manifest);
+      if (mutation === "media role") manifest.media_ref = manifest.ffprobe_ref;
+      if (mutation === "probe role") manifest.ffprobe_ref = manifest.full_decode_ref;
+      if (mutation === "decode role") manifest.full_decode_ref = manifest.ffprobe_ref;
+      if (mutation === "media version") manifest.media_ref.version += 1;
+      if (mutation === "probe version") manifest.ffprobe_ref.version += 1;
+      if (mutation === "decode version") manifest.full_decode_ref.version += 1;
+      if (mutation === "render spec") manifest.render_spec.width += 2;
+      // Seed the real immutable store with schema-valid but semantically wrong
+      // metadata. Files/lineage/QC/supplements are exactly the original valid ones.
+      winner = await original({ ...input, manifest });
+      return winner;
+    });
+    try {
+      await expect(built.phases.publishValidated({ request: deliveryRequestFor(built), encoded, qc }))
+        .rejects.toMatchObject({ code: "PACKAGE_LINEAGE_CONFLICT" });
+    } finally { spy.mockRestore(); }
+    expect(winner).toBeDefined();
+    await expect(built.phases.publishValidated({ request: deliveryRequestFor(built, 2), encoded, qc }))
+      .rejects.toMatchObject({ code: "PACKAGE_LINEAGE_CONFLICT" });
+    expect(await built.packages.verifyPackage(winner!.package_id)).toEqual(winner!.receipt);
+    await built.phases.close();
+  });
+
   it("refuses a successful publication result if durable cancellation arrives during cleanup", async () => {
     const built = await harness({ label: "phase-publish-cleanup-cancel" });
     const encoded = await built.phases.prepareEncoded(requestFor(built));

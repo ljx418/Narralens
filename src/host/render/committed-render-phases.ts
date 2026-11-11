@@ -869,7 +869,10 @@ export class CommittedRenderPhases implements CommittedRenderPhasesPort, PhaseOb
             format: "narralens.package-phase-lineage@1", project_id: request.project_id,
             snapshot_id: request.snapshot_id, source_digest: request.source_digest,
             config_digest: stageKeys.config_digest, parent_encoded_digest: encoded.receipt_digest,
-            parent_qc_digest: qc.receipt_digest, qc_decision_digest: canonicalDigest(qcItems),
+            parent_qc_digest: qc.receipt_digest,
+            // This legacy field names the QC item values, not trusted human
+            // decision/Approval authority. BRIDGE must check that authority itself.
+            qc_decision_digest: canonicalDigest(qcItems),
           }, null, 2)}\n`);
         packageFiles.push({ id: lineage.id, name: lineage.relative_path, source_path: resolve(staging, lineage.relative_path) });
         supplementRefs.push({ id: lineage.id, version: 1, sha256: lineage.sha256 });
@@ -922,7 +925,11 @@ export class CommittedRenderPhases implements CommittedRenderPhasesPort, PhaseOb
         const winnerFiles = [...published.receipt.files].sort((a,b) => a.id < b.id ? -1 : a.id > b.id ? 1 : 0);
         if (canonicalDigest(winnerFiles) !== canonicalDigest(expectedFiles)
           || canonicalDigest(published.receipt.manifest.qc) !== canonicalDigest(qcItems)
-          || canonicalDigest(published.receipt.manifest.supplement_refs) !== canonicalDigest(supplementRefs)) {
+          || canonicalDigest(published.receipt.manifest.supplement_refs) !== canonicalDigest(supplementRefs)
+          || canonicalDigest(published.receipt.manifest.media_ref) !== canonicalDigest(mediaRef)
+          || canonicalDigest(published.receipt.manifest.ffprobe_ref) !== canonicalDigest(ffprobeRef)
+          || canonicalDigest(published.receipt.manifest.full_decode_ref) !== canonicalDigest(fullDecodeRef)
+          || canonicalDigest(published.receipt.manifest.render_spec) !== canonicalDigest(request.render_spec)) {
           throw new CommittedRenderPhaseError("PACKAGE_LINEAGE_CONFLICT",
             "the published winner is not the verified encoded and QC parent chain", false, true);
         }
