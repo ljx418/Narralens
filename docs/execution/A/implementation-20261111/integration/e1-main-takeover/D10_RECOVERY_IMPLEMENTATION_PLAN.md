@@ -87,11 +87,19 @@ prepared journal + 三方 identity 早于任何 rename。若 observed author 正
 
 每次 rename 后 fsync 所有发生目录项变动的父目录；中止在完整 O 与持久目录证明后发生。若当前 DB 已 committed，以上文件回退分支完全禁止，旧内容恢复只能新 revision。再次 SIGKILL 覆盖上述每个中间状态。
 
-### RD-05：specialized 恢复的域间顺序与 deferred
+### RD-05：按实际进展收敛，不使用固定 family pass 数量
 
-不能仅在现有 agent recoverBeforeGeneric 一次处理后把未完成行交给 generic。MAIN 将引入 Host 内部第二次恢复 hook（暂定 recoverAfterControlled），放在既有 history/adoption 多 pass 之后、generic 之前；它不增加公共协议。首 pass 可延迟被更老受控行挡住的 created，第二 pass 再决定；若可重试 I/O/资源仍使 own pending 未决，Host 本次启动保持未就绪/可重试退出，generic 不得误转 terminal attention。
+1b267ff 的“固定第二次 created hook”方案仍为 REQUEST_CHANGES：A1 legacy adoption → C2 created adoption → H3 history 时，两轮组合可把可恢复 H3 遗留给 generic。本节替代那一方案，不追改原审计记录。
 
-既有 src/host/projects/controlled-write-formats.ts 的纯识别函数需认识精确 created apply operation；旧 history/adoption 的 pending 集合和老少判定统一包含三个域，仅用于恢复排序，不授予写权限。相同 created_at 用 transaction_id 确定稳定次序，拒绝两个相等时戳互等。未知 edit/import 不得加入可忽略集合。正常在线队列必须仍重验当前 gate。RCV-D10-08/10 用实际旧 history/legacy pending 混合、两个顺序与相等时戳验证，不能只单测分类字符串。
+MAIN 将新增 Host 内部 controlled recovery scheduler，按同项目 (created_at, transaction_id) 的稳定全序约束三个恢复域。已有 history 与 adoption、created recovery 都只决定自己类型；每个域必须跳过更老的非终态受控行，pending gate 的可忽略集合仅含三个精确识别域，不含未知 edit/import。legacy adoption 同样补老少判定，不能只更新 history/created。识别不是授权，执行仍须原队列/真实 facts/原状态机。
+
+调度以 startup 独占运行根、写入口未开放时的数据库初始受控集合为边界，每轮调用全部三个域（created、history、legacy adoption；每个域内部同样排序）。从数据库重新读取集合和真实 state，完全忽略回调自报 recovered 数。只有 commited/aborted/attention 的真实新增决定才算进展；非终态工作仍等待资源/前序时不虚报进展。每一有进展轮至少减少一项未决集合，有限 N 项至多 N 个进展轮和一次无进展观察；这是由真实有限集合推导的终止保证，不是人工预算/次数上限。
+
+全部已决定即可停止；无进展也停止本次重试，不 busy loop、不睡眠等资源。各 family 的孤儿 sweep 只首轮执行一次；legacy adoption 增可选 sweep 参数且默认保持原行为，避免重复 sweep 删除证据。若出现新的受控 transaction 或非终态状态异常退回，停止并报告独占/生命周期违例，不以旧 N 掩盖集合变化。
+
+进入 generic 前重新扫描 ALL 三域，scheduler 输出的未决 IDs 由原 Coordinator generic startup 明确排除；generic 不再把它们误标 recovering/attention。排除仅来自 Host 识别的真实行，不接受客户端 IDs/布尔。未决项目继续被已有 recoveryGate 阻断，健康/诊断如实报告；Host 可以服务已就绪的其他项目，保留旧“一处 attention 不拖垮其他项目”的边界。未知非受控 pending 仍由原 generic 拥有，不静默忽略。所有已决定 attention 原封保留。
+
+RCV-D10-08/10 必须新增 A1-C2-H3、H1-C2-A3-C4-H5 等任意交错链、相同 created_at tie-break、多个项目、无进展资源等待与 fabricated recovered count、集合意外变化的检查，并有实际三个模块/Host.listen 证明；纯 scheduler mock 测试仅计调度单元证据，不能闭合业务恢复门。固定 pass 数字的旧方案不得作为回退实现。
 
 ### RD-06：环境与证据界限
 

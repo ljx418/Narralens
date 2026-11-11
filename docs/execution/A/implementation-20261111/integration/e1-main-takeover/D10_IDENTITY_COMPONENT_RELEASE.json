@@ -1,0 +1,29 @@
+{
+  "format": "narralens.main-component-release@1",
+  "released_at": "2026-11-11T22:24:07.360489+00:00",
+  "owner": "MAIN",
+  "base": "1b267fff99af5752aabcfe3c3a58d3d516ec372c",
+  "scope": "D10 immutable filesystem identity component only; independent of scheduler RD05",
+  "basis": "Independent RD01/02/03/04/06 design findings addressed per msg_4b6fab981dd9; RD05 still pending so no recovery orchestration/production ingress is released",
+  "paths": [
+    "src/host/agent-driven/retained-source-tree.ts",
+    "src/host/agent-driven/created-publication-identity-store.ts",
+    "tests/agent-driven/integration/retained-source-tree.test.ts",
+    "tests/agent-driven/integration/created-publication-identity-store.test.ts"
+  ],
+  "constraints": [
+    "Readonly FD identity accessors only in existing guard; no release or verify weakening",
+    "One immutable same-DB identity fact without state/Approval/FD numbers",
+    "Original/staging/snapshot-source plus container identity binding required before future rename",
+    "No Publisher journal integration or recovery/Host wiring until broader design closed",
+    "No public DTO/EnginePort/CP-A0 namespace change"
+  ],
+  "cases": [
+    "FI-01 actual rename retains identities",
+    "FI-02 same bytes new file/tree/container identity refused",
+    "FI-03 real same-DB immutable record/reopen/replay/conflict",
+    "FI-04 transaction scope/schema/version/tamper/rollback fail-closed",
+    "FI-05 identity data grants no publication or commit capability"
+  ],
+  "status": "RELEASED_COMPONENT_ONLY"
+}
