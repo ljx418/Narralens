@@ -1,0 +1,35 @@
+{
+  "command": [
+    "pnpm",
+    "exec",
+    "vitest",
+    "run",
+    "tests/agent-driven/integration/created-run-authority.test.ts",
+    "tests/agent-driven/product/fixed-workflow-service.test.ts",
+    "--maxWorkers=1",
+    "--minWorkers=1"
+  ],
+  "baseline": "54f2ac4",
+  "current_source_sha256": {
+    "src/host/agent-driven/created-run-authority.ts": "58ff4047c0bd0946e2a17b5495cf8a9a459c967e86ead1d2556af7b6f2137bf5",
+    "src/host/creative/fixed-workflow-service.ts": "e0a2718b1a98aa0fcaa5d2150dca0aa25614b655b2c89a9a3408abd7ecb86e7f",
+    "src/host/creative/product-repository.ts": "803ec45b79c24ce75af096ff2e93995f40e1777ae80ec5f29d835fcd8b2a8394"
+  },
+  "test_sha256": {
+    "tests/agent-driven/integration/created-run-authority.test.ts": "4d1c6d48645e5ca7629dfa42d16b2febec21438405f660f8fa0cf60796f1aba7",
+    "tests/agent-driven/product/fixed-workflow-service.test.ts": "da7e39a1a05d11060497eaaf2f3a3210351f74149491f78d91b1e26dad2b8f6d"
+  },
+  "started_at": "2026-11-11T20:18:21.479030+00:00",
+  "old_source_sha256": {
+    "src/host/agent-driven/created-run-authority.ts": "571da409fd742705d1293cab81312a24766410679e223c354590724f98fa749a",
+    "src/host/creative/fixed-workflow-service.ts": "bb83f2bfb1a0fdf7a96af151a3ce62d39e49cfb81f41f6b4b8f71b2b7f73bbc0",
+    "src/host/creative/product-repository.ts": "f071a02f1ed691e70a7f7cc774c6f4b5948c088e4a8411491fb51adb7affc3b7"
+  },
+  "old_exit_code": 1,
+  "restored_exact_source_bytes": true,
+  "current_exit_code": 0,
+  "logs": {
+    "d09-old-code-negative.txt": "4807ccc63d41f6142df0c601622e54399386f0feb38262355192e410f07bdafe",
+    "d09-unit-02.txt": "e5586d5b2835a0b3182bf86850df849f96f4761cd9e56b09d91e00c1fc8cc05b"
+  }
+}

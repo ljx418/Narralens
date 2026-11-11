@@ -211,3 +211,46 @@ it('answers the project facts from the real authorities and fails closed without
     expect((await notReady.readProjectFacts('missing-project')).capability_available).toBe(false);
   } finally { f.close(); }
 });
+
+/** D09 boundary negatives use real SQLite, not a fake prepared-source reader. */
+async function approvalFixture() {
+  const f = fixture(); f.seed();
+  const authorize = await f.repository.transaction(tx => f.authority.registerConfirmation(tx, confirmation({action_digest:SCOPE})));
+  const change = await f.repository.transaction(tx => f.authority.registerConfirmation(tx,
+    confirmation({purpose:'change.approve',review_id:'review-1',action_digest:'3'.repeat(64),expires_at:NOW+900})));
+  f.revisions.compose(db => {
+    db.prepare("INSERT INTO cp_a0_execution_grant(project_id,run_id,grant_id,run_scope_digest,confirmation_id,principal_id,action,capability_id,capability_version,allow_paid,allow_external,state,expires_at) VALUES('project-1','run-1','grant-1',?,?,'owner','clip.prepare','clip.prepare','1',0,0,'active',?)").run(SCOPE,authorize.confirmation_id,NOW+300);
+    db.prepare("INSERT INTO cp_a0_step_attempt(project_id,run_id,plan_version,run_scope_digest,step_id,attempt,grant_id,input_digest,dependencies_json,state,job_id,output_artifact_id,output_version,updated_at) VALUES('project-1','run-1',1,?,'sample',1,'grant-1',?,'[]','waiting_user','job-1',NULL,NULL,?)").run(SCOPE,INPUT,AT);
+  });
+  return {...f, input:approval({confirmation_id:change.confirmation_id})};
+}
+
+it('D09 refuses a prepared id without actual Host proof even with real confirmation and attempt', async () => {
+  const f = await approvalFixture();
+  try {
+    expect(await f.repository.transaction(tx => f.authority.registerApproval(tx,
+      {...f.input,change_id:'ps_'+ 'a'.repeat(60)}))).toBeNull();
+    expect(await f.repository.transaction(tx => tx.list('approval',{project_id:'project-1',run_id:'run-1'}))).toEqual([]);
+  } finally { f.close(); }
+});
+
+it.each([
+  ['changed action', {action_digest:'9'.repeat(64)}],
+  ['extended confirmation lifetime', {expires_at:NOW+901}],
+])('D09 refuses %s against the original trusted confirmation', async (_name,over) => {
+  const f = await approvalFixture();
+  try {
+    expect(await f.repository.transaction(tx => f.authority.registerApproval(tx,{...f.input,...over}))).toBeNull();
+  } finally { f.close(); }
+});
+
+it('D09 confirmation replay returns one original approval and rejects changed bindings', async () => {
+  const f = await approvalFixture();
+  try {
+    const first = await f.repository.transaction(tx => f.authority.registerApproval(tx,f.input));
+    expect(first).not.toBeNull();
+    expect(await f.repository.transaction(tx => f.authority.registerApproval(tx,f.input))).toEqual(first);
+    expect(await f.repository.transaction(tx => f.authority.registerApproval(tx,{...f.input,facts_digest:'8'.repeat(64)}))).toBeNull();
+    expect(await f.repository.transaction(tx => tx.list('approval',{project_id:'project-1',run_id:'run-1'}))).toHaveLength(1);
+  } finally { f.close(); }
+});

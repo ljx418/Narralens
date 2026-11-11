@@ -5,6 +5,7 @@ import { canonicalDigest, styleDigest } from "../../../src/host/creative/digest.
 import { CreativeService } from "../../../src/host/creative/creative-service.js";
 import { FixedWorkflowService } from "../../../src/host/creative/fixed-workflow-service.js";
 import { guardExecutionInTransaction, readGuardFacts } from "../../../src/host/creative/execution-guard.js";
+import type { TrustedAdoptionAuthority } from "../../../src/host/creative/product-repository.js";
 import { MemoryProductRepository } from "./support/memory-repository.js";
 import {
   BRIEF,
@@ -840,6 +841,51 @@ describe("the fixed workflow service", () => {
     expect(approval?.attempt).toBe(2);
     expect(approval?.change_id).toBe(IMPACT.materialization_id);
     expect(approval?.state).toBe("active");
+    expect(context.adoption.confirmations.some((row) => row.purpose === "change.approve")).toBe(true);
+  });
+
+  it("D09 passes the Host full-plan digest into approval without recomputing the legacy digest", async () => {
+    const context = await prepared();
+    // Isolated workflow-port test only: this callback is not a production reader
+    // and does not claim actual prepared-source acceptance.
+    const port = context.adoption as TestAdoptionAuthority & TrustedAdoptionAuthority;
+    port.reviewTransaction = (_input, _caller, work) => context.repository.transaction(tx => work(tx, IMPACT.plan_sha256));
+    const grantId = await authorized(context);
+    await recordAttempt(context, grantId, "sample", 2);
+    await publish(context, {
+      package_id: "package-sample",
+      kind: "sample",
+      step_id: "sample",
+      attempt: 2,
+      allowed_choices: ["accept", "accept_and_adopt"],
+      impact: IMPACT,
+    });
+    const decision = await context.service.decideReview(
+      {
+        meta: meta("k-adopt"),
+        project_id: "project-1",
+        run_id: context.runId,
+        package_id: "package-sample",
+        package_version: 1,
+        plan_version: 1,
+        input_digest: context.inputDigest,
+        output_digest: "2".repeat(64),
+        quality_digest: "3".repeat(64),
+        choice: "accept_and_adopt",
+        impact_id: IMPACT.impact_id,
+        plan_sha256: IMPACT.plan_sha256,
+      },
+      TRUSTED_CALLER,
+    );
+    expect(decision.approval).not.toBeNull();
+    expect(decision.approval?.impact_id).toBe(IMPACT.impact_id);
+    const approval = context.adoption.approvals[0];
+    expect(approval?.step_id).toBe("sample");
+    expect(approval?.attempt).toBe(2);
+    expect(approval?.change_id).toBe(IMPACT.materialization_id);
+    expect(approval?.state).toBe("active");
+    expect(approval?.facts_digest).toBe(IMPACT.plan_sha256);
+    expect(approval?.action_digest).toBe(IMPACT.plan_sha256);
     expect(context.adoption.confirmations.some((row) => row.purpose === "change.approve")).toBe(true);
   });
 

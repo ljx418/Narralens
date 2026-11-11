@@ -1109,7 +1109,11 @@ export class FixedWorkflowService {
     }
     const digest = contentDigest(request);
 
-    return this.#repository.transaction((tx) => {
+    const transact = <T>(work: (tx: ProductTransaction, preparedPlanDigest: string | null) => T) =>
+      adoption.reviewTransaction
+        ? adoption.reviewTransaction(request, caller, work)
+        : this.#repository.transaction((tx) => work(tx, null));
+    return transact((tx, preparedPlanDigest) => {
       const stored = tx.recallIdempotency(
         { kind: "project", project_id: request.project_id },
         WORKFLOW_OPERATIONS.reviewDecide,
@@ -1193,7 +1197,9 @@ export class FixedWorkflowService {
 
       const now = this.#now();
       const recordedAt = new Date(now * 1000).toISOString();
-      const expiresAt = now + this.#authorizationTtl;
+      const expiresAt = preparedPlanDigest !== null && impact !== null
+        ? Math.min(now + this.#authorizationTtl, Math.floor(Date.parse(impact.expires_at) / 1000))
+        : now + this.#authorizationTtl;
       const actionDigest = request.plan_sha256 ?? packageDocument.output_digest;
 
       const confirmation = adoption.registerConfirmation(tx, {
@@ -1235,7 +1241,7 @@ export class FixedWorkflowService {
           base_revision: impact.base_revision,
           control_revision: impact.control_revision,
           action_digest: actionDigest,
-          facts_digest: canonicalDigest({
+          facts_digest: preparedPlanDigest ?? canonicalDigest({
             impact_id: impact.impact_id,
             materialization_id: impact.materialization_id,
             base_revision: impact.base_revision,

@@ -1,0 +1,172 @@
+
+ RUN  v3.2.4 /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+
+(node:1694042) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/agent-driven/integration/created-run-authority.test.ts (16 tests | 4 failed) 153ms
+   ✓ persists the trusted confirmation inside the caller transaction and binds it to the real session 15ms
+   ✓ refuses a confirmation whose session is no longer active and writes nothing 10ms
+   ✓ refuses a confirmation with an expired lifetime 15ms
+   ✓ refuses a confirmation with a lifetime that is not in the future 9ms
+   ✓ refuses a confirmation with an issued time in the future 9ms
+   ✓ refuses a confirmation with a review purpose without a review 8ms
+   ✓ refuses a confirmation with a non hash input digest 7ms
+   ✓ refuses a confirmation with a foreign actor 8ms
+   ✓ rolls the confirmation back with the transaction that wrote it 8ms
+   ✓ returns no approval when the current confirmation, run or attempt is missing 8ms
+   ✓ writes the limited approval only when the current run, attempt and confirmation are real 9ms
+   ✓ answers the project facts from the real authorities and fails closed without a capability 8ms
+   × D09 refuses a prepared id without actual Host proof even with real confirmation and attempt 11ms
+     → expected { project_id: 'project-1', …(17) } to be null
+   × D09 refuses changed action against the original trusted confirmation 9ms
+     → APPROVAL_CONFIRMATION_PURPOSE_INPUT_ACTION
+   × D09 refuses extended confirmation lifetime against the original trusted confirmation 9ms
+     → APPROVAL_CONFIRMATION_PURPOSE_INPUT_ACTION
+   × D09 confirmation replay returns one original approval and rejects changed bindings 10ms
+     → expected { project_id: 'project-1', …(17) } to deeply equal { project_id: 'project-1', …(17) }
+ ❯ tests/agent-driven/product/fixed-workflow-service.test.ts (32 tests | 1 failed) 141ms
+   ✓ the fixed workflow service > takes the registered fingerprint from MAIN facts rather than capability names 55ms
+   ✓ the fixed workflow service > fails closed without a valid registered capability fingerprint 3ms
+   ✓ the fixed workflow service > rejects script and storyboard artifacts presented as the style carrier 2ms
+   ✓ the fixed workflow service > rejects a real brief carrier whose style differs from the selected intake 1ms
+   ✓ the fixed workflow service > reads the newest durable attempt when an old binding is replayed 9ms
+   ✓ the fixed workflow service > prepares a run with the fixed scope and an accepted definition gate 2ms
+   ✓ the fixed workflow service > refuses to prepare a run without the project facts 1ms
+   ✓ the fixed workflow service > refuses a content decision that did not accept the content 1ms
+   ✓ the fixed workflow service > refuses to start without an active authorization 2ms
+   ✓ the fixed workflow service > authorizes a run in a trusted session and then starts it 1ms
+   ✓ the fixed workflow service > refuses to start under another principal's authorization 1ms
+   ✓ the fixed workflow service > keeps pause and cancel available without a grant, because they are safe controls 1ms
+   ✓ the fixed workflow service > refuses a first chapter before the sample gate is accepted 1ms
+   ✓ the fixed workflow service > refuses a chapter package before the first chapter is accepted 22ms
+   ✓ the fixed workflow service > does not let an audio package stand in for the chapter gate 1ms
+   ✓ the fixed workflow service > refuses a chapter package that does not carry every chapter part 1ms
+   ✓ the fixed workflow service > refuses a package that comes from an attempt that is not the current one 2ms
+   ✓ the fixed workflow service > refuses a package that comes from a cancelled attempt 1ms
+   ✓ the fixed workflow service > publishes the same package twice without resetting anything 1ms
+   ✓ the fixed workflow service > refuses a reuse whose quality is different 1ms
+   ✓ the fixed workflow service > keeps the cover an independent package 4ms
+   ✓ the fixed workflow service > refuses a decision that is bound to another package version 1ms
+   ✓ the fixed workflow service > refuses a choice the package does not allow 1ms
+   ✓ the fixed workflow service > records a plain review without granting any approval 2ms
+   ✓ the fixed workflow service > fails the adoption closed when MAIN cannot register the approval 2ms
+   ✓ the fixed workflow service > refuses an adoption whose impact has expired 2ms
+   ✓ the fixed workflow service > refuses an adoption whose impact belongs to another project 2ms
+   ✓ the fixed workflow service > records the limited approval against the real attempt and the frozen change id 1ms
+   × the fixed workflow service > D09 passes the Host full-plan digest into approval without recomputing the legacy digest 7ms
+     → expected 'bec4c38aa9316602cd85ffa88309fb8c57fe1…' to be '1111111111111111111111111111111111111…' // Object.is equality
+   ✓ the fixed workflow service > refuses a trusted confirmation that does not match the action 1ms
+   ✓ the fixed workflow service > guards a dispatch against the durable facts of the run 1ms
+   ✓ the fixed workflow service > shows the real attempts of the workflow nodes 6ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/created-run-authority.test.ts > D09 refuses a prepared id without actual Host proof even with real confirmation and attempt
+AssertionError: expected { project_id: 'project-1', …(17) } to be null
+
+- Expected: 
+null
+
++ Received: 
+{
+  "action_digest": "3333333333333333333333333333333333333333333333333333333333333333",
+  "approval_id": "approval_375501d74ca04ec886a470e87bea18b8",
+  "attempt": 1,
+  "base_revision": 1,
+  "change_id": "ps_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "confirmation_id": "confirm_6ff76b1813794141aa6ceecc0e0de8fb",
+  "consumed_transaction_id": null,
+  "control_revision": 0,
+  "expires_at": 1794355800,
+  "facts_digest": "4444444444444444444444444444444444444444444444444444444444444444",
+  "impact_id": "impact-1",
+  "input_digest": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+  "plan_version": 1,
+  "project_id": "project-1",
+  "run_id": "run-1",
+  "run_scope_digest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+  "state": "active",
+  "step_id": "sample",
+}
+
+ ❯ tests/agent-driven/integration/created-run-authority.test.ts:232:55
+    230|   try {
+    231|     expect(await f.repository.transaction(tx => f.authority.registerAp…
+    232|       {...f.input,change_id:'ps_'+ 'a'.repeat(60)}))).toBeNull();
+       |                                                       ^
+    233|     expect(await f.repository.transaction(tx => tx.list('approval',{pr…
+    234|   } finally { f.close(); }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  tests/agent-driven/integration/created-run-authority.test.ts > D09 refuses changed action against the original trusted confirmation
+ FAIL  tests/agent-driven/integration/created-run-authority.test.ts > D09 refuses extended confirmation lifetime against the original trusted confirmation
+Error: APPROVAL_CONFIRMATION_PURPOSE_INPUT_ACTION
+ ❯ ProductSqliteRepository.insert src/host/agent-driven/product-sqlite-repository.ts:211:137
+    209|     const supplied=Object.keys(record);
+    210|     if(!supplied.length||supplied.some(k=>!cols.includes(k)))throw inv…
+    211|     this.#db.prepare(`INSERT INTO ${quote(spec.table)} (${supplied.map…
+       |                                                                                                                                         ^
+    212|     return this.read(c,key)!;
+    213|   }
+ ❯ ProductSqliteRepository.write src/host/agent-driven/product-sqlite-repository.ts:218:33
+ ❯ src/host/agent-driven/product-sqlite-repository.ts:167:41
+ ❯ guarded src/host/agent-driven/product-sqlite-repository.ts:157:18
+ ❯ Object.put src/host/agent-driven/product-sqlite-repository.ts:167:24
+ ❯ CreatedRunAuthority.registerApproval src/host/agent-driven/created-run-authority.ts:142:8
+ ❯ tests/agent-driven/integration/created-run-authority.test.ts:243:61
+ ❯ src/host/agent-driven/product-sqlite-repository.ts:173:21
+ ❯ ProductSqliteRepository.scope src/host/agent-driven/product-sqlite-repository.ts:180:7
+ ❯ src/host/agent-driven/product-sqlite-repository.ts:65:63
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  tests/agent-driven/integration/created-run-authority.test.ts > D09 confirmation replay returns one original approval and rejects changed bindings
+AssertionError: expected { project_id: 'project-1', …(17) } to deeply equal { project_id: 'project-1', …(17) }
+
+- Expected
++ Received
+
+@@ -1,8 +1,8 @@
+  {
+    "action_digest": "3333333333333333333333333333333333333333333333333333333333333333",
+-   "approval_id": "approval_33a57ba25ef946fd8fb5ded0bec29df3",
++   "approval_id": "approval_48eb41c5ff6147c59ac72ddc2f91f584",
+    "attempt": 1,
+    "base_revision": 1,
+    "change_id": "change-1",
+    "confirmation_id": "confirm_5d734f560ff84bdbb8ef2b7d99bcbd52",
+    "consumed_transaction_id": null,
+
+ ❯ tests/agent-driven/integration/created-run-authority.test.ts:252:92
+    250|     const first = await f.repository.transaction(tx => f.authority.reg…
+    251|     expect(first).not.toBeNull();
+    252|     expect(await f.repository.transaction(tx => f.authority.registerAp…
+       |                                                                                            ^
+    253|     expect(await f.repository.transaction(tx => f.authority.registerAp…
+    254|     expect(await f.repository.transaction(tx => tx.list('approval',{pr…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ FAIL  tests/agent-driven/product/fixed-workflow-service.test.ts > the fixed workflow service > D09 passes the Host full-plan digest into approval without recomputing the legacy digest
+AssertionError: expected 'bec4c38aa9316602cd85ffa88309fb8c57fe1…' to be '1111111111111111111111111111111111111…' // Object.is equality
+
+Expected: "1111111111111111111111111111111111111111111111111111111111111111"
+Received: "bec4c38aa9316602cd85ffa88309fb8c57fe12705ecceea8406f67e6b99761e3"
+
+ ❯ tests/agent-driven/product/fixed-workflow-service.test.ts:887:36
+    885|     expect(approval?.change_id).toBe(IMPACT.materialization_id);
+    886|     expect(approval?.state).toBe("active");
+    887|     expect(approval?.facts_digest).toBe(IMPACT.plan_sha256);
+       |                                    ^
+    888|     expect(approval?.action_digest).toBe(IMPACT.plan_sha256);
+    889|     expect(context.adoption.confirmations.some((row) => row.purpose ==…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+
+
+ Test Files  2 failed (2)
+      Tests  5 failed | 43 passed (48)
+   Start at  04:18:25
+   Duration  942ms (transform 245ms, setup 0ms, collect 420ms, tests 294ms, environment 0ms, prepare 63ms)
+

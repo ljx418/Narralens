@@ -1,0 +1,8 @@
+src/host/agent-driven/created-run-authority.ts(62,14): error TS2420: Class 'CreatedRunAuthority' incorrectly implements interface 'TrustedAdoptionAuthority'.
+  Types of property 'reviewTransaction' are incompatible.
+    Type '(<T>(input: ReviewDecisionInput, caller: TrustedCallerContext, work: (tx: ProductTransaction, preparedPlanDigest: string | null) => T) => Promise<...>) | undefined' is not assignable to type '<T>(input: ReviewDecisionInput, caller: TrustedCallerContext, work: (tx: ProductTransaction, preparedPlanDigest: string | null) => T) => Promise<...>'.
+      Type 'undefined' is not assignable to type '<T>(input: ReviewDecisionInput, caller: TrustedCallerContext, work: (tx: ProductTransaction, preparedPlanDigest: string | null) => T) => Promise<...>'.
+src/host/agent-driven/creation-application.ts(153,61): error TS2375: Type 'CreatedRunAuthority' is not assignable to type 'TrustedAdoptionAuthority' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'reviewTransaction' are incompatible.
+    Type '(<T>(input: ReviewDecisionInput, caller: TrustedCallerContext, work: (tx: ProductTransaction, preparedPlanDigest: string | null) => T) => Promise<...>) | undefined' is not assignable to type '<T>(input: ReviewDecisionInput, caller: TrustedCallerContext, work: (tx: ProductTransaction, preparedPlanDigest: string | null) => T) => Promise<...>'.
+      Type 'undefined' is not assignable to type '<T>(input: ReviewDecisionInput, caller: TrustedCallerContext, work: (tx: ProductTransaction, preparedPlanDigest: string | null) => T) => Promise<...>'.
