@@ -1,0 +1,32 @@
+{
+  "selected": 8,
+  "selected_pass": 6,
+  "selected_fail": 2,
+  "filtered_unrelated": 17,
+  "critical_cases_skipped": 0,
+  "passed_cases": [
+    "actual approval/full-plan digests/replay/FD release",
+    "rehashed false plan refusal/FD release",
+    "package version refusal/FD release",
+    "expired impact refusal/FD release",
+    "creative closure refusal/FD release",
+    "copied transaction proof refusal/FD release"
+  ],
+  "failed_cases": {
+    "rights": "received REVISION_CONFLICT / Local asset facts or bytes changed; expected Prepared rights are unavailable",
+    "selection": "received IMPACT_STALE / Actual source, selection, native plan or rights changed; expected REVISION_CONFLICT / Prepared source facts are no longer current"
+  },
+  "failed_case_post_refusal_assertions": "NOT_RUN after exact error assertion failed; outer cleanup did run",
+  "roots": [
+    "/tmp/narralens-created-workspace-l8mfJc",
+    "/tmp/narralens-created-workspace-amPhXF",
+    "/tmp/narralens-created-workspace-mpey9u",
+    "/tmp/narralens-created-workspace-1kFQpe",
+    "/tmp/narralens-created-workspace-Wbgqxx",
+    "/tmp/narralens-created-workspace-eLaMbk",
+    "/tmp/narralens-created-workspace-ZbPzoW",
+    "/tmp/narralens-created-workspace-OZn5S3"
+  ],
+  "roots_absent_after_run": true,
+  "slot_return_message": "msg_eb35365f2f63"
+}

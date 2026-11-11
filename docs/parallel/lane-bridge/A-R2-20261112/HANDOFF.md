@@ -218,3 +218,8 @@ Sole writer remains Codex; MAIN-approved matching closure imported at 54f2ac4 wi
 ## R2-BRIDGE-D09-REAL-001 failed; slot returned
 
 Frozen tests eeeec319c38e5767e847d0939b4094e9baae28ce ran once: selected8, success/wrong-transaction2failed, six refusal outcomes not claimed as targeted coverage; source/index unchanged and all roots/observed children cleaned. Evidence in evidence/d09-real-001/REPORT.md. Light diagnosis reproduces unnormalized affected-range comparison in owned authority; MAIN asked for narrow correction and new heavy slot. R2/D09 integration remains incomplete.
+
+
+## R2-BRIDGE-D09-REAL-002 returned FAILED
+
+Canonical comparison repair frozen10d97994df80ebc8e2ad95aaeba912709690b345; pure ordering regression and tsc pass. Reserved real002 ran once: actual success/replay/FD, wrong-transaction and four mutations pass; rights/selection exact expected errors mismatch, so2failed/6passed and their post-refusal assertions NOT_RUN. All8 roots and observed child processes cleaned, inputs unchanged. Raw evidence/case mapping in evidence/d09-real-002/REPORT.md; slot returned msg_eb35365f2f63. MAIN disposition requested for test-only expectation correction; no new run or source edit.
