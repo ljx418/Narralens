@@ -1,0 +1,16 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:1987649) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/controlled-recovery-families.test.ts (22 tests) 3654ms
+(node:1987815) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/controlled-recovery-scheduler.test.ts (23 tests) 2664ms
+   ✓ uses as many progress passes as a long alternating chain actually requires  302ms
+
+ Test Files  2 passed (2)
+      Tests  45 passed (45)
+   Start at  07:12:55
+   Duration  15.56s (transform 1.10s, setup 0ms, collect 5.32s, tests 6.32s, environment 0ms, prepare 2.57s)
+

@@ -22,7 +22,7 @@ import type { SnapshotStore } from "../projects/snapshot-store.js";
 import type { OperationIdempotencyStore } from "../projects/operation-idempotency-store.js";
 import { AdoptionStore, type InstalledAdoptionAsset } from "./adoption-store.js";
 import { AuthorSourcePublisher } from "./author-source-publisher.js";
-import { claimsControlledWrite } from "../projects/controlled-write-formats.js";
+import { controlledRecoveryFamily, compareControlledRecoveryRows, hasOlderControlledPending } from "../projects/controlled-recovery-scheduler.js";
 
 export interface AdoptionCoordinatorDeps {
   readonly coordinator: ProjectCoordinator;
@@ -379,7 +379,7 @@ export class AdoptionCoordinator {
     const own: string[] = [];
     for (const transaction of this.deps.revisions.projectTransactions(projectId)) {
       if (transaction.state === "committed" || transaction.state === "aborted") continue;
-      if (!claimsControlledWrite(transaction.request_json)) continue;
+      if (controlledRecoveryFamily(transaction) === undefined) continue;
       own.push(transaction.transaction_id);
     }
     return own;
@@ -481,10 +481,10 @@ export class AdoptionCoordinator {
    *   prove it either. That is latched as terminal attention with its reason, instead of
    *   leaving the row `prepared` with an empty `error_code` for the next boot to trip over.
    */
-  async recoverOnStart(): Promise<{ recovered: number; aborted: number; attention: number }> {
+  async recoverOnStart(options: { sweep?: boolean } = {}): Promise<{ recovered: number; aborted: number; attention: number }> {
     const report = { recovered: 0, aborted: 0, attention: 0 };
-    await this.#sweepOrphanedStaging();
-    for (const transaction of this.deps.revisions.incompleteTransactions()) {
+    if (options.sweep !== false) await this.#sweepOrphanedStaging();
+    for (const transaction of this.deps.revisions.incompleteTransactions().sort(compareControlledRecoveryRows)) {
       if (transaction.state === "attention") {
         // Terminal by the state machine: there is no outgoing edge and nothing to recover.
         report.attention += 1;
@@ -521,6 +521,9 @@ export class AdoptionCoordinator {
       const claimsAdoption = (value as { format?: unknown } | null)?.format
         === "narralens.adopt-request@1.0";
       if (!claimsAdoption) continue;
+      // An older created/history/adoption row owns the preceding decision. Never
+      // consume a younger request merely because this family happened to run first.
+      if (hasOlderControlledPending(transaction, this.deps.revisions.projectTransactions(transaction.project_id))) continue;
       const parsed = validateAdoptRequest(value);
       if (!parsed.ok) {
         // It is M4B's row and it cannot be recovered. Latching it is a decided state, and

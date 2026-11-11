@@ -1,0 +1,160 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:1986885) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/agent-driven/integration/controlled-recovery-families.test.ts (22 tests | 11 failed) 3785ms
+   × actual created predecessor defers younger adoption before validating its own request 174ms
+     → expected 'attention' to be 'received' // Object.is equality
+   × actual created predecessor defers younger history before validating its own request 175ms
+     → expected 'attention' to be 'received' // Object.is equality
+   × actual history predecessor defers younger adoption before validating its own request 174ms
+     → expected 'attention' to be 'received' // Object.is equality
+   ✓ actual adoption predecessor defers younger history before validating its own request 237ms
+   × actual history equal-time older row is not mutually deferred 151ms
+     → expected 'received' to be 'attention' // Object.is equality
+   ✓ actual adoption equal-time older row is not mutually deferred 168ms
+   × actual history sorts same-family rows before considering the younger one 158ms
+     → expected 'received' to be 'attention' // Object.is equality
+   × actual adoption sorts same-family rows before considering the younger one 172ms
+     → expected 'attention' to be 'received' // Object.is equality
+   ✓ actual history keeps another project independent of an older created row 166ms
+   ✓ actual adoption keeps another project independent of an older created row 169ms
+   × actual families cannot pass an older created attention row 175ms
+     → expected 'attention' to be 'received' // Object.is equality
+   × actual families cannot pass an older created recovering row 178ms
+     → expected 'attention' to be 'received' // Object.is equality
+   ✓ actual history may inspect after the older transaction was safely aborted 175ms
+   ✓ actual adoption may inspect after the older transaction was safely aborted 177ms
+   × legacy adoption sweep defaults true, while explicit false retains later-pass evidence 155ms
+     → ENOENT: no such file or directory, open '/tmp/narralens-recovery-family-gyDghl/adopt-kept/evidence.txt'
+   ✓ history retains explicit no-sweep and existing default sweep behavior 157ms
+   ✓ preserves the existing legacy corrupt-JSON decided state and observable error code 168ms
+   ✓ both actual family entrypoints leave readable unknown legacy requests to generic recovery 152ms
+   × actual history queue allows older unpublished work to abort while retaining a younger created row 173ms
+     → expected 'attention' to be 'aborted' // Object.is equality
+   × actual adoption queue allows older unpublished work to abort while retaining a younger created row 176ms
+     → expected 'attention' to be 'aborted' // Object.is equality
+   ✓ actual history queue does not ignore an unknown pending write 188ms
+   ✓ actual adoption queue does not ignore an unknown pending write 166ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 11 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/controlled-recovery-families.test.ts > actual created predecessor defers younger adoption before validating its own request
+ FAIL  tests/agent-driven/integration/controlled-recovery-families.test.ts > actual created predecessor defers younger history before validating its own request
+ FAIL  tests/agent-driven/integration/controlled-recovery-families.test.ts > actual history predecessor defers younger adoption before validating its own request
+AssertionError: expected 'attention' to be 'received' // Object.is equality
+
+Expected: "received"
+Received: "attention"
+
+ ❯ tests/agent-driven/integration/controlled-recovery-families.test.ts:47:50
+     45|   await f.recover(younger);
+     46|   expect(f.store.projectTransaction('a')?.state).toBe('received');
+     47|   expect(f.store.projectTransaction('b')?.state).toBe('received');
+       |                                                  ^
+     48|   expect(f.store.projectsInAttention()).toEqual([]);
+     49| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/11]⎯
+
+ FAIL  tests/agent-driven/integration/controlled-recovery-families.test.ts > actual history equal-time older row is not mutually deferred
+AssertionError: expected 'received' to be 'attention' // Object.is equality
+
+Expected: "attention"
+Received: "received"
+
+ ❯ tests/agent-driven/integration/controlled-recovery-families.test.ts:53:50
+     51|   const f = await fixture(); f.add(family === 'history' ? 'adoption' :…
+     52|   await f.recover(family);
+     53|   expect(f.store.projectTransaction('a')?.state).toBe('attention'); //…
+       |                                                  ^
+     54|   expect(f.store.projectTransaction('b')?.state).toBe('received');
+     55|   expect(f.store.projectTransaction('a')?.error_code).toBe(family === …
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/11]⎯
+
+ FAIL  tests/agent-driven/integration/controlled-recovery-families.test.ts > actual history sorts same-family rows before considering the younger one
+AssertionError: expected 'received' to be 'attention' // Object.is equality
+
+Expected: "attention"
+Received: "received"
+
+ ❯ tests/agent-driven/integration/controlled-recovery-families.test.ts:60:50
+     58|   const f = await fixture(); f.add(family, 'b'); f.add(family, 'a');
+     59|   await f.recover(family);
+     60|   expect(f.store.projectTransaction('a')?.state).toBe('attention');
+       |                                                  ^
+     61|   expect(f.store.projectTransaction('b')?.state).toBe('received');
+     62| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/11]⎯
+
+ FAIL  tests/agent-driven/integration/controlled-recovery-families.test.ts > actual adoption sorts same-family rows before considering the younger one
+AssertionError: expected 'attention' to be 'received' // Object.is equality
+
+Expected: "received"
+Received: "attention"
+
+ ❯ tests/agent-driven/integration/controlled-recovery-families.test.ts:61:50
+     59|   await f.recover(family);
+     60|   expect(f.store.projectTransaction('a')?.state).toBe('attention');
+     61|   expect(f.store.projectTransaction('b')?.state).toBe('received');
+       |                                                  ^
+     62| });
+     63| it.each(['history', 'adoption'] as const)('actual %s keeps another pro…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/11]⎯
+
+ FAIL  tests/agent-driven/integration/controlled-recovery-families.test.ts > actual families cannot pass an older created attention row
+ FAIL  tests/agent-driven/integration/controlled-recovery-families.test.ts > actual families cannot pass an older created recovering row
+AssertionError: expected 'attention' to be 'received' // Object.is equality
+
+Expected: "received"
+Received: "attention"
+
+ ❯ tests/agent-driven/integration/controlled-recovery-families.test.ts:74:115
+     72|   if (state === 'attention') f.store.transition('a', 'received', 'atte…
+     73|   await f.history.recoverOnStart({ sweep: false }); await f.adoption.r…
+     74|   expect(f.store.projectTransaction('b')?.state).toBe('received'); exp…
+       |                                                                                                                   ^
+     75| });
+     76| it.each(['history', 'adoption'] as const)('actual %s may inspect after…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/11]⎯
+
+ FAIL  tests/agent-driven/integration/controlled-recovery-families.test.ts > legacy adoption sweep defaults true, while explicit false retains later-pass evidence
+Error: ENOENT: no such file or directory, open '/tmp/narralens-recovery-family-gyDghl/adopt-kept/evidence.txt'
+ ❯ tests/agent-driven/integration/controlled-recovery-families.test.ts:85:10
+     83|   await mkdir(join(f.root, 'adopt-kept')); await writeFile(path, 'not …
+     84|   expect(await f.adoption.recoverOnStart({ sweep: false })).toEqual({ …
+     85|   expect(await readFile(path, 'utf8')).toBe('not a completed recovery'…
+       |          ^
+     86|   expect(await f.adoption.recoverOnStart()).toEqual({ recovered: 0, ab…
+     87|   await expect(readFile(path)).rejects.toMatchObject({ code: 'ENOENT' …
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/11]⎯
+
+ FAIL  tests/agent-driven/integration/controlled-recovery-families.test.ts > actual history queue allows older unpublished work to abort while retaining a younger created row
+ FAIL  tests/agent-driven/integration/controlled-recovery-families.test.ts > actual adoption queue allows older unpublished work to abort while retaining a younger created row
+AssertionError: expected 'attention' to be 'aborted' // Object.is equality
+
+Expected: "aborted"
+Received: "attention"
+
+ ❯ tests/agent-driven/integration/controlled-recovery-families.test.ts:119:50
+    117|     .run(JSON.stringify(validRequest(family, 'recover-before-publicati…
+    118|   await f.recover(family);
+    119|   expect(f.store.projectTransaction('a')?.state).toBe('aborted');
+       |                                                  ^
+    120|   expect(f.store.projectTransaction('b')?.state).toBe('received'); exp…
+    121|   expect(f.store.recoveryGate('p1', 0)).toBe(true); // Remaining creat…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/11]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  11 failed | 11 passed (22)
+   Start at  07:12:16
+   Duration  8.64s (transform 974ms, setup 0ms, collect 3.07s, tests 3.78s, environment 0ms, prepare 1.19s)
+

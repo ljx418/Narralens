@@ -17,9 +17,10 @@ import type { AffectedLock, LockService } from "../projects/lock-service.js";
 import type { OperationIdempotencyStore } from "../projects/operation-idempotency-store.js";
 import type { ProjectCoordinator } from "../projects/project-coordinator.js";
 import type { ProjectResolver } from "../projects/project-resolver.js";
-import type { RevisionStore } from "../projects/revision-store.js";
+import type { RevisionStore, ProjectTransactionRow } from "../projects/revision-store.js";
 import type { SnapshotStore } from "../projects/snapshot-store.js";
-import { claimsControlledWrite, claimsHistoryRestore } from "../projects/controlled-write-formats.js";
+import { claimsHistoryRestore } from "../projects/controlled-write-formats.js";
+import { controlledRecoveryFamily, compareControlledRecoveryRows, hasOlderControlledPending } from "../projects/controlled-recovery-scheduler.js";
 import type { HistoryCommandTranslator, HistoryIntentV1 } from "./history-command-translator.js";
 import type { HistoryStore } from "./history-store.js";
 import type { RestorePlanContext, RestorePlanner } from "./restore-planner.js";
@@ -461,21 +462,14 @@ export class HistoryService {
   }> {
     const report = { recovered: 0, aborted: 0, attention: 0, deferred: 0 };
     if (options.sweep !== false) await this.#sweepOrphanedStaging();
-    for (const transaction of this.#deps.revisions.incompleteTransactions()) {
+    for (const transaction of this.#deps.revisions.incompleteTransactions().sort(compareControlledRecoveryRows)) {
       if (transaction.state === "attention") {
         report.attention += 1;
         continue;
       }
       if (!claimsHistoryRestore(transaction.request_json)) continue;
-      // **The two specialized recoveries decide the transactions in the order they were
-      // created.** A restore row that is younger than a still-pending adoption row for the
-      // same project is *deferred*: the adoption's row is the older one, and it is the
-      // adoption's recovery that owns it. Deciding the younger restore first would move the
-      // revision under the older adoption, and the adoption's publication would then be
-      // unprovable — a terminal attention produced purely by the order of two recoveries.
-      //
-      // The deferred row is decided by a second pass, after the adoption's recovery has
-      // taken its own rows.
+      // All three controlled families share the stable creation order. A deferred
+      // row is retried by the progress scheduler, never an assumed fixed second pass.
       if (this.#olderControlledPending(transaction)) {
         report.deferred += 1;
         continue;
@@ -804,18 +798,11 @@ export class HistoryService {
   /**
    * Whether an *older* controlled row for the same project is still pending.
    *
-   * "Controlled" means either module's: an adoption and a restore are both controlled
-   * writes, and the one that was created first has to be decided first.
+   * "Controlled" includes created-source adoption, legacy adoption and history restore.
+   * The stable oldest pending row of the project must be decided first.
    */
-  #olderControlledPending(transaction: { transaction_id: string; project_id: string; created_at: string }): boolean {
-    for (const other of this.#deps.revisions.projectTransactions(transaction.project_id)) {
-      if (other.transaction_id === transaction.transaction_id) continue;
-      if (other.state === "committed" || other.state === "aborted") continue;
-      if (other.created_at > transaction.created_at) continue;
-      if (!claimsControlledWrite(other.request_json)) continue;
-      return true;
-    }
-    return false;
+  #olderControlledPending(transaction: ProjectTransactionRow): boolean {
+    return hasOlderControlledPending(transaction, this.#deps.revisions.projectTransactions(transaction.project_id));
   }
 
   /** Every pending controlled row of a project, whichever module owns it. */
@@ -823,7 +810,7 @@ export class HistoryService {
     const own: string[] = [];
     for (const transaction of this.#deps.revisions.projectTransactions(projectId)) {
       if (transaction.state === "committed" || transaction.state === "aborted") continue;
-      if (!claimsControlledWrite(transaction.request_json)) continue;
+      if (controlledRecoveryFamily(transaction) === undefined) continue;
       own.push(transaction.transaction_id);
     }
     return own;

@@ -1,0 +1,29 @@
+{
+  "format": "narralens.main-component-release@1",
+  "owner": "MAIN",
+  "base": "10ebadd0c770f67c54de268747420042eaea3850",
+  "scope": "Actual legacy/history recovery family stable order, created-family pending recognition and first-pass-only legacy sweep option",
+  "basis": [
+    "RD05 design bounded ACCEPT23cf",
+    "scheduler64884 independent bounded ACCEPT msg_0554d45d00fe"
+  ],
+  "paths": [
+    "src/host/history/history-service.ts",
+    "src/host/adoption/adoption-coordinator.ts",
+    "tests/agent-driven/integration/controlled-recovery-families.test.ts"
+  ],
+  "requirements": [
+    "Use shared stable created_at/transaction_id order in actual family loops and older-row guard",
+    "Include created pending only via exact Host row classification, not wire claims",
+    "Legacy sweep optional defaults true; false preserves orphan evidence on later scheduler passes",
+    "Keep existing transaction state and authority logic, old malformed JSON error behavior and public contracts",
+    "No Host/generic/created recovery production activation yet"
+  ],
+  "verification": [
+    "Real SQLite + actual family classes and actual Coordinator attention; no Host/mocked business recovery claim",
+    "Older created/history/adoption and equal timestamp cases",
+    "Multiple projects, attention/recovering blockers, committed/aborted predecessors",
+    "Legacy default sweep vs explicit false, unknown request legacy error regression"
+  ],
+  "status": "RELEASED_EXACT_SCOPE"
+}
