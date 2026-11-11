@@ -1,5 +1,5 @@
 import {createHash,randomUUID} from 'node:crypto';
-import {constants,type BigIntStats} from 'node:fs';
+import {constants,fstatSync,lstatSync,realpathSync,type BigIntStats} from 'node:fs';
 import {mkdir,open,readFile,rm,unlink,lstat,realpath,type FileHandle} from 'node:fs/promises';
 import {basename,dirname,resolve,sep} from 'node:path';
 import {asHostResourceError} from '../api-error.js';
@@ -373,7 +373,9 @@ export class PreparedPreviewService implements PreparedPreviewPort {
  readonly #renderer:NativeRenderer;
  readonly #retained:string[]=[];
  #closed=false;
- #active:Promise<unknown>|undefined;
+ #active:Promise<void>|undefined;
+ #objectDirectory:FileHandle|undefined;
+ #objectIdentity:string|undefined;
  constructor(verifier:PreparedSourceProofPort,options:PreparedPreviewOptions){
   if(!verifier||!options||typeof options.assertCurrentAuthorAndRights!=='function')throw unavailable();
   const workspace=resolve(options.workspaceRoot),objects=resolve(options.objectRoot);
@@ -396,13 +398,41 @@ export class PreparedPreviewService implements PreparedPreviewPort {
   try{const stat=await handle.stat({bigint:true});created(object_id,`${stat.dev}:${stat.ino}`);await handle.writeFile(bytes);await handle.sync();}finally{await handle.close();}
   return {slot,object_id,content_type,bytes:bytes.length,sha256:sha(bytes),media_facts};
  }
+ async #discard(directory:FileHandle,objects:readonly {id:string;identity:string}[]):Promise<void>{
+  for(const object of objects){
+   const path='/proc/self/fd/'+directory.fd+'/'+object.id;
+   const actual=await lstat(path,{bigint:true}).catch(()=>undefined);
+   if(actual?.isFile()&&`${actual.dev}:${actual.ino}`===object.identity)await unlink(path).catch(()=>undefined);
+  }
+ }
  async preview(request:PreparedPreviewRequestV1):Promise<PreparedPreviewReceiptV1> {
   if(this.#active)throw unavailable('A prepared preview is already running');
-  const work=this.#run(request);
-  this.#active=work;
-  try{return await work;}finally{if(this.#active===work)this.#active=undefined;}
+  if(this.#closed)throw unavailable();
+  let settled!:()=>void;
+  const active=new Promise<void>(resolve=>{settled=resolve;});
+  this.#active=active;
+  let pending:{receipt:PreparedPreviewReceiptV1;directory:FileHandle;objects:Array<{id:string;identity:string}>}|undefined;
+  try{
+   pending=await this.#run(request);
+   // All asynchronous disposal is finished. No await may separate this final
+   // authority check from the public promise settling with a receipt.
+   if(request.signal?.aborted||this.#closed)throw unavailable('The prepared preview stopped before receipt exposure');
+   const held=fstatSync(pending.directory.fd,{bigint:true});
+   const root=resolve(this.#options.objectRoot),named=lstatSync(root,{bigint:true});
+   if(!named.isDirectory()||named.isSymbolicLink()||`${named.dev}:${named.ino}`!==this.#objectIdentity
+      ||`${held.dev}:${held.ino}`!==this.#objectIdentity||realpathSync('/proc/self/fd/'+pending.directory.fd)!==root)
+    throw changed('The prepared preview object domain was replaced');
+   this.#verifier.assertCurrentForRead(request.completed,request.binding,request.proof,()=>this.#options.assertCurrentAuthorAndRights(request.completed.project_id));
+   return pending.receipt;
+  }catch(error){
+   if(pending)await this.#discard(pending.directory,pending.objects);
+   return failure(error);
+  }finally{
+   if(this.#active===active)this.#active=undefined;
+   settled();
+  }
  }
- async #run(request:PreparedPreviewRequestV1):Promise<PreparedPreviewReceiptV1> {
+ async #run(request:PreparedPreviewRequestV1):Promise<{receipt:PreparedPreviewReceiptV1;directory:FileHandle;objects:Array<{id:string;identity:string}>}> {
   let workspace:OwnedDirectory|undefined;
   let retain=false,exposed=false;
   let objectDirectory:FileHandle|undefined;
@@ -429,9 +459,13 @@ export class PreparedPreviewService implements PreparedPreviewPort {
    await assertAnchoredPrivate(objectRoot,'The prepared preview object domain');
    await ensurePrivateDirectory(workspaceRoot,'The prepared preview workspace');
    await ensurePrivateDirectory(objectRoot,'The prepared preview object domain');
-   objectDirectory=await open(objectRoot,constants.O_RDONLY|constants.O_DIRECTORY|constants.O_NOFOLLOW);
-   const objectStat=await objectDirectory.stat({bigint:true});
-   const objectIdentity=`${objectStat.dev}:${objectStat.ino}`;
+   if(!this.#objectDirectory){
+    this.#objectDirectory=await open(objectRoot,constants.O_RDONLY|constants.O_DIRECTORY|constants.O_NOFOLLOW);
+    const objectStat=await this.#objectDirectory.stat({bigint:true});
+    this.#objectIdentity=`${objectStat.dev}:${objectStat.ino}`;
+   }
+   objectDirectory=this.#objectDirectory;
+   const objectIdentity=this.#objectIdentity;
    const currentObjects=async()=>{
     const named=await lstat(objectRoot,{bigint:true}),held=await objectDirectory!.stat({bigint:true});
     if(!named.isDirectory()||named.isSymbolicLink()||`${named.dev}:${named.ino}`!==objectIdentity
@@ -528,22 +562,23 @@ export class PreparedPreviewService implements PreparedPreviewPort {
     if(request.signal?.aborted||this.#closed)throw unavailable('The prepared preview stopped before receipt exposure');
     this.#verifier.assertCurrentForRead(completed,binding,proof,()=>this.#options.assertCurrentAuthorAndRights(completed.project_id));
     const receipt_digest=canonicalDigest(content);
+    const receipt=deepFreeze({...content,receipt_digest});
+    await copy.dispose();copy=undefined;
+    if(workspace&&!retain){await removeOwnedDirectory(workspace);workspace=undefined;}
+    // Transfer ownership to preview(), which checks again after this promise settles.
     exposed=true;
-    return deepFreeze({...content,receipt_digest});
-   }finally{await copy?.dispose();}
+    return {receipt,directory:objectDirectory,objects:unpublished};
+   }finally{if(copy)await copy.dispose();}
   }catch(error){return failure(error);}
   finally{
-   if(objectDirectory){
-    try{
-     if(!exposed)for(const object of unpublished){
-      const path='/proc/self/fd/'+objectDirectory.fd+'/'+object.id;
-      const actual=await lstat(path,{bigint:true}).catch(()=>undefined);
-      if(actual?.isFile()&&`${actual.dev}:${actual.ino}`===object.identity)await unlink(path).catch(()=>undefined);
-     }
-    }finally{await objectDirectory.close();}
-   }
+   if(objectDirectory&&!exposed)await this.#discard(objectDirectory,unpublished);
    if(workspace&&!retain)await removeOwnedDirectory(workspace);
   }
  }
- async close():Promise<void>{this.#closed=true;if(this.#active)await this.#active.catch(()=>undefined);}
+ async close():Promise<void>{
+  this.#closed=true;
+  if(this.#active)await this.#active;
+  const directory=this.#objectDirectory;this.#objectDirectory=undefined;this.#objectIdentity=undefined;
+  if(directory)await directory.close();
+ }
 }

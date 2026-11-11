@@ -18,13 +18,17 @@ import type {Script,Storyboard,TaskPrepare} from '../../../src/contracts/agent-d
 import type {TaskReservation} from '../../../src/host/agent-driven/created-task-store.js';
 import type {CompletedPreparedSourceV1,NativeDraftAsset,PreparedPreviewBindingV1,PreparedPreviewReceiptV1} from '../../../src/host/render/assembly-ports.js';
 
-const ioFault=vi.hoisted(()=>({root:'',readerMode:'' as ''|'read'|'hash-eof',onRead:undefined as undefined|(()=>Promise<void>),beforePublish:undefined as undefined|(()=>Promise<void>),onFifthSync:undefined as undefined|(()=>void),shortWrite:false,zeroWrite:false,shortHits:0,closes:0,publishes:0}));
+const ioFault=vi.hoisted(()=>({cleanupRoot:'',onCleanupClose:undefined as undefined|(()=>void),root:'',readerMode:'' as ''|'read'|'hash-eof',onRead:undefined as undefined|(()=>Promise<void>),beforePublish:undefined as undefined|(()=>Promise<void>),onFifthSync:undefined as undefined|(()=>void),shortWrite:false,zeroWrite:false,shortHits:0,closes:0,publishes:0}));
 vi.mock('node:fs/promises',async importOriginal=>{
  const actual=await importOriginal<typeof import('node:fs/promises')>();
  return {...actual,open:async(path:Parameters<typeof actual.open>[0],flags:Parameters<typeof actual.open>[1],...rest:any[])=>{
   const name=String(path),object=/\/obj_[a-f0-9]{32}$/.test(name);
   if(object&&typeof flags==='number'&&(flags&constants.O_CREAT)!==0&&ioFault.beforePublish){const hook=ioFault.beforePublish;ioFault.beforePublish=undefined;await hook();}
   const handle=await (actual.open as (...args:any[])=>ReturnType<typeof actual.open>)(path,flags,...rest);
+  if(name===ioFault.cleanupRoot&&typeof flags==='number'&&(flags&constants.O_DIRECTORY)!==0){
+   const close=handle.close.bind(handle);
+   handle.close=async()=>{const hook=ioFault.onCleanupClose;ioFault.onCleanupClose=undefined;hook?.();await close();};
+  }
   if(object&&typeof flags==='number'&&(flags&constants.O_CREAT)!==0){
    const sync=handle.sync.bind(handle);
    handle.sync=async()=>{ioFault.publishes++;if(ioFault.publishes===5)ioFault.onFifthSync?.();await sync();};
@@ -50,7 +54,7 @@ vi.mock('node:fs/promises',async importOriginal=>{
   return handle;
  }};
 });
-afterEach(()=>{Object.assign(ioFault,{root:'',readerMode:'',onRead:undefined,beforePublish:undefined,onFifthSync:undefined,shortWrite:false,zeroWrite:false,shortHits:0,closes:0,publishes:0});vi.restoreAllMocks();});
+afterEach(()=>{Object.assign(ioFault,{cleanupRoot:'',onCleanupClose:undefined,root:'',readerMode:'',onRead:undefined,beforePublish:undefined,onFifthSync:undefined,shortWrite:false,zeroWrite:false,shortHits:0,closes:0,publishes:0});vi.restoreAllMocks();});
 
 const vendorRoot='/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm';
 const sha=(bytes:Uint8Array)=>createHash('sha256').update(bytes).digest('hex');
@@ -306,6 +310,22 @@ it.each(['cancel','close'] as const)('does not expose a receipt after %s at the 
   try{await expect(f.service.preview({format:'narralens.prepared-preview-request@1',completed:f.completed,binding:f.binding,proof,signal:controller.signal})).rejects.toBeTruthy();}
   finally{f.verifier.release(proof);}
   await closing;
+  expect(ioFault.publishes).toBe(5);
+  expect(await readdir(f.objects)).toEqual([]);
+ }finally{await f.close();}
+},600000);
+
+it.each(['cancel','close','revoke'] as const)('does not expose a receipt after %s during awaited copy cleanup',async mode=>{
+ const f=await fixture(),controller=new AbortController();let closing:Promise<void>|undefined;
+ try{
+  const proof=await f.verifier.proveForRead(f.completed,f.binding,f.registryFacts);
+  ioFault.cleanupRoot=f.completed.root;
+  let hit=false;
+  ioFault.onCleanupClose=()=>{hit=true;if(mode==='cancel')controller.abort();else if(mode==='close')closing=f.service.close();else f.verifier.release(proof);};
+  try{await expect(f.service.preview({format:'narralens.prepared-preview-request@1',completed:f.completed,binding:f.binding,proof,signal:controller.signal})).rejects.toBeTruthy();}
+  finally{f.verifier.release(proof);}
+  await closing;
+  expect(hit).toBe(true);
   expect(ioFault.publishes).toBe(5);
   expect(await readdir(f.objects)).toEqual([]);
  }finally{await f.close();}
