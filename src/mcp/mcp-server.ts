@@ -77,6 +77,7 @@ import {
   type AgentRouteView,
 } from "./registry-view.js";
 import { toolDescription, toolInputSchema } from "./tool-schemas.js";
+import { matchAdjunctResourceUri, type AdjunctResourceView } from "./asset-inventory-resource.js";
 
 /** The name the façade reports to a client. */
 export const MCP_SERVER_NAME = "narralens";
@@ -132,6 +133,14 @@ export interface McpFacadeOptions {
   readonly filterDigest?: string;
   readonly serverName?: string;
   readonly serverVersion?: string;
+  /**
+   * The reviewed adjunct resources.
+   *
+   * They are NOT in the frozen registry and they are counted separately from it. The
+   * façade serves them next to the frozen ones with the same handshake, the same
+   * credential and the same bounded read; they simply have their own validator.
+   */
+  readonly adjunctResources?: readonly AdjunctResourceView[];
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -390,28 +399,48 @@ export function createMcpServer(options: McpFacadeOptions): Server {
   });
 
   server.setRequestHandler(ListResourcesRequestSchema, async (): Promise<ListResourcesResult> => ({
-    resources: AGENT_RESOURCES
-      .filter((resource) => !isResourceTemplate(resource.uri))
-      .map((resource) => ({
-        uri: resource.uri,
-        name: resource.uri,
-        description: `Narralens ${resource.output} for ${resource.source}.`,
-        mimeType: "application/json",
-      })),
+    resources: [
+      ...AGENT_RESOURCES
+        .filter((resource) => !isResourceTemplate(resource.uri))
+        .map((resource) => ({
+          uri: resource.uri,
+          name: resource.uri,
+          description: `Narralens ${resource.output} for ${resource.source}.`,
+          mimeType: "application/json",
+        })),
+      ...(options.adjunctResources ?? [])
+        .filter((resource) => !isResourceTemplate(resource.uri))
+        .map((resource) => ({
+          uri: resource.uri,
+          name: resource.uri,
+          description: resource.description,
+          mimeType: resource.mimeType,
+        })),
+    ],
   }));
 
   server.setRequestHandler(ListResourceTemplatesRequestSchema, async (): Promise<ListResourceTemplatesResult> => ({
-    resourceTemplates: AGENT_RESOURCES
-      .filter((resource) => isResourceTemplate(resource.uri))
-      .map((resource) => ({
-        uriTemplate: resource.uri,
-        name: resource.uri,
-        description: [
-          `Narralens ${resource.output} for ${resource.source}.`,
-          resource.projection === null ? "" : `Projection: ${resource.projection}.`,
-        ].filter((part) => part.length > 0).join(" "),
-        mimeType: "application/json",
-      })),
+    resourceTemplates: [
+      ...AGENT_RESOURCES
+        .filter((resource) => isResourceTemplate(resource.uri))
+        .map((resource) => ({
+          uriTemplate: resource.uri,
+          name: resource.uri,
+          description: [
+            `Narralens ${resource.output} for ${resource.source}.`,
+            resource.projection === null ? "" : `Projection: ${resource.projection}.`,
+          ].filter((part) => part.length > 0).join(" "),
+          mimeType: "application/json",
+        })),
+      ...(options.adjunctResources ?? [])
+        .filter((resource) => isResourceTemplate(resource.uri))
+        .map((resource) => ({
+          uriTemplate: resource.uri,
+          name: resource.uri,
+          description: resource.description,
+          mimeType: resource.mimeType,
+        })),
+    ],
   }));
 
   server.setRequestHandler(ReadResourceRequestSchema, async (request): Promise<ReadResourceResult> => {
@@ -437,6 +466,77 @@ export function createMcpServer(options: McpFacadeOptions): Server {
     const questionMark = rawUri.indexOf("?");
     const uriPath = questionMark === -1 ? rawUri : rawUri.slice(0, questionMark);
     const query = questionMark === -1 ? "" : rawUri.slice(questionMark + 1);
+
+    const adjunct = matchAdjunctResourceUri(uriPath, options.adjunctResources ?? []);
+    if (adjunct !== null) {
+      let adjunctProjectId: string;
+      try {
+        adjunctProjectId = adjunct.projectId === null ? "" : decodeURIComponent(adjunct.projectId);
+      } catch {
+        return {
+          contents: [{
+            uri: rawUri,
+            mimeType: "application/json",
+            text: JSON.stringify(errorFromInvalidRequest(
+              "The resource URI could not be decoded.",
+              correlationId,
+            )),
+          }],
+        };
+      }
+      const adjunctQuery = new URLSearchParams(query);
+      for (const key of adjunctQuery.keys()) {
+        if (key !== "limit" && key !== "cursor") {
+          return {
+            contents: [{
+              uri: rawUri,
+              mimeType: "application/json",
+              text: JSON.stringify(errorFromInvalidRequest(
+                `The resource ${uriPath} does not accept the query parameter ${key}.`,
+                correlationId,
+              )),
+            }],
+          };
+        }
+      }
+      try {
+        await ensureHandshake();
+      } catch (error) {
+        return {
+          contents: [{
+            uri: rawUri,
+            mimeType: "application/json",
+            text: JSON.stringify(envelopeForUnexpected(
+              error,
+              correlationId,
+              `The host contract could not be verified before reading ${uriPath}.`,
+            )),
+          }],
+        };
+      }
+      try {
+        const output = await adjunct.resource.read(adjunctProjectId, adjunctQuery);
+        return {
+          contents: [{
+            uri: rawUri,
+            mimeType: adjunct.resource.mimeType,
+            text: JSON.stringify(output),
+          }],
+        };
+      } catch (error) {
+        return {
+          contents: [{
+            uri: rawUri,
+            mimeType: "application/json",
+            text: JSON.stringify(envelopeForUnexpected(
+              error,
+              correlationId,
+              `The resource ${uriPath} could not be read.`,
+            )),
+          }],
+        };
+      }
+    }
 
     const match = matchResourceUri(uriPath);
     if (match === null) {

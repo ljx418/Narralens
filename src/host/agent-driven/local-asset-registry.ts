@@ -1,6 +1,6 @@
 import { createHash, randomUUID } from 'node:crypto';
 import { constants, lstatSync, openSync, fstatSync, closeSync, realpathSync, readSync, fsyncSync } from 'node:fs';
-import { link, lstat, open, realpath, unlink } from 'node:fs/promises';
+import { link, lstat, open, readdir, realpath, unlink } from 'node:fs/promises';
 import type { BigIntStats } from 'node:fs';
 import { resolve, join, sep, dirname, relative } from 'node:path';
 import type { DatabaseSync } from 'node:sqlite';
@@ -67,6 +67,18 @@ const DDL = `CREATE TABLE IF NOT EXISTS created_local_asset(
 const ID = /^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$/;
 const SHA = /^[a-f0-9]{64}$/;
 const OP = 'agent.v1:local-asset.import';
+/** The media extensions the existing probe and importer accept. */
+const MEDIA_EXTENSIONS = new Set(['mp4', 'wav', 'm4a', 'mp3', 'flac', 'ogg']);
+/** The listing never walks an unbounded tree. */
+const MAX_SOURCE_DEPTH = 4;
+/** One safe source file. It carries a relative path and a regular-file identity only. */
+export interface SourceFileCandidate {
+    readonly relative_path: string;
+    readonly display_name: string;
+    readonly kind: 'video' | 'audio';
+    readonly bytes: number;
+    readonly identity: string;
+}
 /** Resolve even a not-yet-created reserved domain through its existing ancestor. */
 function canonicalLocation(path: string): string {
     const absolute = resolve(path);
@@ -538,6 +550,100 @@ export class LocalAssetRegistry {
         }
         finally {
             closeSync(fd);
+        }
+    }
+    /** Host-only owner/access check for the adjunct transports. It performs no read of
+     * the material itself and never leaks whether another project exists. */
+    assertAccess(project: string, caller: TrustedCallerContext): void { this.#access(project, caller); }
+    /** Host-only: an opaque generation token for the configured source root. It changes
+     * when the root itself is replaced and it never reveals a path. */
+    sourceRootGeneration(): string {
+        this.#assertSourceRoot();
+        return canonicalDigest({ root: this.#sourceIdentity });
+    }
+    /** R1 adjunct: the original typed import receipt for a key, without re-reading the
+     * source input. Only this registry's own operation response is read; no arbitrary
+     * operation response is exposed, and the caller still has to own the project. */
+    recallImport(project: string, idempotencyKey: string, caller: TrustedCallerContext): LocalAsset | null {
+        this.#access(project, caller);
+        if (typeof idempotencyKey !== 'string' || !ID.test(idempotencyKey)) throw invalid();
+        const found = this.#commands.recall(project, OP, idempotencyKey);
+        if (!found) return null;
+        const response = JSON.parse(found.response_json) as LocalAsset;
+        const stored = this.#row(project, response.asset_id);
+        if (!stored || canonicalDigest(stored.asset) !== canonicalDigest(response)) throw conflict();
+        return stored.asset;
+    }
+    /** Host-only: the safe, bounded listing of the configured source root. It returns
+     * only relative paths and regular-file identities, never an absolute path, and it
+     * never hashes a file. Symlinks, non-regular files and anything outside the
+     * configured root are skipped, so a listing cannot become a directory walk. */
+    async listSourceFiles(limit: number): Promise<readonly SourceFileCandidate[]> {
+        if (!Number.isSafeInteger(limit) || limit < 1 || limit > 4096) throw invalid();
+        this.#assertSourceRoot();
+        const found: SourceFileCandidate[] = [];
+        await this.#walkSource('', 0, found, limit);
+        return found;
+    }
+    async #walkSource(prefix: string, depth: number, found: SourceFileCandidate[], limit: number): Promise<void> {
+        if (found.length >= limit || depth > MAX_SOURCE_DEPTH) return;
+        let entries: Array<{ name: string; isSymbolicLink(): boolean; isDirectory(): boolean; isFile(): boolean }>;
+        try {
+            entries = await readdir(prefix ? resolve(this.#sourceRoot, prefix) : this.#sourceRoot, { withFileTypes: true });
+        } catch {
+            return;
+        }
+        entries.sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0));
+        for (const entry of entries) {
+            if (found.length >= limit) return;
+            if (entry.name.startsWith('.') || entry.name.includes('/')) continue;
+            const relative = prefix ? `${prefix}/${entry.name}` : entry.name;
+            // A symlink is never followed and never listed: it is the only way a listing
+            // could escape the configured root.
+            if (entry.isSymbolicLink()) continue;
+            if (entry.isDirectory()) { await this.#walkSource(relative, depth + 1, found, limit); continue; }
+            if (!entry.isFile()) continue;
+            const extension = entry.name.slice(entry.name.lastIndexOf('.') + 1).toLowerCase();
+            if (!MEDIA_EXTENSIONS.has(extension)) continue;
+            let stat: BigIntStats;
+            try { stat = await lstat(resolve(this.#sourceRoot, relative), { bigint: true }); } catch { continue; }
+            if (!stat.isFile() || stat.isSymbolicLink() || stat.size < 1n || stat.size > BigInt(MAX_BYTES)) continue;
+            found.push({
+                relative_path: relative,
+                display_name: entry.name,
+                kind: extension === 'mp4' ? 'video' : 'audio',
+                bytes: Number(stat.size),
+                identity: [stat.dev, stat.ino, stat.size, stat.mtimeNs].join(':'),
+            });
+        }
+    }
+    /** Host-only: hash ONE selected source file inside the configured root. The file is
+     * opened without following a symlink, and its regular-file identity is re-checked
+     * afterwards, so a file that was replaced between the listing and the import is
+     * refused instead of being registered under a stale identity. */
+    async hashSourceFile(relativePath: string, expectedIdentity: string): Promise<{ sha256: string; bytes: number }> {
+        this.#assertSourceRoot();
+        const path = resolve(this.#sourceRoot, relativePath);
+        if (!path.startsWith(this.#sourceRoot + sep) || await realpath(path) !== path) throw invalid();
+        const opened = await this.#openInput(relativePath);
+        try {
+            const before = await opened.handle.stat({ bigint: true });
+            if (!before.isFile()) throw invalid();
+            const hash = createHash('sha256'), buffer = Buffer.alloc(1024 * 1024);
+            let bytes = 0;
+            while (true) {
+                const part = await opened.handle.read(buffer, 0, buffer.length, null);
+                if (!part.bytesRead) break;
+                bytes += part.bytesRead;
+                if (bytes > MAX_BYTES) throw invalid();
+                hash.update(buffer.subarray(0, part.bytesRead));
+            }
+            const after = await opened.handle.stat({ bigint: true });
+            if ([after.dev, after.ino, after.size, after.mtimeNs].join(':') !== expectedIdentity)
+                throw new ProductError('REVISION_CONFLICT', 'The selected source file changed');
+            return { sha256: hash.digest('hex'), bytes };
+        } finally {
+            try { await opened.handle.close(); } finally { await opened.closeParents(); }
         }
     }
     /** Host-only path resolution for a verifier, never serialized or accepted as a DTO. */

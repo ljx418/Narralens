@@ -1,0 +1,48 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+ ✓ tests/architecture/m2.1-fitness.test.ts (22 tests) 1003ms
+   ✓ fitness 1-3: dependency direction > 3. production code never imports a spike, statically or dynamically  574ms
+   ✓ fitness 10-14: stage-specific invariants > 11. no production path reaches editProjectFilm from a translated write  308ms
+ ✓ tests/agent-driven/bridge/mcp-stdio-client.test.ts (8 tests) 40839ms
+   ✓ A-MCP stdio façade > advertises exactly the registry's tool allowlist over a real stdio transport  4208ms
+   ✓ A-MCP stdio façade > reads the concrete health resource over the real transport  4174ms
+   ✓ A-MCP stdio façade > reaches the host over http and returns the contract output  3823ms
+   ✓ A-MCP stdio façade > verifies the host's contract version before the first dispatch  3795ms
+   ✓ A-MCP stdio façade > reads a project resource through the host  4749ms
+   ✓ A-MCP stdio façade > rejects an invalid field without reaching the host  5464ms
+   ✓ A-MCP stdio façade > reports an unreachable host and recovers when the host returns  10327ms
+   ✓ A-MCP stdio façade > refuses an unknown tool name  4264ms
+ ✓ tests/agent-driven/bridge/mcp-wrapper-cleanup.test.ts (2 tests) 12118ms
+   ✓ A-MCP skill bin wrapper > serves the real client through the real wrapper and leaves nothing behind  8319ms
+   ✓ A-MCP skill bin wrapper > does not stop anything but its own child  3798ms
+ ✓ tests/architecture/m2.2-fitness.test.ts (17 tests) 1855ms
+   ✓ M2.2 fitness: one state machine, no arbitrary state writes > 1. every production `UPDATE ... SET state` lives in transition, advanceJournal or markRecovering  391ms
+   ✓ M2.2 fitness: no second actor, queue, store or timeline > 6. the revision store owns one database handle; no second DatabaseSync for project state  301ms
+(node:968572) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/created-task-worker.test.ts (14 tests) 2828ms
+   ✓ renews the real lease during a long processor and only the current lease can settle  2522ms
+(node:968644) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/created-task-store.test.ts (46 tests) 318ms
+(node:968892) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/host-close-lifecycle.test.ts (3 tests) 11352ms
+   ✓ releases the live lease and its checkpoint together on a graceful close, survives a reopen and resumes the same job  6325ms
+   ✓ settles a user cancellation through the real processor instead of requeueing it  4629ms
+ ✓ tests/agent-driven/bridge/mcp-registry.test.ts (40 tests) 155ms
+ ✓ tests/agent-driven/bridge/mcp-host-client.test.ts (15 tests) 74ms
+ ✓ tests/agent-driven/bridge/cursor-events.test.ts (26 tests) 38ms
+ ✓ tests/agent-driven/bridge/launcher-cold.test.ts (16 tests) 22ms
+(node:970283) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/created-run-authority.test.ts (12 tests) 109ms
+ ✓ tests/agent-driven/integration/review-media-transport.test.ts (5 tests) 23ms
+ ✓ tests/agent-driven/bridge/skill-library.test.ts (3 tests) 5ms
+
+ Test Files  14 passed (14)
+      Tests  229 passed (229)
+   Start at  23:41:20
+   Duration  147.20s (transform 6.79s, setup 0ms, collect 47.56s, tests 70.74s, environment 2ms, prepare 19.52s)
+

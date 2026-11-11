@@ -140,6 +140,16 @@ export class ProjectCreationStore {
         const row = this.#db.prepare('SELECT command_id FROM cp_a0_bootstrap_command WHERE reserved_project_id=?').get(projectId);
         return row ? this.read(String(row.command_id)) : null;
     }
+    /** The principal that owns the created project. It is the real intake principal,
+     * never a body field and never a guess. */
+    ownerOf(projectId: string): string | null {
+        const row = this.#db.prepare('SELECT command_id FROM cp_a0_bootstrap_command WHERE reserved_project_id=?').get(projectId);
+        if (!row) return null;
+        const reservation = this.read(String(row.command_id));
+        if (!reservation) return null;
+        const intake = this.#db.prepare('SELECT principal_id FROM cp_a0_intake_version WHERE intake_id=? AND version=?').get(reservation.request.intake_id, reservation.request.intake_version);
+        return intake?.principal_id === undefined ? null : String(intake.principal_id);
+    }
     pending(): CreationReservation[] { return (this.#db.prepare("SELECT command_id FROM cp_a0_bootstrap_command WHERE state IN('reserved','staging','compensating') ORDER BY rowid").all()).map(row => this.read(String(row.command_id))!); }
     markStaging(commandId: string): void {
         const moved = this.transitionBootstrap(commandId, ['reserved'], 'staging');

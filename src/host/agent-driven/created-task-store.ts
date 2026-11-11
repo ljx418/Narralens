@@ -277,10 +277,39 @@ export class CreatedTaskStore {
       count++;
     });return count;
   }
+  /** R0-M01: a graceful Host shutdown must not leave a queued job owning a running
+   * workflow checkpoint. Release THIS live lease and return the bound step/checkpoint to
+   * pending inside ONE same-database transaction, so a reopened database can never split
+   * the job state from the checkpoint state. An old lease, a lost lease or an already
+   * settled job is left untouched and reports false. A callback fault or a thenable
+   * rolls the whole composition back; nothing is partially committed. */
+  releaseForShutdown(jobId:string,lease:TaskLease,settle:(db:TaskTransactionDb,task:TaskReservation,now:Date)=>void):boolean {
+    return this.#atomic(()=>{
+      const task=this.#task(jobId),job=this.#job(task),at=date(this.now);
+      // Only the exact live owner+attempt may release. A superseded attempt or a job that
+      // already settled must never be rewritten by a late shutdown path.
+      if(job.state!=='running'||job.lease_owner!==lease.owner||job.attempt!==lease.attempt)return false;
+      if(job.lease_expires_at===null||job.lease_expires_at<=at.getTime())return false;
+      // The checkpoint goes back to pending in the same transaction as the lease release.
+      this.#hook(db=>settle(db,task,at));
+      if(!this.revisions.releaseLease(jobId,lease.owner,at.getTime()))fail('REVISION_CONFLICT','Graceful release lost its lease');
+      const released=this.#job(task);
+      if(released.state!=='queued'||released.lease_owner!==null||released.lease_expires_at!==null||released.attempt!==job.attempt)fail('REVISION_CONFLICT','Graceful release changed the job binding');
+      // Exactly one durable event for this release; the lease identity is not restated.
+      this.revisions.appendJobEvent(jobId,'queued',at.toISOString(),{message:'Host closed before the preparation finished; the step is queued again'},true);
+      return true;
+    });
+  }
   preparedLeaseAttempt(jobId:string,principalId:string):number|null {
     const fact=this.readPrepared(jobId,principalId);if(!fact)return null;
     const row=this.#db.prepare('SELECT lease_attempt FROM created_task_prepared WHERE job_id=?').get(jobId);
     if(!row||!Number.isSafeInteger(row.lease_attempt)||Number(row.lease_attempt)<1)fail('CAPABILITY_UNAVAILABLE','Prepared lease binding differs');return Number(row.lease_attempt);
+  }
+  /** The receipt of a created task job, or null when the job is not a task job. The
+   * creation jobs and the task jobs are read through one resolver. */
+  taskReceipt(jobId:string,principalId:string):JobReceipt|null {
+    if(!this.#db.prepare('SELECT job_id FROM created_task_input WHERE job_id=?').get(jobId))return null;
+    return this.receipt(jobId,principalId);
   }
   receipt(jobId:string,principalId:string):JobReceipt {
     const task=this.read(jobId,principalId),job=this.#job(task);
