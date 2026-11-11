@@ -5,6 +5,11 @@ import type {
   Ref,
   RenderSpec,
 } from "../../contracts/agent-driven-types.js";
+import type { PackageReceipt, PublishedPackageStore } from "../delivery/published-package-store.js";
+import type { MediaToolRunner } from "../delivery/qc.js";
+import { canonicalDigest } from "../creative/digest.js";
+import type { NativeRenderPort } from "./native-renderer.js";
+import type { RenderPinVerdict } from "./upstream-pin.js";
 
 /**
  * The ports IT-A06 consumes.
@@ -297,4 +302,292 @@ export interface RenderOutcome {
  */
 export interface RenderPort {
   render(request: RenderRequest): Promise<RenderOutcome>;
+}
+
+/* -------------------------------------------------------------------------------------- */
+/* L07 — the committed render phases: encode, inspect, publish                              */
+/* -------------------------------------------------------------------------------------- */
+
+/**
+ * The three media stages of a committed render, as one port.
+ *
+ * The legacy `RenderPort` above is a *facade*: it runs the whole delivery path in one
+ * call and then asks MAIN to record the result. The stage port is the same work split
+ * at the points where a fact becomes durable, so that BRIDGE's phase executor can hold
+ * the lease, record each stage in its own transaction and wait for a human between the
+ * inspection and the publication without holding a descriptor.
+ *
+ * Three rules shape it:
+ *
+ * - **A stage never claims a job or a lease.** The executor holds the real lease and
+ *   passes the fence of the execution it is running; a stage only asks the fence
+ *   whether the attempt it is bound to may still act.
+ * - **A stage returns a fact, not a state.** `prepareEncoded` returns an encoded fact
+ *   and never a "ready"; the durable registration of that fact is BRIDGE's, in its own
+ *   transaction.
+ * - **A stage never invents an approval.** A technical pass is not a human acceptance:
+ *   `inspectEncoded` reports what the tools found, and `publishValidated` refuses to
+ *   publish a blocked inspection or a warning without a recorded disposition.
+ */
+export interface CommittedRenderPhasesPort {
+  /**
+   * Encode the committed closure and return the immutable encoded fact.
+   *
+   * The bytes are written, hashed and made durable before the fact exists, and the
+   * fact names an immutable private object. The object is never removed by this module:
+   * a crash between the fsync and BRIDGE's registration leaves a private orphan that
+   * MAIN reconciles, never a half-written object that somebody else may adopt.
+   */
+  prepareEncoded(request: RenderRequest): Promise<EncodedFactV1>;
+  /**
+   * Inspect the encoded object and return the immutable quality-control receipt.
+   *
+   * The encoded object is reopened and re-verified — hash, size, closure and rights —
+   * before anything is inspected, and the inspection writes its *own* immutable object.
+   * The encoded object is never altered by the inspection.
+   */
+  inspectEncoded(input: InspectEncodedInput): Promise<QcReceiptV1>;
+  /**
+   * Publish the delivery package from the already encoded and already inspected bytes.
+   *
+   * Nothing is rendered again: the package carries the very bytes the encoder produced
+   * and the very evidence the inspection produced. `PublishedPackageStore` stays the
+   * only public publisher, so the no-clobber rule is unchanged.
+   */
+  publishValidated(input: PublishValidatedInput): Promise<PublishedPhaseReceiptV1>;
+}
+
+/** The input of `inspectEncoded`. The request is the *delivery* job's request. */
+export interface InspectEncodedInput {
+  readonly request: RenderRequest;
+  /** The encoded fact the executor resolved from the durable registry. */
+  readonly encoded: EncodedFactV1;
+}
+
+/** The input of `publishValidated`. The request is the *delivery* job's request. */
+export interface PublishValidatedInput {
+  readonly request: RenderRequest;
+  /** The encoded fact this publication is derived from. */
+  readonly encoded: EncodedFactV1;
+  /** The inspection receipt this publication is derived from. */
+  readonly qc: QcReceiptV1;
+}
+
+/**
+ * One file of an immutable private phase object.
+ *
+ * The path is relative to the object's own root. An absolute path never appears in a
+ * receipt: a receipt is a fact about bytes, and a fact about bytes does not carry the
+ * place on a disk where they happened to be written.
+ */
+export interface PhaseObjectFileV1 {
+  /** The id the file is known by. Unique inside the object. */
+  readonly id: string;
+  /** The path relative to the object's root, with POSIX separators. */
+  readonly relative_path: string;
+  /** The role the file fills: `media`, `native_document`, `native_source`, a supplement role. */
+  readonly role: string;
+  readonly bytes: number;
+  readonly sha256: string;
+}
+
+/**
+ * The immutable fact of one encode.
+ *
+ * It names the job that really produced the bytes and the lease attempt that was live
+ * at that moment. It carries no quality-control verdict and no readiness: the
+ * inspection has its own receipt and the durable registration belongs to BRIDGE.
+ */
+export interface EncodedFactV1 {
+  readonly format: "narralens.encoded-fact@1";
+  readonly project_id: string;
+  /** The real encoder job. It is not necessarily the delivery job. */
+  readonly job_id: string;
+  /** The execution the encoder ran under. */
+  readonly producer_execution: ExecutionBinding;
+  /** The lease attempt that was live when the bytes were produced. */
+  readonly producer_lease_attempt: number;
+  readonly snapshot_id: string;
+  readonly source_digest: string;
+  readonly render_spec: RenderSpec;
+  /** The digest of the render configuration that produced the bytes. */
+  readonly config_digest: string;
+  /** The immutable private object that holds the encoded bytes. */
+  readonly media_object_id: string;
+  /** The reference of the media file inside that object. */
+  readonly media_ref: Ref;
+  /** Every file of the object, including the media and its supplements. */
+  readonly files: readonly PhaseObjectFileV1[];
+  readonly frame_count: number;
+  readonly fps_numerator: number;
+  readonly fps_denominator: number;
+  /** The digest of the committed closure the bytes were rendered from. */
+  readonly closure_digest: string;
+  /** The digest of the rights facts the closure carried at that moment. */
+  readonly rights_digest: string;
+  readonly created_at: string;
+  /** The digest of this receipt, computed over its own content without this field. */
+  readonly receipt_digest: string;
+}
+
+/**
+ * The immutable receipt of one inspection.
+ *
+ * `technical_status` says what the *tools* found. It is not an acceptance: a technical
+ * pass still waits for the human review, and a warning still needs a recorded
+ * disposition before anything is published.
+ */
+export interface QcReceiptV1 {
+  readonly format: "narralens.qc-receipt@1";
+  readonly project_id: string;
+  readonly snapshot_id: string;
+  readonly source_digest: string;
+  readonly config_digest: string;
+  /** The digest of the encoded fact this inspection belongs to. */
+  readonly parent_encoded_digest: string;
+  /** The immutable private object that holds the inspection's evidence. */
+  readonly qc_object_id: string;
+  /** The checks exactly as the quality control recorded them. */
+  readonly qc_items: readonly QCItem[];
+  readonly technical_status: "pass" | "warn" | "block";
+  /** Every file of the inspection object: the probe output and the decode output. */
+  readonly files: readonly PhaseObjectFileV1[];
+  readonly created_at: string;
+  readonly receipt_digest: string;
+}
+
+/**
+ * The immutable receipt of one publication.
+ *
+ * It carries the package receipt of the real publication, so the winner's identity is
+ * in the receipt and not in the caller's memory, and it names the two receipts the
+ * publication was derived from.
+ */
+export interface PublishedPhaseReceiptV1 {
+  readonly format: "narralens.published-phase-receipt@1";
+  /** The receipt of the published package, as `PublishedPackageStore` wrote it. */
+  readonly package_receipt: PackageReceipt;
+  readonly parent_encoded_digest: string;
+  readonly parent_qc_digest: string;
+  /** The execution the publication ran under. It may be another job's and another lease. */
+  readonly publication_execution: ExecutionBinding;
+  readonly publication_lease_attempt: number;
+  readonly receipt_digest: string;
+}
+
+/**
+ * The largest read a phase object handle ever serves.
+ *
+ * The bound is the same one the prepared-review media handle uses: a phase object is
+ * opened to check a few bytes, never to carry a film through memory.
+ */
+export const PHASE_OBJECT_MAX_READ_BYTES = 1024 * 1024;
+
+/** The input of the phase object resolver. */
+export interface PhaseObjectOpenInput {
+  /** The immutable object the file belongs to. */
+  readonly object_id: string;
+  /** The path of the file relative to the object's root. */
+  readonly relative_path: string;
+  /** The digest the file is expected to have. */
+  readonly sha256: string;
+  /** The size the file is expected to have. */
+  readonly bytes: number;
+  readonly signal?: AbortSignal;
+}
+
+/**
+ * One verified, read-only handle on a file of an immutable phase object.
+ *
+ * The descriptor is not business state and it is not held across a wait: the handle is
+ * closed by its owner, and the next phase opens the object again.
+ */
+export interface PhaseObjectHandle {
+  readonly object_id: string;
+  readonly relative_path: string;
+  readonly bytes: number;
+  readonly sha256: string;
+  readonly content_type: string;
+  /** A bounded read of the verified bytes. `length` is at most 1 MiB. */
+  read(range: { readonly offset: number; readonly length: number }): Promise<Uint8Array>;
+  /** Idempotent. Every open descriptor is closed exactly once by its owner. */
+  close(): Promise<void>;
+}
+
+/**
+ * The resolver of the private phase objects.
+ *
+ * It resolves an object id inside the Host's own private object root. It never accepts
+ * an absolute path, never accepts a URL and never exposes an HTTP route: only the Host
+ * executor, after it has verified the durable fact, may ask for a handle.
+ */
+export interface PhaseObjectResolver {
+  openPhaseObject(input: PhaseObjectOpenInput): Promise<PhaseObjectHandle>;
+}
+
+/**
+ * The dependencies a phase service is built from.
+ *
+ * The two roots are chosen by the Host, not by a caller: the workspace is where the
+ * attempt's own staging happens and the object root is where the immutable objects
+ * live. A request never names either of them.
+ */
+export interface CommittedRenderPhasesDeps {
+  /** Reads the committed snapshot. MAIN's implementation is the only authority. */
+  readonly snapshots: SnapshotReadPort;
+  /** The fence of the execution the phase is running under. */
+  readonly fence: AttemptFencePort;
+  /** The real renderer. */
+  readonly native_renderer: NativeRenderPort;
+  /** The store that publishes the public package. It stays the only one. */
+  readonly packages: PublishedPackageStore;
+  /** The pinned OpenFilm checkout. */
+  readonly upstream_root: string;
+  /** The Host-selected private root of the immutable phase objects. */
+  readonly object_root: string;
+  /** The Host-selected private root of this attempt's staging. */
+  readonly workspace_root: string;
+  /** MAIN's boundary hooks, when the executor wants the named boundaries. */
+  readonly hooks?: RenderBoundaryHooks;
+  /** How the quality control runs its tools. The default is the real runner. */
+  readonly qc_runner?: MediaToolRunner;
+  /** How the pinned upstream is checked. The default is the real check. */
+  readonly pin_verifier?: (upstream_root: string) => Promise<RenderPinVerdict>;
+  readonly render_timeout_ms?: number;
+  readonly qc_timeout_ms?: number;
+}
+
+/**
+ * How a phase failed.
+ *
+ * A phase reports a media failure as a thrown error rather than as a state, because a
+ * state would have to be invented for a stage that has no state machine: the durable
+ * state belongs to BRIDGE. `requires_reconciliation` is the honest answer to "may
+ * something still be running?" — it is true when a child process could not be seen to
+ * end.
+ */
+export class CommittedRenderPhaseError extends Error {
+  constructor(
+    readonly code: string,
+    message: string,
+    readonly retryable: boolean,
+    readonly requires_reconciliation = false,
+  ) {
+    super(message);
+    this.name = "CommittedRenderPhaseError";
+  }
+}
+
+/**
+ * The digest of a phase receipt.
+ *
+ * The receipt's own digest field is removed before the canonical text is built, so a
+ * receipt can be checked by anyone who holds it — and the preimage contains no
+ * absolute path, because a receipt describes bytes and not the place they were written.
+ * The canonicalization is the frozen restricted one: safe integers, strings, booleans
+ * and null only.
+ */
+export function phaseReceiptDigest(receipt: { readonly receipt_digest: string }): string {
+  const { receipt_digest: _self, ...content } = receipt as { readonly receipt_digest: string } & Record<string, unknown>;
+  return canonicalDigest(content);
 }
