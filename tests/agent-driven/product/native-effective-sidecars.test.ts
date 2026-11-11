@@ -26,4 +26,20 @@ describe('pinned native effective sidecars, pure independent inputs',()=>{
  it('external source is unsupported',async()=>{const i=input(0);(i.files as Record<string,unknown>)['film.html']='<section><audio src="../escape.wav#t=0,2"></audio></section>';expect(await computeNativeEffectiveSidecars(i)).toMatchObject({status:'unsupported',reason:'SOURCE_PATH_UNSUPPORTED'});});
  it('caller mutation after call cannot change pending projection',async()=>{const i=input(1),pending=computeNativeEffectiveSidecars(i);(i.files as Record<string,unknown>)['assets/vo/a.vtt']='changed';const out=await pending;expect(out.status).toBe('computed');if(out.status==='computed')expect(out.captions).toEqual(fixtures.vectors[1]!.expected.captions);});
  it('result defaults do not alias later calls',async()=>{const a=await computeNativeEffectiveSidecars(input(0));if(a.status==='computed')(a.style.value as Record<string,unknown>).font=null;const b=await computeNativeEffectiveSidecars(input(0));if(b.status==='computed')expect(b.style).toEqual(fixtures.vectors[0]!.expected.style);});
+ // Adapter-contract negatives, not native-consumer parity: native discovers only listed names.
+ it('rejects present translation omitted from queried listing',async()=>{
+  const i=input(1);(i.directories as Record<string,string[]>)['assets/vo']=i.directories['assets/vo']!.filter(n=>n!=='a.en.vtt');
+  expect(await computeNativeEffectiveSidecars(i)).toMatchObject({status:'unsupported',reason:'DIRECTORY_FILE_CONFLICT'});
+ });
+ it('rejects listed absent direct child even when native never discovers it',async()=>{
+  const i=input(1);(i.files as Record<string,string|null>)['assets/vo/unrelated.txt']=null;
+  (i.directories['assets/vo'] as string[]).push('unrelated.txt');
+  expect(await computeNativeEffectiveSidecars(i)).toMatchObject({status:'unsupported',reason:'DIRECTORY_FILE_CONFLICT'});
+ });
+ it('does not equate nested or unqueried children with direct listing members',async()=>{
+  const i=input(1);(i.files as Record<string,string|null>)['assets/vo/nested/a.en.vtt']='unqueried';
+  (i.files as Record<string,string|null>)['elsewhere/unqueried.txt']='unqueried';
+  expect(await computeNativeEffectiveSidecars(i)).toMatchObject({status:'computed',captions:fixtures.vectors[1]!.expected.captions});
+ });
+
 });

@@ -3003,7 +3003,14 @@ async function translationsOf(root, src) {
 
     const value=await filmCaptions('closed');
     if(missing.size)return unsupported('DEPENDENCY_INPUT_MISSING');
-    // Explicit absence and listing must agree; new translation sidecars invalidate this closure.
+    // Validate every supplied direct-child fact in each queried exact listing, even
+    // when native discovery did not consume it (e.g. an omitted translation).
+    // Do not reorder the native listing or manufacture discovery from supplied bytes.
+    for(const [p,text] of Object.entries(input.files)){
+      const dir=posix.dirname(p),name=posix.basename(p);
+      if(directories.has(dir)&&input.directories[dir].includes(name)!==(text!==null))return unsupported('DIRECTORY_FILE_CONFLICT');
+    }
+    // Keep the existing check for consumed media references as well as file reads.
     for(const p of [...consumed,...negative]){
       const dir=posix.dirname(p),name=posix.basename(p);
       if(directories.has(dir)&&input.directories[dir].includes(name)===negative.has(p))return unsupported('DIRECTORY_FILE_CONFLICT');
