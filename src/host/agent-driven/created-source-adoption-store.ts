@@ -14,7 +14,7 @@ import type { CreatedSourceFactV1, PreparedSourceFileFact } from './created-sour
  *   original closure, the target closure, the native plan, the impact and approval it
  *   is bound to, the private stage and the backup token, and the snapshot it expects.
  *   It is written before the commit and never changes.
- * - `created_source_fact` records what the adoption *produced*: the committed source
+ * - `created_adopted_source_fact` records what the adoption *produced*: the committed source
  *   of one snapshot. It is inserted, or verified field by field when the same content
  *   is adopted again, because content addressing means the same bytes produce the same
  *   snapshot id and a second adoption of it must not fail.
@@ -47,7 +47,7 @@ CREATE TRIGGER created_adoption_fact_no_delete BEFORE DELETE ON created_adoption
 `;
 
 export const CREATED_SOURCE_FACT_DDL = `
-CREATE TABLE created_source_fact (
+CREATE TABLE created_adopted_source_fact (
   project_id TEXT NOT NULL,
   snapshot_id TEXT NOT NULL,
   source_digest TEXT NOT NULL,
@@ -62,8 +62,8 @@ CREATE TABLE created_source_fact (
   created_at TEXT NOT NULL,
   PRIMARY KEY(project_id, snapshot_id)
 );
-CREATE TRIGGER created_source_fact_no_update BEFORE UPDATE ON created_source_fact BEGIN SELECT RAISE(ABORT,'immutable created source fact'); END;
-CREATE TRIGGER created_source_fact_no_delete BEFORE DELETE ON created_source_fact BEGIN SELECT RAISE(ABORT,'immutable created source fact'); END;
+CREATE TRIGGER created_adopted_source_fact_no_update BEFORE UPDATE ON created_adopted_source_fact BEGIN SELECT RAISE(ABORT,'immutable created source fact'); END;
+CREATE TRIGGER created_adopted_source_fact_no_delete BEFORE DELETE ON created_adopted_source_fact BEGIN SELECT RAISE(ABORT,'immutable created source fact'); END;
 `;
 
 /** Both fragments, in the order they are created. */
@@ -147,13 +147,18 @@ export class CreatedSourceAdoptionStore {
   #schema(): void {
     const version = Number(this.#db.prepare('PRAGMA schema_version').get()?.schema_version);
     if (version === this.#schemaVersion) return;
-    const found = this.#db.prepare("SELECT name FROM sqlite_master WHERE name GLOB 'created_*_fact' LIMIT 1").get();
-    if (found === undefined) {
-      this.#db.exec(CREATED_ADOPTION_FACT_DDL);
-      this.#db.exec(CREATED_SOURCE_FACT_DDL);
-    } else if (!matchesFrozenSchemaNamespace(this.#db, CREATED_ADOPTION_FACT_DDL, 'created_adoption_fact') ||
-      !matchesFrozenSchemaNamespace(this.#db, CREATED_SOURCE_FACT_DDL, 'created_source_fact')) {
-      fail('REVISION_CONFLICT', 'The created adoption schema differs from the one this build expects');
+    // R1 already owns created_source_fact: its immutable geometry is consumed by
+    // ProjectCreationStore, Context, task guards and render. This table is separate
+    // transaction provenance, never a replacement of that existing schema.
+    for (const [name, ddl] of [
+      ['created_adoption_fact', CREATED_ADOPTION_FACT_DDL],
+      ['created_adopted_source_fact', CREATED_SOURCE_FACT_DDL],
+    ] as const) {
+      const found = this.#db.prepare("SELECT name FROM sqlite_master WHERE name=?").get(name);
+      if (found === undefined) this.#db.exec(ddl);
+      else if (!matchesFrozenSchemaNamespace(this.#db, ddl, name)) {
+        fail('REVISION_CONFLICT', 'The created adoption schema differs from the one this build expects');
+      }
     }
     this.#schemaVersion = version;
   }
@@ -243,7 +248,7 @@ export class CreatedSourceAdoptionStore {
       return { record: existing, replayed: true };
     }
     const at = input.now.toISOString();
-    this.#db.prepare(`INSERT INTO created_source_fact(
+    this.#db.prepare(`INSERT INTO created_adopted_source_fact(
       project_id, snapshot_id, source_digest, transaction_id, prepared_source_id, impact_id,
       approval_id, plan_sha256, facts_digest, revision, execution_json, created_at)
       VALUES(?,?,?,?,?,?,?,?,?,?,?,?)`).run(
@@ -256,7 +261,7 @@ export class CreatedSourceAdoptionStore {
   /** The fact of one committed source, or `undefined`. */
   sourceFact(projectId: string, snapshotId: string): CreatedSourceFactV1 | undefined {
     this.#schema();
-    const row = this.#db.prepare('SELECT * FROM created_source_fact WHERE project_id=? AND snapshot_id=?')
+    const row = this.#db.prepare('SELECT * FROM created_adopted_source_fact WHERE project_id=? AND snapshot_id=?')
       .get(projectId, snapshotId) as Record<string, unknown> | undefined;
     if (row === undefined) return undefined;
     return {
@@ -350,18 +355,10 @@ export class CreatedSourceAdoptionStore {
   }
 
   #sourceFacts(fact: CreatedSourceFactV1): Record<string, unknown> {
-    return {
-      project_id: fact.project_id,
-      snapshot_id: fact.snapshot_id,
-      source_digest: fact.source_digest,
-      transaction_id: fact.transaction_id,
-      prepared_source_id: fact.prepared_source_id,
-      impact_id: fact.impact_id,
-      approval_id: fact.approval_id,
-      plan_sha256: fact.plan_sha256,
-      facts_digest: fact.facts_digest,
-      revision: fact.revision,
-      execution: fact.execution,
-    };
+    // Content addressing permits a later adoption of the same source after restore.
+    // Each transaction keeps its own created_adoption_fact; this snapshot provenance
+    // row retains its original author rather than pretending a second transaction
+    // originally created it. Geometry is independently verified in the R1 fact table.
+    return {project_id:fact.project_id,snapshot_id:fact.snapshot_id,source_digest:fact.source_digest};
   }
 }

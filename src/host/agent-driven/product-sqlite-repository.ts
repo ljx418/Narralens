@@ -1,7 +1,8 @@
 import type { DatabaseSync, SQLInputValue } from 'node:sqlite';
 import { canonicalJson } from '../engine/source-digest-v1.js';
 import { RevisionStore } from '../projects/revision-store.js';
-import { isLiveCreatedSourceCommitScope } from '../projects/revision-store.js';
+import { ProjectCreationStore } from '../projects/project-creation-store.js';
+import { isLiveCreatedSourceCommitScope,poisonLiveCreatedSourceCommitScope } from '../projects/revision-store.js';
 import type { CreatedSourceCommitScope } from './created-source-ports.js';
 import { OperationIdempotencyStore } from '../projects/operation-idempotency-store.js';
 import {isCurrentTaskTransaction,type TaskTransactionDb} from './created-task-store.js';
@@ -81,11 +82,67 @@ export class ProductSqliteRepository implements ProductRepository {
    * transaction rolls back even when the caller swallows the error. This join does not
    * replace or loosen `joinTaskTransaction`; it is a different, narrower capability. */
   joinCreatedSourceCommit<T>(scope:CreatedSourceCommitScope,work:(tx:ProductTransaction)=>T):T {
-    if(!isLiveCreatedSourceCommitScope(scope,this.revisions,this.#db)||!this.#db.isTransaction)throw invalid();
     try {
-      return this.scope(work);
+      if(!isLiveCreatedSourceCommitScope(scope,this.revisions,this.#db)||!this.#db.isTransaction)throw invalid();
+      return this.scope(tx => {
+        // A same-connection scope is not authority over other projects. Check every
+        // key, value, query, event and command before the underlying transaction sees it.
+        const project = (value: unknown): void => {
+          if (object(value).project_id !== scope.project_id) throw invalid();
+        };
+        const commandScope = (value: ProductIdempotencyScope): void => {
+          if (value.kind !== 'project' || value.project_id !== scope.project_id) throw invalid();
+        };
+        const intakeReads = new Set<ProductCollection>(['intake_head','intake_version','question_head','question_version','answer_head','answer_version']);
+        let boundIntake: string | undefined;
+        const intakeRead = (collection: ProductCollection, key: unknown): boolean => {
+          if (!intakeReads.has(collection)) return false;
+          // A read-only exception for this project's actual bootstrap intake. No
+          // global intake query or intake mutation is authorized by the commit scope.
+          boundIntake ??= new ProjectCreationStore(this.revisions).forProject(scope.project_id)?.request.intake_id;
+          if (!boundIntake || object(key).intake_id !== boundIntake) throw invalid();
+          return true;
+        };
+        const bounded: ProductTransaction = {
+          get: (collection, key) => {
+            if (collection === 'prepared_authorization') {
+              if (object(key).transaction_id !== scope.transaction_id) throw invalid();
+              const record = tx.get(collection, key); if (record) project(record); return record;
+            }
+            if (!intakeRead(collection,key)) project(key); return tx.get(collection, key);
+          },
+          list: (collection, query) => { if (!intakeRead(collection,query)) project(query); return tx.list(collection, query); },
+          put: (collection, key, value) => { project(key); project(value); return tx.put(collection, key, value); },
+          compareAndSet: (collection, key, expected, value) => {
+            project(key); project(value); return tx.compareAndSet(collection, key, expected, value);
+          },
+          recallIdempotency: (query, operation, key) => {
+            commandScope(query); return tx.recallIdempotency(query, operation, key);
+          },
+          recordIdempotency: (query, operation, key, receipt, response) => {
+            commandScope(query); project(receipt); return tx.recordIdempotency(query, operation, key, receipt, response);
+          },
+          emit: event => {
+            if (event.scope.kind === 'intake') throw invalid();
+            project(event.scope); return tx.emit(event);
+          },
+        };
+        // Failures in the additional project guards also poison the *outer* scope,
+        // even if a caller catches them inside work before returning normally.
+        const guarded = new Proxy(bounded, {
+          get(target, property, receiver) {
+            const value: unknown = Reflect.get(target, property, receiver);
+            if (typeof value !== 'function') return value;
+            return (...args: unknown[]) => {
+              try { return Reflect.apply(value, target, args); }
+              catch (error) { poisonLiveCreatedSourceCommitScope(scope,error); throw error; }
+            };
+          },
+        });
+        return work(guarded);
+      });
     } catch (error) {
-      scope.poison(error);
+      poisonLiveCreatedSourceCommitScope(scope,error);
       throw error;
     }
   }

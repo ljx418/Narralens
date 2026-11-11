@@ -66,6 +66,15 @@ export const PREPARED_ADOPTION_IMPACT_TTL_SECONDS = 15 * 60;
 /** The kind of source an adoption applies to. Only one kind is created-source. */
 export const PREPARED_ADOPTION_SOURCE_KIND = 'created_prepared_source';
 
+/** D10's internal journal marker. This predicate is never a write capability:
+ * callers must pass the transaction read from the original RevisionStore. */
+export function isCreatedSourceApplyTransaction(transaction:{readonly kind:string;readonly request_json:string}):boolean {
+  if(transaction.kind!=='edit')return false;
+  try{const request:unknown=JSON.parse(transaction.request_json);
+    return !!request&&typeof request==='object'&&'operation' in request&&request.operation==='agent.created_source.apply@1';
+  }catch{return false;}
+}
+
 /** One file of the prepared closure. */
 export interface PreparedSourceFileFact {
   readonly relative_path: string;
@@ -352,7 +361,7 @@ export function assertPreparedAdoptionPlan(plan: PreparedAdoptionPlanV1): Prepar
   hash(plan.request_digest, 'request_digest');
   hash(plan.target_source_digest, 'target_source_digest');
   text(plan.target_snapshot_id, 'target_snapshot_id');
-  hash(plan.engine_upstream_sha, 'engine_upstream_sha');
+  if (typeof plan.engine_upstream_sha !== 'string' || !/^[a-f0-9]{40}$/.test(plan.engine_upstream_sha)) invalid('engine_upstream_sha must be a full lowercase 40-hex Git commit');
   text(plan.expires_at, 'expires_at');
 
   const execution = plan.producer_execution;
@@ -437,7 +446,9 @@ export function assertPreparedAdoptionPlan(plan: PreparedAdoptionPlanV1): Prepar
     text(lock.lock_id, 'locks_checked.lock_id');
     text(lock.lock_type, 'locks_checked.lock_type');
     text(lock.scope, 'locks_checked.scope');
-    text(lock.target_id, 'locks_checked.target_id');
+    // The original LockService represents an unqualified project lock with the
+    // empty target. A shot lock still needs an actual target identity.
+    if(lock.scope!=='project'||lock.target_id!=='')text(lock.target_id, 'locks_checked.target_id');
     integer(lock.start_frame, 'locks_checked.start_frame');
     integer(lock.end_frame_exclusive, 'locks_checked.end_frame_exclusive');
     if (locks.has(lock.lock_id)) invalid('The plan names the same lock twice');

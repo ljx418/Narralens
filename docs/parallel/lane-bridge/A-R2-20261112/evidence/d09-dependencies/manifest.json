@@ -1,0 +1,44 @@
+{
+  "source_repository": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+  "source_commit": "5d99e47c750aea7c8cd0fd0adfc60bd93222a38e",
+  "files": [
+    {
+      "path": "src/host/agent-driven/created-source-ports.ts",
+      "sha256": "a3bb4ebe6c17aba0930cdc42076afbeb9baa04105837accba1988533e7693c34"
+    },
+    {
+      "path": "src/host/agent-driven/created-prepared-source-store.ts",
+      "sha256": "f234fc0d74bee887ad4c09ff711d52f7b22d44559a8302e2327b5674f86611d1"
+    },
+    {
+      "path": "src/host/agent-driven/created-source-impact-store.ts",
+      "sha256": "219ea7870cb517e196ff03dd325b110dcbad73442f2c0e2699f2ee427dc16c3c"
+    },
+    {
+      "path": "src/host/agent-driven/created-source-adoption-store.ts",
+      "sha256": "ff2c6a0ce18b38169071a4c27c38359ec18d79bd95ce2f52d9c78bacd3df3a01"
+    },
+    {
+      "path": "src/host/agent-driven/created-source-publisher.ts",
+      "sha256": "424496b432b36b648d3555cec9729bb8245f2bf3ed384ae339c07dded56018fe"
+    },
+    {
+      "path": "src/host/agent-driven/created-source-facts-reader.ts",
+      "sha256": "60cbf936501ef2be37242fa70c41ef12165716836ddc280f82f7b382ce769b66"
+    },
+    {
+      "path": "src/host/agent-driven/retained-source-tree.ts",
+      "sha256": "046c53b353f6b47e82de2d72e2986f4ddf7be9159867c1a4a8a9f3fefb0b06b7"
+    },
+    {
+      "path": "src/host/projects/revision-store.ts",
+      "sha256": "8d861c1627bf6ffb1a64fdec38b784822cb877bdec03c95c001c3e7acb81e773"
+    },
+    {
+      "path": "src/host/agent-driven/product-sqlite-repository.ts",
+      "sha256": "d2233cae1669f42f3236cb793c7f4a2864bb9d2fc467be2bb56531cef09f9226"
+    }
+  ],
+  "authorization": "Exact readonly dependency import into BRIDGE only; MAIN retains implementation ownership. Before mutation require local tracked bytes==HEAD and no indexed change per path, or already exact approved bytes; for new paths require absent or exact approved. Preserve and ask on any mismatch. No reset/stash/overwrite user dirty. Do not import/change-source-change-service81249. No tests during source import. If exact dependency closure incomplete, request precise additional immutable paths; no blanket cherry-pick. Retain original baseline hashes and import manifest. Frozen candidate retains acknowledged N3 and final clock outstanding, not wholesale accepted Gate.",
+  "tests": "pure SQLite/module and tsc allowed, Host/media/browser/full gate not released"
+}
