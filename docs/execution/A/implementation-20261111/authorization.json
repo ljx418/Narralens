@@ -1,6 +1,6 @@
 {
   "format": "narralens.a-implementation-authorization@1",
-  "status": "A_AUTHORIZED_R0_IN_PROGRESS",
+  "status": "A_AUTHORIZED_R0_FROZEN_R1_INTERFACE_CLOSURE",
   "approved_by": "user active goal",
   "preparation_package": "../relaunch-20261111",
   "baseline_head": "838ba5f2c8500f0103f56dbe51264ea9f70086fc",
@@ -9,7 +9,9 @@
     "R1-R4 released A work under exact ownership, unified acceptance",
     "stop at A human gate; no B"
   ],
-  "claude_credential_disposition": "PENDING_USER_RESPONSE; no new Claude calls pending response",
+  "claude_credential_disposition": "UNKNOWN; not asserted rotated or risk accepted",
   "writer": "MAIN only until per-lane release",
-  "git": "explicit scoped commits allowed; no reset/stash/force push or unapproved main merge/push"
+  "git": "explicit scoped commits allowed; no reset/stash/force push or unapproved main merge/push",
+  "claude_call_authorization": "explicit current user goal names ClaudeCode implementation; not inferred from unanswered async question",
+  "interpretation": "AUTHORIZATION_INTERPRETATION.md"
 }

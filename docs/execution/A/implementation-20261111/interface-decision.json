@@ -1,0 +1,35 @@
+{
+  "format": "narralens.a-r1-interface-decision@1",
+  "status": "MAIN_APPROVED_FOR_IMPLEMENTATION",
+  "interface_file": "CR-R1-001-INTERFACE-LOCK.md",
+  "interface_sha256": "7e9b61b339d9cf2bc80c7925e09139f6362eeee6ecc373a2bd142d4be0f895b8",
+  "registry_sha256": "8416e1abeec71b4e063df53c9e4974ea4ab1bab3b8f1f5ddfc280f5b5261e54f",
+  "acks": [
+    {
+      "lane": "bridge",
+      "message": "msg_0b7ae9682840",
+      "dispatch": "ctx_a3b656343243"
+    },
+    {
+      "lane": "product",
+      "message": "msg_ed84403cd49d",
+      "dispatch": "ctx_f1203c44b93a"
+    },
+    {
+      "lane": "media",
+      "message": "msg_ad240b871434",
+      "dispatch": "ctx_e5ca0d39282f"
+    }
+  ],
+  "closed": [
+    "trusted UI versus native purpose transport",
+    "read versus adoption proof binding",
+    "immutable preview receipt/FD lifecycle",
+    "actual fps/frame count/sample descriptor transport"
+  ],
+  "global_unique_owner_paths": 127,
+  "initial_R1_unique_paths": 90,
+  "authorization": "AUTHORIZATION_INTERPRETATION.md; explicit current user goal authorizes existing Claude CLI, credential disposition UNKNOWN",
+  "no_product_pass": true,
+  "no_new_full_review_gate": true
+}

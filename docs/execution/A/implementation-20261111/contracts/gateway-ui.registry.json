@@ -1,0 +1,56 @@
+{
+  "format": "narralens.gateway-ui-design-registry@1",
+  "status": "DESIGN_NOT_IMPLEMENTED",
+  "routes": [
+    {
+      "method": "POST",
+      "path": "/narralens/api/ui/call",
+      "input": "exact {surface,operation,input}; original DTO validators reused"
+    },
+    {
+      "method": "GET",
+      "path": "/narralens/api/ui/review-media/:ref",
+      "input": "opaque ref; project comes from independent UI grant, no secret query"
+    }
+  ],
+  "operation_allowlist": {
+    "agent.v1": [
+      "context.read",
+      "workflow.read",
+      "workflow.run.prepare",
+      "workflow.run.authorize",
+      "workflow.run.read",
+      "workflow.run.start",
+      "workflow.run.pause",
+      "workflow.run.resume",
+      "workflow.run.cancel",
+      "review.read",
+      "review.decide",
+      "job.read",
+      "job.cancel",
+      "health.read",
+      "delivery.read",
+      "change.prepare",
+      "change.approve",
+      "change.apply"
+    ],
+    "local-assets.v1": [
+      "local-source-files.read",
+      "local-assets.import",
+      "local-assets.read.ui",
+      "asset-inventory.read"
+    ],
+    "workbench.v1": [
+      "native.reopen",
+      "review.part.describe"
+    ]
+  },
+  "native_reopen": "surface workbench.v1, operation native.reopen; exact empty input; fixed delegate project; same existing native-open service and validated NativeEntry response, no new Host route",
+  "counting": "31 frozen Host + 5 reviewed adjunct Host + 2 explicitly additional Gateway HTTP; no hidden total-unchanged claim",
+  "source": "../CR-R1-001-INTERFACE-LOCK.md",
+  "review_part_describe": {
+    "input": "exact {run_id,package_id,package_version,part_kind,artifact_ref}; Ref validated using frozen schema, project from delegate",
+    "response": "PreviewMediaDescriptorV1 per CR section8, exact fields; verified rational fps/frame_count and sample facts bound to receipt_digest; no private path",
+    "count": "one read-only operation on existing added RPC alias, no third HTTP route"
+  }
+}
