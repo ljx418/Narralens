@@ -59,14 +59,26 @@ export interface CompletedPreparedSourceV1 {
  readonly task:TaskReservation;
  /** The attempt that actually produced the bytes. Not necessarily the current attempt. */
  readonly producer_attempt:number;
- /** The real succeeded job receipt. `result_ref` is null: SOURCE_ONLY is not a commit. */
+ /** The real succeeded job receipt. */
  readonly job:JobReceipt;
- /** The prepared receipt the job carries. */
- readonly prepared_receipt:{
-  readonly format:'narralens.local.native-draft@1';
-  readonly stage:'prepared';
+ /**
+  * The job row's real `terminal_reason`.
+  *
+  * `SOURCE_ONLY` is what the durable settlement writes: the source was prepared, the
+  * project was not committed. It is read from the row, not asserted here.
+  */
+ readonly terminal_reason:'SOURCE_ONLY';
+ /**
+  * The durable provider receipt the job row carries.
+  *
+  * This is the real `provider_receipt_json` of the settlement, with the exact kind,
+  * source digest and stage the Host wrote. MEDIA checks it against the prepared fact;
+  * it never restates it.
+  */
+ readonly provider_receipt:{
+  readonly kind:'local.native-draft@1';
   readonly source_digest:string;
-  readonly plan_digest:string;
+  readonly stage:'SOURCE_ONLY';
  };
  /** The immutable prepared fact stored with that job. */
  readonly fact:PreparedTaskFact;
@@ -141,8 +153,8 @@ export interface PreparedAdoptionProofV1 {
  * controlled transaction, where the current author and rights are re-verified.
  */
 export interface PreparedSourceProofPort {
- proveForRead(completed:CompletedPreparedSourceV1,binding:PreparedReadBindingV1,registryFacts:readonly LocalAsset[]):Promise<PreparedReadProofV1>;
- assertCurrentForRead(completed:CompletedPreparedSourceV1,binding:PreparedReadBindingV1,proof:PreparedReadProofV1,assertCurrentAuthorAndRights:()=>void):void;
+ proveForRead<P extends PreparedReadBindingV1['purpose']>(completed:CompletedPreparedSourceV1,binding:PreparedReadBindingV1&{readonly purpose:P},registryFacts:readonly LocalAsset[]):Promise<PreparedReadProofV1&{readonly purpose:P}>;
+ assertCurrentForRead<P extends PreparedReadBindingV1['purpose']>(completed:CompletedPreparedSourceV1,binding:PreparedReadBindingV1&{readonly purpose:P},proof:PreparedReadProofV1&{readonly purpose:P},assertCurrentAuthorAndRights:()=>void):void;
  proveForAdoption(completed:CompletedPreparedSourceV1,binding:PreparedAdoptionBindingV1,registryFacts:readonly LocalAsset[]):Promise<PreparedAdoptionProofV1>;
  assertCurrentForAdoption(completed:CompletedPreparedSourceV1,binding:PreparedAdoptionBindingV1,proof:PreparedAdoptionProofV1,assertCurrentAuthorAndRights:()=>void):void;
 }
@@ -199,7 +211,7 @@ export interface PreparedPreviewReceiptV1 {
  readonly format:'narralens.prepared-preview-receipt@1';
  readonly project_id:string;
  readonly run_id:string;
- readonly plan_version:number;
+ readonly plan_version:1;
  readonly step_id:string;
  readonly execution_attempt:number;
  readonly prepared_job_id:string;
@@ -220,10 +232,15 @@ export interface PreparedPreviewRequestV1 {
  readonly format:'narralens.prepared-preview-request@1';
  readonly completed:CompletedPreparedSourceV1;
  /** A read binding whose purpose is `preview`. */
- readonly binding:PreparedReadBindingV1;
- readonly proof:PreparedReadProofV1;
+ readonly binding:PreparedPreviewBindingV1;
+ readonly proof:PreparedPreviewProofV1;
  readonly signal?:AbortSignal;
 }
+
+/** The read binding of a preview. An impact binding is not a preview binding. */
+export type PreparedPreviewBindingV1=PreparedReadBindingV1&{readonly purpose:'preview'};
+/** The read proof of a preview. An impact proof is not a preview proof. */
+export type PreparedPreviewProofV1=PreparedReadProofV1&{readonly purpose:'preview'};
 
 /** The preview service. It renders an isolated copy and never touches the author tree. */
 export interface PreparedPreviewPort {
