@@ -22,3 +22,8 @@ start=2026-11-11T18:19:39+0000
 exit=0
 end=2026-11-11T18:19:42$+0000
 end=2026-11-11T18:19:42+0000
+--- correction, appended; the run above is unchanged ---
+The line "end=2026-11-11T18:19:42$+0000" above is a typo in the wrapper that wrote this
+log: a stray "$" between the seconds and the offset. The next line is the real end of
+the run, 2026-11-11T18:19:42+0000, and the run's exit is the 0 above it. Nothing else in
+the log is affected, and the run itself is unchanged.
