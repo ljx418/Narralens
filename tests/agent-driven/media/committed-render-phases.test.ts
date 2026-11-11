@@ -1,7 +1,7 @@
 import { readFile, stat, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import { CommittedRenderPhases, closureDigestOf, rightsDigestOf } from "../../../src/host/render/committed-render-phases.js";
+import { CommittedRenderPhases, closureDigestOf, frameRateOf, rightsDigestOf } from "../../../src/host/render/committed-render-phases.js";
 import { PublishedPackageStore } from "../../../src/host/delivery/published-package-store.js";
 import { computeRenderConfigDigest } from "../../../src/host/render/render-profile.js";
 import { RENDER_PIN } from "../../../src/host/render/upstream-pin.js";
@@ -193,7 +193,7 @@ describe("encoding a committed closure", () => {
     expect(encoded.frame_count).toBe(60);
     expect(encoded.fps_numerator).toBe(30);
     expect(encoded.fps_denominator).toBe(1);
-    expect(encoded.closure_digest).toBe(closureDigestOf(built.closure));
+    expect(encoded.closure_digest).toBe(closureDigestOf(built.closure, frameRateOf(requestFor(built).render_spec)));
     expect(encoded.rights_digest).toBe(rightsDigestOf(built.closure));
     expect(encoded.receipt_digest).toBe(phaseReceiptDigest(encoded));
   });
@@ -594,11 +594,57 @@ describe("MP01 — a closure digest over a fractional duration", () => {
       expected_frames: 91,
       expected_duration_seconds: 91 / 30,
     };
+    const rate = { numerator: 30, denominator: 1 };
 
-    expect(() => closureDigestOf(fractional)).not.toThrow();
-    const digest = closureDigestOf(fractional);
-    expect(digest).toBe(closureDigestOf({ ...fractional }));
-    expect(digest).not.toBe(closureDigestOf({ ...fractional, expected_duration_seconds: 92 / 30 }));
+    expect(() => closureDigestOf(fractional, rate)).not.toThrow();
+    const digest = closureDigestOf(fractional, rate);
+    expect(digest).toBe(closureDigestOf({ ...fractional }, rate));
+    // A different number of frames is a different film, and it is digested as such.
+    expect(digest).not.toBe(closureDigestOf({ ...fractional, expected_frames: 92, expected_duration_seconds: 92 / 30 }, rate));
+  });
+
+  it("computes a digest for a film of one frame at 30 fps", async () => {
+    const built = await harness({ label: "mp01-one-frame-30" });
+    const oneFrame: SnapshotClosure = {
+      ...built.closure,
+      expected_frames: 1,
+      expected_duration_seconds: 1 / 30,
+    };
+    const rate = { numerator: 30, denominator: 1 };
+
+    expect(() => closureDigestOf(oneFrame, rate)).not.toThrow();
+    expect(closureDigestOf(oneFrame, rate)).toBe(closureDigestOf({ ...oneFrame }, rate));
+  });
+
+  it("computes a digest for a film of one frame at 30000/1001", async () => {
+    const built = await harness({ label: "mp01-one-frame-rational" });
+    const oneFrame: SnapshotClosure = {
+      ...built.closure,
+      expected_frames: 1,
+      expected_duration_seconds: 1001 / 30000,
+    };
+    const rate = { numerator: 30000, denominator: 1001 };
+
+    expect(() => closureDigestOf(oneFrame, rate)).not.toThrow();
+    expect(closureDigestOf(oneFrame, rate)).toBe(closureDigestOf({ ...oneFrame }, rate));
+  });
+
+  it("does not carry the stated seconds into the digest", async () => {
+    const built = await harness({ label: "mp01-no-float" });
+    const closure: SnapshotClosure = { ...built.closure, expected_frames: 60, expected_duration_seconds: 2 };
+    const rate = { numerator: 30, denominator: 1 };
+
+    // The seconds are checked, not hashed: a difference far below one frame does not
+    // change the digest, and a difference above one frame is refused outright.
+    expect(closureDigestOf({ ...closure, expected_duration_seconds: 2.0000001 }, rate))
+      .toBe(closureDigestOf(closure, rate));
+    let code: string | undefined;
+    try {
+      closureDigestOf({ ...closure, expected_duration_seconds: 92 / 30 }, rate);
+    } catch (error) {
+      code = (error as { code?: string }).code;
+    }
+    expect(code).toBe("CLOSURE_DURATION_INCONSISTENT");
   });
 
   it("encodes and inspects a film whose frame rate is a rational number", async () => {

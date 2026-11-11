@@ -145,46 +145,25 @@ function contentTypeOf(relative_path: string): string {
   }
 }
 
-/**
- * The exact rational value of a finite number.
- *
- * The closure states the film's length in seconds, and that value is a double: a film
- * of 91 frames at 30 fps is 3.0333…, and no rounding of it is a whole number of
- * seconds. The restricted canonical domain admits safe integers only, so the value
- * cannot go into a digest as it stands. It goes in as the exact rational it is: a
- * double is exactly `mantissa * 2^-k`, so it can be written as an integer numerator
- * over a power-of-two denominator, and both of those are safe integers.
- *
- * The canonicalization itself is not touched. A length that cannot be written exactly
- * is refused rather than approximated.
- */
-export function exactRationalOf(value: number): { readonly numerator: number; readonly denominator: number } {
-  if (!Number.isFinite(value)) {
-    throw new CommittedRenderPhaseError("DURATION_NOT_FINITE", "the closure states a length that is not a finite number", false);
+/** The frame rate a film's length is counted in. */
+export interface FrameRate {
+  readonly numerator: number;
+  readonly denominator: number;
+}
+
+/** Check that a frame rate is a usable rational. */
+function assertFrameRate(fps: FrameRate): void {
+  if (!Number.isSafeInteger(fps.numerator) || fps.numerator < 1
+    || !Number.isSafeInteger(fps.denominator) || fps.denominator < 1) {
+    throw new CommittedRenderPhaseError("FRAME_RATE_INVALID", "the frame rate is not a usable rational", false);
   }
-  if (Number.isSafeInteger(value)) return { numerator: value, denominator: 1 };
-  let numerator = value;
-  let denominator = 1;
-  while (!Number.isSafeInteger(numerator)) {
-    numerator *= 2;
-    denominator *= 2;
-    if (!Number.isFinite(numerator) || !Number.isSafeInteger(denominator)) {
-      throw new CommittedRenderPhaseError(
-        "DURATION_NOT_EXACT",
-        "the closure states a length that cannot be written as an exact rational of safe integers",
-        false,
-      );
-    }
-  }
-  let left = Math.abs(numerator);
-  let right = denominator;
-  while (right !== 0) {
-    const rest = left % right;
-    left = right;
-    right = rest;
-  }
-  const divisor = left === 0 ? 1 : left;
-  return { numerator: numerator / divisor, denominator: denominator / divisor };
+}
+
+/** The frame rate of a render specification. */
+export function frameRateOf(render_spec: { readonly fps_numerator: number; readonly fps_denominator: number }): FrameRate {
+  const rate = { numerator: render_spec.fps_numerator, denominator: render_spec.fps_denominator };
+  assertFrameRate(rate);
+  return rate;
 }
 
 async function syncFileOf(path: string): Promise<void> {
@@ -583,7 +562,7 @@ export class CommittedRenderPhases implements CommittedRenderPhasesPort, PhaseOb
           frame_count: closure.expected_frames,
           fps_numerator: request.render_spec.fps_numerator,
           fps_denominator: request.render_spec.fps_denominator,
-          closure_digest: closureDigestOf(closure),
+          closure_digest: closureDigestOf(closure, frameRateOf(request.render_spec)),
           rights_digest: rightsDigestOf(closure),
           created_at: new Date().toISOString(),
         };
@@ -626,7 +605,7 @@ export class CommittedRenderPhases implements CommittedRenderPhasesPort, PhaseOb
 
       // The closure is read again, and it has to be the closure the encoder saw.
       const closure = await this.#readClosure(request);
-      if (closureDigestOf(closure) !== encoded.closure_digest) {
+      if (closureDigestOf(closure, frameRateOf(request.render_spec)) !== encoded.closure_digest) {
         throw new CommittedRenderPhaseError("CLOSURE_CHANGED", "the committed closure is no longer the closure the film was rendered from", false);
       }
       if (rightsDigestOf(closure) !== encoded.rights_digest) {
@@ -808,7 +787,7 @@ export class CommittedRenderPhases implements CommittedRenderPhasesPort, PhaseOb
 
       // The closure is read again and it has to be the one the facts describe.
       const closure = await this.#readClosure(request);
-      if (closureDigestOf(closure) !== encoded.closure_digest || rightsDigestOf(closure) !== encoded.rights_digest) {
+      if (closureDigestOf(closure, frameRateOf(request.render_spec)) !== encoded.closure_digest || rightsDigestOf(closure) !== encoded.rights_digest) {
         throw new CommittedRenderPhaseError("CLOSURE_CHANGED", "the committed closure is no longer the closure the facts describe", false);
       }
       await this.#verifyEncodedSupplements(encoded, closure, stageKeys.delivery_id, request.required_supplements);
@@ -1489,21 +1468,55 @@ export class CommittedRenderPhases implements CommittedRenderPhasesPort, PhaseOb
  *
  * The preimage names the files of the closure by their relative path and their
  * digests. It never names an absolute path: the closure is the same on every machine
- * that holds it, and a digest that carried a disk path would not be. The length of the
- * film goes in as the exact rational it is, because the restricted canonical domain
- * admits safe integers only.
+ * that holds it, and a digest that carried a disk path would not be.
+ *
+ * The length of the film goes in as the **approved rational**: the integer frame count
+ * of the closure and the integer frame rate of the render. The closure states its
+ * length in seconds as a double, and a double is not a length — one frame at 30 fps is
+ * `1/30` and one frame at `30000/1001` is `1001/30000`, and neither is a binary
+ * fraction that the restricted canonical domain can carry. So the float is never
+ * hashed: it is used only to **check** that it agrees with the frame count and the
+ * frame rate, within half a frame, and a closure whose stated length disagrees with
+ * its own frame count is refused rather than digested.
+ *
+ * The canonicalization itself is not weakened: the preimage holds safe integers,
+ * strings, booleans and null only, exactly as before.
  */
-export function closureDigestOf(closure: SnapshotClosure): string {
+export function closureDigestOf(closure: SnapshotClosure, fps: FrameRate): string {
+  assertFrameRate(fps);
+  const frames = closure.expected_frames;
+  if (frames !== undefined && (!Number.isSafeInteger(frames) || frames < 0)) {
+    throw new CommittedRenderPhaseError("SNAPSHOT_LENGTH_UNKNOWN", "the closure states a frame count that is not a whole number", false);
+  }
+  if (frames === undefined && closure.expected_duration_seconds !== undefined) {
+    throw new CommittedRenderPhaseError(
+      "DURATION_WITHOUT_FRAMES",
+      "the closure states a length in seconds but no frame count, so the length cannot be written as a frame rational",
+      false,
+    );
+  }
+  if (frames !== undefined && closure.expected_duration_seconds !== undefined) {
+    const stated = closure.expected_duration_seconds;
+    const implied = frames * fps.denominator / fps.numerator;
+    const halfFrame = 0.5 * fps.denominator / fps.numerator;
+    if (!Number.isFinite(stated) || Math.abs(stated - implied) > halfFrame + 1e-9) {
+      throw new CommittedRenderPhaseError(
+        "CLOSURE_DURATION_INCONSISTENT",
+        "the length the closure states does not agree with its own frame count at this frame rate",
+        false,
+      );
+    }
+  }
   return canonicalDigest({
     project_id: closure.project_id,
     snapshot_id: closure.snapshot_id,
     source_digest: closure.source_digest,
     project_revision: closure.project_revision,
     native_entry: closure.native_entry,
-    expected_frames: closure.expected_frames ?? null,
-    expected_duration: closure.expected_duration_seconds === undefined
+    expected_frames: frames ?? null,
+    expected_duration: frames === undefined
       ? null
-      : exactRationalOf(closure.expected_duration_seconds),
+      : { frames, fps_numerator: fps.numerator, fps_denominator: fps.denominator },
     entries: closure.entries
       .map((entry) => ({
         relative_path: entry.relative_path,
