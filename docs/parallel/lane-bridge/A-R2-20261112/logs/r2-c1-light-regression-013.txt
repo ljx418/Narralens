@@ -1,0 +1,44 @@
+command: corepack pnpm test tests/agent-driven/integration/created-source-change.test.ts tests/agent-driven/integration/created-schema-upgrade.test.ts tests/agent-driven/integration/created-run-authority.test.ts tests/agent-driven/integration/created-task-gate.test.ts tests/agent-driven/integration/capability-fingerprint.test.ts tests/agent-driven/product/fixed-workflow-service.test.ts tests/agent-driven/product/execution-guard.test.ts --maxWorkers=1 --minWorkers=1
+cwd: /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+head: d4e092d211b344fd36bfa4c83f8abc88f6fff903
+note: C1 light subset; created-source-adoption.test.ts does not exist yet and is excluded
+started: 2026-11-11T17:10:25Z
+--- output ---
+
+> narralens@0.1.0 test /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+> vitest run --config vitest.config.ts tests/agent-driven/integration/created-source-change.test.ts tests/agent-driven/integration/created-schema-upgrade.test.ts tests/agent-driven/integration/created-run-authority.test.ts tests/agent-driven/integration/created-task-gate.test.ts tests/agent-driven/integration/capability-fingerprint.test.ts tests/agent-driven/product/fixed-workflow-service.test.ts tests/agent-driven/product/execution-guard.test.ts --maxWorkers=1 --minWorkers=1
+
+
+ RUN  v3.2.4 /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+
+(node:1164460) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/created-task-gate.test.ts (7 tests) 21781ms
+   ✓ reserves one real job, cp step/checkpoint and mirrored event atomically, then replays without new effects  3157ms
+   ✓ rejects stale base, altered refs/scope/attempt and crossing the sample gate before creating any job  3012ms
+   ✓ rolls back real job, step, checkpoint, event and grant mutation if final authorization is revoked  3315ms
+   ✓ rejects a creative closure changed after authorization without task side effects  3070ms
+   ✓ emits real pending-to-running progress and rolls back step/checkpoint/outbox if the event mirror fails  3026ms
+   ✓ recovers exhausted leases atomically with the real workflow checkpoint, and is idempotent after SQLite reopen  3136ms
+   ✓ recovers cancelled leases atomically with the real workflow checkpoint, and is idempotent after SQLite reopen  3063ms
+ ✓ tests/agent-driven/product/fixed-workflow-service.test.ts (31 tests) 139ms
+(node:1165501) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/created-run-authority.test.ts (12 tests) 119ms
+(node:1165561) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/created-source-change.test.ts (11 tests) 38ms
+(node:1165607) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/created-schema-upgrade.test.ts (11 tests) 22ms
+ ✓ tests/agent-driven/product/execution-guard.test.ts (22 tests) 12ms
+ ✓ tests/agent-driven/integration/capability-fingerprint.test.ts (2 tests) 3ms
+
+ Test Files  7 passed (7)
+      Tests  96 passed (96)
+   Start at  01:10:26
+   Duration  24.48s (transform 933ms, setup 0ms, collect 1.54s, tests 22.11s, environment 1ms, prepare 250ms)
+
+--- end ---
+exit: 0
+finished: 2026-11-11T17:10:52Z

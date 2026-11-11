@@ -1,0 +1,114 @@
+command: corepack pnpm test tests/agent-driven/integration/created-schema-upgrade.test.ts --maxWorkers=1 --minWorkers=1
+cwd: /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+head: d4e092d211b344fd36bfa4c83f8abc88f6fff903
+started: 2026-11-11T17:09:16Z
+--- output ---
+
+> narralens@0.1.0 test /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+> vitest run --config vitest.config.ts tests/agent-driven/integration/created-schema-upgrade.test.ts --maxWorkers=1 --minWorkers=1
+
+
+ RUN  v3.2.4 /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+
+(node:1161317) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/agent-driven/integration/created-schema-upgrade.test.ts (11 tests | 5 failed) 29ms
+   × the forward upgrade of the impact table > upgrades an old table and keeps every old row and value 4ms
+     → UNIQUE constraint failed: impact.project_id, impact.impact_hash
+   ✓ the forward upgrade of the impact table > is idempotent and does not upgrade a table twice 1ms
+   ✓ the forward upgrade of the impact table > refuses the created operation until the table was upgraded 1ms
+   ✓ the two impact hash domains > hashes the created spec in the created domain only 1ms
+   ✓ the two impact hash domains > keeps the legacy reader away from a created impact and the created reader away from a legacy one 5ms
+   ✓ the two impact hash domains > never extends the window on a replay 2ms
+   × the created adoption facts > records the adoption once and verifies the same content on a replay 2ms
+     → The created adoption schema differs from the one this build expects
+   × the created adoption facts > refuses a second, different adoption under the same transaction 1ms
+     → The created adoption schema differs from the one this build expects
+   × the created adoption facts > inserts the source fact once and verifies the same content on a replay 3ms
+     → The created adoption schema differs from the one this build expects
+   × the D02 prepared source mapping > registers the same preparation once and refuses a different one under the same identifier 5ms
+     → expected [Function] to throw an error
+   ✓ the D02 prepared source mapping > has no result reference until the package is really bound 2ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/created-schema-upgrade.test.ts > the forward upgrade of the impact table > upgrades an old table and keeps every old row and value
+Error: UNIQUE constraint failed: impact.project_id, impact.impact_hash
+ ❯ insertLegacy tests/agent-driven/integration/created-schema-upgrade.test.ts:81:47
+     79|     control_revision, rights_digest, native_plan_sha256, request_diges…
+     80|     impact_hash, state, expires_at, created_at, updated_at)
+     81|     VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`).run(
+       |                                               ^
+     82|     row.impact_id, row.project_id, row.operation, row.reference_id, ro…
+     83|     row.source_digest, row.control_revision, row.rights_digest, row.na…
+ ❯ tests/agent-driven/integration/created-schema-upgrade.test.ts:98:29
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  tests/agent-driven/integration/created-schema-upgrade.test.ts > the created adoption facts > records the adoption once and verifies the same content on a replay
+CreatedAdoptionError: The created adoption schema differs from the one this build expects
+ ❯ fail src/host/agent-driven/created-source-adoption-store.ts:76:9
+     74| 
+     75| function fail(code: CreatedAdoptionError['code'], message: string): ne…
+     76|   throw new CreatedAdoptionError(code, message);
+       |         ^
+     77| }
+     78| 
+ ❯ CreatedSourceAdoptionStore.#schema src/host/agent-driven/created-source-adoption-store.ts:149:7
+ ❯ CreatedSourceAdoptionStore.record src/host/agent-driven/created-source-adoption-store.ts:162:10
+ ❯ tests/agent-driven/integration/created-schema-upgrade.test.ts:266:25
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  tests/agent-driven/integration/created-schema-upgrade.test.ts > the created adoption facts > refuses a second, different adoption under the same transaction
+CreatedAdoptionError: The created adoption schema differs from the one this build expects
+ ❯ fail src/host/agent-driven/created-source-adoption-store.ts:76:9
+     74| 
+     75| function fail(code: CreatedAdoptionError['code'], message: string): ne…
+     76|   throw new CreatedAdoptionError(code, message);
+       |         ^
+     77| }
+     78| 
+ ❯ CreatedSourceAdoptionStore.#schema src/host/agent-driven/created-source-adoption-store.ts:149:7
+ ❯ CreatedSourceAdoptionStore.record src/host/agent-driven/created-source-adoption-store.ts:162:10
+ ❯ tests/agent-driven/integration/created-schema-upgrade.test.ts:298:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ FAIL  tests/agent-driven/integration/created-schema-upgrade.test.ts > the created adoption facts > inserts the source fact once and verifies the same content on a replay
+CreatedAdoptionError: The created adoption schema differs from the one this build expects
+ ❯ fail src/host/agent-driven/created-source-adoption-store.ts:76:9
+     74| 
+     75| function fail(code: CreatedAdoptionError['code'], message: string): ne…
+     76|   throw new CreatedAdoptionError(code, message);
+       |         ^
+     77| }
+     78| 
+ ❯ CreatedSourceAdoptionStore.#schema src/host/agent-driven/created-source-adoption-store.ts:149:7
+ ❯ CreatedSourceAdoptionStore.insertOrVerifySourceFact src/host/agent-driven/created-source-adoption-store.ts:228:10
+ ❯ tests/agent-driven/integration/created-schema-upgrade.test.ts:324:25
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+
+ FAIL  tests/agent-driven/integration/created-schema-upgrade.test.ts > the D02 prepared source mapping > registers the same preparation once and refuses a different one under the same identifier
+AssertionError: expected [Function] to throw an error
+ ❯ tests/agent-driven/integration/created-schema-upgrade.test.ts:368:8
+    366|     // A different preparation under the same identifier is refused, n…
+    367|     expect(() => store.register({ ...input, fact_digest: 'b'.repeat(64…
+    368|       .toThrow();
+       |        ^
+    369|     revisions.close();
+    370|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  5 failed | 6 passed (11)
+   Start at  01:09:16
+   Duration  325ms (transform 133ms, setup 0ms, collect 165ms, tests 29ms, environment 0ms, prepare 39ms)
+
+ ELIFECYCLE  Test failed. See above for more details.
+--- end ---
+exit: 1
+finished: 2026-11-11T17:09:16Z

@@ -98,3 +98,44 @@ Implementation sequence/cases/commands in existing TASK remain applicable with t
 | 重型 Host/media/ffmpeg/browser/build/full | NOT_RUN | 须先经 parent 申请 MAIN 单槽 |
 
 peer 端口状态：MEDIA `CommittedRenderPhasesPort`、PRODUCT 原生接口的真实候选 commit **尚未到达**（未收到）。依赖组合 case 一律标 BLOCKED，不以 fixture 冒充真实 Run，不伪造 available。
+
+### 后续阶段（actual，续）
+
+**E1 correction1**（commit `8e410fe`）：D09 字段补全（version/source_kind/base_source_digest/materialization_id/prepared_fact_digest/request_digest/target_source_digest/target_snapshot_id/affected ranges/固定 upstream）、重复键**拒绝**而非 tie-break、safe-integer/小写 hash 校验、review-media 类型改为**复用既有** `review-media-http.ts` 与 `PreparedPreviewReceiptV1`（不再重复声明）、proof/scope 改为运行时身份。独立 Python 互核 `tools/d09-plan-golden.py` 读同一 `golden/d09-plan-vectors.json`，9 case 全同意。首个真实失败（version 未参与摘要）已保留：`logs/r2-created-source-change-test-003.txt`。
+
+**受控导入**（MAIN 授权，均逐 blob 校验 sha256，未改 peer 字节、未合分支）：
+- MEDIA `3fc977168f0941f8b1286e08fc24827afda74b72` → `src/host/render/ports.ts`（commit `4fbb3e8`；导入前确认工作树字节等于候选父 blob `06ab9bea…` 且无本地改动）。
+- PRODUCT `e0aaa242c9d1b19211366a53ce8d6c989b07a912` → 16 条新增路径（commit `f3a9a9e`；全部先前不存在，导入后逐条 sha256 相符；`request013.patch` = L06 固定 `f6998892…`）。候选自报 tsc0+14 pure units，我方复跑 14/14 通过。**候选仍只是 interface-only**，不是生产能力。
+
+**E1 correction2**（commit `d4e092d`）：共享 ports 模块**移除**全部 mint/lease/issuer/scope-opening API，只留类型。scope 归 `RevisionStore` 真实 atomic 事务所有（绑定 owning store + 同一连接 + live 窗口），repository 以**身份**校验（`isLiveCreatedSourceCommitScope(scope, owner, db)`），不接受结构相同对象、跨库、跨 store、已出域 scope；join 内失败同时记录在 scope 上，外层即使吞错也回滚；thenable 被拒。proof 的发行/识别归 publisher 实例所有。守卫测试：一旦 mint/lease/issuer/scope-opening 导出重新出现在共享模块即打红。
+
+**E2（本次，commit 见下方）**：三个真实 store 已落盘并有实证：
+- `created-prepared-source-store.ts`：D02 不可变 `ps_` 映射（`ps_`+canonical(project/job/request/fact) hash 前 60，全 hash 保留作碰撞检查），绑定 execution/base/source/plan/rights/frame_count/有理 fps/descriptor/Host 私有 stage；**无 state 列**；可幂等重建；包未发布时 `packageBinding` 为 undefined（无悬空 result_ref）；同名同身份不同闭包被拒。
+- `created-source-impact-store.ts`：新 operation `adopt_prepared_source` 走**受控前向 schema 升级**（SQLite 无法原地扩 CHECK，故重建表并逐行比对旧值；不用 `IF NOT EXISTS` 掩盖未升级）；不可变 `created_impact_fact`（**无 state 列**）；新 hash 域 `narralens-created-impact-v1\n`，旧域读新行被拒、新域读旧行被拒；TTL 固定 15 分钟且重放不续期。
+- `created-source-adoption-store.ts`：不可变 `created_adoption_fact`（原/目标完整闭包、原生计划、impact/approval 绑定、私有 stage/backup token、预期 snapshot；**无 state 列**）+ `created_source_fact`（按 (project, snapshot) **插入或逐字段验证**，同内容重放不失败、同 snapshot 不同内容回滚）；`plan_sha256` 与 `facts_digest` 必须是**同一个**摘要。
+
+### 本阶段实证
+
+| 命令 | exit | 结果 |
+|---|---|---|
+| `corepack pnpm exec tsc --noEmit` | 0 | log `r2-e2-tsc-014.txt` sha256 `b6179327f3a7d78088736e7e2b1dfef508a56ec9e08ddb1f7ee8a7274071da2c` |
+| `pnpm test created-source-change.test.ts` | 0 | 11 passed，log `…-007.txt` sha256 `116b70743a11648ee45c6235e6ddaa2f5e8e1002b76fba15576e3eae150a20f8` |
+| `pnpm test created-schema-upgrade.test.ts` | 0 | 11 passed，log `…-012.txt` sha256 `0a998001f97c4ecf24ceed2b974492e191b5f1c891bead9d0c63f42fe817851b` |
+| C1 轻量子集（7 文件） | 0 | 96 passed，log `…-013.txt` sha256 `a59f3b5b9f4ae71012e08b3d87bceb9e482e7ab5f8eb97b11f397e77b1089195` |
+| `pnpm test created-native-ack.test.ts`（PRODUCT 自带） | 0 | 14 passed，log `…-008.txt` sha256 `6b44e92d683f7cff7998e171488155262aec59b01d546ea476740a945593c5d3` |
+
+首失败保留：`…-010.txt`（fixture 自身触发 UNIQUE、命名空间片段不匹配、身份语义误判）、`…-011.txt`（DDL 片段重复触发器）。
+
+### 仍未开始（NOT_STARTED，勿当已做）
+
+- `created-source-change-service.ts`（change.prepare/apply 接线、prepared 与 legacy M3 按 source kind 分派）
+- `created-source-publisher.ts`（完整树私有 copy/fsync→journal→原根 backup/rename；proof 由该实例发行）
+- `created-source-adoption-service.ts`（恰一次采用、+1）
+- `RevisionStore.commitPreparedCreatedSource` 本体（scope/join 接缝已就位，提交逻辑未写）
+- `created-review-package-service.ts` / `created-review-media-bindings.ts` / `review-media-http.ts` 接线（同 ProductTransaction 内 publish + 绑定 + result_ref 原子）
+- `fixed-workflow-service.ts` prepared 分支取完整 plan 摘要作 facts_digest；两个窄 effect（`review_impact_prepare` / `approved_prepared_adoption`）
+- L05 Host 真实 reader（retained FD + verifyClosure）：**等 PRODUCT 更正后的实际类型 commit**，未自行造 DTO
+- 早期 R3 基础 `fixed-phase-executor.ts` / `created-render-delivery-store.ts` / `created-review-gate-store.ts`
+- `created-source-adoption.test.ts` / `created-source-process-recovery.test.ts` / 三个 delivery/qc 测试文件（尚未创建）
+
+全部 R2-01..R2-08 / R2-F case 与重型 Host/media/ffmpeg/browser/build/full 仍 **NOT_RUN**。重型槽当前 FREE 但**需 MAIN 显式 grant**，本 child 未申请也未使用。

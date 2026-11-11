@@ -1,0 +1,84 @@
+command: corepack pnpm test tests/agent-driven/integration/created-schema-upgrade.test.ts --maxWorkers=1 --minWorkers=1
+cwd: /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+head: d4e092d211b344fd36bfa4c83f8abc88f6fff903
+started: 2026-11-11T17:09:44Z
+--- output ---
+
+> narralens@0.1.0 test /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+> vitest run --config vitest.config.ts tests/agent-driven/integration/created-schema-upgrade.test.ts --maxWorkers=1 --minWorkers=1
+
+
+ RUN  v3.2.4 /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+
+(node:1163024) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/agent-driven/integration/created-schema-upgrade.test.ts (11 tests | 3 failed) 24ms
+   ✓ the forward upgrade of the impact table > upgrades an old table and keeps every old row and value 3ms
+   ✓ the forward upgrade of the impact table > is idempotent and does not upgrade a table twice 1ms
+   ✓ the forward upgrade of the impact table > refuses the created operation until the table was upgraded 0ms
+   ✓ the two impact hash domains > hashes the created spec in the created domain only 1ms
+   ✓ the two impact hash domains > keeps the legacy reader away from a created impact and the created reader away from a legacy one 4ms
+   ✓ the two impact hash domains > never extends the window on a replay 2ms
+   × the created adoption facts > records the adoption once and verifies the same content on a replay 4ms
+     → trigger created_adoption_fact_no_update already exists
+   × the created adoption facts > refuses a second, different adoption under the same transaction 1ms
+     → trigger created_adoption_fact_no_update already exists
+   × the created adoption facts > inserts the source fact once and verifies the same content on a replay 1ms
+     → trigger created_adoption_fact_no_update already exists
+   ✓ the D02 prepared source mapping > registers the same preparation once and refuses a different one under the same identifier 4ms
+   ✓ the D02 prepared source mapping > has no result reference until the package is really bound 2ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/created-schema-upgrade.test.ts > the created adoption facts > records the adoption once and verifies the same content on a replay
+Error: trigger created_adoption_fact_no_update already exists
+ ❯ CreatedSourceAdoptionStore.#schema src/host/agent-driven/created-source-adoption-store.ts:155:16
+    153|     if (found === undefined) {
+    154|       this.#db.exec(CREATED_ADOPTION_FACT_DDL);
+    155|       this.#db.exec(CREATED_SOURCE_FACT_DDL);
+       |                ^
+    156|     } else if (!matchesFrozenSchemaNamespace(this.#db, CREATED_ADOPTIO…
+    157|       !matchesFrozenSchemaNamespace(this.#db, CREATED_SOURCE_FACT_DDL,…
+ ❯ new CreatedSourceAdoptionStore src/host/agent-driven/created-source-adoption-store.ts:146:10
+ ❯ tests/agent-driven/integration/created-schema-upgrade.test.ts:247:19
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  tests/agent-driven/integration/created-schema-upgrade.test.ts > the created adoption facts > refuses a second, different adoption under the same transaction
+Error: trigger created_adoption_fact_no_update already exists
+ ❯ CreatedSourceAdoptionStore.#schema src/host/agent-driven/created-source-adoption-store.ts:155:16
+    153|     if (found === undefined) {
+    154|       this.#db.exec(CREATED_ADOPTION_FACT_DDL);
+    155|       this.#db.exec(CREATED_SOURCE_FACT_DDL);
+       |                ^
+    156|     } else if (!matchesFrozenSchemaNamespace(this.#db, CREATED_ADOPTIO…
+    157|       !matchesFrozenSchemaNamespace(this.#db, CREATED_SOURCE_FACT_DDL,…
+ ❯ new CreatedSourceAdoptionStore src/host/agent-driven/created-source-adoption-store.ts:146:10
+ ❯ tests/agent-driven/integration/created-schema-upgrade.test.ts:279:19
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  tests/agent-driven/integration/created-schema-upgrade.test.ts > the created adoption facts > inserts the source fact once and verifies the same content on a replay
+Error: trigger created_adoption_fact_no_update already exists
+ ❯ CreatedSourceAdoptionStore.#schema src/host/agent-driven/created-source-adoption-store.ts:155:16
+    153|     if (found === undefined) {
+    154|       this.#db.exec(CREATED_ADOPTION_FACT_DDL);
+    155|       this.#db.exec(CREATED_SOURCE_FACT_DDL);
+       |                ^
+    156|     } else if (!matchesFrozenSchemaNamespace(this.#db, CREATED_ADOPTIO…
+    157|       !matchesFrozenSchemaNamespace(this.#db, CREATED_SOURCE_FACT_DDL,…
+ ❯ new CreatedSourceAdoptionStore src/host/agent-driven/created-source-adoption-store.ts:146:10
+ ❯ tests/agent-driven/integration/created-schema-upgrade.test.ts:309:19
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 8 passed (11)
+   Start at  01:09:44
+   Duration  305ms (transform 122ms, setup 0ms, collect 149ms, tests 24ms, environment 0ms, prepare 34ms)
+
+ ELIFECYCLE  Test failed. See above for more details.
+--- end ---
+exit: 1
+finished: 2026-11-11T17:09:45Z

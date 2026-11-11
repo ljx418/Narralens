@@ -1,0 +1,24 @@
+command: corepack pnpm test tests/agent-driven/integration/created-schema-upgrade.test.ts --maxWorkers=1 --minWorkers=1
+cwd: /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+head: d4e092d211b344fd36bfa4c83f8abc88f6fff903
+started: 2026-11-11T17:10:18Z
+--- output ---
+
+> narralens@0.1.0 test /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+> vitest run --config vitest.config.ts tests/agent-driven/integration/created-schema-upgrade.test.ts --maxWorkers=1 --minWorkers=1
+
+
+ RUN  v3.2.4 /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+
+(node:1164080) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/created-schema-upgrade.test.ts (11 tests) 23ms
+
+ Test Files  1 passed (1)
+      Tests  11 passed (11)
+   Start at  01:10:18
+   Duration  321ms (transform 138ms, setup 0ms, collect 171ms, tests 23ms, environment 0ms, prepare 35ms)
+
+--- end ---
+exit: 0
+finished: 2026-11-11T17:10:18Z
