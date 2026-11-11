@@ -790,6 +790,10 @@ export class NativeObservationService implements NativeContextPort, NativeObserv
       if (current.revision !== session.binding.revision) return null;
       if (current.snapshot_id !== session.binding.snapshot_id) return null;
       if (current.source_digest !== session.binding.source_digest) return null;
+      // A control revision that moved while this round was running means the editor's
+      // loaded state may already be stale. This is a race detector over the Host's own
+      // facts and not a proof of the physical source: the proof of the source is the
+      // retained closure guard above.
       if (current.control_revision !== this.#controlRevisionOf(session)) return null;
       const ack: NativeAck = {
         project_id: session.binding.project_id,
