@@ -1,0 +1,31 @@
+
+> narralens@0.1.0 test /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+> vitest run --config vitest.config.ts tests/agent-driven/integration/created-run-authority.test.ts --maxWorkers=1 --minWorkers=1 -t 'D09 real adoption service'
+
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:1874633) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+stdout | tests/agent-driven/integration/created-run-authority.test.ts > D09 real adoption service commits one actual approved native source through the project queue
+{"case":"D10 committed projection diagnostic","problems":["OPENFILM_PROJECTION:CLIP_UNMODELED_FIELD:concept-s1:box","OPENFILM_PROJECTION:CLIP_UNMODELED_FIELD:shot-s1:style","OPENFILM_PROJECTION:CLIP_UNMODELED_FIELD:shot-s1:volume","OPENFILM_PROJECTION:CLIP_UNMODELED_FIELD:shot-s2:style","OPENFILM_PROJECTION:CLIP_UNMODELED_FIELD:shot-s2:volume"],"frames":90,"expected_frames":90,"fps":{"num":30,"den":1},"expected_fps":{"den":1,"num":30}}
+
+stdout | tests/agent-driven/integration/created-run-authority.test.ts > D09 real adoption service commits one actual approved native source through the project queue
+{"case":"D09 real prepared cleanup","pid":1874633,"root":"/tmp/narralens-created-workspace-4rr7Wn","removed":true}
+
+stdout | tests/agent-driven/integration/created-run-authority.test.ts > D09 real adoption service refuses missing approval before starting publication
+{"case":"D09 real prepared cleanup","pid":1874633,"root":"/tmp/narralens-created-workspace-PeKuWQ","removed":true}
+
+stdout | tests/agent-driven/integration/created-run-authority.test.ts > D09 real adoption service refuses changed selection before starting publication
+{"case":"D09 real prepared cleanup","pid":1874633,"root":"/tmp/narralens-created-workspace-Y4xVV9","removed":true}
+
+ ✓ tests/agent-driven/integration/created-run-authority.test.ts (34 tests | 31 skipped) 28679ms
+   ✓ D09 real adoption service commits one actual approved native source through the project queue  13951ms
+   ✓ D09 real adoption service refuses missing approval before starting publication  7646ms
+   ✓ D09 real adoption service refuses changed selection before starting publication  7081ms
+
+ Test Files  1 passed (1)
+      Tests  3 passed | 31 skipped (34)
+   Start at  06:00:19
+   Duration  33.46s (transform 3.49s, setup 0ms, collect 2.98s, tests 28.68s, environment 0ms, prepare 1.18s)
+

@@ -1,0 +1,35 @@
+
+> narralens@0.1.0 test /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+> vitest run --config vitest.config.ts tests/agent-driven/integration/created-run-authority.test.ts --maxWorkers=1 --minWorkers=1 -t 'D09 real adoption service'
+
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:1876143) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+stdout | tests/agent-driven/integration/created-run-authority.test.ts > D09 real adoption service commits one actual approved native source through the project queue
+{"case":"D10 committed projection diagnostic","problems":["OPENFILM_PROJECTION:CLIP_UNMODELED_FIELD:concept-s1:box","OPENFILM_PROJECTION:CLIP_UNMODELED_FIELD:shot-s1:style","OPENFILM_PROJECTION:CLIP_UNMODELED_FIELD:shot-s1:volume","OPENFILM_PROJECTION:CLIP_UNMODELED_FIELD:shot-s2:style","OPENFILM_PROJECTION:CLIP_UNMODELED_FIELD:shot-s2:volume"],"frames":90,"expected_frames":90,"fps":{"num":30,"den":1},"expected_fps":{"den":1,"num":30}}
+
+stdout | tests/agent-driven/integration/created-run-authority.test.ts > D09 real adoption service commits one actual approved native source through the project queue
+{"case":"D09 real prepared cleanup","pid":1876143,"root":"/tmp/narralens-created-workspace-Jv4jDK","removed":true}
+
+stdout | tests/agent-driven/integration/created-run-authority.test.ts > D09 real adoption service refuses missing approval before starting publication
+{"case":"D09 real prepared cleanup","pid":1876143,"root":"/tmp/narralens-created-workspace-g3WhJl","removed":true}
+
+stdout | tests/agent-driven/integration/created-run-authority.test.ts > D09 real adoption service refuses changed selection before starting publication
+{"case":"D09 real prepared cleanup","pid":1876143,"root":"/tmp/narralens-created-workspace-SZl1JZ","removed":true}
+
+stdout | tests/agent-driven/integration/created-run-authority.test.ts > D09 real adoption service preserves acquire cleanup uncertainty through service close
+{"case":"D09 real prepared cleanup","pid":1876143,"root":"/tmp/narralens-created-workspace-UeiHul","removed":true}
+
+ ✓ tests/agent-driven/integration/created-run-authority.test.ts (35 tests | 31 skipped) 40267ms
+   ✓ D09 real adoption service commits one actual approved native source through the project queue  19657ms
+   ✓ D09 real adoption service refuses missing approval before starting publication  7043ms
+   ✓ D09 real adoption service refuses changed selection before starting publication  7054ms
+   ✓ D09 real adoption service preserves acquire cleanup uncertainty through service close  6512ms
+
+ Test Files  1 passed (1)
+      Tests  4 passed | 31 skipped (35)
+   Start at  06:01:28
+   Duration  45.57s (transform 3.58s, setup 0ms, collect 3.28s, tests 40.27s, environment 0ms, prepare 1.37s)
+

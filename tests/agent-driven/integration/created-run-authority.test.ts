@@ -531,3 +531,84 @@ it.each(['release','acquire-stage'] as const)('D09 real reader retains all resou
    if(!(error instanceof PublicationCleanupError)||leaves(error).some(value=>value!==fault))throw error;
   }}finally{await f.close();}}
 },120000);
+
+
+async function d09AdoptionFixture(){
+ const f=await d09RealFixture();const {CreatedSourceAdoptionService}=await import('../../../src/host/agent-driven/created-source-adoption-service.js');
+ const {CreatedSourceFactsReader}=await import('../../../src/host/agent-driven/created-source-facts-reader.js');
+ const reader=new CreatedSourceFactsReader({...f.readDependencies,prepared:f.prepared});
+ const service=new CreatedSourceAdoptionService({host:f.host,authority:f.projectAuthority,prepared:f.prepared,impacts:f.impacts,facts:reader,
+  tasks:f.tasks,assets:f.registry,verifier:f.verifier,selection:f.readDependencies.selection,stageDomainRoot:f.taskRoot,privateRoot:f.root+'/adoption-publish'});
+ const close=async()=>{try{await service.close();}finally{try{await reader.close();}finally{await f.close();}}};
+ return {...f,reader,service,baseClose:f.close,close};
+}
+it('D09 real adoption service commits one actual approved native source through the project queue',async()=>{
+ const f=await d09AdoptionFixture();
+ try{
+  const decision=await f.workflow.decideReview(f.request,f.ui);expect(decision.approval).not.toBeNull();
+  const request={meta:{idempotency_key:'d09-real-apply',correlation_id:'d09-real-apply'},project_id:f.projectId,
+   impact_id:f.change.impact_id,approval_id:decision.approval!.approval_id,base_revision:1,source_digest:f.commit.source_digest,execution:f.execution};
+  const [first,second]=await Promise.all([f.service.apply(request,'owner'),f.service.apply(request,'owner')]);
+  expect(first).toMatchObject({project_revision:2,snapshot_id:f.change.target_snapshot_id,source_digest:f.completed.fact.source_digest,replayed:false});
+  expect(second).toEqual({...first,replayed:true});expect(f.host.revisions.activeCommit(f.projectId)!.revision).toBe(2);
+  expect(f.host.revisions.projectTransaction(first.transaction_id)).toMatchObject({kind:'edit',state:'committed'});
+  const approval=await f.repo.transaction(tx=>tx.get('approval',{project_id:f.projectId,run_id:f.execution.run_id,approval_id:request.approval_id}));
+  expect(approval).toMatchObject({state:'consumed',consumed_transaction_id:first.transaction_id});expect(f.impacts.state(f.change.impact_id)).toBe('consumed');
+  const {readFile}=await import('node:fs/promises');expect(await readFile(f.authorRoot+'/film.html')).toEqual(await readFile(f.completed.root+'/film.html'));
+  const {OpenFilmEngineAdapter}=await import('../../../src/adapters/openfilm/openfilm-engine-adapter.js');
+  const {createPinnedOpenFilmUpstream}=await import('../../../src/adapters/openfilm/openfilm-upstream.js');
+  const {vendorRoot}=await import('./helpers/created-project-fixture.js');
+  const geometry=f.app.creation.sourceFact(f.projectId,first.snapshot_id)!;
+  const projection=await new OpenFilmEngineAdapter(await createPinnedOpenFilmUpstream(vendorRoot)).inspectSnapshot({root:f.host.snapshots.snapshotRoot(f.projectId,first.snapshot_id)+'/source',roots:geometry.roots,subtitles:geometry.subtitles},first.source_digest,{projectId:f.projectId,correlationId:'d10-diagnostic',signal:AbortSignal.timeout(20000)});
+  console.info(JSON.stringify({case:'D10 committed projection diagnostic',problems:projection.problems,frames:projection.frame_count,expected_frames:geometry.frame_count,fps:projection.fps,expected_fps:geometry.fps}));
+  const snapshot=await f.app.committedSnapshots.readerForTransaction(f.projectId,first.transaction_id,'owner').readSnapshot({project_id:f.projectId,snapshot_id:first.snapshot_id,source_digest:first.source_digest});
+  expect(snapshot).toMatchObject({project_id:f.projectId,snapshot_id:first.snapshot_id,source_digest:first.source_digest});
+  await expect(f.service.apply({...request,base_revision:2},'owner')).rejects.toBeDefined();
+  expect(f.host.revisions.activeCommit(f.projectId)!.revision).toBe(2);
+  // Corruption injection in the owned temporary DB: native metadata alone must not
+  // activate the committed-producer read path, even with the same actual film bytes.
+  f.host.revisions.compose(db=>{
+   const trigger=db.prepare("SELECT sql FROM sqlite_master WHERE type='trigger' AND name='created_adopted_source_fact_no_delete'").get()!;
+   db.exec('DROP TRIGGER created_adopted_source_fact_no_delete');
+   try{db.prepare('DELETE FROM created_adopted_source_fact WHERE project_id=? AND snapshot_id=?').run(f.projectId,first.snapshot_id);}finally{db.exec(String(trigger.sql));}
+  });
+  const {CreatedSourceAdoptionStore}=await import('../../../src/host/agent-driven/created-source-adoption-store.js');
+  expect(new CreatedSourceAdoptionStore(f.host.revisions).sourceFact(f.projectId,first.snapshot_id)).toBeUndefined();
+  await expect(f.app.committedSnapshots.readerForTransaction(f.projectId,first.transaction_id,'owner').readSnapshot({project_id:f.projectId,snapshot_id:first.snapshot_id,source_digest:first.source_digest})).rejects.toMatchObject({code:'REVISION_CONFLICT'});
+  expect(f.host.revisions.activeCommit(f.projectId)!.revision).toBe(2);
+ }finally{await f.close();}
+},120000);
+it.each(['missing approval','changed selection'] as const)('D09 real adoption service refuses %s before starting publication',async mode=>{
+ const f=await d09AdoptionFixture();
+ try{
+  const decision=mode==='missing approval'?undefined:await f.workflow.decideReview(f.request,f.ui);
+  if(mode==='changed selection')f.advanceSelection();
+  const request={meta:{idempotency_key:'d09-refuse-apply',correlation_id:'d09-refuse-apply'},project_id:f.projectId,
+   impact_id:f.change.impact_id,approval_id:decision?.approval?.approval_id??'approval-missing',base_revision:1,source_digest:f.commit.source_digest,execution:f.execution};
+  await expect(f.service.apply(request,'owner')).rejects.toBeDefined();
+  expect(f.host.revisions.activeCommit(f.projectId)!.revision).toBe(1);expect(f.impacts.state(f.change.impact_id)).toBe('active');
+  expect(f.host.revisions.compose(db=>db.prepare('SELECT count(*) AS n FROM created_adoption_fact').get()?.n)).toBe(0);
+  const {readFile}=await import('node:fs/promises');expect(await readFile(f.authorRoot+'/film.html')).toEqual(f.authorBytes);
+ }finally{await f.close();}
+},120000);
+
+
+it('D09 real adoption service preserves acquire cleanup uncertainty through service close',async()=>{
+ const f=await d09AdoptionFixture(),fault=new Error('injected adoption reader stage close uncertainty');
+ const {RetainedSourceTree}=await import('../../../src/host/agent-driven/retained-source-tree.js');
+ const {PublicationCleanupError}=await import('../../../src/host/agent-driven/publication-cleanup.js');
+ const original=RetainedSourceTree.prototype.close;let injected=false;
+ const spy=vi.spyOn(RetainedSourceTree.prototype,'close').mockImplementation(function(this:InstanceType<typeof RetainedSourceTree>){
+  if(this.root===f.completed.root&&!injected){injected=true;throw fault;}original.call(this);
+ });
+ const flatten=(value:unknown):unknown[]=>value instanceof PublicationCleanupError?value.errors.flatMap(flatten):[value];
+ const settle=async(close:()=>Promise<void>)=>{try{await close();}catch(error){if(!(error instanceof PublicationCleanupError)||flatten(error).some(value=>value!==fault))throw error;}};
+ try{
+  const request={meta:{idempotency_key:'d10-acquire-cleanup',correlation_id:'d10-acquire-cleanup'},project_id:f.projectId,
+   impact_id:f.change.impact_id,approval_id:'approval-unneeded-before-guard',base_revision:1,source_digest:f.commit.source_digest,execution:f.execution};
+  await expect(f.service.apply(request,'owner')).rejects.toBeInstanceOf(PublicationCleanupError);expect(injected).toBe(true);
+  spy.mockRestore();await expect(f.service.apply(request,'owner')).rejects.toMatchObject({requires_reconciliation:true});
+  await expect(f.service.close()).rejects.toBeInstanceOf(PublicationCleanupError);
+  expect(f.host.revisions.activeCommit(f.projectId)!.revision).toBe(1);
+ }finally{spy.mockRestore();try{await settle(()=>f.service.close());}finally{try{await settle(()=>f.reader.close());}finally{await f.baseClose();}}}
+},120000);

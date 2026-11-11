@@ -15,6 +15,10 @@ import {OPENFILM_UPSTREAM_SHA} from '../engine/engine-binding-store.js';
 import {OpenFilmEngineAdapter} from '../../adapters/openfilm/openfilm-engine-adapter.js';
 import {createPinnedOpenFilmUpstream} from '../../adapters/openfilm/openfilm-upstream.js';
 import {CreativeProjectAuthority} from './creative-project-authority.js';
+import {CreatedSourceAdoptionStore} from './created-source-adoption-store.js';
+import {assertPreparedAdoptionPlan,preparedAdoptionPlanDigest,type PreparedAdoptionPlanV1} from './created-source-ports.js';
+import {preparedSourceConsumerGraph} from './created-source-publisher.js';
+import {validateCreatedSourceFact} from '../projects/project-creation-store.js';
 
 interface CommitBinding {
  readonly project_id:string;
@@ -64,6 +68,48 @@ export class CommittedSnapshotAuthority {
   try{return await pending;}
   catch(error){if(this.#adapter===pending)this.#adapter=undefined;throw error;}
  }
+ /** Created SOURCE_ONLY publications have a richer native vocabulary than the
+  * legacy M4 impact projection. Accept ONLY a committed immutable producer lineage,
+  * not arbitrary problem filtering or a caller-supplied "complete" flag. */
+ async #verifyAdoptedNative(binding:CommitBinding,root:string,digest:Awaited<ReturnType<typeof computeSourceDigest>>):Promise<boolean>{
+  const exists=this.revisions.compose(db=>db.prepare("SELECT name FROM sqlite_master WHERE name='created_adopted_source_fact'").get());
+  if(!exists)return false;
+  const store=new CreatedSourceAdoptionStore(this.revisions),source=store.sourceFact(binding.project_id,binding.snapshot_id);
+  if(!source)return false;
+  const fact=store.adoptionFact(source.transaction_id);
+  const row=this.revisions.compose(db=>db.prepare('SELECT plan_json,plan_sha256 FROM created_impact_fact WHERE impact_id=?').get(source.impact_id));
+  if(!fact||!row)throw changed();
+  const plan=assertPreparedAdoptionPlan(JSON.parse(String(row.plan_json)) as PreparedAdoptionPlanV1),planDigest=preparedAdoptionPlanDigest(plan);
+  const committed=this.revisions.projectTransaction(source.transaction_id);
+  if(!committed||committed.state!=='committed'||committed.snapshot_id!==binding.snapshot_id||committed.source_digest_after!==binding.source_digest
+   ||source.source_digest!==binding.source_digest||source.plan_sha256!==planDigest||source.facts_digest!==planDigest
+   ||row.plan_sha256!==planDigest||fact.project_id!==binding.project_id||fact.expected_snapshot_id!==binding.snapshot_id
+   ||fact.target_source_digest!==binding.source_digest||fact.plan_sha256!==planDigest||fact.facts_digest!==planDigest
+   ||plan.project_id!==binding.project_id||plan.target_snapshot_id!==binding.snapshot_id||plan.target_source_digest!==binding.source_digest
+   ||plan.materialization_id!==source.prepared_source_id||canonicalDigest(plan.native_plan)!==canonicalDigest(fact.native_plan))throw changed();
+  const readJson=async(path:string):Promise<unknown>=>{
+   const entry=digest.manifest.files.find(file=>file.path===path);if(!entry)throw changed();
+   const handle=await open(resolve(root,path),constants.O_RDONLY|constants.O_NOFOLLOW|constants.O_NONBLOCK);
+   try{const stat=await handle.stat();if(!stat.isFile()||stat.size>64*1024*1024||stat.size!==entry.size)throw changed();
+    const bytes=await handle.readFile();if(createHash('sha256').update(bytes).digest('hex')!==entry.sha256)throw changed();return JSON.parse(bytes.toString('utf8')) as unknown;
+   }finally{await handle.close();}
+  };
+  const metadata=await readJson('prepared-native.json') as Parameters<typeof preparedSourceConsumerGraph>[0]&{format:string;plan_digest:string};
+  const draft=await readJson('draft-plan.json') as Parameters<typeof preparedSourceConsumerGraph>[1];
+  if(metadata.format!=='narralens.prepared-native-output@1'||metadata.project_id!==binding.project_id||metadata.plan_digest!==plan.native_plan.native_plan_sha256)throw changed();
+  const geometry=validateCreatedSourceFact({schema_version:1,roots:['film.html',...plan.roots.filter(path=>path!=='film.html')],subtitles:metadata.subtitles,frame_count:metadata.frame_count,fps:metadata.fps,
+   assets:metadata.assets.map(asset=>({asset_id:asset.asset_id,path:asset.path,sha256:asset.sha256,bytes:asset.bytes,duration_frames:asset.duration_frames,
+    media_type:asset.media_type,source:asset.source,license:asset.license}))});
+  if(canonicalDigest(geometry)!==canonicalDigest(binding.fact)||geometry.frame_count!==plan.frame_count||geometry.fps.num!==plan.fps_numerator
+   ||geometry.fps.den!==plan.fps_denominator||canonicalDigest(preparedSourceConsumerGraph(metadata,draft))!==plan.consumer.graph_digest)throw changed();
+  const parsed=await(await createPinnedOpenFilmUpstream(this.vendorRoot)).readProjectFilm(root);
+  const film=digest.manifest.files.find(file=>file.path==='film.html');
+  if(parsed.problems.length||!film||createHash('sha256').update(parsed.text).digest('hex')!==film.sha256)throw changed();
+  const doc=parsed.doc as {tracks?:{clips?:{id?:unknown}[]}[]}|null;
+  const ids=doc?.tracks?.flatMap(track=>track.clips?.map(clip=>clip.id)??[])??[];
+  if(canonicalDigest(ids)!==canonicalDigest(metadata.clip_ids))throw changed();
+  return true;
+ }
  async #read(binding:CommitBinding,principalId:string,request:SnapshotReadRequest):Promise<SnapshotClosure>{
   if(request.project_id!==binding.project_id||request.snapshot_id!==binding.snapshot_id)throw missing();
   if(request.source_digest!==undefined&&request.source_digest!==binding.source_digest)throw changed();
@@ -79,8 +125,10 @@ export class CommittedSnapshotAuthority {
   const observedMedia=digest.manifest.assets.map(row=>({path:row.path,sha256:row.sha256,bytes:row.size})).sort((a,b)=>a.path<b.path?-1:a.path>b.path?1:0);
   const recordedMedia=binding.fact.assets.map(row=>({path:row.path,sha256:row.sha256,bytes:row.bytes})).sort((a,b)=>a.path<b.path?-1:a.path>b.path?1:0);
   if(canonicalDigest(observedMedia)!==canonicalDigest(recordedMedia))throw changed();
-  const projection=await (await this.#loadAdapter()).inspectSnapshot({root,roots:binding.fact.roots,subtitles:binding.fact.subtitles},binding.source_digest,{projectId:binding.project_id,correlationId:binding.transaction_id,signal:AbortSignal.timeout(20000)});
-  if(projection.problems.length||projection.frame_count!==binding.fact.frame_count||projection.fps.num!==binding.fact.fps.num||projection.fps.den!==binding.fact.fps.den||projection.source_digest!==binding.source_digest)throw changed();
+  if(!await this.#verifyAdoptedNative(binding,root,digest)){
+   const projection=await (await this.#loadAdapter()).inspectSnapshot({root,roots:binding.fact.roots,subtitles:binding.fact.subtitles},binding.source_digest,{projectId:binding.project_id,correlationId:binding.transaction_id,signal:AbortSignal.timeout(20000)});
+   if(projection.problems.length||projection.frame_count!==binding.fact.frame_count||projection.fps.num!==binding.fact.fps.num||projection.fps.den!==binding.fact.fps.den||projection.source_digest!==binding.source_digest)throw changed();
+  }
   const entries:SnapshotEntry[]=[];
   const assets=new Map(binding.fact.assets.map(asset=>[asset.path,asset]));
   const subtitles=new Set(binding.fact.subtitles.map(subtitle=>subtitle.path));

@@ -1,0 +1,86 @@
+
+> narralens@0.1.0 test /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+> vitest run --config vitest.config.ts tests/agent-driven/integration/created-run-authority.test.ts --maxWorkers=1 --minWorkers=1 -t 'D09 real adoption service'
+
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:1872906) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+stdout | tests/agent-driven/integration/created-run-authority.test.ts > D09 real adoption service commits one actual approved native source through the project queue
+{"case":"D10 committed projection diagnostic","problems":["OPENFILM_PROJECTION:CLIP_UNMODELED_FIELD:concept-s1:box","OPENFILM_PROJECTION:CLIP_UNMODELED_FIELD:shot-s1:style","OPENFILM_PROJECTION:CLIP_UNMODELED_FIELD:shot-s1:volume","OPENFILM_PROJECTION:CLIP_UNMODELED_FIELD:shot-s2:style","OPENFILM_PROJECTION:CLIP_UNMODELED_FIELD:shot-s2:volume"],"frames":90,"expected_frames":90,"fps":{"num":30,"den":1},"expected_fps":{"den":1,"num":30}}
+
+stdout | tests/agent-driven/integration/created-run-authority.test.ts > D09 real adoption service commits one actual approved native source through the project queue
+{"case":"D09 real prepared cleanup","pid":1872906,"root":"/tmp/narralens-created-workspace-2OWdmI","removed":true}
+
+stdout | tests/agent-driven/integration/created-run-authority.test.ts > D09 real adoption service refuses missing approval before starting publication
+{"case":"D09 real prepared cleanup","pid":1872906,"root":"/tmp/narralens-created-workspace-SCD5p8","removed":true}
+
+stdout | tests/agent-driven/integration/created-run-authority.test.ts > D09 real adoption service refuses changed selection before starting publication
+{"case":"D09 real prepared cleanup","pid":1872906,"root":"/tmp/narralens-created-workspace-lyiHIl","removed":true}
+
+ ❯ tests/agent-driven/integration/created-run-authority.test.ts (34 tests | 1 failed | 31 skipped) 31563ms
+   ↓ persists the trusted confirmation inside the caller transaction and binds it to the real session
+   ↓ refuses a confirmation whose session is no longer active and writes nothing
+   ↓ refuses a confirmation with an expired lifetime
+   ↓ refuses a confirmation with a lifetime that is not in the future
+   ↓ refuses a confirmation with an issued time in the future
+   ↓ refuses a confirmation with a review purpose without a review
+   ↓ refuses a confirmation with a non hash input digest
+   ↓ refuses a confirmation with a foreign actor
+   ↓ rolls the confirmation back with the transaction that wrote it
+   ↓ returns no approval when the current confirmation, run or attempt is missing
+   ↓ writes the limited approval only when the current run, attempt and confirmation are real
+   ↓ answers the project facts from the real authorities and fails closed without a capability
+   ↓ D09 refuses a prepared id without actual Host proof even with real confirmation and attempt
+   ↓ D09 refuses changed action against the original trusted confirmation
+   ↓ D09 refuses extended confirmation lifetime against the original trusted confirmation
+   ↓ D09 confirmation replay returns one original approval and rejects changed bindings
+   ↓ D09 real prepared succeeds with full plan digest, replays once and releases held source FDs
+   ↓ D09 real prepared refuses changed plan without approval and releases held source FDs
+   ↓ D09 real prepared refuses changed package without approval and releases held source FDs
+   ↓ D09 real prepared refuses changed rights without approval and releases held source FDs
+   ↓ D09 real prepared refuses changed selection without approval and releases held source FDs
+   ↓ D09 real prepared refuses changed expiry without approval and releases held source FDs
+   ↓ D09 real prepared refuses changed closure without approval and releases held source FDs
+   ↓ D09 real prepared refuses a copied transaction object even while actual proof is held
+   ↓ D09 canonical range and lock comparison preserves native-order plan identity
+   ↓ D09 final insertion rechecks expiry after approval enumeration (existing=false)
+   ↓ D09 final insertion rechecks expiry after approval enumeration (existing=true)
+   ↓ D09 real prepared refuses confirmation expiry during actual retained-byte verification
+   ↓ D09 real prepared retains post-commit read cleanup uncertainty and refuses normal replay
+   ↓ D09 real reader retains all resource ownership after release cleanup fails
+   ↓ D09 real reader retains all resource ownership after acquire-stage cleanup fails
+   × D09 real adoption service commits one actual approved native source through the project queue 15268ms
+     → expected ProductError: Committed snapshot verifica… { …(5) } to match object { code: 'REVISION_CONFLICT' }
+(5 matching properties omitted from actual)
+   ✓ D09 real adoption service refuses missing approval before starting publication  8480ms
+   ✓ D09 real adoption service refuses changed selection before starting publication  7814ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/created-run-authority.test.ts > D09 real adoption service commits one actual approved native source through the project queue
+AssertionError: expected ProductError: Committed snapshot verifica… { …(5) } to match object { code: 'REVISION_CONFLICT' }
+(5 matching properties omitted from actual)
+
+- Expected
++ Received
+
+- {
+-   "code": "REVISION_CONFLICT",
++ ProductError {
++   "code": "CAPABILITY_UNAVAILABLE",
+  }
+
+ ❯ tests/agent-driven/integration/created-run-authority.test.ts:571:3
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 2 passed | 31 skipped (34)
+   Start at  05:59:08
+   Duration  36.86s (transform 3.80s, setup 0ms, collect 3.27s, tests 31.56s, environment 0ms, prepare 1.35s)
+
+ ELIFECYCLE  Test failed. See above for more details.
