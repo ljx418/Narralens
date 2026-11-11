@@ -382,16 +382,18 @@ it.each(['plan','package','rights','selection','expiry','closure'] as const)(
       const expected = {
         plan: {code:'IMPACT_STALE',message:'Actual source, selection, native plan or rights changed'},
         package: {code:'IMPACT_STALE',message:'Prepared plan/package binding differs'},
-        rights: {code:'REVISION_CONFLICT',message:'Prepared rights are unavailable'},
-        selection: {code:'REVISION_CONFLICT',message:'Prepared source facts are no longer current'},
+        rights: {code:'REVISION_CONFLICT',message:'Local asset facts or bytes changed'},
+        selection: {code:'IMPACT_STALE',message:'Actual source, selection, native plan or rights changed'},
         expiry: {code:'IMPACT_STALE',message:'The impact has expired'},
         closure: {code:'IMPACT_STALE',message:'Current creative input closure differs'},
       } as const;
-      await expect(f.workflow.decideReview(f.request,f.ui)).rejects.toMatchObject(expected[field]);
+      let failure: unknown;
+      try { await f.workflow.decideReview(f.request,f.ui); } catch (error) { failure = error; }
       expect(await f.repo.transaction(tx=>tx.list('approval',{project_id:f.projectId,run_id:f.execution.run_id}))).toEqual([]);
       expect(await f.repo.transaction(tx=>tx.get('review_request',{project_id:f.projectId,run_id:f.execution.run_id,review_id:f.request.package_id})?.state)).toBe('pending');
       expect(await d09SourceDescriptors(roots)).toEqual(before);
       expect(f.host.revisions.activeCommit(f.projectId)!.revision).toBe(1);
+      expect(failure).toMatchObject(expected[field]);
     } finally {await f.close();}
   },120000);
 

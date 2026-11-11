@@ -1,0 +1,18 @@
+{
+  "status": "QUEUED_NOT_GRANTED",
+  "implementation_base": "10d97994df80ebc8e2ad95aaeba912709690b345",
+  "command": [
+    "pnpm",
+    "exec",
+    "tsc",
+    "--noEmit"
+  ],
+  "exit_code": 0,
+  "sha256": {
+    "src/host/agent-driven/created-run-authority.ts": "19cdee1468deb63740bff6eedf0e676766897b13045bad2bedfcf0d616cee220",
+    "src/host/creative/fixed-workflow-service.ts": "e0a2718b1a98aa0fcaa5d2150dca0aa25614b655b2c89a9a3408abd7ecb86e7f",
+    "src/host/creative/product-repository.ts": "803ec45b79c24ce75af096ff2e93995f40e1777ae80ec5f29d835fcd8b2a8394",
+    "tests/agent-driven/integration/created-run-authority.test.ts": "3a9c8f1002f6f363c55907db5912ea0222231754cc3a1f5bc5a01ebd2eb228d2"
+  },
+  "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}
