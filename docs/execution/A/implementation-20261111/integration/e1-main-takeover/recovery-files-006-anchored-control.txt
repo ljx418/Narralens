@@ -1,0 +1,68 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:2024372) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/agent-driven/integration/created-publication-recovery-files.test.ts (22 tests | 5 failed | 17 skipped) 1744ms
+   ↓ inspects and durably restores the complete original from original without business writes
+   ↓ inspects and durably restores the complete original from rename_gap without business writes
+   ↓ inspects and durably restores the complete original from published without business writes
+   ↓ inspects and durably restores the complete original from rollback_gap without business writes
+   ↓ inspects and durably restores the complete original from restored without business writes
+   ↓ inspects and durably restores the complete original from original_missing_stage without business writes
+   ↓ reopens actual renamed trees after compensation itself is interrupted at after_target_quarantined
+   ↓ reopens actual renamed trees after compensation itself is interrupted at after_original_restored
+   ↓ reopens actual renamed trees after compensation itself is interrupted at after_fsync
+   × rejects same-byte substituted original file without moving either source 387ms
+     → promise resolved "{ transaction_id: 'txn_recovery' }" instead of rejecting
+   × rejects same-byte substituted target file without moving either source 332ms
+     → promise resolved "{ transaction_id: 'txn_recovery' }" instead of rejecting
+   × rejects same-byte substituted snapshot file without moving either source 350ms
+     → promise resolved "{ transaction_id: 'txn_recovery' }" instead of rejecting
+   × rejects same-byte substituted snapshot tree without moving either source 345ms
+     → promise resolved "{ transaction_id: 'txn_recovery' }" instead of rejecting
+   × rejects same-byte substituted snapshot container without moving either source 329ms
+     → promise resolved "{ transaction_id: 'txn_recovery' }" instead of rejecting
+   ↓ rejects symlink escape, fabricated lease and released authority
+   ↓ refuses restoration after the database committed, without changing either source
+   ↓ rejects an owner-marker mismatch before changing source
+   ↓ rejects an added workspace entry at the synchronous abort guard
+   ↓ waits for its own in-flight movement before close, leaving a restartable rollback gap
+   ↓ rejects a forged journal root with the original immutable schema restored
+   ↓ rejects a changed active base without resetting the pending transaction
+   ↓ preserves the primary inspection failure and attempts every acquired resource on cleanup failure
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/created-publication-recovery-files.test.ts > rejects same-byte substituted original file without moving either source
+ FAIL  tests/agent-driven/integration/created-publication-recovery-files.test.ts > rejects same-byte substituted target file without moving either source
+ FAIL  tests/agent-driven/integration/created-publication-recovery-files.test.ts > rejects same-byte substituted snapshot file without moving either source
+ FAIL  tests/agent-driven/integration/created-publication-recovery-files.test.ts > rejects same-byte substituted snapshot tree without moving either source
+ FAIL  tests/agent-driven/integration/created-publication-recovery-files.test.ts > rejects same-byte substituted snapshot container without moving either source
+AssertionError: promise resolved "{ transaction_id: 'txn_recovery' }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "transaction_id": "txn_recovery",
+  }
+
+ ❯ tests/agent-driven/integration/created-publication-recovery-files.test.ts:99:46
+     97|  if(role==='snapshot tree'){await rename(f.snapshot,f.snapshot+'-old')…
+     98|  if(role==='snapshot container'){await rename(f.container,f.container+…
+     99|  await expect(f.make().inspect(f.transaction)).rejects.toThrow();expec…
+       |                                              ^
+    100|  expect(await f.digest(f.author)).toBe(f.targetDigest);expect(await f.…
+    101| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  5 failed | 17 skipped (22)
+   Start at  07:39:19
+   Duration  6.27s (transform 810ms, setup 0ms, collect 2.77s, tests 1.74s, environment 0ms, prepare 1.16s)
+

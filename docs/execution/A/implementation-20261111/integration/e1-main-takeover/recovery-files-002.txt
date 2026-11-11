@@ -1,0 +1,31 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:2012636) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/created-publication-recovery-files.test.ts (19 tests) 6981ms
+   ✓ inspects and durably restores the complete original from original without business writes  428ms
+   ✓ inspects and durably restores the complete original from rename_gap without business writes  383ms
+   ✓ inspects and durably restores the complete original from published without business writes  393ms
+   ✓ inspects and durably restores the complete original from rollback_gap without business writes  386ms
+   ✓ inspects and durably restores the complete original from restored without business writes  361ms
+   ✓ inspects and durably restores the complete original from original_missing_stage without business writes  381ms
+   ✓ reopens actual renamed trees after compensation itself is interrupted at after_target_quarantined  372ms
+   ✓ reopens actual renamed trees after compensation itself is interrupted at after_original_restored  399ms
+   ✓ reopens actual renamed trees after compensation itself is interrupted at after_fsync  391ms
+   ✓ rejects same-byte substituted original file without moving either source  334ms
+   ✓ rejects same-byte substituted target file without moving either source  322ms
+   ✓ rejects same-byte substituted snapshot file without moving either source  339ms
+   ✓ rejects same-byte substituted snapshot tree without moving either source  385ms
+   ✓ rejects same-byte substituted snapshot container without moving either source  351ms
+   ✓ rejects symlink escape, fabricated lease and released authority  366ms
+   ✓ refuses restoration after the database committed, without changing either source  338ms
+   ✓ rejects owner-marker or journal path forgery before changing source  323ms
+   ✓ rejects an added workspace entry at the synchronous abort guard  351ms
+   ✓ waits for its own in-flight movement before close, leaving a restartable rollback gap  377ms
+
+ Test Files  1 passed (1)
+      Tests  19 passed (19)
+   Start at  07:31:45
+   Duration  11.35s (transform 788ms, setup 0ms, collect 2.67s, tests 6.98s, environment 0ms, prepare 1.13s)
+

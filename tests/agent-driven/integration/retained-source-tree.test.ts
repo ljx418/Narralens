@@ -61,3 +61,20 @@ it('distinguishes a freshly opened same-byte replacement from the persisted file
  expect(fresh.identity().files[0]?.ino).not.toBe(before.files[0]?.ino);
  expect(()=>f.guard.identity()).toThrow(/identity changed/);
 });
+
+
+it('moves through retained parents and syncs them without releasing identity',async()=>{
+ const f=await fixture(),parent=new RetainedSourceTree(f.root,[],false),before=f.guard.identity();cleanup.push(async()=>parent.close());
+ f.guard.moveTo(f.backup,parent);parent.syncDirectory();expect(f.guard.identity()).toEqual(before);expect(f.guard.root).toBe(f.backup);
+ expect(await readFile(join(f.backup,'film.html'))).toEqual(f.bytes);
+});
+it('refuses even an empty existing destination instead of replacing its identity',async()=>{
+ const f=await fixture(),parent=new RetainedSourceTree(f.root,[],false);cleanup.push(async()=>parent.close());await mkdir(f.backup);
+ const identity=parent.directoryIdentity(f.root);expect(()=>f.guard.moveTo(f.backup,parent)).toThrow(/already exists/);
+ expect(await readFile(join(f.source,'film.html'))).toEqual(f.bytes);expect(parent.directoryIdentity(f.root)).toEqual(identity);
+});
+it('refuses wrong parent, read-only partial source and released sync operations',async()=>{
+ const f=await fixture(),parent=new RetainedSourceTree(f.root,[],false);cleanup.push(async()=>parent.close());
+ expect(()=>f.guard.moveTo(join(f.root,'nested','target'),parent)).toThrow(/Invalid/);
+ expect(()=>parent.moveTo(f.backup,parent)).toThrow(/Invalid/);parent.close();expect(()=>parent.syncDirectory()).toThrow(/released/);
+});

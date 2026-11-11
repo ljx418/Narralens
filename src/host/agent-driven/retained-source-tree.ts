@@ -1,5 +1,5 @@
 import {createHash} from 'node:crypto';
-import {constants,openSync,closeSync,lstatSync,realpathSync,fstatSync,readdirSync,readSync,type BigIntStats} from 'node:fs';
+import {constants,openSync,closeSync,renameSync,fsyncSync,lstatSync,realpathSync,fstatSync,readdirSync,readSync,type BigIntStats} from 'node:fs';
 import {dirname,basename,resolve,sep} from 'node:path';
 import {canonicalDigest} from '../creative/digest.js';
 import {ProductError} from '../creative/trusted-context.js';
@@ -53,6 +53,31 @@ export class RetainedSourceTree {
     for(const [path] of entries)if(path===previous||path.startsWith(previous+sep))this.#dirs.delete(path);
     for(const [path,value] of entries)if(path===previous||path.startsWith(previous+sep))this.#dirs.set(nextRoot+path.slice(previous.length),value);
     this.#root=nextRoot;this.#directory(dirname(nextRoot));this.verify();
+  }
+  /** Host-only whole-tree move between already retained parent descriptors.
+   * No asynchronous pathname lookup may redirect an ancestor to a foreign project.
+   * Caller still owns the original queue/runtime lock; this is not write authorization.
+   */
+  moveTo(nextRoot:string,destinationParent:RetainedSourceTree):void {
+    if(!this.whole||resolve(nextRoot)!==nextRoot||dirname(nextRoot)!==destinationParent.root
+      ||nextRoot===this.#root||destinationParent.root===this.#root||destinationParent.root.startsWith(this.#root+sep))
+      fail('REVISION_CONFLICT','Invalid retained tree move');
+    this.verify();destinationParent.verify();
+    const source=this.#dirs.get(dirname(this.#root)),target=destinationParent.#dirs.get(destinationParent.root);
+    if(!source||!target||fstatSync(source.fd,{bigint:true}).dev!==fstatSync(target.fd,{bigint:true}).dev)
+      fail('REVISION_CONFLICT','Retained rename requires the same filesystem');
+    const from=`/proc/self/fd/${source.fd}/${basename(this.#root)}`,to=`/proc/self/fd/${target.fd}/${basename(nextRoot)}`;
+    try{lstatSync(to);fail('REVISION_CONFLICT','Retained move destination already exists');}
+    catch(error){if((error as NodeJS.ErrnoException).code!=='ENOENT')throw error;}
+    // One synchronous syscall with descriptor-anchored parents. All legitimate
+    // writers are serialized by the caller; external same-UID mutation is not a lock.
+    renameSync(from,to);this.relocatedTo(nextRoot);
+  }
+  /** Directory durability over the original retained descriptor, not a reopened name. */
+  syncDirectory():void {
+    this.verify();const directory=this.#dirs.get(this.#root);
+    if(!directory)fail('REVISION_CONFLICT','Retained root missing');
+    fsyncSync(directory.fd);this.verify();
   }
   #directory(path:string):{fd:number;identity:string} {
     const old=this.#dirs.get(path);if(old)return old;

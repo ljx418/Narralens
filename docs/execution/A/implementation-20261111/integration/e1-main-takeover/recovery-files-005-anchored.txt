@@ -1,0 +1,40 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:2021108) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/created-publication-recovery-files.test.ts (22 tests) 8377ms
+   ✓ inspects and durably restores the complete original from original without business writes  668ms
+   ✓ inspects and durably restores the complete original from rename_gap without business writes  379ms
+   ✓ inspects and durably restores the complete original from published without business writes  391ms
+   ✓ inspects and durably restores the complete original from rollback_gap without business writes  384ms
+   ✓ inspects and durably restores the complete original from restored without business writes  370ms
+   ✓ inspects and durably restores the complete original from original_missing_stage without business writes  359ms
+   ✓ reopens actual renamed trees after compensation itself is interrupted at after_target_quarantined  367ms
+   ✓ reopens actual renamed trees after compensation itself is interrupted at after_original_restored  383ms
+   ✓ reopens actual renamed trees after compensation itself is interrupted at after_fsync  403ms
+   ✓ rejects same-byte substituted original file without moving either source  347ms
+   ✓ rejects same-byte substituted target file without moving either source  340ms
+   ✓ rejects same-byte substituted snapshot file without moving either source  343ms
+   ✓ rejects same-byte substituted snapshot tree without moving either source  407ms
+   ✓ rejects same-byte substituted snapshot container without moving either source  328ms
+   ✓ rejects symlink escape, fabricated lease and released authority  354ms
+   ✓ refuses restoration after the database committed, without changing either source  343ms
+   ✓ rejects an owner-marker mismatch before changing source  345ms
+   ✓ rejects an added workspace entry at the synchronous abort guard  395ms
+   ✓ waits for its own in-flight movement before close, leaving a restartable rollback gap  406ms
+   ✓ rejects a forged journal root with the original immutable schema restored  363ms
+   ✓ rejects a changed active base without resetting the pending transaction  359ms
+   ✓ preserves the primary inspection failure and attempts every acquired resource on cleanup failure  338ms
+(node:2022303) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/created-publication-identity-store.test.ts (15 tests) 4595ms
+   ✓ requires the existing journal transaction and rolls back with its owner  899ms
+   ✓ rejects invalid wrong snapshot without storing a resource fact  1154ms
+ ✓ tests/agent-driven/integration/retained-source-tree.test.ts (10 tests) 35ms
+
+ Test Files  3 passed (3)
+      Tests  47 passed (47)
+   Start at  07:37:57
+   Duration  25.16s (transform 997ms, setup 0ms, collect 5.63s, tests 13.01s, environment 0ms, prepare 4.21s)
+

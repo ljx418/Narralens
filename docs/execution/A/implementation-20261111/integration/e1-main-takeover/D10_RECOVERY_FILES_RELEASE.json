@@ -1,0 +1,29 @@
+{
+  "format": "narralens.main-component-release@1",
+  "owner": "MAIN",
+  "base": "b0238ebff566d504002089d66d80d76cdaaf73e9",
+  "scope": "Actual prepared created-publication location/retained-identity inspection and restartable complete-source compensation; no new business state/proof",
+  "basis": "Accepted RD01..06 design and implemented atomic Publisher identity+journal",
+  "paths": [
+    "src/host/agent-driven/created-publication-recovery-files.ts",
+    "tests/agent-driven/integration/created-publication-recovery-files.test.ts",
+    "src/host/agent-driven/retained-source-tree.ts",
+    "tests/agent-driven/integration/retained-source-tree.test.ts"
+  ],
+  "requirements": [
+    "Roots from fixed Host configuration/project id and original creation owner identity, never arbitrary journal author roots",
+    "Exact original/target/snapshot/container persisted identities plus full actual bytes/source digests",
+    "Only prepared original transaction at current committed base; no committed/attention resets",
+    "Fixed rollback-target intermediate, retain both original and target, fsync parents, repeatable after compensation interruption",
+    "All retained resources owned/closed on every exit and uncertain cleanup stays explicit",
+    "No schema/public DTO/authorization weakening or startup/route enablement"
+  ],
+  "verification": [
+    "All declared real file location states and two-rename compensation restarts",
+    "Same-byte inode substitution, symlink/path/wrongproject/forgedlease/digest drift failclosed",
+    "Same original SQLite facts, no revision/pointer/approval changes by file helper",
+    "Real fsync/rename and cleanup; SIGKILL business closure separatelyNOT_RUN"
+  ],
+  "status": "RELEASED_EXACT_SCOPE",
+  "scope_addendum": "MAIN self-review: recovery rename/fsync must use original retained parent descriptors, with no asynchronous pathname substitution gap; add Host-only complete-tree move and directory sync primitives, preserving existing behavior"
+}

@@ -1,0 +1,208 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:2011149) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/agent-driven/integration/created-publication-recovery-files.test.ts (19 tests | 19 failed) 4332ms
+   × inspects and durably restores the complete original from original without business writes 257ms
+     → Created impact and its immutable plan disagree
+   × inspects and durably restores the complete original from rename_gap without business writes 224ms
+     → Created impact and its immutable plan disagree
+   × inspects and durably restores the complete original from published without business writes 227ms
+     → Created impact and its immutable plan disagree
+   × inspects and durably restores the complete original from rollback_gap without business writes 225ms
+     → Created impact and its immutable plan disagree
+   × inspects and durably restores the complete original from restored without business writes 229ms
+     → Created impact and its immutable plan disagree
+   × inspects and durably restores the complete original from original_missing_stage without business writes 228ms
+     → Created impact and its immutable plan disagree
+   × reopens actual renamed trees after compensation itself is interrupted at after_target_quarantined 233ms
+     → Created impact and its immutable plan disagree
+   × reopens actual renamed trees after compensation itself is interrupted at after_original_restored 218ms
+     → Created impact and its immutable plan disagree
+   × reopens actual renamed trees after compensation itself is interrupted at after_fsync 220ms
+     → Created impact and its immutable plan disagree
+   × rejects same-byte substituted original file without moving either source 223ms
+     → Created impact and its immutable plan disagree
+   × rejects same-byte substituted target file without moving either source 221ms
+     → Created impact and its immutable plan disagree
+   × rejects same-byte substituted snapshot file without moving either source 221ms
+     → Created impact and its immutable plan disagree
+   × rejects same-byte substituted snapshot tree without moving either source 229ms
+     → Created impact and its immutable plan disagree
+   × rejects same-byte substituted snapshot container without moving either source 220ms
+     → Created impact and its immutable plan disagree
+   × rejects symlink escape, fabricated lease and released authority 215ms
+     → Created impact and its immutable plan disagree
+   × refuses restoration after the database committed, without changing either source 213ms
+     → Created impact and its immutable plan disagree
+   × rejects owner-marker or journal path forgery before changing source 218ms
+     → Created impact and its immutable plan disagree
+   × rejects an added workspace entry at the synchronous abort guard 290ms
+     → Created impact and its immutable plan disagree
+   × waits for its own in-flight movement before close, leaving a restartable rollback gap 220ms
+     → Created impact and its immutable plan disagree
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 19 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/created-publication-recovery-files.test.ts > inspects and durably restores the complete original from original without business writes
+ FAIL  tests/agent-driven/integration/created-publication-recovery-files.test.ts > inspects and durably restores the complete original from rename_gap without business writes
+ FAIL  tests/agent-driven/integration/created-publication-recovery-files.test.ts > inspects and durably restores the complete original from published without business writes
+ FAIL  tests/agent-driven/integration/created-publication-recovery-files.test.ts > inspects and durably restores the complete original from rollback_gap without business writes
+ FAIL  tests/agent-driven/integration/created-publication-recovery-files.test.ts > inspects and durably restores the complete original from restored without business writes
+ FAIL  tests/agent-driven/integration/created-publication-recovery-files.test.ts > inspects and durably restores the complete original from original_missing_stage without business writes
+CreatedImpactError: Created impact and its immutable plan disagree
+ ❯ fail src/host/agent-driven/created-source-impact-store.ts:136:9
+    134| 
+    135| function fail(code: CreatedImpactError['code'], message: string): neve…
+    136|   throw new CreatedImpactError(code, message);
+       |         ^
+    137| }
+    138| 
+ ❯ CreatedSourceImpactStore.insertInTransaction src/host/agent-driven/created-source-impact-store.ts:370:7
+ ❯ src/host/agent-driven/created-source-impact-store.ts:356:46
+ ❯ RevisionStore.atomic src/host/projects/revision-store.ts:437:22
+ ❯ CreatedSourceImpactStore.create src/host/agent-driven/created-source-impact-store.ts:356:28
+ ❯ fixture tests/agent-driven/integration/created-publication-recovery-files.test.ts:57:10
+ ❯ tests/agent-driven/integration/created-publication-recovery-files.test.ts:82:10
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/19]⎯
+
+ FAIL  tests/agent-driven/integration/created-publication-recovery-files.test.ts > reopens actual renamed trees after compensation itself is interrupted at after_target_quarantined
+ FAIL  tests/agent-driven/integration/created-publication-recovery-files.test.ts > reopens actual renamed trees after compensation itself is interrupted at after_original_restored
+ FAIL  tests/agent-driven/integration/created-publication-recovery-files.test.ts > reopens actual renamed trees after compensation itself is interrupted at after_fsync
+CreatedImpactError: Created impact and its immutable plan disagree
+ ❯ fail src/host/agent-driven/created-source-impact-store.ts:136:9
+    134| 
+    135| function fail(code: CreatedImpactError['code'], message: string): neve…
+    136|   throw new CreatedImpactError(code, message);
+       |         ^
+    137| }
+    138| 
+ ❯ CreatedSourceImpactStore.insertInTransaction src/host/agent-driven/created-source-impact-store.ts:370:7
+ ❯ src/host/agent-driven/created-source-impact-store.ts:356:46
+ ❯ RevisionStore.atomic src/host/projects/revision-store.ts:437:22
+ ❯ CreatedSourceImpactStore.create src/host/agent-driven/created-source-impact-store.ts:356:28
+ ❯ fixture tests/agent-driven/integration/created-publication-recovery-files.test.ts:57:10
+ ❯ tests/agent-driven/integration/created-publication-recovery-files.test.ts:90:10
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/19]⎯
+
+ FAIL  tests/agent-driven/integration/created-publication-recovery-files.test.ts > rejects same-byte substituted original file without moving either source
+ FAIL  tests/agent-driven/integration/created-publication-recovery-files.test.ts > rejects same-byte substituted target file without moving either source
+ FAIL  tests/agent-driven/integration/created-publication-recovery-files.test.ts > rejects same-byte substituted snapshot file without moving either source
+ FAIL  tests/agent-driven/integration/created-publication-recovery-files.test.ts > rejects same-byte substituted snapshot tree without moving either source
+ FAIL  tests/agent-driven/integration/created-publication-recovery-files.test.ts > rejects same-byte substituted snapshot container without moving either source
+CreatedImpactError: Created impact and its immutable plan disagree
+ ❯ fail src/host/agent-driven/created-source-impact-store.ts:136:9
+    134| 
+    135| function fail(code: CreatedImpactError['code'], message: string): neve…
+    136|   throw new CreatedImpactError(code, message);
+       |         ^
+    137| }
+    138| 
+ ❯ CreatedSourceImpactStore.insertInTransaction src/host/agent-driven/created-source-impact-store.ts:370:7
+ ❯ src/host/agent-driven/created-source-impact-store.ts:356:46
+ ❯ RevisionStore.atomic src/host/projects/revision-store.ts:437:22
+ ❯ CreatedSourceImpactStore.create src/host/agent-driven/created-source-impact-store.ts:356:28
+ ❯ fixture tests/agent-driven/integration/created-publication-recovery-files.test.ts:57:10
+ ❯ tests/agent-driven/integration/created-publication-recovery-files.test.ts:96:10
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/19]⎯
+
+ FAIL  tests/agent-driven/integration/created-publication-recovery-files.test.ts > rejects symlink escape, fabricated lease and released authority
+CreatedImpactError: Created impact and its immutable plan disagree
+ ❯ fail src/host/agent-driven/created-source-impact-store.ts:136:9
+    134| 
+    135| function fail(code: CreatedImpactError['code'], message: string): neve…
+    136|   throw new CreatedImpactError(code, message);
+       |         ^
+    137| }
+    138| 
+ ❯ CreatedSourceImpactStore.insertInTransaction src/host/agent-driven/created-source-impact-store.ts:370:7
+ ❯ src/host/agent-driven/created-source-impact-store.ts:356:46
+ ❯ RevisionStore.atomic src/host/projects/revision-store.ts:437:22
+ ❯ CreatedSourceImpactStore.create src/host/agent-driven/created-source-impact-store.ts:356:28
+ ❯ fixture tests/agent-driven/integration/created-publication-recovery-files.test.ts:57:10
+ ❯ tests/agent-driven/integration/created-publication-recovery-files.test.ts:105:10
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/19]⎯
+
+ FAIL  tests/agent-driven/integration/created-publication-recovery-files.test.ts > refuses restoration after the database committed, without changing either source
+CreatedImpactError: Created impact and its immutable plan disagree
+ ❯ fail src/host/agent-driven/created-source-impact-store.ts:136:9
+    134| 
+    135| function fail(code: CreatedImpactError['code'], message: string): neve…
+    136|   throw new CreatedImpactError(code, message);
+       |         ^
+    137| }
+    138| 
+ ❯ CreatedSourceImpactStore.insertInTransaction src/host/agent-driven/created-source-impact-store.ts:370:7
+ ❯ src/host/agent-driven/created-source-impact-store.ts:356:46
+ ❯ RevisionStore.atomic src/host/projects/revision-store.ts:437:22
+ ❯ CreatedSourceImpactStore.create src/host/agent-driven/created-source-impact-store.ts:356:28
+ ❯ fixture tests/agent-driven/integration/created-publication-recovery-files.test.ts:57:10
+ ❯ tests/agent-driven/integration/created-publication-recovery-files.test.ts:111:10
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/19]⎯
+
+ FAIL  tests/agent-driven/integration/created-publication-recovery-files.test.ts > rejects owner-marker or journal path forgery before changing source
+CreatedImpactError: Created impact and its immutable plan disagree
+ ❯ fail src/host/agent-driven/created-source-impact-store.ts:136:9
+    134| 
+    135| function fail(code: CreatedImpactError['code'], message: string): neve…
+    136|   throw new CreatedImpactError(code, message);
+       |         ^
+    137| }
+    138| 
+ ❯ CreatedSourceImpactStore.insertInTransaction src/host/agent-driven/created-source-impact-store.ts:370:7
+ ❯ src/host/agent-driven/created-source-impact-store.ts:356:46
+ ❯ RevisionStore.atomic src/host/projects/revision-store.ts:437:22
+ ❯ CreatedSourceImpactStore.create src/host/agent-driven/created-source-impact-store.ts:356:28
+ ❯ fixture tests/agent-driven/integration/created-publication-recovery-files.test.ts:57:10
+ ❯ tests/agent-driven/integration/created-publication-recovery-files.test.ts:116:10
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/19]⎯
+
+ FAIL  tests/agent-driven/integration/created-publication-recovery-files.test.ts > rejects an added workspace entry at the synchronous abort guard
+CreatedImpactError: Created impact and its immutable plan disagree
+ ❯ fail src/host/agent-driven/created-source-impact-store.ts:136:9
+    134| 
+    135| function fail(code: CreatedImpactError['code'], message: string): neve…
+    136|   throw new CreatedImpactError(code, message);
+       |         ^
+    137| }
+    138| 
+ ❯ CreatedSourceImpactStore.insertInTransaction src/host/agent-driven/created-source-impact-store.ts:370:7
+ ❯ src/host/agent-driven/created-source-impact-store.ts:356:46
+ ❯ RevisionStore.atomic src/host/projects/revision-store.ts:437:22
+ ❯ CreatedSourceImpactStore.create src/host/agent-driven/created-source-impact-store.ts:356:28
+ ❯ fixture tests/agent-driven/integration/created-publication-recovery-files.test.ts:57:10
+ ❯ tests/agent-driven/integration/created-publication-recovery-files.test.ts:120:10
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/19]⎯
+
+ FAIL  tests/agent-driven/integration/created-publication-recovery-files.test.ts > waits for its own in-flight movement before close, leaving a restartable rollback gap
+CreatedImpactError: Created impact and its immutable plan disagree
+ ❯ fail src/host/agent-driven/created-source-impact-store.ts:136:9
+    134| 
+    135| function fail(code: CreatedImpactError['code'], message: string): neve…
+    136|   throw new CreatedImpactError(code, message);
+       |         ^
+    137| }
+    138| 
+ ❯ CreatedSourceImpactStore.insertInTransaction src/host/agent-driven/created-source-impact-store.ts:370:7
+ ❯ src/host/agent-driven/created-source-impact-store.ts:356:46
+ ❯ RevisionStore.atomic src/host/projects/revision-store.ts:437:22
+ ❯ CreatedSourceImpactStore.create src/host/agent-driven/created-source-impact-store.ts:356:28
+ ❯ fixture tests/agent-driven/integration/created-publication-recovery-files.test.ts:57:10
+ ❯ tests/agent-driven/integration/created-publication-recovery-files.test.ts:124:10
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/19]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  19 failed (19)
+   Start at  07:30:35
+   Duration  10.48s (transform 1.44s, setup 0ms, collect 4.17s, tests 4.33s, environment 0ms, prepare 1.38s)
+
