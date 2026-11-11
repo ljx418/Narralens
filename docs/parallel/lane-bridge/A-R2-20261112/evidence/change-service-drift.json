@@ -1,0 +1,16 @@
+{
+  "format": "narralens.r2-change-service-drift@1",
+  "subject": "src/host/agent-driven/created-source-change-service.ts",
+  "state": "PROCESS_GAP_NOT_PROVEN_PREFREEZE_EDIT",
+  "acknowledgement": "The edit happened after the STOP ACK and after the parent's 'preserve 10-path fence' message, and before the 'keep hash unchanged' message. MAIN treats it as a process gap, not as a proven pre-freeze edit.",
+  "file_mtime_utc": "2026-11-11T17:19:13Z",
+  "current_sha256": "81249c77503bd20b1e52fa37756e8f80ec64248b3bb82c07f74ec12738e924a6",
+  "archived_copy": "docs/parallel/lane-bridge/A-R2-20261112/evidence/created-source-change-service-81249c77.ts",
+  "archived_copy_sha256": "81249c77503bd20b1e52fa37756e8f80ec64248b3bb82c07f74ec12738e924a6",
+  "original_observed_sha256": "0bf1c09f43d3369abb6d69f938675eb67b7657fab89589726b4b6f0aaedd89fc",
+  "original_bytes_recoverable": false,
+  "original_bytes_note": "The original 0bf1c09f bytes were hash-observed independently by the parent after the STOP ACK, but the bytes themselves were never captured in a patch or a snapshot. They are NOT reconstructed here and no chronology is invented.",
+  "difference": "One edit: the D09 plan's rights references now come from the facts port instead of being an always-empty array.",
+  "main_import": "MAIN imported only the immutable nine files of cfadc136; the untracked service file was not imported.",
+  "recorded_at": "2026-11-11T17:30:36.480150+00:00"
+}
