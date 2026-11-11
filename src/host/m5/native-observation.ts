@@ -498,13 +498,15 @@ export class NativeObservationService implements NativeContextPort, NativeObserv
   currentSelectionVersion(project_id: string): number {
     if (this.#closed) throw new Error('NATIVE_OBSERVATION_CLOSED');
     const session = this.#active.get(project_id);
+    // No session at all: nothing was ever observed, and the honest answer is 0.
     if (session === undefined || session.closed) return 0;
-    // The same liveness the observation path uses. A revoked session, a moved
-    // generation or a stale owner yields no current authority, and it never yields a
-    // stale cached number either: the session is void and the answer is 0.
+    // A session that is no longer current is *not* the same as one that never
+    // observed a selection. A revoked session, a moved generation or a stale owner
+    // has no authority to answer at all, and it must not be turned into a valid 0
+    // that a caller could mistake for an untouched selection.
     if (!this.#bindingCurrent(session)) {
       this.#closeSession(session, 'SESSION_STALE');
-      return 0;
+      throw new Error('NATIVE_OBSERVATION_SESSION_STALE');
     }
     return session.selectionVersion;
   }

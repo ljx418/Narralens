@@ -863,7 +863,7 @@ describe('the selection version port', () => {
 });
 
 describe("the selection version of a stale session", () => {
-  it("yields no current authority when the binding is no longer current", async () => {
+  it("rejects a session that is no longer current, and keeps it apart from one that never observed", async () => {
     const root = mkdtempSync(join(tmpdir(), 'narralens-r2-stale-'));
     try {
       const source = resolve(root, 'source');
@@ -889,7 +889,10 @@ describe("the selection version of a stale session", () => {
           }),
         },
       });
-      // The session starts live.
+      // A project with no session at all: nothing was observed, and 0 is the answer.
+      expect(service.currentSelectionVersion('p1')).toBe(0);
+
+      // A live session that has not observed a selection yet: also 0, and not a refusal.
       let live = true;
       const binding: NativeObservationSessionBinding = {
         bridge_session_id: 'c'.repeat(32),
@@ -904,6 +907,8 @@ describe("the selection version of a stale session", () => {
         isCurrent: () => live,
       };
       service.sessionOpened(binding);
+      expect(service.currentSelectionVersion('p1')).toBe(0);
+
       await service.observe(binding, {
         format: 'narralens.native-observation@1', sequence: 1, event_kind: 'selection',
         event: { projectId: 'n1', time: 1, refs: [{ kind: 'clip', id: 'shot1' }] },
@@ -912,7 +917,11 @@ describe("the selection version of a stale session", () => {
 
       // The generation moves, or the owner is revoked: the binding is no longer current.
       live = false;
-      // The version yields no current authority, and it never yields the stale number.
+      // The version refuses. It does not answer 0, because 0 is what a session that
+      // never observed a selection says, and the two must not be confused.
+      expect(() => service.currentSelectionVersion('p1')).toThrow('NATIVE_OBSERVATION_SESSION_STALE');
+      // The stale session is void, so the next answer is the honest one for a project
+      // with no session at all — and never the stale number.
       expect(service.currentSelectionVersion('p1')).toBe(0);
       // The session is void, so the context has no stale facts either.
       const facts = await service.read('p1');
