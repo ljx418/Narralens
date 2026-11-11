@@ -31,6 +31,7 @@ import type {
   QuestionAnswer,
   Ref,
   ReviewPackage,
+  ReviewDecisionInput,
   RunAuthorization,
   RunGate,
   RunScope,
@@ -1057,6 +1058,11 @@ export function isTrustedCallerContext(value: unknown): value is TrustedCallerCo
 }
 
 export interface TrustedAdoptionAuthority {
+  /** Host-only same-DB review scope. The concrete authority holds actual prepared
+   * read capabilities until the synchronous review/approval transaction completes. */
+  reviewTransaction?<T>(input: ReviewDecisionInput, caller: TrustedCallerContext,
+    work: (tx: ProductTransaction, preparedPlanDigest: string | null) => T): Promise<T>;
+
   /**
    * Registers the trusted confirmation for this exact action inside the caller's
    * transaction.
