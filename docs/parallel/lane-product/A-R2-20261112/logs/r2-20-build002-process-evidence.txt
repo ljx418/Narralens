@@ -1,0 +1,40 @@
+cwd=/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-PRODUCT
+subject=the granted build002 run: process, absence and state evidence
+grant=R2-PRODUCT-EXPECTED-BUILD-002
+argv=corepack pnpm exec tsx tools/agent-driven/product/build-native-hydration.ts --upstream /mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm --build
+tool=commit 24bd9b8bb866552f2aaec3308647945006ec887d, byte-identical at the run (verified with git diff against that commit and by hashing the blob and the worktree copy)
+run_window=2026-11-11T18:01:26+0000 to 2026-11-11T18:01:27+0000, as recorded in the run's own log
+exit=1
+failure=UNSET_NODE_PATH_REQUIRED, raised by the pinned build script's own guard
+dist=NOT_PRODUCED
+
+--- the frozen tree, before and after the run ---
+pre_head=dd8a3ea9f51b1c73e67c382b832380bd5d2ede5b
+post_head=dd8a3ea9f51b1c73e67c382b832380bd5d2ede5b
+pre_index_tree=ea407ad4dfede494d3f814b8f95e4f6cc940c583
+post_index_tree=ea407ad4dfede494d3f814b8f95e4f6cc940c583
+the head and the index tree are identical before and after, so the source and the index were frozen throughout the run
+
+--- the owned process tree, and its limitation ---
+The run lasted one second. The sampler that was started right after the run was launched observed only the shell processes of this workspace and no build process, which is consistent with a run that had already terminated; the sampler's raw output is kept. It is NOT evidence of the tree the run had while it was alive: I did not observe that tree, and I do not reconstruct one after the fact.
+sampler output, the unique processes it saw:
+  pid=1102029 ppid=1102028 start_ticks=3767924 comm=bash cwd=/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-PRODUCT cmd=/bin/bash --rcfile /mnt/c/Users/Administrator/AppData/Roaming/orca/shell-wrappers/3a5eddb4e912410d/shell-ready/bash/rcfile 
+  pid=1107024 ppid=1107023 start_ticks=3778733 comm=bash cwd=/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-PRODUCT cmd=/bin/bash --rcfile /mnt/c/Users/Administrator/AppData/Roaming/orca/shell-wrappers/3a5eddb4e912410d/shell-ready/bash/rcfile 
+  pid=1368071 ppid=1107051 start_ticks=4208672 comm=bash cwd=/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-PRODUCT cmd=/bin/bash -c source /home/administrator/.claude/shell-snapshots/snapshot-bash-1794415635834-qqa0st.sh 2>/dev/null || true && shopt -u extglob 2>/dev/null || true && { \bu
+  pid=671159 ppid=671154 start_ticks=2534466 comm=bash cwd=/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-PRODUCT cmd=/bin/bash --rcfile /mnt/c/Users/Administrator/AppData/Roaming/orca/shell-wrappers/3a5eddb4e912410d/shell-ready/bash/rcfile 
+  pid=925482 ppid=925481 start_ticks=3249950 comm=bash cwd=/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-PRODUCT cmd=/bin/bash --rcfile /mnt/c/Users/Administrator/AppData/Roaming/orca/shell-wrappers/3a5eddb4e912410d/shell-ready/bash/rcfile 
+
+--- the absence, observed after the run ---
+observed_at=2026-11-11T18:02:40+0000
+node|vite|esbuild|tsx processes with their cwd in this worktree or in the private runtime root:
+  NONE
+listening sockets owned by a node whose cwd is this worktree:
+  pid=1102251 cwd=/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-PRODUCT cmd=/home/administrator/.npm-global/lib/node_modules/@openai/codex/node_modules/@openai/codex-linux-x64/vendor/x86_64-unknown-linux-mu
+
+--- the cause, and the mechanism check ---
+The pinned build script refuses to run when NODE_PATH is set, and the runner that starts it sets NODE_PATH for its own module resolution. The presence was checked without reading any value: a plain node sees NODE_PATH unset, the same node under corepack pnpm exec sees it unset, and the same node under corepack pnpm exec tsx sees it set. The fix in the build tool hands the pinned script a child environment with the variable removed, and the mechanism was checked: the parent sees NODE_PATH set, the child sees it unset. The pinned script imports its dependency by an absolute path and needs nothing from the variable.
+
+--- what was NOT done ---
+no automatic retry, no Studio UI build, no Host run, no browser, no ffmpeg, no media, no full gate, no fixture generation, and no process of another lane was signalled or killed
+the earlier build001 failure and every artifact are preserved
+end=2026-11-11T18:02:41+0000

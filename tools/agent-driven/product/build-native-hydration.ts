@@ -375,7 +375,15 @@ function main(): void {
   }
   verifyPinnedToolchain();
   const script = resolve(expectedRoot, 'source/managed-expected/build-expected.mjs');
-  const output = execFileSync(process.execPath, [script], { cwd: resolve(expectedRoot, 'source'), encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
+  // The pinned build refuses to run with NODE_PATH set, and the runner that starts
+  // it sets NODE_PATH for its own module resolution. The child therefore gets the
+  // variable removed, which is exactly what the pinned script asks for; the pinned
+  // script imports its dependency by an absolute path and needs nothing from it.
+  const childEnv: NodeJS.ProcessEnv = { ...process.env };
+  delete childEnv.NODE_PATH;
+  const output = execFileSync(process.execPath, [script], {
+    cwd: resolve(expectedRoot, 'source'), env: childEnv, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024,
+  });
   const dist = resolve(expectedRoot, 'dist');
   const built: Record<string, string> = {};
   for (const name of readdirSync(dist)) {
