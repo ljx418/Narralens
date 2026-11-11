@@ -260,10 +260,10 @@ failures, their logs and their process evidence are in `logs/`, and neither was
 retried. The pinned 015 candidate is not
 built, so the helper under test in the unit cases is a local stand-in for the pinned
 API: the guards, the approval chain and the cleanup are what those cases prove, not the
-015 math. The three changes made after the last verified run — the epoch comparison, the
-expected states and the expected origins — are committed but their type check and unit
-run have not happened, because the slot handoff to the queued lane was pending when
-they were made.
+015 math. The three changes that were committed while the slot handoff was pending —
+the epoch comparison, the expected states and the expected origins — are verified now:
+the type check exits 0 and the unit round passes, with their boundaries in
+`logs/r2-21-tsc.txt` and `logs/r2-21-light-units.txt`.
 
 The unauthorized run of the M5 studio gateway suite, the first build failure and their
 process evidence are kept as they are, in `logs/`, and neither is re-run.
