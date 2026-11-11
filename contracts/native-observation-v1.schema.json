@@ -46,11 +46,25 @@
       "allOf": [
         {
           "if": { "properties": { "kind": { "const": "document_dom_committed" } }, "required": ["kind"] },
-          "then": { "required": ["native_rev", "film_sha256", "utf8_byte_length"] }
+          "then": {
+            "required": ["native_rev", "film_sha256", "utf8_byte_length"],
+            "properties": {
+              "native_rev": { "type": "string", "minLength": 1 },
+              "film_sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+              "utf8_byte_length": { "type": "integer", "minimum": 0 }
+            }
+          }
         },
         {
           "if": { "properties": { "kind": { "const": "invalidated" } }, "required": ["kind"] },
-          "then": { "required": ["reason"] }
+          "then": {
+            "required": ["reason"],
+            "properties": {
+              "reason": {
+                "enum": ["dirty", "refresh", "broken", "external_edit", "replaced", "hash_failed", "unmounted"]
+              }
+            }
+          }
         }
       ]
     },

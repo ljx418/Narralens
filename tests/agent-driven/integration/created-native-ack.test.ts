@@ -16,6 +16,7 @@ import {
   NATIVE_EXPECTED_UPSTREAM_SHA,
   OpenFilmNativeExpected,
   nativeExpectedInputsDigest,
+  nativeExpectedApprovalFromPin,
   nativeExpectedLibraryLoader,
   snapshotNativeExpectedBinding,
   type NativeExpectedBinding,
@@ -685,6 +686,7 @@ describe('the binding snapshot', () => {
  * ──────────────────────────────────────────────────────────────────────────────────── */
 
 import { pathToFileURL } from 'node:url';
+import Ajv2020 from 'ajv/dist/2020.js';
 import { NativeAckStore } from '../../../src/host/m5/native-ack-store.js';
 import { NativeObservationService, type NativeObservationSessionBinding } from '../../../src/host/m5/native-observation.js';
 import { ControlledStudioAccess, type NativeStudioGrant } from '../../../src/host/m5/controlled-studio-access.js';
@@ -1055,5 +1057,100 @@ describe("the controlled session and the observation binding", () => {
     const response = fakeResponse();
     await expect(access.exchange(request as never, response as never)).rejects.toThrow();
     expect(opened.length).toBe(0);
+  });
+});
+
+/**
+ * The shipped contract and the tracked pin.
+ *
+ * The contract file is the one the Gateway and the Host are bound to, so the cases
+ * below validate real envelopes and real events against it, and they check that the
+ * loader refuses a candidate that no review has approved.
+ */
+describe("the shipped native observation contract", () => {
+  const schema = JSON.parse(readFileSync(resolve("contracts/native-observation-v1.schema.json"), "utf8")) as Record<string, unknown>;
+  const ajv = new Ajv2020({ allErrors: true, strict: true });
+  ajv.addSchema(schema);
+  const schemaId = String((schema as { $id?: string }).$id ?? "");
+  const validateEnvelope = ajv.getSchema(schemaId);
+  if (validateEnvelope === undefined) throw new Error("MISSING_CONTRACT");
+  const validateEvent = (definition: string) => ajv.compile({
+    $id: `https://narralens.local/internal/native-observation-case-${definition}@1`,
+    $ref: `${schemaId}#/$defs/${definition}`,
+  });
+
+  const envelope = (event: unknown) => ({
+    format: "narralens.native-observation@1", sequence: 1, event_kind: "hydration", event,
+  });
+
+  it("accepts a closed envelope and refuses one that carries an identity", () => {
+    expect(validateEnvelope(envelope({ project_id: "n1" }))).toBe(true);
+    expect(validateEnvelope({ ...envelope({ project_id: "n1" }), project_id: "p1" })).toBe(false);
+    expect(validateEnvelope({ ...envelope({ project_id: "n1" }), session: "s" })).toBe(false);
+    expect(validateEnvelope({ format: "narralens.native-observation@2", sequence: 1, event_kind: "hydration", event: {} })).toBe(false);
+    expect(validateEnvelope({ format: "narralens.native-observation@1", sequence: 0, event_kind: "hydration", event: {} })).toBe(false);
+    expect(validateEnvelope({ format: "narralens.native-observation@1", sequence: 1, event_kind: "write", event: {} })).toBe(false);
+  });
+
+  it("accepts the three original event shapes and refuses the ones they forbid", () => {
+    const document = validateEvent("NativeDocumentObservation");
+    expect(document({
+      protocol_version: 1, kind: "document_dom_committed", project_id: "n1", editor_view_id: "v1",
+      document_epoch: 2, native_rev: "rev-1", film_sha256: "a".repeat(64), utf8_byte_length: 10,
+    })).toBe(true);
+    expect(document({
+      protocol_version: 1, kind: "document_dom_committed", project_id: "n1", editor_view_id: "v1",
+      document_epoch: 2, native_rev: "rev-1", film_sha256: "A".repeat(64), utf8_byte_length: 10,
+    })).toBe(false);
+
+    const hydration = validateEvent("NativeHydrationObservation");
+    const part = { state: "hydrated", origin: "project", effective_sha256: "a".repeat(64) };
+    expect(hydration({
+      project_id: "n1", editor_view_id: "v1", document_epoch: 2, hydration_epoch: 3,
+      parts: { settings: part, subtitle_style: part, captions: part, markers: part },
+    })).toBe(true);
+    // A browser preference is never a proof.
+    expect(hydration({
+      project_id: "n1", editor_view_id: "v1", document_epoch: 2, hydration_epoch: 3,
+      parts: {
+        settings: { state: "hydrated", origin: "browser_preference", effective_sha256: "a".repeat(64) },
+        subtitle_style: part, captions: part, markers: part,
+      },
+    })).toBe(false);
+
+    const selection = validateEvent("NativeSelectionObservation");
+    expect(selection({ projectId: "n1", time: 1.25, refs: [{ kind: "clip", id: "c1" }] })).toBe(true);
+    expect(selection({ projectId: "n1", time: 1.25, refs: [{ kind: "unknown" }] })).toBe(false);
+  });
+});
+
+describe("the tracked candidate pin", () => {
+  it("refuses the candidate until a review has approved it", () => {
+    // The pin that is in the repository carries no approval: the build has not run
+    // under a grant, so the loader must refuse rather than load anything.
+    expect(() => nativeExpectedApprovalFromPin()).toThrow("NATIVE_EXPECTED_BUILD_NOT_APPROVED");
+  });
+
+  it("reads an approval that a review has recorded", () => {
+    const root = mkdtempSync(join(tmpdir(), 'narralens-r2-pin-'));
+    try {
+      const path = resolve(root, 'pin.json');
+      writeFileSync(path, JSON.stringify({
+        native_expected: {
+          upstream_sha: NATIVE_EXPECTED_UPSTREAM_SHA,
+          inputs_sha256: "b".repeat(64),
+          build_sha256: "c".repeat(64),
+          modules: { 'expected-projection.mjs': "d".repeat(64) },
+          approval: "APPROVED",
+        },
+      }));
+      const approval = nativeExpectedApprovalFromPin(path);
+      expect(approval.upstream_sha).toBe(NATIVE_EXPECTED_UPSTREAM_SHA);
+      expect(approval.inputs_sha256).toBe("b".repeat(64));
+      expect(approval.build_sha256).toBe("c".repeat(64));
+      expect(approval.modules['expected-projection.mjs']).toBe("d".repeat(64));
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
   });
 });
