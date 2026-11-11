@@ -534,6 +534,13 @@ function assertNarrowEffect(
       details: { state: facts.run.state },
     });
   }
+  // The effect stands for one of the two ordinary actions, and it is checked the same
+  // way: the fixed stage has to allow the action, the action has to be inside the
+  // authorized scope, and the predecessor gates have to be accepted. Only the gate of
+  // the very package the effect is about is exempt.
+  const action: GuardedAction = effect.kind === "review_impact_prepare" ? "change.prepare" : "change.apply";
+  assertStageAndAction(binding.step_id, action, facts);
+  assertGates(binding.step_id, action, facts, effect.package_id);
   // The reviewed product is the only thing the effect may act on. A package of
   // another run, of another state, or with another digest is not this effect's.
   const narrow = facts.narrow;
@@ -636,10 +643,22 @@ function assertAttemptIdentity(facts: ExecutionGuardFacts, binding: ExecutionBin
   if (attempt.grant_id !== binding.authorization_id) {
     throw new ProductError("RUN_SCOPE_REQUIRED", "The attempt was made under another authorization");
   }
+  if (attempt.state === "stale") {
+    throw new ProductError("RUN_PLAN_STALE", "The attempt was superseded", {
+      details: { state: attempt.state },
+    });
+  }
 }
 
-function assertStageAndGates(effect: Extract<GuardedEffect, { kind: "action" }>, facts: ExecutionGuardFacts): void {
-  const stage = effect.stage_id;
+/**
+ * The stage and the action of an effect.
+ *
+ * It is the same check for the ordinary actions and for the two narrow ones: the
+ * effect has to belong to the durable step, the action has to be one the fixed stage
+ * allows, and the action has to be inside the authorized scope. A narrow effect is
+ * not a way around the fixed plan.
+ */
+function assertStageAndAction(stage: string, action: GuardedAction, facts: ExecutionGuardFacts): void {
   const allowed = A_STAGE_ACTIONS[stage];
   if (allowed === undefined) {
     throw new ProductError("CAPABILITY_UNAVAILABLE", "Unknown step for this workflow", {
@@ -649,20 +668,38 @@ function assertStageAndGates(effect: Extract<GuardedEffect, { kind: "action" }>,
   if (facts.attempt?.step_id !== stage) {
     throw new ProductError("RUN_PLAN_STALE", "The effect stage does not match the durable step");
   }
-  if (!allowed.includes(effect.action)) {
+  if (!allowed.includes(action)) {
     throw new ProductError("CAPABILITY_UNAVAILABLE", "This action does not belong to this step", {
-      details: { stage_id: stage, action: effect.action, allowed_actions: allowed },
+      details: { stage_id: stage, action, allowed_actions: allowed },
     });
   }
-  if (!facts.run.scope.allowed_actions.includes(effect.action)) {
+  if (!facts.run.scope.allowed_actions.includes(action)) {
     throw new ProductError("RUN_SCOPE_REQUIRED", "The action is outside the authorized scope", {
-      details: { action: effect.action, allowed_actions: facts.run.scope.allowed_actions },
+      details: { action, allowed_actions: facts.run.scope.allowed_actions },
     });
   }
+}
 
+/**
+ * The gates an effect depends on.
+ *
+ * `exemptPackageId` is the ONE gate that is not required to be accepted: the gate of
+ * the very product the effect is about. It is the gate the effect exists for, and it
+ * is pending by definition while the decision is being made.
+ *
+ * Every other gate has to be accepted, including one that belongs to another
+ * package. A predecessor that is pending or failed stops the effect, and so does an
+ * unrelated package's gate: the exemption is for the current product and nothing else.
+ */
+function assertGates(
+  stage: string,
+  action: GuardedAction,
+  facts: ExecutionGuardFacts,
+  exemptPackageId?: string,
+): void {
   const required = new Set<RunGate["kind"]>([
     ...(A_STAGE_GATE_REQUIREMENTS[stage] ?? []),
-    ...(A_ACTION_GATE_REQUIREMENTS[effect.action] ?? []),
+    ...(A_ACTION_GATE_REQUIREMENTS[action] ?? []),
   ]);
   for (const kind of required) {
     const gate = facts.gates.find((candidate) => candidate.kind === kind);
@@ -670,6 +707,9 @@ function assertStageAndGates(effect: Extract<GuardedEffect, { kind: "action" }>,
       throw new ProductError("RUN_GATE_BLOCKED", "The run has no gate for this step yet", {
         details: { stage_id: stage, gate_kind: kind },
       });
+    }
+    if (exemptPackageId !== undefined && gate.review_package_id === exemptPackageId) {
+      continue;
     }
     if (gate.state !== "accepted") {
       throw new ProductError("RUN_GATE_BLOCKED", "The step is still waiting for a review decision", {
@@ -682,6 +722,11 @@ function assertStageAndGates(effect: Extract<GuardedEffect, { kind: "action" }>,
       });
     }
   }
+}
+
+function assertStageAndGates(effect: Extract<GuardedEffect, { kind: "action" }>, facts: ExecutionGuardFacts): void {
+  assertStageAndAction(effect.stage_id, effect.action, facts);
+  assertGates(effect.stage_id, effect.action, facts);
 }
 
 /**

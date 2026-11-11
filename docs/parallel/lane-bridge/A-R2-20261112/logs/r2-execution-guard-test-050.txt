@@ -1,0 +1,423 @@
+command: corepack pnpm test tests/agent-driven/product/execution-guard.test.ts --maxWorkers=1 --minWorkers=1
+cwd: /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+started: 2026-11-11T18:20:36Z
+--- output ---
+
+> narralens@0.1.0 test /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+> vitest run --config vitest.config.ts tests/agent-driven/product/execution-guard.test.ts --maxWorkers=1 --minWorkers=1
+
+
+ RUN  v3.2.4 /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+
+ ❯ tests/agent-driven/product/execution-guard.test.ts (39 tests | 13 failed) 30ms
+   ✓ the execution guard > refuses future-issued or missing issuance facts, while cancellation stays available 7ms
+   ✓ the execution guard > refuses to authorize anything without the durable facts 0ms
+   ✓ the execution guard > allows an effect whose prerequisites are accepted 0ms
+   ✓ the execution guard > blocks a first chapter while the sample gate is not accepted 0ms
+   ✓ the execution guard > refuses a binding that belongs to another scope 0ms
+   ✓ the execution guard > refuses a scope that does not hash to the run's own digest 0ms
+   ✓ the execution guard > refuses an action the scope does not allow 0ms
+   ✓ the execution guard > refuses an action that is not one of the fixed actions 0ms
+   ✓ the execution guard > refuses an action that does not belong to the step 0ms
+   ✓ the execution guard > refuses an unknown step 0ms
+   ✓ the execution guard > refuses a caller-selected stage that differs from the durable step 0ms
+   ✓ the execution guard > permits scoped prepare/apply while leaving finite approval consumption to MAIN 0ms
+   ✓ the execution guard > refuses a scope that asks for a paid, external or runtime action 0ms
+   ✓ the execution guard > refuses a revoked or expired authorization 0ms
+   ✓ the execution guard > refuses an effect under another principal 0ms
+   ✓ the execution guard > refuses a stale attempt 0ms
+   ✓ the execution guard > refuses an attempt that is over 0ms
+   ✓ the execution guard > refuses a run that is paused, cancelled or waiting for a decision 0ms
+   ✓ the execution guard > keeps the safe controls available without a grant 0ms
+   ✓ the execution guard > refuses to pause a run that was already cancelled 0ms
+   ✓ the execution guard > refuses a binding without a plan version, an attempt or an authorization 0ms
+   ✓ the execution guard > never accepts a gate on its own 0ms
+   × the two narrow Host-only effects > prepares the impact of a product that is still waiting for a decision 5ms
+     → expected [Function] to not throw an error but 'ProductError: The authorization belon…' was thrown
+   × the two narrow Host-only effects > consumes an approval of an accepted product 1ms
+     → expected [Function] to not throw an error but 'ProductError: The authorization belon…' was thrown
+   × the two narrow Host-only effects > refuses an impact preparation for a package that was already decided 3ms
+     → expected error to match asymmetric matcher
+   × the two narrow Host-only effects > refuses an adoption whose product was not accepted 1ms
+     → expected error to match asymmetric matcher
+   × the two narrow Host-only effects > refuses an impact preparation for another package or another version 1ms
+     → expected error to match asymmetric matcher
+   × the two narrow Host-only effects > refuses a narrow effect whose facts were not read 1ms
+     → expected error to match asymmetric matcher
+   × the two narrow Host-only effects > refuses a narrow effect whose predecessor gate is not accepted 1ms
+     → expected error to match asymmetric matcher
+   ✓ the two narrow Host-only effects > refuses a narrow effect whose scope does not allow the action 0ms
+   × the two narrow Host-only effects > refuses a narrow effect at a stage that does not allow the action 0ms
+     → expected error to match asymmetric matcher
+   × the two narrow Host-only effects > refuses a narrow effect in a run that is paused, cancelled or stale 1ms
+     → expected error to match asymmetric matcher
+   ✓ the two narrow Host-only effects > does not widen the ordinary dispatch: an action is still refused while the run waits 0ms
+   × the two narrow Host-only effects > refuses an adoption whose approval or impact is not active 0ms
+     → expected error to match asymmetric matcher
+   × the two narrow Host-only effects > refuses an adoption whose approval names another impact 1ms
+     → expected error to match asymmetric matcher
+   × the two narrow Host-only effects > refuses an adoption without an approval or without an impact 0ms
+     → expected error to match asymmetric matcher
+   × the two narrow Host-only effects > refuses a narrow effect when the run has no gate for the reviewed package 1ms
+     → expected error to match asymmetric matcher
+   ✓ the narrow effect facts reader > reads the review and the approval out of the real records 1ms
+   ✓ the narrow effect facts reader > reports a record that is not there as nothing, not as a default 0ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 13 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/product/execution-guard.test.ts > the two narrow Host-only effects > prepares the impact of a product that is still waiting for a decision
+AssertionError: expected [Function] to not throw an error but 'ProductError: The authorization belon…' was thrown
+
+[32m- Expected:[39m 
+undefined
+
+[31m+ Received:[39m 
+"ProductError: The authorization belongs to a different scope"
+
+ ❯ tests/agent-driven/product/execution-guard.test.ts:363:90
+    361| 
+    362|   it("prepares the impact of a product that is still waiting for a dec…
+    363|     expect(() => guardExecution(NARROW_BINDING, PREPARE, withNarrow(na…
+       |                                                                                          ^
+    364|   });
+    365| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/13]⎯
+
+ FAIL  tests/agent-driven/product/execution-guard.test.ts > the two narrow Host-only effects > consumes an approval of an accepted product
+AssertionError: expected [Function] to not throw an error but 'ProductError: The authorization belon…' was thrown
+
+[32m- Expected:[39m 
+undefined
+
+[31m+ Received:[39m 
+"ProductError: The authorization belongs to a different scope"
+
+ ❯ tests/agent-driven/product/execution-guard.test.ts:367:110
+    365| 
+    366|   it("consumes an approval of an accepted product", () => {
+    367|     expect(() => guardExecution(NARROW_BINDING, ADOPT, withNarrow(narr…
+       |                                                                                                              ^
+    368|   });
+    369| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/13]⎯
+
+ FAIL  tests/agent-driven/product/execution-guard.test.ts > the two narrow Host-only effects > refuses an impact preparation for a package that was already decided
+AssertionError: expected error to match asymmetric matcher
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- ObjectContaining {[39m
+[32m-   "code": "REVIEW_STALE",[39m
+[31m+ ProductError {[39m
+[31m+   "message": "The authorization belongs to a different scope",[39m
+[31m+   "code": "RUN_SCOPE_REQUIRED",[39m
+[31m+   "http_status": 428,[39m
+[31m+   "retryable": false,[39m
+[31m+   "next_actions": [],[39m
+[31m+   "details": {},[39m
+[31m+   "name": "ProductError",[39m
+[2m  }[22m
+
+ ❯ tests/agent-driven/product/execution-guard.test.ts:375:10
+    373|     for (const state of ["accepted", "changes_requested", "rejected", …
+    374|       expect(() => guardExecution(NARROW_BINDING, PREPARE, withNarrow(…
+    375|         .toThrowError(expect.objectContaining({ code: "REVIEW_STALE" }…
+       |          ^
+    376|     }
+    377|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/13]⎯
+
+ FAIL  tests/agent-driven/product/execution-guard.test.ts > the two narrow Host-only effects > refuses an adoption whose product was not accepted
+AssertionError: expected error to match asymmetric matcher
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- ObjectContaining {[39m
+[32m-   "code": "REVIEW_STALE",[39m
+[31m+ ProductError {[39m
+[31m+   "message": "The authorization belongs to a different scope",[39m
+[31m+   "code": "RUN_SCOPE_REQUIRED",[39m
+[31m+   "http_status": 428,[39m
+[31m+   "retryable": false,[39m
+[31m+   "next_actions": [],[39m
+[31m+   "details": {},[39m
+[31m+   "name": "ProductError",[39m
+[2m  }[22m
+
+ ❯ tests/agent-driven/product/execution-guard.test.ts:384:10
+    382|     for (const state of ["pending", "changes_requested", "rejected", "…
+    383|       expect(() => guardExecution(NARROW_BINDING, ADOPT, withNarrow(na…
+    384|         .toThrowError(expect.objectContaining({ code: "REVIEW_STALE" }…
+       |          ^
+    385|     }
+    386|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/13]⎯
+
+ FAIL  tests/agent-driven/product/execution-guard.test.ts > the two narrow Host-only effects > refuses an impact preparation for another package or another version
+AssertionError: expected error to match asymmetric matcher
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- ObjectContaining {[39m
+[32m-   "code": "REVIEW_STALE",[39m
+[31m+ ProductError {[39m
+[31m+   "message": "The authorization belongs to a different scope",[39m
+[31m+   "code": "RUN_SCOPE_REQUIRED",[39m
+[31m+   "http_status": 428,[39m
+[31m+   "retryable": false,[39m
+[31m+   "next_actions": [],[39m
+[31m+   "details": {},[39m
+[31m+   "name": "ProductError",[39m
+[2m  }[22m
+
+ ❯ tests/agent-driven/product/execution-guard.test.ts:390:8
+    388|   it("refuses an impact preparation for another package or another ver…
+    389|     expect(() => guardExecution(NARROW_BINDING, { ...PREPARE, package_…
+    390|       .toThrowError(expect.objectContaining({ code: "REVIEW_STALE" }));
+       |        ^
+    391|     expect(() => guardExecution(NARROW_BINDING, { ...PREPARE, package_…
+    392|       .toThrowError(expect.objectContaining({ code: "REVIEW_STALE" }));
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/13]⎯
+
+ FAIL  tests/agent-driven/product/execution-guard.test.ts > the two narrow Host-only effects > refuses a narrow effect whose facts were not read
+AssertionError: expected error to match asymmetric matcher
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- ObjectContaining {[39m
+[32m-   "code": "REVIEW_STALE",[39m
+[31m+ ProductError {[39m
+[31m+   "message": "The authorization belongs to a different scope",[39m
+[31m+   "code": "RUN_SCOPE_REQUIRED",[39m
+[31m+   "http_status": 428,[39m
+[31m+   "retryable": false,[39m
+[31m+   "next_actions": [],[39m
+[31m+   "details": {},[39m
+[31m+   "name": "ProductError",[39m
+[2m  }[22m
+
+ ❯ tests/agent-driven/product/execution-guard.test.ts:397:8
+    395|   it("refuses a narrow effect whose facts were not read", () => {
+    396|     expect(() => guardExecution(NARROW_BINDING, PREPARE, withNarrow(un…
+    397|       .toThrowError(expect.objectContaining({ code: "REVIEW_STALE" }));
+       |        ^
+    398|     expect(() => guardExecution(NARROW_BINDING, PREPARE, withNarrow(nu…
+    399|       .toThrowError(expect.objectContaining({ code: "REVIEW_STALE" }));
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/13]⎯
+
+ FAIL  tests/agent-driven/product/execution-guard.test.ts > the two narrow Host-only effects > refuses a narrow effect whose predecessor gate is not accepted
+AssertionError: expected error to match asymmetric matcher
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- ObjectContaining {[39m
+[32m-   "code": "RUN_GATE_BLOCKED",[39m
+[31m+ ProductError {[39m
+[31m+   "message": "The authorization belongs to a different scope",[39m
+[31m+   "code": "RUN_SCOPE_REQUIRED",[39m
+[31m+   "http_status": 428,[39m
+[31m+   "retryable": false,[39m
+[31m+   "next_actions": [],[39m
+[31m+   "details": {},[39m
+[31m+   "name": "ProductError",[39m
+[2m  }[22m
+
+ ❯ tests/agent-driven/product/execution-guard.test.ts:410:12
+    408|       expect(() => guardExecution(NARROW_BINDING, PREPARE, withNarrow(…
+    409|         gates: [gate("definition", "accepted"), { ...gate("sample", st…
+    410|       }))).toThrowError(expect.objectContaining({ code: "RUN_GATE_BLOC…
+       |            ^
+    411|     }
+    412|     // A predecessor gate that belongs to ANOTHER package is not exemp…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/13]⎯
+
+ FAIL  tests/agent-driven/product/execution-guard.test.ts > the two narrow Host-only effects > refuses a narrow effect at a stage that does not allow the action
+AssertionError: expected error to match asymmetric matcher
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- ObjectContaining {[39m
+[32m-   "code": "CAPABILITY_UNAVAILABLE",[39m
+[31m+ ProductError {[39m
+[31m+   "message": "The authorization belongs to a different scope",[39m
+[31m+   "code": "RUN_SCOPE_REQUIRED",[39m
+[31m+   "http_status": 428,[39m
+[31m+   "retryable": false,[39m
+[31m+   "next_actions": [],[39m
+[31m+   "details": {},[39m
+[31m+   "name": "ProductError",[39m
+[2m  }[22m
+
+ ❯ tests/agent-driven/product/execution-guard.test.ts:446:8
+    444|     });
+    445|     expect(() => guardExecution({ ...NARROW_BINDING, step_id: "definit…
+    446|       .toThrowError(expect.objectContaining({ code: "CAPABILITY_UNAVAI…
+       |        ^
+    447|   });
+    448| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/13]⎯
+
+ FAIL  tests/agent-driven/product/execution-guard.test.ts > the two narrow Host-only effects > refuses a narrow effect in a run that is paused, cancelled or stale
+AssertionError: expected error to match asymmetric matcher
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- ObjectContaining {[39m
+[32m-   "code": "RUN_PLAN_STALE",[39m
+[31m+ ProductError {[39m
+[31m+   "message": "The authorization belongs to a different scope",[39m
+[31m+   "code": "RUN_SCOPE_REQUIRED",[39m
+[31m+   "http_status": 428,[39m
+[31m+   "retryable": false,[39m
+[31m+   "next_actions": [],[39m
+[31m+   "details": {},[39m
+[31m+   "name": "ProductError",[39m
+[2m  }[22m
+
+ ❯ tests/agent-driven/product/execution-guard.test.ts:452:10
+    450|     for (const state of ["paused", "cancelled", "failed", "blocked"] a…
+    451|       expect(() => guardExecution(NARROW_BINDING, PREPARE, withNarrow(…
+    452|         .toThrowError(expect.objectContaining({ code: "RUN_PLAN_STALE"…
+       |          ^
+    453|     }
+    454|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/13]⎯
+
+ FAIL  tests/agent-driven/product/execution-guard.test.ts > the two narrow Host-only effects > refuses an adoption whose approval or impact is not active
+AssertionError: expected error to match asymmetric matcher
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- ObjectContaining {[39m
+[32m-   "code": "APPROVAL_REQUIRED",[39m
+[31m+ ProductError {[39m
+[31m+   "message": "The authorization belongs to a different scope",[39m
+[31m+   "code": "RUN_SCOPE_REQUIRED",[39m
+[31m+   "http_status": 428,[39m
+[31m+   "retryable": false,[39m
+[31m+   "next_actions": [],[39m
+[31m+   "details": {},[39m
+[31m+   "name": "ProductError",[39m
+[2m  }[22m
+
+ ❯ tests/agent-driven/product/execution-guard.test.ts:470:10
+    468|     for (const approval of ["consumed", "rejected", "revoked"] as cons…
+    469|       expect(() => guardExecution(NARROW_BINDING, ADOPT, withNarrow(na…
+    470|         .toThrowError(expect.objectContaining({ code: "APPROVAL_REQUIR…
+       |          ^
+    471|     }
+    472|     for (const impact of ["consumed", "expired", "stale"] as const) {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/13]⎯
+
+ FAIL  tests/agent-driven/product/execution-guard.test.ts > the two narrow Host-only effects > refuses an adoption whose approval names another impact
+AssertionError: expected error to match asymmetric matcher
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- ObjectContaining {[39m
+[32m-   "code": "APPROVAL_REQUIRED",[39m
+[31m+ ProductError {[39m
+[31m+   "message": "The authorization belongs to a different scope",[39m
+[31m+   "code": "RUN_SCOPE_REQUIRED",[39m
+[31m+   "http_status": 428,[39m
+[31m+   "retryable": false,[39m
+[31m+   "next_actions": [],[39m
+[31m+   "details": {},[39m
+[31m+   "name": "ProductError",[39m
+[2m  }[22m
+
+ ❯ tests/agent-driven/product/execution-guard.test.ts:481:8
+    479|     const narrow = narrowFacts({ review: "accepted" });
+    480|     expect(() => guardExecution(NARROW_BINDING, ADOPT, withNarrow({ ..…
+    481|       .toThrowError(expect.objectContaining({ code: "APPROVAL_REQUIRED…
+       |        ^
+    482|   });
+    483| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/13]⎯
+
+ FAIL  tests/agent-driven/product/execution-guard.test.ts > the two narrow Host-only effects > refuses an adoption without an approval or without an impact
+AssertionError: expected error to match asymmetric matcher
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- ObjectContaining {[39m
+[32m-   "code": "APPROVAL_REQUIRED",[39m
+[31m+ ProductError {[39m
+[31m+   "message": "The authorization belongs to a different scope",[39m
+[31m+   "code": "RUN_SCOPE_REQUIRED",[39m
+[31m+   "http_status": 428,[39m
+[31m+   "retryable": false,[39m
+[31m+   "next_actions": [],[39m
+[31m+   "details": {},[39m
+[31m+   "name": "ProductError",[39m
+[2m  }[22m
+
+ ❯ tests/agent-driven/product/execution-guard.test.ts:487:8
+    485|     const narrow = narrowFacts({ review: "accepted" });
+    486|     expect(() => guardExecution(NARROW_BINDING, ADOPT, withNarrow({ ..…
+    487|       .toThrowError(expect.objectContaining({ code: "APPROVAL_REQUIRED…
+       |        ^
+    488|     expect(() => guardExecution(NARROW_BINDING, ADOPT, withNarrow({ ..…
+    489|       .toThrowError(expect.objectContaining({ code: "IMPACT_REQUIRED" …
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/13]⎯
+
+ FAIL  tests/agent-driven/product/execution-guard.test.ts > the two narrow Host-only effects > refuses a narrow effect when the run has no gate for the reviewed package
+AssertionError: expected error to match asymmetric matcher
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- ObjectContaining {[39m
+[32m-   "code": "RUN_GATE_BLOCKED",[39m
+[31m+ ProductError {[39m
+[31m+   "message": "The authorization belongs to a different scope",[39m
+[31m+   "code": "RUN_SCOPE_REQUIRED",[39m
+[31m+   "http_status": 428,[39m
+[31m+   "retryable": false,[39m
+[31m+   "next_actions": [],[39m
+[31m+   "details": {},[39m
+[31m+   "name": "ProductError",[39m
+[2m  }[22m
+
+ ❯ tests/agent-driven/product/execution-guard.test.ts:495:10
+    493|     expect(() => guardExecution(NARROW_BINDING, PREPARE, withNarrow(na…
+    494|       gates: [gate("definition", "accepted"), gate("sample", "accepted…
+    495|     }))).toThrowError(expect.objectContaining({ code: "RUN_GATE_BLOCKE…
+       |          ^
+    496|   });
+    497| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/13]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  13 failed | 26 passed (39)
+   Start at  02:20:36
+   Duration  314ms (transform 84ms, setup 0ms, collect 152ms, tests 30ms, environment 0ms, prepare 35ms)
+
+ ELIFECYCLE  Test failed. See above for more details.
+--- end ---
+exit: 1
+finished: 2026-11-11T18:20:37Z

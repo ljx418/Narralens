@@ -54,14 +54,17 @@ export interface CreatedReviewPackagePorts {
   readonly currentAuthorAndRights?: (input: {
     readonly project_id: string;
     readonly prepared_source_id: string;
-  }) => {
-    /** The CURRENT committed source digest of the project. */
-    readonly source_digest: string;
-    /** The rights digest the project's current facts carry. */
-    readonly rights_digest: string;
-    readonly authorized: boolean;
-    readonly reason: string;
-  };
+  }) => Promise<CreatedAuthorAndRights> | CreatedAuthorAndRights;
+}
+
+/** The Host's own current author and rights. */
+export interface CreatedAuthorAndRights {
+  /** The CURRENT committed source digest of the project. */
+  readonly source_digest: string;
+  /** The rights digest the project's current facts carry. */
+  readonly rights_digest: string;
+  readonly authorized: boolean;
+  readonly reason: string;
 }
 
 /** The input of one published review package. */
@@ -138,7 +141,10 @@ export class CreatedReviewPackageService {
         input.completed,
         input.binding,
         proof,
-        () => { this.#assertCurrentAuthorAndRights(input, receipt); },
+        // The callback MEDIA makes is SYNCHRONOUS, so it checks what can be checked
+        // without awaiting: that the receipt is of the prepared source this binding
+        // names. The current author and the rights are re-read after the release.
+        () => { this.#assertReceiptIdentity(receipt, input); },
       );
     } finally {
       // The proof is released here and only here. Borrowing it afterwards would make
@@ -148,7 +154,7 @@ export class CreatedReviewPackageService {
     this.#assertReceipt(receipt, input);
     // The publication boundary: the author and rights are re-read AFTER the proof was
     // released, so this check is the Host's own and not the proof's.
-    this.#assertCurrentAuthorAndRights(input, receipt);
+    await this.#assertCurrentAuthorAndRights(input, receipt);
 
     return publisher.publish(input.package, caller, (published) => {
       this.#bindings.bind({
@@ -209,6 +215,21 @@ export class CreatedReviewPackageService {
   }
 
   /**
+   * The receipt has to be of the prepared source this binding names.
+   *
+   * It is the check MEDIA's SYNCHRONOUS callback can make, and it is checked while
+   * the proof still holds the real descriptors.
+   */
+  #assertReceiptIdentity(receipt: PreparedPreviewReceiptV1, input: PublishCreatedReviewPackageInput): void {
+    if (receipt.prepared_source_id !== input.binding.prepared_source_id) {
+      throw new ProductError('REVIEW_STALE', 'The preview receipt is of another prepared source');
+    }
+    if (receipt.source_digest !== input.binding.source_digest) {
+      throw new ProductError('REVIEW_STALE', 'The preview receipt is of another source');
+    }
+  }
+
+  /**
    * The Host's own current author and rights.
    *
    * Two things have to hold: the rights are authorized right now, and the committed
@@ -216,15 +237,15 @@ export class CreatedReviewPackageService {
    * preview was rendered means the preview describes a closure that is no longer the
    * project's, and the package is not published.
    */
-  #assertCurrentAuthorAndRights(
+  async #assertCurrentAuthorAndRights(
     input: PublishCreatedReviewPackageInput,
     receipt: PreparedPreviewReceiptV1,
-  ): void {
+  ): Promise<void> {
     const probe = this.#ports.currentAuthorAndRights;
     if (probe === undefined) {
       throw new ProductError('CAPABILITY_UNAVAILABLE', 'The current author and rights cannot be read');
     }
-    const current = probe({
+    const current = await probe({
       project_id: input.package.project_id,
       prepared_source_id: input.binding.prepared_source_id,
     });

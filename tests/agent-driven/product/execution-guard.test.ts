@@ -317,7 +317,15 @@ describe("the execution guard", () => {
 });
 
 describe("the two narrow Host-only effects", () => {
-  const reviewGate: RunGate = { ...gate("first_chapter", "pending"), review_package_id: "package-1" };
+  // The scope that authorizes the two change actions. The narrow effects stand for
+  // them, so the scope has to allow them exactly as it allows any other action.
+  const NARROW_SCOPE: RunScope = { ...SCOPE, allowed_actions: [...SCOPE.allowed_actions, "change.prepare", "change.apply"] };
+  const NARROW_SCOPE_DIGEST = canonicalDigest(NARROW_SCOPE);
+  const NARROW_BINDING: ExecutionBinding = { ...BINDING, run_scope_digest: NARROW_SCOPE_DIGEST };
+
+  const ownGate = (state: RunGate["state"]): RunGate => ({
+    ...gate("first_chapter", state), review_package_id: "package-1",
+  });
   const narrowFacts = (overrides: {
     readonly review?: NarrowReviewState;
     readonly approval?: NarrowApprovalState;
@@ -338,49 +346,112 @@ describe("the two narrow Host-only effects", () => {
       state: overrides.impact ?? ("active" as NarrowImpactState),
     },
   });
-  const waiting = facts({
-    run: { ...facts().run, state: "waiting_user" },
-    gates: [gate("definition", "accepted"), reviewGate],
+  /** A run that waits for the decision of its own first chapter. */
+  const waiting = (overrides: Partial<ExecutionGuardFacts> = {}): ExecutionGuardFacts => ({
+    ...facts(),
+    run: { ...facts().run, state: "waiting_user", scope: NARROW_SCOPE, run_scope_digest: NARROW_SCOPE_DIGEST },
+    // The grant belongs to the scope the run holds, so it carries that scope's digest.
+    grant: { ...facts().grant!, run_scope_digest: NARROW_SCOPE_DIGEST },
+    gates: [gate("definition", "accepted"), gate("sample", "accepted"), ownGate("pending")],
     attempt: { ...facts().attempt!, state: "succeeded" },
+    ...overrides,
   });
   const withNarrow = (narrow: NarrowEffectFacts | null | undefined, overrides: Partial<ExecutionGuardFacts> = {}) =>
-    facts({ run: { ...facts().run, state: "waiting_user" }, gates: [gate("definition", "accepted"), reviewGate],
-      attempt: { ...facts().attempt!, state: "succeeded" }, narrow, ...overrides });
+    waiting({ ...overrides, narrow });
   const PREPARE = { kind: "review_impact_prepare", package_id: "package-1", package_digest: "b".repeat(64) } as const;
   const ADOPT = { kind: "approved_prepared_adoption", package_id: "package-1", impact_id: "impact-1", approval_id: "approval-1" } as const;
 
   it("prepares the impact of a product that is still waiting for a decision", () => {
-    expect(() => guardExecution(BINDING, PREPARE, withNarrow(narrowFacts()))).not.toThrow();
+    expect(() => guardExecution(NARROW_BINDING, PREPARE, withNarrow(narrowFacts()))).not.toThrow();
+  });
+
+  it("consumes an approval of an accepted product", () => {
+    expect(() => guardExecution(NARROW_BINDING, ADOPT, withNarrow(narrowFacts({ review: "accepted" })))).not.toThrow();
   });
 
   it("refuses an impact preparation for a package that was already decided", () => {
     // The impact is prepared BEFORE the decision. A package that was accepted or
     // rejected is not this effect's.
     for (const state of ["accepted", "changes_requested", "rejected", "stale"] as const) {
-      expect(() => guardExecution(BINDING, PREPARE, withNarrow(narrowFacts({ review: state }))))
+      expect(() => guardExecution(NARROW_BINDING, PREPARE, withNarrow(narrowFacts({ review: state }))))
+        .toThrowError(expect.objectContaining({ code: "REVIEW_STALE" }));
+    }
+  });
+
+  it("refuses an adoption whose product was not accepted", () => {
+    // The adoption happens AFTER the trusted decision. Adopting a package that is
+    // still pending would be an adoption nobody decided.
+    for (const state of ["pending", "changes_requested", "rejected", "stale"] as const) {
+      expect(() => guardExecution(NARROW_BINDING, ADOPT, withNarrow(narrowFacts({ review: state }))))
         .toThrowError(expect.objectContaining({ code: "REVIEW_STALE" }));
     }
   });
 
   it("refuses an impact preparation for another package or another version", () => {
-    expect(() => guardExecution(BINDING, { ...PREPARE, package_id: "package-2" }, withNarrow(narrowFacts())))
+    expect(() => guardExecution(NARROW_BINDING, { ...PREPARE, package_id: "package-2" }, withNarrow(narrowFacts())))
       .toThrowError(expect.objectContaining({ code: "REVIEW_STALE" }));
-    expect(() => guardExecution(BINDING, { ...PREPARE, package_digest: "c".repeat(64) }, withNarrow(narrowFacts())))
+    expect(() => guardExecution(NARROW_BINDING, { ...PREPARE, package_digest: "c".repeat(64) }, withNarrow(narrowFacts())))
       .toThrowError(expect.objectContaining({ code: "REVIEW_STALE" }));
   });
 
   it("refuses a narrow effect whose facts were not read", () => {
-    expect(() => guardExecution(BINDING, PREPARE, withNarrow(undefined)))
+    expect(() => guardExecution(NARROW_BINDING, PREPARE, withNarrow(undefined)))
       .toThrowError(expect.objectContaining({ code: "REVIEW_STALE" }));
-    expect(() => guardExecution(BINDING, PREPARE, withNarrow(null)))
+    expect(() => guardExecution(NARROW_BINDING, PREPARE, withNarrow(null)))
       .toThrowError(expect.objectContaining({ code: "REVIEW_STALE" }));
-    expect(() => guardExecution(BINDING, PREPARE, withNarrow({ review: null, approval: null, impact: null })))
+    expect(() => guardExecution(NARROW_BINDING, PREPARE, withNarrow({ review: null, approval: null, impact: null })))
       .toThrowError(expect.objectContaining({ code: "REVIEW_STALE" }));
+  });
+
+  it("refuses a narrow effect whose predecessor gate is not accepted", () => {
+    // The predecessor of the first chapter is the sample. A sample that is still
+    // waiting, or that failed, stops the effect.
+    for (const state of ["pending", "blocked", "rejected", "stale"] as const) {
+      expect(() => guardExecution(NARROW_BINDING, PREPARE, withNarrow(narrowFacts(), {
+        gates: [gate("definition", "accepted"), { ...gate("sample", state) }, ownGate("pending")],
+      }))).toThrowError(expect.objectContaining({ code: "RUN_GATE_BLOCKED" }));
+    }
+    // A predecessor gate that belongs to ANOTHER package is not exempt either.
+    expect(() => guardExecution(NARROW_BINDING, PREPARE, withNarrow(narrowFacts(), {
+      gates: [gate("definition", "accepted"), { ...gate("sample", "pending"), review_package_id: "package-other" }, ownGate("pending")],
+    }))).toThrowError(expect.objectContaining({ code: "RUN_GATE_BLOCKED" }));
+    // And a missing predecessor stops it as well.
+    expect(() => guardExecution(NARROW_BINDING, PREPARE, withNarrow(narrowFacts(), {
+      gates: [gate("definition", "accepted"), ownGate("pending")],
+    }))).toThrowError(expect.objectContaining({ code: "RUN_GATE_BLOCKED" }));
+  });
+
+  it("refuses a narrow effect whose scope does not allow the action", () => {
+    const withoutPrepare: RunScope = { ...SCOPE, allowed_actions: [...SCOPE.allowed_actions, "change.apply"] };
+    const withoutApply: RunScope = { ...SCOPE, allowed_actions: [...SCOPE.allowed_actions, "change.prepare"] };
+    const factsOf = (scope: RunScope): ExecutionGuardFacts => ({
+      ...waiting(),
+      run: { ...facts().run, state: "waiting_user", scope, run_scope_digest: canonicalDigest(scope) },
+      grant: { ...facts().grant!, run_scope_digest: canonicalDigest(scope) },
+    });
+    const bindingOf = (scope: RunScope): ExecutionBinding => ({ ...BINDING, run_scope_digest: canonicalDigest(scope) });
+    expect(() => guardExecution(bindingOf(withoutPrepare), PREPARE, { ...factsOf(withoutPrepare), narrow: narrowFacts() }))
+      .toThrowError(expect.objectContaining({ code: "RUN_SCOPE_REQUIRED" }));
+    expect(() => guardExecution(bindingOf(withoutApply), ADOPT, { ...factsOf(withoutApply), narrow: narrowFacts({ review: "accepted" }) }))
+      .toThrowError(expect.objectContaining({ code: "RUN_SCOPE_REQUIRED" }));
+  });
+
+  it("refuses a narrow effect at a stage that does not allow the action", () => {
+    // The definition stage allows clip.prepare only. A narrow effect there is not a
+    // way around the fixed plan.
+    const atDefinition = (): ExecutionGuardFacts => ({
+      ...waiting(),
+      run: { ...facts().run, state: "waiting_user", scope: NARROW_SCOPE, run_scope_digest: NARROW_SCOPE_DIGEST },
+      gates: [gate("definition", "accepted"), ownGate("pending")],
+      attempt: { ...facts().attempt!, step_id: "definition" },
+    });
+    expect(() => guardExecution({ ...NARROW_BINDING, step_id: "definition" }, PREPARE, atDefinition()))
+      .toThrowError(expect.objectContaining({ code: "CAPABILITY_UNAVAILABLE" }));
   });
 
   it("refuses a narrow effect in a run that is paused, cancelled or stale", () => {
     for (const state of ["paused", "cancelled", "failed", "blocked"] as const) {
-      expect(() => guardExecution(BINDING, PREPARE, withNarrow(narrowFacts(), { run: { ...facts().run, state } })))
+      expect(() => guardExecution(NARROW_BINDING, PREPARE, withNarrow(narrowFacts(), { run: { ...facts().run, state, scope: NARROW_SCOPE, run_scope_digest: NARROW_SCOPE_DIGEST } })))
         .toThrowError(expect.objectContaining({ code: "RUN_PLAN_STALE" }));
     }
   });
@@ -388,7 +459,7 @@ describe("the two narrow Host-only effects", () => {
   it("does not widen the ordinary dispatch: an action is still refused while the run waits", () => {
     // A run that waits for a decision refuses an ordinary action outright, and the
     // narrow effects do not change that.
-    expect(() => guardExecution(BINDING, EFFECT, { ...waiting, gates: [gate("definition", "accepted"), gate("sample", "pending")] }))
+    expect(() => guardExecution(NARROW_BINDING, EFFECT, waiting({ gates: [gate("definition", "accepted"), gate("sample", "pending"), ownGate("pending")] })))
       .toThrowError(expect.objectContaining({ code: "RUN_PLAN_STALE" }));
     // And the ordinary gate check is untouched: a running run with an open gate is
     // still blocked at that gate.
@@ -396,47 +467,35 @@ describe("the two narrow Host-only effects", () => {
       .toThrowError(expect.objectContaining({ code: "RUN_GATE_BLOCKED" }));
   });
 
-  it("consumes an approval of an accepted product", () => {
-    expect(() => guardExecution(BINDING, ADOPT, withNarrow(narrowFacts({ review: "accepted" })))).not.toThrow();
-  });
-
-  it("refuses an adoption whose product was not accepted", () => {
-    // The adoption happens AFTER the trusted decision. Adopting a package that is
-    // still pending would be an adoption nobody decided.
-    for (const state of ["pending", "changes_requested", "rejected", "stale"] as const) {
-      expect(() => guardExecution(BINDING, ADOPT, withNarrow(narrowFacts({ review: state }))))
-        .toThrowError(expect.objectContaining({ code: "REVIEW_STALE" }));
-    }
-  });
-
   it("refuses an adoption whose approval or impact is not active", () => {
     for (const approval of ["consumed", "rejected", "revoked"] as const) {
-      expect(() => guardExecution(BINDING, ADOPT, withNarrow(narrowFacts({ review: "accepted", approval }))))
+      expect(() => guardExecution(NARROW_BINDING, ADOPT, withNarrow(narrowFacts({ review: "accepted", approval }))))
         .toThrowError(expect.objectContaining({ code: "APPROVAL_REQUIRED" }));
     }
     for (const impact of ["consumed", "expired", "stale"] as const) {
-      expect(() => guardExecution(BINDING, ADOPT, withNarrow(narrowFacts({ review: "accepted", impact }))))
+      expect(() => guardExecution(NARROW_BINDING, ADOPT, withNarrow(narrowFacts({ review: "accepted", impact }))))
         .toThrowError(expect.objectContaining({ code: "IMPACT_STALE" }));
     }
   });
 
   it("refuses an adoption whose approval names another impact", () => {
     const narrow = narrowFacts({ review: "accepted" });
-    expect(() => guardExecution(BINDING, ADOPT, withNarrow({ ...narrow, approval: { ...narrow.approval!, impact_id: "impact-2" } })))
+    expect(() => guardExecution(NARROW_BINDING, ADOPT, withNarrow({ ...narrow, approval: { ...narrow.approval!, impact_id: "impact-2" } })))
       .toThrowError(expect.objectContaining({ code: "APPROVAL_REQUIRED" }));
   });
 
   it("refuses an adoption without an approval or without an impact", () => {
     const narrow = narrowFacts({ review: "accepted" });
-    expect(() => guardExecution(BINDING, ADOPT, withNarrow({ ...narrow, approval: null })))
+    expect(() => guardExecution(NARROW_BINDING, ADOPT, withNarrow({ ...narrow, approval: null })))
       .toThrowError(expect.objectContaining({ code: "APPROVAL_REQUIRED" }));
-    expect(() => guardExecution(BINDING, ADOPT, withNarrow({ ...narrow, impact: null })))
+    expect(() => guardExecution(NARROW_BINDING, ADOPT, withNarrow({ ...narrow, impact: null })))
       .toThrowError(expect.objectContaining({ code: "IMPACT_REQUIRED" }));
   });
 
   it("refuses a narrow effect when the run has no gate for the reviewed package", () => {
-    expect(() => guardExecution(BINDING, PREPARE, withNarrow(narrowFacts(), { gates: [gate("definition", "accepted")] })))
-      .toThrowError(expect.objectContaining({ code: "RUN_GATE_BLOCKED" }));
+    expect(() => guardExecution(NARROW_BINDING, PREPARE, withNarrow(narrowFacts(), {
+      gates: [gate("definition", "accepted"), gate("sample", "accepted")],
+    }))).toThrowError(expect.objectContaining({ code: "RUN_GATE_BLOCKED" }));
   });
 });
 

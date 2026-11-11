@@ -17,6 +17,10 @@ import {ApplicationDispatcher,creativeHandlers} from './application-dispatcher.j
 import {AssetInventory} from './asset-inventory.js';
 import {LocalAssetHttp} from './local-asset-http.js';
 import {ReviewMediaHttp} from './review-media-http.js';
+import {CreatedReviewMediaBindings} from './created-review-media-bindings.js';
+import {CreatedPreparedSourceStore} from './created-prepared-source-store.js';
+import {CreatedReviewPackageService} from './created-review-package-service.js';
+import type {PreparedPreviewPort,PreparedSourceProofPort} from '../render/assembly-ports.js';
 import {PreparedReviewMediaReaderImpl} from '../render/preview-prepared-source.js';
 import {CreatedRunFacts} from './created-run-facts.js';
 import {CreatedRunAuthority} from './created-run-authority.js';
@@ -64,6 +68,18 @@ export interface CreationApplicationOptions {
    * bound to it; the review package publication that would register a binding is not
    * produced in this ticket, so the surface stays fail closed. */
   readonly reviewMediaObjectRoot?: string;
+  /**
+   * The real MEDIA proof and preview surfaces.
+   *
+   * They are the seam the review package publication consumes. The composition does
+   * NOT create them: without the real producer there is no way to render an isolated
+   * preview, and a made-up one would publish packages over bytes nobody verified. The
+   * review package producer stays unavailable until the Host supplies the real ports.
+   */
+  readonly reviewMedia?: {
+    readonly proofPort: PreparedSourceProofPort;
+    readonly previewPort: PreparedPreviewPort;
+  };
   readonly worker?: Pick<CreationServiceDeps,'leaseMs'|'pollMs'|'boundary'>;
   readonly instance?: () => Instance;
   readonly health?: () => HealthRead;
@@ -87,6 +103,8 @@ export class CreationApplication implements AgentHostApplication {
   readonly #inventory:AssetInventory|null;
   readonly #localAssetsHttp:LocalAssetHttp|null;
   readonly #reviewMedia:ReviewMediaHttp;
+  /** The review package producer. Null until the real MEDIA surfaces are supplied. */
+  readonly reviewPackages:CreatedReviewPackageService|null;
   #tasks:CreatedTaskApplication|null=null;
   #closing:Promise<void>|undefined;
   readonly worker:ProjectCreationService;
@@ -115,9 +133,16 @@ export class CreationApplication implements AgentHostApplication {
   // the immutable receipt linkage are not published in this ticket: every request
   // answers 503 until that producer exists, and nothing is ever served from an
   // in-memory map.
-  this.#reviewMedia=new ReviewMediaHttp({auth:this.auth,origin:()=>host.origin,assertOwner:(projectId,principalId)=>authority.assertOwner(projectId,principalId),reader:new PreparedReviewMediaReaderImpl(options.reviewMediaObjectRoot??options.createdRoot+'-preview-objects')});
+  // The transport's producer is the REAL one: it reads the bindings out of the
+  // original database. Without a published package it answers nothing, which is the
+  // truth rather than a missing dependency.
+  const reviewBindings=new CreatedReviewMediaBindings(host.revisions);
+  this.#reviewMedia=new ReviewMediaHttp({auth:this.auth,origin:()=>host.origin,assertOwner:(projectId,principalId)=>authority.assertOwner(projectId,principalId),reader:new PreparedReviewMediaReaderImpl(options.reviewMediaObjectRoot??options.createdRoot+'-preview-objects'),bindings:reviewBindings});
+
   this.worker=new ProjectCreationService({store:this.creation,coordinator:host.coordinator,snapshots:host.snapshots,verifier,createdRoot:options.createdRoot,...options.worker});
   const repository=new ProductSqliteRepository(host.revisions);
+  // The D02 mapping of the prepared sources, on the same original database.
+  const preparedSources=new CreatedPreparedSourceStore(host.revisions);
   // The facts are the real ones: the active commit, the control revision, the CURRENT
   // creative closure and the registered capability manifest. A missing or malformed
   // capability manifest is not a capability, so a run stays unavailable.
@@ -126,6 +151,37 @@ export class CreationApplication implements AgentHostApplication {
   // the STORED session lifetime; the probe's own expiry field is not part of that check.
   const adoption=new CreatedRunAuthority({sessionGuard:({principal_id,session_ref})=>this.auth.isPrincipalActive({principal_id,channel:'trusted_ui',session_ref,expires_at:0})});
   const workflow=new FixedWorkflowService({repository,facts,adoption});
+  // The review package producer exists only with the real MEDIA surfaces. The
+  // composition never fabricates them: without the real producer there is no way to
+  // render an isolated preview, and a made-up one would publish packages over bytes
+  // nobody verified.
+  this.reviewPackages=options.reviewMedia===undefined?null:new CreatedReviewPackageService(reviewBindings,{
+   proofPort:options.reviewMedia.proofPort,
+   previewPort:options.reviewMedia.previewPort,
+   publisher:{
+    publish:async(input,caller,work)=>repository.transaction(tx=>{
+     const published=workflow.publishReviewPackageInScope(tx,input,caller);
+     work(published);
+     return published;
+    }),
+   },
+   registryFacts:()=>[],
+   // The Host's own current author and rights: the committed source of the project,
+   // the rights of the prepared closure, and the rights authorization of the real
+   // facts port. The facts port is the authority that verifies the declared rights
+   // against the real rows, so it is asked rather than assumed.
+   currentAuthorAndRights:async({project_id,prepared_source_id})=>{
+    const commit=host.revisions.activeCommit(project_id);
+    const mapping=preparedSources.read(prepared_source_id);
+    const current=mapping===undefined?null:await facts.readProjectFacts(project_id);
+    return {
+     source_digest:commit?.source_digest??'',
+     rights_digest:mapping?.rights_digest??'',
+     authorized:mapping!==undefined&&current!==null&&current.rights_authorized,
+     reason:mapping===undefined?'the prepared source is unknown':current?.rights_reason??'the current rights of the project',
+    };
+   },
+  });
   // The created-task chain is assembled over the ORIGINAL database. It is activated
   // only with the local material registry, because the real preparation proof needs
   // the registered bytes; without them the chain stays unavailable.
