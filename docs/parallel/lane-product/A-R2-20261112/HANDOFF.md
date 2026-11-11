@@ -197,6 +197,13 @@ every commit adds explicit paths only.
 | `d4542681c3ccdd2e28808311e8325516937eedd0` | The counted observation route made verifiable against the registry. |
 | `dd8a3ea9f51b1c73e67c382b832380bd5d2ede5b` | One acknowledgement per state, not one per report. |
 | `d0e22e4687242ca68877b8ef2ae199934db85d46` | The build tool hands the pinned build a child without `NODE_PATH`. |
+| `50f1615bef2dd03a3f75b94d8fd3038eb36f1e6e` | The ticket records both build failures and what each one was. |
+| `ffb06f11a4a234a2e31d864466c73ff24015b630`, `405c7f38d68b68fe35050762bcbb407e34d0bbc6` | The document epoch is compared with the epoch the hydration belonged to, with its case. |
+| `e9582e5d5027d0d068337282679fdabab5d4a731` | The expectation follows the 013 rule that the settings, the captions and the markers are hydrated even when empty. |
+| `b99bdb3b5bb7a78ed09f84e3b30096cd2f92710d` | A failed library load is not a permanent answer. |
+| `c570904164c98a56b7bdeb5a7bba5a8b066e5b30`, `8969ea7f3c2fd01154c2de84e276ca16c8eeec0d`, `dd533ac8498a3b8443d1710525f0fa946f5fb3d4` | Three corrections found by self-review: what the control revision check is, the write path's comment, and what registers the adoption. |
+| `cedad1179ac60857fce25f0c0080739fc28f13ad` | The origin of every part is checked, not only its digest. |
+| `777a95d426a46a508e7cebe0e608d1cb619c7417`, `c06c9c24974ffe0372237209e4aa087f7d2a255e` | The registry records the hydration origins, the expected side and the counting. |
 
 ## Released path coverage
 
@@ -253,7 +260,10 @@ failures, their logs and their process evidence are in `logs/`, and neither was
 retried. The pinned 015 candidate is not
 built, so the helper under test in the unit cases is a local stand-in for the pinned
 API: the guards, the approval chain and the cleanup are what those cases prove, not the
-015 math.
+015 math. The three changes made after the last verified run — the epoch comparison, the
+expected states and the expected origins — are committed but their type check and unit
+run have not happened, because the slot handoff to the queued lane was pending when
+they were made.
 
 The unauthorized run of the M5 studio gateway suite, the first build failure and their
 process evidence are kept as they are, in `logs/`, and neither is re-run.
