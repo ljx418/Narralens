@@ -1,0 +1,16 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:1956786) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/created-source-adoption.test.ts (43 tests | 39 skipped) 42357ms
+   ✓ actual closed created-source commit and publisher > D10 identity records actual three retained trees in the prepared journal transaction before any rename  10281ms
+   ✓ actual closed created-source commit and publisher > D10 identity rolls back both pre-rename facts when the identity insert fails  10163ms
+   ✓ actual closed created-source commit and publisher > D10 identity rolls back both pre-rename facts when the prepared journal insert fails  13746ms
+   ✓ actual closed created-source commit and publisher > D10 identity missing after publication refuses the original closed commit without consuming authorities  8166ms
+
+ Test Files  1 passed (1)
+      Tests  4 passed | 39 skipped (43)
+   Start at  06:54:28
+   Duration  50.46s (transform 3.25s, setup 0ms, collect 6.29s, tests 42.36s, environment 0ms, prepare 1.18s)
+

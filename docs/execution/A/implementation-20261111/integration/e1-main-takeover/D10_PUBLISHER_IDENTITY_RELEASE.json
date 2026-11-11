@@ -1,0 +1,28 @@
+{
+  "format": "narralens.main-component-release@1",
+  "owner": "MAIN",
+  "base": "64884a8b0be35bd2e43734cbebced875263a54b3",
+  "scope": "Atomic pre-rename identity and prepared journal integration only",
+  "basis": [
+    "RD01 identity design accepted",
+    "399f identity component independent bounded ACCEPT msg_d19936b61dd9"
+  ],
+  "paths": [
+    "src/host/agent-driven/created-source-publisher.ts",
+    "tests/agent-driven/integration/created-source-adoption.test.ts"
+  ],
+  "requirements": [
+    "Original author, actual private staging, snapshot source and retained snapshot container identity",
+    "Identity plus prepared journal in one original RevisionStore atomic transaction, before first rename",
+    "Keep actual staged guard through rename and validate persisted identities at closed commit",
+    "Preserve all N3 cleanup and legacy commit authorities",
+    "No public ingress, specialized recovery, Host or native observation changes"
+  ],
+  "verification": [
+    "Actual publisher source identity capture before rename",
+    "Fault each database insert and assert both records rollback plus complete original tree unchanged",
+    "Genuine closed commit and missing identity refusal",
+    "Existing N3 resource cleanup regressions"
+  ],
+  "status": "RELEASED_EXACT_SCOPE"
+}

@@ -1,4 +1,5 @@
 import {readFile,writeFile,symlink,rename,open,readdir} from 'node:fs/promises';
+import {lstatSync,readFileSync,readdirSync} from 'node:fs';
 import {join,dirname} from 'node:path';
 import {randomUUID} from 'node:crypto';
 import {createRequire,syncBuiltinESMExports} from 'node:module';
@@ -15,6 +16,7 @@ import {CreatedSourceChangeService} from '../../../src/host/agent-driven/created
 import {CreatedSourceFactsReader} from '../../../src/host/agent-driven/created-source-facts-reader.js';
 import {CreativeProjectAuthority} from '../../../src/host/agent-driven/creative-project-authority.js';
 import {CreatedSourcePublisher,isCreatedSourcePublicationProof,preparedSourceConsumerGraph} from '../../../src/host/agent-driven/created-source-publisher.js';
+import {CreatedPublicationIdentityStore,type PublicationIdentityInput} from '../../../src/host/agent-driven/created-publication-identity-store.js';
 import {PublicationCleanupError} from '../../../src/host/agent-driven/publication-cleanup.js';
 import {RetainedSourceTree} from '../../../src/host/agent-driven/retained-source-tree.js';
 import {ProductSqliteRepository} from '../../../src/host/agent-driven/product-sqlite-repository.js';
@@ -136,6 +138,69 @@ async function fixture(options:{transactionKind?:'edit'|'snapshot_publish';mutat
 }
 
 describe('actual closed created-source commit and publisher',()=>{
+ it('D10 identity records actual three retained trees in the prepared journal transaction before any rename',async()=>{
+  let prepared:Awaited<ReturnType<typeof preparedDraftFixture>>|undefined,captured:PublicationIdentityInput|undefined;
+  const record=CreatedPublicationIdentityStore.prototype.record;
+  const f=await fixture({onPrepared:value=>{prepared=value;},onPublisher:()=>{
+   vi.spyOn(CreatedPublicationIdentityStore.prototype,'record').mockImplementation(function(this:CreatedPublicationIdentityStore,input,now){
+    const db=prepared!.host.revisions.compose(db=>db);expect(db.isTransaction).toBe(true);
+    expect(db.prepare('SELECT count(*) AS n FROM created_publication_journal').get()?.n).toBe(0);
+    expect(readFileSync(join(prepared!.authorRoot,'film.html'))).toEqual(prepared!.authorBytes);
+    const workspace=join(prepared!.root,'publication',readdirSync(join(prepared!.root,'publication'))[0]!);
+    const original=lstatSync(prepared!.authorRoot,{bigint:true}),target=lstatSync(join(workspace,'staging'),{bigint:true});
+    const container=join(prepared!.root,'snapshots',prepared!.projectId,input.target_snapshot_id);
+    const snapshot=lstatSync(join(container,'source'),{bigint:true}),directory=lstatSync(container,{bigint:true});
+    expect(input.original_tree.directories[0]).toMatchObject({dev:String(original.dev),ino:String(original.ino)});
+    expect(input.target_tree.directories[0]).toMatchObject({dev:String(target.dev),ino:String(target.ino)});
+    expect(input.snapshot_tree.directories[0]).toMatchObject({dev:String(snapshot.dev),ino:String(snapshot.ino)});
+    expect(input.snapshot_container).toEqual({dev:String(directory.dev),ino:String(directory.ino)});
+    expect(()=>lstatSync(join(workspace,'backup'))).toThrow();captured=input;
+    return record.call(this,input,now);
+   });
+  }});
+  expect(captured).toBeDefined();
+  expect(f.publisher.journalOf(f.input.transaction_id).map(row=>row.phase)).toEqual(['prepared','published']);
+  const fresh=new RevisionStore(join(f.root,'host.sqlite'));
+  try{expect(new CreatedPublicationIdentityStore(fresh).read(f.input.transaction_id)).toMatchObject(captured!);}finally{fresh.close();}
+  const receipt=f.revisions.commitPreparedCreatedSource(f.input);expect(receipt.project_revision).toBe(2);
+  expect(f.revisions.commitPreparedCreatedSource(f.input)).toEqual({...receipt,replayed:true});
+ },120000);
+ it.each(['identity','prepared journal'] as const)('D10 identity rolls back both pre-rename facts when the %s insert fails',async phase=>{
+  let prepared:Awaited<ReturnType<typeof preparedDraftFixture>>|undefined,transactionId='';
+  await expect(fixture({onPrepared:value=>{prepared=value;},onPublisher:()=>{
+   const revisions=prepared!.host.revisions;new CreatedPublicationIdentityStore(revisions);
+   revisions.compose(db=>{
+    transactionId=String(db.prepare("SELECT transaction_id FROM project_transaction WHERE state='prepared'").get()?.transaction_id);
+    if(phase==='identity')db.exec("CREATE TEMP TRIGGER identity_insert_fault AFTER INSERT ON created_publication_identity BEGIN SELECT RAISE(ABORT,'identity atomic insert fault'); END");
+    else db.exec("CREATE TEMP TRIGGER journal_insert_fault AFTER INSERT ON created_publication_journal WHEN NEW.phase='prepared' BEGIN SELECT RAISE(ABORT,'identity atomic insert fault'); END");
+   });
+  }})).rejects.toThrow('identity atomic insert fault');
+  const f=prepared!,revisions=f.host.revisions;
+  expect(revisions.compose(db=>db.prepare('SELECT count(*) AS n FROM created_publication_identity').get()?.n)).toBe(0);
+  expect(revisions.compose(db=>db.prepare('SELECT count(*) AS n FROM created_publication_journal').get()?.n)).toBe(0);
+  const fact=f.app.creation.sourceFact(f.projectId,f.commit.snapshot_id)!;
+  const actual=await computeSourceDigest({root:f.authorRoot,roots:fact.roots,engine:'openfilm',engineUpstreamSha:OPENFILM_UPSTREAM_SHA});
+  expect(actual.source_digest).toBe(f.commit.source_digest);expect(revisions.activeCommit(f.projectId)?.revision).toBe(1);
+  const files=[...actual.manifest.files,...actual.manifest.assets].map(file=>({relative_path:file.path,bytes:file.size,sha256:file.sha256}));
+  const guard=new RetainedSourceTree(f.authorRoot,files);try{guard.verify();}finally{guard.close();}
+  expect(revisions.projectTransaction(transactionId)?.state).toBe('prepared');
+  expect(revisions.compose(db=>db.prepare('SELECT state FROM created_adoption_fact JOIN impact USING(impact_id) WHERE transaction_id=?').get(transactionId)?.state)).toBe('active');
+  expect(readdirSync(join(f.root,'publication'))).toEqual([]);
+ },120000);
+ it('D10 identity missing after publication refuses the original closed commit without consuming authorities',async()=>{
+  const f=await fixture(),before=f.revisions.outboxRowCount();
+  f.revisions.compose(db=>{
+   const sql=String(db.prepare("SELECT sql FROM sqlite_master WHERE name='created_publication_identity_no_delete'").get()?.sql);
+   db.exec('DROP TRIGGER created_publication_identity_no_delete');
+   try{db.prepare('DELETE FROM created_publication_identity WHERE transaction_id=?').run(f.input.transaction_id);}finally{db.exec(sql);}
+  });
+  expect(()=>f.revisions.commitPreparedCreatedSource(f.input)).toThrow(/identity/i);
+  expect(f.revisions.activeCommit(f.projectId)?.revision).toBe(1);expect(f.revisions.outboxRowCount()).toBe(before);
+  expect(f.revisions.projectTransaction(f.input.transaction_id)?.state).toBe('prepared');
+  expect(f.revisions.compose(db=>db.prepare('SELECT state FROM impact WHERE impact_id=?').get(f.input.impact_id)?.state)).toBe('active');
+  expect(f.revisions.compose(db=>db.prepare('SELECT state FROM cp_a0_approval WHERE approval_id=?').get(f.input.approval_id)?.state)).toBe('active');
+ },120000);
+
  it.each(['stage','outer held'] as const)('N3 real issuance revokes a genuine token when the %s guard cleanup fails',async mode=>{
   const fault=new Error('injected post-issuance '+mode+' close');
   let prepared:Awaited<ReturnType<typeof preparedDraftFixture>>|undefined,publisher:CreatedSourcePublisher|undefined;

@@ -6,6 +6,7 @@ import type { DatabaseSync } from 'node:sqlite';
 import { canonicalJson, canonicalDigest } from '../creative/digest.js';
 import { RevisionStore } from '../projects/revision-store.js';
 import { matchesFrozenSchemaNamespace } from './agent-schema-definition.js';
+import {CreatedPublicationIdentityStore} from './created-publication-identity-store.js';
 import {RetainedSourceTree as RetainedTree} from './retained-source-tree.js';
 import {assertPreparedAdoptionPlan,preparedAdoptionPlanDigest,isCreatedSourceApplyTransaction,type PreparedAdoptionPlanV1,type CreatedSourcePublicationFacts,type CreatedSourcePublicationProof,type PreparedSourceFileFact} from './created-source-ports.js';
 import {SnapshotStore,snapshotIdFor} from '../projects/snapshot-store.js';
@@ -112,6 +113,7 @@ interface PublicationRecord {
   readonly registry:readonly LocalAsset[];readonly completed:CompletedPreparedSourceV1;
   readonly adoptionBinding:PreparedAdoptionBindingV1;readonly preparedProof:PreparedAdoptionProofV1;
   readonly metadata:PreparedNativeMetadata;readonly draft:PreparedNativeConsumerPlan;
+  readonly originalTree:RetainedTree;readonly targetTree:RetainedTree;readonly snapshotTree:RetainedTree;readonly snapshotContainer:string;
 }
 type PreparedNativeMetadata=Pick<StagedNativeDraft,'project_id'|'clip_ids'|'fps'|'frame_count'|'subtitles'|'assets'|'plan_digest'>&{readonly format:string};
 type PreparedNativeConsumerPlan={readonly storyboard:Storyboard;readonly narration_asset_id:string|null};
@@ -172,6 +174,7 @@ export class CreatedSourcePublisher {
   readonly #now:()=>Date;readonly #fsync:(path:string)=>Promise<void>;readonly #instance=`publisher_${randomUUID()}`;
   readonly #issued=new Set<object>();readonly #pending=new Set<Promise<unknown>>();
   readonly #cleanup=new PublicationCleanup();
+  readonly #identities:CreatedPublicationIdentityStore;
   readonly #fsyncHandles=new Set<FileHandle>();
   #failed=false;#closed=false;#closing:Promise<void>|undefined;
   constructor(options:CreatedSourcePublisherOptions){
@@ -190,6 +193,7 @@ export class CreatedSourcePublisher {
     const exists=this.#db.prepare("SELECT name FROM sqlite_master WHERE name='created_publication_journal'").get();
     if(!exists)this.#db.exec(CREATED_PUBLICATION_JOURNAL_DDL);
     else if(!matchesFrozenSchemaNamespace(this.#db,CREATED_PUBLICATION_JOURNAL_DDL,'created_publication_journal'))fail('REVISION_CONFLICT','Publication journal schema differs');
+    this.#identities=new CreatedPublicationIdentityStore(this.#owner);
   }
   get instance():string{return this.#instance;}
   isUsable():boolean{return !this.#closed&&!this.#failed;}
@@ -349,13 +353,23 @@ export class CreatedSourcePublisher {
       const snapshotSource=resolve(this.#snapshots.snapshotRoot(input.project_id,snapshot.snapshot_id),'source');
       const snapshotGuard=new RetainedTree(snapshotSource,targetFiles);finalGuards.push(snapshotGuard);
       originalGuard.verify();stageGuard.verify();for(const guard of blobGuards)guard.verify();this.#plan(input);this.#assertOpen();
-      this.#journal(input,'prepared',staged,backup,targetFiles);
+      // Capture the actual isolated copy, not the producer stage that was copied.
+      // Both durable facts commit together before either source directory is moved.
+      const isolatedGuard=new RetainedTree(staged,targetFiles);finalGuards.push(isolatedGuard);
+      this.#owner.atomic(()=>{
+        this.#identities.record({transaction_id:input.transaction_id,project_id:input.project_id,
+          original_source_digest:plan.base_source_digest,target_source_digest:plan.target_source_digest,target_snapshot_id:plan.target_snapshot_id,
+          original_tree:originalGuard!.identity(),target_tree:isolatedGuard.identity(),snapshot_tree:snapshotGuard.identity(),
+          snapshot_container:snapshotGuard.directoryIdentity(dirname(snapshotSource))},this.#now());
+        this.#journal(input,'prepared',staged,backup,targetFiles);
+      });
       await rename(this.#authorRoot,backup);moved=true;
       originalGuard.relocatedTo(backup);
       await rename(staged,this.#authorRoot);published=true;
+      isolatedGuard.relocatedTo(this.#authorRoot);
       await this.#fsync(dirname(this.#authorRoot));await this.#fsync(workspace);
       originalGuard.verify();
-      finalGuards.push(originalGuard,new RetainedTree(this.#authorRoot,targetFiles));originalGuard=undefined;
+      const backupGuard=originalGuard;finalGuards.push(backupGuard);originalGuard=undefined;
       for(const guard of finalGuards)guard.verify();for(const guard of blobGuards)guard.verify();this.#assertOpen();
       this.#journal(input,'published',staged,backup,targetFiles);
       const facts=freeze({publisher_instance:this.#instance,project_id:input.project_id,transaction_id:input.transaction_id,
@@ -364,7 +378,8 @@ export class CreatedSourcePublisher {
       const proof=Object.freeze({facts});
       const record:PublicationRecord=Object.freeze({facts,issuer:this,guards:Object.freeze([...finalGuards,...blobGuards]),geometry,
         plan:freeze(structuredClone(plan)),registry:freeze(structuredClone(registry)),completed:freeze(structuredClone(completed)),
-        adoptionBinding:freeze(adoptionBinding),preparedProof,metadata:freeze(structuredClone(metadata)),draft:freeze(structuredClone(draft))});
+        adoptionBinding:freeze(adoptionBinding),preparedProof,metadata:freeze(structuredClone(metadata)),draft:freeze(structuredClone(draft)),
+        originalTree:backupGuard,targetTree:isolatedGuard,snapshotTree:snapshotGuard,snapshotContainer:dirname(snapshotSource)});
       liveProofs.set(proof,record);this.#issued.add(proof);issuedToken=proof;
       this.assertCurrentForCommit(proof,this.#owner,{...input,selection_version:plan.selection_version});
       transferred=true;return proof;
@@ -412,6 +427,7 @@ export class CreatedSourcePublisher {
       if(canonicalDigest(actual)!==canonicalDigest(proof.registry))fail('REVISION_CONFLICT','Source rights changed');
     });
     for(const guard of proof.guards)guard.verify();
+    this.#identities.assertCurrent(expected.transaction_id,proof.originalTree,proof.targetTree,proof.snapshotTree,proof.snapshotContainer);
   }
   async verify(value:unknown,expected:Omit<PublicationCommitExpectation,'selection_version'>):Promise<void>{
     if(!value||typeof value!=='object')fail('REVISION_CONFLICT','Proof missing');const proof=liveProofs.get(value);if(!proof)fail('REVISION_CONFLICT','Proof not issued');

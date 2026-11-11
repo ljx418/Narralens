@@ -1,0 +1,2849 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:1958564) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/agent-driven/integration/created-source-adoption.test.ts (43 tests | 2 failed | 40 skipped) 29239ms
+   × actual closed created-source commit and publisher > D10 identity records actual three retained trees in the prepared journal transaction before any rename 8544ms
+     → expected undefined to be defined
+   × actual closed created-source commit and publisher > D10 identity rolls back both pre-rename facts when the identity insert fails 8329ms
+     → promise resolved "{ …(34) }" instead of rejecting
+   ✓ actual closed created-source commit and publisher > D10 identity rolls back both pre-rename facts when the prepared journal insert fails  12365ms
+   ↓ actual closed created-source commit and publisher > D10 identity missing after publication refuses the original closed commit without consuming authorities
+   ↓ actual closed created-source commit and publisher > N3 real issuance revokes a genuine token when the stage guard cleanup fails
+   ↓ actual closed created-source commit and publisher > N3 real issuance revokes a genuine token when the outer held guard cleanup fails
+   ↓ actual closed created-source commit and publisher > N3 real pending close waits for publication and never returns an issued proof after closing
+   ↓ actual closed created-source commit and publisher > N3 real temporary default fsync close preserves uncertainty (sync also fails=false)
+   ↓ actual closed created-source commit and publisher > N3 real temporary default fsync close preserves uncertainty (sync also fails=true)
+   ↓ actual closed created-source commit and publisher > N3 real temporary style descriptor close preserves uncertainty (stat also fails=false)
+   ↓ actual closed created-source commit and publisher > N3 real temporary style descriptor close preserves uncertainty (stat also fails=true)
+   ↓ actual closed created-source commit and publisher > N3 real publication attempts every guard when verifier release fails and never revives the proof
+   ↓ actual closed created-source commit and publisher > N3 real publication attempts other guards after the first guard close fails
+   ↓ actual closed created-source commit and publisher > N3 real publication preserves the primary publish failure and cleanup failures together
+   ↓ actual closed created-source commit and publisher > refuses authority expiring during the final creative closure scan
+   ↓ actual closed created-source commit and publisher > rolls back checkpoint, attempt and every authority after a post-checkpoint transaction failure
+   ↓ actual closed created-source commit and publisher > poisons a swallowed read of another intake inside the project commit scope
+   ↓ actual closed created-source commit and publisher > rejects a real intake update after approval without consuming database authorities
+   ↓ actual closed created-source commit and publisher > rejects a predecessor gate changed to pending after approval
+   ↓ actual closed created-source commit and publisher > rejects a predecessor gate changed to rejected after approval
+   ↓ actual closed created-source commit and publisher > persists the same succeeded attempt in workflow checkpoint and a freshly opened SQLite reader
+   ↓ actual closed created-source commit and publisher > publishes complete native source, commits once, preserves R1 geometry and replays without a second commit
+   ↓ actual closed created-source commit and publisher > refuses a prepared transaction of another kind before publishing source
+   ↓ actual closed created-source commit and publisher > refuses a workflow attempt detached from the actual prepared job
+   ↓ actual closed created-source commit and publisher > refuses JSON-cloned publication proof without moving database authorities
+   ↓ actual closed created-source commit and publisher > refuses author bytes changed after publication even while database base is unchanged
+   ↓ actual closed created-source commit and publisher > refuses current selection changed after publication
+   ↓ actual closed created-source commit and publisher > refuses a symlink replacement of the committed snapshot source
+   ↓ actual closed created-source commit and publisher > rolls every database authority back if an actual post-consume write fails
+   ↓ actual closed created-source commit and publisher > poisons the outer transaction when a project-bound repository guard failure is swallowed
+   ↓ actual closed created-source commit and publisher > poisons the owner if a real scope is used against another database even when the error is swallowed
+   ↓ actual closed created-source commit and publisher > invalidates an authentic joined scope when its successful commit ends
+   ↓ actual closed created-source commit and publisher > does not expose mutable issuer, guard or geometry authority on a real publication token
+   ↓ actual closed created-source commit and publisher > refuses an authority that expires during final synchronous file verification
+   ↓ actual closed created-source commit and publisher > retains the original backup inode when a same-byte replacement happens after rename
+   ↓ actual closed created-source commit and publisher > refuses a fully rehashed approved plan that lies about film
+   ↓ actual closed created-source commit and publisher > refuses a fully rehashed approved plan that lies about settings
+   ↓ actual closed created-source commit and publisher > refuses a fully rehashed approved plan that lies about captions
+   ↓ actual closed created-source commit and publisher > refuses a fully rehashed approved plan that lies about native_plan
+   ↓ actual closed created-source commit and publisher > refuses a fully rehashed approved plan that lies about rights
+   ↓ actual closed created-source commit and publisher > refuses a fully rehashed approved plan that lies about consumer
+   ↓ actual closed created-source commit and publisher > refuses a fully rehashed approved plan that lies about upstream
+   ↓ actual closed created-source commit and publisher > refuses a fully rehashed approved plan that lies about ranges
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/created-source-adoption.test.ts > actual closed created-source commit and publisher > D10 identity records actual three retained trees in the prepared journal transaction before any rename
+AssertionError: expected undefined to be defined
+ ❯ tests/agent-driven/integration/created-source-adoption.test.ts:161:20
+    159|    });
+    160|   }});
+    161|   expect(captured).toBeDefined();
+       |                    ^
+    162|   expect(f.publisher.journalOf(f.input.transaction_id).map(row=>row.ph…
+    163|   const fresh=new RevisionStore(join(f.root,'host.sqlite'));
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/agent-driven/integration/created-source-adoption.test.ts > actual closed created-source commit and publisher > D10 identity rolls back both pre-rename facts when the identity insert fails
+AssertionError: promise resolved "{ …(34) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "adoptions": CreatedSourceAdoptionStore {},
++   "advanceSelection": [Function advanceSelection],
++   "app": CreationApplication {
++     "auth": ScopedAgentAuth {
++       "cookieName": "narralens_a_session",
++       "now": [Function now],
++       "options": {
++         "requireUiReadProof": false,
++       },
++       "origin": [Function anonymous],
++     },
++     "committedSnapshots": CommittedSnapshotAuthority {
++       "creation": ProjectCreationStore {
++         "now": [Function anonymous],
++         "revisions": RevisionStore {
++           "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++           "migrations": MigrationStore {},
++         },
++         "verifier": CreationSourceVerifier {
++           "createdRoot": "/tmp/narralens-created-workspace-5MjDej/projects",
++           "hooks": {},
++           "snapshots": SnapshotStore {},
++           "vendorRoot": "/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm",
++         },
++       },
++       "revisions": RevisionStore {
++         "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++         "migrations": MigrationStore {},
++       },
++       "snapshots": SnapshotStore {},
++       "vendorRoot": "/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm",
++     },
++     "createdWorkbench": CreatedWorkbenchService {
++       "host": NarralensHost {
++         "adoption": AdoptionCoordinator {
++           "deps": {
++             "adoption": AdoptionStore {},
++             "coordinator": ProjectCoordinator {
++               "computeAffectedLocks": [Function computeAffectedLocks],
++               "deps": {
++                 "actor": ProjectWriteActor {
++                   "adapter": HypitWriteAdapter {
++                     "catalog": ProjectCatalog {
++                       "entries": Map {},
++                     },
++                   },
++                   "assets": AssetRegistry {
++                     "catalog": ProjectCatalog {
++                       "entries": Map {},
++                     },
++                     "dependencies": {},
++                   },
++                   "catalog": ProjectCatalog {
++                     "entries": Map {},
++                   },
++                   "operations": InMemoryProjectOperationQueue {},
++                   "store": RevisionStore {
++                     "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++                     "migrations": MigrationStore {},
++                   },
++                 },
++                 "bindings": EngineBindingStore {
++                   "revisions": RevisionStore {
++                     "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++                     "migrations": MigrationStore {},
++                   },
++                 },
++                 "digestFor": [Function digestFor],
++                 "engines": EngineRegistry {
++                   "bindings": EngineBindingStore {
++                     "revisions": RevisionStore {
++                       "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++                       "migrations": MigrationStore {},
++                     },
++                   },
++                 },
++                 "gateway": NativeWriteGateway {},
++                 "jobs": PersistentJobStore {},
++                 "locks": LockService {
++                   "store": RevisionStore {
++                     "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++                     "migrations": MigrationStore {},
++                   },
++                 },
++                 "outbox": Outbox {},
++                 "queue": InMemoryProjectOperationQueue {},
++                 "snapshots": SnapshotStore {},
++                 "sourceFor": [Function sourceFor],
++                 "store": RevisionStore {
++                   "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++                   "migrations": MigrationStore {},
++                 },
++               },
++             },
++             "engines": EngineRegistry {
++               "bindings": EngineBindingStore {
++                 "revisions": RevisionStore {
++                   "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++                   "migrations": MigrationStore {},
++                 },
++               },
++             },
++             "gateway": NativeWriteGateway {},
++             "idempotency": OperationIdempotencyStore {},
++             "impact": ImpactService {},
++             "ledger": MigratedAssetLedger {},
++             "locks": LockService {
++               "store": RevisionStore {
++                 "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++                 "migrations": MigrationStore {},
++               },
++             },
++             "materialize": MaterializeService {},
++             "projections": ActivatedProjectionService {},
++             "publisher": AuthorSourcePublisher {},
++             "resolver": ProjectResolver {},
++             "revisions": RevisionStore {
++               "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++               "migrations": MigrationStore {},
++             },
++             "snapshots": SnapshotStore {},
++             "stagingRoot": "/tmp/narralens-created-workspace-5MjDej/stage",
++           },
++         },
++         "adoptionFacts": AdoptionStore {},
++         "assetInventory": AssetInventoryPort {},
++         "assetLedger": MigratedAssetLedger {},
++         "catalog": ProjectCatalog {
++           "entries": Map {},
++         },
++         "comparisons": ProposalComparisonAdapter {
++           "stagingRoot": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/var/proposal-comparisons",
++         },
++         "coordinator": ProjectCoordinator {
++           "computeAffectedLocks": [Function computeAffectedLocks],
++           "deps": {
++             "actor": ProjectWriteActor {
++               "adapter": HypitWriteAdapter {
++                 "catalog": ProjectCatalog {
++                   "entries": Map {},
++                 },
++               },
++               "assets": AssetRegistry {
++                 "catalog": ProjectCatalog {
++                   "entries": Map {},
++                 },
++                 "dependencies": {},
++               },
++               "catalog": ProjectCatalog {
++                 "entries": Map {},
++               },
++               "operations": InMemoryProjectOperationQueue {},
++               "store": RevisionStore {
++                 "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++                 "migrations": MigrationStore {},
++               },
++             },
++             "bindings": EngineBindingStore {
++               "revisions": RevisionStore {
++                 "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++                 "migrations": MigrationStore {},
++               },
++             },
++             "digestFor": [Function digestFor],
++             "engines": EngineRegistry {
++               "bindings": EngineBindingStore {
++                 "revisions": RevisionStore {
++                   "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++                   "migrations": MigrationStore {},
++                 },
++               },
++             },
++             "gateway": NativeWriteGateway {},
++             "jobs": PersistentJobStore {},
++             "locks": LockService {
++               "store": RevisionStore {
++                 "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++                 "migrations": MigrationStore {},
++               },
++             },
++             "outbox": Outbox {},
++             "queue": InMemoryProjectOperationQueue {},
++             "snapshots": SnapshotStore {},
++             "sourceFor": [Function sourceFor],
++             "store": RevisionStore {
++               "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++               "migrations": MigrationStore {},
++             },
++           },
++         },
++         "derivedArtifacts": DerivedArtifactStore {
++           "root": "/tmp/narralens-created-workspace-5MjDej/derived",
++         },
++         "diagnostics": {
++           "write_actor_execute_count": 0,
++         },
++         "engines": EngineRegistry {
++           "bindings": EngineBindingStore {
++             "revisions": RevisionStore {
++               "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++               "migrations": MigrationStore {},
++             },
++           },
++         },
++         "failures": HostDiagnostics {},
++         "historical": HistoricalSnapshotResolver {},
++         "history": HistoryService {},
++         "historyStore": HistoryStore {},
++         "historyTranslator": HistoryCommandTranslator {},
++         "idempotency": OperationIdempotencyStore {},
++         "impact": ImpactService {},
++         "impactClock": [Function anonymous],
++         "impacts": ImpactStore {},
++         "imports": AssetImportService {
++           "catalog": ProjectCatalog {
++             "entries": Map {},
++           },
++           "operations": InMemoryProjectOperationQueue {},
++           "registry": AssetRegistry {
++             "catalog": ProjectCatalog {
++               "entries": Map {},
++             },
++             "dependencies": {},
++           },
++           "revisions": RevisionStore {
++             "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++             "migrations": MigrationStore {},
++           },
++         },
++         "jobs": PersistentJobStore {},
++         "locks": LockService {
++           "store": RevisionStore {
++             "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++             "migrations": MigrationStore {},
++           },
++         },
++         "m5Locks": LockMutationService {},
++         "m5Replay": ComparisonReplayService {},
++         "m5Supervisor": OpenFilmStudioSupervisor {},
++         "m5Workbench": WorkbenchService {},
++         "materializations": MaterializationStore {},
++         "materialize": MaterializeService {},
++         "migrationRoot": "/tmp/narralens-created-workspace-5MjDej/migrations",
++         "migrations": MigrationService {
++           "deps": {
++             "bindings": EngineBindingStore {
++               "revisions": RevisionStore {
++                 "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++                 "migrations": MigrationStore {},
++               },
++             },
++             "catalog": ProjectCatalog {
++               "entries": Map {},
++             },
++             "ledger": MigratedAssetLedger {},
++             "migrationRoot": "/tmp/narralens-created-workspace-5MjDej/migrations",
++             "openfilmUpstreamSha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
++             "projectRoot": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/var/projects",
++             "registerProject": [Function registerProject],
++             "revisions": RevisionStore {
++               "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++               "migrations": MigrationStore {},
++             },
++             "snapshots": SnapshotStore {},
++             "verifyStagedProject": [Function verifyStagedProject],
++           },
++         },
++         "nativeStudioRuntimeRoot": "/tmp/narralens-created-workspace-5MjDej/studio-runtime",
++         "openFilmComposition": {
++           "availability": {
++             "available": true,
++             "checked": [
++               "git_head",
++               "git_clean",
++               "package.json",
++               "pnpm-lock.yaml",
++               "LICENSE",
++               "packages/openfilm/studio/server/film.mjs",
++               "packages/openfilm/studio/server/ops.mjs",
++               "packages/openfilm/studio/server/atomic.mjs",
++               "packages/openfilm/src/film-doc.mjs",
++             ],
++             "expected_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
++             "observed_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
++             "reason": "all pinned files match their digests",
++             "vendor_root": "/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm",
++           },
++           "installed": true,
++           "reason": "all pinned files match their digests",
++           "registrar": OpenFilmEngineAdapter {},
++           "vendor_root": "/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm",
++         },
++         "openFilmCompositionFailure": null,
++         "operations": InMemoryProjectOperationQueue {},
++         "origin": "http://127.0.0.1:46331",
++         "outbox": Outbox {},
++         "projectResolver": ProjectResolver {},
++         "projections": ActivatedProjectionService {},
++         "proposals": ProposalAdapter {
++           "stagingRoot": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/var/proposals",
++         },
++         "restorePlanner": RestorePlanner {},
++         "revisions": RevisionStore {
++           "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++           "migrations": MigrationStore {},
++         },
++         "runner": ControlledAgentRunner {
++           "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
++           "executable": "claude",
++           "maxOutputBytes": 1048576,
++           "onAudit": undefined,
++           "prefixArgs": [],
++           "timeoutMs": 180000,
++         },
++         "sessionExpiresAt": 2026-11-11T23:56:13.367Z,
++         "sessionToken": "Iaka49vPAbVc_gZuE8DcxUOHlb6QHNVtMAoq1a-hIBk",
++         "snapshots": SnapshotStore {},
++         "writes": ProjectWriteActor {
++           "adapter": HypitWriteAdapter {
++             "catalog": ProjectCatalog {
++               "entries": Map {},
++             },
++           },
++           "assets": AssetRegistry {
++             "catalog": ProjectCatalog {
++               "entries": Map {},
++             },
++             "dependencies": {},
++           },
++           "catalog": ProjectCatalog {
++             "entries": Map {},
++           },
++           "operations": InMemoryProjectOperationQueue {},
++           "store": RevisionStore {
++             "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++             "migrations": MigrationStore {},
++           },
++         },
++       },
++     },
++     "creation": ProjectCreationStore {
++       "now": [Function anonymous],
++       "revisions": RevisionStore {
++         "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++         "migrations": MigrationStore {},
++       },
++       "verifier": CreationSourceVerifier {
++         "createdRoot": "/tmp/narralens-created-workspace-5MjDej/projects",
++         "hooks": {},
++         "snapshots": SnapshotStore {},
++         "vendorRoot": "/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm",
++       },
++     },
++     "dispatcher": ApplicationDispatcher {
++       "handlers": {
++         "artifact.put": [Function artifact.put],
++         "content.relay": [Function content.relay],
++         "context.read": [Function context.read],
++         "intake.confirm": [Function intake.confirm],
++         "intake.put": [Function intake.put],
++         "intake.read": [Function intake.read],
++         "job.cancel": [Function job.cancel],
++         "job.read": [Function job.read],
++         "project.create": [Function project.create],
++         "question.answer": [Function question.answer],
++         "question.answer.ui": [Function question.answer.ui],
++         "question.put": [Function question.put],
++         "review.decide": [Function review.decide],
++         "review.read": [Function review.read],
++         "task.prepare": [Function task.prepare],
++         "workflow.read": [Function workflow.read],
++         "workflow.run.authorize": [Function workflow.run.authorize],
++         "workflow.run.cancel": [Function workflow.run.cancel],
++         "workflow.run.pause": [Function workflow.run.pause],
++         "workflow.run.prepare": [Function workflow.run.prepare],
++         "workflow.run.read": [Function workflow.run.read],
++         "workflow.run.resume": [Function workflow.run.resume],
++         "workflow.run.start": [Function workflow.run.start],
++       },
++     },
++     "localAssets": null,
++     "nativeWorkspaces": CreatedNativeWorkspaceService {
++       "creation": ProjectCreationStore {
++         "now": [Function anonymous],
++         "revisions": RevisionStore {
++           "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++           "migrations": MigrationStore {},
++         },
++         "verifier": CreationSourceVerifier {
++           "createdRoot": "/tmp/narralens-created-workspace-5MjDej/projects",
++           "hooks": {},
++           "snapshots": SnapshotStore {},
++           "vendorRoot": "/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm",
++         },
++       },
++       "revisions": RevisionStore {
++         "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++         "migrations": MigrationStore {},
++       },
++       "snapshots": CommittedSnapshotAuthority {
++         "creation": ProjectCreationStore {
++           "now": [Function anonymous],
++           "revisions": RevisionStore {
++             "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++             "migrations": MigrationStore {},
++           },
++           "verifier": CreationSourceVerifier {
++             "createdRoot": "/tmp/narralens-created-workspace-5MjDej/projects",
++             "hooks": {},
++             "snapshots": SnapshotStore {},
++             "vendorRoot": "/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm",
++           },
++         },
++         "revisions": RevisionStore {
++           "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++           "migrations": MigrationStore {},
++         },
++         "snapshots": SnapshotStore {},
++         "vendorRoot": "/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm",
++       },
++     },
++     "workbenchSessions": null,
++     "worker": ProjectCreationService {
++       "deps": {
++         "coordinator": ProjectCoordinator {
++           "computeAffectedLocks": [Function computeAffectedLocks],
++           "deps": {
++             "actor": ProjectWriteActor {
++               "adapter": HypitWriteAdapter {
++                 "catalog": ProjectCatalog {
++                   "entries": Map {},
++                 },
++               },
++               "assets": AssetRegistry {
++                 "catalog": ProjectCatalog {
++                   "entries": Map {},
++                 },
++                 "dependencies": {},
++               },
++               "catalog": ProjectCatalog {
++                 "entries": Map {},
++               },
++               "operations": InMemoryProjectOperationQueue {},
++               "store": RevisionStore {
++                 "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++                 "migrations": MigrationStore {},
++               },
++             },
++             "bindings": EngineBindingStore {
++               "revisions": RevisionStore {
++                 "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++                 "migrations": MigrationStore {},
++               },
++             },
++             "digestFor": [Function digestFor],
++             "engines": EngineRegistry {
++               "bindings": EngineBindingStore {
++                 "revisions": RevisionStore {
++                   "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++                   "migrations": MigrationStore {},
++                 },
++               },
++             },
++             "gateway": NativeWriteGateway {},
++             "jobs": PersistentJobStore {},
++             "locks": LockService {
++               "store": RevisionStore {
++                 "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++                 "migrations": MigrationStore {},
++               },
++             },
++             "outbox": Outbox {},
++             "queue": InMemoryProjectOperationQueue {},
++             "snapshots": SnapshotStore {},
++             "sourceFor": [Function sourceFor],
++             "store": RevisionStore {
++               "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++               "migrations": MigrationStore {},
++             },
++           },
++         },
++         "createdRoot": "/tmp/narralens-created-workspace-5MjDej/projects",
++         "pollMs": 10,
++         "snapshots": SnapshotStore {},
++         "store": ProjectCreationStore {
++           "now": [Function anonymous],
++           "revisions": RevisionStore {
++             "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++             "migrations": MigrationStore {},
++           },
++           "verifier": CreationSourceVerifier {
++             "createdRoot": "/tmp/narralens-created-workspace-5MjDej/projects",
++             "hooks": {},
++             "snapshots": SnapshotStore {},
++             "vendorRoot": "/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm",
++           },
++         },
++         "verifier": CreationSourceVerifier {
++           "createdRoot": "/tmp/narralens-created-workspace-5MjDej/projects",
++           "hooks": {},
++           "snapshots": SnapshotStore {},
++           "vendorRoot": "/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm",
++         },
++       },
++     },
++   },
++   "authorBytes": {
++     "data": [
++       60,
++       33,
++       100,
++       111,
++       99,
++       116,
++       121,
++       112,
++       101,
++       32,
++       104,
++       116,
++       109,
++       108,
++       62,
++       10,
++       60,
++       104,
++       116,
++       109,
++       108,
++       62,
++       10,
++       60,
++       104,
++       101,
++       97,
++       100,
++       62,
++       10,
++       60,
++       109,
++       101,
++       116,
++       97,
++       32,
++       99,
++       104,
++       97,
++       114,
++       115,
++       101,
++       116,
++       61,
++       34,
++       117,
++       116,
++       102,
++       45,
++       56,
++       34,
++       62,
++       10,
++       60,
++       109,
++       101,
++       116,
++       97,
++       32,
++       110,
++       97,
++       109,
++       101,
++       61,
++       34,
++       118,
++       105,
++       101,
++       119,
++       112,
++       111,
++       114,
++       116,
++       34,
++       32,
++       99,
++       111,
++       110,
++       116,
++       101,
++       110,
++       116,
++       61,
++       34,
++       119,
++       105,
++       100,
++       116,
++       104,
++       61,
++       49,
++       50,
++       56,
++       48,
++       44,
++       32,
++       104,
++       101,
++       105,
++       103,
++       104,
++       116,
++       61,
++       55,
++       50,
++       48,
++       34,
++       62,
++       10,
++       60,
++       115,
++       116,
++       121,
++       108,
++       101,
++       62,
++       10,
++       32,
++       32,
++       105,
++       102,
++       114,
++       97,
++       109,
++       101,
++       32,
++       123,
++       32,
++       119,
++       105,
++       100,
++       116,
++       104,
++       58,
++       32,
++       49,
++       50,
++       56,
++       48,
++       112,
++       120,
++       59,
++       32,
++       104,
++       101,
++       105,
++       103,
++       104,
++       116,
++       58,
++       32,
++       55,
++       50,
++       48,
++       112,
++       120,
++       59,
++       32,
++       108,
++       101,
++       102,
++       116,
++       58,
++       32,
++       48,
++       59,
++       32,
++       116,
++       111,
++       112,
++       58,
++       32,
++       48,
++       59,
++       32,
++       125,
++       10,
++       60,
++       47,
++       115,
++       116,
++       121,
++       108,
++       101,
++       62,
++       10,
++       60,
++       47,
++       104,
++       101,
++       97,
++       100,
++       62,
++       10,
++       60,
++       98,
++       111,
++       100,
++       121,
++       62,
++       10,
++       60,
++       115,
++       101,
++       99,
++       116,
++       105,
++       111,
++       110,
++       32,
++       100,
++       97,
++       116,
++       97,
++       45,
++       116,
++       114,
++       97,
++       99,
++       107,
++       61,
++       34,
++       112,
++       105,
++       99,
++       116,
++       117,
++       114,
++       101,
++       34,
++       62,
++       10,
++       10,
++       60,
++       47,
++       115,
++       101,
++       99,
++       116,
++       105,
++       111,
++       110,
++       62,
++       10,
++       60,
++       115,
++       101,
++       99,
++       116,
++       105,
++       111,
++       110,
++       32,
++       100,
++       97,
++       116,
++       97,
++       45,
++       116,
++       114,
++       97,
++       99,
++       107,
++       61,
++       34,
++       110,
++       97,
++       114,
++       114,
++       97,
++       116,
++       105,
++       111,
++       110,
++       34,
++       62,
++       10,
++       10,
++       60,
++       47,
++       115,
++       101,
++       99,
++       116,
++       105,
++       111,
++       110,
++       62,
++       10,
++       60,
++       47,
++       98,
++       111,
++       100,
++       121,
++       62,
++       10,
++       60,
++       47,
++       104,
++       116,
++       109,
++       108,
++       62,
++       10,
++     ],
++     "type": "Buffer",
++   },
++   "authorRoot": "/tmp/narralens-created-workspace-5MjDej/projects/project_43307eed1dbc467381c4014a19198a36/source",
++   "close": [Function close],
++   "closePublisher": [Function closePublisher],
++   "closure": {
++     "entries": [
++       {
++         "absolute_path": "/tmp/narralens-created-workspace-5MjDej/snapshots/project_43307eed1dbc467381c4014a19198a36/3c2e9daedffb4ee63b9c9945ed6b67e628f8bf5763a1c0b849b454592a425b21/source/film.html",
++         "bytes": 305,
++         "kind": "native_source",
++         "relative_path": "film.html",
++         "rights_ref": null,
++         "role": null,
++         "sha256": "6fa7da5e347efad23a6a0cad2892445e6c643806dca0acc0b35f5e6c85d5a6bd",
++       },
++     ],
++     "expected_duration_seconds": 0,
++     "expected_frames": 0,
++     "native_entry": "film.html",
++     "native_root": "/tmp/narralens-created-workspace-5MjDej/snapshots/project_43307eed1dbc467381c4014a19198a36/3c2e9daedffb4ee63b9c9945ed6b67e628f8bf5763a1c0b849b454592a425b21/source",
++     "project_id": "project_43307eed1dbc467381c4014a19198a36",
++     "project_revision": 1,
++     "rights": [],
++     "snapshot_id": "3c2e9daedffb4ee63b9c9945ed6b67e628f8bf5763a1c0b849b454592a425b21",
++     "source_digest": "deb8d69a668e8b5b252a0213742bb427c440d307946783e97ec41f788342eb78",
++   },
++   "commit": {
++     "created_at": "2026-11-11T22:56:14.927Z",
++     "engine": "openfilm",
++     "project_id": "project_43307eed1dbc467381c4014a19198a36",
++     "revision": 1,
++     "snapshot_id": "3c2e9daedffb4ee63b9c9945ed6b67e628f8bf5763a1c0b849b454592a425b21",
++     "source_digest": "deb8d69a668e8b5b252a0213742bb427c440d307946783e97ec41f788342eb78",
++     "transaction_id": "txn_43307eed1dbc467381c4014a19198a36",
++   },
++   "driver": {
++     "csrf": null,
++     "principal": {
++       "channel": "authenticated",
++       "expires_at": 1794438074095,
++       "principal_id": "owner",
++       "session_ref": "session_00dcf637345270ee72950e40",
++     },
++     "token": "9TNkj5KNdjNJQ7jzrVioB-DCO8LDtTCGSSq2wysCvzI",
++   },
++   "foreign": {
++     "channel": "authenticated",
++     "principal_id": "other",
++     "session_ref": "fixture-other",
++     "source": "driver_relay",
++     Symbol(narralens.trustedCallerContext): true,
++   },
++   "grant": {
++     "authorization_id": "grant-393487ca-710e-4241-8f4e-b3ebf8ef81bc",
++     "channel": "trusted_ui",
++     "decision_id": "conf-1",
++     "expires_at": "2026-11-11T23:56:18.000Z",
++     "issued_at": "2026-11-11T22:56:18.000Z",
++     "principal_id": "owner",
++     "scope": {
++       "allow_external_write": false,
++       "allow_paid": false,
++       "allow_runtime_mutation": false,
++       "allowed_actions": [
++         "clip.prepare",
++         "snapshot.render",
++         "qc.inspect",
++         "delivery.package",
++         "change.prepare",
++         "change.apply",
++       ],
++       "capability_fingerprint": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
++       "content_type": "short_film",
++       "execution_digest": "b70615d5ad4246caac7d0e770022429de5826831b222447e4be7637e4a07ca32",
++       "input_digest": "9e71d4205e0abfd8aed9bc5b666e524dee282d9a0cb458179dc81e2cf9dc9407",
++       "plan_version": 1,
++       "project_id": "project_43307eed1dbc467381c4014a19198a36",
++       "run_id": "run-e670de98-cb17-42dd-acb4-a4dc8c7c454e",
++       "style_ref": {
++         "id": "brief_43307eed1dbc467381c4014a19198a36",
++         "sha256": "4276471ab07ba8224a4e03da7d36a5a98ecd8790e073a5a86d4009ebab6742d7",
++         "version": 1,
++       },
++       "template_id": "local-short-film",
++       "template_version": 1,
++     },
++     "scope_digest": "a99d87aa04d83b4a324cf565843d343a7c60a37c0c214930ba878279850a5ab0",
++     "state": "active",
++   },
++   "host": NarralensHost {
++     "adoption": AdoptionCoordinator {
++       "deps": {
++         "adoption": AdoptionStore {},
++         "coordinator": ProjectCoordinator {
++           "computeAffectedLocks": [Function computeAffectedLocks],
++           "deps": {
++             "actor": ProjectWriteActor {
++               "adapter": HypitWriteAdapter {
++                 "catalog": ProjectCatalog {
++                   "entries": Map {},
++                 },
++               },
++               "assets": AssetRegistry {
++                 "catalog": ProjectCatalog {
++                   "entries": Map {},
++                 },
++                 "dependencies": {},
++               },
++               "catalog": ProjectCatalog {
++                 "entries": Map {},
++               },
++               "operations": InMemoryProjectOperationQueue {},
++               "store": RevisionStore {
++                 "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++                 "migrations": MigrationStore {},
++               },
++             },
++             "bindings": EngineBindingStore {
++               "revisions": RevisionStore {
++                 "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++                 "migrations": MigrationStore {},
++               },
++             },
++             "digestFor": [Function digestFor],
++             "engines": EngineRegistry {
++               "bindings": EngineBindingStore {
++                 "revisions": RevisionStore {
++                   "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++                   "migrations": MigrationStore {},
++                 },
++               },
++             },
++             "gateway": NativeWriteGateway {},
++             "jobs": PersistentJobStore {},
++             "locks": LockService {
++               "store": RevisionStore {
++                 "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++                 "migrations": MigrationStore {},
++               },
++             },
++             "outbox": Outbox {},
++             "queue": InMemoryProjectOperationQueue {},
++             "snapshots": SnapshotStore {},
++             "sourceFor": [Function sourceFor],
++             "store": RevisionStore {
++               "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++               "migrations": MigrationStore {},
++             },
++           },
++         },
++         "engines": EngineRegistry {
++           "bindings": EngineBindingStore {
++             "revisions": RevisionStore {
++               "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++               "migrations": MigrationStore {},
++             },
++           },
++         },
++         "gateway": NativeWriteGateway {},
++         "idempotency": OperationIdempotencyStore {},
++         "impact": ImpactService {},
++         "ledger": MigratedAssetLedger {},
++         "locks": LockService {
++           "store": RevisionStore {
++             "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++             "migrations": MigrationStore {},
++           },
++         },
++         "materialize": MaterializeService {},
++         "projections": ActivatedProjectionService {},
++         "publisher": AuthorSourcePublisher {},
++         "resolver": ProjectResolver {},
++         "revisions": RevisionStore {
++           "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++           "migrations": MigrationStore {},
++         },
++         "snapshots": SnapshotStore {},
++         "stagingRoot": "/tmp/narralens-created-workspace-5MjDej/stage",
++       },
++     },
++     "adoptionFacts": AdoptionStore {},
++     "assetInventory": AssetInventoryPort {},
++     "assetLedger": MigratedAssetLedger {},
++     "catalog": ProjectCatalog {
++       "entries": Map {},
++     },
++     "comparisons": ProposalComparisonAdapter {
++       "stagingRoot": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/var/proposal-comparisons",
++     },
++     "coordinator": ProjectCoordinator {
++       "computeAffectedLocks": [Function computeAffectedLocks],
++       "deps": {
++         "actor": ProjectWriteActor {
++           "adapter": HypitWriteAdapter {
++             "catalog": ProjectCatalog {
++               "entries": Map {},
++             },
++           },
++           "assets": AssetRegistry {
++             "catalog": ProjectCatalog {
++               "entries": Map {},
++             },
++             "dependencies": {},
++           },
++           "catalog": ProjectCatalog {
++             "entries": Map {},
++           },
++           "operations": InMemoryProjectOperationQueue {},
++           "store": RevisionStore {
++             "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++             "migrations": MigrationStore {},
++           },
++         },
++         "bindings": EngineBindingStore {
++           "revisions": RevisionStore {
++             "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++             "migrations": MigrationStore {},
++           },
++         },
++         "digestFor": [Function digestFor],
++         "engines": EngineRegistry {
++           "bindings": EngineBindingStore {
++             "revisions": RevisionStore {
++               "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++               "migrations": MigrationStore {},
++             },
++           },
++         },
++         "gateway": NativeWriteGateway {},
++         "jobs": PersistentJobStore {},
++         "locks": LockService {
++           "store": RevisionStore {
++             "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++             "migrations": MigrationStore {},
++           },
++         },
++         "outbox": Outbox {},
++         "queue": InMemoryProjectOperationQueue {},
++         "snapshots": SnapshotStore {},
++         "sourceFor": [Function sourceFor],
++         "store": RevisionStore {
++           "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++           "migrations": MigrationStore {},
++         },
++       },
++     },
++     "derivedArtifacts": DerivedArtifactStore {
++       "root": "/tmp/narralens-created-workspace-5MjDej/derived",
++     },
++     "diagnostics": {
++       "write_actor_execute_count": 0,
++     },
++     "engines": EngineRegistry {
++       "bindings": EngineBindingStore {
++         "revisions": RevisionStore {
++           "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++           "migrations": MigrationStore {},
++         },
++       },
++     },
++     "failures": HostDiagnostics {},
++     "historical": HistoricalSnapshotResolver {},
++     "history": HistoryService {},
++     "historyStore": HistoryStore {},
++     "historyTranslator": HistoryCommandTranslator {},
++     "idempotency": OperationIdempotencyStore {},
++     "impact": ImpactService {},
++     "impactClock": [Function anonymous],
++     "impacts": ImpactStore {},
++     "imports": AssetImportService {
++       "catalog": ProjectCatalog {
++         "entries": Map {},
++       },
++       "operations": InMemoryProjectOperationQueue {},
++       "registry": AssetRegistry {
++         "catalog": ProjectCatalog {
++           "entries": Map {},
++         },
++         "dependencies": {},
++       },
++       "revisions": RevisionStore {
++         "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++         "migrations": MigrationStore {},
++       },
++     },
++     "jobs": PersistentJobStore {},
++     "locks": LockService {
++       "store": RevisionStore {
++         "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++         "migrations": MigrationStore {},
++       },
++     },
++     "m5Locks": LockMutationService {},
++     "m5Replay": ComparisonReplayService {},
++     "m5Supervisor": OpenFilmStudioSupervisor {},
++     "m5Workbench": WorkbenchService {},
++     "materializations": MaterializationStore {},
++     "materialize": MaterializeService {},
++     "migrationRoot": "/tmp/narralens-created-workspace-5MjDej/migrations",
++     "migrations": MigrationService {
++       "deps": {
++         "bindings": EngineBindingStore {
++           "revisions": RevisionStore {
++             "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++             "migrations": MigrationStore {},
++           },
++         },
++         "catalog": ProjectCatalog {
++           "entries": Map {},
++         },
++         "ledger": MigratedAssetLedger {},
++         "migrationRoot": "/tmp/narralens-created-workspace-5MjDej/migrations",
++         "openfilmUpstreamSha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
++         "projectRoot": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/var/projects",
++         "registerProject": [Function registerProject],
++         "revisions": RevisionStore {
++           "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++           "migrations": MigrationStore {},
++         },
++         "snapshots": SnapshotStore {},
++         "verifyStagedProject": [Function verifyStagedProject],
++       },
++     },
++     "nativeStudioRuntimeRoot": "/tmp/narralens-created-workspace-5MjDej/studio-runtime",
++     "openFilmComposition": {
++       "availability": {
++         "available": true,
++         "checked": [
++           "git_head",
++           "git_clean",
++           "package.json",
++           "pnpm-lock.yaml",
++           "LICENSE",
++           "packages/openfilm/studio/server/film.mjs",
++           "packages/openfilm/studio/server/ops.mjs",
++           "packages/openfilm/studio/server/atomic.mjs",
++           "packages/openfilm/src/film-doc.mjs",
++         ],
++         "expected_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
++         "observed_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
++         "reason": "all pinned files match their digests",
++         "vendor_root": "/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm",
++       },
++       "installed": true,
++       "reason": "all pinned files match their digests",
++       "registrar": OpenFilmEngineAdapter {},
++       "vendor_root": "/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm",
++     },
++     "openFilmCompositionFailure": null,
++     "operations": InMemoryProjectOperationQueue {},
++     "origin": "http://127.0.0.1:46331",
++     "outbox": Outbox {},
++     "projectResolver": ProjectResolver {},
++     "projections": ActivatedProjectionService {},
++     "proposals": ProposalAdapter {
++       "stagingRoot": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/var/proposals",
++     },
++     "restorePlanner": RestorePlanner {},
++     "revisions": RevisionStore {
++       "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++       "migrations": MigrationStore {},
++     },
++     "runner": ControlledAgentRunner {
++       "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
++       "executable": "claude",
++       "maxOutputBytes": 1048576,
++       "onAudit": undefined,
++       "prefixArgs": [],
++       "timeoutMs": 180000,
++     },
++     "sessionExpiresAt": 2026-11-11T23:56:13.367Z,
++     "sessionToken": "Iaka49vPAbVc_gZuE8DcxUOHlb6QHNVtMAoq1a-hIBk",
++     "snapshots": SnapshotStore {},
++     "writes": ProjectWriteActor {
++       "adapter": HypitWriteAdapter {
++         "catalog": ProjectCatalog {
++           "entries": Map {},
++         },
++       },
++       "assets": AssetRegistry {
++         "catalog": ProjectCatalog {
++           "entries": Map {},
++         },
++         "dependencies": {},
++       },
++       "catalog": ProjectCatalog {
++         "entries": Map {},
++       },
++       "operations": InMemoryProjectOperationQueue {},
++       "store": RevisionStore {
++         "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++         "migrations": MigrationStore {},
++       },
++     },
++   },
++   "impact": {
++     "affected_consumers": [
++       {
++         "action": "replace",
++         "id": "native",
++         "kind": "native",
++       },
++     ],
++     "affected_ranges": [
++       {
++         "clip_id": "concept-s1",
++         "end_frame_exclusive": 31,
++         "start_frame": 0,
++       },
++       {
++         "clip_id": "shot-s1",
++         "end_frame_exclusive": 31,
++         "start_frame": 0,
++       },
++       {
++         "clip_id": "narration",
++         "end_frame_exclusive": 90,
++         "start_frame": 0,
++       },
++       {
++         "clip_id": "shot-s2",
++         "end_frame_exclusive": 60,
++         "start_frame": 31,
++       },
++       {
++         "clip_id": "shot-s3",
++         "end_frame_exclusive": 90,
++         "start_frame": 60,
++       },
++     ],
++     "approvals_required": [
++       "change.approve",
++     ],
++     "base_revision": 1,
++     "control_revision": 0,
++     "engine": "openfilm",
++     "engine_upstream_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
++     "expires_at": "2026-11-11T23:11:22.001Z",
++     "format": "narralens.created-impact@1",
++     "impact_hash": "8b159e07572d7a251145f004b43fcac5b1ac4c0f4343edb2df1e9beb0bd03863",
++     "impact_id": "imp_057fd8cb190c486784ef0b532af3e752",
++     "locks_checked": [],
++     "materialization_id": "ps_b9489854a529db9b31d220e4cabc430c4b365e3eac92dcc25660ba45dd7d",
++     "native_plan_sha256": "09bc6ee76108a6faa40c05205bb7a334fff904e306f4cd76af6ab2744895fe6c",
++     "operation": "adopt_prepared_source",
++     "project_id": "project_43307eed1dbc467381c4014a19198a36",
++     "rights_digest": "c24ed8810150f8fd357a8c40f2ce069d3ad8de613206080463389b1c684187a2",
++     "source_digest": "deb8d69a668e8b5b252a0213742bb427c440d307946783e97ec41f788342eb78",
++     "target_snapshot_id": "97fe122bb54273add07d763cd84a85c1474f0ddaa6f04288eb3a77e9f417a07e",
++   },
++   "input": {
++     "approval_id": "approval_45a8154792214f9281e79b5c7e69299f",
++     "execution": {
++       "attempt": 1,
++       "authorization_id": "grant-393487ca-710e-4241-8f4e-b3ebf8ef81bc",
++       "input_digest": "9e71d4205e0abfd8aed9bc5b666e524dee282d9a0cb458179dc81e2cf9dc9407",
++       "plan_version": 1,
++       "run_id": "run-e670de98-cb17-42dd-acb4-a4dc8c7c454e",
++       "run_scope_digest": "a99d87aa04d83b4a324cf565843d343a7c60a37c0c214930ba878279850a5ab0",
++       "step_id": "sample",
++     },
++     "idempotency_key": "module-apply",
++     "impact_id": "imp_057fd8cb190c486784ef0b532af3e752",
++     "prepared_source_id": "ps_b9489854a529db9b31d220e4cabc430c4b365e3eac92dcc25660ba45dd7d",
++     "project_id": "project_43307eed1dbc467381c4014a19198a36",
++     "publication_proof": {
++       "facts": {
++         "backup_root": "/tmp/narralens-created-workspace-5MjDej/publication/publication-1849b047-e85d-46a2-8ada-d71d93d27710/backup",
++         "issued_at": "2026-11-11T22:56:23.829Z",
++         "journal_id": "txn_6144e0fa9fb54c369c8fc5af26012dbf:published",
++         "original_source_digest": "deb8d69a668e8b5b252a0213742bb427c440d307946783e97ec41f788342eb78",
++         "prepared_source_id": "ps_b9489854a529db9b31d220e4cabc430c4b365e3eac92dcc25660ba45dd7d",
++         "project_id": "project_43307eed1dbc467381c4014a19198a36",
++         "published_files": [
++           {
++             "bytes": 11,
++             "relative_path": ".film/settings.json",
++             "sha256": "5f098b8911b608c4f0ebefa7a838289331f490c8fb79880249941c10866e2ad9",
++           },
++           {
++             "bytes": 530,
++             "relative_path": ".film/subtitles.json",
++             "sha256": "2ac9c6ecad02ee5b179565bb0d73ff6e0a88051c4cbd52bd5b2bb398077d97d2",
++           },
++           {
++             "bytes": 4112,
++             "relative_path": "assets/video/001-23cfae6d486bb5558e398f8b48069b68c773910cf7eb360e157adb9a83b39bc5.mp4",
++             "sha256": "23cfae6d486bb5558e398f8b48069b68c773910cf7eb360e157adb9a83b39bc5",
++           },
++           {
++             "bytes": 259,
++             "relative_path": "assets/vo/002-42c9992dbd4dcfbeaf52790767beb0febee1279ce37e2e46d5cb474bdd8e1a1d.vtt",
++             "sha256": "7589688eff6e9ca5ee39341deb23d149f5a6cccec1da8ac9299fbb07230b88d9",
++           },
++           {
++             "bytes": 288078,
++             "relative_path": "assets/vo/002-42c9992dbd4dcfbeaf52790767beb0febee1279ce37e2e46d5cb474bdd8e1a1d.wav",
++             "sha256": "42c9992dbd4dcfbeaf52790767beb0febee1279ce37e2e46d5cb474bdd8e1a1d",
++           },
++           {
++             "bytes": 2228,
++             "relative_path": "draft-plan.json",
++             "sha256": "e934e1eae5b90027983b753091f3e94164f6f461f2e87c74b57e97c80c379261",
++           },
++           {
++             "bytes": 933,
++             "relative_path": "film.html",
++             "sha256": "ed7b107d820d02065b5cca124058201769589de0f7f0a99ca8302aeb41c1d447",
++           },
++           {
++             "bytes": 1646,
++             "relative_path": "prepared-native.json",
++             "sha256": "d91f8f2c98fdde3491aa4fd57092c0dfd27adde00234249a1a97535fe2d31153",
++           },
++           {
++             "bytes": 1260,
++             "relative_path": "rights.json",
++             "sha256": "ba7dbf1c4ad6d9f1077fd0373b577cc56b51f33049923d81b87afcf631c4d6ad",
++           },
++           {
++             "bytes": 976,
++             "relative_path": "scenes/001.html",
++             "sha256": "7709f707a89923e04062d045124de642a2367dd2191ae1ae344c4927b0b7db1e",
++           },
++           {
++             "bytes": 939,
++             "relative_path": "scenes/003.html",
++             "sha256": "bc3520cfecfd1210f0a2d1a7605dd35349ad87c71d3cb5c051daa4e6c6651b8e",
++           },
++         ],
++         "published_source_digest": "eeea326abe990c29701ade0a1dad1f112bffe64af5a3ab9ff77734792ca2ecc8",
++         "publisher_instance": "publisher_acb893ec-4ba9-406f-aa77-a58381248b10",
++         "target_snapshot_id": "97fe122bb54273add07d763cd84a85c1474f0ddaa6f04288eb3a77e9f417a07e",
++         "transaction_id": "txn_6144e0fa9fb54c369c8fc5af26012dbf",
++       },
++     },
++     "request_digest": "e29014bcf8f72534751b2f0933f743c85fa099e29216c2f240ccc2307858d9b6",
++     "transaction_id": "txn_6144e0fa9fb54c369c8fc5af26012dbf",
++   },
++   "owner": {
++     "channel": "authenticated",
++     "principal_id": "owner",
++     "session_ref": "fixture-owner",
++     "source": "driver_relay",
++     Symbol(narralens.trustedCallerContext): true,
++   },
++   "plan": {
++     "affected_ranges": [
++       {
++         "clip_id": "shot-s1",
++         "end_frame_exclusive": 31,
++         "start_frame": 0,
++       },
++       {
++         "clip_id": "concept-s1",
++         "end_frame_exclusive": 31,
++         "start_frame": 0,
++       },
++       {
++         "clip_id": "shot-s2",
++         "end_frame_exclusive": 60,
++         "start_frame": 31,
++       },
++       {
++         "clip_id": "shot-s3",
++         "end_frame_exclusive": 90,
++         "start_frame": 60,
++       },
++       {
++         "clip_id": "narration",
++         "end_frame_exclusive": 90,
++         "start_frame": 0,
++       },
++     ],
++     "base_revision": 1,
++     "base_source_digest": "deb8d69a668e8b5b252a0213742bb427c440d307946783e97ec41f788342eb78",
++     "consumer": {
++       "consumer_id": "native",
++       "graph_digest": "528bbe2d327f88008c4cba3878c7e18321d78bd179e5f4db5467dba15807d961",
++       "project_id": "project_43307eed1dbc467381c4014a19198a36",
++       "run_id": "run-e670de98-cb17-42dd-acb4-a4dc8c7c454e",
++     },
++     "control_revision": 0,
++     "engine_upstream_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
++     "expires_at": "2026-11-11T23:11:22.001Z",
++     "files": [
++       {
++         "bytes": 11,
++         "relative_path": ".film/settings.json",
++         "sha256": "5f098b8911b608c4f0ebefa7a838289331f490c8fb79880249941c10866e2ad9",
++       },
++       {
++         "bytes": 530,
++         "relative_path": ".film/subtitles.json",
++         "sha256": "2ac9c6ecad02ee5b179565bb0d73ff6e0a88051c4cbd52bd5b2bb398077d97d2",
++       },
++       {
++         "bytes": 4112,
++         "relative_path": "assets/video/001-23cfae6d486bb5558e398f8b48069b68c773910cf7eb360e157adb9a83b39bc5.mp4",
++         "sha256": "23cfae6d486bb5558e398f8b48069b68c773910cf7eb360e157adb9a83b39bc5",
++       },
++       {
++         "bytes": 259,
++         "relative_path": "assets/vo/002-42c9992dbd4dcfbeaf52790767beb0febee1279ce37e2e46d5cb474bdd8e1a1d.vtt",
++         "sha256": "7589688eff6e9ca5ee39341deb23d149f5a6cccec1da8ac9299fbb07230b88d9",
++       },
++       {
++         "bytes": 288078,
++         "relative_path": "assets/vo/002-42c9992dbd4dcfbeaf52790767beb0febee1279ce37e2e46d5cb474bdd8e1a1d.wav",
++         "sha256": "42c9992dbd4dcfbeaf52790767beb0febee1279ce37e2e46d5cb474bdd8e1a1d",
++       },
++       {
++         "bytes": 2228,
++         "relative_path": "draft-plan.json",
++         "sha256": "e934e1eae5b90027983b753091f3e94164f6f461f2e87c74b57e97c80c379261",
++       },
++       {
++         "bytes": 933,
++         "relative_path": "film.html",
++         "sha256": "ed7b107d820d02065b5cca124058201769589de0f7f0a99ca8302aeb41c1d447",
++       },
++       {
++         "bytes": 1646,
++         "relative_path": "prepared-native.json",
++         "sha256": "d91f8f2c98fdde3491aa4fd57092c0dfd27adde00234249a1a97535fe2d31153",
++       },
++       {
++         "bytes": 1260,
++         "relative_path": "rights.json",
++         "sha256": "ba7dbf1c4ad6d9f1077fd0373b577cc56b51f33049923d81b87afcf631c4d6ad",
++       },
++       {
++         "bytes": 976,
++         "relative_path": "scenes/001.html",
++         "sha256": "7709f707a89923e04062d045124de642a2367dd2191ae1ae344c4927b0b7db1e",
++       },
++       {
++         "bytes": 939,
++         "relative_path": "scenes/003.html",
++         "sha256": "bc3520cfecfd1210f0a2d1a7605dd35349ad87c71d3cb5c051daa4e6c6651b8e",
++       },
++     ],
++     "format": "narralens.prepared-adoption-plan@1",
++     "fps_denominator": 1,
++     "fps_numerator": 30,
++     "frame_count": 90,
++     "locks_checked": [],
++     "materialization_id": "ps_b9489854a529db9b31d220e4cabc430c4b365e3eac92dcc25660ba45dd7d",
++     "native_plan": {
++       "captions_digest": "7589688eff6e9ca5ee39341deb23d149f5a6cccec1da8ac9299fbb07230b88d9",
++       "film_bytes": 933,
++       "film_sha256": "ed7b107d820d02065b5cca124058201769589de0f7f0a99ca8302aeb41c1d447",
++       "markers_digest": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
++       "native_plan_sha256": "7732cdb662d6c5c4f1a82074f8475f58f1a31fc103a429b6419d205b43675656",
++       "settings_digest": "5f098b8911b608c4f0ebefa7a838289331f490c8fb79880249941c10866e2ad9",
++       "subtitle_style_digest": "2ac9c6ecad02ee5b179565bb0d73ff6e0a88051c4cbd52bd5b2bb398077d97d2",
++     },
++     "prepared_fact_digest": "d90cb85e1146553ba793113977be805c3fbcad3a1369de6d8676e489c277d750",
++     "producer_execution": {
++       "attempt": 1,
++       "authorization_id": "grant-393487ca-710e-4241-8f4e-b3ebf8ef81bc",
++       "input_digest": "9e71d4205e0abfd8aed9bc5b666e524dee282d9a0cb458179dc81e2cf9dc9407",
++       "plan_version": 1,
++       "run_id": "run-e670de98-cb17-42dd-acb4-a4dc8c7c454e",
++       "run_scope_digest": "a99d87aa04d83b4a324cf565843d343a7c60a37c0c214930ba878279850a5ab0",
++       "step_id": "sample",
++     },
++     "project_id": "project_43307eed1dbc467381c4014a19198a36",
++     "request_digest": "9e71d4205e0abfd8aed9bc5b666e524dee282d9a0cb458179dc81e2cf9dc9407",
++     "rights": [
++       {
++         "artifact_version": 1,
++         "ref_id": "rights_5a3c7aeb1dada1dfc280b14d8579f346f5805c0917fe1705bea4e3df",
++         "sha256": "5a3c7aeb1dada1dfc280b14d8579f346f5805c0917fe1705bea4e3dfece8566a",
++       },
++       {
++         "artifact_version": 1,
++         "ref_id": "rights_a45f36a93e3392745dcd143000f1c42f05db7d2cf0e055d19fc7a481",
++         "sha256": "a45f36a93e3392745dcd143000f1c42f05db7d2cf0e055d19fc7a481c6675aa3",
++       },
++     ],
++     "roots": [
++       ".film/settings.json",
++       ".film/subtitles.json",
++       "assets/video/001-23cfae6d486bb5558e398f8b48069b68c773910cf7eb360e157adb9a83b39bc5.mp4",
++       "assets/vo/002-42c9992dbd4dcfbeaf52790767beb0febee1279ce37e2e46d5cb474bdd8e1a1d.vtt",
++       "assets/vo/002-42c9992dbd4dcfbeaf52790767beb0febee1279ce37e2e46d5cb474bdd8e1a1d.wav",
++       "draft-plan.json",
++       "film.html",
++       "prepared-native.json",
++       "rights.json",
++       "scenes/001.html",
++       "scenes/003.html",
++     ],
++     "selection_version": 0,
++     "source_kind": "created_prepared_source",
++     "target_snapshot_id": "97fe122bb54273add07d763cd84a85c1474f0ddaa6f04288eb3a77e9f417a07e",
++     "target_source_digest": "eeea326abe990c29701ade0a1dad1f112bffe64af5a3ab9ff77734792ca2ecc8",
++     "version": 1,
++   },
++   "processor": CreatedDraftTaskProcessor {
++     "assertPrepared": [Function assertPrepared],
++     "assets": LocalAssetRegistry {
++       "creation": ProjectCreationStore {
++         "now": [Function anonymous],
++         "revisions": RevisionStore {
++           "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++           "migrations": MigrationStore {},
++         },
++         "verifier": CreationSourceVerifier {
++           "createdRoot": "/tmp/narralens-created-workspace-5MjDej/projects",
++           "hooks": {},
++           "snapshots": SnapshotStore {},
++           "vendorRoot": "/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm",
++         },
++       },
++       "revisions": RevisionStore {
++         "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++         "migrations": MigrationStore {},
++       },
++     },
++     "authority": CreativeProjectAuthority {
++       "assertArtifact": [Function assertArtifact],
++       "assertContent": [Function assertContent],
++       "creation": ProjectCreationStore {
++         "now": [Function anonymous],
++         "revisions": RevisionStore {
++           "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++           "migrations": MigrationStore {},
++         },
++         "verifier": CreationSourceVerifier {
++           "createdRoot": "/tmp/narralens-created-workspace-5MjDej/projects",
++           "hooks": {},
++           "snapshots": SnapshotStore {},
++           "vendorRoot": "/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm",
++         },
++       },
++     },
++     "gate": CreatedTaskGate {
++       "assertAllowed": [Function assertAllowed],
++       "authority": CreativeProjectAuthority {
++         "assertArtifact": [Function assertArtifact],
++         "assertContent": [Function assertContent],
++         "creation": ProjectCreationStore {
++           "now": [Function anonymous],
++           "revisions": RevisionStore {
++             "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++             "migrations": MigrationStore {},
++           },
++           "verifier": CreationSourceVerifier {
++             "createdRoot": "/tmp/narralens-created-workspace-5MjDej/projects",
++             "hooks": {},
++             "snapshots": SnapshotStore {},
++             "vendorRoot": "/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm",
++           },
++         },
++       },
++       "repository": ProductSqliteRepository {
++         "revisions": RevisionStore {
++           "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++           "migrations": MigrationStore {},
++         },
++       },
++       "revisions": RevisionStore {
++         "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++         "migrations": MigrationStore {},
++       },
++     },
++     "host": NarralensHost {
++       "adoption": AdoptionCoordinator {
++         "deps": {
++           "adoption": AdoptionStore {},
++           "coordinator": ProjectCoordinator {
++             "computeAffectedLocks": [Function computeAffectedLocks],
++             "deps": {
++               "actor": ProjectWriteActor {
++                 "adapter": HypitWriteAdapter {
++                   "catalog": ProjectCatalog {
++                     "entries": Map {},
++                   },
++                 },
++                 "assets": AssetRegistry {
++                   "catalog": ProjectCatalog {
++                     "entries": Map {},
++                   },
++                   "dependencies": {},
++                 },
++                 "catalog": ProjectCatalog {
++                   "entries": Map {},
++                 },
++                 "operations": InMemoryProjectOperationQueue {},
++                 "store": RevisionStore {
++                   "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++                   "migrations": MigrationStore {},
++                 },
++               },
++               "bindings": EngineBindingStore {
++                 "revisions": RevisionStore {
++                   "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++                   "migrations": MigrationStore {},
++                 },
++               },
++               "digestFor": [Function digestFor],
++               "engines": EngineRegistry {
++                 "bindings": EngineBindingStore {
++                   "revisions": RevisionStore {
++                     "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++                     "migrations": MigrationStore {},
++                   },
++                 },
++               },
++               "gateway": NativeWriteGateway {},
++               "jobs": PersistentJobStore {},
++               "locks": LockService {
++                 "store": RevisionStore {
++                   "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++                   "migrations": MigrationStore {},
++                 },
++               },
++               "outbox": Outbox {},
++               "queue": InMemoryProjectOperationQueue {},
++               "snapshots": SnapshotStore {},
++               "sourceFor": [Function sourceFor],
++               "store": RevisionStore {
++                 "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++                 "migrations": MigrationStore {},
++               },
++             },
++           },
++           "engines": EngineRegistry {
++             "bindings": EngineBindingStore {
++               "revisions": RevisionStore {
++                 "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++                 "migrations": MigrationStore {},
++               },
++             },
++           },
++           "gateway": NativeWriteGateway {},
++           "idempotency": OperationIdempotencyStore {},
++           "impact": ImpactService {},
++           "ledger": MigratedAssetLedger {},
++           "locks": LockService {
++             "store": RevisionStore {
++               "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++               "migrations": MigrationStore {},
++             },
++           },
++           "materialize": MaterializeService {},
++           "projections": ActivatedProjectionService {},
++           "publisher": AuthorSourcePublisher {},
++           "resolver": ProjectResolver {},
++           "revisions": RevisionStore {
++             "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++             "migrations": MigrationStore {},
++           },
++           "snapshots": SnapshotStore {},
++           "stagingRoot": "/tmp/narralens-created-workspace-5MjDej/stage",
++         },
++       },
++       "adoptionFacts": AdoptionStore {},
++       "assetInventory": AssetInventoryPort {},
++       "assetLedger": MigratedAssetLedger {},
++       "catalog": ProjectCatalog {
++         "entries": Map {},
++       },
++       "comparisons": ProposalComparisonAdapter {
++         "stagingRoot": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/var/proposal-comparisons",
++       },
++       "coordinator": ProjectCoordinator {
++         "computeAffectedLocks": [Function computeAffectedLocks],
++         "deps": {
++           "actor": ProjectWriteActor {
++             "adapter": HypitWriteAdapter {
++               "catalog": ProjectCatalog {
++                 "entries": Map {},
++               },
++             },
++             "assets": AssetRegistry {
++               "catalog": ProjectCatalog {
++                 "entries": Map {},
++               },
++               "dependencies": {},
++             },
++             "catalog": ProjectCatalog {
++               "entries": Map {},
++             },
++             "operations": InMemoryProjectOperationQueue {},
++             "store": RevisionStore {
++               "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++               "migrations": MigrationStore {},
++             },
++           },
++           "bindings": EngineBindingStore {
++             "revisions": RevisionStore {
++               "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++               "migrations": MigrationStore {},
++             },
++           },
++           "digestFor": [Function digestFor],
++           "engines": EngineRegistry {
++             "bindings": EngineBindingStore {
++               "revisions": RevisionStore {
++                 "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++                 "migrations": MigrationStore {},
++               },
++             },
++           },
++           "gateway": NativeWriteGateway {},
++           "jobs": PersistentJobStore {},
++           "locks": LockService {
++             "store": RevisionStore {
++               "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++               "migrations": MigrationStore {},
++             },
++           },
++           "outbox": Outbox {},
++           "queue": InMemoryProjectOperationQueue {},
++           "snapshots": SnapshotStore {},
++           "sourceFor": [Function sourceFor],
++           "store": RevisionStore {
++             "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++             "migrations": MigrationStore {},
++           },
++         },
++       },
++       "derivedArtifacts": DerivedArtifactStore {
++         "root": "/tmp/narralens-created-workspace-5MjDej/derived",
++       },
++       "diagnostics": {
++         "write_actor_execute_count": 0,
++       },
++       "engines": EngineRegistry {
++         "bindings": EngineBindingStore {
++           "revisions": RevisionStore {
++             "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++             "migrations": MigrationStore {},
++           },
++         },
++       },
++       "failures": HostDiagnostics {},
++       "historical": HistoricalSnapshotResolver {},
++       "history": HistoryService {},
++       "historyStore": HistoryStore {},
++       "historyTranslator": HistoryCommandTranslator {},
++       "idempotency": OperationIdempotencyStore {},
++       "impact": ImpactService {},
++       "impactClock": [Function anonymous],
++       "impacts": ImpactStore {},
++       "imports": AssetImportService {
++         "catalog": ProjectCatalog {
++           "entries": Map {},
++         },
++         "operations": InMemoryProjectOperationQueue {},
++         "registry": AssetRegistry {
++           "catalog": ProjectCatalog {
++             "entries": Map {},
++           },
++           "dependencies": {},
++         },
++         "revisions": RevisionStore {
++           "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++           "migrations": MigrationStore {},
++         },
++       },
++       "jobs": PersistentJobStore {},
++       "locks": LockService {
++         "store": RevisionStore {
++           "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++           "migrations": MigrationStore {},
++         },
++       },
++       "m5Locks": LockMutationService {},
++       "m5Replay": ComparisonReplayService {},
++       "m5Supervisor": OpenFilmStudioSupervisor {},
++       "m5Workbench": WorkbenchService {},
++       "materializations": MaterializationStore {},
++       "materialize": MaterializeService {},
++       "migrationRoot": "/tmp/narralens-created-workspace-5MjDej/migrations",
++       "migrations": MigrationService {
++         "deps": {
++           "bindings": EngineBindingStore {
++             "revisions": RevisionStore {
++               "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++               "migrations": MigrationStore {},
++             },
++           },
++           "catalog": ProjectCatalog {
++             "entries": Map {},
++           },
++           "ledger": MigratedAssetLedger {},
++           "migrationRoot": "/tmp/narralens-created-workspace-5MjDej/migrations",
++           "openfilmUpstreamSha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
++           "projectRoot": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/var/projects",
++           "registerProject": [Function registerProject],
++           "revisions": RevisionStore {
++             "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++             "migrations": MigrationStore {},
++           },
++           "snapshots": SnapshotStore {},
++           "verifyStagedProject": [Function verifyStagedProject],
++         },
++       },
++       "nativeStudioRuntimeRoot": "/tmp/narralens-created-workspace-5MjDej/studio-runtime",
++       "openFilmComposition": {
++         "availability": {
++           "available": true,
++           "checked": [
++             "git_head",
++             "git_clean",
++             "package.json",
++             "pnpm-lock.yaml",
++             "LICENSE",
++             "packages/openfilm/studio/server/film.mjs",
++             "packages/openfilm/studio/server/ops.mjs",
++             "packages/openfilm/studio/server/atomic.mjs",
++             "packages/openfilm/src/film-doc.mjs",
++           ],
++           "expected_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
++           "observed_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
++           "reason": "all pinned files match their digests",
++           "vendor_root": "/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm",
++         },
++         "installed": true,
++         "reason": "all pinned files match their digests",
++         "registrar": OpenFilmEngineAdapter {},
++         "vendor_root": "/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm",
++       },
++       "openFilmCompositionFailure": null,
++       "operations": InMemoryProjectOperationQueue {},
++       "origin": "http://127.0.0.1:46331",
++       "outbox": Outbox {},
++       "projectResolver": ProjectResolver {},
++       "projections": ActivatedProjectionService {},
++       "proposals": ProposalAdapter {
++         "stagingRoot": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/var/proposals",
++       },
++       "restorePlanner": RestorePlanner {},
++       "revisions": RevisionStore {
++         "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++         "migrations": MigrationStore {},
++       },
++       "runner": ControlledAgentRunner {
++         "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
++         "executable": "claude",
++         "maxOutputBytes": 1048576,
++         "onAudit": undefined,
++         "prefixArgs": [],
++         "timeoutMs": 180000,
++       },
++       "sessionExpiresAt": 2026-11-11T23:56:13.367Z,
++       "sessionToken": "Iaka49vPAbVc_gZuE8DcxUOHlb6QHNVtMAoq1a-hIBk",
++       "snapshots": SnapshotStore {},
++       "writes": ProjectWriteActor {
++         "adapter": HypitWriteAdapter {
++           "catalog": ProjectCatalog {
++             "entries": Map {},
++           },
++         },
++         "assets": AssetRegistry {
++           "catalog": ProjectCatalog {
++             "entries": Map {},
++           },
++           "dependencies": {},
++         },
++         "catalog": ProjectCatalog {
++           "entries": Map {},
++         },
++         "operations": InMemoryProjectOperationQueue {},
++         "store": RevisionStore {
++           "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++           "migrations": MigrationStore {},
++         },
++       },
++     },
++     "options": {
++       "height": 180,
++       "protectedRoots": [
++         "/tmp/narralens-created-workspace-5MjDej/projects",
++         "/tmp/narralens-created-workspace-5MjDej/snapshots",
++       ],
++       "root": "/tmp/narralens-created-workspace-5MjDej/tasks",
++       "vendorRoot": "/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm",
++       "width": 320,
++     },
++     "repo": ProductSqliteRepository {
++       "revisions": RevisionStore {
++         "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++         "migrations": MigrationStore {},
++       },
++     },
++     "tasks": CreatedTaskStore {
++       "now": [Function now],
++       "ports": {
++         "assertAllowed": [Function assertAllowed],
++         "assertPrepared": [Function assertPrepared],
++         "bindStep": [Function bindStep],
++       },
++       "revisions": RevisionStore {
++         "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++         "migrations": MigrationStore {},
++       },
++     },
++     "verifier": PreparedDraftVerifier {
++       "vendorRoot": "/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm",
++     },
++     "workflow": FixedWorkflowService {},
++   },
++   "projectId": "project_43307eed1dbc467381c4014a19198a36",
++   "proof": {
++     "facts": {
++       "backup_root": "/tmp/narralens-created-workspace-5MjDej/publication/publication-1849b047-e85d-46a2-8ada-d71d93d27710/backup",
++       "issued_at": "2026-11-11T22:56:23.829Z",
++       "journal_id": "txn_6144e0fa9fb54c369c8fc5af26012dbf:published",
++       "original_source_digest": "deb8d69a668e8b5b252a0213742bb427c440d307946783e97ec41f788342eb78",
++       "prepared_source_id": "ps_b9489854a529db9b31d220e4cabc430c4b365e3eac92dcc25660ba45dd7d",
++       "project_id": "project_43307eed1dbc467381c4014a19198a36",
++       "published_files": [
++         {
++           "bytes": 11,
++           "relative_path": ".film/settings.json",
++           "sha256": "5f098b8911b608c4f0ebefa7a838289331f490c8fb79880249941c10866e2ad9",
++         },
++         {
++           "bytes": 530,
++           "relative_path": ".film/subtitles.json",
++           "sha256": "2ac9c6ecad02ee5b179565bb0d73ff6e0a88051c4cbd52bd5b2bb398077d97d2",
++         },
++         {
++           "bytes": 4112,
++           "relative_path": "assets/video/001-23cfae6d486bb5558e398f8b48069b68c773910cf7eb360e157adb9a83b39bc5.mp4",
++           "sha256": "23cfae6d486bb5558e398f8b48069b68c773910cf7eb360e157adb9a83b39bc5",
++         },
++         {
++           "bytes": 259,
++           "relative_path": "assets/vo/002-42c9992dbd4dcfbeaf52790767beb0febee1279ce37e2e46d5cb474bdd8e1a1d.vtt",
++           "sha256": "7589688eff6e9ca5ee39341deb23d149f5a6cccec1da8ac9299fbb07230b88d9",
++         },
++         {
++           "bytes": 288078,
++           "relative_path": "assets/vo/002-42c9992dbd4dcfbeaf52790767beb0febee1279ce37e2e46d5cb474bdd8e1a1d.wav",
++           "sha256": "42c9992dbd4dcfbeaf52790767beb0febee1279ce37e2e46d5cb474bdd8e1a1d",
++         },
++         {
++           "bytes": 2228,
++           "relative_path": "draft-plan.json",
++           "sha256": "e934e1eae5b90027983b753091f3e94164f6f461f2e87c74b57e97c80c379261",
++         },
++         {
++           "bytes": 933,
++           "relative_path": "film.html",
++           "sha256": "ed7b107d820d02065b5cca124058201769589de0f7f0a99ca8302aeb41c1d447",
++         },
++         {
++           "bytes": 1646,
++           "relative_path": "prepared-native.json",
++           "sha256": "d91f8f2c98fdde3491aa4fd57092c0dfd27adde00234249a1a97535fe2d31153",
++         },
++         {
++           "bytes": 1260,
++           "relative_path": "rights.json",
++           "sha256": "ba7dbf1c4ad6d9f1077fd0373b577cc56b51f33049923d81b87afcf631c4d6ad",
++         },
++         {
++           "bytes": 976,
++           "relative_path": "scenes/001.html",
++           "sha256": "7709f707a89923e04062d045124de642a2367dd2191ae1ae344c4927b0b7db1e",
++         },
++         {
++           "bytes": 939,
++           "relative_path": "scenes/003.html",
++           "sha256": "bc3520cfecfd1210f0a2d1a7605dd35349ad87c71d3cb5c051daa4e6c6651b8e",
++         },
++       ],
++       "published_source_digest": "eeea326abe990c29701ade0a1dad1f112bffe64af5a3ab9ff77734792ca2ecc8",
++       "publisher_instance": "publisher_acb893ec-4ba9-406f-aa77-a58381248b10",
++       "target_snapshot_id": "97fe122bb54273add07d763cd84a85c1474f0ddaa6f04288eb3a77e9f417a07e",
++       "transaction_id": "txn_6144e0fa9fb54c369c8fc5af26012dbf",
++     },
++   },
++   "publicationInput": {
++     "files": [
++       {
++         "bytes": 11,
++         "relative_path": ".film/settings.json",
++         "sha256": "5f098b8911b608c4f0ebefa7a838289331f490c8fb79880249941c10866e2ad9",
++       },
++       {
++         "bytes": 530,
++         "relative_path": ".film/subtitles.json",
++         "sha256": "2ac9c6ecad02ee5b179565bb0d73ff6e0a88051c4cbd52bd5b2bb398077d97d2",
++       },
++       {
++         "bytes": 4112,
++         "relative_path": "assets/video/001-23cfae6d486bb5558e398f8b48069b68c773910cf7eb360e157adb9a83b39bc5.mp4",
++         "sha256": "23cfae6d486bb5558e398f8b48069b68c773910cf7eb360e157adb9a83b39bc5",
++       },
++       {
++         "bytes": 259,
++         "relative_path": "assets/vo/002-42c9992dbd4dcfbeaf52790767beb0febee1279ce37e2e46d5cb474bdd8e1a1d.vtt",
++         "sha256": "7589688eff6e9ca5ee39341deb23d149f5a6cccec1da8ac9299fbb07230b88d9",
++       },
++       {
++         "bytes": 288078,
++         "relative_path": "assets/vo/002-42c9992dbd4dcfbeaf52790767beb0febee1279ce37e2e46d5cb474bdd8e1a1d.wav",
++         "sha256": "42c9992dbd4dcfbeaf52790767beb0febee1279ce37e2e46d5cb474bdd8e1a1d",
++       },
++       {
++         "bytes": 2228,
++         "relative_path": "draft-plan.json",
++         "sha256": "e934e1eae5b90027983b753091f3e94164f6f461f2e87c74b57e97c80c379261",
++       },
++       {
++         "bytes": 933,
++         "relative_path": "film.html",
++         "sha256": "ed7b107d820d02065b5cca124058201769589de0f7f0a99ca8302aeb41c1d447",
++       },
++       {
++         "bytes": 1646,
++         "relative_path": "prepared-native.json",
++         "sha256": "d91f8f2c98fdde3491aa4fd57092c0dfd27adde00234249a1a97535fe2d31153",
++       },
++       {
++         "bytes": 1260,
++         "relative_path": "rights.json",
++         "sha256": "ba7dbf1c4ad6d9f1077fd0373b577cc56b51f33049923d81b87afcf631c4d6ad",
++       },
++       {
++         "bytes": 976,
++         "relative_path": "scenes/001.html",
++         "sha256": "7709f707a89923e04062d045124de642a2367dd2191ae1ae344c4927b0b7db1e",
++       },
++       {
++         "bytes": 939,
++         "relative_path": "scenes/003.html",
++         "sha256": "bc3520cfecfd1210f0a2d1a7605dd35349ad87c71d3cb5c051daa4e6c6651b8e",
++       },
++     ],
++     "original_source_digest": "deb8d69a668e8b5b252a0213742bb427c440d307946783e97ec41f788342eb78",
++     "prepared_source_id": "ps_b9489854a529db9b31d220e4cabc430c4b365e3eac92dcc25660ba45dd7d",
++     "project_id": "project_43307eed1dbc467381c4014a19198a36",
++     "published_source_digest": "eeea326abe990c29701ade0a1dad1f112bffe64af5a3ab9ff77734792ca2ecc8",
++     "stage_root": "/tmp/narralens-created-workspace-5MjDej/tasks/stage_ibIbRDhQOt4UN8gR0bM2-0qdIKTmmrvy/attempt-1/source",
++     "target_snapshot_id": "97fe122bb54273add07d763cd84a85c1474f0ddaa6f04288eb3a77e9f417a07e",
++     "transaction_id": "txn_6144e0fa9fb54c369c8fc5af26012dbf",
++   },
++   "publisher": CreatedSourcePublisher {},
++   "registry": LocalAssetRegistry {
++     "creation": ProjectCreationStore {
++       "now": [Function anonymous],
++       "revisions": RevisionStore {
++         "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++         "migrations": MigrationStore {},
++       },
++       "verifier": CreationSourceVerifier {
++         "createdRoot": "/tmp/narralens-created-workspace-5MjDej/projects",
++         "hooks": {},
++         "snapshots": SnapshotStore {},
++         "vendorRoot": "/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm",
++       },
++     },
++     "revisions": RevisionStore {
++       "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++       "migrations": MigrationStore {},
++     },
++   },
++   "repo": ProductSqliteRepository {
++     "revisions": RevisionStore {
++       "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++       "migrations": MigrationStore {},
++     },
++   },
++   "request": [Function request],
++   "revisions": RevisionStore {
++     "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++     "migrations": MigrationStore {},
++   },
++   "root": "/tmp/narralens-created-workspace-5MjDej",
++   "run": {
++     "authorization": null,
++     "checkpoint_id": "checkpoint-1",
++     "gates": [
++       {
++         "chapter_id": null,
++         "decision_id": "content-decision-4a86be06dec8b6731becde8c57c8def1",
++         "gate_id": "gate-definition",
++         "input_digest": "9e71d4205e0abfd8aed9bc5b666e524dee282d9a0cb458179dc81e2cf9dc9407",
++         "kind": "definition",
++         "output_digest": null,
++         "reason": "bound_to_content_decision",
++         "reuse_of_gate_id": null,
++         "review_package_id": null,
++         "state": "accepted",
++       },
++       {
++         "chapter_id": null,
++         "decision_id": null,
++         "gate_id": "gate-sample",
++         "input_digest": "9e71d4205e0abfd8aed9bc5b666e524dee282d9a0cb458179dc81e2cf9dc9407",
++         "kind": "sample",
++         "output_digest": null,
++         "reason": "waiting_for_step",
++         "reuse_of_gate_id": null,
++         "review_package_id": null,
++         "state": "pending",
++       },
++       {
++         "chapter_id": null,
++         "decision_id": null,
++         "gate_id": "gate-first_chapter",
++         "input_digest": "9e71d4205e0abfd8aed9bc5b666e524dee282d9a0cb458179dc81e2cf9dc9407",
++         "kind": "first_chapter",
++         "output_digest": null,
++         "reason": "waiting_for_step",
++         "reuse_of_gate_id": null,
++         "review_package_id": null,
++         "state": "pending",
++       },
++       {
++         "chapter_id": null,
++         "decision_id": null,
++         "gate_id": "gate-chapter_pack",
++         "input_digest": "9e71d4205e0abfd8aed9bc5b666e524dee282d9a0cb458179dc81e2cf9dc9407",
++         "kind": "chapter_pack",
++         "output_digest": null,
++         "reason": "waiting_for_step",
++         "reuse_of_gate_id": null,
++         "review_package_id": null,
++         "state": "pending",
++       },
++       {
++         "chapter_id": null,
++         "decision_id": null,
++         "gate_id": "gate-cover",
++         "input_digest": "9e71d4205e0abfd8aed9bc5b666e524dee282d9a0cb458179dc81e2cf9dc9407",
++         "kind": "cover",
++         "output_digest": null,
++         "reason": "waiting_for_step",
++         "reuse_of_gate_id": null,
++         "review_package_id": null,
++         "state": "pending",
++       },
++       {
++         "chapter_id": null,
++         "decision_id": null,
++         "gate_id": "gate-qc",
++         "input_digest": "9e71d4205e0abfd8aed9bc5b666e524dee282d9a0cb458179dc81e2cf9dc9407",
++         "kind": "qc",
++         "output_digest": null,
++         "reason": "waiting_for_step",
++         "reuse_of_gate_id": null,
++         "review_package_id": null,
++         "state": "pending",
++       },
++       {
++         "chapter_id": null,
++         "decision_id": null,
++         "gate_id": "gate-adoption",
++         "input_digest": "9e71d4205e0abfd8aed9bc5b666e524dee282d9a0cb458179dc81e2cf9dc9407",
++         "kind": "adoption",
++         "output_digest": null,
++         "reason": "waiting_for_step",
++         "reuse_of_gate_id": null,
++         "review_package_id": null,
++         "state": "pending",
++       },
++     ],
++     "next_actions": [
++       "authorize_run",
++     ],
++     "observed_at": "2026-11-11T22:56:18.000Z",
++     "plan_version": 1,
++     "project_id": "project_43307eed1dbc467381c4014a19198a36",
++     "run_id": "run-e670de98-cb17-42dd-acb4-a4dc8c7c454e",
++     "scope": {
++       "allow_external_write": false,
++       "allow_paid": false,
++       "allow_runtime_mutation": false,
++       "allowed_actions": [
++         "clip.prepare",
++         "snapshot.render",
++         "qc.inspect",
++         "delivery.package",
++         "change.prepare",
++         "change.apply",
++       ],
++       "capability_fingerprint": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
++       "content_type": "short_film",
++       "execution_digest": "b70615d5ad4246caac7d0e770022429de5826831b222447e4be7637e4a07ca32",
++       "input_digest": "9e71d4205e0abfd8aed9bc5b666e524dee282d9a0cb458179dc81e2cf9dc9407",
++       "plan_version": 1,
++       "project_id": "project_43307eed1dbc467381c4014a19198a36",
++       "run_id": "run-e670de98-cb17-42dd-acb4-a4dc8c7c454e",
++       "style_ref": {
++         "id": "brief_43307eed1dbc467381c4014a19198a36",
++         "sha256": "4276471ab07ba8224a4e03da7d36a5a98ecd8790e073a5a86d4009ebab6742d7",
++         "version": 1,
++       },
++       "template_id": "local-short-film",
++       "template_version": 1,
++     },
++     "scope_digest": "a99d87aa04d83b4a324cf565843d343a7c60a37c0c214930ba878279850a5ab0",
++     "state": "ready",
++     "workflow": {
++       "capability_ids": [
++         "clip.prepare",
++         "snapshot.render",
++         "qc.inspect",
++         "delivery.package",
++       ],
++       "composition": "fixed_a",
++       "execution_digest": "b70615d5ad4246caac7d0e770022429de5826831b222447e4be7637e4a07ca32",
++       "stage_ids": [
++         "definition",
++         "sample",
++         "first_chapter",
++         "chapters",
++         "cover",
++         "delivery",
++       ],
++       "status": "published",
++       "template_id": "local-short-film",
++       "template_version": 1,
++     },
++   },
++   "task": {
++     "accepted": {
++       "attempt": 0,
++       "bootstrap": null,
++       "execution": {
++         "attempt": 1,
++         "authorization_id": "grant-393487ca-710e-4241-8f4e-b3ebf8ef81bc",
++         "input_digest": "9e71d4205e0abfd8aed9bc5b666e524dee282d9a0cb458179dc81e2cf9dc9407",
++         "plan_version": 1,
++         "run_id": "run-e670de98-cb17-42dd-acb4-a4dc8c7c454e",
++         "run_scope_digest": "a99d87aa04d83b4a324cf565843d343a7c60a37c0c214930ba878279850a5ab0",
++         "step_id": "sample",
++       },
++       "job_id": "job_db655800d81049138205513e894e3026",
++       "next_actions": [
++         "poll_job",
++       ],
++       "project_id": "project_43307eed1dbc467381c4014a19198a36",
++       "result_ref": null,
++       "snapshot_id": "3c2e9daedffb4ee63b9c9945ed6b67e628f8bf5763a1c0b849b454592a425b21",
++       "state": "queued",
++     },
++     "job_id": "job_db655800d81049138205513e894e3026",
++     "job_kind": "snapshot_publish",
++     "max_attempts": 3,
++     "principal_id": "owner",
++     "request": {
++       "base_revision": 1,
++       "execution": {
++         "attempt": 1,
++         "authorization_id": "grant-393487ca-710e-4241-8f4e-b3ebf8ef81bc",
++         "input_digest": "9e71d4205e0abfd8aed9bc5b666e524dee282d9a0cb458179dc81e2cf9dc9407",
++         "plan_version": 1,
++         "run_id": "run-e670de98-cb17-42dd-acb4-a4dc8c7c454e",
++         "run_scope_digest": "a99d87aa04d83b4a324cf565843d343a7c60a37c0c214930ba878279850a5ab0",
++         "step_id": "sample",
++       },
++       "input_refs": [
++         {
++           "id": "artifact-18e7e5a2-156d-4bfe-93ae-74a8b254f674",
++           "sha256": "3334677a0fc1a3f1406af22e6744605ef2cdae4b03a67deb3aec5bb9ac32c6d3",
++           "version": 1,
++         },
++         {
++           "id": "artifact-c106a619-6c33-4bdf-9ef5-2c82797cd5ed",
++           "sha256": "3d22e4b6c48a87c8fce28b446d04b4f7ce0ef7a16cbbb6ec61523d8065104c66",
++           "version": 1,
++         },
++       ],
++       "kind": "assemble_draft",
++       "meta": {
++         "correlation_id": "task",
++         "idempotency_key": "task",
++       },
++       "project_id": "project_43307eed1dbc467381c4014a19198a36",
++       "render_spec": null,
++       "snapshot_id": "3c2e9daedffb4ee63b9c9945ed6b67e628f8bf5763a1c0b849b454592a425b21",
++       "source_digest": "deb8d69a668e8b5b252a0213742bb427c440d307946783e97ec41f788342eb78",
++     },
++     "request_digest": "9d52aa2c49086f28325b16dfbb8df95cab41d7b6e201b73860057504c03bf727",
++     "stage_token": "stage_ibIbRDhQOt4UN8gR0bM2-0qdIKTmmrvy",
++   },
++   "taskRoot": "/tmp/narralens-created-workspace-5MjDej/tasks",
++   "tasks": CreatedTaskStore {
++     "now": [Function now],
++     "ports": {
++       "assertAllowed": [Function assertAllowed],
++       "assertPrepared": [Function assertPrepared],
++       "bindStep": [Function bindStep],
++     },
++     "revisions": RevisionStore {
++       "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++       "migrations": MigrationStore {},
++     },
++   },
++   "ui": {
++     "csrf": "xuwDhodVQjm8Bka_AWUMlkMRu0BKD3isdbMeJeB_vEM",
++     "principal": {
++       "channel": "trusted_ui",
++       "expires_at": 1794438074095,
++       "principal_id": "owner",
++       "session_ref": "session_ccc7fd53f0da42bf38b08b4c",
++     },
++     "token": "rGKGpaR3E32LyOGw0iLr7WqVyLIeA1my6vxu4PKYutE",
++   },
++   "verifier": PreparedDraftVerifier {
++     "vendorRoot": "/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm",
++   },
++   "worker": CreatedTaskWorker {
++     "jobs": PersistentJobStore {},
++     "options": {
++       "pollMs": 10,
++     },
++     "processor": CreatedDraftTaskProcessor {
++       "assertPrepared": [Function assertPrepared],
++       "assets": LocalAssetRegistry {
++         "creation": ProjectCreationStore {
++           "now": [Function anonymous],
++           "revisions": RevisionStore {
++             "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++             "migrations": MigrationStore {},
++           },
++           "verifier": CreationSourceVerifier {
++             "createdRoot": "/tmp/narralens-created-workspace-5MjDej/projects",
++             "hooks": {},
++             "snapshots": SnapshotStore {},
++             "vendorRoot": "/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm",
++           },
++         },
++         "revisions": RevisionStore {
++           "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++           "migrations": MigrationStore {},
++         },
++       },
++       "authority": CreativeProjectAuthority {
++         "assertArtifact": [Function assertArtifact],
++         "assertContent": [Function assertContent],
++         "creation": ProjectCreationStore {
++           "now": [Function anonymous],
++           "revisions": RevisionStore {
++             "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++             "migrations": MigrationStore {},
++           },
++           "verifier": CreationSourceVerifier {
++             "createdRoot": "/tmp/narralens-created-workspace-5MjDej/projects",
++             "hooks": {},
++             "snapshots": SnapshotStore {},
++             "vendorRoot": "/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm",
++           },
++         },
++       },
++       "gate": CreatedTaskGate {
++         "assertAllowed": [Function assertAllowed],
++         "authority": CreativeProjectAuthority {
++           "assertArtifact": [Function assertArtifact],
++           "assertContent": [Function assertContent],
++           "creation": ProjectCreationStore {
++             "now": [Function anonymous],
++             "revisions": RevisionStore {
++               "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++               "migrations": MigrationStore {},
++             },
++             "verifier": CreationSourceVerifier {
++               "createdRoot": "/tmp/narralens-created-workspace-5MjDej/projects",
++               "hooks": {},
++               "snapshots": SnapshotStore {},
++               "vendorRoot": "/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm",
++             },
++           },
++         },
++         "repository": ProductSqliteRepository {
++           "revisions": RevisionStore {
++             "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++             "migrations": MigrationStore {},
++           },
++         },
++         "revisions": RevisionStore {
++           "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++           "migrations": MigrationStore {},
++         },
++       },
++       "host": NarralensHost {
++         "adoption": AdoptionCoordinator {
++           "deps": {
++             "adoption": AdoptionStore {},
++             "coordinator": ProjectCoordinator {
++               "computeAffectedLocks": [Function computeAffectedLocks],
++               "deps": {
++                 "actor": ProjectWriteActor {
++                   "adapter": HypitWriteAdapter {
++                     "catalog": ProjectCatalog {
++                       "entries": Map {},
++                     },
++                   },
++                   "assets": AssetRegistry {
++                     "catalog": ProjectCatalog {
++                       "entries": Map {},
++                     },
++                     "dependencies": {},
++                   },
++                   "catalog": ProjectCatalog {
++                     "entries": Map {},
++                   },
++                   "operations": InMemoryProjectOperationQueue {},
++                   "store": RevisionStore {
++                     "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++                     "migrations": MigrationStore {},
++                   },
++                 },
++                 "bindings": EngineBindingStore {
++                   "revisions": RevisionStore {
++                     "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++                     "migrations": MigrationStore {},
++                   },
++                 },
++                 "digestFor": [Function digestFor],
++                 "engines": EngineRegistry {
++                   "bindings": EngineBindingStore {
++                     "revisions": RevisionStore {
++                       "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++                       "migrations": MigrationStore {},
++                     },
++                   },
++                 },
++                 "gateway": NativeWriteGateway {},
++                 "jobs": PersistentJobStore {},
++                 "locks": LockService {
++                   "store": RevisionStore {
++                     "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++                     "migrations": MigrationStore {},
++                   },
++                 },
++                 "outbox": Outbox {},
++                 "queue": InMemoryProjectOperationQueue {},
++                 "snapshots": SnapshotStore {},
++                 "sourceFor": [Function sourceFor],
++                 "store": RevisionStore {
++                   "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++                   "migrations": MigrationStore {},
++                 },
++               },
++             },
++             "engines": EngineRegistry {
++               "bindings": EngineBindingStore {
++                 "revisions": RevisionStore {
++                   "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++                   "migrations": MigrationStore {},
++                 },
++               },
++             },
++             "gateway": NativeWriteGateway {},
++             "idempotency": OperationIdempotencyStore {},
++             "impact": ImpactService {},
++             "ledger": MigratedAssetLedger {},
++             "locks": LockService {
++               "store": RevisionStore {
++                 "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++                 "migrations": MigrationStore {},
++               },
++             },
++             "materialize": MaterializeService {},
++             "projections": ActivatedProjectionService {},
++             "publisher": AuthorSourcePublisher {},
++             "resolver": ProjectResolver {},
++             "revisions": RevisionStore {
++               "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++               "migrations": MigrationStore {},
++             },
++             "snapshots": SnapshotStore {},
++             "stagingRoot": "/tmp/narralens-created-workspace-5MjDej/stage",
++           },
++         },
++         "adoptionFacts": AdoptionStore {},
++         "assetInventory": AssetInventoryPort {},
++         "assetLedger": MigratedAssetLedger {},
++         "catalog": ProjectCatalog {
++           "entries": Map {},
++         },
++         "comparisons": ProposalComparisonAdapter {
++           "stagingRoot": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/var/proposal-comparisons",
++         },
++         "coordinator": ProjectCoordinator {
++           "computeAffectedLocks": [Function computeAffectedLocks],
++           "deps": {
++             "actor": ProjectWriteActor {
++               "adapter": HypitWriteAdapter {
++                 "catalog": ProjectCatalog {
++                   "entries": Map {},
++                 },
++               },
++               "assets": AssetRegistry {
++                 "catalog": ProjectCatalog {
++                   "entries": Map {},
++                 },
++                 "dependencies": {},
++               },
++               "catalog": ProjectCatalog {
++                 "entries": Map {},
++               },
++               "operations": InMemoryProjectOperationQueue {},
++               "store": RevisionStore {
++                 "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++                 "migrations": MigrationStore {},
++               },
++             },
++             "bindings": EngineBindingStore {
++               "revisions": RevisionStore {
++                 "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++                 "migrations": MigrationStore {},
++               },
++             },
++             "digestFor": [Function digestFor],
++             "engines": EngineRegistry {
++               "bindings": EngineBindingStore {
++                 "revisions": RevisionStore {
++                   "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++                   "migrations": MigrationStore {},
++                 },
++               },
++             },
++             "gateway": NativeWriteGateway {},
++             "jobs": PersistentJobStore {},
++             "locks": LockService {
++               "store": RevisionStore {
++                 "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++                 "migrations": MigrationStore {},
++               },
++             },
++             "outbox": Outbox {},
++             "queue": InMemoryProjectOperationQueue {},
++             "snapshots": SnapshotStore {},
++             "sourceFor": [Function sourceFor],
++             "store": RevisionStore {
++               "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++               "migrations": MigrationStore {},
++             },
++           },
++         },
++         "derivedArtifacts": DerivedArtifactStore {
++           "root": "/tmp/narralens-created-workspace-5MjDej/derived",
++         },
++         "diagnostics": {
++           "write_actor_execute_count": 0,
++         },
++         "engines": EngineRegistry {
++           "bindings": EngineBindingStore {
++             "revisions": RevisionStore {
++               "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++               "migrations": MigrationStore {},
++             },
++           },
++         },
++         "failures": HostDiagnostics {},
++         "historical": HistoricalSnapshotResolver {},
++         "history": HistoryService {},
++         "historyStore": HistoryStore {},
++         "historyTranslator": HistoryCommandTranslator {},
++         "idempotency": OperationIdempotencyStore {},
++         "impact": ImpactService {},
++         "impactClock": [Function anonymous],
++         "impacts": ImpactStore {},
++         "imports": AssetImportService {
++           "catalog": ProjectCatalog {
++             "entries": Map {},
++           },
++           "operations": InMemoryProjectOperationQueue {},
++           "registry": AssetRegistry {
++             "catalog": ProjectCatalog {
++               "entries": Map {},
++             },
++             "dependencies": {},
++           },
++           "revisions": RevisionStore {
++             "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++             "migrations": MigrationStore {},
++           },
++         },
++         "jobs": PersistentJobStore {},
++         "locks": LockService {
++           "store": RevisionStore {
++             "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++             "migrations": MigrationStore {},
++           },
++         },
++         "m5Locks": LockMutationService {},
++         "m5Replay": ComparisonReplayService {},
++         "m5Supervisor": OpenFilmStudioSupervisor {},
++         "m5Workbench": WorkbenchService {},
++         "materializations": MaterializationStore {},
++         "materialize": MaterializeService {},
++         "migrationRoot": "/tmp/narralens-created-workspace-5MjDej/migrations",
++         "migrations": MigrationService {
++           "deps": {
++             "bindings": EngineBindingStore {
++               "revisions": RevisionStore {
++                 "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++                 "migrations": MigrationStore {},
++               },
++             },
++             "catalog": ProjectCatalog {
++               "entries": Map {},
++             },
++             "ledger": MigratedAssetLedger {},
++             "migrationRoot": "/tmp/narralens-created-workspace-5MjDej/migrations",
++             "openfilmUpstreamSha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
++             "projectRoot": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/var/projects",
++             "registerProject": [Function registerProject],
++             "revisions": RevisionStore {
++               "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++               "migrations": MigrationStore {},
++             },
++             "snapshots": SnapshotStore {},
++             "verifyStagedProject": [Function verifyStagedProject],
++           },
++         },
++         "nativeStudioRuntimeRoot": "/tmp/narralens-created-workspace-5MjDej/studio-runtime",
++         "openFilmComposition": {
++           "availability": {
++             "available": true,
++             "checked": [
++               "git_head",
++               "git_clean",
++               "package.json",
++               "pnpm-lock.yaml",
++               "LICENSE",
++               "packages/openfilm/studio/server/film.mjs",
++               "packages/openfilm/studio/server/ops.mjs",
++               "packages/openfilm/studio/server/atomic.mjs",
++               "packages/openfilm/src/film-doc.mjs",
++             ],
++             "expected_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
++             "observed_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
++             "reason": "all pinned files match their digests",
++             "vendor_root": "/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm",
++           },
++           "installed": true,
++           "reason": "all pinned files match their digests",
++           "registrar": OpenFilmEngineAdapter {},
++           "vendor_root": "/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm",
++         },
++         "openFilmCompositionFailure": null,
++         "operations": InMemoryProjectOperationQueue {},
++         "origin": "http://127.0.0.1:46331",
++         "outbox": Outbox {},
++         "projectResolver": ProjectResolver {},
++         "projections": ActivatedProjectionService {},
++         "proposals": ProposalAdapter {
++           "stagingRoot": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/var/proposals",
++         },
++         "restorePlanner": RestorePlanner {},
++         "revisions": RevisionStore {
++           "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++           "migrations": MigrationStore {},
++         },
++         "runner": ControlledAgentRunner {
++           "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
++           "executable": "claude",
++           "maxOutputBytes": 1048576,
++           "onAudit": undefined,
++           "prefixArgs": [],
++           "timeoutMs": 180000,
++         },
++         "sessionExpiresAt": 2026-11-11T23:56:13.367Z,
++         "sessionToken": "Iaka49vPAbVc_gZuE8DcxUOHlb6QHNVtMAoq1a-hIBk",
++         "snapshots": SnapshotStore {},
++         "writes": ProjectWriteActor {
++           "adapter": HypitWriteAdapter {
++             "catalog": ProjectCatalog {
++               "entries": Map {},
++             },
++           },
++           "assets": AssetRegistry {
++             "catalog": ProjectCatalog {
++               "entries": Map {},
++             },
++             "dependencies": {},
++           },
++           "catalog": ProjectCatalog {
++             "entries": Map {},
++           },
++           "operations": InMemoryProjectOperationQueue {},
++           "store": RevisionStore {
++             "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++             "migrations": MigrationStore {},
++           },
++         },
++       },
++       "options": {
++         "height": 180,
++         "protectedRoots": [
++           "/tmp/narralens-created-workspace-5MjDej/projects",
++           "/tmp/narralens-created-workspace-5MjDej/snapshots",
++         ],
++         "root": "/tmp/narralens-created-workspace-5MjDej/tasks",
++         "vendorRoot": "/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm",
++         "width": 320,
++       },
++       "repo": ProductSqliteRepository {
++         "revisions": RevisionStore {
++           "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++           "migrations": MigrationStore {},
++         },
++       },
++       "tasks": CreatedTaskStore {
++         "now": [Function now],
++         "ports": {
++           "assertAllowed": [Function assertAllowed],
++           "assertPrepared": [Function assertPrepared],
++           "bindStep": [Function bindStep],
++         },
++         "revisions": RevisionStore {
++           "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++           "migrations": MigrationStore {},
++         },
++       },
++       "verifier": PreparedDraftVerifier {
++         "vendorRoot": "/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm",
++       },
++       "workflow": FixedWorkflowService {},
++     },
++     "revisions": RevisionStore {
++       "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++       "migrations": MigrationStore {},
++     },
++     "tasks": CreatedTaskStore {
++       "now": [Function now],
++       "ports": {
++         "assertAllowed": [Function assertAllowed],
++         "assertPrepared": [Function assertPrepared],
++         "bindStep": [Function bindStep],
++       },
++       "revisions": RevisionStore {
++         "databasePath": "/tmp/narralens-created-workspace-5MjDej/host.sqlite",
++         "migrations": MigrationStore {},
++       },
++     },
++   },
+  }
+
+ ❯ tests/agent-driven/integration/created-source-adoption.test.ts:177:6
+    175|     else db.exec("CREATE TEMP TRIGGER journal_insert_fault AFTER INSER…
+    176|    });
+    177|   }})).rejects.toThrow('identity atomic insert fault');
+       |      ^
+    178|   const f=prepared!,revisions=f.host.revisions;
+    179|   expect(revisions.compose(db=>db.prepare('SELECT count(*) AS n FROM c…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 1 passed | 40 skipped (43)
+   Start at  06:55:55
+   Duration  38.53s (transform 4.44s, setup 0ms, collect 7.37s, tests 29.24s, environment 0ms, prepare 1.24s)
+

@@ -1,0 +1,78 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:1961344) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/agent-driven/integration/created-source-adoption.test.ts (43 tests | 1 failed | 42 skipped) 8601ms
+   ↓ actual closed created-source commit and publisher > D10 identity records actual three retained trees in the prepared journal transaction before any rename
+   ↓ actual closed created-source commit and publisher > D10 identity rolls back both pre-rename facts when the identity insert fails
+   × actual closed created-source commit and publisher > D10 identity rolls back both pre-rename facts when the prepared journal insert fails 8600ms
+     → expected 1 to be +0 // Object.is equality
+   ↓ actual closed created-source commit and publisher > D10 identity missing after publication refuses the original closed commit without consuming authorities
+   ↓ actual closed created-source commit and publisher > N3 real issuance revokes a genuine token when the stage guard cleanup fails
+   ↓ actual closed created-source commit and publisher > N3 real issuance revokes a genuine token when the outer held guard cleanup fails
+   ↓ actual closed created-source commit and publisher > N3 real pending close waits for publication and never returns an issued proof after closing
+   ↓ actual closed created-source commit and publisher > N3 real temporary default fsync close preserves uncertainty (sync also fails=false)
+   ↓ actual closed created-source commit and publisher > N3 real temporary default fsync close preserves uncertainty (sync also fails=true)
+   ↓ actual closed created-source commit and publisher > N3 real temporary style descriptor close preserves uncertainty (stat also fails=false)
+   ↓ actual closed created-source commit and publisher > N3 real temporary style descriptor close preserves uncertainty (stat also fails=true)
+   ↓ actual closed created-source commit and publisher > N3 real publication attempts every guard when verifier release fails and never revives the proof
+   ↓ actual closed created-source commit and publisher > N3 real publication attempts other guards after the first guard close fails
+   ↓ actual closed created-source commit and publisher > N3 real publication preserves the primary publish failure and cleanup failures together
+   ↓ actual closed created-source commit and publisher > refuses authority expiring during the final creative closure scan
+   ↓ actual closed created-source commit and publisher > rolls back checkpoint, attempt and every authority after a post-checkpoint transaction failure
+   ↓ actual closed created-source commit and publisher > poisons a swallowed read of another intake inside the project commit scope
+   ↓ actual closed created-source commit and publisher > rejects a real intake update after approval without consuming database authorities
+   ↓ actual closed created-source commit and publisher > rejects a predecessor gate changed to pending after approval
+   ↓ actual closed created-source commit and publisher > rejects a predecessor gate changed to rejected after approval
+   ↓ actual closed created-source commit and publisher > persists the same succeeded attempt in workflow checkpoint and a freshly opened SQLite reader
+   ↓ actual closed created-source commit and publisher > publishes complete native source, commits once, preserves R1 geometry and replays without a second commit
+   ↓ actual closed created-source commit and publisher > refuses a prepared transaction of another kind before publishing source
+   ↓ actual closed created-source commit and publisher > refuses a workflow attempt detached from the actual prepared job
+   ↓ actual closed created-source commit and publisher > refuses JSON-cloned publication proof without moving database authorities
+   ↓ actual closed created-source commit and publisher > refuses author bytes changed after publication even while database base is unchanged
+   ↓ actual closed created-source commit and publisher > refuses current selection changed after publication
+   ↓ actual closed created-source commit and publisher > refuses a symlink replacement of the committed snapshot source
+   ↓ actual closed created-source commit and publisher > rolls every database authority back if an actual post-consume write fails
+   ↓ actual closed created-source commit and publisher > poisons the outer transaction when a project-bound repository guard failure is swallowed
+   ↓ actual closed created-source commit and publisher > poisons the owner if a real scope is used against another database even when the error is swallowed
+   ↓ actual closed created-source commit and publisher > invalidates an authentic joined scope when its successful commit ends
+   ↓ actual closed created-source commit and publisher > does not expose mutable issuer, guard or geometry authority on a real publication token
+   ↓ actual closed created-source commit and publisher > refuses an authority that expires during final synchronous file verification
+   ↓ actual closed created-source commit and publisher > retains the original backup inode when a same-byte replacement happens after rename
+   ↓ actual closed created-source commit and publisher > refuses a fully rehashed approved plan that lies about film
+   ↓ actual closed created-source commit and publisher > refuses a fully rehashed approved plan that lies about settings
+   ↓ actual closed created-source commit and publisher > refuses a fully rehashed approved plan that lies about captions
+   ↓ actual closed created-source commit and publisher > refuses a fully rehashed approved plan that lies about native_plan
+   ↓ actual closed created-source commit and publisher > refuses a fully rehashed approved plan that lies about rights
+   ↓ actual closed created-source commit and publisher > refuses a fully rehashed approved plan that lies about consumer
+   ↓ actual closed created-source commit and publisher > refuses a fully rehashed approved plan that lies about upstream
+   ↓ actual closed created-source commit and publisher > refuses a fully rehashed approved plan that lies about ranges
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/created-source-adoption.test.ts > actual closed created-source commit and publisher > D10 identity rolls back both pre-rename facts when the prepared journal insert fails
+AssertionError: expected 1 to be +0 // Object.is equality
+
+- Expected
++ Received
+
+- 0
++ 1
+
+ ❯ tests/agent-driven/integration/created-source-adoption.test.ts:179:112
+    177|   }})).rejects.toThrow('identity atomic insert fault');
+    178|   const f=prepared!,revisions=f.host.revisions;
+    179|   expect(revisions.compose(db=>db.prepare('SELECT count(*) AS n FROM c…
+       |                                                                                                                ^
+    180|   expect(revisions.compose(db=>db.prepare('SELECT count(*) AS n FROM c…
+    181|   const fact=f.app.creation.sourceFact(f.projectId,f.commit.snapshot_i…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 42 skipped (43)
+   Start at  06:57:12
+   Duration  16.32s (transform 3.30s, setup 0ms, collect 5.98s, tests 8.60s, environment 0ms, prepare 1.13s)
+
