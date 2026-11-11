@@ -1,0 +1,24 @@
+{
+  "slot": "R1-MAIN-BRIDGE-COMPAT-010",
+  "argv": [
+    "corepack",
+    "pnpm",
+    "exec",
+    "vitest",
+    "run",
+    "tests/agent-driven/bridge",
+    "tests/agent-driven/integration/created-run-authority.test.ts",
+    "tests/agent-driven/integration/created-task-store.test.ts",
+    "tests/agent-driven/integration/created-task-worker.test.ts",
+    "tests/agent-driven/integration/host-close-lifecycle.test.ts",
+    "tests/agent-driven/integration/review-media-transport.test.ts",
+    "tests/architecture",
+    "--maxWorkers=1",
+    "--minWorkers=1"
+  ],
+  "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+  "start": "2026-11-11T15:41:17.717990+00:00",
+  "main_head": "34118e71cf9582d20a715b441e3fe4ea8e98412f",
+  "source_state": "30author files from stopped5274+2dirty guard attempts, MAINunifiedreceipt/strictquery/reopen +newtest, exacttakeover manifest preserved",
+  "pid": 967005
+}

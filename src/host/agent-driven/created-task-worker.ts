@@ -13,6 +13,12 @@ export interface CreatedTaskProcessor {
 export interface CreatedTaskWorkerOptions {
  readonly capacity?:number;readonly pollMs?:number;readonly leaseMs?:number;
  readonly diagnostic?:(event:{code:string;job_id:string|null})=>void;
+ /** R0-M01: the same-database graceful release. On shutdown the worker must return the live
+  * lease AND its durable workflow checkpoint to a resumable state in ONE transaction, so a
+  * reopened database never shows a queued job that still owns a running checkpoint. The
+  * application that owns the workflow authority supplies this composition; without it the
+  * worker keeps the legacy lease-only release and the split stays possible. */
+ readonly gracefulRelease?:(task:TaskReservation,lease:LeaseIdentity)=>void;
 }
 /** One scheduler over original durable jobs. The pump never awaits a render: a free
  * slot can start the next job even while another slot is busy. No second queue/DB. */
@@ -85,7 +91,12 @@ export class CreatedTaskWorker {
    clearInterval(heartbeat);
    // Closing retains restartable work rather than converting it to success. Release
    // only this live identity; a reclaimed lease or user cancellation stays untouched.
-   if(this.#closed){try{if(this.jobs.holdsLease(task.job_id,lease))this.jobs.releaseLease(task.job_id,lease.owner);}catch{this.#diagnostic('TASK_SHUTDOWN_RELEASE_FAILED',task.job_id);}}
+   // The graceful composition also returns the workflow checkpoint to pending inside the
+   // SAME transaction, so a reopened database cannot split the two states.
+   if(this.#closed){try{
+    if(this.options.gracefulRelease)this.options.gracefulRelease(task,lease);
+    else if(this.jobs.holdsLease(task.job_id,lease))this.jobs.releaseLease(task.job_id,lease.owner);
+   }catch{this.#diagnostic('TASK_SHUTDOWN_RELEASE_FAILED',task.job_id);}}
   }
  }
  close():Promise<void>{

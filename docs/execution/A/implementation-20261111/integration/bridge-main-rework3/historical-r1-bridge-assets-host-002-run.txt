@@ -1,0 +1,112 @@
+argv=corepack pnpm exec vitest run tests/agent-driven/integration/local-assets-transport.test.ts tests/agent-driven/integration/host-application.test.ts tests/agent-driven/integration/creative-context-host.test.ts tests/agent-driven/integration/created-task-gate.test.ts --maxWorkers=1 --minWorkers=1
+cwd=/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+slot=R1-BRIDGE-ASSETS-HOST-002
+head=712bcc55239f8f6748f416a7f2a6b8aead2063d3
+start_utc=2026-11-11T14:50:45Z
+start_epoch=1794408645
+execution=foreground synchronous Bash tool call; no background handle, no persistent command id
+
+ RUN  v3.2.4 /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+
+(node:877058) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/creative-context-host.test.ts (13 tests) 29071ms
+   ✓ writes Script and bound Storyboard through real HTTP and observes them beside the actual committed native project  2244ms
+   ✓ rejects foreign owner access and unresolved or altered lineage without inserting content/outbox/command facts  2054ms
+   ✓ keeps original artifact replay after input changes but refuses new stale writes and rejects dangling storyboard paragraphs  3498ms
+   ✓ reports an actual non-creator active Job as missing its producer, never hides it or misreports a revision conflict  2138ms
+   ✓ does not resolve another real project artifact even for the same owner and matching hash  3726ms
+   ✓ binds new draft writes to the question closure, while replay keeps the original artifact after a new question  2293ms
+   ✓ maps a real native source drift to conflict and checks ownership before unavailable source lookup  2421ms
+   ✓ component observer uses the authorization written during native observation in its one final SQLite projection  1817ms
+   ✓ component observer reports expired grants honestly and prefers a new valid authorization over expired predecessors  1799ms
+   ✓ rejects a committed author source replaced by a FIFO without hanging the HTTP request or Host close  1781ms
+   ✓ component safe-control pause still commits with a future-issued grant and does not authorize a new action  1754ms
+   ✓ component safe-control cancel still commits with a future-issued grant and does not authorize a new action  1770ms
+   ✓ binds content relay project scope to its owned project and originating intake while preserving pre-project decisions  1775ms
+(node:878150) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/created-task-gate.test.ts (7 tests) 19145ms
+   ✓ reserves one real job, cp step/checkpoint and mirrored event atomically, then replays without new effects  2612ms
+   ✓ rejects stale base, altered refs/scope/attempt and crossing the sample gate before creating any job  2438ms
+   ✓ rolls back real job, step, checkpoint, event and grant mutation if final authorization is revoked  2516ms
+   ✓ rejects a creative closure changed after authorization without task side effects  2474ms
+   ✓ emits real pending-to-running progress and rolls back step/checkpoint/outbox if the event mirror fails  2520ms
+   ✓ recovers exhausted leases atomically with the real workflow checkpoint, and is idempotent after SQLite reopen  2594ms
+   ✓ recovers cancelled leases atomically with the real workflow checkpoint, and is idempotent after SQLite reopen  3990ms
+(node:878678) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/agent-driven/integration/local-assets-transport.test.ts (3 tests | 3 failed) 6943ms
+   × lists the safe source files to the trusted UI and refuses the driver channel 2278ms
+     → expected 403 to be 200 // Object.is equality
+   × registers the selected file once, replays the original receipt and refuses a different declaration 2394ms
+     → Target cannot be null or undefined.
+   × refuses an unknown candidate, a foreign reader and an unusable cursor without side effects 2160ms
+     → expected 403 to be 404 // Object.is equality
+(node:878882) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/host-application.test.ts (1 test) 814ms
+   ✓ mounts real creative SQL in NarralensHost and denies the legacy bearer/session/write bypass  814ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/local-assets-transport.test.ts > lists the safe source files to the trusted UI and refuses the driver channel
+AssertionError: expected 403 to be 200 // Object.is equality
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 200[39m
+[31m+ 403[39m
+
+ ❯ tests/agent-driven/integration/local-assets-transport.test.ts:101:28
+     99|   // The inventory read is owner scoped and works for the driver.
+    100|   const inventory=await f.owner(`/api/ui/v1/projects/${f.projectId}/as…
+    101|   expect(inventory.status).toBe(200);
+       |                            ^
+    102|   const empty=await inventory.json() as {format:string;items:unknown[]…
+    103|   expect(empty.format).toBe('narralens.asset-inventory@1');
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  tests/agent-driven/integration/local-assets-transport.test.ts > registers the selected file once, replays the original receipt and refuses a different declaration
+AssertionError: Target cannot be null or undefined.
+ ❯ tests/agent-driven/integration/local-assets-transport.test.ts:140:25
+    138|   const inventory=await f.owner(`/api/ui/v1/projects/${f.projectId}/as…
+    139|   const listed2=await inventory.json() as {items:unknown[]};
+    140|   expect(listed2.items).toHaveLength(1);
+       |                         ^
+    141|   // The same key with a DIFFERENT declaration is a conflict, never a …
+    142|   const different=declaration(video.candidate_id,'transport-key','A di…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  tests/agent-driven/integration/local-assets-transport.test.ts > refuses an unknown candidate, a foreign reader and an unusable cursor without side effects
+AssertionError: expected 403 to be 404 // Object.is equality
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 404[39m
+[31m+ 403[39m
+
+ ❯ tests/agent-driven/integration/local-assets-transport.test.ts:163:26
+    161|   // Another principal cannot enumerate this project's inventory.
+    162|   const foreign=await f.asForeign(`/api/ui/v1/projects/${f.projectId}/…
+    163|   expect(foreign.status).toBe(404);
+       |                          ^
+    164|   // An unknown cursor is refused instead of silently continuing.
+    165|   const cursor=await f.owner(`/api/ui/v1/projects/${f.projectId}/asset…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  1 failed | 3 passed (4)
+      Tests  3 failed | 21 passed (24)
+   Start at  22:50:45
+   Duration  58.36s (transform 900ms, setup 0ms, collect 1.89s, tests 55.97s, environment 0ms, prepare 134ms)
+
+end_utc=2026-11-11T14:51:46Z
+end_epoch=1794408706
+duration_seconds=61
+exit_code=1

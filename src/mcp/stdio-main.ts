@@ -25,20 +25,36 @@
  */
 
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { createHostApplicationPorts } from "./host-application-ports.js";
+import { createHostAdjunctPorts, createHostApplicationPorts } from "./host-application-ports.js";
 import { createMcpServer } from "./mcp-server.js";
+import {
+  LOCAL_ASSET_INVENTORY_HOST_ROUTE,
+  localAssetInventoryResource,
+} from "./asset-inventory-resource.js";
 
 const baseUrl = process.env["NARRALENS_HOST_URL"] ?? "http://127.0.0.1:4173";
 const token = process.env["NARRALENS_HOST_TOKEN"];
 const filterDigest = process.env["NARRALENS_FILTER_DIGEST"];
 
-const ports = createHostApplicationPorts({
-  baseUrl,
-  headers: () => (token === undefined || token.length === 0 ? {} : { authorization: `Bearer ${token}` }),
-});
+const credentials = () => (token === undefined || token.length === 0 ? {} : { authorization: `Bearer ${token}` });
+
+const ports = createHostApplicationPorts({ baseUrl, headers: credentials });
+
+// The adjunct local-material transport. It is not in the frozen registry, it uses the
+// same client and the same credential, and it is counted separately from the frozen
+// resources.
+const adjunctPorts = createHostAdjunctPorts(
+  { baseUrl, headers: credentials },
+  [LOCAL_ASSET_INVENTORY_HOST_ROUTE],
+);
 
 const server = createMcpServer({
   ports,
+  adjunctResources: [
+    localAssetInventoryResource({
+      read: (input) => adjunctPorts[LOCAL_ASSET_INVENTORY_HOST_ROUTE.id]!(input),
+    }),
+  ],
   ...(filterDigest === undefined || filterDigest.length === 0 ? {} : { filterDigest }),
 });
 const transport = new StdioServerTransport();

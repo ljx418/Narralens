@@ -109,6 +109,11 @@ Some facts are better read as resources than as tools:
 - `narralens://projects/{id}/events-snapshot` — the observation snapshot and its
   signed cursor. It accepts `?filter_digest=`, `?cursor=` and `?last_event_id=`; any
   other query parameter is refused rather than ignored.
+- `narralens://projects/{id}/local-assets` — the registered local material of the
+  project, as the reviewed adjunct transport. It is read only: it never registers,
+  never probes and never encodes. It accepts `?limit=` and `?cursor=`; any other
+  query parameter is refused rather than ignored. This resource is counted
+  separately from the frozen ones above, and it belongs to a project you own.
 
 ## Library
 

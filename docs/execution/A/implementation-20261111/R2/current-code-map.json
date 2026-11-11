@@ -1,0 +1,31 @@
+{
+  "freeze": "de086f32c48c44fb72d0212ef80365f1c786408c",
+  "observed": {
+    "src/host/agent-driven/creation-application.ts": "774749bfab1f13f8a6ecad6ac5c85e157daa2f0a97f0385b2798229b16f50333",
+    "src/host/agent-driven/created-run-facts.ts": "f466f813049b82c39f90de70713464a5115ba1f4245d45ab8e3e50622aa2f65d",
+    "src/host/agent-driven/created-run-authority.ts": "571da409fd742705d1293cab81312a24766410679e223c354590724f98fa749a",
+    "src/host/agent-driven/product-sqlite-repository.ts": "e0beb9353f8f34fcdef9a5b434959f0b63c990aef3de8588cae25cea34a328a1",
+    "src/host/creative/execution-guard.ts": "e9ddb03a7d50b1f4e247405c7579beb7e6ccd311a714d3dd688a75322bba6010",
+    "src/host/creative/fixed-workflow-service.ts": "8a2eaded89c7c160b687019b614a1e9c6a080865488933affdff0e9517139995",
+    "src/host/creative/product-repository.ts": "f071a02f1ed691e70a7f7cc774c6f4b5948c088e4a8411491fb51adb7affc3b7",
+    "src/host/projects/revision-store.ts": "95a2158d8bf69a680227a525090724d2e0721aba7bf08b9332a7f3dbfd4c8c0f",
+    "src/host/projects/project-coordinator.ts": "36a996d700f7009bc08f9aaafe489081058033fe8adbf2ae20019c8568143e02",
+    "src/host/projects/project-creation-store.ts": "ee87d38d6f2ac79e5ec0ed3ee5ea074d035c388de43ff1a5365eb0732d43f682",
+    "src/host/agent-driven/prepared-draft-verifier.ts": "f69770afba85137d0dfd7a33be6115093538a411c2a4308295b523a018bbe93f",
+    "src/host/render/assembly-ports.ts": "6c0d0f18602d4fb7a0c334d51e2c5a0f0c21c7cab4ff4a980fbe77f8461eb596"
+  },
+  "missing_in_freeze": [
+    "src/host/agent-driven/created-source-change-service.ts",
+    "src/host/agent-driven/created-source-impact-store.ts",
+    "src/host/agent-driven/created-source-adoption-store.ts",
+    "src/host/agent-driven/created-source-adoption-service.ts",
+    "src/host/agent-driven/created-source-publisher.ts",
+    "src/host/agent-driven/fixed-phase-executor.ts",
+    "src/host/render/committed-render-phases.ts",
+    "src/host/m5/native-observation.ts",
+    "src/host/m5/openfilm-native-expected.ts",
+    "src/host/m5/native-ack-store.ts"
+  ],
+  "observed_at": "2026-11-11T16:23:46.851392+00:00",
+  "scope": "read-only source inspection; no runtime or business acceptance"
+}

@@ -1,0 +1,21 @@
+{
+  "slot": "R1-MAIN-TRANSPORT-002",
+  "argv": [
+    "corepack",
+    "pnpm",
+    "test",
+    "tests/agent-driven/integration/created-native-ui-transport.test.ts",
+    "--maxWorkers=1",
+    "--minWorkers=1"
+  ],
+  "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+  "wrapper_pid": 826031,
+  "started_at": "2026-11-11T14:36:47.840979+00:00",
+  "base_head": "69a26e57fb73a09286baca01627ece4c469ab545",
+  "inputs": {
+    "src/host/m5/controlled-studio-access.ts": "8d8825ea2392dec02040e728579abd522d202bb4fe56a027fba9515c0fa68ac6",
+    "src/host/m5/openfilm-studio-gateway.ts": "451e0ba8e8c2013f2eff429b66e57a2d62659b97d86e9fff809e32f50a11f2a2",
+    "tests/agent-driven/integration/created-native-ui-transport.test.ts": "45ff1305610632ed0870e5c6cb96242737dc6a123fe3300012dd5eb1c2307fd1"
+  },
+  "command_pid": 826033
+}

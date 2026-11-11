@@ -1,9 +1,11 @@
-import {ControlledStudioAccess,StudioAccessError,type NativeStudioGrant,type NativeStudioSession} from './controlled-studio-access.js';
+import {ControlledStudioAccess,StudioAccessError,UI_MAX_READ_BYTES,type NativeStudioGrant,type NativeStudioSession,type NativeStudioUiReviewMedia} from './controlled-studio-access.js';
 import {CONTROLLED_NATIVE_ENTRY_HTML,CONTROLLED_NATIVE_TRANSPORT_SCRIPT} from './controlled-studio-browser.js';
 import { createHmac, randomBytes, randomUUID } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { createServer, request as httpRequest, type IncomingMessage, type Server, type ServerResponse } from "node:http";
+import { resolve } from "node:path";
 import type { Duplex } from "node:stream";
+import { fileURLToPath } from "node:url";
 import { openFilmCapabilityMap } from "../engine/engine-capabilities.js";
 import { NATIVE_MUTATION_REGISTRY } from "../engine/native-mutation-registry.js";
 import type { StartedStudio } from "./openfilm-studio-supervisor.js";
@@ -90,7 +92,81 @@ export interface OpenFilmStudioGatewayDeps {
    * can never become a way to read a directory.
    */
   readonly mediaFiles?: Readonly<Record<string, string>> | undefined;
+  /**
+   * The runtime UI registry: the closed surface/operation allowlist.
+   *
+   * It is BRIDGE's file (`contracts/agent-workbench-ui-v1.registry.json`) and it is
+   * injected by the Host composition. When it is absent the Gateway refuses the UI
+   * aliases with 503 rather than guessing an allowlist of its own.
+   */
+  readonly uiRegistry?: GatewayUiRuntimeRegistry | null | undefined;
 }
+
+/**
+ * The runtime UI registry (CR-R1-001 §3).
+ *
+ * It is a closed set of surfaces and operations. The Gateway consults it before every
+ * call; the Host's dispatcher remains the authority for the answer.
+ */
+export interface GatewayUiRuntimeRegistry {
+  readonly format: string;
+  readonly operations: Readonly<Record<string, readonly string[]>>;
+}
+
+/** Where BRIDGE's runtime registry lives, relative to the repository root. */
+export const GATEWAY_UI_REGISTRY_RELATIVE_PATH = "contracts/agent-workbench-ui-v1.registry.json";
+
+/** The repository root, from this module's own location. */
+export function gatewayUiRegistryRoot(): string {
+  return resolve(fileURLToPath(new URL("../../../", import.meta.url)));
+}
+
+/**
+ * Read BRIDGE's runtime registry.
+ *
+ * It returns `null` when the file is absent or malformed: the Gateway then refuses the
+ * UI aliases with 503. It never falls back to a registry of its own — a second allowlist
+ * would be a second protocol.
+ */
+export async function loadGatewayUiRegistry(root: string = gatewayUiRegistryRoot()): Promise<GatewayUiRuntimeRegistry | null> {
+  const raw = await readFile(resolve(root, GATEWAY_UI_REGISTRY_RELATIVE_PATH), "utf8").catch(() => null);
+  if (raw === null) return null;
+  let value: unknown;
+  try { value = JSON.parse(raw); } catch { return null; }
+  if (value === null || typeof value !== "object" || Array.isArray(value)) return null;
+  const record = value as { format?: unknown; operations?: unknown; operation_allowlist?: unknown };
+  const source = record.operations ?? record.operation_allowlist;
+  if (source === null || typeof source !== "object" || Array.isArray(source)) return null;
+  const operations: Record<string, readonly string[]> = Object.create(null);
+  for (const [surface, list] of Object.entries(source as Record<string, unknown>)) {
+    if (!Array.isArray(list)) return null;
+    for (const item of list) if (typeof item !== "string") return null;
+    operations[surface] = Object.freeze([...(list as string[])]);
+  }
+  return Object.freeze({
+    format: typeof record.format === "string" ? record.format : "narralens.gateway-ui-runtime-registry@1",
+    operations: Object.freeze(operations),
+  });
+}
+
+/**
+ * The two Gateway aliases this ticket adds (CR-R1-001 §1).
+ *
+ * They are counted separately from the Host routes: 31 frozen Host + 5 reviewed adjunct
+ * Host + 2 explicitly additional Gateway HTTP. The count is never "still 31+5".
+ */
+export const GATEWAY_UI_ALIASES: readonly { readonly method: "POST" | "GET"; readonly path: string }[] = Object.freeze([
+  Object.freeze({ method: "POST", path: "/narralens/api/ui/call" }),
+  Object.freeze({ method: "GET", path: "/narralens/api/ui/review-media/:ref" }),
+]);
+
+/** The exposure counting, stated exactly. */
+export const GATEWAY_UI_EXPOSURE_COUNTING =
+  "31 frozen Host + 5 reviewed adjunct Host + 2 explicitly additional Gateway HTTP";
+
+/** The three closed surfaces the UI RPC may name. */
+const UI_SURFACES = ["agent.v1", "local-assets.v1", "workbench.v1"] as const;
+
 
 interface AllowedRead {
   readonly method: "GET" | "HEAD";
@@ -174,6 +250,7 @@ export class OpenFilmStudioGateway {
   #filmGatewayOrigin = "";
   #filmOrigin = "";
   readonly #sockets = new Set<Duplex>();
+  readonly #uiMediaRequests = new Set<AbortController>();
 
   constructor(deps: OpenFilmStudioGatewayDeps) {
     this.#deps = deps;
@@ -190,7 +267,11 @@ export class OpenFilmStudioGateway {
     if(response.destroyed||response.writableEnded)return;
     if(response.headersSent){response.destroy();return;}
     const failure=error instanceof StudioAccessError?error:new StudioAccessError(503,'CAPABILITY_UNAVAILABLE');
-    response.writeHead(failure.status,{'Content-Type':'application/json','Cache-Control':'no-store'});response.end(JSON.stringify({code:failure.code,message:'原生工程会话不可用，请从工作台重新打开。'}));
+    const message=failure.code==='RANGE_NOT_SATISFIABLE'?'请求的范围无法满足。'
+      :failure.code==='INVALID_REQUEST'?'请求无效，未被转交。'
+      :failure.code==='CAPABILITY_UNAVAILABLE'?'该能力当前不可用，未伪造可用。'
+      :'原生工程会话不可用，请从工作台重新打开。';
+    response.writeHead(failure.status,{'Content-Type':'application/json','Cache-Control':'no-store'});response.end(JSON.stringify({code:failure.code,message}));
   }
   #filmPrefix(session:NativeStudioSession){return '/p/'+createHmac('sha256',this.#deps.studio.key).update('film origin\0'+session.grant.native_project_id).digest().subarray(0,18).toString('base64url')+'/';}
 
@@ -243,6 +324,8 @@ export class OpenFilmStudioGateway {
 
   async close(): Promise<void> {
     this.#access?.close();
+    for (const controller of this.#uiMediaRequests) controller.abort();
+    this.#uiMediaRequests.clear();
     for (const socket of this.#sockets) socket.destroy();
     this.#sockets.clear();
     const server = this.#server;
@@ -347,6 +430,13 @@ export class OpenFilmStudioGateway {
       return;
     }
 
+    // The workbench UI aliases (CR-R1-001 §1). They are a second purpose: they carry
+    // the independent UI cookie and proof, and the native proof never stands in for them.
+    if (path.startsWith("/narralens/api/ui/")) {
+      await this.#uiRoute(request, response, path);
+      return;
+    }
+
     // The Narralens service surface: the operations the panel may ask the Host for.
     if (path.startsWith("/narralens/api/")) {
       await this.#narralensOperation(request, response, path, url);
@@ -377,8 +467,143 @@ export class OpenFilmStudioGateway {
     await this.#proxyEditor(request, response, path, url);
   }
 
-  #hostHeaderAllowed(request: IncomingMessage, origin: string): boolean {
-    const host = request.headers.host;
+  // ── the workbench UI aliases ─────────────────────────────────────────────────────────
+
+  /**
+   * The two UI aliases.
+   *
+   * The order is the contract's: the independent cookie and proof first, then the
+   * closed registry, then the Host's own dispatcher. A missing producer answers 503 —
+   * the Gateway never claims a capability it does not have, and it never falls back to
+   * the native session.
+   */
+  async #uiRoute(request: IncomingMessage, response: ServerResponse, path: string): Promise<void> {
+    if (this.#access === undefined) throw new StudioAccessError(503, "CAPABILITY_UNAVAILABLE");
+    const method = (request.method ?? "GET").toUpperCase();
+    if (method === "POST" && path === "/narralens/api/ui/call") {
+      await this.#uiCall(request, response);
+      return;
+    }
+    const media = /^\/narralens\/api\/ui\/review-media\/([A-Za-z0-9_-]{1,200})$/.exec(path);
+    if ((method === "GET" || method === "HEAD") && media !== null) {
+      await this.#uiReviewMedia(request, response, media[1]!);
+      return;
+    }
+    throw new StudioAccessError(404, "NOT_FOUND");
+  }
+
+  /**
+   * One closed UI call.
+   *
+   * The envelope has exactly three fields, and the input is passed on untouched: the
+   * Host's own DTO validators must see exactly what the caller sent, and an unknown
+   * field must not be dropped before they do.
+   */
+  async #uiCall(request: IncomingMessage, response: ServerResponse): Promise<void> {
+    const session = this.#access!.authenticateUi(request);
+    const envelope = await readJsonBody(request);
+    if (envelope === undefined || envelope === null || typeof envelope !== "object" || Array.isArray(envelope)) {
+      throw new StudioAccessError(400, "INVALID_REQUEST");
+    }
+    const keys = Object.keys(envelope);
+    if (keys.length !== 3 || !keys.includes("surface") || !keys.includes("operation") || !keys.includes("input")) {
+      throw new StudioAccessError(400, "INVALID_REQUEST");
+    }
+    const surface = (envelope as { surface: unknown }).surface;
+    const operation = (envelope as { operation: unknown }).operation;
+    const input = (envelope as { input: unknown }).input;
+    if (typeof surface !== "string" || !(UI_SURFACES as readonly string[]).includes(surface)) {
+      throw new StudioAccessError(400, "INVALID_REQUEST");
+    }
+    if (typeof operation !== "string" || operation === "") throw new StudioAccessError(400, "INVALID_REQUEST");
+    // `null` means the composition has no registry at all; `undefined` means "read the
+    // runtime registry". Either way the Gateway never invents an allowlist.
+    const registry = this.#deps.uiRegistry === undefined ? await loadGatewayUiRegistry() : this.#deps.uiRegistry;
+    if (registry === null) throw new StudioAccessError(503, "CAPABILITY_UNAVAILABLE");
+    const allowed = registry.operations[surface];
+    if (allowed === undefined || !allowed.includes(operation)) throw new StudioAccessError(400, "INVALID_REQUEST");
+    const result = await this.#access!.invokeUi(session, { surface, operation, input, correlation_id: randomUUID() });
+    response.writeHead(result.status, { "content-type": "application/json" });
+    response.end(result.body === undefined ? "" : JSON.stringify(result.body));
+  }
+
+  /**
+   * One prepared review medium.
+   *
+   * The bytes come from the authorised reader, in bounded reads, and the reader is
+   * closed on every path — success, short read, cancel or error. The ETag is the
+   * object's own digest, so the caller can check the bytes it received against the
+   * descriptor it was given.
+   */
+  async #uiReviewMedia(request: IncomingMessage, response: ServerResponse, ref: string): Promise<void> {
+    const session = this.#access!.authenticateUi(request);
+    const method = (request.method ?? "GET").toUpperCase();
+    const controller = new AbortController();
+    const cancel = () => controller.abort();
+    const disconnected = () => { if (!response.writableFinished) cancel(); };
+    request.once("aborted", cancel);
+    response.once("close", disconnected);
+    this.#uiMediaRequests.add(controller);
+    let media: NativeStudioUiReviewMedia | undefined;
+    try {
+      if (request.aborted || response.destroyed) controller.abort();
+      media = await this.#access!.openUiMedia(session, ref, undefined, controller.signal);
+      const current = () => {
+        controller.signal.throwIfAborted();
+        this.#access!.recheckUi(session);
+      };
+      current();
+      if (!Number.isSafeInteger(media.bytes) || media.bytes < 0
+        || !/^[a-f0-9]{64}$/.test(media.sha256) || media.etag !== `"${media.sha256}"`) {
+        throw new StudioAccessError(503, "CAPABILITY_UNAVAILABLE");
+      }
+      const headers: Record<string, string> = {
+        "content-type": media.content_type,
+        "cache-control": "no-store",
+        "accept-ranges": "bytes",
+        "etag": media.etag,
+        "x-content-type-options": "nosniff",
+      };
+      const window = resolveByteRange(request.headers.range, media.bytes);
+      const length = window === undefined ? media.bytes : window.end - window.start + 1;
+      const status = window === undefined ? 200 : 206;
+      headers["content-length"] = String(length);
+      if (window !== undefined) headers["content-range"] = `bytes ${window.start}-${window.end}/${media.bytes}`;
+      if (method === "HEAD") {
+        current();
+        response.writeHead(status, headers);
+        response.end();
+        return;
+      }
+      let offset = window === undefined ? 0 : window.start;
+      let remaining = length;
+      // Only one reader chunk is retained. Await the socket's backpressure before
+      // fetching another chunk; never concatenate the complete video into memory.
+      while (remaining > 0) {
+        current();
+        const size = Math.min(remaining, UI_MAX_READ_BYTES);
+        const chunk = await media.read({ offset, length: size });
+        current();
+        if (chunk.byteLength !== size) throw new StudioAccessError(503, "CAPABILITY_UNAVAILABLE");
+        if (!response.headersSent) response.writeHead(status, headers);
+        if (!response.write(Buffer.from(chunk))) await awaitResponseDrain(response, controller.signal);
+        offset += size;
+        remaining -= size;
+      }
+      current();
+      if (!response.headersSent) response.writeHead(status, headers);
+      response.end();
+    } finally {
+      request.removeListener("aborted", cancel);
+      response.removeListener("close", disconnected);
+      this.#uiMediaRequests.delete(controller);
+      if (media !== undefined) {
+        try { await media.close(); } catch { /* preserve the original request outcome */ }
+      }
+    }
+  }
+
+  #hostHeaderAllowed(request: IncomingMessage, origin: string): boolean {    const host = request.headers.host;
     if (typeof host !== "string" || host === "") return false;
     const expected = new URL(origin).host;
     if (host === expected) return true;
@@ -840,4 +1065,54 @@ async function readJsonBody(request: IncomingMessage): Promise<unknown> {
   if (chunks.length === 0) return {};
   try { return JSON.parse(Buffer.concat(chunks).toString("utf8")) as unknown; }
   catch { return undefined; }
+}
+
+/**
+ * The byte window a `Range` header asks for.
+ *
+ * The window may be any size: the one-mebyte bound belongs to a single *read*, not to
+ * the response. A range that cannot be satisfied is refused with 416, never silently
+ * widened.
+ */
+function resolveByteRange(header: string | undefined, total: number): { start: number; end: number } | undefined {
+  if (header === undefined) return undefined;
+  const match = /^bytes=(\d*)-(\d*)$/u.exec(header.trim());
+  if (match === null) throw new StudioAccessError(416, "RANGE_NOT_SATISFIABLE");
+  const rawStart = match[1]!;
+  const rawEnd = match[2]!;
+  if (rawStart === "" && rawEnd === "") throw new StudioAccessError(416, "RANGE_NOT_SATISFIABLE");
+  if (total <= 0) throw new StudioAccessError(416, "RANGE_NOT_SATISFIABLE");
+  let start: number;
+  let end: number;
+  if (rawStart === "") {
+    const suffix = Number(rawEnd);
+    if (!Number.isSafeInteger(suffix) || suffix <= 0) throw new StudioAccessError(416, "RANGE_NOT_SATISFIABLE");
+    start = Math.max(0, total - suffix);
+    end = total - 1;
+  } else {
+    start = Number(rawStart);
+    if (!Number.isSafeInteger(start)) throw new StudioAccessError(416, "RANGE_NOT_SATISFIABLE");
+    end = rawEnd === "" ? total - 1 : Math.min(Number(rawEnd), total - 1);
+    if (!Number.isSafeInteger(end)) throw new StudioAccessError(416, "RANGE_NOT_SATISFIABLE");
+  }
+  if (start >= total || start > end) throw new StudioAccessError(416, "RANGE_NOT_SATISFIABLE");
+  return { start, end };
+}
+
+/** Wait for actual socket capacity, or cancel immediately on disconnect/shutdown. */
+function awaitResponseDrain(response: ServerResponse, signal: AbortSignal): Promise<void> {
+  return new Promise<void>((resolve, reject) => {
+    const cleanup = () => {
+      response.removeListener("drain", drained);
+      response.removeListener("error", failed);
+      signal.removeEventListener("abort", aborted);
+    };
+    const drained = () => { cleanup(); resolve(); };
+    const failed = (error: Error) => { cleanup(); reject(error); };
+    const aborted = () => { cleanup(); reject(signal.reason ?? new DOMException("Review media cancelled", "AbortError")); };
+    response.once("drain", drained);
+    response.once("error", failed);
+    signal.addEventListener("abort", aborted, { once: true });
+    if (signal.aborted) aborted();
+  });
 }

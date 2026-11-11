@@ -1,0 +1,20 @@
+{
+  "argv": [
+    "corepack",
+    "pnpm",
+    "exec",
+    "vitest",
+    "run",
+    "tests/agent-driven/headless/created-native-entry.test.ts",
+    "tests/agent-driven/product/fixed-workflow-service.test.ts",
+    "tests/agent-driven/integration/created-workflow-host.test.ts",
+    "--maxWorkers=1",
+    "--minWorkers=1"
+  ],
+  "start": "2026-11-11T16:15:12.165886+00:00",
+  "scope": "cold owned project no-run read is empty facts, actual health registry observed bound Host, actual native UI+system controls",
+  "pid": 1030681,
+  "exit": 0,
+  "end": "2026-11-11T16:15:46.904479+00:00",
+  "log_sha256": "790b8cc7ce17c824dce0076b17cce2f8b751add9184c9666f436f286db25d7cb"
+}

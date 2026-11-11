@@ -1,0 +1,23 @@
+{
+  "status": "MAIN_IMPLEMENTATION_NOT_YET_RUNTIME_TESTED",
+  "candidate": "c8a06729c2a58d0e79c40042f3155c558ca6fd11",
+  "takeover": "explicit writer stop; >2 reworks",
+  "root_cause": "preview fixture bypassed actual Host processor metadata and invented durable completion; startup failure leaked fixture resources",
+  "decision": "reuse one real worker/Job/provider/fact fixture in both test suites; no second production metadata writer introduced",
+  "new_helper": "tests/agent-driven/integration/helpers/created-draft-fixture.ts",
+  "actual_preview": "NOT_RUN pending MAIN resource after BRIDGE",
+  "tsc_session": 17768,
+  "known_original_failure": "7 processor tests pass,4 preview fixtures fail before preview",
+  "tsc_exit": 0,
+  "production_defect": "probeVideo used fps as seconds/frame, so valid30fps output compared0.033333 against30; fixed expected.den/expected.num",
+  "runtime_test": "NOT_RUN pending heavy slot",
+  "positive_quality_assertion": "real decoded quality artifact constant_frame_step near1/30 and90 countedframes",
+  "runtime_result": {
+    "processor7": "exit0 from run1",
+    "preview4": "exit0 from run2",
+    "preview_log_sha256": "b8fdf76bf962d272c53a783b3603081c55a8d6cf9923b77a42aade82e22e497b"
+  },
+  "additional_production_defect": "NativeRenderer received sibling output directory as staging_root, excluding copied project; pass common owned workspace root, keeping renderer containment guard unchanged",
+  "independent_review": "PENDING until frozen candidate",
+  "scope": "diagnostic90frame actual render/decode/5parts/audio144000 samples; not real human/A"
+}

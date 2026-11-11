@@ -264,3 +264,49 @@ it('never permits a recovery hook to consume or forge an additional lease attemp
   expect(f.revisions.readJob(task.job_id)).toEqual(before);expect(f.count('job_event')).toBe(events);expect(f.revisions.compose(db=>db.prepare('SELECT tag FROM fixture_task_link WHERE job_id=?').get(task.job_id)?.tag)).toBe('fixture SQL hook only');
  }finally{f.close();}
 });
+
+// R0-M01: a graceful shutdown must not split the job state from the checkpoint state.
+it('releases the live lease and returns the bound checkpoint in ONE same-database transaction',()=>{
+ const f=fixture();try{
+  const task=running(f),lease={owner:'worker',attempt:1},events=f.count('job_event');let settled=0;
+  const released=f.store.releaseForShutdown(task.job_id,lease,(rows,current,now)=>{settled++;expect(current.job_id).toBe(task.job_id);expect(now.getTime()).toBe(NOW);rows.prepare("UPDATE fixture_task_link SET tag='pending' WHERE job_id=?").run(current.job_id);});
+  expect(released).toBe(true);expect(settled).toBe(1);
+  expect(f.revisions.readJob(task.job_id)).toMatchObject({state:'queued',lease_owner:null,lease_expires_at:null,attempt:1});
+  expect(f.revisions.compose(db=>db.prepare('SELECT tag FROM fixture_task_link WHERE job_id=?').get(task.job_id)?.tag)).toBe('pending');
+  // Exactly one durable event for this release.
+  expect(f.count('job_event')).toBe(events+1);
+ }finally{f.close();}
+});
+it('rolls back the lease release and the checkpoint when the settlement callback faults',()=>{
+ const f=fixture();try{
+  const task=running(f),lease={owner:'worker',attempt:1},events=f.count('job_event');
+  expect(()=>f.store.releaseForShutdown(task.job_id,lease,rows=>{rows.prepare("UPDATE fixture_task_link SET tag='must rollback' WHERE job_id=?").run(task.job_id);throw Error('shutdown boundary');})).toThrow('shutdown boundary');
+  expect(f.revisions.readJob(task.job_id)).toMatchObject({state:'running',lease_owner:'worker'});
+  expect(f.revisions.compose(db=>db.prepare('SELECT tag FROM fixture_task_link WHERE job_id=?').get(task.job_id)?.tag)).toBe('fixture SQL hook only');
+  expect(f.count('job_event')).toBe(events);
+ }finally{f.close();}
+});
+it('rejects an asynchronous settlement callback and rolls the whole release back',async()=>{
+ const f=fixture();try{
+  const task=running(f),lease={owner:'worker',attempt:1},events=f.count('job_event');
+  expect(()=>f.store.releaseForShutdown(task.job_id,lease,async rows=>{rows.prepare("UPDATE fixture_task_link SET tag='must rollback' WHERE job_id=?").run(task.job_id);await Promise.resolve();})).toThrow('Async SQL hooks');
+  await Promise.resolve();await Promise.resolve();
+  expect(f.revisions.readJob(task.job_id)).toMatchObject({state:'running',lease_owner:'worker'});
+  expect(f.revisions.compose(db=>db.prepare('SELECT tag FROM fixture_task_link WHERE job_id=?').get(task.job_id)?.tag)).toBe('fixture SQL hook only');
+  expect(f.count('job_event')).toBe(events);
+ }finally{f.close();}
+});
+it.each(['owner','attempt','expiry','settled'] as const)('never releases a %s job through the shutdown path',mode=>{
+ const f=fixture();try{
+  const task=running(f);
+  let owner='worker',attempt=1;
+  if(mode==='owner')owner='foreign';if(mode==='attempt')attempt=2;if(mode==='expiry')f.setClock(NOW+1000);
+  if(mode==='settled')f.jobs.recordCallback(task.job_id,{owner:'worker',attempt:1},{state:'succeeded'},new Date(NOW));
+  // The baseline is taken after the pre-action so only the shutdown path is measured.
+  const events=f.count('job_event');
+  expect(f.store.releaseForShutdown(task.job_id,{owner,attempt},()=>{throw Error('must not settle');})).toBe(false);
+  expect(f.count('job_event')).toBe(events);
+  if(mode==='settled')expect(f.revisions.readJob(task.job_id)?.state).toBe('succeeded');
+  else expect(f.revisions.readJob(task.job_id)).toMatchObject({state:'running',lease_owner:'worker'});
+ }finally{f.close();}
+});

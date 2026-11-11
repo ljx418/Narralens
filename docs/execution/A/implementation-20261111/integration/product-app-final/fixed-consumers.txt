@@ -1,0 +1,19 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+ ✓ tests/agent-driven/integration/created-native-ui-transport.test.ts (28 tests) 3790ms
+   ✓ MAIN transport lifecycle regressions > shutdown cancels a pending reader and actually closes both Gateway listeners  3029ms
+ ✓ tests/agent-driven/product/fixed-workflow-service.test.ts (31 tests) 136ms
+ ✓ tests/agent-driven/product/creative-service.test.ts (20 tests) 69ms
+ ✓ tests/agent-driven/integration/created-workbench-review.test.ts (32 tests) 14ms
+ ✓ tests/agent-driven/product/execution-guard.test.ts (22 tests) 13ms
+ ✓ tests/agent-driven/product/digest.test.ts (6 tests) 4ms
+ ✓ tests/agent-driven/product/static-agent-validation.test.ts (65 tests) 78ms
+ ✓ tests/agent-driven/product/observation-ui.test.tsx (63 tests) 782ms
+ ✓ tests/agent-driven/product/local-asset-registration.test.tsx (13 tests) 127ms
+
+ Test Files  9 passed (9)
+      Tests  280 passed (280)
+   Start at  00:10:45
+   Duration  59.65s (transform 1.23s, setup 0ms, collect 19.86s, tests 5.01s, environment 16.38s, prepare 12.38s)
+

@@ -1,0 +1,19 @@
+{
+  "slot": "R1-MAIN-MEDIA-SAFETY-007",
+  "argv": [
+    "corepack",
+    "pnpm",
+    "test",
+    "tests/agent-driven/media/preview-prepared-source.test.ts",
+    "--maxWorkers=1",
+    "--minWorkers=1"
+  ],
+  "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+  "start": "2026-11-11T15:22:41.982255+00:00",
+  "inputs": {
+    "src/host/render/preview-prepared-source.ts": "b50016728357c91bb748314297fa9e5e87fbfbf33b48caa7e799c3889032bafc",
+    "tests/agent-driven/media/preview-prepared-source.test.ts": "739d4f0fc0e7e5362709761431ffd8cd95731f35182b8c29d9ce9e14623039c5",
+    "tests/agent-driven/integration/helpers/created-draft-fixture.ts": "3e553993afcb4c9364227b86806fb64466e3ce595ed838433ee1cfcbb5b92ffb"
+  },
+  "pid": 932655
+}

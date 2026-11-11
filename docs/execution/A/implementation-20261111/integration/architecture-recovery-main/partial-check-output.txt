@@ -1,0 +1,78 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+ ❯ tests/architecture/m2.2-fitness.test.ts (17 tests | 2 failed) 1946ms
+   × M2.2 fitness: one state machine, no arbitrary state writes > 1. every production `UPDATE ... SET state` lives in transition, advanceJournal or markRecovering 450ms
+     → expected [ Array(1) ] to deeply equal []
+   × M2.2 fitness: one state machine, no arbitrary state writes > 13. every job state write goes through the store that owns the transition table 290ms
+     → expected [ Array(1) ] to deeply equal []
+   ✓ M2.2 fitness: one state machine, no arbitrary state writes > 2. no production DELETE on a journal row; rows are evidence, not scratch 285ms
+   ✓ M2.2 fitness: one state machine, no arbitrary state writes > 3. only project_state ever changes the current revision  317ms
+   ✓ M2.2 fitness: no second actor, queue, store or timeline > 4. exactly one ProjectOperationQueue is constructed by the Host and injected everywhere 3ms
+   ✓ M2.2 fitness: no second actor, queue, store or timeline > 5. no production class extends or duplicates ProjectWriteActor 288ms
+   ✓ M2.2 fitness: no second actor, queue, store or timeline > 6. the revision store owns one database handle; no second DatabaseSync for project state 293ms
+   ✓ M2.2 fitness: no second actor, queue, store or timeline > 7. EngineProjection is still a read-only projection with no persistence 2ms
+   ✓ M2.2 fitness: routes that must stay closed stay unmounted > 8. /api/migration/v1 holds exactly the frozen route set, opened stage by stage 0ms
+   ✓ M2.2 fitness: routes that must stay closed stay unmounted > 9. the M4C history routes are mounted, and the ones M4C does not own stay closed 0ms
+   ✓ M2.2 fitness: routes that must stay closed stay unmounted > 10. a frozen fictional operation is still a 422, not a new state 1ms
+   ✓ M2.2 fitness: the write gate and the store agree > 11. state() and the recovery gate read one predicate 3ms
+   ✓ M2.2 fitness: the write gate and the store agree > 12. attention_reason never reaches a response as an empty string 4ms
+   ✓ M2.2 fitness: the write gate and the store agree > 13. the coordinator owns the state machine; the actor does not 4ms
+   ✓ M2.2 fitness: the write gate and the store agree > 14. production edits and startup recovery are wired through the coordinator 3ms
+   ✓ state-write scanner ownership > identifies private methods independent of indentation and ignores nearby calls 0ms
+   ✓ state-write scanner ownership > does not attribute a new unauthorized method to an earlier allowed helper 0ms
+(node:862358) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/job-recovery-authority.test.ts (8 tests) 13ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/architecture/m2.2-fitness.test.ts > M2.2 fitness: one state machine, no arbitrary state writes > 1. every production `UPDATE ... SET state` lives in transition, advanceJournal or markRecovering
+AssertionError: expected [ Array(1) ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   "src/host/projects/migrated-asset-ledger.ts asset_ledger_bootstrap:  (in #seed)",
++ ]
+
+ ❯ tests/architecture/m2.2-fitness.test.ts:95:23
+     93|       }
+     94|     }
+     95|     expect(offenders).toEqual([]);
+       |                       ^
+     96|   });
+     97| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/architecture/m2.2-fitness.test.ts > M2.2 fitness: one state machine, no arbitrary state writes > 13. every job state write goes through the store that owns the transition table
+AssertionError: expected [ Array(1) ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   "src/host/agent-driven/created-task-store.ts",
++ ]
+
+ ❯ tests/architecture/m2.2-fitness.test.ts:105:23
+    103|       if (/UPDATE\s+job\s+SET[^;]*?\bstate\s*=/iu.test(sourceOf(file))…
+    104|     }
+    105|     expect(offenders).toEqual([]);
+       |                       ^
+    106|     // The statements live in the store, and the legal pairs are decla…
+    107|     expect(sourceOf(resolve(REPO, owner))).not.toMatch(/JOB_TRANSITION…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  2 failed | 23 passed (25)
+   Start at  22:47:01
+   Duration  8.00s (transform 220ms, setup 0ms, collect 1.32s, tests 1.96s, environment 0ms, prepare 3.35s)
+
+ ELIFECYCLE  Test failed. See above for more details.

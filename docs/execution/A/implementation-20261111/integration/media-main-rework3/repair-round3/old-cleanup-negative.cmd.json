@@ -1,0 +1,17 @@
+{
+  "source_control": "34118e71cf9582d20a715b441e3fe4ea8e98412f",
+  "argv": [
+    "corepack",
+    "pnpm",
+    "exec",
+    "vitest",
+    "run",
+    "tests/agent-driven/media/preview-prepared-source.test.ts",
+    "--maxWorkers=1",
+    "--minWorkers=1",
+    "-t",
+    "during awaited copy cleanup"
+  ],
+  "start": "2026-11-11T16:02:35.603571+00:00",
+  "expected": "3 FAIL: old producer returns receipt despite cleanup cancellation/close/proof revocation"
+}

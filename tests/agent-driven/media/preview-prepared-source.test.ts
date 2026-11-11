@@ -1,7 +1,11 @@
-import {it,expect} from 'vitest';
+import {preparedDraftFixture,waitForCompletedDraft,readBinding,registryFacts} from '../integration/helpers/created-draft-fixture.js';
+import {it,expect,vi,afterEach} from 'vitest';
 import {execFileSync} from 'node:child_process';
 import {createHash} from 'node:crypto';
-import {mkdir,readFile,readdir,writeFile} from 'node:fs/promises';
+import {mkdir,readFile,readdir,writeFile,mkdtemp,rm,rename,symlink} from 'node:fs/promises';
+import {constants} from 'node:fs';
+import {tmpdir} from 'node:os';
+import {NativeRenderer} from '../../../src/host/render/native-renderer.js';
 import {join} from 'node:path';
 import {createdProjectFixture} from '../integration/helpers/created-project-fixture.js';
 import {LocalAssetRegistry} from '../../../src/host/agent-driven/local-asset-registry.js';
@@ -14,56 +18,73 @@ import type {Script,Storyboard,TaskPrepare} from '../../../src/contracts/agent-d
 import type {TaskReservation} from '../../../src/host/agent-driven/created-task-store.js';
 import type {CompletedPreparedSourceV1,NativeDraftAsset,PreparedPreviewBindingV1,PreparedPreviewReceiptV1} from '../../../src/host/render/assembly-ports.js';
 
+const ioFault=vi.hoisted(()=>({cleanupRoot:'',onCleanupClose:undefined as undefined|(()=>void),root:'',readerMode:'' as ''|'read'|'hash-eof',onRead:undefined as undefined|(()=>Promise<void>),beforePublish:undefined as undefined|(()=>Promise<void>),onFifthSync:undefined as undefined|(()=>void),shortWrite:false,zeroWrite:false,shortHits:0,closes:0,publishes:0}));
+vi.mock('node:fs/promises',async importOriginal=>{
+ const actual=await importOriginal<typeof import('node:fs/promises')>();
+ return {...actual,open:async(path:Parameters<typeof actual.open>[0],flags:Parameters<typeof actual.open>[1],...rest:any[])=>{
+  const name=String(path),object=/\/obj_[a-f0-9]{32}$/.test(name);
+  if(object&&typeof flags==='number'&&(flags&constants.O_CREAT)!==0&&ioFault.beforePublish){const hook=ioFault.beforePublish;ioFault.beforePublish=undefined;await hook();}
+  const handle=await (actual.open as (...args:any[])=>ReturnType<typeof actual.open>)(path,flags,...rest);
+  if(name===ioFault.cleanupRoot&&typeof flags==='number'&&(flags&constants.O_DIRECTORY)!==0){
+   const close=handle.close.bind(handle);
+   handle.close=async()=>{const hook=ioFault.onCleanupClose;ioFault.onCleanupClose=undefined;hook?.();await close();};
+  }
+  if(object&&typeof flags==='number'&&(flags&constants.O_CREAT)!==0){
+   const sync=handle.sync.bind(handle);
+   handle.sync=async()=>{ioFault.publishes++;if(ioFault.publishes===5)ioFault.onFifthSync?.();await sync();};
+  }
+  if(object&&ioFault.root&&name.startsWith(ioFault.root+'/')){
+   const read=handle.read.bind(handle) as (...args:any[])=>Promise<any>,close=handle.close.bind(handle);
+   handle.close=async()=>{ioFault.closes++;await close();};
+   handle.read=(async(...args:any[])=>{
+    if(ioFault.readerMode==='read'&&typeof args[3]==='number'&&ioFault.onRead){const hook=ioFault.onRead;ioFault.onRead=undefined;await hook();}
+    const result=await read(...args);
+    if(ioFault.readerMode==='hash-eof'&&args[3]===null&&result.bytesRead===0&&ioFault.onRead){const hook=ioFault.onRead;ioFault.onRead=undefined;await hook();}
+    return result;
+   }) as typeof handle.read;
+  }
+  if(name.endsWith('/film.html')&&typeof flags==='number'&&(flags&constants.O_CREAT)!==0&&(ioFault.shortWrite||ioFault.zeroWrite)){
+   const write=handle.write.bind(handle) as (...args:any[])=>Promise<any>;
+   handle.write=(async(buffer:Buffer,offset:number,length:number,position?:number|null)=>{
+    ioFault.shortHits++;
+    if(ioFault.zeroWrite)return {bytesWritten:0,buffer};
+    return write(buffer,offset,Math.min(length,7),position??null);
+   }) as typeof handle.write;
+  }
+  return handle;
+ }};
+});
+afterEach(()=>{Object.assign(ioFault,{cleanupRoot:'',onCleanupClose:undefined,root:'',readerMode:'',onRead:undefined,beforePublish:undefined,onFifthSync:undefined,shortWrite:false,zeroWrite:false,shortHits:0,closes:0,publishes:0});vi.restoreAllMocks();});
+
 const vendorRoot='/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm';
 const sha=(bytes:Uint8Array)=>createHash('sha256').update(bytes).digest('hex');
 const PROJECT='project_preview_probe';
 
-/** Real local media, the real pinned parser, the real verifier and a real render.
- * Nothing here is a stand-in for the Host: the fixture only supplies the project and
- * the registry, and every product of the preview is measured from real bytes. */
+/** Actual durable SOURCE_ONLY worker/metadata/proof, registered diagnostic media and
+ * real pinned render. Workflow eligibility and adoption authority remain explicit test
+ * ports in the shared fixture; this is not production Run/approval or A human evidence. */
 async function fixture(){
- const f=await createdProjectFixture();
- const root=join(f.root,'prepared-preview'),inputs=join(root,'inputs'),stage=join(root,'stage'),author=join(root,'author');
- const objects=join(root,'objects'),workspace=join(root,'workspace');
- for(const directory of [root,inputs,stage,author,objects,workspace])await mkdir(directory,{mode:0o700});
- const ff=(args:string[])=>execFileSync('ffmpeg',['-nostdin','-hide_banner','-v','error',...args],{windowsHide:true,timeout:60000});
- ff(['-f','lavfi','-i','color=c=0x185a88:s=320x180:r=30:d=3','-threads','1','-c:v','libx264','-pix_fmt','yuv420p',join(inputs,'video.mp4')]);
- ff(['-f','lavfi','-i','sine=frequency=430:sample_rate=48000:duration=2','-threads','1','-c:a','pcm_s16le',join(inputs,'voice.wav')]);
- const registry=new LocalAssetRegistry(f.host.revisions,f.app.creation,{sourceRoot:inputs,storageRoot:join(root,'blobs'),projectsRoot:join(f.root,'projects'),snapshotsRoot:join(f.root,'snapshots')});
- const ui=createTrustedCallerContext({principal_id:'owner',channel:'trusted_ui',source:'trusted_ui',session_ref:f.ui.principal.session_ref});
- const registered=[];
- for(const [file,kind]of [['video.mp4','video'],['voice.wav','audio']] as const){
-  const bytes=await readFile(join(inputs,file));
-  registered.push(await registry.import({project_id:f.projectId,idempotency_key:'preview-import-'+kind,relative_path:file,expected_sha256:sha(bytes),kind,source:{kind:'generated',label:'Diagnostic preview fixture media'},license:{status:'cleared',label:'Diagnostic fixture only',commercial_use:true},recording_origin:kind==='audio'?'synthetic':null,attestation_ref:'preview-'+kind},ui));
- }
- const native:NativeDraftAsset[]=registered.map(asset=>({project_id:asset.project_id,asset_id:asset.asset_id,absolute_path:registry.blobPathForFact(asset),sha256:asset.sha256,bytes:asset.bytes,duration_frames:asset.media.duration_frames,kind:asset.media.kind,mime_type:asset.media.media_type,source:asset.source,license:asset.license,rights_ref:asset.rights_ref,recording_origin:asset.attestation.recording_origin}));
- const script:Script={kind:'script',paragraphs:[{paragraph_id:'p1',text:'第一段诊断内容。'},{paragraph_id:'p2',text:'第二段诊断内容。'}]};
- const storyboard:Storyboard={kind:'storyboard',fps:30,shots:[{shot_id:'s1',paragraph_id:'p1',asset_id:registered[0]!.asset_id,duration_frames:31,caption:'第一条诊断字幕。',concept_text:''},{shot_id:'s2',paragraph_id:'p2',asset_id:registered[0]!.asset_id,duration_frames:29,caption:'第二条诊断字幕。',concept_text:''}]};
- const narration=registered[1]!;
- const token='stage_'+'a'.repeat(32),attemptRoot=join(stage,token,'attempt-1');
- await mkdir(attemptRoot,{mode:0o700,recursive:true});
- const assembler=new PinnedNativeDraftAssembler(vendorRoot);
- const draft=await assembler.prepare({project_id:f.projectId,script,storyboard,assets:native,narration_asset_id:narration.asset_id,target_root:join(attemptRoot,'source'),protected_roots:[author],width:320,height:180});
- const execution={run_id:'run_preview_probe',plan_version:1 as const,step_id:'sample',attempt:1,input_digest:'0'.repeat(64),run_scope_digest:'1'.repeat(64),authorization_id:'grant_preview_probe'};
- const facts={project_id:f.projectId,kind:'assemble_draft' as const,input_refs:[{id:'script_ref',version:1,sha256:canonicalDigest(script)},{id:'storyboard_ref',version:1,sha256:canonicalDigest(storyboard)}],snapshot_id:null,base_revision:1,source_digest:'2'.repeat(64),execution,render_spec:null};
- const request:TaskPrepare={meta:{idempotency_key:'preview-probe',correlation_id:'preview-probe'},...facts};
- const task:TaskReservation={job_id:'job_preview_probe',principal_id:'owner',request,request_digest:canonicalDigest({principal_id:'owner',request:facts}),stage_token:token,job_kind:'snapshot_publish',max_attempts:3,accepted:{job_id:'job_preview_probe',project_id:f.projectId,state:'succeeded',attempt:1,snapshot_id:null,result_ref:null,next_actions:['review_prepared_source'],execution,bootstrap:null}};
- const verifier=new PreparedDraftVerifier(vendorRoot,{stageDomainRoot:stage,blobPath:asset=>registry.blobPathForFact(asset)});
- const caller=createTrustedCallerContext({principal_id:'owner',channel:'authenticated',source:'driver_relay',session_ref:'job_preview_probe'});
- const registryFacts=registry.list(f.projectId,caller);
- const {fact}=await verifier.prove(task,{owner:'worker',attempt:1},draft,registryFacts);
- const completed:CompletedPreparedSourceV1={format:'narralens.completed-prepared-source@1',project_id:f.projectId,task,producer_attempt:1,
-  job:{job_id:'job_preview_probe',project_id:f.projectId,state:'succeeded',attempt:1,snapshot_id:null,result_ref:null,next_actions:['review_prepared_source'],execution,bootstrap:null},
-  terminal_reason:'SOURCE_ONLY',provider_receipt:{kind:'local.native-draft@1',source_digest:fact.source_digest,stage:'SOURCE_ONLY'},
-  fact,root:join(attemptRoot,'source')};
- const binding:PreparedPreviewBindingV1={purpose:'preview',project_id:f.projectId,run_id:execution.run_id,execution,
-  prepared_source_id:'prepared_'+fact.source_digest.slice(0,24),prepared_job_id:task.job_id,fact_digest:canonicalDigest(fact),
-  base_revision:1,control_revision:0,source_digest:facts.source_digest,selection_version:0};
- const service=new PreparedPreviewService(verifier,{upstreamRoot:vendorRoot,workspaceRoot:workspace,objectRoot:objects,protectedRoots:[author],width:320,height:180,timeoutMs:120000,assertCurrentAuthorAndRights:()=>{}});
- const reader=new PreparedReviewMediaReaderImpl(objects);
- return {...f,registry,verifier,service,reader,completed,binding,stage,author,objects,workspace,registryFacts,
-  close:async()=>{await service.close();await registry.close();await verifier.close();await f.close();}};
+ const f=await preparedDraftFixture();
+ let service:PreparedPreviewService|undefined;
+ try{
+  f.worker.start();
+  const completed=await waitForCompletedDraft(f);
+  const binding={...readBinding(completed,'preview'),purpose:'preview' as const};
+  const objects=join(f.root,'preview-objects'),workspace=join(f.root,'preview-workspace');
+  for(const directory of [objects,workspace])await mkdir(directory,{mode:0o700});
+  const protectedRoots=[f.authorRoot,f.taskRoot,...f.registry.protectedRoots()];
+  const assertCurrentAuthorAndRights=()=>{
+   expect(f.host.revisions.activeCommit(f.projectId)).toEqual(f.commit);
+   expect(registryFacts(f)).toEqual(registryFactsAtPreparation);
+  };
+  const registryFactsAtPreparation=registryFacts(f);
+  service=new PreparedPreviewService(f.verifier,{upstreamRoot:vendorRoot,workspaceRoot:workspace,objectRoot:objects,protectedRoots,width:320,height:180,timeoutMs:120000,assertCurrentAuthorAndRights});
+  const reader=new PreparedReviewMediaReaderImpl(objects);
+  return {...f,service,reader,completed,binding,stage:f.taskRoot,author:f.authorRoot,objects,workspace,registryFacts:registryFactsAtPreparation,
+   close:async()=>{await service!.close();await f.close();}};
+ }catch(error){await service?.close();await f.close();throw error;}
 }
+
 async function treeDigest(root:string):Promise<Record<string,string>>{
  const result:Record<string,string>={};
  const walk=async(relative:string)=>{
@@ -90,22 +111,51 @@ it('renders an isolated preview of a completed prepared source with five real pa
   expect(receipt.source_digest).toBe(f.completed.fact.source_digest);
   // The measured timeline, not the project default.
   expect(receipt.fps).toEqual({num:30,den:1});
-  expect(receipt.frame_count).toBe(60);
+  expect(receipt.frame_count).toBe(90);
   const slots=receipt.parts.map(part=>part.slot);
   expect(slots).toEqual(['preview','narration','subtitles','shot_summary','rights_quality']);
   for(const part of receipt.parts){expect(part.bytes).toBeGreaterThan(0);expect(part.sha256).toMatch(/^[a-f0-9]{64}$/);expect(part.object_id).toMatch(/^obj_[a-f0-9]{32}$/);expect(JSON.stringify(part)).not.toContain(f.completed.root);}
   const video=receipt.parts.find(part=>part.slot==='preview')!;
   expect(video.content_type).toBe('video/mp4');
-  expect(video.media_facts).toEqual({kind:'video',fps:{num:30,den:1},frame_count:60});
+  expect(video.media_facts).toEqual({kind:'video',fps:{num:30,den:1},frame_count:90});
   const narration=receipt.parts.find(part=>part.slot==='narration')!;
   expect(narration.media_facts).toMatchObject({kind:'audio',sample_rate:48000,channels:1});
-  expect((narration.media_facts as {sample_count:number}).sample_count).toBe(96000);
+  expect((narration.media_facts as {sample_count:number}).sample_count).toBe(144000);
   expect(receipt.parts.find(part=>part.slot==='subtitles')!.media_facts).toEqual({kind:'text'});
   expect(receipt.parts.find(part=>part.slot==='subtitles')!.content_type).toBe('text/vtt; charset=utf-8');
   expect(receipt.parts.find(part=>part.slot==='shot_summary')!.media_facts).toEqual({kind:'json'});
   expect(receipt.parts.find(part=>part.slot==='shot_summary')!.content_type).toBe('application/json; charset=utf-8');
   expect(receipt.parts.find(part=>part.slot==='rights_quality')!.media_facts).toEqual({kind:'json'});
   expect(receipt.parts.find(part=>part.slot==='rights_quality')!.content_type).toBe('application/json; charset=utf-8');
+  // The quality product records measured decoded time units, not fps as a time delta.
+  const quality=receipt.parts.find(part=>part.slot==='rights_quality')!;
+  const qualityHandle=await f.reader.open(receipt,quality.object_id);
+  try{
+   const bytes=await qualityHandle.read({offset:0,length:quality.bytes});
+   const value=JSON.parse(Buffer.from(bytes).toString('utf8'));
+   expect(value.quality.measured_video.constant_frame_step).toBeCloseTo(1/30,12);
+   expect(value.quality.measured_video.nb_read_frames).toBe(90);
+  }finally{await qualityHandle.close();}
+  // Retain independently hashable diagnostic products before the tamper tests below
+  // remove the fixture. These are a real three-second render, never A human evidence.
+  const evidence=join('docs/parallel/lane-media/A-R1-20261111/evidence','prepared-preview-real-'+Date.now());
+  await mkdir(evidence,{recursive:true});
+  const names={preview:'preview.mp4',narration:'narration.wav',subtitles:'subtitles.vtt',shot_summary:'shot-summary.json',rights_quality:'rights-quality.json'} as const;
+  const artifacts=[];
+  for(const part of receipt.parts){
+   const opened=await f.reader.open(receipt,part.object_id);
+   try{
+    const chunks:Buffer[]=[];
+    for(let offset=0;offset<part.bytes;offset+=1024*1024)
+     chunks.push(Buffer.from(await opened.read({offset,length:Math.min(1024*1024,part.bytes-offset)})));
+    const bytes=Buffer.concat(chunks);
+    expect(bytes.length).toBe(part.bytes);expect(sha(bytes)).toBe(part.sha256);
+    await writeFile(join(evidence,names[part.slot]),bytes,{mode:0o600});
+    artifacts.push({file:names[part.slot],slot:part.slot,bytes:bytes.length,sha256:sha(bytes),content_type:part.content_type});
+   }finally{await opened.close();}
+  }
+  await writeFile(join(evidence,'receipt.json'),JSON.stringify(receipt,null,2)+'\n');
+  await writeFile(join(evidence,'observed.json'),JSON.stringify({scope:'synthetic diagnostic3seconds, real completed worker+pinned render/decode; NOT human voice, production Run admission or A acceptance',receipt_digest:receipt.receipt_digest,artifacts,prepared_source_unchanged:true,active_commit_unchanged:true},null,2)+'\n');
   // The receipt digest covers the deterministic content, including the measured timeline.
   const {receipt_digest,...content}=receipt;
   expect(receipt_digest).toBe(canonicalDigest(content));
@@ -117,8 +167,8 @@ it('renders an isolated preview of a completed prepared source with five real pa
    expect(handle.content_type).toBe('video/mp4');
    expect(handle.bytes).toBe(video.bytes);
    expect(handle.sha256).toBe(video.sha256);
-   expect(handle.timeline).toEqual({fps:{num:30,den:1},frame_count:60});
-   expect(handle.media_facts).toEqual({kind:'video',fps:{num:30,den:1},frame_count:60});
+   expect(handle.timeline).toEqual({fps:{num:30,den:1},frame_count:90});
+   expect(handle.media_facts).toEqual({kind:'video',fps:{num:30,den:1},frame_count:90});
    const all=await handle.read({offset:0,length:video.bytes});
    expect(sha(all)).toBe(video.sha256);
    const head=await handle.read({offset:0,length:16});
@@ -192,5 +242,91 @@ it('refuses a part whose content type or media facts do not belong to its slot',
   await expect(f.reader.open(retype('text/plain; charset=utf-8',video.media_facts),video.object_id)).rejects.toBeTruthy();
   await expect(f.reader.open(retype(video.content_type,{kind:'text'}),video.object_id)).rejects.toBeTruthy();
   f.verifier.release(proof);
+ }finally{await f.close();}
+},600000);
+
+
+it.each(['read','hash-eof'] as const)('refuses a same-inode rewrite during %s and closes its verified descriptor once',async mode=>{
+ const root=await mkdtemp(join(tmpdir(),'narralens-review-reader-race-'));
+ try{
+  const evidence='docs/parallel/lane-media/A-R1-20261111/evidence/prepared-preview-real-1794409475326';
+  const receipt=JSON.parse(await readFile(join(evidence,'receipt.json'),'utf8')) as PreparedPreviewReceiptV1;
+  const part=receipt.parts.find(p=>p.slot==='preview')!,path=join(root,part.object_id),bytes=await readFile(join(evidence,'preview.mp4'));
+  await writeFile(path,bytes,{mode:0o600});
+  ioFault.root=root;ioFault.readerMode=mode;
+  ioFault.onRead=async()=>{const changed=Buffer.from(bytes);changed[0]=changed[0]!^1;await writeFile(path,changed);};
+  const reader=new PreparedReviewMediaReaderImpl(root);
+  if(mode==='hash-eof'){
+   let unexpected:Awaited<ReturnType<PreparedReviewMediaReaderImpl['open']>>|undefined;
+   try{await expect(reader.open(receipt,part.object_id).then(handle=>{unexpected=handle;return 'unexpected verified handle';})).rejects.toBeTruthy();}
+   finally{await unexpected?.close();}
+  }
+  else{
+   const handle=await reader.open(receipt,part.object_id);
+   try{await expect(handle.read({offset:0,length:bytes.length}).then(()=>'unexpected changed bytes')).rejects.toBeTruthy();}
+   finally{await handle.close();}
+  }
+  expect(ioFault.onRead).toBeUndefined();expect(ioFault.closes).toBe(1);
+ }finally{await rm(root,{recursive:true,force:true});}
+});
+
+it('cannot redirect object publication into author source by replacing the object directory at open',async()=>{
+ const f=await fixture();try{
+  const authorBefore=await treeDigest(f.authorRoot);
+  const held=join(f.root,'objects-held');
+  ioFault.beforePublish=async()=>{await rename(f.objects,held);await symlink(f.authorRoot,f.objects,'dir');};
+  const proof=await f.verifier.proveForRead(f.completed,f.binding,f.registryFacts);
+  try{await expect(f.service.preview({format:'narralens.prepared-preview-request@1',completed:f.completed,binding:f.binding,proof})).rejects.toBeTruthy();}
+  finally{f.verifier.release(proof);}
+  expect(ioFault.beforePublish).toBeUndefined();
+  expect(await treeDigest(f.authorRoot)).toEqual(authorBefore);
+  expect(await readdir(held)).toEqual([]);
+ }finally{await f.close();}
+},600000);
+
+it.each(['partial','zero'] as const)('handles a %s target write without rendering different copied bytes',async mode=>{
+ const f=await fixture();let observed:string|undefined;
+ try{
+  const expected=f.completed.fact.files.find(file=>file.relative_path==='film.html')!.sha256;
+  vi.spyOn(NativeRenderer.prototype,'render').mockImplementation(async request=>{
+   observed=sha(await readFile(join(request.project_root,'film.html')));
+   throw new Error('stop after actual copy inspection; no renderer stand-in acceptance');
+  });
+  ioFault.shortWrite=mode==='partial';ioFault.zeroWrite=mode==='zero';
+  const proof=await f.verifier.proveForRead(f.completed,f.binding,f.registryFacts);
+  try{await expect(f.service.preview({format:'narralens.prepared-preview-request@1',completed:f.completed,binding:f.binding,proof})).rejects.toBeTruthy();}
+  finally{f.verifier.release(proof);}
+  expect(ioFault.shortHits).toBeGreaterThan(0);
+  if(mode==='partial')expect(observed).toBe(expected);else expect(observed).toBeUndefined();
+ }finally{await f.close();}
+},600000);
+
+it.each(['cancel','close'] as const)('does not expose a receipt after %s at the fifth publication',async mode=>{
+ const f=await fixture(),controller=new AbortController();let closing:Promise<void>|undefined;
+ try{
+  ioFault.publishes=0;
+  ioFault.onFifthSync=()=>{if(mode==='cancel')controller.abort();else closing=f.service.close();};
+  const proof=await f.verifier.proveForRead(f.completed,f.binding,f.registryFacts);
+  try{await expect(f.service.preview({format:'narralens.prepared-preview-request@1',completed:f.completed,binding:f.binding,proof,signal:controller.signal})).rejects.toBeTruthy();}
+  finally{f.verifier.release(proof);}
+  await closing;
+  expect(ioFault.publishes).toBe(5);
+  expect(await readdir(f.objects)).toEqual([]);
+ }finally{await f.close();}
+},600000);
+
+it.each(['cancel','close','revoke'] as const)('does not expose a receipt after %s during awaited copy cleanup',async mode=>{
+ const f=await fixture(),controller=new AbortController();let closing:Promise<void>|undefined;
+ try{
+  const proof=await f.verifier.proveForRead(f.completed,f.binding,f.registryFacts);
+  ioFault.cleanupRoot=f.completed.root;
+  let hit=false;
+  ioFault.onCleanupClose=()=>{hit=true;if(mode==='cancel')controller.abort();else if(mode==='close')closing=f.service.close();else f.verifier.release(proof);};
+  try{await expect(f.service.preview({format:'narralens.prepared-preview-request@1',completed:f.completed,binding:f.binding,proof,signal:controller.signal})).rejects.toBeTruthy();}
+  finally{f.verifier.release(proof);}
+  await closing;
+  expect(hit).toBe(true);
+  expect(ioFault.publishes).toBe(5);
+  expect(await readdir(f.objects)).toEqual([]);
  }finally{await f.close();}
 },600000);

@@ -1,0 +1,26 @@
+{
+  "slot": "R1-MAIN-TRANSPORT-002",
+  "purpose": "negative control against immutable old df32311 implementation; expected test command nonzero",
+  "argv": [
+    "corepack",
+    "pnpm",
+    "test",
+    "tests/agent-driven/integration/created-native-ui-transport.test.ts",
+    "--maxWorkers=1",
+    "--minWorkers=1",
+    "-t",
+    "rechecks UI revocation after|delivers the first chunk before"
+  ],
+  "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+  "started_at": "2026-11-11T14:37:27.165648+00:00",
+  "source_commit": "df32311ce86193aa91db4535776d833358680013",
+  "old_input_sha256": {
+    "src/host/m5/controlled-studio-access.ts": "9f10ba2748a77a66d0537d0915f272c80ed0913ebbfb28a4aa647a22e5d89b70",
+    "src/host/m5/openfilm-studio-gateway.ts": "8be50e04acaf0993f8f0b1c8cf917982ff455f3bff5f54a4cba16065c8d6865b"
+  },
+  "pid": 826683,
+  "test_exit": 1,
+  "restored_exactly": true,
+  "ended_at": "2026-11-11T14:37:35.883187+00:00",
+  "log_sha256": "cdf2926705d394a6771322221f22af651b4d3aca43dd4c96b4fb916355a4b403"
+}

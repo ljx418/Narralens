@@ -1,0 +1,98 @@
+{
+  "format": "narralens.additive-transport-runtime@1",
+  "status": "R1_RUNTIME_REGISTERED",
+  "owner": "BRIDGE-Claude",
+  "version": "agent-local-assets-v1",
+  "design_source": "docs/execution/A/relaunch-20261111/contracts/asset-inventory-v1.registry.json",
+  "schema": "contracts/agent-local-assets-v1.schema.json",
+  "frozen_cp_a0_routes": 31,
+  "frozen_cp_a0_files": "unchanged",
+  "counting": {
+    "frozen_host_http": 31,
+    "adjunct_host_http": 4,
+    "adjunct_mcp_resources": 1,
+    "note": "31+4 HTTP and +1 resource are counted separately; the adjunct is not added to the frozen registry."
+  },
+  "additional_http_routes": [
+    {
+      "id": "local-source-files.read",
+      "method": "GET",
+      "path": "/api/ui/v1/projects/:id/local-source-files",
+      "channel": "trusted_ui",
+      "response": "SourceFileListing"
+    },
+    {
+      "id": "local-assets.import",
+      "method": "POST",
+      "path": "/api/ui/v1/projects/:id/local-assets",
+      "channel": "trusted_ui",
+      "input": "RegistrationRequest",
+      "response": "InventoryItem"
+    },
+    {
+      "id": "local-assets.read.ui",
+      "method": "GET",
+      "path": "/api/ui/v1/projects/:id/local-assets",
+      "channel": "trusted_ui",
+      "response": "Inventory"
+    },
+    {
+      "id": "asset-inventory.read",
+      "method": "GET",
+      "path": "/api/ui/v1/projects/:id/asset-inventory",
+      "channel": "authenticated_owner_driver_or_ui",
+      "response": "Inventory"
+    }
+  ],
+  "additional_mcp_resources": [
+    {
+      "uri_template": "narralens://projects/{id}/local-assets",
+      "http_route_id": "asset-inventory.read",
+      "output": "Inventory",
+      "mutating": false
+    }
+  ],
+  "pagination": {
+    "default_limit": 32,
+    "maximum_limit": 64,
+    "sort": "asset_id ASCII for inventory; stable Host source candidate ordering for source-files",
+    "cursor": "opaque server-held token bound to principal/project/operation/filter/root-generation; expires after 900 seconds; stale cursor 410, never silently continue new generation"
+  },
+  "source_candidate": {
+    "identity": "Host opaque per-principal/project/root-generation and regular-file identity token; no absolute paths or raw directory controls accepted",
+    "ttl_seconds": 900,
+    "selection": "safe configured sourceRoot only; symlinks/escape/unconfigured forbidden; no J scan",
+    "hash": "only selected file hashed before import; no hashing entire directory in GET",
+    "registration": "Host resolves candidate to private relative_path, computes expected_sha256, rechecks identity, sets attestation_ref from trusted session, then invokes existing LocalAssetRegistry.import"
+  },
+  "idempotency": {
+    "authority": "existing operation_idempotency for LocalAssetRegistry import; no second command state",
+    "public_digest": "canonical {principal_id,project_id,idempotency_key,candidate_id,source,license,recording_origin}; exclude correlation_id/time/session/root-generation",
+    "attestation_ref": "ui_ + first60hex(SHA256(domain narralens-local-asset-declaration-v1 newline + canonical public_digest preimage))",
+    "lookup_order": "current auth/owner+public schema -> recall original import operation receipt by same project/key and verify response asset/operator/declaration ref -> return original InventoryItem if matching -> otherwise validate candidate/expiry/root/file and construct original LocalAssetInput",
+    "same_key_different_public_input": "IDEMPOTENCY_CONFLICT even if candidate expired; never replay an unrelated declaration",
+    "same_key_success_after_expiry_or_restart": "replay original authenticated import receipt without requiring candidate cache; do not reopen/re-probe source input or generate new attestation ref",
+    "no_receipt": "candidate must still be valid; hash current selected bytes; import with deterministic attestation ref; no random per-retry declared identity",
+    "scope": "public wrapper private registry method may read only original typed import receipt/LocalAsset; never arbitrary operation responses"
+  },
+  "rights_ref": "id=real asset.rights_ref; version=1; sha256=registration_digest; row/project/bytes/license must still validate",
+  "errors": {
+    "400": "invalid known schema/unknown field/limit/path format",
+    "401": "no current auth",
+    "403": "wrong channel or Origin, runtime scope not allowed",
+    "404": "unknown or not-owned project/asset/candidate",
+    "409": "idempotency mismatch, source identity/hash/rights drift",
+    "410": "candidate/cursor expired or root generation moved",
+    "503": "unconfigured root, unsupported media/tool, transient resource exhaustion; retryable truth preserved"
+  },
+  "registration_owner": "MAIN publishes explicit adjunct allowlist and merges runtime discovery; not added to frozen registry resources",
+  "consumers": [
+    "PRODUCT UI",
+    "BRIDGE MCP",
+    "MEDIA rights verification"
+  ],
+  "side_effects": {
+    "GET": "none; no encode/register/source/revision writes",
+    "POST": "only verified blob/LocalAsset/idempotency/outbox, never Run grant/Approval/author/revision"
+  }
+}
