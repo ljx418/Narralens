@@ -1,0 +1,75 @@
+command: corepack pnpm test tests/agent-driven/integration/review-media-transport.test.ts --maxWorkers=1 --minWorkers=1
+cwd: /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+head: 30a0abd9eee603dd8e2e70b975b370d9b1d296f3
+started: 2026-11-11T17:47:31Z
+--- output ---
+
+> narralens@0.1.0 test /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+> vitest run --config vitest.config.ts tests/agent-driven/integration/review-media-transport.test.ts --maxWorkers=1 --minWorkers=1
+
+
+ RUN  v3.2.4 /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+
+(node:1269669) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/agent-driven/integration/review-media-transport.test.ts (15 tests | 6 failed) 178ms
+   ✓ fails closed with no binding producer and no reader instead of serving anything 15ms
+   ✓ refuses a cross-owner reader before it reaches the producer 1ms
+   ✓ streams the whole object in bounded reads and closes the descriptor exactly once 9ms
+   ✓ answers a bounded range with 206 and refuses an unsatisfiable range with 416 1ms
+   ✓ describes a part only when the owner, the current package and the receipt agree 2ms
+   ✓ the created review media bindings > resolves the current package part and the reference behind it 14ms
+   ✓ the created review media bindings > refuses a part of another package version, another project and an unknown reference 10ms
+   ✓ the created review media bindings > serves nothing when the package was published without a binding 10ms
+   ✓ the created review media bindings > refuses a second, different binding of the same package part 10ms
+   × the review package publication and its bindings > publishes the package and writes its binding in one scope 59ms
+     → FOREIGN KEY constraint failed
+   × the review package publication and its bindings > rolls the package back when the binding cannot be written 11ms
+     → FOREIGN KEY constraint failed
+   × the review package publication and its bindings > refuses to publish a receipt that does not match its own digest 9ms
+     → FOREIGN KEY constraint failed
+   × the review package publication and its bindings > refuses to publish when the committed source moved after the proof was released 10ms
+     → FOREIGN KEY constraint failed
+   × the review package publication and its bindings > refuses to publish when the rights are no longer authorized 8ms
+     → FOREIGN KEY constraint failed
+   × the review package publication and its bindings > refuses to publish when the current author and rights cannot be read at all 10ms
+     → FOREIGN KEY constraint failed
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/review-media-transport.test.ts > the review package publication and its bindings > publishes the package and writes its binding in one scope
+ FAIL  tests/agent-driven/integration/review-media-transport.test.ts > the review package publication and its bindings > rolls the package back when the binding cannot be written
+ FAIL  tests/agent-driven/integration/review-media-transport.test.ts > the review package publication and its bindings > refuses to publish a receipt that does not match its own digest
+ FAIL  tests/agent-driven/integration/review-media-transport.test.ts > the review package publication and its bindings > refuses to publish when the committed source moved after the proof was released
+ FAIL  tests/agent-driven/integration/review-media-transport.test.ts > the review package publication and its bindings > refuses to publish when the rights are no longer authorized
+ FAIL  tests/agent-driven/integration/review-media-transport.test.ts > the review package publication and its bindings > refuses to publish when the current author and rights cannot be read at all
+Error: FOREIGN KEY constraint failed
+ ❯ ProductSqliteRepository.insert src/host/agent-driven/product-sqlite-repository.ts:154:137
+    152|     const supplied=Object.keys(record);
+    153|     if(!supplied.length||supplied.some(k=>!cols.includes(k)))throw inv…
+    154|     this.#db.prepare(`INSERT INTO ${quote(spec.table)} (${supplied.map…
+       |                                                                                                                                         ^
+    155|     return this.read(c,key)!;
+    156|   }
+ ❯ ProductSqliteRepository.write src/host/agent-driven/product-sqlite-repository.ts:161:33
+ ❯ src/host/agent-driven/product-sqlite-repository.ts:110:41
+ ❯ guarded src/host/agent-driven/product-sqlite-repository.ts:100:18
+ ❯ Object.put src/host/agent-driven/product-sqlite-repository.ts:110:24
+ ❯ FixedWorkflowService.recordStepAttemptInTransaction src/host/creative/fixed-workflow-service.ts:804:10
+ ❯ src/host/creative/fixed-workflow-service.ts:705:52
+ ❯ src/host/agent-driven/product-sqlite-repository.ts:116:21
+ ❯ ProductSqliteRepository.scope src/host/agent-driven/product-sqlite-repository.ts:123:7
+ ❯ src/host/agent-driven/product-sqlite-repository.ts:64:63
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  6 failed | 9 passed (15)
+   Start at  01:47:31
+   Duration  608ms (transform 201ms, setup 0ms, collect 312ms, tests 178ms, environment 0ms, prepare 32ms)
+
+ ELIFECYCLE  Test failed. See above for more details.
+--- end ---
+exit: 1
+finished: 2026-11-11T17:47:32Z

@@ -1,0 +1,72 @@
+command: corepack pnpm test tests/agent-driven/integration/review-media-transport.test.ts --maxWorkers=1 --minWorkers=1
+cwd: /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+started: 2026-11-11T17:48:41Z
+--- output ---
+
+> narralens@0.1.0 test /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+> vitest run --config vitest.config.ts tests/agent-driven/integration/review-media-transport.test.ts --maxWorkers=1 --minWorkers=1
+
+
+ RUN  v3.2.4 /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+
+(node:1271750) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/agent-driven/integration/review-media-transport.test.ts (15 tests | 2 failed) 194ms
+   ✓ fails closed with no binding producer and no reader instead of serving anything 15ms
+   ✓ refuses a cross-owner reader before it reaches the producer 1ms
+   ✓ streams the whole object in bounded reads and closes the descriptor exactly once 9ms
+   ✓ answers a bounded range with 206 and refuses an unsatisfiable range with 416 1ms
+   ✓ describes a part only when the owner, the current package and the receipt agree 2ms
+   ✓ the created review media bindings > resolves the current package part and the reference behind it 15ms
+   ✓ the created review media bindings > refuses a part of another package version, another project and an unknown reference 11ms
+   ✓ the created review media bindings > serves nothing when the package was published without a binding 10ms
+   ✓ the created review media bindings > refuses a second, different binding of the same package part 11ms
+   × the review package publication and its bindings > publishes the package and writes its binding in one scope 64ms
+     → The preview receipt belongs to another project or run
+   × the review package publication and its bindings > rolls the package back when the binding cannot be written 13ms
+     → The receipt belongs to another project or run
+   ✓ the review package publication and its bindings > refuses to publish a receipt that does not match its own digest 11ms
+   ✓ the review package publication and its bindings > refuses to publish when the committed source moved after the proof was released 10ms
+   ✓ the review package publication and its bindings > refuses to publish when the rights are no longer authorized 10ms
+   ✓ the review package publication and its bindings > refuses to publish when the current author and rights cannot be read at all 10ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/review-media-transport.test.ts > the review package publication and its bindings > publishes the package and writes its binding in one scope
+ProductError: The preview receipt belongs to another project or run
+ ❯ CreatedReviewPackageService.#assertReceipt src/host/agent-driven/created-review-package-service.ts:169:13
+    167|     if (receipt.format !== 'narralens.prepared-preview-receipt@1' ||
+    168|       receipt.project_id !== project || receipt.run_id !== run) {
+    169|       throw new ProductError('REVIEW_STALE', 'The preview receipt belo…
+       |             ^
+    170|     }
+    171|     if (receipt.prepared_source_id !== input.binding.prepared_source_i…
+ ❯ CreatedReviewPackageService.publish src/host/agent-driven/created-review-package-service.ts:138:10
+ ❯ tests/agent-driven/integration/review-media-transport.test.ts:432:19
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/agent-driven/integration/review-media-transport.test.ts > the review package publication and its bindings > rolls the package back when the binding cannot be written
+CreatedReviewMediaBindingError: The receipt belongs to another project or run
+ ❯ fail src/host/agent-driven/created-review-media-bindings.ts:50:9
+     48| 
+     49| function fail(code: CreatedReviewMediaBindingError['code'], message: s…
+     50|   throw new CreatedReviewMediaBindingError(code, message);
+       |         ^
+     51| }
+     52| 
+ ❯ CreatedReviewMediaBindings.bind src/host/agent-driven/created-review-media-bindings.ts:108:7
+ ❯ tests/agent-driven/integration/review-media-transport.test.ts:450:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 13 passed (15)
+   Start at  01:48:41
+   Duration  641ms (transform 210ms, setup 0ms, collect 324ms, tests 194ms, environment 0ms, prepare 34ms)
+
+ ELIFECYCLE  Test failed. See above for more details.
+--- end ---
+exit: 1
+finished: 2026-11-11T17:48:42Z

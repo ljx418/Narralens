@@ -1,0 +1,48 @@
+command: corepack pnpm test tests/agent-driven/integration/created-source-change.test.ts tests/agent-driven/integration/created-source-adoption.test.ts tests/agent-driven/integration/created-schema-upgrade.test.ts tests/agent-driven/integration/review-media-transport.test.ts tests/agent-driven/integration/created-run-authority.test.ts tests/agent-driven/integration/created-task-gate.test.ts tests/agent-driven/integration/capability-fingerprint.test.ts tests/agent-driven/product/fixed-workflow-service.test.ts tests/agent-driven/product/execution-guard.test.ts --maxWorkers=1 --minWorkers=1
+cwd: /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+started: 2026-11-11T17:50:25Z
+--- output ---
+
+> narralens@0.1.0 test /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+> vitest run --config vitest.config.ts tests/agent-driven/integration/created-source-change.test.ts tests/agent-driven/integration/created-source-adoption.test.ts tests/agent-driven/integration/created-schema-upgrade.test.ts tests/agent-driven/integration/review-media-transport.test.ts tests/agent-driven/integration/created-run-authority.test.ts tests/agent-driven/integration/created-task-gate.test.ts tests/agent-driven/integration/capability-fingerprint.test.ts tests/agent-driven/product/fixed-workflow-service.test.ts tests/agent-driven/product/execution-guard.test.ts --maxWorkers=1 --minWorkers=1
+
+
+ RUN  v3.2.4 /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+
+(node:1274178) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/created-task-gate.test.ts (7 tests) 20211ms
+   ✓ reserves one real job, cp step/checkpoint and mirrored event atomically, then replays without new effects  2881ms
+   ✓ rejects stale base, altered refs/scope/attempt and crossing the sample gate before creating any job  2640ms
+   ✓ rolls back real job, step, checkpoint, event and grant mutation if final authorization is revoked  2628ms
+   ✓ rejects a creative closure changed after authorization without task side effects  2768ms
+   ✓ emits real pending-to-running progress and rolls back step/checkpoint/outbox if the event mirror fails  3200ms
+   ✓ recovers exhausted leases atomically with the real workflow checkpoint, and is idempotent after SQLite reopen  3083ms
+   ✓ recovers cancelled leases atomically with the real workflow checkpoint, and is idempotent after SQLite reopen  3008ms
+(node:1274932) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/review-media-transport.test.ts (15 tests) 218ms
+ ✓ tests/agent-driven/product/fixed-workflow-service.test.ts (31 tests) 140ms
+(node:1274989) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/created-run-authority.test.ts (12 tests) 108ms
+(node:1275010) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/created-source-adoption.test.ts (6 tests) 69ms
+(node:1275082) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/created-source-change.test.ts (11 tests) 32ms
+(node:1275122) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/created-schema-upgrade.test.ts (11 tests) 20ms
+ ✓ tests/agent-driven/product/execution-guard.test.ts (29 tests) 15ms
+ ✓ tests/agent-driven/integration/capability-fingerprint.test.ts (2 tests) 3ms
+
+ Test Files  9 passed (9)
+      Tests  124 passed (124)
+   Start at  01:50:25
+   Duration  23.50s (transform 990ms, setup 0ms, collect 1.71s, tests 20.82s, environment 1ms, prepare 292ms)
+
+--- end ---
+exit: 0
+finished: 2026-11-11T17:50:51Z

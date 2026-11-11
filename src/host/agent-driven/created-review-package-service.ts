@@ -11,6 +11,8 @@ import type { TrustedCallerContext } from '../creative/product-repository.js';
 import type { PublishReviewPackageInput } from '../creative/fixed-workflow-service.js';
 import { ProductError } from '../creative/trusted-context.js';
 import { canonicalDigest } from '../creative/digest.js';
+
+const HASH = /^[a-f0-9]{64}$/;
 import { CreatedReviewMediaBindings } from './created-review-media-bindings.js';
 
 /**
@@ -39,6 +41,25 @@ export interface CreatedReviewPackagePorts {
   readonly publisher: ReviewPackagePublisher;
   /** The real local assets of the project, for the rights check of the proof. */
   readonly registryFacts: (project_id: string) => readonly LocalAsset[];
+  /**
+   * The Host's own current author and rights.
+   *
+   * It is consulted at the publication boundary, AFTER the proof was released, so the
+   * boundary check never leans on a proof nobody holds any more. It is the Host's own
+   * reading of the committed source and of the registered rights.
+   *
+   * Absent means the boundary cannot be proved, and the publication does not happen:
+   * a package that cannot be tied to the current author is not a package.
+   */
+  readonly currentAuthorAndRights?: (input: {
+    readonly project_id: string;
+    readonly prepared_source_id: string;
+  }) => {
+    readonly source_digest: string;
+    readonly rights_digest: string;
+    readonly authorized: boolean;
+    readonly reason: string;
+  };
 }
 
 /** The input of one published review package. */
@@ -70,8 +91,20 @@ export class CreatedReviewPackageService {
   /**
    * Publish the package of a prepared source.
    *
-   * The order is fixed: prove, preview, release, verify, then publish and bind in one
-   * scope. A failure anywhere leaves nothing published.
+   * The order is fixed and every step of it is a check:
+   *
+   * 1. MEDIA proves the completed prepared source and holds the real descriptors.
+   * 2. The isolated preview is rendered with that proof.
+   * 3. The proof's own final check runs, while the descriptors are still held.
+   * 4. The proof is released. It is released here and only here, and nothing after
+   *    this point may borrow it.
+   * 5. The receipt's own digest is recomputed, so a receipt that was altered after it
+   *    was made is not a receipt.
+   * 6. The Host re-reads its CURRENT author and rights, after the release, and they
+   *    have to be the ones the receipt was made against.
+   * 7. The package is published and the bindings are written in ONE scope.
+   *
+   * A failure anywhere leaves nothing published.
    */
   async publish(input: PublishCreatedReviewPackageInput, caller: TrustedCallerContext): Promise<ReviewPackage> {
     const { proofPort, previewPort, publisher } = this.#ports;
@@ -88,12 +121,24 @@ export class CreatedReviewPackageService {
         binding: input.binding,
         proof,
       });
+      // The final synchronous check of the proof, with the real descriptors still
+      // held. MEDIA calls the Host back here, and the Host checks the current author
+      // and rights itself.
+      proofPort.assertCurrentForRead(
+        input.completed,
+        input.binding,
+        proof,
+        () => { this.#assertCurrentAuthorAndRights(input, receipt); },
+      );
     } finally {
       // The proof is released here and only here. Borrowing it afterwards would make
       // the preview rest on a proof nobody holds any more.
       await proofPort.release(proof);
     }
     this.#assertReceipt(receipt, input);
+    // The publication boundary: the author and rights are re-read AFTER the proof was
+    // released, so this check is the Host's own and not the proof's.
+    this.#assertCurrentAuthorAndRights(input, receipt);
 
     return publisher.publish(input.package, caller, (published) => {
       this.#bindings.bind({
@@ -126,17 +171,62 @@ export class CreatedReviewPackageService {
     if (receipt.prepared_source_id !== input.binding.prepared_source_id) {
       throw new ProductError('REVIEW_STALE', 'The preview receipt is of another prepared source');
     }
-    if (receipt.receipt_digest.length === 0) {
+    if (!HASH.test(receipt.receipt_digest)) {
       throw new ProductError('REVIEW_STALE', 'The preview receipt carries no digest');
+    }
+    // The receipt's digest has to cover the receipt's own content. A receipt that was
+    // altered after it was made does not hash to its own digest any more, and the
+    // objects it names are not the ones that were verified.
+    const { receipt_digest: _self, ...content } = receipt;
+    if (canonicalDigest(content) !== receipt.receipt_digest) {
+      throw new ProductError('REVIEW_STALE', 'The preview receipt does not match its own digest');
     }
     for (const part of input.package.parts) {
       const slot = receipt.parts.find((candidate) => candidate.slot === part.kind);
       if (slot === undefined) {
         throw new ProductError('REVIEW_STALE', `The preview receipt carries no part for ${part.kind}`);
       }
-      if (slot.bytes < 0 || slot.sha256.length === 0) {
+      if (!Number.isSafeInteger(slot.bytes) || slot.bytes < 1 || !HASH.test(slot.sha256)) {
         throw new ProductError('REVIEW_STALE', 'The preview receipt carries an unproved object');
       }
+      if (slot.object_id.length === 0) {
+        throw new ProductError('REVIEW_STALE', 'The preview receipt names no object');
+      }
+    }
+  }
+
+  /**
+   * The Host's own current author and rights.
+   *
+   * Two things have to hold: the rights are authorized right now, and the committed
+   * source is the one the receipt was made against. A source that moved after the
+   * preview was rendered means the preview describes a closure that is no longer the
+   * project's, and the package is not published.
+   */
+  #assertCurrentAuthorAndRights(
+    input: PublishCreatedReviewPackageInput,
+    receipt: PreparedPreviewReceiptV1,
+  ): void {
+    const probe = this.#ports.currentAuthorAndRights;
+    if (probe === undefined) {
+      throw new ProductError('CAPABILITY_UNAVAILABLE', 'The current author and rights cannot be read');
+    }
+    const current = probe({
+      project_id: input.package.project_id,
+      prepared_source_id: input.binding.prepared_source_id,
+    });
+    if (current.authorized !== true) {
+      throw new ProductError('APPROVAL_REQUIRED', 'The declared rights are not authorized right now');
+    }
+    if (current.source_digest !== receipt.source_digest) {
+      throw new ProductError('REVISION_CONFLICT', 'The committed source moved after the preview was rendered', {
+        details: { expected: receipt.source_digest, received: current.source_digest },
+      });
+    }
+    if (current.rights_digest !== receipt.rights_digest) {
+      throw new ProductError('REVISION_CONFLICT', 'The rights moved after the preview was rendered', {
+        details: { expected: receipt.rights_digest, received: current.rights_digest },
+      });
     }
   }
 }
