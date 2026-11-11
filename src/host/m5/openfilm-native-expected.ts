@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto';
+import { readFileSync } from 'node:fs';
 import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -346,6 +347,43 @@ export function nativeExpectedDistRoot(): string {
 /** The tracked build inputs of this ticket. They are reviewed source, not build output. */
 export function nativeExpectedInputsRoot(): string {
   return resolve(fileURLToPath(new URL('../../../tools/agent-driven/product/native-inputs', import.meta.url)));
+}
+
+/** The tracked pin of the OpenFilm Studio candidate, reviewed source. */
+export function nativeExpectedPinPath(): string {
+  return resolve(fileURLToPath(new URL('./openfilm-studio-ui-pin.json', import.meta.url)));
+}
+
+/**
+ * The approved build record, read from the tracked pin.
+ *
+ * The pin is reviewed source: changing it is a reviewed change. A build manifest that
+ * sits next to the built modules is not, and it is never read for an approval.
+ */
+export function nativeExpectedApprovalFromPin(pinPath: string = nativeExpectedPinPath()): NativeExpectedApprovedBuild {
+  const raw = readFileSync(pinPath, 'utf8');
+  const pin = JSON.parse(raw) as {
+    readonly native_expected?: {
+      readonly upstream_sha?: string;
+      readonly inputs_sha256?: string;
+      readonly build_sha256?: string;
+      readonly modules?: Record<string, string>;
+      readonly approval?: string;
+    };
+  };
+  const section = pin.native_expected;
+  if (section === undefined) throw new Error('NATIVE_EXPECTED_BUILD_NOT_APPROVED');
+  if (section.approval !== 'APPROVED') throw new Error('NATIVE_EXPECTED_BUILD_NOT_APPROVED');
+  const modules = section.modules ?? {};
+  if (Object.keys(modules).length === 0) throw new Error('NATIVE_EXPECTED_BUILD_NOT_APPROVED');
+  if (typeof section.inputs_sha256 !== 'string' || section.inputs_sha256 === '') throw new Error('NATIVE_EXPECTED_BUILD_NOT_APPROVED');
+  if (typeof section.build_sha256 !== 'string' || section.build_sha256 === '') throw new Error('NATIVE_EXPECTED_BUILD_NOT_APPROVED');
+  return Object.freeze({
+    upstream_sha: section.upstream_sha ?? '',
+    inputs_sha256: section.inputs_sha256,
+    build_sha256: section.build_sha256,
+    modules: Object.freeze({ ...modules }),
+  });
 }
 
 /** The tracked inputs the expected candidate is built from, by name. */

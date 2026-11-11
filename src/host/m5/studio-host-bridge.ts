@@ -56,6 +56,69 @@ export const STUDIO_HOST_BRIDGE_SCRIPT = `/* The Narralens panel's bridge into t
     }
   };
 
+  /* The native observation ingress (A-R2, L05).
+     The Studio's own document and hydration callbacks are forwarded to the Host's single
+     observation route. Nothing here decides anything: the Host compares what arrives
+     with what it computed independently, and only the Host writes an acknowledgement.
+
+     The sequence is strictly increasing inside the session, and it survives a reload:
+     the editor may be reloaded while the session is reused, and a sequence that went
+     backwards would be refused by the Host. The counter is kept in the session's own
+     storage and in the shared high-water mark of this origin, so a second tab of the
+     same editor starts above what the first tab already sent. */
+  var observationSequence = (function () {
+    try {
+      var stored = parseInt(sessionStorage.getItem("narralens.native.observation.sequence") || "0", 10);
+      var shared = parseInt(localStorage.getItem("narralens.native.observation.sequence") || "0", 10);
+      var value = isFinite(stored) && stored > shared ? stored : shared;
+      if (!isFinite(value) || value < 0) { value = 0; }
+      return value;
+    } catch (error) { return 0; }
+  })();
+  var rememberSequence = function (value) {
+    try { sessionStorage.setItem("narralens.native.observation.sequence", String(value)); } catch (error) {}
+    try {
+      var shared = parseInt(localStorage.getItem("narralens.native.observation.sequence") || "0", 10);
+      if (!isFinite(shared) || shared < value) { localStorage.setItem("narralens.native.observation.sequence", String(value)); }
+    } catch (error) {}
+  };
+  var nativeSessionPresent = function () {
+    try { return !!sessionStorage.getItem("narralens.native.session"); } catch (error) { return false; }
+  };
+  var sendObservation = function (event_kind, event) {
+    if (!nativeSessionPresent()) { return; }
+    observationSequence += 1;
+    rememberSequence(observationSequence);
+    try {
+      fetch("/narralens/native/observation", {
+        method: "POST",
+        credentials: "same-origin",
+        cache: "no-store",
+        redirect: "error",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          format: "narralens.native-observation@1",
+          sequence: observationSequence,
+          event_kind: event_kind,
+          event: event
+        })
+      }).catch(function () { /* a failed observation is never retried with another number */ });
+    } catch (error) { /* the editor must not break because the Host did not answer */ }
+  };
+
+  /* The selection is reported when it *changes*, not on every playhead tick: the Host
+     owns the selection version, and the selection it records is a range of shots, not
+     a moment in time. */
+  var lastSelectionIdentity = null;
+  var selectionIdentity = function (selection) {
+    try {
+      return JSON.stringify({
+        refs: selection && selection.refs ? selection.refs : [],
+        range: selection && selection.range ? selection.range : null
+      });
+    } catch (error) { return null; }
+  };
+
   /* The Studio asks the app what is selected, and tells the app when it changes. */
   var host = {
     version: 1,
@@ -63,9 +126,24 @@ export const STUDIO_HOST_BRIDGE_SCRIPT = `/* The Narralens panel's bridge into t
     onSelection: function (selection) {
       var event = new CustomEvent("narralens:studio-selection", { detail: selection });
       window.dispatchEvent(event);
+      var identity = selectionIdentity(selection);
+      if (identity !== null && identity !== lastSelectionIdentity) {
+        lastSelectionIdentity = identity;
+        sendObservation("selection", selection);
+      }
     },
     onCommand: function (listener) {
       listeners.push(listener);
+    },
+    /* The optional managed extensions of the pinned 013 candidate. They report; they
+       never write, and they carry no approval authority. */
+    narralensObservation: {
+      version: 1,
+      onDocumentState: function (state) { sendObservation("document", state); }
+    },
+    narralensHydration: {
+      version: 1,
+      onState: function (state) { sendObservation("hydration", state); }
     },
     panel: {
       label: "Narralens",

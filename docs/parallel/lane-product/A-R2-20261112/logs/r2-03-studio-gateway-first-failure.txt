@@ -1,0 +1,181 @@
+cwd=/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-PRODUCT
+argv=corepack pnpm exec vitest run --config vitest.config.ts tests/m5/studio-gateway.test.ts --maxWorkers=1 --minWorkers=1
+start=2026-11-11T17:22:49+0000
+
+ RUN  v3.2.4 /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-PRODUCT
+
+(node:1196222) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/m5/studio-gateway.test.ts (9 tests | 8 failed) 9024ms
+   × M5 Studio Gateway: the only origin the browser sees > binds 127.0.0.1 on a random port and answers a rebound Host header with nothing 1264ms
+     → MIGRATE_500: {"code":"INTERNAL_ERROR","message":"Internal host error","correlation_id":"94d8c463-83da-4d57-a079-fd0d8c5c063f"}
+ diagnostic=route:Error:ENOENT: no such file or directory, open '<path>'
+   × M5 Studio Gateway: the only origin the browser sees > requires its session cookie for the API, and issues it HttpOnly and SameSite 1091ms
+     → MIGRATE_500: {"code":"INTERNAL_ERROR","message":"Internal host error","correlation_id":"62c217e0-3ae7-4ee3-ad24-2cfa855ff853"}
+ diagnostic=route:Error:ENOENT: no such file or directory, open '<path>'
+   × M5 Studio Gateway: the only origin the browser sees > answers every page with a no-referrer policy, a self-only CSP and no framing 1095ms
+     → MIGRATE_500: {"code":"INTERNAL_ERROR","message":"Internal host error","correlation_id":"f24be1db-c729-4439-8005-91c516941ff8"}
+ diagnostic=route:Error:ENOENT: no such file or directory, open '<path>'
+   ✓ M5 Studio Gateway: the only origin the browser sees > allows only the same Gateway origin to frame the film preview 1ms
+   × M5 Studio Gateway: the only origin the browser sees > never publishes the project's absolute path 1105ms
+     → MIGRATE_500: {"code":"INTERNAL_ERROR","message":"Internal host error","correlation_id":"4348311f-f99c-4842-be7e-e85e8659dd95"}
+ diagnostic=route:Error:ENOENT: no such file or directory, open '<path>'
+   × M5 Studio Gateway: the only origin the browser sees > refuses every write that the OpenFilm capability map does not open 1118ms
+     → MIGRATE_500: {"code":"INTERNAL_ERROR","message":"Internal host error","correlation_id":"6f38ecc5-9f8f-4a3a-a6c2-a61bcaee1a3f"}
+ diagnostic=route:Error:ENOENT: no such file or directory, open '<path>'
+   × M5 Studio Gateway: the only origin the browser sees > never proxies the upstream's own edit endpoint 1113ms
+     → MIGRATE_500: {"code":"INTERNAL_ERROR","message":"Internal host error","correlation_id":"b790138f-6f4a-4cf8-9bf8-db09d88bd5f4"}
+ diagnostic=route:Error:ENOENT: no such file or directory, open '<path>'
+   × M5 Studio Gateway: the only origin the browser sees > refuses a write that does not come from the Gateway's own origin 1143ms
+     → MIGRATE_500: {"code":"INTERNAL_ERROR","message":"Internal host error","correlation_id":"c7a8d5be-b70e-4c7a-8cb1-d575549fb2f9"}
+ diagnostic=route:Error:ENOENT: no such file or directory, open '<path>'
+   × M5 Studio Gateway: the only origin the browser sees > refuses a direct call from the Gateway's origin to the Host, and changes nothing 1092ms
+     → MIGRATE_500: {"code":"INTERNAL_ERROR","message":"Internal host error","correlation_id":"39b2353d-ba1f-4ff6-b731-14d18b9c8c8a"}
+ diagnostic=route:Error:ENOENT: no such file or directory, open '<path>'
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 8 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/m5/studio-gateway.test.ts > M5 Studio Gateway: the only origin the browser sees > binds 127.0.0.1 on a random port and answers a rebound Host header with nothing
+Error: MIGRATE_500: {"code":"INTERNAL_ERROR","message":"Internal host error","correlation_id":"94d8c463-83da-4d57-a079-fd0d8c5c063f"}
+ diagnostic=route:Error:ENOENT: no such file or directory, open '<path>'
+ ❯ tests/wave2/m4a/harness.ts:131:23
+    129|       const suffix = diagnostic === undefined ? ""
+    130|         : ` diagnostic=${diagnostic.stage}:${diagnostic.kind}:${diagno…
+    131|       const failure = new Error(`MIGRATE_${attempt.status}: ${text.sli…
+       |                       ^
+    132|       // Keep the structured fields used by retryRecoverable without c…
+    133|       // the actionable local message above.
+ ❯ retryRecoverable tests/support/retry-recoverable.ts:11:18
+ ❯ migrate tests/wave2/m4a/harness.ts:110:20
+ ❯ withGateway tests/m5/studio-gateway.test.ts:66:18
+ ❯ tests/m5/studio-gateway.test.ts:81:21
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/8]⎯
+
+ FAIL  tests/m5/studio-gateway.test.ts > M5 Studio Gateway: the only origin the browser sees > requires its session cookie for the API, and issues it HttpOnly and SameSite
+Error: MIGRATE_500: {"code":"INTERNAL_ERROR","message":"Internal host error","correlation_id":"62c217e0-3ae7-4ee3-ad24-2cfa855ff853"}
+ diagnostic=route:Error:ENOENT: no such file or directory, open '<path>'
+ ❯ tests/wave2/m4a/harness.ts:131:23
+    129|       const suffix = diagnostic === undefined ? ""
+    130|         : ` diagnostic=${diagnostic.stage}:${diagnostic.kind}:${diagno…
+    131|       const failure = new Error(`MIGRATE_${attempt.status}: ${text.sli…
+       |                       ^
+    132|       // Keep the structured fields used by retryRecoverable without c…
+    133|       // the actionable local message above.
+ ❯ retryRecoverable tests/support/retry-recoverable.ts:11:18
+ ❯ migrate tests/wave2/m4a/harness.ts:110:20
+ ❯ withGateway tests/m5/studio-gateway.test.ts:66:18
+ ❯ tests/m5/studio-gateway.test.ts:98:21
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/8]⎯
+
+ FAIL  tests/m5/studio-gateway.test.ts > M5 Studio Gateway: the only origin the browser sees > answers every page with a no-referrer policy, a self-only CSP and no framing
+Error: MIGRATE_500: {"code":"INTERNAL_ERROR","message":"Internal host error","correlation_id":"f24be1db-c729-4439-8005-91c516941ff8"}
+ diagnostic=route:Error:ENOENT: no such file or directory, open '<path>'
+ ❯ tests/wave2/m4a/harness.ts:131:23
+    129|       const suffix = diagnostic === undefined ? ""
+    130|         : ` diagnostic=${diagnostic.stage}:${diagnostic.kind}:${diagno…
+    131|       const failure = new Error(`MIGRATE_${attempt.status}: ${text.sli…
+       |                       ^
+    132|       // Keep the structured fields used by retryRecoverable without c…
+    133|       // the actionable local message above.
+ ❯ retryRecoverable tests/support/retry-recoverable.ts:11:18
+ ❯ migrate tests/wave2/m4a/harness.ts:110:20
+ ❯ withGateway tests/m5/studio-gateway.test.ts:66:18
+ ❯ tests/m5/studio-gateway.test.ts:117:21
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/8]⎯
+
+ FAIL  tests/m5/studio-gateway.test.ts > M5 Studio Gateway: the only origin the browser sees > never publishes the project's absolute path
+Error: MIGRATE_500: {"code":"INTERNAL_ERROR","message":"Internal host error","correlation_id":"4348311f-f99c-4842-be7e-e85e8659dd95"}
+ diagnostic=route:Error:ENOENT: no such file or directory, open '<path>'
+ ❯ tests/wave2/m4a/harness.ts:131:23
+    129|       const suffix = diagnostic === undefined ? ""
+    130|         : ` diagnostic=${diagnostic.stage}:${diagnostic.kind}:${diagno…
+    131|       const failure = new Error(`MIGRATE_${attempt.status}: ${text.sli…
+       |                       ^
+    132|       // Keep the structured fields used by retryRecoverable without c…
+    133|       // the actionable local message above.
+ ❯ retryRecoverable tests/support/retry-recoverable.ts:11:18
+ ❯ migrate tests/wave2/m4a/harness.ts:110:20
+ ❯ withGateway tests/m5/studio-gateway.test.ts:66:18
+ ❯ tests/m5/studio-gateway.test.ts:157:21
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/8]⎯
+
+ FAIL  tests/m5/studio-gateway.test.ts > M5 Studio Gateway: the only origin the browser sees > refuses every write that the OpenFilm capability map does not open
+Error: MIGRATE_500: {"code":"INTERNAL_ERROR","message":"Internal host error","correlation_id":"6f38ecc5-9f8f-4a3a-a6c2-a61bcaee1a3f"}
+ diagnostic=route:Error:ENOENT: no such file or directory, open '<path>'
+ ❯ tests/wave2/m4a/harness.ts:131:23
+    129|       const suffix = diagnostic === undefined ? ""
+    130|         : ` diagnostic=${diagnostic.stage}:${diagnostic.kind}:${diagno…
+    131|       const failure = new Error(`MIGRATE_${attempt.status}: ${text.sli…
+       |                       ^
+    132|       // Keep the structured fields used by retryRecoverable without c…
+    133|       // the actionable local message above.
+ ❯ retryRecoverable tests/support/retry-recoverable.ts:11:18
+ ❯ migrate tests/wave2/m4a/harness.ts:110:20
+ ❯ withGateway tests/m5/studio-gateway.test.ts:66:18
+ ❯ tests/m5/studio-gateway.test.ts:169:21
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/8]⎯
+
+ FAIL  tests/m5/studio-gateway.test.ts > M5 Studio Gateway: the only origin the browser sees > never proxies the upstream's own edit endpoint
+Error: MIGRATE_500: {"code":"INTERNAL_ERROR","message":"Internal host error","correlation_id":"b790138f-6f4a-4cf8-9bf8-db09d88bd5f4"}
+ diagnostic=route:Error:ENOENT: no such file or directory, open '<path>'
+ ❯ tests/wave2/m4a/harness.ts:131:23
+    129|       const suffix = diagnostic === undefined ? ""
+    130|         : ` diagnostic=${diagnostic.stage}:${diagnostic.kind}:${diagno…
+    131|       const failure = new Error(`MIGRATE_${attempt.status}: ${text.sli…
+       |                       ^
+    132|       // Keep the structured fields used by retryRecoverable without c…
+    133|       // the actionable local message above.
+ ❯ retryRecoverable tests/support/retry-recoverable.ts:11:18
+ ❯ migrate tests/wave2/m4a/harness.ts:110:20
+ ❯ withGateway tests/m5/studio-gateway.test.ts:66:18
+ ❯ tests/m5/studio-gateway.test.ts:190:21
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/8]⎯
+
+ FAIL  tests/m5/studio-gateway.test.ts > M5 Studio Gateway: the only origin the browser sees > refuses a write that does not come from the Gateway's own origin
+Error: MIGRATE_500: {"code":"INTERNAL_ERROR","message":"Internal host error","correlation_id":"c7a8d5be-b70e-4c7a-8cb1-d575549fb2f9"}
+ diagnostic=route:Error:ENOENT: no such file or directory, open '<path>'
+ ❯ tests/wave2/m4a/harness.ts:131:23
+    129|       const suffix = diagnostic === undefined ? ""
+    130|         : ` diagnostic=${diagnostic.stage}:${diagnostic.kind}:${diagno…
+    131|       const failure = new Error(`MIGRATE_${attempt.status}: ${text.sli…
+       |                       ^
+    132|       // Keep the structured fields used by retryRecoverable without c…
+    133|       // the actionable local message above.
+ ❯ retryRecoverable tests/support/retry-recoverable.ts:11:18
+ ❯ migrate tests/wave2/m4a/harness.ts:110:20
+ ❯ withGateway tests/m5/studio-gateway.test.ts:66:18
+ ❯ tests/m5/studio-gateway.test.ts:215:21
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/8]⎯
+
+ FAIL  tests/m5/studio-gateway.test.ts > M5 Studio Gateway: the only origin the browser sees > refuses a direct call from the Gateway's origin to the Host, and changes nothing
+Error: MIGRATE_500: {"code":"INTERNAL_ERROR","message":"Internal host error","correlation_id":"39b2353d-ba1f-4ff6-b731-14d18b9c8c8a"}
+ diagnostic=route:Error:ENOENT: no such file or directory, open '<path>'
+ ❯ tests/wave2/m4a/harness.ts:131:23
+    129|       const suffix = diagnostic === undefined ? ""
+    130|         : ` diagnostic=${diagnostic.stage}:${diagnostic.kind}:${diagno…
+    131|       const failure = new Error(`MIGRATE_${attempt.status}: ${text.sli…
+       |                       ^
+    132|       // Keep the structured fields used by retryRecoverable without c…
+    133|       // the actionable local message above.
+ ❯ retryRecoverable tests/support/retry-recoverable.ts:11:18
+ ❯ migrate tests/wave2/m4a/harness.ts:110:20
+ ❯ withGateway tests/m5/studio-gateway.test.ts:66:18
+ ❯ tests/m5/studio-gateway.test.ts:229:21
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/8]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  8 failed | 1 passed (9)
+   Start at  01:22:49
+   Duration  9.90s (transform 612ms, setup 0ms, collect 750ms, tests 9.02s, environment 0ms, prepare 33ms)
+
+exit=1
+end=2026-11-11T17:22:59+0000
