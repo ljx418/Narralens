@@ -28,8 +28,12 @@ it('starts another queued job when one slot frees while a different processor re
 });
 it('renews the real lease during a long processor and only the current lease can settle',async()=>{
  const f=fixture(),task=f.reserve('long'),finish=deferred();let started=false;
- const worker=new CreatedTaskWorker(f.revisions,f.tasks,f.jobs,{recover:()=>{},execute:async(t,l)=>{started=true;await finish.promise;expect(f.jobs.holdsLease(t.job_id,l)).toBe(true);f.jobs.recordCallback(t.job_id,l,{state:'succeeded'});},failed:async(t,l)=>{f.jobs.recordCallback(t.job_id,l,{state:'failed'});}},{pollMs:10,leaseMs:600});
- try{worker.start();await until(()=>started);const first=f.revisions.readJob(task.job_id)!;await sleep(900);expect(f.revisions.readJob(task.job_id)?.lease_expires_at).toBeGreaterThan(first.lease_expires_at!);finish.resolve();await until(()=>worker.activeCount===0);expect(f.revisions.readJob(task.job_id)?.state).toBe('succeeded');}
+ // The lease is deliberately long enough that only a real renewal keeps it alive, and
+ // the window is wide enough that a loaded machine cannot turn the renewal into a
+ // timing accident. The assertion itself is unchanged: the lease must still be live and
+ // it must have moved forward.
+ const worker=new CreatedTaskWorker(f.revisions,f.tasks,f.jobs,{recover:()=>{},execute:async(t,l)=>{started=true;await finish.promise;expect(f.jobs.holdsLease(t.job_id,l)).toBe(true);f.jobs.recordCallback(t.job_id,l,{state:'succeeded'});},failed:async(t,l)=>{f.jobs.recordCallback(t.job_id,l,{state:'failed'});}},{pollMs:10,leaseMs:2000});
+ try{worker.start();await until(()=>started);const first=f.revisions.readJob(task.job_id)!;await sleep(2500);expect(f.revisions.readJob(task.job_id)?.lease_expires_at).toBeGreaterThan(first.lease_expires_at!);finish.resolve();await until(()=>worker.activeCount===0);expect(f.revisions.readJob(task.job_id)?.state).toBe('succeeded');}
  finally{finish.resolve();await worker.close();f.revisions.close();}
 });
 it('awaits aborted processor cleanup before close and returns its live unfinished lease to queued',async()=>{

@@ -1,14 +1,14 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
-import { createHash, randomUUID } from 'node:crypto';
+import { randomUUID } from 'node:crypto';
 import { validateAgentDefinition } from '../../contracts/agent-driven-validator.js';
 import type { ReviewPart } from '../../contracts/agent-driven-types.js';
 import type { AgentPrincipal, ScopedAgentAuth } from './scoped-auth.js';
-import { createTrustedCallerContext } from '../creative/trusted-context.js';
 import { AgentRouteError } from './agent-http-router.js';
 import { agentErrorCode } from './agent-error-alias.js';
 import registry from '../../../contracts/agent-driven-a.registry.json' with { type: 'json' };
 import {
   PREPARED_REVIEW_MAX_READ_BYTES,
+  type PreparedPreviewPartKind,
   type PreparedPreviewReceiptV1,
   type PreparedReviewMediaHandleV1,
   type PreparedReviewMediaReader,
@@ -17,14 +17,11 @@ import {
 
 const statuses = new Map(registry.errorMapping.map((row) => [row.code, row.http_status]));
 const REF = /^[A-Za-z0-9_-]{1,200}$/;
-const PART_KINDS = ['preview', 'narration', 'subtitles', 'shot_summary', 'rights_quality'] as const;
+const PART_KINDS: readonly PreparedPreviewPartKind[] = ['preview', 'narration', 'subtitles', 'shot_summary', 'rights_quality'];
 
 /**
- * One reviewable part of the current package, bound to the immutable preview receipt
+ * One reviewable part of the CURRENT package, bound to the immutable preview receipt
  * and to the exact object inside it.
- *
- * The binding is established when the real package is established. It is never taken
- * from a request: a caller names an opaque reference and the Host resolves it.
  */
 export interface ReviewMediaBinding {
   readonly project_id: string;
@@ -35,80 +32,47 @@ export interface ReviewMediaBinding {
   readonly part: ReviewPart;
   readonly receipt: PreparedPreviewReceiptV1;
   readonly object_id: string;
-  /** The slot of the receipt that carries this part's object. */
-  readonly slot: (typeof PART_KINDS)[number];
+  readonly slot: PreparedPreviewPartKind;
 }
 
 /**
- * The private registry of the reviewable media bindings.
+ * The binding port of the review media transport.
  *
- * It is written by the Host when a real package is established and read by the
- * transport. It holds no bytes of its own and it never accepts a path.
+ * It resolves the CURRENT package, the CURRENT run and the IMMUTABLE receipt linkage
+ * of one part. It is supplied by the real publication producer; an in-memory map is
+ * not an authority for it, so the transport refuses to serve anything while the real
+ * producer is absent.
  */
-export class ReviewMediaRegistry {
-  readonly #byRef = new Map<string, ReviewMediaBinding>();
-  readonly #byPackage = new Map<string, ReviewMediaBinding[]>();
-
-  /** The opaque reference of one part. It contains no path and no identifier. */
-  static referenceFor(binding: ReviewMediaBinding): string {
-    return `rm_${createHash('sha256').update([
-      binding.project_id,
-      binding.run_id,
-      binding.package_id,
-      String(binding.package_version),
-      binding.package_digest,
-      binding.slot,
-      binding.object_id,
-    ].join('|')).digest('hex').slice(0, 48)}`;
-  }
-
-  register(binding: ReviewMediaBinding): string {
-    const reference = ReviewMediaRegistry.referenceFor(binding);
-    this.#byRef.set(reference, binding);
-    const key = `${binding.project_id}|${binding.run_id}|${binding.package_id}|${binding.package_version}`;
-    const existing = this.#byPackage.get(key) ?? [];
-    if (!existing.some((row) => row.object_id === binding.object_id && row.slot === binding.slot)) {
-      existing.push(binding);
-      this.#byPackage.set(key, existing);
-    }
-    return reference;
-  }
-
-  /** The binding of one opaque reference inside a project. */
-  resolve(projectId: string, reference: string): ReviewMediaBinding | null {
-    const binding = this.#byRef.get(reference);
-    if (!binding || binding.project_id !== projectId) return null;
-    return binding;
-  }
-
-  /** The binding of one part of one package. */
-  resolvePart(input: {
+export interface ReviewMediaBindingPort {
+  /** The current binding of one part of the current package of the current run. */
+  currentPart(input: {
     readonly project_id: string;
     readonly run_id: string;
-    readonly package_id: string;
-    readonly package_version: number;
     readonly part_kind: string;
     readonly artifact_ref: { readonly id: string; readonly version: number; readonly sha256: string };
-  }): ReviewMediaBinding | null {
-    const key = `${input.project_id}|${input.run_id}|${input.package_id}|${input.package_version}`;
-    const rows = this.#byPackage.get(key) ?? [];
-    return rows.find((row) =>
-      row.part.kind === input.part_kind &&
-      row.part.artifact_ref.id === input.artifact_ref.id &&
-      row.part.artifact_ref.version === input.artifact_ref.version &&
-      row.part.artifact_ref.sha256 === input.artifact_ref.sha256) ?? null;
-  }
+  }): Promise<ReviewMediaBinding | null>;
+  /** The current binding behind one opaque reference. */
+  currentByReference(project_id: string, reference: string): Promise<ReviewMediaBinding | null>;
 }
 
 export interface ReviewMediaHttpOptions {
   readonly auth: ScopedAgentAuth;
   readonly origin: () => string;
-  readonly registry: ReviewMediaRegistry;
-  /**
-   * The real MEDIA reader. Without it the transport answers 503: a preview that has no
-   * producer is unavailable, never a fabricated one.
-   */
+  /** The owner authority of the project. The transport never serves another project. */
+  readonly assertOwner: (project_id: string, principal_id: string) => void;
+  /** The real binding producer. Without it the whole surface is unavailable. */
+  readonly bindings?: ReviewMediaBindingPort;
+  /** The real MEDIA reader. Without it the whole surface is unavailable. */
   readonly reader?: PreparedReviewMediaReader;
+}
+
+/** The closed describe input of CR-R1-001 §8. */
+export interface ReviewPartDescribeInput {
+  readonly run_id: string;
+  readonly package_id: string;
+  readonly package_version: number;
+  readonly part_kind: string;
+  readonly artifact_ref: { readonly id: string; readonly version: number; readonly sha256: string };
 }
 
 /**
@@ -116,45 +80,96 @@ export interface ReviewMediaHttpOptions {
  *
  * One reviewed read route plus the closed-set describe operation of the same RPC
  * alias. It serves bytes that the real MEDIA reader verified; it never renders, never
- * registers and never starts a producer.
+ * registers and never starts a producer. Every check that can be invalidated by an
+ * await is repeated after that await.
  */
 export class ReviewMediaHttp {
   readonly #auth: ScopedAgentAuth;
   readonly #origin: () => string;
-  readonly #registry: ReviewMediaRegistry;
+  readonly #assertOwner: (project_id: string, principal_id: string) => void;
+  readonly #bindings: ReviewMediaBindingPort | undefined;
   readonly #reader: PreparedReviewMediaReader | undefined;
 
   constructor(options: ReviewMediaHttpOptions) {
     this.#auth = options.auth;
     this.#origin = options.origin;
-    this.#registry = options.registry;
+    this.#assertOwner = options.assertOwner;
+    this.#bindings = options.bindings;
     this.#reader = options.reader;
   }
 
-  /** The descriptor of one part, bound to the verified receipt and object. */
+  /** The producer side must both exist. Neither one is ever faked. */
+  #producer(): { readonly bindings: ReviewMediaBindingPort; readonly reader: PreparedReviewMediaReader } {
+    if (!this.#bindings || !this.#reader) throw new AgentRouteError('CAPABILITY_UNAVAILABLE');
+    return { bindings: this.#bindings, reader: this.#reader };
+  }
+
+  /** The binding must really be the current package's part of the current run. */
+  #verify(binding: ReviewMediaBinding, input: { readonly project_id: string; readonly run_id: string; readonly part_kind?: string; readonly artifact_ref?: { readonly id: string; readonly version: number; readonly sha256: string } }): void {
+    if (binding.project_id !== input.project_id || binding.run_id !== input.run_id)
+      throw new AgentRouteError('NOT_FOUND');
+    if (input.part_kind !== undefined && binding.part.kind !== input.part_kind)
+      throw new AgentRouteError('NOT_FOUND');
+    const ref = input.artifact_ref ?? binding.part.artifact_ref;
+    if (binding.part.artifact_ref.id !== ref.id || binding.part.artifact_ref.version !== ref.version || binding.part.artifact_ref.sha256 !== ref.sha256)
+      throw new AgentRouteError('REVISION_CONFLICT');
+    // The immutable linkage: the receipt belongs to this project and run, carries this
+    // exact object, and the object's own digest and size are the receipt's facts.
+    const receipt = binding.receipt;
+    if (receipt.project_id !== binding.project_id || receipt.run_id !== binding.run_id)
+      throw new AgentRouteError('REVISION_CONFLICT');
+    const part = receipt.parts.find((row) => row.slot === binding.slot);
+    if (!part || part.object_id !== binding.object_id) throw new AgentRouteError('REVISION_CONFLICT');
+    if (part.bytes < 0 || !/^[a-f0-9]{64}$/.test(part.sha256)) throw new AgentRouteError('REVISION_CONFLICT');
+  }
+
+  /**
+   * The descriptor of one part, bound to the verified receipt and object.
+   *
+   * The caller is the real principal, the owner is checked, and the binding is
+   * re-read after the open: a package that moved while the object was opening is
+   * refused rather than described.
+   */
   async describe(
-    input: {
-      readonly run_id: string;
-      readonly package_id: string;
-      readonly package_version: number;
-      readonly part_kind: string;
-      readonly artifact_ref: { readonly id: string; readonly version: number; readonly sha256: string };
-    },
+    input: ReviewPartDescribeInput,
     projectId: string,
     caller: { readonly principal_id: string; readonly channel: string; readonly session_ref: string },
     signal?: AbortSignal,
   ): Promise<PreviewMediaDescriptorV1> {
-    if (!PART_KINDS.includes(input.part_kind as (typeof PART_KINDS)[number]))
+    if (caller.channel === 'native_bridge') throw new AgentRouteError('ORIGIN_REJECTED');
+    if (!PART_KINDS.includes(input.part_kind as PreparedPreviewPartKind))
       throw new AgentRouteError('INVALID_REQUEST');
-    const binding = this.#registry.resolvePart({ project_id: projectId, ...input });
+    if (!Number.isSafeInteger(input.package_version) || input.package_version < 1)
+      throw new AgentRouteError('INVALID_REQUEST');
+    this.#assertOwner(projectId, caller.principal_id);
+    const { bindings, reader } = this.#producer();
+    const binding = await bindings.currentPart({
+      project_id: projectId,
+      run_id: input.run_id,
+      part_kind: input.part_kind,
+      artifact_ref: input.artifact_ref,
+    });
     if (!binding) throw new AgentRouteError('NOT_FOUND');
-    if (!this.#reader) throw new AgentRouteError('CAPABILITY_UNAVAILABLE');
-    // The reader opens the verified object of the immutable receipt. The handle is
-    // closed on every path, including the failure paths.
+    this.#verify(binding, { project_id: projectId, run_id: input.run_id, part_kind: input.part_kind, artifact_ref: input.artifact_ref });
+    if (binding.package_id !== input.package_id || binding.package_version !== input.package_version)
+      throw new AgentRouteError('NOT_FOUND');
     let handle: PreparedReviewMediaHandleV1 | undefined;
     try {
-      handle = await this.#reader.open(binding.receipt, binding.object_id, signal ? { signal } : {});
-      if (handle.bytes < 0 || !/^[a-f0-9]{64}$/.test(handle.sha256)) throw new AgentRouteError('REVISION_CONFLICT');
+      handle = await reader.open(binding.receipt, binding.object_id, signal ? { signal } : {});
+      // After the await: the owner is still the owner, the binding is still current and
+      // the handle still describes the very object of the receipt.
+      this.#assertOwner(projectId, caller.principal_id);
+      const current = await bindings.currentPart({
+        project_id: projectId,
+        run_id: input.run_id,
+        part_kind: input.part_kind,
+        artifact_ref: input.artifact_ref,
+      });
+      if (!current || current.receipt.receipt_digest !== binding.receipt.receipt_digest || current.object_id !== binding.object_id)
+        throw new AgentRouteError('REVISION_CONFLICT');
+      const part = binding.receipt.parts.find((row) => row.slot === binding.slot)!;
+      if (handle.sha256 !== part.sha256 || handle.bytes !== part.bytes)
+        throw new AgentRouteError('REVISION_CONFLICT');
       return {
         format: 'narralens.review-media-descriptor@1',
         project_id: binding.project_id,
@@ -173,6 +188,64 @@ export class ReviewMediaHttp {
       };
     } finally {
       await handle?.close().catch(() => undefined);
+    }
+  }
+
+  /**
+   * Open one prepared object for the workbench delegate.
+   *
+   * The supplied signal is forwarded into the real reader, and the owner and the
+   * current binding are checked before and after the open.
+   */
+  async openMedia(
+    projectId: string,
+    reference: string,
+    caller: { readonly principal_id: string; readonly channel: string; readonly session_ref: string },
+    options: { readonly range?: { readonly offset: number; readonly length: number }; readonly signal?: AbortSignal } = {},
+  ): Promise<{ readonly content_type: string; readonly bytes: number; readonly sha256: string; readonly etag: string; readonly read: (range: { readonly offset: number; readonly length: number }) => Promise<Uint8Array>; readonly close: () => Promise<void> }> {
+    if (caller.channel === 'native_bridge') throw new AgentRouteError('ORIGIN_REJECTED');
+    if (!REF.test(reference)) throw new AgentRouteError('INVALID_REQUEST');
+    this.#assertOwner(projectId, caller.principal_id);
+    const { bindings, reader } = this.#producer();
+    const binding = await bindings.currentByReference(projectId, reference);
+    if (!binding) throw new AgentRouteError('NOT_FOUND');
+    this.#verify(binding, { project_id: projectId, run_id: binding.run_id });
+    options.signal?.throwIfAborted();
+    let handle: PreparedReviewMediaHandleV1 | undefined;
+    try {
+      handle = await reader.open(binding.receipt, binding.object_id, options.signal ? { signal: options.signal } : {});
+      this.#assertOwner(projectId, caller.principal_id);
+      const current = await bindings.currentByReference(projectId, reference);
+      if (!current || current.receipt.receipt_digest !== binding.receipt.receipt_digest)
+        throw new AgentRouteError('REVISION_CONFLICT');
+      const part = binding.receipt.parts.find((row) => row.slot === binding.slot)!;
+      if (handle.sha256 !== part.sha256 || handle.bytes !== part.bytes)
+        throw new AgentRouteError('REVISION_CONFLICT');
+      const opened = handle;
+      let closing = false;
+      return {
+        content_type: opened.content_type,
+        bytes: opened.bytes,
+        sha256: opened.sha256,
+        etag: `"${opened.sha256}"`,
+        read: async (window) => {
+          if (closing) throw new AgentRouteError('CAPABILITY_UNAVAILABLE');
+          options.signal?.throwIfAborted();
+          if (!Number.isSafeInteger(window?.offset) || !Number.isSafeInteger(window?.length) || window.offset < 0 || window.length < 1 || window.length > PREPARED_REVIEW_MAX_READ_BYTES)
+            throw new AgentRouteError('INVALID_REQUEST');
+          const bytes = await opened.read({ offset: window.offset, length: window.length });
+          options.signal?.throwIfAborted();
+          return bytes;
+        },
+        close: async () => {
+          if (closing) return;
+          closing = true;
+          await opened.close();
+        },
+      };
+    } catch (error) {
+      await handle?.close().catch(() => undefined);
+      throw error;
     }
   }
 
@@ -212,47 +285,73 @@ export class ReviewMediaHttp {
         ...(typeof request.headers['sec-fetch-site'] === 'string' ? { secFetchSite: request.headers['sec-fetch-site'] } : {}),
         rawHeaders: request.rawHeaders,
       };
-      // The native bridge never reads this surface, and the driver reads it only as an
-      // owner of the project.
+      // The native bridge never reads this surface. The driver reads it only as the
+      // owner of the project, and the trusted UI reads it with its own proof.
       const principal: AgentPrincipal = this.#auth.authenticate(headers, 'authenticated');
       if (principal.channel === 'native_bridge') throw new AgentRouteError('ORIGIN_REJECTED');
       const projectId = match[1]!;
       const reference = match[2]!;
-      if (!REF.test(reference)) throw new AgentRouteError('NOT_FOUND');
-      const binding = this.#registry.resolve(projectId, reference);
+      this.#assertOwner(projectId, principal.principal_id);
+      const { bindings, reader } = this.#producer();
+      const binding = await bindings.currentByReference(projectId, reference);
       if (!binding) throw new AgentRouteError('NOT_FOUND');
-      if (!this.#reader) throw new AgentRouteError('CAPABILITY_UNAVAILABLE');
+      this.#verify(binding, { project_id: projectId, run_id: binding.run_id });
       const controller = new AbortController();
-      request.once('aborted', () => controller.abort(Error('The media request was aborted')));
-      response.once('close', () => controller.abort(Error('The media response closed')));
-      handle = await this.#reader.open(binding.receipt, binding.object_id, { signal: controller.signal });
+      const abort = () => controller.abort(Error('The media request was aborted'));
+      request.once('aborted', abort);
+      response.once('close', abort);
+      handle = await reader.open(binding.receipt, binding.object_id, { signal: controller.signal });
+      // After the open: the owner is still the owner and the binding is still current.
+      this.#assertOwner(projectId, principal.principal_id);
+      const current = await bindings.currentByReference(projectId, reference);
+      if (!current || current.receipt.receipt_digest !== binding.receipt.receipt_digest)
+        throw new AgentRouteError('REVISION_CONFLICT');
+      const part = binding.receipt.parts.find((row) => row.slot === binding.slot)!;
+      if (handle.sha256 !== part.sha256 || handle.bytes !== part.bytes)
+        throw new AgentRouteError('REVISION_CONFLICT');
       const total = handle.bytes;
       const etag = `"${handle.sha256}"`;
-      const range = this.#range(request.headers.range, total);
-      if (range === 'invalid') {
+      const window = this.#range(request.headers.range, total);
+      if (window === 'invalid') {
         response.writeHead(416, { 'Content-Range': `bytes */${total}`, 'Accept-Ranges': 'bytes' });
         response.end();
         return true;
       }
-      const start = range === null ? 0 : range.start;
-      const end = range === null ? Math.min(total, PREPARED_REVIEW_MAX_READ_BYTES) - 1 : range.end;
-      const chunk = await handle.read({ offset: start, length: end - start + 1 });
-      // The bytes must be the verified bytes.
-      if (chunk.length !== end - start + 1) throw new AgentRouteError('REVISION_CONFLICT');
-      response.writeHead(range === null ? 200 : 206, {
+      const from = window === null ? 0 : window.start;
+      const to = window === null ? total - 1 : window.end;
+      const length = to - from + 1;
+      response.writeHead(window === null ? 200 : 206, {
         'Content-Type': handle.content_type,
-        'Content-Length': chunk.length,
+        'Content-Length': length,
         'ETag': etag,
         'Accept-Ranges': 'bytes',
         'Cache-Control': 'no-store',
         'X-Content-Type-Options': 'nosniff',
-        ...(range === null ? {} : { 'Content-Range': `bytes ${start}-${end}/${total}` }),
+        ...(window === null ? {} : { 'Content-Range': `bytes ${from}-${to}/${total}` }),
       });
-      response.end(Buffer.from(chunk));
+      // The whole requested window is streamed in bounded reads, with the socket's
+      // backpressure awaited before the next read.
+      let offset = from;
+      let remaining = length;
+      while (remaining > 0) {
+        controller.signal.throwIfAborted();
+        const size = Math.min(remaining, PREPARED_REVIEW_MAX_READ_BYTES);
+        const chunk = await handle.read({ offset, length: size });
+        controller.signal.throwIfAborted();
+        if (chunk.length !== size) throw new AgentRouteError('REVISION_CONFLICT');
+        if (!response.write(Buffer.from(chunk))) await this.#drain(response);
+        offset += size;
+        remaining -= size;
+      }
+      response.end();
       return true;
     } catch (error) {
       const code = agentErrorCode(error);
       const status = statuses.get(code) ?? 500;
+      if (response.headersSent) {
+        response.destroy();
+        return true;
+      }
       send(status, validateAgentDefinition('Error', {
         schema_version: 'agent.v1',
         correlation_id: randomUUID(),
@@ -269,6 +368,23 @@ export class ReviewMediaHttp {
     }
   }
 
+  /** Wait for the socket to accept the bytes that were already written. */
+  #drain(response: ServerResponse): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      const cleanup = () => {
+        response.off('drain', onDrain);
+        response.off('close', onClose);
+        response.off('error', onError);
+      };
+      const onDrain = () => { cleanup(); resolve(); };
+      const onClose = () => { cleanup(); reject(Error('The media response closed')); };
+      const onError = () => { cleanup(); reject(Error('The media response failed')); };
+      response.once('drain', onDrain);
+      response.once('close', onClose);
+      response.once('error', onError);
+    });
+  }
+
   #range(value: string | undefined, total: number): { readonly start: number; readonly end: number } | null | 'invalid' {
     if (value === undefined) return null;
     const match = /^bytes=(\d*)-(\d*)$/.exec(value.trim());
@@ -281,14 +397,4 @@ export class ReviewMediaHttp {
     if (!Number.isSafeInteger(from) || !Number.isSafeInteger(to) || from < 0 || to < from || from >= total) return 'invalid';
     return { start: from, end: to };
   }
-}
-
-/** The caller a review media read may act for. The body never names one. */
-export function reviewMediaCaller(principal: AgentPrincipal) {
-  return createTrustedCallerContext({
-    principal_id: principal.principal_id,
-    channel: principal.channel === 'trusted_ui' ? 'trusted_ui' : 'authenticated',
-    source: principal.channel === 'trusted_ui' ? 'trusted_ui' : 'driver_relay',
-    session_ref: principal.session_ref,
-  });
 }

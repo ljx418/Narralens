@@ -1,0 +1,10 @@
+=== post-run owned process/listener/temp state (R1-BRIDGE-ASSETS-HOST-002) ===
+recorded_at_utc=2026-11-11T14:52:38Z
+--- vitest/narralens/ffmpeg/ffprobe processes ---
+(none: no owned test, host or media process survived the run)
+--- listening sockets (non-codex) ---
+LISTEN 0      4096       127.0.0.54:53         0.0.0.0:*                                             
+LISTEN 0      511         127.0.0.1:46231      0.0.0.0:*    users:(("node",pid=650,fd=22))           
+LISTEN 0      511         127.0.0.1:3080       0.0.0.0:*    users:(("node",pid=386,fd=28))           
+--- leftover fixture temp roots ---
+(none: every fixture root was removed)

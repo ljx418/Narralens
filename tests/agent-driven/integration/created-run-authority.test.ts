@@ -29,6 +29,7 @@ function fixture() {
   const creation = new ProjectCreationStore(revisions);
   const repository = new ProductSqliteRepository(revisions);
   const authority = new CreatedRunAuthority({ now: () => NOW, confirmationTtlSeconds: 3600 });
+  const factsOptions = { revisions, creation, repository };
   const seed = () => revisions.compose((db) => {
     db.prepare('INSERT OR IGNORE INTO project_state(project_id,revision,updated_at) VALUES(?,1,?)').run('project-1', AT);
     db.prepare("INSERT OR IGNORE INTO cp_a0_template_version(template_id,version,execution_digest,capability_id,capability_version,definition_json,created_at) VALUES('local-short-film',1,'b70615d5ad4246caac7d0e770022429de5826831b222447e4be7637e4a07ca32','clip.prepare','1','{}',?)").run(AT);
@@ -39,7 +40,7 @@ function fixture() {
     db.prepare("INSERT OR IGNORE INTO cp_a0_artifact_version(project_id,artifact_id,version,kind,schema_version,input_digest,content_digest,content_json,input_refs_json,created_at) VALUES('project-1','artifact-1',1,'chapter',1,?,?,'{}','[]',?)").run(INPUT, INPUT, AT);
     db.prepare("INSERT OR IGNORE INTO cp_a0_review_request(project_id,run_id,plan_version,run_scope_digest,review_id,gate,artifact_id,artifact_version,input_digest,package_digest,state,reuse_review_id,created_at) VALUES('project-1','run-1',1,?,'review-1','sample','artifact-1',1,?,?,'pending',NULL,?)").run(SCOPE, INPUT, '5'.repeat(64), AT);
   });
-  return { revisions, creation, repository, authority, seed, close: () => revisions.close() };
+  return { revisions, creation, repository, authority, factsOptions, seed, close: () => revisions.close() };
 }
 
 const confirmation = (over: Partial<Parameters<CreatedRunAuthority['registerConfirmation']>[1]> = {}) => ({
@@ -179,7 +180,7 @@ it('writes the limited approval only when the current run, attempt and confirmat
 it('answers the project facts from the real authorities and fails closed without a capability', async () => {
   const f = fixture();
   try {
-    const facts = new CreatedRunFacts({ revisions: f.revisions, creation: f.creation });
+    const facts = new CreatedRunFacts(f.factsOptions);
     const unknown = await facts.readProjectFacts('missing-project');
     expect(unknown.project_id).toBe('missing-project');
     expect(unknown.exists).toBe(false);
@@ -189,17 +190,12 @@ it('answers the project facts from the real authorities and fails closed without
     // The fingerprint is a real digest of the ACTUAL registered descriptors; it is
     // never a constant and it never claims readiness on its own.
     expect(unknown.capability_fingerprint).toMatch(/^[a-f0-9]{64}$/);
-    const partial = new CreatedRunFacts({
-      revisions: f.revisions,
-      creation: f.creation,
-      capabilities: () => FULL.slice(0, 2),
-    });
+    const partial = new CreatedRunFacts({ ...f.factsOptions, capabilities: () => FULL.slice(0, 2) });
     const incomplete = await partial.readProjectFacts('missing-project');
     expect(incomplete.capability_available).toBe(false);
     expect(incomplete.capability_fingerprint).not.toBe(capabilityFingerprint(FULL));
     const complete = new CreatedRunFacts({
-      revisions: f.revisions,
-      creation: f.creation,
+      ...f.factsOptions,
       capabilities: () => FULL,
       capabilityReadiness: () => ({ available: true, reason: 'every registered producer reported itself available' }),
     });
@@ -208,8 +204,7 @@ it('answers the project facts from the real authorities and fails closed without
     expect(ready.capability_available).toBe(true);
     // A manifest that is registered but not ready stays unavailable.
     const notReady = new CreatedRunFacts({
-      revisions: f.revisions,
-      creation: f.creation,
+      ...f.factsOptions,
       capabilities: () => FULL,
       capabilityReadiness: () => ({ available: false, reason: 'the delivery producer is still starting' }),
     });

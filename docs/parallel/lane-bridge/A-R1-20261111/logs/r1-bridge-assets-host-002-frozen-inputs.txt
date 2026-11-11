@@ -1,0 +1,44 @@
+# R1-BRIDGE-ASSETS-HOST-002 frozen tested inputs
+recorded_at_utc=2026-11-11T14:50:33Z
+cwd=/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+head=712bcc55239f8f6748f416a7f2a6b8aead2063d3
+branch=agent-driven/a-r1-bridge
+index_staged=
+dirty=?? docs/parallel/lane-bridge/A-R1-20261111/logs/r1-bridge-assets-host-002-frozen-inputs.txt;
+7a8396a2f8ca3dea8237fb2c51beb6deceba3d299355b708de8b00ab160027a2  tests/agent-driven/integration/local-assets-transport.test.ts
+c63ee3d0f61f63349b397f8a77ee99fc83bc153ab3d1f691eb4a2ddc331b8e7d  tests/agent-driven/integration/host-application.test.ts
+006dd039d449979d4cfefb4728003247ff61ab2317a32acf3423c848d6f8df2f  tests/agent-driven/integration/creative-context-host.test.ts
+238050e8eb0aa88c7badebe22ea639c7b88ba8e04c01b350af7b35f302e25aa3  tests/agent-driven/integration/created-task-gate.test.ts
+e769bcc9d52c103a8385d9013ef791ec45388504a18aba7adaf118cf1f123099  tests/agent-driven/integration/created-task-store.test.ts
+9cc01611a7b59c5c7b10566866277e03a7188b1573ec86be15df5ed02a951e2a  tests/agent-driven/integration/created-task-worker.test.ts
+a8d57c0b987192987c0a212937ee55ff192dbf8733a997304d8777902ea0d565  tests/agent-driven/integration/created-run-authority.test.ts
+42798b0ff021eaf9bd9d20803ca066a5b9eb2068df7185cbba4fe1fbef08491c  src/host/agent-driven/creation-application.ts
+4203e55493c330ea537b11601cd48eb736a6bd29915565a9c4f5cae046288493  src/host/agent-driven/created-task-application.ts
+3a8bebdc321d545d34b7df803c88ae7e321a9343942575542fc80c7e16f904c2  src/host/agent-driven/created-task-store.ts
+79f141851e449a6e5dfc2139c78a511f62c0f99a6843eb58649c86627d91692f  src/host/agent-driven/created-task-worker.ts
+1a65d8f3e9950847decdea2478a2d8542bb33d5018119282c18144c2694a8860  src/host/agent-driven/created-task-gate.ts
+6727b0b64bc07cfdea0346e7f885d0ffcbd74832a66f939056735c66872eeef5  src/host/agent-driven/created-draft-processor.ts
+7be972da9ec263b22a6f74bd5d25466d404f8d3d9227db343a3b1c95b86297ec  src/host/agent-driven/asset-inventory.ts
+32e9e8efb17dd1d6801c997b691e65bf79348a3d21233b89b4452d6a36f4ddc2  src/host/agent-driven/local-asset-http.ts
+2d8e087ae0f57c72db418433ef7c6237e67d97d2e54cd4f2272d32e0eb141823  src/host/agent-driven/local-asset-registry.ts
+90ac6c61b3fc87b0e34c5234564e97b9bc86a759df5178e0ac1d101b23e3c48c  src/host/agent-driven/created-run-facts.ts
+571da409fd742705d1293cab81312a24766410679e223c354590724f98fa749a  src/host/agent-driven/created-run-authority.ts
+56f55e16646b7e3cb5847719251defd8f58f4da055611e958240727822433687  src/host/agent-driven/project-context-service.ts
+e0beb9353f8f34fcdef9a5b434959f0b63c990aef3de8588cae25cea34a328a1  src/host/agent-driven/product-sqlite-repository.ts
+affb339613036d4b7a6572d63247f53754725a98488ae671c76b7317995aaf7e  src/host/creative/fixed-workflow-service.ts
+f071a02f1ed691e70a7f7cc774c6f4b5948c088e4a8411491fb51adb7affc3b7  src/host/creative/product-repository.ts
+e9ddb03a7d50b1f4e247405c7579beb7e6ccd311a714d3dd688a75322bba6010  src/host/creative/execution-guard.ts
+7d899a4c7cdd9138a98f4e49ac2100a2d4d260d10ef888cad40a4aa4d4d67245  src/host/creative/trusted-context.ts
+fea46b6310be044d2c90b6c846b07e04600da286643411a53313680230978dae  src/host/projects/revision-store.ts
+8c08130d23e0b80611856dc94ded585aa2677a480604f22243bc8e3823f45b31  src/host/projects/project-creation-store.ts
+f1b9029158730bd24967361f4cd677b1d37c8c9474c1b0af7049e9ca5dd5025d  src/host/server.ts
+54356697802c0bf048e5cbcde1f54eb33713d4fe58943b346406804011cb3644  src/contracts/agent-driven-types.ts
+f11a68bad982b7914e73f396ce48e99195ffc8fa88e842f137ffabf31900ea73  src/contracts/agent-driven-validator.ts
+9bf605c786e2b6d1a797ab7ec8c450810a91ece87039eb28b7880a1d46f54076  src/contracts/agent-local-assets-types.ts
+73d24cbed71989fb26f14a5464c06da615e835991938fa0c8ac512c32708d7a0  src/contracts/agent-local-assets-validator.ts
+088a451e9646199618261a6cc95a84e3767dbf4cc87004f3e5995dda86b60964  contracts/agent-driven-a.schema.json
+05f29d947ec65398fee37851a583afc781adc87d6b7d382b1da45eb46f80dc4f  contracts/agent-driven-a.registry.json
+5572530b5036728e414a0653fc36fd43958874a3a89cc8223e3984194c4a1fa4  contracts/agent-driven-a.migration.sql
+80dfa4918118bf7b57c65e52142dc95ebed69b6fb5951dead2f8a18f01ec0d6a  contracts/agent-local-assets-v1.schema.json
+053914b00b4b409eea06dc863be7abd97fac6f0a21756388e8ecf891081510b7  contracts/agent-local-assets-v1.registry.json
+1d372a55ac1c6b5db772377672b6675394f3b42d0ae62f038b71259fb300235e  contracts/agent-workbench-ui-v1.registry.json

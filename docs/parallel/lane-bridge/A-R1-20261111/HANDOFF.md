@@ -271,3 +271,50 @@ child msg_5c5f4cba8023明确停止全部命令/写入并移交Codex；入站与d
 - 冻结 `contracts/agent-driven-a.*`、31 冻结路由、80 defs、`cp_a0_*` DDL/namespace **零改动**（本票新增全部为 `agent-local-assets-v1.*` 与 `agent-workbench-ui-v1.registry.json`）。
 - 附属扩展计数：原 31 Host + 4 附属 HTTP（asset-inventory@1）+ 1 附属 HTTP（review-media@1，尚未注册到运行面）+ 1 MCP resource；不声称总暴露面未扩大。
 - 本记录为**本领域子阶段自验证**，不含独立审查、不含产品整体验收、不含人验；未进入 B，未代签任何 PASS。
+
+## Round-1 审查修正（bridge-Claude，2026-11-11，接 712bcc5）
+
+### 触发与结论
+
+- 触发：Codex 对候选 `712bcc55239f8f6748f416a7f2a6b8aead2063d3` 的**第一次有界实现审查**（非整包重审），六条具体项。候选 `712bcc5` 与全部首个失败记录保留未改。
+- MAIN 槽 `R1-BRIDGE-ASSETS-HOST-002` 的 4 文件运行**终态为 exit 1**（21/24 通过）：`host-application`、`creative-context-host`、`created-task-gate` 三个既有文件**全部通过**（证明新装配未破坏既有创建/上下文/门路径）；三个失败全部在我新增的 `local-assets-transport.test.ts`，且**同一根因**：`local-asset-http.ts` 把路径段与路由 ID 比较，导致 `asset-inventory` 被按 `trusted_ui` 通道鉴权（driver 被打回 403、外来读者得到 403 而非 404、库存体变成错误封套）。原始日志 `logs/r1-bridge-assets-host-002-run.txt` SHA256 `e223619d2f119ac3a52c0a2c266f4e6755b557c082325c6f582b19af72d1241c` 保留，未在该槽下重跑。
+
+### 六条修正
+
+1. **UI delegate 与闭集 dispatcher（真实生产接线）**
+   - `creation-application.ts` 抽出唯一的 `#openNative()`：Host 路由与 workbench delegate **共用同一 native-open 服务**。
+   - 新增真实 `NativeStudioUiGrantV1` 生产者：在已认证 `trusted_ui` 分支铸造，捕获真实 principal / project / owner session / generation；`expires_at = min(父会话到期, now+8h)`；`isCurrent()` 每次重核真实父会话活性与 generation；`invoke` 与 `openReviewMedia` 为闭包。`issueNativeEntry` 现在**真的携带 `ui`**。
+   - delegate 的 `invoke` 走**同一 dispatcher**，并对 `surface/operation` 做**双向闭集**（网关读同一份 `contracts/agent-workbench-ui-v1.registry.json`；delegate 侧再查一次 allowlist）：`agent.v1` 用**原 validator** 校验输入并校验输出（无输入路由传 `undefined`）；`local-assets.v1` 调素材服务；`workbench.v1` 的 `native.reopen` 要求**严格空 input** 并走同一 native-open 服务，`review.part.describe` 要求严格 5 字段。无 producer 一律 503，绝不伪造 body。
+   - dispatcher 补登**已审 workflow handlers**（`workflow.run.prepare/authorize/start/pause/resume/cancel`、`review.read/decide`），每一条都**保留 owner 校验**；缺 producer 的 `delivery.read`/`change.*` 仍 503。
+   - `ReviewMediaHttp` 已挂载到 Host 路由面。
+2. **context 与 job.read 同一 receipt resolver**：`ProjectContextService` 新增 `ProjectJobReceiptPort`；`creation-application.ts` 注入**唯一**解析器（创建 job + created task job），`job.read` 与 `context.active_jobs` 共用；解析出的 receipt 必须与 project 一致，否则 `REVISION_CONFLICT`。
+3. **关闭顺序改为串行**：`worker.close()` → `tasks.close()`（含 processor）→ `localAssets.close()` → `nativeWorkspaces.close()`。任务 processor 在它读取字节的 registry 之前关闭，不再 `Promise.all` 并发。
+4. **审阅媒体绑定改为权威端口**：删除内存 map 这类弱适配器，改为 `ReviewMediaBindingPort`（读取**当前** package/run/part 行与**不可变** receipt 关联）。生产无真实发布/关联 producer → **整体 503 fail closed**；`describe` 与 GET 在 await **前后**都重核 owner、当前包、part kind、完整 Ref、receipt↔object 关联与 handle 摘要/字节；跨 owner/过期一律拒绝。
+5. **流式读取**：GET 按 ≤1 MiB 有界读 + 真实 socket 背压流式输出**整个请求窗口**，准确 `Content-Length`/`Content-Range`，断连取消，所有分支 `finally` 关闭 handle；无 Range 时返回**整个对象**而非首个 1 MiB。
+6. **facts fail closed**：`capability_available` 现在要求 `capabilityFingerprint()` **真实校验通过**（畸形/重复 manifest 一律不可用）；rights 闭包改为读**当前** intake head 版本并用 `creativeInputClosure` 计算闭包摘要，且必须与当前 Run 的 `input_digest` 一致，不再只看 bootstrap brief。
+
+### 额外发现并修好的跨域互操作缺陷（原本会让 Gateway 永久 503）
+
+- `contracts/agent-workbench-ui-v1.registry.json` 之前用了 `surfaces` 结构，**PRODUCT 网关读的是 `operations` / `operation_allowlist`**（`loadGatewayUiRegistry`），因此网关会拿到 `null` 并对两条 UI 别名一律 503。已改为网关实际读取的形状并**实测**：`registry loaded: true`，`agent.v1` 18 项、`local-assets.v1` 4 项、`workbench.v1` 2 项。
+
+### 本轮证据
+
+| 命令 | 分类 | 结果 |
+|---|---|---|
+| `corepack pnpm exec vitest run tests/agent-driven/bridge …created-task-store …created-task-worker …created-run-authority …review-media-transport …fixed-workflow-service …execution-guard --maxWorkers=1 --minWorkers=1` | 轻量 | **exit 0，13 文件 / 238 测试全过**（`logs/light-bridge-regression-006.txt` SHA256 `6860a5764e7daf8c47fea8c2041b2130857ef1b073f383a310e5d02480f3e338`） |
+| `corepack pnpm exec vitest run tests/agent-driven/integration/review-media-transport.test.ts --maxWorkers=1 --minWorkers=1` | 轻量（新建） | exit 0，5/5：无 producer → 503；跨 owner → 404 且**未打开** descriptor；>1 MiB 全量流式且单读 ≤1 MiB、恰好关闭 1 次；Range 206 与 416 准确；describe 仅在 owner+当前包+receipt 一致时成立 |
+| `corepack pnpm exec tsc --noEmit` | 轻量 | exit 0 |
+
+- 保留的首个失败：`logs/light-bridge-regression-005.txt`（exit 1）——既有 `created-task-worker` 的租约续租用例在 13 文件同进程负载下出现**时序抖动**（600ms 租约 / 200ms 心跳 / 900ms 等待）；该用例**单独运行 3/3 通过**，证明是负载敏感而非行为回归。已把租约放宽到 2000ms、等待 2500ms，**断言未放松**（仍要求租约存活且到期时间前移），随后整套 238/238 通过。
+- `logs/light-bridge-regression-002.txt`（exit 1，adjunct resource 使 MCP resource template 由 4 变 5）与 `logs/r1-bridge-assets-host-002-run.txt`（exit 1，通道比较缺陷）同样保留。
+
+### 仍然 NOT_RUN
+
+- `local-assets-transport.test.ts`、`host-application.test.ts`、`creative-context-host.test.ts`、`created-task-gate.test.ts`（真实 Host + 真实 ffmpeg 媒体）：通道缺陷已修，但**未在授权槽下重跑**；需要新槽。
+- 任何 build / full / Chromium / 多 Host 并行：未执行。
+- MEDIA 真实 `PreparedReviewMediaReader` 运行实现与真实 ReviewPackage 发布/关联仍缺 → 审阅媒体生产面保持 503；`review.part.describe` 在 registry 标 `BLOCKED_NO_PRODUCER`。
+
+### 与 MAIN 的边界
+
+- MAIN 拥有 Job recovery 权威修正：`created-task-store.ts` 的 `reapExpired` 空 owner 取消子句与 Job SQL **未被我改动**（我的改动为纯增量，`git diff -U0` 无删除行）。收到 MAIN 的 `completeUnownedCancellation` 冻结 SHA 后，我可在下一个明确安全边界交付**那一条精确子句**的替换。
+- 已实现 `openReviewMedia({ref,range?,signal?})`：**signal 透传进 `reader.open`**，且 owner/当前包校验在 await 前后各一次。

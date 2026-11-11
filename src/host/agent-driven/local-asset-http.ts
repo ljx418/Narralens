@@ -66,8 +66,10 @@ export class LocalAssetHttp {
       const projectId = match[1]!;
       const route = match[2]!;
       const isPost = request.method === 'POST';
-      // The channel is decided by the route, never by the request body.
-      const channel = route === 'asset-inventory.read' ? 'authenticated' : 'trusted_ui';
+      // The channel is decided by the route, never by the request body. The
+      // asset-inventory read is the owner-scoped one: a driver may read it, the
+      // source listing and the registration stay trusted-UI only.
+      const channel = route === 'asset-inventory' ? 'authenticated' : 'trusted_ui';
       if (route === 'local-source-files' && isPost) throw new AgentRouteError('NOT_FOUND');
       if (route === 'local-assets' && !isPost && request.method !== 'GET') throw new AgentRouteError('NOT_FOUND');
       if (route === 'asset-inventory' && isPost) throw new AgentRouteError('NOT_FOUND');
