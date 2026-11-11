@@ -199,9 +199,21 @@ export interface NativeExpectedSourcePort {
 /** What one expected part is. */
 export type NativeExpectedPartState = 'hydrated' | 'absent_default' | 'unsupported';
 
-/** One expected part: its state and its own effective digest. */
+/**
+ * The origin an expected part must have.
+ *
+ * The pinned 013 contract is explicit about the origins: the settings, the captions
+ * and the markers are revalidated with origin project, and a project without a style
+ * uses the pinned default, which is origin explicit_default. A browser preference is
+ * never an expected origin, not even when its value happens to be the default.
+ */
+export const NATIVE_EXPECTED_ORIGINS = ['project', 'explicit_default'] as const;
+export type NativeExpectedOrigin = (typeof NATIVE_EXPECTED_ORIGINS)[number];
+
+/** One expected part: its state, its origin and its own effective digest. */
 export interface NativeExpectedPart {
   readonly state: NativeExpectedPartState;
+  readonly origin: NativeExpectedOrigin | null;
   readonly effective_sha256: string | null;
   readonly reason: string | null;
 }
@@ -656,7 +668,7 @@ export class OpenFilmNativeExpected implements NativeExpectedPort {
    * they are hashed with the *same* canonical implementation the editor used.
    */
   #projection(binding: NativeExpectedBinding, facts: NativeExpectedSourceFacts, library: NativeExpectedLibrary): NativeExpectedProjection {
-    const unsupported = (reason: string): NativeExpectedPart => Object.freeze({ state: 'unsupported', effective_sha256: null, reason });
+    const unsupported = (reason: string): NativeExpectedPart => Object.freeze({ state: 'unsupported', origin: null, effective_sha256: null, reason });
     const computed = library.computeExpectedProjection(facts.expected_input);
     const parts: Record<NativeExpectedPartKind, NativeExpectedPart> = {
       settings: unsupported('NOT_COMPUTED'),
@@ -674,13 +686,15 @@ export class OpenFilmNativeExpected implements NativeExpectedPort {
       // source file is not what the state says; the parsed value is. So an absent
       // settings file still expects a hydrated part, with the digest of the empty
       // parsed settings.
-      parts.settings = this.#part('hydrated', computed.settings.sha256);
-      parts.markers = this.#part('hydrated', computed.markers.sha256);
-      parts.captions = this.#effective('captions', facts.captions, library, 'hydrated');
+      parts.settings = this.#part('hydrated', 'project', computed.settings.sha256);
+      parts.markers = this.#part('hydrated', 'project', computed.markers.sha256);
+      parts.captions = this.#effective('captions', facts.captions, library, 'hydrated', 'project');
       // The style is the one part that may be absent: a project without a style uses
-      // the pinned default, and only then is the part absent_default.
+      // the pinned default, and only then is the part absent_default with the explicit
+      // default's origin.
       parts.subtitle_style = this.#effective('subtitle_style', facts.style, library,
-        facts.style.state === 'present' ? 'hydrated' : 'absent_default');
+        facts.style.state === 'present' ? 'hydrated' : 'absent_default',
+        facts.style.state === 'present' ? 'project' : 'explicit_default');
     }
     return Object.freeze({
       project_id: binding.project_id,
@@ -696,8 +710,12 @@ export class OpenFilmNativeExpected implements NativeExpectedPort {
     });
   }
 
-  #part(state: 'hydrated' | 'absent_default', sha256: string): NativeExpectedPart {
-    return Object.freeze({ state, effective_sha256: sha256, reason: null });
+  #part(
+    state: 'hydrated' | 'absent_default',
+    origin: NativeExpectedOrigin,
+    sha256: string,
+  ): NativeExpectedPart {
+    return Object.freeze({ state, origin, effective_sha256: sha256, reason: null });
   }
 
   /**
@@ -712,15 +730,17 @@ export class OpenFilmNativeExpected implements NativeExpectedPort {
     fact: { readonly state: 'present' | 'absent'; readonly value: unknown },
     library: NativeExpectedLibrary,
     state: 'hydrated' | 'absent_default',
+    origin: NativeExpectedOrigin,
   ): NativeExpectedPart {
     let canonical: string;
     try {
       canonical = library.hydrationCanonicalJson({ format: NATIVE_EFFECTIVE_FORMAT, part: kind, value: fact.value });
     } catch {
-      return Object.freeze({ state: 'unsupported', effective_sha256: null, reason: 'EXPECTED_VALUE_NOT_JSON' });
+      return Object.freeze({ state: 'unsupported', origin: null, effective_sha256: null, reason: 'EXPECTED_VALUE_NOT_JSON' });
     }
     return Object.freeze({
       state,
+      origin,
       effective_sha256: sha256(Buffer.from(canonical, 'utf8')),
       reason: null,
     });

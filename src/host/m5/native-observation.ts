@@ -859,7 +859,11 @@ export class NativeObservationService implements NativeContextPort, NativeObserv
       const expected: NativeExpectedPart = projection.parts[kind];
       if (expected.state === 'unsupported') return false;
       if (expected.effective_sha256 === null) return false;
+      if (expected.origin === null) return false;
       if (observed.state !== expected.state) return false;
+      // The origin is checked too: a part that came from somewhere else, even with the
+      // same digest, is not the part the source says the editor should have.
+      if (observed.origin !== expected.origin) return false;
       if (observed.effective_sha256 !== expected.effective_sha256) return false;
     }
     return true;

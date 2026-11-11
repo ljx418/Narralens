@@ -779,7 +779,7 @@ describe('the selection version port', () => {
         hydration_epoch: 1,
         parts: {
           settings: { state: 'hydrated', origin: 'project', effective_sha256: HASH_A },
-          subtitle_style: { state: 'absent_default', origin: 'project', effective_sha256: digestOfPart('subtitle_style', {}) },
+          subtitle_style: { state: 'absent_default', origin: 'explicit_default', effective_sha256: digestOfPart('subtitle_style', {}) },
           captions: { state: 'hydrated', origin: 'project', effective_sha256: digestOfPart('captions', { cues: [] }) },
           markers: { state: 'hydrated', origin: 'project', effective_sha256: HASH_A },
         },
@@ -1271,7 +1271,7 @@ describe("the epoch of the hydration and the epoch of the document", () => {
         project_id: 'n1', editor_view_id: 'view1', document_epoch: 5, hydration_epoch: 1,
         parts: {
           settings: { state: 'hydrated', origin: 'project', effective_sha256: HASH_A },
-          subtitle_style: { state: 'absent_default', origin: 'project', effective_sha256: digestOfPart('subtitle_style', {}) },
+          subtitle_style: { state: 'absent_default', origin: 'explicit_default', effective_sha256: digestOfPart('subtitle_style', {}) },
           captions: { state: 'hydrated', origin: 'project', effective_sha256: digestOfPart('captions', { cues: [] }) },
           markers: { state: 'hydrated', origin: 'project', effective_sha256: HASH_A },
         },
@@ -1360,7 +1360,7 @@ describe("the expected state of the parts that come from the project's own sourc
         project_id: 'n1', editor_view_id: 'view1', document_epoch: 1, hydration_epoch: 1,
         parts: {
           settings: { state: 'absent_default', origin: 'project', effective_sha256: HASH_A },
-          subtitle_style: { state: 'absent_default', origin: 'project', effective_sha256: digestOfPart('subtitle_style', {}) },
+          subtitle_style: { state: 'absent_default', origin: 'explicit_default', effective_sha256: digestOfPart('subtitle_style', {}) },
           captions: { state: 'hydrated', origin: 'project', effective_sha256: digestOfPart('captions', { cues: [] }) },
           markers: { state: 'hydrated', origin: 'project', effective_sha256: HASH_A },
         },
