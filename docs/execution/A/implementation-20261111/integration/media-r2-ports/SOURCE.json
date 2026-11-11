@@ -1,0 +1,10 @@
+{
+  "producer_commit": "3fc977168f0941f8b1286e08fc24827afda74b72",
+  "integration_base": "dd2be1f08e65305dac6d0e4ecb05a03e1875e5b2",
+  "path": "src/host/render/ports.ts",
+  "old_sha256": "06ab9bea87df660e7e2297886b259a0d90d8561a6b01199f7bd16265f1ecee6a",
+  "new_sha256": "b3d6127fbafd5de652560cff1c4324fd428dc2318c49143b2540cd641b38ef3c",
+  "scope": "exact producer ports/type and canonical receipt helper import only; no phase implementation or capability readiness",
+  "review": "L07 field sets match; actual QCItem has no raw probe float fields; RenderRequest/PackageReceipt reused; runtime behavior NOT_RUN",
+  "import_attempt": "first append-only assertion rejected because producer also adds required imports; no write occurred; actual parent-byte comparison passed"
+}
