@@ -402,9 +402,35 @@ export function validateNativeHydrationObservation(value: unknown): Check<Native
   });
 }
 
+/**
+ * The fields of each original `StudioRef` that this side actually consumes.
+ *
+ * The shipped contract declares the whole original shape, branch by branch. The ingress
+ * checks the fields the Host's own mapping reads — the clip a reference names, the
+ * clips of a region, the times of a range — and refuses a reference that is missing
+ * one of them, because such a reference cannot be checked against the committed source.
+ * The remaining fields of the original are the Studio's own business and are carried
+ * through untouched.
+ */
+export const NATIVE_SELECTION_REF_FIELDS: Readonly<Record<NativeSelectionRefKind, readonly string[]>> = Object.freeze({
+  clip: ['id'],
+  layer: ['clipId'],
+  region: ['clipIds'],
+  time: ['time'],
+  range: ['start', 'end'],
+  track: ['clipIds'],
+  file: ['path'],
+  subtitle: ['start', 'end'],
+});
+
 /** The original `StudioSelection`, in its original shape. */
 export function validateNativeSelectionObservation(value: unknown): Check<NativeSelectionObservation> {
   if (!isPlainObject(value)) return no('SELECTION_NOT_AN_OBJECT');
+  const keys = Object.keys(value).sort();
+  if (keys.length < 3 || keys.length > 5
+    || !keys.every((key) => ['projectId', 'time', 'refs', 'range', 'stage'].includes(key))) {
+    return no('SELECTION_FIELDS_NOT_CLOSED');
+  }
   if (!isName(value.projectId)) return no('SELECTION_PROJECT_ID_INVALID');
   if (typeof value.time !== 'number' || !Number.isFinite(value.time)) return no('SELECTION_TIME_INVALID');
   if (!Array.isArray(value.refs)) return no('SELECTION_REFS_INVALID');
@@ -413,6 +439,10 @@ export function validateNativeSelectionObservation(value: unknown): Check<Native
     if (!isPlainObject(entry)) return no('SELECTION_REF_NOT_AN_OBJECT');
     if (typeof entry.kind !== 'string' || !(NATIVE_SELECTION_REF_KINDS as readonly string[]).includes(entry.kind)) {
       return no('SELECTION_REF_KIND_UNKNOWN');
+    }
+    const kind = entry.kind as NativeSelectionRefKind;
+    for (const field of NATIVE_SELECTION_REF_FIELDS[kind]) {
+      if (!Object.hasOwn(entry, field)) return no('SELECTION_REF_FIELD_MISSING');
     }
     refs.push(entry as unknown as NativeSelectionRef);
   }

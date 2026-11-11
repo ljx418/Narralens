@@ -1127,8 +1127,14 @@ describe("the shipped native observation contract", () => {
     })).toBe(false);
 
     const selection = validateEvent("NativeSelectionObservation");
-    expect(selection({ projectId: "n1", time: 1.25, refs: [{ kind: "clip", id: "c1" }] })).toBe(true);
+    // The original StudioRef carries every field of its own branch.
+    expect(selection({
+      projectId: "n1", time: 1.25,
+      refs: [{ kind: "clip", id: "c1", loc: null, label: "片段", clipKind: "video", src: null, start: 0, end: 5 }],
+    })).toBe(true);
     expect(selection({ projectId: "n1", time: 1.25, refs: [{ kind: "unknown" }] })).toBe(false);
+    // A reference that is missing a field of its own branch is not an original reference.
+    expect(selection({ projectId: "n1", time: 1.25, refs: [{ kind: "clip", id: "c1" }] })).toBe(false);
   });
 });
 
@@ -1375,5 +1381,33 @@ describe("the expected state of the parts that come from the project's own sourc
     } finally {
       rmSync(root, { recursive: true, force: true });
     }
+  });
+});
+
+describe("the original Studio selection at the ingress", () => {
+  it("refuses a reference that is missing the field the Host has to read", () => {
+    // A clip without its id cannot be checked against the committed source.
+    const withoutId = validateNativeSelectionObservation({
+      projectId: "n1", time: 1, refs: [{ kind: "clip", label: "片段" }],
+    });
+    expect(withoutId.ok).toBe(false);
+    if (!withoutId.ok) expect(withoutId.reason).toBe("SELECTION_REF_FIELD_MISSING");
+    // A range without its times cannot be turned into frames.
+    const withoutTimes = validateNativeSelectionObservation({
+      projectId: "n1", time: 1, refs: [{ kind: "range", clipIds: [] }],
+    });
+    expect(withoutTimes.ok).toBe(false);
+    // The field the Host reads is enough.
+    expect(validateNativeSelectionObservation({
+      projectId: "n1", time: 1, refs: [{ kind: "clip", id: "c1" }],
+    }).ok).toBe(true);
+  });
+
+  it("refuses a selection that carries a field the original does not have", () => {
+    const extra = validateNativeSelectionObservation({
+      projectId: "n1", time: 1, refs: [], impact_id: "i1",
+    });
+    expect(extra.ok).toBe(false);
+    if (!extra.ok) expect(extra.reason).toBe("SELECTION_FIELDS_NOT_CLOSED");
   });
 });
