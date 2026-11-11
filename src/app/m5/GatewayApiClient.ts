@@ -23,6 +23,61 @@ export class GatewayApiError extends Error {
   }
 }
 
+/**
+ * Where the transport script keeps this tab's independent UI credential.
+ *
+ * It is a second purpose with its own proof. It is never the native proof, and it is
+ * never derived from it.
+ */
+export const UI_SESSION_STORAGE_KEY = "narralens.ui.session";
+
+export interface GatewayUiSession {
+  readonly csrf: string;
+  readonly expires_at: number;
+}
+
+/** This tab's UI credential, or `null` when there is none — a native-only entry. */
+export function readUiSession(): GatewayUiSession | null {
+  try {
+    const raw = globalThis.sessionStorage?.getItem(UI_SESSION_STORAGE_KEY);
+    if (raw === null || raw === undefined) return null;
+    const value = JSON.parse(raw) as { csrf?: unknown; expires_at?: unknown };
+    if (typeof value.csrf !== "string" || !/^[A-Za-z0-9_-]{43}$/.test(value.csrf)) return null;
+    if (typeof value.expires_at !== "number" || value.expires_at <= Date.now()) return null;
+    return { csrf: value.csrf, expires_at: value.expires_at };
+  } catch { return null; }
+}
+
+/** The header that carries the independent UI proof — and nothing else. */
+export function uiProofHeaders(): Record<string, string> {
+  const session = readUiSession();
+  return session === null ? {} : { "X-Narralens-Workbench-CSRF": session.csrf };
+}
+
+/** Read one JSON answer, and turn a failure into the Host's own error semantics. */
+async function readJsonBody<T>(response: Response): Promise<T> {
+  const text = await response.text();
+  let body: Record<string, unknown> = {};
+  if (text !== "") {
+    try { body = JSON.parse(text) as Record<string, unknown>; }
+    catch { throw new GatewayApiError(response.status, "INVALID_RESPONSE", "本地服务返回了无法读取的响应"); }
+  }
+  if (!response.ok) {
+    throw new GatewayApiError(response.status, String(body.code ?? "UNKNOWN"),
+      String(body.message ?? "本地服务请求失败"), body.details as Record<string, unknown> | undefined);
+  }
+  return body as T;
+}
+
+/** The digest of the bytes, as the lowercase hex the contracts use. */
+export async function sha256Hex(bytes: Uint8Array): Promise<string> {
+  const subtle = globalThis.crypto?.subtle;
+  if (subtle === undefined) throw new Error("DIGEST_UNAVAILABLE");
+  const digest = await subtle.digest("SHA-256", bytes as unknown as ArrayBuffer);
+  return Array.from(new Uint8Array(digest)).map((byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+
+
 export interface MaterializationStatus {
   readonly materialization_id?: string;
   readonly job_id?: string;
@@ -41,17 +96,58 @@ export class GatewayApiClient {
       credentials: "same-origin",
       headers: { ...init.headers, "content-type": "application/json" },
     });
-    const text = await response.text();
-    let body: Record<string, unknown> = {};
-    if (text !== "") {
-      try { body = JSON.parse(text) as Record<string, unknown>; }
-      catch { throw new GatewayApiError(response.status, "INVALID_RESPONSE", "本地服务返回了无法读取的响应"); }
-    }
+    return readJsonBody<T>(response);
+  }
+
+  /**
+   * One closed workbench UI call.
+   *
+   * It carries the *independent* UI proof, not the native one: the native proof that
+   * rides along on this origin does not make the request a UI request. The Host's own
+   * status and body come back untouched, so the caller sees the real error semantics.
+   */
+  async uiCall<T>(surface: string, operation: string, input: unknown): Promise<T> {
+    const response = await fetch(`${this.baseUrl}/narralens/api/ui/call`, {
+      method: "POST",
+      credentials: "same-origin",
+      cache: "no-store",
+      redirect: "error",
+      headers: { ...uiProofHeaders(), "content-type": "application/json" },
+      body: JSON.stringify({ surface, operation, input }),
+    });
+    return readJsonBody<T>(response);
+  }
+
+  /**
+   * Read one prepared review object.
+   *
+   * The bytes are returned raw, with the ETag the alias answered: the caller checks
+   * them against the descriptor it was given before it shows anything.
+   */
+  async reviewMedia(ref: string): Promise<{
+    readonly bytes: Uint8Array;
+    readonly etag: string;
+    readonly contentType: string;
+  }> {
+    const response = await fetch(`${this.baseUrl}/narralens/api/ui/review-media/${encodeURIComponent(ref)}`, {
+      credentials: "same-origin",
+      cache: "no-store",
+      redirect: "error",
+      headers: { ...uiProofHeaders() },
+    });
     if (!response.ok) {
+      const text = await response.text();
+      let body: Record<string, unknown> = {};
+      try { body = JSON.parse(text) as Record<string, unknown>; } catch { /* the body is not JSON */ }
       throw new GatewayApiError(response.status, String(body.code ?? "UNKNOWN"),
-        String(body.message ?? "本地服务请求失败"), body.details as Record<string, unknown> | undefined);
+        String(body.message ?? "预览读取失败"), body.details as Record<string, unknown> | undefined);
     }
-    return body as T;
+    const bytes = new Uint8Array(await response.arrayBuffer());
+    return {
+      bytes,
+      etag: response.headers.get("etag") ?? "",
+      contentType: response.headers.get("content-type") ?? "",
+    };
   }
 
   async workbench(projectId: string): Promise<NativeWorkbenchProjection> {

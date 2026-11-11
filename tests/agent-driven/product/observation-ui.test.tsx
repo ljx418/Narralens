@@ -11,6 +11,7 @@ import type {
 import { WorkflowTopBar } from "../../../src/app/observation/WorkflowTopBar.js";
 import { CreativeReviewPanel } from "../../../src/app/observation/CreativeReviewPanel.js";
 import { nativeSyncState } from "../../../src/app/observation/content-views.js";
+import { nativeSyncState as nativeSyncStateFromItsOwnModule } from "../../../src/app/observation/NativeSyncIndicator.js";
 import { SystemControlPanel } from "../../../src/app/system/SystemControlPanel.js";
 
 /**
@@ -358,5 +359,98 @@ describe("the native sync indicator", () => {
   it("claims the editor is loaded only when the acknowledgement matches", () => {
     const state = nativeSyncState({ ...base, native_sync: "loaded", native_ack: ack });
     expect(state.state).toBe("loaded");
+  });
+});
+
+describe("the review panel's fact separation", () => {
+  const decision = {
+    decision_id: "decision-1",
+    project_id: "project-1",
+    run_id: "run-1",
+    package_id: "package-1",
+    package_version: 1,
+    input_digest: PACKAGE.input_digest,
+    output_digest: PACKAGE.output_digest,
+    quality_digest: PACKAGE.quality_digest,
+    choice: "accept_and_adopt" as const,
+    principal_id: "operator",
+    channel: "trusted_ui" as const,
+    recorded_at: "2026-11-11T00:00:00.000Z",
+    approval: null,
+  };
+
+  it("shows a recorded decision as a decision, and never as an adoption", () => {
+    render(<CreativeReviewPanel package={PACKAGE} decision={decision} />);
+    expect(screen.getByText(/决定已登记/)).toBeTruthy();
+    expect(screen.getByText(/决定已登记/).textContent).toContain("decision-1");
+    expect(document.body.textContent).not.toContain("已采用");
+  });
+
+  it("keeps the adoption pending when the decision asked for it", () => {
+    render(
+      <CreativeReviewPanel
+        package={PACKAGE}
+        decision={decision}
+        adoption={{ state: "requested", reason: "决定已登记；实际提交与原生确认尚未取得。" }}
+      />,
+    );
+    expect(screen.getByText(/采用待完成/)).toBeTruthy();
+    expect(document.body.textContent).not.toContain("已采用");
+  });
+
+  it("shows the real lineage when the package reuses an earlier one", () => {
+    render(<CreativeReviewPanel package={{ ...PACKAGE, reuse_of_package_id: "package-0" }} />);
+    const lineage = document.querySelector("[data-nl-review-reuse='package-0']");
+    expect(lineage).not.toBeNull();
+    expect(lineage!.textContent).toContain("package-0");
+  });
+
+  it("follows a download only when it is this instance's own controlled address", () => {
+    const withDownload = {
+      ...PACKAGE,
+      parts: [{ ...PACKAGE.parts[0]!, download_ref: "/narralens/api/ui/review-media/object-1" }],
+    };
+    const { unmount } = render(
+      <CreativeReviewPanel package={withDownload} controlledMediaBase="/narralens/api/ui/review-media/" />,
+    );
+    const link = screen.getByRole("link", { name: "下载" }) as HTMLAnchorElement;
+    expect(link.getAttribute("href")).toBe("/narralens/api/ui/review-media/object-1");
+    unmount();
+
+    render(<CreativeReviewPanel package={withDownload} />);
+    expect(screen.queryByRole("link", { name: "下载" })).toBeNull();
+    expect(screen.getByText(/不是本实例的受控地址/)).toBeTruthy();
+  });
+
+  it("shows the five parts of one package together", () => {
+    render(
+      <CreativeReviewPanel
+        package={{
+          ...PACKAGE,
+          parts: [
+            PACKAGE.parts[0]!,
+            PACKAGE.parts[1]!,
+            PACKAGE.parts[2]!,
+            { kind: "shot_summary", artifact_ref: { id: "shots", version: 1, sha256: "d".repeat(64) }, download_ref: null },
+            { kind: "rights_quality", artifact_ref: { id: "rights", version: 1, sha256: "e".repeat(64) }, download_ref: null },
+          ],
+        }}
+      />,
+    );
+    for (const label of ["画面", "旁白", "字幕", "镜头摘要", "来源与质量"]) {
+      expect(screen.getByText(label)).toBeTruthy();
+    }
+  });
+
+  it("calls the prepared content a preparation, never a delivery", () => {
+    render(<CreativeReviewPanel package={PACKAGE} />);
+    expect(screen.getByText(/准备内容，尚未采用/)).toBeTruthy();
+  });
+});
+
+describe("the native sync indicator module", () => {
+  it("has one implementation, reachable from both paths", () => {
+    expect(nativeSyncStateFromItsOwnModule).toBe(nativeSyncState);
+    expect(nativeSyncStateFromItsOwnModule(null).state).toBe("unknown");
   });
 });

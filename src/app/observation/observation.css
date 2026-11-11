@@ -418,3 +418,116 @@
     transition: border-color 120ms ease-out;
   }
 }
+
+/*
+ * The local-asset registration panel and the review decision lines.
+ *
+ * They use the same palette as the rest of the observation surfaces, so the panel reads
+ * as one surface rather than as a second application.
+ */
+
+.nl-local-assets {
+  border: 1px solid var(--nl-border);
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin: 12px 0;
+  background: var(--nl-surface);
+  color: var(--nl-ink);
+}
+
+.nl-local-assets-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.nl-local-assets-head h3 {
+  margin: 0;
+  font-size: 15px;
+}
+
+.nl-local-assets-candidates {
+  border: 1px solid var(--nl-border);
+  border-radius: 6px;
+  padding: 8px 10px;
+  margin: 8px 0;
+}
+
+.nl-local-assets-candidates legend {
+  font-size: 12px;
+  color: var(--nl-muted);
+}
+
+.nl-local-assets-candidate {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+}
+
+.nl-local-assets-declaration {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 6px 10px;
+  align-items: center;
+  margin: 10px 0;
+}
+
+.nl-local-assets-declaration label {
+  color: var(--nl-muted);
+  font-size: 12px;
+}
+
+.nl-local-assets-declaration input[type="text"],
+.nl-local-assets-declaration select {
+  min-height: 34px;
+  border: 1px solid var(--nl-border);
+  border-radius: 6px;
+  padding: 4px 8px;
+  background: var(--nl-bg);
+  color: var(--nl-ink);
+}
+
+.nl-local-assets-commercial {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nl-local-assets-error {
+  color: #8c2f12;
+}
+
+.nl-local-assets-notice {
+  color: var(--nl-accent);
+}
+
+.nl-local-assets-inventory ul {
+  list-style: none;
+  margin: 6px 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.nl-local-assets-ineligible {
+  color: #8c2f12;
+}
+
+.nl-review-decision {
+  border-top: 1px solid var(--nl-border);
+  margin-top: 8px;
+  padding-top: 8px;
+}
+
+.nl-review-decision-line {
+  margin: 0 0 4px;
+}
+
+.nl-review-adoption {
+  margin: 4px 0 0;
+  color: var(--nl-muted);
+}

@@ -2,9 +2,36 @@ import type {NativeWorkbenchProjection} from '../../contracts/created-workbench.
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { ComparisonReplayResponseV1, WorkbenchProjectionV1 } from "../../contracts/wave3-types.js";
 import type { ImpactSpecV1 } from "../../contracts/wave2-types.js";
-import { GatewayApiClient, GatewayApiError } from "./GatewayApiClient.js";
+import type {
+  Context,
+  HealthRead,
+  ReviewDecision,
+  ReviewPackage,
+  ReviewPart,
+  Workflow,
+} from "../../contracts/agent-driven-types.js";
+import { GatewayApiClient, GatewayApiError, sha256Hex } from "./GatewayApiClient.js";
 import { PlaybackClock, SelectionStore, WorkbenchStore, type SelectionContext } from "./stores.js";
 import { SelectionCoordinator, clipOf } from "./SelectionCoordinator.js";
+import {
+  AgentWorkbenchClient,
+  readCandidates,
+  readInventoryItems,
+  unavailableReason,
+  type LocalAssetCandidate,
+  type LocalAssetInventoryItem,
+  type LocalAssetRegistrationRequest,
+  type PreviewMediaDescriptorV1,
+} from "../agent-workbench-client.js";
+import { WorkflowTopBar } from "../observation/WorkflowTopBar.js";
+import { CreativeReviewPanel } from "../observation/CreativeReviewPanel.js";
+import { LocalAssetRegistrationPanel } from "../observation/LocalAssetRegistrationPanel.js";
+import { NativeSyncIndicator } from "../observation/NativeSyncIndicator.js";
+import { SystemControlPanel } from "../system/SystemControlPanel.js";
+// The observation and system surfaces are mounted in the panel, so their styles travel
+// with the panel's own bundle.
+import "../observation/observation.css";
+import "../system/system.css";
 
 /**
  * The M5 panel (Wave 3 `01` §5–§6, `04` §1).
@@ -22,6 +49,22 @@ import { SelectionCoordinator, clipOf } from "./SelectionCoordinator.js";
 export interface M5PanelProps {
   readonly client?: GatewayApiClient;
   readonly targetProjectId?: string;
+  /**
+   * The workbench observation client.
+   *
+   * When it is absent — or when the Host has no producer for what it asks for — the
+   * observation surfaces say so and show nothing. They never show a plausible stand-in.
+   */
+  readonly ui?: AgentWorkbenchClient;
+}
+
+/** The state of the one prepared-preview slot. */
+interface PreparedPreview {
+  readonly part: ReviewPart;
+  readonly descriptor: PreviewMediaDescriptorV1;
+  /** The object URL of the verified bytes. It is revoked when the slot is left. */
+  readonly url: string;
+  readonly label: string;
 }
 
 /** The next step for each error the Host can answer with. */
@@ -58,6 +101,72 @@ export function nextStepFor(code: string): string {
  * names them; it never invents a picture to stand in for a video.
  */
 const PROXY_MEDIA = ["proxy-a.mp4", "proxy-b.mp4", "proxy-c.mp4"] as const;
+
+/** The creative names of the five review parts. */
+const PART_LABEL: Readonly<Record<ReviewPart["kind"], string>> = {
+  preview: "画面",
+  narration: "旁白",
+  subtitles: "字幕",
+  shot_summary: "镜头摘要",
+  rights_quality: "来源与质量",
+};
+
+/**
+ * Why a prepared part may not be previewed, or `null` when it may.
+ *
+ * The order is the contract's: the identity of the package and the part first, then the
+ * product's own digest and length, then the media facts, and only then the comparison
+ * with the workbench's one clock. A missing fact is a refusal, never a guess.
+ */
+function refusePreview(
+  descriptor: PreviewMediaDescriptorV1,
+  packageDocument: ReviewPackage,
+  part: ReviewPart,
+  clockFps: { readonly num: number; readonly den: number },
+): string | null {
+  if (descriptor.project_id !== packageDocument.project_id) return "这份描述属于另一工程。";
+  if (descriptor.run_id !== packageDocument.run_id) return "这份描述属于另一次运行。";
+  if (descriptor.package_id !== packageDocument.package_id) return "这份描述属于另一个内容包。";
+  if (descriptor.package_version !== packageDocument.version) return "这份描述属于另一个版本的包。";
+  if (descriptor.part.artifact_ref.id !== part.artifact_ref.id
+    || descriptor.part.artifact_ref.version !== part.artifact_ref.version
+    || descriptor.part.artifact_ref.sha256 !== part.artifact_ref.sha256) {
+    return "这份描述指向的是另一个产物。";
+  }
+  if (!/^[0-9a-f]{64}$/.test(descriptor.sha256)) return "描述里没有产物摘要。";
+  if (!Number.isSafeInteger(descriptor.bytes) || descriptor.bytes <= 0) return "描述里没有产物长度。";
+  const facts = descriptor.media_facts;
+  if (facts.kind === "video") {
+    if (facts.fps.num !== descriptor.timeline.fps.num || facts.fps.den !== descriptor.timeline.fps.den) {
+      return "产物的实际帧率与它自己的时间基不一致。";
+    }
+    if (facts.fps.num !== clockFps.num || facts.fps.den !== clockFps.den) {
+      return `产物的实际帧率（${facts.fps.num}/${facts.fps.den}）与工作台时钟（${clockFps.num}/${clockFps.den}）不一致，已拒绝预览。`;
+    }
+    if (!Number.isSafeInteger(facts.frame_count) || facts.frame_count <= 0) return "描述里没有完整解码帧数。";
+    return null;
+  }
+  if (facts.kind === "audio") {
+    if (!Number.isSafeInteger(facts.sample_rate) || facts.sample_rate <= 0) return "描述里没有实际采样率。";
+    if (!Number.isSafeInteger(facts.sample_count) || facts.sample_count <= 0) return "描述里没有实际样本数。";
+    if (!Number.isSafeInteger(facts.channels) || facts.channels <= 0) return "描述里没有声道数。";
+    return null;
+  }
+  if (part.kind === "preview" || part.kind === "narration") return "这一部分没有真实的媒体事实，不能预览。";
+  return null;
+}
+
+/**
+ * The opaque reference of the controlled media, or `null`.
+ *
+ * The media alias addresses an object by an opaque id; a relative path, a `file:` URL
+ * or a foreign address is not one, and is not turned into one.
+ */
+function mediaRefOf(downloadRef: string | null): string | null {
+  if (downloadRef === null) return null;
+  const tail = downloadRef.slice(downloadRef.lastIndexOf("/") + 1);
+  return /^[A-Za-z0-9_-]{1,200}$/.test(tail) ? tail : null;
+}
 
 const PHASE_LABELS: Record<string, string> = {  proposal_only: "仅有已录制提案",
   bindings_required: "需要素材绑定",
@@ -131,7 +240,7 @@ export function useStage(): { stage: M5Stage; target: string } {
   return value;
 }
 
-export function M5Panel({ client, targetProjectId }: M5PanelProps): React.JSX.Element {
+export function M5Panel({ client, targetProjectId, ui: uiProp }: M5PanelProps): React.JSX.Element {
   const api = useMemo(() => client ?? new GatewayApiClient(), [client]);
   const stage = useStage();
   const target = useMemo(() => {
@@ -171,6 +280,32 @@ export function M5Panel({ client, targetProjectId }: M5PanelProps): React.JSX.El
   const [restoreIntent, setRestoreIntent] = useState<{ target_snapshot_id: string } | null>(null);
   /** The last key the panel handled. It is published so the page's state can be read. */
   const [lastKey, setLastKey] = useState("");
+  // ── the workbench observation surfaces ──────────────────────────────────────────────
+  /** The real workflow, when the Host produced one. */
+  const [workflow, setWorkflow] = useState<Workflow | null>(null);
+  const [context, setContext] = useState<Context | null>(null);
+  const [health, setHealth] = useState<HealthRead | null>(null);
+  const [review, setReview] = useState<ReviewPackage | null>(null);
+  const [reviewDecision, setReviewDecision] = useState<ReviewDecision | null>(null);
+  /** Why the observation surfaces show what they show. It is never empty. */
+  const [observation, setObservation] = useState("");
+  const [systemOpen, setSystemOpen] = useState(false);
+  /** The one prepared-preview slot. There is never a second one. */
+  const [preview, setPreview] = useState<PreparedPreview | null>(null);
+  /** The reason a preview was refused, in the operator's words. */
+  const [previewReason, setPreviewReason] = useState("");
+  /** The clock the health panel judges staleness against. */
+  const [nowMs, setNowMs] = useState(() => Date.now());
+  /** The controlled local-asset candidates and the registered inventory. */
+  const [candidates, setCandidates] = useState<readonly LocalAssetCandidate[]>([]);
+  const [localInventory, setLocalInventory] = useState<readonly LocalAssetInventoryItem[]>([]);
+  const [localAssetError, setLocalAssetError] = useState<string | null>(null);
+  const [localAssetNotice, setLocalAssetNotice] = useState<string | null>(null);
+  const previewSlot = useRef<HTMLVideoElement | null>(null);
+  /** Whether the panel is in review mode: the native editor is not driven. */
+  const reviewMode = useRef(false);
+  /** The last clip the native editor reported, so a real change can be seen. */
+  const lastNativeClip = useRef<string | null>(null);
   const [theme, setTheme] = useState<"system" | "dark" | "light">(() => {
     const saved = window.localStorage.getItem("narralens.m5.theme");
     return saved === "dark" || saved === "light" ? saved : "system";
@@ -232,6 +367,53 @@ export function M5Panel({ client, targetProjectId }: M5PanelProps): React.JSX.El
 
   useEffect(() => { void load(); }, [load]);
 
+  /**
+   * The observation client.
+   *
+   * It speaks the closed UI RPC over the Gateway with the independent UI proof. When
+   * this tab has no UI credential — a native-only entry — the calls fail, and the
+   * surfaces say that instead of showing something plausible.
+   */
+  const uiClient = useMemo<AgentWorkbenchClient | undefined>(() => {
+    if (uiProp !== undefined) return uiProp;
+    if (target === "") return undefined;
+    return new AgentWorkbenchClient(
+      { call: (surface, operation, input) => api.uiCall(surface, operation, input) },
+      target,
+    );
+  }, [api, target, uiProp]);
+
+  // The observation facts. Each read settles on its own: one missing producer does not
+  // blank the others.
+  useEffect(() => {
+    if (uiClient === undefined) {
+      setObservation("工作台观察入口未就绪：本次打开的工程没有独立的工作台界面授权。");
+      return;
+    }
+    let cancelled = false;
+    const settle = async <T,>(read: () => Promise<T>, apply: (value: T) => void): Promise<void> => {
+      try { const value = await read(); if (!cancelled) apply(value); }
+      catch (reason) { if (!cancelled) setObservation(unavailableReason(reason)); }
+    };
+    void settle(() => uiClient.readWorkflow(), setWorkflow);
+    void settle(() => uiClient.readContext(), setContext);
+    void settle(() => uiClient.readHealth(), setHealth);
+    return () => { cancelled = true; };
+  }, [uiClient]);
+
+  // The review package is named by a real gate. It is never guessed.
+  useEffect(() => {
+    if (uiClient === undefined || context === null) return;
+    const run = context.active_run;
+    const gate = run?.gates.find((candidate) => candidate.review_package_id !== null);
+    if (run === null || run === undefined || gate?.review_package_id == null) { setReview(null); return; }
+    let cancelled = false;
+    void uiClient.readReview(run.run_id, gate.review_package_id)
+      .then((document_) => { if (!cancelled) setReview(document_); })
+      .catch(() => { if (!cancelled) setReview(null); });
+    return () => { cancelled = true; };
+  }, [context, uiClient]);
+
   // The three proxies: all of them play, one of them has the audio, and one that leaves
   // the viewport is paused. The observer is the browser's own, so "off screen" means what
   // it means to the page.
@@ -288,6 +470,17 @@ export function M5Panel({ client, targetProjectId }: M5PanelProps): React.JSX.El
       const detail = (event as CustomEvent<StudioSelectionEvent>).detail;
       if (!projection) return;
       const clipId = detail.refs?.find((ref) => ref.kind === "clip")?.id ?? null;
+      if (reviewMode.current) {
+        // In review mode the native report does not write the selection. A report that
+        // names a *different* clip means the native timeline really moved: the preview
+        // stops there, and the clock is left where it was.
+        if (clipId !== null && clipId !== "" && clipId !== lastNativeClip.current) {
+          lastNativeClip.current = clipId;
+          closePreview();
+        }
+        return;
+      }
+      lastNativeClip.current = clipId ?? null;
       const range = detail.range;
       const fps = projection.fps;
       const toFrame = (seconds: number | undefined): number =>
@@ -352,7 +545,7 @@ export function M5Panel({ client, targetProjectId }: M5PanelProps): React.JSX.El
         setFrame(next);
         const clip = projection.clips.find((candidate) =>
           next >= candidate.start_frame && next < candidate.end_frame_exclusive);
-        if (clip !== undefined && clip.clip_id !== coordinator.current?.clip_id) {
+        if (!reviewMode.current && clip !== undefined && clip.clip_id !== coordinator.current?.clip_id) {
           coordinator.selectClip(projection, clip.clip_id, {
             start_frame: next, end_frame_exclusive: next + 1,
           });
@@ -383,6 +576,9 @@ export function M5Panel({ client, targetProjectId }: M5PanelProps): React.JSX.El
 
   const selectClip = useCallback((clipId: string): void => {
     if (!projection) return;
+    // In review mode the native editor is not driven: the preview owns the clock, and
+    // the author's selection stays where it was.
+    if (reviewMode.current) return;
     const next = coordinator.selectClip(projection, clipId);
     if (next === null) return;
     clock.seek(next.range.start_frame);
@@ -406,6 +602,171 @@ export function M5Panel({ client, targetProjectId }: M5PanelProps): React.JSX.El
     };
     ask();
   }, [clock, coordinator, projection]);
+
+  // ── the one prepared-preview slot ────────────────────────────────────────────────────
+
+  /** Leave the preview. The object URL is released and the clock is left where it was. */
+  const closePreview = useCallback((): void => {
+    reviewMode.current = false;
+    setPreview((current) => {
+      if (current !== null) URL.revokeObjectURL(current.url);
+      return null;
+    });
+  }, []);
+
+  /**
+   * Open one prepared part.
+   *
+   * The order is the contract's: the descriptor first, then the identity and the
+   * timeline checks, then the bytes, and only then the object URL. A refusal at any
+   * step leaves the slot empty and says why.
+   */
+  const openPreparedPart = useCallback(async (part: ReviewPart): Promise<void> => {
+    if (uiClient === undefined) { setPreviewReason("工作台观察入口未就绪，无法读取准备内容。"); return; }
+    if (review === null) { setPreviewReason("当前没有待审阅的包。"); return; }
+    setPreviewReason("");
+    let descriptor: PreviewMediaDescriptorV1;
+    try {
+      descriptor = await uiClient.describePart({
+        run_id: review.run_id,
+        package_id: review.package_id,
+        package_version: review.version,
+        part_kind: part.kind,
+        artifact_ref: part.artifact_ref,
+      });
+    } catch (reason) {
+      setPreviewReason(`无法取得该部分的真实描述：${unavailableReason(reason)}`);
+      return;
+    }
+    const refusal = refusePreview(descriptor, review, part, clock.fps);
+    if (refusal !== null) { setPreviewReason(refusal); return; }
+    const ref = mediaRefOf(part.download_ref);
+    if (ref === null) { setPreviewReason("该部分没有可读取的受控媒体地址。"); return; }
+    try {
+      const media = await api.reviewMedia(ref);
+      const digest = await sha256Hex(media.bytes);
+      if (digest !== descriptor.sha256 || media.bytes.byteLength !== descriptor.bytes) {
+        setPreviewReason("读取到的字节与描述不符，已拒绝预览。");
+        return;
+      }
+      if (media.etag !== `"${descriptor.sha256}"`) {
+        setPreviewReason("媒体标识与描述不符，已拒绝预览。");
+        return;
+      }
+      const url = URL.createObjectURL(new Blob([new Uint8Array(media.bytes).buffer as ArrayBuffer], { type: descriptor.content_type }));
+      setPreview((current) => {
+        if (current !== null) URL.revokeObjectURL(current.url);
+        return { part, descriptor, url, label: PART_LABEL[part.kind] };
+      });
+      reviewMode.current = true;
+    } catch (reason) {
+      setPreviewReason(`读取预览失败：${unavailableReason(reason)}`);
+    }
+  }, [api, clock.fps, review, uiClient]);
+
+  // The slot's media element follows the one clock. It is never played automatically.
+  useEffect(() => {
+    const element = previewSlot.current;
+    if (element === null || preview === null) return;
+    const seconds = clock.seconds;
+    if (Number.isFinite(seconds) && Math.abs(element.currentTime - seconds) > 0.05) {
+      element.currentTime = seconds;
+    }
+  }, [clock, frame, preview]);
+
+  // Leaving the page releases the object URL.
+  useEffect(() => () => {
+    setPreview((current) => {
+      if (current !== null) URL.revokeObjectURL(current.url);
+      return null;
+    });
+  }, []);
+
+  // The health sample is judged against the clock; the clock ticks so a stale sample
+  // becomes unknown on its own.
+  useEffect(() => {
+    const timer = setInterval(() => setNowMs(Date.now()), 5000);
+    return () => clearInterval(timer);
+  }, []);
+
+  // ── the local assets and the review decision ───────────────────────────────────────
+
+  /** Re-read the controlled candidates and the registered inventory. */
+  const loadLocalAssets = useCallback(async (): Promise<void> => {
+    if (uiClient === undefined) { setLocalAssetError("工作台观察入口未就绪，无法读取素材清单。"); return; }
+    try {
+      const [sourceFiles, assets] = await Promise.all([uiClient.readLocalSourceFiles(), uiClient.readLocalAssets()]);
+      setCandidates(readCandidates(sourceFiles));
+      setLocalInventory(readInventoryItems(assets));
+      setLocalAssetError(null);
+    } catch (reason) {
+      setLocalAssetError(unavailableReason(reason));
+    }
+  }, [uiClient]);
+
+  useEffect(() => { void loadLocalAssets(); }, [loadLocalAssets]);
+
+  /**
+   * Register one declared local asset.
+   *
+   * The request key is the Host's business; what matters here is that an unknown
+   * outcome is reported as unknown and the inventory is re-read, rather than the
+   * declaration being declared successful.
+   */
+  const registerLocalAsset = useCallback(async (request: LocalAssetRegistrationRequest): Promise<void> => {
+    if (uiClient === undefined) { setLocalAssetError("工作台观察入口未就绪，无法登记素材。"); return; }
+    setBusy("local-asset");
+    setLocalAssetError(null);
+    setLocalAssetNotice(null);
+    try {
+      await uiClient.importLocalAsset(request);
+      setLocalAssetNotice("声明已提交：登记是否成功以清单为准。结果未知时保留同一次请求键，先对账。");
+      await loadLocalAssets();
+    } catch (reason) {
+      setLocalAssetError(unavailableReason(reason));
+    } finally { setBusy(""); }
+  }, [loadLocalAssets, uiClient]);
+
+  /**
+   * Record one decision about the package under review.
+   *
+   * The same package and the same choice keep the same request key, so an unknown
+   * result is reconciled with the same key instead of being re-sent under a new one.
+   */
+  const decisionKeys = useRef(new Map<string, string>());
+  const decideReview = useCallback(async (
+    choice: "accept" | "changes_requested" | "reject" | "accept_and_adopt",
+  ): Promise<void> => {
+    if (uiClient === undefined || review === null) return;
+    const slot = `${review.package_id}@${review.version}:${choice}`;
+    const idempotency_key = decisionKeys.current.get(slot) ?? `m5-${crypto.randomUUID()}`;
+    decisionKeys.current.set(slot, idempotency_key);
+    setBusy("review");
+    try {
+      const decision = await uiClient.decideReview({
+        meta: { idempotency_key, correlation_id: crypto.randomUUID() },
+        package: review,
+        choice,
+      });
+      setReviewDecision(decision);
+    } catch (reason) { fail(reason); }
+    finally { setBusy(""); }
+  }, [fail, review, uiClient]);
+
+  /**
+   * What is known about the adoption.
+   *
+   * A recorded decision that asked for adoption leaves the adoption *pending*: the
+   * commit and the native acknowledgement are separate facts, and neither is produced
+   * on this path in R1.
+   */
+  const adoption = reviewDecision === null ? null : {
+    state: (reviewDecision.choice === "accept_and_adopt" ? "requested" : "not_requested") as
+      "requested" | "not_requested",
+    reason: reviewDecision.choice === "accept_and_adopt"
+      ? "决定已登记；实际提交与原生确认尚未取得，采用保持待完成。"
+      : "这次决定没有请求采用。",
+  };
 
   // The recorded comparison the page replays. It is named by the operator, and it is
   // always an *existing* D4.1 recording: M5 never calls a provider.
@@ -652,6 +1013,71 @@ export function M5Panel({ client, targetProjectId }: M5PanelProps): React.JSX.El
     data-history={projection.history.length}
     data-studio-selection={studioSelection === null ? "" : studioSelection.clipId}
     data-studio-seconds={studioSelection === null ? "" : String(studioSelection.seconds)}>
+    {workflow === null ? null : (
+      <WorkflowTopBar workflow={workflow} connection="connected" />
+    )}
+    {observation === "" ? null : (
+      <p className="nl-muted" data-nl-observation="unavailable" role="status">{observation}</p>
+    )}
+
+    <section className="m5-section" aria-labelledby="m5-system-title">
+      <h3 id="m5-system-title">系统</h3>
+      <button type="button" aria-expanded={systemOpen} onClick={() => setSystemOpen(!systemOpen)}>
+        {systemOpen ? "收起系统面板" : "打开系统面板（可继续剪辑）"}
+      </button>
+      <SystemControlPanel
+        health={health}
+        nowMs={nowMs}
+        open={systemOpen}
+        onClose={() => setSystemOpen(false)}
+      />
+      <NativeSyncIndicator context={context} />
+    </section>
+
+    {projection.format === "narralens.created-workbench@1.0" ? (
+      <section className="m5-section" aria-labelledby="m5-preview-title">
+        <h3 id="m5-preview-title">准备预览</h3>
+        <p className="nl-muted">准备预览，尚未采用：预览只占用下面这一个槽位，不接管原生时间线。</p>
+        {preview === null ? null : (
+          <figure data-nl-prepared-preview={preview.part.kind}>
+            <video ref={previewSlot} src={preview.url} controls playsInline preload="auto" />
+            <figcaption>
+              {preview.label} · {preview.descriptor.timeline.fps.num}/{preview.descriptor.timeline.fps.den} ·
+              {" "}{preview.descriptor.media_facts.kind}
+            </figcaption>
+            <button type="button" onClick={closePreview}>退出预览</button>
+          </figure>
+        )}
+        {previewReason === "" ? null : (
+          <p className="nl-muted" role="status" data-nl-preview-reason="true">{previewReason}</p>
+        )}
+      </section>
+    ) : null}
+
+    {review === null ? null : (
+      <CreativeReviewPanel
+        package={review}
+        decision={reviewDecision}
+        adoption={adoption}
+        onOpenPart={(part) => void openPreparedPart(part)}
+        onAccept={() => void decideReview("accept")}
+        onRequestChanges={() => void decideReview("changes_requested")}
+        onReject={() => void decideReview("reject")}
+        onAcceptAndAdopt={() => void decideReview("accept_and_adopt")}
+      />
+    )}
+
+    <LocalAssetRegistrationPanel
+      projectId={projection.project_id}
+      candidates={candidates}
+      inventory={localInventory}
+      busy={busy === "local-asset"}
+      error={busy === "local-asset" ? null : localAssetError}
+      notice={localAssetNotice}
+      onRegister={registerLocalAsset}
+      onRefresh={() => void loadLocalAssets()}
+    />
+
     <header className="m5-head">
       <h2>Narralens 导演面板</h2>
       <label className="m5-theme">主题

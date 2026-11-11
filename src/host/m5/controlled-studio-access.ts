@@ -1,4 +1,5 @@
 import type {CreatedWorkbenchProjection} from '../../contracts/created-workbench.js';
+import {PREPARED_REVIEW_MAX_READ_BYTES} from '../render/assembly-ports.js';
 import {createHash,randomBytes,timingSafeEqual} from 'node:crypto';
 import type {IncomingMessage,ServerResponse} from 'node:http';
 
@@ -103,12 +104,17 @@ const secret=()=>randomBytes(32).toString('base64url');
 const validSecret=(value:unknown):value is string=>typeof value==='string'&&/^[A-Za-z0-9_-]{43}$/.test(value);
 /** The UI delegate never outlasts its parent, and never longer than eight hours. */
 const UI_MAX_LIFETIME_MS=8*60*60*1000;
-/** One read never asks for more than one mebibyte. */
-const UI_MAX_READ_BYTES=1024*1024;
+/**
+ * One read never asks for more than one mebibyte. A *requested range* may be larger.
+ *
+ * The bound is MEDIA's own: the prepared reader serves at most one mebibyte per read,
+ * and the transport here does not widen it.
+ */
+export const UI_MAX_READ_BYTES=PREPARED_REVIEW_MAX_READ_BYTES;
 /** The header that carries the independent UI proof. */
 export const UI_CSRF_HEADER='x-narralens-workbench-csrf';
 export class StudioAccessError extends Error {
- constructor(readonly status:number,readonly code:'UNAUTHORIZED'|'ORIGIN_REJECTED'|'INVALID_REQUEST'|'NOT_FOUND'|'NATIVE_SESSION_STALE'|'CAPABILITY_UNAVAILABLE'){super('The controlled native session is unavailable');}
+ constructor(readonly status:number,readonly code:'UNAUTHORIZED'|'ORIGIN_REJECTED'|'INVALID_REQUEST'|'NOT_FOUND'|'NATIVE_SESSION_STALE'|'CAPABILITY_UNAVAILABLE'|'RANGE_NOT_SATISFIABLE'){super('The controlled native session is unavailable');}
 }
 /** Ephemeral browser transport, not a business fact store or an approval authority. */
 export class ControlledStudioAccess {
@@ -226,6 +232,10 @@ export class ControlledStudioAccess {
   if(ui.project_id!==grant.project_id)throw new StudioAccessError(503,'CAPABILITY_UNAVAILABLE');
   if(ui.owner_session_ref!==grant.owner_session_ref||ui.instance_generation!==grant.instance_generation)throw new StudioAccessError(503,'CAPABILITY_UNAVAILABLE');
   if(!Number.isSafeInteger(ui.expires_at)||ui.expires_at<=this.now())return null;
+  // The parent must still be live: a revoked or stale parent mints no UI credential at
+  // all, so the exchange never hands out a proof that could not be used.
+  if(!this.#current(grant)||!this.#uiCurrent(ui))return null;
+  if(this.#uiProofs.size>=64)throw new StudioAccessError(503,'CAPABILITY_UNAVAILABLE');
   const expires_at=Math.min(ui.expires_at,this.now()+UI_MAX_LIFETIME_MS);
   const session:NativeStudioUiSession=Object.freeze({grant:ui,proof:secret(),expires_at});
   this.#uiProofs.set(key(session.proof),session);
@@ -285,18 +295,33 @@ export class ControlledStudioAccess {
  /**
   * Open one prepared review object.
   *
-  * The range is bounded here, before the Host is asked: a read is at most one mebibyte
-  * and never a path, never a URL and never an unbounded range.
+  * The requested range is bounded here, before the Host is asked: it is a window into
+  * the object, never a path, never a URL and never an unbounded range. A range may be
+  * larger than one mebibyte — the limit of one mebibyte is the limit of a single
+  * *read*, and the caller reads the window in bounded pieces.
+  *
+  * When the parent is revoked while the object is being opened, the reader that was
+  * just handed out is closed here: the caller never receives it, so it can never leak.
   */
  async openUiMedia(session:NativeStudioUiSession,ref:string,range?:NativeStudioUiMediaRange):Promise<NativeStudioUiReviewMedia>{
   this.recheckUi(session);
   if(typeof ref!=='string'||!/^[A-Za-z0-9_-]{1,200}$/.test(ref))throw new StudioAccessError(400,'INVALID_REQUEST');
   if(range!==undefined){
-   if(!Number.isSafeInteger(range.offset)||!Number.isSafeInteger(range.length)||range.offset<0||range.length<1||range.length>UI_MAX_READ_BYTES)throw new StudioAccessError(400,'INVALID_REQUEST');
+   if(!Number.isSafeInteger(range.offset)||!Number.isSafeInteger(range.length)||range.offset<0||range.length<1||range.offset+range.length>Number.MAX_SAFE_INTEGER)throw new StudioAccessError(400,'INVALID_REQUEST');
   }
   const media=await session.grant.openReviewMedia(range===undefined?{ref}:{ref,range});
-  this.recheckUi(session);
-  return media;
+  try{this.recheckUi(session);}
+  catch(error){await media.close().catch(()=>undefined);throw error;}
+  // The single-read bound belongs to the transport, so it is enforced here rather than
+  // trusted: a caller can ask for a window, but never for an unbounded read.
+  return Object.freeze({
+   content_type:media.content_type,bytes:media.bytes,sha256:media.sha256,etag:media.etag,
+   read:async(window:NativeStudioUiMediaRange)=>{
+    if(!Number.isSafeInteger(window?.offset)||!Number.isSafeInteger(window?.length)||window.offset<0||window.length<1||window.length>UI_MAX_READ_BYTES)throw new StudioAccessError(400,'INVALID_REQUEST');
+    return media.read(window);
+   },
+   close:()=>media.close(),
+  });
  }
 
  async #body(request:IncomingMessage):Promise<string>{
