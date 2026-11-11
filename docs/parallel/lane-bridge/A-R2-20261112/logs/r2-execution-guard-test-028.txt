@@ -1,0 +1,21 @@
+command: corepack pnpm test tests/agent-driven/product/execution-guard.test.ts --maxWorkers=1 --minWorkers=1
+cwd: /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+started: 2026-11-11T17:29:09Z
+--- output ---
+
+> narralens@0.1.0 test /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+> vitest run --config vitest.config.ts tests/agent-driven/product/execution-guard.test.ts --maxWorkers=1 --minWorkers=1
+
+
+ RUN  v3.2.4 /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+
+ ✓ tests/agent-driven/product/execution-guard.test.ts (29 tests) 14ms
+
+ Test Files  1 passed (1)
+      Tests  29 passed (29)
+   Start at  01:29:10
+   Duration  256ms (transform 67ms, setup 0ms, collect 128ms, tests 14ms, environment 0ms, prepare 31ms)
+
+--- end ---
+exit: 0
+finished: 2026-11-11T17:29:10Z

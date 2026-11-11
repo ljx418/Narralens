@@ -309,3 +309,93 @@ describe("the execution guard", () => {
     expect(gates[1]?.state).toBe("pending");
   });
 });
+
+describe("the two narrow Host-only effects", () => {
+  const review = { package_id: "package-1", package_digest: "b".repeat(64), state: "pending" as const };
+  const reviewGate: RunGate = { ...gate("first_chapter", "pending"), review_package_id: "package-1" };
+  const waiting = facts({
+    run: { ...facts().run, state: "waiting_user" },
+    gates: [gate("definition", "accepted"), reviewGate],
+    attempt: { ...facts().attempt!, state: "succeeded" },
+    review,
+  });
+
+  it("prepares the impact of the reviewed product while the run waits", () => {
+    expect(() => guardExecution(
+      BINDING,
+      { kind: "review_impact_prepare", package_id: "package-1", package_digest: "b".repeat(64) },
+      waiting,
+    )).not.toThrow();
+  });
+
+  it("refuses an impact preparation for another package or another version", () => {
+    expect(() => guardExecution(
+      BINDING,
+      { kind: "review_impact_prepare", package_id: "package-2", package_digest: "b".repeat(64) },
+      waiting,
+    )).toThrowError(expect.objectContaining({ code: "REVIEW_STALE" }));
+    expect(() => guardExecution(
+      BINDING,
+      { kind: "review_impact_prepare", package_id: "package-1", package_digest: "c".repeat(64) },
+      waiting,
+    )).toThrowError(expect.objectContaining({ code: "REVIEW_STALE" }));
+  });
+
+  it("refuses a narrow effect whose package was not read", () => {
+    expect(() => guardExecution(
+      BINDING,
+      { kind: "review_impact_prepare", package_id: "package-1", package_digest: "b".repeat(64) },
+      facts({ run: { ...facts().run, state: "waiting_user" }, gates: [reviewGate] }),
+    )).toThrowError(expect.objectContaining({ code: "REVIEW_STALE" }));
+  });
+
+  it("refuses a narrow effect in a run that is paused, cancelled or stale", () => {
+    for (const state of ["paused", "cancelled", "failed", "blocked"] as const) {
+      expect(() => guardExecution(
+        BINDING,
+        { kind: "review_impact_prepare", package_id: "package-1", package_digest: "b".repeat(64) },
+        { ...waiting, run: { ...waiting.run, state } },
+      )).toThrowError(expect.objectContaining({ code: "RUN_PLAN_STALE" }));
+    }
+  });
+
+  it("does not widen the ordinary dispatch: an action is still refused while the run waits", () => {
+    // A run that waits for a decision refuses an ordinary action outright, and the
+    // narrow effects do not change that.
+    expect(() => guardExecution(
+      BINDING,
+      EFFECT,
+      { ...waiting, gates: [gate("definition", "accepted"), gate("sample", "pending")] },
+    )).toThrowError(expect.objectContaining({ code: "RUN_PLAN_STALE" }));
+    // And the ordinary gate check is untouched: a running run with an open gate is
+    // still blocked at that gate.
+    expect(() => guardExecution(
+      BINDING,
+      EFFECT,
+      facts({ gates: [gate("definition", "accepted"), gate("sample", "pending")] }),
+    )).toThrowError(expect.objectContaining({ code: "RUN_GATE_BLOCKED" }));
+  });
+
+  it("consumes an approval only when it and the impact are active and name each other", () => {
+    const approval = { approval_id: "approval-1", impact_id: "impact-1", state: "active" as const };
+    const impact = { impact_id: "impact-1", state: "active" as const };
+    const effect = { kind: "approved_prepared_adoption", package_id: "package-1", impact_id: "impact-1", approval_id: "approval-1" } as const;
+    expect(() => guardExecution(BINDING, effect, { ...waiting, approval, impact })).not.toThrow();
+    expect(() => guardExecution(BINDING, effect, { ...waiting, approval: { ...approval, state: "consumed" }, impact }))
+      .toThrowError(expect.objectContaining({ code: "APPROVAL_REQUIRED" }));
+    expect(() => guardExecution(BINDING, effect, { ...waiting, approval, impact: { ...impact, state: "expired" } }))
+      .toThrowError(expect.objectContaining({ code: "IMPACT_STALE" }));
+    expect(() => guardExecution(BINDING, effect, { ...waiting, approval: { ...approval, impact_id: "impact-2" }, impact }))
+      .toThrowError(expect.objectContaining({ code: "APPROVAL_REQUIRED" }));
+    expect(() => guardExecution(BINDING, effect, { ...waiting, approval: null, impact }))
+      .toThrowError(expect.objectContaining({ code: "APPROVAL_REQUIRED" }));
+  });
+
+  it("refuses a narrow effect when the run has no gate for the reviewed package", () => {
+    expect(() => guardExecution(
+      BINDING,
+      { kind: "review_impact_prepare", package_id: "package-1", package_digest: "b".repeat(64) },
+      { ...waiting, gates: [gate("definition", "accepted")] },
+    )).toThrowError(expect.objectContaining({ code: "RUN_GATE_BLOCKED" }));
+  });
+});

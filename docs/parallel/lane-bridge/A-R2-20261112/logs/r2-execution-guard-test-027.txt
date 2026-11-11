@@ -1,0 +1,86 @@
+command: corepack pnpm test tests/agent-driven/product/execution-guard.test.ts --maxWorkers=1 --minWorkers=1
+cwd: /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+head: 2da58f6efccd60fdc5a1d5ed6005e202c5360fea
+started: 2026-11-11T17:29:02Z
+--- output ---
+
+> narralens@0.1.0 test /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+> vitest run --config vitest.config.ts tests/agent-driven/product/execution-guard.test.ts --maxWorkers=1 --minWorkers=1
+
+
+ RUN  v3.2.4 /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+
+ ❯ tests/agent-driven/product/execution-guard.test.ts (29 tests | 1 failed) 18ms
+   ✓ the execution guard > refuses future-issued or missing issuance facts, while cancellation stays available 7ms
+   ✓ the execution guard > refuses to authorize anything without the durable facts 0ms
+   ✓ the execution guard > allows an effect whose prerequisites are accepted 0ms
+   ✓ the execution guard > blocks a first chapter while the sample gate is not accepted 0ms
+   ✓ the execution guard > refuses a binding that belongs to another scope 0ms
+   ✓ the execution guard > refuses a scope that does not hash to the run's own digest 0ms
+   ✓ the execution guard > refuses an action the scope does not allow 0ms
+   ✓ the execution guard > refuses an action that is not one of the fixed actions 0ms
+   ✓ the execution guard > refuses an action that does not belong to the step 0ms
+   ✓ the execution guard > refuses an unknown step 0ms
+   ✓ the execution guard > refuses a caller-selected stage that differs from the durable step 0ms
+   ✓ the execution guard > permits scoped prepare/apply while leaving finite approval consumption to MAIN 0ms
+   ✓ the execution guard > refuses a scope that asks for a paid, external or runtime action 0ms
+   ✓ the execution guard > refuses a revoked or expired authorization 0ms
+   ✓ the execution guard > refuses an effect under another principal 0ms
+   ✓ the execution guard > refuses a stale attempt 0ms
+   ✓ the execution guard > refuses an attempt that is over 0ms
+   ✓ the execution guard > refuses a run that is paused, cancelled or waiting for a decision 0ms
+   ✓ the execution guard > keeps the safe controls available without a grant 0ms
+   ✓ the execution guard > refuses to pause a run that was already cancelled 0ms
+   ✓ the execution guard > refuses a binding without a plan version, an attempt or an authorization 0ms
+   ✓ the execution guard > never accepts a gate on its own 0ms
+   ✓ the two narrow Host-only effects > prepares the impact of the reviewed product while the run waits 0ms
+   ✓ the two narrow Host-only effects > refuses an impact preparation for another package or another version 0ms
+   ✓ the two narrow Host-only effects > refuses a narrow effect whose package was not read 0ms
+   ✓ the two narrow Host-only effects > refuses a narrow effect in a run that is paused, cancelled or stale 0ms
+   × the two narrow Host-only effects > does not widen the ordinary dispatch: an action is still refused while the run waits 5ms
+     → expected error to match asymmetric matcher
+   ✓ the two narrow Host-only effects > consumes an approval only when it and the impact are active and name each other 0ms
+   ✓ the two narrow Host-only effects > refuses a narrow effect when the run has no gate for the reviewed package 0ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/product/execution-guard.test.ts > the two narrow Host-only effects > does not widen the ordinary dispatch: an action is still refused while the run waits
+AssertionError: expected error to match asymmetric matcher
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- ObjectContaining {[39m
+[32m-   "code": "RUN_GATE_BLOCKED",[39m
+[31m+ ProductError {[39m
+[31m+   "message": "The run is not in a state that allows a new effect",[39m
+[31m+   "code": "RUN_PLAN_STALE",[39m
+[31m+   "http_status": 409,[39m
+[31m+   "retryable": false,[39m
+[31m+   "next_actions": [],[39m
+[31m+   "details": {[39m
+[31m+     "state": "waiting_user",[39m
+[31m+   },[39m
+[31m+   "name": "ProductError",[39m
+[2m  }[22m
+
+ ❯ tests/agent-driven/product/execution-guard.test.ts:367:8
+    365|       EFFECT,
+    366|       { ...waiting, gates: [gate("definition", "accepted"), gate("samp…
+    367|     )).toThrowError(expect.objectContaining({ code: "RUN_GATE_BLOCKED"…
+       |        ^
+    368|   });
+    369| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 28 passed (29)
+   Start at  01:29:03
+   Duration  252ms (transform 64ms, setup 0ms, collect 123ms, tests 18ms, environment 0ms, prepare 31ms)
+
+ ELIFECYCLE  Test failed. See above for more details.
+--- end ---
+exit: 1
+finished: 2026-11-11T17:29:03Z

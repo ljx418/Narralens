@@ -157,16 +157,70 @@ export interface ExecutionGuardFacts {
   } | null;
   /** The run's gates, from the durable checkpoint. */
   readonly gates: ReadonlyArray<RunGate>;
+  /**
+   * The review package the narrow Host-only effects are about.
+   *
+   * It is absent when the caller did not read it, and a narrow effect without it is
+   * refused: the guard does not look it up itself, because it has no authority to.
+   */
+  readonly review?: {
+    readonly package_id: string;
+    readonly package_digest: string;
+    readonly state: "pending" | "accepted" | "changes_requested" | "rejected" | "stale";
+  } | null;
+  /** The approval a narrow adoption effect would consume. */
+  readonly approval?: {
+    readonly approval_id: string;
+    readonly impact_id: string;
+    readonly state: "active" | "consumed" | "rejected" | "revoked";
+  } | null;
+  /** The impact a narrow effect would authorise or consume. */
+  readonly impact?: {
+    readonly impact_id: string;
+    readonly state: "active" | "consumed" | "expired" | "stale";
+  } | null;
   /** The authenticated principal that is about to cause the side effect. */
   readonly principal_id: string;
   /** The current time, in epoch seconds. */
   readonly now_epoch_seconds: number;
 }
 
-/** The effect the caller is about to cause. */
+/**
+ * The effect the caller is about to cause.
+ *
+ * The two narrow Host-only effects are not reachable from a request: a body cannot
+ * name an effect kind, and the ordinary dispatch set does not grow because they
+ * exist. They are the two things that happen while a run is waiting for a decision —
+ * preparing the impact of a reviewed product, and consuming an approval to adopt it.
+ */
 export type GuardedEffect =
   | { readonly kind: "action"; readonly action: GuardedAction; readonly stage_id: string }
-  | { readonly kind: "safe_control"; readonly control: "pause" | "cancel" };
+  | { readonly kind: "safe_control"; readonly control: "pause" | "cancel" }
+  | {
+      readonly kind: "review_impact_prepare";
+      /** The package the impact is prepared for. */
+      readonly package_id: string;
+      readonly package_digest: string;
+    }
+  | {
+      readonly kind: "approved_prepared_adoption";
+      readonly package_id: string;
+      readonly impact_id: string;
+      readonly approval_id: string;
+    };
+
+/**
+ * The run states in which a narrow Host-only effect may happen.
+ *
+ * A run that is waiting for a decision is exactly the state the narrow effects are
+ * for. A run that is paused, cancelled or stale is not, and a successful job is never
+ * put back to running.
+ */
+export const A_NARROW_DISPATCHABLE_RUN_STATES: ReadonlyArray<RunState> = [
+  "ready",
+  "running",
+  "waiting_user",
+];
 
 /**
  * Guards one actual side effect.
@@ -198,6 +252,11 @@ export function guardExecution(
         details: { state: facts.run.state },
       });
     }
+    return;
+  }
+
+  if (effect.kind === "review_impact_prepare" || effect.kind === "approved_prepared_adoption") {
+    assertNarrowEffect(effect, facts, binding);
     return;
   }
 
@@ -358,6 +417,124 @@ function assertAttempt(facts: ExecutionGuardFacts, binding: ExecutionBinding): v
     throw new ProductError("RUN_PLAN_STALE", "The attempt is over", {
       details: { state: attempt.state },
     });
+  }
+}
+
+/**
+ * The two narrow Host-only effects.
+ *
+ * They are the two things that happen while a run waits for a decision: preparing the
+ * impact of the reviewed product, and consuming an approval to adopt it. They are
+ * narrow on purpose. The run's identity, scope, grant and attempt still have to hold,
+ * the run has to be in a state where a decision can be acted on, and the effect has to
+ * be about the very package, approval and impact it names.
+ *
+ * What they do NOT do is widen the ordinary dispatch: an ordinary action is still
+ * refused in `waiting_user`, a paused or cancelled or stale run is refused, and the
+ * gate that is open is only the one of the reviewed product.
+ */
+function assertNarrowEffect(
+  effect: Extract<GuardedEffect, { kind: "review_impact_prepare" | "approved_prepared_adoption" }>,
+  facts: ExecutionGuardFacts,
+  binding: ExecutionBinding,
+): void {
+  assertRunIdentity(binding, facts);
+  assertScope(facts, binding);
+  assertGrant(facts, binding);
+  assertAttemptIdentity(facts, binding);
+  if (!A_NARROW_DISPATCHABLE_RUN_STATES.includes(facts.run.state)) {
+    throw new ProductError("RUN_PLAN_STALE", "The run is not in a state that allows this effect", {
+      details: { state: facts.run.state },
+    });
+  }
+  // The reviewed product is the only thing the effect may act on. A package of
+  // another run, of another state, or with another digest is not this effect's.
+  const review = facts.review;
+  if (review === undefined || review === null) {
+    throw new ProductError("REVIEW_STALE", "The reviewed package was not read");
+  }
+  if (review.package_id !== effect.package_id) {
+    throw new ProductError("REVIEW_STALE", "The effect names another package", {
+      details: { expected: review.package_id, received: effect.package_id },
+    });
+  }
+  if (review.state !== "pending" && review.state !== "changes_requested") {
+    throw new ProductError("REVIEW_STALE", "The reviewed package is not waiting for a decision", {
+      details: { state: review.state },
+    });
+  }
+  if (effect.kind === "review_impact_prepare") {
+    if (review.package_digest !== effect.package_digest) {
+      throw new ProductError("REVIEW_STALE", "The effect names another version of the package", {
+        details: { expected: review.package_digest, received: effect.package_digest },
+      });
+    }
+  } else {
+    const approval = facts.approval;
+    const impact = facts.impact;
+    if (approval === undefined || approval === null) {
+      throw new ProductError("APPROVAL_REQUIRED", "The approval was not read");
+    }
+    if (impact === undefined || impact === null) {
+      throw new ProductError("IMPACT_REQUIRED", "The impact was not read");
+    }
+    if (approval.approval_id !== effect.approval_id) {
+      throw new ProductError("APPROVAL_REQUIRED", "The effect names another approval", {
+        details: { expected: approval.approval_id, received: effect.approval_id },
+      });
+    }
+    if (approval.impact_id !== effect.impact_id || impact.impact_id !== effect.impact_id) {
+      throw new ProductError("APPROVAL_REQUIRED", "The approval does not belong to the named impact");
+    }
+    if (approval.state !== "active") {
+      throw new ProductError("APPROVAL_REQUIRED", "The approval is not active", {
+        details: { state: approval.state },
+      });
+    }
+    if (impact.state !== "active") {
+      throw new ProductError("IMPACT_STALE", "The impact is not active", {
+        details: { state: impact.state },
+      });
+    }
+  }
+  // Only the gate of the reviewed product is exempt, and it has to exist.
+  const gate = facts.gates.find((candidate) => candidate.review_package_id === effect.package_id);
+  if (gate === undefined) {
+    throw new ProductError("RUN_GATE_BLOCKED", "The run has no gate for the reviewed package", {
+      details: { package_id: effect.package_id },
+    });
+  }
+}
+
+/**
+ * The identity of the attempt, without the dispatchable states.
+ *
+ * A narrow effect happens while the run waits for a decision, and the attempt that
+ * produced the reviewed product has usually finished. What still has to hold is that
+ * it is the current attempt of the step, made against the same input.
+ */
+function assertAttemptIdentity(facts: ExecutionGuardFacts, binding: ExecutionBinding): void {
+  const attempt = facts.attempt;
+  if (attempt === null || attempt === undefined) {
+    throw new ProductError("RUN_PLAN_STALE", "The step has no durable attempt to continue");
+  }
+  if (attempt.step_id !== binding.step_id) {
+    throw new ProductError("RUN_PLAN_STALE", "The binding names another step", {
+      details: { expected: attempt.step_id, received: binding.step_id },
+    });
+  }
+  if (attempt.attempt !== binding.attempt) {
+    throw new ProductError("RUN_PLAN_STALE", "The attempt is not the current attempt of this step", {
+      details: { expected: attempt.attempt, received: binding.attempt },
+    });
+  }
+  if (attempt.input_digest !== binding.input_digest) {
+    throw new ProductError("RUN_PLAN_STALE", "The attempt was made against another input", {
+      details: { expected: attempt.input_digest, received: binding.input_digest },
+    });
+  }
+  if (attempt.grant_id !== binding.authorization_id) {
+    throw new ProductError("RUN_SCOPE_REQUIRED", "The attempt was made under another authorization");
   }
 }
 
