@@ -658,6 +658,14 @@ export class AgentWorkbenchClient {
     const document = input.package;
     if (document.project_id !== this.projectId) throw new Error("PROJECT_MISMATCH");
     if (!isMeta(input.meta)) throw new Error("INVALID_META");
+    const impact_id = input.impact_id ?? document.impact?.impact_id ?? null;
+    const plan_sha256 = input.plan_sha256 ?? document.impact?.plan_sha256 ?? null;
+    // An adoption needs the impact it adopts. A choice that asks for one without an
+    // impact is refused here, before the call, so it can never be recorded as a
+    // decision that adopted something.
+    if (input.choice === "accept_and_adopt" && (impact_id === null || plan_sha256 === null)) {
+      throw new Error("INVALID_ADOPTION_IMPACT");
+    }
     const value = await this.#call<unknown>("agent.v1", "review.decide", {
       meta: input.meta,
       project_id: this.projectId,
@@ -669,8 +677,8 @@ export class AgentWorkbenchClient {
       output_digest: document.output_digest,
       quality_digest: document.quality_digest,
       choice: input.choice,
-      impact_id: input.impact_id ?? document.impact?.impact_id ?? null,
-      plan_sha256: input.plan_sha256 ?? document.impact?.plan_sha256 ?? null,
+      impact_id,
+      plan_sha256,
     });
     const decision = validateDefinition<ReviewDecision>("ReviewDecision", value, "INVALID_REVIEW_DECISION");
     if (decision.project_id !== this.projectId) throw new Error("INVALID_REVIEW_DECISION");
