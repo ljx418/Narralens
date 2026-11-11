@@ -687,6 +687,7 @@ describe('the binding snapshot', () => {
 import { pathToFileURL } from 'node:url';
 import { NativeAckStore } from '../../../src/host/m5/native-ack-store.js';
 import { NativeObservationService, type NativeObservationSessionBinding } from '../../../src/host/m5/native-observation.js';
+import { ControlledStudioAccess, type NativeStudioGrant } from '../../../src/host/m5/controlled-studio-access.js';
 import { RevisionStore } from '../../../src/host/projects/revision-store.js';
 
 describe('the selection version port', () => {
@@ -933,5 +934,126 @@ describe("the selection version of a stale session", () => {
     } finally {
       rmSync(root, { recursive: true, force: true });
     }
+  });
+});
+
+/**
+ * The controlled session and the observation binding.
+ *
+ * These cases use the real access object with a faked request and response: no
+ * socket is bound, no listener is started, and nothing is fetched.
+ */
+describe("the controlled session and the observation binding", () => {
+  const ORIGIN = "http://127.0.0.1:1234";
+
+  const fakeRequest = (headers: Record<string, string>, body: string) => ({
+    method: "POST",
+    url: "/narralens/session/exchange",
+    headers,
+    rawHeaders: Object.entries(headers).flat(),
+    async *[Symbol.asyncIterator]() { yield Buffer.from(body); },
+  });
+
+  const fakeResponse = () => {
+    const state: { status: number | null; headers: Record<string, unknown>; body: string | null } = {
+      status: null, headers: {}, body: null,
+    };
+    return {
+      setHeader: (name: string, value: string) => { state.headers[name] = value; },
+      writeHead: (status: number, headers?: Record<string, unknown>) => {
+        state.status = status;
+        if (headers !== undefined) for (const [name, value] of Object.entries(headers)) state.headers[name] = value;
+      },
+      end: (body?: string) => { state.body = body ?? null; },
+      state,
+    };
+  };
+
+  const grantOf = (opened: NativeObservationSessionBinding[], closed: NativeObservationSessionBinding[]): NativeStudioGrant => ({
+    project_id: "p1",
+    native_project_id: "n1",
+    owner_session_ref: "owner1",
+    instance_generation: 1,
+    revision: 3,
+    snapshot_id: "snap1",
+    source_digest: HASH_A,
+    isCurrent: () => true,
+    readWorkbench: async () => ({}) as never,
+    nativeObservation: {
+      port: {
+        sessionOpened: (binding) => { opened.push(binding); },
+        observe: async () => ({ accepted: true, reason: "DOCUMENT_ACCEPTED", sequence: 1, ack: null }),
+        sessionClosed: (binding) => { closed.push(binding); },
+      },
+      owner_session_ref: "owner1",
+      project_id: "p1",
+      native_project_id: "n1",
+      instance_generation: 1,
+      revision: 3,
+      snapshot_id: "snap1",
+      source_digest: HASH_A,
+      workspace: { workspace_ref: "ws1", snapshot_id: "snap1", source_digest: HASH_A, revision: 3 },
+      isCurrent: () => true,
+    },
+  });
+
+  it("mints the bridge session id at the exchange, tells the producer, and closes it again", async () => {
+    const opened: NativeObservationSessionBinding[] = [];
+    const closed: NativeObservationSessionBinding[] = [];
+    const access = new ControlledStudioAccess(() => ORIGIN);
+    const issued = access.issue(grantOf(opened, closed));
+    const ticket = issued.url.split("#native_ticket=")[1]!;
+    const request = fakeRequest(
+      { host: "127.0.0.1:1234", origin: ORIGIN, "content-type": "application/json" },
+      JSON.stringify({ ticket }),
+    );
+    const response = fakeResponse();
+    await access.exchange(request as never, response as never);
+    expect(response.state.status).toBe(200);
+    // The producer was told about the session exactly once.
+    expect(opened.length).toBe(1);
+    const binding = opened[0]!;
+    // The bridge session id is minted by the Host, is not a credential, and is not
+    // anything the client could have named.
+    expect(binding.bridge_session_id).toMatch(/^[a-f0-9]{32}$/);
+    expect(binding.project_id).toBe("p1");
+    expect(binding.native_project_id).toBe("n1");
+    expect(binding.instance_generation).toBe(1);
+    expect(binding.workspace.workspace_ref).toBe("ws1");
+    // Closing the access tells the producer before the credentials go away.
+    access.close();
+    expect(closed.length).toBe(1);
+    expect(closed[0]).toBe(binding);
+  });
+
+  it("refuses an exchange from another origin", async () => {
+    const opened: NativeObservationSessionBinding[] = [];
+    const closed: NativeObservationSessionBinding[] = [];
+    const access = new ControlledStudioAccess(() => ORIGIN);
+    const issued = access.issue(grantOf(opened, closed));
+    const ticket = issued.url.split("#native_ticket=")[1]!;
+    const request = fakeRequest(
+      { host: "127.0.0.1:1234", origin: "http://127.0.0.1:9999", "content-type": "application/json" },
+      JSON.stringify({ ticket }),
+    );
+    const response = fakeResponse();
+    await expect(access.exchange(request as never, response as never)).rejects.toThrow();
+    // Nothing was told to the producer: no session was opened.
+    expect(opened.length).toBe(0);
+  });
+
+  it("refuses an exchange whose body is not exactly the ticket", async () => {
+    const opened: NativeObservationSessionBinding[] = [];
+    const closed: NativeObservationSessionBinding[] = [];
+    const access = new ControlledStudioAccess(() => ORIGIN);
+    const issued = access.issue(grantOf(opened, closed));
+    const ticket = issued.url.split("#native_ticket=")[1]!;
+    const request = fakeRequest(
+      { host: "127.0.0.1:1234", origin: ORIGIN, "content-type": "application/json" },
+      JSON.stringify({ ticket, project_id: "p1" }),
+    );
+    const response = fakeResponse();
+    await expect(access.exchange(request as never, response as never)).rejects.toThrow();
+    expect(opened.length).toBe(0);
   });
 });
