@@ -1389,8 +1389,12 @@ export function M5Panel({ client, targetProjectId, ui: uiProp }: M5PanelProps): 
    *
    * It is read from the project's own facts, not from the decision: the decision says
    * a person chose, the commit says the Host published a new version, and the native
-   * acknowledgement says the editor loaded it. The adoption is *registered* only when
-   * the project's own revision really advanced, and it stays *pending* until then.
+   * acknowledgement says the editor loaded it.
+   *
+   * A revision that advanced is a commit that happened, not necessarily *this*
+   * adoption: an unrelated native edit or another adoption moves it too. The adoption
+   * is registered only when a commit is bound to this decision, and the panel has no
+   * such binding today, so it stays pending until the Host supplies one.
    */
   const adoption = reviewDecision === null ? null : reviewAdoptionState({
     decision: reviewDecision,
