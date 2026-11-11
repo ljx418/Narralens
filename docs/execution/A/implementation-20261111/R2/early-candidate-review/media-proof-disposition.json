@@ -1,0 +1,27 @@
+{
+  "grant": "R2-MEDIA-PROOF-001",
+  "tested_commit": "6c22182aebefee14f4cceccd3e2583da8630cc2f",
+  "attempt1": {
+    "exit": 1,
+    "passed": 11,
+    "timeout": 8,
+    "raw_sha256": "5395630bad6869436eb61c1e33a432974f9648790cce6fedc5aa0e787478f8c1"
+  },
+  "attempt2": {
+    "exit": 0,
+    "passed": 19,
+    "files": 2,
+    "raw_sha256": "f0e3e4336fa2f8c83f1b65ab80a0d81f3e1fdbe770f681042b2199fcb2848a62"
+  },
+  "main_observation": {
+    "both_raw_hashes_match": true,
+    "raw_summaries_read": true,
+    "current_named_vitest_ffmpeg_ffprobe_openfilm_processes": [],
+    "old_fixture_exists": false
+  },
+  "limitation": "No dedicated old-descendant sweep before retry; cannot retroactively prove isolation. Preserve ordering record; final clean integration acceptance required. 19/19 is bounded run result, not full module/product acceptance.",
+  "resource": "RELEASED; no extra retry granted",
+  "cleanup_raw_sha256": "f78e51b0c203c265e81a305263981405831183b98077bc4c73e845d02808444e",
+  "cleanup_self_hash_note": "Embedded self-hash is stale, not an integrity authority; external byte hash verified by MAIN.",
+  "parent_confirmation": "msg_57b5a80454dd: parent independently observed no matching media/test processes or fixtures after command terminal"
+}

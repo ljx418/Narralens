@@ -1,0 +1,15 @@
+{
+  "candidate": "6c22182aebefee14f4cceccd3e2583da8630cc2f",
+  "source": "src/host/render/committed-render-phases.ts",
+  "source_sha256": "66a358e691b18ba91b57216038092b1f3f0889433471b9fe65a792faa4889c06",
+  "scope": "early immutable implementation review; not final independent external review",
+  "status": "NOT_READY_FOR_INTEGRATION",
+  "findings": {
+    "MP-01": "raw fractional expected_duration_seconds in restricted canonicalDigest preimage",
+    "MP-02": "object resolver lacks ancestor/root identity and read-time mutation guards; errors/close race can leak handles",
+    "MP-03": "QC supplements only compare receipt fields, not actual reopened supplement bytes",
+    "MP-04": "phase objects published without durable receipt; returned receipt exists only RAM, lifecycle cleanup failures swallowed"
+  },
+  "required": "integer/rational hash model; FD-root anchored guarded reader lifecycle; actual complete supplement bytes; durable receipt+restart recovery evidence",
+  "test_scope_limit": "prior19proof cases exercise prepared-draft-verifier, not committed phase implementation;29phase pure cases use fake tools"
+}
