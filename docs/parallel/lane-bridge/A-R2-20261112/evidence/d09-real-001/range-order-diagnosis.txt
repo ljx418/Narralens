@@ -1,0 +1,60 @@
+{
+  "kind": "pure deterministic fixture-order counterexample; not retained runtime source",
+  "plan_ranges": [
+    {
+      "start_frame": 0,
+      "end_frame_exclusive": 31,
+      "clip_id": "shot-s1"
+    },
+    {
+      "start_frame": 0,
+      "end_frame_exclusive": 31,
+      "clip_id": "concept-s1"
+    },
+    {
+      "start_frame": 31,
+      "end_frame_exclusive": 60,
+      "clip_id": "shot-s2"
+    },
+    {
+      "start_frame": 60,
+      "end_frame_exclusive": 90,
+      "clip_id": "shot-s3"
+    },
+    {
+      "start_frame": 0,
+      "end_frame_exclusive": 90,
+      "clip_id": "narration"
+    }
+  ],
+  "stored_impact_ranges": [
+    {
+      "start_frame": 0,
+      "end_frame_exclusive": 31,
+      "clip_id": "concept-s1"
+    },
+    {
+      "start_frame": 0,
+      "end_frame_exclusive": 31,
+      "clip_id": "shot-s1"
+    },
+    {
+      "start_frame": 0,
+      "end_frame_exclusive": 90,
+      "clip_id": "narration"
+    },
+    {
+      "start_frame": 31,
+      "end_frame_exclusive": 60,
+      "clip_id": "shot-s2"
+    },
+    {
+      "start_frame": 60,
+      "end_frame_exclusive": 90,
+      "clip_id": "shot-s3"
+    }
+  ],
+  "same_order": false
+}
+(node:1740126) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)

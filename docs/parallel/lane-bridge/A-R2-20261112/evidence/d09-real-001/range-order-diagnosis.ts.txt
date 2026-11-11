@@ -1,0 +1,8 @@
+import {preparedSourceConsumerGraph} from './src/host/agent-driven/created-source-publisher.ts';
+import {createdImpactFacts} from './src/host/agent-driven/created-source-impact-store.ts';
+import {canonicalDigest} from './src/host/creative/digest.ts';
+const metadata={clip_ids:['shot-s1','concept-s1','shot-s2','shot-s3','narration'],frame_count:90,subtitles:[],assets:[]};
+const draft={storyboard:{shots:[{shot_id:'s1',paragraph_id:'p1',asset_id:'video',concept_text:'concept',duration_frames:31},{shot_id:'s2',paragraph_id:'p2',asset_id:'video',concept_text:'',duration_frames:29},{shot_id:'s3',paragraph_id:'p3',asset_id:null,concept_text:'concept',duration_frames:30}]},narration_asset_id:'voice'};
+const ranges=preparedSourceConsumerGraph(metadata as any,draft as any).clips.map(c=>({start_frame:c.start_frame,end_frame_exclusive:c.end_frame_exclusive,clip_id:c.clip_id}));
+const impactRanges=createdImpactFacts({affected_ranges:ranges,affected_consumers:[],locks_checked:[],approvals_required:[]} as any).affected_ranges;
+console.log(JSON.stringify({kind:'pure deterministic fixture-order counterexample; not retained runtime source',plan_ranges:ranges,stored_impact_ranges:impactRanges,same_order:canonicalDigest(ranges)===canonicalDigest(impactRanges)},null,2));

@@ -213,3 +213,8 @@ MAIN msg_719a9e6b8e51 clarified originalD03/D04: impact before package. Guard no
 ## D09 continuation candidate after MAIN immutable dependency closure
 
 Sole writer remains Codex; MAIN-approved matching closure imported at 54f2ac4 with original service81249 archived byte-for-byte before replacement. D09 three-source/two-test candidate now implements concrete same-DB Host proof review transaction and full-plan approval binding; isolated48/48, old-code5 failures, final typecheck evidence in evidence/d09-dependencies. See evidence/d09-dependencies/D09_CANDIDATE.md for exact limitations: actual prepared positive/mutation integration NOT_RUN pending MAIN heavy slot, production composition and independent review remain pending. No source acceptance or A/human completion claimed.
+
+
+## R2-BRIDGE-D09-REAL-001 failed; slot returned
+
+Frozen tests eeeec319c38e5767e847d0939b4094e9baae28ce ran once: selected8, success/wrong-transaction2failed, six refusal outcomes not claimed as targeted coverage; source/index unchanged and all roots/observed children cleaned. Evidence in evidence/d09-real-001/REPORT.md. Light diagnosis reproduces unnormalized affected-range comparison in owned authority; MAIN asked for narrow correction and new heavy slot. R2/D09 integration remains incomplete.

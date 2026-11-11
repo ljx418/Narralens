@@ -1,0 +1,361 @@
+{
+  "reservation": "R2-BRIDGE-D09-REAL-001",
+  "head": "eeeec319c38e5767e847d0939b4094e9baae28ce",
+  "argv": [
+    "corepack",
+    "pnpm",
+    "test",
+    "tests/agent-driven/integration/created-run-authority.test.ts",
+    "--maxWorkers=1",
+    "--minWorkers=1",
+    "-t",
+    "D09 real prepared"
+  ],
+  "started_at": "2026-11-11T20:28:52.369392+00:00",
+  "wrapper_pid": 1736941,
+  "input_manifest_sha256": "138a976b186f5c467309d6fa48906023731358c7202e8feab73538c99392c9f4",
+  "command_pid": 1736951,
+  "exit_code": 1,
+  "ended_at": "2026-11-11T20:29:48.758409+00:00",
+  "observed_processes": {
+    "1736951": {
+      "ppid": 1736941,
+      "start_ticks": "5037525",
+      "comm": "node"
+    },
+    "1736963": {
+      "ppid": 1736951,
+      "start_ticks": "5037541",
+      "comm": "sh"
+    },
+    "1736964": {
+      "ppid": 1736963,
+      "start_ticks": "5037541",
+      "comm": "node (vitest)"
+    },
+    "1736999": {
+      "ppid": 1736964,
+      "start_ticks": "5037560",
+      "comm": "node (vitest 1)"
+    },
+    "1736989": {
+      "ppid": 1736964,
+      "start_ticks": "5037557",
+      "comm": "esbuild"
+    },
+    "1737115": {
+      "ppid": 1736999,
+      "start_ticks": "5037720",
+      "comm": "git"
+    },
+    "1737131": {
+      "ppid": 1736999,
+      "start_ticks": "5037817",
+      "comm": "git"
+    },
+    "1737141": {
+      "ppid": 1736999,
+      "start_ticks": "5037894",
+      "comm": "git"
+    },
+    "1737209": {
+      "ppid": 1736999,
+      "start_ticks": "5038012",
+      "comm": "git"
+    },
+    "1737224": {
+      "ppid": 1736999,
+      "start_ticks": "5038105",
+      "comm": "git"
+    },
+    "1737337": {
+      "ppid": 1736999,
+      "start_ticks": "5038201",
+      "comm": "git"
+    },
+    "1737389": {
+      "ppid": 1736999,
+      "start_ticks": "5038301",
+      "comm": "git"
+    },
+    "1737416": {
+      "ppid": 1736999,
+      "start_ticks": "5038414",
+      "comm": "git"
+    },
+    "1737417": {
+      "ppid": 1736999,
+      "start_ticks": "5038494",
+      "comm": "git"
+    },
+    "1737418": {
+      "ppid": 1736999,
+      "start_ticks": "5038570",
+      "comm": "git"
+    },
+    "1737492": {
+      "ppid": 1736999,
+      "start_ticks": "5038751",
+      "comm": "ffmpeg"
+    },
+    "1737505": {
+      "ppid": 1736999,
+      "start_ticks": "5038777",
+      "comm": "git"
+    },
+    "1737535": {
+      "ppid": 1736999,
+      "start_ticks": "5038877",
+      "comm": "git"
+    },
+    "1737577": {
+      "ppid": 1736999,
+      "start_ticks": "5038972",
+      "comm": "git"
+    },
+    "1737583": {
+      "ppid": 1736999,
+      "start_ticks": "5039057",
+      "comm": "git"
+    },
+    "1737613": {
+      "ppid": 1736999,
+      "start_ticks": "5039167",
+      "comm": "git"
+    },
+    "1737614": {
+      "ppid": 1736999,
+      "start_ticks": "5039248",
+      "comm": "git"
+    },
+    "1737623": {
+      "ppid": 1736999,
+      "start_ticks": "5039326",
+      "comm": "git"
+    },
+    "1737632": {
+      "ppid": 1736999,
+      "start_ticks": "5039397",
+      "comm": "ffmpeg"
+    },
+    "1737684": {
+      "ppid": 1736999,
+      "start_ticks": "5039438",
+      "comm": "git"
+    },
+    "1737706": {
+      "ppid": 1736999,
+      "start_ticks": "5039525",
+      "comm": "git"
+    },
+    "1737716": {
+      "ppid": 1736999,
+      "start_ticks": "5039610",
+      "comm": "git"
+    },
+    "1737731": {
+      "ppid": 1736999,
+      "start_ticks": "5039693",
+      "comm": "git"
+    },
+    "1737737": {
+      "ppid": 1736999,
+      "start_ticks": "5039801",
+      "comm": "git"
+    },
+    "1737745": {
+      "ppid": 1736999,
+      "start_ticks": "5039881",
+      "comm": "git"
+    },
+    "1737753": {
+      "ppid": 1736999,
+      "start_ticks": "5039958",
+      "comm": "git"
+    },
+    "1737864": {
+      "ppid": 1736999,
+      "start_ticks": "5040075",
+      "comm": "git"
+    },
+    "1737879": {
+      "ppid": 1736999,
+      "start_ticks": "5040163",
+      "comm": "git"
+    },
+    "1737888": {
+      "ppid": 1736999,
+      "start_ticks": "5040252",
+      "comm": "git"
+    },
+    "1737913": {
+      "ppid": 1736999,
+      "start_ticks": "5040374",
+      "comm": "git"
+    },
+    "1737921": {
+      "ppid": 1736999,
+      "start_ticks": "5040454",
+      "comm": "git"
+    },
+    "1737950": {
+      "ppid": 1736999,
+      "start_ticks": "5040530",
+      "comm": "git"
+    },
+    "1738010": {
+      "ppid": 1736999,
+      "start_ticks": "5040625",
+      "comm": "ffprobe"
+    },
+    "1738015": {
+      "ppid": 1736999,
+      "start_ticks": "5040642",
+      "comm": "git"
+    },
+    "1738038": {
+      "ppid": 1736999,
+      "start_ticks": "5040729",
+      "comm": "git"
+    },
+    "1738039": {
+      "ppid": 1736999,
+      "start_ticks": "5040814",
+      "comm": "git"
+    },
+    "1738051": {
+      "ppid": 1736999,
+      "start_ticks": "5040898",
+      "comm": "git"
+    },
+    "1738069": {
+      "ppid": 1736999,
+      "start_ticks": "5041013",
+      "comm": "git"
+    },
+    "1738070": {
+      "ppid": 1736999,
+      "start_ticks": "5041092",
+      "comm": "git"
+    },
+    "1738092": {
+      "ppid": 1736999,
+      "start_ticks": "5041168",
+      "comm": "git"
+    },
+    "1738095": {
+      "ppid": 1736999,
+      "start_ticks": "5041237",
+      "comm": "ffmpeg"
+    },
+    "1738147": {
+      "ppid": 1736999,
+      "start_ticks": "5041278",
+      "comm": "git"
+    },
+    "1738149": {
+      "ppid": 1736999,
+      "start_ticks": "5041366",
+      "comm": "git"
+    },
+    "1738158": {
+      "ppid": 1736999,
+      "start_ticks": "5041452",
+      "comm": "git"
+    },
+    "1738161": {
+      "ppid": 1736999,
+      "start_ticks": "5041539",
+      "comm": "git"
+    },
+    "1738171": {
+      "ppid": 1736999,
+      "start_ticks": "5041644",
+      "comm": "git"
+    },
+    "1738172": {
+      "ppid": 1736999,
+      "start_ticks": "5041723",
+      "comm": "git"
+    },
+    "1738186": {
+      "ppid": 1736999,
+      "start_ticks": "5041804",
+      "comm": "git"
+    },
+    "1738219": {
+      "ppid": 1736999,
+      "start_ticks": "5041883",
+      "comm": "ffmpeg"
+    },
+    "1738252": {
+      "ppid": 1736999,
+      "start_ticks": "5041918",
+      "comm": "git"
+    },
+    "1738287": {
+      "ppid": 1736999,
+      "start_ticks": "5042008",
+      "comm": "git"
+    },
+    "1738310": {
+      "ppid": 1736999,
+      "start_ticks": "5042095",
+      "comm": "git"
+    },
+    "1738312": {
+      "ppid": 1736999,
+      "start_ticks": "5042181",
+      "comm": "git"
+    },
+    "1738341": {
+      "ppid": 1736999,
+      "start_ticks": "5042300",
+      "comm": "git"
+    },
+    "1738364": {
+      "ppid": 1736999,
+      "start_ticks": "5042380",
+      "comm": "git"
+    },
+    "1738365": {
+      "ppid": 1736999,
+      "start_ticks": "5042455",
+      "comm": "git"
+    },
+    "1738413": {
+      "ppid": 1736999,
+      "start_ticks": "5042529",
+      "comm": "ffmpeg"
+    },
+    "1738447": {
+      "ppid": 1736999,
+      "start_ticks": "5042564",
+      "comm": "git"
+    },
+    "1738456": {
+      "ppid": 1736999,
+      "start_ticks": "5042651",
+      "comm": "git"
+    },
+    "1738465": {
+      "ppid": 1736999,
+      "start_ticks": "5042735",
+      "comm": "git"
+    },
+    "1738474": {
+      "ppid": 1736999,
+      "start_ticks": "5042817",
+      "comm": "git"
+    },
+    "1738482": {
+      "ppid": 1736964,
+      "start_ticks": "5042895",
+      "comm": "node"
+    }
+  },
+  "remaining_observed_pids": [],
+  "inputs_unchanged": true,
+  "head_unchanged": true,
+  "log_sha256": "324c97263a550c301922ed03e6d51d4c46ee5b8398d406603896fbbb280a40d4"
+}
