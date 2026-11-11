@@ -1209,3 +1209,89 @@ describe("the counted observation route", () => {
     expect(STUDIO_HOST_BRIDGE_SCRIPT).toContain(NATIVE_OBSERVATION_ROUTE);
   });
 });
+
+/**
+ * The document epoch and the hydration epoch count different things.
+ */
+describe("the epoch of the hydration and the epoch of the document", () => {
+  it("keeps the parts when the document event confirms the very hydration they belong to", async () => {
+    const root = mkdtempSync(join(tmpdir(), 'narralens-r2-epoch-'));
+    try {
+      const source = resolve(root, 'source');
+      mkdirSync(source, { recursive: true });
+      const film = 'the original film';
+      writeFileSync(resolve(source, 'film.html'), film);
+      const reader = realReader(source, ['film.html']);
+      const staged = stageLibrary(root, { computed: true });
+      const expected = new OpenFilmNativeExpected({
+        source: reader.port,
+        loader: nativeExpectedLibraryLoader({ distRoot: staged.dist, inputsRoot: staged.inputs, runtimeRoot: staged.runtime }),
+        approved: await approvedOf(staged),
+      });
+      const canonical = (await import(pathToFileURL(resolve(staged.dist, 'native-pure-library.mjs')).href)) as {
+        hydrationCanonicalJson: (value: unknown) => string;
+      };
+      const digestOfPart = (part: string, value: unknown): string =>
+        sha256(Buffer.from(canonical.hydrationCanonicalJson({ format: 'narralens.native-hydration-effective@1', part, value }), 'utf8'));
+      const revisions = new RevisionStore(':memory:');
+      const now = new Date().toISOString();
+      revisions.compose(db => {
+        db.prepare('INSERT INTO snapshot(snapshot_id,project_id,source_digest,engine,created_at) VALUES(?,?,?,?,?)')
+          .run('snap1', 'p1', HASH_A, 'openfilm', now);
+        db.prepare('INSERT INTO active_commit(project_id,revision,snapshot_id,source_digest,engine,transaction_id,created_at) VALUES(?,?,?,?,?,?,?)')
+          .run('p1', 3, 'snap1', HASH_A, 'openfilm', 'tx1', now);
+      });
+      const ackStore = new NativeAckStore({ revisions });
+      const service = new NativeObservationService({
+        ackStore,
+        expected,
+        selectionMapping: {
+          mapSelection: async () => ({ shot_ids: [], start_frame: 0, end_frame_exclusive: 1 }),
+        },
+      });
+      const binding: NativeObservationSessionBinding = {
+        bridge_session_id: 'd'.repeat(32),
+        instance_generation: 1,
+        project_id: 'p1',
+        native_project_id: 'n1',
+        owner_session_ref: 'owner1',
+        revision: 3,
+        snapshot_id: 'snap1',
+        source_digest: HASH_A,
+        workspace: { workspace_ref: 'ws1', snapshot_id: 'snap1', source_digest: HASH_A, revision: 3 },
+        isCurrent: () => true,
+      };
+      service.sessionOpened(binding);
+      const envelope = (sequence: number, event_kind: 'document' | 'hydration' | 'selection', event: unknown) => ({
+        format: 'narralens.native-observation@1' as const, sequence, event_kind, event,
+      });
+      const filmBytes = Buffer.from(film, 'utf8');
+      // The hydration arrives first, for a document epoch of five.
+      const hydration = await service.observe(binding, envelope(1, 'hydration', {
+        project_id: 'n1', editor_view_id: 'view1', document_epoch: 5, hydration_epoch: 1,
+        parts: {
+          settings: { state: 'absent_default', origin: 'project', effective_sha256: HASH_A },
+          subtitle_style: { state: 'absent_default', origin: 'project', effective_sha256: digestOfPart('subtitle_style', {}) },
+          captions: { state: 'absent_default', origin: 'project', effective_sha256: digestOfPart('captions', { cues: [] }) },
+          markers: { state: 'absent_default', origin: 'project', effective_sha256: HASH_A },
+        },
+      }));
+      expect(hydration.accepted).toBe(true);
+      // Then the document event for that very epoch confirms it.
+      const document = await service.observe(binding, envelope(2, 'document', {
+        protocol_version: 1, kind: 'document_dom_committed', project_id: 'n1',
+        editor_view_id: 'view1', document_epoch: 5, native_rev: 'rev-1',
+        film_sha256: sha256(filmBytes), utf8_byte_length: filmBytes.byteLength,
+      }));
+      expect(document.accepted).toBe(true);
+      // The parts survived: the profile is complete, and the selection completes it.
+      const selection = await service.observe(binding, envelope(3, 'selection', {
+        projectId: 'n1', time: 1, refs: [],
+      }));
+      expect(selection.accepted).toBe(true);
+      expect(selection.ack).not.toBeNull();
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+});
