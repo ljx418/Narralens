@@ -254,3 +254,156 @@ it('D09 confirmation replay returns one original approval and rejects changed bi
     expect(await f.repository.transaction(tx => tx.list('approval',{project_id:'project-1',run_id:'run-1'}))).toHaveLength(1);
   } finally { f.close(); }
 });
+
+// Reserved R2-BRIDGE-D09-REAL-001 only. Actual Host/bootstrap/SOURCE_ONLY worker,
+// immutable native draft, asset registry and concrete reader. Package part refs are
+// isolated publication metadata fixtures, not preview transport or human acceptance.
+async function d09RealFixture(planMutation = false) {
+  const {preparedDraftFixture,waitForCompletedDraft} = await import('./helpers/created-draft-fixture.js');
+  const {CreatedPreparedSourceStore} = await import('../../../src/host/agent-driven/created-prepared-source-store.js');
+  const {CreatedSourceImpactStore} = await import('../../../src/host/agent-driven/created-source-impact-store.js');
+  const {CreatedSourceFactsReader} = await import('../../../src/host/agent-driven/created-source-facts-reader.js');
+  const {CreatedSourceChangeService} = await import('../../../src/host/agent-driven/created-source-change-service.js');
+  const {CreativeProjectAuthority} = await import('../../../src/host/agent-driven/creative-project-authority.js');
+  const {ImpactStore} = await import('../../../src/host/impact/impact-store.js');
+  const {OperationIdempotencyStore} = await import('../../../src/host/projects/operation-idempotency-store.js');
+  const {FixedWorkflowService} = await import('../../../src/host/creative/fixed-workflow-service.js');
+  const {canonicalDigest} = await import('../../../src/host/creative/digest.js');
+  const {preparedAdoptionPlanDigest} = await import('../../../src/host/agent-driven/created-source-ports.js');
+  const {createTrustedCallerContext} = await import('../../../src/host/creative/trusted-context.js');
+  const f = await preparedDraftFixture();
+  let reader: InstanceType<typeof CreatedSourceFactsReader> | undefined;
+  try {
+    f.worker.start(); const completed = await waitForCompletedDraft(f); await f.worker.close();
+    const prepared = new CreatedPreparedSourceStore(f.host.revisions);
+    const impacts = new CreatedSourceImpactStore(f.host.revisions,
+      new ImpactStore(f.host.revisions,new OperationIdempotencyStore(f.host.revisions.compose(db=>db))));
+    const projectAuthority = new CreativeProjectAuthority(f.app.creation);
+    let selection = 0, clock = Math.floor(Date.now()/1000);
+    const dependencies = {host:f.host,authority:projectAuthority,tasks:f.tasks,assets:f.registry,
+      verifier:f.verifier,selection:{currentSelectionVersion:()=>selection},stageDomainRoot:f.taskRoot};
+    reader = new CreatedSourceFactsReader({...dependencies,prepared});
+    const execution = f.task.request.execution;
+    expect(completed.terminal_reason).toBe('SOURCE_ONLY');
+    const mapping = prepared.register({project_id:f.projectId,job_id:f.task.job_id,request_digest:f.task.request_digest,
+      fact_digest:canonicalDigest(completed.fact),execution,base_revision:1,source_digest:f.commit.source_digest,
+      plan_sha256:completed.fact.plan_digest!,rights_digest:completed.fact.rights_digest,frame_count:90,
+      fps_numerator:30,fps_denominator:1,stage_root:completed.root,roots:completed.fact.roots,files:completed.fact.files});
+    const changes = new CreatedSourceChangeService({host:f.host,prepared,impacts,facts:reader,authority:projectAuthority});
+    let change = await changes.prepare({meta:{idempotency_key:'d09-prepare',correlation_id:'d09-prepare'},project_id:f.projectId,
+      materialization_id:mapping.prepared_source_id,base_revision:1,source_digest:f.commit.source_digest,selection_version:0,execution},'owner');
+    if (planMutation) {
+      // A validly rehashed but false plan, registered through the actual impact store.
+      // No accepted review/approval rows are forged to exercise this refusal.
+      const plan = structuredClone(impacts.planFact(change.impact_id)!.plan) as import('../../../src/host/agent-driven/created-source-ports.js').PreparedAdoptionPlanV1;
+      Reflect.set(plan.native_plan,'film_sha256','f'.repeat(64));
+      const planDigest = preparedAdoptionPlanDigest(plan), original = impacts.read(change.impact_id)!;
+      const impact = impacts.create({impact_id:'imp_d09_false_plan',project_id:f.projectId,materialization_id:mapping.prepared_source_id,
+        target_snapshot_id:plan.target_snapshot_id,base_revision:plan.base_revision,source_digest:plan.base_source_digest,
+        control_revision:plan.control_revision,engine_upstream_sha:plan.engine_upstream_sha,affected_ranges:plan.affected_ranges,
+        affected_consumers:original.affected_consumers,locks_checked:plan.locks_checked,rights_digest:original.rights_digest,
+        native_plan_sha256:planDigest,approvals_required:['change.approve'],request_digest:canonicalDigest({case:'false-plan'}),plan,
+        now:new Date(Date.parse(plan.expires_at)-900000)});
+      change = {...change,impact_id:impact.impact_id,plan_sha256:planDigest};
+    }
+    const authority = new CreatedRunAuthority({prepared:dependencies,now:()=>clock,
+      sessionGuard:({principal_id,session_ref})=>f.app.auth.isPrincipalActive({principal_id,channel:'trusted_ui',session_ref,expires_at:0})});
+    const workflow = new FixedWorkflowService({repository:f.repo,adoption:authority,now:()=>clock});
+    const ui = createTrustedCallerContext({principal_id:'owner',channel:'trusted_ui',source:'trusted_ui',session_ref:f.ui.principal.session_ref});
+    const pkg = await workflow.publishReviewPackage({project_id:f.projectId,run_id:execution.run_id,package_id:'d09-package',kind:'sample',chapter_id:null,
+      input_digest:execution.input_digest,output_digest:completed.fact.source_digest,quality_digest:canonicalDigest({case:'D09 authority fixture only'}),
+      parts:(['preview','narration','subtitles','shot_summary','rights_quality'] as const).map(kind=>({kind,artifact_ref:{id:'fixture-'+kind,version:1,sha256:canonicalDigest(completed.fact)},download_ref:null})),
+      source_shot_ids:['s1','s2','s3'],selection_reason:'D09 authority fixture metadata, not preview or human acceptance',
+      allowed_choices:['accept','accept_and_adopt'],impact:change,step_id:execution.step_id,attempt:execution.attempt},f.owner);
+    prepared.bindPackage({prepared_source_id:mapping.prepared_source_id,package_id:pkg.package_id,package_version:pkg.version,receipt_digest:canonicalDigest(pkg)});
+    const request: import('../../../src/contracts/agent-driven-types.js').ReviewDecisionInput = {
+      meta:{idempotency_key:'d09-approve',correlation_id:'d09-approve'},project_id:f.projectId,run_id:execution.run_id,
+      package_id:pkg.package_id,package_version:pkg.version,plan_version:1,input_digest:pkg.input_digest,output_digest:pkg.output_digest,
+      quality_digest:pkg.quality_digest,choice:'accept_and_adopt',impact_id:change.impact_id,plan_sha256:change.plan_sha256};
+    const close = async()=>{try {await reader!.close();} finally {await f.close();}
+      const {existsSync}=await import('node:fs');expect(existsSync(f.root)).toBe(false);
+      console.info(JSON.stringify({case:'D09 real prepared cleanup',pid:process.pid,root:f.root,removed:true}));};
+    return {...f,completed,prepared,impacts,projectAuthority,authority,workflow,request,ui,change,execution,
+      clockNow:()=>clock,advanceSelection:()=>{selection++;},expire:()=>{clock=Math.ceil(Date.parse(change.expires_at)/1000);},close};
+  } catch(error) {try {await reader?.close();} finally {await f.close();}
+    const {existsSync}=await import('node:fs');
+    console.info(JSON.stringify({case:'D09 real prepared setup failure cleanup',pid:process.pid,root:f.root,removed:!existsSync(f.root)}));
+    throw error;}
+}
+
+async function d09SourceDescriptors(roots: readonly string[]): Promise<string[]> {
+  const {readdir,readlink} = await import('node:fs/promises');
+  const found:string[]=[];
+  for (const fd of await readdir('/proc/self/fd')) {
+    try {const target=await readlink('/proc/self/fd/'+fd);if(roots.some(root=>target===root||target.startsWith(root+'/')))found.push(fd+':'+target);}catch{}
+  }
+  return found.sort();
+}
+
+it('D09 real prepared succeeds with full plan digest, replays once and releases held source FDs', async()=>{
+  const f=await d09RealFixture();
+  try {
+    const roots=[f.authorRoot,f.completed.root],before=await d09SourceDescriptors(roots);
+    const result=await f.workflow.decideReview(f.request,f.ui);
+    expect(result.approval).not.toBeNull();
+    const approvals=await f.repo.transaction(tx=>tx.list('approval',{project_id:f.projectId,run_id:f.execution.run_id}));
+    expect(approvals).toHaveLength(1);
+    expect(approvals[0]).toMatchObject({action_digest:f.change.plan_sha256,facts_digest:f.change.plan_sha256,state:'active'});
+    expect(await f.workflow.decideReview(f.request,f.ui)).toEqual(result);
+    expect(await f.repo.transaction(tx=>tx.list('approval',{project_id:f.projectId,run_id:f.execution.run_id}))).toHaveLength(1);
+    expect(await d09SourceDescriptors(roots)).toEqual(before);
+    expect(f.host.revisions.activeCommit(f.projectId)!.revision).toBe(1);
+  } finally {await f.close();}
+},120000);
+
+it.each(['plan','package','rights','selection','expiry','closure'] as const)(
+  'D09 real prepared refuses changed %s without approval and releases held source FDs',async field=>{
+    const f=await d09RealFixture(field==='plan');
+    try {
+      if(field==='package')f.request.package_version++;
+      if(field==='selection')f.advanceSelection();
+      if(field==='expiry')f.expire();
+      if(field==='rights') {
+        // Explicit durable-registry corruption fault injection: no rights mutation API
+        // exists for immutable registrations. Never manufacture an accepted policy row.
+        f.host.revisions.compose(db=>{db.exec('DROP TRIGGER created_local_asset_no_delete');
+          db.prepare('DELETE FROM created_local_asset WHERE project_id=?').run(f.projectId);});
+      }
+      if(field==='closure') {
+        const {CreativeService}=await import('../../../src/host/creative/creative-service.js');
+        const creation=f.app.creation.forProject(f.projectId)!;
+        const current=await f.repo.transaction(tx=>{const head=tx.get('intake_head',{intake_id:creation.request.intake_id})!;
+          return tx.get('intake_version',{intake_id:head.intake_id,version:head.current_version})!;});
+        const creative=new CreativeService({repository:f.repo,artifactAuthority:f.projectAuthority.assertArtifact,contentAuthority:f.projectAuthority.assertContent});
+        await creative.putIntake({meta:{idempotency_key:'d09-change-intake',correlation_id:'d09-change-intake'},intake_id:current.intake_id,
+          base_version:current.version,brief:{...current.content_json,topic:current.content_json.topic+' changed'}},f.owner);
+      }
+      const roots=[f.authorRoot,f.completed.root],before=await d09SourceDescriptors(roots);
+      await expect(f.workflow.decideReview(f.request,f.ui)).rejects.toThrow();
+      expect(await f.repo.transaction(tx=>tx.list('approval',{project_id:f.projectId,run_id:f.execution.run_id}))).toEqual([]);
+      expect(await f.repo.transaction(tx=>tx.get('review_request',{project_id:f.projectId,run_id:f.execution.run_id,review_id:f.request.package_id})?.state)).toBe('pending');
+      expect(await d09SourceDescriptors(roots)).toEqual(before);
+      expect(f.host.revisions.activeCommit(f.projectId)!.revision).toBe(1);
+    } finally {await f.close();}
+  },120000);
+
+it('D09 real prepared refuses a copied transaction object even while actual proof is held',async()=>{
+  const f=await d09RealFixture();
+  try {
+    const roots=[f.authorRoot,f.completed.root],before=await d09SourceDescriptors(roots);
+    await expect(f.authority.reviewTransaction!(f.request,f.ui,(tx,digest)=>{
+      const now=f.clockNow(),expires=Math.min(now+60,Math.floor(Date.parse(f.change.expires_at)/1000));
+      const confirm=f.authority.registerConfirmation(tx,{project_id:f.projectId,run_id:f.execution.run_id,review_id:f.request.package_id,
+        input_digest:f.request.input_digest,purpose:'change.approve',authenticated_actor:'owner',session_ref:f.ui.session_ref,
+        action_digest:digest!,issued_at:now,expires_at:expires});
+      const copied={...tx};
+      expect(f.authority.registerApproval(copied,{project_id:f.projectId,run_id:f.execution.run_id,run_scope_digest:f.execution.run_scope_digest,
+        confirmation_id:confirm.confirmation_id,plan_version:1,step_id:f.execution.step_id,attempt:f.execution.attempt,input_digest:f.request.input_digest,
+        change_id:f.change.materialization_id,impact_id:f.change.impact_id,base_revision:f.change.base_revision,control_revision:f.change.control_revision,
+        action_digest:digest!,facts_digest:digest!,expires_at:expires})).toBeNull();
+      throw Error('rollback wrong-transaction fixture confirmation');
+    })).rejects.toThrow('rollback wrong-transaction fixture confirmation');
+    expect(await f.repo.transaction(tx=>tx.list('approval',{project_id:f.projectId,run_id:f.execution.run_id}))).toEqual([]);
+    expect(await d09SourceDescriptors(roots)).toEqual(before);
+  } finally {await f.close();}
+},120000);
