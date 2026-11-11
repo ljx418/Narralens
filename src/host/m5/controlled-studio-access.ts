@@ -75,7 +75,7 @@ export interface NativeStudioUiGrantV1{
  /** Calls the Host's own closed dispatcher. It never loops back through HTTP. */
  readonly invoke:(input:NativeStudioUiInvokeInput)=>Promise<NativeStudioUiInvokeResult>;
  /** Opens one prepared review object for reading. */
- readonly openReviewMedia:(input:{readonly ref:string;readonly range?:NativeStudioUiMediaRange})=>Promise<NativeStudioUiReviewMedia>;
+ readonly openReviewMedia:(input:{readonly ref:string;readonly range?:NativeStudioUiMediaRange;readonly signal?:AbortSignal})=>Promise<NativeStudioUiReviewMedia>;
 }
 
 export interface NativeStudioGrant {
@@ -303,24 +303,35 @@ export class ControlledStudioAccess {
   * When the parent is revoked while the object is being opened, the reader that was
   * just handed out is closed here: the caller never receives it, so it can never leak.
   */
- async openUiMedia(session:NativeStudioUiSession,ref:string,range?:NativeStudioUiMediaRange):Promise<NativeStudioUiReviewMedia>{
+ async openUiMedia(session:NativeStudioUiSession,ref:string,range?:NativeStudioUiMediaRange,signal?:AbortSignal):Promise<NativeStudioUiReviewMedia>{
   this.recheckUi(session);
   if(typeof ref!=='string'||!/^[A-Za-z0-9_-]{1,200}$/.test(ref))throw new StudioAccessError(400,'INVALID_REQUEST');
   if(range!==undefined){
    if(!Number.isSafeInteger(range.offset)||!Number.isSafeInteger(range.length)||range.offset<0||range.length<1||range.offset+range.length>Number.MAX_SAFE_INTEGER)throw new StudioAccessError(400,'INVALID_REQUEST');
   }
-  const media=await session.grant.openReviewMedia(range===undefined?{ref}:{ref,range});
-  try{this.recheckUi(session);}
+  signal?.throwIfAborted();
+  const input={ref,...(range===undefined?{}:{range}),...(signal===undefined?{}:{signal})};
+  // Opening may finish after a disconnect. The late handle still belongs to us and
+  // must be closed even though the HTTP caller has already gone away.
+  const media=await awaitUiOperation(session.grant.openReviewMedia(input),signal,
+   async late=>{await late.close();});
+  try{signal?.throwIfAborted();this.recheckUi(session);}
   catch(error){await media.close().catch(()=>undefined);throw error;}
+  let closing:Promise<void>|undefined;
+  const close=()=>closing??=Promise.resolve().then(()=>media.close());
   // The single-read bound belongs to the transport, so it is enforced here rather than
   // trusted: a caller can ask for a window, but never for an unbounded read.
   return Object.freeze({
    content_type:media.content_type,bytes:media.bytes,sha256:media.sha256,etag:media.etag,
    read:async(window:NativeStudioUiMediaRange)=>{
     if(!Number.isSafeInteger(window?.offset)||!Number.isSafeInteger(window?.length)||window.offset<0||window.length<1||window.length>UI_MAX_READ_BYTES)throw new StudioAccessError(400,'INVALID_REQUEST');
-    return media.read(window);
+    if(closing!==undefined)throw new StudioAccessError(503,'CAPABILITY_UNAVAILABLE');
+    signal?.throwIfAborted();this.recheckUi(session);
+    const bytes=await awaitUiOperation(media.read(window),signal);
+    signal?.throwIfAborted();this.recheckUi(session);
+    return bytes;
    },
-   close:()=>media.close(),
+   close,
   });
  }
 
@@ -360,4 +371,26 @@ export class ControlledStudioAccess {
   response.writeHead(200,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store'});
   response.end(JSON.stringify(answer));
  }
+}
+
+/** Cancel the consumer without losing ownership of a late opened resource. */
+function awaitUiOperation<T>(operation:Promise<T>,signal?:AbortSignal,onLate?:(value:T)=>Promise<void>):Promise<T>{
+ if(signal===undefined)return operation;
+ return new Promise<T>((resolve,reject)=>{
+  let settled=false,aborted=false;
+  const cancel=()=>{
+   if(settled)return;
+   settled=true;aborted=true;signal.removeEventListener('abort',cancel);
+   reject(signal.reason??new DOMException('Review media request cancelled','AbortError'));
+  };
+  operation.then(value=>{
+   if(aborted){if(onLate!==undefined)void Promise.resolve().then(()=>onLate(value)).catch(()=>undefined);return;}
+   settled=true;signal.removeEventListener('abort',cancel);resolve(value);
+  },error=>{
+   if(settled)return;
+   settled=true;signal.removeEventListener('abort',cancel);reject(error);
+  });
+  signal.addEventListener('abort',cancel,{once:true});
+  if(signal.aborted)cancel();
+ });
 }

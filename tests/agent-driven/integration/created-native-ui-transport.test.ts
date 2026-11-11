@@ -108,7 +108,7 @@ async function harness(options: {
     };
   };
 
-  return { origin, recorder, exchange, close: async () => { await gateway.close(); } };
+  return { origin, recorder, exchange, close: async () => { await gateway.close(); expect(gateway.isListening).toBe(false); } };
 }
 
 /**
@@ -548,3 +548,182 @@ async function rawPost(
     socket.destroy();
   }
 }
+
+
+function deferred<T>() {
+  let resolve!: (value: T) => void;
+  const promise = new Promise<T>((done) => { resolve = done; });
+  return { promise, resolve };
+}
+function mediaHeaders(h: Harness, session: Awaited<ReturnType<Harness["exchange"]>>) {
+  return { Origin: h.origin, Cookie: session.uiCookie!, "X-Narralens-Workbench-CSRF": session.ui!.csrf };
+}
+
+describe("MAIN transport lifecycle regressions", () => {
+  it("rechecks UI revocation after a pending read before sending any bytes", async () => {
+    const h = await harness();
+    let live = true;
+    const ui = fixtureUi(h.recorder, () => live);
+    const closed = deferred<void>();
+    try {
+      const session = await h.exchange(grantFor(h, { ...ui, openReviewMedia: async () => ({
+        content_type: "video/mp4", bytes: MEDIA_BYTES.length, sha256: MEDIA_SHA, etag: `"${MEDIA_SHA}"`,
+        read: async ({ offset, length }) => {
+          h.recorder.reads.push(length);
+          await Promise.resolve();
+          live = false;
+          return MEDIA_BYTES.subarray(offset, offset + length);
+        },
+        close: async () => { h.recorder.closes++; closed.resolve(); },
+      }) }));
+      const response = await fetch(`${h.origin}/narralens/api/ui/review-media/ref_1`, { headers: mediaHeaders(h, session) });
+      expect(response.status).toBe(409);
+      await closed.promise;
+      expect(h.recorder.reads).toHaveLength(1);
+      expect(h.recorder.closes).toBe(1);
+    } finally { await h.close(); }
+  });
+
+  it("cuts an already-started response on later revocation instead of completing it", async () => {
+    const h = await harness();
+    let live = true;
+    const ui = fixtureUi(h.recorder, () => live);
+    const secondRead = deferred<void>(), release = deferred<void>(), closed = deferred<void>();
+    try {
+      const session = await h.exchange(grantFor(h, { ...ui, openReviewMedia: async () => ({
+        content_type: "video/mp4", bytes: MEDIA_BYTES.length, sha256: MEDIA_SHA, etag: `"${MEDIA_SHA}"`,
+        read: async ({ offset, length }) => {
+          h.recorder.reads.push(length);
+          if (offset > 0) { secondRead.resolve(); await release.promise; live = false; }
+          return MEDIA_BYTES.subarray(offset, offset + length);
+        },
+        close: async () => { h.recorder.closes++; closed.resolve(); },
+      }) }));
+      const responsePromise = fetch(`${h.origin}/narralens/api/ui/review-media/ref_1`, { headers: mediaHeaders(h, session) });
+      await secondRead.promise;
+      const response = await responsePromise;
+      expect(response.status).toBe(200);
+      const body = response.arrayBuffer();
+      const rejected = expect(body).rejects.toThrow();
+      release.resolve();
+      await rejected;
+      await closed.promise;
+      expect(h.recorder.reads).toHaveLength(2);
+      expect(h.recorder.closes).toBe(1);
+    } finally { release.resolve(); await h.close(); }
+  });
+
+  it("forwards cancellation and closes a reader whose open finishes after disconnect", async () => {
+    const h = await harness(), opened = deferred<void>(), release = deferred<void>(), closed = deferred<void>();
+    const client = new AbortController();
+    let hostSignal: AbortSignal | undefined;
+    const ui = fixtureUi(h.recorder);
+    try {
+      const session = await h.exchange(grantFor(h, { ...ui, openReviewMedia: async ({ signal }) => {
+        hostSignal = signal; opened.resolve(); await release.promise;
+        return {
+          content_type: "video/mp4", bytes: MEDIA_BYTES.length, sha256: MEDIA_SHA, etag: `"${MEDIA_SHA}"`,
+          read: async () => { throw new Error("late reader must not be read"); },
+          close: async () => { h.recorder.closes++; closed.resolve(); },
+        };
+      } }));
+      const pending = fetch(`${h.origin}/narralens/api/ui/review-media/ref_1`, { headers: mediaHeaders(h, session), signal: client.signal });
+      const rejected = expect(pending).rejects.toThrow();
+      await opened.promise;
+      expect(hostSignal).toBeDefined();
+      const cancelled = new Promise<void>((done) => { hostSignal!.addEventListener("abort", () => done(), { once: true }); });
+      client.abort(); await rejected; await cancelled;
+      expect(hostSignal!.aborted).toBe(true);
+      release.resolve(); await closed.promise;
+      expect(h.recorder.closes).toBe(1);
+    } finally { release.resolve(); await h.close(); }
+  });
+
+  it("closes on disconnect while a read is still pending, without waiting for that read", async () => {
+    const h = await harness(), reading = deferred<void>(), release = deferred<void>(), closed = deferred<void>();
+    const client = new AbortController();
+    const ui = fixtureUi(h.recorder);
+    try {
+      const session = await h.exchange(grantFor(h, { ...ui, openReviewMedia: async () => ({
+        content_type: "video/mp4", bytes: MEDIA_BYTES.length, sha256: MEDIA_SHA, etag: `"${MEDIA_SHA}"`,
+        read: async ({ offset, length }) => { reading.resolve(); await release.promise; return MEDIA_BYTES.subarray(offset, offset + length); },
+        close: async () => { h.recorder.closes++; closed.resolve(); },
+      }) }));
+      const pending = fetch(`${h.origin}/narralens/api/ui/review-media/ref_1`, { headers: mediaHeaders(h, session), signal: client.signal });
+      const rejected = expect(pending).rejects.toThrow();
+      await reading.promise; client.abort(); await rejected;
+      await closed.promise;
+      expect(h.recorder.closes).toBe(1);
+      release.resolve();
+    } finally { release.resolve(); await h.close(); }
+  });
+
+  it("shutdown cancels a pending reader and actually closes both Gateway listeners", async () => {
+    const h = await harness(), reading = deferred<void>(), release = deferred<void>(), closed = deferred<void>();
+    const ui = fixtureUi(h.recorder);
+    try {
+      const session = await h.exchange(grantFor(h, { ...ui, openReviewMedia: async () => ({
+        content_type: "video/mp4", bytes: MEDIA_BYTES.length, sha256: MEDIA_SHA, etag: `"${MEDIA_SHA}"`,
+        read: async ({ offset, length }) => { reading.resolve(); await release.promise; return MEDIA_BYTES.subarray(offset, offset + length); },
+        close: async () => { h.recorder.closes++; closed.resolve(); },
+      }) }));
+      const pending = fetch(`${h.origin}/narralens/api/ui/review-media/ref_1`, { headers: mediaHeaders(h, session) });
+      // The request may receive the final 503 before socket shutdown, or be disconnected.
+      const outcome = pending.then(response => response.status, () => 0);
+      await reading.promise; await h.close(); await closed.promise;
+      expect([0, 503]).toContain(await outcome);
+      expect(h.recorder.closes).toBe(1);
+      const endpoint = new URL(h.origin);
+      await new Promise<void>((done, fail) => {
+        const probe = connect({ host: endpoint.hostname, port: Number(endpoint.port) });
+        probe.once("connect", () => { probe.destroy(); fail(new Error("closed Gateway is still accepting connections")); });
+        probe.once("error", error => { expect((error as NodeJS.ErrnoException).code).toBe("ECONNREFUSED"); done(); });
+      });
+    } finally { release.resolve(); await h.close(); }
+  });
+
+  it("HEAD returns metadata without reading and releases the opened handle", async () => {
+    const h = await harness();
+    try {
+      const session = await h.exchange(grantFor(h));
+      const response = await fetch(`${h.origin}/narralens/api/ui/review-media/ref_1`, {
+        method: "HEAD", headers: { ...mediaHeaders(h, session), Range: "bytes=-17" },
+      });
+      expect(response.status).toBe(206);
+      expect(response.headers.get("content-length")).toBe("17");
+      expect(h.recorder.reads).toEqual([]);
+      expect(h.recorder.closes).toBe(1);
+    } finally { await h.close(); }
+  });
+
+  it("delivers the first chunk before reading an entire virtual video and stops on disconnect", async () => {
+    const h = await harness(), closed = deferred<void>();
+    const totalChunks = 64, chunk = Buffer.alloc(1024 * 1024, 0x47);
+    const ui = fixtureUi(h.recorder);
+    let socket: Socket | undefined;
+    try {
+      const session = await h.exchange(grantFor(h, { ...ui, openReviewMedia: async () => ({
+        content_type: "video/mp4", bytes: totalChunks * chunk.length, sha256: MEDIA_SHA, etag: `"${MEDIA_SHA}"`,
+        // Virtual diagnostic object: tests transport flow only, not content-integrity proof.
+        read: async ({ length }) => { h.recorder.reads.push(length); return chunk.subarray(0, length); },
+        close: async () => { h.recorder.closes++; closed.resolve(); },
+      }) }));
+      const endpoint = new URL(h.origin);
+      socket = connect({ host: endpoint.hostname, port: Number(endpoint.port) });
+      const first = new Promise<Buffer>((done, fail) => { socket!.once("data", done); socket!.once("error", fail); });
+      socket.write([
+        "GET /narralens/api/ui/review-media/ref_1 HTTP/1.1", `Host: ${endpoint.host}`,
+        `Origin: ${h.origin}`, `Cookie: ${session.uiCookie!}`, `X-Narralens-Workbench-CSRF: ${session.ui!.csrf}`,
+        "Connection: close", "", "",
+      ].join("\r\n"));
+      const bytes = await first;
+      expect(bytes.toString("utf8")).toContain("HTTP/1.1 200");
+      expect(h.recorder.reads.length).toBeLessThan(totalChunks);
+      socket.destroy(); await closed.promise;
+      const readsAtClose = h.recorder.reads.length;
+      await Promise.resolve();
+      expect(h.recorder.reads.length).toBe(readsAtClose);
+      expect(h.recorder.closes).toBe(1);
+    } finally { socket?.destroy(); await h.close(); }
+  });
+});

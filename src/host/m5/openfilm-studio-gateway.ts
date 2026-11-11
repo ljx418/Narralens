@@ -250,6 +250,7 @@ export class OpenFilmStudioGateway {
   #filmGatewayOrigin = "";
   #filmOrigin = "";
   readonly #sockets = new Set<Duplex>();
+  readonly #uiMediaRequests = new Set<AbortController>();
 
   constructor(deps: OpenFilmStudioGatewayDeps) {
     this.#deps = deps;
@@ -323,6 +324,8 @@ export class OpenFilmStudioGateway {
 
   async close(): Promise<void> {
     this.#access?.close();
+    for (const controller of this.#uiMediaRequests) controller.abort();
+    this.#uiMediaRequests.clear();
     for (const socket of this.#sockets) socket.destroy();
     this.#sockets.clear();
     const server = this.#server;
@@ -535,8 +538,25 @@ export class OpenFilmStudioGateway {
   async #uiReviewMedia(request: IncomingMessage, response: ServerResponse, ref: string): Promise<void> {
     const session = this.#access!.authenticateUi(request);
     const method = (request.method ?? "GET").toUpperCase();
-    const media = await this.#access!.openUiMedia(session, ref);
+    const controller = new AbortController();
+    const cancel = () => controller.abort();
+    const disconnected = () => { if (!response.writableFinished) cancel(); };
+    request.once("aborted", cancel);
+    response.once("close", disconnected);
+    this.#uiMediaRequests.add(controller);
+    let media: NativeStudioUiReviewMedia | undefined;
     try {
+      if (request.aborted || response.destroyed) controller.abort();
+      media = await this.#access!.openUiMedia(session, ref, undefined, controller.signal);
+      const current = () => {
+        controller.signal.throwIfAborted();
+        this.#access!.recheckUi(session);
+      };
+      current();
+      if (!Number.isSafeInteger(media.bytes) || media.bytes < 0
+        || !/^[a-f0-9]{64}$/.test(media.sha256) || media.etag !== `"${media.sha256}"`) {
+        throw new StudioAccessError(503, "CAPABILITY_UNAVAILABLE");
+      }
       const headers: Record<string, string> = {
         "content-type": media.content_type,
         "cache-control": "no-store",
@@ -546,21 +566,40 @@ export class OpenFilmStudioGateway {
       };
       const window = resolveByteRange(request.headers.range, media.bytes);
       const length = window === undefined ? media.bytes : window.end - window.start + 1;
+      const status = window === undefined ? 200 : 206;
       headers["content-length"] = String(length);
       if (window !== undefined) headers["content-range"] = `bytes ${window.start}-${window.end}/${media.bytes}`;
       if (method === "HEAD") {
-        response.writeHead(window === undefined ? 200 : 206, headers);
+        current();
+        response.writeHead(status, headers);
         response.end();
         return;
       }
-      const body = await readBounded(media, window === undefined ? 0 : window.start, length);
-      // A short or long read means the object changed under the descriptor: it is
-      // refused rather than served.
-      if (body.length !== length) throw new StudioAccessError(503, "CAPABILITY_UNAVAILABLE");
-      response.writeHead(window === undefined ? 200 : 206, headers);
-      response.end(body);
+      let offset = window === undefined ? 0 : window.start;
+      let remaining = length;
+      // Only one reader chunk is retained. Await the socket's backpressure before
+      // fetching another chunk; never concatenate the complete video into memory.
+      while (remaining > 0) {
+        current();
+        const size = Math.min(remaining, UI_MAX_READ_BYTES);
+        const chunk = await media.read({ offset, length: size });
+        current();
+        if (chunk.byteLength !== size) throw new StudioAccessError(503, "CAPABILITY_UNAVAILABLE");
+        if (!response.headersSent) response.writeHead(status, headers);
+        if (!response.write(Buffer.from(chunk))) await awaitResponseDrain(response, controller.signal);
+        offset += size;
+        remaining -= size;
+      }
+      current();
+      if (!response.headersSent) response.writeHead(status, headers);
+      response.end();
     } finally {
-      try { await media.close(); } catch { /* the reader is released either way */ }
+      request.removeListener("aborted", cancel);
+      response.removeListener("close", disconnected);
+      this.#uiMediaRequests.delete(controller);
+      if (media !== undefined) {
+        try { await media.close(); } catch { /* preserve the original request outcome */ }
+      }
     }
   }
 
@@ -1060,27 +1099,20 @@ function resolveByteRange(header: string | undefined, total: number): { start: n
   return { start, end };
 }
 
-/**
- * Read a window of the object in bounded reads.
- *
- * Every read is at most one mebibyte, and a read that returns a different number of
- * bytes than was asked for means the object moved under the descriptor.
- */
-async function readBounded(
-  media: NativeStudioUiReviewMedia,
-  offset: number,
-  length: number,
-): Promise<Buffer> {
-  const chunks: Buffer[] = [];
-  let remaining = length;
-  let at = offset;
-  while (remaining > 0) {
-    const size = Math.min(remaining, UI_MAX_READ_BYTES);
-    const chunk = await media.read({ offset: at, length: size });
-    if (chunk.byteLength !== size) throw new StudioAccessError(503, "CAPABILITY_UNAVAILABLE");
-    chunks.push(Buffer.from(chunk));
-    at += size;
-    remaining -= size;
-  }
-  return Buffer.concat(chunks);
+/** Wait for actual socket capacity, or cancel immediately on disconnect/shutdown. */
+function awaitResponseDrain(response: ServerResponse, signal: AbortSignal): Promise<void> {
+  return new Promise<void>((resolve, reject) => {
+    const cleanup = () => {
+      response.removeListener("drain", drained);
+      response.removeListener("error", failed);
+      signal.removeEventListener("abort", aborted);
+    };
+    const drained = () => { cleanup(); resolve(); };
+    const failed = (error: Error) => { cleanup(); reject(error); };
+    const aborted = () => { cleanup(); reject(signal.reason ?? new DOMException("Review media cancelled", "AbortError")); };
+    response.once("drain", drained);
+    response.once("error", failed);
+    signal.addEventListener("abort", aborted, { once: true });
+    if (signal.aborted) aborted();
+  });
 }
