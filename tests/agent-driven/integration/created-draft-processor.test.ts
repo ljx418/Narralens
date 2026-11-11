@@ -132,3 +132,56 @@ it('refuses a read proof of prepared bytes that changed under the same size and 
  const targets=await Promise.all((await readdir('/proc/self/fd')).map(fd=>readlink('/proc/self/fd/'+fd).catch(()=>'')));
  expect(targets.filter(path=>path.startsWith(f.root))).toEqual([]);
 },120000);
+
+/* ---- CR-R1-001 section 5 / R2: the SOURCE_ONLY settlement, the lease it gives back and
+ * the fences around it. A completed prepared source is read, never re-created, and a
+ * cancellation at any point leaves the author untouched. ---- */
+
+it('cancels before the preparation starts, writes no stage and leaves the author unchanged',async()=>{
+ const f=await fixture(async(point,task,{host})=>{if(point==='before_prepare')host.jobs.requestCancel(task.job_id);});try{
+  f.worker.start();await until(()=>['succeeded','failed','attention','cancelled'].includes(f.host.revisions.readJob(f.task.job_id)!.state));
+  expect(f.host.revisions.readJob(f.task.job_id)!.state).not.toBe('succeeded');
+  expect(f.tasks.readPrepared(f.task.job_id,'owner')).toBeNull();
+  expect(await readdir(f.taskRoot).catch(e=>{if(e.code==='ENOENT')return[];throw e;})).toEqual([]);
+  expect(f.host.revisions.activeCommit(f.projectId)).toEqual(f.commit);
+ }finally{await f.close();}
+},120000);
+
+it('does not publish a prepared result when the cancellation arrives after the fact was recorded',async()=>{
+ const f=await fixture(async(point,task,{host})=>{if(point==='before_finish')host.jobs.requestCancel(task.job_id);});try{
+  f.worker.start();await until(()=>['succeeded','failed','attention','cancelled'].includes(f.host.revisions.readJob(f.task.job_id)!.state));
+  const job=f.host.revisions.readJob(f.task.job_id)!;
+  expect(job.state).not.toBe('succeeded');
+  expect(f.tasks.receipt(f.task.job_id,'owner').result_ref).toBeNull();
+  // A recorded fact on a cancelled job is not a completed SOURCE_ONLY source.
+  const row=f.host.revisions.compose(db=>db.prepare('SELECT terminal_reason FROM job WHERE job_id=?').get(f.task.job_id)) as {terminal_reason:string}|undefined;
+  expect(row?.terminal_reason).not.toBe('SOURCE_ONLY');
+  expect(f.host.revisions.activeCommit(f.projectId)).toEqual(f.commit);
+ }finally{await f.close();}
+},120000);
+
+it('leaves the succeeded SOURCE_ONLY job without a live lease and without moving the author',async()=>{
+ const f=await fixture();try{
+  f.worker.start();await until(()=>['succeeded','failed','attention','cancelled'].includes(f.host.revisions.readJob(f.task.job_id)!.state));
+  expect(f.tasks.receipt(f.task.job_id,'owner').state).toBe('succeeded');
+  const job=f.host.revisions.compose(db=>db.prepare('SELECT lease_owner,lease_expires_at,attempt FROM job WHERE job_id=?').get(f.task.job_id)) as {lease_owner:string|null;lease_expires_at:number|null;attempt:number}|undefined;
+  expect(job?.lease_owner??null).toBeNull();
+  expect(job?.attempt).toBe(1);
+  expect(f.host.revisions.activeCommit(f.projectId)).toEqual(f.commit);
+ }finally{await f.close();}
+},120000);
+
+it('proves the completed source again without reclaiming the succeeded job',async()=>{
+ const f=await fixture();try{
+  f.worker.start();await until(()=>['succeeded','failed','attention','cancelled'].includes(f.host.revisions.readJob(f.task.job_id)!.state));
+  const completed=completedSource(f),binding=readBinding(completed,'impact'),assets=registryFacts(f);
+  const proof=await f.verifier.proveForRead(completed,binding,assets);
+  expect(()=>f.verifier.assertCurrentForRead(completed,binding,proof,()=>{})).not.toThrow();
+  // Reading a completed source never claims the succeeded job again.
+  const job=f.host.revisions.compose(db=>db.prepare('SELECT lease_owner,attempt,state FROM job WHERE job_id=?').get(f.task.job_id)) as {lease_owner:string|null;attempt:number;state:string}|undefined;
+  expect(job?.lease_owner??null).toBeNull();
+  expect(job?.attempt).toBe(1);
+  expect(job?.state).toBe('succeeded');
+  f.verifier.release(proof);
+ }finally{await f.close();}
+},120000);

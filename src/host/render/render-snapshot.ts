@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import { createReadStream } from "node:fs";
 import { copyFile, mkdir, readFile, stat, writeFile } from "node:fs/promises";
 import { extname, resolve } from "node:path";
-import type { DeliveryManifest, QCItem, Ref } from "../../contracts/agent-driven-types.js";
+import type { DeliveryManifest, QCItem, Ref, RenderSpec } from "../../contracts/agent-driven-types.js";
 import { MANDATORY_A_SUPPLEMENT_ROLES, runPreflight } from "../preflight/preflight.js";
 import { assertManifestMatches, buildDeliveryManifest } from "../delivery/manifest.js";
 import { realMediaToolRunner, runQualityControl, type MediaToolRunner, type SupplementCheck } from "../delivery/qc.js";
@@ -92,7 +92,7 @@ function sha256Of(bytes: Buffer | string): string {
  * the package is built and when the package is verified. Reading it in pieces keeps a
  * delivery from needing as much memory as the film is big.
  */
-async function sha256File(path: string): Promise<string | null> {
+export async function sha256FileDigest(path: string): Promise<string | null> {
   return await new Promise<string | null>((resolvePromise) => {
     const hash = createHash("sha256");
     const stream = createReadStream(path);
@@ -100,6 +100,116 @@ async function sha256File(path: string): Promise<string | null> {
     stream.on("data", (chunk) => { hash.update(chunk); });
     stream.on("end", () => { resolvePromise(hash.digest("hex")); });
   });
+}
+
+/**
+ * The delivery keys of one render.
+ *
+ * The key is the film plus the configuration: two attempts for the same film and the
+ * same configuration find the same package instead of publishing a second copy, and two
+ * different configurations never share one. The stage port uses the same derivation, so
+ * the evidence a phase produces names the delivery the package will carry.
+ */
+export interface RenderStageKeys {
+  readonly config_digest: string;
+  readonly delivery_id: string;
+  readonly package_id: string;
+  readonly download_ref: string;
+}
+
+/** Derive the delivery keys of one render. */
+export function renderStageKeys(project_id: string, snapshot_id: string, render_spec: RenderSpec): RenderStageKeys {
+  const config_digest = computeRenderConfigDigest({
+    render_spec,
+    upstream_sha: RENDER_PIN.upstream_sha,
+    worker_sha256: RENDER_PIN.worker_sha256,
+  });
+  const key = { project_id, snapshot_id, render_config_digest: config_digest };
+  const package_id = derivePackageId(key);
+  return {
+    config_digest,
+    delivery_id: deriveDeliveryId(key),
+    package_id,
+    download_ref: deriveDownloadRef(package_id),
+  };
+}
+
+/**
+ * The checks the quality control makes about the supplements of a closure.
+ *
+ * The comparison is against the digest the *snapshot* recorded, not against whatever
+ * the copy happens to hold: a supplement that changed between the commit and the copy
+ * is a supplement that was never cleared.
+ */
+export async function buildSupplementChecks(
+  closure: SnapshotClosure,
+  project_root: string,
+): Promise<SupplementCheck[]> {
+  const checks: SupplementCheck[] = [];
+  const supplementEntries = closure.entries.filter((entry) => entry.kind === "supplement");
+  for (const [index, entry] of supplementEntries.entries()) {
+    const path = resolve(project_root, entry.relative_path);
+    const bytes = await readFile(path).catch(() => null);
+    checks.push({
+      id: `sup${index}`,
+      role: entry.role ?? "",
+      sha256: entry.sha256,
+      bytes: entry.bytes,
+      actual_sha256: bytes === null ? null : sha256Of(bytes),
+      actual_bytes: bytes === null ? null : bytes.byteLength,
+    });
+  }
+  return checks;
+}
+
+/**
+ * The attachment that tells a package which project its film came from.
+ *
+ * The package carries the film's own entry document and this list of the snapshot's
+ * files with the digests the snapshot committed to. A package that holds only an MP4
+ * would present a flat film as if it were the project; this one says which project it
+ * came from and carries its document.
+ */
+export interface NativeSourceAttachment {
+  readonly kind: "narralens.native_project_attachment@1.0";
+  readonly scope: "document_and_closure_reference";
+  readonly editable_project_complete: false;
+  readonly note: string;
+  readonly project_id: string;
+  readonly snapshot_id: string;
+  readonly source_digest: string;
+  readonly project_revision: number;
+  readonly native_entry: string;
+  readonly expected_frames: number | null;
+  readonly expected_duration_seconds: number | null;
+  readonly copied: readonly { readonly relative_path: string; readonly sha256: string; readonly bytes: number }[];
+  readonly referenced: readonly { readonly relative_path: string; readonly sha256: string; readonly bytes: number }[];
+}
+
+/** Build the attachment of one closure. */
+export function nativeSourceAttachment(closure: SnapshotClosure, native_entry: string): NativeSourceAttachment {
+  return {
+    kind: "narralens.native_project_attachment@1.0",
+    // What this file is, exactly: the film's own document and the list of the
+    // snapshot's files. It is not an export of the whole editable project — the
+    // assets stay in the snapshot, which is the authoritative editable source.
+    scope: "document_and_closure_reference",
+    editable_project_complete: false,
+    note: "the package carries the film's entry document; the snapshot remains the authoritative editable source",
+    project_id: closure.project_id,
+    snapshot_id: closure.snapshot_id,
+    source_digest: closure.source_digest,
+    project_revision: closure.project_revision,
+    native_entry,
+    expected_frames: closure.expected_frames ?? null,
+    expected_duration_seconds: closure.expected_duration_seconds ?? null,
+    copied: closure.entries
+      .filter((entry) => entry.relative_path === native_entry)
+      .map((entry) => ({ relative_path: entry.relative_path, sha256: entry.sha256, bytes: entry.bytes })),
+    referenced: closure.entries
+      .filter((entry) => entry.relative_path !== native_entry)
+      .map((entry) => ({ relative_path: entry.relative_path, sha256: entry.sha256, bytes: entry.bytes })),
+  };
 }
 
 function failure(code: string, message: string, retryable: boolean, requiresReconciliation = false): RenderOutcome {
@@ -242,19 +352,11 @@ export class SnapshotRenderService implements RenderPort {
       // 3. The delivery key. One key, one package: a second attempt for the same film
       //    and the same configuration finds the first one's package instead of
       //    publishing a second copy.
-      const configDigest = computeRenderConfigDigest({
-        render_spec: request.render_spec,
-        upstream_sha: RENDER_PIN.upstream_sha,
-        worker_sha256: RENDER_PIN.worker_sha256,
-      });
-      const key = {
-        project_id: request.project_id,
-        snapshot_id: request.snapshot_id,
-        render_config_digest: configDigest,
-      };
-      const deliveryId = deriveDeliveryId(key);
-      const packageId = derivePackageId(key);
-      const downloadRef = deriveDownloadRef(packageId);
+      const stageKeys = renderStageKeys(request.project_id, request.snapshot_id, request.render_spec);
+      const configDigest = stageKeys.config_digest;
+      const deliveryId = stageKeys.delivery_id;
+      const packageId = stageKeys.package_id;
+      const downloadRef = stageKeys.download_ref;
 
       // 4. The film's own copy. The live project is never rendered.
       staging = await this.#deps.packages.createStaging(`attempt${request.attempt}`);
@@ -342,20 +444,8 @@ export class SnapshotRenderService implements RenderPort {
       // 7. The quality control: the file itself, and the files that travel with it.
       //    The digests are the ones the snapshot committed to, not the ones the copies
       //    happen to have.
-      const supplementChecks: SupplementCheck[] = [];
       const supplementEntries = closure.entries.filter((entry) => entry.kind === "supplement");
-      for (const [index, entry] of supplementEntries.entries()) {
-        const path = resolve(copy.project_root, entry.relative_path);
-        const bytes = await readFile(path).catch(() => null);
-        supplementChecks.push({
-          id: `sup${index}`,
-          role: entry.role ?? "",
-          sha256: entry.sha256,
-          bytes: entry.bytes,
-          actual_sha256: bytes === null ? null : sha256Of(bytes),
-          actual_bytes: bytes === null ? null : bytes.byteLength,
-        });
-      }
+      const supplementChecks = await buildSupplementChecks(closure, copy.project_root);
 
       const qc = await runQualityControl({
         media_path: outPath,
@@ -430,7 +520,7 @@ export class SnapshotRenderService implements RenderPort {
         const name = supplementFileName(index, extname(entry.relative_path));
         const target = resolve(staging, name);
         await copyFile(source, target);
-        const digest = await sha256File(target);
+        const digest = await sha256FileDigest(target);
         if (digest === null || digest !== entry.sha256) {
           // The copy does not match what the snapshot committed to. The committed
           // digest is the one that goes into the manifest; a copy that disagrees is
@@ -448,35 +538,14 @@ export class SnapshotRenderService implements RenderPort {
       // project; this one says which project it came from and carries its document.
       const nativeDocumentPath = resolve(staging, PACKAGE_FILES.nativeDocument);
       await copyFile(resolve(copy.project_root, copy.native_entry), nativeDocumentPath);
-      const nativeDocumentDigest = await sha256File(nativeDocumentPath);
+      const nativeDocumentDigest = await sha256FileDigest(nativeDocumentPath);
       const nativeEntry = closure.entries.find((entry) => entry.relative_path === copy.native_entry);
       if (nativeDocumentDigest === null || nativeDocumentDigest !== nativeEntry?.sha256) {
         await this.#deps.packages.quarantineStaging(staging, `native-${request.attempt}`);
         return failure("NATIVE_DOCUMENT_CHANGED", "the film's own document does not match the bytes the snapshot committed to", false);
       }
       const nativeSourcePath = resolve(staging, PACKAGE_FILES.nativeSource);
-      await writeFile(nativeSourcePath, `${JSON.stringify({
-        kind: "narralens.native_project_attachment@1.0",
-        // What this file is, exactly: the film's own document and the list of the
-        // snapshot's files. It is not an export of the whole editable project — the
-        // assets stay in the snapshot, which is the authoritative editable source.
-        scope: "document_and_closure_reference",
-        editable_project_complete: false,
-        note: "the package carries the film's entry document; the snapshot remains the authoritative editable source",
-        project_id: closure.project_id,
-        snapshot_id: closure.snapshot_id,
-        source_digest: closure.source_digest,
-        project_revision: closure.project_revision,
-        native_entry: copy.native_entry,
-        expected_frames: closure.expected_frames ?? null,
-        expected_duration_seconds: closure.expected_duration_seconds ?? null,
-        copied: closure.entries
-          .filter((entry) => entry.relative_path === copy.native_entry)
-          .map((entry) => ({ relative_path: entry.relative_path, sha256: entry.sha256, bytes: entry.bytes })),
-        referenced: closure.entries
-          .filter((entry) => entry.relative_path !== copy.native_entry)
-          .map((entry) => ({ relative_path: entry.relative_path, sha256: entry.sha256, bytes: entry.bytes })),
-      }, null, 2)}\n`, { encoding: "utf8", mode: 0o600 });
+      await writeFile(nativeSourcePath, `${JSON.stringify(nativeSourceAttachment(closure, copy.native_entry), null, 2)}\n`, { encoding: "utf8", mode: 0o600 });
       files.push({
         id: packageRefId(deliveryId, PACKAGE_ROLES.nativeDocument),
         name: PACKAGE_FILES.nativeDocument,
@@ -488,7 +557,7 @@ export class SnapshotRenderService implements RenderPort {
         source_path: nativeSourcePath,
       });
 
-      const mediaDigest = await sha256File(outPath);
+      const mediaDigest = await sha256FileDigest(outPath);
       if (mediaDigest === null) {
         await this.#deps.packages.quarantineStaging(staging, `unreadable-${request.attempt}`);
         return failure("MEDIA_UNREADABLE", "the rendered file could not be read", true);
