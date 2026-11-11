@@ -71,6 +71,20 @@ export interface CreativeReviewPanelProps {
    * instance's address is shown as unusable rather than linked.
    */
   readonly controlledMediaBase?: string;
+  /**
+   * Whether a decision is in flight.
+   *
+   * A decision that is on its way must not be sent twice: the buttons are disabled
+   * until the Host has answered.
+   */
+  readonly busy?: boolean;
+  /**
+   * Whether the package on screen is no longer the one the Host would answer about.
+   *
+   * The last known package stays on screen, but it cannot be decided until it has been
+   * read again.
+   */
+  readonly stale?: boolean;
 }
 
 /** The adoption state the panel shows. It is never derived from the decision itself. */
@@ -120,6 +134,9 @@ export function CreativeReviewPanel(props: CreativeReviewPanelProps) {
   const isCover = packageDocument.kind === "cover";
   const decision = props.decision ?? null;
   const adoption = props.adoption ?? null;
+  // A package that is stale, or that the Host has already decided, cannot be decided
+  // again: the buttons are disabled rather than offered and refused.
+  const decidable = packageDocument.state === "pending" && props.busy !== true && props.stale !== true;
 
   return (
     <section className="nl-review" aria-label="创作审阅">
@@ -151,7 +168,7 @@ export function CreativeReviewPanel(props: CreativeReviewPanelProps) {
                 )}
                 {downloadOf(part.download_ref, props.controlledMediaBase) === null ? (
                   <span className="nl-muted">
-                    {part.download_ref === null ? "尚无可下载文件" : "下载不可用：不是本实例的受控地址"}
+                    {part.download_ref === null ? "尚无可下载文件" : "下载不可用：不是本实例的受控引用"}
                   </span>
                 ) : (
                   <a href={downloadOf(part.download_ref, props.controlledMediaBase)!}>下载</a>
@@ -201,21 +218,21 @@ export function CreativeReviewPanel(props: CreativeReviewPanelProps) {
       <footer className="nl-review-actions">
         <button
           type="button"
-          disabled={!allowed.has("accept") || props.onAccept === undefined}
+          disabled={!decidable || !allowed.has("accept") || props.onAccept === undefined}
           onClick={() => props.onAccept?.()}
         >
           接受
         </button>
         <button
           type="button"
-          disabled={!allowed.has("changes_requested") || props.onRequestChanges === undefined}
+          disabled={!decidable || !allowed.has("changes_requested") || props.onRequestChanges === undefined}
           onClick={() => props.onRequestChanges?.()}
         >
           提出修改
         </button>
         <button
           type="button"
-          disabled={!allowed.has("reject") || props.onReject === undefined}
+          disabled={!decidable || !allowed.has("reject") || props.onReject === undefined}
           onClick={() => props.onReject?.()}
         >
           拒绝
@@ -223,11 +240,19 @@ export function CreativeReviewPanel(props: CreativeReviewPanelProps) {
         <button
           type="button"
           className="nl-primary"
-          disabled={!canAdopt || props.onAcceptAndAdopt === undefined}
+          disabled={!decidable || !canAdopt || props.onAcceptAndAdopt === undefined}
           onClick={() => props.onAcceptAndAdopt?.()}
         >
           确认并采用
         </button>
+        {packageDocument.state === "stale" ? (
+          <p className="nl-muted" data-nl-review-stale="true">这份内容包已过期：请重新读取当前待审的内容包。</p>
+        ) : null}
+        {props.stale === true ? (
+          <p className="nl-muted" data-nl-review-stale="true">
+            这份内容包没有重新读到：它不能被决定了，请稍后重试。
+          </p>
+        ) : null}
         <p className="nl-muted">关闭面板不会产生任何决定。</p>
       </footer>
     </section>
@@ -237,13 +262,14 @@ export function CreativeReviewPanel(props: CreativeReviewPanelProps) {
 /**
  * The download address of this instance, or `null`.
  *
- * A `download_ref` is followed only when it is this instance's own controlled media
- * address. Anything else is shown as unusable: a panel never links an address it
- * cannot vouch for.
+ * A `download_ref` is the frozen contract's own opaque token — a path, a URL or a
+ * foreign address is not one, and is never turned into one. The controlled address is
+ * built from this instance's own base and that token, and nothing else is linked: a
+ * panel never links an address it cannot vouch for.
  */
 function downloadOf(ref: string | null, base: string | undefined): string | null {
   if (ref === null) return null;
   if (base === undefined || base === "") return null;
-  if (!ref.startsWith(base)) return null;
-  return ref;
+  if (!/^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$/.test(ref)) return null;
+  return `${base}${encodeURIComponent(ref)}`;
 }

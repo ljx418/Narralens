@@ -531,3 +531,27 @@
   margin: 4px 0 0;
   color: var(--nl-muted);
 }
+
+/* The one prepared-preview slot: the panel's own transport, not the browser's. */
+.nl-preview-transport {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 6px 0;
+}
+
+.nl-preview-transport input[type="range"] {
+  flex: 1;
+}
+
+/* A prepared text or JSON product: shown as text, never as markup. */
+.nl-prepared-text {
+  max-height: 320px;
+  overflow: auto;
+  margin: 6px 0;
+  padding: 8px;
+  border: 1px solid var(--nl-border);
+  background: var(--nl-bg-2, transparent);
+  white-space: pre-wrap;
+  word-break: break-word;
+}

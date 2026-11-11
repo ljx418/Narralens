@@ -18,6 +18,42 @@ import type {
 export { NativeSyncIndicator, nativeSyncState } from "./NativeSyncIndicator.js";
 export type { NativeSyncState } from "./NativeSyncIndicator.js";
 
+/**
+ * One prepared text or JSON product, shown as text.
+ *
+ * A subtitle track or a JSON product is *text*, and it is shown item by item as text:
+ * the content is escaped by the renderer and never handed to the browser as markup, so
+ * a prepared product can never become a script. A product that claims to be HTML is
+ * refused outright rather than shown.
+ */
+export function PreparedTextView(props: {
+  /** The content type the descriptor reported. */
+  readonly contentType: string;
+  /** The bytes, already decoded as UTF-8 text. */
+  readonly text: string;
+}) {
+  const contentType = props.contentType.toLowerCase();
+  if (contentType.includes("html")) {
+    return (
+      <p className="nl-muted" role="alert" data-nl-prepared-text="refused">
+        这一部分声明为 HTML，已拒绝展示：这里只显示安全的文本内容。
+      </p>
+    );
+  }
+  const isJson = contentType.includes("json");
+  let body = props.text;
+  if (isJson) {
+    try {
+      body = JSON.stringify(JSON.parse(props.text) as unknown, null, 2);
+    } catch {
+      body = props.text;
+    }
+  }
+  return (
+    <pre className="nl-prepared-text" data-nl-prepared-text={isJson ? "json" : "text"}>{body}</pre>
+  );
+}
+
 /** The brief: the topic, the audience, the length and the structured content brief. */
 export function BriefView(props: { readonly brief: Brief | null }) {
   const brief = props.brief;

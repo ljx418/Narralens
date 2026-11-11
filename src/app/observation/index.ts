@@ -8,7 +8,7 @@ export { WorkflowTopBar, TaskDetailDialog } from "./WorkflowTopBar.js";
 export type { WorkflowTopBarProps } from "./WorkflowTopBar.js";
 export { CreativeReviewPanel } from "./CreativeReviewPanel.js";
 export type { CreativeReviewPanelProps, ReviewAdoptionState } from "./CreativeReviewPanel.js";
-export { BriefView, ScriptView, StoryboardView } from "./content-views.js";
+export { BriefView, ScriptView, StoryboardView, PreparedTextView } from "./content-views.js";
 export { NativeSyncIndicator, nativeSyncState } from "./NativeSyncIndicator.js";
 export type { NativeSyncState } from "./NativeSyncIndicator.js";
 export { LocalAssetRegistrationPanel } from "./LocalAssetRegistrationPanel.js";
@@ -18,6 +18,7 @@ export type {
   LocalAssetInventoryItem,
   LocalAssetLicense,
   LocalAssetLicenseStatus,
+  LocalAssetRecordingOrigin,
   LocalAssetRegistrationRequest,
   LocalAssetSource,
   LocalAssetSourceKind,

@@ -105,13 +105,17 @@ export class GatewayApiClient {
    * It carries the *independent* UI proof, not the native one: the native proof that
    * rides along on this origin does not make the request a UI request. The Host's own
    * status and body come back untouched, so the caller sees the real error semantics.
+   *
+   * The call can be aborted: a read that is no longer wanted must not keep a request
+   * and a response alive on the wire.
    */
-  async uiCall<T>(surface: string, operation: string, input: unknown): Promise<T> {
+  async uiCall<T>(surface: string, operation: string, input: unknown, signal?: AbortSignal): Promise<T> {
     const response = await fetch(`${this.baseUrl}/narralens/api/ui/call`, {
       method: "POST",
       credentials: "same-origin",
       cache: "no-store",
       redirect: "error",
+      ...(signal === undefined ? {} : { signal }),
       headers: { ...uiProofHeaders(), "content-type": "application/json" },
       body: JSON.stringify({ surface, operation, input }),
     });
@@ -123,8 +127,10 @@ export class GatewayApiClient {
    *
    * The bytes are returned raw, with the ETag the alias answered: the caller checks
    * them against the descriptor it was given before it shows anything.
+   *
+   * The read is abortable, so a preview that is abandoned does not keep pulling bytes.
    */
-  async reviewMedia(ref: string): Promise<{
+  async reviewMedia(ref: string, signal?: AbortSignal): Promise<{
     readonly bytes: Uint8Array;
     readonly etag: string;
     readonly contentType: string;
@@ -133,6 +139,7 @@ export class GatewayApiClient {
       credentials: "same-origin",
       cache: "no-store",
       redirect: "error",
+      ...(signal === undefined ? {} : { signal }),
       headers: { ...uiProofHeaders() },
     });
     if (!response.ok) {
