@@ -1,21 +1,17 @@
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
+import * as createdSourcePorts from "../../../src/host/agent-driven/created-source-ports.js";
 import {
   PREPARED_ADOPTION_PLAN_DOMAIN,
   PreparedAdoptionPlanError,
   assertPreparedAdoptionPlan,
-  closeCreatedSourceCommitScope,
-  closeCreatedSourcePublisherLease,
-  createCreatedSourceProofIssuer,
-  isCreatedSourceCommitScope,
-  isCreatedSourcePublicationProof,
-  openCreatedSourceCommitScope,
-  openCreatedSourcePublisherLease,
   preparedAdoptionPlanDigest,
   preparedAdoptionPlanPreimage,
   type PreparedAdoptionPlanV1,
 } from "../../../src/host/agent-driven/created-source-ports.js";
+import { RevisionStore } from "../../../src/host/projects/revision-store.js";
+import { ProductSqliteRepository } from "../../../src/host/agent-driven/product-sqlite-repository.js";
 
 /**
  * The frozen golden vectors of the D09 adoption plan.
@@ -164,56 +160,79 @@ describe("the D09 prepared adoption plan", () => {
 });
 
 describe("the opacity of the created-source capabilities", () => {
-  it("refuses a publication proof that is only structurally identical", () => {
-    const facts = {
-      publisher_instance: "publisher-1",
-      project_id: "project-1",
-      transaction_id: "txn-1",
-      prepared_source_id: "ps_1",
-      original_source_digest: "a".repeat(64),
-      published_source_digest: "b".repeat(64),
-      target_snapshot_id: "snapshot-1",
-      published_files: [],
-      journal_id: "journal-1",
-      backup_root: "/private/backup",
-      issued_at: "2026-11-12T00:00:00.000Z",
-    };
-    expect(isCreatedSourcePublicationProof({ facts, verify: () => undefined })).toBe(false);
-    expect(isCreatedSourcePublicationProof(null)).toBe(false);
-    expect(isCreatedSourcePublicationProof(undefined)).toBe(false);
-    expect(isCreatedSourcePublicationProof({ ...facts })).toBe(false);
+  it("exposes no mint, lease, issuer or scope-opening API in the shared ports module", () => {
+    // The capability lives with its owner: the scope belongs to the RevisionStore's own
+    // transaction and the proof belongs to the publisher instance that issued it. A
+    // shared module that could mint either would be a shared module a request could
+    // reach, so this guard fails the moment one is added back.
+    const forbidden = [
+      "openCreatedSourceCommitScope",
+      "closeCreatedSourceCommitScope",
+      "isCreatedSourceCommitScope",
+      "openCreatedSourcePublisherLease",
+      "closeCreatedSourcePublisherLease",
+      "createCreatedSourceProofIssuer",
+      "isCreatedSourcePublicationProof",
+      "issueCreatedSourcePublicationProof",
+    ];
+    const exported = Object.keys(createdSourcePorts);
+    for (const name of forbidden) {
+      expect(exported, `${name} must not be exported from the shared ports module`).not.toContain(name);
+    }
   });
 
-  it("issues a proof only while a publisher lease is live, and only for its project", () => {
-    const lease = openCreatedSourcePublisherLease("publisher-1", "project-1");
-    const issuer = createCreatedSourceProofIssuer(lease);
-    const facts = {
-      publisher_instance: "publisher-1",
-      project_id: "project-1",
-      transaction_id: "txn-1",
-      prepared_source_id: "ps_1",
-      original_source_digest: "a".repeat(64),
-      published_source_digest: "b".repeat(64),
-      target_snapshot_id: "snapshot-1",
-      published_files: [],
-      journal_id: "journal-1",
-      backup_root: "/private/backup",
-      issued_at: "2026-11-12T00:00:00.000Z",
-    };
-    const proof = issuer.issue(facts, () => undefined);
-    expect(isCreatedSourcePublicationProof(proof)).toBe(true);
-    // A clone of a live proof is not a live proof.
-    expect(isCreatedSourcePublicationProof({ facts: proof.facts, verify: () => undefined })).toBe(false);
-    expect(() => issuer.issue({ ...facts, project_id: "project-2" }, () => undefined)).toThrow();
-    closeCreatedSourcePublisherLease(lease);
-    expect(() => issuer.issue(facts, () => undefined)).toThrow();
+  it("refuses a commit scope that no live transaction opened", () => {
+    const revisions = new RevisionStore(":memory:");
+    const repository = new ProductSqliteRepository(revisions);
+    const forged = { project_id: "project-1", transaction_id: "txn-1", poison: () => undefined, poisoned: false };
+    expect(() => repository.joinCreatedSourceCommit(forged, () => undefined)).toThrow();
+    revisions.close();
   });
 
-  it("closes a commit scope when the commit leaves", () => {
-    const scope = openCreatedSourceCommitScope("project-1", "txn-1");
-    expect(isCreatedSourceCommitScope(scope)).toBe(true);
-    closeCreatedSourceCommitScope(scope);
-    expect(isCreatedSourceCommitScope(scope)).toBe(false);
-    expect(isCreatedSourceCommitScope({ project_id: "project-1", transaction_id: "txn-1" })).toBe(false);
+  it("refuses a scope from another store and a scope whose transaction has ended", () => {
+    const first = new RevisionStore(":memory:");
+    const second = new RevisionStore(":memory:");
+    const secondRepository = new ProductSqliteRepository(second);
+    let captured: import("../../../src/host/agent-driven/created-source-ports.js").CreatedSourceCommitScope | undefined;
+    first.withCreatedSourceCommitScope("project-1", "txn-1", (scope) => {
+      captured = scope;
+      // Another store's repository must not accept this scope, even while it is live.
+      expect(() => secondRepository.joinCreatedSourceCommit(scope, () => undefined)).toThrow();
+      // The owning repository does accept it: it is the same connection and the same
+      // live transaction.
+      expect(() => first.compose(() => undefined)).not.toThrow();
+    });
+    // The transaction has ended, so the scope authorises nothing any more.
+    expect(captured).toBeDefined();
+    expect(() => secondRepository.joinCreatedSourceCommit(captured!, () => undefined)).toThrow();
+    first.close();
+    second.close();
+  });
+
+  it("rolls the transaction back when the joined failure is swallowed", () => {
+    const revisions = new RevisionStore(":memory:");
+    const repository = new ProductSqliteRepository(revisions);
+    const before = revisions.outboxRowCount();
+    expect(() => revisions.withCreatedSourceCommitScope("project-1", "txn-1", (scope) => {
+      try {
+        repository.joinCreatedSourceCommit(scope, () => {
+          throw new Error("the joined work failed");
+        });
+      } catch {
+        // The caller swallows the failure. The scope remembers it, so the transaction
+        // still rolls back.
+      }
+    })).toThrow();
+    expect(revisions.outboxRowCount()).toBe(before);
+    revisions.close();
+  });
+
+  it("refuses a joined work that returns a thenable", () => {
+    const revisions = new RevisionStore(":memory:");
+    const repository = new ProductSqliteRepository(revisions);
+    expect(() => revisions.withCreatedSourceCommitScope("project-1", "txn-1", (scope) => {
+      repository.joinCreatedSourceCommit(scope, () => Promise.resolve(1) as unknown as number);
+    })).toThrow();
+    revisions.close();
   });
 });

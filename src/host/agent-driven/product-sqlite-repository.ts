@@ -1,6 +1,8 @@
 import type { DatabaseSync, SQLInputValue } from 'node:sqlite';
 import { canonicalJson } from '../engine/source-digest-v1.js';
 import { RevisionStore } from '../projects/revision-store.js';
+import { isLiveCreatedSourceCommitScope } from '../projects/revision-store.js';
+import type { CreatedSourceCommitScope } from './created-source-ports.js';
 import { OperationIdempotencyStore } from '../projects/operation-idempotency-store.js';
 import {isCurrentTaskTransaction,type TaskTransactionDb} from './created-task-store.js';
 import { applyAgentSchema } from './agent-schema.js';
@@ -67,6 +69,25 @@ export class ProductSqliteRepository implements ProductRepository {
   joinTaskTransaction<T>(rows:TaskTransactionDb,work:(tx:ProductTransaction)=>T):T {
     if(!isCurrentTaskTransaction(rows,this.#db)||!this.#db.isTransaction)throw invalid();
     return rows.within(()=>this.scope(work));
+  }
+  /** Join only the live created-source commit scope of THIS store on THIS connection.
+   *
+   * The scope is recognised by identity: the owning store, the exact connection and
+   * the live window all have to match. A scope from another store, a scope from another
+   * database, a scope whose transaction has ended and an object that merely has the
+   * right shape are all refused.
+   *
+   * A failure inside the joined work is recorded on the scope, so the enclosing
+   * transaction rolls back even when the caller swallows the error. This join does not
+   * replace or loosen `joinTaskTransaction`; it is a different, narrower capability. */
+  joinCreatedSourceCommit<T>(scope:CreatedSourceCommitScope,work:(tx:ProductTransaction)=>T):T {
+    if(!isLiveCreatedSourceCommitScope(scope,this.revisions,this.#db)||!this.#db.isTransaction)throw invalid();
+    try {
+      return this.scope(work);
+    } catch (error) {
+      scope.poison(error);
+      throw error;
+    }
   }
   private scope<T>(work:(tx:ProductTransaction)=>T):T {
     if (this.#inside) {const error=invalid();this.#poison?.(error);throw error;}

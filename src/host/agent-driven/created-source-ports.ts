@@ -515,8 +515,9 @@ export interface CreatedSourceFactV1 {
 /**
  * The facts a publication proof carries.
  *
- * They are data, not authority: the commit re-derives the truth from the journal, the
- * backup and the live author root before it believes any of them.
+ * They are data, not authority. The proof itself is minted and recognised by the
+ * publisher that owns it, and the commit re-derives the truth from the journal, the
+ * backup and the live author root before it believes any of it.
  */
 export interface CreatedSourcePublicationFacts {
   readonly publisher_instance: string;
@@ -542,98 +543,13 @@ export interface CreatedSourcePublicationFacts {
 /**
  * The opaque proof that a publication really happened.
  *
- * The class behind this interface is not exported, so a structurally identical object
- * literal cannot satisfy it: the check is `instanceof` plus a live-set membership
- * test, never a field comparison.
+ * This module holds the type only. The runtime identity of a proof belongs to the
+ * publisher that issued it: a shared module that could mint one would be a shared
+ * module anybody could mint one in, and a proof that is accepted on the strength of
+ * its own fields is a proof that a request body could forge.
  */
 export interface CreatedSourcePublicationProof {
   readonly facts: CreatedSourcePublicationFacts;
-  /**
-   * The publisher's own re-check of the journal, the backup and the author root.
-   *
-   * It is a method on a class this module does not export, so it cannot be supplied by
-   * a request body, a JSON payload or a plain object.
-   */
-  verify(): void;
-}
-
-class PublicationProofImpl implements CreatedSourcePublicationProof {
-  readonly #verifier: () => void;
-
-  constructor(readonly facts: CreatedSourcePublicationFacts, verifier: () => void) {
-    this.#verifier = verifier;
-  }
-
-  verify(): void {
-    this.#verifier();
-  }
-}
-
-/** The proofs this process actually issued. A clone of one is not in here. */
-const liveProofs = new WeakSet<object>();
-
-/**
- * The runtime check for a publication proof.
- *
- * Identity, not shape: a plain object with exactly the right fields is refused.
- */
-export function isCreatedSourcePublicationProof(value: unknown): value is CreatedSourcePublicationProof {
-  return value instanceof PublicationProofImpl && liveProofs.has(value);
-}
-
-/**
- * A live lease of one publisher instance, for one project.
- *
- * The issuer only mints while a lease is open, and only for the project the lease
- * names. A proof therefore cannot be produced outside a publication.
- */
-export interface CreatedSourcePublisherLease {
-  readonly publisher_instance: string;
-  readonly project_id: string;
-}
-
-const liveLeases = new WeakSet<object>();
-
-/** Opens the lease of a publisher that is about to publish for one project. */
-export function openCreatedSourcePublisherLease(publisher_instance: string, project_id: string): CreatedSourcePublisherLease {
-  const lease = { publisher_instance, project_id };
-  liveLeases.add(lease);
-  return lease;
-}
-
-/** Closes a lease. A closed lease mints nothing. */
-export function closeCreatedSourcePublisherLease(lease: CreatedSourcePublisherLease): void {
-  liveLeases.delete(lease);
-}
-
-/**
- * The issuer of publication proofs.
- *
- * It is created by the composition root and handed to the publisher; it is not reachable
- * from any request, and it mints nothing outside an open lease.
- */
-export interface CreatedSourceProofIssuer {
-  issue(facts: CreatedSourcePublicationFacts, verifier: () => void): CreatedSourcePublicationProof;
-}
-
-/**
- * Creates the issuer of one publisher instance.
- *
- * The issuer is a Host capability. It is created where the publisher is wired and given
- * to the publisher; no request path reaches it.
- */
-export function createCreatedSourceProofIssuer(lease: CreatedSourcePublisherLease): CreatedSourceProofIssuer {
-  if (!liveLeases.has(lease)) invalid('The publisher lease is not live');
-  return {
-    issue(facts: CreatedSourcePublicationFacts, verifier: () => void): CreatedSourcePublicationProof {
-      if (!liveLeases.has(lease)) invalid('The publisher lease is closed');
-      if (facts.project_id !== lease.project_id) invalid('The proof names another project');
-      if (facts.publisher_instance !== lease.publisher_instance) invalid('The proof names another publisher');
-      const proof = new PublicationProofImpl(facts, verifier);
-      liveProofs.add(proof);
-      return proof;
-    },
-  };
 }
 
 /**
@@ -658,41 +574,22 @@ export interface CommitPreparedCreatedSourceInput {
 /**
  * The scope of a live created-source commit.
  *
- * A scope can only be created by the running commit, and it is invalid the moment that
- * commit leaves. There is no exported constructor, so a caller cannot manufacture one.
+ * The scope is created by the RevisionStore's own atomic transaction and is recognised
+ * by the repository through the exact owning store and the exact connection. There is
+ * no constructor here and no way to make one from outside that transaction.
  */
 export interface CreatedSourceCommitScope {
   readonly project_id: string;
   readonly transaction_id: string;
-}
-
-class CommitScopeImpl implements CreatedSourceCommitScope {
-  constructor(readonly project_id: string, readonly transaction_id: string) {}
-}
-
-const liveScopes = new WeakSet<object>();
-
-/** The runtime check for a commit scope. Identity, not shape. */
-export function isCreatedSourceCommitScope(value: unknown): value is CreatedSourceCommitScope {
-  return value instanceof CommitScopeImpl && liveScopes.has(value);
-}
-
-/**
- * Opens a commit scope.
- *
- * The scope lives only for the synchronous call it was opened for. The caller must close
- * it, and a scope that is still open when the commit returns is a defect the caller
- * cannot walk away from.
- */
-export function openCreatedSourceCommitScope(project_id: string, transaction_id: string): CreatedSourceCommitScope {
-  const scope = new CommitScopeImpl(project_id, transaction_id);
-  liveScopes.add(scope);
-  return scope;
-}
-
-/** Closes a commit scope. A closed scope authorises nothing. */
-export function closeCreatedSourceCommitScope(scope: CreatedSourceCommitScope): void {
-  liveScopes.delete(scope);
+  /**
+   * Host-only: records that the joined work failed.
+   *
+   * The outer transaction rolls back even when a caller swallows the error, because
+   * the failure is remembered here rather than only thrown.
+   */
+  poison(error: unknown): void;
+  /** Host-only: whether a failure was recorded on this scope. */
+  readonly poisoned: boolean;
 }
 
 /* -------------------------------------------------------------------------------------- */

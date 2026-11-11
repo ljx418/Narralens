@@ -6,6 +6,81 @@ import type { ApiError, AssetImportResponse, EditResponse, JobEvent, JobState } 
 import type { ControlledWriteFailureResponseV1, ControlledWriteResponseV1 } from "../../contracts/wave2-types.js";
 import { HttpError } from "../api-error.js";
 import { verifyOrInsertProjectionFact } from "../adoption/adoption-store.js";
+import type { CreatedSourceCommitScope } from "../agent-driven/created-source-ports.js";
+
+/* ── the created-source commit scope ───────────────────────────────────────────────────── */
+
+/**
+ * The live state of one created-source commit scope.
+ *
+ * The scope is a capability, and a capability is identified by identity rather than by
+ * shape: the entry lives in a module-private map, so an object that merely has the
+ * right fields is not a scope. It is bound to the store that opened it, to the exact
+ * connection that opened it, and to the project and transaction of the commit.
+ */
+interface CreatedSourceScopeEntry {
+  readonly owner: RevisionStore;
+  readonly db: DatabaseSync;
+  readonly project_id: string;
+  readonly transaction_id: string;
+  live: boolean;
+  poisoned: boolean;
+  fault: unknown;
+}
+
+/**
+ * The live scopes of this process.
+ *
+ * Module-private on purpose. A shared module that could open a scope would be a shared
+ * module anybody could open one in, and a scope that authorises joining a transaction
+ * is not something a request may carry.
+ */
+const liveCreatedSourceScopes = new WeakMap<object, CreatedSourceScopeEntry>();
+
+class CreatedSourceScope implements CreatedSourceCommitScope {
+  readonly #entry: CreatedSourceScopeEntry;
+
+  constructor(entry: CreatedSourceScopeEntry) {
+    this.#entry = entry;
+  }
+
+  get project_id(): string { return this.#entry.project_id; }
+
+  get transaction_id(): string { return this.#entry.transaction_id; }
+
+  /**
+   * Records that the joined work failed.
+   *
+   * The failure is remembered rather than only thrown, so the outer transaction rolls
+   * back even when a caller swallows the error and carries on.
+   */
+  poison(error: unknown): void {
+    this.#entry.poisoned = true;
+    this.#entry.fault = error;
+  }
+
+  get poisoned(): boolean { return this.#entry.poisoned; }
+}
+
+/**
+ * The repository's validation of a commit scope.
+ *
+ * Three things have to hold, and all three are about identity: the scope was opened by
+ * this exact store, it is bound to this exact connection, and it is still live. A scope
+ * from another store, a scope from another database and a scope whose transaction has
+ * already ended are all refused, and so is an object that only looks like one.
+ */
+export function isLiveCreatedSourceCommitScope(
+  scope: unknown,
+  owner: RevisionStore,
+  db: DatabaseSync,
+): boolean {
+  if (typeof scope !== "object" || scope === null) return false;
+  const entry = liveCreatedSourceScopes.get(scope);
+  if (entry === undefined) return false;
+  return entry.live && entry.owner === owner && entry.db === db;
+}
+
 
 export type JournalState = "prepared" | "source_validated" | "metadata_committed" | "aborted" | "compensated" | "attention";
 
@@ -333,6 +408,46 @@ export class RevisionStore {
       this.#db.exec("COMMIT");
       return result;
     } catch (error) { this.#db.exec("ROLLBACK"); throw error; }
+  }
+
+  /**
+   * Runs `work` inside this store's own transaction and hands it the live scope of that
+   * transaction.
+   *
+   * The scope exists only for the synchronous call it was opened for. It is bound to
+   * this store, to this connection and to the project and transaction named here, and it
+   * stops being live the moment the transaction ends — so a scope that is kept and used
+   * later authorises nothing.
+   *
+   * A failure inside the joined work is remembered on the scope as well as thrown, so a
+   * caller that swallows the error still cannot commit a half-written transaction.
+   */
+  withCreatedSourceCommitScope<T>(
+    projectId: string,
+    transactionId: string,
+    work: (scope: CreatedSourceCommitScope) => T,
+  ): T {
+    return this.atomic(() => {
+      const entry: CreatedSourceScopeEntry = {
+        owner: this,
+        db: this.#db,
+        project_id: projectId,
+        transaction_id: transactionId,
+        live: true,
+        poisoned: false,
+        fault: undefined,
+      };
+      const scope = new CreatedSourceScope(entry);
+      liveCreatedSourceScopes.set(scope, entry);
+      try {
+        const result = work(scope);
+        if (entry.poisoned) throw entry.fault;
+        return result;
+      } finally {
+        entry.live = false;
+        liveCreatedSourceScopes.delete(scope);
+      }
+    });
   }
 
   // ── M2.2: one authoritative transaction machine, predecessor-checked everywhere ───────
