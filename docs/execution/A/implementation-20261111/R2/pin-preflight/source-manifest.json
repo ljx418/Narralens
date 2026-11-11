@@ -1,0 +1,65 @@
+{
+  "upstream_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+  "previous_candidate_commit": "e96ca4ce06fc6515c6351844ac4375f15e481a78",
+  "previous_patch_sha256": "214c629238c2635f5c6212e5e9207eab18f61d17454c08ee64ccd32be41dffa6",
+  "patch_sha256": "f699889206e129dfe4fd913618b34baa8d7e04363f1940d3659664a1e7b9d435",
+  "extension_patch_sha256": "64b2f5bccdc3045af5e195bbbaa9697cee099d464f970045a50ac98d622392da",
+  "source_files_sha256": "6f0e1f0371fc3f472c0758f2d759b4e1f94fa0b3d19420b92122c1ad0f7c1efc",
+  "files": [
+    {
+      "path": "packages/openfilm/studio/ui/src/lib/host.ts",
+      "pre_sha256": "84b6b549a80a695d68a0915681b865f0a22c7e49b8533fc5d8d889ef8a966053",
+      "pre_extension_sha256": "39860da114016dfee4dec65bcce28a94d4f35dececfd86cdb7a2f0d78a1abf4b",
+      "post_sha256": "62facd2ebf670defb1d4ba100c2fe6e26c0a6227bde8ba5d85482b337e959f0b"
+    },
+    {
+      "path": "packages/openfilm/studio/ui/src/editor/use-film.ts",
+      "pre_sha256": "8e88ca064e0a3e5292523952fff567101da0170418641d6e02400772c974dc26",
+      "pre_extension_sha256": "9361b5cbbe4dc11984ec5b05305ff1a823c0f432b6b62f7cb796f037475d7b48",
+      "post_sha256": "61d38d1c3d0e74f3c5a1d127d71e9b0192de4980c7411dc7d2555c4efe57033b"
+    },
+    {
+      "path": "packages/openfilm/studio/ui/src/components/ProjectView.tsx",
+      "pre_sha256": "1dd6e2e7330924897299e082e7a0a962319da16238d8063b72b9ccd2276dc405",
+      "pre_extension_sha256": "0344b39cbad1356651b31a8ac72d881cfbf2e92ecbd4fce8a8057f5747a92d70",
+      "post_sha256": "93cc1f7c5c02e8e8e20a8c10b97bce2a48f993c2130a4530a5be33ef2fbb7b30"
+    },
+    {
+      "path": "packages/openfilm/studio/ui/src/lib/media-queue.ts",
+      "pre_sha256": "104eaa8d1b260ca64b38557c59524dbd847f5fb98c0a089b13f515bc2f724724",
+      "pre_extension_sha256": "669b2add59d9cdbe2e53a438fd0de47f717f35ef6d7879bd13bb2c36ad474d25",
+      "post_sha256": "669b2add59d9cdbe2e53a438fd0de47f717f35ef6d7879bd13bb2c36ad474d25"
+    },
+    {
+      "path": "packages/openfilm/studio/ui/src/lib/use-film-subtitles.ts",
+      "pre_sha256": "b8d83bda0308ed3cf497b95df3f26ed56e43c6ba00cd260f81cf07ca4393c6fe",
+      "pre_extension_sha256": "b8d83bda0308ed3cf497b95df3f26ed56e43c6ba00cd260f81cf07ca4393c6fe",
+      "post_sha256": "412ffbc8ac47ef23a92c78bd1c89f9878c8a7bcbf31c31801eac72aa2693eb80"
+    },
+    {
+      "path": "packages/openfilm/studio/ui/src/lib/use-subtitle-style.ts",
+      "pre_sha256": "87ae42d4244b9cba4663d6a57628dca896c0f260a9960837ff9983e57d8c7438",
+      "pre_extension_sha256": "87ae42d4244b9cba4663d6a57628dca896c0f260a9960837ff9983e57d8c7438",
+      "post_sha256": "901128d7b6a847ca1612dd2fd9e861f700e1ad30f33fc78b56e03c880633e995"
+    },
+    {
+      "path": "packages/openfilm/studio/ui/src/components/use-editor-tools.tsx",
+      "pre_sha256": "564bafd3db73f82e8dc27672974a3bbda66d4a443afa5f29b9122efe4583235b",
+      "pre_extension_sha256": "564bafd3db73f82e8dc27672974a3bbda66d4a443afa5f29b9122efe4583235b",
+      "post_sha256": "ae9e8c021a800b2d97b6c40c56f3cc8f6f4bf8bf8b24d453d68e3d33b5f5de67"
+    },
+    {
+      "path": "packages/openfilm/studio/ui/src/lib/native-hydration.ts",
+      "pre_sha256": null,
+      "pre_extension_sha256": null,
+      "post_sha256": "5db47837e690590c9e9678a97e53a10a7115631bd05807ddf6afc925904e2f64"
+    }
+  ],
+  "status": "SOURCE_CANDIDATE_ONLY",
+  "typecheck": "NOT_RUN",
+  "build": "NOT_RUN",
+  "tests": "NOT_RUN",
+  "browser": "NOT_RUN",
+  "host": "NOT_RUN",
+  "independent_review": "PENDING"
+}

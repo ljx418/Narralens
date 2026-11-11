@@ -1,0 +1,374 @@
+{
+  "format": "narralens.a-r2-ownership@1",
+  "common_source_base": "0c1b73cbe384938083482355aaba8eb548c7971b",
+  "interface_sha256": "e25140ff5e71272f042387804fb75b751cf576621eb99c381dc93c221c529b17",
+  "files": [
+    {
+      "path": "contracts/native-observation-v1.registry.json",
+      "writer": "product-Claude"
+    },
+    {
+      "path": "contracts/native-observation-v1.schema.json",
+      "writer": "product-Claude"
+    },
+    {
+      "path": "src/app/agent-workbench-client.ts",
+      "writer": "product-Claude"
+    },
+    {
+      "path": "src/app/m5/GatewayApiClient.ts",
+      "writer": "product-Claude"
+    },
+    {
+      "path": "src/app/m5/M5Panel.tsx",
+      "writer": "product-Claude"
+    },
+    {
+      "path": "src/app/observation/CreativeReviewPanel.tsx",
+      "writer": "product-Claude"
+    },
+    {
+      "path": "src/app/observation/NativeSyncIndicator.tsx",
+      "writer": "product-Claude"
+    },
+    {
+      "path": "src/host/agent-driven/created-prepared-source-store.ts",
+      "writer": "bridge-Claude"
+    },
+    {
+      "path": "src/host/agent-driven/created-render-delivery-store.ts",
+      "writer": "bridge-Claude"
+    },
+    {
+      "path": "src/host/agent-driven/created-review-gate-store.ts",
+      "writer": "bridge-Claude"
+    },
+    {
+      "path": "src/host/agent-driven/created-review-media-bindings.ts",
+      "writer": "bridge-Claude"
+    },
+    {
+      "path": "src/host/agent-driven/created-review-package-service.ts",
+      "writer": "bridge-Claude"
+    },
+    {
+      "path": "src/host/agent-driven/created-run-authority.ts",
+      "writer": "bridge-Claude"
+    },
+    {
+      "path": "src/host/agent-driven/created-run-facts.ts",
+      "writer": "bridge-Claude"
+    },
+    {
+      "path": "src/host/agent-driven/created-source-adoption-service.ts",
+      "writer": "bridge-Claude"
+    },
+    {
+      "path": "src/host/agent-driven/created-source-adoption-store.ts",
+      "writer": "bridge-Claude"
+    },
+    {
+      "path": "src/host/agent-driven/created-source-change-service.ts",
+      "writer": "bridge-Claude"
+    },
+    {
+      "path": "src/host/agent-driven/created-source-impact-store.ts",
+      "writer": "bridge-Claude"
+    },
+    {
+      "path": "src/host/agent-driven/created-source-ports.ts",
+      "writer": "bridge-Claude"
+    },
+    {
+      "path": "src/host/agent-driven/created-source-publisher.ts",
+      "writer": "bridge-Claude"
+    },
+    {
+      "path": "src/host/agent-driven/created-task-application.ts",
+      "writer": "bridge-Claude"
+    },
+    {
+      "path": "src/host/agent-driven/created-task-store.ts",
+      "writer": "bridge-Claude"
+    },
+    {
+      "path": "src/host/agent-driven/creation-application.ts",
+      "writer": "bridge-Claude"
+    },
+    {
+      "path": "src/host/agent-driven/fixed-phase-executor.ts",
+      "writer": "bridge-Claude"
+    },
+    {
+      "path": "src/host/agent-driven/prepared-draft-verifier.ts",
+      "writer": "media-Claude"
+    },
+    {
+      "path": "src/host/agent-driven/product-sqlite-repository.ts",
+      "writer": "bridge-Claude"
+    },
+    {
+      "path": "src/host/agent-driven/project-context-service.ts",
+      "writer": "bridge-Claude"
+    },
+    {
+      "path": "src/host/agent-driven/review-media-http.ts",
+      "writer": "bridge-Claude"
+    },
+    {
+      "path": "src/host/creative/execution-guard.ts",
+      "writer": "bridge-Claude"
+    },
+    {
+      "path": "src/host/creative/fixed-workflow-service.ts",
+      "writer": "bridge-Claude"
+    },
+    {
+      "path": "src/host/creative/product-repository.ts",
+      "writer": "bridge-Claude"
+    },
+    {
+      "path": "src/host/impact/impact-store.ts",
+      "writer": "bridge-Claude"
+    },
+    {
+      "path": "src/host/m5/controlled-studio-access.ts",
+      "writer": "product-Claude"
+    },
+    {
+      "path": "src/host/m5/controlled-studio-browser.ts",
+      "writer": "product-Claude"
+    },
+    {
+      "path": "src/host/m5/isolated-studio.ts",
+      "writer": "product-Claude"
+    },
+    {
+      "path": "src/host/m5/managed-editor-dist.tar.gz",
+      "writer": "product-Claude"
+    },
+    {
+      "path": "src/host/m5/managed-editor-pin.json",
+      "writer": "product-Claude"
+    },
+    {
+      "path": "src/host/m5/managed-editor.d.mts",
+      "writer": "product-Claude"
+    },
+    {
+      "path": "src/host/m5/managed-editor.mjs",
+      "writer": "product-Claude"
+    },
+    {
+      "path": "src/host/m5/native-ack-store.ts",
+      "writer": "product-Claude"
+    },
+    {
+      "path": "src/host/m5/native-observation.ts",
+      "writer": "product-Claude"
+    },
+    {
+      "path": "src/host/m5/openfilm-native-expected.ts",
+      "writer": "product-Claude"
+    },
+    {
+      "path": "src/host/m5/openfilm-studio-gateway.ts",
+      "writer": "product-Claude"
+    },
+    {
+      "path": "src/host/m5/openfilm-studio-ui-pin.json",
+      "writer": "product-Claude"
+    },
+    {
+      "path": "src/host/m5/studio-host-bridge.ts",
+      "writer": "product-Claude"
+    },
+    {
+      "path": "src/host/projects/project-coordinator.ts",
+      "writer": "bridge-Claude"
+    },
+    {
+      "path": "src/host/projects/project-creation-store.ts",
+      "writer": "bridge-Claude"
+    },
+    {
+      "path": "src/host/projects/project-resolver.ts",
+      "writer": "bridge-Claude"
+    },
+    {
+      "path": "src/host/projects/revision-store.ts",
+      "writer": "bridge-Claude"
+    },
+    {
+      "path": "src/host/render/assembly-ports.ts",
+      "writer": "media-Claude"
+    },
+    {
+      "path": "src/host/render/committed-render-phases.ts",
+      "writer": "media-Claude"
+    },
+    {
+      "path": "src/host/render/ports.ts",
+      "writer": "media-Claude"
+    },
+    {
+      "path": "src/host/render/render-snapshot.ts",
+      "writer": "media-Claude"
+    },
+    {
+      "path": "tests/agent-driven/integration/capability-fingerprint.test.ts",
+      "writer": "bridge-Claude"
+    },
+    {
+      "path": "tests/agent-driven/integration/created-delivery-recovery.test.ts",
+      "writer": "bridge-Claude"
+    },
+    {
+      "path": "tests/agent-driven/integration/created-draft-processor.test.ts",
+      "writer": "media-Claude"
+    },
+    {
+      "path": "tests/agent-driven/integration/created-native-ack.test.ts",
+      "writer": "product-Claude"
+    },
+    {
+      "path": "tests/agent-driven/integration/created-qc-review.test.ts",
+      "writer": "bridge-Claude"
+    },
+    {
+      "path": "tests/agent-driven/integration/created-render-delivery.test.ts",
+      "writer": "bridge-Claude"
+    },
+    {
+      "path": "tests/agent-driven/integration/created-run-authority.test.ts",
+      "writer": "bridge-Claude"
+    },
+    {
+      "path": "tests/agent-driven/integration/created-schema-upgrade.test.ts",
+      "writer": "bridge-Claude"
+    },
+    {
+      "path": "tests/agent-driven/integration/created-source-adoption.test.ts",
+      "writer": "bridge-Claude"
+    },
+    {
+      "path": "tests/agent-driven/integration/created-source-change.test.ts",
+      "writer": "bridge-Claude"
+    },
+    {
+      "path": "tests/agent-driven/integration/created-source-process-recovery.test.ts",
+      "writer": "bridge-Claude"
+    },
+    {
+      "path": "tests/agent-driven/integration/created-task-gate.test.ts",
+      "writer": "bridge-Claude"
+    },
+    {
+      "path": "tests/agent-driven/integration/created-task-store.test.ts",
+      "writer": "bridge-Claude"
+    },
+    {
+      "path": "tests/agent-driven/integration/created-workbench-headless.test.ts",
+      "writer": "product-Claude"
+    },
+    {
+      "path": "tests/agent-driven/integration/created-workbench-review.test.ts",
+      "writer": "product-Claude"
+    },
+    {
+      "path": "tests/agent-driven/integration/creative-context-host.test.ts",
+      "writer": "bridge-Claude"
+    },
+    {
+      "path": "tests/agent-driven/integration/helpers/created-production-run-fixture.ts",
+      "writer": "bridge-Claude"
+    },
+    {
+      "path": "tests/agent-driven/integration/helpers/created-source-recovery-child.ts",
+      "writer": "bridge-Claude"
+    },
+    {
+      "path": "tests/agent-driven/integration/host-application.test.ts",
+      "writer": "bridge-Claude"
+    },
+    {
+      "path": "tests/agent-driven/integration/host-close-lifecycle.test.ts",
+      "writer": "bridge-Claude"
+    },
+    {
+      "path": "tests/agent-driven/integration/review-media-transport.test.ts",
+      "writer": "bridge-Claude"
+    },
+    {
+      "path": "tests/agent-driven/media/committed-render-phases.test.ts",
+      "writer": "media-Claude"
+    },
+    {
+      "path": "tests/agent-driven/media/prepared-source-adoption-proof.test.ts",
+      "writer": "media-Claude"
+    },
+    {
+      "path": "tests/agent-driven/media/render-snapshot.test.ts",
+      "writer": "media-Claude"
+    },
+    {
+      "path": "tests/agent-driven/product/execution-guard.test.ts",
+      "writer": "bridge-Claude"
+    },
+    {
+      "path": "tests/agent-driven/product/fixed-workflow-service.test.ts",
+      "writer": "bridge-Claude"
+    },
+    {
+      "path": "tests/agent-driven/product/observation-ui.test.tsx",
+      "writer": "product-Claude"
+    },
+    {
+      "path": "tools/agent-driven/product/build-native-hydration.ts",
+      "writer": "product-Claude"
+    },
+    {
+      "path": "tools/agent-driven/product/native-inputs/build-expected.mjs",
+      "writer": "product-Claude"
+    },
+    {
+      "path": "tools/agent-driven/product/native-inputs/expected-projection.d.ts",
+      "writer": "product-Claude"
+    },
+    {
+      "path": "tools/agent-driven/product/native-inputs/expected-projection.mjs",
+      "writer": "product-Claude"
+    },
+    {
+      "path": "tools/agent-driven/product/native-inputs/native-pure.entry.ts",
+      "writer": "product-Claude"
+    },
+    {
+      "path": "tools/agent-driven/product/native-inputs/request013.patch",
+      "writer": "product-Claude"
+    },
+    {
+      "path": "tools/agent-driven/product/native-inputs/vite.expected.config.mjs",
+      "writer": "product-Claude"
+    }
+  ],
+  "counts": {
+    "bridge": {
+      "head": "5f4fbe07aa9275c4c0ab73afd83a377df09bb934",
+      "files": 47,
+      "release_sha256": "0a712fe01fb050842c9fe01b79e9bccc7f0a5344b3a84507e3a14a3f890b1049"
+    },
+    "media": {
+      "head": "51b84015981ce2a2e5fc281b4ec302f7742ee984",
+      "files": 9,
+      "release_sha256": "bf21df6d37c8e16439ba5b1c5aae51bef2c731b8b3966a9245d6a6fba70eef37"
+    },
+    "product": {
+      "head": "39201d932cd10e0ce60b023bdde2f233dfb009e5",
+      "files": 31,
+      "release_sha256": "03ac04a80e1e3e1ec0a8d283ab7f8fe111befbb9b6d6d316229de82a6a2889fb"
+    }
+  },
+  "one_writer_per_file": true,
+  "total": 87
+}

@@ -1,0 +1,35 @@
+{
+  "time": "2026-11-11T16:38:02.061594+00:00",
+  "dispatch": "ctx_7c659dbc206c",
+  "task": "task_bb5c75bf8a8f",
+  "head": "5f4fbe07aa9275c4c0ab73afd83a377df09bb934",
+  "branch": "agent-driven/a-r1-bridge",
+  "parents": "9620b6437e44dc1880724cdf1ef0ca18275b40c1 0c1b73cbe384938083482355aaba8eb548c7971b",
+  "common": "0c1b73cbe384938083482355aaba8eb548c7971b",
+  "archive_commit": "9620b6437e44dc1880724cdf1ef0ca18275b40c1",
+  "archive_sources_hash_verified": true,
+  "source_scope": [
+    "src",
+    "tests",
+    "contracts",
+    "tools",
+    "package.json",
+    "pnpm-lock.yaml",
+    "skills"
+  ],
+  "committed_source_diff_empty": true,
+  "working_source_diff_empty": true,
+  "common_source_equals_de086": true,
+  "protected_file_count": 34,
+  "protected_hash_mismatches": [],
+  "missing_original_untracked": [],
+  "index_diff": "",
+  "status": " M docs/parallel/lane-bridge/A-R1-20261111/HANDOFF.md\n?? docs/parallel/lane-bridge/A-R1-20261111/evidence/media-producer-integration.json\n?? docs/parallel/lane-bridge/A-R1-20261111/logs/light-bridge-regression-008.txt\n?? docs/parallel/lane-bridge/A-R1-20261111/logs/r1-bridge-assets-host-003-frozen-inputs.txt\n?? docs/parallel/lane-bridge/A-R1-20261111/logs/r1-bridge-assets-host-003-post-run-state.txt\n?? docs/parallel/lane-bridge/A-R1-20261111/logs/r1-bridge-assets-host-003-run.txt\n?? docs/parallel/lane-bridge/A-R2-20261112/\n",
+  "conflicts_resolved_exact_common": [
+    "src/host/agent-driven/creation-application.ts",
+    "src/host/agent-driven/project-context-service.ts",
+    "tests/agent-driven/integration/local-assets-transport.test.ts"
+  ],
+  "writer_readiness": "Parent Codex sole writer; old R1 child failed/settled with retained visible Claude pid738006 and zero descendants at pre-mutation inspection; no R2 child or owned test/service launched; awaiting MAIN protocol/type lock and exact R2 release",
+  "acceptance": "Alignment only; no feature implementation or product acceptance"
+}
