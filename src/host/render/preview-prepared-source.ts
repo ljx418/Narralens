@@ -1,6 +1,6 @@
 import {createHash,randomUUID} from 'node:crypto';
 import {constants,type BigIntStats} from 'node:fs';
-import {mkdir,open,readFile,rm,lstat,realpath,type FileHandle} from 'node:fs/promises';
+import {mkdir,open,readFile,rm,unlink,lstat,realpath,type FileHandle} from 'node:fs/promises';
 import {basename,dirname,resolve,sep} from 'node:path';
 import {asHostResourceError} from '../api-error.js';
 import {canonicalDigest} from '../creative/digest.js';
@@ -245,11 +245,23 @@ class IsolatedCopy {
     try{
      const stat=await source.stat();if(!stat.isFile()||stat.size!==file.bytes)throw changed();
      const hash=createHash('sha256');let total=0;
-     const target=await open('/proc/self/fd/'+targetParent.fd+'/'+basename(relative),constants.O_WRONLY|constants.O_CREAT|constants.O_EXCL|constants.O_NOFOLLOW,0o600);
+     const target=await open('/proc/self/fd/'+targetParent.fd+'/'+basename(relative),constants.O_RDWR|constants.O_CREAT|constants.O_EXCL|constants.O_NOFOLLOW,0o600);
      try{
       const buffer=Buffer.allocUnsafe(1024*1024);
-      for(;;){const {bytesRead}=await source.read(buffer,0,buffer.length,null);if(!bytesRead)break;total+=bytesRead;if(total>file.bytes)throw changed();hash.update(buffer.subarray(0,bytesRead));await target.write(buffer,0,bytesRead);}
+      for(;;){
+       const {bytesRead}=await source.read(buffer,0,buffer.length,null);if(!bytesRead)break;
+       total+=bytesRead;if(total>file.bytes)throw changed();hash.update(buffer.subarray(0,bytesRead));
+       let written=0;
+       while(written<bytesRead){
+        const {bytesWritten}=await target.write(buffer,written,bytesRead-written,null);
+        if(!Number.isSafeInteger(bytesWritten)||bytesWritten<=0||bytesWritten>bytesRead-written)throw changed('The isolated copy made no write progress');
+        written+=bytesWritten;
+       }
+      }
       await target.sync();
+      const copiedHash=createHash('sha256');let copied=0;
+      for(;;){const {bytesRead}=await target.read(buffer,0,buffer.length,copied);if(!bytesRead)break;copied+=bytesRead;copiedHash.update(buffer.subarray(0,bytesRead));}
+      if(copied!==file.bytes||copiedHash.digest('hex')!==file.sha256)throw changed('The isolated copy differs from its prepared fact');
      }finally{await target.close();}
      if(total!==file.bytes||hash.digest('hex')!==file.sha256)throw changed();
     }finally{await source.close();}
@@ -306,6 +318,8 @@ export class PreparedReviewMediaReaderImpl implements PreparedReviewMediaReader 
    const hash=createHash('sha256');const buffer=Buffer.allocUnsafe(1024*1024);
    for(;;){const {bytesRead}=await handle.read(buffer,0,buffer.length,null);if(!bytesRead)break;hash.update(buffer.subarray(0,bytesRead));}
    if(hash.digest('hex')!==part.sha256)throw changed();
+   if(signal?.aborted)throw unavailable('The prepared preview read was cancelled');
+   if(fingerprint(await handle.stat({bigint:true}))!==opened||fingerprint(await lstat(path,{bigint:true}))!==opened)throw changed('The prepared preview object changed during verification');
    const owned=handle;handle=undefined;
    let closed=false;
    const timeline:PreparedPreviewTimelineV1=deepFreeze({fps:{...receipt.fps},frame_count:receipt.frame_count});
@@ -326,6 +340,8 @@ export class PreparedReviewMediaReaderImpl implements PreparedReviewMediaReader 
      let total=0;
      while(total<range.length){const {bytesRead}=await owned.read(output,total,range.length-total,range.offset+total);if(!bytesRead)break;total+=bytesRead;}
      if(total!==range.length)throw changed();
+     if(closed||signal?.aborted)throw unavailable('The prepared preview read was cancelled');
+     if(fingerprint(await owned.stat({bigint:true}))!==opened||fingerprint(await lstat(path,{bigint:true}))!==opened)throw changed('The prepared preview object changed during its read');
      return new Uint8Array(output);
     },
     close:async()=>{if(closed)return;closed=true;await owned.close();},
@@ -370,12 +386,14 @@ export class PreparedPreviewService implements PreparedPreviewPort {
  /** The staging directories that were kept because a render tree could not be shown to be gone. */
  retainedStaging():readonly string[]{return [...this.#retained];}
  /** Writes one product into the fixed object domain and returns its descriptor. */
- async #publish(slot:PreparedPreviewPartKind,content_type:string,bytes:Buffer,media_facts:PreparedPreviewMediaFactsV1):Promise<PreparedPreviewPartV1> {
+ async #publish(directory:FileHandle,created:(id:string,identity:string)=>void,slot:PreparedPreviewPartKind,content_type:string,bytes:Buffer,media_facts:PreparedPreviewMediaFactsV1):Promise<PreparedPreviewPartV1> {
   if(!SLOT_CONTENT_TYPES[slot].includes(content_type))throw changed('A prepared preview part has a content type its slot does not allow');
   const object_id='obj_'+randomUUID().replace(/-/gu,'');
-  const path=resolve(this.#options.objectRoot,object_id);
+  // The retained directory FD is the authority. A symlink replacing its old name
+  // cannot redirect an intermediate path component into author source.
+  const path='/proc/self/fd/'+directory.fd+'/'+object_id;
   const handle=await open(path,constants.O_WRONLY|constants.O_CREAT|constants.O_EXCL|constants.O_NOFOLLOW,0o600);
-  try{await handle.writeFile(bytes);await handle.sync();}finally{await handle.close();}
+  try{const stat=await handle.stat({bigint:true});created(object_id,`${stat.dev}:${stat.ino}`);await handle.writeFile(bytes);await handle.sync();}finally{await handle.close();}
   return {slot,object_id,content_type,bytes:bytes.length,sha256:sha(bytes),media_facts};
  }
  async preview(request:PreparedPreviewRequestV1):Promise<PreparedPreviewReceiptV1> {
@@ -386,7 +404,9 @@ export class PreparedPreviewService implements PreparedPreviewPort {
  }
  async #run(request:PreparedPreviewRequestV1):Promise<PreparedPreviewReceiptV1> {
   let workspace:OwnedDirectory|undefined;
-  let retain=false;
+  let retain=false,exposed=false;
+  let objectDirectory:FileHandle|undefined;
+  const unpublished:Array<{id:string;identity:string}>=[];
   try{
    if(this.#closed)throw unavailable();
    if(!request||request.format!=='narralens.prepared-preview-request@1')throw changed();
@@ -409,6 +429,16 @@ export class PreparedPreviewService implements PreparedPreviewPort {
    await assertAnchoredPrivate(objectRoot,'The prepared preview object domain');
    await ensurePrivateDirectory(workspaceRoot,'The prepared preview workspace');
    await ensurePrivateDirectory(objectRoot,'The prepared preview object domain');
+   objectDirectory=await open(objectRoot,constants.O_RDONLY|constants.O_DIRECTORY|constants.O_NOFOLLOW);
+   const objectStat=await objectDirectory.stat({bigint:true});
+   const objectIdentity=`${objectStat.dev}:${objectStat.ino}`;
+   const currentObjects=async()=>{
+    const named=await lstat(objectRoot,{bigint:true}),held=await objectDirectory!.stat({bigint:true});
+    if(!named.isDirectory()||named.isSymbolicLink()||`${named.dev}:${named.ino}`!==objectIdentity
+      ||`${held.dev}:${held.ino}`!==objectIdentity||await realpath('/proc/self/fd/'+objectDirectory!.fd)!==objectRoot)
+     throw changed('The prepared preview object domain was replaced');
+   };
+   await currentObjects();
    workspace=await createOwnedDirectory(resolve(workspaceRoot,'preview-'+randomUUID()),'The prepared preview workspace');
    let copy:IsolatedCopy|undefined;
    try{
@@ -476,7 +506,10 @@ export class PreparedPreviewService implements PreparedPreviewPort {
     const publish=async(slot:PreparedPreviewPartKind,content_type:string,bytes:Buffer,media_facts:PreparedPreviewMediaFactsV1)=>{
      if(request.signal?.aborted)throw unavailable('The prepared preview was cancelled');
      if(this.#closed)throw unavailable('The prepared preview is stopping');
-     parts.push(await this.#publish(slot,content_type,bytes,media_facts));
+     await currentObjects();
+     parts.push(await this.#publish(objectDirectory!,(id,identity)=>unpublished.push({id,identity}),slot,content_type,bytes,media_facts));
+     await currentObjects();
+     if(request.signal?.aborted||this.#closed)throw unavailable('The prepared preview stopped during publication');
     };
     await publish('preview','video/mp4',await readFile(outPath),{kind:'video',fps:measured.fps,frame_count:measured.frame_count});
     await publish('narration',String(narration.media_type),narrationBytes,{kind:'audio',sample_rate:audio.sample_rate,sample_count:audio.sample_count,channels:audio.channels});
@@ -491,11 +524,24 @@ export class PreparedPreviewService implements PreparedPreviewPort {
      plan_digest:planDigest,rights_digest:fact.rights_digest,producer_attempt:completed.producer_attempt,
      fps:measured.fps,frame_count:measured.frame_count,parts,
     };
+    await currentObjects();
+    if(request.signal?.aborted||this.#closed)throw unavailable('The prepared preview stopped before receipt exposure');
+    this.#verifier.assertCurrentForRead(completed,binding,proof,()=>this.#options.assertCurrentAuthorAndRights(completed.project_id));
     const receipt_digest=canonicalDigest(content);
-    return {...content,receipt_digest};
+    exposed=true;
+    return deepFreeze({...content,receipt_digest});
    }finally{await copy?.dispose();}
   }catch(error){return failure(error);}
   finally{
+   if(objectDirectory){
+    try{
+     if(!exposed)for(const object of unpublished){
+      const path='/proc/self/fd/'+objectDirectory.fd+'/'+object.id;
+      const actual=await lstat(path,{bigint:true}).catch(()=>undefined);
+      if(actual?.isFile()&&`${actual.dev}:${actual.ino}`===object.identity)await unlink(path).catch(()=>undefined);
+     }
+    }finally{await objectDirectory.close();}
+   }
    if(workspace&&!retain)await removeOwnedDirectory(workspace);
   }
  }

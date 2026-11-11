@@ -1,0 +1,270 @@
+
+> narralens@0.1.0 test /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+> vitest run --config vitest.config.ts tests/agent-driven/media/preview-prepared-source.test.ts --maxWorkers=1 --minWorkers=1 -t 'cannot redirect|handles a .* target write|does not expose'
+
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:941124) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/agent-driven/media/preview-prepared-source.test.ts (11 tests | 5 failed | 6 skipped) 60551ms
+   ↓ renders an isolated preview of a completed prepared source with five real parts and measured facts
+   ↓ refuses a preview whose proof is not a proof of this prepared source
+   ↓ refuses the boundaries a prepared preview must not cross
+   ↓ refuses a part whose content type or media facts do not belong to its slot
+   ↓ refuses a same-inode rewrite during read and closes its verified descriptor once
+   ↓ refuses a same-inode rewrite during hash-eof and closes its verified descriptor once
+   × cannot redirect object publication into author source by replacing the object directory at open 15246ms
+     → promise resolved "{ …(16) }" instead of rejecting
+   × handles a partial target write without rendering different copied bytes 7375ms
+     → expected 'd736aa68c287b7b019413cd9679d14ff0222d…' to be '1ec8a5ee0d98ce3a61d0a65a234ec25d1f159…' // Object.is equality
+   × handles a zero target write without rendering different copied bytes 6574ms
+     → expected 'e3b0c44298fc1c149afbf4c8996fb92427ae4…' to be undefined
+   × does not expose a receipt after cancel at the fifth publication 17431ms
+     → promise resolved "{ …(16) }" instead of rejecting
+   × does not expose a receipt after close at the fifth publication 13924ms
+     → promise resolved "{ …(16) }" instead of rejecting
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/media/preview-prepared-source.test.ts > cannot redirect object publication into author source by replacing the object directory at open
+AssertionError: promise resolved "{ …(16) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "execution_attempt": 1,
++   "format": "narralens.prepared-preview-receipt@1",
++   "fps": {
++     "den": 1,
++     "num": 30,
++   },
++   "frame_count": 90,
++   "parts": [
++     {
++       "bytes": 84175,
++       "content_type": "video/mp4",
++       "media_facts": {
++         "fps": {
++           "den": 1,
++           "num": 30,
++         },
++         "frame_count": 90,
++         "kind": "video",
++       },
++       "object_id": "obj_596ab325c0754bf9b060dac509eea56a",
++       "sha256": "011bd960b4cc2d41b575af6e91a252ee6f96524e24a22f3a608603957378e1ec",
++       "slot": "preview",
++     },
++     {
++       "bytes": 288078,
++       "content_type": "audio/wav",
++       "media_facts": {
++         "channels": 1,
++         "kind": "audio",
++         "sample_count": 144000,
++         "sample_rate": 48000,
++       },
++       "object_id": "obj_268498b2f6564bf48177ffa33a76caf4",
++       "sha256": "42c9992dbd4dcfbeaf52790767beb0febee1279ce37e2e46d5cb474bdd8e1a1d",
++       "slot": "narration",
++     },
++     {
++       "bytes": 259,
++       "content_type": "text/vtt; charset=utf-8",
++       "media_facts": {
++         "kind": "text",
++       },
++       "object_id": "obj_25123febad50481ab2c6f9a31ac03c0e",
++       "sha256": "7589688eff6e9ca5ee39341deb23d149f5a6cccec1da8ac9299fbb07230b88d9",
++       "slot": "subtitles",
++     },
++     {
++       "bytes": 385,
++       "content_type": "application/json; charset=utf-8",
++       "media_facts": {
++         "kind": "json",
++       },
++       "object_id": "obj_eb858af9580143ffb5246b6dbbb64dfd",
++       "sha256": "db2126e336f372367f4fd69dc5c7d91cdece81a56f5af3144943b380fd2c1a0c",
++       "slot": "shot_summary",
++     },
++     {
++       "bytes": 1663,
++       "content_type": "application/json; charset=utf-8",
++       "media_facts": {
++         "kind": "json",
++       },
++       "object_id": "obj_0a569852ebab46d0a9c9489e8ef6377c",
++       "sha256": "09a5ac1863490cc03b61edb53a21eca37b313fff4d9fe12b870c0efae847e71c",
++       "slot": "rights_quality",
++     },
++   ],
++   "plan_digest": "74e803fd44e948633dcd385ae7c90780282a7010ab7942769a0d8464d5812523",
++   "plan_version": 1,
++   "prepared_job_id": "job_a2aa3945aa9e4ea49456908d3f9de8a3",
++   "prepared_source_id": "prepared_6defbd6e2fc3fc054e9f308a",
++   "producer_attempt": 1,
++   "project_id": "project_c63b85a4a1524c26ad13e455fcc62a52",
++   "receipt_digest": "7fe5c9413e361c4ee39a6c8ded89885c612a14bd64f6e3f57b76fbbc3ddf5fa8",
++   "rights_digest": "d1a38baad9db774978cc604b62affb789f8f9fad11956b83910f944bd6bec3bc",
++   "run_id": "run-673e4198-e2bf-4b94-a6f2-c62d039088da",
++   "source_digest": "6defbd6e2fc3fc054e9f308ac501c574cd043ce1d36786e23ce19ec70dff1069",
++   "step_id": "sample",
+  }
+
+ ❯ tests/agent-driven/media/preview-prepared-source.test.ts:275:132
+    273|   ioFault.beforePublish=async()=>{await rename(f.objects,held);await s…
+    274|   const proof=await f.verifier.proveForRead(f.completed,f.binding,f.re…
+    275|   try{await expect(f.service.preview({format:'narralens.prepared-previ…
+       |                                                                                                                                    ^
+    276|   finally{f.verifier.release(proof);}
+    277|   expect(ioFault.beforePublish).toBeUndefined();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  tests/agent-driven/media/preview-prepared-source.test.ts > handles a partial target write without rendering different copied bytes
+AssertionError: expected 'd736aa68c287b7b019413cd9679d14ff0222d…' to be '1ec8a5ee0d98ce3a61d0a65a234ec25d1f159…' // Object.is equality
+
+Expected: "1ec8a5ee0d98ce3a61d0a65a234ec25d1f159853c547c9f522c3fe0b265d1c7c"
+Received: "d736aa68c287b7b019413cd9679d14ff0222ddfca2b102ecedd0bcad9d3c0529"
+
+ ❯ tests/agent-driven/media/preview-prepared-source.test.ts:296:40
+    294|   finally{f.verifier.release(proof);}
+    295|   expect(ioFault.shortHits).toBeGreaterThan(0);
+    296|   if(mode==='partial')expect(observed).toBe(expected);else expect(obse…
+       |                                        ^
+    297|  }finally{await f.close();}
+    298| },600000);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  tests/agent-driven/media/preview-prepared-source.test.ts > handles a zero target write without rendering different copied bytes
+AssertionError: expected 'e3b0c44298fc1c149afbf4c8996fb92427ae4…' to be undefined
+
+- Expected: 
+undefined
+
++ Received: 
+"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+
+ ❯ tests/agent-driven/media/preview-prepared-source.test.ts:296:77
+    294|   finally{f.verifier.release(proof);}
+    295|   expect(ioFault.shortHits).toBeGreaterThan(0);
+    296|   if(mode==='partial')expect(observed).toBe(expected);else expect(obse…
+       |                                                                             ^
+    297|  }finally{await f.close();}
+    298| },600000);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ FAIL  tests/agent-driven/media/preview-prepared-source.test.ts > does not expose a receipt after cancel at the fifth publication
+ FAIL  tests/agent-driven/media/preview-prepared-source.test.ts > does not expose a receipt after close at the fifth publication
+AssertionError: promise resolved "{ …(16) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "execution_attempt": 1,
++   "format": "narralens.prepared-preview-receipt@1",
++   "fps": {
++     "den": 1,
++     "num": 30,
++   },
++   "frame_count": 90,
++   "parts": [
++     {
++       "bytes": 84175,
++       "content_type": "video/mp4",
++       "media_facts": {
++         "fps": {
++           "den": 1,
++           "num": 30,
++         },
++         "frame_count": 90,
++         "kind": "video",
++       },
++       "object_id": "obj_3d4b8258379846e2b5ed054b917138c5",
++       "sha256": "011bd960b4cc2d41b575af6e91a252ee6f96524e24a22f3a608603957378e1ec",
++       "slot": "preview",
++     },
++     {
++       "bytes": 288078,
++       "content_type": "audio/wav",
++       "media_facts": {
++         "channels": 1,
++         "kind": "audio",
++         "sample_count": 144000,
++         "sample_rate": 48000,
++       },
++       "object_id": "obj_98c0c5813a7d4c2b86ef5a2120b0899e",
++       "sha256": "42c9992dbd4dcfbeaf52790767beb0febee1279ce37e2e46d5cb474bdd8e1a1d",
++       "slot": "narration",
++     },
++     {
++       "bytes": 259,
++       "content_type": "text/vtt; charset=utf-8",
++       "media_facts": {
++         "kind": "text",
++       },
++       "object_id": "obj_b9a574158df44d2d912af30d6f55ead1",
++       "sha256": "7589688eff6e9ca5ee39341deb23d149f5a6cccec1da8ac9299fbb07230b88d9",
++       "slot": "subtitles",
++     },
++     {
++       "bytes": 385,
++       "content_type": "application/json; charset=utf-8",
++       "media_facts": {
++         "kind": "json",
++       },
++       "object_id": "obj_960d672771b5478ea1a1fb2aebd4af9e",
++       "sha256": "54b221eabe94759e0681f2ea2a94ff7ad3d15487df8d53585f42bf5cfbe5c613",
++       "slot": "shot_summary",
++     },
++     {
++       "bytes": 1663,
++       "content_type": "application/json; charset=utf-8",
++       "media_facts": {
++         "kind": "json",
++       },
++       "object_id": "obj_931fb94deeef4ec9ad405352d429293f",
++       "sha256": "ef312cdfc219e8cc02c20c5f05fa108b53c3d021ee1623da733ff432543b19c8",
++       "slot": "rights_quality",
++     },
++   ],
++   "plan_digest": "9dda7726df3d5c7e7a2fc5c8ecffdd4b65e889aecd011eaf8a7594c0c6321b3b",
++   "plan_version": 1,
++   "prepared_job_id": "job_86461afa3ee94cf49acbbd07784eae5c",
++   "prepared_source_id": "prepared_3077a00235e901cd603a3f39",
++   "producer_attempt": 1,
++   "project_id": "project_be8b524e79154f5fad5163c545880b18",
++   "receipt_digest": "f354d67cb71958937e4c447c585b6ceb0da7973cb85f47735589476fdecf7fc9",
++   "rights_digest": "6d24bede5e73f7c7a6baebdb9099bf0025fde4c8fbcd57a4912d226921a615a5",
++   "run_id": "run-ce8108bd-5319-4a79-9b56-ca3404b3918a",
++   "source_digest": "3077a00235e901cd603a3f395416da5ef7a99f998b3c170a0158dde327e2df15",
++   "step_id": "sample",
+  }
+
+ ❯ tests/agent-driven/media/preview-prepared-source.test.ts:306:157
+    304|   ioFault.onFifthSync=()=>{if(mode==='cancel')controller.abort();else …
+    305|   const proof=await f.verifier.proveForRead(f.completed,f.binding,f.re…
+    306|   try{await expect(f.service.preview({format:'narralens.prepared-previ…
+       |                                                                                                                                                             ^
+    307|   finally{f.verifier.release(proof);}
+    308|   await closing;
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  5 failed | 6 skipped (11)
+   Start at  23:26:40
+   Duration  68.52s (transform 3.01s, setup 0ms, collect 5.93s, tests 60.55s, environment 0ms, prepare 1.31s)
+
+ ELIFECYCLE  Test failed. See above for more details.
