@@ -1,0 +1,23 @@
+{
+  "format": "narralens.recorded-independent-review-summary@1",
+  "scheduler": {
+    "commit": "64884a8b0be35bd2e43734cbebced875263a54b3",
+    "dispatch": "ctx_715908fe5faa",
+    "message": "msg_0554d45d00fe",
+    "decision": "BOUNDED_COMPONENT_ACCEPT",
+    "blocker": 0,
+    "major": 0,
+    "scope": "standalone scheduler source and completed module evidence only; actual family/Host/generic/SIGKILL remains NOT_RUN"
+  },
+  "publisher": {
+    "commit": "d8fdc1a0b16cd5a594ba7516dd0cb932d3cc910f",
+    "dispatch": "ctx_a229c4656342",
+    "message": "msg_2ce4b8868317",
+    "decision": "BOUNDED_INTEGRATION_ACCEPT",
+    "blocker": 0,
+    "major": 0,
+    "scope": "Publisher atomic identity delta and completed037/038/039/type48 evidence; reviewer did not access then-live real040"
+  },
+  "recorded_by": "MAIN; summary of actual Orca worker_done, not a new independent signoff",
+  "fullA": "NOT_ACCEPTED"
+}
