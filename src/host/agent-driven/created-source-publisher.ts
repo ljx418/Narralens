@@ -117,13 +117,17 @@ type PreparedNativeConsumerPlan={readonly storyboard:Storyboard;readonly narrati
 /** Derived consumer edges of the already-verified immutable native plan. This is a
  * hash preimage, not another writable timeline or a source of approval authority. */
 export function preparedSourceConsumerGraph(metadata:PreparedNativeMetadata,draft:PreparedNativeConsumerPlan){
-  if(metadata.clip_ids.length!==draft.storyboard.shots.length)fail('REVISION_CONFLICT','Native consumer membership differs');
+  const expected=[...draft.storyboard.shots.map(s=>'shot-'+s.shot_id),...(draft.narration_asset_id===null?[]:['narration'])];
+  if(new Set(metadata.clip_ids).size!==metadata.clip_ids.length||metadata.clip_ids.length!==expected.length
+    ||expected.some(id=>!metadata.clip_ids.includes(id)))fail('REVISION_CONFLICT','Native consumer membership differs');
   let start=0;
   const clips=draft.storyboard.shots.map((shot,index)=>{const begin=start;start+=shot.duration_frames;
-    return {clip_id:metadata.clip_ids[index]!,shot_id:shot.shot_id,paragraph_id:shot.paragraph_id,asset_id:shot.asset_id,
+    return {clip_id:'shot-'+shot.shot_id,kind:'visual' as const,shot_id:shot.shot_id,paragraph_id:shot.paragraph_id,asset_id:shot.asset_id,
       start_frame:begin,end_frame_exclusive:start};});
   if(start!==metadata.frame_count)fail('REVISION_CONFLICT','Native consumer frames differ');
-  return {clips,narration_asset_id:draft.narration_asset_id,subtitles:metadata.subtitles,
+  const nativeClips=draft.narration_asset_id===null?clips:[...clips,{clip_id:'narration',kind:'narration' as const,shot_id:null,paragraph_id:null,
+    asset_id:draft.narration_asset_id,start_frame:0,end_frame_exclusive:metadata.frame_count}];
+  return {clips:nativeClips,narration_asset_id:draft.narration_asset_id,subtitles:metadata.subtitles,
     assets:metadata.assets.map(a=>({asset_id:a.asset_id,path:a.path,rights_ref:a.rights_ref})).sort((a,b)=>a.asset_id<b.asset_id?-1:1)};
 }
 // The returned token contains no issuer, guards, geometry or validation machinery.

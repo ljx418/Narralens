@@ -1,0 +1,58 @@
+
+> narralens@0.1.0 test /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+> vitest run --config vitest.config.ts tests/agent-driven/integration/created-source-adoption.test.ts --maxWorkers=1 --minWorkers=1 -t 'publishes complete native source'
+
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:1586012) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/agent-driven/integration/created-source-adoption.test.ts (22 tests | 1 failed | 21 skipped) 5083ms
+   × actual closed created-source commit and publisher > publishes complete native source, commits once, preserves R1 geometry and replays without a second commit 5082ms
+     → Native consumer membership differs
+   ↓ actual closed created-source commit and publisher > refuses a prepared transaction of another kind before publishing source
+   ↓ actual closed created-source commit and publisher > refuses a workflow attempt detached from the actual prepared job
+   ↓ actual closed created-source commit and publisher > refuses JSON-cloned publication proof without moving database authorities
+   ↓ actual closed created-source commit and publisher > refuses author bytes changed after publication even while database base is unchanged
+   ↓ actual closed created-source commit and publisher > refuses current selection changed after publication
+   ↓ actual closed created-source commit and publisher > refuses a symlink replacement of the committed snapshot source
+   ↓ actual closed created-source commit and publisher > rolls every database authority back if an actual post-consume write fails
+   ↓ actual closed created-source commit and publisher > poisons the outer transaction when a project-bound repository guard failure is swallowed
+   ↓ actual closed created-source commit and publisher > poisons the owner if a real scope is used against another database even when the error is swallowed
+   ↓ actual closed created-source commit and publisher > invalidates an authentic joined scope when its successful commit ends
+   ↓ actual closed created-source commit and publisher > does not expose mutable issuer, guard or geometry authority on a real publication token
+   ↓ actual closed created-source commit and publisher > refuses an authority that expires during final synchronous file verification
+   ↓ actual closed created-source commit and publisher > retains the original backup inode when a same-byte replacement happens after rename
+   ↓ actual closed created-source commit and publisher > refuses a fully rehashed approved plan that lies about film
+   ↓ actual closed created-source commit and publisher > refuses a fully rehashed approved plan that lies about settings
+   ↓ actual closed created-source commit and publisher > refuses a fully rehashed approved plan that lies about captions
+   ↓ actual closed created-source commit and publisher > refuses a fully rehashed approved plan that lies about native_plan
+   ↓ actual closed created-source commit and publisher > refuses a fully rehashed approved plan that lies about rights
+   ↓ actual closed created-source commit and publisher > refuses a fully rehashed approved plan that lies about consumer
+   ↓ actual closed created-source commit and publisher > refuses a fully rehashed approved plan that lies about upstream
+   ↓ actual closed created-source commit and publisher > refuses a fully rehashed approved plan that lies about ranges
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/created-source-adoption.test.ts > actual closed created-source commit and publisher > publishes complete native source, commits once, preserves R1 geometry and replays without a second commit
+CreatedSourcePublishError: Native consumer membership differs
+ ❯ fail src/host/agent-driven/created-source-publisher.ts:79:9
+     77| 
+     78| function fail(code: CreatedSourcePublishError['code'], message: string…
+     79|   throw new CreatedSourcePublishError(code, message);
+       |         ^
+     80| }
+     81| 
+ ❯ preparedSourceConsumerGraph src/host/agent-driven/created-source-publisher.ts:120:63
+ ❯ fixture tests/agent-driven/integration/created-source-adoption.test.ts:41:14
+ ❯ tests/agent-driven/integration/created-source-adoption.test.ts:127:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 21 skipped (22)
+   Start at  03:11:38
+   Duration  12.52s (transform 3.10s, setup 0ms, collect 5.70s, tests 5.08s, environment 0ms, prepare 1.15s)
+
+ ELIFECYCLE  Test failed. See above for more details.

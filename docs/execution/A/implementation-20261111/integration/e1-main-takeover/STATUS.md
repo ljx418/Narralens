@@ -44,3 +44,10 @@ prepare-foundation-light-02：4文件63例PASS；typecheck14 PASS。runner升级
 ## D10事务与实际Job关系补强
 
 自审对照原D10补齐最后提交和发布前的journal marker：仅接受kind=edit且request.operation=agent.created_source.apply@1，拒绝借snapshot_publish事务写created source。原真实夹具之前误用了snapshot_publish，现已修正，并新增拒绝错误kind用例（NOT_RUN）。reader与commit也核对当前step_attempt.job_id为实际准备Job，新增脱离Job关系拒绝用例（NOT_RUN）。typecheck15通过；之前63轻量结果不扩大为本增量的真实Host验收。
+
+
+## 实际整组定向验证 real-010
+
+real-008在真实准备产物抓到新消费者图把旁白当视觉镜头：clip_ids实际含shot-*与narration。按固定生成器的真实身份/数量对账，完整graph保留独立narration范围与关系，不用数组下标猜镜头。real-009实际单正向通过；real-010三文件40/40（22个真实Host/本地媒体/源码发布/事务边界用例、其余18个计划/SQLite用例）通过；v2输入无修改或新增，原失败保留。typecheck16通过。这里的真实媒体是诊断素材输入与源码验证，不是正式视频导出或人类配音验收。
+
+正常路径已实际使用新CreatedSourceChangeService在没有review包时产生impact并同key重放，project revision不变；之后review/confirmation/Approval仍为明确模块夹具，验证最终受控提交与拒绝边界，不能冒充真实UI可信审批或完整Run。API注册、专项recovery、整工作流推进、正式渲染、UI/NativeAck、整轮独立审查与人验仍未通过。

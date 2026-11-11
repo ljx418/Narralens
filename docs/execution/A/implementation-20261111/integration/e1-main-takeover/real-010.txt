@@ -1,0 +1,44 @@
+
+> narralens@0.1.0 test /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+> vitest run --config vitest.config.ts tests/agent-driven/integration/created-source-adoption.test.ts tests/agent-driven/integration/created-source-change.test.ts tests/agent-driven/integration/created-impact-atomic.test.ts --maxWorkers=1 --minWorkers=1
+
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:1594321) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/created-source-adoption.test.ts (22 tests) 166347ms
+   ✓ actual closed created-source commit and publisher > publishes complete native source, commits once, preserves R1 geometry and replays without a second commit  9060ms
+   ✓ actual closed created-source commit and publisher > refuses a prepared transaction of another kind before publishing source  7726ms
+   ✓ actual closed created-source commit and publisher > refuses a workflow attempt detached from the actual prepared job  7988ms
+   ✓ actual closed created-source commit and publisher > refuses JSON-cloned publication proof without moving database authorities  8149ms
+   ✓ actual closed created-source commit and publisher > refuses author bytes changed after publication even while database base is unchanged  9213ms
+   ✓ actual closed created-source commit and publisher > refuses current selection changed after publication  8096ms
+   ✓ actual closed created-source commit and publisher > refuses a symlink replacement of the committed snapshot source  9394ms
+   ✓ actual closed created-source commit and publisher > rolls every database authority back if an actual post-consume write fails  8618ms
+   ✓ actual closed created-source commit and publisher > poisons the outer transaction when a project-bound repository guard failure is swallowed  8167ms
+   ✓ actual closed created-source commit and publisher > poisons the owner if a real scope is used against another database even when the error is swallowed  8192ms
+   ✓ actual closed created-source commit and publisher > invalidates an authentic joined scope when its successful commit ends  8193ms
+   ✓ actual closed created-source commit and publisher > does not expose mutable issuer, guard or geometry authority on a real publication token  8914ms
+   ✓ actual closed created-source commit and publisher > refuses an authority that expires during final synchronous file verification  8040ms
+   ✓ actual closed created-source commit and publisher > retains the original backup inode when a same-byte replacement happens after rename  7924ms
+   ✓ actual closed created-source commit and publisher > refuses a fully rehashed approved plan that lies about film  6537ms
+   ✓ actual closed created-source commit and publisher > refuses a fully rehashed approved plan that lies about settings  5571ms
+   ✓ actual closed created-source commit and publisher > refuses a fully rehashed approved plan that lies about captions  5521ms
+   ✓ actual closed created-source commit and publisher > refuses a fully rehashed approved plan that lies about native_plan  6643ms
+   ✓ actual closed created-source commit and publisher > refuses a fully rehashed approved plan that lies about rights  6932ms
+   ✓ actual closed created-source commit and publisher > refuses a fully rehashed approved plan that lies about consumer  5645ms
+   ✓ actual closed created-source commit and publisher > refuses a fully rehashed approved plan that lies about upstream  6192ms
+   ✓ actual closed created-source commit and publisher > refuses a fully rehashed approved plan that lies about ranges  5629ms
+(node:1600000) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/created-impact-atomic.test.ts (7 tests) 38ms
+(node:1600058) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/created-source-change.test.ts (11 tests) 20ms
+
+ Test Files  3 passed (3)
+      Tests  40 passed (40)
+   Start at  03:18:16
+   Duration  180.87s (transform 3.09s, setup 0ms, collect 9.24s, tests 166.41s, environment 0ms, prepare 3.51s)
+
