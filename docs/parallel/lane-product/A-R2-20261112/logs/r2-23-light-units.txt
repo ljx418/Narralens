@@ -1,0 +1,23 @@
+cwd=/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-PRODUCT
+argv=corepack pnpm exec vitest run --config vitest.config.ts tests/agent-driven/product/observation-ui.test.tsx tests/agent-driven/integration/created-native-ack.test.ts tests/agent-driven/integration/created-workbench-review.test.ts tests/contracts --maxWorkers=1 --minWorkers=1
+start=2026-11-11T18:15:33+0000
+
+ RUN  v3.2.4 /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-PRODUCT
+
+ ✓ tests/agent-driven/product/observation-ui.test.tsx (80 tests) 755ms
+(node:1431245) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/created-native-ack.test.ts (45 tests) 196ms
+ ✓ tests/contracts/contracts.test.ts (7 tests) 99ms
+ ✓ tests/contracts/native-workbench-static.test.ts (2 tests) 49ms
+ ✓ tests/contracts/d4.2.1-contracts.test.ts (6 tests) 35ms
+ ✓ tests/contracts/d4.1-contracts.test.ts (8 tests) 23ms
+ ✓ tests/agent-driven/integration/created-workbench-review.test.ts (35 tests) 14ms
+
+ Test Files  7 passed (7)
+      Tests  183 passed (183)
+   Start at  02:15:34
+   Duration  3.09s (transform 516ms, setup 0ms, collect 1.06s, tests 1.17s, environment 90ms, prepare 224ms)
+
+exit=0
+end=2026-11-11T18:15:37+0000

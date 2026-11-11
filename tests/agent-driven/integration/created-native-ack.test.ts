@@ -1411,3 +1411,26 @@ describe("the original Studio selection at the ingress", () => {
     if (!extra.ok) expect(extra.reason).toBe("SELECTION_FIELDS_NOT_CLOSED");
   });
 });
+
+describe("the closed shape of the document and the hydration event", () => {
+  it("refuses an event that carries a field the original does not have", () => {
+    const document = validateNativeDocumentObservation({
+      protocol_version: 1, kind: "invalidated", project_id: "n1", editor_view_id: "v1",
+      document_epoch: 1, reason: "dirty", impact_id: "i1",
+    });
+    expect(document.ok).toBe(false);
+    if (!document.ok) expect(document.reason).toBe("DOCUMENT_FIELDS_NOT_CLOSED");
+    const hydration = validateNativeHydrationObservation({
+      project_id: "n1", editor_view_id: "v1", document_epoch: 1, hydration_epoch: 1,
+      parts: {
+        settings: { state: "hydrated", origin: "project", effective_sha256: HASH_A },
+        subtitle_style: { state: "hydrated", origin: "project", effective_sha256: HASH_A },
+        captions: { state: "hydrated", origin: "project", effective_sha256: HASH_A },
+        markers: { state: "hydrated", origin: "project", effective_sha256: HASH_A },
+      },
+      session_id: "s1",
+    });
+    expect(hydration.ok).toBe(false);
+    if (!hydration.ok) expect(hydration.reason).toBe("HYDRATION_FIELDS_NOT_CLOSED");
+  });
+});

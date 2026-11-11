@@ -314,6 +314,11 @@ export function parseNativeObservationBody(raw: string): Check<NativeObservation
 /** The original p2 document state, in its original shape. */
 export function validateNativeDocumentObservation(value: unknown): Check<NativeDocumentObservation> {
   if (!isPlainObject(value)) return no('DOCUMENT_NOT_AN_OBJECT');
+  const keys = Object.keys(value);
+  const allowed = value.kind === 'invalidated'
+    ? ['protocol_version', 'kind', 'project_id', 'editor_view_id', 'document_epoch', 'reason']
+    : ['protocol_version', 'kind', 'project_id', 'editor_view_id', 'document_epoch', 'native_rev', 'film_sha256', 'utf8_byte_length'];
+  if (!keys.every((key) => allowed.includes(key))) return no('DOCUMENT_FIELDS_NOT_CLOSED');
   if (value.protocol_version !== 1) return no('DOCUMENT_PROTOCOL_VERSION_UNKNOWN');
   if (!isName(value.project_id)) return no('DOCUMENT_PROJECT_ID_INVALID');
   if (!isName(value.editor_view_id)) return no('DOCUMENT_VIEW_ID_INVALID');
@@ -357,6 +362,10 @@ export function validateNativeDocumentObservation(value: unknown): Check<NativeD
 /** The original 013 hydration event: five fields and exactly four closed parts. */
 export function validateNativeHydrationObservation(value: unknown): Check<NativeHydrationObservation> {
   if (!isPlainObject(value)) return no('HYDRATION_NOT_AN_OBJECT');
+  const keys = Object.keys(value).sort();
+  if (keys.length !== 5 || keys.join(',') !== 'document_epoch,editor_view_id,hydration_epoch,parts,project_id') {
+    return no('HYDRATION_FIELDS_NOT_CLOSED');
+  }
   if (!isName(value.project_id)) return no('HYDRATION_PROJECT_ID_INVALID');
   if (!isName(value.editor_view_id)) return no('HYDRATION_VIEW_ID_INVALID');
   if (!isEpoch(value.document_epoch)) return no('HYDRATION_DOCUMENT_EPOCH_INVALID');
