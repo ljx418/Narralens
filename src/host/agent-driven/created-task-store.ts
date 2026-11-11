@@ -266,7 +266,7 @@ export class CreatedTaskStore {
       const task=this.#task(String(id.job_id)),job=this.#job(task),at=date(this.now);
       if(!['running','cancel_requested'].includes(job.state)||job.state==='running'&&job.lease_expires_at===null||job.lease_expires_at!==null&&job.lease_expires_at>at.getTime())return;
       const cancel=job.state==='cancel_requested',requeue=!cancel&&job.attempt<job.max_attempts;
-      const applied=cancel?(job.lease_owner!==null?this.revisions.completeCancelledCallback(job.job_id,job.lease_owner,job.attempt,at):Number(this.#db.prepare("UPDATE job SET state='cancelled',lease_owner=NULL,lease_expires_at=NULL,updated_at=? WHERE job_id=? AND state='cancel_requested' AND lease_owner IS NULL AND attempt=? AND lease_expires_at IS ?").run(at.toISOString(),job.job_id,job.attempt,job.lease_expires_at).changes)===1):this.revisions.reclaimLease(job.job_id,requeue,at);
+      const applied=cancel?(job.lease_owner!==null?this.revisions.completeCancelledCallback(job.job_id,job.lease_owner,job.attempt,at):this.revisions.completeUnownedCancellation(job.job_id,job.attempt,job.lease_expires_at,at)):this.revisions.reclaimLease(job.job_id,requeue,at);
       if(!applied)return;
       this.#hook(db=>settle(db,task,cancel?'cancelled':requeue?'pending':'failed',at));
       const settled=this.#job(task);if(settled.attempt!==job.attempt||settled.state!==(cancel?'cancelled':requeue?'queued':'attention')||settled.lease_owner!==null||settled.lease_expires_at!==null)fail('REVISION_CONFLICT','Recovery settlement changed');

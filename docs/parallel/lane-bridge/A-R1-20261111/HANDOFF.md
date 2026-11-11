@@ -318,3 +318,8 @@ child msg_5c5f4cba8023明确停止全部命令/写入并移交Codex；入站与d
 
 - MAIN 拥有 Job recovery 权威修正：`created-task-store.ts` 的 `reapExpired` 空 owner 取消子句与 Job SQL **未被我改动**（我的改动为纯增量，`git diff -U0` 无删除行）。收到 MAIN 的 `completeUnownedCancellation` 冻结 SHA 后，我可在下一个明确安全边界交付**那一条精确子句**的替换。
 - 已实现 `openReviewMedia({ref,range?,signal?})`：**signal 透传进 `reader.open`**，且 owner/当前包校验在 await 前后各一次。
+
+
+## MAIN recovery helper安全合并
+
+child msg_9b92ca689813在干净0d2ab8d03b7a1008fe42cda6010ce092326be18a停写且无活动命令后交回Codex。已用git merge --no-edit合并MAIN6402ae78179a48dfad5ab1c1ebfe54488ae9ce2d，实际merge HEAD `d73ce43b38d89dc0f6c8d93b8ffbf78e3510d498`；三条BRIDGE提交保留，project-creation-store自动合并保留ownerOf，无冲突/reset/stash。CreatedTaskStore逐字节与原候选相同，Codex未实施恢复分支改动；见evidence/recovery-helper-integration.json。交回Claude后仅按MAIN原文替换null-owner取消表达式为completeUnownedCancellation，保live-owner路径/原事务/事件/R0-M01。重型slot未获准；集成不继承最新candidate的回归PASS，原失败证据保留。

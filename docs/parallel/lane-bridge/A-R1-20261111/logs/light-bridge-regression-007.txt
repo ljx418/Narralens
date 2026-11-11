@@ -1,0 +1,39 @@
+argv=corepack pnpm exec vitest run tests/agent-driven/bridge tests/agent-driven/integration/created-task-store.test.ts tests/agent-driven/integration/created-task-worker.test.ts tests/agent-driven/integration/created-run-authority.test.ts tests/agent-driven/integration/review-media-transport.test.ts tests/agent-driven/product/fixed-workflow-service.test.ts tests/agent-driven/product/execution-guard.test.ts --maxWorkers=1 --minWorkers=1
+cwd=/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+head=d73ce43b38d89dc0f6c8d93b8ffbf78e3510d498
+clause=the null-owner cancellation now uses revisions.completeUnownedCancellation(job_id,attempt,lease_expires_at,at)
+class=LIGHT (no real Host, no ffmpeg/ffprobe, no Chromium, no large fixture)
+start_utc=2026-11-11T15:05:41Z
+
+ RUN  v3.2.4 /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+
+(node:901497) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/created-task-worker.test.ts (14 tests) 2831ms
+   ✓ renews the real lease during a long processor and only the current lease can settle  2526ms
+ ✓ tests/agent-driven/bridge/mcp-stdio-client.test.ts (8 tests) 2503ms
+   ✓ A-MCP stdio façade > verifies the host's contract version before the first dispatch  302ms
+   ✓ A-MCP stdio façade > reports an unreachable host and recovers when the host returns  532ms
+ ✓ tests/agent-driven/bridge/mcp-wrapper-cleanup.test.ts (2 tests) 571ms
+(node:901888) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/created-task-store.test.ts (46 tests) 370ms
+ ✓ tests/agent-driven/bridge/mcp-registry.test.ts (40 tests) 162ms
+ ✓ tests/agent-driven/product/fixed-workflow-service.test.ts (31 tests) 143ms
+(node:901981) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/created-run-authority.test.ts (12 tests) 113ms
+ ✓ tests/agent-driven/bridge/mcp-host-client.test.ts (15 tests) 58ms
+ ✓ tests/agent-driven/bridge/cursor-events.test.ts (26 tests) 40ms
+ ✓ tests/agent-driven/integration/review-media-transport.test.ts (5 tests) 24ms
+ ✓ tests/agent-driven/bridge/launcher-cold.test.ts (16 tests) 22ms
+ ✓ tests/agent-driven/product/execution-guard.test.ts (22 tests) 13ms
+ ✓ tests/agent-driven/bridge/skill-library.test.ts (3 tests) 3ms
+
+ Test Files  13 passed (13)
+      Tests  240 passed (240)
+   Start at  23:05:41
+   Duration  10.02s (transform 400ms, setup 0ms, collect 1.61s, tests 6.85s, environment 1ms, prepare 442ms)
+
+exit_code=0
+end_utc=2026-11-11T15:05:51Z
