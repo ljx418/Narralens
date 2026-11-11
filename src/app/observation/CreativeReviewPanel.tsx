@@ -65,6 +65,14 @@ export interface CreativeReviewPanelProps {
   /** What is known about the adoption a decision may have started. */
   readonly adoption?: ReviewAdoptionState | null;
   /**
+   * The project's own committed revision.
+   *
+   * It is shown on its own line, because it is its own fact. The project may have
+   * committed for a reason that has nothing to do with this decision, so the reader
+   * must be able to see the commit without it being read as this adoption.
+   */
+  readonly committedRevision?: number | null;
+  /**
    * The controlled media address of *this* instance.
    *
    * A `download_ref` is only followed when it belongs to this instance: another
@@ -300,6 +308,12 @@ export function CreativeReviewPanel(props: CreativeReviewPanelProps) {
       {adoption === null ? null : (
         <p className="nl-review-adoption" data-nl-review-adoption={adoption.state}>
           {ADOPTION_LABEL[adoption.state]}：{adoption.reason}
+        </p>
+      )}
+
+      {props.committedRevision === undefined || props.committedRevision === null ? null : (
+        <p className="nl-review-committed" data-nl-review-committed={props.committedRevision}>
+          工程当前版本：{props.committedRevision}
         </p>
       )}
 

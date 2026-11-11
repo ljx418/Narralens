@@ -1734,3 +1734,52 @@ describe("the Studio bridge and the native observation", () => {
     expect(bridge.sent[0]?.body.sequence).toBe(41);
   });
 });
+
+/**
+ * The committed revision is its own fact.
+ */
+describe("the committed revision and the adoption", () => {
+  it("shows the project's committed revision on its own line, apart from the adoption", () => {
+    render(
+      <CreativeReviewPanel
+        package={PACKAGE}
+        decision={{
+          decision_id: "decision-1",
+          project_id: "project-1",
+          run_id: "run-1",
+          package_id: PACKAGE.package_id,
+          package_version: PACKAGE.version,
+          input_digest: PACKAGE.input_digest,
+          output_digest: PACKAGE.output_digest,
+          quality_digest: PACKAGE.quality_digest,
+          choice: "accept_and_adopt",
+          principal_id: "operator",
+          channel: "trusted_ui",
+          recorded_at: "2026-11-12T00:00:00.000Z",
+          approval: null,
+        }}
+        adoption={{ state: "requested", reason: "决定已登记；实际提交与原生确认尚未取得，采用保持待完成。" }}
+        committedRevision={4}
+      />,
+    );
+    // The commit is visible, and it is not the adoption.
+    const committed = document.querySelector("[data-nl-review-committed]");
+    expect(committed?.textContent).toContain("4");
+    const adoption = document.querySelector("[data-nl-review-adoption]");
+    expect(adoption?.getAttribute("data-nl-review-adoption")).toBe("requested");
+  });
+
+  it("shows no revision line when there is no revision to show", () => {
+    render(<CreativeReviewPanel package={PACKAGE} committedRevision={null} />);
+    expect(document.querySelector("[data-nl-review-committed]")).toBeNull();
+  });
+
+  it("names the revision the editor has not confirmed yet", () => {
+    const context = {
+      ...CONTEXT_WITH_RUN, native_sync: "pending" as const, project_revision: 7,
+    };
+    const state = nativeSyncStateFromItsOwnModule(context);
+    expect(state.state).toBe("pending");
+    expect(state.reason).toContain("7");
+  });
+});

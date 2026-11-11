@@ -1751,6 +1751,7 @@ export function M5Panel({ client, targetProjectId, ui: uiProp }: M5PanelProps): 
         package={review}
         decision={reviewDecision}
         adoption={adoption}
+        committedRevision={context?.project_revision ?? null}
         busy={busy === "review"}
         stale={reviewStale}
         onOpenPart={(part) => void openPreparedPart(part)}
