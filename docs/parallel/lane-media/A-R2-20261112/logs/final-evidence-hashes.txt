@@ -1,0 +1,38 @@
+# A-R2 MEDIA - final evidence hashes (computed after every other file was written)
+utc=2026-11-11T17:11:22Z
+head=cb913a953bb303fd24e3003866f37befd33b3129
+branch=agent-driven/a-r1-media
+cwd=/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-MEDIA
+
+--- implementation commits ---
+cb913a953bb303fd24e3003866f37befd33b3129 docs(A-R2): narrow the attempt-1 wording and label the correction
+b89dc4fc1306706efddb391ff499d59f9912617c docs(A-R2): record the frozen media candidate, its evidence and its cleanup
+5763dfbec562927e0a601eedebe4372816389be7 test(A-R2): pin the stage primitives the legacy facade and the phase port share
+6c22182aebefee14f4cceccd3e2583da8630cc2f fix(A-R2): give the adoption proof cases the repo's per-case budget
+ef9e095c2ae8781fd58cfc6f4daaca3032d74364 feat(A-R2): implement the committed render phases and their R2 proof coverage
+3fc977168f0941f8b1286e08fc24827afda74b72 feat(A-R2): add L07 committed render phase ports and typed deps
+
+--- product paths under the released scope (sha256 of the working-tree bytes) ---
+b3d6127fbafd5de652560cff1c4324fd428dc2318c49143b2540cd641b38ef3c  src/host/render/ports.ts
+66a358e691b18ba91b57216038092b1f3f0889433471b9fe65a792faa4889c06  src/host/render/committed-render-phases.ts
+42cb9658e80e280dfd3842d30e023fad2740806b026f87c4e154b5792e5a10ab  src/host/render/render-snapshot.ts
+f69770afba85137d0dfd7a33be6115093538a411c2a4308295b523a018bbe93f  src/host/agent-driven/prepared-draft-verifier.ts
+6c0d0f18602d4fb7a0c334d51e2c5a0f0c21c7cab4ff4a980fbe77f8461eb596  src/host/render/assembly-ports.ts
+3f1a4ade59198e3e210e8e316e746e0bfdb955e6be6e829840430458547a868b  tests/agent-driven/media/committed-render-phases.test.ts
+397d34a1fd5befbd9d5c4f86e4a9493ea93b6677531b10ca08444515f51765f8  tests/agent-driven/media/prepared-source-adoption-proof.test.ts
+8a2d83e7c04dac76b462c1ec3f058d54ddd1972fd58e145dce2e223a6937b560  tests/agent-driven/media/render-snapshot.test.ts
+1bfec77cb01bc2dce86c7728f30bec1943b7dd01e701d0903419d72e957c8455  tests/agent-driven/integration/created-draft-processor.test.ts
+
+--- evidence logs and records (sha256) ---
+c3e16b505c961bc54e38da6ad6b12ba6d68165b73acd37b008b54f7ae7ed4833  docs/parallel/lane-media/A-R2-20261112/logs/r2-media-proof-001-cleanup.txt
+7dd1b78d093d8b7e6b7cbfc95732efabef37599b7564b93079e0cc157fdb4270  docs/parallel/lane-media/A-R2-20261112/logs/r2-media-proof-001-input-freeze-attempt1.txt
+1c49564f9ee5eee955e5add07b77fe6673df2741371afb4d57cb76f6993446f0  docs/parallel/lane-media/A-R2-20261112/logs/r2-media-proof-001-input-freeze.txt
+1aaad7a4fac86c511c430d0d0ae87f2f92447fe9cac173ebf329a577dab23ee0  docs/parallel/lane-media/A-R2-20261112/logs/r2-media-proof-001-ordering.md
+f0e3e4336fa2f8c83f1b65ab80a0d81f3e1fdbe770f681042b2199fcb2848a62  docs/parallel/lane-media/A-R2-20261112/logs/r2-media-proof-001-run-attempt2.log
+5395630bad6869436eb61c1e33a432974f9648790cce6fedc5aa0e787478f8c1  docs/parallel/lane-media/A-R2-20261112/logs/r2-media-proof-001-run.log
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  docs/parallel/lane-media/A-R2-20261112/logs/tsc-ports-first.log
+6345e51a75e1beafcb5db12cea2bead1daf2cd6bd7b78c2e13167ec3661820fd  docs/parallel/lane-media/A-R2-20261112/logs/vitest-committed-render-phases-001.log
+1711f3cc26ebd1ccf82af6d37e55a8a1e338e2e75e152dedfe8ec3e5bf436912  docs/parallel/lane-media/A-R2-20261112/logs/vitest-media-module-002.log
+30e088a8eb6ce9b4cb0ef1a9a74c0bb1715911105f7ebe35825ad637cf15157d  docs/parallel/lane-media/A-R2-20261112/logs/vitest-render-snapshot-001.log
+
+# The sha256 of this file itself is reported externally, in the message to the parent, because a file cannot carry its own digest.
