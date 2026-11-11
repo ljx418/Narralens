@@ -1,0 +1,23 @@
+
+> narralens@0.1.0 test /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+> vitest run --config vitest.config.ts tests/agent-driven/integration/created-source-adoption.test.ts --maxWorkers=1 --minWorkers=1 -t 'post-checkpoint|another intake|real intake update|predecessor gate changed|persists the same succeeded|publishes complete native source'
+
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:1646010) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/created-source-adoption.test.ts (28 tests | 21 skipped) 60883ms
+   ✓ actual closed created-source commit and publisher > rolls back checkpoint, attempt and every authority after a post-checkpoint transaction failure  9091ms
+   ✓ actual closed created-source commit and publisher > poisons a swallowed read of another intake inside the project commit scope  8708ms
+   ✓ actual closed created-source commit and publisher > rejects a real intake update after approval without consuming database authorities  7874ms
+   ✓ actual closed created-source commit and publisher > rejects a predecessor gate changed to pending after approval  7951ms
+   ✓ actual closed created-source commit and publisher > rejects a predecessor gate changed to rejected after approval  9345ms
+   ✓ actual closed created-source commit and publisher > persists the same succeeded attempt in workflow checkpoint and a freshly opened SQLite reader  8543ms
+   ✓ actual closed created-source commit and publisher > publishes complete native source, commits once, preserves R1 geometry and replays without a second commit  9371ms
+
+ Test Files  1 passed (1)
+      Tests  7 passed | 21 skipped (28)
+   Start at  03:49:14
+   Duration  69.02s (transform 3.28s, setup 0ms, collect 6.10s, tests 60.88s, environment 0ms, prepare 1.35s)
+

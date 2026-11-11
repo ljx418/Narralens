@@ -4,6 +4,8 @@ import {randomUUID} from 'node:crypto';
 import {afterEach,describe,it,expect,vi} from 'vitest';
 import {preparedDraftFixture,waitForCompletedDraft,registryFacts} from './helpers/created-draft-fixture.js';
 import {canonicalDigest} from '../../../src/host/creative/digest.js';
+import {CreativeService} from '../../../src/host/creative/creative-service.js';
+import {FixedWorkflowService} from '../../../src/host/creative/fixed-workflow-service.js';
 import {CreatedPreparedSourceStore} from '../../../src/host/agent-driven/created-prepared-source-store.js';
 import {CreatedSourceImpactStore} from '../../../src/host/agent-driven/created-source-impact-store.js';
 import {CreatedSourceAdoptionStore} from '../../../src/host/agent-driven/created-source-adoption-store.js';
@@ -105,6 +107,13 @@ async function fixture(options:{transactionKind?:'edit'|'snapshot_publish';mutat
    run_scope_digest:execution.run_scope_digest,confirmation_id:confirmationId,plan_version:1,step_id:execution.step_id,attempt:execution.attempt,input_digest:execution.input_digest,
    change_id:impactId,impact_id:impactId,base_revision:1,control_revision:0,action_digest:actionDigest,facts_digest:planDigest,state:'active',expires_at:Math.floor(now.getTime()/1000)+900,consumed_transaction_id:null});
   tx.put('prepared_authorization',{transaction_id:transactionId},{transaction_id:transactionId,project_id:f.projectId,run_id:execution.run_id,approval_id:approvalId,facts_digest:planDigest});
+  // Explicit accepted-review fixture, including the original checkpoint binding.
+  // This is not evidence that a human or the production decision UI accepted it.
+  const runKey={project_id:f.projectId,run_id:execution.run_id},run=tx.get('run',runKey)!;
+  tx.put('run',runKey,{...run,checkpoint_json:{...run.checkpoint_json,
+   workflow_revision:run.checkpoint_json.workflow_revision+1,
+   gates:run.checkpoint_json.gates.map(g=>g.kind==='sample'?{...g,state:'accepted' as const,review_package_id:reviewId}:g)}});
+
  });
  prepared.bindPackage({prepared_source_id:mapping.prepared_source_id,package_id:packageId,package_version:1,receipt_digest:packageDigest});
  adoptions.record({transaction_id:transactionId,project_id:f.projectId,prepared_source_id:mapping.prepared_source_id,impact_id:impactId,approval_id:approvalId,
@@ -123,6 +132,63 @@ async function fixture(options:{transactionKind?:'edit'|'snapshot_publish';mutat
 }
 
 describe('actual closed created-source commit and publisher',()=>{
+ it('rolls back checkpoint, attempt and every authority after a post-checkpoint transaction failure',async()=>{
+  const f=await fixture(),workflow=new FixedWorkflowService({repository:f.repo});
+  const before=await workflow.readWorkflow(f.projectId,f.owner),outbox=f.revisions.outboxRowCount();
+  f.revisions.compose(db=>db.exec("CREATE TEMP TRIGGER fail_created_terminal BEFORE UPDATE OF state ON project_transaction WHEN NEW.state='committed' BEGIN SELECT RAISE(ABORT,'after checkpoint fault'); END"));
+  expect(()=>f.revisions.commitPreparedCreatedSource(f.input)).toThrow('after checkpoint fault');
+  expect(await workflow.readWorkflow(f.projectId,f.owner)).toEqual(before);
+  expect(await f.repo.transaction(tx=>tx.get('step_attempt',{project_id:f.projectId,run_id:f.input.execution.run_id,plan_version:1,step_id:f.input.execution.step_id,attempt:f.input.execution.attempt})?.state)).toBe('waiting_user');
+  expect(f.revisions.activeCommit(f.projectId)?.revision).toBe(1);expect(f.revisions.outboxRowCount()).toBe(outbox);
+  expect(f.revisions.projectTransaction(f.input.transaction_id)?.state).toBe('prepared');
+  expect(f.revisions.compose(db=>db.prepare('SELECT state FROM impact WHERE impact_id=?').get(f.input.impact_id)?.state)).toBe('active');
+  expect(f.revisions.compose(db=>db.prepare('SELECT state FROM cp_a0_approval WHERE approval_id=?').get(f.input.approval_id)?.state)).toBe('active');
+ },120000);
+ it('poisons a swallowed read of another intake inside the project commit scope',async()=>{
+  const f=await fixture(),original=ProductSqliteRepository.prototype.joinCreatedSourceCommit;
+  vi.spyOn(ProductSqliteRepository.prototype,'joinCreatedSourceCommit').mockImplementation(function<T>(this:ProductSqliteRepository,scope:CreatedSourceCommitScope,work:(tx:ProductTransaction)=>T):T{
+   return original.call(this,scope,(tx:ProductTransaction)=>{try{tx.get('intake_head',{intake_id:'another-intake'});}catch{}return work(tx);}) as T;
+  });
+  expect(()=>f.revisions.commitPreparedCreatedSource(f.input)).toThrow();expect(f.revisions.activeCommit(f.projectId)?.revision).toBe(1);
+ },120000);
+ it('rejects a real intake update after approval without consuming database authorities',async()=>{
+  const f=await fixture(),creation=f.app.creation.forProject(f.projectId)!;
+  const current=await f.repo.transaction(tx=>{const head=tx.get('intake_head',{intake_id:creation.request.intake_id})!;
+   return tx.get('intake_version',{intake_id:head.intake_id,version:head.current_version})!;});
+  const authority=new CreativeProjectAuthority(f.app.creation);
+  const creative=new CreativeService({repository:f.repo,artifactAuthority:authority.assertArtifact,contentAuthority:authority.assertContent});
+  await creative.putIntake({meta:{idempotency_key:'after-approval-intake',correlation_id:'after-approval-intake'},
+   intake_id:current.intake_id,base_version:current.version,brief:{...current.content_json,topic:current.content_json.topic+' 修订'}},f.owner);
+  const before=f.revisions.outboxRowCount();
+  expect(()=>f.revisions.commitPreparedCreatedSource(f.input)).toThrow('CREATIVE_INPUT_CHANGED');
+  expect(f.revisions.activeCommit(f.projectId)?.revision).toBe(1);expect(f.revisions.outboxRowCount()).toBe(before);
+  expect(f.revisions.compose(db=>db.prepare('SELECT state FROM impact WHERE impact_id=?').get(f.input.impact_id)?.state)).toBe('active');
+  expect(f.revisions.compose(db=>db.prepare('SELECT state FROM cp_a0_approval WHERE approval_id=?').get(f.input.approval_id)?.state)).toBe('active');
+ },120000);
+ it.each(['pending','rejected'] as const)('rejects a predecessor gate changed to %s after approval',async state=>{
+  const f=await fixture(),execution=f.input.execution;
+  await f.repo.transaction(tx=>{const key={project_id:f.projectId,run_id:execution.run_id},run=tx.get('run',key)!;
+   tx.put('run',key,{...run,checkpoint_json:{...run.checkpoint_json,gates:run.checkpoint_json.gates.map(g=>g.kind==='definition'?{...g,state}:g)}});});
+  const before=f.revisions.outboxRowCount();let failure:unknown;try{f.revisions.commitPreparedCreatedSource(f.input);}catch(error){failure=error;}
+  expect(failure).toMatchObject({code:'RUN_GATE_BLOCKED',details:{gate_kind:'definition',gate_state:state}});
+  expect(f.revisions.activeCommit(f.projectId)?.revision).toBe(1);expect(f.revisions.outboxRowCount()).toBe(before);
+  expect(f.revisions.compose(db=>db.prepare('SELECT state FROM impact WHERE impact_id=?').get(f.input.impact_id)?.state)).toBe('active');
+  expect(f.revisions.compose(db=>db.prepare('SELECT state FROM cp_a0_approval WHERE approval_id=?').get(f.input.approval_id)?.state)).toBe('active');
+ },120000);
+ it('persists the same succeeded attempt in workflow checkpoint and a freshly opened SQLite reader',async()=>{
+  const f=await fixture(),workflow=new FixedWorkflowService({repository:f.repo});
+  const before=await workflow.readWorkflow(f.projectId,f.owner);
+  expect(before.nodes.find(n=>n.node_id===f.input.execution.step_id)?.state).toBe('waiting_user');
+  f.revisions.commitPreparedCreatedSource(f.input);
+  const after=await workflow.readWorkflow(f.projectId,f.owner);
+  expect(after.workflow_revision).toBe(before.workflow_revision+1);
+  expect(await f.repo.transaction(tx=>tx.get('step_attempt',{project_id:f.projectId,run_id:f.input.execution.run_id,plan_version:1,step_id:f.input.execution.step_id,attempt:f.input.execution.attempt})?.state)).toBe('succeeded');
+  expect(after.nodes.find(n=>n.node_id===f.input.execution.step_id)).toMatchObject({state:'succeeded',job_id:f.task.job_id});
+  const reopened=new RevisionStore(join(f.root,'host.sqlite'));
+  try{const fresh=new FixedWorkflowService({repository:new ProductSqliteRepository(reopened)});
+   expect(await fresh.readWorkflow(f.projectId,f.owner)).toEqual(after);
+  }finally{reopened.close();}
+ },120000);
  it('publishes complete native source, commits once, preserves R1 geometry and replays without a second commit',async()=>{
   const f=await fixture();expect(isCreatedSourcePublicationProof(f.proof)).toBe(true);
   const before=f.revisions.outboxRowCount();const applied=f.revisions.commitPreparedCreatedSource(f.input);

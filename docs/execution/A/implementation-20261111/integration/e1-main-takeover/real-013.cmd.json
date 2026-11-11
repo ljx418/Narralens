@@ -1,0 +1,17 @@
+{
+  "argv": [
+    "corepack",
+    "pnpm",
+    "test",
+    "tests/agent-driven/integration/created-source-adoption.test.ts",
+    "--maxWorkers=1",
+    "--minWorkers=1",
+    "-t",
+    "real intake update|predecessor gate changed|persists the same succeeded|publishes complete native source"
+  ],
+  "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+  "started_at": "2026-11-11T19:46:28.292855+00:00",
+  "runner_version": 2,
+  "git_head": "45f29ede65d1993736e4fe183af773fa33a3de0d",
+  "input_scope": "source/contracts/test/tool text, config/lock, D09 vectors and this runner; upstream pin and binary fixture receipts remain separate"
+}

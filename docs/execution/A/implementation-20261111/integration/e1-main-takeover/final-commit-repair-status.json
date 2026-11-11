@@ -1,0 +1,45 @@
+{
+  "base": "45f29ed",
+  "M7": "actual overlay+narration source in all real013/015 fixtures; pure5 earlier; independent closure pending",
+  "M8": "current bootstrap-bound intake closure and original common adoption/predecessor gate rechecked in final same DB commit",
+  "M9": "original FixedWorkflowService.recordStepAttemptInTransaction updates same-transaction attempt/checkpoint/event; fresh SQLite reader consistent; post-checkpoint failure rolls back authorities",
+  "verification": {
+    "real013": {
+      "exit": 0,
+      "passed": 5
+    },
+    "real014_old_commit": {
+      "exit": 1,
+      "failed": 4,
+      "note": "expected mutation failures; runner wrapper exit0 does not mean test pass"
+    },
+    "real015": {
+      "exit": 0,
+      "passed": 7,
+      "skipped": 21
+    },
+    "typecheck18": {
+      "exit": 0
+    },
+    "media_fake001": {
+      "exit": 0,
+      "passed": 48,
+      "skipped": 1,
+      "real_tools": false
+    }
+  },
+  "preserved_failures": {
+    "real011": "three failures due project-only intake read rejection; two generic negative passes were not gate evidence",
+    "real012": "one genuine intake rejection pass; other failures exposed missing accepted checkpoint binding in explicit fixture and incorrect error-message assertion; production common guard retained"
+  },
+  "read_exception": "six collections GET/LIST only for actual project bootstrap intake; cross-intake caught failure poisons outer commit; no intake mutation/global reads",
+  "NOT_DONE": [
+    "N3 publisher cleanup",
+    "MEDIA B01 M01 M03 M04",
+    "full28 adoption regression on current candidate",
+    "real UI approval instead of explicit accepted fixture",
+    "production service registration and specialized recovery",
+    "complete adopted NativeAck/export/R2/A/human acceptance"
+  ],
+  "external": "REVIEW_PENDING"
+}

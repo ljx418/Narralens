@@ -1,0 +1,92 @@
+
+> narralens@0.1.0 test /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+> vitest run --config vitest.config.ts tests/agent-driven/integration/created-source-adoption.test.ts --maxWorkers=1 --minWorkers=1 -t 'real intake update|predecessor gate changed|persists the same succeeded|publishes complete native source'
+
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:1637859) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/agent-driven/integration/created-source-adoption.test.ts (26 tests | 4 failed | 21 skipped) 42372ms
+   ✓ actual closed created-source commit and publisher > rejects a real intake update after approval without consuming database authorities  8843ms
+   × actual closed created-source commit and publisher > rejects a predecessor gate changed to pending after approval 7964ms
+     → expected [Function] to throw error matching /gate/i but got 'The step is still waiting for a revie…'
+   × actual closed created-source commit and publisher > rejects a predecessor gate changed to rejected after approval 8929ms
+     → expected [Function] to throw error matching /gate/i but got 'The step is still waiting for a revie…'
+   × actual closed created-source commit and publisher > persists the same succeeded attempt in workflow checkpoint and a freshly opened SQLite reader 8370ms
+     → The run has no gate for the reviewed package
+   × actual closed created-source commit and publisher > publishes complete native source, commits once, preserves R1 geometry and replays without a second commit 8266ms
+     → The run has no gate for the reviewed package
+   ↓ actual closed created-source commit and publisher > refuses a prepared transaction of another kind before publishing source
+   ↓ actual closed created-source commit and publisher > refuses a workflow attempt detached from the actual prepared job
+   ↓ actual closed created-source commit and publisher > refuses JSON-cloned publication proof without moving database authorities
+   ↓ actual closed created-source commit and publisher > refuses author bytes changed after publication even while database base is unchanged
+   ↓ actual closed created-source commit and publisher > refuses current selection changed after publication
+   ↓ actual closed created-source commit and publisher > refuses a symlink replacement of the committed snapshot source
+   ↓ actual closed created-source commit and publisher > rolls every database authority back if an actual post-consume write fails
+   ↓ actual closed created-source commit and publisher > poisons the outer transaction when a project-bound repository guard failure is swallowed
+   ↓ actual closed created-source commit and publisher > poisons the owner if a real scope is used against another database even when the error is swallowed
+   ↓ actual closed created-source commit and publisher > invalidates an authentic joined scope when its successful commit ends
+   ↓ actual closed created-source commit and publisher > does not expose mutable issuer, guard or geometry authority on a real publication token
+   ↓ actual closed created-source commit and publisher > refuses an authority that expires during final synchronous file verification
+   ↓ actual closed created-source commit and publisher > retains the original backup inode when a same-byte replacement happens after rename
+   ↓ actual closed created-source commit and publisher > refuses a fully rehashed approved plan that lies about film
+   ↓ actual closed created-source commit and publisher > refuses a fully rehashed approved plan that lies about settings
+   ↓ actual closed created-source commit and publisher > refuses a fully rehashed approved plan that lies about captions
+   ↓ actual closed created-source commit and publisher > refuses a fully rehashed approved plan that lies about native_plan
+   ↓ actual closed created-source commit and publisher > refuses a fully rehashed approved plan that lies about rights
+   ↓ actual closed created-source commit and publisher > refuses a fully rehashed approved plan that lies about consumer
+   ↓ actual closed created-source commit and publisher > refuses a fully rehashed approved plan that lies about upstream
+   ↓ actual closed created-source commit and publisher > refuses a fully rehashed approved plan that lies about ranges
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/created-source-adoption.test.ts > actual closed created-source commit and publisher > rejects a predecessor gate changed to pending after approval
+ FAIL  tests/agent-driven/integration/created-source-adoption.test.ts > actual closed created-source commit and publisher > rejects a predecessor gate changed to rejected after approval
+AssertionError: expected [Function] to throw error matching /gate/i but got 'The step is still waiting for a revie…'
+
+- Expected: 
+/gate/i
+
++ Received: 
+"The step is still waiting for a review decision"
+
+ ❯ tests/agent-driven/integration/created-source-adoption.test.ts:146:106
+    144|   await f.repo.transaction(tx=>{const key={project_id:f.projectId,run_…
+    145|    tx.put('run',key,{...run,checkpoint_json:{...run.checkpoint_json,ga…
+    146|   const before=f.revisions.outboxRowCount();expect(()=>f.revisions.com…
+       |                                                                                                          ^
+    147|   expect(f.revisions.activeCommit(f.projectId)?.revision).toBe(1);expe…
+    148|   expect(f.revisions.compose(db=>db.prepare('SELECT state FROM impact …
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  tests/agent-driven/integration/created-source-adoption.test.ts > actual closed created-source commit and publisher > persists the same succeeded attempt in workflow checkpoint and a freshly opened SQLite reader
+ FAIL  tests/agent-driven/integration/created-source-adoption.test.ts > actual closed created-source commit and publisher > publishes complete native source, commits once, preserves R1 geometry and replays without a second commit
+ProductError: The run has no gate for the reviewed package
+ ❯ assertNarrowEffect src/host/creative/execution-guard.ts:634:11
+    632|   const gate = facts.gates.find((candidate) => candidate.review_packag…
+    633|   if (gate === undefined) {
+    634|     throw new ProductError("RUN_GATE_BLOCKED", "The run has no gate fo…
+       |           ^
+    635|       details: { package_id: effect.package_id },
+    636|     });
+ ❯ guardExecution src/host/creative/execution-guard.ts:362:5
+ ❯ src/host/projects/revision-store.ts:655:9
+ ❯ src/host/agent-driven/product-sqlite-repository.ts:142:16
+ ❯ src/host/agent-driven/product-sqlite-repository.ts:173:21
+ ❯ ProductSqliteRepository.scope src/host/agent-driven/product-sqlite-repository.ts:180:7
+ ❯ ProductSqliteRepository.joinCreatedSourceCommit src/host/agent-driven/product-sqlite-repository.ts:87:19
+ ❯ src/host/projects/revision-store.ts:572:19
+ ❯ src/host/projects/revision-store.ts:473:24
+ ❯ RevisionStore.atomic src/host/projects/revision-store.ts:437:22
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  4 failed | 1 passed | 21 skipped (26)
+   Start at  03:44:49
+   Duration  51.18s (transform 4.04s, setup 0ms, collect 7.09s, tests 42.37s, environment 0ms, prepare 1.14s)
+
+ ELIFECYCLE  Test failed. See above for more details.

@@ -17,6 +17,11 @@ import { snapshotIdFor } from "./snapshot-store.js";
 import { computeCreatedImpactHash, type CreatedImpactSpecV1 } from "../agent-driven/created-source-impact-store.js";
 import { CreatedSourceAdoptionStore } from "../agent-driven/created-source-adoption-store.js";
 import { assertCreatedPublicationForCommit } from "../agent-driven/created-source-publisher.js";
+import { ProjectCreationStore } from './project-creation-store.js';
+import { creativeInputClosure } from '../creative/creative-closure.js';
+import { guardExecution, readGuardFacts, readNarrowEffectFacts } from '../creative/execution-guard.js';
+import { FixedWorkflowService } from '../creative/fixed-workflow-service.js';
+import { createTrustedCallerContext } from '../creative/trusted-context.js';
 
 /* ── the created-source commit scope ───────────────────────────────────────────────────── */
 
@@ -633,6 +638,22 @@ export class RevisionStore {
           ||commitSeconds>=grant.expires_at||commitSeconds>=confirmation.expires_at
           ||commitSeconds>=grantConfirmation.expires_at||commitSeconds<confirmation.issued_at
           ||commitSeconds<grantConfirmation.issued_at)fail('AUTHORITY_EXPIRED_AT_COMMIT');
+        // Re-read the current intake, including question/answer heads, inside the
+        // same final transaction. A published source or approval never freezes the
+        // user's ability to change the brief, nor grants permission to ignore it.
+        const creation = new ProjectCreationStore(this).forProject(input.project_id);
+        if (!creation || creation.state !== 'committed') fail('CREATION_MISSING');
+        const intakeHead = tx.get('intake_head', {intake_id:creation.request.intake_id});
+        if (!intakeHead || canonicalDigest(creativeInputClosure(tx,creation.request.intake_id,intakeHead.current_version))!==execution.input_digest)
+          fail('CREATIVE_INPUT_CHANGED');
+        const guardFacts=readGuardFacts(tx,input.project_id,execution,grant.principal_id,commitSeconds);
+        const narrow=readNarrowEffectFacts(tx,{project_id:input.project_id,run_id:execution.run_id,
+          package_id:review.review_id,approval_id:input.approval_id,impact_id:input.impact_id},id=>{
+            const current=this.#db.prepare('SELECT state FROM impact WHERE impact_id=? AND project_id=?').get(id,input.project_id);
+            return current?.state==='active'?'active':undefined;
+          });
+        guardExecution(execution,{kind:'approved_prepared_adoption',package_id:review.review_id,
+          impact_id:input.impact_id,approval_id:input.approval_id},{...guardFacts,narrow});
         at=commitNow.toISOString();
         const changed = this.#db.prepare("UPDATE project_state SET revision=revision+1,source_digest=?,updated_at=? WHERE project_id=? AND revision=? AND source_digest=? AND CAST(control_revision AS INTEGER)=? AND attention=0")
           .run(plan.target_source_digest,at,input.project_id,plan.base_revision,plan.base_source_digest,plan.control_revision);
@@ -657,10 +678,16 @@ export class RevisionStore {
           plan_sha256:digest,facts_digest:digest,revision:plan.base_revision+1,execution,created_at:at},now:commitNow});
         this.#db.prepare("INSERT INTO active_commit(project_id,revision,snapshot_id,source_digest,engine,transaction_id,created_at) VALUES(?,?,?,?,'openfilm',?,?) ON CONFLICT(project_id) DO UPDATE SET revision=excluded.revision,snapshot_id=excluded.snapshot_id,source_digest=excluded.source_digest,engine=excluded.engine,transaction_id=excluded.transaction_id,created_at=excluded.created_at")
           .run(input.project_id,plan.base_revision+1,plan.target_snapshot_id,plan.target_source_digest,input.transaction_id,at);
-        tx.put('step_attempt',stepKey,{...step,state:'succeeded',updated_at:at});
+        // Advance the existing attempt/checkpoint/event projection together using
+        // its original writer, never a second manual workflow state machine.
+        new FixedWorkflowService({repository:repo}).recordStepAttemptInTransaction(tx,{
+          project_id:input.project_id,run_id:execution.run_id,plan_version:1,step_id:execution.step_id,
+          attempt:execution.attempt,grant_id:grant.grant_id,input_digest:execution.input_digest,
+          state:'succeeded',job_id:step.job_id,observed_at:at,
+        },createTrustedCallerContext({principal_id:grant.principal_id,channel:'authenticated',
+          source:'driver_relay',session_ref:grantConfirmation.session_ref}));
         const response: Applied = {project_id:input.project_id,transaction_id:input.transaction_id,project_revision:plan.base_revision+1,
           snapshot_id:plan.target_snapshot_id,source_digest:plan.target_source_digest,replayed:false};
-        tx.emit({topic:'workflow.run.state_changed',scope:{kind:'run',project_id:input.project_id,run_id:execution.run_id,run_scope_digest:execution.run_scope_digest,plan_version:1},entity:{type:'task',id:execution.step_id,version:execution.attempt,state:'succeeded'},attempt:execution.attempt,source:'host',input_digest:execution.input_digest,observed_at:at,payload:{operation:'adopt_prepared_source',transaction_id:input.transaction_id,revision:response.project_revision,snapshot_id:response.snapshot_id}});
         // Same shared command authority and envelope as every Agent operation.
         commands.record({projectId:input.project_id,operationKind:operation,idempotencyKey:input.idempotency_key,requestDigest:input.request_digest,transactionId:input.transaction_id,now:commitNow,
           response:{format:'agent.idempotency@1',receipt:{operation:'change.apply',idempotency_key:input.idempotency_key,request_digest:input.request_digest,principal_id:grant.principal_id,project_id:input.project_id,correlation_id:transaction.correlation_id},response}});
