@@ -43,11 +43,12 @@
     "max_bytes": 65536,
     "shape": "exactly the four fields format, sequence, event_kind and event",
     "sequence": "1..MAX_SAFE_INTEGER, strictly monotonic inside one real session; the latest sequence is recorded before the asynchronous verification, so a late callback can never re-green a session",
-    "identity": "the envelope carries no logical project, actor, session, grant, Host revision, snapshot, source digest, approval or proof; every one of those comes from the session binding"
+    "identity": "the envelope carries no logical project, actor, session, grant, Host revision, snapshot, source digest, approval or proof; every one of those comes from the session binding",
+    "checked_in_one_place": "the Gateway and the observation service share one parser, so a body that is not the closed envelope is refused before the producer is reached and the two cannot drift apart"
   },
   "event_kinds": {
     "document": "the original p2 NarralensDocumentState (protocol_version 1, native project and view, document epoch, committed or invalidated)",
-    "hydration": "the original 013 hydration event (five fields, exactly the four parts settings, subtitle_style, captions and markers)",
+    "hydration": "the original 013 hydration event (five fields, exactly the four parts settings, subtitle_style, captions and markers). The revalidation origin of the settings, the captions and the markers is project and their state is hydrated, including a legitimate empty parsed result; the subtitle style may be absent_default with origin explicit_default when the project has no style and the native uses the pinned default. A browser preference is never a proof, not even when its value happens to equal the default.",
     "selection": "the original StudioSelection, mapped onto the committed clip and time mapping"
   },
   "native_canonicalisation": {
@@ -94,5 +95,12 @@
   "provenance": {
     "manifest": "docs/parallel/lane-product/A-R2-20261112/native-inputs-manifest.json",
     "rule": "every tracked input lists its source commit, its original path, its byte hash and every change made to it in this ticket"
+  },
+  "expected_side": {
+    "description": "What the editor is compared against, computed from the Host's committed source and never from the editor's rows.",
+    "settings_captions_markers": "the pinned 015 helper, over the parsed value; the presence of the source file is not what the state says",
+    "subtitle_style": "the Host's committed reader and the fixed original native parser rules, hashed with the pinned canonical implementation",
+    "parts_compared": "the state, the origin and the effective digest of each of the four parts, and the film's hash, its byte length and its native revision",
+    "unsupported": "an unsupported part, an unsupported origin or a moved closure produces no acknowledgement at all"
   }
 }
