@@ -193,6 +193,18 @@ async function syncTreeOf(root: string): Promise<void> {
   await syncDirectoryOf(root);
 }
 
+/** A typed reconciliation failure with private, non-wire diagnostic causes. */
+class PhaseCleanupError extends CommittedRenderPhaseError {
+  readonly errors: readonly unknown[];
+  constructor(primary: unknown, cleanup: readonly unknown[]) {
+    super("PHASE_CLEANUP_FAILED", "phase cleanup failed; reconciliation is required", true, true);
+    this.errors = Object.freeze([...(primary === undefined ? [] : [primary]), ...cleanup]);
+    // A Host may serialize the public error fields; physical filesystem diagnostics
+    // remain available locally without becoming accidental API details.
+    Object.defineProperty(this, "errors", { enumerable: false });
+  }
+}
+
 /** One directory of an anchored path. */
 interface AnchoredDirectory {
   readonly fd: number;
@@ -224,6 +236,7 @@ class AnchoredPhaseObjectHandle implements PhaseObjectHandle {
   readonly #fileIdentity: string;
   readonly #fileFingerprint: string;
   readonly #directories: readonly AnchoredDirectory[];
+  readonly #acceptNewReads: () => boolean;
   readonly #reads = new Set<Promise<Uint8Array>>();
   #closePromise: Promise<void> | undefined;
   #closed = false;
@@ -239,6 +252,7 @@ class AnchoredPhaseObjectHandle implements PhaseObjectHandle {
     readonly fileIdentity: string;
     readonly fileFingerprint: string;
     readonly directories: readonly AnchoredDirectory[];
+    readonly acceptNewReads: () => boolean;
   }) {
     this.object_id = input.object_id;
     this.relative_path = input.relative_path;
@@ -251,6 +265,7 @@ class AnchoredPhaseObjectHandle implements PhaseObjectHandle {
     this.#fileIdentity = input.fileIdentity;
     this.#fileFingerprint = input.fileFingerprint;
     this.#directories = input.directories;
+    this.#acceptNewReads = input.acceptNewReads;
   }
 
   /** Check that nothing on the path or the file itself changed. */
@@ -281,7 +296,7 @@ class AnchoredPhaseObjectHandle implements PhaseObjectHandle {
   }
 
   read(range: { readonly offset: number; readonly length: number }): Promise<Uint8Array> {
-    if (this.#closePromise) return Promise.reject(new CommittedRenderPhaseError("OBJECT_CLOSED", "the phase object handle is closing", false));
+    if (this.#closePromise || !this.#acceptNewReads()) return Promise.reject(new CommittedRenderPhaseError("OBJECT_CLOSED", "the phase object handle is closing", false));
     const reading = this.#readRange(range);
     this.#reads.add(reading);
     void reading.then(() => this.#reads.delete(reading), () => this.#reads.delete(reading));
@@ -395,7 +410,7 @@ export class CommittedRenderPhases implements CommittedRenderPhasesPort, PhaseOb
    */
   async prepareEncoded(request: RenderRequest): Promise<EncodedFactV1> {
     this.#assertOpen();
-    return await this.#track(async () => {
+    return await this.#trackFenced(request, async () => {
       const identity = this.#identityOf(request);
       await this.#fence(request, identity, "before the snapshot was read");
 
@@ -560,6 +575,7 @@ export class CommittedRenderPhases implements CommittedRenderPhasesPort, PhaseOb
 
         const objectId = await this.#publishObject(object_id, objectStaging);
         objectStaging = null;
+        await this.#fence(request, identity, "after the encoded object was published");
 
         const content = {
           format: "narralens.encoded-fact@1" as const,
@@ -603,7 +619,7 @@ export class CommittedRenderPhases implements CommittedRenderPhasesPort, PhaseOb
    */
   async inspectEncoded(input: InspectEncodedInput): Promise<QcReceiptV1> {
     this.#assertOpen();
-    return await this.#track(async () => {
+    return await this.#trackFenced(input.request, async () => {
       const request = input.request;
       const encoded = input.encoded;
       const identity = this.#identityOf(request);
@@ -653,6 +669,9 @@ export class CommittedRenderPhases implements CommittedRenderPhasesPort, PhaseOb
           ...(this.#deps.pin_verifier === undefined ? {} : { pin_verifier: this.#deps.pin_verifier }),
         });
 
+        // Preflight and descriptor materialization both await external work. A
+        // durable cancellation/lost lease during either must prevent tool startup.
+        await this.#fence(request, identity, "before the QC tools were started");
         const qc = await runQualityControl({
           media_path: mediaPath,
           delivery_id: stageKeys.delivery_id,
@@ -661,7 +680,14 @@ export class CommittedRenderPhases implements CommittedRenderPhasesPort, PhaseOb
           required_supplements: [...MANDATORY_A_SUPPLEMENT_ROLES, ...request.required_supplements],
           expected_frames: closure.expected_frames,
           expected_duration_seconds: closure.expected_duration_seconds,
-          runner: this.#deps.qc_runner ?? realMediaToolRunner,
+          runner: {
+            run: async (tool, args, options) => {
+              // Probe and full decode are separate expensive process starts. An
+              // AbortSignal is insufficient when the durable lease changed alone.
+              await this.#fence(request, identity, `before the QC ${tool} process`);
+              return (this.#deps.qc_runner ?? realMediaToolRunner).run(tool, args, options);
+            },
+          },
           timeout_ms: this.#deps.qc_timeout_ms ?? DEFAULT_QC_TIMEOUT_MS,
           signal: request.signal,
         });
@@ -677,6 +703,8 @@ export class CommittedRenderPhases implements CommittedRenderPhasesPort, PhaseOb
           );
         }
 
+        await this.#fence(request, identity, "after the QC tools settled");
+
         const qcItems: QCItem[] = [
           ...preflight.findings.map((finding) => ({
             id: finding.id,
@@ -691,66 +719,59 @@ export class CommittedRenderPhases implements CommittedRenderPhasesPort, PhaseOb
         // not touched.
         const qc_object_id = `obj_${randomUUID().replace(/-/gu, "")}`;
         objectStaging = await this.#createObjectStaging();
-        let published = false;
-        try {
-          const probe = await this.#stageWrittenFile(
-            objectStaging,
-            PACKAGE_FILES.ffprobe,
-            QC_ROLES.probe,
-            packageRefId(stageKeys.delivery_id, PACKAGE_ROLES.ffprobe),
-            qc.probe_bytes.toString("utf8"),
-          );
-          const decode = await this.#stageWrittenFile(
-            objectStaging,
-            PACKAGE_FILES.fullDecode,
-            QC_ROLES.decode,
-            packageRefId(stageKeys.delivery_id, PACKAGE_ROLES.fullDecode),
-            qc.decode_bytes.toString("utf8"),
-          );
-          await this.#stageObjectReceipt(objectStaging, {
-            object_id: qc_object_id,
-            kind: "qc",
-            project_id: request.project_id,
-            snapshot_id: request.snapshot_id,
-            source_digest: request.source_digest,
-            config_digest: stageKeys.config_digest,
-            files: [probe, decode],
-            created_at: new Date().toISOString(),
-          });
-          await syncTreeOf(objectStaging);
-          await this.#fence(request, identity, "before the inspection object was published");
-          const qcObjectId = await this.#publishObject(qc_object_id, objectStaging);
-          published = true;
+        const probe = await this.#stageWrittenFile(
+          objectStaging,
+          PACKAGE_FILES.ffprobe,
+          QC_ROLES.probe,
+          packageRefId(stageKeys.delivery_id, PACKAGE_ROLES.ffprobe),
+          qc.probe_bytes.toString("utf8"),
+        );
+        const decode = await this.#stageWrittenFile(
+          objectStaging,
+          PACKAGE_FILES.fullDecode,
+          QC_ROLES.decode,
+          packageRefId(stageKeys.delivery_id, PACKAGE_ROLES.fullDecode),
+          qc.decode_bytes.toString("utf8"),
+        );
+        await this.#stageObjectReceipt(objectStaging, {
+          object_id: qc_object_id,
+          kind: "qc",
+          project_id: request.project_id,
+          snapshot_id: request.snapshot_id,
+          source_digest: request.source_digest,
+          config_digest: stageKeys.config_digest,
+          files: [probe, decode],
+          created_at: new Date().toISOString(),
+        });
+        await syncTreeOf(objectStaging);
+        await this.#fence(request, identity, "before the inspection object was published");
+        const qcObjectId = await this.#publishObject(qc_object_id, objectStaging);
+        objectStaging = null;
+        await this.#fence(request, identity, "after the inspection object was published");
 
-          const technical_status: "pass" | "warn" | "block" = qcItems.some((item) => item.status === "block")
-            ? "block"
-            : qcItems.some((item) => item.status === "warn") ? "warn" : "pass";
+        const technical_status: "pass" | "warn" | "block" = qcItems.some((item) => item.status === "block")
+          ? "block"
+          : qcItems.some((item) => item.status === "warn") ? "warn" : "pass";
 
-          const content = {
-            format: "narralens.qc-receipt@1" as const,
-            project_id: request.project_id,
-            snapshot_id: request.snapshot_id,
-            source_digest: request.source_digest,
-            config_digest: stageKeys.config_digest,
-            parent_encoded_digest: encoded.receipt_digest,
-            qc_object_id: qcObjectId,
-            qc_items: qcItems,
-            technical_status,
-            files: [probe, decode],
-            created_at: new Date().toISOString(),
-          };
-          return { ...content, receipt_digest: phaseReceiptDigest({ ...content, receipt_digest: "" }) };
-        } finally {
-          if (!published) {
-            const cleanupFailure = await this.#removeStaging(objectStaging);
-            if (cleanupFailure !== null && failure === undefined) failure = cleanupFailure;
-          }
-        }
+        const content = {
+          format: "narralens.qc-receipt@1" as const,
+          project_id: request.project_id,
+          snapshot_id: request.snapshot_id,
+          source_digest: request.source_digest,
+          config_digest: stageKeys.config_digest,
+          parent_encoded_digest: encoded.receipt_digest,
+          qc_object_id: qcObjectId,
+          qc_items: qcItems,
+          technical_status,
+          files: [probe, decode],
+          created_at: new Date().toISOString(),
+        };
+        return { ...content, receipt_digest: phaseReceiptDigest({ ...content, receipt_digest: "" }) };
       } catch (error) {
         failure = error;
         throw error;
       } finally {
-        await this.#cleanupStaging(null, workspace, failure);
+        await this.#cleanupStaging(objectStaging, workspace, failure);
       }
     });
   }
@@ -764,7 +785,7 @@ export class CommittedRenderPhases implements CommittedRenderPhasesPort, PhaseOb
    */
   async publishValidated(input: PublishValidatedInput): Promise<PublishedPhaseReceiptV1> {
     this.#assertOpen();
-    return await this.#track(async () => {
+    return await this.#trackFenced(input.request, async () => {
       const request = input.request;
       const encoded = input.encoded;
       const qc = input.qc;
@@ -922,9 +943,7 @@ export class CommittedRenderPhases implements CommittedRenderPhasesPort, PhaseOb
         throw error;
       } finally {
         const discarded = await this.#deps.packages.discardStaging(staging).then(() => null, (error: unknown) => error);
-        if (discarded !== null && failure === undefined) {
-          throw new CommittedRenderPhaseError("PHASE_CLEANUP_FAILED", `the package staging could not be discarded: ${String((discarded as Error).message)}`, true, true);
-        }
+        if (discarded !== null) throw new PhaseCleanupError(failure, [discarded]);
       }
     });
   }
@@ -947,7 +966,7 @@ export class CommittedRenderPhases implements CommittedRenderPhasesPort, PhaseOb
   async openPhaseObject(input: PhaseObjectOpenInput): Promise<PhaseObjectHandle> {
     this.#assertOpen();
     return await this.#track(async () => {
-      const handle = await this.#openAnchored(input.object_id, input.relative_path, input.sha256, input.bytes);
+      const handle = await this.#openAnchored(input.object_id, input.relative_path, input.sha256, input.bytes, true);
       this.#open.add(handle);
       return handle;
     });
@@ -1036,6 +1055,16 @@ export class CommittedRenderPhases implements CommittedRenderPhasesPort, PhaseOb
    * The work starts immediately — it is not deferred — because a phase that had not
    * started yet would not be a phase that is running.
    */
+  /** The final durable fence is inside the tracked operation and after its
+   * finally cleanup awaits, so close() waits for the same decision we return. */
+  #trackFenced<T>(request: RenderRequest, work: () => Promise<T>): Promise<T> {
+    return this.#track(async () => {
+      const result = await work();
+      await this.#fence(request, this.#identityOf(request), "after phase cleanup");
+      return result;
+    });
+  }
+
   #track<T>(work: () => Promise<T>): Promise<T> {
     let promise: Promise<T>;
     try {
@@ -1118,8 +1147,8 @@ export class CommittedRenderPhases implements CommittedRenderPhasesPort, PhaseOb
    * Every descriptor this opens is closed again if anything goes wrong: a hash that
    * fails must not leave a descriptor behind.
    */
-  async #openAnchored(object_id: string, relative_path: string, sha256: string, bytes: number): Promise<AnchoredPhaseObjectHandle> {
-    const handle = await this.#openAnchoredUnverified(object_id, relative_path);
+  async #openAnchored(object_id: string, relative_path: string, sha256: string, bytes: number, external = false): Promise<AnchoredPhaseObjectHandle> {
+    const handle = await this.#openAnchoredUnverified(object_id, relative_path, external);
     try {
       if (!HASH.test(sha256)) {
         throw new CommittedRenderPhaseError("OBJECT_DIGEST_REJECTED", "the expected digest is not a digest", false);
@@ -1147,7 +1176,7 @@ export class CommittedRenderPhases implements CommittedRenderPhasesPort, PhaseOb
    * `O_NOFOLLOW`, and each opened descriptor is compared with the named entry it came
    * from. The file is then hashed through its own descriptor.
    */
-  async #openAnchoredUnverified(object_id: string, relative_path: string): Promise<AnchoredPhaseObjectHandle> {
+  async #openAnchoredUnverified(object_id: string, relative_path: string, external = false): Promise<AnchoredPhaseObjectHandle> {
     if (typeof object_id !== "string" || !OBJECT_ID.test(object_id)) {
       throw new CommittedRenderPhaseError("OBJECT_ID_REJECTED", "the object id is not a plain name", false);
     }
@@ -1218,6 +1247,10 @@ export class CommittedRenderPhases implements CommittedRenderPhasesPort, PhaseOb
         fileIdentity: identityOf(opened),
         fileFingerprint: fileFingerprintOf(opened),
         directories,
+        // Only returned consumer handles stop accepting reads immediately when the
+        // service closes. Reads belonging to already tracked internal phases may
+        // drain normally; they remain covered by the pending phase close barrier.
+        acceptNewReads: () => !external || !(this.#closing || this.#closed),
       });
       file = null;
       return handle;
@@ -1489,20 +1522,12 @@ export class CommittedRenderPhases implements CommittedRenderPhasesPort, PhaseOb
    * failure is turned into an error that asks for a reconciliation.
    */
   async #cleanupStaging(objectStaging: string | null, workspace: string | null, failure: unknown): Promise<void> {
-    const problems: string[] = [];
+    const problems: unknown[] = [];
     for (const path of [objectStaging, workspace]) {
       const error = await this.#removeStaging(path);
-      if (error !== null) problems.push(`${String((error as Error).message)}`);
+      if (error !== null) problems.push(error);
     }
-    if (problems.length === 0) return;
-    const message = `the staging of this phase could not be removed: ${problems.join("; ")}`;
-    if (failure === undefined) {
-      throw new CommittedRenderPhaseError("PHASE_CLEANUP_FAILED", message, true, true);
-    }
-    throw new AggregateError(
-      [failure, new CommittedRenderPhaseError("PHASE_CLEANUP_FAILED", message, true, true)],
-      "the phase failed and its staging could not be removed",
-    );
+    if (problems.length > 0) throw new PhaseCleanupError(failure, problems);
   }
 }
 

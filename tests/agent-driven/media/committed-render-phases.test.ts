@@ -278,6 +278,48 @@ describe("encoding a committed closure", () => {
 });
 
 describe("inspecting an encoded object", () => {
+  it.each(["cancelled", "superseded"] as const)("does not start a decode after the probe settles into durable %s", async verdict => {
+    const built = await harness({ label: "phase-between-tools-" + verdict });
+    const encoded = await built.phases.prepareEncoded(requestFor(built));
+    const tools: string[] = [], runner = runnerOf({});
+    let state: "proceed" | "cancelled" | "superseded" = "proceed";
+    const phases = new CommittedRenderPhases({
+      snapshots: { async readSnapshot() { return built.closure; } },
+      fence: { async claimAttempt() { return true; }, async checkAttempt() { return state; }, async releaseAttempt() {} },
+      packages: built.packages, native_renderer: fakeRenderer(), upstream_root: join(built.objectRoot, "absent-checkout"),
+      object_root: built.objectRoot, workspace_root: built.workspace,
+      qc_runner: { async run(...args) { tools.push(args[0]); const result = await runner.run(...args); state = verdict; return result; } },
+      pin_verifier: async () => ({ ok: true, reason: "module fixture", checked: [], missing: [], mismatched: [],
+        upstream_root: built.objectRoot, observed_sha: RENDER_PIN.upstream_sha, expected_sha: RENDER_PIN.upstream_sha, worker_sha256: RENDER_PIN.worker_sha256 }),
+    });
+    try {
+      await expect(phases.inspectEncoded({ request: deliveryRequestFor(built), encoded }))
+        .rejects.toMatchObject({ code: verdict === "cancelled" ? "ATTEMPT_CANCELLED" : "ATTEMPT_SUPERSEDED" });
+      expect(tools).toEqual(["ffprobe"]);
+    } finally { await phases.close(); await built.phases.close(); }
+  });
+
+  it.each(["cancelled", "superseded"] as const)("does not start QC tools when preflight observes a durable %s attempt", async verdict => {
+    const built = await harness({ label: "phase-inspect-preflight-" + verdict });
+    const encoded = await built.phases.prepareEncoded(requestFor(built));
+    let state: "proceed" | "cancelled" | "superseded" = "proceed", calls = 0;
+    const runner = runnerOf({});
+    const phases = new CommittedRenderPhases({
+      snapshots: { async readSnapshot() { return built.closure; } },
+      fence: { async claimAttempt() { return true; }, async checkAttempt() { return state; }, async releaseAttempt() {} },
+      packages: built.packages, native_renderer: fakeRenderer(), upstream_root: join(built.objectRoot, "absent-checkout"),
+      object_root: built.objectRoot, workspace_root: built.workspace,
+      qc_runner: { async run(...args) { calls += 1; return runner.run(...args); } },
+      pin_verifier: async () => { state = verdict; return { ok: true, reason: "module fixture", checked: [], missing: [], mismatched: [],
+        upstream_root: built.objectRoot, observed_sha: RENDER_PIN.upstream_sha, expected_sha: RENDER_PIN.upstream_sha, worker_sha256: RENDER_PIN.worker_sha256 }; },
+    });
+    try {
+      await expect(phases.inspectEncoded({ request: deliveryRequestFor(built), encoded })).rejects.toMatchObject({
+        code: verdict === "cancelled" ? "ATTEMPT_CANCELLED" : "ATTEMPT_SUPERSEDED" });
+      expect(calls).toBe(0);
+    } finally { await phases.close(); await built.phases.close(); }
+  });
+
   it("returns a receipt that is bound to the encoded fact", async () => {
     const built = await harness({ label: "phase-inspect" });
     const encoded = await built.phases.prepareEncoded(requestFor(built));
@@ -362,6 +404,20 @@ describe("inspecting an encoded object", () => {
 });
 
 describe("publishing from the encoded and inspected bytes", () => {
+  it("refuses a successful publication result if durable cancellation arrives during cleanup", async () => {
+    const built = await harness({ label: "phase-publish-cleanup-cancel" });
+    const encoded = await built.phases.prepareEncoded(requestFor(built));
+    const qc = await built.phases.inspectEncoded({ request: deliveryRequestFor(built), encoded });
+    const original = built.packages.discardStaging.bind(built.packages);
+    const spy = vi.spyOn(built.packages, "discardStaging").mockImplementation(async path => {
+      await original(path); built.setVerdict("cancelled");
+    });
+    try {
+      await expect(built.phases.publishValidated({ request: deliveryRequestFor(built), encoded, qc }))
+        .rejects.toMatchObject({ code: "ATTEMPT_CANCELLED" });
+    } finally { spy.mockRestore(); await built.phases.close(); }
+  });
+
   it("refuses a legacy winner without lineage and preserves its verified files", async () => {
     const built = await harness({ label: "phase-legacy-winner" });
     const encoded = await built.phases.prepareEncoded(requestFor(built));
@@ -954,6 +1010,124 @@ describe("MP03 — the actual bytes of the promised supplements are checked", ()
 });
 
 describe("MP04 — the object carries a durable receipt and the cleanup is honest", () => {
+  it("preserves the primary publication failure and a failed staging discard", async () => {
+    const built = await harness({ label: "phase-cleanup-two-failures" });
+    const encoded = await built.phases.prepareEncoded(requestFor(built));
+    const qc = await built.phases.inspectEncoded({ request: deliveryRequestFor(built), encoded });
+    const create = built.packages.createStaging.bind(built.packages);
+    const discarded = built.packages.discardStaging.bind(built.packages);
+    const created: string[] = [];
+    const createSpy = vi.spyOn(built.packages, "createStaging").mockImplementation(async token => {
+      const path = await create(token); created.push(path); built.setVerdict("cancelled"); return path;
+    });
+    const discardSpy = vi.spyOn(built.packages, "discardStaging").mockRejectedValue(Object.assign(new Error("discard denied"), { code: "EACCES" }));
+    let failure: unknown;
+    try {
+      try { await built.phases.publishValidated({ request: deliveryRequestFor(built), encoded, qc }); } catch (error) { failure = error; }
+      expect(failure).toMatchObject({ code: "PHASE_CLEANUP_FAILED", requires_reconciliation: true });
+      expect((failure as { errors: unknown[] }).errors).toEqual(expect.arrayContaining([
+        expect.objectContaining({ code: "ATTEMPT_CANCELLED" }), expect.objectContaining({ code: "EACCES" }),
+      ]));
+    } finally {
+      createSpy.mockRestore(); discardSpy.mockRestore();
+      for (const path of created) await discarded(path);
+      await built.phases.close();
+    }
+  });
+
+  it("preserves the primary QC failure and an actual object-staging removal failure", async () => {
+    const built = await harness({ label: "phase-qc-cleanup-two-failures" });
+    const encoded = await built.phases.prepareEncoded(requestFor(built));
+    const fs = await import("node:fs/promises"), runner = runnerOf({});
+    let qcFinished = false, injected = false;
+    const denied: string[] = [];
+    const phases = new CommittedRenderPhases({
+      snapshots: { async readSnapshot() { return built.closure; } },
+      fence: { async claimAttempt() { return true; }, async releaseAttempt() {}, async checkAttempt() {
+        if (qcFinished) for (const name of await fs.readdir(resolve(built.objectRoot, "staging"))) {
+          const staged = resolve(built.objectRoot, "staging", name);
+          if ((await fs.readdir(staged)).includes("receipt.json")) {
+            await fs.chmod(staged, 0o500); denied.push(staged); injected = true; return "cancelled";
+          }
+        }
+        return "proceed";
+      } },
+      packages: built.packages, native_renderer: fakeRenderer(), upstream_root: join(built.objectRoot, "absent-checkout"),
+      object_root: built.objectRoot, workspace_root: built.workspace,
+      qc_runner: { async run(...args) { const result = await runner.run(...args); if (args[0] === "ffmpeg") qcFinished = true; return result; } },
+      pin_verifier: async () => ({ ok: true, reason: "module fixture", checked: [], missing: [], mismatched: [],
+        upstream_root: built.objectRoot, observed_sha: RENDER_PIN.upstream_sha, expected_sha: RENDER_PIN.upstream_sha, worker_sha256: RENDER_PIN.worker_sha256 }),
+    });
+    let failure: unknown;
+    try {
+      try { await phases.inspectEncoded({ request: deliveryRequestFor(built), encoded }); } catch (error) { failure = error; }
+      expect(injected).toBe(true);
+      expect(failure).toMatchObject({ code: "PHASE_CLEANUP_FAILED", requires_reconciliation: true });
+      expect((failure as { errors: unknown[] }).errors).toEqual(expect.arrayContaining([
+        expect.objectContaining({ code: "ATTEMPT_CANCELLED" }), expect.objectContaining({ code: "EACCES" }),
+      ]));
+    } finally {
+      for (const path of denied) await fs.chmod(path, 0o700).catch(() => undefined);
+      await phases.close(); await built.phases.close();
+    }
+  });
+
+  it.each(["encode", "qc"] as const)("refuses a %s result when cancellation arrives during object publication fsync", async phase => {
+    const built = await harness({ label: "phase-object-postsync-" + phase });
+    const encoded = phase === "qc" ? await built.phases.prepareEncoded(requestFor(built)) : undefined;
+    const fs = await import("node:fs/promises");
+    const probe = await fs.open(built.objectRoot, "r");
+    const prototype = Object.getPrototypeOf(probe); await probe.close();
+    const original = prototype.sync;
+    let crossed = false;
+    const spy = vi.spyOn(prototype, "sync").mockImplementation(async function(this: { fd: number }, ...args: unknown[]) {
+      const target = await fs.readlink(`/proc/self/fd/${this.fd}`);
+      const result = await Reflect.apply(original, this, args);
+      if (target === resolve(built.objectRoot, "objects")) { crossed = true; built.setVerdict("cancelled"); }
+      return result;
+    });
+    try {
+      const result = phase === "encode" ? built.phases.prepareEncoded(requestFor(built))
+        : built.phases.inspectEncoded({ request: deliveryRequestFor(built), encoded: encoded! });
+      await expect(result).rejects.toMatchObject({ code: "ATTEMPT_CANCELLED" });
+      expect(crossed).toBe(true);
+      // A durable private orphan is retained, never presented as a successful fact.
+      expect((await fs.readdir(resolve(built.objectRoot, "objects"))).length).toBe(phase === "encode" ? 1 : 2);
+    } finally { spy.mockRestore(); await built.phases.close(); }
+  });
+
+  it("refuses new reads on returned handles while another open is pending at service close", async () => {
+    const built = await harness({ label: "mp04-pending-open-read-gate" });
+    const encoded = await built.phases.prepareEncoded(requestFor(built));
+    const media = encoded.files.find(file => file.role === "media")!;
+    const input = { object_id: encoded.media_object_id, relative_path: media.relative_path, sha256: media.sha256, bytes: media.bytes };
+    const returned = await built.phases.openPhaseObject(input);
+    const fs = await import("node:fs/promises");
+    const probe = await fs.open(resolve(built.objectRoot, "objects", encoded.media_object_id, media.relative_path), "r");
+    const prototype = Object.getPrototypeOf(probe); await probe.close();
+    const original = prototype.read;
+    let enter!: () => void, release!: () => void, armed = true;
+    const entered = new Promise<void>(done => { enter = done; });
+    const gate = new Promise<void>(done => { release = done; });
+    const spy = vi.spyOn(prototype, "read").mockImplementation(function(this: unknown, ...args: unknown[]) {
+      if (armed) { armed = false; enter(); return gate.then(() => Reflect.apply(original, this, args)); }
+      return Reflect.apply(original, this, args);
+    });
+    const opening = built.phases.openPhaseObject(input);
+    const observed = opening.then(handle => ({ handle }), error => ({ error }));
+    await entered;
+    const first = built.phases.close(), second = built.phases.close();
+    const settlements = Promise.allSettled([first, second]);
+    try {
+      expect(second).toBe(first);
+      await expect(returned.read({ offset: 0, length: 1 })).rejects.toMatchObject({ code: "OBJECT_CLOSED" });
+      release();
+      const result = await observed;
+      if ('handle' in result) await expect(result.handle.read({ offset: 0, length: 1 })).rejects.toMatchObject({ code: "OBJECT_CLOSED" });
+      await Promise.all([first, second]);
+    } finally { release(); await observed; await settlements; spy.mockRestore(); }
+  });
+
   it.each(["handle", "service"] as const)("shares the %s close barrier and waits for an in-flight descriptor read", async owner => {
     const built = await harness({ label: "mp04-read-barrier-" + owner });
     const encoded = await built.phases.prepareEncoded(requestFor(built));

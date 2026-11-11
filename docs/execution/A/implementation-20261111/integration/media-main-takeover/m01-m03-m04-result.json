@@ -1,0 +1,28 @@
+{
+  "base": "1ae5c7ce656e6299c94e8940786c9d30bd32906d",
+  "repairs": {
+    "M03_R1": "service-owned private read gate rejects new reads on returned handles immediately, even while pending opens/phases drain; private internal phase reads remain covered by pending barrier",
+    "M01": "durable fence before each QC process start, after QC settled, after encoded/QC object publication and after all cleanup awaits inside tracked operation",
+    "M04": "one QC cleanup finally attempts object and workspace removals, retaining primary failure; failed package discard also retains primary; typed CommittedRenderPhaseError subclass reconciliation=true exposes non-enumerable private diagnostic causes"
+  },
+  "old_failure_evidence": {
+    "media-m03-pending-before": 1,
+    "media-m01-before": 5,
+    "media-m01-between-tools-before": 2,
+    "media-m04-before": 2
+  },
+  "intermediate_passes": {
+    "media-m03-pending-after": "56PASS1SKIP",
+    "media-m01-after": "61PASS1SKIP",
+    "media-m04-after": "63PASS1SKIP"
+  },
+  "final": "media-final-002 65PASS1realtoolSKIP, typecheck23 exit0, raw input hashes unchanged",
+  "facts": "real filesystem/descriptors/package store/permission denial; encoder and QC tools deliberately fake; no real media process/Host/browser/runtime acceptance here",
+  "external": "REVIEW_PENDING",
+  "remaining": [
+    "publisher N3 cleanup",
+    "real media phase integration and executor/recovery",
+    "full current acceptance/security/recovery gates",
+    "adopted native proof/Ack/full A/human gate"
+  ]
+}

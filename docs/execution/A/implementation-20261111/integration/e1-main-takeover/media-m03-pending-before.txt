@@ -1,0 +1,99 @@
+
+> narralens@0.1.0 test /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+> vitest run --config vitest.config.ts tests/agent-driven/media/committed-render-phases.test.ts --maxWorkers=1 --minWorkers=1 -t 'returned handles while another open is pending'
+
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+ ❯ tests/agent-driven/media/committed-render-phases.test.ts (57 tests | 1 failed | 56 skipped) 74ms
+   ↓ encoding a committed closure > returns an encoded fact that describes the bytes it produced
+   ↓ encoding a committed closure > carries no quality-control verdict and no readiness
+   ↓ encoding a committed closure > names an immutable object that holds the film and its supplements
+   ↓ encoding a committed closure > never puts a physical path into the receipt
+   ↓ encoding a committed closure > asks the fence before the film is rendered and before the object is published
+   ↓ encoding a committed closure > does not encode when the attempt may not act
+   ↓ encoding a committed closure > leaves no published object behind when the renderer fails
+   ↓ encoding a committed closure > refuses a closure that does not say how many frames the film has
+   ↓ inspecting an encoded object > returns a receipt that is bound to the encoded fact
+   ↓ inspecting an encoded object > writes its own object and leaves the encoded object alone
+   ↓ inspecting an encoded object > refuses an encoded fact whose digest does not describe it
+   ↓ inspecting an encoded object > refuses an encoded fact that is about another snapshot
+   ↓ inspecting an encoded object > refuses when the closure is no longer the closure the film was rendered from
+   ↓ inspecting an encoded object > blocks when the decoder refuses the file
+   ↓ publishing from the encoded and inspected bytes > refuses a legacy winner without lineage and preserves its verified files
+   ↓ publishing from the encoded and inspected bytes > refuses an existing winner with different media without relabelling or replacing it
+   ↓ publishing from the encoded and inspected bytes > refuses an existing winner with different encoder parent without relabelling or replacing it
+   ↓ publishing from the encoded and inspected bytes > refuses an existing winner with different QC parent without relabelling or replacing it
+   ↓ publishing from the encoded and inspected bytes > replays the same verified parent chain under a later publication lease
+   ↓ publishing from the encoded and inspected bytes > publishes one package and returns a receipt that names it
+   ↓ publishing from the encoded and inspected bytes > publishes the very bytes the encoder produced
+   ↓ publishing from the encoded and inspected bytes > does not publish a blocked inspection
+   ↓ publishing from the encoded and inspected bytes > does not publish a warning that has no recorded decision
+   ↓ publishing from the encoded and inspected bytes > publishes a warned inspection when the decision is recorded
+   ↓ publishing from the encoded and inspected bytes > refuses an inspection receipt that is not about this encoded fact
+   ↓ publishing from the encoded and inspected bytes > publishes under another job and another lease without changing the encoded fact
+   ↓ the phase object resolver > opens a file of an object and reads it in bounded pieces
+   ↓ the phase object resolver > refuses a read that is larger than the bound
+   ↓ the phase object resolver > refuses a file that is not the bytes it was recorded to be
+   ↓ the phase object resolver > refuses a path that walks out of the object
+   ↓ the phase object resolver > refuses an object id that is not a plain name
+   ↓ the objects a phase leaves behind > keeps a published object when the service is closed
+   ↓ the objects a phase leaves behind > keeps the encoded object when a later stage fails
+   ↓ the objects a phase leaves behind > holds no descriptor across the phases
+   ↓ MP01 — a closure digest over a fractional duration > computes a digest for a duration that is not a whole number of seconds
+   ↓ MP01 — a closure digest over a fractional duration > computes a digest for a film of one frame at 30 fps
+   ↓ MP01 — a closure digest over a fractional duration > computes a digest for a film of one frame at 30000/1001
+   ↓ MP01 — a closure digest over a fractional duration > does not carry the stated seconds into the digest
+   ↓ MP01 — a closure digest over a fractional duration > encodes and inspects a film whose frame rate is a rational number
+   ↓ MP02 — the resolver may not be walked out of, nor serve changed bytes > releases every opened root descriptor when an ancestor alias is rejected
+   ↓ MP02 — the resolver may not be walked out of, nor serve changed bytes > refuses an object root that is an alias of the real root
+   ↓ MP02 — the resolver may not be walked out of, nor serve changed bytes > refuses an object that is a symlink
+   ↓ MP02 — the resolver may not be walked out of, nor serve changed bytes > refuses a file that lives under a symlinked directory inside the object
+   ↓ MP02 — the resolver may not be walked out of, nor serve changed bytes > refuses to serve bytes that were changed in place after the file was opened
+   ↓ MP02 — the resolver may not be walked out of, nor serve changed bytes > leaks no descriptor when close runs while an open is still hashing
+   ↓ MP03 — the actual bytes of the promised supplements are checked > refuses an encoded object whose actual subtitle bytes changed
+   ↓ MP03 — the actual bytes of the promised supplements are checked > refuses an encoded object whose actual licence file is missing
+   ↓ MP03 — the actual bytes of the promised supplements are checked > refuses an encoded object whose supplements were reordered
+   × MP04 — the object carries a durable receipt and the cleanup is honest > refuses new reads on returned handles while another open is pending at service close 73ms
+     → promise resolved "Uint8Array[ 116 ]" instead of rejecting
+   ↓ MP04 — the object carries a durable receipt and the cleanup is honest > shares the handle close barrier and waits for an in-flight descriptor read
+   ↓ MP04 — the object carries a durable receipt and the cleanup is honest > shares the service close barrier and waits for an in-flight descriptor read
+   ↓ MP04 — the object carries a durable receipt and the cleanup is honest > publishes an immutable receipt beside the object it describes
+   ↓ MP04 — the object carries a durable receipt and the cleanup is honest > reads the durable receipt of an object through the anchored resolver
+   ↓ MP04 — the object carries a durable receipt and the cleanup is honest > keeps the object and its receipt across a restart of the service
+   ↓ MP04 — the object carries a durable receipt and the cleanup is honest > reports a cleanup failure instead of swallowing it
+   ↓ MP04 — the object carries a durable receipt and the cleanup is honest > waits for the phases that are still running when it closes
+   ↓ the real tools (NARRALENS_PHASE_REAL_TOOLS=1) > encodes, inspects and publishes with the pinned renderer and the real ffprobe and ffmpeg
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/media/committed-render-phases.test.ts > MP04 — the object carries a durable receipt and the cleanup is honest > refuses new reads on returned handles while another open is pending at service close
+AssertionError: promise resolved "Uint8Array[ 116 ]" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
+- }
++ Uint8Array [
++   116,
++ ]
+
+ ❯ tests/agent-driven/media/committed-render-phases.test.ts:981:59
+    979|     try {
+    980|       expect(second).toBe(first);
+    981|       await expect(returned.read({ offset: 0, length: 1 })).rejects.to…
+       |                                                           ^
+    982|       release();
+    983|       const result = await observed;
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 56 skipped (57)
+   Start at  04:11:54
+   Duration  4.28s (transform 417ms, setup 0ms, collect 2.26s, tests 74ms, environment 0ms, prepare 1.24s)
+
+ ELIFECYCLE  Test failed. See above for more details.

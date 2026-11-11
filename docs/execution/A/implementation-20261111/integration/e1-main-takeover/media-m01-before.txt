@@ -1,0 +1,695 @@
+
+> narralens@0.1.0 test /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+> vitest run --config vitest.config.ts tests/agent-driven/media/committed-render-phases.test.ts --maxWorkers=1 --minWorkers=1 -t 'preflight observes a durable|cancellation arrives during cleanup|cancellation arrives during object publication fsync'
+
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+ ❯ tests/agent-driven/media/committed-render-phases.test.ts (62 tests | 5 failed | 57 skipped) 602ms
+   ↓ encoding a committed closure > returns an encoded fact that describes the bytes it produced
+   ↓ encoding a committed closure > carries no quality-control verdict and no readiness
+   ↓ encoding a committed closure > names an immutable object that holds the film and its supplements
+   ↓ encoding a committed closure > never puts a physical path into the receipt
+   ↓ encoding a committed closure > asks the fence before the film is rendered and before the object is published
+   ↓ encoding a committed closure > does not encode when the attempt may not act
+   ↓ encoding a committed closure > leaves no published object behind when the renderer fails
+   ↓ encoding a committed closure > refuses a closure that does not say how many frames the film has
+   × inspecting an encoded object > does not start QC tools when preflight observes a durable cancelled attempt 96ms
+     → expected 2 to be +0 // Object.is equality
+   × inspecting an encoded object > does not start QC tools when preflight observes a durable superseded attempt 79ms
+     → expected 2 to be +0 // Object.is equality
+   ↓ inspecting an encoded object > returns a receipt that is bound to the encoded fact
+   ↓ inspecting an encoded object > writes its own object and leaves the encoded object alone
+   ↓ inspecting an encoded object > refuses an encoded fact whose digest does not describe it
+   ↓ inspecting an encoded object > refuses an encoded fact that is about another snapshot
+   ↓ inspecting an encoded object > refuses when the closure is no longer the closure the film was rendered from
+   ↓ inspecting an encoded object > blocks when the decoder refuses the file
+   × publishing from the encoded and inspected bytes > refuses a successful publication result if durable cancellation arrives during cleanup 295ms
+     → promise resolved "{ …(7) }" instead of rejecting
+   ↓ publishing from the encoded and inspected bytes > refuses a legacy winner without lineage and preserves its verified files
+   ↓ publishing from the encoded and inspected bytes > refuses an existing winner with different media without relabelling or replacing it
+   ↓ publishing from the encoded and inspected bytes > refuses an existing winner with different encoder parent without relabelling or replacing it
+   ↓ publishing from the encoded and inspected bytes > refuses an existing winner with different QC parent without relabelling or replacing it
+   ↓ publishing from the encoded and inspected bytes > replays the same verified parent chain under a later publication lease
+   ↓ publishing from the encoded and inspected bytes > publishes one package and returns a receipt that names it
+   ↓ publishing from the encoded and inspected bytes > publishes the very bytes the encoder produced
+   ↓ publishing from the encoded and inspected bytes > does not publish a blocked inspection
+   ↓ publishing from the encoded and inspected bytes > does not publish a warning that has no recorded decision
+   ↓ publishing from the encoded and inspected bytes > publishes a warned inspection when the decision is recorded
+   ↓ publishing from the encoded and inspected bytes > refuses an inspection receipt that is not about this encoded fact
+   ↓ publishing from the encoded and inspected bytes > publishes under another job and another lease without changing the encoded fact
+   ↓ the phase object resolver > opens a file of an object and reads it in bounded pieces
+   ↓ the phase object resolver > refuses a read that is larger than the bound
+   ↓ the phase object resolver > refuses a file that is not the bytes it was recorded to be
+   ↓ the phase object resolver > refuses a path that walks out of the object
+   ↓ the phase object resolver > refuses an object id that is not a plain name
+   ↓ the objects a phase leaves behind > keeps a published object when the service is closed
+   ↓ the objects a phase leaves behind > keeps the encoded object when a later stage fails
+   ↓ the objects a phase leaves behind > holds no descriptor across the phases
+   ↓ MP01 — a closure digest over a fractional duration > computes a digest for a duration that is not a whole number of seconds
+   ↓ MP01 — a closure digest over a fractional duration > computes a digest for a film of one frame at 30 fps
+   ↓ MP01 — a closure digest over a fractional duration > computes a digest for a film of one frame at 30000/1001
+   ↓ MP01 — a closure digest over a fractional duration > does not carry the stated seconds into the digest
+   ↓ MP01 — a closure digest over a fractional duration > encodes and inspects a film whose frame rate is a rational number
+   ↓ MP02 — the resolver may not be walked out of, nor serve changed bytes > releases every opened root descriptor when an ancestor alias is rejected
+   ↓ MP02 — the resolver may not be walked out of, nor serve changed bytes > refuses an object root that is an alias of the real root
+   ↓ MP02 — the resolver may not be walked out of, nor serve changed bytes > refuses an object that is a symlink
+   ↓ MP02 — the resolver may not be walked out of, nor serve changed bytes > refuses a file that lives under a symlinked directory inside the object
+   ↓ MP02 — the resolver may not be walked out of, nor serve changed bytes > refuses to serve bytes that were changed in place after the file was opened
+   ↓ MP02 — the resolver may not be walked out of, nor serve changed bytes > leaks no descriptor when close runs while an open is still hashing
+   ↓ MP03 — the actual bytes of the promised supplements are checked > refuses an encoded object whose actual subtitle bytes changed
+   ↓ MP03 — the actual bytes of the promised supplements are checked > refuses an encoded object whose actual licence file is missing
+   ↓ MP03 — the actual bytes of the promised supplements are checked > refuses an encoded object whose supplements were reordered
+   × MP04 — the object carries a durable receipt and the cleanup is honest > refuses a encode result when cancellation arrives during object publication fsync 51ms
+     → promise resolved "{ …(19) }" instead of rejecting
+   × MP04 — the object carries a durable receipt and the cleanup is honest > refuses a qc result when cancellation arrives during object publication fsync 80ms
+     → promise resolved "{ …(12) }" instead of rejecting
+   ↓ MP04 — the object carries a durable receipt and the cleanup is honest > refuses new reads on returned handles while another open is pending at service close
+   ↓ MP04 — the object carries a durable receipt and the cleanup is honest > shares the handle close barrier and waits for an in-flight descriptor read
+   ↓ MP04 — the object carries a durable receipt and the cleanup is honest > shares the service close barrier and waits for an in-flight descriptor read
+   ↓ MP04 — the object carries a durable receipt and the cleanup is honest > publishes an immutable receipt beside the object it describes
+   ↓ MP04 — the object carries a durable receipt and the cleanup is honest > reads the durable receipt of an object through the anchored resolver
+   ↓ MP04 — the object carries a durable receipt and the cleanup is honest > keeps the object and its receipt across a restart of the service
+   ↓ MP04 — the object carries a durable receipt and the cleanup is honest > reports a cleanup failure instead of swallowing it
+   ↓ MP04 — the object carries a durable receipt and the cleanup is honest > waits for the phases that are still running when it closes
+   ↓ the real tools (NARRALENS_PHASE_REAL_TOOLS=1) > encodes, inspects and publishes with the pinned renderer and the real ffprobe and ffmpeg
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/media/committed-render-phases.test.ts > inspecting an encoded object > does not start QC tools when preflight observes a durable cancelled attempt
+ FAIL  tests/agent-driven/media/committed-render-phases.test.ts > inspecting an encoded object > does not start QC tools when preflight observes a durable superseded attempt
+AssertionError: expected 2 to be +0 // Object.is equality
+
+- Expected
++ Received
+
+- 0
++ 2
+
+ ❯ tests/agent-driven/media/committed-render-phases.test.ts:298:21
+    296|       await expect(phases.inspectEncoded({ request: deliveryRequestFor…
+    297|         code: verdict === "cancelled" ? "ATTEMPT_CANCELLED" : "ATTEMPT…
+    298|       expect(calls).toBe(0);
+       |                     ^
+    299|     } finally { await phases.close(); await built.phases.close(); }
+    300|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  tests/agent-driven/media/committed-render-phases.test.ts > publishing from the encoded and inspected bytes > refuses a successful publication result if durable cancellation arrives during cleanup
+AssertionError: promise resolved "{ …(7) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "format": "narralens.published-phase-receipt@1",
++   "package_receipt": {
++     "attempt": 1,
++     "delivery_id": "d_f4a12998a2f846e6f601c4bb4ba55796",
++     "download_ref": "dl_f4a12998a2f846e6f601c4bb4ba55796",
++     "files": [
++       {
++         "bytes": 17,
++         "file": "media.mp4",
++         "id": "d_f4a12998a2f846e6f601c4bb4ba55796_media",
++         "sha256": "0216f244c714f98a86961b8d29990ee6af7c50c7b1344c673b945f7ac9eafb88",
++       },
++       {
++         "bytes": 112,
++         "file": "native_film.html",
++         "id": "d_f4a12998a2f846e6f601c4bb4ba55796_native_document",
++         "sha256": "259e0134e8231bc1dbc9f31730c0933713ac92a1c025c9904e876430a7c09159",
++       },
++       {
++         "bytes": 1172,
++         "file": "native_source.json",
++         "id": "d_f4a12998a2f846e6f601c4bb4ba55796_native_source",
++         "sha256": "11cb18591dcffd4af7de21c622a4036ffb52e76707d87fee54016e3b9d9059ab",
++       },
++       {
++         "bytes": 12,
++         "file": "supplement_0.txt",
++         "id": "d_f4a12998a2f846e6f601c4bb4ba55796_sup0",
++         "sha256": "064545f991197adc34b55c1c08e1f3448d3e205d9fe86f374e2d9ead2440050f",
++       },
++       {
++         "bytes": 38,
++         "file": "supplement_1.vtt",
++         "id": "d_f4a12998a2f846e6f601c4bb4ba55796_sup1",
++         "sha256": "301288e7e342d01a7864366943814ac5cc91bb4ca6f09bbb26973247d2c3aac9",
++       },
++       {
++         "bytes": 330,
++         "file": "ffprobe.json",
++         "id": "d_f4a12998a2f846e6f601c4bb4ba55796_ffprobe",
++         "sha256": "0b179e9717d0ad9e2e2726839c5e5c105b609a6d87ede1abafda1242f97106bd",
++       },
++       {
++         "bytes": 0,
++         "file": "full_decode.log",
++         "id": "d_f4a12998a2f846e6f601c4bb4ba55796_full_decode",
++         "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
++       },
++       {
++         "bytes": 570,
++         "file": "phase_lineage.json",
++         "id": "d_f4a12998a2f846e6f601c4bb4ba55796_phase_lineage",
++         "sha256": "6e81cc2cba6a047fbca0b568bb47367320098cf04fb0056cfc9eddddd24f69aa",
++       },
++     ],
++     "kind": "narralens.delivery_package_receipt@1.0",
++     "manifest": {
++       "attempt": 1,
++       "delivery_id": "d_f4a12998a2f846e6f601c4bb4ba55796",
++       "download_ref": "dl_f4a12998a2f846e6f601c4bb4ba55796",
++       "ffprobe_ref": {
++         "id": "d_f4a12998a2f846e6f601c4bb4ba55796_ffprobe",
++         "sha256": "0b179e9717d0ad9e2e2726839c5e5c105b609a6d87ede1abafda1242f97106bd",
++         "version": 1,
++       },
++       "full_decode_ref": {
++         "id": "d_f4a12998a2f846e6f601c4bb4ba55796_full_decode",
++         "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
++         "version": 1,
++       },
++       "media_ref": {
++         "id": "d_f4a12998a2f846e6f601c4bb4ba55796_media",
++         "sha256": "0216f244c714f98a86961b8d29990ee6af7c50c7b1344c673b945f7ac9eafb88",
++         "version": 1,
++       },
++       "project_id": "proj_media_01",
++       "published_at": "2026-11-11T20:13:59.459Z",
++       "qc": [
++         {
++           "evidence_ref": null,
++           "id": "snapshot_identity",
++           "reason": "the closure is snapshot snap_media_01 at revision 7",
++           "status": "pass",
++         },
++         {
++           "evidence_ref": null,
++           "id": "inputs_local",
++           "reason": "4 local file(s) with recorded digests",
++           "status": "pass",
++         },
++         {
++           "evidence_ref": null,
++           "id": "inputs_rights",
++           "reason": "3 asset(s) and supplement(s) are cleared for this use",
++           "status": "pass",
++         },
++         {
++           "evidence_ref": null,
++           "id": "inputs_complete",
++           "reason": "the snapshot carries 2 promised supplement(s) and the film's own source",
++           "status": "pass",
++         },
++         {
++           "evidence_ref": null,
++           "id": "render_spec",
++           "reason": "1920x1080 at 30/1 fps, mp4/h264/aac",
++           "status": "pass",
++         },
++         {
++           "evidence_ref": null,
++           "id": "render_config",
++           "reason": "the configuration digest names this renderer, this upstream and these options",
++           "status": "pass",
++         },
++         {
++           "evidence_ref": null,
++           "id": "upstream_pin",
++           "reason": "the pinned upstream e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3 and the worker match their digests",
++           "status": "pass",
++         },
++         {
++           "evidence_ref": null,
++           "id": "output_space",
++           "reason": "the staging area has room",
++           "status": "pass",
++         },
++         {
++           "evidence_ref": {
++             "id": "d_f4a12998a2f846e6f601c4bb4ba55796_ffprobe",
++             "sha256": "0b179e9717d0ad9e2e2726839c5e5c105b609a6d87ede1abafda1242f97106bd",
++             "version": 1,
++           },
++           "id": "media_container",
++           "reason": "the container is mov,mp4,m4a,3gp,3g2,mj2",
++           "status": "pass",
++         },
++         {
++           "evidence_ref": {
++             "id": "d_f4a12998a2f846e6f601c4bb4ba55796_ffprobe",
++             "sha256": "0b179e9717d0ad9e2e2726839c5e5c105b609a6d87ede1abafda1242f97106bd",
++             "version": 1,
++           },
++           "id": "media_video_codec",
++           "reason": "the video codec is h264",
++           "status": "pass",
++         },
++         {
++           "evidence_ref": {
++             "id": "d_f4a12998a2f846e6f601c4bb4ba55796_ffprobe",
++             "sha256": "0b179e9717d0ad9e2e2726839c5e5c105b609a6d87ede1abafda1242f97106bd",
++             "version": 1,
++           },
++           "id": "media_audio_codec",
++           "reason": "the audio codec is aac",
++           "status": "pass",
++         },
++         {
++           "evidence_ref": {
++             "id": "d_f4a12998a2f846e6f601c4bb4ba55796_ffprobe",
++             "sha256": "0b179e9717d0ad9e2e2726839c5e5c105b609a6d87ede1abafda1242f97106bd",
++             "version": 1,
++           },
++           "id": "media_dimensions",
++           "reason": "the picture is 1920x1080",
++           "status": "pass",
++         },
++         {
++           "evidence_ref": {
++             "id": "d_f4a12998a2f846e6f601c4bb4ba55796_ffprobe",
++             "sha256": "0b179e9717d0ad9e2e2726839c5e5c105b609a6d87ede1abafda1242f97106bd",
++             "version": 1,
++           },
++           "id": "media_frame_rate",
++           "reason": "the frame rate is 30/1",
++           "status": "pass",
++         },
++         {
++           "evidence_ref": {
++             "id": "d_f4a12998a2f846e6f601c4bb4ba55796_ffprobe",
++             "sha256": "0b179e9717d0ad9e2e2726839c5e5c105b609a6d87ede1abafda1242f97106bd",
++             "version": 1,
++           },
++           "id": "media_streams",
++           "reason": "the file holds one video stream and one audio stream",
++           "status": "pass",
++         },
++         {
++           "evidence_ref": {
++             "id": "d_f4a12998a2f846e6f601c4bb4ba55796_ffprobe",
++             "sha256": "0b179e9717d0ad9e2e2726839c5e5c105b609a6d87ede1abafda1242f97106bd",
++             "version": 1,
++           },
++           "id": "media_frames",
++           "reason": "the file holds 60 frame(s), as the snapshot's native document says",
++           "status": "pass",
++         },
++         {
++           "evidence_ref": {
++             "id": "d_f4a12998a2f846e6f601c4bb4ba55796_ffprobe",
++             "sha256": "0b179e9717d0ad9e2e2726839c5e5c105b609a6d87ede1abafda1242f97106bd",
++             "version": 1,
++           },
++           "id": "media_duration",
++           "reason": "the film is 2s long, as the snapshot's native document says",
++           "status": "pass",
++         },
++         {
++           "evidence_ref": {
++             "id": "d_f4a12998a2f846e6f601c4bb4ba55796_full_decode",
++             "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
++             "version": 1,
++           },
++           "id": "media_full_decode",
++           "reason": "the whole file decodes",
++           "status": "pass",
++         },
++         {
++           "evidence_ref": null,
++           "id": "supplements",
++           "reason": "2 supplement(s) match their digests and every promised one is there",
++           "status": "pass",
++         },
++       ],
++       "render_config_digest": "5a7ed99f322463f58dfb1d4ede0c6595a51209fd1fb640f18d8839f9bcceb6dc",
++       "render_spec": {
++         "audio_codec": "aac",
++         "config_digest": "5a7ed99f322463f58dfb1d4ede0c6595a51209fd1fb640f18d8839f9bcceb6dc",
++         "container": "mp4",
++         "engine_id": "openfilm",
++         "engine_version": "openfilm@0.1.7",
++         "fps_denominator": 1,
++         "fps_numerator": 30,
++         "height": 1080,
++         "video_codec": "h264",
++         "width": 1920,
++       },
++       "snapshot_id": "snap_media_01",
++       "source_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
++       "supplement_refs": [
++         {
++           "id": "d_f4a12998a2f846e6f601c4bb4ba55796_sup0",
++           "sha256": "064545f991197adc34b55c1c08e1f3448d3e205d9fe86f374e2d9ead2440050f",
++           "version": 1,
++         },
++         {
++           "id": "d_f4a12998a2f846e6f601c4bb4ba55796_sup1",
++           "sha256": "301288e7e342d01a7864366943814ac5cc91bb4ca6f09bbb26973247d2c3aac9",
++           "version": 1,
++         },
++         {
++           "id": "d_f4a12998a2f846e6f601c4bb4ba55796_phase_lineage",
++           "sha256": "6e81cc2cba6a047fbca0b568bb47367320098cf04fb0056cfc9eddddd24f69aa",
++           "version": 1,
++         },
++       ],
++     },
++     "object_id": "obj_71ed791ee2f640c6bf637301fea50a8f",
++     "package_id": "pkg_f4a12998a2f846e6f601c4bb4ba55796",
++     "project_id": "proj_media_01",
++     "published_at": "2026-11-11T20:13:59.459Z",
++     "render_config_digest": "5a7ed99f322463f58dfb1d4ede0c6595a51209fd1fb640f18d8839f9bcceb6dc",
++     "snapshot_id": "snap_media_01",
++     "source_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
++   },
++   "parent_encoded_digest": "00240027a1ed8172cefd0f6c97d2a38f40648276338e49a8c750ae68dfdd6e25",
++   "parent_qc_digest": "0cc08da2b37595a5d59a76958010d92a3ce36d35027c72e02fbfc5c477989ed3",
++   "publication_execution": {
++     "attempt": 1,
++     "authorization_id": "auth_media_01",
++     "input_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
++     "plan_version": 1,
++     "run_id": "run_media_01",
++     "run_scope_digest": "0000000000000000000000000000000000000000000000000000000000000000",
++     "step_id": "delivery.package",
++   },
++   "publication_lease_attempt": 1,
++   "receipt_digest": "7df5ef4436c219731f9f442545bf8b94ee0e1a4a8ee585937f3150975eaa81e6",
+  }
+
+ ❯ tests/agent-driven/media/committed-render-phases.test.ts:395:102
+    393|     });
+    394|     try {
+    395|       await expect(built.phases.publishValidated({ request: deliveryRe…
+       |                                                                                                      ^
+    396|         .rejects.toMatchObject({ code: "ATTEMPT_CANCELLED" });
+    397|     } finally { spy.mockRestore(); await built.phases.close(); }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  tests/agent-driven/media/committed-render-phases.test.ts > MP04 — the object carries a durable receipt and the cleanup is honest > refuses a encode result when cancellation arrives during object publication fsync
+AssertionError: promise resolved "{ …(19) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "closure_digest": "c14bedbdc1b9f7d323c3f6891f55448e4251d2d462d26763bc74230b789cc0c3",
++   "config_digest": "5a7ed99f322463f58dfb1d4ede0c6595a51209fd1fb640f18d8839f9bcceb6dc",
++   "created_at": "2026-11-11T20:13:59.681Z",
++   "files": [
++     {
++       "bytes": 17,
++       "id": "d_f4a12998a2f846e6f601c4bb4ba55796_media",
++       "relative_path": "media.mp4",
++       "role": "media",
++       "sha256": "0216f244c714f98a86961b8d29990ee6af7c50c7b1344c673b945f7ac9eafb88",
++     },
++     {
++       "bytes": 112,
++       "id": "d_f4a12998a2f846e6f601c4bb4ba55796_native_document",
++       "relative_path": "native_film.html",
++       "role": "native_document",
++       "sha256": "259e0134e8231bc1dbc9f31730c0933713ac92a1c025c9904e876430a7c09159",
++     },
++     {
++       "bytes": 1172,
++       "id": "d_f4a12998a2f846e6f601c4bb4ba55796_native_source",
++       "relative_path": "native_source.json",
++       "role": "native_source",
++       "sha256": "11cb18591dcffd4af7de21c622a4036ffb52e76707d87fee54016e3b9d9059ab",
++     },
++     {
++       "bytes": 12,
++       "id": "d_f4a12998a2f846e6f601c4bb4ba55796_sup0",
++       "relative_path": "supplement_0.txt",
++       "role": "rights",
++       "sha256": "064545f991197adc34b55c1c08e1f3448d3e205d9fe86f374e2d9ead2440050f",
++     },
++     {
++       "bytes": 38,
++       "id": "d_f4a12998a2f846e6f601c4bb4ba55796_sup1",
++       "relative_path": "supplement_1.vtt",
++       "role": "subtitles",
++       "sha256": "301288e7e342d01a7864366943814ac5cc91bb4ca6f09bbb26973247d2c3aac9",
++     },
++   ],
++   "format": "narralens.encoded-fact@1",
++   "fps_denominator": 1,
++   "fps_numerator": 30,
++   "frame_count": 60,
++   "job_id": "job_render_01",
++   "media_object_id": "obj_de0bca22f26648bfa35639a175bd4f78",
++   "media_ref": {
++     "id": "d_f4a12998a2f846e6f601c4bb4ba55796_media",
++     "sha256": "0216f244c714f98a86961b8d29990ee6af7c50c7b1344c673b945f7ac9eafb88",
++     "version": 1,
++   },
++   "producer_execution": {
++     "attempt": 1,
++     "authorization_id": "auth_media_01",
++     "input_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
++     "plan_version": 1,
++     "run_id": "run_media_01",
++     "run_scope_digest": "0000000000000000000000000000000000000000000000000000000000000000",
++     "step_id": "snapshot.render",
++   },
++   "producer_lease_attempt": 1,
++   "project_id": "proj_media_01",
++   "receipt_digest": "b2accdaacfb252f56cf40b59223b698aa66980e6ee4dfd37824f8abb4792a038",
++   "render_spec": {
++     "audio_codec": "aac",
++     "config_digest": "5a7ed99f322463f58dfb1d4ede0c6595a51209fd1fb640f18d8839f9bcceb6dc",
++     "container": "mp4",
++     "engine_id": "openfilm",
++     "engine_version": "openfilm@0.1.7",
++     "fps_denominator": 1,
++     "fps_numerator": 30,
++     "height": 1080,
++     "video_codec": "h264",
++     "width": 1920,
++   },
++   "rights_digest": "7e9ca177fdf9331b9dc74024b341675557ce739f54dca84133c3aa47c161bbdb",
++   "snapshot_id": "snap_media_01",
++   "source_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  }
+
+ ❯ tests/agent-driven/media/committed-render-phases.test.ts:1009:26
+    1007|       const result = phase === "encode" ? built.phases.prepareEncoded(…
+    1008|         : built.phases.inspectEncoded({ request: deliveryRequestFor(bu…
+    1009|       await expect(result).rejects.toMatchObject({ code: "ATTEMPT_CANC…
+       |                          ^
+    1010|       expect(crossed).toBe(true);
+    1011|       // A durable private orphan is retained, never presented as a su…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ FAIL  tests/agent-driven/media/committed-render-phases.test.ts > MP04 — the object carries a durable receipt and the cleanup is honest > refuses a qc result when cancellation arrives during object publication fsync
+AssertionError: promise resolved "{ …(12) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "config_digest": "5a7ed99f322463f58dfb1d4ede0c6595a51209fd1fb640f18d8839f9bcceb6dc",
++   "created_at": "2026-11-11T20:13:59.760Z",
++   "files": [
++     {
++       "bytes": 330,
++       "id": "d_f4a12998a2f846e6f601c4bb4ba55796_ffprobe",
++       "relative_path": "ffprobe.json",
++       "role": "ffprobe",
++       "sha256": "0b179e9717d0ad9e2e2726839c5e5c105b609a6d87ede1abafda1242f97106bd",
++     },
++     {
++       "bytes": 0,
++       "id": "d_f4a12998a2f846e6f601c4bb4ba55796_full_decode",
++       "relative_path": "full_decode.log",
++       "role": "full_decode",
++       "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
++     },
++   ],
++   "format": "narralens.qc-receipt@1",
++   "parent_encoded_digest": "af5a14ce7bf7d984d1784b005476300c9fb8ced4e05a617f811166fa256b3c24",
++   "project_id": "proj_media_01",
++   "qc_items": [
++     {
++       "evidence_ref": null,
++       "id": "snapshot_identity",
++       "reason": "the closure is snapshot snap_media_01 at revision 7",
++       "status": "pass",
++     },
++     {
++       "evidence_ref": null,
++       "id": "inputs_local",
++       "reason": "4 local file(s) with recorded digests",
++       "status": "pass",
++     },
++     {
++       "evidence_ref": null,
++       "id": "inputs_rights",
++       "reason": "3 asset(s) and supplement(s) are cleared for this use",
++       "status": "pass",
++     },
++     {
++       "evidence_ref": null,
++       "id": "inputs_complete",
++       "reason": "the snapshot carries 2 promised supplement(s) and the film's own source",
++       "status": "pass",
++     },
++     {
++       "evidence_ref": null,
++       "id": "render_spec",
++       "reason": "1920x1080 at 30/1 fps, mp4/h264/aac",
++       "status": "pass",
++     },
++     {
++       "evidence_ref": null,
++       "id": "render_config",
++       "reason": "the configuration digest names this renderer, this upstream and these options",
++       "status": "pass",
++     },
++     {
++       "evidence_ref": null,
++       "id": "upstream_pin",
++       "reason": "the pinned upstream e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3 and the worker match their digests",
++       "status": "pass",
++     },
++     {
++       "evidence_ref": null,
++       "id": "output_space",
++       "reason": "the staging area has room",
++       "status": "pass",
++     },
++     {
++       "evidence_ref": {
++         "id": "d_f4a12998a2f846e6f601c4bb4ba55796_ffprobe",
++         "sha256": "0b179e9717d0ad9e2e2726839c5e5c105b609a6d87ede1abafda1242f97106bd",
++         "version": 1,
++       },
++       "id": "media_container",
++       "reason": "the container is mov,mp4,m4a,3gp,3g2,mj2",
++       "status": "pass",
++     },
++     {
++       "evidence_ref": {
++         "id": "d_f4a12998a2f846e6f601c4bb4ba55796_ffprobe",
++         "sha256": "0b179e9717d0ad9e2e2726839c5e5c105b609a6d87ede1abafda1242f97106bd",
++         "version": 1,
++       },
++       "id": "media_video_codec",
++       "reason": "the video codec is h264",
++       "status": "pass",
++     },
++     {
++       "evidence_ref": {
++         "id": "d_f4a12998a2f846e6f601c4bb4ba55796_ffprobe",
++         "sha256": "0b179e9717d0ad9e2e2726839c5e5c105b609a6d87ede1abafda1242f97106bd",
++         "version": 1,
++       },
++       "id": "media_audio_codec",
++       "reason": "the audio codec is aac",
++       "status": "pass",
++     },
++     {
++       "evidence_ref": {
++         "id": "d_f4a12998a2f846e6f601c4bb4ba55796_ffprobe",
++         "sha256": "0b179e9717d0ad9e2e2726839c5e5c105b609a6d87ede1abafda1242f97106bd",
++         "version": 1,
++       },
++       "id": "media_dimensions",
++       "reason": "the picture is 1920x1080",
++       "status": "pass",
++     },
++     {
++       "evidence_ref": {
++         "id": "d_f4a12998a2f846e6f601c4bb4ba55796_ffprobe",
++         "sha256": "0b179e9717d0ad9e2e2726839c5e5c105b609a6d87ede1abafda1242f97106bd",
++         "version": 1,
++       },
++       "id": "media_frame_rate",
++       "reason": "the frame rate is 30/1",
++       "status": "pass",
++     },
++     {
++       "evidence_ref": {
++         "id": "d_f4a12998a2f846e6f601c4bb4ba55796_ffprobe",
++         "sha256": "0b179e9717d0ad9e2e2726839c5e5c105b609a6d87ede1abafda1242f97106bd",
++         "version": 1,
++       },
++       "id": "media_streams",
++       "reason": "the file holds one video stream and one audio stream",
++       "status": "pass",
++     },
++     {
++       "evidence_ref": {
++         "id": "d_f4a12998a2f846e6f601c4bb4ba55796_ffprobe",
++         "sha256": "0b179e9717d0ad9e2e2726839c5e5c105b609a6d87ede1abafda1242f97106bd",
++         "version": 1,
++       },
++       "id": "media_frames",
++       "reason": "the file holds 60 frame(s), as the snapshot's native document says",
++       "status": "pass",
++     },
++     {
++       "evidence_ref": {
++         "id": "d_f4a12998a2f846e6f601c4bb4ba55796_ffprobe",
++         "sha256": "0b179e9717d0ad9e2e2726839c5e5c105b609a6d87ede1abafda1242f97106bd",
++         "version": 1,
++       },
++       "id": "media_duration",
++       "reason": "the film is 2s long, as the snapshot's native document says",
++       "status": "pass",
++     },
++     {
++       "evidence_ref": {
++         "id": "d_f4a12998a2f846e6f601c4bb4ba55796_full_decode",
++         "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
++         "version": 1,
++       },
++       "id": "media_full_decode",
++       "reason": "the whole file decodes",
++       "status": "pass",
++     },
++     {
++       "evidence_ref": null,
++       "id": "supplements",
++       "reason": "2 supplement(s) match their digests and every promised one is there",
++       "status": "pass",
++     },
++   ],
++   "qc_object_id": "obj_f8021444c14d49ca9d5b182e77fef5f4",
++   "receipt_digest": "34384ac809445ff37fdd72469cc76120299e145aea87b3fa268fc790708725a0",
++   "snapshot_id": "snap_media_01",
++   "source_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
++   "technical_status": "pass",
+  }
+
+ ❯ tests/agent-driven/media/committed-render-phases.test.ts:1009:26
+    1007|       const result = phase === "encode" ? built.phases.prepareEncoded(…
+    1008|         : built.phases.inspectEncoded({ request: deliveryRequestFor(bu…
+    1009|       await expect(result).rejects.toMatchObject({ code: "ATTEMPT_CANC…
+       |                          ^
+    1010|       expect(crossed).toBe(true);
+    1011|       // A durable private orphan is retained, never presented as a su…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  5 failed | 57 skipped (62)
+   Start at  04:13:55
+   Duration  4.64s (transform 415ms, setup 0ms, collect 2.23s, tests 602ms, environment 0ms, prepare 1.16s)
+
+ ELIFECYCLE  Test failed. See above for more details.
