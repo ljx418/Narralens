@@ -9,3 +9,8 @@
 - 原失败real-001..005全部保留；real-006为单条正向通过。
 
 限制：接受review策略为明确模块夹具，未证明真实UI审核、全Run、独立外审或人验；未集成created-source-change-service，BRIDGE剩余模块/PRODUCT/MEDIA仍各自开发。当前只能称E1候选内部模块证据，不能声明R2/A完成。
+
+
+## 后续存储修复候选
+
+`impact-atomic-02` 5/5、typecheck-07 exit0；增加真实外层事务插入、修正read返回完整hash/初次重放规范化，尚未服务接线。real-007的19例绑定前一候选8f35330，不能冒称已覆盖这次存储修改；受影响真实回归等待重型slot，PRODUCT当前持有。独立审查仍绑定原冻结commit，未取得本次增量PASS。

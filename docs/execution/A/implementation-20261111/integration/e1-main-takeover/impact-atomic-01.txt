@@ -1,0 +1,114 @@
+
+> narralens@0.1.0 test /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+> vitest run --config vitest.config.ts tests/agent-driven/integration/created-impact-atomic.test.ts --maxWorkers=1 --minWorkers=1
+
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:1402024) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/agent-driven/integration/created-impact-atomic.test.ts (5 tests | 1 failed) 36ms
+   ✓ created impact and response share the original SQLite transaction > refuses an insertion without an outer Host transaction 7ms
+   ✓ created impact and response share the original SQLite transaction > rolls back impact, immutable plan and response when the final caller boundary fails 5ms
+   ✓ created impact and response share the original SQLite transaction > does not leave an active impact when a real response-key constraint fails 4ms
+   × created impact and response share the original SQLite transaction > commits all three records together and releases the transaction 14ms
+     → expected { …(18) } to deeply equal { …(19) }
+   ✓ created impact and response share the original SQLite transaction > keeps the standalone create entry atomic for existing callers 5ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/created-impact-atomic.test.ts > created impact and response share the original SQLite transaction > commits all three records together and releases the transaction
+AssertionError: expected { …(18) } to deeply equal { …(19) }
+
+- Expected
++ Received
+
+@@ -6,55 +6,54 @@
+        "kind": "native",
+      },
+    ],
+    "affected_ranges": [
+      {
+-       "clip_id": "clip_b",
+-       "end_frame_exclusive": 900,
+-       "start_frame": 600,
+-     },
+-     {
+        "clip_id": "clip_a",
+        "end_frame_exclusive": 300,
+        "start_frame": 0,
+      },
++     {
++       "clip_id": "clip_b",
++       "end_frame_exclusive": 900,
++       "start_frame": 600,
++     },
+    ],
+    "approvals_required": [
+      "change.approve",
+    ],
+    "base_revision": 3,
+    "control_revision": 2,
+    "engine": "openfilm",
+    "engine_upstream_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+    "expires_at": "2026-11-12T00:15:00.000Z",
+    "format": "narralens.created-impact@1",
+-   "impact_hash": "7aa85a4e56965f73ed96ddd097f4320078e58ab17ab3180fc339757fbaccb7b0",
+    "impact_id": "imp_actual_atomic",
+    "locks_checked": [
+      {
+-       "end_frame_exclusive": 1200,
+-       "lock_id": "lock_visual",
+-       "lock_type": "visual",
+-       "scope": "project",
++       "end_frame_exclusive": 300,
++       "lock_id": "lock_duration",
++       "lock_type": "duration",
++       "scope": "shot",
+        "start_frame": 0,
+-       "target_id": "",
++       "target_id": "clip_a",
+      },
+      {
+        "end_frame_exclusive": 1200,
+        "lock_id": "lock_narration",
+        "lock_type": "narration",
+        "scope": "project",
+        "start_frame": 0,
+        "target_id": "",
+      },
+      {
+-       "end_frame_exclusive": 300,
+-       "lock_id": "lock_duration",
+-       "lock_type": "duration",
+-       "scope": "shot",
++       "end_frame_exclusive": 1200,
++       "lock_id": "lock_visual",
++       "lock_type": "visual",
++       "scope": "project",
+        "start_frame": 0,
+-       "target_id": "clip_a",
++       "target_id": "",
+      },
+    ],
+    "materialization_id": "ps_0123456789abcdef0123456789abcdef0123456789abcdef01234567",
+    "native_plan_sha256": "f23b24fec3afbc896eefbd148b1b005ea652da0ecd4379517db7499a5ffc8797",
+    "operation": "adopt_prepared_source",
+
+ ❯ tests/agent-driven/integration/created-impact-atomic.test.ts:49:45
+     47|    expect(f.counts()).toEqual({impact:1,fact:1,response:1});
+     48|    expect(f.revisions.compose(db=>db.isTransaction)).toBe(false);
+     49|    expect(f.impacts.read(impact.impact_id)).toEqual(impact);
+       |                                             ^
+     50|    expect(JSON.parse(f.operations.recall(f.input.project_id,'agent.v1:…
+     51|   }finally{f.revisions.close();}
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 4 passed (5)
+   Start at  02:06:29
+   Duration  4.37s (transform 540ms, setup 0ms, collect 2.36s, tests 36ms, environment 0ms, prepare 1.32s)
+
+ ELIFECYCLE  Test failed. See above for more details.

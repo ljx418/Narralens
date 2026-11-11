@@ -158,7 +158,7 @@ function byLock(left: CreatedImpactLock, right: CreatedImpactLock): number {
 }
 
 /** The spec with its arrays in their canonical order and without its own hash. */
-export function createdImpactFacts(spec: CreatedImpactSpecV1): Record<string, unknown> {
+export function createdImpactFacts(spec: CreatedImpactSpecV1): Omit<CreatedImpactSpecV1, 'impact_hash'> {
   return {
     format: spec.format,
     impact_id: spec.impact_id,
@@ -318,9 +318,11 @@ export interface CreateCreatedImpactInput {
 export class CreatedSourceImpactStore {
   readonly #db: DatabaseSync;
   readonly #impacts: ImpactStore;
+  readonly #revisions: RevisionStore;
   #schemaVersion = -1;
 
   constructor(revisions: RevisionStore, impacts: ImpactStore) {
+    this.#revisions = revisions;
     this.#db = revisions.compose((db) => db);
     this.#impacts = impacts;
     this.#schema();
@@ -350,6 +352,13 @@ export class CreatedSourceImpactStore {
    * asked again.
    */
   create(input: CreateCreatedImpactInput): CreatedImpactSpecV1 {
+    return this.#revisions.atomic(() => this.insertInTransaction(input));
+  }
+
+  /** Insert alongside the request's remembered response in the caller's one Host
+   * transaction. This method cannot silently commit the caller's other writes. */
+  insertInTransaction(input: CreateCreatedImpactInput): CreatedImpactSpecV1 {
+    if (!this.#db.isTransaction) fail('REVISION_CONFLICT', 'Created impact insertion requires the Host transaction');
     this.#schema();
     if (!HASH.test(input.request_digest) || !HASH.test(input.source_digest) ||
       !HASH.test(input.rights_digest) || !HASH.test(input.native_plan_sha256) ||
@@ -383,7 +392,7 @@ export class CreatedSourceImpactStore {
       impact_hash: '',
     };
     const hash = computeCreatedImpactHash(spec);
-    const stored: CreatedImpactSpecV1 = { ...spec, impact_hash: hash };
+    const stored: CreatedImpactSpecV1 = { ...createdImpactFacts(spec), impact_hash: hash };
     const at = input.now.toISOString();
     const existing = this.#impacts.get(input.impact_id);
     if (existing !== undefined) {
@@ -392,8 +401,6 @@ export class CreatedSourceImpactStore {
       if (found === undefined) fail('REVISION_CONFLICT', 'The stored created impact does not parse');
       return found;
     }
-    this.#db.exec('BEGIN IMMEDIATE');
-    try {
       this.#db.prepare(`INSERT INTO impact(
         impact_id, project_id, operation, reference_id, base_revision, source_digest,
         control_revision, rights_digest, native_plan_sha256, request_digest, canonical_json,
@@ -408,11 +415,6 @@ export class CreatedSourceImpactStore {
         VALUES(?,?,?,?,?,?)`).run(
         stored.impact_id, stored.format, canonicalJson(input.plan), stored.native_plan_sha256,
         stored.materialization_id, 'created_prepared_source');
-      this.#db.exec('COMMIT');
-    } catch (error) {
-      this.#db.exec('ROLLBACK');
-      throw error;
-    }
     return stored;
   }
 
@@ -491,6 +493,6 @@ export class CreatedSourceImpactStore {
     const spec = parsed as unknown as CreatedImpactSpecV1;
     if (spec.format !== 'narralens.created-impact@1' || spec.operation !== CREATED_IMPACT_OPERATION) return undefined;
     if (computeCreatedImpactHash(spec) !== row.impact_hash) return undefined;
-    return spec;
+    return { ...spec, impact_hash: row.impact_hash };
   }
 }
