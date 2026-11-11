@@ -57,6 +57,8 @@ interface RecordProof {
  purpose:'lease'|'read'|'adoption';
  /** The digest of the complete binding this record was opened with. */
  bindingDigest:string;
+ /** The attempt that produced the bytes, for a completed-source proof. Zero otherwise. */
+ producerAttempt:number;
 }
 interface NativeFormat {readFilmFile:(text:string)=>{doc:unknown;problems:readonly unknown[]};style:unknown;}
 export interface PreparedDraftVerifierOptions {
@@ -222,12 +224,12 @@ export class PreparedDraftVerifier {
   if(plan.narration){const audio=clips.find(c=>obj(c)&&c.id==='narration');check(obj(audio)&&audio.src===draft.assets.find(a=>a.asset_id===plan.narration!.asset_id)!.path&&audio.at===0&&audio.time===undefined&&audio.speed===undefined&&audio.volume===undefined);}
   return plan;
  }
- async #prove(taskInput:TaskReservation,leaseInput:TaskLease|null,rootInput:string,files:StagedNativeDraft['files'],roots:readonly string[],registryInput:readonly LocalAsset[],options:{readonly purpose:'lease'|'read'|'adoption';readonly bindingDigest?:string;readonly proofValue?:object;readonly known?:StagedNativeDraft;readonly expected?:PreparedTaskFact}):Promise<{fact:PreparedTaskFact;proof:object}>{
+ async #prove(taskInput:TaskReservation,leaseInput:TaskLease|null,rootInput:string,files:StagedNativeDraft['files'],roots:readonly string[],registryInput:readonly LocalAsset[],options:{readonly purpose:'lease'|'read'|'adoption';readonly bindingDigest?:string;readonly proofValue?:object;readonly producerAttempt?:number;readonly known?:StagedNativeDraft;readonly expected?:PreparedTaskFact}):Promise<{fact:PreparedTaskFact;proof:object}>{
   const task=freeze(structuredClone(taskInput)),lease=leaseInput===null?null:freeze({...leaseInput});
   if(lease)this.#binding(task,lease);else this.#bindingTask(task);
   check(!this.#closed);
   const root=absolute(rootInput);check(inside(this.#domain,root));
-  const record:RecordProof={taskDigest:canonicalDigest(task),leaseDigest:lease?canonicalDigest(lease):'',factDigest:'',root,registry:this.#registry(task,registryInput),dirs:new Map(),files:new Map(),blobs:new Map(),fds:new Set(),closed:false,purpose:options.purpose,bindingDigest:options.bindingDigest??''};this.#records.add(record);
+  const record:RecordProof={taskDigest:canonicalDigest(task),leaseDigest:lease?canonicalDigest(lease):'',factDigest:'',root,registry:this.#registry(task,registryInput),dirs:new Map(),files:new Map(),blobs:new Map(),fds:new Set(),closed:false,purpose:options.purpose,bindingDigest:options.bindingDigest??'',producerAttempt:options.producerAttempt??0};this.#records.add(record);
   try{
    const domain=this.#dir(record,this.#domain),directory=this.#dir(record,root);for(const d of [domain,directory])check(d.stat.uid===BigInt(process.getuid!())&&(d.stat.mode&0o077n)===0n);
    check(files.length>0&&roots[0]==='film.html'&&new Set(roots).size===roots.length);
@@ -271,7 +273,7 @@ export class PreparedDraftVerifier {
   check(completed&&typeof completed==='object'&&completed.format==='narralens.completed-prepared-source@1');
   const task=completed.task;check(task&&typeof task==='object');this.#bindingTask(task);
   check(completed.project_id===task.request.project_id);
-  check(completed.job&&typeof completed.job==='object'&&completed.job.job_id===task.job_id&&completed.job.state==='succeeded');
+  check(completed.job&&typeof completed.job==='object'&&completed.job.job_id===task.job_id&&completed.job.project_id===task.request.project_id&&completed.job.state==='succeeded');
   check(same(completed.job.execution,task.request.execution));
   check(completed.terminal_reason==='SOURCE_ONLY');
   check(completed.provider_receipt&&typeof completed.provider_receipt==='object'&&completed.provider_receipt.kind==='local.native-draft@1'&&completed.provider_receipt.stage==='SOURCE_ONLY');
@@ -293,14 +295,14 @@ export class PreparedDraftVerifier {
   // The execution identifies the run and the step of the preparation. Its attempt may
   // have advanced when the preparation was retried, so only the run, plan and step are
   // required to be the same; the attempt itself is a positive integer.
-  check(binding.execution&&typeof binding.execution==='object');
-  check(binding.execution.run_id===task.request.execution.run_id&&binding.execution.plan_version===task.request.execution.plan_version&&binding.execution.step_id===task.request.execution.step_id);
-  check(Number.isSafeInteger(binding.execution.attempt)&&binding.execution.attempt>=1);
-  check(typeof binding.execution.input_digest==='string'&&binding.execution.input_digest.length>0&&typeof binding.execution.run_scope_digest==='string'&&binding.execution.run_scope_digest.length>0&&typeof binding.execution.authorization_id==='string'&&binding.execution.authorization_id.length>0);
+  // The binding is the current author baseline of the preparation. The execution is
+  // the producer's own execution: a lease retry is a lease attempt, not a change of
+  // the execution, so the whole binding has to be the one the preparation ran under.
+  check(binding.execution&&typeof binding.execution==='object'&&same(binding.execution,task.request.execution));
   check(typeof binding.prepared_source_id==='string'&&binding.prepared_source_id.length>0&&binding.prepared_source_id.length<=128&&!/[\u0000-\u001f\u007f]/u.test(binding.prepared_source_id));
   check(binding.prepared_job_id===task.job_id);
   check(binding.fact_digest===canonicalDigest(completed.fact));
-  check(binding.source_digest===completed.fact.source_digest);
+  check(binding.source_digest===task.request.source_digest);
   check(binding.base_revision===task.request.base_revision);
   check(Number.isSafeInteger(binding.control_revision)&&binding.control_revision>=0);
   check(Number.isSafeInteger(binding.selection_version)&&binding.selection_version>=0);
@@ -321,7 +323,7 @@ export class PreparedDraftVerifier {
   const proofValue=purpose==='read'
    ?Object.freeze({format:'narralens.prepared-read-proof@1',purpose:(binding as PreparedReadBindingV1).purpose})
    :Object.freeze({format:'narralens.prepared-adoption-proof@1',purpose:'adoption'});
-  const result=await this.#prove(completed.task,null,root,completed.fact.files,completed.fact.roots,registry,{purpose,bindingDigest,proofValue,expected:completed.fact});
+  const result=await this.#prove(completed.task,null,root,completed.fact.files,completed.fact.roots,registry,{purpose,bindingDigest,proofValue,producerAttempt:completed.producer_attempt,expected:completed.fact});
   return result.proof;
  }
  async proveForRead<P extends PreparedReadBindingV1['purpose']>(completed:CompletedPreparedSourceV1,binding:PreparedReadBindingV1&{readonly purpose:P},registryFacts:readonly LocalAsset[]):Promise<PreparedReadProofV1&{readonly purpose:P}>{
@@ -352,6 +354,9 @@ export class PreparedDraftVerifier {
    check(record&&record.purpose==='read'&&!record.closed&&!this.#closed&&this.#records.has(record));
    this.#completedSource(completed);this.#readBinding(completed,binding);
    check(record.bindingDigest===canonicalDigest(binding)&&record.taskDigest===canonicalDigest(completed.task)&&record.factDigest===canonicalDigest(completed.fact));
+   // The opened descriptors belong to this root and to this producer attempt. A root
+   // that was changed after the proof was made is not the proof's root.
+   check(record.root===this.#completedRoot(completed)&&record.producerAttempt===completed.producer_attempt);
    this.#assertRights(assertCurrentRights);this.#current(record,true);this.#assertRights(assertCurrentRights);this.#current(record,false);
   }catch(error){failure(error);}
  }
@@ -361,6 +366,7 @@ export class PreparedDraftVerifier {
    check(record&&record.purpose==='adoption'&&!record.closed&&!this.#closed&&this.#records.has(record));
    this.#completedSource(completed);this.#adoptionBinding(completed,binding);
    check(record.bindingDigest===canonicalDigest(binding)&&record.taskDigest===canonicalDigest(completed.task)&&record.factDigest===canonicalDigest(completed.fact));
+   check(record.root===this.#completedRoot(completed)&&record.producerAttempt===completed.producer_attempt);
    this.#assertRights(assertCurrentRights);this.#current(record,true);this.#assertRights(assertCurrentRights);this.#current(record,false);
   }catch(error){failure(error);}
  }

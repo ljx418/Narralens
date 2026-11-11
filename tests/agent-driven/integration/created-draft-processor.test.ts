@@ -119,7 +119,7 @@ function readBinding(completed:CompletedPreparedSourceV1,purpose:'impact'|'previ
  return {purpose,project_id:completed.project_id,run_id:execution.run_id,execution,
   prepared_source_id:'prepared_'+completed.fact.source_digest.slice(0,24),prepared_job_id:completed.task.job_id,
   fact_digest:canonicalDigest(completed.fact),base_revision:completed.task.request.base_revision,
-  control_revision:0,source_digest:completed.fact.source_digest,selection_version:0};
+  control_revision:0,source_digest:completed.task.request.source_digest,selection_version:0};
 }
 function adoptionBinding(completed:CompletedPreparedSourceV1):PreparedAdoptionBindingV1{
  return {...readBinding(completed,'preview'),purpose:'adoption',transaction_id:'txn_'+'1'.repeat(32),impact_id:'imp_'+'2'.repeat(32),
@@ -144,6 +144,11 @@ it('re-proves a succeeded SOURCE_ONLY source without a live lease and keeps the 
   expect(()=>f.verifier.assertCurrentForAdoption(completed,adoption,proof as never,()=>{})).toThrow();
   expect(()=>f.verifier.assertCurrentForRead(completed,{...binding,base_revision:binding.base_revision+1},proof,()=>{})).toThrow();
   expect(()=>f.verifier.assertCurrentForRead(completed,{...binding,source_digest:'0'.repeat(64)},proof,()=>{})).toThrow();
+  expect(()=>f.verifier.assertCurrentForRead(completed,{...binding,execution:{...binding.execution,attempt:binding.execution.attempt+1}},proof,()=>{})).toThrow();
+  expect(()=>f.verifier.assertCurrentForRead(completed,{...binding,prepared_job_id:'job_other'},proof,()=>{})).toThrow();
+  // A completed source whose root was changed after the proof is not the proof's source.
+  expect(()=>f.verifier.assertCurrentForRead({...completed,root:join(f.taskRoot,'other')},binding,proof,()=>{})).toThrow();
+  expect(()=>f.verifier.assertCurrentForRead({...completed,producer_attempt:completed.producer_attempt+1},binding,proof,()=>{})).toThrow();
   // A JSON fact is not a proof.
   expect(()=>f.verifier.assertCurrentForRead(completed,binding,JSON.parse(JSON.stringify(completed)) as never,()=>{})).toThrow();
   // The final check is synchronous: an asynchronous callback is refused.

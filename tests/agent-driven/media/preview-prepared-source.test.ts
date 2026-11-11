@@ -12,7 +12,7 @@ import {canonicalDigest} from '../../../src/host/creative/digest.js';
 import {createTrustedCallerContext} from '../../../src/host/creative/trusted-context.js';
 import type {Script,Storyboard,TaskPrepare} from '../../../src/contracts/agent-driven-types.js';
 import type {TaskReservation} from '../../../src/host/agent-driven/created-task-store.js';
-import type {CompletedPreparedSourceV1,NativeDraftAsset,PreparedPreviewBindingV1} from '../../../src/host/render/assembly-ports.js';
+import type {CompletedPreparedSourceV1,NativeDraftAsset,PreparedPreviewBindingV1,PreparedPreviewReceiptV1} from '../../../src/host/render/assembly-ports.js';
 
 const vendorRoot='/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm';
 const sha=(bytes:Uint8Array)=>createHash('sha256').update(bytes).digest('hex');
@@ -58,10 +58,10 @@ async function fixture(){
   fact,root:join(attemptRoot,'source')};
  const binding:PreparedPreviewBindingV1={purpose:'preview',project_id:f.projectId,run_id:execution.run_id,execution,
   prepared_source_id:'prepared_'+fact.source_digest.slice(0,24),prepared_job_id:task.job_id,fact_digest:canonicalDigest(fact),
-  base_revision:1,control_revision:0,source_digest:fact.source_digest,selection_version:0};
+  base_revision:1,control_revision:0,source_digest:facts.source_digest,selection_version:0};
  const service=new PreparedPreviewService(verifier,{upstreamRoot:vendorRoot,workspaceRoot:workspace,objectRoot:objects,protectedRoots:[author],width:320,height:180,timeoutMs:120000,assertCurrentAuthorAndRights:()=>{}});
  const reader=new PreparedReviewMediaReaderImpl(objects);
- return {...f,registry,verifier,service,reader,completed,binding,stage,author,objects,registryFacts,
+ return {...f,registry,verifier,service,reader,completed,binding,stage,author,objects,workspace,registryFacts,
   close:async()=>{await service.close();await registry.close();await verifier.close();await f.close();}};
 }
 async function treeDigest(root:string):Promise<Record<string,string>>{
@@ -101,8 +101,11 @@ it('renders an isolated preview of a completed prepared source with five real pa
   expect(narration.media_facts).toMatchObject({kind:'audio',sample_rate:48000,channels:1});
   expect((narration.media_facts as {sample_count:number}).sample_count).toBe(96000);
   expect(receipt.parts.find(part=>part.slot==='subtitles')!.media_facts).toEqual({kind:'text'});
-  expect(receipt.parts.find(part=>part.slot==='shot_summary')!.media_facts).toEqual({kind:'text'});
+  expect(receipt.parts.find(part=>part.slot==='subtitles')!.content_type).toBe('text/vtt; charset=utf-8');
+  expect(receipt.parts.find(part=>part.slot==='shot_summary')!.media_facts).toEqual({kind:'json'});
+  expect(receipt.parts.find(part=>part.slot==='shot_summary')!.content_type).toBe('application/json; charset=utf-8');
   expect(receipt.parts.find(part=>part.slot==='rights_quality')!.media_facts).toEqual({kind:'json'});
+  expect(receipt.parts.find(part=>part.slot==='rights_quality')!.content_type).toBe('application/json; charset=utf-8');
   // The receipt digest covers the deterministic content, including the measured timeline.
   const {receipt_digest,...content}=receipt;
   expect(receipt_digest).toBe(canonicalDigest(content));
@@ -150,6 +153,44 @@ it('refuses a preview whose proof is not a proof of this prepared source',async(
   const proof=await f.verifier.proveForRead(f.completed,f.binding,f.registryFacts);
   await expect(f.service.preview({format:'narralens.prepared-preview-request@1',completed:f.completed,binding:f.binding,proof:JSON.parse(JSON.stringify(f.completed)) as never})).rejects.toBeTruthy();
   await expect(f.service.preview({format:'narralens.prepared-preview-request@1',completed:f.completed,binding:{...f.binding,purpose:'impact'} as never,proof})).rejects.toBeTruthy();
+  f.verifier.release(proof);
+ }finally{await f.close();}
+},600000);
+
+it('refuses the boundaries a prepared preview must not cross',async()=>{
+ const f=await fixture();try{
+  const proof=await f.verifier.proveForRead(f.completed,f.binding,f.registryFacts);
+  // A binding that is not the current author baseline of the preparation.
+  await expect(f.service.preview({format:'narralens.prepared-preview-request@1',completed:f.completed,binding:{...f.binding,source_digest:'9'.repeat(64)},proof})).rejects.toBeTruthy();
+  // A completed source whose root was changed after the proof was made.
+  await expect(f.service.preview({format:'narralens.prepared-preview-request@1',completed:{...f.completed,root:join(f.stage,'other')},binding:f.binding,proof})).rejects.toBeTruthy();
+  // A cancelled preview publishes nothing.
+  const controller=new AbortController();controller.abort();
+  await expect(f.service.preview({format:'narralens.prepared-preview-request@1',completed:f.completed,binding:f.binding,proof,signal:controller.signal})).rejects.toBeTruthy();
+  expect(await readdir(f.objects)).toEqual([]);
+  // A closed service publishes nothing.
+  await f.service.close();
+  await expect(f.service.preview({format:'narralens.prepared-preview-request@1',completed:f.completed,binding:f.binding,proof})).rejects.toBeTruthy();
+  f.verifier.release(proof);
+ }finally{await f.close();}
+ // A workspace or object domain that overlaps a protected source domain is refused.
+ expect(()=>new PreparedPreviewService(f.verifier,{upstreamRoot:vendorRoot,workspaceRoot:f.author,objectRoot:f.objects,protectedRoots:[f.author],width:320,height:180,timeoutMs:1000,assertCurrentAuthorAndRights:()=>{}})).toThrow();
+ expect(()=>new PreparedPreviewService(f.verifier,{upstreamRoot:vendorRoot,workspaceRoot:f.workspace,objectRoot:f.author,protectedRoots:[f.author],width:320,height:180,timeoutMs:1000,assertCurrentAuthorAndRights:()=>{}})).toThrow();
+},600000);
+
+it('refuses a part whose content type or media facts do not belong to its slot',async()=>{
+ const f=await fixture();try{
+  const proof=await f.verifier.proveForRead(f.completed,f.binding,f.registryFacts);
+  const receipt=await f.service.preview({format:'narralens.prepared-preview-request@1',completed:f.completed,binding:f.binding,proof});
+  const video=receipt.parts.find(part=>part.slot==='preview')!;
+  const retype=(content_type:string,media_facts:unknown):PreparedPreviewReceiptV1=>{
+   const parts=receipt.parts.map(part=>part.slot==='preview'?{...part,content_type,media_facts}:part);
+   const content={...receipt,parts};const {receipt_digest:_digest,...rest}=content;
+   return {...rest,receipt_digest:canonicalDigest(rest)} as PreparedPreviewReceiptV1;
+  };
+  // The digest is recomputed, so only the slot rule can refuse these.
+  await expect(f.reader.open(retype('text/plain; charset=utf-8',video.media_facts),video.object_id)).rejects.toBeTruthy();
+  await expect(f.reader.open(retype(video.content_type,{kind:'text'}),video.object_id)).rejects.toBeTruthy();
   f.verifier.release(proof);
  }finally{await f.close();}
 },600000);
