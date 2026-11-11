@@ -1,0 +1,22 @@
+command: corepack pnpm test tests/agent-driven/integration/created-source-change.test.ts --maxWorkers=1 --minWorkers=1
+cwd: /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+head: 4fbb3e8ceecae870448d9bcda54015fe941ca9f0
+started: 2026-11-11T16:59:32Z
+--- output ---
+
+> narralens@0.1.0 test /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+> vitest run --config vitest.config.ts tests/agent-driven/integration/created-source-change.test.ts --maxWorkers=1 --minWorkers=1
+
+
+ RUN  v3.2.4 /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+
+ ✓ tests/agent-driven/integration/created-source-change.test.ts (9 tests) 7ms
+
+ Test Files  1 passed (1)
+      Tests  9 passed (9)
+   Start at  00:59:33
+   Duration  173ms (transform 41ms, setup 0ms, collect 45ms, tests 7ms, environment 0ms, prepare 31ms)
+
+--- end ---
+exit: 0
+finished: 2026-11-11T16:59:33Z

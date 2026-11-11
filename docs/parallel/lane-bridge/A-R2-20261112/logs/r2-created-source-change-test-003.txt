@@ -1,0 +1,48 @@
+command: corepack pnpm test tests/agent-driven/integration/created-source-change.test.ts --maxWorkers=1 --minWorkers=1
+cwd: /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+head: 4fbb3e8ceecae870448d9bcda54015fe941ca9f0
+started: 2026-11-11T16:58:41Z
+--- output ---
+
+> narralens@0.1.0 test /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+> vitest run --config vitest.config.ts tests/agent-driven/integration/created-source-change.test.ts --maxWorkers=1 --minWorkers=1
+
+
+ RUN  v3.2.4 /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+
+ ❯ tests/agent-driven/integration/created-source-change.test.ts (9 tests | 1 failed) 8ms
+   ✓ the D09 prepared adoption plan > hashes the frozen golden vector exactly 1ms
+   ✓ the D09 prepared adoption plan > refuses every frozen negative vector 1ms
+   × the D09 prepared adoption plan > changes its digest when any one of its fields changes 3ms
+     → version must change the digest: expected '65f1d083ade50769b55243c7689874c51eca8…' not to be '65f1d083ade50769b55243c7689874c51eca8…' // Object.is equality
+   ✓ the D09 prepared adoption plan > hashes the same plan the same way whatever order the arrays arrive in 0ms
+   ✓ the D09 prepared adoption plan > refuses a plan whose domain is not the one it claims 0ms
+   ✓ the D09 prepared adoption plan > refuses a plan whose frame count is not a safe integer 0ms
+   ✓ the opacity of the created-source capabilities > refuses a publication proof that is only structurally identical 0ms
+   ✓ the opacity of the created-source capabilities > issues a proof only while a publisher lease is live, and only for its project 1ms
+   ✓ the opacity of the created-source capabilities > closes a commit scope when the commit leaves 0ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/created-source-change.test.ts > the D09 prepared adoption plan > changes its digest when any one of its fields changes
+AssertionError: version must change the digest: expected '65f1d083ade50769b55243c7689874c51eca8…' not to be '65f1d083ade50769b55243c7689874c51eca8…' // Object.is equality
+ ❯ tests/agent-driven/integration/created-source-change.test.ts:133:98
+    131|       const mutated = mutable(base);
+    132|       mutate(mutated);
+    133|       expect(preparedAdoptionPlanDigest(frozen(mutated)), `${field} mu…
+       |                                                                                                  ^
+    134|     }
+    135|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 8 passed (9)
+   Start at  00:58:42
+   Duration  200ms (transform 45ms, setup 0ms, collect 48ms, tests 8ms, environment 0ms, prepare 43ms)
+
+ ELIFECYCLE  Test failed. See above for more details.
+--- end ---
+exit: 1
+finished: 2026-11-11T16:58:42Z

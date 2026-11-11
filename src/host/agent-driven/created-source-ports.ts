@@ -16,18 +16,33 @@
  *   preimage, and its SHA-256 is used both as the change's `plan_sha256` and as the
  *   prepared approval's `facts_digest`. The five-field summary that used to stand in for
  *   it is not a second digest; it is the same one, read from the immutable plan.
- * - **Opaque capabilities stay opaque.** The publication proof and the commit scope are
- *   interfaces with no exported constructor, so a caller cannot forge them from JSON and
- *   cannot smuggle a callback in through a request.
- *
- * The peer lanes own their own ports. MEDIA's `CommittedRenderPhasesPort` and PRODUCT's
- * native observation ports are consumed through MAIN once their real candidate commits
- * exist; this file declares only what BRIDGE itself owns.
+ * - **Opacity is a runtime property.** The publication proof and the commit scope are
+ *   instances of a class this module does not export, so a structurally identical
+ *   object literal is refused. Identity is what is checked, not shape.
+ * - **The peer lanes own their own ports.** MEDIA's `CommittedRenderPhasesPort` and
+ *   PRODUCT's native observation ports are consumed through MAIN once their real
+ *   candidate commits exist. The review-media types are re-exported from the module
+ *   that already owns them, never redeclared here.
  */
 
 import { canonicalDigest, canonicalJson } from '../creative/digest.js';
-import type { ExecutionBinding } from '../../contracts/agent-driven-types.js';
-import type { Applied } from '../../contracts/agent-driven-types.js';
+import type { Applied, ExecutionBinding } from '../../contracts/agent-driven-types.js';
+import type { ReviewPart } from '../../contracts/agent-driven-types.js';
+import type {
+  PreparedPreviewPartKind,
+  PreparedPreviewReceiptV1,
+  PreviewMediaDescriptorV1,
+} from '../../contracts/prepared-preview.js';
+
+/**
+ * The review-media shapes are owned by the transport that already uses them.
+ *
+ * They are re-exported, not redeclared: a second, compatible-looking definition of
+ * `ReviewMediaBinding` is how the producer and the consumer end up disagreeing about
+ * which receipt a part belongs to.
+ */
+export type { PreparedPreviewPartKind, PreparedPreviewReceiptV1, PreviewMediaDescriptorV1 };
+export type { ReviewMediaBinding, ReviewMediaBindingPort } from './review-media-http.js';
 
 /* -------------------------------------------------------------------------------------- */
 /* D09: the prepared adoption plan                                                        */
@@ -42,8 +57,14 @@ import type { Applied } from '../../contracts/agent-driven-types.js';
  */
 export const PREPARED_ADOPTION_PLAN_DOMAIN = 'narralens.prepared-adoption-plan@1';
 
+/** The version of the plan shape this module hashes. */
+export const PREPARED_ADOPTION_PLAN_VERSION = 1;
+
 /** The fixed lifetime of an adoption impact, in seconds. It never extends on replay. */
 export const PREPARED_ADOPTION_IMPACT_TTL_SECONDS = 15 * 60;
+
+/** The kind of source an adoption applies to. Only one kind is created-source. */
+export const PREPARED_ADOPTION_SOURCE_KIND = 'created_prepared_source';
 
 /** One file of the prepared closure. */
 export interface PreparedSourceFileFact {
@@ -69,11 +90,20 @@ export interface PreparedSourceLockFact {
   readonly end_frame_exclusive: number;
 }
 
-/** The consumer that will observe the adopted source. */
+/** One affected frame range. The frames are integers; no native float enters this domain. */
+export interface PreparedSourceRangeFact {
+  readonly start_frame: number;
+  readonly end_frame_exclusive: number;
+  readonly clip_id: string;
+}
+
+/** The consumer graph the adoption has to satisfy. */
 export interface PreparedSourceConsumerFact {
   readonly consumer_id: string;
   readonly project_id: string;
   readonly run_id: string;
+  /** The digest of the whole consumer graph, computed by the Host from real edges. */
+  readonly graph_digest: string;
 }
 
 /** The native plan the adopted source must satisfy. */
@@ -90,9 +120,9 @@ export interface PreparedSourceNativePlanFact {
 /**
  * The complete D09 adoption plan.
  *
- * Every field D09 names is present, and none of them is optional. A plan that can omit
- * its rights, its locks or its frame count is a plan whose digest does not cover the
- * premises the adoption rests on, which is precisely the gap this type closes.
+ * Every field D09 names is present, and none of them is optional. The base and the
+ * target are separate fields: a plan that conflated them could not tell a change of
+ * target snapshot or of the fixed upstream from a change of nothing at all.
  *
  * The frame rate is a rational: an integer numerator over an integer denominator. A
  * float would make the canonical preimage ambiguous, and the canonical form rejects
@@ -100,25 +130,65 @@ export interface PreparedSourceNativePlanFact {
  */
 export interface PreparedAdoptionPlanV1 {
   readonly format: typeof PREPARED_ADOPTION_PLAN_DOMAIN;
+  readonly version: typeof PREPARED_ADOPTION_PLAN_VERSION;
+  readonly source_kind: typeof PREPARED_ADOPTION_SOURCE_KIND;
   readonly project_id: string;
-  readonly transaction_id: string;
-  readonly prepared_source_id: string;
-  readonly impact_id: string;
   readonly base_revision: number;
+  /** The committed source digest the adoption was prepared against. */
+  readonly base_source_digest: string;
   readonly control_revision: number;
   readonly selection_version: number;
-  readonly source_digest: string;
-  readonly execution: ExecutionBinding;
+  /** The D02 `ps_` mapping this adoption applies. */
+  readonly materialization_id: string;
+  readonly prepared_fact_digest: string;
+  readonly request_digest: string;
+  readonly producer_execution: ExecutionBinding;
+  /** The source digest the publication will produce. */
+  readonly target_source_digest: string;
+  /** The predicted snapshot id. It is an expectation, not a committed row. */
+  readonly target_snapshot_id: string;
   readonly roots: readonly string[];
   readonly files: readonly PreparedSourceFileFact[];
   readonly rights: readonly PreparedSourceRightsFact[];
-  readonly locks: readonly PreparedSourceLockFact[];
   readonly consumer: PreparedSourceConsumerFact;
   readonly native_plan: PreparedSourceNativePlanFact;
   readonly frame_count: number;
   readonly fps_numerator: number;
   readonly fps_denominator: number;
+  readonly affected_ranges: readonly PreparedSourceRangeFact[];
+  readonly locks_checked: readonly PreparedSourceLockFact[];
+  /** The fixed upstream the adoption is bound to. */
+  readonly engine_upstream_sha: string;
   readonly expires_at: string;
+}
+
+/* -------------------------------------------------------------------------------------- */
+/* The canonical facts of a plan                                                           */
+/* -------------------------------------------------------------------------------------- */
+
+const HASH = /^[a-f0-9]{64}$/;
+const ASCII = /^[\x20-\x7e]+$/;
+
+/** The stable order of the files, by path. */
+function byPath(left: PreparedSourceFileFact, right: PreparedSourceFileFact): number {
+  return left.relative_path < right.relative_path ? -1 : left.relative_path > right.relative_path ? 1 : 0;
+}
+
+/** The stable order of the rights references, by id. */
+function byRef(left: PreparedSourceRightsFact, right: PreparedSourceRightsFact): number {
+  return left.ref_id < right.ref_id ? -1 : left.ref_id > right.ref_id ? 1 : 0;
+}
+
+/** The stable order of the locks, by id. */
+function byLock(left: PreparedSourceLockFact, right: PreparedSourceLockFact): number {
+  return left.lock_id < right.lock_id ? -1 : left.lock_id > right.lock_id ? 1 : 0;
+}
+
+/** The stable order of the ranges: start, then end, then clip. */
+function byRange(left: PreparedSourceRangeFact, right: PreparedSourceRangeFact): number {
+  return left.start_frame - right.start_frame
+    || left.end_frame_exclusive - right.end_frame_exclusive
+    || (left.clip_id < right.clip_id ? -1 : left.clip_id > right.clip_id ? 1 : 0);
 }
 
 /**
@@ -130,44 +200,38 @@ export interface PreparedAdoptionPlanV1 {
  */
 export function preparedAdoptionPlanFacts(plan: PreparedAdoptionPlanV1): Record<string, unknown> {
   return {
+    source_kind: plan.source_kind,
     project_id: plan.project_id,
-    transaction_id: plan.transaction_id,
-    prepared_source_id: plan.prepared_source_id,
-    impact_id: plan.impact_id,
     base_revision: plan.base_revision,
+    base_source_digest: plan.base_source_digest,
     control_revision: plan.control_revision,
     selection_version: plan.selection_version,
-    source_digest: plan.source_digest,
-    execution: {
-      run_id: plan.execution.run_id,
-      plan_version: plan.execution.plan_version,
-      step_id: plan.execution.step_id,
-      attempt: plan.execution.attempt,
-      input_digest: plan.execution.input_digest,
-      run_scope_digest: plan.execution.run_scope_digest,
-      authorization_id: plan.execution.authorization_id,
+    materialization_id: plan.materialization_id,
+    prepared_fact_digest: plan.prepared_fact_digest,
+    request_digest: plan.request_digest,
+    producer_execution: {
+      run_id: plan.producer_execution.run_id,
+      plan_version: plan.producer_execution.plan_version,
+      step_id: plan.producer_execution.step_id,
+      attempt: plan.producer_execution.attempt,
+      input_digest: plan.producer_execution.input_digest,
+      run_scope_digest: plan.producer_execution.run_scope_digest,
+      authorization_id: plan.producer_execution.authorization_id,
     },
+    target_source_digest: plan.target_source_digest,
+    target_snapshot_id: plan.target_snapshot_id,
     roots: [...plan.roots].sort(),
     files: [...plan.files]
       .map((file) => ({ relative_path: file.relative_path, bytes: file.bytes, sha256: file.sha256 }))
-      .sort((left, right) => (left.relative_path < right.relative_path ? -1 : left.relative_path > right.relative_path ? 1 : 0)),
+      .sort(byPath),
     rights: [...plan.rights]
       .map((right) => ({ ref_id: right.ref_id, artifact_version: right.artifact_version, sha256: right.sha256 }))
-      .sort((left, right) => (left.ref_id < right.ref_id ? -1 : left.ref_id > right.ref_id ? 1 : 0)),
-    locks: [...plan.locks]
-      .map((lock) => ({
-        lock_id: lock.lock_id,
-        lock_type: lock.lock_type,
-        scope: lock.scope,
-        target_id: lock.target_id,
-        start_frame: lock.start_frame,
-        end_frame_exclusive: lock.end_frame_exclusive,
-      }))
-      .sort((left, right) => (left.lock_id < right.lock_id ? -1 : left.lock_id > right.lock_id ? 1 : 0)),
+      .sort(byRef),
     consumer: {
       consumer_id: plan.consumer.consumer_id,
       project_id: plan.consumer.project_id,
       run_id: plan.consumer.run_id,
+      graph_digest: plan.consumer.graph_digest,
     },
     native_plan: {
       native_plan_sha256: plan.native_plan.native_plan_sha256,
@@ -181,6 +245,24 @@ export function preparedAdoptionPlanFacts(plan: PreparedAdoptionPlanV1): Record<
     frame_count: plan.frame_count,
     fps_numerator: plan.fps_numerator,
     fps_denominator: plan.fps_denominator,
+    affected_ranges: [...plan.affected_ranges]
+      .map((range) => ({
+        start_frame: range.start_frame,
+        end_frame_exclusive: range.end_frame_exclusive,
+        clip_id: range.clip_id,
+      }))
+      .sort(byRange),
+    locks_checked: [...plan.locks_checked]
+      .map((lock) => ({
+        lock_id: lock.lock_id,
+        lock_type: lock.lock_type,
+        scope: lock.scope,
+        target_id: lock.target_id,
+        start_frame: lock.start_frame,
+        end_frame_exclusive: lock.end_frame_exclusive,
+      }))
+      .sort(byLock),
+    engine_upstream_sha: plan.engine_upstream_sha,
     expires_at: plan.expires_at,
   };
 }
@@ -188,12 +270,15 @@ export function preparedAdoptionPlanFacts(plan: PreparedAdoptionPlanV1): Record<
 /**
  * The canonical preimage of a plan.
  *
- * The domain is inside the hashed text. A caller that hashes the facts alone has not
- * hashed the plan, and the two must never be confused.
+ * The domain and the version are inside the hashed text, and they are the ones the
+ * *plan* claims — not the constants of this module. A plan that claims another version
+ * must hash differently, or "the version is part of the plan" would be a claim the
+ * digest does not keep.
  */
 export function preparedAdoptionPlanPreimage(plan: PreparedAdoptionPlanV1): string {
   return canonicalJson({
-    domain: PREPARED_ADOPTION_PLAN_DOMAIN,
+    domain: plan.format,
+    version: plan.version,
     facts: preparedAdoptionPlanFacts(plan),
   });
 }
@@ -206,9 +291,159 @@ export function preparedAdoptionPlanPreimage(plan: PreparedAdoptionPlanV1): stri
  */
 export function preparedAdoptionPlanDigest(plan: PreparedAdoptionPlanV1): string {
   return canonicalDigest({
-    domain: PREPARED_ADOPTION_PLAN_DOMAIN,
+    domain: plan.format,
+    version: plan.version,
     facts: preparedAdoptionPlanFacts(plan),
   });
+}
+
+/* -------------------------------------------------------------------------------------- */
+/* The validation of a plan                                                                */
+/* -------------------------------------------------------------------------------------- */
+
+/** The failure of a malformed plan. */
+export class PreparedAdoptionPlanError extends Error {
+  constructor(readonly code: 'INVALID_REQUEST' | 'REVISION_CONFLICT', message: string) {
+    super(message);
+    this.name = 'PreparedAdoptionPlanError';
+  }
+}
+
+function invalid(message: string): never {
+  throw new PreparedAdoptionPlanError('INVALID_REQUEST', message);
+}
+
+function text(value: unknown, field: string): string {
+  if (typeof value !== 'string' || !ASCII.test(value)) invalid(`${field} must be printable ASCII`);
+  return value;
+}
+
+function hash(value: unknown, field: string): string {
+  if (typeof value !== 'string' || !HASH.test(value)) invalid(`${field} must be a lowercase SHA-256 digest`);
+  return value;
+}
+
+function integer(value: unknown, field: string, minimum = 0): number {
+  if (typeof value !== 'number' || !Number.isSafeInteger(value) || value < minimum) {
+    invalid(`${field} must be a safe integer of at least ${minimum}`);
+  }
+  return value;
+}
+
+/**
+ * Validate a plan and refuse the shapes that would make its digest ambiguous.
+ *
+ * Duplicate keys are rejected rather than broken by a tie-break rule. A tie-break would
+ * make the digest depend on which duplicate came first, and "the first one" is not a
+ * fact anybody can verify later. Rejecting the plan is the only honest answer.
+ */
+export function assertPreparedAdoptionPlan(plan: PreparedAdoptionPlanV1): PreparedAdoptionPlanV1 {
+  if (plan === null || typeof plan !== 'object') invalid('The adoption plan is missing');
+  if (plan.format !== PREPARED_ADOPTION_PLAN_DOMAIN) invalid('The adoption plan has another domain');
+  if (plan.version !== PREPARED_ADOPTION_PLAN_VERSION) invalid('The adoption plan has another version');
+  if (plan.source_kind !== PREPARED_ADOPTION_SOURCE_KIND) invalid('The adoption plan has another source kind');
+  text(plan.project_id, 'project_id');
+  integer(plan.base_revision, 'base_revision');
+  hash(plan.base_source_digest, 'base_source_digest');
+  integer(plan.control_revision, 'control_revision');
+  integer(plan.selection_version, 'selection_version');
+  text(plan.materialization_id, 'materialization_id');
+  hash(plan.prepared_fact_digest, 'prepared_fact_digest');
+  hash(plan.request_digest, 'request_digest');
+  hash(plan.target_source_digest, 'target_source_digest');
+  text(plan.target_snapshot_id, 'target_snapshot_id');
+  hash(plan.engine_upstream_sha, 'engine_upstream_sha');
+  text(plan.expires_at, 'expires_at');
+
+  const execution = plan.producer_execution;
+  if (execution === null || typeof execution !== 'object') invalid('The producer execution is missing');
+  if (execution.plan_version !== 1) invalid('Only plan version 1 is dispatchable');
+  text(execution.run_id, 'producer_execution.run_id');
+  text(execution.step_id, 'producer_execution.step_id');
+  integer(execution.attempt, 'producer_execution.attempt', 1);
+  hash(execution.input_digest, 'producer_execution.input_digest');
+  hash(execution.run_scope_digest, 'producer_execution.run_scope_digest');
+  text(execution.authorization_id, 'producer_execution.authorization_id');
+
+  if (!Array.isArray(plan.roots) || plan.roots.length === 0) invalid('The plan has no roots');
+  const roots = new Set<string>();
+  for (const root of plan.roots) {
+    text(root, 'roots');
+    if (roots.has(root)) invalid('The plan names the same root twice');
+    roots.add(root);
+  }
+
+  if (!Array.isArray(plan.files) || plan.files.length === 0) invalid('The plan has no files');
+  const files = new Set<string>();
+  for (const file of plan.files) {
+    text(file.relative_path, 'files.relative_path');
+    integer(file.bytes, 'files.bytes');
+    hash(file.sha256, 'files.sha256');
+    if (files.has(file.relative_path)) invalid('The plan names the same file twice');
+    files.add(file.relative_path);
+  }
+  for (const root of plan.roots) {
+    if (!files.has(root)) invalid('A root of the plan is not one of its files');
+  }
+
+  if (!Array.isArray(plan.rights)) invalid('The plan has no rights list');
+  const rights = new Set<string>();
+  for (const right of plan.rights) {
+    text(right.ref_id, 'rights.ref_id');
+    integer(right.artifact_version, 'rights.artifact_version', 1);
+    hash(right.sha256, 'rights.sha256');
+    if (rights.has(right.ref_id)) invalid('The plan names the same rights reference twice');
+    rights.add(right.ref_id);
+  }
+
+  const consumer = plan.consumer;
+  if (consumer === null || typeof consumer !== 'object') invalid('The consumer graph is missing');
+  text(consumer.consumer_id, 'consumer.consumer_id');
+  text(consumer.project_id, 'consumer.project_id');
+  text(consumer.run_id, 'consumer.run_id');
+  hash(consumer.graph_digest, 'consumer.graph_digest');
+  if (consumer.project_id !== plan.project_id) invalid('The consumer graph belongs to another project');
+
+  const native = plan.native_plan;
+  if (native === null || typeof native !== 'object') invalid('The native plan is missing');
+  hash(native.native_plan_sha256, 'native_plan.native_plan_sha256');
+  hash(native.film_sha256, 'native_plan.film_sha256');
+  integer(native.film_bytes, 'native_plan.film_bytes');
+  hash(native.settings_digest, 'native_plan.settings_digest');
+  hash(native.subtitle_style_digest, 'native_plan.subtitle_style_digest');
+  hash(native.captions_digest, 'native_plan.captions_digest');
+  hash(native.markers_digest, 'native_plan.markers_digest');
+
+  const frameCount = integer(plan.frame_count, 'frame_count', 1);
+  integer(plan.fps_numerator, 'fps_numerator', 1);
+  integer(plan.fps_denominator, 'fps_denominator', 1);
+
+  if (!Array.isArray(plan.affected_ranges)) invalid('The plan has no affected ranges');
+  const ranges = new Set<string>();
+  for (const range of plan.affected_ranges) {
+    const start = integer(range.start_frame, 'affected_ranges.start_frame');
+    const end = integer(range.end_frame_exclusive, 'affected_ranges.end_frame_exclusive');
+    text(range.clip_id, 'affected_ranges.clip_id');
+    if (end <= start) invalid('An affected range is empty');
+    if (end > frameCount) invalid('An affected range reaches past the frame count');
+    const key = `${start}:${end}:${range.clip_id}`;
+    if (ranges.has(key)) invalid('The plan names the same affected range twice');
+    ranges.add(key);
+  }
+
+  if (!Array.isArray(plan.locks_checked)) invalid('The plan has no checked locks');
+  const locks = new Set<string>();
+  for (const lock of plan.locks_checked) {
+    text(lock.lock_id, 'locks_checked.lock_id');
+    text(lock.lock_type, 'locks_checked.lock_type');
+    text(lock.scope, 'locks_checked.scope');
+    text(lock.target_id, 'locks_checked.target_id');
+    integer(lock.start_frame, 'locks_checked.start_frame');
+    integer(lock.end_frame_exclusive, 'locks_checked.end_frame_exclusive');
+    if (locks.has(lock.lock_id)) invalid('The plan names the same lock twice');
+    locks.add(lock.lock_id);
+  }
+  return plan;
 }
 
 /* -------------------------------------------------------------------------------------- */
@@ -243,7 +478,6 @@ export interface PreparedSourceMapping {
   readonly stage_root: string;
   readonly roots: readonly string[];
   readonly files: readonly PreparedSourceFileFact[];
-  readonly result_ref: { readonly id: string; readonly version: number; readonly sha256: string } | null;
   readonly created_at: string;
 }
 
@@ -279,20 +513,16 @@ export interface CreatedSourceFactV1 {
 /* -------------------------------------------------------------------------------------- */
 
 /**
- * The opaque proof that a publication really happened.
+ * The facts a publication proof carries.
  *
- * The publisher holds it; only the publisher's own instance can produce one, and a
- * plain object with the same fields is not one. The proof keeps the identity of the
- * original files it verified, so the commit can re-check the journal and the backup
- * rather than take the publisher's word for it.
+ * They are data, not authority: the commit re-derives the truth from the journal, the
+ * backup and the live author root before it believes any of them.
  */
-export interface CreatedSourcePublicationProof {
-  /** The publisher instance that produced this proof. */
+export interface CreatedSourcePublicationFacts {
   readonly publisher_instance: string;
-  /** The project this publication belongs to. */
   readonly project_id: string;
-  /** The transaction this publication belongs to. */
   readonly transaction_id: string;
+  readonly prepared_source_id: string;
   /** The source digest of the ORIGINAL closure, before the publication. */
   readonly original_source_digest: string;
   /** The source digest of the published closure. */
@@ -309,20 +539,101 @@ export interface CreatedSourcePublicationProof {
   readonly issued_at: string;
 }
 
-/** The only issuer of a publication proof. The publisher holds the private brand. */
-export interface CreatedSourcePublicationIssuer {
-  issue(input: {
-    readonly publisher_instance: string;
-    readonly project_id: string;
-    readonly transaction_id: string;
-    readonly original_source_digest: string;
-    readonly published_source_digest: string;
-    readonly target_snapshot_id: string;
-    readonly published_files: readonly PreparedSourceFileFact[];
-    readonly journal_id: string;
-    readonly backup_root: string;
-    readonly issued_at: string;
-  }): CreatedSourcePublicationProof;
+/**
+ * The opaque proof that a publication really happened.
+ *
+ * The class behind this interface is not exported, so a structurally identical object
+ * literal cannot satisfy it: the check is `instanceof` plus a live-set membership
+ * test, never a field comparison.
+ */
+export interface CreatedSourcePublicationProof {
+  readonly facts: CreatedSourcePublicationFacts;
+  /**
+   * The publisher's own re-check of the journal, the backup and the author root.
+   *
+   * It is a method on a class this module does not export, so it cannot be supplied by
+   * a request body, a JSON payload or a plain object.
+   */
+  verify(): void;
+}
+
+class PublicationProofImpl implements CreatedSourcePublicationProof {
+  readonly #verifier: () => void;
+
+  constructor(readonly facts: CreatedSourcePublicationFacts, verifier: () => void) {
+    this.#verifier = verifier;
+  }
+
+  verify(): void {
+    this.#verifier();
+  }
+}
+
+/** The proofs this process actually issued. A clone of one is not in here. */
+const liveProofs = new WeakSet<object>();
+
+/**
+ * The runtime check for a publication proof.
+ *
+ * Identity, not shape: a plain object with exactly the right fields is refused.
+ */
+export function isCreatedSourcePublicationProof(value: unknown): value is CreatedSourcePublicationProof {
+  return value instanceof PublicationProofImpl && liveProofs.has(value);
+}
+
+/**
+ * A live lease of one publisher instance, for one project.
+ *
+ * The issuer only mints while a lease is open, and only for the project the lease
+ * names. A proof therefore cannot be produced outside a publication.
+ */
+export interface CreatedSourcePublisherLease {
+  readonly publisher_instance: string;
+  readonly project_id: string;
+}
+
+const liveLeases = new WeakSet<object>();
+
+/** Opens the lease of a publisher that is about to publish for one project. */
+export function openCreatedSourcePublisherLease(publisher_instance: string, project_id: string): CreatedSourcePublisherLease {
+  const lease = { publisher_instance, project_id };
+  liveLeases.add(lease);
+  return lease;
+}
+
+/** Closes a lease. A closed lease mints nothing. */
+export function closeCreatedSourcePublisherLease(lease: CreatedSourcePublisherLease): void {
+  liveLeases.delete(lease);
+}
+
+/**
+ * The issuer of publication proofs.
+ *
+ * It is created by the composition root and handed to the publisher; it is not reachable
+ * from any request, and it mints nothing outside an open lease.
+ */
+export interface CreatedSourceProofIssuer {
+  issue(facts: CreatedSourcePublicationFacts, verifier: () => void): CreatedSourcePublicationProof;
+}
+
+/**
+ * Creates the issuer of one publisher instance.
+ *
+ * The issuer is a Host capability. It is created where the publisher is wired and given
+ * to the publisher; no request path reaches it.
+ */
+export function createCreatedSourceProofIssuer(lease: CreatedSourcePublisherLease): CreatedSourceProofIssuer {
+  if (!liveLeases.has(lease)) invalid('The publisher lease is not live');
+  return {
+    issue(facts: CreatedSourcePublicationFacts, verifier: () => void): CreatedSourcePublicationProof {
+      if (!liveLeases.has(lease)) invalid('The publisher lease is closed');
+      if (facts.project_id !== lease.project_id) invalid('The proof names another project');
+      if (facts.publisher_instance !== lease.publisher_instance) invalid('The proof names another publisher');
+      const proof = new PublicationProofImpl(facts, verifier);
+      liveProofs.add(proof);
+      return proof;
+    },
+  };
 }
 
 /**
@@ -351,59 +662,37 @@ export interface CommitPreparedCreatedSourceInput {
  * commit leaves. There is no exported constructor, so a caller cannot manufacture one.
  */
 export interface CreatedSourceCommitScope {
-  /** The project this scope is bound to. */
   readonly project_id: string;
-  /** The transaction this scope is bound to. */
   readonly transaction_id: string;
-  /** The identity of the connection this scope belongs to. Never the connection itself. */
-  readonly connection_identity: symbol;
 }
 
-/* -------------------------------------------------------------------------------------- */
-/* L04: the review media bindings                                                          */
-/* -------------------------------------------------------------------------------------- */
+class CommitScopeImpl implements CreatedSourceCommitScope {
+  constructor(readonly project_id: string, readonly transaction_id: string) {}
+}
 
-/** One immutable part of a review package. */
-export interface ReviewMediaPartBinding {
-  readonly part_kind: string;
-  readonly relative_path: string;
-  readonly bytes: number;
-  readonly sha256: string;
-  readonly media_object_id: string;
+const liveScopes = new WeakSet<object>();
+
+/** The runtime check for a commit scope. Identity, not shape. */
+export function isCreatedSourceCommitScope(value: unknown): value is CreatedSourceCommitScope {
+  return value instanceof CommitScopeImpl && liveScopes.has(value);
 }
 
 /**
- * The receipt of a prepared preview.
+ * Opens a commit scope.
  *
- * It binds the five parts of a review package to the immutable objects that back them.
- * The receipt digest covers the parts themselves, so a part that was replaced cannot be
- * served under the old receipt.
+ * The scope lives only for the synchronous call it was opened for. The caller must close
+ * it, and a scope that is still open when the commit returns is a defect the caller
+ * cannot walk away from.
  */
-export interface ReviewMediaReceipt {
-  readonly format: 'narralens.review-media-receipt@1';
-  readonly project_id: string;
-  readonly run_id: string;
-  readonly package_id: string;
-  readonly package_version: number;
-  readonly parts: readonly ReviewMediaPartBinding[];
-  readonly receipt_digest: string;
-  readonly created_at: string;
+export function openCreatedSourceCommitScope(project_id: string, transaction_id: string): CreatedSourceCommitScope {
+  const scope = new CommitScopeImpl(project_id, transaction_id);
+  liveScopes.add(scope);
+  return scope;
 }
 
-/** The current binding of a review package, as the read transport sees it. */
-export interface ReviewMediaBinding {
-  readonly package_id: string;
-  readonly package_version: number;
-  readonly package_digest: string;
-  readonly receipt: ReviewMediaReceipt;
-  readonly part_kind: string;
-  readonly part: ReviewMediaPartBinding;
-}
-
-/** The producer of the current binding. A missing producer is not a binding. */
-export interface ReviewMediaBindingPort {
-  currentPart(projectId: string, packageId: string, partKind: string): ReviewMediaBinding | null;
-  currentByReference(projectId: string, reference: { readonly id: string; readonly version: number; readonly sha256: string }): ReviewMediaBinding | null;
+/** Closes a commit scope. A closed scope authorises nothing. */
+export function closeCreatedSourceCommitScope(scope: CreatedSourceCommitScope): void {
+  liveScopes.delete(scope);
 }
 
 /* -------------------------------------------------------------------------------------- */
@@ -473,3 +762,6 @@ export function createdCapabilitiesAdmitted(admissions: CreatedCapabilityAdmissi
 
 /** The receipt of a created-source commit. The same frozen shape as any other commit. */
 export type CreatedSourceApplied = Applied;
+
+/** The part of a review package, as the media transport already describes it. */
+export type CreatedReviewPart = ReviewPart;
