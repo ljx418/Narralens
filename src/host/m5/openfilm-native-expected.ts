@@ -556,7 +556,15 @@ export class OpenFilmNativeExpected implements NativeExpectedPort {
   }
 
   #load(): Promise<NativeExpectedLibrary> {
-    this.#library ??= this.#loader.load(this.#approved);
+    if (this.#library === null) {
+      // A failed load is not a permanent answer: the cache is dropped so a later round
+      // can try again. What stays permanent is the refusal of an unapproved candidate,
+      // which the loader decides again every time.
+      this.#library = this.#loader.load(this.#approved).catch((error: unknown) => {
+        this.#library = null;
+        throw error;
+      });
+    }
     return this.#library;
   }
 
