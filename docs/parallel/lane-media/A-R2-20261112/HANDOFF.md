@@ -371,3 +371,42 @@ one case).
 The R2 proof result of the previous batch (19/19 under `R2-MEDIA-PROOF-001`) is **not**
 reclassified by this batch: it was the R2 prepared-source proof, not an acceptance of
 the phase chain.
+
+## ACTIVE WRITER — MP01 residual, iteration 2 (2026-11-11T17:33Z)
+
+The batch-1 candidate `99b6ee8cd91f0ba77473618485272113256067f9` and the report commit
+`624635d0e799987d81c5697e3c8ee777d1200ade` are preserved unchanged, together with the
+batch-1 evidence. MAIN's residual review (`msg_c3d849bce0f6`, `msg_e1eb292d0feb`)
+crossed the completion of that batch and found that the first MP01 fix was wrong.
+
+- My task: `task_92f2edcad800`
+- My dispatch: `ctx_ed58920f84a9` (follow-up of `ctx_a1215e8134ef`)
+- My terminal: `term_b0779d328f0edc798fcd3d75d5158c3d`
+- Coordinator / creator terminal: `term_84cbf3b186ee5d4cfc8860e84d7e972f`
+- Same exact nine released product paths; the parent is read-only while I write.
+- Pure arithmetic and isolated module checks only: no heavy resource slot is granted
+  for this iteration.
+
+**The residual is confirmed by reproduction.** The first fix expressed the stated
+length as the exact binary value of the double. That works only when the double's
+denominator stays a safe integer, and it does not:
+
+| stated length | binary expansion | first fix |
+|---|---|---|
+| `91/30` | `1707614858711313/562949953421312` | accepted |
+| `1/30` | denominator reaches `2^53 = 9007199254740992` | `DURATION_NOT_EXACT` |
+| `1001/30000` | denominator reaches `2^53 = 9007199254740992` | `DURATION_NOT_EXACT` |
+
+A film of one frame at 30 fps, and one frame at `30000/1001`, are legitimate lengths
+and the first fix refused them. `91/30` fitting was luck, not correctness.
+
+**The correction.** The canonical duration is the *approved* rational: the integer
+`frame_count` of the closure and the integer `fps` numerator and denominator of the
+render. The preimage carries those integers and never the float. The float the
+closure states is used only to **check** that it agrees with the frames and the frame
+rate, within half a frame, and a closure whose stated length disagrees with its own
+frame count is refused instead of hashed. The restricted canonical domain is not
+weakened and the binary-float expansion is removed rather than kept beside it.
+
+This is the second iteration on the same root (MP01), so MAIN takes the work over if
+another residual on it appears.
