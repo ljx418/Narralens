@@ -1,10 +1,15 @@
 # A-R2 MEDIA - final evidence hashes (computed after every other file was written)
-utc=2026-11-11T17:11:22Z
-head=cb913a953bb303fd24e3003866f37befd33b3129
+utc=2026-11-11T17:30:43Z
+head=40aa51263602e8c583944246fe631bf35aecb826
 branch=agent-driven/a-r1-media
 cwd=/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-MEDIA
 
---- implementation commits ---
+--- implementation commits since the release base ---
+40aa51263602e8c583944246fe631bf35aecb826 docs(A-R2): record the batch-1 correction, its negative evidence and the real-tool selection
+99b6ee8cd91f0ba77473618485272113256067f9 fix(A-R2): close the review batch 1 gaps MP01-MP04
+8d8788013a7d052649508660132d6bec93808e83 docs(A-R2): record the batch-1 follow-up dispatch and the four gaps to close
+f626669d5efdca97ff3a1ca80b1aa123968c112d docs(A-R2): state the final frozen HEAD and the external digests
+5e322196d6aaf5902c6ade979d7594cd0e121924 docs(A-R2): record the final evidence hashes and drop the stale self-hashes
 cb913a953bb303fd24e3003866f37befd33b3129 docs(A-R2): narrow the attempt-1 wording and label the correction
 b89dc4fc1306706efddb391ff499d59f9912617c docs(A-R2): record the frozen media candidate, its evidence and its cleanup
 5763dfbec562927e0a601eedebe4372816389be7 test(A-R2): pin the stage primitives the legacy facade and the phase port share
@@ -13,17 +18,18 @@ ef9e095c2ae8781fd58cfc6f4daaca3032d74364 feat(A-R2): implement the committed ren
 3fc977168f0941f8b1286e08fc24827afda74b72 feat(A-R2): add L07 committed render phase ports and typed deps
 
 --- product paths under the released scope (sha256 of the working-tree bytes) ---
-b3d6127fbafd5de652560cff1c4324fd428dc2318c49143b2540cd641b38ef3c  src/host/render/ports.ts
-66a358e691b18ba91b57216038092b1f3f0889433471b9fe65a792faa4889c06  src/host/render/committed-render-phases.ts
+cf160521775ea6fc0841a72af91b88599f88ecf5426429826d52cefa7e74dca1  src/host/render/ports.ts
+a61fb88c7565c90e8afd01d265c6b6f777c1bb06d5a6fe23f90d374ed8b18bd8  src/host/render/committed-render-phases.ts
 42cb9658e80e280dfd3842d30e023fad2740806b026f87c4e154b5792e5a10ab  src/host/render/render-snapshot.ts
 f69770afba85137d0dfd7a33be6115093538a411c2a4308295b523a018bbe93f  src/host/agent-driven/prepared-draft-verifier.ts
 6c0d0f18602d4fb7a0c334d51e2c5a0f0c21c7cab4ff4a980fbe77f8461eb596  src/host/render/assembly-ports.ts
-3f1a4ade59198e3e210e8e316e746e0bfdb955e6be6e829840430458547a868b  tests/agent-driven/media/committed-render-phases.test.ts
+126fdcdf70d1c3ed7bc94e5df906932948e90e76850ca9d7433d7878b73948de  tests/agent-driven/media/committed-render-phases.test.ts
 397d34a1fd5befbd9d5c4f86e4a9493ea93b6677531b10ca08444515f51765f8  tests/agent-driven/media/prepared-source-adoption-proof.test.ts
 8a2d83e7c04dac76b462c1ec3f058d54ddd1972fd58e145dce2e223a6937b560  tests/agent-driven/media/render-snapshot.test.ts
 1bfec77cb01bc2dce86c7728f30bec1943b7dd01e701d0903419d72e957c8455  tests/agent-driven/integration/created-draft-processor.test.ts
 
 --- evidence logs and records (sha256) ---
+c00bc483abf6219511a22efc08553c7938324430121a38ba64b888f0649a5563  docs/parallel/lane-media/A-R2-20261112/logs/batch1-evidence.txt
 c3e16b505c961bc54e38da6ad6b12ba6d68165b73acd37b008b54f7ae7ed4833  docs/parallel/lane-media/A-R2-20261112/logs/r2-media-proof-001-cleanup.txt
 7dd1b78d093d8b7e6b7cbfc95732efabef37599b7564b93079e0cc157fdb4270  docs/parallel/lane-media/A-R2-20261112/logs/r2-media-proof-001-input-freeze-attempt1.txt
 1c49564f9ee5eee955e5add07b77fe6673df2741371afb4d57cb76f6993446f0  docs/parallel/lane-media/A-R2-20261112/logs/r2-media-proof-001-input-freeze.txt
@@ -31,6 +37,12 @@ c3e16b505c961bc54e38da6ad6b12ba6d68165b73acd37b008b54f7ae7ed4833  docs/parallel/
 f0e3e4336fa2f8c83f1b65ab80a0d81f3e1fdbe770f681042b2199fcb2848a62  docs/parallel/lane-media/A-R2-20261112/logs/r2-media-proof-001-run-attempt2.log
 5395630bad6869436eb61c1e33a432974f9648790cce6fedc5aa0e787478f8c1  docs/parallel/lane-media/A-R2-20261112/logs/r2-media-proof-001-run.log
 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  docs/parallel/lane-media/A-R2-20261112/logs/tsc-ports-first.log
+07eaa6eacbb40bce3a0950f91f340e15ca77d6d6f61c51075d848fc5e149df70  docs/parallel/lane-media/A-R2-20261112/logs/vitest-batch1-fixed-001.log
+356ded85e09493500b57fc6af31bb3f4f952aed8f11fd769204a13b91cccd2fe  docs/parallel/lane-media/A-R2-20261112/logs/vitest-batch1-fixed-002.log
+d86fdaae7a8adaaed6c267f45908d1fd5c16911c79cb242cd7d5f528dc67d3d1  docs/parallel/lane-media/A-R2-20261112/logs/vitest-batch1-fixed-003.log
+8854f19f7040b067759bcf4c1f3d08259f3537c6c36315465ead5c10b39a0487  docs/parallel/lane-media/A-R2-20261112/logs/vitest-batch1-fixed-004.log
+488567269d241e8a557d82841136a2f8a661afb4336cbe0f97b0cb5908dfeff8  docs/parallel/lane-media/A-R2-20261112/logs/vitest-batch1-negative-old-source-reproduced.log
+ba1356ff50ec2f13234ab4846751e62cac830e57ce965b2dd91ec6e7079f4583  docs/parallel/lane-media/A-R2-20261112/logs/vitest-batch1-negative-old-source.log
 6345e51a75e1beafcb5db12cea2bead1daf2cd6bd7b78c2e13167ec3661820fd  docs/parallel/lane-media/A-R2-20261112/logs/vitest-committed-render-phases-001.log
 1711f3cc26ebd1ccf82af6d37e55a8a1e338e2e75e152dedfe8ec3e5bf436912  docs/parallel/lane-media/A-R2-20261112/logs/vitest-media-module-002.log
 30e088a8eb6ce9b4cb0ef1a9a74c0bb1715911105f7ebe35825ad637cf15157d  docs/parallel/lane-media/A-R2-20261112/logs/vitest-render-snapshot-001.log
