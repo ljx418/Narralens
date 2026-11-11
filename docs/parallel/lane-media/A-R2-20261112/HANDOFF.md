@@ -234,3 +234,18 @@ The file, index and runtime writer is released back to the parent for its scoped
 at HEAD `5763dfbec562927e0a601eedebe4372816389be7`. The heavy slot R2-MEDIA-PROOF-001
 is reported as released with its cleanup. This candidate carries no independent review,
 no A-stage PASS and no human acceptance.
+
+### Final frozen state (2026-11-11T17:13Z)
+
+- Candidate HEAD: `5e322196d6aaf5902c6ade979d7594cd0e121924` (documentation only on top of
+  the code candidate `cb913a953bb303fd24e3003866f37befd33b3129`, whose product bytes are
+  the ones `logs/final-evidence-hashes.txt` lists).
+- `corepack pnpm exec tsc --noEmit` at HEAD: exit 0.
+- The tracked tree is clean; the only untracked files are the preserved R1 inventory.
+- The nine released paths are the only product paths this lane changed; `contracts/`,
+  `src/contracts/`, `pnpm-lock.yaml` and `vendor/` are byte-identical to the release base.
+- `logs/final-evidence-hashes.txt` carries every digest and states that its own digest
+  is reported externally: it is
+  `e64921e450d66420703a454dcc780d9ee272834f09beb1aa4009fd4f0a017d2e`. The cleanup record
+  `logs/r2-media-proof-001-cleanup.txt` is
+  `c3e16b505c961bc54e38da6ad6b12ba6d68165b73acd37b008b54f7ae7ed4833`.
