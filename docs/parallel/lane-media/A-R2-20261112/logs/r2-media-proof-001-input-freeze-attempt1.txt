@@ -1,0 +1,32 @@
+# R2-MEDIA-PROOF-001 input freeze
+utc=2026-11-11T17:01:36Z
+head=ef9e095c2ae8781fd58cfc6f4daaca3032d74364
+branch=agent-driven/a-r1-media
+cwd=/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-MEDIA
+status_porcelain:
+?? docs/parallel/lane-media/A-R1-20261111/CLAUDE_IMPLEMENT.md
+?? docs/parallel/lane-media/A-R1-20261111/HANDOFF.md
+?? docs/parallel/lane-media/A-R1-20261111/MAIN_DELTA_HANDOFF.md
+?? docs/parallel/lane-media/A-R1-20261111/MAIN_DELTA_MANIFEST.json
+?? docs/parallel/lane-media/A-R1-20261111/MAIN_START.md
+?? docs/parallel/lane-media/A-R1-20261111/ReleaseAssignment.json
+?? docs/parallel/lane-media/A-R1-20261111/TASK.md
+?? docs/parallel/lane-media/A-R1-20261111/evidence/cleanup-20261111-224528.txt
+?? docs/parallel/lane-media/A-R1-20261111/evidence/draft-processor-real-1794408261304/
+?? docs/parallel/lane-media/A-R1-20261111/logs/
+?? docs/parallel/lane-media/A-R1-20261111/run-ticket-command.sh
+?? docs/parallel/lane-media/A-R2-20261112/
+--- tracked input hashes (sha256) ---
+1bfec77cb01bc2dce86c7728f30bec1943b7dd01e701d0903419d72e957c8455  tests/agent-driven/integration/created-draft-processor.test.ts
+6bd821a6edf2be1098ec0077b43588e9dca119fdaa1403f58db495cb43689f10  tests/agent-driven/media/prepared-source-adoption-proof.test.ts
+3e553993afcb4c9364227b86806fb64466e3ce595ed838433ee1cfcbb5b92ffb  tests/agent-driven/integration/helpers/created-draft-fixture.ts
+8907d1d910aa08f773306fcfcecd2d20d525609707e3ec23987925378d13dee4  tests/agent-driven/integration/helpers/created-project-fixture.ts
+f69770afba85137d0dfd7a33be6115093538a411c2a4308295b523a018bbe93f  src/host/agent-driven/prepared-draft-verifier.ts
+bafb71ffdbf41aab2f2d7779bfa0f42e0127ccee661f7a3631b0427220c62de2  src/host/agent-driven/created-draft-processor.ts
+dca19ab5d29b44a6608808bf77c4892a2b2ea2fff89d290b64b7ce57f59dd902  src/host/agent-driven/created-task-store.ts
+6c0d0f18602d4fb7a0c334d51e2c5a0f0c21c7cab4ff4a980fbe77f8461eb596  src/host/render/assembly-ports.ts
+--- external read-only pinned inputs ---
+vendor_root=/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm
+ffmpeg=ffmpeg version 6.1.1-3ubuntu5 Copyright (c) 2000-2023 the FFmpeg developers
+node=v22.22.1
+pnpm=10.33.0

@@ -1,0 +1,29 @@
+# R2-MEDIA-PROOF-001 attempt 2 terminal result and owned-resource cleanup
+utc=2026-11-11T17:08:26Z
+tested_head=6c22182aebefee14f4cceccd3e2583da8630cc2f
+command=corepack pnpm test tests/agent-driven/integration/created-draft-processor.test.ts tests/agent-driven/media/prepared-source-adoption-proof.test.ts --maxWorkers=1 --minWorkers=1
+cwd=/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-MEDIA
+attempt1_exit=1  log=docs/parallel/lane-media/A-R2-20261112/logs/r2-media-proof-001-run.log
+attempt2_exit=0  log=docs/parallel/lane-media/A-R2-20261112/logs/r2-media-proof-001-run-attempt2.log
+--- surviving owned processes after attempt 2 (ps) ---
+(none)
+--- leftover owned fixture workspace from attempt 1 (before removal) ---
+drwx------ 7 administrator administrator 4096 2026-11-12 01:03:32.306564946 +0800 /tmp/narralens-created-workspace-AUfkd9
+28420558e031aa72eebe5745030960236dd4807172eb879a099ce04658c55fc4  /tmp/narralens-created-workspace-AUfkd9/host.sqlite
+--- removal ---
+removed /tmp/narralens-created-workspace-AUfkd9
+--- remaining /tmp narralens workspaces ---
+(none)
+--- repo evidence the released test itself wrote ---
+docs/parallel/lane-media/A-R1-20261111/evidence/draft-processor-real-1794408261304
+docs/parallel/lane-media/A-R1-20261111/evidence/draft-processor-real-1794416514046
+docs/parallel/lane-media/A-R1-20261111/evidence/draft-processor-real-1794416805157
+--- log hashes ---
+f0e3e4336fa2f8c83f1b65ab80a0d81f3e1fdbe770f681042b2199fcb2848a62  docs/parallel/lane-media/A-R2-20261112/logs/r2-media-proof-001-run-attempt2.log
+5395630bad6869436eb61c1e33a432974f9648790cce6fedc5aa0e787478f8c1  docs/parallel/lane-media/A-R2-20261112/logs/r2-media-proof-001-run.log
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  docs/parallel/lane-media/A-R2-20261112/logs/tsc-ports-first.log
+6345e51a75e1beafcb5db12cea2bead1daf2cd6bd7b78c2e13167ec3661820fd  docs/parallel/lane-media/A-R2-20261112/logs/vitest-committed-render-phases-001.log
+30e088a8eb6ce9b4cb0ef1a9a74c0bb1715911105f7ebe35825ad637cf15157d  docs/parallel/lane-media/A-R2-20261112/logs/vitest-render-snapshot-001.log
+6c61dd8a3a0cfd1312b2d54199b1c7a218c2295e036430962b42b7cf5a1dd637  docs/parallel/lane-media/A-R2-20261112/logs/r2-media-proof-001-cleanup.txt
+7dd1b78d093d8b7e6b7cbfc95732efabef37599b7564b93079e0cc157fdb4270  docs/parallel/lane-media/A-R2-20261112/logs/r2-media-proof-001-input-freeze-attempt1.txt
+1c49564f9ee5eee955e5add07b77fe6673df2741371afb4d57cb76f6993446f0  docs/parallel/lane-media/A-R2-20261112/logs/r2-media-proof-001-input-freeze.txt
