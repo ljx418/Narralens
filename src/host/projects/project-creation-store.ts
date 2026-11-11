@@ -152,8 +152,8 @@ export class ProjectCreationStore {
     }
     pending(): CreationReservation[] { return (this.#db.prepare("SELECT command_id FROM cp_a0_bootstrap_command WHERE state IN('reserved','staging','compensating') ORDER BY rowid").all()).map(row => this.read(String(row.command_id))!); }
     markStaging(commandId: string): void {
-        const moved = this.#db.prepare("UPDATE cp_a0_bootstrap_command SET state='staging' WHERE command_id=? AND state='reserved'").run(commandId);
-        if (Number(moved.changes) !== 1 && this.read(commandId)?.state !== 'staging')
+        const moved = this.transitionBootstrap(commandId, ['reserved'], 'staging');
+        if (!moved && this.read(commandId)?.state !== 'staging')
             throw conflict();
     }
     receiptForJob(jobId: string, principal: string): JobReceipt | null {
@@ -195,8 +195,7 @@ export class ProjectCreationStore {
             if (!reservation || !['reserved','staging'].includes(reservation.state)) return false;
             const job = this.revisions.readJob(reservation.job_id);
             if (!job || job.state !== 'running' || job.lease_expires_at === null || job.lease_expires_at > now.getTime()) return false;
-            const changed = this.#db.prepare("UPDATE job SET state='queued',lease_owner=NULL,lease_expires_at=NULL,updated_at=? WHERE job_id=? AND state='running' AND lease_owner IS ? AND attempt=? AND lease_expires_at=? AND lease_expires_at<=?").run(now.toISOString(), job.job_id, job.lease_owner, job.attempt, job.lease_expires_at, now.getTime());
-            if (Number(changed.changes) !== 1) return false;
+            if (!this.revisions.requeueExpiredObservedLease(job.job_id, job.lease_owner, job.attempt, job.lease_expires_at, now)) return false;
             this.revisions.appendJobEvent(job.job_id, 'queued', now.toISOString(), {message:'Expired creation worker reclaimed'}, true);
             return true;
         });
@@ -215,11 +214,12 @@ export class ProjectCreationStore {
             if (!transaction || !['received','preconditions_checked','staged','validated','prepared'].includes(transaction.state) || this.revisions.activeCommit(reservation.project_id)) return false;
             this.revisions.transition(reservation.transaction_id, transaction.state, 'aborted', {error_code: /^[A-Z][A-Z0-9_]{0,63}$/.test(code) ? code : 'INTERNAL_ERROR', terminal_reason: 'CREATION_FAILED_BEFORE_COMMIT'}, now);
             const changed = job.state === 'cancel_requested'
-                ? Number(this.#db.prepare("UPDATE job SET state='cancelled',lease_owner=NULL,lease_expires_at=NULL,updated_at=? WHERE job_id=? AND state='cancel_requested' AND lease_owner IS ? AND attempt=?").run(now.toISOString(), reservation.job_id, owner, attempt).changes) === 1
+                ? owner === null
+                    ? this.revisions.completeUnownedCancellation(reservation.job_id, attempt, job.lease_expires_at, now)
+                    : this.revisions.completeCancelledCallback(reservation.job_id, owner, attempt, now)
                 : this.revisions.completeCallback(reservation.job_id, owner!, attempt, 'failed', 'known', canonicalJson({kind:'local.bootstrap_failure@1',code:/^[A-Z][A-Z0-9_]{0,63}$/.test(code)?code:'INTERNAL_ERROR'}), 'CREATION_FAILED_BEFORE_COMMIT', undefined, undefined, now);
             if (!changed) throw conflict();
-            const moved = this.#db.prepare("UPDATE cp_a0_bootstrap_command SET state='failed' WHERE command_id=? AND state IN('reserved','staging')").run(commandId);
-            if (Number(moved.changes) !== 1) throw conflict();
+            if (!this.transitionBootstrap(commandId, ['reserved', 'staging'], 'failed')) throw conflict();
             this.revisions.appendJobEvent(reservation.job_id, job.state === 'cancel_requested' ? 'cancelled' : 'failed', now.toISOString(), {message:'Project creation stopped before its initial commit'}, true);
             this.revisions.enqueueOutbox('project.creation.failed', reservation.project_id, canonicalJson({project_id:reservation.project_id,job_id:reservation.job_id,code:/^[A-Z][A-Z0-9_]{0,63}$/.test(code)?code:'INTERNAL_ERROR'}), now);
             return true;
@@ -289,8 +289,8 @@ export class ProjectCreationStore {
             tx.compareAndSet('artifact_head', { project_id: projectId, artifact_id: artifactId }, 0, { project_id: projectId, artifact_id: artifactId, draft_version: 1 });
             fault('brief');
             const result = validateAgentDefinition<BootstrapResult>('BootstrapResult', { project_id: projectId, origin: 'created', intake_ref: { id: reservation.request.intake_id, version: reservation.request.intake_version, sha256: reservation.brief_digest }, initial_transaction_id: reservation.transaction_id, initial_snapshot_id: snapshot.snapshot_id, project_revision: 1, control_revision: 0, source_digest: snapshot.source_digest, native_state: 'unconfirmed', native_ack: null });
-            const updated = this.#db.prepare("UPDATE cp_a0_bootstrap_command SET state='committed',response_json=? WHERE command_id=? AND state='staging'").run(canonicalJson({ accepted: reservation.accepted, result }), reservation.command_id);
-            if (Number(updated.changes) !== 1)
+            const updated = this.transitionBootstrap(reservation.command_id, ['staging'], 'committed', canonicalJson({ accepted: reservation.accepted, result }));
+            if (!updated)
                 throw conflict();
             fault('command');
             if (!this.revisions.completeCallback(reservation.job_id, input.owner, input.attempt, 'succeeded', 'known', canonicalJson({ kind: 'local.bootstrap_commit@1', transaction_id: reservation.transaction_id, snapshot_id: snapshot.snapshot_id }), '', undefined, undefined, now))
@@ -308,6 +308,19 @@ export class ProjectCreationStore {
             return result;
         });
     }
+  /** The sole bootstrap-command transition helper; Job state remains in RevisionStore. */
+  private transitionBootstrap(commandId: string, expected: readonly BootstrapCommandRecord['state'][],
+    target: BootstrapCommandRecord['state'], responseJson?: string): boolean {
+    const legal = { reserved: ['staging', 'failed'], staging: ['committed', 'failed'] } as const;
+    if (expected.length === 0 || new Set(expected).size !== expected.length
+      || expected.some(from => !(legal[from as keyof typeof legal] as readonly string[] | undefined)?.includes(target))
+      || (target === 'committed') !== (responseJson !== undefined)) throw conflict();
+    const placeholders = expected.map(() => '?').join(',');
+    const changed = this.#db.prepare(`UPDATE cp_a0_bootstrap_command SET state=?,
+      response_json=COALESCE(?,response_json) WHERE command_id=? AND state IN(${placeholders})`)
+      .run(target, responseJson ?? null, commandId, ...expected);
+    return Number(changed.changes) === 1;
+  }
     private assertSchema(): void {
         const version = Number(this.#db.prepare('PRAGMA schema_version').get()?.schema_version);
         if (version !== this.#schemaVersion) {

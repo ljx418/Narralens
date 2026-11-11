@@ -1,0 +1,11 @@
+# 架构恢复写入权威：MAIN 实施中
+
+MEDIA报告的两条门在MAIN真实复现（15项中2失败），没有忽略历史门。实际代码存在业务存储内联Job SQL；项目创建的bootstrap状态有三个分散写入口。旧检测器用两空格和最近调用行猜方法归属，还把四空格方法当top-level。
+
+MAIN正在把Job精确owner/attempt/expiry CAS放回唯一RevisionStore；创建流程保留原同DB事务、事件与outbox，仅调用该权威。Bootstrap自身状态收敛为私有transitionBootstrap，合法前态/目标对与committed响应一并验证。未修改冻结cp_a0 DDL、命名空间、Job状态图或新增第二DB。
+
+Fitness改用TypeScript语法节点识别真实方法归属，没有扩大helpers/豁免/允许目录，并增加两个扫描器反例。这又检出原先被最近方法名掩盖的MigratedAssetLedger.#seed内联active写入；现改为在原seeding原子事务内调用原transitionBootstrap，故障点与原子性要求保留。不能因更强扫描暴露旧问题就退回弱扫描。
+
+8个实际SQLite守卫用例已通过：身份/尝试/expiry/未过期拒绝、孤儿取消不偷owner、重复拒绝、事务回滚。当前组合检查仍exit1：该捕获在ledger修复前，且BRIDGE task-store原内联Job SQL仍待所属owner安全消费。失败输出原样保留，不称全绿。MEDIA正在独占重型验证，MAIN只跑静态/小型内存SQLite与类型检查，没有并发Host/渲染。
+
+下一步在MEDIA实际终态后运行创建与账本原用例；同时把唯一task-store恢复分支改为central helper，保全BRIDGE新R0-M01代码并先获取写权边界。未冻结此候选、不签架构或A阶段PASS。
