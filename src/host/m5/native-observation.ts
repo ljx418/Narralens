@@ -206,6 +206,21 @@ export interface NativeSelectionMappingPort {
   }): Promise<{ readonly shot_ids: readonly string[]; readonly start_frame: number; readonly end_frame_exclusive: number } | null>;
 }
 
+/**
+ * MAIN's synchronous selection version port (L02).
+ *
+ * It answers one question: what is the current selection version of this project?
+ * The answer is the Host's own, and it is read from the live session — never from a
+ * client, never from a request body and never from the plan.
+ *
+ * It is an internal read. It opens no ingress operation, it adds no field to any body,
+ * it changes no frozen DTO, and it grants nothing.
+ */
+export interface NativeSelectionVersionPort {
+  /** The current selection version, or 0 when no selection has been observed. */
+  currentSelectionVersion(project_id: string): number;
+}
+
 export interface NativeObservationServiceDeps {
   /** The durable acknowledgement store, on the Host's one connection. */
   readonly ackStore: NativeAckStore;
@@ -433,7 +448,7 @@ const emptyParts = (): Record<NativeExpectedPartKind, NativeHydrationPartObserva
   markers: { state: 'pending', origin: 'project', effective_sha256: null },
 });
 
-export class NativeObservationService implements NativeContextPort, NativeObservationPort {
+export class NativeObservationService implements NativeContextPort, NativeObservationPort, NativeSelectionVersionPort {
   readonly #ackStore: NativeAckStore;
   readonly #expected: NativeExpectedPort;
   readonly #selectionMapping: NativeSelectionMappingPort | undefined;
@@ -465,8 +480,22 @@ export class NativeObservationService implements NativeContextPort, NativeObserv
     };
   }
 
-  /* the NativeObservationPort face --------------------------------------------------- */
+  /**
+   * The current selection version of a project.
+   *
+   * It is a synchronous internal read. A project with no live session, or a session in
+   * which no selection has been observed, answers 0. A closed service answers nothing
+   * at all: it refuses, because a version read from a service that stopped is not a
+   * version.
+   */
+  currentSelectionVersion(project_id: string): number {
+    if (this.#closed) throw new Error('NATIVE_OBSERVATION_CLOSED');
+    const session = this.#active.get(project_id);
+    if (session === undefined || session.closed) return 0;
+    return session.selectionVersion;
+  }
 
+  /* the NativeObservationPort face --------------------------------------------------- */
   sessionOpened(binding: NativeObservationSessionBinding): void {
     if (this.#closed) return;
     // The most recent explicit open is the project's active session; the old one is
@@ -636,18 +665,43 @@ export class NativeObservationService implements NativeContextPort, NativeObserv
       return { accepted: false, reason: 'SELECTION_SUPERSEDED', sequence, ack: null };
     }
     session.selection = selection;
-    // The version is Host-owned and it moves whenever the editor's selection moves, so
-    // an acknowledgement written before this can never match the current selection.
-    session.selectionVersion += 1;
-    session.mapped = mapped;
     if (mapped === null) {
       // The selection is known to have changed, but it cannot be mapped onto the
       // committed source: the old acknowledgement is void and no new one is written.
+      // The version still moves, because the Host cannot prove the selection is the
+      // same one it knew.
+      session.selectionVersion += 1;
+      session.mapped = null;
       session.ack = null;
       return { accepted: false, reason: 'SELECTION_NOT_MAPPABLE', sequence, ack: null };
     }
+    // The version moves when the *selection* moves, not when a report arrives. A
+    // repeated report of the same selection keeps the version, and with it the
+    // acknowledgement that was written for it.
+    if (!this.#sameSelection(session.mapped, mapped)) {
+      session.selectionVersion += 1;
+      session.mapped = mapped;
+      session.ack = null;
+    } else {
+      session.mapped = mapped;
+    }
     const ack = await this.#acknowledge(session, sequence);
     return { accepted: true, reason: 'SELECTION_ACCEPTED', sequence, ack };
+  }
+
+  /** Whether two mapped selections are the same selection. */
+  #sameSelection(
+    left: { readonly shot_ids: readonly string[]; readonly start_frame: number; readonly end_frame_exclusive: number } | null,
+    right: { readonly shot_ids: readonly string[]; readonly start_frame: number; readonly end_frame_exclusive: number },
+  ): boolean {
+    if (left === null) return false;
+    if (left.start_frame !== right.start_frame) return false;
+    if (left.end_frame_exclusive !== right.end_frame_exclusive) return false;
+    if (left.shot_ids.length !== right.shot_ids.length) return false;
+    for (let index = 0; index < left.shot_ids.length; index += 1) {
+      if (left.shot_ids[index] !== right.shot_ids[index]) return false;
+    }
+    return true;
   }
 
   /* the acknowledgement -------------------------------------------------------------- */

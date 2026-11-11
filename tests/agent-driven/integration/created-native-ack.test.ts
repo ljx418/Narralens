@@ -348,7 +348,7 @@ function realReader(root: string, names: readonly string[]): {
 }
 
 /** A loader stand-in that is loaded through the *real* loader path. */
-function stageLibrary(root: string, options: { readonly throwOnCompute?: boolean } = {}): { dist: string; inputs: string; runtime: string; digestOf: (name: string) => string } {
+function stageLibrary(root: string, options: { readonly throwOnCompute?: boolean; readonly computed?: boolean } = {}): { dist: string; inputs: string; runtime: string; digestOf: (name: string) => string } {
   const dist = resolve(root, 'dist');
   const inputs = resolve(root, 'inputs');
   const runtime = resolve(root, 'runtime');
@@ -375,9 +375,14 @@ function stageLibrary(root: string, options: { readonly throwOnCompute?: boolean
     + 'export const EXPECTED_PROFILE = "narralens.native-expected-numeric@1";\n'
     + (options.throwOnCompute === true
       ? 'export function computeExpectedProjection() { throw new Error("THE_PROJECTION_FAILED"); }\n'
-      : 'export function computeExpectedProjection() {\n'
-        + '  return { status: "unsupported", profile: EXPECTED_PROFILE, reason: "INPUT_INVALID" };\n'
-        + '}\n')
+      : options.computed === true
+        ? 'export function computeExpectedProjection(input) {\n'
+          + '  const part = { value: {}, canonical_utf8: "{}", sha256: "' + HASH_A + '" };\n'
+          + '  return { status: "computed", profile: EXPECTED_PROFILE, binding: input.binding, input_sha256: "' + HASH_A + '", settings: part, markers: part, not_proven: ["UI_TRANSIENTS"] };\n'
+          + '}\n'
+        : 'export function computeExpectedProjection() {\n'
+          + '  return { status: "unsupported", profile: EXPECTED_PROFILE, reason: "INPUT_INVALID" };\n'
+          + '}\n')
     + 'export { hydrationCanonicalJson };\n');
   writeFileSync(resolve(dist, 'build-manifest.json'), JSON.stringify({ kind: 'narralens.native-expected-projection-build@1', upstream_sha: NATIVE_EXPECTED_UPSTREAM_SHA }));
   return {
@@ -666,5 +671,193 @@ describe('the binding snapshot', () => {
     expect(snapshot.project_id).toBe('p1');
     expect(snapshot.workspace_ref).toBe('ws1');
     expect(Object.isFrozen(snapshot)).toBe(true);
+  });
+});
+
+/* ────────────────────────────────────────────────────────────────────────────────────
+ * The selection version port and the acknowledgement it guards (L02).
+ *
+ * The expected side is the *real* service, over a staged candidate whose helper
+ * returns a computed projection, so the whole acknowledgement path runs for real:
+ * the document event, the four hydration parts, the selection, the comparison and
+ * the final boundary. Only the 015 math is a stand-in; the pinned candidate is
+ * not built.
+ * ──────────────────────────────────────────────────────────────────────────────────── */
+
+import { pathToFileURL } from 'node:url';
+import { NativeAckStore } from '../../../src/host/m5/native-ack-store.js';
+import { NativeObservationService, type NativeObservationSessionBinding } from '../../../src/host/m5/native-observation.js';
+import { RevisionStore } from '../../../src/host/projects/revision-store.js';
+
+describe('the selection version port', () => {
+  it('follows the real selection changes, voids the acknowledgement, and refuses when closed', async () => {
+    const root = mkdtempSync(join(tmpdir(), 'narralens-r2-selection-'));
+    try {
+      const source = resolve(root, 'source');
+      mkdirSync(source, { recursive: true });
+      const film = 'the original film';
+      writeFileSync(resolve(source, 'film.html'), film);
+      const reader = realReader(source, ['film.html']);
+      const staged = stageLibrary(root, { computed: true });
+      const expected = new OpenFilmNativeExpected({
+        source: reader.port,
+        loader: nativeExpectedLibraryLoader({ distRoot: staged.dist, inputsRoot: staged.inputs, runtimeRoot: staged.runtime }),
+        approved: await approvedOf(staged),
+      });
+      // The canonical the staged candidate uses, imported from the staged bytes.
+      const canonical = (await import(pathToFileURL(resolve(staged.dist, 'native-pure-library.mjs')).href)) as {
+        hydrationCanonicalJson: (value: unknown) => string;
+      };
+      const digestOfPart = (part: string, value: unknown): string =>
+        sha256(Buffer.from(canonical.hydrationCanonicalJson({ format: 'narralens.native-hydration-effective@1', part, value }), 'utf8'));
+
+      const revisions = new RevisionStore(':memory:');
+      const now = new Date().toISOString();
+      revisions.compose(db => {
+        db.prepare('INSERT INTO snapshot(snapshot_id,project_id,source_digest,engine,created_at) VALUES(?,?,?,?,?)')
+          .run('snap1', 'p1', HASH_A, 'openfilm', now);
+        db.prepare('INSERT INTO active_commit(project_id,revision,snapshot_id,source_digest,engine,transaction_id,created_at) VALUES(?,?,?,?,?,?,?)')
+          .run('p1', 3, 'snap1', HASH_A, 'openfilm', 'tx1', now);
+      });
+      const ackStore = new NativeAckStore({ revisions });
+      const service = new NativeObservationService({
+        ackStore,
+        expected,
+        selectionMapping: {
+          mapSelection: async ({ selection }) => ({
+            shot_ids: selection.refs.map(ref => ref.id ?? 'shot'),
+            start_frame: Math.round(selection.time * 24),
+            end_frame_exclusive: Math.round(selection.time * 24) + 1,
+          }),
+        },
+      });
+
+      // No session, no observed selection: the version is 0, never a guess.
+      expect(service.currentSelectionVersion('p1')).toBe(0);
+      const binding: NativeObservationSessionBinding = {
+        bridge_session_id: 'a'.repeat(32),
+        instance_generation: 1,
+        project_id: 'p1',
+        native_project_id: 'n1',
+        owner_session_ref: 'owner1',
+        revision: 3,
+        snapshot_id: 'snap1',
+        source_digest: HASH_A,
+        workspace: { workspace_ref: 'ws1', snapshot_id: 'snap1', source_digest: HASH_A, revision: 3 },
+        isCurrent: () => true,
+      };
+      service.sessionOpened(binding);
+      expect(service.currentSelectionVersion('p1')).toBe(0);
+
+      const envelope = (sequence: number, event_kind: string, event: unknown) => ({
+        format: 'narralens.native-observation@1' as const, sequence, event_kind: event_kind as 'document' | 'hydration' | 'selection', event,
+      });
+      const filmBytes = Buffer.from(film, 'utf8');
+      const document = await service.observe(binding, envelope(1, 'document', {
+        protocol_version: 1,
+        kind: 'document_dom_committed',
+        project_id: 'n1',
+        editor_view_id: 'view1',
+        document_epoch: 3,
+        native_rev: 'rev-1',
+        film_sha256: sha256(filmBytes),
+        utf8_byte_length: filmBytes.byteLength,
+      }));
+      expect(document.accepted).toBe(true);
+      // The document alone is not a loaded editor: there is no selection and no part.
+      expect(document.ack).toBeNull();
+
+      const hydration = await service.observe(binding, envelope(2, 'hydration', {
+        project_id: 'n1',
+        editor_view_id: 'view1',
+        document_epoch: 3,
+        hydration_epoch: 1,
+        parts: {
+          settings: { state: 'absent_default', origin: 'project', effective_sha256: HASH_A },
+          subtitle_style: { state: 'absent_default', origin: 'project', effective_sha256: digestOfPart('subtitle_style', {}) },
+          captions: { state: 'absent_default', origin: 'project', effective_sha256: digestOfPart('captions', { cues: [] }) },
+          markers: { state: 'absent_default', origin: 'project', effective_sha256: HASH_A },
+        },
+      }));
+      expect(hydration.accepted).toBe(true);
+      // Still no acknowledgement: the selection is not known yet.
+      expect(hydration.ack).toBeNull();
+
+      const selection = { projectId: 'n1', time: 2, refs: [{ kind: 'clip' as const, id: 'shot1' }] };
+      const first = await service.observe(binding, envelope(3, 'selection', selection));
+      expect(first.accepted).toBe(true);
+      expect(first.ack).not.toBeNull();
+      expect(service.currentSelectionVersion('p1')).toBe(1);
+      // The acknowledgement really was written, on the real table.
+      const durable = await ackStore.latest('p1');
+      expect(durable?.loaded_revision).toBe(3);
+      expect(durable?.editor_session_id).toBe('a'.repeat(32));
+
+      // The same selection again: the version does not move, and the acknowledgement stands.
+      const again = await service.observe(binding, envelope(4, 'selection', selection));
+      expect(again.accepted).toBe(true);
+      expect(service.currentSelectionVersion('p1')).toBe(1);
+      expect((await service.read('p1')).ack).not.toBeNull();
+
+      // A different selection: the version moves and the acknowledgement is void.
+      const changed = await service.observe(binding, envelope(5, 'selection', {
+        projectId: 'n1', time: 2, refs: [{ kind: 'clip' as const, id: 'shot2' }],
+      }));
+      expect(changed.accepted).toBe(true);
+      expect(service.currentSelectionVersion('p1')).toBe(2);
+      expect((await service.read('p1')).ack).toBeNull();
+
+      service.close();
+      expect(() => service.currentSelectionVersion('p1')).toThrow('NATIVE_OBSERVATION_CLOSED');
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it('moves the version even when the selection cannot be mapped, because nothing can be proved', async () => {
+    const root = mkdtempSync(join(tmpdir(), 'narralens-r2-selection-'));
+    try {
+      const source = resolve(root, 'source');
+      mkdirSync(source, { recursive: true });
+      writeFileSync(resolve(source, 'film.html'), 'the original film');
+      const reader = realReader(source, ['film.html']);
+      const staged = stageLibrary(root, { computed: true });
+      const expected = new OpenFilmNativeExpected({
+        source: reader.port,
+        loader: nativeExpectedLibraryLoader({ distRoot: staged.dist, inputsRoot: staged.inputs, runtimeRoot: staged.runtime }),
+        approved: await approvedOf(staged),
+      });
+      const revisions = new RevisionStore(':memory:');
+      const ackStore = new NativeAckStore({ revisions });
+      const service = new NativeObservationService({
+        ackStore,
+        expected,
+        selectionMapping: { mapSelection: async () => null },
+      });
+      const binding: NativeObservationSessionBinding = {
+        bridge_session_id: 'b'.repeat(32),
+        instance_generation: 1,
+        project_id: 'p1',
+        native_project_id: 'n1',
+        owner_session_ref: 'owner1',
+        revision: 3,
+        snapshot_id: 'snap1',
+        source_digest: HASH_A,
+        workspace: { workspace_ref: 'ws1', snapshot_id: 'snap1', source_digest: HASH_A, revision: 3 },
+        isCurrent: () => true,
+      };
+      service.sessionOpened(binding);
+      const outcome = await service.observe(binding, {
+        format: 'narralens.native-observation@1', sequence: 1, event_kind: 'selection',
+        event: { projectId: 'n1', time: 1, refs: [] },
+      });
+      expect(outcome.accepted).toBe(false);
+      expect(outcome.reason).toBe('SELECTION_NOT_MAPPABLE');
+      // The version moves anyway: the Host cannot prove the selection is unchanged.
+      expect(service.currentSelectionVersion('p1')).toBe(1);
+      expect((await service.read('p1')).selection).toBeNull();
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
   });
 });

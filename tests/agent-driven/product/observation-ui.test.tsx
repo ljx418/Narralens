@@ -10,7 +10,7 @@ import type {
   Workflow,
 } from "../../../src/contracts/agent-driven-types.js";
 import { WorkflowTopBar } from "../../../src/app/observation/WorkflowTopBar.js";
-import { CreativeReviewPanel } from "../../../src/app/observation/CreativeReviewPanel.js";
+import { CreativeReviewPanel, reviewAdoptionState } from "../../../src/app/observation/CreativeReviewPanel.js";
 import { nativeSyncState } from "../../../src/app/observation/content-views.js";
 import { PreparedTextView } from "../../../src/app/observation/content-views.js";
 import { nativeSyncState as nativeSyncStateFromItsOwnModule } from "../../../src/app/observation/NativeSyncIndicator.js";
@@ -1458,5 +1458,90 @@ describe("the controlled listings, at the edges", () => {
     });
     expect(screen.queryByRole("radio", { name: /麦克风录音 A/ })).toBeNull();
     expect(screen.queryByRole("radio", { name: /cand-old/ })).toBeNull();
+  });
+});
+
+/**
+ * The four facts stay apart: the decision, the adoption, the commit and the native
+ * acknowledgement.
+ *
+ * These cases are pure: no Host, no listener, no browser, no fixture.
+ */
+describe("the review adoption state", () => {
+  const decisionOf = (choice: string) => ({
+    decision_id: "dec-1",
+    project_id: "project-1",
+    run_id: "run-1",
+    package_id: "pkg-1",
+    package_version: 1,
+    choice,
+    impact_id: null,
+    approval_id: null,
+    decided_at: "2026-11-12T00:00:00.000Z",
+  }) as never;
+
+  it("says that nothing was requested when there is no decision", () => {
+    expect(reviewAdoptionState({ decision: null, atDecision: null, current: null }).state).toBe("not_requested");
+  });
+
+  it("says that nothing was requested when the decision did not ask for an adoption", () => {
+    const state = reviewAdoptionState({
+      decision: decisionOf("accept"),
+      atDecision: { project_revision: 3, source_digest: "a".repeat(64) },
+      current: { project_revision: 3, source_digest: "a".repeat(64) },
+    });
+    expect(state.state).toBe("not_requested");
+  });
+
+  it("keeps the adoption pending while the project's own revision has not moved", () => {
+    const state = reviewAdoptionState({
+      decision: decisionOf("accept_and_adopt"),
+      atDecision: { project_revision: 3, source_digest: "a".repeat(64) },
+      current: { project_revision: 3, source_digest: "a".repeat(64) },
+    });
+    expect(state.state).toBe("requested");
+  });
+
+  it("registers the adoption when the project's own revision really advanced", () => {
+    const state = reviewAdoptionState({
+      decision: decisionOf("accept_and_adopt"),
+      atDecision: { project_revision: 3, source_digest: "a".repeat(64) },
+      current: { project_revision: 4, source_digest: "b".repeat(64) },
+    });
+    expect(state.state).toBe("registered");
+  });
+
+  it("says unknown rather than guessing when the facts cannot be lined up", () => {
+    expect(reviewAdoptionState({
+      decision: decisionOf("accept_and_adopt"),
+      atDecision: null,
+      current: { project_revision: 4, source_digest: "b".repeat(64) },
+    }).state).toBe("unknown");
+    expect(reviewAdoptionState({
+      decision: decisionOf("accept_and_adopt"),
+      atDecision: { project_revision: 3, source_digest: "a".repeat(64) },
+      current: null,
+    }).state).toBe("unknown");
+    // The revision moved backwards, or the digest changed without a revision: neither
+    // is a commit this decision can be credited with.
+    expect(reviewAdoptionState({
+      decision: decisionOf("accept_and_adopt"),
+      atDecision: { project_revision: 3, source_digest: "a".repeat(64) },
+      current: { project_revision: 2, source_digest: "a".repeat(64) },
+    }).state).toBe("unknown");
+    expect(reviewAdoptionState({
+      decision: decisionOf("accept_and_adopt"),
+      atDecision: { project_revision: 3, source_digest: "a".repeat(64) },
+      current: { project_revision: 3, source_digest: "b".repeat(64) },
+    }).state).toBe("unknown");
+  });
+
+  it("never claims a native load from the adoption", () => {
+    const state = reviewAdoptionState({
+      decision: decisionOf("accept_and_adopt"),
+      atDecision: { project_revision: 3, source_digest: "a".repeat(64) },
+      current: { project_revision: 4, source_digest: "b".repeat(64) },
+    });
+    expect(state.reason).toContain("提交与原生确认仍是两件事");
   });
 });

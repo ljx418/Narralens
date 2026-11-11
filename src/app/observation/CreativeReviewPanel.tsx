@@ -93,6 +93,51 @@ export interface ReviewAdoptionState {
   readonly reason: string;
 }
 
+/** The project's own facts the adoption is read against. */
+export interface AdoptionFacts {
+  readonly project_revision: number;
+  readonly source_digest: string;
+}
+
+/**
+ * What is known about the adoption.
+ *
+ * The four facts stay apart, and this function reads only one of them: the *commit*.
+ * The decision says that a person chose; the commit says that the Host published a new
+ * version; the native acknowledgement says that the editor loaded it. Each is read from
+ * its own source, and none of them is inferred from another.
+ *
+ * The comparison is the project's own revision and source digest before and after the
+ * decision. A revision that advanced is a commit that really happened; a revision that
+ * did not is a pending adoption; anything the app cannot line up is *unknown*, because
+ * an adoption that cannot be checked is not an adoption that happened.
+ */
+export function reviewAdoptionState(input: {
+  readonly decision: ReviewDecision | null;
+  /** The project's facts when the decision was recorded. */
+  readonly atDecision: AdoptionFacts | null;
+  /** The project's facts now. */
+  readonly current: AdoptionFacts | null;
+}): ReviewAdoptionState {
+  const decision = input.decision;
+  if (decision === null) return { state: "not_requested", reason: "尚未登记任何决定。" };
+  if (decision.choice !== "accept_and_adopt") return { state: "not_requested", reason: "这次决定没有请求采用。" };
+  const atDecision = input.atDecision;
+  const current = input.current;
+  if (atDecision === null) return { state: "unknown", reason: "登记决定时的工程版本未知，采用状态无法核对。" };
+  if (current === null) return { state: "unknown", reason: "尚未读到工程的当前版本，采用状态未知。" };
+  if (current.project_revision > atDecision.project_revision) {
+    return {
+      state: "registered",
+      reason: `采用已提交：工程版本已从 ${atDecision.project_revision} 前进到 ${current.project_revision}。提交与原生确认仍是两件事。`,
+    };
+  }
+  if (current.project_revision === atDecision.project_revision && current.source_digest === atDecision.source_digest) {
+    return { state: "requested", reason: "决定已登记；实际提交与原生确认尚未取得，采用保持待完成。" };
+  }
+  return { state: "unknown", reason: "工程版本与登记决定时对不上，采用状态未知。" };
+}
+
 const PART_LABEL: Readonly<Record<ReviewPart["kind"], string>> = {
   preview: "画面",
   narration: "旁白",
