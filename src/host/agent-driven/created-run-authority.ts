@@ -101,6 +101,7 @@ export class CreatedRunAuthority implements TrustedAdoptionAuthority {
       throw new ProductError('UNAUTHORIZED', 'A trusted UI session is required');
     const request = structuredClone(raw);
     const read = await this.#repository!.transaction(tx => {
+      this.#usable();
       // The existing command ledger remains the only request replay authority.
       if (tx.recallIdempotency({kind:'project',project_id:request.project_id},
         'review.decide',request.meta.idempotency_key) || request.choice !== 'accept_and_adopt') return null;
@@ -117,14 +118,20 @@ export class CreatedRunAuthority implements TrustedAdoptionAuthority {
         throw new ProductError('IMPACT_STALE', 'Prepared review mapping is missing');
       return {project_id:request.project_id,prepared_source_id:mapping.prepared_source_id,execution:mapping.execution};
     });
-    if (!read) return this.#repository!.transaction(tx => work(tx, null));
+    this.#usable();
+    if (!read) {
+      const result=await this.#repository!.transaction(tx => {this.#usable();return work(tx,null);});
+      this.#usable();return result;
+    }
     let proof:CreatedPreparedFactsProof;
     try{proof=await this.#reader!.acquire(read, caller.principal_id);}catch(error){
       if(error instanceof PublicationCleanupError)this.#cleanupFailure=error;throw error;
     }
     let failed=false,primary:unknown;
     try {
-      return await this.#repository!.transaction(tx => {
+      this.#usable();
+      const result=await this.#repository!.transaction(tx => {
+        this.#usable();
         if (tx.recallIdempotency({kind:'project',project_id:request.project_id},
           'review.decide',request.meta.idempotency_key)) return work(tx, null);
         const fact = this.#impacts!.planFact(request.impact_id!);
@@ -134,6 +141,7 @@ export class CreatedRunAuthority implements TrustedAdoptionAuthority {
         this.#reviews.set(tx, scope);
         try { return work(tx, scope.digest); } finally { this.#reviews.delete(tx); }
       });
+      this.#usable();return result;
     }catch(error){failed=true;primary=error;throw error;}
     finally{try{this.#reader!.release(proof);}catch(error){
       this.#cleanupFailure=new PublicationCleanupError([...(failed?[primary]:[]),error]);throw this.#cleanupFailure;

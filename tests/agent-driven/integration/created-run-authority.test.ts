@@ -612,3 +612,32 @@ it('D09 real adoption service preserves acquire cleanup uncertainty through serv
   expect(f.host.revisions.activeCommit(f.projectId)!.revision).toBe(1);
  }finally{spy.mockRestore();try{await settle(()=>f.service.close());}finally{try{await settle(()=>f.reader.close());}finally{await f.baseClose();}}}
 },120000);
+
+it('D09 real overlapping replay cannot bypass a cleanup failure recorded after its first await',async()=>{
+ const f=await d09RealFixture(),fault=new Error('injected overlapping review release uncertainty');
+ const {FixedWorkflowService}=await import('../../../src/host/creative/fixed-workflow-service.js');
+ const {PublicationCleanupError}=await import('../../../src/host/agent-driven/publication-cleanup.js');
+ type Outcome={value:unknown;error:unknown};const observe=(work:Promise<unknown>):Promise<Outcome>=>work.then(value=>({value,error:undefined}),error=>({value:undefined,error}));
+ let second:Promise<Outcome>|undefined,queued=false,started!:()=>void;
+ const secondStarted=new Promise<void>(resolve=>{started=resolve;});
+ const adoption={registerConfirmation:f.authority.registerConfirmation.bind(f.authority),registerApproval:f.authority.registerApproval.bind(f.authority),
+  reviewTransaction:<T>(input:Parameters<NonNullable<typeof f.authority.reviewTransaction>>[0],caller:Parameters<NonNullable<typeof f.authority.reviewTransaction>>[1],
+   work:(tx:import('../../../src/host/creative/product-repository.js').ProductTransaction,digest:string|null)=>T):Promise<T>=>
+   f.authority.reviewTransaction!(input,caller,(tx,digest)=>{
+    const result=work(tx,digest);
+    if(!queued&&digest!==null){queued=true;queueMicrotask(()=>{second=observe(workflow.decideReview(f.request,f.ui));started();});}
+    return result;
+   })};
+ const workflow=new FixedWorkflowService({repository:f.repo,adoption,now:f.clockNow});
+ const original=f.verifier.release.bind(f.verifier);let injected=false;
+ const spy=vi.spyOn(f.verifier,'release').mockImplementation(proof=>{original(proof);if(!injected){injected=true;throw fault;}});
+ const leaves=(value:unknown):unknown[]=>value instanceof PublicationCleanupError?value.errors.flatMap(leaves):[value];
+ try{
+  const first=await observe(workflow.decideReview(f.request,f.ui));expect(queued).toBe(true);await secondStarted;const replay=await second!;
+  expect(injected).toBe(true);expect(first.error).toBeInstanceOf(PublicationCleanupError);
+  expect(replay.error).toMatchObject({code:'CAPABILITY_UNAVAILABLE',requires_reconciliation:true,retryable:false});
+  expect(replay.value).toBeUndefined();
+  expect(await f.repo.transaction(tx=>tx.list('approval',{project_id:f.projectId,run_id:f.execution.run_id}))).toHaveLength(1);
+  expect(f.host.revisions.activeCommit(f.projectId)!.revision).toBe(1);
+ }finally{spy.mockRestore();try{try{await f.authority.close();}catch(error){if(!(error instanceof PublicationCleanupError)||leaves(error).some(value=>value!==fault))throw error;}}finally{await f.close();}}
+},120000);

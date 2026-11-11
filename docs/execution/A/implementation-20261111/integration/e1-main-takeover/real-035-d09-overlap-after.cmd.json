@@ -1,0 +1,17 @@
+{
+  "argv": [
+    "corepack",
+    "pnpm",
+    "test",
+    "tests/agent-driven/integration/created-run-authority.test.ts",
+    "--maxWorkers=1",
+    "--minWorkers=1",
+    "-t",
+    "D09 real overlapping replay"
+  ],
+  "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+  "started_at": "2026-11-11T22:07:40.327221+00:00",
+  "runner_version": 2,
+  "git_head": "b444aa4738c921c87a7af02c6fc6ab2e8102506f",
+  "input_scope": "source/contracts/test/tool text, config/lock, D09 vectors and this runner; upstream pin and binary fixture receipts remain separate"
+}

@@ -1,0 +1,83 @@
+
+> narralens@0.1.0 test /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+> vitest run --config vitest.config.ts tests/agent-driven/integration/created-run-authority.test.ts --maxWorkers=1 --minWorkers=1 -t 'D09 real overlapping replay'
+
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:1884376) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+stdout | tests/agent-driven/integration/created-run-authority.test.ts > D09 real overlapping replay cannot bypass a cleanup failure recorded after its first await
+{"case":"D09 real prepared cleanup","pid":1884376,"root":"/tmp/narralens-created-workspace-I9mUpE","removed":true}
+
+ ❯ tests/agent-driven/integration/created-run-authority.test.ts (36 tests | 1 failed | 35 skipped) 14496ms
+   ↓ persists the trusted confirmation inside the caller transaction and binds it to the real session
+   ↓ refuses a confirmation whose session is no longer active and writes nothing
+   ↓ refuses a confirmation with an expired lifetime
+   ↓ refuses a confirmation with a lifetime that is not in the future
+   ↓ refuses a confirmation with an issued time in the future
+   ↓ refuses a confirmation with a review purpose without a review
+   ↓ refuses a confirmation with a non hash input digest
+   ↓ refuses a confirmation with a foreign actor
+   ↓ rolls the confirmation back with the transaction that wrote it
+   ↓ returns no approval when the current confirmation, run or attempt is missing
+   ↓ writes the limited approval only when the current run, attempt and confirmation are real
+   ↓ answers the project facts from the real authorities and fails closed without a capability
+   ↓ D09 refuses a prepared id without actual Host proof even with real confirmation and attempt
+   ↓ D09 refuses changed action against the original trusted confirmation
+   ↓ D09 refuses extended confirmation lifetime against the original trusted confirmation
+   ↓ D09 confirmation replay returns one original approval and rejects changed bindings
+   ↓ D09 real prepared succeeds with full plan digest, replays once and releases held source FDs
+   ↓ D09 real prepared refuses changed plan without approval and releases held source FDs
+   ↓ D09 real prepared refuses changed package without approval and releases held source FDs
+   ↓ D09 real prepared refuses changed rights without approval and releases held source FDs
+   ↓ D09 real prepared refuses changed selection without approval and releases held source FDs
+   ↓ D09 real prepared refuses changed expiry without approval and releases held source FDs
+   ↓ D09 real prepared refuses changed closure without approval and releases held source FDs
+   ↓ D09 real prepared refuses a copied transaction object even while actual proof is held
+   ↓ D09 canonical range and lock comparison preserves native-order plan identity
+   ↓ D09 final insertion rechecks expiry after approval enumeration (existing=false)
+   ↓ D09 final insertion rechecks expiry after approval enumeration (existing=true)
+   ↓ D09 real prepared refuses confirmation expiry during actual retained-byte verification
+   ↓ D09 real prepared retains post-commit read cleanup uncertainty and refuses normal replay
+   ↓ D09 real reader retains all resource ownership after release cleanup fails
+   ↓ D09 real reader retains all resource ownership after acquire-stage cleanup fails
+   ↓ D09 real adoption service commits one actual approved native source through the project queue
+   ↓ D09 real adoption service refuses missing approval before starting publication
+   ↓ D09 real adoption service refuses changed selection before starting publication
+   ↓ D09 real adoption service preserves acquire cleanup uncertainty through service close
+   × D09 real overlapping replay cannot bypass a cleanup failure recorded after its first await 14495ms
+     → expected undefined to match object { Object (code, requires_reconciliation, ...) }
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/created-run-authority.test.ts > D09 real overlapping replay cannot bypass a cleanup failure recorded after its first await
+AssertionError: expected undefined to match object { Object (code, requires_reconciliation, ...) }
+
+- Expected: 
+{
+  "code": "CAPABILITY_UNAVAILABLE",
+  "requires_reconciliation": true,
+  "retryable": false,
+}
+
++ Received: 
+undefined
+
+ ❯ tests/agent-driven/integration/created-run-authority.test.ts:638:24
+    636|   const first=await observe(workflow.decideReview(f.request,f.ui));awa…
+    637|   expect(injected).toBe(true);expect(first.error).toBeInstanceOf(Publi…
+    638|   expect(replay.error).toMatchObject({code:'CAPABILITY_UNAVAILABLE',re…
+       |                        ^
+    639|   expect(replay.value).toBeUndefined();
+    640|   expect(await f.repo.transaction(tx=>tx.list('approval',{project_id:f…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 35 skipped (36)
+   Start at  06:05:59
+   Duration  19.84s (transform 3.71s, setup 0ms, collect 3.32s, tests 14.50s, environment 0ms, prepare 1.34s)
+
+ ELIFECYCLE  Test failed. See above for more details.
