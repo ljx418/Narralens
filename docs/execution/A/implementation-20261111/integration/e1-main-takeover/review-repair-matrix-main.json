@@ -1,0 +1,59 @@
+{
+  "candidate_reviewed": "8f35330b9106916996979660ff35a94bef38a2ad",
+  "verdict": "REQUEST_CHANGES",
+  "repairs": [
+    {
+      "id": "B1",
+      "implementation": "opaque frozen token; authority only module-private WeakMap record",
+      "verification": "new real-token pollution case; NOT_RUN"
+    },
+    {
+      "id": "M1",
+      "implementation": "fresh Host wall clock after final synchronous validation",
+      "verification": "expiry during guard case; NOT_RUN"
+    },
+    {
+      "id": "M2",
+      "implementation": "actual native plan/files/rights/consumer edges/ranges and pinned upstream reconciliation",
+      "verification": "8 parameterized real preparation cases; NOT_RUN"
+    },
+    {
+      "id": "M3",
+      "implementation": "retained original directory/file FDs follow author rename to backup",
+      "verification": "same-byte backup replacement after rename; NOT_RUN"
+    },
+    {
+      "id": "M4",
+      "implementation": "cross-store rejection poisons authentic owner via private scope registry",
+      "verification": "caught cross-database rejection; NOT_RUN"
+    },
+    {
+      "id": "M5",
+      "implementation": "outer transaction insert and remembered response",
+      "verification": "impact-atomic-02 5PASS before latest additions; current version pending"
+    },
+    {
+      "id": "M6",
+      "implementation": "read and requireActive include row impact hash",
+      "verification": "read/requireActive assertions; current version pending"
+    },
+    {
+      "id": "N1",
+      "implementation": "same identifier rejects different immutable request",
+      "verification": "new request/target conflict assertions; NOT_RUN"
+    },
+    {
+      "id": "N2",
+      "implementation": "first return and replay use same normalized facts",
+      "verification": "replay equality/no TTL renewal; NOT_RUN"
+    }
+  ],
+  "claims": "No fix is independently closed yet. R2/A/UI/human remain unpassed.",
+  "verification_update": {
+    "light_command": "impact-atomic-04",
+    "result": "2 files /18 tests exit0; inputs unchanged",
+    "typecheck": "typecheck-10 exit0; inputs unchanged",
+    "real_media_boundary_tests": "NOT_RUN at this candidate; MEDIA owns heavy slot",
+    "independent": "REQUEST_CHANGES on 8f35330; new fix not independently closed"
+  }
+}

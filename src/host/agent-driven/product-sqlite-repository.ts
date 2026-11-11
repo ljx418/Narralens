@@ -1,7 +1,7 @@
 import type { DatabaseSync, SQLInputValue } from 'node:sqlite';
 import { canonicalJson } from '../engine/source-digest-v1.js';
 import { RevisionStore } from '../projects/revision-store.js';
-import { isLiveCreatedSourceCommitScope } from '../projects/revision-store.js';
+import { isLiveCreatedSourceCommitScope,poisonLiveCreatedSourceCommitScope } from '../projects/revision-store.js';
 import type { CreatedSourceCommitScope } from './created-source-ports.js';
 import { OperationIdempotencyStore } from '../projects/operation-idempotency-store.js';
 import {isCurrentTaskTransaction,type TaskTransactionDb} from './created-task-store.js';
@@ -81,8 +81,8 @@ export class ProductSqliteRepository implements ProductRepository {
    * transaction rolls back even when the caller swallows the error. This join does not
    * replace or loosen `joinTaskTransaction`; it is a different, narrower capability. */
   joinCreatedSourceCommit<T>(scope:CreatedSourceCommitScope,work:(tx:ProductTransaction)=>T):T {
-    if(!isLiveCreatedSourceCommitScope(scope,this.revisions,this.#db)||!this.#db.isTransaction)throw invalid();
     try {
+      if(!isLiveCreatedSourceCommitScope(scope,this.revisions,this.#db)||!this.#db.isTransaction)throw invalid();
       return this.scope(tx => {
         // A same-connection scope is not authority over other projects. Check every
         // key, value, query, event and command before the underlying transaction sees it.
@@ -124,14 +124,14 @@ export class ProductSqliteRepository implements ProductRepository {
             if (typeof value !== 'function') return value;
             return (...args: unknown[]) => {
               try { return Reflect.apply(value, target, args); }
-              catch (error) { scope.poison(error); throw error; }
+              catch (error) { poisonLiveCreatedSourceCommitScope(scope,error); throw error; }
             };
           },
         });
         return work(guarded);
       });
     } catch (error) {
-      scope.poison(error);
+      poisonLiveCreatedSourceCommitScope(scope,error);
       throw error;
     }
   }

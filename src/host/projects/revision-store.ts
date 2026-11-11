@@ -58,6 +58,7 @@ class CreatedSourceScope implements CreatedSourceCommitScope {
 
   constructor(entry: CreatedSourceScopeEntry) {
     this.#entry = entry;
+    Object.freeze(this);
   }
 
   get project_id(): string { return this.#entry.project_id; }
@@ -95,6 +96,14 @@ export function isLiveCreatedSourceCommitScope(
   const entry = liveCreatedSourceScopes.get(scope);
   if (entry === undefined) return false;
   return entry.live && entry.owner === owner && entry.db === db;
+}
+
+/** Abort the real owning transaction after a rejected join, including a cross-store
+ * join. Never invoke a caller-controlled poison method on an untrusted object. */
+export function poisonLiveCreatedSourceCommitScope(scope:unknown,error:unknown):void {
+  if(!scope||typeof scope!=='object')return;
+  const entry=liveCreatedSourceScopes.get(scope);
+  if(entry?.live){entry.poisoned=true;entry.fault=error;}
 }
 
 
@@ -481,7 +490,8 @@ export class RevisionStore {
       throw new Error('CREATED_COMMIT_INPUT_REJECTED');
     const repo = new ProductSqliteRepository(this);
     const commands = new OperationIdempotencyStore(this.#db);
-    const now = new Date(), at = now.toISOString(), seconds = Math.floor(now.getTime() / 1000);
+    const now = new Date(), seconds = Math.floor(now.getTime() / 1000);
+    let at = now.toISOString();
     const operation = 'agent.v1:change.apply';
     return this.#withCreatedSourceCommitScope(input.project_id, input.transaction_id, scope => {
       function fail(message: string): never { throw new Error(`CREATED_COMMIT_${message}`); }
@@ -615,6 +625,15 @@ export class RevisionStore {
           target_snapshot_id:plan.target_snapshot_id,original_source_digest:plan.base_source_digest,
           published_source_digest:plan.target_source_digest,selection_version:plan.selection_version,
         });
+        // Disk/FD verification and BEGIN IMMEDIATE can cross an expiry. The final
+        // decision uses a fresh Host clock after the last synchronous world check.
+        const commitNow=new Date(),commitSeconds=Math.floor(commitNow.getTime()/1000);
+        if(!Number.isFinite(commitNow.getTime())||commitNow.getTime()>=Date.parse(impact.expires_at)
+          ||commitNow.getTime()>=Date.parse(plan.expires_at)||commitSeconds>=approval.expires_at
+          ||commitSeconds>=grant.expires_at||commitSeconds>=confirmation.expires_at
+          ||commitSeconds>=grantConfirmation.expires_at||commitSeconds<confirmation.issued_at
+          ||commitSeconds<grantConfirmation.issued_at)fail('AUTHORITY_EXPIRED_AT_COMMIT');
+        at=commitNow.toISOString();
         const changed = this.#db.prepare("UPDATE project_state SET revision=revision+1,source_digest=?,updated_at=? WHERE project_id=? AND revision=? AND source_digest=? AND CAST(control_revision AS INTEGER)=? AND attention=0")
           .run(plan.target_source_digest,at,input.project_id,plan.base_revision,plan.base_source_digest,plan.control_revision);
         if (Number(changed.changes)!==1) fail('PROJECT_CAS');
@@ -635,7 +654,7 @@ export class RevisionStore {
         provenance.insertOrVerifySourceFact({fact:{format:'narralens.created-source-fact@1',project_id:input.project_id,
           transaction_id:input.transaction_id,prepared_source_id:input.prepared_source_id,impact_id:input.impact_id,
           approval_id:input.approval_id,snapshot_id:plan.target_snapshot_id,source_digest:plan.target_source_digest,
-          plan_sha256:digest,facts_digest:digest,revision:plan.base_revision+1,execution,created_at:at},now});
+          plan_sha256:digest,facts_digest:digest,revision:plan.base_revision+1,execution,created_at:at},now:commitNow});
         this.#db.prepare("INSERT INTO active_commit(project_id,revision,snapshot_id,source_digest,engine,transaction_id,created_at) VALUES(?,?,?,?,'openfilm',?,?) ON CONFLICT(project_id) DO UPDATE SET revision=excluded.revision,snapshot_id=excluded.snapshot_id,source_digest=excluded.source_digest,engine=excluded.engine,transaction_id=excluded.transaction_id,created_at=excluded.created_at")
           .run(input.project_id,plan.base_revision+1,plan.target_snapshot_id,plan.target_source_digest,input.transaction_id,at);
         tx.put('step_attempt',stepKey,{...step,state:'succeeded',updated_at:at});
@@ -643,10 +662,10 @@ export class RevisionStore {
           snapshot_id:plan.target_snapshot_id,source_digest:plan.target_source_digest,replayed:false};
         tx.emit({topic:'workflow.run.state_changed',scope:{kind:'run',project_id:input.project_id,run_id:execution.run_id,run_scope_digest:execution.run_scope_digest,plan_version:1},entity:{type:'task',id:execution.step_id,version:execution.attempt,state:'succeeded'},attempt:execution.attempt,source:'host',input_digest:execution.input_digest,observed_at:at,payload:{operation:'adopt_prepared_source',transaction_id:input.transaction_id,revision:response.project_revision,snapshot_id:response.snapshot_id}});
         // Same shared command authority and envelope as every Agent operation.
-        commands.record({projectId:input.project_id,operationKind:operation,idempotencyKey:input.idempotency_key,requestDigest:input.request_digest,transactionId:input.transaction_id,now,
+        commands.record({projectId:input.project_id,operationKind:operation,idempotencyKey:input.idempotency_key,requestDigest:input.request_digest,transactionId:input.transaction_id,now:commitNow,
           response:{format:'agent.idempotency@1',receipt:{operation:'change.apply',idempotency_key:input.idempotency_key,request_digest:input.request_digest,principal_id:grant.principal_id,project_id:input.project_id,correlation_id:transaction.correlation_id},response}});
-        this.enqueueOutbox('project.committed',input.project_id,JSON.stringify({project_id:input.project_id,transaction_id:input.transaction_id,revision:response.project_revision,snapshot_id:response.snapshot_id}),now);
-        this.transition(input.transaction_id,'prepared','committed',{snapshot_id:plan.target_snapshot_id,source_digest_after:plan.target_source_digest},now);
+        this.enqueueOutbox('project.committed',input.project_id,JSON.stringify({project_id:input.project_id,transaction_id:input.transaction_id,revision:response.project_revision,snapshot_id:response.snapshot_id}),commitNow);
+        this.transition(input.transaction_id,'prepared','committed',{snapshot_id:plan.target_snapshot_id,source_digest_after:plan.target_source_digest},commitNow);
         return response;
       });
     });

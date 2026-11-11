@@ -1,0 +1,126 @@
+
+> narralens@0.1.0 test /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+> vitest run --config vitest.config.ts tests/agent-driven/integration/created-impact-atomic.test.ts tests/agent-driven/integration/created-source-change.test.ts --maxWorkers=1 --minWorkers=1
+
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:1434853) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/agent-driven/integration/created-impact-atomic.test.ts (7 tests | 5 failed) 53ms
+   ✓ created impact and response share the original SQLite transaction > refuses an insertion without an outer Host transaction 7ms
+   × created impact and response share the original SQLite transaction > rolls back impact, immutable plan and response when the final caller boundary fails 20ms
+     → expected [Function] to throw error including 'after response' but got 'locks_checked.target_id must be print…'
+   ✓ created impact and response share the original SQLite transaction > does not leave an active impact when a real response-key constraint fails 4ms
+   × created impact and response share the original SQLite transaction > commits all three records together and releases the transaction 8ms
+     → locks_checked.target_id must be printable ASCII
+   × created impact and response share the original SQLite transaction > keeps the standalone create entry atomic for existing callers 5ms
+     → locks_checked.target_id must be printable ASCII
+   × created impact and response share the original SQLite transaction > replays identical immutable facts without renewing expiry or dropping the impact hash 4ms
+     → locks_checked.target_id must be printable ASCII
+   × created impact and response share the original SQLite transaction > refuses the same impact identifier with a different request or immutable target 4ms
+     → locks_checked.target_id must be printable ASCII
+(node:1434986) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/created-source-change.test.ts (11 tests) 20ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/created-impact-atomic.test.ts > created impact and response share the original SQLite transaction > rolls back impact, immutable plan and response when the final caller boundary fails
+AssertionError: expected [Function] to throw error including 'after response' but got 'locks_checked.target_id must be print…'
+
+Expected: "after response"
+Received: "locks_checked.target_id must be printable ASCII"
+
+ ❯ tests/agent-driven/integration/created-impact-atomic.test.ts:37:165
+     35|  });
+     36|  it('rolls back impact, immutable plan and response when the final cal…
+     37|   const f=fixture();try{expect(()=>f.revisions.atomic(()=>{const impac…
+       |                                                                                                                                                                     ^
+     38|    expect(f.counts()).toEqual({impact:0,fact:0,response:0});}finally{f…
+     39|  });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  tests/agent-driven/integration/created-impact-atomic.test.ts > created impact and response share the original SQLite transaction > commits all three records together and releases the transaction
+PreparedAdoptionPlanError: locks_checked.target_id must be printable ASCII
+ ❯ invalid src/host/agent-driven/created-source-ports.ts:313:9
+    311| 
+    312| function invalid(message: string): never {
+    313|   throw new PreparedAdoptionPlanError('INVALID_REQUEST', message);
+       |         ^
+    314| }
+    315| 
+ ❯ text src/host/agent-driven/created-source-ports.ts:317:56
+ ❯ assertPreparedAdoptionPlan src/host/agent-driven/created-source-ports.ts:440:5
+ ❯ CreatedSourceImpactStore.insertInTransaction src/host/agent-driven/created-source-impact-store.ts:365:16
+ ❯ tests/agent-driven/integration/created-impact-atomic.test.ts:46:82
+ ❯ RevisionStore.atomic src/host/projects/revision-store.ts:432:22
+ ❯ tests/agent-driven/integration/created-impact-atomic.test.ts:46:50
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  tests/agent-driven/integration/created-impact-atomic.test.ts > created impact and response share the original SQLite transaction > keeps the standalone create entry atomic for existing callers
+PreparedAdoptionPlanError: locks_checked.target_id must be printable ASCII
+ ❯ invalid src/host/agent-driven/created-source-ports.ts:313:9
+    311| 
+    312| function invalid(message: string): never {
+    313|   throw new PreparedAdoptionPlanError('INVALID_REQUEST', message);
+       |         ^
+    314| }
+    315| 
+ ❯ text src/host/agent-driven/created-source-ports.ts:317:56
+ ❯ assertPreparedAdoptionPlan src/host/agent-driven/created-source-ports.ts:440:5
+ ❯ CreatedSourceImpactStore.insertInTransaction src/host/agent-driven/created-source-impact-store.ts:365:16
+ ❯ src/host/agent-driven/created-source-impact-store.ts:356:46
+ ❯ RevisionStore.atomic src/host/projects/revision-store.ts:432:22
+ ❯ CreatedSourceImpactStore.create src/host/agent-driven/created-source-impact-store.ts:356:28
+ ❯ tests/agent-driven/integration/created-impact-atomic.test.ts:54:42
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ FAIL  tests/agent-driven/integration/created-impact-atomic.test.ts > created impact and response share the original SQLite transaction > replays identical immutable facts without renewing expiry or dropping the impact hash
+PreparedAdoptionPlanError: locks_checked.target_id must be printable ASCII
+ ❯ invalid src/host/agent-driven/created-source-ports.ts:313:9
+    311| 
+    312| function invalid(message: string): never {
+    313|   throw new PreparedAdoptionPlanError('INVALID_REQUEST', message);
+       |         ^
+    314| }
+    315| 
+ ❯ text src/host/agent-driven/created-source-ports.ts:317:56
+ ❯ assertPreparedAdoptionPlan src/host/agent-driven/created-source-ports.ts:440:5
+ ❯ CreatedSourceImpactStore.insertInTransaction src/host/agent-driven/created-source-impact-store.ts:365:16
+ ❯ src/host/agent-driven/created-source-impact-store.ts:356:46
+ ❯ RevisionStore.atomic src/host/projects/revision-store.ts:432:22
+ ❯ CreatedSourceImpactStore.create src/host/agent-driven/created-source-impact-store.ts:356:28
+ ❯ tests/agent-driven/integration/created-impact-atomic.test.ts:60:47
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+
+ FAIL  tests/agent-driven/integration/created-impact-atomic.test.ts > created impact and response share the original SQLite transaction > refuses the same impact identifier with a different request or immutable target
+PreparedAdoptionPlanError: locks_checked.target_id must be printable ASCII
+ ❯ invalid src/host/agent-driven/created-source-ports.ts:313:9
+    311| 
+    312| function invalid(message: string): never {
+    313|   throw new PreparedAdoptionPlanError('INVALID_REQUEST', message);
+       |         ^
+    314| }
+    315| 
+ ❯ text src/host/agent-driven/created-source-ports.ts:317:56
+ ❯ assertPreparedAdoptionPlan src/host/agent-driven/created-source-ports.ts:440:5
+ ❯ CreatedSourceImpactStore.insertInTransaction src/host/agent-driven/created-source-impact-store.ts:365:16
+ ❯ src/host/agent-driven/created-source-impact-store.ts:356:46
+ ❯ RevisionStore.atomic src/host/projects/revision-store.ts:432:22
+ ❯ CreatedSourceImpactStore.create src/host/agent-driven/created-source-impact-store.ts:356:28
+ ❯ tests/agent-driven/integration/created-impact-atomic.test.ts:66:47
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯
+
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  5 failed | 13 passed (18)
+   Start at  02:17:42
+   Duration  8.20s (transform 612ms, setup 0ms, collect 4.45s, tests 72ms, environment 0ms, prepare 2.50s)
+
+ ELIFECYCLE  Test failed. See above for more details.

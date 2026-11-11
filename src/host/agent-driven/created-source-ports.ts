@@ -437,7 +437,9 @@ export function assertPreparedAdoptionPlan(plan: PreparedAdoptionPlanV1): Prepar
     text(lock.lock_id, 'locks_checked.lock_id');
     text(lock.lock_type, 'locks_checked.lock_type');
     text(lock.scope, 'locks_checked.scope');
-    text(lock.target_id, 'locks_checked.target_id');
+    // The original LockService represents an unqualified project lock with the
+    // empty target. A shot lock still needs an actual target identity.
+    if(lock.scope!=='project'||lock.target_id!=='')text(lock.target_id, 'locks_checked.target_id');
     integer(lock.start_frame, 'locks_checked.start_frame');
     integer(lock.end_frame_exclusive, 'locks_checked.end_frame_exclusive');
     if (locks.has(lock.lock_id)) invalid('The plan names the same lock twice');

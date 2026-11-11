@@ -56,4 +56,17 @@ describe('created impact and response share the original SQLite transaction',()=
    expect(f.revisions.compose(db=>db.isTransaction)).toBe(false);
   }finally{f.revisions.close();}
  });
+ it('replays identical immutable facts without renewing expiry or dropping the impact hash',()=>{
+  const f=fixture();try{const first=f.impacts.create(f.input);
+   expect(f.impacts.create({...f.input,now:new Date(f.input.now.getTime()+10000)})).toEqual(first);
+   expect(f.impacts.requireActive(first.impact_id,f.input.now)).toEqual(first);
+  }finally{f.revisions.close();}
+ });
+ it('refuses the same impact identifier with a different request or immutable target',()=>{
+  const f=fixture();try{const first=f.impacts.create(f.input);
+   expect(()=>f.impacts.create({...f.input,request_digest:'c'.repeat(64)})).toThrow(/different immutable facts/);
+   expect(()=>f.impacts.create({...f.input,target_snapshot_id:'another-target'})).toThrow(/disagree/);
+   expect(f.impacts.read(first.impact_id)).toEqual(first);expect(f.counts()).toEqual({impact:1,fact:1,response:0});
+  }finally{f.revisions.close();}
+ });
 });

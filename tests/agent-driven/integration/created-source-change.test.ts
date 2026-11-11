@@ -79,6 +79,7 @@ describe("the D09 prepared adoption plan", () => {
     const accepted = VECTORS.cases.filter((entry) => entry.expect === "accepted");
     expect(accepted.length).toBeGreaterThan(0);
     for (const entry of accepted) {
+      expect(assertPreparedAdoptionPlan(entry.plan)).toBe(entry.plan);
       expect(preparedAdoptionPlanPreimage(entry.plan)).toBe(entry.preimage);
       expect(preparedAdoptionPlanDigest(entry.plan)).toBe(entry.digest);
     }

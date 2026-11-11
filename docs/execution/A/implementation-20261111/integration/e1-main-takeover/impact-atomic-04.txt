@@ -1,0 +1,19 @@
+
+> narralens@0.1.0 test /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+> vitest run --config vitest.config.ts tests/agent-driven/integration/created-impact-atomic.test.ts tests/agent-driven/integration/created-source-change.test.ts --maxWorkers=1 --minWorkers=1
+
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:1436816) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/created-impact-atomic.test.ts (7 tests) 39ms
+(node:1436856) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/created-source-change.test.ts (11 tests) 19ms
+
+ Test Files  2 passed (2)
+      Tests  18 passed (18)
+   Start at  02:18:51
+   Duration  7.68s (transform 563ms, setup 0ms, collect 4.16s, tests 58ms, environment 0ms, prepare 2.32s)
+
