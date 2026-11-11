@@ -1,0 +1,48 @@
+
+> narralens@0.1.0 test /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+> vitest run --config vitest.config.ts tests/agent-driven/integration/created-run-authority.test.ts --maxWorkers=1 --minWorkers=1 -t 'D09 real prepared'
+
+
+ RUN  v3.2.4 /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+
+(node:1788595) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+stdout | tests/agent-driven/integration/created-run-authority.test.ts > D09 real prepared succeeds with full plan digest, replays once and releases held source FDs
+{"case":"D09 real prepared cleanup","pid":1788595,"root":"/tmp/narralens-created-workspace-DJ8Jii","removed":true}
+
+stdout | tests/agent-driven/integration/created-run-authority.test.ts > D09 real prepared refuses changed plan without approval and releases held source FDs
+{"case":"D09 real prepared cleanup","pid":1788595,"root":"/tmp/narralens-created-workspace-jLW3qX","removed":true}
+
+stdout | tests/agent-driven/integration/created-run-authority.test.ts > D09 real prepared refuses changed package without approval and releases held source FDs
+{"case":"D09 real prepared cleanup","pid":1788595,"root":"/tmp/narralens-created-workspace-myoSUH","removed":true}
+
+stdout | tests/agent-driven/integration/created-run-authority.test.ts > D09 real prepared refuses changed rights without approval and releases held source FDs
+{"case":"D09 real prepared cleanup","pid":1788595,"root":"/tmp/narralens-created-workspace-Jtn5Ay","removed":true}
+
+stdout | tests/agent-driven/integration/created-run-authority.test.ts > D09 real prepared refuses changed selection without approval and releases held source FDs
+{"case":"D09 real prepared cleanup","pid":1788595,"root":"/tmp/narralens-created-workspace-AzrvCg","removed":true}
+
+stdout | tests/agent-driven/integration/created-run-authority.test.ts > D09 real prepared refuses changed expiry without approval and releases held source FDs
+{"case":"D09 real prepared cleanup","pid":1788595,"root":"/tmp/narralens-created-workspace-W6Sfqy","removed":true}
+
+stdout | tests/agent-driven/integration/created-run-authority.test.ts > D09 real prepared refuses changed closure without approval and releases held source FDs
+{"case":"D09 real prepared cleanup","pid":1788595,"root":"/tmp/narralens-created-workspace-cNPLvo","removed":true}
+
+stdout | tests/agent-driven/integration/created-run-authority.test.ts > D09 real prepared refuses a copied transaction object even while actual proof is held
+{"case":"D09 real prepared cleanup","pid":1788595,"root":"/tmp/narralens-created-workspace-qzg0p6","removed":true}
+
+ ✓ tests/agent-driven/integration/created-run-authority.test.ts (25 tests | 17 skipped) 58713ms
+   ✓ D09 real prepared succeeds with full plan digest, replays once and releases held source FDs  9851ms
+   ✓ D09 real prepared refuses changed plan without approval and releases held source FDs  6474ms
+   ✓ D09 real prepared refuses changed package without approval and releases held source FDs  6507ms
+   ✓ D09 real prepared refuses changed rights without approval and releases held source FDs  5790ms
+   ✓ D09 real prepared refuses changed selection without approval and releases held source FDs  7478ms
+   ✓ D09 real prepared refuses changed expiry without approval and releases held source FDs  6819ms
+   ✓ D09 real prepared refuses changed closure without approval and releases held source FDs  6613ms
+   ✓ D09 real prepared refuses a copied transaction object even while actual proof is held  9180ms
+
+ Test Files  1 passed (1)
+      Tests  8 passed | 17 skipped (25)
+   Start at  05:01:18
+   Duration  59.25s (transform 1.03s, setup 0ms, collect 409ms, tests 58.71s, environment 0ms, prepare 32ms)
+

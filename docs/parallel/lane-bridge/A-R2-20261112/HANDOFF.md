@@ -223,3 +223,8 @@ Frozen tests eeeec319c38e5767e847d0939b4094e9baae28ce ran once: selected8, succe
 ## R2-BRIDGE-D09-REAL-002 returned FAILED
 
 Canonical comparison repair frozen10d97994df80ebc8e2ad95aaeba912709690b345; pure ordering regression and tsc pass. Reserved real002 ran once: actual success/replay/FD, wrong-transaction and four mutations pass; rights/selection exact expected errors mismatch, so2failed/6passed and their post-refusal assertions NOT_RUN. All8 roots and observed child processes cleaned, inputs unchanged. Raw evidence/case mapping in evidence/d09-real-002/REPORT.md; slot returned msg_eb35365f2f63. MAIN disposition requested for test-only expectation correction; no new run or source edit.
+
+
+## D09 real003 bounded candidate delivered
+
+Implementation10d97994df80ebc8e2ad95aaeba912709690b345, exact tested freeze0e07402859d8daef96eda391963e0e1b8c192c21: one reserved real003 run8/8 selected pass,17 unrelated filtered, no selected skip; all state/FD checks passed. Inputs/HEAD unchanged, all8 roots and observed descendants cleaned, slot returned msg_6cdc50d3a95e. Formal scoped author report evidence/d09-real-003/REPORT.md; prior001/002 remain failed history. MAIN dependency hashes and service81249 archive unchanged. Production composition, independent review and full R2/A acceptance remain pending; no B.
