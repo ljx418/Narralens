@@ -450,6 +450,8 @@ interface SessionState {
   documentEpoch: number;
   document: NativeDocumentCommitted | null;
   hydrationEpoch: number;
+  /** The document epoch the accepted hydration belonged to. */
+  hydrationDocumentEpoch: number;
   parts: Record<NativeExpectedPartKind, NativeHydrationPartObservation>;
   selection: NativeSelectionObservation | null;
   selectionVersion: number;
@@ -550,6 +552,7 @@ export class NativeObservationService implements NativeContextPort, NativeObserv
       documentEpoch: -1,
       document: null,
       hydrationEpoch: 0,
+      hydrationDocumentEpoch: -1,
       parts: emptyParts(),
       selection: null,
       selectionVersion: 0,
@@ -634,9 +637,11 @@ export class NativeObservationService implements NativeContextPort, NativeObserv
     if (document.document_epoch < session.documentEpoch) {
       return { accepted: false, reason: 'DOCUMENT_EPOCH_STALE', sequence, ack: null };
     }
-    if (session.hydrationEpoch > 0 && document.document_epoch > session.hydrationEpoch) {
+    if (session.hydrationDocumentEpoch >= 0 && document.document_epoch > session.hydrationDocumentEpoch) {
       // The document moved past the hydration that was already accepted: those parts
-      // describe an older document and cannot be kept.
+      // describe an older document and cannot be kept. The comparison is against the
+      // document epoch the hydration belonged to, never against the hydration counter:
+      // the two count different things.
       this.#invalidateParts(session, 'pending');
     }
     session.documentEpoch = document.document_epoch;
@@ -675,6 +680,7 @@ export class NativeObservationService implements NativeContextPort, NativeObserv
       return { accepted: false, reason: 'HYDRATION_EPOCH_NOT_MONOTONIC', sequence, ack: null };
     }
     session.hydrationEpoch = hydration.hydration_epoch;
+    session.hydrationDocumentEpoch = hydration.document_epoch;
     if (session.documentEpoch < 0) session.documentEpoch = hydration.document_epoch;
     session.parts = { ...hydration.parts };
     const ack = await this.#acknowledge(session, sequence);
@@ -912,6 +918,7 @@ export class NativeObservationService implements NativeContextPort, NativeObserv
     session.documentEpoch = -1;
     session.document = null;
     session.hydrationEpoch = 0;
+    session.hydrationDocumentEpoch = -1;
     session.parts = emptyParts();
     session.selection = null;
     session.mapped = null;
