@@ -1,0 +1,22 @@
+{
+  "base": "8f179d8cb1e45c79eb3dcff9186a6dd244c86472",
+  "fix": "clock reread after creative closure and again after common guard immediately before project CAS; no stale authority timestamp reused",
+  "before": "real016 old code 1 failure (commit did not reject expired authority)",
+  "after": "real017 2 real Host tests pass, closure traversal and old final filesystem verification expiry",
+  "authority_unchanged": [
+    "revision",
+    "Approval",
+    "impact",
+    "checkpoint",
+    "outbox",
+    "idempotency",
+    "prepared transaction"
+  ],
+  "typecheck21": 0,
+  "external": "REVIEW_PENDING",
+  "open": [
+    "N3 cleanup",
+    "full29 current regression",
+    "production composition/specialized recovery/nativeAck/full A"
+  ]
+}

@@ -1,0 +1,18 @@
+
+> narralens@0.1.0 test /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+> vitest run --config vitest.config.ts tests/agent-driven/integration/created-source-adoption.test.ts --maxWorkers=1 --minWorkers=1 -t 'expiring during the final creative closure scan|authority that expires during final synchronous'
+
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:1669365) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/created-source-adoption.test.ts (29 tests | 27 skipped) 17724ms
+   ✓ actual closed created-source commit and publisher > refuses authority expiring during the final creative closure scan  8364ms
+   ✓ actual closed created-source commit and publisher > refuses an authority that expires during final synchronous file verification  9359ms
+
+ Test Files  1 passed (1)
+      Tests  2 passed | 27 skipped (29)
+   Start at  04:02:56
+   Duration  25.14s (transform 2.99s, setup 0ms, collect 5.55s, tests 17.72s, environment 0ms, prepare 1.21s)
+

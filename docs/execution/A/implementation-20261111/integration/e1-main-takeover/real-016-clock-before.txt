@@ -1,0 +1,69 @@
+
+> narralens@0.1.0 test /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+> vitest run --config vitest.config.ts tests/agent-driven/integration/created-source-adoption.test.ts --maxWorkers=1 --minWorkers=1 -t 'expiring during the final creative closure scan'
+
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:1667995) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/agent-driven/integration/created-source-adoption.test.ts (29 tests | 1 failed | 28 skipped) 9543ms
+   × actual closed created-source commit and publisher > refuses authority expiring during the final creative closure scan 9543ms
+     → expected [Function] to throw an error
+   ↓ actual closed created-source commit and publisher > rolls back checkpoint, attempt and every authority after a post-checkpoint transaction failure
+   ↓ actual closed created-source commit and publisher > poisons a swallowed read of another intake inside the project commit scope
+   ↓ actual closed created-source commit and publisher > rejects a real intake update after approval without consuming database authorities
+   ↓ actual closed created-source commit and publisher > rejects a predecessor gate changed to pending after approval
+   ↓ actual closed created-source commit and publisher > rejects a predecessor gate changed to rejected after approval
+   ↓ actual closed created-source commit and publisher > persists the same succeeded attempt in workflow checkpoint and a freshly opened SQLite reader
+   ↓ actual closed created-source commit and publisher > publishes complete native source, commits once, preserves R1 geometry and replays without a second commit
+   ↓ actual closed created-source commit and publisher > refuses a prepared transaction of another kind before publishing source
+   ↓ actual closed created-source commit and publisher > refuses a workflow attempt detached from the actual prepared job
+   ↓ actual closed created-source commit and publisher > refuses JSON-cloned publication proof without moving database authorities
+   ↓ actual closed created-source commit and publisher > refuses author bytes changed after publication even while database base is unchanged
+   ↓ actual closed created-source commit and publisher > refuses current selection changed after publication
+   ↓ actual closed created-source commit and publisher > refuses a symlink replacement of the committed snapshot source
+   ↓ actual closed created-source commit and publisher > rolls every database authority back if an actual post-consume write fails
+   ↓ actual closed created-source commit and publisher > poisons the outer transaction when a project-bound repository guard failure is swallowed
+   ↓ actual closed created-source commit and publisher > poisons the owner if a real scope is used against another database even when the error is swallowed
+   ↓ actual closed created-source commit and publisher > invalidates an authentic joined scope when its successful commit ends
+   ↓ actual closed created-source commit and publisher > does not expose mutable issuer, guard or geometry authority on a real publication token
+   ↓ actual closed created-source commit and publisher > refuses an authority that expires during final synchronous file verification
+   ↓ actual closed created-source commit and publisher > retains the original backup inode when a same-byte replacement happens after rename
+   ↓ actual closed created-source commit and publisher > refuses a fully rehashed approved plan that lies about film
+   ↓ actual closed created-source commit and publisher > refuses a fully rehashed approved plan that lies about settings
+   ↓ actual closed created-source commit and publisher > refuses a fully rehashed approved plan that lies about captions
+   ↓ actual closed created-source commit and publisher > refuses a fully rehashed approved plan that lies about native_plan
+   ↓ actual closed created-source commit and publisher > refuses a fully rehashed approved plan that lies about rights
+   ↓ actual closed created-source commit and publisher > refuses a fully rehashed approved plan that lies about consumer
+   ↓ actual closed created-source commit and publisher > refuses a fully rehashed approved plan that lies about upstream
+   ↓ actual closed created-source commit and publisher > refuses a fully rehashed approved plan that lies about ranges
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/created-source-adoption.test.ts > actual closed created-source commit and publisher > refuses authority expiring during the final creative closure scan
+AssertionError: expected [Function] to throw an error
+
+- Expected: 
+null
+
++ Received: 
+undefined
+
+ ❯ tests/agent-driven/integration/created-source-adoption.test.ts:149:68
+    147|   });
+    148|   vi.useFakeTimers({toFake:['Date']});vi.setSystemTime(expires-100);
+    149|   try{expect(()=>f.revisions.commitPreparedCreatedSource(f.input)).toT…
+       |                                                                    ^
+    150|    expect(f.revisions.activeCommit(f.projectId)?.revision).toBe(1);exp…
+    151|    expect(await workflow.readWorkflow(f.projectId,f.owner)).toEqual(be…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 28 skipped (29)
+   Start at  04:01:59
+   Duration  16.89s (transform 3.12s, setup 0ms, collect 5.67s, tests 9.54s, environment 0ms, prepare 1.10s)
+
+ ELIFECYCLE  Test failed. See above for more details.

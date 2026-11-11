@@ -632,12 +632,15 @@ export class RevisionStore {
         });
         // Disk/FD verification and BEGIN IMMEDIATE can cross an expiry. The final
         // decision uses a fresh Host clock after the last synchronous world check.
-        const commitNow=new Date(),commitSeconds=Math.floor(commitNow.getTime()/1000);
-        if(!Number.isFinite(commitNow.getTime())||commitNow.getTime()>=Date.parse(impact.expires_at)
-          ||commitNow.getTime()>=Date.parse(plan.expires_at)||commitSeconds>=approval.expires_at
-          ||commitSeconds>=grant.expires_at||commitSeconds>=confirmation.expires_at
-          ||commitSeconds>=grantConfirmation.expires_at||commitSeconds<confirmation.issued_at
-          ||commitSeconds<grantConfirmation.issued_at)fail('AUTHORITY_EXPIRED_AT_COMMIT');
+        const assertLiveAuthority = (clock: Date): void => {
+          const seconds=Math.floor(clock.getTime()/1000);
+          if(!Number.isFinite(clock.getTime())||clock.getTime()>=Date.parse(impact.expires_at)
+            ||clock.getTime()>=Date.parse(plan.expires_at)||seconds>=approval.expires_at
+            ||seconds>=grant.expires_at||seconds>=confirmation.expires_at
+            ||seconds>=grantConfirmation.expires_at||seconds<confirmation.issued_at
+            ||seconds<grantConfirmation.issued_at)fail('AUTHORITY_EXPIRED_AT_COMMIT');
+        };
+        assertLiveAuthority(new Date());
         // Re-read the current intake, including question/answer heads, inside the
         // same final transaction. A published source or approval never freezes the
         // user's ability to change the brief, nor grants permission to ignore it.
@@ -646,7 +649,10 @@ export class RevisionStore {
         const intakeHead = tx.get('intake_head', {intake_id:creation.request.intake_id});
         if (!intakeHead || canonicalDigest(creativeInputClosure(tx,creation.request.intake_id,intakeHead.current_version))!==execution.input_digest)
           fail('CREATIVE_INPUT_CHANGED');
-        const guardFacts=readGuardFacts(tx,input.project_id,execution,grant.principal_id,commitSeconds);
+        // Closure traversal can itself cross expiry; the common guard must see
+        // the current clock too, rather than the pre-traversal authorization time.
+        assertLiveAuthority(new Date());
+        const guardFacts=readGuardFacts(tx,input.project_id,execution,grant.principal_id,Math.floor(Date.now()/1000));
         const narrow=readNarrowEffectFacts(tx,{project_id:input.project_id,run_id:execution.run_id,
           package_id:review.review_id,approval_id:input.approval_id,impact_id:input.impact_id},id=>{
             const current=this.#db.prepare('SELECT state FROM impact WHERE impact_id=? AND project_id=?').get(id,input.project_id);
@@ -654,6 +660,9 @@ export class RevisionStore {
           });
         guardExecution(execution,{kind:'approved_prepared_adoption',package_id:review.review_id,
           impact_id:input.impact_id,approval_id:input.approval_id},{...guardFacts,narrow});
+        // The common gate also traverses durable rows. Linearize consumption only
+        // after ALL validation, with one last fresh clock immediately before CAS.
+        const commitNow=new Date();assertLiveAuthority(commitNow);
         at=commitNow.toISOString();
         const changed = this.#db.prepare("UPDATE project_state SET revision=revision+1,source_digest=?,updated_at=? WHERE project_id=? AND revision=? AND source_digest=? AND CAST(control_revision AS INTEGER)=? AND attention=0")
           .run(plan.target_source_digest,at,input.project_id,plan.base_revision,plan.base_source_digest,plan.control_revision);

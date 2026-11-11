@@ -132,6 +132,29 @@ async function fixture(options:{transactionKind?:'edit'|'snapshot_publish';mutat
 }
 
 describe('actual closed created-source commit and publisher',()=>{
+ it('refuses authority expiring during the final creative closure scan',async()=>{
+  const f=await fixture(),workflow=new FixedWorkflowService({repository:f.repo});
+  const before=await workflow.readWorkflow(f.projectId,f.owner),outbox=f.revisions.outboxRowCount();
+  const expires=f.revisions.compose(db=>Number(db.prepare('SELECT expires_at FROM cp_a0_approval WHERE approval_id=?').get(f.input.approval_id)!.expires_at))*1000;
+  const original=ProductSqliteRepository.prototype.joinCreatedSourceCommit;
+  let crossed=false;
+  vi.spyOn(ProductSqliteRepository.prototype,'joinCreatedSourceCommit').mockImplementation(function<T>(this:ProductSqliteRepository,scope:CreatedSourceCommitScope,work:(tx:ProductTransaction)=>T):T{
+   return original.call(this,scope,(tx:ProductTransaction)=>work(new Proxy(tx,{get(target,property,receiver){
+    if(property!=='list')return Reflect.get(target,property,receiver);
+    return ((...args:Parameters<ProductTransaction['list']>)=>{const rows=Reflect.apply(target.list,target,args);
+     if(args[0]==='question_head'){crossed=true;vi.setSystemTime(expires);}return rows;}) as ProductTransaction['list'];
+   }}))) as T;
+  });
+  vi.useFakeTimers({toFake:['Date']});vi.setSystemTime(expires-100);
+  try{expect(()=>f.revisions.commitPreparedCreatedSource(f.input)).toThrow('AUTHORITY_EXPIRED_AT_COMMIT');expect(crossed).toBe(true);
+   expect(f.revisions.activeCommit(f.projectId)?.revision).toBe(1);expect(f.revisions.outboxRowCount()).toBe(outbox);
+   expect(await workflow.readWorkflow(f.projectId,f.owner)).toEqual(before);
+   expect(f.revisions.projectTransaction(f.input.transaction_id)?.state).toBe('prepared');
+   expect(f.revisions.compose(db=>db.prepare('SELECT state FROM impact WHERE impact_id=?').get(f.input.impact_id)?.state)).toBe('active');
+   expect(f.revisions.compose(db=>db.prepare('SELECT state FROM cp_a0_approval WHERE approval_id=?').get(f.input.approval_id)?.state)).toBe('active');
+   expect(new OperationIdempotencyStore(f.revisions.compose(db=>db)).recall(f.projectId,'agent.v1:change.apply',f.input.idempotency_key)).toBeUndefined();
+  }finally{vi.useRealTimers();}
+ },120000);
  it('rolls back checkpoint, attempt and every authority after a post-checkpoint transaction failure',async()=>{
   const f=await fixture(),workflow=new FixedWorkflowService({repository:f.repo});
   const before=await workflow.readWorkflow(f.projectId,f.owner),outbox=f.revisions.outboxRowCount();
