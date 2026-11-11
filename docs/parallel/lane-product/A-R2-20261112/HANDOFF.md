@@ -166,3 +166,78 @@ Commands actually run, with cwd, argv, exit and log hashes:
 NOT_RUN in this candidate, by policy and by slot: native hydration build, browser, Host,
 ffmpeg, media, full gate, contract gate, and every real E2E. The generated expected
 library is not present and the source wrapper is not claimed executable.
+
+---
+
+# R2 state at the settlement point (PRODUCT Claude)
+
+Writer: exactly one, this child (`task_3eaa8996288a` / `ctx_e1ce32b44d5c` /
+`term_a096c007-df5d-464b-8ca2-3ecf3cd97f01`). The parent is read-only over source,
+index and runtime. Base `39201d932cd10e0ce60b023bdde2f233dfb009e5`, branch
+`agent-driven/a-r1-product`. No branch, merge, reset, stash or push was ever used;
+every commit adds explicit paths only.
+
+## Commits
+
+| Commit | What it carries |
+|---|---|
+| `e0aaa242c9d1b19211366a53ce8d6c989b07a912` | The first candidate: the closed observation envelope, the three original event kinds, the retained-source expected interface, the acknowledgement store, the two contract files, the six pinned candidate inputs and fourteen pure unit cases. |
+| `86a933e7840c5ed4f4946410dc5d1b3f184e1ff3` | MAIN's three corrections: the real retained file identity and the closure guard, the proof's membership and immutable binding snapshot, the loader's approval chain with a verified-byte private import, and the required negatives. |
+| `6335749a5e44b42def191b9b38c560aa3baf347e` | The `+1` Gateway observation ingress, the controlled-session adaptation, the Studio bridge that reports into it, the tracked pin and the build tool. |
+| `e86c75ba7f6c18eafea3ab1e8406e98bf633ac5b` | The authorised isolated copy of the pinned offline toolchain, byte-identical to the historical closure. |
+| `a4d8295dad96b9e4c6ced10eb711532009619f61` | The L02 selection version port and the app-side separation of the decision, the commit and the native load. |
+| `24bd9b8bb866552f2aaec3308647945006ec887d` | The build staging defect and the two reviewed defects: the session liveness in the selection version, and the adoption attribution. |
+| `af1aa2b8906e7acde5fe6376d4a6643b2c5403cc` | The client's refusal of an adoption without an impact, and the build001 process evidence as a file. |
+
+## Released path coverage
+
+Twenty-two of the exact thirty-one released paths are written. Nothing outside the
+released list is written, apart from this ticket's own documentation prefix. The eight
+untouched paths and why:
+
+- `src/app/m5/GatewayApiClient.ts` — the observation runs from the Studio to the Host,
+  not from the workbench, so the app's Gateway client has nothing to add.
+- `src/app/observation/NativeSyncIndicator.tsx` — the existing implementation already
+  refuses to say "loaded" for an acknowledgement that does not match the current
+  revision, snapshot, source digest and selection.
+- `src/host/m5/controlled-studio-browser.ts` — the existing transport already adds the
+  native CSRF proof to `/narralens/native/` paths, so the observation needs no change
+  there.
+- `src/host/m5/managed-editor.mjs`, `.d.mts`, `-pin.json`, `-dist.tar.gz` and
+  `src/host/m5/isolated-studio.ts` — these carry the **Studio UI** archive. The pinned
+  archive is the p2 candidate, which carries the document observation but not the 013
+  hydration extension, so the four-part hydration events need the f699 archive. That
+  archive may only be built and pinned after a real build under a MAIN grant, and no
+  Studio UI build was granted. They are therefore deliberately unchanged, and the
+  dependency is reported rather than papered over.
+- `tests/agent-driven/integration/created-workbench-headless.test.ts` — a headless case
+  needs a real Host, which needs the slot.
+
+## Open dependencies, owned elsewhere
+
+- **BRIDGE**: the production committed reader that returns the retained open
+  descriptors and the closure guard, and the injection of the same observation service
+  instance into the creation application. The exact port shape was reported to MAIN
+  and MAIN forwarded it to BRIDGE.
+- **MAIN**: the publisher's use of the selection version port, and the four capability
+  producers, without which no Run is available.
+- **MAIN**: the Studio UI build for the f699 archive, and then the browser and Host
+  evidence.
+
+## Evidence, and what is NOT_RUN
+
+Light and real: `corepack pnpm exec tsc --noEmit` exit 0; the observation UI, the
+native acknowledgement, the workbench review and the contract suites exit 0 with 162
+cases; the toolchain copy is byte-identical to the historical closure; the
+acknowledgement path, the selection version, the release, the attribution and the
+guards are exercised over real files and real descriptors.
+
+NOT_RUN: the expected library build (the first attempt failed on my staging defect and
+the fix awaits a fresh grant), the Studio UI build, the browser, the real Host, ffmpeg,
+the media, the full gate and the real end-to-end Run. The pinned 015 candidate is not
+built, so the helper under test in the unit cases is a local stand-in for the pinned
+API: the guards, the approval chain and the cleanup are what those cases prove, not the
+015 math.
+
+The unauthorized run of the M5 studio gateway suite, the first build failure and their
+process evidence are kept as they are, in `logs/`, and neither is re-run.

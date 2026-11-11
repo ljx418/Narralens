@@ -13,6 +13,18 @@
     "event": { "type": "object" }
   },
   "$defs": {
+    "NativeObservationOutcome": {
+      "description": "What the ingress answered. The transport succeeded when the envelope was closed and well formed; whether the observation advanced the Host's own state is a separate answer, and it never carries an identity of its own.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["format", "accepted", "reason", "sequence"],
+      "properties": {
+        "format": { "const": "narralens.native-observation-outcome@1" },
+        "accepted": { "type": "boolean" },
+        "reason": { "type": "string", "minLength": 1 },
+        "sequence": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 }
+      }
+    },
     "NativeDocumentObservation": {
       "description": "The original p2 NarralensDocumentState: a committed document DOM or an invalidation.",
       "type": "object",
