@@ -188,10 +188,16 @@ every commit adds explicit paths only.
 | `a4d8295dad96b9e4c6ced10eb711532009619f61` | The L02 selection version port and the app-side separation of the decision, the commit and the native load. |
 | `24bd9b8bb866552f2aaec3308647945006ec887d` | The build staging defect and the two reviewed defects: the session liveness in the selection version, and the adoption attribution. |
 | `af1aa2b8906e7acde5fe6376d4a6643b2c5403cc` | The client's refusal of an adoption without an impact, and the build001 process evidence as a file. |
+| `dbc4eff5b39241379718537b7c3a5e52ef411dcd` | The stale session refuses the selection version instead of answering zero. |
+| `e6bdb3d6204f4161a1e29ed56f5df8302aace927` | The pid reconciliation and the command idle boundary, as files. |
+| `ec2106c31ca8fe272f215a492669b4950cec6736` | The appended factual corrections to that evidence, and the cases over the real Studio bridge source. |
+| `8c408e72544b0e2f534497c26de3275c68c703eb` | The cases over the controlled session that carries the observation binding. |
+| `c7b77568f12ca56fc00fabd9868c7eb87b45c807` | The shipped observation contract made strict-mode valid, and the cases over it and over the tracked pin. |
+| `b0dc5f8c1f8bd850be9b5b2ed12cbdbabb5cdacb` | One body check shared by the ingress and the service. |
 
 ## Released path coverage
 
-Twenty-two of the exact thirty-one released paths are written. Nothing outside the
+Twenty-three of the exact thirty-one released paths are written. Nothing outside the
 released list is written, apart from this ticket's own documentation prefix. The eight
 untouched paths and why:
 
@@ -210,8 +216,9 @@ untouched paths and why:
   archive may only be built and pinned after a real build under a MAIN grant, and no
   Studio UI build was granted. They are therefore deliberately unchanged, and the
   dependency is reported rather than papered over.
-- `tests/agent-driven/integration/created-workbench-headless.test.ts` — a headless case
-  needs a real Host, which needs the slot.
+- `tests/agent-driven/integration/created-workbench-headless.test.ts` — it is written: a
+  real created project, a real Host, no native acknowledgement, an empty durable
+  table. It starts a Host, so it needs the slot and is NOT_RUN.
 
 ## Open dependencies, owned elsewhere
 
