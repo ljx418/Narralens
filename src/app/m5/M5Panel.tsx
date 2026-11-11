@@ -19,9 +19,13 @@ import {
   type LocalAssetCandidate,
   type LocalAssetInventoryItem,
   type LocalAssetRegistrationRequest,
-  type PreparedPreviewMediaFactsV1,
-  type PreviewMediaDescriptorV1,
 } from "../agent-workbench-client.js";
+// The prepared-preview DTOs come from the public contract, not from the app and not
+// from the host: there is one definition and the app checks against it.
+import type {
+  PreparedPreviewMediaFactsV1,
+  PreviewMediaDescriptorV1,
+} from "../../contracts/prepared-preview.js";
 import { WorkflowTopBar } from "../observation/WorkflowTopBar.js";
 import { CreativeReviewPanel } from "../observation/CreativeReviewPanel.js";
 import { LocalAssetRegistrationPanel } from "../observation/LocalAssetRegistrationPanel.js";

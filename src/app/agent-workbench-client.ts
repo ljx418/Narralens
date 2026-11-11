@@ -11,6 +11,11 @@ import type {
 // DTO rules: it asks the contract, and an answer that does not satisfy the contract is
 // refused instead of being cast into the shape the panel would like.
 import { validateAgentDefinition } from "../contracts/agent-driven-validator.js";
+// The public prepared-preview DTOs: one definition, owned by the contract.
+import type {
+  PreparedPreviewMediaFactsV1,
+  PreviewMediaDescriptorV1,
+} from "../contracts/prepared-preview.js";
 // MEDIA owns the preview receipt, the media facts and the descriptor. They are consumed
 // here as they are: this client does not define a second copy of that protocol.
 import { GatewayApiError } from "./m5/GatewayApiClient.js";
@@ -115,70 +120,26 @@ export interface ReviewPartDescribeInput {
 }
 
 /* -------------------------------------------------------------------------------------- */
+/* -------------------------------------------------------------------------------------- */
 /* The preview descriptor, as this app sees it on the wire                                    */
 /* -------------------------------------------------------------------------------------- */
 
 /**
- * The measured facts of one prepared product.
+ * The prepared-preview DTOs are the *public* contract's own.
  *
- * MEDIA owns these facts. The shape below is the *consumer's* view of the wire format
- * that CR-R1-001 §8 froze, and every field of it is checked before the app believes it.
- *
- * The app may not import MEDIA's own module: `src/app` may not depend on `src/host`
- * (the frozen dependency-direction rule of `tests/architecture/m2.1-fitness.test.ts`,
- * fitness 1). MAIN has therefore decided (msg `6bd5210f9a44` and CR-R1-002) that a
- * *public* module `src/contracts/prepared-preview.ts` will carry the authoritative
- * descriptor, timeline, fact and receipt types, and that `assembly-ports` will
- * re-export them.
- *
- * These local declarations are therefore **temporary**: they are the app's stand-in
- * until the parent has integrated that module, and they must be replaced by an import
- * of it as soon as it is there. They are a consumer's check, not a second protocol.
+ * MAIN published `src/contracts/prepared-preview.ts` (CR-R1-002) with the authoritative
+ * descriptor, timeline, fact and receipt types, because the app may not depend on
+ * `src/host/**` (the frozen dependency-direction rule of
+ * `tests/architecture/m2.1-fitness.test.ts`, fitness 1) and MEDIA's own module lives
+ * there. The app therefore consumes that one public definition — it does not keep a
+ * second copy of the protocol, and it does not check the bytes against a shape of its
+ * own.
  */
-export type PreparedPreviewMediaFactsV1 =
-  | {
-    readonly kind: "video";
-    readonly fps: { readonly num: number; readonly den: number };
-    readonly frame_count: number;
-  }
-  | {
-    readonly kind: "audio";
-    readonly sample_rate: number;
-    readonly sample_count: number;
-    readonly channels: number;
-  }
-  | { readonly kind: "text" }
-  | { readonly kind: "json" };
-
-/** The timeline a prepared product belongs to. It is measured, never defaulted. */
-export interface PreparedPreviewTimelineV1 {
-  readonly fps: { readonly num: number; readonly den: number };
-  readonly frame_count: number;
-}
-
-/**
- * The descriptor of one prepared artifact (CR-R1-001 §8).
- *
- * It is the only thing that may authorize a preview: the bytes are checked against it
- * before anything is shown, and a descriptor whose body does not satisfy the frozen
- * shape is refused rather than cast.
- */
-export interface PreviewMediaDescriptorV1 {
-  readonly format: "narralens.review-media-descriptor@1";
-  readonly project_id: string;
-  readonly run_id: string;
-  readonly package_id: string;
-  readonly package_version: number;
-  readonly package_digest: string;
-  readonly part: ReviewPart;
-  readonly receipt_digest: string;
-  readonly object_id: string;
-  readonly content_type: string;
-  readonly bytes: number;
-  readonly sha256: string;
-  readonly timeline: PreparedPreviewTimelineV1;
-  readonly media_facts: PreparedPreviewMediaFactsV1;
-}
+export type {
+  PreparedPreviewMediaFactsV1,
+  PreparedPreviewTimelineV1,
+  PreviewMediaDescriptorV1,
+} from "../contracts/prepared-preview.js";
 
 /** A failure that is not a failure of the call, but a missing producer. */
 export function isUnavailable(reason: unknown): boolean {

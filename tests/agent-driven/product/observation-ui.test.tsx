@@ -1358,3 +1358,105 @@ describe("the controlled listings, page by page", () => {
     expect(screen.getByRole("alert").textContent).toContain("已过期");
   });
 });
+
+describe("the controlled listings, at the edges", () => {
+  it("starts the inventory again at the first page when its cursor has expired", async () => {
+    const asked: Array<string | undefined> = [];
+    const client = gatewayStub({
+      uiCall: async (surface, operation, input) => {
+        const key = `${surface}/${operation}`;
+        if (key === "local-assets.v1/local-assets.read.ui") {
+          const cursor = (input as { cursor?: string }).cursor;
+          asked.push(cursor);
+          if (cursor !== undefined) {
+            throw new GatewayApiError(410, "CURSOR_EXPIRED", "游标已过期。");
+          }
+          return { ...INVENTORY, cursor_next: "cursor-2" };
+        }
+        const answer = DEFAULT_ANSWERS[key];
+        if (answer === undefined) {
+          throw new GatewayApiError(503, "CAPABILITY_UNAVAILABLE", "该能力当前不可用，未伪造可用。");
+        }
+        return answer;
+      },
+    });
+    mountPanel(client);
+    await waitFor(() => { expect(asked).toHaveLength(1); });
+    fireEvent.click(screen.getByRole("button", { name: "加载更多已登记素材" }));
+    await waitFor(() => { expect(asked).toEqual([undefined, "cursor-2", undefined]); });
+    expect(screen.getByRole("alert").textContent).toContain("已过期");
+  });
+
+  it("discards the cursors and the pages when the project changes", async () => {
+    const asked: Array<{ project: string; cursor?: string | undefined }> = [];
+    const client = gatewayStub({
+      uiCall: async (surface, operation, input) => {
+        const key = `${surface}/${operation}`;
+        if (key === "local-assets.v1/local-source-files.read") {
+          const request = input as { project_id: string; cursor?: string };
+          asked.push({ project: request.project_id, cursor: request.cursor });
+          return request.project_id === "project-1"
+            ? { ...LISTING, cursor_next: "cursor-2" }
+            : { ...LISTING, project_id: "project-2", items: [], cursor_next: null };
+        }
+        const answer = DEFAULT_ANSWERS[key];
+        if (answer === undefined) {
+          throw new GatewayApiError(503, "CAPABILITY_UNAVAILABLE", "该能力当前不可用，未伪造可用。");
+        }
+        return answer;
+      },
+    });
+    const view = mountPanel(client);
+    await waitFor(() => { expect(asked.length).toBeGreaterThan(0); });
+    expect(asked[0]!.project).toBe("project-1");
+
+    view.rerender(<M5Panel client={client} targetProjectId="project-2" />);
+    await waitFor(() => {
+      expect(asked.some((entry) => entry.project === "project-2")).toBe(true);
+    });
+    // The other project's cursor was not carried over.
+    expect(asked.filter((entry) => entry.project === "project-2")
+      .every((entry) => entry.cursor === undefined)).toBe(true);
+  });
+
+  it("does not let a late page of the previous project land on the new one", async () => {
+    let resolveOld: ((value: unknown) => void) | null = null;
+    const client = gatewayStub({
+      uiCall: async (surface, operation, input) => {
+        const key = `${surface}/${operation}`;
+        if (key === "local-assets.v1/local-source-files.read") {
+          const request = input as { project_id: string; cursor?: string };
+          if (request.project_id === "project-1" && request.cursor !== undefined) {
+            return await new Promise((resolve) => { resolveOld = resolve; });
+          }
+          return request.project_id === "project-1"
+            ? { ...LISTING, cursor_next: "cursor-2" }
+            : { ...LISTING, project_id: "project-2", items: [], cursor_next: null };
+        }
+        const answer = DEFAULT_ANSWERS[key];
+        if (answer === undefined) {
+          throw new GatewayApiError(503, "CAPABILITY_UNAVAILABLE", "该能力当前不可用，未伪造可用。");
+        }
+        return answer;
+      },
+    });
+    const view = mountPanel(client);
+    await waitFor(() => {
+      expect(screen.getByRole("radio", { name: /麦克风录音 A/ })).toBeTruthy();
+    });
+    // The second page of the first project is on its way…
+    fireEvent.click(screen.getByRole("button", { name: "加载更多候选" }));
+    // …and the project changes while it is.
+    view.rerender(<M5Panel client={client} targetProjectId="project-2" />);
+    await waitFor(() => {
+      expect(screen.queryByRole("radio", { name: /麦克风录音 A/ })).toBeNull();
+    });
+    // The late page arrives: it must not land on the new project.
+    await act(async () => {
+      resolveOld?.({ ...LISTING, items: [{ ...LISTING.items[0]!, candidate_id: "cand-old" }], cursor_next: null });
+      await Promise.resolve();
+    });
+    expect(screen.queryByRole("radio", { name: /麦克风录音 A/ })).toBeNull();
+    expect(screen.queryByRole("radio", { name: /cand-old/ })).toBeNull();
+  });
+});
