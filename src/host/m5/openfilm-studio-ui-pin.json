@@ -39,10 +39,16 @@
       "tools/agent-driven/product/native-inputs/native-pure.entry.ts",
       "tools/agent-driven/product/native-inputs/vite.expected.config.mjs"
     ],
-    "inputs_sha256": "",
-    "build_sha256": "",
-    "modules": {},
-    "approval": "PENDING_BUILD",
+    "inputs_sha256": "c5b53099b2f94fc12b5f9d184c0c8c2b12c51349051eddf67794fb0866e8dfd1",
+    "build_sha256": "13c803b00dc4d0dc40d62209dc03b7f0d2707404a7cce6fcd4c3739a8daf8c95",
+    "modules": {
+      "NATIVE_LICENSE.txt": "4f39fecc5d074a4795bb7c55c5aaad1a4505b5e022ae6c2c3b55b4f26e7c43fc",
+      "build-manifest.json": "13c803b00dc4d0dc40d62209dc03b7f0d2707404a7cce6fcd4c3739a8daf8c95",
+      "expected-projection.d.ts": "0f5f565a3d8b70de995aeb0dfdfb6052acad53cbf452c8d70168f555a8937f80",
+      "expected-projection.mjs": "3500b1d6485791b13ec9364c6eb80740531142c16754877e21923ad73e9d494e",
+      "native-pure-library.mjs": "9cb18aebe9a5daf08a2c92259b6314493fe98e40fe8a1b410bad444671a9904c"
+    },
+    "approval": "APPROVED",
     "note": "The loader refuses an unapproved candidate. The digests are filled in only after a real build under a MAIN resource grant, and only from the approval candidate the build tool writes."
   },
   "managed_editor_archive": {

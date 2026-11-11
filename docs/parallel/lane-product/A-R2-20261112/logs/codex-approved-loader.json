@@ -1,0 +1,14 @@
+{
+  "argv": [
+    "corepack",
+    "pnpm",
+    "exec",
+    "tsx",
+    "--eval",
+    "import {nativeExpectedLibraryLoader,nativeExpectedApprovalFromPin} from './src/host/m5/openfilm-native-expected.ts'; void (async()=>{const library=await nativeExpectedLibraryLoader().load(nativeExpectedApprovalFromPin()); if(library.EXPECTED_PROFILE!=='narralens.native-expected-numeric@1')throw Error('profile'); console.log(JSON.stringify({scope:'actual approved module loader, no Host/browser',profile:library.EXPECTED_PROFILE,canonical:library.hydrationCanonicalJson({a:1})}));})().catch(e=>{console.error(e);process.exitCode=1;});"
+  ],
+  "cwd": "/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-PRODUCT",
+  "start": "2026-11-11T19:25:47.080217+00:00",
+  "end": "2026-11-11T19:25:47.470848+00:00",
+  "exit": 0
+}

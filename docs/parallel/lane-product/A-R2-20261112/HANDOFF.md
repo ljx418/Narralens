@@ -277,3 +277,8 @@ Orca reported real429 quota error2056 on child ctx_e1ce32b44d5c/task_3eaa8996288
 ## Codex expected-library build003 and actual015 vectors
 
 MAIN grant msg8ff3cfc1bb3d executed once against frozen HEAD5031bc189d7691338fc4094cbd2a613c944706de/d0e22e-identical tool; exit0. Captured launcher and observed descendants with start ticks; none survived wait. HEAD/index/all tracked source input hashes unchanged. Exact evidence logs/codex-build003.txt, codex-build003-inputs.json, codex-build003-result.json; slot release reported to MAIN msg7a55b26c69b5. Runtime artifacts retained and candidate linkage copied to EXPECTED_BUILD003_CANDIDATE.json for review; tracked approval still pending. Ran actual built015 against original15 literal vectors read-only, exit0; logs/codex-actual015-vectors.txt/.json. This proves pure expected math on those vectors, not native UI/Host/browser. Studio managed archive remains old p2 and no013 hydration bundle has yet been built.
+
+
+## MAIN limited expected build pin approval
+
+MAIN msg_fdb82dbdb731 independently verified six tracked inputs, five built files/manifest and15 actual literal vectors, recorded canonical R2/product-build003-main-verification.json and main-vectors.txt. Updated only native_expected inputs_sha256/build_sha256/modules/approval=APPROVED from EXPECTED_BUILD003_CANDIDATE.json; profile/upstream retained. Managed Studio archive/pin untouched, archive remains NOT_REBUILT. This approval covers build bytes and pure math only, not loader/Host/NativeAck/browser or independent whole-product acceptance. Separate Studio request frozen68ddb0fa59d9da8f881ae3e808b7b6c84f109da8 was sent via msg_d590eb44dcee and remains ungranted.
