@@ -10,7 +10,7 @@ import { CreatedPreparedSourceStore } from './created-prepared-source-store.js';
 import { CreatedSourceImpactStore } from './created-source-impact-store.js';
 import { ImpactStore } from '../impact/impact-store.js';
 import { OperationIdempotencyStore } from '../projects/operation-idempotency-store.js';
-import { assertPreparedAdoptionPlan, preparedAdoptionPlanDigest, type PreparedAdoptionPlanV1 } from './created-source-ports.js';
+import { assertPreparedAdoptionPlan, preparedAdoptionPlanDigest, preparedAdoptionPlanFacts, type PreparedAdoptionPlanV1 } from './created-source-ports.js';
 import { ProductError } from '../creative/trusted-context.js';
 import type {
   ApprovalRecord,
@@ -135,6 +135,7 @@ export class CreatedRunAuthority implements TrustedAdoptionAuthority {
     const fact = this.#impacts!.planFact(impact.impact_id);
     if (!fact) stale('The immutable adoption plan is missing');
     const plan = assertPreparedAdoptionPlan(fact!.plan as PreparedAdoptionPlanV1);
+    const canonicalPlan = preparedAdoptionPlanFacts(plan);
     const mapping = this.#prepared!.read(read.prepared_source_id);
     const binding = this.#prepared!.packageBinding(read.prepared_source_id);
     if (preparedAdoptionPlanDigest(plan) !== digest || fact!.plan_sha256 !== digest
@@ -145,8 +146,8 @@ export class CreatedRunAuthority implements TrustedAdoptionAuthority {
       || impact.base_revision !== plan.base_revision || impact.control_revision !== plan.control_revision
       || impact.source_digest !== plan.base_source_digest || impact.target_snapshot_id !== plan.target_snapshot_id
       || impact.engine_upstream_sha !== plan.engine_upstream_sha
-      || canonicalDigest(impact.affected_ranges) !== canonicalDigest(plan.affected_ranges)
-      || canonicalDigest(impact.locks_checked) !== canonicalDigest(plan.locks_checked)
+      || canonicalDigest(impact.affected_ranges) !== canonicalDigest(canonicalPlan.affected_ranges)
+      || canonicalDigest(impact.locks_checked) !== canonicalDigest(canonicalPlan.locks_checked)
       || Date.parse(plan.expires_at) <= this.#now()*1000 || !mapping || !binding
       || binding.package_id !== request.package_id || binding.package_version !== request.package_version
       || canonicalDigest(mapping.execution) !== canonicalDigest(read.execution)

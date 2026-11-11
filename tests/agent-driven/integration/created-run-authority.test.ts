@@ -379,7 +379,15 @@ it.each(['plan','package','rights','selection','expiry','closure'] as const)(
           base_version:current.version,brief:{...current.content_json,topic:current.content_json.topic+' changed'}},f.owner);
       }
       const roots=[f.authorRoot,f.completed.root],before=await d09SourceDescriptors(roots);
-      await expect(f.workflow.decideReview(f.request,f.ui)).rejects.toThrow();
+      const expected = {
+        plan: {code:'IMPACT_STALE',message:'Actual source, selection, native plan or rights changed'},
+        package: {code:'IMPACT_STALE',message:'Prepared plan/package binding differs'},
+        rights: {code:'REVISION_CONFLICT',message:'Prepared rights are unavailable'},
+        selection: {code:'REVISION_CONFLICT',message:'Prepared source facts are no longer current'},
+        expiry: {code:'IMPACT_STALE',message:'The impact has expired'},
+        closure: {code:'IMPACT_STALE',message:'Current creative input closure differs'},
+      } as const;
+      await expect(f.workflow.decideReview(f.request,f.ui)).rejects.toMatchObject(expected[field]);
       expect(await f.repo.transaction(tx=>tx.list('approval',{project_id:f.projectId,run_id:f.execution.run_id}))).toEqual([]);
       expect(await f.repo.transaction(tx=>tx.get('review_request',{project_id:f.projectId,run_id:f.execution.run_id,review_id:f.request.package_id})?.state)).toBe('pending');
       expect(await d09SourceDescriptors(roots)).toEqual(before);
@@ -407,3 +415,29 @@ it('D09 real prepared refuses a copied transaction object even while actual proo
     expect(await d09SourceDescriptors(roots)).toEqual(before);
   } finally {await f.close();}
 },120000);
+
+
+it('D09 canonical range and lock comparison preserves native-order plan identity', async()=>{
+  const {readFileSync}=await import('node:fs');
+  const {preparedAdoptionPlanFacts,preparedAdoptionPlanDigest}=await import('../../../src/host/agent-driven/created-source-ports.js');
+  const {createdImpactFacts}=await import('../../../src/host/agent-driven/created-source-impact-store.js');
+  const {canonicalDigest}=await import('../../../src/host/creative/digest.js');
+  const vectors=JSON.parse(readFileSync('docs/parallel/lane-bridge/A-R2-20261112/golden/d09-plan-vectors.json','utf8')) as {
+    cases:{expect:string;plan:import('../../../src/host/agent-driven/created-source-ports.js').PreparedAdoptionPlanV1}[]};
+  const plan=structuredClone(vectors.cases.find(c=>c.expect==='accepted')!.plan);
+  const ranges=[{start_frame:0,end_frame_exclusive:31,clip_id:'shot-s1'},
+    {start_frame:0,end_frame_exclusive:31,clip_id:'concept-s1'},
+    {start_frame:31,end_frame_exclusive:60,clip_id:'shot-s2'},
+    {start_frame:60,end_frame_exclusive:90,clip_id:'shot-s3'},
+    {start_frame:0,end_frame_exclusive:90,clip_id:'narration'}];
+  const locks=['z','a'].map(lock_id=>({lock_id,lock_type:'edit',scope:'project',target_id:'project-1',start_frame:0,end_frame_exclusive:90}));
+  Reflect.set(plan,'affected_ranges',ranges);Reflect.set(plan,'locks_checked',locks);
+  const input=structuredClone(plan),canonical=preparedAdoptionPlanFacts(plan);
+  const impact=createdImpactFacts({affected_ranges:ranges,locks_checked:locks,affected_consumers:[],approvals_required:[]} as unknown as
+    Parameters<typeof createdImpactFacts>[0]);
+  expect(canonicalDigest(impact.affected_ranges)).not.toBe(canonicalDigest(plan.affected_ranges));
+  expect(canonicalDigest(impact.affected_ranges)).toBe(canonicalDigest(canonical.affected_ranges));
+  expect(canonicalDigest(impact.locks_checked)).toBe(canonicalDigest(canonical.locks_checked));
+  expect(preparedAdoptionPlanDigest({...plan,affected_ranges:impact.affected_ranges,locks_checked:impact.locks_checked})).toBe(preparedAdoptionPlanDigest(plan));
+  expect(plan).toEqual(input);
+});
