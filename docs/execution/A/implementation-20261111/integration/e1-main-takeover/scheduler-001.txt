@@ -1,0 +1,36 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:1945693) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/controlled-recovery-scheduler.test.ts [ tests/agent-driven/integration/controlled-recovery-scheduler.test.ts ]
+Error: Transform failed with 1 error:
+/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/src/host/projects/controlled-recovery-scheduler.ts:62:6: ERROR: Expected ")" but found "as"
+  Plugin: vite:esbuild
+  File: /mnt/c/workspace/videoworkline/Narralens-agents/main-integration/src/host/projects/controlled-recovery-scheduler.ts:62:6
+  
+  Expected ")" but found "as"
+  60 |      // All reads use the same existing connection, never a shadow status database.
+  61 |      return this.revisions.compose(db => (db.prepare('SELECT transaction_id FROM project_transaction').all()
+  62 |        as Array<{ transaction_id: string }>).map(row => this.revisions.projectTransaction(row.transaction_id)!))
+     |        ^
+  63 |        .filter(row => controlledRecoveryFamily(row) !== undefined).sort(compareControlledRecoveryRows);
+  64 |    }
+  
+ ❯ failureErrorWithLog node_modules/.pnpm/esbuild@0.25.12/node_modules/esbuild/lib/main.js:1467:15
+ ❯ node_modules/.pnpm/esbuild@0.25.12/node_modules/esbuild/lib/main.js:736:50
+ ❯ responseCallbacks.<computed> node_modules/.pnpm/esbuild@0.25.12/node_modules/esbuild/lib/main.js:603:9
+ ❯ handleIncomingPacket node_modules/.pnpm/esbuild@0.25.12/node_modules/esbuild/lib/main.js:658:12
+ ❯ Socket.readFromStdout node_modules/.pnpm/esbuild@0.25.12/node_modules/esbuild/lib/main.js:581:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  no tests
+   Start at  06:47:31
+   Duration  4.55s (transform 708ms, setup 0ms, collect 0ms, tests 0ms, environment 0ms, prepare 1.17s)
+

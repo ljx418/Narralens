@@ -1,0 +1,21 @@
+{
+  "format": "narralens.main-component-release@1",
+  "owner": "MAIN",
+  "base": "399f1e45d68041ddbb2af4e5c3df4d9ba24d713a",
+  "scope": "RD05 database-progress scheduler component; no startup or public ingress wiring",
+  "basis": [
+    "ctx_a9a63ff7c930 bounded design ACCEPT 23cf2d",
+    "msg_d19936b61dd9 identity bounded ACCEPT 399f1e4"
+  ],
+  "paths": [
+    "src/host/projects/controlled-recovery-scheduler.ts",
+    "tests/agent-driven/integration/controlled-recovery-scheduler.test.ts"
+  ],
+  "constraints": [
+    "Only actual original RevisionStore rows determine progress",
+    "All three families; stable created_at/transaction_id ordering",
+    "First-pass sweep once; no-progress terminates; lifecycle growth/regression refuses",
+    "Callbacks are existing family handlers; this component grants no authorization",
+    "No Host/Publisher integration and no RCV business claim in this component"
+  ]
+}

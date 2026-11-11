@@ -1,0 +1,167 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:1950282) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/agent-driven/integration/controlled-recovery-scheduler.test.ts (23 tests | 5 failed) 2434ms
+   × resolves the A1-C2-H3 counterexample from actual database decisions 163ms
+     → expected { passes: 1, decided: +0, …(2) } to deeply equal { passes: 2, decided: 3, …(2) }
+   × uses as many progress passes as a long alternating chain actually requires 14ms
+     → expected +0 to be 96 // Object.is equality
+   × orders equal timestamps by transaction id instead of mutually deferring 157ms
+     → expected [ 'a' ] to deeply equal [ 'a', 'b' ]
+   × does not let blocked older work in one project block another project 161ms
+     → expected { passes: 1, decided: +0, …(2) } to deeply equal { passes: 2, decided: 1, …(2) }
+   ✓ ignores fabricated progress and stops after one unchanged pass 160ms
+   ✓ does not count forward nonterminal state movement as a recovery decision 135ms
+   ✓ retains attention and recovering rows in unresolved exclusion and ordering 168ms
+   × counts a new attention decision once without treating the blocked project as writable 141ms
+     → expected { passes: 1, decided: +0, …(2) } to deeply equal { passes: 1, decided: 1, …(2) }
+   ✓ refuses lifecycle growth: new pending 149ms
+   ✓ refuses lifecycle growth: new committed 148ms
+   ✓ refuses lifecycle growth: reclassified unknown 147ms
+   ✓ refuses lifecycle violation: regression 150ms
+   ✓ refuses lifecycle violation: terminal reopen 145ms
+   ✓ refuses lifecycle violation: request mutation 145ms
+   ✓ refuses lifecycle violation: row removal 162ms
+   ✓ propagates family failure, restores its single-flight guard and rejects overlapping execution 147ms
+   ✓ sweeps each family once even with an empty database 140ms
+   ✓ does not claim malformed or wrong-kind request 'edit'/'{}' 0ms
+   ✓ does not claim malformed or wrong-kind request 'edit'/'{' 0ms
+   ✓ does not claim malformed or wrong-kind request 'asset_import'/'{"operation":"agent.created_source.ap…' 0ms
+   ✓ does not claim malformed or wrong-kind request 'history'/'{"operation":"agent.created_source.ap…' 0ms
+   ✓ does not claim malformed or wrong-kind request 'edit'/'{"format":"narralens.restore-request@…' 0ms
+   ✓ does not claim malformed or wrong-kind request 'snapshot_publish'/'{"format":"narralens.adopt-request@1.…' 0ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/controlled-recovery-scheduler.test.ts > resolves the A1-C2-H3 counterexample from actual database decisions
+AssertionError: expected { passes: 1, decided: +0, …(2) } to deeply equal { passes: 2, decided: 3, …(2) }
+
+- Expected
++ Received
+
+  {
+-   "decided": 3,
+-   "passes": 2,
+-   "stopped": "decided",
+-   "unresolved_transaction_ids": [],
++   "decided": 0,
++   "passes": 1,
++   "stopped": "no_progress",
++   "unresolved_transaction_ids": [
++     "2",
++     "3",
++   ],
+  }
+
+ ❯ tests/agent-driven/integration/controlled-recovery-scheduler.test.ts:47:18
+     45|   const f = await fixture(); f.add('adoption', '1'); f.add('created', …
+     46|   const result = await new ControlledRecoveryScheduler(f.store, f.hand…
+     47|   expect(result).toEqual({ passes: 2, decided: 3, unresolved_transacti…
+       |                  ^
+     48|   expect(f.decisions).toEqual(['1', '2', '3']);
+     49|   expect(f.calls).toEqual(['created:true', 'history:true', 'adoption:t…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  tests/agent-driven/integration/controlled-recovery-scheduler.test.ts > uses as many progress passes as a long alternating chain actually requires
+AssertionError: expected +0 to be 96 // Object.is equality
+
+- Expected
++ Received
+
+- 96
++ 0
+
+ ❯ tests/agent-driven/integration/controlled-recovery-scheduler.test.ts:56:26
+     54|   for (let i = 0; i < sequence.length; i++) f.add(sequence[i]!, String…
+     55|   const result = await new ControlledRecoveryScheduler(f.store, f.hand…
+     56|   expect(result.decided).toBe(96); expect(result.passes).toBeGreaterTh…
+       |                          ^
+     57|   expect(f.decisions).toEqual(f.rows().map(row => row.transaction_id));
+     58|   expect(f.calls.filter(call => call.endsWith(':true'))).toHaveLength(…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  tests/agent-driven/integration/controlled-recovery-scheduler.test.ts > orders equal timestamps by transaction id instead of mutually deferring
+AssertionError: expected [ 'a' ] to deeply equal [ 'a', 'b' ]
+
+- Expected
++ Received
+
+  [
+    "a",
+-   "b",
+  ]
+
+ ❯ tests/agent-driven/integration/controlled-recovery-scheduler.test.ts:64:93
+     62|   expect(hasOlderControlledPending(f.store.projectTransaction('a')!, f…
+     63|   expect(hasOlderControlledPending(f.store.projectTransaction('b')!, f…
+     64|   await new ControlledRecoveryScheduler(f.store, f.handlers).recover()…
+       |                                                                                             ^
+     65| });
+     66| it('does not let blocked older work in one project block another proje…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ FAIL  tests/agent-driven/integration/controlled-recovery-scheduler.test.ts > does not let blocked older work in one project block another project
+AssertionError: expected { passes: 1, decided: +0, …(2) } to deeply equal { passes: 2, decided: 1, …(2) }
+
+- Expected
++ Received
+
+@@ -1,8 +1,8 @@
+  {
+-   "decided": 1,
+-   "passes": 2,
++   "decided": 0,
++   "passes": 1,
+    "stopped": "no_progress",
+    "unresolved_transaction_ids": [
+      "1",
+      "2",
+    ],
+
+ ❯ tests/agent-driven/integration/controlled-recovery-scheduler.test.ts:70:18
+     68|   f.handlers.adoption = async () => ({ recovered: 1000000 });
+     69|   const result = await new ControlledRecoveryScheduler(f.store, f.hand…
+     70|   expect(result).toEqual({ passes: 2, decided: 1, unresolved_transacti…
+       |                  ^
+     71|   expect(f.decisions).toEqual(['3']);
+     72| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+
+ FAIL  tests/agent-driven/integration/controlled-recovery-scheduler.test.ts > counts a new attention decision once without treating the blocked project as writable
+AssertionError: expected { passes: 1, decided: +0, …(2) } to deeply equal { passes: 1, decided: 1, …(2) }
+
+- Expected
++ Received
+
+@@ -1,7 +1,7 @@
+  {
+-   "decided": 1,
++   "decided": 0,
+    "passes": 1,
+    "stopped": "decided",
+    "unresolved_transaction_ids": [
+      "1",
+    ],
+
+ ❯ tests/agent-driven/integration/controlled-recovery-scheduler.test.ts:94:80
+     92|   const f = await fixture(); f.add('created', '1');
+     93|   f.handlers.created = async () => f.store.transition('1', 'received',…
+     94|   expect(await new ControlledRecoveryScheduler(f.store, f.handlers).re…
+       |                                                                                ^
+     95| });
+     96| it.each(['new pending', 'new committed', 'reclassified unknown'] as co…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  5 failed | 18 passed (23)
+   Start at  06:50:05
+   Duration  6.71s (transform 633ms, setup 0ms, collect 2.43s, tests 2.43s, environment 0ms, prepare 1.19s)
+

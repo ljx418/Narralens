@@ -1,0 +1,53 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:1946033) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/agent-driven/integration/controlled-recovery-scheduler.test.ts (23 tests | 1 failed) 8081ms
+   ✓ resolves the A1-C2-H3 counterexample from actual database decisions 157ms
+   × uses as many progress passes as a long alternating chain actually requires 5668ms
+     → Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+   ✓ orders equal timestamps by transaction id instead of mutually deferring 149ms
+   ✓ does not let blocked older work in one project block another project 158ms
+   ✓ ignores fabricated progress and stops after one unchanged pass 140ms
+   ✓ does not count forward nonterminal state movement as a recovery decision 162ms
+   ✓ retains attention and recovering rows in unresolved exclusion and ordering 160ms
+   ✓ counts a new attention decision once without treating the blocked project as writable 151ms
+   ✓ refuses lifecycle growth: new pending 156ms
+   ✓ refuses lifecycle growth: new committed 151ms
+   ✓ refuses lifecycle growth: reclassified unknown 148ms
+   ✓ refuses lifecycle violation: regression 147ms
+   ✓ refuses lifecycle violation: terminal reopen 152ms
+   ✓ refuses lifecycle violation: request mutation 148ms
+   ✓ refuses lifecycle violation: row removal 145ms
+   ✓ propagates family failure, restores its single-flight guard and rejects overlapping execution 146ms
+   ✓ sweeps each family once even with an empty database 141ms
+   ✓ does not claim malformed or wrong-kind request 'edit'/'{}' 0ms
+   ✓ does not claim malformed or wrong-kind request 'edit'/'{' 0ms
+   ✓ does not claim malformed or wrong-kind request 'asset_import'/'{"operation":"agent.created_source.ap…' 0ms
+   ✓ does not claim malformed or wrong-kind request 'history'/'{"operation":"agent.created_source.ap…' 0ms
+   ✓ does not claim malformed or wrong-kind request 'edit'/'{"format":"narralens.restore-request@…' 0ms
+   ✓ does not claim malformed or wrong-kind request 'snapshot_publish'/'{"format":"narralens.adopt-request@1.…' 0ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/controlled-recovery-scheduler.test.ts > uses as many progress passes as a long alternating chain actually requires
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ tests/agent-driven/integration/controlled-recovery-scheduler.test.ts:50:1
+     48|   expect(f.calls).toEqual(['created:true', 'history:true', 'adoption:t…
+     49| });
+     50| it('uses as many progress passes as a long alternating chain actually …
+       | ^
+     51|   const f = await fixture(), sequence: ControlledRecoveryFamily[] = Ar…
+     52|   for (let i = 0; i < sequence.length; i++) f.add(sequence[i]!, String…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 22 passed (23)
+   Start at  06:47:52
+   Duration  12.29s (transform 646ms, setup 0ms, collect 2.46s, tests 8.08s, environment 0ms, prepare 1.15s)
+
