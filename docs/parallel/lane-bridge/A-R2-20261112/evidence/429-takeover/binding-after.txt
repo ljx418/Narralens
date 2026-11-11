@@ -1,0 +1,16 @@
+
+> narralens@0.1.0 test /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+> vitest run --config vitest.config.ts tests/agent-driven/integration/review-media-transport.test.ts --maxWorkers=1 --minWorkers=1
+
+
+ RUN  v3.2.4 /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+
+(node:1459190) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/review-media-transport.test.ts (18 tests) 207ms
+
+ Test Files  1 passed (1)
+      Tests  18 passed (18)
+   Start at  02:30:57
+   Duration  611ms (transform 190ms, setup 0ms, collect 291ms, tests 207ms, environment 0ms, prepare 30ms)
+

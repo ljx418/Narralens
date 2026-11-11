@@ -120,9 +120,13 @@ export class CreatedReviewMediaBindings implements ReviewMediaBindingPort {
       }
       const existing = this.#row(input.project_id, input.package_id, input.package_version, part.kind);
       if (existing !== undefined) {
-        if (existing.receipt_digest !== receipt.receipt_digest ||
+        if (existing.run_id !== input.run_id ||
+          existing.package_digest !== input.package_digest ||
+          canonicalJson(existing.receipt) !== canonicalJson(receipt) ||
+          existing.slot !== slot.slot ||
+          existing.receipt_digest !== receipt.receipt_digest ||
           existing.object_id !== slot.object_id ||
-          canonicalJson(existing.artifact_ref_json) !== canonicalJson(part.artifact_ref)) {
+          existing.artifact_ref_json !== canonicalJson(part.artifact_ref)) {
           fail('IDEMPOTENCY_CONFLICT', 'Another binding is already recorded for this package part');
         }
         continue;
@@ -157,7 +161,9 @@ export class CreatedReviewMediaBindings implements ReviewMediaBindingPort {
       return null;
     }
     const row = this.#row(input.project_id, review.review_id, review.artifact_version, input.part_kind);
-    if (row === undefined) return null;
+    if (row === undefined || row.run_id !== document.run_id ||
+      row.package_digest !== review.package_digest ||
+      row.artifact_ref_json !== canonicalJson(part.artifact_ref)) return null;
     return {
       project_id: row.project_id,
       run_id: row.run_id,
@@ -182,7 +188,9 @@ export class CreatedReviewMediaBindings implements ReviewMediaBindingPort {
     const part = document.parts.find((candidate) => candidate.artifact_ref.id === reference);
     if (part === undefined) return null;
     const row = this.#row(project_id, review.review_id, review.artifact_version, part.kind);
-    if (row === undefined) return null;
+    if (row === undefined || row.run_id !== document.run_id ||
+      row.package_digest !== review.package_digest ||
+      row.artifact_ref_json !== canonicalJson(part.artifact_ref)) return null;
     return {
       project_id: row.project_id,
       run_id: row.run_id,

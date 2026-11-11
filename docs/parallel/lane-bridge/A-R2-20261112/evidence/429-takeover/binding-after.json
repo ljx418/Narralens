@@ -1,0 +1,12 @@
+{
+  "command": [
+    "corepack",
+    "pnpm",
+    "test",
+    "tests/agent-driven/integration/review-media-transport.test.ts",
+    "--maxWorkers=1",
+    "--minWorkers=1"
+  ],
+  "exit": 0,
+  "log_sha256": "df7c1a569d675d8732890ff2fcf1887418515ac43cf9c5476ad2e51bdab6ce72"
+}

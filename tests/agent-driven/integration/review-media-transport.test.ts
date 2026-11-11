@@ -275,6 +275,34 @@ describe('the created review media bindings',()=>{
   f.revisions.close();
  });
 
+ it('replays an identical immutable binding without adding another row',async()=>{
+  const f=await fixtureWithBindings();
+  try {
+   expect(()=>f.bindings.bind({project_id:'project-1',run_id:'run-1',package_id:'package-1',package_version:1,
+    package_digest:f.digest,receipt:receiptOf(64),parts:f.document.parts,now:new Date(NOW_ISO)})).not.toThrow();
+   expect(f.revisions.compose(db=>db.prepare('SELECT count(*) AS n FROM created_review_media_binding').get()?.n)).toBe(1);
+  } finally { f.revisions.close(); }
+ });
+
+ it('refuses immutable binding replay with another package digest',async()=>{
+  const f=await fixtureWithBindings();
+  try {
+   expect(()=>f.bindings.bind({project_id:'project-1',run_id:'run-1',package_id:'package-1',package_version:1,
+    package_digest:'f'.repeat(64),receipt:receiptOf(64),parts:f.document.parts,now:new Date(NOW_ISO)}))
+    .toThrow();
+  } finally { f.revisions.close(); }
+ });
+
+ it('never serves a persisted binding whose package digest differs from the current package',async()=>{
+  const f=await fixtureWithBindings({bind:false});
+  try {
+   f.bindings.bind({project_id:'project-1',run_id:'run-1',package_id:'package-1',package_version:1,
+    package_digest:'f'.repeat(64),receipt:receiptOf(64),parts:f.document.parts,now:new Date(NOW_ISO)});
+   expect(await f.bindings.currentPart({project_id:'project-1',run_id:'run-1',part_kind:PART.kind,artifact_ref:PART.artifact_ref})).toBeNull();
+   expect(await f.bindings.currentByReference('project-1',PART.artifact_ref.id)).toBeNull();
+  } finally { f.revisions.close(); }
+ });
+
  it('refuses a second, different binding of the same package part',async()=>{
   const f=await fixtureWithBindings();
   expect(()=>f.bindings.bind({

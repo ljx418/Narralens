@@ -1,0 +1,132 @@
+
+> narralens@0.1.0 test /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+> vitest run --config vitest.config.ts tests/agent-driven/integration/review-media-transport.test.ts --maxWorkers=1 --minWorkers=1
+
+
+ RUN  v3.2.4 /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+
+(node:1458324) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/agent-driven/integration/review-media-transport.test.ts (18 tests | 2 failed) 242ms
+   ✓ fails closed with no binding producer and no reader instead of serving anything 13ms
+   ✓ refuses a cross-owner reader before it reaches the producer 1ms
+   ✓ streams the whole object in bounded reads and closes the descriptor exactly once 8ms
+   ✓ answers a bounded range with 206 and refuses an unsatisfiable range with 416 1ms
+   ✓ describes a part only when the owner, the current package and the receipt agree 1ms
+   ✓ the created review media bindings > resolves the current package part and the reference behind it 15ms
+   ✓ the created review media bindings > refuses a part of another package version, another project and an unknown reference 10ms
+   ✓ the created review media bindings > serves nothing when the package was published without a binding 10ms
+   × the created review media bindings > replays an identical immutable binding without adding another row 16ms
+     → expected [Function] to not throw an error but 'CreatedReviewMediaBindingError: Anoth…' was thrown
+   ✓ the created review media bindings > refuses immutable binding replay with another package digest 8ms
+   × the created review media bindings > never serves a persisted binding whose package digest differs from the current package 9ms
+     → expected { project_id: 'project-1', …(8) } to be null
+   ✓ the created review media bindings > refuses a second, different binding of the same package part 8ms
+   ✓ the review package publication and its bindings > publishes the package and writes its binding in one scope 81ms
+   ✓ the review package publication and its bindings > rolls the package back when the binding cannot be written 14ms
+   ✓ the review package publication and its bindings > refuses to publish a receipt that does not match its own digest 18ms
+   ✓ the review package publication and its bindings > refuses to publish when the committed source moved after the proof was released 9ms
+   ✓ the review package publication and its bindings > refuses to publish when the rights are no longer authorized 10ms
+   ✓ the review package publication and its bindings > refuses to publish when the current author and rights cannot be read at all 9ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/review-media-transport.test.ts > the created review media bindings > replays an identical immutable binding without adding another row
+AssertionError: expected [Function] to not throw an error but 'CreatedReviewMediaBindingError: Anoth…' was thrown
+
+- Expected: 
+undefined
+
++ Received: 
+"CreatedReviewMediaBindingError: Another binding is already recorded for this package part"
+
+ ❯ tests/agent-driven/integration/review-media-transport.test.ts:282:103
+    280|   try {
+    281|    expect(()=>f.bindings.bind({project_id:'project-1',run_id:'run-1',p…
+    282|     package_digest:f.digest,receipt:receiptOf(64),parts:f.document.par…
+       |                                                                                                       ^
+    283|    expect(f.revisions.compose(db=>db.prepare('SELECT count(*) AS n FRO…
+    284|   } finally { f.revisions.close(); }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/agent-driven/integration/review-media-transport.test.ts > the created review media bindings > never serves a persisted binding whose package digest differs from the current package
+AssertionError: expected { project_id: 'project-1', …(8) } to be null
+
+- Expected: 
+null
+
++ Received: 
+{
+  "object_id": "object-1",
+  "package_digest": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+  "package_id": "package-1",
+  "package_version": 1,
+  "part": {
+    "artifact_ref": {
+      "id": "artifact-1",
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "version": 1,
+    },
+    "download_ref": null,
+    "kind": "preview",
+  },
+  "project_id": "project-1",
+  "receipt": {
+    "execution_attempt": 1,
+    "format": "narralens.prepared-preview-receipt@1",
+    "fps": {
+      "den": 1,
+      "num": 30,
+    },
+    "frame_count": 90,
+    "parts": [
+      {
+        "bytes": 64,
+        "content_type": "video/mp4",
+        "media_facts": {
+          "fps": {
+            "den": 1,
+            "num": 30,
+          },
+          "frame_count": 90,
+          "kind": "video",
+        },
+        "object_id": "object-1",
+        "sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "slot": "preview",
+      },
+    ],
+    "plan_digest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "plan_version": 1,
+    "prepared_job_id": "job-1",
+    "prepared_source_id": "source-1",
+    "producer_attempt": 1,
+    "project_id": "project-1",
+    "receipt_digest": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+    "rights_digest": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+    "run_id": "run-1",
+    "source_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "step_id": "sample",
+  },
+  "run_id": "run-1",
+  "slot": "preview",
+}
+
+ ❯ tests/agent-driven/integration/review-media-transport.test.ts:301:133
+    299|    f.bindings.bind({project_id:'project-1',run_id:'run-1',package_id:'…
+    300|     package_digest:'f'.repeat(64),receipt:receiptOf(64),parts:f.docume…
+    301|    expect(await f.bindings.currentPart({project_id:'project-1',run_id:…
+       |                                                                                                                                     ^
+    302|    expect(await f.bindings.currentByReference('project-1',PART.artifac…
+    303|   } finally { f.revisions.close(); }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 16 passed (18)
+   Start at  02:30:22
+   Duration  715ms (transform 221ms, setup 0ms, collect 339ms, tests 242ms, environment 0ms, prepare 36ms)
+
+ ELIFECYCLE  Test failed. See above for more details.

@@ -1,0 +1,13 @@
+{
+  "command": [
+    "corepack",
+    "pnpm",
+    "test",
+    "tests/agent-driven/integration/review-media-transport.test.ts",
+    "--maxWorkers=1",
+    "--minWorkers=1"
+  ],
+  "exit": 1,
+  "log_sha256": "85f5704ac9e5602d4a58add210583bd41752d6563a15a0c3379a5c16a0d68244",
+  "kind": "pure in-memory SQLite/mock HTTP tests; no Host/media/browser"
+}

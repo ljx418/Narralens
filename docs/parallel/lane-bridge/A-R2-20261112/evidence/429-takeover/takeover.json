@@ -1,0 +1,41 @@
+{
+  "observed_at": "2026-11-11T18:29:02.833583+00:00",
+  "parent_dispatch": "ctx_2bf750ebdb18",
+  "stopped_child_task": "task_ebea482641ca",
+  "stopped_child_dispatch": "ctx_ef761fb42ca4",
+  "terminal": "term_20821d83f257f24463624894b8dd05cb",
+  "error": "API Error: Request rejected (429); Token Plan limit; code2056",
+  "error_message_id": "msg_stop_d58c4d5c7fc45babb5bd568f",
+  "stop_result": {
+    "state": "stopped",
+    "processAction": "closed_agent_terminal",
+    "ptyKilled": true,
+    "requestId": "8c60dc79-6b04-4120-beb9-de294059e7e8"
+  },
+  "head": "258eef2f2d0c4d163b3f2287cac7ba331264a46b",
+  "index_diff": "",
+  "dirty_hashes": {
+    "docs/parallel/lane-bridge/A-R1-20261111/evidence/media-producer-integration.json": "c5d70fa8a8e5d394811ef72842213c4cfb5197ee9662d7aa1a669e0814a6d039",
+    "docs/parallel/lane-bridge/A-R1-20261111/logs/light-bridge-regression-008.txt": "eb2fc8d4d9559ede163cf5b3bb206c7659c618b53646d3aee72bb4ee9d6a30df",
+    "docs/parallel/lane-bridge/A-R1-20261111/logs/r1-bridge-assets-host-003-frozen-inputs.txt": "070e23b22d9d308643fd06614d55c39611ce1ad28e927a492d566ae88d7efe75",
+    "docs/parallel/lane-bridge/A-R1-20261111/logs/r1-bridge-assets-host-003-post-run-state.txt": "56e90ac7518cd6769267d89e1574aba2a55ed6ee46696bb6712e114abd827928",
+    "docs/parallel/lane-bridge/A-R1-20261111/logs/r1-bridge-assets-host-003-run.txt": "7c00be1cdfc1f07790fa1c839f7819f4dce4190f3467b4da242c82fe8edf1124",
+    "docs/parallel/lane-bridge/A-R2-20261112/CLAUDE_IMPLEMENT.md": "e23a7cbd4099381709044fac8f1cb7c18080c4314e199f96677276631009fc2f",
+    "docs/parallel/lane-bridge/A-R2-20261112/INTERFACE_LOCK.md": "e25140ff5e71272f042387804fb75b751cf576621eb99c381dc93c221c529b17",
+    "docs/parallel/lane-bridge/A-R2-20261112/ReleaseAssignment.json": "0a712fe01fb050842c9fe01b79e9bccc7f0a5344b3a84507e3a14a3f890b1049",
+    "docs/parallel/lane-bridge/A-R2-20261112/TASK.md": "b4b78dfbfbb35cdb8112a8edcd07bbcbc4e15097cd431baad4f7ca22d2a9fb14",
+    "docs/parallel/lane-bridge/A-R2-20261112/alignment/archive-commit.txt": "a1354b4da63845b7815b8a90bb55f475ce8c911d2f978e90bf9c9f37aa3d52da",
+    "docs/parallel/lane-bridge/A-R2-20261112/alignment/archived-source-hashes.json": "4a1f071f23ba4785878ac917316a0514caf97194a513eaa155b0449ccaef5428",
+    "docs/parallel/lane-bridge/A-R2-20261112/alignment/before.json": "327a030c648cf963df05cf4e8d85cd4180925749d5b5b3c52da4b24115e1aa31",
+    "docs/parallel/lane-bridge/A-R2-20261112/alignment/result.json": "4f162fe2d5ce7656f96336f4f0565b18d4a780259bfc3f80ed480201d1d79322",
+    "docs/parallel/lane-bridge/A-R2-20261112/pre-release-docs/CLAUDE_IMPLEMENT.md": "bd587fcc8f63368305bfa342863305804956966586ca50716dacccaf450da84d",
+    "docs/parallel/lane-bridge/A-R2-20261112/pre-release-docs/HANDOFF.md": "2636f4375d786a8fa49f567d2a95c6bda23b61fa41b5710f60dad50c56f36b69",
+    "docs/parallel/lane-bridge/A-R2-20261112/pre-release-docs/TASK.md": "4b84e01537adc14fb7d599415987b0e93a1a353191ba76efade8972be3fc3542",
+    "docs/parallel/lane-bridge/A-R2-20261112/release-preflight.json": "495ecdb33fa8659103466a5d239b272864b99a2c0c7428101f65743b5c8427cb",
+    "src/host/agent-driven/created-source-change-service.ts": "81249c77503bd20b1e52fa37756e8f80ec64248b3bb82c07f74ec12738e924a6",
+    "docs/parallel/lane-bridge/A-R1-20261111/HANDOFF.md": "7651b23761ea48dc751ae0e86245842145c49f5d3b8ad7d6ac65103b9334258a"
+  },
+  "process_check": "After stop, exact-worktree /proc cwd census contains only old settled R1 Claude pid738006, shells, parent Codex/tool processes; no R2 Claude or runtime/test process; supervised stop killed exact target PTY; no helper workers launched",
+  "writer": "Codex takeover under preauthorized429 policy, only remaining released paths outside MAIN frozen10",
+  "limits": "No restart/model/config change; no root10 edits/import; no heavy without grant; internal validation only, independent review pending"
+}
