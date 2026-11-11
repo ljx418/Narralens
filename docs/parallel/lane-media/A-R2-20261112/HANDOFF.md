@@ -176,13 +176,20 @@ the pinned read-only OpenFilm checkout and real `ffmpeg` 6.1.1.
 ### The failed attempt, truthfully
 
 Attempt 1 exited 1 with the processor file 11/11 and the new proof file 0/8, every
-failure being `Test timed out in 5000ms`. The cause is a harness defect in my new test
-file: it omitted the per-case `120000` timeout that the existing integration file
-already passes, so vitest's five second default cut every case off before the real Host
-fixture had settled. There is no assertion failure in that log. Attempt 1 therefore
-proves the eleven processor cases and proves **nothing** about the eight proof cases; it
-is not a 19-pass run. The fix is commit `6c22182a` (eight `}, 120000);` additions, no
-assertion removed) and attempt 2 then passed 19/19.
+failure being `Test timed out in 5000ms`. The omission of the per-case `120000` timeout
+in my new test file — the argument the existing integration file already passes — is
+what produced those timeouts: vitest's five second default cut every case off before
+the real Host fixture had settled. All eight failures are the timeout and **no
+assertion failure is reported** for that file; a timeout can interrupt a case after
+some of its assertions have already run, so the absence of a reported assertion
+failure is not proof that none would have failed. Attempt 1 therefore establishes the
+eleven processor cases and, for the eight proof cases, only that each of them exceeded
+the default before it finished; it is not a 19-pass run and it is not by itself a
+statement about the product. The fix is commit `6c22182a` (eight `}, 120000);`
+additions, no assertion removed) and attempt 2 then passed 19/19, including 8/8 of the
+proof cases. The wording of this paragraph was narrowed after MAIN's review; the
+correction is labelled in `logs/r2-media-proof-001-ordering.md` and the original raw log
+is unchanged.
 
 The ordering, the indirect nature of the attempt-1 descendant evidence and the owned
 resource cleanup are recorded in `logs/r2-media-proof-001-ordering.md` and

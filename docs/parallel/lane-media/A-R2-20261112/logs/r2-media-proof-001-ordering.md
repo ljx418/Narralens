@@ -27,20 +27,25 @@ vitest run with the two named files, one worker.
 - `tests/agent-driven/media/prepared-source-adoption-proof.test.ts`: **8/8 failed**, every
   one with the identical message `Test timed out in 5000ms`.
 
-### The exact failure cause of attempt 1
+### The observed failure of attempt 1
 
-The defect is in the new test file and nowhere else. The eight cases of
+The eight cases of
 `prepared-source-adoption-proof.test.ts` drive the real Host fixture (a real Host
 process, a real SQLite database, the real worker, real `ffmpeg`), and each of them
 needs several seconds. The file was written without the per-case timeout argument that
 `created-draft-processor.test.ts` already passes (`}, 120000);`), so vitest's five
-second default cut every case off. The log contains **no assertion failure** in that
-file — every failure line is the timeout.
+second default cut every case off. **All eight failures are the timeout and no
+assertion failure is reported** for that file in the log — every failure line of that
+file is the timeout. A vitest timeout can interrupt a case after some of its assertions
+have already run, so the absence of a *reported* assertion failure is not proof that
+none of those assertions would have failed.
 
-Consequence for the record: attempt 1 proves the eleven processor cases and proves
-**nothing at all** about the eight proof cases. It is not a "19 passed" run and it is
-not a product failure either; it is a harness defect that stopped the assertions from
-running at all.
+Consequence for the record: attempt 1 proves the eleven processor cases. For the eight
+proof cases it establishes only that each of them exceeded vitest's five second default
+before it finished. It is not a "19 passed" run, and it is not by itself a statement
+about how the product behaves: whether those eight cases' assertions would all have
+passed is not established by attempt 1. Attempt 2 — which added the per-case budget and
+passed 8/8 — is what establishes that.
 
 ### What attempt 1 left behind
 
@@ -116,3 +121,32 @@ All three directories are preserved, the R1 one included:
 In every directory `film.html` is sha256 `1ec8a5ee0d98ce3a61d0a65a234ec25d1f159853c547c9f522c3fe0b265d1c7c`
 and `diagnostic.wav` is sha256 `42c9992dbd4dcfbeaf52790767beb0febee1279ce37e2e46d5cb474bdd8e1a1d`:
 the same real prepared film and the same real registered audio in all three runs.
+
+## Wording correction — 2026-11-11T17:12Z
+
+MAIN asked that two absolutes in this record be narrowed, and the correction is
+labelled here rather than made silently. **The original failure evidence is unchanged
+and preserved:** `r2-media-proof-001-run.log` is byte-for-byte the log of attempt 1, and
+the input freeze of attempt 1 is kept under its own name.
+
+What was changed in this document:
+
+1. The heading "The exact failure cause of attempt 1" became "The observed failure of
+   attempt 1", and the sentence "The defect is in the new test file and nowhere else"
+   was removed. The omission of the per-case timeout in that file is the change that
+   produced the eight timeouts, but the record does not claim that it is the only
+   relevant fact about those cases.
+2. "The log contains no assertion failure in that file" became "**All eight failures
+   are the timeout and no assertion failure is reported** for that file in the log".
+   A vitest timeout can interrupt a case after some of its assertions have already
+   run, so the absence of a *reported* assertion failure is not proof that none of
+   those assertions would have failed.
+3. "Attempt 1 proves the eleven processor cases and proves nothing at all about the
+   eight proof cases … it is not a product failure either" became the narrower
+   statement: attempt 1 proves the eleven processor cases, and for the eight proof
+   cases it establishes only that each exceeded vitest's five second default before it
+   finished. Whether those eight cases' assertions would all have passed is not
+   established by attempt 1; attempt 2, which passed 8/8, is what establishes it.
+
+No raw log, no freeze record, no command and no result was altered, and no run was
+repeated for this correction.
