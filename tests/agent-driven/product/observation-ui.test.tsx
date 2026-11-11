@@ -660,7 +660,10 @@ const CONTEXT_WITH_RUN: Context = {
   selection_version: 2,
   current_selection: null,
   active_jobs: [],
-  artifacts: [],
+  // The Host publishes the review package as an artifact, and the artifact's own
+  // `sha256` is the canonical digest of the package document: this is what the
+  // descriptor's `package_digest` is compared with.
+  artifacts: [{ id: "package-1", version: 1, sha256: DESCRIPTOR.package_digest }],
   capabilities: [],
   next_actions: ["review_package"],
   active_run: RUN as never,
@@ -903,5 +906,455 @@ describe("the M5 panel, mounted", () => {
     mountPanel(client);
     await screen.findAllByRole("button", { name: "在工作台中查看" });
     expect(asked).toBe("package-1");
+  });
+});
+
+/* -------------------------------------------------------------------------------------- */
+/* Round two: the preview really plays, the fences hold, and the media facts are checked      */
+/* -------------------------------------------------------------------------------------- */
+
+const RUN_2 = {
+  ...RUN,
+  run_id: "run-2",
+  gates: [{
+    ...RUN.gates[1]!,
+    gate_id: "gate-chapter-2",
+    review_package_id: "package-2",
+  }],
+};
+
+const PACKAGE_2: ReviewPackage = { ...MEDIA_PACKAGE, run_id: "run-2", package_id: "package-2" };
+const PACKAGE_VERSION_2: ReviewPackage = { ...MEDIA_PACKAGE, version: 2 };
+
+const CONTEXT_RUN_2: Context = {
+  ...CONTEXT_WITH_RUN,
+  workflow_revision: 5,
+  artifacts: [{ id: "package-2", version: 1, sha256: DESCRIPTOR.package_digest }],
+  active_run: RUN_2 as never,
+};
+
+const CONTEXT_WITHOUT_ARTIFACTS: Context = { ...CONTEXT_WITH_RUN, artifacts: [] };
+
+/** Flush the pending promise chain without waiting for a timer. */
+async function flush(times = 12): Promise<void> {
+  for (let index = 0; index < times; index += 1) {
+    await act(async () => { await Promise.resolve(); });
+  }
+}
+
+/** The panel, with a descriptor of the test's own choosing. */
+function mountWithDescriptor(descriptor: unknown, context: Context = CONTEXT_WITH_RUN) {
+  const client = gatewayStub({
+    uiCall: async (surface, operation) => {
+      const key = `${surface}/${operation}`;
+      if (key === "workbench.v1/review.part.describe") return descriptor;
+      if (key === "agent.v1/context.read") return context;
+      const answer = DEFAULT_ANSWERS[key];
+      if (answer === undefined) {
+        throw new GatewayApiError(503, "CAPABILITY_UNAVAILABLE", "该能力当前不可用，未伪造可用。");
+      }
+      return answer;
+    },
+  });
+  return mountPanel(client);
+}
+
+/** The package that is on screen right now. */
+function shownPackage(): { readonly id: string | null; readonly version: string | null } {
+  const section = document.querySelector("[data-nl-review-package]");
+  return {
+    id: section?.getAttribute("data-nl-review-package") ?? null,
+    version: section?.getAttribute("data-nl-review-package-version") ?? null,
+  };
+}
+
+describe("the prepared preview, playing", () => {
+  it("plays the media for real and advances the one clock with it", async () => {
+    const play = vi.spyOn(window.HTMLMediaElement.prototype, "play");
+    try {
+      mountPanel();
+      const open = (await screen.findAllByRole("button", { name: "在工作台中查看" }))[0]!;
+      reportNative("clip-1", 12.5);
+      fireEvent.click(open);
+      await waitFor(() => {
+        expect(document.querySelector("[data-nl-prepared-preview='preview']")).not.toBeNull();
+      });
+      const element = document.querySelector("[data-nl-prepared-preview='preview'] video") as HTMLVideoElement;
+      const before = Number(document.querySelector("[data-playhead]")!.getAttribute("data-playhead"));
+      // The editor was stopped at the frame it had really observed, and the one clock
+      // is at that same frame.
+      expect(before).toBe(375);
+
+      fireEvent.click(screen.getByRole("button", { name: "播放" }));
+      // The element really plays: this is where the narration is heard.
+      expect(play).toHaveBeenCalled();
+      expect(element.paused).toBe(false);
+
+      // And the one clock advances with it.
+      await waitFor(() => {
+        const after = Number(document.querySelector("[data-playhead]")!.getAttribute("data-playhead"));
+        expect(after).toBeGreaterThan(before);
+      });
+
+      // The operator stops it again, and the clock keeps the frame it was on.
+      const stopped = Number(document.querySelector("[data-playhead]")!.getAttribute("data-playhead"));
+      fireEvent.click(screen.getByRole("button", { name: "暂停" }));
+      expect(element.paused).toBe(true);
+      expect(Number(document.querySelector("[data-playhead]")!.getAttribute("data-playhead"))).toBe(stopped);
+    } finally {
+      play.mockRestore();
+    }
+  });
+
+  it("never plays the native editor on its own", async () => {
+    mountPanel();
+    const open = (await screen.findAllByRole("button", { name: "在工作台中查看" }))[0]!;
+    reportNative("clip-1", 12.5);
+    fireEvent.click(open);
+    await waitFor(() => {
+      expect(document.querySelector("[data-nl-prepared-preview='preview']")).not.toBeNull();
+    });
+    // The only command the editor was given is the seek that pauses it.
+    expect(studioCommands).toEqual([{ type: "seek", time: 12.5 }]);
+  });
+
+  it("refuses the preview when this page has no native command entry", async () => {
+    delete (window as unknown as { narralensStudio?: unknown }).narralensStudio;
+    mountPanel();
+    const open = (await screen.findAllByRole("button", { name: "在工作台中查看" }))[0]!;
+    reportNative("clip-1", 12.5);
+    fireEvent.click(open);
+    expect(await screen.findByText(/没有原生命令入口/)).toBeTruthy();
+    expect(document.querySelector("[data-nl-prepared-preview='preview']")).toBeNull();
+  });
+
+  it("abandons a preview that was being read when the operator moved the editor, and never rewinds it", async () => {
+    let resolveDescribe: ((value: unknown) => void) | null = null;
+    const client = gatewayStub({
+      uiCall: async (surface, operation) => {
+        const key = `${surface}/${operation}`;
+        if (key === "workbench.v1/review.part.describe") {
+          return await new Promise((resolve) => { resolveDescribe = resolve; });
+        }
+        const answer = DEFAULT_ANSWERS[key];
+        if (answer === undefined) {
+          throw new GatewayApiError(503, "CAPABILITY_UNAVAILABLE", "该能力当前不可用，未伪造可用。");
+        }
+        return answer;
+      },
+    });
+    mountPanel(client);
+    const open = (await screen.findAllByRole("button", { name: "在工作台中查看" }))[0]!;
+    reportNative("clip-1", 12.5);
+    fireEvent.click(open);
+    // The operator moves the editor while the description is still on its way.
+    reportNative("clip-1", 30);
+    await act(async () => {
+      resolveDescribe?.(DESCRIPTOR);
+      await Promise.resolve();
+    });
+    expect(document.querySelector("[data-nl-prepared-preview='preview']")).toBeNull();
+    // The editor was not rewound to the position the read began at.
+    expect(studioCommands).not.toContainEqual({ type: "seek", time: 12.5 });
+  });
+});
+
+describe("the review read, fenced", () => {
+  it("does not let the late answer of a previous run land on the new run", async () => {
+    vi.useFakeTimers();
+    try {
+      let currentContext: Context = CONTEXT_WITH_RUN;
+      let resolveOld: ((value: unknown) => void) | null = null;
+      const asked: string[] = [];
+      const client = gatewayStub({
+        uiCall: async (surface, operation, input) => {
+          const key = `${surface}/${operation}`;
+          if (key === "agent.v1/context.read") return currentContext;
+          if (key === "agent.v1/review.read") {
+            const packageId = (input as { package_id: string }).package_id;
+            asked.push(packageId);
+            if (packageId === "package-1") {
+              return await new Promise((resolve) => { resolveOld = resolve; });
+            }
+            return PACKAGE_2;
+          }
+          const answer = DEFAULT_ANSWERS[key];
+          if (answer === undefined) {
+            throw new GatewayApiError(503, "CAPABILITY_UNAVAILABLE", "该能力当前不可用，未伪造可用。");
+          }
+          return answer;
+        },
+      });
+      mountPanel(client);
+      await flush();
+      expect(asked).toContain("package-1");
+
+      // The next observation names another run: its package is read.
+      currentContext = CONTEXT_RUN_2;
+      await act(async () => { await vi.advanceTimersByTimeAsync(5_000); });
+      await flush();
+      expect(asked).toContain("package-2");
+      expect(shownPackage().id).toBe("package-2");
+
+      // The late answer of the previous run arrives: it must not land.
+      await act(async () => {
+        resolveOld?.(MEDIA_PACKAGE);
+        await Promise.resolve();
+      });
+      await flush();
+      expect(shownPackage().id).toBe("package-2");
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("never starts a second observation while the first one is still on its way", async () => {
+    vi.useFakeTimers();
+    try {
+      let resolveWorkflow: ((value: unknown) => void) | null = null;
+      let workflowReads = 0;
+      const client = gatewayStub({
+        uiCall: async (surface, operation) => {
+          const key = `${surface}/${operation}`;
+          if (key === "agent.v1/workflow.read") {
+            workflowReads += 1;
+            if (workflowReads === 1) {
+              return await new Promise((resolve) => { resolveWorkflow = resolve; });
+            }
+            return WORKFLOW;
+          }
+          const answer = DEFAULT_ANSWERS[key];
+          if (answer === undefined) {
+            throw new GatewayApiError(503, "CAPABILITY_UNAVAILABLE", "该能力当前不可用，未伪造可用。");
+          }
+          return answer;
+        },
+      });
+      mountPanel(client);
+      await flush();
+      expect(workflowReads).toBe(1);
+      // Polls that arrive while the first read is on its way do not start a second one.
+      await act(async () => { await vi.advanceTimersByTimeAsync(20_000); });
+      await flush();
+      expect(workflowReads).toBe(1);
+      // The first read answers, and the next poll reads again.
+      await act(async () => {
+        resolveWorkflow?.(WORKFLOW);
+        await Promise.resolve();
+      });
+      await flush();
+      await act(async () => { await vi.advanceTimersByTimeAsync(5_000); });
+      await flush();
+      expect(workflowReads).toBe(2);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("reads an updated package of the same id again instead of suppressing it", async () => {
+    vi.useFakeTimers();
+    try {
+      let currentContext: Context = CONTEXT_WITH_RUN;
+      const asked: string[] = [];
+      const client = gatewayStub({
+        uiCall: async (surface, operation, input) => {
+          const key = `${surface}/${operation}`;
+          if (key === "agent.v1/context.read") return currentContext;
+          if (key === "agent.v1/review.read") {
+            asked.push((input as { package_id: string }).package_id);
+            return asked.length === 1 ? MEDIA_PACKAGE : PACKAGE_VERSION_2;
+          }
+          const answer = DEFAULT_ANSWERS[key];
+          if (answer === undefined) {
+            throw new GatewayApiError(503, "CAPABILITY_UNAVAILABLE", "该能力当前不可用，未伪造可用。");
+          }
+          return answer;
+        },
+      });
+      mountPanel(client);
+      await flush();
+      expect(asked).toEqual(["package-1"]);
+      expect(shownPackage().version).toBe("1");
+
+      // The workflow moved on: the same package was published again.
+      currentContext = { ...CONTEXT_WITH_RUN, workflow_revision: 5 };
+      await act(async () => { await vi.advanceTimersByTimeAsync(5_000); });
+      await flush();
+      expect(asked).toEqual(["package-1", "package-1"]);
+      expect(shownPackage().version).toBe("2");
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("does not keep the recorded decision when another run's package arrives", async () => {
+    vi.useFakeTimers();
+    try {
+      let currentContext: Context = CONTEXT_WITH_RUN;
+      const client = gatewayStub({
+        uiCall: async (surface, operation, input) => {
+          const key = `${surface}/${operation}`;
+          if (key === "agent.v1/context.read") return currentContext;
+          if (key === "agent.v1/review.read") {
+            const packageId = (input as { package_id: string }).package_id;
+            return packageId === "package-1" ? MEDIA_PACKAGE : PACKAGE_2;
+          }
+          if (key === "agent.v1/review.decide") {
+            return {
+              decision_id: "decision-1",
+              project_id: "project-1",
+              run_id: "run-1",
+              package_id: "package-1",
+              package_version: 1,
+              input_digest: MEDIA_PACKAGE.input_digest,
+              output_digest: MEDIA_PACKAGE.output_digest,
+              quality_digest: MEDIA_PACKAGE.quality_digest,
+              choice: "accept",
+              principal_id: "operator",
+              channel: "trusted_ui",
+              recorded_at: "2026-11-11T00:00:00.000Z",
+              approval: null,
+            };
+          }
+          const answer = DEFAULT_ANSWERS[key];
+          if (answer === undefined) {
+            throw new GatewayApiError(503, "CAPABILITY_UNAVAILABLE", "该能力当前不可用，未伪造可用。");
+          }
+          return answer;
+        },
+      });
+      mountPanel(client);
+      await flush();
+      fireEvent.click(screen.getByRole("button", { name: "接受" }));
+      await flush();
+      expect(document.body.textContent).toContain("决定已登记");
+
+      // The run changes: the decision belonged to the previous run's package.
+      currentContext = CONTEXT_RUN_2;
+      await act(async () => { await vi.advanceTimersByTimeAsync(5_000); });
+      await flush();
+      expect(shownPackage().id).toBe("package-2");
+      expect(document.body.textContent).not.toContain("决定已登记");
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+});
+
+describe("the prepared media, checked", () => {
+  it("refuses a descriptor whose time base is not the clock's", async () => {
+    mountWithDescriptor({
+      ...DESCRIPTOR,
+      timeline: { fps: { num: 25, den: 1 }, frame_count: 900 },
+      media_facts: { kind: "video", fps: { num: 25, den: 1 }, frame_count: 900 },
+    });
+    const open = (await screen.findAllByRole("button", { name: "在工作台中查看" }))[0]!;
+    reportNative("clip-1", 12.5);
+    fireEvent.click(open);
+    expect(await screen.findByText(/时间基帧率/)).toBeTruthy();
+    expect(document.querySelector("[data-nl-prepared-preview='preview']")).toBeNull();
+  });
+
+  it("refuses a part whose media facts are of another kind", async () => {
+    mountWithDescriptor({
+      ...DESCRIPTOR,
+      content_type: "audio/wav",
+      media_facts: { kind: "audio", sample_rate: 48000, sample_count: 48000, channels: 1 },
+    });
+    const open = (await screen.findAllByRole("button", { name: "在工作台中查看" }))[0]!;
+    reportNative("clip-1", 12.5);
+    fireEvent.click(open);
+    expect(await screen.findByText(/媒体事实与它在内容包里的种类不一致/)).toBeTruthy();
+    expect(document.querySelector("[data-nl-prepared-preview='preview']")).toBeNull();
+  });
+
+  it("refuses a content type that this kind does not allow", async () => {
+    mountWithDescriptor({ ...DESCRIPTOR, content_type: "application/json" });
+    const open = (await screen.findAllByRole("button", { name: "在工作台中查看" }))[0]!;
+    reportNative("clip-1", 12.5);
+    fireEvent.click(open);
+    expect(await screen.findByText(/不是这一类内容允许的类型/)).toBeTruthy();
+    expect(document.querySelector("[data-nl-prepared-preview='preview']")).toBeNull();
+  });
+
+  it("fails closed when the context does not carry the package's artifact reference", async () => {
+    mountWithDescriptor(DESCRIPTOR, CONTEXT_WITHOUT_ARTIFACTS);
+    const open = (await screen.findAllByRole("button", { name: "在工作台中查看" }))[0]!;
+    reportNative("clip-1", 12.5);
+    fireEvent.click(open);
+    expect(await screen.findByText(/当前上下文没有它的产物引用/)).toBeTruthy();
+    expect(document.querySelector("[data-nl-prepared-preview='preview']")).toBeNull();
+  });
+
+  it("refuses a descriptor whose package digest is not the package's own", async () => {
+    mountWithDescriptor({ ...DESCRIPTOR, package_digest: "0".repeat(64) });
+    const open = (await screen.findAllByRole("button", { name: "在工作台中查看" }))[0]!;
+    reportNative("clip-1", 12.5);
+    fireEvent.click(open);
+    expect(await screen.findByText(/内容包摘要与当前内容包不符/)).toBeTruthy();
+    expect(document.querySelector("[data-nl-prepared-preview='preview']")).toBeNull();
+  });
+});
+
+describe("the controlled listings, page by page", () => {
+  it("reads the next page with the Host's own cursor and says what is still missing", async () => {
+    const asked: Array<string | undefined> = [];
+    const client = gatewayStub({
+      uiCall: async (surface, operation, input) => {
+        const key = `${surface}/${operation}`;
+        if (key === "local-assets.v1/local-source-files.read") {
+          const cursor = (input as { cursor?: string }).cursor;
+          asked.push(cursor);
+          return cursor === undefined
+            ? { ...LISTING, cursor_next: "cursor-2" }
+            : { ...LISTING, items: [{ ...LISTING.items[0]!, candidate_id: "cand-2", display_name: "屏幕录制 B" }], cursor_next: null };
+        }
+        const answer = DEFAULT_ANSWERS[key];
+        if (answer === undefined) {
+          throw new GatewayApiError(503, "CAPABILITY_UNAVAILABLE", "该能力当前不可用，未伪造可用。");
+        }
+        return answer;
+      },
+    });
+    mountPanel(client);
+    await waitFor(() => { expect(asked).toHaveLength(1); });
+    // The first page says that it is not the whole listing.
+    expect(screen.getByText(/当前只显示 Host 返回的第 1 页：还有更多候选没有显示/)).toBeTruthy();
+
+    fireEvent.click(screen.getByRole("button", { name: "加载更多候选" }));
+    await waitFor(() => { expect(asked).toEqual([undefined, "cursor-2"]); });
+    await waitFor(() => {
+      expect(screen.getByRole("radio", { name: /屏幕录制 B/ })).toBeTruthy();
+    });
+    // The whole listing is on screen now, and it says so.
+    expect(screen.queryByText(/还有更多候选没有显示/)).toBeNull();
+  });
+
+  it("starts again at the first page when the cursor has expired", async () => {
+    const asked: Array<string | undefined> = [];
+    const client = gatewayStub({
+      uiCall: async (surface, operation, input) => {
+        const key = `${surface}/${operation}`;
+        if (key === "local-assets.v1/local-source-files.read") {
+          const cursor = (input as { cursor?: string }).cursor;
+          asked.push(cursor);
+          if (cursor !== undefined) {
+            throw new GatewayApiError(410, "CURSOR_EXPIRED", "游标已过期。");
+          }
+          return { ...LISTING, cursor_next: "cursor-2" };
+        }
+        const answer = DEFAULT_ANSWERS[key];
+        if (answer === undefined) {
+          throw new GatewayApiError(503, "CAPABILITY_UNAVAILABLE", "该能力当前不可用，未伪造可用。");
+        }
+        return answer;
+      },
+    });
+    mountPanel(client);
+    await waitFor(() => { expect(asked).toHaveLength(1); });
+    fireEvent.click(screen.getByRole("button", { name: "加载更多候选" }));
+    // The stale cursor is refused, and the listing starts again at the first page.
+    await waitFor(() => { expect(asked).toEqual([undefined, "cursor-2", undefined]); });
+    expect(screen.getByRole("alert").textContent).toContain("已过期");
   });
 });

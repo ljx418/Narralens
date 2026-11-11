@@ -126,11 +126,14 @@ export interface ReviewPartDescribeInput {
  *
  * The app may not import MEDIA's own module: `src/app` may not depend on `src/host`
  * (the frozen dependency-direction rule of `tests/architecture/m2.1-fitness.test.ts`,
- * fitness 1), and the authoritative definition lives in
- * `src/host/render/assembly-ports.ts`. So the app carries the structural type of what
- * arrives over the wire — a consumer's check, not a second protocol — and the request
- * to MAIN is that the same type be exposed from a contracts-owned module, so that the
- * two cannot drift apart.
+ * fitness 1). MAIN has therefore decided (msg `6bd5210f9a44` and CR-R1-002) that a
+ * *public* module `src/contracts/prepared-preview.ts` will carry the authoritative
+ * descriptor, timeline, fact and receipt types, and that `assembly-ports` will
+ * re-export them.
+ *
+ * These local declarations are therefore **temporary**: they are the app's stand-in
+ * until the parent has integrated that module, and they must be replaced by an import
+ * of it as soon as it is there. They are a consumer's check, not a second protocol.
  */
 export type PreparedPreviewMediaFactsV1 =
   | {
@@ -216,6 +219,21 @@ const CURSOR_PATTERN = /^[\S\s]{1,2048}$/;
 const MEDIA_EXTENSIONS = ["mp4", "wav", "m4a", "mp3", "flac", "ogg"] as const;
 const RECORDING_ORIGINS = ["human_recording", "synthetic", "unknown"] as const;
 const LICENSE_STATUSES = ["cleared", "restricted", "unknown"] as const;
+
+/**
+ * The read input of the adjunct listing routes (CR-R1-002).
+ *
+ * The input has exactly three optional keys and no others: the project (which must be
+ * the delegate's own project), the page size and the cursor. There is no filter, no
+ * path, no root and no extra field: a request that carries anything else is refused by
+ * the Host's own validator.
+ */
+export interface LocalAssetsPageRequest {
+  /** The cursor of the page to read. Without one, the first page is read. */
+  readonly cursor?: string | null;
+  /** How many items the page may hold: 1 to 64. The Host's own default is 32. */
+  readonly limit?: number;
+}
 
 /** One controlled candidate the panel may offer. */
 export interface LocalAssetCandidate {
@@ -708,9 +726,12 @@ export class AgentWorkbenchClient {
   }
 
   /** The controlled local-source candidates the operator may declare. */
-  async readLocalSourceFiles(signal?: AbortSignal): Promise<SourceFileListing> {
+  async readLocalSourceFiles(
+    request: LocalAssetsPageRequest = {},
+    signal?: AbortSignal,
+  ): Promise<SourceFileListing> {
     const value = await this.#call<unknown>(
-      "local-assets.v1", "local-source-files.read", { project_id: this.projectId }, signal,
+      "local-assets.v1", "local-source-files.read", pageInput(this.projectId, request), signal,
     );
     const listing = readSourceFileListing(value);
     // A listing of another project is not this project's shelf.
@@ -759,9 +780,12 @@ export class AgentWorkbenchClient {
   }
 
   /** The registered local assets of this project. */
-  async readLocalAssets(signal?: AbortSignal): Promise<AssetInventory> {
+  async readLocalAssets(
+    request: LocalAssetsPageRequest = {},
+    signal?: AbortSignal,
+  ): Promise<AssetInventory> {
     const value = await this.#call<unknown>(
-      "local-assets.v1", "local-assets.read.ui", { project_id: this.projectId }, signal,
+      "local-assets.v1", "local-assets.read.ui", pageInput(this.projectId, request), signal,
     );
     const inventory = readAssetInventory(value);
     if (inventory.project_id !== this.projectId) throw new Error("PROJECT_MISMATCH");
@@ -769,9 +793,12 @@ export class AgentWorkbenchClient {
   }
 
   /** The asset inventory the Agent sees — the same inventory, read by id. */
-  async readAssetInventory(signal?: AbortSignal): Promise<AssetInventory> {
+  async readAssetInventory(
+    request: LocalAssetsPageRequest = {},
+    signal?: AbortSignal,
+  ): Promise<AssetInventory> {
     const value = await this.#call<unknown>(
-      "local-assets.v1", "asset-inventory.read", { project_id: this.projectId }, signal,
+      "local-assets.v1", "asset-inventory.read", pageInput(this.projectId, request), signal,
     );
     const inventory = readAssetInventory(value);
     if (inventory.project_id !== this.projectId) throw new Error("PROJECT_MISMATCH");
@@ -816,6 +843,28 @@ export class AgentWorkbenchClient {
     this.#registrationKeys.set(declaration, idempotency_key);
     return { idempotency_key, correlation_id: crypto.randomUUID() };
   }
+}
+
+/**
+ * The read input of a listing route (CR-R1-002).
+ *
+ * Exactly the three optional keys the approved contract names, and nothing else: the
+ * project, the page size and the cursor. A cursor that is not a string, or a page size
+ * that is not between 1 and 64, is refused here rather than sent.
+ */
+function pageInput(projectId: string, request: LocalAssetsPageRequest): Record<string, unknown> {
+  if (request.limit !== undefined
+    && (!Number.isSafeInteger(request.limit) || request.limit < 1 || request.limit > 64)) {
+    throw new Error("INVALID_PAGE_LIMIT");
+  }
+  if (request.cursor !== undefined && request.cursor !== null && typeof request.cursor !== "string") {
+    throw new Error("INVALID_CURSOR");
+  }
+  return {
+    project_id: projectId,
+    ...(request.limit === undefined ? {} : { limit: request.limit }),
+    ...(request.cursor === undefined || request.cursor === null ? {} : { cursor: request.cursor }),
+  };
 }
 
 /**

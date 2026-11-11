@@ -139,7 +139,13 @@ export function CreativeReviewPanel(props: CreativeReviewPanelProps) {
   const decidable = packageDocument.state === "pending" && props.busy !== true && props.stale !== true;
 
   return (
-    <section className="nl-review" aria-label="创作审阅">
+    <section
+      className="nl-review"
+      aria-label="创作审阅"
+      data-nl-review-package={packageDocument.package_id}
+      data-nl-review-package-version={packageDocument.version}
+      data-nl-review-run={packageDocument.run_id}
+    >
       <header className="nl-review-head">
         <div>
           <span className="nl-result-label">{KIND_LABEL[packageDocument.kind]}</span>

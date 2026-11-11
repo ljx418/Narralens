@@ -518,6 +518,38 @@ describe("the workbench observation client", () => {
     await expect(client.readLocalAssets()).rejects.toThrow("INVALID_ASSET_INVENTORY");
   });
 
+  it("reads the next page with exactly the approved read input", async () => {
+    const bus = transport({
+      "local-assets.v1/local-source-files.read": { ...LISTING, cursor_next: "cursor-2" },
+      "local-assets.v1/local-assets.read.ui": INVENTORY,
+    });
+    const client = new AgentWorkbenchClient(bus, "project-1");
+    await client.readLocalSourceFiles({ cursor: "cursor-2" });
+    // The approved input has three optional keys and no others: the project, the page
+    // size and the cursor.
+    expect(Object.keys(bus.calls[0]!.input as Record<string, unknown>).sort()).toEqual([
+      "cursor", "project_id",
+    ]);
+    expect((bus.calls[0]!.input as { cursor: string }).cursor).toBe("cursor-2");
+    // The first page carries no cursor at all.
+    await client.readLocalAssets();
+    expect(Object.keys(bus.calls[1]!.input as Record<string, unknown>).sort()).toEqual(["project_id"]);
+    // A page size is only sent when one was asked for.
+    await client.readLocalSourceFiles({ limit: 8 });
+    expect(Object.keys(bus.calls[2]!.input as Record<string, unknown>).sort()).toEqual([
+      "limit", "project_id",
+    ]);
+  });
+
+  it("refuses a page size or a cursor that the approved input does not allow", async () => {
+    const bus = transport({});
+    const client = new AgentWorkbenchClient(bus, "project-1");
+    await expect(client.readLocalSourceFiles({ limit: 0 })).rejects.toThrow("INVALID_PAGE_LIMIT");
+    await expect(client.readLocalSourceFiles({ limit: 65 })).rejects.toThrow("INVALID_PAGE_LIMIT");
+    await expect(client.readLocalSourceFiles({ cursor: 7 as never })).rejects.toThrow("INVALID_CURSOR");
+    expect(bus.calls).toHaveLength(0);
+  });
+
   it("refuses a listing of another project", async () => {
     const bus = transport({ "local-assets.v1/local-source-files.read": { ...LISTING, project_id: "project-2" } });
     const client = new AgentWorkbenchClient(bus, "project-1");

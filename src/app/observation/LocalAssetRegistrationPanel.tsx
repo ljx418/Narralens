@@ -68,6 +68,23 @@ export interface LocalAssetRegistrationPanelProps {
    * of a new one.
    */
   readonly requestKey?: string | null;
+  /**
+   * Whether the Host says there is more than the page that is on screen.
+   *
+   * The panel says so plainly: the operator must not read a first page as the whole
+   * inventory, and the panel does not guess a cursor input the Host has not named.
+   */
+  readonly hasMoreCandidates?: boolean;
+  /** Whether the inventory has more pages than the one on screen. */
+  readonly hasMoreInventory?: boolean;
+  /** How many pages of candidates are on screen. */
+  readonly candidatePages?: number;
+  /** How many pages of the inventory are on screen. */
+  readonly inventoryPages?: number;
+  /** Asks for the next page of candidates. */
+  readonly onLoadMoreCandidates?: () => void;
+  /** Asks for the next page of the inventory. */
+  readonly onLoadMoreInventory?: () => void;
 }
 
 const SOURCE_LABEL: Readonly<Record<LocalAssetSourceKind, string>> = {
@@ -176,6 +193,16 @@ export function LocalAssetRegistrationPanel(props: LocalAssetRegistrationPanelPr
           ))}
         </fieldset>
       )}
+      {props.hasMoreCandidates === true ? (
+        <p className="nl-muted" data-nl-local-asset-more-candidates="true">
+          {`当前只显示 Host 返回的第 ${props.candidatePages ?? 1} 页：还有更多候选没有显示，翻页由 Host 的受控游标决定。`}
+        </p>
+      ) : null}
+      {props.hasMoreCandidates === true && props.onLoadMoreCandidates !== undefined ? (
+        <button type="button" onClick={props.onLoadMoreCandidates} disabled={props.busy === true}>
+          加载更多候选
+        </button>
+      ) : null}
 
       <div className="nl-local-assets-declaration">
         <label htmlFor="nl-local-asset-source-kind">来源类型</label>
@@ -315,6 +342,16 @@ export function LocalAssetRegistrationPanel(props: LocalAssetRegistrationPanelPr
           </ul>
         )}
         <p className="nl-muted">Agent 读取的是同一份清单：你不需要复制任何编号。</p>
+        {props.hasMoreInventory === true ? (
+          <p className="nl-muted" data-nl-local-asset-more-inventory="true">
+            {`当前只显示 Host 返回的第 ${props.inventoryPages ?? 1} 页：还有更多已登记素材没有显示，翻页由 Host 的受控游标决定。`}
+          </p>
+        ) : null}
+        {props.hasMoreInventory === true && props.onLoadMoreInventory !== undefined ? (
+          <button type="button" onClick={props.onLoadMoreInventory} disabled={props.busy === true}>
+            加载更多已登记素材
+          </button>
+        ) : null}
       </section>
     </section>
   );
