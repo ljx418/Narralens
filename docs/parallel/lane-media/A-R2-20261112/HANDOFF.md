@@ -249,3 +249,46 @@ no A-stage PASS and no human acceptance.
   `e64921e450d66420703a454dcc780d9ee272834f09beb1aa4009fd4f0a017d2e`. The cleanup record
   `logs/r2-media-proof-001-cleanup.txt` is
   `c3e16b505c961bc54e38da6ad6b12ba6d68165b73acd37b008b54f7ae7ed4833`.
+
+## ACTIVE WRITER — follow-up batch 1 (2026-11-11T17:20Z)
+
+The R2 + early-R3 media candidate at `f626669d5efdca97ff3a1ca80b1aa123968c112d` is
+preserved unchanged. MAIN's source review batch 1 (`msg_250325429306`) crossed the
+handoff and found four gaps that are **MEDIA implementation work**, not MAIN-only
+validation, so this writer resumes under the new follow-up dispatch.
+
+- My task: `task_d8b43874e3b8`
+- My dispatch: `ctx_a1215e8134ef` (follow-up of `ctx_17b224413d57`)
+- My terminal: `term_346f185e2780a8916b52c5f4d6e0e1d9`
+- Coordinator / creator terminal: `term_84cbf3b186ee5d4cfc8860e84d7e972f`
+- Same exact nine released product paths; the parent is read-only while I write.
+- No heavy resource slot is granted for this batch: only pure isolated checks and
+  `tsc` may run. The heavy command is requested separately, when the batch is closed.
+
+The four gaps, quoted from the review and mapped to what will be done here:
+
+- **MP01** — `closureDigestOf` hashes the raw `expected_duration_seconds` through the
+  restricted canonical digest, so a fractional duration (91 frames at 30 fps) throws.
+  The preimage will carry an exact rational frame duration instead, the canonical
+  domain will not be weakened, and the negative case will use a fractional duration
+  and a rational frame rate.
+- **MP02** — the resolver's lexical check plus a final `O_NOFOLLOW` still permits a
+  symlinked parent or object, a once-only hash permits later in-place mutation, a
+  hash or read error leaks the descriptor, and `close` during an await can add a
+  handle after it closed. The resolver will anchor the root, the object and every
+  path component on file descriptors, keep the fingerprints, bound every read, close
+  the descriptor on every error path and track the pending work that `close` has to
+  wait for.
+- **MP03** — `inspectEncoded` materialises only the media while the supplement checks
+  compare metadata against itself. Every required file and role of the encoded object
+  will be opened and hashed against the committed closure, and an omitted, duplicated
+  or reordered supplement will fail closed.
+- **MP04** — the receipt of a private object exists only in RAM. Every published
+  object will carry a durable, fsynced receipt of its own files before it is
+  published, the object will survive a restart of the service, the cleanup failures
+  will stop being swallowed, and `close` will account for the phases that are still
+  running and report them honestly.
+
+Each gap gets a targeted negative case that is shown to **fail against the immutable
+old source** (`6c22182a` / `f626669d`) before the fix and to pass afterwards, and the
+old source's failure log is kept beside the new one.
