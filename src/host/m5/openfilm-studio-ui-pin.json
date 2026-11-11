@@ -44,5 +44,12 @@
     "modules": {},
     "approval": "PENDING_BUILD",
     "note": "The loader refuses an unapproved candidate. The digests are filled in only after a real build under a MAIN resource grant, and only from the approval candidate the build tool writes."
+  },
+  "managed_editor_archive": {
+    "state": "NOT_REBUILT",
+    "current_pin": "src/host/m5/managed-editor-pin.json",
+    "current_patch_sha256": "214c629238c2635f5c6212e5e9207eab18f61d17454c08ee64ccd32be41dffa6",
+    "expected_patch_sha256": "f699889206e129dfe4fd913618b34baa8d7e04363f1940d3659664a1e7b9d435",
+    "note": "The archive the Host serves is still the p2 candidate, which carries the document observation but not the 013 hydration extension, so the four hydration parts never arrive from it. The archive and the managed editor pin may only be changed after a real Studio UI build under a MAIN grant; until then this record says so rather than pretending the two agree."
   }
 }
