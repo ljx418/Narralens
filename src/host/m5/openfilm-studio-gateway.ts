@@ -706,14 +706,6 @@ export class OpenFilmStudioGateway {
   }
 
   /**
-   * The write path.
-   *
-   * Everything is denied by default. The only accepted writes are the native entries the
-   * OpenFilm capability map reports as supported, and they are addressed by their
-   * registry id — never as a raw upstream operation, so the upstream's own `/edit` can
-   * never reach the author's source.
-   */
-  /**
    * The native observation ingress (A-R2, L05).
    *
    * The order is the contract's: the native cookie and the native CSRF proof of a live
@@ -775,6 +767,14 @@ export class OpenFilmStudioGateway {
     return Buffer.concat(chunks).toString("utf8");
   }
 
+  /**
+   * The write path.
+   *
+   * Everything is denied by default. The only accepted writes are the native entries the
+   * OpenFilm capability map reports as supported, and they are addressed by their
+   * registry id — never as a raw upstream operation, so the upstream's own `/edit` can
+   * never reach the author's source.
+   */
   async #nativeWrite(request: IncomingMessage, response: ServerResponse, path: string): Promise<void> {
     if(this.#access){this.#access.authenticate(request);throw new StudioAccessError(403,'ORIGIN_REJECTED');}
     const match = /^\/narralens\/native\/([A-Za-z0-9_.]+)$/u.exec(path);
