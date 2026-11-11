@@ -406,6 +406,7 @@ export class PreparedPreviewService implements PreparedPreviewPort {
    }
    await assertAnchoredPrivate(workspaceRoot,'The prepared preview workspace');
    await assertAnchoredPrivate(objectRoot,'The prepared preview object domain');
+   await ensurePrivateDirectory(workspaceRoot,'The prepared preview workspace');
    await ensurePrivateDirectory(objectRoot,'The prepared preview object domain');
    workspace=await createOwnedDirectory(resolve(workspaceRoot,'preview-'+randomUUID()),'The prepared preview workspace');
    let copy:IsolatedCopy|undefined;
