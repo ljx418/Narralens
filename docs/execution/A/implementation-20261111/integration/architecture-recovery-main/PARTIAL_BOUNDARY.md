@@ -1,0 +1,3 @@
+# 本提交声明边界
+
+创建及账本的原始回归、八个Job精确CAS用例共4文件87项通过，原失败及扫描器发现保留。该提交提供唯一RevisionStore恢复helper和bootstrap/ledger原子转换，便于BRIDGE在下一安全边界消费；BRIDGE created-task-store的null-owner取消SQL尚未在MAIN改写，原架构全门仍未关闭。语法扫描器加强及MEDIA接管工作在MAIN独立dirty中保全，并未被此提交悄悄纳入。不得把这个模块提交称为R1或A完成，不自签独立复审。

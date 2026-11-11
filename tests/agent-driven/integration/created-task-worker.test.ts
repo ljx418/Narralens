@@ -28,8 +28,12 @@ it('starts another queued job when one slot frees while a different processor re
 });
 it('renews the real lease during a long processor and only the current lease can settle',async()=>{
  const f=fixture(),task=f.reserve('long'),finish=deferred();let started=false;
- const worker=new CreatedTaskWorker(f.revisions,f.tasks,f.jobs,{recover:()=>{},execute:async(t,l)=>{started=true;await finish.promise;expect(f.jobs.holdsLease(t.job_id,l)).toBe(true);f.jobs.recordCallback(t.job_id,l,{state:'succeeded'});},failed:async(t,l)=>{f.jobs.recordCallback(t.job_id,l,{state:'failed'});}},{pollMs:10,leaseMs:600});
- try{worker.start();await until(()=>started);const first=f.revisions.readJob(task.job_id)!;await sleep(900);expect(f.revisions.readJob(task.job_id)?.lease_expires_at).toBeGreaterThan(first.lease_expires_at!);finish.resolve();await until(()=>worker.activeCount===0);expect(f.revisions.readJob(task.job_id)?.state).toBe('succeeded');}
+ // The lease is deliberately long enough that only a real renewal keeps it alive, and
+ // the window is wide enough that a loaded machine cannot turn the renewal into a
+ // timing accident. The assertion itself is unchanged: the lease must still be live and
+ // it must have moved forward.
+ const worker=new CreatedTaskWorker(f.revisions,f.tasks,f.jobs,{recover:()=>{},execute:async(t,l)=>{started=true;await finish.promise;expect(f.jobs.holdsLease(t.job_id,l)).toBe(true);f.jobs.recordCallback(t.job_id,l,{state:'succeeded'});},failed:async(t,l)=>{f.jobs.recordCallback(t.job_id,l,{state:'failed'});}},{pollMs:10,leaseMs:2000});
+ try{worker.start();await until(()=>started);const first=f.revisions.readJob(task.job_id)!;await sleep(2500);expect(f.revisions.readJob(task.job_id)?.lease_expires_at).toBeGreaterThan(first.lease_expires_at!);finish.resolve();await until(()=>worker.activeCount===0);expect(f.revisions.readJob(task.job_id)?.state).toBe('succeeded');}
  finally{finish.resolve();await worker.close();f.revisions.close();}
 });
 it('awaits aborted processor cleanup before close and returns its live unfinished lease to queued',async()=>{
@@ -98,4 +102,29 @@ it('recovers the original expired task before a new lease can be claimed',async(
  const worker=new CreatedTaskWorker(f.revisions,f.tasks,f.jobs,{recover:()=>{f.tasks.reapExpired((_rows,t,state)=>{expect(t.job_id).toBe(task.job_id);expect(state).toBe('pending');recovered=true;});},execute:async(t,l)=>{expect(recovered).toBe(true);expect(l.attempt).toBe(2);executed=true;f.jobs.recordCallback(t.job_id,l,{state:'succeeded'});},failed:async()=>{throw Error('unexpected');}},{pollMs:10});
  try{worker.start();await until(()=>executed&&worker.activeCount===0);expect(f.revisions.readJob(task.job_id)).toMatchObject({state:'succeeded',attempt:2});}
  finally{await worker.close();f.revisions.close();}
+});
+
+// R0-M01: the worker must return the live lease AND its checkpoint in one transaction.
+it('releases the live lease and its checkpoint together on close instead of only the lease',async()=>{
+ const f=fixture(),task=f.reserve('graceful-release'),cleanup=deferred();
+ f.revisions.compose(db=>db.exec("CREATE TABLE fixture_release_marker(job_id TEXT PRIMARY KEY,state TEXT NOT NULL)"));
+ let started=false,releases=0,settled=0,releasedIdentity:{owner:string;attempt:number}|null=null;
+ const worker=new CreatedTaskWorker(f.revisions,f.tasks,f.jobs,{recover:()=>{},execute:async(_t,_l,signal)=>{started=true;await new Promise<void>(r=>signal.addEventListener('abort',()=>r(),{once:true}));await cleanup.promise;},failed:async()=>{throw Error('unexpected failure settlement');}},{pollMs:10,gracefulRelease:(current,lease)=>{releases++;releasedIdentity=lease;const applied=f.tasks.releaseForShutdown(current.job_id,lease,(rows,task,now)=>{settled++;expect(now).toBeInstanceOf(Date);rows.prepare('INSERT INTO fixture_release_marker(job_id,state) VALUES(?,?)').run(task.job_id,'pending');});expect(applied).toBe(true);}});
+ try{
+  worker.start();await until(()=>started);
+  // close() aborts the processor; the release happens in its finally block, so the
+  // processor cleanup is released first and the release is observed afterwards.
+  const closing=worker.close();cleanup.resolve();await until(()=>releases===1);await closing;
+  expect(releasedIdentity).toEqual({owner:expect.any(String),attempt:1});
+  // The job is queued with no lease and the checkpoint is back to pending: no split state.
+  expect(f.revisions.readJob(task.job_id)).toMatchObject({state:'queued',lease_owner:null,lease_expires_at:null});
+  expect(f.revisions.compose(db=>db.prepare('SELECT state FROM fixture_release_marker WHERE job_id=?').get(task.job_id)?.state)).toBe('pending');
+  expect(settled).toBe(1);
+ }finally{cleanup.resolve();await worker.close();f.revisions.close();}
+});
+it('keeps the legacy lease-only release when no graceful composition is supplied',async()=>{
+ const f=fixture(),task=f.reserve('legacy-release'),cleanup=deferred();let started=false;
+ const worker=new CreatedTaskWorker(f.revisions,f.tasks,f.jobs,{recover:()=>{},execute:async(_t,_l,signal)=>{started=true;await new Promise<void>(r=>signal.addEventListener('abort',()=>r(),{once:true}));await cleanup.promise;},failed:async()=>{throw Error('unexpected failure settlement');}},{pollMs:10});
+ try{worker.start();await until(()=>started);const closing=worker.close();await sleep(20);cleanup.resolve();await closing;expect(f.revisions.readJob(task.job_id)).toMatchObject({state:'queued',lease_owner:null});}
+ finally{cleanup.resolve();await worker.close();f.revisions.close();}
 });

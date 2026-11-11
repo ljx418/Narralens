@@ -1,0 +1,79 @@
+
+> narralens@0.1.0 test /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+> vitest run --config vitest.config.ts tests/agent-driven/integration/created-native-ui-transport.test.ts --maxWorkers=1 --minWorkers=1 -t 'rechecks UI revocation after|delivers the first chunk before'
+
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+ ❯ tests/agent-driven/integration/created-native-ui-transport.test.ts (28 tests | 2 failed | 26 skipped) 177ms
+   ↓ the two workbench UI aliases > adds exactly two Gateway aliases and states the exposure count
+   ↓ the independent UI credential > mints a separate cookie and proof for a grant that carries a UI delegate
+   ↓ the independent UI credential > gives a native-only grant no UI credential at all
+   ↓ the independent UI credential > refuses the native cookie with the UI proof, and the UI cookie with the native proof
+   ↓ the independent UI credential > refuses a duplicated UI proof header
+   ↓ the independent UI credential > refuses another origin before it reaches the Host
+   ↓ the independent UI credential > mints nothing when the UI delegate is already revoked
+   ↓ the independent UI credential > keeps a live UI delegate when the native session has gone stale
+   ↓ the independent UI credential > stops the UI delegate when its own parent is revoked
+   ↓ the closed UI call > passes the Host's own status and body through
+   ↓ the closed UI call > rejects an envelope that is not exactly surface, operation and input
+   ↓ the closed UI call > refuses an unknown surface or an unknown operation
+   ↓ the closed UI call > refuses a body that names another project, before the Host sees it
+   ↓ the closed UI call > answers 503 when the runtime registry is absent, and calls nothing
+   ↓ the closed UI call > hands native.reopen an exactly empty input
+   ↓ the closed UI call > hands review.part.describe its exact input, unchanged
+   ↓ the review media alias > serves the bytes with the object's own ETag and closes the reader once
+   ↓ the review media alias > serves a range larger than one read, in bounded reads
+   ↓ the review media alias > refuses a range it cannot satisfy
+   ↓ the review media alias > refuses the media alias without the independent UI credential
+   ↓ the review media alias > closes the reader exactly once when the parent is revoked while it is opening
+   × MAIN transport lifecycle regressions > rechecks UI revocation after a pending read before sending any bytes 61ms
+     → expected 200 to be 409 // Object.is equality
+   ↓ MAIN transport lifecycle regressions > cuts an already-started response on later revocation instead of completing it
+   ↓ MAIN transport lifecycle regressions > forwards cancellation and closes a reader whose open finishes after disconnect
+   ↓ MAIN transport lifecycle regressions > closes on disconnect while a read is still pending, without waiting for that read
+   ↓ MAIN transport lifecycle regressions > shutdown cancels a pending reader and actually closes both Gateway listeners
+   ↓ MAIN transport lifecycle regressions > HEAD returns metadata without reading and releases the opened handle
+   × MAIN transport lifecycle regressions > delivers the first chunk before reading an entire virtual video and stops on disconnect 115ms
+     → expected 64 to be less than 64
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/created-native-ui-transport.test.ts > MAIN transport lifecycle regressions > rechecks UI revocation after a pending read before sending any bytes
+AssertionError: expected 200 to be 409 // Object.is equality
+
+- Expected
++ Received
+
+- 409
++ 200
+
+ ❯ tests/agent-driven/integration/created-native-ui-transport.test.ts:580:31
+    578|       }) }));
+    579|       const response = await fetch(`${h.origin}/narralens/api/ui/revie…
+    580|       expect(response.status).toBe(409);
+       |                               ^
+    581|       await closed.promise;
+    582|       expect(h.recorder.reads).toHaveLength(1);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/agent-driven/integration/created-native-ui-transport.test.ts > MAIN transport lifecycle regressions > delivers the first chunk before reading an entire virtual video and stops on disconnect
+AssertionError: expected 64 to be less than 64
+ ❯ tests/agent-driven/integration/created-native-ui-transport.test.ts:721:39
+    719|       const bytes = await first;
+    720|       expect(bytes.toString("utf8")).toContain("HTTP/1.1 200");
+    721|       expect(h.recorder.reads.length).toBeLessThan(totalChunks);
+       |                                       ^
+    722|       socket.destroy(); await closed.promise;
+    723|       const readsAtClose = h.recorder.reads.length;
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 26 skipped (28)
+   Start at  22:37:31
+   Duration  3.70s (transform 261ms, setup 0ms, collect 514ms, tests 177ms, environment 0ms, prepare 2.03s)
+
+ ELIFECYCLE  Test failed. See above for more details.

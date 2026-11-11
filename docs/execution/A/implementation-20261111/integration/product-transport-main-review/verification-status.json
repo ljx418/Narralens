@@ -1,0 +1,24 @@
+{
+  "status": "MAIN_IMPLEMENTATION_SELF_VALIDATED",
+  "transport": {
+    "tests": 28,
+    "exit": 0,
+    "raw_log_sha256": "25197a8c42d30df8d0b8503233f1d71f02911dd64bbf07d87b19e5ac12025799"
+  },
+  "negative_control": {
+    "old_commit": "df32311ce86193aa91db4535776d833358680013",
+    "test_exit": 1,
+    "failed_tests": 2,
+    "source_restored_exactly": true
+  },
+  "affected_regression": {
+    "tests": 34,
+    "files": 3,
+    "exit": 0,
+    "raw_log_sha256": "2b565d4ae653729c028ac0561432a6e66a062703b7872a1e3abdf9b626e2962b"
+  },
+  "typecheck_exit": 0,
+  "independent_review": "PENDING",
+  "business_A_acceptance": "NOT_RUN",
+  "scope": "component transport and existing real native-entry regression only"
+}

@@ -1,0 +1,28 @@
+{
+  "slot": "R1-MAIN-BRIDGE-TAKEOVER-009",
+  "argv": [
+    "corepack",
+    "pnpm",
+    "exec",
+    "vitest",
+    "run",
+    "tests/agent-driven/integration/local-assets-transport.test.ts",
+    "tests/agent-driven/integration/host-application.test.ts",
+    "tests/agent-driven/integration/creative-context-host.test.ts",
+    "tests/agent-driven/integration/created-task-gate.test.ts",
+    "--maxWorkers=1",
+    "--minWorkers=1"
+  ],
+  "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+  "start": "2026-11-11T15:37:55.634712+00:00",
+  "inputs": {
+    "src/host/agent-driven/creation-application.ts": "ab60a41949e58e3365fbb8c9a5b2f3259f1673c67f04c61198b59a1a6c867d5a",
+    "src/host/agent-driven/project-context-service.ts": "27a9e09f7647148443ad549f386e3aa6175f7a3de0f362886ef981769b440b7e",
+    "tests/agent-driven/integration/local-assets-transport.test.ts": "d856485eafc031d2c6b379253cc018b4eb4d19d89d4a45264e490cafd5297a2d"
+  },
+  "pid": 962652,
+  "exit": 0,
+  "end": "2026-11-11T15:39:47.315206+00:00",
+  "inputs_unchanged": true,
+  "log_sha256": "fdfad17d7f709ae565ca832cdacc956a66327f34022f35d4e7c6684f6ddde61c"
+}

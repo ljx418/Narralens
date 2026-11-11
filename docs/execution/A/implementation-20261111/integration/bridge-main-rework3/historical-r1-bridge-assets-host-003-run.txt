@@ -1,0 +1,80 @@
+argv=corepack pnpm exec vitest run tests/agent-driven/integration/local-assets-transport.test.ts tests/agent-driven/integration/host-application.test.ts tests/agent-driven/integration/creative-context-host.test.ts tests/agent-driven/integration/created-task-gate.test.ts --maxWorkers=1 --minWorkers=1
+cwd=/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+slot=R1-BRIDGE-ASSETS-HOST-003
+head=5274a8aceb71c3c27d4617b597d6c88e428e8e6e
+frozen_manifest_sha256=070e23b22d9d308643fd06614d55c39611ce1ad28e927a492d566ae88d7efe75
+start_utc=2026-11-11T15:11:17Z
+start_epoch=1794409877
+execution=foreground synchronous Bash tool call; no background handle, no persistent command id
+
+ RUN  v3.2.4 /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-BRIDGE
+
+(node:912877) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/local-assets-transport.test.ts (3 tests) 11282ms
+   ✓ lists the safe source files to the trusted UI and refuses the driver channel  7161ms
+   ✓ registers the selected file once, replays the original receipt and refuses a different declaration  2075ms
+   ✓ refuses an unknown candidate, a foreign reader and an unusable cursor without side effects  1937ms
+(node:913513) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/agent-driven/integration/creative-context-host.test.ts (13 tests | 1 failed) 36067ms
+   ✓ writes Script and bound Storyboard through real HTTP and observes them beside the actual committed native project  2102ms
+   ✓ rejects foreign owner access and unresolved or altered lineage without inserting content/outbox/command facts  2038ms
+   ✓ keeps original artifact replay after input changes but refuses new stale writes and rejects dangling storyboard paragraphs  2974ms
+   × reports an actual non-creator active Job as missing its producer, never hides it or misreports a revision conflict 1983ms
+     → expected 409 to be 503 // Object.is equality
+   ✓ does not resolve another real project artifact even for the same owner and matching hash  6768ms
+   ✓ binds new draft writes to the question closure, while replay keeps the original artifact after a new question  2731ms
+   ✓ maps a real native source drift to conflict and checks ownership before unavailable source lookup  2199ms
+   ✓ component observer uses the authorization written during native observation in its one final SQLite projection  1853ms
+   ✓ component observer reports expired grants honestly and prefers a new valid authorization over expired predecessors  1787ms
+   ✓ rejects a committed author source replaced by a FIFO without hanging the HTTP request or Host close  1910ms
+   ✓ component safe-control pause still commits with a future-issued grant and does not authorize a new action  5884ms
+   ✓ component safe-control cancel still commits with a future-issued grant and does not authorize a new action  2011ms
+   ✓ binds content relay project scope to its owned project and originating intake while preserving pre-project decisions  1825ms
+(node:914869) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/created-task-gate.test.ts (7 tests) 25284ms
+   ✓ reserves one real job, cp step/checkpoint and mirrored event atomically, then replays without new effects  2670ms
+   ✓ rejects stale base, altered refs/scope/attempt and crossing the sample gate before creating any job  2756ms
+   ✓ rolls back real job, step, checkpoint, event and grant mutation if final authorization is revoked  2557ms
+   ✓ rejects a creative closure changed after authorization without task side effects  3548ms
+   ✓ emits real pending-to-running progress and rolls back step/checkpoint/outbox if the event mirror fails  7299ms
+   ✓ recovers exhausted leases atomically with the real workflow checkpoint, and is idempotent after SQLite reopen  3212ms
+   ✓ recovers cancelled leases atomically with the real workflow checkpoint, and is idempotent after SQLite reopen  3240ms
+(node:915745) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/host-application.test.ts (1 test) 635ms
+   ✓ mounts real creative SQL in NarralensHost and denies the legacy bearer/session/write bypass  634ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/creative-context-host.test.ts > reports an actual non-creator active Job as missing its producer, never hides it or misreports a revision conflict
+AssertionError: expected 409 to be 503 // Object.is equality
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 503[39m
+[31m+ 409[39m
+
+ ❯ tests/agent-driven/integration/creative-context-host.test.ts:86:108
+     84|   const job=new PersistentJobStore(f.host.revisions).create({projectId…
+     85|   const jobPath='/api/agent/v1/projects/'+f.projectId+'/jobs/'+job.job…
+     86|   const response=await f.request('/api/agent/v1/projects/'+f.projectId…
+       |                                                                                                            ^
+     87|  }finally{await f.close();}
+     88| },120000);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 3 passed (4)
+      Tests  1 failed | 23 passed (24)
+   Start at  23:11:18
+   Duration  75.67s (transform 1.01s, setup 0ms, collect 1.86s, tests 73.27s, environment 0ms, prepare 139ms)
+
+end_utc=2026-11-11T15:12:37Z
+end_epoch=1794409957
+duration_seconds=80
+exit_code=1

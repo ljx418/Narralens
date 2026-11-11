@@ -1,0 +1,11 @@
+# MAIN接管BRIDGE第三返工
+
+父子明确停写后，从5274a8保存30个已释放变更路径与两份未提交尝试修复的精确bytes/hash；原worktree不改、不reset、不stash。导入当前MAIN以保留原有实现而非新建替代工程。旧002/003失败各保留。
+
+根因是Context和job.read的回执路由重复且泛用creation.receiptForJob：非creation Job会误报REVISION_CONFLICT。MAIN改为一个shared ProjectJobReceiptPort，以reserved项目ownership先授权、再证真实Job与project，再路由task/精确creator，缺producer返回不可用；Context已独立要求committed creative authority，bootstrap的job.read仍能在初次commit前轮询，不混淆这两种门。无伪造Job、Run能力或NativeAck。
+
+一并闭合同一trustedUI delegate的实际输入：native.reopen恰好空对象，local读query仅project_id(若有须匹配bound)/limit1..64/cursor，不筛掉未知字段。无input的agent读也拒绝非空未知对象；原31DTO/错误码合同不扩。
+
+实际4file25case通过，含原unknown-producer503反例和新增real Host+pinnedStudio+Gateway+trustedUI grant分页/拒绝case；随后14file229case通过，覆盖全部bridge/MCPstdio/wrapper、worker/store、原database重开同Job取消/恢复、reviewmedia transport及architecture。最后无input guard加一断言仅重跑该实际UIcase1PASS/3SKIP，不冒充25再次全跑。合同公开类型另在16c0，App不用Host导入。
+
+这些是接管模块自验证。部分workflow eligibility在component case为测试ports，真实materialization/adoption/render/QC依赖仍按R2/R3提供，缺producer返回真实503。没有宣称R1整体验收、完整视频交付或A/V1通过；MEDIA异步cleanup后receipt暴露minor仍由MAIN待修。

@@ -1017,6 +1017,27 @@ export class RevisionStore {
     return Number(result.changes) === 1;
   }
 
+  /** Recover only the exact expired running lease observed inside the caller's transaction. */
+  requeueExpiredObservedLease(jobId: string, owner: string | null, attempt: number,
+    expectedExpiry: number, now = new Date()): boolean {
+    const result = this.#db.prepare(`UPDATE job SET state='queued', lease_owner=NULL,
+      lease_expires_at=NULL, updated_at=? WHERE job_id=? AND state='running'
+      AND lease_owner IS ? AND attempt=? AND lease_expires_at=? AND lease_expires_at<=?`)
+      .run(now.toISOString(), jobId, owner, attempt, expectedExpiry, now.getTime());
+    return Number(result.changes) === 1;
+  }
+
+  /** An orphan cancel has no callback owner. Never settle a different attempt/expiry. */
+  completeUnownedCancellation(jobId: string, attempt: number,
+    expectedExpiry: number | null, now = new Date()): boolean {
+    const result = this.#db.prepare(`UPDATE job SET state='cancelled', lease_owner=NULL,
+      lease_expires_at=NULL, updated_at=? WHERE job_id=? AND state='cancel_requested'
+      AND lease_owner IS NULL AND attempt=? AND lease_expires_at IS ?
+      AND (lease_expires_at IS NULL OR lease_expires_at<=?)`)
+      .run(now.toISOString(), jobId, attempt, expectedExpiry, now.getTime());
+    return Number(result.changes) === 1;
+  }
+
   expiredLeases(now: number): Array<{ job_id: string; project_id: string; state: JobState;
     attempt: number; max_attempts: number }> {
     return (this.#db.prepare(`SELECT job_id, project_id, state, attempt, max_attempts FROM job

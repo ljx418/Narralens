@@ -1,0 +1,35 @@
+{
+  "slot": "R1-MAIN-MEDIA-003",
+  "argv": [
+    "corepack",
+    "pnpm",
+    "test",
+    "tests/agent-driven/integration/created-draft-processor.test.ts",
+    "tests/agent-driven/media/preview-prepared-source.test.ts",
+    "--maxWorkers=1",
+    "--minWorkers=1"
+  ],
+  "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+  "head": "cca95020ee4ede16ef133ecd6e08b6a27632adaa",
+  "started_at": "2026-11-11T14:55:57.168297+00:00",
+  "wrapper_pid": 885467,
+  "inputs": {
+    "src/host/agent-driven/created-draft-processor.ts": "bafb71ffdbf41aab2f2d7779bfa0f42e0127ccee661f7a3631b0427220c62de2",
+    "src/host/agent-driven/prepared-draft-verifier.ts": "f69770afba85137d0dfd7a33be6115093538a411c2a4308295b523a018bbe93f",
+    "src/host/render/assembly-ports.ts": "5d216cb00662bb002ba44b18a4c15dced7c90e27d88d8c0162d81926d4ef1c67",
+    "src/host/render/preview-prepared-source.ts": "8b30728edaa07b9a85e54ca375641b68bdcd1144f63bb556997443cb55356205",
+    "tests/agent-driven/integration/created-draft-processor.test.ts": "51da71f510271fa63e66c2b740ee9f680fa5f51b7c756b3afaf72ba2f9d304f0",
+    "tests/agent-driven/media/preview-prepared-source.test.ts": "1694e5fb8149ac7498bf388439788429698a0e0ba9eb85bedec97f34cbf52bda",
+    "tests/agent-driven/integration/helpers/created-draft-fixture.ts": "3e553993afcb4c9364227b86806fb64466e3ce595ed838433ee1cfcbb5b92ffb",
+    "src/host/projects/revision-store.ts": "95a2158d8bf69a680227a525090724d2e0721aba7bf08b9332a7f3dbfd4c8c0f",
+    "src/host/projects/project-creation-store.ts": "2ca8d5cea9dc3148f90d46d44f419bc87c9466027641172daf725e61d6e05e8e",
+    "src/host/projects/migrated-asset-ledger.ts": "67cf33e938ad98c3a995ae02759d6f1fd82e1110775a6da1c3e6710916e814f9"
+  },
+  "command_pid": 885469,
+  "exit": 1,
+  "ended_at": "2026-11-11T14:57:14.238212+00:00",
+  "inputs_unchanged": true,
+  "log_sha256": "ea66c2afd0ec1576c2a143e01070eddec0f735d1e8d825ff8e10cc5a51c2fb55",
+  "diagnosis": "2 actual preview failures at renderer gate PROJECT_ROOT_OUTSIDE_STAGING; copy/project and render outputs were siblings, only output folder passed as staging root",
+  "scope": "7 processor pass +2 negative preview pass;2 happy-preview failures, no preview success yet"
+}

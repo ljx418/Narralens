@@ -1,6 +1,7 @@
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join, relative, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
+import ts from "typescript";
 import { MIGRATION_ROUTE_WHITELIST, migrationRouteGate } from "./migration-route-gate.js";
 
 /**
@@ -24,6 +25,19 @@ function walk(directory: string): string[] {
 
 const SOURCE_FILES = walk(resolve(REPO, "src"));
 const sourceOf = (file: string): string => readFileSync(file, "utf8");
+
+/** Use syntax ownership, not two-space indentation or the last call-like line. */
+function owningMethod(source: string, position: number): string {
+  const tree = ts.createSourceFile("state-owner.ts", source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+  let owner = "";
+  const visit = (node: ts.Node): void => {
+    if (position < node.getFullStart() || position >= node.end) return;
+    if (ts.isMethodDeclaration(node)) owner = node.name.getText(tree);
+    ts.forEachChild(node, visit);
+  };
+  visit(tree);
+  return owner;
+}
 
 /** Methods of a class body, used to scope the "no forbidden member" scans. */
 function classBody(source: string, className: string): string {
@@ -71,9 +85,8 @@ describe("M2.2 fitness: one state machine, no arbitrary state writes", () => {
         if (/\bWHERE\b/iu.test(assignments)) continue;
         // The job table has its own documented transition table; rule 13 owns that one.
         if (table === "job") continue;
-        // Find the enclosing method by looking at the text just before the statement.
-        const before = text.slice(0, match.index!);
-        const enclosing = [...before.matchAll(/^\s{2}(?:async\s+)?(\w+)\s*\(/gmu)].pop()?.[1] ?? "";
+        // A private or four-space method is still a method; a nearby call is not its owner.
+        const enclosing = owningMethod(text, match.index!);
         if (helpers.includes(enclosing)) continue;
         if ((scopedHelpers.get(file) ?? []).includes(enclosing)) continue;
         offenders.push(`${relative(REPO, file)} ${table}: ${assignments.trim().slice(0, 40)} (in ${enclosing || "<top level>"})`);
@@ -226,5 +239,25 @@ describe("M2.2 fitness: the write gate and the store agree", () => {
     expect(server).toContain("await this.coordinator.executeEdit(projectId, result.value)");
     expect(server).not.toContain("await this.writes.execute(projectId, result.value)");
     expect(server).toContain("this.jobs.acquireLease(job.job_id");
+  });
+});
+
+
+describe("state-write scanner ownership", () => {
+  it("identifies private methods independent of indentation and ignores nearby calls", () => {
+    const text = `class Bootstrap {
+        private transitionBootstrap() {
+            accidentalCall();
+            db.prepare("UPDATE cp_a0_bootstrap_command SET state=? WHERE state=?");
+        }
+    }`;
+    expect(owningMethod(text, text.indexOf("UPDATE"))).toBe("transitionBootstrap");
+  });
+  it("does not attribute a new unauthorized method to an earlier allowed helper", () => {
+    const text = `class Bootstrap {
+  transitionBootstrap() {}
+        forbidden() { db.prepare("UPDATE fact SET state='done'"); }
+    }`;
+    expect(owningMethod(text, text.indexOf("UPDATE"))).toBe("forbidden");
   });
 });

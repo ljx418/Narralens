@@ -1,0 +1,28 @@
+{
+  "slot": "R1-MAIN-TRANSPORT-REGRESSION-003",
+  "argv": [
+    "corepack",
+    "pnpm",
+    "test",
+    "tests/agent-driven/integration/created-native-ui-transport.test.ts",
+    "tests/agent-driven/integration/controlled-native-session-capacity.test.ts",
+    "tests/agent-driven/integration/created-native-entry.test.ts",
+    "--maxWorkers=1",
+    "--minWorkers=1"
+  ],
+  "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+  "start": "2026-11-11T14:38:11.724377+00:00",
+  "wrapper_pid": 828398,
+  "inputs": {
+    "src/host/m5/controlled-studio-access.ts": "8d8825ea2392dec02040e728579abd522d202bb4fe56a027fba9515c0fa68ac6",
+    "src/host/m5/openfilm-studio-gateway.ts": "451e0ba8e8c2013f2eff429b66e57a2d62659b97d86e9fff809e32f50a11f2a2",
+    "tests/agent-driven/integration/created-native-ui-transport.test.ts": "45ff1305610632ed0870e5c6cb96242737dc6a123fe3300012dd5eb1c2307fd1",
+    "tests/agent-driven/integration/controlled-native-session-capacity.test.ts": "589373cd134ee6386aea649bc0ed5def7f6d2156e31e163ad3f6655dc8ee54f5",
+    "tests/agent-driven/integration/created-native-entry.test.ts": "72379cde0cd26b52fc5c77a5f275f187bff894f1959b3e0a691bfed93dd5d702"
+  },
+  "pid": 828399,
+  "exit": 0,
+  "end": "2026-11-11T14:39:11.374730+00:00",
+  "log_sha256": "2b565d4ae653729c028ac0561432a6e66a062703b7872a1e3abdf9b626e2962b",
+  "inputs_unchanged": true
+}

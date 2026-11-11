@@ -408,12 +408,9 @@ export class MigratedAssetLedger {
       dependencies.fault?.("after_rows");
       dependencies.fault?.("before_active");
 
-      const moved = this.#db.prepare(
-        "UPDATE asset_ledger_bootstrap SET state='active', control_revision=control_revision+1 WHERE project_id=? AND state='prepared'",
-      ).run(evidence.projectId);
-      if (Number(moved.changes) !== 1) {
-        throw new Error(`INVALID_LEDGER_BOOTSTRAP_TRANSITION:prepared->active:${evidence.projectId}`);
-      }
+      // Keep the activation in this same transaction, through the one legal-transition
+      // owner. Syntax-aware fitness now detects a second inline state writer here.
+      this.transitionBootstrap(evidence.projectId, "prepared", "active", now);
     });
     return {
       state: "active", project_id: evidence.projectId, migration_id: evidence.migrationId,

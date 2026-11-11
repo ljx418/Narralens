@@ -2,6 +2,7 @@ import {mkdtemp,rm,readFile} from 'node:fs/promises';
 import {readFileSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
+import {ServiceHealthRegistry} from '../../../../src/launcher/health-registry.js';
 import {NarralensHost} from '../../../../src/host/server.js';
 import {ProjectCatalog} from '../../../../src/host/projects/project-catalog.js';
 import {CreationApplication} from '../../../../src/host/agent-driven/creation-application.js';
@@ -11,12 +12,14 @@ import type {IntakePut,Intake,Decision,JobReceipt} from '../../../../src/contrac
 export const vendorRoot='/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm';
 /** Real HTTP/bootstrap/pinned snapshot, not a synthetic migration or verifier. UI
  * credentials below are fixture authority; these tests never claim human acceptance. */
-export async function createdProjectFixture(options:{workbench?:{principalId:string;operatorSecret:string};studioBeforeGatewayPublish?:(state:{gateway_origin:string;studio_origin:string;film_origin:string;close_native:()=>Promise<void>;gateway_is_listening:()=>boolean})=>Promise<void>}={}){
+export async function createdProjectFixture(options:{observedHealth?:boolean;workbench?:{principalId:string;operatorSecret:string};studioBeforeGatewayPublish?:(state:{gateway_origin:string;studio_origin:string;film_origin:string;close_native:()=>Promise<void>;gateway_is_listening:()=>boolean})=>Promise<void>}={}){
  const root=await mkdtemp(join(tmpdir(),'narralens-created-workspace-'));let app!:CreationApplication;
- const {workbench,...hostOptions}=options;
- const host=new NarralensHost({...hostOptions,catalog:new ProjectCatalog(new Map()),dbPath:join(root,'host.sqlite'),snapshotsRoot:join(root,'snapshots'),adoptionStagingRoot:join(root,'stage'),migrationsRoot:join(root,'migrations'),derivedRoot:join(root,'derived'),openFilmVendorRoot:vendorRoot,isolatedStudioRuntimeRoot:join(root,'studio-runtime'),agentApplication:instance=>app=new CreationApplication(instance,{createdRoot:join(root,'projects'),vendorRoot,...(workbench?{workbench}:{}),worker:{pollMs:10}})});
+ const {workbench,observedHealth,...hostOptions}=options;
+ const health=new ServiceHealthRegistry();
+ const host=new NarralensHost({...hostOptions,catalog:new ProjectCatalog(new Map()),dbPath:join(root,'host.sqlite'),snapshotsRoot:join(root,'snapshots'),adoptionStagingRoot:join(root,'stage'),migrationsRoot:join(root,'migrations'),derivedRoot:join(root,'derived'),openFilmVendorRoot:vendorRoot,isolatedStudioRuntimeRoot:join(root,'studio-runtime'),agentApplication:instance=>app=new CreationApplication(instance,{createdRoot:join(root,'projects'),vendorRoot,...(workbench?{workbench}:{}),...(observedHealth?{health:()=>health.read('fixture-runtime')} :{}),worker:{pollMs:10}})});
  try{
   await host.listen(0);
+  if(observedHealth)health.record({service_id:'host',instance_id:'fixture-runtime',ownership:'owned',state:'ready',reason:'fixture_loopback_listener_bound',sampled_at_ms:Date.now(),metrics:[]});
   const driver=app.auth.issue({principal_id:'owner',channel:'authenticated',expires_at:Date.now()+300000}),ui=app.auth.issue({principal_id:'owner',channel:'trusted_ui',expires_at:Date.now()+300000});
   const request=(path:string,body?:unknown,human=false)=>fetch(host.origin+path,{method:body===undefined?'GET':'POST',headers:{Origin:host.origin,...(human?{Cookie:app.auth.cookieName+'='+ui.token,'X-Narralens-CSRF':ui.csrf!}:{Authorization:'Bearer '+driver.token}),...(body===undefined?{}:{'Content-Type':'application/json'})},...(body===undefined?{}:{body:JSON.stringify(body)})});
   const vectors=JSON.parse(readFileSync('docs/agent-driven-v1/cp-a0/contract-vectors.json','utf8')) as {vectors:{id:string;value:unknown}[]};

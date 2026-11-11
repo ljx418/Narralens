@@ -1,0 +1,14 @@
+{
+  "argv": [
+    "corepack",
+    "pnpm",
+    "exec",
+    "vitest",
+    "run",
+    "tests/agent-driven/headless/created-native-entry.test.ts",
+    "--maxWorkers=1",
+    "--minWorkers=1"
+  ],
+  "start": "2026-11-11T16:07:33.152277+00:00",
+  "scope": "actual imported bundle and existing native-entry headless; no prepared/review happy path claim"
+}

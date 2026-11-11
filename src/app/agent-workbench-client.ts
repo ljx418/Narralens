@@ -10,7 +10,7 @@ import type {
 // The frozen agent contract's own validator. The app does not keep a second copy of the
 // DTO rules: it asks the contract, and an answer that does not satisfy the contract is
 // refused instead of being cast into the shape the panel would like.
-import { validateAgentDefinition } from "../contracts/agent-driven-validator.js";
+import { validateAgentDefinition } from "../contracts/agent-workbench-validator.js";
 // The public prepared-preview DTOs: one definition, owned by the contract.
 import type {
   PreparedPreviewMediaFactsV1,
