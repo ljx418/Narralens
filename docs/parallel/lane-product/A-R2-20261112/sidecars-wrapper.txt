@@ -1,0 +1,85 @@
+export const NATIVE_SIDECARS_UPSTREAM = 'e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3' as const;
+export interface NativeSidecarInputs {
+  readonly upstream_sha: typeof NATIVE_SIDECARS_UPSTREAM;
+  /** Complete requested UTF-8 source reads; null is independently proved absence.
+   * Consumer paths also include film-referenced media, whose byte identity MAIN verifies. */
+  readonly files: Readonly<Record<string, string | null>>;
+  /** Exact native readdir order, independently closed by MAIN. */
+  readonly directories: Readonly<Record<string, readonly string[]>>;
+  /** Independent native probe facts, never guessed from trim or observed UI. */
+  readonly media: Readonly<Record<string, { readonly duration: number | null; readonly audio: boolean }>>;
+}
+export interface NativeSidecarDependencies {
+  readonly consumed_paths: readonly string[];
+  readonly negative_lookups: readonly string[];
+  readonly directory_lookups: readonly string[];
+  readonly media_lookups: readonly string[];
+}
+export type NativeSidecarResult = NativeSidecarDependencies & (
+  { readonly status: 'computed'; readonly style: { readonly state: 'present' | 'absent'; readonly value: unknown };
+    readonly captions: { readonly state: 'present'; readonly value: { readonly cues: readonly unknown[]; readonly sourceLanguage: string | null; readonly languages: readonly string[]; readonly untranscribed: readonly string[] } } }
+  | { readonly status: 'unsupported'; readonly reason: string; readonly missing: readonly string[] });
+
+/** Pure data only. This does not verify provenance, hash files, mint proof, or authorize Ack.
+ * MAIN must retain all dependencies including negative lookups and directory membership.
+ * Literal pinned JS above is intentionally not re-normalized; malformed films/styles fail
+ * conservatively instead of native UI's error-to-empty fallback. */
+export async function computeNativeEffectiveSidecars(input: NativeSidecarInputs): Promise<NativeSidecarResult> {
+  const consumed = new Set<string>(), negative = new Set<string>(), directories = new Set<string>(), mediaPaths = new Set<string>(), missing = new Set<string>();
+  const dependencies = () => ({ consumed_paths: [...consumed].sort(), negative_lookups: [...negative].sort(), directory_lookups: [...directories].sort(), media_lookups: [...mediaPaths].sort() });
+  const unsupported = (reason: string): NativeSidecarResult => ({status:'unsupported',reason,missing:[...missing].sort(),...dependencies()});
+  const safe = (p: string) => typeof p === 'string' && p.length > 0 && p.length <= 4096 && !p.includes('\\') && !p.includes('\0') && !p.includes(':') && !p.startsWith('/') && p.split('/').every(s=>s!==''&&s!=='.'&&s!=='..');
+  const own = (o: object, p: string) => Object.prototype.hasOwnProperty.call(o,p);
+  try {
+    // Snapshot caller-owned mutable inputs before any await; results never alias them.
+    input = structuredClone(input);
+    if(input.upstream_sha !== NATIVE_SIDECARS_UPSTREAM || !input.files || !input.directories || !input.media) return unsupported('INPUT_INVALID');
+    if(Object.keys(input.files).length>4096 || Object.keys(input.directories).length>4096 || Object.keys(input.media).length>4096) return unsupported('INPUT_LIMIT');
+    for(const [p,text] of Object.entries(input.files)) if(!safe(p)||!(text===null||typeof text==='string')||(typeof text==='string'&&text.length>8*1024*1024)) return unsupported('INPUT_INVALID');
+    for(const [p,names] of Object.entries(input.directories)) if(!(p==='.'||safe(p))||!Array.isArray(names)||names.length>4096||new Set(names).size!==names.length||names.some(n=>!safe(n)||n.includes('/'))) return unsupported('INPUT_INVALID');
+    for(const [p,fact] of Object.entries(input.media)) if(!safe(p)||!fact||typeof fact.audio!=='boolean'||!(fact.duration===null||(typeof fact.duration==='number'&&Number.isFinite(fact.duration)&&fact.duration>=0))) return unsupported('INPUT_INVALID');
+    const readText = async (p: string) => {
+      if(!safe(p)||!own(input.files,p)){missing.add(p);throw new Error('SOURCE_INPUT_MISSING');}
+      const value=input.files[p];if(value===null)negative.add(p);else consumed.add(p);return value;
+    };
+    const filmText=await readText('film.html');
+    if(filmText===null)return unsupported('FILM_ABSENT');
+    const parsed=NativeFilm.readFilmFile(filmText);
+    if(!parsed.doc||parsed.problems.length)return unsupported('FILM_INVALID');
+    // Refuse external/ambiguous native paths rather than silently omitting their captions.
+    for(const track of parsed.doc.tracks)for(const clip of track.clips){if(!safe(clip.src))return unsupported('SOURCE_PATH_UNSUPPORTED');consumed.add(clip.src);}
+    const styleText=await readText('.film/subtitles.json');
+    let style;
+    if(styleText===null)style={state:'absent',value:structuredClone(NativeStyle.FILM_SUBTITLE_DEFAULT)};
+    else {
+      let raw;try{raw=JSON.parse(styleText);}catch{return unsupported('STYLE_JSON_INVALID');}
+      if(!raw||typeof raw!=='object'||Array.isArray(raw))return unsupported('STYLE_OBJECT_INVALID');
+      // Server readSubtitleStyle then UI fetchSubtitleStyle parse the persisted value.
+      style={state:'present',value:NativeStyle.parseFilmSubtitleStyle(NativeStyle.parseFilmSubtitleStyle(raw))};
+    }
+    const {clipKind,clipSpan,kindOf,soundRole}=NativeFilm;
+    const {filmSubtitleLanguageOf,filmSubtitleLanguagesIn}=NativeStyle;
+    const {clipCues,transcriptOutlasts}=NativeCues;
+    const {transcriptPath,parseVtt,wordCues,linesOfWords}=NativeTranscript;
+    const {basename,dirname,extname}=posix;
+    const inProject=(_root:string,p:string)=>safe(p)?p:null;
+    const readProjectFilm=async()=>parsed;
+    const readdir=async(p:string)=>{directories.add(p);if(!own(input.directories,p)){missing.add('directory:'+p);throw new Error('DIRECTORY_INPUT_MISSING');}return [...input.directories[p]];};
+    const probe=async(_root:string,p:string)=>{
+      mediaPaths.add(p);consumed.add(p);
+      if(!own(input.media,p)){missing.add('media:'+p);throw new Error('MEDIA_INPUT_MISSING');}
+      const fact=input.media[p];return {duration:fact.duration??undefined,audio:fact.audio};
+    };
+    /* PINNED_ASYNC_CONSUMERS */
+    const value=await filmCaptions('closed');
+    if(missing.size)return unsupported('DEPENDENCY_INPUT_MISSING');
+    // Explicit absence and listing must agree; new translation sidecars invalidate this closure.
+    for(const p of [...consumed,...negative]){
+      const dir=posix.dirname(p),name=posix.basename(p);
+      if(directories.has(dir)&&input.directories[dir].includes(name)===negative.has(p))return unsupported('DIRECTORY_FILE_CONFLICT');
+    }
+    return {status:'computed',style,captions:{state:'present',value},...dependencies()};
+  } catch(error) {
+    return unsupported(missing.size?'DEPENDENCY_INPUT_MISSING':'NATIVE_CONSUMER_FAILED');
+  }
+}

@@ -1,0 +1,14 @@
+node:fs:2430
+    return binding.writeFileUtf8(
+                   ^
+
+Error: ENOENT: no such file or directory, open 'tests/agent-driven/product/fixtures/native-effective-sidecars.vectors.json'
+    at writeFileSync (node:fs:2430:20)
+    at <anonymous> (/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-PRODUCT/tests/agent-driven/product/native-effective-sidecars-oracle.mts:71:37) {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'tests/agent-driven/product/fixtures/native-effective-sidecars.vectors.json'
+}
+
+Node.js v22.22.1
