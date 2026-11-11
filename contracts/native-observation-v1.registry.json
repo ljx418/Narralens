@@ -9,10 +9,11 @@
   "counting": {
     "frozen_host_http": 31,
     "adjunct_host_http": 5,
+    "gateway_aliases": 2,
     "additional_gateway_http": 1,
     "mcp_tools": 0,
     "mcp_resources": 0,
-    "note": "The observation ingress is exactly one additional Gateway HTTP route, counted separately. It joins no MCP tool set, replaces no UI alias, and opens no native write surface. The count is never 'still 31+5'."
+    "note": "The two Gateway aliases and the one observation route are counted separately from the frozen Host routes. The observation route is the only one this ticket adds, and it joins no MCP tool set and no resource."
   },
   "additional_gateway_http": [
     {
