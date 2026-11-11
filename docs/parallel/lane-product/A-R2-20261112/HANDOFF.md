@@ -282,3 +282,8 @@ MAIN grant msg8ff3cfc1bb3d executed once against frozen HEAD5031bc189d7691338fc4
 ## MAIN limited expected build pin approval
 
 MAIN msg_fdb82dbdb731 independently verified six tracked inputs, five built files/manifest and15 actual literal vectors, recorded canonical R2/product-build003-main-verification.json and main-vectors.txt. Updated only native_expected inputs_sha256/build_sha256/modules/approval=APPROVED from EXPECTED_BUILD003_CANDIDATE.json; profile/upstream retained. Managed Studio archive/pin untouched, archive remains NOT_REBUILT. This approval covers build bytes and pure math only, not loader/Host/NativeAck/browser or independent whole-product acceptance. Separate Studio request frozen68ddb0fa59d9da8f881ae3e808b7b6c84f109da8 was sent via msg_d590eb44dcee and remains ungranted.
+
+
+## Codex actual Studio hydration build and packaging
+
+Granted Studio001 native tsc and Vite both exit0;623 source hashes/HEAD/index unchanged, .npmrc excluded from reads, launcher and observed esbuild identities absent afterward. Exact evidence logs/codex-studio001-result.json and two logs; slot returned msg_da6894ecdbb9. Packaged10 actual dist files as deterministic regular-file USTAR/gzip and updated only released managed-editor archive/pin and observation candidate status after commands ended, preserving previous pin/provenance in STUDIO_ARCHIVE_PROVENANCE.json and Git history. Existing runtime extraction/path/byte guards unchanged. Actual browser/Host hydration and Ack remain NOT_RUN; bundle compile is not runtime proof.

@@ -1,6 +1,6 @@
 {
   "kind": "narralens.openfilm-studio-ui-pin@1",
-  "status": "SOURCE_CANDIDATE_PINNED_BUILD_PENDING",
+  "status": "EXPECTED_APPROVED_STUDIO_BUILT_BROWSER_PENDING",
   "owner": "PRODUCT",
   "note": "The tracked pin of the OpenFilm Studio candidate this worktree uses. It is reviewed source: changing it is a reviewed change, unlike the manifest that sits next to a built artifact. The loader of the expected candidate reads the approval from here and never from a co-located build output.",
   "managed_013": {
@@ -25,7 +25,7 @@
       "active_metadata_patch_sha256": "198c8b5e6873d6cf7b3d6f2171b55c9859ca73d3bf2725b2b9da118db258d753",
       "reason": "the historical active metadata names a patch that is not the tracked candidate; it is not a valid pin. The historical metadata bytes are preserved unchanged and are not used."
     },
-    "built_archive_sha256": "",
+    "built_archive_sha256": "2e009cc28a6784daa555c34196fef3bb6a60fd0f1ac874982492a3712bd436c7",
     "browser": "NOT_RUN"
   },
   "native_expected": {
@@ -52,10 +52,10 @@
     "note": "The loader refuses an unapproved candidate. The digests are filled in only after a real build under a MAIN resource grant, and only from the approval candidate the build tool writes."
   },
   "managed_editor_archive": {
-    "state": "NOT_REBUILT",
+    "state": "REBUILT_BROWSER_NOT_RUN",
     "current_pin": "src/host/m5/managed-editor-pin.json",
-    "current_patch_sha256": "214c629238c2635f5c6212e5e9207eab18f61d17454c08ee64ccd32be41dffa6",
+    "current_patch_sha256": "f699889206e129dfe4fd913618b34baa8d7e04363f1940d3659664a1e7b9d435",
     "expected_patch_sha256": "f699889206e129dfe4fd913618b34baa8d7e04363f1940d3659664a1e7b9d435",
-    "note": "The archive the Host serves is still the p2 candidate, which carries the document observation but not the 013 hydration extension, so the four hydration parts never arrive from it. The archive and the managed editor pin may only be changed after a real Studio UI build under a MAIN grant; until then this record says so rather than pretending the two agree."
+    "note": "Actual Studio typecheck/build succeeded under R2-PRODUCT-STUDIO-BUILD-001; deterministic exact-byte archive packaged afterward; runtime Host/browser verification remains NOT_RUN."
   }
 }

@@ -1,0 +1,113 @@
+{
+  "slot": "R2-PRODUCT-STUDIO-BUILD-001",
+  "head": "2eecfe4a53b9efc6dd950900707a9cef816762e3",
+  "index_tree": "778c3656e230c55c718872e465e94a1936d45839",
+  "commands": [
+    {
+      "name": "typecheck",
+      "argv": [
+        "node",
+        "node_modules/typescript/bin/tsc",
+        "-p",
+        "studio/ui"
+      ],
+      "cwd": "/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-PRODUCT/var/native-hydration-r2/managed-native-expected/source/packages/openfilm",
+      "start": "2026-11-11T19:31:19.491810+00:00",
+      "end": "2026-11-11T19:31:24.128699+00:00",
+      "launcher_pid": 1613648,
+      "exit": 0,
+      "observed_processes": [
+        {
+          "pid": 1613648,
+          "ppid": 1613616,
+          "start_ticks": "4713816",
+          "comm": "node",
+          "cwd": "/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-PRODUCT/var/native-hydration-r2/managed-native-expected/source/packages/openfilm"
+        }
+      ],
+      "observed_survivors": [],
+      "log": "logs/codex-studio001-typecheck.txt"
+    },
+    {
+      "name": "build",
+      "argv": [
+        "node",
+        "node_modules/vite/bin/vite.js",
+        "build",
+        "--config",
+        "studio/ui/vite.config.ts"
+      ],
+      "cwd": "/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-PRODUCT/var/native-hydration-r2/managed-native-expected/source/packages/openfilm",
+      "start": "2026-11-11T19:31:24.128753+00:00",
+      "end": "2026-11-11T19:31:26.619154+00:00",
+      "launcher_pid": 1613704,
+      "exit": 0,
+      "observed_processes": [
+        {
+          "pid": 1613704,
+          "ppid": 1613616,
+          "start_ticks": "4714279",
+          "comm": "node",
+          "cwd": "/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-PRODUCT/var/native-hydration-r2/managed-native-expected/source/packages/openfilm"
+        },
+        {
+          "pid": 1613712,
+          "ppid": 1613704,
+          "start_ticks": "4714289",
+          "comm": "esbuild",
+          "cwd": "/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-PRODUCT/var/native-hydration-r2/managed-native-expected/source/packages/openfilm"
+        }
+      ],
+      "observed_survivors": [],
+      "log": "logs/codex-studio001-build.txt"
+    }
+  ],
+  "checked_source_files": 623,
+  "skipped_config": ".npmrc not opened; original manifest retained",
+  "source_inputs_unchanged": true,
+  "head_unchanged": true,
+  "index_unchanged": true,
+  "artifacts": {
+    "index.html": {
+      "sha256": "2bbdfba0568df54f5fe03936d19421177eb762936d25bfb2816f1df942008343",
+      "bytes": 2105
+    },
+    "assets/index-DwjabaiN.css": {
+      "sha256": "f4e98fb54a11a553e4aa3668c1a2314e1d165322da014a53a900c6bc8a292f4e",
+      "bytes": 92867
+    },
+    "assets/inter-cyrillic-wght-normal-DqGufNeO.woff2": {
+      "sha256": "71d5ee93cc1e9f1d520a3a8b66456de18c7879d8df09d57fcd2eaff75fef0075",
+      "bytes": 18748
+    },
+    "assets/inter-latin-wght-normal-Dx4kXJAl.woff2": {
+      "sha256": "3100e775e8616cd2611beecfa23a4263d7037586789b43f035236a2e6fbd4c62",
+      "bytes": 48256
+    },
+    "assets/inter-cyrillic-ext-wght-normal-BOeWTOD4.woff2": {
+      "sha256": "ca157063339ac4ad418f214f3abfed119b0798ab4d377386ce5c9e5a7a435ebd",
+      "bytes": 25960
+    },
+    "assets/inter-greek-wght-normal-CkhJZR-_.woff2": {
+      "sha256": "1be3448e292fbf05ffe176fe1e43f135013d50b1e7d324ad1a558f623d3bb6f6",
+      "bytes": 18996
+    },
+    "assets/inter-latin-ext-wght-normal-DO1Apj_S.woff2": {
+      "sha256": "34b9c504cab7a73e37b746343a449132e56cf7b5481af2cb81dc74dcff25c956",
+      "bytes": 85068
+    },
+    "assets/inter-greek-ext-wght-normal-DlzME5K_.woff2": {
+      "sha256": "6e9e020a25f9b56d418f2c085b1d3c09725a4da23fe693a5b463064606732190",
+      "bytes": 11232
+    },
+    "assets/index-DdBD4wIB.js": {
+      "sha256": "94d82bcea3cc504a2fc86cf0e9df8de7632a765b359615787bb18d25a90eb035",
+      "bytes": 1574871
+    },
+    "assets/inter-vietnamese-wght-normal-CBcvBZtf.woff2": {
+      "sha256": "5c66f9e07e90c6d4ac4922cc68d60de26c17b1858e677fb5e603fce3952b3ff2",
+      "bytes": 10252
+    }
+  },
+  "scope": "native Studio typecheck/build only; no Host/browser/media"
+}

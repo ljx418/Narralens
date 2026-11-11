@@ -1,0 +1,147 @@
+{
+  "source": "private managed-native-expected/source full pinned upstream plus actual013 patch",
+  "grant": "R2-PRODUCT-STUDIO-BUILD-001",
+  "result": "logs/codex-studio001-result.json",
+  "previous": {
+    "pin": {
+      "upstream_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+      "patch_sha256": "f699889206e129dfe4fd913618b34baa8d7e04363f1940d3659664a1e7b9d435",
+      "dependencies_sha256": "6805315c6e5d9f3759541a6b7db780c5f805d243020db257b5ec15588ab3bde2",
+      "source_files_sha256": "ea1878f6995fa228d2b7467781b3972faac5322fd2af109d5aea6311c26b8c6e",
+      "dist_manifest_sha256": "bb338a4ce43c079d08a83126502429c30ec8568a09ed178db963a9ada843daaa",
+      "archive_sha256": "2e009cc28a6784daa555c34196fef3bb6a60fd0f1ac874982492a3712bd436c7",
+      "archive_bytes": 745783,
+      "files": [
+        {
+          "path": "assets/index-DdBD4wIB.js",
+          "bytes": 1574871,
+          "sha256": "94d82bcea3cc504a2fc86cf0e9df8de7632a765b359615787bb18d25a90eb035"
+        },
+        {
+          "path": "assets/index-DwjabaiN.css",
+          "bytes": 92867,
+          "sha256": "f4e98fb54a11a553e4aa3668c1a2314e1d165322da014a53a900c6bc8a292f4e"
+        },
+        {
+          "path": "assets/inter-cyrillic-ext-wght-normal-BOeWTOD4.woff2",
+          "bytes": 25960,
+          "sha256": "ca157063339ac4ad418f214f3abfed119b0798ab4d377386ce5c9e5a7a435ebd"
+        },
+        {
+          "path": "assets/inter-cyrillic-wght-normal-DqGufNeO.woff2",
+          "bytes": 18748,
+          "sha256": "71d5ee93cc1e9f1d520a3a8b66456de18c7879d8df09d57fcd2eaff75fef0075"
+        },
+        {
+          "path": "assets/inter-greek-ext-wght-normal-DlzME5K_.woff2",
+          "bytes": 11232,
+          "sha256": "6e9e020a25f9b56d418f2c085b1d3c09725a4da23fe693a5b463064606732190"
+        },
+        {
+          "path": "assets/inter-greek-wght-normal-CkhJZR-_.woff2",
+          "bytes": 18996,
+          "sha256": "1be3448e292fbf05ffe176fe1e43f135013d50b1e7d324ad1a558f623d3bb6f6"
+        },
+        {
+          "path": "assets/inter-latin-ext-wght-normal-DO1Apj_S.woff2",
+          "bytes": 85068,
+          "sha256": "34b9c504cab7a73e37b746343a449132e56cf7b5481af2cb81dc74dcff25c956"
+        },
+        {
+          "path": "assets/inter-latin-wght-normal-Dx4kXJAl.woff2",
+          "bytes": 48256,
+          "sha256": "3100e775e8616cd2611beecfa23a4263d7037586789b43f035236a2e6fbd4c62"
+        },
+        {
+          "path": "assets/inter-vietnamese-wght-normal-CBcvBZtf.woff2",
+          "bytes": 10252,
+          "sha256": "5c66f9e07e90c6d4ac4922cc68d60de26c17b1858e677fb5e603fce3952b3ff2"
+        },
+        {
+          "path": "index.html",
+          "bytes": 2105,
+          "sha256": "2bbdfba0568df54f5fe03936d19421177eb762936d25bfb2816f1df942008343"
+        }
+      ],
+      "format": "narralens.managed-native-editor@1",
+      "observation_protocol": 1,
+      "observation_scope": "film document plus request013-f699-p2-hr1 hydration; actual Host/browser acknowledgement NOT_RUN",
+      "original_lock_sha256": "d9faf24e9480b847be99b61ec2b220ef5290530a54b1f6f667845fb8ac2905f9",
+      "source_archive_sha256": "2e009cc28a6784daa555c34196fef3bb6a60fd0f1ac874982492a3712bd436c7",
+      "source_archive_bytes": 745783,
+      "packaging": "deterministic USTAR regular files only; exact dist bytes unchanged"
+    },
+    "archive_sha256": "0fbdb3ac52b5bb4cc5f31e435f269d2ea8070bb4bbb04ffbe25febd106fd9bca"
+  },
+  "new_pin": {
+    "upstream_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+    "patch_sha256": "f699889206e129dfe4fd913618b34baa8d7e04363f1940d3659664a1e7b9d435",
+    "dependencies_sha256": "6805315c6e5d9f3759541a6b7db780c5f805d243020db257b5ec15588ab3bde2",
+    "source_files_sha256": "ea1878f6995fa228d2b7467781b3972faac5322fd2af109d5aea6311c26b8c6e",
+    "dist_manifest_sha256": "bb338a4ce43c079d08a83126502429c30ec8568a09ed178db963a9ada843daaa",
+    "archive_sha256": "2e009cc28a6784daa555c34196fef3bb6a60fd0f1ac874982492a3712bd436c7",
+    "archive_bytes": 745783,
+    "files": [
+      {
+        "path": "assets/index-DdBD4wIB.js",
+        "bytes": 1574871,
+        "sha256": "94d82bcea3cc504a2fc86cf0e9df8de7632a765b359615787bb18d25a90eb035"
+      },
+      {
+        "path": "assets/index-DwjabaiN.css",
+        "bytes": 92867,
+        "sha256": "f4e98fb54a11a553e4aa3668c1a2314e1d165322da014a53a900c6bc8a292f4e"
+      },
+      {
+        "path": "assets/inter-cyrillic-ext-wght-normal-BOeWTOD4.woff2",
+        "bytes": 25960,
+        "sha256": "ca157063339ac4ad418f214f3abfed119b0798ab4d377386ce5c9e5a7a435ebd"
+      },
+      {
+        "path": "assets/inter-cyrillic-wght-normal-DqGufNeO.woff2",
+        "bytes": 18748,
+        "sha256": "71d5ee93cc1e9f1d520a3a8b66456de18c7879d8df09d57fcd2eaff75fef0075"
+      },
+      {
+        "path": "assets/inter-greek-ext-wght-normal-DlzME5K_.woff2",
+        "bytes": 11232,
+        "sha256": "6e9e020a25f9b56d418f2c085b1d3c09725a4da23fe693a5b463064606732190"
+      },
+      {
+        "path": "assets/inter-greek-wght-normal-CkhJZR-_.woff2",
+        "bytes": 18996,
+        "sha256": "1be3448e292fbf05ffe176fe1e43f135013d50b1e7d324ad1a558f623d3bb6f6"
+      },
+      {
+        "path": "assets/inter-latin-ext-wght-normal-DO1Apj_S.woff2",
+        "bytes": 85068,
+        "sha256": "34b9c504cab7a73e37b746343a449132e56cf7b5481af2cb81dc74dcff25c956"
+      },
+      {
+        "path": "assets/inter-latin-wght-normal-Dx4kXJAl.woff2",
+        "bytes": 48256,
+        "sha256": "3100e775e8616cd2611beecfa23a4263d7037586789b43f035236a2e6fbd4c62"
+      },
+      {
+        "path": "assets/inter-vietnamese-wght-normal-CBcvBZtf.woff2",
+        "bytes": 10252,
+        "sha256": "5c66f9e07e90c6d4ac4922cc68d60de26c17b1858e677fb5e603fce3952b3ff2"
+      },
+      {
+        "path": "index.html",
+        "bytes": 2105,
+        "sha256": "2bbdfba0568df54f5fe03936d19421177eb762936d25bfb2816f1df942008343"
+      }
+    ],
+    "format": "narralens.managed-native-editor@1",
+    "observation_protocol": 1,
+    "observation_scope": "film document plus request013-f699-p2-hr1 hydration; actual Host/browser acknowledgement NOT_RUN",
+    "original_lock_sha256": "d9faf24e9480b847be99b61ec2b220ef5290530a54b1f6f667845fb8ac2905f9",
+    "source_archive_sha256": "2e009cc28a6784daa555c34196fef3bb6a60fd0f1ac874982492a3712bd436c7",
+    "source_archive_bytes": 745783,
+    "packaging": "deterministic USTAR regular files only; exact dist bytes unchanged"
+  },
+  "source_files_digest_definition": "SHA256 compact sorted JSON managed_013.post_patch_files mapping",
+  "archive": "deterministic gzip mtime0 USTAR regular files; no original source archive existed for this local build; source_archive identifies local dist packaging",
+  "runtime": "NOT_RUN"
+}
