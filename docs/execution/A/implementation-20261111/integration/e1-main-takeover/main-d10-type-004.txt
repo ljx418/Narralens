@@ -1,0 +1,2 @@
+tests/agent-driven/integration/created-source-recovery.test.ts(506,43): error TS2352: Conversion of type '{ store: RevisionStore; queue: InMemoryProjectOperationQueue; }' to type 'CoordinatorDeps' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Type '{ store: RevisionStore; queue: InMemoryProjectOperationQueue; }' is missing the following properties from type 'CoordinatorDeps': actor, bindings, engines, gateway, and 6 more.

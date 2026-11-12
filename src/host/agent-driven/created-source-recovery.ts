@@ -24,7 +24,7 @@ import {
 } from './created-publication-recovery-files.js';
 import { RetainedSourceTree } from './retained-source-tree.js';
 import { PublicationCleanupError } from './publication-cleanup.js';
-import { assertPreparedAdoptionPlan, type PreparedAdoptionPlanV1 } from './created-source-ports.js';
+import { assertPreparedAdoptionPlan, preparedAdoptionPlanDigest, type PreparedAdoptionPlanV1 } from './created-source-ports.js';
 import type { CreatedTaskStore } from './created-task-store.js';
 import type { LocalAssetRegistry } from './local-asset-registry.js';
 import type { PreparedDraftVerifier } from './prepared-draft-verifier.js';
@@ -338,7 +338,10 @@ export class CreatedSourceRecovery {
    * revisited on a second pass.
    */
   async recoverOnStart(): Promise<CreatedSourceRecoveryReport> {
-    this.#open();
+    return this.#admit(() => this.#sweep());
+  }
+
+  async #sweep(): Promise<CreatedSourceRecoveryReport> {
     const results = new Map<string, CreatedSourceRecoveryResult>();
     let passes = 0;
     let decided = 0;
@@ -357,7 +360,9 @@ export class CreatedSourceRecovery {
           results.set(row.transaction_id, this.#result(row, 'deferred', 'ORDERED_AFTER_OLDER_PENDING'));
           continue;
         }
-        const outcome = await this.recoverTransaction(row.transaction_id);
+        // The complete sweep was admitted before close. Its internal work does not
+        // request a new public admission while shutdown waits for that sweep.
+        const outcome = await this.#recover(row.transaction_id);
         results.set(row.transaction_id, outcome);
       }
       // Only an observed terminal state in the original database is progress.
@@ -380,8 +385,14 @@ export class CreatedSourceRecovery {
    * that is already decided returns that real result instead of repeating the work.
    */
   async recoverTransaction(transactionId: string): Promise<CreatedSourceRecoveryResult> {
+    return this.#admit(() => this.#recover(transactionId));
+  }
+
+  #admit<T>(operation: () => Promise<T>): Promise<T> {
     this.#open();
-    const work = this.#recover(transactionId);
+    // Register before any user callback, queue callback or synchronous failure can
+    // re-enter close. close then owns the entire accepted operation's lifetime.
+    const work = Promise.resolve().then(operation);
     this.#pending.add(work);
     void work.then(() => this.#pending.delete(work), () => this.#pending.delete(work));
     return work;
@@ -521,6 +532,7 @@ export class CreatedSourceRecovery {
     if (contentDigest(input) !== row.request_hash) return { ok: false };
     if (input.project_id !== row.project_id || input.base_revision !== row.base_revision) return { ok: false };
     const adoption = this.#adoptions.adoptionFact(row.transaction_id);
+    if (!this.#authorizationMatches(row, input, adoption)) return { ok: false };
     if (!adoption) {
       // The original database has not produced an adoption fact yet. The request is
       // still complete and self-consistent; what it must additionally name is checked
@@ -533,15 +545,15 @@ export class CreatedSourceRecovery {
     if (!plan) return { ok: false };
     if (input.source_digest !== plan.base_source_digest) return { ok: false };
     if (plan.project_id !== row.project_id || plan.base_revision !== row.base_revision) return { ok: false };
-    if (!this.#authorizationMatches(row, adoption)) return { ok: false };
     return { ok: true, input, adoption, plan };
   }
 
   /**
    * The prepared authorization of this transaction, when the original database already
-   * holds one. Every item is matched against the adoption fact.
+   * holds one. Missing adoption never means missing authorization. When adoption
+   * is absent, the original immutable impact plan proves the authorization digest.
    */
-  #authorizationMatches(row: ProjectTransactionRow, adoption: CreatedAdoptionFact): boolean {
+  #authorizationMatches(row: ProjectTransactionRow, input: ApplyChange, adoption?: CreatedAdoptionFact): boolean {
     let record: unknown;
     try {
       record = this.options.host.revisions.compose((db) => db.prepare(
@@ -552,10 +564,27 @@ export class CreatedSourceRecovery {
     }
     if (!record) return true;
     const found = record as { project_id?: unknown; run_id?: unknown; approval_id?: unknown; facts_digest?: unknown };
-    return String(found.project_id) === row.project_id
-      && String(found.run_id) === adoption.execution.run_id
-      && String(found.approval_id) === adoption.approval_id
-      && String(found.facts_digest) === adoption.facts_digest;
+    if (found.project_id !== row.project_id || found.run_id !== input.execution.run_id
+      || found.approval_id !== input.approval_id) return false;
+    if (adoption) return found.facts_digest === adoption.facts_digest;
+    const plan = this.#plan(input);
+    if (!plan || plan.project_id !== row.project_id || plan.base_revision !== row.base_revision
+      || plan.base_source_digest !== input.source_digest
+      || found.facts_digest !== preparedAdoptionPlanDigest(plan)) return false;
+    // The surviving authorization must refer to the request's original approval,
+    // not merely a self-consistent replacement execution on the same run.
+    let approval: Record<string, unknown> | undefined;
+    try {
+      approval = this.options.host.revisions.compose((db) => db.prepare(
+        'SELECT * FROM cp_a0_approval WHERE project_id=? AND run_id=? AND approval_id=?',
+      ).get(row.project_id, input.execution.run_id, input.approval_id));
+    } catch (error) { throw new TransientRecoveryError(error); }
+    return approval !== undefined && approval.impact_id === input.impact_id
+      && approval.facts_digest === found.facts_digest && approval.action_digest === found.facts_digest
+      && approval.base_revision === row.base_revision && approval.control_revision === plan.control_revision
+      && approval.plan_version === input.execution.plan_version && approval.step_id === input.execution.step_id
+      && approval.attempt === input.execution.attempt && approval.input_digest === input.execution.input_digest
+      && approval.run_scope_digest === input.execution.run_scope_digest;
   }
 
   // ── the prepared (published-or-not) transaction ───────────────────────────────────
@@ -595,7 +624,7 @@ export class CreatedSourceRecovery {
       try {
         this.#abort(row, 'PROVEN_ABORTED');
         return this.#result(row, 'aborted', 'PROVEN_ABORTED');
-      } finally { proof.guard.close(); }
+      } finally { this.#releaseGuard(row.project_id, proof.guard); }
     }
 
     let lease: CreatedRecoveryFilesLease;
@@ -626,7 +655,7 @@ export class CreatedSourceRecovery {
       this.#abort(row, 'COMPENSATED_ABORTED');
       return this.#result(row, 'aborted', 'COMPENSATED_ABORTED');
     } finally {
-      try { this.#files.release(lease); } catch (error) { this.#uncertain.set(row.project_id, error); }
+      try { this.#files.release(lease); } catch (error) { this.#recordCleanupFailure(row.project_id, error); }
     }
   }
 
@@ -723,7 +752,7 @@ export class CreatedSourceRecovery {
       }
       return this.#result(row, 'deferred', 'PUBLISHED_NOT_PROVABLE');
     } finally {
-      try { await publisher.close(); this.#publishers.delete(publisher); } catch (error) { this.#uncertain.set(row.project_id, error); }
+      try { await publisher.close(); this.#publishers.delete(publisher); } catch (error) { this.#recordCleanupFailure(row.project_id, error); }
     }
   }
 
@@ -797,7 +826,7 @@ export class CreatedSourceRecovery {
     try {
       this.#abort(row, 'PROVEN_ABORTED');
       return this.#result(row, 'aborted', 'PROVEN_ABORTED');
-    } finally { proof.guard.close(); }
+    } finally { this.#releaseGuard(row.project_id, proof.guard); }
   }
 
   // ── proofs ───────────────────────────────────────────────────────────────────────
@@ -857,7 +886,7 @@ export class CreatedSourceRecovery {
   }
 
   /** The immutable adoption plan of the original impact. */
-  #plan(adoption: CreatedAdoptionFact): PreparedAdoptionPlanV1 | undefined {
+  #plan(adoption: Pick<CreatedAdoptionFact, 'impact_id'>): PreparedAdoptionPlanV1 | undefined {
     let row: unknown;
     try {
       row = this.options.host.revisions.compose((db) => db.prepare(
@@ -964,13 +993,13 @@ export class CreatedSourceRecovery {
     if (digest.external_reference_count || digest.source_digest !== baseDigest) {
       return { ok: false, reason: 'AUTHOR_NOT_PROVABLE' };
     }
-    const guard = this.#guard(root, digest);
+    const guard = this.#guard(projectId, root, digest);
     if (guard.state === 'refused') return { ok: false, reason: 'AUTHOR_NOT_PROVABLE' };
     if (guard.state === 'unknown') throw new TransientRecoveryError(guard.original);
     return { ok: true, guard: guard.guard, active: base.active };
   }
 
-  #guard(root: string, digest: Awaited<ReturnType<typeof computeSourceDigest>>):
+  #guard(projectId: string, root: string, digest: Awaited<ReturnType<typeof computeSourceDigest>>):
     { readonly state: 'proved'; readonly guard: RetainedSourceTree }
     | { readonly state: 'refused' }
     | { readonly state: 'unknown'; readonly original: unknown } {
@@ -983,6 +1012,7 @@ export class CreatedSourceRecovery {
       const guard = new RetainedSourceTree(root, files);
       return { state: 'proved', guard };
     } catch (error) {
+      if (error instanceof PublicationCleanupError) this.#recordCleanupFailure(projectId, error);
       const kind = classifyResource(error);
       if (kind === 'conflict' || kind === 'absent') return { state: 'refused' };
       if (kind === 'fatal') throw error;
@@ -1186,6 +1216,21 @@ export class CreatedSourceRecovery {
   }
 
   // ── shutdown ─────────────────────────────────────────────────────────────────────
+
+  #recordCleanupFailure(projectId: string, error: unknown): void {
+    const previous = this.#uncertain.get(projectId);
+    this.#uncertain.set(projectId, this.#uncertain.has(projectId)
+      ? new PublicationCleanupError([previous, error]) : error);
+  }
+
+  #releaseGuard(projectId: string, guard: RetainedSourceTree): void {
+    try { guard.close(); }
+    catch (error) {
+      // Cleanup uncertainty must not overwrite the primary operation's error or
+      // turn an already completed abort into a misleading deferred result.
+      this.#recordCleanupFailure(projectId, error);
+    }
+  }
 
   /**
    * Stop accepting, wait for everything this service already accepted, then release the

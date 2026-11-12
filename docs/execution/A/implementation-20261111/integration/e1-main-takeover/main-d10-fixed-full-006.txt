@@ -1,0 +1,39 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:442295) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/created-source-recovery.test.ts (31 tests) 261148ms
+   ✓ D10 created-source business recovery > D10 recovery commits the original published transaction exactly once and replays its receipt  15553ms
+   ✓ D10 created-source business recovery > D10 recovery reconstructs a missing published journal from the actual resources and commits once  10101ms
+   ✓ D10 created-source business recovery > D10 recovery never takes over an unknown operation or an unknown transaction kind  9584ms
+   ✓ D10 created-source business recovery > D10 recovery preserves the published source and refuses a marker-only request with a real attention  9594ms
+   ✓ D10 created-source business recovery > D10 recovery aborts an early unpublished transaction after proving the complete original closure  8089ms
+   ✓ D10 created-source business recovery > D10 recovery preserves everything when the published author bytes were tampered with  9818ms
+   ✓ D10 created-source business recovery > D10 recovery keeps an attention in the unresolved set instead of reporting an empty readiness  9971ms
+   ✓ D10 created-source business recovery > D10 recovery preserves the published source and defers on a transient resource error  12224ms
+   ✓ D10 created-source business recovery > D10 recovery treats an exhausted host resource as deferred and never as a terminal fact  10154ms
+   ✓ D10 created-source business recovery > D10 recovery treats an out-of-memory failure as unknown rather than as a lost source  8802ms
+   ✓ D10 created-source business recovery > D10 recovery preserves the publication when the adoption fact is missing but the publication evidence exists  7871ms
+   ✓ D10 created-source business recovery > D10 recovery refuses to replay a committed transaction whose receipt is gone  9198ms
+   ✓ D10 created-source business recovery > D10 recovery refuses a replay whose receipt names another principal, key or correlation  9319ms
+   ✓ D10 created-source business recovery > D10 recovery replays the original receipt independently of a corrupted current pointer  9646ms
+   ✓ D10 created-source business recovery > D10 recovery keeps no retained descriptor when a guard verification fails  8675ms
+   ✓ D10 created-source business recovery > D10 recovery refuses further work for a project whose resource cleanup failed  9258ms
+   ✓ D10 created-source business recovery > D10 recovery compensates and aborts when the approval has expired, without consuming any authority  8751ms
+   ✓ D10 created-source business recovery > D10 recovery compensates and aborts when the selection moved  8954ms
+   ✓ D10 created-source business recovery > D10 recovery compensates and aborts when an active lock covers the project  9005ms
+   ✓ D10 created-source business recovery > D10 recovery compensates and aborts when the run was cancelled  8773ms
+   ✓ D10 created-source business recovery > D10 recovery defers behind an older controlled pending row of another family  8277ms
+   ✓ D10 created-source business recovery > D10 recovery leaves an unrelated unknown pending row to the original gate  7622ms
+   ✓ D10 created-source business recovery > D10 recovery startup decides only its own family rows and reports the unresolved ones  9368ms
+   ✓ D10 created-source business recovery > D10 recovery closes after the work it already accepted and refuses new work  16575ms
+   ✓ D10 MAIN authorization regression (real producer) > MAIN authorization checks existing authorization before any source proof when adoption is missing  9406ms
+   ✓ D10 MAIN surviving authorization control (real producer) > MAIN authorization still permits a proven early abort with matching surviving authorization  7951ms
+   ✓ D10 MAIN surviving authorization control (real producer) > MAIN cleanup records guard uncertainty in the prepared adoption branch without hiding the abort  8260ms
+
+ Test Files  1 passed (1)
+      Tests  31 passed (31)
+   Start at  11:57:29
+   Duration  277.31s (transform 8.96s, setup 0ms, collect 14.16s, tests 261.15s, environment 0ms, prepare 1.35s)
+

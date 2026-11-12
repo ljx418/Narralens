@@ -1,0 +1,81 @@
+{
+  "base": "eba0d42fc41d0c9c99e1ddf90364149d3a8d5880",
+  "writer": "MAIN",
+  "declaration": "D10_MAIN_REPAIR_INTERNAL_EVIDENCED_REVIEW_PENDING",
+  "source_sha256": {
+    "src/host/agent-driven/created-source-recovery.ts": "e90f63b07e1659999a0ec8916b35fb42ce5c94875c4a73a22894ecd63105a0b7",
+    "src/host/agent-driven/created-source-adoption-service.ts": "9e140f5887b6e8ad5f406517504043ade1eaaa9df8978fee8a2d99d82c46ddb7",
+    "tests/agent-driven/integration/created-source-recovery.test.ts": "eda8cbbc0ba78368db5893def66b956888df97c3c8e65b3a59099b22ff077e13",
+    "tests/agent-driven/integration/created-source-adoption.test.ts": "04eb25fa45efede7d101878d0c603d96b8947f377c49896dc3422a74ed644548"
+  },
+  "protected_agents_sha256": "37300463a72a612ae16e0a5fcfb496502c57c722b83781e0e2e8c9480594542b",
+  "captures": [
+    {
+      "name": "main-d10-fixed-full-006",
+      "exit": 0,
+      "source_changed": [],
+      "source_added": [],
+      "log_sha256": "e3c9be7546414ec79571841c8fce82dd2e5fe8ba06d24c632658794a93deba9e",
+      "finished_at": "2026-11-12T04:02:18.479153+00:00"
+    },
+    {
+      "name": "main-d10-fixed-lifecycle-003",
+      "exit": 0,
+      "source_changed": [],
+      "source_added": [],
+      "log_sha256": "6c203e9ddbfd447d28ab4efdd9e32945eac39b47020a912fc6656eaa8d196957",
+      "finished_at": "2026-11-12T03:56:01.805235+00:00"
+    },
+    {
+      "name": "main-d10-old-authorization-002",
+      "exit": 1,
+      "source_changed": [],
+      "source_added": [],
+      "log_sha256": "5cd78a281886a188cbe0c0d49c2e9202c3cd93b8836fe75b219450c648c87479",
+      "finished_at": "2026-11-12T03:55:00.839854+00:00"
+    },
+    {
+      "name": "main-d10-old-lifecycle-001",
+      "exit": 1,
+      "source_changed": [],
+      "source_added": [],
+      "log_sha256": "6eb09fd9c1b9872c303b4580521512990e5b378f332846171e9cbcb147eda295",
+      "finished_at": "2026-11-12T03:54:19.942791+00:00"
+    },
+    {
+      "name": "main-d10-original-probe-005",
+      "exit": 0,
+      "source_changed": [],
+      "source_added": [],
+      "log_sha256": "10990bbaab7b368dcf5417a35f7f0fdaeb0eda34482b10e51ca47540c21c9a89",
+      "finished_at": "2026-11-12T03:56:18.953593+00:00"
+    },
+    {
+      "name": "main-d10-type-004",
+      "exit": 2,
+      "source_changed": [],
+      "source_added": [],
+      "log_sha256": "94675b478ad7d0e5708f609696ac4d06d8442e8a384e2f63d12e46eac8eb1017",
+      "finished_at": "2026-11-12T03:56:33.565706+00:00"
+    },
+    {
+      "name": "main-d10-type-007",
+      "exit": 0,
+      "source_changed": [],
+      "source_added": [],
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "finished_at": "2026-11-12T03:58:03.239090+00:00"
+    }
+  ],
+  "full_recovery": "31 passed (24 inherited +7 new)",
+  "typecheck": "exit0; earlier test-only TS2352 exit2 retained",
+  "original_independent_probe": "unchanged diagnostic script exit0; recovery source matches final; test file gained3 cases afterward, no same-all-input claim",
+  "limits": [
+    "not production Host mounted",
+    "not real SIGKILL",
+    "not NativeAck/Studio",
+    "not legal committed successor",
+    "not A acceptance"
+  ],
+  "at": "2026-11-12T04:03:12.046783+00:00"
+}

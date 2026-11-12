@@ -1,3 +1,12 @@
+import {mkdtempSync,mkdirSync,writeFileSync,readFileSync,rmSync} from 'node:fs';
+import {tmpdir} from 'node:os';
+import {RevisionStore} from '../../../src/host/projects/revision-store.js';
+import {ProjectCreationStore} from '../../../src/host/projects/project-creation-store.js';
+import {ProjectCoordinator} from '../../../src/host/projects/project-coordinator.js';
+import {InMemoryProjectOperationQueue} from '../../../src/host/projects/project-operation-queue.js';
+import {RetainedSourceTree} from '../../../src/host/agent-driven/retained-source-tree.js';
+import {PublicationCleanupError} from '../../../src/host/agent-driven/publication-cleanup.js';
+import type {ApplyChange} from '../../../src/contracts/agent-driven-types.js';
 import {readFile,writeFile,stat,readdir} from 'node:fs/promises';
 import {join,dirname} from 'node:path';
 import {randomUUID} from 'node:crypto';
@@ -484,5 +493,137 @@ describe('D10 created-source business recovery',()=>{
   await expect(f.recovery.recoverTransaction(f.transactionId)).rejects.toBeDefined();
   await closing;
   expect(f.revisions.projectTransaction(f.transactionId)?.state).toBe('prepared');
+ },120000);
+});
+
+
+/** Seeded diagnostic authorities on real SQLite/queue/FS/FDs. These cases test
+ * lifecycle only; they do not prove bootstrap, production startup or SIGKILL. */
+function lifecycleFixture(){
+ const root=mkdtempSync(join(tmpdir(),'narralens-d10-lifecycle-'));
+ const revisions=new RevisionStore(':memory:');new ProjectCreationStore(revisions);
+ const queue=new InMemoryProjectOperationQueue();
+ const coordinator=new ProjectCoordinator({store:revisions,queue} as unknown as ConstructorParameters<typeof ProjectCoordinator>[0]);
+ const service=new CreatedSourceRecovery({host:{revisions,coordinator,snapshots:{}},
+  creation:{forProject:()=>({command_id:'creation-command',transaction_id:'creation-txn'}),origin:()=>({origin:'created'}),ownerOf:()=> 'owner'},
+  createdRoot:root,privateRoot:join(root,'private'),stageDomainRoot:join(root,'stage'),
+  selection:{currentSelectionVersion:()=>0},tasks:{},assets:{},verifier:{}} as unknown as ConstructorParameters<typeof CreatedSourceRecovery>[0]);
+ // A cleanup-error test explicitly observes close rejection before afterEach. Do not
+ // retry numeric descriptors, or convert an unexpected close failure into a test pass.
+ let closed=false;
+ const close=async()=>{try{await service.close();}finally{closed=true;}};
+ cleanups.push(async()=>{try{if(!closed)await close();}finally{revisions.close();rmSync(root,{recursive:true,force:true});}});
+ const vector=(JSON.parse(readFileSync(join(process.cwd(),'docs/agent-driven-v1/cp-a0/contract-vectors.json'),'utf8')) as
+  {vectors:Array<{id:string;value:ApplyChange}>}).vectors.find(v=>v.id==='definition:ApplyChange:valid')!.value;
+ const add=(id:string,project:string,input?:ApplyChange)=>revisions.beginTransaction({transaction_id:id,project_id:project,kind:'edit',correlation_id:'id1',
+  request_json:canonicalJson(input?{operation:'agent.created_source.apply@1',input}:{operation:'agent.created_source.apply@1'}),
+  request_hash:input?contentDigest(input):'a'.repeat(64),base_revision:1,createdAt:new Date(id.endsWith('1')?0:1)});
+ const author=async(project:string)=>{
+  const source=join(root,project,'source');mkdirSync(source,{recursive:true});writeFileSync(join(source,'film.html'),'<html><body>diagnostic</body></html>');
+  writeFileSync(join(root,project,'owner.json'),canonicalJson({kind:'narralens.created-root@1',project_id:project,command_id:'creation-command',transaction_id:'creation-txn'}));
+  const digest=await computeSourceDigest({root:source,roots:['film.html'],engine:'openfilm',engineUpstreamSha:OPENFILM_UPSTREAM_SHA});
+  revisions.ensureProject(project,1);const fact={schema_version:1,roots:['film.html'],subtitles:[],frame_count:0,fps:{num:30,den:1},assets:[]};
+  revisions.compose(db=>{db.prepare('UPDATE project_state SET source_digest=? WHERE project_id=?').run(digest.source_digest,project);
+   db.prepare('INSERT INTO snapshot(snapshot_id,project_id,source_digest,engine,created_at) VALUES(?,?,?,?,?)').run('snapshot-'+project,project,digest.source_digest,'openfilm',new Date().toISOString());
+   db.prepare('INSERT INTO active_commit VALUES(?,?,?,?,?,?,?)').run(project,1,'snapshot-'+project,digest.source_digest,'openfilm','creation-txn',new Date().toISOString());
+   db.prepare('INSERT INTO created_source_fact VALUES(?,?,?,?)').run(project,'snapshot-'+project,canonicalJson(fact),canonicalDigest(fact));});
+  return {source,input:{...vector,project_id:project,base_revision:1,source_digest:digest.source_digest}};
+ };
+ return {root,revisions,queue,coordinator,service,close,add,author};
+}
+
+describe('D10 MAIN lifecycle regressions (diagnostic authorities)',()=>{
+ it('MAIN lifecycle keeps abort truthful and cleanup uncertainty sticky until close',async()=>{
+  const f=lifecycleFixture();const {source,input}=await f.author('early');f.add('early1','early',input);
+  const original=RetainedSourceTree.prototype.close;const cause=new Error('injected guard close uncertainty');let injected=0;
+  vi.spyOn(RetainedSourceTree.prototype,'close').mockImplementation(function(this:RetainedSourceTree){original.call(this);if(this.root===source&&injected++===0)throw new PublicationCleanupError([cause]);});
+  const first=await f.service.recoverTransaction('early1');f.add('early2','early',input);
+  const second=await f.service.recoverTransaction('early2');
+  let failure:unknown;try{await f.close();}catch(error){failure=error;}
+  expect(first).toMatchObject({outcome:'aborted',reason:'PROVEN_ABORTED'});
+  expect(f.revisions.projectTransaction('early1')?.state).toBe('aborted');
+  expect(second).toMatchObject({outcome:'deferred',reason:'TRANSIENT_RESOURCE_ERROR'});
+  expect(f.revisions.projectTransaction('early2')?.state).toBe('received');
+  expect(failure).toBeInstanceOf(PublicationCleanupError);
+  expect((failure as PublicationCleanupError).errors.flatMap(error=>error instanceof PublicationCleanupError?[...error.errors]:[error])).toContain(cause);
+  expect(JSON.stringify(f.revisions.activeCommit('early'))).toContain('snapshot-early');
+ });
+ it('MAIN lifecycle keeps failed constructor cleanup sticky instead of treating it as an ordinary retry',async()=>{
+  const f=lifecycleFixture();const {source,input}=await f.author('construct');f.add('construct1','construct',input);
+  const original=RetainedSourceTree.prototype.close;let closing=0;
+  vi.spyOn(RetainedSourceTree.prototype,'verify').mockImplementationOnce(()=>{throw new Error('injected verification I/O failure');});
+  const closeSpy=vi.spyOn(RetainedSourceTree.prototype,'close').mockImplementation(function(this:RetainedSourceTree){original.call(this);if(this.root===source&&closing++===0)throw new Error('injected constructor cleanup uncertainty');});
+  const first=await f.service.recoverTransaction('construct1');
+  closeSpy.mockRestore();
+  const second=await f.service.recoverTransaction('construct1');
+  let failure:unknown;try{await f.close();}catch(error){failure=error;}
+  expect(first).toMatchObject({outcome:'deferred',reason:'TRANSIENT_RESOURCE_ERROR'});
+  expect(second).toMatchObject({outcome:'deferred',reason:'TRANSIENT_RESOURCE_ERROR'});
+  expect(f.revisions.projectTransaction('construct1')?.state).toBe('received');
+  expect(failure).toBeInstanceOf(PublicationCleanupError);
+ });
+ it('MAIN lifecycle preserves the primary operation error and also exposes cleanup uncertainty',async()=>{
+  const f=lifecycleFixture();const {source,input}=await f.author('primary');f.add('primary1','primary',input);
+  const primary=new Error('injected abort failed before a decision');const cleanup=new Error('injected guard cleanup outcome unknown');
+  vi.spyOn(f.coordinator,'abort').mockImplementationOnce(()=>{throw primary;});
+  const original=RetainedSourceTree.prototype.close;
+  vi.spyOn(RetainedSourceTree.prototype,'close').mockImplementation(function(this:RetainedSourceTree){original.call(this);if(this.root===source)throw cleanup;});
+  let operationError:unknown;try{await f.service.recoverTransaction('primary1');}catch(error){operationError=error;}
+  let closeError:unknown;try{await f.close();}catch(error){closeError=error;}
+  expect(operationError).toBe(primary);expect(f.revisions.projectTransaction('primary1')?.state).toBe('received');
+  expect(closeError).toBeInstanceOf(PublicationCleanupError);expect((closeError as PublicationCleanupError).errors).toContain(cleanup);
+ });
+ it('MAIN lifecycle close waits for the complete accepted startup sweep and rejects new admissions',async()=>{
+  const f=lifecycleFixture();f.add('sweep1','sweep-a');f.add('sweep2','sweep-b');
+  let release!:()=>void;const gate=new Promise<void>(r=>release=r);const held=f.queue.run('sweep-a',()=>gate);
+  const sweep=f.service.recoverOnStart();const swept=sweep.then(value=>({value}),error=>({error}));
+  const closing=f.close();const refused=f.service.recoverTransaction('sweep2').then(()=>false,()=>true);
+  release();await held;await closing;const result=await swept;
+  expect(await refused).toBe(true);expect(result).toHaveProperty('value');
+  expect(f.revisions.projectTransaction('sweep1')?.state).toBe('attention');
+  expect(f.revisions.projectTransaction('sweep2')?.state).toBe('attention');
+ });
+});
+
+describe('D10 MAIN authorization regression (real producer)',()=>{
+ it('MAIN authorization checks existing authorization before any source proof when adoption is missing',async()=>{
+  const f=await recoveryFixture({publish:false});
+  f.revisions.compose(db=>{const sql=String(db.prepare("SELECT sql FROM sqlite_master WHERE name='created_adoption_fact_no_delete'").get()?.sql);
+   db.exec('DROP TRIGGER created_adoption_fact_no_delete');try{db.prepare('DELETE FROM created_adoption_fact WHERE transaction_id=?').run(f.transactionId);}finally{db.exec(sql);}});
+  const input={...f.applyChange,approval_id:'approval_'+randomUUID().replaceAll('-','')};
+  f.revisions.compose(db=>db.prepare('UPDATE project_transaction SET request_json=?,request_hash=? WHERE transaction_id=?')
+   .run(canonicalJson({operation:'agent.created_source.apply@1',input}),contentDigest(input),f.transactionId));
+  const before=await witness(f);
+  const guard=vi.spyOn(RetainedSourceTree.prototype,'verify');
+  const outcome=await f.recovery.recoverTransaction(f.transactionId);
+  expect(outcome).toMatchObject({outcome:'attention',reason:'REQUEST_NOT_LEGITIMATE'});
+  expect(f.revisions.projectTransaction(f.transactionId)?.state).toBe('attention');
+  expect(guard).not.toHaveBeenCalled();
+  expect(await witness(f)).toEqual(before);expect(await readFile(f.authorPath)).toEqual(f.authorBytesNow);
+ },120000);
+});
+
+
+describe('D10 MAIN surviving authorization control (real producer)',()=>{
+ it('MAIN authorization still permits a proven early abort with matching surviving authorization',async()=>{
+  const f=await recoveryFixture({publish:false});
+  f.revisions.compose(db=>{const sql=String(db.prepare("SELECT sql FROM sqlite_master WHERE name='created_adoption_fact_no_delete'").get()?.sql);
+   db.exec('DROP TRIGGER created_adoption_fact_no_delete');try{db.prepare('DELETE FROM created_adoption_fact WHERE transaction_id=?').run(f.transactionId);}finally{db.exec(sql);}});
+  const before=await witness(f);
+  expect(await f.recovery.recoverTransaction(f.transactionId)).toMatchObject({outcome:'aborted',reason:'PROVEN_ABORTED'});
+  expect(f.revisions.projectTransaction(f.transactionId)?.state).toBe('aborted');
+  expect(await witness(f)).toEqual(before);expect(await readFile(f.authorPath)).toEqual(f.authorBytesNow);
+ },120000);
+ it('MAIN cleanup records guard uncertainty in the prepared adoption branch without hiding the abort',async()=>{
+  const f=await recoveryFixture({publish:false});const original=RetainedSourceTree.prototype.close;let injected=false;
+  vi.spyOn(RetainedSourceTree.prototype,'close').mockImplementation(function(this:RetainedSourceTree){original.call(this);if(!injected&&this.root===f.authorRoot){injected=true;throw new PublicationCleanupError([new Error('prepared guard cleanup uncertainty')]);}});
+  const outcome=await f.recovery.recoverTransaction(f.transactionId);
+  let failure:unknown;try{await f.recovery.close();}catch(error){failure=error;}
+  // This service's sticky failure is asserted here; remove only its already-observed
+  // close callback, not the fixture/reader/publisher cleanup obligations.
+  cleanups.pop();
+  expect(injected).toBe(true);expect(outcome).toMatchObject({outcome:'aborted',reason:'PROVEN_ABORTED'});
+  expect(f.revisions.projectTransaction(f.transactionId)?.state).toBe('aborted');
+  expect(failure).toBeInstanceOf(PublicationCleanupError);expect(await readFile(f.authorPath)).toEqual(f.authorBytesNow);
  },120000);
 });

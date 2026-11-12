@@ -1,0 +1,63 @@
+(node:441205) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+[
+  {
+    "scenario": "early_guard_cleanup_not_sticky",
+    "injected": true,
+    "first": {
+      "transaction_id": "early1",
+      "project_id": "early",
+      "outcome": "aborted",
+      "reason": "PROVEN_ABORTED",
+      "revision": null
+    },
+    "firstState": "aborted",
+    "second": {
+      "transaction_id": "early2",
+      "project_id": "early",
+      "outcome": "deferred",
+      "reason": "TRANSIENT_RESOURCE_ERROR",
+      "revision": null
+    },
+    "secondState": "received",
+    "closeError": "Publication resource cleanup requires reconciliation",
+    "defect": false
+  },
+  {
+    "scenario": "close_while_startup_sweep_accepted",
+    "events": [
+      "sweep_resolved",
+      "close_resolved"
+    ],
+    "swept": {
+      "value": {
+        "passes": 1,
+        "decided": 2,
+        "results": [
+          {
+            "transaction_id": "sweep1",
+            "project_id": "sweep-a",
+            "outcome": "attention",
+            "reason": "REQUEST_NOT_LEGITIMATE",
+            "revision": null
+          },
+          {
+            "transaction_id": "sweep2",
+            "project_id": "sweep-b",
+            "outcome": "attention",
+            "reason": "REQUEST_NOT_LEGITIMATE",
+            "revision": null
+          }
+        ],
+        "unresolved_transaction_ids": [
+          "sweep1",
+          "sweep2"
+        ],
+        "stopped": "decided"
+      }
+    },
+    "first": "attention",
+    "second": "attention",
+    "defect": false
+  }
+]
