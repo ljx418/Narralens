@@ -17,6 +17,7 @@ import {CreatedSourceFactsReader} from '../../../src/host/agent-driven/created-s
 import {CreativeProjectAuthority} from '../../../src/host/agent-driven/creative-project-authority.js';
 import {CreatedSourcePublisher,isCreatedSourcePublicationProof,preparedSourceConsumerGraph} from '../../../src/host/agent-driven/created-source-publisher.js';
 import {CreatedPublicationIdentityStore,type PublicationIdentityInput} from '../../../src/host/agent-driven/created-publication-identity-store.js';
+import {CreatedPublicationRecoveryFiles} from '../../../src/host/agent-driven/created-publication-recovery-files.js';
 import {PublicationCleanupError} from '../../../src/host/agent-driven/publication-cleanup.js';
 import {RetainedSourceTree} from '../../../src/host/agent-driven/retained-source-tree.js';
 import {ProductSqliteRepository} from '../../../src/host/agent-driven/product-sqlite-repository.js';
@@ -36,7 +37,7 @@ import type {ProductTransaction} from '../../../src/host/creative/product-reposi
 // It never claims that a person reviewed the film or that the review UI path passed.
 const cleanups:Array<()=>Promise<void>>=[];
 afterEach(async()=>{vi.restoreAllMocks();for(const close of cleanups.splice(0).reverse())await close();});
-async function fixture(options:{transactionKind?:'edit'|'snapshot_publish';mutatePlan?:(plan:PreparedAdoptionPlanV1)=>void;fsync?:(path:string)=>Promise<void>;onPrepared?:(f:Awaited<ReturnType<typeof preparedDraftFixture>>)=>void;onPublisher?:(publisher:CreatedSourcePublisher,close:()=>Promise<void>)=>void}={}){
+async function fixture(options:{scopedPublicationRoot?:boolean;transactionKind?:'edit'|'snapshot_publish';mutatePlan?:(plan:PreparedAdoptionPlanV1)=>void;fsync?:(path:string)=>Promise<void>;onPrepared?:(f:Awaited<ReturnType<typeof preparedDraftFixture>>)=>void;onPublisher?:(publisher:CreatedSourcePublisher,close:()=>Promise<void>)=>void}={}){
  const f=await preparedDraftFixture();cleanups.push(f.close);f.worker.start();const completed=await waitForCompletedDraft(f);await f.worker.close();
  const revisions=f.host.revisions,repo=f.repo,now=new Date(),execution=f.task.request.execution;
  if(completed.fact.plan_digest===null)throw Error('Assembly must produce a native plan digest');
@@ -126,7 +127,8 @@ async function fixture(options:{transactionKind?:'edit'|'snapshot_publish';mutat
   plan_sha256:planDigest,facts_digest:planDigest,original_source_digest:plan.base_source_digest,target_source_digest:plan.target_source_digest,expected_snapshot_id:plan.target_snapshot_id,
   native_plan:plan.native_plan,original_closure:originalFiles,target_closure:plan.files,stage_root:completed.root,backup_token:'backup_'+transactionId,execution,now});
  for(const [from,to]of [['received','preconditions_checked'],['preconditions_checked','staged'],['staged','validated'],['validated','prepared']] as const)revisions.transition(transactionId,from,to);
- const publisher=new CreatedSourcePublisher({revisions,authorRoot:f.authorRoot,privateRoot:join(f.root,'publication'),snapshots:new SnapshotStore({snapshotsRoot:join(f.root,'snapshots')}),
+ const publisherPrivateRoot=options.scopedPublicationRoot?join(f.root,'publication',f.projectId):join(f.root,'publication');
+ const publisher=new CreatedSourcePublisher({revisions,authorRoot:f.authorRoot,privateRoot:publisherPrivateRoot,snapshots:new SnapshotStore({snapshotsRoot:join(f.root,'snapshots')}),
   selection:{currentSelectionVersion:()=>selection},assets:f.registry,tasks:f.tasks,verifier:f.verifier,stageDomainRoot:f.taskRoot,...(options.fsync?{fsync:options.fsync}:{})});
  const closePublisher=()=>publisher.close();cleanups.push(closePublisher);options.onPublisher?.(publisher,closePublisher);
  const publicationInput={project_id:f.projectId,transaction_id:transactionId,prepared_source_id:mapping.prepared_source_id,stage_root:completed.root,files:plan.files,
@@ -134,10 +136,62 @@ async function fixture(options:{transactionKind?:'edit'|'snapshot_publish';mutat
  const proof=await publisher.publish(publicationInput);
  const input:CommitPreparedCreatedSourceInput={project_id:f.projectId,transaction_id:transactionId,impact_id:impactId,approval_id:approvalId,prepared_source_id:mapping.prepared_source_id,
   execution,idempotency_key:'module-apply',request_digest:requestDigest,publication_proof:proof};
- return {...f,revisions,repo,plan,impact,adoptions,publisher,closePublisher,input,publicationInput,proof,advanceSelection:()=>selection++};
+ return {...f,revisions,repo,plan,impact,adoptions,publisher,closePublisher,input,publicationInput,proof,publisherPrivateRoot,selectionPort:{currentSelectionVersion:()=>selection},advanceSelection:()=>selection++};
+}
+
+async function recoveryFixture(){
+ const f=await fixture({scopedPublicationRoot:true});await f.closePublisher();
+ const files=new CreatedPublicationRecoveryFiles({revisions:f.revisions,snapshots:f.host.snapshots,
+  createdRoot:dirname(dirname(f.authorRoot)),privateRoot:join(f.root,'publication'),creationIdentity:id=>{
+   const source=f.app.creation.forProject(id);return source?{command_id:source.command_id,transaction_id:source.transaction_id}:null;
+  }});cleanups.push(()=>files.close());
+ const lease=await files.inspect(f.input.transaction_id);
+ const publisher=new CreatedSourcePublisher({revisions:f.revisions,authorRoot:f.authorRoot,privateRoot:f.publisherPrivateRoot,snapshots:f.host.snapshots,
+  selection:f.selectionPort,assets:f.registry,tasks:f.tasks,verifier:f.verifier,stageDomainRoot:f.taskRoot});cleanups.push(()=>publisher.close());
+ return {...f,files,lease,recoveredPublisher:publisher};
 }
 
 describe('actual closed created-source commit and publisher',()=>{
+ it('D10 recovery issuer reopens actual published source and commits the original transaction exactly once',async()=>{
+  const f=await recoveryFixture(),outbox=f.revisions.outboxRowCount();expect(isCreatedSourcePublicationProof(f.proof)).toBe(false);
+  const originalIdentity=new CreatedPublicationIdentityStore(f.revisions).read(f.input.transaction_id);
+  const proof=await f.recoveredPublisher.recoverPublished(f.publicationInput,f.files,f.lease);
+  expect(isCreatedSourcePublicationProof(proof)).toBe(true);expect(proof.facts.publisher_instance).not.toBe(f.proof.facts.publisher_instance);
+  const input={...f.input,publication_proof:proof},applied=f.revisions.commitPreparedCreatedSource(input);
+  expect(applied).toMatchObject({project_revision:2,transaction_id:f.input.transaction_id,replayed:false,snapshot_id:f.plan.target_snapshot_id});
+  expect(f.revisions.commitPreparedCreatedSource(input)).toEqual({...applied,replayed:true});expect(f.revisions.outboxRowCount()).toBe(outbox+2);
+  expect(new CreatedPublicationIdentityStore(f.revisions).read(f.input.transaction_id)).toEqual(originalIdentity);f.files.release(f.lease);
+ },120000);
+ it('D10 recovery issuer reconstructs a missing published journal from actual resources without publishing a new snapshot or job',async()=>{
+  const f=await recoveryFixture(),jobs=f.revisions.compose(db=>db.prepare('SELECT count(*) AS n FROM job').get()?.n);
+  f.revisions.compose(db=>{const sql=String(db.prepare("SELECT sql FROM sqlite_master WHERE name='created_publication_journal_no_delete'").get()?.sql);
+   db.exec('DROP TRIGGER created_publication_journal_no_delete');try{db.prepare("DELETE FROM created_publication_journal WHERE transaction_id=? AND phase='published'").run(f.input.transaction_id);}finally{db.exec(sql);}});
+  expect(f.publisher.journalOf(f.input.transaction_id).map(row=>row.phase)).toEqual(['prepared']);
+  const publishing=vi.spyOn(SnapshotStore.prototype,'publish').mockRejectedValue(new Error('Recovery must not publish another snapshot'));
+  const proof=await f.recoveredPublisher.recoverPublished(f.publicationInput,f.files,f.lease);
+  expect(f.recoveredPublisher.journalOf(f.input.transaction_id).map(row=>row.phase)).toEqual(['prepared','published']);
+  const applied=f.revisions.commitPreparedCreatedSource({...f.input,publication_proof:proof});expect(applied.project_revision).toBe(2);
+  expect(publishing).not.toHaveBeenCalled();expect(f.revisions.compose(db=>db.prepare('SELECT count(*) AS n FROM job').get()?.n)).toBe(jobs);f.files.release(f.lease);
+ },120000);
+ it('D10 recovery issuer refuses a JSON lease and a changed selection without consuming approval',async()=>{
+  const f=await recoveryFixture();await expect(f.recoveredPublisher.recoverPublished(f.publicationInput,f.files,JSON.parse(JSON.stringify(f.lease)))).rejects.toThrow(/not live/);
+  f.advanceSelection();await expect(f.recoveredPublisher.recoverPublished(f.publicationInput,f.files,f.lease)).rejects.toThrow(/bindings changed/);
+  expect(f.revisions.activeCommit(f.projectId)?.revision).toBe(1);expect(f.revisions.compose(db=>db.prepare('SELECT state FROM cp_a0_approval WHERE approval_id=?').get(f.input.approval_id)?.state)).toBe('active');f.files.release(f.lease);
+ },120000);
+ it('D10 recovery issuer refuses expired authority and the actual resource lease compensates the complete original before abort',async()=>{
+  const f=await recoveryFixture(),outbox=f.revisions.outboxRowCount();vi.useFakeTimers({toFake:['Date']});
+  try{vi.setSystemTime(new Date(Date.parse(f.plan.expires_at)+1000));
+   await expect(f.recoveredPublisher.recoverPublished(f.publicationInput,f.files,f.lease)).rejects.toThrow(/approval expired/);
+   await f.files.restoreOriginal(f.lease);f.files.assertOriginalRestored(f.lease);f.host.coordinator.abort(f.input.transaction_id,'CREATED_ADOPTION_AUTHORITY_EXPIRED');
+   expect(f.revisions.projectTransaction(f.input.transaction_id)?.state).toBe('aborted');expect(await readFile(join(f.authorRoot,'film.html'))).toEqual(f.authorBytes);
+   const fact=f.app.creation.sourceFact(f.projectId,f.commit.snapshot_id)!;
+   expect((await computeSourceDigest({root:f.authorRoot,roots:fact.roots,engine:'openfilm',engineUpstreamSha:OPENFILM_UPSTREAM_SHA})).source_digest).toBe(f.commit.source_digest);
+   expect(f.revisions.activeCommit(f.projectId)?.revision).toBe(1);expect(f.revisions.outboxRowCount()).toBe(outbox);
+   expect(f.revisions.compose(db=>db.prepare('SELECT state,consumed_transaction_id FROM cp_a0_approval WHERE approval_id=?').get(f.input.approval_id))).toMatchObject({state:'active',consumed_transaction_id:null});
+   f.files.release(f.lease);
+  }finally{vi.useRealTimers();}
+ },120000);
+
  it('D10 identity records actual three retained trees in the prepared journal transaction before any rename',async()=>{
   let prepared:Awaited<ReturnType<typeof preparedDraftFixture>>|undefined,captured:PublicationIdentityInput|undefined;
   const record=CreatedPublicationIdentityStore.prototype.record;

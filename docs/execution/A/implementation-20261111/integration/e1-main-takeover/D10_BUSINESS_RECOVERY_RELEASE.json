@@ -1,0 +1,35 @@
+{
+  "format": "narralens.main-component-release@1",
+  "owner": "MAIN",
+  "base": "4b423528eb4ce424725534349a6a41bb5c6bfe79",
+  "scope": "Actual created publication recovery issuer + original transaction orchestration; public ingress and Host startup not enabled until integration gates",
+  "basis": [
+    "Accepted RD01..06 design",
+    "4b42352 files recovery bounded ACCEPT msg_ccd3be755cf9",
+    "Original closed commit and publisher atomic identity independent accepted"
+  ],
+  "paths": [
+    "src/host/agent-driven/created-source-publisher.ts",
+    "src/host/agent-driven/created-publication-recovery-files.ts",
+    "src/host/agent-driven/created-source-recovery.ts",
+    "src/host/agent-driven/created-source-adoption-service.ts",
+    "tests/agent-driven/integration/created-source-adoption.test.ts",
+    "tests/agent-driven/integration/created-source-recovery.test.ts",
+    "tests/agent-driven/integration/created-publication-recovery-files.test.ts"
+  ],
+  "requirements": [
+    "Reopened real producer and original/target/snapshot identities, current native plan/rights, private proof only current Publisher instance",
+    "Only original prepared transaction may commit+1, original idempotent receipt on already committed",
+    "Original per-project controlledRecovery queue + all-family older pending precedence",
+    "Definitive invalid authority/cancel/expiry compensates original files before abort; transient uncertain IO defers, unprovable identity attention",
+    "No reset of attention/recovering/committed and no new business state or public DTO",
+    "Preserve old N3 cleanup and explicit failure evidence; Headless/no provider/paid/J"
+  ],
+  "validation": [
+    "Actual SOURCE_ONLY producer/publisher and original DB+closedcommit",
+    "Original protocol and published-journal missing/replay/expiry/locks/cancel/file drift negatives",
+    "Compensation and shutdown boundaries with real original ownership; process SIGKILL separately labeled until executed"
+  ],
+  "status": "RELEASED_EXACT_SCOPE",
+  "addendum": "Actual SOURCE_ONLY exposed root-entry role ordering gap; resource helper now forces native film.html entry exactly as existing Publisher and SnapshotStore. Reproducer old008 fails. No SourceDigestV1 algorithm or golden vector changed."
+}

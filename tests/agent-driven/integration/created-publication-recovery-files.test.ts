@@ -26,7 +26,7 @@ import { CreatedPublicationRecoveryFiles, type RecoveryFileLayout } from '../../
 const cleanup: Array<() => Promise<void>> = [];
 afterEach(async () => { for (const close of cleanup.splice(0).reverse()) await close(); });
 const sha = (bytes: Uint8Array) => createHash('sha256').update(bytes).digest('hex');
-async function fixture(layout: RecoveryFileLayout | 'original_missing_stage' = 'published') {
+async function fixture(layout: RecoveryFileLayout | 'original_missing_stage' = 'published', targetRoots?: readonly string[]) {
  const root = await mkdtemp(join(tmpdir(), 'narralens-recovery-files-')); cleanup.push(() => rm(root,{recursive:true,force:true}));
  const project='project-1',transaction='txn_recovery',createdRoot=join(root,'created'),privateRoot=join(root,'publication');
  const author=join(createdRoot,project,'source'),workspace=join(privateRoot,project,'publication-00000000-0000-4000-8000-000000000001');
@@ -50,7 +50,7 @@ async function fixture(layout: RecoveryFileLayout | 'original_missing_stage' = '
   const geometry={schema_version:1,roots,subtitles:[],frame_count:0,fps:{num:30,den:1},assets:[]};
   db.prepare('INSERT INTO created_source_fact VALUES(?,?,?,?)').run(project,baseSnapshot,canonicalJson(geometry),canonicalDigest(geometry));});
  const vector=JSON.parse(readFileSync(new URL('../../../docs/parallel/lane-bridge/A-R2-20261112/golden/d09-plan-vectors.json',import.meta.url),'utf8')).cases.find((x:{expect:string})=>x.expect==='accepted').plan as PreparedAdoptionPlanV1;
- const plan:PreparedAdoptionPlanV1={...vector,project_id:project,base_revision:1,control_revision:0,base_source_digest:originalDigest,target_source_digest:targetDigest,target_snapshot_id:targetSnapshot,roots,files:targetFiles,
+ const plan:PreparedAdoptionPlanV1={...vector,project_id:project,base_revision:1,control_revision:0,base_source_digest:originalDigest,target_source_digest:targetDigest,target_snapshot_id:targetSnapshot,roots:targetRoots??roots,files:targetFiles,
   consumer:{...vector.consumer,project_id:project},engine_upstream_sha:OPENFILM_UPSTREAM_SHA};
  const operations=new OperationIdempotencyStore(store.compose(db=>db));const impacts=new CreatedSourceImpactStore(store,new ImpactStore(store,operations));
  const planDigest=preparedAdoptionPlanDigest(plan),impactId='impact_component',approval='approval_component';
@@ -150,4 +150,9 @@ it('preserves the primary inspection failure and attempts every acquired resourc
   expect(attempted).toEqual(new Set([f.backup,f.author,f.snapshot,join(f.createdRoot,f.project),f.workspace]));
  }finally{verifySpy.mockRestore();closeSpy.mockRestore();let closing:unknown;try{await service.close();}catch(error){closing=error;}
   expect(new Set(flatten(closing))).toEqual(new Set([cleanupFault]));}
+});
+
+it('keeps film.html as the native digest entry when declared dependencies are ordered differently',async()=>{
+ const f=await fixture('published',['scenes/one.html','film.html']),service=f.make(),lease=await service.inspect(f.transaction);
+ expect(await service.layout(lease)).toBe('published');service.release(lease);
 });

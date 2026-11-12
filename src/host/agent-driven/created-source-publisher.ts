@@ -6,6 +6,7 @@ import type { DatabaseSync } from 'node:sqlite';
 import { canonicalJson, canonicalDigest } from '../creative/digest.js';
 import { RevisionStore } from '../projects/revision-store.js';
 import { matchesFrozenSchemaNamespace } from './agent-schema-definition.js';
+import {CreatedPublicationRecoveryFiles,type CreatedRecoveryFilesLease} from './created-publication-recovery-files.js';
 import {CreatedPublicationIdentityStore} from './created-publication-identity-store.js';
 import {RetainedSourceTree as RetainedTree} from './retained-source-tree.js';
 import {assertPreparedAdoptionPlan,preparedAdoptionPlanDigest,isCreatedSourceApplyTransaction,type PreparedAdoptionPlanV1,type CreatedSourcePublicationFacts,type CreatedSourcePublicationProof,type PreparedSourceFileFact} from './created-source-ports.js';
@@ -199,8 +200,24 @@ export class CreatedSourcePublisher {
   isUsable():boolean{return !this.#closed&&!this.#failed;}
   #assertOpen():void{if(!this.isUsable())fail('REVISION_CONFLICT','Publisher is not usable');}
   publish(input:PublishCreatedSourceInput):Promise<CreatedSourcePublicationProof>{
+    this.#assertOpen();const request=freeze(structuredClone(input));
+    return this.#dispatch(()=>this.#withPrepared(request,held=>this.#publishGuarded(request,held)));
+  }
+  /** No encoding/copy/new transaction. Re-issues only this instance's private proof
+   * after actual reopened producer, persisted resource identity and current rights checks. */
+  recoverPublished(input:PublishCreatedSourceInput,files:CreatedPublicationRecoveryFiles,lease:CreatedRecoveryFilesLease):Promise<CreatedSourcePublicationProof>{
+    this.#assertOpen();const request=freeze(structuredClone(input));
+    return this.#dispatch(async()=>{
+      if(!(files instanceof CreatedPublicationRecoveryFiles))fail('REVISION_CONFLICT','Recovery file issuer differs');
+      const locations=files.publishedLocations(lease,this.#owner);
+      if(locations.transaction_id!==request.transaction_id||locations.project_id!==request.project_id)
+        fail('REVISION_CONFLICT','Recovery transaction differs');
+      return this.#withPrepared(request,held=>this.#recoverPublishedGuarded(request,held,files,lease));
+    });
+  }
+  #dispatch(work:()=>Promise<CreatedSourcePublicationProof>):Promise<CreatedSourcePublicationProof>{
     this.#assertOpen();const cleanupOwner={};
-    const task=Promise.resolve().then(()=>this.#publish(freeze(structuredClone(input)))).catch(error=>{
+    const task=Promise.resolve().then(work).catch(error=>{
       if(error instanceof PublicationCleanupError || (error && typeof error==='object' && 'requires_reconciliation' in error && error.requires_reconciliation===true)){
         this.#failed=true;this.#cleanup.recordFailure(cleanupOwner,error);
       }
@@ -265,7 +282,7 @@ export class CreatedSourcePublisher {
       ||plan.fps_numerator!==metadata.fps.num||plan.fps_denominator!==metadata.fps.den)
       fail('REVISION_CONFLICT','Approved native plan contradicts the prepared source');
   }
-  async #publish(input:PublishCreatedSourceInput):Promise<CreatedSourcePublicationProof>{
+  async #withPrepared(input:PublishCreatedSourceInput,action:(held:RetainedTree)=>Promise<CreatedSourcePublicationProof>):Promise<CreatedSourcePublicationProof>{
     this.#assertOpen();this.#plan(input);
     const mapping=this.#row('SELECT job_id,stage_root FROM created_prepared_source WHERE prepared_source_id=?',input.prepared_source_id);
     const taskInput=this.#row('SELECT principal_id FROM created_task_input WHERE job_id=?',String(mapping.job_id));
@@ -276,7 +293,7 @@ export class CreatedSourcePublisher {
     if(input.stage_root!==expected||mapping.stage_root!==expected)fail('REVISION_CONFLICT','Prepared location is not producer-owned');
     const held=new RetainedTree(expected,fact.files);
     let result:CreatedSourcePublicationProof|undefined,primary:unknown;
-    try{result=await this.#publishGuarded(input,held);return result;}
+    try{result=await action(held);return result;}
     catch(error){primary=error;throw error;}
     finally{
       this.#cleanup.register(held,[{identity:held,close:()=>held.close()}]);
@@ -288,13 +305,8 @@ export class CreatedSourcePublisher {
       }
     }
   }
-  async #publishGuarded(input:PublishCreatedSourceInput,held:RetainedTree):Promise<CreatedSourcePublicationProof>{
-    this.#assertOpen();const plan=this.#plan(input),active=this.#owner.activeCommit(input.project_id)!;
-    const originalRow=this.#row('SELECT fact_json,fact_sha256 FROM created_source_fact WHERE project_id=? AND snapshot_id=?',input.project_id,active.snapshot_id);
-    const original=validateCreatedSourceFact(JSON.parse(String(originalRow.fact_json)) as CreatedSourceFact);
-    if(canonicalDigest(original)!==originalRow.fact_sha256)fail('REVISION_CONFLICT','Original source geometry differs');
-    const originalDigest=await computeSourceDigest({root:this.#authorRoot,roots:original.roots,engine:'openfilm',engineUpstreamSha:OPENFILM_UPSTREAM_SHA});
-    if(originalDigest.external_reference_count||originalDigest.source_digest!==plan.base_source_digest)fail('REVISION_CONFLICT','Original source bytes differ');
+  async #preparedContext(input:PublishCreatedSourceInput,held:RetainedTree){
+    this.#assertOpen();const plan=this.#plan(input);
     const targetDigest=await computeSourceDigest({root:input.stage_root,roots:['film.html',...plan.roots.filter(root=>root!=='film.html')],engine:'openfilm',engineUpstreamSha:OPENFILM_UPSTREAM_SHA});
     const targetFiles=manifestFiles(targetDigest);
     if(targetDigest.external_reference_count||targetDigest.source_digest!==plan.target_source_digest
@@ -334,11 +346,22 @@ export class CreatedSourcePublisher {
       transaction_id:input.transaction_id,impact_id:String(adoption.impact_id),impact_hash:String(impact.impact_hash),plan_sha256:preparedAdoptionPlanDigest(plan),
       approval_id:String(adoption.approval_id),target_snapshot_id:plan.target_snapshot_id};
     const preparedProof=await this.#verifier.proveForAdoption(completed,adoptionBinding,registry);
+    return {plan,targetFiles,metadata,draft,geometry,registry,completed,adoptionBinding,preparedProof};
+  }
+  async #publishGuarded(input:PublishCreatedSourceInput,held:RetainedTree):Promise<CreatedSourcePublicationProof>{
+    this.#assertOpen();const plan=this.#plan(input),active=this.#owner.activeCommit(input.project_id)!;
+    const originalRow=this.#row('SELECT fact_json,fact_sha256 FROM created_source_fact WHERE project_id=? AND snapshot_id=?',input.project_id,active.snapshot_id);
+    const original=validateCreatedSourceFact(JSON.parse(String(originalRow.fact_json)) as CreatedSourceFact);
+    if(canonicalDigest(original)!==originalRow.fact_sha256)fail('REVISION_CONFLICT','Original source geometry differs');
+    const originalDigest=await computeSourceDigest({root:this.#authorRoot,roots:original.roots,engine:'openfilm',engineUpstreamSha:OPENFILM_UPSTREAM_SHA});
+    if(originalDigest.external_reference_count||originalDigest.source_digest!==plan.base_source_digest)fail('REVISION_CONFLICT','Original source bytes differ');
+    const {plan:currentPlan,targetFiles,metadata,draft,geometry,registry,completed,adoptionBinding,preparedProof}=await this.#preparedContext(input,held);
     const originalFiles=manifestFiles(originalDigest),blobGuards:RetainedTree[]=[];
     let originalGuard:RetainedTree|undefined,stageGuard:RetainedTree|undefined,workspace='',moved=false,published=false,transferred=false;
     const finalGuards:RetainedTree[]=[];let issuedToken:object|undefined;
     const cleanupOwner={};let primary:unknown;
     try{
+      if(preparedAdoptionPlanDigest(currentPlan)!==preparedAdoptionPlanDigest(plan))fail('REVISION_CONFLICT','Publication plan moved');
       originalGuard=new RetainedTree(this.#authorRoot,originalFiles);stageGuard=new RetainedTree(input.stage_root,targetFiles);
       for(const asset of registry){const path=this.#assets.blobPathForFact(asset);blobGuards.push(new RetainedTree(dirname(path),[{relative_path:basename(path),sha256:asset.sha256,bytes:asset.bytes}],false));}
       workspace=resolve(this.#privateRoot,`publication-${randomUUID()}`);const staged=resolve(workspace,'staging'),backup=resolve(workspace,'backup');
@@ -405,6 +428,43 @@ export class CreatedSourcePublisher {
       if(issuedToken&&!liveProofs.has(issuedToken))try{this.#cleanup.run(issuedToken);}catch(error){failures.push(error);}
       if(failures.length){this.#failed=true;throw new PublicationCleanupError([...(primary===undefined?[]:[primary]),...failures]);}
       void published;
+    }
+  }
+  async #recoverPublishedGuarded(input:PublishCreatedSourceInput,held:RetainedTree,files:CreatedPublicationRecoveryFiles,lease:CreatedRecoveryFilesLease):Promise<CreatedSourcePublicationProof>{
+    const {plan,targetFiles,metadata,draft,geometry,registry,completed,adoptionBinding,preparedProof}=await this.#preparedContext(input,held);
+    const guards:RetainedTree[]=[];const cleanupOwner={};let transferred=false,issuedToken:object|undefined,primary:unknown,failed=false;
+    try{
+      const locations=files.publishedLocations(lease,this.#owner);
+      const snapshotSource=resolve(this.#snapshots.snapshotRoot(input.project_id,plan.target_snapshot_id),'source');
+      if(locations.author_root!==this.#authorRoot||dirname(dirname(locations.backup_root))!==this.#privateRoot
+        ||locations.snapshot_source!==snapshotSource||locations.transaction_id!==input.transaction_id||locations.project_id!==input.project_id)
+        fail('REVISION_CONFLICT','Recovered publication locations differ');
+      const identity=this.#identities.read(input.transaction_id);if(!identity)fail('REVISION_CONFLICT','Recovered publication identity missing');
+      const hold=(root:string,facts:readonly PreparedSourceFileFact[],whole=true)=>{const guard=new RetainedTree(root,facts,whole);guards.push(guard);return guard;};
+      const originalTree=hold(locations.backup_root,identity.original_tree.files),targetTree=hold(this.#authorRoot,targetFiles),snapshotTree=hold(snapshotSource,targetFiles);
+      for(const asset of registry){const path=this.#assets.blobPathForFact(asset);hold(dirname(path),[{relative_path:basename(path),sha256:asset.sha256,bytes:asset.bytes}],false);}
+      this.#identities.assertCurrent(input.transaction_id,originalTree,targetTree,snapshotTree,dirname(snapshotSource));
+      this.#plan(input);files.syncPublished(lease,this.#owner);
+      // A missing published row is reconstructed from actual target/backup/snapshot
+      // identity, never by trusting the prepared JSON as proof that rename happened.
+      if(!this.journal(`${input.transaction_id}:published`))this.#journal(input,'published',locations.staging_root,locations.backup_root,targetFiles);
+      const facts=freeze({publisher_instance:this.#instance,project_id:input.project_id,transaction_id:input.transaction_id,
+        prepared_source_id:input.prepared_source_id,original_source_digest:plan.base_source_digest,published_source_digest:plan.target_source_digest,
+        target_snapshot_id:plan.target_snapshot_id,published_files:targetFiles,journal_id:`${input.transaction_id}:published`,backup_root:locations.backup_root,issued_at:this.#now().toISOString()});
+      const proof=Object.freeze({facts});
+      const record:PublicationRecord=Object.freeze({facts,issuer:this,guards:Object.freeze([...guards]),geometry,
+        plan:freeze(structuredClone(plan)),registry:freeze(structuredClone(registry)),completed:freeze(structuredClone(completed)),
+        adoptionBinding:freeze(adoptionBinding),preparedProof,metadata:freeze(structuredClone(metadata)),draft:freeze(structuredClone(draft)),
+        originalTree,targetTree,snapshotTree,snapshotContainer:dirname(snapshotSource)});
+      liveProofs.set(proof,record);this.#issued.add(proof);issuedToken=proof;
+      this.assertCurrentForCommit(proof,this.#owner,{...input,selection_version:plan.selection_version});
+      files.publishedLocations(lease,this.#owner);transferred=true;return proof;
+    }catch(error){failed=true;primary=error;this.#failed=true;if(issuedToken)this.#retire(issuedToken);throw error;}
+    finally{
+      if(!transferred)this.#cleanup.register(cleanupOwner,[{identity:preparedProof,close:()=>this.#verifier.release(preparedProof)},...guards.map(guard=>({identity:guard,close:()=>guard.close()}))]);
+      const failures:unknown[]=[];try{this.#cleanup.run(cleanupOwner);}catch(error){failures.push(error);}
+      if(issuedToken&&!liveProofs.has(issuedToken))try{this.#cleanup.run(issuedToken);}catch(error){failures.push(error);}
+      if(failures.length){this.#failed=true;throw new PublicationCleanupError([...(failed?[primary]:[]),...failures]);}
     }
   }
   assertCurrentForCommit(value:unknown,owner:RevisionStore,expected:PublicationCommitExpectation):void{

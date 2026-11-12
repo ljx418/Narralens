@@ -129,7 +129,7 @@ export class CreatedPublicationRecoveryFiles {
     if (preparedAdoptionPlanDigest(plan) !== fact.plan_sha256 || planRow.plan_sha256 !== fact.plan_sha256
       || plan.project_id !== project || plan.base_source_digest !== identity.original_source_digest
       || plan.target_source_digest !== identity.target_source_digest || plan.target_snapshot_id !== identity.target_snapshot_id
-      || !same(plan.files, fact.target_closure)) return conflict('The target plan changed');
+      || !plan.roots.includes('film.html') || !same(plan.files, fact.target_closure)) return conflict('The target plan changed');
     return { row, identity, fact, geometry, plan, paths };
   }
   #layout(record: Pick<Record, 'identity' | 'paths'>): RecoveryFileLayout {
@@ -181,7 +181,7 @@ export class CreatedPublicationRecoveryFiles {
           target, snapshot, owner: projectOwner, workspace, durable: false };
         this.#verify(record);
         for (const [root, roots, digest] of [[original.root, scope.geometry.roots, identity.original_source_digest],
-          [snapshot.root, scope.plan.roots, identity.target_source_digest]] as const) {
+          [snapshot.root, ['film.html', ...scope.plan.roots.filter(root => root !== 'film.html')], identity.target_source_digest]] as const) {
           const observed = await computeSourceDigest({ root, roots, engine: 'openfilm', engineUpstreamSha: OPENFILM_UPSTREAM_SHA });
           if (observed.external_reference_count || observed.source_digest !== digest) conflict('Recovery cannot prove the full committed source digest');
         }
@@ -207,6 +207,23 @@ export class CreatedPublicationRecoveryFiles {
   }
   async layout(lease: CreatedRecoveryFilesLease): Promise<RecoveryFileLayout> {
     return this.#admit(async () => { const record = this.#record(lease); this.#verify(record); const value = await this.#layout(record); this.#verify(record); return value; });
+  }
+  /** Only the actual current published resources, on their original database.
+   * These Host-only paths are data; they do not replace the Publisher's own checks.
+   */
+  publishedLocations(lease: CreatedRecoveryFilesLease, owner: RevisionStore) {
+    const record = this.#record(lease);
+    if (owner !== this.options.revisions || this.#moving.has(lease)) conflict('Published recovery lease owner differs or is moving');
+    this.#verify(record);
+    if (this.#layout(record) !== 'published') conflict('Recovery target is not currently published');
+    return Object.freeze({ transaction_id: record.transaction, project_id: record.project,
+      author_root: record.paths.author, backup_root: record.paths.backup, staging_root: record.paths.staging,
+      snapshot_source: record.paths.snapshot });
+  }
+  /** Repeat both actual parent durability barriers before a recovered publication proof. */
+  syncPublished(lease: CreatedRecoveryFilesLease, owner: RevisionStore): void {
+    this.publishedLocations(lease, owner); const record = this.#record(lease);
+    record.owner.syncDirectory(); record.workspace.syncDirectory(); this.publishedLocations(lease, owner);
   }
   restoreOriginal(lease: CreatedRecoveryFilesLease): Promise<void> {
     return this.#admit(async () => {
