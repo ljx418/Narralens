@@ -1,0 +1,5 @@
+# Reissue候选独立审查 RISSUE-M1
+
+不可变7e41f48由ctx_7c83a29dcfc6/msg_0b389d98e967审查，REQUEST_CHANGES/MAJOR。instanceof允许Object.create同prototype的伪instance，实例可覆盖publishedLocations/syncPublished，绕过真实私有lease/owner/DB/moving检查和父目录fsync。真实三树身份与producer其余检查仍在，故不声称已绕过closedcommit全部批准；入口契约与资源耐久性承诺已被突破，必须返修。
+
+real044完整47项实际测试exit0、source输入无变化，但没有上述反例，不能用47PASS抹掉独立Major或声明READY。该捕获保全；修复将增加真实假instance/覆盖method/失活lease反例，先证明原7e代码会失败，再改为模块私有brand+private record路径，不依赖可替换实例方法。

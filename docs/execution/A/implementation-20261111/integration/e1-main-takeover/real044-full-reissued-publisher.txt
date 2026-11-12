@@ -1,0 +1,59 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:2065837) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/created-source-adoption.test.ts (47 tests) 400699ms
+   ✓ actual closed created-source commit and publisher > D10 recovery issuer reopens actual published source and commits the original transaction exactly once  9432ms
+   ✓ actual closed created-source commit and publisher > D10 recovery issuer reconstructs a missing published journal from actual resources without publishing a new snapshot or job  8950ms
+   ✓ actual closed created-source commit and publisher > D10 recovery issuer refuses a JSON lease and a changed selection without consuming approval  7905ms
+   ✓ actual closed created-source commit and publisher > D10 recovery issuer refuses expired authority and the actual resource lease compensates the complete original before abort  8292ms
+   ✓ actual closed created-source commit and publisher > D10 identity records actual three retained trees in the prepared journal transaction before any rename  8419ms
+   ✓ actual closed created-source commit and publisher > D10 identity rolls back both pre-rename facts when the identity insert fails  9821ms
+   ✓ actual closed created-source commit and publisher > D10 identity rolls back both pre-rename facts when the prepared journal insert fails  9326ms
+   ✓ actual closed created-source commit and publisher > D10 identity missing after publication refuses the original closed commit without consuming authorities  10333ms
+   ✓ actual closed created-source commit and publisher > N3 real issuance revokes a genuine token when the stage guard cleanup fails  7931ms
+   ✓ actual closed created-source commit and publisher > N3 real issuance revokes a genuine token when the outer held guard cleanup fails  7889ms
+   ✓ actual closed created-source commit and publisher > N3 real pending close waits for publication and never returns an issued proof after closing  7745ms
+   ✓ actual closed created-source commit and publisher > N3 real temporary default fsync close preserves uncertainty (sync also fails=false)  8245ms
+   ✓ actual closed created-source commit and publisher > N3 real temporary default fsync close preserves uncertainty (sync also fails=true)  7911ms
+   ✓ actual closed created-source commit and publisher > N3 real temporary style descriptor close preserves uncertainty (stat also fails=false)  7639ms
+   ✓ actual closed created-source commit and publisher > N3 real temporary style descriptor close preserves uncertainty (stat also fails=true)  9893ms
+   ✓ actual closed created-source commit and publisher > N3 real publication attempts every guard when verifier release fails and never revives the proof  8718ms
+   ✓ actual closed created-source commit and publisher > N3 real publication attempts other guards after the first guard close fails  7934ms
+   ✓ actual closed created-source commit and publisher > N3 real publication preserves the primary publish failure and cleanup failures together  7830ms
+   ✓ actual closed created-source commit and publisher > refuses authority expiring during the final creative closure scan  8032ms
+   ✓ actual closed created-source commit and publisher > rolls back checkpoint, attempt and every authority after a post-checkpoint transaction failure  8289ms
+   ✓ actual closed created-source commit and publisher > poisons a swallowed read of another intake inside the project commit scope  8307ms
+   ✓ actual closed created-source commit and publisher > rejects a real intake update after approval without consuming database authorities  9808ms
+   ✓ actual closed created-source commit and publisher > rejects a predecessor gate changed to pending after approval  7881ms
+   ✓ actual closed created-source commit and publisher > rejects a predecessor gate changed to rejected after approval  8303ms
+   ✓ actual closed created-source commit and publisher > persists the same succeeded attempt in workflow checkpoint and a freshly opened SQLite reader  8882ms
+   ✓ actual closed created-source commit and publisher > publishes complete native source, commits once, preserves R1 geometry and replays without a second commit  7809ms
+   ✓ actual closed created-source commit and publisher > refuses a prepared transaction of another kind before publishing source  7069ms
+   ✓ actual closed created-source commit and publisher > refuses a workflow attempt detached from the actual prepared job  8293ms
+   ✓ actual closed created-source commit and publisher > refuses JSON-cloned publication proof without moving database authorities  9321ms
+   ✓ actual closed created-source commit and publisher > refuses author bytes changed after publication even while database base is unchanged  7725ms
+   ✓ actual closed created-source commit and publisher > refuses current selection changed after publication  10565ms
+   ✓ actual closed created-source commit and publisher > refuses a symlink replacement of the committed snapshot source  11936ms
+   ✓ actual closed created-source commit and publisher > rolls every database authority back if an actual post-consume write fails  12617ms
+   ✓ actual closed created-source commit and publisher > poisons the outer transaction when a project-bound repository guard failure is swallowed  10967ms
+   ✓ actual closed created-source commit and publisher > poisons the owner if a real scope is used against another database even when the error is swallowed  8484ms
+   ✓ actual closed created-source commit and publisher > invalidates an authentic joined scope when its successful commit ends  8177ms
+   ✓ actual closed created-source commit and publisher > does not expose mutable issuer, guard or geometry authority on a real publication token  8217ms
+   ✓ actual closed created-source commit and publisher > refuses an authority that expires during final synchronous file verification  12647ms
+   ✓ actual closed created-source commit and publisher > retains the original backup inode when a same-byte replacement happens after rename  11607ms
+   ✓ actual closed created-source commit and publisher > refuses a fully rehashed approved plan that lies about film  6150ms
+   ✓ actual closed created-source commit and publisher > refuses a fully rehashed approved plan that lies about settings  6487ms
+   ✓ actual closed created-source commit and publisher > refuses a fully rehashed approved plan that lies about captions  8158ms
+   ✓ actual closed created-source commit and publisher > refuses a fully rehashed approved plan that lies about native_plan  7988ms
+   ✓ actual closed created-source commit and publisher > refuses a fully rehashed approved plan that lies about rights  5788ms
+   ✓ actual closed created-source commit and publisher > refuses a fully rehashed approved plan that lies about consumer  5700ms
+   ✓ actual closed created-source commit and publisher > refuses a fully rehashed approved plan that lies about upstream  5481ms
+   ✓ actual closed created-source commit and publisher > refuses a fully rehashed approved plan that lies about ranges  5790ms
+
+ Test Files  1 passed (1)
+      Tests  47 passed (47)
+   Start at  08:04:34
+   Duration  411.05s (transform 3.32s, setup 0ms, collect 6.22s, tests 400.70s, environment 0ms, prepare 3.44s)
+
