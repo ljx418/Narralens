@@ -152,6 +152,25 @@ async function recoveryFixture(){
 }
 
 describe('actual closed created-source commit and publisher',()=>{
+ it.each(['forged instance','overridden instance','released overridden instance'] as const)('D10 recovery issuer refuses %s through non-replaceable private lease checks',async mode=>{
+  const f=await recoveryFixture(),outbox=f.revisions.outboxRowCount();
+  const journal=f.publisher.journalOf(f.input.transaction_id).find(row=>row.phase==='prepared')!;
+  const locations={transaction_id:f.input.transaction_id,project_id:f.projectId,author_root:f.authorRoot,backup_root:journal.backup_root,
+   staging_root:journal.staging_root,snapshot_source:join(f.host.snapshots.snapshotRoot(f.projectId,f.plan.target_snapshot_id),'source')};
+  f.revisions.compose(db=>{const sql=String(db.prepare("SELECT sql FROM sqlite_master WHERE name='created_publication_journal_no_delete'").get()?.sql);
+   db.exec('DROP TRIGGER created_publication_journal_no_delete');try{db.prepare("DELETE FROM created_publication_journal WHERE transaction_id=? AND phase='published'").run(f.input.transaction_id);}finally{db.exec(sql);}});
+  const methods={publishedLocations:()=>locations,syncPublished:()=>{}};
+  const issuer=mode==='forged instance'?Object.assign(Object.create(CreatedPublicationRecoveryFiles.prototype),methods) as CreatedPublicationRecoveryFiles:Object.assign(f.files,methods);
+  const lease=mode==='forged instance'?{} as typeof f.lease:f.lease;
+  if(mode==='released overridden instance')f.files.release(f.lease);
+  else await writeFile(join(dirname(f.authorRoot),'owner.json'),'not the current creation owner');
+  const outcome=await f.recoveredPublisher.recoverPublished(f.publicationInput,issuer,lease).then(proof=>({proof,error:undefined}),error=>({proof:undefined,error}));
+  expect(isCreatedSourcePublicationProof(outcome.proof),'a forged/overridden issuer must not receive a genuine proof').toBe(false);
+  expect(outcome.error).toBeDefined();expect(f.recoveredPublisher.journalOf(f.input.transaction_id).map(row=>row.phase)).toEqual(['prepared']);
+  expect(f.revisions.projectTransaction(f.input.transaction_id)?.state).toBe('prepared');expect(f.revisions.activeCommit(f.projectId)?.revision).toBe(1);
+  expect(f.revisions.outboxRowCount()).toBe(outbox);expect(f.revisions.compose(db=>db.prepare('SELECT state FROM cp_a0_approval WHERE approval_id=?').get(f.input.approval_id)?.state)).toBe('active');
+ },120000);
+
  it('D10 recovery issuer reopens actual published source and commits the original transaction exactly once',async()=>{
   const f=await recoveryFixture(),outbox=f.revisions.outboxRowCount();expect(isCreatedSourcePublicationProof(f.proof)).toBe(false);
   const originalIdentity=new CreatedPublicationIdentityStore(f.revisions).read(f.input.transaction_id);

@@ -38,6 +38,30 @@ const hash = (value: string) => createHash('sha256').update(value).digest('hex')
 const same = (left: unknown, right: unknown) => canonicalDigest(left) === canonicalDigest(right);
 const overlaps = (a: string, b: string) => a === b || a.startsWith(b + sep) || b.startsWith(a + sep);
 
+interface PublishedRecoveryLocations {
+  readonly transaction_id: string; readonly project_id: string;
+  readonly author_root: string; readonly backup_root: string; readonly staging_root: string;
+  readonly snapshot_source: string;
+}
+// Constructor-only registration. Neither instanceof nor public method dispatch is authority.
+const publishedRecoveryIssuers = new WeakMap<object, Readonly<{
+  owner: RevisionStore;
+  read: (lease: CreatedRecoveryFilesLease) => PublishedRecoveryLocations;
+  sync: (lease: CreatedRecoveryFilesLease) => void;
+}>>();
+function publishedRecoveryIssuer(issuer: object, owner: RevisionStore) {
+  const binding = publishedRecoveryIssuers.get(issuer);
+  if (!binding || binding.owner !== owner) return conflict('Recovery file issuer differs');
+  return binding;
+}
+/** Host-only bridge to the constructor's private lease/identity checks. */
+export function readPublishedRecoveryLocations(issuer: object, lease: CreatedRecoveryFilesLease, owner: RevisionStore): PublishedRecoveryLocations {
+  return publishedRecoveryIssuer(issuer, owner).read(lease);
+}
+export function syncPublishedRecoveryFiles(issuer: object, lease: CreatedRecoveryFilesLease, owner: RevisionStore): void {
+  publishedRecoveryIssuer(issuer, owner).sync(lease);
+}
+
 /** Files only: never grants Approval/publication proof, commits, clears attention, or edits a pointer.
  * Actual startup ownership and the original project queue remain the caller's obligations. */
 export class CreatedPublicationRecoveryFiles {
@@ -52,9 +76,16 @@ export class CreatedPublicationRecoveryFiles {
   readonly #faults = new Set<unknown>();
   #closed = false;
   #closing: Promise<void> | undefined;
-  constructor(private readonly options: Options) {
+  readonly #options: Readonly<Options>;
+  constructor(options: Options) {
+    this.#options = Object.freeze({ ...options });
     this.#identities = new CreatedPublicationIdentityStore(options.revisions);
     this.#adoptions = new CreatedSourceAdoptionStore(options.revisions);
+    publishedRecoveryIssuers.set(this, Object.freeze({
+      owner: options.revisions,
+      read: (lease: CreatedRecoveryFilesLease) => this.#publishedLocations(lease, this.#options.revisions),
+      sync: (lease: CreatedRecoveryFilesLease) => this.#syncPublished(lease, this.#options.revisions),
+    }));
   }
   #open(): void {
     if (this.#closed) conflict('Recovery file reader is closed');
@@ -65,7 +96,7 @@ export class CreatedPublicationRecoveryFiles {
     void task.then(() => this.#pending.delete(task), () => this.#pending.delete(task)); return task;
   }
   #scope(transactionId: string) {
-    this.#open(); const { revisions } = this.options;
+    this.#open(); const { revisions } = this.#options;
     const row = revisions.projectTransaction(transactionId), identity = this.#identities.read(transactionId);
     const fact = this.#adoptions.adoptionFact(transactionId);
     if (!row || !isCreatedSourceApplyTransaction(row) || row.state !== 'prepared' || !identity || !fact
@@ -85,7 +116,7 @@ export class CreatedPublicationRecoveryFiles {
     }
     const project = row.project_id;
     if (!/^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$/.test(project)) return conflict('Invalid recovery project');
-    const roots = [resolve(this.options.createdRoot), resolve(this.options.privateRoot), resolve(this.options.snapshots.projectRoot(''))];
+    const roots = [resolve(this.#options.createdRoot), resolve(this.#options.privateRoot), resolve(this.#options.snapshots.projectRoot(''))];
     if (roots.some((root, i) => roots.some((other, j) => i !== j && overlaps(root, other)))) {
       return conflict('Recovery roots overlap');
     }
@@ -101,8 +132,8 @@ export class CreatedPublicationRecoveryFiles {
     const workspace = dirname(String(prepared.staging_root)), publicationRoot = resolve(roots[1]!, project);
     const paths: Paths = { workspace, author: resolve(roots[0]!, project, 'source'), backup: resolve(workspace, 'backup'),
       staging: resolve(workspace, 'staging'), quarantine: resolve(workspace, 'rollback-target'),
-      container: this.options.snapshots.snapshotRoot(project, identity.target_snapshot_id),
-      snapshot: resolve(this.options.snapshots.snapshotRoot(project, identity.target_snapshot_id), 'source') };
+      container: this.#options.snapshots.snapshotRoot(project, identity.target_snapshot_id),
+      snapshot: resolve(this.#options.snapshots.snapshotRoot(project, identity.target_snapshot_id), 'source') };
     if (dirname(workspace) !== publicationRoot || !/^publication-[a-f0-9]{8}-(?:[a-f0-9]{4}-){3}[a-f0-9]{12}$/.test(basename(workspace))) {
       return conflict('Publication workspace is not Host-derived');
     }
@@ -161,7 +192,7 @@ export class CreatedPublicationRecoveryFiles {
       this.#busy.add(transactionId); const guards: RetainedSourceTree[] = [], owner = {}; let transferred = false, failed = false; let primary: unknown;
       try {
         const scope = this.#scope(transactionId), { identity, paths } = scope;
-        const creation = this.options.creationIdentity(scope.row.project_id);
+        const creation = this.#options.creationIdentity(scope.row.project_id);
         if (!creation) conflict('No original creation identity owns this project');
         const expectedOwner = canonicalJson({ kind: 'narralens.created-root@1', project_id: scope.row.project_id,
           command_id: creation!.command_id, transaction_id: creation!.transaction_id });
@@ -211,9 +242,9 @@ export class CreatedPublicationRecoveryFiles {
   /** Only the actual current published resources, on their original database.
    * These Host-only paths are data; they do not replace the Publisher's own checks.
    */
-  publishedLocations(lease: CreatedRecoveryFilesLease, owner: RevisionStore) {
+  #publishedLocations(lease: CreatedRecoveryFilesLease, owner: RevisionStore) {
     const record = this.#record(lease);
-    if (owner !== this.options.revisions || this.#moving.has(lease)) conflict('Published recovery lease owner differs or is moving');
+    if (owner !== this.#options.revisions || this.#moving.has(lease)) conflict('Published recovery lease owner differs or is moving');
     this.#verify(record);
     if (this.#layout(record) !== 'published') conflict('Recovery target is not currently published');
     return Object.freeze({ transaction_id: record.transaction, project_id: record.project,
@@ -221,9 +252,9 @@ export class CreatedPublicationRecoveryFiles {
       snapshot_source: record.paths.snapshot });
   }
   /** Repeat both actual parent durability barriers before a recovered publication proof. */
-  syncPublished(lease: CreatedRecoveryFilesLease, owner: RevisionStore): void {
-    this.publishedLocations(lease, owner); const record = this.#record(lease);
-    record.owner.syncDirectory(); record.workspace.syncDirectory(); this.publishedLocations(lease, owner);
+  #syncPublished(lease: CreatedRecoveryFilesLease, owner: RevisionStore): void {
+    this.#publishedLocations(lease, owner); const record = this.#record(lease);
+    record.owner.syncDirectory(); record.workspace.syncDirectory(); this.#publishedLocations(lease, owner);
   }
   restoreOriginal(lease: CreatedRecoveryFilesLease): Promise<void> {
     return this.#admit(async () => {
@@ -234,16 +265,16 @@ export class CreatedPublicationRecoveryFiles {
       record.durable = false;
       if (layout === 'published') {
         record.target!.moveTo(record.paths.quarantine, record.workspace);
-        await this.options.boundary?.('after_target_quarantined'); this.#verify(record);
+        await this.#options.boundary?.('after_target_quarantined'); this.#verify(record);
         record.owner.syncDirectory(); record.workspace.syncDirectory(); this.#verify(record);
       }
       if (layout === 'published' || layout === 'rename_gap' || layout === 'rollback_gap') {
         record.original.moveTo(record.paths.author, record.owner);
-        await this.options.boundary?.('after_original_restored'); this.#verify(record);
+        await this.#options.boundary?.('after_original_restored'); this.#verify(record);
         record.owner.syncDirectory(); record.workspace.syncDirectory(); this.#verify(record);
       }
       record.owner.syncDirectory(); record.workspace.syncDirectory();
-      await this.options.boundary?.('after_fsync'); this.#verify(record);
+      await this.#options.boundary?.('after_fsync'); this.#verify(record);
       if (!['original', 'restored'].includes(await this.#layout(record))) conflict('Recovery did not restore the complete original source');
       this.#verify(record); record.durable = true;
       } finally { this.#moving.delete(lease); }

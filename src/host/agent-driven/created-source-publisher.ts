@@ -6,7 +6,7 @@ import type { DatabaseSync } from 'node:sqlite';
 import { canonicalJson, canonicalDigest } from '../creative/digest.js';
 import { RevisionStore } from '../projects/revision-store.js';
 import { matchesFrozenSchemaNamespace } from './agent-schema-definition.js';
-import {CreatedPublicationRecoveryFiles,type CreatedRecoveryFilesLease} from './created-publication-recovery-files.js';
+import {readPublishedRecoveryLocations,syncPublishedRecoveryFiles,type CreatedPublicationRecoveryFiles,type CreatedRecoveryFilesLease} from './created-publication-recovery-files.js';
 import {CreatedPublicationIdentityStore} from './created-publication-identity-store.js';
 import {RetainedSourceTree as RetainedTree} from './retained-source-tree.js';
 import {assertPreparedAdoptionPlan,preparedAdoptionPlanDigest,isCreatedSourceApplyTransaction,type PreparedAdoptionPlanV1,type CreatedSourcePublicationFacts,type CreatedSourcePublicationProof,type PreparedSourceFileFact} from './created-source-ports.js';
@@ -208,8 +208,7 @@ export class CreatedSourcePublisher {
   recoverPublished(input:PublishCreatedSourceInput,files:CreatedPublicationRecoveryFiles,lease:CreatedRecoveryFilesLease):Promise<CreatedSourcePublicationProof>{
     this.#assertOpen();const request=freeze(structuredClone(input));
     return this.#dispatch(async()=>{
-      if(!(files instanceof CreatedPublicationRecoveryFiles))fail('REVISION_CONFLICT','Recovery file issuer differs');
-      const locations=files.publishedLocations(lease,this.#owner);
+      const locations=readPublishedRecoveryLocations(files,lease,this.#owner);
       if(locations.transaction_id!==request.transaction_id||locations.project_id!==request.project_id)
         fail('REVISION_CONFLICT','Recovery transaction differs');
       return this.#withPrepared(request,held=>this.#recoverPublishedGuarded(request,held,files,lease));
@@ -434,7 +433,7 @@ export class CreatedSourcePublisher {
     const {plan,targetFiles,metadata,draft,geometry,registry,completed,adoptionBinding,preparedProof}=await this.#preparedContext(input,held);
     const guards:RetainedTree[]=[];const cleanupOwner={};let transferred=false,issuedToken:object|undefined,primary:unknown,failed=false;
     try{
-      const locations=files.publishedLocations(lease,this.#owner);
+      const locations=readPublishedRecoveryLocations(files,lease,this.#owner);
       const snapshotSource=resolve(this.#snapshots.snapshotRoot(input.project_id,plan.target_snapshot_id),'source');
       if(locations.author_root!==this.#authorRoot||dirname(dirname(locations.backup_root))!==this.#privateRoot
         ||locations.snapshot_source!==snapshotSource||locations.transaction_id!==input.transaction_id||locations.project_id!==input.project_id)
@@ -444,7 +443,7 @@ export class CreatedSourcePublisher {
       const originalTree=hold(locations.backup_root,identity.original_tree.files),targetTree=hold(this.#authorRoot,targetFiles),snapshotTree=hold(snapshotSource,targetFiles);
       for(const asset of registry){const path=this.#assets.blobPathForFact(asset);hold(dirname(path),[{relative_path:basename(path),sha256:asset.sha256,bytes:asset.bytes}],false);}
       this.#identities.assertCurrent(input.transaction_id,originalTree,targetTree,snapshotTree,dirname(snapshotSource));
-      this.#plan(input);files.syncPublished(lease,this.#owner);
+      this.#plan(input);syncPublishedRecoveryFiles(files,lease,this.#owner);
       // A missing published row is reconstructed from actual target/backup/snapshot
       // identity, never by trusting the prepared JSON as proof that rename happened.
       if(!this.journal(`${input.transaction_id}:published`))this.#journal(input,'published',locations.staging_root,locations.backup_root,targetFiles);
@@ -458,7 +457,7 @@ export class CreatedSourcePublisher {
         originalTree,targetTree,snapshotTree,snapshotContainer:dirname(snapshotSource)});
       liveProofs.set(proof,record);this.#issued.add(proof);issuedToken=proof;
       this.assertCurrentForCommit(proof,this.#owner,{...input,selection_version:plan.selection_version});
-      files.publishedLocations(lease,this.#owner);transferred=true;return proof;
+      readPublishedRecoveryLocations(files,lease,this.#owner);transferred=true;return proof;
     }catch(error){failed=true;primary=error;this.#failed=true;if(issuedToken)this.#retire(issuedToken);throw error;}
     finally{
       if(!transferred)this.#cleanup.register(cleanupOwner,[{identity:preparedProof,close:()=>this.#verifier.release(preparedProof)},...guards.map(guard=>({identity:guard,close:()=>guard.close()}))]);

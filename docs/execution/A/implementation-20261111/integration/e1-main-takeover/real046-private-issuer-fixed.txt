@@ -1,0 +1,19 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:2088356) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/created-source-adoption.test.ts (50 tests | 43 skipped) 68595ms
+   ✓ actual closed created-source commit and publisher > D10 recovery issuer refuses forged instance through non-replaceable private lease checks  8608ms
+   ✓ actual closed created-source commit and publisher > D10 recovery issuer refuses overridden instance through non-replaceable private lease checks  7790ms
+   ✓ actual closed created-source commit and publisher > D10 recovery issuer refuses released overridden instance through non-replaceable private lease checks  10034ms
+   ✓ actual closed created-source commit and publisher > D10 recovery issuer reopens actual published source and commits the original transaction exactly once  9647ms
+   ✓ actual closed created-source commit and publisher > D10 recovery issuer reconstructs a missing published journal from actual resources without publishing a new snapshot or job  9998ms
+   ✓ actual closed created-source commit and publisher > D10 recovery issuer refuses a JSON lease and a changed selection without consuming approval  9046ms
+   ✓ actual closed created-source commit and publisher > D10 recovery issuer refuses expired authority and the actual resource lease compensates the complete original before abort  13471ms
+
+ Test Files  1 passed (1)
+      Tests  7 passed | 43 skipped (50)
+   Start at  08:18:32
+   Duration  77.15s (transform 3.74s, setup 0ms, collect 6.80s, tests 68.59s, environment 0ms, prepare 1.17s)
+
