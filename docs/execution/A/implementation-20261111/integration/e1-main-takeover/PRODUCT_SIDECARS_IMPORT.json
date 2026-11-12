@@ -1,0 +1,29 @@
+{
+  "source_commit": "9e14cbc7cd3348f0c1895e1715089e60d9cf6756",
+  "lane_evidence": "a809f8d7e53fb90dbd1f56aa956c48c9600d508f",
+  "review": "msg_1d8808da6418 / ctx_7e75b2971083 bounded component ACCEPT",
+  "files": [
+    {
+      "path": "src/host/m5/native-effective-sidecars.ts",
+      "sha256": "5178b7599024f0a3aeab13919fe2f83d964ececcd9f63d0f25f9301cd6a85c65"
+    },
+    {
+      "path": "tests/agent-driven/product/native-effective-sidecars.test.ts",
+      "sha256": "c5f9dd1918370791ab96aadd373a52f63516448d26e02da7231a73c02b82757b"
+    },
+    {
+      "path": "tests/agent-driven/product/native-effective-sidecars-oracle.mts",
+      "sha256": "5d631db523183244705d45ca30fd339c7040739792b2f21302ccc52209bb46d8"
+    },
+    {
+      "path": "tests/agent-driven/product/fixtures/native-effective-sidecars.vectors.json",
+      "sha256": "442dcee677cc84ee1dacdb7fdde9d6b941b79387e328ff6b852977d483bd9ba3"
+    }
+  ],
+  "scope": "exact4blobs; no branch merge; no source-port/Host composition/NativeAck claim",
+  "limits": [
+    "whole-module ts-nocheck preserved",
+    "per-input limits after clone, no total allocation budget",
+    "MAIN must retain and verify actual files/listings/probes/rights"
+  ]
+}
