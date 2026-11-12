@@ -1,0 +1,45 @@
+{
+  "base": "13496366d9c0a2ff3aec5efa4798ce6b5f1c9818",
+  "source_sha256": {
+    "src/host/agent-driven/created-source-recovery.ts": "392ffe1dcb64bfd3478287524996fc774e001d3b3ea8f61cae296a3e12289f97",
+    "src/host/agent-driven/created-source-adoption-service.ts": "9e140f5887b6e8ad5f406517504043ade1eaaa9df8978fee8a2d99d82c46ddb7",
+    "tests/agent-driven/integration/created-source-recovery.test.ts": "f4750e9fb5201434bfeab07197d7ce8edeb63b89824c9f730850f8bc262d9466",
+    "tests/agent-driven/integration/created-source-adoption.test.ts": "04eb25fa45efede7d101878d0c603d96b8947f377c49896dc3422a74ed644548"
+  },
+  "protected_agents_sha256": "37300463a72a612ae16e0a5fcfb496502c57c722b83781e0e2e8c9480594542b",
+  "captures": [
+    {
+      "name": "main-d10-old-full-execution-008",
+      "exit": 1,
+      "source_changed": [],
+      "source_added": [],
+      "log_sha256": "9d9bd95c0b202c51aba39cd976d1421342ccb19024a39492473e1c74685eae2c",
+      "finished_at": "2026-11-12T04:10:19.034570+00:00"
+    },
+    {
+      "name": "main-d10-full-execution-full-009",
+      "exit": 0,
+      "source_changed": [],
+      "source_added": [],
+      "log_sha256": "76301e29c563778521137d4a0539d616455b56ac7a975d040c5d2f9be5ac20d6",
+      "finished_at": "2026-11-12T04:15:54.171618+00:00"
+    },
+    {
+      "name": "main-d10-full-execution-type-010",
+      "exit": 0,
+      "source_changed": [],
+      "source_added": [],
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "finished_at": "2026-11-12T04:11:00.676501+00:00"
+    }
+  ],
+  "source_change": "exact2 full canonical execution equality checks; existing request/family/authorization/source/queue/commit gates retained",
+  "tests": "33/33 recovery tests, including2 new substituted-grant negatives; full tsc0",
+  "declaration": "INTERNAL_EVIDENCED_EXTERNAL_REVIEW_PENDING",
+  "at": "2026-11-12T04:16:28.634904+00:00",
+  "limits": [
+    "No production recovery mounting",
+    "No real SIGKILL or legal successor",
+    "No NativeAck/Studio/film/A acceptance"
+  ]
+}

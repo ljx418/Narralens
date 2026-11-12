@@ -1,3 +1,4 @@
+import {validateAgentDefinition} from '../../../src/contracts/agent-driven-validator.js';
 import {mkdtempSync,mkdirSync,writeFileSync,readFileSync,rmSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {RevisionStore} from '../../../src/host/projects/revision-store.js';
@@ -625,5 +626,35 @@ describe('D10 MAIN surviving authorization control (real producer)',()=>{
   expect(injected).toBe(true);expect(outcome).toMatchObject({outcome:'aborted',reason:'PROVEN_ABORTED'});
   expect(f.revisions.projectTransaction(f.transactionId)?.state).toBe('aborted');
   expect(failure).toBeInstanceOf(PublicationCleanupError);expect(await readFile(f.authorPath)).toEqual(f.authorBytesNow);
+ },120000);
+});
+
+
+describe('D10 MAIN full execution binding (real producer, controlled corruption)',()=>{
+ it.each(['missing','present'] as const)('MAIN full execution rejects a substituted grant when adoption is %s',async(presence)=>{
+  const f=await recoveryFixture({publish:false});
+  const input={...f.applyChange,execution:{...f.applyChange.execution,authorization_id:'grant_'+randomUUID().replaceAll('-','')}};
+  expect(()=>validateAgentDefinition('ApplyChange',input)).not.toThrow();
+  f.revisions.compose(db=>{
+   if(presence==='missing'){
+    const trigger=String(db.prepare("SELECT sql FROM sqlite_master WHERE name='created_adoption_fact_no_delete'").get()?.sql);
+    db.exec('DROP TRIGGER created_adoption_fact_no_delete');try{db.prepare('DELETE FROM created_adoption_fact WHERE transaction_id=?').run(f.transactionId);}finally{db.exec(trigger);}
+   }else{
+    // Corrupt the redundant adoption execution together with the request, while the
+    // independently immutable producer plan and original authorization stay intact.
+    const trigger=String(db.prepare("SELECT sql FROM sqlite_master WHERE name='created_adoption_fact_no_update'").get()?.sql);
+    db.exec('DROP TRIGGER created_adoption_fact_no_update');try{db.prepare('UPDATE created_adoption_fact SET execution_json=? WHERE transaction_id=?').run(canonicalJson(input.execution),f.transactionId);}finally{db.exec(trigger);}
+   }
+   db.prepare('UPDATE project_transaction SET request_json=?,request_hash=? WHERE transaction_id=?')
+    .run(canonicalJson({operation:'agent.created_source.apply@1',input}),contentDigest(input),f.transactionId);
+  });
+  const before=await witness(f),identity=await stat(f.authorPath);const guard=vi.spyOn(RetainedSourceTree.prototype,'verify');
+  const owner=vi.spyOn(f.app.creation,'ownerOf');
+  const outcome=await f.recovery.recoverTransaction(f.transactionId);
+  expect(outcome).toMatchObject({outcome:'attention',reason:'REQUEST_NOT_LEGITIMATE'});
+  expect(f.revisions.projectTransaction(f.transactionId)?.state).toBe('attention');
+  expect(guard).not.toHaveBeenCalled();expect(owner).not.toHaveBeenCalled();
+  expect(await witness(f)).toEqual(before);expect(await readFile(f.authorPath)).toEqual(f.authorBytesNow);
+  const after=await stat(f.authorPath);expect([after.dev,after.ino,after.size,after.mtimeMs]).toEqual([identity.dev,identity.ino,identity.size,identity.mtimeMs]);
  },120000);
 });

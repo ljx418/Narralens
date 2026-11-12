@@ -543,6 +543,7 @@ export class CreatedSourceRecovery {
     if (canonicalDigest(input.execution) !== canonicalDigest(adoption.execution)) return { ok: false };
     const plan = this.#plan(adoption);
     if (!plan) return { ok: false };
+    if (canonicalDigest(input.execution) !== canonicalDigest(plan.producer_execution)) return { ok: false };
     if (input.source_digest !== plan.base_source_digest) return { ok: false };
     if (plan.project_id !== row.project_id || plan.base_revision !== row.base_revision) return { ok: false };
     return { ok: true, input, adoption, plan };
@@ -570,6 +571,7 @@ export class CreatedSourceRecovery {
     const plan = this.#plan(input);
     if (!plan || plan.project_id !== row.project_id || plan.base_revision !== row.base_revision
       || plan.base_source_digest !== input.source_digest
+      || canonicalDigest(input.execution) !== canonicalDigest(plan.producer_execution)
       || found.facts_digest !== preparedAdoptionPlanDigest(plan)) return false;
     // The surviving authorization must refer to the request's original approval,
     // not merely a self-consistent replacement execution on the same run.
