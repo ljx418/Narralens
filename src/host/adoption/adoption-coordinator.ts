@@ -485,6 +485,7 @@ export class AdoptionCoordinator {
     const report = { recovered: 0, aborted: 0, attention: 0 };
     if (options.sweep !== false) await this.#sweepOrphanedStaging();
     for (const transaction of this.deps.revisions.incompleteTransactions().sort(compareControlledRecoveryRows)) {
+      if (controlledRecoveryFamily(transaction) !== "adoption") continue;
       if (transaction.state === "attention") {
         // Terminal by the state machine: there is no outgoing edge and nothing to recover.
         report.attention += 1;
@@ -497,16 +498,15 @@ export class AdoptionCoordinator {
       // owns them. Deciding them here would make one module answer for another's
       // transaction, with a reason that is false about a perfectly readable request.
       //
-      // A row that cannot be parsed at all is a different case: it *may* be M4B's, and the
-      // generic recovery would move a pre-publish row to `recovering`, which has no legal
-      // outgoing edge. So an unreadable row is latched, and a readable non-adoption row is
-      // left alone.
+      // Unparseable/unknown requests were excluded by the ownership classifier and
+      // remain generic. Only a known adoption marker may reach this contract parser;
+      // ownership alone still proves neither a valid request nor permission to write.
       let value: unknown;
       let readable = true;
       try { value = JSON.parse(transaction.request_json); } catch { readable = false; }
       if (!readable) {
-        // The request cannot be read. That *may* be M4B's row, and leaving it for the
-        // generic recovery would move it to `recovering`, which has no legal outgoing edge.
+        // The row was already classified as ours. Preserve it if its payload cannot
+        // be read here; never acquire ownership merely because parsing failed.
         this.deps.coordinator.attention(transaction.transaction_id, "ADOPTION_REQUEST_UNREADABLE",
           "the unfinished adoption's request cannot be read");
         report.attention += 1;

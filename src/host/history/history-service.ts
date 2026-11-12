@@ -463,11 +463,11 @@ export class HistoryService {
     const report = { recovered: 0, aborted: 0, attention: 0, deferred: 0 };
     if (options.sweep !== false) await this.#sweepOrphanedStaging();
     for (const transaction of this.#deps.revisions.incompleteTransactions().sort(compareControlledRecoveryRows)) {
+      if (controlledRecoveryFamily(transaction) !== "history") continue;
       if (transaction.state === "attention") {
         report.attention += 1;
         continue;
       }
-      if (!claimsHistoryRestore(transaction.request_json)) continue;
       // All three controlled families share the stable creation order. A deferred
       // row is retried by the progress scheduler, never an assumed fixed second pass.
       if (this.#olderControlledPending(transaction)) {

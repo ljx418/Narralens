@@ -1,0 +1,14 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:505195) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/m4b/adoption-route.test.ts (35 tests | 33 skipped) 6244ms
+   ✓ M4B production adoption route > latches an owned adoption marker whose payload violates its contract  3790ms
+   ✓ M4B production adoption route > keeps an unparseable unknown request under generic recovery after Host restart  2454ms
+
+ Test Files  1 passed (1)
+      Tests  2 passed | 33 skipped (35)
+   Start at  12:31:17
+   Duration  15.87s (transform 3.32s, setup 0ms, collect 5.84s, tests 6.24s, environment 0ms, prepare 2.82s)
+

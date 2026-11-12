@@ -1,0 +1,185 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:499780) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/agent-driven/integration/controlled-recovery-families.test.ts (32 tests | 8 failed | 22 skipped) 1743ms
+   ↓ actual created predecessor defers younger adoption before validating its own request
+   ↓ actual created predecessor defers younger history before validating its own request
+   ↓ actual history predecessor defers younger adoption before validating its own request
+   ↓ actual adoption predecessor defers younger history before validating its own request
+   ↓ actual history equal-time older row is not mutually deferred
+   ↓ actual adoption equal-time older row is not mutually deferred
+   ↓ actual history sorts same-family rows before considering the younger one
+   ↓ actual adoption sorts same-family rows before considering the younger one
+   ↓ actual history keeps another project independent of an older created row
+   ↓ actual adoption keeps another project independent of an older created row
+   ↓ actual families cannot pass an older created attention row
+   ↓ actual families cannot pass an older created recovering row
+   ↓ actual history may inspect after the older transaction was safely aborted
+   ↓ actual adoption may inspect after the older transaction was safely aborted
+   ↓ legacy adoption sweep defaults true, while explicit false retains later-pass evidence
+   ↓ history retains explicit no-sweep and existing default sweep behavior
+   ↓ preserves the existing legacy corrupt-JSON decided state and observable error code
+   ↓ both actual family entrypoints leave readable unknown legacy requests to generic recovery
+   ↓ actual history queue allows older unpublished work to abort while retaining a younger created row
+   ↓ actual adoption queue allows older unpublished work to abort while retaining a younger created row
+   ↓ actual history queue does not ignore an unknown pending write
+   ↓ actual adoption queue does not ignore an unknown pending write
+   ✓ MAIN ownership history leaves unparseable unknown requests for generic recovery 151ms
+   × MAIN ownership adoption leaves unparseable unknown requests for generic recovery 166ms
+     → expected { transaction_id: 'unknown', …(14) } to deeply equal { transaction_id: 'unknown', …(14) }
+   × MAIN ownership history rejects its marker on the wrong transaction kind 165ms
+     → expected { transaction_id: 'wrong-kind', …(14) } to deeply equal { transaction_id: 'wrong-kind', …(14) }
+   × MAIN ownership adoption rejects its marker on the wrong transaction kind 169ms
+     → expected { transaction_id: 'wrong-kind', …(14) } to deeply equal { transaction_id: 'wrong-kind', …(14) }
+   × MAIN ownership history does not count another family attention as its recovery decision 240ms
+     → expected 1 to be +0 // Object.is equality
+   × MAIN ownership adoption does not count another family attention as its recovery decision 166ms
+     → expected 1 to be +0 // Object.is equality
+   × MAIN ownership generic preserves unresolved created rows for their actual handler 163ms
+     → expected { transaction_id: 'owned', …(14) } to deeply equal { transaction_id: 'owned', …(14) }
+   × MAIN ownership generic preserves unresolved history rows for their actual handler 169ms
+     → expected { transaction_id: 'owned', …(14) } to deeply equal { transaction_id: 'owned', …(14) }
+   × MAIN ownership generic preserves unresolved adoption rows for their actual handler 170ms
+     → expected { transaction_id: 'owned', …(14) } to deeply equal { transaction_id: 'owned', …(14) }
+   ✓ MAIN ownership generic still decides unparseable and readable unknown operations 182ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 8 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/controlled-recovery-families.test.ts > MAIN ownership adoption leaves unparseable unknown requests for generic recovery
+AssertionError: expected { transaction_id: 'unknown', …(14) } to deeply equal { transaction_id: 'unknown', …(14) }
+
+- Expected
++ Received
+
+  {
+    "base_revision": 0,
+    "correlation_id": "unknown-json",
+    "created_at": "2026-11-12T04:28:00.714Z",
+-   "error_code": "",
++   "error_code": "ADOPTION_REQUEST_UNREADABLE",
+    "kind": "edit",
+    "project_id": "unknown-project",
+    "request_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "request_json": "{",
+    "snapshot_id": "",
+    "source_digest_after": "",
+    "source_digest_before": "",
+-   "state": "received",
+-   "terminal_reason": "",
++   "state": "attention",
++   "terminal_reason": "the unfinished adoption's request cannot be read",
+    "transaction_id": "unknown",
+-   "updated_at": "2026-11-12T04:28:00.714Z",
++   "updated_at": "2026-11-12T04:28:00.719Z",
+  }
+
+ ❯ tests/agent-driven/integration/controlled-recovery-families.test.ts:149:48
+    147|   request_hash:'a'.repeat(64),correlation_id:'unknown-json',base_revis…
+    148|  const before=f.store.projectTransaction('unknown');const report=await…
+    149|  expect(f.store.projectTransaction('unknown')).toEqual(before);expect(…
+       |                                                ^
+    150|  expect(f.store.projectsInAttention()).toEqual([]);expect(f.store.outb…
+    151| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/8]⎯
+
+ FAIL  tests/agent-driven/integration/controlled-recovery-families.test.ts > MAIN ownership history rejects its marker on the wrong transaction kind
+ FAIL  tests/agent-driven/integration/controlled-recovery-families.test.ts > MAIN ownership adoption rejects its marker on the wrong transaction kind
+AssertionError: expected { transaction_id: 'wrong-kind', …(14) } to deeply equal { transaction_id: 'wrong-kind', …(14) }
+
+- Expected
++ Received
+
+  {
+    "base_revision": 0,
+    "correlation_id": "wrong-kind",
+    "created_at": "2026-11-12T04:28:00.889Z",
+-   "error_code": "",
++   "error_code": "HISTORY_REQUEST_UNREADABLE",
+    "kind": "edit",
+    "project_id": "wrong-kind-project",
+    "request_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "request_json": "{\"format\":\"narralens.restore-request@1.0\"}",
+    "snapshot_id": "",
+    "source_digest_after": "",
+    "source_digest_before": "",
+-   "state": "received",
+-   "terminal_reason": "",
++   "state": "attention",
++   "terminal_reason": "the unfinished restore's request does not satisfy its contract",
+    "transaction_id": "wrong-kind",
+-   "updated_at": "2026-11-12T04:28:00.889Z",
++   "updated_at": "2026-11-12T04:28:00.893Z",
+  }
+
+ ❯ tests/agent-driven/integration/controlled-recovery-families.test.ts:157:51
+    155|   request_hash:'a'.repeat(64),correlation_id:'wrong-kind',base_revisio…
+    156|  const before=f.store.projectTransaction('wrong-kind');const report=aw…
+    157|  expect(f.store.projectTransaction('wrong-kind')).toEqual(before);expe…
+       |                                                   ^
+    158|  expect(f.store.projectsInAttention()).toEqual([]);expect(f.store.outb…
+    159| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/8]⎯
+
+ FAIL  tests/agent-driven/integration/controlled-recovery-families.test.ts > MAIN ownership history does not count another family attention as its recovery decision
+ FAIL  tests/agent-driven/integration/controlled-recovery-families.test.ts > MAIN ownership adoption does not count another family attention as its recovery decision
+AssertionError: expected 1 to be +0 // Object.is equality
+
+- Expected
++ Received
+
+- 0
++ 1
+
+ ❯ tests/agent-driven/integration/controlled-recovery-families.test.ts:163:27
+    161|  const f=await fixture();f.add('created','created-attention');f.coordi…
+    162|  const before=f.store.projectTransaction('created-attention');const re…
+    163|  expect(report.attention).toBe(0);expect(f.store.projectTransaction('c…
+       |                           ^
+    164|  expect(f.store.recoveryGate('p1',0)).toBe(true);
+    165| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/8]⎯
+
+ FAIL  tests/agent-driven/integration/controlled-recovery-families.test.ts > MAIN ownership generic preserves unresolved created rows for their actual handler
+ FAIL  tests/agent-driven/integration/controlled-recovery-families.test.ts > MAIN ownership generic preserves unresolved history rows for their actual handler
+ FAIL  tests/agent-driven/integration/controlled-recovery-families.test.ts > MAIN ownership generic preserves unresolved adoption rows for their actual handler
+AssertionError: expected { transaction_id: 'owned', …(14) } to deeply equal { transaction_id: 'owned', …(14) }
+
+- Expected
++ Received
+
+@@ -8,10 +8,10 @@
+    "request_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "request_json": "{\"operation\":\"agent.created_source.apply@1\"}",
+    "snapshot_id": "",
+    "source_digest_after": "",
+    "source_digest_before": "",
+-   "state": "received",
+-   "terminal_reason": "",
++   "state": "recovering",
++   "terminal_reason": "CRASH_RECOVERY_REQUIRED",
+    "transaction_id": "owned",
+-   "updated_at": "2026-11-12T00:00:00.000Z",
++   "updated_at": "2026-11-12T04:28:01.633Z",
+  }
+
+ ❯ tests/agent-driven/integration/controlled-recovery-families.test.ts:170:46
+    168|  const generic=new ProjectCoordinator(strictDeps<CoordinatorDeps>({sto…
+    169|  const result=await generic.recoverOnStart();
+    170|  expect(f.store.projectTransaction('owned')).toEqual(before);expect(re…
+       |                                              ^
+    171|  expect(f.store.recoveryGate('p1',0)).toBe(true);expect(f.store.projec…
+    172| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/8]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  8 failed | 2 passed | 22 skipped (32)
+   Start at  12:27:51
+   Duration  10.30s (transform 1.40s, setup 0ms, collect 5.39s, tests 1.74s, environment 0ms, prepare 2.45s)
+

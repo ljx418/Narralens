@@ -1,3 +1,5 @@
+import {Outbox} from '../../../src/host/outbox.js';
+import {PersistentJobStore} from '../../../src/host/persistent-job-store.js';
 import { mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -92,9 +94,9 @@ it('history retains explicit no-sweep and existing default sweep behavior', asyn
   await f.history.recoverOnStart({ sweep: false }); expect(await readFile(path, 'utf8')).toBe('restore evidence');
   await f.history.recoverOnStart(); await expect(readFile(path)).rejects.toMatchObject({ code: 'ENOENT' });
 });
-it('preserves the existing legacy corrupt-JSON decided state and observable error code', async () => {
+it('preserves the owned adoption malformed-payload decided state and observable error code', async () => {
   const f = await fixture(); f.store.beginTransaction({ transaction_id: 'corrupt', project_id: 'p1', kind: 'edit',
-    request_json: '{not json at all', request_hash: 'a'.repeat(64), correlation_id: 'old-corrupt-case', base_revision: 0 });
+    request_json: JSON.stringify({format:'narralens.adopt-request@1.0'}), request_hash: 'a'.repeat(64), correlation_id: 'old-corrupt-case', base_revision: 0 });
   await f.adoption.recoverOnStart({ sweep: false });
   expect(f.store.projectTransaction('corrupt')).toMatchObject({ state: 'attention', error_code: 'ADOPTION_REQUEST_UNREADABLE' });
 });
@@ -135,4 +137,44 @@ it.each(['history', 'adoption'] as const)('actual %s queue does not ignore an un
   const op = family === 'history' ? 'controlled_write.restore_snapshot' : 'controlled_write.adopt_materialization';
   expect(f.idempotency.recall('p1', op, 'must-not-abort')).toBeUndefined();
   expect(f.store.recoveryGate('p1', 0)).toBe(true); expect(f.store.outboxRowCount()).toBe(0);
+});
+
+
+// Startup ownership component regressions. Real SQLite, original family methods and
+// original generic recovery; no production listen, publication or SIGKILL claim.
+it.each(['history','adoption'] as const)('MAIN ownership %s leaves unparseable unknown requests for generic recovery',async family=>{
+ const f=await fixture();f.store.beginTransaction({transaction_id:'unknown',project_id:'unknown-project',kind:'edit',request_json:'{',
+  request_hash:'a'.repeat(64),correlation_id:'unknown-json',base_revision:0});
+ const before=f.store.projectTransaction('unknown');const report=await f.recover(family);
+ expect(f.store.projectTransaction('unknown')).toEqual(before);expect(report.attention).toBe(0);
+ expect(f.store.projectsInAttention()).toEqual([]);expect(f.store.outboxRowCount()).toBe(0);
+});
+it.each(['history','adoption'] as const)('MAIN ownership %s rejects its marker on the wrong transaction kind',async family=>{
+ const f=await fixture();f.store.beginTransaction({transaction_id:'wrong-kind',project_id:'wrong-kind-project',kind:family==='history'?'edit':'history',
+  request_json:JSON.stringify({format:family==='history'?'narralens.restore-request@1.0':'narralens.adopt-request@1.0'}),
+  request_hash:'a'.repeat(64),correlation_id:'wrong-kind',base_revision:0});
+ const before=f.store.projectTransaction('wrong-kind');const report=await f.recover(family);
+ expect(f.store.projectTransaction('wrong-kind')).toEqual(before);expect(report.attention).toBe(0);
+ expect(f.store.projectsInAttention()).toEqual([]);expect(f.store.outboxRowCount()).toBe(0);
+});
+it.each(['history','adoption'] as const)('MAIN ownership %s does not count another family attention as its recovery decision',async family=>{
+ const f=await fixture();f.add('created','created-attention');f.coordinator.attention('created-attention','component-held','diagnostic ownership hold');
+ const before=f.store.projectTransaction('created-attention');const report=await f.recover(family);
+ expect(report.attention).toBe(0);expect(f.store.projectTransaction('created-attention')).toEqual(before);
+ expect(f.store.recoveryGate('p1',0)).toBe(true);
+});
+it.each(['created','history','adoption'] as const)('MAIN ownership generic preserves unresolved %s rows for their actual handler',async family=>{
+ const f=await fixture();f.add(family,'owned');const before=f.store.projectTransaction('owned');
+ const generic=new ProjectCoordinator(strictDeps<CoordinatorDeps>({store:f.store,outbox:new Outbox(f.store),jobs:new PersistentJobStore(f.store)}));
+ const result=await generic.recoverOnStart();
+ expect(f.store.projectTransaction('owned')).toEqual(before);expect(result.transactions_marked_recovering).toBe(0);
+ expect(f.store.recoveryGate('p1',0)).toBe(true);expect(f.store.projectsInAttention()).toEqual([]);
+});
+it('MAIN ownership generic still decides unparseable and readable unknown operations',async()=>{
+ const f=await fixture();for(const [id,json]of [['broken','{'],['unknown',JSON.stringify({operation:'agent.unknown@1'})]]){
+  f.store.beginTransaction({transaction_id:id!,project_id:'project-'+id,kind:'edit',request_json:json!,request_hash:'a'.repeat(64),correlation_id:'unknown-generic',base_revision:0});
+ }
+ const generic=new ProjectCoordinator(strictDeps<CoordinatorDeps>({store:f.store,outbox:new Outbox(f.store),jobs:new PersistentJobStore(f.store)}));
+ const result=await generic.recoverOnStart();expect(result.transactions_marked_recovering).toBe(2);
+ for(const id of ['broken','unknown']){expect(f.store.projectTransaction(id)?.state).toBe('recovering');expect(f.store.recoveryGate('project-'+id,0)).toBe(true);}
 });

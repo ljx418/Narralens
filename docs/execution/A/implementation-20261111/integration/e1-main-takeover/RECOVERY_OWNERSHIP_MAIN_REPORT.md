@@ -1,0 +1,9 @@
+# MAIN恢复归属入口修复内部验证
+
+三个现有生产入口在计数/解析/状态操作之前按原controlledRecoveryFamily判定自身职责：history/adoption只认领匹配kind+marker的行，generic跳过三族已知行且保留unknown。没有调用者ignore列表，没有改原gate、状态机、DDL、Publisher/closedcommit、scheduler有限集合算法或Host启动装配。
+
+实际原源反例：新增10组件用例8断言失败/2对照通过；源修复后原legacy corrupt-JSON前提测试暴露架构冲突，已按ADR-OWNERSHIP-001明示处理：两处原latch断言保留，但前提须为可认领adoption marker的坏payload；新实际Host重开用原完全无法解析JSON验证generic recovering/terminal_reason和gate阻断。旧用例字节、历史Git与旧Gate报告都保留，无删测试/改历史。组件002的旧前提失败、type003新增fixture漏参数、host004新增断言读错列均保存，不算成功或业务反例。未改原通用状态机迎合断言。
+
+最终真实结果：family32+原scheduler23共55PASS；完整tsc0；actual legacy Host close/reopen两例PASS（owned-malformed latch与unknown-generic preservation）。三组最终捕获所有输入和当前字节逐项相同，所有七组实际exit/logSHA/source-stability已核对。component严格最小deps以真实SQLite/原family及generic方法证明分支，不冒充完整producer；Host两例也不是SIGKILL或整阶段闭环。
+
+MAIN参与实现，当前只有内部验证，独立复核待完成。接下来统一真实NativeSource/selection接口、生产三族scheduler/generic生命周期、public review/change producers及崩溃矩阵，不能以本修复宣称Host/Aready。保护AGENTS，未reset/stash/push/合main。

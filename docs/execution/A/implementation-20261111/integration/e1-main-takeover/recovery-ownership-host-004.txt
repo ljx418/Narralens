@@ -1,0 +1,69 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:502333) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/wave2/m4b/adoption-route.test.ts (35 tests | 1 failed | 33 skipped) 14502ms
+   ↓ M4B production adoption route > returns 428 before resource lookup when impact or approval is missing
+   ↓ M4B production adoption route > adopts three native clips once, replays exactly, and rebuilds after restart
+   ↓ M4B production adoption route > recovers a simulated crash at after_prepared to one durable outcome
+   ↓ M4B production adoption route > recovers a simulated crash at after_published to one durable outcome
+   ↓ M4B production adoption route > recovers a simulated crash at after_committed to one durable outcome
+   ↓ M4B production adoption route > latches terminal attention when recovery can prove neither publication boundary
+   ↓ M4B production adoption route > starts again after latching terminal attention, because one blocked project must not stop the Host
+   ↓ M4B production adoption route > recovers the author-source publication boundary asset_temp_fsynced
+   ↓ M4B production adoption route > recovers the author-source publication boundary asset_installed
+   ↓ M4B production adoption route > recovers the author-source publication boundary film_temp_fsynced
+   ↓ M4B production adoption route > recovers the author-source publication boundary film_renamed
+   ↓ M4B production adoption route > recovers the author-source publication boundary parent_fsynced
+   ↓ M4B production adoption route > rejects a visual lock acquired after staging with revision +0
+   ↓ M4B production adoption route > re-reads the rights before publication, so a rights change after the impact stops it
+   ↓ M4B production adoption route > does not over-block an adoption that preserves narration while a narration lock is held
+   ↓ M4B production adoption route > converges the pre-publish crash boundary after_received to aborted with revision +0
+   ↓ M4B production adoption route > converges the pre-publish crash boundary after_preconditions to aborted with revision +0
+   ↓ M4B production adoption route > converges the pre-publish crash boundary after_plan to aborted with revision +0
+   ↓ M4B production adoption route > converges the pre-publish crash boundary after_stage to aborted with revision +0
+   ↓ M4B production adoption route > converges the pre-publish crash boundary after_validate to aborted with revision +0
+   ↓ M4B production adoption route > converges the pre-publish crash boundary after_snapshot_publish to aborted with revision +0
+   ↓ M4B production adoption route > converges the crash boundary after_active_inspect to a decided state with revision +1
+   ↓ M4B production adoption route > answers the same key with the same body whether the recovery just ran or was replayed
+   ↓ M4B production adoption route > records the source=after / DB-not-committed transition state field by field
+   ↓ M4B production adoption route > answers a visual lock held during recovery with a controlled 423 and nothing committed
+   ↓ M4B production adoption route > reclaims a crashed staging tree through the production composition, where the database path is the store's
+   ✓ M4B production adoption route > latches an owned adoption marker whose payload violates its contract  5059ms
+   × M4B production adoption route > keeps an unparseable unknown request under generic recovery after Host restart 9442ms
+     → expected '' to be 'CRASH_RECOVERY_REQUIRED' // Object.is equality
+   ↓ M4B production adoption route > records why a recovery was blocked, and closes the project visibly
+   ↓ M4B production adoption route > does not let one of its own pending rows block the recovery of another
+   ↓ M4B production adoption route > leaves another module's transaction alone: a legacy edit row is not M4B's to decide
+   ↓ M4B production adoption route > answers a conflicting idempotency key with the request's correlation id
+   ↓ M4B production adoption route > answers one idempotency key with one body, whatever the request body is
+   ↓ M4B production adoption route > gives two Hosts with different databases different staging roots, so one sweep cannot touch the other
+   ↓ M4B production adoption route > sweeps an adoption staging tree left behind by a hard crash
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/wave2/m4b/adoption-route.test.ts > M4B production adoption route > keeps an unparseable unknown request under generic recovery after Host restart
+AssertionError: expected '' to be 'CRASH_RECOVERY_REQUIRED' // Object.is equality
+
+- Expected
++ Received
+
+- CRASH_RECOVERY_REQUIRED
+
+ ❯ tests/wave2/m4b/adoption-route.test.ts:622:29
+    620|     const row = restarted.host.revisions.projectTransaction("txn_unkno…
+    621|     expect(row?.state).toBe("recovering");
+    622|     expect(row?.error_code).toBe("CRASH_RECOVERY_REQUIRED");
+       |                             ^
+    623|     expect(restarted.host.revisions.recoveryGate("of_unknown_json", 0)…
+    624|     expect(restarted.host.revisions.activeCommit("of_unknown_json")).t…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 1 passed | 33 skipped (35)
+   Start at  12:30:05
+   Duration  21.65s (transform 2.44s, setup 0ms, collect 5.10s, tests 14.50s, environment 0ms, prepare 1.29s)
+

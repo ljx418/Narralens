@@ -1,0 +1,77 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:501915) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/agent-driven/integration/controlled-recovery-families.test.ts (32 tests | 1 failed) 5897ms
+   ✓ actual created predecessor defers younger adoption before validating its own request 163ms
+   ✓ actual created predecessor defers younger history before validating its own request 164ms
+   ✓ actual history predecessor defers younger adoption before validating its own request 165ms
+   ✓ actual adoption predecessor defers younger history before validating its own request 162ms
+   ✓ actual history equal-time older row is not mutually deferred 175ms
+   ✓ actual adoption equal-time older row is not mutually deferred 170ms
+   ✓ actual history sorts same-family rows before considering the younger one 175ms
+   ✓ actual adoption sorts same-family rows before considering the younger one 174ms
+   ✓ actual history keeps another project independent of an older created row 175ms
+   ✓ actual adoption keeps another project independent of an older created row 174ms
+   ✓ actual families cannot pass an older created attention row 172ms
+   ✓ actual families cannot pass an older created recovering row 169ms
+   ✓ actual history may inspect after the older transaction was safely aborted 182ms
+   ✓ actual adoption may inspect after the older transaction was safely aborted 185ms
+   ✓ legacy adoption sweep defaults true, while explicit false retains later-pass evidence 153ms
+   ✓ history retains explicit no-sweep and existing default sweep behavior 153ms
+   × preserves the existing legacy corrupt-JSON decided state and observable error code 177ms
+     → expected { transaction_id: 'corrupt', …(14) } to match object { state: 'attention', …(1) }
+(13 matching properties omitted from actual)
+   ✓ both actual family entrypoints leave readable unknown legacy requests to generic recovery 158ms
+   ✓ actual history queue allows older unpublished work to abort while retaining a younger created row 169ms
+   ✓ actual adoption queue allows older unpublished work to abort while retaining a younger created row 173ms
+   ✓ actual history queue does not ignore an unknown pending write 179ms
+   ✓ actual adoption queue does not ignore an unknown pending write  752ms
+   ✓ MAIN ownership history leaves unparseable unknown requests for generic recovery 153ms
+   ✓ MAIN ownership adoption leaves unparseable unknown requests for generic recovery 149ms
+   ✓ MAIN ownership history rejects its marker on the wrong transaction kind 150ms
+   ✓ MAIN ownership adoption rejects its marker on the wrong transaction kind 150ms
+   ✓ MAIN ownership history does not count another family attention as its recovery decision 164ms
+   ✓ MAIN ownership adoption does not count another family attention as its recovery decision 162ms
+   ✓ MAIN ownership generic preserves unresolved created rows for their actual handler 151ms
+   ✓ MAIN ownership generic preserves unresolved history rows for their actual handler 159ms
+   ✓ MAIN ownership generic preserves unresolved adoption rows for their actual handler 149ms
+   ✓ MAIN ownership generic still decides unparseable and readable unknown operations 189ms
+(node:502086) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/controlled-recovery-scheduler.test.ts (23 tests) 2858ms
+   ✓ uses as many progress passes as a long alternating chain actually requires  334ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/controlled-recovery-families.test.ts > preserves the existing legacy corrupt-JSON decided state and observable error code
+AssertionError: expected { transaction_id: 'corrupt', …(14) } to match object { state: 'attention', …(1) }
+(13 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+-   "error_code": "ADOPTION_REQUEST_UNREADABLE",
+-   "state": "attention",
++   "error_code": "",
++   "state": "received",
+  }
+
+ ❯ tests/agent-driven/integration/controlled-recovery-families.test.ts:101:49
+     99|     request_json: '{not json at all', request_hash: 'a'.repeat(64), co…
+    100|   await f.adoption.recoverOnStart({ sweep: false });
+    101|   expect(f.store.projectTransaction('corrupt')).toMatchObject({ state:…
+       |                                                 ^
+    102| });
+    103| it('both actual family entrypoints leave readable unknown legacy reque…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 54 passed (55)
+   Start at  12:29:44
+   Duration  18.00s (transform 1.20s, setup 0ms, collect 5.43s, tests 8.76s, environment 0ms, prepare 2.58s)
+

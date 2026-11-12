@@ -1,0 +1,87 @@
+{
+  "base": "4f2bb06be6d26dab240e1faeed0163f3edb7c920",
+  "scope": "Only exact owned family filters before counter/parse/mutation; no Host wiring/job reaper/scheduler algorithm/DDL/commit/ignore/force changes; exact legacy regression evolution: keep owned-malformed-request latch, add actual unknown-JSON generic startup case; no Gate history overwrite",
+  "source_sha256": {
+    "src/host/projects/project-coordinator.ts": "8dd7acf5a063bc6087a83cf0b6f4ac943c938697e564249b08ce31c20d196fe0",
+    "src/host/adoption/adoption-coordinator.ts": "d67fc581a23f253b740eaaaf4b4fd9b5e0d671d3032fb0629b40008523b14179",
+    "src/host/history/history-service.ts": "55238f929cf4ddf64589c59e5e8a2ec4de0ce1771a844d68b1304d659ee40044",
+    "tests/agent-driven/integration/controlled-recovery-families.test.ts": "e4f3adf9cd9db48efaea65d7ef365eb05273542cc915cda4d8238dfa767554f8",
+    "tests/wave2/m4b/adoption-route.test.ts": "2010e23727f8714b64041de240e2c71dbb911cf08bb82fb8d35be791a4918a44"
+  },
+  "protected_agents_sha256": "37300463a72a612ae16e0a5fcfb496502c57c722b83781e0e2e8c9480594542b",
+  "captures": [
+    {
+      "name": "recovery-ownership-old-001",
+      "exit": 1,
+      "source_changed": [],
+      "source_added": [],
+      "log_sha256": "d70d2b22750d62da652bdae3aea37aa4a20191d92cff68ba34f126dd20998899",
+      "finished_at": "2026-11-12T04:28:05.045639+00:00"
+    },
+    {
+      "name": "recovery-ownership-fixed-002",
+      "exit": 1,
+      "source_changed": [],
+      "source_added": [],
+      "log_sha256": "19be5aaeb42796524a59268af60c5f76a85353d37556bab3fa6529b04349e283",
+      "finished_at": "2026-11-12T04:30:06.894794+00:00"
+    },
+    {
+      "name": "recovery-ownership-type-003",
+      "exit": 2,
+      "source_changed": [],
+      "source_added": [],
+      "log_sha256": "cbe33bd161ab08763e5bf202d1dc18a1eaee64bc15cdf6f00c179f96e4ee9737",
+      "finished_at": "2026-11-12T04:30:29.513162+00:00"
+    },
+    {
+      "name": "recovery-ownership-host-004",
+      "exit": 1,
+      "source_changed": [],
+      "source_added": [],
+      "log_sha256": "c459798d76d0e5248ff69073508783d94c46a98832805789ff36b58859351ef8",
+      "finished_at": "2026-11-12T04:30:31.816677+00:00"
+    },
+    {
+      "name": "recovery-ownership-fixed-005",
+      "exit": 0,
+      "source_changed": [],
+      "source_added": [],
+      "log_sha256": "f8bd4da1a107d466c91e5e6e5d8d2096a1fd83f2707959f7aa55a3885e08c73f",
+      "finished_at": "2026-11-12T04:31:45.237567+00:00"
+    },
+    {
+      "name": "recovery-ownership-type-006",
+      "exit": 0,
+      "source_changed": [],
+      "source_added": [],
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "finished_at": "2026-11-12T04:31:40.259528+00:00"
+    },
+    {
+      "name": "recovery-ownership-host-007",
+      "exit": 0,
+      "source_changed": [],
+      "source_added": [],
+      "log_sha256": "92c9aaab97e3b66a28137d983d42bd7f773c8de474da76ba684f3cc2a1c80d43",
+      "finished_at": "2026-11-12T04:31:38.255997+00:00"
+    }
+  ],
+  "declaration": "OWNERSHIP_FILTERS_INTERNAL_EVIDENCED_INDEPENDENT_REVIEW_PENDING",
+  "test_results": {
+    "old001": "8 real assertion FAIL /2 controlsPASS,22filtered",
+    "fixed002": "54PASS/1 legacy old-premiseFAIL retained",
+    "type003": "test fixture call arity TS2554; not business counterexample",
+    "host004": "one new test misread error_code instead of original terminal_reason, onePASS, retained",
+    "fixed005": "55PASS including unchanged scheduler23 and family32",
+    "type006": "complete tsc0",
+    "host007": "2 actual Host restartPASS /33filtered"
+  },
+  "ADR": "canonical R2/recovery-family-ownership-main/ADR-OWNERSHIP-001.md",
+  "limits": [
+    "No full Host scheduler/source selection composition",
+    "No SIGKILL",
+    "No NativeSourcePort/Ack/Studio/films/A acceptance"
+  ],
+  "at": "2026-11-12T04:32:48.819042+00:00"
+}

@@ -582,17 +582,17 @@ describe("M4B production adoption route", () => {
     expect(await readdir(expected).catch(() => [])).not.toContain("adopt-orphaned");
   }, 300_000);
 
-  it("latches a row whose request cannot be read, rather than leaving it to a recovery with no way out", async () => {
-    // The generic recovery moves a pre-publish row to `recovering`, which has no legal
-    // outgoing edge — TX-08B forbids leaving one. So a row M4B cannot read is latched as a
-    // decided state. The behaviour existed; nothing produced the condition.
+  it("latches an owned adoption marker whose payload violates its contract", async () => {
+    // TX-08B applies to a row that actually claims the adoption family. Completely
+    // unparseable JSON has no such provenance and is covered separately below by
+    // generic recovery. ADR-OWNERSHIP-001 preserves both obligations explicitly.
     const running = await start();
     hosts.push(running.host); dirs.push(running.base);
     const projectId = "of_corrupt_request";
     const db = running.host.revisions.compose((handle) => handle);
     running.host.revisions.beginTransaction({
       transaction_id: "txn_corrupt", project_id: projectId, kind: "edit",
-      request_json: "{not json at all", request_hash: "0".repeat(64),
+      request_json: JSON.stringify({ format: "narralens.adopt-request@1.0" }), request_hash: "0".repeat(64),
       correlation_id: "corr-corrupt", base_revision: 0,
     });
     await running.host.close();
@@ -606,6 +606,22 @@ describe("M4B production adoption route", () => {
     // A decided state with a reason, never `recovering`.
     expect(row.state).toBe("attention");
     expect(row.error_code).toBe("ADOPTION_REQUEST_UNREADABLE");
+  }, 300_000);
+
+  it("keeps an unparseable unknown request under generic recovery after Host restart", async () => {
+    const running = await start(); hosts.push(running.host); dirs.push(running.base);
+    running.host.revisions.beginTransaction({
+      transaction_id: "txn_unknown_json", project_id: "of_unknown_json", kind: "edit",
+      request_json: "{not json at all", request_hash: "0".repeat(64),
+      correlation_id: "corr-unknown-json", base_revision: 0,
+    });
+    await running.host.close(); hosts.splice(hosts.indexOf(running.host), 1);
+    const restarted = await startOn(running.base); hosts.push(restarted.host);
+    const row = restarted.host.revisions.projectTransaction("txn_unknown_json");
+    expect(row?.state).toBe("recovering");
+    expect(row?.terminal_reason).toBe("CRASH_RECOVERY_REQUIRED");
+    expect(restarted.host.revisions.recoveryGate("of_unknown_json", 0)).toBe(true);
+    expect(restarted.host.revisions.activeCommit("of_unknown_json")).toBeUndefined();
   }, 300_000);
 
   it("records why a recovery was blocked, and closes the project visibly", async () => {

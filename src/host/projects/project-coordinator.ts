@@ -1,3 +1,4 @@
+import { controlledRecoveryFamily } from "./controlled-recovery-scheduler.js";
 import { createHash, randomUUID } from "node:crypto";
 import { HttpError } from "../api-error.js";
 import type { EditRequest, EditResponse } from "../../contracts/types.js";
@@ -343,6 +344,10 @@ export class ProjectCoordinator {
   async recoverOnStart(now = new Date()): Promise<RecoveryReport> {
     let transactionsMarkedRecovering = 0;
     for (const transaction of this.deps.store.incompleteTransactions()) {
+      // Known controlled owners retain their unresolved rows, even if that owner's
+      // capability is unavailable. Pending still blocks the original write gate.
+      // Classification is local to actual DB rows, never a caller's ignore list.
+      if (controlledRecoveryFamily(transaction) !== undefined) continue;
       if (["received", "preconditions_checked", "staged"].includes(transaction.state)) {
         this.deps.store.markRecovering(transaction.transaction_id, "CRASH_RECOVERY_REQUIRED", now);
         this.deps.store.markAttention(transaction.project_id, transaction.transaction_id,
