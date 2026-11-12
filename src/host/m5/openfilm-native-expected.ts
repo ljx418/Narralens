@@ -108,6 +108,11 @@ export function snapshotNativeExpectedBinding(binding: NativeExpectedBinding): N
   });
 }
 
+/** Compare owned plain snapshots, after all possibly reentrant Host callbacks. */
+function sameNativeExpectedBindingSnapshot(left: NativeExpectedBindingSnapshot, right: NativeExpectedBindingSnapshot): boolean {
+  return (Object.keys(left) as (keyof NativeExpectedBindingSnapshot)[]).every(key => left[key] === right[key]);
+}
+
 /** One closed source file of the committed workspace. */
 export interface NativeExpectedSourceEntry {
   readonly relative_path: string;
@@ -266,10 +271,31 @@ interface NativeExpectedFacts {
  * The held facts, outside every object's reach.
  *
  * A `WeakMap` is used on purpose: the facts are not a property of the proof, so no
- * caller can read them, mutate them or fabricate them. Membership in this map *is* the
- * outstanding-membership check.
+ * caller can read them, mutate them or fabricate them. Membership in this map is the
+ * facts check; the *liveness* of a proof is the separate, module-private record
+ * below, and it is the only authority.
  */
 const HELD_FACTS = new WeakMap<NativeExpectedProof, NativeExpectedFacts>();
+
+/**
+ * The liveness of one proof, outside every object's reach.
+ *
+ * It outlives the facts on purpose. A released proof must stay recognisable as
+ * *released* — and never as a foreign one — after its facts are gone, and the record
+ * is what says whether the proof is still outstanding at all.
+ *
+ * The instance token is here as well, so that `release` can refuse a proof that this
+ * instance did not issue without ever touching the resources of the instance that
+ * did. The global facts map is never enough to answer that question.
+ */
+interface NativeExpectedProofStatus {
+  /** The issuing instance's own token. Only that instance may release the proof. */
+  readonly instance: object;
+  /** Whether the authority of the proof has been revoked. */
+  released: boolean;
+}
+
+const PROOF_STATUS = new WeakMap<NativeExpectedProof, NativeExpectedProofStatus>();
 
 /**
  * An opaque proof.
@@ -285,11 +311,69 @@ export class NativeExpectedProof {
     if (brand !== PROOF_BRAND) throw new Error('NATIVE_EXPECTED_PROOF_FORGED');
   }
 
-  /** Whether the proof has been released. */
-  get released(): boolean { return this.#released; }
+  /**
+   * Whether the proof has been released.
+   *
+   * It is a *view* of the module-private record, never the record itself: the public
+   * surface of the proof is not the authority, and the authority is not derived from
+   * anything a caller can reach.
+   */
+  get released(): boolean {
+    const status = PROOF_STATUS.get(this);
+    return status === undefined ? this.#released : status.released;
+  }
 
   /** Mark the proof released. Only the owning service may do this. */
-  markReleased(): void { this.#released = true; }
+  markReleased(): void {
+    this.#released = true;
+    const status = PROOF_STATUS.get(this);
+    if (status !== undefined) status.released = true;
+  }
+}
+
+/**
+ * The aggregate of a cleanup that did not finish.
+ *
+ * The message is a code and nothing else: no absolute path and no credential is ever
+ * disclosed. The causes are kept in a non-enumerable field, so a logged or serialised
+ * error carries the code and not the details.
+ */
+class NativeExpectedCleanupError extends Error {
+  constructor(code: string, causes: readonly unknown[]) {
+    super(code);
+    this.name = 'NativeExpectedCleanupError';
+    Object.defineProperty(this, 'errors', {
+      value: causes,
+      enumerable: false,
+      writable: false,
+      configurable: false,
+    });
+  }
+}
+
+/**
+ * Attach the cleanup causes to the primary failure, without making them public.
+ *
+ * The primary failure keeps its own type, its own message and its own stack: it is
+ * still the primary failure. The causes are added in a non-enumerable field, so the
+ * error that leaves this module does not disclose a path or a credential.
+ *
+ * It answers whether the causes could be attached at all.
+ */
+function attachCleanupFailures(error: unknown, failures: readonly unknown[]): boolean {
+  if (typeof error !== 'object' || error === null) return false;
+  try {
+    Object.defineProperty(error, 'cleanup_errors', {
+      value: failures,
+      enumerable: false,
+      writable: false,
+      configurable: true,
+    });
+    return true;
+  } catch {
+    // A frozen or sealed failure cannot carry them; the aggregate keeps them instead.
+    return false;
+  }
 }
 
 /** The fixed expected interface. */
@@ -558,8 +642,30 @@ export class OpenFilmNativeExpected implements NativeExpectedPort {
   /** This instance's own token. A proof from another instance is refused. */
   readonly #instance = {};
   readonly #outstanding = new Set<NativeExpectedProof>();
+  /**
+   * The proofs this instance has already released.
+   *
+   * It is the instance's own record of its own work, so a repeated release is a
+   * no-op and a foreign proof can never be mistaken for one of them.
+   */
+  readonly #released = new WeakSet<NativeExpectedProof>();
+  /**
+   * The retained resources this instance has already released.
+   *
+   * A resource is released exactly once. The same object may appear twice in one
+   * list, and a raw descriptor number is never retried: closing a descriptor that is
+   * already closed can close an unrelated file that took its number.
+   */
+  readonly #releasedResources = new WeakSet<NativeExpectedRetainedFile>();
   #library: Promise<NativeExpectedLibrary> | null = null;
   #closed = false;
+  /**
+   * Whether a cleanup failed and left the outcome of a release unknown.
+   *
+   * It is sticky: while it holds, this instance can no longer prove anything, because
+   * it cannot say that every descriptor it took ownership of was released.
+   */
+  #cleanupUncertain = false;
 
   constructor(deps: OpenFilmNativeExpectedDeps) {
     this.#source = deps.source;
@@ -580,40 +686,79 @@ export class OpenFilmNativeExpected implements NativeExpectedPort {
     return this.#library;
   }
 
+  /** Every callback and snapshot read precedes the final private admission fence. */
+  #admitBinding(binding: NativeExpectedBinding, baseline: NativeExpectedBindingSnapshot): void {
+    const current = binding.isCurrent();
+    const matches = sameNativeExpectedBindingSnapshot(snapshotNativeExpectedBinding(binding), baseline);
+    if (this.#closed) throw new Error('NATIVE_EXPECTED_CLOSED');
+    if (this.#cleanupUncertain) throw new Error('NATIVE_EXPECTED_CLEANUP_UNCERTAIN');
+    if (!current) throw new Error('NATIVE_EXPECTED_BINDING_STALE');
+    if (!matches) throw new Error('NATIVE_EXPECTED_BINDING_MOVED');
+  }
+
   async prove(binding: NativeExpectedBinding): Promise<NativeExpectedProof> {
     if (this.#closed) throw new Error('NATIVE_EXPECTED_CLOSED');
-    if (!binding.isCurrent()) throw new Error('NATIVE_EXPECTED_BINDING_STALE');
+    if (this.#cleanupUncertain) throw new Error('NATIVE_EXPECTED_CLEANUP_UNCERTAIN');
+    // One baseline owns the read, projection and proof; never resample it after callbacks.
+    const binding_snapshot = snapshotNativeExpectedBinding(binding);
+    this.#admitBinding(binding, binding_snapshot);
     const library = await this.#load();
-    if (!binding.isCurrent()) throw new Error('NATIVE_EXPECTED_BINDING_STALE');
+    // The candidate may have loaded after the service was closed. `close` is
+    // synchronous and cannot wait for this promise, so the state is checked again
+    // here, and the read is not started at all.
+    if (this.#closed) throw new Error('NATIVE_EXPECTED_CLOSED');
+    if (this.#cleanupUncertain) throw new Error('NATIVE_EXPECTED_CLEANUP_UNCERTAIN');
+    this.#admitBinding(binding, binding_snapshot);
     const facts = await this.#source.readSource({ binding });
     // The handles are taken over the moment the read resolves. From here on they are
     // this service's, and every failure path closes them.
     const retained = facts.retained;
     try {
-      if (!binding.isCurrent()) throw new Error('NATIVE_EXPECTED_BINDING_STALE');
-      const projection = this.#projection(binding, facts, library);
+      // The read may have returned after the service was closed. The resources it
+      // delivered are released and the proof is refused: a closed service issues
+      // nothing, and a late read is not a reason to leak a descriptor.
+      if (this.#closed) throw new Error('NATIVE_EXPECTED_CLOSED');
+      if (this.#cleanupUncertain) throw new Error('NATIVE_EXPECTED_CLEANUP_UNCERTAIN');
+      this.#admitBinding(binding, binding_snapshot);
+      const projection = this.#projection(binding_snapshot, facts, library);
+      // Every value that comes from a callback is computed *before* the guard that
+      // decides whether a proof may be issued. A callback may close the service or
+      // leave a cleanup uncertain, and the guard has to see that.
+      const input_sha256 = sha256(Buffer.from(library.hydrationCanonicalJson(facts.expected_input), 'utf8'));
+      // Accessing a source-port property can itself reenter/close this service.
+      // Capture the callback before final admission, not in the fact object below.
+      const verifyClosure = facts.verifyClosure;
+      // The final session callback and binding read both precede private admission.
+      // No external callback is invoked between that fence and proof registration.
+      this.#admitBinding(binding, binding_snapshot);
       const proof = new NativeExpectedProof(PROOF_BRAND);
       HELD_FACTS.set(proof, {
         instance: this.#instance,
         binding,
-        binding_snapshot: snapshotNativeExpectedBinding(binding),
+        binding_snapshot,
         projection,
-        input_sha256: sha256(Buffer.from(library.hydrationCanonicalJson(facts.expected_input), 'utf8')),
+        input_sha256,
         retained,
-        verifyClosure: facts.verifyClosure,
+        verifyClosure,
       });
+      PROOF_STATUS.set(proof, { instance: this.#instance, released: false });
       this.#outstanding.add(proof);
       return proof;
     } catch (error) {
-      // Nothing may leak: a failure after the reader returned still releases its files.
-      for (const file of retained) file.close();
-      throw error;
+      // Nothing may leak: a failure after the reader returned still releases its
+      // files, and every one of them is attempted even when an earlier one fails.
+      this.#fail(error, this.#releaseResources(retained));
     }
   }
 
   assertCurrent(binding: NativeExpectedBinding, proof: NativeExpectedProof): NativeExpectedProjection {
     if (this.#closed) throw new Error('NATIVE_EXPECTED_CLOSED');
-    if (proof.released) throw new Error('NATIVE_EXPECTED_PROOF_RELEASED');
+    // An uncertain cleanup is sticky and fail-closed: this instance cannot say that
+    // everything it took ownership of was released, so it cannot certify anything.
+    if (this.#cleanupUncertain) throw new Error('NATIVE_EXPECTED_CLEANUP_UNCERTAIN');
+    const status = PROOF_STATUS.get(proof);
+    if (status === undefined) throw new Error('NATIVE_EXPECTED_PROOF_FOREIGN');
+    if (status.released) throw new Error('NATIVE_EXPECTED_PROOF_RELEASED');
     const facts = HELD_FACTS.get(proof);
     if (facts === undefined) throw new Error('NATIVE_EXPECTED_PROOF_FOREIGN');
     if (facts.instance !== this.#instance) throw new Error('NATIVE_EXPECTED_PROOF_FOREIGN');
@@ -623,41 +768,140 @@ export class OpenFilmNativeExpected implements NativeExpectedPort {
     if (facts.binding !== binding) throw new Error('NATIVE_EXPECTED_BINDING_MOVED');
     const snapshot = snapshotNativeExpectedBinding(binding);
     const held = facts.binding_snapshot;
-    if (snapshot.project_id !== held.project_id
-      || snapshot.native_project_id !== held.native_project_id
-      || snapshot.revision !== held.revision
-      || snapshot.snapshot_id !== held.snapshot_id
-      || snapshot.source_digest !== held.source_digest
-      || snapshot.instance_generation !== held.instance_generation
-      || snapshot.selection_version !== held.selection_version
-      || snapshot.workspace_ref !== held.workspace_ref
-      || snapshot.workspace_snapshot_id !== held.workspace_snapshot_id
-      || snapshot.workspace_source_digest !== held.workspace_source_digest
-      || snapshot.workspace_revision !== held.workspace_revision) throw new Error('NATIVE_EXPECTED_BINDING_MOVED');
+    if (!sameNativeExpectedBindingSnapshot(snapshot, held)) throw new Error('NATIVE_EXPECTED_BINDING_MOVED');
     if (!binding.isCurrent()) throw new Error('NATIVE_EXPECTED_BINDING_STALE');
     // The synchronous final guard: the whole closure, and then every retained file.
     if (facts.verifyClosure() !== true) throw new Error('NATIVE_EXPECTED_CLOSURE_MOVED');
     for (const file of facts.retained) {
       if (file.verify() !== true) throw new Error('NATIVE_EXPECTED_SOURCE_MOVED');
     }
+    // Verifiers may mutate the binding while still returning true. Read its fields
+    // before the final private fence: a getter could also close/revoke this service.
+    const finalBindingMatches = sameNativeExpectedBindingSnapshot(snapshotNativeExpectedBinding(binding), held);
+    // The callbacks above may have closed the service or released this proof. The
+    // private state is checked once more — no callback is asked again — and a
+    // projection is never returned after the authority was revoked.
+    if (this.#closed) throw new Error('NATIVE_EXPECTED_CLOSED');
+    if (this.#cleanupUncertain) throw new Error('NATIVE_EXPECTED_CLEANUP_UNCERTAIN');
+    const finalStatus = PROOF_STATUS.get(proof);
+    if (finalStatus === undefined) throw new Error('NATIVE_EXPECTED_PROOF_FOREIGN');
+    if (finalStatus.released) throw new Error('NATIVE_EXPECTED_PROOF_RELEASED');
+    // The facts are the very ones the proof was made with, and they are still
+    // this instance's.
+    if (HELD_FACTS.get(proof) !== facts) throw new Error('NATIVE_EXPECTED_PROOF_FOREIGN');
+    if (facts.instance !== this.#instance) throw new Error('NATIVE_EXPECTED_PROOF_FOREIGN');
+    if (!this.#outstanding.has(proof)) throw new Error('NATIVE_EXPECTED_PROOF_FOREIGN');
+    if (!finalBindingMatches) throw new Error('NATIVE_EXPECTED_BINDING_MOVED');
+    // The captured projection is immutable, and it is returned without any further
+    // external call.
     return facts.projection;
   }
 
   release(proof: NativeExpectedProof): void {
-    const facts = HELD_FACTS.get(proof);
-    this.#outstanding.delete(proof);
-    if (facts !== undefined) {
-      HELD_FACTS.delete(proof);
-      for (const file of facts.retained) file.close();
+    const status = PROOF_STATUS.get(proof);
+    // A proof this instance did not issue is refused, and nothing of the instance
+    // that did issue it is touched: the global facts map is never the authority.
+    if (status === undefined) throw new Error('NATIVE_EXPECTED_PROOF_FOREIGN');
+    if (status.instance !== this.#instance) throw new Error('NATIVE_EXPECTED_PROOF_FOREIGN');
+    if (this.#released.has(proof)) {
+      // The release is idempotent: the descriptors are not touched again. But an
+      // earlier uncertain cleanup is not erased by the absence of a record, so this
+      // does not report a success it cannot stand behind.
+      if (this.#cleanupUncertain) throw new Error('NATIVE_EXPECTED_CLEANUP_UNCERTAIN');
+      return;
     }
-    proof.markReleased();
+    const facts = HELD_FACTS.get(proof);
+    const retained = facts?.retained ?? [];
+    // The authority is revoked *before* the cleanup: a proof whose cleanup failed
+    // must not be assertable afterwards, and the failure of one release must not
+    // stop the release of another proof.
+    //
+    // The revocation is the module-private record and nothing else. The proof's own
+    // public surface belongs to the caller, who may replace a method or a getter
+    // on it; a call into that surface would strand the descriptors below, skip the
+    // other proofs and hide the uncertainty of a failed cleanup. The observable
+    // `released` state is unchanged — it is a view of this very record.
+    status.released = true;
+    this.#released.add(proof);
+    this.#outstanding.delete(proof);
+    HELD_FACTS.delete(proof);
+    const failures = this.#releaseResources(retained);
+    if (failures.length > 0) {
+      this.#cleanupUncertain = true;
+      throw new NativeExpectedCleanupError('NATIVE_EXPECTED_CLEANUP_FAILED', failures);
+    }
   }
 
   close(): void {
     this.#closed = true;
-    for (const proof of [...this.#outstanding]) this.release(proof);
+    const failures: unknown[] = [];
+    for (const proof of [...this.#outstanding]) {
+      const status = PROOF_STATUS.get(proof);
+      if (status === undefined || status.instance !== this.#instance) continue;
+      const facts = HELD_FACTS.get(proof);
+      const retained = facts?.retained ?? [];
+      // The authority is revoked before the cleanup, proof by proof, so that a
+      // cleanup that fails cannot leave a proof that still asserts. The record is
+      // the only thing that is written: the proof's own public surface is the
+      // caller's, and a replaced method there must not stop this close.
+      status.released = true;
+      this.#released.add(proof);
+      this.#outstanding.delete(proof);
+      HELD_FACTS.delete(proof);
+      // Every proof is attempted, even when an earlier one failed to release.
+      failures.push(...this.#releaseResources(retained));
+    }
     this.#outstanding.clear();
     this.#library = null;
+    if (failures.length > 0) {
+      this.#cleanupUncertain = true;
+      throw new NativeExpectedCleanupError('NATIVE_EXPECTED_CLEANUP_FAILED', failures);
+    }
+    // A close that follows an uncertain cleanup does not report a success it cannot
+    // stand behind.
+    if (this.#cleanupUncertain) throw new Error('NATIVE_EXPECTED_CLEANUP_UNCERTAIN');
+  }
+
+  /**
+   * Release a set of retained descriptors.
+   *
+   * Every descriptor is attempted, even when an earlier one failed: the first
+   * failure must not strand the rest. A descriptor this instance already released is
+   * never released again, and the same object listed twice is one resource, not two.
+   *
+   * The failures are returned and never thrown: the caller keeps the primary failure
+   * and adds these to it.
+   */
+  #releaseResources(resources: readonly NativeExpectedRetainedFile[]): unknown[] {
+    const failures: unknown[] = [];
+    for (const resource of resources) {
+      if (this.#releasedResources.has(resource)) continue;
+      // The resource is marked before the attempt: an unknown outcome is never
+      // retried on a raw descriptor number.
+      this.#releasedResources.add(resource);
+      try {
+        resource.close();
+      } catch (error) {
+        // Latch immediately: the next close may reenter another outstanding proof.
+        this.#cleanupUncertain = true;
+        failures.push(error);
+      }
+    }
+    return failures;
+  }
+
+  /**
+   * Fail with the primary error and the cleanup failures it collected.
+   *
+   * The primary error is still the primary error: it keeps its type, its message and
+   * its stack, and it carries the cleanup causes in a non-enumerable field. When it
+   * cannot carry them, the aggregate keeps them instead, and nothing is swallowed.
+   */
+  #fail(error: unknown, failures: readonly unknown[]): never {
+    if (failures.length === 0) throw error;
+    this.#cleanupUncertain = true;
+    if (attachCleanupFailures(error, failures)) throw error;
+    throw new NativeExpectedCleanupError('NATIVE_EXPECTED_CLEANUP_FAILED', [error, ...failures]);
   }
 
   /**
@@ -667,7 +911,7 @@ export class OpenFilmNativeExpected implements NativeExpectedPort {
    * `captions` come from the Host's own reader and the fixed original native rules, and
    * they are hashed with the *same* canonical implementation the editor used.
    */
-  #projection(binding: NativeExpectedBinding, facts: NativeExpectedSourceFacts, library: NativeExpectedLibrary): NativeExpectedProjection {
+  #projection(binding: NativeExpectedBindingSnapshot, facts: NativeExpectedSourceFacts, library: NativeExpectedLibrary): NativeExpectedProjection {
     const unsupported = (reason: string): NativeExpectedPart => Object.freeze({ state: 'unsupported', origin: null, effective_sha256: null, reason });
     const computed = library.computeExpectedProjection(facts.expected_input);
     const parts: Record<NativeExpectedPartKind, NativeExpectedPart> = {

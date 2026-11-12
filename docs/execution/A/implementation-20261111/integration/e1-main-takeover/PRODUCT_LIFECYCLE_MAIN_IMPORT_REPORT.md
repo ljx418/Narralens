@@ -1,0 +1,7 @@
+# PRODUCT生命周期固定blob集成验证
+
+从已独立bounded ACCEPT的dd32f156ee576e65c5e0ed8e7f9dc228827a97fe只导入openfilm-native-expected.ts和created-native-ack.test.ts。提交blob与SHA256均逐一匹配原审定清单及独立报告，不复制PRODUCT用户dirty/流程文件，不cherry-pick整分支。
+
+主目录实际84项pure native expected/observation envelope/lifecycle用例PASS，完整tsc exit0；两次捕获输入与导入最终字节逐项相同，无捕获输入变化，完整日志/actual exit/SHA保留。导入没有改D10恢复源及其测试；D10 abf34c9独立4PASS并bounded ACCEPT，交回消息msg_a2c6684f115e另存canonical，不冒称这些门在此重新运行。
+
+本次只证明已审两blob在MAIN的集成与类型兼容。真实NativeExpectedSourcePort/文件与目录negative closure、media探测/真实selection、原Studio四hydration、同库NativeAck/Contextloaded尚未完成；Host恢复/generic/scheduler/SIGKILL和A影片/人验未据本次通过。不自签新生产验收。AGENTS原dirty保持保护，不纳入提交。
