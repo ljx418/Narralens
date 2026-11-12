@@ -1,0 +1,22 @@
+[
+  {
+    "scenario": "failed_close_then_next_cleanup_reenters_other_proof",
+    "nestedProjectionReturned": false,
+    "nestedError": "NATIVE_EXPECTED_CLEANUP_UNCERTAIN",
+    "releaseError": "NATIVE_EXPECTED_CLEANUP_FAILED",
+    "afterError": "NATIVE_EXPECTED_CLEANUP_UNCERTAIN",
+    "defect": false
+  },
+  {
+    "scenario": "prove_binding_changed_by_canonical",
+    "bindingProject": "p2",
+    "error": "NATIVE_EXPECTED_BINDING_MOVED",
+    "defect": false
+  },
+  {
+    "scenario": "prove_binding_changed_by_closure_getter",
+    "bindingProject": "p2",
+    "error": "NATIVE_EXPECTED_BINDING_MOVED",
+    "defect": false
+  }
+]

@@ -1,0 +1,192 @@
+
+ RUN  v3.2.4 /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-PRODUCT
+
+(node:233858) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/agent-driven/integration/created-native-ack.test.ts (84 tests | 7 failed | 77 skipped) 26ms
+   ↓ the native observation envelope > accepts exactly the four closed fields
+   ↓ the native observation envelope > refuses an envelope that carries any identity of its own
+   ↓ the native observation envelope > refuses an unknown format, an unknown event kind and a non-integer sequence
+   ↓ the original p2 document observation > accepts a committed document and an invalidation
+   ↓ the original p2 document observation > refuses a foreign protocol version, a broken hash and an unknown reason
+   ↓ the original 013 hydration observation > accepts exactly the four parts with a project origin
+   ↓ the original 013 hydration observation > refuses a part set that is not exactly the four
+   ↓ the original 013 hydration observation > refuses a browser preference as a proven origin
+   ↓ the original 013 hydration observation > refuses a digest on a part that is not hydrated and refuses a missing one
+   ↓ the original 013 hydration observation > refuses a hydration epoch that is not positive
+   ↓ the original Studio selection > accepts a fractional native second and the original ref kinds
+   ↓ the original Studio selection > refuses a non-finite time, an unknown ref kind and a broken range
+   ↓ the native seconds canonicalisation > is its own fractional domain and never the integer canonical domain
+   ↓ the native seconds canonicalisation > refuses a value that is not finite
+   ↓ the retained source identity > refuses a proof whose file bytes drifted between prove and the acknowledgement
+   ↓ the retained source identity > refuses a proof whose file was replaced by another file with the same bytes
+   ↓ the retained source identity > refuses a closure that gained or lost a file
+   ↓ the expected proof > refuses a proof whose file drifted between prove and the acknowledgement
+   ↓ the expected proof > refuses a proof whose file was replaced by an identical file, and a closure that changed
+   ↓ the expected proof > refuses a released proof and a proof from another instance
+   ↓ the expected proof > refuses a binding that is not the one the proof was made against
+   ↓ the expected proof > closes every descriptor when the projection fails, and when the service is closed
+   ↓ the expected loader approval chain > loads a candidate whose inputs, manifest and modules all match the approval
+   ↓ the expected loader approval chain > refuses a changed input, a changed manifest and a swapped module
+   ↓ the expected loader approval chain > refuses a module that reaches outside the verified directory
+   ↓ the expected loader approval chain > refuses a candidate whose upstream is not the pinned one
+   ↓ the binding snapshot > captures the fields, so a mutated binding cannot pass for the original
+   ↓ the selection version port > follows the real selection changes, voids the acknowledgement, and refuses when closed
+   ↓ the selection version port > moves the version even when the selection cannot be mapped, because nothing can be proved
+   ↓ the selection version of a stale session > rejects a session that is no longer current, and keeps it apart from one that never observed
+   ↓ the controlled session and the observation binding > mints the bridge session id at the exchange, tells the producer, and closes it again
+   ↓ the controlled session and the observation binding > tells the producer again when the editor opens again on the same session
+   ↓ the controlled session and the observation binding > refuses an exchange from another origin
+   ↓ the controlled session and the observation binding > refuses an exchange whose body is not exactly the ticket
+   ↓ the shipped native observation contract > accepts a closed envelope and refuses one that carries an identity
+   ↓ the shipped native observation contract > accepts the three original event shapes and refuses the ones they forbid
+   ↓ the tracked candidate pin > refuses the candidate until a review has approved it
+   ↓ the tracked candidate pin > reads an approval that a review has recorded
+   ↓ the body of one observation > parses the closed envelope and refuses anything else
+   ↓ the counted observation route > is exactly one additional Gateway route, and the registry says the same
+   ↓ the counted observation route > is the same path the Studio bridge reports into
+   ↓ the epoch of the hydration and the epoch of the document > keeps the parts when the document event confirms the very hydration they belong to
+   ↓ the expected state of the parts that come from the project's own sources > expects settings, captions and markers to be hydrated, even when the parsed result is empty
+   ↓ the original Studio selection at the ingress > refuses a reference that is missing the field the Host has to read
+   ↓ the original Studio selection at the ingress > refuses a selection that carries a field the original does not have
+   ↓ the closed shape of the document and the hydration event > refuses an event that carries a field the original does not have
+   ↓ the document branches of the shipped contract > accepts each branch on its own and refuses a mixture
+   ↓ the selection reference against the upstream source > declares exactly the branches and the fields the upstream declares
+   ↓ the document and the hydration against the upstream sources > declares the document state the upstream declares
+   ↓ the document and the hydration against the upstream sources > declares the hydration state the pinned patch adds
+   ↓ the editor that opens again > voids the acknowledgement of the view that is gone
+   ↓ the private lifecycle of the expected service > keeps the projection failure and still releases every other descriptor
+   ↓ the private lifecycle of the expected service > revokes the proof before the cleanup, and still releases every descriptor
+   ↓ the private lifecycle of the expected service > releases every proof on close, even when the first cleanup fails
+   ↓ the private lifecycle of the expected service > does not go green again after an uncertain cleanup
+   ↓ the private lifecycle of the expected service > refuses a candidate that loads after the close, and never reads the source
+   ↓ the private lifecycle of the expected service > releases the descriptors of a source that returns after the close, and issues no proof
+   ↓ the private lifecycle of the expected service > refuses a foreign proof and releases nothing of the owner
+   ↓ the private lifecycle of the expected service > refuses a forged or a rebuilt proof, and releases nothing
+   ↓ the private lifecycle of the expected service > releases one resource that is listed twice exactly once
+   ↓ the private lifecycle of the expected service > releases a proof once, and a repeated release neither closes again nor fails
+   ↓ the private lifecycle of the expected service > closes twice without closing a descriptor twice
+   ↓ the proof surface is never the authority > releases the descriptors even when the proof replaces its own method
+   ↓ the proof surface is never the authority > does not let a replaced method hide an uncertain cleanup
+   ↓ the proof surface is never the authority > closes every proof even when one proof replaces its own method
+   ↓ the final check before a proof is issued > refuses to issue a proof when the binding stops being current while the projection is computed
+   ↓ the final check before a proof is issued > refuses to issue a proof when a cleanup failed while the projection was computed
+   ↓ the terminal guard of the expected service > refuses to issue a proof when the last liveness callback closes the service
+   ↓ the terminal guard of the expected service > refuses to issue a proof when a canonical callback closes the service
+   ↓ the terminal guard of the expected service > refuses to issue a proof when a canonical callback leaves a cleanup uncertain
+   ↓ the terminal guard of the expected service > does not certify a binding that a callback changed while the proof was prepared
+   ↓ the final guard of the acknowledgement > does not return a projection after the proof was released during the check
+   ↓ the final guard of the acknowledgement > does not return a projection after the service was closed during the check
+   ↓ MAIN final source getter and binding fence > captures a closure getter before admission and releases late-owned descriptors when it closes the service
+   ↓ MAIN final source getter and binding fence > rechecks binding after the session callback mutates it
+   ↓ MAIN final source getter and binding fence > rechecks binding after the closure callback mutates it
+   ↓ MAIN final source getter and binding fence > rechecks binding after the last file callback mutates it
+   × MAIN operation baseline and immediate cleanup latch > rejects a binding changed during canonical before issuing a proof 14ms
+     → promise resolved "NativeExpectedProof{}" instead of rejecting
+   × MAIN operation baseline and immediate cleanup latch > rejects a binding changed during closure getter before issuing a proof 2ms
+     → promise resolved "NativeExpectedProof{}" instead of rejecting
+   × MAIN operation baseline and immediate cleanup latch > rejects a binding changed during compute before issuing a proof 1ms
+     → promise resolved "NativeExpectedProof{}" instead of rejecting
+   × MAIN operation baseline and immediate cleanup latch > rejects a binding changed during load before issuing a proof 1ms
+     → promise resolved "NativeExpectedProof{}" instead of rejecting
+   × MAIN operation baseline and immediate cleanup latch > rejects a binding changed during read before issuing a proof 1ms
+     → promise resolved "NativeExpectedProof{}" instead of rejecting
+   × MAIN operation baseline and immediate cleanup latch > latches a failed close before the next close reenters another proof during release 3ms
+     → expected { project_id: 'p1', revision: 3, …(8) } to be undefined
+   × MAIN operation baseline and immediate cleanup latch > latches a failed close before the next close reenters another proof during prove failure 2ms
+     → expected { project_id: 'p1', revision: 3, …(8) } to be undefined
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 7 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/created-native-ack.test.ts > MAIN operation baseline and immediate cleanup latch > rejects a binding changed during canonical before issuing a proof
+ FAIL  tests/agent-driven/integration/created-native-ack.test.ts > MAIN operation baseline and immediate cleanup latch > rejects a binding changed during closure getter before issuing a proof
+ FAIL  tests/agent-driven/integration/created-native-ack.test.ts > MAIN operation baseline and immediate cleanup latch > rejects a binding changed during compute before issuing a proof
+ FAIL  tests/agent-driven/integration/created-native-ack.test.ts > MAIN operation baseline and immediate cleanup latch > rejects a binding changed during load before issuing a proof
+ FAIL  tests/agent-driven/integration/created-native-ack.test.ts > MAIN operation baseline and immediate cleanup latch > rejects a binding changed during read before issuing a proof
+AssertionError: promise resolved "NativeExpectedProof{}" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
+- }
++ NativeExpectedProof {}
+
+ ❯ tests/agent-driven/integration/created-native-ack.test.ts:2649:42
+    2647|         approved: { upstream_sha: NATIVE_EXPECTED_UPSTREAM_SHA, inputs…
+    2648|       });
+    2649|       await expect(service.prove(binding)).rejects.toThrow('NATIVE_EXP…
+       |                                          ^
+    2650|       if (point === 'load') expect(reader.reads()).toBe(0);
+    2651|       else {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/7]⎯
+
+ FAIL  tests/agent-driven/integration/created-native-ack.test.ts > MAIN operation baseline and immediate cleanup latch > latches a failed close before the next close reenters another proof during release
+ FAIL  tests/agent-driven/integration/created-native-ack.test.ts > MAIN operation baseline and immediate cleanup latch > latches a failed close before the next close reenters another proof during prove failure
+AssertionError: expected { project_id: 'p1', revision: 3, …(8) } to be undefined
+
+- Expected: 
+undefined
+
++ Received: 
+{
+  "film_bytes": 22,
+  "film_sha256": "414e282b5dca322f3e67f0602c311024958fb765bdc609af6470c8c84b6b57ce",
+  "native_rev": "rev-1",
+  "parts": {
+    "captions": {
+      "effective_sha256": null,
+      "origin": null,
+      "reason": "EXPECTED_INPUT_INVALID",
+      "state": "unsupported",
+    },
+    "markers": {
+      "effective_sha256": null,
+      "origin": null,
+      "reason": "EXPECTED_INPUT_INVALID",
+      "state": "unsupported",
+    },
+    "settings": {
+      "effective_sha256": null,
+      "origin": null,
+      "reason": "EXPECTED_INPUT_INVALID",
+      "state": "unsupported",
+    },
+    "subtitle_style": {
+      "effective_sha256": null,
+      "origin": null,
+      "reason": "EXPECTED_INPUT_INVALID",
+      "state": "unsupported",
+    },
+  },
+  "project_id": "p1",
+  "revision": 3,
+  "selection_version": 4,
+  "snapshot_id": "snap1",
+  "source_closure": [
+    {
+      "relative_path": "film.html",
+      "sha256": "414e282b5dca322f3e67f0602c311024958fb765bdc609af6470c8c84b6b57ce",
+    },
+  ],
+  "source_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+}
+
+ ❯ tests/agent-driven/integration/created-native-ack.test.ts:2697:32
+    2695|         expect((error as { cleanup_errors?: unknown[] }).cleanup_error…
+    2696|       }
+    2697|       expect(nestedProjection).toBeUndefined();
+       |                                ^
+    2698|       expect(nestedError).toBeInstanceOf(Error);
+    2699|       expect((nestedError as Error).message).toBe('NATIVE_EXPECTED_CLE…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/7]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  7 failed | 77 skipped (84)
+   Start at  10:44:14
+   Duration  645ms (transform 284ms, setup 0ms, collect 456ms, tests 26ms, environment 0ms, prepare 49ms)
+

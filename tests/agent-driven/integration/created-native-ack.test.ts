@@ -2478,9 +2478,10 @@ describe('the terminal guard of the expected service', () => {
         loader: nativeExpectedLibraryLoader({ distRoot: staged.dist, inputsRoot: staged.inputs, runtimeRoot: staged.runtime }),
         approved: await approvedOf(staged),
       });
-      const proof = await service.prove(changed);
-      // The binding moved under the proof: it cannot certify it any more.
-      expect(() => service.assertCurrent(changed, proof)).toThrow('NATIVE_EXPECTED_BINDING_MOVED');
+      // Stronger admission: a binding moved during prove is refused before issuance.
+      await expect(service.prove(changed)).rejects.toThrow('NATIVE_EXPECTED_BINDING_MOVED');
+      expect(reader.attempts()[0]).toEqual([1]);
+      expect(reader.descriptorIsOpen(0, 0)).toBe(false);
     } finally {
       reader.closeAll();
       rmSync(root, { recursive: true, force: true });
@@ -2618,6 +2619,95 @@ describe('MAIN final source getter and binding fence', () => {
       expect(reader.descriptorIsOpen(0, 0)).toBe(false);
     } finally {
       service?.close(); reader.closeAll(); rmSync(root, { recursive: true, force: true });
+    }
+  });
+});
+
+
+// Independent review MAJOR-01/02: bind before callbacks and latch cleanup before reentry.
+describe('MAIN operation baseline and immediate cleanup latch', () => {
+  it.each(['canonical', 'closure getter', 'compute', 'load', 'read'] as const)('rejects a binding changed during %s before issuing a proof', async point => {
+    const root = mkdtempSync(join(tmpdir(), 'native-main-baseline-'));
+    const reader = faultyReader(root, ['film.html']);
+    const binding = bindingOf();
+    const move = () => { (binding as unknown as { project_id: string }).project_id = 'p2'; };
+    let service!: OpenFilmNativeExpected;
+    try {
+      const library: NativeExpectedLibrary = { ...stubLibrary(),
+        computeExpectedProjection: input => { if (point === 'compute') move(); return stubLibrary().computeExpectedProjection(input); },
+        hydrationCanonicalJson: value => { if (point === 'canonical') move(); return JSON.stringify(value) ?? 'null'; },
+      };
+      service = new OpenFilmNativeExpected({
+        source: { readSource: async input => {
+          const facts = await reader.port.readSource(input);
+          if (point === 'read') move();
+          if (point === 'closure getter') Object.defineProperty(facts, 'verifyClosure', { get: () => { move(); return () => true; } });
+          return facts;
+        } },
+        loader: { load: async () => { if (point === 'load') move(); return library; } },
+        approved: { upstream_sha: NATIVE_EXPECTED_UPSTREAM_SHA, inputs_sha256: HASH_A, build_sha256: HASH_A, modules: {} },
+      });
+      await expect(service.prove(binding)).rejects.toThrow('NATIVE_EXPECTED_BINDING_MOVED');
+      if (point === 'load') expect(reader.reads()).toBe(0);
+      else {
+        expect(reader.attempts()[0]).toEqual([1]);
+        expect(reader.descriptorIsOpen(0, 0)).toBe(false);
+      }
+    } finally { service?.close(); reader.closeAll(); rmSync(root, { recursive: true, force: true }); }
+  });
+
+  it.each(['release', 'prove failure'] as const)('latches a failed close before the next close reenters another proof during %s', async path => {
+    const root = mkdtempSync(join(tmpdir(), 'native-main-cleanup-reentry-'));
+    const healthy = faultyReader(join(root, 'healthy'), ['film.html']);
+    const failing = faultyReader(join(root, 'failing'), ['film.html', 'settings.json'], 0);
+    const binding = bindingOf();
+    let service!: OpenFilmNativeExpected;
+    let other!: NativeExpectedProof;
+    let read = 0;
+    let nestedProjection: unknown;
+    let nestedError: unknown;
+    let computeFails = false;
+    try {
+      service = new OpenFilmNativeExpected({
+        source: { readSource: async input => {
+          if (++read === 1) return healthy.port.readSource(input);
+          const facts = await failing.port.readSource(input);
+          const second = facts.retained[1]!;
+          return { ...facts, retained: [facts.retained[0]!, { ...second, close: () => {
+            try { nestedProjection = service.assertCurrent(binding, other); } catch (error) { nestedError = error; }
+            second.close();
+          } }] };
+        } },
+        loader: { load: async () => ({ ...stubLibrary(), computeExpectedProjection: input => {
+          if (computeFails) throw new Error('PRIMARY_PROJECTION_FAILED');
+          return stubLibrary().computeExpectedProjection(input);
+        } }) },
+        approved: { upstream_sha: NATIVE_EXPECTED_UPSTREAM_SHA, inputs_sha256: HASH_A, build_sha256: HASH_A, modules: {} },
+      });
+      other = await service.prove(binding);
+      if (path === 'release') {
+        const proof = await service.prove(binding);
+        expect(() => service.release(proof)).toThrow('NATIVE_EXPECTED_CLEANUP_FAILED');
+      } else {
+        computeFails = true;
+        const error = await service.prove(binding).then(() => null, (error: unknown) => error);
+        expect(error).toBeInstanceOf(Error);
+        expect((error as Error).message).toBe('PRIMARY_PROJECTION_FAILED');
+        expect((error as { cleanup_errors?: unknown[] }).cleanup_errors).toHaveLength(1);
+      }
+      expect(nestedProjection).toBeUndefined();
+      expect(nestedError).toBeInstanceOf(Error);
+      expect((nestedError as Error).message).toBe('NATIVE_EXPECTED_CLEANUP_UNCERTAIN');
+      expect(failing.attempts()[0]).toEqual([1, 1]);
+      expect(failing.descriptorIsOpen(0, 0)).toBe(true); // Honest failed close, not a claimed release.
+      expect(failing.descriptorIsOpen(0, 1)).toBe(false);
+      expect(() => service.assertCurrent(binding, other)).toThrow('NATIVE_EXPECTED_CLEANUP_UNCERTAIN');
+      expect(() => service.close()).toThrow('NATIVE_EXPECTED_CLEANUP_UNCERTAIN');
+      expect(healthy.descriptorIsOpen(0, 0)).toBe(false);
+      expect(failing.attempts()[0]).toEqual([1, 1]); // Raw failed descriptor is not retried.
+    } finally {
+      try { service?.close(); } catch { /* sticky failure is intentional */ }
+      healthy.closeAll(); failing.closeAll(); rmSync(root, { recursive: true, force: true });
     }
   });
 });

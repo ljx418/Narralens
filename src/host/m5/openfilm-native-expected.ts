@@ -686,17 +686,29 @@ export class OpenFilmNativeExpected implements NativeExpectedPort {
     return this.#library;
   }
 
+  /** Every callback and snapshot read precedes the final private admission fence. */
+  #admitBinding(binding: NativeExpectedBinding, baseline: NativeExpectedBindingSnapshot): void {
+    const current = binding.isCurrent();
+    const matches = sameNativeExpectedBindingSnapshot(snapshotNativeExpectedBinding(binding), baseline);
+    if (this.#closed) throw new Error('NATIVE_EXPECTED_CLOSED');
+    if (this.#cleanupUncertain) throw new Error('NATIVE_EXPECTED_CLEANUP_UNCERTAIN');
+    if (!current) throw new Error('NATIVE_EXPECTED_BINDING_STALE');
+    if (!matches) throw new Error('NATIVE_EXPECTED_BINDING_MOVED');
+  }
+
   async prove(binding: NativeExpectedBinding): Promise<NativeExpectedProof> {
     if (this.#closed) throw new Error('NATIVE_EXPECTED_CLOSED');
     if (this.#cleanupUncertain) throw new Error('NATIVE_EXPECTED_CLEANUP_UNCERTAIN');
-    if (!binding.isCurrent()) throw new Error('NATIVE_EXPECTED_BINDING_STALE');
+    // One baseline owns the read, projection and proof; never resample it after callbacks.
+    const binding_snapshot = snapshotNativeExpectedBinding(binding);
+    this.#admitBinding(binding, binding_snapshot);
     const library = await this.#load();
     // The candidate may have loaded after the service was closed. `close` is
     // synchronous and cannot wait for this promise, so the state is checked again
     // here, and the read is not started at all.
     if (this.#closed) throw new Error('NATIVE_EXPECTED_CLOSED');
     if (this.#cleanupUncertain) throw new Error('NATIVE_EXPECTED_CLEANUP_UNCERTAIN');
-    if (!binding.isCurrent()) throw new Error('NATIVE_EXPECTED_BINDING_STALE');
+    this.#admitBinding(binding, binding_snapshot);
     const facts = await this.#source.readSource({ binding });
     // The handles are taken over the moment the read resolves. From here on they are
     // this service's, and every failure path closes them.
@@ -707,8 +719,8 @@ export class OpenFilmNativeExpected implements NativeExpectedPort {
       // nothing, and a late read is not a reason to leak a descriptor.
       if (this.#closed) throw new Error('NATIVE_EXPECTED_CLOSED');
       if (this.#cleanupUncertain) throw new Error('NATIVE_EXPECTED_CLEANUP_UNCERTAIN');
-      if (!binding.isCurrent()) throw new Error('NATIVE_EXPECTED_BINDING_STALE');
-      const projection = this.#projection(binding, facts, library);
+      this.#admitBinding(binding, binding_snapshot);
+      const projection = this.#projection(binding_snapshot, facts, library);
       // Every value that comes from a callback is computed *before* the guard that
       // decides whether a proof may be issued. A callback may close the service or
       // leave a cleanup uncertain, and the guard has to see that.
@@ -716,17 +728,9 @@ export class OpenFilmNativeExpected implements NativeExpectedPort {
       // Accessing a source-port property can itself reenter/close this service.
       // Capture the callback before final admission, not in the fact object below.
       const verifyClosure = facts.verifyClosure;
-      // The snapshot is taken before the last liveness check, so that a binding
-      // that is changed by that callback is caught by the comparison later.
-      const binding_snapshot = snapshotNativeExpectedBinding(binding);
-      // The liveness of the session is asked exactly once, and never in a loop.
-      const current = binding.isCurrent();
-      // The terminal guard of the service. Nothing runs a callback after this
-      // point: the proof is issued from here on, and no callback can slip between
-      // the guard and the issuance.
-      if (this.#closed) throw new Error('NATIVE_EXPECTED_CLOSED');
-      if (this.#cleanupUncertain) throw new Error('NATIVE_EXPECTED_CLEANUP_UNCERTAIN');
-      if (!current) throw new Error('NATIVE_EXPECTED_BINDING_STALE');
+      // The final session callback and binding read both precede private admission.
+      // No external callback is invoked between that fence and proof registration.
+      this.#admitBinding(binding, binding_snapshot);
       const proof = new NativeExpectedProof(PROOF_BRAND);
       HELD_FACTS.set(proof, {
         instance: this.#instance,
@@ -878,6 +882,8 @@ export class OpenFilmNativeExpected implements NativeExpectedPort {
       try {
         resource.close();
       } catch (error) {
+        // Latch immediately: the next close may reenter another outstanding proof.
+        this.#cleanupUncertain = true;
         failures.push(error);
       }
     }
@@ -905,7 +911,7 @@ export class OpenFilmNativeExpected implements NativeExpectedPort {
    * `captions` come from the Host's own reader and the fixed original native rules, and
    * they are hashed with the *same* canonical implementation the editor used.
    */
-  #projection(binding: NativeExpectedBinding, facts: NativeExpectedSourceFacts, library: NativeExpectedLibrary): NativeExpectedProjection {
+  #projection(binding: NativeExpectedBindingSnapshot, facts: NativeExpectedSourceFacts, library: NativeExpectedLibrary): NativeExpectedProjection {
     const unsupported = (reason: string): NativeExpectedPart => Object.freeze({ state: 'unsupported', origin: null, effective_sha256: null, reason });
     const computed = library.computeExpectedProjection(facts.expected_input);
     const parts: Record<NativeExpectedPartKind, NativeExpectedPart> = {
