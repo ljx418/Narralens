@@ -1,0 +1,128 @@
+{
+  "kind": "narralens.native-expected-lifecycle-receipts@1",
+  "lane": "PRODUCT",
+  "written_by": "fresh visible Claude (sole source/test/evidence writer for this ticket)",
+  "parent": {
+    "parent_task": "task_61570c14c644",
+    "parent_dispatch": "ctx_802299266d15",
+    "parent_state": "read-only during implementation and captures"
+  },
+  "launch_receipt": {
+    "task": "task_7fbdee3fbe6c",
+    "dispatch": "ctx_ba8ca62faab0",
+    "terminal": "term_3250e75d-1a40-42e9-b158-63ae6604480e",
+    "run": "run_399f9dd3ce5a",
+    "kept_open": true,
+    "state": "ready",
+    "coordinator_terminal": "term_d0da21385daaeb26007c3d57936f2438",
+    "coordinator_message_id": "msg_8b8f3694b8fb",
+    "session_self_description": "MiniMax-M3.1-Flash-Preview[1m]",
+    "session_self_description_source": "the session's own environment block; no provider, credential, config or model setting was read or changed"
+  },
+  "baseline": {
+    "head": "a809f8d7e53fb90dbd1f56aa956c48c9600d508f",
+    "branch": "agent-driven/a-r1-product",
+    "worktree": "/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-PRODUCT",
+    "main_baseline": "de438d17dfc777a9d113c7207b98e1923ab72e6c",
+    "target_blobs_at_baseline": {
+      "src/host/m5/openfilm-native-expected.ts": "9a1104fc16c5065c1737a208c5efcaa0a704f7c4",
+      "tests/agent-driven/integration/created-native-ack.test.ts": "34b43e0e089667d0a017b98ae8b3531555ba25e6"
+    },
+    "target_sha256_at_baseline": {
+      "src/host/m5/openfilm-native-expected.ts": "9f9d2c820510beee15d926f3d7e6e11034843ff829d15b5526ac45028848ab14",
+      "tests/agent-driven/integration/created-native-ack.test.ts": "12c3e8b3e70f4a2a278f2998941c6d24133234157a1106cdda66efbde225e5bc"
+    }
+  },
+  "changed_paths": {
+    "src/host/m5/openfilm-native-expected.ts": {
+      "sha256_before": "9f9d2c820510beee15d926f3d7e6e11034843ff829d15b5526ac45028848ab14",
+      "sha256_after": "1dd35aaafe5c5463fb1018819539794cee30bb2953995a328fe957c991b27a75",
+      "restore_command": "git show HEAD:src/host/m5/openfilm-native-expected.ts > src/host/m5/openfilm-native-expected.ts",
+      "restore_sha256": "9f9d2c820510beee15d926f3d7e6e11034843ff829d15b5526ac45028848ab14"
+    },
+    "tests/agent-driven/integration/created-native-ack.test.ts": {
+      "sha256_before": "12c3e8b3e70f4a2a278f2998941c6d24133234157a1106cdda66efbde225e5bc",
+      "sha256_after": "a3dd488f2857e2d71336ecffb40bf8ca859725b52914dc3b63a290b09563f321",
+      "note": "the original 51 cases are byte-identical; only imports and the appended 'the private lifecycle of the expected service' block were added"
+    }
+  },
+  "commands": [
+    {
+      "id": "00-baseline",
+      "argv": "node_modules/.bin/vitest run --config vitest.config.ts tests/agent-driven/integration/created-native-ack.test.ts",
+      "cwd": "/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-PRODUCT",
+      "source": "pristine baseline (HEAD a809f8d, original test file)",
+      "exit": 1,
+      "result": "1 failed | 50 passed (51)",
+      "failed_case": "the tracked candidate pin > refuses the candidate until a review has approved it",
+      "log": "logs/00-baseline-original-source.test.log",
+      "log_sha256": "364f1ba31901895304e07523de0af98b413d5b3048606209a98c84fb85e50652"
+    },
+    {
+      "id": "01-original-source-new-tests",
+      "argv": "node_modules/.bin/vitest run --config vitest.config.ts tests/agent-driven/integration/created-native-ack.test.ts",
+      "cwd": "/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-PRODUCT",
+      "source": "pristine original source 9f9d2c82..., identical new test bytes a3dd488f...",
+      "exit": 1,
+      "result": "10 failed | 52 passed (62)",
+      "failed_cases": [
+        "the tracked candidate pin > refuses the candidate until a review has approved it (PRE-EXISTING, not this ticket)",
+        "the private lifecycle of the expected service > keeps the projection failure and still releases every other descriptor",
+        "the private lifecycle of the expected service > revokes the proof before the cleanup, and still releases every descriptor",
+        "the private lifecycle of the expected service > releases every proof on close, even when the first cleanup fails",
+        "the private lifecycle of the expected service > does not go green again after an uncertain cleanup",
+        "the private lifecycle of the expected service > refuses a candidate that loads after the close, and never reads the source",
+        "the private lifecycle of the expected service > releases the descriptors of a source that returns after the close, and issues no proof",
+        "the private lifecycle of the expected service > refuses a foreign proof and releases nothing of the owner",
+        "the private lifecycle of the expected service > refuses a forged or a rebuilt proof, and releases nothing",
+        "the private lifecycle of the expected service > releases one resource that is listed twice exactly once"
+      ],
+      "log": "logs/01-original-source-new-tests.log",
+      "log_sha256": "f7b179b41d8045f3a212ebb60338287b93d3cedd503fae18f09366efa00a4755"
+    },
+    {
+      "id": "02-fixed-source-same-tests",
+      "argv": "node_modules/.bin/vitest run --config vitest.config.ts tests/agent-driven/integration/created-native-ack.test.ts",
+      "cwd": "/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-PRODUCT",
+      "source": "fixed source 1dd35aaa..., byte-identical test file a3dd488f... (same bytes as run 01)",
+      "exit": 1,
+      "result": "1 failed | 61 passed (62)",
+      "failed_case": "the tracked candidate pin > refuses the candidate until a review has approved it (PRE-EXISTING, identical to the baseline failure)",
+      "log": "logs/02-fixed-source-same-tests.log",
+      "log_sha256": "75f80bf59b731ab079ed5ad078536fd8211a4361789d87ed2b61729f45529629"
+    },
+    {
+      "id": "03-tsc",
+      "argv": "node_modules/.bin/tsc --noEmit",
+      "cwd": "/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-PRODUCT",
+      "exit": 0,
+      "result": "no diagnostics",
+      "log": "logs/03-tsc-noemit.log",
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "artifacts": {
+    "evidence/fixed-openfilm-native-expected.ts": "1dd35aaafe5c5463fb1018819539794cee30bb2953995a328fe957c991b27a75",
+    "evidence/created-native-ack.test.ts": "a3dd488f2857e2d71336ecffb40bf8ca859725b52914dc3b63a290b09563f321"
+  },
+  "not_run": [
+    "full vitest suite (forbidden by the ticket)",
+    "any Host, listener, browser, ffmpeg, build, install or network command (forbidden by the ticket)",
+    "tests/agent-driven/headless/created-native-entry.test.ts (launches a real browser and real servers; forbidden)",
+    "tests/agent-driven/product/observation-ui.test.tsx (happy-dom UI case; imports no part of the changed module)",
+    "no independent review, no NativeAck acceptance, no A/V1 acceptance, no human acceptance"
+  ],
+  "git": {
+    "add": false,
+    "commit": false,
+    "reset": false,
+    "stash": false,
+    "push": false,
+    "branch": "unchanged (agent-driven/a-r1-product)"
+  },
+  "protected_dirty_unchanged": {
+    "checked": 42,
+    "changed": 0,
+    "source": "docs/parallel/lane-product/A-R2-20261112/native-expected-lifecycle/PREFLIGHT.json protected_hashes"
+  }
+}

@@ -1,0 +1,65 @@
+[
+  {
+    "scenario": "verifyClosure_getter_closes_before_registration",
+    "proveResolved": true,
+    "proveError": null,
+    "assertError": null,
+    "bindingProject": "p1",
+    "closesAfterProve": 0,
+    "fdOpenBeforeCleanup": true,
+    "defect": true
+  },
+  {
+    "scenario": "isCurrent_mutates_binding_during_assert",
+    "proveResolved": true,
+    "proveError": null,
+    "assertError": null,
+    "projectionProject": "p1",
+    "bindingProject": "p2",
+    "closesAfterProve": 0,
+    "fdOpenBeforeCleanup": true,
+    "defect": true
+  },
+  {
+    "scenario": "closure_mutates_binding_during_assert",
+    "proveResolved": true,
+    "proveError": null,
+    "assertError": null,
+    "projectionProject": "p1",
+    "bindingProject": "p2",
+    "closesAfterProve": 0,
+    "fdOpenBeforeCleanup": true,
+    "defect": true
+  },
+  {
+    "scenario": "last_file_mutates_binding_during_assert",
+    "proveResolved": true,
+    "proveError": null,
+    "assertError": null,
+    "projectionProject": "p1",
+    "bindingProject": "p2",
+    "closesAfterProve": 0,
+    "fdOpenBeforeCleanup": true,
+    "defect": true
+  },
+  {
+    "scenario": "closure_releases_proof_control",
+    "proveResolved": true,
+    "proveError": null,
+    "assertError": "NATIVE_EXPECTED_PROOF_RELEASED",
+    "bindingProject": "p1",
+    "closesAfterProve": 0,
+    "fdOpenBeforeCleanup": false,
+    "defect": false
+  },
+  {
+    "scenario": "last_file_closes_service_control",
+    "proveResolved": true,
+    "proveError": null,
+    "assertError": "NATIVE_EXPECTED_CLOSED",
+    "bindingProject": "p1",
+    "closesAfterProve": 0,
+    "fdOpenBeforeCleanup": false,
+    "defect": false
+  }
+]

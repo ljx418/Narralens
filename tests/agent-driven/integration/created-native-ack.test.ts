@@ -13,6 +13,7 @@ import {
 } from '../../../src/host/m5/native-observation.js';
 import {
   NATIVE_EXPECTED_INPUT_FILES,
+  NATIVE_EXPECTED_PROFILE,
   NATIVE_EXPECTED_UPSTREAM_SHA,
   OpenFilmNativeExpected,
   nativeExpectedInputsDigest,
@@ -20,6 +21,8 @@ import {
   nativeExpectedLibraryLoader,
   snapshotNativeExpectedBinding,
   type NativeExpectedBinding,
+  type NativeExpectedLibrary,
+  type NativeExpectedProof,
   type NativeExpectedRetainedFile,
   type NativeExpectedSourceFacts,
   type NativeExpectedSourcePort,
@@ -1163,9 +1166,25 @@ describe("the shipped native observation contract", () => {
 
 describe("the tracked candidate pin", () => {
   it("refuses the candidate until a review has approved it", () => {
-    // The pin that is in the repository carries no approval: the build has not run
-    // under a grant, so the loader must refuse rather than load anything.
-    expect(() => nativeExpectedApprovalFromPin()).toThrow("NATIVE_EXPECTED_BUILD_NOT_APPROVED");
+    // The tracked pin now carries a recorded approval, so the refusal is exercised
+    // against an explicit pin of the same shape that has *no* approval: the build
+    // has not run under a grant, so the loader must refuse rather than load
+    // anything. The tracked pin itself is reviewed source and is not touched.
+    const root = mkdtempSync(join(tmpdir(), 'narralens-r2-pin-refused-'));
+    try {
+      const path = resolve(root, 'pin.json');
+      writeFileSync(path, JSON.stringify({
+        native_expected: {
+          upstream_sha: NATIVE_EXPECTED_UPSTREAM_SHA,
+          inputs_sha256: "b".repeat(64),
+          build_sha256: "c".repeat(64),
+          modules: { 'expected-projection.mjs': "d".repeat(64) },
+        },
+      }));
+      expect(() => nativeExpectedApprovalFromPin(path)).toThrow("NATIVE_EXPECTED_BUILD_NOT_APPROVED");
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
   });
 
   it("reads an approval that a review has recorded", () => {
@@ -1755,6 +1774,850 @@ describe("the editor that opens again", () => {
       expect(service.currentSelectionVersion('p1')).toBe(2);
     } finally {
       rmSync(root, { recursive: true, force: true });
+    }
+  });
+});
+
+/* ────────────────────────────────────────────────────────────────────────────────────
+ * The private lifecycle of the expected service.
+ *
+ * These are the counterexamples of the ticket. Every one of them is a real way the
+ * old lifecycle loses a descriptor or keeps an authority it should have dropped, and
+ * every one of them runs on real files, real descriptors and controlled promises.
+ *
+ * Two rules shape the cases:
+ *
+ * - a *primary* failure and a *cleanup* failure are different things. The primary
+ *   failure stays the primary failure, and the cleanup causes are kept beside it
+ *   without ever becoming public;
+ * - a close that failed has an unknown outcome. Such a case never claims that the
+ *   operating system released the descriptor — it only claims what it can prove.
+ * ──────────────────────────────────────────────────────────────────────────────────── */
+
+/** A controlled promise, so a read can be resolved after the service moved on. */
+function deferred<T>(): { promise: Promise<T>; resolve: (value: T) => void; reject: (error: unknown) => void } {
+  let resolve!: (value: T) => void;
+  let reject!: (error: unknown) => void;
+  const promise = new Promise<T>((res, rej) => { resolve = res; reject = rej; });
+  return { promise, resolve, reject };
+}
+
+/**
+ * The facts of one read, with the given retained descriptors.
+ *
+ * It is the same fact shape the real reader produces; only the descriptors and the
+ * closure guard are the case's own.
+ */
+function factsOf(retained: readonly NativeExpectedRetainedFile[], verifyClosure: () => boolean): NativeExpectedSourceFacts {
+  return {
+    entries: retained.map(file => ({ relative_path: file.relative_path, sha256: file.sha256 })),
+    film: { relative_path: 'film.html', sha256: retained[0]?.sha256 ?? HASH_A, bytes: retained[0]?.bytes ?? 0, native_rev: 'rev-1' },
+    expected_input: {
+      format: 'narralens.native-expected-input@1',
+      upstream_sha: NATIVE_EXPECTED_UPSTREAM_SHA,
+      profile: 'narralens.native-expected-numeric@1',
+      binding: { project_id: 'p1', project_revision: 3, snapshot_id: 'snap1', source_digest: HASH_A, film_sha256: HASH_A },
+      provenance: { origin: 'host_independent', source_manifest_digest: HASH_A, rights_digest: null, media_catalog_digest: null, listing_digest: HASH_A },
+      ui_profile: { pending_drops: 'excluded', preview_error: 'excluded', live_height: 'excluded', browser_preferences: 'excluded' },
+      source_entries: [{ relative_path: 'film.html', sha256: HASH_A }],
+      film: { file: { relative_path: 'film.html', state: 'present', sha256: HASH_A }, value: { tracks: [] } },
+      settings: { file: { relative_path: '.film/settings.json', state: 'absent', sha256: null }, value: {} },
+      markers: { file: { relative_path: '.film/markers.json', state: 'absent', sha256: null }, value: [] },
+      clip_refs: [],
+      media_facts: [],
+      video_files_in_native_order: [],
+      span_facts: { profile: 'numeric_source_only', origin: 'not_used', proof_digest: null, values: [] },
+    },
+    style: { state: 'absent', value: {} },
+    captions: { state: 'absent', value: { cues: [] } },
+    retained,
+    verifyClosure,
+  };
+}
+
+/**
+ * A reader that opens *fresh* real descriptors on every read.
+ *
+ * The close of one designated file fails honestly: it throws and it does not close
+ * the descriptor, so the outcome of that one release is unknown and no case may claim
+ * that the operating system released it. Every other close really closes, and the
+ * case can prove that with `fstatSync`.
+ */
+function faultyReader(root: string, names: readonly string[], failingCloseAt: number | null = null): {
+  port: NativeExpectedSourcePort;
+  readonly reads: () => number;
+  readonly attempts: () => readonly (readonly number[])[];
+  readonly descriptorIsOpen: (read: number, index: number) => boolean;
+  readonly closeAll: () => void;
+} {
+  const source = resolve(root, 'source');
+  mkdirSync(source, { recursive: true });
+  const attempts: number[][] = [];
+  const descriptors: number[][] = [];
+  let reads = 0;
+  const port: NativeExpectedSourcePort = {
+    readSource: async () => {
+      const read = reads;
+      reads += 1;
+      attempts.push(new Array<number>(names.length).fill(0));
+      descriptors.push(new Array<number>(names.length).fill(-1));
+      const retained: NativeExpectedRetainedFile[] = [];
+      names.forEach((name, index) => {
+        const path = resolve(source, name);
+        writeFileSync(path, `the bytes of ${name}`);
+        const fd = openSync(path, 'r');
+        descriptors[read]![index] = fd;
+        const bytes = readFileSync(path);
+        const identity = fstatSync(fd);
+        retained.push({
+          relative_path: name,
+          sha256: sha256(bytes),
+          bytes: bytes.byteLength,
+          verify: () => {
+            try {
+              const stat = lstatSync(path);
+              if (!stat.isFile() || stat.dev !== identity.dev || stat.ino !== identity.ino) return false;
+              const buffer = Buffer.alloc(bytes.byteLength);
+              const count = readSync(fd, buffer, 0, buffer.byteLength, 0);
+              if (count !== buffer.byteLength) return false;
+              return sha256(buffer) === sha256(bytes);
+            } catch {
+              return false;
+            }
+          },
+          close: () => {
+            attempts[read]![index]! += 1;
+            if (index === failingCloseAt) {
+              // The close failed and the outcome is unknown: the descriptor is left
+              // alone and the failure is reported.
+              throw new Error(`THE_CLOSE_FAILED:${name}`);
+            }
+            try { closeSync(fd); } catch { /* already closed */ }
+          },
+        });
+      });
+      return factsOf(retained, () => true);
+    },
+  };
+  return {
+    port,
+    reads: () => reads,
+    attempts: () => attempts,
+    descriptorIsOpen: (read, index) => {
+      const fd = descriptors[read]?.[index] ?? -1;
+      if (fd < 0) return false;
+      try { fstatSync(fd); return true; } catch { return false; }
+    },
+    closeAll: () => {
+      for (const row of descriptors) {
+        for (const fd of row) {
+          if (fd < 0) continue;
+          try { closeSync(fd); } catch { /* already closed */ }
+        }
+      }
+    },
+  };
+}
+
+/** A stand-in for the pinned candidate, for the cases that never reach the maths. */
+function stubLibrary(): NativeExpectedLibrary {
+  return {
+    EXPECTED_PROFILE: NATIVE_EXPECTED_PROFILE,
+    upstream_sha: NATIVE_EXPECTED_UPSTREAM_SHA,
+    computeExpectedProjection: () => ({ status: 'unsupported', profile: NATIVE_EXPECTED_PROFILE, reason: 'INPUT_INVALID' }),
+    hydrationCanonicalJson: (value: unknown) => JSON.stringify(value) ?? 'null',
+  };
+}
+
+describe('the private lifecycle of the expected service', () => {
+  const serviceOf = async (root: string, reader: NativeExpectedSourcePort, staged: ReturnType<typeof stageLibrary>): Promise<OpenFilmNativeExpected> =>
+    new OpenFilmNativeExpected({
+      source: reader,
+      loader: nativeExpectedLibraryLoader({ distRoot: staged.dist, inputsRoot: staged.inputs, runtimeRoot: staged.runtime }),
+      approved: await approvedOf(staged),
+    });
+
+  it('keeps the projection failure and still releases every other descriptor', async () => {
+    const root = mkdtempSync(join(tmpdir(), 'narralens-r2-lifecycle-'));
+    const reader = faultyReader(root, ['film.html', 'settings.json', 'markers.json'], 0);
+    try {
+      const staged = stageLibrary(root, { throwOnCompute: true });
+      const service = await serviceOf(root, reader.port, staged);
+      const failure = await service.prove(bindingOf()).then(() => null, (error: unknown) => error);
+      expect(failure).toBeInstanceOf(Error);
+      // The primary failure is still the primary failure: the cleanup did not
+      // overwrite it.
+      expect((failure as Error).message).toContain('THE_PROJECTION_FAILED');
+      // Every descriptor was attempted, including the ones after the failing close.
+      expect(reader.attempts()[0]).toEqual([1, 1, 1]);
+      // The two that closed really closed.
+      expect(reader.descriptorIsOpen(0, 1)).toBe(false);
+      expect(reader.descriptorIsOpen(0, 2)).toBe(false);
+      // The failing one has an unknown outcome, and the case claims nothing about it.
+      // The cleanup causes are preserved, but they are not public.
+      const causes = (failure as { cleanup_errors?: unknown[] }).cleanup_errors;
+      expect(Array.isArray(causes)).toBe(true);
+      expect(causes?.length).toBe(1);
+      expect(Object.keys(failure as object)).not.toContain('cleanup_errors');
+    } finally {
+      reader.closeAll();
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it('revokes the proof before the cleanup, and still releases every descriptor', async () => {
+    const root = mkdtempSync(join(tmpdir(), 'narralens-r2-lifecycle-'));
+    const reader = faultyReader(root, ['film.html', 'settings.json'], 0);
+    try {
+      const staged = stageLibrary(root, { computed: true });
+      const service = await serviceOf(root, reader.port, staged);
+      const binding = bindingOf();
+      const proof = await service.prove(binding);
+      expect(() => service.release(proof)).toThrow('NATIVE_EXPECTED_CLEANUP_FAILED');
+      // Every descriptor was attempted, in spite of the first close failing.
+      expect(reader.attempts()[0]).toEqual([1, 1]);
+      expect(reader.descriptorIsOpen(0, 1)).toBe(false);
+      // The authority was revoked before the cleanup, so the proof is dead even
+      // though the release failed.
+      expect(proof.released).toBe(true);
+      expect(() => service.assertCurrent(binding, proof)).toThrow();
+    } finally {
+      reader.closeAll();
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it('releases every proof on close, even when the first cleanup fails', async () => {
+    const root = mkdtempSync(join(tmpdir(), 'narralens-r2-lifecycle-'));
+    const reader = faultyReader(root, ['film.html', 'settings.json'], 0);
+    try {
+      const staged = stageLibrary(root, { computed: true });
+      const service = await serviceOf(root, reader.port, staged);
+      await service.prove(bindingOf());
+      await service.prove(bindingOf());
+      expect(reader.reads()).toBe(2);
+      expect(() => service.close()).toThrow('NATIVE_EXPECTED_CLEANUP_FAILED');
+      // Both proofs were cleaned: the failure of the first did not strand the second.
+      expect(reader.attempts()).toEqual([[1, 1], [1, 1]]);
+      expect(reader.descriptorIsOpen(1, 1)).toBe(false);
+    } finally {
+      reader.closeAll();
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it('does not go green again after an uncertain cleanup', async () => {
+    const root = mkdtempSync(join(tmpdir(), 'narralens-r2-lifecycle-'));
+    const reader = faultyReader(root, ['film.html'], 0);
+    try {
+      const staged = stageLibrary(root, { computed: true });
+      const service = await serviceOf(root, reader.port, staged);
+      const binding = bindingOf();
+      const proof = await service.prove(binding);
+      expect(() => service.release(proof)).toThrow('NATIVE_EXPECTED_CLEANUP_FAILED');
+      const attempts = reader.attempts()[0]!.slice();
+      // The uncertainty is sticky: nothing is proved any more.
+      await expect(service.prove(binding)).rejects.toThrow('NATIVE_EXPECTED_CLEANUP_UNCERTAIN');
+      expect(() => service.assertCurrent(binding, proof)).toThrow('NATIVE_EXPECTED_CLEANUP_UNCERTAIN');
+      // A repeated release neither retries the descriptor nor reports a success.
+      expect(() => service.release(proof)).toThrow('NATIVE_EXPECTED_CLEANUP_UNCERTAIN');
+      expect(reader.attempts()[0]).toEqual(attempts);
+      // And a repeated close neither retries nor reports a success.
+      expect(() => service.close()).toThrow('NATIVE_EXPECTED_CLEANUP_UNCERTAIN');
+      expect(reader.attempts()[0]).toEqual(attempts);
+    } finally {
+      reader.closeAll();
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it('refuses a candidate that loads after the close, and never reads the source', async () => {
+    const root = mkdtempSync(join(tmpdir(), 'narralens-r2-lifecycle-'));
+    try {
+      const gate = deferred<NativeExpectedLibrary>();
+      let reads = 0;
+      const service = new OpenFilmNativeExpected({
+        source: { readSource: async () => { reads += 1; return factsOf([], () => true); } },
+        loader: { load: async () => gate.promise },
+        approved: { upstream_sha: NATIVE_EXPECTED_UPSTREAM_SHA, inputs_sha256: HASH_A, build_sha256: HASH_A, modules: {} },
+      });
+      const pending = service.prove(bindingOf());
+      service.close();
+      gate.resolve(stubLibrary());
+      await expect(pending).rejects.toThrow('NATIVE_EXPECTED_CLOSED');
+      // The source was never read: a closed service starts no read at all.
+      expect(reads).toBe(0);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it('releases the descriptors of a source that returns after the close, and issues no proof', async () => {
+    const root = mkdtempSync(join(tmpdir(), 'narralens-r2-lifecycle-'));
+    const reader = faultyReader(root, ['film.html', 'settings.json']);
+    try {
+      const gate = deferred<NativeExpectedSourceFacts>();
+      let readStarted!: () => void;
+      const started = new Promise<void>(resolve => { readStarted = resolve; });
+      const service = new OpenFilmNativeExpected({
+        source: { readSource: () => { readStarted(); return gate.promise; } },
+        loader: { load: async () => stubLibrary() },
+        approved: { upstream_sha: NATIVE_EXPECTED_UPSTREAM_SHA, inputs_sha256: HASH_A, build_sha256: HASH_A, modules: {} },
+      });
+      const pending = service.prove(bindingOf());
+      // The read is in flight when the service is closed.
+      await started;
+      service.close();
+      // The read returns its descriptors now: the responsibility is the service's
+      // from that moment on.
+      const facts = await reader.port.readSource({ binding: bindingOf() });
+      gate.resolve(facts);
+      await expect(pending).rejects.toThrow('NATIVE_EXPECTED_CLOSED');
+      // Every descriptor the late read delivered was released, and no proof was
+      // issued.
+      expect(reader.attempts()[0]).toEqual([1, 1]);
+      expect(reader.descriptorIsOpen(0, 0)).toBe(false);
+      expect(reader.descriptorIsOpen(0, 1)).toBe(false);
+    } finally {
+      reader.closeAll();
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it('refuses a foreign proof and releases nothing of the owner', async () => {
+    const root = mkdtempSync(join(tmpdir(), 'narralens-r2-lifecycle-'));
+    const reader = faultyReader(root, ['film.html']);
+    try {
+      const staged = stageLibrary(root, { computed: true });
+      const owner = await serviceOf(root, reader.port, staged);
+      const other = await serviceOf(root, reader.port, staged);
+      const binding = bindingOf();
+      const proof = await owner.prove(binding);
+      // Another instance may not release this proof, and it may not release the
+      // resources behind it either.
+      expect(() => other.release(proof)).toThrow('NATIVE_EXPECTED_PROOF_FOREIGN');
+      // The owner's descriptor was never closed by the other instance.
+      expect(reader.attempts()[0]).toEqual([0]);
+      // The owner's proof still asserts: nobody revoked it behind its back.
+      expect(() => owner.assertCurrent(binding, proof)).not.toThrow();
+    } finally {
+      reader.closeAll();
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it('refuses a forged or a rebuilt proof, and releases nothing', async () => {
+    const root = mkdtempSync(join(tmpdir(), 'narralens-r2-lifecycle-'));
+    const reader = faultyReader(root, ['film.html']);
+    try {
+      const staged = stageLibrary(root, { computed: true });
+      const service = await serviceOf(root, reader.port, staged);
+      const binding = bindingOf();
+      const proof = await service.prove(binding);
+      const forged = Object.create(Object.getPrototypeOf(proof)) as typeof proof;
+      expect(() => service.release(forged)).toThrow('NATIVE_EXPECTED_PROOF_FOREIGN');
+      const rebuilt = JSON.parse(JSON.stringify({ released: false })) as typeof proof;
+      expect(() => service.release(rebuilt)).toThrow('NATIVE_EXPECTED_PROOF_FOREIGN');
+      // Nothing was released: the owner's descriptor is still open.
+      expect(reader.attempts()[0]).toEqual([0]);
+      expect(reader.descriptorIsOpen(0, 0)).toBe(true);
+      // The real proof is untouched.
+      expect(() => service.assertCurrent(binding, proof)).not.toThrow();
+    } finally {
+      reader.closeAll();
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it('releases one resource that is listed twice exactly once', async () => {
+    const root = mkdtempSync(join(tmpdir(), 'narralens-r2-lifecycle-'));
+    let fd = -1;
+    try {
+      const source = resolve(root, 'source');
+      mkdirSync(source, { recursive: true });
+      writeFileSync(resolve(source, 'film.html'), 'the original film');
+      fd = openSync(resolve(source, 'film.html'), 'r');
+      let closes = 0;
+      const file: NativeExpectedRetainedFile = {
+        relative_path: 'film.html',
+        sha256: HASH_A,
+        bytes: 0,
+        verify: () => true,
+        close: () => { closes += 1; try { closeSync(fd); } catch { /* already closed */ } },
+      };
+      const staged = stageLibrary(root, { computed: true });
+      const service = await serviceOf(root, readerPortOf([file, file]), staged);
+      const proof = await service.prove(bindingOf());
+      service.release(proof);
+      // The same object twice in one list is one resource, not two: closing it twice
+      // could close an unrelated file that took its descriptor number.
+      expect(closes).toBe(1);
+    } finally {
+      if (fd >= 0) { try { closeSync(fd); } catch { /* already closed */ } }
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it('releases a proof once, and a repeated release neither closes again nor fails', async () => {
+    const root = mkdtempSync(join(tmpdir(), 'narralens-r2-lifecycle-'));
+    const reader = faultyReader(root, ['film.html', 'settings.json']);
+    try {
+      const staged = stageLibrary(root, { computed: true });
+      const service = await serviceOf(root, reader.port, staged);
+      const binding = bindingOf();
+      const proof = await service.prove(binding);
+      service.release(proof);
+      expect(reader.attempts()[0]).toEqual([1, 1]);
+      expect(reader.descriptorIsOpen(0, 0)).toBe(false);
+      // A repeated release is idempotent: the descriptors are not touched again.
+      service.release(proof);
+      expect(reader.attempts()[0]).toEqual([1, 1]);
+      // And the released proof is refused from now on.
+      expect(() => service.assertCurrent(binding, proof)).toThrow('NATIVE_EXPECTED_PROOF_RELEASED');
+    } finally {
+      reader.closeAll();
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it('closes twice without closing a descriptor twice', async () => {
+    const root = mkdtempSync(join(tmpdir(), 'narralens-r2-lifecycle-'));
+    const reader = faultyReader(root, ['film.html', 'settings.json']);
+    try {
+      const staged = stageLibrary(root, { computed: true });
+      const service = await serviceOf(root, reader.port, staged);
+      await service.prove(bindingOf());
+      service.close();
+      expect(reader.attempts()[0]).toEqual([1, 1]);
+      expect(reader.descriptorIsOpen(0, 0)).toBe(false);
+      // The second close is a no-op: it neither closes again nor fails.
+      service.close();
+      expect(reader.attempts()[0]).toEqual([1, 1]);
+    } finally {
+      reader.closeAll();
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+});
+
+/** A port that always answers with the given descriptors. */
+function readerPortOf(retained: readonly NativeExpectedRetainedFile[]): NativeExpectedSourcePort {
+  return { readSource: async () => factsOf(retained, () => true) };
+}
+
+/* ────────────────────────────────────────────────────────────────────────────────────
+ * The proof's own public surface is not the authority.
+ *
+ * A proof is handed to the caller, and the caller owns its object. The service must
+ * never reach *into* that object to do its own bookkeeping: a replaced method or a
+ * replaced getter would otherwise strand the retained descriptors, skip the other
+ * proofs and hide the uncertainty of a failed cleanup.
+ *
+ * The observable `released` state of a proof stays exactly what it was; only the
+ * *way* it is decided changes, and it is decided by the module-private record.
+ * ──────────────────────────────────────────────────────────────────────────────────── */
+
+describe('the proof surface is never the authority', () => {
+  const serviceOf = async (root: string, reader: NativeExpectedSourcePort, staged: ReturnType<typeof stageLibrary>): Promise<OpenFilmNativeExpected> =>
+    new OpenFilmNativeExpected({
+      source: reader,
+      loader: nativeExpectedLibraryLoader({ distRoot: staged.dist, inputsRoot: staged.inputs, runtimeRoot: staged.runtime }),
+      approved: await approvedOf(staged),
+    });
+
+  /** Replace the proof's own method with one that throws, and count the calls. */
+  const sabotage = (proof: NativeExpectedProof): (() => number) => {
+    let calls = 0;
+    (proof as unknown as { markReleased: () => void }).markReleased = (): void => {
+      calls += 1;
+      throw new Error('THE_MARK_RELEASED_THREW');
+    };
+    return () => calls;
+  };
+
+  it('releases the descriptors even when the proof replaces its own method', async () => {
+    const root = mkdtempSync(join(tmpdir(), 'narralens-r2-surface-'));
+    const reader = faultyReader(root, ['film.html', 'settings.json']);
+    try {
+      const staged = stageLibrary(root, { computed: true });
+      const service = await serviceOf(root, reader.port, staged);
+      const binding = bindingOf();
+      const proof = await service.prove(binding);
+      const calls = sabotage(proof);
+      service.release(proof);
+      // The replaced method was never dispatched to: the bookkeeping is the
+      // service's own.
+      expect(calls()).toBe(0);
+      // The descriptors were released all the same.
+      expect(reader.attempts()[0]).toEqual([1, 1]);
+      expect(reader.descriptorIsOpen(0, 0)).toBe(false);
+      expect(reader.descriptorIsOpen(0, 1)).toBe(false);
+      // And the observable released state is what it has always been.
+      expect(proof.released).toBe(true);
+    } finally {
+      reader.closeAll();
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it('does not let a replaced method hide an uncertain cleanup', async () => {
+    const root = mkdtempSync(join(tmpdir(), 'narralens-r2-surface-'));
+    const reader = faultyReader(root, ['film.html'], 0);
+    try {
+      const staged = stageLibrary(root, { computed: true });
+      const service = await serviceOf(root, reader.port, staged);
+      const binding = bindingOf();
+      const proof = await service.prove(binding);
+      sabotage(proof);
+      // The cleanup failure is the failure that is reported, not the replaced
+      // method's own error.
+      expect(() => service.release(proof)).toThrow('NATIVE_EXPECTED_CLEANUP_FAILED');
+      // And the instance is uncertain: it cannot prove anything any more.
+      await expect(service.prove(binding)).rejects.toThrow('NATIVE_EXPECTED_CLEANUP_UNCERTAIN');
+    } finally {
+      reader.closeAll();
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it('closes every proof even when one proof replaces its own method', async () => {
+    const root = mkdtempSync(join(tmpdir(), 'narralens-r2-surface-'));
+    const reader = faultyReader(root, ['film.html', 'settings.json']);
+    try {
+      const staged = stageLibrary(root, { computed: true });
+      const service = await serviceOf(root, reader.port, staged);
+      const first = await service.prove(bindingOf());
+      await service.prove(bindingOf());
+      sabotage(first);
+      service.close();
+      // The first proof's own surface did not strand the second proof.
+      expect(reader.attempts()).toEqual([[1, 1], [1, 1]]);
+      expect(reader.descriptorIsOpen(1, 0)).toBe(false);
+      expect(reader.descriptorIsOpen(1, 1)).toBe(false);
+    } finally {
+      reader.closeAll();
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+});
+
+describe('the final check before a proof is issued', () => {
+  it('refuses to issue a proof when the binding stops being current while the projection is computed', async () => {
+    const root = mkdtempSync(join(tmpdir(), 'narralens-r2-surface-'));
+    const reader = faultyReader(root, ['film.html']);
+    try {
+      const staged = stageLibrary(root, { computed: true });
+      const service = new OpenFilmNativeExpected({
+        source: reader.port,
+        loader: nativeExpectedLibraryLoader({ distRoot: staged.dist, inputsRoot: staged.inputs, runtimeRoot: staged.runtime }),
+        approved: await approvedOf(staged),
+      });
+      // The session is current for the first three checks and stale at the last one.
+      let calls = 0;
+      const binding = bindingOf({ isCurrent: () => { calls += 1; return calls <= 3; } });
+      await expect(service.prove(binding)).rejects.toThrow('NATIVE_EXPECTED_BINDING_STALE');
+      // The check really happened: it is a fourth, separate one.
+      expect(calls).toBe(4);
+      // The descriptors of the refused read were released.
+      expect(reader.attempts()[0]).toEqual([1]);
+      expect(reader.descriptorIsOpen(0, 0)).toBe(false);
+    } finally {
+      reader.closeAll();
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it('refuses to issue a proof when a cleanup failed while the projection was computed', async () => {
+    const root = mkdtempSync(join(tmpdir(), 'narralens-r2-surface-'));
+    const reader = faultyReader(root, ['film.html', 'settings.json'], 0);
+    try {
+      let service!: OpenFilmNativeExpected;
+      let earlier: NativeExpectedProof | undefined;
+      const library: NativeExpectedLibrary = {
+        ...stubLibrary(),
+        computeExpectedProjection: () => {
+          // The cleanup of an earlier proof fails while the projection is computed.
+          try { if (earlier !== undefined) service.release(earlier); } catch { /* the service records it */ }
+          return { status: 'unsupported', profile: NATIVE_EXPECTED_PROFILE, reason: 'INPUT_INVALID' };
+        },
+      };
+      service = new OpenFilmNativeExpected({
+        source: reader.port,
+        loader: { load: async () => library },
+        approved: { upstream_sha: NATIVE_EXPECTED_UPSTREAM_SHA, inputs_sha256: HASH_A, build_sha256: HASH_A, modules: {} },
+      });
+      earlier = await service.prove(bindingOf());
+      await expect(service.prove(bindingOf())).rejects.toThrow('NATIVE_EXPECTED_CLEANUP_UNCERTAIN');
+      // And the instance stays uncertain: it cannot go green again.
+      await expect(service.prove(bindingOf())).rejects.toThrow('NATIVE_EXPECTED_CLEANUP_UNCERTAIN');
+    } finally {
+      reader.closeAll();
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+});
+
+/* ────────────────────────────────────────────────────────────────────────────────────
+ * The terminal guard of the expected service.
+ *
+ * Every value that comes from a callback — the projection, the canonical form, the
+ * liveness of the session — is computed *before* the guard that decides whether a
+ * proof may be issued. A callback may close the service or leave a cleanup
+ * uncertain, and a proof must never be issued after that.
+ *
+ * The same rule holds for the final acknowledgement: `assertCurrent` asks its
+ * callbacks, and a projection is never returned after the authority was revoked
+ * while they ran. The liveness callbacks are asked once, never in a loop.
+ * ──────────────────────────────────────────────────────────────────────────────────── */
+
+describe('the terminal guard of the expected service', () => {
+  it('refuses to issue a proof when the last liveness callback closes the service', async () => {
+    const root = mkdtempSync(join(tmpdir(), 'narralens-r2-reentry-'));
+    const reader = faultyReader(root, ['film.html']);
+    try {
+      const staged = stageLibrary(root, { computed: true });
+      let service!: OpenFilmNativeExpected;
+      let calls = 0;
+      const binding = bindingOf({
+        isCurrent: () => {
+          calls += 1;
+          // The last liveness check closes the service and still answers "current".
+          if (calls === 4) service.close();
+          return true;
+        },
+      });
+      service = new OpenFilmNativeExpected({
+        source: reader.port,
+        loader: nativeExpectedLibraryLoader({ distRoot: staged.dist, inputsRoot: staged.inputs, runtimeRoot: staged.runtime }),
+        approved: await approvedOf(staged),
+      });
+      await expect(service.prove(binding)).rejects.toThrow('NATIVE_EXPECTED_CLOSED');
+      // No proof was issued, and the descriptors of the refused read were released.
+      expect(reader.attempts()[0]).toEqual([1]);
+      expect(reader.descriptorIsOpen(0, 0)).toBe(false);
+    } finally {
+      reader.closeAll();
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it('refuses to issue a proof when a canonical callback closes the service', async () => {
+    const root = mkdtempSync(join(tmpdir(), 'narralens-r2-reentry-'));
+    const reader = faultyReader(root, ['film.html']);
+    try {
+      let service!: OpenFilmNativeExpected;
+      const library: NativeExpectedLibrary = {
+        ...stubLibrary(),
+        hydrationCanonicalJson: () => {
+          // The canonical form is computed from the facts, and this callback closes
+          // the service while it runs.
+          service.close();
+          return '{}';
+        },
+      };
+      service = new OpenFilmNativeExpected({
+        source: reader.port,
+        loader: { load: async () => library },
+        approved: { upstream_sha: NATIVE_EXPECTED_UPSTREAM_SHA, inputs_sha256: HASH_A, build_sha256: HASH_A, modules: {} },
+      });
+      await expect(service.prove(bindingOf())).rejects.toThrow('NATIVE_EXPECTED_CLOSED');
+      expect(reader.attempts()[0]).toEqual([1]);
+      expect(reader.descriptorIsOpen(0, 0)).toBe(false);
+    } finally {
+      reader.closeAll();
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it('refuses to issue a proof when a canonical callback leaves a cleanup uncertain', async () => {
+    const root = mkdtempSync(join(tmpdir(), 'narralens-r2-reentry-'));
+    const reader = faultyReader(root, ['film.html', 'settings.json'], 0);
+    try {
+      let service!: OpenFilmNativeExpected;
+      let earlier: NativeExpectedProof | undefined;
+      const library: NativeExpectedLibrary = {
+        ...stubLibrary(),
+        hydrationCanonicalJson: () => {
+          // The cleanup of an earlier proof fails while the canonical form is
+          // computed.
+          try { if (earlier !== undefined) service.release(earlier); } catch { /* the service records it */ }
+          return '{}';
+        },
+      };
+      service = new OpenFilmNativeExpected({
+        source: reader.port,
+        loader: { load: async () => library },
+        approved: { upstream_sha: NATIVE_EXPECTED_UPSTREAM_SHA, inputs_sha256: HASH_A, build_sha256: HASH_A, modules: {} },
+      });
+      earlier = await service.prove(bindingOf());
+      await expect(service.prove(bindingOf())).rejects.toThrow('NATIVE_EXPECTED_CLEANUP_UNCERTAIN');
+      // And the instance stays uncertain: it cannot go green again.
+      await expect(service.prove(bindingOf())).rejects.toThrow('NATIVE_EXPECTED_CLEANUP_UNCERTAIN');
+    } finally {
+      reader.closeAll();
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it('does not certify a binding that a callback changed while the proof was prepared', async () => {
+    const root = mkdtempSync(join(tmpdir(), 'narralens-r2-reentry-'));
+    const reader = faultyReader(root, ['film.html']);
+    try {
+      const staged = stageLibrary(root, { computed: true });
+      const changed = bindingOf();
+      const movable = changed as unknown as { project_id: string };
+      let calls = 0;
+      (changed as unknown as { isCurrent: () => boolean }).isCurrent = () => {
+        calls += 1;
+        // The last liveness check moves the binding's own fields.
+        if (calls === 4) movable.project_id = 'p2';
+        return true;
+      };
+      const service = new OpenFilmNativeExpected({
+        source: reader.port,
+        loader: nativeExpectedLibraryLoader({ distRoot: staged.dist, inputsRoot: staged.inputs, runtimeRoot: staged.runtime }),
+        approved: await approvedOf(staged),
+      });
+      const proof = await service.prove(changed);
+      // The binding moved under the proof: it cannot certify it any more.
+      expect(() => service.assertCurrent(changed, proof)).toThrow('NATIVE_EXPECTED_BINDING_MOVED');
+    } finally {
+      reader.closeAll();
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+});
+
+describe('the final guard of the acknowledgement', () => {
+  /** A reader whose guards always answer "true", so only the authority can refuse. */
+  const alwaysTrueReader = (): { port: NativeExpectedSourcePort; readonly closes: () => number } => {
+    let closes = 0;
+    const retained: NativeExpectedRetainedFile = {
+      relative_path: 'film.html',
+      sha256: HASH_A,
+      bytes: 0,
+      verify: () => true,
+      close: () => { closes += 1; },
+    };
+    return { port: { readSource: async () => factsOf([retained], () => true) }, closes: () => closes };
+  };
+
+  it('does not return a projection after the proof was released during the check', async () => {
+    const root = mkdtempSync(join(tmpdir(), 'narralens-r2-reentry-'));
+    const reader = alwaysTrueReader();
+    try {
+      let service!: OpenFilmNativeExpected;
+      let proof!: NativeExpectedProof;
+      let armed = false;
+      const binding = bindingOf({
+        isCurrent: () => {
+          // The liveness callback releases the proof and still answers "current".
+          if (armed) { armed = false; service.release(proof); }
+          return true;
+        },
+      });
+      service = new OpenFilmNativeExpected({
+        source: reader.port,
+        loader: { load: async () => stubLibrary() },
+        approved: { upstream_sha: NATIVE_EXPECTED_UPSTREAM_SHA, inputs_sha256: HASH_A, build_sha256: HASH_A, modules: {} },
+      });
+      proof = await service.prove(binding);
+      armed = true;
+      expect(() => service.assertCurrent(binding, proof)).toThrow('NATIVE_EXPECTED_PROOF_RELEASED');
+      expect(reader.closes()).toBe(1);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it('does not return a projection after the service was closed during the check', async () => {
+    const root = mkdtempSync(join(tmpdir(), 'narralens-r2-reentry-'));
+    const reader = alwaysTrueReader();
+    try {
+      let service!: OpenFilmNativeExpected;
+      let proof!: NativeExpectedProof;
+      let armed = false;
+      const binding = bindingOf({
+        isCurrent: () => {
+          // The liveness callback closes the service and still answers "current".
+          if (armed) { armed = false; service.close(); }
+          return true;
+        },
+      });
+      service = new OpenFilmNativeExpected({
+        source: reader.port,
+        loader: { load: async () => stubLibrary() },
+        approved: { upstream_sha: NATIVE_EXPECTED_UPSTREAM_SHA, inputs_sha256: HASH_A, build_sha256: HASH_A, modules: {} },
+      });
+      proof = await service.prove(binding);
+      armed = true;
+      expect(() => service.assertCurrent(binding, proof)).toThrow('NATIVE_EXPECTED_CLOSED');
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+});
+
+
+// MAIN regression: real retained file descriptors with controlled Host ports only.
+// This is lifecycle evidence, not a native renderer/hydration or NativeAck claim.
+describe('MAIN final source getter and binding fence', () => {
+  it('captures a closure getter before admission and releases late-owned descriptors when it closes the service', async () => {
+    const root = mkdtempSync(join(tmpdir(), 'native-main-getter-'));
+    const reader = faultyReader(root, ['film.html']);
+    let service!: OpenFilmNativeExpected;
+    try {
+      service = new OpenFilmNativeExpected({
+        source: { readSource: async input => {
+          const facts = await reader.port.readSource(input);
+          Object.defineProperty(facts, 'verifyClosure', { get: () => { service.close(); return () => true; } });
+          return facts;
+        } },
+        loader: { load: async () => stubLibrary() },
+        approved: { upstream_sha: NATIVE_EXPECTED_UPSTREAM_SHA, inputs_sha256: HASH_A, build_sha256: HASH_A, modules: {} },
+      });
+      await expect(service.prove(bindingOf())).rejects.toThrow('NATIVE_EXPECTED_CLOSED');
+      expect(reader.attempts()[0]).toEqual([1]);
+      expect(reader.descriptorIsOpen(0, 0)).toBe(false);
+    } finally {
+      service?.close(); reader.closeAll(); rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it.each(['session', 'closure', 'last file'] as const)('rechecks binding after the %s callback mutates it', async callback => {
+    const root = mkdtempSync(join(tmpdir(), 'native-main-binding-'));
+    const reader = faultyReader(root, ['film.html']);
+    let armed = false;
+    const binding = bindingOf({ isCurrent: () => {
+      if (armed && callback === 'session') (binding as unknown as { project_id: string }).project_id = 'p2';
+      return true;
+    } });
+    let service!: OpenFilmNativeExpected;
+    try {
+      service = new OpenFilmNativeExpected({
+        source: { readSource: async input => {
+          const facts = await reader.port.readSource(input);
+          const original = facts.retained[0]!;
+          return { ...facts, retained: [{ ...original, verify: () => {
+            const valid = original.verify();
+            if (armed && callback === 'last file') (binding as unknown as { project_id: string }).project_id = 'p2';
+            return valid;
+          } }], verifyClosure: () => {
+            if (armed && callback === 'closure') (binding as unknown as { project_id: string }).project_id = 'p2';
+            return true;
+          } };
+        } },
+        loader: { load: async () => stubLibrary() },
+        approved: { upstream_sha: NATIVE_EXPECTED_UPSTREAM_SHA, inputs_sha256: HASH_A, build_sha256: HASH_A, modules: {} },
+      });
+      const proof = await service.prove(binding);
+      armed = true;
+      expect(() => service.assertCurrent(binding, proof)).toThrow('NATIVE_EXPECTED_BINDING_MOVED');
+      service.release(proof);
+      expect(reader.attempts()[0]).toEqual([1]);
+      expect(reader.descriptorIsOpen(0, 0)).toBe(false);
+    } finally {
+      service?.close(); reader.closeAll(); rmSync(root, { recursive: true, force: true });
     }
   });
 });

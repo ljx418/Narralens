@@ -1,0 +1,181 @@
+{
+  "kind": "narralens.native-expected-lifecycle-receipts@2",
+  "lane": "PRODUCT",
+  "written_by": "the same sole visible Claude writer of round 1 (task_7fbdee3fbe6c), continuing under the parent read-only review",
+  "task": {
+    "task": "task_33558cf8e146",
+    "dispatch": "ctx_537a8d25982b",
+    "terminal": "term_ba17ed9fe94dac509ae9844f618da902",
+    "coordinator_terminal": "term_d0da21385daaeb26007c3d57936f2438",
+    "coordinator_message_id": "msg_169de2336cde",
+    "main_authorisation": "MAIN msg_b850663ed8a8 (stale-pin fixture reconciliation only, via the coordinator)",
+    "parent_task": "task_61570c14c644",
+    "parent_dispatch": "ctx_802299266d15",
+    "parent_state": "read-only during implementation and captures",
+    "session_self_description": "MiniMax-M3.1-Flash-Preview[1m]",
+    "session_self_description_source": "the session's own environment block; no provider, credential, config or model setting was read or changed"
+  },
+  "scope_of_this_round": [
+    "round 2 correction: remove every public dispatch into the proof's own surface from the internal cleanup, and make the module-private record the only authority",
+    "round 2 correction: complete the final pre-issuance check in prove() (closed / cleanupUncertain / binding.isCurrent)",
+    "MAIN-authorised stale-pin fixture reconciliation of the single existing refusal test",
+    "no other source, test, contract, pin, manifest, config or dependency was touched"
+  ],
+  "round1_preserved": {
+    "receipts": "evidence/RECEIPTS.json (round 1, untouched)",
+    "report": "CLAUDE_LIFECYCLE_IMPLEMENT.md (round 1, untouched)",
+    "candidate1_source": {
+      "path": "evidence/candidate1-openfilm-native-expected.ts",
+      "sha256": "1dd35aaafe5c5463fb1018819539794cee30bb2953995a328fe957c991b27a75"
+    },
+    "candidate1_tests": {
+      "path": "evidence/candidate1-created-native-ack.test.ts",
+      "sha256": "a3dd488f2857e2d71336ecffb40bf8ca859725b52914dc3b63a290b09563f321"
+    },
+    "round1_named_evidence_paths_restored_byte_exact": {
+      "evidence/fixed-openfilm-native-expected.ts": "1dd35aaafe5c5463fb1018819539794cee30bb2953995a328fe957c991b27a75",
+      "evidence/created-native-ack.test.ts": "a3dd488f2857e2d71336ecffb40bf8ca859725b52914dc3b63a290b09563f321"
+    },
+    "round1_logs_retained": [
+      "logs/00-baseline-original-source.test.log",
+      "logs/01-original-source-new-tests.log",
+      "logs/02-fixed-source-same-tests.log",
+      "logs/03-tsc-noemit.log"
+    ]
+  },
+  "hashes": {
+    "source": {
+      "before_this_round": "1dd35aaafe5c5463fb1018819539794cee30bb2953995a328fe957c991b27a75",
+      "after_this_round": "5184d200e11638518c2fdf99800a0a57f98f863762c674f30fb5b819b4eac81d",
+      "pristine_baseline": "9f9d2c820510beee15d926f3d7e6e11034843ff829d15b5526ac45028848ab14",
+      "pristine_baseline_blob": "9a1104fc16c5065c1737a208c5efcaa0a704f7c4",
+      "restore_command": "git show HEAD:src/host/m5/openfilm-native-expected.ts > src/host/m5/openfilm-native-expected.ts",
+      "restore_sha256": "9f9d2c820510beee15d926f3d7e6e11034843ff829d15b5526ac45028848ab14"
+    },
+    "test": {
+      "before_this_round": "a3dd488f2857e2d71336ecffb40bf8ca859725b52914dc3b63a290b09563f321",
+      "after_this_round": "702c16faf907df3679ff2fb1c679041af591bb52b320b10f7726e8889ec69128",
+      "pristine_baseline": "12c3e8b3e70f4a2a278f2998941c6d24133234157a1106cdda66efbde225e5bc",
+      "pristine_baseline_blob": "34b43e0e089667d0a017b98ae8b3531555ba25e6"
+    },
+    "tracked_inputs_unchanged": {
+      "aggregate_loader_digest": "c5b53099b2f94fc12b5f9d184c0c8c2b12c51349051eddf67794fb0866e8dfd1",
+      "aggregate_loader_digest_matches_tracked_pin": true,
+      "files": {
+        "tools/agent-driven/product/native-inputs/build-expected.mjs": "60027ead5a509522f2d35fda33749675923dee523bb8cc12f2b7de3dca8f840d",
+        "tools/agent-driven/product/native-inputs/expected-projection.d.ts": "0f5f565a3d8b70de995aeb0dfdfb6052acad53cbf452c8d70168f555a8937f80",
+        "tools/agent-driven/product/native-inputs/expected-projection.mjs": "3500b1d6485791b13ec9364c6eb80740531142c16754877e21923ad73e9d494e",
+        "tools/agent-driven/product/native-inputs/native-pure.entry.ts": "1ca8590535d412f0d91a522fbf942cbacabba7d95c64f3e849ca9f0fbf416354",
+        "tools/agent-driven/product/native-inputs/request013.patch": "f699889206e129dfe4fd913618b34baa8d7e04363f1940d3659664a1e7b9d435",
+        "tools/agent-driven/product/native-inputs/vite.expected.config.mjs": "ffac37faeb5e9fcc53460f19d235cc9c38251b3bf969a9183e8cffe5e0657f29"
+      }
+    }
+  },
+  "captures": [
+    {
+      "id": "04-stale-pin-fixture-reconciliation",
+      "kind": "separately authorised stale-fixture reconciliation (MAIN msg_b850663ed8a8) - NOT a lifecycle oldfail/fixedpass pair",
+      "argv": "node_modules/.bin/vitest run --config vitest.config.ts tests/agent-driven/integration/created-native-ack.test.ts",
+      "cwd": "/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-PRODUCT",
+      "source": "candidate1 1dd35aaa... (unchanged)",
+      "test_bytes": "f49d27047f739b2806763f8a2107562d28bf427fd91a4cd713e6180adbdfe816",
+      "exit": 0,
+      "result": "1 passed (1) file | 62 passed (62)",
+      "log": "logs/04-stale-pin-fixture-reconciliation.log",
+      "log_sha256": "38ef9d35b0a49b9a27d382a1d12fe4ac6af03b555e86b74d1189db6cde2bd43d"
+    },
+    {
+      "id": "05-candidate1-source-round2-tests",
+      "kind": "lifecycle OLD FAIL - same test bytes as capture 06",
+      "argv": "node_modules/.bin/vitest run --config vitest.config.ts tests/agent-driven/integration/created-native-ack.test.ts",
+      "cwd": "/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-PRODUCT",
+      "source": "candidate1 1dd35aaa... (the reviewed candidate, unchanged)",
+      "test_bytes": "702c16faf907df3679ff2fb1c679041af591bb52b320b10f7726e8889ec69128",
+      "exit": 1,
+      "result": "5 failed | 62 passed (67)",
+      "failed_cases": [
+        "the proof surface is never the authority > releases the descriptors even when the proof replaces its own method",
+        "the proof surface is never the authority > does not let a replaced method hide an uncertain cleanup",
+        "the proof surface is never the authority > closes every proof even when one proof replaces its own method",
+        "the final check before a proof is issued > refuses to issue a proof when the binding stops being current while the projection is computed",
+        "the final check before a proof is issued > refuses to issue a proof when a cleanup failed while the projection was computed"
+      ],
+      "log": "logs/05-candidate1-source-round2-tests.log",
+      "log_sha256": "a23ab5305f23941842c25a0624a62285f6aeb51810e531d8a167a9efa64b1081"
+    },
+    {
+      "id": "06-corrected-source-same-round2-tests",
+      "kind": "lifecycle FIXED PASS - byte-identical test file to capture 05",
+      "argv": "node_modules/.bin/vitest run --config vitest.config.ts tests/agent-driven/integration/created-native-ack.test.ts",
+      "cwd": "/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-PRODUCT",
+      "source": "corrected 5184d200...",
+      "test_bytes": "702c16faf907df3679ff2fb1c679041af591bb52b320b10f7726e8889ec69128",
+      "exit": 0,
+      "result": "1 passed (1) file | 67 passed (67) - the FULL targeted suite",
+      "log": "logs/06-corrected-source-same-round2-tests.log",
+      "log_sha256": "d78f44bc5a7e958230e185010714ab29560fc1ff6ad1d0f361ddfe2b2ed0ad0e"
+    },
+    {
+      "id": "07-tsc-noemit-round2",
+      "kind": "typecheck of the final bytes",
+      "argv": "node_modules/.bin/tsc --noEmit",
+      "cwd": "/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-PRODUCT",
+      "exit": 0,
+      "result": "no diagnostics",
+      "log": "logs/07-tsc-noemit-round2.log",
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "id": "08-final-confirmation-run",
+      "kind": "confirmation re-run of the targeted suite on the final on-disk bytes (nothing drifted since capture 06)",
+      "argv": "node_modules/.bin/vitest run --config vitest.config.ts tests/agent-driven/integration/created-native-ack.test.ts",
+      "cwd": "/home/administrator/orca/workspaces/Narralens/Narralens-A-R1-PRODUCT",
+      "source": "corrected 5184d200... (verified on disk before the run)",
+      "test_bytes": "702c16faf907df3679ff2fb1c679041af591bb52b320b10f7726e8889ec69128 (verified on disk before the run)",
+      "exit": 0,
+      "result": "1 passed (1) file | 67 passed (67) - the FULL targeted suite",
+      "log": "logs/08-final-confirmation-run.log",
+      "log_sha256": "a94ad5d2d40f74686bd0630da4e318e4a83ed245adfcf825b117017af4fed744"
+    }
+  ],
+  "raw_log_copies": {
+    "note": "*.log is gitignored, so every raw log referenced by any receipt is copied to a byte-identical .txt next to it; the .log originals are retained.",
+    "pairs": [
+      { "log": "logs/00-baseline-original-source.test.log", "txt": "logs/00-baseline-original-source.test.txt", "sha256": "364f1ba31901895304e07523de0af98b413d5b3048606209a98c84fb85e50652" },
+      { "log": "logs/01-original-source-new-tests.log", "txt": "logs/01-original-source-new-tests.txt", "sha256": "f7b179b41d8045f3a212ebb60338287b93d3cedd503fae18f09366efa00a4755" },
+      { "log": "logs/02-fixed-source-same-tests.log", "txt": "logs/02-fixed-source-same-tests.txt", "sha256": "75f80bf59b731ab079ed5ad078536fd8211a4361789d87ed2b61729f45529629" },
+      { "log": "logs/03-tsc-noemit.log", "txt": "logs/03-tsc-noemit.txt", "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855" },
+      { "log": "logs/04-stale-pin-fixture-reconciliation.log", "txt": "logs/04-stale-pin-fixture-reconciliation.txt", "sha256": "38ef9d35b0a49b9a27d382a1d12fe4ac6af03b555e86b74d1189db6cde2bd43d" },
+      { "log": "logs/05-candidate1-source-round2-tests.log", "txt": "logs/05-candidate1-source-round2-tests.txt", "sha256": "a23ab5305f23941842c25a0624a62285f6aeb51810e531d8a167a9efa64b1081" },
+      { "log": "logs/06-corrected-source-same-round2-tests.log", "txt": "logs/06-corrected-source-same-round2-tests.txt", "sha256": "d78f44bc5a7e958230e185010714ab29560fc1ff6ad1d0f361ddfe2b2ed0ad0e" },
+      { "log": "logs/07-tsc-noemit-round2.log", "txt": "logs/07-tsc-noemit-round2.txt", "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855" },
+      { "log": "logs/08-final-confirmation-run.log", "txt": "logs/08-final-confirmation-run.txt", "sha256": "a94ad5d2d40f74686bd0630da4e318e4a83ed245adfcf825b117017af4fed744" }
+    ]
+  },
+  "artifacts": {
+    "evidence/corrected-openfilm-native-expected.ts": "5184d200e11638518c2fdf99800a0a57f98f863762c674f30fb5b819b4eac81d",
+    "evidence/round2-created-native-ack.test.ts": "702c16faf907df3679ff2fb1c679041af591bb52b320b10f7726e8889ec69128",
+    "evidence/RECEIPTS.json": "round 1, untouched",
+    "evidence/RECEIPTS_ROUND2.json": "this file"
+  },
+  "not_run": [
+    "the full vitest suite (forbidden by the ticket); only the targeted file tests/agent-driven/integration/created-native-ack.test.ts was run",
+    "any Host, listener, browser, ffmpeg, build, install or network command (forbidden)",
+    "tests/agent-driven/headless/created-native-entry.test.ts (real browser and real servers)",
+    "no independent review, no NativeAck acceptance, no A/V1 acceptance, no human acceptance"
+  ],
+  "git": {
+    "add": false,
+    "commit": false,
+    "reset": false,
+    "stash": false,
+    "push": false,
+    "branch": "unchanged (agent-driven/a-r1-product)",
+    "index": "untouched"
+  },
+  "protected_dirty_unchanged": {
+    "checked": 42,
+    "changed": 0,
+    "source": "docs/parallel/lane-product/A-R2-20261112/native-expected-lifecycle/PREFLIGHT.json protected_hashes"
+  }
+}

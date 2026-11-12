@@ -1,0 +1,173 @@
+
+ RUN  v3.2.4 /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-PRODUCT
+
+(node:2230863) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/agent-driven/integration/created-native-ack.test.ts (67 tests | 5 failed) 409ms
+   ✓ the native observation envelope > accepts exactly the four closed fields 1ms
+   ✓ the native observation envelope > refuses an envelope that carries any identity of its own 0ms
+   ✓ the native observation envelope > refuses an unknown format, an unknown event kind and a non-integer sequence 0ms
+   ✓ the original p2 document observation > accepts a committed document and an invalidation 0ms
+   ✓ the original p2 document observation > refuses a foreign protocol version, a broken hash and an unknown reason 0ms
+   ✓ the original 013 hydration observation > accepts exactly the four parts with a project origin 0ms
+   ✓ the original 013 hydration observation > refuses a part set that is not exactly the four 0ms
+   ✓ the original 013 hydration observation > refuses a browser preference as a proven origin 0ms
+   ✓ the original 013 hydration observation > refuses a digest on a part that is not hydrated and refuses a missing one 0ms
+   ✓ the original 013 hydration observation > refuses a hydration epoch that is not positive 0ms
+   ✓ the original Studio selection > accepts a fractional native second and the original ref kinds 0ms
+   ✓ the original Studio selection > refuses a non-finite time, an unknown ref kind and a broken range 0ms
+   ✓ the native seconds canonicalisation > is its own fractional domain and never the integer canonical domain 0ms
+   ✓ the native seconds canonicalisation > refuses a value that is not finite 0ms
+   ✓ the retained source identity > refuses a proof whose file bytes drifted between prove and the acknowledgement 1ms
+   ✓ the retained source identity > refuses a proof whose file was replaced by another file with the same bytes 1ms
+   ✓ the retained source identity > refuses a closure that gained or lost a file 1ms
+   ✓ the expected proof > refuses a proof whose file drifted between prove and the acknowledgement 12ms
+   ✓ the expected proof > refuses a proof whose file was replaced by an identical file, and a closure that changed 11ms
+   ✓ the expected proof > refuses a released proof and a proof from another instance 13ms
+   ✓ the expected proof > refuses a binding that is not the one the proof was made against 10ms
+   ✓ the expected proof > closes every descriptor when the projection fails, and when the service is closed 19ms
+   ✓ the expected loader approval chain > loads a candidate whose inputs, manifest and modules all match the approval 9ms
+   ✓ the expected loader approval chain > refuses a changed input, a changed manifest and a swapped module 6ms
+   ✓ the expected loader approval chain > refuses a module that reaches outside the verified directory 4ms
+   ✓ the expected loader approval chain > refuses a candidate whose upstream is not the pinned one 2ms
+   ✓ the binding snapshot > captures the fields, so a mutated binding cannot pass for the original 0ms
+   ✓ the selection version port > follows the real selection changes, voids the acknowledgement, and refuses when closed 25ms
+   ✓ the selection version port > moves the version even when the selection cannot be mapped, because nothing can be proved 7ms
+   ✓ the selection version of a stale session > rejects a session that is no longer current, and keeps it apart from one that never observed 10ms
+   ✓ the controlled session and the observation binding > mints the bridge session id at the exchange, tells the producer, and closes it again 1ms
+   ✓ the controlled session and the observation binding > tells the producer again when the editor opens again on the same session 1ms
+   ✓ the controlled session and the observation binding > refuses an exchange from another origin 0ms
+   ✓ the controlled session and the observation binding > refuses an exchange whose body is not exactly the ticket 0ms
+   ✓ the shipped native observation contract > accepts a closed envelope and refuses one that carries an identity 0ms
+   ✓ the shipped native observation contract > accepts the three original event shapes and refuses the ones they forbid 23ms
+   ✓ the tracked candidate pin > refuses the candidate until a review has approved it 1ms
+   ✓ the tracked candidate pin > reads an approval that a review has recorded 1ms
+   ✓ the body of one observation > parses the closed envelope and refuses anything else 0ms
+   ✓ the counted observation route > is exactly one additional Gateway route, and the registry says the same 0ms
+   ✓ the counted observation route > is the same path the Studio bridge reports into 0ms
+   ✓ the epoch of the hydration and the epoch of the document > keeps the parts when the document event confirms the very hydration they belong to 22ms
+   ✓ the expected state of the parts that come from the project's own sources > expects settings, captions and markers to be hydrated, even when the parsed result is empty 17ms
+   ✓ the original Studio selection at the ingress > refuses a reference that is missing the field the Host has to read 0ms
+   ✓ the original Studio selection at the ingress > refuses a selection that carries a field the original does not have 0ms
+   ✓ the closed shape of the document and the hydration event > refuses an event that carries a field the original does not have 0ms
+   ✓ the document branches of the shipped contract > accepts each branch on its own and refuses a mixture 12ms
+   ✓ the selection reference against the upstream source > declares exactly the branches and the fields the upstream declares 1ms
+   ✓ the document and the hydration against the upstream sources > declares the document state the upstream declares 0ms
+   ✓ the document and the hydration against the upstream sources > declares the hydration state the pinned patch adds 0ms
+   ✓ the editor that opens again > voids the acknowledgement of the view that is gone 19ms
+   ✓ the private lifecycle of the expected service > keeps the projection failure and still releases every other descriptor 9ms
+   ✓ the private lifecycle of the expected service > revokes the proof before the cleanup, and still releases every descriptor 10ms
+   ✓ the private lifecycle of the expected service > releases every proof on close, even when the first cleanup fails 10ms
+   ✓ the private lifecycle of the expected service > does not go green again after an uncertain cleanup 10ms
+   ✓ the private lifecycle of the expected service > refuses a candidate that loads after the close, and never reads the source 0ms
+   ✓ the private lifecycle of the expected service > releases the descriptors of a source that returns after the close, and issues no proof 1ms
+   ✓ the private lifecycle of the expected service > refuses a foreign proof and releases nothing of the owner 10ms
+   ✓ the private lifecycle of the expected service > refuses a forged or a rebuilt proof, and releases nothing 9ms
+   ✓ the private lifecycle of the expected service > releases one resource that is listed twice exactly once 10ms
+   ✓ the private lifecycle of the expected service > releases a proof once, and a repeated release neither closes again nor fails 11ms
+   ✓ the private lifecycle of the expected service > closes twice without closing a descriptor twice 10ms
+   × the proof surface is never the authority > releases the descriptors even when the proof replaces its own method 19ms
+     → THE_MARK_RELEASED_THREW
+   × the proof surface is never the authority > does not let a replaced method hide an uncertain cleanup 28ms
+     → expected [Function] to throw error including 'NATIVE_EXPECTED_CLEANUP_FAILED' but got 'THE_MARK_RELEASED_THREW'
+   × the proof surface is never the authority > closes every proof even when one proof replaces its own method 14ms
+     → THE_MARK_RELEASED_THREW
+   × the final check before a proof is issued > refuses to issue a proof when the binding stops being current while the projection is computed 16ms
+     → promise resolved "NativeExpectedProof{}" instead of rejecting
+   × the final check before a proof is issued > refuses to issue a proof when a cleanup failed while the projection was computed 2ms
+     → promise resolved "NativeExpectedProof{}" instead of rejecting
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/created-native-ack.test.ts > the proof surface is never the authority > releases the descriptors even when the proof replaces its own method
+Error: THE_MARK_RELEASED_THREW
+ ❯ NativeExpectedProof.proof.markReleased tests/agent-driven/integration/created-native-ack.test.ts:2233:13
+    2231|     (proof as unknown as { markReleased: () => void }).markReleased = …
+    2232|       calls += 1;
+    2233|       throw new Error('THE_MARK_RELEASED_THREW');
+       |             ^
+    2234|     };
+    2235|     return () => calls;
+ ❯ OpenFilmNativeExpected.release src/host/m5/openfilm-native-expected.ts:787:11
+ ❯ tests/agent-driven/integration/created-native-ack.test.ts:2247:15
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  tests/agent-driven/integration/created-native-ack.test.ts > the proof surface is never the authority > does not let a replaced method hide an uncertain cleanup
+AssertionError: expected [Function] to throw error including 'NATIVE_EXPECTED_CLEANUP_FAILED' but got 'THE_MARK_RELEASED_THREW'
+
+Expected: [32m"NATIVE_EXPECTED_CLEANUP_FAILED"[39m
+Received: [31m"THE_MARK_RELEASED_THREW"[39m
+
+ ❯ tests/agent-driven/integration/created-native-ack.test.ts:2274:44
+    2272|       // The cleanup failure is the failure that is reported, not the …
+    2273|       // method's own error.
+    2274|       expect(() => service.release(proof)).toThrow('NATIVE_EXPECTED_CL…
+       |                                            ^
+    2275|       // And the instance is uncertain: it cannot prove anything any m…
+    2276|       await expect(service.prove(binding)).rejects.toThrow('NATIVE_EXP…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  tests/agent-driven/integration/created-native-ack.test.ts > the proof surface is never the authority > closes every proof even when one proof replaces its own method
+Error: THE_MARK_RELEASED_THREW
+ ❯ NativeExpectedProof.proof.markReleased tests/agent-driven/integration/created-native-ack.test.ts:2233:13
+    2231|     (proof as unknown as { markReleased: () => void }).markReleased = …
+    2232|       calls += 1;
+    2233|       throw new Error('THE_MARK_RELEASED_THREW');
+       |             ^
+    2234|     };
+    2235|     return () => calls;
+ ❯ OpenFilmNativeExpected.close src/host/m5/openfilm-native-expected.ts:809:13
+ ❯ tests/agent-driven/integration/created-native-ack.test.ts:2292:15
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ FAIL  tests/agent-driven/integration/created-native-ack.test.ts > the final check before a proof is issued > refuses to issue a proof when the binding stops being current while the projection is computed
+AssertionError: promise resolved "NativeExpectedProof{}" instead of rejecting
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- Error {[39m
+[32m-   "message": "rejected promise",[39m
+[32m- }[39m
+[31m+ NativeExpectedProof {}[39m
+
+ ❯ tests/agent-driven/integration/created-native-ack.test.ts:2318:42
+    2316|       let calls = 0;
+    2317|       const binding = bindingOf({ isCurrent: () => { calls += 1; retur…
+    2318|       await expect(service.prove(binding)).rejects.toThrow('NATIVE_EXP…
+       |                                          ^
+    2319|       // The check really happened: it is a fourth, separate one.
+    2320|       expect(calls).toBe(4);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+
+ FAIL  tests/agent-driven/integration/created-native-ack.test.ts > the final check before a proof is issued > refuses to issue a proof when a cleanup failed while the projection was computed
+AssertionError: promise resolved "NativeExpectedProof{}" instead of rejecting
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- Error {[39m
+[32m-   "message": "rejected promise",[39m
+[32m- }[39m
+[31m+ NativeExpectedProof {}[39m
+
+ ❯ tests/agent-driven/integration/created-native-ack.test.ts:2350:46
+    2348|       });
+    2349|       earlier = await service.prove(bindingOf());
+    2350|       await expect(service.prove(bindingOf())).rejects.toThrow('NATIVE…
+       |                                              ^
+    2351|       // And the instance stays uncertain: it cannot go green again.
+    2352|       await expect(service.prove(bindingOf())).rejects.toThrow('NATIVE…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  5 failed | 62 passed (67)
+   Start at  08:44:05
+   Duration  912ms (transform 282ms, setup 0ms, collect 367ms, tests 409ms, environment 0ms, prepare 34ms)
+

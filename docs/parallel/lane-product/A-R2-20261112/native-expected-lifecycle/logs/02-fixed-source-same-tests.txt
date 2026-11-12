@@ -1,0 +1,97 @@
+
+ RUN  v3.2.4 /home/administrator/orca/workspaces/Narralens/Narralens-A-R1-PRODUCT
+
+(node:2178970) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/agent-driven/integration/created-native-ack.test.ts (62 tests | 1 failed) 329ms
+   ✓ the native observation envelope > accepts exactly the four closed fields 1ms
+   ✓ the native observation envelope > refuses an envelope that carries any identity of its own 0ms
+   ✓ the native observation envelope > refuses an unknown format, an unknown event kind and a non-integer sequence 0ms
+   ✓ the original p2 document observation > accepts a committed document and an invalidation 0ms
+   ✓ the original p2 document observation > refuses a foreign protocol version, a broken hash and an unknown reason 0ms
+   ✓ the original 013 hydration observation > accepts exactly the four parts with a project origin 0ms
+   ✓ the original 013 hydration observation > refuses a part set that is not exactly the four 0ms
+   ✓ the original 013 hydration observation > refuses a browser preference as a proven origin 0ms
+   ✓ the original 013 hydration observation > refuses a digest on a part that is not hydrated and refuses a missing one 0ms
+   ✓ the original 013 hydration observation > refuses a hydration epoch that is not positive 0ms
+   ✓ the original Studio selection > accepts a fractional native second and the original ref kinds 0ms
+   ✓ the original Studio selection > refuses a non-finite time, an unknown ref kind and a broken range 0ms
+   ✓ the native seconds canonicalisation > is its own fractional domain and never the integer canonical domain 0ms
+   ✓ the native seconds canonicalisation > refuses a value that is not finite 0ms
+   ✓ the retained source identity > refuses a proof whose file bytes drifted between prove and the acknowledgement 1ms
+   ✓ the retained source identity > refuses a proof whose file was replaced by another file with the same bytes 1ms
+   ✓ the retained source identity > refuses a closure that gained or lost a file 1ms
+   ✓ the expected proof > refuses a proof whose file drifted between prove and the acknowledgement 11ms
+   ✓ the expected proof > refuses a proof whose file was replaced by an identical file, and a closure that changed 10ms
+   ✓ the expected proof > refuses a released proof and a proof from another instance 10ms
+   ✓ the expected proof > refuses a binding that is not the one the proof was made against 8ms
+   ✓ the expected proof > closes every descriptor when the projection fails, and when the service is closed 19ms
+   ✓ the expected loader approval chain > loads a candidate whose inputs, manifest and modules all match the approval 8ms
+   ✓ the expected loader approval chain > refuses a changed input, a changed manifest and a swapped module 6ms
+   ✓ the expected loader approval chain > refuses a module that reaches outside the verified directory 4ms
+   ✓ the expected loader approval chain > refuses a candidate whose upstream is not the pinned one 2ms
+   ✓ the binding snapshot > captures the fields, so a mutated binding cannot pass for the original 0ms
+   ✓ the selection version port > follows the real selection changes, voids the acknowledgement, and refuses when closed 24ms
+   ✓ the selection version port > moves the version even when the selection cannot be mapped, because nothing can be proved 7ms
+   ✓ the selection version of a stale session > rejects a session that is no longer current, and keeps it apart from one that never observed 10ms
+   ✓ the controlled session and the observation binding > mints the bridge session id at the exchange, tells the producer, and closes it again 2ms
+   ✓ the controlled session and the observation binding > tells the producer again when the editor opens again on the same session 1ms
+   ✓ the controlled session and the observation binding > refuses an exchange from another origin 1ms
+   ✓ the controlled session and the observation binding > refuses an exchange whose body is not exactly the ticket 0ms
+   ✓ the shipped native observation contract > accepts a closed envelope and refuses one that carries an identity 0ms
+   ✓ the shipped native observation contract > accepts the three original event shapes and refuses the ones they forbid 24ms
+   × the tracked candidate pin > refuses the candidate until a review has approved it 7ms
+     → expected [Function] to throw an error
+   ✓ the tracked candidate pin > reads an approval that a review has recorded 1ms
+   ✓ the body of one observation > parses the closed envelope and refuses anything else 0ms
+   ✓ the counted observation route > is exactly one additional Gateway route, and the registry says the same 0ms
+   ✓ the counted observation route > is the same path the Studio bridge reports into 0ms
+   ✓ the epoch of the hydration and the epoch of the document > keeps the parts when the document event confirms the very hydration they belong to 22ms
+   ✓ the expected state of the parts that come from the project's own sources > expects settings, captions and markers to be hydrated, even when the parsed result is empty 17ms
+   ✓ the original Studio selection at the ingress > refuses a reference that is missing the field the Host has to read 0ms
+   ✓ the original Studio selection at the ingress > refuses a selection that carries a field the original does not have 0ms
+   ✓ the closed shape of the document and the hydration event > refuses an event that carries a field the original does not have 0ms
+   ✓ the document branches of the shipped contract > accepts each branch on its own and refuses a mixture 11ms
+   ✓ the selection reference against the upstream source > declares exactly the branches and the fields the upstream declares 1ms
+   ✓ the document and the hydration against the upstream sources > declares the document state the upstream declares 1ms
+   ✓ the document and the hydration against the upstream sources > declares the hydration state the pinned patch adds 0ms
+   ✓ the editor that opens again > voids the acknowledgement of the view that is gone 21ms
+   ✓ the private lifecycle of the expected service > keeps the projection failure and still releases every other descriptor 10ms
+   ✓ the private lifecycle of the expected service > revokes the proof before the cleanup, and still releases every descriptor 11ms
+   ✓ the private lifecycle of the expected service > releases every proof on close, even when the first cleanup fails 11ms
+   ✓ the private lifecycle of the expected service > does not go green again after an uncertain cleanup 11ms
+   ✓ the private lifecycle of the expected service > refuses a candidate that loads after the close, and never reads the source 1ms
+   ✓ the private lifecycle of the expected service > releases the descriptors of a source that returns after the close, and issues no proof 1ms
+   ✓ the private lifecycle of the expected service > refuses a foreign proof and releases nothing of the owner 12ms
+   ✓ the private lifecycle of the expected service > refuses a forged or a rebuilt proof, and releases nothing 11ms
+   ✓ the private lifecycle of the expected service > releases one resource that is listed twice exactly once 9ms
+   ✓ the private lifecycle of the expected service > releases a proof once, and a repeated release neither closes again nor fails 9ms
+   ✓ the private lifecycle of the expected service > closes twice without closing a descriptor twice 9ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/created-native-ack.test.ts > the tracked candidate pin > refuses the candidate until a review has approved it
+AssertionError: expected [Function] to throw an error
+
+[32m- Expected:[39m 
+null
+
+[31m+ Received:[39m 
+undefined
+
+ ❯ tests/agent-driven/integration/created-native-ack.test.ts:1170:51
+    1168|     // The pin that is in the repository carries no approval: the buil…
+    1169|     // under a grant, so the loader must refuse rather than load anyth…
+    1170|     expect(() => nativeExpectedApprovalFromPin()).toThrow("NATIVE_EXPE…
+       |                                                   ^
+    1171|   });
+    1172| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 61 passed (62)
+   Start at  08:40:06
+   Duration  843ms (transform 264ms, setup 0ms, collect 353ms, tests 329ms, environment 0ms, prepare 32ms)
+
