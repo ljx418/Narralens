@@ -1,3 +1,7 @@
+## 最新用户规则：ClaudeCode 429 必须停下（2026-11-12）
+
+ClaudeCode 报 429 时，停止该实现任务，保留源码、未提交工作、日志和失败证据，向用户报告；未经用户对此次接手的明确授权，MAIN、领域 Codex 或其他 Agent 都不得代替它继续开发。旧 goal、旧 ReleaseAssignment 的“429 自动接手”、额度恢复、常规开发批准或“同阶段超过两次返工由 MAIN 接管”均不能代替这项明确授权。不得自动重试 Claude 请求、重启旧窗口、换供应商或更换凭据绕过。先停止继续派发，核对并记录原调用及所属子进程状态；仅观察超时不能认定进程已停，不得双写。只可进行保全现场、必要安全清理和只读诊断；不得将任务标为完成或 PASS。用户明确授权接手后，再确认原 writer 已停、保留全部工作并完成唯一写入者交接。此规则覆盖本文件下方及历史计划中冲突的 429 自动接手条款。
+
 # Narralens 自动化开发持久记忆
 
 ## 最新体验规格确认：阶段协作与流程固化
@@ -19,7 +23,7 @@
 
 ## 2026-11-08 当前指令优先入口
 
-- 最新批准：三个lane由目录内Codex负责设计/文档/验收，Claude Code CLI具体实现；429后Codex核对原writer停止并保留工作后自动接手。分时单writer，接手实现需未参与者复核；MAIN统一集成验收。此条覆盖旧文中对CLI角色的泛称，不改变生产release门。
+- 最新批准：三个lane由目录内Codex负责设计/文档/验收，Claude Code CLI具体实现；429后停止该任务并保全工作，须用户明确授权后才可由Codex接手。分时单writer，接手实现需未参与者复核；MAIN统一集成验收。此条覆盖旧文中对CLI角色的泛称，不改变生产release门。
 
 - 最新用户认可截至867b3b3的目标与规划文档，要求主Agent设计多Agent并行架构和目录。采用主Agent+BRIDGE/PRODUCT/MEDIA独立worktree，不在同一checkout并发Git操作；公共合同/DDL/装配/原核心与最终验收由MAIN负责。后续以07/08/09文档、parallel-plan.json和根AGENTS.md为协作入口，未发布CP-A0与IMPLEMENTATION_RELEASE前不启动生产代码。
 
@@ -94,7 +98,7 @@
 
 ## 用户批准的双CLI分工
 
-三个lane内Codex负责设计/文档/验收，同目录Claude Code CLI负责具体开发；Claude报429时由该lane Codex自动接手，交接前核对进程停止并保留dirty工作。同目录单writer，恢复后不得自动抢回。接手实现的Codex不能自签独立外审；MAIN统一集成验收。详见AGENTS.md与07_PARALLEL_DEVELOPMENT.md。
+三个lane内Codex负责设计/文档/验收，同目录Claude Code CLI负责具体开发；Claude报429时该任务必须停止并报告，须用户明确授权后才可由lane Codex接手；交接前核对进程停止并保留dirty工作。同目录单writer，恢复后不得自动抢回。接手实现的Codex不能自签独立外审；MAIN统一集成验收。详见AGENTS.md与07_PARALLEL_DEVELOPMENT.md。
 
 ## 实现前汇报与大阶段人工验收（最新用户要求）
 

@@ -1,6 +1,10 @@
+## 最新用户规则：ClaudeCode 429 必须停下（2026-11-12）
+
+ClaudeCode 报 429 时，停止该实现任务，保留源码、未提交工作、日志和失败证据，向用户报告；未经用户对此次接手的明确授权，MAIN、领域 Codex 或其他 Agent 都不得代替它继续开发。旧 goal、旧 ReleaseAssignment 的“429 自动接手”、额度恢复、常规开发批准或“同阶段超过两次返工由 MAIN 接管”均不能代替这项明确授权。不得自动重试 Claude 请求、重启旧窗口、换供应商或更换凭据绕过。先停止继续派发，核对并记录原调用及所属子进程状态；仅观察超时不能认定进程已停，不得双写。只可进行保全现场、必要安全清理和只读诊断；不得将任务标为完成或 PASS。用户明确授权接手后，再确认原 writer 已停、保留全部工作并完成唯一写入者交接。此规则覆盖本文件下方及历史计划中冲突的 429 自动接手条款。
+
 ## 2026-11-11 最新授权：A恢复后实际开发
 
-用户新active goal明确批准按docs/execution/A/relaunch-20261111审定包进入A实际开发，覆盖旧暂停/仅准备文字。MAIN先R0当前字节复审、受影响验证、真实共同commit及精确ReleaseAssignment，再通过Orca领域Codex管理Claude实施与自验证；无release不跨owner写。当前进度与授权记录在canonical docs/execution/A/implementation-20261111，不修改已封存relaunch包。B仍不进入；不代签人验。Claude凭据事件处置仍UNKNOWN，不能假称已轮换；当前用户goal已明确授权ClaudeCode实施，不将轮换建议设为重复开工审批。按MAIN精确release交接后可调现有CLI，不读改配置；后续用户限制优先。429安全接手、超过两次返工MAIN接管、Headless静音、保全原候选与旧Gate历史继续有效。
+用户新active goal明确批准按docs/execution/A/relaunch-20261111审定包进入A实际开发，覆盖旧暂停/仅准备文字。MAIN先R0当前字节复审、受影响验证、真实共同commit及精确ReleaseAssignment，再通过Orca领域Codex管理Claude实施与自验证；无release不跨owner写。当前进度与授权记录在canonical docs/execution/A/implementation-20261111，不修改已封存relaunch包。B仍不进入；不代签人验。Claude凭据事件处置仍UNKNOWN，不能假称已轮换；当前用户goal已明确授权ClaudeCode实施，不将轮换建议设为重复开工审批。按MAIN精确release交接后可调现有CLI，不读改配置；后续用户限制优先。429必须停下且用户明确授权后方可接手、超过两次返工MAIN接管、Headless静音、保全原候选与旧Gate历史继续有效。
 
 # Narralens 多Agent工作约定
 
@@ -29,7 +33,7 @@
 
 **同一lane只有一个写入者。** Codex设计/文档与Claude实现分时执行；Claude写入时Codex仅只读观察，不并发改文件、Git索引、分支或运行根。每个lane在自身`docs/parallel/lane-*/`维护`TASK.md`与`HANDOFF.md`，记录任务状态、当前writer、base/contract/HEAD、dirty文件、命令/进程、日志与接手理由。默认Codex是lane负责人，Claude仅接已释放的实现任务。
 
-遇到Claude **429**，无需再问用户，Codex自动接手已授权剩余实现。先确认原Claude调用/子进程已结束或停止并记录，不能只凭一个429日志判断全部进程停止；记录错误与未完成工作，复核HEAD/差异、保留全部未提交内容，移交唯一writer后继续。不得reset/stash覆盖，不把失败或未完成测试写PASS；不得新增付费请求、外传或更换凭据。Claude恢复后默认仍停，直到Codex显式移交，禁止双写/自动抢回。
+遇到 Claude **429**，必须停止该实现任务并向用户报告，保全源码、dirty 工作、日志及失败证据。未经用户明确授权此次接手，Codex/MAIN/其他 Agent 不得继续实现；不自动重试、不重启旧窗口、不更换供应商或凭据。核对原调用及所属子进程状态，观察超时不能当作已停。只允许保全、必要安全清理与只读诊断。用户授权后须确认原 writer 已停，再完成唯一写入者移交；不得 reset/stash 覆盖、不得把未完成写 PASS。旧自动接手规则已废止。
 
 Codex接手实现后，其自测只能称内部验证，不能自签独立外审。该候选由未参与实现的MAIN/其他干净只读审查上下文复核；若MAIN也参与实现，则另取未参与的审查上下文。独立复核暂不可得时标`REVIEW_PENDING`，可继续无依赖的已授权工作，不能越过相关验收门。
 
