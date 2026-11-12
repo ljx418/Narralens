@@ -1,0 +1,14 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:234075) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/created-source-recovery.test.ts (20 tests | 18 skipped) 20253ms
+   ✓ D10 created-source business recovery > D10 recovery preserves the published source and refuses a marker-only request with a real attention  9274ms
+   ✓ D10 created-source business recovery > D10 recovery preserves everything when the published author bytes were tampered with  10979ms
+
+ Test Files  1 passed (1)
+      Tests  2 passed | 18 skipped (20)
+   Start at  10:44:24
+   Duration  28.67s (transform 3.58s, setup 0ms, collect 6.55s, tests 20.25s, environment 0ms, prepare 1.24s)
+

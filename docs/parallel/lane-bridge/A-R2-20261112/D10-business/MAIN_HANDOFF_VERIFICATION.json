@@ -1,0 +1,120 @@
+{
+  "at": "2026-11-12T03:30:44.805215+00:00",
+  "before_freeze_head": "de438d17dfc777a9d113c7207b98e1923ab72e6c",
+  "writer_handoff": [
+    "msg_aafa9c215cd0",
+    "msg_0929d782e51b",
+    "msg_e8101dff7d64",
+    "msg_ed4c031ed5c9"
+  ],
+  "final_source_sha256": {
+    "src/host/agent-driven/created-source-recovery.ts": "eb980288feb888a743475d185c1e34df3a67313d69dc2bb772e1eb9d13bfd1b5",
+    "src/host/agent-driven/created-source-adoption-service.ts": "9e140f5887b6e8ad5f406517504043ade1eaaa9df8978fee8a2d99d82c46ddb7",
+    "tests/agent-driven/integration/created-source-adoption.test.ts": "04eb25fa45efede7d101878d0c603d96b8947f377c49896dc3422a74ed644548",
+    "tests/agent-driven/integration/created-source-recovery.test.ts": "38bf3a469dfd8437c819f90751a0e004f817d724813a7a8e615ee7a0ed088445"
+  },
+  "captures": {
+    "d10-business-adoption-010": {
+      "exit": 0,
+      "source_changed": [],
+      "source_added": [],
+      "log_sha256": "9d6147989d60a80adc27937b6b2d5127fa770e6b3ad52507add8738cbcac733d",
+      "finished_at": "2026-11-12T03:22:37.257375+00:00"
+    },
+    "d10-business-oldsel-001": {
+      "exit": 1,
+      "source_changed": [],
+      "source_added": [],
+      "log_sha256": "18d81cfaaf6f44e9a178de2dc8c7ebd8675bf9d130e25883eec192d5c299b927",
+      "finished_at": "2026-11-12T02:38:07.626190+00:00"
+    },
+    "d10-business-oldsel-002": {
+      "exit": 1,
+      "source_changed": [],
+      "source_added": [],
+      "log_sha256": "2fa63fda6b592403c53f2267be70ac558a5176c5ae9f2525f77ec816b4a30c65",
+      "finished_at": "2026-11-12T02:44:01.578878+00:00"
+    },
+    "d10-business-oldsel-006": {
+      "exit": 1,
+      "source_changed": [],
+      "source_added": [],
+      "log_sha256": "76fbf60cbe6bcff0776b9f60e695d71a8b38fe3132e024054411bb523a2309cc",
+      "finished_at": "2026-11-12T03:00:48.177995+00:00"
+    },
+    "d10-business-oldsel-007": {
+      "exit": 1,
+      "source_changed": [],
+      "source_added": [],
+      "log_sha256": "92d314bfb96cc5e1eefc26721919d6deb8282f2bf961bf0d8fb453573e84b176",
+      "finished_at": "2026-11-12T03:05:37.625739+00:00"
+    },
+    "d10-business-repairedfull-004": {
+      "exit": 1,
+      "source_changed": [],
+      "source_added": [],
+      "log_sha256": "10364619ca1de993ce7264fd4aaed08cd1aa2762aa474b285783ecbb69015133",
+      "finished_at": "2026-11-12T02:49:15.213768+00:00"
+    },
+    "d10-business-repairedfull-005": {
+      "exit": 0,
+      "source_changed": [],
+      "source_added": [],
+      "log_sha256": "ae660ef28a802e69ccd88007a34b22c3712c2ac628d65078e34a7abfd3338003",
+      "finished_at": "2026-11-12T02:55:18.361930+00:00"
+    },
+    "d10-business-repairedfull-009": {
+      "exit": 0,
+      "source_changed": [],
+      "source_added": [],
+      "log_sha256": "e94a5977b69a9bf3111a299513aa96704571ca6fb005c8c08bd019bf42d0630b",
+      "finished_at": "2026-11-12T03:11:57.422640+00:00"
+    },
+    "d10-business-repairedsel-003": {
+      "exit": 0,
+      "source_changed": [],
+      "source_added": [],
+      "log_sha256": "dd9da8330a8b56d5020a5d6b7ac4a1458a7ad009f595546af9ddf821f305a686",
+      "finished_at": "2026-11-12T02:44:56.645551+00:00"
+    },
+    "d10-business-repairedsel-007": {
+      "exit": 0,
+      "source_changed": [],
+      "source_added": [],
+      "log_sha256": "a8d48c448a4aed640236b6d6b820f0a63df2071a2c8c546551b0f86de3245865",
+      "finished_at": "2026-11-12T03:01:55.379105+00:00"
+    },
+    "d10-business-repairedsel-008": {
+      "exit": 0,
+      "source_changed": [],
+      "source_added": [],
+      "log_sha256": "a88ea1383665953afb8027467995d85999a6a2f94bf08b0dd5f8c61f69f70e32",
+      "finished_at": "2026-11-12T03:06:19.568208+00:00"
+    },
+    "d10-business-tsc-011": {
+      "exit": 0,
+      "source_changed": [],
+      "source_added": [],
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "finished_at": "2026-11-12T03:26:50.265193+00:00"
+    }
+  },
+  "final_code_input_verification": {
+    "d10-business-repairedfull-009": {
+      "files_checked": 616,
+      "changed": []
+    },
+    "d10-business-adoption-010": {
+      "files_checked": 616,
+      "changed": []
+    },
+    "d10-business-tsc-011": {
+      "files_checked": 616,
+      "changed": []
+    }
+  },
+  "matching_cwd_node_vitest_processes": [],
+  "limit": "Scoped observation only, not all machine process absence; retained Claude idle not process exit. No productready or Host production/SIGKILL/legal successor/A claim.",
+  "report_corrections": "Claude report capture count11/groups66files stale; observed12groups72 capture files includes tsc011. Do not execute its checkout/delete rollback recipe: after freeze use reviewed explicit revert preserving all evidence/user work.",
+  "independent_review": "REVIEW_PENDING"
+}

@@ -6,7 +6,7 @@ import {createRequire,syncBuiltinESMExports} from 'node:module';
 import {vendorRoot} from './helpers/created-project-fixture.js';
 import {afterEach,describe,it,expect,vi} from 'vitest';
 import {preparedDraftFixture,waitForCompletedDraft,registryFacts} from './helpers/created-draft-fixture.js';
-import {canonicalDigest} from '../../../src/host/creative/digest.js';
+import {canonicalDigest,canonicalJson,contentDigest} from '../../../src/host/creative/digest.js';
 import {CreativeService} from '../../../src/host/creative/creative-service.js';
 import {FixedWorkflowService} from '../../../src/host/creative/fixed-workflow-service.js';
 import {CreatedPreparedSourceStore} from '../../../src/host/agent-driven/created-prepared-source-store.js';
@@ -89,11 +89,17 @@ async function fixture(options:{scopedPublicationRoot?:boolean;transactionKind?:
  }
  const planDigest=preparedAdoptionPlanDigest(plan),transactionId='txn_'+randomUUID().replaceAll('-','');
  const approvalId='approval_'+randomUUID().replaceAll('-',''),confirmationId='confirm_'+randomUUID().replaceAll('-',''),reviewId='review_'+randomUUID().replaceAll('-',''),packageId='package_'+randomUUID().replaceAll('-','');
- const requestDigest=canonicalDigest({project_id:f.projectId,impact_id:impactId,execution});
+ // The original request of a created-source adoption is the complete ApplyChange
+ // wrapper. The stored hash is the content digest of that exact input, so the dedicated
+ // recovery can prove which request it is recovering.
+ const applyChange={meta:{idempotency_key:'module-apply',correlation_id:'module-root'},project_id:f.projectId,impact_id:impactId,approval_id:approvalId,
+  base_revision:1,source_digest:plan.base_source_digest,execution};
+ const requestDigest=contentDigest(applyChange);
+ const impactRequestDigest=canonicalDigest({project_id:f.projectId,impact_id:impactId,execution});
  const impact=preparedByService?impacts.read(impactId)!:impacts.create({impact_id:impactId,project_id:f.projectId,materialization_id:mapping.prepared_source_id,target_snapshot_id:plan.target_snapshot_id,
   base_revision:1,source_digest:plan.base_source_digest,control_revision:0,engine_upstream_sha:OPENFILM_UPSTREAM_SHA,affected_ranges:plan.affected_ranges,
   affected_consumers:[{kind:'native',id:'native',action:'replace'}],locks_checked:[],rights_digest:completed.fact.rights_digest,native_plan_sha256:planDigest,
-  approvals_required:['change.approve'],request_digest:requestDigest,plan,now});
+  approvals_required:['change.approve'],request_digest:impactRequestDigest,plan,now});
  const pkg:ReviewPackage={project_id:f.projectId,run_id:execution.run_id,plan_version:1,package_id:packageId,version:1,kind:'sample',chapter_id:null,
   input_digest:execution.input_digest,output_digest:completed.fact.source_digest,quality_digest:canonicalDigest({fixture:'accepted review policy only'}),
   parts:(['preview','narration','subtitles','shot_summary','rights_quality'] as const).map(kind=>({kind,artifact_ref:{id:'module-'+kind,version:1,sha256:factDigest},download_ref:null})),source_shot_ids:[...metadata.clip_ids],selection_reason:'Module fixture; no human review or UI claim',allowed_choices:['accept_and_adopt'],
@@ -101,7 +107,7 @@ async function fixture(options:{scopedPublicationRoot?:boolean;transactionKind?:
    selection_version:0,plan_sha256:planDigest,target_snapshot_id:plan.target_snapshot_id,expires_at:plan.expires_at,state:'active',summary:'module fixture'},
   reuse_of_package_id:null,review_url:`/workbench/projects/${f.projectId}/reviews/${reviewId}`,state:'accepted'};
  const packageDigest=canonicalDigest(pkg),actionDigest=planDigest;
- revisions.beginTransaction({transaction_id:transactionId,project_id:f.projectId,kind:options.transactionKind??'edit',correlation_id:'module-root',request_json:JSON.stringify({operation:'agent.created_source.apply@1'}),request_hash:requestDigest,base_revision:1});
+ revisions.beginTransaction({transaction_id:transactionId,project_id:f.projectId,kind:options.transactionKind??'edit',correlation_id:'module-root',request_json:canonicalJson({operation:'agent.created_source.apply@1',input:applyChange}),request_hash:requestDigest,base_revision:1});
  await repo.transaction(tx=>{
   tx.put('artifact_version',{project_id:f.projectId,artifact_id:packageId,version:1},{project_id:f.projectId,artifact_id:packageId,version:1,kind:'chapter',schema_version:1,
    input_digest:execution.input_digest,content_digest:packageDigest,content_json:pkg,input_refs_json:[],created_at:now.toISOString()});
@@ -136,7 +142,7 @@ async function fixture(options:{scopedPublicationRoot?:boolean;transactionKind?:
  const proof=await publisher.publish(publicationInput);
  const input:CommitPreparedCreatedSourceInput={project_id:f.projectId,transaction_id:transactionId,impact_id:impactId,approval_id:approvalId,prepared_source_id:mapping.prepared_source_id,
   execution,idempotency_key:'module-apply',request_digest:requestDigest,publication_proof:proof};
- return {...f,revisions,repo,plan,impact,adoptions,publisher,closePublisher,input,publicationInput,proof,publisherPrivateRoot,selectionPort:{currentSelectionVersion:()=>selection},advanceSelection:()=>selection++};
+ return {...f,revisions,repo,plan,impact,adoptions,publisher,closePublisher,input,publicationInput,proof,publisherPrivateRoot,applyChange,selectionPort:{currentSelectionVersion:()=>selection},advanceSelection:()=>selection++};
 }
 
 async function recoveryFixture(){

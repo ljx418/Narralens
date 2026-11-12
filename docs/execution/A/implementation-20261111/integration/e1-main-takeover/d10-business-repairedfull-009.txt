@@ -1,0 +1,36 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:312288) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/created-source-recovery.test.ts (24 tests) 303961ms
+   ✓ D10 created-source business recovery > D10 recovery commits the original published transaction exactly once and replays its receipt  10656ms
+   ✓ D10 created-source business recovery > D10 recovery reconstructs a missing published journal from the actual resources and commits once  16865ms
+   ✓ D10 created-source business recovery > D10 recovery never takes over an unknown operation or an unknown transaction kind  8949ms
+   ✓ D10 created-source business recovery > D10 recovery preserves the published source and refuses a marker-only request with a real attention  11896ms
+   ✓ D10 created-source business recovery > D10 recovery aborts an early unpublished transaction after proving the complete original closure  11812ms
+   ✓ D10 created-source business recovery > D10 recovery preserves everything when the published author bytes were tampered with  10247ms
+   ✓ D10 created-source business recovery > D10 recovery keeps an attention in the unresolved set instead of reporting an empty readiness  12082ms
+   ✓ D10 created-source business recovery > D10 recovery preserves the published source and defers on a transient resource error  12542ms
+   ✓ D10 created-source business recovery > D10 recovery treats an exhausted host resource as deferred and never as a terminal fact  14402ms
+   ✓ D10 created-source business recovery > D10 recovery treats an out-of-memory failure as unknown rather than as a lost source  17596ms
+   ✓ D10 created-source business recovery > D10 recovery preserves the publication when the adoption fact is missing but the publication evidence exists  9180ms
+   ✓ D10 created-source business recovery > D10 recovery refuses to replay a committed transaction whose receipt is gone  12488ms
+   ✓ D10 created-source business recovery > D10 recovery refuses a replay whose receipt names another principal, key or correlation  16134ms
+   ✓ D10 created-source business recovery > D10 recovery replays the original receipt independently of a corrupted current pointer  9178ms
+   ✓ D10 created-source business recovery > D10 recovery keeps no retained descriptor when a guard verification fails  12689ms
+   ✓ D10 created-source business recovery > D10 recovery refuses further work for a project whose resource cleanup failed  15388ms
+   ✓ D10 created-source business recovery > D10 recovery compensates and aborts when the approval has expired, without consuming any authority  20668ms
+   ✓ D10 created-source business recovery > D10 recovery compensates and aborts when the selection moved  13975ms
+   ✓ D10 created-source business recovery > D10 recovery compensates and aborts when an active lock covers the project  11524ms
+   ✓ D10 created-source business recovery > D10 recovery compensates and aborts when the run was cancelled  12559ms
+   ✓ D10 created-source business recovery > D10 recovery defers behind an older controlled pending row of another family  8997ms
+   ✓ D10 created-source business recovery > D10 recovery leaves an unrelated unknown pending row to the original gate  10992ms
+   ✓ D10 created-source business recovery > D10 recovery startup decides only its own family rows and reports the unresolved ones  10637ms
+   ✓ D10 created-source business recovery > D10 recovery closes after the work it already accepted and refuses new work  12502ms
+
+ Test Files  1 passed (1)
+      Tests  24 passed (24)
+   Start at  11:06:30
+   Duration  313.83s (transform 4.20s, setup 0ms, collect 7.56s, tests 303.96s, environment 0ms, prepare 1.55s)
+

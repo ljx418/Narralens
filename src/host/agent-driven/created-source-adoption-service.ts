@@ -123,8 +123,16 @@ export class CreatedSourceAdoptionService {
      prepared_source_id:mapping.prepared_source_id,execution:input.execution,idempotency_key:input.meta.idempotency_key,request_digest:digest,publication_proof:publication});
    }catch(error){failed=true;primary=error;
     if(transactionId){
-     if(publisher?.journalOf(transactionId).length)this.options.host.coordinator.attention(transactionId,'CREATED_SOURCE_RECOVERY_REQUIRED','Publication requires dedicated recovery');
-     else this.options.host.coordinator.abort(transactionId,'CREATED_SOURCE_ADOPTION_FAILED');
+     // An interrupted publication is not a terminal attention. The prepared row stays
+     // with the dedicated recovery, and the original gate keeps blocking writes for this
+     // project until that recovery decides it. A failed operation never produces a
+     // terminal state that the dedicated recovery could not still converge.
+     const published=publisher?.journalOf(transactionId).some(row=>row.phase==='published');
+     // An abort is only legal after the complete original closure is proved at the
+     // author root. An empty publication journal is not a proof of anything.
+     const holds=await this.#authorHoldsBase(input.project_id,plan.base_source_digest);
+     if(!published&&holds==='holds')
+      this.options.host.coordinator.abort(transactionId,'CREATED_SOURCE_ADOPTION_FAILED');
     }
     throw error;
    }finally{
@@ -140,4 +148,27 @@ export class CreatedSourceAdoptionService {
   for(const publisher of [...this.#publishers])try{await publisher.close();this.#publishers.delete(publisher);}catch(error){errors.push(error);}
   if(errors.length)throw new PublicationCleanupError(errors);
  })();}
+ /** The author root still holds the complete original closure of the committed base.
+  * This is the proof an abort of an unpublished transaction needs; the absence of a
+  * publication journal is not that proof.
+  *
+  * The three answers are kept apart on purpose: `holds` is a proved fact that makes an
+  * abort legal, `differs` is a proved fact that does not, and `unknown` is a machine
+  * failure such as ENOMEM or EIO. A machine failure is never turned into "the author
+  * does not hold the source": the prepared row simply stays with the dedicated
+  * recovery, and the original error is still thrown to the caller. */
+ async #authorHoldsBase(projectId:string,baseSourceDigest:string):Promise<'holds'|'differs'|'unknown'>{
+  try{
+   const view=await this.options.host.projectResolver.resolveCreated(projectId);
+   const now=await computeSourceDigest({root:view.source_root.value,roots:view.source_fact.roots,engine:'openfilm',engineUpstreamSha:OPENFILM_UPSTREAM_SHA});
+   return now.external_reference_count===0&&now.source_digest===baseSourceDigest?'holds':'differs';
+  }catch(error){
+   // A confirmed absence or a proven conflict is a fact about the author. Every other
+   // failure is the machine, and the machine is not a verdict about the source.
+   const code=(error as {code?:unknown}|null|undefined)?.code;
+   if(code==='ENOENT'||code==='ENOTDIR')return 'differs';
+   if(error instanceof ProductError&&error.code==='REVISION_CONFLICT')return 'differs';
+   return 'unknown';
+  }
+ }
 }
