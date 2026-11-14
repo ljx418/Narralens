@@ -1,0 +1,62 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+ ❯ tests/m2.1/openfilm-upstream-lock.test.ts (15 tests | 1 failed) 219ms
+   ✓ M-04 pinned OpenFilm checkout verification > pins every file the loader is about to execute, plus package, lock and licence 2ms
+   ✓ M-04 pinned OpenFilm checkout verification > keeps the production lock consistent with the M1B recorded upstream lock 0ms
+   ✓ M-04 pinned OpenFilm checkout verification > refuses a checkout with no git HEAD 7ms
+   ✓ M-04 pinned OpenFilm checkout verification > fails closed when git status cannot be executed 9ms
+   ✓ M-04 pinned OpenFilm checkout verification > fails closed when git status exits non-zero 8ms
+   ✓ M-04 pinned OpenFilm checkout verification > fails closed when git status times out 18ms
+   ✓ M-04 pinned OpenFilm checkout verification > uses a 30 second production default without weakening an explicit fail-closed budget 4ms
+   ✓ M-04 pinned OpenFilm checkout verification > rejects a tracked dirty checkout and records git_clean only after a successful check 17ms
+   ✓ M-04 pinned OpenFilm checkout verification > refuses when the seam module was tampered with 7ms
+   ✓ M-04 pinned OpenFilm checkout verification > refuses when any other loaded module, package, lock or licence changes 36ms
+   ✓ M-04 pinned OpenFilm checkout verification > reports a missing pinned file as missing rather than as a digest mismatch 8ms
+   ✓ M-04 pinned OpenFilm checkout verification > refuses to load rather than loading a module whose digest does not match 7ms
+   ✓ M-04 pinned OpenFilm checkout verification > refuses a caller-forged reusable verification verdict 6ms
+   × M-04 pinned OpenFilm checkout verification > never lets a caller supply the vendor path through a request 50ms
+     → expected { openFilmAvailability: +0, …(6) } to deeply equal { …(6) }
+   ✓ M-04 pinned OpenFilm checkout verification > proves the vendor-path rule has teeth on the real ways in 40ms
+ ✓ tests/architecture/m2.2-fitness.test.ts (18 tests) 2161ms
+   ✓ M2.2 fitness: one state machine, no arbitrary state writes > 1. every production `UPDATE ... SET state` lives in transition, advanceJournal or markRecovering  536ms
+   ✓ M2.2 fitness: one state machine, no arbitrary state writes > 13. every job state write goes through the store that owns the transition table  340ms
+   ✓ M2.2 fitness: one state machine, no arbitrary state writes > 2. no production DELETE on a journal row; rows are evidence, not scratch  302ms
+   ✓ M2.2 fitness: one state machine, no arbitrary state writes > 3. only project_state ever changes the current revision  313ms
+   ✓ M2.2 fitness: no second actor, queue, store or timeline > 5. no production class extends or duplicates ProjectWriteActor  320ms
+   ✓ M2.2 fitness: no second actor, queue, store or timeline > 6. the revision store owns one database handle; no second DatabaseSync for project state  330ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/m2.1/openfilm-upstream-lock.test.ts > M-04 pinned OpenFilm checkout verification > never lets a caller supply the vendor path through a request
+AssertionError: expected { openFilmAvailability: +0, …(6) } to deeply equal { …(6) }
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  {[22m
+[2m    "createPinnedOpenFilmCacheProducer": 0,[22m
+[2m    "createPinnedOpenFilmFolderServer": 0,[22m
+[2m    "createPinnedOpenFilmServingOwner": 0,[22m
+[2m    "createPinnedOpenFilmUpstream": 0,[22m
+[31m+   "isIssuedOpenFilmCacheProducer": 0,[39m
+[2m    "openFilmAvailability": 0,[22m
+[2m    "openFilmServingBridge": 1,[22m
+[2m  }[22m
+
+ ❯ tests/m2.1/openfilm-upstream-lock.test.ts:650:8
+    648|     // it at - the fact is derived from the module, it is not a number…
+    649|     expect(Object.fromEntries(entries.map(entry => [entry.exportName, …
+    650|       .toEqual({
+       |        ^
+    651|         createPinnedOpenFilmCacheProducer: 0,
+    652|         createPinnedOpenFilmFolderServer: 0,
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 32 passed (33)
+   Start at  17:05:07
+   Duration  8.15s (transform 171ms, setup 0ms, collect 1.62s, tests 2.38s, environment 0ms, prepare 2.77s)
+

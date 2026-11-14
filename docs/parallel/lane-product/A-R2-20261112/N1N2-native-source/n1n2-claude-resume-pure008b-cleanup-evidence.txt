@@ -1,0 +1,26 @@
+# N1N2 pure gate 083 - owned-resource cleanup receipt, captured raw
+# Narrow labelling: what THIS shell's view showed at the moment it was captured. It is NOT
+# a proof that no such process or directory exists anywhere on the machine, NOT a proof
+# that no descriptor leaked into another process, and NOT a per-resource lifetime test.
+
+## after command 083 (n1n2-claude-resume-083-gate-pure), captured 2026-11-12T09:40:32Z
+### the shell of command 083 (pid 1406068)
+    PID STAT ELAPSED COMMAND
+(the header alone, with no row under it, is what 'absent' looks like here)
+
+### every process of commands 080 and 083, by their recorder names
+(no rows above = none matched in this view at this moment)
+
+### processes matching ffprobe|ffmpeg|vitest|narralens|openfilm, in this shell's process view
+(no rows above = none matched in this view at this moment)
+
+### fixture tmpdirs, in this shell's view
+ls: cannot access '/tmp/n1n2-closure-*': No such file or directory
+ls: cannot access '/tmp/n1n2-rev-*': No such file or directory
+ls: cannot access '/tmp/narralens-created-workspace-*': No such file or directory
+(no rows above = none present in this view at this moment)
+
+## the commands and their terminal identities
+080 n1n2-claude-resume-080-gate-pure  shell 1359943  exit 1  14PASS/2FAIL/34filtered  log c7623a026aa4fae0e234b47a32ce95d4d210c8acab3d5e749ca69818874a2a18
+083 n1n2-claude-resume-083-gate-pure  shell 1406068  exit 1  14PASS/3FAIL/34filtered  log 2d2a6a577176d36146385ecc4c2deed2842a2ba6254a1362b152973863e2b0d2
+both: source_changed [] and source_added [] (no input drift)

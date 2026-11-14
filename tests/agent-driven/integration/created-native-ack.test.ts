@@ -27,6 +27,9 @@ import {
   type NativeExpectedSourceFacts,
   type NativeExpectedSourcePort,
 } from '../../../src/host/m5/openfilm-native-expected.js';
+// The two parser types the approved library exposes. They are types only: the stub
+// library below stands in for the approved module, and the 84 assertions are unchanged.
+import type { Marker, ProjectSettings } from '../../../tools/agent-driven/product/native-inputs/expected-projection.js';
 
 /**
  * The closed native observation envelope (A-R2, L05).
@@ -387,7 +390,13 @@ function stageLibrary(root: string, options: { readonly throwOnCompute?: boolean
         : 'export function computeExpectedProjection() {\n'
           + '  return { status: "unsupported", profile: EXPECTED_PROFILE, reason: "INPUT_INVALID" };\n'
           + '}\n')
-    + 'export { hydrationCanonicalJson };\n');
+    + 'export { hydrationCanonicalJson };\n'
+    // The approved module exports the settings and markers parsers; a stand-in for it
+    // has to offer them too, or the loader refuses the candidate.
+    + 'export function parseProjectSettings(value) {\n'
+      + '  return value && typeof value === "object" && !Array.isArray(value) ? value : {};\n'
+      + '}\n'
+    + 'export function parseMarkers(value) { return Array.isArray(value) ? value : []; }\n');
   writeFileSync(resolve(dist, 'build-manifest.json'), JSON.stringify({ kind: 'narralens.native-expected-projection-build@1', upstream_sha: NATIVE_EXPECTED_UPSTREAM_SHA }));
   return {
     dist,
@@ -650,6 +659,26 @@ describe('the expected loader approval chain', () => {
       approved.modules['expected-projection.mjs'] = staged.digestOf('expected-projection.mjs');
       await expect(nativeExpectedLibraryLoader({ distRoot: staged.dist, inputsRoot: staged.inputs, runtimeRoot: staged.runtime }).load(approved))
         .rejects.toThrow('NATIVE_EXPECTED_MODULE_DEPENDENCY_UNBOUND');
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it('refuses a candidate whose module does not export the settings and markers parsers', async () => {
+    const root = mkdtempSync(join(tmpdir(), 'narralens-r2-loader-'));
+    try {
+      const staged = stageLibrary(root);
+      const approved = await approvedOf(staged);
+      // The same approved candidate without the two parsers the Host needs: the
+      // loader refuses it and never falls back to another parser.
+      writeFileSync(resolve(staged.dist, 'expected-projection.mjs'),
+        'import { hydrationCanonicalJson } from "./native-pure-library.mjs";\n'
+        + 'export const EXPECTED_PROFILE = "narralens.native-expected-numeric@1";\n'
+        + 'export function computeExpectedProjection() { return { status: "unsupported", profile: EXPECTED_PROFILE, reason: "INPUT_INVALID" }; }\n'
+        + 'export { hydrationCanonicalJson };\n');
+      approved.modules['expected-projection.mjs'] = staged.digestOf('expected-projection.mjs');
+      await expect(nativeExpectedLibraryLoader({ distRoot: staged.dist, inputsRoot: staged.inputs, runtimeRoot: staged.runtime }).load(approved))
+        .rejects.toThrow('NATIVE_EXPECTED_BUILD_UNSUPPORTED');
     } finally {
       rmSync(root, { recursive: true, force: true });
     }
@@ -1926,6 +1955,8 @@ function stubLibrary(): NativeExpectedLibrary {
     upstream_sha: NATIVE_EXPECTED_UPSTREAM_SHA,
     computeExpectedProjection: () => ({ status: 'unsupported', profile: NATIVE_EXPECTED_PROFILE, reason: 'INPUT_INVALID' }),
     hydrationCanonicalJson: (value: unknown) => JSON.stringify(value) ?? 'null',
+    parseProjectSettings: (value: unknown) => (value && typeof value === 'object' && !Array.isArray(value) ? (value as ProjectSettings) : {}),
+    parseMarkers: (value: unknown) => (Array.isArray(value) ? (value as Marker[]) : []),
   };
 }
 

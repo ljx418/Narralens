@@ -1,0 +1,198 @@
+{
+  "status": "ACCEPTANCE_CHECKLIST_NOT_EXECUTED_NOT_RUNTIME_GRANT",
+  "created_at": "2026-11-13T00:46:21.926559+00:00",
+  "implementation_dispatch": "ctx_297f7b8da2e1",
+  "candidate_commit": null,
+  "original_matrix": "/mnt/c/workspace/videoworkline/Narralens/docs/execution/A/implementation-20261111/R2/native-composition-implementation/resume-claude-20261112/independent-coverage-audit-round3/MATRIX.json",
+  "original_matrix_sha256": "baa321eece3c2bcca154b9463e6fcdc94dd86ddabf13a396e0d88a3db5f667e6",
+  "requirements": [
+    {
+      "group": "R01",
+      "requirement": "producer_chain",
+      "proof_required": "Actual bootstrap, SOURCE_ONLY draft and controlled adoption produce committed rich source; actual workspace/reader consumes it; preserve producer/rights/consumer identities.",
+      "linked_findings": [],
+      "candidate_evidence": [],
+      "status": "PENDING_CANDIDATE_VERIFICATION"
+    },
+    {
+      "group": "R01",
+      "requirement": "independent_trees",
+      "proof_required": "Committed source and workspace retain independent physical trees; equal relative paths never collapse resource ownership; nested and empty directories are separate evidence.",
+      "linked_findings": [],
+      "candidate_evidence": [],
+      "status": "PENDING_CANDIDATE_VERIFICATION"
+    },
+    {
+      "group": "R02",
+      "requirement": "tamper_and_authority",
+      "proof_required": "Same bytes/new inode, parent/root replacement, same-size/restored mtime, symlink, copied/foreign/released capability and stale base/control/owner/generation are refused before authoritative use.",
+      "linked_findings": [
+        "K04",
+        "K06"
+      ],
+      "candidate_evidence": [],
+      "status": "PENDING_CANDIDATE_VERIFICATION"
+    },
+    {
+      "group": "R03",
+      "requirement": "complete_dependencies",
+      "proof_required": "Positive/negative style/settings/markers/subtitle/translation dependencies, added empty directory and actual listing changes invalidate stale proofs.",
+      "linked_findings": [
+        "K06"
+      ],
+      "candidate_evidence": [],
+      "status": "PENDING_CANDIDATE_VERIFICATION"
+    },
+    {
+      "group": "R04",
+      "requirement": "native_cache",
+      "proof_required": "Unknown/forged native metadata or cache refused; concrete approved producer derivation invalidates old round, then stable proven native derivation can be read; no broad cache whitelist.",
+      "linked_findings": [
+        "K01",
+        "K03",
+        "K04",
+        "K05"
+      ],
+      "candidate_evidence": [],
+      "status": "PENDING_CANDIDATE_VERIFICATION"
+    },
+    {
+      "group": "R05",
+      "requirement": "actual_probe",
+      "proof_required": "Fixed local ffprobe uses same held parent-PID FD; normalized duration/first-video/fps/rotation/audio/dimensions and provenance match pinned upstream; no injected facts.",
+      "linked_findings": [],
+      "candidate_evidence": [],
+      "status": "PENDING_CANDIDATE_VERIFICATION"
+    },
+    {
+      "group": "R05",
+      "requirement": "child_lifetime",
+      "proof_required": "Timeout/cancel/abrupt child: actual child exit and reap precede input release; limits refuse rather than truncate; diagnostic media never represents Chinese A films.",
+      "linked_findings": [],
+      "candidate_evidence": [],
+      "status": "PENDING_CANDIDATE_VERIFICATION"
+    },
+    {
+      "group": "R06",
+      "requirement": "native_bytes_and_order",
+      "proof_required": "Exact UTF8/BOM/CRLF/native_rev vectors; numeric localeCompare video ordering vs separate actual caption readdir order; Node/ICU/locale recorded.",
+      "linked_findings": [],
+      "candidate_evidence": [],
+      "status": "PENDING_CANDIDATE_VERIFICATION"
+    },
+    {
+      "group": "R07",
+      "requirement": "budgets",
+      "proof_required": "Size checks precede bounded text read; growth, total bytes, path/depth/FD/output/time bounds have explicit rejection; no unbounded media read.",
+      "linked_findings": [
+        "K02",
+        "K05"
+      ],
+      "candidate_evidence": [],
+      "status": "PENDING_CANDIDATE_VERIFICATION"
+    },
+    {
+      "group": "R07",
+      "requirement": "per_allocation_fd_lifetime",
+      "proof_required": "Descriptor allocation generations own closes; recycled integer after temporary directory walk still closes newly retained allocation exactly once; no raw numeric retry.",
+      "linked_findings": [
+        "K05"
+      ],
+      "candidate_evidence": [],
+      "status": "PENDING_CANDIDATE_VERIFICATION"
+    },
+    {
+      "group": "R07",
+      "requirement": "cleanup_uncertainty",
+      "proof_required": "Nth open/stat/verify/close/reentry failures preserve primary and all cleanup errors; every outstanding resource attempted; sticky uncertainty prevents new proof.",
+      "linked_findings": [
+        "K02",
+        "K05"
+      ],
+      "candidate_evidence": [],
+      "status": "PENDING_CANDIDATE_VERIFICATION"
+    },
+    {
+      "group": "R07",
+      "requirement": "drain_and_delivery",
+      "proof_required": "Close drains accepted reads and probes; success transfers source/workspace plus directory/negative guards; reader close cannot destroy delivered resources.",
+      "linked_findings": [
+        "K05"
+      ],
+      "candidate_evidence": [],
+      "status": "PENDING_CANDIDATE_VERIFICATION"
+    },
+    {
+      "group": "R01/R02",
+      "requirement": "lease_isolation",
+      "proof_required": "Releasing one acquired lease does not revoke ref or another lease; repeated proof works; issuing instance checked and replaced generation invalidates prior proof.",
+      "linked_findings": [
+        "K01",
+        "K06"
+      ],
+      "candidate_evidence": [],
+      "status": "PENDING_CANDIDATE_VERIFICATION"
+    },
+    {
+      "group": "REG",
+      "requirement": "existing_behavior",
+      "proof_required": "Original render SnapshotReadPort, legacy refusal and accepted Expected lifecycle/84 assertions preserved; loader only approved015 minimal exports, no artifact/pin change.",
+      "linked_findings": [],
+      "candidate_evidence": [],
+      "status": "PENDING_CANDIDATE_VERIFICATION"
+    },
+    {
+      "group": "EVIDENCE",
+      "requirement": "frozen_capture",
+      "proof_required": "Exact ten-file diff and protected hashes checked; unique captures retain all failures, source/index immutable during commands, actual exits and source/artifact SHA256 verified.",
+      "linked_findings": [],
+      "candidate_evidence": [],
+      "status": "PENDING_CANDIDATE_VERIFICATION"
+    },
+    {
+      "group": "REVIEW",
+      "requirement": "independent_acceptance",
+      "proof_required": "Freeze actual candidate and obtain independent review bound to it; fix then reverify affected gates. No self-signed external pass.",
+      "linked_findings": [],
+      "candidate_evidence": [],
+      "status": "PENDING_CANDIDATE_VERIFICATION"
+    },
+    {
+      "group": "NEXT",
+      "requirement": "next_integration_plan",
+      "proof_required": "After N1N2 acceptance freeze compatible next-stage contract and exact implementation/acceptance plan; no premature S01/NativeAck/Studio/film/A readiness claim.",
+      "linked_findings": [],
+      "candidate_evidence": [],
+      "status": "PENDING_CANDIDATE_VERIFICATION"
+    }
+  ],
+  "capture_prerequisites": [
+    "Claude completes all-source correction and case map, recorded compile settles before final source snapshot",
+    "MAIN independently checks exact scope, protected files, user AGENTS and empty index",
+    "Persist exact bytes and SHA256 of all source dependencies, including conditional helper when used; do not rely on git for untracked sources",
+    "Exact argv/cwd/case/runtime owners and cleanup supplied before resource grant; immutable input during actual commands"
+  ],
+  "evidence_layers": [
+    "Pure bounded closure and capability negatives",
+    "Actual committed rich-source reader/authority/cleanup and real service/DB windows",
+    "Pinned real pageframe+poster producer in silent headless offline loopback; prove source/witness/cleanup and last-owner lifetime",
+    "Default shared fixture regression across actual callers and retained Expected/ack/workspace/snapshot tests",
+    "Frozen candidate commit independent review, affected re-verification after fixes",
+    "Next-stage contract and development/acceptance package reanchored only after N1N2 acceptance"
+  ],
+  "non_substitution_rules": [
+    "No test count substitutes original requirement coverage",
+    "020 passed on old bytes remains historical and cannot prove021",
+    "Foreign negatives independently hit intended boundary, including actual service.record promotion and actual consumer refusal",
+    "owner/base/control/ref/generation distinct authority changes with recorded hit",
+    "No browser grant inferred from component grant; actual producer success required, no mocks or permanently disabled family",
+    "Real cleanup failures retain primary and every genuine cause; borrowed numericFD never retried",
+    "Historic parse-prefix leftovers require ownership proof before removal; no blind glob delete",
+    "Failed captures preserved with complete commands/exits/hash inputs; unknown cause remains unknown"
+  ],
+  "stop_conditions": [
+    "New Claude429: immediately stop affected implementation, preserve state, report; no automatic retry/provider switch/Codex takeover",
+    "No next-stage code release until actual N1N2 frozen candidate independently accepted"
+  ],
+  "approval_scope": "Planning/checklist only; no actual verification results asserted"
+}

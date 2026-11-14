@@ -1,0 +1,40 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:1277215) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/created-native-workspace.test.ts (11 tests) 73135ms
+   ✓ opens the real HTTP-created committed project in native Studio using only its independent verified working copy  10265ms
+   ✓ coalesces identical preparation, rejects a foreign principal before I/O, and does not turn a copy into a revision  4475ms
+   ✓ refuses a modified disposable source, then rebuilds from the still-proven immutable snapshot  4140ms
+   ✓ rejects storage overlapping an author or snapshot root before creating any directories  4867ms
+   ✓ does not follow a symbolic-link leaf in a damaged derived copy  4232ms
+   ✓ wires the actual Host Supervisor to a prepared committed copy and removes it only after native shutdown  9996ms
+   ✓ closes every actual late-created Gateway/Studio listener when Host close races Gateway publication  10434ms
+   ✓ rechecks the actual cached preparation after its awaited verification when shutdown begins  3934ms
+   ✓ rejects an ancestor alias installed after construction without creating anything inside the real snapshot  3546ms
+   ✓ refuses an obsolete prepared version after the actual native startup window  9684ms
+   ✓ does not publish a preview when the actual native-open response races a prepared version replacement  7560ms
+(node:1279220) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/committed-snapshot-host.test.ts (11 tests) 32796ms
+   ✓ uses a real committed Host transaction and pinned native parser for its immutable snapshot, never claims a draft is a film  3970ms
+   ✓ continues to read the committed snapshot after the live author source drifts  3874ms
+   ✓ refuses another principal, another transaction, another snapshot and a false expected digest  2126ms
+   ✓ rechecks the committed transaction on every read rather than trusting a once-created reader  2841ms
+   ✓ rejects mutated immutable bytes even while the database digest stays unchanged  2428ms
+   ✓ refuses a snapshot source symlink to identical bytes outside its own snapshot directory  2543ms
+   ✓ refuses a FIFO substituted for a snapshot entry without occupying the request forever  2218ms
+   ✓ reports unavailable snapshot paths without leaking absolute server paths or latching a read failure  3501ms
+   ✓ retries a failed pinned upstream initialization instead of caching unavailable forever  2929ms
+   ✓ refuses a FIFO installed after the digest but immediately before the actual pinned parser reads the film  3080ms
+   ✓ refuses changed film bytes between digest and pinned parsing even when its editable document is equivalent  3283ms
+(node:1280283) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/created-native-ack.test.ts (85 tests) 996ms
+
+ Test Files  3 passed (3)
+      Tests  107 passed (107)
+   Start at  16:45:01
+   Duration  131.81s (transform 5.53s, setup 0ms, collect 16.64s, tests 106.93s, environment 0ms, prepare 5.56s)
+

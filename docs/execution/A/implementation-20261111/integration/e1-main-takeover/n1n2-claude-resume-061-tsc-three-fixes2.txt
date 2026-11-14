@@ -1,0 +1,6 @@
+src/host/agent-driven/retained-native-closure.ts(208,138): error TS2345: Argument of type '((bytes: number) => void) | undefined' is not assignable to parameter of type '((relativePath: string, bytes: number) => void) | undefined'.
+  Type '(bytes: number) => void' is not assignable to type '(relativePath: string, bytes: number) => void'.
+    Types of parameters 'bytes' and 'relativePath' are incompatible.
+      Type 'string' is not assignable to type 'number'.
+tests/agent-driven/integration/created-native-source-reader.test.ts(920,35): error TS2322: Type '(relativePath: string, bytes: number) => void' is not assignable to type '(bytes: number) => void'.
+  Target signature provides too few arguments. Expected 2 or more, but got 1.

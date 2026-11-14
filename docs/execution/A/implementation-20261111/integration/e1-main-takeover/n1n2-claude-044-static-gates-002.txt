@@ -1,0 +1,75 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+ ❯ tests/m2.1/openfilm-upstream-lock.test.ts (35 tests | 1 failed) 1375ms
+   ✓ M-04 pinned OpenFilm checkout verification > pins every file the loader is about to execute, plus package, lock and licence 1ms
+   ✓ M-04 pinned OpenFilm checkout verification > keeps the production lock consistent with the M1B recorded upstream lock 0ms
+   ✓ M-04 pinned OpenFilm checkout verification > refuses a checkout with no git HEAD 7ms
+   ✓ M-04 pinned OpenFilm checkout verification > fails closed when git status cannot be executed 9ms
+   ✓ M-04 pinned OpenFilm checkout verification > fails closed when git status exits non-zero 9ms
+   ✓ M-04 pinned OpenFilm checkout verification > fails closed when git status times out 24ms
+   ✓ M-04 pinned OpenFilm checkout verification > uses a 30 second production default without weakening an explicit fail-closed budget 3ms
+   ✓ M-04 pinned OpenFilm checkout verification > rejects a tracked dirty checkout and records git_clean only after a successful check 18ms
+   ✓ M-04 pinned OpenFilm checkout verification > refuses when the seam module was tampered with 7ms
+   ✓ M-04 pinned OpenFilm checkout verification > refuses when any other loaded module, package, lock or licence changes 36ms
+   ✓ M-04 pinned OpenFilm checkout verification > reports a missing pinned file as missing rather than as a digest mismatch 6ms
+   ✓ M-04 pinned OpenFilm checkout verification > refuses to load rather than loading a module whose digest does not match 6ms
+   ✓ M-04 pinned OpenFilm checkout verification > refuses a caller-forged reusable verification verdict 5ms
+   ✓ M-04 pinned OpenFilm checkout verification > never lets a caller supply the vendor path through a request  1093ms
+   ✓ M-04 pinned OpenFilm checkout verification > derives the entry points of a module from its OWN capability flow 1ms
+   × M-04 pinned OpenFilm checkout verification > follows an alias of the issued capability through the transparent wrappers 9ms
+     → expected undefined to be +0 // Object.is equality
+   ✓ M-04 pinned OpenFilm checkout verification > the vendor-path rule detects a request header 8ms
+   ✓ M-04 pinned OpenFilm checkout verification > the vendor-path rule detects a request body 8ms
+   ✓ M-04 pinned OpenFilm checkout verification > the vendor-path rule detects an alias of a request 11ms
+   ✓ M-04 pinned OpenFilm checkout verification > the vendor-path rule detects a renamed request parameter 7ms
+   ✓ M-04 pinned OpenFilm checkout verification > the vendor-path rule detects a helper that was handed the request 7ms
+   ✓ M-04 pinned OpenFilm checkout verification > the vendor-path rule detects a helper that receives the value in its own parameter 7ms
+   ✓ M-04 pinned OpenFilm checkout verification > the vendor-path rule detects the same export under a renamed import 9ms
+   ✓ M-04 pinned OpenFilm checkout verification > the vendor-path rule detects the same export through a namespace import 6ms
+   ✓ M-04 pinned OpenFilm checkout verification > the vendor-path rule detects the producer position of the serving owner 7ms
+   ✓ M-04 pinned OpenFilm checkout verification > the vendor-path rule detects the producer position of the bridge 7ms
+   ✓ M-04 pinned OpenFilm checkout verification > the vendor-path rule detects a request wrapped in an assertion 6ms
+   ✓ M-04 pinned OpenFilm checkout verification > the vendor-path rule detects a request wrapped in parentheses 8ms
+   ✓ M-04 pinned OpenFilm checkout verification > the vendor-path rule accepts the composition-time value 7ms
+   ✓ M-04 pinned OpenFilm checkout verification > the vendor-path rule accepts a file that never reaches the loader 7ms
+   ✓ M-04 pinned OpenFilm checkout verification > the vendor-path rule accepts a same-named parameter that is trusted 7ms
+   ✓ M-04 pinned OpenFilm checkout verification > the vendor-path rule accepts a wrapped composition-time value 9ms
+   ✓ M-04 pinned OpenFilm checkout verification > the vendor-path rule accepts a wrapped same-named parameter that is trusted 7ms
+   ✓ M-04 pinned OpenFilm checkout verification > detects the loader module's own local call with a request-derived value 12ms
+   ✓ M-04 pinned OpenFilm checkout verification > does not mistake a same-named parameter for a vendor path 0ms
+ ✓ tests/architecture/m2.2-fitness.test.ts (18 tests) 2185ms
+   ✓ M2.2 fitness: one state machine, no arbitrary state writes > 1. every production `UPDATE ... SET state` lives in transition, advanceJournal or markRecovering  475ms
+   ✓ M2.2 fitness: one state machine, no arbitrary state writes > 13. every job state write goes through the store that owns the transition table  329ms
+   ✓ M2.2 fitness: one state machine, no arbitrary state writes > 2. no production DELETE on a journal row; rows are evidence, not scratch  336ms
+   ✓ M2.2 fitness: one state machine, no arbitrary state writes > 3. only project_state ever changes the current revision  356ms
+   ✓ M2.2 fitness: no second actor, queue, store or timeline > 5. no production class extends or duplicates ProjectWriteActor  333ms
+   ✓ M2.2 fitness: no second actor, queue, store or timeline > 6. the revision store owns one database handle; no second DatabaseSync for project state  335ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/m2.1/openfilm-upstream-lock.test.ts > M-04 pinned OpenFilm checkout verification > follows an alias of the issued capability through the transparent wrappers
+AssertionError: expected undefined to be +0 // Object.is equality
+
+[32m- Expected:[39m 
+0
+
+[31m+ Received:[39m 
+undefined
+
+ ❯ tests/m2.1/openfilm-upstream-lock.test.ts:759:31
+    757|     const entries = Object.fromEntries(vendorEntries(module).map(entry…
+    758|     // The alias through the assertion is the capability, at its own p…
+    759|     expect(entries.drawsWith).toBe(0);
+       |                               ^
+    760|     // A chain of aliases is the same capability.
+    761|     expect(entries.drawsWithChainedAliases).toBe(0);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 52 passed (53)
+   Start at  17:16:08
+   Duration  9.25s (transform 149ms, setup 0ms, collect 1.48s, tests 3.56s, environment 0ms, prepare 2.82s)
+

@@ -494,6 +494,19 @@ export class CreatedSourceImpactStore {
     return this.#impacts.transition(impactId, 'active', 'consumed', now);
   }
 
+  /**
+   * Move an impact out of `active` by EXPIRY, and only when its deadline really passed.
+   *
+   * The transition is the impact table's own authority: it checks the deadline, the
+   * predecessor state and the number of rows it changed. This store adds no state of
+   * its own and no back door around the predecessor check, so a caller can never
+   * REPORT an expiry the table did not make - and a caller that reports one must read
+   * the state back from the table rather than decide it locally.
+   */
+  expire(impactId: string, now: Date): ImpactRow {
+    return this.#impacts.markExpired(impactId, now);
+  }
+
   #parse(row: ImpactRow): CreatedImpactSpecV1 | undefined {
     let parsed: Record<string, unknown>;
     try {

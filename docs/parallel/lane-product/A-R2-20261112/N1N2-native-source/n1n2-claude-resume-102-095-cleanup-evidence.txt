@@ -1,0 +1,82 @@
+N1N2 RESUME — own cleanup receipt of the granted full scope 102-component / 095-legacy
+
+Writer: Claude implementation child, task task_5dcbe8192764 / dispatch ctx_b4086093cd96,
+cwd /mnt/c/workspace/videoworkline/Narralens-agents/main-integration, HEAD
+e2eff61b464d75d36598103d718cd2a75db5dfda.
+
+GRANT: N1N2-RESUME-FULL-013 (MAIN, `msg_1eea7fb00290`, BATCH_013_GRANT.json). The
+source freeze of N1N2-RESUME-DEDUPE-012 continued through both captures; there was no
+source, test, tool, config or index write in this scope.
+
+THE CAPTURES (read from their own capture files; unchanged `run-recorded.py`; the
+canonical cwd; the two runs were serial, the second only because the first passed)
+
+  n1n2-claude-resume-102-gate-component
+    argv   corepack pnpm exec vitest run --config vitest.config.ts
+           tests/agent-driven/integration/created-native-source-reader.test.ts
+           -t "R0|F02|F03|F04|F05|F06|F07|F08|F09|F10 shows"
+    exit   0
+    result 1 test file passed; 34 PASSED, 18 filtered out (52 cases in the file);
+           0 failures; duration 361.44 s
+    source_changed []   source_added []
+    log_sha256 18cd9b8e9f40058b1f5e6887a066cd55efd50cf1eeb938a0a8b04528491ff1ac
+
+  n1n2-claude-resume-095-gate-legacy
+    argv   corepack pnpm exec vitest run --config vitest.config.ts
+           tests/agent-driven/integration/created-native-ack.test.ts
+           tests/agent-driven/integration/committed-snapshot-host.test.ts
+           tests/agent-driven/integration/created-native-workspace.test.ts
+    exit   0
+    result 3 test files passed; 107 PASSED out of 107; 0 failures; duration 89.38 s
+           (the count 107 is the ACTUAL count of this run, not a target that was
+           forced: the three legacy files hold 107 cases on these bytes)
+    source_changed []   source_added []
+    log_sha256 80fd6fc8ac54da5d8f22498b2d79881ac5c9c60cc33961cfa787805496fdbd19
+
+OBSERVED AT THE TIME OF WRITING THIS RECEIPT (current observation only)
+
+  1. Processes. `ps -eo pid,etimes,comm` was inspected for vitest, ffprobe and
+     ffmpeg: no match. Nothing of either run was still alive.
+
+  2. Temporary roots. The component cases build their own Host, sqlite database and
+     working copy under the fixture's `mkdtemp(join(tmpdir(),
+     'narralens-created-workspace-'))`; the pure cases use `n1n2-closure-`,
+     `n1n2-rev-`, `n1n2-probe-`, `n1n2-listing-` and `n1n2-caption-`. At the time of
+     writing, `ls -d` over all of those patterns matched ZERO entries.
+     The only `n1n2-*` item still in the temporary directory is `/tmp/n1n2-rot/`,
+     which holds five DIAGNOSTIC media files (plain.mp4, rot_disp.mp4, rot_meta.mp4,
+     two.mp4, other.mp4) dated 2026-11-12 16:27-16:28. It belongs to an earlier
+     session, it was NOT created by this child and it was NOT touched: diagnostic
+     media is not A-film evidence and it is not a resource of this lane's runs.
+
+  3. The repository. HEAD is still
+     `e2eff61b464d75d36598103d718cd2a75db5dfda`, the git index is still EMPTY, and
+     the dirty set is exactly the five files it was before the scope: the protected
+     `AGENTS.md` and the four tracked release paths. The ten released paths still
+     carry the digests of the frozen candidate:
+       committed-snapshot-authority.ts  f8470afddb8e8732edb112379902c3e28f51892a0104d6182f13207d473906c9
+       created-native-workspace.ts      b57bed5df0ea600a2aa1a5b2dc3df2873f794389ee5274f32efb52a6f3d653ad
+       openfilm-native-expected.ts      19110e45a83b6d5b611b4260620ce873f923f1e5a5b907bc6176c4b734fbeed3
+       retained-native-closure.ts       ab6697759a85c4a0b787ad00ce57b2a25680c5fb9630cf6a7797a10aa775a48e
+       created-native-source-reader.ts  b386615cb4036f0ce3d2bc65a5d9aa99ee8bc9c191f3468eb15baf65b2a33aa1
+       created-native-workspace.test.ts 439d469032c9af2b83ceb826e0aead7cf5c2fe5c5693be7cbf18c8e67f0f615f
+       committed-snapshot-host.test.ts  bfd0c6373b254050d32a6a99e7b6f8b9827dc24b6b2587515ab4c5aad2cd9037
+       created-native-ack.test.ts       5f50db85c7c07a2ecf4faefc20ec2ec6c7ad4910fafe549c2edc76bbad729c7c
+       created-native-source-reader.test.ts bf1a7e3394142a07aa08ea3799fbe9ed3e2e9276ecbc0f6786e945ea40f72b6b
+       native-source-fixture.ts         19cb73cb9d69394e550699d3363128a4ea60e96a3f28f22e1ea4fce01c6dda0a
+     AGENTS.md is still 37300463a72a612ae16e0a5fcfb496502c57c722b83781e0e2e8c9480594542b.
+
+  4. Nothing was added to the git index, committed, reset, stashed or checked out.
+
+NOT CLAIMED
+
+  - Not a historical observation of the machine at any moment before this writing.
+  - Not a per-descriptor accounting, a per-resource lifetime proof or a global
+    absence claim.
+  - NOT a completion of N1N2: MAIN's round-2 independent review is
+    REQUEST_CHANGES (1 BLOCKER, 6 MAJOR) on these same bytes, and the original scope
+    still has the G01-G07 gaps that review names. The green gates above are internal
+    evidence only, not an acceptance, not an independent review, not a NativeAck, not
+    a Studio or native-UI readiness, not an A-film result, not a human acceptance.
+  - The candidate is NOT frozen and NOT committed; MAIN decides that after the
+    review.

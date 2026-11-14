@@ -1,0 +1,19 @@
+{
+  "argv": [
+    "corepack",
+    "pnpm",
+    "exec",
+    "vitest",
+    "run",
+    "--config",
+    "vitest.config.ts",
+    "tests/agent-driven/integration/created-native-source-reader.test.ts",
+    "-t",
+    "R07 refuses a later read after a delivered release failed|F06 refuses a referenced text above the budget in the authority path|F09 refuses every injected probe failure through the production runner"
+  ],
+  "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+  "started_at": "2026-11-12T08:56:31.443888+00:00",
+  "runner_version": 3,
+  "git_head": "e2eff61b464d75d36598103d718cd2a75db5dfda",
+  "input_scope": "source/contracts/test/tool text, config/lock, D09 vectors and this runner; upstream pin and binary fixture receipts remain separate"
+}

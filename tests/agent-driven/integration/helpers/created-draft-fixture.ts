@@ -24,22 +24,60 @@ import type {CompletedPreparedSourceV1,PreparedReadBindingV1,PreparedAdoptionBin
 
 const sha=(data:Uint8Array)=>createHash('sha256').update(data).digest('hex');
 const meta=(id:string)=>({idempotency_key:id,correlation_id:id});
-export async function preparedDraftFixture(boundary?:(point:string,task:TaskReservation,context:{host:Awaited<ReturnType<typeof createdProjectFixture>>['host'];root:string;grantId:string})=>Promise<void>){
+/**
+ * The optional test shape of the prepared draft.
+ *
+ * Everything here is OPTIONAL and the default is exactly the behaviour the
+ * fixture always had: the same media, the same narration, the same plan.
+ *
+ * - `narration:false` asks the real producer for a plan WITHOUT a narration. The
+ *   pinned assembler and the created-source publisher both support a null
+ *   narration, so this is a lawful production input and not a doctored fact. It
+ *   matters because a video clip of a narrated plan is MUTED by the assembler,
+ *   and a muted clip is not heard at all: the native's own heard consumer never
+ *   asks it for a transcript.
+ * - `videoWithAudio:true` generates the diagnostic video WITH a real audio track,
+ *   so the video is a clip that is really heard. It is still a synthetic local
+ *   diagnostic: it is not an authorised Chinese film and not a human voice.
+ */
+export interface PreparedDraftFixtureOptions{
+ /** Whether the plan carries a narration. The default is true. */
+ readonly narration?:boolean;
+ /** Whether the diagnostic video carries an audio track. The default is false. */
+ readonly videoWithAudio?:boolean;
+}
+export async function preparedDraftFixture(boundary?:(point:string,task:TaskReservation,context:{host:Awaited<ReturnType<typeof createdProjectFixture>>['host'];root:string;grantId:string})=>Promise<void>,options?:PreparedDraftFixtureOptions){
  const f=await createdProjectFixture();let registry:LocalAssetRegistry|undefined,worker:CreatedTaskWorker|undefined,processor:CreatedDraftTaskProcessor|undefined;
  try{
   const inputRoot=join(f.root,'inputs'),blobRoot=join(f.root,'local-assets'),taskRoot=join(f.root,'tasks');await mkdir(inputRoot,{mode:0o700});
   const ff=(args:string[])=>execFileSync('ffmpeg',['-nostdin','-hide_banner','-v','error',...args],{windowsHide:true,timeout:30000});
-  ff(['-f','lavfi','-i','color=c=0x185a88:s=320x180:r=30:d=3','-threads','1','-c:v','libx264','-pix_fmt','yuv420p',join(inputRoot,'video.mp4')]);
+  if(options?.videoWithAudio===true){
+   // The very same picture, with a real audio track beside it: the video is then a
+   // clip the native really HEARS.
+   ff(['-f','lavfi','-i','color=c=0x185a88:s=320x180:r=30:d=3','-f','lavfi','-i','sine=frequency=220:sample_rate=48000:duration=3','-threads','1','-c:v','libx264','-pix_fmt','yuv420p','-c:a','aac','-shortest',join(inputRoot,'video.mp4')]);
+  }else{
+   ff(['-f','lavfi','-i','color=c=0x185a88:s=320x180:r=30:d=3','-threads','1','-c:v','libx264','-pix_fmt','yuv420p',join(inputRoot,'video.mp4')]);
+  }
   ff(['-f','lavfi','-i','sine=frequency=430:sample_rate=48000:duration=3','-threads','1','-c:a','pcm_s16le',join(inputRoot,'voice.wav')]);
   registry=new LocalAssetRegistry(f.host.revisions,f.app.creation,{sourceRoot:inputRoot,storageRoot:blobRoot,projectsRoot:join(f.root,'projects'),snapshotsRoot:join(f.root,'snapshots')});
   const ui=createTrustedCallerContext({principal_id:'owner',channel:'trusted_ui',source:'trusted_ui',session_ref:f.ui.principal.session_ref});
   const registered=[];for(const [file,kind]of [['video.mp4','video'],['voice.wav','audio']] as const){const bytes=await readFile(join(inputRoot,file));registered.push(await registry.import({project_id:f.projectId,idempotency_key:'import-'+kind,relative_path:file,expected_sha256:sha(bytes),kind,source:{kind:'generated',label:'Test-created local diagnostic media'},license:{status:'cleared',label:'Diagnostic fixture only',commercial_use:true},recording_origin:kind==='audio'?'synthetic':null,attestation_ref:'test-'+kind},ui));}
   const repo=new ProductSqliteRepository(f.host.revisions),authority=new CreativeProjectAuthority(f.app.creation),creative=new CreativeService({repository:repo,artifactAuthority:authority.assertArtifact,contentAuthority:authority.assertContent}),created=f.app.creation.forProject(f.projectId)!;
-  const brief=structuredClone(created.brief);brief.local_asset_ids=registered.map(a=>a.asset_id);brief.narration_asset_id=registered[1]!.asset_id;Object.assign(brief.content_brief.material_strategy,{asset_ids:brief.local_asset_ids,narration_asset_id:brief.narration_asset_id,rights_refs:registered.map(a=>({id:a.rights_ref,version:1,sha256:a.registration_digest}))});
+  const brief=structuredClone(created.brief);brief.local_asset_ids=registered.map(a=>a.asset_id);brief.narration_asset_id=options?.narration===false?null:registered[1]!.asset_id;Object.assign(brief.content_brief.material_strategy,{asset_ids:brief.local_asset_ids,narration_asset_id:brief.narration_asset_id,rights_refs:registered.map(a=>({id:a.rights_ref,version:1,sha256:a.registration_digest}))});
   const intake=await creative.putIntake({meta:meta('updated'),intake_id:created.request.intake_id,base_version:1,brief},f.owner);
   const closure=await repo.transaction(tx=>canonicalDigest(creativeInputClosure(tx,intake.intake_id,intake.version)));
   const script=await creative.putArtifact({meta:meta('script'),project_id:f.projectId,artifact_id:null,base_version:0,input_digest:closure,content:{kind:'script',paragraphs:[{paragraph_id:'p1',text:'第一段诊断内容。'},{paragraph_id:'p2',text:'第二段诊断内容。'},{paragraph_id:'p3',text:'原生概念说明。'}]},input_refs:[]},f.owner);
-  const storyboard=await creative.putArtifact({meta:meta('storyboard'),project_id:f.projectId,artifact_id:null,base_version:0,input_digest:closure,content:{kind:'storyboard',fps:30,shots:[{shot_id:'s1',paragraph_id:'p1',asset_id:registered[0]!.asset_id,duration_frames:31,caption:'第一条诊断字幕。',concept_text:'与视频独立可编辑的说明叠层'},{shot_id:'s2',paragraph_id:'p2',asset_id:registered[0]!.asset_id,duration_frames:29,caption:'第二条诊断字幕。',concept_text:''},{shot_id:'s3',paragraph_id:'p3',asset_id:null,duration_frames:30,caption:'概念说明字幕。',concept_text:'可编辑概念'}]},input_refs:[script.ref]},f.owner);
+  // The planned captions of a shot need the complete narration source: the pinned
+  // plan refuses a narration-less draft that still carries them
+  // (`native-draft-plan.ts`: 'Native planned captions currently require the
+  // complete narration source'). A narration-less draft therefore has NO planned
+  // caption - which is the whole point of that shape: the media is really heard
+  // and the native's own consumer really looks for its transcript.
+  // The caption of a shot is a required field of the storyboard, and an EMPTY one
+  // is how a shot carries no planned caption: the producer's own rule is
+  // `!s.caption`, and the empty string is exactly that.
+  const plannedCaption=(text:string):{readonly caption:string}=>options?.narration===false?{caption:''}:{caption:text};
+  const storyboard=await creative.putArtifact({meta:meta('storyboard'),project_id:f.projectId,artifact_id:null,base_version:0,input_digest:closure,content:{kind:'storyboard',fps:30,shots:[{shot_id:'s1',paragraph_id:'p1',asset_id:registered[0]!.asset_id,duration_frames:31,...plannedCaption('第一条诊断字幕。'),concept_text:'与视频独立可编辑的说明叠层'},{shot_id:'s2',paragraph_id:'p2',asset_id:registered[0]!.asset_id,duration_frames:29,...plannedCaption('第二条诊断字幕。'),concept_text:''},{shot_id:'s3',paragraph_id:'p3',asset_id:null,duration_frames:30,...plannedCaption('概念说明字幕。'),concept_text:'可编辑概念'}]},input_refs:[script.ref]},f.owner);
   const style=await repo.transaction(tx=>{const row=tx.list('artifact_version',{project_id:f.projectId}).find(a=>a.kind==='brief')!;return {id:row.artifact_id,version:row.version,sha256:row.content_digest};});
   const decision=await creative.relayContentDecision({meta:meta('content'),project_id:f.projectId,intake_id:intake.intake_id,intake_version:intake.version,input_digest:closure,request_id:'request',choice:'accept_content',source:'driver_relay',source_message_ref:'component-confirmation'},f.owner);
   const workflow=new FixedWorkflowService({repository:repo,adoption:new TestAdoptionAuthority(),facts:{readProjectFacts:async()=>({project_id:f.projectId,exists:true,project_revision:1,control_revision:0,source_digest:f.commit.source_digest,snapshot_id:f.commit.snapshot_id,rights_authorized:true,rights_reason:'fixture eligibility only; actual assets separately verified',capability_available:true,capability_fingerprint:'a'.repeat(64),capability_reason:'fixture producer registration only'})}});

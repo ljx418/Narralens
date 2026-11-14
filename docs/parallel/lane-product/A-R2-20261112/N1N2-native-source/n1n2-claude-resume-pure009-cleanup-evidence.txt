@@ -1,0 +1,50 @@
+# N1N2 pure gate 093 - owned-resource cleanup receipt, captured raw
+# Narrow labelling: what THIS shell's view showed at the moment it was captured. It is NOT
+# a proof that no such process or directory exists anywhere on the machine, NOT a proof
+# that no descriptor leaked into another process, and NOT a per-resource lifetime test.
+
+## after command 093 (n1n2-claude-resume-093-gate-pure), captured 2026-11-12T09:57Z
+### the shell of command 093
+The pid of the shell that ran 093 was NOT captured during the run, so it is not stated
+here. The recorder recorded the argv, the cwd and the start time of the command it ran;
+it does not record the pid of the shell that launched it, and no value is invented for
+that field. The observations below are of THIS shell's view at THIS moment, after 093
+had already terminated.
+
+### every process of the recorder names, in this shell's view
+(no rows above = none matched in this view at this moment)
+the names searched: n1n2-claude-resume-09[0-9], run-recorded
+
+### processes matching ffprobe|ffmpeg|vitest|narralens|openfilm, in this shell's process view
+(no rows above = none matched in this view at this moment)
+
+### the shell that captured this receipt
+    PID STAT ELAPSED COMMAND
+ 1458310 Ss         0 /bin/bash -c ... (this receipt's own shell; it is not 093's shell)
+
+### fixture tmpdirs, in this shell's view
+ls: cannot access '/tmp/n1n2-closure-*': No such file or directory
+ls: cannot access '/tmp/n1n2-rev-*': No such file or directory
+ls: cannot access '/tmp/narralens-created-workspace-*': No such file or directory
+(no rows above = none present in this view at this moment)
+
+### the capture directory's own files for 093
+n1n2-claude-resume-093-gate-pure.claim.json
+n1n2-claude-resume-093-gate-pure.cmd.json
+n1n2-claude-resume-093-gate-pure.exit
+n1n2-claude-resume-093-gate-pure.inputs.json
+n1n2-claude-resume-093-gate-pure.result.json
+n1n2-claude-resume-093-gate-pure.txt
+
+## the commands and their terminal identities
+080 n1n2-claude-resume-080-gate-pure  exit 1  14PASS/2FAIL/34filtered  log c7623a026aa4fae0e234b47a32ce95d4d210c8acab3d5e749ca69818874a2a18
+083 n1n2-claude-resume-083-gate-pure  exit 1  14PASS/3FAIL/34filtered  log 2d2a6a577176d36146385ecc4c2deed2842a2ba6254a1362b152973863e2b0d2
+092 n1n2-claude-resume-092-tsc-budget  exit 0  (tsc --noEmit, empty log)  log e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+093 n1n2-claude-resume-093-gate-pure  exit 0  17PASS/0FAIL/34filtered  log 5b365d6eba647a2fd65b30bc32f5ce4d6b41b467e5631d1ebd7818583732b7d1
+080/083/092/093: source_changed [] and source_added [] (no input drift)
+
+## the scope of this receipt
+This receipt covers command 093 only. It does not claim that the pure gate is the whole
+of N1N2, it does not cover the heavy component gate or the legacy regressions, and it is
+not an independent review, a NativeAck, a Studio or native-UI readiness, an A-film
+result, or a human acceptance.

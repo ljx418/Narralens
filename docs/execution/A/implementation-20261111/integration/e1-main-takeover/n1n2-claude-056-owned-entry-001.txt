@@ -1,0 +1,16 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:3844422) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+stdout | tests/agent-driven/headless/owned-project-entry.test.ts > starts at the real owned project chooser, preserves refresh, and opens the selected original native editor
+[owned-project-entry] ready state {"ready":{"hash":"","url":"http://127.0.0.1:46565/projects/rj2FxQ9NTWwN","readyState":"complete","hasWorkspaceShell":true,"hasPanelReady":true,"hasTimelineScroll":true,"timelineScrollCount":1,"bodyHead":"workspace-20e93fcb-e450-4cf7-828f-5a0f82e04ecc\n上传\n全部\n正在绘制第一帧\n00:00:00 / 00:00:00\n16:9\n检查器\nworkspace-20e93fcb-e450-4cf7-828f-5a0f82e04ecc\n1280 × 720 · 00:00:00:00\n画布\n16:9\nW\npx\nH\npx\n帧率\n30 fps\n\n取自素材。时间码、逐帧移动和导出的默认帧率都用它。\n\n内容\n时长\n00:00:00:00\n轨道\n2\n片段\n0\n\n点击画面中的任意内容——一行文字、一张图片、一个形状——或时间轴上的一个片段。\n\n把素材拖到这里开始制作影","htmlLength":47157},"frameTree":{"root":"http://127.0.0.1:46565/projects/rj2FxQ9NTWwN?target=project_204590af2dec4d63bc2378d4be73b058","childFrames":1},"consoleEvents":[],"failedRequests":[],"responses":[]}
+
+ ✓ tests/agent-driven/headless/owned-project-entry.test.ts (1 test) 13823ms
+   ✓ starts at the real owned project chooser, preserves refresh, and opens the selected original native editor  13822ms
+
+ Test Files  1 passed (1)
+      Tests  1 passed (1)
+   Start at  03:30:07
+   Duration  22.14s (transform 3.44s, setup 0ms, collect 6.35s, tests 13.82s, environment 0ms, prepare 1.22s)
+

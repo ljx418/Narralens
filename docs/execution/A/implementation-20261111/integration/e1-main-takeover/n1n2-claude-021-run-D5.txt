@@ -1,0 +1,24 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:2490834) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/media/preview-prepared-source.test.ts (14 tests) 156558ms
+   ✓ renders an isolated preview of a completed prepared source with five real parts and measured facts  15606ms
+   ✓ refuses a preview whose proof is not a proof of this prepared source  10344ms
+   ✓ refuses the boundaries a prepared preview must not cross  7544ms
+   ✓ refuses a part whose content type or media facts do not belong to its slot  15477ms
+   ✓ cannot redirect object publication into author source by replacing the object directory at open  13623ms
+   ✓ handles a partial target write without rendering different copied bytes  6559ms
+   ✓ handles a zero target write without rendering different copied bytes  7233ms
+   ✓ does not expose a receipt after cancel at the fifth publication  14448ms
+   ✓ does not expose a receipt after close at the fifth publication  15848ms
+   ✓ does not expose a receipt after cancel during awaited copy cleanup  18651ms
+   ✓ does not expose a receipt after close during awaited copy cleanup  15713ms
+   ✓ does not expose a receipt after revoke during awaited copy cleanup  15497ms
+
+ Test Files  1 passed (1)
+      Tests  14 passed (14)
+   Start at  10:43:37
+   Duration  167.49s (transform 4.61s, setup 0ms, collect 8.32s, tests 156.56s, environment 0ms, prepare 1.73s)
+

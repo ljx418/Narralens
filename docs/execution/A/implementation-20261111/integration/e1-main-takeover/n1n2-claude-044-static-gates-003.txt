@@ -1,0 +1,18 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+ ✓ tests/m2.1/openfilm-upstream-lock.test.ts (35 tests) 1628ms
+   ✓ M-04 pinned OpenFilm checkout verification > never lets a caller supply the vendor path through a request  1301ms
+ ✓ tests/architecture/m2.2-fitness.test.ts (18 tests) 2169ms
+   ✓ M2.2 fitness: one state machine, no arbitrary state writes > 1. every production `UPDATE ... SET state` lives in transition, advanceJournal or markRecovering  487ms
+   ✓ M2.2 fitness: one state machine, no arbitrary state writes > 13. every job state write goes through the store that owns the transition table  337ms
+   ✓ M2.2 fitness: one state machine, no arbitrary state writes > 2. no production DELETE on a journal row; rows are evidence, not scratch  332ms
+   ✓ M2.2 fitness: one state machine, no arbitrary state writes > 3. only project_state ever changes the current revision  342ms
+   ✓ M2.2 fitness: no second actor, queue, store or timeline > 5. no production class extends or duplicates ProjectWriteActor  330ms
+   ✓ M2.2 fitness: no second actor, queue, store or timeline > 6. the revision store owns one database handle; no second DatabaseSync for project state  319ms
+
+ Test Files  2 passed (2)
+      Tests  53 passed (53)
+   Start at  17:17:10
+   Duration  10.99s (transform 169ms, setup 0ms, collect 1.67s, tests 3.80s, environment 0ms, prepare 3.67s)
+

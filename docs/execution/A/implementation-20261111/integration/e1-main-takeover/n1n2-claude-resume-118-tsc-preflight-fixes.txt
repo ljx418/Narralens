@@ -1,0 +1,5 @@
+src/host/agent-driven/native-cache-witness.ts(117,14): error TS2420: Class 'NativeCacheWitnessLedger' incorrectly implements interface 'NativeCacheWitnessRegistry'.
+  Property 'issuedRoot' is missing in type 'NativeCacheWitnessLedger' but required in type 'NativeCacheWitnessRegistry'.
+tests/agent-driven/integration/native-cache-witness.test.ts(76,3): error TS2353: Object literal may only specify known properties, and 'filmPoster' does not exist in type 'NativeCacheProducer'.
+tests/agent-driven/integration/native-cache-witness.test.ts(76,20): error TS7006: Parameter 'request' implicitly has an 'any' type.
+tests/agent-driven/integration/native-cache-witness.test.ts(76,48): error TS2339: Property 'filmPoster' does not exist on type 'OpenFilmCacheProducerOwner'.

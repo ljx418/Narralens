@@ -1,0 +1,13 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:3739195) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/local-assets-host.test.ts (24 tests | 23 skipped) 2898ms
+   ✓ proves a published blob again when only the change time of its inode moved, and keeps every other change refused  2706ms
+
+ Test Files  1 passed (1)
+      Tests  1 passed | 23 skipped (24)
+   Start at  01:38:47
+   Duration  11.20s (transform 3.42s, setup 0ms, collect 6.36s, tests 2.90s, environment 0ms, prepare 1.29s)
+

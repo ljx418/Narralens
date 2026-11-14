@@ -1,0 +1,7 @@
+tests/agent-driven/integration/created-source-adoption.test.ts(653,26): error TS2304: Cannot find name 'withCleanup'.
+tests/agent-driven/integration/native-cache-witness.test.ts(1266,24): error TS2552: Cannot find name 'point'. Did you mean 'points'?
+tests/agent-driven/integration/native-cache-witness.test.ts(1266,24): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(predicate: (value: string, index: number, array: string[]) => value is string, thisArg?: any): string[]', gave the following error.
+    Argument of type 'boolean' is not assignable to parameter of type '(value: string, index: number, array: string[]) => value is string'.
+  Overload 2 of 2, '(predicate: (value: string, index: number, array: string[]) => unknown, thisArg?: any): string[]', gave the following error.
+    Argument of type 'boolean' is not assignable to parameter of type '(value: string, index: number, array: string[]) => unknown'.

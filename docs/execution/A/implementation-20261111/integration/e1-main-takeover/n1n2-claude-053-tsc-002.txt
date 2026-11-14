@@ -1,0 +1,2 @@
+tests/m2.3/migration-real-export.test.ts(286,3): error TS2741: Property 'artifact' is missing in type '{ path: string; bytes: number; sha256: string; frames: number; width: number; height: number; duration_seconds: number; audio: { codec: string; sample_rate: string; channels: number; duration_seconds: number; } | null; commands: CommandRecord[]; render: CliChildRecord; }' but required in type 'ExportFacts'.
+tests/m2.3/migration-real-export.test.ts(326,5): error TS2552: Cannot find name 'writeFileSync'. Did you mean 'writeFile'?

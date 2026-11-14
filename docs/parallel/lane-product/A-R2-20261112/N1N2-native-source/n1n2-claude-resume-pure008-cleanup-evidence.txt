@@ -1,0 +1,18 @@
+# N1N2 pure gate 080 - owned-resource cleanup receipt, captured raw
+# Narrow labelling: what THIS shell's view showed at the moment it was captured. It is NOT
+# a proof that no such process or directory exists anywhere on the machine, NOT a proof
+# that no descriptor leaked into another process, and NOT a per-resource lifetime test.
+
+## after command 080 (n1n2-claude-resume-080-gate-pure), captured 2026-11-12T09:35:35Z
+### the shell of command 080 (pid 1359943) and the vitest worker it reported (958338 belongs to an earlier command)
+    PID STAT ELAPSED COMMAND
+(the header alone, with no row under it, is what 'absent' looks like here)
+
+### processes matching ffprobe|ffmpeg|vitest|narralens|openfilm, in this shell's process view
+(no rows above = none matched in this view at this moment)
+
+### fixture tmpdirs, in this shell's view
+ls: cannot access '/tmp/n1n2-closure-*': No such file or directory
+ls: cannot access '/tmp/n1n2-rev-*': No such file or directory
+ls: cannot access '/tmp/narralens-created-workspace-*': No such file or directory
+(no rows above = none present in this view at this moment)

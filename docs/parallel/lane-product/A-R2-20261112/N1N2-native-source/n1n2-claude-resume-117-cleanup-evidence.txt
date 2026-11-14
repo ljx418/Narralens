@@ -1,0 +1,43 @@
+N1N2 RESUME — the interim pure gate 117: own cleanup receipt (CURRENT OBSERVATION ONLY)
+
+Writer: Claude implementation child, task task_5dcbe8192764 / dispatch ctx_b4086093cd96,
+cwd /mnt/c/workspace/videoworkline/Narralens-agents/main-integration, HEAD
+e2eff61b464d75d36598103d718cd2a75db5dfda.
+
+THE CAPTURE (read from its own capture files)
+
+  capture            n1n2-claude-resume-117-gate-pure
+  argv               corepack pnpm exec vitest run --config vitest.config.ts
+                     tests/agent-driven/integration/created-native-source-reader.test.ts
+                     -t "P0|F01|F10 lists|F10 keeps"
+  cwd                /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+  git_head           e2eff61b464d75d36598103d718cd2a75db5dfda
+  started/finished   2026-11-12T14:15:35 / 2026-11-12T14:15:44 (recorded by the recorder)
+  exit               0
+  result             1 file passed; 18 PASSED, 53 filtered out (71 cases in the file)
+  source_changed     []
+  source_added       []
+  log_sha256         3c4dba0d2a28e8b410f1d38ef137f55e91e9e35e2a27b3ac81ea232efb8cf929
+
+  This was the INTERIM defect discovery grant of MAIN (`msg_597c554f49ec`,
+  N1N2-RESUME-FOCUSED-015 / BATCH_015_GRANT.json): the pure gate only. No component,
+  no legacy and no browser gate was granted, and none was run.
+
+OBSERVED AT THE TIME OF WRITING THIS RECEIPT (current observation only)
+
+  1. Processes: no vitest, ffprobe, ffmpeg or chromium process was alive.
+  2. Temporary roots: the pure cases create their trees with mkdtemp and remove them
+     in their `finally`; `ls -d /tmp/n1n2-closure-* /tmp/n1n2-rev-*` matched nothing
+     at the time of writing.
+  3. The repository: HEAD is still e2eff61b464d75d36598103d718cd2a75db5dfda, the git
+     index is still EMPTY, and the dirty set is unchanged (the ten released paths
+     plus the protected AGENTS.md). The recorder confirms no input drift.
+  4. The earlier session's /tmp scratch items are untouched.
+
+NOT CLAIMED
+
+  - Not a historical observation of the machine at any moment before this writing.
+  - Not a per-descriptor accounting, a per-resource lifetime proof or a global
+    absence claim.
+  - Not an acceptance: this is the interim pure gate only, and MAIN's round-2
+    findings (the defect list of `msg_597c554f49ec`) are still open.

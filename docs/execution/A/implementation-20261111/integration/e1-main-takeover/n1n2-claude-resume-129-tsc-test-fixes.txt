@@ -1,0 +1,4 @@
+tests/agent-driven/integration/created-native-source-reader.test.ts(2220,72): error TS2322: Type '(value: { pid: number; argument: string; } | PromiseLike<{ pid: number; argument: string; }>) => void' is not assignable to type '(pid: number, argument: string) => void'.
+  Types of parameters 'value' and 'pid' are incompatible.
+    Type 'number' is not assignable to type '{ pid: number; argument: string; } | PromiseLike<{ pid: number; argument: string; }>'.
+tests/agent-driven/integration/created-native-source-reader.test.ts(2227,6): error TS2554: Expected 2 arguments, but got 1.

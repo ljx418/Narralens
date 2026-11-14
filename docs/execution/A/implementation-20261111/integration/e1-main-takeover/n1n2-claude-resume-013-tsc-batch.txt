@@ -1,0 +1,19 @@
+tests/agent-driven/integration/created-native-source-reader.test.ts(342,51): error TS2339: Property 'host' does not exist on type 'NativeSourceFixture'.
+tests/agent-driven/integration/created-native-source-reader.test.ts(342,68): error TS2339: Property 'app' does not exist on type 'NativeSourceFixture'.
+tests/agent-driven/integration/created-native-source-reader.test.ts(342,83): error TS2339: Property 'app' does not exist on type 'NativeSourceFixture'.
+tests/agent-driven/integration/created-native-source-reader.test.ts(343,17): error TS2339: Property 'root' does not exist on type 'NativeSourceFixture'.
+tests/agent-driven/integration/created-native-source-reader.test.ts(343,65): error TS2339: Property 'root' does not exist on type 'NativeSourceFixture'.
+tests/agent-driven/integration/created-native-source-reader.test.ts(343,89): error TS2339: Property 'root' does not exist on type 'NativeSourceFixture'.
+tests/agent-driven/integration/created-native-source-reader.test.ts(345,49): error TS2339: Property 'owner' does not exist on type 'NativeSourceFixture'.
+tests/agent-driven/integration/created-native-source-reader.test.ts(371,10): error TS18046: 'f.authority' is of type 'unknown'.
+tests/agent-driven/integration/created-native-source-reader.test.ts(373,10): error TS18046: 'f.authority' is of type 'unknown'.
+tests/agent-driven/integration/created-native-source-reader.test.ts(375,48): error TS2339: Property 'host' does not exist on type 'NativeSourceFixture'.
+tests/agent-driven/integration/created-native-source-reader.test.ts(375,65): error TS2339: Property 'host' does not exist on type 'NativeSourceFixture'.
+tests/agent-driven/integration/created-native-source-reader.test.ts(375,82): error TS2339: Property 'app' does not exist on type 'NativeSourceFixture'.
+tests/agent-driven/integration/created-native-source-reader.test.ts(377,10): error TS18046: 'f.authority' is of type 'unknown'.
+tests/agent-driven/integration/created-native-source-reader.test.ts(451,19): error TS2304: Cannot find name 'CreatedNativeSourceReader'.
+tests/agent-driven/integration/created-native-source-reader.test.ts(454,26): error TS2304: Cannot find name 'NativeExpectedBinding'.
+tests/agent-driven/integration/created-native-source-reader.test.ts(512,2): error TS2375: Type '{ audio: boolean; codec?: string; pixfmt?: string; fps?: number; width?: number | undefined; height?: number | undefined; duration?: number; }' is not assignable to type '{ duration?: number; width?: number; height?: number; fps?: number; codec?: string; pixfmt?: string; audio: boolean; }' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'width' are incompatible.
+    Type 'number | undefined' is not assignable to type 'number'.
+      Type 'undefined' is not assignable to type 'number'.

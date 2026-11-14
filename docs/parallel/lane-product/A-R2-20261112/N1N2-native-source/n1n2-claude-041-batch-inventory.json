@@ -1,0 +1,89 @@
+{
+  "at": "2026-11-13T08:45:46.785945+00:00",
+  "head": "e2eff61b464d75d36598103d718cd2a75db5dfda",
+  "note": "041 concentrated correction: the FOUR released paths only (C1 factory closure + negatives, C2 Q02 rewrite, C3/C4 gate analysis), with the byte backups.",
+  "batch_paths": {
+    "src/adapters/openfilm/openfilm-upstream.ts": {
+      "sha256": "874b7bb843305717549c3a7cc1da9a07b62a9f8b402fa851e2aea3b20712e0e1",
+      "bytes": 50957
+    },
+    "tests/agent-driven/integration/native-cache-witness.test.ts": {
+      "sha256": "a25bcf18fcb0bd3a20c81d83ad2fe79c9123ba81c821f5473203787f880a4e79",
+      "bytes": 84058
+    },
+    "tests/m2.1/openfilm-upstream-lock.test.ts": {
+      "sha256": "4593eef0a02c60027bdc344eb6fc956160c6d6d910fd05c10a4d88c7069e089f",
+      "bytes": 34086
+    },
+    "tests/agent-driven/integration/helpers/native-source-fixture.ts": {
+      "sha256": "8ad549119634fa511d3dd8c05586a2ed3176dd4a456586d1403cfbf4a6765c03",
+      "bytes": 23395
+    }
+  },
+  "other_candidates": {
+    "src/host/agent-driven/created-native-workspace.ts": {
+      "sha256": "2253bc1470aa6af7c4fc1a9bfe718141ccd025ccab387f4c1bf445c18cae9e44",
+      "bytes": 64296
+    },
+    "src/host/agent-driven/native-cache-witness.ts": {
+      "sha256": "97c1fe93037f3f31afdf67e97a5d4451d42ac7016d3cca642217fe1750c2573b",
+      "bytes": 13857
+    },
+    "src/host/agent-driven/created-native-source-reader.ts": {
+      "sha256": "cde88435d61dba1a881bef403e6a013f1d4f2bb93db8e1ffa2b3c15b4c74f82b",
+      "bytes": 77595
+    },
+    "src/host/agent-driven/retained-native-closure.ts": {
+      "sha256": "ab7ffead1c4b7b238f7e4f6097b1d17ad7792513e84591b623f67c95576ac6e7",
+      "bytes": 66515
+    },
+    "src/host/agent-driven/local-asset-registry.ts": {
+      "sha256": "0f99ed585bc8152926b555a3139a240c80025c023db4dc690b26769e1635bb25",
+      "bytes": 41475
+    },
+    "src/host/agent-driven/created-source-impact-store.ts": {
+      "sha256": "f1cb2d87b21dd5177c2ea29e214a0d89c46868eaa5a255cd6debe4cf4f72a3b1",
+      "bytes": 23999
+    },
+    "src/host/agent-driven/created-source-change-service.ts": {
+      "sha256": "249df97d95939beeebcc1f9f51d3daed21100fc6aaebfb9b5d000d3a32c0f259",
+      "bytes": 11967
+    },
+    "tests/agent-driven/integration/created-native-source-reader.test.ts": {
+      "sha256": "09ef2019ad95cbd3b3bb377e8f146b994c9462f48f4662db5e072b629383ea77",
+      "bytes": 163608
+    },
+    "tests/agent-driven/integration/created-impact-atomic.test.ts": {
+      "sha256": "e6f1ddb662deea7c506ec28d390aa1f548c818016a0bc829e8cebd3294e0f5d8",
+      "bytes": 6559
+    },
+    "tests/agent-driven/integration/created-source-adoption.test.ts": {
+      "sha256": "8ab6dfcdc98bdef2f4dd42a38c32b0048a0907a95a7c07488910534f49b2097e",
+      "bytes": 62806
+    },
+    "tests/agent-driven/integration/local-assets-host.test.ts": {
+      "sha256": "5c13f98cebe4bc196c4f515ff267fe1059cc17aeb712c5d597f76944b8bb1452",
+      "bytes": 29419
+    },
+    "tests/m2.3/migration-real-export.test.ts": {
+      "sha256": "0862247a6ddb953e462f861983379e0e97ade1d5744df0d1de61cc2b38e227f0",
+      "bytes": 18749
+    },
+    "tests/architecture/m2.2-fitness.test.ts": {
+      "sha256": "e806d88c7a5452539e629a4da0f4c4e0a4346e0364c233f07e0f16675931cb63",
+      "bytes": 16652
+    },
+    "tests/fixtures/m2.1/snapshot-project/assets/generated/visual-10s.mp4": {
+      "sha256": "0427d617584264ac2875243d6cf711dd985577566f71db6b9d5faf051575989c",
+      "bytes": 17
+    },
+    "tests/fixtures/m2.1/snapshot-project/assets/generated/visual-alt-10s.mp4": {
+      "sha256": "40d825e66ee7e69ae53dfdc8d5195fbb9ffc3af7eb07452a5081c51e24115cff",
+      "bytes": 17
+    },
+    "tests/fixtures/m2.1/snapshot-project/assets/generated/narration-30s.wav": {
+      "sha256": "e4276d5ec9199f11df067a98061508eaa11dbaf11ffac107775714b95962173d",
+      "bytes": 18
+    }
+  }
+}

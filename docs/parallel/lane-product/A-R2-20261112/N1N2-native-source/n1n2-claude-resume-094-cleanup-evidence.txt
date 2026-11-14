@@ -1,0 +1,139 @@
+N1N2 RESUME — 094 cleanup receipt (CURRENT OBSERVATION ONLY)
+
+Written by: Claude implementation child, task task_5dcbe8192764 / dispatch ctx_b4086093cd96,
+cwd /mnt/c/workspace/videoworkline/Narralens-agents/main-integration, HEAD
+e2eff61b464d75d36598103d718cd2a75db5dfda.
+
+SCOPE OF THIS RECEIPT
+
+The capture n1n2-claude-resume-094-gate-component was run by the previous child
+(dispatch ctx_283e4028fc76), which was stopped and exited before it wrote its own
+cleanup receipt. That receipt was never produced and is NOT reconstructed here. This
+file states only what this shell observed WHEN IT WAS WRITTEN; it does not claim
+anything about the state of the machine at the moment 094 ran, and it does not claim
+a global absence of any resource.
+
+WHAT 094 ITSELF RECORDED (read from its own capture files, not observed)
+
+  capture            n1n2-claude-resume-094-gate-component
+  argv               corepack pnpm exec vitest run --config vitest.config.ts
+                     tests/agent-driven/integration/created-native-source-reader.test.ts
+                     -t "R0|F02|F03|F04|F05|F06|F07|F08|F09|F10 shows"
+  cwd                /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+  git_head           e2eff61b464d75d36598103d718cd2a75db5dfda
+  started_at         2026-11-12T10:00:01.095240+00:00
+  finished_at        2026-11-12T10:07:21.819517+00:00
+  exit               1
+  result             32 passed, 2 failed, 17 filtered out
+  source_changed     []
+  source_added       []
+  log_sha256         0034b2b1340cd53039ae363237ec73350242ff53758ab602fa45bf4dce2df1c5
+
+OBSERVED AT THE TIME OF WRITING THIS RECEIPT (current observation only)
+
+  1. Processes. `ps -eo pid,etimes,comm,args` was inspected. No process whose
+     command line mentions vitest, ffprobe or ffmpeg was present. No process whose
+     command line mentions `main-integration` or `created-native-source-reader` was
+     present. The only line matched by the broader grep was an unrelated Orca WSL
+     bridge process of another workspace; it is not a child of this lane.
+     This states the process table as it was seen, not that nothing existed earlier.
+
+  2. Fixture roots. The fixture of this lane creates its temporary root with
+     `mkdtemp(join(tmpdir(),'narralens-created-workspace-'))`. At the time of writing,
+     `ls -d /tmp/narralens-created-workspace-*` matched ZERO entries: no fixture root
+     of this lane was left behind.
+
+  3. Other observed items in the temporary directory, NOT created by this child and
+     NOT touched by it, left exactly as they were found (they are evidence or scratch
+     of the earlier session, and they are outside this lane's write scope):
+       /tmp/n1n2-rot/            five diagnostic media files (plain.mp4, rot_disp.mp4,
+                                 rot_meta.mp4, two.mp4, other.mp4), dated 2026-11-12
+                                 16:27-16:28. Diagnostic media is not A-film evidence.
+       /tmp/n1n2-093-correction.txt, /tmp/n1n2-093-report.txt,
+       /tmp/n1n2-authority-block.ts, /tmp/n1n2-component-gate-request.txt,
+       /tmp/n1n2-pure-gate-request.txt — scratch files of the earlier session.
+
+  4. No descriptor, port, database or process identity of 094 is claimed to be
+     accounted for by this receipt. What 094 owned was released by the processes that
+     ended with it; this receipt does not assert when, how, or by whom.
+
+NOT CLAIMED
+
+  - Not a historical observation of the machine at the moment 094 ran.
+  - Not a proof that 094 leaked nothing: only the current state of the process table
+    and of the temporary directory is stated.
+  - Not a per-resource lifetime proof, a per-descriptor accounting or a global
+    absence claim.
+  - 094's failing captures are preserved and were not re-run under their own names.
+
+================================================================================
+ERRATUM 1 — the identity of the 094 writer (APPENDED, nothing above is erased)
+================================================================================
+
+Appended by: Claude implementation child, task task_5dcbe8192764 / dispatch
+ctx_b4086093cd96, on MAIN's instruction (message msg_e7ce24a0f227).
+
+The paragraph above that names "the previous child (dispatch ctx_283e4028fc76)" as
+the writer of capture n1n2-claude-resume-094-gate-component is WRONG and is
+superseded by this erratum.
+
+The correct identity, read from the authoritative receipts and not inferred:
+
+  - `BATCH_010_GRANT.json` (grant N1N2-RESUME-COMPONENT-010, at
+    2026-11-12T09:59:48.627685+00:00) names the HOLDER of that grant as
+    `ctx_e5e736e1846b`, and its `commands[0]` is exactly the capture
+    `n1n2-claude-resume-094-gate-component` with the argv and the 34/17 selection
+    that the capture really used.
+  - `NEW_429_STOP_20261112_1008.json` names the observed terminal
+    `term_b4006907-19df-46dd-ae99-34909d8de5e6` for dispatch `ctx_e5e736e1846b`.
+  - `CLAUDE_RESUMED_BY_MAIN.json` names dispatch `ctx_e5e736e1846b`, terminal
+    `term_b4006907-19df-46dd-ae99-34909d8de5e6`, and records `ctx_283e4028fc76` as
+    the `retry_of` — the EARLIER dispatch of the same task that had already been
+    stopped, not the one that ran 094.
+
+So: the writer of 094 was dispatch `ctx_e5e736e1846b` on terminal
+`term_b4006907-19df-46dd-ae99-34909d8de5e6`. `ctx_283e4028fc76` is its predecessor
+dispatch of the same task.
+
+Nothing else above is changed by this erratum. In particular:
+
+  - The capture's own recorded facts (argv, cwd, git_head, start/finish time, exit 1,
+    32 passed / 2 failed / 17 filtered, source_changed [], source_added [], log
+    sha256 0034b2b1340cd53039ae363237ec73350242ff53758ab602fa45bf4dce2df1c5) were
+    read from the capture files themselves and are unchanged.
+  - The current observations (no vitest/ffprobe/ffmpeg process, no
+    `narralens-created-workspace-*` fixture root, the earlier session's `/tmp` items
+    left untouched) remain exactly what this shell observed WHEN THIS RECEIPT WAS
+    WRITTEN. No historical observation of the moment 094 ran is asserted, and no
+    identity of the 094 writer is inferred from the observation itself.
+  - The current dispatch of this child is `ctx_b4086093cd96`, which is correct and
+    is not changed.
+
+No further correction is pending on this receipt.
+
+================================================================================
+ERRATUM 2 — the direction of the 098 assertion (APPENDED)
+================================================================================
+
+Appended on MAIN's instruction (message msg_ed5500ae44bf).
+
+This receipt states, above, about the failing 098 assertion:
+"expected 5, received 4". That direction is WRONG and is superseded by this
+erratum.
+
+The authoritative vitest diff of capture n1n2-claude-resume-098-gate-pure reads:
+
+    AssertionError: expected 5 to be 4 // Object.is equality
+    - Expected
+    + Received
+    - 4
+    + 5
+
+so the truth is: **EXPECTED 4, RECEIVED 5**. The assertion is
+`expect(causes!.length).toBe(cleanupFailures.length+1)`: the expectation is the
+primary plus each DISTINCT cleanup cause (3 injected failures + 1 primary = 4),
+and what the refusal actually carried was 5 cause entries, because ONE AND THE SAME
+cleanup failure object was attached twice. The cause object is the same in both
+places; the duplicate is confirmed.
+
+Nothing else above this erratum is changed.

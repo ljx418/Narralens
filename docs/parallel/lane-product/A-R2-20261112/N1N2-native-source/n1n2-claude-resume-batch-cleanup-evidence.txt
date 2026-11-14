@@ -1,0 +1,132 @@
+# N1N2 batch N1N2-RESUME-BATCH-001 - owned-resource cleanup evidence, captured raw
+# Narrow labelling: every statement is what THIS shell's view showed at the moment it
+# was captured. It is NOT a proof that no such process or directory exists anywhere on
+# the machine, NOT a proof that no descriptor of the run leaked into another process,
+# and NOT a per-resource lifetime test of the closure, the leases or the descriptors.
+
+## after batch command A (n1n2-claude-resume-017-batch-pure), 2026-11-12T06:38:21Z
+### the shell and the recorder of command A (pids 979111 / the recorder child)
+(no rows above = none matched in this view at this moment)
+
+### processes matching ffprobe|ffmpeg|vitest|narralens|openfilm, in this shell's process view
+(no rows above = none matched in this view at this moment)
+
+### fixture tmpdirs, in this shell's view
+ls: cannot access '/tmp/narralens-*': No such file or directory
+/tmp/n1n2-authority-block.ts
+(no rows above = none present in this view at this moment)
+
+## after batch command B (n1n2-claude-resume-018-batch-component), 2026-11-12T06:42:44Z
+### the shell of command B (pid 980705) and any of its recorder/worker
+(no rows above = none matched in this view at this moment)
+
+### processes matching ffprobe|ffmpeg|vitest|narralens|openfilm, in this shell's process view
+(no rows above = none matched in this view at this moment)
+
+### fixture tmpdirs, in this shell's view
+ls: cannot access '/tmp/narralens-*': No such file or directory
+ls: cannot access '/tmp/narralens-created-workspace-*': No such file or directory
+(no rows above = none present in this view at this moment)
+
+## after batch command C (n1n2-claude-resume-019-batch-regressions), 2026-11-12T06:48:38Z
+### the shell of command C (pid 987200) and any of its recorder/worker
+(no rows above = none matched in this view at this moment)
+
+### every process of the three batch commands, by their recorder name
+(no rows above = none matched in this view at this moment)
+
+### processes matching ffprobe|ffmpeg|vitest|narralens|openfilm, in this shell's process view
+(no rows above = none matched in this view at this moment)
+
+### fixture tmpdirs, in this shell's view
+ls: cannot access '/tmp/narralens-created-workspace-*': No such file or directory
+ls: cannot access '/tmp/narralens-committed-read-*': No such file or directory
+(no rows above = none present in this view at this moment)
+
+## the three batch commands and their terminal identities
+A  n1n2-claude-resume-017-batch-pure      shell 979111  recorder exit 1  2PASS/5FAIL/15filtered  log a94348421d081a401176f81d92ddfb4629c6a009a1bc89144979250f79ea3921  06:37:16Z-06:37:54Z
+B  n1n2-claude-resume-018-batch-component shell 980705  recorder exit 1  14PASS/1FAIL/7filtered  log 360ade92e1cc02e404123e4d545ac819bb33ed7a2cd8f1ceb195ff1533d3711e  06:38:29Z-06:42:23Z
+C  n1n2-claude-resume-019-batch-regressions shell 987200 recorder exit 1  82PASS/24FAIL        log d8f638c0b85fe8bf7b825bb9fb7b993e0fa44aa7358bbc33842b8861abdd42bc  06:42:51Z-06:44:42Z
+all three: source_changed [] and source_added [] (no input drift)
+
+## after corrected batch command A (n1n2-claude-resume-021-batch-pure), 2026-11-12T07:02:42Z
+### the shell of command A (pid 1057699) and any of its recorder/worker
+(no rows above = none matched in this view at this moment)
+
+### processes matching ffprobe|ffmpeg|vitest|narralens|openfilm, in this shell's process view
+(no rows above = none matched in this view at this moment)
+
+### fixture tmpdirs, in this shell's view
+ls: cannot access '/tmp/narralens-created-workspace-*': No such file or directory
+ls: cannot access '/tmp/n1n2-closure-*': No such file or directory
+ls: cannot access '/tmp/n1n2-rev-*': No such file or directory
+(no rows above = none present in this view at this moment)
+
+## after corrected batch command B (n1n2-claude-resume-022-batch-component), 2026-11-12T07:06:56Z
+### the shell of command B (pid 1059874) and any of its recorder/worker
+(no rows above = none matched in this view at this moment)
+
+### processes matching ffprobe|ffmpeg|vitest|narralens|openfilm, in this shell's process view
+(no rows above = none matched in this view at this moment)
+
+### fixture tmpdirs, in this shell's view
+ls: cannot access '/tmp/narralens-created-workspace-*': No such file or directory
+(no rows above = none present in this view at this moment)
+
+## after corrected batch command C (n1n2-claude-resume-023-batch-regressions), 2026-11-12T07:10:48Z
+### the shell of command C (pid 1090112) and any of its recorder/worker
+(no rows above = none matched in this view at this moment)
+
+### every process of the three corrected batch commands, by their recorder name
+(no rows above = none matched in this view at this moment)
+
+### processes matching ffprobe|ffmpeg|vitest|narralens|openfilm, in this shell's process view
+(no rows above = none matched in this view at this moment)
+
+### fixture tmpdirs, in this shell's view
+ls: cannot access '/tmp/narralens-created-workspace-*': No such file or directory
+ls: cannot access '/tmp/narralens-committed-read-*': No such file or directory
+ls: cannot access '/tmp/n1n2-closure-*': No such file or directory
+ls: cannot access '/tmp/n1n2-rev-*': No such file or directory
+(no rows above = none present in this view at this moment)
+
+## the three corrected batch commands and their terminal identities
+A  n1n2-claude-resume-021-batch-pure      shell 1057699 recorder exit 1  6PASS/2FAIL/18filtered  log ccc6ac29b697f69bdf52931de560c9eaa88c0032dd1cec3ea4676f82bef3362c  07:01:53Z-07:02:18Z
+B  n1n2-claude-resume-022-batch-component shell 1059874 recorder exit 1  17PASS/1FAIL +1 unhandled/8filtered  log 58f3114a15ce4c69cc60a4e718b879b983e88a13989a1a54a816b4837d727a13  07:02:46Z-07:06:11Z
+C  n1n2-claude-resume-023-batch-regressions shell 1090112 recorder exit 0  107PASS/3 files  log 53bfd698cc978698fabf41ffac3de14d5d5b7d84a4631814d84b2e905cfa0a50  07:06:56Z-07:08:43Z
+all three: source_changed [] and source_added [] (no input drift)
+NOTE on identities: the shell pid above is the launcher; the recorder, the vitest
+launcher and the vitest worker are its children and are all absent in this view.
+
+## after batch 003 command A (n1n2-claude-resume-034-batch-pure), 2026-11-12T07:14:09Z
+(no rows above = none matched in this view at this moment)
+(no rows above = none matched in this view at this moment)
+ls: cannot access '/tmp/n1n2-closure-*': No such file or directory
+ls: cannot access '/tmp/n1n2-rev-*': No such file or directory
+(no rows above = none present in this view at this moment)
+
+## after batch 003 command B (n1n2-claude-resume-035-batch-component), 2026-11-12T07:18:37Z
+(no rows above = none matched in this view at this moment)
+(no rows above = none matched in this view at this moment)
+ls: cannot access '/tmp/narralens-created-workspace-*': No such file or directory
+(no rows above = none present in this view at this moment)
+
+## after batch 003 command C (n1n2-claude-resume-036-batch-regressions), 2026-11-12T07:21:31Z
+### the shell of command C (pid 1106758) and any of its recorder/worker
+(no rows above = none matched in this view at this moment)
+### every process of the three batch-003 commands
+(no rows above = none matched in this view at this moment)
+### processes matching ffprobe|ffmpeg|vitest|narralens|openfilm, in this shell's process view
+(no rows above = none matched in this view at this moment)
+### fixture tmpdirs, in this shell's view
+ls: cannot access '/tmp/narralens-created-workspace-*': No such file or directory
+ls: cannot access '/tmp/narralens-committed-read-*': No such file or directory
+(no rows above = none present in this view at this moment)
+
+## the three batch-003 commands and their terminal identities
+A  n1n2-claude-resume-034-batch-pure       shell 1098146  exit 0  8PASS/18filtered   log 2df7f22afccda8cba9a772720c125d27c34be3bee265459420a8d7e11bd37eea  07:13:27Z-07:13:57Z
+B  n1n2-claude-resume-035-batch-component  shell 1099899  exit 0  18PASS/8filtered   log 82d64e914fab5b2371dd77d22e1e5ee82f784d118cd526bab4a354a43aac7da5  07:14:09Z-07:18:12Z
+C  n1n2-claude-resume-036-batch-regressions shell 1106758  exit 0  107PASS/3 files    log 4c84e9e75dea48f0f68a07380b57bfd2003d24790b0b1c6b895429a30c50f04f  07:18:37Z-07:21:12Z
+all three: source_changed [] and source_added [] (no input drift), no unhandled error
+NOTE on identities: the shell pid above is the launcher; the recorder, the vitest
+launcher and the vitest worker are its children and are all absent in this view.

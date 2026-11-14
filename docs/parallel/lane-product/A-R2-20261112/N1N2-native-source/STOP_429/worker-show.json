@@ -1,0 +1,220 @@
+{
+  "id": "cb419f3c-f6fb-463b-91c7-b3cda43ef679",
+  "ok": true,
+  "result": {
+    "dispatch": {
+      "id": "ctx_283e4028fc76",
+      "runId": "run_399f9dd3ce5a",
+      "taskId": "task_5dcbe8192764",
+      "task_id": "task_5dcbe8192764",
+      "contractVersion": 1,
+      "assigneeHandle": "term_b4defdac-eb95-4d2a-94d8-33773059282f",
+      "assigneePaneKey": "a6a7913c-1fae-48f1-8dec-81a2f322be5f:4a51bacd-f02f-4c09-855c-04b2e2e86f9c",
+      "processIncarnation": "2e732423-9bcc-494c-a0ed-e27a9488f313::C:\\workspace\\videoworkline\\Narralens-agents\\main-integration@@fb205f11:e112c847-3b13-4bb7-a6c1-38a017dd4315",
+      "capabilityRevokedAt": "2026-11-12T05:04:44.180Z",
+      "retryOfDispatchId": null,
+      "creatorDispatchId": "ctx_b68ba2408385",
+      "followUpOf": null,
+      "hostScope": {
+        "kind": "wsl",
+        "hostId": "local",
+        "distro": "Ubuntu-24.04"
+      },
+      "status": "failed",
+      "failureCount": 0,
+      "lastFailure": "stopped",
+      "terminationReason": null,
+      "depth": 2,
+      "dispatchedAt": "2026-11-12 04:49:24",
+      "completedAt": "2026-11-12T05:04:48.782Z",
+      "createdAt": "2026-11-12 04:49:24",
+      "lastHeartbeatAt": null
+    },
+    "worker": {
+      "dispatchId": "ctx_283e4028fc76",
+      "runtimeEpoch": "854c82c2-6710-44db-ad53-7a56fce6074c",
+      "state": "stopped",
+      "stage": "process_stopped",
+      "worktreeId": "2e732423-9bcc-494c-a0ed-e27a9488f313::C:\\workspace\\videoworkline\\Narralens-agents\\main-integration",
+      "agentTerminalHandle": "term_b4defdac-eb95-4d2a-94d8-33773059282f",
+      "setupState": "not_applicable",
+      "effects": [
+        {
+          "kind": "worktree",
+          "action": "reused",
+          "id": "2e732423-9bcc-494c-a0ed-e27a9488f313::C:\\workspace\\videoworkline\\Narralens-agents\\main-integration"
+        },
+        {
+          "kind": "setup",
+          "action": "not_applicable",
+          "state": "not_applicable"
+        },
+        {
+          "kind": "terminal",
+          "role": "agent",
+          "action": "created",
+          "id": "term_b4defdac-eb95-4d2a-94d8-33773059282f",
+          "surface": "visible"
+        },
+        {
+          "kind": "dispatch_input",
+          "role": "agent",
+          "id": "term_b4defdac-eb95-4d2a-94d8-33773059282f",
+          "state": "accepted"
+        }
+      ],
+      "residualResources": [
+        {
+          "kind": "terminal",
+          "role": "agent",
+          "action": "created",
+          "id": "term_b4defdac-eb95-4d2a-94d8-33773059282f",
+          "surface": "visible"
+        }
+      ],
+      "startOptions": {
+        "worktree": "identity:wt2:local:3e906924-8c30-4dd8-bd81-cbebd88eb807",
+        "mode": {
+          "mode": "terminal",
+          "preferred": "terminal",
+          "reason": "user_default",
+          "detail": "Started a terminal agent worker, the default for new agent tabs in your settings."
+        },
+        "resolvedWorktreeId": "2e732423-9bcc-494c-a0ed-e27a9488f313::C:\\workspace\\videoworkline\\Narralens-agents\\main-integration",
+        "name": null,
+        "repo": null,
+        "baseBranch": null,
+        "terminal": null,
+        "agent": "claude",
+        "launch": {
+          "requested": {
+            "agent": "claude",
+            "model": null,
+            "effort": null
+          },
+          "effective": {
+            "agent": "claude",
+            "model": null,
+            "effort": null
+          }
+        },
+        "timeoutMs": 60000,
+        "setup": "not_applicable",
+        "setupSource": "existing_worktree"
+      },
+      "lastError": null,
+      "createdAt": "2026-11-12 04:49:24",
+      "updatedAt": "2026-11-12T05:04:48.782Z"
+    },
+    "projection": {
+      "id": "ctx_283e4028fc76",
+      "dispatchId": "ctx_283e4028fc76",
+      "taskId": "task_5dcbe8192764",
+      "runId": "run_399f9dd3ce5a",
+      "role": "worker",
+      "parent": {
+        "taskId": "task_de9ae6c61fbf"
+      },
+      "provider": null,
+      "host": {
+        "kind": "local",
+        "id": "local"
+      },
+      "workspace": {
+        "id": "2e732423-9bcc-494c-a0ed-e27a9488f313::C:\\workspace\\videoworkline\\Narralens-agents\\main-integration",
+        "kind": "folder_or_worktree"
+      },
+      "stage": {
+        "worker": "stopped",
+        "dispatch": "failed",
+        "detail": "process_stopped",
+        "activity": "unknown"
+      },
+      "outcome": "failed",
+      "liveness": {
+        "verdict": "exited",
+        "source": "worker_stop"
+      },
+      "evidence": {
+        "durable": true,
+        "liveStatus": "unavailable",
+        "lastObservedAt": null
+      },
+      "resource": {
+        "state": "owned",
+        "id": "wtr_a104a99ea93e",
+        "ownerDispatchId": "ctx_283e4028fc76",
+        "releaseState": "not_requested",
+        "terminalState": "retained"
+      },
+      "nextAction": {
+        "kind": "release",
+        "argv": [
+          "orchestration",
+          "worker-release",
+          "--dispatch",
+          "ctx_283e4028fc76"
+        ]
+      },
+      "attention": {
+        "categories": [
+          "failure"
+        ],
+        "requiresAction": true
+      }
+    },
+    "terminal": {
+      "handle": "term_b4defdac-eb95-4d2a-94d8-33773059282f",
+      "ptyId": "2e732423-9bcc-494c-a0ed-e27a9488f313::C:\\workspace\\videoworkline\\Narralens-agents\\main-integration@@fb205f11",
+      "incarnationId": "e112c847-3b13-4bb7-a6c1-38a017dd4315",
+      "orphaned": true,
+      "recordedPaneKey": "a6a7913c-1fae-48f1-8dec-81a2f322be5f:4a51bacd-f02f-4c09-855c-04b2e2e86f9c",
+      "worktreeId": "2e732423-9bcc-494c-a0ed-e27a9488f313::C:\\workspace\\videoworkline\\Narralens-agents\\main-integration",
+      "worktreePath": "C:\\workspace\\videoworkline\\Narralens-agents\\main-integration",
+      "branch": "refs/heads/agent-driven/main-a-integration",
+      "tabId": "a6a7913c-1fae-48f1-8dec-81a2f322be5f",
+      "leafId": "4a51bacd-f02f-4c09-855c-04b2e2e86f9c",
+      "title": "N1N2 native source",
+      "connected": false,
+      "writable": false,
+      "lastOutputAt": 1794459888395,
+      "preview": "alens-agents/main-integration$claude --plugin-dir '/home/administrator/.orca-relay/claude-plugins/9556390b965aa4241335b87d33e9247a/claude-agent-view/09e2818844508c25c9df/orca-agent-view' '--dangerously-skip-permissions'\n●                                                                              8",
+      "exitCause": {
+        "kind": "operator_close"
+      },
+      "executionHostId": "local",
+      "paneRuntimeId": -1,
+      "rendererGraphEpoch": 0
+    },
+    "observation": {
+      "status": "exited",
+      "exactWorker": true
+    },
+    "terminalResource": {
+      "id": "wtr_a104a99ea93e",
+      "ownershipState": "owned",
+      "releaseState": "not_requested",
+      "retainedReason": null,
+      "terminalHandle": "term_b4defdac-eb95-4d2a-94d8-33773059282f",
+      "worktreeId": "2e732423-9bcc-494c-a0ed-e27a9488f313::C:\\workspace\\videoworkline\\Narralens-agents\\main-integration",
+      "endpointId": "854c82c2-6710-44db-ad53-7a56fce6074c",
+      "endpointIncarnation": "2e732423-9bcc-494c-a0ed-e27a9488f313::C:\\workspace\\videoworkline\\Narralens-agents\\main-integration@@fb205f11:e112c847-3b13-4bb7-a6c1-38a017dd4315",
+      "originDispatchId": "ctx_283e4028fc76",
+      "ownerDispatchId": "ctx_283e4028fc76",
+      "releaseRequestedAt": null,
+      "releaseCompletedAt": null,
+      "releaseError": null,
+      "recoveryAttemptCount": 0,
+      "lastRecoveryAt": null,
+      "autoReleaseAt": null,
+      "archive": {
+        "source": "transcript",
+        "status": "captured"
+      }
+    },
+    "autoReleaseAt": null
+  },
+  "_meta": {
+    "runtimeId": "854c82c2-6710-44db-ad53-7a56fce6074c"
+  }
+}

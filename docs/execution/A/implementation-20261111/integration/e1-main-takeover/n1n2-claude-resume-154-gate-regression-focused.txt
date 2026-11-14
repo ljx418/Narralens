@@ -1,0 +1,108 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:1915186) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/agent-driven/integration/created-native-source-reader.test.ts (80 tests | 1 failed | 58 skipped) 191822ms
+   ↓ R00 smoke reaches the reader from the real committed created source
+   ↓ R00 smoke commits a rich source with the native files and the media
+   ↓ R01 refuses the legacy project that has no created producer
+   ↓ R02 invalidates the old proof when the working copy changes under it
+   ↓ R02 refuses a pending round when the working copy changes during the read
+   ↓ R03 refuses a sidecar, an unknown item and a missing committed file
+   ↓ R04 refuses a foreign native id, a forged probe cache and a file in flight
+   ↓ R04 accepts a legitimate cache in the next stable round
+   ↓ R05 proves the media facts of the retained bytes
+   ↓ R06 lists the media in the native numeric order
+   ↓ R02 keeps parallel leases independent and refuses foreign and copied tokens
+   ↓ R02 refuses a facts lease of another authority
+   ↓ R02 releases the whole closure only after the last retained leaf
+   ↓ R06 places every clip where the committed film places it
+   ↓ R07 ends a read at a close and releases a late result exactly once
+   ↓ R07 lets the real media child exit before the reader closes
+   ↓ R07 registers the read before a binding callback can close the reader
+   ↓ R07 refuses a later read after a delivered release failed
+   ↓ F01 keeps a temporary release failure and reports it once at the final release
+   ✓ F03 refuses a source leaf and a source parent replaced during the acquisition  16050ms
+   ↓ F03 refuses a stale source identity and proves the next one
+   ✓ F04 refuses a hardlink alias and an unknown directory in the working copy  16725ms
+   ✓ F04 refuses a working copy leaf that is hardlinked to an external file  7906ms
+   ↓ F05 refuses a page frame cache entry and an orphan film poster
+   ↓ F07 reports a delivered release failure when the reader closes
+   ↓ F08 refuses a lease whose producer lineage changed after the issue
+   ↓ F08 refuses a lineage changed during the acquisition
+   ↓ F02 accepts a proved absence and refuses its later birth
+   ↓ F06 refuses a referenced text above the budget in the authority path
+   ↓ F09 refuses every injected probe failure through the production runner
+   ↓ F09 normalises a rotated video and the first of two video streams
+   ↓ F10 lists the media as the pinned consumer lists it
+   ↓ F10 keeps the caption directory in the platform order
+   ↓ F10 shows that the pinned consumer refuses a clip without a number
+   ↓ P07 refuses a grown file, the cumulative text, the deep tree and the descriptor budget
+   ↓ P07 keeps the primary error when an open fails and releases everything else
+   ↓ P07 keeps the primary cause of an EMFILE, an ENOMEM and an EACCES
+   ↓ P06 normalises a missing and a picture duration as no duration
+   ↓ F05 binds the probe evidence to the concrete tool, argv, input and result
+   ↓ F03 refuses a pending round when the working copy changes during the probe
+   ↓ R07 keeps the delivered resources until their owner releases them
+   ↓ R03 refuses a translation beside the media that the committed source does not have
+   ↓ P06 resolves a clip without a place as the native does and refuses a disagreement
+   ↓ P06 places a clip without a place where the pinned consumer places it
+   ↓ P07 refuses a symbolic link, a same-bytes replacement and a restored change time
+   ↓ P07 refuses a text file above the budget and bounds the total
+   ↓ P07 refuses to release while work is in flight and releases every allocation once
+   ↓ P07 refuses a reentrant release from inside an accepted read
+   ↓ P07 keeps the failure of the walk release with the failure that stopped it
+   ✓ G01 adopts the genuine cleanup uncertainty of a rejected source acquisition  13820ms
+   ✓ G01 keeps the reader usable after an ordinary failure of the acquisition  12793ms
+   ✓ G01 adopts the genuine uncertainty of a raw rejection that arrives after the caller was cancelled 1ms
+   ✓ G02 refuses the round when the binding goes stale during the read  7698ms
+   ✓ G02 refuses the round when the reader is closed during the final verification  8308ms
+   ✓ G02 refuses the round when the working copy view is invalidated during the read  8141ms
+   ✓ G02 refuses the round when another delivered proof fails to release  10808ms
+   ✓ G03 refuses a film that is replaced between the bounded digest and the parse  7960ms
+   ↓ G04 refuses a page frame entry that no fixed producer witnessed
+   ↓ G04 refuses a film poster that no fixed producer witnessed
+   ↓ G05 refuses a real stdout overflow and a real stderr overflow
+   ↓ G05 kills and reaps a real hung child and keeps the input held until it ends
+   ↓ G05 proves the named media branch is the one that failed
+   ✓ G05 proves a real child that dies by a signal and a real child that is cancelled  17465ms
+   ↓ G06 refuses a working copy whose settings file was deleted and sees it change under a proof
+   ✓ P07 hands a non-lexical caption order to the actual consumer without changing it 4ms
+   ✓ G06 accepts an absent heard transcript and refuses its later birth  9658ms
+   ↓ G06 refuses an empty directory born alone under a held proof
+   ↓ G06 refuses a stale generation at the reader
+   ↓ G06 refuses a foreign facts lease consumed through the actual reader
+   ✓ G06 refuses an isolated parent swap that leaves no extra file behind  8463ms
+   ✓ G07 refuses a workspace leaf hardlinked to an external file 1ms
+   × G01 keeps the alias reason and the release failure of the same acquisition 7825ms
+     → expected [ …(1) ] to include Error: injected source release failure
+   ✓ G07 invalidates an old proof when an external hardlink appears after it  8855ms
+   ✓ G07 holds both trees and a parallel proof under one descriptor pool  10537ms
+   ✓ G07 holds every nested and empty directory of both trees independently  8850ms
+   ✓ P07 keeps the named primary and every cleanup cause of the real unpack path 3ms
+   ↓ P07 proves an empty directory and sees the file that appears in it
+   ↓ P06 reproduces the five pinned native revision vectors
+   ↓ P06 lists the media in the numeric order of the host
+   ✓ G02 refuses the round when the last liveness callback closes the reader  9948ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/created-native-source-reader.test.ts > G01 keeps the alias reason and the release failure of the same acquisition
+AssertionError: expected [ …(1) ] to include Error: injected source release failure
+ ❯ tests/agent-driven/integration/created-native-source-reader.test.ts:2541:25
+    2539|  if(primary!==undefined)withCleanup(primary,reportedCauses);
+    2540|  expect(reported).not.toBeNull();
+    2541|  expect(reportedCauses).toContain(releaseFailure);
+       |                         ^
+    2542| },300000);
+    2543| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 21 passed | 58 skipped (80)
+   Start at  23:37:15
+   Duration  200.61s (transform 3.81s, setup 0ms, collect 6.75s, tests 191.82s, environment 0ms, prepare 1.31s)
+

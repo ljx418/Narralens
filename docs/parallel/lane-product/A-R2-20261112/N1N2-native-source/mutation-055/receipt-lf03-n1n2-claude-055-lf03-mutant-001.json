@@ -1,0 +1,38 @@
+{
+  "format": "narralens.mutation-055-receipt@1",
+  "mutation": "lf03",
+  "capture": "n1n2-claude-055-lf03-mutant-001",
+  "target": "src/host/agent-driven/local-asset-registry.ts",
+  "expectation": "the legitimate published blob (same content, only the change time of its inode moved) is refused",
+  "original_sha256": "0f99ed585bc8152926b555a3139a240c80025c023db4dc690b26769e1635bb25",
+  "original_bytes": 41475,
+  "backup": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/parallel/lane-product/A-R2-20261112/N1N2-native-source/mutation-055/backup-lf03-0f99ed585bc8152926b555a3139a240c80025c023db4dc690b26769e1635bb25.txt",
+  "backup_sha256": "0f99ed585bc8152926b555a3139a240c80025c023db4dc690b26769e1635bb25",
+  "argv": [
+    "corepack",
+    "pnpm",
+    "exec",
+    "vitest",
+    "run",
+    "--config",
+    "vitest.config.ts",
+    "tests/agent-driven/integration/local-assets-host.test.ts",
+    "-t",
+    "proves a published blob again when only the change time of its inode moved, and keeps every other change refused"
+  ],
+  "started_at": "2026-11-13T17:39:18.734008+00:00",
+  "restore": {
+    "method": "byte for byte copy of the backup file; no git checkout, reset or restore",
+    "restored_sha256": "0f99ed585bc8152926b555a3139a240c80025c023db4dc690b26769e1635bb25",
+    "bytes": 41475,
+    "identical_to_original": true
+  },
+  "recorder_exit": 1,
+  "status": "mutant_run_done",
+  "anchor_occurrences": 1,
+  "mutant_sha256": "43aedda9b109e041bef4b7a4a01881bf5462bd2f88d4a50a73a157cd423a7c3e",
+  "mutant_bytes": 41661,
+  "patch": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/parallel/lane-product/A-R2-20261112/N1N2-native-source/mutation-055/patch-lf03-n1n2-claude-055-lf03-mutant-001.diff",
+  "patch_sha256": "27dec334a93970e81023ca7a75aea0ea902dbf2552026034610f9ec18607f95a",
+  "finished_at": "2026-11-13T17:39:42.184472+00:00"
+}

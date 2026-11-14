@@ -56,6 +56,24 @@ describe('created impact and response share the original SQLite transaction',()=
    expect(f.revisions.compose(db=>db.isTransaction)).toBe(false);
   }finally{f.revisions.close();}
  });
+ it('expires an impact only when its deadline really passed, and moves no other state',()=>{
+  const f=fixture();try{
+   const created=f.impacts.create(f.input);
+   const deadline=Date.parse(created.expires_at);
+   // Before the deadline the authority moves NOTHING: the row is still active.
+   expect(f.impacts.expire(created.impact_id,new Date(deadline-1000)).state).toBe('active');
+   expect(f.impacts.state(created.impact_id)).toBe('active');
+   // After the deadline the authority really moves the row, and the state that is
+   // read back is the state the table holds.
+   expect(f.impacts.expire(created.impact_id,new Date(deadline+1000)).state).toBe('expired');
+   expect(f.impacts.state(created.impact_id)).toBe('expired');
+   // A terminal row is never moved again: the expiry is idempotent.
+   expect(f.impacts.expire(created.impact_id,new Date(deadline+2000)).state).toBe('expired');
+  }finally{f.revisions.close();}
+ });
+ it('refuses to expire an impact that is not there',()=>{
+  const f=fixture();try{expect(()=>f.impacts.expire('imp_not_there',new Date())).toThrow();}finally{f.revisions.close();}
+ });
  it('replays identical immutable facts without renewing expiry or dropping the impact hash',()=>{
   const f=fixture();try{const first=f.impacts.create(f.input);
    expect(f.impacts.create({...f.input,now:new Date(f.input.now.getTime()+10000)})).toEqual(first);

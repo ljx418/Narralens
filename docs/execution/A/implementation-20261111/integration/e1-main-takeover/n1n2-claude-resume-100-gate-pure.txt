@@ -1,0 +1,16 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:1715026) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+stdout | tests/agent-driven/integration/created-native-source-reader.test.ts > F10 lists the media as the pinned consumer lists it
+N1N2_ENVIRONMENT_FINGERPRINT {"node":"v22.22.1","icu":"78.2","locale":"en-US"}
+
+ ✓ tests/agent-driven/integration/created-native-source-reader.test.ts (52 tests | 34 skipped) 1047ms
+   ✓ F10 lists the media as the pinned consumer lists it  1000ms
+
+ Test Files  1 passed (1)
+      Tests  18 passed | 34 skipped (52)
+   Start at  21:19:02
+   Duration  11.04s (transform 4.62s, setup 0ms, collect 7.90s, tests 1.05s, environment 0ms, prepare 1.38s)
+

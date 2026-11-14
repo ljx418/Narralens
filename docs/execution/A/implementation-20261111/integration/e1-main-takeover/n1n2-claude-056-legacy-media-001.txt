@@ -1,0 +1,58 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:3846546) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/m4b/adoption-route.test.ts (35 tests) 274645ms
+   ✓ M4B production adoption route > returns 428 before resource lookup when impact or approval is missing  1262ms
+   ✓ M4B production adoption route > adopts three native clips once, replays exactly, and rebuilds after restart  43389ms
+   ✓ M4B production adoption route > recovers a simulated crash at after_prepared to one durable outcome  14415ms
+   ✓ M4B production adoption route > recovers a simulated crash at after_published to one durable outcome  9967ms
+   ✓ M4B production adoption route > recovers a simulated crash at after_committed to one durable outcome  9298ms
+   ✓ M4B production adoption route > latches terminal attention when recovery can prove neither publication boundary  8852ms
+   ✓ M4B production adoption route > starts again after latching terminal attention, because one blocked project must not stop the Host  10653ms
+   ✓ M4B production adoption route > recovers the author-source publication boundary asset_temp_fsynced  9563ms
+   ✓ M4B production adoption route > recovers the author-source publication boundary asset_installed  9740ms
+   ✓ M4B production adoption route > recovers the author-source publication boundary film_temp_fsynced  9497ms
+   ✓ M4B production adoption route > recovers the author-source publication boundary film_renamed  10826ms
+   ✓ M4B production adoption route > recovers the author-source publication boundary parent_fsynced  10184ms
+   ✓ M4B production adoption route > rejects a visual lock acquired after staging with revision +0  7153ms
+   ✓ M4B production adoption route > re-reads the rights before publication, so a rights change after the impact stops it  7549ms
+   ✓ M4B production adoption route > does not over-block an adoption that preserves narration while a narration lock is held  7621ms
+   ✓ M4B production adoption route > converges the pre-publish crash boundary after_received to aborted with revision +0  6832ms
+   ✓ M4B production adoption route > converges the pre-publish crash boundary after_preconditions to aborted with revision +0  7032ms
+   ✓ M4B production adoption route > converges the pre-publish crash boundary after_plan to aborted with revision +0  6840ms
+   ✓ M4B production adoption route > converges the pre-publish crash boundary after_stage to aborted with revision +0  7227ms
+   ✓ M4B production adoption route > converges the pre-publish crash boundary after_validate to aborted with revision +0  7422ms
+   ✓ M4B production adoption route > converges the pre-publish crash boundary after_snapshot_publish to aborted with revision +0  7213ms
+   ✓ M4B production adoption route > converges the crash boundary after_active_inspect to a decided state with revision +1  9562ms
+   ✓ M4B production adoption route > answers the same key with the same body whether the recovery just ran or was replayed  6400ms
+   ✓ M4B production adoption route > records the source=after / DB-not-committed transition state field by field  9849ms
+   ✓ M4B production adoption route > answers a visual lock held during recovery with a controlled 423 and nothing committed  7597ms
+   ✓ M4B production adoption route > reclaims a crashed staging tree through the production composition, where the database path is the store's  1759ms
+   ✓ M4B production adoption route > latches an owned adoption marker whose payload violates its contract  2502ms
+   ✓ M4B production adoption route > keeps an unparseable unknown request under generic recovery after Host restart  1771ms
+   ✓ M4B production adoption route > records why a recovery was blocked, and closes the project visibly  1790ms
+   ✓ M4B production adoption route > does not let one of its own pending rows block the recovery of another  2562ms
+   ✓ M4B production adoption route > leaves another module's transaction alone: a legacy edit row is not M4B's to decide  1763ms
+   ✓ M4B production adoption route > answers a conflicting idempotency key with the request's correlation id  7902ms
+   ✓ M4B production adoption route > answers one idempotency key with one body, whatever the request body is  6905ms
+   ✓ M4B production adoption route > sweeps an adoption staging tree left behind by a hard crash  1747ms
+(node:3850838) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/wave2/m4c/history-media-and-failure.test.ts (9 tests) 105238ms
+   ✓ M4C-14 and M4C-15: the restored film is still three native, decodable clips > restores three native clips, renders them with the pinned upstream and decodes 900 frames  24564ms
+   ✓ M4C-14 and M4C-15: the restored film is still three native, decodable clips > keeps the other two clips' identity when one clip is edited natively  11643ms
+   ✓ M4C TX-03C and TX-04C: the locks and the consumers are the right ones > asks for a visual lock on every changed clip and no narration lock while the narration is preserved  8860ms
+   ✓ M4C TX-03C and TX-04C: the locks and the consumers are the right ones > does not let a narration lock block a restore that preserves the narration  9934ms
+   ✓ M4C TX-12C: the restore changes nothing it did not name > leaves the old snapshot's bytes and the adopted snapshot's bytes exactly as they were  9823ms
+   ✓ M4C: the content-addressed asset the restore installs > installs the missing asset, and refuses one filed under a digest that is not its own bytes  12642ms
+   ✓ M4C: the content-addressed asset the restore installs > refuses a target whose asset is filed under a digest that is not its own content address  9389ms
+   ✓ M4C-16: a cancellation before the publication intent discards the staged result > aborts with revision +0 and publishes nothing  9125ms
+   ✓ M4C-17: a failed restore writes nothing but its own failure > leaves the source, the revision, the pointer, the impact, the outbox and the idempotency row as they were  9255ms
+
+ Test Files  2 passed (2)
+      Tests  44 passed (44)
+   Start at  03:34:54
+   Duration  392.08s (transform 3.09s, setup 0ms, collect 8.37s, tests 379.88s, environment 0ms, prepare 2.53s)
+

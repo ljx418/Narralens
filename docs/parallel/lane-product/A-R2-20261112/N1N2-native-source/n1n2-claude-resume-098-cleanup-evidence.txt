@@ -1,0 +1,59 @@
+N1N2 RESUME — 098 own cleanup receipt (CURRENT OBSERVATION ONLY)
+
+Writer: Claude implementation child, task task_5dcbe8192764 / dispatch ctx_b4086093cd96,
+cwd /mnt/c/workspace/videoworkline/Narralens-agents/main-integration, HEAD
+e2eff61b464d75d36598103d718cd2a75db5dfda.
+
+THE CAPTURE ITSELF (read from its own capture files, not observed)
+
+  capture            n1n2-claude-resume-098-gate-pure
+  argv               corepack pnpm exec vitest run --config vitest.config.ts
+                     tests/agent-driven/integration/created-native-source-reader.test.ts
+                     -t "P0|F01|F10 lists|F10 keeps"
+  cwd                /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+  git_head           e2eff61b464d75d36598103d718cd2a75db5dfda
+  started_at         2026-11-12T13:15:41.390504+00:00
+  finished_at        2026-11-12T13:15:55.914299+00:00
+  exit               1
+  result             17 passed, 1 failed, 34 filtered out (52 cases in the file)
+  failing case       P07 keeps the named primary and every cleanup cause of the real
+                     unpack path  (the case this child added)
+  assertion         expect(causes!.length).toBe(cleanupFailures.length+1)
+                     expected 5, received 4  (the cause list holds the SAME cleanup
+                     failure twice; see the report to MAIN)
+  source_changed     []
+  source_added       []
+  log_sha256         e419be828944ab5809bc6f25ccaaa532580f4278daa370302caff0291001a6f9
+
+  The grant of MAIN (`msg_104758de390c`, N1N2-RESUME-FOCUSED-011) chained the
+  component capture to this one ONLY IF this one had exited 0 with no input drift.
+  It did not, so the component capture was NOT run.
+
+OBSERVED AT THE TIME OF WRITING THIS RECEIPT (current observation only)
+
+  1. Processes. `ps -eo pid,etimes,comm` was inspected for vitest, ffprobe and
+     ffmpeg: no match. No process of this lane's run was still alive.
+
+  2. Temporary roots. The pure cases of this file create their temporary trees with
+     `mkdtemp(join(tmpdir(),'n1n2-closure-'))` and `mkdtemp(join(tmpdir(),'n1n2-rev-'))`
+     and remove them in their `finally`. At the time of writing,
+     `ls -d /tmp/n1n2-closure-* /tmp/n1n2-rev-* /tmp/narralens-created-workspace-*`
+     matched ZERO entries.
+
+  3. The repository. HEAD is still
+     `e2eff61b464d75d36598103d718cd2a75db5dfda`, the git index is still EMPTY, and
+     the dirty set is exactly the five files it was before the run: the protected
+     `AGENTS.md` and the four tracked release paths. The ten released paths and
+     `AGENTS.md` were frozen for the whole run; the recorder confirms it with
+     `source_changed []` and `source_added []`.
+
+  4. The earlier session's `/tmp` scratch items (`/tmp/n1n2-rot/`, `n1n2-*.txt`,
+     `n1n2-authority-block.ts`) are still there, untouched by this child.
+
+NOT CLAIMED
+
+  - Not a historical observation of the machine at any moment before this writing.
+  - Not a per-descriptor accounting, a per-resource lifetime proof or a global
+    absence claim.
+  - The failing capture is preserved under its own name and was NOT re-run under
+    that name.

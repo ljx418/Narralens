@@ -1,0 +1,742 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:2213712) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/agent-driven/integration/created-native-source-reader.test.ts (88 tests | 3 failed | 80 skipped) 80673ms
+   ↓ R00 smoke reaches the reader from the real committed created source
+   ↓ R00 smoke commits a rich source with the native files and the media
+   ↓ R01 refuses the legacy project that has no created producer
+   ↓ R02 invalidates the old proof when the working copy changes under it
+   ↓ R02 refuses a pending round when the working copy changes during the read
+   ↓ R03 refuses a sidecar, an unknown item and a missing committed file
+   ↓ R04 refuses a foreign native id, a forged probe cache and a file in flight
+   ↓ R04 accepts a legitimate cache in the next stable round
+   ↓ R05 proves the media facts of the retained bytes
+   ↓ R06 lists the media in the native numeric order
+   ↓ R02 keeps parallel leases independent and refuses foreign and copied tokens
+   ↓ R02 refuses a facts lease of another authority
+   ↓ R02 releases the whole closure only after the last retained leaf
+   ↓ R06 places every clip where the committed film places it
+   ↓ R07 ends a read at a close and releases a late result exactly once
+   ↓ R07 lets the real media child exit before the reader closes
+   ↓ R07 registers the read before a binding callback can close the reader
+   ↓ R07 refuses a later read after a delivered release failed
+   ↓ F01 keeps a temporary release failure and reports it once at the final release
+   ↓ F03 refuses a source leaf and a source parent replaced during the acquisition
+   ↓ F03 refuses a stale source identity and proves the next one
+   ↓ F04 refuses a hardlink alias and an unknown directory in the working copy
+   ↓ F04 refuses a working copy leaf that is hardlinked to an external file
+   ↓ F05 refuses a page frame cache entry and an orphan film poster
+   ↓ F07 reports a delivered release failure when the reader closes
+   ↓ F08 refuses a lease whose producer lineage changed after the issue
+   ↓ F08 refuses a lineage changed during the acquisition
+   ↓ F02 accepts a proved absence and refuses its later birth
+   ↓ F06 refuses a referenced text above the budget in the authority path
+   ↓ F09 refuses every injected probe failure through the production runner
+   ↓ F09 normalises a rotated video and the first of two video streams
+   ↓ F10 lists the media as the pinned consumer lists it
+   ↓ F10 keeps the caption directory in the platform order
+   ↓ F10 shows that the pinned consumer refuses a clip without a number
+   ↓ P07 refuses a grown file, the cumulative text, the deep tree and the descriptor budget
+   ↓ P07 keeps the primary error when an open fails and releases everything else
+   ↓ P07 keeps the primary cause of an EMFILE, an ENOMEM and an EACCES
+   ↓ P06 normalises a missing and a picture duration as no duration
+   ↓ F05 binds the probe evidence to the concrete tool, argv, input and result
+   ↓ F03 refuses a pending round when the working copy changes during the probe
+   ↓ R07 keeps the delivered resources until their owner releases them
+   ↓ R03 refuses a translation beside the media that the committed source does not have
+   ↓ P06 resolves a clip without a place as the native does and refuses a disagreement
+   ↓ P06 places a clip without a place where the pinned consumer places it
+   ↓ P07 refuses a symbolic link, a same-bytes replacement and a restored change time
+   ↓ P07 refuses a text file above the budget and bounds the total
+   ↓ P07 refuses to release while work is in flight and releases every allocation once
+   ↓ P07 refuses a reentrant release from inside an accepted read
+   ↓ P07 keeps the failure of the walk release with the failure that stopped it
+   ↓ G01 adopts the genuine cleanup uncertainty of a rejected source acquisition
+   ↓ G01 keeps the reader usable after an ordinary failure of the acquisition
+   ↓ G01 adopts the genuine uncertainty of a raw rejection that arrives after the caller was cancelled
+   ↓ G02 refuses the round when the binding goes stale during the read
+   ↓ G02 refuses the round when the reader is closed during the final verification
+   ↓ G02 refuses the round when the working copy view is invalidated during the read
+   ↓ G02 refuses the round when another delivered proof fails to release
+   ↓ G03 refuses a film that is replaced between the bounded digest and the parse
+   ↓ G04 refuses a page frame entry that no fixed producer witnessed
+   ↓ G04 refuses a film poster that no fixed producer witnessed
+   ↓ G05 refuses a real stdout overflow and a real stderr overflow
+   ↓ G05 kills and reaps a real hung child and keeps the input held until it ends
+   ↓ G05 proves the named media branch is the one that failed
+   ↓ G05 proves a real child that dies by a signal and a real child that is cancelled
+   ↓ G06 refuses a working copy whose settings file was deleted and sees it change under a proof
+   ↓ P07 hands a non-lexical caption order to the actual consumer without changing it
+   ↓ G06 accepts an absent heard transcript and refuses its later birth
+   ↓ G06 refuses an empty directory born alone under a held proof
+   ↓ G06 refuses a stale generation at the reader
+   ↓ G06 refuses a foreign facts lease consumed through the actual reader
+   ↓ G06 refuses an isolated parent swap that leaves no extra file behind
+   ↓ G07 refuses a workspace leaf hardlinked to an external file
+   ↓ G01 keeps the alias reason and the release failure of the same acquisition
+   ↓ G07 invalidates an old proof when an external hardlink appears after it
+   ↓ G07 holds both trees and a parallel proof under one descriptor pool
+   ↓ G07 holds every nested and empty directory of both trees independently
+   ↓ P07 keeps the named primary and every cleanup cause of the real unpack path
+   ↓ P07 proves an empty directory and sees the file that appears in it
+   ↓ P06 reproduces the five pinned native revision vectors
+   ↓ P06 lists the media in the numeric order of the host
+   ↓ G02 refuses the round when the last liveness callback closes the reader
+   ✓ K02-a releases the private parse copy of a successful acquisition  9999ms
+   ✓ K02-b releases the private parse copy of a failed parse  7960ms
+   ✓ K02-c delivers nothing when the private parse copy could not be removed  8232ms
+   × K06-a proves that the heard consumer really asked for the absent transcript 3180ms
+     → expected { attempt: 1, bootstrap: null, …(7) } to match object { state: 'succeeded' }
+(15 matching properties omitted from actual)
+   ✓ K06-b refuses the round when the ownership authority moved during the read  16343ms
+   × K06-c refuses the round when the committed base moved during the read 13739ms
+     → expected NativeSourceReaderError: The working copy… { code: '…' } to match object { Object (code) }
+(1 matching property omitted from actual)
+   ✓ K06-d refuses the round when the control revision moved during the read  9672ms
+   × K06-e refuses the round when the issued view was replaced 11545ms
+     → promise resolved "{ entries: [ { …(2) }, …(10) ], …(6) }" instead of rejecting
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/created-native-source-reader.test.ts > K06-a proves that the heard consumer really asked for the absent transcript
+AssertionError: expected { attempt: 1, bootstrap: null, …(7) } to match object { state: 'succeeded' }
+(15 matching properties omitted from actual)
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  {[22m
+[32m-   "state": "succeeded",[39m
+[31m+   "state": "failed",[39m
+[2m  }[22m
+
+ ❯ waitForCompletedDraft tests/agent-driven/integration/helpers/created-draft-fixture.ts:115:49
+    113|  while(!['succeeded','failed','attention','cancelled'].includes(f.host…
+    114|   await new Promise<void>(done=>setTimeout(done,20));
+    115|  expect(f.tasks.receipt(f.task.job_id,'owner')).toMatchObject({state:'…
+       |                                                 ^
+    116|  return completedSource(f);
+    117| }
+ ❯ nativeSourceFixture tests/agent-driven/integration/helpers/native-source-fixture.ts:113:19
+ ❯ withFixtureOptions tests/agent-driven/integration/created-native-source-reader.test.ts:66:10
+ ❯ tests/agent-driven/integration/created-native-source-reader.test.ts:2965:2
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  tests/agent-driven/integration/created-native-source-reader.test.ts > K06-c refuses the round when the committed base moved during the read
+AssertionError: expected NativeSourceReaderError: The working copy… { code: '…' } to match object { Object (code) }
+(1 matching property omitted from actual)
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- {[39m
+[32m-   "code": "NATIVE_SOURCE_WORKSPACE_STALE",[39m
+[31m+ NativeSourceReaderError {[39m
+[31m+   "code": "NATIVE_SOURCE_CLOSURE_MOVED",[39m
+[2m  }[22m
+
+ ❯ tests/agent-driven/integration/created-native-source-reader.test.ts:3025:4
+    3023|   }});
+    3024|   try{
+    3025|    await expect(readOnce(f)).rejects.toMatchObject({code:'NATIVE_SOURC…
+       |    ^
+    3026|    expect(injected).toBe(true);
+    3027|   }finally{observeNativeFacts(undefined);}
+ ❯ withFixtureOptions tests/agent-driven/integration/created-native-source-reader.test.ts:68:6
+ ❯ withFixture tests/agent-driven/integration/created-native-source-reader.test.ts:54:2
+ ❯ tests/agent-driven/integration/created-native-source-reader.test.ts:3017:2
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  tests/agent-driven/integration/created-native-source-reader.test.ts > K06-e refuses the round when the issued view was replaced
+AssertionError: promise resolved "{ entries: [ { …(2) }, …(10) ], …(6) }" instead of rejecting
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- Error {[39m
+[32m-   "message": "rejected promise",[39m
+[31m+ {[39m
+[31m+   "captions": {[39m
+[31m+     "state": "present",[39m
+[31m+     "value": {[39m
+[31m+       "cues": [[39m
+[31m+         {[39m
+[31m+           "clip": "narration",[39m
+[31m+           "durMs": 1033,[39m
+[31m+           "line": 0,[39m
+[31m+           "src": "assets/vo/002-42c9992dbd4dcfbeaf52790767beb0febee1279ce37e2e46d5cb474bdd8e1a1d.wav",[39m
+[31m+           "startMs": 0,[39m
+[31m+           "text": "第一条诊断字幕",[39m
+[31m+         },[39m
+[31m+         {[39m
+[31m+           "clip": "narration",[39m
+[31m+           "durMs": 967,[39m
+[31m+           "line": 1033,[39m
+[31m+           "src": "assets/vo/002-42c9992dbd4dcfbeaf52790767beb0febee1279ce37e2e46d5cb474bdd8e1a1d.wav",[39m
+[31m+           "startMs": 1033,[39m
+[31m+           "text": "第二条诊断字幕",[39m
+[31m+         },[39m
+[31m+         {[39m
+[31m+           "clip": "narration",[39m
+[31m+           "durMs": 1000,[39m
+[31m+           "line": 2000,[39m
+[31m+           "src": "assets/vo/002-42c9992dbd4dcfbeaf52790767beb0febee1279ce37e2e46d5cb474bdd8e1a1d.wav",[39m
+[31m+           "startMs": 2000,[39m
+[31m+           "text": "概念说明字幕",[39m
+[31m+         },[39m
+[31m+       ],[39m
+[31m+       "languages": [],[39m
+[31m+       "sourceLanguage": "zh",[39m
+[31m+       "untranscribed": [],[39m
+[31m+     },[39m
+[31m+   },[39m
+[31m+   "entries": [[39m
+[31m+     {[39m
+[31m+       "relative_path": ".film/settings.json",[39m
+[31m+       "sha256": "5f098b8911b608c4f0ebefa7a838289331f490c8fb79880249941c10866e2ad9",[39m
+[31m+     },[39m
+[31m+     {[39m
+[31m+       "relative_path": ".film/subtitles.json",[39m
+[31m+       "sha256": "2ac9c6ecad02ee5b179565bb0d73ff6e0a88051c4cbd52bd5b2bb398077d97d2",[39m
+[31m+     },[39m
+[31m+     {[39m
+[31m+       "relative_path": "assets/vo/002-42c9992dbd4dcfbeaf52790767beb0febee1279ce37e2e46d5cb474bdd8e1a1d.vtt",[39m
+[31m+       "sha256": "7589688eff6e9ca5ee39341deb23d149f5a6cccec1da8ac9299fbb07230b88d9",[39m
+[31m+     },[39m
+[31m+     {[39m
+[31m+       "relative_path": "draft-plan.json",[39m
+[31m+       "sha256": "361a35096242158a66e11c4ecdba6daf71ddf6353942cc359b77b6414701ce71",[39m
+[31m+     },[39m
+[31m+     {[39m
+[31m+       "relative_path": "film.html",[39m
+[31m+       "sha256": "ed7b107d820d02065b5cca124058201769589de0f7f0a99ca8302aeb41c1d447",[39m
+[31m+     },[39m
+[31m+     {[39m
+[31m+       "relative_path": "prepared-native.json",[39m
+[31m+       "sha256": "70ec7fa8ea1ef129c7e16fba3c60b4021da260ab6a95aa3f116f2d750818c68e",[39m
+[31m+     },[39m
+[31m+     {[39m
+[31m+       "relative_path": "rights.json",[39m
+[31m+       "sha256": "1a75cac250801f8f69c09cd2f71154c5307b835ad78b0eaf3aab9bd513f475a1",[39m
+[31m+     },[39m
+[31m+     {[39m
+[31m+       "relative_path": "scenes/001.html",[39m
+[31m+       "sha256": "7709f707a89923e04062d045124de642a2367dd2191ae1ae344c4927b0b7db1e",[39m
+[31m+     },[39m
+[31m+     {[39m
+[31m+       "relative_path": "scenes/003.html",[39m
+[31m+       "sha256": "bc3520cfecfd1210f0a2d1a7605dd35349ad87c71d3cb5c051daa4e6c6651b8e",[39m
+[31m+     },[39m
+[31m+     {[39m
+[31m+       "relative_path": "assets/video/001-23cfae6d486bb5558e398f8b48069b68c773910cf7eb360e157adb9a83b39bc5.mp4",[39m
+[31m+       "sha256": "23cfae6d486bb5558e398f8b48069b68c773910cf7eb360e157adb9a83b39bc5",[39m
+[31m+     },[39m
+[31m+     {[39m
+[31m+       "relative_path": "assets/vo/002-42c9992dbd4dcfbeaf52790767beb0febee1279ce37e2e46d5cb474bdd8e1a1d.wav",[39m
+[31m+       "sha256": "42c9992dbd4dcfbeaf52790767beb0febee1279ce37e2e46d5cb474bdd8e1a1d",[39m
+[31m+     },[39m
+[31m+   ],[39m
+[31m+   "expected_input": {[39m
+[31m+     "binding": {[39m
+[31m+       "film_sha256": "ed7b107d820d02065b5cca124058201769589de0f7f0a99ca8302aeb41c1d447",[39m
+[31m+       "project_id": "project_d130d57c4a7049c39222104d12b3bd28",[39m
+[31m+       "project_revision": 2,[39m
+[31m+       "snapshot_id": "1db8190624c8f1a28d362d2a778cb44ccae19a6f6fb16e1635ea0ccb3c2c4dbf",[39m
+[31m+       "source_digest": "ebfc292632b19c5163410d5cd7b50d6d4f2ee3539c4aaf8aeea8c9743416ac2c",[39m
+[31m+     },[39m
+[31m+     "clip_refs": [[39m
+[31m+       {[39m
+[31m+         "clip_id": "concept-s1",[39m
+[31m+         "provenance": {[39m
+[31m+           "artifact_ref": {[39m
+[31m+             "id": "native-draft-plan:project_d130d57c4a7049c39222104d12b3bd28",[39m
+[31m+             "sha256": "8191e4a908472a1ba7f07dbaac0d0ad1caf6264feac761edfb1cd145b5ba362e",[39m
+[31m+             "version": 2,[39m
+[31m+           },[39m
+[31m+           "kind": "controlled_source_artifact",[39m
+[31m+           "producer_digest": "8191e4a908472a1ba7f07dbaac0d0ad1caf6264feac761edfb1cd145b5ba362e",[39m
+[31m+           "producer_receipt_digest": "7f2a2a30f6fc9fa1872fb28e1b60fe9de837c67321f016870a3764816d87ceed",[39m
+[31m+         },[39m
+[31m+         "source_ref": "scenes/001.html",[39m
+[31m+         "source_sha256": "7709f707a89923e04062d045124de642a2367dd2191ae1ae344c4927b0b7db1e",[39m
+[31m+       },[39m
+[31m+       {[39m
+[31m+         "clip_id": "shot-s1",[39m
+[31m+         "provenance": {[39m
+[31m+           "asset_id": "asset_12c971050565c65d203f6059cf06fdc21a68bdaeefe3ad1380f8c6fd",[39m
+[31m+           "kind": "registered_asset",[39m
+[31m+           "rights_digest": "d17d68518d34f94574c5059a9f61ba19e77c2ab139ad1f4c22b498c759507965",[39m
+[31m+         },[39m
+[31m+         "source_ref": "assets/video/001-23cfae6d486bb5558e398f8b48069b68c773910cf7eb360e157adb9a83b39bc5.mp4",[39m
+[31m+         "source_sha256": "23cfae6d486bb5558e398f8b48069b68c773910cf7eb360e157adb9a83b39bc5",[39m
+[31m+       },[39m
+[31m+       {[39m
+[31m+         "clip_id": "shot-s2",[39m
+[31m+         "provenance": {[39m
+[31m+           "asset_id": "asset_12c971050565c65d203f6059cf06fdc21a68bdaeefe3ad1380f8c6fd",[39m
+[31m+           "kind": "registered_asset",[39m
+[31m+           "rights_digest": "d17d68518d34f94574c5059a9f61ba19e77c2ab139ad1f4c22b498c759507965",[39m
+[31m+         },[39m
+[31m+         "source_ref": "assets/video/001-23cfae6d486bb5558e398f8b48069b68c773910cf7eb360e157adb9a83b39bc5.mp4",[39m
+[31m+         "source_sha256": "23cfae6d486bb5558e398f8b48069b68c773910cf7eb360e157adb9a83b39bc5",[39m
+[31m+       },[39m
+[31m+       {[39m
+[31m+         "clip_id": "shot-s3",[39m
+[31m+         "provenance": {[39m
+[31m+           "artifact_ref": {[39m
+[31m+             "id": "native-draft-plan:project_d130d57c4a7049c39222104d12b3bd28",[39m
+[31m+             "sha256": "8191e4a908472a1ba7f07dbaac0d0ad1caf6264feac761edfb1cd145b5ba362e",[39m
+[31m+             "version": 2,[39m
+[31m+           },[39m
+[31m+           "kind": "controlled_source_artifact",[39m
+[31m+           "producer_digest": "8191e4a908472a1ba7f07dbaac0d0ad1caf6264feac761edfb1cd145b5ba362e",[39m
+[31m+           "producer_receipt_digest": "7f2a2a30f6fc9fa1872fb28e1b60fe9de837c67321f016870a3764816d87ceed",[39m
+[31m+         },[39m
+[31m+         "source_ref": "scenes/003.html",[39m
+[31m+         "source_sha256": "bc3520cfecfd1210f0a2d1a7605dd35349ad87c71d3cb5c051daa4e6c6651b8e",[39m
+[31m+       },[39m
+[31m+       {[39m
+[31m+         "clip_id": "narration",[39m
+[31m+         "provenance": {[39m
+[31m+           "asset_id": "asset_965edecb806d22fb2634b809505c0973c6f2000c8b436be23dd4489f",[39m
+[31m+           "kind": "registered_asset",[39m
+[31m+           "rights_digest": "f0289843003c54da337687d89a480b0df8d4cfafc0e3c2ae82fa0488fd68c077",[39m
+[31m+         },[39m
+[31m+         "source_ref": "assets/vo/002-42c9992dbd4dcfbeaf52790767beb0febee1279ce37e2e46d5cb474bdd8e1a1d.wav",[39m
+[31m+         "source_sha256": "42c9992dbd4dcfbeaf52790767beb0febee1279ce37e2e46d5cb474bdd8e1a1d",[39m
+[31m+       },[39m
+[31m+     ],[39m
+[31m+     "film": {[39m
+[31m+       "file": {[39m
+[31m+         "relative_path": "film.html",[39m
+[31m+         "sha256": "ed7b107d820d02065b5cca124058201769589de0f7f0a99ca8302aeb41c1d447",[39m
+[31m+         "state": "present",[39m
+[31m+       },[39m
+[31m+       "value": {[39m
+[31m+         "stage": {[39m
+[31m+           "h": 180,[39m
+[31m+           "w": 320,[39m
+[31m+         },[39m
+[31m+         "tracks": [[39m
+[31m+           {[39m
+[31m+             "clips": [[39m
+[31m+               {[39m
+[31m+                 "at": 0,[39m
+[31m+                 "box": {[39m
+[31m+                   "h": 133,[39m
+[31m+                   "w": 109,[39m
+[31m+                   "x": 198,[39m
+[31m+                   "y": 11,[39m
+[31m+                 },[39m
+[31m+                 "id": "concept-s1",[39m
+[31m+                 "src": "scenes/001.html",[39m
+[31m+                 "time": [[39m
+[31m+                   0,[39m
+[31m+                   1.033,[39m
+[31m+                 ],[39m
+[31m+               },[39m
+[31m+             ],[39m
+[31m+           },[39m
+[31m+           {[39m
+[31m+             "clips": [[39m
+[31m+               {[39m
+[31m+                 "at": 0,[39m
+[31m+                 "id": "shot-s1",[39m
+[31m+                 "src": "assets/video/001-23cfae6d486bb5558e398f8b48069b68c773910cf7eb360e157adb9a83b39bc5.mp4",[39m
+[31m+                 "style": "object-fit: contain",[39m
+[31m+                 "time": [[39m
+[31m+                   0,[39m
+[31m+                   1.033,[39m
+[31m+                 ],[39m
+[31m+                 "volume": 0,[39m
+[31m+               },[39m
+[31m+               {[39m
+[31m+                 "at": 1.033,[39m
+[31m+                 "id": "shot-s2",[39m
+[31m+                 "src": "assets/video/001-23cfae6d486bb5558e398f8b48069b68c773910cf7eb360e157adb9a83b39bc5.mp4",[39m
+[31m+                 "style": "object-fit: contain",[39m
+[31m+                 "time": [[39m
+[31m+                   0,[39m
+[31m+                   0.967,[39m
+[31m+                 ],[39m
+[31m+                 "volume": 0,[39m
+[31m+               },[39m
+[31m+               {[39m
+[31m+                 "at": 2,[39m
+[31m+                 "id": "shot-s3",[39m
+[31m+                 "src": "scenes/003.html",[39m
+[31m+                 "time": [[39m
+[31m+                   0,[39m
+[31m+                   1,[39m
+[31m+                 ],[39m
+[31m+               },[39m
+[31m+             ],[39m
+[31m+           },[39m
+[31m+           {[39m
+[31m+             "clips": [[39m
+[31m+               {[39m
+[31m+                 "at": 0,[39m
+[31m+                 "id": "narration",[39m
+[31m+                 "src": "assets/vo/002-42c9992dbd4dcfbeaf52790767beb0febee1279ce37e2e46d5cb474bdd8e1a1d.wav",[39m
+[31m+                 "time": [[39m
+[31m+                   0,[39m
+[31m+                   3,[39m
+[31m+                 ],[39m
+[31m+               },[39m
+[31m+             ],[39m
+[31m+           },[39m
+[31m+         ],[39m
+[31m+       },[39m
+[31m+     },[39m
+[31m+     "format": "narralens.native-expected-input@1",[39m
+[31m+     "markers": {[39m
+[31m+       "file": {[39m
+[31m+         "relative_path": ".film/markers.json",[39m
+[31m+         "sha256": null,[39m
+[31m+         "state": "absent",[39m
+[31m+       },[39m
+[31m+       "value": [],[39m
+[31m+     },[39m
+[31m+     "media_facts": [[39m
+[31m+       {[39m
+[31m+         "duration_ms": null,[39m
+[31m+         "fps": null,[39m
+[31m+         "has_audio": false,[39m
+[31m+         "origin": "host_deterministic_source",[39m
+[31m+         "proof_digest": "a7087da9328e86dd50ed2f07dda27e8745201174350d2986989a9e52db236d4c",[39m
+[31m+         "source_ref": "scenes/001.html",[39m
+[31m+         "source_sha256": "7709f707a89923e04062d045124de642a2367dd2191ae1ae344c4927b0b7db1e",[39m
+[31m+       },[39m
+[31m+       {[39m
+[31m+         "duration_ms": 3000,[39m
+[31m+         "fps": 30,[39m
+[31m+         "has_audio": false,[39m
+[31m+         "origin": "host_actual_probe",[39m
+[31m+         "proof_digest": "97107ab1d6cb8693643a33d8d180d1d67d3af36bfb74a339f94b0750f6aef5d6",[39m
+[31m+         "source_ref": "assets/video/001-23cfae6d486bb5558e398f8b48069b68c773910cf7eb360e157adb9a83b39bc5.mp4",[39m
+[31m+         "source_sha256": "23cfae6d486bb5558e398f8b48069b68c773910cf7eb360e157adb9a83b39bc5",[39m
+[31m+       },[39m
+[31m+       {[39m
+[31m+         "duration_ms": null,[39m
+[31m+         "fps": null,[39m
+[31m+         "has_audio": false,[39m
+[31m+         "origin": "host_deterministic_source",[39m
+[31m+         "proof_digest": "c5151380d9a6321dd4cd975206888297a2bfe27b2eeed90deb7424c44f4a4904",[39m
+[31m+         "source_ref": "scenes/003.html",[39m
+[31m+         "source_sha256": "bc3520cfecfd1210f0a2d1a7605dd35349ad87c71d3cb5c051daa4e6c6651b8e",[39m
+[31m+       },[39m
+[31m+       {[39m
+[31m+         "duration_ms": 3000,[39m
+[31m+         "fps": null,[39m
+[31m+         "has_audio": true,[39m
+[31m+         "origin": "host_actual_probe",[39m
+[31m+         "proof_digest": "e8c9c6ae87a065dcde9adf4b95a07fb1e0ae75cee20d96c40c9b705227def0d7",[39m
+[31m+         "source_ref": "assets/vo/002-42c9992dbd4dcfbeaf52790767beb0febee1279ce37e2e46d5cb474bdd8e1a1d.wav",[39m
+[31m+         "source_sha256": "42c9992dbd4dcfbeaf52790767beb0febee1279ce37e2e46d5cb474bdd8e1a1d",[39m
+[31m+       },[39m
+[31m+     ],[39m
+[31m+     "profile": "narralens.native-expected-numeric@1",[39m
+[31m+     "provenance": {[39m
+[31m+       "listing_digest": "d9b928f103c8c0510dd5dd503b322249bbb9191b101d6405157b4a2c92a81ae3",[39m
+[31m+       "media_catalog_digest": "a70b612c1486b0596c9c6a186900afd089ef6ac02b197f129d4105a2f83d80d7",[39m
+[31m+       "origin": "host_independent",[39m
+[31m+       "rights_digest": "1a75cac250801f8f69c09cd2f71154c5307b835ad78b0eaf3aab9bd513f475a1",[39m
+[31m+       "source_manifest_digest": "ebfc292632b19c5163410d5cd7b50d6d4f2ee3539c4aaf8aeea8c9743416ac2c",[39m
+[31m+     },[39m
+[31m+     "settings": {[39m
+[31m+       "file": {[39m
+[31m+         "relative_path": ".film/settings.json",[39m
+[31m+         "sha256": "5f098b8911b608c4f0ebefa7a838289331f490c8fb79880249941c10866e2ad9",[39m
+[31m+         "state": "present",[39m
+[31m+       },[39m
+[31m+       "value": {[39m
+[31m+         "fps": 30,[39m
+[31m+       },[39m
+[31m+     },[39m
+[31m+     "source_entries": [[39m
+[31m+       {[39m
+[31m+         "relative_path": ".film/settings.json",[39m
+[31m+         "sha256": "5f098b8911b608c4f0ebefa7a838289331f490c8fb79880249941c10866e2ad9",[39m
+[31m+       },[39m
+[31m+       {[39m
+[31m+         "relative_path": ".film/subtitles.json",[39m
+[31m+         "sha256": "2ac9c6ecad02ee5b179565bb0d73ff6e0a88051c4cbd52bd5b2bb398077d97d2",[39m
+[31m+       },[39m
+[31m+       {[39m
+[31m+         "relative_path": "assets/vo/002-42c9992dbd4dcfbeaf52790767beb0febee1279ce37e2e46d5cb474bdd8e1a1d.vtt",[39m
+[31m+         "sha256": "7589688eff6e9ca5ee39341deb23d149f5a6cccec1da8ac9299fbb07230b88d9",[39m
+[31m+       },[39m
+[31m+       {[39m
+[31m+         "relative_path": "draft-plan.json",[39m
+[31m+         "sha256": "361a35096242158a66e11c4ecdba6daf71ddf6353942cc359b77b6414701ce71",[39m
+[31m+       },[39m
+[31m+       {[39m
+[31m+         "relative_path": "film.html",[39m
+[31m+         "sha256": "ed7b107d820d02065b5cca124058201769589de0f7f0a99ca8302aeb41c1d447",[39m
+[31m+       },[39m
+[31m+       {[39m
+[31m+         "relative_path": "prepared-native.json",[39m
+[31m+         "sha256": "70ec7fa8ea1ef129c7e16fba3c60b4021da260ab6a95aa3f116f2d750818c68e",[39m
+[31m+       },[39m
+[31m+       {[39m
+[31m+         "relative_path": "rights.json",[39m
+[31m+         "sha256": "1a75cac250801f8f69c09cd2f71154c5307b835ad78b0eaf3aab9bd513f475a1",[39m
+[31m+       },[39m
+[31m+       {[39m
+[31m+         "relative_path": "scenes/001.html",[39m
+[31m+         "sha256": "7709f707a89923e04062d045124de642a2367dd2191ae1ae344c4927b0b7db1e",[39m
+[31m+       },[39m
+[31m+       {[39m
+[31m+         "relative_path": "scenes/003.html",[39m
+[31m+         "sha256": "bc3520cfecfd1210f0a2d1a7605dd35349ad87c71d3cb5c051daa4e6c6651b8e",[39m
+[31m+       },[39m
+[31m+       {[39m
+[31m+         "relative_path": "assets/video/001-23cfae6d486bb5558e398f8b48069b68c773910cf7eb360e157adb9a83b39bc5.mp4",[39m
+[31m+         "sha256": "23cfae6d486bb5558e398f8b48069b68c773910cf7eb360e157adb9a83b39bc5",[39m
+[31m+       },[39m
+[31m+       {[39m
+[31m+         "relative_path": "assets/vo/002-42c9992dbd4dcfbeaf52790767beb0febee1279ce37e2e46d5cb474bdd8e1a1d.wav",[39m
+[31m+         "sha256": "42c9992dbd4dcfbeaf52790767beb0febee1279ce37e2e46d5cb474bdd8e1a1d",[39m
+[31m+       },[39m
+[31m+     ],[39m
+[31m+     "span_facts": {[39m
+[31m+       "origin": "not_used",[39m
+[31m+       "profile": "numeric_source_only",[39m
+[31m+       "proof_digest": null,[39m
+[31m+       "values": [],[39m
+[31m+     },[39m
+[31m+     "ui_profile": {[39m
+[31m+       "browser_preferences": "excluded",[39m
+[31m+       "live_height": "excluded",[39m
+[31m+       "pending_drops": "excluded",[39m
+[31m+       "preview_error": "excluded",[39m
+[31m+     },[39m
+[31m+     "upstream_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",[39m
+[31m+     "video_files_in_native_order": [[39m
+[31m+       "assets/video/001-23cfae6d486bb5558e398f8b48069b68c773910cf7eb360e157adb9a83b39bc5.mp4",[39m
+[31m+     ],[39m
+[31m+   },[39m
+[31m+   "film": {[39m
+[31m+     "bytes": 933,[39m
+[31m+     "native_rev": "ed7b107d820d0206",[39m
+[31m+     "relative_path": "film.html",[39m
+[31m+     "sha256": "ed7b107d820d02065b5cca124058201769589de0f7f0a99ca8302aeb41c1d447",[39m
+[31m+   },[39m
+[31m+   "retained": [[39m
+[31m+     {[39m
+[31m+       "bytes": 11,[39m
+[31m+       "close": [Function close],[39m
+[31m+       "relative_path": ".film/settings.json",[39m
+[31m+       "sha256": "5f098b8911b608c4f0ebefa7a838289331f490c8fb79880249941c10866e2ad9",[39m
+[31m+       "verify": [Function verify],[39m
+[31m+     },[39m
+[31m+     {[39m
+[31m+       "bytes": 530,[39m
+[31m+       "close": [Function close],[39m
+[31m+       "relative_path": ".film/subtitles.json",[39m
+[31m+       "sha256": "2ac9c6ecad02ee5b179565bb0d73ff6e0a88051c4cbd52bd5b2bb398077d97d2",[39m
+[31m+       "verify": [Function verify],[39m
+[31m+     },[39m
+[31m+     {[39m
+[31m+       "bytes": 4112,[39m
+[31m+       "close": [Function close],[39m
+[31m+       "relative_path": "assets/video/001-23cfae6d486bb5558e398f8b48069b68c773910cf7eb360e157adb9a83b39bc5.mp4",[39m
+[31m+       "sha256": "23cfae6d486bb5558e398f8b48069b68c773910cf7eb360e157adb9a83b39bc5",[39m
+[31m+       "verify": [Function verify],[39m
+[31m+     },[39m
+[31m+     {[39m
+[31m+       "bytes": 259,[39m
+[31m+       "close": [Function close],[39m
+[31m+       "relative_path": "assets/vo/002-42c9992dbd4dcfbeaf52790767beb0febee1279ce37e2e46d5cb474bdd8e1a1d.vtt",[39m
+[31m+       "sha256": "7589688eff6e9ca5ee39341deb23d149f5a6cccec1da8ac9299fbb07230b88d9",[39m
+[31m+       "verify": [Function verify],[39m
+[31m+     },[39m
+[31m+     {[39m
+[31m+       "bytes": 288078,[39m
+[31m+       "close": [Function close],[39m
+[31m+       "relative_path": "assets/vo/002-42c9992dbd4dcfbeaf52790767beb0febee1279ce37e2e46d5cb474bdd8e1a1d.wav",[39m
+[31m+       "sha256": "42c9992dbd4dcfbeaf52790767beb0febee1279ce37e2e46d5cb474bdd8e1a1d",[39m
+[31m+       "verify": [Function verify],[39m
+[31m+     },[39m
+[31m+     {[39m
+[31m+       "bytes": 2228,[39m
+[31m+       "close": [Function close],[39m
+[31m+       "relative_path": "draft-plan.json",[39m
+[31m+       "sha256": "361a35096242158a66e11c4ecdba6daf71ddf6353942cc359b77b6414701ce71",[39m
+[31m+       "verify": [Function verify],[39m
+[31m+     },[39m
+[31m+     {[39m
+[31m+       "bytes": 933,[39m
+[31m+       "close": [Function close],[39m
+[31m+       "relative_path": "film.html",[39m
+[31m+       "sha256": "ed7b107d820d02065b5cca124058201769589de0f7f0a99ca8302aeb41c1d447",[39m
+[31m+       "verify": [Function verify],[39m
+[31m+     },[39m
+[31m+     {[39m
+[31m+       "bytes": 1646,[39m
+[31m+       "close": [Function close],[39m
+[31m+       "relative_path": "prepared-native.json",[39m
+[31m+       "sha256": "70ec7fa8ea1ef129c7e16fba3c60b4021da260ab6a95aa3f116f2d750818c68e",[39m
+[31m+       "verify": [Function verify],[39m
+[31m+     },[39m
+[31m+     {[39m
+[31m+       "bytes": 1260,[39m
+[31m+       "close": [Function close],[39m
+[31m+       "relative_path": "rights.json",[39m
+[31m+       "sha256": "1a75cac250801f8f69c09cd2f71154c5307b835ad78b0eaf3aab9bd513f475a1",[39m
+[31m+       "verify": [Function verify],[39m
+[31m+     },[39m
+[31m+     {[39m
+[31m+       "bytes": 976,[39m
+[31m+       "close": [Function close],[39m
+[31m+       "relative_path": "scenes/001.html",[39m
+[31m+       "sha256": "7709f707a89923e04062d045124de642a2367dd2191ae1ae344c4927b0b7db1e",[39m
+[31m+       "verify": [Function verify],[39m
+[31m+     },[39m
+[31m+     {[39m
+[31m+       "bytes": 939,[39m
+[31m+       "close": [Function close],[39m
+[31m+       "relative_path": "scenes/003.html",[39m
+[31m+       "sha256": "bc3520cfecfd1210f0a2d1a7605dd35349ad87c71d3cb5c051daa4e6c6651b8e",[39m
+[31m+       "verify": [Function verify],[39m
+[31m+     },[39m
+[31m+     {[39m
+[31m+       "bytes": 11,[39m
+[31m+       "close": [Function close],[39m
+[31m+       "relative_path": ".film/settings.json",[39m
+[31m+       "sha256": "5f098b8911b608c4f0ebefa7a838289331f490c8fb79880249941c10866e2ad9",[39m
+[31m+       "verify": [Function verify],[39m
+[31m+     },[39m
+[31m+     {[39m
+[31m+       "bytes": 530,[39m
+[31m+       "close": [Function close],[39m
+[31m+       "relative_path": ".film/subtitles.json",[39m
+[31m+       "sha256": "2ac9c6ecad02ee5b179565bb0d73ff6e0a88051c4cbd52bd5b2bb398077d97d2",[39m
+[31m+       "verify": [Function verify],[39m
+[31m+     },[39m
+[31m+     {[39m
+[31m+       "bytes": 259,[39m
+[31m+       "close": [Function close],[39m
+[31m+       "relative_path": "assets/vo/002-42c9992dbd4dcfbeaf52790767beb0febee1279ce37e2e46d5cb474bdd8e1a1d.vtt",[39m
+[31m+       "sha256": "7589688eff6e9ca5ee39341deb23d149f5a6cccec1da8ac9299fbb07230b88d9",[39m
+[31m+       "verify": [Function verify],[39m
+[31m+     },[39m
+[31m+     {[39m
+[31m+       "bytes": 2228,[39m
+[31m+       "close": [Function close],[39m
+[31m+       "relative_path": "draft-plan.json",[39m
+[31m+       "sha256": "361a35096242158a66e11c4ecdba6daf71ddf6353942cc359b77b6414701ce71",[39m
+[31m+       "verify": [Function verify],[39m
+[31m+     },[39m
+[31m+     {[39m
+[31m+       "bytes": 933,[39m
+[31m+       "close": [Function close],[39m
+[31m+       "relative_path": "film.html",[39m
+[31m+       "sha256": "ed7b107d820d02065b5cca124058201769589de0f7f0a99ca8302aeb41c1d447",[39m
+[31m+       "verify": [Function verify],[39m
+[31m+     },[39m
+[31m+     {[39m
+[31m+       "bytes": 1646,[39m
+[31m+       "close": [Function close],[39m
+[31m+       "relative_path": "prepared-native.json",[39m
+[31m+       "sha256": "70ec7fa8ea1ef129c7e16fba3c60b4021da260ab6a95aa3f116f2d750818c68e",[39m
+[31m+       "verify": [Function verify],[39m
+[31m+     },[39m
+[31m+     {[39m
+[31m+       "bytes": 1260,[39m
+[31m+       "close": [Function close],[39m
+[31m+       "relative_path": "rights.json",[39m
+[31m+       "sha256": "1a75cac250801f8f69c09cd2f71154c5307b835ad78b0eaf3aab9bd513f475a1",[39m
+[31m+       "verify": [Function verify],[39m
+[31m+     },[39m
+[31m+     {[39m
+[31m+       "bytes": 976,[39m
+[31m+       "close": [Function close],[39m
+[31m+       "relative_path": "scenes/001.html",[39m
+[31m+       "sha256": "7709f707a89923e04062d045124de642a2367dd2191ae1ae344c4927b0b7db1e",[39m
+[31m+       "verify": [Function verify],[39m
+[31m+     },[39m
+[31m+     {[39m
+[31m+       "bytes": 939,[39m
+[31m+       "close": [Function close],[39m
+[31m+       "relative_path": "scenes/003.html",[39m
+[31m+       "sha256": "bc3520cfecfd1210f0a2d1a7605dd35349ad87c71d3cb5c051daa4e6c6651b8e",[39m
+[31m+       "verify": [Function verify],[39m
+[31m+     },[39m
+[31m+     {[39m
+[31m+       "bytes": 4112,[39m
+[31m+       "close": [Function close],[39m
+[31m+       "relative_path": "assets/video/001-23cfae6d486bb5558e398f8b48069b68c773910cf7eb360e157adb9a83b39bc5.mp4",[39m
+[31m+       "sha256": "23cfae6d486bb5558e398f8b48069b68c773910cf7eb360e157adb9a83b39bc5",[39m
+[31m+       "verify": [Function verify],[39m
+[31m+     },[39m
+[31m+     {[39m
+[31m+       "bytes": 288078,[39m
+[31m+       "close": [Function close],[39m
+[31m+       "relative_path": "assets/vo/002-42c9992dbd4dcfbeaf52790767beb0febee1279ce37e2e46d5cb474bdd8e1a1d.wav",[39m
+[31m+       "sha256": "42c9992dbd4dcfbeaf52790767beb0febee1279ce37e2e46d5cb474bdd8e1a1d",[39m
+[31m+       "verify": [Function verify],[39m
+[31m+     },[39m
+[31m+   ],[39m
+[31m+   "style": {[39m
+[31m+     "state": "present",[39m
+[31m+     "value": {[39m
+[31m+       "align": "center",[39m
+[31m+       "bilingual": false,[39m
+[31m+       "box": null,[39m
+[31m+       "fill": "#ffffff",[39m
+[31m+       "font": {[39m
+[31m+         "family": "ui-sans-serif, system-ui, -apple-system, \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", \"Helvetica Neue\", Arial, sans-serif",[39m
+[31m+         "italic": false,[39m
+[31m+         "letterSpacingEm": 0.04,[39m
+[31m+         "lineHeight": 1.45,[39m
+[31m+         "sizePct": 4,[39m
+[31m+         "upper": false,[39m
+[31m+         "weight": 500,[39m
+[31m+       },[39m
+[31m+       "karaoke": null,[39m
+[31m+       "language": null,[39m
+[31m+       "maxWidthPct": 100,[39m
+[31m+       "on": true,[39m
+[31m+       "pos": {[39m
+[31m+         "x": 0.5,[39m
+[31m+         "y": 0.94,[39m
+[31m+       },[39m
+[31m+       "shadow": {[39m
+[31m+         "blurEm": 0.22,[39m
+[31m+         "color": "rgba(0,0,0,0.72)",[39m
+[31m+         "dxEm": 0,[39m
+[31m+         "dyEm": 0.05,[39m
+[31m+       },[39m
+[31m+       "stroke": {[39m
+[31m+         "color": "rgba(0,0,0,0.84)",[39m
+[31m+         "widthEm": 0.055,[39m
+[31m+       },[39m
+[31m+     },[39m
+[31m+   },[39m
+[31m+   "verifyClosure": [Function verifyClosure],[39m
+[2m  }[22m
+
+ ❯ tests/agent-driven/integration/created-native-source-reader.test.ts:3065:27
+    3063|   await f.workspace.prepare(f.projectId,f.owner);
+    3064|   expect(f.workspace.cacheWitness(f.workspaceRef,before,'film-poster')…
+    3065|   await expect(readOnce(f)).rejects.toMatchObject({code:'CAPABILITY_UN…
+       |                           ^
+    3066|  });
+    3067| },300000);
+ ❯ withFixtureOptions tests/agent-driven/integration/created-native-source-reader.test.ts:68:6
+ ❯ withFixture tests/agent-driven/integration/created-native-source-reader.test.ts:54:2
+ ❯ tests/agent-driven/integration/created-native-source-reader.test.ts:3061:2
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 5 passed | 80 skipped (88)
+   Start at  08:59:10
+   Duration  91.98s (transform 4.80s, setup 0ms, collect 8.65s, tests 80.67s, environment 0ms, prepare 1.75s)
+

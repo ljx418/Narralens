@@ -1,0 +1,64 @@
+src/host/agent-driven/created-native-source-reader.ts(246,26): error TS2552: Cannot find name 'relative_path'. Did you mean 'relativePath'?
+src/host/agent-driven/created-native-source-reader.ts(384,7): error TS18048: 'copy' is possibly 'undefined'.
+src/host/agent-driven/created-native-source-reader.ts(394,50): error TS2345: Argument of type 'RetainedNativeFile | undefined' is not assignable to parameter of type 'RetainedNativeFile'.
+  Type 'undefined' is not assignable to type 'RetainedNativeFile'.
+src/host/agent-driven/created-native-source-reader.ts(432,61): error TS2345: Argument of type 'RetainedNativeFile | undefined' is not assignable to parameter of type 'RetainedNativeFile'.
+  Type 'undefined' is not assignable to type 'RetainedNativeFile'.
+src/host/agent-driven/created-native-source-reader.ts(448,37): error TS2322: Type 'string | undefined' is not assignable to type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/host/agent-driven/created-native-source-reader.ts(455,36): error TS2322: Type 'string | undefined' is not assignable to type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/host/agent-driven/created-native-source-reader.ts(455,97): error TS18048: 'record' is possibly 'undefined'.
+src/host/agent-driven/created-native-source-reader.ts(456,17): error TS18048: 'record' is possibly 'undefined'.
+src/host/agent-driven/created-native-source-reader.ts(456,67): error TS18048: 'record' is possibly 'undefined'.
+src/host/agent-driven/created-native-source-reader.ts(457,15): error TS18048: 'record' is possibly 'undefined'.
+src/host/agent-driven/created-native-source-reader.ts(457,43): error TS18048: 'record' is possibly 'undefined'.
+src/host/agent-driven/created-native-source-reader.ts(465,37): error TS2322: Type 'string | undefined' is not assignable to type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/host/agent-driven/created-native-source-reader.ts(465,98): error TS18048: 'record' is possibly 'undefined'.
+src/host/agent-driven/created-native-source-reader.ts(466,17): error TS18048: 'record' is possibly 'undefined'.
+src/host/agent-driven/created-native-source-reader.ts(466,67): error TS18048: 'record' is possibly 'undefined'.
+src/host/agent-driven/created-native-source-reader.ts(467,15): error TS18048: 'record' is possibly 'undefined'.
+src/host/agent-driven/created-native-source-reader.ts(467,43): error TS18048: 'record' is possibly 'undefined'.
+src/host/agent-driven/created-native-source-reader.ts(470,9): error TS2322: Type '({ clip_id: string; source_ref: string; source_sha256: string | undefined; provenance: { kind: "controlled_source_artifact"; artifact_ref: { id: string; version: number; sha256: string; }; producer_digest: string; producer_receipt_digest: string; asset_id?: never; rights_digest?: never; }; } | { ...; })[]' is not assignable to type '{ clip_id: string; source_ref: string; source_sha256: string; provenance: { kind: "registered_asset"; asset_id: string; rights_digest: string; } | { kind: "controlled_source_artifact"; artifact_ref: { ...; }; producer_digest: string; producer_receipt_digest: string; }; }[]'.
+  Type '{ clip_id: string; source_ref: string; source_sha256: string | undefined; provenance: { kind: "controlled_source_artifact"; artifact_ref: { id: string; version: number; sha256: string; }; producer_digest: string; producer_receipt_digest: string; asset_id?: never; rights_digest?: never; }; } | { ...; }' is not assignable to type '{ clip_id: string; source_ref: string; source_sha256: string; provenance: { kind: "registered_asset"; asset_id: string; rights_digest: string; } | { kind: "controlled_source_artifact"; artifact_ref: { ...; }; producer_digest: string; producer_receipt_digest: string; }; }'.
+    Type '{ clip_id: string; source_ref: string; source_sha256: string | undefined; provenance: { kind: "controlled_source_artifact"; artifact_ref: { id: string; version: number; sha256: string; }; producer_digest: string; producer_receipt_digest: string; asset_id?: never; rights_digest?: never; }; }' is not assignable to type '{ clip_id: string; source_ref: string; source_sha256: string; provenance: { kind: "registered_asset"; asset_id: string; rights_digest: string; } | { kind: "controlled_source_artifact"; artifact_ref: { ...; }; producer_digest: string; producer_receipt_digest: string; }; }'.
+      Types of property 'source_sha256' are incompatible.
+        Type 'string | undefined' is not assignable to type 'string'.
+          Type 'undefined' is not assignable to type 'string'.
+src/host/agent-driven/created-native-source-reader.ts(482,41): error TS2345: Argument of type 'string | null' is not assignable to parameter of type 'string'.
+  Type 'null' is not assignable to type 'string'.
+src/host/agent-driven/created-native-source-reader.ts(530,19): error TS2339: Property 'style' does not exist on type 'NativeSidecarResult'.
+  Property 'style' does not exist on type 'NativeSidecarDependencies & { readonly status: "unsupported"; readonly reason: string; readonly missing: readonly string[]; }'.
+src/host/agent-driven/created-native-source-reader.ts(531,22): error TS2339: Property 'captions' does not exist on type 'NativeSidecarResult'.
+  Property 'captions' does not exist on type 'NativeSidecarDependencies & { readonly status: "unsupported"; readonly reason: string; readonly missing: readonly string[]; }'.
+src/host/agent-driven/created-native-source-reader.ts(541,10): error TS18048: 'file' is possibly 'undefined'.
+src/host/agent-driven/created-native-source-reader.ts(643,76): error TS2345: Argument of type 'RetainedNativeFile | undefined' is not assignable to parameter of type 'RetainedNativeFile'.
+  Type 'undefined' is not assignable to type 'RetainedNativeFile'.
+src/host/agent-driven/created-native-source-reader.ts(652,79): error TS2345: Argument of type 'RetainedNativeFile | undefined' is not assignable to parameter of type 'RetainedNativeFile'.
+  Type 'undefined' is not assignable to type 'RetainedNativeFile'.
+src/host/agent-driven/created-native-source-reader.ts(730,26): error TS18047: 'record' is possibly 'null'.
+src/host/agent-driven/created-native-source-reader.ts(730,53): error TS18047: 'record' is possibly 'null'.
+src/host/agent-driven/created-native-source-reader.ts(731,23): error TS18047: 'record' is possibly 'null'.
+src/host/agent-driven/created-native-source-reader.ts(731,47): error TS18047: 'record' is possibly 'null'.
+src/host/agent-driven/created-native-source-reader.ts(732,24): error TS18047: 'record' is possibly 'null'.
+src/host/agent-driven/created-native-source-reader.ts(732,49): error TS18047: 'record' is possibly 'null'.
+src/host/agent-driven/created-native-source-reader.ts(733,21): error TS18047: 'record' is possibly 'null'.
+src/host/agent-driven/created-native-source-reader.ts(733,43): error TS18047: 'record' is possibly 'null'.
+src/host/agent-driven/created-native-source-reader.ts(734,16): error TS18047: 'record' is possibly 'null'.
+src/host/agent-driven/created-native-source-reader.ts(735,23): error TS18047: 'record' is possibly 'null'.
+src/host/agent-driven/created-native-source-reader.ts(735,47): error TS18047: 'record' is possibly 'null'.
+src/host/agent-driven/created-native-source-reader.ts(736,24): error TS18047: 'record' is possibly 'null'.
+src/host/agent-driven/created-native-source-reader.ts(736,49): error TS18047: 'record' is possibly 'null'.
+src/host/agent-driven/created-native-source-reader.ts(737,30): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/host/agent-driven/created-native-source-reader.ts(740,48): error TS2345: Argument of type 'RetainedNativeFile | undefined' is not assignable to parameter of type 'RetainedNativeFile'.
+  Type 'undefined' is not assignable to type 'RetainedNativeFile'.
+src/host/agent-driven/created-native-source-reader.ts(776,7): error TS18047: 'record' is possibly 'null'.
+src/host/agent-driven/created-native-source-reader.ts(776,24): error TS18048: 'film' is possibly 'undefined'.
+src/host/agent-driven/created-native-source-reader.ts(776,41): error TS18048: 'film' is possibly 'undefined'.
+src/host/agent-driven/created-native-source-reader.ts(777,14): error TS18047: 'record' is possibly 'null'.
+src/host/agent-driven/created-native-source-reader.ts(777,59): error TS18047: 'record' is possibly 'null'.
+src/host/agent-driven/created-native-source-reader.ts(795,23): error TS18046: 'list' is of type 'unknown'.
+src/host/agent-driven/created-native-source-reader.ts(798,49): error TS18048: 'dependency' is possibly 'undefined'.
+src/host/agent-driven/created-native-source-reader.ts(798,75): error TS18048: 'dependency' is possibly 'undefined'.

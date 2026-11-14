@@ -1,0 +1,113 @@
+{
+  "format": "narralens.real-export-evidence@1",
+  "capture_id": "n1n2-claude-056-final-check-001",
+  "capture_id_source": "the N1N2_CAPTURE_ID of this run",
+  "stage": "en05-export-copy-after-rollback",
+  "artifact": {
+    "name": "en05-export-copy-after-rollback-bbf30366cec4-n1n2-claude-056-final-check-001.mp4",
+    "sha256": "bbf30366cec4268effe2e625a94eb3dda133fa2156b05a45a91a6e494bbfb8ad",
+    "bytes": 917726,
+    "kept_at": "at the moment of this export, before any later export could overwrite it",
+    "verified": "the kept bytes were read back and their digest compared with the digest this export was measured from"
+  },
+  "media": {
+    "frames": 900,
+    "width": 1280,
+    "height": 720,
+    "duration_seconds": 30,
+    "audio": {
+      "codec": "aac",
+      "sample_rate": "48000",
+      "channels": 2,
+      "duration_seconds": 30
+    }
+  },
+  "render_child": {
+    "pid": 3902158,
+    "argv": [
+      "/usr/bin/node",
+      "/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm/packages/openfilm/bin/openfilm.mjs",
+      "render"
+    ],
+    "cwd": "/tmp/narralens-m23-rollback-8hSmGs/migrations/mig_495424105ae3456ba1367f89afb473dd",
+    "outcome": "exited",
+    "exit": 0,
+    "signal": null,
+    "stdout_bytes": 111,
+    "stderr_bytes": 356,
+    "killed": false,
+    "settled": true,
+    "budget": {
+      "timeout_ms": 600000,
+      "max_output_bytes": 8388608
+    }
+  },
+  "commands": [
+    {
+      "argv": [
+        "ffprobe",
+        "-v",
+        "error",
+        "-select_streams",
+        "v:0",
+        "-count_frames",
+        "-show_entries",
+        "stream=nb_read_frames,width,height,r_frame_rate",
+        "-of",
+        "json",
+        "/tmp/narralens-m23-rollback-8hSmGs/migrations/mig_495424105ae3456ba1367f89afb473dd/mig_495424105ae3456ba1367f89afb473dd.mp4"
+      ],
+      "exit": 0,
+      "cwd": "/tmp/narralens-m23-rollback-8hSmGs",
+      "note": "real container probe of the video stream"
+    },
+    {
+      "argv": [
+        "ffprobe",
+        "-v",
+        "error",
+        "-select_streams",
+        "a:0",
+        "-show_entries",
+        "stream=codec_type,codec_name,sample_rate,channels,duration:format=duration",
+        "-of",
+        "json",
+        "/tmp/narralens-m23-rollback-8hSmGs/migrations/mig_495424105ae3456ba1367f89afb473dd/mig_495424105ae3456ba1367f89afb473dd.mp4"
+      ],
+      "exit": 0,
+      "cwd": "/tmp/narralens-m23-rollback-8hSmGs",
+      "note": "real probe of the audio stream and the container duration"
+    },
+    {
+      "argv": [
+        "ffmpeg",
+        "-nostdin",
+        "-hide_banner",
+        "-v",
+        "error",
+        "-i",
+        "/tmp/narralens-m23-rollback-8hSmGs/migrations/mig_495424105ae3456ba1367f89afb473dd/mig_495424105ae3456ba1367f89afb473dd.mp4",
+        "-f",
+        "null",
+        "-"
+      ],
+      "exit": 0,
+      "cwd": "/tmp/narralens-m23-rollback-8hSmGs",
+      "note": "the FULL decode of the exported media"
+    }
+  ],
+  "upstream": {
+    "openfilm_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+    "pinned_cli": "/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm/packages/openfilm/bin/openfilm.mjs",
+    "pinned_cli_sha256": "d16915ad600310058e6f08966c6f9f596eba67a37c6abd200025a523c2ccf192"
+  },
+  "candidate": {
+    "test_file": "tests/m2.3/migration-real-export.test.ts",
+    "test_sha256": "6dc3e62eaf0095b4178c60226c10e5f5e8e60fbef69f7ba4d6f02627f18525fc",
+    "migration_service_sha256": "920fbba4abad78847ebb25b6cfde40e4e4d8e4a2011face7ca832c11ce54aa5a",
+    "openfilm_adapter_sha256": "013f50ce87e04b3ff542e15f3c98d833ae43940fef9d85ccad79ff38e5bd200b"
+  },
+  "case": "EN-05 the source project is still intact and openable after rollback",
+  "project_id": "d1-30s",
+  "claim_limit": "the migrated copy is a real render; the Hypit SOURCE is NOT freshly rendered and NOT a paid Hypit render"
+}

@@ -1,0 +1,96 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:3125757) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/agent-driven/integration/native-cache-witness.test.ts (31 tests | 3 failed | 16 skipped) 174558ms
+   ↓ B0-1 the fixed producer really draws and the witness binds the request, the key, the triple and the dependencies
+   ↓ B0-2 one owner close never kills the peer work in flight, and the browser goes with the last owner
+   ↓ B0-3 refuses a cache entry that was already there and keeps its old bytes
+   ↓ B0-4 the fixed producer draws a page frame and the witness binds it
+   ↓ B0-5 refuses a producer that the Host did not issue
+   ↓ K01-a refuses an unknown, a copied and a shaped production lease before the producer runs
+   ↓ K01-b refuses a production lease of another real service
+   ↓ K01-c refuses a hand-branded witness and the reader refuses the entry it speaks about
+   ↓ K01-d refuses the production lease of a view that was replaced
+   ↓ K03-a refuses a partial triple of that key and keeps its bytes
+   ↓ K03-b refuses a request that is not the exact request of its family
+   ↓ K05-a keeps the primary of a failed producer and the genuine release failure
+   ↓ K05-b delivers nothing when the release of the production did not finish
+   ↓ P08 keeps the platform own milliseconds for a whole, a fractional and a pre-epoch file
+   ↓ K04-a refuses a witnessed picture that was replaced by an equal copy
+   ↓ K04-b refuses a witnessed dependency that was changed and written back
+   ✓ PF01 refuses a serving that this service did not register, before any page is asked for  14912ms
+   ✓ PF02 proves the film duration by the draw that wrote it, and refuses every other one  12773ms
+   ✓ K05-c keeps the primary of a real draw and the genuine release failure of each of the two trees  14322ms
+   ✓ Q01 a close during the construction waits for it, and the failed owner is closed at once  9536ms
+   × Q01 a root that moved during the construction closes the owner at once and refuses the serving 9261ms
+     → expected 'NATIVE_CACHE_PRODUCTION_STALE' to be 'NATIVE_CACHE_ORIGIN_FOREIGN' // Object.is equality
+   ✓ Q01 two concurrent requests for the same view share one construction and one owner  14481ms
+   ✓ Q01 a dispose during the construction waits for it and settles the owner at once  9770ms
+   ✓ Q01 the factory settles its own construction when the serving observation throws, and keeps the same primary  10746ms
+   ✓ Q01 the factory settles its own construction when the root check fails after the listener is up  9415ms
+   ✓ Q01 a factory failure with a genuine settlement failure keeps the primary, the genuine object and the sticky service  10417ms
+   × Q01 a registration failure with a genuine settlement failure keeps the primary and latches the service 9608ms
+     → expected +0 to be 1 // Object.is equality
+   ✓ Q02 a close during a real draw waits for the draw and keeps its origin alive  10917ms
+   × Q03 a draw of another page never brands a duration it did not write 25869ms
+     → window.film with a frame() function did not appear within 15 s
+   ✓ Q03 two lawful different frames keep both triples consumable and the current duration belongs to the newest draw  12527ms
+   ✓ Q03 the newest authorisation of an output never falls back to an older one 0ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/native-cache-witness.test.ts > Q01 a root that moved during the construction closes the owner at once and refuses the serving
+AssertionError: expected 'NATIVE_CACHE_PRODUCTION_STALE' to be 'NATIVE_CACHE_ORIGIN_FOREIGN' // Object.is equality
+
+Expected: [32m"NATIVE_CACHE_[7mORIGIN_FOREIGN[27m"[39m
+Received: [31m"NATIVE_CACHE_[7mPRODUCTION_STALE[27m"[39m
+
+ ❯ tests/agent-driven/integration/native-cache-witness.test.ts:1233:56
+    1231|   try{await f.workspace.servingFor(f.productionLease(),owner,{headers:…
+    1232|   expect(thrown).toBeDefined();
+    1233|   expect(String((thrown as {code?:unknown}).code??'')).toBe('NATIVE_CA…
+       |                                                        ^
+    1234|   // The owner was closed AT ONCE - not left to a later disposal.
+    1235|   expect(points).toContain('serving_closed');
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  tests/agent-driven/integration/native-cache-witness.test.ts > Q01 a registration failure with a genuine settlement failure keeps the primary and latches the service
+AssertionError: expected +0 to be 1 // Object.is equality
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 1[39m
+[31m+ 0[39m
+
+ ❯ tests/agent-driven/integration/native-cache-witness.test.ts:1489:58
+    1487|   // The genuine settlement failure is kept with the primary.
+    1488|   const failures=genuineServingCleanupFailures(thrown);
+    1489|   expect(failures.filter(error=>error===genuine).length).toBe(1);
+       |                                                          ^
+    1490|   // The service can no longer say what it holds.
+    1491|   expect(f.workspace.uncertain).toBe(true);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  tests/agent-driven/integration/native-cache-witness.test.ts > Q03 a draw of another page never brands a duration it did not write
+Error: window.film with a frame() function did not appear within 15 s
+ ❯ Function.open ../../Narralens-openfilm-m1b/vendor/openfilm/packages/openfilm/src/host.mjs:351:13
+    349|     } catch {
+    350|       await film.context.close();
+    351|       throw new FrameError(`window.film with a frame() function did no…
+       |             ^
+    352|     }
+    353|     /* a ready that never comes (a file that never loads, a loop that …
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 12 passed | 16 skipped (31)
+   Start at  17:17:42
+   Duration  183.81s (transform 4.44s, setup 0ms, collect 7.23s, tests 174.56s, environment 0ms, prepare 1.35s)
+

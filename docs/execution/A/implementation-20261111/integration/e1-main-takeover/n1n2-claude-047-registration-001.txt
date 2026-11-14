@@ -1,0 +1,13 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:3490506) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/native-cache-witness.test.ts (31 tests | 30 skipped) 13541ms
+   ✓ Q01 a registration failure with a genuine settlement failure keeps the primary and latches the service  13540ms
+
+ Test Files  1 passed (1)
+      Tests  1 passed | 30 skipped (31)
+   Start at  23:45:42
+   Duration  22.09s (transform 4.16s, setup 0ms, collect 6.63s, tests 13.54s, environment 0ms, prepare 1.27s)
+

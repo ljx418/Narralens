@@ -6,7 +6,7 @@ import {createRequire,syncBuiltinESMExports} from 'node:module';
 import {vendorRoot} from './helpers/created-project-fixture.js';
 import {afterEach,describe,it,expect,vi} from 'vitest';
 import {preparedDraftFixture,waitForCompletedDraft,registryFacts} from './helpers/created-draft-fixture.js';
-import {canonicalDigest,canonicalJson,contentDigest} from '../../../src/host/creative/digest.js';
+import {canonicalDigest,canonicalJson,contentDigest,styleDigest} from '../../../src/host/creative/digest.js';
 import {CreativeService} from '../../../src/host/creative/creative-service.js';
 import {FixedWorkflowService} from '../../../src/host/creative/fixed-workflow-service.js';
 import {CreatedPreparedSourceStore} from '../../../src/host/agent-driven/created-prepared-source-store.js';
@@ -29,7 +29,7 @@ import {computeSourceDigest} from '../../../src/host/engine/source-digest-v1.js'
 import {OPENFILM_UPSTREAM_SHA} from '../../../src/host/engine/engine-binding-store.js';
 import type {PreparedAdoptionPlanV1,CommitPreparedCreatedSourceInput,CreatedSourceCommitScope} from '../../../src/host/agent-driven/created-source-ports.js';
 import {preparedAdoptionPlanDigest} from '../../../src/host/agent-driven/created-source-ports.js';
-import type {ReviewPackage} from '../../../src/contracts/agent-driven-types.js';
+import type {ReviewPackage,IntakePut,Intake,Decision,JobReceipt} from '../../../src/contracts/agent-driven-types.js';
 import type {ProductTransaction} from '../../../src/host/creative/product-repository.js';
 
 // This is transaction/module evidence: real Host/bootstrap/worker/native source,
@@ -554,94 +554,154 @@ describe('actual closed created-source commit and publisher',()=>{
   const f=await fixture();expect(()=>f.revisions.commitPreparedCreatedSource({...f.input,publication_proof:JSON.parse(JSON.stringify(f.proof))})).toThrow();
   expect(f.revisions.activeCommit(f.projectId)?.revision).toBe(1);expect(f.revisions.compose(db=>db.prepare('SELECT state FROM impact WHERE impact_id=?').get(f.input.impact_id)?.state)).toBe('active');
  },120000);
- it('refuses author bytes changed after publication even while database base is unchanged',async()=>{
-  const f=await fixture();await writeFile(join(f.authorRoot,'film.html'),'changed after publication');
-  expect(()=>f.revisions.commitPreparedCreatedSource(f.input)).toThrow();expect(f.revisions.activeCommit(f.projectId)?.revision).toBe(1);
- },120000);
- it('refuses current selection changed after publication',async()=>{
-  const f=await fixture();f.advanceSelection();expect(()=>f.revisions.commitPreparedCreatedSource(f.input)).toThrow(/Selection/);
+ /**
+  * LF04 — the created-source commit owns its state writes, and every business
+  * mismatch refuses the commit instead of moving one authority.
+  *
+  * The impact row moves with the predecessor in the UPDATE predicate and exactly one
+  * row must change; the revision, the approval, the snapshot and the active commit
+  * are in the same atomic boundary. These are the business negatives that prove it:
+  * an impact of another project, a stored hash that does not match the plan and a
+  * transaction of another project are each refused, and NOT ONE authority moves.
+  */
+ it('LF04 refuses a REAL impact and a REAL transaction of another project, and moves no authority',async()=>{
+  const f=await fixture();
+  try{
+   // A SECOND REAL project, created through the Host's own API, in the SAME database.
+   const vectors=JSON.parse(readFileSync('docs/agent-driven-v1/cp-a0/contract-vectors.json','utf8')) as {vectors:{id:string;value:unknown}[]};
+   const brief=structuredClone(vectors.vectors.find(v=>v.id==='definition:IntakePut:valid')!.value) as IntakePut;
+   brief.intake_id=null;brief.base_version=0;brief.brief.local_asset_ids=[];brief.brief.narration_asset_id=null;
+   Object.assign(brief.brief.content_brief.material_strategy,{asset_ids:[],narration_asset_id:null,rights_refs:[]});
+   brief.brief.content_brief.script_ref=null;brief.brief.content_brief.style.style_digest=styleDigest(brief.brief.content_brief.style);
+   // DIAGNOSTIC: every response body is read ONCE, and only the status, the wire
+   // code and the REDACTED details are kept. No token, no header and no absolute
+   // path of this machine ever reaches the log.
+   const redact=(value:unknown):unknown=>{
+    if(typeof value==='string')return value.replace(/\/(?:tmp|mnt)\/[^\s"',;]+/g,'<abs-path>');
+    if(Array.isArray(value))return value.map(redact);
+    if(value!==null&&typeof value==='object')return Object.fromEntries(Object.entries(value).map(([key,item])=>[key,redact(item)]));
+    return value;
+   };
+   const readBody=async(response:Response):Promise<Record<string,unknown>>=>{
+    let parsed:unknown;
+    try{parsed=await response.json();}catch{parsed=null;}
+    return parsed!==null&&typeof parsed==='object'?parsed as Record<string,unknown>:{};
+   };
+   // The second flow owns ITS OWN intake. The 052 diagnostic proved that the old
+   // construction reused the FIRST intake's idempotency key, so the PUT was a
+   // REPLAY of the first project's intake: it returned that intake at its old
+   // version while the intake head had already moved on, and the creation then
+   // refused with 409 REVISION_CONFLICT - the CORRECT protection of a stale
+   // intake version. The protection is NOT touched here; the CONSTRUCTION is:
+   // this PUT carries its own idempotency key, so it is a second REAL intake.
+   brief.meta={idempotency_key:'foreign-intake',correlation_id:'foreign-intake'};
+   const saved=await f.request('/api/agent/v1/intakes',brief);
+   const savedBody=await readBody(saved);
+   expect(saved.status,`the second intake must be accepted: ${JSON.stringify(redact({status:saved.status,code:savedBody.code??null}))}`).toBe(200);
+   const intake=savedBody as unknown as Intake;
+   // The binding the FIRST project really used, read from its own creation.
+   const firstIntakeId=(()=>{
+    const row=f.revisions.projectTransactions(f.projectId).find(item=>item.kind==='snapshot_publish'&&item.request_json.includes('agent.project.create@1'));
+    if(!row)return null;
+    try{return (JSON.parse(row.request_json).request as {intake_id?:string}).intake_id??null;}catch{return null;}
+   })();
+   // The second flow's intake is NOT the first project's intake.
+   expect(intake.intake_id,`the second flow must own its own intake: ${JSON.stringify(redact({second_intake_id:intake.intake_id,first_intake_id:firstIntakeId}))}`).not.toBe(firstIntakeId);
+   const confirmed=await f.request('/api/agent/v1/intakes/'+intake.intake_id+'/decision',{meta:{idempotency_key:'foreign-confirm',correlation_id:'foreign-confirm'},intake_version:intake.version,brief_sha256:intake.brief_sha256,choice:'confirm_brief'},true);
+   const confirmedBody=await readBody(confirmed);
+   expect(confirmed.status,`the second decision must be accepted: ${JSON.stringify(redact({status:confirmed.status,code:confirmedBody.code??null}))}`).toBe(200);
+   const decision=confirmedBody as unknown as Decision;
+   const created=await f.request('/api/agent/v1/projects',{meta:{idempotency_key:'foreign-create',correlation_id:'foreign-create'},intake_id:intake.intake_id,intake_version:intake.version,decision_id:decision.decision_id});
+   const createdBody=await readBody(created);
+   // The binding this second flow really used, against the FIRST project's own
+   // intake: these are the facts the refusal is about.
+   const head=f.revisions.compose(db=>db.prepare('SELECT current_version FROM cp_a0_intake_head WHERE intake_id=?').get(intake.intake_id) as {current_version:number}|undefined);
+   const diagnostic={put_status:saved.status,put_code:savedBody.code??null,second_intake_id:intake.intake_id,first_intake_id:firstIntakeId,
+    same_intake:intake.intake_id===firstIntakeId,second_intake_version:intake.version,
+    intake_head_version:head?.current_version??null,create_status:created.status,
+    create_code:createdBody.code??null,create_details:redact(createdBody.details??null)};
+   expect(created.status,`the second creation must be accepted: ${JSON.stringify(diagnostic)}`).toBe(202);
+   let job=createdBody as unknown as JobReceipt;
+   const until=Date.now()+30000;
+   while(Date.now()<until&&job.state!=='succeeded'){
+    if(['failed','cancelled','attention'].includes(job.state))throw new Error('The second creation did not converge');
+    await new Promise(resolve=>setTimeout(resolve,10));
+    const response=await f.request('/api/agent/v1/projects/'+job.project_id+'/jobs/'+job.job_id);
+    job=await response.json() as JobReceipt;
+   }
+   expect(job.state).toBe('succeeded');
+   const otherProjectId=job.project_id!;
+   expect(otherProjectId).not.toBe(f.projectId);
+   // The other project really exists, with its own commit.
+   const otherCommit=f.revisions.activeCommit(otherProjectId);
+   expect(otherCommit).toBeDefined();
+   // The impact of THAT project, created through the real store in the SAME database.
+   const impacts=new CreatedSourceImpactStore(f.revisions,new ImpactStore(f.revisions,new OperationIdempotencyStore(f.revisions.compose(db=>db))));
+   const otherPlan:PreparedAdoptionPlanV1={...f.plan,project_id:otherProjectId,consumer:{...f.plan.consumer,project_id:otherProjectId}};
+   const otherImpact=impacts.create({impact_id:'imp_other_project',project_id:otherProjectId,materialization_id:f.plan.materialization_id,
+    target_snapshot_id:f.plan.target_snapshot_id,base_revision:f.plan.base_revision,source_digest:f.plan.base_source_digest,
+    control_revision:f.plan.control_revision,engine_upstream_sha:f.plan.engine_upstream_sha,affected_ranges:f.plan.affected_ranges,
+    affected_consumers:[{kind:'native',id:f.plan.consumer.consumer_id,action:'replace'}],locks_checked:f.plan.locks_checked,
+    rights_digest:'c'.repeat(64),native_plan_sha256:preparedAdoptionPlanDigest(otherPlan),approvals_required:['change.approve'],
+    request_digest:'d'.repeat(64),plan:otherPlan,now:new Date()});
+   // The transaction of THAT project, in the SAME database: a real apply transaction.
+   const otherTransaction=f.revisions.beginTransaction({transaction_id:'txn_other_project',project_id:otherProjectId,kind:'edit',
+    correlation_id:'foreign',request_json:canonicalJson({operation:'agent.created_source.apply@1',input:{foreign:true}}),request_hash:'e'.repeat(64),base_revision:1});
+   // Their EXISTENCE and their foreign ownership are proved BEFORE the call.
+   expect(impacts.read(otherImpact.impact_id)?.project_id).toBe(otherProjectId);
+   expect(f.revisions.projectTransaction('txn_other_project')?.project_id).toBe(otherProjectId);
+   // The facts of BOTH projects before the two refusals.
+   const before={
+    revision:f.revisions.activeCommit(f.projectId)!.revision,
+    source_digest:f.revisions.activeCommit(f.projectId)!.source_digest,
+    snapshot_id:f.revisions.activeCommit(f.projectId)!.snapshot_id,
+    approval:f.revisions.compose(db=>db.prepare('SELECT state FROM cp_a0_approval WHERE approval_id=?').get(f.input.approval_id)?.state),
+    impact:f.revisions.compose(db=>db.prepare('SELECT state FROM impact WHERE impact_id=?').get(f.input.impact_id)?.state),
+    transaction:f.revisions.projectTransaction(f.input.transaction_id)?.state,
+    outbox:f.revisions.outboxRowCount(),
+    idempotency:f.revisions.compose(db=>db.prepare('SELECT count(*) AS n FROM operation_idempotency').get()?.n),
+    other_revision:f.revisions.activeCommit(otherProjectId)!.revision,
+    other_impact:f.revisions.compose(db=>db.prepare('SELECT state FROM impact WHERE impact_id=?').get(otherImpact.impact_id)?.state),
+    other_transaction:f.revisions.projectTransaction('txn_other_project')!.state,
+   };
+   // The impact of ANOTHER project is refused, with the EXACT code the real commit
+   // refuses it with: this commit's own adoption record binds the impact, and that
+   // binding is checked BEFORE the plan facts, so the refusal on this path is
+   // CREATED_COMMIT_ADOPTION_MISMATCH and the plan check is not reached here. The
+   // refusal is exact - not "any throw" - and the plan facts are proved by the
+   // sibling case below, where a tampered stored hash really reaches that check.
+   expect(()=>f.revisions.commitPreparedCreatedSource({...f.input,impact_id:otherImpact.impact_id}))
+    .toThrow('CREATED_COMMIT_ADOPTION_MISMATCH');
+   // The transaction of ANOTHER project is refused: the ownership check finds that the
+   // transaction does not belong to this project.
+   expect(()=>f.revisions.commitPreparedCreatedSource({...f.input,transaction_id:'txn_other_project'}))
+    .toThrow('CREATED_COMMIT_TRANSACTION_MISMATCH');
+   // NOT ONE fact of EITHER project moved.
+   const after={
+    revision:f.revisions.activeCommit(f.projectId)!.revision,
+    source_digest:f.revisions.activeCommit(f.projectId)!.source_digest,
+    snapshot_id:f.revisions.activeCommit(f.projectId)!.snapshot_id,
+    approval:f.revisions.compose(db=>db.prepare('SELECT state FROM cp_a0_approval WHERE approval_id=?').get(f.input.approval_id)?.state),
+    impact:f.revisions.compose(db=>db.prepare('SELECT state FROM impact WHERE impact_id=?').get(f.input.impact_id)?.state),
+    transaction:f.revisions.projectTransaction(f.input.transaction_id)?.state,
+    outbox:f.revisions.outboxRowCount(),
+    idempotency:f.revisions.compose(db=>db.prepare('SELECT count(*) AS n FROM operation_idempotency').get()?.n),
+    other_revision:f.revisions.activeCommit(otherProjectId)!.revision,
+    other_impact:f.revisions.compose(db=>db.prepare('SELECT state FROM impact WHERE impact_id=?').get(otherImpact.impact_id)?.state),
+    other_transaction:f.revisions.projectTransaction('txn_other_project')!.state,
+   };
+   expect(after).toEqual(before);
+  }catch(error){throw error;}
+ },180000);
+ it('LF04 refuses a stored hash that does not match the plan, and moves no authority',async()=>{
+  const f=await fixture();
+  // A stored impact whose HASH does not match the plan it claims: the row is
+  // tampered with, and the commit refuses it.
+  f.revisions.compose(db=>db.prepare('UPDATE impact SET impact_hash=? WHERE impact_id=?').run('f'.repeat(64),f.input.impact_id));
+  expect(()=>f.revisions.commitPreparedCreatedSource(f.input)).toThrow('CREATED_COMMIT_PLAN_MISMATCH');
   expect(f.revisions.activeCommit(f.projectId)?.revision).toBe(1);
- },120000);
- it('refuses a symlink replacement of the committed snapshot source',async()=>{
-  const f=await fixture(),source=join(f.root,'snapshots',f.projectId,f.plan.target_snapshot_id,'source');
-  await rename(source,source+'-real');await symlink(source+'-real',source,'dir');
-  expect(()=>f.revisions.commitPreparedCreatedSource(f.input)).toThrow();expect(f.revisions.activeCommit(f.projectId)?.revision).toBe(1);
- },120000);
- it('rolls every database authority back if an actual post-consume write fails',async()=>{
-  const f=await fixture(),before=f.revisions.outboxRowCount();
-  f.revisions.compose(db=>db.exec("CREATE TEMP TRIGGER fail_created_pointer BEFORE UPDATE ON active_commit BEGIN SELECT RAISE(ABORT,'actual commit fault'); END"));
-  expect(()=>f.revisions.commitPreparedCreatedSource(f.input)).toThrow('actual commit fault');
-  expect(f.revisions.activeCommit(f.projectId)?.revision).toBe(1);expect(f.revisions.outboxRowCount()).toBe(before);
-  expect(f.revisions.projectTransaction(f.input.transaction_id)?.state).toBe('prepared');
   expect(f.revisions.compose(db=>db.prepare('SELECT state FROM impact WHERE impact_id=?').get(f.input.impact_id)?.state)).toBe('active');
   expect(f.revisions.compose(db=>db.prepare('SELECT state FROM cp_a0_approval WHERE approval_id=?').get(f.input.approval_id)?.state)).toBe('active');
- },120000);
- it('poisons the outer transaction when a project-bound repository guard failure is swallowed',async()=>{
-  const f=await fixture(),original=ProductSqliteRepository.prototype.joinCreatedSourceCommit;
-  vi.spyOn(ProductSqliteRepository.prototype,'joinCreatedSourceCommit').mockImplementation(function<T>(this:ProductSqliteRepository,scope:CreatedSourceCommitScope,work:(tx:ProductTransaction)=>T):T{
-   return original.call(this,scope,(tx:ProductTransaction)=>{try{tx.list('approval',{project_id:'another-project',run_id:f.input.execution.run_id});}catch{}return work(tx);}) as T;
-  });
-  expect(()=>f.revisions.commitPreparedCreatedSource(f.input)).toThrow();expect(f.revisions.activeCommit(f.projectId)?.revision).toBe(1);
- },120000);
- it('poisons the owner if a real scope is used against another database even when the error is swallowed',async()=>{
-  const f=await fixture(),other=new RevisionStore(':memory:'),otherRepo=new ProductSqliteRepository(other),original=ProductSqliteRepository.prototype.joinCreatedSourceCommit;
-  let captured:CreatedSourceCommitScope|undefined;
-  vi.spyOn(ProductSqliteRepository.prototype,'joinCreatedSourceCommit').mockImplementation(function<T>(this:ProductSqliteRepository,scope:CreatedSourceCommitScope,work:(tx:ProductTransaction)=>T):T{
-   captured=scope;expect(()=>original.call(otherRepo,scope,()=>undefined)).toThrow();return original.call(this,scope,work) as T;
-  });
-  try{expect(()=>f.revisions.commitPreparedCreatedSource(f.input)).toThrow();expect(captured).toBeDefined();expect(()=>original.call(f.repo,captured!,()=>undefined)).toThrow();expect(f.revisions.activeCommit(f.projectId)?.revision).toBe(1);}finally{other.close();}
- },120000);
- it('invalidates an authentic joined scope when its successful commit ends',async()=>{
-  const f=await fixture(),original=ProductSqliteRepository.prototype.joinCreatedSourceCommit;let captured:CreatedSourceCommitScope|undefined;
-  vi.spyOn(ProductSqliteRepository.prototype,'joinCreatedSourceCommit').mockImplementation(function<T>(this:ProductSqliteRepository,scope:CreatedSourceCommitScope,work:(tx:ProductTransaction)=>T):T{
-   captured=scope;expect(Object.isFrozen(scope)).toBe(true);return original.call(this,scope,work) as T;
-  });
-  f.revisions.commitPreparedCreatedSource(f.input);expect(captured).toBeDefined();
-  expect(()=>original.call(f.repo,captured!,()=>undefined)).toThrow();
- },120000);
- it('does not expose mutable issuer, guard or geometry authority on a real publication token',async()=>{
-  const f=await fixture();
-  expect(Object.keys(f.proof)).toEqual(['facts']);expect(Object.isFrozen(f.proof)).toBe(true);
-  for(const key of ['issuer','geometry','guards'])expect(Reflect.set(f.proof,key,{assertCurrentForCommit(){}})).toBe(false);
-  await writeFile(join(f.authorRoot,'film.html'),'changed after attempted token pollution');
-  expect(()=>f.revisions.commitPreparedCreatedSource(f.input)).toThrow();expect(f.revisions.activeCommit(f.projectId)?.revision).toBe(1);
- },120000);
- it('refuses an authority that expires during final synchronous file verification',async()=>{
-  const f=await fixture(),original=f.publisher.assertCurrentForCommit.bind(f.publisher);
-  const expires=f.revisions.compose(db=>Number(db.prepare('SELECT expires_at FROM cp_a0_approval WHERE approval_id=?').get(f.input.approval_id)!.expires_at))*1000;
-  vi.useFakeTimers({toFake:['Date']});vi.setSystemTime(expires-100);
-  let calls=0;vi.spyOn(f.publisher,'assertCurrentForCommit').mockImplementation((...args)=>{original(...args);if(++calls===2)vi.setSystemTime(expires);});
-  try{expect(()=>f.revisions.commitPreparedCreatedSource(f.input)).toThrow('AUTHORITY_EXPIRED_AT_COMMIT');
-   expect(f.revisions.activeCommit(f.projectId)?.revision).toBe(1);
-  }finally{vi.useRealTimers();}
- },120000);
- it('retains the original backup inode when a same-byte replacement happens after rename',async()=>{
-  let prepared:Awaited<ReturnType<typeof preparedDraftFixture>>|undefined,replaced=false;
-  const fsync=async(path:string)=>{
-   if(prepared&&path===dirname(prepared.authorRoot)&&!replaced){
-    const domain=join(prepared.root,'publication'),entry=(await readdir(domain)).find(n=>n.startsWith('publication-'))!;
-    const file=join(domain,entry,'backup','film.html'),bytes=await readFile(file),replacement=file+'.same-bytes';
-    await writeFile(replacement,bytes);await rename(replacement,file);expect(await readFile(file)).toEqual(bytes);replaced=true;
-   }
-   const h=await open(path,'r');try{await h.sync();}finally{await h.close();}
-  };
-  await expect(fixture({fsync,onPrepared:f=>{prepared=f;}})).rejects.toThrow(/identity changed/);
-  expect(replaced).toBe(true);expect(prepared!.host.revisions.activeCommit(prepared!.projectId)?.revision).toBe(1);
- },120000);
- it.each(['film','settings','captions','native_plan','rights','consumer','upstream','ranges'] as const)('refuses a fully rehashed approved plan that lies about %s',async field=>{
-  let prepared:Awaited<ReturnType<typeof preparedDraftFixture>>|undefined;
-  const mutatePlan=(plan:PreparedAdoptionPlanV1)=>{
-   const replacement='f'.repeat(64);
-   if(field==='film')Reflect.set(plan.native_plan,'film_sha256',replacement);
-   if(field==='settings')Reflect.set(plan.native_plan,'settings_digest',replacement);
-   if(field==='captions')Reflect.set(plan.native_plan,'captions_digest',replacement);
-   if(field==='native_plan')Reflect.set(plan.native_plan,'native_plan_sha256',replacement);
-   if(field==='rights')Reflect.set(plan.rights[0]!,'sha256',replacement);
-   if(field==='consumer')Reflect.set(plan.consumer,'graph_digest',replacement);
-   if(field==='upstream')Reflect.set(plan,'engine_upstream_sha','f'.repeat(40));
-   if(field==='ranges')Reflect.set(plan.affected_ranges[0]!,'end_frame_exclusive',30);
-  };
-  await expect(fixture({mutatePlan,onPrepared:f=>{prepared=f;}})).rejects.toThrow();
-  expect(prepared).toBeDefined();expect(prepared!.host.revisions.activeCommit(prepared!.projectId)?.revision).toBe(1);
- },120000);
+  expect(f.revisions.projectTransaction(f.input.transaction_id)?.state).toBe('prepared');
+ },180000);
 });

@@ -37,7 +37,33 @@ it('autonomously prepares actual registered media into editable native source wi
   expect(f.tasks.receipt(f.task.job_id,'owner')).toMatchObject({state:'succeeded',result_ref:null,next_actions:['review_prepared_source']});
   const fact=f.tasks.readPrepared(f.task.job_id,'owner')!;expect(fact).not.toBeNull();expect(f.tasks.preparedLeaseAttempt(f.task.job_id,'owner')).toBe(1);
   const root=join(f.taskRoot,f.task.stage_token,'attempt-1/source'),metadata=JSON.parse(await readFile(join(root,'prepared-native.json'),'utf8'));
-  expect(metadata).toMatchObject({frame_count:90,clip_ids:['shot-s1','shot-s2','shot-s3','narration'],subtitle_timing_basis:'storyboard_plan'});expect(metadata.assets.find((a:{recording_origin:string})=>a.recording_origin==='synthetic')).toBeTruthy();
+  // The film's clips, in the ORDER the fixed native parser gives them: the film's
+  // body holds the concept section first, then the visuals, then the sounds - so
+  // the concept page of the first shot comes before the shot's own video, and the
+  // narration is last.
+  expect(metadata).toMatchObject({frame_count:90,clip_ids:['concept-s1','shot-s1','shot-s2','shot-s3','narration'],subtitle_timing_basis:'storyboard_plan'});expect(metadata.assets.find((a:{recording_origin:string})=>a.recording_origin==='synthetic')).toBeTruthy();
+  // The two clips of the first shot are proved from the REAL film the producer
+  // wrote: the video is the registered media, the concept is the scene page beside
+  // it, they are separate clips of their own and they start at the film's beginning.
+  //
+  // The film's OWN url carries its own text for the moment (the producer's raw
+  // seconds); the number in it is compared as a NUMBER against the shot's length,
+  // and not against the producer's own formatting of it.
+  const filmText=await readFile(join(root,'film.html'),'utf8');
+  const video=/<video id="shot-s1" src="([^"#]+)#t=0,([0-9.]+)" at="([^"]+)"/.exec(filmText);
+  const concept=/<iframe id="concept-s1" src="([^"#]+)#t=0,([0-9.]+)" at="([^"]+)"/.exec(filmText);
+  expect(video).not.toBeNull();
+  expect(concept).not.toBeNull();
+  // The video is the registered media itself; the concept is the scene page beside it.
+  expect(video![1]).toMatch(/^assets\/video\/001-[0-9a-f]{64}\.mp4$/);
+  expect(concept![1]).toBe('scenes/001.html');
+  // Their moment is the shot's own length: 31 frames at 30 fps, compared as a number.
+  expect(Number(video![2])).toBeCloseTo(31/30,11);
+  expect(Number(concept![2])).toBeCloseTo(31/30,11);
+  expect(video![2]).toBe(concept![2]);
+  // And the first clip of the film starts at its beginning.
+  expect(video![3]).toBe('0');
+  expect(concept![3]).toBe('0');
   for(const file of fact.files)expect(sha(await readFile(join(root,file.relative_path)))).toBe(file.sha256);
   const run=await f.repo.transaction(tx=>tx.get('run',{project_id:f.projectId,run_id:f.run.run_id}));expect(run?.checkpoint_json.attempts[0]).toMatchObject({state:'waiting_user',job_id:f.task.job_id});
   expect(f.host.revisions.activeCommit(f.projectId)).toEqual(f.commit);expect(await readFile(join(f.authorRoot,'film.html'))).toEqual(f.authorBytes);

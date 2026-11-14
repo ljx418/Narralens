@@ -1,0 +1,3 @@
+src/host/agent-driven/committed-snapshot-authority.ts(378,95): error TS2339: Property 'rights_ref' does not exist on type 'CreatedAssetFact'.
+src/host/agent-driven/committed-snapshot-authority.ts(387,82): error TS2339: Property 'principal_id' does not exist on type 'CommitBinding'.
+tests/agent-driven/integration/created-native-ack.test.ts(1924,3): error TS2739: Type '{ EXPECTED_PROFILE: "narralens.native-expected-numeric@1"; upstream_sha: string; computeExpectedProjection: () => { status: "unsupported"; profile: "narralens.native-expected-numeric@1"; reason: "INPUT_INVALID"; }; hydrationCanonicalJson: (value: unknown) => string; }' is missing the following properties from type 'NativeExpectedLibrary': parseProjectSettings, parseMarkers

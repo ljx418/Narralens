@@ -1,0 +1,84 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:1060161) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/agent-driven/integration/created-native-source-reader.test.ts (26 tests | 1 failed | 8 skipped) 178666ms
+   ✓ R00 smoke reaches the reader from the real committed created source  16042ms
+   ✓ R00 smoke commits a rich source with the native files and the media  9237ms
+   ✓ R01 refuses the legacy project that has no created producer  8455ms
+   ✓ R02 invalidates the old proof when the working copy changes under it  12640ms
+   ✓ R02 refuses a pending round when the working copy changes during the read  8584ms
+   ✓ R03 refuses a sidecar, an unknown item and a missing committed file  10677ms
+   ✓ R04 refuses a foreign native id, a forged probe cache and a file in flight  13294ms
+   ✓ R04 accepts a legitimate cache in the next stable round  14533ms
+   ✓ R05 proves the media facts of the retained bytes  10059ms
+   ✓ R06 lists the media in the native numeric order  11600ms
+   ✓ R02 keeps parallel leases independent and refuses foreign and copied tokens  14695ms
+   ✓ R02 refuses a facts lease of another authority  14180ms
+   ✓ R02 releases the whole closure only after the last retained leaf  10176ms
+   ✓ R06 places every clip where the committed film places it  8194ms
+   ✓ R07 ends a read at a close and releases a late result exactly once 1ms
+   ✓ R07 lets the real media child exit before the reader closes  8012ms
+   × R07 registers the read before a binding callback can close the reader 8ms
+     → expected 1 to be less than 0
+   ✓ R07 refuses a later read after a delivered release failed  8274ms
+   ↓ P07 refuses a symbolic link, a same-bytes replacement and a restored change time
+   ↓ P07 refuses a text file above the budget and bounds the total
+   ↓ P07 refuses to release while work is in flight and releases every allocation once
+   ↓ P07 refuses a reentrant release from inside an accepted read
+   ↓ P07 keeps the failure of the walk release with the failure that stopped it
+   ↓ P07 proves an empty directory and sees the file that appears in it
+   ↓ P06 reproduces the five pinned native revision vectors
+   ↓ P06 lists the media in the numeric order of the host
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/created-native-source-reader.test.ts > R07 registers the read before a binding callback can close the reader
+AssertionError: expected 1 to be less than 0
+ ❯ tests/agent-driven/integration/created-native-source-reader.test.ts:621:40
+    619|  // The close returned only after the read settled: the admission was …
+    620|  // before the callback ran, so the close could not leave the read beh…
+    621|  expect(order.indexOf('read-settled')).toBeLessThan(order.indexOf('clo…
+       |                                        ^
+    622| },60000);
+    623| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+⎯⎯⎯⎯⎯⎯ Unhandled Errors ⎯⎯⎯⎯⎯⎯
+
+Vitest caught 1 unhandled error during the test run.
+This might cause false positive tests. Resolve unhandled errors to make sure your tests are not affected.
+
+⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯
+Error: the read must not reach the authority
+ ❯ Object.acquireNativeFacts tests/agent-driven/integration/created-native-source-reader.test.ts:600:57
+    598|  */
+    599| it('R07 registers the read before a binding callback can close the rea…
+    600|  const authority={acquireNativeFacts:()=>Promise.reject(new Error('the…
+       |                                                         ^
+    601|  const lease={workspace_ref:'ws',project_id:'p',principal_id:'owner',t…
+    602|   source_digest:'digest',revision:1,native_project_id:'native',generat…
+ ❯ CreatedNativeSourceReader.#read src/host/agent-driven/created-native-source-reader.ts:463:35
+ ❯ CreatedNativeSourceReader.readSource src/host/agent-driven/created-native-source-reader.ts:426:19
+ ❯ tests/agent-driven/integration/created-native-source-reader.test.ts:615:23
+ ❯ node_modules/.pnpm/@vitest+runner@3.2.4/node_modules/@vitest/runner/dist/chunk-hooks.js:155:11
+ ❯ node_modules/.pnpm/@vitest+runner@3.2.4/node_modules/@vitest/runner/dist/chunk-hooks.js:752:26
+ ❯ node_modules/.pnpm/@vitest+runner@3.2.4/node_modules/@vitest/runner/dist/chunk-hooks.js:1897:20
+ ❯ runWithTimeout node_modules/.pnpm/@vitest+runner@3.2.4/node_modules/@vitest/runner/dist/chunk-hooks.js:1863:10
+ ❯ runTest node_modules/.pnpm/@vitest+runner@3.2.4/node_modules/@vitest/runner/dist/chunk-hooks.js:1574:12
+
+This error originated in "tests/agent-driven/integration/created-native-source-reader.test.ts" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+The latest test that might've caused the error is "R07 refuses a later read after a delivered release failed". It might mean one of the following:
+- The error was thrown, while Vitest was running this test.
+- If the error occurred after the test had been completed, this was the last documented test before it was thrown.
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 17 passed | 8 skipped (26)
+     Errors  1 error
+   Start at  15:02:52
+   Duration  188.66s (transform 4.36s, setup 0ms, collect 7.75s, tests 178.67s, environment 0ms, prepare 1.46s)
+

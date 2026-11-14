@@ -1,0 +1,14 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:1928955) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/created-native-source-reader.test.ts (80 tests | 77 skipped) 17166ms
+   ✓ F04 refuses a working copy leaf that is hardlinked to an external file  9866ms
+   ✓ G01 keeps the alias reason and the release failure of the same acquisition  7297ms
+
+ Test Files  1 passed (1)
+      Tests  3 passed | 77 skipped (80)
+   Start at  23:46:46
+   Duration  26.33s (transform 4.17s, setup 0ms, collect 7.11s, tests 17.17s, environment 0ms, prepare 1.27s)
+

@@ -1,0 +1,14 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:958338) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/created-native-source-reader.test.ts (2 tests) 24083ms
+   ✓ R00 smoke reaches the reader from the real committed created source  12791ms
+   ✓ R00 smoke commits a rich source with the native files and the media  11291ms
+
+ Test Files  1 passed (1)
+      Tests  2 passed (2)
+   Start at  14:22:52
+   Duration  39.97s (transform 6.06s, setup 0ms, collect 11.68s, tests 24.08s, environment 0ms, prepare 2.92s)
+

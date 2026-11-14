@@ -1,0 +1,19 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:2458894) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/created-draft-processor.test.ts (7 tests) 55252ms
+   ✓ autonomously prepares actual registered media into editable native source with matching immutable facts and no author commit  7606ms
+   ✓ rechecks a revoked grant after asynchronous resolution and writes no stage or prepared fact  4009ms
+   ✓ cancels after real preparation without publishing a prepared result or changing author state  7024ms
+   ✓ reproves a durable complete source after lease loss instead of re-encoding or trusting an old in-memory proof  9291ms
+   ✓ recovers a real asynchronous domain-open resource failure in the same processor and closes its descriptors  10330ms
+   ✓ re-proves a succeeded SOURCE_ONLY source without a live lease and keeps the read proof away from the adoption assertion  9555ms
+   ✓ refuses a read proof of prepared bytes that changed under the same size and closes its descriptors  7435ms
+
+ Test Files  1 passed (1)
+      Tests  7 passed (7)
+   Start at  10:25:55
+   Duration  70.99s (transform 4.94s, setup 0ms, collect 13.02s, tests 55.25s, environment 0ms, prepare 1.81s)
+

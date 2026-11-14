@@ -1,0 +1,108 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:2293068) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/agent-driven/integration/native-cache-witness.test.ts (15 tests | 5 failed | 9 skipped) 72154ms
+   × B0-1 the fixed producer really draws and the witness binds the request, the key, the triple and the dependencies 12649ms
+     → A file the producer read changed while it was drawing
+   ✓ B0-2 one owner close never kills the peer work in flight, and the browser goes with the last owner  11401ms
+   ↓ B0-3 refuses a cache entry that was already there and keeps its old bytes
+   × B0-4 the fixed producer draws a page frame and the witness binds it 10833ms
+     → A file the producer read changed while it was drawing
+   ↓ B0-5 refuses a producer that the Host did not issue
+   ↓ K01-a refuses an unknown, a copied and a shaped production lease before the producer runs
+   ↓ K01-b refuses a production lease of another real service
+   ↓ K01-c refuses a hand-branded witness and the reader refuses the entry it speaks about
+   ↓ K01-d refuses the production lease of a view that was replaced
+   ↓ K03-a refuses a partial triple of that key and keeps its bytes
+   ↓ K03-b refuses a request that is not the exact request of its family
+   ↓ K05-a keeps the primary of a failed producer and the genuine release failure
+   × K05-b delivers nothing when the release of the production did not finish 16454ms
+     → expected 'NATIVE_CACHE_SOURCE_RACED' to be 'NATIVE_CACHE_CLEANUP_FAILED' // Object.is equality
+   × K04-a refuses a witnessed picture that was replaced by an equal copy 10890ms
+     → expected NativeSourceReaderError: The native cache… { code: '…' } to match object { code: 'NATIVE_SOURCE_CACHE_STALE' }
+(1 matching property omitted from actual)
+   × K04-b refuses a witnessed file that was changed and written back 9925ms
+     → expected 1794533606674.999 to be 1794533606674.7712 // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/native-cache-witness.test.ts > B0-1 the fixed producer really draws and the witness binds the request, the key, the triple and the dependencies
+ FAIL  tests/agent-driven/integration/native-cache-witness.test.ts > B0-4 the fixed producer draws a page frame and the witness binds it
+NativeCacheWitnessError: A file the producer read changed while it was drawing
+ ❯ refuseCache src/host/agent-driven/created-native-workspace.ts:120:78
+    118| const witnessLeases=new WeakMap<object,object>();
+    119| /** The failure of the native cache production. */
+    120| const refuseCache:(code:string,message:string)=>never=(code,message)=>…
+       |                                                                              ^
+    121| /** The identity of a path, as the platform reports it. It is never a …
+    122| interface PathIdentity{readonly dev:string;readonly ino:string;readonl…
+ ❯ CreatedNativeWorkspaceService.#produce src/host/agent-driven/created-native-workspace.ts:543:46
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  tests/agent-driven/integration/native-cache-witness.test.ts > K05-b delivers nothing when the release of the production did not finish
+AssertionError: expected 'NATIVE_CACHE_SOURCE_RACED' to be 'NATIVE_CACHE_CLEANUP_FAILED' // Object.is equality
+
+Expected: [32m"NATIVE_CACHE_[7mCLEANUP_FAIL[27mED"[39m
+Received: [31m"NATIVE_CACHE_[7mSOURCE_RAC[27mED"[39m
+
+ ❯ tests/agent-driven/integration/native-cache-witness.test.ts:758:56
+    756|   }catch(error){thrown=error;}
+    757|   expect(thrown).toBeDefined();
+    758|   expect(String((thrown as {code?:unknown}).code??'')).toBe('NATIVE_CA…
+       |                                                        ^
+    759|   // The hit is proven, and the descriptor really was closed.
+    760|   expect(hits.length).toBe(1);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  tests/agent-driven/integration/native-cache-witness.test.ts > K04-a refuses a witnessed picture that was replaced by an equal copy
+AssertionError: expected NativeSourceReaderError: The native cache… { code: '…' } to match object { code: 'NATIVE_SOURCE_CACHE_STALE' }
+(1 matching property omitted from actual)
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- {[39m
+[32m-   "code": "NATIVE_SOURCE_CACHE_STALE",[39m
+[31m+ NativeSourceReaderError {[39m
+[31m+   "code": "NATIVE_SOURCE_CACHE_FORGED",[39m
+[2m  }[22m
+
+ ❯ tests/agent-driven/integration/native-cache-witness.test.ts:811:3
+    809|   expect(readFileSync(picture).equals(bytes)).toBe(true);
+    810|   // The consumer refuses it: the identity of the file moved.
+    811|   await expect(f.reader.readSource({binding:f.binding})).rejects.toMat…
+       |   ^
+    812|  }catch(error){primary=error;}
+    813|  const failures:unknown[]=[];
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ FAIL  tests/agent-driven/integration/native-cache-witness.test.ts > K04-b refuses a witnessed file that was changed and written back
+AssertionError: expected 1794533606674.999 to be 1794533606674.7712 // Object.is equality
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 1794533606674.7712[39m
+[31m+ 1794533606674.999[39m
+
+ ❯ tests/agent-driven/integration/native-cache-witness.test.ts:852:25
+    850|   expect(after.ino).toBe(before.ino);
+    851|   expect(after.size).toBe(before.size);
+    852|   expect(after.mtimeMs).toBe(before.mtimeMs);
+       |                         ^
+    853|   // The consumer refuses it: the change time of the inode moved.
+    854|   await expect(f.reader.readSource({binding:f.binding})).rejects.toMat…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  5 failed | 1 passed | 9 skipped (15)
+   Start at  09:32:00
+   Duration  81.17s (transform 4.33s, setup 0ms, collect 7.06s, tests 72.15s, environment 0ms, prepare 1.29s)
+

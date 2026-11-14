@@ -1,0 +1,83 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:2433295) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+stdout | tests/agent-driven/integration/created-run-authority.test.ts > D09 real prepared succeeds with full plan digest, replays once and releases held source FDs
+{"case":"D09 real prepared cleanup","pid":2433295,"root":"/tmp/narralens-created-workspace-q8mEGC","removed":true}
+
+stdout | tests/agent-driven/integration/created-run-authority.test.ts > D09 real prepared refuses changed plan without approval and releases held source FDs
+{"case":"D09 real prepared cleanup","pid":2433295,"root":"/tmp/narralens-created-workspace-3KLyuf","removed":true}
+
+stdout | tests/agent-driven/integration/created-run-authority.test.ts > D09 real prepared refuses changed package without approval and releases held source FDs
+{"case":"D09 real prepared cleanup","pid":2433295,"root":"/tmp/narralens-created-workspace-2HHtgF","removed":true}
+
+stdout | tests/agent-driven/integration/created-run-authority.test.ts > D09 real prepared refuses changed rights without approval and releases held source FDs
+{"case":"D09 real prepared cleanup","pid":2433295,"root":"/tmp/narralens-created-workspace-YSG9BB","removed":true}
+
+stdout | tests/agent-driven/integration/created-run-authority.test.ts > D09 real prepared refuses changed selection without approval and releases held source FDs
+{"case":"D09 real prepared cleanup","pid":2433295,"root":"/tmp/narralens-created-workspace-KZkBP7","removed":true}
+
+stdout | tests/agent-driven/integration/created-run-authority.test.ts > D09 real prepared refuses changed expiry without approval and releases held source FDs
+{"case":"D09 real prepared cleanup","pid":2433295,"root":"/tmp/narralens-created-workspace-E1yfYC","removed":true}
+
+stdout | tests/agent-driven/integration/created-run-authority.test.ts > D09 real prepared refuses changed closure without approval and releases held source FDs
+{"case":"D09 real prepared cleanup","pid":2433295,"root":"/tmp/narralens-created-workspace-zv2v99","removed":true}
+
+stdout | tests/agent-driven/integration/created-run-authority.test.ts > D09 real prepared refuses a copied transaction object even while actual proof is held
+{"case":"D09 real prepared cleanup","pid":2433295,"root":"/tmp/narralens-created-workspace-rcgwG6","removed":true}
+
+stdout | tests/agent-driven/integration/created-run-authority.test.ts > D09 real prepared refuses confirmation expiry during actual retained-byte verification
+{"case":"D09 real prepared cleanup","pid":2433295,"root":"/tmp/narralens-created-workspace-6AQjbO","removed":true}
+
+stdout | tests/agent-driven/integration/created-run-authority.test.ts > D09 real prepared retains post-commit read cleanup uncertainty and refuses normal replay
+{"case":"D09 real prepared cleanup","pid":2433295,"root":"/tmp/narralens-created-workspace-hM7MwO","removed":true}
+
+stdout | tests/agent-driven/integration/created-run-authority.test.ts > D09 real reader retains all resource ownership after release cleanup fails
+{"case":"D09 real prepared cleanup","pid":2433295,"root":"/tmp/narralens-created-workspace-PS03p0","removed":true}
+
+stdout | tests/agent-driven/integration/created-run-authority.test.ts > D09 real reader retains all resource ownership after acquire-stage cleanup fails
+{"case":"D09 real prepared cleanup","pid":2433295,"root":"/tmp/narralens-created-workspace-dlbSRp","removed":true}
+
+stdout | tests/agent-driven/integration/created-run-authority.test.ts > D09 real adoption service commits one actual approved native source through the project queue
+{"case":"D10 committed projection diagnostic","problems":["OPENFILM_PROJECTION:CLIP_UNMODELED_FIELD:concept-s1:box","OPENFILM_PROJECTION:CLIP_UNMODELED_FIELD:shot-s1:style","OPENFILM_PROJECTION:CLIP_UNMODELED_FIELD:shot-s1:volume","OPENFILM_PROJECTION:CLIP_UNMODELED_FIELD:shot-s2:style","OPENFILM_PROJECTION:CLIP_UNMODELED_FIELD:shot-s2:volume"],"frames":90,"expected_frames":90,"fps":{"num":30,"den":1},"expected_fps":{"den":1,"num":30}}
+
+stdout | tests/agent-driven/integration/created-run-authority.test.ts > D09 real adoption service commits one actual approved native source through the project queue
+{"case":"D09 real prepared cleanup","pid":2433295,"root":"/tmp/narralens-created-workspace-p4wnz7","removed":true}
+
+stdout | tests/agent-driven/integration/created-run-authority.test.ts > D09 real adoption service refuses missing approval before starting publication
+{"case":"D09 real prepared cleanup","pid":2433295,"root":"/tmp/narralens-created-workspace-X3z3gs","removed":true}
+
+stdout | tests/agent-driven/integration/created-run-authority.test.ts > D09 real adoption service refuses changed selection before starting publication
+{"case":"D09 real prepared cleanup","pid":2433295,"root":"/tmp/narralens-created-workspace-BLtmKu","removed":true}
+
+stdout | tests/agent-driven/integration/created-run-authority.test.ts > D09 real adoption service preserves acquire cleanup uncertainty through service close
+{"case":"D09 real prepared cleanup","pid":2433295,"root":"/tmp/narralens-created-workspace-CWJvM9","removed":true}
+
+stdout | tests/agent-driven/integration/created-run-authority.test.ts > D09 real overlapping replay cannot bypass a cleanup failure recorded after its first await
+{"case":"D09 real prepared cleanup","pid":2433295,"root":"/tmp/narralens-created-workspace-jC7v8m","removed":true}
+
+ ✓ tests/agent-driven/integration/created-run-authority.test.ts (36 tests) 172787ms
+   ✓ D09 real prepared succeeds with full plan digest, replays once and releases held source FDs  10518ms
+   ✓ D09 real prepared refuses changed plan without approval and releases held source FDs  7534ms
+   ✓ D09 real prepared refuses changed package without approval and releases held source FDs  7492ms
+   ✓ D09 real prepared refuses changed rights without approval and releases held source FDs  7260ms
+   ✓ D09 real prepared refuses changed selection without approval and releases held source FDs  7489ms
+   ✓ D09 real prepared refuses changed expiry without approval and releases held source FDs  9035ms
+   ✓ D09 real prepared refuses changed closure without approval and releases held source FDs  9961ms
+   ✓ D09 real prepared refuses a copied transaction object even while actual proof is held  10008ms
+   ✓ D09 real prepared refuses confirmation expiry during actual retained-byte verification  9687ms
+   ✓ D09 real prepared retains post-commit read cleanup uncertainty and refuses normal replay  12290ms
+   ✓ D09 real reader retains all resource ownership after release cleanup fails  10708ms
+   ✓ D09 real reader retains all resource ownership after acquire-stage cleanup fails  10676ms
+   ✓ D09 real adoption service commits one actual approved native source through the project queue  14571ms
+   ✓ D09 real adoption service refuses missing approval before starting publication  9119ms
+   ✓ D09 real adoption service refuses changed selection before starting publication  13673ms
+   ✓ D09 real adoption service preserves acquire cleanup uncertainty through service close  9986ms
+   ✓ D09 real overlapping replay cannot bypass a cleanup failure recorded after its first await  12606ms
+
+ Test Files  1 passed (1)
+      Tests  36 passed (36)
+   Start at  10:15:17
+   Duration  177.85s (transform 3.54s, setup 0ms, collect 3.23s, tests 172.79s, environment 0ms, prepare 1.21s)
+

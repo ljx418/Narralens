@@ -1,0 +1,66 @@
+{
+  "report": {
+    "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+    "dist_root": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/var/native-hydration-r2/managed-native-expected/dist",
+    "inputs_root": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tools/agent-driven/product/native-inputs",
+    "upstream_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+    "approved_inputs_sha256": "c5b53099b2f94fc12b5f9d184c0c8c2b12c51349051eddf67794fb0866e8dfd1",
+    "observed_inputs_sha256": "c5b53099b2f94fc12b5f9d184c0c8c2b12c51349051eddf67794fb0866e8dfd1",
+    "inputs_match": true,
+    "approved_build_sha256": "13c803b00dc4d0dc40d62209dc03b7f0d2707404a7cce6fcd4c3739a8daf8c95",
+    "observed_build_sha256": "13c803b00dc4d0dc40d62209dc03b7f0d2707404a7cce6fcd4c3739a8daf8c95",
+    "build_match": true,
+    "modules": {
+      "NATIVE_LICENSE.txt": {
+        "approved": "4f39fecc5d074a4795bb7c55c5aaad1a4505b5e022ae6c2c3b55b4f26e7c43fc",
+        "observed": "4f39fecc5d074a4795bb7c55c5aaad1a4505b5e022ae6c2c3b55b4f26e7c43fc",
+        "match": true
+      },
+      "build-manifest.json": {
+        "approved": "13c803b00dc4d0dc40d62209dc03b7f0d2707404a7cce6fcd4c3739a8daf8c95",
+        "observed": "13c803b00dc4d0dc40d62209dc03b7f0d2707404a7cce6fcd4c3739a8daf8c95",
+        "match": true
+      },
+      "expected-projection.d.ts": {
+        "approved": "0f5f565a3d8b70de995aeb0dfdfb6052acad53cbf452c8d70168f555a8937f80",
+        "observed": "0f5f565a3d8b70de995aeb0dfdfb6052acad53cbf452c8d70168f555a8937f80",
+        "match": true
+      },
+      "expected-projection.mjs": {
+        "approved": "3500b1d6485791b13ec9364c6eb80740531142c16754877e21923ad73e9d494e",
+        "observed": "3500b1d6485791b13ec9364c6eb80740531142c16754877e21923ad73e9d494e",
+        "match": true
+      },
+      "native-pure-library.mjs": {
+        "approved": "9cb18aebe9a5daf08a2c92259b6314493fe98e40fe8a1b410bad444671a9904c",
+        "observed": "9cb18aebe9a5daf08a2c92259b6314493fe98e40fe8a1b410bad444671a9904c",
+        "match": true
+      }
+    }
+  },
+  "loaded": {
+    "expected_profile": "narralens.native-expected-numeric@1",
+    "upstream_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+    "compute_expected_projection": "function",
+    "hydration_canonical_json": "function",
+    "parse_project_settings": "function",
+    "parse_markers": "function",
+    "parse_project_settings_sample": {
+      "fps": 30,
+      "trackNames": [
+        {
+          "name": "a",
+          "index": 0,
+          "clips": []
+        }
+      ]
+    },
+    "parse_markers_sample": [
+      {
+        "id": "m1",
+        "t": 1.235,
+        "color": "green"
+      }
+    ]
+  }
+}

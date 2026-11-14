@@ -1,7 +1,7 @@
 import { beforeAll, afterAll, it, expect } from 'vitest';
 import { execFileSync } from 'node:child_process';
 import { mkdtemp, rm, readFile, writeFile, cp, readdir, symlink, unlink, rename } from 'node:fs/promises';
-import { readFileSync, writeFileSync, renameSync, symlinkSync } from 'node:fs';
+import { readFileSync, writeFileSync, renameSync, symlinkSync, linkSync, unlinkSync, statSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -322,6 +322,69 @@ it('bounds real concurrent imports to two and removes a cancelled queued request
         expect(f.registry.capacity).toEqual({ running: 0, queued: 0, limit: 2 });
         expect(f.count()).toBe(1);
         expect(f.host.revisions.compose(db => db.prepare("SELECT count(*) AS n FROM operation_idempotency WHERE operation_kind='agent.v1:local-asset.import'").get()?.n)).toBe(2);
+        // TWO receipts, ONE immutable asset fact and ONE business event: the second
+        // import of the same content converges on the first, it does not register a
+        // second registration.
+        expect(f.host.revisions.outboxRowCount('asset.local.registered')).toBe(1);
+    }
+    finally {
+        await f.close();
+    }
+}, 120000);
+/**
+ * The published blob is proved again when only the change time of its inode moved.
+ *
+ * The published object is content-addressed: another publisher that links or unlinks
+ * its own staging name moves the change time of that very inode while not one byte
+ * of it moves. The observation point is exactly in that window - after the initial
+ * stat of the published blob and before its bytes are read - so the case can make
+ * the real proof window happen on purpose, with real links.
+ *
+ * What is proved here is a FACT about the content: the change time moved, the whole
+ * content identity did not, and the content was proved again from the same
+ * descriptor. It is NOT a claim about WHY the change time moved.
+ */
+it('proves a published blob again when only the change time of its inode moved, and keeps every other change refused', async () => {
+    const observations: { readonly dev: string; readonly ino: string; readonly size: string; readonly mtime: string; readonly ctime_before: string; readonly ctime_after: string; readonly sha256: string }[] = [];
+    let hits = 0;
+    const f = await fixture((point: Parameters<NonNullable<LocalAssetRegistryOptions['boundary']>>[0]) => {
+        if (point !== 'after_published_stat')
+            return;
+        hits += 1;
+        const published = join(f.storageRoot, 'objects', `${f.video.expected_sha256}.mp4`);
+        const before = statSync(published, { bigint: true });
+        // A REAL link and unlink of the very inode: the number of its names changes,
+        // so its change time moves - and its bytes do not move at all.
+        const extra = join(f.storageRoot, 'objects', `proof-window-${hits}.link`);
+        linkSync(published, extra);
+        unlinkSync(extra);
+        const after = statSync(published, { bigint: true });
+        observations.push({
+            dev: before.dev.toString(), ino: before.ino.toString(), size: before.size.toString(), mtime: before.mtimeNs.toString(),
+            ctime_before: before.ctimeNs.toString(), ctime_after: after.ctimeNs.toString(),
+            sha256: createHash('sha256').update(readFileSync(published)).digest('hex'),
+        });
+    });
+    try {
+        const asset = await f.registry.import(f.video, f.ui);
+        expect(asset.sha256).toBe(f.video.expected_sha256);
+        // The observation point really fired, on the real proof of the published blob.
+        expect(hits).toBeGreaterThan(0);
+        expect(observations.length).toBe(hits);
+        const observed = observations[0]!;
+        // The change time of the inode really moved: a strict comparison of the whole
+        // identity - the change time included - would have refused this blob.
+        expect(observed.ctime_before).not.toBe(observed.ctime_after);
+        // Everything else about the file is exactly what it was: the same device, the
+        // same inode, the same size, the same modification time.
+        const current = statSync(join(f.storageRoot, 'objects', `${f.video.expected_sha256}.mp4`), { bigint: true });
+        expect(current.dev.toString()).toBe(observed.dev);
+        expect(current.ino.toString()).toBe(observed.ino);
+        expect(current.size.toString()).toBe(observed.size);
+        expect(current.mtimeNs.toString()).toBe(observed.mtime);
+        // And the content is still the content that was asked for.
+        expect(observed.sha256).toBe(f.video.expected_sha256);
+        expect(f.count()).toBe(1);
     }
     finally {
         await f.close();

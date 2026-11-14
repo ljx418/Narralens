@@ -1,0 +1,39 @@
+N1N2 RESUME — the focused regression gate 140: own cleanup receipt (CURRENT OBSERVATION ONLY)
+
+Writer: Claude implementation child, task task_5dcbe8192764 / dispatch ctx_b4086093cd96,
+cwd /mnt/c/workspace/videoworkline/Narralens-agents/main-integration, HEAD
+e2eff61b464d75d36598103d718cd2a75db5dfda.
+
+THE CAPTURE (read from its own capture files)
+
+  capture            n1n2-claude-resume-140-gate-regression-focused
+  argv               corepack pnpm exec vitest run --config vitest.config.ts
+                     tests/agent-driven/integration/created-native-source-reader.test.ts
+                     -t "F03 refuses a source leaf|F04 refuses a hardlink|G01 adopts|G01 keeps the reader|G02 refuses the round when|G03 refuses a film|G05 proves a real child|G06 accepts an absent|G06 refuses an isolated|P07 hands a non-lexical|G07 holds every nested"
+  cwd                /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+  git_head           e2eff61b464d75d36598103d718cd2a75db5dfda
+  exit               1
+  result             5 FAILED, 11 passed, 62 filtered out (78 cases in the file; 16 selected)
+  source_changed     []
+  source_added       []
+  log_sha256         905664c621e594db08fb30d43328476edd85516be46061a932a46f4ef9fb533d
+
+  The five failures are real defects of this round, not of the 126 batch: the alias
+  refusal now surfaces from the authority instead of the reader; the authority's
+  revision fence does not cover the retained reads of the lineage; the invalidated
+  view is caught by the reader's earlier working-copy check instead of the delivery
+  fence; and the pinned sidecar consumer refuses the supplier fixture as it stands.
+
+OBSERVED AT THE TIME OF WRITING THIS RECEIPT (current observation only)
+
+  1. Processes: no vitest, ffprobe or ffmpeg process was alive.
+  2. Temporary roots: none of this lane's temp roots was left behind.
+  3. The repository: HEAD is still e2eff61b464d75d36598103d718cd2a75db5dfda, the git
+     index is still EMPTY, and the dirty set is unchanged (the ten released paths
+     plus the protected AGENTS.md).
+  4. The earlier session's /tmp scratch items are untouched.
+
+NOT CLAIMED
+
+  - Not a historical observation of the machine at any moment before this writing.
+  - Not an acceptance: this was a defect-discovery gate, and five defects are open.

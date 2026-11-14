@@ -1,0 +1,3 @@
+src/host/agent-driven/retained-native-closure.ts(435,40): error TS2322: Type 'Readonly<{ relative_path: string; bytes: number; mtime_ms: number; sha256: string; dev: string; ino: string; nlink: string; ctime_ms: number; }>' is not assignable to type 'RetainedNativeFile'.
+  Types of property 'ctime_ms' are incompatible.
+    Type 'number' is not assignable to type 'string'.

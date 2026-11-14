@@ -1,0 +1,119 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:1406279) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+stdout | tests/agent-driven/integration/created-native-source-reader.test.ts > F10 lists the media as the pinned consumer lists it
+N1N2_ENVIRONMENT_FINGERPRINT {"node":"v22.22.1","icu":"78.2","locale":"en-US"}
+
+ ❯ tests/agent-driven/integration/created-native-source-reader.test.ts (51 tests | 3 failed | 34 skipped) 1334ms
+   ↓ R00 smoke reaches the reader from the real committed created source
+   ↓ R00 smoke commits a rich source with the native files and the media
+   ↓ R01 refuses the legacy project that has no created producer
+   ↓ R02 invalidates the old proof when the working copy changes under it
+   ↓ R02 refuses a pending round when the working copy changes during the read
+   ↓ R03 refuses a sidecar, an unknown item and a missing committed file
+   ↓ R04 refuses a foreign native id, a forged probe cache and a file in flight
+   ↓ R04 accepts a legitimate cache in the next stable round
+   ↓ R05 proves the media facts of the retained bytes
+   ↓ R06 lists the media in the native numeric order
+   ↓ R02 keeps parallel leases independent and refuses foreign and copied tokens
+   ↓ R02 refuses a facts lease of another authority
+   ↓ R02 releases the whole closure only after the last retained leaf
+   ↓ R06 places every clip where the committed film places it
+   ↓ R07 ends a read at a close and releases a late result exactly once
+   ↓ R07 lets the real media child exit before the reader closes
+   ↓ R07 registers the read before a binding callback can close the reader
+   ↓ R07 refuses a later read after a delivered release failed
+   ✓ F01 keeps a temporary release failure and reports it once at the final release 4ms
+   ↓ F03 refuses a source leaf and a source parent replaced during the acquisition
+   ↓ F03 refuses a stale source identity and proves the next one
+   ↓ F04 refuses a hardlink alias and an unknown directory in the working copy
+   ↓ F05 refuses a page frame cache entry and an orphan film poster
+   ↓ F07 reports a delivered release failure when the reader closes
+   ↓ F08 refuses a lease whose producer lineage changed after the issue
+   ↓ F08 refuses a lineage changed during the acquisition
+   ↓ F02 accepts a proved absence and refuses its later birth
+   ↓ F06 refuses a referenced text above the budget in the authority path
+   ↓ F09 refuses every injected probe failure through the production runner
+   ↓ F09 normalises a rotated video and the first of two video streams
+   ✓ F10 lists the media as the pinned consumer lists it  1247ms
+   ✓ F10 keeps the caption directory in the platform order 1ms
+   ↓ F10 shows that the pinned consumer refuses a clip without a number
+   × P07 refuses a grown file, the cumulative text, the deep tree and the descriptor budget 16ms
+     → The retained text is larger than the total budget allows
+   × P07 keeps the primary error when an open fails and releases everything else 17ms
+     → actual value must be number or bigint, received "undefined"
+   × P07 keeps the primary cause of an EMFILE, an ENOMEM and an EACCES 3ms
+     → expected false to be true // Object.is equality
+   ✓ P06 normalises a missing and a picture duration as no duration 4ms
+   ↓ F05 binds the probe evidence to the concrete tool, argv, input and result
+   ↓ F03 refuses a pending round when the working copy changes during the probe
+   ↓ R07 keeps the delivered resources until their owner releases them
+   ↓ R03 refuses a translation beside the media that the committed source does not have
+   ✓ P06 resolves a clip without a place as the native does and refuses a disagreement 1ms
+   ✓ P06 places a clip without a place where the pinned consumer places it 27ms
+   ✓ P07 refuses a symbolic link, a same-bytes replacement and a restored change time 4ms
+   ✓ P07 refuses a text file above the budget and bounds the total 2ms
+   ✓ P07 refuses to release while work is in flight and releases every allocation once 1ms
+   ✓ P07 refuses a reentrant release from inside an accepted read 1ms
+   ✓ P07 keeps the failure of the walk release with the failure that stopped it 1ms
+   ✓ P07 proves an empty directory and sees the file that appears in it 2ms
+   ✓ P06 reproduces the five pinned native revision vectors 2ms
+   ✓ P06 lists the media in the numeric order of the host 0ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/created-native-source-reader.test.ts > P07 refuses a grown file, the cumulative text, the deep tree and the descriptor budget
+RetainedNativeError: The retained text is larger than the total budget allows
+ ❯ fail src/host/agent-driven/retained-native-closure.ts:38:14
+     36| 
+     37| function fail(code:string,message:string,causes?:readonly unknown[]):n…
+     38|  const error=new RetainedNativeError(code,message);
+       |              ^
+     39|  if(causes&&causes.length>0)attachCauses(error,causes);
+     40|  throw error;
+ ❯ src/host/agent-driven/retained-native-closure.ts:531:62
+ ❯ RetainedNativeClosure.#admit src/host/agent-driven/retained-native-closure.ts:317:14
+ ❯ RetainedNativeClosure.readText src/host/agent-driven/retained-native-closure.ts:515:15
+ ❯ tests/agent-driven/integration/created-native-source-reader.test.ts:1153:24
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  tests/agent-driven/integration/created-native-source-reader.test.ts > P07 keeps the primary error when an open fails and releases everything else
+TypeError: actual value must be number or bigint, received "undefined"
+ ❯ tests/agent-driven/integration/created-native-source-reader.test.ts:1216:75
+    1214|    },
+    1215|   }).catch((error:unknown)=>error);
+    1216|   expect((failure as {cleanup_errors?:unknown[]}).cleanup_errors?.leng…
+       |                                                                           ^
+    1217|  }finally{
+    1218|   // The injected release left its descriptor open: the test closes it.
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  tests/agent-driven/integration/created-native-source-reader.test.ts > P07 keeps the primary cause of an EMFILE, an ENOMEM and an EACCES
+AssertionError: expected false to be true // Object.is equality
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- true[39m
+[31m+ false[39m
+
+ ❯ tests/agent-driven/integration/created-native-source-reader.test.ts:1242:111
+    1240|    // The primary cause is the injected one, and it is not swallowed.
+    1241|    const causes=(failure as {cleanup_errors?:unknown[]}).cleanup_error…
+    1242|    expect(causes.some(cause=>(cause as {code?:string}).code===code)||(…
+       |                                                                                                               ^
+    1243|   }finally{rmSync(root,{recursive:true,force:true});}
+    1244|  }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 14 passed | 34 skipped (51)
+   Start at  17:35:41
+   Duration  11.37s (transform 4.70s, setup 0ms, collect 7.54s, tests 1.33s, environment 0ms, prepare 1.65s)
+

@@ -1,0 +1,305 @@
+import {readFile} from 'node:fs/promises';
+import {join} from 'node:path';
+import {randomUUID} from 'node:crypto';
+import {vendorRoot} from './created-project-fixture.js';
+import {preparedDraftFixture,waitForCompletedDraft,registryFacts} from './created-draft-fixture.js';
+import {canonicalDigest,canonicalJson,contentDigest} from '../../../../src/host/creative/digest.js';
+import {CreatedPreparedSourceStore} from '../../../../src/host/agent-driven/created-prepared-source-store.js';
+import {CreatedSourceImpactStore} from '../../../../src/host/agent-driven/created-source-impact-store.js';
+import {CreatedSourceAdoptionStore} from '../../../../src/host/agent-driven/created-source-adoption-store.js';
+import {CreatedSourcePublisher,preparedSourceConsumerGraph} from '../../../../src/host/agent-driven/created-source-publisher.js';
+import {CreatedNativeWorkspaceService} from '../../../../src/host/agent-driven/created-native-workspace.js';
+import type {NativeCacheProductionLease} from '../../../../src/host/agent-driven/created-native-workspace.js';
+import {CreatedNativeSourceReader} from '../../../../src/host/agent-driven/created-native-source-reader.js';
+import {ImpactStore} from '../../../../src/host/impact/impact-store.js';
+import {OperationIdempotencyStore} from '../../../../src/host/projects/operation-idempotency-store.js';
+import {computeSourceDigest} from '../../../../src/host/engine/source-digest-v1.js';
+import {OPENFILM_UPSTREAM_SHA} from '../../../../src/host/engine/engine-binding-store.js';
+import {preparedAdoptionPlanDigest} from '../../../../src/host/agent-driven/created-source-ports.js';
+import type {PreparedAdoptionPlanV1} from '../../../../src/host/agent-driven/created-source-ports.js';
+import type {CommittedSnapshotAuthority} from '../../../../src/host/agent-driven/committed-snapshot-authority.js';
+import type {RetainedNativeDescriptorOps} from '../../../../src/host/agent-driven/retained-native-closure.js';
+import type {NativeToolTransport} from '../../../../src/host/agent-driven/created-native-source-reader.js';
+import type {NarralensHost} from '../../../../src/host/server.js';
+import type {CreationApplication} from '../../../../src/host/agent-driven/creation-application.js';
+import type {TrustedCallerContext} from '../../../../src/host/creative/product-repository.js';
+import {nativeExpectedApprovalFromPin,nativeExpectedLibraryLoader} from '../../../../src/host/m5/openfilm-native-expected.js';
+import type {NativeExpectedBinding} from '../../../../src/host/m5/openfilm-native-expected.js';
+import type {ReviewPackage} from '../../../../src/contracts/agent-driven-types.js';
+
+/**
+ * The real native-source fixture.
+ *
+ * It is the real chain and nothing synthetic: the real HTTP bootstrap, the real
+ * registered local assets, the real SOURCE_ONLY producer (the pinned native
+ * assembler), and the real controlled adoption that commits the rich source. The
+ * accepted-review policy is fixture data and says so; it is not a claim that a person
+ * reviewed the film.
+ */
+export interface NativeSourceFixture {
+ /** The Host, the project and the committed commit of the rich source. */
+ readonly projectId:string;
+ readonly revision:number;
+ readonly snapshotId:string;
+ readonly sourceDigest:string;
+ readonly transactionId:string;
+ /** The prepared working copy and the ref the Host issued for it. */
+ readonly workspace:CreatedNativeWorkspaceService;
+ readonly workspaceRef:string;
+ readonly workspaceRoot:string;
+ readonly generation:number;
+ /** The reader, with the approved 015 module and the real authority. */
+ readonly reader:CreatedNativeSourceReader;
+ /** The binding of one proof of this fixture. */
+ readonly binding:NativeExpectedBinding;
+ /** The committed source root and the working copy. */
+ readonly sourceRoot:string;
+ readonly authorRoot:string;
+ /** The authority that issued the facts lease, for the foreign-instance cases. */
+ readonly authority:CommittedSnapshotAuthority;
+ /** The Host, the application and the owner the fixture drives. */
+ readonly host:NarralensHost;
+ readonly app:CreationApplication;
+ readonly owner:TrustedCallerContext;
+ /** The private root of the fixture: the tmpdir everything of it lives in. */
+ readonly root:string;
+ /** The production lease of the issued view.
+  *
+  * It is the authority to produce inside that view, and it is issued by the real
+  * workspace service: a copy of it is not a lease at all. */
+ productionLease():NativeCacheProductionLease;
+ /** The transaction of the bootstrap commit, which has no created producer. */
+ readonly bootstrapTransactionId:string;
+ /** Close everything the fixture owns. */
+ close():Promise<void>;
+}
+
+export interface NativeSourceFixtureOptions {
+ /** The native project id the Host issued for the working copy. */
+ readonly nativeProjectId?:string;
+ /** A Host-private observation of the reader's own children: the real process and the
+  *  real exit of every tool the reader starts and reaps. */
+ readonly childEvents?:(event:{readonly kind:'started'|'exited';readonly pid:number;readonly argument:string})=>void;
+ /** The Host-private descriptor operations of the working copy's closure, so a case
+  *  can observe a release that fails. */
+ readonly closureOps?:RetainedNativeDescriptorOps;
+ /** A Host-private injection at the transport level of the media tool. */
+ readonly toolTransport?:NativeToolTransport;
+ /** The Host-private descriptor operations of the PRODUCTION's own closures, so a
+  *  case can make the release of a production really fail. */
+ readonly productionDescriptorOps?:RetainedNativeDescriptorOps;
+ /** The lawful plan WITHOUT a narration: the video clip is then really heard, and
+  *  the native's own heard consumer really asks it for a transcript. */
+ readonly narration?:boolean;
+ /** The diagnostic video carries a real audio track, so the video is really heard.
+  *  It is a synthetic local diagnostic, not an authorised film and not a voice. */
+ readonly videoWithAudio?:boolean;
+}
+
+export async function nativeSourceFixture(options:NativeSourceFixtureOptions={}):Promise<NativeSourceFixture>{
+ // The default shape of the fixture is exactly the shape it always had: the same
+ // media, the same narration and the same plan.
+ const draftOptions=options.narration===false||options.videoWithAudio===true?
+  {narration:options.narration??true,videoWithAudio:options.videoWithAudio??false}:undefined;
+ const f=await preparedDraftFixture(undefined,draftOptions);
+ const nativeProjectId=options.nativeProjectId??'native-fixture-01';
+ let publisher:CreatedSourcePublisher|undefined;
+ let service:CreatedNativeWorkspaceService|undefined;
+ let reader:CreatedNativeSourceReader|undefined;
+ try{
+  // The real SOURCE_ONLY producer: the worker assembles the native draft with the
+  // pinned upstream, from the registered assets.
+  f.worker.start();
+  const completed=await waitForCompletedDraft(f);
+  await f.worker.close();
+  if(completed.fact.plan_digest===null)throw Error('The assembly must produce a native plan digest');
+
+  const revisions=f.host.revisions,repo=f.repo,now=new Date(),execution=f.task.request.execution;
+  const prepared=new CreatedPreparedSourceStore(revisions),adoptions=new CreatedSourceAdoptionStore(revisions);
+  let selection=0;
+  const operations=new OperationIdempotencyStore(revisions.compose(db=>db));
+  const impacts=new CreatedSourceImpactStore(revisions,new ImpactStore(revisions,operations));
+  const metadata=JSON.parse(await readFile(join(completed.root,'prepared-native.json'),'utf8')) as Parameters<typeof preparedSourceConsumerGraph>[0];
+  const draft=JSON.parse(await readFile(join(completed.root,'draft-plan.json'),'utf8')) as Parameters<typeof preparedSourceConsumerGraph>[1];
+  const graph=preparedSourceConsumerGraph(metadata,draft);
+  const registry=registryFacts(f),factDigest=canonicalDigest(completed.fact);
+  // The rights of the adoption plan cover EXACTLY the assets the PREPARED SOURCE
+  // really holds: the producer stages only the assets it uses (a narration-less
+  // plan uses no narration asset), and the publisher compares the plan's rights
+  // with exactly those - a plan that claims a right of an asset the source does
+  // not hold is a refusal, not a detail. A missing asset fact is refused here too:
+  // a right is never invented.
+  const usedAssetIds=new Set(metadata.assets.map(asset=>asset.asset_id));
+  const usedAssets=registry.filter(asset=>usedAssetIds.has(asset.asset_id));
+  if(usedAssets.length!==usedAssetIds.size)throw Error('The prepared source names an asset the registry does not hold');
+  const original=await computeSourceDigest({root:f.authorRoot,roots:f.app.creation.sourceFact(f.projectId,f.commit.snapshot_id)!.roots,
+   engine:'openfilm',engineUpstreamSha:OPENFILM_UPSTREAM_SHA});
+  const originalFiles=[...original.manifest.files,...original.manifest.assets]
+   .map(file=>({relative_path:file.path,bytes:file.size,sha256:file.sha256}));
+  const mapping=prepared.register({project_id:f.projectId,job_id:f.task.job_id,request_digest:f.task.request_digest,
+   fact_digest:factDigest,execution,base_revision:1,source_digest:f.commit.source_digest,plan_sha256:completed.fact.plan_digest,
+   rights_digest:completed.fact.rights_digest,frame_count:metadata.frame_count,fps_numerator:metadata.fps.num,
+   fps_denominator:metadata.fps.den,stage_root:completed.root,roots:completed.fact.roots,files:completed.fact.files});
+  const hashFor=(path:string)=>completed.fact.files.find(file=>file.relative_path===path)?.sha256??canonicalDigest([]);
+  const plan:PreparedAdoptionPlanV1={format:'narralens.prepared-adoption-plan@1',version:1,source_kind:'created_prepared_source',
+   project_id:f.projectId,base_revision:1,base_source_digest:f.commit.source_digest,control_revision:0,selection_version:0,
+   materialization_id:mapping.prepared_source_id,prepared_fact_digest:factDigest,request_digest:execution.input_digest,
+   producer_execution:execution,target_source_digest:completed.fact.source_digest,
+   target_snapshot_id:(await import('../../../../src/host/projects/snapshot-store.js')).snapshotIdFor(f.projectId,completed.fact.source_digest),
+   roots:mapping.roots,files:mapping.files,
+   rights:[...usedAssets].sort((a,b)=>a.rights_ref<b.rights_ref?-1:a.rights_ref>b.rights_ref?1:0)
+    .map(asset=>({ref_id:asset.rights_ref,artifact_version:1,sha256:asset.registration_digest})),
+   consumer:{consumer_id:'native',project_id:f.projectId,run_id:execution.run_id,graph_digest:canonicalDigest(graph)},
+   native_plan:{native_plan_sha256:completed.fact.plan_digest,film_sha256:hashFor('film.html'),
+    film_bytes:completed.fact.files.find(file=>file.relative_path==='film.html')!.bytes,
+    settings_digest:hashFor('.film/settings.json'),subtitle_style_digest:hashFor('.film/subtitles.json'),
+    captions_digest:hashFor(completed.fact.roots.find(root=>root.endsWith('.vtt'))??''),markers_digest:canonicalDigest([])},
+   frame_count:metadata.frame_count,fps_numerator:metadata.fps.num,fps_denominator:metadata.fps.den,
+   affected_ranges:graph.clips.map(clip=>({start_frame:clip.start_frame,end_frame_exclusive:clip.end_frame_exclusive,clip_id:clip.clip_id})),
+   locks_checked:[],engine_upstream_sha:OPENFILM_UPSTREAM_SHA,expires_at:new Date(now.getTime()+900000).toISOString()};
+  const planDigest=preparedAdoptionPlanDigest(plan);
+  const impactId='imp_'+randomUUID().replaceAll('-','');
+  const transactionId='txn_'+randomUUID().replaceAll('-','');
+  const approvalId='approval_'+randomUUID().replaceAll('-','');
+  const confirmationId='confirm_'+randomUUID().replaceAll('-','');
+  const reviewId='review_'+randomUUID().replaceAll('-','');
+  const packageId='package_'+randomUUID().replaceAll('-','');
+  const applyChange={meta:{idempotency_key:'native-source-fixture',correlation_id:'native-source-fixture'},project_id:f.projectId,
+   impact_id:impactId,approval_id:approvalId,base_revision:1,source_digest:plan.base_source_digest,execution};
+  const requestDigest=contentDigest(applyChange);
+  const impactRequestDigest=canonicalDigest({project_id:f.projectId,impact_id:impactId,execution});
+  const impact=impacts.create({impact_id:impactId,project_id:f.projectId,materialization_id:mapping.prepared_source_id,
+   target_snapshot_id:plan.target_snapshot_id,base_revision:1,source_digest:plan.base_source_digest,control_revision:0,
+   engine_upstream_sha:OPENFILM_UPSTREAM_SHA,affected_ranges:plan.affected_ranges,
+   affected_consumers:[{kind:'native',id:'native',action:'replace'}],locks_checked:[],rights_digest:completed.fact.rights_digest,
+   native_plan_sha256:planDigest,approvals_required:['change.approve'],request_digest:impactRequestDigest,plan,now});
+  const pkg:ReviewPackage={project_id:f.projectId,run_id:execution.run_id,plan_version:1,package_id:packageId,version:1,kind:'sample',
+   chapter_id:null,input_digest:execution.input_digest,output_digest:completed.fact.source_digest,
+   quality_digest:canonicalDigest({fixture:'accepted review policy only'}),parts:(['preview','narration','subtitles','shot_summary','rights_quality'] as const)
+    .map(kind=>({kind,artifact_ref:{id:'fixture-'+kind,version:1,sha256:factDigest},download_ref:null})),
+   source_shot_ids:[...metadata.clip_ids],selection_reason:'Module fixture; no human review or UI claim',
+   allowed_choices:['accept_and_adopt'],
+   impact:{impact_id:impactId,project_id:f.projectId,materialization_id:mapping.prepared_source_id,base_revision:1,control_revision:0,
+    source_digest:plan.base_source_digest,selection_version:0,plan_sha256:planDigest,target_snapshot_id:plan.target_snapshot_id,
+    expires_at:plan.expires_at,state:'active',summary:'module fixture'},
+   reuse_of_package_id:null,review_url:`/workbench/projects/${f.projectId}/reviews/${reviewId}`,state:'accepted'};
+  const packageDigest=canonicalDigest(pkg),actionDigest=planDigest;
+  revisions.beginTransaction({transaction_id:transactionId,project_id:f.projectId,kind:'edit',correlation_id:'native-source-fixture',
+   request_json:canonicalJson({operation:'agent.created_source.apply@1',input:applyChange}),request_hash:requestDigest,base_revision:1});
+  await repo.transaction(tx=>{
+   tx.put('artifact_version',{project_id:f.projectId,artifact_id:packageId,version:1},{project_id:f.projectId,artifact_id:packageId,version:1,
+    kind:'chapter',schema_version:1,input_digest:execution.input_digest,content_digest:packageDigest,content_json:pkg,input_refs_json:[],created_at:now.toISOString()});
+   tx.put('review_request',{project_id:f.projectId,run_id:execution.run_id,review_id:reviewId},{project_id:f.projectId,run_id:execution.run_id,review_id:reviewId,
+    plan_version:1,run_scope_digest:execution.run_scope_digest,gate:'sample',artifact_id:packageId,artifact_version:1,input_digest:execution.input_digest,
+    package_digest:packageDigest,state:'accepted',reuse_review_id:null,created_at:now.toISOString()});
+   tx.put('trusted_confirmation',{project_id:f.projectId,run_id:execution.run_id,confirmation_id:confirmationId},{project_id:f.projectId,run_id:execution.run_id,
+    confirmation_id:confirmationId,review_id:reviewId,input_digest:execution.input_digest,purpose:'change.approve',channel:'trusted_ui',
+    authenticated_actor:'owner',session_ref:f.ui.principal.session_ref,action_digest:actionDigest,issued_at:Math.floor(now.getTime()/1000),
+    expires_at:Math.floor(now.getTime()/1000)+900});
+   tx.put('approval',{project_id:f.projectId,run_id:execution.run_id,approval_id:approvalId},{project_id:f.projectId,run_id:execution.run_id,
+    approval_id:approvalId,run_scope_digest:execution.run_scope_digest,confirmation_id:confirmationId,plan_version:1,step_id:execution.step_id,
+    attempt:execution.attempt,input_digest:execution.input_digest,change_id:impactId,impact_id:impactId,base_revision:1,control_revision:0,
+    action_digest:actionDigest,facts_digest:planDigest,state:'active',expires_at:Math.floor(now.getTime()/1000)+900,consumed_transaction_id:null});
+   tx.put('prepared_authorization',{transaction_id:transactionId},{transaction_id:transactionId,project_id:f.projectId,run_id:execution.run_id,
+    approval_id:approvalId,facts_digest:planDigest});
+   const runKey={project_id:f.projectId,run_id:execution.run_id},run=tx.get('run',runKey)!;
+   tx.put('run',runKey,{...run,checkpoint_json:{...run.checkpoint_json,
+    workflow_revision:run.checkpoint_json.workflow_revision+1,
+    gates:run.checkpoint_json.gates.map(gate=>gate.kind==='sample'?{...gate,state:'accepted' as const,review_package_id:reviewId}:gate)}});
+  });
+  prepared.bindPackage({prepared_source_id:mapping.prepared_source_id,package_id:packageId,package_version:1,receipt_digest:packageDigest});
+  adoptions.record({transaction_id:transactionId,project_id:f.projectId,prepared_source_id:mapping.prepared_source_id,impact_id:impactId,
+   approval_id:approvalId,plan_sha256:planDigest,facts_digest:planDigest,original_source_digest:plan.base_source_digest,
+   target_source_digest:plan.target_source_digest,expected_snapshot_id:plan.target_snapshot_id,native_plan:plan.native_plan,
+   original_closure:originalFiles,target_closure:plan.files,stage_root:completed.root,backup_token:'backup_'+transactionId,execution,now});
+  for(const [from,to] of [['received','preconditions_checked'],['preconditions_checked','staged'],['staged','validated'],['validated','prepared']] as const)
+   revisions.transition(transactionId,from,to);
+  publisher=new CreatedSourcePublisher({revisions,authorRoot:f.authorRoot,privateRoot:join(f.root,'publication'),
+   snapshots:f.host.snapshots,selection:{currentSelectionVersion:()=>selection},assets:f.registry,tasks:f.tasks,verifier:f.verifier,
+   stageDomainRoot:f.taskRoot});
+  const publicationInput={project_id:f.projectId,transaction_id:transactionId,prepared_source_id:mapping.prepared_source_id,
+   stage_root:completed.root,files:plan.files,original_source_digest:plan.base_source_digest,
+   published_source_digest:plan.target_source_digest,target_snapshot_id:plan.target_snapshot_id};
+  const proof=await publisher.publish(publicationInput);
+  const applied=revisions.commitPreparedCreatedSource({project_id:f.projectId,transaction_id:transactionId,impact_id:impactId,
+   approval_id:approvalId,prepared_source_id:mapping.prepared_source_id,execution,idempotency_key:'native-source-fixture',
+   request_digest:requestDigest,publication_proof:proof});
+
+  // The working copy of the committed rich source, and the ref the Host issues for it.
+  service=new CreatedNativeWorkspaceService(f.host.revisions,f.app.creation,f.app.committedSnapshots,{root:join(f.root,'native-workspaces'),
+   protectedRoots:[join(f.root,'projects'),join(f.root,'snapshots'),vendorRoot],
+   ...(options.productionDescriptorOps?{descriptorOps:options.productionDescriptorOps}:{})});
+  const view=await service.prepare(f.projectId,f.owner);
+  // The generation is the service's own fact of the issued view: the caller never
+  // states it, and an unregistered ref is never primed.
+  const workspaceRef='native-ws-'+randomUUID();
+  const registration=service.registerWorkspaceRef(view,workspaceRef,{project_id:f.projectId,principal_id:'owner',
+   transaction_id:applied.transaction_id,snapshot_id:view.snapshot_id,source_digest:view.source_digest,revision:view.revision,
+   native_project_id:nativeProjectId});
+
+  // The reader with the approved 015 module of this worktree.
+  const library=await nativeExpectedLibraryLoader().load(nativeExpectedApprovalFromPin());
+  reader=new CreatedNativeSourceReader({authority:f.app.committedSnapshots,workspaces:service,library,
+   // The ONE descriptor count of this instance: the two trees of a read and the
+   // production of a cache entry draw from the same budget.
+   pool:service.descriptorPool,
+   ...(options.childEvents?{childEvents:options.childEvents}:{}),
+   ...(options.closureOps?{closureOps:options.closureOps}:{}),
+   ...(options.toolTransport?{toolTransport:options.toolTransport}:{})});
+  const binding:NativeExpectedBinding={
+   project_id:f.projectId,native_project_id:nativeProjectId,revision:applied.project_revision,snapshot_id:applied.snapshot_id,
+   source_digest:applied.source_digest,instance_generation:registration.generation,selection_version:0,
+   workspace:{workspace_ref:workspaceRef,snapshot_id:view.snapshot_id,source_digest:view.source_digest,revision:view.revision},
+   // Component-fixture policy only: the session liveness callback of this fixture is
+   // the truth of the fixture, not a production session authority. The producer, the
+   // source, the rights and the bytes stay real.
+   isCurrent:()=>true,
+  };
+  const sourceRoot=f.host.snapshots.snapshotRoot(f.projectId,applied.snapshot_id);
+  const release=async():Promise<void>=>{
+   // Every owner is attempted, even when an earlier one failed, and the children are
+   // settled before the roots are disposed.
+   const failures=await settleAll([
+    ()=>reader?.close(),
+    ()=>service?.disposeAfterNative(),
+    ()=>publisher?.close(),
+    ()=>f.close(),
+   ]);
+   if(failures.length>0){
+    const failure=new Error('The native source fixture could not release everything');
+    Object.defineProperty(failure,'cleanup_errors',{value:failures,enumerable:false,configurable:true});
+    throw failure;
+   }
+  };
+  return {
+   projectId:f.projectId,revision:applied.project_revision,snapshotId:applied.snapshot_id,sourceDigest:applied.source_digest,
+   transactionId:applied.transaction_id,workspace:service,workspaceRef,workspaceRoot:view.source_root.value,generation:registration.generation,
+   reader,binding,sourceRoot:join(sourceRoot,'source'),authorRoot:f.authorRoot,authority:f.app.committedSnapshots,
+   host:f.host,app:f.app,owner:f.owner,root:f.root,
+   bootstrapTransactionId:f.commit.transaction_id,
+   productionLease:()=>service!.acquireCacheProductionLease(workspaceRef,{project_id:f.projectId,
+    snapshot_id:view.snapshot_id,source_digest:view.source_digest,revision:view.revision,native_project_id:nativeProjectId}),
+   close:release,
+  };
+ }catch(error){
+  // A setup failure must not leave a Host, a publisher or a reader running, and it
+  // must stay the primary failure with the cleanup failures attached to it.
+  const failures=await settleAll([
+   ()=>reader?.close(),
+   ()=>service?.disposeAfterNative(),
+   ()=>publisher?.close(),
+   ()=>f.close(),
+  ]);
+  if(failures.length>0&&typeof error==='object'&&error!==null){
+   try{Object.defineProperty(error,'cleanup_errors',{value:failures,enumerable:false,configurable:true});}catch{/* the error carries what it can */}
+  }
+  throw error;
+ }
+}
+
+/** Attempt every step, even when an earlier one failed, and keep every failure. */
+async function settleAll(steps:readonly (()=>Promise<void>|void)[]):Promise<unknown[]>{
+ const failures:unknown[]=[];
+ for(const step of steps){try{await step();}catch(error){failures.push(error);}}
+ return failures;
+}

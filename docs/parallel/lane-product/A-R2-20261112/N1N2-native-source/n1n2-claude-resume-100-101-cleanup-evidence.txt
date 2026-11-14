@@ -1,0 +1,85 @@
+N1N2 RESUME — own cleanup receipt of the granted sequence 099-tsc / 100-pure / 101-component
+
+Writer: Claude implementation child, task task_5dcbe8192764 / dispatch ctx_b4086093cd96,
+cwd /mnt/c/workspace/videoworkline/Narralens-agents/main-integration, HEAD
+e2eff61b464d75d36598103d718cd2a75db5dfda.
+
+GRANT: N1N2-RESUME-DEDUPE-012 (MAIN, `msg_ed5500ae44bf`, BATCH_012_GRANT.json), after
+N1N2-RESUME-FOCUSED-011 (`msg_104758de390c`, BATCH_011_GRANT.json).
+
+THE ONE EDIT OF THE SEQUENCE (the only write to src/tests/tools/config/index)
+
+  src/host/agent-driven/retained-native-closure.ts, the EXISTING `attachCauses`
+  helper, one line:
+    const merged=Array.isArray(existing)?[...existing,...causes.filter(cause=>!existing.includes(cause))]:[...causes];
+  Identity based (`includes` compares the very objects), NOT a message or code
+  comparison. The merge keeps every cause and never overwrites one; it only refuses
+  to attach the SAME failure twice.
+
+  sha256 of that file after the edit:
+    ab6697759a85c4a0b787ad00ce57b2a25680c5fb9630cf6a7797a10aa775a48e
+  which is EXACTLY the sha256 MAIN predicted for this one line. The other nine
+  released paths and `AGENTS.md` are unchanged (their digests are listed in
+  `n1n2-claude-resume-corrections-record.md`).
+
+THE CAPTURES (each read from its own capture files)
+
+  n1n2-claude-resume-099-tsc-dedupe
+    argv   corepack pnpm exec tsc --noEmit
+    exit   0
+    log    empty; log_sha256 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+           (the digest of the empty string, because the log is empty)
+    source_changed []   source_added []
+
+  n1n2-claude-resume-100-gate-pure
+    argv   corepack pnpm exec vitest run --config vitest.config.ts
+           tests/agent-driven/integration/created-native-source-reader.test.ts
+           -t "P0|F01|F10 lists|F10 keeps"
+    exit   0
+    result 18 passed, 34 filtered out (52 cases in the file)
+    source_changed []   source_added []
+    log_sha256 62c7c84b039019dc1a411e55ca7f3892c641982052456955d90453e97a339a9c
+
+  n1n2-claude-resume-101-gate-component-focused
+    argv   corepack pnpm exec vitest run --config vitest.config.ts
+           tests/agent-driven/integration/created-native-source-reader.test.ts
+           -t "R02 invalidates the old proof|F05 binds the probe evidence"
+    exit   0
+    result 2 passed (R02 invalidates the old proof when the working copy changes
+           under it; F05 binds the probe evidence to the concrete tool, argv, input
+           and result), 50 filtered out
+    source_changed []   source_added []
+    log_sha256 18857c1d892cc3f8a5e191ac6b560d3c7c1b02853b12ea13c3784b9dc8261fb5
+
+  The recorder was the unchanged `run-recorded.py` in every case, in the canonical
+  cwd, with the sources frozen while the command ran; the three runs were serial.
+
+OBSERVED AT THE TIME OF WRITING THIS RECEIPT (current observation only)
+
+  1. Processes. `ps -eo pid,etimes,comm` was inspected for vitest, ffprobe and
+     ffmpeg: no match. Nothing of this sequence was still alive.
+
+  2. Temporary roots. The component cases build their own Host, sqlite database and
+     temporary workspace under the fixture's `mkdtemp(join(tmpdir(),
+     'narralens-created-workspace-'))`, and the pure cases use `n1n2-closure-`,
+     `n1n2-rev-`, `n1n2-probe-`, `n1n2-listing-` and `n1n2-caption-`. At the time of
+     writing, `ls -d` over all of those patterns matched ZERO entries.
+
+  3. The repository. HEAD is still
+     `e2eff61b464d75d36598103d718cd2a75db5dfda`, the git index is still EMPTY, and
+     the dirty set is exactly the five files it was before the sequence: the
+     protected `AGENTS.md` and the four tracked release paths. The ten released
+     paths still carry the digests listed above after the whole sequence.
+
+  4. The earlier session's `/tmp` scratch items (`/tmp/n1n2-rot/`, `n1n2-*.txt`,
+     `n1n2-authority-block.ts`) are still there, untouched by this child.
+
+NOT CLAIMED
+
+  - Not a historical observation of the machine at any moment before this writing.
+  - Not a per-descriptor accounting, a per-resource lifetime proof or a global
+    absence claim.
+  - Not an acceptance of N1N2, not an independent review, not a NativeAck, not a
+    Studio or native-UI readiness, not an A-film result, not a human acceptance.
+  - The full component gate and the legacy regressions were NOT granted and were
+    NOT run; on these bytes the legacy regressions remain NOT_RUN.

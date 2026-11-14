@@ -1,0 +1,29 @@
+{
+  "at": "2026-11-12T05:43:44.530170+00:00",
+  "supervisor": "term_8f4b98aa-974d-4cf3-bd14-a62eb267c6ca",
+  "task": "task_de9ae6c61fbf",
+  "dispatch": "ctx_3f52de60cbc1",
+  "head": "e2eff61b464d75d36598103d718cd2a75db5dfda",
+  "preserved": {
+    "src/host/agent-driven/committed-snapshot-authority.ts": "c11dc60c20e49d7a4a9293eb5b501508bed5eeffd6468d008715db2a50e3ef76",
+    "src/host/agent-driven/created-native-workspace.ts": "f4dcd1c4518e63c1835bd768ca941e2b764b588660332b4bc4a54c7b13124f73",
+    "src/host/m5/openfilm-native-expected.ts": "19110e45a83b6d5b611b4260620ce873f923f1e5a5b907bc6176c4b734fbeed3",
+    "tests/agent-driven/integration/created-native-workspace.test.ts": "439d469032c9af2b83ceb826e0aead7cf5c2fe5c5693be7cbf18c8e67f0f615f",
+    "tests/agent-driven/integration/committed-snapshot-host.test.ts": "bfd0c6373b254050d32a6a99e7b6f8b9827dc24b6b2587515ab4c5aad2cd9037",
+    "tests/agent-driven/integration/created-native-ack.test.ts": "439677f921b14e70e4f3553747d8e683ef4490e0595854df4f8d8ccc71959e19",
+    "src/host/agent-driven/retained-native-closure.ts": "d3c9b58eaffd6b63240a86f743275c2157c93430e6c5bee61eb26090b57a3bf0",
+    "src/host/agent-driven/created-native-source-reader.ts": null,
+    "tests/agent-driven/integration/created-native-source-reader.test.ts": null,
+    "tests/agent-driven/integration/helpers/native-source-fixture.ts": null
+  },
+  "agents_sha256": "37300463a72a612ae16e0a5fcfb496502c57c722b83781e0e2e8c9480594542b",
+  "previous_child": {
+    "task": "task_5dcbe8192764",
+    "dispatch": "ctx_283e4028fc76",
+    "state": "stopped",
+    "liveness": "exited",
+    "terminalState": "released"
+  },
+  "heavy_grant": false,
+  "source_edits_by_supervisor": false
+}

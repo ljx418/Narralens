@@ -1,0 +1,38 @@
+N1N2 RESUME — the 014 implementation phase: own cleanup receipt (CURRENT OBSERVATION ONLY)
+
+Writer: Claude implementation child, task task_5dcbe8192764 / dispatch ctx_b4086093cd96,
+cwd /mnt/c/workspace/videoworkline/Narralens-agents/main-integration, HEAD
+e2eff61b464d75d36598103d718cd2a75db5dfda.
+
+WHAT RAN IN THIS PHASE
+
+Only the recorded serial compile: `corepack pnpm exec tsc --noEmit` through the
+unchanged `run-recorded.py`, under the standing grant of N1N2-G01-G07-CONSOLIDATED-014.
+Captures n1n2-claude-resume-103 through -116; the ones that failed are preserved
+under their own names, and the last one (116) exited 0 with an empty log and no
+input drift.
+
+NO vitest, NO Host, NO media tool, NO browser, NO build, NO install, NO network,
+NO provider, NO J drive and NO other command ran in this phase. No capture was
+re-run under its own name.
+
+OBSERVED AT THE TIME OF WRITING THIS RECEIPT (current observation only)
+
+  1. Processes: no vitest, ffprobe or ffmpeg process was alive; no chromium of the
+     playwright cache was started by this phase.
+  2. Temporary roots: the private parse folders of the authority are named
+     `narralens-n1n2-film-*` and are removed when the parse ends; none was left
+     behind by this phase (the compile never reached them).
+  3. The repository: HEAD is still e2eff61b464d75d36598103d718cd2a75db5dfda, the git
+     index is still EMPTY, and the dirty set is exactly the ten released paths (six
+     tracked modifications, four new untracked files) plus the protected AGENTS.md.
+     The three protected release paths and AGENTS.md still carry their original
+     digests.
+  4. The earlier session's /tmp scratch items are untouched.
+
+NOT CLAIMED
+
+  - Not a historical observation of the machine at any moment before this writing.
+  - Not a per-descriptor accounting, a per-resource lifetime proof or a global
+    absence claim.
+  - Not an acceptance of anything: the gates of this round have not run.

@@ -1,0 +1,30 @@
+# N1N2 batch N1N2-RESUME-BATCH-004 - owned-resource cleanup receipt, captured raw
+# Narrow labelling: every statement is what THIS shell's view showed at the moment it
+# was captured. It is NOT a proof that no such process or directory exists anywhere on
+# the machine, NOT a proof that no descriptor of the runs leaked into another process,
+# and NOT a per-resource lifetime test of the closure, the leases or the descriptors.
+
+## after command 051 (n1n2-claude-resume-051-corrective-regressions), 2026-11-12T08:25:12Z
+### the three shells and the three recorders of the batch
+    PID STAT ELAPSED COMMAND
+    PID STAT ELAPSED COMMAND
+    PID STAT ELAPSED COMMAND
+(the header alone, with no row under it, is what 'absent' looks like here)
+
+### every process of the three commands, by their recorder name
+(no rows above = none matched in this view at this moment)
+
+### processes matching ffprobe|ffmpeg|vitest|narralens|openfilm, in this shell's process view
+(no rows above = none matched in this view at this moment)
+
+### fixture tmpdirs, in this shell's view
+ls: cannot access '/tmp/narralens-created-workspace-*': No such file or directory
+ls: cannot access '/tmp/narralens-committed-read-*': No such file or directory
+/tmp/n1n2-authority-block.ts
+(no rows above = none present in this view at this moment)
+
+## the three commands and their terminal identities
+049 n1n2-claude-resume-049-corrective-pure       shell 1210589  08:09:08Z-08:09:42Z  exit 0  11PASS/30filtered  log 1f994bfd27da29c3d9a21c29d1615fd684fa5c776f5c303e1de8efc8b1df2c99
+050 n1n2-claude-resume-050-corrective-component  shell 1212377  08:10:30Z-08:18:48Z  exit 1  26PASS/4FAIL/11filtered  log 5dd8781441e319209fdc593c7eac152f7986538cb5155fe7b8e8598749fb65f8
+051 n1n2-claude-resume-051-corrective-regressions shell 1231950  08:20:27Z-08:22:57Z  exit 0  107PASS/3 files  log ca70ae830234f79bee703e157e21e646faa9855acc07ed3a5597615e4ac7d237
+all three: source_changed [] and source_added [] (no input drift)

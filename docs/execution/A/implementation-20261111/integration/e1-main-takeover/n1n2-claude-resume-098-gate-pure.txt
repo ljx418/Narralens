@@ -1,0 +1,90 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:1698291) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+stdout | tests/agent-driven/integration/created-native-source-reader.test.ts > F10 lists the media as the pinned consumer lists it
+N1N2_ENVIRONMENT_FINGERPRINT {"node":"v22.22.1","icu":"78.2","locale":"en-US"}
+
+ ❯ tests/agent-driven/integration/created-native-source-reader.test.ts (52 tests | 1 failed | 34 skipped) 1022ms
+   ↓ R00 smoke reaches the reader from the real committed created source
+   ↓ R00 smoke commits a rich source with the native files and the media
+   ↓ R01 refuses the legacy project that has no created producer
+   ↓ R02 invalidates the old proof when the working copy changes under it
+   ↓ R02 refuses a pending round when the working copy changes during the read
+   ↓ R03 refuses a sidecar, an unknown item and a missing committed file
+   ↓ R04 refuses a foreign native id, a forged probe cache and a file in flight
+   ↓ R04 accepts a legitimate cache in the next stable round
+   ↓ R05 proves the media facts of the retained bytes
+   ↓ R06 lists the media in the native numeric order
+   ↓ R02 keeps parallel leases independent and refuses foreign and copied tokens
+   ↓ R02 refuses a facts lease of another authority
+   ↓ R02 releases the whole closure only after the last retained leaf
+   ↓ R06 places every clip where the committed film places it
+   ↓ R07 ends a read at a close and releases a late result exactly once
+   ↓ R07 lets the real media child exit before the reader closes
+   ↓ R07 registers the read before a binding callback can close the reader
+   ↓ R07 refuses a later read after a delivered release failed
+   ✓ F01 keeps a temporary release failure and reports it once at the final release 4ms
+   ↓ F03 refuses a source leaf and a source parent replaced during the acquisition
+   ↓ F03 refuses a stale source identity and proves the next one
+   ↓ F04 refuses a hardlink alias and an unknown directory in the working copy
+   ↓ F05 refuses a page frame cache entry and an orphan film poster
+   ↓ F07 reports a delivered release failure when the reader closes
+   ↓ F08 refuses a lease whose producer lineage changed after the issue
+   ↓ F08 refuses a lineage changed during the acquisition
+   ↓ F02 accepts a proved absence and refuses its later birth
+   ↓ F06 refuses a referenced text above the budget in the authority path
+   ↓ F09 refuses every injected probe failure through the production runner
+   ↓ F09 normalises a rotated video and the first of two video streams
+   ✓ F10 lists the media as the pinned consumer lists it  967ms
+   ✓ F10 keeps the caption directory in the platform order 1ms
+   ↓ F10 shows that the pinned consumer refuses a clip without a number
+   ✓ P07 refuses a grown file, the cumulative text, the deep tree and the descriptor budget 6ms
+   ✓ P07 keeps the primary error when an open fails and releases everything else 1ms
+   ✓ P07 keeps the primary cause of an EMFILE, an ENOMEM and an EACCES 2ms
+   ✓ P06 normalises a missing and a picture duration as no duration 0ms
+   ↓ F05 binds the probe evidence to the concrete tool, argv, input and result
+   ↓ F03 refuses a pending round when the working copy changes during the probe
+   ↓ R07 keeps the delivered resources until their owner releases them
+   ↓ R03 refuses a translation beside the media that the committed source does not have
+   ✓ P06 resolves a clip without a place as the native does and refuses a disagreement 0ms
+   ✓ P06 places a clip without a place where the pinned consumer places it 19ms
+   ✓ P07 refuses a symbolic link, a same-bytes replacement and a restored change time 3ms
+   ✓ P07 refuses a text file above the budget and bounds the total 1ms
+   ✓ P07 refuses to release while work is in flight and releases every allocation once 1ms
+   ✓ P07 refuses a reentrant release from inside an accepted read 1ms
+   ✓ P07 keeps the failure of the walk release with the failure that stopped it 1ms
+   × P07 keeps the named primary and every cleanup cause of the real unpack path 11ms
+     → expected 5 to be 4 // Object.is equality
+   ✓ P07 proves an empty directory and sees the file that appears in it 2ms
+   ✓ P06 reproduces the five pinned native revision vectors 1ms
+   ✓ P06 lists the media in the numeric order of the host 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/created-native-source-reader.test.ts > P07 keeps the named primary and every cleanup cause of the real unpack path
+AssertionError: expected 5 to be 4 // Object.is equality
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 4[39m
+[31m+ 5[39m
+
+ ❯ tests/agent-driven/integration/created-native-source-reader.test.ts:1849:26
+    1847|   // Every cleanup cause is kept as well, in the order the releases fa…
+    1848|   expect(cleanupFailures.length).toBeGreaterThanOrEqual(2);
+    1849|   expect(causes!.length).toBe(cleanupFailures.length+1);
+       |                          ^
+    1850|   for(const [index,cleanup] of cleanupFailures.entries())expect(causes…
+    1851|   // The refusal is the production one: the syscall error is kept as i…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 17 passed | 34 skipped (52)
+   Start at  21:15:44
+   Duration  9.33s (transform 3.89s, setup 0ms, collect 6.54s, tests 1.02s, environment 0ms, prepare 1.15s)
+

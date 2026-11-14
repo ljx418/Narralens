@@ -1,0 +1,205 @@
+{
+  "format": "narralens.n1n2-gates@1",
+  "gates": {
+    "n1n2-claude-056-final-check-001": {
+      "cmd": {
+        "argv": [
+          "corepack",
+          "pnpm",
+          "check"
+        ],
+        "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+        "started_at": "2026-11-13T19:44:27.692438+00:00",
+        "runner_version": 3,
+        "git_head": "e2eff61b464d75d36598103d718cd2a75db5dfda",
+        "input_scope": "source/contracts/test/tool text, config/lock, D09 vectors and this runner; upstream pin and binary fixture receipts remain separate"
+      },
+      "result": {
+        "exit": 0,
+        "source_changed": [],
+        "source_added": [],
+        "log_sha256": "61befc15eb2932eb11882e81d9ec3450d8b8e96fe89667827a4d0c24d9d11fcc",
+        "finished_at": "2026-11-13T21:16:21.930483+00:00"
+      },
+      "log": "docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-056-final-check-001.txt"
+    },
+    "n1n2-main-057-production-build-001": {
+      "cmd": {
+        "argv": [
+          "corepack",
+          "pnpm",
+          "build"
+        ],
+        "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+        "started_at": "2026-11-14T02:13:31.408752+00:00",
+        "runner_version": 3,
+        "git_head": "e2eff61b464d75d36598103d718cd2a75db5dfda",
+        "input_scope": "source/contracts/test/tool text, config/lock, D09 vectors and this runner; upstream pin and binary fixture receipts remain separate"
+      },
+      "result": {
+        "exit": 0,
+        "source_changed": [],
+        "source_added": [],
+        "log_sha256": "adb589776a678192c538e5688e7b52bdac331c8349ccf96b4e708976f6a4ce05",
+        "finished_at": "2026-11-14T02:13:42.992592+00:00"
+      },
+      "log": "docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-main-057-production-build-001.txt"
+    },
+    "n1n2-claude-055-expected-regression-001": {
+      "cmd": {
+        "argv": [
+          "corepack",
+          "pnpm",
+          "exec",
+          "vitest",
+          "run",
+          "--config",
+          "vitest.config.ts",
+          "tests/agent-driven/integration/created-native-ack.test.ts"
+        ],
+        "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+        "started_at": "2026-11-13T17:37:16.464891+00:00",
+        "runner_version": 3,
+        "git_head": "e2eff61b464d75d36598103d718cd2a75db5dfda",
+        "input_scope": "source/contracts/test/tool text, config/lock, D09 vectors and this runner; upstream pin and binary fixture receipts remain separate"
+      },
+      "result": {
+        "exit": 0,
+        "source_changed": [],
+        "source_added": [],
+        "log_sha256": "aac4c1096f5909ca9501a302427948d08076f5196df47c0dcf20b334d5b4c110",
+        "finished_at": "2026-11-13T17:37:33.009341+00:00"
+      },
+      "log": "docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-055-expected-regression-001.txt"
+    },
+    "n1n2-claude-055-lf03-mutant-001": {
+      "cmd": {
+        "argv": [
+          "corepack",
+          "pnpm",
+          "exec",
+          "vitest",
+          "run",
+          "--config",
+          "vitest.config.ts",
+          "tests/agent-driven/integration/local-assets-host.test.ts",
+          "-t",
+          "proves a published blob again when only the change time of its inode moved, and keeps every other change refused"
+        ],
+        "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+        "started_at": "2026-11-13T17:39:21.111526+00:00",
+        "runner_version": 3,
+        "git_head": "e2eff61b464d75d36598103d718cd2a75db5dfda",
+        "input_scope": "source/contracts/test/tool text, config/lock, D09 vectors and this runner; upstream pin and binary fixture receipts remain separate"
+      },
+      "result": {
+        "exit": 1,
+        "source_changed": [],
+        "source_added": [],
+        "log_sha256": "84eb469bbd4cc3d3b99891c4245720b191071eaf039271b0dd1193121d5803b0",
+        "finished_at": "2026-11-13T17:39:42.166245+00:00"
+      },
+      "log": "docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-055-lf03-mutant-001.txt"
+    },
+    "n1n2-claude-055-lf03-restored-001": {
+      "cmd": {
+        "argv": [
+          "corepack",
+          "pnpm",
+          "exec",
+          "vitest",
+          "run",
+          "--config",
+          "vitest.config.ts",
+          "tests/agent-driven/integration/local-assets-host.test.ts",
+          "-t",
+          "proves a published blob again when only the change time of its inode moved, and keeps every other change refused"
+        ],
+        "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+        "started_at": "2026-11-13T17:40:23.310386+00:00",
+        "runner_version": 3,
+        "git_head": "e2eff61b464d75d36598103d718cd2a75db5dfda",
+        "input_scope": "source/contracts/test/tool text, config/lock, D09 vectors and this runner; upstream pin and binary fixture receipts remain separate"
+      },
+      "result": {
+        "exit": 0,
+        "source_changed": [],
+        "source_added": [],
+        "log_sha256": "0ff630c24e0403b52ea24975f8c640f74757970cb1931a56834a4da597d0f2b7",
+        "finished_at": "2026-11-13T17:40:42.378503+00:00"
+      },
+      "log": "docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-055-lf03-restored-001.txt"
+    },
+    "n1n2-claude-055-pf03-mutant-001": {
+      "cmd": {
+        "argv": [
+          "corepack",
+          "pnpm",
+          "exec",
+          "vitest",
+          "run",
+          "--config",
+          "vitest.config.ts",
+          "tests/agent-driven/integration/native-cache-witness.test.ts",
+          "-t",
+          "K05-c keeps the primary of a real draw and the genuine release failure of each of the two trees"
+        ],
+        "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+        "started_at": "2026-11-13T17:41:57.205557+00:00",
+        "runner_version": 3,
+        "git_head": "e2eff61b464d75d36598103d718cd2a75db5dfda",
+        "input_scope": "source/contracts/test/tool text, config/lock, D09 vectors and this runner; upstream pin and binary fixture receipts remain separate"
+      },
+      "result": {
+        "exit": 1,
+        "source_changed": [],
+        "source_added": [],
+        "log_sha256": "23313743061d7bbdc6558ced3eb68b2b57ba24bdedece70a0bd654df0407088e",
+        "finished_at": "2026-11-13T17:42:24.228273+00:00"
+      },
+      "log": "docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-055-pf03-mutant-001.txt"
+    },
+    "n1n2-claude-055-pf03-restored-001": {
+      "cmd": {
+        "argv": [
+          "corepack",
+          "pnpm",
+          "exec",
+          "vitest",
+          "run",
+          "--config",
+          "vitest.config.ts",
+          "tests/agent-driven/integration/native-cache-witness.test.ts",
+          "-t",
+          "K05-c keeps the primary of a real draw and the genuine release failure of each of the two trees"
+        ],
+        "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+        "started_at": "2026-11-13T17:42:57.958594+00:00",
+        "runner_version": 3,
+        "git_head": "e2eff61b464d75d36598103d718cd2a75db5dfda",
+        "input_scope": "source/contracts/test/tool text, config/lock, D09 vectors and this runner; upstream pin and binary fixture receipts remain separate"
+      },
+      "result": {
+        "exit": 0,
+        "source_changed": [],
+        "source_added": [],
+        "log_sha256": "f0d4ad3741c719aade05e963893016fd731700b218ff451460be5ef83fc7559d",
+        "finished_at": "2026-11-13T17:43:30.980752+00:00"
+      },
+      "log": "docs/execution/A/implementation-20261111/integration/e1-main-takeover/n1n2-claude-055-pf03-restored-001.txt"
+    }
+  },
+  "full_counts": {
+    "files_passed": 188,
+    "tests_passed": 2592,
+    "tests_skipped": 1,
+    "tests_total": 2593
+  },
+  "skip": {
+    "file": "tests/agent-driven/media/committed-render-phases.test.ts",
+    "condition": "NARRALENS_PHASE_REAL_TOOLS is not1",
+    "case": "encodes, inspects and publishes with the pinned renderer and the real ffprobe and ffmpeg",
+    "status": "NOT_RUN in defaultfullcheck, not passed. Separate actualdiagnostic render evidence doesnot silently close thisopt-in gate."
+  },
+  "mutation_note": "Expected mutant exit1 is accepted only through intended semantic assertion plus before/after actual0, byte restore receipts and unchanged35normalguards. Not compile/missingfile red."
+}

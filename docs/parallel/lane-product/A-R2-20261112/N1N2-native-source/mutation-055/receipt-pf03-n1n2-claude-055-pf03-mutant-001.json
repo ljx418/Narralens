@@ -1,0 +1,38 @@
+{
+  "format": "narralens.mutation-055-receipt@1",
+  "mutation": "pf03",
+  "capture": "n1n2-claude-055-pf03-mutant-001",
+  "target": "src/host/agent-driven/created-native-workspace.ts",
+  "expectation": "the genuine release failure of the after (POST) tree is missing from the cleanup causes",
+  "original_sha256": "3702917cf6efe09287030435c1883e1cdd57eb6e0da2fdd577bf3879ab965c1e",
+  "original_bytes": 65816,
+  "backup": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/parallel/lane-product/A-R2-20261112/N1N2-native-source/mutation-055/backup-pf03-3702917cf6efe09287030435c1883e1cdd57eb6e0da2fdd577bf3879ab965c1e.txt",
+  "backup_sha256": "3702917cf6efe09287030435c1883e1cdd57eb6e0da2fdd577bf3879ab965c1e",
+  "argv": [
+    "corepack",
+    "pnpm",
+    "exec",
+    "vitest",
+    "run",
+    "--config",
+    "vitest.config.ts",
+    "tests/agent-driven/integration/native-cache-witness.test.ts",
+    "-t",
+    "K05-c keeps the primary of a real draw and the genuine release failure of each of the two trees"
+  ],
+  "started_at": "2026-11-13T17:41:55.451569+00:00",
+  "restore": {
+    "method": "byte for byte copy of the backup file; no git checkout, reset or restore",
+    "restored_sha256": "3702917cf6efe09287030435c1883e1cdd57eb6e0da2fdd577bf3879ab965c1e",
+    "bytes": 65816,
+    "identical_to_original": true
+  },
+  "recorder_exit": 1,
+  "status": "mutant_run_done",
+  "anchor_occurrences": 1,
+  "mutant_sha256": "8fff93edda70ac522e4d369c1caa73443855142315123c30537c9b0988645dba",
+  "mutant_bytes": 65859,
+  "patch": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/docs/parallel/lane-product/A-R2-20261112/N1N2-native-source/mutation-055/patch-pf03-n1n2-claude-055-pf03-mutant-001.diff",
+  "patch_sha256": "453da1392593b0fc5748d7c76e3252827a459e0cf9dd77607d11526ddbf3f1b5",
+  "finished_at": "2026-11-13T17:42:24.245949+00:00"
+}

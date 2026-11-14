@@ -1,0 +1,279 @@
+{
+  "candidate": "n1n2-claude-021",
+  "at": "2026-11-13",
+  "note": "byte-for-byte copy of the candidate whitelist source and the protected regression files; the SHA256 is the file name",
+  "files": {
+    "src/host/agent-driven/retained-native-closure.ts": "210b4653c98985e062bebe17fec185bf7ada8fada60538c87863ec4ce8010471",
+    "src/host/agent-driven/native-cache-witness.ts": "85b1e804b3956165a6f8e171aa1fb8800cd8337290ad2d16ac05d3906ba2501a",
+    "src/host/agent-driven/created-native-workspace.ts": "32d5adae9d737b6799f20531e50956413a619e048a8f2f225fccb064205afbd2",
+    "src/host/agent-driven/created-native-source-reader.ts": "919648425c0a9a461efa56007e31d4a247d4ef198d2fef21f0122711af81f781",
+    "src/host/agent-driven/committed-snapshot-authority.ts": "1c53360e3c618c603cfcbe61d0c2d57004c5bd33dc26a92c2fdec72a1844bd6d",
+    "src/host/m5/openfilm-native-expected.ts": "19110e45a83b6d5b611b4260620ce873f923f1e5a5b907bc6176c4b734fbeed3",
+    "src/adapters/openfilm/openfilm-upstream.ts": "850234a5c29a0dd742f51d7a8d591abe4ba01e68a0b3755838099f94b1bf9b16",
+    "tests/agent-driven/integration/native-cache-witness.test.ts": "3dbd6229d273f4f30adcbe80fcf6140cc84ed58e18cf2e51b9154a4bf4d16dfa",
+    "tests/agent-driven/integration/created-native-source-reader.test.ts": "41bc3696af99072861d872957b055065308c399dde50cba39ecf1047921ede21",
+    "tests/agent-driven/integration/helpers/native-source-fixture.ts": "a1bab66fa52fe6f54bd3a42427cad6a0a979ff6be1b81668ba04df7cb98f9a1e",
+    "tests/agent-driven/integration/helpers/created-draft-fixture.ts": "d006ef9679d095b5b8f50d45ec99a35c549064a6bd7c6cb4c224559d58bb4fa1",
+    "tests/agent-driven/integration/created-native-workspace.test.ts": "439d469032c9af2b83ceb826e0aead7cf5c2fe5c5693be7cbf18c8e67f0f615f",
+    "tests/agent-driven/integration/committed-snapshot-host.test.ts": "bfd0c6373b254050d32a6a99e7b6f8b9827dc24b6b2587515ab4c5aad2cd9037",
+    "tests/agent-driven/integration/created-native-ack.test.ts": "5f50db85c7c07a2ecf4faefc20ec2ec6c7ad4910fafe549c2edc76bbad729c7c"
+  },
+  "candidates": [
+    {
+      "candidate": "n1n2-claude-021-after-preflight-003",
+      "at": "2026-11-13",
+      "files": {
+        "src/host/agent-driven/retained-native-closure.ts": "210b4653c98985e062bebe17fec185bf7ada8fada60538c87863ec4ce8010471",
+        "src/host/agent-driven/native-cache-witness.ts": "85b1e804b3956165a6f8e171aa1fb8800cd8337290ad2d16ac05d3906ba2501a",
+        "src/host/agent-driven/created-native-workspace.ts": "32d5adae9d737b6799f20531e50956413a619e048a8f2f225fccb064205afbd2",
+        "src/host/agent-driven/created-native-source-reader.ts": "919648425c0a9a461efa56007e31d4a247d4ef198d2fef21f0122711af81f781",
+        "src/host/agent-driven/committed-snapshot-authority.ts": "1c53360e3c618c603cfcbe61d0c2d57004c5bd33dc26a92c2fdec72a1844bd6d",
+        "src/host/m5/openfilm-native-expected.ts": "19110e45a83b6d5b611b4260620ce873f923f1e5a5b907bc6176c4b734fbeed3",
+        "src/adapters/openfilm/openfilm-upstream.ts": "850234a5c29a0dd742f51d7a8d591abe4ba01e68a0b3755838099f94b1bf9b16",
+        "tests/agent-driven/integration/native-cache-witness.test.ts": "f5012264004edef4d20e6bb60adabaf091c7a8f55fadf5f389f77b82eac71760",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts": "7c604257365582b23ee3663e04e71cf6e648586994b2ad0d5d08b80bc664c784",
+        "tests/agent-driven/integration/helpers/native-source-fixture.ts": "a1bab66fa52fe6f54bd3a42427cad6a0a979ff6be1b81668ba04df7cb98f9a1e",
+        "tests/agent-driven/integration/helpers/created-draft-fixture.ts": "d006ef9679d095b5b8f50d45ec99a35c549064a6bd7c6cb4c224559d58bb4fa1",
+        "tests/agent-driven/integration/created-native-workspace.test.ts": "439d469032c9af2b83ceb826e0aead7cf5c2fe5c5693be7cbf18c8e67f0f615f",
+        "tests/agent-driven/integration/committed-snapshot-host.test.ts": "bfd0c6373b254050d32a6a99e7b6f8b9827dc24b6b2587515ab4c5aad2cd9037",
+        "tests/agent-driven/integration/created-native-ack.test.ts": "5f50db85c7c07a2ecf4faefc20ec2ec6c7ad4910fafe549c2edc76bbad729c7c"
+      }
+    },
+    {
+      "candidate": "n1n2-claude-021-after-A1-preflight-fixes",
+      "at": "2026-11-13",
+      "note": "the three approved corrections after the A1 run: no-narration storyboard without planned captions, the exact early-layer base refusal, the verifiable rebuild of this case own derived working copy",
+      "files": {
+        "src/host/agent-driven/retained-native-closure.ts": "210b4653c98985e062bebe17fec185bf7ada8fada60538c87863ec4ce8010471",
+        "src/host/agent-driven/native-cache-witness.ts": "85b1e804b3956165a6f8e171aa1fb8800cd8337290ad2d16ac05d3906ba2501a",
+        "src/host/agent-driven/created-native-workspace.ts": "32d5adae9d737b6799f20531e50956413a619e048a8f2f225fccb064205afbd2",
+        "src/host/agent-driven/created-native-source-reader.ts": "919648425c0a9a461efa56007e31d4a247d4ef198d2fef21f0122711af81f781",
+        "src/host/agent-driven/committed-snapshot-authority.ts": "1c53360e3c618c603cfcbe61d0c2d57004c5bd33dc26a92c2fdec72a1844bd6d",
+        "src/host/m5/openfilm-native-expected.ts": "19110e45a83b6d5b611b4260620ce873f923f1e5a5b907bc6176c4b734fbeed3",
+        "src/adapters/openfilm/openfilm-upstream.ts": "850234a5c29a0dd742f51d7a8d591abe4ba01e68a0b3755838099f94b1bf9b16",
+        "tests/agent-driven/integration/native-cache-witness.test.ts": "f5012264004edef4d20e6bb60adabaf091c7a8f55fadf5f389f77b82eac71760",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts": "8d740f83883fd42c13f8e0e2ea63bee406f8d9edf19ea02a1005c72e26616e60",
+        "tests/agent-driven/integration/helpers/native-source-fixture.ts": "a1bab66fa52fe6f54bd3a42427cad6a0a979ff6be1b81668ba04df7cb98f9a1e",
+        "tests/agent-driven/integration/helpers/created-draft-fixture.ts": "59788a8f9c08415a808b2418e86b4dac6bb7de65297ad5d1cb19b5f26eb22d27",
+        "tests/agent-driven/integration/created-native-workspace.test.ts": "439d469032c9af2b83ceb826e0aead7cf5c2fe5c5693be7cbf18c8e67f0f615f",
+        "tests/agent-driven/integration/committed-snapshot-host.test.ts": "bfd0c6373b254050d32a6a99e7b6f8b9827dc24b6b2587515ab4c5aad2cd9037",
+        "tests/agent-driven/integration/created-native-ack.test.ts": "5f50db85c7c07a2ecf4faefc20ec2ec6c7ad4910fafe549c2edc76bbad729c7c"
+      }
+    },
+    {
+      "candidate": "n1n2-claude-021-after-A1b-rights-fix",
+      "at": "2026-11-13",
+      "note": "the approved fixture correction: the adoption plan rights cover exactly the assets the prepared source holds; a missing asset fact is refused",
+      "files": {
+        "src/host/agent-driven/retained-native-closure.ts": "210b4653c98985e062bebe17fec185bf7ada8fada60538c87863ec4ce8010471",
+        "src/host/agent-driven/native-cache-witness.ts": "85b1e804b3956165a6f8e171aa1fb8800cd8337290ad2d16ac05d3906ba2501a",
+        "src/host/agent-driven/created-native-workspace.ts": "32d5adae9d737b6799f20531e50956413a619e048a8f2f225fccb064205afbd2",
+        "src/host/agent-driven/created-native-source-reader.ts": "919648425c0a9a461efa56007e31d4a247d4ef198d2fef21f0122711af81f781",
+        "src/host/agent-driven/committed-snapshot-authority.ts": "1c53360e3c618c603cfcbe61d0c2d57004c5bd33dc26a92c2fdec72a1844bd6d",
+        "src/host/m5/openfilm-native-expected.ts": "19110e45a83b6d5b611b4260620ce873f923f1e5a5b907bc6176c4b734fbeed3",
+        "src/adapters/openfilm/openfilm-upstream.ts": "850234a5c29a0dd742f51d7a8d591abe4ba01e68a0b3755838099f94b1bf9b16",
+        "tests/agent-driven/integration/native-cache-witness.test.ts": "f5012264004edef4d20e6bb60adabaf091c7a8f55fadf5f389f77b82eac71760",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts": "8d740f83883fd42c13f8e0e2ea63bee406f8d9edf19ea02a1005c72e26616e60",
+        "tests/agent-driven/integration/helpers/native-source-fixture.ts": "7160a285930e61b7927d90bb517e7d9575f5f0888394d228b192baff80daf622",
+        "tests/agent-driven/integration/helpers/created-draft-fixture.ts": "59788a8f9c08415a808b2418e86b4dac6bb7de65297ad5d1cb19b5f26eb22d27",
+        "tests/agent-driven/integration/created-native-workspace.test.ts": "439d469032c9af2b83ceb826e0aead7cf5c2fe5c5693be7cbf18c8e67f0f615f",
+        "tests/agent-driven/integration/committed-snapshot-host.test.ts": "bfd0c6373b254050d32a6a99e7b6f8b9827dc24b6b2587515ab4c5aad2cd9037",
+        "tests/agent-driven/integration/created-native-ack.test.ts": "5f50db85c7c07a2ecf4faefc20ec2ec6c7ad4910fafe549c2edc76bbad729c7c"
+      }
+    },
+    {
+      "candidate": "n1n2-claude-021-after-A2-fixed-folderfiles",
+      "at": "2026-11-13",
+      "note": "the approved two-file correction: the fixed upstream own folderFiles serving behind the Host constraints, and the K01-d real rebuild with zero page-request evidence",
+      "files": {
+        "src/host/agent-driven/retained-native-closure.ts": "210b4653c98985e062bebe17fec185bf7ada8fada60538c87863ec4ce8010471",
+        "src/host/agent-driven/native-cache-witness.ts": "85b1e804b3956165a6f8e171aa1fb8800cd8337290ad2d16ac05d3906ba2501a",
+        "src/host/agent-driven/created-native-workspace.ts": "32d5adae9d737b6799f20531e50956413a619e048a8f2f225fccb064205afbd2",
+        "src/host/agent-driven/created-native-source-reader.ts": "919648425c0a9a461efa56007e31d4a247d4ef198d2fef21f0122711af81f781",
+        "src/host/agent-driven/committed-snapshot-authority.ts": "1c53360e3c618c603cfcbe61d0c2d57004c5bd33dc26a92c2fdec72a1844bd6d",
+        "src/host/m5/openfilm-native-expected.ts": "19110e45a83b6d5b611b4260620ce873f923f1e5a5b907bc6176c4b734fbeed3",
+        "src/adapters/openfilm/openfilm-upstream.ts": "3827c1c1e18d22113e4171933eab58281cb2c9c40fdcf90a3bc9285027941c27",
+        "tests/agent-driven/integration/native-cache-witness.test.ts": "8e8918f29f691f6e26ac59f90c1ed961f34d9a08edc41e46178735f8dbeddbce",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts": "8d740f83883fd42c13f8e0e2ea63bee406f8d9edf19ea02a1005c72e26616e60",
+        "tests/agent-driven/integration/helpers/native-source-fixture.ts": "7160a285930e61b7927d90bb517e7d9575f5f0888394d228b192baff80daf622",
+        "tests/agent-driven/integration/helpers/created-draft-fixture.ts": "59788a8f9c08415a808b2418e86b4dac6bb7de65297ad5d1cb19b5f26eb22d27",
+        "tests/agent-driven/integration/created-native-workspace.test.ts": "439d469032c9af2b83ceb826e0aead7cf5c2fe5c5693be7cbf18c8e67f0f615f",
+        "tests/agent-driven/integration/committed-snapshot-host.test.ts": "bfd0c6373b254050d32a6a99e7b6f8b9827dc24b6b2587515ab4c5aad2cd9037",
+        "tests/agent-driven/integration/created-native-ack.test.ts": "5f50db85c7c07a2ecf4faefc20ec2ec6c7ad4910fafe549c2edc76bbad729c7c"
+      }
+    },
+    {
+      "candidate": "n1n2-claude-021-after-025-folderfiles-seam",
+      "at": "2026-11-13",
+      "note": "the 025 two-file correction: the fixed upstream own folderFiles serving with the runtime catalog, the of-boundary, the real probe tracking and the root identity; the K01-d real rebuild",
+      "files": {
+        "src/host/agent-driven/retained-native-closure.ts": "210b4653c98985e062bebe17fec185bf7ada8fada60538c87863ec4ce8010471",
+        "src/host/agent-driven/native-cache-witness.ts": "85b1e804b3956165a6f8e171aa1fb8800cd8337290ad2d16ac05d3906ba2501a",
+        "src/host/agent-driven/created-native-workspace.ts": "32d5adae9d737b6799f20531e50956413a619e048a8f2f225fccb064205afbd2",
+        "src/host/agent-driven/created-native-source-reader.ts": "919648425c0a9a461efa56007e31d4a247d4ef198d2fef21f0122711af81f781",
+        "src/host/agent-driven/committed-snapshot-authority.ts": "1c53360e3c618c603cfcbe61d0c2d57004c5bd33dc26a92c2fdec72a1844bd6d",
+        "src/host/m5/openfilm-native-expected.ts": "19110e45a83b6d5b611b4260620ce873f923f1e5a5b907bc6176c4b734fbeed3",
+        "src/adapters/openfilm/openfilm-upstream.ts": "29a0827a6130c2f382de93d1738b1be003c5ef15ded253d256585e6214d2aa69",
+        "tests/agent-driven/integration/native-cache-witness.test.ts": "e767a19813fd44b396c448cd2571edc0c21754307207f5e4b8c55276be47164b",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts": "8d740f83883fd42c13f8e0e2ea63bee406f8d9edf19ea02a1005c72e26616e60",
+        "tests/agent-driven/integration/helpers/native-source-fixture.ts": "7160a285930e61b7927d90bb517e7d9575f5f0888394d228b192baff80daf622",
+        "tests/agent-driven/integration/helpers/created-draft-fixture.ts": "59788a8f9c08415a808b2418e86b4dac6bb7de65297ad5d1cb19b5f26eb22d27",
+        "tests/agent-driven/integration/created-native-workspace.test.ts": "439d469032c9af2b83ceb826e0aead7cf5c2fe5c5693be7cbf18c8e67f0f615f",
+        "tests/agent-driven/integration/committed-snapshot-host.test.ts": "bfd0c6373b254050d32a6a99e7b6f8b9827dc24b6b2587515ab4c5aad2cd9037",
+        "tests/agent-driven/integration/created-native-ack.test.ts": "5f50db85c7c07a2ecf4faefc20ec2ec6c7ad4910fafe549c2edc76bbad729c7c"
+      }
+    },
+    {
+      "candidate": "n1n2-claude-021-after-027-platform-timestamp",
+      "at": "2026-11-13",
+      "note": "the 027 two-path correction: the platform own millisecond conversion in the retained closure, the platform-stat vectors, and the reworked K04-a/K04-b",
+      "files": {
+        "src/host/agent-driven/retained-native-closure.ts": "776331d6397191ee7fc97a4859f8d3ff95031efaf2d4fe7a7ee875451d85eb30",
+        "src/host/agent-driven/native-cache-witness.ts": "85b1e804b3956165a6f8e171aa1fb8800cd8337290ad2d16ac05d3906ba2501a",
+        "src/host/agent-driven/created-native-workspace.ts": "32d5adae9d737b6799f20531e50956413a619e048a8f2f225fccb064205afbd2",
+        "src/host/agent-driven/created-native-source-reader.ts": "919648425c0a9a461efa56007e31d4a247d4ef198d2fef21f0122711af81f781",
+        "src/host/agent-driven/committed-snapshot-authority.ts": "1c53360e3c618c603cfcbe61d0c2d57004c5bd33dc26a92c2fdec72a1844bd6d",
+        "src/host/m5/openfilm-native-expected.ts": "19110e45a83b6d5b611b4260620ce873f923f1e5a5b907bc6176c4b734fbeed3",
+        "src/adapters/openfilm/openfilm-upstream.ts": "29a0827a6130c2f382de93d1738b1be003c5ef15ded253d256585e6214d2aa69",
+        "tests/agent-driven/integration/native-cache-witness.test.ts": "71119fc394d8dbbae6b5843d1dd7c73dec3ecd29aeb027dd11a7007c03c25155",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts": "8d740f83883fd42c13f8e0e2ea63bee406f8d9edf19ea02a1005c72e26616e60",
+        "tests/agent-driven/integration/helpers/native-source-fixture.ts": "7160a285930e61b7927d90bb517e7d9575f5f0888394d228b192baff80daf622",
+        "tests/agent-driven/integration/helpers/created-draft-fixture.ts": "59788a8f9c08415a808b2418e86b4dac6bb7de65297ad5d1cb19b5f26eb22d27",
+        "tests/agent-driven/integration/created-native-workspace.test.ts": "439d469032c9af2b83ceb826e0aead7cf5c2fe5c5693be7cbf18c8e67f0f615f",
+        "tests/agent-driven/integration/committed-snapshot-host.test.ts": "bfd0c6373b254050d32a6a99e7b6f8b9827dc24b6b2587515ab4c5aad2cd9037",
+        "tests/agent-driven/integration/created-native-ack.test.ts": "5f50db85c7c07a2ecf4faefc20ec2ec6c7ad4910fafe549c2edc76bbad729c7c"
+      }
+    },
+    {
+      "candidate": "n1n2-claude-021-after-029-paired-poster",
+      "at": "2026-11-13",
+      "note": "the 029 two-path correction: the reader pairs a page-frame triple with the poster witness of the very same draw, and B0-1 proves the direct lookup empty, the poster witness covering the paired triple, and another frame key refused",
+      "files": {
+        "src/host/agent-driven/retained-native-closure.ts": "776331d6397191ee7fc97a4859f8d3ff95031efaf2d4fe7a7ee875451d85eb30",
+        "src/host/agent-driven/native-cache-witness.ts": "85b1e804b3956165a6f8e171aa1fb8800cd8337290ad2d16ac05d3906ba2501a",
+        "src/host/agent-driven/created-native-workspace.ts": "32d5adae9d737b6799f20531e50956413a619e048a8f2f225fccb064205afbd2",
+        "src/host/agent-driven/created-native-source-reader.ts": "f00e02781c8531a74a1034a6a1c992c463f49ff1cbf9c49b203e8449d8360d7d",
+        "src/host/agent-driven/committed-snapshot-authority.ts": "1c53360e3c618c603cfcbe61d0c2d57004c5bd33dc26a92c2fdec72a1844bd6d",
+        "src/host/m5/openfilm-native-expected.ts": "19110e45a83b6d5b611b4260620ce873f923f1e5a5b907bc6176c4b734fbeed3",
+        "src/adapters/openfilm/openfilm-upstream.ts": "29a0827a6130c2f382de93d1738b1be003c5ef15ded253d256585e6214d2aa69",
+        "tests/agent-driven/integration/native-cache-witness.test.ts": "eb5c71c99b749509b304bc925ec47469099f1049746e63f145ae851c6281bcb1",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts": "8d740f83883fd42c13f8e0e2ea63bee406f8d9edf19ea02a1005c72e26616e60",
+        "tests/agent-driven/integration/helpers/native-source-fixture.ts": "7160a285930e61b7927d90bb517e7d9575f5f0888394d228b192baff80daf622",
+        "tests/agent-driven/integration/helpers/created-draft-fixture.ts": "59788a8f9c08415a808b2418e86b4dac6bb7de65297ad5d1cb19b5f26eb22d27",
+        "tests/agent-driven/integration/created-native-workspace.test.ts": "439d469032c9af2b83ceb826e0aead7cf5c2fe5c5693be7cbf18c8e67f0f615f",
+        "tests/agent-driven/integration/committed-snapshot-host.test.ts": "bfd0c6373b254050d32a6a99e7b6f8b9827dc24b6b2587515ab4c5aad2cd9037",
+        "tests/agent-driven/integration/created-native-ack.test.ts": "5f50db85c7c07a2ecf4faefc20ec2ec6c7ad4910fafe549c2edc76bbad729c7c"
+      }
+    },
+    {
+      "candidate": "n1n2-claude-021-after-031-d1-concept-assertion",
+      "at": "2026-11-13",
+      "note": "release 031: the D1 expectation names the five native-ordered clips and proves the real film has shot-s1 video and concept-s1 iframe as separate clips with the scene path and the first-clip timing",
+      "files": {
+        "src/host/agent-driven/retained-native-closure.ts": "776331d6397191ee7fc97a4859f8d3ff95031efaf2d4fe7a7ee875451d85eb30",
+        "src/host/agent-driven/native-cache-witness.ts": "85b1e804b3956165a6f8e171aa1fb8800cd8337290ad2d16ac05d3906ba2501a",
+        "src/host/agent-driven/created-native-workspace.ts": "32d5adae9d737b6799f20531e50956413a619e048a8f2f225fccb064205afbd2",
+        "src/host/agent-driven/created-native-source-reader.ts": "f00e02781c8531a74a1034a6a1c992c463f49ff1cbf9c49b203e8449d8360d7d",
+        "src/host/agent-driven/committed-snapshot-authority.ts": "1c53360e3c618c603cfcbe61d0c2d57004c5bd33dc26a92c2fdec72a1844bd6d",
+        "src/host/m5/openfilm-native-expected.ts": "19110e45a83b6d5b611b4260620ce873f923f1e5a5b907bc6176c4b734fbeed3",
+        "src/adapters/openfilm/openfilm-upstream.ts": "29a0827a6130c2f382de93d1738b1be003c5ef15ded253d256585e6214d2aa69",
+        "tests/agent-driven/integration/native-cache-witness.test.ts": "eb5c71c99b749509b304bc925ec47469099f1049746e63f145ae851c6281bcb1",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts": "8d740f83883fd42c13f8e0e2ea63bee406f8d9edf19ea02a1005c72e26616e60",
+        "tests/agent-driven/integration/helpers/native-source-fixture.ts": "7160a285930e61b7927d90bb517e7d9575f5f0888394d228b192baff80daf622",
+        "tests/agent-driven/integration/helpers/created-draft-fixture.ts": "59788a8f9c08415a808b2418e86b4dac6bb7de65297ad5d1cb19b5f26eb22d27",
+        "tests/agent-driven/integration/created-native-workspace.test.ts": "439d469032c9af2b83ceb826e0aead7cf5c2fe5c5693be7cbf18c8e67f0f615f",
+        "tests/agent-driven/integration/committed-snapshot-host.test.ts": "bfd0c6373b254050d32a6a99e7b6f8b9827dc24b6b2587515ab4c5aad2cd9037",
+        "tests/agent-driven/integration/created-native-ack.test.ts": "5f50db85c7c07a2ecf4faefc20ec2ec6c7ad4910fafe549c2edc76bbad729c7c",
+        "tests/agent-driven/integration/created-draft-processor.test.ts": "b63a0efea346093def271755bca08af79c9eb4f668e8c58ba87775f783a2cb34"
+      }
+    },
+    {
+      "candidate": "n1n2-claude-021-after-031-corrected-order",
+      "at": "2026-11-13",
+      "note": "the corrected native-parser order: the concept section comes first, so the ids are concept-s1, shot-s1, shot-s2, shot-s3, narration",
+      "files": {
+        "src/host/agent-driven/retained-native-closure.ts": "776331d6397191ee7fc97a4859f8d3ff95031efaf2d4fe7a7ee875451d85eb30",
+        "src/host/agent-driven/native-cache-witness.ts": "85b1e804b3956165a6f8e171aa1fb8800cd8337290ad2d16ac05d3906ba2501a",
+        "src/host/agent-driven/created-native-workspace.ts": "32d5adae9d737b6799f20531e50956413a619e048a8f2f225fccb064205afbd2",
+        "src/host/agent-driven/created-native-source-reader.ts": "f00e02781c8531a74a1034a6a1c992c463f49ff1cbf9c49b203e8449d8360d7d",
+        "src/host/agent-driven/committed-snapshot-authority.ts": "1c53360e3c618c603cfcbe61d0c2d57004c5bd33dc26a92c2fdec72a1844bd6d",
+        "src/host/m5/openfilm-native-expected.ts": "19110e45a83b6d5b611b4260620ce873f923f1e5a5b907bc6176c4b734fbeed3",
+        "src/adapters/openfilm/openfilm-upstream.ts": "29a0827a6130c2f382de93d1738b1be003c5ef15ded253d256585e6214d2aa69",
+        "tests/agent-driven/integration/native-cache-witness.test.ts": "eb5c71c99b749509b304bc925ec47469099f1049746e63f145ae851c6281bcb1",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts": "8d740f83883fd42c13f8e0e2ea63bee406f8d9edf19ea02a1005c72e26616e60",
+        "tests/agent-driven/integration/helpers/native-source-fixture.ts": "7160a285930e61b7927d90bb517e7d9575f5f0888394d228b192baff80daf622",
+        "tests/agent-driven/integration/helpers/created-draft-fixture.ts": "59788a8f9c08415a808b2418e86b4dac6bb7de65297ad5d1cb19b5f26eb22d27",
+        "tests/agent-driven/integration/created-native-workspace.test.ts": "439d469032c9af2b83ceb826e0aead7cf5c2fe5c5693be7cbf18c8e67f0f615f",
+        "tests/agent-driven/integration/committed-snapshot-host.test.ts": "bfd0c6373b254050d32a6a99e7b6f8b9827dc24b6b2587515ab4c5aad2cd9037",
+        "tests/agent-driven/integration/created-native-ack.test.ts": "5f50db85c7c07a2ecf4faefc20ec2ec6c7ad4910fafe549c2edc76bbad729c7c",
+        "tests/agent-driven/integration/created-draft-processor.test.ts": "e72d12ff00b714654f3e4a3126de522fe8131870b41c5329f2776f38cef40d6e"
+      }
+    },
+    {
+      "candidate": "n1n2-claude-021-after-031-numeric-time",
+      "at": "2026-11-13",
+      "note": "the raw url moment is compared as a number against the shot length (31/30), not as the producer formatted text; the clip order is the native parser order",
+      "files": {
+        "src/host/agent-driven/retained-native-closure.ts": "776331d6397191ee7fc97a4859f8d3ff95031efaf2d4fe7a7ee875451d85eb30",
+        "src/host/agent-driven/native-cache-witness.ts": "85b1e804b3956165a6f8e171aa1fb8800cd8337290ad2d16ac05d3906ba2501a",
+        "src/host/agent-driven/created-native-workspace.ts": "32d5adae9d737b6799f20531e50956413a619e048a8f2f225fccb064205afbd2",
+        "src/host/agent-driven/created-native-source-reader.ts": "f00e02781c8531a74a1034a6a1c992c463f49ff1cbf9c49b203e8449d8360d7d",
+        "src/host/agent-driven/committed-snapshot-authority.ts": "1c53360e3c618c603cfcbe61d0c2d57004c5bd33dc26a92c2fdec72a1844bd6d",
+        "src/host/m5/openfilm-native-expected.ts": "19110e45a83b6d5b611b4260620ce873f923f1e5a5b907bc6176c4b734fbeed3",
+        "src/adapters/openfilm/openfilm-upstream.ts": "29a0827a6130c2f382de93d1738b1be003c5ef15ded253d256585e6214d2aa69",
+        "tests/agent-driven/integration/native-cache-witness.test.ts": "eb5c71c99b749509b304bc925ec47469099f1049746e63f145ae851c6281bcb1",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts": "8d740f83883fd42c13f8e0e2ea63bee406f8d9edf19ea02a1005c72e26616e60",
+        "tests/agent-driven/integration/helpers/native-source-fixture.ts": "7160a285930e61b7927d90bb517e7d9575f5f0888394d228b192baff80daf622",
+        "tests/agent-driven/integration/helpers/created-draft-fixture.ts": "59788a8f9c08415a808b2418e86b4dac6bb7de65297ad5d1cb19b5f26eb22d27",
+        "tests/agent-driven/integration/created-native-workspace.test.ts": "439d469032c9af2b83ceb826e0aead7cf5c2fe5c5693be7cbf18c8e67f0f615f",
+        "tests/agent-driven/integration/committed-snapshot-host.test.ts": "bfd0c6373b254050d32a6a99e7b6f8b9827dc24b6b2587515ab4c5aad2cd9037",
+        "tests/agent-driven/integration/created-native-ack.test.ts": "5f50db85c7c07a2ecf4faefc20ec2ec6c7ad4910fafe549c2edc76bbad729c7c",
+        "tests/agent-driven/integration/created-draft-processor.test.ts": "684df1c287890a13ecd8b08a4cd32d5053c2868e80494eca2fcc6412cdc4e0b6"
+      }
+    },
+    {
+      "candidate": "n1n2-claude-021-after-034-p09-g07",
+      "at": "2026-11-13",
+      "note": "release 034: the P09 path-limit case, the P09 named lstat fault with an independent genuine release failure, and the G07 strengthening that matches the complete directory sets of both trees against newly held live descriptors",
+      "files": {
+        "src/host/agent-driven/retained-native-closure.ts": "776331d6397191ee7fc97a4859f8d3ff95031efaf2d4fe7a7ee875451d85eb30",
+        "src/host/agent-driven/native-cache-witness.ts": "85b1e804b3956165a6f8e171aa1fb8800cd8337290ad2d16ac05d3906ba2501a",
+        "src/host/agent-driven/created-native-workspace.ts": "32d5adae9d737b6799f20531e50956413a619e048a8f2f225fccb064205afbd2",
+        "src/host/agent-driven/created-native-source-reader.ts": "f00e02781c8531a74a1034a6a1c992c463f49ff1cbf9c49b203e8449d8360d7d",
+        "src/host/agent-driven/committed-snapshot-authority.ts": "1c53360e3c618c603cfcbe61d0c2d57004c5bd33dc26a92c2fdec72a1844bd6d",
+        "src/host/m5/openfilm-native-expected.ts": "19110e45a83b6d5b611b4260620ce873f923f1e5a5b907bc6176c4b734fbeed3",
+        "src/adapters/openfilm/openfilm-upstream.ts": "29a0827a6130c2f382de93d1738b1be003c5ef15ded253d256585e6214d2aa69",
+        "tests/agent-driven/integration/native-cache-witness.test.ts": "eb5c71c99b749509b304bc925ec47469099f1049746e63f145ae851c6281bcb1",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts": "1679cac7675fe22531c373670107b56f7d081ac03b08953c1751ab30b4f6fd72",
+        "tests/agent-driven/integration/helpers/native-source-fixture.ts": "7160a285930e61b7927d90bb517e7d9575f5f0888394d228b192baff80daf622",
+        "tests/agent-driven/integration/helpers/created-draft-fixture.ts": "59788a8f9c08415a808b2418e86b4dac6bb7de65297ad5d1cb19b5f26eb22d27",
+        "tests/agent-driven/integration/created-native-workspace.test.ts": "439d469032c9af2b83ceb826e0aead7cf5c2fe5c5693be7cbf18c8e67f0f615f",
+        "tests/agent-driven/integration/committed-snapshot-host.test.ts": "bfd0c6373b254050d32a6a99e7b6f8b9827dc24b6b2587515ab4c5aad2cd9037",
+        "tests/agent-driven/integration/created-native-ack.test.ts": "5f50db85c7c07a2ecf4faefc20ec2ec6c7ad4910fafe549c2edc76bbad729c7c",
+        "tests/agent-driven/integration/created-draft-processor.test.ts": "684df1c287890a13ecd8b08a4cd32d5053c2868e80494eca2fcc6412cdc4e0b6"
+      }
+    },
+    {
+      "candidate": "n1n2-claude-021-after-034-corrected",
+      "at": "2026-11-13",
+      "note": "the three static corrections: the root is not an observed subdirectory, the allocation identity is a monotonic id and not the descriptor number, and the vanished path is asserted with its exact syscall and path plus the same saved release error object",
+      "files": {
+        "src/host/agent-driven/retained-native-closure.ts": "776331d6397191ee7fc97a4859f8d3ff95031efaf2d4fe7a7ee875451d85eb30",
+        "src/host/agent-driven/native-cache-witness.ts": "85b1e804b3956165a6f8e171aa1fb8800cd8337290ad2d16ac05d3906ba2501a",
+        "src/host/agent-driven/created-native-workspace.ts": "32d5adae9d737b6799f20531e50956413a619e048a8f2f225fccb064205afbd2",
+        "src/host/agent-driven/created-native-source-reader.ts": "f00e02781c8531a74a1034a6a1c992c463f49ff1cbf9c49b203e8449d8360d7d",
+        "src/host/agent-driven/committed-snapshot-authority.ts": "1c53360e3c618c603cfcbe61d0c2d57004c5bd33dc26a92c2fdec72a1844bd6d",
+        "src/host/m5/openfilm-native-expected.ts": "19110e45a83b6d5b611b4260620ce873f923f1e5a5b907bc6176c4b734fbeed3",
+        "src/adapters/openfilm/openfilm-upstream.ts": "29a0827a6130c2f382de93d1738b1be003c5ef15ded253d256585e6214d2aa69",
+        "tests/agent-driven/integration/native-cache-witness.test.ts": "eb5c71c99b749509b304bc925ec47469099f1049746e63f145ae851c6281bcb1",
+        "tests/agent-driven/integration/created-native-source-reader.test.ts": "f2e7cc847718b52e4937d55be8bc4adcf4372dee055ff170e1c1f49817b7be99",
+        "tests/agent-driven/integration/helpers/native-source-fixture.ts": "7160a285930e61b7927d90bb517e7d9575f5f0888394d228b192baff80daf622",
+        "tests/agent-driven/integration/helpers/created-draft-fixture.ts": "59788a8f9c08415a808b2418e86b4dac6bb7de65297ad5d1cb19b5f26eb22d27",
+        "tests/agent-driven/integration/created-native-workspace.test.ts": "439d469032c9af2b83ceb826e0aead7cf5c2fe5c5693be7cbf18c8e67f0f615f",
+        "tests/agent-driven/integration/committed-snapshot-host.test.ts": "bfd0c6373b254050d32a6a99e7b6f8b9827dc24b6b2587515ab4c5aad2cd9037",
+        "tests/agent-driven/integration/created-native-ack.test.ts": "5f50db85c7c07a2ecf4faefc20ec2ec6c7ad4910fafe549c2edc76bbad729c7c",
+        "tests/agent-driven/integration/created-draft-processor.test.ts": "684df1c287890a13ecd8b08a4cd32d5053c2868e80494eca2fcc6412cdc4e0b6"
+      }
+    }
+  ]
+}

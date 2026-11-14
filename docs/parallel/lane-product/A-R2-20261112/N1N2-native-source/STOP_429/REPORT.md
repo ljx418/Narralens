@@ -1,0 +1,15 @@
+# N1N2 stopped on Claude429 — incomplete / failed
+
+MAIN observed 429 Token Plan usage limit and automatic retry7/10 with21s delay (message msg_6d5c6734811d); supervisor issued no retry or takeover. MAIN initiated guarded stop. Exact child task_5dcbe8192764 / ctx_283e4028fc76 / term_b4defdac-eb95-4d2a-94d8-33773059282f is reported stopped/process_stopped/exited by worker_stop at2026-11-12T05:04:48.782Z; capability revoked05:04:44.180Z. Full worker-show receipt retained. Terminal resource is retained, disconnected/nonwritable; cleanup custody remains MAIN pending its final receipt. This receipt proves the exact agent exit, not an independently enumerated descendant census.
+
+Partial edits: committed-snapshot-authority.ts, created-native-workspace.ts, openfilm-native-expected.ts and created-native-ack.test.ts; new retained-native-closure.ts. Exact tracked patch, preserved new-file bytes and released-path SHA256 manifest stored here. Source reader, new reader test and native-source-fixture are absent; no completed R01–R07 evidence. Existing workspace/committed-snapshot-host tests unchanged. Protected AGENTS and Git index match supervisor prewrite hashes. No source or index edits by supervisor.
+
+Captured commands (all original full logs remain): tsc001/002/003 exit2, tsc004 exit0, approved-loader005 exit0, final tsc006 exit2. Final errors: committed-snapshot-authority.ts:378 missing CreatedAssetFact.rights_ref; :387 missing CommitBinding.principal_id; created-native-ack.test.ts:1924 missing parseProjectSettings/parseMarkers in library fixture. These failures are preserved, not repaired. Earlier tsc0 is not a pass for the final bytes. No heavy grant issued; no Host/media/ffprobe/browser/A validation claimed.
+
+worker-read returned empty terminal fallback with contentComplete=false/session_not_reported; this is not a complete Claude transcript or independent capture of429 text. MAIN observed429 and must preserve its actual screen/stop/descendant evidence. Do not delete retained terminal evidence to manufacture completeness.
+
+Implementation is frozen. No retry, new worker, provider/credentials change or Codex/MAIN takeover without explicit user authorization for this occurrence. Remaining implementation and all missing acceptance are NOT_RUN/incomplete; latest compiler gate FAIL. Approval provisioning only proves bytes and the loader005 component command, never NativeAck/Studio/A.
+
+## Final custody confirmation
+
+MAIN message msg_63b6c44a89a5 confirms guarded worker-stop exit0, processAction=closed_agent_terminal, ptyKilled=true, mutation request1c58de9e-8bdf-41d3-8c6e-c6dc9f2f950b. MAIN owns receipt-directed release of this stopped assignment; supervisor did not race release. Exact agent exit is confirmed; arbitrary descendant absence is not asserted. All six discovered capture commands have recorded actual exits, and all supervisor command sessions have terminated; no supervisor-held FD, runtime or heavy slot remains. No new execution was used to repair or test the candidate after429. Task outcome FAILED/STOPPED_429, not N1N2 complete, pending user explicit authorization before any replacement writer.

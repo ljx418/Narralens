@@ -1,0 +1,76 @@
+# N1N2 smoke 011 — owned-resource cleanup evidence, captured raw
+# Narrow labelling: every statement below is what THIS shell's view showed at the
+# moment it was captured. It is NOT a global absence proof over the machine, and it
+# is NOT a proof that no descriptor of the run leaked into any other process.
+
+## BEFORE the corrected capture (2026-11-12)
+### the recorder and the test process of capture 008 (pids 930430 / 930809)
+    PID STAT ELAPSED COMMAND
+(the header alone, with no row under it, is what 'absent' looks like here)
+
+### processes matching ffprobe|ffmpeg|vitest|narralens|openfilm, in this shell's process view
+(no rows above = none matched in this view at this moment)
+
+### fixture tmpdirs, in this shell's view
+ls: cannot access '/tmp/narralens-*': No such file or directory
+(no rows above = none present in this view at this moment)
+
+### the loopback listeners this shell can see (for the record; these belong to
+### long-running services of the machine and were not produced by the N1N2 run)
+LISTEN 0      1000   10.255.255.254:53         0.0.0.0:*                                             
+LISTEN 0      128         127.0.0.1:44907      0.0.0.0:*    users:(("codex",pid=915862,fd=36))       
+LISTEN 0      128         127.0.0.1:44917      0.0.0.0:*    users:(("codex",pid=345627,fd=36))       
+LISTEN 0      128         127.0.0.1:44851      0.0.0.0:*    users:(("codex",pid=263330,fd=42))       
+LISTEN 0      128         127.0.0.1:45055      0.0.0.0:*    users:(("codex",pid=343870,fd=36))       
+LISTEN 0      511         127.0.0.1:4011       0.0.0.0:*    users:(("node",pid=739047,fd=21))        
+LISTEN 0      511         127.0.0.1:4000       0.0.0.0:*    users:(("node",pid=739092,fd=29))        
+LISTEN 0      511         127.0.0.1:3080       0.0.0.0:*    users:(("node",pid=391,fd=28))           
+LISTEN 0      511         127.0.0.1:3000       0.0.0.0:*    users:(("node",pid=739066,fd=22))        
+LISTEN 0      511         127.0.0.1:18792      0.0.0.0:*    users:(("openclaw-gatewa",pid=392,fd=30))
+LISTEN 0      511         127.0.0.1:18789      0.0.0.0:*    users:(("openclaw-gatewa",pid=392,fd=21))
+LISTEN 0      511         127.0.0.1:18791      0.0.0.0:*    users:(("openclaw-gatewa",pid=392,fd=29))
+
+## AFTER the corrected capture 011 (2026-11-12T06:23Z onward)
+### the shell, the recorder and the vitest child of capture 011 (pids 958090 / 958096 / 958249)
+    PID STAT ELAPSED COMMAND
+(the header alone, with no row under it, is what 'absent' looks like here)
+
+### processes matching ffprobe|ffmpeg|vitest|narralens|openfilm, in this shell's process view at this moment
+(no rows above = none matched in this view at this moment)
+
+### fixture tmpdirs, in this shell's view at this moment
+ls: cannot access '/tmp/narralens-*': No such file or directory
+(no rows above = none present in this view at this moment)
+
+### the loopback listeners this shell can see (for the record; these belong to
+### long-running services of the machine and were not produced by the N1N2 run)
+LISTEN 0      1000   10.255.255.254:53         0.0.0.0:*                                             
+LISTEN 0      128         127.0.0.1:44907      0.0.0.0:*    users:(("codex",pid=915862,fd=36))       
+LISTEN 0      128         127.0.0.1:44917      0.0.0.0:*    users:(("codex",pid=345627,fd=36))       
+LISTEN 0      128         127.0.0.1:44851      0.0.0.0:*    users:(("codex",pid=263330,fd=42))       
+LISTEN 0      128         127.0.0.1:45055      0.0.0.0:*    users:(("codex",pid=343870,fd=36))       
+LISTEN 0      511         127.0.0.1:4011       0.0.0.0:*    users:(("node",pid=739047,fd=21))        
+LISTEN 0      511         127.0.0.1:4000       0.0.0.0:*    users:(("node",pid=959639,fd=29))        
+LISTEN 0      511         127.0.0.1:3080       0.0.0.0:*    users:(("node",pid=391,fd=28))           
+LISTEN 0      511         127.0.0.1:3000       0.0.0.0:*    users:(("node",pid=739066,fd=22))        
+LISTEN 0      511         127.0.0.1:18792      0.0.0.0:*    users:(("openclaw-gatewa",pid=392,fd=30))
+LISTEN 0      511         127.0.0.1:18789      0.0.0.0:*    users:(("openclaw-gatewa",pid=392,fd=21))
+LISTEN 0      511         127.0.0.1:18791      0.0.0.0:*    users:(("openclaw-gatewa",pid=392,fd=29))
+
+### what this evidence does NOT claim
+- It is NOT a proof that no such process or directory exists anywhere on the machine.
+- It is NOT a proof that no descriptor of the run leaked into another process.
+- It is NOT a proof that the machine is free of media tools.
+- It is NOT a per-resource lifetime test of the closure, the leases or the descriptors:
+  it is a supplementary observed-view snapshot taken after the recorder terminated.
+
+### ADDENDUM: the vitest WORKER of capture 011 (pid 958338, named in the raw log)
+    PID STAT ELAPSED COMMAND
+(the header alone, with no row under it, is what 'absent' looks like here)
+
+### the whole process tree of capture 011 as it was, for the record:
+  958090 shell      -> 958096 recorder (python3 run-recorded.py) -> 958249 vitest launcher (node corepack pnpm exec vitest) -> 958338 vitest worker
+### all four are checked above and below in this shell's process view.
+
+### a further observation of this shell's process view, a minute after the run
+    PID STAT ELAPSED COMMAND

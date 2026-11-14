@@ -1,0 +1,26 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:3501095) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/native-cache-witness.test.ts (31 tests | 16 skipped) 172587ms
+   ✓ PF01 refuses a serving that this service did not register, before any page is asked for  14315ms
+   ✓ PF02 proves the film duration by the draw that wrote it, and refuses every other one  11865ms
+   ✓ K05-c keeps the primary of a real draw and the genuine release failure of each of the two trees  10186ms
+   ✓ Q01 a close during the construction waits for it, and the failed owner is closed at once  9933ms
+   ✓ Q01 a root that moved during the construction closes the owner at once and refuses the serving  9757ms
+   ✓ Q01 two concurrent requests for the same view share one construction and one owner  12069ms
+   ✓ Q01 a dispose during the construction waits for it and settles the owner at once  17800ms
+   ✓ Q01 the factory settles its own construction when the serving observation throws, and keeps the same primary  11806ms
+   ✓ Q01 the factory settles its own construction when the root check fails after the listener is up  14688ms
+   ✓ Q01 a factory failure with a genuine settlement failure keeps the primary, the genuine object and the sticky service  10099ms
+   ✓ Q01 a registration failure with a genuine settlement failure keeps the primary and latches the service  12518ms
+   ✓ Q02 a close during a real draw waits for the draw and keeps its origin alive  12728ms
+   ✓ Q03 a draw of another page never brands a duration it did not write  10808ms
+   ✓ Q03 two lawful different frames keep both triples consumable and the current duration belongs to the newest draw  14013ms
+
+ Test Files  1 passed (1)
+      Tests  15 passed | 16 skipped (31)
+   Start at  23:46:26
+   Duration  181.20s (transform 4.05s, setup 0ms, collect 6.63s, tests 172.59s, environment 0ms, prepare 1.28s)
+

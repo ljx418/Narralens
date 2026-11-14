@@ -1,0 +1,51 @@
+N1N2 RESUME — the focused regression gate 154: own cleanup receipt (CURRENT OBSERVATION ONLY)
+
+Writer: Claude implementation child, task task_5dcbe8192764 / dispatch ctx_b4086093cd96,
+cwd /mnt/c/workspace/videoworkline/Narralens-agents/main-integration, HEAD
+e2eff61b464d75d36598103d718cd2a75db5dfda.
+
+THE CAPTURE (read from its own capture files)
+
+  capture            n1n2-claude-resume-154-gate-regression-focused
+  argv               corepack pnpm exec vitest run --config vitest.config.ts
+                     tests/agent-driven/integration/created-native-source-reader.test.ts
+                     -t "F03 refuses a source leaf|F04 refuses a hardlink|F04 refuses a working copy leaf|G01 adopts|G01 keeps the reader|G01 keeps the alias|G02 refuses the round when|G03 refuses a film|G05 proves a real child|G06 accepts an absent|G06 refuses an isolated|P07 hands a non-lexical|G07 refuses a workspace leaf|G07 invalidates an old proof|G07 holds both trees|G07 holds every nested|P07 keeps the named primary"
+  cwd                /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+  git_head           e2eff61b464d75d36598103d718cd2a75db5dfda
+  exit               1
+  result             1 FAILED, 21 passed, 58 filtered out (80 cases in the file; 22 selected)
+  source_changed     []
+  source_added       []
+  log_sha256         3e8f8dc89c25f4735787aad507a6ff90d53228ccadc5989ffe3646afc3d2d905
+
+  Twenty-one of the twenty-two now pass; 145 had eleven and 140 had eleven. The one
+  failure is the oracle of a case this child wrote in this round: it read the
+  FIXTURE's close report, which carries the reader's own cleanup failure ONE LEVEL
+  DEEPER, so the named injected object was not where the case looked for it. The
+  case is corrected to read the reader's own close report.
+
+OBSERVED AT THE TIME OF WRITING THIS RECEIPT (current observation only)
+
+  1. Processes: no vitest, ffprobe or ffmpeg process was alive.
+  2. Temporary roots: none of this lane's temp roots was left behind.
+  3. The repository: HEAD is still e2eff61b464d75d36598103d718cd2a75db5dfda, the git
+     index is still EMPTY, and the dirty set is unchanged (the ten released paths
+     plus the protected AGENTS.md).
+  4. The earlier session's /tmp scratch items are untouched.
+
+NOT CLAIMED
+
+  - Not a historical observation of the machine at any moment before this writing.
+  - Not an acceptance: 154 is a defect-discovery gate and one defect is open.
+
+================================================================================
+ERRATUM 1 — the count of the earlier gate (APPENDED)
+================================================================================
+
+The paragraph above says "Twenty-one of the twenty-two now pass; 145 had eleven
+and 140 had eleven". The first half is right and the second half is wrong: the
+actual result of capture 145 was **15 passed, 2 failed, 62 filtered out** (log
+07daf837588446b14ad17efca6590f0d26e8e0ae8c3d9478f29c48a330614f22), and the
+actual result of capture 140 was **11 passed, 5 failed, 62 filtered out** (log
+905664c621e594db08fb30d43328476edd85516be46061a932a46f4ef9fb533d). The exit files
+and the logs are authoritative; this sentence is superseded by this erratum.

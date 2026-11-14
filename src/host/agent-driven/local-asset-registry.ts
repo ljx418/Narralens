@@ -55,7 +55,7 @@ export interface LocalAssetRegistryOptions {
         readonly command: 'ffprobe' | 'ffmpeg';
         readonly pid: number;
     }) => void;
-    readonly boundary?: (point: 'before_stage_create' | 'before_publish' | 'before_insert' | 'after_insert' | 'after_receipt' | 'after_event') => void;
+    readonly boundary?: (point: 'before_stage_create' | 'before_publish' | 'after_published_stat' | 'before_insert' | 'after_insert' | 'after_receipt' | 'after_event') => void;
 }
 const DDL = `CREATE TABLE IF NOT EXISTS created_local_asset(
  project_id TEXT NOT NULL REFERENCES project_state(project_id),asset_id TEXT NOT NULL,
@@ -449,7 +449,7 @@ export class LocalAssetRegistry {
                 if (!(error && typeof error === 'object' && 'code' in error && error.code === 'EEXIST'))
                     throw error;
             }
-            const blobProof = await this.#hashFile(destination, input.expected_sha256, true, destinationCanonical);
+            const blobProof = await this.#hashFile(destination, input.expected_sha256, true, destinationCanonical, true);
             this.#assertStorage();
             fsyncSync(this.#objectsFd);
             fsyncSync(this.#rootFd);
@@ -494,7 +494,23 @@ export class LocalAssetRegistry {
             }
         }
     }
-    async #hashFile(path: string, expected: string, synchronize = false, canonical = path): Promise<BigIntStats> {
+    /**
+     * Prove the content of one file, and its identity, through one open descriptor.
+     *
+     * The PRIVATE staging file is not shared with anybody: its whole identity, the
+     * change time of the inode included, must be exactly what it was before the read.
+     *
+     * The PUBLISHED blob is a content-addressed object whose NAME COUNT changes while
+     * other publishers publish the same content: a publisher that links or unlinks its
+     * own staging name moves the change time of the inode without moving a single
+     * byte. That is not assumed here - it is PROVED: the content is proved a second
+     * time, from the SAME descriptor, from the explicit start of the file, and the
+     * whole identity, the change time included, must be stable across that second
+     * proof. The second proof is synchronous, so no other cleanup of this process can
+     * slip into its window, and it happens ONCE: there is no retry loop, no general
+     * waiver of the change time, and no claim about WHY the change time moved.
+     */
+    async #hashFile(path: string, expected: string, synchronize = false, canonical = path, published = false): Promise<BigIntStats> {
         if (await realpath(path) !== canonical)
             throw conflict();
         const handle = await open(path, constants.O_RDONLY | constants.O_NOFOLLOW | constants.O_NONBLOCK);
@@ -502,6 +518,11 @@ export class LocalAssetRegistry {
             const before = await handle.stat({ bigint: true });
             if (!before.isFile() || before.size < 1 || before.size > BigInt(MAX_BYTES))
                 throw conflict();
+            // The observation point of the published blob is exactly HERE: after its
+            // initial stat and before its bytes are read, so that the real proof
+            // window can be made to happen on purpose.
+            if (published)
+                this.#boundary?.('after_published_stat');
             const hash = createHash('sha256'), buffer = Buffer.alloc(1024 * 1024);
             while (true) {
                 if (this.#closed)
@@ -511,8 +532,42 @@ export class LocalAssetRegistry {
                     break;
                 hash.update(buffer.subarray(0, part.bytesRead));
             }
-            if (hash.digest('hex') !== expected || fingerprint(before) !== fingerprint(await handle.stat({ bigint: true })) || await realpath(path) !== canonical)
+            const after = await handle.stat({ bigint: true });
+            if (hash.digest('hex') !== expected || await realpath(path) !== canonical)
                 throw conflict();
+            if (!published) {
+                // The private staging file: every part of its identity must be the
+                // one it had before the read.
+                if (fingerprint(before) !== fingerprint(after))
+                    throw conflict();
+            }
+            else if (before.ctimeNs !== after.ctimeNs) {
+                // The content is the same and the change time of the inode moved.
+                // The content is proved AGAIN, from the same descriptor, from the
+                // explicit start of the file - the cursor is never continued from
+                // where the first read stopped - and the whole identity must be
+                // stable across that second proof.
+                const beforeSecond = fstatSync(handle.fd, { bigint: true });
+                const second = createHash('sha256'), secondBuffer = Buffer.alloc(1024 * 1024);
+                let secondBytes = 0, offset = 0;
+                while (true) {
+                    const count = readSync(handle.fd, secondBuffer, 0, secondBuffer.length, offset);
+                    if (!count)
+                        break;
+                    secondBytes += count;
+                    if (secondBytes > MAX_BYTES)
+                        throw conflict();
+                    second.update(secondBuffer.subarray(0, count));
+                    offset += count;
+                }
+                const afterSecond = fstatSync(handle.fd, { bigint: true });
+                if (second.digest('hex') !== expected
+                    || fingerprint(beforeSecond) !== fingerprint(afterSecond)
+                    || before.dev !== afterSecond.dev || before.ino !== afterSecond.ino
+                    || before.size !== afterSecond.size || before.mtimeNs !== afterSecond.mtimeNs
+                    || await realpath(path) !== canonical)
+                    throw conflict();
+            }
             if (synchronize)
                 await handle.sync();
             return before;
@@ -669,7 +724,7 @@ export class LocalAssetRegistry {
             throw new ProductError('NOT_FOUND', 'Local asset not found');
         this.#assertStorage();
         const path = join(this.#objects, row.token);
-        await this.#hashFile(this.#at(this.#objectsFd, row.token), row.asset.sha256, false, path);
+        await this.#hashFile(this.#at(this.#objectsFd, row.token), row.asset.sha256, false, path, true);
         this.#access(project, caller);
         return { asset: row.asset, absolute_path: path };
     }

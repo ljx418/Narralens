@@ -1,0 +1,746 @@
+import { createHash } from "node:crypto";
+import { execFile, execFileSync, spawn, spawnSync } from "node:child_process";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { cp, mkdir, mkdtemp, readFile, rm, stat, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join, resolve, sep } from "node:path";
+import { promisify } from "node:util";
+import { afterEach, describe, expect, it } from "vitest";
+import { MigrationService } from "../../src/host/projects/migration-service.js";
+import { AssetRegistry } from "../../src/host/projects/asset-registry.js";
+import { MigratedAssetLedger } from "../../src/host/projects/migrated-asset-ledger.js";
+import { ProjectCatalog } from "../../src/host/projects/project-catalog.js";
+import { RevisionStore } from "../../src/host/projects/revision-store.js";
+import { SnapshotStore } from "../../src/host/projects/snapshot-store.js";
+import { EngineBindingStore } from "../../src/host/engine/engine-binding-store.js";
+import { createPinnedOpenFilmUpstream } from "../../src/adapters/openfilm/openfilm-upstream.js";
+import { treeDigest } from "../../src/host/projects/openfilm-migrator.js";
+import type { EngineKind } from "../../src/contracts/engine-types.js";
+
+/**
+ * MIG-03 and EN-05 (M2.3 plan §6): the real chain, with real media.
+ *
+ * Migrate, close and reopen, export, edit the middle clip, export again. Nothing here is
+ * simulated: the exports are produced by the pinned OpenFilm renderer and the two MP4s are
+ * compared by digest, frame count and duration. A test that only inspected JSON would not
+ * be evidence for this case, so none of it does.
+ *
+ * THE HARNESS OWNS EVERYTHING IT STARTS (053):
+ *
+ *  - The pinned CLI is an INTERACTIVE tool: `openfilm.mjs` shows a project Studio has never
+ *    shown, and a missing `project/.film/opened` makes `render` open the project first,
+ *    which starts the Studio as a DETACHED process that this case would then leave behind.
+ *    This case renders OFFLINE, so it writes the marker the upstream itself uses, in its
+ *    OWN private project copy. The marker says ONE thing - "do not open this project
+ *    interactively" - and it is NOT a claim that a person opened the project, NOT a claim
+ *    that Studio ever showed it and NOT a UX pass.
+ *  - Every CLI child runs with its OWN `OPENFILM_HOME` and `OPENFILM_LIBRARY` under this
+ *    case's private temp root and with `OPENFILM_NO_UPDATE_CHECK=1`. `HOME` is never set
+ *    or changed, the real `~/.openfilm` is never read or written, and no user credential
+ *    or configuration is touched.
+ *  - Every child is owned: its pid, its argv, its cwd and its exit are recorded, and the
+ *    Studio this case may have started is settled BY ITS OWN IDENTITY (the `run.json` in
+ *    this case's OWN private home), never by a broad name match and never by cleaning a
+ *    shared port. A Studio that appears at all is a FAILURE of this harness, and it is
+ *    still settled before the case ends.
+ *  - The real MP4s are KEPT: every export is copied into `docs/evidence/N1N2/real-export-053/`
+ *    with its real sha256 and byte count, and a manifest records the real commands, their
+ *    real exits and the real media facts. The evidence is evidence, never authority.
+ */
+
+const VENDOR = "/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm";
+const SOURCE_FIXTURE = resolve("tests/fixtures/m2.1/snapshot-project");
+const OPENFILM_SHA = "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3";
+const PROJECT = "d1-30s";
+/** The one place the real media and its facts are kept. Nothing here is ever overwritten. */
+const EVIDENCE_DIR = resolve("docs/evidence/N1N2/real-export-053");
+/** The capture this run belongs to, when the runner is told which one it is. */
+const CAPTURE_ID = process.env.N1N2_CAPTURE_ID ?? null;
+const run = promisify(execFile);
+
+const dirs: string[] = [];
+const stores: RevisionStore[] = [];
+afterEach(async () => {
+  while (stores.length > 0) stores.pop()!.close();
+  await Promise.all(dirs.splice(0).map((path) => rm(path, { recursive: true, force: true })));
+});
+
+/** The pinned renderer must actually be there; its absence is reported, never assumed. */
+function pinnedUpstreamPresent(): boolean {
+  return existsSync(resolve(VENDOR, "packages/openfilm/bin/openfilm.mjs"));
+}
+
+/** One command this case ran, with the facts it produced. */
+interface CommandRecord {
+  readonly argv: readonly string[];
+  readonly exit: number | null;
+  readonly cwd: string;
+  readonly note: string;
+}
+
+/** One CLI child this case owned: its pid, its argv, its cwd and its real exit. */
+interface CliChildRecord extends CommandRecord {
+  readonly pid: number;
+  readonly stderr_tail: string;
+  readonly stdout_tail: string;
+}
+
+/** The Studio this case may have started, identified by its OWN private home. */
+interface StudioOwnership {
+  readonly present: boolean;
+  readonly pid: number | null;
+  readonly supervisor: number | null;
+  readonly origin: string | null;
+  readonly run_file: string | null;
+}
+
+/** Everything this case owns while it runs. */
+interface RenderContext {
+  /** The private temp root of this case. Everything it owns lives under it. */
+  readonly base: string;
+  /** The private `OPENFILM_HOME` of this case: the upstream's own isolation variable. */
+  readonly private_home: string;
+  /** The private `OPENFILM_LIBRARY` of this case. */
+  readonly private_library: string;
+  /** Every CLI child this case started, in order. */
+  readonly children: CliChildRecord[];
+  /** The Studio this case's private home advertises, if any. */
+  studio: StudioOwnership;
+  /** What the settlement of that Studio was. */
+  cleanup: { settled: boolean; actions: string[] } | null;
+}
+
+/** The private roots of one case. The upstream reads them; the real `~/.openfilm` is never used. */
+function createRenderContext(base: string): RenderContext {
+  const private_home = join(base, "openfilm-home");
+  const private_library = join(base, "openfilm-library");
+  mkdirSync(private_home, { recursive: true });
+  mkdirSync(private_library, { recursive: true });
+  return {
+    base, private_home, private_library,
+    children: [],
+    studio: { present: false, pid: null, supervisor: null, origin: null, run_file: null },
+    cleanup: null,
+  };
+}
+
+/**
+ * The environment of ONE CLI child.
+ *
+ * `HOME` is neither set nor changed, and no user configuration or credential is touched:
+ * the upstream's own `OPENFILM_HOME` / `OPENFILM_LIBRARY` variables are what isolate this
+ * case, and `OPENFILM_NO_UPDATE_CHECK=1` keeps it off the network.
+ */
+function cliEnv(context: RenderContext): NodeJS.ProcessEnv {
+  return {
+    ...process.env,
+    OPENFILM_HOME: context.private_home,
+    OPENFILM_LIBRARY: context.private_library,
+    OPENFILM_NO_UPDATE_CHECK: "1",
+    OPENFILM_NO_BROWSER: "1",
+  };
+}
+
+/**
+ * The HEADLESS marker of THIS harness, in THIS case's OWN project copy.
+ *
+ * The pinned CLI opens a project Studio has never shown before it renders it, and that
+ * open starts a DETACHED Studio. This case renders offline and owns every process it
+ * starts, so it writes the marker the upstream itself reads (`project/.film/opened`).
+ *
+ * The marker says ONE thing and nothing else: this project must not be opened
+ * interactively. It is NOT evidence that a person opened the project, NOT evidence that
+ * Studio ever showed it and NOT a UX pass. It is written ONLY inside this case's own
+ * private temp project - never into the fixed fixture, never into a user project.
+ */
+async function markHeadlessProject(root: string, context: RenderContext): Promise<void> {
+  if (!root.startsWith(context.base + sep)) throw new Error("the rendered project is not inside this case's own private root");
+  const film = join(root, ".film");
+  await mkdir(film, { recursive: true });
+  await writeFile(join(film, "opened"), "");
+}
+
+/** Run ONE CLI child and own it: its pid, its argv, its cwd, its real exit and its output. */
+function runCli(argv: readonly string[], options: { cwd: string; env: NodeJS.ProcessEnv }): Promise<CliChildRecord> {
+  return new Promise((resolveChild, rejectChild) => {
+    const child = spawn(argv[0]!, argv.slice(1), { cwd: options.cwd, env: options.env, windowsHide: true });
+    let stdout = "";
+    let stderr = "";
+    child.stdout.on("data", (chunk) => { stdout += String(chunk); });
+    child.stderr.on("data", (chunk) => { stderr += String(chunk); });
+    child.once("error", (error) => { rejectChild(error); });
+    child.once("close", (code) => {
+      resolveChild({
+        pid: child.pid ?? -1, argv: [...argv], cwd: options.cwd, exit: code, note: "pinned CLI child",
+        stderr_tail: stderr.slice(-2000), stdout_tail: stdout.slice(-2000),
+      });
+    });
+  });
+}
+
+/**
+ * What THIS case's own private home advertises.
+ *
+ * The Studio writes its own `run.json` into the studio home it was started with. With a
+ * private `OPENFILM_HOME`, that file belongs to THIS case and to nothing else - so the
+ * pids in it are THIS case's own processes, and no other process is ever touched.
+ */
+function studioOwnership(context: RenderContext): StudioOwnership {
+  const file = join(context.private_home, "run.json");
+  if (!existsSync(file)) return { present: false, pid: null, supervisor: null, origin: null, run_file: null };
+  try {
+    const raw = JSON.parse(readFileSync(file, "utf8")) as { pid?: number; supervisor?: number; origin?: string };
+    return { present: true, pid: raw.pid ?? null, supervisor: raw.supervisor ?? null, origin: raw.origin ?? null, run_file: file };
+  } catch {
+    return { present: true, pid: null, supervisor: null, origin: null, run_file: file };
+  }
+}
+
+/**
+ * Settle the Studio THIS case started, by its OWN identity.
+ *
+ * Only the pids that this case's own private home names are signalled, and each of them
+ * is asked to stop before it is forced. Nothing is matched by name and no shared port is
+ * cleaned: a process this case did not start is never touched.
+ */
+async function settleOwnedStudio(context: RenderContext): Promise<{ settled: boolean; actions: string[] }> {
+  const actions: string[] = [];
+  const owned = context.studio;
+  if (!owned.present) return { settled: true, actions };
+  const pids = [owned.pid, owned.supervisor].filter((pid): pid is number => pid !== null && pid > 0);
+  if (pids.length === 0) {
+    actions.push("the private home advertised a Studio without a pid: nothing of ours was signalled");
+    return { settled: true, actions };
+  }
+  const alive = (pid: number): boolean => { try { process.kill(pid, 0); return true; } catch { return false; } };
+  for (const pid of pids) {
+    try { process.kill(pid, "SIGTERM"); actions.push(`SIGTERM ${pid}`); }
+    catch { actions.push(`SIGTERM ${pid} (already gone)`); }
+  }
+  for (let attempt = 0; attempt < 50; attempt += 1) {
+    if (!pids.some(alive)) return { settled: true, actions };
+    await new Promise((done) => setTimeout(done, 100));
+  }
+  for (const pid of pids) {
+    if (!alive(pid)) continue;
+    try { process.kill(pid, "SIGKILL"); actions.push(`SIGKILL ${pid}`); }
+    catch { actions.push(`SIGKILL ${pid} (already gone)`); }
+  }
+  await new Promise((done) => setTimeout(done, 500));
+  return { settled: !pids.some(alive), actions };
+}
+
+/** The real facts of one exported MP4, measured by the fixed local tools. */
+interface ExportFacts {
+  readonly path: string;
+  readonly bytes: number;
+  readonly sha256: string;
+  readonly frames: number;
+  readonly width: number;
+  readonly height: number;
+  readonly duration_seconds: number;
+  readonly audio: { readonly codec: string; readonly sample_rate: string; readonly channels: number; readonly duration_seconds: number } | null;
+  readonly commands: readonly CommandRecord[];
+  readonly render: CliChildRecord;
+  /** The KEPT artifact of THIS export: its name and the sha its bytes really have. */
+  readonly artifact: { readonly name: string; readonly path: string; readonly sha256: string; readonly bytes: number };
+}
+
+/**
+ * Probe and FULLY DECODE one exported MP4.
+ *
+ * The frame count comes from the real container, the audio facts from the real stream and
+ * the whole file goes through the decoder: a decode failure is a non-zero exit of a real
+ * command, and every command with its argv and its exit is kept.
+ */
+function probeExport(path: string, render: CliChildRecord, context: RenderContext): Omit<ExportFacts, "artifact"> {
+  const commands: CommandRecord[] = [];
+  const bytes = readFileSync(path);
+  const sha256 = createHash("sha256").update(bytes).digest("hex");
+
+  const videoArgv = ["-v", "error", "-select_streams", "v:0", "-count_frames",
+    "-show_entries", "stream=nb_read_frames,width,height,r_frame_rate", "-of", "json", path];
+  const video = spawnSync("ffprobe", videoArgv, { encoding: "utf8", windowsHide: true, timeout: 120_000 });
+  commands.push({ argv: ["ffprobe", ...videoArgv], exit: video.status, cwd: context.base, note: "real container probe of the video stream" });
+  if (video.status !== 0) throw new Error(`the ffprobe of the exported video failed with exit ${video.status}: ${video.stderr}`);
+  const videoStream = (JSON.parse(video.stdout) as { streams: Array<{ nb_read_frames: string; width: string; height: string }> }).streams[0];
+  if (videoStream === undefined) throw new Error("the exported MP4 has no video stream");
+
+  const audioArgv = ["-v", "error", "-select_streams", "a:0",
+    "-show_entries", "stream=codec_name,sample_rate,channels,duration:format=duration", "-of", "json", path];
+  const audio = spawnSync("ffprobe", audioArgv, { encoding: "utf8", windowsHide: true, timeout: 120_000 });
+  commands.push({ argv: ["ffprobe", ...audioArgv], exit: audio.status, cwd: context.base, note: "real probe of the audio stream and the container duration" });
+  if (audio.status !== 0) throw new Error(`the ffprobe of the exported audio failed with exit ${audio.status}: ${audio.stderr}`);
+  const audioFacts = JSON.parse(audio.stdout) as {
+    format?: { duration?: string };
+    streams?: Array<{ codec_type?: string; codec_name?: string; sample_rate?: string; channels?: number; duration?: string }>;
+  };
+  const sound = audioFacts.streams?.find((stream) => stream.codec_type === "audio");
+  const duration = Number(audioFacts.format?.duration ?? "0");
+
+  const decodeArgv = ["-nostdin", "-hide_banner", "-v", "error", "-i", path, "-f", "null", "-"];
+  const decode = spawnSync("ffmpeg", decodeArgv, { stdio: "pipe", windowsHide: true, timeout: 300_000 });
+  commands.push({ argv: ["ffmpeg", ...decodeArgv], exit: decode.status, cwd: context.base, note: "the FULL decode of the exported media" });
+  if (decode.status !== 0) throw new Error(`the full decode of the exported MP4 failed with exit ${decode.status}: ${decode.stderr}`);
+
+  return {
+    path, bytes: bytes.length, sha256,
+    frames: Number.parseInt(videoStream.nb_read_frames, 10),
+    width: Number.parseInt(videoStream.width, 10),
+    height: Number.parseInt(videoStream.height, 10),
+    duration_seconds: duration,
+    audio: sound === undefined ? null : {
+      codec: sound.codec_name ?? "",
+      sample_rate: sound.sample_rate ?? "",
+      channels: sound.channels ?? 0,
+      duration_seconds: Number(sound.duration ?? duration),
+    },
+    commands, render,
+  };
+}
+
+/**
+ * KEEP one real export, RIGHT NOW.
+ *
+ * The renderer writes its MP4 to ONE path in the project, so the NEXT export overwrites
+ * it: an artifact copied at the end of the case would carry the bytes of the LAST
+ * export under the name of an earlier one. The bytes are therefore copied AT THE MOMENT
+ * of that export, and the copy is read back and compared with the digest the probe
+ * measured - a mismatch is a failure, never a silent mislabel.
+ *
+ * The name carries the capture, so an artifact of an earlier capture is never
+ * overwritten by a later one.
+ */
+async function keepArtifact(stage: string, facts: Omit<ExportFacts, "artifact">, context: RenderContext): Promise<ExportFacts["artifact"]> {
+  await mkdir(EVIDENCE_DIR, { recursive: true });
+  const tag = (CAPTURE_ID ?? `run-${process.pid}`).replace(/[^A-Za-z0-9._-]/gu, "-");
+  const name = `${stage}-${facts.sha256.slice(0, 12)}-${tag}.mp4`;
+  const path = join(EVIDENCE_DIR, name);
+  const bytes = readFileSync(facts.path);
+  if (createHash("sha256").update(bytes).digest("hex") !== facts.sha256)
+    throw new Error("the bytes of this export are not the bytes this export was measured from");
+  if (existsSync(path)) {
+    const kept = createHash("sha256").update(readFileSync(path)).digest("hex");
+    if (kept !== facts.sha256) throw new Error(`the evidence artifact ${name} exists with other bytes and is never overwritten`);
+  } else {
+    writeFileSync(path, bytes);
+  }
+  // The kept bytes are read back and compared: the artifact IS what it says it is.
+  const written = readFileSync(path);
+  const writtenSha = createHash("sha256").update(written).digest("hex");
+  if (writtenSha !== facts.sha256) throw new Error(`the kept artifact ${name} does not hold the bytes of this export`);
+  return { name, path, sha256: writtenSha, bytes: written.length };
+}
+
+/** Render a project with the pinned CLI. Fixed argv, no shell, nothing caller-controlled. */
+async function renderProject(root: string, context: RenderContext, stage: string): Promise<ExportFacts> {
+  // The harness marker goes in before the CLI runs, in this case's OWN project copy.
+  await markHeadlessProject(root, context);
+  const cli = resolve(VENDOR, "packages/openfilm/bin/openfilm.mjs");
+  // Node under this runtime lives wherever `node` resolves; a hard-coded path is brittle.
+  const nodeBin = process.execPath || "node";
+  const child = await runCli([nodeBin, cli, "render"], { cwd: root, env: cliEnv(context) });
+  context.children.push(child);
+  if (child.exit !== 0) throw new Error(`the pinned render failed with exit ${child.exit}: ${child.stderr_tail}`);
+  const name = root.slice(root.lastIndexOf("/") + 1);
+  const output = join(root, `${name}.mp4`);
+  const facts = await probeExport(output, child, context);
+  // The bytes of THIS export are kept at once, before anything can overwrite them.
+  const artifact = await keepArtifact(stage, facts, context);
+  return { ...facts, artifact };
+}
+
+/** Real container frame count, read with ffprobe rather than assumed. */
+async function frameCount(path: string): Promise<number> {
+  const probe = spawnSync("ffprobe", ["-v", "error", "-select_streams", "v:0",
+    "-count_frames", "-show_entries", "stream=nb_read_frames", "-of", "json", path], { encoding: "utf8", timeout: 120_000 });
+  if (probe.status !== 0) throw new Error(`the ffprobe of ${path} failed with exit ${probe.status}: ${probe.stderr}`);
+  return Number.parseInt((JSON.parse(probe.stdout) as { streams: Array<{ nb_read_frames: string }> }).streams[0]!.nb_read_frames, 10);
+}
+
+/**
+ * The DIAGNOSTIC media of this case, prepared in its OWN private copy.
+ *
+ * The fixed fixture carries OPAQUE bytes: 17 bytes that stand for a video and 18 bytes
+ * that stand for a sound. They are the component contract of the migration - they are
+ * NOT a video and NOT a sound, and no renderer can decode them.
+ *
+ * This case therefore PREPARES ITS OWN media, in the PRIVATE copy of the fixture:
+ * real, bounded diagnostic files with a real frame count, made by the fixed local
+ * ffmpeg with a fixed argv, and measured by the fixed local ffprobe. The manifest of
+ * the PRIVATE copy carries the REAL digests and the REAL frame count of those bytes.
+ *
+ * The fixed fixture is NOT touched, and this media is a DIAGNOSTIC: it is not a
+ * creation film and it is not an A film.
+ */
+async function prepareDiagnosticMedia(sourceRoot: string): Promise<void> {
+  const generated = join(sourceRoot, "assets", "generated");
+  await mkdir(generated, { recursive: true });
+  // The three files the fixed fixture copied are OPAQUE bytes - 17, 17 and 18 bytes
+  // that stand for a video, a video and a sound. They are removed HERE, in THIS
+  // case's OWN private copy, and only there: the fixed fixture and the user's media
+  // are never touched, and no prefix is swept.
+  if (!generated.startsWith(sourceRoot + sep)) throw new Error("the private media root is not inside the private fixture");
+  for (const name of ["visual-10s.mp4", "visual-alt-10s.mp4", "narration-30s.wav"])
+    await rm(join(generated, name), { force: true });
+  // 900 frames at 30 fps: thirty seconds. The frame count of the case is MEASURED
+  // below, never declared: the manifest carries what ffprobe really counted.
+  const visual = async (color: string, name: string): Promise<void> => {
+    await run("ffmpeg", ["-nostdin", "-hide_banner", "-v", "error", "-filter_threads", "1",
+      "-f", "lavfi", "-i", `color=c=${color}:s=160x90:r=30:d=30`, "-threads", "1",
+      "-c:v", "libx264", "-pix_fmt", "yuv420p", "-frames:v", "900", join(generated, name)],
+    { timeout: 120_000, maxBuffer: 8 * 1024 * 1024, windowsHide: true });
+    // The video is really DECODED, not only counted: the whole file goes through the
+    // decoder, and a decode failure is a non-zero exit of this command.
+    execFileSync("ffmpeg", ["-nostdin", "-hide_banner", "-v", "error", "-i", join(generated, name),
+      "-f", "null", "-"], { stdio: "pipe", windowsHide: true, timeout: 120_000 });
+  };
+  await visual("blue", "visual-10s.mp4");
+  await visual("green", "visual-alt-10s.mp4");
+  await run("ffmpeg", ["-nostdin", "-hide_banner", "-v", "error", "-f", "lavfi",
+    "-i", "sine=frequency=400:sample_rate=48000:duration=30", "-threads", "1",
+    "-c:a", "pcm_s16le", join(generated, "narration-30s.wav")],
+  { timeout: 120_000, maxBuffer: 8 * 1024 * 1024, windowsHide: true });
+  // The sound is really probed AND really decoded as well.
+  const narration = join(generated, "narration-30s.wav");
+  const audio = JSON.parse(execFileSync("ffprobe", ["-v", "error",
+    "-show_entries", "format=duration:stream=codec_type,sample_rate,duration", "-of", "json", narration],
+  { encoding: "utf8", windowsHide: true, timeout: 60_000 })) as {
+    format?: { duration?: string };
+    streams?: Array<{ codec_type?: string; sample_rate?: string; duration?: string }>;
+  };
+  const sound = audio.streams?.find(stream => stream.codec_type === "audio");
+  if (sound === undefined) throw new Error("the prepared narration has no audio stream");
+  if (Number(sound.sample_rate) !== 48000) throw new Error("the prepared narration is not the 48 kHz it claims");
+  if (Math.abs(Number(audio.format?.duration ?? "0") - 30) > 0.5) throw new Error("the prepared narration is not thirty seconds");
+  execFileSync("ffmpeg", ["-nostdin", "-hide_banner", "-v", "error", "-i", narration, "-f", "null", "-"],
+    { stdio: "pipe", windowsHide: true, timeout: 120_000 });
+  // The manifest of the PRIVATE copy carries the real digests and the real frame
+  // count of the bytes that are really there.
+  const manifestPath = join(sourceRoot, "narralens.assets.json");
+  const manifest = JSON.parse(await readFile(manifestPath, "utf8")) as {
+    assets: Array<{ asset_id: string; project_path: string; sha256: string; duration_frames: number }>;
+  };
+  for (const asset of manifest.assets) {
+    if (!asset.project_path.endsWith(".mp4")) continue;
+    const path = join(sourceRoot, asset.project_path);
+    asset.sha256 = createHash("sha256").update(await readFile(path)).digest("hex");
+    asset.duration_frames = await frameCount(path);
+  }
+  await writeFile(manifestPath, JSON.stringify(manifest, null, 2));
+}
+
+/**
+ * WRITE the manifest of one real export.
+ *
+ * The artifact itself was already kept, byte for byte, at the moment of its export; the
+ * manifest names it and states the facts that were really measured. The manifest is
+ * written under a free name, so no earlier manifest is ever replaced.
+ */
+async function writeManifest(stage: string, facts: ExportFacts, extra: Record<string, unknown>): Promise<string> {
+  await mkdir(EVIDENCE_DIR, { recursive: true });
+  let index = 1;
+  while (existsSync(join(EVIDENCE_DIR, `manifest-${stage}-${index}.json`))) index += 1;
+  const manifest = join(EVIDENCE_DIR, `manifest-${stage}-${index}.json`);
+  const body = {
+    format: "narralens.real-export-evidence@1",
+    capture_id: CAPTURE_ID,
+    capture_id_source: CAPTURE_ID === null ? "the runner was not told which capture this is" : "the N1N2_CAPTURE_ID of this run",
+    stage,
+    artifact: {
+      name: facts.artifact.name, sha256: facts.artifact.sha256, bytes: facts.artifact.bytes,
+      kept_at: "at the moment of this export, before any later export could overwrite it",
+      verified: "the kept bytes were read back and their digest compared with the digest this export was measured from",
+    },
+    media: {
+      frames: facts.frames, width: facts.width, height: facts.height,
+      duration_seconds: facts.duration_seconds, audio: facts.audio,
+    },
+    commands: [facts.render, ...facts.commands],
+    upstream: {
+      openfilm_sha: OPENFILM_SHA,
+      pinned_cli: resolve(VENDOR, "packages/openfilm/bin/openfilm.mjs"),
+      pinned_cli_sha256: createHash("sha256").update(readFileSync(resolve(VENDOR, "packages/openfilm/bin/openfilm.mjs"))).digest("hex"),
+    },
+    candidate: {
+      test_file: "tests/m2.3/migration-real-export.test.ts",
+      test_sha256: createHash("sha256").update(readFileSync(resolve("tests/m2.3/migration-real-export.test.ts"))).digest("hex"),
+      migration_service_sha256: createHash("sha256").update(readFileSync(resolve("src/host/projects/migration-service.ts"))).digest("hex"),
+      openfilm_adapter_sha256: createHash("sha256").update(readFileSync(resolve("src/adapters/openfilm/openfilm-upstream.ts"))).digest("hex"),
+    },
+    ...extra,
+  };
+  await writeFile(manifest, JSON.stringify(body, null, 2));
+  // The real digest is printed, so the log itself carries the artifact's identity.
+  console.log(`[real-export-053] stage=${stage} sha256=${facts.sha256} bytes=${facts.bytes} frames=${facts.frames} ` +
+    `audio=${facts.audio === null ? "none" : `${facts.audio.codec} ${facts.audio.sample_rate}Hz ${facts.audio.duration_seconds}s`} ` +
+    `artifact=${facts.artifact.name} artifact_sha256=${facts.artifact.sha256} manifest=${manifest.split("/").pop()}`);
+  return manifest;
+}
+
+describe("MIG-03 the real chain: migrate, reopen, export, edit the middle clip, export again", () => {
+  it("produces two real, different exports of the same 900-frame three-clip film", async () => {
+    // Absence of the pinned runtime is reported, never replaced by a weaker assertion.
+    if (!pinnedUpstreamPresent()) throw new Error("PINNED_OPENFILM_ABSENT: the real export cannot run here");
+
+    const base = await mkdtemp(join(tmpdir(), "narralens-m23-real-"));
+    dirs.push(base);
+    const context = createRenderContext(base);
+    const sourceRoot = join(base, "source");
+    await cp(SOURCE_FIXTURE, sourceRoot, { recursive: true });
+    // The PRIVATE copy gets real, decodable diagnostic media and a manifest that
+    // describes those real bytes.
+    await prepareDiagnosticMedia(sourceRoot);
+
+    const revisions = new RevisionStore(); stores.push(revisions);
+    const bindings = new EngineBindingStore(revisions);
+    bindings.bind(PROJECT, "hypit", { createdAt: new Date(0) });
+    const catalog = new ProjectCatalog(new Map([[PROJECT, join(sourceRoot, "narralens.project.json")]]));
+    const roots = new Map<string, string>([[PROJECT, sourceRoot]]);
+
+    const upstream = await createPinnedOpenFilmUpstream(VENDOR);
+    const service = new MigrationService({
+      catalog, revisions, bindings,
+      // ASSET-03: activation seeds the target's asset ledger, so a real migration carries it.
+      ledger: MigratedAssetLedger.create({
+        // The REAL probe: the frame count of every asset is measured with ffprobe and
+        // compared with the manifest, never assumed.
+        revisions, registry: new AssetRegistry(catalog),
+        catalog, migrationRoot: join(base, "migrations"),
+      }),
+      snapshots: new SnapshotStore({ snapshotsRoot: join(base, "snapshots") }),
+      migrationRoot: join(base, "migrations"), projectRoot: join(base, "projects"),
+      openfilmUpstreamSha: OPENFILM_SHA,
+      registerProject: (projectId, root) => { roots.set(projectId, root); },
+      verifyStagedProject: async (root) => {
+        const film = await upstream.readProjectFilm(root);
+        if (film.problems.length > 0) throw new Error("staged film does not read");
+        const clips = (film.doc as { tracks: Array<{ clips: Array<{ id: string; src: string }> }> }).tracks[0]!.clips;
+        if (clips.some((clip) => /\.(mp4|mov|webm|mkv)$/iu.test(clip.src))) {
+          throw new Error("flattened video clip is not native");
+        }
+        return clips.map((clip, index) => ({
+          source_id: clip.id, target_id: clip.id,
+          start_frame: index * 300, end_frame_exclusive: (index + 1) * 300,
+        }));
+      },
+      // The SOURCE is a Hypit project: it is exported by its OWN engine, and a fresh
+      // Hypit export submits a Build to external providers. Only the migrated copy is
+      // rendered here, by the pinned OpenFilm CLI, in this case's own private home.
+      exportProject: async (root, _label, engine) => {
+        if (engine === "openfilm") {
+          const facts = await renderProject(root, context, "mig03-migration-export");
+          return { sha256: facts.sha256, durationFrames: facts.frames };
+        }
+        const recorded = join(sourceRoot, "assets/generated/visual-10s.mp4");
+        return {
+          sha256: createHash("sha256").update(await readFile(recorded)).digest("hex"),
+          durationFrames: await frameCount(recorded),
+        };
+      },
+    });
+
+    let firstFacts: ExportFacts | null = null;
+    let secondFacts: ExportFacts | null = null;
+    let editFacts: Record<string, unknown> = {};
+    try {
+      const sourceBefore = await treeDigest(sourceRoot);
+      const plan = await service.plan({ projectId: PROJECT, idempotencyKey: "mig-real-0001" });
+      const report = await service.execute(plan.migration_id);
+      expect(report.complete).toBe(true);
+      const targetRoot = roots.get(plan.target_project_id)!;
+
+      // The first export is a real MP4 of the whole film.
+      const first = await renderProject(targetRoot, context, "mig03-export-first");
+      firstFacts = first;
+      expect(first.frames).toBe(900);
+      expect(first.sha256).toMatch(/^[a-f0-9]{64}$/u);
+      expect(first.bytes).toBeGreaterThan(0);
+      expect(first.duration_seconds).toBeGreaterThan(0);
+      expect(report.export_artifacts).toHaveLength(1);
+      expect(report.export_artifacts[0]!.sha256).toBe(first.sha256);
+      expect(report.export_artifacts[0]!.duration_frames).toBe(900);
+
+      // Close and reopen: a fresh process-level read sees the same three clips.
+      const reopened = await createPinnedOpenFilmUpstream(VENDOR);
+      const film = await reopened.readProjectFilm(targetRoot);
+      expect(film.problems).toEqual([]);
+      const clips = (film.doc as { tracks: Array<{ clips: Array<{ id: string }> }> }).tracks[0]!.clips;
+      expect(clips.map((clip) => clip.id)).toEqual(["shot-001", "shot-002", "shot-003"]);
+
+      // Edit the middle clip natively; the revision advances by exactly one.
+      const beforeEdit = film.rev;
+      const captionBefore = await readFile(join(targetRoot, "assets/narration.vtt"), "utf8");
+      const edited = await reopened.editProjectFilm(targetRoot, beforeEdit,
+        [{ op: "set", clip: "shot-002", field: "overrides", value: [{ at: ".t", text: "改过的第二镜" }] }]);
+      expect(edited.rebased).toBe(false);
+      expect(edited.rev).not.toBe(beforeEdit);
+      const captionAfter = await readFile(join(targetRoot, "assets/narration.vtt"), "utf8");
+      editFacts = {
+        clip_ids: clips.map((clip) => clip.id),
+        rev_before: beforeEdit, rev_after: edited.rev,
+        middle_clip: "shot-002", middle_clip_edited: true,
+        caption_sha256_before: createHash("sha256").update(captionBefore).digest("hex"),
+        caption_sha256_after: createHash("sha256").update(captionAfter).digest("hex"),
+        caption_bytes_before: Buffer.byteLength(captionBefore),
+        caption_bytes_after: Buffer.byteLength(captionAfter),
+        caption_contains_edited_text: captionAfter.includes("第二镜"),
+      };
+
+      // The second export differs from the first, and is the same length and clip count.
+      const second = await renderProject(targetRoot, context, "mig03-export-after-middle-edit");
+      secondFacts = second;
+      expect(second.sha256).not.toBe(first.sha256);
+      expect(second.frames).toBe(900);
+      expect(second.duration_seconds).toBeGreaterThan(0);
+
+      // Subtitles and narration travelled with the film. The names are read from the film
+      // itself rather than assumed, so the assertion is about the copy, not about our naming.
+      const filmText = await readFile(join(targetRoot, "film.html"), "utf8");
+      // The src carries an OpenFilm time fragment; the file on disk is what we stat.
+      const narrationRef = (/<audio[^>]*src="([^"#]+)/u.exec(filmText)?.[1] ?? "").trim();
+      const subtitlePath = join(targetRoot, "assets/narration.vtt");
+      expect(narrationRef).not.toBe("");
+      expect((await stat(join(targetRoot, narrationRef))).size).toBeGreaterThan(0);
+      expect(await readFile(subtitlePath, "utf8")).toContain("第二镜");
+      const afterReopen = await reopened.readProjectFilm(targetRoot);
+      expect((afterReopen.doc as { tracks: Array<{ clips: Array<{ id: string }> }> }).tracks[0]!.clips)
+        .toHaveLength(3);
+
+      // And the source project is still exactly as it was.
+      expect(await treeDigest(sourceRoot)).toBe(sourceBefore);
+      expect(bindings.read(PROJECT)).toMatchObject({ engine: "hypit" });
+      expect(bindings.read(plan.target_project_id)).toMatchObject({ engine: "openfilm" as EngineKind });
+
+      // The HEADLESS claim of this harness is a fact, not a hope: no Studio was started
+      // against this case's own private home, and no child of ours opened anything.
+      context.studio = studioOwnership(context);
+      expect(context.studio.present).toBe(false);
+      for (const child of context.children) expect(child.stderr_tail).not.toMatch(/OpenFilm Studio/i);
+    } finally {
+      // Every process this case owns is settled, even when the case failed.
+      context.studio = studioOwnership(context);
+      context.cleanup = await settleOwnedStudio(context);
+      const manifestFacts = [
+        { stage: "mig03-export-first", facts: firstFacts },
+        { stage: "mig03-export-after-middle-edit", facts: secondFacts },
+      ];
+      for (const entry of manifestFacts) {
+        if (entry.facts === null) continue;
+        await writeManifest(entry.stage, entry.facts, {
+          case: "MIG-03 the real chain: migrate, reopen, export, edit the middle clip, export again",
+          project_id: PROJECT, target_project_id: "the migrated copy of this case",
+          ...editFacts,
+        });
+      }
+      console.log(`[real-export-053] children=${context.children.length} pids=${context.children.map((child) => child.pid).join(",")} ` +
+        `studio_started=${context.studio.present} cleanup=${JSON.stringify(context.cleanup)}`);
+    }
+  }, 300_000);
+});
+
+describe("EN-05 the source project is still intact and openable after rollback", () => {
+  it("keeps the source bytes, binding and recorded output, and retains the copy", async () => {
+    if (!pinnedUpstreamPresent()) throw new Error("PINNED_OPENFILM_ABSENT: the real export cannot run here");
+
+    const base = await mkdtemp(join(tmpdir(), "narralens-m23-rollback-"));
+    dirs.push(base);
+    const context = createRenderContext(base);
+    const sourceRoot = join(base, "source");
+    await cp(SOURCE_FIXTURE, sourceRoot, { recursive: true });
+    await prepareDiagnosticMedia(sourceRoot);
+
+    const revisions = new RevisionStore(); stores.push(revisions);
+    const bindings = new EngineBindingStore(revisions);
+    bindings.bind(PROJECT, "hypit", { createdAt: new Date(0) });
+    const catalog = new ProjectCatalog(new Map([[PROJECT, join(sourceRoot, "narralens.project.json")]]));
+    const roots = new Map<string, string>([[PROJECT, sourceRoot]]);
+    const upstream = await createPinnedOpenFilmUpstream(VENDOR);
+
+    const service = new MigrationService({
+      catalog, revisions, bindings,
+      // ASSET-03: activation seeds the target's asset ledger, so a real migration carries it.
+      ledger: MigratedAssetLedger.create({
+        // The REAL probe again: the frame count of every asset is measured.
+        revisions, registry: new AssetRegistry(catalog),
+        catalog, migrationRoot: join(base, "migrations"),
+      }),
+      snapshots: new SnapshotStore({ snapshotsRoot: join(base, "snapshots") }),
+      migrationRoot: join(base, "migrations"), projectRoot: join(base, "projects"),
+      openfilmUpstreamSha: OPENFILM_SHA,
+      registerProject: (projectId, root) => { roots.set(projectId, root); },
+      verifyStagedProject: async (root) => {
+        const film = await upstream.readProjectFilm(root);
+        const clips = (film.doc as { tracks: Array<{ clips: Array<{ id: string; src: string }> }> }).tracks[0]!.clips;
+        if (clips.some((clip) => /\.(mp4|mov|webm|mkv)$/iu.test(clip.src))) throw new Error("flattened clip");
+        return clips.map((clip, index) => ({
+          source_id: clip.id, target_id: clip.id, start_frame: index * 300, end_frame_exclusive: (index + 1) * 300,
+        }));
+      },
+      // The copy is a real OpenFilm render. The Hypit SOURCE has no offline headless
+      // render: a fresh export of it would submit a Build to external providers, which
+      // costs money and egresses data, and this wave is authorised for neither.
+      //
+      // What the source side reports here is therefore the RECORDED artifact of the
+      // prepared diagnostic media - its digest and its MEASURED frame count. It is not
+      // a fresh export of the source project, and its frame count is measured rather
+      // than declared.
+      exportProject: async (root, _label, engine) => {
+        if (engine === "openfilm") {
+          const facts = await renderProject(root, context, "en05-migration-export");
+          return { sha256: facts.sha256, durationFrames: facts.frames };
+        }
+        const recorded = join(sourceRoot, "assets/generated/visual-10s.mp4");
+        return {
+          sha256: createHash("sha256").update(await readFile(recorded)).digest("hex"),
+          durationFrames: await frameCount(recorded),
+        };
+      },
+    });
+
+    let copyFacts: ExportFacts | null = null;
+    try {
+      const sourceBefore = await treeDigest(sourceRoot);
+      const plan = await service.plan({ projectId: PROJECT, idempotencyKey: "mig-rollback-01" });
+      await service.execute(plan.migration_id);
+      const targetRoot = roots.get(plan.target_project_id)!;
+      const copyExport = await renderProject(targetRoot, context, "en05-export-copy-after-rollback");
+      copyFacts = copyExport;
+      expect(copyExport.frames).toBe(900);
+
+      const record = await service.rollback(plan.migration_id);
+      expect(record.phase).toBe("verified");
+
+      // The source is byte-identical, still bound to hypit, and the copy is kept for audit.
+      expect(await treeDigest(sourceRoot)).toBe(sourceBefore);
+      expect(bindings.read(PROJECT)).toMatchObject({ engine: "hypit" });
+      expect(record.source_sha256_after).toBe(sourceBefore);
+      expect(record.target_retained).toBe(true);
+      expect(copyExport.frames).toBe(900);
+      expect(await readFile(join(targetRoot, "film.html"), "utf8")).toContain("shot-002");
+
+      // The HEADLESS claim of this harness is a fact, not a hope.
+      context.studio = studioOwnership(context);
+      expect(context.studio.present).toBe(false);
+      for (const child of context.children) expect(child.stderr_tail).not.toMatch(/OpenFilm Studio/i);
+
+      // A fresh render of the Hypit SOURCE is deliberately NOT claimed here: it submits a Build
+      // to external providers, which costs money and egresses data, and this wave is not
+      // authorised for either. The source side is proved by byte identity, by its binding and
+      // by its recorded D1 output; the real render is of the migrated copy.
+    } finally {
+      // Every process this case owns is settled, even when the case failed.
+      context.studio = studioOwnership(context);
+      context.cleanup = await settleOwnedStudio(context);
+      if (copyFacts !== null) {
+        await writeManifest("en05-export-copy-after-rollback", copyFacts, {
+          case: "EN-05 the source project is still intact and openable after rollback",
+          project_id: PROJECT,
+          claim_limit: "the migrated copy is a real render; the Hypit SOURCE is NOT freshly rendered and NOT a paid Hypit render",
+        });
+      }
+      console.log(`[real-export-053] children=${context.children.length} pids=${context.children.map((child) => child.pid).join(",")} ` +
+        `studio_started=${context.studio.present} cleanup=${JSON.stringify(context.cleanup)}`);
+    }
+  }, 300_000);
+});

@@ -1,0 +1,131 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:1213020) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/agent-driven/integration/created-native-source-reader.test.ts (41 tests | 4 failed | 11 skipped) 441127ms
+   ✓ R00 smoke reaches the reader from the real committed created source  18880ms
+   ✓ R00 smoke commits a rich source with the native files and the media  18370ms
+   ✓ R01 refuses the legacy project that has no created producer  16519ms
+   ✓ R02 invalidates the old proof when the working copy changes under it  20786ms
+   ✓ R02 refuses a pending round when the working copy changes during the read  15607ms
+   ✓ R03 refuses a sidecar, an unknown item and a missing committed file  18924ms
+   ✓ R04 refuses a foreign native id, a forged probe cache and a file in flight  17748ms
+   ✓ R04 accepts a legitimate cache in the next stable round  21564ms
+   ✓ R05 proves the media facts of the retained bytes  17560ms
+   ✓ R06 lists the media in the native numeric order  17494ms
+   ✓ R02 keeps parallel leases independent and refuses foreign and copied tokens  17915ms
+   ✓ R02 refuses a facts lease of another authority  22358ms
+   ✓ R02 releases the whole closure only after the last retained leaf  14518ms
+   ✓ R06 places every clip where the committed film places it  13153ms
+   ✓ R07 ends a read at a close and releases a late result exactly once 1ms
+   ✓ R07 lets the real media child exit before the reader closes  11487ms
+   ✓ R07 registers the read before a binding callback can close the reader 1ms
+   × R07 refuses a later read after a delivered release failed 9604ms
+     → The case could not release everything
+   ↓ F01 keeps a temporary release failure and reports it once at the final release
+   ✓ F03 refuses a source leaf and a source parent replaced during the acquisition  24563ms
+   ✓ F03 refuses a stale source identity and proves the next one  16276ms
+   ✓ F04 refuses a hardlink alias and an unknown directory in the working copy  20869ms
+   ✓ F05 refuses a page frame cache entry and an orphan film poster  20991ms
+   ✓ F07 reports a delivered release failure when the reader closes  17341ms
+   ✓ F08 refuses a lease whose producer lineage changed after the issue  12693ms
+   ✓ F08 refuses a lineage changed during the acquisition  11129ms
+   ✓ F02 accepts a proved absence and refuses its later birth  13508ms
+   × F06 refuses a referenced text above the budget in the authority path 10692ms
+     → expected ProductError: The creation facts changed { …(5) } to match object { code: 'NATIVE_CLOSURE_BUDGET' }
+(5 matching properties omitted from actual)
+   × F09 refuses every injected probe failure 10677ms
+     → expected TypeError: this[#library].parseProjectSet… to match object { code: StringMatching{…} }
+   × F09 normalises a rotated video and the first of two video streams 155ms
+     → expected 320 to be 180 // Object.is equality
+   ↓ F10 lists the media as the pinned consumer lists it
+   ↓ F10 keeps the caption directory in the platform order
+   ✓ F10 shows that the pinned consumer refuses a clip without a number  9738ms
+   ↓ P07 refuses a symbolic link, a same-bytes replacement and a restored change time
+   ↓ P07 refuses a text file above the budget and bounds the total
+   ↓ P07 refuses to release while work is in flight and releases every allocation once
+   ↓ P07 refuses a reentrant release from inside an accepted read
+   ↓ P07 keeps the failure of the walk release with the failure that stopped it
+   ↓ P07 proves an empty directory and sees the file that appears in it
+   ↓ P06 reproduces the five pinned native revision vectors
+   ↓ P06 lists the media in the numeric order of the host
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/created-native-source-reader.test.ts > R07 refuses a later read after a delivered release failed
+Error: The case could not release everything
+ ❯ tests/agent-driven/integration/created-native-source-reader.test.ts:656:17
+    654|  if(primary!==undefined)withCleanup(primary,cleanupFailures);
+    655|  if(cleanupFailures.length>0){
+    656|   const failure=new Error('The case could not release everything');
+       |                 ^
+    657|   Object.defineProperty(failure,'cleanup_errors',{value:cleanupFailure…
+    658|   throw failure;
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  tests/agent-driven/integration/created-native-source-reader.test.ts > F06 refuses a referenced text above the budget in the authority path
+AssertionError: expected ProductError: The creation facts changed { …(5) } to match object { code: 'NATIVE_CLOSURE_BUDGET' }
+(5 matching properties omitted from actual)
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- {[39m
+[32m-   "code": "NATIVE_CLOSURE_BUDGET",[39m
+[31m+ ProductError {[39m
+[31m+   "code": "REVISION_CONFLICT",[39m
+[2m  }[22m
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  tests/agent-driven/integration/created-native-source-reader.test.ts > F09 refuses every injected probe failure
+AssertionError: expected TypeError: this[#library].parseProjectSet… to match object { code: StringMatching{…} }
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- {[39m
+[32m-   "code": StringMatching /^NATIVE_PROBE_/,[39m
+[31m+ TypeError {[39m
+[31m+   "message": "this[#library].parseProjectSettings is not a function",[39m
+[2m  }[22m
+
+ ❯ tests/agent-driven/integration/created-native-source-reader.test.ts:942:4
+    940|    const reader=new CreatedNativeSourceReader({authority:f.authority a…
+    941|     probeFault:()=>fault});
+    942|    await expect(reader.readSource({binding:f.binding})).rejects.toMatc…
+       |    ^
+    943|    await reader.close();
+    944|   });
+ ❯ withFixture tests/agent-driven/integration/created-native-source-reader.test.ts:52:6
+ ❯ tests/agent-driven/integration/created-native-source-reader.test.ts:939:3
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  tests/agent-driven/integration/created-native-source-reader.test.ts > F09 normalises a rotated video and the first of two video streams
+AssertionError: expected 320 to be 180 // Object.is equality
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 180[39m
+[31m+ 320[39m
+
+ ❯ tests/agent-driven/integration/created-native-source-reader.test.ts:967:30
+    965|   const rotatedFacts=normalizeNativeProbe(answerOf(rotated));
+    966|   // The upstream shows a turned video with its sides swapped.
+    967|   expect(rotatedFacts.width).toBe(180);
+       |                              ^
+    968|   expect(rotatedFacts.height).toBe(320);
+    969|   expect(rotatedFacts.fps).toBe(30);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  4 failed | 26 passed | 11 skipped (41)
+   Start at  16:10:45
+   Duration  459.96s (transform 6.76s, setup 0ms, collect 12.76s, tests 441.13s, environment 0ms, prepare 2.68s)
+

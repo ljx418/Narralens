@@ -1,0 +1,14 @@
+{
+  "argv": [
+    "corepack",
+    "pnpm",
+    "exec",
+    "tsx",
+    "-e",
+    "process.chdir(\"/tmp/narralens-freeze-scan-057-bgbguxo_\"); void import(\"/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tools/secret-scan.ts\").catch(error=>{console.error(error.message);process.exitCode=1;});"
+  ],
+  "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+  "started_at": "2026-11-14T02:18:02.186680+00:00",
+  "exit": 0,
+  "note": "Tool runs withcwd limited to flattened explicitpayload. No reading user configs/env or excludedfiles; temporarytextcopies only."
+}

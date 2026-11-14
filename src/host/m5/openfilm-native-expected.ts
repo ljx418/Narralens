@@ -6,6 +6,8 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import type {
   ExpectedProjectionInput,
   ExpectedProjectionResult,
+  Marker,
+  ProjectSettings,
 } from '../../../tools/agent-driven/product/native-inputs/expected-projection.js';
 
 /**
@@ -418,6 +420,16 @@ export interface NativeExpectedLibrary {
   readonly upstream_sha: string;
   computeExpectedProjection(input: unknown): ExpectedProjectionResult;
   readonly hydrationCanonicalJson: (value: unknown) => string;
+  /**
+   * The pinned 015 project settings parser.
+   *
+   * It is the *same approved module* that computes the projection — not a second
+   * implementation and not a direct import of the tracked inputs. The Host needs it to
+   * normalise the settings it read itself, exactly as the native does.
+   */
+  readonly parseProjectSettings: (value: unknown) => ProjectSettings;
+  /** The pinned 015 markers parser, from the same approved module. */
+  readonly parseMarkers: (value: unknown) => Marker[];
 }
 
 export interface NativeExpectedLibraryLoader {
@@ -599,17 +611,26 @@ export function nativeExpectedLibraryLoader(deps: {
         const expected = (await import(pathToFileURL(expectedPath[1]).href)) as unknown as {
           readonly EXPECTED_PROFILE: string;
           computeExpectedProjection(input: unknown): ExpectedProjectionResult;
+          readonly parseProjectSettings?: (value: unknown) => ProjectSettings;
+          readonly parseMarkers?: (value: unknown) => Marker[];
         };
         const pure = (await import(pathToFileURL(purePath[1]).href)) as unknown as {
           readonly hydrationCanonicalJson: (value: unknown) => string;
         };
         if (expected.EXPECTED_PROFILE !== NATIVE_EXPECTED_PROFILE) throw new Error('NATIVE_EXPECTED_PROFILE_MISMATCH');
         if (typeof pure.hydrationCanonicalJson !== 'function') throw new Error('NATIVE_EXPECTED_CANONICAL_MISSING');
+        // The settings and markers parsers come from the same verified module. A
+        // candidate that does not export them is not usable, and there is no fallback
+        // to another parser: the refusal is the answer.
+        if (typeof expected.parseProjectSettings !== 'function' || typeof expected.parseMarkers !== 'function')
+          throw new Error('NATIVE_EXPECTED_BUILD_UNSUPPORTED');
         return Object.freeze({
           EXPECTED_PROFILE: NATIVE_EXPECTED_PROFILE,
           upstream_sha: NATIVE_EXPECTED_UPSTREAM_SHA,
           computeExpectedProjection: expected.computeExpectedProjection,
           hydrationCanonicalJson: pure.hydrationCanonicalJson,
+          parseProjectSettings: expected.parseProjectSettings,
+          parseMarkers: expected.parseMarkers,
         });
       } finally {
         // The private copy exists only for the import; nothing is left behind.

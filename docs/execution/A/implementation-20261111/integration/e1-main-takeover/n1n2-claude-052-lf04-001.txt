@@ -1,0 +1,69 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:3580423) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/agent-driven/integration/created-source-adoption.test.ts (34 tests | 1 failed | 33 skipped) 19122ms
+   ↓ actual closed created-source commit and publisher > D10 recovery issuer refuses forged instance through non-replaceable private lease checks
+   ↓ actual closed created-source commit and publisher > D10 recovery issuer refuses overridden instance through non-replaceable private lease checks
+   ↓ actual closed created-source commit and publisher > D10 recovery issuer refuses released overridden instance through non-replaceable private lease checks
+   ↓ actual closed created-source commit and publisher > D10 recovery issuer reopens actual published source and commits the original transaction exactly once
+   ↓ actual closed created-source commit and publisher > D10 recovery issuer reconstructs a missing published journal from actual resources without publishing a new snapshot or job
+   ↓ actual closed created-source commit and publisher > D10 recovery issuer refuses a JSON lease and a changed selection without consuming approval
+   ↓ actual closed created-source commit and publisher > D10 recovery issuer refuses expired authority and the actual resource lease compensates the complete original before abort
+   ↓ actual closed created-source commit and publisher > D10 identity records actual three retained trees in the prepared journal transaction before any rename
+   ↓ actual closed created-source commit and publisher > D10 identity rolls back both pre-rename facts when the identity insert fails
+   ↓ actual closed created-source commit and publisher > D10 identity rolls back both pre-rename facts when the prepared journal insert fails
+   ↓ actual closed created-source commit and publisher > D10 identity missing after publication refuses the original closed commit without consuming authorities
+   ↓ actual closed created-source commit and publisher > N3 real issuance revokes a genuine token when the stage guard cleanup fails
+   ↓ actual closed created-source commit and publisher > N3 real issuance revokes a genuine token when the outer held guard cleanup fails
+   ↓ actual closed created-source commit and publisher > N3 real pending close waits for publication and never returns an issued proof after closing
+   ↓ actual closed created-source commit and publisher > N3 real temporary default fsync close preserves uncertainty (sync also fails=false)
+   ↓ actual closed created-source commit and publisher > N3 real temporary default fsync close preserves uncertainty (sync also fails=true)
+   ↓ actual closed created-source commit and publisher > N3 real temporary style descriptor close preserves uncertainty (stat also fails=false)
+   ↓ actual closed created-source commit and publisher > N3 real temporary style descriptor close preserves uncertainty (stat also fails=true)
+   ↓ actual closed created-source commit and publisher > N3 real publication attempts every guard when verifier release fails and never revives the proof
+   ↓ actual closed created-source commit and publisher > N3 real publication attempts other guards after the first guard close fails
+   ↓ actual closed created-source commit and publisher > N3 real publication preserves the primary publish failure and cleanup failures together
+   ↓ actual closed created-source commit and publisher > refuses authority expiring during the final creative closure scan
+   ↓ actual closed created-source commit and publisher > rolls back checkpoint, attempt and every authority after a post-checkpoint transaction failure
+   ↓ actual closed created-source commit and publisher > poisons a swallowed read of another intake inside the project commit scope
+   ↓ actual closed created-source commit and publisher > rejects a real intake update after approval without consuming database authorities
+   ↓ actual closed created-source commit and publisher > rejects a predecessor gate changed to pending after approval
+   ↓ actual closed created-source commit and publisher > rejects a predecessor gate changed to rejected after approval
+   ↓ actual closed created-source commit and publisher > persists the same succeeded attempt in workflow checkpoint and a freshly opened SQLite reader
+   ↓ actual closed created-source commit and publisher > publishes complete native source, commits once, preserves R1 geometry and replays without a second commit
+   ↓ actual closed created-source commit and publisher > refuses a prepared transaction of another kind before publishing source
+   ↓ actual closed created-source commit and publisher > refuses a workflow attempt detached from the actual prepared job
+   ↓ actual closed created-source commit and publisher > refuses JSON-cloned publication proof without moving database authorities
+   × actual closed created-source commit and publisher > LF04 refuses a REAL impact and a REAL transaction of another project, and moves no authority 19120ms
+     → the second creation must be accepted: {"put_status":200,"put_code":null,"second_intake_id":"intake-edcc25aa-6d96-4d15-95b6-b95d0cbfeb4d","first_intake_id":"intake-edcc25aa-6d96-4d15-95b6-b95d0cbfeb4d","same_intake":true,"second_intake_version":1,"intake_head_version":2,"create_status":409,"create_code":"REVISION_CONFLICT","create_details":null}: expected 409 to be 202 // Object.is equality
+   ↓ actual closed created-source commit and publisher > LF04 refuses a stored hash that does not match the plan, and moves no authority
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/created-source-adoption.test.ts > actual closed created-source commit and publisher > LF04 refuses a REAL impact and a REAL transaction of another project, and moves no authority
+AssertionError: the second creation must be accepted: {"put_status":200,"put_code":null,"second_intake_id":"intake-edcc25aa-6d96-4d15-95b6-b95d0cbfeb4d","first_intake_id":"intake-edcc25aa-6d96-4d15-95b6-b95d0cbfeb4d","same_intake":true,"second_intake_version":1,"intake_head_version":2,"create_status":409,"create_code":"REVISION_CONFLICT","create_details":null}: expected 409 to be 202 // Object.is equality
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 202[39m
+[31m+ 409[39m
+
+ ❯ tests/agent-driven/integration/created-source-adoption.test.ts:612:97
+    610|     intake_head_version:head?.current_version??null,create_status:crea…
+    611|     create_code:createdBody.code??null,create_details:redact(createdBo…
+    612|    expect(created.status,`the second creation must be accepted: ${JSON…
+       |                                                                                                 ^
+    613|    let job=createdBody as unknown as JobReceipt;
+    614|    const until=Date.now()+30000;
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 33 skipped (34)
+   Start at  00:14:53
+   Duration  32.67s (transform 5.55s, setup 0ms, collect 10.39s, tests 19.12s, environment 0ms, prepare 2.15s)
+

@@ -1,0 +1,14 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:3600584) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/m2.3/migration-real-export.test.ts (2 tests) 69971ms
+   ✓ MIG-03 the real chain: migrate, reopen, export, edit the middle clip, export again > produces two real, different exports of the same 900-frame three-clip film  42966ms
+   ✓ EN-05 the source project is still intact and openable after rollback > keeps the source bytes, binding and recorded output, and retains the copy  27004ms
+
+ Test Files  1 passed (1)
+      Tests  2 passed (2)
+   Start at  00:31:12
+   Duration  76.12s (transform 1.32s, setup 0ms, collect 3.80s, tests 69.97s, environment 0ms, prepare 1.57s)
+

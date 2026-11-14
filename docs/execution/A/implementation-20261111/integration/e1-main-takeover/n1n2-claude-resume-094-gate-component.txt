@@ -1,0 +1,108 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:1464549) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/agent-driven/integration/created-native-source-reader.test.ts (51 tests | 2 failed | 17 skipped) 406405ms
+   ✓ R00 smoke reaches the reader from the real committed created source  10104ms
+   ✓ R00 smoke commits a rich source with the native files and the media  9691ms
+   ✓ R01 refuses the legacy project that has no created producer  9196ms
+   × R02 invalidates the old proof when the working copy changes under it 9901ms
+     → expected Error: NATIVE_EXPECTED_CLOSURE_MOVED to match object { Object (code) }
+   ✓ R02 refuses a pending round when the working copy changes during the read  13690ms
+   ✓ R03 refuses a sidecar, an unknown item and a missing committed file  14590ms
+   ✓ R04 refuses a foreign native id, a forged probe cache and a file in flight  15857ms
+   ✓ R04 accepts a legitimate cache in the next stable round  10733ms
+   ✓ R05 proves the media facts of the retained bytes  10328ms
+   ✓ R06 lists the media in the native numeric order  9920ms
+   ✓ R02 keeps parallel leases independent and refuses foreign and copied tokens  10080ms
+   ✓ R02 refuses a facts lease of another authority  10440ms
+   ✓ R02 releases the whole closure only after the last retained leaf  9062ms
+   ✓ R06 places every clip where the committed film places it  10427ms
+   ✓ R07 ends a read at a close and releases a late result exactly once 1ms
+   ✓ R07 lets the real media child exit before the reader closes  15827ms
+   ✓ R07 registers the read before a binding callback can close the reader 1ms
+   ✓ R07 refuses a later read after a delivered release failed  10474ms
+   ↓ F01 keeps a temporary release failure and reports it once at the final release
+   ✓ F03 refuses a source leaf and a source parent replaced during the acquisition  17895ms
+   ✓ F03 refuses a stale source identity and proves the next one  10327ms
+   ✓ F04 refuses a hardlink alias and an unknown directory in the working copy  18312ms
+   ✓ F05 refuses a page frame cache entry and an orphan film poster  24706ms
+   ✓ F07 reports a delivered release failure when the reader closes  10173ms
+   ✓ F08 refuses a lease whose producer lineage changed after the issue  9484ms
+   ✓ F08 refuses a lineage changed during the acquisition  8484ms
+   ✓ F02 accepts a proved absence and refuses its later birth  9499ms
+   ✓ F06 refuses a referenced text above the budget in the authority path  9003ms
+   ✓ F09 refuses every injected probe failure through the production runner  49177ms
+   ✓ F09 normalises a rotated video and the first of two video streams 265ms
+   ↓ F10 lists the media as the pinned consumer lists it
+   ↓ F10 keeps the caption directory in the platform order
+   ✓ F10 shows that the pinned consumer refuses a clip without a number  9869ms
+   ↓ P07 refuses a grown file, the cumulative text, the deep tree and the descriptor budget
+   ↓ P07 keeps the primary error when an open fails and releases everything else
+   ↓ P07 keeps the primary cause of an EMFILE, an ENOMEM and an EACCES
+   ↓ P06 normalises a missing and a picture duration as no duration
+   × F05 binds the probe evidence to the concrete tool, argv, input and result 12571ms
+     → expected '87c83e675600e7a73381fb7d445000187782e…' not to be '87c83e675600e7a73381fb7d445000187782e…' // Object.is equality
+   ✓ F03 refuses a pending round when the working copy changes during the probe  12686ms
+   ✓ R07 keeps the delivered resources until their owner releases them  11966ms
+   ✓ R03 refuses a translation beside the media that the committed source does not have  11660ms
+   ↓ P06 resolves a clip without a place as the native does and refuses a disagreement
+   ↓ P06 places a clip without a place where the pinned consumer places it
+   ↓ P07 refuses a symbolic link, a same-bytes replacement and a restored change time
+   ↓ P07 refuses a text file above the budget and bounds the total
+   ↓ P07 refuses to release while work is in flight and releases every allocation once
+   ↓ P07 refuses a reentrant release from inside an accepted read
+   ↓ P07 keeps the failure of the walk release with the failure that stopped it
+   ↓ P07 proves an empty directory and sees the file that appears in it
+   ↓ P06 reproduces the five pinned native revision vectors
+   ↓ P06 lists the media in the numeric order of the host
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/created-native-source-reader.test.ts > R02 invalidates the old proof when the working copy changes under it
+AssertionError: expected Error: NATIVE_EXPECTED_CLOSURE_MOVED to match object { Object (code) }
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- {[39m
+[32m-   "code": "NATIVE_EXPECTED_CLOSURE_MOVED",[39m
+[31m+ Error {[39m
+[31m+   "message": "NATIVE_EXPECTED_CLOSURE_MOVED",[39m
+[2m  }[22m
+
+ ❯ tests/agent-driven/integration/created-native-source-reader.test.ts:205:4
+    203|    expect(facts.verifyClosure()).toBe(false);
+    204|    // The expected service refuses the stale proof with its own reason.
+    205|    await expect(Promise.resolve().then(()=>expected.assertCurrent(f.bi…
+       |    ^
+    206|     .rejects.toMatchObject({code:'NATIVE_EXPECTED_CLOSURE_MOVED'});
+    207|    // A fresh round independently revalidates the committed bytes and …
+ ❯ withFixture tests/agent-driven/integration/created-native-source-reader.test.ts:53:6
+ ❯ tests/agent-driven/integration/created-native-source-reader.test.ts:186:2
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/agent-driven/integration/created-native-source-reader.test.ts > F05 binds the probe evidence to the concrete tool, argv, input and result
+AssertionError: expected '87c83e675600e7a73381fb7d445000187782e…' not to be '87c83e675600e7a73381fb7d445000187782e…' // Object.is equality
+ ❯ tests/agent-driven/integration/created-native-source-reader.test.ts:1393:22
+    1391|   expect(media!.proof_digest).toBe(digest);
+    1392|   // And the evidence is not merely a shape: it changes with the input.
+    1393|   expect(digest).not.toBe(media!.proof_digest.replace(/.$/,'0'));
+       |                      ^
+    1394|  });
+    1395| },300000);
+ ❯ tests/agent-driven/integration/created-native-source-reader.test.ts:75:37
+ ❯ withFixture tests/agent-driven/integration/created-native-source-reader.test.ts:53:6
+ ❯ withFacts tests/agent-driven/integration/created-native-source-reader.test.ts:72:2
+ ❯ tests/agent-driven/integration/created-native-source-reader.test.ts:1373:2
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 32 passed | 17 skipped (51)
+   Start at  18:00:05
+   Duration  416.36s (transform 4.26s, setup 0ms, collect 7.57s, tests 406.41s, environment 0ms, prepare 1.53s)
+

@@ -1,0 +1,91 @@
+src/adapters/openfilm/openfilm-upstream.ts(913,26): error TS2345: Argument of type '`serving_request:${string}`' is not assignable to parameter of type 'OpenFilmServingLifecyclePoint'.
+src/adapters/openfilm/openfilm-upstream.ts(932,26): error TS2345: Argument of type '`serving_listening:${string}`' is not assignable to parameter of type 'OpenFilmServingLifecyclePoint'.
+tests/m2.1/openfilm-upstream-lock.test.ts(4,16): error TS2440: Import declaration conflicts with local declaration of 'resolve'.
+tests/m2.1/openfilm-upstream-lock.test.ts(31,30): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(prefix: string, options?: BufferEncoding | ObjectEncodingOptions | null | undefined): Promise<string>', gave the following error.
+    Argument of type 'Node | undefined' is not assignable to parameter of type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+  Overload 2 of 3, '(prefix: string, options?: BufferEncoding | ObjectEncodingOptions | null | undefined): Promise<string | Buffer<ArrayBufferLike>>', gave the following error.
+    Argument of type 'Node | undefined' is not assignable to parameter of type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+tests/m2.1/openfilm-upstream-lock.test.ts(31,38): error TS2345: Argument of type 'string' is not assignable to parameter of type 'LexicalScope'.
+tests/m2.1/openfilm-upstream-lock.test.ts(35,26): error TS2345: Argument of type 'string & Buffer<ArrayBufferLike>' is not assignable to parameter of type 'LexicalScope'.
+  Type 'String & Buffer<ArrayBufferLike>' is missing the following properties from type 'LexicalScope': parent, locals
+tests/m2.1/openfilm-upstream-lock.test.ts(36,14): error TS2345: Argument of type 'Node | undefined' is not assignable to parameter of type 'PathLike'.
+  Type 'undefined' is not assignable to type 'PathLike'.
+tests/m2.1/openfilm-upstream-lock.test.ts(37,52): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(path: PathLike, options: MakeDirectoryOptions & { recursive: true; }): Promise<string | undefined>', gave the following error.
+    Argument of type 'Node | undefined' is not assignable to parameter of type 'PathLike'.
+      Type 'undefined' is not assignable to type 'PathLike'.
+  Overload 2 of 3, '(path: PathLike, options?: Mode | (MakeDirectoryOptions & { recursive?: false | undefined; }) | null | undefined): Promise<void>', gave the following error.
+    Argument of type 'Node | undefined' is not assignable to parameter of type 'PathLike'.
+      Type 'undefined' is not assignable to type 'PathLike'.
+  Overload 3 of 3, '(path: PathLike, options?: MakeDirectoryOptions | Mode | null | undefined): Promise<string | undefined>', gave the following error.
+    Argument of type 'Node | undefined' is not assignable to parameter of type 'PathLike'.
+      Type 'undefined' is not assignable to type 'PathLike'.
+tests/m2.1/openfilm-upstream-lock.test.ts(37,60): error TS2345: Argument of type 'Node | undefined' is not assignable to parameter of type 'LexicalScope'.
+  Type 'undefined' is not assignable to type 'LexicalScope'.
+tests/m2.1/openfilm-upstream-lock.test.ts(38,21): error TS2345: Argument of type 'Node | undefined' is not assignable to parameter of type 'PathLike | FileHandle'.
+  Type 'undefined' is not assignable to type 'PathLike | FileHandle'.
+tests/m2.1/openfilm-upstream-lock.test.ts(58,15): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(path: PathLike, options: MakeDirectoryOptions & { recursive: true; }): Promise<string | undefined>', gave the following error.
+    Argument of type 'Node | undefined' is not assignable to parameter of type 'PathLike'.
+      Type 'undefined' is not assignable to type 'PathLike'.
+  Overload 2 of 3, '(path: PathLike, options?: Mode | (MakeDirectoryOptions & { recursive?: false | undefined; }) | null | undefined): Promise<void>', gave the following error.
+    Argument of type 'Node | undefined' is not assignable to parameter of type 'PathLike'.
+      Type 'undefined' is not assignable to type 'PathLike'.
+  Overload 3 of 3, '(path: PathLike, options?: MakeDirectoryOptions | Mode | null | undefined): Promise<string | undefined>', gave the following error.
+    Argument of type 'Node | undefined' is not assignable to parameter of type 'PathLike'.
+      Type 'undefined' is not assignable to type 'PathLike'.
+tests/m2.1/openfilm-upstream-lock.test.ts(58,23): error TS2345: Argument of type 'string' is not assignable to parameter of type 'LexicalScope'.
+tests/m2.1/openfilm-upstream-lock.test.ts(59,19): error TS2345: Argument of type 'Node | undefined' is not assignable to parameter of type 'PathLike | FileHandle'.
+  Type 'undefined' is not assignable to type 'PathLike | FileHandle'.
+tests/m2.1/openfilm-upstream-lock.test.ts(59,27): error TS2345: Argument of type 'string' is not assignable to parameter of type 'LexicalScope'.
+tests/m2.1/openfilm-upstream-lock.test.ts(64,29): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(prefix: string, options?: BufferEncoding | ObjectEncodingOptions | null | undefined): Promise<string>', gave the following error.
+    Argument of type 'Node | undefined' is not assignable to parameter of type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+  Overload 2 of 3, '(prefix: string, options?: BufferEncoding | ObjectEncodingOptions | null | undefined): Promise<string | Buffer<ArrayBufferLike>>', gave the following error.
+    Argument of type 'Node | undefined' is not assignable to parameter of type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+tests/m2.1/openfilm-upstream-lock.test.ts(64,37): error TS2345: Argument of type 'string' is not assignable to parameter of type 'LexicalScope'.
+tests/m2.1/openfilm-upstream-lock.test.ts(66,23): error TS2345: Argument of type 'string & Buffer<ArrayBufferLike>' is not assignable to parameter of type 'LexicalScope'.
+  Type 'String & Buffer<ArrayBufferLike>' is missing the following properties from type 'LexicalScope': parent, locals
+tests/m2.1/openfilm-upstream-lock.test.ts(67,19): error TS2345: Argument of type 'Node | undefined' is not assignable to parameter of type 'PathLike | FileHandle'.
+  Type 'undefined' is not assignable to type 'PathLike | FileHandle'.
+tests/m2.1/openfilm-upstream-lock.test.ts(68,15): error TS2345: Argument of type 'Node | undefined' is not assignable to parameter of type 'PathLike'.
+  Type 'undefined' is not assignable to type 'PathLike'.
+tests/m2.1/openfilm-upstream-lock.test.ts(128,8): error TS2554: Expected 2 arguments, but got 1.
+tests/m2.1/openfilm-upstream-lock.test.ts(128,8): error TS2345: Argument of type 'Node | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+tests/m2.1/openfilm-upstream-lock.test.ts(474,43): error TS2554: Expected 2 arguments, but got 1.
+tests/m2.1/openfilm-upstream-lock.test.ts(474,43): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(path: PathLike | FileHandle, options?: ({ encoding?: null | undefined; flag?: OpenMode | undefined; } & Abortable) | null | undefined): Promise<...>', gave the following error.
+    Argument of type 'Node | undefined' is not assignable to parameter of type 'PathLike | FileHandle'.
+      Type 'undefined' is not assignable to type 'PathLike | FileHandle'.
+  Overload 2 of 3, '(path: PathLike | FileHandle, options: BufferEncoding | ({ encoding: BufferEncoding; flag?: OpenMode | undefined; } & Abortable)): Promise<...>', gave the following error.
+    Argument of type 'Node | undefined' is not assignable to parameter of type 'PathLike | FileHandle'.
+      Type 'undefined' is not assignable to type 'PathLike | FileHandle'.
+  Overload 3 of 3, '(path: PathLike | FileHandle, options?: BufferEncoding | (ObjectEncodingOptions & Abortable & { flag?: OpenMode | undefined; }) | null | undefined): Promise<...>', gave the following error.
+    Argument of type 'Node | undefined' is not assignable to parameter of type 'PathLike | FileHandle'.
+      Type 'undefined' is not assignable to type 'PathLike | FileHandle'.
+tests/m2.1/openfilm-upstream-lock.test.ts(475,46): error TS2554: Expected 2 arguments, but got 1.
+tests/m2.1/openfilm-upstream-lock.test.ts(475,46): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(path: PathLike | FileHandle, options?: ({ encoding?: null | undefined; flag?: OpenMode | undefined; } & Abortable) | null | undefined): Promise<...>', gave the following error.
+    Argument of type 'Node | undefined' is not assignable to parameter of type 'PathLike | FileHandle'.
+      Type 'undefined' is not assignable to type 'PathLike | FileHandle'.
+  Overload 2 of 3, '(path: PathLike | FileHandle, options: BufferEncoding | ({ encoding: BufferEncoding; flag?: OpenMode | undefined; } & Abortable)): Promise<...>', gave the following error.
+    Argument of type 'Node | undefined' is not assignable to parameter of type 'PathLike | FileHandle'.
+      Type 'undefined' is not assignable to type 'PathLike | FileHandle'.
+  Overload 3 of 3, '(path: PathLike | FileHandle, options?: BufferEncoding | (ObjectEncodingOptions & Abortable & { flag?: OpenMode | undefined; }) | null | undefined): Promise<...>', gave the following error.
+    Argument of type 'Node | undefined' is not assignable to parameter of type 'PathLike | FileHandle'.
+      Type 'undefined' is not assignable to type 'PathLike | FileHandle'.
+tests/m2.1/openfilm-upstream-lock.test.ts(500,21): error TS2345: Argument of type 'Node | undefined' is not assignable to parameter of type 'PathLike | FileHandle'.
+  Type 'undefined' is not assignable to type 'PathLike | FileHandle'.
+tests/m2.1/openfilm-upstream-lock.test.ts(500,29): error TS2345: Argument of type 'string' is not assignable to parameter of type 'LexicalScope'.
+tests/m2.1/openfilm-upstream-lock.test.ts(512,23): error TS2345: Argument of type 'Node | undefined' is not assignable to parameter of type 'PathLike | FileHandle'.
+  Type 'undefined' is not assignable to type 'PathLike | FileHandle'.
+tests/m2.1/openfilm-upstream-lock.test.ts(512,31): error TS2345: Argument of type 'string' is not assignable to parameter of type 'LexicalScope'.
+tests/m2.1/openfilm-upstream-lock.test.ts(521,14): error TS2345: Argument of type 'Node | undefined' is not assignable to parameter of type 'PathLike'.
+  Type 'undefined' is not assignable to type 'PathLike'.
+tests/m2.1/openfilm-upstream-lock.test.ts(521,22): error TS2345: Argument of type 'string' is not assignable to parameter of type 'LexicalScope'.

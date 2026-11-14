@@ -51,8 +51,14 @@ export class CreatedSourceChangeService {
    ||remembered.transaction_id!==impact.impact_id)stale('Stored impact response has no matching authority');
   let state=this.options.impacts.state(impact.impact_id);
   if(state==='active'&&this.#clock().getTime()>=Date.parse(impact.expires_at)){
-   this.options.host.revisions.compose(db=>db.prepare("UPDATE impact SET state='expired',updated_at=? WHERE impact_id=? AND project_id=? AND state='active'")
-    .run(this.#clock().toISOString(),impact.impact_id,input.project_id));state='expired';
+   // The impact table's own authority decides whether the row really expires: it
+   // checks the deadline, the predecessor state and the number of rows it changed.
+   // This service writes NO state of its own - it asks, and then it READS BACK what
+   // the table really holds. A row another writer moved in the meantime (to
+   // `consumed`, say) is reported as it really is, never as the expiry this call
+   // wanted to make.
+   this.options.impacts.expire(impact.impact_id,this.#clock());
+   state=this.options.impacts.state(impact.impact_id);
   }
   if(!state)stale('Impact state is missing');
   return {...response,state:state==='stale'?'revoked':state};

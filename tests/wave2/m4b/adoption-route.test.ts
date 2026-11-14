@@ -103,9 +103,37 @@ async function postAdoption(running: Started, projectId: string, request: object
   throw new Error("UNREACHABLE");
 }
 
+/**
+ * Render with the pinned CLI, OFFLINE and OWNED.
+ *
+ * The pinned CLI opens a project Studio has never shown before it renders it, and that
+ * open starts the Studio as a DETACHED process. This case renders offline and owns what
+ * it starts, so the upstream's OWN marker is written in THIS project's own copy and the
+ * child gets its OWN private OpenFilm home. The marker says one thing only - "do not
+ * open this project interactively" - and it is NOT a claim that a person opened the
+ * project, NOT a claim that Studio ever showed it and NOT a UX pass.
+ *
+ * The budget of the child is the one it always had (600000 ms, 8 MiB) and the real
+ * media, the native edit and the recovery assertions below are NOT weakened.
+ */
 async function render(root: string): Promise<{ digest: string; frames: number }> {
-  await run(process.execPath || "node", [resolve(VENDOR, "packages/openfilm/bin/openfilm.mjs"), "render"],
-    { cwd: root, timeout: 600_000, maxBuffer: 8 * 1024 * 1024 });
+  await mkdir(join(root, ".film"), { recursive: true });
+  await writeFile(join(root, ".film", "opened"), "");
+  const privateHome = await mkdtemp(join(tmpdir(), "narralens-openfilm-home-"));
+  try {
+    await run(process.execPath || "node", [resolve(VENDOR, "packages/openfilm/bin/openfilm.mjs"), "render"],
+      { cwd: root, timeout: 600_000, maxBuffer: 8 * 1024 * 1024,
+        env: { ...process.env, OPENFILM_HOME: privateHome, OPENFILM_LIBRARY: join(privateHome, "library"),
+          OPENFILM_NO_UPDATE_CHECK: "1", OPENFILM_NO_BROWSER: "1" } });
+    // A Studio in THIS case's own private home would be this case's own process. It is
+    // reported as a failure of this harness rather than quietly left behind.
+    let studioAdvertised = false;
+    try { await readFile(join(privateHome, "run.json")); studioAdvertised = true; }
+    catch { /* no Studio advertised itself in this case's own home */ }
+    if (studioAdvertised) throw new Error("THE_RENDER_STARTED_A_STUDIO:" + join(privateHome, "run.json"));
+  } finally {
+    await rm(privateHome, { recursive: true, force: true });
+  }
   const output = join(root, `${basename(root)}.mp4`);
   const probe = await run("ffprobe", ["-v", "error", "-select_streams", "v:0", "-count_frames",
     "-show_entries", "stream=nb_read_frames", "-of", "json", output], { timeout: 60_000 });

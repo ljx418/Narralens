@@ -1,0 +1,54 @@
+N1N2 RESUME — the conditional serial batch 020: own cleanup receipt (CURRENT OBSERVATION ONLY)
+
+Writer: Claude implementation child, task task_5dcbe8192764 / dispatch ctx_b4086093cd96,
+cwd /mnt/c/workspace/videoworkline/Narralens-agents/main-integration, HEAD
+e2eff61b464d75d36598103d718cd2a75db5dfda.
+
+THE FOUR CAPTURES (read from their own capture files; the recorder ran once per name;
+every next command ran only because the previous one exited 0 with no input drift)
+
+  156-gate-alias-focused    exit 0   3 passed,  77 filtered (80)   log feb386e692afc04ceca73387baa1bab2a4cf0db0bc42b8d961a0a86ed90a0f83
+  157-gate-pure              exit 0  19 passed,  61 filtered (80)   log 8cc2591108744e2a90d139fd456bc51c96dbabb906a8171347827784baa7f664
+  158-gate-component        exit 0  61 passed,  19 filtered (80)   log e81de0b781d65c158ff9c7f011d01575c7becb6f371cdf6a1dd52275a012a4f3
+  159-gate-legacy           exit 0 107 passed of 107 (3 files)     log 6c6af114c67cd641a0ead3c49c03206a26eafc5e7405999e49d6d420e2a45bee
+  All four: source_changed [], source_added [].
+
+  The 159 legacy step HAD ALREADY STARTED when MAIN's message asking to cancel an
+  unstarted legacy step arrived, so it was finished unmodified and its ACTUAL
+  result is preserved above.
+
+A REAL LEAK OF THIS ROUND, OBSERVED AND NOT HIDDEN
+
+  170 leftover private parse folders, named `narralens-n1n2-film-*` (the folder is
+  mode 0700 and holds the film's copy at mode 0600).
+
+  THE CAUSE IS MINE: the authority's private parse of the retained film REMOVES its
+  own copy only on the FAILURE path - the success path returns the parse result
+  before the copy is removed. Every successful parse of every acquisition leaves one
+  folder behind, which is why the count follows the number of acquisitions the
+  batch performed. This is exactly the defect the independent round-3 review names
+  (K02), observed here rather than inferred.
+
+  The folders are NOT removed by this receipt: they are the evidence of the leak,
+  and the repair belongs to the source change that the release allows next.
+
+  EVERY OTHER TEMPORARY ROOT IS GONE: `narralens-created-workspace-*` 0,
+  `n1n2-closure-*` 0, `n1n2-rev-*` 0, `n1n2-probe-*` 0, `n1n2-listing-*` 0,
+  `n1n2-caption-*` 0. The earlier session's own scratch items are untouched.
+
+OBSERVED AT THE TIME OF WRITING THIS RECEIPT (current observation only)
+
+  1. Processes: no vitest, ffprobe, ffmpeg or chrome process was alive.
+  2. The repository: HEAD is still e2eff61b464d75d36598103d718cd2a75db5dfda, the git
+     index is still EMPTY, and the dirty set is unchanged (the ten released paths
+     plus the protected AGENTS.md). All thirteen blobs still carry the digests of
+     the 020 grant, and the 020 grant's source byte backups are linked to them.
+  3. The thirteen protected and released digests were re-hashed after the batch and
+     match the grant exactly.
+
+NOT CLAIMED
+
+  - Not a historical observation of the machine at any moment before this writing.
+  - NOT an acceptance of N1N2: the independent round-3 review is REQUEST_CHANGES
+    (K01-K06) on these bytes, and the browser gate was never granted or run. The
+    green gates above are bounded evidence on these bytes only.

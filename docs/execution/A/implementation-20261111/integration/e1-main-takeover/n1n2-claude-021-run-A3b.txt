@@ -1,0 +1,49 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:2359765) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/agent-driven/integration/native-cache-witness.test.ts (16 tests | 1 failed | 10 skipped) 80577ms
+   × B0-1 the fixed producer really draws and the witness binds the request, the key, the triple and the dependencies 14529ms
+     → The native cache entry was not produced by the fixed producer
+   ✓ B0-2 one owner close never kills the peer work in flight, and the browser goes with the last owner  12627ms
+   ↓ B0-3 refuses a cache entry that was already there and keeps its old bytes
+   ✓ B0-4 the fixed producer draws a page frame and the witness binds it  11570ms
+   ↓ B0-5 refuses a producer that the Host did not issue
+   ↓ K01-a refuses an unknown, a copied and a shaped production lease before the producer runs
+   ↓ K01-b refuses a production lease of another real service
+   ↓ K01-c refuses a hand-branded witness and the reader refuses the entry it speaks about
+   ↓ K01-d refuses the production lease of a view that was replaced
+   ↓ K03-a refuses a partial triple of that key and keeps its bytes
+   ↓ K03-b refuses a request that is not the exact request of its family
+   ↓ K05-a keeps the primary of a failed producer and the genuine release failure
+   ✓ K05-b delivers nothing when the release of the production did not finish  15957ms
+   ↓ P08 keeps the platform own milliseconds for a whole, a fractional and a pre-epoch file
+   ✓ K04-a refuses a witnessed picture that was replaced by an equal copy  12852ms
+   ✓ K04-b refuses a witnessed dependency that was changed and written back  13039ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/native-cache-witness.test.ts > B0-1 the fixed producer really draws and the witness binds the request, the key, the triple and the dependencies
+NativeSourceReaderError: The native cache entry was not produced by the fixed producer
+ ❯ refuse src/host/agent-driven/created-native-source-reader.ts:41:73
+     39|  constructor(readonly code:string,message:string){super(message);this.…
+     40| }
+     41| const refuse:(code:string,message:string)=>never=(code,message)=>{thro…
+       |                                                                         ^
+     42| 
+     43| /** The normalised fact of one probed media file.
+ ❯ CreatedNativeSourceReader.#proveWitnessedCache src/host/agent-driven/created-native-source-reader.ts:1270:21
+ ❯ CreatedNativeSourceReader.#classifyCache src/host/agent-driven/created-native-source-reader.ts:1249:15
+ ❯ CreatedNativeSourceReader.#classifyDerived src/host/agent-driven/created-native-source-reader.ts:1161:16
+ ❯ CreatedNativeSourceReader.#readFacts src/host/agent-driven/created-native-source-reader.ts:774:3
+ ❯ CreatedNativeSourceReader.#read src/host/agent-driven/created-native-source-reader.ts:645:15
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 5 passed | 10 skipped (16)
+   Start at  09:44:43
+   Duration  94.02s (transform 5.15s, setup 0ms, collect 8.64s, tests 80.58s, environment 0ms, prepare 4.03s)
+

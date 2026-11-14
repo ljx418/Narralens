@@ -1,0 +1,34 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:930809) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/agent-driven/integration/created-native-source-reader.test.ts (2 tests | 1 failed) 30567ms
+   × R00 smoke reaches the reader from the real committed created source 17102ms
+     → expected 'unsupported' to be 'hydrated' // Object.is equality
+   ✓ R00 smoke commits a rich source with the native files and the media  13463ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/created-native-source-reader.test.ts > R00 smoke reaches the reader from the real committed created source
+AssertionError: expected 'unsupported' to be 'hydrated' // Object.is equality
+
+Expected: [32m"[7mhydra[27mted"[39m
+Received: [31m"[7munsuppor[27mted"[39m
+
+ ❯ tests/agent-driven/integration/created-native-source-reader.test.ts:44:43
+     42|   expect(projection.native_rev).toMatch(/^[0-9a-f]{16}$/);
+     43|   // The four parts of the hydration contract are computed from proved…
+     44|   expect(projection.parts.settings.state).toBe('hydrated');
+       |                                           ^
+     45|   expect(projection.parts.markers.state).toBe('hydrated');
+     46|   expect(projection.parts.captions.state).toBe('hydrated');
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 1 passed (2)
+   Start at  14:11:39
+   Duration  44.78s (transform 5.91s, setup 0ms, collect 10.89s, tests 30.57s, environment 0ms, prepare 2.16s)
+

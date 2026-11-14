@@ -1,0 +1,46 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:2432241) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/agent-driven/integration/created-draft-processor.test.ts (7 tests | 1 failed) 36007ms
+   × autonomously prepares actual registered media into editable native source with matching immutable facts and no author commit 5662ms
+     → expected { …(9) } to match object { frame_count: 90, …(2) }
+(8 matching properties omitted from actual)
+   ✓ rechecks a revoked grant after asynchronous resolution and writes no stage or prepared fact  3029ms
+   ✓ cancels after real preparation without publishing a prepared result or changing author state  5318ms
+   ✓ reproves a durable complete source after lease loss instead of re-encoding or trusting an old in-memory proof  5923ms
+   ✓ recovers a real asynchronous domain-open resource failure in the same processor and closes its descriptors  4940ms
+   ✓ re-proves a succeeded SOURCE_ONLY source without a live lease and keeps the read proof away from the adoption assertion  6474ms
+   ✓ refuses a read proof of prepared bytes that changed under the same size and closes its descriptors  4660ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/created-draft-processor.test.ts > autonomously prepares actual registered media into editable native source with matching immutable facts and no author commit
+AssertionError: expected { …(9) } to match object { frame_count: 90, …(2) }
+(8 matching properties omitted from actual)
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[33m@@ -1,7 +1,8 @@[39m
+[2m  {[22m
+[2m    "clip_ids": [[22m
+[31m+     "concept-s1",[39m
+[2m      "shot-s1",[22m
+[2m      "shot-s2",[22m
+[2m      "shot-s3",[22m
+[2m      "narration",[22m
+[2m    ],[22m
+
+ ❯ tests/agent-driven/integration/created-draft-processor.test.ts:40:20
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 6 passed (7)
+   Start at  10:14:22
+   Duration  44.07s (transform 3.26s, setup 0ms, collect 5.88s, tests 36.01s, environment 0ms, prepare 1.42s)
+

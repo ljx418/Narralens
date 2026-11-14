@@ -1,0 +1,11 @@
+--- a/src/host/agent-driven/created-native-workspace.ts
++++ b/src/host/agent-driven/created-native-workspace.ts
+@@ -815,7 +815,7 @@
+   }catch(error){primary=error;}
+   // 13) Every resource of this call is settled, and every failure is kept.
+   const cleanupFailures:unknown[]=[];
+-  if(after)try{await after.release();}catch(error){cleanupFailures.push(error);}
++  if(after)try{await after.release();}catch(error){/* MUTATION-055-PF03: the genuine cause of the after tree is dropped */}
+   if(before)try{await before.release();}catch(error){cleanupFailures.push(error);}
+   if(primary!==undefined){
+    // The primary keeps its place and the cleanup failures are merged into it.

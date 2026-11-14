@@ -1,0 +1,12 @@
+--- a/src/host/agent-driven/local-asset-registry.ts
++++ b/src/host/agent-driven/local-asset-registry.ts
+@@ -533,6 +533,9 @@
+                 hash.update(buffer.subarray(0, part.bytesRead));
+             }
+             const after = await handle.stat({ bigint: true });
++            // MUTATION-055-LF03 (temporary): the OLD strict identity refusal.
++            if (published && fingerprint(before) !== fingerprint(after))
++                throw conflict();
+             if (hash.digest('hex') !== expected || await realpath(path) !== canonical)
+                 throw conflict();
+             if (!published) {

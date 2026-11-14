@@ -1,0 +1,25 @@
+# N1N2 focused N1N2-RESUME-FOCUSED-006 - owned-resource cleanup receipt, captured raw
+# Narrow labelling: every statement is what THIS shell's view showed at the moment it
+# was captured. It is NOT a proof that no such process or directory exists anywhere on
+# the machine, NOT a proof that no descriptor of the runs leaked into another process,
+# and NOT a per-resource lifetime test of the closure, the leases or the descriptors.
+
+## after command 064 (n1n2-claude-resume-064-focused-three), 2026-11-12T09:00:13Z
+### the shell of the command (pid 1299415)
+    PID STAT ELAPSED COMMAND
+(the header alone, with no row under it, is what 'absent' looks like here)
+
+### every process of the command, by its recorder name
+(no rows above = none matched in this view at this moment)
+
+### processes matching ffprobe|ffmpeg|vitest|narralens|openfilm, in this shell's process view
+(no rows above = none matched in this view at this moment)
+
+### fixture tmpdirs, in this shell's view
+ls: cannot access '/tmp/narralens-created-workspace-*': No such file or directory
+ls: cannot access '/tmp/narralens-committed-read-*': No such file or directory
+(no rows above = none present in this view at this moment)
+
+## the command and its terminal identity
+064 n1n2-claude-resume-064-focused-three  shell 1299415  08:56:29Z-08:58:15Z  exit 0  3PASS/38filtered  log 1c683c55d20e45339d6f1afd7c7189435642b1f8517aa05080fbdab49faa9ca8
+source_changed [] and source_added [] (no input drift)

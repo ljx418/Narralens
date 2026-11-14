@@ -1,0 +1,83 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:3708654) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+stdout | tests/m2.3/migration-real-export.test.ts > the child boundaries of this harness, with REAL node children > writes the machine-readable validity index of the 053 evidence and adjudicates every entry
+[real-export-054] validity index sha256=9b36b66620d93b387a4c38d24a2310e48f8a5d62ee2b55617acaa7ec262868a5 active=n1n2-claude-053-real-export-003 admissible=5 refused=6 file=validity-index-053-n1n2-claude-054-export-harness-001.json
+
+stdout | tests/m2.3/migration-real-export.test.ts > MIG-03 the real chain: migrate, reopen, export, edit the middle clip, export again > produces two real, different exports of the same 900-frame three-clip film
+[real-export-053] stage=mig03-migration-export sha256=bbf30366cec4268effe2e625a94eb3dda133fa2156b05a45a91a6e494bbfb8ad bytes=917726 frames=900 audio=aac 48000Hz 30s artifact=mig03-migration-export-bbf30366cec4-n1n2-claude-054-export-harness-001.mp4 artifact_sha256=bbf30366cec4268effe2e625a94eb3dda133fa2156b05a45a91a6e494bbfb8ad manifest=manifest-mig03-migration-export-1.json
+
+stdout | tests/m2.3/migration-real-export.test.ts > MIG-03 the real chain: migrate, reopen, export, edit the middle clip, export again > produces two real, different exports of the same 900-frame three-clip film
+[real-export-053] stage=mig03-export-first sha256=bbf30366cec4268effe2e625a94eb3dda133fa2156b05a45a91a6e494bbfb8ad bytes=917726 frames=900 audio=aac 48000Hz 30s artifact=mig03-export-first-bbf30366cec4-n1n2-claude-054-export-harness-001.mp4 artifact_sha256=bbf30366cec4268effe2e625a94eb3dda133fa2156b05a45a91a6e494bbfb8ad manifest=manifest-mig03-export-first-1.json
+
+stdout | tests/m2.3/migration-real-export.test.ts > MIG-03 the real chain: migrate, reopen, export, edit the middle clip, export again > produces two real, different exports of the same 900-frame three-clip film
+[real-export-053] stage=mig03-export-after-middle-edit sha256=7870320dc14505149afd161abeab7f954aae83f3716feb1aba4943c58eadcf07 bytes=939596 frames=900 audio=aac 48000Hz 30s artifact=mig03-export-after-middle-edit-7870320dc145-n1n2-claude-054-export-harness-001.mp4 artifact_sha256=7870320dc14505149afd161abeab7f954aae83f3716feb1aba4943c58eadcf07 manifest=manifest-mig03-export-after-middle-edit-1.json
+
+stdout | tests/m2.3/migration-real-export.test.ts > MIG-03 the real chain: migrate, reopen, export, edit the middle clip, export again > produces two real, different exports of the same 900-frame three-clip film
+[real-export-054] children=3 pids=3710076,3711355,3712479 studio_started=false cleanup={"settled":true,"actions":[],"reasons":[]}
+
+stdout | tests/m2.3/migration-real-export.test.ts > EN-05 the source project is still intact and openable after rollback > keeps the source bytes, binding and recorded output, and retains the copy
+[real-export-053] stage=en05-migration-export sha256=bbf30366cec4268effe2e625a94eb3dda133fa2156b05a45a91a6e494bbfb8ad bytes=917726 frames=900 audio=aac 48000Hz 30s artifact=en05-migration-export-bbf30366cec4-n1n2-claude-054-export-harness-001.mp4 artifact_sha256=bbf30366cec4268effe2e625a94eb3dda133fa2156b05a45a91a6e494bbfb8ad manifest=manifest-en05-migration-export-1.json
+
+stdout | tests/m2.3/migration-real-export.test.ts > EN-05 the source project is still intact and openable after rollback > keeps the source bytes, binding and recorded output, and retains the copy
+[real-export-053] stage=en05-export-copy-after-rollback sha256=bbf30366cec4268effe2e625a94eb3dda133fa2156b05a45a91a6e494bbfb8ad bytes=917726 frames=900 audio=aac 48000Hz 30s artifact=en05-export-copy-after-rollback-bbf30366cec4-n1n2-claude-054-export-harness-001.mp4 artifact_sha256=bbf30366cec4268effe2e625a94eb3dda133fa2156b05a45a91a6e494bbfb8ad manifest=manifest-en05-export-copy-after-rollback-1.json
+
+stdout | tests/m2.3/migration-real-export.test.ts > EN-05 the source project is still intact and openable after rollback > keeps the source bytes, binding and recorded output, and retains the copy
+[real-export-054] children=2 pids=3713822,3714946 studio_started=false cleanup={"settled":true,"actions":[],"reasons":[]}
+
+ ❯ tests/m2.3/migration-real-export.test.ts (9 tests | 2 failed) 133027ms
+   ✓ the child boundaries of this harness, with REAL node children > kills and reaps a child that hangs past its budget, and keeps both reasons  1510ms
+   ✓ the child boundaries of this harness, with REAL node children > stops a child that floods stdout at the output limit, and reaps it 17ms
+   ✓ the child boundaries of this harness, with REAL node children > stops a child that floods stderr at the output limit, and reaps it 16ms
+   × the child boundaries of this harness, with REAL node children > stops a child that was cancelled, and reaps it 60021ms
+     → Test timed out in 60000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+   ✓ the child boundaries of this harness, with REAL node children > fails closed when a private home advertises a Studio without a verifiable pid 2ms
+   × the child boundaries of this harness, with REAL node children > writes the machine-readable validity index of the 053 evidence and adjudicates every entry 547ms
+     → expected 11 to be 12 // Object.is equality
+   ✓ the child boundaries of this harness, with REAL node children > never signals a pid it cannot prove belongs to this case 4ms
+   ✓ MIG-03 the real chain: migrate, reopen, export, edit the middle clip, export again > produces two real, different exports of the same 900-frame three-clip film  42669ms
+   ✓ EN-05 the source project is still intact and openable after rollback > keeps the source bytes, binding and recorded output, and retains the copy  28240ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/m2.3/migration-real-export.test.ts > the child boundaries of this harness, with REAL node children > stops a child that was cancelled, and reaps it
+Error: Test timed out in 60000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ tests/m2.3/migration-real-export.test.ts:904:3
+    902|   }, 60_000);
+    903| 
+    904|   it("stops a child that was cancelled, and reaps it", async () => {
+       |   ^
+    905|     const base = await mkdtemp(join(tmpdir(), "narralens-m23-cancel-")…
+    906|     dirs.push(base);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/m2.3/migration-real-export.test.ts > the child boundaries of this harness, with REAL node children > writes the machine-readable validity index of the 053 evidence and adjudicates every entry
+AssertionError: expected 11 to be 12 // Object.is equality
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 12[39m
+[31m+ 11[39m
+
+ ❯ tests/m2.3/migration-real-export.test.ts:960:33
+    958|     };
+    959|     // Every 053 manifest is listed one by one: nothing is hidden by a…
+    960|     expect(body.entries.length).toBe(12);
+       |                                 ^
+    961|     // The acceptance entry is ONE explicitly active capture group.
+    962|     expect(body.active_captures).toEqual(["n1n2-claude-053-real-export…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 7 passed (9)
+   Start at  01:26:38
+   Duration  138.59s (transform 1.23s, setup 0ms, collect 3.54s, tests 133.03s, environment 0ms, prepare 1.30s)
+

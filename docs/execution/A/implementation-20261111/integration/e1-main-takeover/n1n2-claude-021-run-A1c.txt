@@ -1,0 +1,20 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:2258334) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/created-native-source-reader.test.ts (88 tests | 80 skipped) 91072ms
+   ✓ K02-a releases the private parse copy of a successful acquisition  10669ms
+   ✓ K02-b releases the private parse copy of a failed parse  10077ms
+   ✓ K02-c delivers nothing when the private parse copy could not be removed  10411ms
+   ✓ K06-a proves that the heard consumer really asked for the absent transcript  12948ms
+   ✓ K06-b refuses the round when the ownership authority moved during the read  11355ms
+   ✓ K06-c refuses the round when the committed base moved during the read  11218ms
+   ✓ K06-d refuses the round when the control revision moved during the read  12359ms
+   ✓ K06-e refuses the round when the issued view was replaced  12033ms
+
+ Test Files  1 passed (1)
+      Tests  8 passed | 80 skipped (88)
+   Start at  09:13:13
+   Duration  101.88s (transform 4.64s, setup 0ms, collect 8.32s, tests 91.07s, environment 0ms, prepare 1.65s)
+

@@ -1,0 +1,490 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:987375) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/created-native-workspace.test.ts (11 tests) 51183ms
+   ✓ opens the real HTTP-created committed project in native Studio using only its independent verified working copy  5247ms
+   ✓ coalesces identical preparation, rejects a foreign principal before I/O, and does not turn a copy into a revision  3530ms
+   ✓ refuses a modified disposable source, then rebuilds from the still-proven immutable snapshot  3708ms
+   ✓ rejects storage overlapping an author or snapshot root before creating any directories  2979ms
+   ✓ does not follow a symbolic-link leaf in a damaged derived copy  3146ms
+   ✓ wires the actual Host Supervisor to a prepared committed copy and removes it only after native shutdown  7144ms
+   ✓ closes every actual late-created Gateway/Studio listener when Host close races Gateway publication  6153ms
+   ✓ rechecks the actual cached preparation after its awaited verification when shutdown begins  3521ms
+   ✓ rejects an ancestor alias installed after construction without creating anything inside the real snapshot  3252ms
+   ✓ refuses an obsolete prepared version after the actual native startup window  7242ms
+   ✓ does not publish a preview when the actual native-open response races a prepared version replacement  5259ms
+(node:988905) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ tests/agent-driven/integration/committed-snapshot-host.test.ts (11 tests) 30172ms
+   ✓ uses a real committed Host transaction and pinned native parser for its immutable snapshot, never claims a draft is a film  3178ms
+   ✓ continues to read the committed snapshot after the live author source drifts  2710ms
+   ✓ refuses another principal, another transaction, another snapshot and a false expected digest  2517ms
+   ✓ rechecks the committed transaction on every read rather than trusting a once-created reader  2005ms
+   ✓ rejects mutated immutable bytes even while the database digest stays unchanged  2177ms
+   ✓ refuses a snapshot source symlink to identical bytes outside its own snapshot directory  2165ms
+   ✓ refuses a FIFO substituted for a snapshot entry without occupying the request forever  2099ms
+   ✓ reports unavailable snapshot paths without leaking absolute server paths or latching a read failure  3550ms
+   ✓ retries a failed pinned upstream initialization instead of caching unavailable forever  3320ms
+   ✓ refuses a FIFO installed after the digest but immediately before the actual pinned parser reads the film  2989ms
+   ✓ refuses changed film bytes between digest and pinned parsing even when its editable document is equivalent  3459ms
+(node:990197) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/agent-driven/integration/created-native-ack.test.ts (84 tests | 24 failed) 705ms
+   ✓ the native observation envelope > accepts exactly the four closed fields 1ms
+   ✓ the native observation envelope > refuses an envelope that carries any identity of its own 0ms
+   ✓ the native observation envelope > refuses an unknown format, an unknown event kind and a non-integer sequence 0ms
+   ✓ the original p2 document observation > accepts a committed document and an invalidation 0ms
+   ✓ the original p2 document observation > refuses a foreign protocol version, a broken hash and an unknown reason 0ms
+   ✓ the original 013 hydration observation > accepts exactly the four parts with a project origin 0ms
+   ✓ the original 013 hydration observation > refuses a part set that is not exactly the four 0ms
+   ✓ the original 013 hydration observation > refuses a browser preference as a proven origin 0ms
+   ✓ the original 013 hydration observation > refuses a digest on a part that is not hydrated and refuses a missing one 0ms
+   ✓ the original 013 hydration observation > refuses a hydration epoch that is not positive 0ms
+   ✓ the original Studio selection > accepts a fractional native second and the original ref kinds 0ms
+   ✓ the original Studio selection > refuses a non-finite time, an unknown ref kind and a broken range 0ms
+   ✓ the native seconds canonicalisation > is its own fractional domain and never the integer canonical domain 0ms
+   ✓ the native seconds canonicalisation > refuses a value that is not finite 0ms
+   ✓ the retained source identity > refuses a proof whose file bytes drifted between prove and the acknowledgement 2ms
+   ✓ the retained source identity > refuses a proof whose file was replaced by another file with the same bytes 1ms
+   ✓ the retained source identity > refuses a closure that gained or lost a file 1ms
+   × the expected proof > refuses a proof whose file drifted between prove and the acknowledgement 31ms
+     → NATIVE_EXPECTED_BUILD_UNSUPPORTED
+   × the expected proof > refuses a proof whose file was replaced by an identical file, and a closure that changed 22ms
+     → NATIVE_EXPECTED_BUILD_UNSUPPORTED
+   × the expected proof > refuses a released proof and a proof from another instance 22ms
+     → NATIVE_EXPECTED_BUILD_UNSUPPORTED
+   × the expected proof > refuses a binding that is not the one the proof was made against 19ms
+     → NATIVE_EXPECTED_BUILD_UNSUPPORTED
+   × the expected proof > closes every descriptor when the projection fails, and when the service is closed 30ms
+     → expected [Function] to throw error including 'THE_PROJECTION_FAILED' but got 'NATIVE_EXPECTED_BUILD_UNSUPPORTED'
+   × the expected loader approval chain > loads a candidate whose inputs, manifest and modules all match the approval 20ms
+     → NATIVE_EXPECTED_BUILD_UNSUPPORTED
+   ✓ the expected loader approval chain > refuses a changed input, a changed manifest and a swapped module 15ms
+   ✓ the expected loader approval chain > refuses a module that reaches outside the verified directory 11ms
+   ✓ the expected loader approval chain > refuses a candidate whose upstream is not the pinned one 9ms
+   ✓ the binding snapshot > captures the fields, so a mutated binding cannot pass for the original 0ms
+   × the selection version port > follows the real selection changes, voids the acknowledgement, and refuses when closed 36ms
+     → expected null not to be null
+   ✓ the selection version port > moves the version even when the selection cannot be mapped, because nothing can be proved 20ms
+   ✓ the selection version of a stale session > rejects a session that is no longer current, and keeps it apart from one that never observed 18ms
+   ✓ the controlled session and the observation binding > mints the bridge session id at the exchange, tells the producer, and closes it again 2ms
+   ✓ the controlled session and the observation binding > tells the producer again when the editor opens again on the same session 1ms
+   ✓ the controlled session and the observation binding > refuses an exchange from another origin 0ms
+   ✓ the controlled session and the observation binding > refuses an exchange whose body is not exactly the ticket 0ms
+   ✓ the shipped native observation contract > accepts a closed envelope and refuses one that carries an identity 0ms
+   ✓ the shipped native observation contract > accepts the three original event shapes and refuses the ones they forbid 29ms
+   ✓ the tracked candidate pin > refuses the candidate until a review has approved it 1ms
+   ✓ the tracked candidate pin > reads an approval that a review has recorded 0ms
+   ✓ the body of one observation > parses the closed envelope and refuses anything else 0ms
+   ✓ the counted observation route > is exactly one additional Gateway route, and the registry says the same 1ms
+   ✓ the counted observation route > is the same path the Studio bridge reports into 0ms
+   × the epoch of the hydration and the epoch of the document > keeps the parts when the document event confirms the very hydration they belong to 31ms
+     → expected null not to be null
+   ✓ the expected state of the parts that come from the project's own sources > expects settings, captions and markers to be hydrated, even when the parsed result is empty 27ms
+   ✓ the original Studio selection at the ingress > refuses a reference that is missing the field the Host has to read 0ms
+   ✓ the original Studio selection at the ingress > refuses a selection that carries a field the original does not have 0ms
+   ✓ the closed shape of the document and the hydration event > refuses an event that carries a field the original does not have 0ms
+   ✓ the document branches of the shipped contract > accepts each branch on its own and refuses a mixture 16ms
+   ✓ the selection reference against the upstream source > declares exactly the branches and the fields the upstream declares 7ms
+   ✓ the document and the hydration against the upstream sources > declares the document state the upstream declares 3ms
+   ✓ the document and the hydration against the upstream sources > declares the hydration state the pinned patch adds 3ms
+   × the editor that opens again > voids the acknowledgement of the view that is gone 28ms
+     → expected null not to be null
+   × the private lifecycle of the expected service > keeps the projection failure and still releases every other descriptor 18ms
+     → expected 'NATIVE_EXPECTED_BUILD_UNSUPPORTED' to contain 'THE_PROJECTION_FAILED'
+   × the private lifecycle of the expected service > revokes the proof before the cleanup, and still releases every descriptor 19ms
+     → NATIVE_EXPECTED_BUILD_UNSUPPORTED
+   × the private lifecycle of the expected service > releases every proof on close, even when the first cleanup fails 18ms
+     → NATIVE_EXPECTED_BUILD_UNSUPPORTED
+   × the private lifecycle of the expected service > does not go green again after an uncertain cleanup 18ms
+     → NATIVE_EXPECTED_BUILD_UNSUPPORTED
+   ✓ the private lifecycle of the expected service > refuses a candidate that loads after the close, and never reads the source 1ms
+   ✓ the private lifecycle of the expected service > releases the descriptors of a source that returns after the close, and issues no proof 1ms
+   × the private lifecycle of the expected service > refuses a foreign proof and releases nothing of the owner 19ms
+     → NATIVE_EXPECTED_BUILD_UNSUPPORTED
+   × the private lifecycle of the expected service > refuses a forged or a rebuilt proof, and releases nothing 17ms
+     → NATIVE_EXPECTED_BUILD_UNSUPPORTED
+   × the private lifecycle of the expected service > releases one resource that is listed twice exactly once 18ms
+     → NATIVE_EXPECTED_BUILD_UNSUPPORTED
+   × the private lifecycle of the expected service > releases a proof once, and a repeated release neither closes again nor fails 19ms
+     → NATIVE_EXPECTED_BUILD_UNSUPPORTED
+   × the private lifecycle of the expected service > closes twice without closing a descriptor twice 20ms
+     → NATIVE_EXPECTED_BUILD_UNSUPPORTED
+   × the proof surface is never the authority > releases the descriptors even when the proof replaces its own method 18ms
+     → NATIVE_EXPECTED_BUILD_UNSUPPORTED
+   × the proof surface is never the authority > does not let a replaced method hide an uncertain cleanup 18ms
+     → NATIVE_EXPECTED_BUILD_UNSUPPORTED
+   × the proof surface is never the authority > closes every proof even when one proof replaces its own method 18ms
+     → NATIVE_EXPECTED_BUILD_UNSUPPORTED
+   × the final check before a proof is issued > refuses to issue a proof when the binding stops being current while the projection is computed 21ms
+     → expected [Function] to throw error including 'NATIVE_EXPECTED_BINDING_STALE' but got 'NATIVE_EXPECTED_BUILD_UNSUPPORTED'
+   ✓ the final check before a proof is issued > refuses to issue a proof when a cleanup failed while the projection was computed 1ms
+   × the terminal guard of the expected service > refuses to issue a proof when the last liveness callback closes the service 18ms
+     → expected [Function] to throw error including 'NATIVE_EXPECTED_CLOSED' but got 'NATIVE_EXPECTED_BUILD_UNSUPPORTED'
+   ✓ the terminal guard of the expected service > refuses to issue a proof when a canonical callback closes the service 1ms
+   ✓ the terminal guard of the expected service > refuses to issue a proof when a canonical callback leaves a cleanup uncertain 1ms
+   × the terminal guard of the expected service > does not certify a binding that a callback changed while the proof was prepared 19ms
+     → expected [Function] to throw error including 'NATIVE_EXPECTED_BINDING_MOVED' but got 'NATIVE_EXPECTED_BUILD_UNSUPPORTED'
+   ✓ the final guard of the acknowledgement > does not return a projection after the proof was released during the check 1ms
+   ✓ the final guard of the acknowledgement > does not return a projection after the service was closed during the check 0ms
+   ✓ MAIN final source getter and binding fence > captures a closure getter before admission and releases late-owned descriptors when it closes the service 1ms
+   ✓ MAIN final source getter and binding fence > rechecks binding after the session callback mutates it 1ms
+   ✓ MAIN final source getter and binding fence > rechecks binding after the closure callback mutates it 0ms
+   ✓ MAIN final source getter and binding fence > rechecks binding after the last file callback mutates it 0ms
+   ✓ MAIN operation baseline and immediate cleanup latch > rejects a binding changed during canonical before issuing a proof 1ms
+   ✓ MAIN operation baseline and immediate cleanup latch > rejects a binding changed during closure getter before issuing a proof 1ms
+   ✓ MAIN operation baseline and immediate cleanup latch > rejects a binding changed during compute before issuing a proof 0ms
+   ✓ MAIN operation baseline and immediate cleanup latch > rejects a binding changed during load before issuing a proof 0ms
+   ✓ MAIN operation baseline and immediate cleanup latch > rejects a binding changed during read before issuing a proof 1ms
+   ✓ MAIN operation baseline and immediate cleanup latch > latches a failed close before the next close reenters another proof during release 1ms
+   ✓ MAIN operation baseline and immediate cleanup latch > latches a failed close before the next close reenters another proof during prove failure 1ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 24 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/created-native-ack.test.ts > the expected proof > refuses a proof whose file drifted between prove and the acknowledgement
+Error: NATIVE_EXPECTED_BUILD_UNSUPPORTED
+ ❯ Object.load src/host/m5/openfilm-native-expected.ts:626:17
+    624|         // to another parser: the refusal is the answer.
+    625|         if (typeof expected.parseProjectSettings !== 'function' || typ…
+    626|           throw new Error('NATIVE_EXPECTED_BUILD_UNSUPPORTED');
+       |                 ^
+    627|         return Object.freeze({
+    628|           EXPECTED_PROFILE: NATIVE_EXPECTED_PROFILE,
+ ❯ OpenFilmNativeExpected.prove src/host/m5/openfilm-native-expected.ts:726:21
+ ❯ tests/agent-driven/integration/created-native-ack.test.ts:503:21
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/24]⎯
+
+ FAIL  tests/agent-driven/integration/created-native-ack.test.ts > the expected proof > refuses a proof whose file was replaced by an identical file, and a closure that changed
+Error: NATIVE_EXPECTED_BUILD_UNSUPPORTED
+ ❯ Object.load src/host/m5/openfilm-native-expected.ts:626:17
+    624|         // to another parser: the refusal is the answer.
+    625|         if (typeof expected.parseProjectSettings !== 'function' || typ…
+    626|           throw new Error('NATIVE_EXPECTED_BUILD_UNSUPPORTED');
+       |                 ^
+    627|         return Object.freeze({
+    628|           EXPECTED_PROFILE: NATIVE_EXPECTED_PROFILE,
+ ❯ OpenFilmNativeExpected.prove src/host/m5/openfilm-native-expected.ts:726:21
+ ❯ tests/agent-driven/integration/created-native-ack.test.ts:523:21
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/24]⎯
+
+ FAIL  tests/agent-driven/integration/created-native-ack.test.ts > the expected proof > refuses a released proof and a proof from another instance
+Error: NATIVE_EXPECTED_BUILD_UNSUPPORTED
+ ❯ Object.load src/host/m5/openfilm-native-expected.ts:626:17
+    624|         // to another parser: the refusal is the answer.
+    625|         if (typeof expected.parseProjectSettings !== 'function' || typ…
+    626|           throw new Error('NATIVE_EXPECTED_BUILD_UNSUPPORTED');
+       |                 ^
+    627|         return Object.freeze({
+    628|           EXPECTED_PROFILE: NATIVE_EXPECTED_PROFILE,
+ ❯ OpenFilmNativeExpected.prove src/host/m5/openfilm-native-expected.ts:726:21
+ ❯ tests/agent-driven/integration/created-native-ack.test.ts:549:21
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/24]⎯
+
+ FAIL  tests/agent-driven/integration/created-native-ack.test.ts > the expected proof > refuses a binding that is not the one the proof was made against
+Error: NATIVE_EXPECTED_BUILD_UNSUPPORTED
+ ❯ Object.load src/host/m5/openfilm-native-expected.ts:626:17
+    624|         // to another parser: the refusal is the answer.
+    625|         if (typeof expected.parseProjectSettings !== 'function' || typ…
+    626|           throw new Error('NATIVE_EXPECTED_BUILD_UNSUPPORTED');
+       |                 ^
+    627|         return Object.freeze({
+    628|           EXPECTED_PROFILE: NATIVE_EXPECTED_PROFILE,
+ ❯ OpenFilmNativeExpected.prove src/host/m5/openfilm-native-expected.ts:726:21
+ ❯ tests/agent-driven/integration/created-native-ack.test.ts:572:21
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/24]⎯
+
+ FAIL  tests/agent-driven/integration/created-native-ack.test.ts > the expected proof > closes every descriptor when the projection fails, and when the service is closed
+AssertionError: expected [Function] to throw error including 'THE_PROJECTION_FAILED' but got 'NATIVE_EXPECTED_BUILD_UNSUPPORTED'
+
+Expected: [32m"[7mTHE_PROJECTION_FAIL[27mED"[39m
+Received: [31m"[7mNATIVE_EXPECTED_BUILD_UNSUPPORT[27mED"[39m
+
+ ❯ tests/agent-driven/integration/created-native-ack.test.ts:591:7
+    589|       const service = await serviceOf(root, reader, staged);
+    590|       const binding = bindingOf();
+    591|       await expect(service.prove(binding)).rejects.toThrow('THE_PROJEC…
+       |       ^
+    592|       // The reader's handles are the service's from the moment the re…
+    593|       expect(reader.closedDescriptors()).toBe(1);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/24]⎯
+
+ FAIL  tests/agent-driven/integration/created-native-ack.test.ts > the expected loader approval chain > loads a candidate whose inputs, manifest and modules all match the approval
+Error: NATIVE_EXPECTED_BUILD_UNSUPPORTED
+ ❯ Object.load src/host/m5/openfilm-native-expected.ts:626:17
+    624|         // to another parser: the refusal is the answer.
+    625|         if (typeof expected.parseProjectSettings !== 'function' || typ…
+    626|           throw new Error('NATIVE_EXPECTED_BUILD_UNSUPPORTED');
+       |                 ^
+    627|         return Object.freeze({
+    628|           EXPECTED_PROFILE: NATIVE_EXPECTED_PROFILE,
+ ❯ tests/agent-driven/integration/created-native-ack.test.ts:614:23
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/24]⎯
+
+ FAIL  tests/agent-driven/integration/created-native-ack.test.ts > the selection version port > follows the real selection changes, voids the acknowledgement, and refuses when closed
+AssertionError: expected null not to be null
+ ❯ tests/agent-driven/integration/created-native-ack.test.ts:800:29
+    798|       const first = await service.observe(binding, envelope(3, 'select…
+    799|       expect(first.accepted).toBe(true);
+    800|       expect(first.ack).not.toBeNull();
+       |                             ^
+    801|       expect(service.currentSelectionVersion('p1')).toBe(1);
+    802|       // The acknowledgement really was written, on the real table.
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/24]⎯
+
+ FAIL  tests/agent-driven/integration/created-native-ack.test.ts > the epoch of the hydration and the epoch of the document > keeps the parts when the document event confirms the very hydration they belong to
+AssertionError: expected null not to be null
+ ❯ tests/agent-driven/integration/created-native-ack.test.ts:1343:33
+    1341|       }));
+    1342|       expect(selection.accepted).toBe(true);
+    1343|       expect(selection.ack).not.toBeNull();
+       |                                 ^
+    1344|     } finally {
+    1345|       rmSync(root, { recursive: true, force: true });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/24]⎯
+
+ FAIL  tests/agent-driven/integration/created-native-ack.test.ts > the editor that opens again > voids the acknowledgement of the view that is gone
+AssertionError: expected null not to be null
+ ❯ tests/agent-driven/integration/created-native-ack.test.ts:1746:33
+    1744|       }));
+    1745|       const selection = await service.observe(binding, envelope(3, 'se…
+    1746|       expect(selection.ack).not.toBeNull();
+       |                                 ^
+    1747|       expect((await service.read('p1')).ack).not.toBeNull();
+    1748| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/24]⎯
+
+ FAIL  tests/agent-driven/integration/created-native-ack.test.ts > the private lifecycle of the expected service > keeps the projection failure and still releases every other descriptor
+AssertionError: expected 'NATIVE_EXPECTED_BUILD_UNSUPPORTED' to contain 'THE_PROJECTION_FAILED'
+
+Expected: [32m"[7mTHE_PROJECTION_FAIL[27mED"[39m
+Received: [31m"[7mNATIVE_EXPECTED_BUILD_UNSUPPORT[27mED"[39m
+
+ ❯ tests/agent-driven/integration/created-native-ack.test.ts:1955:42
+    1953|       // The primary failure is still the primary failure: the cleanup…
+    1954|       // overwrite it.
+    1955|       expect((failure as Error).message).toContain('THE_PROJECTION_FAI…
+       |                                          ^
+    1956|       // Every descriptor was attempted, including the ones after the …
+    1957|       expect(reader.attempts()[0]).toEqual([1, 1, 1]);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/24]⎯
+
+ FAIL  tests/agent-driven/integration/created-native-ack.test.ts > the private lifecycle of the expected service > revokes the proof before the cleanup, and still releases every descriptor
+Error: NATIVE_EXPECTED_BUILD_UNSUPPORTED
+ ❯ Object.load src/host/m5/openfilm-native-expected.ts:626:17
+    624|         // to another parser: the refusal is the answer.
+    625|         if (typeof expected.parseProjectSettings !== 'function' || typ…
+    626|           throw new Error('NATIVE_EXPECTED_BUILD_UNSUPPORTED');
+       |                 ^
+    627|         return Object.freeze({
+    628|           EXPECTED_PROFILE: NATIVE_EXPECTED_PROFILE,
+ ❯ OpenFilmNativeExpected.prove src/host/m5/openfilm-native-expected.ts:726:21
+ ❯ tests/agent-driven/integration/created-native-ack.test.ts:1980:21
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/24]⎯
+
+ FAIL  tests/agent-driven/integration/created-native-ack.test.ts > the private lifecycle of the expected service > releases every proof on close, even when the first cleanup fails
+Error: NATIVE_EXPECTED_BUILD_UNSUPPORTED
+ ❯ Object.load src/host/m5/openfilm-native-expected.ts:626:17
+    624|         // to another parser: the refusal is the answer.
+    625|         if (typeof expected.parseProjectSettings !== 'function' || typ…
+    626|           throw new Error('NATIVE_EXPECTED_BUILD_UNSUPPORTED');
+       |                 ^
+    627|         return Object.freeze({
+    628|           EXPECTED_PROFILE: NATIVE_EXPECTED_PROFILE,
+ ❯ OpenFilmNativeExpected.prove src/host/m5/openfilm-native-expected.ts:726:21
+ ❯ tests/agent-driven/integration/created-native-ack.test.ts:2001:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/24]⎯
+
+ FAIL  tests/agent-driven/integration/created-native-ack.test.ts > the private lifecycle of the expected service > does not go green again after an uncertain cleanup
+Error: NATIVE_EXPECTED_BUILD_UNSUPPORTED
+ ❯ Object.load src/host/m5/openfilm-native-expected.ts:626:17
+    624|         // to another parser: the refusal is the answer.
+    625|         if (typeof expected.parseProjectSettings !== 'function' || typ…
+    626|           throw new Error('NATIVE_EXPECTED_BUILD_UNSUPPORTED');
+       |                 ^
+    627|         return Object.freeze({
+    628|           EXPECTED_PROFILE: NATIVE_EXPECTED_PROFILE,
+ ❯ OpenFilmNativeExpected.prove src/host/m5/openfilm-native-expected.ts:726:21
+ ❯ tests/agent-driven/integration/created-native-ack.test.ts:2021:21
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/24]⎯
+
+ FAIL  tests/agent-driven/integration/created-native-ack.test.ts > the private lifecycle of the expected service > refuses a foreign proof and releases nothing of the owner
+Error: NATIVE_EXPECTED_BUILD_UNSUPPORTED
+ ❯ Object.load src/host/m5/openfilm-native-expected.ts:626:17
+    624|         // to another parser: the refusal is the answer.
+    625|         if (typeof expected.parseProjectSettings !== 'function' || typ…
+    626|           throw new Error('NATIVE_EXPECTED_BUILD_UNSUPPORTED');
+       |                 ^
+    627|         return Object.freeze({
+    628|           EXPECTED_PROFILE: NATIVE_EXPECTED_PROFILE,
+ ❯ OpenFilmNativeExpected.prove src/host/m5/openfilm-native-expected.ts:726:21
+ ❯ tests/agent-driven/integration/created-native-ack.test.ts:2100:21
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/24]⎯
+
+ FAIL  tests/agent-driven/integration/created-native-ack.test.ts > the private lifecycle of the expected service > refuses a forged or a rebuilt proof, and releases nothing
+Error: NATIVE_EXPECTED_BUILD_UNSUPPORTED
+ ❯ Object.load src/host/m5/openfilm-native-expected.ts:626:17
+    624|         // to another parser: the refusal is the answer.
+    625|         if (typeof expected.parseProjectSettings !== 'function' || typ…
+    626|           throw new Error('NATIVE_EXPECTED_BUILD_UNSUPPORTED');
+       |                 ^
+    627|         return Object.freeze({
+    628|           EXPECTED_PROFILE: NATIVE_EXPECTED_PROFILE,
+ ❯ OpenFilmNativeExpected.prove src/host/m5/openfilm-native-expected.ts:726:21
+ ❯ tests/agent-driven/integration/created-native-ack.test.ts:2121:21
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[15/24]⎯
+
+ FAIL  tests/agent-driven/integration/created-native-ack.test.ts > the private lifecycle of the expected service > releases one resource that is listed twice exactly once
+Error: NATIVE_EXPECTED_BUILD_UNSUPPORTED
+ ❯ Object.load src/host/m5/openfilm-native-expected.ts:626:17
+    624|         // to another parser: the refusal is the answer.
+    625|         if (typeof expected.parseProjectSettings !== 'function' || typ…
+    626|           throw new Error('NATIVE_EXPECTED_BUILD_UNSUPPORTED');
+       |                 ^
+    627|         return Object.freeze({
+    628|           EXPECTED_PROFILE: NATIVE_EXPECTED_PROFILE,
+ ❯ OpenFilmNativeExpected.prove src/host/m5/openfilm-native-expected.ts:726:21
+ ❯ tests/agent-driven/integration/created-native-ack.test.ts:2155:21
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[16/24]⎯
+
+ FAIL  tests/agent-driven/integration/created-native-ack.test.ts > the private lifecycle of the expected service > releases a proof once, and a repeated release neither closes again nor fails
+Error: NATIVE_EXPECTED_BUILD_UNSUPPORTED
+ ❯ Object.load src/host/m5/openfilm-native-expected.ts:626:17
+    624|         // to another parser: the refusal is the answer.
+    625|         if (typeof expected.parseProjectSettings !== 'function' || typ…
+    626|           throw new Error('NATIVE_EXPECTED_BUILD_UNSUPPORTED');
+       |                 ^
+    627|         return Object.freeze({
+    628|           EXPECTED_PROFILE: NATIVE_EXPECTED_PROFILE,
+ ❯ OpenFilmNativeExpected.prove src/host/m5/openfilm-native-expected.ts:726:21
+ ❯ tests/agent-driven/integration/created-native-ack.test.ts:2173:21
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[17/24]⎯
+
+ FAIL  tests/agent-driven/integration/created-native-ack.test.ts > the private lifecycle of the expected service > closes twice without closing a descriptor twice
+Error: NATIVE_EXPECTED_BUILD_UNSUPPORTED
+ ❯ Object.load src/host/m5/openfilm-native-expected.ts:626:17
+    624|         // to another parser: the refusal is the answer.
+    625|         if (typeof expected.parseProjectSettings !== 'function' || typ…
+    626|           throw new Error('NATIVE_EXPECTED_BUILD_UNSUPPORTED');
+       |                 ^
+    627|         return Object.freeze({
+    628|           EXPECTED_PROFILE: NATIVE_EXPECTED_PROFILE,
+ ❯ OpenFilmNativeExpected.prove src/host/m5/openfilm-native-expected.ts:726:21
+ ❯ tests/agent-driven/integration/created-native-ack.test.ts:2194:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[18/24]⎯
+
+ FAIL  tests/agent-driven/integration/created-native-ack.test.ts > the proof surface is never the authority > releases the descriptors even when the proof replaces its own method
+Error: NATIVE_EXPECTED_BUILD_UNSUPPORTED
+ ❯ Object.load src/host/m5/openfilm-native-expected.ts:626:17
+    624|         // to another parser: the refusal is the answer.
+    625|         if (typeof expected.parseProjectSettings !== 'function' || typ…
+    626|           throw new Error('NATIVE_EXPECTED_BUILD_UNSUPPORTED');
+       |                 ^
+    627|         return Object.freeze({
+    628|           EXPECTED_PROFILE: NATIVE_EXPECTED_PROFILE,
+ ❯ OpenFilmNativeExpected.prove src/host/m5/openfilm-native-expected.ts:726:21
+ ❯ tests/agent-driven/integration/created-native-ack.test.ts:2250:21
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[19/24]⎯
+
+ FAIL  tests/agent-driven/integration/created-native-ack.test.ts > the proof surface is never the authority > does not let a replaced method hide an uncertain cleanup
+Error: NATIVE_EXPECTED_BUILD_UNSUPPORTED
+ ❯ Object.load src/host/m5/openfilm-native-expected.ts:626:17
+    624|         // to another parser: the refusal is the answer.
+    625|         if (typeof expected.parseProjectSettings !== 'function' || typ…
+    626|           throw new Error('NATIVE_EXPECTED_BUILD_UNSUPPORTED');
+       |                 ^
+    627|         return Object.freeze({
+    628|           EXPECTED_PROFILE: NATIVE_EXPECTED_PROFILE,
+ ❯ OpenFilmNativeExpected.prove src/host/m5/openfilm-native-expected.ts:726:21
+ ❯ tests/agent-driven/integration/created-native-ack.test.ts:2275:21
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[20/24]⎯
+
+ FAIL  tests/agent-driven/integration/created-native-ack.test.ts > the proof surface is never the authority > closes every proof even when one proof replaces its own method
+Error: NATIVE_EXPECTED_BUILD_UNSUPPORTED
+ ❯ Object.load src/host/m5/openfilm-native-expected.ts:626:17
+    624|         // to another parser: the refusal is the answer.
+    625|         if (typeof expected.parseProjectSettings !== 'function' || typ…
+    626|           throw new Error('NATIVE_EXPECTED_BUILD_UNSUPPORTED');
+       |                 ^
+    627|         return Object.freeze({
+    628|           EXPECTED_PROFILE: NATIVE_EXPECTED_PROFILE,
+ ❯ OpenFilmNativeExpected.prove src/host/m5/openfilm-native-expected.ts:726:21
+ ❯ tests/agent-driven/integration/created-native-ack.test.ts:2294:21
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[21/24]⎯
+
+ FAIL  tests/agent-driven/integration/created-native-ack.test.ts > the final check before a proof is issued > refuses to issue a proof when the binding stops being current while the projection is computed
+AssertionError: expected [Function] to throw error including 'NATIVE_EXPECTED_BINDING_STALE' but got 'NATIVE_EXPECTED_BUILD_UNSUPPORTED'
+
+Expected: [32m"NATIVE_EXPECTED_B[7mINDING_STALE[27m"[39m
+Received: [31m"NATIVE_EXPECTED_B[7mUILD_UNSUPPORTED[27m"[39m
+
+ ❯ tests/agent-driven/integration/created-native-ack.test.ts:2323:7
+    2321|       let calls = 0;
+    2322|       const binding = bindingOf({ isCurrent: () => { calls += 1; retur…
+    2323|       await expect(service.prove(binding)).rejects.toThrow('NATIVE_EXP…
+       |       ^
+    2324|       // The check really happened: it is a fourth, separate one.
+    2325|       expect(calls).toBe(4);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[22/24]⎯
+
+ FAIL  tests/agent-driven/integration/created-native-ack.test.ts > the terminal guard of the expected service > refuses to issue a proof when the last liveness callback closes the service
+AssertionError: expected [Function] to throw error including 'NATIVE_EXPECTED_CLOSED' but got 'NATIVE_EXPECTED_BUILD_UNSUPPORTED'
+
+Expected: [32m"NATIVE_EXPECTED_[7mCLOS[27mED"[39m
+Received: [31m"NATIVE_EXPECTED_[7mBUILD_UNSUPPORT[27mED"[39m
+
+ ❯ tests/agent-driven/integration/created-native-ack.test.ts:2399:7
+    2397|         approved: await approvedOf(staged),
+    2398|       });
+    2399|       await expect(service.prove(binding)).rejects.toThrow('NATIVE_EXP…
+       |       ^
+    2400|       // No proof was issued, and the descriptors of the refused read …
+    2401|       expect(reader.attempts()[0]).toEqual([1]);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[23/24]⎯
+
+ FAIL  tests/agent-driven/integration/created-native-ack.test.ts > the terminal guard of the expected service > does not certify a binding that a callback changed while the proof was prepared
+AssertionError: expected [Function] to throw error including 'NATIVE_EXPECTED_BINDING_MOVED' but got 'NATIVE_EXPECTED_BUILD_UNSUPPORTED'
+
+Expected: [32m"NATIVE_EXPECTED_B[7mINDING_MOV[27mED"[39m
+Received: [31m"NATIVE_EXPECTED_B[7mUILD_UNSUPPORT[27mED"[39m
+
+ ❯ tests/agent-driven/integration/created-native-ack.test.ts:2487:7
+    2485|       });
+    2486|       // Stronger admission: a binding moved during prove is refused b…
+    2487|       await expect(service.prove(changed)).rejects.toThrow('NATIVE_EXP…
+       |       ^
+    2488|       expect(reader.attempts()[0]).toEqual([1]);
+    2489|       expect(reader.descriptorIsOpen(0, 0)).toBe(false);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[24/24]⎯
+
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  24 failed | 82 passed (106)
+   Start at  14:42:56
+   Duration  100.93s (transform 4.02s, setup 0ms, collect 12.29s, tests 82.06s, environment 0ms, prepare 4.32s)
+

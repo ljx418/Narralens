@@ -1,0 +1,585 @@
+diff --git a/src/host/agent-driven/committed-snapshot-authority.ts b/src/host/agent-driven/committed-snapshot-authority.ts
+index 1729616..d89f654 100644
+--- a/src/host/agent-driven/committed-snapshot-authority.ts
++++ b/src/host/agent-driven/committed-snapshot-authority.ts
+@@ -10,7 +10,8 @@ import {snapshotIdFor} from '../projects/snapshot-store.js';
+ import {canonicalDigest} from '../creative/digest.js';
+ import {ProductError} from '../creative/trusted-context.js';
+ import {asHostResourceError} from '../api-error.js';
+-import {computeSourceDigest} from '../engine/source-digest-v1.js';
++import {computeSourceDigest,SOURCE_DIGEST_DOMAIN,canonicalJson,compareUtf8,extractReferences} from '../engine/source-digest-v1.js';
++import type {SourceDigestManifest,SourceFileRole} from '../engine/source-digest-v1.js';
+ import {OPENFILM_UPSTREAM_SHA} from '../engine/engine-binding-store.js';
+ import {OpenFilmEngineAdapter} from '../../adapters/openfilm/openfilm-engine-adapter.js';
+ import {createPinnedOpenFilmUpstream} from '../../adapters/openfilm/openfilm-upstream.js';
+@@ -19,6 +20,7 @@ import {CreatedSourceAdoptionStore} from './created-source-adoption-store.js';
+ import {assertPreparedAdoptionPlan,preparedAdoptionPlanDigest,type PreparedAdoptionPlanV1} from './created-source-ports.js';
+ import {preparedSourceConsumerGraph} from './created-source-publisher.js';
+ import {validateCreatedSourceFact} from '../projects/project-creation-store.js';
++import {RetainedNativeClosure} from './retained-native-closure.js';
+ 
+ interface CommitBinding {
+  readonly project_id:string;
+@@ -31,11 +33,124 @@ interface CommitBinding {
+ const id=/^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$/;
+ const missing=()=>new ProductError('NOT_FOUND','No owned committed snapshot');
+ const changed=()=>new ProductError('REVISION_CONFLICT','The committed snapshot facts or bytes changed');
++
++/** The proved facts of one committed native source.
++ *
++ * These are read-only values: the geometry, the rights, the producer's consumer graph
++ * and the committed entries of the very transaction the lease was issued for. */
++export interface VerifiedNativeFacts {
++ readonly project_id:string;
++ readonly transaction_id:string;
++ readonly snapshot_id:string;
++ readonly source_digest:string;
++ readonly project_revision:number;
++ readonly native_root:string;
++ readonly entries:readonly SnapshotEntry[];
++ readonly geometry:CreatedSourceFact;
++ readonly consumer_graph:unknown;
++ readonly rights:readonly {readonly asset_id:string;readonly status:string;readonly commercial_use:boolean;readonly ref:string}[];
++ readonly film:{readonly relative_path:'film.html';readonly sha256:string;readonly bytes:number;readonly native_rev:string};
++ readonly film_doc:unknown;
++ readonly source_entries:readonly {readonly relative_path:string;readonly sha256:string}[];
++ readonly assets:readonly {readonly asset_id:string;readonly path:string;readonly sha256:string;readonly bytes:number;
++  readonly status:string;readonly commercial_use:boolean;readonly rights_ref:string}[];
++}
++
++/** The opaque lease of one committed native source.
++ *
++ * It is registered per issuing instance: a copy of it, a lease of another instance, a
++ * lease of another owner, project or transaction, and a lease of a transaction that has
++ * moved on are all refusals. Its `release` is the only owner of the retained closure. */
++export interface VerifiedNativeFactsLease {
++ readonly facts:VerifiedNativeFacts;
++ /** The retained source tree: the real descriptors of the committed files. */
++ readonly closure:RetainedNativeClosure;
++ /** The synchronous guard of the authority behind the lease. */
++ assertCurrent():boolean;
++ /** Release the retained closure. It is attempted once and never retried. */
++ release():void;
++ readonly released:boolean;
++}
++
++interface NativeFactsFacts {
++ readonly instance:object;
++ readonly binding:CommitBinding;
++ readonly principal_id:string;
++ readonly closure:RetainedNativeClosure;
++ readonly facts:VerifiedNativeFacts;
++ released:boolean;
++}
++const NATIVE_FACTS_LEASES=new WeakMap<object,NativeFactsFacts>();
++
++/** Whether a value is a native facts lease this module issued. */
++export function isVerifiedNativeFactsLease(value:unknown):value is VerifiedNativeFactsLease{
++ return !!value&&typeof value==='object'&&NATIVE_FACTS_LEASES.has(value);
++}
++
++/** The extensions the digest treats as media: they are hashed, never parsed. */
++const ASSET_EXTENSIONS=new Set([
++ 'wav','mp3','m4a','aac','ogg','oga','opus','flac','aif','aiff','weba',
++ 'mp4','m4v','mov','webm','mkv','avi','ogv',
++ 'png','jpg','jpeg','webp','gif','avif',
++]);
++const ROLE_BY_EXTENSION=new Map<string,SourceFileRole>([
++ ['html','html'],['htm','html'],['js','js'],['mjs','js'],['cjs','js'],
++ ['css','css'],['vtt','subtitle'],['srt','subtitle'],['json','settings'],
++ ['woff','font'],['woff2','font'],['ttf','font'],['otf','font'],['eot','font'],
++]);
++const EXTERNAL_SCHEME=/^(?:[a-z][a-z0-9+.-]*:|\/\/)/iu;
++const HASH_BUFFER=64*1024;
++const MAX_TEXT_BYTES=8*1024*1024;
++
++const extensionOf=(path:string):string=>{
++ const base=path.slice(path.lastIndexOf('/')+1);
++ const dot=base.lastIndexOf('.');
++ return dot<=0?'':base.slice(dot+1).toLowerCase();
++};
++const normalizeRelative=(input:string):string=>{
++ const value=input.trim();
++ if(value===''||value.includes('\\')||value.startsWith('/')||/^[a-z]:/iu.test(value))throw changed();
++ const segments=value.split('/').filter(segment=>segment!==''&&segment!=='.');
++ if(segments.length===0||segments.includes('..'))throw changed();
++ return segments.join('/');
++};
++const dirnameSlash=(path:string):string=>{
++ const index=path.lastIndexOf('/');
++ return index<=0?'':path.slice(0,index);
++};
++const joinRelative=(from:string,target:string):string=>{
++ const base=dirnameSlash(from);
++ const segments=(base===''?[]:base.split('/')).concat(target.split('/'));
++ const stack:string[]=[];
++ for(const segment of segments){
++  if(segment===''||segment==='.')continue;
++  if(segment==='..'){
++   if(stack.length===0)return '..';
++   stack.pop();
++   continue;
++  }
++  stack.push(segment);
++ }
++ return stack.join('/');
++};
++const roleFor=(extension:string,referencedByEntry:boolean):SourceFileRole=>{
++ const role=ROLE_BY_EXTENSION.get(extension);
++ if(role===undefined)throw changed();
++ return role==='html'&&referencedByEntry?'scene':role;
++};
++const deepFreeze=<T>(value:T):T=>{
++ if(value===null||typeof value!=='object')return value;
++ if(Array.isArray(value)){for(const item of value)deepFreeze(item);return Object.freeze(value);}
++ for(const item of Object.values(value as Record<string,unknown>))deepFreeze(item);
++ return Object.freeze(value);
++};
+ /** Host-only factory. The render attempt gets a reader for ONE durable commit, not live source.
+  * This is read authority, not authorization to dispatch, charge, publish or mark a Job ready.
+  */
+ export class CommittedSnapshotAuthority {
+  readonly #owner:CreativeProjectAuthority;
++ /** This instance's own token. A lease of another instance is a foreign lease. */
++ readonly #instance={};
+  #adapter:Promise<OpenFilmEngineAdapter>|undefined;
+  constructor(private readonly revisions:RevisionStore,private readonly snapshots:SnapshotStore,private readonly creation:ProjectCreationStore,private readonly vendorRoot:string){this.#owner=new CreativeProjectAuthority(creation);}
+  readerForTransaction(projectId:string,transactionId:string,principalId:string):SnapshotReadPort {
+@@ -72,10 +187,25 @@ export class CommittedSnapshotAuthority {
+   * legacy M4 impact projection. Accept ONLY a committed immutable producer lineage,
+   * not arbitrary problem filtering or a caller-supplied "complete" flag. */
+  async #verifyAdoptedNative(binding:CommitBinding,root:string,digest:Awaited<ReturnType<typeof computeSourceDigest>>):Promise<boolean>{
++  return (await this.#nativeLineage(binding,root,digest.manifest))!==null;
++ }
++ /** The proved created-producer lineage of a committed snapshot.
++  *
++  * It is `null` when this project has no created producer at all — the legacy case,
++  * which stays unsupported — and it throws when the lineage contradicts itself. */
++ async #nativeLineage(binding:CommitBinding,root:string,manifest:SourceDigestManifest):Promise<{
++  metadata:Parameters<typeof preparedSourceConsumerGraph>[0]&{format:string;plan_digest:string};
++  draft:Parameters<typeof preparedSourceConsumerGraph>[1];
++  graph:ReturnType<typeof preparedSourceConsumerGraph>;
++  geometry:CreatedSourceFact;
++  doc:unknown;
++  film_sha256:string;
++  plan_sha256:string;
++ }|null>{
+   const exists=this.revisions.compose(db=>db.prepare("SELECT name FROM sqlite_master WHERE name='created_adopted_source_fact'").get());
+-  if(!exists)return false;
++  if(!exists)return null;
+   const store=new CreatedSourceAdoptionStore(this.revisions),source=store.sourceFact(binding.project_id,binding.snapshot_id);
+-  if(!source)return false;
++  if(!source)return null;
+   const fact=store.adoptionFact(source.transaction_id);
+   const row=this.revisions.compose(db=>db.prepare('SELECT plan_json,plan_sha256 FROM created_impact_fact WHERE impact_id=?').get(source.impact_id));
+   if(!fact||!row)throw changed();
+@@ -88,7 +218,7 @@ export class CommittedSnapshotAuthority {
+    ||plan.project_id!==binding.project_id||plan.target_snapshot_id!==binding.snapshot_id||plan.target_source_digest!==binding.source_digest
+    ||plan.materialization_id!==source.prepared_source_id||canonicalDigest(plan.native_plan)!==canonicalDigest(fact.native_plan))throw changed();
+   const readJson=async(path:string):Promise<unknown>=>{
+-   const entry=digest.manifest.files.find(file=>file.path===path);if(!entry)throw changed();
++   const entry=manifest.files.find(file=>file.path===path);if(!entry)throw changed();
+    const handle=await open(resolve(root,path),constants.O_RDONLY|constants.O_NOFOLLOW|constants.O_NONBLOCK);
+    try{const stat=await handle.stat();if(!stat.isFile()||stat.size>64*1024*1024||stat.size!==entry.size)throw changed();
+     const bytes=await handle.readFile();if(createHash('sha256').update(bytes).digest('hex')!==entry.sha256)throw changed();return JSON.parse(bytes.toString('utf8')) as unknown;
+@@ -103,12 +233,172 @@ export class CommittedSnapshotAuthority {
+   if(canonicalDigest(geometry)!==canonicalDigest(binding.fact)||geometry.frame_count!==plan.frame_count||geometry.fps.num!==plan.fps_numerator
+    ||geometry.fps.den!==plan.fps_denominator||canonicalDigest(preparedSourceConsumerGraph(metadata,draft))!==plan.consumer.graph_digest)throw changed();
+   const parsed=await(await createPinnedOpenFilmUpstream(this.vendorRoot)).readProjectFilm(root);
+-  const film=digest.manifest.files.find(file=>file.path==='film.html');
++  const film=manifest.files.find(file=>file.path==='film.html');
+   if(parsed.problems.length||!film||createHash('sha256').update(parsed.text).digest('hex')!==film.sha256)throw changed();
+   const doc=parsed.doc as {tracks?:{clips?:{id?:unknown}[]}[]}|null;
+   const ids=doc?.tracks?.flatMap(track=>track.clips?.map(clip=>clip.id)??[])??[];
+   if(canonicalDigest(ids)!==canonicalDigest(metadata.clip_ids))throw changed();
+-  return true;
++  return {metadata,draft,graph:preparedSourceConsumerGraph(metadata,draft),geometry,doc,film_sha256:film.sha256,plan_sha256:planDigest};
++ }
++ /** The same manifest and the same digest as the render contract — and the same rules —
++  *  but the media is hashed with a bounded stream instead of being read whole into
++  *  memory. The result is only accepted when it equals the committed digest. */
++ async #streamDigest(root:string,roots:readonly string[]):Promise<{manifest:SourceDigestManifest;source_digest:string;external_reference_count:number}>{
++  const rootAbsolute=await realpath(root);
++  const roles=new Map<string,SourceFileRole>();
++  const visited=new Set<string>();
++  const queue:Array<{relative:string;referrer:string}>=[];
++  const files:Array<{path:string;role:SourceFileRole;sha256:string;size:number}>=[];
++  const assets:Array<{path:string;asset_id:string|null;sha256:string;size:number}>=[];
++  let externalReferenceCount=0;
++  const cache=new Map<string,{relative:string;sha256:string;size:number;bytes:Buffer|null}>();
++  const read=async(relative:string):Promise<{relative:string;sha256:string;size:number;bytes:Buffer|null}>=>{
++   const cached=cache.get(relative);if(cached)return cached;
++   const canonical=await realpath(resolve(rootAbsolute,relative));
++   if(canonical!==rootAbsolute&&!canonical.startsWith(rootAbsolute+sep))throw changed();
++   const handle=await open(canonical,constants.O_RDONLY|constants.O_NONBLOCK|constants.O_NOFOLLOW);
++   try{
++    const stat=await handle.stat();if(!stat.isFile())throw changed();
++    const canonicalRelative=canonical.slice(rootAbsolute.length+1).split(sep).join('/');
++    if(ASSET_EXTENSIONS.has(extensionOf(canonicalRelative))){
++     const hash=createHash('sha256'),buffer=Buffer.allocUnsafe(HASH_BUFFER);
++     let position=0,size=0;
++     for(;;){
++      const {bytesRead}=await handle.read(buffer,0,buffer.length,position);
++      if(bytesRead===0)break;
++      hash.update(buffer.subarray(0,bytesRead));position+=bytesRead;size+=bytesRead;
++     }
++     const record={relative:canonicalRelative,sha256:hash.digest('hex'),size,bytes:null};
++     cache.set(relative,record);return record;
++    }
++    const bytes=await handle.readFile();
++    if(bytes.length>MAX_TEXT_BYTES)throw changed();
++    const record={relative:canonicalRelative,sha256:createHash('sha256').update(bytes).digest('hex'),size:bytes.length,bytes};
++    cache.set(relative,record);return record;
++   }finally{await handle.close();}
++  };
++  const normalizedRoots=[...new Set(roots.map(root=>normalizeRelative(root)))];
++  const entryRelative=normalizedRoots[0];
++  if(entryRelative===undefined)throw changed();
++  const canonicalRoots:string[]=[];
++  for(const relative of [...normalizedRoots].sort(compareUtf8))canonicalRoots.push((await read(relative)).relative);
++  const canonicalEntry=(await read(entryRelative)).relative;
++  for(const relative of [...new Set(canonicalRoots)].sort(compareUtf8)){
++   const extension=extensionOf(relative);
++   if(ASSET_EXTENSIONS.has(extension)){queue.push({relative,referrer:''});continue;}
++   roles.set(relative,relative===canonicalEntry?'entry':roleFor(extension,false));
++   queue.push({relative,referrer:''});
++  }
++  while(queue.length>0){
++   const item=queue.shift()!;
++   if(visited.has(item.relative))continue;
++   visited.add(item.relative);
++   const loaded=await read(item.relative);
++   const extension=extensionOf(loaded.relative);
++   if(ASSET_EXTENSIONS.has(extension)){assets.push({path:loaded.relative,asset_id:null,sha256:loaded.sha256,size:loaded.size});continue;}
++   const role=roles.get(loaded.relative)??roleFor(extension,item.referrer===canonicalEntry);
++   roles.set(loaded.relative,role);
++   files.push({path:loaded.relative,role,sha256:loaded.sha256,size:loaded.size});
++   for(const reference of extractReferences(role,loaded.bytes!.toString('utf8'))){
++    const withoutFragment=reference.split('#')[0]??'';
++    if(withoutFragment==='')continue;
++    if(withoutFragment.includes('?'))throw changed();
++    if(withoutFragment.includes('\\')||withoutFragment.startsWith('/')||/^[a-z]:/iu.test(withoutFragment))throw changed();
++    if(EXTERNAL_SCHEME.test(withoutFragment)){externalReferenceCount+=1;continue;}
++    const resolvedRelative=joinRelative(item.relative,withoutFragment);
++    if(resolvedRelative===''||resolvedRelative==='..'||resolvedRelative.startsWith('../'))throw changed();
++    const resolvedExtension=extensionOf(resolvedRelative);
++    if(!ASSET_EXTENSIONS.has(resolvedExtension)&&!ROLE_BY_EXTENSION.has(resolvedExtension))throw changed();
++    const target=await read(resolvedRelative);
++    if(visited.has(target.relative))continue;
++    const targetExtension=extensionOf(target.relative);
++    if(!ASSET_EXTENSIONS.has(targetExtension)&&!ROLE_BY_EXTENSION.has(targetExtension))throw changed();
++    queue.push({relative:target.relative,referrer:item.relative});
++   }
++  }
++  files.sort((left,right)=>compareUtf8(left.path,right.path));
++  const manifest:SourceDigestManifest={format:'narralens.source-digest-manifest@1.0',engine:'openfilm',
++   engine_upstream_sha:OPENFILM_UPSTREAM_SHA,files,assets};
++  const source_digest=createHash('sha256').update(SOURCE_DIGEST_DOMAIN).update(canonicalJson(manifest)).digest('hex');
++  return {manifest,source_digest,external_reference_count:externalReferenceCount};
++ }
++ /** Acquire the opaque lease of one committed native source.
++  *
++  * It proves the very transaction the caller named, the very bytes that transaction
++  * committed and the very producer that made them, and it *retains* the source tree:
++  * the descriptors stay open until the lease is released. The media is hashed with a
++  * bounded stream; it is never read whole. */
++ async acquireNativeFacts(projectId:string,transactionId:string,principalId:string):Promise<VerifiedNativeFactsLease>{
++  const binding=this.#bind(projectId,transactionId,principalId);
++  const project=this.snapshots.projectRoot(binding.project_id);
++  const directory=this.snapshots.snapshotRoot(binding.project_id,binding.snapshot_id);
++  const root=resolve(directory,'source');
++  for(const path of [project,directory,root]){
++   const info=await lstat(path);if(!info.isDirectory()||info.isSymbolicLink()||await realpath(path)!==path)throw changed();
++  }
++  if(!directory.startsWith(project+sep)||root!==resolve(directory,'source'))throw changed();
++  const digest=await this.#streamDigest(root,binding.fact.roots);
++  if(digest.source_digest!==binding.source_digest||digest.external_reference_count!==0)throw changed();
++  const observedMedia=digest.manifest.assets.map(row=>({path:row.path,sha256:row.sha256,bytes:row.size})).sort((a,b)=>a.path<b.path?-1:a.path>b.path?1:0);
++  const recordedMedia=binding.fact.assets.map(row=>({path:row.path,sha256:row.sha256,bytes:row.bytes})).sort((a,b)=>a.path<b.path?-1:a.path>b.path?1:0);
++  if(canonicalDigest(observedMedia)!==canonicalDigest(recordedMedia))throw changed();
++  const lineage=await this.#nativeLineage(binding,root,digest.manifest);
++  if(lineage===null)throw new ProductError('CAPABILITY_UNAVAILABLE','This snapshot has no registered created-source producer');
++  const closure=await RetainedNativeClosure.open(root);
++  try{
++   const manifestPaths=new Set([...digest.manifest.files,...digest.manifest.assets].map(file=>file.path));
++   const membership=closure.membership();
++   if(membership.length!==manifestPaths.size||membership.some(path=>!manifestPaths.has(path)))throw changed();
++   const assets=new Map(binding.fact.assets.map(asset=>[asset.path,asset]));
++   const subtitles=new Set(binding.fact.subtitles.map(subtitle=>subtitle.path));
++   const entries:SnapshotEntry[]=[];
++   for(const file of [...digest.manifest.files,...digest.manifest.assets]){
++    const retained=await closure.retainFile(file.path);
++    if(retained.sha256!==file.sha256||retained.bytes!==file.size)throw changed();
++    const path=resolve(root,file.path);
++    const asset=assets.get(file.path);
++    const role='role' in file?file.role:undefined;
++    const kind=subtitles.has(file.path)?'supplement':asset||role==='font'||role===undefined?'asset':'native_source';
++    entries.push({relative_path:file.path,absolute_path:path,sha256:file.sha256,bytes:file.size,kind,rights_ref:asset?.asset_id??null,role:kind==='supplement'?'subtitles':null});
++   }
++   const film=digest.manifest.files.find(file=>file.path==='film.html');
++   if(!film)throw changed();
++   const filmText=await closure.readText(await closure.retainFile('film.html'));
++   const native_rev=createHash('sha256').update(filmText).digest('hex').slice(0,16);
++   if(native_rev!==film.sha256.slice(0,16))throw changed();
++   const facts:VerifiedNativeFacts=deepFreeze({
++    project_id:binding.project_id,transaction_id:binding.transaction_id,snapshot_id:binding.snapshot_id,
++    source_digest:binding.source_digest,project_revision:binding.project_revision,native_root:root,entries,
++    geometry:lineage.geometry,consumer_graph:lineage.graph,
++    rights:binding.fact.assets.map(asset=>({asset_id:asset.asset_id,status:asset.license.status,
++     commercial_use:asset.license.commercial_use,ref:asset.asset_id})),
++    film:{relative_path:'film.html',sha256:film.sha256,bytes:film.size,native_rev},
++    film_doc:lineage.doc,
++    source_entries:[...digest.manifest.files,...digest.manifest.assets].map(file=>({relative_path:file.path,sha256:file.sha256})),
++    assets:lineage.metadata.assets.map(asset=>({asset_id:asset.asset_id,path:asset.path,sha256:asset.sha256,bytes:asset.bytes,
++     status:asset.license.status,commercial_use:asset.license.commercial_use,rights_ref:asset.rights_ref})),
++   });
++   const held:NativeFactsFacts={instance:this.#instance,binding,principal_id:principalId,closure,facts,released:false};
++   const lease=Object.freeze({
++    facts,
++    closure,
++    assertCurrent:()=>{
++     if(held.released)return false;
++     try{
++      const current=this.#bind(binding.project_id,binding.transaction_id,held.principal_id);
++      return canonicalDigest(current)===canonicalDigest(binding);
++     }catch{return false;}
++    },
++    release:()=>{
++     if(held.released)return;
++     held.released=true;
++     held.closure.close();
++    },
++    get released(){return held.released;},
++   });
++   NATIVE_FACTS_LEASES.set(lease,held);
++   return lease;
++  }catch(error){closure.close();throw error;}
+  }
+  async #read(binding:CommitBinding,principalId:string,request:SnapshotReadRequest):Promise<SnapshotClosure>{
+   if(request.project_id!==binding.project_id||request.snapshot_id!==binding.snapshot_id)throw missing();
+diff --git a/src/host/agent-driven/created-native-workspace.ts b/src/host/agent-driven/created-native-workspace.ts
+index d86147e..bbe4f4d 100644
+--- a/src/host/agent-driven/created-native-workspace.ts
++++ b/src/host/agent-driven/created-native-workspace.ts
+@@ -19,7 +19,54 @@ export interface PreparedNativeWorkspace {
+  readonly project_id:string;readonly snapshot_id:string;readonly source_digest:string;readonly revision:number;
+  readonly source_root:AbsoluteServerPath;readonly film_sha256:string;
+ }
+-interface HeldWorkspace {binding:Binding;name:string;directory:FileHandle;files:readonly SnapshotEntry[];view:PreparedNativeWorkspace}
++/** The complete binding an issued workspace ref carries.
++ *
++ * Every field is part of the capability: the verified owner, the project, the committed
++ * transaction, the snapshot, the revision, the source digest, the native project id and
++ * the generation of the working copy. A ref is a name; this is what it stands for. */
++export interface NativeWorkspaceBinding {
++ readonly project_id:string;
++ readonly principal_id:string;
++ readonly transaction_id:string;
++ readonly snapshot_id:string;
++ readonly source_digest:string;
++ readonly revision:number;
++ readonly native_project_id:string|null;
++ readonly generation:number;
++}
++/** What a caller states about the binding it expects to acquire. Every field it states
++ *  is compared with the registered binding; a difference is a refusal. */
++export interface NativeWorkspaceExpectation {
++ readonly project_id:string;
++ readonly snapshot_id:string;
++ readonly source_digest:string;
++ readonly revision:number;
++ readonly native_project_id:string|null;
++}
++/** The opaque lease of one issued workspace view.
++ *
++ * It is not a path and not a string: the descriptors and the authority stay inside this
++ * service, and a copy of this object is not a lease. */
++export interface NativeWorkspaceLease {
++ readonly workspace_ref:string;
++ readonly project_id:string;
++ readonly principal_id:string;
++ readonly transaction_id:string;
++ readonly snapshot_id:string;
++ readonly source_digest:string;
++ readonly revision:number;
++ readonly native_project_id:string|null;
++ readonly generation:number;
++ readonly root:string;
++ /** The synchronous guard of the lease: the view is still the issued one and still current. */
++ assertCurrent():boolean;
++ /** Release the lease. The working copy itself stays until the native has stopped. */
++ release():void;
++}
++interface HeldWorkspace {binding:Binding;name:string;directory:FileHandle;files:readonly SnapshotEntry[];view:PreparedNativeWorkspace;generation:number}
++interface RegisteredRef {record:HeldWorkspace;binding:NativeWorkspaceBinding;released:boolean}
++interface LeaseFacts {registration:RegisteredRef}
++const LEASES=new WeakMap<object,LeaseFacts>();
+ const conflict=()=>new ProductError('REVISION_CONFLICT','The committed native workspace facts changed');
+ const unavailable=()=>new ProductError('CAPABILITY_UNAVAILABLE','The owned native workspace is unavailable');
+ const fdPath=(handle:FileHandle)=>'/proc/'+process.pid+'/fd/'+handle.fd;
+@@ -38,6 +85,10 @@ const overlaps=(a:string,b:string)=>a===b||a.startsWith(b+sep)||b.startsWith(a+s
+ export class CreatedNativeWorkspaceService {
+  readonly #prepared=new Map<string,HeldWorkspace>();
+  readonly #held=new Set<HeldWorkspace>();
++ /** The workspace refs this instance issued, and what each of them stands for. */
++ readonly #refs=new Map<string,RegisteredRef>();
++ /** The generation of the working copy of each project: it moves on every preparation. */
++ readonly #generations=new Map<string,number>();
+  readonly #operations=new Set<Promise<unknown>>();
+  readonly #flights=new Map<string,Promise<PreparedNativeWorkspace>>();
+  readonly #abort=new AbortController();
+@@ -116,7 +167,8 @@ export class CreatedNativeWorkspaceService {
+     this.#check(binding);await this.#assertRoot();
+     const film=closure.entries.find(entry=>entry.relative_path===closure.native_entry);if(!film)throw conflict();
+     const view=Object.freeze({project_id:projectId,snapshot_id:binding.snapshot_id,source_digest:binding.source_digest,revision:binding.revision,source_root:Object.freeze(absoluteServerPath(this.#path+'/'+name)),film_sha256:film.sha256});
+-    const record:HeldWorkspace={binding,name,directory,files:closure.entries,view};
++    const record:HeldWorkspace={binding,name,directory,files:closure.entries,view,generation:(this.#generations.get(projectId)??0)+1};
++    this.#generations.set(projectId,record.generation);
+     await this.#verify(record);this.#check(binding);
+     this.#prepared.set(projectId,record);this.#held.add(record);retained=true;return view;
+    }finally{
+@@ -141,6 +193,61 @@ export class CreatedNativeWorkspaceService {
+  rootFor(projectId:string):Promise<AbsoluteServerPath>{
+   return this.#admit(async()=>{const record=this.#prepared.get(projectId);if(!record)throw unavailable();this.#check(record.binding);await this.#verify(record);this.#check(record.binding);return record.view.source_root;});
+  }
++ /** Register the Host's own workspace ref for an issued view.
++  *
++  * The ref is a name the Host generated; this service is what gives it meaning, and only
++  * for the exact view it issued. The complete binding is snapshotted here, privately:
++  * the verified owner, the project, the committed transaction, the snapshot, the
++  * revision, the source digest, the native project id and the generation of this copy.
++  * A ref is issued once and is never rebound. */
++ registerWorkspaceRef(view:PreparedNativeWorkspace,ref:string,registration:NativeWorkspaceBinding):NativeWorkspaceBinding{
++  if(typeof ref!=='string'||!/^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$/.test(ref))throw conflict();
++  if(this.#closing)throw unavailable();
++  const record=this.#prepared.get(view.project_id);
++  if(!record||record.view!==view)throw conflict();
++  if(this.#refs.has(ref))throw conflict();
++  const binding=record.binding;
++  if(registration.project_id!==binding.project_id||registration.principal_id!==binding.principal_id
++   ||registration.transaction_id!==binding.transaction_id||registration.snapshot_id!==binding.snapshot_id
++   ||registration.source_digest!==binding.source_digest||registration.revision!==binding.revision
++   ||registration.generation!==record.generation)throw conflict();
++  if(registration.native_project_id!==null&&(typeof registration.native_project_id!=='string'||registration.native_project_id.length===0))throw conflict();
++  const snapshot=Object.freeze({project_id:registration.project_id,principal_id:registration.principal_id,
++   transaction_id:registration.transaction_id,snapshot_id:registration.snapshot_id,source_digest:registration.source_digest,
++   revision:registration.revision,native_project_id:registration.native_project_id,generation:registration.generation});
++  this.#refs.set(ref,{record,binding:snapshot,released:false});
++  return snapshot;
++ }
++ /** Acquire the lease of an issued workspace ref.
++  *
++  * The caller states the binding it expects; every field it states must be the one the
++  * ref was registered with. A ref of another instance, an unknown ref, a released ref
++  * and a ref whose view was replaced are all refusals. */
++ acquireExpectedLease(ref:string,expectation:NativeWorkspaceExpectation):NativeWorkspaceLease{
++  const registration=this.#refs.get(ref);
++  if(!registration||registration.released)throw unavailable();
++  const binding=registration.binding;
++  if(expectation.project_id!==binding.project_id||expectation.snapshot_id!==binding.snapshot_id
++   ||expectation.source_digest!==binding.source_digest||expectation.revision!==binding.revision
++   ||expectation.native_project_id!==binding.native_project_id)throw conflict();
++  const lease=Object.freeze({workspace_ref:ref,project_id:binding.project_id,principal_id:binding.principal_id,
++   transaction_id:binding.transaction_id,snapshot_id:binding.snapshot_id,source_digest:binding.source_digest,
++   revision:binding.revision,native_project_id:binding.native_project_id,generation:binding.generation,
++   root:registration.record.view.source_root.value,
++   assertCurrent:()=>this.#assertLeaseCurrent(registration),
++   release:()=>{registration.released=true;}});
++  LEASES.set(lease,{registration});
++  return lease;
++ }
++ #assertLeaseCurrent(registration:RegisteredRef):boolean{
++  try{
++   if(registration.released)return false;
++   const record=registration.record;
++   if(this.#prepared.get(record.binding.project_id)!==record)return false;
++   this.#check(record.binding);
++   return this.isPrepared(record.view);
++  }catch{return false;}
++ }
+  async #leaf(root:FileHandle,path:string,create:boolean):Promise<{file:FileHandle;parents:FileHandle[]}>{
+   const parts=assertSafeRelativePath(path).split('/'),parents:FileHandle[]=[];let parent=root;
+   try{
+@@ -183,6 +290,11 @@ export class CreatedNativeWorkspaceService {
+  /** Called only AFTER native Studio/Gateway have stopped. Never delete a live native root. */
+  disposeAfterNative(){return this.#dispose??=(async()=>{await this.close();const root=this.#root;if(!root)return;
+   for(const record of this.#held){await record.directory.close();await rm(fdPath(root)+'/'+record.name,{recursive:true,force:true});}
+-  this.#held.clear();this.#prepared.clear();await root.close();this.#root=undefined;
++  this.#held.clear();this.#prepared.clear();this.#refs.clear();this.#generations.clear();await root.close();this.#root=undefined;
+  })();}
+ }
++
++/** Whether a value is a lease this service issued. A copy of a lease is not a lease. */
++export function isNativeWorkspaceLease(value:unknown):value is NativeWorkspaceLease{
++ return !!value&&typeof value==='object'&&LEASES.has(value);
++}
+diff --git a/src/host/m5/openfilm-native-expected.ts b/src/host/m5/openfilm-native-expected.ts
+index 37ae6ad..e04d519 100644
+--- a/src/host/m5/openfilm-native-expected.ts
++++ b/src/host/m5/openfilm-native-expected.ts
+@@ -6,6 +6,8 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
+ import type {
+   ExpectedProjectionInput,
+   ExpectedProjectionResult,
++  Marker,
++  ProjectSettings,
+ } from '../../../tools/agent-driven/product/native-inputs/expected-projection.js';
+ 
+ /**
+@@ -418,6 +420,16 @@ export interface NativeExpectedLibrary {
+   readonly upstream_sha: string;
+   computeExpectedProjection(input: unknown): ExpectedProjectionResult;
+   readonly hydrationCanonicalJson: (value: unknown) => string;
++  /**
++   * The pinned 015 project settings parser.
++   *
++   * It is the *same approved module* that computes the projection — not a second
++   * implementation and not a direct import of the tracked inputs. The Host needs it to
++   * normalise the settings it read itself, exactly as the native does.
++   */
++  readonly parseProjectSettings: (value: unknown) => ProjectSettings;
++  /** The pinned 015 markers parser, from the same approved module. */
++  readonly parseMarkers: (value: unknown) => Marker[];
+ }
+ 
+ export interface NativeExpectedLibraryLoader {
+@@ -599,17 +611,26 @@ export function nativeExpectedLibraryLoader(deps: {
+         const expected = (await import(pathToFileURL(expectedPath[1]).href)) as unknown as {
+           readonly EXPECTED_PROFILE: string;
+           computeExpectedProjection(input: unknown): ExpectedProjectionResult;
++          readonly parseProjectSettings?: (value: unknown) => ProjectSettings;
++          readonly parseMarkers?: (value: unknown) => Marker[];
+         };
+         const pure = (await import(pathToFileURL(purePath[1]).href)) as unknown as {
+           readonly hydrationCanonicalJson: (value: unknown) => string;
+         };
+         if (expected.EXPECTED_PROFILE !== NATIVE_EXPECTED_PROFILE) throw new Error('NATIVE_EXPECTED_PROFILE_MISMATCH');
+         if (typeof pure.hydrationCanonicalJson !== 'function') throw new Error('NATIVE_EXPECTED_CANONICAL_MISSING');
++        // The settings and markers parsers come from the same verified module. A
++        // candidate that does not export them is not usable, and there is no fallback
++        // to another parser: the refusal is the answer.
++        if (typeof expected.parseProjectSettings !== 'function' || typeof expected.parseMarkers !== 'function')
++          throw new Error('NATIVE_EXPECTED_BUILD_UNSUPPORTED');
+         return Object.freeze({
+           EXPECTED_PROFILE: NATIVE_EXPECTED_PROFILE,
+           upstream_sha: NATIVE_EXPECTED_UPSTREAM_SHA,
+           computeExpectedProjection: expected.computeExpectedProjection,
+           hydrationCanonicalJson: pure.hydrationCanonicalJson,
++          parseProjectSettings: expected.parseProjectSettings,
++          parseMarkers: expected.parseMarkers,
+         });
+       } finally {
+         // The private copy exists only for the import; nothing is left behind.
+diff --git a/tests/agent-driven/integration/created-native-ack.test.ts b/tests/agent-driven/integration/created-native-ack.test.ts
+index 242c6af..82db587 100644
+--- a/tests/agent-driven/integration/created-native-ack.test.ts
++++ b/tests/agent-driven/integration/created-native-ack.test.ts
+@@ -1926,6 +1926,8 @@ function stubLibrary(): NativeExpectedLibrary {
+     upstream_sha: NATIVE_EXPECTED_UPSTREAM_SHA,
+     computeExpectedProjection: () => ({ status: 'unsupported', profile: NATIVE_EXPECTED_PROFILE, reason: 'INPUT_INVALID' }),
+     hydrationCanonicalJson: (value: unknown) => JSON.stringify(value) ?? 'null',
++    parseProjectSettings: (value: unknown) => (value && typeof value === 'object' && !Array.isArray(value) ? (value as ProjectSettings) : {}),
++    parseMarkers: (value: unknown) => (Array.isArray(value) ? (value as Marker[]) : []),
+   };
+ }
+ 

@@ -1,0 +1,135 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:980154) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/agent-driven/integration/created-native-source-reader.test.ts (22 tests | 5 failed | 15 skipped) 41ms
+   ↓ R00 smoke reaches the reader from the real committed created source
+   ↓ R00 smoke commits a rich source with the native files and the media
+   ↓ R01 refuses the legacy project that has no created producer
+   ↓ R02 refuses a working copy that changed under the proof
+   ↓ R03 refuses a sidecar, an unknown item and a missing committed file
+   ↓ R04 refuses a foreign native id, a forged probe cache and a file in flight
+   ↓ R04 accepts a legitimate cache in the next stable round
+   ↓ R05 proves the media facts of the retained bytes
+   ↓ R06 lists the media in the native numeric order
+   ↓ R02 keeps parallel leases independent and refuses foreign and copied tokens
+   ↓ R02 refuses a facts lease of another authority
+   ↓ R02 releases the whole closure only after the last retained leaf
+   ↓ R06 places every clip where the committed film places it
+   ↓ R07 ends a read at a close and releases a late result exactly once
+   ↓ R07 lets the real child exit before the reader closes
+   × P07 refuses a symbolic link, a same-bytes replacement and a restored change time 20ms
+     → expected false to be true // Object.is equality
+   ✓ P07 refuses a text file above the budget and bounds the total 4ms
+   × P07 refuses to release while work is in flight and releases every allocation once 1ms
+     → expected undefined to be 'NATIVE_CLOSURE_BUSY' // Object.is equality
+   × P07 keeps the failure of the walk release with the failure that stopped it 2ms
+     → The retained tree could not be released
+   ✓ P07 proves an empty directory and sees the file that appears in it 2ms
+   × P06 reproduces the five pinned native revision vectors 1ms
+     → The retained path is not a member of the tree
+   × P06 lists the media in the numeric order of the host 8ms
+     → expected [ 'assets/clip/非ASCII.mp4', …(3) ] to deeply equal [ 'assets/video/video1.mp4', …(3) ]
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/created-native-source-reader.test.ts > P07 refuses a symbolic link, a same-bytes replacement and a restored change time
+AssertionError: expected false to be true // Object.is equality
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- true[39m
+[31m+ false[39m
+
+ ❯ tests/agent-driven/integration/created-native-source-reader.test.ts:575:39
+    573|    utimesSync(join(restored,'.film','settings.json'),before.atime,befo…
+    574|    expect(other.verify()).toBe(false);
+    575|    expect(other.verifyFile(settings)).toBe(true);
+       |                                       ^
+    576|    other.close();
+    577|   }finally{rmSync(restored,{recursive:true,force:true});}
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  tests/agent-driven/integration/created-native-source-reader.test.ts > P07 refuses to release while work is in flight and releases every allocation once
+AssertionError: expected undefined to be 'NATIVE_CLOSURE_BUSY' // Object.is equality
+
+[32m- Expected:[39m 
+"NATIVE_CLOSURE_BUSY"
+
+[31m+ Received:[39m 
+undefined
+
+ ❯ tests/agent-driven/integration/created-native-source-reader.test.ts:645:52
+    643|   let busy:unknown;
+    644|   try{closure.close();}catch(error){busy=error;}
+    645|   expect((busy as {code?:string}|undefined)?.code).toBe('NATIVE_CLOSUR…
+       |                                                    ^
+    646|   // The accepted operation still completes: its descriptor was not cl…
+    647|   const text=await closure.readText(film);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  tests/agent-driven/integration/created-native-source-reader.test.ts > P07 keeps the failure of the walk release with the failure that stopped it
+RetainedNativeError: The retained tree could not be released
+ ❯ fail src/host/agent-driven/retained-native-closure.ts:36:14
+     34| 
+     35| function fail(code:string,message:string,causes?:readonly unknown[]):n…
+     36|  const error=new RetainedNativeError(code,message);
+       |              ^
+     37|  if(causes&&causes.length>0)attachCauses(error,causes);
+     38|  throw error;
+ ❯ RetainedNativeClosure.#enumerate src/host/agent-driven/retained-native-closure.ts:306:47
+ ❯ Function.open src/host/agent-driven/retained-native-closure.ts:189:12
+ ❯ tests/agent-driven/integration/created-native-source-reader.test.ts:676:45
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ FAIL  tests/agent-driven/integration/created-native-source-reader.test.ts > P06 reproduces the five pinned native revision vectors
+RetainedNativeError: The retained path is not a member of the tree
+ ❯ fail src/host/agent-driven/retained-native-closure.ts:36:14
+     34| 
+     35| function fail(code:string,message:string,causes?:readonly unknown[]):n…
+     36|  const error=new RetainedNativeError(code,message);
+       |              ^
+     37|  if(causes&&causes.length>0)attachCauses(error,causes);
+     38|  throw error;
+ ❯ src/host/agent-driven/retained-native-closure.ts:352:30
+ ❯ RetainedNativeClosure.#admit src/host/agent-driven/retained-native-closure.ts:268:17
+ ❯ RetainedNativeClosure.retainFile src/host/agent-driven/retained-native-closure.ts:348:15
+ ❯ tests/agent-driven/integration/created-native-source-reader.test.ts:730:29
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+
+ FAIL  tests/agent-driven/integration/created-native-source-reader.test.ts > P06 lists the media in the numeric order of the host
+AssertionError: expected [ 'assets/clip/非ASCII.mp4', …(3) ] to deeply equal [ 'assets/video/video1.mp4', …(3) ]
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  [[22m
+[31m+   "assets/clip/非ASCII.mp4",[39m
+[2m    "assets/video/video1.mp4",[22m
+[2m    "assets/video/video2.mp4",[22m
+[2m    "assets/video/video10.mp4",[22m
+[32m-   "assets/clip/非ASCII.mp4",[39m
+[2m  ][22m
+
+ ❯ tests/agent-driven/integration/created-native-source-reader.test.ts:753:18
+    751|  ];
+    752|  const listing=nativeVideoListingOrder(paths);
+    753|  expect(listing).toEqual(['assets/video/video1.mp4','assets/video/vide…
+       |                  ^
+    754|  // The order is the host's numeric collation, not a plain lexicograph…
+    755|  const plain=[...listing].sort();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  5 failed | 2 passed | 15 skipped (22)
+   Start at  14:37:29
+   Duration  19.29s (transform 5.87s, setup 0ms, collect 15.35s, tests 41ms, environment 0ms, prepare 2.67s)
+

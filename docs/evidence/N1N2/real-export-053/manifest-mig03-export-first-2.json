@@ -1,0 +1,115 @@
+{
+  "format": "narralens.real-export-evidence@1",
+  "capture_id": "n1n2-claude-053-real-export-002",
+  "capture_id_source": "the N1N2_CAPTURE_ID of this run",
+  "stage": "mig03-export-first",
+  "artifact": {
+    "name": "mig03-export-first-bbf30366cec4-n1n2-claude-053-real-export-002.mp4",
+    "sha256": "bbf30366cec4268effe2e625a94eb3dda133fa2156b05a45a91a6e494bbfb8ad",
+    "bytes": 917726,
+    "kept_at": "at the moment of this export, before any later export could overwrite it",
+    "verified": "the kept bytes were read back and their digest compared with the digest this export was measured from"
+  },
+  "media": {
+    "frames": 900,
+    "width": 1280,
+    "height": 720,
+    "duration_seconds": 30,
+    "audio": null
+  },
+  "commands": [
+    {
+      "pid": 3669840,
+      "argv": [
+        "/usr/bin/node",
+        "/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm/packages/openfilm/bin/openfilm.mjs",
+        "render"
+      ],
+      "cwd": "/tmp/narralens-m23-real-WqBd7I/migrations/mig_84bfe8434a58403f88b91d3c8d9a5265",
+      "exit": 0,
+      "note": "pinned CLI child",
+      "stderr_tail": "  rendering 900 frames with 5 browsers…\n  90/900 frames · about 8 s left\n  180/900 frames · about 8 s left\n  270/900 frames · about 7 s left\n  360/900 frames · about 6 s left\n  450/900 frames · about 5 s left\n  540/900 frames · about 4 s left\n  630/900 frames · about 3 s left\n  720/900 frames · about 2 s left\n  810/900 frames · about 1 s left\n",
+      "stdout_tail": "→ mig_84bfe8434a58403f88b91d3c8d9a5265.mp4\n  900 frames · 30s at 30 fps · 1280×720 · 5 workers · 11.3 s\n"
+    },
+    {
+      "argv": [
+        "ffprobe",
+        "-v",
+        "error",
+        "-select_streams",
+        "v:0",
+        "-count_frames",
+        "-show_entries",
+        "stream=nb_read_frames,width,height,r_frame_rate",
+        "-of",
+        "json",
+        "/tmp/narralens-m23-real-WqBd7I/migrations/mig_84bfe8434a58403f88b91d3c8d9a5265/mig_84bfe8434a58403f88b91d3c8d9a5265.mp4"
+      ],
+      "exit": 0,
+      "cwd": "/tmp/narralens-m23-real-WqBd7I",
+      "note": "real container probe of the video stream"
+    },
+    {
+      "argv": [
+        "ffprobe",
+        "-v",
+        "error",
+        "-select_streams",
+        "a:0",
+        "-show_entries",
+        "stream=codec_name,sample_rate,channels,duration:format=duration",
+        "-of",
+        "json",
+        "/tmp/narralens-m23-real-WqBd7I/migrations/mig_84bfe8434a58403f88b91d3c8d9a5265/mig_84bfe8434a58403f88b91d3c8d9a5265.mp4"
+      ],
+      "exit": 0,
+      "cwd": "/tmp/narralens-m23-real-WqBd7I",
+      "note": "real probe of the audio stream and the container duration"
+    },
+    {
+      "argv": [
+        "ffmpeg",
+        "-nostdin",
+        "-hide_banner",
+        "-v",
+        "error",
+        "-i",
+        "/tmp/narralens-m23-real-WqBd7I/migrations/mig_84bfe8434a58403f88b91d3c8d9a5265/mig_84bfe8434a58403f88b91d3c8d9a5265.mp4",
+        "-f",
+        "null",
+        "-"
+      ],
+      "exit": 0,
+      "cwd": "/tmp/narralens-m23-real-WqBd7I",
+      "note": "the FULL decode of the exported media"
+    }
+  ],
+  "upstream": {
+    "openfilm_sha": "e70d9d93c7bebe3d634ff2caa6f7a738cdde59d3",
+    "pinned_cli": "/mnt/c/workspace/videoworkline/Narralens-openfilm-m1b/vendor/openfilm/packages/openfilm/bin/openfilm.mjs",
+    "pinned_cli_sha256": "d16915ad600310058e6f08966c6f9f596eba67a37c6abd200025a523c2ccf192"
+  },
+  "candidate": {
+    "test_file": "tests/m2.3/migration-real-export.test.ts",
+    "test_sha256": "306413decd16309ba01dd71b94d732b1373bccc743fbaed1c1e783803f31cdc6",
+    "migration_service_sha256": "920fbba4abad78847ebb25b6cfde40e4e4d8e4a2011face7ca832c11ce54aa5a",
+    "openfilm_adapter_sha256": "013f50ce87e04b3ff542e15f3c98d833ae43940fef9d85ccad79ff38e5bd200b"
+  },
+  "case": "MIG-03 the real chain: migrate, reopen, export, edit the middle clip, export again",
+  "project_id": "d1-30s",
+  "target_project_id": "the migrated copy of this case",
+  "clip_ids": [
+    "shot-001",
+    "shot-002",
+    "shot-003"
+  ],
+  "rev_before": "91f328c7e5e80673",
+  "rev_after": "22af153f22a70eea",
+  "middle_clip": "shot-002",
+  "middle_clip_edited": true,
+  "caption_sha256_before": "98c2d00b754ea34de6431b5d830f24759301670fa76347bb060fabfb47dc146e",
+  "caption_sha256_after": "98c2d00b754ea34de6431b5d830f24759301670fa76347bb060fabfb47dc146e",
+  "caption_bytes_before": 172,
+  "caption_bytes_after": 172,
+  "caption_contains_edited_text": true
+}

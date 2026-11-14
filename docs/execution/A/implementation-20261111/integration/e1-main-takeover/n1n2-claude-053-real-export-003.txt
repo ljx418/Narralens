@@ -1,0 +1,35 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:3682678) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+stdout | tests/m2.3/migration-real-export.test.ts > MIG-03 the real chain: migrate, reopen, export, edit the middle clip, export again > produces two real, different exports of the same 900-frame three-clip film
+[real-export-053] stage=mig03-migration-export sha256=bbf30366cec4268effe2e625a94eb3dda133fa2156b05a45a91a6e494bbfb8ad bytes=917726 frames=900 audio=aac 48000Hz 30s artifact=mig03-migration-export-bbf30366cec4-n1n2-claude-053-real-export-003.mp4 artifact_sha256=bbf30366cec4268effe2e625a94eb3dda133fa2156b05a45a91a6e494bbfb8ad manifest=manifest-mig03-migration-export-1.json
+
+stdout | tests/m2.3/migration-real-export.test.ts > MIG-03 the real chain: migrate, reopen, export, edit the middle clip, export again > produces two real, different exports of the same 900-frame three-clip film
+[real-export-053] stage=mig03-export-first sha256=bbf30366cec4268effe2e625a94eb3dda133fa2156b05a45a91a6e494bbfb8ad bytes=917726 frames=900 audio=aac 48000Hz 30s artifact=mig03-export-first-bbf30366cec4-n1n2-claude-053-real-export-003.mp4 artifact_sha256=bbf30366cec4268effe2e625a94eb3dda133fa2156b05a45a91a6e494bbfb8ad manifest=manifest-mig03-export-first-3.json
+
+stdout | tests/m2.3/migration-real-export.test.ts > MIG-03 the real chain: migrate, reopen, export, edit the middle clip, export again > produces two real, different exports of the same 900-frame three-clip film
+[real-export-053] stage=mig03-export-after-middle-edit sha256=7870320dc14505149afd161abeab7f954aae83f3716feb1aba4943c58eadcf07 bytes=939596 frames=900 audio=aac 48000Hz 30s artifact=mig03-export-after-middle-edit-7870320dc145-n1n2-claude-053-real-export-003.mp4 artifact_sha256=7870320dc14505149afd161abeab7f954aae83f3716feb1aba4943c58eadcf07 manifest=manifest-mig03-export-after-middle-edit-3.json
+
+stdout | tests/m2.3/migration-real-export.test.ts > MIG-03 the real chain: migrate, reopen, export, edit the middle clip, export again > produces two real, different exports of the same 900-frame three-clip film
+[real-export-053] children=3 pids=3682895,3683974,3685055 studio_started=false cleanup={"settled":true,"actions":[]}
+
+stdout | tests/m2.3/migration-real-export.test.ts > EN-05 the source project is still intact and openable after rollback > keeps the source bytes, binding and recorded output, and retains the copy
+[real-export-053] stage=en05-migration-export sha256=bbf30366cec4268effe2e625a94eb3dda133fa2156b05a45a91a6e494bbfb8ad bytes=917726 frames=900 audio=aac 48000Hz 30s artifact=en05-migration-export-bbf30366cec4-n1n2-claude-053-real-export-003.mp4 artifact_sha256=bbf30366cec4268effe2e625a94eb3dda133fa2156b05a45a91a6e494bbfb8ad manifest=manifest-en05-migration-export-1.json
+
+stdout | tests/m2.3/migration-real-export.test.ts > EN-05 the source project is still intact and openable after rollback > keeps the source bytes, binding and recorded output, and retains the copy
+[real-export-053] stage=en05-export-copy-after-rollback sha256=bbf30366cec4268effe2e625a94eb3dda133fa2156b05a45a91a6e494bbfb8ad bytes=917726 frames=900 audio=aac 48000Hz 30s artifact=en05-export-copy-after-rollback-bbf30366cec4-n1n2-claude-053-real-export-003.mp4 artifact_sha256=bbf30366cec4268effe2e625a94eb3dda133fa2156b05a45a91a6e494bbfb8ad manifest=manifest-en05-export-copy-after-rollback-3.json
+
+stdout | tests/m2.3/migration-real-export.test.ts > EN-05 the source project is still intact and openable after rollback > keeps the source bytes, binding and recorded output, and retains the copy
+[real-export-053] children=2 pids=3688103,3689319 studio_started=false cleanup={"settled":true,"actions":[]}
+
+ ✓ tests/m2.3/migration-real-export.test.ts (2 tests) 69860ms
+   ✓ MIG-03 the real chain: migrate, reopen, export, edit the middle clip, export again > produces two real, different exports of the same 900-frame three-clip film  41793ms
+   ✓ EN-05 the source project is still intact and openable after rollback > keeps the source bytes, binding and recorded output, and retains the copy  28066ms
+
+ Test Files  1 passed (1)
+      Tests  2 passed (2)
+   Start at  01:13:43
+   Duration  75.83s (transform 1.27s, setup 0ms, collect 3.66s, tests 69.86s, environment 0ms, prepare 1.51s)
+

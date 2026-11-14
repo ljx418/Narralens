@@ -1,0 +1,86 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:1057823) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/agent-driven/integration/created-native-source-reader.test.ts (26 tests | 2 failed | 18 skipped) 53ms
+   ↓ R00 smoke reaches the reader from the real committed created source
+   ↓ R00 smoke commits a rich source with the native files and the media
+   ↓ R01 refuses the legacy project that has no created producer
+   ↓ R02 invalidates the old proof when the working copy changes under it
+   ↓ R02 refuses a pending round when the working copy changes during the read
+   ↓ R03 refuses a sidecar, an unknown item and a missing committed file
+   ↓ R04 refuses a foreign native id, a forged probe cache and a file in flight
+   ↓ R04 accepts a legitimate cache in the next stable round
+   ↓ R05 proves the media facts of the retained bytes
+   ↓ R06 lists the media in the native numeric order
+   ↓ R02 keeps parallel leases independent and refuses foreign and copied tokens
+   ↓ R02 refuses a facts lease of another authority
+   ↓ R02 releases the whole closure only after the last retained leaf
+   ↓ R06 places every clip where the committed film places it
+   ↓ R07 ends a read at a close and releases a late result exactly once
+   ↓ R07 lets the real media child exit before the reader closes
+   ↓ R07 registers the read before a binding callback can close the reader
+   ↓ R07 refuses a later read after a delivered release failed
+   ✓ P07 refuses a symbolic link, a same-bytes replacement and a restored change time 8ms
+   ✓ P07 refuses a text file above the budget and bounds the total 2ms
+   ✓ P07 refuses to release while work is in flight and releases every allocation once 1ms
+   × P07 refuses a reentrant release from inside an accepted read 27ms
+     → expected false to be true // Object.is equality
+   ✓ P07 keeps the failure of the walk release with the failure that stopped it 1ms
+   ✓ P07 proves an empty directory and sees the file that appears in it 2ms
+   ✓ P06 reproduces the five pinned native revision vectors 2ms
+   × P06 lists the media in the numeric order of the host 8ms
+     → expected [ 'assets/clip/非ASCII.mp4', …(3) ] to deeply equal [ 'assets/.hidden/secret.mp4', …(4) ]
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/created-native-source-reader.test.ts > P07 refuses a reentrant release from inside an accepted read
+AssertionError: expected false to be true // Object.is equality
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- true[39m
+[31m+ false[39m
+
+ ❯ tests/agent-driven/integration/created-native-source-reader.test.ts:847:28
+    845|   expect((busy as {code?:string}|undefined)?.code).toBe('NATIVE_CLOSUR…
+    846|   // The refused release closed nothing: the closure is still whole.
+    847|   expect(closure.verify()).toBe(true);
+       |                            ^
+    848|  }finally{
+    849|   try{closure?.close();}catch{/* the closure reports its own failures …
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/agent-driven/integration/created-native-source-reader.test.ts > P06 lists the media in the numeric order of the host
+AssertionError: expected [ 'assets/clip/非ASCII.mp4', …(3) ] to deeply equal [ 'assets/.hidden/secret.mp4', …(4) ]
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  [[22m
+[32m-   "assets/.hidden/secret.mp4",[39m
+[2m    "assets/clip/非ASCII.mp4",[22m
+[2m    "assets/video/video1.mp4",[22m
+[2m    "assets/video/video2.mp4",[22m
+[2m    "assets/video/video10.mp4",[22m
+[2m  ][22m
+
+ ❯ tests/agent-driven/integration/created-native-source-reader.test.ts:948:18
+    946|  // last one are compared numerically.
+    947|  expect(listing).toEqual(['assets/clip/非ASCII.mp4','assets/video/video…
+    948|  expect(listing).toEqual([...paths].filter(path=>path.endsWith('.mp4')…
+       |                  ^
+    949|  // The order is the host's numeric collation, not a plain lexicograph…
+    950|  const plain=[...listing].sort();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 6 passed | 18 skipped (26)
+   Start at  15:01:59
+   Duration  13.75s (transform 6.57s, setup 0ms, collect 11.18s, tests 53ms, environment 0ms, prepare 1.71s)
+

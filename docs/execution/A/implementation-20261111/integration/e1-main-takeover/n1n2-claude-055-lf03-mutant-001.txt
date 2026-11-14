@@ -1,0 +1,55 @@
+
+ RUN  v3.2.4 /mnt/c/workspace/videoworkline/Narralens-agents/main-integration
+
+(node:3740006) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/agent-driven/integration/local-assets-host.test.ts (24 tests | 1 failed | 23 skipped) 3329ms
+   ↓ actually probes and fully decodes video and synthetic diagnostic audio into the same Host database without modifying native source
+   ↓ requires real trusted UI provenance and ownership before reading files or recording rights
+   ↓ replays the original registration without reimporting changed input and refuses a conflicting key
+   ↓ rolls back row, command and outbox together at before_insert, preserving an unreferenced blob for a safe retry
+   ↓ rolls back row, command and outbox together at after_insert, preserving an unreferenced blob for a safe retry
+   ↓ rolls back row, command and outbox together at after_receipt, preserving an unreferenced blob for a safe retry
+   ↓ rolls back row, command and outbox together at after_event, preserving an unreferenced blob for a safe retry
+   ↓ checks real input hashes, paths and media rather than accepting metadata as proof
+   ↓ preserves unknown license and synthetic origin as facts rather than silently clearing them
+   ↓ detects a published blob changed inside the final SQL boundary and commits no registration
+   ↓ converges concurrent same-key imports to one immutable row, one command and one business event
+   ↓ rounds audio directly from sample time to project frames rather than rounding through displayed milliseconds
+   ↓ refuses truncated audio and a video with a damaged audio track even when video-only legacy validation passes
+   ↓ refuses local storage overlapping author, snapshot or input domains before creating directories
+   ↓ does not follow a newly redirected configured source root, even when replacement bytes have the declared hash
+   ↓ captures trusted input by value before asynchronous inspection rather than accepting later permission changes
+   ↓ waits for the actual media child to close after cancel and reports a retryable tool boundary
+   ↓ waits for the actual media child to close after timeout and reports a retryable tool boundary
+   ↓ bounds real concurrent imports to two and removes a cancelled queued request without leaking a slot
+   × proves a published blob again when only the change time of its inode moved, and keeps every other change refused 3132ms
+     → Local asset facts or bytes changed
+   ↓ preserves cancellation through the actual video validator wrapper and waits for its media child before returning
+   ↓ quiesces admitted local imports and their real media child before the Host closes its shared database
+   ↓ keeps snapshot bytes untouched when a storage parent is replaced exactly at before_stage_create
+   ↓ keeps snapshot bytes untouched when a storage parent is replaced exactly at before_publish
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-driven/integration/local-assets-host.test.ts > proves a published blob again when only the change time of its inode moved, and keeps every other change refused
+ProductError: Local asset facts or bytes changed
+ ❯ conflict src/host/agent-driven/local-asset-registry.ts:104:24
+    102| const MAX_BYTES = 2 * 1024 * 1024 * 1024;
+    103| const invalid = () => new ProductError('INVALID_REQUEST', 'Invalid loc…
+    104| const conflict = () => new ProductError('REVISION_CONFLICT', 'Local as…
+       |                        ^
+    105| function keys(value: unknown, expected: string): boolean { return !!va…
+    106| function fingerprint(info: BigIntStats): string { return [info.dev, in…
+ ❯ LocalAssetRegistry.#hashFile src/host/agent-driven/local-asset-registry.ts:538:23
+ ❯ LocalAssetRegistry.#import src/host/agent-driven/local-asset-registry.ts:452:31
+ ❯ LocalAssetRegistry.#importWithSlot src/host/agent-driven/local-asset-registry.ts:368:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 23 skipped (24)
+   Start at  01:39:24
+   Duration  12.99s (transform 3.84s, setup 0ms, collect 7.36s, tests 3.33s, environment 0ms, prepare 1.53s)
+

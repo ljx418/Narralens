@@ -52,47 +52,91 @@ function classBody(source: string, className: string): string {
   return source.slice(start);
 }
 
+/**
+ * The registered owners of a state write.
+ *
+ * Registered, not exempted. Each of these writes `UPDATE ... SET state=... WHERE
+ * ... AND state=<expected>` and throws unless exactly one row changed, which is the
+ * property this rule protects. `transitionFrom`, `markStale` and `quarantine` are M3.1's
+ * materialization machine; `transitionBootstrap` is W2.0's asset-ledger bootstrap.
+ */
+const STATE_WRITE_HELPERS = ["transition", "advanceJournal", "markRecovering", "#state", "#assetImportState",
+  "transitionBootstrap", "transitionFrom", "markStale", "quarantine",
+  // M4B's two multi-fact transactions keep the predecessor in the UPDATE predicate
+  // and roll every state/business fact back together. They are exempted *by file*, not
+  // by name: exempting the name anywhere would let a method called `commitAdoption` in
+  // any other file escape this rule without anyone noticing.
+  // (See `STATE_WRITE_SCOPED_HELPERS` below.)
+  // M3's joint recovery: carries the expected state in its WHERE clause and throws
+  // unless exactly one row changed, like every other entry here.
+  "resumeOrReset"];
+
+/** The owners of a state write that are registered for ONE file only. */
+const STATE_WRITE_SCOPED_HELPERS = new Map<string, string[]>([
+  // M4C's two multi-fact transactions are the same shape as M4B's: the predecessor is
+  // in the UPDATE predicate, exactly one row must change, and every business fact
+  // rolls back with the state.
+  [resolve(REPO, "src/host/projects/revision-store.ts"),
+    ["commitAdoption", "abortAdoption", "commitHistoryRestore", "abortHistoryRestore",
+      // The created-source commit is the same shape as the two above it: the impact row
+      // moves with `state='active' AND impact_hash=?` in the predicate, exactly one row
+      // must change, and the revision, the approval, the snapshot and the active commit
+      // are in the same atomic boundary, so a failure rolls every fact back together.
+      // It is registered for THIS FILE only, like every other entry here.
+      "commitPreparedCreatedSource"]],
+]);
+
+/**
+ * The offenders of rule 1 in the given sources.
+ *
+ * The detection is a pure function of the sources, so the rule can be exercised
+ * against synthetic sources as well as against the real tree: a registration that
+ * only works for the real file, or only for the real method name, is proved to be
+ * wrong here rather than believed to be right.
+ */
+function stateWriteOffenders(files: readonly { readonly file: string; readonly text: string }[]): string[] {
+  const offenders: string[] = [];
+  for (const { file, text } of files) {
+    for (const match of text.matchAll(/UPDATE\s+(\w+)\s+SET\s+([^;]*?)\bstate\s*=/giu)) {
+      const table = match[1] ?? "";
+      const assignments = match[2] ?? "";
+      // Only the SET list counts: a `state='...'` in the WHERE clause is a predicate.
+      if (/\bWHERE\b/iu.test(assignments)) continue;
+      // The job table has its own documented transition table; rule 13 owns that one.
+      if (table === "job") continue;
+      // A private or four-space method is still a method; a nearby call is not its owner.
+      const enclosing = owningMethod(text, match.index!);
+      if (STATE_WRITE_HELPERS.includes(enclosing)) continue;
+      if ((STATE_WRITE_SCOPED_HELPERS.get(file) ?? []).includes(enclosing)) continue;
+      offenders.push(`${relative(REPO, file)} ${table}: ${assignments.trim().slice(0, 40)} (in ${enclosing || "<top level>"})`);
+    }
+  }
+  return offenders;
+}
+
 describe("M2.2 fitness: one state machine, no arbitrary state writes", () => {
   it("1. every production `UPDATE ... SET state` lives in transition, advanceJournal or markRecovering", () => {
-    // Registered, not exempted. Each of these writes `UPDATE ... SET state=... WHERE
-    // ... AND state=<expected>` and throws unless exactly one row changed, which is the
-    // property this rule protects. `transitionFrom`, `markStale` and `quarantine` are M3.1's
-    // materialization machine; `transitionBootstrap` is W2.0's asset-ledger bootstrap.
-    const scopedHelpers = new Map<string, string[]>([
-      // M4C's two multi-fact transactions are the same shape as M4B's: the predecessor is
-      // in the UPDATE predicate, exactly one row must change, and every business fact
-      // rolls back with the state.
-      [resolve(REPO, "src/host/projects/revision-store.ts"),
-        ["commitAdoption", "abortAdoption", "commitHistoryRestore", "abortHistoryRestore"]],
-    ]);
-    const helpers = ["transition", "advanceJournal", "markRecovering", "#state", "#assetImportState",
-      "transitionBootstrap", "transitionFrom", "markStale", "quarantine",
-      // M4B's two multi-fact transactions keep the predecessor in the UPDATE predicate
-      // and roll every state/business fact back together. They are exempted *by file*, not
-      // by name: exempting the name anywhere would let a method called `commitAdoption` in
-      // any other file escape this rule without anyone noticing.
-      // (See `scopedHelpers` below.)
-      // M3's joint recovery: carries the expected state in its WHERE clause and throws
-      // unless exactly one row changed, like every other entry here.
-      "resumeOrReset"];
-    const offenders: string[] = [];
-    for (const file of SOURCE_FILES) {
-      const text = sourceOf(file);
-      for (const match of text.matchAll(/UPDATE\s+(\w+)\s+SET\s+([^;]*?)\bstate\s*=/giu)) {
-        const table = match[1] ?? "";
-        const assignments = match[2] ?? "";
-        // Only the SET list counts: a `state='...'` in the WHERE clause is a predicate.
-        if (/\bWHERE\b/iu.test(assignments)) continue;
-        // The job table has its own documented transition table; rule 13 owns that one.
-        if (table === "job") continue;
-        // A private or four-space method is still a method; a nearby call is not its owner.
-        const enclosing = owningMethod(text, match.index!);
-        if (helpers.includes(enclosing)) continue;
-        if ((scopedHelpers.get(file) ?? []).includes(enclosing)) continue;
-        offenders.push(`${relative(REPO, file)} ${table}: ${assignments.trim().slice(0, 40)} (in ${enclosing || "<top level>"})`);
-      }
-    }
-    expect(offenders).toEqual([]);
+    expect(stateWriteOffenders(SOURCE_FILES.map(file => ({ file, text: sourceOf(file) })))).toEqual([]);
+  });
+
+  it("1b. a registered state-write owner is registered for its FILE, not for its name anywhere", () => {
+    // The synthetic statement is the shape the rule protects: the predecessor is in
+    // the predicate and exactly one row must change. Only its OWNER decides whether
+    // it is allowed - and the owner is a (file, method) pair.
+    const write = "this.#db.prepare(\"UPDATE impact SET state='consumed',updated_at=? WHERE impact_id=? AND state='active' AND impact_hash=?\").run(at);";
+    const source = (method: string): string => `class Store{ ${method}(){ ${write} } }`;
+    const revisionStore = resolve(REPO, "src/host/projects/revision-store.ts");
+    const otherFile = resolve(REPO, "src/host/other-store.ts");
+    // The registered owner, in its own file, is not an offender.
+    expect(stateWriteOffenders([{ file: revisionStore, text: source("commitPreparedCreatedSource") }])).toEqual([]);
+    // The SAME method name in ANOTHER file is still an offender: the registration is
+    // scoped to the file, so a method that happens to share the name cannot escape.
+    expect(stateWriteOffenders([{ file: otherFile, text: source("commitPreparedCreatedSource") }]).length).toBe(1);
+    // An UNREGISTERED method in the SAME file is still an offender.
+    expect(stateWriteOffenders([{ file: revisionStore, text: source("commitSomethingElse") }]).length).toBe(1);
+    // The other registered owners keep their own scope.
+    expect(stateWriteOffenders([{ file: revisionStore, text: source("commitAdoption") }])).toEqual([]);
+    expect(stateWriteOffenders([{ file: otherFile, text: source("commitAdoption") }]).length).toBe(1);
   });
 
   it("13. every job state write goes through the store that owns the transition table", () => {
