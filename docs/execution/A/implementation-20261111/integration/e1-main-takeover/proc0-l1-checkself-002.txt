@@ -1,0 +1,14 @@
+Traceback (most recent call last):
+  File "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tools/check-delivery-spec.py", line 1440, in <module>
+    main()
+  File "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tools/check-delivery-spec.py", line 1406, in main
+    print(json.dumps(self_test(), ensure_ascii=False, indent=2, sort_keys=True))
+                     ^^^^^^^^^^^
+  File "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tools/check-delivery-spec.py", line 1284, in self_test
+    reject("recorder_outer_mismatch", outer_mismatch)
+  File "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tools/check-delivery-spec.py", line 1197, in reject
+    mutate(broken)
+  File "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration/tools/check-delivery-spec.py", line 1281, in outer_mismatch
+    sidecar = json.loads(path.read_text())
+                         ^^^^^^^^^^^^^^
+AttributeError: 'str' object has no attribute 'read_text'

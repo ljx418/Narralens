@@ -1,0 +1,109 @@
+{
+  "format": "narralens.proc0-cases@1",
+  "status": "DESIGN_NOT_RUN",
+  "cases": [
+    {
+      "id": "PROC0-01",
+      "trigger": "未知command_id/argv/shell/cwd/坏release SHA",
+      "expected": "拒绝在Popen/生成capture之前",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "id": "PROC0-02",
+      "trigger": "protected/source/recorder或命令类型不符",
+      "expected": "拒绝并保已有state",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "id": "PROC0-03",
+      "trigger": "capture任一suffix已存在",
+      "expected": "不覆盖，不运行",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "id": "PROC0-04",
+      "trigger": "两个run同时争抢同project原子槽",
+      "expected": "仅一个真实Popen，无无锁fallback",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "id": "PROC0-05",
+      "trigger": "WRITING/错误owner nonce generation",
+      "expected": "拒绝run或非法end-write；真owner可结束写阶段",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "id": "PROC0-06",
+      "trigger": "STARTING崩溃、wrapper死而recorder仍活",
+      "expected": "UNKNOWN持责，无自动重跑/清锁",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "id": "PROC0-07",
+      "trigger": "PID重用/Z/读状态unknown",
+      "expected": "不当原epochgone，不扩信号权限",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "id": "PROC0-08",
+      "trigger": "Popen确切失败 vs 已返回child后持久化失败",
+      "expected": "前者无child失败，后者保原wait owner",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "id": "PROC0-09",
+      "trigger": "request-cancel后helper仍在运行",
+      "expected": "只标请求，下一run仍拒；不kill recorder",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "id": "PROC0-10",
+      "trigger": "实际wait结束 vs 保存exit与日志被篡改",
+      "expected": "真实终局与metadata准入分离；不伪造exit",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "id": "PROC0-11",
+      "trigger": "源在运行期改变/新增",
+      "expected": "保存drift并BLOCKED，不签ready",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "id": "PROC0-12",
+      "trigger": "known child/group仍live或unknown",
+      "expected": "不释放slot，不用deadline/单PIDabsence假终局",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "id": "PROC0-13",
+      "trigger": "正常单helper0与指定helper1",
+      "expected": "各actual exit/原capture闭环，1非自动PASS",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "id": "PROC0-14",
+      "trigger": "当前R6 PARTIALpacket、删case/改case集/伪source",
+      "expected": "拒绝交还，不调绿当前R6",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "id": "PROC0-15",
+      "trigger": "packet capture cmd/cwd或release允许命令不符",
+      "expected": "拒绝metadata，即使exit0/loghash匹配",
+      "runtime": "NOT_RUN"
+    },
+    {
+      "id": "PROC0-16",
+      "trigger": "工具例异常与恢复rebind",
+      "expected": "旧日志不覆盖；新MAIN pin且无live/unknown才重绑",
+      "runtime": "NOT_RUN"
+    }
+  ],
+  "not_replacing": [
+    "original17",
+    "ISO01..18",
+    "R6 C06..09",
+    "R7",
+    "R8"
+  ]
+}

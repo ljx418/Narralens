@@ -1,0 +1,44 @@
+{
+  "format": "narralens.proc0-release@3",
+  "status": "STATIC_EXAMPLE_NOT_A_GRANT",
+  "implementation_release": false,
+  "runtime_release": false,
+  "project_root": "SYNTHETIC_ONLY",
+  "recorded_source": [
+    {
+      "path": "SYNTHETIC_ONLY/source.py",
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  ],
+  "protected_inputs": [],
+  "required_cases": [
+    "PROC0-13"
+  ],
+  "warning": "Single case static format example only; real final release requires all16 IDs and actual full source, pins and paths",
+  "release_id": "EXAMPLE_L1",
+  "phase": "BOOTSTRAP_CODE",
+  "commands": {
+    "direct": {
+      "argv": [
+        "/usr/bin/python3.12",
+        "-I",
+        "-S",
+        "-B",
+        "tests/process/test_delivery_admission.py"
+      ],
+      "cwd": "SYNTHETIC_ONLY",
+      "runtime_class": "PURE_MOCK",
+      "expected_inner_exit": 0
+    }
+  },
+  "capture_allocations": [
+    {
+      "basename": "example-direct-001",
+      "run_id": "example-run-direct",
+      "command_id": "direct",
+      "case_ids": [
+        "PROC0-13"
+      ]
+    }
+  ]
+}

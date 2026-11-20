@@ -1,0 +1,34 @@
+test_a_missing_sidecar_is_refused_by_the_real_checker (__main__.ChainCase.test_a_missing_sidecar_is_refused_by_the_real_checker) ... ok
+test_a_raw_write_error_keeps_the_wait_and_the_responsibility (__main__.ChainCase.test_a_raw_write_error_keeps_the_wait_and_the_responsibility) ... ok
+test_a_run_without_an_exact_slot_match_is_refused_by_the_real_checker (__main__.ChainCase.test_a_run_without_an_exact_slot_match_is_refused_by_the_real_checker) ... ok
+test_a_tampered_capture_piece_is_refused_by_the_real_checker (__main__.ChainCase.test_a_tampered_capture_piece_is_refused_by_the_real_checker) ... ok
+test_a_vanished_entry_is_only_an_observation_limit (__main__.ChainCase.test_a_vanished_entry_is_only_an_observation_limit) ... ok
+test_an_after_return_identity_read_error_keeps_the_wait (__main__.ChainCase.test_an_after_return_identity_read_error_keeps_the_wait) ... ok
+test_an_undeterminable_group_is_never_signed_clean (__main__.ChainCase.test_an_undeterminable_group_is_never_signed_clean) ... ok
+test_an_unsettled_resource_never_yields_a_verified_credential (__main__.ChainCase.test_an_unsettled_resource_never_yields_a_verified_credential) ... ok
+test_the_expected_failure_chain_carries_its_credential (__main__.ChainCase.test_the_expected_failure_chain_carries_its_credential) ... ok
+test_the_finite_helper_exposes_a_bounded_owned_file_barrier (__main__.ChainCase.test_the_finite_helper_exposes_a_bounded_owned_file_barrier) ... ok
+test_the_real_runner_output_is_accepted_by_the_real_checker (__main__.ChainCase.test_the_real_runner_output_is_accepted_by_the_real_checker) ... ok
+test_a_ready_packet_exits_zero_and_never_claims_business_acceptance (__main__.HandoffCase.test_a_ready_packet_exits_zero_and_never_claims_business_acceptance) ... ok
+test_an_l1_packet_never_reports_the_overall_ready_state (__main__.HandoffCase.test_an_l1_packet_never_reports_the_overall_ready_state) ... ok
+test_an_l1_root_only_ever_reports_the_l1_level (__main__.HandoffCase.test_an_l1_root_only_ever_reports_the_l1_level) ... ok
+test_an_unused_reserved_capture_needs_no_evidence (__main__.HandoffCase.test_an_unused_reserved_capture_needs_no_evidence) ... ok
+test_proc0_14_a_missing_contract_binding_is_refused (__main__.HandoffCase.test_proc0_14_a_missing_contract_binding_is_refused) ... ok
+test_proc0_14_a_partial_or_trimmed_packet_is_refused (__main__.HandoffCase.test_proc0_14_a_partial_or_trimmed_packet_is_refused) ... ok
+test_proc0_14_an_unapproved_same_source_stage_release_is_refused (__main__.HandoffCase.test_proc0_14_an_unapproved_same_source_stage_release_is_refused) ... ok
+test_proc0_15_a_capture_from_another_case_is_refused (__main__.HandoffCase.test_proc0_15_a_capture_from_another_case_is_refused) ... ok
+test_proc0_15_a_capture_whose_recorded_cwd_does_not_match_is_refused (__main__.HandoffCase.test_proc0_15_a_capture_whose_recorded_cwd_does_not_match_is_refused) ... ok
+test_proc0_15_a_shared_suite_that_main_explicitly_allowed_is_accepted (__main__.HandoffCase.test_proc0_15_a_shared_suite_that_main_explicitly_allowed_is_accepted) ... ok
+test_the_cli_never_runs_without_the_external_trust_root (__main__.HandoffCase.test_the_cli_never_runs_without_the_external_trust_root) ... usage: check-delivery-spec.py [-h] [--release RELEASE]
+                              [--expected-release-sha256 EXPECTED_RELEASE_SHA256]
+                              [--packet PACKET] [--self-test]
+check-delivery-spec.py: error: --release, --expected-release-sha256 and --packet are required (only --self-test may run without the external MAIN trust root)
+ok
+test_the_complete_packet_is_admitted_for_review (__main__.HandoffCase.test_the_complete_packet_is_admitted_for_review) ... ok
+test_the_real_checker_self_test_completes_with_its_established_negatives (__main__.HandoffCase.test_the_real_checker_self_test_completes_with_its_established_negatives)
+The real self test must run to the end. ... ok
+
+----------------------------------------------------------------------
+Ran 24 tests in 1.583s
+
+OK

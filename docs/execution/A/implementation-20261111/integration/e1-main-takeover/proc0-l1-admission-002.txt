@@ -1,0 +1,28 @@
+test_all_sixteen_cases_have_a_direct_mapping (__main__.RunnerCase.test_all_sixteen_cases_have_a_direct_mapping) ... ok
+test_proc0_01_unknown_command_and_bad_release_are_refused (__main__.RunnerCase.test_proc0_01_unknown_command_and_bad_release_are_refused) ... ok
+test_proc0_02_source_protected_and_recorder_drift_are_refused (__main__.RunnerCase.test_proc0_02_source_protected_and_recorder_drift_are_refused) ... ok
+test_proc0_03_existing_capture_and_unsafe_basenames_are_refused (__main__.RunnerCase.test_proc0_03_existing_capture_and_unsafe_basenames_are_refused) ... ok
+test_proc0_04_a_second_client_finds_the_slot_busy (__main__.RunnerCase.test_proc0_04_a_second_client_finds_the_slot_busy) ... ok
+test_proc0_05_the_write_lease_identity_is_enforced (__main__.RunnerCase.test_proc0_05_the_write_lease_identity_is_enforced) ... ok
+test_proc0_06_unknown_state_blocks_and_locks_are_never_removed (__main__.RunnerCase.test_proc0_06_unknown_state_blocks_and_locks_are_never_removed) ... ok
+test_proc0_07_status_never_claims_the_epoch_is_gone (__main__.RunnerCase.test_proc0_07_status_never_claims_the_epoch_is_gone) ... ok
+test_proc0_08_a_lost_epoch_after_the_child_was_returned_keeps_the_wait (__main__.RunnerCase.test_proc0_08_a_lost_epoch_after_the_child_was_returned_keeps_the_wait) ... ok
+test_proc0_08_popen_failure_has_no_child (__main__.RunnerCase.test_proc0_08_popen_failure_has_no_child) ... ok
+test_proc0_09_cancel_only_records_a_request (__main__.RunnerCase.test_proc0_09_cancel_only_records_a_request) ... ok
+test_proc0_10_a_recorder_killed_by_a_signal_is_never_decoded (__main__.RunnerCase.test_proc0_10_a_recorder_killed_by_a_signal_is_never_decoded) ... ok
+test_proc0_10_metadata_and_resource_state_are_separate (__main__.RunnerCase.test_proc0_10_metadata_and_resource_state_are_separate) ... ok
+test_proc0_10_the_inner_and_outer_exit_domains_stay_separate (__main__.RunnerCase.test_proc0_10_the_inner_and_outer_exit_domains_stay_separate) ... ok
+test_proc0_11_source_drift_during_the_run_is_saved (__main__.RunnerCase.test_proc0_11_source_drift_during_the_run_is_saved) ... ok
+test_proc0_12_a_live_group_member_keeps_the_slot_unknown (__main__.RunnerCase.test_proc0_12_a_live_group_member_keeps_the_slot_unknown) ... ok
+test_proc0_13_a_slot_of_another_command_cannot_lend_its_assertion (__main__.RunnerCase.test_proc0_13_a_slot_of_another_command_cannot_lend_its_assertion) ... ok
+test_proc0_13_a_slot_of_another_run_cannot_lend_its_assertion (__main__.RunnerCase.test_proc0_13_a_slot_of_another_run_cannot_lend_its_assertion) ... ok
+test_proc0_13_each_exit_is_bound_to_its_own_run (__main__.RunnerCase.test_proc0_13_each_exit_is_bound_to_its_own_run) ... ok
+test_proc0_16_a_capture_is_never_overwritten_and_rebind_is_exact (__main__.RunnerCase.test_proc0_16_a_capture_is_never_overwritten_and_rebind_is_exact) ... ok
+test_proc0_16_a_failed_state_replace_keeps_the_old_state (__main__.RunnerCase.test_proc0_16_a_failed_state_replace_keeps_the_old_state) ... ok
+test_proc0_16_a_pending_audit_blocks_new_executions (__main__.RunnerCase.test_proc0_16_a_pending_audit_blocks_new_executions) ... ok
+test_the_runner_declares_no_signal_fork_or_reaper_api (__main__.RunnerCase.test_the_runner_declares_no_signal_fork_or_reaper_api) ... ok
+
+----------------------------------------------------------------------
+Ran 23 tests in 1.872s
+
+OK

@@ -1,0 +1,186 @@
+{
+  "format": "narralens.delivery-metrics@1",
+  "status": "PARTIAL_OBSERVED_NOT_FINAL",
+  "updated_at": "2026-11-20T04:08:02.926648+00:00",
+  "contract_reviews": [
+    {
+      "round": 1,
+      "result": "REQUEST_CHANGES",
+      "findings": [
+        "G1",
+        "G2",
+        "G3",
+        "G4"
+      ]
+    },
+    {
+      "round": 2,
+      "result": "REQUEST_CHANGES",
+      "findings": [
+        "R2-01"
+      ]
+    },
+    {
+      "round": 3,
+      "result": "PLAN_READY",
+      "open_findings": []
+    }
+  ],
+  "first_recorded_validation": {
+    "capture": "proc0-l1-admission-001",
+    "passed": 20,
+    "failed": 1,
+    "total": 21,
+    "inner_exit": 1,
+    "outer_exit": 1,
+    "input_drift_count": 0,
+    "resource_status": "CLEAN",
+    "remaining_commands": "B2/B3 NOT_RUN"
+  },
+  "observed_provider_stream_errors": [
+    {
+      "at_ms": 1795145371264,
+      "observation_file": "docs/process/proc-0/implementation/OBSERVATION_001.json",
+      "error": "MALFORMED_RESPONSE_STREAM",
+      "quota429": false
+    },
+    {
+      "at_ms": 1795145378493,
+      "observation_file": "docs/process/proc-0/implementation/OBSERVATION_002.json",
+      "error": "MALFORMED_RESPONSE_STREAM",
+      "quota429": false
+    },
+    {
+      "at_ms": 1795145388231,
+      "observation_file": "docs/process/proc-0/implementation/OBSERVATION_003.json",
+      "error": "MALFORMED_RESPONSE_STREAM",
+      "quota429": false
+    },
+    {
+      "at_ms": 1795145391572,
+      "observation_file": "docs/process/proc-0/implementation/OBSERVATION_003.json",
+      "error": "MALFORMED_RESPONSE_STREAM",
+      "quota429": false
+    },
+    {
+      "at_ms": 1795145573894,
+      "observation_file": "docs/process/proc-0/implementation/OBSERVATION_003.json",
+      "error": "MALFORMED_RESPONSE_STREAM",
+      "quota429": false
+    },
+    {
+      "at_ms": 1795145581517,
+      "observation_file": "docs/process/proc-0/implementation/OBSERVATION_004.json",
+      "error": "MALFORMED_RESPONSE_STREAM",
+      "quota429": false
+    },
+    {
+      "at_ms": 1795145585638,
+      "observation_file": "docs/process/proc-0/implementation/OBSERVATION_004.json",
+      "error": "MALFORMED_RESPONSE_STREAM",
+      "quota429": false
+    },
+    {
+      "at_ms": 1795145734762,
+      "observation_file": "docs/process/proc-0/implementation/OBSERVATION_004.json",
+      "error": "MALFORMED_RESPONSE_STREAM",
+      "quota429": false
+    },
+    {
+      "at_ms": 1795146182548,
+      "observation_file": "docs/process/proc-0/implementation/OBSERVATION_005.json",
+      "error": "MALFORMED_RESPONSE_STREAM",
+      "quota429": false
+    },
+    {
+      "at_ms": 1795146187172,
+      "observation_file": "docs/process/proc-0/implementation/OBSERVATION_005.json",
+      "error": "MALFORMED_RESPONSE_STREAM",
+      "quota429": false
+    },
+    {
+      "at_ms": 1795146214821,
+      "observation_file": "docs/process/proc-0/implementation/OBSERVATION_005.json",
+      "error": "MALFORMED_RESPONSE_STREAM",
+      "quota429": false
+    },
+    {
+      "at_ms": 1795146219468,
+      "observation_file": "docs/process/proc-0/implementation/OBSERVATION_005.json",
+      "error": "MALFORMED_RESPONSE_STREAM",
+      "quota429": false
+    },
+    {
+      "at_ms": 1795146223996,
+      "observation_file": "docs/process/proc-0/implementation/OBSERVATION_005.json",
+      "error": "MALFORMED_RESPONSE_STREAM",
+      "quota429": false
+    },
+    {
+      "at_ms": 1795146471104,
+      "observation_file": "docs/process/proc-0/implementation/OBSERVATION_006.json",
+      "error": "MALFORMED_RESPONSE_STREAM",
+      "quota429": false
+    },
+    {
+      "at_ms": 1795146630307,
+      "observation_file": "docs/process/proc-0/implementation/OBSERVATION_006.json",
+      "error": "MALFORMED_RESPONSE_STREAM",
+      "quota429": false
+    },
+    {
+      "at_ms": 1795146677142,
+      "observation_file": "docs/process/proc-0/implementation/OBSERVATION_006.json",
+      "error": "MALFORMED_RESPONSE_STREAM",
+      "quota429": false
+    },
+    {
+      "at_ms": 1795146710250,
+      "observation_file": "docs/process/proc-0/implementation/OBSERVATION_006.json",
+      "error": "MALFORMED_RESPONSE_STREAM",
+      "quota429": false
+    },
+    {
+      "at_ms": 1795146728887,
+      "observation_file": "docs/process/proc-0/implementation/OBSERVATION_006.json",
+      "error": "MALFORMED_RESPONSE_STREAM",
+      "quota429": false
+    },
+    {
+      "at_ms": 1795147478036,
+      "observation_file": "docs/process/proc-0/implementation/OBSERVATION_007.json",
+      "error": "MALFORMED_RESPONSE_STREAM",
+      "quota429": false
+    },
+    {
+      "at_ms": 1795147487374,
+      "observation_file": "docs/process/proc-0/implementation/OBSERVATION_007.json",
+      "error": "MALFORMED_RESPONSE_STREAM",
+      "quota429": false
+    },
+    {
+      "at_ms": 1795147631479,
+      "observation_file": "docs/process/proc-0/implementation/OBSERVATION_007.json",
+      "error": "MALFORMED_RESPONSE_STREAM",
+      "quota429": false
+    }
+  ],
+  "provider_error_count_lower_bound": 21,
+  "provider_scope": "Only deduplicated sampled assistant error messages, not full provider log or request census; later valid tool calls observed, no stable-recovery claim",
+  "implementation_dispositions": [
+    "MAIN_PREBOOTSTRAP_DISPOSITION same-contract correction before L1",
+    "repair-001 actual first test failure and exact slot authorization correction"
+  ],
+  "next": "repair-001 frozen handback then new bootstrap-002; R7 docs may proceed read-only",
+  "token_cost": "NOT_MEASURED",
+  "fixed_efficiency_savings": "NOT_CLAIMED",
+  "not_acceptance": [
+    "PROC-0 complete",
+    "R6",
+    "R7",
+    "R8",
+    "N1N2",
+    "A",
+    "V1"
+  ]
+}

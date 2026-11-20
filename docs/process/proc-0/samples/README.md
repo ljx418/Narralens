@@ -1,0 +1,6 @@
+# R2-01多证据交还静态样例
+
+L1_STAGE/L3_STAGE是无运行许可的形状样例。FINAL_STAGE以实际示例文件SHA固定两份获准历史阶段票，并在PROC0-13之下列出L1_DIRECT、L3_SUCCESS、L3_EXPECTED_FAILURE三项必需证据slot；这些slot不是新增产品case。
+PACKET_COMPLETE_SHAPE展示三项引用齐全的结构正例，NEGATIVE_PACKET_SHAPES展示分别删去任一slot、用成功替换指定失败、引用同源未获准票的结构反例。额外预留unused-reserve不需交证据。
+所有SYNTHETIC_ONLY路径、source摘要、实现/日志/sidecar都是静态占位，没有实际运行或录制原件。结构正例只表示必备引用齐全，不表示当前checker会准入；真实checker应因未授权、无实际原件而拒绝这些样例。实际direct tests需在隔离临时fixture填入完整合法原件验证对应正反分支。
+CLI外部MAIN路径+摘要是唯一信任入口；修改packet与历史票不能改变外部最终票授权。真实最终票要完整16项、全部真实输入及实际owner/capture。

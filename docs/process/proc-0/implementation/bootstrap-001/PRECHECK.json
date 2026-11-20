@@ -1,0 +1,20 @@
+{
+  "question": "msg_b7e06c09362a",
+  "actual_head": "9bde8c4584e3d13bcad474564caccfcbce2ced6f",
+  "source5": {
+    "tools/run-delivery.py": "89c15941bc362bf25c0b05ccf10b8c24d38fd9f93cc0be2979f8161ef313363e",
+    "tools/check-delivery-spec.py": "3ce5de4933040932f1be1811e5eb7bc9a8855c292365c721ade66df66fd30dcb",
+    "tests/process/test_delivery_admission.py": "507824d40dfacebdad505321e76bb64e3b1418a5f0ea9dd1d44cd0bb93d42f53",
+    "tests/process/test_delivery_handoff.py": "6a3faff402de86b32cdefb8df9da5d68329bff1505e82bafbd177090986f21d9",
+    "tests/process/fixtures/admission_helper.py": "25fc6db481e22f8364471107a72021d3a25007c90115a3f50298a0b81eede3cf"
+  },
+  "recorded_count": 656,
+  "protected_original_mismatches": [],
+  "active_recorders": [],
+  "mode": "STATIC_SAFETY_PRECHECK_ONLY",
+  "runtime_before_release": "NOT_RUN",
+  "limits": [
+    "No L2 implementation review yet; authorization is mocked pure tests only",
+    "Observer reports L1 owned group sample, not complete fork/product proof"
+  ]
+}

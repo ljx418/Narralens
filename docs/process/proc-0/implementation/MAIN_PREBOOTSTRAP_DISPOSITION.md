@@ -1,0 +1,23 @@
+# MAIN对冻结请求msg_978fc693dce0的合并裁决
+
+这是同一PROC-0 rev3合同的实现一致性核对，不新增产品范围、不重开总体合同。未签L1通过，未放行任何测试。
+
+## A1–A7
+A1 state_root在W/var/process-admission内：接受。
+A3 多slot/获准阶段票：按rev3接受，继续要求精确绑定。
+A4 字段可作最小读取面，但protected必须有实际pre/post及缺失拒绝，不仅复制release清单；runner真实输出必须能直接被checker读取。
+A6 bootstrap旁证由实际调用owner保存：接受；其outer wait必须是该次调用实得值。当前B1/B2/B3仍待重绑，不能先run。
+A2 不接受两处简化：BOOTSTRAP_CODE必须接受/输出明确L1的CODE_CANDIDATE_FOR_REVIEW（元数据只核L1齐）；FINAL_METADATA才是整体READY_FOR_REVIEW。packet.contract必需且与根票逐字段一致，缺失不能通过。完善对应direct正反例，不把L1误报总ready。
+A5 不接受log摘要可选和只靠case_passed/cleanup.verified：合同§6.1要求绑定全套原capture摘要以及本run的指定原因与清理事实引用。原6件套实算SHA全部必需，checker逐项比对；任一缺失/错run/错断言/错cleanup引用拒绝。0号日志包含字符串只是必要条件，不能代替正式case语义。保留人工/独立语义判定边界。
+A7 不接受一概忽略不可读条目：已知owned epoch/原组状态不明必须UNKNOWN/BLOCKED，不得据live_members为空签CLEAN。可区分真实ENOENT/ESRCH与EACCES/EPERM/parse failure：扫描未曾归属的条目瞬间消失只记观察局限，但非gone错误导致无法判定组成员时保守UNKNOWN；已知owned身份即使缺失仍需原wait与实际group合证。无需引入kill或reaper。保持本工具不是完整fork记录的限制，增加direct分支反例。
+
+## 同一实际producer→consumer缺口
+当前runner仅_write_failure_credential输出凭据，无独立带evidence_layer等必需字段的sidecar，也没有把实际protected前后值、全套原件摘要闭环交给checker。手工synthetic fixture只证明checker接受自己造的材料，不能证明runner可交还。
+请在允许五文件内完成实际runner→sidecar/credential→真实checker的direct链（底层Popen仍mock原recorder，不真实运行），覆盖正常/指定失败/缺sidecar/不明资源/原件篡改。结果各层保持真实，UNKNOWN时不可credential.cleanup.verified:true或case_passed:true。任何持久化错误保持责任且不假准入。
+已返回child后身份读取和持久化失败必须依同一Popen实际wait；当前read_identity_after_session在wait前，_persist_running仅捕获AdmissionError。请用after-return身份读取抛错、raw OSError写入、unknown组等direct注入验证不会掉wait责任，不能只测helper吞掉一种AdmissionError。
+
+## 后续L3可实施性
+finite helper现仅pass/spec-fail立即返回，不能稳定建立两个请求争抢与取消在途窗口。合同已有owned-file barrier范围，可在同一helper路径准备有限受控文件屏障模式供L3 MAIN精确票使用；只在绑定var自有root内，不fork/网络/产品，有限helper真实返回并由原owner wait，不把时间过去当资源消失。当前只能写和mock设计，绝不能实际运行这个helper。
+
+## 下一步
+原Claude同writer按上述合并修订实现与direct tests，保留当前OWN报告为历史快照（在OWN报告中追加更正），冻结后ask MAIN给新完整5SHA和B1/B2/B3。MAIN核保护项/无在途/安全边界后即发FIRST纯测试票；不需再请用户批准或做新完整文档外审。新429立即停不重试接手。当前未运行的源码候选不标失败捕获，也不制造PASS。

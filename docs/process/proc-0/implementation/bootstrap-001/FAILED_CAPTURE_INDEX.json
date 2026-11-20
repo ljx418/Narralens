@@ -1,0 +1,28 @@
+{
+  "status": "FAILED_PRESERVED_NOT_ACCEPTED",
+  "at": "2026-11-20T04:02:58.723262+00:00",
+  "capture": "proc0-l1-admission-001",
+  "inner": 1,
+  "outer": 1,
+  "resource_status": "CLEAN",
+  "source_changed": [],
+  "source_added": [],
+  "tests": {
+    "passed": 20,
+    "failed": 1,
+    "total": 21
+  },
+  "primary_failure": "test_proc0_13_each_exit_is_bound_to_its_own_run: credential assertion None",
+  "not_run": [
+    "B2",
+    "B3"
+  ],
+  "source5_snapshot": {
+    "tools/run-delivery.py": "89c15941bc362bf25c0b05ccf10b8c24d38fd9f93cc0be2979f8161ef313363e",
+    "tools/check-delivery-spec.py": "3ce5de4933040932f1be1811e5eb7bc9a8855c292365c721ade66df66fd30dcb",
+    "tests/process/test_delivery_admission.py": "507824d40dfacebdad505321e76bb64e3b1418a5f0ea9dd1d44cd0bb93d42f53",
+    "tests/process/test_delivery_handoff.py": "6a3faff402de86b32cdefb8df9da5d68329bff1505e82bafbd177090986f21d9",
+    "tests/process/fixtures/admission_helper.py": "25fc6db481e22f8364471107a72021d3a25007c90115a3f50298a0b81eede3cf"
+  },
+  "scope": "Actual L1 failure, not product failure; later success does not overwrite this capture"
+}

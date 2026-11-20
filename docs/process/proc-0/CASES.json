@@ -6,97 +6,181 @@
       "id": "PROC0-01",
       "trigger": "未知command_id/argv/shell/cwd/坏release SHA",
       "expected": "拒绝在Popen/生成capture之前",
-      "runtime": "NOT_RUN"
+      "runtime": "NOT_RUN",
+      "revision2_acceptance": [
+        "原case语义保留"
+      ],
+      "L1_required": "direct mock/static mapping; no actual product/runtime",
+      "L3_required": "No new actual process obligation; direct evidence plus MAIN review"
     },
     {
       "id": "PROC0-02",
       "trigger": "protected/source/recorder或命令类型不符",
       "expected": "拒绝并保已有state",
-      "runtime": "NOT_RUN"
+      "runtime": "NOT_RUN",
+      "revision2_acceptance": [
+        "原case语义保留"
+      ],
+      "L1_required": "direct mock/static mapping; no actual product/runtime",
+      "L3_required": "No new actual process obligation; direct evidence plus MAIN review"
     },
     {
       "id": "PROC0-03",
       "trigger": "capture任一suffix已存在",
       "expected": "不覆盖，不运行",
-      "runtime": "NOT_RUN"
+      "runtime": "NOT_RUN",
+      "revision2_acceptance": [
+        "ASCII basename路径穿越/Unicode/slash/dot拒绝，原六件套任一suffix已存在拒绝"
+      ],
+      "L1_required": "direct mock/static mapping; no actual product/runtime",
+      "L3_required": "No new actual process obligation; direct evidence plus MAIN review"
     },
     {
       "id": "PROC0-04",
       "trigger": "两个run同时争抢同project原子槽",
       "expected": "仅一个真实Popen，无无锁fallback",
-      "runtime": "NOT_RUN"
+      "runtime": "NOT_RUN",
+      "revision2_acceptance": [
+        "L1模拟争抢；L3 MAIN另票两个不同实际客户请求，只一个原claim/Popen及winner wait"
+      ],
+      "L1_required": "direct mock/static mapping; no actual product/runtime",
+      "L3_required": "MAIN exact finite helper real proof"
     },
     {
       "id": "PROC0-05",
       "trigger": "WRITING/错误owner nonce generation",
       "expected": "拒绝run或非法end-write；真owner可结束写阶段",
-      "runtime": "NOT_RUN"
+      "runtime": "NOT_RUN",
+      "revision2_acceptance": [
+        "授权改源后end-write关闭原nonce租约但stale pin BLOCKED；WRITING时rebind拒绝"
+      ],
+      "L1_required": "direct mock/static mapping; no actual product/runtime",
+      "L3_required": "No new actual process obligation; direct evidence plus MAIN review"
     },
     {
       "id": "PROC0-06",
       "trigger": "STARTING崩溃、wrapper死而recorder仍活",
       "expected": "UNKNOWN持责，无自动重跑/清锁",
-      "runtime": "NOT_RUN"
+      "runtime": "NOT_RUN",
+      "revision2_acceptance": [
+        "STARTING已存/Popen未知，pending_audit/state损坏/锁未知保守阻塞"
+      ],
+      "L1_required": "direct mock/static mapping; no actual product/runtime",
+      "L3_required": "No new actual process obligation; direct evidence plus MAIN review"
     },
     {
       "id": "PROC0-07",
       "trigger": "PID重用/Z/读状态unknown",
       "expected": "不当原epochgone，不扩信号权限",
-      "runtime": "NOT_RUN"
+      "runtime": "NOT_RUN",
+      "revision2_acceptance": [
+        "原case语义保留"
+      ],
+      "L1_required": "direct mock/static mapping; no actual product/runtime",
+      "L3_required": "No new actual process obligation; direct evidence plus MAIN review"
     },
     {
       "id": "PROC0-08",
       "trigger": "Popen确切失败 vs 已返回child后持久化失败",
       "expected": "前者无child失败，后者保原wait owner",
-      "runtime": "NOT_RUN"
+      "runtime": "NOT_RUN",
+      "revision2_acceptance": [
+        "已返回child后读epoch失败/state写失败/journal写失败仍同owner wait；Popen前确切失败另分支"
+      ],
+      "L1_required": "direct mock/static mapping; no actual product/runtime",
+      "L3_required": "No new actual process obligation; direct evidence plus MAIN review"
     },
     {
       "id": "PROC0-09",
       "trigger": "request-cancel后helper仍在运行",
       "expected": "只标请求，下一run仍拒；不kill recorder",
-      "runtime": "NOT_RUN"
+      "runtime": "NOT_RUN",
+      "revision2_acceptance": [
+        "锁内request-cancel与终局两序交错，不丢sticky请求；L3只验证有限helper在途"
+      ],
+      "L1_required": "direct mock/static mapping; no actual product/runtime",
+      "L3_required": "MAIN exact finite helper real proof"
     },
     {
       "id": "PROC0-10",
       "trigger": "实际wait结束 vs 保存exit与日志被篡改",
       "expected": "真实终局与metadata准入分离；不伪造exit",
-      "runtime": "NOT_RUN"
+      "runtime": "NOT_RUN",
+      "revision2_acceptance": [
+        "inner -15/outer241仅完整原件可比编码；outer自身被signal、缺result、错原因拒绝"
+      ],
+      "L1_required": "direct mock/static mapping; no actual product/runtime",
+      "L3_required": "No new actual process obligation; direct evidence plus MAIN review"
     },
     {
       "id": "PROC0-11",
       "trigger": "源在运行期改变/新增",
       "expected": "保存drift并BLOCKED，不签ready",
-      "runtime": "NOT_RUN"
+      "runtime": "NOT_RUN",
+      "revision2_acceptance": [
+        "原case语义保留"
+      ],
+      "L1_required": "direct mock/static mapping; no actual product/runtime",
+      "L3_required": "No new actual process obligation; direct evidence plus MAIN review"
     },
     {
       "id": "PROC0-12",
       "trigger": "known child/group仍live或unknown",
       "expected": "不释放slot，不用deadline/单PIDabsence假终局",
-      "runtime": "NOT_RUN"
+      "runtime": "NOT_RUN",
+      "revision2_acceptance": [
+        "原case语义保留"
+      ],
+      "L1_required": "direct mock/static mapping; no actual product/runtime",
+      "L3_required": "No new actual process obligation; direct evidence plus MAIN review"
     },
     {
       "id": "PROC0-13",
       "trigger": "正常单helper0与指定helper1",
       "expected": "各actual exit/原capture闭环，1非自动PASS",
-      "runtime": "NOT_RUN"
+      "runtime": "NOT_RUN",
+      "revision2_acceptance": [
+        "L1 mock actual-wait与错误失败凭据；L3有限实际helper0与指定1分层报告"
+      ],
+      "L1_required": "direct mock/static mapping; no actual product/runtime",
+      "L3_required": "MAIN exact finite helper real proof",
+      "revision3_acceptance": [
+        "L1_DIRECT+L3_SUCCESS+L3_EXPECTED_FAILURE全部必交，漏任一拒绝",
+        "成功capture不能替指定失败；同源未获准历史票拒绝；未用预留capture不必交"
+      ]
     },
     {
       "id": "PROC0-14",
       "trigger": "当前R6 PARTIALpacket、删case/改case集/伪source",
       "expected": "拒绝交还，不调绿当前R6",
-      "runtime": "NOT_RUN"
+      "runtime": "NOT_RUN",
+      "revision2_acceptance": [
+        "替换整套packet+release但CLI外部SHA原值拒绝；删换case/多余inputs键/跨运行失败凭据拒绝"
+      ],
+      "L1_required": "direct mock/static mapping; no actual product/runtime",
+      "L3_required": "No new actual process obligation; direct evidence plus MAIN review"
     },
     {
       "id": "PROC0-15",
       "trigger": "packet capture cmd/cwd或release允许命令不符",
       "expected": "拒绝metadata，即使exit0/loghash匹配",
-      "runtime": "NOT_RUN"
+      "runtime": "NOT_RUN",
+      "revision2_acceptance": [
+        "两个合法case互换capture拒绝；MAIN显式允许共享suite可接受；claim/name/argv/version/精确inputs/sidecar绑定"
+      ],
+      "L1_required": "direct mock/static mapping; no actual product/runtime",
+      "L3_required": "No new actual process obligation; direct evidence plus MAIN review"
     },
     {
       "id": "PROC0-16",
       "trigger": "工具例异常与恢复rebind",
       "expected": "旧日志不覆盖；新MAIN pin且无live/unknown才重绑",
-      "runtime": "NOT_RUN"
+      "runtime": "NOT_RUN",
+      "revision2_acceptance": [
+        "state替换前/后、journal前/后失败保守；终局保存失败不回IDLE；新MAIN pin仅无active/unknown且无WRITING可rebind"
+      ],
+      "L1_required": "direct mock/static mapping; no actual product/runtime",
+      "L3_required": "No new actual process obligation; direct evidence plus MAIN review"
     }
   ],
   "not_replacing": [
@@ -105,5 +189,12 @@
     "R6 C06..09",
     "R7",
     "R8"
+  ],
+  "revision": 3,
+  "handoff_levels": [
+    "L1 CODE_CANDIDATE_FOR_REVIEW (all16 mappings, real NOT_RUN)",
+    "L2 independent static SAFE_FOR_SEPARATELY_PINNED_TOOL_RUNTIME",
+    "L3 exact MAIN helper release",
+    "L4 complete same-source metadata+independent disposition; not product PASS"
   ]
 }

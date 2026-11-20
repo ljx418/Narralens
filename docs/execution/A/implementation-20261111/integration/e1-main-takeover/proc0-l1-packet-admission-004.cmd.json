@@ -1,0 +1,20 @@
+{
+  "argv": [
+    "/usr/bin/python3.12",
+    "-I",
+    "-S",
+    "-B",
+    "tools/check-delivery-spec.py",
+    "--release",
+    "/mnt/c/workspace/videoworkline/Narralens/docs/process/proc-0/implementation/bootstrap-003/RELEASE.json",
+    "--expected-release-sha256",
+    "5cd157511a0e4888383835b57563cf842e65427848386956c8632459a3e39a92",
+    "--packet",
+    "/mnt/c/workspace/videoworkline/Narralens/docs/process/proc-0/implementation/bootstrap-003/MAIN_L1_DELIVERY.json"
+  ],
+  "cwd": "/mnt/c/workspace/videoworkline/Narralens-agents/main-integration",
+  "started_at": "2026-11-20T04:38:14.129912+00:00",
+  "runner_version": 3,
+  "git_head": "9bde8c4584e3d13bcad474564caccfcbce2ced6f",
+  "input_scope": "source/contracts/test/tool text, config/lock, D09 vectors and this runner; upstream pin and binary fixture receipts remain separate"
+}
