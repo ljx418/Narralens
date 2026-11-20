@@ -1,5 +1,12 @@
 <!-- CURRENT_N1N2_EXECUTION_CHECKPOINT_START -->
 
+### 当前维护收口与调度状态（2026-11-20）
+流程v2、剩余计划和安全清理已落盘；PROC-0独立审查启动实际返回consumer_fenced，未产生成功派发、未发实施release。不是429，不据此接手Claude源码。先恢复合法Orca协调绑定再独立审合同；不重试窗口绕过。所有源码检查点仍UNACCEPTED。清理详情见docs/process/07_REVISION_AND_CLEANUP_REPORT.md。
+
+### 新active goal恢复：PROC-0先行
+用户设置完整goal：执行预约/交还门→Claude补R6→独立复核/真实验收/R7R8冻结→NEXT门停止，未来新429仍停。MAIN已核B3ff7635/Wfae74ae clean，旧ctx_17cf94883a53 stopped/exited，未见本项目recorder；无实施writer。PROC-0合同/16case/计划/基线在docs/process/proc-0，先只读独立审，尚无源码/helper/kernel release。当前旧阻塞fixture已用tempfile，仅静态事实，非补验。下阶段原Claude实施薄wrapper，不改原recorder/产品代码，不把metadata或观察已知后代签为D2。全goal仍未完成。
+
+
 ### 2026-11-20 流程v2维护轮
 用户批准固化流程/修订计划/保全整理/Git上传，不自动恢复产品实现。权威docs/process/README.md与01..06；Claude实施/Codex设计验收不变。新429仍停。R6源码未验收，旧最小正常/故障只历史固定版本。恢复先P0执行预约与交还门，再R6/R7/R8/NEXT；原case/人工门不减。清理先保全独有资料，源码WIP与流程分别提交，禁止伪验收。
 

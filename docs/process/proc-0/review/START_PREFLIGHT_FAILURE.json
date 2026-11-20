@@ -1,0 +1,33 @@
+{
+  "error": "CLI --spec-file mapped WSL path to invalid C:/mnt/c/... before launch",
+  "receipt_task_or_dispatch": null,
+  "recovery_guide_read": true,
+  "newest_dispatches_checked": [
+    {
+      "dispatch": "ctx_17cf94883a53",
+      "state": "stopped",
+      "liveness": "exited"
+    },
+    {
+      "dispatch": "ctx_4cc02f3f2417",
+      "state": "succeeded",
+      "liveness": "exited"
+    },
+    {
+      "dispatch": "ctx_b3be2f145bc3",
+      "state": "succeeded",
+      "liveness": "exited"
+    },
+    {
+      "dispatch": "ctx_3350f704c5d8",
+      "state": "succeeded",
+      "liveness": "exited"
+    },
+    {
+      "dispatch": "ctx_4d0c948a4261",
+      "state": "succeeded",
+      "liveness": "exited"
+    }
+  ],
+  "correction": "First valid dispatch uses structured --spec text, not an ambiguous local path; no unknown worker restarted"
+}
